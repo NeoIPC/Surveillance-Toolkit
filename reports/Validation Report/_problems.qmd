@@ -1,0 +1,233 @@
+```{r Aggregating problems}
+
+get_problem_text <- function(problem_ids, contexts) {
+  ret <- list()
+  for (i in 1:length(problem_ids)) {
+    problem_id <- as.character(problem_ids[i])
+    formatter <- formatters$problems[[problem_id]]
+    translation <- translations$problems[[problem_id]]
+    context <- contexts[i][[1]]
+    ret <- c(ret, list(data.frame(PROBLEM_TEXT = formatter(translation, context))))
+  }
+  return(ret)
+}
+
+if(nrow(problems) > 0)
+problem_results <- problems |>
+  distinct() |>
+  nest(
+    .by = c(
+      SITE_CODE,
+      DEPARTMENT_OU,
+      DEPARTMENT_NAME,
+      PATIENT_TEI,
+      NEOIPC_PATIENT_ID,
+      ENROLMENT_ID,
+      ENROLMENT_DATE,
+      EVENT_ID,
+      EVENT_TYPE,
+      EVENT_DATE,
+      PROBLEM_ID),
+    .key = "CONTEXT") |>
+  mutate(PROBLEM_TEXT = get_problem_text(PROBLEM_ID, CONTEXT), .keep = "all") |>
+  select(!CONTEXT)
+```
+
+```{r Write problems}
+#| output: asis
+
+header <- function(text, level, numbered = FALSE) paste0(c(rep("#", level), " ", text, (if(!numbered) " {.unnumbered}"), "\n"), collapse = "")
+
+event_problem_header_prefix <- function(type) {
+  switch (
+    as.character(type),
+    ADM = translations$adm_problem_header_prefix,
+    END = translations$end_problem_header_prefix,
+    SUR = translations$sur_problem_header_prefix,
+    BSI = translations$bsi_problem_header_prefix,
+    HAP = translations$hap_problem_header_prefix,
+    NEC = translations$nec_problem_header_prefix,
+    SSI = translations$ssi_problem_header_prefix)
+}
+
+multiple_problems_hint <- function(partner_code, patient_id) {
+  mailto_subject <- paste0(
+    translations$patient_problem_multiple_hint_email_subject,
+    " (",
+    translations$neoipc_surveillance_partner_code,
+    ": ",
+    partner_code,
+    ")",
+    collapse = "")
+  mailto_body <- sprintf(translations$patient_problem_multiple_hint_email_body, patient_id)
+  mailto_content <- paste0(
+    support_email_address,
+    "?subject=",
+    URLencode(mailto_subject, reserved = TRUE),
+    "&body=",
+    URLencode(mailto_body, reserved = TRUE))
+  sprintf(translations$patient_problem_multiple_hint, mailto_content)
+}
+
+report_problems <- NULL
+
+if(exists("problem_results")) {
+  report_problems <- problem_results |> pull(PROBLEM_ID) |> unique() |> sort()
+  report_sites <- problem_results |> pull(SITE_CODE) |> unique() |> sort()
+  multiple_report_sites <- length(report_sites) > 1
+  
+  # Iterate sites
+  for (site in report_sites) {
+    if(multiple_report_sites) {
+      site_header_level <- 3
+      cat(header(site, site_header_level))
+    } else {
+      site_header_level <- 2
+    }
+  
+    report_departments <- problem_results |>
+      filter(SITE_CODE == site) |>
+      select(DEPARTMENT_NAME, DEPARTMENT_OU) |>
+      distinct() |>
+      arrange(DEPARTMENT_NAME)
+  
+    multiple_report_departments <- nrow(report_departments) > 1
+    # Iterate departments of the site
+    for (dept_index in 1:nrow(report_departments)) {
+      dept_name <- report_departments[dept_index,"DEPARTMENT_NAME"] |> pull()
+      dept_ou <- report_departments[dept_index,"DEPARTMENT_OU"] |> pull()
+      if(multiple_report_departments){
+        dept_header_level <- site_header_level + 1
+        cat(header(dept_name, dept_header_level))
+      } else {
+        dept_header_level <- site_header_level
+      }
+  
+      # If the patient ids contain a numeric part sort this part numerically first
+      report_patients <- problem_results |>
+        filter(SITE_CODE == site & DEPARTMENT_OU == dept_ou) |>
+        mutate(
+          NEOIPC_PATIENT_ID = NEOIPC_PATIENT_ID,
+          PATIENT_TEI = PATIENT_TEI,
+          sort = replace_na(suppressWarnings(as.integer(str_replace_all(NEOIPC_PATIENT_ID, "[^0-9]", ""))), -999),
+          .keep = "none") |>
+        distinct() |>
+        arrange(sort, NEOIPC_PATIENT_ID) |>
+        select(!sort)
+  
+      # Iterate the patients of the department
+      for (pat_index in 1:nrow(report_patients)) {
+        pat_id <- report_patients[pat_index,"NEOIPC_PATIENT_ID"] |> pull()
+        pat_tei <- report_patients[pat_index,"PATIENT_TEI"] |> pull()
+        pat_header_level <- dept_header_level + 1
+        cat(header(paste0(
+          translations$patient_problem_header_prefix,
+          " \"[",
+          pat_id,
+          "](https://neoipc.charite.de/dhis-web-tracker-capture/index.html#/dashboard?program=",
+          NeoIPC_ProgramId,
+          "&ou=",
+          dept_ou,
+          "&tei=",
+          pat_tei,
+          ' "',
+          translations$patient_problem_dashboard_link_description,
+          '")"',
+          collapse = ""), pat_header_level))
+  
+        patient_problems <- problem_results |>
+          filter(SITE_CODE == site & DEPARTMENT_OU == dept_ou & PATIENT_TEI == pat_tei)
+  
+        if (nrow(patient_problems) > 1) {
+          cat("::: {.callout-tip}", multiple_problems_hint(site, pat_id), ":::", sep= "\n")
+          cat("\n")
+        }
+  
+        enrolment_problems <- patient_problems |>
+          filter(!is.na(ENROLMENT_ID)) |>
+          distinct() |>
+          arrange(ENROLMENT_DATE)
+  
+        enrolments_by_id <- enrolment_problems |>
+          select(ENROLMENT_ID, ENROLMENT_DATE) |>
+          distinct() |>
+          arrange(ENROLMENT_DATE, ENROLMENT_ID)
+  
+        non_enrolment_problems <- patient_problems |>
+          filter(is.na(ENROLMENT_ID)) |>
+          unnest(cols = c(PROBLEM_TEXT)) |>
+          select(PROBLEM_ID, PROBLEM_TEXT) |>
+          distinct() |>
+          arrange(PROBLEM_ID)
+  
+        if(nrow(non_enrolment_problems) > 0){
+          cat(non_enrolment_problems$PROBLEM_TEXT, sep = "\n")
+          cat("\n")
+        }
+  
+        # Iterate the enrolments of the patient
+        if(nrow(enrolments_by_id) > 0)
+        for (ep_index in 1:nrow(enrolments_by_id)) {
+          ep_id <- enrolments_by_id[ep_index,"ENROLMENT_ID"] |> pull()
+          ep_date <- enrolments_by_id[ep_index,"ENROLMENT_DATE"] |> pull()
+          ep_header_level <- pat_header_level + 1
+          cat(header(paste0(
+            translations$enrolment_problem_header_prefix,
+            " ",
+            format(ep_date, format = "%x"),
+            # Only print the id if the enrolment date is ambiguous
+            if(nrow(enrolments_by_id) > nrow(enrolments_by_id |> select(ENROLMENT_DATE) |> distinct())){
+              paste0(" (", ep_id, ")", collapse = "")
+            },
+            collapse = ""),
+            ep_header_level))
+  
+          event_problems <- enrolment_problems |>
+            filter(ENROLMENT_ID == ep_id & !is.na(EVENT_ID)) |>
+            distinct() |>
+            arrange(EVENT_TYPE, EVENT_DATE)
+  
+          event_problems_by_id <- event_problems |>
+            select(EVENT_ID, EVENT_TYPE, EVENT_DATE) |>
+            distinct() |>
+            arrange(EVENT_TYPE, EVENT_DATE)
+    
+          non_event_problems <- enrolment_problems |>
+            filter(ENROLMENT_ID == ep_id & is.na(EVENT_DATE)) |>
+            unnest(cols = c(PROBLEM_TEXT)) |>
+            select(PROBLEM_ID, PROBLEM_TEXT) |>
+            distinct() |>
+            arrange(PROBLEM_ID)
+  
+          if(nrow(non_event_problems) > 0){
+            cat(non_event_problems$PROBLEM_TEXT, sep = "\n")
+            cat("\n")
+          }
+  
+          ev_header_level <- ep_header_level + 1
+          if(nrow(event_problems_by_id) > 0)
+          for (ev_index in 1:nrow(event_problems_by_id)) {
+            ev_id <- event_problems_by_id[ev_index,"EVENT_ID"] |> pull()
+            ev_type <- event_problems_by_id[ev_index,"EVENT_TYPE"] |> pull()
+            ev_date <- event_problems_by_id[ev_index,"EVENT_DATE"] |> pull()
+  
+            specific_event_problems <- event_problems |>
+              filter(EVENT_ID == ev_id)
+  
+            cat(header(
+              paste0(
+                event_problem_header_prefix(ev_type),
+                " ",
+                format(ev_date, format = "%x"),
+                collapse = ""),
+              ev_header_level))
+            
+              cat(specific_event_problems  |> unnest(cols = c(PROBLEM_TEXT)) |> pull(PROBLEM_TEXT), sep = "\n")
+              cat("\n")
+          }
+        }
+      }
+    }
+  }
+}
+```

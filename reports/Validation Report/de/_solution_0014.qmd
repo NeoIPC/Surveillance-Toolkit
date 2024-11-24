@@ -1,0 +1,14 @@
+
+{{< pagebreak >}}
+
+### Hinzufügen eines Ereignis-Formulars {#sec-solution-14}
+
+Um ein Ereignisformular zu öffnen, müssen Sie zuerst die entsprechende Patientenregistrierung im Tracked Entity Dashboard öffnen (siehe @sec-solution-10).
+Klicken sie anschließend auf die Schaltfläche mit dem "+"-Symbol am rechten Rand der Ereignis-Zeitleiste (siehe @fig-add-event).
+
+
+![Die Schaltfläche mit dem "+"-Symbol am rechten Rand der Ereignis-Zeitleiste des Tracked Entity Instance Dashboards](img/fig-add-event.png){#fig-add-event fig-alt="Ein Screenshot des Tracked Entity Instance Dashboards, in dem die Schaltfläche mit dem \"+\"-Symbol am rechten Rand der Ereignis-Zeitleiste hervorgehoben ist"}
+
+::: {.callout-note}
+Da eine Patientenregistrierung jeweils nur ein Aufnahme- und ein Surveillance-Ende-Ereignis enthalten kann, können diese beiden Ereignisse nur hinzugefügt werden, wenn die betreffende Patientenregistrierung nicht bereits ein Ereignis dieser Kategorie enthält.
+:::

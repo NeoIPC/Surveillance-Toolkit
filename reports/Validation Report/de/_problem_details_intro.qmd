@@ -1,0 +1,3 @@
+## Detailinformationen zu den erkannten Problemen  {#sec-problem-details}
+
+Im Folgenden finden Sie Informationen zu den möglichen Ursachen der erkannten Probleme sowie Hinweise zur Vermeidung und zur Lösung der bereits bestehenden Probleme.

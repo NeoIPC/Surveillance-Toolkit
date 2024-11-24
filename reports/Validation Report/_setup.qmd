@@ -1,0 +1,84 @@
+```{r Install neoipcr, message=FALSE, warning=FALSE}
+suppressMessages(pak::pak("Brar/neoipcr@initial_tests"))
+```
+
+```{r Attach packages, message=FALSE, warning=FALSE}
+suppressMessages(library(tidyverse, warn.conflicts = FALSE, quietly = TRUE))
+suppressMessages(library(neoipcr, warn.conflicts = FALSE, quietly = TRUE))
+```
+
+```{r Initialize variables}
+if(!exists("params")) params <- list()
+token <- dplyr::coalesce(params$token, Sys.getenv("NEOIPC_DHIS2_TOKEN", unset = NA_character_))
+language <- dplyr::coalesce(params$language, "en")
+default_countries <- list(
+  en = "GB",
+  de = "DE"
+)
+country <- dplyr::coalesce(params$country, default_countries[[language]], NA_character_)
+codepage <- dplyr::coalesce(params$codepage, "UTF-8")
+locale <- paste0(language, (if(is.na(country)) NULL else paste0("_", country)), ".", codepage)
+invisible(Sys.setlocale(category = "LC_ALL", locale = locale))
+departmentFilter <- params$departmentFilter
+testUnitFilter <- dplyr::coalesce(params$testUnitFilter, TRUE)
+NeoIPC_ProgramId <- "D8mSSpOpsKj"
+event_types <- function(x = NA) factor(x, levels = c("ADM","END","SUR","BSI","HAP","NEC","SSI"))
+support_email_address <- "NeoIPC-Support@charite.de"
+
+problems <- tibble(
+  SITE_CODE = character(),
+  DEPARTMENT_NAME = character(),
+  DEPARTMENT_OU = character(),
+  NEOIPC_PATIENT_ID = character(),
+  PATIENT_TEI = character(),
+  ENROLMENT_ID = character(),
+  ENROLMENT_DATE = Date(),
+  EVENT_ID = character(),
+  EVENT_TYPE = event_types(),
+  EVENT_DATE = Date(),
+  PROBLEM_ID = integer())
+```
+
+```{r Data Import, message=FALSE, warning=FALSE}
+data <- if(rlang::is_na(token)) import_dhis2(locale = language) else import_dhis2(connection_options = dhis2_connection_options(token = token), locale = locale)
+```
+
+```{r Filtering}
+countries <- data$metadata$countries
+
+hospitals <- data$metadata$hospitals |>
+  dplyr::semi_join(countries, dplyr::join_by(country_code == code))
+
+departments <- data$metadata$departments
+
+if(!rlang::is_null(departmentFilter))
+  departments <- departments |>
+    dplyr::filter(code %in% departmentFilter)
+
+if(testUnitFilter)
+  departments <- departments |>
+      dplyr::filter(isTestUnit == FALSE)
+
+enrollments <- data$enrollments |>
+  mutate(
+    ENROLMENT_ID = enrollment,
+    ADMISSION_INTERVAL = interval(enrollment_enrolledAt, surveillanceEnd_occurredAt),
+    ENROLMENT_DATE = enrollment_enrolledAt,
+    SURVEILLANCE_END_DATE = surveillanceEnd_occurredAt,
+    .keep = "unused") |>
+  dplyr::semi_join(departments, dplyr::join_by(enrollment_department == key))
+
+patients <- hospitals |>
+  mutate(hospital = key, SITE_CODE = code, .keep = "none") |>
+  inner_join(
+    departments |>
+      mutate(
+        department = key,
+        hospital = hospital,
+        DEPARTMENT_NAME = displayShortName,
+        DEPARTMENT_OU = id,
+        .keep = "none"), join_by(hospital)) |>
+  inner_join(data$patients |> mutate(PATIENT_TEI = trackedEntity, .keep = "unused"), dplyr::join_by(department)) |>
+  select(!c("hospital", "department"))
+
+```

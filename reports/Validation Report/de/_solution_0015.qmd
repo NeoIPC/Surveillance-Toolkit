@@ -1,0 +1,9 @@
+
+{{< pagebreak >}}
+
+### Öffnen eines Ereignis-Formulars {#sec-solution-15}
+
+Um ein Ereignisformular zu öffnen, müssen Sie zuerst die entsprechende Patientenregistrierung im Tracked Entity Dashboard öffnen (siehe @sec-solution-10) und dann das Ereignis in der Ereignis-Zeitleiste auswählen.
+Wenn die Ereignis-Zeitleiste einer Patientenregistrierung sehr viele Ereignisse enthält, enthält sie möglicherweise eine Next- und/oder Previous-Schaltfläche (siehe @fig-event-timeline-full), mit der Sie zur nächsten oder vorherigen Seite der Zeitleistenansicht wechseln können, um weitere Ereignisse anzuzeigen.
+
+![Die Schaltflächen "Next" und "Previous" in der Ereignis-Zeitleiste des Tracked Entity Instance Dashboards](img/fig-event-timeline-full.png){#fig-event-timeline-full fig-alt="Ein Screenshot des Tracked Entity Instance Dashboards, in dem die Schaltflächen \"Next\" und \"Previous\" in der Ereignis-Zeitleiste hervorgehoben sind"}

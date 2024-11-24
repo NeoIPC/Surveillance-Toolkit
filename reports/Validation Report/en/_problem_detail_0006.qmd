@@ -1,0 +1,6 @@
+### The Patient Record Has a Completed Enrolment but the Surveillance End Form Is Not Completed {#sec-problem-details-6}
+
+The surveillance end form is a mandatory form that must always be completed and closed before the patient enrolment is completed so that the data can be analysed later.
+The data of a patient record without a surveillance end form cannot be included in analyses because the most important denominator data for calculating the rates is missing.
+
+Please reopen the enrolment (see @sec-solution-5), fill in the surveillance end form, complete it (see @sec-solution-8) and then complete the patient record again (see @sec-solution-4).

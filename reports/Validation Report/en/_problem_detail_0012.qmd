@@ -1,0 +1,9 @@
+### The Manually Entered Pathogen Cannot Be Assigned {#sec-problem-details-12}
+
+Since the pathogen list of the NeoIPC Surveillance Platform cannot contain all potential infectious agents occurring worldwide, we have created the option of adding pathogens that are not in the database as free text.
+When this happens, we try to find out which pathogen it is, add it to the database and then assign the pathogen entered as free text to this new pathogen so that it can be grouped and analysed in the future.
+
+If this message appears in the validation report, we were unable to find out which pathogen (species, genus, family) is involved for the free text entered and were therefore unable to make a meaningful assignment.
+As a result, the pathogen entered cannot appear in analyses or the reference data report.
+
+If in doubt, please consult your microbiological laboratory or try to find the correct pathogen using taxonomic databases such as [LPSN](https://www.bacterio.net/), [MycoBank](https://www.mycobank.org/) or [ICTV](https://ictv.global/taxonomy) and inform us so that we can include it in the database.

@@ -1,0 +1,3 @@
+## Detailed Information on the Detected Problems {#sec-problem-details}
+
+The following information is provided to help you understand the possible causes of the detected problems, how to avoid them, and how to resolve existing problems.

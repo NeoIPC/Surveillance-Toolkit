@@ -1,0 +1,11 @@
+
+{{< pagebreak >}}
+
+### Changing the Date of an Event in an Event Form {#sec-solution-7}
+
+First, you must open the event whose date you want to change in the Tracked Entity Instance Dashboard (see @sec-solution-15).
+To change the date of an event, it must be open for editing.
+If the event is grey in the timeline and has the status 'Completed', it must first be reopened for editing (see @sec-solution-9).
+Once the event is open for editing (indicated by the yellow colour and the status 'Open' in the timeline), select the date field (see @fig-change-event-date; depending on the form it may be called 'Admission Date', 'Infection Date', 'Surgery Date' or 'Surveillance End Date') and enter the correct date using the dialogue that appears or the keyboard.
+
+![The field for the date of an event in the Tracked Entity Instance Dashboard](img/fig-change-event-date.png){#fig-change-event-date fig-alt="A screenshot of the Tracked Entity Instance Dashboard, in which the field for the event date is highlighted"}

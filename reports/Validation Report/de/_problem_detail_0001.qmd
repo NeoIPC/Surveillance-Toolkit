@@ -1,0 +1,13 @@
+### Die Patientenakte hat keine Patientenregistrierung {#sec-problem-details-1}
+
+Dieses Problem taucht typischerweise auf, wenn jemand die eingegebenen Daten eines Patienten (eine Patientenakte) löschen wollte, aber stattdessen nur die Patientenregistrierung gelöscht hat.
+
+Übrig bleibt dann eine Patientenakte ohne Patientenregistrierung, die im System wie eine Datenwaise existiert.
+Diese Patientenakten werden nicht in der Liste der registrierten Patienten angezeigt und ihre Daten können auch nicht in Auswertungen aufgeführt werden, da ihnen die meisten für die Analyse erforderlichen Informationen fehlen.
+Wenn Sie allerdings versuchen, einen neuen Patienten mit derselben NeoIPC-Patienten-ID einzugeben, kann das System erkennen, dass diese ID bereits von einem anderen Patienten verwendet wird und verweigert die Eingabe.
+
+Je nachdem, ob sie die in der Patientenakte eingegebenen Daten weiter verwenden möchten oder nicht haben Sie unterschiedliche Möglichkeiten, diese Situation aufzulösen, aber für beide müssen Sie zunächst einmal das Tracked Entity Instance Dashboard der Patientenakte öffnen, was bei Patientenakten ohne Registrierung mit den Standardmitteln von DHIS2 gar nicht so einfach ist.
+Wenn Sie noch nicht wissen, wie das funktioniert, lesen Sie bitte @sec-solution-1.
+
+Wenn Sie die das Tracked Entity Instance Dashboard der Patientenakte geöffnet haben, und die Daten nicht erhalten möchten, können Sie die Patientenakte vollständig löschen (siehe @sec-solution-2).
+Wenn Sie die Daten erhalten und den betreffenden Patienten in die NeoIPC Surveillance einzuschließen möchten, können Sie stattdessen eine Patientenregistrierung für die Patientenakte anlegen (siehe @sec-solution-3).

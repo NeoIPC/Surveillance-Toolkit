@@ -1,0 +1,25 @@
+Damit alle Partner ihre Entscheidungen auf eine valide Datengrundlage stellen können, streben wir eine möglichst hohe Datenqualität für die Einzelauswertungen und Referenzberichte der NeoIPC-Surveillance an.
+Wo immer möglich, versuchen wir, die Validität der Daten bereits bei der Eingabe zu überprüfen und gegebenenfalls den Eingebenden zur Korrektur aufzufordern.
+Leider kann unsere Surveillance-Plattform nicht alle möglichen Probleme bereits bei der Eingabe erkennen.
+In regelmäßigen Abständen, insbesondere vor der Erstellung von Referenzberichten, versuchen wir daher, diese Probleme durch spezielle Datenbankabfragen zu identifizieren, in diesem Bericht zusammenzufassen und mit der Bitte um Korrektur an unsere Partner zu versenden.
+Um die Korrektur so effizient wie möglich zu gestalten, enthält der Bericht in @sec-problems für jede Patientenakte, in der ein Problem erkannt wurde, einen Link, der direkt zum Tracked Entity Instance Dashboard der betreffenden Patientenakte führt.
+Darüber hinaus werden in @sec-problem-details die aufgetretenen Probleme detailliert beschrieben, so dass Sie die möglichen Auswirkungen und Wege zur zukünftigen Vermeidung des Problems verstehen können.
+In @sec-solutions haben wir auch die verschiedenen Schritte dargestellt, die zur Lösung des Problems unternommen werden können.
+
+::: {.callout-warning}
+## Auf Links in per E-Mail erhaltenen Dokumenten klicken
+
+Obwohl wir versuchen, die Behebung von Problemen in Patientenakten so einfach wie möglich zu gestalten, indem wir direkte Links zum Tracked Entity Instance Dashboard bereitstellen, ist dies mit einem gewissen Risiko verbunden.
+
+Wenn Sie zum ersten Mal auf einen solchen Link klicken, werden Sie aufgefordert, Ihre Zugangsdaten (Benutzername und Passwort) für die NeoIPC-Surveillance-Plattform einzugeben.
+Verlassen Sie sich bitte nie auf den angezeigten Absender von E-Mails, die Links oder ein Dokument mit Links enthalten und prüfen Sie immer, ob die URL in der Adressleiste Ihres Browsers korrekt ist, bevor Sie Ihre Zugangsdaten eingeben.
+
+Sollte dies nicht der Fall sein, schließen Sie bitte das Browserfenster und informieren Sie uns über unsere [Support-E-Mail-Adresse](mailto:`r support_email_address`).
+:::
+
+{{< pagebreak >}}
+
+## Erkannte Probleme {#sec-problems}
+
+Das folgende ist eine Liste der Patientenakten, bei denen wir irgendeine Art von Problem festgestellt haben. Die Aufzeichnungen sind nach Aufnahmedatum und Ereignisdatum gruppiert.
+Wenn eine Patientenakte mehr als ein Problem aufweist, werden alle aufgeführt.

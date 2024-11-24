@@ -1,0 +1,55 @@
+```{r Validation rule 23: "The surgical procedure has an invalid first side procedure code"}
+
+valid_iche_codes <- read_csv("ICHE-Health-Intervention-Codes.csv", col_names = FALSE, col_types = "c") |>
+  pull(1)
+
+problems <- problems |>
+  bind_rows(
+    patients |>
+      select(SITE_CODE, DEPARTMENT_NAME, DEPARTMENT_OU, NEOIPC_PATIENT_ID, PATIENT_TEI, key) |>
+      rename(patient_key = key) |>
+      inner_join(
+        enrollments |>
+          select(ENROLMENT_ID, ENROLMENT_DATE, key, patient) |>
+          rename(enrollment_key = key),
+        join_by(patient_key == patient)) |>
+      left_join(
+        data$surgeries |>
+          select(
+            enrollment,
+            event,
+            occurredAt,
+            NEOIPC_SURGERY_PROCEDURE_DESCRIPTION,
+            NEOIPC_SURGERY_SIDE_PROCEDURE_CODE_1) |>
+          rename(
+            EVENT_ID = event,
+            EVENT_DATE = occurredAt,
+            PROCEDURE_DESCRIPTION = NEOIPC_SURGERY_PROCEDURE_DESCRIPTION,
+            PROCEDURE_CODE = NEOIPC_SURGERY_SIDE_PROCEDURE_CODE_1),
+        join_by(enrollment_key == enrollment)) |>
+      mutate(
+        EVENT_TYPE = event_types("SUR"),
+        PROBLEM_ID = 23L,
+        PROCEDURE_CODE_VALID = if_else(
+          is.na(PROCEDURE_CODE),
+          TRUE,
+          PROCEDURE_CODE %in% valid_iche_codes)) |>
+      filter(!PROCEDURE_CODE_VALID) |>
+      select(
+        SITE_CODE,
+        DEPARTMENT_NAME,
+        DEPARTMENT_OU,
+        NEOIPC_PATIENT_ID,
+        PATIENT_TEI,
+        ENROLMENT_ID,
+        ENROLMENT_DATE,
+        EVENT_ID,
+        EVENT_TYPE,
+        EVENT_DATE,
+        PROBLEM_ID,
+        PROCEDURE_CODE,
+        PROCEDURE_DESCRIPTION
+        ) |>
+      distinct())
+
+```

@@ -1,0 +1,5 @@
+### The Infection Occurred Within the First Two Days of Hospitalisation of a Referred or (Re-)Admitted Patient {#sec-problem-details-20}
+
+Infections that occur within the first two days in referred or (re-)admitted patients are not considered to be nosocomial infections according to the NeoIPC Surveillance Protocol and therefore cannot be recorded.
+
+Please delete the forms for all infections that are not nosocomial infections according to this definition (see @sec-solution-12) or adjust the infection date (see @sec-solution-7) or the admission date (see @sec-solution-6) if it is an input error.

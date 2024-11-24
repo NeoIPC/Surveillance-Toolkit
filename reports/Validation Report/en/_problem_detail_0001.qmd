@@ -1,0 +1,13 @@
+### The Patient Record Does Not Have an Enrolment {#sec-problem-details-1}
+
+This problem typically occurs when someone has tried to delete a patient's data (a patient record) but has only deleted the patient enrolment instead.
+
+What remains is a patient record without patient enrolment, which exists in the system as a data orphan.
+These patient records will not appear in the list of registered patients and their data cannot be listed in any reports, as most of the information required for analysis is missing.
+However, if you try to enter a new patient with the same NeoIPC Patient ID, the system will recognise that this ID is already being used by a different patient and will reject the entry.
+
+Depending on whether you want to continue using the data entered in the patient record or not, you have different options for resolving this situation. However, for both, you first have to open the Tracked Entity Instance Dashboard of the patient record, which is not so easy for patient records without registration using the standard DHIS2 tools.
+If you do not yet know how this works, please read @sec-solution-1.
+
+If you have opened the Tracked Entity Instance Dashboard of the patient record and do not want to keep the data, you can delete the patient record completely (see @sec-solution-2).
+If you want to keep the data and include the patient in NeoIPC Surveillance, you can instead create a patient enrolment for the patient record (see @sec-solution-3).

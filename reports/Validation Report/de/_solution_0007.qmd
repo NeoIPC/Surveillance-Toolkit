@@ -1,0 +1,11 @@
+
+{{< pagebreak >}}
+
+### Ändern des Datums eines Ereignisses in einem Ereignis-Formular {#sec-solution-7}
+
+Zunächst müssen Sie das Ereignis, dessen Datum sie ändern möchten, im Tracked Entity Instance Dashboard öffnen (siehe @sec-solution-15).
+Um das Datum eines Ereignisses ändern zu können, muss dieses zum Bearbeiten geöffnet sein.
+Wenn das Ereignis in der Zeitleiste grau dargestellt und mit dem Status "Completed" gekennzeichnet ist, muss es also zunächst wieder zum Bearbeiten geöffnet werden (siehe @sec-solution-9).
+Ist das Ereignis zum Bearbeiten geöffnet (erkennbar an der gelben Farbe und dem Status "Open" in der Zeitleiste), wählen Sie das Datumsfeld aus (siehe @fig-change-event-date; je nach Formular kann es "Aufnahmedatum", "Infektionsdatum", "OP-Datum" oder "Surveillance-Ende-Datum" heißen) und geben Sie über den erscheinenden Dialog oder die Tastatur das korrekte Datum ein.
+
+![Das Feld für das Datums eines Ereignisses im Tracked Entity Instance Dashboard](img/fig-change-event-date.png){#fig-change-event-date fig-alt="Ein Screenshot des Tracked Entity Instance Dashboards, in dem das Feld für das Ereignisdatum hervorgehoben ist"}

@@ -1,0 +1,27 @@
+### Die postoperative Wundinfektion ereignete sich nicht während des Nachbeobachtungszeitraums eines chirurgischen Eingriffs {#sec-problem-details-11}
+
+Nach operativen Eingriffen werden die Patienten im Rahmen der NeoIPC Surveillance hinsichtlich postoperativer Wundinfektionen nachbeobachtet.
+Die Nachbeobachtungszeit ist dabei wie folgt definiert (der Tag des Eingriffs ist Tag 1):
+
+* Oberflächliche postoperative Wundinfektion: 30 Tage
+* Tiefe postoperative Wundinfektion: 30 Tage bzw. 90 Tage wenn ein Implantat eingesetzt wurde
+* Postoperative Wundinfektion an Organen oder in Körperhöhlen: 30 Tage bzw. 90 Tage wenn ein Implantat eingesetzt wurde
+
+Wenn diese Meldung im Validierungsbericht erscheint, enthält die angegebene Patientenakte ein Formular für eine postoperative Wundinfektion, aber keines für einen operativen Eingriff in den 30 bzw. 90 Tagen davor, wie oben definiert.
+
+Dafür kann es verschiedene Gründe geben:
+
+1. Es wurde ein Formular für den operativen Eingriff angelegt, aber der Abstand zur Infektion ist zu groß.
+
+    Es ist sehr unwahrscheilich, dass die Infektion nach so langer Zeit noch in Zusammenhang mit dem Eingriff steht.
+    Bitte prüfen Sie die dokumentierten Befunde nochmal genau und halten Sie ggf. mit dem behandelnden Neonatologen und/oder Chirurgen Rücksprache.
+    Wenn Sie danach immer noch der Meinung sind, dass es sich um eine postoperative Wundinfektion handelt, setzen Sie sich bitte mit uns in Verbindung (z. B. über unsere [Support-E-Mail-Adresse](mailto:NeoIPC-Support@charite.de)).
+    Sind Sie nach Prüfung zu dem Schluss gekommen, dass es sich nicht um eine postoperative Wundinfektion handelt, löschen Sie bitte das Ereignis-Formular (siehe @sec-solution-12)
+
+2. Es wurde kein Formular für den operativen Eingriff angelegt
+
+    Bitte legen sie ein Ereignis-Formular für den operativen Eingriff in der NeoIPC Surveillance-Plattform an (siehe @sec-solution-14), füllen Sie es aus und schließen Sie es ab (siehe @sec-solution-8).
+
+3. Das Datum für den operativen Eingriff oder die postoperative Wundinfektion wurde falsch eingegeben.
+
+    Bitte korrigieren Sie das fehlerhafte Datum im entsprechenden Ereignis-Formular (siehe @sec-solution-7).

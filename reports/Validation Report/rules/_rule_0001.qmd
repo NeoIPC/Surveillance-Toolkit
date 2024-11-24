@@ -1,0 +1,16 @@
+```{r Validation rule 1: "The patient does not have an enrollment"}
+
+problems <- problems |>
+  bind_rows(
+    patients |>
+      anti_join(enrollments, join_by(key == patient)) |>
+      select(
+        SITE_CODE,
+        DEPARTMENT_NAME,
+        DEPARTMENT_OU,
+        NEOIPC_PATIENT_ID,
+        PATIENT_TEI
+        ) |>
+      bind_cols(PROBLEM_ID = c(1L)))
+
+```

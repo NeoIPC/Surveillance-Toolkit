@@ -1,0 +1,7 @@
+### Die Summe aller Tage mit antibiotischen Substanzen ist geringer als die Gesamtzahl der Antibiotikatage {#sec-problem-details-13}
+
+Im Surveillance-Ende-Formular wird sowohl die Anzahl der Tage, an denen ein Patient (irgendeine) Antibiotikatherapie erhalten hat (Antibiotika-Tage), als auch die Anzahl der Tage, an denen die einzelnen Antibiotika-Substanzen jeweils angewendet wurden (Substanz-Tage), abgefragt.
+Die Anzahl der Antibiotikatage muss naturgemäß kleiner oder gleich dem Wert sein, der sich aus der Addition aller Substanztage ergibt.
+Leider funktioniert die Eingabevalidierung, die dies überprüft, nicht ganz zuverlässig und kann umgangen werden, was zu dieser Fehlermeldung im Validierungsbericht führt.
+
+Bitte öffnen Sie das Surveillance-Ende-Formular erneut (siehe @sec-solution-9) und geben Sie die korrekten Werte für die einzelnen Substanz-Tage bzw. den korrekten Wert für die Antibiotika-Tage ein.

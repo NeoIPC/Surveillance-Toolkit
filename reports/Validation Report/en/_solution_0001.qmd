@@ -1,0 +1,12 @@
+### Opening the Tracked Entity Instance Dashboard of a Patient Record {#sec-solution-1}
+
+To work with a patient record or an enrolment, you need to open the associated [Tracked Entity Instance (TEI) Dashboard](https://docs.dhis2.org/en/use/user-guides/dhis-core-version-240/tracking-individual-level-data/tracker-capture.html#about_tracked_entity_instance_dashboard) in DHIS2.
+
+Normally you do this from the [list of enrolled patients](https://docs.dhis2.org/en/use/user-guides/dhis-core-version-240/tracking-individual-level-data/tracker-capture.html#simple_tracked_entity_instance_search) by clicking on the relevant entry.
+
+Unfortunately, this does not work for patient records without enrolment.
+If you do have the NeoIPC Patient ID or other data that you can use in a search, you can use the [Tracker Capture search function](https://docs.dhis2.org/en/use/user-guides/dhis-core-version-240/tracking-individual-level-data/tracker-capture.html#advanced_tracked_entity_instance_search) to find and open the patient record.
+
+::: {.callout-tip}
+For the records included in this report, the easiest way to open the dashboard is to click on the link we have provided under the corresponding NeoIPC Patient ID.
+:::

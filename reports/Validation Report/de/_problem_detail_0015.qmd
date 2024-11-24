@@ -1,0 +1,6 @@
+### Die Patientenakte enthält eine abgeschlossene Patientenregistrierung, aber kein Surveillance-Ende-Formular {#sec-problem-details-15}
+
+Das Surveillance-Ende-Formular ist ein Pflichtformular, das immer vorhanden sein muss, bevor Sie die Patientenregistrierung (Enrollment) abschließen, damit die Daten anschließend ausgewertet werden können.
+Diese Fehlermeldung erscheint im Validierungsbericht, wenn die Patientenakte eine abgeschlossene Patientenregistrierung ohne Surveillance-Ende-Formular enthält.
+
+Bitte öffnen Sie das Tracked Entity Instance Dashboard der Patientenakte (siehe @sec-solution-1), dann die Patientenregistrierung (siehe @sec-solution-2), fügen Sie ein Surveillance-Ende-Formular hinzu (siehe @sec-solution-14), füllen Sie dieses vollständig aus und schließen Sie anschließend sowohl das Formular (siehe @sec-solution-8) als auch die Patientenregistrierung (siehe @sec-solution-4) ab.

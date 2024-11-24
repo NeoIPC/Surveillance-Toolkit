@@ -1,0 +1,9 @@
+
+{{< pagebreak >}}
+
+### Opening an Event Form {#sec-solution-15}
+
+To open an event form you must first open the relevant enrolment in the Tracked Entity Dashboard (see @sec-solution-10) and then select the event in the event timeline.
+If an enrolment's event timeline contains a large number of events, it may include a Next and/or Previous button (see @fig-event-timeline-full) which allows you to navigate to the next or previous page of the timeline view to view more events.
+
+![The Next and Previous buttons in the event timeline of the Tracked Entity Instance Dashboard](img/fig-event-timeline-full.png){#fig-event-timeline-full fig-alt="A screenshot of the Tracked Entity Instance Dashboard with the Next and Previous buttons in the event timeline highlighted"}

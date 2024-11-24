@@ -1,0 +1,5 @@
+### The Patient Record’s Admission Form Is Not Completed {#sec-problem-details-5}
+
+For each inpatient stay of a patient to be included in NeoIPC Surveillance, an enrolment must be created on the NeoIPC Surveillance platform.
+This must always include a completed admission form in addition to the patient information.
+This form is automatically created and opened when a patient is enrolled and should be completed and closed immediately (see @sec-solution-8) so that the data is available for internal calculations and analysis.

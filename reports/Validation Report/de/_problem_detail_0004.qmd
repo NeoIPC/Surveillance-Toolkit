@@ -1,0 +1,6 @@
+### Das Datum des Endes der Surveillance liegt vor dem Aufnahmedatum im Aufnahme-Formular {#sec-problem-details-4}
+
+Wenn die Surveillance eines Patienten beendet wurde, muss das Datum, an dem dies geschehen ist, im Surveillance-Ende-Formular eingetragen werden. Die Surveillance kann natürlich frühestens an dem Tag enden, an dem sie begonnen hat, aber nicht früher.
+Damit das System die Nennerdaten berechnen und das Infektionsrisiko des Patienten bestimmen kann, müssen sowohl das Aufnahmedatum als auch das Ende der Surveillance korrekt eingegeben werden.
+Wenn dieser Fehler auftritt, haben Sie entweder ein falsches Aufnahmedatum oder ein falsches Ende der Surveillance eingegeben.
+Um das Aufnahmedatum zu korrigieren, lesen Sie bitte @sec-solution-6. Um das Entlassungsdatum zu korrigieren, lesen Sie bitte @sec-solution-7.

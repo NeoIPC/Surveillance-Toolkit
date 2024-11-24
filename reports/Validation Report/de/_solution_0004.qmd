@@ -1,0 +1,8 @@
+
+{{< pagebreak >}}
+
+### Abschließen einer Patientenregistrierung {#sec-solution-4}
+
+Zum Abschließen einer Patientenregistrierung öffnen Sie das Tracked Entity Instance Dashboard der Patientenakte (siehe @sec-solution-1) und klicken auf „Complete“. Siehe @fig-complete-enrolment.
+
+![Wo findet man die Schaltfläche „Complete“ im Anmeldeformular?](img/fig-complete-enrolment.png){#fig-complete-enrolment fig-alt="Die Schaltfläche \"Complete\" befindet sich unten links im Block \"Enrollment\", der sich oben links im Tracked Entity Instance Dashboards der Patientenakte befindet."}

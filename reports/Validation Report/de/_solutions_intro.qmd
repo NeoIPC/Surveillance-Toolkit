@@ -1,0 +1,3 @@
+## Lösungen {#sec-solutions}
+
+Da die NeoIPC Surveillance für die Bearbeitung von Patientendaten aktuell die Tracker Capture App in DHIS2 verwendet, gilt neben dem hier geschriebenen die [DHIS2-Benutzerdokumentation für Tracker Capture](https://docs.dhis2.org/en/use/user-guides/dhis-core-version-240/tracking-individual-level-data/tracker-capture.html).

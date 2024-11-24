@@ -1,0 +1,9 @@
+### Die Patientenakte enthält ein Ereignis-Formular mit einem Datum, das nicht innerhalb des Zeitrahmens einer dokumentierten Aufnahme liegt {#sec-problem-details-8}
+
+Die Surveillance-Periode eines in NeoIPC Surveillance eingeschlossenen Patienten beginnt mit der Aufnahme und endet mit der Entlassung oder dem Tod des Patienten.
+Nur in diesem Zeitraum werden Risikofaktoren und Infektionen erfasst und in der NeoIPC Surveillance Plattform dokumentiert.
+Aus diesem Vorgehen ergibt sich naturgemäß, dass alle dokumentierten Ereignisse (Infektionen, chirurgische Eingriffe) zwischen dem Aufnahmedatum und dem Datum, an dem die Surveillance endet, stattgefunden haben müssen.
+Ein Ereignisformular, dessen Datum nicht innerhalb dieses Zeitintervalls liegt, stellt entweder einen Eingabefehler oder ein Missverständnis bezüglich des vorgesehenen Vorgehens dar. Der Fehler muss nicht unbedingt im Formular selbst liegen. Auch ein falsches Aufnahmedatum oder ein falsches Datum im Surveillance-Ende-Formular kann diesen Fehler verursachen.
+
+Bitte überprüfen Sie die entsprechenden Daten und korrigieren Sie das falsche Datum (siehe @sec-solution-6 und @sec-solution-7).
+Wenn Sie ein Ereignisformular begonnen haben und am Ende der Surveillance feststellen, dass die Kriterien der NeoIPC Surveillance Definitionen nicht erfüllt sind, löschen Sie bitte das Formular (siehe @sec-solution-12).

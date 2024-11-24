@@ -1,0 +1,9 @@
+### Der manuell eingegebene Erreger kann nicht zugeordnet werden {#sec-problem-details-12}
+
+Da die Erregerliste der NeoIPC Surveillance Plattform nicht alle weltweit vorkommenden potentiellen Infektionserreger enthalten kann, haben wir die Möglichkeit geschaffen, Erreger, die nicht in der Datenbank vorkommen, als Freitext hinzuzufügen.
+Wenn dies geschieht, versuchen wir herauszufinden, um welchen Erreger es sich handelt, fügen diesen in die Datenbank ein und ordnen dann den als Freitext eingegebenen Erreger diesem neuen Erreger zu, damit in Zukunft eine Gruppenbildung und Auswertung möglich ist.
+
+Wenn diese Meldung im Validierungsbericht erscheint, konnten wir für den eingegebenen Freitext nicht herausfinden, um welchen Erreger (Art, Gattung, Familie) es sich handelt und konnten daher keine sinnvolle Zuordnung vornehmen.
+In der Konsequenz kan der eingegebene Erreger nicht in Auswertungen oder dem Referenzdatenbericht auftauchen.
+
+Bitte konsultieren Sie im Zweifelsfall Ihr mikrobiologisches Labor oder versuchen Sie mit Hilfe taxonomischer Datenbanken wie [LPSN](https://www.bacterio.net/), [MycoBank](https://www.mycobank.org/) oder [ICTV](https://ictv.global/taxonomy) den richtigen Erreger zu finden und uns diesen mitzuteilen, damit wir ihn in die Datenbank aufnehmen können.

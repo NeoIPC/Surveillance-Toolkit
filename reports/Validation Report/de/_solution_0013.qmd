@@ -1,0 +1,17 @@
+
+{{< pagebreak >}}
+
+### Löschen einer Patientenregistrierung {#sec-solution-13}
+
+Um eine Patientenregistrierung zu löschen, öffnen Sie zunächst die entsprechende Patientenregistrierung im Tracked Entity Dashboard (siehe @sec-solution-10), klicken Sie auf "Delete" (siehe @fig-delete-enrolment) und bestätigen Sie den Löschvorgang mit "Yes" im erscheinenden Dialog (siehe @fig-delete-enrolment-confirm).
+
+::: {.callout-note}
+Im Berechtigungssystem der NeoIPC Surveillance Plattform gibt es spezielle Berechtigungen für das Löschen von Patientenregistrierungen.
+Sollte die Schaltfläche "Delete" ausgegraut sein oder der Versuch, Patientenregistrierungen zu löschen, fehlschlagen, liegt dies wahrscheinlich daran, dass Ihr Benutzerkonto nicht über die erforderliche Berechtigung verfügt.
+Dies dient dazu, bereits vollständig erfasste und geprüfte Informationen vor versehentlichem Löschen zu schützen, kann aber auch den Prozess der Datenbereinigung erschweren.
+Grundsätzlich hat die in der NeoIPC Surveillance Kooperationsvereinbarung als Projektleiter Ihrer Klinik benannte Person immer die notwendigen Berechtigungen und kann uns beauftragen, diese Berechtigungen auch anderen Personen in Ihrem Team zu erteilen oder zu entziehen.
+:::
+
+![Löschen einer Patientenregistrierung](img/fig-delete-enrolment.png){#fig-delete-enrolment fig-alt="Screenshot einer im Tracked Entity Dashboards der DHIS2 App Tracker Capture geöffneten Patientenakte in der die Schaltfläche \"Delete\" mit einem Pfeil markiert ist."}
+
+![Bestätigungsdialog zum Löschen einer Patientenregistrierung](img/fig-delete-enrolment-confirm.png){#fig-delete-enrolment-confirm fig-alt="Screenshot des Bestätigungsdialogs zum Löchen einer Patientenregistrierung in der die Schaltfläche \"Yes\" mit einem Pfeil markiert ist."}

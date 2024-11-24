@@ -1,0 +1,15 @@
+
+{{< pagebreak >}}
+
+### Opening an Enrolment in the Tracked Entity Instance Dashboard {#sec-solution-10}
+
+When you open the Tracked Entity Instance Dashboard (see @sec-solution-1) of a patient record that contains an open enrolment, it opens automatically.
+You can access other closed enrolments by clicking the 'History' link (see @fig-open-enrolment-multiple) in the top left corner of the Tracked Entity Instance Dashboard under Enrolment and then selecting the one you want to open from the history displayed by date.
+If this link is missing, there are no other patient enrolments in the corresponding patient record.
+
+If the Tracked Entity Instance Dashboard of the patient record you are opening does not contain any open patient enrolments, the history of patient enrolments will be displayed directly.
+
+Please note that only one enrolment can be open for editing at any one time.
+You will therefore need to close an open enrolment (at least temporarily) in order to reopen another one for editing (also see @sec-solution-5).
+
+![The 'History' link in the Tracked Entity Instance Dashboard, which allows you to access the history of patient registrations.](img/fig-open-enrolment-multiple.png){#fig-open-enrolment-multiple fig-alt="A screenshot in which the 'History' link in the Tracked Entity Instance Dashboard is highlighted."}

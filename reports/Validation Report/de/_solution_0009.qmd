@@ -1,0 +1,18 @@
+
+{{< pagebreak >}}
+
+### Wiedereröffnung eines abgeschlossenen Ereignis-Formulars, um Änderungen vorzunehmen {#sec-solution-9}
+
+Wenn Sie Informationen in einem Ereignis-Formular ändern möchten, das bereits abgeschlossen und damit vor Änderungen geschützt wurde, müssen Sie es zunächst wieder zur Bearbeitung öffnen.
+Wen auch die Patientenregistrierung bereits abgeschlossen ist, muss auch diese wieder zur Bearbeitung geöffnet werden, bevor das Ereignis-Formular zur Bearbeitung geöffnet werden kann (siehe @sec-solution-5).
+
+Um es wieder zur Bearbeitung zu öffnen, öffenen Sie das betreffende Ereignis-Formular (siehe @sec-solution-15) im Tracked Entity Dashboard und klicken Sie anschließend auf die Schaltfläche "Incomplete", die sich in der Regel links unterhalb des Ereignis-Formulars befindet (siehe @fig-incomplete-event).
+
+::: {.callout-note}
+Im Berechtigungssystem der NeoIPC Surveillance Plattform gibt es spezielle Berechtigungen für das Wiedereröffnen von Ereignisformularen
+Sollte die Schaltfläche "Incomplete" ausgegraut sein oder der Versuch, abgeschlossene Ereignisformulare wieder zu öffnen, fehlschlagen, ist entweder auch die Patientenregistrierung bereits abgeschlossen oder es liegt daran, dass Ihr Benutzerkonto nicht über die erforderliche Berechtigung verfügt.
+Dies dient dazu, bereits vollständig erfasste und geprüfte Informationen vor versehentlichen Änderungen zu schützen, kann aber auch den Prozess der Datenkorrektur erschweren.
+Grundsätzlich hat die in der NeoIPC Surveillance Kooperationsvereinbarung als Projektleiter Ihrer Klinik benannte Person immer die notwendigen Berechtigungen und kann uns beauftragen, diese Berechtigungen auch anderen Personen in Ihrem Team zu erteilen oder zu entziehen.
+:::
+
+![Die Schaltfläche "Incomplete" in einem Ereignis-Formular des Tracked Entity Instance Dashboards](img/fig-incomplete-event.png){#fig-incomplete-event fig-alt="Ein Screenshot eines Ereignis-Formulars des Tracked Entity Instance Dashboards, in dem die Schaltfläche \"Incomplete\" hervorgehoben ist"}

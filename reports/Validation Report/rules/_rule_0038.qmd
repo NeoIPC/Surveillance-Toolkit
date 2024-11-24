@@ -1,0 +1,37 @@
+```{r Validation rule 38: "The day of the nec event is less than day 3 of the hospital stay of a transferred or re-admitted patient"}
+problems <- problems |>
+  bind_rows(
+    patients |>
+      select(SITE_CODE, DEPARTMENT_NAME, DEPARTMENT_OU, NEOIPC_PATIENT_ID, PATIENT_TEI, key) |>
+      rename(patient_key = key) |>
+      inner_join(
+        enrollments |>
+          filter(NEOIPC_ADMISSION_TYPE == 3) |>
+          select(ENROLMENT_ID, ENROLMENT_DATE, key, patient) |>
+          rename(enrollment_key = key),
+        join_by(patient_key == patient)) |>
+      inner_join(
+        data$necs |>
+          select(event, occurredAt, enrollment, NEOIPC_NEC_LOS) |>
+          rename(EVENT_DATE = occurredAt, EVENT_ID = event),
+        join_by(enrollment_key == enrollment)) |>
+      mutate(
+        PROBLEM_ID = 38L,
+        EVENT_TYPE = event_types("NEC"),
+        NEC_DOS = NEOIPC_NEC_LOS + 1L) |>
+      filter(NEC_DOS < 3) |>
+      select(
+        SITE_CODE,
+        DEPARTMENT_NAME,
+        DEPARTMENT_OU,
+        NEOIPC_PATIENT_ID,
+        PATIENT_TEI,
+        ENROLMENT_ID,
+        ENROLMENT_DATE,
+        EVENT_ID,
+        EVENT_TYPE,
+        EVENT_DATE,
+        PROBLEM_ID,
+        NEC_DOS
+        ))
+```

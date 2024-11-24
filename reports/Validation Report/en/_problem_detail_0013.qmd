@@ -1,0 +1,7 @@
+### The Sum of All Antibiotic Substance Days Is Less Than the Total Number of Antibiotic Days {#sec-problem-details-13}
+
+In the Surveillance End form, the number of days on which a patient received (any) antibiotic treatment (antibiotic days) and the number of days on which each antibiotic substance was used (substance days) are recorded.
+By nature, the number of antibiotic days must be less than or equal to the value obtained by adding all substance days.
+Unfortunately, the input validation that checks this does not work reliably and can be bypassed, which leads to this error message in the validation report.
+
+Please reopen the Surveillance End form (see @sec-solution-9) and enter the correct values for the individual substance days or the correct value for the antibiotic days.

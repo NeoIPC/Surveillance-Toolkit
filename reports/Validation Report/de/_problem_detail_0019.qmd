@@ -1,0 +1,12 @@
+### Die Infektion trat innerhalb der ersten drei Lebenstage auf {#sec-problem-details-19}
+
+Diese Meldung ist nicht unbedingt als Fehler zu verstehen, sondern vielmehr als Warnung vor einem möglichen Missverständnis.
+
+Da es bei der NeoIPC Surveillance um die Erfassung von nosokomialen Infektionen mit Präventionspotenzial auf neonatologischen Stationen geht, sind früh auftretende Infektionen (Early-Onset-Infektionen) in den allermeisten Fällen nicht zu erfassen.
+Das NeoIPC-Surveillance-Protokoll legt diesbezüglich fest, dass eine Infektion, die früher als 72 Stunden nach der Geburt auftritt, nicht als nosokomiale Infektion gilt und daher nicht in der NeoIPC-Surveillance erfasst werden sollte, es sei denn, sie wurde eindeutig im Krankenhaus erworben (z. B. bei eindeutigen Hinweisen auf eine Katheterinfektion).
+
+Wir haben festgestellt, dass diese Festlegung im Protokoll manchmal übersehen wird und dass einige unserer Partner früh auftretende Infektionen erfassen, was zu einer Verzerrung der Referenzdaten und ihrer eigenen Statistiken führen kann.
+
+Wir haben zwar geplant, im Rahmen der NeoIPC Surveillance auch die Erfassung von Early-Onset Infektionen zu ermöglichen, dies wird aber in jedem Fall in einem separaten Ereignisformular erfolgen, um die Infektionen mit Präventionspotential im Bereich der Neonatologie von den Infektionen zu trennen, deren Prävention eher in den Bereich der Schwangerenvorsorge und Geburtsmedizin fällt.
+
+Bitte löschen Sie die Formulare für alle Infektionen, die keine nosokomialen Infektionen im Sinne der obigen Definition sind (siehe @sec-solution-12) oder passen Sie das Infektionsdatum (siehe @sec-solution-7) oder das Aufnahmedatum (siehe @sec-solution-6) an, wenn es sich um einen Eingabefehler handelt.

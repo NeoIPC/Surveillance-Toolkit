@@ -1,0 +1,10 @@
+
+{{< pagebreak >}}
+
+### Löschen einer Patientenakte {#sec-solution-2}
+
+Um eine Patientenakte zu löschen, öffnen Sie zunächst, wie in @sec-solution-1 beschrieben, das Tracked Entity Instance Dashboard und klicken dann, wie in @fig-delete-patient dargestellt, auf die Schaltfläche "Delete NeoIPC Patient", die nach dem Klicken auf die rote Schaltfläche oben rechts im Tracked Entity Instance Dashboard der Patientenakte angezeigt wird. Wenn Sie anschließend den Löschvorgang im erscheinenden Dialog bestätigen, wird die Patientenakte gelöscht.
+
+Siehe auch "[Delete a TEI](https://docs.dhis2.org/en/use/user-guides/dhis-core-version-240/tracking-individual-level-data/tracker-capture.html#delete_tracked_entity_instance)".
+
+![Löschen einer NeoIPC Patientenakte in DHIS2](img/fig-delete-patient.png){#fig-delete-patient fig-alt="Die Schaltfläche \"Delete NeoIPC Patient\" wird angezeigt, nachdem Sie auf die rote Schaltfläche oben rechts im Tracked Entity Instance Dashboard der Patientenakte geklickt haben."}

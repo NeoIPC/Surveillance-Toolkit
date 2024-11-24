@@ -1,0 +1,112 @@
+---
+params:
+  token: NULL
+  language: "en"
+  country: NULL
+  departmentFilter: NULL
+  testUnitFilter: TRUE
+---
+
+{{< include _setup.qmd >}}
+
+{{< include _mapping.qmd >}}
+
+```{r Import translated strings}
+invisible(knitr::knit_child(text = readr::read_file(Sys.glob(paste0(language, "/_strings.qmd"))), quiet = TRUE))
+```
+
+{{< include _formatters.qmd >}}
+
+```{r Execute validation rules}
+options(knitr.duplicate.label = "allow")
+
+rule_files <- Sys.glob("rules/_rule_[0-9][0-9][0-9][0-9].qmd") |>
+  sort()
+
+for (rule_file in rule_files) {
+  knitr::knit_child(text = readr::read_file(rule_file), quiet = TRUE)
+}
+```
+
+```{r Abort if the current configuration did not yield any problems}
+if(nrow(problems) < 1)
+  stop("No problem detected")
+```
+
+`{r} translations$header$createdAt`:
+
+:   `{r} format(Sys.time(), format = "%x %X", tz = "UTC", usetz = TRUE)`
+
+`{r} if(nrow(departments) > 1){translations$header$departments}else{translations$header$department}`:
+
+:   `{r} paste(departments |> pull(code) |> sort(), sep = ", ")`
+
+```{r Write problems intro}
+#| output: asis
+
+cat(
+  sep = "\n",
+  knitr::knit_child(text = readr::read_file(Sys.glob(paste0(language, "/_problems_intro.qmd"))), quiet = TRUE)
+)
+```
+
+{{< include _problems.qmd >}}
+
+{{< pagebreak >}}
+
+```{r Write problem details and solutions}
+#| output: asis
+# Problem details intro
+cat(
+  sep = "\n",
+  knitr::knit_child(text = readr::read_file(Sys.glob(paste0(language, "/_problem_details_intro.qmd"))), quiet = TRUE)
+)
+
+# Problem details
+sortedDetails <- problem_detail_info |>
+  dplyr::semi_join(
+    problem_info |>
+      dplyr::filter(id %in% report_problems) |>
+      dplyr::select(usedDetails) |>
+      tidyr::unnest_longer(usedDetails),
+    dplyr::join_by(id == usedDetails)) |>
+  dplyr::arrange(sortOrder) |>
+  dplyr::mutate(filePath = paste0(language, "/_problem_detail_", sprintf("%04d", id), ".qmd")) |>
+  dplyr::select(filePath, usedSolutions) |>
+  dplyr::distinct()
+
+problem_detail_files <- Sys.glob(sortedDetails$filePath)
+
+for (problem_detail_file in problem_detail_files) {
+  cat(sep = "\n", knitr::knit_child(quiet = TRUE, text = readr::read_file(problem_detail_file)))
+}
+```
+
+{{< pagebreak >}}
+
+```{r Write solutions}
+#| output: asis
+# Solutions intro
+cat(
+  sep = "\n",
+  knitr::knit_child(text = readr::read_file(Sys.glob(paste0(language, "/_solutions_intro.qmd"))), quiet = TRUE)
+)
+
+# Solutions
+solution_files <- solution_info |>
+  dplyr::semi_join(
+    sortedDetails |>
+      dplyr::select(usedSolutions) |>
+      tidyr::unnest_longer(usedSolutions),
+    dplyr::join_by(id == usedSolutions)) |>
+  dplyr::arrange(sortOrder) |>
+  dplyr::mutate(filePath = paste0(language, "/_solution_", sprintf("%04d", id), ".qmd"), .keep = "none") |>
+  dplyr::distinct() |>
+  dplyr::pull(filePath) |>
+  Sys.glob()
+
+for (solution_file in solution_files) {
+  cat(sep = "\n", knitr::knit_child(quiet = TRUE, text = readr::read_file(solution_file)))
+}
+```
+

@@ -1,0 +1,81 @@
+```{r Validation rule 20: "Unknown pathogen"}
+
+problems <- problems |>
+  bind_rows(
+    patients |>
+      select(SITE_CODE, DEPARTMENT_NAME, DEPARTMENT_OU, NEOIPC_PATIENT_ID, PATIENT_TEI, key) |>
+      rename(patient = key) |>
+      inner_join(
+        enrollments |>
+          select(ENROLMENT_ID, ENROLMENT_DATE, key, patient) |>
+          rename(enrollment = key),
+        join_by(patient)) |>
+      inner_join(
+        data$causative_pathogens |>
+          filter(PATHOGEN == 0) |>
+          select(key, eventType, index, secondary_bsi, PATHOGEN_NAME) |>
+          rename(PATHOGEN_INDEX = index, IS_SECONDARY_BSI = secondary_bsi) |>
+          inner_join(
+            data$metadata$eventTypes |>
+              select(key, name),
+            join_by(eventType == key)) |>
+          mutate(
+            EVENT_TYPE = case_match(
+              name,
+              "Necrotizing enterocolitis" ~ "NEC",
+              "Surgical Site Infection" ~ "SSI",
+              "Primary Sepsis/BSI" ~ "BSI",
+              "Pneumonia" ~ "HAP"),
+            nec_key = if_else(EVENT_TYPE == "NEC", key, NA),
+            ssi_key = if_else(EVENT_TYPE == "SSI", key, NA),
+            bsi_key = if_else(EVENT_TYPE == "BSI", key, NA),
+            hap_key = if_else(EVENT_TYPE == "HAP", key, NA),
+            .keep = "unused") |>
+          left_join(
+            data$necs |>
+              select(key, event, enrollment, occurredAt) |>
+              distinct() |>
+              rename(nec_key = key, nec_event = event, nec_enrollment = enrollment, nec_occurredAt = occurredAt),
+            join_by(nec_key)) |>
+          left_join(
+            data$ssis |>
+              select(key, event, enrollment, occurredAt) |>
+              distinct() |>
+              rename(ssi_key = key, ssi_event = event, ssi_enrollment = enrollment, ssi_occurredAt = occurredAt),
+            join_by(ssi_key)) |>
+          left_join(
+            data$sepses |>
+              select(key, event, enrollment, occurredAt) |>
+              distinct() |>
+              rename(bsi_key = key, bsi_event = event, bsi_enrollment = enrollment, bsi_occurredAt = occurredAt),
+            join_by(bsi_key)) |>
+          left_join(
+            data$pneumonias |>
+              select(key, event, enrollment, occurredAt) |>
+              distinct() |>
+              rename(hap_key = key, hap_event = event, hap_enrollment = enrollment, hap_occurredAt = occurredAt),
+            join_by(hap_key)) |>
+          mutate(
+            PROBLEM_ID = 20L,
+            enrollment = coalesce(nec_enrollment, ssi_enrollment, bsi_enrollment, hap_enrollment),
+            EVENT_ID = coalesce(nec_event, ssi_event, bsi_event, hap_event),
+            EVENT_DATE = coalesce(nec_occurredAt, ssi_occurredAt, bsi_occurredAt, hap_occurredAt),
+            .keep = "unused"),
+        join_by(enrollment)) |>
+      select(
+        SITE_CODE,
+        DEPARTMENT_NAME,
+        DEPARTMENT_OU,
+        NEOIPC_PATIENT_ID,
+        PATIENT_TEI,
+        ENROLMENT_ID,
+        ENROLMENT_DATE,
+        EVENT_ID,
+        EVENT_TYPE,
+        EVENT_DATE,
+        PROBLEM_ID,
+        IS_SECONDARY_BSI,
+        PATHOGEN_INDEX,
+        PATHOGEN_NAME
+        ))
+```

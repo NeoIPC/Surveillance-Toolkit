@@ -1,0 +1,6 @@
+### Die Patientenakte enthält eine abgeschlossene Patientenregistrierung, aber das Surveillance-Ende-Formular ist nicht abgeschlossen {#sec-problem-details-6}
+
+Das Surveillance-Ende-Formular ist ein Pflichtformular, das immer vor dem Abschluss der Patientenregistrierung (Enrollment) ausgefüllt und abgeschlossen werden muss, damit die Daten später ausgewertet werden können.
+Die Daten einer Patientenakte ohne Surveillance-Ende-Formular können nicht in Auswertungen einbezogen werden, da die wichtigsten Nennerdaten zur Berechnung der Raten fehlen.
+
+Bitte öffnen Sie die Patientenregistrierung erneut (siehe @sec-solution-5), füllen Sie das Surveillance-Ende-Formular aus, schließen Sie es (siehe @sec-solution-8) und schließen Sie anschließend die Patientenakte wieder ab (siehe @sec-solution-4).

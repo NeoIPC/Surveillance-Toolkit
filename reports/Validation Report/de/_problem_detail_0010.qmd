@@ -1,0 +1,19 @@
+### Die Anzahl der Patiententage stimmt nicht mit dem berechneten Wert überein {#sec-problem-details-10}
+
+Der Wert für die Patiententage, der im Formular Ende der Surveillance angegeben wird, wird automatisch aus dem Datum des Endes der Surveillance und dem Aufnahmedatum der Patientenregistrierung berechnet.
+Die Anzahl der Patiententage ist eine der wichtigsten Informationen für die Berechnung von Raten in verschiedenen Auswertungen und wird auch für die Validierung von Eingaben in verschiedenen anderen Feldern verwendet. Zum Beispiel kann die Anzahl der Device-Tage (ZVK, PVK, Beatmung, ...) nicht größer sein als die Anzahl der Patiententage, was bei der Eingabe überprüft wird.
+Aus diesen Gründen ist es sehr wichtig, dass der Wert für die Patiententage korrekt ist.
+
+Wenn diese Fehlermeldung im Validierungsbericht erscheint, haben wir festgestellt, dass der gespeicherte Wert für die Patiententage nicht korrekt ist.
+Dies kann zwei Gründe haben:
+
+1. Ein Fehler in unserer automatischen Berechnung vor dem `r format(lubridate::date("2024-08-21"), format = "%x")` hat dazu geführt, dass der Wert für die Patiententage um einen Tag zu klein ist.
+2. Das Aufnahmedatum der Patientenregistrierung wurde nach dem Abschließen des Formulars für das Ende der Surveillance geändert.
+
+Was den ersten Grund betrifft, tut es uns wirklich leid, denn es ist ein Problem, das wir verursacht haben, und das für Sie zu Arbeit führt.
+Normalerweise würden wir alles tun, um dies zu vermeiden, und bei automatisch berechneten Werten wäre dies - trotz unserer grundsätzlichen Politik, die von unseren Partnern eingegebenen Werte niemals ohne Rücksprache zu ändern - prinzipiell auch möglich, aber leider ergibt sich in diesem Fall, durch die Validierung der Eingaben, in manchen Fällen ein zusätzliches Problem, das wir mit den uns zur Verfügung stehenden Informationen nicht selbst lösen können.
+So kann es in Einzelfällen vorkommen, dass Sie für bestimmte Risiko- oder Schutzfaktoren die gleiche Anzahl von Tagen ("Device-Tage") wie die Anzahl der Patiententage eingeben wollten (z.B. gibt es regelmäßig Fälle, in denen die Anzahl der Humanmilchtage gleich der Anzahl der Patiententage ist). In diesen Fällen müsste auch der Wert für die entsprechenden Device-Tage angepasst werden, was wir nicht können, da wir den wahren Wert nicht kennen.
+
+Auch beim zweiten oben beschriebenen Grund besteht das im vorigen Abschnitt beschriebene Problem mit der Eingabevalidierung, was erklärt, warum die NeoIPC Surveillance Plattform den Wert nicht einfach automatisch neu berechnet, wenn das Aufnahmedatum der Patientenregistrierung geändert wird.
+
+Unabhängig von der Ursache des Problems bitten wir Sie, den Wert der Patiententage im Surveillance End-Formular zu aktualisieren (siehe @sec-solution-11) und anschließend zu überprüfen, ob weitere Werte aktualisiert werden müssen und diese gegebenenfalls anzupassen.

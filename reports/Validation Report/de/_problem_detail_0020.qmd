@@ -1,0 +1,5 @@
+### Die Infektion trat innerhalb der ersten zwei Tage des Krankenhausaufenthalts eines überwiesenen oder (wieder-)aufgenommenen Patienten auf {#sec-problem-details-20}
+
+Infektionen, die bei überwiesenen oder (wieder-)aufgenommenen Patienten innerhalb der ersten beiden Tage auftreten, sind laut NeoIPC Surveilance Protokoll nicht als nosokomiale Infektionen zu werten und können deshalb nicht erfasst werden.
+
+Bitte löschen Sie die Formulare für alle Infektionen, die keine nosokomialen Infektionen im Sinne dieser Definition sind (siehe @sec-solution-12) oder passen Sie das Infektionsdatum (siehe @sec-solution-7) oder das Aufnahmedatum (siehe @sec-solution-6) an, wenn es sich um einen Eingabefehler handelt.

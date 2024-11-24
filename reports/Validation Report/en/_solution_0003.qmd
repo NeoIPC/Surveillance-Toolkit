@@ -1,0 +1,9 @@
+
+{{< pagebreak >}}
+
+### Adding an Enrollment to a Patient Record {#sec-solution-3}
+
+To add an enrolment to a patient record, open the Tracked Entity Instance Dashboard (see @sec-solution-1) and click on the 'Add new' link (see @fig-add-enrolment). In the form that opens, you can change the pre-filled values if necessary. Then, click on 'Enrol'.
+
+![Adding an Enrollment in DHIS2](img/fig-add-enrolment.png){#fig-add-enrolment fig-alt="The 'Add new' button is in the middle of the 'Enrollment' block in the upper left corner of the Tracked Entity Instance Dashboard in the patient file."}
+

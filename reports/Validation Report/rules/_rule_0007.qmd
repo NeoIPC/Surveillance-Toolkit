@@ -1,0 +1,36 @@
+```{r Validation rule 7: "The patient record has a completed enrolment or surveillance end form but a sepsis form is not completed"}
+
+problems <- problems |>
+  bind_rows(
+    patients |>
+      inner_join(
+        enrollments |>
+          inner_join(data$sepses, join_by(key == enrollment)),
+        join_by(key == patient)) |>
+      filter((enrollment_status == "COMPLETED" | surveillanceEnd_status == "COMPLETED") & status != "COMPLETED") |>
+      mutate(
+        EVENT_ID = event,
+        EVENT_TYPE = event_types("BSI"),
+        EVENT_DATE = occurredAt,
+        PROBLEM_ID = 7L,
+        ENROLMENT_STATUS = enrollment_status,
+        SURVEILLANCE_END_STATUS = surveillanceEnd_status,
+        SEPSIS_STATUS = status,
+        .keep = "unused") |>
+      select(
+        SITE_CODE,
+        DEPARTMENT_NAME,
+        DEPARTMENT_OU,
+        NEOIPC_PATIENT_ID,
+        PATIENT_TEI,
+        ENROLMENT_ID,
+        ENROLMENT_DATE,
+        EVENT_ID,
+        EVENT_TYPE,
+        EVENT_DATE,
+        PROBLEM_ID,
+        ENROLMENT_STATUS,
+        SURVEILLANCE_END_STATUS,
+        SEPSIS_STATUS
+        ))
+```

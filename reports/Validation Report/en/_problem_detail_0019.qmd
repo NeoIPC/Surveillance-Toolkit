@@ -1,0 +1,12 @@
+### The Infection Occurred Within the First Three Days of Life {#sec-problem-details-19}
+
+This message should not necessarily be interpreted as an error, but rather as a warning of a possible misunderstanding.
+
+As the purpose of NeoIPC surveillance is to monitor nosocomial infections with the potential for prevention in neonatal units, early-onset infections generally cannot be recorded.
+The NeoIPC Surveillance Protocol states that if an infection occurs earlier than 72 hours after birth, it is not considered a nosocomial infection and should not be included in NeoIPC surveillance unless it is clearly hospital-acquired (e.g. there is clear evidence of catheter infection).
+
+We have found that this protocol specification is sometimes overlooked and that some of our partners are recording early-onset infections, which can distort the reference data and their own statistics.
+
+We have planned to allow the recording of early-onset infections as part of NeoIPC Surveillance, but this will in any case be done in a separate event form in order to separate those infections with a potential for prevention in the neonatal setting from those whose prevention is more in the domain of antenatal care and obstetrics.
+
+Please delete the forms for all infections that are not nosocomial infections according to the above definition (see @sec-solution-12) or adjust the infection date (see @sec-solution-7) or the admission date (see @sec-solution-6) if it was an input error.

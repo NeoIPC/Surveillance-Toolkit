@@ -1,0 +1,17 @@
+
+{{< pagebreak >}}
+
+### Deleting an Enrolment {#sec-solution-13}
+
+To delete a patient enrolment, first open the corresponding patient enrolment in the Tracked Entity Dashboard (see @sec-solution-10), then click on ‘Delete’ (see @fig-delete-enrolment) and confirm the deletion by clicking on 'Yes' in the dialogue that appears (see @fig-delete-enrolment-confirm).
+
+::: {.callout-note}
+The NeoIPC Surveillance platform permissions system includes specific permissions for deleting patient enrolments.
+If the 'Delete' button is greyed out or attempts to delete patient enrolments fail, it is likely that your user account does not have the required permissions.
+This is to protect enrolments that have already been fully entered and reviewed from inadvertent deletion, but it can also make the process of data cleaning more difficult.
+In principle, the person designated as your hospital's project manager in the NeoIPC Surveillance cooperation agreement will always have the necessary permissions and can instruct us to grant or revoke these permissions for other members of your team.
+:::
+
+![Deleting an Enrolment](img/fig-delete-enrolment.png){#fig-delete-enrolment fig-alt="Screenshot of a patient file opened in the Tracked Entity Dashboards of the DHIS2 Tracker Capture App in which the 'Delete' button is marked with an arrow."}
+
+![Confirmation dialogue for deleting a patient registration](img/fig-delete-enrolment-confirm.png){#fig-delete-enrolment-confirm fig-alt="Screenshot of the confirmation dialogue for deleting a patient registration in which the 'Yes' button is marked with an arrow."}

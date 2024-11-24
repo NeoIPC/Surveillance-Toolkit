@@ -1,0 +1,26 @@
+```{r Validation rule 26: "The patient has a completed enrollment but no admission form"}
+
+problems <- problems |>
+  bind_rows(
+    patients |>
+      select(SITE_CODE, DEPARTMENT_NAME, DEPARTMENT_OU, NEOIPC_PATIENT_ID, PATIENT_TEI, key) |>
+      rename(patient_key = key) |>
+      inner_join(
+        enrollments |>
+          select(ENROLMENT_ID, ENROLMENT_DATE, enrollment_status, admission_status, patient),
+        join_by(patient_key == patient)) |>
+      filter(enrollment_status == "COMPLETED" & is.na(admission_status)) |>
+      mutate(
+        PROBLEM_ID = 26L) |>
+      select(
+        SITE_CODE,
+        DEPARTMENT_NAME,
+        DEPARTMENT_OU,
+        NEOIPC_PATIENT_ID,
+        PATIENT_TEI,
+        ENROLMENT_ID,
+        ENROLMENT_DATE,
+        PROBLEM_ID
+        ))
+
+```

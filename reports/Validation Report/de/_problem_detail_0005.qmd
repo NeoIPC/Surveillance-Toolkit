@@ -1,0 +1,4 @@
+### Das Aufnahmeformular der Patientenakte ist nicht abgeschlossen {#sec-problem-details-5}
+
+Für jeden stationären Aufenthalt eines in die NeoIPC Surveillance einzuschließenden Patienten muss in der NeoIPC Surveillance Plattform eine Patientenregistrierung angelegt werden, die neben den Patienteninformationen immer auch ein abgeschlossenes Aufnahme-Formular enthalten muss.
+Dieses Formular wird bei Anlegen einer Patientenregistrierung automatisch angelegt und geöffnet und sollte unmittelbar ausgefüllt und abgeschlossen werden (siehe @sec-solution-8), damit die Daten für interne Berechnungen und Analysen zur Verfügung stehen.

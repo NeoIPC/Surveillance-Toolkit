@@ -1,0 +1,6 @@
+### The Date of the End of the Surveillance Is Earlier Than the Date of Admission in the Admission Form {#sec-problem-details-4}
+
+When a patient's surveillance has ended, the date on which this happened must be entered on the Surveillance End form. Naturally, the earliest the surveillance can end is on the day it started, but not before.
+In order for the system to calculate the denominator data and determine the patient's risk of infection, both the admission date and the surveillance end date must be entered correctly.
+If this error occurs, you have either entered an incorrect admission date or an incorrect end of surveillance date.
+To correct the admission date, please refer to @sec-solution-6. To correct the discharge date, see @sec-solution-7.

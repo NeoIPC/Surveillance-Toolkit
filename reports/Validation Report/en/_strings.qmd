@@ -1,0 +1,161 @@
+```{r English translations}
+translations <- list(
+  patient_problem_header_prefix = "Patient with the NeoIPC-ID",
+  patient_problem_dashboard_link_description = "Link to the patient's tracked entity instance dashboard on the NeoIPC Data Management Platform",
+  patient_problem_multiple_hint = "We have detected more than one problem in this patient record. It can sometimes be difficult to fix multiple problems in a patient record, because one single error may be causing more than one problem, or fixing one problem may cause a new one. If you are unsure how to proceed, please get in touch with us via our [support e-mail address](mailto:%s) and we will be happy to help you.",
+  patient_problem_multiple_hint_email_subject = "Support request regarding complex errors in a patient record",
+  patient_problem_multiple_hint_email_body = "Dear NeoIPC Surveillance support team,
+my validation report contains multiple errors for the patient with the id '%s'.
+Can you please have a look and get in touch with me?
+Best regards,
+",
+  neoipc_surveillance_partner_code = "NeoIPC Surveillance Partner Code",
+  enrolment_problem_header_prefix = "Enrolment with the admission date",
+  adm_problem_header_prefix = "Admission event with the admission date",
+  end_problem_header_prefix = "Surveillance-End event with the surveillance end date",
+  sur_problem_header_prefix = "Surgical Procedure event with the procedure date",
+  bsi_problem_header_prefix = "Primary Sepsis/BSI event with the infection date",
+  hap_problem_header_prefix = "Pneumonia event with the infection date",
+  nec_problem_header_prefix = "Necrotizing enterocolitis event with the infection date",
+  ssi_problem_header_prefix = "Surgical Site Infection event with the infection date",
+  header = list(
+    createdAt = "Created",
+    departments = "Departments",
+    department = "Department"
+  ),
+  ssi_types = list(
+    `1` = "superficial incisional SSI",
+    `2` = "deep incisional SSI",
+    `3` = "organ/space SSI"
+  ),
+  problems = list(
+    `1` = list(
+      description = "The patient record does not have an enrolment. See @sec-problem-details-1."
+      ),
+    `2` = list(
+      description = "The patient record has a completed surveillance end form but the enrolment is still active. See @sec-problem-details-2."
+      ),
+    `3` = list(
+      description = "The admission date in the admission form (%s) differs from the admission date in the enrolment (%s). See @sec-problem-details-3."
+      ),
+    `4` = list(
+      description = "The date of the end of the surveillance (%s) is earlier than the date of admission on the admission form (%s). See @sec-problem-details-4."
+      ),
+    `5` = list(
+      description = "The patient record's admission form is not completed (status is '%s'). See @sec-problem-details-5."
+      ),
+    `6` = list(
+      description = "The patient record has a completed enrolment but the surveillance end form is not completed (status is '%s'). See @sec-problem-details-6."
+      ),
+    `7` = list(
+      description = "The patient record has a completed enrolment or surveillance end form but a sepsis form is not completed (enrolment status is '%s', surveillance end form status is '%s', sepsis form status is '%s'). See @sec-problem-details-7."
+      ),
+    `8` = list(
+      description = "The patient record has a completed enrolment or surveillance end form but a necrotizing enterocolitis form is not completed (enrolment status is '%s', surveillance end form status is '%s', necrotizing enterocolitis form status is '%s'). See @sec-problem-details-7."
+      ),
+    `9` = list(
+      description = "The patient record has a completed enrolment or surveillance end form but a pneumonia form is not completed (enrolment status is '%s', surveillance end form status is '%s', pneumonia form status is '%s'). See @sec-problem-details-7."
+      ),
+    `10` = list(
+      description = "The patient record has a completed enrolment or surveillance end form but a surgical procedure form is not completed (enrolment status is '%s', surveillance end form status is '%s', surgical procedure form status is '%s'). See @sec-problem-details-7."
+      ),
+    `11` = list(
+      description = "The patient record has a completed enrolment or surveillance end form but a surgical site infection form is not completed (enrolment status is '%s', surveillance end form status is '%s', surgical site infection form status is '%s'). See @sec-problem-details-7."
+      ),
+    `12` = list(
+      description = "The patient record contains a sepsis form with an infection date that is not within the time frame of a documented enrolment (admission date in the enrolment '%s', admission date in the admission form is '%s', surveillance end date is '%s', sepsis date is '%s'). See @sec-problem-details-8."
+      ),
+    `13` = list(
+      description = "The patient record contains a necrotizing enterocolitis form with an infection date that is not within the time frame of a documented enrolment (admission date in the enrolment '%s', admission date in the admission form is '%s', surveillance end date is '%s', necrotizing enterocolitis date is '%s'). See @sec-problem-details-8."
+      ),
+    `14` = list(
+      description = "The patient record contains a pneumonia form with an infection date that is not within the time frame of a documented enrolment (admission date in the enrolment '%s', admission date in the admission form is '%s', surveillance end date is '%s', pneumonia date is '%s'). See @sec-problem-details-8."
+      ),
+    `15` = list(
+      description = "The patient record contains a surgical procedure form with an infection date that is not within the time frame of a documented enrolment (admission date in the enrolment '%s', admission date in the admission form is '%s', surveillance end date is '%s', surgical procedure date is '%s'). See @sec-problem-details-8."
+      ),
+    `16` = list(
+      description = "The patient record contains a surgical site infection form with an infection date that is not within the time frame of a documented enrolment (admission date in the enrolment '%s', admission date in the admission form is '%s', surveillance end date is '%s', surgical site infection date is '%s'). See @sec-problem-details-8."
+      ),
+    `17` = list(
+      description = "The patient record contains an enrolment with a time interval that overlaps with that of another enrolment (this enrolment has an interval from %s to %s and the other enrolment has an interval from %s to %s). See @sec-problem-details-9."
+      ),
+    `18` = list(
+      description = "The number of patient days (%s) does not match the calculated value (%s). See @sec-problem-details-10."
+      ),
+    `19` = list(
+      description = "The surgical site infection (%s) did not occur during the follow-up period of a recorded surgical procedure. See @sec-problem-details-11."
+      ),
+    `20` = list(
+      description = "The pathogen manually entered as pathogen %i%s ('%s') cannot be assigned. See @sec-problem-details-12.",
+      sec_bsi_part = " causing secondary sepsis"
+      ),
+    `21` = list(
+      description = "The sum of all antibiotic substance days (%i) is less than the total number of antibiotic days (%i). See @sec-problem-details-13."
+      ),
+    `22` = list(
+      description = "The surgical procedure ('%s') has an invalid ICHE code ('%s') as the main procedure code. See @sec-problem-details-14."
+      ),
+    `23` = list(
+      description = "The surgical procedure ('%s') has an invalid ICHE code ('%s') as the first side procedure code. See @sec-problem-details-14."
+      ),
+    `24` = list(
+      description = "The surgical procedure ('%s') has an invalid ICHE code ('%s') as the second side procedure code. See @sec-problem-details-14."
+      ),
+    `25` = list(
+      description = "The patient record has a completed enrolment but no surveillance end form. See @sec-problem-details-15."
+      ),
+    `26` = list(
+      description = "The patient record has a completed enrolment but no admission form. See @sec-problem-details-16."
+      ),
+    `27` = list(
+      description = "The day of life stored in the sepsis form (%i) does not match the calculated value (%i). See @sec-problem-details-17."
+      ),
+    `28` = list(
+      description = "The day of occurrence after admission stored in the sepsis form (%i) does not match the calculated value (%i). See @sec-problem-details-18."
+      ),
+    `29` = list(
+      description = "The sepsis occurred within the first 3 days of life (day of life is %i). See @sec-problem-details-19."
+      ),
+    `30` = list(
+      description = "The sepsis occurred within the first two days of hospitalisation of a referred or (re-)admitted patient (day of hospitalisation is %i). See @sec-problem-details-20."
+      ),
+    `31` = list(
+      description = "The day of life stored in the pneumonia form (%i) does not match the calculated value (%i). See @sec-problem-details-17."
+      ),
+    `32` = list(
+      description = "The day of occurrence after admission stored in the pneumonia form (%i) does not match the calculated value (%i). See @sec-problem-details-18."
+      ),
+    `33` = list(
+      description = "The pneumonia occurred within the first 3 days of life (day of life is %i). See @sec-problem-details-19."
+      ),
+    `34` = list(
+      description = "The pneumonia occurred within the first two days of hospitalisation of a referred or (re-)admitted patient (day of hospitalisation is %i). See @sec-problem-details-20."
+      ),
+    `35` = list(
+      description = "The day of life stored in the necrotising enterocolitis form (%i) does not match the calculated value (%i). See @sec-problem-details-17."
+      ),
+    `36` = list(
+      description = "The day of occurrence after admission stored in the necrotising enterocolitis form (%i) does not match the calculated value (%i). See @sec-problem-details-18."
+      ),
+    `37` = list(
+      description = "The necrotising enterocolitis occurred within the first 3 days of life (day of life is %i). See @sec-problem-details-19."
+      ),
+    `38` = list(
+      description = "The necrotising enterocolitis occurred within the first two days of hospitalisation of a referred or (re-)admitted patient (day of hospitalisation is %i). See @sec-problem-details-20."
+      ),
+    `39` = list(
+      description = "The day of life stored in the surgical procedure form (%i) does not match the calculated value (%i). See @sec-problem-details-17."
+      ),
+    `40` = list(
+      description = "The day of occurrence after admission stored in the surgical procedure form (%i) does not match the calculated value (%i). See @sec-problem-details-18."
+      ),
+    `41` = list(
+      description = "The day of life stored in the surgical site infection form (%i) does not match the calculated value (%i). See @sec-problem-details-17."
+      ),
+    `42` = list(
+      description = "The day of occurrence after admission stored in the surgical site infection form (%i) does not match the calculated value (%i). See @sec-problem-details-18."
+      )
+  )
+)
+```

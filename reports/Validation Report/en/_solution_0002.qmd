@@ -1,0 +1,10 @@
+
+{{< pagebreak >}}
+
+### Deleting a Patient Record {#sec-solution-2}
+
+To delete a patient record, first open the Tracked Entity Instance Dashboard as described in @sec-solution-1 and then click on the 'Delete NeoIPC Patient' button that appears in the top right corner of the Tracked Entity Instance Dashboard of the patient record after clicking on the red button, as shown in @fig-delete-patient. If you then confirm the deletion in the dialogue that appears, the patient record will be deleted.
+
+See also '[Delete a TEI](https://docs.dhis2.org/en/use/user-guides/dhis-core-version-240/tracking-individual-level-data/tracker-capture.html#delete_tracked_entity_instance)'.
+
+![Deleting a NeoIPC Patient record in DHIS2](img/fig-delete-patient.png){#fig-delete-patient fig-alt="The \"Delete NeoIPC Patient\" button appears after you have clicked on the red button at the top right of the patient record's tracked entity instance dashboard."}

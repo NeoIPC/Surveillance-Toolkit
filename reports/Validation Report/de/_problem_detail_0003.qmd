@@ -1,0 +1,17 @@
+
+{{< pagebreak >}}
+
+### Das Aufnahmedatum im Aufnahme-Formular unterscheidet sich vom Aufnahmedatum in der Patientenregistrierung {#sec-problem-details-3}
+
+Die NeoIPC Surveillance-Plattform braucht das Aufnahmedatum eines Patienten für interne Berechnungen. Das Datum muss zweimal vorhanden sein, einmal in der Patientenregistrierung und einmal im Aufnahmeformular (siehe @fig-the-two-admission-dates).
+Normalerweise übernimmt das Ausnahmeformular automatisch das Aufnahmedatum aus der Patientenregistrierung.
+Es gibt auch eine Eingabevalidierung, die verhindert, dass man ein Aufnahmeformular abschließt, wenn das Aufnahmedatum nicht mit dem Aufnahmedatum in der Patientenregistrierung übereinstimmt.
+Leider kann man aber das Aufnahmedatum in der Patientenregistrierung ändern und die Änderung im erscheinenden Warnungs-Dialog (siehe @fig-warning-enrolment-admission-date) bestätigen.
+Das System kann fehlerhafte Berechnungen durchführen, wenn es zwei unterschiedliche Aufnahmedaten für die gleiche Patientenregistrierung hat. Deshalb muss man das verhindern.
+
+Bitte stellen Sie sicher, dass das korrekte Aufnahmedatum des betreffenden Patienten sowohl im Feld "Aufnahmedatum" der Patientenregistrierung als auch im Feld "Aufnahmedatum" des Aufnahmeformulars angegeben ist (siehe @sec-solution-6).
+
+
+![Die zwei Eingabefelder für das Aufnahmedatum müssen übereinstimmen](img/fig-the-two-admission-dates.png){#fig-the-two-admission-dates fig-alt="Ein Screenshot, in dem zwei Eingabefelder für das Aufnahmedatum durch Umrahmung hervorgehoben und mit Pfeilen gekennzeichnet sind"}
+
+![Wenn man ein Aufnahmedatum in der Patientenregistrierung nachträglich ändert, erscheint ein Warndialog](img/fig-warning-enrolment-admission-date.png){#fig-warning-enrolment-admission-date fig-alt="Ein Dialog mit dem Titel \"Admission date\" und dem Text \"Updating this date might require further action from you. Events in this program have been scheduled based on this date, but these events will not be rescheduled automatically. Do you want to continue with the date update?\" und den Schaltflächen \"Cancel\" und  \"OK\""}

@@ -1,0 +1,8 @@
+
+{{< pagebreak >}}
+
+### Hinzufügen einer Registrierung zu einer Patientenakte {#sec-solution-3}
+
+Um einer Patientenakte eine Registrierung hinzuzufügen, öffnen Sie das Tracked Entity Instance Dashboard (siehe @sec-solution-1) und klicken auf den Link "Add new" (siehe @fig-add-enrolment). Im sich öffnenden Formular können Sie bei Bedarf die vorausgefüllten Werte verändern und anschließend auf "Enroll" klicken.
+
+![Hinzufügen einer Registrierung in DHIS2](img/fig-add-enrolment.png){#fig-add-enrolment fig-alt="Die Schaltfläche \"Add new\" (Neu hinzufügen) ist in der Mitte des Blocks \"Enrollment\" (Registrierung) oben links im Tracked Entity Instance Dashboard der Patientenakte."}

@@ -1,0 +1,9 @@
+### The Patient Record Contains an Event Form With a Date That Is Not Within the Time Frame of a Documented Admission {#sec-problem-details-8}
+
+The surveillance period for a patient enrolled in the NeoIPC Surveillance begins on admission and ends when the patient is discharged or dies.
+Risk factors and infections are only recorded and documented in the NeoIPC Surveillance platform during this period.
+This approach naturally means that all documented events (infections, surgical procedures) must have occurred between the date of admission and the date on which surveillance ends.
+An event form with a date that does not fall within this time interval indicates either an input error or a misunderstanding of the intended procedure. The error is not necessarily in the form itself. An incorrect admission date or an incorrect date in the Surveillance-End form can also cause this error.
+
+Please check the relevant data and correct the incorrect date (see @sec-solution-6 and @sec-solution-7).
+If you have started an event form and at the end of the surveillance you find that the criteria of the NeoIPC Surveillance Definitions are not met, please delete the form (see @sec-solution-12).
