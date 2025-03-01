@@ -1,0 +1,8 @@
+
+{{< pagebreak >}}
+
+### Aktualisierung berechneter Werte in Ereignis-Formularen {#sec-solution-11}
+
+Manchmal führen Änderungen in Formularfeldern (insbesondere des Aufnahmedatums in der Patientenregistrierung) dazu, dass andere automatisch berechnete Felder aktualisiert werden müssen.
+Wenn die betroffenen Formulare abgeschlossen und damit vor Änderungen geschützt sind, erfolgt die Aktualisierung der berechneten Felder nicht automatisch, sondern muss manuell angestoßen werden.
+Öffnen Sie dazu das betreffende Formular erneut zum Bearbeiten (siehe @sec-solution-9) und lösen Sie die Neuberechnung aus, indem Sie auf den Aktualisieren-Button Ihres Browsers klicken (auch die Tastenkombination STRG+R oder die F5-Taste aktualisieren in den meisten Browsern die Seite und lösen damit die Neuberechnung aus). Danach sollten die aktualisierten Werte in den entsprechenden Datenfeldern angezeigt werden. Überprüfen und aktualisieren Sie, wenn nötig, die übrigen übrigen Datenfelder des Formulars und schließen Sie es (siehe @sec-solution-8), und ggf. die Patientenregistrierung (siehe @sec-solution-4), wieder ab.

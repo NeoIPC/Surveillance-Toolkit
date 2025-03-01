@@ -1,0 +1,12 @@
+### Öffnen des Tracked Entity Instance Dashboards einer Patientenakte {#sec-solution-1}
+
+Um mit einer Patientenakte, oder einer Patientenregistrierung zu arbeiten, müssen Sie das zugehörige [Tracked Entity Instance (TEI) Dashboard](https://docs.dhis2.org/en/use/user-guides/dhis-core-version-240/tracking-individual-level-data/tracker-capture.html#about_tracked_entity_instance_dashboard) in DHIS2 öffnen.
+
+Normalerweise tun Sie dies über die [Liste der registrierten Patienten](https://docs.dhis2.org/en/use/user-guides/dhis-core-version-240/tracking-individual-level-data/tracker-capture.html#simple_tracked_entity_instance_search), indem sie auf den entsprechenden Eintrag klicken.
+
+Bei Patientenakten ohne Registrierung funktioniert das leider nicht nicht.
+Wenn Sie aber über die NeoIPC Patienten-ID oder andere Daten verfügen, die sie zur Suche verwenden können, können Sie die [Suchfunktion von Tracker Capture](https://docs.dhis2.org/en/use/user-guides/dhis-core-version-240/tracking-individual-level-data/tracker-capture.html#advanced_tracked_entity_instance_search) nutzen, um die Patientenakte zu finden und zu öffnen.
+
+::: {.callout-tip}
+Für die in diesem Bericht aufgeführten Patientenakten ist es am einfachsten, das Dashboard zu öffnen, indem Sie auf den Link klicken, den wir unter der entsprechenden NeoIPC Patienten-ID hinterlegt haben.
+:::

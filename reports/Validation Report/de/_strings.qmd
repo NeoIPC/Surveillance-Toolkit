@@ -1,0 +1,163 @@
+```{r German translations }
+translations <- list(
+  patient_problem_header_prefix = "Patient mit der NeoIPC-ID",
+  patient_problem_dashboard_link_description = "Link zum Tracked Entity Instance Dashboard des Patienten auf der NeoIPC-Datenverwaltungsplattform",
+  patient_problem_multiple_hint = "Wir haben in dieser Patientenakte mehr als ein Problem festgestellt. Es kann manchmal schwierig sein, mehrere Probleme in einer Patientenakte zu beheben, da ein einzelner Fehler mehrere Probleme verursachen kann oder die Behebung eines Problems ein neues verursachen kann. Wenn Sie sich nicht sicher sind, wie Sie vorgehen sollen, kontaktieren Sie uns bitte über unsere [Support-E-Mail-Adresse](mailto:%s), und wir helfen Ihnen gerne weiter.",
+  patient_problem_multiple_hint_email_subject = "Supportanfrage zu komplexen Fehlern in einer Patientenakte",
+  patient_problem_multiple_hint_email_body = "Sehr geehrtes NeoIPC Surveillance Support-Team,
+mein Validierungsbericht enthält mehrere Fehler für den Patienten mit der ID „%s“.
+Könnten Sie sich das bitte ansehen und sich mit mir in Verbindung setzen?
+Mit freundlichen Grüßen,
+",
+  neoipc_surveillance_partner_code = "NeoIPC Surveillance Partner Code",
+  enrolment_problem_header_prefix = "Patientenregistrierung mit dem Aufnahmedatum",
+  adm_problem_header_prefix = "Aufnahme-Ereignis mit Aufnahmedatum",
+  end_problem_header_prefix = "Surveillance-Ende-Ereignis mit dem Surveillance-Ende-Datum",
+  sur_problem_header_prefix = "Chirurgischer-Eingriff-Ereignis mit dem Eingriffsdatum",
+  bsi_problem_header_prefix = "Primäre-Sepsis/BSI-Ereignis mit Infektionsdatum",
+  hap_problem_header_prefix = "Pneumonie-Ereignis mit dem Infektionsdatum",
+  nec_problem_header_prefix = "Nekrotisierende-Enterokolitis-Ereignis mit dem Infektionsdatum",
+  ssi_problem_header_prefix = "Wundinfektions-Ereignis mit dem Infektionsdatum",
+  header = list(
+    createdAt = "Erstellt",
+    departments = "Abteilungen",
+    department = "Abteilung"
+  ),
+  ssi_types = list(
+    `1` = "oberflächliche Inzisionsinfektion",
+    `2` = "tiefe Inzisionsinfektion",
+    `3` = "Organ-/Körperhöhleninfektion"
+  ),
+  problems = list(
+    `1` = list(
+      description = "Die Patientenakte hat keine Patientenregistrierung. Siehe @sec-problem-details-1."
+    ),
+    `2` = list(
+      description = "Die Patientenakte enthält ein abgeschlossenes Surveillance-Ende-Formular, aber die Patientenregistrierung ist noch offen. Siehe @sec-problem-details-2."
+      ),
+    `3` = list(
+      description = "Das Aufnahmedatum im Aufnahme-Formular (%s) unterscheidet sich vom Aufnahmedatum in der Patientenregistrierung (%s). Siehe @sec-problem-details-3."
+      ),
+    `4` = list(
+      description = "Das Datum des Endes der Surveillance (%s) liegt vor dem Aufnahmedatum im Aufnahmeformular (%s). Siehe @sec-problem-details-4."
+      ),
+    `5` = list(
+      description = "Das Aufnahmeformular der Patientenakte ist nicht abgeschlossen (der Status ist '%s'). Siehe @sec-problem-details-5."
+      ),
+    `6` = list(
+      description = "Die Patientenakte enthält eine abgeschlossene Patientenregistrierung, aber das Surveillance-Ende-Formular ist nicht abgeschlossen (der Status ist '%s'). Siehe @sec-problem-details-6."
+      ),
+    `7` = list(
+      description = "Die Patientenakte enthält eine abgeschlossene Patientenregistrierung oder ein abgeschlossenes Surveillance-Ende-Formular, aber ein Sepsis-Formular ist nicht abgeschlossen (Status der Patientenregistrierung ist '%s', Status des Surveillance-Ende-Formulars ist '%s', Status des Sepsis-Formulars ist '%s'). Siehe @sec-problem-details-7."
+      ),
+    `8` = list(
+      description = "Die Patientenakte enthält eine abgeschlossene Patientenregistrierung oder ein abgeschlossenes Surveillance-Ende-Formular, aber ein Nekrotisierende-Enterokolitis-Formular ist nicht abgeschlossen (Status der Patientenregistrierung ist '%s', Status des Surveillance-Ende-Formulars ist '%s', Status des Nekrotisierende-Enterokolitis-Formulars ist '%s'). Siehe @sec-problem-details-7."
+      ),
+    `9` = list(
+      description = "Die Patientenakte enthält eine abgeschlossene Patientenregistrierung oder ein abgeschlossenes Surveillance-Ende-Formular, aber ein Pneumonie-Formular ist nicht abgeschlossen (Status der Patientenregistrierung ist '%s', Status des Surveillance-Ende-Formulars ist '%s', Status des Pneumonie-Formulars ist '%s'). Siehe @sec-problem-details-7."
+      ),
+    `10` = list(
+      description = "Die Patientenakte enthält eine abgeschlossene Patientenregistrierung oder ein abgeschlossenes Surveillance-Ende-Formular, aber ein Chirurgischer-Eingriff-Formular ist nicht abgeschlossen (Status der Patientenregistrierung ist '%s', Status des Surveillance-Ende-Formulars ist '%s', Status des Chirurgischer-Eingriff-Formulars ist '%s'). Siehe @sec-problem-details-7."
+      ),
+    `11` = list(
+      description = "Die Patientenakte enthält eine abgeschlossene Patientenregistrierung oder ein abgeschlossenes Surveillance-Ende-Formular, aber ein Wundinfektions-Formular ist nicht abgeschlossen (Status der Patientenregistrierung ist '%s', Status des Surveillance-Ende-Formulars ist '%s', Status des Wundinfektions-Formulars ist '%s'). Siehe @sec-problem-details-7."
+      ),
+    `12` = list(
+      description = "Die Patientenakte enthält ein Sepsis-Formular mit einem Infektionsdatum, das nicht innerhalb des Zeitrahmens einer dokumentierten Aufnahme liegt (Aufnahmedatum in der Patientenregistrierung ist '%s' Aufnahmedatum im Aufnahmeformular ist '%s' Datum des Endes der Surveillance ist '%s' Datum der Sepsis ist '%s'). Siehe",
+      details_title = "Die Patientenakte enthält ein Sepsis-Formular mit einem Infektionsdatum, das nicht innerhalb des Zeitrahmens einer dokumentierten Aufnahme liegt",
+      details_section_id = "sec-problem-details-8."
+      ),
+    `13` = list(
+      description = "Die Patientenakte enthält ein Nekrotisierende-Enterokolitis-Formular mit einem Infektionsdatum, das nicht innerhalb des Zeitrahmens einer dokumentierten Aufnahme liegt (Aufnahmedatum in der Patientenregistrierung ist '%s' Aufnahmedatum im Aufnahmeformular ist '%s' Datum des Endes der Surveillance ist '%s' Datum der Nekrotisierenden Enterokolitis ist '%s'). Siehe @sec-problem-details-8."
+      ),
+    `14` = list(
+      description = "Die Patientenakte enthält ein Pneumonie-Formular mit einem Infektionsdatum, das nicht innerhalb des Zeitrahmens einer dokumentierten Aufnahme liegt (Aufnahmedatum in der Patientenregistrierung ist '%s' Aufnahmedatum im Aufnahmeformular ist '%s' Datum des Endes der Surveillance ist '%s' Datum der Pneumonie ist '%s'). Siehe @sec-problem-details-8."
+      ),
+    `15` = list(
+      description = "Die Patientenakte enthält ein Chirurgischer-Eingriff-Formular mit einem Infektionsdatum, das nicht innerhalb des Zeitrahmens einer dokumentierten Aufnahme liegt (Aufnahmedatum in der Patientenregistrierung ist '%s' Aufnahmedatum im Aufnahmeformular ist '%s' Datum des Endes der Surveillance ist '%s' Datum der chirurgischen Eingriffs ist '%s'). Siehe @sec-problem-details-8"
+      ),
+    `16` = list(
+      description = "Die Patientenakte enthält ein Wundinfektions-Formular mit einem Infektionsdatum, das nicht innerhalb des Zeitrahmens einer dokumentierten Aufnahme liegt (Aufnahmedatum in der Patientenregistrierung ist '%s' Aufnahmedatum im Aufnahmeformular ist '%s' Datum des Endes der Surveillance ist '%s' Datum der Wundinfektion ist '%s'). Siehe @sec-problem-details-8."
+      ),
+    `17` = list(
+      description = "Die Patientenakte enthält eine Patientenregistrierung, deren Zeitintervall sich mit dem einer anderen Patientenregistrierung überschneidet (diese Patientenregistrierung hat ein Intervall von %s bis %s und die andere Patientenregistrierung hat ein Intervall von %s bis %s). Siehe @sec-problem-details-9."
+      ),
+    `18` = list(
+      description = "Die Anzahl der Patiententage (%s) stimmt nicht mit dem berechneten Wert (%s) überein. Siehe @sec-problem-details-10."
+      ),
+    `19` = list(
+      description = "Die postoperative Wundinfektion (%s) ereignete sich nicht während des Nachbeobachtungszeitraums eines erfassten chirurgischen Eingriffs. Siehe @sec-problem-details-11."
+      ),
+    `20` = list(
+      description = "Der als Erreger %i manuell eingegebene Erreger%s (\"%s\") kann nicht zugeordnet werden. Siehe @sec-problem-details-12.",
+      sec_bsi_part = " der sekundären Sepsis"
+      ),
+    `21` = list(
+      description = "Die Summe aller Tage mit antibiotischen Substanzen (%i) ist geringer als die Gesamtzahl der Antibiotikatage (%i). Siehe @sec-problem-details-13."
+      ),
+    `22` = list(
+      description = "Der chirurgische Eingriff (\"%s\") hat als Haupteingriffs-Code einen ungülitgen ICHE-Code (\"%s\"). Siehe @sec-problem-details-14."
+      ),
+    `23` = list(
+      description = "Der chirurgische Eingriff (\"%s\") hat als ersten Nebeneingriffs-Code einen ungülitgen ICHE-Code (\"%s\"). Siehe @sec-problem-details-14."
+      ),
+    `24` = list(
+      description = "Der chirurgische Eingriff (\"%s\") hat als zweiten Nebeneingriffs-Code einen ungülitgen ICHE-Code (\"%s\"). Siehe @sec-problem-details-14."
+      ),
+    `25` = list(
+      description = "Die Patientenakte enthält eine abgeschlossene Patientenregistrierung, aber kein Surveillance-Ende-Formular. Siehe @sec-problem-details-15"
+      ),
+    `26` = list(
+      description = "Die Patientenakte enthält eine abgeschlossene Patientenregistrierung, aber kein Aufnahmeformular. Siehe @sec-problem-details-16"
+      ),
+    `27` = list(
+      description = "Der im Sepsis-Formular gespeicherte Lebenstag (%i) stimmt nicht mit dem berechneten Wert (%i) überein. Siehe @sec-problem-details-17"
+      ),
+    `28` = list(
+      description = "Der im Sepsis-Formular gespeicherte Tag des Auftretens nach Aufnahme (%i) stimmt nicht mit dem berechneten Wert (%i) überein. Siehe @sec-problem-details-18"
+      ),
+    `29` = list(
+      description = "Die Sepsis trat innerhalb der ersten drei Lebenstage auf (der Lebenstag ist %i). Siehe @sec-problem-details-19"
+      ),
+    `30` = list(
+      description = "Die Sepsis trat innerhalb der ersten zwei Tage des Krankenhausaufenthalts eines überwiesenen oder (wieder-)aufgenommenen Patienten auf (der Tag des Krankenhausaufenthalts ist %i). Siehe @sec-problem-details-20"
+      ),
+    `31` = list(
+      description = "Der im Pneumonie-Formular gespeicherte Lebenstag (%i) stimmt nicht mit dem berechneten Wert (%i) überein. Siehe @sec-problem-details-17"
+      ),
+    `32` = list(
+      description = "Der im Pneumonie-Formular gespeicherte Tag des Auftretens nach Aufnahme (%i) stimmt nicht mit dem berechneten Wert (%i) überein. Siehe @sec-problem-details-18"
+      ),
+    `33` = list(
+      description = "Die Pneumonie trat innerhalb der ersten drei Lebenstage auf (der Lebenstag ist %i). Siehe @sec-problem-details-19"
+      ),
+    `34` = list(
+      description = "Die Pneumonie trat innerhalb der ersten zwei Tage des Krankenhausaufenthalts eines überwiesenen oder (wieder-)aufgenommenen Patienten auf (der Tag des Krankenhausaufenthalts ist %i). Siehe @sec-problem-details-20"
+      ),
+    `35` = list(
+      description = "Der im Nekrotisierende Enterokolitis-Formular gespeicherte Lebenstag (%i) stimmt nicht mit dem berechneten Wert (%i) überein. Siehe @sec-problem-details-17"
+      ),
+    `36` = list(
+      description = "Der im Nekrotisierende Enterokolitis-Formular gespeicherte Tag des Auftretens nach Aufnahme (%i) stimmt nicht mit dem berechneten Wert (%i) überein. Siehe @sec-problem-details-18"
+      ),
+    `37` = list(
+      description = "Die Nekrotisierende Enterokolitis trat innerhalb der ersten drei Lebenstage auf (der Lebenstag ist %i). Siehe @sec-problem-details-19"
+      ),
+    `38` = list(
+      description = "Die Nekrotisierende Enterokolitis trat innerhalb der ersten zwei Tage des Krankenhausaufenthalts eines überwiesenen oder (wieder-)aufgenommenen Patienten auf (der Tag des Krankenhausaufenthalts ist %i). Siehe @sec-problem-details-20"
+      ),
+    `39` = list(
+      description = "Der im Operations-Formular gespeicherte Lebenstag (%i) stimmt nicht mit dem berechneten Wert (%i) überein. Siehe @sec-problem-details-17"
+      ),
+    `40` = list(
+      description = "Der im Operations-Formular gespeicherte Tag des Auftretens nach Aufnahme (%i) stimmt nicht mit dem berechneten Wert (%i) überein. Siehe @sec-problem-details-18"
+      ),
+    `41` = list(
+      description = "Der im Wundinfektions-Formular gespeicherte Lebenstag (%i) stimmt nicht mit dem berechneten Wert (%i) überein. Siehe @sec-problem-details-17"
+      ),
+    `42` = list(
+      description = "Der im Wundinfektions-Formular gespeicherte Tag des Auftretens nach Aufnahme (%i) stimmt nicht mit dem berechneten Wert (%i) überein. Siehe @sec-problem-details-18"
+      )
+  )
+)
+```

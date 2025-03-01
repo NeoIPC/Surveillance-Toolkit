@@ -1,0 +1,9 @@
+### Der im Formular gespeicherte Aufenthaltstag zum Zeitpunkt des Ereignisses stimmt nicht mit dem berechneten Wert überein {#sec-problem-details-18}
+
+Der Wert für den Aufenthaltstag zum Zeitpunkt des Ereignisses, der in einigen Formularen angegeben ist, wird automatisch aus dem Datum des Ereignisses und dem Aufnahmedatum der Patientenregistrierung berechnet.
+
+Wenn diese Fehlermeldung im Validierungsbericht erscheint, haben wir festgestellt, dass der gespeicherte Wert für den Aufenthaltstag nicht korrekt ist, was in den meisten Fällen darauf zurückzuführen ist, dass das Aufnahmedatum der Patientenregistrierung nach dem Abschließen des betreffenden Formulars geändert wurde.
+
+Bitte aktualisieren Sie den Wert für den Aufenthaltstag im Formular (siehe @sec-solution-11).
+
+Wenn gleichzeitig die Fehlermeldung erscheint, dass der gespeicherte Lebenstag zum Zeitpunkt des Ereignisses nicht mit dem berechneten Wert übereinstimmt, was in der Mehrzahl der Fälle gegeben ist (siehe @sec-problem-details-17), müssen Sie die in @sec-solution-11 angegebene Prozedur nur einmal ausführen, um beide Werte zu aktualisieren.

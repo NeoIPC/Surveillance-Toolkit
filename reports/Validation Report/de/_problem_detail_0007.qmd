@@ -1,0 +1,6 @@
+### Die Patientenakte enthält eine abgeschlossene Patientenregistrierung oder ein abgeschlossenes Surveillance-Ende-Formular, aber ein Ereignis-Formular ist nicht abgeschlossen {#sec-problem-details-7}
+
+Wenn Sie die Surveillance für einen Patienten beenden und die Patientenregistrierung abschließen, sollten Sie über alle Informationen verfügen, die Sie benötigen, um die NeoIPC Surveillance Definitionen anzuwenden und begonnene Ereignisformulare auszufüllen und abzuschließen oder, falls die Definitionen nicht erfüllt sind, zu löschen.
+Da die Validierung der Eingaben nur beim Abschließen von Formularen erfolgt, können Daten aus nicht abgeschlossenen Formularen nicht für Auswertungen berücksichtigt werden.
+
+Bitte schließen Sie daher das Formular ab (siehe @sec-solution-8).

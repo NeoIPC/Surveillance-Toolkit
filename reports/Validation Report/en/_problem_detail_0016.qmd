@@ -1,0 +1,5 @@
+### The Patient Record Has a Completed Enrolment but no Admission Form {#sec-problem-details-16}
+
+The Admission Form is a mandatory form that must exist exactly once for each patient admission.
+It is usually created automatically, but like any event form, it can be deleted.
+If the Admission form for a patient registration has been deleted, a new Admission form must be created and completed before the patient registration is completed, so that the data can be analysed later.

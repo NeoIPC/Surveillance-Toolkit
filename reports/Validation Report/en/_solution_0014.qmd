@@ -1,0 +1,13 @@
+
+{{< pagebreak >}}
+
+### Adding an Event Form {#sec-solution-14}
+
+To open an event form, you must first open the corresponding enrolment in the Tracked Entity Dashboard (see @sec-solution-10).
+Then click the '+' button on the right side of the event timeline (see @fig-add-event).
+
+![The button with the '+' symbol on the right-hand side of the event timeline of the Tracked Entity Instance Dashboard](img/fig-add-event.png){#fig-add-event fig-alt="A screenshot of the Tracked Entity Instance Dashboard, in which the button with the '+' symbol on the right-hand side of the event timeline is highlighted"}
+
+::: {.callout-note}
+Since an enrolment can only contain one admission and one surveillance end event, these two events can only be added if the enrolment in question does not already contain an event of this category.
+:::

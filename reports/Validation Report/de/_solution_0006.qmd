@@ -1,0 +1,33 @@
+
+{{< pagebreak >}}
+
+### Ändern des Aufnahmedatums {#sec-solution-6}
+
+Da das Aufnahmedatum in der NeoIPC-Surveillance-Plattform zweimal erfasst und für eine Vielzahl von internen Berechnungen verwendet wird, ist eine nachträgliche Korrektur leider mitunter eine komplexe Prozedur.
+
+Zunächst einmal müssen Sie sicherstellen, dass Sie sowohl in der Patientenregistrierung als auch im Aufnahme-Formular das selbe Aufnahmedatum verwenden. Siehe dazu auch @sec-problem-details-3.
+Das bedeutet, dass nachträgliche Änderungen ggf. auch in beiden Formularen erfolgen müssen.
+Jenachdem, ob Sie das Aufnahmedatum in der Patientenregistrierung, im Aufnahme-Formular, oder in beidem ändern müssen, müssen Sie evtl. zusätzlich noch weitere Schritte durchführen, damit die internen Berechnungen aktualisiert werden.
+
+In jedem Fall müssen Sie zunächst das Tracked Entity Instance Dashboard der betreffenden Patientenakte (siehe @sec-solution-1) und evtl. auch die entsprechende Patientenregistierung (siehe @sec-solution-10) öffnen.
+
+Wenn die Patientenregistrierung, für die Sie das Aufnahmedatum ändern müssen, bereits abgeschlossen ist, muss diese zunächst wieder geöffnet werden. Siehe dazu @sec-solution-5. 
+
+#### Ändern des Aufnahmedatums im Aufnahme-Formular {#sec-solution-6-1}
+
+Um das Aufnahmedatum im Aufnahme-Formular zu ändern müssen sie evtl. das Aufnahme-Formular wiedereröffnen (siehe @sec-solution-9).
+Nachdem Sie das Aufnahmedatum im Aufnahme-Formular geändert (siehe @sec-solution-7) und das Formular abgeschlossen haben (siehe @sec-solution-8) müssen Sie ggf. auch das Aufnahmedatum in der Patientenregistrierung ändern (siehe @sec-solution-6-2).
+
+#### Ändern des Aufnahmedatums in der Patientenregistrierung {#sec-solution-6-2}
+
+Um das Aufnahmedatum in der Patientenregistrierung zu ändern wählen Sie das Feld "Aufnahmedatum" aus, geben Sie über den erscheinenden Dialog oder die Tastatur das korrekte Aufnahmedatum ein und bestätigen Sie die Änderung im erscheinenden Warnungs-Dialog (siehe @fig-warning-enrolment-admission-date).
+Anschließend müssen Sie unbedingt die berechneten Werte in allen bereits eingegebenen Ereignis-Formularen aktualisieren (siehe @sec-solution-11) und evtl. auch noch das Aufnahmedatum im Aufnahme-Formular korrigieren (siehe @sec-solution-6-1).
+
+::: {.callout-important}
+## Aktualisierung berechneter Werte nach Änderung des Aufnahmedatums in der Patientenregistrierung
+
+Die NeoIPC Surveillance-Platform unterstützt die effiziente Dateneingabe, indem sie einige Werte beim Anlegen und Bearbeiten von Formularen automatisch berechnet.
+Die meisten dieser berechneten Werte basieren auf dem in der Patientenregistrierung eingegebenen Aufnahmedatum.
+Leider gibt es in DHIS2 keine Funktion um diese Berechnungen auch dann durchzuführen, wenn die entsprechenden Formulare nicht geöffnet sind.
+Aus diesem Grund müssen Sie nach einer Änderung des des Aufnahmedatums in der Patientenregistrierung unbedingt alle bereits angelegten Ereignis-Formulare öffnen und die berechneten Werte aktualisieren (siehe @sec-solution-11).
+:::

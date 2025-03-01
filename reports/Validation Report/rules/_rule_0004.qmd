@@ -1,0 +1,32 @@
+```{r Validation rule 4: "The surveillance end date is the same as or earlier than the admission date"}
+
+problems <- problems |>
+  bind_rows(
+    patients |>
+      inner_join(enrollments, join_by(key == patient)) |>
+      filter(SURVEILLANCE_END_DATE < admission_occurredAt) |>
+      mutate(
+        EVENT_ID = surveillanceEnd_event,
+        EVENT_TYPE = event_types("END"),
+        EVENT_DATE = SURVEILLANCE_END_DATE,
+        PROBLEM_ID = 4L,
+        SURVEILLANCE_END_DATE = SURVEILLANCE_END_DATE,
+        ADMISSION_ADMISSION_DATE = admission_occurredAt,
+        .keep = "unused") |>
+      select(
+        SITE_CODE,
+        DEPARTMENT_NAME,
+        DEPARTMENT_OU,
+        NEOIPC_PATIENT_ID,
+        PATIENT_TEI,
+        ENROLMENT_ID,
+        ENROLMENT_DATE,
+        EVENT_ID,
+        EVENT_TYPE,
+        EVENT_DATE,
+        PROBLEM_ID,
+        SURVEILLANCE_END_DATE,
+        ADMISSION_ADMISSION_DATE
+        ))
+
+```

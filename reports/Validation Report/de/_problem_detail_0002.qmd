@@ -1,0 +1,5 @@
+### Die Patientenakte enthält ein abgeschlossenes Surveillance-Ende-Formular, aber die Patientenregistrierung ist noch offen {#sec-problem-details-2}
+
+Wenn Sie das Surveillance-Ende-Formular abschließen sollten Sie normalerweise auch die Patientenregistrierung abschließen um sie im System als vollständig und fertig für die Auswertung zu markieren und sie vor versehentlichen Änderungen zu schützen.
+Wenn Sie das nicht tun, werden die Daten des betreffenden Patienten nicht in Ihren Auswertungen enthalten sein.
+Am einfachsten geht das, indem Sie im Dialogfeld, das nach dem Klicken auf „Complete“ im Surveillance-Ende-Formular angezeigt wird, auf „Complete event and enrollment“ klicken. Wenn Sie eine Patientenregistrierung im Nachhinein abschließen möchten und nicht wissen, wie das funktionert, folgen Sie bitte der Beschreibung in @sec-solution-4.

@@ -1,0 +1,15 @@
+
+{{< pagebreak >}}
+
+### Löschen eines Ereignis-Formulars {#sec-solution-12}
+
+Um ein Ereignis-Formular zu löschen, öffenen Sie es im Tracked Entity Dashboard (siehe @sec-solution-15) und klicken Sie anschließend auf die Schaltfläche "Delete", die sich in der Regel rechts unterhalb des Ereignis-Formulars befindet (siehe @fig-delete-event).
+
+::: {.callout-note}
+Im Berechtigungssystem der NeoIPC Surveillance Plattform gibt es spezielle Berechtigungen für das Löschen von Ereignisformularen
+Sollte die Schaltfläche "Delete" ausgegraut sein oder der Versuch, abgeschlossene Ereignisformulare wieder zu öffnen, fehlschlagen, ist entweder die Patientenregistrierung bereits abgeschlossen oder es liegt daran, dass Ihr Benutzerkonto nicht über die erforderliche Berechtigung verfügt.
+Dies dient dazu, bereits vollständig erfasste und geprüfte Informationen vor versehentlichem Löschen zu schützen, kann aber auch den Prozess der Datenbereinigung erschweren.
+Grundsätzlich hat die in der NeoIPC Surveillance Kooperationsvereinbarung als Projektleiter Ihrer Klinik benannte Person immer die notwendigen Berechtigungen und kann uns beauftragen, diese Berechtigungen auch anderen Personen in Ihrem Team zu erteilen oder zu entziehen.
+:::
+
+![Die Schaltfläche "Delete" in einem Ereignis-Formular des Tracked Entity Instance Dashboards](img/fig-delete-event.png){#fig-delete-event fig-alt="Ein Screenshot eines Ereignis-Formulars des Tracked Entity Instance Dashboards, in dem die Schaltfläche \"Delete\" hervorgehoben ist"}

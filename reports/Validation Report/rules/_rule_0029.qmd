@@ -1,0 +1,35 @@
+```{r Validation rule 29: "The sepsis occurred within the first three days of life"}
+problems <- problems |>
+  bind_rows(
+    patients |>
+      select(SITE_CODE, DEPARTMENT_NAME, DEPARTMENT_OU, NEOIPC_PATIENT_ID, PATIENT_TEI, key) |>
+      rename(patient_key = key) |>
+      inner_join(
+        enrollments |>
+          select(ENROLMENT_ID, ENROLMENT_DATE, NEOIPC_ADMISSION_DOL, key, patient) |>
+          rename(enrollment_key = key),
+        join_by(patient_key == patient)) |>
+      inner_join(
+        data$sepses |>
+          select(event, occurredAt, enrollment, NEOIPC_BSI_DOL) |>
+          rename(EVENT_DATE = occurredAt, EVENT_ID = event),
+        join_by(enrollment_key == enrollment)) |>
+      mutate(
+        PROBLEM_ID = 29L,
+        EVENT_TYPE = event_types("BSI")) |>
+      filter(NEOIPC_BSI_DOL < 4) |>
+      select(
+        SITE_CODE,
+        DEPARTMENT_NAME,
+        DEPARTMENT_OU,
+        NEOIPC_PATIENT_ID,
+        PATIENT_TEI,
+        ENROLMENT_ID,
+        ENROLMENT_DATE,
+        EVENT_ID,
+        EVENT_TYPE,
+        EVENT_DATE,
+        PROBLEM_ID,
+        NEOIPC_BSI_DOL
+        ))
+```

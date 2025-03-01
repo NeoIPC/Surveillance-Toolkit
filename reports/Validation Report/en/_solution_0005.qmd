@@ -1,0 +1,20 @@
+
+{{< pagebreak >}}
+
+### Reopening a Closed Enrolment to Make Changes {#sec-solution-5}
+
+If you want to change information in an enrolment that has already been completed and thus protected from changes, you must first reopen it for editing.
+
+To do this, first open the relevant enrolment in the tracked entity dashboard (see @sec-solution-10) and click on 'Reopen' (see @fig-reopen-enrolment). Then, usually, the corresponding event form must be opened for editing (see @sec-solution-9).
+
+Since only one patient enrolment can be open for editing in DHIS2 at a time, another patient enrolment that is currently open for editing may have to be closed (at least temporarily) before another one can be opened for editing. To do this, first open the other patient enrolment in the tracked entity dashboard (see @sec-solution-10), then close it (see @sec-solution-4) and then open the patient enrolment you want to edit.
+This step is not necessary for patient records that only contain one patient enrolment, and you can open the relevant patient enrolment directly for editing.
+
+::: {.callout-note}
+The NeoIPC Surveillance platform permissions system includes specific permissions for reopening patient enrolments.
+If the 'Reopen' button is greyed out or attempts to reopen closed patient enrolments fail, it is likely that your user account does not have the required permissions.
+This is to protect enrolments that have already been fully entered and reviewed from inadvertent changes, but it can also make the process of correcting data more difficult.
+In principle, the person designated as your hospital's project manager in the NeoIPC Surveillance cooperation agreement will always have the necessary permissions and can instruct us to grant or revoke these permissions for other members of your team.
+:::
+
+![Reopening a closed enrollment to make changes](img/fig-reopen-enrolment.png){#fig-reopen-enrolment fig-alt="Screenshot of a patient record opened in the Tracked Entity Dashboards of the DHIS2 App Tracker Capture, in which the 'Reopen' button is marked with an arrow."}

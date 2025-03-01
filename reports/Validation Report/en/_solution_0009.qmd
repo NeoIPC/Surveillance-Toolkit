@@ -1,0 +1,18 @@
+
+{{< pagebreak >}}
+
+### Incompleting a Completed Event Form to Make Changes {#sec-solution-9}
+
+If you want to change information in an event form that has already been completed and is protected from changes, you must first incomplete it.
+If the enrolment has already been completed, it must also be reopened for editing before the event form can be incompleted (see @sec-solution-5).
+
+To incomplete it, open the relevant event form (see @sec-solution-15) in the tracked entity dashboard and then click the 'Incomplete' button, which is usually located at the bottom left of the event form (see @fig-incomplete-event).
+
+::: {.callout-note}
+The NeoIPC Surveillance platform permissions system includes specific permissions for incompleting event forms.
+If the 'Incomplete' button is greyed out or if an attempt to incomplete completed event forms fails, either the patient enrolment is already closed or it is because your user account does not have the required permission.
+This is to protect information that have already been fully entered and reviewed from inadvertent changes, but it can also make the process of correcting data more difficult.
+In principle, the person designated as your hospital's project manager in the NeoIPC Surveillance cooperation agreement will always have the necessary permissions and can instruct us to grant or revoke these permissions for other members of your team.
+:::
+
+![The 'Incomplete' button in an event form of the Tracked Entity Instance Dashboard](img/fig-incomplete-event.png){#fig-incomplete-event fig-alt="A screenshot of an event form of the Tracked Entity Instance Dashboard, in which the 'Incomplete' button is highlighted"}

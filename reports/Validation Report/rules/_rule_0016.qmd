@@ -1,0 +1,39 @@
+```{r Validation rule 16: "The patient record contains a SSI form with an infection date that is not within the time frame of a documented enrolment."}
+
+problems <- problems |>
+  bind_rows(
+    patients |>
+      inner_join(
+        enrollments |>
+          inner_join(data$ssis, join_by(key == enrollment)),
+        join_by(key == patient)) |>
+      filter(occurredAt < ENROLMENT_DATE | occurredAt < admission_occurredAt | occurredAt > SURVEILLANCE_END_DATE) |>
+      mutate(
+        ENROLMENT_DATE = ENROLMENT_DATE,
+        EVENT_ID = event,
+        EVENT_TYPE = event_types("SSI"),
+        EVENT_DATE = occurredAt,
+        PROBLEM_ID = 16L,
+        ENROLMENT_ADMISSION_DATE = ENROLMENT_DATE,
+        ADMISSION_ADMISSION_DATE = admission_occurredAt,
+        SURVEILLANCE_END_DATE = SURVEILLANCE_END_DATE,
+        SSI_DATE = occurredAt,
+        .keep = "unused") |>
+      select(
+        SITE_CODE,
+        DEPARTMENT_NAME,
+        DEPARTMENT_OU,
+        NEOIPC_PATIENT_ID,
+        PATIENT_TEI,
+        ENROLMENT_ID,
+        ENROLMENT_DATE,
+        EVENT_ID,
+        EVENT_TYPE,
+        EVENT_DATE,
+        PROBLEM_ID,
+        ENROLMENT_ADMISSION_DATE,
+        ADMISSION_ADMISSION_DATE,
+        SURVEILLANCE_END_DATE,
+        SSI_DATE
+        ))
+```

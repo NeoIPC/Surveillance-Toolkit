@@ -1,0 +1,15 @@
+### Der chirurgische Eingriff hat einen ungülitgen ICHE-Code {#sec-problem-details-14}
+
+Die Standardisierung operativer Prozeduren in der NeoIPC Surveillance wird dadurch erschwert, dass es keine international gebräuchliche Kodierung für Operationen und Prozeduren gibt.
+Zwar verwenden viele Länder Varianten der "International Classification Of Procedures In Medicine" (ICPM) der WHO, aber fast alle haben nationale Varianten, was die Situation für einen internationalen Vergleich erheblich verkompliziert.
+Aus diesem Grund haben wir uns bei der Entwicklung der NeoIPC Surveillance Methoden für die International Classification of Health Interventions (ICHI) entschieden, die derzeit von der WHO im Zusammenhang mit der ICD-11 entwickelt wird.
+Der Nachteil dieser Entscheidung ist, dass keiner unserer Partner sein vertrautes nationales Kodierungssystem für Prozeduren verwenden kann, der Vorteil ist, dass wir uns auf ein modernes und sehr umfassendes Kodierungssystem stützen, das es erlaubt, verschiedene Gruppen von Prozeduren sinnvoll zusammenzufassen und zu analysieren.
+
+Bitte geben Sie daher in den Feldern "Main procedure code (ICHI)" und "Side procedure code (ICHI)" immer gültige ICHI-Kodes ein.
+
+Sie können die entsprechenden Codes finden, indem Sie in der ICHE Reference Classification unter https://icd.who.int/dev11/l-ichi/en oben links im Feld "Search" die englische Bezeichnung der Prozedur (oder einen Teil davon) eingeben.
+
+Sollten Sie Probleme haben, den richtigen Code zu finden, kontaktieren Sie uns bitte und wir werden Ihnen gerne weiterhelfen.
+
+Um den gemeldeten Fehler zu beheben, öffnen Sie bitte das Formular (siehe @sec-solution-15) und geben Sie anstelle des vorhandenen Codes den ICHE-Code der Prozedur ein.
+Falls das Formular bereits abgeschlossen wurde, muss es erneut zur Bearbeitung geöffnet werden (siehe @sec-solution-9). Wenn auch die Patientenregistrierung bereits abgeschlossen ist, müssen Sie auch diese zuvor erneut zur Bearbeitung öffnen (siehe @sec-solution-5).

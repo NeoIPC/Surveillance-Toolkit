@@ -1,0 +1,41 @@
+```{r Validation rule 17: "The patient record contains an enrolment whose time interval overlaps with that of another enrolment."}
+
+problems <- problems |>
+  bind_rows(
+    patients |>
+      inner_join(
+        enrollments |>
+          inner_join(
+            enrollments,
+            join_by(patient),
+            relationship = "many-to-many") |>
+          filter(
+            key.x != key.y & (
+              int_overlaps(ADMISSION_INTERVAL.x, ADMISSION_INTERVAL.y) |
+                ENROLMENT_DATE.x == ENROLMENT_DATE.y
+            )),
+        join_by(key == patient)) |>
+      mutate(
+        ENROLMENT_ID = ENROLMENT_ID.x,
+        ENROLMENT_DATE = ENROLMENT_DATE.x,
+        PROBLEM_ID = 17L,
+        ENROLMENT_1_ADMISSION_DATE = ENROLMENT_DATE.x,
+        ENROLMENT_2_ADMISSION_DATE = ENROLMENT_DATE.y,
+        ENROLMENT_1_SURVEILLANCE_END_DATE = SURVEILLANCE_END_DATE.x,
+        ENROLMENT_2_SURVEILLANCE_END_DATE = SURVEILLANCE_END_DATE.y,
+        .keep = "unused") |>
+      select(
+        SITE_CODE,
+        DEPARTMENT_NAME,
+        DEPARTMENT_OU,
+        NEOIPC_PATIENT_ID,
+        PATIENT_TEI,
+        ENROLMENT_ID,
+        ENROLMENT_DATE,
+        PROBLEM_ID,
+        ENROLMENT_1_ADMISSION_DATE,
+        ENROLMENT_2_ADMISSION_DATE,
+        ENROLMENT_1_SURVEILLANCE_END_DATE,
+        ENROLMENT_2_SURVEILLANCE_END_DATE
+        ))
+```

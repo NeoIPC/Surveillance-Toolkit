@@ -1,0 +1,16 @@
+
+{{< pagebreak >}}
+
+### The Admission Date in the Admission Form Differs From the Admission Date in the Enrolment {#sec-problem-details-3}
+
+The NeoIPC Surveillance Platform requires a patient's admission date for internal calculations. The date must be present twice, once in the patient enrolment and once in the admission form (see @fig-the-two-admission-dates).
+Normally, the exception form automatically takes the admission date from the patient registration.
+There is also an input validation that prevents you from completing an admission form if the admission date does not match the admission date in the patient registration.
+But you can change the admission date in the patient registration and confirm the change in the warning dialogue that appears (see @fig-warning-enrolment-admission-date).
+The system can make erroneous calculations if it has two different admission dates for the same patient registration. Therefore, this must be prevented.
+
+Please ensure that the correct admission date for the patient in question is entered in both the 'Admission date' field of the enrolment form and the 'Admission date' field of the admission form (see @sec-solution-6).
+
+![The two input fields for the admission date must match](img/fig-the-two-admission-dates.png){#fig-the-two-admission-dates fig-alt="A screenshot in which two input fields for the admission date are highlighted by framing and marked with arrows"}
+
+![If you subsequently change an admission date in the patient registration, a warning dialogue appears](img/fig-warning-enrolment-admission-date.png){#fig-warning-enrolment-admission-date fig-alt="A dialogue with the title 'Admission date' and the text 'Updating this date might require further action from you. Events in this program have been scheduled based on this date, but these events will not be rescheduled automatically. Do you want to continue with the date update?' and the buttons 'Cancel' and 'OK'"}

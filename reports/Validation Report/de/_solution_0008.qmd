@@ -1,0 +1,19 @@
+
+{{< pagebreak >}}
+
+### Abschließen eines Ereignis-Formulars {#sec-solution-8}
+
+Zunächst müssen Sie das Ereignis das Sie abschließen möchten im Tracked Entity Instance Dashboard öffnen (siehe @sec-solution-15).
+Klicken Sie anschließend auf die Schaltfläche "Complete", die sich in der Regel links unterhalb des Ereignis-Formulars befindet (siehe @fig-complete-event).
+
+![Die Schaltfläche "Complete" in einem Ereignis-Formular des Tracked Entity Instance Dashboards](img/fig-complete-event.png){#fig-complete-event fig-alt="Ein Screenshot eines Ereignis-Formulars des Tracked Entity Instance Dashboards, in dem die Schaltfläche \"Complete\" hervorgehoben ist"}
+
+::: {.callout-caution}
+## Gültigkeitsprüfung von Ereignis-Formularen
+
+Wenn Sie versuchen, ein Ereignis-Formular abzuschließen, wird eine Gültigkeitsprüfung durchgeführt, um die Daten auf Vollständigkeit und ungültige Eingaben zu prüfen.
+Bei Infektionsformularen werden auch die NeoIPC Surveillance Definitionen überprüft.
+Wenn Informationen fehlen oder ungültig sind, kann das Formular erst abgeschlossen werden, wenn dies korrigiert wurde.
+
+Die Validierung führt zum Teil sehr komplexe Prüfungen durch, die auch Fehler enthalten können. Wenn Sie der Meinung sind, dass die Prüfung Sie daran hindert, Formulare mit gültigen Informationen zu speichern, kontaktieren Sie uns bitte, damit wir dies überprüfen können.
+:::

@@ -1,0 +1,15 @@
+
+{{< pagebreak >}}
+
+### Öffnen einer Patientenregistrierung im Tracked Entity Instance Dashboard {#sec-solution-10}
+
+Wenn Sie das Tracked Entity Instance Dashboard einer Patientenakte öffnen (siehe @sec-solution-1), die eine offene Patientenregistrierung (Enrollment) enthält, wird diese automatisch geöffnet.
+Sie können auf andere abgeschlossene Patientenregistrierungen zugreifen, indem Sie auf den Link "History" (siehe @fig-open-enrolment-multiple) oben links im Tracked Entity Instance Dashboard unter Enrollment klicken und dann in der angezeigten Historie die gesuchte Patientenregistrierung anhand des Datums auswählen, um sie zu öffnen.
+Wird dieser Link nicht angezeigt, so sind keine weiteren Patientenregistrierungen in der betreffenden Patientenakte enthalten.
+
+Wenn das Tracked Entity Instance Dashboard der Patientenakte, die Sie öffnen, keine offene Patientenregistrierung enthält, wird die Historie der Patientenregistrierungen direkt angezeigt.
+
+Beachten Sie, dass abgeschlossene Patientenregistrierungen schreibgeschützt geöffnet werden und dass immer nur eine Patientenregistrierung zur Bearbeitung geöffnet sein kann.
+Sie müssen also eine Patientenregistrierung (zumindest temporär) abschließen, um eine andere zur Bearbeitung wiedereröffnen zu können (siehe auch @sec-solution-5).
+
+![Der Link "History" im Tracked Entity Instance Dashboard, über den Sie auf die Historie der Patientenregistrierungen zugreifen können](img/fig-open-enrolment-multiple.png){#fig-open-enrolment-multiple fig-alt="Ein Screenshot, in dem der Link \"History\" im Tracked Entity Instance Dashboard hervorgehoben ist"}

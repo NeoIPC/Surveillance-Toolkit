@@ -1,0 +1,36 @@
+```{r Validation rule 10: "The patient record has a completed enrolment or surveillance end form but a surgical procedure form is not completed"}
+
+problems <- problems |>
+  bind_rows(
+    patients |>
+      inner_join(
+        enrollments |>
+          inner_join(data$surgeries, join_by(key == enrollment)),
+        join_by(key == patient)) |>
+      filter((enrollment_status == "COMPLETED" | surveillanceEnd_status == "COMPLETED") & status != "COMPLETED") |>
+      mutate(
+        EVENT_ID = event,
+        EVENT_TYPE = event_types("SUR"),
+        EVENT_DATE = occurredAt,
+        PROBLEM_ID = 10L,
+        ENROLMENT_STATUS = enrollment_status,
+        SURVEILLANCE_END_STATUS = surveillanceEnd_status,
+        SURGERY_STATUS = status,
+        .keep = "unused") |>
+      select(
+        SITE_CODE,
+        DEPARTMENT_NAME,
+        DEPARTMENT_OU,
+        NEOIPC_PATIENT_ID,
+        PATIENT_TEI,
+        ENROLMENT_ID,
+        ENROLMENT_DATE,
+        EVENT_ID,
+        EVENT_TYPE,
+        EVENT_DATE,
+        PROBLEM_ID,
+        ENROLMENT_STATUS,
+        SURVEILLANCE_END_STATUS,
+        SURGERY_STATUS
+        ))
+```

@@ -1,0 +1,30 @@
+```{r Validation rule 6: "The patient has a completed enrollment but the surveillance end event is not completed"}
+
+problems <- problems |>
+  bind_rows(
+    patients |>
+      inner_join(enrollments, join_by(key == patient)) |>
+      filter(enrollment_status == "COMPLETED" & surveillanceEnd_status != "COMPLETED") |>
+      mutate(
+        EVENT_ID = surveillanceEnd_event,
+        EVENT_TYPE = event_types("END"),
+        EVENT_DATE = admission_occurredAt,
+        PROBLEM_ID = 6L,
+        SURVEILLANCE_END_STATUS = surveillanceEnd_status,
+        .keep = "unused") |>
+      select(
+        SITE_CODE,
+        DEPARTMENT_NAME,
+        DEPARTMENT_OU,
+        NEOIPC_PATIENT_ID,
+        PATIENT_TEI,
+        ENROLMENT_ID,
+        ENROLMENT_DATE,
+        EVENT_ID,
+        EVENT_TYPE,
+        EVENT_DATE,
+        PROBLEM_ID,
+        SURVEILLANCE_END_STATUS
+        ))
+
+```

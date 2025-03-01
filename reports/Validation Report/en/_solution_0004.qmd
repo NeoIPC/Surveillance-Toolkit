@@ -1,0 +1,9 @@
+
+{{< pagebreak >}}
+
+### Completing an Enrolment {#sec-solution-4}
+
+To complete an enrolment, open the Tracked Entity Instance Dashboard of the patient record (see @sec-solution-1) and click on 'Complete'. See @fig-complete-enrolment.
+
+![Where to find the "Complete" button in the enrolment form](img/fig-complete-enrolment.png){#fig-complete-enrolment fig-alt="The \"Complete\" button is located at the bottom left of the \"Enrollment\" block which is located at the top left of the patient record's tracked entity instance dashboard."}
+

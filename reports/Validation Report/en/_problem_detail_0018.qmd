@@ -1,0 +1,9 @@
+### The Day of Occurrence After Admission Stored in the Form Does Not Match the Calculated Value {#sec-problem-details-18}
+
+The value of the day of occurrence after admission, which appears on some forms, is automatically calculated from the date of the event and the admission date of the enrolment.
+
+If this error message appears in the validation report, we have determined that the stored value for the day of occurrence after admission is incorrect, which in most cases is due to the admission date of the enrolment having been changed after the form in question was completed.
+
+Please update the value of the day of occurrence after admission in the form (see @sec-solution-11).
+
+If at the same time the error message appears that the stored day of life does not match the calculated value, which is the majority of cases (see @sec-problem-details-17), you only need to perform the procedure described in @sec-solution-11 once to update both values.

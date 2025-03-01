@@ -1,0 +1,17 @@
+project:
+  output-dir: _output
+execute:
+  keep-md: true
+date-meta: now
+number-sections: true
+echo: false
+format:
+  pdf:
+    documentclass: scrartcl
+    papersize: a4paper
+    fig-pos: 'h'
+    colorlinks: true
+filters: ["../filters/pandoc-quotes.lua"]
+profile:
+  group: 
+    - [en, de]

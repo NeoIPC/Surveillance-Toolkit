@@ -1,0 +1,48 @@
+```{r Validation rule 21: "The sum of all antibiotic substance days is less than the total number of antibiotic days"}
+
+problems <- problems |>
+  bind_rows(
+    patients |>
+      select(SITE_CODE, DEPARTMENT_NAME, DEPARTMENT_OU, NEOIPC_PATIENT_ID, PATIENT_TEI, key) |>
+      rename(patient = key) |>
+      inner_join(
+        enrollments |>
+          select(
+            NEOIPC_SURVEILLANCE_END_AB_DAYS,
+            ENROLMENT_ID,
+            ENROLMENT_DATE,
+            surveillanceEnd_event,
+            SURVEILLANCE_END_DATE,
+            key,
+            patient) |>
+          rename(
+            enrollment = key,
+            EVENT_ID = surveillanceEnd_event,
+            EVENT_DATE = SURVEILLANCE_END_DATE),
+        join_by(patient)) |>
+      left_join(
+        data$ab_treatments |>
+          group_by(enrollment) |>
+          summarise(AB_SUBSTANCE_DAYS = sum(days)), join_by(enrollment)) |>
+      filter(NEOIPC_SURVEILLANCE_END_AB_DAYS > 0) |>
+      mutate(
+        AB_SUBSTANCE_DAYS = replace_na(AB_SUBSTANCE_DAYS, 0),
+        EVENT_TYPE = event_types("END"),
+        PROBLEM_ID = 21L) |>
+      filter(AB_SUBSTANCE_DAYS < NEOIPC_SURVEILLANCE_END_AB_DAYS) |>
+      select(
+        SITE_CODE,
+        DEPARTMENT_NAME,
+        DEPARTMENT_OU,
+        NEOIPC_PATIENT_ID,
+        PATIENT_TEI,
+        ENROLMENT_ID,
+        ENROLMENT_DATE,
+        EVENT_ID,
+        EVENT_TYPE,
+        EVENT_DATE,
+        PROBLEM_ID,
+        NEOIPC_SURVEILLANCE_END_AB_DAYS,
+        AB_SUBSTANCE_DAYS
+        ))
+```

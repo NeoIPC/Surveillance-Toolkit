@@ -1,0 +1,15 @@
+
+{{< pagebreak >}}
+
+### Deleting an Event Form {#sec-solution-12}
+
+To delete an event form, open it in the Tracked Entity Dashboard (see @sec-solution-15) and then click on the 'Delete' button, which is usually located at the bottom right of the event form (see @fig-delete-event).
+
+::: {.callout-note}
+The NeoIPC Surveillance platform permissions system includes specific permissions for deleting event forms.
+If the 'Delete' button is greyed out or if an attempt to delete event forms fails, either the patient enrolment is already completed, or it is because your user account does not have the required permission.
+This is to protect information that have already been fully entered and reviewed from inadvertent deletion, but it can also make the process of data cleanup more difficult.
+In principle, the person designated as your hospital's project manager in the NeoIPC Surveillance cooperation agreement will always have the necessary permissions and can instruct us to grant or revoke these permissions for other members of your team.
+:::
+
+![The "Delete" button in an event form of the Tracked Entity Instance Dashboard](img/fig-delete-event.png){#fig-delete-event fig-alt="A screenshot of an event form of the Tracked Entity Instance Dashboard, in which the 'Delete' button is highlighted"}

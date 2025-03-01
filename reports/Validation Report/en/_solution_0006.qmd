@@ -1,0 +1,33 @@
+
+{{< pagebreak >}}
+
+### Changing the Admission Date {#sec-solution-6}
+
+Unfortunately, because the admission date is captured twice in the NeoIPC Surveillance platform and used for a variety of internal calculations, correcting it after the fact is sometimes a complex procedure.
+
+First of all, you must ensure that you use the same admission date in both the enrolment and the admission form. See also @sec-problem-details-3.
+This means that any subsequent changes may also have to be made in both forms.
+Depending on whether you need to change the admission date in the patient enrolment, in the admission form, or in both, you may need to take additional steps to update the internal calculations.
+
+In any case, you must first open the Tracked Entity Instance Dashboard of the relevant patient record (see @sec-solution-1) and possibly also the corresponding patient enrolment (see @sec-solution-10).
+
+If the patient enrolment for which you need to change the admission date has already been closed, it must first be reopened. See @sec-solution-5. 
+
+#### Changing the Admission Date in the Admission Form {#sec-solution-6-1}
+
+To change the admission date in the admission form, you may have to reopen the admission form (see @sec-solution-9).
+After you have changed the admission date in the admission form (see @sec-solution-7) and completed the form (see @sec-solution-8), you may also have to change the admission date in the patient enrolment (see @sec-solution-6-2).
+
+#### Changing the Admission Date in the Enrolment {#sec-solution-6-2}
+
+To change the admission date in the enrolment, select the ‘Admission date’ field, enter the correct admission date using the dialogue that appears or the keyboard and confirm the change in the warning dialogue that appears (see @fig-warning-enrolment-admission-date).
+Afterwards, you must update the calculated values in all event forms that have already been entered (see @sec-solution-11) and possibly also correct the admission date in the admission form (see @sec-solution-6-1).
+
+::: {.callout-important}
+## Updating Calculated Values After Changing the Admission Date in Patient Enrolment
+
+The NeoIPC Surveillance Platform supports efficient data entry by automatically calculating some values when creating and editing forms.
+Most of these calculated values are based on the admission date entered in the enrolment.
+Unfortunately, DHIS2 does not have a function to perform these calculations even if the corresponding forms are not open.
+For this reason, you must open all event forms that have already been created and update the calculated values after changing the admission date in the enrolment (see @sec-solution-11).
+:::

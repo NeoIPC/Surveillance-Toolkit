@@ -1,0 +1,10 @@
+### Die Patientenakte enthält eine Patientenregistrierung, deren Zeitintervall sich mit dem einer anderen Patientenregistrierung überschneidet. {#sec-problem-details-9}
+
+Die Mehrheit der in NeoIPC eingeschlossenen Patienten hat genau einen Krankenhausaufenthalt während des Beobachtungszeitraums, der mit der ersten Aufnahme (in der Regel zum Zeitpunkt der Geburt) beginnt und mit der Entlassung endet.
+Nur in wenigen Fällen werden Patienten nach der Entlassung erneut stationär aufgenommen.
+Für diese Situation gibt es in der NeoIPC-Surveillance-Plattform das Konzept der Patientenregistrierung ("Enrolments"), mit dem Patienten, die nach der Entlassung wieder aufgenommen werden, ein zweites (und drittes, viertes, ...) Mal in die Surveillance aufgenommen werden können.
+Naturgemäß können sich die Zeitintervalle, in denen ein Patient stationär behandelt wird, nicht überlappen, und daraus folgt, dass auch eine erneute Patientenregistrierung in der NeoIPC Surveillance-Plattform frühestens am Tag nach der letzten Entlassung beginnen kann (im Fall, dass ein Patient am selben Tag entlassen und wieder aufgenommen wird, ignorieren wir die Entlassung).
+
+In dem in der Fehlermeldung genannten Fall gibt es mehrere Patientenregistrierungen, deren Surveillance-Perioden (Zeitraum zwischen Aufnahmedatum und Datum, an dem die Surveillance endet) sich überschneiden. Dies kann entweder auf einen Eingabefehler bei einem der Datumswerte oder auf ein Missverständnis bezüglich des Zwecks der Patientenregistrierung zurückzuführen sein.
+
+Bitte korrigieren Sie ggf. falsche Datumswerte (siehe @sec-solution-6) oder löschen Sie überflüssige Patientenregistrierungen (siehe @sec-solution-13), so dass für jeden stationären Aufenthalt des betreffenden Patienten genau eine Registrierung existiert.

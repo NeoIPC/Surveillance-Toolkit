@@ -1,0 +1,8 @@
+
+{{< pagebreak >}}
+
+### Updating Calculated Values in Event Forms {#sec-solution-11}
+
+Sometimes changes to form fields (especially the admission date in the enrolment) mean that other automatically calculated fields need to be updated.
+If the affected forms are completed and therefore protected from changes, the calculated fields will not be updated automatically and the update must be initiated manually.
+To do this, reopen the relevant form for editing (see @sec-solution-9) and trigger the recalculation by clicking your browser's refresh button (the F5 key or CTRL+R combination will also refresh the page and trigger the recalculation in most browsers). The updated values should then appear in the relevant data fields. If necessary, check and update the remaining data fields of the form and complete it (see @sec-solution-8) and, if necessary, the enrolment (see @sec-solution-4).

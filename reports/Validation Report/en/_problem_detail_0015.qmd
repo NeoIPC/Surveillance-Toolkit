@@ -1,0 +1,6 @@
+### The Patient Record Has a Completed Enrolment but no Surveillance End Form {#sec-problem-details-15}
+
+The Surveillance End form is a mandatory form that must always be present before you complete the enrollment so that the data can be analysed afterwards.
+This error message will appear in the validation report if the patient record contains a completed enrolment without a Surveillance End Form.
+
+Please open the Tracked Entity Instance Dashboard of the patient record (see @sec-solution-1), then the patient enrolment (see @sec-solution-2), add a Surveillance End form (see @sec-solution-14), fill in the data and then complete both the form (see @sec-solution-8) and the patient enrolment (see @sec-solution-4).

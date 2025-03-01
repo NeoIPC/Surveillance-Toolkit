@@ -1,0 +1,19 @@
+
+{{< pagebreak >}}
+
+### Completing an Event Form {#sec-solution-8}
+
+First, you have to open the event you want to complete in the Tracked Entity Instance Dashboard (see @sec-solution-15).
+Then click on the 'Complete' button, which is usually located at the bottom left of the event form (see @fig-complete-event).
+
+![The 'Complete' button in an event form of the Tracked Entity Instance Dashboard](img/fig-complete-event.png){#fig-complete-event fig-alt="A screenshot of an event form of the Tracked Entity Instance Dashboard, in which the 'Complete' button is highlighted"}
+
+::: {.callout-caution}
+## Event form validity check
+
+When you attempt to complete an event form, a validity check is performed to ensure that the data is complete and that no invalid entries have been made.
+For infection forms, the NeoIPC Surveillance Definitions are also checked.
+If information is missing or invalid, the form cannot be completed until this has been corrected.
+
+The validation process sometimes performs very complex checks which may contain errors. If you feel that the validation process is preventing you from saving forms with valid information, please contact us so that we can review it.
+:::

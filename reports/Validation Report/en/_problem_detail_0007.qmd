@@ -1,0 +1,6 @@
+### The Patient Record Contains a Completed Patient Enrolment or Surveillance End Form, but an Event Form Is Not Completed {#sec-problem-details-7}
+
+When you have ended surveillance for a patient and completed enrolment, you should have all the information you need to apply the NeoIPC Surveillance definitions and to fill out and complete event forms that you have started, or to delete them if the definitions are not met.
+Since input validation only occurs when forms are completed, data from incomplete forms cannot be included in analyses.
+
+Please complete the form (see @sec-solution-8).

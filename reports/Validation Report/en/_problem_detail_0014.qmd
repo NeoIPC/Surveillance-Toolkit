@@ -1,0 +1,15 @@
+### The Surgical Procedure Has an Invalid ICHE Code {#sec-problem-details-14}
+
+The stratification of surgical procedures in NeoIPC Surveillance is complicated by the lack of an internationally used coding system for surgical and procedural procedures.
+Although many countries use variants of the WHO's ‘International Classification Of Procedures In Medicine’ (ICPM), almost all of them have national variants, making international comparisons difficult.
+For this reason, when developing the NeoIPC Surveillance methods, we have decided to use the International Classification of Health Interventions (ICHI), which is currently being developed by the WHO in connection with ICD-11.
+The disadvantage of this decision is that none of our partners can use their familiar national coding system for procedures. The advantage, however, is that we can rely on a modern and very comprehensive coding system that allows us to group and analyse different groups of procedures in a meaningful way.
+
+Please always enter valid ICHI codes in the ‘Main procedure code (ICHI)’ and ‘Side procedure code (ICHI)’ fields.
+
+You can find the these codes by entering the English name of the procedure (or part of it) in the ‘Search’ field at the top left of the ICHE Reference Classification at https://icd.who.int/dev11/l-ichi/en.
+
+If you have any problems finding the correct code, please contact us and we will be happy to help.
+
+To correct the reported error, please open the form (see @sec-solution-15) and enter the ICHE code for the procedure instead of the existing code.
+If the form has already been completed, it will need to bebe reopened for editing (see @sec-solution-9). If the patient registration has also already been completed, you will also need reopen it for editing beforehand (see @sec-solution-5).

@@ -1,0 +1,5 @@
+### Die Patientenakte enthält eine abgeschlossene Patientenregistrierung, aber kein Aufnahmeformular {#sec-problem-details-16}
+
+Das Aufnahmeformular ist ein obligatorisches Formular, das für jede Patientenregistrierung (Enrollment) genau einmal vorhanden sein muss.
+Es wird normalerweise automatisch erstellt, kann aber wie jedes Ereignisformular gelöscht werden.
+Wenn das Aufnahmeformular einer Patientenregistrierung gelöscht wurde, muss ein neues Aufnahmeformular angelegt und abgeschlossen werden, bevor die Patientenregistrierung abgeschlossen wird, damit die Daten später ausgewertet werden können.

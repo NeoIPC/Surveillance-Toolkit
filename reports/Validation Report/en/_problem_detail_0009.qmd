@@ -1,0 +1,10 @@
+### The Patient Record Contains an Enrolment Whose Time Interval Overlaps With That of Another Enrolment {#sec-problem-details-9}
+
+The majority of patients included in NeoIPC have only one hospital stay during the observation period, which starts with the first admission (usually at birth) and ends with discharge.
+Only in a few cases are patients readmitted to hospital after discharge.
+For this situation, the NeoIPC surveillance platform has the concept of enrolments, which allows patients who are readmitted after discharge to be included in the surveillance for a second (and third, fourth, etc.) time.
+Naturally, the time intervals in which a patient is treated as an inpatient cannot overlap, and it follows that a new enrolment in the NeoIPC Surveillance platform can only start on the day after the last discharge at the earliest (in case a patient is discharged and readmitted on the same day, we ignore the discharge).
+
+In the case mentioned in the error message, there are multiple enrolments with overlapping surveillance periods (the period between the admission date and the surveillance end date). This may be due to either an input error in one of the date values or a misunderstanding of the purpose of the enrolment.
+
+Please correct any incorrect dates (see @sec-solution-6) or delete any redundant enrolments (see @sec-solution-13) so that there is exactly one enrolment for each of the patient's hospital stays.

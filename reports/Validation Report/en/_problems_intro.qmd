@@ -1,0 +1,25 @@
+To ensure that all partners can base their decisions on valid data, we strive for the highest possible data quality for the individual analyses and reference reports of the NeoIPC surveillance.
+Wherever possible, we try to check the validity of the data as soon as it is entered and, if necessary, ask the person entering the data to make corrections.
+Unfortunately, our surveillance platform cannot recognise all possible problems at the time of entry.
+At regular intervals, especially before reference reports are created, we therefore try to identify these problems using special database queries, summarise them in this report and send it to our partners with a request for correction.
+To make the correction as efficient as possible, the report in @sec-problems contains a link for each patient record in which a problem has been identified, which leads directly to the Tracked Entity Instance Dashboard of the patient record in question.
+In addition, @sec-problem-details details the issues encountered so that you can understand the potential impact and ways to avoid the problem in the future.
+In @sec-solutions we have also outlined the various steps that can be taken to resolve the issue.
+
+::: {.callout-warning}
+## Clicking on Links in Documents Received by Email
+
+Although we try to make it as easy as possible to resolve issues in patient records by providing direct links to the Tracked Entity Instance Dashboard, there is some risk involved.
+
+The first time you click on such a link, you will be asked to enter your NeoIPC monitoring platform credentials (username and password).
+Please never rely on the displayed sender of an email or document containing links and always check that the URL in your browser's address bar is correct before entering your credentials.
+
+If this is not the case, please close the browser window and let us know via our [support email address](mailto:`r support_email_address`).
+:::
+
+{{< pagebreak >}}
+
+## Detected Problems {#sec-problems}
+
+The following is a list of patient records where we have found some kind of problem. The records are grouped by enrolment date and event date.
+If a patient record has more than one problem, all of them are listed.

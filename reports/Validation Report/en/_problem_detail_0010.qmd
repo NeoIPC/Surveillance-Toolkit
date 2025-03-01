@@ -1,0 +1,19 @@
+### The Number of Patient Days Does Not Match the Calculated Value {#sec-problem-details-10}
+
+The patient days value entered in the End of Surveillance form is automatically calculated from the end of surveillance date and the admission date of the enrolment.
+The number of patient days is one of the most important pieces of information for calculating rates in various analyses, and is also used to validate entries in several other fields. For example, the number of device days (CVC, PVC, ventilation, ...) cannot be greater than the number of patient days, which is checked during entry.
+For these reasons, it is very important that the value for patient days is correct.
+
+If this error message appears in the validation report, we have found that the stored value for patient days is not correct.
+There can be two reasons for this:
+
+1. an error in our automatic calculation prior to `r format(lubridate::date("2024-08-21"), format = "%x")` has caused the patient days value to be one day too low.
+2. the admission date of the enrolment was changed after the end of surveillance form was completed.
+
+As for the first reason, we are truly sorry, because it is a problem that we have caused and that is creating work for you.
+Normally we would do everything possible to avoid this, and in the case of automatically calculated values this would be possible in principle - despite our basic policy of never changing the values entered by our partners without consultation - but unfortunately in this case the validation of the entries sometimes leads to an additional problem that we cannot solve ourselves with the information available to us.
+For example, in some cases you may want to enter the same number of days ('device days') as the number of patient days for certain risk or protective factors (e.g. there are regular cases where the number of human milk days is the same as the number of patient days). In these cases, the value for the corresponding device days would also have to be adjusted, which we cannot do because we do not know the true value.
+
+The second reason described above also has the input validation problem described in the previous section, which explains why the NeoIPC Surveillance Platform does not simply recalculate the value automatically when the admission date of the enrolment is changed.
+
+Regardless of the cause of the problem, please update the patient days value in the Surveillance End form (see @sec-solution-11) and then check if other values need to be updated and adjust them if necessary.

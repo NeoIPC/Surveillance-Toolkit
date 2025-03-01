@@ -1,0 +1,285 @@
+```{r Formatters}
+formatters <- list(
+  problems = list(
+    `1` = function(problem_translation, problem_context) paste0("* ", problem_translation$description),
+    `2` = function(problem_translation, problem_context) paste0("* ", problem_translation$description),
+    `3` = function(problem_translation, problem_context) paste0(
+      "* ",
+      sprintf(
+        problem_translation$description,
+        format(problem_context$ADMISSION_ADMISSION_DATE, format = "%x"),
+        format(problem_context$ENROLMENT_ADMISSION_DATE, format = "%x"))
+      ),
+    `4` = function(problem_translation, problem_context) paste0(
+      "* ",
+      sprintf(
+        problem_translation$description,
+        format(problem_context$SURVEILLANCE_END_DATE, format = "%x"),
+        format(problem_context$ADMISSION_ADMISSION_DATE, format = "%x"))
+      ),
+    `5` = function(problem_translation, problem_context) paste0(
+      "* ",
+      sprintf(
+        problem_translation$description,
+        problem_context$ADMISSION_STATUS)
+      ),
+    `6` = function(problem_translation, problem_context) paste0(
+      "* ",
+      sprintf(
+        problem_translation$description,
+        problem_context$SURVEILLANCE_END_STATUS)
+      ),
+    `7` = function(problem_translation, problem_context) paste0(
+      "* ",
+      sprintf(
+        problem_translation$description,
+        problem_context$ENROLMENT_STATUS,
+        problem_context$SURVEILLANCE_END_STATUS,
+        problem_context$SEPSIS_STATUS)
+      ),
+    `8` = function(problem_translation, problem_context) paste0(
+      "* ",
+      sprintf(
+        problem_translation$description,
+        problem_context$ENROLMENT_STATUS,
+        problem_context$SURVEILLANCE_END_STATUS,
+        problem_context$NEC_STATUS)
+      ),
+    `9` = function(problem_translation, problem_context) paste0(
+      "* ",
+      sprintf(
+        problem_translation$description,
+        problem_context$ENROLMENT_STATUS,
+        problem_context$SURVEILLANCE_END_STATUS,
+        problem_context$PNEUMONIA_STATUS)
+      ),
+    `10` = function(problem_translation, problem_context) paste0(
+      "* ",
+      sprintf(
+        problem_translation$description,
+        problem_context$ENROLMENT_STATUS,
+        problem_context$SURVEILLANCE_END_STATUS,
+        problem_context$SURGERY_STATUS)
+      ),
+    `11` = function(problem_translation, problem_context) paste0(
+      "* ",
+      sprintf(
+        problem_translation$description,
+        problem_context$ENROLMENT_STATUS,
+        problem_context$SURVEILLANCE_END_STATUS,
+        problem_context$SSI_STATUS)
+      ),
+    `12` = function(problem_translation, problem_context) paste0(
+      "* ",
+      sprintf(
+        problem_translation$description,
+        format(problem_context$ENROLMENT_ADMISSION_DATE, format = "%x"),
+        format(problem_context$ADMISSION_ADMISSION_DATE, format = "%x"),
+        format(problem_context$SURVEILLANCE_END_DATE, format = "%x"),
+        format(problem_context$SEPSIS_DATE, format = "%x"))
+      ),
+    `13` = function(problem_translation, problem_context) paste0(
+      "* ",
+      sprintf(
+        problem_translation$description,
+        format(problem_context$ENROLMENT_ADMISSION_DATE, format = "%x"),
+        format(problem_context$ADMISSION_ADMISSION_DATE, format = "%x"),
+        format(problem_context$SURVEILLANCE_END_DATE, format = "%x"),
+        format(problem_context$NEC_DATE, format = "%x"))
+      ),
+    `14` = function(problem_translation, problem_context) paste0(
+      "* ",
+      sprintf(
+        problem_translation$description,
+        format(problem_context$ENROLMENT_ADMISSION_DATE, format = "%x"),
+        format(problem_context$ADMISSION_ADMISSION_DATE, format = "%x"),
+        format(problem_context$SURVEILLANCE_END_DATE, format = "%x"),
+        format(problem_context$PNEUMONIA_DATE, format = "%x"))
+      ),
+    `15` = function(problem_translation, problem_context) paste0(
+      "* ",
+      sprintf(
+        problem_translation$description,
+        format(problem_context$ENROLMENT_ADMISSION_DATE, format = "%x"),
+        format(problem_context$ADMISSION_ADMISSION_DATE, format = "%x"),
+        format(problem_context$SURVEILLANCE_END_DATE, format = "%x"),
+        format(problem_context$SURGERY_DATE, format = "%x"))
+      ),
+    `16` = function(problem_translation, problem_context) paste0(
+      "* ",
+      sprintf(
+        problem_translation$description,
+        format(problem_context$ENROLMENT_ADMISSION_DATE, format = "%x"),
+        format(problem_context$ADMISSION_ADMISSION_DATE, format = "%x"),
+        format(problem_context$SURVEILLANCE_END_DATE, format = "%x"),
+        format(problem_context$SSI_DATE, format = "%x"))
+      ),
+    `17` = function(problem_translation, problem_context) paste0(
+      "* ",
+      sprintf(
+        problem_translation$description,
+        format(problem_context$ENROLMENT_1_ADMISSION_DATE, format = "%x"),
+        format(problem_context$ENROLMENT_1_SURVEILLANCE_END_DATE, format = "%x"),
+        format(problem_context$ENROLMENT_2_ADMISSION_DATE, format = "%x"),
+        format(problem_context$ENROLMENT_2_SURVEILLANCE_END_DATE, format = "%x"))
+      ),
+    `18` = function(problem_translation, problem_context) paste0(
+      "* ",
+      sprintf(
+        problem_translation$description,
+        problem_context$PATIENT_DAYS,
+        problem_context$PATIENT_DAYS_CALCULATED)
+      ),
+    `19` = function(problem_translation, problem_context) paste0(
+      "* ",
+      sprintf(
+        problem_translation$description,
+        translations$ssi_types[[as.character(problem_context$NEOIPC_SSI_INFECTION_TYPE)]])
+      ),
+    `20` = function(problem_translation, problem_context) paste0(
+      "* ",
+      sprintf(
+        problem_translation$description,
+        problem_context$PATHOGEN_INDEX,
+        if_else(problem_context$IS_SECONDARY_BSI, problem_translation$sec_bsi_part, ""),
+        problem_context$PATHOGEN_NAME)
+      ),
+    `21` = function(problem_translation, problem_context) paste0(
+      "* ",
+      sprintf(
+        problem_translation$description,
+        problem_context$AB_SUBSTANCE_DAYS,
+        problem_context$NEOIPC_SURVEILLANCE_END_AB_DAYS)
+      ),
+    `22` = function(problem_translation, problem_context) paste0(
+      "* ",
+      sprintf(
+        problem_translation$description,
+        problem_context$PROCEDURE_DESCRIPTION,
+        problem_context$PROCEDURE_CODE)
+      ),
+    `23` = function(problem_translation, problem_context) paste0(
+      "* ",
+      sprintf(
+        problem_translation$description,
+        problem_context$PROCEDURE_DESCRIPTION,
+        problem_context$PROCEDURE_CODE)
+      ),
+    `24` = function(problem_translation, problem_context) paste0(
+      "* ",
+      sprintf(
+        problem_translation$description,
+        problem_context$PROCEDURE_DESCRIPTION,
+        problem_context$PROCEDURE_CODE)
+      ),
+    `25` = function(problem_translation, problem_context) paste0("* ", problem_translation$description),
+    `26` = function(problem_translation, problem_context) paste0("* ", problem_translation$description),
+    `27` = function(problem_translation, problem_context) paste0(
+      "* ",
+      sprintf(
+        problem_translation$description,
+        problem_context$NEOIPC_BSI_DOL,
+        problem_context$BSI_DOL_CALCULATED)
+      ),
+    `28` = function(problem_translation, problem_context) paste0(
+      "* ",
+      sprintf(
+        problem_translation$description,
+        problem_context$NEOIPC_BSI_LOS,
+        problem_context$BSI_LOS_CALCULATED)
+      ),
+    `29` = function(problem_translation, problem_context) paste0(
+      "* ",
+      sprintf(
+        problem_translation$description,
+        problem_context$NEOIPC_BSI_DOL)
+      ),
+    `30` = function(problem_translation, problem_context) paste0(
+      "* ",
+      sprintf(
+        problem_translation$description,
+        problem_context$BSI_DOS)
+      ),
+    `31` = function(problem_translation, problem_context) paste0(
+      "* ",
+      sprintf(
+        problem_translation$description,
+        problem_context$NEOIPC_HAP_DOL,
+        problem_context$HAP_DOL_CALCULATED)
+      ),
+    `32` = function(problem_translation, problem_context) paste0(
+      "* ",
+      sprintf(
+        problem_translation$description,
+        problem_context$NEOIPC_HAP_LOS,
+        problem_context$HAP_LOS_CALCULATED)
+      ),
+    `33` = function(problem_translation, problem_context) paste0(
+      "* ",
+      sprintf(
+        problem_translation$description,
+        problem_context$NEOIPC_HAP_DOL)
+      ),
+    `34` = function(problem_translation, problem_context) paste0(
+      "* ",
+      sprintf(
+        problem_translation$description,
+        problem_context$HAP_DOS)
+      ),
+    `35` = function(problem_translation, problem_context) paste0(
+      "* ",
+      sprintf(
+        problem_translation$description,
+        problem_context$NEOIPC_NEC_DOL,
+        problem_context$NEC_DOL_CALCULATED)
+      ),
+    `36` = function(problem_translation, problem_context) paste0(
+      "* ",
+      sprintf(
+        problem_translation$description,
+        problem_context$NEOIPC_NEC_LOS,
+        problem_context$NEC_LOS_CALCULATED)
+      ),
+    `37` = function(problem_translation, problem_context) paste0(
+      "* ",
+      sprintf(
+        problem_translation$description,
+        problem_context$NEOIPC_NEC_DOL)
+      ),
+    `38` = function(problem_translation, problem_context) paste0(
+      "* ",
+      sprintf(
+        problem_translation$description,
+        problem_context$NEC_DOS)
+      ),
+    `39` = function(problem_translation, problem_context) paste0(
+      "* ",
+      sprintf(
+        problem_translation$description,
+        problem_context$NEOIPC_SURGERY_DOL,
+        problem_context$SURGERY_DOL_CALCULATED)
+      ),
+    `40` = function(problem_translation, problem_context) paste0(
+      "* ",
+      sprintf(
+        problem_translation$description,
+        problem_context$NEOIPC_SURGERY_LOS,
+        problem_context$SURGERY_LOS_CALCULATED)
+      ),
+    `41` = function(problem_translation, problem_context) paste0(
+      "* ",
+      sprintf(
+        problem_translation$description,
+        problem_context$NEOIPC_SSI_DOL,
+        problem_context$SSI_DOL_CALCULATED)
+      ),
+    `42` = function(problem_translation, problem_context) paste0(
+      "* ",
+      sprintf(
+        problem_translation$description,
+        problem_context$NEOIPC_SSI_LOS,
+        problem_context$SSI_LOS_CALCULATED)
+      )
+  )
+)
+```

@@ -1,0 +1,5 @@
+### The Patient Record Has a Completed Surveillance End Form but the Enrolment Is Still Active {#sec-problem-details-2}
+
+When you complete the surveillance end form, you should normally also complete the enrolment to mark the case as complete and ready for analysis and to protect it from accidental changes.
+If you do not do this, the data for the patient in question will not be included in your analyses.
+The easiest way to do this is to click 'Complete event and enrollment' in the dialogue box that appears after clicking 'Complete' in the surveillance end form. If you want to complete an enrolment afterwards and don't know how to do it, please follow the instructions in @sec-solution-4.

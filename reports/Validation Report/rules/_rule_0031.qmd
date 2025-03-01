@@ -1,0 +1,37 @@
+```{r Validation rule 31: "The day of life stored in the pneumonia event does not match the calculated value"}
+problems <- problems |>
+  bind_rows(
+    patients |>
+      select(SITE_CODE, DEPARTMENT_NAME, DEPARTMENT_OU, NEOIPC_PATIENT_ID, PATIENT_TEI, key) |>
+      rename(patient_key = key) |>
+      inner_join(
+        enrollments |>
+          select(ENROLMENT_ID, ENROLMENT_DATE, NEOIPC_ADMISSION_DOL, key, patient) |>
+          rename(enrollment_key = key),
+        join_by(patient_key == patient)) |>
+      inner_join(
+        data$pneumonias |>
+          select(event, occurredAt, enrollment, NEOIPC_HAP_DOL) |>
+          rename(EVENT_DATE = occurredAt, EVENT_ID = event),
+        join_by(enrollment_key == enrollment)) |>
+      mutate(
+        PROBLEM_ID = 31L,
+        EVENT_TYPE = event_types("HAP"),
+        HAP_DOL_CALCULATED = NEOIPC_ADMISSION_DOL + as.integer(EVENT_DATE - ENROLMENT_DATE)) |>
+      filter(HAP_DOL_CALCULATED != NEOIPC_HAP_DOL) |>
+      select(
+        SITE_CODE,
+        DEPARTMENT_NAME,
+        DEPARTMENT_OU,
+        NEOIPC_PATIENT_ID,
+        PATIENT_TEI,
+        ENROLMENT_ID,
+        ENROLMENT_DATE,
+        EVENT_ID,
+        EVENT_TYPE,
+        EVENT_DATE,
+        PROBLEM_ID,
+        HAP_DOL_CALCULATED,
+        NEOIPC_HAP_DOL
+        ))
+```

@@ -1,0 +1,27 @@
+### The Surgical Site Infection Did Not Occur During the Follow-Up Period of a Surgical Procedure {#sec-problem-details-11}
+
+After surgery, patients are followed up as part of NeoIPC Surveillance for surgical site infections.
+The follow-up period is defined as follows (the day of surgery is day 1):
+
+* Superficial incisional infection: 30 days
+* Deep incisional infection: 30 days or 90 days if an implant was inserted
+* Organ/space infection: 30 days or 90 days if an implant was inserted
+
+If this message appears in the validation report, the specified patient record contains a form for a surgical site infection, but not for a surgical procedure in the 30 or 90 days prior to that, as defined above.
+
+There may be different reasons for this:
+
+1. A form was created for the surgical procedure, but the period of time between the procedure and the infection is too long.
+
+    It is very unlikely that the infection is still related to the procedure after such a long time.
+    Please check the documented findings again carefully and, if necessary, consult with the treating neonatologist and/or surgeon.
+    If you still believe that this is a surgical site infection, please contact us (e.g. via our [support email address](mailto:NeoIPC-Support@charite.de)).
+    If you have verified that it is not a surgical site infection, please delete the event form (see @sec-solution-12).
+
+2. No form has been created for the surgical procedure
+
+    Please create an event form for the surgical procedure in the NeoIPC Surveillance platform (see @sec-solution-14), fill it out and complete it (see @sec-solution-8).
+
+3. The date for the surgical procedure or surgical site infection was entered incorrectly.
+
+    Please correct the erroneous date in the corresponding event form (see @sec-solution-7).

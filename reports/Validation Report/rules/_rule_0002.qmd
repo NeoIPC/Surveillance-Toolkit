@@ -1,0 +1,18 @@
+```{r Validation rule 2: "The patient has a completed surveillance end event but an active enrollment"}
+
+problems <- problems |>
+  bind_rows(
+    patients |>
+      inner_join(enrollments, join_by(key == patient)) |>
+      filter(enrollment_status == "ACTIVE" & surveillanceEnd_status == "COMPLETED") |>
+      select(
+        SITE_CODE,
+        DEPARTMENT_NAME,
+        DEPARTMENT_OU,
+        NEOIPC_PATIENT_ID,
+        PATIENT_TEI,
+        ENROLMENT_ID,
+        ENROLMENT_DATE
+        ) |>
+      bind_cols(PROBLEM_ID = c(2L)))
+```
