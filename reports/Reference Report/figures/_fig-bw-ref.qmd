@@ -1,0 +1,43 @@
+```{r}
+#| label: fig-bw-ref
+#| fig-cap: "Distribution of birth weights of the infants included in this report. A is a histogram in 50 g steps with density curve and B is a boxplot. Vertical lines in the boxplot represent the 25%, 50% and 75% quantiles, the diamond represents the pooled arithmetic mean."
+
+label_bw <- function(x) paste(format(x, big.mark =" "), "g", sep = " ")
+breaks_bw <- function(x) pretty(x, as.integer((as.integer(x[2]) + 1 - as.integer(x[1])) / 100))
+min_bw <- min(data$patients$birth_weight)
+max_bw <- max(data$patients$birth_weight)
+
+
+bwCombined <- data$patients |>
+  ggplot(aes(x = birth_weight)) +
+  geom_histogram(aes(y = after_stat(density)), colour = 1, fill = "white", binwidth = 50, boundary = 25, closed = "left") +
+  geom_density() +
+  scale_x_continuous(breaks = breaks_bw) +
+  coord_cartesian(xlim = c(min_bw - 50, max_bw + 50)) +
+  theme(
+    plot.tag = element_text(size = 9),
+    axis.title=element_blank(),
+    axis.text=element_blank(),
+    axis.ticks=element_blank(),
+    panel.grid.major.y=element_blank(),
+    panel.grid.minor.y=element_blank()) +
+  labs(tag = "A")
+
+bwBoxPlot <- data$patients |>
+  ggplot(aes(x=factor(0), y = birth_weight)) +
+  geom_boxplot(outlier.shape = NA, coef = 0) +
+  stat_summary(fun = "mean", geom = "point", shape = 23, size = 3, fill = "white") +
+  scale_y_continuous(breaks = breaks_bw, labels = label_bw) +
+  coord_flip(ylim = c(min_bw - 50, max_bw + 50)) +
+  theme(
+    plot.tag = element_text(size = 9),
+    axis.title=element_blank(),
+    axis.text.x=element_text(angle = 45, hjust = 1, vjust = 1),
+    axis.text.y=element_blank(),
+    axis.ticks.y=element_blank(),
+    panel.grid.major.y=element_blank(),
+    panel.grid.minor.y=element_blank()) +
+  labs(tag = "B")
+
+bwCombined / bwBoxPlot
+```

@@ -1,0 +1,35 @@
+format:
+  pdf:
+    template-partials:
+      - before-body.tex
+    documentclass: scrartcl
+    mainfont: "EB Garamond"
+    fontsize: 10pt
+    classoption: [footsepline=true, plainfootsepline=true]
+    papersize: a4paper
+    fig-pos: 'H'
+    tbl-pos: 'H'
+    colorlinks: true
+    geometry:
+      - top=30mm
+      - bottom=30mm
+      - left=25mm
+      - right=25mm
+      - heightrounded
+    keep-tex: true
+    include-in-header:
+      text: |
+        \usepackage{float}
+        \usepackage{placeins}
+        \usepackage{graphicx}
+        \usepackage{wrapfig}
+        \usepackage{scrlayer-scrpage}
+        \ModifyLayer[addvoffset=-.6ex]{scrheadings.foot.above.line}
+        \ModifyLayer[addvoffset=-.6ex]{plain.scrheadings.foot.above.line}
+        \ihead{\includegraphics[width=4cm]{logos/LOGO_NEOIPC_2.png}}
+        \ifoot*{\includegraphics[width=1.37cm]{logos/eu-flag.png}}
+        \cfoot*{\raggedright \hspace{1.5cm}This project has received funding from the European Union’s Horizon 2020 research and innovation\\ \hspace{1.5cm}programme under grant agreement No 965328.}
+        \ofoot{\pagemark}
+  docx:
+    highlight-style: github
+number-sections: true

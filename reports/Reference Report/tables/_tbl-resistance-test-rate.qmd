@@ -1,0 +1,94 @@
+```{r}
+#| label: tbl-resistance-test-rate
+#| tbl-cap: "Antibiotic resistance diagnostics"
+#| tbl-cap-location: top
+
+reference_data |>
+    neoipcr::get_resistance_test_rate_table() |>
+  dplyr::rename(
+    "N"="n",
+    "Pooled"="pooled",
+    "Q₁"="q1",
+    "Q₂"="q2",
+    "Q₃"="q3") |>
+  dplyr::mutate(
+    i = dplyr::if_else(
+      .data$cond == "routine",
+      0,
+      2),
+    abr = dplyr::if_else(
+      .data$cond == "routine",
+      .data$abr,
+      .data$cond),
+    abr = dplyr::case_match(
+      .data$abr,
+      "3gcr"~"3^rd^ gen. cephalosporin resistance (3GCR)",
+      "car"~"Carbapenem resistance (CARBR)",
+      "cor"~"Colistin resistance (COLR)",
+      "mrsa"~"Methicillin-resistant Staphylococcus aureus (MRSA)",
+      "vre"~"Vancomycin-resistant Enterococcus (VRE)",
+      "if_3gcr"~"\\- in case of 3GCR",
+      "if_3gcr&car"~"\\- in case of 3GCR and CARBR"),
+    .before = 1) |>
+  gt(rowname_col = "abr") |>
+  sub_missing() |>
+  gt::tab_options(
+    table.font.size = 13,
+    footnotes.marks = "extended"
+  ) |>
+  fmt_number(decimals = 1) |>
+  fmt_number(columns = "N", decimals = 0) |>
+  fmt_markdown(columns = "abr") |>
+  cols_width("abr" ~ pct(50)) |>
+  cols_width(starts_with("Q") ~ pct(7)) |>
+  tab_stub_indent(
+    rows = gt::everything(),
+    indent = gt::from_column(column = "i")
+  ) |>
+  tab_style(
+    style = cell_text(
+      style = "italic"
+      ),
+    locations = cells_stub(
+      rows = cond %in% c("if_3gcr","if_3gcr&car")
+    )
+  ) |>
+  cols_hide(columns = c("i","cond")) |>
+  tab_spanner(
+    label = "Antibiotic resistance test rate",
+    columns = c("Pooled","Q₁","Q₂","Q₃"),
+    id = "antibiotic_resistance_test_rate"
+  ) |>
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = list(
+      cells_column_spanners(),
+      cells_column_labels(),
+      cells_row_groups()
+    )
+  ) |>
+  tab_footnote(
+    footnote = md(
+      paste0(
+        "$$\\text{",
+        "Antibiotic resistance test rate",
+        "} = \\frac{\\text{",
+        "Number of pathogens with recorded test for antibiotic resistance",
+        "}}{\\text{",
+        "Number of pathogens eligible for antibiotic resistance test recording",
+        "}} \\times ",
+        format(100, big.mark = locale_sep_mark),
+        "$$"
+      )),
+    locations = cells_column_spanners(spanners = "antibiotic_resistance_test_rate")
+  ) |>
+  tab_footnote(
+    footnote = "N: The aggregated number of antibiotic resistant pathogens that have a documented test for antibiotic resistance.",
+    locations = cells_column_labels(columns = "N")) |>
+  tab_footnote(
+    footnote = "Pooled: The antibiotic resistance test rate calculated across all infants from all departments.",
+    locations = cells_column_labels(columns = "Pooled")) |>
+  tab_footnote(
+    footnote = "Q₁, Q₂, Q₃: The quartiles (25%, 50% and 75% quantiles) of the antibiotic resistance test rates of the partner departments",
+    locations = cells_column_labels(columns = c("Q₁","Q₂","Q₃")))
+```

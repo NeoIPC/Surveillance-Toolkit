@@ -1,0 +1,103 @@
+```{r General setup and parameter preparation}
+#| message: false
+#| warning: false
+#| include: false
+pak::pak("Brar/neoipcr@TowardsReferenceReport")
+library(tidyverse, warn.conflicts = FALSE, quietly = TRUE)
+library(smplot2, warn.conflicts = FALSE, quietly = TRUE)
+library(scales, warn.conflicts = FALSE, quietly = TRUE)
+library(patchwork, warn.conflicts = FALSE, quietly = TRUE)
+library(gt, warn.conflicts = FALSE, quietly = TRUE)
+library(neoipcr, warn.conflicts = FALSE, quietly = TRUE)
+
+if(!exists("params")) params <- list()
+reportingPeriodFrom <- as_date(coalesce(params[["reportingPeriodFrom"]], "2024-01-01"))
+reportingPeriodTo <- as_date(coalesce(params[["reportingPeriodTo"]], as.character(Sys.Date())))
+birthWeightFrom <- coalesce(params[["birthWeightFrom"]], 0L)
+birthWeightTo <- coalesce(params[["birthWeightTo"]], 2147483647L)
+gestationWeeksFrom <- coalesce(params[["gestationWeeksFrom"]], 0L)
+gestationWeeksTo <- coalesce(params[["gestationWeeksTo"]], 2147483647L)
+token <- coalesce(params$token, Sys.getenv("NEOIPC_DHIS2_TOKEN", unset = NA))
+session_id <- coalesce(params[["session_id"]], Sys.getenv("NEOIPC_DHIS2_SESSION_ID", unset = NA))
+connection_options <- if(is.na(session_id))
+  dhis2_connection_options(token = token) else
+    dhis2_connection_options(session_id = session_id)
+reportingCountries = params[["reportingCountries"]]
+hospitalFilter = params[["hospitalFilter"]]
+defaultPatientFilter = coalesce(params[["defaultPatientFilter"]], TRUE)
+testUnitFilter = coalesce(params[["testUnitFilter"]], TRUE)
+validation_exceptions <- read_csv("../../../validation-exceptions_ref.csv")
+
+dataset_options <- dhis2_dataset_options(
+    include_country = "yes",
+    include_department = "pseudonymised",
+    surveillance_end_from = reportingPeriodFrom,
+    surveillance_end_to = reportingPeriodTo,
+    birth_weight_from = birthWeightFrom,
+    birth_weight_to = birthWeightTo,
+    gestational_age_from = gestationWeeksFrom,
+    gestational_age_to = gestationWeeksTo,
+    country_filter = reportingCountries,
+    include_invalid_patients = validation_exceptions)
+
+language <- dplyr::coalesce(params$language, "en")
+default_countries <- list(
+  en = "GB",
+  de = "DE"
+)
+country <- dplyr::coalesce(params$country, default_countries[[language]], NA_character_)
+codepage <- dplyr::coalesce(params$codepage, "UTF-8")
+locale <- paste0(language, (if(is.na(country)) NULL else paste0("_", country)), ".", codepage)
+gt_locale <- paste0(language, (if(is.na(country)) NULL else paste0("-", country)))
+options(`gt.locale` = gt_locale)
+`_locales` <- (gt::info_locales(begins_with = substr(gt_locale,1,1)))$`_data`
+locale_sep_mark <- `_locales`$group[`_locales`$locale == gt_locale]
+invisible(Sys.setlocale(category = "LC_ALL", locale = locale))
+invisible(Sys.setLanguage(locale))
+translation_file <- paste0("translations/", stringr::str_extract(locale, "^([^.]+)"),".json")
+rm(gt_locale, `_locales`)
+```
+
+```{r Importing data}
+#| include: false
+
+data <- import_dhis2(
+  connection_options = connection_options,
+  dataset_options = dataset_options
+  )
+
+reference_data <- data |>
+  neoipcr::calculate_reference_data()
+
+data |>
+  jsonlite::serializeJSON() |>
+  readr::write_file(file = "_output/ReferenceData.json")
+
+reference_data |>
+  jsonlite::serializeJSON() |>
+  readr::write_file(file = "_output/ReferenceInformation.json")
+
+ichi_health_interventions <- read_csv("../../../Surveillance-Private/metadata/WHO/ICHI/Health interventions.csv", col_names = c("code","intervention","url"), col_types = "ccc")
+ichi_targets <- read_csv("../../../Surveillance-Private/metadata/WHO/ICHI/Targets.csv", col_names = c("code","target","url"), col_types = "ccc")
+
+if(file.exists(translation_file)) {
+  translations <- readr::read_file(translation_file) |> jsonlite::fromJSON()
+} else {
+  translation_file <- paste0("translations/",stringr::str_extract(locale, "^([^_]+)"),".json")
+  if(file.exists(translation_file)) {
+    translations <- readr::read_file(translation_file) |> jsonlite::fromJSON()
+  } else {
+    rlang::abort(paste0("Failed to find translation file for locale", locale))
+  }
+}
+
+surgery_summary <- data$events |>
+  dplyr::filter(event_type_key == "pro") |>
+  dplyr::semi_join(data$enrollments, dplyr::join_by(enrollment_key)) |>
+  dplyr::summarise(n_departments = n_distinct(department_key), n_patients = n_distinct(patient_key), n_procedures = n())
+
+n_surgical_departments <- surgery_summary |> dplyr::pull("n_departments")
+n_patients <- surgery_summary |> dplyr::pull("n_patients")
+n_procedures <- surgery_summary |> dplyr::pull("n_procedures")
+n_procedures_per_patient <- n_procedures / n_patients
+```

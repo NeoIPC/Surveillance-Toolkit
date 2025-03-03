@@ -1,0 +1,178 @@
+---
+title: "Random Info on Antibiotics"
+format: pdf
+echo: true
+params:
+  reportingPeriodFrom: NULL
+  reportingPeriodTo: NULL
+  birthWeightFrom: NULL
+  birthWeightTo: NULL
+  gestationalAgeFrom: NULL
+  gestationalAgeTo: NULL
+  countryFilter: NULL
+  hospitalFilter: NULL
+  testUnitFilter: true
+  defaultPatientFilter: true
+  token: NULL
+---
+
+{{< include _setup.qmd >}}
+
+```{r}
+n_enrollments <- nrow(enrollments)
+
+ab_enrollments <- enrollments |>
+  select(NEOIPC_SURVEILLANCE_END_AB_DAYS) |>
+  filter(NEOIPC_SURVEILLANCE_END_AB_DAYS > 0) |>
+  pull()
+
+n_ab_enrollments <- ab_enrollments |>
+  length()
+
+prop_ab_enrollments <- n_ab_enrollments / n_enrollments
+sum_ab_days <- sum(enrollments$NEOIPC_SURVEILLANCE_END_AB_DAYS)
+mean_ab_days <- mean(enrollments$NEOIPC_SURVEILLANCE_END_AB_DAYS)
+mean_ab_days_treated <- mean(ab_enrollments)
+quartiles_ab_days_treated <- quantile(ab_enrollments)
+
+tibble::tribble(
+  ~Variable, ~Value,
+  "Number of enrolments",
+    format(n_enrollments),
+  "Number of enrolments with antibiotic treatment",
+    format(n_ab_enrollments),
+  "Proportion of enrolments with antibiotic treatment",
+    format(prop_ab_enrollments),
+  "Sum of antibiotic days",
+    format(sum_ab_days),
+  "Mean antibiotic days per enrolment",
+    format(mean_ab_days),
+  "Min antibiotic days of enrolments with antibiotic treatment",
+    format(quartiles_ab_days_treated[1]),
+  "Max antibiotic days of enrolments with antibiotic treatment",
+    format(quartiles_ab_days_treated[5]),
+  "Mean antibiotic days per enrolment with antibiotic treatment",
+    format(mean_ab_days_treated),
+  "Q1 antibiotic days of enrolments with antibiotic treatment",
+    format(quartiles_ab_days_treated[2]),
+  "Median antibiotic days of enrolments with antibiotic treatment",
+    format(quartiles_ab_days_treated[3]),
+  "Q3 antibiotic days of enrolments with antibiotic treatment",
+    format(quartiles_ab_days_treated[4])
+) |>
+  gt()
+```
+
+```{r}
+enrollments |>
+  select(NEOIPC_SURVEILLANCE_END_AB_DAYS) |>
+  group_by(NEOIPC_SURVEILLANCE_END_AB_DAYS) |>
+  summarise(n = n()) |>
+  arrange(NEOIPC_SURVEILLANCE_END_AB_DAYS) |>
+  gt()
+```
+
+```{r}
+enrollments |>
+  select(NEOIPC_SURVEILLANCE_END_AB_DAYS) |>
+  ggplot2::ggplot(aes(x = NEOIPC_SURVEILLANCE_END_AB_DAYS)) +
+  geom_histogram(binwidth = 1)
+```
+
+```{r}
+enrollments |>
+  select(NEOIPC_SURVEILLANCE_END_AB_DAYS) |>
+  ggplot2::ggplot(aes(y = NEOIPC_SURVEILLANCE_END_AB_DAYS)) +
+  geom_boxplot()
+```
+
+```{r}
+enrollments |>
+  select(NEOIPC_SURVEILLANCE_END_AB_DAYS) |>
+  rename(`AB days` = NEOIPC_SURVEILLANCE_END_AB_DAYS) |>
+  mutate(
+    !!paste0(
+      "Poisson (lambda = ", round(mean_ab_days, 2), ")") :=
+      rpois(n = n_enrollments, lambda = mean_ab_days),
+    !!paste0(
+      "Neg. Bin. (mean = ", round(mean_ab_days, 2), ", size = 0.5)") :=
+      rnbinom(n = n_enrollments, mu = mean_ab_days, size = 0.5)
+    ) |>
+  pivot_longer(everything(), names_to = "Distribution", values_to = "Days") |>
+  ggplot2::ggplot(aes(x = Days, colour = Distribution)) +
+  geom_density() +
+  theme(
+    legend.position = "top",
+    legend.title = element_blank(),
+    legend.text = element_text(size = 8))
+```
+
+```{r}
+tibble(`AB days` = ab_enrollments) |>
+  mutate(
+    !!paste0(
+      "Poisson (lambda = ", round(mean_ab_days_treated, 2), ")") :=
+      rpois(n = n_ab_enrollments, lambda = mean_ab_days_treated),
+    !!paste0(
+      "Neg. Bin. (mean = ", round(mean_ab_days_treated, 2), ", size = 0.9)") :=
+      rnbinom(n = n_ab_enrollments, mu = mean_ab_days_treated, size = 0.9)
+    ) |>
+  pivot_longer(everything(), names_to = "Distribution", values_to = "Days") |>
+  ggplot2::ggplot(aes(x = Days, colour = Distribution)) +
+  geom_density() +
+  theme(
+    legend.position = "top",
+    legend.title = element_blank(),
+    legend.text = element_text(size = 8))
+```
+
+```{r}
+enrollments |>
+  select(key, NEOIPC_SURVEILLANCE_END_AB_DAYS) |>
+  left_join(
+    sepses |>
+      select(key, enrollment) |>
+      rename(sepsis = key),
+    join_by(key == enrollment),
+    relationship = "many-to-many") |>
+  left_join(
+    necs |>
+      select(key, enrollment) |>
+      rename(nec = key),
+    join_by(key == enrollment),
+    relationship = "many-to-many") |>
+  left_join(
+    pneumonias |>
+      select(key, enrollment) |>
+      rename(pneumonia = key),
+    join_by(key == enrollment),
+    relationship = "many-to-many") |>
+  left_join(
+    ssis |>
+      select(key, enrollment) |>
+      rename(ssi = key),
+    join_by(key == enrollment),
+    relationship = "many-to-many") |>
+  mutate(
+    sepsis = if_else(is.na(sepsis), 0, 1),
+    nec = if_else(is.na(nec), 0, 1),
+    pneumonia = if_else(is.na(pneumonia), 0, 1),
+    ssi = if_else(is.na(ssi), 0, 1)) |>
+  group_by(key, NEOIPC_SURVEILLANCE_END_AB_DAYS) |>
+  summarise(
+    n_sepsis = sum(sepsis),
+    n_nec = sum(nec),
+    n_pneumonia = sum(pneumonia),
+    n_ssi = sum(ssi),
+    .groups = "drop") |>
+  mutate(n_inf = n_sepsis + n_nec+ n_pneumonia + n_ssi) |>
+  ggplot(aes(y = NEOIPC_SURVEILLANCE_END_AB_DAYS, x = n_inf)) +
+  geom_point(shape = 21, fill = "black", color = "white", size = 2) +
+  scale_x_continuous(breaks = breaks_pretty()) +
+  smplot2::sm_hvgrid() +
+  smplot2::sm_statCorr(
+    color = "black",
+    corr_method = "spearman",
+    linetype = "dashed",
+    R2 = TRUE)
+```

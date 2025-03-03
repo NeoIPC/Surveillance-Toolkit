@@ -1,0 +1,179 @@
+---
+lang: en
+title: "NeoIPC Surveillance Reference Report"
+params:
+  reportingPeriodFrom: NULL
+  reportingPeriodTo: NULL
+  birthWeightFrom: NULL
+  birthWeightTo: NULL
+  gestationWeeksFrom: NULL
+  gestationWeeksTo: NULL
+  reportingCountries: NULL
+  hospitalFilter: NULL
+  testUnitFilter: true
+  defaultPatientFilter: true
+  token: NULL
+---
+
+{{< include _setup.qmd >}}
+
+`{r} translations$headerList$createdAt`:
+
+:   `{r} format(data$metadata$system$date, format = "%x %X", tz = "UTC", usetz = TRUE)`
+
+`{r} translations$headerList$analysisPeriod`:
+
+:   `{r} paste(format(reportingPeriodFrom, format = "%x"), format(as_date(min(data$metadata$system$date, as_datetime(reportingPeriodTo))), format = "%x"), sep = " - ")`
+
+`{r} if(nrow(data$metadata$countries) > 1){translations$headerList$countries}else{translations$headerList$country}`:
+
+:   `{r} paste0(data$metadata$countries |> arrange(displayName) |> pull(displayName), collapse = ", ")`
+
+`{r} translations$headerList$birthweightFilter`:
+
+:   `{r} if(birthWeightFrom == 0L && birthWeightTo == 2147483647L) translations$headerList$allBirthweights else if(birthWeightFrom == 0) paste0(c("≤ ", format(birthWeightTo), " g"), collapse = "") else if(birthWeightTo == 2147483647L) paste0(c("≥ ", format(birthWeightFrom), " g"), collapse = "") else paste0(c(format(birthWeightFrom), " g - ", format(birthWeightTo), " g"), collapse = "")`
+
+`{r} translations$headerList$gestationalAgeFilter`:
+
+:   `{r} if(gestationWeeksFrom == 0L && gestationWeeksTo == 2147483647L) translations$headerList$allGestationalAges else if(gestationWeeksFrom == 0) paste0(c("≤ ", format(gestationWeeksTo), " w"), collapse = "") else if(gestationWeeksTo == 2147483647L) paste0(c("≥ ", format(gestationWeeksFrom), " w"), collapse = "") else paste0(c(format(gestationWeeksFrom), " w - ", format(gestationWeeksTo), " w"), collapse = "")`
+
+```{r Countries hint}
+#| echo: false
+#| output: asis
+
+if(nrow(data$metadata$countries) > 1){
+  cat(sep = "\n", c(
+    "::: {.callout-note}",
+    paste0("## ", translations$headerList$multiCountryHintHeader),
+    "",
+    translations$headerList$multiCountryHint,
+    "",
+    translations$headerList$multiCountryHintGoal,
+    ":::"))
+} else {
+  cat(sep = "\n", c(
+    "::: {.callout-note}",
+    paste0("## ", translations$headerList$singleCountryHintHeader),
+    "",
+    translations$headerList$singleCountryHint,
+    "",
+    translations$headerList$singleCountryRepresentativenessHint,
+    ":::"))
+}
+```
+
+```{r Custom report hint}
+#| echo: false
+#| output: asis
+
+if(!testUnitFilter || !defaultPatientFilter){
+  cat(sep = "\n", c("::: {.callout-note}", paste0(
+    c(
+    translations$headerList$specialAnalysisHint,
+    if(!testUnitFilter){
+      paste0(translations$headerList$includesTestDepartments,
+      if(!defaultPatientFilter)
+        translations$headerList$and
+      else
+        ".", collapse = "")
+    },
+    if (!defaultPatientFilter)
+      translations$headerList$ignoresInclusionCriteria
+    ), collapse = " "),
+    ":::"))
+}
+```
+
+{{< pagebreak >}}
+
+# Introduction
+
+This document is a reference report on the NeoIPC Surveillance. It contains information relating to nosocomial infections, their causative infectious agents, and the associated risk and protective factors in high-risk neonates which was collected by partners from multiple neonatology departments participating in the NeoIPC Surveillance. The following numbers provide an overview of the current data set. If you are interested in the surveillance definitions, data collection methods and sheets, please refer to the [surveillance resources on the NeoIPC website](https://neoipc.org/surveillance/resources/).
+
+Number of neonatology departments contributing at least one patient record:
+
+:   `{r} format(length(unique(data$enrollments$department_key)), big.mark = locale_sep_mark)`
+
+Number of patient records:
+
+:   `{r} format(neoipcr:::get_risk_population(data)$n_patients, big.mark = locale_sep_mark)`
+
+Number of patient admissions:
+
+:   `{r} format(neoipcr:::get_risk_population(data)$n_enrollments, big.mark = locale_sep_mark)`
+
+Sum of patient days:
+
+:   `{r} format(neoipcr:::get_risk_time(data)$patient_days, big.mark = locale_sep_mark)`
+
+Average surveillance period per patient:
+
+:   `{r} format(neoipcr:::get_risk_time(data)$patient_days / neoipcr:::get_risk_population(data)$n_patients, digits = 2, nsmall = 1, scientific = FALSE)` days
+
+::: {.content-visible when-format="pdf"}
+\FloatBarrier
+:::
+
+# Patient Population
+
+As the process, although supported by various tools, relies on the collection, interpretation and monitoring of information by qualified professionals, NeoIPC surveillance is currently being targeted at the most common nosocomial infections in high-risk neonates, in order to make it sustainable in a continuous manner in as many settings as possible. This means that patients with a birth weight below 1 500 g and/or a gestational age below 32 weeks at the time of birth are included into the surveillance database if they are admitted to a participating neonatology department within the first 120 days of life. This results in the composition of the patient population that is shown in @fig-bw-ref and @fig-ga-ref.
+
+{{< include figures/_fig-bw-ref.qmd >}}
+
+{{< include figures/_fig-ga-ref.qmd >}}
+
+::: {.content-visible when-format="pdf"}
+\pagebreak
+:::
+
+# Nosocomial infections
+
+Nosocomial infections represent the primary endpoint of NeoIPC surveillance. In @tbl-incidence-density-rates, the incidence densities of sepsis/BSI, pneumonia and necrotising enterocolitis, as well as the combined endpoint 'severe infection', are displayed. Overall `{r} format(reference_data$incidence_density_rate_table |> dplyr::filter(inf == "si") |> dplyr::pull("n"), big.mark = locale_sep_mark)` severe infections were recorded in `{r} format(neoipcr:::get_risk_population(data)$n_patients, big.mark = locale_sep_mark)` infants resulting in an average number of `{r} format(((reference_data$incidence_density_rate_table |> dplyr::filter(inf == "si") |> dplyr::pull("n")) / (neoipcr:::get_risk_population(data)$n_patients)), digits = 2, nsmall = 1, scientific = FALSE)` infections per patient.
+
+Device-associated infections can be found in @tbl-device-associated-incidence-density-rates.
+
+{{< include tables/_tbl-incidence-density-rates.qmd >}}
+
+{{< include tables/_tbl-device-associated-incidence-density-rates.qmd >}}
+
+::: {.content-visible when-format="pdf"}
+\pagebreak
+:::
+
+## Infectious Agents
+
+Epidemiology of the infectious agents causing nosocomial infections in neonatology is complex and there is a lot of potential for bias. While low diagnostic sensitivity (low blood volume) and specificity (contamination) are a general problem in the neonatal population, the lack of availability of some or all means of microbiological diagnostics, or the lack of financial resources can have a strong effect on the detection rates in resource-constrained settings.
+
+<!-- When comparing data with the information on pathogens presented in @tbl-agent-per-infection-rate and information on drug resistance in @tbl-abr-infection-rate, please also have a look at the infectious agent detection rates presented in @tbl-infectious-agent-detection-rate and the antibiotic resistance test rates in @tbl-resistance-test-rate. -->
+
+In total, `{r} format(reference_data$infectious_agent_detection_rate_per_agent_table |> dplyr::filter(group == "Total") |> dplyr::pull("n"), big.mark = locale_sep_mark)` infectious agents were detected in the `{r} format(reference_data$infectious_agent_detection_rate_per_inf_type_table |> dplyr::filter(inf == "all") |> dplyr::pull("n"), big.mark = locale_sep_mark)` infections that were reported to have yielded at least one agent from either the primary infection and/or the secondary bloodstream infection resulting from it (@tbl-agent-per-infection-rate). These `{r} format(reference_data$infectious_agent_detection_rate_per_inf_type_table |> dplyr::filter(inf == "all") |> dplyr::pull("n"), big.mark = locale_sep_mark)` diagnostic-positive infections out of `{r} format(data |> neoipcr:::get_infection_counts() |> dplyr::pull("n"), big.mark = locale_sep_mark)` overall infections represent an Infectious Agent Detection Rate of `{r} format(((reference_data$infectious_agent_detection_rate_per_inf_type_table |> dplyr::filter(inf == "all") |> dplyr::pull("n")) / (data |> neoipcr:::get_infection_counts() |> dplyr::pull("n")) * 100), digits = 2, nsmall = 1, scientific = FALSE)` per 100 infections (@tbl-infectious-agent-detection-rate).
+
+{{< include tables/_tbl-agent-per-infection-rate.qmd >}}
+
+<!-- {{< include tables/_tbl-abr-infection-rate.qmd >}} -->
+
+{{< include tables/_tbl-infectious-agent-detection-rate.qmd >}}
+
+<!-- {{< include tables/_tbl-resistance-test-rate.qmd >}} -->
+
+::: {.content-visible when-format="pdf"}
+\pagebreak
+:::
+
+# Risk and Protective Factors
+
+Next to the inherent risk factors gestational age and birth weight there are also a number of expositional factors that influence the risk of an infant to acquire a multi-drug-resistant pathogen or to develop an infection. @tbl-risk-density-rates shows the presence of these factors in the NeoIPC Surveillance population.
+
+{{< include tables/_tbl-risk-density-rates.qmd >}}
+
+::: {.content-visible when-format="pdf"}
+\pagebreak
+:::
+
+## Surgery
+
+In this dataset, `{r} format(n_surgical_departments, big.mark = locale_sep_mark)` of the partner departments (`{r} format(round(n_surgical_departments / length(unique(data$enrollments$department_key)) * 100))`%) recorded a total of `{r} format(n_procedures, big.mark = locale_sep_mark)` surgical procedures performed on `{r} format(n_patients, big.mark = locale_sep_mark)` neonates, resulting in an average number of `{r} format(n_procedures_per_patient, digits = 2, nsmall = 1, scientific = FALSE)` operations per surgical patient during the surveillance period.
+
+Due to the low number of surgical site infections in this dataset (n = `{r} format(nrow(data$ssiData), digits = 2, nsmall = 1, scientific = FALSE)`) we are not currently calculating their infection rates, but @tbl-surgical-procedure-rates provides an overview of the categories of procedures performed on neonates.
+
+{{< include tables/_tbl-surgical-procedure-rates.qmd >}}

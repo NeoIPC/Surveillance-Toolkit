@@ -1,0 +1,33 @@
+---
+title: "Random Info on Antibiotics"
+format: pdf
+echo: true
+params:
+  reportingPeriodFrom: NULL
+  reportingPeriodTo: NULL
+  birthWeightFrom: NULL
+  birthWeightTo: NULL
+  gestationalAgeFrom: NULL
+  gestationalAgeTo: NULL
+  countryFilter: NULL
+  hospitalFilter: NULL
+  testUnitFilter: true
+  defaultPatientFilter: true
+  token: NULL
+---
+
+{{< include _setup2.qmd >}}
+
+```{r Invasive ventilation}
+
+base_table <- data$surveillanceEndData |>
+  inner_join(data$events, join_by(event_key)) |>
+  inner_join(data$patients, join_by(patient_key)) |>
+  select(inv_days, niv_days, patient_days, reason, occurredAt, sex, siblings, birth_weight, delivery_mode, total_gestation_days, event_key, enrollment_key, patient_key, department_key, hospital_key, country_key) |>
+  mutate(
+    inv_rate_pat = inv_days / patient_days * 100,
+    .after = inv_days)
+
+
+
+```

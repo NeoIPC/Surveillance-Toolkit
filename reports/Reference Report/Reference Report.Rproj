@@ -1,0 +1,25 @@
+Version: 1.0
+ProjectId: 3a50ff97-51e1-49d1-9d1a-164916df9447
+
+RestoreWorkspace: No
+SaveWorkspace: No
+AlwaysSaveHistory: No
+
+EnableCodeIndexing: Yes
+UseSpacesForTab: Yes
+NumSpacesForTab: 2
+Encoding: UTF-8
+
+RnwWeave: Sweave
+LaTeX: pdfLaTeX
+
+AutoAppendNewline: Yes
+StripTrailingWhitespace: Yes
+
+UseNativePipeOperator: Yes
+
+MarkdownCanonical: Yes
+
+SpellingDictionary: en_GB
+
+ProjectName: NeoIPC Reference Report

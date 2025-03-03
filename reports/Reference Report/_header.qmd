@@ -1,0 +1,19 @@
+Number of partner departments contributing at least one patient record:
+
+:   `{r} format(nrow(data$metadata$departments), big.mark =" ")`
+
+Number of patient records:
+
+:   `{r} format(nrow(data$patients), big.mark =" ")`
+
+Number of patient admissions:
+
+:   `{r} format(nrow(data$enrollments), big.mark =" ")`
+
+Sum of patient days:
+
+:   `{r} format(sum(data$surveillanceEndData$patient_days_value), big.mark =" ")`
+
+Average surveillance period per patient:
+
+:   `{r} format(sum(data$surveillanceEndData$patient_days_value) / nrow(data$patients), digits = 2, nsmall = 1, scientific = FALSE)` days
