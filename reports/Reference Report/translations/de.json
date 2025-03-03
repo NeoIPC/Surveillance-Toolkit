@@ -81,8 +81,7 @@
         "CsfPositive": "Liquor",
         "NumberOfInfections": "Anzahl der Infektionen",
         "SumOfPatientDays": "Summe der Patiententage",
-        "Median": "Median",
-        "Q3": "Q3"
+        "Median": "Median"
     },
     "vcSepsisTable": {
         "Header": "Gefäßkatheter-assoziierte Sepsis",
