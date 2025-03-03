@@ -91,7 +91,6 @@
         "NumberOfCvcAssociatedInfections": "Anzahl der ZVK-assoziierten Sepsisfälle",
         "PvcAssociatedIncidenceRate": "PVK-assoziierte Sepsisrate",
         "NumberOfPvcAssociatedInfections": "Anzahl der PVK-assoziierten Sepsisfälle",
-        "SumOfPvcDays": "Summe der PVK-Tage",
         "VcAssociation": "Gefäßkatheter-Assoziation"
     },
     "surgeryCategories": [
