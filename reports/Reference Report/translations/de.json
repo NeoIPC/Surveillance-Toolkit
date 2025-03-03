@@ -82,8 +82,7 @@
         "NumberOfInfections": "Anzahl der Infektionen",
         "SumOfPatientDays": "Summe der Patiententage",
         "Median": "Median",
-        "Q3": "Q3",
-        "Q1": "Q1"
+        "Q3": "Q3"
     },
     "vcSepsisTable": {
         "Header": "Gefäßkatheter-assoziierte Sepsis",
