@@ -1,1 +1,100 @@
-{"multipleBirthCategories":{"singleBirth":"Single birth","twins":"Twins","tripletsOrMore":"Triplet or more"},"headerList":{"createdAt":"Created","analysisPeriod":"Analysis period","country":"Country","countries":"Countries","birthweightFilter":"Birth weight filter","allBirthweights":"All birth weights","gestationalAgeFilter":"Gestational age filter","allGestationalAges":"All gestational ages","multiCountryHintHeader":"Multinational analysis","multiCountryHint":"This report aggregates data from neonatal units in several countries. This means that, while it reflects a broad spectrum of care structures, it is only suitable as a benchmark to a somewhat limited extent due to the sometimes very different healthcare systems and the resources available there.","multiCountryHintGoal":"The aim of NeoIPC Surveillance is therefore always to provide a national or regional report, provided that a sufficient number of units in the respective region participate in the system.","singleCountryHintHeader":"National report","singleCountryHint":"This report presents data from neonatal units in a single country. This means that, because of the relative homogeneity of the healthcare system, it is in principle a good benchmark. However, it should be noted that only a proportion of neonatal units in a country actually participate in NeoIPC Surveillance. Since participation is voluntary, these are typically hospitals that have a particular interest in infection prevention and are willing and able to provide the resources required for surveillance.","singleCountryRepresentativenessHint":"The information presented here can therefore not fully describe the situation in the individual countries.","specialAnalysisHint":"This is a special analysis that","includesTestDepartments":"includes test units","and":" and ","ignoresInclusionCriteria":"ignores the NeoIPC Surveillance inclusion criteria."},"pats":{"all":"Number of all patients","days":"Sum of all patient days"},"devs":{"VC":{"days":"Vascular-Catheter Utilisation Duration","days.abbr":"Vasc.-cath. days","pats":"Patients With Vascular Cathteters","pats.abbr":"Pat. w. vasc. cath.","rate":"Vascular-catheter utilisation rate","density_rate":"Vascular-catheter utilisation density rate","CVC":{"name":"CVC","rate":"CVC utilisation rate","density_rate":"CVC utilisation density rate","pats.no":"Number of patients with CVC","days.sum":"Sum of CVC Days"},"PVC":{"name":"PVC","rate":"PVC utilisation rate","density_rate":"PVC utilisation density rate","pats.no":"Number of patients with PVC","days.sum":"Sum of PVC Days"}},"VS":{"days":"Vent.-supp. days","pats":"Pat. w. vent. supp.","NIV":{"name":"NIV"},"INV":{"name":"INV"}}},"globalTable":{"PooledMean":"Pooled mean","Q1":"Q1","Median":"Median","Q3":"Q3"},"sepsisTable":{"Header":"Sepsis/Meningitis","PathogenSource":"Source of pathogen detection","Definition":"Definition","IncidenceRate":"Incidence density rate","NoOfInfections":"No. of infections","Q1":"Q1","Median":"Median","Q3":"Q3","Total":"Total","Pathogens":"Non-commensals","Commensals":"Commensals","Clinical":"Clinical sepsis","CsfPositive":"CSF","NumberOfInfections":"Number of infections","SumOfPatientDays":"Sum of patient days"},"vcSepsisTable":{"Header":"Vascular-Catheter-Associated Sepsis","VcAssociation":"Vascular-catheter association","vcAssociatedIncidenceRate":"Vascular-catheter-associated sepsis rate","CvcAssociated":"CVC-associated","PvcAssociated":"PVC-associated","CvcAssociatedIncidenceRate":"CVC-associated sepsis rate","NumberOfCvcAssociatedInfections":"Number of CVC-associated sepsis cases","SumOfCvcDays":"Sum of CVC-days","PvcAssociatedIncidenceRate":"PVC-associated sepsis rate","NumberOfPvcAssociatedInfections":"Number of PVC-associated sepsis cases","SumOfPvcDays":"Sum of PVC-days"}}
+{
+    "multipleBirthCategories": {
+        "singleBirth": "Single birth",
+        "twins": "Twins",
+        "tripletsOrMore": "Triplet or more"
+    },
+    "headerList": {
+        "createdAt": "Created",
+        "analysisPeriod": "Analysis period",
+        "country": "Country",
+        "countries": "Countries",
+        "birthweightFilter": "Birth weight filter",
+        "allBirthweights": "All birth weights",
+        "gestationalAgeFilter": "Gestational age filter",
+        "allGestationalAges": "All gestational ages",
+        "multiCountryHintHeader": "Multinational analysis",
+        "multiCountryHint": "This report aggregates data from neonatal units in several countries. This means that, while it reflects a broad spectrum of care structures, it is only suitable as a benchmark to a somewhat limited extent due to the sometimes very different healthcare systems and the resources available there.",
+        "multiCountryHintGoal": "The aim of NeoIPC Surveillance is therefore always to provide a national or regional report, provided that a sufficient number of units in the respective region participate in the system.",
+        "singleCountryHintHeader": "National report",
+        "singleCountryHint": "This report presents data from neonatal units in a single country. This means that, because of the relative homogeneity of the healthcare system, it is in principle a good benchmark. However, it should be noted that only a proportion of neonatal units in a country actually participate in NeoIPC Surveillance. Since participation is voluntary, these are typically hospitals that have a particular interest in infection prevention and are willing and able to provide the resources required for surveillance.",
+        "singleCountryRepresentativenessHint": "The information presented here can therefore not fully describe the situation in the individual countries.",
+        "specialAnalysisHint": "This is a special analysis that",
+        "includesTestDepartments": "includes test units",
+        "and": " and ",
+        "ignoresInclusionCriteria": "ignores the NeoIPC Surveillance inclusion criteria."
+    },
+    "pats": {
+        "all": "Number of all patients",
+        "days": "Sum of all patient days"
+    },
+    "devs": {
+        "VC": {
+            "days": "Vascular-Catheter Utilisation Duration",
+            "days.abbr": "Vasc.-cath. days",
+            "pats": "Patients With Vascular Cathteters",
+            "pats.abbr": "Pat. w. vasc. cath.",
+            "rate": "Vascular-catheter utilisation rate",
+            "density_rate": "Vascular-catheter utilisation density rate",
+            "CVC": {
+                "name": "CVC",
+                "rate": "CVC utilisation rate",
+                "density_rate": "CVC utilisation density rate",
+                "pats.no": "Number of patients with CVC",
+                "days.sum": "Sum of CVC Days"
+            },
+            "PVC": {
+                "name": "PVC",
+                "rate": "PVC utilisation rate",
+                "density_rate": "PVC utilisation density rate",
+                "pats.no": "Number of patients with PVC",
+                "days.sum": "Sum of PVC Days"
+            }
+        },
+        "VS": {
+            "days": "Vent.-supp. days",
+            "pats": "Pat. w. vent. supp.",
+            "NIV": {
+                "name": "NIV"
+            },
+            "INV": {
+                "name": "INV"
+            }
+        }
+    },
+    "globalTable": {
+        "PooledMean": "Pooled mean",
+        "Q1": "Q1",
+        "Median": "Median",
+        "Q3": "Q3"
+    },
+    "sepsisTable": {
+        "Header": "Sepsis/Meningitis",
+        "PathogenSource": "Source of pathogen detection",
+        "Definition": "Definition",
+        "IncidenceRate": "Incidence density rate",
+        "NoOfInfections": "No. of infections",
+        "Median": "Median",
+        "Q3": "Q3",
+        "Total": "Total",
+        "Pathogens": "Non-commensals",
+        "Commensals": "Commensals",
+        "Clinical": "Clinical sepsis",
+        "CsfPositive": "CSF",
+        "NumberOfInfections": "Number of infections",
+        "SumOfPatientDays": "Sum of patient days"
+    },
+    "vcSepsisTable": {
+        "Header": "Vascular-Catheter-Associated Sepsis",
+        "VcAssociation": "Vascular-catheter association",
+        "vcAssociatedIncidenceRate": "Vascular-catheter-associated sepsis rate",
+        "CvcAssociated": "CVC-associated",
+        "PvcAssociated": "PVC-associated",
+        "CvcAssociatedIncidenceRate": "CVC-associated sepsis rate",
+        "NumberOfCvcAssociatedInfections": "Number of CVC-associated sepsis cases",
+        "SumOfCvcDays": "Sum of CVC-days",
+        "PvcAssociatedIncidenceRate": "PVC-associated sepsis rate",
+        "NumberOfPvcAssociatedInfections": "Number of PVC-associated sepsis cases",
+        "SumOfPvcDays": "Sum of PVC-days"
+    }
+}
