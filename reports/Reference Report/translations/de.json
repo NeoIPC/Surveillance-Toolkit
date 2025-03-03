@@ -1,0 +1,129 @@
+{
+    "multipleBirthCategories": {
+        "singleBirth": "Einling",
+        "twins": "Zwillinge",
+        "tripletsOrMore": "Drillinge oder mehr"
+    },
+    "headerList": {
+        "createdAt": "Erstellt",
+        "analysisPeriod": "Auswertungszeitraum",
+        "country": "Land",
+        "countries": "Länder",
+        "birthweightFilter": "Geburtsgewichtsfilter",
+        "allBirthweights": "Alle Geburtsgewichte",
+        "gestationalAgeFilter": "Gestationsalterfilter",
+        "allGestationalAges": "Alle Gestationsalter",
+        "multiCountryHintHeader": "Länderübergreifende Auswertung",
+        "multiCountryHint": "Diese Auswertung aggregiert Daten von neonatologischen Abteilungen aus mehreren Ländern. Das bedeutet, dass sie zwar einerseits ein breites Spektrum an Versorgungsstrukturen abbildet, andererseits aber aufgrund der teilweise sehr unterschiedlichen Gesundheitssysteme und der dort verfügbaren Ressourcen nur bedingt als Benchmark geeignet ist.",
+        "multiCountryHintGoal": "Ziel der NeoIPC Surveillance ist es daher immer, eine nationale oder regionale Auswertung zur Verfügung zu stellen, sofern eine ausreichende Anzahl von Abteilungen aus der jeweiligen Region am System teilnimmt.",
+        "singleCountryHintHeader": "Nationale Auswertung",
+        "singleCountryHint": "Diese Auswertung umfasst die Daten von neonatologischen Abteilungen eines einzelnen Landes. Dies bedeutet, dass sie aufgrund des relativ homogenen Gesundheitssystems prinzipiell gut als Benchmark geeignet ist. Es muss jedoch darauf hingewiesen werden, dass praktisch immer nur ein Teil der neonatologischen Abteilungen eines Landes an der NeoIPC Surveillance teilnimmt. Da die Teilnahme freiwillig ist, handelt es sich in der Regel um Kliniken, die ein besonderes Interesse an der Infektionsprävention haben und die bereit und in der Lage sind, die für die Surveillance erforderlichen Ressourcen bereitzustellen.",
+        "singleCountryRepresentativenessHint": "Die hier dargestellten Informationen können daher die Situation in den einzelnen Ländern nicht vollständig beschreiben.",
+        "specialAnalysisHint": "Dies ist eine Sonderauswertung, die",
+        "includesTestDepartments": "Testabteilungen enthält",
+        "and": " und ",
+        "ignoresInclusionCriteria": "die Einschlusskriterien der NeoIPC Surveillance ignoriert."
+    },
+    "pats": {
+        "all": "Anzahl aller Patienten",
+        "days": "Summe aller Patiententage"
+    },
+    "devs": {
+        "VC": {
+            "days": "Gefäßkathetertage",
+            "days.abbr": "Gefäßkath.-Tage",
+            "pats": "Patienten mit Gefäßkathteter",
+            "pats.abbr": "Pat. m. Gefäßkath.",
+            "rate": "Gefäßkatheter-Anwendungsrate",
+            "density_rate": "Gefäßkatheter-Anwendungsdichte",
+            "CVC": {
+                "name": "ZVK",
+                "rate": "ZVK-Anwendungsrate",
+                "density_rate": "ZVK-Anwendungsdichte",
+                "pats.no": "Anzahl der Patienten mit ZVK",
+                "days.sum": "Summe der ZVK-Tage"
+            },
+            "PVC": {
+                "name": "PVK",
+                "rate": "PVK-Anwendungsrate",
+                "density_rate": "PVK-Anwendungsdichte",
+                "pats.no": "Anzahl der Patienten mit PVK",
+                "days.sum": "Summe der PVK-Tage"
+            }
+        },
+        "VS": {
+            "days": "Atemunterst.-Tage",
+            "pats": "Pat. m. Atemunterst.",
+            "NIV": {
+                "name": "NIV"
+            },
+            "INV": {
+                "name": "INV"
+            }
+        }
+    },
+    "globalTable": {
+        "PooledMean": "Gep. arithm. Mittel",
+        "Q1": "Q1",
+        "Median": "Median",
+        "Q3": "Q3"
+    },
+    "sepsisTable": {
+        "Header": "Sepsis/Meningitis",
+        "PathogenSource": "Erregernachweisquelle",
+        "Definition": "Definition",
+        "IncidenceRate": "Inzidenzdichte",
+        "NoOfInfections": "Anz. d. Inf.",
+        "Total": "Gesamt",
+        "Pathogens": "Nicht-Kommensale",
+        "Commensals": "Kommensale",
+        "Clinical": "Klinische Sepsis",
+        "CsfPositive": "Liquor",
+        "NumberOfInfections": "Anzahl der Infektionen",
+        "SumOfPatientDays": "Summe der Patiententage"
+    },
+    "vcSepsisTable": {
+        "Header": "Gefäßkatheter-assoziierte Sepsis",
+        "vcAssociatedIncidenceRate": "Gefäßkatheter-assoziierte Sepsisrate",
+        "CvcAssociated": "ZVK-assoziiert",
+        "PvcAssociated": "PVK-assoziiert",
+        "CvcAssociatedIncidenceRate": "ZVK-assoziierte Sepsisrate",
+        "NumberOfCvcAssociatedInfections": "Anzahl der ZVK-assoziierten Sepsisfälle",
+        "PvcAssociatedIncidenceRate": "PVK-assoziierte Sepsisrate",
+        "NumberOfPvcAssociatedInfections": "Anzahl der PVK-assoziierten Sepsisfälle",
+        "VcAssociation": "Gefäßkatheter-Assoziation"
+    },
+    "surgeryCategories": [
+        {
+            "cat": "brain_ventricle",
+            "translation": "Operationen an Hirnventriken"
+        },
+        {
+            "cat": "other_brain",
+            "translation": "Andere Operationen am Gehirn"
+        },
+        {
+            "cat": "bowel",
+            "translation": "Darmoperationen"
+        },
+        {
+            "cat": "herniorrhaphy",
+            "translation": "Herniorrhaphien"
+        },
+        {
+            "cat": "cvc",
+            "translation": "ZVK-Anlage"
+        },
+        {
+            "cat": "multiple",
+            "translation": "Kombinationseingriffe"
+        },
+        {
+            "cat": "other",
+            "translation": "Andere"
+        },
+        {
+            "translation": "Ungültiger ICHE-Code"
+        }
+    ]
+}
