@@ -90,7 +90,6 @@
         "PvcAssociated": "PVC-associated",
         "CvcAssociatedIncidenceRate": "CVC-associated sepsis rate",
         "NumberOfCvcAssociatedInfections": "Number of CVC-associated sepsis cases",
-        "SumOfCvcDays": "Sum of CVC-days",
         "PvcAssociatedIncidenceRate": "PVC-associated sepsis rate",
         "NumberOfPvcAssociatedInfections": "Number of PVC-associated sepsis cases",
         "SumOfPvcDays": "Sum of PVC-days"
