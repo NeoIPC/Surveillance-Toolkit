@@ -89,7 +89,6 @@
         "PvcAssociated": "PVK-assoziiert",
         "CvcAssociatedIncidenceRate": "ZVK-assoziierte Sepsisrate",
         "NumberOfCvcAssociatedInfections": "Anzahl der ZVK-assoziierten Sepsisfälle",
-        "SumOfCvcDays": "Summe der ZVK-Tage",
         "PvcAssociatedIncidenceRate": "PVK-assoziierte Sepsisrate",
         "NumberOfPvcAssociatedInfections": "Anzahl der PVK-assoziierten Sepsisfälle",
         "SumOfPvcDays": "Summe der PVK-Tage",
