@@ -13,13 +13,22 @@ problems <- problems |>
       inner_join(
         data$ssis |>
           select(enrollment, NEOIPC_SSI_INFECTION_TYPE, event, occurredAt) |>
-          rename(EVENT_ID = event, SSI_DATE = occurredAt),
+          rename(EVENT_ID = event, SSI_DATE = occurredAt) |>
+          inner_join(
+            enrollments |>
+              select(key, patient),
+            join_by(enrollment == key)) |>
+          left_join(
+            data$surgeries |>
+              select(enrollment, occurredAt, NEOIPC_SURGERY_IMPLANT) |>
+              rename(SURGERY_DATE = occurredAt) |>
+              inner_join(
+                enrollments |>
+                  select(key, patient),
+                join_by(enrollment == key)) |>
+              select(!enrollment),
+            join_by(patient)),
         join_by(enrollment_key == enrollment)) |>
-      left_join(
-        data$surgeries |>
-          select(enrollment, occurredAt, NEOIPC_SURGERY_IMPLANT) |>
-          rename(SURGERY_DATE = occurredAt),
-        join_by(enrollment_key == enrollment, SSI_DATE > SURGERY_DATE)) |>
       mutate(
         SSI_OFFSET = as.integer(SSI_DATE - SURGERY_DATE),
         EVENT_TYPE = event_types("SSI"),
@@ -45,5 +54,4 @@ problems <- problems |>
         NEOIPC_SSI_INFECTION_TYPE
         ) |>
       distinct())
-
 ```
