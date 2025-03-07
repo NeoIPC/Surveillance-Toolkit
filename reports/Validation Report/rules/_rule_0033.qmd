@@ -1,8 +1,8 @@
-```{r Validation rule 33: "The day of life of the pneumonia event is less than 4"}
+```{r Validation rule 33: "The pneumonia occurred within the first three days of life"}
 problems <- problems |>
   bind_rows(
     patients |>
-      select(SITE_CODE, DEPARTMENT_NAME, DEPARTMENT_OU, NEOIPC_PATIENT_ID, PATIENT_TEI, key) |>
+      select(SITE_CODE, DEPARTMENT_CODE, DEPARTMENT_NAME, DEPARTMENT_OU, NEOIPC_PATIENT_ID, PATIENT_TEI, key) |>
       rename(patient_key = key) |>
       inner_join(
         enrollments |>
@@ -20,6 +20,7 @@ problems <- problems |>
       filter(NEOIPC_HAP_DOL < 4) |>
       select(
         SITE_CODE,
+        DEPARTMENT_CODE,
         DEPARTMENT_NAME,
         DEPARTMENT_OU,
         NEOIPC_PATIENT_ID,
@@ -31,5 +32,16 @@ problems <- problems |>
         EVENT_DATE,
         PROBLEM_ID,
         NEOIPC_HAP_DOL
-        ))
+        ) |>
+      anti_join(
+        exceptions,
+        join_by(
+          PROBLEM_ID,
+          SITE_CODE,
+          DEPARTMENT_CODE,
+          NEOIPC_PATIENT_ID,
+          ENROLMENT_DATE,
+          EVENT_TYPE,
+          EVENT_DATE)) |>
+      select(!DEPARTMENT_CODE))
 ```

@@ -41,6 +41,7 @@ problems <- tibble(
 
 ```{r Data Import, message=FALSE, warning=FALSE}
 data <- if(rlang::is_na(token)) import_dhis2(locale = language) else import_dhis2(connection_options = dhis2_connection_options(token = token), locale = locale)
+exceptions <- read_csv("../../../validation-exceptions.csv", col_types = "icccDcD")
 ```
 
 ```{r Filtering}
@@ -75,6 +76,7 @@ patients <- hospitals |>
       mutate(
         department = key,
         hospital = hospital,
+        DEPARTMENT_CODE = code,
         DEPARTMENT_NAME = displayShortName,
         DEPARTMENT_OU = id,
         .keep = "none"), join_by(hospital)) |>
