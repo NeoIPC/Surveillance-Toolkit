@@ -27,22 +27,22 @@ problem_info  <- tibble::tribble(
   24L, 24L, 14L,
   25L, 25L, 15L,
   26L, 26L, 16L,
-  27L, 27L, 17L,
-  28L, 28L, 18L,
+  27L, 27L, c(17L,18L),
+  28L, 28L, c(17L,18L),
   29L, 29L, c(3L,19L),
   30L, 30L, c(3L,20L),
-  31L, 31L, 17L,
-  32L, 32L, 18L,
+  31L, 31L, c(17L,18L),
+  32L, 32L, c(17L,18L),
   33L, 33L, c(3L,19L),
   34L, 34L, c(3L,20L),
-  35L, 35L, 17L,
-  36L, 36L, 18L,
+  35L, 35L, c(17L,18L),
+  36L, 36L, c(17L,18L),
   37L, 37L, c(3L,19L),
   38L, 38L, c(3L,20L),
   39L, 39L, c(17L,18L),
-  40L, 40L, 18L,
-  41L, 41L, 17L,
-  42L, 42L, 18L
+  40L, 40L, c(17L,18L),
+  41L, 41L, c(17L,18L),
+  42L, 42L, c(17L,18L)
 )
 problem_detail_info <- tibble::tribble(
   ~id, ~sortOrder, ~usedSolutions,
@@ -50,22 +50,22 @@ problem_detail_info <- tibble::tribble(
   2L, 2L, c(1L,4L),                                # The Patient Record Has a Completed Surveillance End Form but the Enrolment Is Still Active
   3L, 3L, c(1L,4L,5L,6L,7L,8L,9L,10L,11L,15L),     # The Admission Date in the Admission Form Differs From the Admission Date in the Enrolment
   4L, 4L, c(1L,4L,5L,6L,7L,8L,9L,10L,11L,15L),     # The Date of the End of the Surveillance Is Earlier Than the Date of Admission in the Admission Form
-  5L, 5L, c(8L,10L,15L),                           # The Patient Record’s Admission Form Is Not Completed
+  5L, 5L, c(5L,8L,9L,10L,15L),                     # The Patient Record’s Admission Form Is Not Completed
   6L, 6L, c(1L,4L,5L,8L,9L,10L,15L),               # The Patient Record Has a Completed Enrolment but the Surveillance End Form Is Not Completed
-  7L, 7L, 8L,                                      # The Patient Record Contains a Completed Patient Enrolment or Surveillance End Form, but an Event Form Is Not Completed
+  7L, 7L, c(8L,10L,15L),                           # The Patient Record Contains a Completed Patient Enrolment or Surveillance End Form, but an Event Form Is Not Completed
   8L, 8L, c(1L,4L,5L,6L,7L,8L,9L,10L,11L,12L,15L), # The Patient Record Contains an Event Form With a Date That Is Not Within the Time Frame of a Documented Admission
   9L,9L, c(1L,4L,5L,6L,7L,8L,9L,10L,11L,13L,15L),  # The Patient Record Contains an Enrolment Whose Time Interval Overlaps With That of Another Enrolment
   10L, 10L, c(1L,4L,5L,8L,9L,10L,11L,15L),         # The Number of Patient Days Does Not Match the Calculated Value
   11L, 11L, c(1L,4L,5L,7L,8L,9L,10L,12L,14L,15L),  # The Surgical Site Infection Did Not Occur During the Follow-Up Period of a Surgical Procedure
   12L,12L, NULL,                                   # The Manually Entered Pathogen Cannot Be Assigned
-  13L,13L, c(4L,5L,9L,10L,15L),                    # The Sum of All Antibiotic Substance Days Is Less Than the Total Number of Antibiotic Days
+  13L,13L, c(1L,4L,5L,9L,10L,15L),                 # The Sum of All Antibiotic Substance Days Is Less Than the Total Number of Antibiotic Days
   14L, 14L, c(1L,4L,5L,9L,10L,15L),                # The Surgical Procedure Has an Invalid ICHE Code
   15L, 15L, c(1L,2L,4L,5L,8L,9L,10L,14L,15L),      # The Patient Record Has a Completed Enrolment but no Surveillance End Form
   16L, 16L, NULL,                                  # The Patient Record Has a Completed Enrolment but no Admission Form
-  17L, 17L, c(4L,8L,11L,18L),                      # The Day of Life Stored in the Form Does Not Match the Calculated Value
-  18L, 18L, c(4L,8L,11L),                          # The Day of Occurrence After Admission Stored in the Form Does Not Match the Calculated Value
-  19L, 19L, c(6L,7L,8L,10L,12L),                   # The Infection Occurred Within the First Three Days of Life
-  20L, 20L, c(6L,7L,8L,10L,12L)                    # The Infection Occurred Within the First Two Days of Hospitalisation of a Referred or (Re-)Admitted Patient
+  17L, 17L, c(1L,4L,5L,8L,9L,10L,11L,15L,18L),     # The Day of Life Stored in the Form Does Not Match the Calculated Value
+  18L, 18L, c(1L,4L,5L,8L,9L,10L,11L,15L),         # The Day of Occurrence After Admission Stored in the Form Does Not Match the Calculated Value
+  19L, 19L, c(1L,5L,6L,7L,8L,9L,10L,12L,15L),      # The Infection Occurred Within the First Three Days of Life
+  20L, 20L, c(1L,5L,6L,7L,8L,9L,10L,12L,15L)       # The Infection Occurred Within the First Two Days of Hospitalisation of a Referred or (Re-)Admitted Patient
 )
 solution_info <-tibble::tribble(
   ~id, ~sortOrder,
