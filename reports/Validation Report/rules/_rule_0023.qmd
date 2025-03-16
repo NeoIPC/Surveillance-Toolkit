@@ -6,7 +6,7 @@ valid_iche_codes <- read_csv("ICHE-Health-Intervention-Codes.csv", col_names = F
 problems <- problems |>
   bind_rows(
     patients |>
-      select(SITE_CODE, DEPARTMENT_NAME, DEPARTMENT_OU, NEOIPC_PATIENT_ID, PATIENT_TEI, key) |>
+      select(SITE_CODE, DEPARTMENT_CODE, DEPARTMENT_NAME, DEPARTMENT_OU, NEOIPC_PATIENT_ID, PATIENT_TEI, key) |>
       rename(patient_key = key) |>
       inner_join(
         enrollments |>
@@ -37,6 +37,7 @@ problems <- problems |>
       filter(!PROCEDURE_CODE_VALID) |>
       select(
         SITE_CODE,
+        DEPARTMENT_CODE,
         DEPARTMENT_NAME,
         DEPARTMENT_OU,
         NEOIPC_PATIENT_ID,
@@ -50,6 +51,16 @@ problems <- problems |>
         PROCEDURE_CODE,
         PROCEDURE_DESCRIPTION
         ) |>
-      distinct())
-
+      distinct() |>
+      anti_join(
+        exceptions,
+        join_by(
+          PROBLEM_ID,
+          SITE_CODE,
+          DEPARTMENT_CODE,
+          NEOIPC_PATIENT_ID,
+          ENROLMENT_DATE,
+          EVENT_TYPE,
+          EVENT_DATE)) |>
+      select(!DEPARTMENT_CODE))
 ```

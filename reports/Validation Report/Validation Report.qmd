@@ -54,7 +54,7 @@ cat(
 
 {{< pagebreak >}}
 
-```{r Write problem details and solutions}
+```{r Write problem details}
 #| output: asis
 # Problem details intro
 cat(

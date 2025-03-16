@@ -3,7 +3,7 @@
 problems <- problems |>
   bind_rows(
     patients |>
-      select(SITE_CODE, DEPARTMENT_NAME, DEPARTMENT_OU, NEOIPC_PATIENT_ID, PATIENT_TEI, key) |>
+      select(SITE_CODE, DEPARTMENT_CODE, DEPARTMENT_NAME, DEPARTMENT_OU, NEOIPC_PATIENT_ID, PATIENT_TEI, key) |>
       rename(patient_key = key) |>
       inner_join(
         enrollments |>
@@ -14,6 +14,7 @@ problems <- problems |>
         PROBLEM_ID = 26L) |>
       select(
         SITE_CODE,
+        DEPARTMENT_CODE,
         DEPARTMENT_NAME,
         DEPARTMENT_OU,
         NEOIPC_PATIENT_ID,
@@ -21,6 +22,14 @@ problems <- problems |>
         ENROLMENT_ID,
         ENROLMENT_DATE,
         PROBLEM_ID
-        ))
-
+        ) |>
+      anti_join(
+        exceptions,
+        join_by(
+          PROBLEM_ID,
+          SITE_CODE,
+          DEPARTMENT_CODE,
+          NEOIPC_PATIENT_ID,
+          ENROLMENT_DATE)) |>
+      select(!DEPARTMENT_CODE))
 ```
