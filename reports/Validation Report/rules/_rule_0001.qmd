@@ -6,11 +6,19 @@ problems <- problems |>
       anti_join(enrollments, join_by(key == patient)) |>
       select(
         SITE_CODE,
+        DEPARTMENT_CODE,
         DEPARTMENT_NAME,
         DEPARTMENT_OU,
         NEOIPC_PATIENT_ID,
         PATIENT_TEI
         ) |>
-      bind_cols(PROBLEM_ID = c(1L)))
-
+      bind_cols(PROBLEM_ID = c(1L)) |>
+      anti_join(
+        exceptions,
+        join_by(
+          PROBLEM_ID,
+          SITE_CODE,
+          DEPARTMENT_CODE,
+          NEOIPC_PATIENT_ID)) |>
+      select(!DEPARTMENT_CODE))
 ```

@@ -7,6 +7,7 @@ problems <- problems |>
       filter(enrollment_status == "ACTIVE" & surveillanceEnd_status == "COMPLETED") |>
       select(
         SITE_CODE,
+        DEPARTMENT_CODE,
         DEPARTMENT_NAME,
         DEPARTMENT_OU,
         NEOIPC_PATIENT_ID,
@@ -14,5 +15,14 @@ problems <- problems |>
         ENROLMENT_ID,
         ENROLMENT_DATE
         ) |>
-      bind_cols(PROBLEM_ID = c(2L)))
+      bind_cols(PROBLEM_ID = c(2L)) |>
+      anti_join(
+        exceptions,
+        join_by(
+          PROBLEM_ID,
+          SITE_CODE,
+          DEPARTMENT_CODE,
+          NEOIPC_PATIENT_ID,
+          ENROLMENT_DATE)) |>
+      select(!DEPARTMENT_CODE))
 ```

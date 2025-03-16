@@ -14,6 +14,7 @@ problems <- problems |>
         .keep = "unused") |>
       select(
         SITE_CODE,
+        DEPARTMENT_CODE,
         DEPARTMENT_NAME,
         DEPARTMENT_OU,
         NEOIPC_PATIENT_ID,
@@ -25,6 +26,16 @@ problems <- problems |>
         EVENT_DATE,
         PROBLEM_ID,
         ADMISSION_STATUS
-        ))
-
+        ) |>
+      anti_join(
+        exceptions,
+        join_by(
+          PROBLEM_ID,
+          SITE_CODE,
+          DEPARTMENT_CODE,
+          NEOIPC_PATIENT_ID,
+          ENROLMENT_DATE,
+          EVENT_TYPE,
+          EVENT_DATE)) |>
+      select(!DEPARTMENT_CODE))
 ```

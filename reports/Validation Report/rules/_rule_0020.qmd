@@ -3,7 +3,7 @@
 problems <- problems |>
   bind_rows(
     patients |>
-      select(SITE_CODE, DEPARTMENT_NAME, DEPARTMENT_OU, NEOIPC_PATIENT_ID, PATIENT_TEI, key) |>
+      select(SITE_CODE, DEPARTMENT_CODE, DEPARTMENT_NAME, DEPARTMENT_OU, NEOIPC_PATIENT_ID, PATIENT_TEI, key) |>
       rename(patient = key) |>
       inner_join(
         enrollments |>
@@ -13,7 +13,7 @@ problems <- problems |>
       inner_join(
         data$causative_pathogens |>
           filter(PATHOGEN == 0) |>
-          select(key, eventType, index, secondary_bsi, PATHOGEN_NAME) |>
+          select(any_of(c("key", "eventType", "index", "secondary_bsi", "PATHOGEN_NAME"))) |>
           rename(PATHOGEN_INDEX = index, IS_SECONDARY_BSI = secondary_bsi) |>
           inner_join(
             data$metadata$eventTypes |>
@@ -63,19 +63,33 @@ problems <- problems |>
             .keep = "unused"),
         join_by(enrollment)) |>
       select(
-        SITE_CODE,
-        DEPARTMENT_NAME,
-        DEPARTMENT_OU,
-        NEOIPC_PATIENT_ID,
-        PATIENT_TEI,
-        ENROLMENT_ID,
-        ENROLMENT_DATE,
-        EVENT_ID,
-        EVENT_TYPE,
-        EVENT_DATE,
-        PROBLEM_ID,
-        IS_SECONDARY_BSI,
-        PATHOGEN_INDEX,
-        PATHOGEN_NAME
-        ))
+        any_of(
+          c(
+            "SITE_CODE",
+            "DEPARTMENT_CODE",
+            "DEPARTMENT_NAME",
+            "DEPARTMENT_OU",
+            "NEOIPC_PATIENT_ID",
+            "PATIENT_TEI",
+            "ENROLMENT_ID",
+            "ENROLMENT_DATE",
+            "EVENT_ID",
+            "EVENT_TYPE",
+            "EVENT_DATE",
+            "PROBLEM_ID",
+            "IS_SECONDARY_BSI",
+            "PATHOGEN_INDEX",
+            "PATHOGEN_NAME"
+        ))) |>
+      anti_join(
+        exceptions,
+        join_by(
+          PROBLEM_ID,
+          SITE_CODE,
+          DEPARTMENT_CODE,
+          NEOIPC_PATIENT_ID,
+          ENROLMENT_DATE,
+          EVENT_TYPE,
+          EVENT_DATE)) |>
+      select(!DEPARTMENT_CODE))
 ```
