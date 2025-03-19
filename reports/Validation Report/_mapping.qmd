@@ -50,7 +50,7 @@ problem_detail_info <- tibble::tribble(
   2L, 2L, c(1L,4L),                                # The Patient Record Has a Completed Surveillance End Form but the Enrolment Is Still Active
   3L, 3L, c(1L,4L,5L,6L,7L,8L,9L,10L,11L,15L),     # The Admission Date in the Admission Form Differs From the Admission Date in the Enrolment
   4L, 4L, c(1L,4L,5L,6L,7L,8L,9L,10L,11L,15L),     # The Date of the End of the Surveillance Is Earlier Than the Date of Admission in the Admission Form
-  5L, 5L, c(5L,8L,9L,10L,15L),                     # The Patient Record’s Admission Form Is Not Completed
+  5L, 5L, c(1L,4L,5L,8L,9L,10L,15L),                     # The Patient Record’s Admission Form Is Not Completed
   6L, 6L, c(1L,4L,5L,8L,9L,10L,15L),               # The Patient Record Has a Completed Enrolment but the Surveillance End Form Is Not Completed
   7L, 7L, c(8L,10L,15L),                           # The Patient Record Contains a Completed Patient Enrolment or Surveillance End Form, but an Event Form Is Not Completed
   8L, 8L, c(1L,4L,5L,6L,7L,8L,9L,10L,11L,12L,15L), # The Patient Record Contains an Event Form With a Date That Is Not Within the Time Frame of a Documented Admission
