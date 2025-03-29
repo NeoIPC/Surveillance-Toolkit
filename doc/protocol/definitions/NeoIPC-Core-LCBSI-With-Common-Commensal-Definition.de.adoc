@@ -1,0 +1,81 @@
+.Zweifach im Labor bestätigte Blutstrominfektion mit gewöhnlichen Kommensalen
+[%unbreakable]
+****
+. **Derselbe gewöhnliche Kommensale wird in mindestens ZWEI Blut- und/oder Liquorkulturproben nachgewiesen, die bei verschiedenen Gelegenheiten entnommen wurden**
++
+**UND**
+. **Der Patient weist mindestens ZWEI der folgenden klinischen oder Labormerkmale einer generalisierten Infektion auf:**
+* Temperaturinstabilität, Fieber (> 38 °C) oder Hypothermie (< 36,5 °C)
+* Neue/häufigere Bradykardie-Episoden (<80/min) oder ungeklärte Tachykardie (>200/min)
+* Beeinträchtigte periphere Durchblutung (Rekapillarisierungszeit von > 3s oder marmorierte Haut oder Kern-/periphere Temperaturdifferenz > 2 °C)
+* Neue/häufigere Episoden von Apnoen (>20s) oder Anstieg des Sauerstoffbedarfs oder der Beatmungsunterstützung
+* Intoleranz gegenüber enteraler Ernährung, abdominale Distension oder Ileus
+* Irritabilität, Lethargie, Apathie oder instabiler Zustand
+* Ungeklärte metabolische Azidose (Basenüberschuss < -10 mmol/L; <-10 mEq/L)
+* Neue und ungeklärte Hyperglykämie (> 140 mg/dl; > 7,8 mmol/L) oder Hypoglykämie (< 40 mg/dl; <2,2 mmol/L)
+* Mindestens einer der folgenden Laborbefunde:
+** Thrombozytenzahl von < 100 × 10^9^/L (<100 × 10^3^/μL)
+** Leukozyten < 4 × 10^9^/L oder > 20 × 10^9^/L (< 4 × 10^3^/μL oder > 20 × 10^3^/μL)
+** CRP > 10 mg/L (> 1 mg/dL)
+** Procalcitonin ≥ 2μg/L (2 ng/mL; 200 ng/dL)
+** I/T-Ratio > 0,2 (Verhältnis von unreifen Granulozyten zu den gesamten Granulozyten)
+** Erhöhte Werte von Interleukin (IL) 6 oder 8
+****
+
+.Im Labor bestätigte Blutstrominfektion mit gewöhnlichen Kommensalen und Laborbefund
+[%unbreakable]
+****
+. **Ein gewöhnlicher Kommensale wird aus EINER Blutkultur und/oder Liquorkulturprobe gewonnen**
++
+**UND**
+. **Mindestens einer der folgenden Laborbefunde:**
+* Leukozyten < 4 × 10^9^/L oder > 20 × 10^9^/L (< 4 × 10^3^/μL oder > 20 × 10^3^/μL)
+* CRP > 10 mg/L (> 1 mg/dL)
+* Procalcitonin ≥ 2μg/L (2 ng/mL; 200 ng/dL)
+* I/T-Ratio > 0,2 (Verhältnis von unreifen Granulozyten zu den gesamten Granulozyten)
+* Erhöhte Werte von Interleukin (IL) 6 oder 8
++
+**UND**
+. **Der Patient weist mindestens ZWEI der folgenden klinischen oder Labormerkmale einer generalisierten Infektion auf:**
+* Temperaturinstabilität, Fieber (> 38 °C) oder Unterkühlung (< 36,5 °C)
+* Neue/häufigere Bradykardie-Episoden (<80/min) oder ungeklärte Tachykardie (>200/min)
+* Beeinträchtigte periphere Perfusion (Rekapillarisierungszeit von > 3s oder marmorierte Haut oder Temperaturdifferenz zwischen Kern und Peripherie > 2 °C)
+* Neue/häufigere Episoden von Apnoe (>20s) oder Anstieg des Sauerstoffbedarfs oder der Beatmungsunterstützung 
+* Intoleranz gegenüber enteraler Ernährung, abdominale Distension oder Ileus
+* Irritabilität, Lethargie, Apathie oder instabiler Zustand
+* Ungeklärte metabolische Azidose (Basenüberschuss < -10 mmol/L; <-10 mEq/L)
+* Neue und ungeklärte Hyperglykämie (> 140 mg/dl; > 7,8 mmol/L) oder Hypoglykämie (< 40 mg/dl; <2,2 mmol/L)
+* Thrombozytenzahl von < 100 × 10^9^/L (<100 × 10^3^/μL)
+****
+
+.Im Labor bestätigte Blutstrominfektion mit gewöhnlichen Kommensalen und fünftägiger Behandlung
+[%unbreakable]
+****
+. **Ein gewöhnlicher Kommensale wird aus EINER Blutkultur und/oder Liquorkulturprobe gewonnen**
++
+**UND**
+. **Eine Behandlung mit intravenösen Antibiotika über fünf oder mehr Tage wurde eingeleitet$$*$$** 
++
+**UND**
+. **Der Patient weist mindestens ZWEI der folgenden klinischen oder Labormerkmale einer generalisierten Infektion auf:**
+* Temperaturinstabilität, Fieber (> 38 °C) oder Unterkühlung (< 36,5 °C)
+* Neue/häufigere Bradykardie-Episoden (<80/min) oder ungeklärte Tachykardie (>200/min)
+* Beeinträchtigte periphere Perfusion (Rekapillarisierungszeit von > 3s oder marmorierte Haut oder Temperaturdifferenz zwischen Kern und Peripherie > 2 °C)
+* Neue/häufigere Episoden von Apnoe (>20s) oder Anstieg des Sauerstoffbedarfs oder der Beatmungsunterstützung
+* Intoleranz gegenüber enteraler Ernährung, abdominale Distension oder Ileus
+* Irritabilität, Lethargie, Apathie oder instabiler Zustand
+* Ungeklärte metabolische Azidose (Basenüberschuss < -10 mmol/L; <-10 mEq/L)
+* Neue und ungeklärte Hyperglykämie (> 140 mg/dl; > 7,8 mmol/L) oder Hypoglykämie (< 40 mg/dl; <2,2 mmol/L)
+* Mindestens einer der folgenden Laborbefunde:
+** Thrombozytenzahl von < 100 × 10^9^/L (<100 × 10^3^/μL)
+** Leukozyten < 4 × 10^9^/L oder > 20 × 10^9^/L (< 4 × 10^3^/μL oder > 20 × 10^3^/μL)
+** CRP > 10 mg/L (> 1 mg/dL)
+** Procalcitonin ≥ 2μg/L (2 ng/mL; 200 ng/dL)
+** I/T-Ratio > 0,2 (Verhältnis von unreifen Granulozyten zu den gesamten Granulozyten)
+** Erhöhte Werte von Interleukin (IL) 6 oder 8
+****
+
+*Gezählt werden der Tag der ersten Dosis und der Tag der letzten Dosis.
+Tage, an denen zwischen der ersten und der letzten Dosis keine Dosis verabreicht wurde (z. B. ausgelassene Dosen aufgrund hoher Arzneimittelspiegel in der therapeutischen Arzneimittelüberwachung), werden gezählt, als ob eine Dosis verabreicht worden wäre.
+Tage nach der letzten Dosis werden nicht gezählt, unabhängig vom gemessenen oder angenommenen Medikamentenspiegel des Patienten.
+Wenn das Kind vor dem Ende der fünftägigen Behandlung mit intravenösen Antibiotika verstirbt, entlassen oder verlegt wird, ist diese Bedingung erfüllt, wenn die Behandlung für fünf oder mehr Tage geplant war.

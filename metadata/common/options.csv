@@ -1,0 +1,41 @@
+optionSet_code,code,name,description,formName,sortOrder
+NEOIPC_ASA_SCORE,1,ASA I - A normal healthy patient,,,1
+NEOIPC_ASA_SCORE,2,ASA II - A patient with mild systemic disease,,,2
+NEOIPC_ASA_SCORE,3,ASA III - A patient with severe systemic disease,,,3
+NEOIPC_ASA_SCORE,4,ASA IV - A patient with severe systemic disease that is a constant threat to life,,,4
+NEOIPC_ASA_SCORE,5,ASA V - A moribund patient who is not expected to survive without the operation,,,5
+NEOIPC_ADMISSION_TYPES,1,Delivered here; for infants delivered in your hospital,,,1
+NEOIPC_ADMISSION_TYPES,2,Transferred to your hospital on the day of birth,,,2
+NEOIPC_ADMISSION_TYPES,3,Transferred to your hospital the day after birth or later,,,3
+NEOIPC_BSI_DEVICE_ASS,0,Not catheter-associated,,,1
+NEOIPC_BSI_DEVICE_ASS,1,CVC-associated,,,2
+NEOIPC_BSI_DEVICE_ASS,2,PVC-associated,,,3
+NEOIPC_BSI_PATHOGEN_RECOVERED_FROM,1,Blood,,,1
+NEOIPC_BSI_PATHOGEN_RECOVERED_FROM,2,Cerebrospinal fluid,,,2
+NEOIPC_BSI_PATHOGEN_RECOVERED_FROM,3,Blood and Cerebrospinal fluid,,,3
+NEOIPC_DELIVERY_MODES,1,Vaginal,,,1
+NEOIPC_DELIVERY_MODES,2,Caesarean section (elective),,,2
+NEOIPC_DELIVERY_MODES,3,Caesarean section (emergency),,,3
+NEOIPC_HAP_DEVICE_ASS,0,Not ventilatory support associated,,,1
+NEOIPC_HAP_DEVICE_ASS,1,"Non-invasive ventilatory support (CPAP, HFNC)",,,2
+NEOIPC_HAP_DEVICE_ASS,2,Invasive ventilation (intubation),,,3
+NEOIPC_HAP_RESPIRATORY_TRACT_SAMPLE_SOURCES,1,Upper respiratory tract,,,1
+NEOIPC_HAP_RESPIRATORY_TRACT_SAMPLE_SOURCES,2,Lower respiratory tract,,,2
+NEOIPC_SSI_TYPE,1,...only skin and subcutaneous tissue of the incision,,,1
+NEOIPC_SSI_TYPE,2,...deep soft tissues of the incision,,,2
+NEOIPC_SSI_TYPE,3,"...tissue deeper than fascial/muscle layer, opened/manipulated during the procedure",,,3
+NEOIPC_SEX_VALUES,f,Female,,,1
+NEOIPC_SEX_VALUES,m,Male,,,2
+NEOIPC_SEX_VALUES,u,Undetermined,,,3
+NEOIPC_SURVEILLANCE_END_REASON,1,Discharge/Transfer,,,1
+NEOIPC_SURVEILLANCE_END_REASON,2,Death,,,2
+NEOIPC_WOUND_CLASSES,1,Clean,,,1
+NEOIPC_WOUND_CLASSES,2,Clean-Contaminated,,,2
+NEOIPC_WOUND_CLASSES,3,Contaminated,,,3
+NEOIPC_WOUND_CLASSES,4,Infected,,,4
+NEOIPC_YES_NO_NO_FOLLOWUP,1,Yes,,,1
+NEOIPC_YES_NO_NO_FOLLOWUP,0,No,,,2
+NEOIPC_YES_NO_NO_FOLLOWUP,-1,No follow-up,,,3
+NEOIPC_YES_NO_NOT_TESTED,1,Yes,,,1
+NEOIPC_YES_NO_NOT_TESTED,0,No,,,2
+NEOIPC_YES_NO_NOT_TESTED,-1,Not tested,,,3

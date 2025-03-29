@@ -1,0 +1,31 @@
+.Symptom-based NEC
+[%unbreakable]
+****
+. **At least of ONE the following radiological signs (imaging technologies: X-ray, CT, MRI, ultrasound):**
++
+--
+* Pneumoperitoneum
+* Pneumatosis intestinalis
+* Portal venous gas (Hepatobiliary gas)
+* Fixed bowel loops (≥ 24h) 
+--
+**AND**
+. **At least ONE of the following clinical signs:**
+* Abdominal distention
+* Abdominal discoloration or shiny/reddish skin tone
+* Repeated occult (guaiac test) or visible blood in stool (no anal fissure)
+* Increasing/pronounced vomiting (e.g. bilious or bloody)
+* Increased gastric residuals from previous feeding
+* Bilious gastric aspirate (not from transpyloric feeding tube)
+****
+
+**OR**
+
+.Surgical NEC
+[%unbreakable]
+****
+**At least of ONE the following surgical or pathological findings:**
+
+* Extensive bowel necrosis (> 2 cm of bowel affected)
+* Pneumatosis intestinalis
+****

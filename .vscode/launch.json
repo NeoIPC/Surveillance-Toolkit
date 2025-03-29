@@ -1,0 +1,43 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Make NeoIPC Core Protocol (all)",
+            "type": "PowerShell",
+            "request": "launch",
+            "script": "& \"${workspaceFolder}/scripts/Make-NeoIPC-Core-Protocol.ps1\" -InformationAction Continue -Verbose",
+            "args": []
+        },
+        {
+            "name": "Make NeoIPC Core Protocol (pdf)",
+            "type": "PowerShell",
+            "request": "launch",
+            "script": "& \"${workspaceFolder}/scripts/Make-NeoIPC-Core-Protocol.ps1\" -Pdf -InformationAction Continue -Verbose",
+            "args": []
+        },
+        {
+            "name": "Make NeoIPC Core Protocol (html)",
+            "type": "PowerShell",
+            "request": "launch",
+            "script": "& \"${workspaceFolder}/scripts/Make-NeoIPC-Core-Protocol.ps1\" -Html -InformationAction Continue -Verbose",
+            "args": []
+        },
+        {
+            "name": "Make NeoIPC Core Protocol (docx)",
+            "type": "PowerShell",
+            "request": "launch",
+            "script": "& \"${workspaceFolder}/scripts/Make-NeoIPC-Core-Protocol.ps1\" -Docx -InformationAction Continue -Verbose",
+            "args": []
+        },
+        {
+            "name": "Clean up NeoIPC Core Protocol",
+            "type": "PowerShell",
+            "request": "launch",
+            "script": "& \"${workspaceFolder}/scripts/Make-NeoIPC-Core-Protocol.ps1\" -Clean -Verbose",
+            "args": []
+        }
+    ]
+}

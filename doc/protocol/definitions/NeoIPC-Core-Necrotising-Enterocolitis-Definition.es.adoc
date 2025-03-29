@@ -1,0 +1,31 @@
+.NEC basado en síntomas
+[%unbreakable]
+****
+. **Al menos UNO de los siguientes signos radiológicos (tecnologías de imagen: radiografía, TC, RM, ecografía):**
++
+--
+* Neumoperitoneo
+* Neumatosis intestinal
+* Gas venoso portal (gas hepatobiliar)
+* Asas intestinales fijas (≥ 24h)
+--
+**Y**
+. **Al menos UNO de los siguientes signos clínicos:**
+* Distensión abdominal
+* Decoloración abdominal o tono brillante/rojizo de la piel
+* Repetición de sangre oculta (prueba de guayaco) o visible en las heces (sin fisura anal).
+* Vómitos crecientes/pronunciados (por ejemplo, biliosos o sanguinolentos)
+* Aumento de los residuos gástricos de la alimentación anterior
+* Aspirado gástrico bilioso (no de sonda transpilórica)
+****
+
+**O**
+
+.Quirúrgico NEC
+[%unbreakable]
+****
+**Al menos UNO de los siguientes hallazgos quirúrgicos o patológicos:**
+
+* Necrosis intestinal extensa (> 2 cm de intestino afectado)
+* Neumatosis intestinal
+****

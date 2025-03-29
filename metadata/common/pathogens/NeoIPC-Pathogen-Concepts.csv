@@ -1,0 +1,2428 @@
+id,concept,concept_type,concept_source,concept_id,is_cc,show_mrsa,show_vre,show_3gcr,show_carb_r,show_coli_r
+0,Not listed,unknown,NeoIPC,1,f,t,t,t,t,t
+1436,Abiotrophia,genus,LPSN,genus/abiotrophia,f,f,f,f,f,f
+108,Abiotrophia defectiva,species,LPSN,species/abiotrophia-defectiva,f,f,f,f,f,f
+3370,Acaulium acremonium,species,MycoBank,814571,f,f,f,f,f,f
+57,Acholeplasma,genus,LPSN,genus/acholeplasma,f,f,f,f,f,f
+829,Acholeplasma laidlawii,species,LPSN,species/acholeplasma-laidlawii,f,f,f,f,f,f
+1347,Acholeplasma oculi,species,LPSN,species/acholeplasma-oculi,f,f,f,f,f,f
+2476,Achromobacter,genus,LPSN,genus/achromobacter,f,f,f,f,f,f
+2395,Achromobacter denitrificans,species,LPSN,species/achromobacter-denitrificans,f,f,f,f,f,f
+752,Achromobacter piechaudii,species,LPSN,species/achromobacter-piechaudii,f,f,f,f,f,f
+366,Achromobacter ruhlandii,species,LPSN,species/achromobacter-ruhlandii,f,f,f,f,f,f
+1374,Achromobacter xylosoxidans,species,LPSN,species/achromobacter-xylosoxidans,f,f,f,f,f,f
+2521,Acidaminococcus,genus,LPSN,genus/acidaminococcus,f,f,f,f,f,f
+746,Acidaminococcus fermentans,species,LPSN,species/acidaminococcus-fermentans,f,f,f,f,f,f
+3030,Acidipropionibacterium acidipropionici,species,LPSN,species/acidipropionibacterium-acidipropionici,t,f,f,f,f,f
+3272,Acidipropionibacterium jensenii,species,LPSN,species/acidipropionibacterium-jensenii,t,f,f,f,f,f
+2991,Acidipropionibacterium microaerophilum,species,LPSN,species/acidipropionibacterium-microaerophilum,t,f,f,f,f,f
+3286,Acidipropionibacterium thoenii,species,LPSN,species/acidipropionibacterium-thoenii,t,f,f,f,f,f
+312,Acidovorax,genus,LPSN,genus/acidovorax,f,f,f,f,f,f
+807,Acidovorax delafieldii,species,LPSN,species/acidovorax-delafieldii,f,f,f,f,f,f
+274,Acidovorax facilis,species,LPSN,species/acidovorax-facilis,f,f,f,f,f,f
+1086,Acidovorax temperans,species,LPSN,species/acidovorax-temperans,f,f,f,f,f,f
+2409,Acinetobacter,genus,LPSN,genus/acinetobacter,f,f,f,f,t,t
+1660,Acinetobacter baumannii,species,LPSN,species/acinetobacter-baumannii,f,f,f,f,t,t
+2808,Acinetobacter baylyi,species,LPSN,species/acinetobacter-baylyi,f,f,f,f,t,t
+2809,Acinetobacter beijerinckii,species,LPSN,species/acinetobacter-beijerinckii,f,f,f,f,t,t
+2810,Acinetobacter bereziniae,species,LPSN,species/acinetobacter-bereziniae,f,f,f,f,t,t
+1141,Acinetobacter calcoaceticus,species,LPSN,species/acinetobacter-calcoaceticus,f,f,f,f,t,t
+2704,Acinetobacter calcoaceticus-Acinetobacter baumannii complex,species complex,NeoIPC,31,f,f,f,f,t,t
+2811,Acinetobacter guillouiae,species,LPSN,species/acinetobacter-guillouiae,f,f,f,f,t,t
+2812,Acinetobacter gyllenbergii,species,LPSN,species/acinetobacter-gyllenbergii,f,f,f,f,t,t
+1727,Acinetobacter haemolyticus,species,LPSN,species/acinetobacter-haemolyticus,f,f,f,f,t,t
+2494,Acinetobacter johnsonii,species,LPSN,species/acinetobacter-johnsonii,f,f,f,f,t,t
+2318,Acinetobacter junii,species,LPSN,species/acinetobacter-junii,f,f,f,f,t,t
+2705,Acinetobacter lwoffii,species,LPSN,species/acinetobacter-lwoffii,f,f,f,f,t,t
+1448,Acinetobacter nosocomialis,species,LPSN,species/acinetobacter-nosocomialis,f,f,f,f,t,t
+2813,Acinetobacter parvus,species,LPSN,species/acinetobacter-parvus,f,f,f,f,t,t
+2114,Acinetobacter pittii,species,LPSN,species/acinetobacter-pittii,f,f,f,f,t,t
+1698,Acinetobacter radioresistens,species,LPSN,species/acinetobacter-radioresistens,f,f,f,f,t,t
+1877,Acinetobacter schindleri,species,LPSN,species/acinetobacter-schindleri,f,f,f,f,t,t
+2814,Acinetobacter seifertii,species,LPSN,species/acinetobacter-seifertii,f,f,f,f,t,t
+2815,Acinetobacter septicus,species,LPSN,species/acinetobacter-septicus,f,f,f,f,t,t
+2107,Acinetobacter ursingii,species,LPSN,species/acinetobacter-ursingii,f,f,f,f,t,t
+2816,Acinetobacter variabilis,species,LPSN,species/acinetobacter-variabilis,f,f,f,f,t,t
+105,Acremonium,genus,MycoBank,7028,f,f,f,f,f,f
+2698,Acremonium alabamense,species,MycoBank,308114,f,f,f,f,f,f
+2301,Acremonium potronii,species,MycoBank,248620,f,f,f,f,f,f
+2583,Actinobacillus,genus,LPSN,genus/actinobacillus,f,f,f,f,f,f
+386,Actinobacillus equuli,species,LPSN,species/actinobacillus-equuli,f,f,f,f,f,f
+1263,Actinobacillus hominis,species,LPSN,species/actinobacillus-hominis,f,f,f,f,f,f
+957,Actinobacillus lignieresii,species,LPSN,species/actinobacillus-lignieresii,f,f,f,f,f,f
+2196,Actinobacillus suis,species,LPSN,species/actinobacillus-suis,f,f,f,f,f,f
+1592,Actinobacillus ureae,species,LPSN,species/actinobacillus-ureae,f,f,f,f,f,f
+890,Actinobaculum,genus,LPSN,genus/actinobaculum,f,f,f,f,f,f
+2930,Actinobaculum massiliense,species,LPSN,species/actinobaculum-massiliense,f,f,f,f,f,f
+1198,Actinomadura,genus,LPSN,genus/actinomadura,f,f,f,f,f,f
+2428,Actinomadura latina,species,LPSN,species/actinomadura-latina,f,f,f,f,f,f
+1902,Actinomadura madurae,species,LPSN,species/actinomadura-madurae,f,f,f,f,f,f
+1513,Actinomadura pelletieri,species,LPSN,species/actinomadura-pelletieri,f,f,f,f,f,f
+2962,Actinomortierella wolfii,species,MycoBank,835797,f,f,f,f,f,f
+743,Actinomyces,genus,LPSN,genus/actinomyces,t,f,f,f,f,f
+1833,Actinomyces bovis,species,LPSN,species/actinomyces-bovis,t,f,f,f,f,f
+702,Actinomyces dentalis,species,LPSN,species/actinomyces-dentalis,t,f,f,f,f,f
+1677,Actinomyces gerencseriae,species,LPSN,species/actinomyces-gerencseriae,t,f,f,f,f,f
+2434,Actinomyces graevenitzii,species,LPSN,species/actinomyces-graevenitzii,t,f,f,f,f,f
+1341,Actinomyces israelii,species,LPSN,species/actinomyces-israelii,t,f,f,f,f,f
+1152,Actinomyces naeslundii,species,LPSN,species/actinomyces-naeslundii,t,f,f,f,f,f
+639,Actinomyces oricola,species,LPSN,species/actinomyces-oricola,t,f,f,f,f,f
+2519,Actinomyces oris,species,LPSN,species/actinomyces-oris,t,f,f,f,f,f
+538,Actinomyces radicidentis,species,LPSN,species/actinomyces-radicidentis,t,f,f,f,f,f
+67,Actinomyces urogenitalis,species,LPSN,species/actinomyces-urogenitalis,t,f,f,f,f,f
+1104,Actinomyces viscosus,species,LPSN,species/actinomyces-viscosus,t,f,f,f,f,f
+2442,Actinotignum,genus,LPSN,genus/actinotignum,f,f,f,f,f,f
+2313,Actinotignum schaalii,species,LPSN,species/actinotignum-schaalii,f,f,f,f,f,f
+239,Actinotignum urinale,species,LPSN,species/actinotignum-urinale,f,f,f,f,f,f
+1628,Aerococcus,genus,LPSN,genus/aerococcus,t,f,f,f,f,f
+1668,Aerococcus christensenii,species,LPSN,species/aerococcus-christensenii,t,f,f,f,f,f
+1333,Aerococcus sanguinicola,species,LPSN,species/aerococcus-sanguinicola,t,f,f,f,f,f
+1672,Aerococcus urinae,species,LPSN,species/aerococcus-urinae,t,f,f,f,f,f
+813,Aerococcus urinaeequi,species,LPSN,species/aerococcus-urinaeequi,t,f,f,f,f,f
+2019,Aerococcus urinaehominis,species,LPSN,species/aerococcus-urinaehominis,t,f,f,f,f,f
+945,Aerococcus viridans,species,LPSN,species/aerococcus-viridans,t,f,f,f,f,f
+1731,Aeromonas,genus,LPSN,genus/aeromonas,f,f,f,f,f,t
+1765,Aeromonas bestiarum,species,LPSN,species/aeromonas-bestiarum,f,f,f,f,f,t
+461,Aeromonas caviae,species,LPSN,species/aeromonas-caviae,f,f,f,f,f,t
+2316,Aeromonas encheleia,species,LPSN,species/aeromonas-encheleia,f,f,f,f,f,t
+2578,Aeromonas enteropelogenes,species,LPSN,species/aeromonas-enteropelogenes,f,f,f,f,f,t
+1801,Aeromonas eucrenophila,species,LPSN,species/aeromonas-eucrenophila,f,f,f,f,f,t
+107,Aeromonas hydrophila,species,LPSN,species/aeromonas-hydrophila,f,f,f,f,f,t
+983,Aeromonas jandaei,species,LPSN,species/aeromonas-jandaei,f,f,f,f,f,t
+32,Aeromonas media,species,LPSN,species/aeromonas-media,f,f,f,f,f,t
+2563,Aeromonas molluscorum,species,LPSN,species/aeromonas-molluscorum,f,f,f,f,f,t
+232,Aeromonas popoffii,species,LPSN,species/aeromonas-popoffii,f,f,f,f,f,t
+2328,Aeromonas salmonicida,species,LPSN,species/aeromonas-salmonicida,f,f,f,f,f,t
+1985,Aeromonas schubertii,species,LPSN,species/aeromonas-schubertii,f,f,f,f,f,t
+2293,Aeromonas simiae,species,LPSN,species/aeromonas-simiae,f,f,f,f,f,t
+763,Aeromonas sobria,species,LPSN,species/aeromonas-sobria,f,f,f,f,f,t
+2573,Aeromonas veronii,species,LPSN,species/aeromonas-veronii,f,f,f,f,f,t
+1269,Afipia,genus,LPSN,genus/afipia,f,f,f,f,f,f
+334,Afipia clevelandensis,species,LPSN,species/afipia-clevelandensis,f,f,f,f,f,f
+35,Afipia felis,species,LPSN,species/afipia-felis,f,f,f,f,f,f
+3182,Agathobacter rectalis,species,LPSN,species/agathobacter-rectalis,f,f,f,f,f,f
+1896,Aggregatibacter,genus,LPSN,genus/aggregatibacter,f,f,f,f,f,f
+697,Aggregatibacter actinomycetemcomitans,species,LPSN,species/aggregatibacter-actinomycetemcomitans,f,f,f,f,f,f
+2085,Aggregatibacter aphrophilus,species,LPSN,species/aggregatibacter-aphrophilus,f,f,f,f,f,f
+89,Aggregatibacter segnis,species,LPSN,species/aggregatibacter-segnis,f,f,f,f,f,f
+830,Agrobacterium,genus,LPSN,genus/agrobacterium,f,f,f,f,f,f
+1008,Agrobacterium radiobacter,species,LPSN,species/agrobacterium-radiobacter,f,f,f,f,f,f
+3076,Agrobacterium rubi,species,LPSN,species/agrobacterium-rubi,f,f,f,f,f,f
+2432,Agromyces,genus,LPSN,genus/agromyces,f,f,f,f,f,f
+93,Alcaligenes,genus,LPSN,genus/alcaligenes,f,f,f,f,f,f
+602,Alcaligenes faecalis,species,LPSN,species/alcaligenes-faecalis,f,f,f,f,f,f
+1764,Aleurisma,genus,MycoBank,7087,f,f,f,f,f,f
+1995,Alishewanella,genus,LPSN,genus/alishewanella,f,f,f,f,f,f
+2072,Alishewanella fetalis,species,LPSN,species/alishewanella-fetalis,f,f,f,f,f,f
+1906,Alistipes,genus,LPSN,genus/alistipes,f,f,f,f,f,f
+1619,Alistipes putredinis,species,LPSN,species/alistipes-putredinis,f,f,f,f,f,f
+3258,Alkalicoccus saliphilus,species,LPSN,species/alkalicoccus-saliphilus,t,f,f,f,f,f
+2992,Alkalihalobacillus alcalophilus,species,LPSN,species/alkalihalobacillus-alcalophilus,t,f,f,f,f,f
+3093,Alkalihalobacillus algicola,species,LPSN,species/alkalihalobacillus-algicola,t,f,f,f,f,f
+3046,Alkalihalobacillus macyae,species,LPSN,species/alkalihalobacillus-macyae,t,f,f,f,f,f
+2984,Alkalihalobacillus pseudalcaliphilus,species,LPSN,species/alkalihalobacillus-pseudalcaliphilus,t,f,f,f,f,f
+3230,Alkalihalophilus pseudofirmus,species,LPSN,species/alkalihalophilus-pseudofirmus,t,f,f,f,f,f
+1384,Alloiococcus,genus,LPSN,genus/alloiococcus,f,f,f,f,f,f
+134,Alloiococcus otitis,species,LPSN,species/alloiococcus-otitis,f,f,f,f,f,f
+3223,Alloprevotella tannerae,species,LPSN,species/alloprevotella-tannerae,f,f,f,f,f,t
+3139,Allorhizobium vitis,species,LPSN,species/allorhizobium-vitis,f,f,f,f,f,f
+786,Alloscardovia,genus,LPSN,genus/alloscardovia,f,f,f,f,f,f
+2320,Alloscardovia omnicolens,species,LPSN,species/alloscardovia-omnicolens,f,f,f,f,f,f
+2795,Alpha-hemolytic streptococci,group,NeoIPC,65,f,f,f,f,f,f
+2654,Alphainfluenzavirus influenzae,species,ICTV,202103956,f,f,f,f,f,f
+874,Alternaria,genus,MycoBank,7106,f,f,f,f,f,f
+1869,Alternaria alternata,species,MycoBank,119834,f,f,f,f,f,f
+858,Alternaria dianthicola,species,MycoBank,284026,f,f,f,f,f,f
+1019,Alternaria infectoria,species,MycoBank,103987,f,f,f,f,f,f
+1749,Alternaria tenuissima,species,MycoBank,280005,f,f,f,f,f,f
+2247,Alysiella,genus,LPSN,genus/alysiella,f,f,f,f,f,f
+1658,Alysiella crassa,species,LPSN,species/alysiella-crassa,f,f,f,f,f,f
+3244,Amedibacillus dolichus,species,LPSN,species/amedibacillus-dolichus,f,f,f,f,f,f
+3383,Amesia atrobrunnea,species,MycoBank,818832,f,f,f,f,f,f
+1492,Amycolatopsis,genus,LPSN,genus/amycolatopsis,f,f,f,f,f,f
+686,Amycolatopsis orientalis,species,LPSN,species/amycolatopsis-orientalis,f,f,f,f,f,f
+2982,Anaerobacillus arseniciselenatis,species,LPSN,species/anaerobacillus-arseniciselenatis,t,f,f,f,f,f
+337,Anaerobiospirillum,genus,LPSN,genus/anaerobiospirillum,f,f,f,f,f,f
+1871,Anaerobiospirillum succiniciproducens,species,LPSN,species/anaerobiospirillum-succiniciproducens,f,f,f,f,f,f
+968,Anaerobiospirillum thomasii,species,LPSN,species/anaerobiospirillum-thomasii,f,f,f,f,f,f
+3180,Anaerobutyricum hallii,species,LPSN,species/anaerobutyricum-hallii,f,f,f,f,f,f
+1925,Anaerococcus,genus,LPSN,genus/anaerococcus,f,f,f,f,f,f
+814,Anaerococcus hydrogenalis,species,LPSN,species/anaerococcus-hydrogenalis,f,f,f,f,f,f
+1772,Anaerococcus lactolyticus,species,LPSN,species/anaerococcus-lactolyticus,f,f,f,f,f,f
+2382,Anaerococcus octavius,species,LPSN,species/anaerococcus-octavius,f,f,f,f,f,f
+37,Anaerococcus prevotii,species,LPSN,species/anaerococcus-prevotii,f,f,f,f,f,f
+1388,Anaerococcus tetradius,species,LPSN,species/anaerococcus-tetradius,f,f,f,f,f,f
+2031,Anaerococcus vaginalis,species,LPSN,species/anaerococcus-vaginalis,f,f,f,f,f,f
+767,Anaerorhabdus,genus,LPSN,genus/anaerorhabdus,f,f,f,f,f,f
+3051,Anaerorhabdus furcosa,species,LPSN,species/anaerorhabdus-furcosa,f,f,f,f,f,f
+3058,Anaerostipes hadrus,species,LPSN,species/anaerostipes-hadrus,f,f,f,f,f,f
+2123,Anaplasma,genus,LPSN,genus/anaplasma,f,f,f,f,f,f
+331,Aneurinibacillus,genus,LPSN,genus/aneurinibacillus,f,f,f,f,f,f
+1921,Aneurinibacillus aneurinilyticus,species,LPSN,species/aneurinibacillus-aneurinilyticus,f,f,f,f,f,f
+3412,Apiotrichum loubieri,species,MycoBank,813417,f,f,f,f,f,f
+3398,Apiotrichum mycotoxinovorans,species,MycoBank,623118,f,f,f,f,f,f
+449,Apophysomyces,genus,MycoBank,20045,f,f,f,f,f,f
+1828,Apophysomyces elegans,species,MycoBank,308868,f,f,f,f,f,f
+1554,Aquabacterium,genus,LPSN,genus/aquabacterium,f,f,f,f,f,f
+14,Aquabacterium parvum,species,LPSN,species/aquabacterium-parvum,f,f,f,f,f,f
+2436,Arachnia propionica,species,LPSN,species/arachnia-propionica,t,f,f,f,f,f
+439,Arcanobacterium,genus,LPSN,genus/arcanobacterium,t,f,f,f,f,f
+1418,Arcanobacterium haemolyticum,species,LPSN,species/arcanobacterium-haemolyticum,t,f,f,f,f,f
+90,Arcanobacterium pluranimalium,species,LPSN,species/arcanobacterium-pluranimalium,t,f,f,f,f,f
+81,Arcobacter,genus,LPSN,genus/arcobacter,f,f,f,f,f,f
+2349,Arcobacter butzleri,species,LPSN,species/arcobacter-butzleri,f,f,f,f,f,f
+875,Arcobacter nitrofigilis,species,LPSN,species/arcobacter-nitrofigilis,f,f,f,f,f,f
+2535,Arsenicicoccus,genus,LPSN,genus/arsenicicoccus,f,f,f,f,f,f
+327,Arsenicicoccus bolidensis,species,LPSN,species/arsenicicoccus-bolidensis,f,f,f,f,f,f
+1003,Arthrobacter,genus,LPSN,genus/arthrobacter,t,f,f,f,f,f
+1287,Arthrobacter agilis,species,LPSN,species/arthrobacter-agilis,t,f,f,f,f,f
+1115,Arthrobacter citreus,species,LPSN,species/arthrobacter-citreus,t,f,f,f,f,f
+1370,Arthrobacter crystallopoietes,species,LPSN,species/arthrobacter-crystallopoietes,t,f,f,f,f,f
+2343,Arthrobacter flavus,species,LPSN,species/arthrobacter-flavus,t,f,f,f,f,f
+1196,Arthrobacter gandavensis,species,LPSN,species/arthrobacter-gandavensis,t,f,f,f,f,f
+1477,Arthrobacter globiformis,species,LPSN,species/arthrobacter-globiformis,t,f,f,f,f,f
+1529,Arthrobacter koreensis,species,LPSN,species/arthrobacter-koreensis,t,f,f,f,f,f
+43,Arthrobacter luteolus,species,LPSN,species/arthrobacter-luteolus,t,f,f,f,f,f
+805,Arthrobacter methylotrophus,species,LPSN,species/arthrobacter-methylotrophus,t,f,f,f,f,f
+1085,Arthrobacter oryzae,species,LPSN,species/arthrobacter-oryzae,t,f,f,f,f,f
+2058,Arthrobacter pascens,species,LPSN,species/arthrobacter-pascens,t,f,f,f,f,f
+1587,Arthrobacter psychrolactophilus,species,LPSN,species/arthrobacter-psychrolactophilus,t,f,f,f,f,f
+1496,Arthrobacter ramosus,species,LPSN,species/arthrobacter-ramosus,t,f,f,f,f,f
+1111,Arthrobacter rhombi,species,LPSN,species/arthrobacter-rhombi,t,f,f,f,f,f
+1808,Arthrobacter roseus,species,LPSN,species/arthrobacter-roseus,t,f,f,f,f,f
+1638,Arthrobacter russicus,species,LPSN,species/arthrobacter-russicus,t,f,f,f,f,f
+1175,Arthrobacter woluwensis,species,LPSN,species/arthrobacter-woluwensis,t,f,f,f,f,f
+1332,Arthroderma,genus,MycoBank,335,f,f,f,f,f,f
+465,Arthrographis,genus,MycoBank,7222,f,f,f,f,f,f
+3116,Asaccharospora irregularis,species,LPSN,species/asaccharospora-irregularis,f,f,f,f,f,f
+266,Aspergillus candidus,species,MycoBank,204868,f,f,f,f,f,f
+2205,Aspergillus clavatus,species,MycoBank,211530,f,f,f,f,f,f
+2048,Aspergillus deflectus,species,MycoBank,292841,f,f,f,f,f,f
+3406,Aspergillus fischeri,species,MycoBank,202877,f,f,f,f,f,f
+902,Aspergillus flavipes,species,MycoBank,265045,f,f,f,f,f,f
+2480,Aspergillus flavus,species,MycoBank,209842,f,f,f,f,f,f
+3396,Aspergillus flavus var. oryzae,variety,MycoBank,130238,f,f,f,f,f,f
+1717,Aspergillus fumigatus,species,MycoBank,211776,f,f,f,f,f,f
+853,Aspergillus glaucus,species,MycoBank,161735,f,f,f,f,f,f
+2046,Aspergillus nidulans,species,MycoBank,182069,f,f,f,f,f,f
+2197,Aspergillus niger,species,MycoBank,284309,f,f,f,f,f,f
+1694,Aspergillus niveus,species,MycoBank,272402,f,f,f,f,f,f
+664,Aspergillus ochraceus,species,MycoBank,190223,f,f,f,f,f,f
+2150,Aspergillus parasiticus,species,MycoBank,191085,f,f,f,f,f,f
+1723,Aspergillus restrictus,species,MycoBank,276290,f,f,f,f,f,f
+2288,Aspergillus sydowii,species,MycoBank,279636,f,f,f,f,f,f
+976,Aspergillus terreus,species,MycoBank,191719,f,f,f,f,f,f
+2314,Aspergillus ustus,species,MycoBank,281216,f,f,f,f,f,f
+2188,Aspergillus versicolor,species,MycoBank,172159,f,f,f,f,f,f
+868,Aspergillus wentii,species,MycoBank,172623,f,f,f,f,f,f
+539,Astroviridae,family,ICTV,202102619,f,f,f,f,f,f
+1858,Atopobium,genus,LPSN,genus/atopobium,f,f,f,f,f,f
+2191,Atopobium fossor,species,LPSN,species/atopobium-fossor,f,f,f,f,f,f
+1742,Atopobium minutum,species,LPSN,species/atopobium-minutum,f,f,f,f,f,f
+1072,Aureimonas,genus,LPSN,genus/aureimonas,f,f,f,f,f,f
+1665,Aureimonas altamirensis,species,LPSN,species/aureimonas-altamirensis,f,f,f,f,f,f
+2492,Aureobasidium,genus,MycoBank,7297,f,f,f,f,f,f
+2964,Aureobasidium pullulans,species,MycoBank,101771,f,f,f,f,f,f
+2931,Averyella,genus,LPSN,genus/averyella,f,f,f,t,t,t
+2932,Averyella dalhousiensis,species,LPSN,species/averyella-dalhousiensis,f,f,f,t,t,t
+1400,Azorhizobium,genus,LPSN,genus/azorhizobium,f,f,f,f,f,f
+1,Azorhizobium caulinodans,species,LPSN,species/azorhizobium-caulinodans,f,f,f,f,f,f
+2581,Azospirillum,genus,LPSN,genus/azospirillum,f,f,f,f,f,f
+1918,Azospirillum brasilense,species,LPSN,species/azospirillum-brasilense,f,f,f,f,f,f
+3349,Azymocandida mycoderma,species,MycoBank,326854,f,f,f,f,f,f
+1256,Bacillus,genus,LPSN,genus/bacillus,t,f,f,f,f,f
+2933,Bacillus aeolius,species,LPSN,species/bacillus-aeolius,t,f,f,f,f,f
+2934,Bacillus aerius,species,LPSN,species/bacillus-aerius,t,f,f,f,f,f
+315,Bacillus amyloliquefaciens,species,LPSN,species/bacillus-amyloliquefaciens,t,f,f,f,f,f
+3290,Bacillus aneurinilyticus,species,LPSN,species/bacillus-aneurinilyticus,f,f,f,f,f,f
+2032,Bacillus anthracis,species,LPSN,species/bacillus-anthracis,f,f,f,f,f,f
+1796,Bacillus atrophaeus,species,LPSN,species/bacillus-atrophaeus,t,f,f,f,f,f
+1617,Bacillus badius,species,LPSN,species/bacillus-badius,t,f,f,f,f,f
+2241,Bacillus benzoevorans,species,LPSN,species/bacillus-benzoevorans,t,f,f,f,f,f
+1403,Bacillus carboniphilus,species,LPSN,species/bacillus-carboniphilus,t,f,f,f,f,f
+1202,Bacillus cereus,species,LPSN,species/bacillus-cereus,t,f,f,f,f,f
+2935,Bacillus cereus group,group,NeoIPC,76,t,f,f,f,f,f
+2912,Bacillus cytotoxicus,species,LPSN,species/bacillus-cytotoxicus,t,f,f,f,f,f
+130,Bacillus decisifrondis,species,LPSN,species/bacillus-decisifrondis,t,f,f,f,f,f
+1581,Bacillus horti,species,LPSN,species/bacillus-horti,t,f,f,f,f,f
+3329,Bacillus inaquosorum,species,LPSN,species/bacillus-inaquosorum,t,f,f,f,f,f
+1962,Bacillus infantis,species,LPSN,species/bacillus-infantis,t,f,f,f,f,f
+2306,Bacillus infernus,species,LPSN,species/bacillus-infernus,t,f,f,f,f,f
+1406,Bacillus licheniformis,species,LPSN,species/bacillus-licheniformis,t,f,f,f,f,f
+1038,Bacillus methanolicus,species,LPSN,species/bacillus-methanolicus,t,f,f,f,f,f
+672,Bacillus mojavensis,species,LPSN,species/bacillus-mojavensis,t,f,f,f,f,f
+2506,Bacillus mycoides,species,LPSN,species/bacillus-mycoides,t,f,f,f,f,f
+2089,Bacillus pseudomycoides,species,LPSN,species/bacillus-pseudomycoides,t,f,f,f,f,f
+2045,Bacillus pumilus,species,LPSN,species/bacillus-pumilus,t,f,f,f,f,f
+1941,Bacillus smithii,species,LPSN,species/bacillus-smithii,t,f,f,f,f,f
+2560,Bacillus sonorensis,species,LPSN,species/bacillus-sonorensis,t,f,f,f,f,f
+3213,Bacillus spizizenii,species,LPSN,species/bacillus-spizizenii,t,f,f,f,f,f
+1364,Bacillus subtilis,species,LPSN,species/bacillus-subtilis,t,f,f,f,f,f
+2938,Bacillus subtilis group,group,NeoIPC,77,t,f,f,f,f,f
+851,Bacillus tequilensis,species,LPSN,species/bacillus-tequilensis,t,f,f,f,f,f
+2525,Bacillus thermoamylovorans,species,LPSN,species/bacillus-thermoamylovorans,t,f,f,f,f,f
+794,Bacillus thermocloacae,species,LPSN,species/bacillus-thermocloacae,t,f,f,f,f,f
+282,Bacillus thuringiensis,species,LPSN,species/bacillus-thuringiensis,t,f,f,f,f,f
+854,Bacillus vallismortis,species,LPSN,species/bacillus-vallismortis,t,f,f,f,f,f
+659,Bacillus velezensis,species,LPSN,species/bacillus-velezensis,t,f,f,f,f,f
+44,Bacteroides,genus,LPSN,genus/bacteroides,f,f,f,f,f,f
+2408,Bacteroides caccae,species,LPSN,species/bacteroides-caccae,f,f,f,f,f,f
+2896,Bacteroides denticanum,species,LPSN,species/bacteroides-denticanum,f,f,f,f,f,f
+1923,Bacteroides eggerthii,species,LPSN,species/bacteroides-eggerthii,f,f,f,f,f,f
+2899,Bacteroides faecis,species,LPSN,species/bacteroides-faecis,f,f,f,f,f,f
+2900,Bacteroides fluxus,species,LPSN,species/bacteroides-fluxus,f,f,f,f,f,f
+1296,Bacteroides fragilis,species,LPSN,species/bacteroides-fragilis,f,f,f,f,f,f
+2939,Bacteroides fragilis group,group,NeoIPC,78,f,f,f,f,f,f
+2902,Bacteroides galacturonicus,species,LPSN,species/bacteroides-galacturonicus,f,f,f,f,f,f
+1413,Bacteroides heparinolyticus,species,LPSN,species/bacteroides-heparinolyticus,f,f,f,f,f,f
+772,Bacteroides nordii,species,LPSN,species/bacteroides-nordii,f,f,f,f,f,f
+685,Bacteroides ovatus,species,LPSN,species/bacteroides-ovatus,f,f,f,f,f,f
+2903,Bacteroides pectinophilus,species,LPSN,species/bacteroides-pectinophilus,f,f,f,f,f,f
+1217,Bacteroides pyogenes,species,LPSN,species/bacteroides-pyogenes,f,f,f,f,f,f
+2904,Bacteroides salyersiae,species,LPSN,species/bacteroides-salyersiae,f,f,f,f,f,f
+2216,Bacteroides stercoris,species,LPSN,species/bacteroides-stercoris,f,f,f,f,f,f
+2104,Bacteroides thetaiotaomicron,species,LPSN,species/bacteroides-thetaiotaomicron,f,f,f,f,f,f
+1027,Bacteroides uniformis,species,LPSN,species/bacteroides-uniformis,f,f,f,f,f,f
+2009,Bacteroides zoogleoformans,species,LPSN,species/bacteroides-zoogleoformans,f,f,f,f,f,f
+1739,Balneatrix,genus,LPSN,genus/balneatrix,f,f,f,f,f,f
+1024,Balneatrix alpica,species,LPSN,species/balneatrix-alpica,f,f,f,f,f,f
+1166,Bartonella,genus,LPSN,genus/bartonella,f,f,f,f,f,f
+1010,Bartonella bacilliformis,species,LPSN,species/bartonella-bacilliformis,f,f,f,f,f,f
+264,Bartonella clarridgeiae,species,LPSN,species/bartonella-clarridgeiae,f,f,f,f,f,f
+2520,Bartonella elizabethae,species,LPSN,species/bartonella-elizabethae,f,f,f,f,f,f
+1639,Bartonella henselae,species,LPSN,species/bartonella-henselae,f,f,f,f,f,f
+2075,Bartonella quintana,species,LPSN,species/bartonella-quintana,f,f,f,f,f,f
+1535,Bartonella vinsonii,species,LPSN,species/bartonella-vinsonii,f,f,f,f,f,f
+1326,Basidiobolus,genus,MycoBank,20068,f,f,f,f,f,f
+1670,Basidiobolus haptosporus,species,MycoBank,284511,f,f,f,f,f,f
+1484,Basidiobolus heterosporus,species,MycoBank,326921,f,f,f,f,f,f
+1560,Basidiobolus meristosporus,species,MycoBank,293630,f,f,f,f,f,f
+873,Basidiobolus ranarum,species,MycoBank,224388,f,f,f,f,f,f
+141,Beauveria,genus,MycoBank,7346,f,f,f,f,f,f
+1012,Beauveria bassiana,species,MycoBank,199430,f,f,f,f,f,f
+680,Bergeyella,genus,LPSN,genus/bergeyella,f,f,f,f,f,f
+494,Bergeyella zoohelcum,species,LPSN,species/bergeyella-zoohelcum,f,f,f,f,f,f
+2796,Beta-hemolytic streptococci,group,NeoIPC,66,f,f,f,f,f,f
+2655,Betainfluenzavirus influenzae,species,ICTV,202103958,f,f,f,f,f,f
+2642,Betapolyomavirus hominis,species,ICTV,202104459,f,f,f,f,f,f
+3335,Betapolyomavirus macacae,species,ICTV,202104464,f,f,f,f,f,f
+2682,Betapolyomavirus secuhominis,species,ICTV,202104460,f,f,f,f,f,f
+3171,Bhargavaea ginsengi,species,LPSN,species/bhargavaea-ginsengi,t,f,f,f,f,f
+8,Bifidobacterium,genus,LPSN,genus/bifidobacterium,f,f,f,f,f,f
+840,Bifidobacterium adolescentis,species,LPSN,species/bifidobacterium-adolescentis,f,f,f,f,f,f
+1351,Bifidobacterium angulatum,species,LPSN,species/bifidobacterium-angulatum,f,f,f,f,f,f
+419,Bifidobacterium bifidum,species,LPSN,species/bifidobacterium-bifidum,f,f,f,f,f,f
+1041,Bifidobacterium breve,species,LPSN,species/bifidobacterium-breve,f,f,f,f,f,f
+330,Bifidobacterium catenulatum,species,LPSN,species/bifidobacterium-catenulatum,f,f,f,f,f,f
+1371,Bifidobacterium dentium,species,LPSN,species/bifidobacterium-dentium,f,f,f,f,f,f
+1734,Bifidobacterium gallicum,species,LPSN,species/bifidobacterium-gallicum,f,f,f,f,f,f
+1241,Bifidobacterium longum,species,LPSN,species/bifidobacterium-longum,f,f,f,f,f,f
+3043,Bifidobacterium longum infantis,subspecies,LPSN,subspecies/bifidobacterium-longum-infantis,f,f,f,f,f,f
+3065,Bifidobacterium longum suis,subspecies,LPSN,subspecies/bifidobacterium-longum-suis,f,f,f,f,f,f
+30,Bifidobacterium pseudocatenulatum,species,LPSN,species/bifidobacterium-pseudocatenulatum,f,f,f,f,f,f
+1173,Bifidobacterium scardovii,species,LPSN,species/bifidobacterium-scardovii,f,f,f,f,f,f
+20,Bilophila,genus,LPSN,genus/bilophila,f,f,f,f,f,f
+2397,Bilophila wadsworthia,species,LPSN,species/bilophila-wadsworthia,f,f,f,f,f,f
+1424,Bipolaris,genus,MycoBank,7375,f,f,f,f,f,f
+307,Bipolaris spicifera,species,MycoBank,309557,f,f,f,f,f,f
+3372,Bisifusarium dimerum,species,MycoBank,810229,f,f,f,f,f,f
+2182,Blastoschizomyces,genus,MycoBank,7395,f,f,f,f,f,f
+1685,Blautia,genus,LPSN,genus/blautia,f,f,f,f,f,f
+667,Blautia coccoides,species,LPSN,species/blautia-coccoides,f,f,f,f,f,f
+168,Blautia hansenii,species,LPSN,species/blautia-hansenii,f,f,f,f,f,f
+631,Blautia producta,species,LPSN,species/blautia-producta,f,f,f,f,f,f
+2690,Bocaparvovirus,genus,ICTV,202104241,f,f,f,f,f,f
+249,Bordetella,genus,LPSN,genus/bordetella,f,f,f,f,f,f
+189,Bordetella avium,species,LPSN,species/bordetella-avium,f,f,f,f,f,f
+79,Bordetella bronchiseptica,species,LPSN,species/bordetella-bronchiseptica,f,f,f,f,f,f
+2375,Bordetella hinzii,species,LPSN,species/bordetella-hinzii,f,f,f,f,f,f
+1963,Bordetella holmesii,species,LPSN,species/bordetella-holmesii,f,f,f,f,f,f
+1859,Bordetella parapertussis,species,LPSN,species/bordetella-parapertussis,f,f,f,f,f,f
+2174,Bordetella pertussis,species,LPSN,species/bordetella-pertussis,f,f,f,f,f,f
+1577,Bordetella petrii,species,LPSN,species/bordetella-petrii,f,f,f,f,f,f
+1744,Bordetella trematum,species,LPSN,species/bordetella-trematum,f,f,f,f,f,f
+1507,Borrelia,genus,LPSN,genus/borrelia,f,f,f,f,f,f
+560,Borrelia afzelii,species,LPSN,species/borrelia-afzelii,f,f,f,f,f,f
+938,Borrelia anserina,species,LPSN,species/borrelia-anserina,f,f,f,f,f,f
+834,Borrelia burgdorferi,species,LPSN,species/borrelia-burgdorferi,f,f,f,f,f,f
+162,Borrelia caucasica,species,LPSN,species/borrelia-caucasica,f,f,f,f,f,f
+1649,Borrelia coriaceae,species,LPSN,species/borrelia-coriaceae,f,f,f,f,f,f
+1555,Borrelia crocidurae,species,LPSN,species/borrelia-crocidurae,f,f,f,f,f,f
+1276,Borrelia duttonii,species,LPSN,species/borrelia-duttonii,f,f,f,f,f,f
+2276,Borrelia garinii,species,LPSN,species/borrelia-garinii,f,f,f,f,f,f
+1950,Borrelia hermsii,species,LPSN,species/borrelia-hermsii,f,f,f,f,f,f
+321,Borrelia hispanica,species,LPSN,species/borrelia-hispanica,f,f,f,f,f,f
+1663,Borrelia japonica,species,LPSN,species/borrelia-japonica,f,f,f,f,f,f
+2151,Borrelia lusitaniae,species,LPSN,species/borrelia-lusitaniae,f,f,f,f,f,f
+1070,Borrelia mazzottii,species,LPSN,species/borrelia-mazzottii,f,f,f,f,f,f
+719,Borrelia miyamotoi,species,LPSN,species/borrelia-miyamotoi,f,f,f,f,f,f
+1989,Borrelia parkeri,species,LPSN,species/borrelia-parkeri,f,f,f,f,f,f
+154,Borrelia recurrentis,species,LPSN,species/borrelia-recurrentis,f,f,f,f,f,f
+2103,Borrelia tanukii,species,LPSN,species/borrelia-tanukii,f,f,f,f,f,f
+1980,Borrelia theileri,species,LPSN,species/borrelia-theileri,f,f,f,f,f,f
+1520,Borrelia turicatae,species,LPSN,species/borrelia-turicatae,f,f,f,f,f,f
+1487,Borrelia valaisiana,species,LPSN,species/borrelia-valaisiana,f,f,f,f,f,f
+870,Borrelia venezuelensis,species,LPSN,species/borrelia-venezuelensis,f,f,f,f,f,f
+1714,Botryodiplodia,genus,MycoBank,7420,f,f,f,f,f,f
+3038,Bowdeniella nasicola,species,LPSN,species/bowdeniella-nasicola,t,f,f,f,f,f
+1841,Brachybacterium,genus,LPSN,genus/brachybacterium,f,f,f,f,f,f
+2595,Brachybacterium muris,species,LPSN,species/brachybacterium-muris,f,f,f,f,f,f
+128,Brachyspira,genus,LPSN,genus/brachyspira,f,f,f,f,f,f
+225,Brachyspira aalborgi,species,LPSN,species/brachyspira-aalborgi,f,f,f,f,f,f
+984,Brachyspira pilosicoli,species,LPSN,species/brachyspira-pilosicoli,f,f,f,f,f,f
+493,Brevibacillus,genus,LPSN,genus/brevibacillus,t,f,f,f,f,f
+962,Brevibacillus agri,species,LPSN,species/brevibacillus-agri,t,f,f,f,f,f
+1486,Brevibacillus brevis,species,LPSN,species/brevibacillus-brevis,t,f,f,f,f,f
+1687,Brevibacillus centrosporus,species,LPSN,species/brevibacillus-centrosporus,t,f,f,f,f,f
+1557,Brevibacillus laterosporus,species,LPSN,species/brevibacillus-laterosporus,t,f,f,f,f,f
+389,Brevibacillus parabrevis,species,LPSN,species/brevibacillus-parabrevis,t,f,f,f,f,f
+1251,Brevibacterium,genus,LPSN,genus/brevibacterium,t,f,f,f,f,f
+75,Brevibacterium casei,species,LPSN,species/brevibacterium-casei,t,f,f,f,f,f
+1643,Brevibacterium epidermidis,species,LPSN,species/brevibacterium-epidermidis,t,f,f,f,f,f
+721,Brevibacterium linens,species,LPSN,species/brevibacterium-linens,t,f,f,f,f,f
+531,Brevibacterium luteolum,species,LPSN,species/brevibacterium-luteolum,t,f,f,f,f,f
+2541,Brevibacterium mcbrellneri,species,LPSN,species/brevibacterium-mcbrellneri,t,f,f,f,f,f
+1673,Brevibacterium ravenspurgense,species,LPSN,species/brevibacterium-ravenspurgense,t,f,f,f,f,f
+692,Brevibacterium sanguinis,species,LPSN,species/brevibacterium-sanguinis,t,f,f,f,f,f
+2985,Brevibacterium vitaeruminis,species,LPSN,species/brevibacterium-vitaeruminis,t,f,f,f,f,f
+340,Brevundimonas,genus,LPSN,genus/brevundimonas,f,f,f,f,f,f
+2548,Brevundimonas diminuta,species,LPSN,species/brevundimonas-diminuta,f,f,f,f,f,f
+2193,Brevundimonas vesicularis,species,LPSN,species/brevundimonas-vesicularis,f,f,f,f,f,f
+1316,Brucella,genus,LPSN,genus/brucella,f,f,f,f,f,f
+3176,Brucella anthropi,species,LPSN,species/brucella-anthropi,f,f,f,f,f,f
+3317,Brucella intermedia,species,LPSN,species/brucella-intermedia,f,f,f,f,f,f
+556,Brucella melitensis,species,LPSN,species/brucella-melitensis,f,f,f,f,f,f
+2706,Budvicia,genus,LPSN,genus/budvicia,f,f,f,t,t,t
+2707,Budvicia aquatica,species,LPSN,species/budvicia-aquatica,f,f,f,t,t,t
+2419,Bulleidia,genus,LPSN,genus/bulleidia,f,f,f,f,f,f
+147,Bulleidia extructa,species,LPSN,species/bulleidia-extructa,f,f,f,f,f,f
+2124,Burkholderia,genus,LPSN,genus/burkholderia,f,f,f,f,f,f
+720,Burkholderia ambifaria,species,LPSN,species/burkholderia-ambifaria,f,f,f,f,f,f
+302,Burkholderia anthina,species,LPSN,species/burkholderia-anthina,f,f,f,f,f,f
+1933,Burkholderia arboris,species,LPSN,species/burkholderia-arboris,f,f,f,f,f,f
+411,Burkholderia cenocepacia,species,LPSN,species/burkholderia-cenocepacia,f,f,f,f,f,f
+2117,Burkholderia cepacia,species,LPSN,species/burkholderia-cepacia,f,f,f,f,f,f
+2940,Burkholderia cepacia complex,species complex,NeoIPC,79,f,f,f,f,f,f
+1444,Burkholderia contaminans,species,LPSN,species/burkholderia-contaminans,f,f,f,f,f,f
+1068,Burkholderia diffusa,species,LPSN,species/burkholderia-diffusa,f,f,f,f,f,f
+1488,Burkholderia dolosa,species,LPSN,species/burkholderia-dolosa,f,f,f,f,f,f
+1427,Burkholderia gladioli,species,LPSN,species/burkholderia-gladioli,f,f,f,f,f,f
+251,Burkholderia lata,species,LPSN,species/burkholderia-lata,f,f,f,f,f,f
+2567,Burkholderia latens,species,LPSN,species/burkholderia-latens,f,f,f,f,f,f
+1150,Burkholderia mallei,species,LPSN,species/burkholderia-mallei,f,f,f,f,f,f
+426,Burkholderia metallica,species,LPSN,species/burkholderia-metallica,f,f,f,f,f,f
+2039,Burkholderia multivorans,species,LPSN,species/burkholderia-multivorans,f,f,f,f,f,f
+2253,Burkholderia pseudomallei,species,LPSN,species/burkholderia-pseudomallei,f,f,f,f,f,f
+2963,Burkholderia pyrrocinia,species,LPSN,species/burkholderia-pyrrocinia,f,f,f,f,f,f
+2105,Burkholderia stabilis,species,LPSN,species/burkholderia-stabilis,f,f,f,f,f,f
+1396,Burkholderia thailandensis,species,LPSN,species/burkholderia-thailandensis,f,f,f,f,f,f
+395,Burkholderia ubonensis,species,LPSN,species/burkholderia-ubonensis,f,f,f,f,f,f
+1137,Burkholderia vietnamiensis,species,LPSN,species/burkholderia-vietnamiensis,f,f,f,f,f,f
+2420,Buttiauxella,genus,LPSN,genus/buttiauxella,f,f,f,t,t,t
+646,Buttiauxella agrestis,species,LPSN,species/buttiauxella-agrestis,f,f,f,t,t,t
+245,Buttiauxella brennerae,species,LPSN,species/buttiauxella-brennerae,f,f,f,t,t,t
+896,Buttiauxella ferragutiae,species,LPSN,species/buttiauxella-ferragutiae,f,f,f,t,t,t
+2371,Buttiauxella gaviniae,species,LPSN,species/buttiauxella-gaviniae,f,f,f,t,t,t
+1854,Buttiauxella izardii,species,LPSN,species/buttiauxella-izardii,f,f,f,t,t,t
+820,Buttiauxella noackiae,species,LPSN,species/buttiauxella-noackiae,f,f,f,t,t,t
+1239,Buttiauxella warmboldiae,species,LPSN,species/buttiauxella-warmboldiae,f,f,f,t,t,t
+606,Butyricimonas,genus,LPSN,genus/butyricimonas,f,f,f,f,f,f
+2060,Butyricimonas virosa,species,LPSN,species/butyricimonas-virosa,f,f,f,f,f,f
+1965,Butyrivibrio,genus,LPSN,genus/butyrivibrio,f,f,f,f,f,f
+1022,Butyrivibrio fibrisolvens,species,LPSN,species/butyrivibrio-fibrisolvens,f,f,f,f,f,f
+1171,Butyrivibrio hungatei,species,LPSN,species/butyrivibrio-hungatei,f,f,f,f,f,f
+2680,Caliciviridae,family,ICTV,202102798,f,f,f,f,f,f
+3334,California encephalitis orthobunyavirus,species,ICTV,202100103,f,f,f,f,f,f
+1229,Campylobacter,genus,LPSN,genus/campylobacter,f,f,f,f,f,f
+2220,Campylobacter coli,species,LPSN,species/campylobacter-coli,f,f,f,f,f,f
+1521,Campylobacter concisus,species,LPSN,species/campylobacter-concisus,f,f,f,f,f,f
+1458,Campylobacter curvus,species,LPSN,species/campylobacter-curvus,f,f,f,f,f,f
+2381,Campylobacter fetus,species,LPSN,species/campylobacter-fetus,f,f,f,f,f,f
+1993,Campylobacter fetus fetus,subspecies,LPSN,subspecies/campylobacter-fetus-fetus,f,f,f,f,f,f
+1023,Campylobacter fetus venerealis,subspecies,LPSN,subspecies/campylobacter-fetus-venerealis,f,f,f,f,f,f
+1074,Campylobacter gracilis,species,LPSN,species/campylobacter-gracilis,f,f,f,f,f,f
+651,Campylobacter helveticus,species,LPSN,species/campylobacter-helveticus,f,f,f,f,f,f
+2201,Campylobacter hominis,species,LPSN,species/campylobacter-hominis,f,f,f,f,f,f
+262,Campylobacter hyointestinalis,species,LPSN,species/campylobacter-hyointestinalis,f,f,f,f,f,f
+1874,Campylobacter insulaenigrae,species,LPSN,species/campylobacter-insulaenigrae,f,f,f,f,f,f
+47,Campylobacter jejuni,species,LPSN,species/campylobacter-jejuni,f,f,f,f,f,f
+492,Campylobacter jejuni doylei,subspecies,LPSN,subspecies/campylobacter-jejuni-doylei,f,f,f,f,f,f
+1461,Campylobacter jejuni jejuni,subspecies,LPSN,subspecies/campylobacter-jejuni-jejuni,f,f,f,f,f,f
+1746,Campylobacter lanienae,species,LPSN,species/campylobacter-lanienae,f,f,f,f,f,f
+707,Campylobacter lari,species,LPSN,species/campylobacter-lari,f,f,f,f,f,f
+441,Campylobacter mucosalis,species,LPSN,species/campylobacter-mucosalis,f,f,f,f,f,f
+95,Campylobacter rectus,species,LPSN,species/campylobacter-rectus,f,f,f,f,f,f
+2495,Campylobacter showae,species,LPSN,species/campylobacter-showae,f,f,f,f,f,f
+2335,Campylobacter sputorum,species,LPSN,species/campylobacter-sputorum,f,f,f,f,f,f
+22,Campylobacter sputorum bubulus,subspecies,LPSN,subspecies/campylobacter-sputorum-bubulus,f,f,f,f,f,f
+540,Campylobacter sputorum sputorum,subspecies,LPSN,subspecies/campylobacter-sputorum-sputorum,f,f,f,f,f,f
+1405,Campylobacter upsaliensis,species,LPSN,species/campylobacter-upsaliensis,f,f,f,f,f,f
+471,Campylobacter ureolyticus,species,LPSN,species/campylobacter-ureolyticus,f,f,f,f,f,f
+2273,Candida albicans,species,MycoBank,256187,f,f,f,f,f,f
+1183,Candida auris,species,MycoBank,508967,f,f,f,f,f,f
+2037,Candida bracarensis,species,MycoBank,357201,f,f,f,f,f,f
+730,Candida brumptii,species,MycoBank,453479,f,f,f,f,f,f
+2511,Candida dubliniensis,species,MycoBank,254786,f,f,f,f,f,f
+3362,Candida duobushaemulonis,species,MycoBank,584804,f,f,f,f,f,f
+512,Candida fabianii,species,MycoBank,327431,f,f,f,f,f,f
+2078,Candida glabrata,species,MycoBank,310265,f,f,f,f,f,f
+3380,Candida haemuloni,species,MycoBank,634000,f,f,f,f,f,f
+1805,Candida inconspicua,species,MycoBank,310280,f,f,f,f,f,f
+1466,Candida intermedia,species,MycoBank,252746,f,f,f,f,f,f
+1312,Candida metapsilosis,species,MycoBank,500210,f,f,f,f,f,f
+1322,Candida nivariensis,species,MycoBank,357391,f,f,f,f,f,f
+2427,Candida orthopsilosis,species,MycoBank,500209,f,f,f,f,f,f
+1197,Candida parapsilosis,species,MycoBank,253819,f,f,f,f,f,f
+2701,Candida parapsilosis complex,species complex,NeoIPC,30,f,f,f,f,f,f
+1055,Candida pararugosa,species,MycoBank,310318,f,f,f,f,f,f
+3348,Candida pintolopesii var. pintolopesii,variety,MycoBank,417304,f,f,f,f,f,f
+550,Candida sake,species,MycoBank,283382,f,f,f,f,f,f
+3367,Candida slooffiae,species,MycoBank,324002,f,f,f,f,f,f
+181,Candida tropicalis,species,MycoBank,280770,f,f,f,f,f,f
+94,Candida zeylanoides,species,MycoBank,255505,f,f,f,f,f,f
+3135,Canicola haemoglobinophilus,species,LPSN,species/canicola-haemoglobinophilus,f,f,f,t,t,t
+2177,Capnocytophaga,genus,LPSN,genus/capnocytophaga,f,f,f,f,f,f
+29,Capnocytophaga canimorsus,species,LPSN,species/capnocytophaga-canimorsus,f,f,f,f,f,f
+1905,Capnocytophaga cynodegmi,species,LPSN,species/capnocytophaga-cynodegmi,f,f,f,f,f,f
+755,Capnocytophaga gingivalis,species,LPSN,species/capnocytophaga-gingivalis,f,f,f,f,f,f
+1518,Capnocytophaga granulosa,species,LPSN,species/capnocytophaga-granulosa,f,f,f,f,f,f
+1139,Capnocytophaga haemolytica,species,LPSN,species/capnocytophaga-haemolytica,f,f,f,f,f,f
+61,Capnocytophaga ochracea,species,LPSN,species/capnocytophaga-ochracea,f,f,f,f,f,f
+499,Capnocytophaga sputigena,species,LPSN,species/capnocytophaga-sputigena,f,f,f,f,f,f
+1020,Cardiobacterium,genus,LPSN,genus/cardiobacterium,f,f,f,f,f,f
+2141,Cardiobacterium hominis,species,LPSN,species/cardiobacterium-hominis,f,f,f,f,f,f
+836,Cardiobacterium valvarum,species,LPSN,species/cardiobacterium-valvarum,f,f,f,f,f,f
+177,Catenibacterium,genus,LPSN,genus/catenibacterium,f,f,f,f,f,f
+384,Catenibacterium mitsuokai,species,LPSN,species/catenibacterium-mitsuokai,f,f,f,f,f,f
+935,Catonella,genus,LPSN,genus/catonella,f,f,f,f,f,f
+91,Catonella morbi,species,LPSN,species/catonella-morbi,f,f,f,f,f,f
+904,Cedecea,genus,LPSN,genus/cedecea,f,f,f,t,t,t
+459,Cedecea davisae,species,LPSN,species/cedecea-davisae,f,f,f,t,t,t
+1556,Cedecea lapagei,species,LPSN,species/cedecea-lapagei,f,f,f,t,t,t
+1944,Cedecea neteri,species,LPSN,species/cedecea-neteri,f,f,f,t,t,t
+392,Cellulomonas,genus,LPSN,genus/cellulomonas,t,f,f,f,f,f
+2440,Cellulomonas hominis,species,LPSN,species/cellulomonas-hominis,t,f,f,f,f,f
+1662,Cellulomonas humilata,species,LPSN,species/cellulomonas-humilata,t,f,f,f,f,f
+1315,Cellulosimicrobium,genus,LPSN,genus/cellulosimicrobium,t,f,f,f,f,f
+1271,Cellulosimicrobium cellulans,species,LPSN,species/cellulosimicrobium-cellulans,t,f,f,f,f,f
+2014,Centipeda,genus,LPSN,genus/centipeda,f,f,f,f,f,f
+179,Centipeda periodontii,species,LPSN,species/centipeda-periodontii,f,f,f,f,f,f
+1231,Cephalosporium,genus,MycoBank,7525,f,f,f,f,f,f
+2575,Chaetomium,genus,MycoBank,953,f,f,f,f,f,f
+1732,Chaetomium globosum,species,MycoBank,172545,f,f,f,f,f,f
+916,Chikungunya virus,species,ICTV,202105087,f,f,f,f,f,f
+2165,Chlamydia,genus,LPSN,genus/chlamydia,f,f,f,f,f,f
+3324,Chlamydia abortus,species,LPSN,species/chlamydia-abortus,f,f,f,f,f,f
+1758,Chlamydia pneumoniae,species,LPSN,species/chlamydia-pneumoniae,f,f,f,f,f,f
+1766,Chlamydia psittaci,species,LPSN,species/chlamydia-psittaci,f,f,f,f,f,f
+2325,Chlamydia trachomatis,species,LPSN,species/chlamydia-trachomatis,f,f,f,f,f,f
+3020,Christensenella,genus,LPSN,genus/christensenella,f,f,f,f,f,f
+3163,Christensenella hongkongensis,species,LPSN,species/christensenella-hongkongensis,f,f,f,f,f,f
+1524,Chromobacterium,genus,LPSN,genus/chromobacterium,f,f,f,f,f,f
+453,Chromobacterium violaceum,species,LPSN,species/chromobacterium-violaceum,f,f,f,f,f,f
+2384,Chryseobacterium,genus,LPSN,genus/chryseobacterium,f,f,f,f,f,f
+2544,Chryseobacterium gleum,species,LPSN,species/chryseobacterium-gleum,f,f,f,f,f,f
+294,Chryseobacterium indologenes,species,LPSN,species/chryseobacterium-indologenes,f,f,f,f,f,f
+417,Chryseomonas,genus,LPSN,genus/chryseomonas,f,f,f,f,f,f
+1254,Chryseomonas luteola,species,LPSN,species/chryseomonas-luteola,f,f,f,f,f,f
+1457,Chrysosporium,genus,MycoBank,7645,f,f,f,f,f,f
+1940,Citrobacter,genus,LPSN,genus/citrobacter,f,f,f,t,t,t
+1302,Citrobacter amalonaticus,species,LPSN,species/citrobacter-amalonaticus,f,f,f,t,t,t
+841,Citrobacter braakii,species,LPSN,species/citrobacter-braakii,f,f,f,t,t,t
+292,Citrobacter farmeri,species,LPSN,species/citrobacter-farmeri,f,f,f,t,t,t
+1430,Citrobacter freundii,species,LPSN,species/citrobacter-freundii,f,f,f,t,t,t
+1079,Citrobacter gillenii,species,LPSN,species/citrobacter-gillenii,f,f,f,t,t,t
+1747,Citrobacter koseri,species,LPSN,species/citrobacter-koseri,f,f,f,t,t,t
+1810,Citrobacter murliniae,species,LPSN,species/citrobacter-murliniae,f,f,f,t,t,t
+2712,Citrobacter pasteurii,species,LPSN,species/citrobacter-pasteurii,f,f,f,t,t,t
+131,Citrobacter rodentium,species,LPSN,species/citrobacter-rodentium,f,f,f,t,t,t
+2400,Citrobacter sedlakii,species,LPSN,species/citrobacter-sedlakii,f,f,f,t,t,t
+1432,Citrobacter werkmanii,species,LPSN,species/citrobacter-werkmanii,f,f,f,t,t,t
+1014,Citrobacter youngae,species,LPSN,species/citrobacter-youngae,f,f,f,t,t,t
+1500,Cladophialophora,genus,MycoBank,7677,f,f,f,f,f,f
+2224,Cladophialophora bantiana,species,MycoBank,412791,f,f,f,f,f,f
+1335,Cladosporium,genus,MycoBank,7681,f,f,f,f,f,f
+729,Cladosporium cladosporioides,species,MycoBank,294915,f,f,f,f,f,f
+1233,Cladosporium herbarum,species,MycoBank,231458,f,f,f,f,f,f
+888,Cladosporium sphaerospermum,species,MycoBank,119529,f,f,f,f,f,f
+1127,Clavispora,genus,MycoBank,1095,f,f,f,f,f,f
+2157,Clavispora lusitaniae,species,MycoBank,111257,f,f,f,f,f,f
+1382,Clostridioides,genus,LPSN,genus/clostridioides,f,f,f,f,f,f
+594,Clostridioides difficile,species,LPSN,species/clostridioides-difficile,f,f,f,f,f,f
+1098,Clostridium,genus,LPSN,genus/clostridium,f,f,f,f,f,f
+2817,Clostridium aldenense,species,LPSN,species/clostridium-aldenense,f,f,f,f,f,f
+2818,Clostridium amygdalinum,species,LPSN,species/clostridium-amygdalinum,f,f,f,f,f,f
+2278,Clostridium argentinense,species,LPSN,species/clostridium-argentinense,f,f,f,f,f,f
+1511,Clostridium baratii,species,LPSN,species/clostridium-baratii,f,f,f,f,f,f
+1654,Clostridium beijerinckii,species,LPSN,species/clostridium-beijerinckii,f,f,f,f,f,f
+142,Clostridium botulinum,species,LPSN,species/clostridium-botulinum,f,f,f,f,f,f
+3170,Clostridium budayi,species,LPSN,species/clostridium-budayi,f,f,f,f,f,f
+1538,Clostridium butyricum,species,LPSN,species/clostridium-butyricum,f,f,f,f,f,f
+2018,Clostridium cadaveris,species,LPSN,species/clostridium-cadaveris,f,f,f,f,f,f
+21,Clostridium carnis,species,LPSN,species/clostridium-carnis,f,f,f,f,f,f
+2819,Clostridium celatum,species,LPSN,species/clostridium-celatum,f,f,f,f,f,f
+2820,Clostridium chauvoei,species,LPSN,species/clostridium-chauvoei,f,f,f,f,f,f
+1490,Clostridium cochlearium,species,LPSN,species/clostridium-cochlearium,f,f,f,f,f,f
+253,Clostridium cocleatum,species,LPSN,species/clostridium-cocleatum,f,f,f,f,f,f
+2823,Clostridium combesii,species,LPSN,species/clostridium-combesii,f,f,f,f,f,f
+1612,Clostridium disporicum,species,LPSN,species/clostridium-disporicum,f,f,f,f,f,f
+224,Clostridium fallax,species,LPSN,species/clostridium-fallax,f,f,f,f,f,f
+714,Clostridium haemolyticum,species,LPSN,species/clostridium-haemolyticum,f,f,f,f,f,f
+2824,Clostridium hydrogeniformans,species,LPSN,species/clostridium-hydrogeniformans,f,f,f,f,f,f
+1682,Clostridium innocuum,species,LPSN,species/clostridium-innocuum,f,f,f,f,f,f
+2249,Clostridium intestinale,species,LPSN,species/clostridium-intestinale,f,f,f,f,f,f
+1426,Clostridium leptum,species,LPSN,species/clostridium-leptum,f,f,f,f,f,f
+1629,Clostridium malenominatum,species,LPSN,species/clostridium-malenominatum,f,f,f,f,f,f
+3111,Clostridium moniliforme,species,LPSN,species/clostridium-moniliforme,f,f,f,f,f,f
+2827,Clostridium neonatale,species,LPSN,species/clostridium-neonatale,f,f,f,f,f,f
+1078,Clostridium novyi,species,LPSN,species/clostridium-novyi,f,f,f,f,f,f
+284,Clostridium paraputrificum,species,LPSN,species/clostridium-paraputrificum,f,f,f,f,f,f
+430,Clostridium perfringens,species,LPSN,species/clostridium-perfringens,f,f,f,f,f,f
+999,Clostridium putrefaciens,species,LPSN,species/clostridium-putrefaciens,f,f,f,f,f,f
+1091,Clostridium ramosum,species,LPSN,species/clostridium-ramosum,f,f,f,f,f,f
+833,Clostridium sardiniense,species,LPSN,species/clostridium-sardiniense,f,f,f,f,f,f
+1462,Clostridium septicum,species,LPSN,species/clostridium-septicum,f,f,f,f,f,f
+1966,Clostridium spiroforme,species,LPSN,species/clostridium-spiroforme,f,f,f,f,f,f
+1129,Clostridium sporogenes,species,LPSN,species/clostridium-sporogenes,f,f,f,f,f,f
+726,Clostridium sporosphaeroides,species,LPSN,species/clostridium-sporosphaeroides,f,f,f,f,f,f
+2312,Clostridium subterminale,species,LPSN,species/clostridium-subterminale,f,f,f,f,f,f
+454,Clostridium symbiosum,species,LPSN,species/clostridium-symbiosum,f,f,f,f,f,f
+519,Clostridium tertium,species,LPSN,species/clostridium-tertium,f,f,f,f,f,f
+42,Clostridium tetani,species,LPSN,species/clostridium-tetani,f,f,f,f,f,f
+2776,Coagulase-negative staphylococcus,group,NeoIPC,63,t,f,f,f,f,f
+2777,Coagulase-positive staphylococcus,group,NeoIPC,64,f,f,f,f,f,f
+248,Cokeromyces,genus,MycoBank,23001,f,f,f,f,f,f
+17,Cokeromyces recurvatus,species,MycoBank,295277,f,f,f,f,f,f
+897,Collinsella,genus,LPSN,genus/collinsella,f,f,f,f,f,f
+1460,Collinsella aerofaciens,species,LPSN,species/collinsella-aerofaciens,f,f,f,f,f,f
+2164,Collinsella intestinalis,species,LPSN,species/collinsella-intestinalis,f,f,f,f,f,f
+2140,Collinsella stercoris,species,LPSN,species/collinsella-stercoris,f,f,f,f,f,f
+3339,Colorado tick fever coltivirus,species,ICTV,202104928,f,f,f,f,f,f
+143,Comamonas,genus,LPSN,genus/comamonas,f,f,f,f,f,f
+1235,Comamonas aquatica,species,LPSN,species/comamonas-aquatica,f,f,f,f,f,f
+1170,Comamonas kerstersii,species,LPSN,species/comamonas-kerstersii,f,f,f,f,f,f
+1398,Comamonas terrigena,species,LPSN,species/comamonas-terrigena,f,f,f,f,f,f
+843,Comamonas testosteroni,species,LPSN,species/comamonas-testosteroni,f,f,f,f,f,f
+200,Conidiobolus,genus,MycoBank,20144,f,f,f,f,f,f
+2265,Conidiobolus coronatus,species,MycoBank,283037,f,f,f,f,f,f
+489,Conidiobolus incongruus,species,MycoBank,328753,f,f,f,f,f,f
+3352,Coniochaeta,genus,MycoBank,1209,f,f,f,f,f,f
+3354,Coniochaeta hoffmannii,species,MycoBank,803421,f,f,f,f,f,f
+3368,Coniochaeta mutabilis,species,MycoBank,803419,f,f,f,f,f,f
+2206,Coniothyrium,genus,MycoBank,7765,f,f,f,f,f,f
+882,Coprococcus,genus,LPSN,genus/coprococcus,f,f,f,f,f,f
+669,Coprococcus eutactus,species,LPSN,species/coprococcus-eutactus,f,f,f,f,f,f
+3363,Cordyceps javanica,species,MycoBank,820982,f,f,f,f,f,f
+1968,Corynebacterium,genus,LPSN,genus/corynebacterium,t,f,f,f,f,f
+1616,Corynebacterium accolens,species,LPSN,species/corynebacterium-accolens,t,f,f,f,f,f
+593,Corynebacterium afermentans,species,LPSN,species/corynebacterium-afermentans,t,f,f,f,f,f
+1135,Corynebacterium afermentans afermentans,subspecies,LPSN,subspecies/corynebacterium-afermentans-afermentans,t,f,f,f,f,f
+339,Corynebacterium afermentans lipophilum,subspecies,LPSN,subspecies/corynebacterium-afermentans-lipophilum,t,f,f,f,f,f
+129,Corynebacterium ammoniagenes,species,LPSN,species/corynebacterium-ammoniagenes,t,f,f,f,f,f
+460,Corynebacterium amycolatum,species,LPSN,species/corynebacterium-amycolatum,t,f,f,f,f,f
+2214,Corynebacterium appendicis,species,LPSN,species/corynebacterium-appendicis,t,f,f,f,f,f
+2915,Corynebacterium aquatimens,species,LPSN,species/corynebacterium-aquatimens,t,f,f,f,f,f
+2417,Corynebacterium aquilae,species,LPSN,species/corynebacterium-aquilae,t,f,f,f,f,f
+2594,Corynebacterium argentoratense,species,LPSN,species/corynebacterium-argentoratense,t,f,f,f,f,f
+2321,Corynebacterium atypicum,species,LPSN,species/corynebacterium-atypicum,t,f,f,f,f,f
+2438,Corynebacterium aurimucosum,species,LPSN,species/corynebacterium-aurimucosum,t,f,f,f,f,f
+2194,Corynebacterium auris,species,LPSN,species/corynebacterium-auris,t,f,f,f,f,f
+1153,Corynebacterium auriscanis,species,LPSN,species/corynebacterium-auriscanis,t,f,f,f,f,f
+2916,Corynebacterium belfantii,species,LPSN,species/corynebacterium-belfantii,t,f,f,f,f,f
+1901,Corynebacterium beticola,species,LPSN,species/corynebacterium-beticola,t,f,f,f,f,f
+2479,Corynebacterium bovis,species,LPSN,species/corynebacterium-bovis,t,f,f,f,f,f
+936,Corynebacterium callunae,species,LPSN,species/corynebacterium-callunae,t,f,f,f,f,f
+3101,Corynebacterium camporealense,species,LPSN,species/corynebacterium-camporealense,t,f,f,f,f,f
+2917,Corynebacterium canis,species,LPSN,species/corynebacterium-canis,t,f,f,f,f,f
+485,Corynebacterium capitovis,species,LPSN,species/corynebacterium-capitovis,t,f,f,f,f,f
+1844,Corynebacterium casei,species,LPSN,species/corynebacterium-casei,t,f,f,f,f,f
+1080,Corynebacterium caspium,species,LPSN,species/corynebacterium-caspium,t,f,f,f,f,f
+2509,Corynebacterium ciconiae,species,LPSN,species/corynebacterium-ciconiae,t,f,f,f,f,f
+452,Corynebacterium confusum,species,LPSN,species/corynebacterium-confusum,t,f,f,f,f,f
+1813,Corynebacterium coyleae,species,LPSN,species/corynebacterium-coyleae,t,f,f,f,f,f
+1611,Corynebacterium cystitidis,species,LPSN,species/corynebacterium-cystitidis,t,f,f,f,f,f
+2918,Corynebacterium dentalis,species,LPSN,species/corynebacterium-dentalis,t,f,f,f,f,f
+70,Corynebacterium diphtheriae,species,LPSN,species/corynebacterium-diphtheriae,f,f,f,f,f,f
+1867,Corynebacterium durum,species,LPSN,species/corynebacterium-durum,t,f,f,f,f,f
+506,Corynebacterium efficiens,species,LPSN,species/corynebacterium-efficiens,t,f,f,f,f,f
+2468,Corynebacterium falsenii,species,LPSN,species/corynebacterium-falsenii,t,f,f,f,f,f
+41,Corynebacterium felinum,species,LPSN,species/corynebacterium-felinum,t,f,f,f,f,f
+1109,Corynebacterium flavescens,species,LPSN,species/corynebacterium-flavescens,t,f,f,f,f,f
+2919,Corynebacterium fournieri,species,LPSN,species/corynebacterium-fournieri,t,f,f,f,f,f
+2920,Corynebacterium freiburgense,species,LPSN,species/corynebacterium-freiburgense,t,f,f,f,f,f
+163,Corynebacterium freneyi,species,LPSN,species/corynebacterium-freneyi,t,f,f,f,f,f
+2941,Corynebacterium genitalium,species,LPSN,species/corynebacterium-genitalium-1,t,f,f,f,f,f
+1756,Corynebacterium glaucum,species,LPSN,species/corynebacterium-glaucum,t,f,f,f,f,f
+1620,Corynebacterium glucuronolyticum,species,LPSN,species/corynebacterium-glucuronolyticum,t,f,f,f,f,f
+514,Corynebacterium glutamicum,species,LPSN,species/corynebacterium-glutamicum,t,f,f,f,f,f
+2921,Corynebacterium gottingense,species,LPSN,species/corynebacterium-gottingense,t,f,f,f,f,f
+2475,Corynebacterium halotolerans,species,LPSN,species/corynebacterium-halotolerans,t,f,f,f,f,f
+2922,Corynebacterium hansenii,species,LPSN,species/corynebacterium-hansenii,t,f,f,f,f,f
+1378,Corynebacterium imitans,species,LPSN,species/corynebacterium-imitans,t,f,f,f,f,f
+1991,Corynebacterium jeikeium,species,LPSN,species/corynebacterium-jeikeium,t,f,f,f,f,f
+373,Corynebacterium kroppenstedtii,species,LPSN,species/corynebacterium-kroppenstedtii,t,f,f,f,f,f
+1715,Corynebacterium kutscheri,species,LPSN,species/corynebacterium-kutscheri,t,f,f,f,f,f
+1474,Corynebacterium lipophiloflavum,species,LPSN,species/corynebacterium-lipophiloflavum,t,f,f,f,f,f
+2923,Corynebacterium lowii,species,LPSN,species/corynebacterium-lowii,t,f,f,f,f,f
+777,Corynebacterium macginleyi,species,LPSN,species/corynebacterium-macginleyi,t,f,f,f,f,f
+2245,Corynebacterium massiliense,species,LPSN,species/corynebacterium-massiliense,t,f,f,f,f,f
+618,Corynebacterium mastitidis,species,LPSN,species/corynebacterium-mastitidis,t,f,f,f,f,f
+2230,Corynebacterium matruchotii,species,LPSN,species/corynebacterium-matruchotii,t,f,f,f,f,f
+2942,Corynebacterium mediolanum,species,LPSN,species/corynebacterium-mediolanum,t,f,f,f,f,f
+970,Corynebacterium minutissimum,species,LPSN,species/corynebacterium-minutissimum,t,f,f,f,f,f
+176,Corynebacterium mucifaciens,species,LPSN,species/corynebacterium-mucifaciens,t,f,f,f,f,f
+2360,Corynebacterium mycetoides,species,LPSN,species/corynebacterium-mycetoides,t,f,f,f,f,f
+2924,Corynebacterium oculi,species,LPSN,species/corynebacterium-oculi,t,f,f,f,f,f
+3036,Corynebacterium otitidis,species,LPSN,species/corynebacterium-otitidis,t,f,f,f,f,f
+1106,Corynebacterium phocae,species,LPSN,species/corynebacterium-phocae,t,f,f,f,f,f
+2925,Corynebacterium pilbarense,species,LPSN,species/corynebacterium-pilbarense,t,f,f,f,f,f
+898,Corynebacterium pilosum,species,LPSN,species/corynebacterium-pilosum,t,f,f,f,f,f
+927,Corynebacterium propinquum,species,LPSN,species/corynebacterium-propinquum,t,f,f,f,f,f
+2516,Corynebacterium pseudodiphtheriticum,species,LPSN,species/corynebacterium-pseudodiphtheriticum,t,f,f,f,f,f
+2943,Corynebacterium pseudogenitalium,species,LPSN,species/corynebacterium-pseudogenitalium-1,t,f,f,f,f,f
+214,Corynebacterium pseudotuberculosis,species,LPSN,species/corynebacterium-pseudotuberculosis,t,f,f,f,f,f
+1605,Corynebacterium pyruviciproducens,species,LPSN,species/corynebacterium-pyruviciproducens,t,f,f,f,f,f
+2096,Corynebacterium renale,species,LPSN,species/corynebacterium-renale,t,f,f,f,f,f
+150,Corynebacterium resistens,species,LPSN,species/corynebacterium-resistens,t,f,f,f,f,f
+336,Corynebacterium riegelii,species,LPSN,species/corynebacterium-riegelii,t,f,f,f,f,f
+2926,Corynebacterium rouxii,species,LPSN,species/corynebacterium-rouxii,t,f,f,f,f,f
+2944,Corynebacterium rubrum,species,LPSN,species/corynebacterium-rubrum,t,f,f,f,f,f
+584,Corynebacterium simulans,species,LPSN,species/corynebacterium-simulans,t,f,f,f,f,f
+1412,Corynebacterium singulare,species,LPSN,species/corynebacterium-singulare,t,f,f,f,f,f
+2454,Corynebacterium sphenisci,species,LPSN,species/corynebacterium-sphenisci,t,f,f,f,f,f
+311,Corynebacterium spheniscorum,species,LPSN,species/corynebacterium-spheniscorum,t,f,f,f,f,f
+2927,Corynebacterium sputi,species,LPSN,species/corynebacterium-sputi,t,f,f,f,f,f
+2473,Corynebacterium striatum,species,LPSN,species/corynebacterium-striatum,t,f,f,f,f,f
+1982,Corynebacterium suicordis,species,LPSN,species/corynebacterium-suicordis,t,f,f,f,f,f
+1695,Corynebacterium sundsvallense,species,LPSN,species/corynebacterium-sundsvallense,t,f,f,f,f,f
+1635,Corynebacterium terpenotabidum,species,LPSN,species/corynebacterium-terpenotabidum,t,f,f,f,f,f
+532,Corynebacterium testudinoris,species,LPSN,species/corynebacterium-testudinoris,t,f,f,f,f,f
+190,Corynebacterium thomssenii,species,LPSN,species/corynebacterium-thomssenii,t,f,f,f,f,f
+2928,Corynebacterium timonense,species,LPSN,species/corynebacterium-timonense,t,f,f,f,f,f
+1767,Corynebacterium tuberculostearicum,species,LPSN,species/corynebacterium-tuberculostearicum,t,f,f,f,f,f
+1227,Corynebacterium tuscaniense,species,LPSN,species/corynebacterium-tuscaniense,t,f,f,f,f,f
+2113,Corynebacterium ulcerans,species,LPSN,species/corynebacterium-ulcerans,t,f,f,f,f,f
+2330,Corynebacterium urealyticum,species,LPSN,species/corynebacterium-urealyticum,t,f,f,f,f,f
+1595,Corynebacterium ureicelerivorans,species,LPSN,species/corynebacterium-ureicelerivorans,t,f,f,f,f,f
+1821,Corynebacterium variabile,species,LPSN,species/corynebacterium-variabile,t,f,f,f,f,f
+2372,Corynebacterium vitaeruminis,species,LPSN,species/corynebacterium-vitaeruminis,t,f,f,f,f,f
+1686,Corynebacterium xerosis,species,LPSN,species/corynebacterium-xerosis,t,f,f,f,f,f
+3238,Cosenzaea myxofaciens,species,LPSN,species/cosenzaea-myxofaciens,f,f,f,t,t,f
+2346,Coxiella,genus,LPSN,genus/coxiella,f,f,f,f,f,f
+917,Coxiella burnetii,species,LPSN,species/coxiella-burnetii,f,f,f,f,f,f
+3340,Crimean-Congo hemorrhagic fever orthonairovirus,species,ICTV,202100070,f,f,f,f,f,f
+347,Cronobacter,genus,LPSN,genus/cronobacter,f,f,f,t,t,t
+1575,Cronobacter dublinensis,species,LPSN,species/cronobacter-dublinensis,f,f,f,t,t,t
+1826,Cronobacter malonaticus,species,LPSN,species/cronobacter-malonaticus,f,f,f,t,t,t
+1501,Cronobacter muytjensii,species,LPSN,species/cronobacter-muytjensii,f,f,f,t,t,t
+1295,Cronobacter sakazakii,species,LPSN,species/cronobacter-sakazakii,f,f,f,t,t,t
+15,Cronobacter turicensis,species,LPSN,species/cronobacter-turicensis,f,f,f,t,t,t
+2016,Cryptobacterium,genus,LPSN,genus/cryptobacterium,f,f,f,f,f,f
+1831,Cryptobacterium curtum,species,LPSN,species/cryptobacterium-curtum,f,f,f,f,f,f
+565,Cunninghamella,genus,MycoBank,20150,f,f,f,f,f,f
+1678,Cunninghamella bertholletiae,species,MycoBank,230361,f,f,f,f,f,f
+1467,Cupriavidus,genus,LPSN,genus/cupriavidus,f,f,f,f,f,f
+1699,Cupriavidus basilensis,species,LPSN,species/cupriavidus-basilensis,f,f,f,f,f,f
+1536,Cupriavidus gilardii,species,LPSN,species/cupriavidus-gilardii,f,f,f,f,f,f
+2359,Cupriavidus metallidurans,species,LPSN,species/cupriavidus-metallidurans,f,f,f,f,f,f
+2555,Cupriavidus necator,species,LPSN,species/cupriavidus-necator,f,f,f,f,f,f
+1512,Cupriavidus pauculus,species,LPSN,species/cupriavidus-pauculus,f,f,f,f,f,f
+2546,Cupriavidus respiraculi,species,LPSN,species/cupriavidus-respiraculi,f,f,f,f,f,f
+412,Curtobacterium,genus,LPSN,genus/curtobacterium,f,f,f,f,f,f
+332,Curtobacterium albidum,species,LPSN,species/curtobacterium-albidum,f,f,f,f,f,f
+899,Curvularia,genus,MycoBank,7847,f,f,f,f,f,f
+3402,Curvularia australiensis,species,MycoBank,564767,f,f,f,f,f,f
+785,Curvularia geniculata,species,MycoBank,265873,f,f,f,f,f,f
+3385,Curvularia hawaiiensis,species,MycoBank,800543,f,f,f,f,f,f
+855,Curvularia lunata,species,MycoBank,269889,f,f,f,f,f,f
+3358,Cutaneotrichosporon cutaneum,species,MycoBank,813398,f,f,f,f,f,f
+3360,Cutaneotrichosporon mucoides,species,MycoBank,813402,f,f,f,f,f,f
+56,Cutibacterium,genus,LPSN,genus/cutibacterium,t,f,f,f,f,f
+1331,Cutibacterium acnes,species,LPSN,species/cutibacterium-acnes,t,f,f,f,f,f
+3283,Cutibacterium avidum,species,LPSN,species/cutibacterium-avidum,t,f,f,f,f,f
+2996,Cutibacterium granulosum,species,LPSN,species/cutibacterium-granulosum,t,f,f,f,f,f
+1132,Cyberlindnera fabianii,species,MycoBank,534382,f,f,f,f,f,f
+3356,Cyberlindnera jadinii,species,MycoBank,534383,f,f,f,f,f,f
+3369,Cystobasidium minutum,species,MycoBank,809340,f,f,f,f,f,f
+3105,Cytobacillus firmus,species,LPSN,species/cytobacillus-firmus,t,f,f,f,f,f
+2966,Debaryomyces,genus,MycoBank,1432,f,f,f,f,f,f
+1232,Debaryomyces hansenii,species,MycoBank,296478,f,f,f,f,f,f
+1872,Deinococcus,genus,LPSN,genus/deinococcus,f,f,f,f,f,f
+1125,Delftia,genus,LPSN,genus/delftia,f,f,f,f,f,f
+2356,Delftia acidovorans,species,LPSN,species/delftia-acidovorans,f,f,f,f,f,f
+2656,Deltainfluenzavirus influenzae,species,ICTV,202103962,f,f,f,f,f,f
+1791,Dengue virus,species,ICTV,202103081,f,f,f,f,f,f
+993,Dermabacter,genus,LPSN,genus/dermabacter,t,f,f,f,f,f
+745,Dermabacter hominis,species,LPSN,species/dermabacter-hominis,t,f,f,f,f,f
+2552,Dermacoccus,genus,LPSN,genus/dermacoccus,t,f,f,f,f,f
+545,Dermacoccus nishinomiyaensis,species,LPSN,species/dermacoccus-nishinomiyaensis,t,f,f,f,f,f
+776,Dermatophilus,genus,LPSN,genus/dermatophilus,f,f,f,f,f,f
+1215,Dermatophilus congolensis,species,LPSN,species/dermatophilus-congolensis,f,f,f,f,f,f
+2147,Desulfovibrio,genus,LPSN,genus/desulfovibrio,f,f,f,f,f,f
+1937,Desulfovibrio desulfuricans,species,LPSN,species/desulfovibrio-desulfuricans,f,f,f,f,f,f
+1716,Desulfovibrio piger,species,LPSN,species/desulfovibrio-piger,f,f,f,f,f,f
+570,Desulfovibrio vulgaris,species,LPSN,species/desulfovibrio-vulgaris,f,f,f,f,f,f
+1781,Dialister,genus,LPSN,genus/dialister,f,f,f,f,f,f
+1337,Dialister micraerophilus,species,LPSN,species/dialister-micraerophilus,f,f,f,f,f,f
+2270,Dialister pneumosintes,species,LPSN,species/dialister-pneumosintes,f,f,f,f,f,f
+1318,Dichelobacter,genus,LPSN,genus/dichelobacter,f,f,f,f,f,f
+299,Dichelobacter nodosus,species,LPSN,species/dichelobacter-nodosus,f,f,f,f,f,f
+1532,Dietzia,genus,LPSN,genus/dietzia,f,f,f,f,f,f
+3285,Dietzia maris,species,LPSN,species/dietzia-maris,f,f,f,f,f,f
+3405,Dipodascus klebahnii,species,MycoBank,551674,f,f,f,f,f,f
+3403,Diutina catenulata,species,MycoBank,813778,f,f,f,f,f,f
+3357,Diutina rugosa,species,MycoBank,813768,f,f,f,f,f,f
+2148,Dolosicoccus,genus,LPSN,genus/dolosicoccus,f,f,f,f,f,f
+1999,Dolosicoccus paucivorans,species,LPSN,species/dolosicoccus-paucivorans,f,f,f,f,f,f
+2577,Dolosigranulum,genus,LPSN,genus/dolosigranulum,f,f,f,f,f,f
+1071,Dolosigranulum pigrum,species,LPSN,species/dolosigranulum-pigrum,f,f,f,f,f,f
+910,Dorea,genus,LPSN,genus/dorea,f,f,f,f,f,f
+1730,Dorea formicigenerans,species,LPSN,species/dorea-formicigenerans,f,f,f,f,f,f
+614,Dorea longicatena,species,LPSN,species/dorea-longicatena,f,f,f,f,f,f
+2538,Dyella,genus,LPSN,genus/dyella,f,f,f,f,f,f
+2469,Dysgonomonas,genus,LPSN,genus/dysgonomonas,f,f,f,f,f,f
+2553,Dysgonomonas capnocytophagoides,species,LPSN,species/dysgonomonas-capnocytophagoides,f,f,f,f,f,f
+208,Dysgonomonas gadei,species,LPSN,species/dysgonomonas-gadei,f,f,f,f,f,f
+905,Eastern equine encephalitis virus,species,ICTV,202105088,f,f,f,f,f,f
+1684,Ebolavirus,genus,ICTV,202101564,f,f,f,f,f,f
+2681,Echovirus,group,NeoIPC,27,f,f,f,f,f,f
+3214,Ectobacillus funiculus,species,LPSN,species/ectobacillus-funiculus,t,f,f,f,f,f
+1689,Edwardsiella,genus,LPSN,genus/edwardsiella,f,f,f,t,t,f
+1350,Edwardsiella hoshinae,species,LPSN,species/edwardsiella-hoshinae,f,f,f,t,t,f
+2309,Edwardsiella ictaluri,species,LPSN,species/edwardsiella-ictaluri,f,f,f,t,t,f
+2260,Edwardsiella tarda,species,LPSN,species/edwardsiella-tarda,f,f,f,t,t,f
+2708,Eggerthella,genus,LPSN,genus/eggerthella,f,f,f,f,f,f
+2709,Eggerthella lenta,species,LPSN,species/eggerthella-lenta,f,f,f,f,f,f
+2710,Eggerthella sinensis,species,LPSN,species/eggerthella-sinensis,f,f,f,f,f,f
+1273,Eggerthia,genus,LPSN,genus/eggerthia,f,f,f,f,f,f
+1825,Eggerthia catenaformis,species,LPSN,species/eggerthia-catenaformis,f,f,f,f,f,f
+731,Ehrlichia,genus,LPSN,genus/ehrlichia,f,f,f,f,f,f
+3156,Ehrlichia sennetsu,species,LPSN,species/ehrlichia-sennetsu,f,f,f,f,f,f
+1089,Eikenella,genus,LPSN,genus/eikenella,f,f,f,f,f,f
+2135,Eikenella corrodens,species,LPSN,species/eikenella-corrodens,f,f,f,f,f,f
+795,Elizabethkingia,genus,LPSN,genus/elizabethkingia,f,f,f,f,f,f
+690,Elizabethkingia meningoseptica,species,LPSN,species/elizabethkingia-meningoseptica,f,f,f,f,f,f
+1116,Emmonsia,genus,MycoBank,8151,f,f,f,f,f,f
+13,Empedobacter,genus,LPSN,genus/empedobacter,f,f,f,f,f,f
+1338,Empedobacter brevis,species,LPSN,species/empedobacter-brevis,f,f,f,f,f,f
+1849,Enterobacter,genus,LPSN,genus/enterobacter,f,f,f,t,t,t
+1431,Enterobacter asburiae,species,LPSN,species/enterobacter-asburiae,f,f,f,t,t,t
+2713,Enterobacter bugandensis,species,LPSN,species/enterobacter-bugandensis,f,f,f,t,t,t
+1417,Enterobacter cancerogenus,species,LPSN,species/enterobacter-cancerogenus,f,f,f,t,t,t
+1212,Enterobacter cloacae,species,LPSN,species/enterobacter-cloacae,f,f,f,t,t,t
+2711,Enterobacter cloacae complex,species complex,NeoIPC,32,f,f,f,t,t,t
+1130,Enterobacter cloacae dissolvens,subspecies,LPSN,subspecies/enterobacter-cloacae-dissolvens,f,f,f,t,t,t
+1495,Enterobacter hormaechei,species,LPSN,species/enterobacter-hormaechei,f,f,f,t,t,t
+2714,Enterobacter huaxiensis,species,LPSN,species/enterobacter-huaxiensis,f,f,f,t,t,t
+1591,Enterobacter kobei,species,LPSN,species/enterobacter-kobei,f,f,f,t,t,t
+117,Enterobacter ludwigii,species,LPSN,species/enterobacter-ludwigii,f,f,f,t,t,t
+2715,Enterobacter quasihormaechei,species,LPSN,species/enterobacter-quasihormaechei,f,f,f,t,t,t
+2717,Enterobacter wuhouensis,species,LPSN,species/enterobacter-wuhouensis,f,f,f,t,t,t
+3067,Enterocloster bolteae,species,LPSN,species/enterocloster-bolteae,f,f,f,f,f,f
+2821,Enterocloster citroniae,species,LPSN,species/enterocloster-citroniae,f,f,f,f,f,f
+3136,Enterocloster clostridioformis,species,LPSN,species/enterocloster-clostridioformis,f,f,f,f,f,f
+2825,Enterocloster lavalensis,species,LPSN,species/enterocloster-lavalensis,f,f,f,f,f,f
+503,Enterococcus,genus,LPSN,genus/enterococcus,f,f,t,f,f,f
+196,Enterococcus asini,species,LPSN,species/enterococcus-asini,f,f,t,f,f,f
+1720,Enterococcus avium,species,LPSN,species/enterococcus-avium,f,f,t,f,f,f
+297,Enterococcus canis,species,LPSN,species/enterococcus-canis,f,f,t,f,f,f
+2001,Enterococcus casseliflavus,species,LPSN,species/enterococcus-casseliflavus,f,f,f,f,f,f
+369,Enterococcus cecorum,species,LPSN,species/enterococcus-cecorum,f,f,t,f,f,f
+522,Enterococcus dispar,species,LPSN,species/enterococcus-dispar,f,f,t,f,f,f
+1236,Enterococcus durans,species,LPSN,species/enterococcus-durans,f,f,t,f,f,f
+2345,Enterococcus faecalis,species,LPSN,species/enterococcus-faecalis,f,f,t,f,f,f
+1865,Enterococcus faecium,species,LPSN,species/enterococcus-faecium,f,f,t,f,f,f
+1908,Enterococcus gallinarum,species,LPSN,species/enterococcus-gallinarum,f,f,f,f,f,f
+2213,Enterococcus gilvus,species,LPSN,species/enterococcus-gilvus,f,f,t,f,f,f
+626,Enterococcus haemoperoxidus,species,LPSN,species/enterococcus-haemoperoxidus,f,f,t,f,f,f
+2057,Enterococcus hermanniensis,species,LPSN,species/enterococcus-hermanniensis,f,f,t,f,f,f
+1339,Enterococcus hirae,species,LPSN,species/enterococcus-hirae,f,f,t,f,f,f
+1505,Enterococcus italicus,species,LPSN,species/enterococcus-italicus,f,f,t,f,f,f
+871,Enterococcus malodoratus,species,LPSN,species/enterococcus-malodoratus,f,f,t,f,f,f
+1108,Enterococcus moraviensis,species,LPSN,species/enterococcus-moraviensis,f,f,t,f,f,f
+1780,Enterococcus mundtii,species,LPSN,species/enterococcus-mundtii,f,f,t,f,f,f
+77,Enterococcus pallens,species,LPSN,species/enterococcus-pallens,f,f,t,f,f,f
+243,Enterococcus phoeniculicola,species,LPSN,species/enterococcus-phoeniculicola,f,f,t,f,f,f
+1320,Enterococcus pseudoavium,species,LPSN,species/enterococcus-pseudoavium,f,f,t,f,f,f
+850,Enterococcus raffinosus,species,LPSN,species/enterococcus-raffinosus,f,f,t,f,f,f
+865,Enterococcus ratti,species,LPSN,species/enterococcus-ratti,f,f,t,f,f,f
+303,Enterococcus saccharolyticus,species,LPSN,species/enterococcus-saccharolyticus,f,f,t,f,f,f
+908,Enterococcus sulfureus,species,LPSN,species/enterococcus-sulfureus,f,f,t,f,f,f
+1205,Enterococcus villorum,species,LPSN,species/enterococcus-villorum,f,f,t,f,f,f
+1582,Enterocytozoon,genus,MycoBank,30481,f,f,f,f,f,f
+502,Enterovirus,genus,ICTV,202101982,f,f,f,f,f,f
+2622,Enterovirus B,species,ICTV,202101984,f,f,f,f,f,f
+2636,Enterovirus C,species,ICTV,202101985,f,f,f,f,f,f
+1185,Epicoccum,genus,MycoBank,8188,f,f,f,f,f,f
+1286,Erwinia,genus,LPSN,genus/erwinia,f,f,f,t,t,t
+3086,Erwinia ananatis,species,LPSN,species/erwinia-ananatis,f,f,f,t,t,t
+1063,Erwinia persicina,species,LPSN,species/erwinia-persicina,f,f,f,t,t,t
+1740,Erysipelothrix,genus,LPSN,genus/erysipelothrix,f,f,f,f,f,f
+567,Erysipelothrix inopinata,species,LPSN,species/erysipelothrix-inopinata,f,f,f,f,f,f
+438,Erysipelothrix rhusiopathiae,species,LPSN,species/erysipelothrix-rhusiopathiae,f,f,f,f,f,f
+600,Erysipelothrix tonsillarum,species,LPSN,species/erysipelothrix-tonsillarum,f,f,f,f,f,f
+497,Escherichia,genus,LPSN,genus/escherichia,f,f,f,t,t,t
+1172,Escherichia albertii,species,LPSN,species/escherichia-albertii,f,f,f,t,t,t
+1807,Escherichia coli,species,LPSN,species/escherichia-coli,f,f,f,t,t,t
+1873,Escherichia fergusonii,species,LPSN,species/escherichia-fergusonii,f,f,f,t,t,t
+12,Escherichia hermannii,species,LPSN,species/escherichia-hermannii,f,f,f,t,t,t
+490,Eubacterium,genus,LPSN,genus/eubacterium,f,f,f,f,f,f
+1589,Eubacterium barkeri,species,LPSN,species/eubacterium-barkeri,f,f,f,f,f,f
+2439,Eubacterium brachy,species,LPSN,species/eubacterium-brachy,f,f,f,f,f,f
+1419,Eubacterium callanderi,species,LPSN,species/eubacterium-callanderi,f,f,f,f,f,f
+596,Eubacterium infirmum,species,LPSN,species/eubacterium-infirmum,f,f,f,f,f,f
+765,Eubacterium limosum,species,LPSN,species/eubacterium-limosum,f,f,f,f,f,f
+939,Eubacterium minutum,species,LPSN,species/eubacterium-minutum,f,f,f,f,f,f
+2268,Eubacterium nodatum,species,LPSN,species/eubacterium-nodatum,f,f,f,f,f,f
+588,Eubacterium ramulus,species,LPSN,species/eubacterium-ramulus,f,f,f,f,f,f
+597,Eubacterium saphenum,species,LPSN,species/eubacterium-saphenum,f,f,f,f,f,f
+359,Eubacterium siraeum,species,LPSN,species/eubacterium-siraeum,f,f,f,f,f,f
+1275,Eubacterium sulci,species,LPSN,species/eubacterium-sulci,f,f,f,f,f,f
+53,Eubacterium tenue,species,LPSN,species/eubacterium-tenue,f,f,f,f,f,f
+576,Eubacterium ventriosum,species,LPSN,species/eubacterium-ventriosum,f,f,f,f,f,f
+1358,Eubacterium yurii,species,LPSN,species/eubacterium-yurii,f,f,f,f,f,f
+3300,Evansella clarkii,species,LPSN,species/evansella-clarkii,t,f,f,f,f,f
+3314,Evansella vedderi,species,LPSN,species/evansella-vedderi,t,f,f,f,f,f
+1248,Ewingella,genus,LPSN,genus/ewingella,f,f,f,t,t,t
+1443,Ewingella americana,species,LPSN,species/ewingella-americana,f,f,f,t,t,t
+1151,Exiguobacterium,genus,LPSN,genus/exiguobacterium,t,f,f,f,f,f
+753,Exiguobacterium acetylicum,species,LPSN,species/exiguobacterium-acetylicum,t,f,f,f,f,f
+2251,Exophiala,genus,MycoBank,8233,f,f,f,f,f,f
+562,Exophiala bergeri,species,MycoBank,460080,f,f,f,f,f,f
+212,Exophiala dermatitidis,species,MycoBank,314039,f,f,f,f,f,f
+3374,Exophiala exophialae,species,MycoBank,486420,f,f,f,f,f,f
+2161,Exophiala jeanselmei,species,MycoBank,314040,f,f,f,f,f,f
+2424,Exophiala spinifera,species,MycoBank,314044,f,f,f,f,f,f
+544,Exserohilum,genus,MycoBank,8241,f,f,f,f,f,f
+1770,Exserohilum rostratum,species,MycoBank,314059,f,f,f,f,f,f
+3311,Ezakiella coagulans,species,LPSN,species/ezakiella-coagulans,f,f,f,f,t,f
+1509,Facklamia,genus,LPSN,genus/facklamia,f,f,f,f,f,f
+821,Facklamia hominis,species,LPSN,species/facklamia-hominis,f,f,f,f,f,f
+2077,Facklamia ignava,species,LPSN,species/facklamia-ignava,f,f,f,f,f,f
+335,Facklamia languida,species,LPSN,species/facklamia-languida,f,f,f,f,f,f
+895,Facklamia sourekii,species,LPSN,species/facklamia-sourekii,f,f,f,f,f,f
+1481,Facklamia tabacinasalis,species,LPSN,species/facklamia-tabacinasalis,f,f,f,f,f,f
+1046,Faecalibacterium,genus,LPSN,genus/faecalibacterium,f,f,f,f,f,f
+1570,Faecalibacterium prausnitzii,species,LPSN,species/faecalibacterium-prausnitzii,f,f,f,f,f,f
+3028,Faecalicatena contorta,species,LPSN,species/faecalicatena-contorta,f,f,f,f,f,f
+3168,Faecalicatena orotica,species,LPSN,species/faecalicatena-orotica,f,f,f,f,f,f
+3049,Faecalitalea cylindroides,species,LPSN,species/faecalitalea-cylindroides,f,f,f,f,f,f
+3245,Falsarthrobacter nasiphocae,species,LPSN,species/falsarthrobacter-nasiphocae,t,f,f,f,f,f
+2936,Falsibacillus pallidus,species,LPSN,species/falsibacillus-pallidus,t,f,f,f,f,f
+3233,Fannyhessea vaginae,species,LPSN,species/fannyhessea-vaginae,f,f,f,f,f,f
+3215,Ferdinandcohnia humi,species,LPSN,species/ferdinandcohnia-humi,t,f,f,f,f,f
+3304,Fictibacillus barbaricus,species,LPSN,species/fictibacillus-barbaricus,t,f,f,f,f,f
+3195,Fictibacillus gelatini,species,LPSN,species/fictibacillus-gelatini,t,f,f,f,f,f
+132,Filifactor,genus,LPSN,genus/filifactor,f,f,f,f,f,f
+922,Filifactor alocis,species,LPSN,species/filifactor-alocis,f,f,f,f,f,f
+371,Filifactor villosus,species,LPSN,species/filifactor-villosus,f,f,f,f,f,f
+2416,Finegoldia,genus,LPSN,genus/finegoldia,f,f,f,f,f,f
+103,Finegoldia magna,species,LPSN,species/finegoldia-magna,f,f,f,f,f,f
+1194,Flavivirus,genus,ICTV,202103070,f,f,f,f,f,f
+2299,Flavobacterium,genus,LPSN,genus/flavobacterium,f,f,f,f,f,f
+1688,Flavobacterium devorans,species,LPSN,species/flavobacterium-devorans,f,f,f,f,f,f
+1763,Flavonifractor,genus,LPSN,genus/flavonifractor,f,f,f,f,f,f
+257,Flavonifractor plautii,species,LPSN,species/flavonifractor-plautii,f,f,f,f,f,f
+1297,Fonsecaea,genus,MycoBank,8264,f,f,f,f,f,f
+1207,Fonsecaea pedrosoi,species,MycoBank,253857,f,f,f,f,f,f
+1761,Francisella,genus,LPSN,genus/francisella,f,f,f,f,f,f
+467,Francisella tularensis,species,LPSN,species/francisella-tularensis,f,f,f,f,f,f
+846,Fusarium,genus,MycoBank,8284,f,f,f,f,f,f
+931,Fusarium chlamydosporum,species,MycoBank,260522,f,f,f,f,f,f
+2696,Fusarium culmorum,species,MycoBank,196997,f,f,f,f,f,f
+308,Fusarium graminearum,species,MycoBank,200256,f,f,f,f,f,f
+2960,Fusarium incarnatum,species,MycoBank,231142,f,f,f,f,f,f
+1045,Fusarium javanicum,species,MycoBank,231015,f,f,f,f,f,f
+301,Fusarium oxysporum,species,MycoBank,218372,f,f,f,f,f,f
+1631,Fusarium poae,species,MycoBank,119380,f,f,f,f,f,f
+694,Fusarium tricinctum,species,MycoBank,142388,f,f,f,f,f,f
+205,Fusarium verticillioides,species,MycoBank,314223,f,f,f,f,f,f
+1359,Fusobacterium,genus,LPSN,genus/fusobacterium,f,f,f,f,f,f
+941,Fusobacterium canifelinum,species,LPSN,species/fusobacterium-canifelinum,f,f,f,f,f,f
+662,Fusobacterium equinum,species,LPSN,species/fusobacterium-equinum,f,f,f,f,f,f
+1534,Fusobacterium gonidiaformans,species,LPSN,species/fusobacterium-gonidiaformans,f,f,f,f,f,f
+907,Fusobacterium mortiferum,species,LPSN,species/fusobacterium-mortiferum,f,f,f,f,f,f
+1959,Fusobacterium naviforme,species,LPSN,species/fusobacterium-naviforme,f,f,f,f,f,f
+504,Fusobacterium necrogenes,species,LPSN,species/fusobacterium-necrogenes,f,f,f,f,f,f
+1165,Fusobacterium necrophorum,species,LPSN,species/fusobacterium-necrophorum,f,f,f,f,f,f
+2945,Fusobacterium necrophorum fundiliforme,subspecies,LPSN,subspecies/fusobacterium-necrophorum-fundiliforme,f,f,f,f,f,f
+1404,Fusobacterium necrophorum necrophorum,subspecies,LPSN,subspecies/fusobacterium-necrophorum-necrophorum,f,f,f,f,f,f
+4,Fusobacterium nucleatum,species,LPSN,species/fusobacterium-nucleatum,f,f,f,f,f,f
+1988,Fusobacterium nucleatum nucleatum,subspecies,LPSN,subspecies/fusobacterium-nucleatum-nucleatum,f,f,f,f,f,f
+699,Fusobacterium nucleatum polymorphum,subspecies,LPSN,subspecies/fusobacterium-nucleatum-polymorphum,f,f,f,f,f,f
+591,Fusobacterium periodonticum,species,LPSN,species/fusobacterium-periodonticum,f,f,f,f,f,f
+3248,Fusobacterium plautii,species,LPSN,species/fusobacterium-plautii,f,f,f,f,f,f
+2036,Fusobacterium russii,species,LPSN,species/fusobacterium-russii,f,f,f,f,f,f
+1851,Fusobacterium ulcerans,species,LPSN,species/fusobacterium-ulcerans,f,f,f,f,f,f
+125,Fusobacterium varium,species,LPSN,species/fusobacterium-varium,f,f,f,f,f,f
+2989,Fusobacterium vincentii,species,LPSN,species/fusobacterium-vincentii,f,f,f,f,f,f
+992,Gallicola,genus,LPSN,genus/gallicola,f,f,f,f,f,f
+1435,Gallicola barnesae,species,LPSN,species/gallicola-barnesae,f,f,f,f,f,f
+2797,Gamma-hemolytic streptococci,group,NeoIPC,67,f,f,f,f,f,f
+2658,Gammainfluenzavirus influenzae,species,ICTV,202103960,f,f,f,f,f,f
+1181,Gardnerella,genus,LPSN,genus/gardnerella,f,f,f,f,f,f
+1226,Gardnerella vaginalis,species,LPSN,species/gardnerella-vaginalis,f,f,f,f,f,f
+2003,Gemella,genus,LPSN,genus/gemella,f,f,f,f,f,f
+3276,Gemella bergeri,species,LPSN,species/gemella-bergeri,f,f,f,f,f,f
+1209,Gemella haemolysans,species,LPSN,species/gemella-haemolysans,f,f,f,f,f,f
+1392,Gemella morbillorum,species,LPSN,species/gemella-morbillorum,f,f,f,f,f,f
+1415,Gemella sanguinis,species,LPSN,species/gemella-sanguinis,f,f,f,f,f,f
+1710,Geobacillus,genus,LPSN,genus/geobacillus,f,f,f,f,f,f
+3033,Geobacillus kaustophilus,species,LPSN,species/geobacillus-kaustophilus,t,f,f,f,f,f
+583,Geobacillus stearothermophilus,species,LPSN,species/geobacillus-stearothermophilus,f,f,f,f,f,f
+3023,Geobacillus thermocatenulatus,species,LPSN,species/geobacillus-thermocatenulatus,t,f,f,f,f,f
+929,Geobacillus thermodenitrificans,species,LPSN,species/geobacillus-thermodenitrificans,f,f,f,f,f,f
+2111,Geotrichum,genus,MycoBank,8327,f,f,f,f,f,f
+398,Geotrichum candidum,species,MycoBank,182997,f,f,f,f,f,f
+3189,Gleimia europaea,species,LPSN,species/gleimia-europaea,t,f,f,f,f,f
+1820,Glenosporella,genus,MycoBank,8336,f,f,f,f,f,f
+102,Gliocladium,genus,MycoBank,8342,f,f,f,f,f,f
+2572,Globicatella,genus,LPSN,genus/globicatella,f,f,f,f,f,f
+80,Globicatella sanguinis,species,LPSN,species/globicatella-sanguinis,f,f,f,f,f,f
+60,Globicatella sulfidifaciens,species,LPSN,species/globicatella-sulfidifaciens,f,f,f,f,f,f
+3203,Glutamicibacter arilaitensis,species,LPSN,species/glutamicibacter-arilaitensis,t,f,f,f,f,f
+3068,Glutamicibacter bergerei,species,LPSN,species/glutamicibacter-bergerei,t,f,f,f,f,f
+3169,Glutamicibacter creatinolyticus,species,LPSN,species/glutamicibacter-creatinolyticus,t,f,f,f,f,f
+3151,Glutamicibacter nicotianae,species,LPSN,species/glutamicibacter-nicotianae,t,f,f,f,f,f
+3114,Glutamicibacter protophormiae,species,LPSN,species/glutamicibacter-protophormiae,t,f,f,f,f,f
+3255,Glutamicibacter uratoxydans,species,LPSN,species/glutamicibacter-uratoxydans,t,f,f,f,f,f
+608,Gordonia,genus,LPSN,genus/gordonia,t,f,f,f,f,f
+2527,Gordonia bronchialis,species,LPSN,species/gordonia-bronchialis,t,f,f,f,f,f
+2367,Gordonia otitidis,species,LPSN,species/gordonia-otitidis,t,f,f,f,f,f
+727,Gordonia polyisoprenivorans,species,LPSN,species/gordonia-polyisoprenivorans,t,f,f,f,f,f
+2539,Gordonia rubripertincta,species,LPSN,species/gordonia-rubripertincta,t,f,f,f,f,f
+2146,Gordonia sputi,species,LPSN,species/gordonia-sputi,t,f,f,f,f,f
+2465,Gordonia terrae,species,LPSN,species/gordonia-terrae,t,f,f,f,f,f
+3074,Gottfriedia luciferensis,species,LPSN,species/gottfriedia-luciferensis,t,f,f,f,f,f
+3185,Gracilibacillus dipsosauri,species,LPSN,species/gracilibacillus-dipsosauri,t,f,f,f,f,f
+487,Granulicatella,genus,LPSN,genus/granulicatella,f,f,f,f,f,f
+201,Granulicatella adiacens,species,LPSN,species/granulicatella-adiacens,f,f,f,f,f,f
+99,Granulicatella elegans,species,LPSN,species/granulicatella-elegans,f,f,f,f,f,f
+203,Graphium,genus,MycoBank,8398,f,f,f,f,f,f
+2452,Grimontia,genus,LPSN,genus/grimontia,f,f,f,f,f,f
+1270,Grimontia hollisae,species,LPSN,species/grimontia-hollisae,f,f,f,f,f,f
+1304,Haemophilus,genus,LPSN,genus/haemophilus,f,f,f,t,t,t
+2181,Haemophilus aegyptius,species,LPSN,species/haemophilus-aegyptius,f,f,f,t,t,t
+2248,Haemophilus ducreyi,species,LPSN,species/haemophilus-ducreyi,f,f,f,t,t,t
+2467,Haemophilus haemolyticus,species,LPSN,species/haemophilus-haemolyticus,f,f,f,t,t,t
+1704,Haemophilus influenzae,species,LPSN,species/haemophilus-influenzae,f,f,f,t,t,t
+2849,Haemophilus massiliensi,species,LPSN,species/haemophilus-massiliensis,f,f,f,t,t,t
+658,Haemophilus parahaemolyticus,species,LPSN,species/haemophilus-parahaemolyticus,f,f,f,t,t,t
+2340,Haemophilus parainfluenzae,species,LPSN,species/haemophilus-parainfluenzae,f,f,f,t,t,t
+2850,Haemophilus paraphrohaemolyticus,species,LPSN,species/haemophilus-paraphrohaemolyticus,f,f,f,t,t,t
+1788,Haemophilus pittmaniae,species,LPSN,species/haemophilus-pittmaniae,f,f,f,t,t,t
+2851,Haemophilus sputorum,species,LPSN,species/haemophilus-sputorum,f,f,f,t,t,t
+779,Hafnia,genus,LPSN,genus/hafnia,f,f,f,t,t,f
+23,Hafnia alvei,species,LPSN,species/hafnia-alvei,f,f,f,t,t,f
+2719,Hafnia paralvei,species,LPSN,species/hafnia-paralvei,f,f,f,t,t,f
+3262,Halalkalibacter krulwichiae,species,LPSN,species/halalkalibacter-krulwichiae,t,f,f,f,f,f
+3077,Halalkalibacterium halodurans,species,LPSN,species/halalkalibacterium-halodurans,t,f,f,f,f,f
+432,Halomonas,genus,LPSN,genus/halomonas,f,f,f,f,f,f
+405,Halomonas venusta,species,LPSN,species/halomonas-venusta,f,f,f,f,f,f
+3175,Halopseudomonas pertucinogena,species,LPSN,species/halopseudomonas-pertucinogena,f,f,f,t,t,t
+2961,Hanseniaspora,genus,MycoBank,828979,f,f,f,f,f,f
+3263,Hathewaya histolytica,species,LPSN,species/hathewaya-histolytica,f,f,f,f,f,f
+3021,Hathewaya limosa,species,LPSN,species/hathewaya-limosa,f,f,f,f,f,f
+161,Helcococcus,genus,LPSN,genus/helcococcus,f,f,f,f,f,f
+511,Helcococcus kunzii,species,LPSN,species/helcococcus-kunzii,f,f,f,f,f,f
+256,Helcococcus sueciensis,species,LPSN,species/helcococcus-sueciensis,f,f,f,f,f,f
+2026,Helicobacter,genus,LPSN,genus/helicobacter,f,f,f,f,f,f
+10,Helicobacter acinonychis,species,LPSN,species/helicobacter-acinonychis,f,f,f,f,f,f
+477,Helicobacter aurati,species,LPSN,species/helicobacter-aurati,f,f,f,f,f,f
+353,Helicobacter bilis,species,LPSN,species/helicobacter-bilis,f,f,f,f,f,f
+2946,Helicobacter bizzozeroni,species,LPSN,species/helicobacter-bizzozeroni,f,f,f,f,f,f
+484,Helicobacter canadensis,species,LPSN,species/helicobacter-canadensis,f,f,f,f,f,f
+2503,Helicobacter canis,species,LPSN,species/helicobacter-canis,f,f,f,f,f,f
+653,Helicobacter cholecystus,species,LPSN,species/helicobacter-cholecystus,f,f,f,f,f,f
+2082,Helicobacter cinaedi,species,LPSN,species/helicobacter-cinaedi,f,f,f,f,f,f
+2044,Helicobacter felis,species,LPSN,species/helicobacter-felis,f,f,f,f,f,f
+118,Helicobacter fennelliae,species,LPSN,species/helicobacter-fennelliae,f,f,f,f,f,f
+1301,Helicobacter ganmani,species,LPSN,species/helicobacter-ganmani,f,f,f,f,f,f
+2446,Helicobacter hepaticus,species,LPSN,species/helicobacter-hepaticus,f,f,f,f,f,f
+1657,Helicobacter mesocricetorum,species,LPSN,species/helicobacter-mesocricetorum,f,f,f,f,f,f
+788,Helicobacter muridarum,species,LPSN,species/helicobacter-muridarum,f,f,f,f,f,f
+1261,Helicobacter mustelae,species,LPSN,species/helicobacter-mustelae,f,f,f,f,f,f
+914,Helicobacter pametensis,species,LPSN,species/helicobacter-pametensis,f,f,f,f,f,f
+54,Helicobacter pullorum,species,LPSN,species/helicobacter-pullorum,f,f,f,f,f,f
+258,Helicobacter pylori,species,LPSN,species/helicobacter-pylori,f,f,f,f,f,f
+2947,Helicobacter rappini,species,LPSN,species/helicobacter-rappini,f,f,f,f,f,f
+1754,Helicobacter rodentium,species,LPSN,species/helicobacter-rodentium,f,f,f,f,f,f
+1843,Helicobacter salomonis,species,LPSN,species/helicobacter-salomonis,f,f,f,f,f,f
+880,Helicobacter trogontum,species,LPSN,species/helicobacter-trogontum,f,f,f,f,f,f
+1655,Helicobacter typhlonius,species,LPSN,species/helicobacter-typhlonius,f,f,f,f,f,f
+2049,Helminthosporium,genus,MycoBank,8495,f,f,f,f,f,f
+2640,Hepacivirus C,species,ICTV,202103127,f,f,f,f,f,f
+1903,Hepatitis B virus,species,ICTV,202103653,f,f,f,f,f,f
+2628,Hepatitis D virus,group,NeoIPC,17,f,f,f,f,f,f
+3338,Hepatovirus A,species,ICTV,202102003,f,f,f,f,f,f
+69,Herbaspirillum,genus,LPSN,genus/herbaspirillum,f,f,f,f,f,f
+473,Herpesviridae,family,ICTV,202101411,f,f,f,f,f,f
+3010,Heyndrickxia oleronia,species,LPSN,species/heyndrickxia-oleronia,t,f,f,f,f,f
+3106,Heyndrickxia sporothermodurans,species,LPSN,species/heyndrickxia-sporothermodurans,t,f,f,f,f,f
+3293,Holdemanella biformis,species,LPSN,species/holdemanella-biformis,f,f,f,f,f,f
+469,Holdemania,genus,LPSN,genus/holdemania,f,f,f,f,f,f
+1646,Holdemania filiformis,species,LPSN,species/holdemania-filiformis,f,f,f,f,f,f
+300,Hormodendrum,genus,MycoBank,8558,f,f,f,f,f,f
+1624,Hortaea werneckii,species,MycoBank,106184,f,f,f,f,f,f
+2692,Human adenovirus,group,NeoIPC,28,f,f,f,f,f,f
+2616,Human alphaherpesvirus 1,species,ICTV,202101428,f,f,f,f,f,f
+2618,Human alphaherpesvirus 2,species,ICTV,202101429,f,f,f,f,f,f
+2620,Human alphaherpesvirus 3,species,ICTV,202101454,f,f,f,f,f,f
+2604,Human betaherpesvirus 5,species,ICTV,202101462,f,f,f,f,f,f
+2670,Human betaherpesvirus 6A,species,ICTV,202101475,f,f,f,f,f,f
+2672,Human betaherpesvirus 6B,species,ICTV,202101476,f,f,f,f,f,f
+2626,Human bocavirus,group,NeoIPC,16,f,f,f,f,f,f
+2609,Human coronavirus,group,NeoIPC,7,f,f,f,f,f,f
+2623,Human coxsackievirus,group,NeoIPC,13,f,f,f,f,f,f
+2624,Human coxsackievirus A,group,NeoIPC,14,f,f,f,f,f,f
+2625,Human coxsackievirus B,group,NeoIPC,15,f,f,f,f,f,f
+3344,Human gammaherpesvirus 4,species,ICTV,202101486,f,f,f,f,f,f
+2629,Human gammaherpesvirus 8,species,ICTV,202101510,f,f,f,f,f,f
+2621,Human herpes simplex virus,group,NeoIPC,12,f,f,f,f,f,f
+2674,Human herpesvirus 6,group,NeoIPC,24,f,f,f,f,f,f
+2634,Human immunodeficiency virus,group,NeoIPC,19,f,f,f,f,f,f
+2632,Human immunodeficiency virus 1,species,ICTV,202105030,f,f,f,f,f,f
+2633,Human immunodeficiency virus 2,species,ICTV,202105031,f,f,f,f,f,f
+2462,Human metapneumovirus,species,ICTV,202101648,f,f,f,f,f,f
+2603,Human orthopneumovirus,species,ICTV,202101651,f,f,f,f,f,f
+2663,Human orthorubulavirus 2,species,ICTV,202101630,f,f,f,f,f,f
+2667,Human orthorubulavirus 4,species,ICTV,202101631,f,f,f,f,f,f
+2611,Human papillomavirus,group,NeoIPC,9,f,f,f,f,f,f
+2660,Human parainfluenza virus,group,NeoIPC,23,f,f,f,f,f,f
+2661,Human respirovirus 1,species,ICTV,202101622,f,f,f,f,f,f
+2665,Human respirovirus 3,species,ICTV,202101623,f,f,f,f,f,f
+2610,Human rhinovirus,group,NeoIPC,8,f,f,f,f,f,f
+3306,Hungatella hathewayi,species,LPSN,species/hungatella-hathewayi,f,f,f,f,f,f
+1363,Ignavigranum,genus,LPSN,genus/ignavigranum,f,f,f,f,f,f
+1103,Ignavigranum ruoffiae,species,LPSN,species/ignavigranum-ruoffiae,f,f,f,f,f,f
+2659,Influenza virus,group,NeoIPC,22,f,f,f,f,f,f
+1553,Inquilinus,genus,LPSN,genus/inquilinus,f,f,f,f,f,f
+1107,Inquilinus limosus,species,LPSN,species/inquilinus-limosus,f,f,f,f,f,f
+3045,Intestinibacter bartlettii,species,LPSN,species/intestinibacter-bartlettii,f,f,f,f,f,f
+1839,Janibacter,genus,LPSN,genus/janibacter,t,f,f,f,f,f
+1367,Janibacter hoylei,species,LPSN,species/janibacter-hoylei,t,f,f,f,f,f
+3137,Jeotgalibacillus marinus,species,LPSN,species/jeotgalibacillus-marinus,t,f,f,f,f,f
+2591,Jonesia,genus,LPSN,genus/jonesia,f,f,f,f,f,f
+1559,Jonesia denitrificans,species,LPSN,species/jonesia-denitrificans,f,f,f,f,f,f
+3001,Kandleria vitulina,species,LPSN,species/kandleria-vitulina,f,f,f,f,f,f
+2217,Kerstersia,genus,LPSN,genus/kerstersia,f,f,f,f,f,f
+2383,Kerstersia gyiorum,species,LPSN,species/kerstersia-gyiorum,f,f,f,f,f,f
+769,Kingella,genus,LPSN,genus/kingella,f,f,f,f,f,f
+1713,Kingella denitrificans,species,LPSN,species/kingella-denitrificans,f,f,f,f,f,f
+655,Kingella kingae,species,LPSN,species/kingella-kingae,f,f,f,f,f,f
+174,Kingella oralis,species,LPSN,species/kingella-oralis,f,f,f,f,f,f
+195,Kingella potus,species,LPSN,species/kingella-potus,f,f,f,f,f,f
+1223,Klebsiella,genus,LPSN,genus/klebsiella,f,f,f,t,t,t
+333,Klebsiella aerogenes,species,LPSN,species/klebsiella-aerogenes,f,f,f,t,t,t
+1760,Klebsiella granulomatis,species,LPSN,species/klebsiella-granulomatis,f,f,f,t,t,t
+2720,Klebsiella grimontii,species,LPSN,species/klebsiella-grimontii,f,f,f,t,t,t
+1451,Klebsiella oxytoca,species,LPSN,species/klebsiella-oxytoca,f,f,f,t,t,t
+2721,Klebsiella pasteurii,species,LPSN,species/klebsiella-pasteurii,f,f,f,t,t,t
+390,Klebsiella pneumoniae,species,LPSN,species/klebsiella-pneumoniae,f,f,f,t,t,t
+733,Klebsiella pneumoniae ozaenae,subspecies,LPSN,subspecies/klebsiella-pneumoniae-ozaenae,f,f,f,t,t,t
+1281,Klebsiella pneumoniae pneumoniae,subspecies,LPSN,subspecies/klebsiella-pneumoniae-pneumoniae,f,f,f,t,t,t
+1705,Klebsiella pneumoniae rhinoscleromatis,subspecies,LPSN,subspecies/klebsiella-pneumoniae-rhinoscleromatis,f,f,f,t,t,t
+2722,Klebsiella quasipneumoniae,species,LPSN,species/klebsiella-quasipneumoniae,f,f,f,t,t,t
+2724,Klebsiella quasipneumoniae quasipneumoniae,species,LPSN,subspecies/klebsiella-quasipneumoniae-quasipneumoniae,f,f,f,t,t,t
+2723,Klebsiella quasipneumoniae similipneumoniae,species,LPSN,subspecies/klebsiella-quasipneumoniae-similipneumoniae,f,f,f,t,t,t
+2264,Klebsiella variicola,species,LPSN,species/klebsiella-variicola,f,f,f,t,t,t
+9,Kluyvera,genus,LPSN,genus/kluyvera,f,f,f,t,t,t
+1530,Kluyvera ascorbata,species,LPSN,species/kluyvera-ascorbata,f,f,f,t,t,t
+170,Kluyvera cryocrescens,species,LPSN,species/kluyvera-cryocrescens,f,f,f,t,t,t
+409,Kluyvera georgiana,species,LPSN,species/kluyvera-georgiana,f,f,f,t,t,t
+296,Kluyvera intermedia,species,LPSN,species/kluyvera-intermedia,f,f,f,t,t,t
+1709,Kluyveromyces,genus,MycoBank,2572,f,f,f,f,f,f
+2005,Kocuria,genus,LPSN,genus/kocuria,t,f,f,f,f,f
+2561,Kocuria rosea,species,LPSN,species/kocuria-rosea,t,f,f,f,f,f
+442,Kocuria varians,species,LPSN,species/kocuria-varians,t,f,f,f,f,f
+1009,Kodamaea,genus,MycoBank,27725,f,f,f,f,f,f
+1722,Kodamaea ohmeri,species,MycoBank,436311,f,f,f,f,f,f
+758,Kosakonia,genus,LPSN,genus/kosakonia,f,f,f,t,f,f
+2352,Kosakonia cowanii,species,LPSN,species/kosakonia-cowanii,f,f,f,t,f,f
+2423,Kroppenstedtia,genus,LPSN,genus/kroppenstedtia,f,f,f,f,f,f
+2574,Kroppenstedtia eburnea,species,LPSN,species/kroppenstedtia-eburnea,f,f,f,f,f,f
+1090,Kurthia,genus,LPSN,genus/kurthia,f,f,f,f,f,f
+3082,Kyrpidia tusciae,species,LPSN,species/kyrpidia-tusciae,t,f,f,f,f,f
+2035,Kytococcus,genus,LPSN,genus/kytococcus,t,f,f,f,f,f
+28,Kytococcus sedentarius,species,LPSN,species/kytococcus-sedentarius,t,f,f,f,f,f
+1075,Lachancea,genus,MycoBank,28810,f,f,f,f,f,f
+572,Lachancea fermentati,species,MycoBank,487627,f,f,f,f,f,f
+1567,Lachnoanaerobaculum,genus,LPSN,genus/lachnoanaerobaculum,f,f,f,f,f,f
+2,Lachnoanaerobaculum orale,species,LPSN,species/lachnoanaerobaculum-orale,f,f,f,f,f,f
+3328,Lachnoanaerobaculum saburreum,species,LPSN,species/lachnoanaerobaculum-saburreum,f,f,f,f,f,f
+3148,Lachnospira eligens,species,LPSN,species/lachnospira-eligens,f,f,f,f,f,f
+3205,Lacrimispora celerecrescens,species,LPSN,species/lacrimispora-celerecrescens,f,f,f,f,f,f
+3310,Lacrimispora indolis,species,LPSN,species/lacrimispora-indolis,f,f,f,f,f,f
+3249,Lacrimispora sphenoides,species,LPSN,species/lacrimispora-sphenoides,f,f,f,f,f,f
+3027,Lacticaseibacillus casei,species,LPSN,species/lacticaseibacillus-casei,f,f,f,f,f,f
+2994,Lacticaseibacillus paracasei,species,LPSN,species/lacticaseibacillus-paracasei,f,f,f,f,f,f
+3277,Lacticaseibacillus rhamnosus,species,LPSN,species/lacticaseibacillus-rhamnosus,f,f,f,f,f,f
+3157,Lactiplantibacillus plantarum,species,LPSN,species/lactiplantibacillus-plantarum,f,f,f,f,f,f
+314,Lactobacillus,genus,LPSN,genus/lactobacillus,f,f,f,f,f,f
+286,Lactobacillus acidophilus,species,LPSN,species/lactobacillus-acidophilus,f,f,f,f,f,f
+559,Lactobacillus amylovorus,species,LPSN,species/lactobacillus-amylovorus,f,f,f,f,f,f
+367,Lactobacillus crispatus,species,LPSN,species/lactobacillus-crispatus,f,f,f,f,f,f
+2426,Lactobacillus delbrueckii,species,LPSN,species/lactobacillus-delbrueckii,f,f,f,f,f,f
+816,Lactobacillus gasseri,species,LPSN,species/lactobacillus-gasseri,f,f,f,f,f,f
+259,Lactobacillus iners,species,LPSN,species/lactobacillus-iners,f,f,f,f,f,f
+1679,Lactobacillus jensenii,species,LPSN,species/lactobacillus-jensenii,f,f,f,f,f,f
+1110,Lactobacillus johnsonii,species,LPSN,species/lactobacillus-johnsonii,f,f,f,f,f,f
+1043,Lactobacillus kalixensis,species,LPSN,species/lactobacillus-kalixensis,f,f,f,f,f,f
+2156,Lactobacillus ultunensis,species,LPSN,species/lactobacillus-ultunensis,f,f,f,f,f,f
+1245,Lactococcus,genus,LPSN,genus/lactococcus,f,f,f,f,f,f
+374,Lactococcus garvieae,species,LPSN,species/lactococcus-garvieae,f,f,f,f,f,f
+1887,Lactococcus lactis,species,LPSN,species/lactococcus-lactis,f,f,f,f,f,f
+3011,Lancefieldella parvula,species,LPSN,species/lancefieldella-parvula,f,f,f,f,t,f
+3154,Lancefieldella rimae,species,LPSN,species/lancefieldella-rimae,f,f,f,f,t,f
+159,Lasiodiplodia,genus,MycoBank,8708,f,f,f,f,f,f
+842,Lasiodiplodia theobromae,species,MycoBank,188476,f,f,f,f,f,f
+2669,Lassa mammarenavirus,species,ICTV,202102580,f,f,f,f,f,f
+3268,Latilactobacillus sakei,species,LPSN,species/latilactobacillus-sakei,f,f,f,f,f,f
+2266,Leclercia,genus,LPSN,genus/leclercia,f,f,f,t,t,t
+2159,Leclercia adecarboxylata,species,LPSN,species/leclercia-adecarboxylata,f,f,f,t,t,t
+3282,Lederbergia galactosidilytica,species,LPSN,species/lederbergia-galactosidilytica,t,f,f,f,f,f
+3125,Lederbergia lenta,species,LPSN,species/lederbergia-lenta,t,f,f,f,f,f
+2557,Legionella,genus,LPSN,genus/legionella,f,f,f,f,f,f
+1855,Legionella adelaidensis,species,LPSN,species/legionella-adelaidensis,f,f,f,f,f,f
+1527,Legionella anisa,species,LPSN,species/legionella-anisa,f,f,f,f,f,f
+350,Legionella beliardensis,species,LPSN,species/legionella-beliardensis,f,f,f,f,f,f
+2444,Legionella birminghamensis,species,LPSN,species/legionella-birminghamensis,f,f,f,f,f,f
+549,Legionella bozemanae,species,LPSN,species/legionella-bozemanae,f,f,f,f,f,f
+1569,Legionella brunensis,species,LPSN,species/legionella-brunensis,f,f,f,f,f,f
+1700,Legionella busanensis,species,LPSN,species/legionella-busanensis,f,f,f,f,f,f
+2908,Legionella cardiaca,species,LPSN,species/legionella-cardiaca,f,f,f,f,f,f
+1729,Legionella cherrii,species,LPSN,species/legionella-cherrii,f,f,f,f,f,f
+1219,Legionella cincinnatiensis,species,LPSN,species/legionella-cincinnatiensis,f,f,f,f,f,f
+424,Legionella drancourtii,species,LPSN,species/legionella-drancourtii,f,f,f,f,f,f
+1031,Legionella drozanskii,species,LPSN,species/legionella-drozanskii,f,f,f,f,f,f
+1262,Legionella dumoffii,species,LPSN,species/legionella-dumoffii,f,f,f,f,f,f
+169,Legionella erythra,species,LPSN,species/legionella-erythra,f,f,f,f,f,f
+138,Legionella fairfieldensis,species,LPSN,species/legionella-fairfieldensis,f,f,f,f,f,f
+1177,Legionella fallonii,species,LPSN,species/legionella-fallonii,f,f,f,f,f,f
+912,Legionella feeleii,species,LPSN,species/legionella-feeleii,f,f,f,f,f,f
+1411,Legionella geestiana,species,LPSN,species/legionella-geestiana,f,f,f,f,f,f
+2580,Legionella gormanii,species,LPSN,species/legionella-gormanii,f,f,f,f,f,f
+1868,Legionella hackeliae,species,LPSN,species/legionella-hackeliae,f,f,f,f,f,f
+2909,Legionella indianapolisensis,species,LPSN,species/legionella-indianapolisensis,f,f,f,f,f,f
+732,Legionella israelensis,species,LPSN,species/legionella-israelensis,f,f,f,f,f,f
+2528,Legionella jamestowniensis,species,LPSN,species/legionella-jamestowniensis,f,f,f,f,f,f
+495,Legionella jordanis,species,LPSN,species/legionella-jordanis,f,f,f,f,f,f
+2308,Legionella lansingensis,species,LPSN,species/legionella-lansingensis,f,f,f,f,f,f
+701,Legionella londiniensis,species,LPSN,species/legionella-londiniensis,f,f,f,f,f,f
+1977,Legionella longbeachae,species,LPSN,species/legionella-longbeachae,f,f,f,f,f,f
+1168,Legionella lytica,species,LPSN,species/legionella-lytica,f,f,f,f,f,f
+1929,Legionella maceachernii,species,LPSN,species/legionella-maceachernii,f,f,f,f,f,f
+2263,Legionella micdadei,species,LPSN,species/legionella-micdadei,f,f,f,f,f,f
+740,Legionella moravica,species,LPSN,species/legionella-moravica,f,f,f,f,f,f
+2910,Legionella nagasakiensis,species,LPSN,species/legionella-nagasakiensis,f,f,f,f,f,f
+437,Legionella nautarum,species,LPSN,species/legionella-nautarum,f,f,f,f,f,f
+557,Legionella oakridgensis,species,LPSN,species/legionella-oakridgensis,f,f,f,f,f,f
+2109,Legionella parisiensis,species,LPSN,species/legionella-parisiensis,f,f,f,f,f,f
+1683,Legionella pneumophila,species,LPSN,species/legionella-pneumophila,f,f,f,f,f,f
+344,Legionella quateirensis,species,LPSN,species/legionella-quateirensis,f,f,f,f,f,f
+346,Legionella quinlivanii,species,LPSN,species/legionella-quinlivanii,f,f,f,f,f,f
+700,Legionella rowbothamii,species,LPSN,species/legionella-rowbothamii,f,f,f,f,f,f
+923,Legionella rubrilucens,species,LPSN,species/legionella-rubrilucens,f,f,f,f,f,f
+1955,Legionella sainthelensi,species,LPSN,species/legionella-sainthelensi,f,f,f,f,f,f
+663,Legionella santicrucis,species,LPSN,species/legionella-santicrucis,f,f,f,f,f,f
+342,Legionella shakespearei,species,LPSN,species/legionella-shakespearei,f,f,f,f,f,f
+886,Legionella spiritensis,species,LPSN,species/legionella-spiritensis,f,f,f,f,f,f
+2911,Legionella steelei,species,LPSN,species/legionella-steelei,f,f,f,f,f,f
+2568,Legionella steigerwaltii,species,LPSN,species/legionella-steigerwaltii,f,f,f,f,f,f
+2231,Legionella taurinensis,species,LPSN,species/legionella-taurinensis,f,f,f,f,f,f
+136,Legionella tucsonensis,species,LPSN,species/legionella-tucsonensis,f,f,f,f,f,f
+1334,Legionella wadsworthii,species,LPSN,species/legionella-wadsworthii,f,f,f,f,f,f
+724,Legionella waltersii,species,LPSN,species/legionella-waltersii,f,f,f,f,f,f
+1814,Legionella worsleiensis,species,LPSN,species/legionella-worsleiensis,f,f,f,f,f,f
+2244,Leifsonia,genus,LPSN,genus/leifsonia,t,f,f,f,f,f
+2333,Leifsonia aquatica,species,LPSN,species/leifsonia-aquatica,t,f,f,f,f,f
+1637,Leifsonia xyli,species,LPSN,species/leifsonia-xyli,t,f,f,f,f,f
+2513,Lelliottia,genus,LPSN,genus/lelliottia,f,f,f,t,f,f
+1228,Lelliottia amnigena,species,LPSN,species/lelliottia-amnigena,f,f,f,t,f,f
+1249,Lelliottia nimipressuralis,species,LPSN,species/lelliottia-nimipressuralis,f,f,f,t,f,f
+696,Leminorella,genus,LPSN,genus/leminorella,f,f,f,t,t,t
+464,Leminorella grimontii,species,LPSN,species/leminorella-grimontii,f,f,f,t,t,t
+2053,Leminorella richardii,species,LPSN,species/leminorella-richardii,f,f,f,t,t,t
+3167,Lentilactobacillus buchneri,species,LPSN,species/lentilactobacillus-buchneri,f,f,f,f,f,f
+2110,Leptosphaeria,genus,MycoBank,2800,f,f,f,f,f,f
+2138,Leptosphaeria senegalensis,species,MycoBank,299640,f,f,f,f,f,f
+1580,Leptosphaeria tompkinsii,species,MycoBank,333276,f,f,f,f,f,f
+2226,Leptospira,genus,LPSN,genus/leptospira,f,f,f,f,f,f
+2235,Leptospira interrogans,species,LPSN,species/leptospira-interrogans,f,f,f,f,f,f
+1777,Leptotrichia,genus,LPSN,genus/leptotrichia,f,f,f,f,f,f
+1622,Leptotrichia buccalis,species,LPSN,species/leptotrichia-buccalis,f,f,f,f,f,f
+1259,Leptotrichia trevisanii,species,LPSN,species/leptotrichia-trevisanii,f,f,f,f,f,f
+250,Leptotrichia wadei,species,LPSN,species/leptotrichia-wadei,f,f,f,f,f,f
+2366,Leuconostoc,genus,LPSN,genus/leuconostoc,f,f,f,f,f,f
+2545,Leuconostoc citreum,species,LPSN,species/leuconostoc-citreum,f,f,f,f,f,f
+1147,Leuconostoc lactis,species,LPSN,species/leuconostoc-lactis,f,f,f,f,f,f
+1258,Leuconostoc mesenteroides,species,LPSN,species/leuconostoc-mesenteroides,f,f,f,f,f,f
+1060,Leuconostoc pseudomesenteroides,species,LPSN,species/leuconostoc-pseudomesenteroides,f,f,f,f,f,f
+3227,Levilactobacillus brevis,species,LPSN,species/levilactobacillus-brevis,f,f,f,f,f,f
+3234,Ligilactobacillus salivarius,species,LPSN,species/ligilactobacillus-salivarius,f,f,f,f,f,f
+3318,Limosilactobacillus antri,species,LPSN,species/limosilactobacillus-antri,f,f,f,f,f,f
+3094,Limosilactobacillus fermentum,species,LPSN,species/limosilactobacillus-fermentum,f,f,f,f,f,f
+3133,Limosilactobacillus gastricus,species,LPSN,species/limosilactobacillus-gastricus,f,f,f,f,f,f
+2997,Limosilactobacillus oris,species,LPSN,species/limosilactobacillus-oris,f,f,f,f,f,f
+3309,Limosilactobacillus reuteri,species,LPSN,species/limosilactobacillus-reuteri,f,f,f,f,f,f
+3199,Limosilactobacillus vaginalis,species,LPSN,species/limosilactobacillus-vaginalis,f,f,f,f,f,f
+157,Listeria,genus,LPSN,genus/listeria,f,f,f,f,f,f
+1199,Listeria grayi,species,LPSN,species/listeria-grayi,f,f,f,f,f,f
+2515,Listeria innocua,species,LPSN,species/listeria-innocua,f,f,f,f,f,f
+2118,Listeria ivanovii,species,LPSN,species/listeria-ivanovii,f,f,f,f,f,f
+368,Listeria monocytogenes,species,LPSN,species/listeria-monocytogenes,f,f,f,f,f,f
+172,Listeria seeligeri,species,LPSN,species/listeria-seeligeri,f,f,f,f,f,f
+1057,Listeria welshimeri,species,LPSN,species/listeria-welshimeri,f,f,f,f,f,f
+1675,Listonella,genus,LPSN,genus/listonella,f,f,f,f,f,f
+589,Loboa,genus,MycoBank,20311,f,f,f,f,f,f
+1001,Lodderomyces,genus,MycoBank,2916,f,f,f,f,f,f
+2267,Lodderomyces elongisporus,species,MycoBank,316954,f,f,f,f,f,f
+3343,Lymphocytic choriomeningitis mammarenavirus,species,ICTV,202102586,f,f,f,f,f,f
+3091,Lysinibacillus odysseyi,species,LPSN,species/lysinibacillus-odysseyi,t,f,f,f,f,f
+2913,Lysinibacillus sphaericus,species,LPSN,species/lysinibacillus-sphaericus,t,f,f,f,f,f
+3336,Lyssavirus rabies,species,ICTV,202101733,f,f,f,f,f,f
+2218,Macrococcus,genus,LPSN,genus/macrococcus,f,f,f,f,f,f
+2134,Macrococcus bovicus,species,LPSN,species/macrococcus-bovicus,f,f,f,f,f,f
+1307,Macrococcus carouselicus,species,LPSN,species/macrococcus-carouselicus,f,f,f,f,f,f
+1692,Macrococcus caseolyticus,species,LPSN,species/macrococcus-caseolyticus,f,f,f,f,f,f
+818,Macrococcus equipercicus,species,LPSN,species/macrococcus-equipercicus,f,f,f,f,f,f
+2647,Madariaga virus,species,ICTV,202105094,f,f,f,f,f,f
+2303,Madurella,genus,MycoBank,8824,f,f,f,f,f,f
+1081,Madurella grisea,species,MycoBank,287885,f,f,f,f,f,f
+1627,Madurella mycetomatis,species,MycoBank,535193,f,f,f,f,f,f
+3246,Malacoplasma penetrans,species,LPSN,species/malacoplasma-penetrans,f,f,f,f,f,f
+1614,Malassezia,genus,MycoBank,8831,f,f,f,f,f,f
+1542,Malassezia furfur,species,MycoBank,121793,f,f,f,f,f,f
+801,Malassezia globosa,species,MycoBank,437919,f,f,f,f,f,f
+1904,Malassezia pachydermatis,species,MycoBank,253759,f,f,f,f,f,f
+1797,Malassezia restricta,species,MycoBank,437921,f,f,f,f,f,f
+72,Malassezia sympodialis,species,MycoBank,130281,f,f,f,f,f,f
+1373,Malbranchea,genus,MycoBank,8833,f,f,f,f,f,f
+2993,Mammaliicoccus fleurettii,species,LPSN,species/mammaliicoccus-fleurettii,t,f,f,f,f,f
+3055,Mammaliicoccus lentus,species,LPSN,species/mammaliicoccus-lentus,t,f,f,f,f,f
+2969,Mammaliicoccus sciuri,species,LPSN,species/mammaliicoccus-sciuri,t,f,f,f,f,f
+2987,Mammaliicoccus vitulinus,species,LPSN,species/mammaliicoccus-vitulinus,t,f,f,f,f,f
+2414,Mannheimia,genus,LPSN,genus/mannheimia,f,f,f,f,f,f
+1880,Mannheimia haemolytica,species,LPSN,species/mannheimia-haemolytica,f,f,f,f,f,f
+2170,Marburgvirus,genus,ICTV,202101570,f,f,f,f,f,f
+3320,Margalitia shackletonii,species,LPSN,species/margalitia-shackletonii,t,f,f,f,f,f
+3410,Marquandomyces marquandii,genus,MycoBank,834880,f,f,f,f,f,f
+206,Massilia,genus,LPSN,genus/massilia,f,f,f,f,f,f
+1423,Massilia timonae,species,LPSN,species/massilia-timonae,f,f,f,f,f,f
+387,Mastadenovirus,genus,ICTV,202102412,f,f,f,f,f,f
+3333,Measles morbillivirus,species,ICTV,202101616,f,f,f,f,f,f
+3345,Medicopsis romeroi,species,MycoBank,564792,f,f,f,f,f,f
+160,Megamonas,genus,LPSN,genus/megamonas,f,f,f,f,f,f
+1476,Megamonas hypermegale,species,LPSN,species/megamonas-hypermegale,f,f,f,f,f,f
+483,Megasphaera,genus,LPSN,genus/megasphaera,f,f,f,f,f,f
+1144,Megasphaera elsdenii,species,LPSN,species/megasphaera-elsdenii,f,f,f,f,f,f
+3305,Mesobacillus boroniphilus,species,LPSN,species/mesobacillus-boroniphilus,t,f,f,f,f,f
+2979,Mesobacillus jeotgali,species,LPSN,species/mesobacillus-jeotgali,t,f,f,f,f,f
+3003,Mesobacillus subterraneus,species,LPSN,species/mesobacillus-subterraneus,t,f,f,f,f,f
+3265,Metabacillus fastidiosus,species,LPSN,species/metabacillus-fastidiosus,t,f,f,f,f,f
+3121,Metabacillus idriensis,species,LPSN,species/metabacillus-idriensis,t,f,f,f,f,f
+3150,Metabacillus indicus,species,LPSN,species/metabacillus-indicus,t,f,f,f,f,f
+3059,Metamycoplasma buccale,species,LPSN,species/metamycoplasma-buccale,f,f,f,f,f,f
+3037,Metamycoplasma faucium,species,LPSN,species/metamycoplasma-faucium,f,f,f,f,f,f
+2983,Metamycoplasma hominis,species,LPSN,species/metamycoplasma-hominis,f,f,f,f,f,f
+3002,Metamycoplasma orale,species,LPSN,species/metamycoplasma-orale,f,f,f,f,f,f
+3280,Metamycoplasma salivarium,species,LPSN,species/metamycoplasma-salivarium,f,f,f,f,f,f
+859,Metarhizium,genus,MycoBank,8912,f,f,f,f,f,f
+421,Metarhizium anisopliae,species,MycoBank,101834,f,f,f,f,f,f
+1522,Methylobacterium,genus,LPSN,genus/methylobacterium,f,f,f,f,f,f
+704,Methylobacterium mesophilicum,species,LPSN,species/methylobacterium-mesophilicum,f,f,f,f,f,f
+3202,Methylorubrum zatmanii,species,LPSN,species/methylorubrum-zatmanii,f,f,f,f,f,f
+3414,Metschnikowia pulcherrima,species,MycoBank,334124,f,f,f,f,f,f
+1310,Meyerozyma,genus,MycoBank,513456,f,f,f,f,f,f
+2187,Meyerozyma guilliermondii,species,MycoBank,513463,f,f,f,f,f,f
+3355,Microascus paisii,species,MycoBank,809213,f,f,f,f,f,f
+832,Microbacterium,genus,LPSN,genus/microbacterium,t,f,f,f,f,f
+1830,Microbacterium arborescens,species,LPSN,species/microbacterium-arborescens,t,f,f,f,f,f
+881,Microbacterium hydrocarbonoxydans,species,LPSN,species/microbacterium-hydrocarbonoxydans,t,f,f,f,f,f
+2210,Microbacterium imperiale,species,LPSN,species/microbacterium-imperiale,t,f,f,f,f,f
+1741,Microbacterium lacticum,species,LPSN,species/microbacterium-lacticum,t,f,f,f,f,f
+1203,Microbacterium liquefaciens,species,LPSN,species/microbacterium-liquefaciens,t,f,f,f,f,f
+2093,Microbacterium maritypicum,species,LPSN,species/microbacterium-maritypicum,t,f,f,f,f,f
+180,Microbacterium oxydans,species,LPSN,species/microbacterium-oxydans,t,f,f,f,f,f
+973,Microbacterium paraoxydans,species,LPSN,species/microbacterium-paraoxydans,t,f,f,f,f,f
+1138,Microbacterium resistens,species,LPSN,species/microbacterium-resistens,t,f,f,f,f,f
+100,Micrococcus,genus,LPSN,genus/micrococcus,t,f,f,f,f,f
+1056,Micrococcus antarcticus,species,LPSN,species/micrococcus-antarcticus,t,f,f,f,f,f
+2236,Micrococcus flavus,species,LPSN,species/micrococcus-flavus,t,f,f,f,f,f
+1606,Micrococcus luteus,species,LPSN,species/micrococcus-luteus,t,f,f,f,f,f
+1956,Micrococcus lylae,species,LPSN,species/micrococcus-lylae,t,f,f,f,f,f
+2192,Micromonospora,genus,LPSN,genus/micromonospora,f,f,f,f,f,f
+435,Micromonospora chalcea,species,LPSN,species/micromonospora-chalcea,f,f,f,f,f,f
+1030,Microsporidium,genus,MycoBank,30525,f,f,f,f,f,f
+3408,Microsporon brachytomum,species,MycoBank,528372,f,f,f,f,f,f
+410,Microsporum,genus,MycoBank,8939,f,f,f,f,f,f
+2807,Microsporum canis,species,MycoBank,160689,f,f,f,f,f,f
+3364,Millerozyma farinosa,species,MycoBank,513465,f,f,f,f,f,f
+1543,Mitsuokella,genus,LPSN,genus/mitsuokella,f,f,f,f,f,f
+915,Mitsuokella multacida,species,LPSN,species/mitsuokella-multacida,f,f,f,f,f,f
+2726,Mixta calida,species,LPSN,species/mixta-calida,f,f,f,t,t,t
+1306,Mobiluncus,genus,LPSN,genus/mobiluncus,f,f,f,f,f,f
+2297,Mobiluncus curtisii,species,LPSN,species/mobiluncus-curtisii,f,f,f,f,f,f
+3322,Mobiluncus holmesii,species,LPSN,species/mobiluncus-holmesii,f,f,f,f,f,f
+1819,Mobiluncus mulieris,species,LPSN,species/mobiluncus-mulieris,f,f,f,f,f,f
+472,Moellerella,genus,LPSN,genus/moellerella,f,f,f,t,t,t
+761,Moellerella wisconsensis,species,LPSN,species/moellerella-wisconsensis,f,f,f,t,t,t
+2702,Moesziomyces bullatus,species,MycoBank,317784,f,f,f,f,f,f
+601,Mogibacterium,genus,LPSN,genus/mogibacterium,f,f,f,f,f,f
+2186,Mogibacterium diversum,species,LPSN,species/mogibacterium-diversum,f,f,f,f,f,f
+2347,Mogibacterium neglectum,species,LPSN,species/mogibacterium-neglectum,f,f,f,f,f,f
+641,Mogibacterium timidum,species,LPSN,species/mogibacterium-timidum,f,f,f,f,f,f
+2017,Mogibacterium vescum,species,LPSN,species/mogibacterium-vescum,f,f,f,f,f,f
+1289,Molluscum contagiosum virus,species,ICTV,202104766,f,f,f,f,f,f
+1084,Monkeypox virus,species,ICTV,202104771,f,f,f,f,f,f
+1277,Moraxella,genus,LPSN,genus/moraxella,f,f,f,f,f,f
+3075,Moraxella anatipestifera,species,LPSN,species/moraxella-anatipestifera,f,f,f,f,f,f
+1291,Moraxella atlantae,species,LPSN,species/moraxella-atlantae,f,f,f,f,f,f
+263,Moraxella boevrei,species,LPSN,species/moraxella-boevrei,f,f,f,f,f,f
+1886,Moraxella bovis,species,LPSN,species/moraxella-bovis,f,f,f,f,f,f
+555,Moraxella canis,species,LPSN,species/moraxella-canis,f,f,f,f,f,f
+1759,Moraxella caprae,species,LPSN,species/moraxella-caprae,f,f,f,f,f,f
+770,Moraxella catarrhalis,species,LPSN,species/moraxella-catarrhalis,f,f,f,f,f,f
+400,Moraxella cuniculi,species,LPSN,species/moraxella-cuniculi,f,f,f,f,f,f
+1131,Moraxella lacunata,species,LPSN,species/moraxella-lacunata,f,f,f,f,f,f
+422,Moraxella lincolnii,species,LPSN,species/moraxella-lincolnii,f,f,f,f,f,f
+1633,Moraxella nonliquefaciens,species,LPSN,species/moraxella-nonliquefaciens,f,f,f,f,f,f
+1499,Moraxella oblonga,species,LPSN,species/moraxella-oblonga,f,f,f,f,f,f
+1036,Moraxella osloensis,species,LPSN,species/moraxella-osloensis,f,f,f,f,f,f
+2569,Moraxella ovis,species,LPSN,species/moraxella-ovis,f,f,f,f,f,f
+2369,Morbillivirus,genus,ICTV,202101612,f,f,f,f,f,f
+665,Morganella,genus,LPSN,genus/morganella,f,f,f,t,t,f
+66,Morganella morganii,species,LPSN,species/morganella-morganii,f,f,f,t,t,f
+149,Morganella morganii sibonii,subspecies,LPSN,subspecies/morganella-morganii-sibonii,f,f,f,t,t,f
+288,Mortierella,genus,MycoBank,20345,f,f,f,f,f,f
+2697,Mucor,genus,MycoBank,25484,f,f,f,f,f,f
+1330,Mucor circinelloides,species,MycoBank,198947,f,f,f,f,f,f
+1465,Mucor hiemalis,species,MycoBank,249401,f,f,f,f,f,f
+1645,Mucor janssenii,species,MycoBank,242235,f,f,f,f,f,f
+735,Mucor ramosissimus,species,MycoBank,276099,f,f,f,f,f,f
+3337,Mumps orthorubulavirus,species,ICTV,202101635,f,f,f,f,f,f
+1395,Mycobacterium,genus,LPSN,genus/mycobacterium,f,f,f,f,f,f
+381,Mycobacterium abscessus,species,LPSN,species/mycobacterium-abscessus,f,f,f,f,f,f
+2877,Mycobacterium abscessus massiliense,subspecies,LPSN,subspecies/mycobacterium-abscessus-massiliense,f,f,f,f,f,f
+825,Mycobacterium agri,species,LPSN,species/mycobacterium-agri,f,f,f,f,f,f
+1188,Mycobacterium aichiense,species,LPSN,species/mycobacterium-aichiense,f,f,f,f,f,f
+2852,Mycobacterium alsense,species,LPSN,species/mycobacterium-alsense,f,f,f,f,f,f
+146,Mycobacterium alvei,species,LPSN,species/mycobacterium-alvei,f,f,f,f,f,f
+2853,Mycobacterium arosiense,species,LPSN,species/mycobacterium-arosiense,f,f,f,f,f,f
+2854,Mycobacterium arupense,species,LPSN,species/mycobacterium-arupense,f,f,f,f,f,f
+2502,Mycobacterium asiaticum,species,LPSN,species/mycobacterium-asiaticum,f,f,f,f,f,f
+2855,Mycobacterium aubagnense,species,LPSN,species/mycobacterium-aubagnense,f,f,f,f,f,f
+1696,Mycobacterium aurum,species,LPSN,species/mycobacterium-aurum,f,f,f,f,f,f
+415,Mycobacterium austroafricanum,species,LPSN,species/mycobacterium-austroafricanum,f,f,f,f,f,f
+2461,Mycobacterium avium,species,LPSN,species/mycobacterium-avium,f,f,f,f,f,f
+2599,Mycobacterium avium complex,species complex,NeoIPC,2,f,f,f,f,f,f
+3099,Mycobacterium avium paratuberculosis,subspecies,LPSN,subspecies/mycobacterium-avium-paratuberculosis,f,f,f,f,f,f
+2856,Mycobacterium bacteremicum,species,LPSN,species/mycobacterium-bacteremicum,f,f,f,f,f,f
+2857,Mycobacterium basiliense,species,LPSN,species/mycobacterium-basiliense,f,f,f,f,f,f
+74,Mycobacterium boenickei,species,LPSN,species/mycobacterium-boenickei,f,f,f,f,f,f
+1200,Mycobacterium bohemicum,species,LPSN,species/mycobacterium-bohemicum,f,f,f,f,f,f
+673,Mycobacterium branderi,species,LPSN,species/mycobacterium-branderi,f,f,f,f,f,f
+2020,Mycobacterium brisbanense,species,LPSN,species/mycobacterium-brisbanense,f,f,f,f,f,f
+1726,Mycobacterium brumae,species,LPSN,species/mycobacterium-brumae,f,f,f,f,f,f
+1040,Mycobacterium canariasense,species,LPSN,species/mycobacterium-canariasense,f,f,f,f,f,f
+2351,Mycobacterium celatum,species,LPSN,species/mycobacterium-celatum,f,f,f,f,f,f
+1588,Mycobacterium chelonae,species,LPSN,species/mycobacterium-chelonae,f,f,f,f,f,f
+2950,Mycobacterium chesapeaki,species,LPSN,species/mycobacterium-chesapeaki,f,f,f,f,f,f
+1769,Mycobacterium chitae,species,LPSN,species/mycobacterium-chitae,f,f,f,f,f,f
+2965,Mycobacterium chlorophenolicum,species,LPSN,species/mycobacterium-chlorophenolicum,f,f,f,f,f,f
+2508,Mycobacterium chubuense,species,LPSN,species/mycobacterium-chubuense,f,f,f,f,f,f
+2861,Mycobacterium colombiense,species,LPSN,species/mycobacterium-colombiense,f,f,f,f,f,f
+2862,Mycobacterium conceptionense,species,LPSN,species/mycobacterium-conceptionense,f,f,f,f,f,f
+2100,Mycobacterium confluentis,species,LPSN,species/mycobacterium-confluentis,f,f,f,f,f,f
+2067,Mycobacterium conspicuum,species,LPSN,species/mycobacterium-conspicuum,f,f,f,f,f,f
+787,Mycobacterium cookii,species,LPSN,species/mycobacterium-cookii,f,f,f,f,f,f
+654,Mycobacterium cosmeticum,species,LPSN,species/mycobacterium-cosmeticum,f,f,f,f,f,f
+884,Mycobacterium diernhoferi,species,LPSN,species/mycobacterium-diernhoferi,f,f,f,f,f,f
+115,Mycobacterium doricum,species,LPSN,species/mycobacterium-doricum,f,f,f,f,f,f
+982,Mycobacterium duvalii,species,LPSN,species/mycobacterium-duvalii,f,f,f,f,f,f
+507,Mycobacterium elephantis,species,LPSN,species/mycobacterium-elephantis,f,f,f,f,f,f
+2863,Mycobacterium europaeum,species,LPSN,species/mycobacterium-europaeum,f,f,f,f,f,f
+955,Mycobacterium fallax,species,LPSN,species/mycobacterium-fallax,f,f,f,f,f,f
+418,Mycobacterium farcinogenes,species,LPSN,species/mycobacterium-farcinogenes,f,f,f,f,f,f
+574,Mycobacterium flavescens,species,LPSN,species/mycobacterium-flavescens,f,f,f,f,f,f
+2864,Mycobacterium florentinum,species,LPSN,species/mycobacterium-florentinum,f,f,f,f,f,f
+2457,Mycobacterium fortuitum,species,LPSN,species/mycobacterium-fortuitum,f,f,f,f,f,f
+2951,Mycobacterium fortuitum complex,species complex,NeoIPC,80,f,f,f,f,f,f
+2865,Mycobacterium fragae,species,LPSN,species/mycobacterium-fragae,f,f,f,f,f,f
+1817,Mycobacterium frederiksbergense,species,LPSN,species/mycobacterium-frederiksbergense,f,f,f,f,f,f
+911,Mycobacterium gadium,species,LPSN,species/mycobacterium-gadium,f,f,f,f,f,f
+666,Mycobacterium gastri,species,LPSN,species/mycobacterium-gastri,f,f,f,f,f,f
+423,Mycobacterium genavense,species,LPSN,species/mycobacterium-genavense,f,f,f,f,f,f
+1693,Mycobacterium gilvum,species,LPSN,species/mycobacterium-gilvum,f,f,f,f,f,f
+2551,Mycobacterium goodii,species,LPSN,species/mycobacterium-goodii,f,f,f,f,f,f
+838,Mycobacterium gordonae,species,LPSN,species/mycobacterium-gordonae,f,f,f,f,f,f
+2866,Mycobacterium grossiae,species,LPSN,species/mycobacterium-grossiae,f,f,f,f,f,f
+1912,Mycobacterium haemophilum,species,LPSN,species/mycobacterium-haemophilum,f,f,f,f,f,f
+1579,Mycobacterium hassiacum,species,LPSN,species/mycobacterium-hassiacum,f,f,f,f,f,f
+1454,Mycobacterium heckeshornense,species,LPSN,species/mycobacterium-heckeshornense,f,f,f,f,f,f
+1164,Mycobacterium heidelbergense,species,LPSN,species/mycobacterium-heidelbergense,f,f,f,f,f,f
+2867,Mycobacterium heraklionense,species,LPSN,species/mycobacterium-heraklionense,f,f,f,f,f,f
+1644,Mycobacterium hiberniae,species,LPSN,species/mycobacterium-hiberniae,f,f,f,f,f,f
+1498,Mycobacterium hodleri,species,LPSN,species/mycobacterium-hodleri,f,f,f,f,f,f
+2490,Mycobacterium holsaticum,species,LPSN,species/mycobacterium-holsaticum,f,f,f,f,f,f
+127,Mycobacterium houstonense,species,LPSN,species/mycobacterium-houstonense,f,f,f,f,f,f
+1017,Mycobacterium immunogenum,species,LPSN,species/mycobacterium-immunogenum,f,f,f,f,f,f
+1680,Mycobacterium interjectum,species,LPSN,species/mycobacterium-interjectum,f,f,f,f,f,f
+2208,Mycobacterium intermedium,species,LPSN,species/mycobacterium-intermedium,f,f,f,f,f,f
+268,Mycobacterium intracellulare,species,LPSN,species/mycobacterium-intracellulare,f,f,f,f,f,f
+2859,Mycobacterium intracellulare chimaera,subspecies,LPSN,subspecies/mycobacterium-intracellulare-chimaera,f,f,f,f,f,f
+2868,Mycobacterium iranicum,species,LPSN,species/mycobacterium-iranicum,f,f,f,f,f,f
+2042,Mycobacterium kansasii,species,LPSN,species/mycobacterium-kansasii,f,f,f,f,f,f
+187,Mycobacterium komossense,species,LPSN,species/mycobacterium-komossense,f,f,f,f,f,f
+2869,Mycobacterium koreense,species,LPSN,species/mycobacterium-koreense,f,f,f,f,f,f
+1594,Mycobacterium kubicae,species,LPSN,species/mycobacterium-kubicae,f,f,f,f,f,f
+2870,Mycobacterium kumamotonense,species,LPSN,species/mycobacterium-kumamotonense,f,f,f,f,f,f
+2871,Mycobacterium kyorinense,species,LPSN,species/mycobacterium-kyorinense,f,f,f,f,f,f
+2133,Mycobacterium lacus,species,LPSN,species/mycobacterium-lacus,f,f,f,f,f,f
+2219,Mycobacterium lentiflavum,species,LPSN,species/mycobacterium-lentiflavum,f,f,f,f,f,f
+581,Mycobacterium leprae,species,LPSN,species/mycobacterium-leprae,f,f,f,f,f,f
+2872,Mycobacterium lepromatosis,species,LPSN,species/mycobacterium-lepromatosis,f,f,f,f,f,f
+2873,Mycobacterium llatzerense,species,LPSN,species/mycobacterium-llatzerense,f,f,f,f,f,f
+2874,Mycobacterium longobardum,species,LPSN,species/mycobacterium-longobardum,f,f,f,f,f,f
+1667,Mycobacterium madagascariense,species,LPSN,species/mycobacterium-madagascariense,f,f,f,f,f,f
+2282,Mycobacterium mageritense,species,LPSN,species/mycobacterium-mageritense,f,f,f,f,f,f
+152,Mycobacterium malmoense,species,LPSN,species/mycobacterium-malmoense,f,f,f,f,f,f
+2875,Mycobacterium mantenii,species,LPSN,species/mycobacterium-mantenii,f,f,f,f,f,f
+1762,Mycobacterium marinum,species,LPSN,species/mycobacterium-marinum,f,f,f,f,f,f
+2876,Mycobacterium marseillense,species,LPSN,species/mycobacterium-marseillense,f,f,f,f,f,f
+2879,Mycobacterium monacense,species,LPSN,species/mycobacterium-monacense,f,f,f,f,f,f
+965,Mycobacterium montefiorense,species,LPSN,species/mycobacterium-montefiorense,f,f,f,f,f,f
+2257,Mycobacterium moriokaense,species,LPSN,species/mycobacterium-moriokaense,f,f,f,f,f,f
+1973,Mycobacterium mucogenicum,species,LPSN,species/mycobacterium-mucogenicum,f,f,f,f,f,f
+2880,Mycobacterium mungi,species,LPSN,species/mycobacterium-mungi,f,f,f,f,f,f
+569,Mycobacterium murale,species,LPSN,species/mycobacterium-murale,f,f,f,f,f,f
+2881,Mycobacterium nebraskense,species,LPSN,species/mycobacterium-nebraskense,f,f,f,f,f,f
+2358,Mycobacterium neoaurum,species,LPSN,species/mycobacterium-neoaurum,f,f,f,f,f,f
+528,Mycobacterium neworleansense,species,LPSN,species/mycobacterium-neworleansense,f,f,f,f,f,f
+1703,Mycobacterium nonchromogenicum,species,LPSN,species/mycobacterium-nonchromogenicum,f,f,f,f,f,f
+2882,Mycobacterium noviomagense,species,LPSN,species/mycobacterium-noviomagense,f,f,f,f,f,f
+1142,Mycobacterium novocastrense,species,LPSN,species/mycobacterium-novocastrense,f,f,f,f,f,f
+2374,Mycobacterium obuense,species,LPSN,species/mycobacterium-obuense,f,f,f,f,f,f
+1145,Mycobacterium palustre,species,LPSN,species/mycobacterium-palustre,f,f,f,f,f,f
+2883,Mycobacterium paraffinicum,species,LPSN,species/mycobacterium-paraffinicum,f,f,f,f,f,f
+233,Mycobacterium parafortuitum,species,LPSN,species/mycobacterium-parafortuitum,f,f,f,f,f,f
+2884,Mycobacterium paragordonae,species,LPSN,species/mycobacterium-paragordonae,f,f,f,f,f,f
+2885,Mycobacterium parakoreense,species,LPSN,species/mycobacterium-parakoreense,f,f,f,f,f,f
+322,Mycobacterium parascrofulaceum,species,LPSN,species/mycobacterium-parascrofulaceum,f,f,f,f,f,f
+2886,Mycobacterium paraseoulense,species,LPSN,species/mycobacterium-paraseoulense,f,f,f,f,f,f
+2451,Mycobacterium parmense,species,LPSN,species/mycobacterium-parmense,f,f,f,f,f,f
+2530,Mycobacterium peregrinum,species,LPSN,species/mycobacterium-peregrinum,f,f,f,f,f,f
+341,Mycobacterium phlei,species,LPSN,species/mycobacterium-phlei,f,f,f,f,f,f
+1032,Mycobacterium phocaicum,species,LPSN,species/mycobacterium-phocaicum,f,f,f,f,f,f
+124,Mycobacterium porcinum,species,LPSN,species/mycobacterium-porcinum,f,f,f,f,f,f
+2887,Mycobacterium poriferae,species,LPSN,species/mycobacterium-poriferae,f,f,f,f,f,f
+1585,Mycobacterium psychrotolerans,species,LPSN,species/mycobacterium-psychrotolerans,f,f,f,f,f,f
+728,Mycobacterium rhodesiae,species,LPSN,species/mycobacterium-rhodesiae,f,f,f,f,f,f
+2888,Mycobacterium riyadhense,species,LPSN,species/mycobacterium-riyadhense,f,f,f,f,f,f
+2889,Mycobacterium saskatchewanense,species,LPSN,species/mycobacterium-saskatchewanense,f,f,f,f,f,f
+1182,Mycobacterium scrofulaceum,species,LPSN,species/mycobacterium-scrofulaceum,f,f,f,f,f,f
+2890,Mycobacterium senegalense,species,LPSN,species/mycobacterium-senegalense,f,f,f,f,f,f
+2891,Mycobacterium senuense,species,LPSN,species/mycobacterium-senuense,f,f,f,f,f,f
+2892,Mycobacterium seoulense,species,LPSN,species/mycobacterium-seoulense,f,f,f,f,f,f
+2387,Mycobacterium septicum,species,LPSN,species/mycobacterium-septicum,f,f,f,f,f,f
+2893,Mycobacterium setense,species,LPSN,species/mycobacterium-setense,f,f,f,f,f,f
+1123,Mycobacterium sherrisii,species,LPSN,species/mycobacterium-sherrisii,f,f,f,f,f,f
+1133,Mycobacterium shimoidei,species,LPSN,species/mycobacterium-shimoidei,f,f,f,f,f,f
+2894,Mycobacterium shinjukuense,species,LPSN,species/mycobacterium-shinjukuense,f,f,f,f,f,f
+186,Mycobacterium shottsii,species,LPSN,species/mycobacterium-shottsii,f,f,f,f,f,f
+1970,Mycobacterium simiae,species,LPSN,species/mycobacterium-simiae,f,f,f,f,f,f
+1252,Mycobacterium smegmatis,species,LPSN,species/mycobacterium-smegmatis,f,f,f,f,f,f
+291,Mycobacterium sphagni,species,LPSN,species/mycobacterium-sphagni,f,f,f,f,f,f
+2491,Mycobacterium szulgai,species,LPSN,species/mycobacterium-szulgai,f,f,f,f,f,f
+361,Mycobacterium terrae,species,LPSN,species/mycobacterium-terrae,f,f,f,f,f,f
+2952,Mycobacterium terrae complex,species complex,NeoIPC,81,f,f,f,f,f,f
+2477,Mycobacterium thermoresistibile,species,LPSN,species/mycobacterium-thermoresistibile,f,f,f,f,f,f
+2895,Mycobacterium timonense,species,LPSN,species/mycobacterium-timonense,f,f,f,f,f,f
+2050,Mycobacterium tokaiense,species,LPSN,species/mycobacterium-tokaiense,f,f,f,f,f,f
+215,Mycobacterium triplex,species,LPSN,species/mycobacterium-triplex,f,f,f,f,f,f
+1449,Mycobacterium triviale,species,LPSN,species/mycobacterium-triviale,f,f,f,f,f,f
+1346,Mycobacterium tuberculosis,species,LPSN,species/mycobacterium-tuberculosis,f,f,f,f,f,f
+2948,Mycobacterium tuberculosis canetti,subspecies,LPSN,subspecies/mycobacterium-tuberculosis-canetti,f,f,f,f,f,f
+2953,Mycobacterium tuberculosis complex,species complex,NeoIPC,82,f,f,f,f,f,f
+1323,Mycobacterium tusciae,species,LPSN,species/mycobacterium-tusciae,f,f,f,f,f,f
+2025,Mycobacterium ulcerans,species,LPSN,species/mycobacterium-ulcerans,f,f,f,f,f,f
+975,Mycobacterium vaccae,species,LPSN,species/mycobacterium-vaccae,f,f,f,f,f,f
+2435,Mycobacterium wolinskyi,species,LPSN,species/mycobacterium-wolinskyi,f,f,f,f,f,f
+2289,Mycobacterium xenopi,species,LPSN,species/mycobacterium-xenopi,f,f,f,f,f,f
+2378,Mycoplasma,genus,LPSN,genus/mycoplasma,f,f,f,f,f,f
+101,Mycoplasma spermatophilum,species,LPSN,species/mycoplasma-spermatophilum,f,f,f,f,f,f
+3072,Mycoplasmoides genitalium,species,LPSN,species/mycoplasmoides-genitalium,f,f,f,f,f,f
+3118,Mycoplasmoides pirum,species,LPSN,species/mycoplasmoides-pirum,f,f,f,f,f,f
+2986,Mycoplasmoides pneumoniae,species,LPSN,species/mycoplasmoides-pneumoniae,f,f,f,f,f,f
+3047,Mycoplasmopsis fermentans,species,LPSN,species/mycoplasmopsis-fermentans,f,f,f,f,f,f
+3071,Mycoplasmopsis lipophila,species,LPSN,species/mycoplasmopsis-lipophila,f,f,f,f,f,f
+2998,Mycoplasmopsis primatum,species,LPSN,species/mycoplasmopsis-primatum,f,f,f,f,f,f
+1308,Myroides,genus,LPSN,genus/myroides,f,f,f,f,f,f
+1743,Myroides odoratus,species,LPSN,species/myroides-odoratus,f,f,f,f,f,f
+2054,Nannizzia,genus,MycoBank,3420,f,f,f,f,f,f
+1883,Necator,genus,MycoBank,9082,f,f,f,f,f,f
+1915,Neisseria,genus,LPSN,genus/neisseria,f,f,f,t,t,f
+2841,Neisseria animaloris,species,LPSN,species/neisseria-animaloris,f,f,f,t,t,f
+2842,Neisseria bacilliformis,species,LPSN,species/neisseria-bacilliformis,f,f,f,t,t,f
+2269,Neisseria canis,species,LPSN,species/neisseria-canis,f,f,f,t,t,f
+713,Neisseria cinerea,species,LPSN,species/neisseria-cinerea,f,f,f,t,t,f
+391,Neisseria dentiae,species,LPSN,species/neisseria-dentiae,f,f,f,t,t,f
+2843,Neisseria dumasiana,species,LPSN,species/neisseria-dumasiana,f,f,f,t,t,f
+1626,Neisseria elongata,species,LPSN,species/neisseria-elongata,f,f,f,t,t,f
+1790,Neisseria elongata elongata,subspecies,LPSN,subspecies/neisseria-elongata-elongata,f,f,f,t,t,f
+2484,Neisseria elongata glycolytica,subspecies,LPSN,subspecies/neisseria-elongata-glycolytica,f,f,f,t,t,f
+2588,Neisseria elongata nitroreducens,subspecies,LPSN,subspecies/neisseria-elongata-nitroreducens,f,f,f,t,t,f
+2844,Neisseria flava,species,LPSN,species/neisseria-flava,f,f,f,t,t,f
+718,Neisseria flavescens,species,LPSN,species/neisseria-flavescens,f,f,f,t,t,f
+1357,Neisseria gonorrhoeae,species,LPSN,species/neisseria-gonorrhoeae,f,f,f,t,t,f
+985,Neisseria iguanae,species,LPSN,species/neisseria-iguanae,f,f,f,t,t,f
+1719,Neisseria lactamica,species,LPSN,species/neisseria-lactamica,f,f,f,t,t,f
+1881,Neisseria macacae,species,LPSN,species/neisseria-macacae,f,f,f,t,t,f
+1206,Neisseria meningitidis,species,LPSN,species/neisseria-meningitidis,f,f,f,t,t,f
+610,Neisseria mucosa,species,LPSN,species/neisseria-mucosa,f,f,f,t,t,f
+827,Neisseria oralis,species,LPSN,species/neisseria-oralis,f,f,f,t,t,f
+2271,Neisseria perflava,species,LPSN,species/neisseria-perflava,f,f,f,t,t,f
+2129,Neisseria polysaccharea,species,LPSN,species/neisseria-polysaccharea,f,f,f,t,t,f
+2845,Neisseria shayeganii,species,LPSN,species/neisseria-shayeganii,f,f,f,t,t,f
+2518,Neisseria sicca,species,LPSN,species/neisseria-sicca,f,f,f,t,t,f
+316,Neisseria subflava,species,LPSN,species/neisseria-subflava,f,f,f,t,t,f
+2846,Neisseria wadsworthii,species,LPSN,species/neisseria-wadsworthii,f,f,f,t,t,f
+2847,Neisseria weaveri,species,LPSN,species/neisseria-weaveri,f,f,f,t,t,f
+2848,Neisseria zoodegmatis,species,LPSN,species/neisseria-zoodegmatis,f,f,f,t,t,f
+3098,Neobacillus bataviensis,species,LPSN,species/neobacillus-bataviensis,t,f,f,f,f,f
+3301,Neobacillus drentensis,species,LPSN,species/neobacillus-drentensis,t,f,f,f,f,f
+3270,Neobacillus fumarioli,species,LPSN,species/neobacillus-fumarioli,t,f,f,f,f,f
+3129,Neobacillus niacini,species,LPSN,species/neobacillus-niacini,t,f,f,f,f,f
+3062,Neobacillus novalis,species,LPSN,species/neobacillus-novalis,t,f,f,f,f,f
+3009,Neobacillus pocheonensis,species,LPSN,species/neobacillus-pocheonensis,t,f,f,f,f,f
+3123,Neobacillus soli,species,LPSN,species/neobacillus-soli,t,f,f,f,f,f
+3250,Neobacillus vireti,species,LPSN,species/neobacillus-vireti,t,f,f,f,f,f
+59,Neorickettsia,genus,LPSN,genus/neorickettsia,f,f,f,f,f,f
+2564,Neosartorya,genus,MycoBank,3480,f,f,f,f,f,f
+2145,Neoscytalidium dimidiatum,species,MycoBank,500869,f,f,f,f,f,f
+585,Nesterenkonia,genus,LPSN,genus/nesterenkonia,f,f,f,f,f,f
+106,Nesterenkonia halobia,species,LPSN,species/nesterenkonia-halobia,f,f,f,f,f,f
+3288,Niallia circulans,species,LPSN,species/niallia-circulans,t,f,f,f,f,f
+3131,Niallia nealsonii,species,LPSN,species/niallia-nealsonii,t,f,f,f,f,f
+660,Nigrospora,genus,MycoBank,9124,f,f,f,f,f,f
+1148,Nocardia,genus,LPSN,genus/nocardia,f,f,f,f,f,f
+137,Nocardia abscessus,species,LPSN,species/nocardia-abscessus,f,f,f,f,f,f
+1265,Nocardia africana,species,LPSN,species/nocardia-africana,f,f,f,f,f,f
+2590,Nocardia anaemiae,species,LPSN,species/nocardia-anaemiae,f,f,f,f,f,f
+530,Nocardia aobensis,species,LPSN,species/nocardia-aobensis,f,f,f,f,f,f
+548,Nocardia araoensis,species,LPSN,species/nocardia-araoensis,f,f,f,f,f,f
+2000,Nocardia arthritidis,species,LPSN,species/nocardia-arthritidis,f,f,f,f,f,f
+1697,Nocardia asiatica,species,LPSN,species/nocardia-asiatica,f,f,f,f,f,f
+1260,Nocardia asteroides,species,LPSN,species/nocardia-asteroides,f,f,f,f,f,f
+2954,Nocardia asteroides complex,species complex,NeoIPC,83,f,f,f,f,f,f
+656,Nocardia beijingensis,species,LPSN,species/nocardia-beijingensis,f,f,f,f,f,f
+1899,Nocardia brasiliensis,species,LPSN,species/nocardia-brasiliensis,f,f,f,f,f,f
+2022,Nocardia brevicatena,species,LPSN,species/nocardia-brevicatena,f,f,f,f,f,f
+1069,Nocardia carnea,species,LPSN,species/nocardia-carnea,f,f,f,f,f,f
+378,Nocardia cyriacigeorgica,species,LPSN,species/nocardia-cyriacigeorgica,f,f,f,f,f,f
+1632,Nocardia elegans,species,LPSN,species/nocardia-elegans,f,f,f,f,f,f
+1004,Nocardia farcinica,species,LPSN,species/nocardia-farcinica,f,f,f,f,f,f
+725,Nocardia higoensis,species,LPSN,species/nocardia-higoensis,f,f,f,f,f,f
+1811,Nocardia inohanensis,species,LPSN,species/nocardia-inohanensis,f,f,f,f,f,f
+1898,Nocardia kruczakiae,species,LPSN,species/nocardia-kruczakiae,f,f,f,f,f,f
+783,Nocardia mexicana,species,LPSN,species/nocardia-mexicana,f,f,f,f,f,f
+1786,Nocardia niigatensis,species,LPSN,species/nocardia-niigatensis,f,f,f,f,f,f
+2368,Nocardia nova,species,LPSN,species/nocardia-nova,f,f,f,f,f,f
+2069,Nocardia otitidiscaviarum,species,LPSN,species/nocardia-otitidiscaviarum,f,f,f,f,f,f
+498,Nocardia paucivorans,species,LPSN,species/nocardia-paucivorans,f,f,f,f,f,f
+2357,Nocardia pneumoniae,species,LPSN,species/nocardia-pneumoniae,f,f,f,f,f,f
+800,Nocardia pseudobrasiliensis,species,LPSN,species/nocardia-pseudobrasiliensis,f,f,f,f,f,f
+120,Nocardia sienata,species,LPSN,species/nocardia-sienata,f,f,f,f,f,f
+2280,Nocardia testacea,species,LPSN,species/nocardia-testacea,f,f,f,f,f,f
+1864,Nocardia transvalensis,species,LPSN,species/nocardia-transvalensis,f,f,f,f,f,f
+1455,Nocardia veterana,species,LPSN,species/nocardia-veterana,f,f,f,f,f,f
+1293,Nocardia yamanashiensis,species,LPSN,species/nocardia-yamanashiensis,f,f,f,f,f,f
+372,Nocardiopsis,genus,LPSN,genus/nocardiopsis,f,f,f,f,f,f
+1890,Nocardiopsis dassonvillei,species,LPSN,species/nocardiopsis-dassonvillei,f,f,f,f,f,f
+2489,Nocardiopsis synnemataformans,species,LPSN,species/nocardiopsis-synnemataformans,f,f,f,f,f,f
+578,Norovirus,genus,ICTV,202102805,f,f,f,f,f,f
+647,Norwalk virus,species,ICTV,202102806,f,f,f,f,f,f
+1802,Obesumbacterium,genus,LPSN,genus/obesumbacterium,f,f,f,t,t,t
+527,Obesumbacterium proteus,species,LPSN,species/obesumbacterium-proteus,f,f,f,t,t,t
+2081,Ochroconis,genus,MycoBank,9136,f,f,f,f,f,f
+1429,Ochroconis constricta,species,MycoBank,318847,f,f,f,f,f,f
+861,Ochroconis humicola,species,MycoBank,318849,f,f,f,f,f,f
+693,Odoribacter,genus,LPSN,genus/odoribacter,f,f,f,f,f,f
+1738,Odoribacter splanchnicus,species,LPSN,species/odoribacter-splanchnicus,f,f,f,f,f,f
+241,Oerskovia,genus,LPSN,genus/oerskovia,t,f,f,f,f,f
+972,Ogataea,genus,MycoBank,27299,f,f,f,f,f,f
+2139,Ogataea angusta,species,MycoBank,517102,f,f,f,f,f,f
+1565,Ogataea polymorpha,species,MycoBank,362660,f,f,f,f,f,f
+2108,Oidiodendron,genus,MycoBank,9141,f,f,f,f,f,f
+678,Oligella,genus,LPSN,genus/oligella,f,f,f,f,f,f
+1911,Oligella ureolytica,species,LPSN,species/oligella-ureolytica,f,f,f,f,f,f
+1161,Oligella urethralis,species,LPSN,species/oligella-urethralis,f,f,f,f,f,f
+198,Orbivirus,genus,ICTV,202104877,f,f,f,f,f,f
+1510,Orf virus,species,ICTV,202104780,f,f,f,f,f,f
+1946,Orientia,genus,LPSN,genus/orientia,f,f,f,f,f,f
+2166,Orientia tsutsugamushi,species,LPSN,species/orientia-tsutsugamushi,f,f,f,f,f,f
+3415,Orthoflavivirus zikaense,species,ICTV,202203123,f,f,f,f,f,f
+793,Orthoreovirus,genus,ICTV,202104969,f,f,f,f,f,f
+1225,Paecilomyces,genus,MycoBank,9196,f,f,f,f,f,f
+1343,Paecilomyces variotii,species,MycoBank,248517,f,f,f,f,f,f
+3313,Paenarthrobacter aurescens,species,LPSN,species/paenarthrobacter-aurescens,t,f,f,f,f,f
+3019,Paenarthrobacter histidinolovorans,species,LPSN,species/paenarthrobacter-histidinolovorans,t,f,f,f,f,f
+3210,Paenarthrobacter ilicis,species,LPSN,species/paenarthrobacter-ilicis,t,f,f,f,f,f
+3132,Paenarthrobacter nicotinovorans,species,LPSN,species/paenarthrobacter-nicotinovorans,t,f,f,f,f,f
+3162,Paenarthrobacter nitroguajacolicus,species,LPSN,species/paenarthrobacter-nitroguajacolicus,t,f,f,f,f,f
+3292,Paenarthrobacter ureafaciens,species,LPSN,species/paenarthrobacter-ureafaciens,t,f,f,f,f,f
+285,Paenibacillus,genus,LPSN,genus/paenibacillus,t,f,f,f,f,f
+1329,Paenibacillus agaridevorans,species,LPSN,species/paenibacillus-agaridevorans,t,f,f,f,f,f
+184,Paenibacillus alvei,species,LPSN,species/paenibacillus-alvei,t,f,f,f,f,f
+1336,Paenibacillus edaphicus,species,LPSN,species/paenibacillus-edaphicus,t,f,f,f,f,f
+3209,Paenibacillus ehimensis,species,LPSN,species/paenibacillus-ehimensis,t,f,f,f,f,f
+1653,Paenibacillus larvae,species,LPSN,species/paenibacillus-larvae,t,f,f,f,f,f
+1504,Paenibacillus lentimorbus,species,LPSN,species/paenibacillus-lentimorbus,t,f,f,f,f,f
+470,Paenibacillus macerans,species,LPSN,species/paenibacillus-macerans,t,f,f,f,f,f
+3149,Paenibacillus mucilaginosus,species,LPSN,species/paenibacillus-mucilaginosus,t,f,f,f,f,f
+543,Paenibacillus pabuli,species,LPSN,species/paenibacillus-pabuli,t,f,f,f,f,f
+2517,Paenibacillus polymyxa,species,LPSN,species/paenibacillus-polymyxa,t,f,f,f,f,f
+1547,Paenibacillus popilliae,species,LPSN,species/paenibacillus-popilliae,t,f,f,f,f,f
+2130,Paenibacillus provencensis,species,LPSN,species/paenibacillus-provencensis,t,f,f,f,f,f
+579,Paenibacillus thiaminolyticus,species,LPSN,species/paenibacillus-thiaminolyticus,t,f,f,f,f,f
+960,Paenibacillus urinalis,species,LPSN,species/paenibacillus-urinalis,t,f,f,f,f,f
+87,Paenibacillus validus,species,LPSN,species/paenibacillus-validus,t,f,f,f,f,f
+3138,Paeniclostridium ghonii,species,LPSN,species/paeniclostridium-ghonii,f,f,f,f,f,f
+2995,Paeniclostridium sordellii,species,LPSN,species/paeniclostridium-sordellii,f,f,f,f,f,f
+3013,Paeniglutamicibacter gangotriensis,species,LPSN,species/paeniglutamicibacter-gangotriensis,t,f,f,f,f,f
+2968,Paeniglutamicibacter kerguelensis,species,LPSN,species/paeniglutamicibacter-kerguelensis,t,f,f,f,f,f
+3090,Paeniglutamicibacter psychrophenolicus,species,LPSN,species/paeniglutamicibacter-psychrophenolicus,t,f,f,f,f,f
+3024,Paeniglutamicibacter sulfureus,species,LPSN,species/paeniglutamicibacter-sulfureus,t,f,f,f,f,f
+2051,Pandoraea,genus,LPSN,genus/pandoraea,f,f,f,f,f,f
+1750,Pandoraea apista,species,LPSN,species/pandoraea-apista,f,f,f,f,f,f
+775,Pandoraea norimbergensis,species,LPSN,species/pandoraea-norimbergensis,f,f,f,f,f,f
+848,Pandoraea pnomenusa,species,LPSN,species/pandoraea-pnomenusa,f,f,f,f,f,f
+698,Pandoraea pulmonicola,species,LPSN,species/pandoraea-pulmonicola,f,f,f,f,f,f
+1345,Pandoraea sputorum,species,LPSN,species/pandoraea-sputorum,f,f,f,f,f,f
+1288,Pantoea,genus,LPSN,genus/pantoea,f,f,f,t,t,t
+987,Pantoea agglomerans,species,LPSN,species/pantoea-agglomerans,f,f,f,t,t,t
+2041,Pantoea ananatis,species,LPSN,species/pantoea-ananatis,f,f,f,t,t,t
+2725,Pantoea brenneri,species,LPSN,species/pantoea-brenneri,f,f,f,t,t,t
+2728,Pantoea conspicua,species,LPSN,species/pantoea-conspicua,f,f,f,t,t,t
+913,Pantoea dispersa,species,LPSN,species/pantoea-dispersa,f,f,f,t,t,t
+2729,Pantoea eucrina,species,LPSN,species/pantoea-eucrina,f,f,f,t,t,t
+2730,Pantoea septica,species,LPSN,species/pantoea-septica,f,f,f,t,t,t
+1493,Parabacteroides,genus,LPSN,genus/parabacteroides,f,f,f,f,f,f
+2905,Parabacteroides chongii,species,LPSN,species/parabacteroides-chongii,f,f,f,f,f,f
+1928,Parabacteroides distasonis,species,LPSN,species/parabacteroides-distasonis,f,f,f,f,f,f
+1515,Parabacteroides goldsteinii,species,LPSN,species/parabacteroides-goldsteinii,f,f,f,f,f,f
+2906,Parabacteroides gordonii,species,LPSN,species/parabacteroides-gordonii,f,f,f,f,f,f
+615,Parabacteroides merdae,species,LPSN,species/parabacteroides-merdae,f,f,f,f,f,f
+1211,Paraburkholderia,genus,LPSN,genus/paraburkholderia,f,f,f,f,f,f
+2524,Paraburkholderia fungorum,species,LPSN,species/paraburkholderia-fungorum,f,f,f,f,f,f
+3078,Paraclostridium bifermentans,species,LPSN,species/paraclostridium-bifermentans,f,f,f,f,f,f
+1978,Paracoccus,genus,LPSN,genus/paracoccus,f,f,f,f,f,f
+2262,Paracoccus yeei,species,LPSN,species/paracoccus-yeei,f,f,f,f,f,f
+3029,Parageobacillus thermantarcticus,species,LPSN,species/parageobacillus-thermantarcticus,t,f,f,f,f,f
+3174,Parageobacillus thermoglucosidasius,species,LPSN,species/parageobacillus-thermoglucosidasius,f,f,f,f,f,f
+749,Parascardovia,genus,LPSN,genus/parascardovia,f,f,f,f,f,f
+711,Parascardovia denticolens,species,LPSN,species/parascardovia-denticolens,f,f,f,f,f,f
+1822,Parvimonas,genus,LPSN,genus/parvimonas,f,f,f,f,f,f
+1480,Parvimonas micra,species,LPSN,species/parvimonas-micra,f,f,f,f,f,f
+2649,Paslahepevirus balayani,species,ICTV,202103665,f,f,f,f,f,f
+1861,Pasteurella,genus,LPSN,genus/pasteurella,f,f,f,f,f,t
+1274,Pasteurella aerogenes,species,LPSN,species/pasteurella-aerogenes,f,f,f,f,f,t
+967,Pasteurella bettyae,species,LPSN,species/pasteurella-bettyae,f,f,f,f,f,t
+1690,Pasteurella caballi,species,LPSN,species/pasteurella-caballi,f,f,f,f,f,t
+491,Pasteurella canis,species,LPSN,species/pasteurella-canis,f,f,f,f,f,t
+1146,Pasteurella dagmatis,species,LPSN,species/pasteurella-dagmatis,f,f,f,f,f,t
+831,Pasteurella multocida,species,LPSN,species/pasteurella-multocida,f,f,f,f,f,t
+1625,Pasteurella multocida gallicida,subspecies,LPSN,subspecies/pasteurella-multocida-gallicida,f,f,f,f,f,t
+2483,Pasteurella multocida multocida,subspecies,LPSN,subspecies/pasteurella-multocida-multocida,f,f,f,f,f,t
+2066,Pasteurella multocida septica,subspecies,LPSN,subspecies/pasteurella-multocida-septica,f,f,f,f,f,t
+852,Pasteurella stomatis,species,LPSN,species/pasteurella-stomatis,f,f,f,f,f,t
+1771,Patulibacter,genus,LPSN,genus/patulibacter,f,f,f,f,f,f
+3084,Pauljensenia hongkongensis,species,LPSN,species/pauljensenia-hongkongensis,t,f,f,f,f,f
+2559,Pectobacterium,genus,LPSN,genus/pectobacterium,f,f,f,t,t,t
+1100,Pediococcus,genus,LPSN,genus/pediococcus,f,f,f,f,f,f
+937,Pediococcus acidilactici,species,LPSN,species/pediococcus-acidilactici,f,f,f,f,f,f
+844,Pediococcus pentosaceus,species,LPSN,species/pediococcus-pentosaceus,f,f,f,f,f,f
+1900,Pedobacter,genus,LPSN,genus/pedobacter,f,f,f,f,f,f
+3194,Pedobacter antarcticus,species,LPSN,species/pedobacter-antarcticus,f,f,f,f,f,f
+1048,Pedobacter heparinus,species,LPSN,species/pedobacter-heparinus,f,f,f,f,f,f
+2651,Pegivirus C,species,ICTV,202103142,f,f,f,f,f,f
+406,Penicillium,genus,MycoBank,9257,f,f,f,f,f,f
+3399,Penicillium aurantiogriseum var. aurantiogriseum,variety,MycoBank,418219,f,f,f,f,f,f
+2327,Penicillium commune,species,MycoBank,164241,f,f,f,f,f,f
+2403,Penicillium decumbens,species,MycoBank,156582,f,f,f,f,f,f
+1528,Penicillium expansum,species,MycoBank,159382,f,f,f,f,f,f
+994,Penicillium griseofulvum,species,MycoBank,120566,f,f,f,f,f,f
+2024,Penicillium spinulosum,species,MycoBank,215401,f,f,f,f,f,f
+958,Penicillium viridicatum,species,MycoBank,163349,f,f,f,f,f,f
+1391,Peptococcus,genus,LPSN,genus/peptococcus,f,f,f,f,f,f
+1077,Peptococcus niger,species,LPSN,species/peptococcus-niger,f,f,f,f,f,f
+2073,Peptoniphilus,genus,LPSN,genus/peptoniphilus,f,f,f,f,f,f
+2341,Peptoniphilus asaccharolyticus,species,LPSN,species/peptoniphilus-asaccharolyticus,f,f,f,f,f,f
+2558,Peptoniphilus harei,species,LPSN,species/peptoniphilus-harei,f,f,f,f,f,f
+2370,Peptoniphilus ivorii,species,LPSN,species/peptoniphilus-ivorii,f,f,f,f,f,f
+116,Peptoniphilus lacrimalis,species,LPSN,species/peptoniphilus-lacrimalis,f,f,f,f,f,f
+2296,Peptostreptococcus,genus,LPSN,genus/peptostreptococcus,f,f,f,f,f,f
+1938,Peptostreptococcus anaerobius,species,LPSN,species/peptostreptococcus-anaerobius,f,f,f,f,f,f
+3296,Peribacillus asahii,species,LPSN,species/peribacillus-asahii,t,f,f,f,f,f
+2981,Peribacillus butanolivorans,species,LPSN,species/peribacillus-butanolivorans,t,f,f,f,f,f
+3302,Peribacillus muralis,species,LPSN,species/peribacillus-muralis,t,f,f,f,f,f
+3252,Peribacillus psychrosaccharolyticus,species,LPSN,species/peribacillus-psychrosaccharolyticus,t,f,f,f,f,f
+3060,Peribacillus simplex,species,LPSN,species/peribacillus-simplex,t,f,f,f,f,f
+2091,Phaeoacremonium,genus,MycoBank,27679,f,f,f,f,f,f
+891,Phaeoacremonium parasiticum,species,MycoBank,415651,f,f,f,f,f,f
+518,Phaeoannellomyces,genus,MycoBank,11158,f,f,f,f,f,f
+1234,Phaeococcomyces,genus,MycoBank,9294,f,f,f,f,f,f
+272,Phialemonium,genus,MycoBank,11160,f,f,f,f,f,f
+1439,Phialemonium dimorphosporum,species,MycoBank,108342,f,f,f,f,f,f
+429,Phialemonium obovatum,species,MycoBank,108343,f,f,f,f,f,f
+2127,Phialophora,genus,MycoBank,9342,f,f,f,f,f,f
+167,Phialophora americana,species,MycoBank,302837,f,f,f,f,f,f
+2238,Phialophora europaea,species,MycoBank,482897,f,f,f,f,f,f
+1891,Phialophora verrucosa,species,MycoBank,214996,f,f,f,f,f,f
+2897,Phocaeicola dorei,species,LPSN,species/phocaeicola-dorei,f,f,f,f,t,f
+3039,Phocaeicola massiliensis,species,LPSN,species/phocaeicola-massiliensis,f,f,f,f,t,f
+3294,Phocaeicola vulgatus,species,LPSN,species/phocaeicola-vulgatus,f,f,f,f,t,f
+45,Photobacterium,genus,LPSN,genus/photobacterium,f,f,f,f,f,f
+1380,Photobacterium damselae damselae,subspecies,LPSN,subspecies/photobacterium-damselae-damselae,f,f,f,f,f,f
+1208,Photorhabdus,genus,LPSN,genus/photorhabdus,f,f,f,t,t,t
+287,Photorhabdus asymbiotica,species,LPSN,species/photorhabdus-asymbiotica,f,f,f,t,t,t
+781,Photorhabdus luminescens,species,LPSN,species/photorhabdus-luminescens,f,f,f,t,t,t
+265,Photorhabdus temperata,species,LPSN,species/photorhabdus-temperata,f,f,f,t,t,t
+573,Pichia,genus,MycoBank,4095,f,f,f,f,f,f
+3365,Pichia fermentans,species,MycoBank,252130,f,f,f,f,f,f
+2597,Pichia kudriavzevii,species,MycoBank,337013,f,f,f,f,f,f
+2627,Picornaviridae,family,ICTV,202101953,f,f,f,f,f,f
+1702,Piedraia,genus,MycoBank,4098,f,f,f,f,f,f
+269,Piedraia hortae,species,MycoBank,267365,f,f,f,f,f,f
+2126,Pithomyces,genus,MycoBank,9412,f,f,f,f,f,f
+1597,Pityrosporum,genus,MycoBank,9415,f,f,f,f,f,f
+523,Pityrosporum orbiculare,species,MycoBank,303738,f,f,f,f,f,f
+401,Plasmodium,genus,MycoBank,583195,f,f,f,f,f,f
+590,Plesiomonas,genus,LPSN,genus/plesiomonas,f,f,f,t,t,t
+1324,Plesiomonas shigelloides,species,LPSN,species/plesiomonas-shigelloides,f,f,f,t,t,t
+3379,Pleurostoma,genus,MycoBank,4247,f,f,f,f,f,f
+3397,Pleurostoma richardsiae,species,MycoBank,814423,f,f,f,f,f,f
+630,Pluralibacter,genus,LPSN,genus/pluralibacter,f,f,f,t,f,f
+58,Pluralibacter gergoviae,species,LPSN,species/pluralibacter-gergoviae,f,f,f,t,f,f
+553,Pluralibacter pyrinus,species,LPSN,species/pluralibacter-pyrinus,f,f,f,t,f,f
+2635,Poliovirus,group,NeoIPC,20,f,f,f,f,f,f
+2637,Poliovirus 1,serotype,ICTV,202101985,f,f,f,f,f,f
+2638,Poliovirus 2,serotype,ICTV,202101985,f,f,f,f,f,f
+2639,Poliovirus 3,serotype,ICTV,202101985,f,f,f,f,f,f
+2644,Polyomaviridae,family,ICTV,202104409,f,f,f,f,f,f
+1073,Porphyromonas,genus,LPSN,genus/porphyromonas,f,f,f,f,f,f
+2955,Porphyromonas asaccharolytica,species,LPSN,species/porphyromonas-asaccharolytica,f,f,f,f,f,f
+290,Porphyromonas cangingivalis,species,LPSN,species/porphyromonas-cangingivalis,f,f,f,f,f,f
+1006,Porphyromonas canoris,species,LPSN,species/porphyromonas-canoris,f,f,f,f,f,f
+447,Porphyromonas catoniae,species,LPSN,species/porphyromonas-catoniae,f,f,f,f,f,f
+505,Porphyromonas circumdentaria,species,LPSN,species/porphyromonas-circumdentaria,f,f,f,f,f,f
+857,Porphyromonas crevioricanis,species,LPSN,species/porphyromonas-crevioricanis,f,f,f,f,f,f
+2284,Porphyromonas endodontalis,species,LPSN,species/porphyromonas-endodontalis,f,f,f,f,f,f
+1250,Porphyromonas gingivalis,species,LPSN,species/porphyromonas-gingivalis,f,f,f,f,f,f
+1893,Porphyromonas gingivicanis,species,LPSN,species/porphyromonas-gingivicanis,f,f,f,f,f,f
+640,Porphyromonas gulae,species,LPSN,species/porphyromonas-gulae,f,f,f,f,f,f
+860,Porphyromonas levii,species,LPSN,species/porphyromonas-levii,f,f,f,f,f,f
+50,Porphyromonas macacae,species,LPSN,species/porphyromonas-macacae,f,f,f,f,f,f
+1752,Porphyromonas somerae,species,LPSN,species/porphyromonas-somerae,f,f,f,f,f,f
+480,Poxviridae,family,ICTV,202104737,f,f,f,f,f,f
+207,Pragia,genus,LPSN,genus/pragia,f,f,f,t,t,t
+323,Pragia fontium,species,LPSN,species/pragia-fontium,f,f,f,t,t,t
+1128,Prevotella,genus,LPSN,genus/prevotella,f,f,f,f,f,f
+2279,Prevotella bivia,species,LPSN,species/prevotella-bivia,f,f,f,f,f,f
+1355,Prevotella buccae,species,LPSN,species/prevotella-buccae,f,f,f,f,f,f
+1863,Prevotella buccalis,species,LPSN,species/prevotella-buccalis,f,f,f,f,f,f
+404,Prevotella corporis,species,LPSN,species/prevotella-corporis,f,f,f,f,f,f
+2388,Prevotella dentalis,species,LPSN,species/prevotella-dentalis,f,f,f,f,f,f
+338,Prevotella denticola,species,LPSN,species/prevotella-denticola,f,f,f,f,f,f
+1586,Prevotella disiens,species,LPSN,species/prevotella-disiens,f,f,f,f,f,f
+1942,Prevotella enoeca,species,LPSN,species/prevotella-enoeca,f,f,f,f,f,f
+385,Prevotella intermedia,species,LPSN,species/prevotella-intermedia,f,f,f,f,f,f
+2364,Prevotella loescheii,species,LPSN,species/prevotella-loescheii,f,f,f,f,f,f
+139,Prevotella marshii,species,LPSN,species/prevotella-marshii,f,f,f,f,f,f
+362,Prevotella melaninogenica,species,LPSN,species/prevotella-melaninogenica,f,f,f,f,f,f
+624,Prevotella multiformis,species,LPSN,species/prevotella-multiformis,f,f,f,f,f,f
+2332,Prevotella multisaccharivorax,species,LPSN,species/prevotella-multisaccharivorax,f,f,f,f,f,f
+2167,Prevotella nigrescens,species,LPSN,species/prevotella-nigrescens,f,f,f,f,f,f
+627,Prevotella oralis,species,LPSN,species/prevotella-oralis,f,f,f,f,f,f
+2956,Prevotella oralis group,group,NeoIPC,84,f,f,f,f,f,f
+1005,Prevotella oris,species,LPSN,species/prevotella-oris,f,f,f,f,f,f
+582,Prevotella oulorum,species,LPSN,species/prevotella-oulorum,f,f,f,f,f,f
+194,Prevotella pallens,species,LPSN,species/prevotella-pallens,f,f,f,f,f,f
+2522,Prevotella ruminicola,species,LPSN,species/prevotella-ruminicola,f,f,f,f,f,f
+1545,Prevotella salivae,species,LPSN,species/prevotella-salivae,f,f,f,f,f,f
+909,Prevotella shahii,species,LPSN,species/prevotella-shahii,f,f,f,f,f,f
+1472,Prevotella veroralis,species,LPSN,species/prevotella-veroralis,f,f,f,f,f,f
+3271,Priestia endophytica,species,LPSN,species/priestia-endophytica,t,f,f,f,f,f
+3177,Priestia flexa,species,LPSN,species/priestia-flexa,t,f,f,f,f,f
+3226,Priestia megaterium,species,LPSN,species/priestia-megaterium,t,f,f,f,f,f
+2675,Primate T-lymphotropic virus 1,species,ICTV,202104999,f,f,f,f,f,f
+2677,Primate T-lymphotropic virus 2,species,ICTV,202105000,f,f,f,f,f,f
+2679,Primate T-lymphotropic virus 3,species,ICTV,202105001,f,f,f,f,f,f
+2612,Primate erythroparvovirus 1,species,ICTV,202104266,f,f,f,f,f,f
+1753,Propionibacterium,genus,LPSN,genus/propionibacterium,t,f,f,f,f,f
+18,Propionibacterium australiense,species,LPSN,species/propionibacterium-australiense,t,f,f,f,f,f
+986,Propionibacterium cyclohexanicum,species,LPSN,species/propionibacterium-cyclohexanicum,t,f,f,f,f,f
+399,Propionibacterium freudenreichii,species,LPSN,species/propionibacterium-freudenreichii,t,f,f,f,f,f
+1998,Propioniferax,genus,LPSN,genus/propioniferax,t,f,f,f,f,f
+3316,Propioniferax innocua,species,LPSN,species/propioniferax-innocua,t,f,f,f,f,f
+2512,Propionimicrobium,genus,LPSN,genus/propionimicrobium,f,f,f,f,f,f
+2571,Propionimicrobium lymphophilum,species,LPSN,species/propionimicrobium-lymphophilum,f,f,f,f,f,f
+2386,Proteus,genus,LPSN,genus/proteus,f,f,f,t,t,f
+2731,Proteus faecis,species,LPSN,species/proteus-faecis,f,f,f,t,t,f
+1671,Proteus hauseri,species,LPSN,species/proteus-hauseri,f,f,f,t,t,f
+420,Proteus mirabilis,species,LPSN,species/proteus-mirabilis,f,f,f,t,t,f
+1179,Proteus penneri,species,LPSN,species/proteus-penneri,f,f,f,t,t,f
+1517,Proteus vulgaris,species,LPSN,species/proteus-vulgaris,f,f,f,t,t,f
+252,Prototheca,genus,MycoBank,22315,f,f,f,f,f,f
+2478,Prototheca wickerhamii,species,MycoBank,304229,f,f,f,f,f,f
+2411,Prototheca zopfii,species,MycoBank,169728,f,f,f,f,f,f
+1876,Providencia,genus,LPSN,genus/providencia,f,f,f,t,t,f
+2084,Providencia alcalifaciens,species,LPSN,species/providencia-alcalifaciens,f,f,f,t,t,f
+2178,Providencia heimbachae,species,LPSN,species/providencia-heimbachae,f,f,f,t,t,f
+516,Providencia rettgeri,species,LPSN,species/providencia-rettgeri,f,f,f,t,t,f
+2120,Providencia rustigianii,species,LPSN,species/providencia-rustigianii,f,f,f,t,t,f
+535,Providencia stuartii,species,LPSN,species/providencia-stuartii,f,f,f,t,t,f
+3183,Pseudalkalibacillus decolorationis,species,LPSN,species/pseudalkalibacillus-decolorationis,t,f,f,f,f,f
+3008,Pseudalkalibacillus hwajinpoensis,species,LPSN,species/pseudalkalibacillus-hwajinpoensis,t,f,f,f,f,f
+1533,Pseudallescheria,genus,MycoBank,4403,f,f,f,f,f,f
+3191,Pseudarthrobacter chlorophenolicus,species,LPSN,species/pseudarthrobacter-chlorophenolicus,t,f,f,f,f,f
+2976,Pseudarthrobacter oxydans,species,LPSN,species/pseudarthrobacter-oxydans,t,f,f,f,f,f
+3225,Pseudarthrobacter polychromogenes,species,LPSN,species/pseudarthrobacter-polychromogenes,t,f,f,f,f,f
+3007,Pseudarthrobacter scleromae,species,LPSN,species/pseudarthrobacter-scleromae,t,f,f,f,f,f
+3321,Pseudarthrobacter sulfonivorans,species,LPSN,species/pseudarthrobacter-sulfonivorans,t,f,f,f,f,f
+3325,Pseudescherichia vulneris,species,LPSN,species/pseudescherichia-vulneris,f,f,f,t,t,t
+445,Pseudoclavibacter,genus,LPSN,genus/pseudoclavibacter,f,f,f,f,f,f
+806,Pseudoflavonifractor,genus,LPSN,genus/pseudoflavonifractor,f,f,f,f,f,f
+2415,Pseudoflavonifractor capillosus,species,LPSN,species/pseudoflavonifractor-capillosus,f,f,f,f,f,f
+3164,Pseudoglutamicibacter albus,species,LPSN,species/pseudoglutamicibacter-albus,t,f,f,f,f,f
+3006,Pseudoglutamicibacter cumminsii,species,LPSN,species/pseudoglutamicibacter-cumminsii,t,f,f,f,f,f
+3025,Pseudoleptotrichia goodfellowii,species,LPSN,species/pseudoleptotrichia-goodfellowii,f,f,f,f,f,f
+1975,Pseudomonas,genus,LPSN,genus/pseudomonas,f,f,f,t,t,t
+1958,Pseudomonas aeruginosa,species,LPSN,species/pseudomonas-aeruginosa,f,f,f,t,t,t
+2083,Pseudomonas alcaligenes,species,LPSN,species/pseudomonas-alcaligenes,f,f,f,t,t,t
+2831,Pseudomonas andersonii,species,LPSN,species/pseudomonas-andersonii,f,f,f,t,t,t
+2832,Pseudomonas asiatica,species,LPSN,species/pseudomonas-asiatica,f,f,f,t,t,t
+2448,Pseudomonas beteli,species,LPSN,species/pseudomonas-beteli,f,f,f,t,t,t
+974,Pseudomonas chlororaphis,species,LPSN,species/pseudomonas-chlororaphis,f,f,f,t,t,t
+609,Pseudomonas fluorescens,species,LPSN,species/pseudomonas-fluorescens,f,f,f,t,t,t
+2833,Pseudomonas fulva,species,LPSN,species/pseudomonas-fulva,f,f,f,t,t,t
+2834,Pseudomonas japonica,species,LPSN,species/pseudomonas-japonica,f,f,f,t,t,t
+2835,Pseudomonas juntendi,species,LPSN,species/pseudomonas-juntendi,f,f,f,t,t,t
+309,Pseudomonas marginalis,species,LPSN,species/pseudomonas-marginalis,f,f,f,t,t,t
+2063,Pseudomonas mendocina,species,LPSN,species/pseudomonas-mendocina,f,f,f,t,t,t
+1445,Pseudomonas monteilii,species,LPSN,species/pseudomonas-monteilii,f,f,f,t,t,t
+675,Pseudomonas mosselii,species,LPSN,species/pseudomonas-mosselii,f,f,f,t,t,t
+2988,Pseudomonas oleovorans,species,LPSN,species/pseudomonas-oleovorans,f,f,f,t,t,t
+1204,Pseudomonas oryzihabitans,species,LPSN,species/pseudomonas-oryzihabitans,f,f,f,t,t,t
+2838,Pseudomonas otitidis,species,LPSN,species/pseudomonas-otitidis,f,f,f,t,t,t
+2839,Pseudomonas poae,species,LPSN,species/pseudomonas-poae,f,f,f,t,t,t
+1775,Pseudomonas putida,species,LPSN,species/pseudomonas-putida,f,f,f,t,t,t
+1561,Pseudomonas stutzeri,species,LPSN,species/pseudomonas-stutzeri,f,f,f,t,t,t
+2225,Pseudomonas veronii,species,LPSN,species/pseudomonas-veronii,f,f,f,t,t,t
+2840,Pseudomonas yangonensis,species,LPSN,species/pseudomonas-yangonensis,f,f,f,t,t,t
+1884,Pseudoramibacter,genus,LPSN,genus/pseudoramibacter,f,f,f,f,f,f
+2565,Pseudoramibacter alactolyticus,species,LPSN,species/pseudoramibacter-alactolyticus,f,f,f,f,f,f
+1065,Pseudoxanthomonas,genus,LPSN,genus/pseudoxanthomonas,f,f,f,f,f,f
+2449,Pseudoxanthomonas koreensis,species,LPSN,species/pseudoxanthomonas-koreensis,f,f,f,f,f,f
+2334,Pseudozyma,genus,MycoBank,25732,f,f,f,f,f,f
+51,Psychrobacillus,genus,LPSN,genus/psychrobacillus,f,f,f,f,f,f
+1972,Psychrobacter,genus,LPSN,genus/psychrobacter,f,f,f,f,f,f
+2505,Psychrobacter immobilis,species,LPSN,species/psychrobacter-immobilis,f,f,f,f,f,f
+1525,Psychrobacter phenylpyruvicus,species,LPSN,species/psychrobacter-phenylpyruvicus,f,f,f,f,f,f
+2972,Pullulanibacillus naganoensis,species,LPSN,species/pullulanibacillus-naganoensis,t,f,f,f,f,f
+3366,Purpureocillium lilacinum,species,MycoBank,519530,f,f,f,f,f,f
+2354,Pyrenochaeta,genus,MycoBank,9667,f,f,f,f,f,f
+3361,Pyrenophora,genus,MycoBank,4596,f,f,f,f,f,f
+3389,Quambalaria cyanescens,species,MycoBank,500890,f,f,f,f,f,f
+209,Rahnella,genus,LPSN,genus/rahnella,f,f,f,t,t,t
+943,Rahnella aquatilis,species,LPSN,species/rahnella-aquatilis,f,f,f,t,t,t
+1964,Ralstonia,genus,LPSN,genus/ralstonia,f,f,f,f,f,f
+2421,Ralstonia insidiosa,species,LPSN,species/ralstonia-insidiosa,f,f,f,f,f,f
+1119,Ralstonia mannitolilytica,species,LPSN,species/ralstonia-mannitolilytica,f,f,f,f,f,f
+954,Ralstonia pickettii,species,LPSN,species/ralstonia-pickettii,f,f,f,f,f,f
+2202,Raoultella,genus,LPSN,genus/raoultella,f,f,f,t,t,f
+963,Raoultella ornithinolytica,species,LPSN,species/raoultella-ornithinolytica,f,f,f,t,t,f
+1402,Raoultella planticola,species,LPSN,species/raoultella-planticola,f,f,f,t,t,f
+1294,Raoultella terrigena,species,LPSN,species/raoultella-terrigena,f,f,f,t,t,f
+536,Respirovirus,genus,ICTV,202101620,f,f,f,f,f,f
+2689,Rhabdoviridae,family,ICTV,202101653,f,f,f,f,f,f
+1187,Rhinocladiella aquaspersa,species,MycoBank,109229,f,f,f,f,f,f
+1120,Rhinocladiella atrovirens,species,MycoBank,257799,f,f,f,f,f,f
+2061,Rhinosporidium,genus,MycoBank,4701,f,f,f,f,f,f
+427,Rhizobium,genus,LPSN,genus/rhizobium,f,f,f,f,f,f
+3005,Rhizobium viscosum,species,LPSN,species/rhizobium-viscosum,t,f,f,f,f,f
+1191,Rhizomucor,genus,MycoBank,20481,f,f,f,f,f,f
+403,Rhizomucor miehei,species,MycoBank,322483,f,f,f,f,f,f
+1630,Rhizomucor pusillus,species,MycoBank,322484,f,f,f,f,f,f
+1708,Rhizopus,genus,MycoBank,20487,f,f,f,f,f,f
+799,Rhizopus arrhizus,species,MycoBank,167790,f,f,f,f,f,f
+2586,Rhizopus microsporus,species,MycoBank,177331,f,f,f,f,f,f
+227,Rhizopus stolonifer,species,MycoBank,119545,f,f,f,f,f,f
+2252,Rhodococcus,genus,LPSN,genus/rhodococcus,t,f,f,f,f,f
+1393,Rhodococcus chubuensis,species,LPSN,species/rhodococcus-chubuensis,t,f,f,f,f,f
+1776,Rhodococcus equi,species,LPSN,species/rhodococcus-equi,t,f,f,f,f,f
+1712,Rhodococcus erythropolis,species,LPSN,species/rhodococcus-erythropolis,t,f,f,f,f,f
+2169,Rhodococcus fascians,species,LPSN,species/rhodococcus-fascians,t,f,f,f,f,f
+998,Rhodococcus globerulus,species,LPSN,species/rhodococcus-globerulus,t,f,f,f,f,f
+1076,Rhodococcus gordoniae,species,LPSN,species/rhodococcus-gordoniae,t,f,f,f,f,f
+3115,Rhodococcus hoagii,species,LPSN,species/rhodococcus-hoagii,t,f,f,f,f,f
+2464,Rhodococcus obuensis,species,LPSN,species/rhodococcus-obuensis,t,f,f,f,f,f
+1971,Rhodococcus rhodochrous,species,LPSN,species/rhodococcus-rhodochrous,t,f,f,f,f,f
+819,Rhodotorula,genus,MycoBank,9741,f,f,f,f,f,f
+2472,Rhodotorula glutinis,species,MycoBank,266169,f,f,f,f,f,f
+3347,Rhodotorula mucilaginosa var. mucilaginosa,variety,MycoBank,425170,f,f,f,f,f,f
+414,Rickettsia,genus,LPSN,genus/rickettsia,f,f,f,f,f,f
+2101,Rickettsia akari,species,LPSN,species/rickettsia-akari,f,f,f,f,f,f
+1566,Rickettsia conorii,species,LPSN,species/rickettsia-conorii,f,f,f,f,f,f
+325,Rickettsia parkeri,species,LPSN,species/rickettsia-parkeri,f,f,f,f,f,f
+817,Rickettsia prowazekii,species,LPSN,species/rickettsia-prowazekii,f,f,f,f,f,f
+1356,Rickettsia rickettsii,species,LPSN,species/rickettsia-rickettsii,f,f,f,f,f,f
+236,Rickettsia sibirica,species,LPSN,species/rickettsia-sibirica,f,f,f,f,f,f
+1860,Rickettsia typhi,species,LPSN,species/rickettsia-typhi,f,f,f,f,f,f
+812,Riemerella,genus,LPSN,genus/riemerella,f,f,f,f,f,f
+2974,Riemerella anatipestifera,species,LPSN,species/riemerella-anatipestifera,f,f,f,f,f,f
+3341,Rift Valley fever phlebovirus,species,ICTV,202100163,f,f,f,f,f,f
+3236,Robertmurraya korlensis,species,LPSN,species/robertmurraya-korlensis,t,f,f,f,f,f
+3243,Robertmurraya siralis,species,LPSN,species/robertmurraya-siralis,t,f,f,f,f,f
+345,Robinsoniella,genus,LPSN,genus/robinsoniella,f,f,f,f,f,f
+1800,Robinsoniella peoriensis,species,LPSN,species/robinsoniella-peoriensis,f,f,f,f,f,f
+3107,Rodentibacter pneumotropicus,species,LPSN,species/rodentibacter-pneumotropicus,f,f,f,f,f,t
+716,Roseomonas,genus,LPSN,genus/roseomonas,t,f,f,f,f,f
+283,Roseomonas cervicalis,species,LPSN,species/roseomonas-cervicalis,t,f,f,f,f,f
+1774,Roseomonas gilardii,species,LPSN,species/roseomonas-gilardii,t,f,f,f,f,f
+1362,Roseomonas mucosa,species,LPSN,species/roseomonas-mucosa,t,f,f,f,f,f
+3217,Rossellomorea aquimaris,species,LPSN,species/rossellomorea-aquimaris,t,f,f,f,f,f
+3216,Rossellomorea marisflavi,species,LPSN,species/rossellomorea-marisflavi,t,f,f,f,f,f
+3307,Rossellomorea vietnamensis,species,LPSN,species/rossellomorea-vietnamensis,t,f,f,f,f,f
+2155,Rotavirus,genus,ICTV,202104904,f,f,f,f,f,f
+2234,Rothia,genus,LPSN,genus/rothia,t,f,f,f,f,f
+1383,Rothia aeria,species,LPSN,species/rothia-aeria,t,f,f,f,f,f
+1377,Rothia dentocariosa,species,LPSN,species/rothia-dentocariosa,t,f,f,f,f,f
+3269,Rothia kristinae,species,LPSN,species/rothia-kristinae,t,f,f,f,f,f
+1242,Rothia mucilaginosa,species,LPSN,species/rothia-mucilaginosa,t,f,f,f,f,f
+778,Rubivirus,genus,ICTV,202105114,f,f,f,f,f,f
+3342,Rubivirus rubellae,species,ICTV,202105115,f,f,f,f,f,f
+1840,Ruminococcus,genus,LPSN,genus/ruminococcus,f,f,f,f,f,f
+2361,Ruminococcus gnavus,species,LPSN,species/ruminococcus-gnavus,f,f,f,f,f,f
+2190,Rummeliibacillus,genus,LPSN,genus/rummeliibacillus,t,f,f,f,f,f
+486,Rummeliibacillus pycnus,species,LPSN,species/rummeliibacillus-pycnus,t,f,f,f,f,f
+1706,Saccharomonospora,genus,LPSN,genus/saccharomonospora,f,f,f,f,f,f
+835,Saccharomonospora glauca,species,LPSN,species/saccharomonospora-glauca,f,f,f,f,f,f
+2172,Saccharomonospora viridis,species,LPSN,species/saccharomonospora-viridis,f,f,f,f,f,f
+2700,Saccharomyces,genus,MycoBank,542401,f,f,f,f,f,f
+2695,Saccharomyces cerevisiae,species,MycoBank,492348,f,f,f,f,f,f
+1389,Saccharopolyspora,genus,LPSN,genus/saccharopolyspora,f,f,f,f,f,f
+1422,Saccharopolyspora rectivirgula,species,LPSN,species/saccharopolyspora-rectivirgula,f,f,f,f,f,f
+2686,Saint Louis encephalitis virus,species,ICTV,202103112,f,f,f,f,f,f
+617,Saksenaea,genus,MycoBank,20503,f,f,f,f,f,f
+2350,Saksenaea vasiformis,species,MycoBank,305482,f,f,f,f,f,f
+3085,Salipaludibacillus agaradhaerens,species,LPSN,species/salipaludibacillus-agaradhaerens,t,f,f,f,f,f
+2980,Salisediminibacterium selenitireducens,species,LPSN,species/salisediminibacterium-selenitireducens,t,f,f,f,f,f
+2504,Salmonella,genus,LPSN,genus/salmonella,f,f,f,t,t,t
+2074,Salmonella bongori,species,LPSN,species/salmonella-bongori,f,f,f,t,t,t
+40,Salmonella enterica,species,LPSN,species/salmonella-enterica,f,f,f,t,t,t
+2732,Salmonella enterica arizonae,subspecies,LPSN,subspecies/salmonella-enterica-arizonae,f,f,f,t,t,t
+2768,Salmonella enterica diarizonae,subspecies,LPSN,subspecies/salmonella-enterica-diarizonae,f,f,f,t,t,t
+2733,Salmonella enterica enterica,subspecies,LPSN,subspecies/salmonella-enterica-enterica,f,f,f,t,t,t
+2740,Salmonella enterica enterica Bareilly,serotype,NeoIPC,37,f,f,f,t,t,t
+2734,Salmonella enterica enterica Choleraesuis,serotype,NeoIPC,33,f,f,f,t,t,t
+2736,Salmonella enterica enterica Enteritidis,serotype,NeoIPC,34,f,f,f,t,t,t
+2738,Salmonella enterica enterica Infantis,serotype,NeoIPC,35,f,f,f,t,t,t
+2742,Salmonella enterica enterica Isangi,serotype,NeoIPC,39,f,f,f,t,t,t
+2744,Salmonella enterica enterica Kottbus,serotype,NeoIPC,41,f,f,f,t,t,t
+2746,Salmonella enterica enterica Livingstone,serotype,NeoIPC,43,f,f,f,t,t,t
+2748,Salmonella enterica enterica Montevideo,serotype,NeoIPC,45,f,f,f,t,t,t
+2750,Salmonella enterica enterica Newport,serotype,NeoIPC,47,f,f,f,t,t,t
+2752,Salmonella enterica enterica Ohio,serotype,NeoIPC,49,f,f,f,t,t,t
+2754,Salmonella enterica enterica Senftenberg,serotype,NeoIPC,51,f,f,f,t,t,t
+2756,Salmonella enterica enterica Tennessee,serotype,NeoIPC,53,f,f,f,t,t,t
+2764,Salmonella enterica enterica Typhi,serotype,NeoIPC,61,f,f,f,t,t,t
+2766,Salmonella enterica enterica Typhimurium,serotype,NeoIPC,62,f,f,f,t,t,t
+2758,Salmonella enterica enterica Urbana,serotype,NeoIPC,55,f,f,f,t,t,t
+2760,Salmonella enterica enterica Virchow,serotype,NeoIPC,57,f,f,f,t,t,t
+2762,Salmonella enterica enterica Worthington,serotype,NeoIPC,59,f,f,f,t,t,t
+2771,Salmonella enterica houtenae,subspecies,LPSN,subspecies/salmonella-enterica-houtenae,f,f,f,t,t,t
+2769,Salmonella enterica indica,subspecies,LPSN,subspecies/salmonella-enterica-indica,f,f,f,t,t,t
+2770,Salmonella enterica salamae,subspecies,LPSN,subspecies/salmonella-enterica-salamae,f,f,f,t,t,t
+930,Sarcina,genus,LPSN,genus/sarcina,f,f,f,f,f,f
+2459,Sarcina ventriculi,species,LPSN,species/sarcina-ventriculi,f,f,f,f,f,f
+88,Sarcocystis,genus,MycoBank,584190,f,f,f,f,f,f
+3382,Sarocladium kiliense,species,MycoBank,519592,f,f,f,f,f,f
+3384,Sarocladium strictum,species,MycoBank,519594,f,f,f,f,f,f
+1885,Scardovia,genus,LPSN,genus/scardovia,f,f,f,f,f,f
+1652,Scardovia inopinata,species,LPSN,species/scardovia-inopinata,f,f,f,f,f,f
+642,Scedosporium,genus,MycoBank,9794,f,f,f,f,f,f
+1795,Scedosporium apiospermum,species,MycoBank,432048,f,f,f,f,f,f
+145,Scedosporium boydii,species,MycoBank,538387,f,f,f,f,f,f
+2547,Scedosporium prolificans,species,MycoBank,128175,f,f,f,f,f,f
+3241,Schaalia cardiffensis,species,LPSN,species/schaalia-cardiffensis,t,f,f,f,f,f
+3251,Schaalia funkei,species,LPSN,species/schaalia-funkei,t,f,f,f,f,f
+3208,Schaalia georgiae,species,LPSN,species/schaalia-georgiae,t,f,f,f,f,f
+3267,Schaalia meyeri,species,LPSN,species/schaalia-meyeri,t,f,f,f,f,f
+3298,Schaalia odontolytica,species,LPSN,species/schaalia-odontolytica,t,f,f,f,f,f
+3166,Schaalia radingae,species,LPSN,species/schaalia-radingae,t,f,f,f,f,f
+3040,Schaalia turicensis,species,LPSN,species/schaalia-turicensis,t,f,f,f,f,f
+3122,Schinkia azotoformans,species,LPSN,species/schinkia-azotoformans,t,f,f,f,f,f
+798,Schizophyllum,genus,MycoBank,18512,f,f,f,f,f,f
+723,Schizophyllum commune,species,MycoBank,208403,f,f,f,f,f,f
+782,Schwanniomyces polymorphus,species,MycoBank,513478,f,f,f,f,f,f
+1539,Scolecobasidium,genus,MycoBank,9840,f,f,f,f,f,f
+2304,Scopulariopsis,genus,MycoBank,9854,f,f,f,f,f,f
+598,Scopulariopsis brevicaulis,species,MycoBank,154310,f,f,f,f,f,f
+2184,Scopulariopsis candida,species,MycoBank,120077,f,f,f,f,f,f
+326,Scytalidium,genus,MycoBank,9862,f,f,f,f,f,f
+619,Selenomonas,genus,LPSN,genus/selenomonas,f,f,f,f,f,f
+748,Selenomonas artemidis,species,LPSN,species/selenomonas-artemidis,f,f,f,f,f,f
+1656,Selenomonas dianae,species,LPSN,species/selenomonas-dianae,f,f,f,f,f,f
+1609,Selenomonas flueggei,species,LPSN,species/selenomonas-flueggei,f,f,f,f,f,f
+165,Selenomonas infelix,species,LPSN,species/selenomonas-infelix,f,f,f,f,f,f
+1221,Selenomonas noxia,species,LPSN,species/selenomonas-noxia,f,f,f,f,f,f
+2029,Selenomonas sputigena,species,LPSN,species/selenomonas-sputigena,f,f,f,f,f,f
+1845,Sepedonium,genus,MycoBank,9876,f,f,f,f,f,f
+2393,Serratia,genus,LPSN,genus/serratia,f,f,f,t,t,f
+1895,Serratia entomophila,species,LPSN,species/serratia-entomophila,f,f,f,t,t,f
+1552,Serratia ficaria,species,LPSN,species/serratia-ficaria,f,f,f,t,t,f
+893,Serratia fonticola,species,LPSN,species/serratia-fonticola,f,f,f,t,t,f
+2295,Serratia grimesii,species,LPSN,species/serratia-grimesii,f,f,f,t,t,f
+1456,Serratia liquefaciens,species,LPSN,species/serratia-liquefaciens,f,f,f,t,t,f
+1827,Serratia marcescens,species,LPSN,species/serratia-marcescens,f,f,f,t,t,f
+1162,Serratia odorifera,species,LPSN,species/serratia-odorifera,f,f,f,t,t,f
+2233,Serratia plymuthica,species,LPSN,species/serratia-plymuthica,f,f,f,t,t,f
+1846,Serratia proteamaculans,species,LPSN,species/serratia-proteamaculans,f,f,f,t,t,f
+2337,Serratia quinivorans,species,LPSN,species/serratia-quinivorans,f,f,f,t,t,f
+768,Serratia rubidaea,species,LPSN,species/serratia-rubidaea,f,f,f,t,t,f
+1047,Serratia ureilytica,species,LPSN,species/serratia-ureilytica,f,f,f,t,t,f
+2607,Severe acute respiratory syndrome coronavirus 2,clade,ICTV,202101868,f,f,f,f,f,f
+2606,Severe acute respiratory syndrome-related coronavirus,species,ICTV,202101868,f,f,f,f,f,f
+2596,Shewanella,genus,LPSN,genus/shewanella,f,f,f,f,f,f
+1850,Shewanella algae,species,LPSN,species/shewanella-algae,f,f,f,f,f,f
+863,Shewanella putrefaciens,species,LPSN,species/shewanella-putrefaciens,f,f,f,f,f,f
+86,Shigella,genus,LPSN,genus/shigella,f,f,f,t,t,t
+1438,Shigella boydii,species,LPSN,species/shigella-boydii,f,f,f,t,t,t
+828,Shigella dysenteriae,species,LPSN,species/shigella-dysenteriae,f,f,f,t,t,t
+1541,Shigella flexneri,species,LPSN,species/shigella-flexneri,f,f,f,t,t,t
+1450,Shigella sonnei,species,LPSN,species/shigella-sonnei,f,f,f,t,t,t
+3134,Shouchella clausii,species,LPSN,species/shouchella-clausii,t,f,f,f,f,f
+3041,Shouchella gibsonii,species,LPSN,species/shouchella-gibsonii,t,f,f,f,f,f
+3165,Shouchella patagoniensis,species,LPSN,species/shouchella-patagoniensis,t,f,f,f,f,f
+3256,Siminovitchia farraginis,species,LPSN,species/siminovitchia-farraginis,t,f,f,f,f,f
+3295,Siminovitchia fordii,species,LPSN,species/siminovitchia-fordii,t,f,f,f,f,f
+3004,Siminovitchia fortis,species,LPSN,species/siminovitchia-fortis,t,f,f,f,f,f
+1210,Simonsiella,genus,LPSN,genus/simonsiella,f,f,f,f,f,f
+1348,Simonsiella muelleri,species,LPSN,species/simonsiella-muelleri,f,f,f,f,f,f
+355,Slackia,genus,LPSN,genus/slackia,f,f,f,f,f,f
+1564,Slackia exigua,species,LPSN,species/slackia-exigua,f,f,f,f,f,f
+1598,Slackia heliotrinireducens,species,LPSN,species/slackia-heliotrinireducens,f,f,f,f,f,f
+1244,Sneathia,genus,LPSN,genus/sneathia,f,f,f,f,f,f
+524,Sneathia sanguinegens,species,LPSN,species/sneathia-sanguinegens,f,f,f,f,f,f
+2772,Sodalis praecaptivus,species,LPSN,species/sodalis-praecaptivus,f,f,f,t,t,t
+520,Solibacillus,genus,LPSN,genus/solibacillus,t,f,f,f,f,f
+1913,Solibacillus silvestris,species,LPSN,species/solibacillus-silvestris,t,f,f,f,f,f
+2589,Solobacterium,genus,LPSN,genus/solobacterium,f,f,f,f,f,f
+1996,Solobacterium moorei,species,LPSN,species/solobacterium-moorei,f,f,f,f,f,f
+156,Sphingobacterium,genus,LPSN,genus/sphingobacterium,f,f,f,f,f,f
+953,Sphingobacterium faecium,species,LPSN,species/sphingobacterium-faecium,f,f,f,f,f,f
+3281,Sphingobacterium mizutaii,species,LPSN,species/sphingobacterium-mizutaii,f,f,f,f,f,f
+109,Sphingobacterium multivorum,species,LPSN,species/sphingobacterium-multivorum,f,f,f,f,f,f
+989,Sphingobacterium spiritivorum,species,LPSN,species/sphingobacterium-spiritivorum,f,f,f,f,f,f
+1917,Sphingobacterium thalpophilum,species,LPSN,species/sphingobacterium-thalpophilum,f,f,f,f,f,f
+310,Sphingomonas,genus,LPSN,genus/sphingomonas,f,f,f,f,f,f
+1366,Sphingomonas parapaucimobilis,species,LPSN,species/sphingomonas-parapaucimobilis,f,f,f,f,f,f
+529,Sphingomonas paucimobilis,species,LPSN,species/sphingomonas-paucimobilis,f,f,f,f,f,f
+1562,Spirillum,genus,LPSN,genus/spirillum,f,f,f,f,f,f
+1953,Sporobolomyces,genus,MycoBank,10025,f,f,f,f,f,f
+1311,Sporobolomyces roseus,species,MycoBank,306337,f,f,f,f,f,f
+1768,Sporobolomyces salmonicolor,species,MycoBank,323852,f,f,f,f,f,f
+2529,Sporolactobacillus,genus,LPSN,genus/sporolactobacillus,f,f,f,f,f,f
+436,Sporolactobacillus laevolacticus,species,LPSN,species/sporolactobacillus-laevolacticus,f,f,f,f,f,f
+738,Sporopachydermia,genus,MycoBank,5165,f,f,f,f,f,f
+1724,Sporosarcina,genus,LPSN,genus/sporosarcina,f,f,f,f,f,f
+3193,Sporosarcina pasteurii,species,LPSN,species/sporosarcina-pasteurii,t,f,f,f,f,f
+2990,Sporosarcina psychrophila,species,LPSN,species/sporosarcina-psychrophila,t,f,f,f,f,f
+478,Sporothrix,genus,MycoBank,10046,f,f,f,f,f,f
+1408,Sporothrix schenckii,species,MycoBank,101184,f,f,f,f,f,f
+3400,Sporotrichum gougerotii,species,MycoBank,201834,f,f,f,f,f,f
+1379,Sporotrichum pruinosum,species,MycoBank,254123,f,f,f,f,f,f
+2030,Stachybotrys,genus,MycoBank,10052,f,f,f,f,f,f
+1134,Stachybotrys chartarum,species,MycoBank,306362,f,f,f,f,f,f
+481,Staphylococcus,genus,LPSN,genus/staphylococcus,f,f,f,f,f,f
+2778,Staphylococcus argenteus,species,LPSN,species/staphylococcus-argenteus,f,f,f,f,f,f
+1835,Staphylococcus arlettae,species,LPSN,species/staphylococcus-arlettae,t,f,f,f,f,f
+934,Staphylococcus aureus,species,LPSN,species/staphylococcus-aureus,f,t,f,f,f,f
+780,Staphylococcus auricularis,species,LPSN,species/staphylococcus-auricularis,t,f,f,f,f,f
+2779,Staphylococcus borealis,species,LPSN,species/staphylococcus-borealis,t,f,f,f,f,f
+1193,Staphylococcus capitis,species,LPSN,species/staphylococcus-capitis,t,f,f,f,f,f
+6,Staphylococcus capitis capitis,subspecies,LPSN,subspecies/staphylococcus-capitis-capitis,t,f,f,f,f,f
+2246,Staphylococcus capitis urealyticus,subspecies,LPSN,subspecies/staphylococcus-capitis-urealyticus,t,f,f,f,f,f
+791,Staphylococcus caprae,species,LPSN,species/staphylococcus-caprae,t,f,f,f,f,f
+2223,Staphylococcus carnosus,species,LPSN,species/staphylococcus-carnosus,t,f,f,f,f,f
+1298,Staphylococcus carnosus carnosus,subspecies,LPSN,subspecies/staphylococcus-carnosus-carnosus,t,f,f,f,f,f
+3330,Staphylococcus casei,species,LPSN,species/staphylococcus-casei,t,f,f,f,f,f
+2342,Staphylococcus chromogenes,species,LPSN,species/staphylococcus-chromogenes,t,f,f,f,f,f
+2999,Staphylococcus coagulans,species,LPSN,species/staphylococcus-coagulans,f,f,f,f,f,f
+815,Staphylococcus cohnii,species,LPSN,species/staphylococcus-cohnii,t,f,f,f,f,f
+946,Staphylococcus condimenti,species,LPSN,species/staphylococcus-condimenti,t,f,f,f,f,f
+2780,Staphylococcus cornubiensis,species,LPSN,species/staphylococcus-cornubiensis,f,f,f,f,f,f
+1816,Staphylococcus delphini,species,LPSN,species/staphylococcus-delphini,f,f,f,f,f,f
+810,Staphylococcus epidermidis,species,LPSN,species/staphylococcus-epidermidis,t,f,f,f,f,f
+2059,Staphylococcus equorum,species,LPSN,species/staphylococcus-equorum,t,f,f,f,f,f
+2458,Staphylococcus equorum equorum,subspecies,LPSN,subspecies/staphylococcus-equorum-equorum,t,f,f,f,f,f
+808,Staphylococcus equorum linens,subspecies,LPSN,subspecies/staphylococcus-equorum-linens,t,f,f,f,f,f
+2514,Staphylococcus felis,species,LPSN,species/staphylococcus-felis,t,f,f,f,f,f
+153,Staphylococcus gallinarum,species,LPSN,species/staphylococcus-gallinarum,t,f,f,f,f,f
+1603,Staphylococcus haemolyticus,species,LPSN,species/staphylococcus-haemolyticus,t,f,f,f,f,f
+1156,Staphylococcus hominis,species,LPSN,species/staphylococcus-hominis,t,f,f,f,f,f
+1447,Staphylococcus hominis hominis,subspecies,LPSN,subspecies/staphylococcus-hominis-hominis,t,f,f,f,f,f
+110,Staphylococcus hominis novobiosepticus,subspecies,LPSN,subspecies/staphylococcus-hominis-novobiosepticus,t,f,f,f,f,f
+2496,Staphylococcus hyicus,species,LPSN,species/staphylococcus-hyicus,f,f,f,f,f,f
+393,Staphylococcus intermedius,species,LPSN,species/staphylococcus-intermedius,f,f,f,f,f,f
+24,Staphylococcus kloosii,species,LPSN,species/staphylococcus-kloosii,t,f,f,f,f,f
+1842,Staphylococcus lugdunensis,species,LPSN,species/staphylococcus-lugdunensis,t,f,f,f,f,f
+708,Staphylococcus lutrae,species,LPSN,species/staphylococcus-lutrae,f,f,f,f,f,f
+2781,Staphylococcus massiliensis,species,LPSN,species/staphylococcus-massiliensis,t,f,f,f,f,f
+1463,Staphylococcus muscae,species,LPSN,species/staphylococcus-muscae,t,f,f,f,f,f
+155,Staphylococcus nepalensis,species,LPSN,species/staphylococcus-nepalensis,t,f,f,f,f,f
+978,Staphylococcus pasteuri,species,LPSN,species/staphylococcus-pasteuri,t,f,f,f,f,f
+823,Staphylococcus pettenkoferi,species,LPSN,species/staphylococcus-pettenkoferi,t,f,f,f,f,f
+457,Staphylococcus piscifermentans,species,LPSN,species/staphylococcus-piscifermentans,t,f,f,f,f,f
+2272,Staphylococcus pseudintermedius,species,LPSN,species/staphylococcus-pseudintermedius,f,f,f,f,f,f
+2782,Staphylococcus pseudolugdunensis,species,LPSN,species/staphylococcus-pseudolugdunensis,t,f,f,f,f,f
+19,Staphylococcus saccharolyticus,species,LPSN,species/staphylococcus-saccharolyticus,t,f,f,f,f,f
+739,Staphylococcus saprophyticus,species,LPSN,species/staphylococcus-saprophyticus,t,f,f,f,f,f
+500,Staphylococcus saprophyticus saprophyticus,subspecies,LPSN,subspecies/staphylococcus-saprophyticus-saprophyticus,t,f,f,f,f,f
+741,Staphylococcus schleiferi,species,LPSN,species/staphylococcus-schleiferi,f,f,f,f,f,f
+2775,Staphylococcus sciuri sciuri,subspecies,LPSN,subspecies/staphylococcus-sciuri-sciuri,t,f,f,f,f,f
+2028,Staphylococcus simulans,species,LPSN,species/staphylococcus-simulans,t,f,f,f,f,f
+1026,Staphylococcus succinus,species,LPSN,species/staphylococcus-succinus,t,f,f,f,f,f
+3026,Staphylococcus ureilyticus,species,LPSN,species/staphylococcus-ureilyticus,t,f,f,f,f,f
+375,Staphylococcus warneri,species,LPSN,species/staphylococcus-warneri,t,f,f,f,f,f
+1416,Staphylococcus xylosus,species,LPSN,species/staphylococcus-xylosus,t,f,f,f,f,f
+3350,Starmera stellimalicola,species,MycoBank,814380,f,f,f,f,f,f
+144,Stemphylium,genus,MycoBank,10081,f,f,f,f,f,f
+364,Stephanoascus,genus,MycoBank,5209,f,f,f,f,f,f
+231,Streptobacillus,genus,LPSN,genus/streptobacillus,f,f,f,f,f,f
+566,Streptobacillus moniliformis,species,LPSN,species/streptobacillus-moniliformis,f,f,f,f,f,f
+1642,Streptococcus,genus,LPSN,genus/streptococcus,f,f,f,f,f,f
+474,Streptococcus acidominimus,species,LPSN,species/streptococcus-acidominimus,f,f,f,f,f,f
+2600,Streptococcus agalactiae,species,LPSN,species/streptococcus-agalactiae,f,f,f,f,f,f
+2255,Streptococcus alactolyticus,species,LPSN,species/streptococcus-alactolyticus,t,f,f,f,f,f
+1711,Streptococcus anginosus,species,LPSN,species/streptococcus-anginosus,t,f,f,f,f,f
+2799,Streptococcus anginosus group,group,NeoIPC,69,t,f,f,f,f,f
+2488,Streptococcus australis,species,LPSN,species/streptococcus-australis,t,f,f,f,f,f
+2801,Streptococcus bovis group,group,NeoIPC,71,t,f,f,f,f,f
+2405,Streptococcus canis,species,LPSN,species/streptococcus-canis,f,f,f,f,f,f
+751,Streptococcus constellatus,species,LPSN,species/streptococcus-constellatus,t,f,f,f,f,f
+2203,Streptococcus constellatus constellatus,subspecies,LPSN,subspecies/streptococcus-constellatus-constellatus,t,f,f,f,f,f
+918,Streptococcus constellatus pharyngis,subspecies,LPSN,subspecies/streptococcus-constellatus-pharyngis,t,f,f,f,f,f
+644,Streptococcus criceti,species,LPSN,species/streptococcus-criceti,t,f,f,f,f,f
+1583,Streptococcus cristatus,species,LPSN,species/streptococcus-cristatus,t,f,f,f,f,f
+2784,Streptococcus devriesei,species,LPSN,species/streptococcus-devriesei,t,f,f,f,f,f
+289,Streptococcus downei,species,LPSN,species/streptococcus-downei,t,f,f,f,f,f
+1701,Streptococcus dysgalactiae,species,LPSN,species/streptococcus-dysgalactiae,f,f,f,f,f,f
+1751,Streptococcus dysgalactiae dysgalactiae,subspecies,LPSN,subspecies/streptococcus-dysgalactiae-dysgalactiae,f,f,f,f,f,f
+744,Streptococcus dysgalactiae equisimilis,subspecies,LPSN,subspecies/streptococcus-dysgalactiae-equisimilis,f,f,f,f,f,f
+1479,Streptococcus entericus,species,LPSN,species/streptococcus-entericus,f,f,f,f,f,f
+2493,Streptococcus equi,species,LPSN,species/streptococcus-equi,f,f,f,f,f,f
+2153,Streptococcus equi equi,subspecies,LPSN,subspecies/streptococcus-equi-equi,f,f,f,f,f,f
+148,Streptococcus equi zooepidemicus,subspecies,LPSN,subspecies/streptococcus-equi-zooepidemicus,f,f,f,f,f,f
+2323,Streptococcus equinus,species,LPSN,species/streptococcus-equinus,t,f,f,f,f,f
+1313,Streptococcus ferus,species,LPSN,species/streptococcus-ferus,t,f,f,f,f,f
+2785,Streptococcus gallinaceus,species,LPSN,species/streptococcus-gallinaceus,t,f,f,f,f,f
+1163,Streptococcus gallolyticus,species,LPSN,species/streptococcus-gallolyticus,t,f,f,f,f,f
+1390,Streptococcus gallolyticus gallolyticus,subspecies,LPSN,subspecies/streptococcus-gallolyticus-gallolyticus,t,f,f,f,f,f
+1201,Streptococcus gallolyticus macedonicus,subspecies,LPSN,subspecies/streptococcus-gallolyticus-macedonicus,t,f,f,f,f,f
+1613,Streptococcus gallolyticus pasteurianus,subspecies,LPSN,subspecies/streptococcus-gallolyticus-pasteurianus,t,f,f,f,f,f
+388,Streptococcus gordonii,species,LPSN,species/streptococcus-gordonii,t,f,f,f,f,f
+2786,Streptococcus halichoeri,species,LPSN,species/streptococcus-halichoeri,f,f,f,f,f,f
+2787,Streptococcus hongkongensis,species,LPSN,species/streptococcus-hongkongensis,f,f,f,f,f,f
+2004,Streptococcus hyovaginalis,species,LPSN,species/streptococcus-hyovaginalis,t,f,f,f,f,f
+1783,Streptococcus infantarius,species,LPSN,species/streptococcus-infantarius,t,f,f,f,f,f
+2338,Streptococcus infantarius coli,subspecies,LPSN,subspecies/streptococcus-infantarius-coli,t,f,f,f,f,f
+1514,Streptococcus infantarius infantarius,subspecies,LPSN,subspecies/streptococcus-infantarius-infantarius,t,f,f,f,f,f
+1470,Streptococcus infantis,species,LPSN,species/streptococcus-infantis,t,f,f,f,f,f
+2222,Streptococcus iniae,species,LPSN,species/streptococcus-iniae,f,f,f,f,f,f
+802,Streptococcus intermedius,species,LPSN,species/streptococcus-intermedius,t,f,f,f,f,f
+2788,Streptococcus lactarius,species,LPSN,species/streptococcus-lactarius,t,f,f,f,f,f
+1661,Streptococcus lutetiensis,species,LPSN,species/streptococcus-lutetiensis,t,f,f,f,f,f
+2391,Streptococcus macacae,species,LPSN,species/streptococcus-macacae,t,f,f,f,f,f
+2789,Streptococcus massiliensis,species,LPSN,species/streptococcus-massiliensis,f,f,f,f,f,f
+2790,Streptococcus merionis,species,LPSN,species/streptococcus-merionis,f,f,f,f,f,f
+2791,Streptococcus minor,species,LPSN,species/streptococcus-minor,t,f,f,f,f,f
+668,Streptococcus mitis,species,LPSN,species/streptococcus-mitis,t,f,f,f,f,f
+2802,Streptococcus mitis group,group,NeoIPC,72,t,f,f,f,f,f
+621,Streptococcus mutans,species,LPSN,species/streptococcus-mutans,t,f,f,f,f,f
+2803,Streptococcus mutans group,group,NeoIPC,73,t,f,f,f,f,f
+1066,Streptococcus oralis,species,LPSN,species/streptococcus-oralis,t,f,f,f,f,f
+3064,Streptococcus oralis dentisani,subspecies,LPSN,subspecies/streptococcus-oralis-dentisani,t,f,f,f,f,f
+3179,Streptococcus oralis tigurinus,subspecies,LPSN,subspecies/streptococcus-oralis-tigurinus,t,f,f,f,f,f
+217,Streptococcus ovis,species,LPSN,species/streptococcus-ovis,f,f,f,f,f,f
+764,Streptococcus parasanguinis,species,LPSN,species/streptococcus-parasanguinis,t,f,f,f,f,f
+1981,Streptococcus parauberis,species,LPSN,species/streptococcus-parauberis,f,f,f,f,f,f
+1932,Streptococcus peroris,species,LPSN,species/streptococcus-peroris,t,f,f,f,f,f
+98,Streptococcus pluranimalium,species,LPSN,species/streptococcus-pluranimalium,f,f,f,f,f,f
+126,Streptococcus pneumoniae,species,LPSN,species/streptococcus-pneumoniae,f,f,f,f,f,f
+450,Streptococcus porcinus,species,LPSN,species/streptococcus-porcinus,f,f,f,f,f,f
+261,Streptococcus pseudopneumoniae,species,LPSN,species/streptococcus-pseudopneumoniae,t,f,f,f,f,f
+1792,Streptococcus pseudoporcinus,species,LPSN,species/streptococcus-pseudoporcinus,f,f,f,f,f,f
+1599,Streptococcus pyogenes,species,LPSN,species/streptococcus-pyogenes,f,f,f,f,f,f
+1818,Streptococcus ratti,species,LPSN,species/streptococcus-ratti,t,f,f,f,f,f
+1126,Streptococcus salivarius,species,LPSN,species/streptococcus-salivarius,t,f,f,f,f,f
+2804,Streptococcus salivarius group,group,NeoIPC,74,t,f,f,f,f,f
+1882,Streptococcus salivarius salivarius,subspecies,LPSN,subspecies/streptococcus-salivarius-salivarius,t,f,f,f,f,f
+2132,Streptococcus salivarius thermophilus,subspecies,LPSN,subspecies/streptococcus-salivarius-thermophilus,t,f,f,f,f,f
+537,Streptococcus sanguinis,species,LPSN,species/streptococcus-sanguinis,t,f,f,f,f,f
+2805,Streptococcus sanguinis group,group,NeoIPC,75,t,f,f,f,f,f
+1011,Streptococcus sinensis,species,LPSN,species/streptococcus-sinensis,t,f,f,f,f,f
+226,Streptococcus sobrinus,species,LPSN,species/streptococcus-sobrinus,t,f,f,f,f,f
+1025,Streptococcus suis,species,LPSN,species/streptococcus-suis,f,f,f,f,f,f
+2793,Streptococcus thoraltensis,species,LPSN,species/streptococcus-thoraltensis,t,f,f,f,f,f
+1094,Streptococcus uberis,species,LPSN,species/streptococcus-uberis,f,f,f,f,f,f
+2794,Streptococcus urinalis,species,LPSN,species/streptococcus-urinalis,f,f,f,f,f,f
+867,Streptococcus vestibularis,species,LPSN,species/streptococcus-vestibularis,t,f,f,f,f,f
+2507,Streptomyces,genus,LPSN,genus/streptomyces,f,f,f,f,f,f
+1319,Streptomyces albus,species,LPSN,species/streptomyces-albus,f,f,f,f,f,f
+1176,Streptomyces bikiniensis,species,LPSN,species/streptomyces-bikiniensis,f,f,f,f,f,f
+2040,Streptomyces candidus,species,LPSN,species/streptomyces-candidus,f,f,f,f,f,f
+2501,Streptomyces clavuligerus,species,LPSN,species/streptomyces-clavuligerus,f,f,f,f,f,f
+2023,Streptomyces filamentosus,species,LPSN,species/streptomyces-filamentosus,f,f,f,f,f,f
+2445,Streptomyces griseus,species,LPSN,species/streptomyces-griseus,f,f,f,f,f,f
+638,Streptomyces lincolnensis,species,LPSN,species/streptomyces-lincolnensis,f,f,f,f,f,f
+773,Streptomyces somaliensis,species,LPSN,species/streptomyces-somaliensis,f,f,f,f,f,f
+2163,Streptomyces spectabilis,species,LPSN,species/streptomyces-spectabilis,f,f,f,f,f,f
+151,Streptomyces thermovulgaris,species,LPSN,species/streptomyces-thermovulgaris,f,f,f,f,f,f
+2456,Streptomyces venezuelae,species,LPSN,species/streptomyces-venezuelae,f,f,f,f,f,f
+2836,Stutzerimonas nosocomialis,species,LPSN,species/stutzerimonas-nosocomialis,f,f,f,t,t,t
+343,Succinivibrio,genus,LPSN,genus/succinivibrio,f,f,f,f,f,f
+2336,Succinivibrio dextrinosolvens,species,LPSN,species/succinivibrio-dextrinosolvens,f,f,f,f,f,f
+3140,Sutcliffiella cohnii,species,LPSN,species/sutcliffiella-cohnii,t,f,f,f,f,f
+3220,Sutcliffiella halmapala,species,LPSN,species/sutcliffiella-halmapala,t,f,f,f,f,f
+3196,Sutcliffiella horikoshii,species,LPSN,species/sutcliffiella-horikoshii,t,f,f,f,f,f
+1013,Sutterella,genus,LPSN,genus/sutterella,f,f,f,f,f,f
+2447,Sutterella wadsworthensis,species,LPSN,species/sutterella-wadsworthensis,f,f,f,f,f,f
+1779,Suttonella,genus,LPSN,genus/suttonella,f,f,f,f,f,f
+1278,Suttonella indologenes,species,LPSN,species/suttonella-indologenes,f,f,f,f,f,f
+3392,Sydowia,genus,MycoBank,5311,f,f,f,f,f,f
+1061,Syncephalastrum,genus,MycoBank,20556,f,f,f,f,f,f
+1360,Syncephalastrum racemosum,species,MycoBank,201627,f,f,f,f,f,f
+1452,Talaromyces,genus,MycoBank,5347,f,f,f,f,f,f
+171,Talaromyces marneffei,species,MycoBank,560656,f,f,f,f,f,f
+178,Talaromyces ruber,species,MycoBank,801360,f,f,f,f,f,f
+3353,Talaromyces verruculosus,species,MycoBank,560678,f,f,f,f,f,f
+1836,Tanapox virus,species,ICTV,202104789,f,f,f,f,f,f
+2531,Tannerella,genus,LPSN,genus/tannerella,f,f,f,f,f,f
+2294,Tannerella forsythia,species,LPSN,species/tannerella-forsythia,f,f,f,f,f,f
+318,Tatumella,genus,LPSN,genus/tatumella,f,f,f,t,t,t
+592,Tatumella ptyseos,species,LPSN,species/tatumella-ptyseos,f,f,f,t,t,t
+2773,Tatumella saanichensis,species,LPSN,species/tatumella-saanichensis,f,f,f,t,t,t
+3404,Tausonia pullulans,species,MycoBank,812190,f,f,f,f,f,f
+3323,Terrisporobacter glycolicus,species,LPSN,species/terrisporobacter-glycolicus,f,f,f,f,f,f
+2158,Tetragenococcus,genus,LPSN,genus/tetragenococcus,f,f,f,f,f,f
+629,Tetragenococcus halophilus,species,LPSN,species/tetragenococcus-halophilus,f,f,f,f,f,f
+2292,Tetragenococcus solitarius,species,LPSN,species/tetragenococcus-solitarius,f,f,f,f,f,f
+1096,Thermoactinomyces,genus,LPSN,genus/thermoactinomyces,f,f,f,f,f,f
+3373,Thyridium curvatum,species,MycoBank,841921,f,f,f,f,f,f
+2389,Tick-borne encephalitis virus,species,ICTV,202103114,f,f,f,f,f,f
+1681,Tissierella,genus,LPSN,genus/tissierella,f,f,f,f,f,f
+1021,Tissierella praeacuta,species,LPSN,species/tissierella-praeacuta,f,f,f,f,f,f
+1563,Togaviridae,family,ICTV,202105080,f,f,f,f,f,f
+377,Trabulsiella,genus,LPSN,genus/trabulsiella,f,f,f,t,t,t
+1523,Trabulsiella guamensis,species,LPSN,species/trabulsiella-guamensis,f,f,f,t,t,t
+648,Treponema,genus,LPSN,genus/treponema,f,f,f,f,f,f
+2957,Treponema carateum,species,LPSN,species/treponema-carateum,f,f,f,f,f,f
+2317,Treponema pallidum,species,LPSN,species/treponema-pallidum,f,f,f,f,f,f
+3371,Trichomonascus ciferrii,species,MycoBank,530083,f,f,f,f,f,f
+280,Trichophyton,genus,MycoBank,10292,f,f,f,f,f,f
+83,Trichosporon,genus,MycoBank,10296,f,f,f,f,f,f
+3413,Trichosporon asteroides,species,MycoBank,456617,f,f,f,f,f,f
+1798,Trichosporon beigelii,species,MycoBank,432135,f,f,f,f,f,f
+1834,Trichosporon inkin,species,MycoBank,340422,f,f,f,f,f,f
+571,Trichosporon ovoides,species,MycoBank,456627,f,f,f,f,f,f
+1154,Trichothecium,genus,MycoBank,10303,f,f,f,f,f,f
+2958,Tropheryma,genus,LPSN,genus/tropheryma-1,f,f,f,f,f,f
+2959,Tropheryma whipplei,species,LPSN,species/tropheryma-whipplei,f,f,f,f,f,f
+2542,Trueperella,genus,LPSN,genus/trueperella,t,f,f,f,f,f
+295,Trueperella bernardiae,species,LPSN,species/trueperella-bernardiae,t,f,f,f,f,f
+2122,Trueperella pyogenes,species,LPSN,species/trueperella-pyogenes,t,f,f,f,f,f
+2305,Tsukamurella,genus,LPSN,genus/tsukamurella,t,f,f,f,f,f
+1806,Tsukamurella inchonensis,species,LPSN,species/tsukamurella-inchonensis,t,f,f,f,f,f
+221,Tsukamurella paurometabola,species,LPSN,species/tsukamurella-paurometabola,t,f,f,f,f,f
+2430,Tsukamurella pulmonis,species,LPSN,species/tsukamurella-pulmonis,t,f,f,f,f,f
+73,Tsukamurella strandjordii,species,LPSN,species/tsukamurella-strandjordii,t,f,f,f,f,f
+2425,Tsukamurella tyrosinosolvens,species,LPSN,species/tsukamurella-tyrosinosolvens,t,f,f,f,f,f
+1037,Turicibacter,genus,LPSN,genus/turicibacter,f,f,f,f,f,f
+416,Turicibacter sanguinis,species,LPSN,species/turicibacter-sanguinis,f,f,f,f,f,f
+158,Ureaplasma,genus,LPSN,genus/ureaplasma,f,f,f,f,f,f
+2344,Ureaplasma parvum,species,LPSN,species/ureaplasma-parvum,f,f,f,f,f,f
+1572,Ureaplasma urealyticum,species,LPSN,species/ureaplasma-urealyticum,f,f,f,f,f,f
+3260,Ureibacillus massiliensis,species,LPSN,species/ureibacillus-massiliensis,t,f,f,f,f,f
+2482,Ustilago,genus,MycoBank,16391,f,f,f,f,f,f
+210,Vaccinia virus,species,ICTV,202104775,f,f,f,f,f,f
+1936,Vagococcus,genus,LPSN,genus/vagococcus,f,f,f,f,f,f
+2200,Vagococcus fluvialis,species,LPSN,species/vagococcus-fluvialis,f,f,f,f,f,f
+31,Varicellovirus,genus,ICTV,202101439,f,f,f,f,f,f
+2339,Variola virus,species,ICTV,202104776,f,f,f,f,f,f
+2566,Veillonella,genus,LPSN,genus/veillonella,f,f,f,f,f,f
+1987,Veillonella atypica,species,LPSN,species/veillonella-atypica,f,f,f,f,f,f
+928,Veillonella caviae,species,LPSN,species/veillonella-caviae,f,f,f,f,f,f
+2176,Veillonella criceti,species,LPSN,species/veillonella-criceti,f,f,f,f,f,f
+64,Veillonella dispar,species,LPSN,species/veillonella-dispar,f,f,f,f,f,f
+7,Veillonella montpellierensis,species,LPSN,species/veillonella-montpellierensis,f,f,f,f,f,f
+674,Veillonella parvula,species,LPSN,species/veillonella-parvula,f,f,f,f,f,f
+1489,Veillonella ratti,species,LPSN,species/veillonella-ratti,f,f,f,f,f,f
+2047,Veillonella rodentium,species,LPSN,species/veillonella-rodentium,f,f,f,f,f,f
+2688,Venezuelan equine encephalitis virus,species,ICTV,202105111,f,f,f,f,f,f
+3394,Verruconis gallopava,species,MycoBank,519171,f,f,f,f,f,f
+358,Verticillium,genus,MycoBank,10400,f,f,f,f,f,f
+1919,Vibrio,genus,LPSN,genus/vibrio,f,f,f,f,f,t
+2443,Vibrio alginolyticus,species,LPSN,species/vibrio-alginolyticus,f,f,f,f,f,t
+92,Vibrio cholerae,species,LPSN,species/vibrio-cholerae,f,f,f,f,f,t
+1352,Vibrio cincinnatiensis,species,LPSN,species/vibrio-cincinnatiensis,f,f,f,f,f,t
+3221,Vibrio damselae,species,LPSN,species/vibrio-damselae,f,f,f,f,f,t
+175,Vibrio fluvialis,species,LPSN,species/vibrio-fluvialis,f,f,f,f,f,t
+1016,Vibrio furnissii,species,LPSN,species/vibrio-furnissii,f,f,f,f,f,t
+2261,Vibrio harveyi,species,LPSN,species/vibrio-harveyi,f,f,f,f,f,t
+1267,Vibrio metschnikovii,species,LPSN,species/vibrio-metschnikovii,f,f,f,f,f,t
+2144,Vibrio mimicus,species,LPSN,species/vibrio-mimicus,f,f,f,f,f,t
+1526,Vibrio parahaemolyticus,species,LPSN,species/vibrio-parahaemolyticus,f,f,f,f,f,t
+2095,Vibrio vulnificus,species,LPSN,species/vibrio-vulnificus,f,f,f,f,f,t
+521,Virgibacillus,genus,LPSN,genus/virgibacillus,t,f,f,f,f,f
+3000,Virgibacillus halodenitrificans,species,LPSN,species/virgibacillus-halodenitrificans,t,f,f,f,f,f
+2585,Virgibacillus pantothenticus,species,LPSN,species/virgibacillus-pantothenticus,t,f,f,f,f,f
+3096,Virgibacillus salexigens,species,LPSN,species/virgibacillus-salexigens,t,f,f,f,f,f
+2798,Viridans streptococci,group,NeoIPC,68,t,f,f,f,f,f
+275,Wautersia,genus,LPSN,genus/wautersia,f,f,f,f,f,f
+397,Weeksella,genus,LPSN,genus/weeksella,f,f,f,f,f,f
+661,Weeksella virosa,species,LPSN,species/weeksella-virosa,f,f,f,f,f,f
+1253,Weissella,genus,LPSN,genus/weissella,f,f,f,f,f,f
+1464,Weissella confusa,species,LPSN,species/weissella-confusa,f,f,f,f,f,f
+3159,Weizmannia coagulans,species,LPSN,species/weizmannia-coagulans,t,f,f,f,f,f
+1143,West Nile virus,species,ICTV,202103119,f,f,f,f,f,f
+2645,Western equine encephalitis virus,species,ICTV,202105112,f,f,f,f,f,f
+3386,Wickerhamomyces anomalus,species,MycoBank,508390,f,f,f,f,f,f
+3056,Winkia neuii,species,LPSN,species/winkia-neuii,t,f,f,f,f,f
+1497,Wolinella,genus,LPSN,genus/wolinella,f,f,f,f,f,f
+1804,Wolinella succinogenes,species,LPSN,species/wolinella-succinogenes,f,f,f,f,f,f
+1508,Xanthomonas,genus,LPSN,genus/xanthomonas,f,f,f,f,f,f
+2385,Xanthomonas maltophilia,species,LPSN,species/xanthomonas-maltophilia,f,f,f,f,f,f
+3401,Xenoacremonium recifei,species,MycoBank,810272,f,f,f,f,f,f
+1257,Xenorhabdus,genus,LPSN,genus/xenorhabdus,f,f,f,t,t,t
+944,Xenorhabdus nematophila,species,LPSN,species/xenorhabdus-nematophila,f,f,f,t,t,t
+3377,Yarrowia lipolytica,species,MycoBank,108643,f,f,f,f,f,f
+1757,Yellow fever virus,species,ICTV,202103121,f,f,f,f,f,f
+431,Yersinia,genus,LPSN,genus/yersinia,f,f,f,t,t,t
+2098,Yersinia aldovae,species,LPSN,species/yersinia-aldovae,f,f,f,t,t,t
+1121,Yersinia aleksiciae,species,LPSN,species/yersinia-aleksiciae,f,f,f,t,t,t
+1122,Yersinia bercovieri,species,LPSN,species/yersinia-bercovieri,f,f,f,t,t,t
+2774,Yersinia canariae,species,LPSN,species/yersinia-canariae,f,f,f,t,t,t
+1303,Yersinia enterocolitica,species,LPSN,species/yersinia-enterocolitica,f,f,f,t,t,t
+611,Yersinia frederiksenii,species,LPSN,species/yersinia-frederiksenii,f,f,f,t,t,t
+440,Yersinia intermedia,species,LPSN,species/yersinia-intermedia,f,f,f,t,t,t
+1782,Yersinia kristensenii,species,LPSN,species/yersinia-kristensenii,f,f,f,t,t,t
+254,Yersinia mollaretii,species,LPSN,species/yersinia-mollaretii,f,f,f,t,t,t
+554,Yersinia pestis,species,LPSN,species/yersinia-pestis,f,f,f,t,t,t
+1255,Yersinia pseudotuberculosis,species,LPSN,species/yersinia-pseudotuberculosis,f,f,f,t,t,t
+2115,Yersinia rohdei,species,LPSN,species/yersinia-rohdei,f,f,f,t,t,t
+1218,Yersinia ruckeri,species,LPSN,species/yersinia-ruckeri,f,f,f,t,t,t
+564,Yokenella,genus,LPSN,genus/yokenella,f,f,f,t,t,t
+2227,Yokenella regensburgei,species,LPSN,species/yokenella-regensburgei,f,f,f,t,t,t
+3393,Zasmidium cerophilum,species,MycoBank,822808,f,f,f,f,f,f

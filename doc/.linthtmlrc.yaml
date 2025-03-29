@@ -1,0 +1,15 @@
+maxerr: false
+text-ignore-regex: false
+raw-ignore-regex: false
+attr-name-ignore-regex: false
+id-class-ignore-regex: "^_footnote.+$"
+line-max-len-ignore-regex: false
+rules:
+  id-no-dup:
+    - error
+  id-style:
+    - error
+    - dash
+  class-style:
+    - error
+    - bem

@@ -1,0 +1,1014 @@
+= Infektionssurveillance für die Neonatologie: Kernmodul für Hochrisiko-Neugeborene mit < 1500 g Geburtsgewicht oder < 32 Wochen Gestationsalter
+:lang: de
+include::NeoIPC-Core-Protocol-Header.adoc[]
+:revnumber: 2.0
+
+[#introduction]
+== Einleitung
+[#introduction-what-are-you-reading-here]
+=== Was lesen Sie hier?
+Dieses Dokument ist das Surveillance-Protokoll für das Kernmodul der NeoIPC-Surveillance, das die Surveillance nosokomialer Infektionen bei Neugeborenen mit sehr niedrigem Geburtsgewicht [Very Low Birth Weight] (VLBW)/Sehr Frühgeborenen [Very Preterm] (VPT) umfasst.
+Es ist Teil eines Toolkits für die Surveillance von nosokomialen Infektionen (NI) in der Neonatologie, das wir im Rahmen des NeoIPC-Projekts entwickelt haben.
+Wenn Sie eine Surveillance von früh auftretenden [early-onset] Infektionen oder nosokomialen Infektionen bei Neugeborenen mit einem Geburtsgewicht von über 1500 g und einem Gestationsalter von mehr als 32 Wochen durchführen möchten, bietet das Toolkit zusätzliche Methoden, die in separaten Protokollen behandelt werden.
+
+Dieses Protokoll bietet methodische Hinweise und Unterstützung für die Surveillance von nosokomialen Infektionen auf Neugeborenenstationen oder für diejenigen, die die Entwicklung eines Programms zur Surveillance von nosokomialen Infektionen planen.
+Wenn Sie sich an die hier aufgeführten Methoden und Definitionen halten, können Sie sicherstellen, dass die von Ihnen generierten Surveillance-Daten mit den Referenzdaten des NeoIPC-Projekts vergleichbar sind, auch wenn Sie nicht aktiv an dem Projekt beteiligt sind.
+
+[#introduction-what-is-the-neo-ipc-project]
+=== Was ist das NeoIPC Projekt
+Im Rahmen des NeoIPC-Projekts möchten wir Sie mit Interventionen und Strategien zur Infektionsprävention und -kontrolle (IPC) auf Ihrer Neugeborenen-Intensivstation unterstützen, insbesondere wenn Sie eine hohe Prävalenz von nosokomialen Infektionen oder multiresistenten Erregern (MRE) beobachten.
+Wir sind ein internationales Team von Klinikern und Wissenschaftlern aus 13 kooperierenden Partnerinstitutionen mit nachgewiesener Erfahrung in den Bereichen neonatologische Intensivmedizin, neonatale Infektionen, Infektionsprävention und -kontrolle (IPC), Implementierungswissenschaft, Mikrobiologie und Surveillance, die an diesem Projekt mitarbeiten um zwei übergeordnete Ziele zu erreichen:
+
+. Entwicklung und Umsetzung eines innovativen Ansatzes zur Bewertung von IPC-Interventionen in der Neonatologie durch:
+.. Robuste Bewertung der Wirksamkeit von Interventionen in einer randomisierten kontrollierten Studie (RCT)
+.. Identifizierung einer geeigneten Umsetzungsstrategie.
+. Generierung weithin relevanter und global übertragbarer Ergebnisse zur Verbesserung von IPC in der Neugeborenenversorgung durch:
+.. Bildung eines klinischen Praxisnetzwerks zur Unterstützung der Implementierung von IPC in der Neonatologie, in einer Vielzahl von unterschiedlichen Bereichen, wie Neugeborenen-Intensivstation (NICU), High Care-, Special Care- und Känguru-Pflege (KC) Stationen.
+.. Entwicklung einer offenen Struktur zur gezielten Surveillance von IPC-Prozessen und -Ergebnissen in einer Vielzahl von Umgebungen.
+
+Dieses Projekt wurde vom Forschungs- und Innovationsprogramm Horizon 2020 der Europäischen Union im Rahmen der Finanzhilfevereinbarung Nr. 965328 finanziert.
+
+[#introduction-background]
+=== Hintergrund
+Weltweit gehören Neugeborene und insbesondere Frühgeborene zu den Patientengruppen mit der höchsten Inzidenz nosokomialer Infektionen.
+Einige dieser Infektionen können durch infektionspräventive Maßnahmen verhindert werden, die auf jeder einzelnen Neugeborenenstation umgesetzt und an die spezifischen Infektionsrisiken der Patienten angepasst werden müssen.
+In vielen Krankenhäusern in Europa und weltweit verfügen Ärzte und Pflegekräfte nicht über gute Daten, um die Krankheitslast durch nosokomiale Infektionen und die zu ihrer Entwicklung beitragenden Risikofaktoren einzuschätzen oder die Wirksamkeit von Maßnahmen zur Infektionsprävention zu bewerten.
+Unterstützung für die Surveillance von nosokomialen Infektionen bei Neugeborenen oder Referenzdaten für Benchmarking sind in den meisten Ländern nicht verfügbar.
+Wo nationale und supranationale Datenerhebungssysteme existieren, haben sie häufig einen breiten Ansatz, der nur begrenzt in der Lage ist, die Situation in Bezug auf Infektionsprävention und -kontrolle zu beurteilen.
+Kurzfristig versuchen wir, diese Situation zu verbessern, indem wir Menschen, die an IPC-Surveillance in der Neonatologie interessiert sind, Werkzeuge und Methoden für den Einstieg zur Verfügung stellen um möglicherweise langfristig zur Bildung regionaler Surveillance-Infrastrukturen beitragen.
+
+[#introduction-advice-for-use-and-requirements-for-participation]
+=== Hinweise zur Nutzung und Teilnahmevoraussetzungen
+Wenn Sie mit der Erfassung von Daten mithilfe der NeoIPC Surveillance-Methoden und -Werkzeuge beginnen möchten, können Sie dies einfach tun, ohne uns um Erlaubnis zu fragen oder Gebühren zu zahlen.
+Alle Handbücher und Tools können kostenlos verwendet werden, und Sie können sie sofort verwenden, wenn Sie der Meinung sind, dass sie zur Qualitätsverbesserung der Infektionsprävention in Ihrer Abteilung beitragen.
+
+Indem Sie mit Papierformularen beginnen und Berechnungen mit Stift und Papier oder mit einer Tabellenkalkulation durchführen, haben Sie eine sehr niedrige Eintrittsbarriere, und es kann Ihnen sogar helfen, ein gründliches Verständnis der Berechnungen zu erlangen, die intern von den fortgeschritteneren Tools durchgeführt werden.
+Wenn Sie die Dinge über einen längeren Zeitraum effektiv am Laufen halten möchten und über die erforderlichen Ressourcen verfügen, möchten Sie möglicherweise von der Verwendung der fortschrittlicheren Surveilance-Software vor Ort profitieren oder sich an NeoIPC oder einem regionalen Surveilance-Netzwerk auf der Grundlage seiner Methoden beteiligen.
+
+Für einen langfristigen Erfolg bei der Surveilance nosokomialer Infektionen ist es entscheidend, Daten zu sammeln und verlässliche und vergleichbare Informationen in Ihrer Abteilung über einen langen Zeitraum zu produzieren.
+Um die Erfassung solcher Daten zu erleichtern, möchten Sie möglicherweise Daten zum NeoIPC-Surveilance-Netzwerk beitragen.
+Diese Daten können verwendet werden, um Auswertungen zu erstellen und die Infektionsraten Ihrer Neugeborenenstation mit Anderen zu vergleichen.
+
+Wenn Sie Daten sammeln und übermitteln und für die Qualitätsverbesserung verantwortlich sind, ist es wichtig, dass Sie folgendes Dinge gut verstanden haben:
+
+* Einschlusskriterien für Patienten
+* Definitionen für jedes Datenelement
+* Verfahren zum Ausfüllen und Speichern von Formularen
+* Datensicherheit und Datenschutz (Schutz von Informationen, die zur Identifizierung eines Patienten außerhalb Ihrer Abteilung oder Ihres Krankenhauses verwendet werden könnten)
+* Verfahren zum Sammeln, Übermitteln und Korrigieren von Daten
+* Verfahren für Datenverwaltung und Datenabschluss
+* Verwendung von NeoIPC-Auswertungen zur Beobachtung und Verbesserung der Patientenversorgung
+
+Sie sollten sicherstellen, dass das gesamte Datenerfassungsteam in Ihrem Zentrum die in diesem Protokoll enthaltenen Definitionen akzeptiert und ihre Daten entsprechend übermittelt.
+Um regelmäßig aktuelle Referenzdaten erstellen zu können, fordert NeoIPC die Teilnehmer auf, regelmäßig Daten über die webbasierte Schnittstelle zu übermitteln und sicherzustellen, dass ihre Software- und Hardwaresysteme die Mindestanforderungen erfüllen.
+
+Die Richtlinien und Verfahren Ihres Zentrums müssen die Privatsphäre der Patienten und die Datensicherheit gewährleisten.
+Es ist wichtig, die personenbezogenen Daten der Patienten und andere Daten die zu ihrer Identifikation führen können, gemäß den für Ihr Zentrum geltenden Gesetzen und Richtlinien zu schützen.
+Senden Sie keine personenbezogenen Daten von Patienten an das NeoIPC-Netzwerk.
+
+Wir stellen sicher, dass die von den einzelnen Abteilungen übermittelten disaggregierten Daten streng vertraulich behandelt werden, und stellen Ihnen regelmäßig standardisierte und stratifizierte Referenzdaten zur Verfügung, die aggregierte Daten enthalten, sodass kein einzelner Patient oder keine einzelne Abteilung identifiziert werden kann.
+
+Um Sie bei der Anwendung der bereitgestellten Werkzeuge und Methoden zu unterstützen, bieten wir unter https://neoipc.org/surveillance/ Surveillance-Protokolle und Schulungsmaterialien an.
+Obwohl unsere Ressourcen für die persönliche Interaktion begrenzt sind, werden wir auch versuchen, Ihr Team zu unterstützen, wenn Sie Ihre Fragen an surveillance@neoipc.org senden.
+
+[#data-management]
+== Datenmanagement
+[#data-management-data-protection-and-security]
+=== Datenschutz und -sicherheit
+Die routinemäßige Surveillance nosokomialer Infektionen ist keine Forschung, sondern eine Art der Qualitätssicherung, die Teil der regulären Patientenversorgung ist.
+Aus diesem Grund ist die damit verbundene Datenerhebung in der Regel durch die regulären Krankenhausbehandlungsverträge oder spezielle Gesetze abgedeckt, die dies vorschreiben, und bedarf keiner ausdrücklichen Zustimmung der betroffenen Patienten oder ihrer Erziehungsberechtigten.
+Dennoch sollten Sie sich vergewissern, dass dies in Ihrem Land gilt, bevor Sie mit der Datenerhebung beginnen, und sich darüber hinaus an einige universelle Mindeststandards halten, die unabhängig von den gesetzlichen Rahmenbedingungen gelten sollten.
+
+[#data-management-data-protection-and-security-patient-information]
+==== Patienteninformationen
+Gesundheitsinformationen gehören in den meisten Kulturen zu den vertraulichsten Kategorien von Informationen über Menschen und sollten mit besonderer Sorgfalt behandelt werden.
+Wenn Informationen gespeichert oder übermittelt werden, die zur Identifizierung eines einzelnen Patienten führen können, sollte dies grundsätzlich so geschehen, dass kein unbefugter Dritter darauf zugreifen kann.
+Während dies bei typischen menschlichen Identifikatoren wie der Kombination aus Familienname, Vorname und Geburtsdatum meist sehr klar ist, kann bei Neugeborenen auch ein sehr seltenes Geburtsgewicht oder Gestationsalter zur Identifizierung eines individuellen Patienten führen wenn es mit genügend anderen Informationen, wie dem Geburtsdatum oder dem Krankenhaus, in dem der Patient behandelt wird, verknüpft wird.
+Denken Sie an dieses besondere Phänomen, wenn Sie Daten oder Informationen veröffentlichen, die aus Ihren Surveillance-bezogenen Aktivitäten resultieren, oder sie an ein System übermitteln, das nicht von Ihrem Krankenhaus zugelassen ist.
+Dies kann sogar für eine extern gewartete NeoIPC-Surveillance-Software gelten, sofern keine Verträge bestehen, welche die Datenverarbeitung regeln.
+
+[#data-management-data-protection-and-security-hospital-information]
+==== Krankenhausinformationen
+Informationen über Krankenhäuser sind im Allgemeinen nicht gesetzlich geschützt, aber einige Informationen können als Betriebsgeheimnis betrachtet werden und in diesem Fall dürfen Sie sie als Mitarbeiter normalerweise nicht offenlegen.
+Ob Surveillance-Informationen („Krankenhausinfektionsraten“) ein Betriebsgeheimnis sind oder sein sollten, ist Gegenstand umfangreicher Debatten und es ist verständlich, dass Patientenrechtsorganisationen diesbezüglich für Transparenz plädieren.
+Dennoch kann die Veröffentlichung von Surveillance-Daten sowohl die Wahrnehmung der Behandlungsqualität eines Krankenhauses als auch die Fähigkeit des Surveillance-Teams, die Surveillance ehrlich und selbstkritisch durchzuführen, nachteilig beeinflussen.
+
+Als Instrument der internen Qualitätssicherung kann die Surveillance nicht alle Formen von Subjektivität und Unehrlichkeit ausschließen, und öffentlicher Druck tendiert dazu, die Datenerhebung in Richtung einer übermäßig kritischen Bewertung von Infektionsaufzeichnungen zu verlagern, was zu niedrigen Raten führt, die nicht mehr zu Verbesserung von Behandlungsqualität genutzt werden können.
+Neben diesem Problem der „pro forma Surveillance“ kann es durchaus legitime oder sogar ehrenwerte Gründe für hohe Infektionsraten in einem Krankenhaus geben, wie etwa die Behandlung von Patienten mit besonders hohem Infektionsrisiko, die mit einfachen statistischen Mitteln wie der Risiko-Standardisierung und -Stratifizierung nicht kompensiert werden können.
+Solche Zusammenhänge sind der breiten Öffentlichkeit erfahrungsgemäß schwer zu vermitteln, was zu einer übermäßigen Vereinfachung und politischem Missbrauch führen kann.
+
+Da es für diese Probleme keine einfache Lösung gibt, wird NeoIPC die Identität einzelner teilnehmender Krankenhäuser nicht offenlegen und sicherstellen, dass Veröffentlichungen und Berichte keine Informationen enthalten, die zur Identifizierung eines einzelnen Krankenhauses führen könnten.
+
+Wenn Sie Daten selbst oder als regionales Netzwerk veröffentlichen, sollten Sie die möglichen Auswirkungen der Aufnahme von Informationen auf Krankenhausebene sorgfältig prüfen und dies in enger Abstimmung mit den verschiedenen Interessensgruppen tun.
+
+[#data-management-data-submission]
+=== Datenübermittlung
+Wie xref:participation_requirements[oben] erwähnt, können Sie die vom NeoIPC-Projekt entwickelten Werkzeuge und Methoden verwenden, um die Surveillance nosokomialer Infektionen in Ihrer neonatologischen Abteilung durchzuführen, ohne Informationen an das NeoIPC-Projekt oder ein regionales Netzwerk zu übermitteln.
+
+Wenn Sie sich jedoch entschließen, Daten zu übermitteln, empfehlen wir Ihnen dringend, das webbasierte Meldesystem zu verwenden, das wir auf der Grundlage des Gesundheitsinformationsmanagementsystems https://dhis2.org/[DHIS2] entwickelt haben.
+
+Da DHIS2 ein frei verfügbares Open-Source-System ist, haben Sie mehrere Möglichkeiten, es zu nutzen:
+
+* Sie können es lokal in Ihrem Krankenhaus einsetzen und es für die NeoIPC-Datenerfassung innerhalb Ihres Krankenhauses sowie für andere potenzielle Anwendungsfälle nutzen.
+* Sie können es auf nationaler oder regionaler Ebene einsetzen (oder ein bestehendes nationales oder regionales System nutzen), um ein nationales oder regionales Netz von Abteilungen zu bilden, die Surveillance betreiben.
+* Sie nutzen die https://neoipc.charite.de/[Instanz] des NeoIPC-Projekts, die derzeit vom Team des deutschen Nationalen Referenzzentrums für Surveillance von nosokomialen Infektionen am Institut für Hygiene und Umweltmedizin der Charité betrieben wird.
+
+Einer der Vorteile des webbasierten Erfassungssystems ist die Tatsache, dass Sie damit jederzeit mit wenigen Klicks standardisierte, abteilungsbezogene Auswertungen erstellen und diese mit den jährlich erscheinenden NeoIPC-Referenzberichten vergleichen können.
+
+Zur Erstellung der Rederenzdaten führen wir jedes Jahr zu einem bestimmten Zeitpunkt eine Berechnung mit den zu diesem Zeitpunkt in der NeoIPC-Datenbank vorhandenen Daten durch.
+Um dies zu ermöglichen, müssen Sie alle Dateneingaben und die Ergänzung fehlender Informationen aus dem Vorjahr innerhalb von 6 Wochen nach Ende eines Kalenderjahres abgeschlossen haben.
+Dies gilt für Patienten, deren Surveillance-Zeitraum im Vorjahr endete.
+
+Sollte das webbasierte Erfassungssystem vorübergehend nicht verfügbar sein (z. B. aufgrund von Wartungsarbeiten oder technischen Problemen), verwenden Sie in dieser Zeit bitte die Erfassungsbögen in Papierform zur Dokumentation und denken Sie daran, diese Daten so schnell wie möglich in die Webplattform einzugeben, sobald diese wieder verfügbar ist.
+
+[#data-collection]
+== Datenerhebung
+Das primäre Ziel der vom NeoIPC Surveillance System angewandten Methoden ist es, die internen Qualitätssicherungsstandards zu unterstützen, valide Aussagen über die Häufigkeit von nosokomialen Infektionen bei den in Frage kommenden Kindern während ihres stationären Aufenthaltes zu machen und die Umsetzung von IPC-Strategien in einer neonatologischen Abteilung zu fördern.
+
+Aufgrund unserer Erfahrungen gehen wir davon aus, dass Sie Daten sowohl durch die Durchsicht von Krankenakten als auch durch die Interaktion mit den Kollegen, die an der Behandlung und Pflege des zu überwachenden Patienten beteiligt sind, erheben werden.
+Aus diesem Grund sollte die Datenerhebung idealerweise am Krankenbett des Patienten erfolgen, um die Menge der verfügbaren Informationen zu maximieren (indem die behandelnden Ärzte unklare oder unvollständige Einträge in der Krankenakte klären können) und um den Zeitaufwand für das Aufspüren von Krankenakten nach dem Verlassen des Krankenhauses zu minimieren.
+Die Identifizierung von Patienten mit nosokomialen Infektionen erfolgt in der Regel durch die regelmäßige Prüfung der vorhandenen Patientenakten der Abteilung, einschließlich der Laborergebnisse.
+Der Erfolg Ihrer Teilnahme an der NeoIPC Surveillance hängt in hohem Maße von der engen Kommunikation zwischen denjenigen ab, die die Surveillance durchführen (in der Regel Fachleute für Infektionsprävention und -kontrolle), und denjenigen, die den Patienten versorgen (in der Regel Fachleute für Neonatologie).
+Da die gesammelten Daten letztendlich in einen Computer eingegeben werden müssen, können Sie durch die Kombination von Datenerfassung und Dateneingabe in einem einzigen Verfahren Zeit sparen und das Risiko von Fehlern beim Kopieren von Daten verringern.
+
+Für alle einzuschließenden Patienten des NeoIPC Surveillance-Programms müssen zwei Datenerfassungsbögen ausgefüllt werden:
+
+* Stammblatt für die Datenerfassung
+* Patientenverlaufsbogen
+
+Ein dritter Datenerhebungsbogen muss ebenfalls ausgefüllt werden, wenn sich der Patient einem chirurgischen Eingriff unterzieht:
+
+* Erhebungsbogen für chirurgische Eingriffe
+
+Entwickelt ein teilnahmeberechtigtes Kind innerhalb des NeoIPC-Follow-up-Zeitraums eine nosokomiale Infektion, so ist/sind zusätzlich der/die entsprechende(n) Erhebungsbogen für Infektionen auszufüllen:
+
+* Blutstrominfektion
+* Pneumonie
+* Nekrotisierende Enterokilitis
+* Postoperative Wundinfektion
+
+Nur diese in den teilnehmenden neonatologischen Abteilungen erworbenen Infektionen sollten erfasst werden.
+
+Alle in Frage kommenden Kinder sollten bis zum Ende des Surveillance-Zeitraums beobachtet werden, d. h. bis zum Zeitpunkt, an dem das Kind stirbt, verlegt oder aus dem Krankenhaus entlassen wird.
+
+Im Falle eines chirurgischen Eingriffs werden die Patienten zusätzlich 30 oder 90 Tage lang auf SSIs überwacht, je nachdem, ob ein Implantat vorhanden ist.
+Ausführliche Informationen finden Sie unter Postoperative Wundinfektionen.
+
+[#data-collection-case-eligibility-criteria-for-the-core-module]
+=== Fallzulassungskriterien für das Kernmodul
+Jedes lebend geborene Kind,
+
+[loweralpha]
+. mit einem Geburtsgewicht von weniger als 1500 Gramm
++
+**UND/ODER**
+. dessen Gestationsalter weniger als 32 Wochen (einschließlich 31 Wochen und 6 Tage) beträgt
+
+die **innerhalb von 120 Tagen nach der Geburt** auf einer Station Ihrer Neugeborenenabteilung aufgenommen werden, kommen für die Aufnahme in das Kernmodul des NeoIPC Surveillance Programms in Frage.
+
+.Entscheidungsbaum zur Identifikation einzuschließender Kinder für das Kernmodul
+image::NeoIPC-Core-Decision-Flow.de.svg[Case eligibility decision flow,{full-width},opts=inline]
+
+.Beispiele für Kinder, die für das Kernmodul in Frage kommen/nicht in Frage kommen, sobald sie auf der Station aufgenommen wurden
+[cols=">2,>3,>4,>4",stripes=odd]
+|===
+|Lebenstag |Geburtsgewicht (Gramm) |Gestationsalter (Wochen+Tage) |Einschluss im Kernmodul
+
+|120 [.green]#☑# |1499 [.green]#☑# |31+6 [.green]#☑# |Ja [.green]#☑#
+|1 [.green]#☑# |1500 [.red]#☐# |31+6 [.green]#☑# |Ja [.green]#☑#
+|120 [.green]#☑# |1499 [.green]#☑# |32+0 [.red]#☐# |Ja [.green]#☑#
+|1 [.green]#☑# |1500 [.red]#☐# |32+0 [.red]#☐# |Nein [.red]#☐#
+|121 [.red]#☐# |1499 [.green]#☑# |30+5 [.green]#☑# |Nein [.red]#☐#
+|===
+
+Ein Kind, das im Kernmodul nicht berücksichtigt wird, kann dennoch in einem anderen NeoIPC-Surveillancemodul berücksichtigt werden.
+
+[#data-collection-patient-data-collection]
+=== Erfassung von Patientendaten
+Sobald ein einzuschließender Patient in Ihrer neonatologischen Abteilung aufgenommen oder wieder aufgenommen wird, sollten Sie diesen erfassen, vorzugsweise direkt im Online-Erfassunsgsystem.
+
+[#data-collection-patient-data-collection-pseudonymisation-table]
+==== Pseudonymisierungstabelle
+Wenn Sie aus rechtlichen oder anderen Gründen verpflichtet sind, Patienten im Online-Erfassungssystem eindeutig zu identifizieren, müssen Sie jedem Patienten zum Zeitpunkt der Anmeldung eine NeoIPC-ID zuweisen.
+Die NeoIPC-ID ist ein eindeutiger, zufälliger Identifikator, mit dem Sie den Patienten innerhalb Ihrer Abteilung identifizieren können.
+Dies ermöglicht es Ihnen, die im System gespeicherten anonymen Daten zu nutzen, um sich auf bestimmte Patienten zu beziehen, z. B. im Falle einer Wiederaufnahme oder Datenkorrektur, und macht es Dritten unmöglich, dasselbe zu tun.
+
+Jeder Patient kann nur eine NeoIPC-Identifikationsnummer haben.
+Wenn ein Patient entlassen und dann wieder aufgenommen wird, endet die anfängliche Nachverfolgung zum Zeitpunkt der Entlassung, und es muss eine neue Anmeldung unter Verwendung derselben NeoIPC-Identifikationsnummer vorgenommen werden, wenn der Patient wieder aufgenommen wird.
+
+Sie sind für die Organisation des Abrufs von Patientendaten auf der Grundlage eindeutiger IDs verantwortlich.
+Wir empfehlen Ihnen, eine Pseudonymisierungsliste zu erstellen, die die NeoIPC-ID (eindeutige Zufallszahlen) zusammen mit anderen identifizierenden Informationen (Name, Geburtsdatum, Patienten-ID aus dem Krankenhausinformationssystem) enthält, oder diese Informationen auf dem papierbasierten Patientenüberwachungs-Stammdatenblatt zu vermerken.
+Sie müssen die Pseudonymisierungsliste und die Papierblätter unter denselben Bedingungen aufbewahren, unter denen Sie geheime Gesundheitsdaten von Patienten aufbewahren, und sie oder die darin enthaltenen Informationen auf sichere Weise vernichten, sobald sie nicht mehr benötigt werden.
+Um den Datenschutz zu gewährleisten, sollten Sie bei der Erstellung der NeoIPC-ID niemals einen Identifikator verwenden, der in einem anderen Kontext als der NeoIPC-Surveillance verwendet wird und den Sie nicht vollständig kontrollieren können (verwenden Sie z. B. **nicht** die Patienten-ID aus Ihrem Krankenhausinformationssystem, den Patientennamen oder einen eindeutigen Identifikator, der anderswo verwendet wird).
+
+Für die Erstellung von Referenzdaten muss NeoIPC die einzelnen Patienten nicht nachverfolgen und die von Ihnen vergebenen IDs werden von NeoIPC in keiner Weise verwendet.
+
+NOTE: Für die Erstellung einer Pseudonymisierungsliste können Sie die Vorlagen (Excel-Tabelle und Papierdatenblatt) verwenden, die Sie auf unserer Website im https://neoipc.org/surveillance/resources/[Abschnitt Ressourcen] finden.
+
+.Beispiel einer Pseudonymisierungsliste
+[cols=">1,^2,^2,^3,^2,^4",stripes=odd]
+|===
+|Nr. |NeoIPC-ID |Patienten-ID |Patientenname |Geburtsdatum |Kommentare
+
+|1 | | | | |
+|2 | | | | |
+|3 | | | | |
+|⋮ | | | | |
+|===
+
+<<<
+[#data-collection-patient-data-collection-master-data-collection-sheet]
+==== Stammblatt zur Datenerfassung
+Sobald ein einzuschließender Patient in Ihrer neonatologischen Abteilung aufgenommen oder wieder aufgenommen wird, sollten Sie diesen erfassen, vorzugsweise direkt im Online-Erfassunsgsystem.
+Nachdem Sie einen Patienten eingeschlossen haben, müssen Sie die Aufnahmedaten eingeben und die Verlaufsdaten mit Hilfe von Patientenakten weiter erfassen.
+Wenn der Patient entlassen wird, in ein anderes Krankenhaus verlegt wird oder stirbt, müssen Sie die Nachbeobachtung für diesen Patienten beenden, die Summen der in den Patientenverlaufsbogen erfassten Daten bilden und diese ins Stammblatt übertragen oder direkt ins Online-Erfassungssystem eingeben.
+
+Sie können das Stammblatt zur Datenerfassung verwenden, um die Daten zur Erfassung, Aufnahme und zum Ende der Surveillance lokal zu speichern.
+Wenn Sie jedoch Daten an NeoIPC übermitteln, müssen die Informationen, die Sie auf dem Stammblatt zur Datenerfassung erfassen, letztendlich ins Online-Erfassungssystem eingegeben werden.
+
+.Stammblatt zur Datenerfassung für Patientendaten
+//image::NeoIPC-Core-Master-Data-Collection-Sheet-Image.de.svg[Stammblatt für die Erfassung von Patientendaten,{full-width},pdfwidth=75%,opts=inline,align="center"]
+image::NeoIPC-Core-Master-Data-Collection-Sheet-Image.png[Stammblatt für die Erfassung von Patientendaten,{full-width},pdfwidth=75%,align="center"]
+
+<<<
+[#data-collection-patient-data-collection-patient-progress-chart]
+==== Patientenverlaufsbogen
+Eingeschlossene Patienten, die für das System in Frage kommen, müssen bis zu ihrem Tod, ihrer Verlegung oder ihrer Entlassung mit Hilfe von Patientenverlaufsbögen nachverfolgt werden.
+Darin werden kumulative Risiko- und Schutzfaktoren wie Patiententage, Device-Tage und Antibiotika-Tage erfasst, und zwar möglichst täglich.
+Dieser Bogen muss in Ihrer Einrichtung aufbewahrt werden, um die Datenerfassung und die Nachverfolgung der Patienten zu vereinfachen.
+Sie müssen während des Surveillancezeitraums für jedes eingeschlossenen Kind einem oder mehrere Verlaufsbögen führen.
+Es ist möglich, bis zu sechs verschiedene Antibiotika in einer Karte einzutragen.
+Wenn Ihr Patient mehr als sechs verschiedene Antibiotika erhalten hat, dokumentieren Sie diese bitte auf einem zusätzlichen Bogen.
+
+Wenn ein Patient entlassen wird, in ein anderes Krankenhaus verlegt wird oder verstirbt, müssen Sie die Nachbeobachtung für diesen Patienten beenden, und die Summe der Daten in den Verlaufsbögen des Patienten wird zu den Enddaten der Surveillance des Patienten.
+Diese Daten müssen schließlich unter dem Ereignis „Surveillance-Ende“ ins Online-Erfassungssystem eingegeben werden.
+Sie können das Stammblatt zur Datenerfassung verwenden, um diese Daten lokal zu speichern.
+
+Der Einfachheit halber gelten Patienten, die ihre Abteilung für bis zu zwei Tage verlassen (z. B. für eine Operation), nicht als verlegt oder entlassen.
+Sie sollten die Daten für die Tage, die nicht in der Abteilung verbracht wurden, bei der Wiederaufnahme erfassen.
+Wenn zwischen Verlegung und Wiederaufnahme mehr als 48 Stunden liegen, müssen Sie die Datenerfassung für diesen Patienten beenden und „Verlegung“ als Grund für das Ende der Surveillance angeben.
+In diesem Fall ist jede Wiederaufnahme als Neuaufnahme zu erfassen, und als Art der Aufnahme ist „Verlegung in Ihr Zentrum ≥ 24 Stunden nach der Geburt“ zu wählen.
+
+.Verlaufsbogen für die Erfassung von Patientendaten
+//image::NeoIPC-Core-Patient-Progress-Chart-Image.de.svg[Verlaufsbogen für die Erfassung von Patientendaten,{full-width},pdfwidth=100%,opts=inline,align="center"]
+image::NeoIPC-Core-Patient-Progress-Chart-Image.png[Verlaufsbogen für die Erfassung von Patientendaten,{full-width},pdfwidth=100%,align="center"]
+
+<<<
+[#data-collection-surgical-procedure-data-collection]
+=== Datenerhebung zu chirurgischen Eingriffen
+Jeder chirurgische Eingriff bei Neugeborenen und insbesondere bei VLBW/VPT-Neugeborenen ist ein Indikator für einen komplizierten Verlauf und ein zusätzlicher Risikofaktor für nosokomiale Infektionen und das Auftreten von multiresistenten Erregern.
+Aus diesem Grund wird jeder chirurgische Eingriff, der an einem eingeschlossenen Neugeborenen vorgenommen wird, in NeoIPC erfasst.
+Für die Dokumentation vor Ort können Sie den Erfassungsbogen für chirurgische Eingriffe verwenden oder die entsprechenden Informationen direkt in das Online-Erfassungssystem eingeben.
+Zusätzlich zur Erfassung des Eingriffs müssen Sie das betreffende Kind 30 oder 90 Tage lang auf Wundinfektionen überwachen, je nachdem, ob während des Eingriffs ein Implantat belassen wurde.
+
+.Erhebungsbogen für chirurgische Eingriffe
+//image::NeoIPC-Core-Surgical-Procedure-Data-Collection-Sheet-Image.de.svg[Erhebungsbogen für chirurgische Eingriffe,{full-width},pdfwidth=75%,opts=inline,align="center"]
+image::NeoIPC-Core-Surgical-Procedure-Data-Collection-Sheet-Image.png[Erhebungsbogen für chirurgische Eingriffe,{full-width},pdfwidth=75%,align="center"]
+
+[#data-collection-infection-data-collection]
+=== Erhebung von Infektionsdaten
+Im Krankenhaus erworbene Blutstrominfektionen, Pneumonieen, NEC-Fälle und postoperative Wundinfektionen sollten bei allen eingeschlossenen Patienten bis zum Ende des Surveillance-Zeitraums dokumentiert werden.
+
+Neugeboreneninfektionen lassen sich grob in Früh- und Spätinfektionen (early- und late-onset) unterteilen.
+Die meisten Frühinfektionen sind auf schwangerschafts- und geburtsbedingte Risiken zurückzuführen, bei denen die verursachenden Erreger typischerweise die Mutter in Form einer mikrobiellen Kolonisation oder Infektion befallen, bevor sie eine Infektion beim Kind verursachen.
+Die meisten Spätinfektionen sind dagegen auf nosokomiale Infektionen zurückzuführen, und die Erreger dieser Infektionen stammen in der Regel von Personen oder unbelebten Oberflächen, die während der Neugeborenenversorgung in engen Kontakt mit dem Kind kommen.
+Da nur letztere für das auf neonatologischen Stationen tätige Gesundheitspersonal unmittelbar handlungsrelevant sind, legt NeoIPC den Schwerpunkt auf diese „nosokomialen“ Spätinfektionen, versucht aber auch, Sie bei der Surveillance von Frühinfektionen zu unterstützen.
+Obwohl ein fester zeitbasierter Cut-off-Wert nicht genau erfasst, ob eine Infektion auf der Neugeborenen-Intensivstation erworben wurde, besteht ein relativ breiter internationaler Konsens darüber, dass ein 72-Stunden-Cut-off-Wert als guter Schätzer für nosokomiale Infektionen in der Neonatologie dient.
+Aus diesem Grund sollten Infektionen, bei denen die ersten Symptome innerhalb eines 72-Stunden-Fensters nach der Geburt auftreten, nicht als nosokomiale Infektionen gelten und daher nicht im NeoIPC-Kernmodul erfasst werden.
+Es ist jedoch möglich, sie separat als Frühinfektionen zu erfassen, wenn Sie sich für das NeoIPC-Modul für Frühinfektionen entscheiden.
+Wenn eine Infektion vor 72 Stunden beginnt und eindeutig im Krankenhaus erworben wurde (z. B. weil es deutliche Anzeichen einer Infektion an der Kathetereintrittsstelle gibt) oder nach 72 Stunden beginnt und eindeutig vertikal ist (z. B. alle transplazentaren Infektionen, die bei der Geburt nicht erkennbar sind, wie Toxoplasmose, CMV, HIV, Röteln und Syphilis), kann dieser Cut-off-Wert ignoriert werden.
+
+Für Patienten, die auf eine Station in Ihrer neonatologischen Abteilung verlegt oder wieder aufgenommen werden, muss ein zusätzlicher Grenzwert angewendet werden.
+In diesem Fall gilt eine Infektion nur dann als nosokomiale Infektion, wenn der Tag des Symptombeginns größer oder gleich dem dritten Tag des Krankenhausaufenthalts des Patienten ist, wobei der Tag der Aufnahme als Tag 1 gilt.
+
+Die NeoIPC Surveillance sieht keinen strikten Zeitrahmen für das Auftreten von Elementen der Definitionen vor, aber in der Regel treten alle Elemente, die zur Erfüllung einer Infektionsdefinition erforderlich sind, innerhalb eines Zeitrahmens von 7-10 Tagen auf, wobei typischerweise nicht mehr als 2-3 Tage zwischen den einzelnen Elementen liegen.
+
+Wenn ein neuer Erreger in demselben Organsystem isoliert wird, obwohl bereits eine Infektion festgestellt wurde, kann dies nicht als neue Infektion erfasst werden.
+Es sind mindestens 14 Tage und ein Zeitraum ohne relevante Infektionssymptome erforderlich, um die gleiche Art von Infektion erneut zu erfassen.
+
+<<<
+[#data-collection-infection-data-collection-primary-sepsis-bsi]
+==== Primäre Sepsis/BSI
+Wenn bei einem eingeschlossenen Kind während des Surveillance-Zeitraums eine im Krankenhaus erworbene primäre Sepsis/Blutstrominfektion gemäß den NeoIPC-Surveillance-Kriterien (siehe Infektionsdefinitionen: Primäre Sepsis/Blutstrominfektion) auftritt, sind die erforderlichen Daten mit dem nachstehenden Datenerfassungsbogen zu erfassen und/oder über die Online-Erfassungsplattform übermitteln.
+
+.Erfassungsbogen für primäre Sepsis/BSI
+//image::NeoIPC-Core-Primary-Sepsis-BSI-Reporting-Sheet-Image.de.svg[Erfassungsbogen für primäre Sepsis/BSI,{full-width},pdfwidth=75%,opts=inline,align="center"]
+image::NeoIPC-Core-Primary-Sepsis-BSI-Reporting-Sheet-Image.png[Erfassungsbogen für primäre Sepsis/BSI,{full-width},pdfwidth=75%,align="center"]
+
+<<<
+[#data-collection-infection-data-collection-necrotising-enterocolitis]
+==== Nekrotisierende Enterokolitis
+Wenn bei einem eingeschlossenen Kind während des Surveillance-Zeitraums eine nekrotisierende Enterokolitis (NEC) gemäß den NeoIPC-Surveillance-Kriterien (siehe Infektionsdefinitionen: NEC) auftritt, sind die erforderlichen Daten mit dem nachstehenden Datenerfassungsbogen zu erfassen und/oder über die Online-Erfassungsplattform übermitteln.
+
+.NEC-Erfassungsbogen
+//image::NeoIPC-Core-NEC-Reporting-Sheet-Image.de.svg[NEC-Erfassungsbogen,{full-width},pdfwidth=75%,opts=inline,align="center"]
+image::NeoIPC-Core-NEC-Reporting-Sheet-Image.png[NEC-Erfassungsbogen,{full-width},pdfwidth=75%,align="center"]
+
+<<<
+[#data-collection-infection-data-collection-pneumonia]
+==== Pneumonie
+Wenn bei einem eingeschlossenen Kind während des Surveillance-Zeitraums eine im Krankenhaus erworbene Pneumonie gemäß den NeoIPC-Surveillance-Kriterien (siehe Infektionsdefinitionen: Pneumonie) auftritt, sind die erforderlichen Daten mit dem nachstehenden Datenerfassungsbogen zu erfassen und/oder über die Online-Erfassungsplattform übermitteln.
+
+.Erfassungsbogen Pneumonie
+//image::NeoIPC-Core-Pneumonia-Reporting-Sheet-Image.de.svg[Pneumonie-Erfassungsbogen,{full-width},pdfwidth=75%,opts=inline,align="center"]
+image::NeoIPC-Core-Pneumonia-Reporting-Sheet-Image.png[Pneumonie-Erfassungsbogen,{full-width},pdfwidth=75%,align="center"]
+
+<<<
+[#data-collection-infection-data-collection-surgical-site-infections]
+==== Postoperative Wundinfektionen
+Wenn bei einem eingeschlossenen Kind während des Surveillance-Zeitraums eine postoperative Wundinfektion gemäß den NeoIPC-Surveillance-Kriterien (siehe Infektionsdefinitionen: Postoperative Wundinfektion) auftritt, sind die erforderlichen Daten mit dem nachstehenden Datenerfassungsbogen zu erfassen und/oder über die Online-Erfassungsplattform übermitteln.
+
+.Erfassungsbogen Postoperative Wundinfektion
+//image::NeoIPC-Core-SSI-Reporting-Sheet-Image.de.svg[Erfassungsbogen Postoperative Wundinfektion,{full-width},pdfwidth=75%,opts=inline,align="center"]
+image::NeoIPC-Core-SSI-Reporting-Sheet-Image.png[Erfassungsbogen Postoperative Wundinfektion,{full-width},pdfwidth=75%,align="center"]
+
+<<<
+[#data-collection-infection-data-collection-device-associated-infection]
+==== Device-assoziierte Infektionen
+Intravenöse Therapie und mechanische Beatmung sind etablierte Risikofaktoren für nosokomiale Infektionen in der Neonatologie.
+Diese Arten von Infektionen werden typischerweise als Device-assoziierte Infektionen bezeichnet und in Verbindung mit der Anwenung invasiver medizinischer Verfahren wie Gefäßkathetern oder Intubation erfasst.
+
+In NeoIPC werden die folgenden Device-assoziationen erfasst:
+
+. Infektionen im Zusammenhang mit invasiver Beatmung (INV)
+. Infektionen im Zusammenhang mit non-invasiver Beatmung (NIV)
+. Infektionen im Zusammenhang mit zentralen Venenkathetern (ZVK)
+. Infektionen im Zusammenhang mit peripheren Venenkathetern (PVK)
+
+Da die Feststellung eines ursächlichen Zusammenhangs zwischen einem Device und einer nosokomialen Infektion in vielen neonatologischen Einrichtungen schwierig und undurchführbar ist, konzentriert sich NeoIPC ausschließlich auf einen zeitlichen Zusammenhang.
+Um einen Zusammenhang zwischen einem Device und einer Infektion herzustellen, muss das Device über einen bestimmten Zeitraum vor der Infektion in Gebrauch gewesen sein.
+
+.Beispiel für den Zusammenhang zwischen Infektion und Device bei Device-assoziierten Infektionen
+[cols="1,^1,^2,5"]
+|===
+|Tage |Device vorhanden |Device-Assoziation (wenn dies der Tag der Infektion ist) |Kommentare
+
+|Tag 1 |ZVK |Nein [.red]#☐# |<3 ZVK-Tage am Tag der Infektion
+|Tag 2 |ZVK |Nein [.red]#☐# |<3 ZVK-Tage am Tag der Infektion
+|Tag 3 |ZVK |Ja [.green]#☑# |≥3 ZVK-Tage am Tag der Infektion
+|Tag 4 |Kein Device |Ja [.green]#☑# |Kein ZVK am Tag der Infektion, aber ≥3 ZVK-Tage am Tag 3 (dem Tag vor der Infektion)
+|Tag 5 |Kein Device |Nein [.red]#☐# |Kein ZVK am Tag der Infektion oder am Tag vor der Infektion
+|Tag 6 |Kein Device |Nein [.red]#☐# |Kein ZVK am Tag der Infektion oder am Tag vor der Infektion
+|===
+
+Erfüllt ein Patient, bei dem eine Blutstrominfektion auftritt, die Kriterien sowohl für eine PVK- als auch für eine ZVK-Assoziation, wird der ZVK als das Device mit dem relativ höheren Infektionsrisiko betrachtet und die BSI wird als ZVK-assoziierte BSI erfasst.
+
+Wenn sowohl invasive als auch nicht-invasive Beatmung intermittierend eingesetzt wurden, wird die Pneumonie als INV-assoziierte Pneumonie erfasst.
+
+<<<
+[#data-collection-infection-data-collection-secondary-bloodstream-infection]
+==== Sekundäre Blutstrominfektion
+Im Rahmen der NeoIPC-Surveillance ist es möglich, Blutstrominfektionen sekundär zu Pneumonie, NEC und SSI zu erfassen.
+Die Erfassung von Daten zu sekundären BSI ist optional; daher ist es möglich, **„Keine Nachverfolgung“** auszuwählen, wenn Sie Patienten nicht auf sekundäre BSI überwachen.
+
+Um eine sekundäre Blutstrominfektion einer Pneumonie, einem NEC oder einer SSI zuzuordnen, müssen die folgenden Kriterien erfüllt sein:
+
+. Die Blutprobe wird in einem Zeitraum zwischen 3 Tagen vor und 13 Tagen nach dem Tag der Primärinfektion entnommen (Tag der Primärinfektion = erste Symptome oder erste positive Kultur am Ort der Primärinfektion).
++
+**UND**
+. Mindestens ein Organismus aus der Blutprobe stimmt mit einem Organismus überein, der an der Stelle der Primärinfektion identifiziert wurde.
+
+.Erfassungsbogen sekundäre BSI
+//image::NeoIPC-Core-Secondary-BSI-Image.de.svg[Erfassungsbogen sekundäre BSI,{full-width},pdfwidth=100%,opts=inline,align="center"]
+image::NeoIPC-Core-Secondary-BSI-Image.png[Erfassungsbogen sekundäre BSI,{full-width},pdfwidth=100%,align="center"]
+
+[#infection-definitions]
+== Infektionsdefinitionen
+[#infection-definitions-primary-sepsis-bloodstream-infection]
+=== Primäre Sepsis/Blutstrominfektion
+Sepsis wird im NeoIPC-Surveillance-System entweder als klinis (kulturnegativ) oder mikrobiologisch bestätigt eingestuft.
+Die mikrobiologisch bestätigte Sepsis (LCBSI = „Laboratory-confirmed bloodstream infection“) wird auf der Grundlage des Kulturergebnisses in zwei weitere Unterkategorien eingeteilt.
+
+Infektionen, die durch Mikroorganismen verursacht werden, die von einer primären Infektionsstelle in die Blutbahn gelangen (mit Ausnahme von Katheter-assoziierten Infektionen), werden in diesem Abschnitt nicht berücksichtigt.
+Ausführliche Informationen finden Sie unter xref:data-collection-infection-data-collection-secondary-bloodstream-infection[Secondary Bloodstream Infection].
+
+. Klinische Sepsis (Infektion ohne nachgewiesenen Erreger)
+. Im Labor bestätigte Blutstrominfektion
+.. LCBSI, verursacht durch einen anerkannten Infektionserreger* .
+.. LCBSI, verursacht durch einen gewöhnlichen Kommensalen* .
+
+*Siehe xref:appendix-list-of-list-of-infectious-agents[Liste der Infektionserreger]
+
+<<<
+[#infection-definitions-clinical-sepsis]
+==== Klinische Sepsis
+include::definitions/NeoIPC-Core-Clinical-Sepsis-Definition.de.adoc[]
+
+<<<
+[#infection-definitions-lcbsi-caused-by-a-recognised-pathogen]
+==== LCBSI verursacht durch einen anerkannten Erreger
+include::definitions/NeoIPC-Core-LCBSI-With-Recognised-Pathogen-Definition.de.adoc[]
+
+[#infection-definitions-lcbsi-caused-by-common-commensals]
+==== LCBSI verursacht durch gewöhnliche Kommensalen
+Wenn in Blutkulturen ein oder mehrere gewöhnliche Kommensalen (z. B. koagulasenegative Staphylokokken) nachgewiesen werden, ist in vielen Fällen unklar, ob die nachgewiesenen Bakterien der Erreger einer vermuteten Infektion sind oder ob eine Kontamination zu einer falschen Diagnose führt.
+Es gibt mehrere Ansätze, dieses Problem durch Anpassung der Surveillance-Definitionen an diese Tatsache zu lösen.
+Leider sind all diese Ansätze durch diagnostische Gewohnheiten und die Verfügbarkeit von Ressourcen limitiert, was den Vergleich von Daten aus verschiedenen Umgebungen nahezu unmöglich macht.
+
+Da NeoIPC darauf abzielt, Instrumente und Definitionen bereitzustellen, die in einem breiten Spektrum unterschiedlicher Umgebungen funktionieren, bieten wir drei verschiedene Definitionen für durch gewöhnliche Kommensalen verursachte LCBSI an, die in einem breiten Spektrum von Umgebungen verwendet werden können.
+Da die Instrumente die Rohdaten sammeln, die zur Diagnose einer Infektion führen, ist es möglich, die Anwendung der verschiedenen Definitionen in verschiedenen Umfeldern zu bewerten und möglicherweise die Auswirkungen auf die berechnete Inzidenz zu beurteilen.
+
+In jedem Fall sollten Sie aufgrund dieser Tatsache sehr vorsichtig sein, wenn Sie die Raten von LCBSI, die durch gewöhnliche Kommensalen verursacht werden, in verschiedenen Einrichtungen vergleichen.
+
+include::definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc[]
+
+[#infection-definitions-necrotising-enterocolitis]
+=== Nekrotisierende Enterokolitis
+Die Surveillance-Kriterien für nekrotisierende Enterokolitis (NEC) bestehen entweder aus einer Kombination von radiologischen Befunden und klinischen Zeichen oder einer Diagnose, die auf chirurgischen und/oder pathologischen Befunden beruht.
+Der NEC-Datensatz enthält Informationen darüber, ob der Patient eine Darmperforation aufweist.
+Dies gehört jedoch nicht zu den Kriterien der Surveillance-Definition.
+Das bedeutet, dass Sie Fälle, bei denen Sie einen chirurgischen Nachweis einer Darmperforation ohne Nachweis einer primären Nekrose oder Pneumatosis intestinalis (z. B. spontane Darmperforation) haben, nicht als NEC melden sollten.
+
+include::definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.de.adoc[]
+
+[#infection-definitions-pneumonia]
+=== Pneumonie
+Pneumonie bei Neugeborenen ist eine Entität, die für Surveillancezwecke sehr schwer zu definieren ist, wie man aus der Tatsache schließen kann, dass viele Surveillance-Systeme sie überhaupt nicht erfassen, während andere beatmungsassoziierte Ereignisse erfassen, bei denen die Surveillance auf beatmete Patienten beschränkt ist und Pneumonie nur eine der Entitäten ist, die von der Definition erfasst werden.
+
+include::definitions/NeoIPC-Core-Pneumonia-Definition.de.adoc[]
+
+NOTE: Um die Kriterien einer Device-assoziierten, im Krankenhaus erworbenen Pneumonie zu erfüllen, müssen die Patienten mindestens 4 Kalendertage lang beatmet werden (Tag 1 ist der Tag, an dem die invasive/nicht-invasive Beatmung beginnt).
+Das früheste Datum des Ereignisses ist Tag 3 der Beatmung.
+
+**Beispiele**
+
+Nosokomiale Pneumonie – keine Device-Assoziation
+[%unbreakable, cols=">1,1,2"]
+|===
+|Patiententag |Zustand des Patienten |Kommentare
+
+|1 |Kein Device, stabil |
+|2 |Kein Device, stabil |Basistag 1
+|3 |Kein Device, stabil |Basistag 2
+|4 |Verschlechterung ==> CPAP |[.green]#☑# (Infektionstag)
+|5 |Keine Verbesserung, CPAP wird fortgesetzt |
+|===
+
+Nosokomiale Pneumonie – Device-assoziiert
+[%unbreakable, cols=">1,1,2"]
+|===
+|NIV/INV Tag |Tägliches Minimum FiO~2~ (Sauerstoffkonzentration, %) |Bemerkungen
+
+|1 |1.00 |
+|2 |1.00 |
+|3 |0,70 (Verbesserung) |Basiswert Tag 1
+|4 |0,60 (Verbesserung) |Basislinie Tag 2
+|5 |0,90 |[.green]#☑# (Infektionstag)
+|6 |0,90 |Keine Verbesserung
+|===
+
+[#infection-definitions-surgical-site-infection]
+=== Postoperative Wundinfektion
+Eine Wundinfektion (WI), die an der Inzisions- oder Operationsstelle auftritt, wird als postoperative Wundinfektion („surgical site infection“ – SSI) erfasst, wenn sie in einem bestimmten Zeitfenster nach einem operativen Eingriff auftritt, der ebenfalls im NeoIPC-Surveillance-System erfasst wurde.
+
+SSIs, die bei Patienten auftreten, für die kein chirurgischer Eingriff im NeoIPC-Surveillance-System erfasst wurde (z. B. ein Patient, der nach einem chirurgischen Eingriff in einem anderen Zentrum in Ihr Zentrum verlegt wurde), werden nicht erfasst.
+
+Im Einzelnen gelten die folgenden Surveillancezeiten (Tag 1 = das Datum des Eingriffs):
+
+* Oberflächliche Wundinfektion: 30 Tage
+* Tiefe Wundinfektion: 30 Tage oder 90 Tage, wenn ein Implantat an Ort und Stelle belassen wurde
+* Wundinfektion an Organen oder in Körperhöhlen: 30 Tage bzw. 90 Tage, wenn ein Implantat belassen wurde
+
+Die Nachverfolgung von SSI nach einem chirurgischen Eingriff kannaus zwei Gründen vorzeitig abgebrochen werden:
+
+* Tod, Verlegung oder Entlassung des Patienten.
+* Ein Revisionsverfahren im selben Bereich.
+Damit beginnt jedoch ein neuer Nachbeobachtungszeitraum für den Revisionseingriff.
+
+Kleinere Eingriffe wie einfache Punktionen von Hämatomen/Seromen gelten nicht als Revisionseingriffe.
+Die Surveillance kann durch solche kleineren Eingriffe nicht beendet werden, und es beginnt kein neuer Nachbeobachtungszeitraum.
+
+Die folgenden Einschlusskriterien gelten für alle SSI:
+
+* Erfassen Sie das Haupteingriffsverfahren und den zugehörigen ICHIfootnote:[International Classification of Health Interventionspass:p[ +]
+https://www.who.int/standards/classifications/international-classification-of-health-interventions] Code.
+Nur bei komplexen chirurgischen Eingriffen, bei denen ein Hauptverfahren nicht ausreicht, um den Eingriff angemessen zu beschreiben, können bis zu 2 weitere ICHI-Codes erfasst werden.
+* Die Art der erfassten SSI (oberflächliche WI, tiefe WI oder Organ/Körperhöhle) muss die tiefste Gewebeebene widerspiegeln, in der während des Surveillancezeitraums SSI-Kriterien erfüllt sind.
++
+**Beispiel:** Eine SSI, die am Tag 10 des SSI-Surveillancezeitraums als tiefe Inzisions-SSI begann und dann eine Woche später (Tag 17) die Kriterien für eine Wundinfektion an Organen oder in Körperhöhlen erfüllt.
+Sie müssen dies als Wundinfektion an Organen oder in Körperhöhlen melden, unabhängig davon, ob oberflächliches oder tiefes Gewebe betroffen ist.
+Der Tag der Infektion wäre in diesem Fall der „Tag 17“.
+
+* Der Patient darf nicht verstorben sein (z. B. ist eine postmortale Organentnahme zum Zweck der Organspende ausgeschlossen).
+
+[#infection-definitions-surgical-site-infection-superficial-incisional-ssi]
+==== Oberflächliche postoperative Wundinfektion
+Zu dieser Kategorie gehören Infektionen an der Operationsstelle, die nur die Haut und das subkutane Gewebe betreffen.
+
+include::definitions/NeoIPC-Core-Superficial-Incisional-SSI-Definition.de.adoc[]
+
+[#infection-definitions-surgical-site-infection-deep-incisional-ssi]
+==== Tiefe postoperative Wundinfektion
+Zu dieser Kategorie gehören Infektionen an der Operationsstelle, die tiefe Weichteile der Inzision (z. B. Faszien- und Muskelschichten) betreffen.
+
+include::definitions/NeoIPC-Core-Deep-Incisional-SSI-Definition.de.adoc[]
+
+[#infection-definitions-surgical-site-infection-organ-space-ssi]
+==== Postoperative Wundinfektion an Organen oder in Körperhöhlen
+Zu dieser Kategorie gehören Infektionen an der Operationsstelle, die einen Teil des Körpers betreffen, der tiefer als die Faszien-/Muskelschichten liegt und während des operativen Eingriffs geöffnet oder manipuliert wurde.
+
+include::definitions/NeoIPC-Core-Organ-Space-SSI-Definition.de.adoc[]
+
+[#data-dictionary]
+== Datenverzeichnis
+Die folgenden Datenelemente erscheinen in den NeoIPC-Erfassungsbögen oder in der Online-Erfassungsplattform.
+Einige von ihnen (z. B. Patienten-ID und Patientenname) werden nur für Ihre lokale Dokumentation und nicht in den zentralen NeoIPC-Softwaretools verwendet.
+
+[#data-dictionary-patient-master-data]
+=== Patientenstammdaten
+[#data-dictionary-patient-master-data-enrolment]
+==== Aufnahme
+[[data-dictionary-patient-master-data-enrolment-enroling-organisation-unit]]Aufnehmende Abteilung:: Die Abteilung, in der Sie den neuen Patienten erfassen möchten.
+[[data-dictionary-patient-master-data-enrolment-neoipc-id]]NeoIPC-ID (NeoIPC-Patientenidentifikator):: Die eindeutige Kennung, die Sie dem Patienten zur Nachverfolgung in der Online-Datenerfassungsplatform zuweisen.
+Wir empfehlen Ihnen, diese Information in einer Pseudonymisierungsliste zu speichern.
++
+NOTE: Verwenden Sie diese Kennung zur eindeutigen Identifizierung eines Patienten im System.
+Idealerweise verwenden Sie eine eindeutige zufällige Zeichenfolge.
+Wenn Sie die Anforderung haben, einen hier eingegebenen Patienten zu identifizieren, können Sie diese Kennung als NeoIPC-Schlüssel für die Pseudonymisierung verwenden.
+Verwenden Sie NIEMALS einen Identifikator, der bereits an anderer Stelle verwendet wird und den Sie nicht vollständig kontrollieren können (verwenden Sie z. B. NICHT die Patienten-ID aus Ihrem Krankenhausinformationssystem).
+
+[[data-dictionary-patient-master-data-enrolment-patient-id]]Patienten-ID:: Die eindeutige Kennung des Patienten im Krankenhaus, die in den meisten Fällen aus dem Krankenhausinformationssystem (KIS) oder dem Patientendatenmanagementsystem (PDMS) stammt.
+[[data-dictionary-patient-master-data-enrolment-patient-name]]Patientenname:: Der Name des Patienten (z. B. Vorname, gefolgt von Familienname).
+
+NOTE: Die Patienten-ID und der Patientenname sind nicht Teil des NeoIPC-Datensatzes und dürfen nicht an die Datenerfassungsplattform übermittelt werden (z. B. dürfen sie NICHT als NeoIPC-ID verwendet werden).
+Sie sind auf den Datenerfassungsbögen verfügbar, damit Sie den Patienten innerhalb des Krankenhauses identifizieren und die Datei im Krankenhausinformationssystem nachschlagen können.
+
+[[data-dictionary-patient-master-data-enrolment-gestational-age]]Gestationsalter (GA):: Das Gestationsalter, ausgedrückt in vollen Wochen und Tagen (z. B. 25 Wochen und 4 Tage: 25+4) zum Zeitpunkt der Geburt.
+In der Regel handelt es sich dabei um das vom Geburtshelfer der Mutter berechnete oder geschätzte Gestationsalter, doch wenn dieses nicht verfügbar ist (z. B. bei unbeobachteten Schwangerschaften), kann das vom behandelnden Arzt (z. B. anhand des Ballard-Scores) geschätzte Gestationsalter angegeben werden.
+[[data-dictionary-patient-master-data-enrolment-birthweight]]Geburtsgewicht (BW):: Das Gewicht des Kindes unmittelbar nach der Geburt in Gramm.
+In der Regel basiert dieser Wert auf einer Messung, aber wenn das Geburtsgewicht unbekannt ist oder einen hochgradig pathologischen Wert hat, der nicht die Reife des Kindes widerspiegelt (z. B. Hydrops fetalis), können Sie das vom behandelnden Arzt geschätzte Geburtsgewicht eingeben.
+[[data-dictionary-patient-master-data-enrolment-sex]]Geschlecht:: In der Regel das phänotypische Geschlecht des Patienten.
+Wenn das Geschlecht nicht anhand des Phänotyps oder Genotyps des Patienten bestimmt werden kann oder wenn der Genotyp weder XX noch XY ist, gilt es für die Zwecke der Surveillance als unbestimmt.
++
+* Weiblich
+* Männlich
+* Unbestimmt
+[[data-dictionary-patient-master-data-enrolment-delivery-mode]]Geburtsmodus:: Die Art der Entbindung des Kindes.
+Dies kann eine der folgenden Angaben sein:
++
+* Vaginal (einschließlich assistierte vaginale Entbindung)
+* Elektiver Kaiserschnitt
+* Not-Kaiserschnitt
+[[data-dictionary-patient-master-data-enrolment-multiple-birth]]Mehrlingsgeburt:: Kreuzen Sie dieses Feld an, wenn das Kind Teil einer Mehrlingsgeburt ist.
+[[data-dictionary-patient-master-data-enrolment-number-of-infants]]Anzahl der Kinder bei der Geburt:: Die Anzahl der Kinder, die in der (Mehrlings-)Schwangerschaft, zu der dieses Kind gehört, geboren wurden.
+Bitte geben Sie die Gesamtzahl der Kinder an, einschließlich des Kindes, den Sie hier erfassen.
+
+[#data-dictionary-patient-master-data-admission-information]
+==== Informationen zur Aufnahme
+[[data-dictionary-patient-master-data-admission-information-admission-date]]Aufnahmedatum:: Der Tag, an dem der Patient in das Krankenhaus aufgenommen wurde.
+Bei Kindern, die in Ihrem Krankenhaus geboren wurden, ist dies das Geburtsdatum.
+[[data-dictionary-patient-master-data-admission-information-admission-type]]Aufnahmeart:: Beschreibt, ob das Kind in Ihrem Krankenhaus geboren wurde oder ob er nach der Geburt aufgenommen wurde und wenn ja, wie lange nach der Geburt:
++
+* Aufgenommen aus dem Kreißsaal (Erstaufnahme für Kinder, die in Ihrem Krankenhaus entbunden wurden)
+* Verlegung/Wiederaufnahme in Ihr Krankenhaus am Tag der Geburt
+* Verlegung/Wiederaufnahme in Ihr Krankenhaus am Tag nach der Geburt oder später
+[[data-dictionary-patient-master-data-admission-information-admission-day-of-life]]Aufnahme am Tag des Lebens:: Bei Kindern, die nicht in Ihrem eigenen Krankenhaus entbunden wurden, erfassen Sie den Lebenstag des Kindes am Tag der Aufnahme (Tag der Geburt = Lebenstag 1.
+Der nächste Tag, beginnend um 00:00 Uhr, ist der zweite Lebenstag).
+
+[#data-dictionary-patient-master-data-surveillance-end]
+==== Surveillance-Ende
+[[data-dictionary-patient-master-data-surveillance-end-date]]Surveillance end date:: Der Tag, an dem die Datenerfassung und die Nachverfolgung für den Patienten beendet wurden.
+[[data-dictionary-patient-master-data-surveillance-end-reason]]Grund für das Ende der Surveillance:: Der Grund für die Beendigung der Datenerfassung.
+Einer der folgenden Gründe:
++
+* Entlassung oder Verlegung
+* Tod.
+[[data-dictionary-patient-master-data-surveillance-end-patient-days]]Patiententage:: Die kumulative Anzahl der Tage, die der Patient in der Abteilung verbracht hat, einschließlich des Tages der Aufnahme und des Tages der Entlassung/Verlegung/des Todes (keine Mindestaufenthaltsdauer).
+[[data-dictionary-patient-master-data-surveillance-end-cvc-days]]ZVK-Tage:: Die kumulative Anzahl der Tage, an denen ein zentraler Venenkatheter für mindestens 12 Stunden/Tag gelegt war.
+[[data-dictionary-patient-master-data-surveillance-end-pvc-days]]PVC-Tage:: Die kumulative Anzahl der Tage, an denen ein peripherer Gefäßkatheter für mindestens 12 Stunden/Tag gelegt war.
+[[data-dictionary-patient-master-data-surveillance-end-inv-days]]INV-Tage:: Die kumulative Anzahl der Tage, an denen das Kind mindestens 12 Stunden/Tag invasiv beatmet (intubiert) wurde.
+[[data-dictionary-patient-master-data-surveillance-end-niv-days]]NIV-Tage:: Die kumulative Anzahl der Tage, an denen das Kind mindestens 12 Stunden/Tag nicht-invasiv beatmet wurde (nicht intubiert; z. B. mit High-Flow-Nasenkanülen oder CPAP).
+[[data-dictionary-patient-master-data-surveillance-end-human-milk-days]]Humanmilchtage:: Die kumulative Anzahl der Tage, an denen die enterale Ernährung des Patienten ausschließlich aus Muttermilch (der eigenen Mutter oder einer Spenderin) besteht.
+Angereicherte Muttermilch wird als Muttermilch betrachtet.
+[[data-dictionary-patient-master-data-surveillance-end-kangaroo-care-days]]Känguru-Pflege-Tage:: Die kumulative Anzahl der Tage, an denen der Patient Känguru-Pflege (intensiver Haut-zu-Haut-Kontakt) für mindestens 2 Stunden erhielt.
+[[data-dictionary-patient-master-data-surveillance-end-probiotic-days]]Probiotische Tage:: Die kumulative Anzahl der Tage, an denen der Patient ein orales Probiotikum erhält, das mindestens eines von Lactobacillus spp. oder Bifidobacterium spp. enthält, unabhängig von der Menge.
+[[data-dictionary-patient-master-data-surveillance-end-total-antibiotic-days]]Antibiotika-Tage, gesamt:: Die kumulative Anzahl der Tagefootnote:ab-days-comment[Gezählt werden der Tag der ersten Dosis und der Tag der letzten Dosis einer Antibiotikatherapie sowie alle Tage dazwischen.
+Tage, an denen zwischen der ersten und der letzten Dosis keine Dosis verabreicht wurde (z. B. ausgelassene Dosen aufgrund hoher Arzneimittelspiegel in der therapeutischen Arzneimittelüberwachung), werden gezählt, als ob eine Dosis verabreicht worden wäre.
+Tage nach der letzten Dosis werden nicht gezählt, unabhängig vom gemessenen oder angenommenen Medikamentenspiegel im Patienten.] wenn das Kind (irgendwelche) systemischen Antibiotika erhalten hat.
+Pro Tag kann nur ein Antibiotikatag erfasst werden, d. h. ein Tag, an dem der Patient mehrere Antibiotika erhalten hat, wird trotzdem als ein Antibiotikatag gezählt.
+[[data-dictionary-patient-master-data-surveillance-end-antibiotic-substance-days]]Antibiotikatage, je Substanz 1, 2, 3, …:: Die kumulative Anzahl der Tagefootnote:ab-days-comment[] an denen das Kind eine bestimmte systemische antibiotische Substanz erhalten hat.
+Exp.: Gentamicin-Tage
+
+[#data-dictionary-surgical-procedure]
+=== Chirurgisches Verfahren
+[[data-dictionary-surgical-procedure-date]]Verfahrensdatum:: Der Tag des chirurgischen Eingriffs.
+[[data-dictionary-surgical-procedure-description]]Beschreibung des Eingriffs:: Ein von Menschen lesbarer Name oder eine Beschreibung des chirurgischen Eingriffs, wie er von Chirurgen in Ihrer Einrichtung üblicherweise genannt wird (z. B. Ligatur eines offenen Arterienkanals).
+[[data-dictionary-surgical-procedure-main-procedure-code]]Main procedure code:: Der Code der Internationalen Klassifikation der Gesundheitsinterventionen (ICHI) für das durchgeführte Hauptverfahren.
+Werden während einer Operation mehrere verschiedene Verfahren durchgeführt, entscheidet der Chirurg, welches Verfahren das Hauptverfahren ist (in der Regel das komplexeste Verfahren oder das Verfahren mit dem höchsten Infektionsrisiko).
+Bitte besuchen Sie https://icd.who.int/dev11/l-ichi/en
+[[data-dictionary-surgical-procedure-side-procedure-code]]Side procedure code:: Der Code der Internationalen Klassifikation der Gesundheitsinterventionen (ICHI) für das/die durchgeführte(n) Nebenverfahren.
+Es ist möglich, bis zu zwei Nebenverfahren zu erfassen.
+[[data-dictionary-surgical-procedure-duration]]Dauer:: Die Dauer des chirurgischen Eingriffs in Minuten (Zeit von der Inzision bis zur Naht, falls verfügbar).
+[[data-dictionary-surgical-procedure-wound-class]]Wundklasse:: Eine Bewertung des Kontaminationsgrads einer chirurgischen Wunde zum Zeitpunkt des chirurgischen Eingriffs gemäß den CDC-Richtlinien.
+Sie wird von einer an dem chirurgischen Eingriff beteiligten Person (z. B. Chirurg, OP-Schwester usw.) vergeben.
+Die vier Wundklassifizierungen sind:
+[[data-dictionary-surgical-procedure-wound-class-i]]Klasse I/Sauber::: Eine nicht infizierte Operationswunde, bei der keine Entzündung vorliegt und die Atemwege, der Verdauungstrakt, der Genitaltrakt oder der nicht infizierte Harntrakt nicht betroffen sind.
+Außerdem sind saubere Wunden in erster Linie geschlossen und werden, falls erforderlich, mit einer geschlossenen Drainage abgeleitet.
+Operative Schnittwunden, die keinem penetrierenden (stumpfen) Trauma folgen, sollten in diese Kategorie aufgenommen werden, wenn sie die Kriterien erfüllen.
+[[data-dictionary-surgical-procedure-wound-class-ii]]Klasse II/Sauber-Kontaminiert::: Eine Operationswunde, bei der die Atemwege, der Verdauungstrakt, der Genitaltrakt oder die Harnwege unter kontrollierten Bedingungen und ohne ungewöhnliche Kontamination erreicht werden.
+Insbesondere Operationen, die den Gallengang, den Blinddarm, die Vagina und den Oropharynx betreffen, fallen in diese Kategorie, sofern keine Anzeichen für eine Infektion oder eine wesentliche Unterbrechung der sterilen Technik zu verzeichnen sind.
+[[data-dictionary-surgical-procedure-wound-class-iii]]Klasse III/Kontaminierte Wunden::: Offene, frische, zufällige Wunden.
+Außerdem gehören zu dieser Kategorie Operationen mit größeren Unterbrechungen der sterilen Technik (z. B. offene Herzmassage) oder grobe Verschüttungen aus dem Magen-Darm-Trakt sowie Schnitte, bei denen eine akute oder keine eitrige Entzündung auftritt.
+[[data-dictionary-surgical-procedure-wound-class-iv]]Klasse IV/schmutzig-infizierte Wunden::: Alte traumatische Wunden mit zurückgebliebenem devitalisiertem Gewebe und solche, die eine bestehende klinische Infektion oder perforierte Eingeweide aufweisen.
+Diese Definition legt nahe, dass die Organismen, die eine postoperative Infektion verursachen, bereits vor der Operation im Operationsfeld vorhanden waren.
+
+[[data-dictionary-surgical-procedure-asa-score]]ASA-Score:: Das Klassifizierungssystem für den körperlichen Zustand der American Society of Anesthesiologists (ASA) zur Bewertung und Mitteilung der medizinischen Komorbiditäten eines Patienten vor der Anästhesie:
++
+--
+[[data-dictionary-surgical-procedure-asa-score-i]]ASA I::: Ein normaler gesunder Patient
+[[data-dictionary-surgical-procedure-asa-score-ii]]ASA II::: Ein Patient mit einer leichten systemischen Erkrankung
+[[data-dictionary-surgical-procedure-asa-score-iii]]ASA III::: Ein Patient mit einer schweren systemischen Erkrankung
+[[data-dictionary-surgical-procedure-asa-score-iv]]ASA IV::: Ein Patient mit einer schweren Systemerkrankung: Ein Patient mit einer schweren systemischen Erkrankung, die eine ständige Bedrohung für das Leben darstellt
+[[data-dictionary-surgical-procedure-asa-score-v]]ASA V::: Ein todkranker Patient, der ohne die Operation voraussichtlich nicht überleben wird
+--
++
+Besuchen Sie https://www.asahq.org/standards-and-guidelines/statement-on-asa-physical-status-classification-system.
+[[data-dictionary-surgical-procedure-endoscopic]]Endoskopisches Verfahren::
+Ja::: Die Operation wurde vollständig endoskopisch durchgeführt,
+Nein::: Der Eingriff wurde offen oder endoskopisch assistiert durchgeführt, oder es wurde während eines endoskopischen Eingriffs zu einer offenen Technik gewechselt.
+[[data-dictionary-surgical-procedure-emergency]]Notfalleingriff::
+Ja::: Ein Verfahren, das gemäß dem Protokoll der Einrichtung als Notfall- oder Dringlichkeitsverfahren dokumentiert ist.
+Nein::: Der Eingriff wird in geplanter Weise eingeleitet und durchgeführt.
+Unbekannt::: Keine Informationen verfügbar.
+[[data-dictionary-surgical-procedure-primary-closure]]Primärer Verschluss:: Der Verschluss des Hautniveaus während des ursprünglichen Eingriffs, unabhängig vom Vorhandensein von Drähten, Dochten, Drainagen oder anderen Vorrichtungen oder Gegenständen, die durch den Einschnitt herausragen.
+Diese Kategorie umfasst Operationen, bei denen die Haut auf irgendeine Weise verschlossen wird.
+Wenn also ein Teil der Inzision auf Hautniveau auf irgendeine Weise verschlossen wird, sollte die Operation als Primärverschluss bezeichnet werden.
++
+NOTE: Wenn ein Verfahren mehrere Inzisionen/laparoskopische Trokarstellen hat und eine der Inzisionen primär verschlossen wird, dann wird die Verfahrenstechnik als primär verschlossen erfasst.
+
+[[data-dictionary-surgical-procedure-revision-procedure]]Revisionsverfahren:: Revisionseingriffe sind Folge-, Ersatz- oder Korrektureingriffe nach einem Ersteingriff.
+Mit einem Revisionseingriff wird die Nachsorge für den Primäreingriff beendet und ein neuer Nachsorgezeitraum begonnen.
+[[data-dictionary-surgical-procedure-implant]]Implantat:: Ein Implantat ist ein Fremdkörper nicht-menschlichen Ursprungs, der einem Patienten während einer Operation dauerhaft eingesetzt wird und nicht routinemäßig zu diagnostischen oder therapeutischen Zwecken manipuliert wird (z. B. Gefäßprothesen, Schrauben, Drähte, Netze).
+[[data-dictionary-surgical-procedure-signs-of-infetion]]Anzeichen einer Infektion zum Zeitpunkt der Operation:: Dieses Feld ist auszufüllen, wenn während des chirurgischen Eingriffs Anzeichen einer Infektion festgestellt wurden.
+Die Anzeichen einer Infektion müssen intraoperativ festgestellt und im narrativen Teil der Operationsnotiz oder des Operationsberichts dokumentiert werden.
+Wenn eine Infektion der Operationsstelle auftritt, werden diese Informationen verwendet, um festzustellen, ob die in diesem Abschnitt aufgeführten Anzeichen als „Infektion zum Zeitpunkt der Operation vorhanden“ interpretiert werden können.
+
+Anzeichen einer Infektion zum Zeitpunkt der Operation
+====
+* Beispiele, die auf eine Infektion hinweisen, sind unter anderem: Abszess, Infektion, Eiter, Phlegma oder „fäkale Peritonitis“.
+Ein durchgebrochener/perforierter Blinddarm ist ein Hinweis auf eine Infektion auf der Ebene des Organs/Raums.
+* Beispiele für Formulierungen, die nicht als Beweis für eine Infektion gelten, sind u. a.: Dickdarmperforation, Kontamination, Nekrose, Gangrän, Verschütten von Fäkalien, während des Eingriffs eingekerbter Darm, trübe Flüssigkeit oder Dokumentation einer Entzündung.
+* Die Verwendung der Endung „itis“ in einer Operationsnotiz/einem Operationsbericht gilt nicht automatisch als Beweis für eine Infektion, da sie nur eine Entzündung widerspiegeln kann, die nicht infektiöser Natur ist (z. B. Divertikulitis, Peritonitis und Appendizitis).
+* Befunde aus Pathologieberichten und bildgebenden Verfahren können nicht als Nachweis für eine Infektion herangezogen werden.
+* Die Identifizierung eines Organismus mit Hilfe einer Kultur oder einer nicht kulturbasierten mikrobiologischen Testmethode oder in einem Pathologiebericht einer chirurgischen Probe kann nicht als Nachweis für eine Infektion herangezogen werden.
+* Die Klasse der Wunde kann nicht als Beweis für eine Infektion herangezogen werden.
+* Ein Trauma, das zu einem kontaminierten Fall führt, gilt nicht automatisch als Nachweis einer Infektion.
+Zum Beispiel kann eine frische Schusswunde im Bauch ein Trauma mit einer hohen Wundklasse sein, aber es wäre nicht genug Zeit, um eine Infektion zu entwickeln.
+* Verfahrensbedingte Komplikationen wie eine Darmperforation während einer Operation können nicht als Beweis für eine Infektion gelten, da zum Zeitpunkt der Operation keine Infektion vorlag.
+====
+
+[#data-dictionary-infection-data]
+=== Infektionsdaten
+[#data-dictionary-general-infection-data]
+==== Allgemeine Infektionsdaten
+[[data-dictionary-general-infection-data-infection-date]]Infektionsdatum:: Der Tag, an dem die ersten Infektionssymptome auftraten.
+Wenn keine Symptome auftreten, der Tag der ersten positiven Kultur am Ort der Primärinfektion.
+
+[[data-dictionary-general-infection-data-common-commensal]]Common commensal:: Eine Art von Mikroorganismen (z. B. koagulasenegative Staphylokokken), die häufig auf epithelbedeckten Körperoberflächen (z. B. der Haut) vorkommen.
+Wenn eine oder mehrere dieser Arten in einer Blutkultur wachsen, ist eine Kontamination wahrscheinlicher, als wenn ein anerkannter Erreger wächst.
+Siehe Master Organism List auf https://neoipc.org/surveillance/resources/
+
+[[data-dictionary-general-infection-data-mdros]]Multiresistente Organismen (MDROs):: Wählen Sie die für den isolierten Organismus zutreffende(n) Bezeichnung(en) aus;
+* MRSA/VRE/3GCR: Wählen Sie aus, ob eine der folgenden Bedingungen zutrifft:
+** MRSA: Methicillin-resistenter Staphylococcus aureus
+** VRE: Vancomycin-resistente Enterokokken
+** 3GCR: Multiresistente gramnegative Erreger, die nach den Cut-off-Werten des eigenen Labors gegen Cephalosporine der 3. Generation resistent sind (bezieht sich auf phänotypische Resistenz oder ESBL-produzierende Organismen)
+* Carbapenem-resistent: Resistent gegen mindestens eine der folgenden Substanzen (Imipenem, Meropenem, Ertapenem) gemäß den Cut-off-Werten des eigenen Labors (bezieht sich auf phänotypische Resistenz oder Carbapenemase-produzierende Organismen).
+* Colistin-resistent: Resistent gegen Colistin gemäß den Cut-off-Werten des eigenen Labors.
+
+Optionen für jede Gruppe:
+
+* Ja: Der isolierte Organismus ist gegen die angegebene(n) Antibiotikagruppe(n) resistent.
+* Nein: Der isolierte Organismus ist nicht resistent gegen die angegebene(n) Antibiotikagruppe(n).
+* Nicht getestet: Der isolierte Organismus wurde nicht auf Resistenz gegen die angegebene(n) Antibiotikagruppe(n) getestet.
+
+[[data-dictionary-general-infection-data-secondary-bsi]]Sekundäre Blutstrominfektion:: Eine BSI, von der man annimmt, dass sie von einer ortsspezifischen Infektion an einer anderen Körperstelle ausgeht (außer bei katheterassoziierten Infektionen).
+Eine BSI kann auf eine ortsspezifische Infektion (NEC, PN oder SSI) zurückgeführt werden, wenn sie in einem Zeitraum von 17 Tagen auftritt, der den Tag der Infektion (=erste Symptome der ortsspezifischen Infektion), 3 Tage davor und 13 Tage danach umfasst.
+
+Die Erfassung von Daten über sekundäre BSI ist fakultativ; daher ist es möglich, „No follow-up“ auszuwählen, wenn Sie die Patienten nicht auf sekundäre BSI hin verfolgen.
+Ausführliche Informationen finden Sie unter Sekundäre Blutstrominfektion.
+
+* Ja: wenn Sie Patienten wegen sekundärer BSI verfolgen und der Patient eine sekundäre Sepsis entwickelt hat, die der Definition von NeoIPC entspricht (aktiviert ein Feld unten, in das Sie identifizierte Organismen eingeben können)
+* Nein: wenn Sie Patienten wegen sekundärer BSI verfolgen und der Patient keine sekundäre Sepsis entwickelt hat, die der Definition von NeoIPC entspricht
+* Kein Follow-up: wenn Sie die Patienten nicht auf sekundäre BSI hin verfolgen.
+
+[#data-dictionary-bsi-specific-data]
+==== BSI-spezifische Daten
+[[data-dictionary-bsi-specific-data-cvc]]Zentraler Gefäßkatheter (ZVK):: Ein intravaskulärer Katheter, der am oder in der Nähe des Herzens oder in einem der großen Gefäße endet und für Infusionen, Blutentnahmen oder hämodynamisches Monitoring verwendet wird.
++
+--
+* Zentraler Venenkatheter (ZVK), einschließlich nicht getunnelter, getunnelter und implantierter zentraler Venenkatheter.
+* Peripher eingeführter zentraler Venenkatheter (PICC)
+* Nabelarterienkatheter (UAC) oder Nabelvenenkatheter (UVC)
+
+Extrakorporale Membranoxygenierung (ECMO) und arterielle Katheter (außer Pulmonalarterie, Aorta oder Nabelarterie) gelten NICHT als ZVK.
+
+Die folgenden Gefäße gelten als große Gefäße zum Zweck der Meldung von ZVKs:
+
+* Aorta
+* Pulmonalarterie
+* Obere Hohlvene (Vena cava superior)
+* Inferiore Vena cava
+* Brachiocephale Venen
+* Jugularvenen innen
+* Subclavia-Venen
+* Äußere Darmbeinvenen
+* Gemeinsame Darmbeinvenen
+* Oberschenkelvenen
+* Nabelarterie/-vene
+--
+
+[[data-dictionary-bsi-specific-data-cvc-associated-bsi]]ZVK-associated BSI:: Eine primäre Blutstrominfektion gilt als <<bsi-specific-data_cvc,ZVK>>-associated, wenn der ZVK am Tag der Infektion (=erste Symptome oder erster positiver diagnostischer Test; z. B. Kultur) oder am Tag davor mindestens drei aufeinanderfolgende Tage lang angelegt war.
+
+[[data-dictionary-bsi-specific-data-cvc-day]]ZVK-Tag:: Ein Tag, an dem der Patient einen <<bsi-spezifischen Daten_cvc,ZVK>> für mindestens 12 Stunden kumulativ platziert hatte.
+
+[[data-dictionary-bsi-specific-data-pvc]]Peripherer Gefäßkatheter (PVC):: Ein PVC ist ein Katheter, der in eine periphere Vene gelegt wird und nicht in eines der unter ZVK genannten großen Gefäße reicht.
+
+[[data-dictionary-bsi-specific-data-pvc-associated-bsi]]PVC-assoziierte BSI:: Eine primäre Blutstrominfektion gilt als <<bsi-spezifische-daten_pvc,PVC>>-assoziiert, wenn der PVC am Tag der Infektion (=erste Symptome oder erster positiver diagnostischer Test; z. B. Kultur) oder am Tag davor mindestens drei aufeinanderfolgende Tage lang vorhanden war und nicht die Kriterien für ZVK-assoziierte BSI erfüllt.
+Das heißt, wenn ein Patient, bei dem eine Blutstrominfektion auftritt, sowohl die Kriterien für eine PVC- als auch für eine ZVK-Assoziation erfüllt, wird der ZVK als das Device mit dem relativ höheren Infektionsrisiko betrachtet, und die BSI sollte als ZVK-assoziierte BSI erfasst werden.
+
+[[data-dictionary-bsi-specific-data-pvc-day]]PVC-Tag:: Ein Tag, an dem der Patient einen <<bsi-spezifischen Daten_pvc,PVC>> für mindestens 12 Stunden kumulativ platziert hatte.
+
+[[data-dictionary-bsi-specific-data-iv-ab-therapy-initiated]]Intravenöse Antibiotikatherapie für fünf oder mehr Tage eingeleitet:: Es wurde eine Antibiotikabehandlung für mindestens fünf Tage eingeleitet.
+Gezählt werden der Tag der ersten und der Tag der letzten Dosis.
+Tage, an denen zwischen der ersten und der letzten Dosis keine Dosis verabreicht wurde (z. B. ausgelassene Dosen wegen hoher Wirkstoffspiegel in der therapeutischen Arzneimittelüberwachung), werden gezählt, als ob eine Dosis verabreicht worden wäre.
+Tage nach der letzten Dosis werden nicht gezählt, unabhängig vom gemessenen oder angenommenen Medikamentenspiegel des Patienten.
+Wenn das Kind vor dem Ende der fünftägigen Behandlung mit intravenösen Antibiotika gestorben ist, entlassen oder verlegt wurde, ist diese Bedingung erfüllt, wenn die Behandlung für fünf oder mehr Tage geplant war.
+
+[[data-dictionary-bsi-specific-data-increased-oxygen-demand-or-ventilatory-support]]Neue/häufigere Episoden von Apnoe oder Erhöhung des Sauerstoffbedarfs oder der Beatmungsunterstützung:: Neue oder häufigere Apnoe-Episoden, die länger als 20 Sekunden dauern, oder ein Anstieg der Sauerstoffmenge, die zur Aufrechterhaltung einer angemessenen Sauerstoffversorgung erforderlich ist, oder eine Eskalation der Beatmungsunterstützung, wie z. B. ein erhöhter Flow bei der High-Flow-Therapie oder eine Intubation zur invasiven Beatmung.
+
+[[data-dictionary-bsi-specific-data-enteral-feeding-intolerance]]Intoleranz bei enteraler Ernährung, abdominale Distension oder Ileus:: Intoleranz der enteralen Ernährung, abdominale Distension oder Ileus ohne bildgebende oder chirurgische Befunde, die sonst auf eine nekrotisierende Entrokolitis oder eine spontane Darmperforation hindeuten würden.
+
+[[data-dictionary-bsi-specific-data-unexplained-metabolic-acidosis]]Ungeklärte metabolische Azidose:: Ungeklärte metabolische Azidose mit einem Basendefizit größer (negativer) als 10 mmol/L (10 mEq/L).
+
+[#data-dictionary-nec-specific-data]
+==== NEC-spezifische Daten
+[[data-dictionary-nec-specific-data-portal-veinous-gas]]Portalvenöses Gas:: Ansammlung von Gas (-bläschen) in der Pfortader und ihren Verzweigungen.
+
+Pfortadergas:: Ansammlung von Gas in der Pfortader und ihren Verzweigungen [#data-dictionary-pneumonia-specific-data]
+==== Pneumoniesspezifische Daten
+[[data-dictionary-pneumonia-specific-data-increase-in-respiratory-support]]Beginn oder Erhöhung der Atemunterstützung::
++
+--
+Neuaufnahme der Beatmungsunterstützung oder Erhöhung des bestehenden Niveaus der Beatmungsunterstützung …:::
++
+* Anstieg des Bedarfs an FiO2 ≥ 0,25 (25 Punkte) innerhalb von 24 Stunden (tägliche Mindest-FiO2-Werte müssen hier berücksichtigt werden)
++
+ODER
+* Beginn der nicht-invasiven Beatmungsunterstützung (ausgenommen Umstellung von invasiver Beatmung)
++
+ODER
+* Beginn der invasiven mechanischen Beatmung (einschließlich Umstellung von nicht-invasiver Beatmungsunterstützung)
+
+… der sich nicht innerhalb von weniger als 2 Tagen bessert::: Der oben erwähnte Zustand sollte sich nicht innerhalb von zwei Tagen verbessern.
+
+… nach mindestens 2 Tagen der Stabilität oder Verbesserung::: Eine stabile oder sich verbessernde Ausgangssituation von mindestens zwei Tagen ist erforderlich, bevor die oben genannte Bedingung eintritt.
+
+NOTE: Um das Kriterium der Device-assoziierten, im Krankenhaus erworbenen Pneumonie zu erfüllen, müssen die Patienten mindestens 4 Kalendertage lang beatmet werden (Tag 1 ist der Tag, an dem die invasive/nicht-invasive Beatmung beginnt). Das früheste Datum des Ereignisses ist Tag 3 der Beatmung.
+--
+
+[[data-dictionary-pneumonia-specific-data-inv]]Invasive mechanische Beatmung (INV):: Beatmung über einen Endotracheal- oder Tracheostomietubus.
+
+[[data-dictionary-pneumonia-specific-data-inv-associated-pneumonia]]INV-Associated Pneumonia:: Eine Pneumonie ist mit <<pneumonie-spezifischen-daten_inv,INV>> assoziiert, wenn der Patient am Tag der Infektion (=erste Symptome oder erste positive Kultur) oder am Tag davor an mindestens 3 aufeinander folgenden Tagen einen Endotracheal- oder Tracheostomietubus hatte.
+
+[[data-dictionary-pneumonia-specific-data-inv-day]]INV-Day:: Ein Tag, an dem der Patient mindestens 12 Stunden lang kumulativ invasiv über einen Endotracheal- oder Tracheostomietubus beatmet wurde.
+
+[[data-dictionary-pneumonia-specific-data-niv]]Nicht-invasive Beatmungsunterstützung (NIV):: Beatmungsunterstützung über CPAP oder High-Flow-Nasenkanüle.
+
+[[data-dictionary-pneumonia-specific-data-niv-associated-pneumonia]]NIV-assoziierte Pneumonie:: Eine Pneumonie ist <<pneumonie-spezifische-daten_niv,NIV>>-assoziiert, wenn der Patient am Tag der Infektion (=erste Symptome oder erste positive Kultur) oder am Tag davor an mindestens 3 aufeinanderfolgenden Tagen nicht-invasive Beatmungsunterstützung (z. B. CPAP oder High-Flow-Nasenkanüle) erhalten hat.
+
+NIV-Tag: [[data-dictionary-pneumonia-specific-data-niv-day]]NIV-Tag:: Ein Tag, an dem der Patient mindestens 12 Stunden lang kumulativ eine nicht-invasive Beatmungsunterstützung mittels CPAP oder High-Flow-Nasenkanüle erhielt.
+
+[[data-dictionary-pneumonia-specific-data-organisms-rt]]Identifizierte Organismen aus den Atemwegen:: Mindestens ein Organismus wurde in den Atemwegen durch eine Kultur oder ein nicht kulturbasiertes mikrobiologisches Testverfahren identifiziert, das zu Zwecken der klinischen Diagnose oder Behandlung durchgeführt wird (z. B. NOT Active Surveillance Culture/Testing (ASC/AST)).
++
+[[data-dictionary-pneumonia-specific-data-organisms-lrt]]Wiedergewonnen aus den unteren Atemwegen::: Wählen Sie aus, ob pilzliche, bakterielle oder virale Erreger (virales Gen, Antigen oder Antikörper, z. B. mittels EIA, FAMA, Shell Vial Assay, PCR) in den unteren Atemwegen nachgewiesen wurden.
+[[data-dictionary-pneumonia-specific-data-organisms-urt]]Aus den oberen Atemwegen gewonnen::: Nur auswählen, wenn virale Erreger in den oberen Atemwegen nachgewiesen werden.
+
+[#data-dictionary-ssi-specific-data]
+==== SSI-spezifische Daten
+[[data-dictionary-ssi-specific-data-infection-present]]Infektion zum Zeitpunkt der Operation vorhanden:: Wählen Sie JA, nur wenn das während des chirurgischen Eingriffs festgestellte Infektionszeichen auf die Tiefe der SSI zutrifft, die dem Eingriff zugeschrieben wird.
++
+--
+Beispiel::
+* Wenn bei einem Patienten zum Zeitpunkt der Operation eine intraabdominale Infektion dokumentiert ist und er später mit einer Organ-/Raum-SSI zurückkehrt = JA.
+* Wenn bei einem Patienten zum Zeitpunkt der Operation eine intraabdominale Infektion dokumentiert ist und er später mit einer oberflächlichen oder tiefen Inzisions-SSI zurückkehrt = NEIN.
+--
+
+[[data-dictionary-ssi-specific-data-ssi-type]]SSI-Typ::
++
+--
+* Eine oberflächliche Inzisions-SSI betrifft nur die Haut und das Unterhautgewebe der Inzision, und die ersten Symptome treten innerhalb von 30 Tagen nach der Operation auf.
+* Eine tiefe Inzisions-SSI betrifft tiefe Weichteile der Inzision (z. B. Faszien- und Muskelschichten), und die ersten Symptome treten innerhalb von 30 Tagen nach der Operation oder 90 Tagen nach der Operation auf, wenn ein Implantat belassen wurde.
+* Eine Organ-/Raum-SSI betrifft jeden Körperteil, der tiefer als die Faszien-/Muskelschichten liegt und während des operativen Eingriffs geöffnet oder manipuliert wurde, und erste Symptome treten innerhalb von 30 Tagen nach der Operation oder 90 Tagen nach der Operation auf, wenn ein Implantat an Ort und Stelle belassen wurde.
+
+NOTE: Die gemeldete SSI muss die tiefste Gewebeebene widerspiegeln, in der die SSI-Kriterien während des Surveillancezeitraums erfüllt sind.
+
+Beispiel::
+Wenn eine SSI am Tag 10 des SSI-Surveillancezeitraums als tiefe Inzisions-SSI begann und dann eine Woche später (Tag 17) die Kriterien für eine Organ-/Raum-SSI erfüllt.
+Sie müssen sie als Organ-/Raum-SSI melden, unabhängig davon, ob oberflächliches oder tiefes Gewebe betroffen ist.
+Der Tag der Infektion wäre in diesem Fall der „Tag 17“.
+--
+
+[[data-dictionary-ssi-specific-data-organism-identified]]An der Operationsstelle identifizierte(r) Organismus(e):: Mindestens ein Organismus wurde an der Operationsstelle durch eine Kultur oder ein nicht kulturbasiertes mikrobiologisches Testverfahren identifiziert, das zu Zwecken der klinischen Diagnose oder Behandlung durchgeführt wird (z. B. NOT Active Surveillance Culture/Testing (ASC/AST)).
+
+[#data-analysis]
+== Datenanalyse
+Die folgenden Raten werden sowohl für die Berichte der Abteilungen als auch für die Referenzberichte berechnet und können als Ausgangspunkt für weitere Analysen und Diskussionen in Ihrer Abteilung dienen.
+
+Für das Kernmodul werden die Raten im Allgemeinen nach dem Geburtsgewicht der Kinder in 4 Gruppen stratifiziert:
+
+. < 500 g
+. 500 g - 999 g
+. 1 000 g - 1 499 g
+. > 1 500 g
+
+[#data-analysis-risk-factors-and-protective-factors]
+=== Risikofaktoren und Schutzfaktoren
+[#data-analysis-risk-factors-and-protective-factors-device-utilization]
+==== Devie-Anwendung
+Eine Devie-Anwendungsrate beschreibt den Prozentsatz der Patiententage, an denen ein bestimmtes Device verwendet wurde.
+Sie wird berechnet, indem die Anzahl der Devicetage durch die Anzahl der Patiententage dividiert und das Ergebnis mit 100 multipliziert wird.
+
+stem:["ZVK Utilisation Rate" = "Total ZVK Days" / "Total Patient Days" xx 100 ]
+
+stem:["PVC-Nutzungsrate" = "PVC-Tage gesamt" / "Patiententage gesamt" xx 100 ]
+
+stem:["INV-Nutzungsrate" = "INV-Tage gesamt" / "Patiententage gesamt" xx 100 ]
+
+stem:["NIV-Nutzungsrate" = "NIV-Tage gesamt" / "Patiententage gesamt" xx 100]
+
+[#data-analysis-risk-factors-and-protective-factors-antibiotic-use]
+==== Antibiotika-Einsatz
+Die Antibiotikagebrauchsrate beschreibt den Prozentsatz der Patiententage, an denen systemische Antibiotika eingesetzt wurden, im Verhältnis zu den gesamten Patiententagen.
+Sie wird berechnet, indem die Anzahl der Antibiotikatage durch die Anzahl der Patiententage dividiert und das Ergebnis mit 100 multipliziert wird.
+
+stem:["Antibiotikaeinsatzrate" = "Antibiotikatage insgesamt" / "Patiententage insgesamt" xx 100]
+
+Neben der Gesamt-Antibiotika-Verbrauchsrate werden Antibiotika-Verbrauchsraten und Anteile der Patienten, die eine Substanz erhalten, für einzelne Substanzen und Substanzgruppen berechnet.
+
+Die Substanzen und Gruppen werden aus der Anatomisch-Therapeutisch-Chemischen Klassifikation (ATC) Fußnote:[Anatomisch-Therapeutisch-Chemische Klassifikationpass:p[ +]
+https://www.who.int/tools/atc-ddd-toolkit/atc-classification], wie sie im neuesten ATC/DDD-Index veröffentlicht sindFußnote:[ATC/DDD-Indexpass:p[ +]
+https://www.whocc.no/atc_ddd_index/].
+
+Derzeit werden die ATC-Stufen 1, 2, 4 und 5 für die Gruppierung der Stoffe verwendet.
+
+Da die Zahlen in den einzelnen Gruppen in der Regel sehr klein werden, werden die substanz- und gruppenspezifischen Konsumraten berechnet, indem die Anzahl der Substanz(gruppen)tage durch die Anzahl der Patiententage dividiert und das Ergebnis mit 1000 multipliziert wird.
+
+stem:["Substanzgruppen-Konsumrate" = "Gesamte Therapietage für Substanzgruppe" / "Gesamte Patiententage" xx 100]
+
+Der Anteil der Patienten, die eine bestimmte Substanz(en) einer Substanzgruppe erhalten, wird berechnet als Verhältnis zwischen der Gesamtzahl der Patienten, die eine bestimmte Substanz oder Gruppe von Antibiotika erhalten, und der Gesamtzahl der Patienten, die alle Arten von Antibiotika erhalten, multipliziert mit 100.
+
+stem:["Anteil der Patienten, die eine AB-Substanz oder -Gruppe erhalten" = "Gesamte Therapietage für diese Substanz oder Gruppe" / "Gesamte Patiententage" xx 100]
+
+[#data-analysis-risk-factors-and-protective-factors-protective-factor-implementation]
+==== Umsetzung des Schutzfaktors
+Eine Schutzfaktor-Umsetzungsrate beschreibt den prozentualen Anteil der Patiententage, an denen ein Patient einen bestimmten Schutzfaktor erhalten hat, wie z. B. Muttermilch, Probiotika oder Känguru-Mutter-Pflege.
+Sie wird berechnet, indem die Anzahl der Schutzfaktortage durch die Anzahl der Patiententage dividiert und das Ergebnis mit 100 multipliziert wird.
+
+stem:["Breast Milk Intake Rate" = "Total Breast Milk Days" / "Total Patient Days" xx 100]
+
+stem:["Probiotic Usage Rate" = "Total Probiotic Days" / "Total Patient Days" xx 100]
+
+stem:["Känguru-Pflege-Umsetzungsrate" = "Känguru-Pflege-Tage insgesamt" / "Patiententage insgesamt" xx 100]
+
+[#data-analysis-infections]
+=== Infektionen
+[#data-analysis-infections-incidence-densities]
+==== Inzidenzdichten
+Da ein erheblicher Anteil der Infektionen nicht mit einem spezifischen Risikofaktor in Verbindung gebracht werden kann, werden Inzidenzdichten für Blutstrominfektionen, Pneumonie und NEC berechnet.
+Der Risikofaktor stellt hier die kumulative Anzahl von Patiententagen dar und ist auf 1000 Patiententage normiert.
+
+stem:["BSI-Inzidenzdichte" = "BSI-Fälle insgesamt" / "Patiententage insgesamt" xx 1000]
+
+stem:["Pneumonie-Inzidenzdichte" = "Pneumonie-Fälle insgesamt" / "Patiententage insgesamt" xx 1000]
+
+stem:["NEC-Inzidenzdichte" = "NEC-Fälle insgesamt" / "Patiententage insgesamt" xx 1000]
+
+[#data-analysis-infections-device-associated-infections]
+==== Device-assoziierte Infektionen
+Eine Device-assoziierte Infektionsrate ist eine wichtige Kennzahl für das Qualitätsmanagement und beschreibt, wie viele Device-assoziierte Infektionen pro 1000 Devicetage auftreten.
+Bei diesem als Standardisierung bezeichneten Prozess werden Infektionen (z. B. BSI), die bei Vorhandensein eines bestimmten Risikofaktors (z. B. ZVK) auftreten, mit der Gesamtzahl der Risikotage (z. B. ZVK-Tage) in Beziehung gesetzt, und das Ergebnis wird mit 1000 multipliziert.
+
+stem:["ZVK-associated BSI Rate" = "Total BSI Cases in Patients With ZVK" / "Total ZVK Days" xx 1000]
+
+stem:["PVC-assoziierte BSI-Rate" = "Gesamte BSI-Fälle bei Patienten mit PVC" / "Gesamte PVC-Tage" xx 1000]
+
+stem:["INV-assoziierte Pneumonie-Rate" = "Summe der Pneumonie-Fälle bei Patienten mit INV" / "Summe der INV-Tage" xx 1000]
+
+stem:["NIV-assoziierte Pneumonie-Rate" = "Summe der Pneumonie-Fälle bei Patienten mit NIV" / "Summe der NIV-Tage" xx 1000]
+
+[#data-analysis-infections-surgical-site-infections]
+==== Postoperative Wundinfektionen
+Die Rate der Infektionen an der Operationsstelle (SSI) gibt den Prozentsatz der SSI an, die während des Beobachtungszeitraums nach einem operativen Eingriff auftreten.
+Sie wird berechnet, indem die Anzahl der nach einem chirurgischen Eingriff aufgetretenen SSI durch die Anzahl der chirurgischen Eingriffe dividiert und das Ergebnis mit 100 multipliziert wird.
+Da das Risiko, eine SSI zu entwickeln, von der Art des chirurgischen Eingriffs abhängt, werden mehrere SSI-Raten für Gruppen ähnlicher Eingriffe berechnet.
+Dennoch wird eine Gesamt-SSI-Rate berechnet, um der Tatsache Rechnung zu tragen, dass Operationen bei VLBW/VPT-Neugeborenen seltener sind als bei Erwachsenen und die Gruppierung von Verfahren zu einer sehr geringen Anzahl von Verfahren pro Gruppe führen kann.
+
+stem:["SSI-Gesamtrate" = "SSI-Fälle insgesamt" / "Gesamtzahl der Operationen" xx 100]
+
+stem:["Gruppierte SSI-Rate" = "Summe der SSI-Fälle, die nach den Eingriffen in dieser Gruppe beobachtet wurden" / "Gesamtzahl der Eingriffe in dieser Gruppe" xx 100]
+
+[#data-analysis-infections-standardized-infection-rate]
+==== Standardisierte Infektionsrate
+Mit den oben beschriebenen Infektionsraten ist es möglich, Risikofaktoren und Infektionen für die 3 Geburtsgewichtsklassen im Detail zu betrachten.
+Allerdings ist das Geburtsgewicht von 500 g eine relativ grobe Stratifizierung für das neonatale Infektionsrisiko, und es berücksichtigt auch nicht die Tatsache, dass Kinder lange vor ihrer normalen Entlassung in andere Abteilungen verlegt werden können (z. B. zur Operation oder in eine Abteilung, die näher am Wohnort der Eltern liegt) und dass sich die Hochrisikotage der Stabilisierungsphase in einigen neonatologischen Abteilungen häufen, während andere die Niedrigrisikotage bereits stabilisierter Kinder kumulieren würden.
+Um dies zu berücksichtigen, berechnet NeoIPC eine standardisierte Infektionsrate (SIR), die die Infektionshäufigkeit zwischen den Abteilungen auf der Grundlage der Zusammensetzung ihrer Patientenpopulation vergleicht.
+
+Standardisierte Infektionsraten werden auf der Grundlage von zwei Faktoren berechnet:
+
+. Infektionsrisiko für ein bestimmtes Geburtsgewicht
+. Infektionsrisiko für einen bestimmten Tag des Lebens
+
+Aus der Referenzdatenbank wird das durchschnittliche Risiko für BSI oder Pneumonie für einen bestimmten Lebenstag eines Kindes mit einem bestimmten Geburtsgewicht berechnet.
+
+Anschließend wird die Anzahl der erwarteten Infektionen (kumuliertes Risiko) für eine Abteilung berechnet, indem die durchschnittlichen Risiken der Kinder und die jeweiligen Tage, die sie in der Abteilung verbracht haben, addiert werden.
+
+Der SIR stellt das Verhältnis von beobachteten Infektionen zu erwarteten Infektionen in einer Abteilung dar und kann einen allgemeinen Überblick über das Infektionsrisiko in einer Abteilung geben.
+
+stem:["Standardisierte Infektionsrate" = "Beobachtete Infektionen insgesamt" / "Erwartete Infektionen insgesamt"]
+Wenn die standardisierte Infektionsrate größer als eins ist, haben Sie mehr Infektionen beobachtet, als Sie bei Ihrer Patientenzusammensetzung im Vergleich zu den Referenzdaten erwarten würden.
+
+Wenn die standardisierte Infektionsrate gleich eins ist, haben Sie im Vergleich zu den Referenzdaten die gleiche Anzahl von Infektionen beobachtet, die Sie aufgrund Ihrer Patientenzusammensetzung erwarten würden.
+
+Wenn die standardisierte Infektionsrate kleiner als eins ist, haben Sie im Vergleich zu den Referenzdaten weniger Infektionen beobachtet, als Sie aufgrund Ihrer Patientenzusammensetzung erwarten würden.
+
+[#abbreviations]
+== Abkürzungen
+[horizontal]
+3GCR:: Multiresistente gramnegative Erreger, die gegen Cephalosporine der 3^. Generation resistent sind
+AB:: Antibiotikum
+ASA:: Amerikanische Gesellschaft der Anästhesisten (American Society of Anaesthesiologists)
+BE:: Basenüberschuß
+BSI:: Blutstrominfektion
+BW:: Geburtsgewicht
+CDC:: Zentren für Krankheitskontrolle und Prävention
+CMV:: Zytomegalievirus
+CRP:: C-reaktives Protein
+LIQUOR:: Zerebrospinalflüssigkeit
+CT:: Computertomographie
+ZVK:: Zentraler Venenkatheter
+ECMO:: Extrakorporale Membran-Oxygenierung
+ESBL:: Beta-Laktamase mit erweitertem Spektrum
+GA:: Gestationsalter
+HIS:: Krankenhaus-Informationssystem
+HIV:: Humanes Immundefizienz-Virus
+ICHI:: Internationale Klassifikation der Gesundheitsinterventionen
+INV:: Invasive Beatmung
+IPC:: Infektionsprävention und -kontrolle
+KC:: Känguru-Pflege
+LCBSI:: Im Labor bestätigte Blutstrominfektion
+MDRO:: Multiresistente Organismen
+MRSA:: Methicillin-resistenter Staphylococcus aureus
+NEC:: Nekrotisierende Enterokolitis
+NICU:: Neonatale Intensivstation
+NIV:: Nicht-invasive Beatmung
+OP:: Operativer Eingriff
+PDMS:: Patienten-Daten-Management-System
+PICC:: Peripher eingeführter zentraler Venenkatheter
+PLT:: Thrombozyten
+PVC:: Peripherer Venenkatheter
+RCT:: Randomisierte, kontrollierte Studie
+SSI:: Postoperative Wundinfektion
+UAC:: Nabelarterienkatheter
+UVC:: Nabelvenenkatheter (Umbilical Venous Catheter)
+VAE:: Ventilator-assoziiertes Ereignis
+VAP:: Beatmungs-assoziierte Pneumonie
+VLBW:: Sehr geringes Geburtsgewicht
+VPT:: Sehr Frühgeborene
+VRE:: Vancomycin-resistenter Enterokokkus
+WBC:: Weiße Blutkörperchen
+
+[#imprint]
+== Impressum
+NeoIPC-Projekt
+
+Fondazione Penta Onlus +
+Corso Stati Uniti, 4 +
+35127 Padua +
+ITALIEN
+
+https://neoipc.org/
+
+Um mehr über NeoIPC zu erfahren, schreiben Sie an:
+
+communication@pentafoundation.org
+
+Um mehr über die NeoDeco-Studie und das Clinical Practice Network zu erfahren, schreiben Sie bitte an:
+
+neoipc@sgul.ac.uk
+
+Wenn Sie mehr über Surveillance erfahren möchten, schreiben Sie an:
+
+neoipc-support@charite.de
+
+[appendix]
+[#appendix-list-of-antibiotics]
+== Antibiotikaliste
+
+include::NeoIPC-Antibiotics.de.adoc[]
+
+[appendix]
+[#appendix-list-of-list-of-infectious-agents]
+== Liste der Infektionserreger
+
+include::NeoIPC-Infectious-Agents.de.adoc[]

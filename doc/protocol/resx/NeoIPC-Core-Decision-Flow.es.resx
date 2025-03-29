@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+    <data name="yes" xml:space="preserve">
+        <value>Sí</value>
+    </data>
+    <data name="no" xml:space="preserve">
+        <value>No</value>
+    </data>
+    <data name="admitted" xml:space="preserve">
+        <value>Admitted to your department within 120 days after birth?</value>
+    </data>
+    <data name="not_admitted" xml:space="preserve">
+        <value>es decir, bebés nacidos muertos, muerte en la sala de partos, día de vida &gt; 120</value>
+    </data>
+    <data name="gestational_age" xml:space="preserve">
+        <value>¿Edad gestacional &lt; 32 semanas?</value>
+    </data>
+    <data name="birthweight" xml:space="preserve">
+        <value>¿Peso al nacer &lt; 1500g?</value>
+    </data>
+    <data name="eligible" xml:space="preserve">
+        <value>Eligible</value>
+    </data>
+    <data name="ineligible" xml:space="preserve">
+        <value>No elegible</value>
+    </data>
+</root>

@@ -1,0 +1,32 @@
+.Sepsis Clínica
+[%unbreakable]
+****
+. **Ausencia de cultivo microbiológico positivo de sangre y/o líquido cefalorraquídeo**
++
+**Y**
+. **Se inició tratamiento con CINCO o más días de antibióticos intravenosos$$*$$**
++
+**Y**
+. **El paciente presenta al menos DOS de las siguientes características clínicas o de laboratorio de infección generalizada:**.
+* Inestabilidad térmica, fiebre (> 38 °C) o hipotermia (< 36,5 °C)
+* Episodios nuevos/más frecuentes de bradicardia (<80/min) o taquicardia inexplicada (>200/min)
+* Deterioro de la perfusión periférica (tiempo de relleno capilar > 3 s o moteado de la piel o diferencia de temperatura central/periférica > 2 °C).
+* Episodios nuevos/más frecuentes de apnea (>20s) o aumento de la demanda de oxígeno o del soporte ventilatorio.
+* Intolerancia a la alimentación enteral, distensión abdominal o íleo
+* Irritabilidad, letargo, apatía o estado inestable
+* Acidosis metabólica inexplicable (exceso de bases < -10 mmol/L; <-10 mEq/L)
+* Hiperglucemia nueva e inexplicada (> 140 mg/dl; > 7,8 mmol/L) o hipoglucemia (< 40 mg/dl; <2,2 mmol/L)
+* Al menos uno de los siguientes resultados de laboratorio:
+** Recuento de plaquetas < 100 × 10^9^/L (<100 × 10^3^/μL)
+** CMB < 4 × 10^9^/L o > 20 × 10^9^/L (< 4 × 10^3^/μL o > 20 × 10^3^/μL)
+** PCR > 10 mg/L (> 1 mg/dL)
+** Procalcitonina ≥ 2μg/L (2 ng/mL; 200 ng/dL)
+** Relación I/T > 0,2 (relación entre granulocitos inmaduros y granulocitos totales)
+** Aumento de los niveles de interleucina (IL) 6 u 8
+****
+
+*Se inició tratamiento antibiótico durante al menos cinco días.
+Se cuentan el día de la primera dosis y el día de la última dosis.
+Los días en los que no se administró ninguna dosis entre la primera y la última (por ejemplo, dosis omitidas debido a niveles elevados del fármaco en la monitorización terapéutica de fármacos) se cuentan como si se hubiera administrado una dosis.
+Los días posteriores a la última dosis no se cuentan, independientemente del nivel de fármaco medido o supuesto del paciente.
+Si el lactante falleció, fue dado de alta o trasladado antes de finalizar el tratamiento de cinco días con antibióticos intravenosos, esta condición se cumple si el tratamiento estaba programado para cinco días o más.

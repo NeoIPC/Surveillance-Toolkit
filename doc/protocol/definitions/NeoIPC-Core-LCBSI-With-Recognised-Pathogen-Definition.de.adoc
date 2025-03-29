@@ -1,0 +1,5 @@
+.Mikrobiologisch bestätigte Blutbahninfektion mit anerkanntem Infektionserreger
+[%unbreakable]
+****
+**Anerkannter Infektionserreger wurde aus einer Blut- und/oder Liquorkultur gewonnen**
+****

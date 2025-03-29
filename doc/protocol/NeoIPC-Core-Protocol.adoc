@@ -1,0 +1,1014 @@
+= Infection Surveillance for Neonatology: Core Module for Very Low Birth Weight (VLBW) and Very Preterm (VPT) Infants
+//:lang: en
+include::NeoIPC-Core-Protocol-Header.adoc[]
+:revnumber: 2.0
+
+[#introduction]
+== Introduction
+[#introduction-what-are-you-reading-here]
+=== What are you reading here?
+This document is the surveillance protocol for the core module of the NeoIPC surveillance which covers surveillance of nosocomial infections in Very Low Birth Weight (VLBW)/ Very Preterm (VPT) Infants.
+It is part of a toolkit for the surveillance of healthcare-associated infections (HAI) in neonatology that we developed within the NeoIPC project.
+If you want to perform surveillance of early-onset infections or of healthcare-associated infections in infants with a birth weight above 1500 g and a gestational age greater than 32 weeks, the toolkit provides additional methods that are covered in separate protocols.
+
+This protocol provides methodological reference and support for HAI surveillance in neonatal units or for those planning to develop an HAI surveillance programme.
+By adhering to the methods and definitions we specify here, you can ensure that the surveillance data you generate is comparable to the reference data in the NeoIPC project, even if you are not actively participating in the project.
+
+[#introduction-what-is-the-neo-ipc-project]
+=== What is the NeoIPC Project
+Within the NeoIPC project, we want to support you with infection prevention and control (IPC) interventions and strategies in your neonatal intensive care unit, especially if you observe a high prevalence of hospital-acquired infections or multidrug-resistant (MDR) bacteria.
+We are an international team of clinicians and scientists from 13 collaborating partner institutions with a proven record in the areas of neonatal intensive care, neonatal infection, infection prevention and control (IPC), implementation science, microbiology, and surveillance, who collaborate in this project to achieve two overarching goals:
+
+. Develop and implement an innovative approach towards the evaluation of IPC interventions in neonatology via:
+.. Robust assessment of the effectiveness of interventions in a randomised controlled trial (RCT)
+.. Identification of a suitable implementation strategy.
+. Generate widely relevant and globally transferable outputs to improve IPC in neonatal care through:
+.. Formation of a clinical practice network to support the implementation of IPC in neonatal care, including a variety of practice settings like neonatal intensive care unit (NICU), high care, special care, and kangaroo care (KC).
+.. Development of an open structure for targeted surveillance of IPC processes and outcomes across a large variety of settings.
+
+This project has received funding from the European Union’s Horizon 2020 research and innovation programme under grant agreement No. 965328.
+
+[#introduction-background]
+=== Background
+Worldwide, neonates and especially preterm infants are among the patient groups with the highest incidence of nosocomial infections.
+Some of these infections can be prevented by infection-prevention measures, which must be implemented in each individual neonatal unit and adapted to the specific infection risks of the patients.
+In many hospitals in Europe and worldwide, healthcare professionals do not have good data to assess the burden of healthcare-associated infections and the risk factors contributing to their development or to evaluate the effectiveness of infection prevention interventions.
+Support for surveillance of healthcare-associated infections in neonates or reference data for benchmarking is not available in most countries.
+Where national and supranational data collection systems exist, they frequently have a broad approach that is limited in its ability to assess the situation with respect to infection prevention and control.
+In the short term, we aim to improve this situation by providing those interested in IPC surveillance in neonatology with tools and methods to get started, and in the longer term by potentially contributing to the formation of regional surveillance infrastructures.
+
+[#introduction-advice-for-use-and-requirements-for-participation]
+=== Advice for Use and Requirements for Participation
+If you want to start collecting data using the NeoIPC surveillance methods and tools, you can just do so without asking us for permission or paying any fees.
+All manuals and tools are free to use, and you can start using them right away if you think they will assist in quality improvement for infection control in your department.
+
+By starting with paper forms and performing calculations with pen and paper or by using a spreadsheet, you have a very low barrier of entry, and it may even help you to gain a thorough understanding of the calculations that are performed internally by the more advanced tools.
+If you want to keep things running effectively over an extended period and you have the necessary resources, you may want to benefit from those tools by using the advanced surveillance software locally or by participating in NeoIPC or a regional surveillance network based on its methods.
+
+For long-term success in surveillance of nosocomial infections, collecting data and producing reliable and comparable information in your department over a long period of time will be crucial.
+In order to facilitate the collection of such data, you may want to contribute data to the NeoIPC surveillance network.
+This data could be used to generate reports and benchmark your neonatal unit’s infection rates against others.
+
+If you collect and submit data, and are responsible for quality improvement, it is essential that you have a clear understanding of the following:
+
+* Patient eligibility criteria
+* Data definitions for each data Item
+* Procedures for filling and storing forms
+* Data security and data privacy (protection of information that might be used to identify a patient outside of your department or hospital)
+* Procedures for collecting, submitting, and correcting data
+* Procedures for data management and data finalization
+* Use of NeoIPC reports for monitoring and improving patient care
+
+You should make sure that the whole data collection team in your centre accept the data definitions contained in this protocol and submit their data accordingly.
+To be able to generate up-to-date reference reports on a regular schedule, NeoIPC requires participants to regularly submit data via the web-based interface and to ensure that their software and hardware systems meet the minimum requirements.
+
+Your center's policies and procedures must ensure patient privacy and data security.
+It is important to protect patients' personal information and other information that can lead to their identification in accordance with the laws and policies applicable to your center.
+Do not send patient personal information to the NeoIPC network.
+
+We will ensure to keep the disaggregated data submitted by each department strictly confidential and provide you with regular standardized and stratified reference reports that contain aggregated data so that no individual patient or department can be identified.
+
+To help you navigate and better utilize the tools provided, we offer surveillance manuals, datasheets and training materials at https://neoipc.org/surveillance/.
+While our resources for personal interaction are limited, we will also try to support your team if you send your questions to neoipc-support@charite.de.
+
+[#data-management]
+== Data Management
+[#data-management-data-protection-and-security]
+=== Data Protection and Security
+Routine surveillance of healthcare-associated infections is not research but is rather a way of performing quality assurance which is part of regular patient care.
+Because of this, the associated data collection is typically covered by the regular hospital treatment contracts or special legislation that mandates it and does not need explicit consent from the affected patients or their legal guardians.
+Nevertheless, you should make sure that this applies in your country before starting to collect any data and in addition adhere to some universal minimum standards that should apply irrespective of the legal framework.
+
+[#data-management-data-protection-and-security-patient-information]
+==== Patient Information
+Healthcare information is among the most private categories of information about humans in most cultures and should be handled with special care.
+When information that can lead to the identification of an individual patient is stored or transmitted, this should generally happen in a way that no unauthorized third party can access it.
+While this is usually very clear for typical human identifiers like the combination of family name, given name, and birth date, in the case of neonates even a very rare birth weight or gestational age may lead to the identification of an individual patient if combined with enough other information like birth date or the hospital the patient is treated in.
+Think about this special phenomenon whenever you publish data or information that results from your surveillance-related activities or transmit it to a system that is not approved by your hospital.
+This may even apply to an externally maintained NeoIPC surveillance software if there are no contracts that govern the data processing and ownership.
+
+[#data-management-data-protection-and-security-hospital-information]
+==== Hospital Information
+Information about hospitals generally is not protected by laws but some information may be considered as company secret and in that case, as a member of staff, you are typically not allowed to disclose it.
+Whether surveillance information (“hospital infection rates”) is a company secret or should be, is a matter of extensive debate and it is understandable that patient rights organizations advocate for transparency in that regard.
+Nevertheless, the publication of surveillance data can have a detrimental effect on both the perception of the treatment quality of a hospital and the ability of the surveillance team to perform surveillance in an honest and self-critical way.
+
+Being a self-assessment tool, surveillance cannot rule out all forms of subjectivity and dishonesty and public pressure tends to shift data collection towards an overly critical assessment of infection records leading to low rates that can no longer be acted upon.
+In addition to the problem of pro-forma-surveillance, there may be very legitimate or even honourable reasons for high infection rates in a hospital, like treating those who have an especially high risk for infections, that can’t be adjusted for by the means of standardization or stratification of the collected data.
+These reasons are notoriously hard to communicate to the public which can lead to oversimplification and political abuse.
+
+Since there is no easy solution for these problems NeoIPC will not disclose the identity of individual participating hospitals and make sure that publications and reports will not contain information that may lead to the identification of an individual hospital.
+
+When publishing data yourself or as a regional network you should carefully consider the potential effects of including hospital-level information and do so in close coordination with your stakeholders.
+
+[#data-management-data-submission]
+=== Data Submission
+As stated xref:introduction-advice-for-use-and-requirements-for-participation[above], you can use the tools and methods developed by the NeoIPC project to perform surveillance of nosocomial infections in your neonatology department without submitting any information to the NeoIPC project or a regional network.
+
+If you decide to submit data, however, we strongly advise you to use the web-based reporting system we have developed based on the https://dhis2.org/[DHIS2] health information management system.
+
+Since DHIS2 is a freely available open source system, you have multiple options to use it:
+
+* Deploy it locally at your hospital and use it for the NeoIPC data collection within your hospital as well as for other potential use cases.
+* Deploy it nationally or regionally (or use an existing national or regional deployment) to form a national or regional network of units performing surveillance.
+* Use the NeoIPC project's https://neoipc.charite.de/[instance] of the system which is currently operated by the team at the German National Reference Centre for Surveillance of Nosocomial Infections at Charité's Institute for Hygiene and Environmental Medicine.
+
+One of the advantages of using the web-based reporting system is the fact that you can use it to create standardised unit-based reports at any time with a few clicks and compare them to the NeoIPC reference reports that are published annually.
+
+To create the reference report, we carry out a calculation at a specified time every year using the data available in the NeoIPC database at that point in time.
+In order to make this possible, you must have completed all data entry and addition of missing information from the previous year within 6 weeks after the end of a calendar year.
+This applies to patients whose surveillance period ended in the previous year.
+
+If the web-based reporting system is temporarily unavailable (e. g. due to maintenance or technical problems), please use the paper-based datasheets for documentation during this period and remember to enter this data into the web platform as soon as possible once it becomes available again.
+
+[#data-collection]
+== Data Collection
+The primary aim of the methods used by NeoIPC surveillance system is to support internal quality assurance standards, to make valid statements about the frequency of healthcare-associated infections in eligible infants during their inpatient stay and to promote implementation of IPC strategies in a neonatal unit.
+
+Based on our experience, we anticipate that you will collect data both through the review of medical charts as well as through the interaction with the colleagues who are involved in treatment and care of the patient under surveillance.
+For this reason, your data collection should ideally occur at the patient's bedside, to maximize the amount of information available (by allowing attending clinicians to clarify unclear or incomplete chart entries), and to minimize the amount of time involved in tracking down medical records once the patient has left the hospital.
+You will typically identify patients with healthcare-associated infections through the regular examination of existing departmental patient records, including laboratory results.
+The success of your participation in NeoIPC surveillance will very much depend on the close communication between those who perform the surveillance (typically infection prevention and control professionals) and those who care for the patient (typically neonatology professionals).
+Since the collected data will ultimately need to be entered into a computer, by combining data collection and data entry into a single procedure you have the potential to save time and reduce the risk of data copying errors.
+
+There are two patient data collection sheets that must be fulfilled for all eligible patients for the NeoIPC surveillance programme:
+
+* Master data collection sheet
+* Patient progress chart
+
+A third data collection sheet must also be fulfilled, if the patient undergoes a surgical procedure:
+
+* Surgical procedure data collection form
+
+In addition, if an eligible infant develops a healthcare-associated infection within the NeoIPC follow-up period, the corresponding infection data collection sheet/sheets should also be fulfilled:
+
+* Blood stream infection
+* Pneumonia
+* Necrotising enterocilitis
+* Surgical site infection
+
+Only these infections acquired in participating neonatology departments should be recorded.
+
+All eligible infants should be observed until the end of the surveillance period, defined as the time when the infant dies, is transferred, or is discharged from the hospital.
+
+Patients are additionally followed up for SSIs in case of a surgical procedure for 30 or 90 days, depending on whether an implant is present.
+For detailed information, see Surgical site infections.
+
+[#data-collection-case-eligibility-criteria-for-the-core-module]
+=== Case Eligibility Criteria for the Core Module
+Any live born infant,
+
+[loweralpha]
+. whose birth weight is less than 1500 grams
++
+**AND/OR**
+. whose gestational age is less than 32 weeks (31 weeks 6 days inclusive)
+
+admitted to a ward in your neonatal unit **within 120 days of birth** is eligible for inclusion in the Core Module of the NeoIPC Surveillance Programme.
+
+.Decision flow to identify eligible infants for the core module
+image::NeoIPC-Core-Decision-Flow.svg[Decision flow to identify eligible infants for the core module,{full-width},opts=inline]
+
+.Examples of infants eligible/not eligible for core module once admitted to the ward
+[cols=">2,>3,>4,>4"]
+|===
+|Day of Life |Birth Weight (grams) |Gestational Age (weeks+days) |Eligible for VLBW/VPT Module
+
+|120 [.green]#☑# |1499 [.green]#☑# |31+6 [.green]#☑# |Yes [.green]#☑#
+|1 [.green]#☑# |1500 [.red]#☐# |31+6 [.green]#☑# |Yes [.green]#☑#
+|120 [.green]#☑# |1499 [.green]#☑# |32+0 [.red]#☐# |Yes [.green]#☑#
+|1 [.green]#☑# |1500 [.red]#☐# |32+0 [.red]#☐# |No [.red]#☐#
+|121 [.red]#☐# |1499 [.green]#☑# |30+5 [.green]#☑# |No [.red]#☐#
+|===
+
+An infant that is not eligible in the core module may still be eligible in another NeoIPC Surveillance module.
+
+[#data-collection-patient-data-collection]
+=== Patient Data Collection
+Whenever an eligible patient is admitted or readmitted to one of the wards in your neonatology department, you should enrol this patient, preferably directly into the online reporting platform.
+
+[#data-collection-patient-data-collection-pseudonymisation-table]
+==== Pseudonymisation Table
+If you have a legal or other requirement to unambiguously identify patients in the online reporting platform, you must assign each patient a NeoIPC-ID at the time of enrolment.
+The NeoIPC-ID is a unique random identifier, which allows you to identify that patient within your department.
+This makes it possible for you to use the anonymous data stored in the system to refer to specific patients, e.g. in case of readmission or data correction, but makes it impossible for third parties to do the same.
+
+Each patient can only have one NeoIPC identification number.
+When a patient is discharged and then readmitted, the initial follow-up ends at the time of discharge, and a new enrolment must be made using the same NeoIPC ID number when the patient is readmitted.
+
+You are responsible for organizing patient data retrieval based on unique ids.
+We advise you to generate a pseudonymisation list that contains NeoIPC ID (unique random numbers) together with other identifying information (name, birthdate, patient id from the hospital information system) or to note that information on the paper-based patient surveillance master data sheet.
+You must store the pseudonymisation list and the paper sheets under the same conditions you store secret patient healthcare data and destroy it or the contained information in a secure way as soon as it is no longer needed.
+To ensure data privacy, you should never use an identifier that is used in any context other than the NeoIPC Surveillance and that you do not fully control (e.g. do **not** use the patient id from your hospital information system, the patient name, or any unique identifier that is used elsewhere) while creating NeoIPC ID.
+
+For the generation of reference reports, NeoIPC does not need to track individual patients and the IDs you assign will not be used by NeoIPC in any way.
+
+NOTE: To create a pseudonymisation list you can use the templates (excel spreadsheet and paper datasheet) available in the https://neoipc.org/surveillance/resources/[resources section] of our website.
+
+.Example pseudonymisation list
+[cols=">1,^2,^2,^3,^2,^4"]
+|===
+|№ |NeoIPC-ID |Patient-ID |Patient Name |Date of Birth |Comments
+
+|1 | | | | |
+|2 | | | | |
+|3 | | | | |
+|⋮ | | | | |
+|===
+
+<<<
+[#data-collection-patient-data-collection-master-data-collection-sheet]
+==== Master Data Collection Sheet
+Whenever an eligible patient is admitted or readmitted in your neonatology department, you should enrol this patient, preferably directly into the online reporting platform.
+After enrolling a patient, you must enter admission information and keep collecting the follow-up data using patient progress charts.
+When the patient is discharged, transferred to another hospital or dies, you must end the follow-up for this patient, total the data recorded in the xref:patient-progress-chart[patient progress chart] and transfer it to the master data sheet or enter it directly into the online data entry system.
+
+You can use the master data collection sheet to save enrolment, admission information and surveillance end data locally.
+However, if you submit data to NeoIPC, the information you collect on the master data collection sheet must ultimately be entered into the online data entry system.
+
+.Master data collection sheet for patient data collection
+//image::NeoIPC-Core-Master-Data-Collection-Sheet-Image.svg[Master data collection sheet for patient data collection,{full-width},pdfwidth=75%,opts=inline,align="center"]
+image::NeoIPC-Core-Master-Data-Collection-Sheet-Image.png[Master data collection sheet for patient data collection,{full-width},pdfwidth=75%,align="center"]
+
+<<<
+[#data-collection-patient-data-collection-patient-progress-chart]
+==== Patient Progress Chart
+Eligible patients who have been enrolled in the system must be followed up using patient progress charts until death, transfer, or discharge.
+Cumulative risk and protective factors such as patient days, device days, and antibiotic days are recorded in the chart, if possible on a daily basis.
+This chart must be kept at your facility and to simplify data collection and patient follow-up.
+You must maintain patient progress chart(s) for every eligible infant during the surveillance period.
+It is possible to enter up to six different antibiotic substances in one chart.
+If your patient has received more than six types of antibiotics, please use an additional chart to document them.
+
+When a patient is discharged, transferred to another hospital, or dies, you need to end the follow-up for that patient and the sum data in the patient progress charts will be the patient's surveillance end data.
+This data must be ultimately entered into the online reporting platform under the event “surveillance end”.
+You can use the master data collection sheet to save this data locally.
+
+For simplicity, patients who leave their department for up to two days (i.e., for surgery) are not considered transferred or discharged.
+You should record the data for days not spent in the department upon re-admission.
+If there are more than 48 hours between transfer and re-admission, you must end data collection for that patient and select "transfer" as the reason for the end of surveillance.
+In this case, any readmission should be recorded as a new admission, and the admission type must be selected as “transferred to your centre ≥ 24h postnatal”.
+
+.Patient progress chart for patient data collection
+//image::NeoIPC-Core-Patient-Progress-Chart-Image.svg[Patient progress chart for patient data collection,{full-width},pdfwidth=100%,opts=inline,align="center"]
+image::NeoIPC-Core-Patient-Progress-Chart-Image.png[Patient progress chart for patient data collection,{full-width},pdfwidth=100%,align="center"]
+
+<<<
+[#data-collection-surgical-procedure-data-collection]
+=== Surgical Procedure Data Collection
+Whenever surgery must happen in neonates and especially in VLBW/VPT infants it is an indicator for a complicated course and an additional risk factor for nosocomial infections and the occurrence of multidrug-resistant pathogens.
+For this reason, every surgical procedure that is performed on an eligible infant is recorded in NeoIPC.
+You can use the surgical procedure paper sheet for local documentation or enter the respective information directly into the reporting system.
+In addition to the recording of the procedure, you need to start following up the concerned infant for surgical site infections for 30 or 90 days depending on whether an implant has been left in place during the procedure.
+
+.Surgical procedure data collection sheet
+//image::NeoIPC-Core-Surgical-Procedure-Data-Collection-Sheet-Image.svg[Surgical procedure data collection sheet,{full-width},pdfwidth=75%,opts=inline,align="center"]
+image::NeoIPC-Core-Surgical-Procedure-Data-Collection-Sheet-Image.png[Surgical procedure data collection sheet,{full-width},pdfwidth=75%,align="center"]
+
+[#data-collection-infection-data-collection]
+=== Infection Data Collection
+Hospital-acquired bloodstream infections, pneumonia, NEC, and surgical site infections in eligible patients should be documented until the end of the surveillance period.
+
+Neonatal infections can broadly be separated into early-onset and late-onset infections.
+Most of the early-onset infections result from pregnancy- and delivery-associated risks where the causative pathogens typically affect the mother in the form of microbial colonisation or infection before causing an infection in the child.
+Most of the late-onset infections, in contrast, result from healthcare-associated risks, and the pathogens causing these infections typically stem from persons or inanimate surfaces that get in close contact with the infant during neonatal care.
+Since only the latter are immediately actionable for the healthcare professionals working on neonatology wards, NeoIPC puts a focus on those “nosocomial” late-onset infections but tries to also support you, when trying to perform surveillance of early-onset infections.
+Although a fixed time-based cut-off value does not exactly capture whether an infection was acquired from the NICU environment, there is a relatively broad international consensus that a 72-hour cut-off value serves as a good estimator for nosocomial infections in neonatology.
+For this reason, infections, where the first symptoms occur within a 72-hour window after birth, should not be considered nosocomial infections and therefore should not be recorded in the NeoIPC core module.
+It is, however, possible to record them separately as early-onset infections if you opt into the NeoIPC early-onset infection module.
+If an infection begins before 72 hours and is clearly hospital-acquired (i.e., there are clear signs of infection on the catheter entry site) or starts after 72 hours and is clearly vertical (e.g., all transplacental infections that are not evident at birth, like toxoplasmosis, CMV, HIV, rubella, and syphilis), this cut-off value can be ignored.
+
+For patients that are transferred or re-admitted to a ward in your neonatology department, there is an additional cut-off value that needs to be applied.
+In this case, an infection is only considered a nosocomial infection if the day of symptom onset is greater than or equal to day 3 of the patient’s hospital stay, where the day of admission is regarded as day 1.
+
+NeoIPC guidelines do not offer a strict timeframe for elements of definitions to occur but usually, all elements required to meet an infection definition usually occur within a 7-10 day timeframe with typically no more than 2-3 days between elements.
+
+In the presence of a previously recorded infection, when a new pathogen is isolated in the same organ system, we cannot record this as a new infection.
+A minimum of 14 days and a period without any relevant symptoms of infection are required to register the same type of infection again.
+
+<<<
+[#data-collection-infection-data-collection-primary-sepsis-bsi]
+==== Primary Sepsis/BSI
+If an eligible infant develops a hospital-acquired primary sepsis/bloodstream infection according to the NeoIPC surveillance criteria (see Infection Definitions: Primary sepsis/bloodstream infection) during the surveillance period, you should record and submit the required data using the data collection sheet below and/or via the online reporting platform.
+
+.Primary sepsis/BSI reporting sheet
+//image::NeoIPC-Core-Primary-Sepsis-BSI-Reporting-Sheet-Image.svg[Primary sepsis/BSI reporting sheet,{full-width},pdfwidth=75%,opts=inline,align="center"]
+image::NeoIPC-Core-Primary-Sepsis-BSI-Reporting-Sheet-Image.png[Primary sepsis/BSI reporting sheet,{full-width},pdfwidth=75%,align="center"]
+
+<<<
+[#data-collection-infection-data-collection-necrotising-enterocolitis]
+==== Necrotising Enterocolitis
+If an eligible infant develops a necrotizing enterocolitis according to the NeoIPC surveillance criteria (see Infection Definitions: Necrotising Enterocolitis (NEC)) during the surveillance period, you should record and submit the required data using the data collection sheet below and/or via the online reporting platform.
+
+.NEC reporting sheet
+//image::NeoIPC-Core-NEC-Reporting-Sheet-Image.svg[NEC reporting sheet,{full-width},pdfwidth=75%,opts=inline,align="center"]
+image::NeoIPC-Core-NEC-Reporting-Sheet-Image.png[NEC reporting sheet,{full-width},pdfwidth=75%,align="center"]
+
+<<<
+[#data-collection-infection-data-collection-pneumonia]
+==== Pneumonia
+If an eligible infant develops a hospital-acquired pneumonia according to the NeoIPC surveillance criteria (see Infection Definitions: Pneumonia) during the surveillance period, you should record and submit the required data using the data collection sheet below and/or via the online reporting platform.
+
+.Pneumonia reporting sheet
+//image::NeoIPC-Core-Pneumonia-Reporting-Sheet-Image.svg[Pneumonia reporting sheet,{full-width},pdfwidth=75%,opts=inline,align="center"]
+image::NeoIPC-Core-Pneumonia-Reporting-Sheet-Image.png[Pneumonia reporting sheet,{full-width},pdfwidth=75%,align="center"]
+
+<<<
+[#data-collection-infection-data-collection-surgical-site-infections]
+==== Surgical Site Infections
+If an eligible infant develops a surgical site infection according to the NeoIPC surveillance criteria (see Definitions: Surgical Site Infection (SSI)) during the surveillance period, you should record and submit the required data using the data collection sheet below and/or via the online reporting platform.
+
+.SSI reporting sheet
+//image::NeoIPC-Core-SSI-Reporting-Sheet-Image.svg[SSI reporting sheet,{full-width},pdfwidth=75%,opts=inline,align="center"]
+image::NeoIPC-Core-SSI-Reporting-Sheet-Image.png[SSI reporting sheet,{full-width},pdfwidth=75%,align="center"]
+
+<<<
+[#data-collection-infection-data-collection-device-associated-infection]
+==== Device-associated Infection
+Intravenous therapy and mechanical ventilation are established risk factors for nosocomial infections in neonatology.
+These kinds of infections are typically considered device-associated infections and are recorded in association with medical devices like vascular catheters or intubation.
+
+In NeoIPC the following device associations are recorded:
+
+. Invasive ventilation (INV) associated infections
+. Non-invasive ventilation (NIV) associated infections
+. Central venous catheter (CVC) associated infections
+. Peripheral venous catheter (PVC) associated infections
+
+Since the establishment of a causative relationship between a device and a hospital-acquired infection is difficult and infeasible in many neonatology settings, NeoIPC focuses on a time-based association only.
+To create an association between a device and infection, the device must have been in use for a defined period prior to infection.
+
+.Example showing the relationship between infection and device for device associated infections
+[cols="1,^1,^2,5"]
+|===
+|Days |Device in Place |Device Association (if this is the day of infection) |Comments
+
+|Day 1 |CVC |No [.red]#☐# |<3 CVC days on the day of infection
+|Day 2 |CVC |No [.red]#☐# |<3 CVC days on the day of infection
+|Day 3 |CVC |Yes [.green]#☑# |≥3 CVC days on the day of infection
+|Day 4 |No device |Yes [.green]#☑# |No CVC on the day of infection but ≥3 CVC days on the Day 3 (the day before infection)
+|Day 5 |No device |No [.red]#☐# |No CVC on the day of infection or on day before infection
+|Day 6 |No device |No [.red]#☐# |No CVC on the day of infection or on day before infection
+|===
+
+If a patient developing a bloodstream infection meets the criteria for both, PVC and CVC association, the CVC is considered as the device with the relatively higher infection risk and the BSI should be recorded as CVC-associated BSI.
+
+If both invasive and non-invasive ventilation were used intermittently, pneumonia should be recorded as INV-associated pneumonia.
+
+<<<
+[#data-collection-infection-data-collection-secondary-bloodstream-infection]
+==== Secondary Bloodstream Infection
+Within NeoIPC surveillance, it is possible to record bloodstream infections secondary to pneumonia, NEC, and SSIs.
+Collecting data on secondary BSI is optional; therefore, it is possible to select **“No follow-up”** if you are not following patients for secondary BSI.
+
+To assign a secondary bloodstream infection to a pneumonia, NEC, or an SSI, the following criteria must be met:
+
+. The blood specimen is collected in the period between 3 days prior and 13 days after the day of primary infection (day of primary infection=first symptoms or first positive culture at the primary infection site).
++
+**AND**
+. At least one organism from the blood specimen matches an organism identified from the primary infection site.
+
+.Secondary BSI data collection
+//image::NeoIPC-Core-Secondary-BSI-Image.svg[Secondary BSI data collection,{full-width},pdfwidth=100%,opts=inline,align="center"]
+image::NeoIPC-Core-Secondary-BSI-Image.png[Secondary BSI data collection,{full-width},pdfwidth=100%,align="center"]
+
+[#infection-definitions]
+== Infection Definitions
+[#infection-definitions-primary-sepsis-bloodstream-infection]
+=== Primary Sepsis / Bloodstream Infection
+Sepsis is classified as either culture negative or culture proven in the NeoIPC surveillance system.
+As well, culture proven sepsis (LCBSI = "Laboratory-confirmed bloodstream infection") is classified into two categories based on the culture result.
+
+Infections caused by microorganisms that enter the bloodstream from a primary infection site (except for catheter-associated infections) are not counted in this section.
+For detailed information, please see xref:data-collection-infection-data-collection-secondary-bloodstream-infection[Secondary Bloodstream Infection].
+
+. Clinical sepsis (infection without a detected organism)
+. Laboratory-confirmed bloodstream infection
+.. LCBSI caused by a recognised pathogen*
+.. LCBSI caused by a common commensal*
+
+*See xref:appendix-list-of-list-of-infectious-agents[List of Infectious Agents]
+
+<<<
+[#infection-definitions-clinical-sepsis]
+==== Clinical Sepsis
+include::definitions/NeoIPC-Core-Clinical-Sepsis-Definition.adoc[]
+
+<<<
+[#infection-definitions-lcbsi-caused-by-a-recognised-pathogen]
+==== LCBSI caused by a Recognised Pathogen
+include::definitions/NeoIPC-Core-LCBSI-With-Recognised-Pathogen-Definition.adoc[]
+
+[#infection-definitions-lcbsi-caused-by-common-commensals]
+==== LCBSI caused by Common Commensals
+If blood cultures show growth of one or multiple common commensals (e.g., coagulase-negative staphylococci), it is unclear in many cases, if the detected bacteria are the causative agent of a suspected infection or if a contamination leads to a wrong diagnosis.
+There have been multiple approaches to solve this issue by adapting surveillance definitions to this fact.
+Unfortunately, all these approaches are limited by diagnostic habits and availability of resources, rendering comparison of data from different settings close to impossible.
+
+Since NeoIPC aims at providing tools and definitions that work in a wide range of different settings we offer 3 different definitions for LCBSI caused by common commensals that can be used in a wide range of settings.
+As the tools collect the raw data leading to the diagnosis of an infection it is possible to assess the application of different definitions in various settings and possibly assess the effect on calculated incidences.
+
+In any case, because of this fact, you should be very careful when comparing rates of LCBSI caused by common commensals across different settings.
+
+include::definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc[]
+
+[#infection-definitions-necrotising-enterocolitis]
+=== Necrotising Enterocolitis
+Necrotising Enterocolitis (NEC) surveillance criteria consist of either a combination of radiological findings and clinical signs or a diagnosis based on surgical and/or pathological evidence.
+The NEC dataset includes information on whether the patient has an intestinal perforation.
+However, this is not one of the surveillance definition criteria.
+This means that you should not report cases where you have surgical evidence of intestinal perforation without evidence of primary necrosis or pneumatosis intestinalis (e.g. spontaneous bowel perforation) as NEC.
+
+include::definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc[]
+
+[#infection-definitions-pneumonia]
+=== Pneumonia
+Pneumonia in neonates is an entity that is very difficult to define for surveillance purposes as one can infer from the fact that many surveillance systems abstain from recording it at all, while others record ventilator-associated events where surveillance is limited to ventilated patients and pneumonia is only one of the entities captured by the definition.
+
+include::definitions/NeoIPC-Core-Pneumonia-Definition.adoc[]
+
+NOTE: To meet the criteria of device associated hospital-acquired pneumonia, patients must be ventilated for at least 4 calendar days (day 1 is the day invasive/non-invasive ventilation starts).
+The earliest date of the event is day 3 of ventilation.
+
+**Examples**
+
+.Hospital-acquired pneumonia - no device association
+[%unbreakable, cols=">1,1,2"]
+|===
+|Patient day |Patient´s condition |Comments
+
+|1 |No device, stable |
+|2 |No device, stable |Baseline day 1
+|3 |No device, stable |Baseline day 2
+|4 |Deteriorating ==> CPAP |[.green]#☑# (infection day)
+|5 |No improvement, CPAP continues |
+|===
+
+.Hospital-acquired pneumonia - device associated
+[%unbreakable, cols=">1,1,2"]
+|===
+|NIV/INV Day |Daily minimum FiO~2~ (oxygen concentration, %) |Comments
+
+|1 |1.00 |
+|2 |1.00 |
+|3 |0.70 (improving) |Baseline Day 1
+|4 |0.60 (improving) |Baseline Day 2
+|5 |0.90 |[.green]#☑# (infection day)
+|6 |0.90 |No improvement
+|===
+
+[#infection-definitions-surgical-site-infection]
+=== Surgical Site Infection
+A wound infection that occurs at the incision or surgical site is recorded as a surgical site infection (SSI) if it occurs in a certain time window after a surgical procedure that was also recorded in the NeoIPC surveillance system.
+
+SSIs occurring in patients without a surgical procedure record in the NeoIPC surveillance system (e.g. a patient transferred to your centre after a surgical procedure performed at another centre) are not eligible.
+
+The following surveillance times apply in detail (day 1 = the procedure date):
+
+* Superficial incisional SSI: 30 days
+* Deep incisional SSI: 30 days or 90 days if an implant has been left in place
+* Organ/Space SSI: 30 days or 90 days if an implant has been left in place
+
+Follow-up for SSIs can be terminated preliminarily for a surgical procedure for two reasons:
+
+* Death, transfer, or discharge of the patient.
+* A revision procedure in the same area.
+This will start a new follow-up period for the revision procedure though.
+
+Minor interventions such as simple punctures of hematoma/seroma do not count as revision procedures.
+Surveillance cannot be terminated by such minor procedures, and they do not start a new follow-up period.
+
+The following inclusion criteria apply to all SSIs:
+
+* Record the main procedure and the associated ICHIfootnote:[International Classification of Health Interventionspass:p[ +]
+https://www.who.int/standards/classifications/international-classification-of-health-interventions] code.
+Only in complex surgical interventions where one main procedure is not sufficient to adequately describe the procedure, up to 2 further ICHI codes can be recorded.
+* The type of SSI (superficial incisional, deep incisional, or organ/space) reported must reflect the deepest tissue level where SSI criteria are met during the surveillance period.
++
+**Example:** An SSI started as a deep incisional SSI on day 10 of the SSI surveillance period and then a week later (Day 17) meets the criteria for an organ/space SSI.
+You must report it as organ/space SSI regardless of superficial or deep tissue involvement.
+The day of infection in this case would be “Day 17”.
+
+* The patient must not be deceased (e.g., post-mortem surgery in case of organ donation is excluded).
+
+[#infection-definitions-surgical-site-infection-superficial-incisional-ssi]
+==== Superficial Incisional SSI
+Surgical site infections involving only the skin and subcutaneous tissue belong to this category.
+
+include::definitions/NeoIPC-Core-Superficial-Incisional-SSI-Definition.adoc[]
+
+[#infection-definitions-surgical-site-infection-deep-incisional-ssi]
+==== Deep Incisional SSI
+Surgical site infections involving deep soft tissues of the incision (for example, fascial and muscle layers) belong to this category.
+
+include::definitions/NeoIPC-Core-Deep-Incisional-SSI-Definition.adoc[]
+
+[#infection-definitions-surgical-site-infection-organ-space-ssi]
+==== Organ/Space SSI
+Surgical site infections involving any part of the body deeper than the fascial/muscle layers that is opened or manipulated during the operative procedure belong to this category.
+
+include::definitions/NeoIPC-Core-Organ-Space-SSI-Definition.adoc[]
+
+[#data-dictionary]
+== Data Dictionary
+The following data items appear in the NeoIPC documentation sheets or in the reporting platform.
+Some of them (e.g., patient id and patient name) are used for your local documentation only and not used in the central NeoIPC software tools.
+
+[#data-dictionary-patient-master-data]
+=== Patient Master Data
+[#data-dictionary-patient-master-data-enrolment]
+==== Enrolment
+[[data-dictionary-patient-master-data-enrolment-enroling-organisation-unit]]Enroling organisation unit:: The unit you want to register the new patient.
+[[data-dictionary-patient-master-data-enrolment-neoipc-id]]NeoIPC-ID (NeoIPC patient identifier):: The unique id you assign to the patient for tracking in the reporting platform.
+We advise you to store this information in a pseudonymisation list.
++
+NOTE: Use this identifier to uniquely identify a patient in the system.
+Ideally use a unique random string of characters.
+If you have a requirement to identify a patient you have entered here, you can use this identifier as the NeoIPC key for pseudonymisation.
+NEVER use an identifier that is used anywhere else and that you do not fully control (e.g. do NOT use the patient id from your hospital information system).
+
+[[data-dictionary-patient-master-data-enrolment-patient-id]]Patient-ID:: The unique id of the patient in the hospital, which most of the time comes from the hospital information system (HIS) or the patient data management system (PDMS).
+[[data-dictionary-patient-master-data-enrolment-patient-name]]Patient name:: The patient's name (e.g., given name followed by family name).
+
+NOTE: The patient ID and the patient name are not part of the NeoIPC dataset and must not be submitted to the data collection platform (e.g., do NOT use any of them as NeoIPC-ID).
+They are available on the data collection paper sheets so that you can identify the patient within the hospital and to look up the file in the hospital information system.
+
+[[data-dictionary-patient-master-data-enrolment-gestational-age]]Gestational age (GA):: The gestational age, expressed in completed weeks and days (e.g., 25 weeks and 4 days: 25+4) at the time of birth.
+Typically this refers to the gestational age as it was calculated or estimated by the mother's obstetrician but where this is not available (e.g. in unobserved pregnancies) the gestational age assesed by the treating physician (e.g. via the Ballard score) may be recorded.
+[[data-dictionary-patient-master-data-enrolment-birthweight]]Birthweight (BW):: The infant’s weight immediately after birth in grams.
+Typically this value is based on a measurement but in case the birth weigth is unknown or has a highly pathological value that does not reflect the maturity of the infant (e.g. hydrops fetalis) you can enter the birth weight that is estimated by the treating physician.
+[[data-dictionary-patient-master-data-enrolment-sex]]Sex:: Typically the phenotypic sex of the patient.
+If sex cannot be determined from the patient's phenotype or genotype, or if the genotype is neither XX nor XY, it is considered undetermined for purposes of surveillance.
++
+* Female
+* Male
+* Undetermined
+[[data-dictionary-patient-master-data-enrolment-delivery-mode]]Delivery mode:: The mode of the infant's delivery.
+This can be one of the following:
++
+* Vaginal (including assisted vaginal delivery)
+* Elective caesarean section
+* Emergency caesarean section
+[[data-dictionary-patient-master-data-enrolment-multiple-birth]]Multiple birth:: Check this field if the infant is part of a multiple birth.
+[[data-dictionary-patient-master-data-enrolment-number-of-infants]]Number of infants at birth:: The number of infants delivered from the (multiple) pregnancy this infant belongs to.
+Please report the total number of infants including the one you are recording here.
+
+[#data-dictionary-patient-master-data-admission-information]
+==== Admission Information
+[[data-dictionary-patient-master-data-admission-information-admission-date]]Admission date:: The day the patient is admitted to the hospital.
+For infants born in your hospital this is the same as the date of birth.
+[[data-dictionary-patient-master-data-admission-information-admission-type]]Admission type:: Describes if the infant was born in your hospital or if it was admitted after birth and if so, how long after birth:
++
+* Admitted from delivery room (initial admission for infants delivered in your hospital)
+* Transferred/readmitted to your hospital on the day of birth
+* Transferred/readmitted to your hospital the day after birth or later
+[[data-dictionary-patient-master-data-admission-information-admission-day-of-life]]Admission on day of life:: For infants that have not been delivered in your own hospital, record the infant's day of life on the day of admission (Day of birth = Day of Life 1.
+The next day, starting at 00:00, is the second day of life.)
+
+[#data-dictionary-patient-master-data-surveillance-end]
+==== Surveillance End
+[[data-dictionary-patient-master-data-surveillance-end-date]]Surveillance end date:: The day the data collection and follow-up for the patient has been stopped.
+[[data-dictionary-patient-master-data-surveillance-end-reason]]Surveillance end reason:: The reason for ending data collection.
+One of the following:
++
+* Discharge or transfer
+* Death.
+[[data-dictionary-patient-master-data-surveillance-end-patient-days]]Patient days:: The cumulative number of days the patient stayed in the department, including the day of admission and the day of discharge/transfer/death (no minimum duration of stay).
+[[data-dictionary-patient-master-data-surveillance-end-cvc-days]]CVC days:: The cumulative number of days when a central venous catheter was in place for at least 12 hours/day.
+[[data-dictionary-patient-master-data-surveillance-end-pvc-days]]PVC days:: The cumulative number of days when a peripheral vascular catheter was in place for at least 12 hours/day.
+[[data-dictionary-patient-master-data-surveillance-end-inv-days]]INV days:: The cumulative number of days when the infant was on invasive ventilation (intubated) for at least 12 hours/day.
+[[data-dictionary-patient-master-data-surveillance-end-niv-days]]NIV days:: The cumulative number of days when the infant was on non-invasive ventilation (not intubated; e.g. high flow nasal cannulae or CPAP) for at least 12 hours/day.
+[[data-dictionary-patient-master-data-surveillance-end-human-milk-days]]Human milk days:: The cumulative number of days the patient’s enteral feeding exclusively consists of (own mother’s or donor) breast milk.
+Fortified breast milk is considered as breast milk.
+[[data-dictionary-patient-master-data-surveillance-end-kangaroo-care-days]]Cangaroo care days:: The cumulative number of days the patient received kangaroo care (intensive skin-to-skin-contact) for at least 2 hours.
+[[data-dictionary-patient-master-data-surveillance-end-probiotic-days]]Probiotic days:: The cumulative number of days the patient receives an oral probiotic containing at least one of Lactobacillus spp. or Bifidobacterium spp., regardless of the amount.
+[[data-dictionary-patient-master-data-surveillance-end-total-antibiotic-days]]Antibiotic days, total:: The cumulative number of daysfootnote:ab-days-comment[The day of the first dose and the day of the last dose of an antibiotic therapy as well as all the days in between are counted.
+Days where no doses were applied between the first and the last dose (e.g., skipped doses because of high drug levels in therapeutic drug monitoring) are counted as if a dose was applied.
+Days after the last dose are not counted irrespective of the measured or assumed drug level in the patient.] when the infant received (any) systemic antibiotics.
+Only one antibiotic day can be recorded per day, which means that a day when the patient received multiple antibiotics is still counted as one antibiotic day.
+[[data-dictionary-patient-master-data-surveillance-end-antibiotic-substance-days]]Antibiotic days, per substance 1, 2, 3, …:: The cumulative number of daysfootnote:ab-days-comment[] when the infant received a specified systemic antibiotic substance.
+Exp.: Gentamicin days
+
+[#data-dictionary-surgical-procedure]
+=== Surgical Procedure
+[[data-dictionary-surgical-procedure-date]]Procedure date:: The day of the surgical procedure.
+[[data-dictionary-surgical-procedure-description]]Procedure description:: A human-readable name or description of the surgical procedure as it is typically called by surgeons in your institution (e.g.; ligation of patent arterial duct).
+[[data-dictionary-surgical-procedure-main-procedure-code]]Main procedure code:: The International Classification of Health Interventions (ICHI) code of the main procedure performed.
+If multiple different procedures are performed during one surgery, the surgeon decides which one is the main procedure (typically the most complex procedure or the one causing the highest risk for infection).
+Please visit https://icd.who.int/dev11/l-ichi/en
+[[data-dictionary-surgical-procedure-side-procedure-code]]Side procedure code:: The International Classification of Health Interventions (ICHI) code of the side procedure(s) performed.
+It is possible to capture up to two side procedures.
+[[data-dictionary-surgical-procedure-duration]]Duration:: The duration of the surgical procedure in minutes (incision-to-suture time if available).
+[[data-dictionary-surgical-procedure-wound-class]]Wound class:: An assessment of the degree of contamination of a surgical wound at the time of the surgical procedure according to the CDC Guidelines.
+It is assigned by a person involved in the surgical procedure (for example, surgeon, circulating nurse, etc.).
+The four wound classifications are:
+[[data-dictionary-surgical-procedure-wound-class-i]]Class I/Clean::: An uninfected operative wound in which no inflammation is encountered, and the respiratory, alimentary, genital, or uninfected urinary tract is not entered.
+In addition, clean wounds are primarily closed and, if necessary, drained with closed drainage.
+Operative incisional wounds that follow no penetrating (blunt) trauma should be included in this category if they meet the criteria.
+[[data-dictionary-surgical-procedure-wound-class-ii]]Class II/Clean-Contaminated::: An operative wound in which the respiratory, alimentary, genital, or urinary tracts are entered under controlled conditions and without unusual contamination.
+Specifically, operations involving the biliary tract, appendix, vagina, and oropharynx are included in this category, provided no evidence of infection or major break in a sterile technique is encountered.
+[[data-dictionary-surgical-procedure-wound-class-iii]]Class III/Contaminated::: Open, fresh, accidental wounds.
+In addition, operations with major breaks in a sterile technique (eg, open cardiac massage) or gross spillage from the gastrointestinal tract, and incisions in which acute or no purulent inflammation is encountered are included in this category.
+[[data-dictionary-surgical-procedure-wound-class-iv]]Class IV/Dirty-Infected::: Old traumatic wounds with retained devitalized tissue and those that involve existing clinical infection or perforated viscera.
+This definition suggests that the organisms causing postoperative infection were present in the operative field before the operation.
+
+[[data-dictionary-surgical-procedure-asa-score]]ASA score:: The American Society of Anesthesiologists' (ASA) Physical Status Classification System to assess and communicate a patient’s pre-anesthesia medical co-morbidities:
++
+--
+[[data-dictionary-surgical-procedure-asa-score-i]]ASA I::: A normal healthy patient
+[[data-dictionary-surgical-procedure-asa-score-ii]]ASA II::: A patient with mild systemic disease
+[[data-dictionary-surgical-procedure-asa-score-iii]]ASA III::: A patient with severe systemic disease
+[[data-dictionary-surgical-procedure-asa-score-iv]]ASA IV::: A patient with severe systemic disease that is a constant threat to life
+[[data-dictionary-surgical-procedure-asa-score-v]]ASA V::: A moribund patient who is not expected to survive without the operation
+--
++
+Visit https://www.asahq.org/standards-and-guidelines/statement-on-asa-physical-status-classification-system.
+[[data-dictionary-surgical-procedure-endoscopic]]Endoscopic procedure::
+Yes::: The operation was performed entirely endoscopically,
+No::: The procedure was performed open or endoscopically assisted, or switched to an open technique during an endoscopic procedure.
+[[data-dictionary-surgical-procedure-emergency]]Emergency procedure::
+Yes::: A procedure that is documented per the facility’s protocol to be an Emergency or Urgent procedure.
+No::: The intervention is initiated and performed in a planned manner.
+Unknown::: No information available.
+[[data-dictionary-surgical-procedure-primary-closure]]Primary closure:: The closure of the skin level during the original surgery, regardless of the presence of wires, wicks, drains, or other devices or objects extruding through the incision.
+This category includes surgeries where the skin is closed by some means.
+Thus, if any portion of the incision is closed at the skin level, by any manner, a designation of primary closure should be assigned to the surgery.
++
+NOTE: If a procedure has multiple incision/laparoscopic trocar sites and any of the incisions are closed primarily then the procedure technique is recorded as primary closed.
+
+[[data-dictionary-surgical-procedure-revision-procedure]]Revision procedure:: Revision procedures are follow-up, replacement or corrective procedures after an initial procedure.
+A revision procedure terminates the follow-up for the primary procedure and starts a new follow-up period.
+[[data-dictionary-surgical-procedure-implant]]Implant:: An implant is a foreign body of non-human origin that is permanently placed into a patient during an operation and is not routinely manipulated for diagnostic or therapeutic purposes (e.g., vascular prostheses, screws, wires, meshes).
+[[data-dictionary-surgical-procedure-signs-of-infetion]]Signs of infection at time of surgery:: Complete this field if signs of infection were identified during the surgical procedure.
+The signs of infection must be noted intraoperatively and documented in the narrative part of the operation note or report of surgery.
+If a surgical site infection occurs, this information will be used to determine if the signs listed in this section can be interpreted as "Infection present at time of surgery".
+
+.Signs of infection at time of surgery
+====
+* Examples that indicate evidence of infection include but are not limited to: abscess, infection, purulence/pus, phlegmon, or “feculent peritonitis”.
+A ruptured/perforated appendix is evidence of infection at the organ/space level.
+* Examples of verbiage that is not considered evidence of infection include but are not limited to: colon perforation, contamination, necrosis, gangrene, fecal spillage, nicked bowel during procedure, murky fluid, or documentation of inflammation.
+* The use of the ending “itis” in an operative note/report of surgery does not automatically count as evidence of infection, as it may only reflect inflammation which is not infectious in nature (for example, diverticulitis, peritonitis, and appendicitis).
+* Pathology report findings and imaging test findings cannot be used as evidence of infection.
+* Identification of an organism using culture or non-culture based microbiologic testing method or on a pathology report from a surgical specimen cannot be used as evidence of infection.
+* Wound class cannot be used as evidence of infection.
+* Trauma resulting in a contaminated case does not automatically count as evidence of infection.
+For example, a fresh gunshot wound to the abdomen may be a trauma with a high wound class but there would not be time for infection to develop.
+* Procedural complications such as bowel perforation during surgery cannot be used as evidence of infection since there was no infection present at time of surgery.
+====
+
+[#data-dictionary-infection-data]
+=== Infection Data
+[#data-dictionary-general-infection-data]
+==== General Infection Data
+[[data-dictionary-general-infection-data-infection-date]]Infection date:: The day the first infection symptoms appeared.
+If no symptoms occur, the day of first positive culture at the primary infection site.
+
+[[data-dictionary-general-infection-data-common-commensal]]Common commensal:: A type of micro-organism (e.g., coagulase-negative staphylococci), that is commonly present on epithelium-covered body surfaces (e.g., skin).
+When one or multiple of these species grow in a blood culture, a contamination is more likely than when a recognised pathogen grows.
+See Master Organism List on https://neoipc.org/surveillance/resources/
+
+[[data-dictionary-general-infection-data-mdros]]Multidrug-resistant organisms (MDROs):: Select the one(s) applicable to the isolated organism;
+* MRSA/VRE/3GCR: Choose if one of the following applies:
+** MRSA: Methicillin-resistant Staphylococcus aureus
+** VRE: Vancomycin-resistant Enterococci
+** 3GCR: Multi drug resistant gram-negative pathogen resistant to 3rd generation Cephalosporins according to own lab’s cut-off values (refers to phenotypic resistance or ESBL-producing organisms)
+* Carbapenem resistant: Resistant to at least one of the following (Imipenem, Meropenem, Ertapenem) according to own lab's cut-off values (refers to phenotypic resistance or carbapenemase-producing organisms.)
+* Colistin resistant: Resistant to colistin according to own lab's cut-off values.
+
+Options for each group:
+
+* Yes: the isolated organism is resistant to the specified antibiotic group(s).
+* No: the isolated organism is not resistant to the specified antibiotic group(s).
+* Not tested: the isolated organism was not tested for resistance to the specified antibiotic group(s).
+
+[[data-dictionary-general-infection-data-secondary-bsi]]Secondary bloodstream infection:: A BSI that is thought to be seeded from a site-specific infection at another body site (except for catheter-associated infections).
+A BSI can be attributed to a site-specific infection (NEC, PN or SSI) if it occurs in a 17-day period that includes the day of infection (=first symptoms of site-specific infection), 3 days prior, and 13 days after.
+
+Collecting data about the secondary BSI is optional; therefore, it is possible to select “No follow-up” if you are not following patients for secondary BSI.
+For detailed information, please see Secondary bloodstream infection.
+
+* Yes: if you are following patients for secondary BSI and the patient has developed a secondary sepsis that meets the definition of NeoIPC (activates a field below where you can enter identified organisms)
+* No: if you are following patients for secondary BSI and the patient has not developed a secondary sepsis that meets the definition of NeoIPC
+* No follow-up: if you are not following patients for secondary BSI.
+
+[#data-dictionary-bsi-specific-data]
+==== BSI Specific Data
+[[data-dictionary-bsi-specific-data-cvc]]Central vascular catheter (CVC):: An intravascular catheter that terminates at or close to the heart or in one of the great vessels which is used for infusion, withdrawal of blood, or hemodynamic monitoring.
++
+--
+* Central venous catheter (CVC), including non-tunnelled, tunnelled and implanted central venous catheters.
+* Peripherally inserted central venous catheter (PICC)
+* Umbilical artery catheter (UAC) or umbilical venous catheter (UVC)
+
+Extracorporeal membrane oxygenation (ECMO) and arterial catheters (except pulmonary artery, aorta, or umbilical artery) are NOT considered as CVC.
+
+The following are considered great vessels for the purpose of reporting CVCs:
+
+* Aorta
+* Pulmonary artery
+* Superior vena cava
+* Inferior vena cava
+* Brachiocephalic veins
+* Internal jugular veins
+* Subclavian veins
+* External iliac veins
+* Common iliac veins
+* Femoral veins
+* Umbilical artery/vein
+--
+
+[[data-dictionary-bsi-specific-data-cvc-associated-bsi]]CVC-associated BSI:: A primary bloodstream infection is considered <<bsi-specific-data_cvc,CVC>>-associated if the CVC has been in place for at least three consecutive days on the day of infection (=first symptoms or first positive diagnostic test; e.g. culture) or the day before.
+
+[[data-dictionary-bsi-specific-data-cvc-day]]CVC-day:: A day in which the patient had a <<bsi-specific-data_cvc,CVC>> placed for at least 12 hours cumulatively.
+
+[[data-dictionary-bsi-specific-data-pvc]]Peripheral vascular catheter (PVC):: A PVC is a catheter placed into a peripheral vein and does not reach one of the great vessels mentioned under CVC.
+
+[[data-dictionary-bsi-specific-data-pvc-associated-bsi]]PVC-associated BSI:: A primary bloodstream infection is considered <<bsi-specific-data_pvc,PVC>>-associated if the PVC has been present for at least three consecutive days on the day of infection (=first symptoms or first positive diagnostic test; e.g. culture) or the day before and does not meet the criteria for CVC-associated BSI.
+That means, if a patient developing a bloodstream infection meets the criteria for both, PVC- and CVC-association, the CVC is considered as the device with the relatively higher infection risk and the BSI should be recorded as CVC-associated BSI.
+
+[[data-dictionary-bsi-specific-data-pvc-day]]PVC-day:: A day in which the patient had a <<bsi-specific-data_pvc,PVC>> placed for at least 12 hours cumulatively.
+
+[[data-dictionary-bsi-specific-data-iv-ab-therapy-initiated]]Intravenous antibiotic therapy for five or more days initiated:: Antibiotic treatment for at least five days was initiated.
+The day of the first dose and the day of the last dose are counted.
+Days where no dose was administered between the first and the last dose (e.g., skipped doses because of high drug levels in therapeutic drug monitoring) are counted as if a dose had been administered.
+Days after the last dose are not counted regardless of the patient's measured or assumed drug level.
+If the infant died, was discharged, or transferred before the end of the five-day course of intravenous antibiotics, this condition is met if treatment was scheduled for five days or more.
+
+[[data-dictionary-bsi-specific-data-increased-oxygen-demand-or-ventilatory-support]]New/more frequent episodes of apnoea or increases in oxygen demand or ventilatory support:: New or increased frequency of episodes of apnea lasting more than 20 seconds, or an increase in the amount of oxygen required to maintain adequate oxygenation, or an escalation of ventilatory support, such as increased flow with high-flow therapy or intubation for invasive ventilation.
+
+[[data-dictionary-bsi-specific-data-enteral-feeding-intolerance]]Enteral feeding intolerance, abdominal distension or ileus:: Enteral feeding intolerance, abdominal distension or ileus without imaging findings or surgical findings that would otherwise suggest a necrotizing entrocolitis or a spontaneous intestinal perforation.
+
+[[data-dictionary-bsi-specific-data-unexplained-metabolic-acidosis]]Unexplained metabolic acidosis:: Unexplained metabolic acidosis with a base deficit greater (more negative) than 10 mmol/L (10 mEq/L).
+
+[#data-dictionary-nec-specific-data]
+==== NEC Specific Data
+[[data-dictionary-nec-specific-data-portal-veinous-gas]]Portal veinous gas:: Accumulation of gas (-bubbles) in the portal vein and its branches.
+
+[#data-dictionary-pneumonia-specific-data]
+==== Pneumonia Specific Data
+[[data-dictionary-pneumonia-specific-data-increase-in-respiratory-support]]Beginning or Increase in Respiratory Support::
++
+--
+New initiation of respiratory support or escalation of existing level of respiratory support …:::
++
+* Increase in need for FiO2 ≥ 0.25 (25 points) within 24 hours (daily minimum FiO2 values must be taken into account here)
++
+OR
+* begin of non-invasive ventilatory support (excluding switch from invasive ventilation)
++
+OR
+* begin of invasive mechanical ventilation (including switch from non-invasive ventilatory support)
+
+… that does not improve within less than 2 days::: The above-mentioned condition should not improve within two days.
+
+… after at least 2 days of stability or improvement::: A stable or improving baseline period of at least two days is required before the above condition occurs.
+
+NOTE: To meet the criteria of device associated hospital-acquired pneumonia, patients must be ventilated for at least 4 calendar days (day 1 is the day invasive/non-invasive ventilation starts). The earliest date of the event is day 3 of ventilation.
+--
+
+[[data-dictionary-pneumonia-specific-data-inv]]Invasive mechanical ventilation (INV):: Ventilation via endotracheal or tracheostomy tube.
+
+[[data-dictionary-pneumonia-specific-data-inv-associated-pneumonia]]INV-Associated Pneumonia:: A pneumonia is associated with <<pneumonia-specific-data_inv,INV>> if the patient had an endotracheal or tracheostomy tube for at least 3 consecutive days on the day of infection (=first symptoms or first positive culture) or on the day before.
+
+[[data-dictionary-pneumonia-specific-data-inv-day]]INV-Day:: A day in which the patient was ventilated invasively via endotracheal or tracheostomy tube for at least 12 hours cumulatively.
+
+[[data-dictionary-pneumonia-specific-data-niv]]Non-invasive ventilatory support (NIV):: Ventilatory support via CPAP or High-Flow Nasal Cannula.
+
+[[data-dictionary-pneumonia-specific-data-niv-associated-pneumonia]]NIV-Associated Pneumonia:: A pneumonia is associated with <<pneumonia-specific-data_niv,NIV>> if the patient received non-invasive ventilatory support (e.g., CPAP or High-Flow Nasal Cannula) for at least 3 consecutive days on the day of infection (=first symptoms or first positive culture) or on the day before.
+
+[[data-dictionary-pneumonia-specific-data-niv-day]]NIV-Day:: A day in which the patient received non-invasive ventilatory support via CPAP or High-Flow Nasal Cannula for at least 12 hours cumulatively.
+
+[[data-dictionary-pneumonia-specific-data-organisms-rt]]Organisms Identified From Respiratory Tract:: At least one organism has been identified from respiratory tract by a culture or non-culture based microbiologic testing method which is performed for purposes of clinical diagnosis or treatment (for example, NOT Active Surveillance Culture/Testing (ASC/AST)).
++
+[[data-dictionary-pneumonia-specific-data-organisms-lrt]]Recovered from lower respiratory tract::: Select if fungal, bacterial or viral pathogens (viral gene, antigen or antibody via e.g. EIA, FAMA, shell vial assay, PCR) are detected in lower respiratory tract.
+[[data-dictionary-pneumonia-specific-data-organisms-urt]]Recovered from upper respiratory tract::: Select only if viral pathogens are detected in upper respiratory tract.
+
+[#data-dictionary-ssi-specific-data]
+==== SSI Specific Data
+[[data-dictionary-ssi-specific-data-infection-present]]Infection Present at Time of Surgery:: Select YES, only if the sign of infection identified during the surgical procedure applies to the depth of the SSI that is being attributed to the procedure.
++
+--
+Example::
+* If a patient has documentation of an intra-abdominal infection at time of surgery and then later returns with an organ/space SSI = YES.
+* If a patient has documentation of an intra-abdominal infection at time of surgery and then later returns with a superficial or deep incisional SSI = NO.
+--
+
+[[data-dictionary-ssi-specific-data-ssi-type]]SSI Type::
++
+--
+* A superficial incisional SSI involves only skin and subcutaneous tissue of the incision and first symptoms occur within 30 days after the operation.
+* A deep incisional SSI involves deep soft tissues of the incision (for example, fascial and muscle layers) and first symptoms occur within 30 days after the operation or 90 days after the operation when an implant was left in place.
+* An organ/space SSI involves any part of the body deeper than the fascial/muscle layers that is opened or manipulated during the operative procedure and first symptoms occur within 30 days after the operation or 90 days after the operation when an implant was left in place.
+
+NOTE: The SSI reported must reflect the deepest tissue level where SSI criteria are met during the surveillance period.
+
+Example::
+If a SSI started as a deep incisional SSI on day 10 of the SSI surveillance period and then a week later (Day 17) meets criteria for an organ/space SSI.
+You must report it as organ/space SSI regardless of superficial or deep tissue involvement.
+The day of infection in this case would be “Day 17”.
+--
+
+[[data-dictionary-ssi-specific-data-organism-identified]]Organism(s) Identified From Surgical Site:: At least one organism has been identified from surgical site by a culture or non-culture based microbiologic testing method which is performed for purposes of clinical diagnosis or treatment (for example, NOT Active Surveillance Culture/Testing (ASC/AST)).
+
+[#data-analysis]
+== Data Analysis
+The following rates are calculated both for the departments’ reports and for the reference reports and can serve as starting point for further analyses and discussions in your department.
+
+For the core module, the rates are generally stratified into 4 groups according to the birth weight of the infants:
+
+. < 500 g
+. 500 g ‑ 999 g
+. 1 000 g ‑ 1 499 g
+. > 1 500 g
+
+[#data-analysis-risk-factors-and-protective-factors]
+=== Risk Factors and Protective Factors
+[#data-analysis-risk-factors-and-protective-factors-device-utilization]
+==== Device Utilization
+A device utilization rate describes the percentage of patient days on which a specific device was used.
+It is calculated by dividing the number of device days by the number of patient days and multiplying the result by 100.
+
+stem:["CVC Utilisation Rate" = "Total CVC Days" / "Total Patient Days" xx 100 ]
+
+stem:["PVC Utilisation Rate" = "Total PVC Days" / "Total Patient Days" xx 100 ]
+
+stem:["INV Utilisation Rate" = "Total INV Days" / "Total Patient Days" xx 100 ]
+
+stem:["NIV Utilisation Rate" = "Total NIV Days" / "Total Patient Days" xx 100]
+
+[#data-analysis-risk-factors-and-protective-factors-antibiotic-use]
+==== Antibiotic Use
+Antibiotic use rate describes the percentage of patient days on which systemic antibiotics were used in relation to the total patient days.
+It is calculated by dividing the number of antibiotic days by the number of patient days and multiplying the result by 100.
+
+stem:["Antibiotic Use Rate" = "Total Antibiotic Days" / "Total Patient Days" xx 100]
+
+In addition to the overall antibiotic use rate, antibiotic use rates and proportions of patients receiving a substance are calculated for individual substances and groups of substances.
+
+The substances and groups are derived from the Anatomical Therapeutic Chemical (ATC) Classificationfootnote:[Anatomical Therapeutic Chemical Classificationpass:p[ +]
+https://www.who.int/tools/atc-ddd-toolkit/atc-classification] as published in the most recent ATC/DDD Indexfootnote:[ATC/DDD Indexpass:p[ +]
+https://www.whocc.no/atc_ddd_index/].
+
+Currently the ATC 1st, 2nd, 4th and 5th level are used for grouping substances.
+
+Since the numbers in the individual groups usually get very small, the substance and group specific use rates are calculated by dividing the number of substance (group) days by the number of patient days and multiplying the result by 1000.
+
+stem:["Substance Group Use Rate" = "Total Therapy Days for Substance Group" / "Total Patient Days" xx 100]
+
+The proportion of patients receiving any specific substance(s) of a substance group is calculated as ratio between the total number of patients receiving a specific substance or group of antibiotics and the total number of patients receiving any kind of antibiotic multiplied by 100.
+
+stem:["Proportion of Patients Receiving an AB Substance or Group" = "Total Therapy Days for that Substance or Group" / "Total Patient Days" xx 100]
+
+[#data-analysis-risk-factors-and-protective-factors-protective-factor-implementation]
+==== Protective Factor Implementation
+A protective factor utilization rate describes the percentage of patient days on which a patient received a specific protective factor, such as breast milk, probiotic or kangaroo mother care.
+It is calculated by dividing the number of protective factor days by the number of patient days and multiplying the result by 100.
+
+stem:["Breast Milk Intake Rate" = "Total Breast Milk Days" / "Total Patient Days" xx 100]
+
+stem:["Probiotic Usage Rate" = "Total Probiotic Days" / "Total Patient Days" xx 100]
+
+stem:["Kangaroo Care Implementation Rate" = "Total Kangaroo Care Days" / "Total Patient Days" xx 100]
+
+[#data-analysis-infections]
+=== Infections
+[#data-analysis-infections-incidence-densities]
+==== Incidence Densities
+Since a substantial proportion of infections cannot be linked to a specific risk factor, incidence densities are calculated for bloodstream infections, pneumonia, NEC.
+The risk factor here represents the cumulative number of patient days and is standardized as 1000 patient days.
+
+stem:["BSI Incidence Density" = "Total BSI Cases" / "Total Patient Days" xx 1000]
+
+stem:["Pneumonia Incidence Density" = "Total Pneumonia Cases" / "Total Patient Days" xx 1000]
+
+stem:["NEC Incidence Density" = "Total NEC Cases" / "Total Patient Days" xx 1000]
+
+[#data-analysis-infections-device-associated-infections]
+==== Device-associated Infections
+A device-associated infection rate is an important quality management metric and describes how many device-associated infections occur per 1000 device days.
+In this process called standardization, infections (e.g., BSI) occurring in the presence of a certain risk factor (e.g., CVC) are associated with the total number of days at risk (e.g., CVC Days) and the result is multiplied by 1000.
+
+stem:["CVC-associated BSI Rate" = "Total BSI Cases in Patients With CVC" / "Total CVC Days" xx 1000]
+
+stem:["PVC-associated BSI Rate" = "Total BSI Cases in Patients With PVC" / "Total PVC Days" xx 1000]
+
+stem:["INV-associated Pneumonia Rate" = "Total Pneumonia Cases in Patients With INV" / "Total INV Days" xx 1000]
+
+stem:["NIV-associated Pneumonia Rate" = "Total Pneumonia Cases in Patients With NIV" / "Total NIV Days" xx 1000]
+
+[#data-analysis-infections-surgical-site-infections]
+==== Surgical Site Infections
+Surgical site infection (SSI) rates define the percentage of SSI that occur during the observation period after an operative procedure.
+It is calculated by dividing the number of SSIs occurring after a surgical procedure by the number of surgical procedures and multiplying the result by 100.
+Since the risk of developing a SSI depends on the type of surgical procedure, multiple SSI rates are calculated for groups of similar procedures.
+Nevertheless, an overall SSI rate will be calculated to account for the fact that surgery in VLBW/VPT infants is less frequent than in adults and grouping procedures may result in very low procedure counts per group.
+
+stem:["Overall SSI Rate" = "Total SSI Cases" / "Total Number of Surgeries" xx 100]
+
+stem:["Grouped SSI Rate" = "Total SSI Cases Observed After the Procedures in This Group" / "Total Number of Procedures in This Group" xx 100]
+
+[#data-analysis-infections-standardized-infection-rate]
+==== Standardized Infection Rate
+With the infection rates described above, it is possible to observe risk factors and infections for the 3 birthweight classes in detail.
+However, 500 g birth weight is a relatively crude stratification for neonatal infection risk, and it also does not account the fact that infants may be transferred to other departments (e.g., for surgery or to a department closer to the parents’ home) long before they would normally be discharged and that the high-risk days of the stabilization phase would accumulate in some neonatology departments while others would accumulate the low risk days of already stabilized infants.
+To account for this, NeoIPC calculates a standardized infection rate (SIR) , which compares infection frequencies between departments based on their patient population composition.
+
+Standardized infection rates are calculated based on two factors:
+
+. Risk of infection for a certain birth weight
+. Risk of infection for a certain day of life
+
+From the reference database, the average risk of BSI or pneumonia for a certain day of life of an infant with a certain birth weight is calculated.
+
+After this, the number of expected infections (cumulated risk) for a department is calculated by summing the average risks of the infants and the respective days they spent in the department.
+
+The SIR represents the ratio of observed infections to expected infections in a department and can give a general overview of the infection risk in a department.
+
+stem:["Standardized Infection Rate" = "Total Infections Observed" / "Total infections expected"]
+When the standardized infection rate is greater than one, you observed more infections than you would expect from your patient composition when compared to the reference data.
+
+When the standardized infection rate equals one, you observed the same number of infections as you would expect from your patient composition when compared to the reference data.
+
+When the standardized infection rate is less than one, you observed less infections than you would expect from your patient composition when compared to the reference data.
+
+[#abbreviations]
+== Abbreviations
+[horizontal]
+3GCR:: Multi drug resistant gram-negative pathogen resistant to 3^rd^ generation Cephalosporins
+AB:: Antibiotic
+ASA:: American Society of Anaesthesiologists
+BE:: Base Excess
+BSI:: Bloodstream Infection
+BW:: Birthweight
+CDC:: Centers for Disease Control and Prevention
+CMV:: Cytomegalovirus
+CRP:: C-reactive Protein
+CSF:: Cerebrospinal Fluid
+CT:: Computer Tomography
+CVC:: Central Venous Catheter
+ECMO:: Extracorporeal Membrane Oxygenation
+ESBL:: Extended spectrum beta-lactamase
+GA:: Gestational Age
+HIS:: Hospital Information System
+HIV:: Human Immunodeficiency Virus
+ICHI:: International classification of health interventions
+INV:: Invasive Ventilation
+IPC:: Infection Prevention and Control
+KC:: Kangaroo care
+LCBSI:: Laboratory Confirmed Bloodstream Infection
+MDRO:: Multidrug Resistant Organism
+MRSA:: Methicillin-resistant Staphylococcus aureus
+NEC:: Necrotizing Enterocolitis
+NICU:: Neonatal intensive care unit
+NIV:: Non-invasive Ventilation
+OP:: Operative Procedure
+PDMS:: Patient Data Management System
+PICC:: Peripherally Inserted Central Venous Catheter
+PLT:: Platelet
+PVC:: Peripheral Venous Catheter
+RCT:: Randomised Controlled Trial
+SSI:: Surgical Site Infection
+UAC:: Umbilical Artery Catheter
+UVC:: Umbilical Venous Catheter
+VAE:: Ventilator Associated Event
+VAP:: Ventilator Associated Pneumonia
+VLBW:: Very Low Birthweight
+VPT:: Very Preterm
+VRE:: Vancomycin-resistant Enterococcus
+WBC:: White Blood Cells
+
+[#imprint]
+== Imprint
+NeoIPC Project
+
+Fondazione Penta Onlus +
+Corso Stati Uniti, 4 +
+35127 Padova +
+ITALY
+
+https://neoipc.org/
+
+To learn more about NeoIPC, write to:
+
+communication@pentafoundation.org
+
+To learn more about the NeoDeco Trial and the Clinical Practice Network, write to:
+
+neoipc@sgul.ac.uk
+
+To learn more about Surveillance, write to:
+
+neoipc-support@charite.de
+
+[appendix]
+[#appendix-list-of-antibiotics]
+== List of Antibiotics
+
+include::NeoIPC-Antibiotics.adoc[]
+
+[appendix]
+[#appendix-list-of-list-of-infectious-agents]
+== List of Infectious Agents
+
+include::NeoIPC-Infectious-Agents.adoc[]

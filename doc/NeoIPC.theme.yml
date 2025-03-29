@@ -1,0 +1,23 @@
+extends: default
+footer:
+  recto:
+    left:
+      content: '{version-label} {revnumber}{revsuffix}, {revdate}'
+    center:
+      content: ''
+    right:
+      content: '{page-number}'
+  verso:
+    left:
+      content: '{page-number}'
+    center:
+      content: ''
+    right:
+      content: '{version-label} {revnumber}{revsuffix}, {revdate}'
+role:
+  red:
+    font-color: #FF0000
+  green:
+    font-color: #008000
+svg:
+  fallback-font-family: Noto Serif

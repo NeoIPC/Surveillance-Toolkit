@@ -1,0 +1,16 @@
+.Organ/space SSI
+[%unbreakable]
+****
+. **First symptoms occur within 30 or 90^#^ days after the operation**
++
+**AND**
+. **Infection involves any part of the body deeper than the fascial/muscle layers that is opened or manipulated during the operative procedure**
++
+**AND**
+. **Patient has at least ONE of the following:**
+.. Purulent drainage from a drain that is placed into the organ/space (for example, closed suction drainage system, open drain, T-tube drain, CT-guided drainage).
+.. Organism(s) identified from fluid or tissue in the organ/space by a culture or non-culture based microbiologic testing method which is performed for purposes of clinical diagnosis or treatment (for example, not Active Surveillance Culture/Testing (ASC/AST)).
+.. An abscess or other evidence of infection involving the organ/space that is detected on gross anatomical or histopathologic exam, or imaging test evidence suggestive of infection.
+****
+
+^#^Follow-up of 90 days applies when an implant was left in place.

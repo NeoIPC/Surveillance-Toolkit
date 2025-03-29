@@ -1,0 +1,93 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build NeoIPC documentation",
+            "type": "shell",
+            "command": "${workspaceFolder}/scripts/Make-NeoIPC-Core-Protocol.ps1",
+            "args": [
+                "-InformationAction",
+                "Continue",
+                "-Verbose"
+            ],
+            "problemMatcher": [
+                {
+                    "owner": "build.ps1",
+                    "fileLocation": [
+                        "absolute"
+                    ],
+                    "pattern": [
+                        {
+                            "regexp": "^Write-(Warning|Error):\\s+([A-Z]:[^:]+):(\\d+):(\\d+)$",
+                            "severity": 1,
+                            "file": 2,
+                            "line": 3,
+                            "column": 4
+                        },
+                        {
+                            "regexp": "^Line\\s\\|\\s*$"
+                        },
+                        {
+                            "regexp": "^\\s*\\d*\\s*\\|.*"
+                        },
+                        {
+                            "regexp": "^\\s*\\|\\s*~~+\\s*$"
+                        },
+                        {
+                            "regexp": "^\\s*\\|\\s*([^~].*)\\s*$",
+                            "message": 1
+                        }
+                    ]
+                },
+                {
+                    "owner": "build.ps1",
+                    "fileLocation": [
+                        "absolute"
+                    ],
+                    "severity": "error",
+                    "pattern": [
+                        {
+                            "regexp": "^[A-Za-z]*Exception:\\s+([A-Z]:[^:]+):(\\d+):(\\d+)$",
+                            "file": 1,
+                            "line": 2,
+                            "column": 4
+                        },
+                        {
+                            "regexp": "^Line\\s\\|\\s*$"
+                        },
+                        {
+                            "regexp": "^\\s*\\d*\\s*\\|.*"
+                        },
+                        {
+                            "regexp": "^\\s*\\|\\s*~~+\\s*$"
+                        },
+                        {
+                            "regexp": "^\\s*\\|\\s*([^~].*)\\s*$",
+                            "message": 1
+                        }
+                    ]
+                }
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Cleanup NeoIPC documentation build",
+            "type": "shell",
+            "command": "${workspaceFolder}/scripts/Make-NeoIPC-Core-Protocol.ps1",
+            "args": [
+                "-Clean",
+                "-Verbose"
+            ],
+            "group": {
+                "kind": "none",
+                "isDefault": false
+            },
+            "problemMatcher": []
+        }
+    ]
+}

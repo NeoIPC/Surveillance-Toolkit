@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+    <data name="title" xml:space="preserve">
+        <value>Hoja maestra de recogida de datos</value>
+    </data>
+    <data name="subtitle" xml:space="preserve">
+        <value>NeoIPC - Módulo principal</value>
+    </data>
+    <data name="enrolment" xml:space="preserve">
+        <value>Inscripción</value>
+    </data>
+    <data name="pat_id" xml:space="preserve">
+        <value>Identificación del paciente</value>
+    </data>
+    <data name="pat_name" xml:space="preserve">
+        <value>Nombre del paciente</value>
+    </data>
+    <data name="private_note" xml:space="preserve">
+        <value>Estos campos sirven para identificar inequívocamente al paciente dentro del hospital. No forman parte del conjunto de datos de vigilancia de NeoIPC y no deben transmitirse a la plataforma de recogida de datos.</value>
+    </data>
+    <data name="gest_age" xml:space="preserve">
+        <value>Edad gestacional</value>
+    </data>
+    <data name="gest_age_desc" xml:space="preserve">
+        <value>semanas + días (por ejemplo, 25+4)</value>
+    </data>
+    <data name="birthweight" xml:space="preserve">
+        <value>Peso al nacer</value>
+    </data>
+    <data name="birthweight_desc" xml:space="preserve">
+        <value>gramos</value>
+    </data>
+    <data name="sex" xml:space="preserve">
+        <value>Sexo</value>
+    </data>
+    <data name="female" xml:space="preserve">
+        <value>femenino</value>
+    </data>
+    <data name="male" xml:space="preserve">
+        <value>masculino</value>
+    </data>
+    <data name="undetermined" xml:space="preserve">
+        <value>indeterminado</value>
+    </data>
+</root>

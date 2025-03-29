@@ -1,0 +1,30 @@
+.Superficial incisional SSI
+[%unbreakable]
+****
+. **First symptoms occur within 30 days after the operation**
++
+**AND**
+. **Infection involves only skin and subcutaneous tissue of the incision**
++
+**AND**
+. **Patient has at least ONE of the following:**
+[loweralpha]
+.. Purulent drainage from the superficial incision.
+.. Organism(s) identified from an aseptically obtained specimen from the superficial incision or subcutaneous tissue by a culture or non-culture based microbiologic testing method which is performed for purposes of clinical diagnosis or treatment (for example, not Active Surveillance Culture/Testing (ASC/AST)).
+.. Superficial incision that is deliberately opened by a surgeon, physician* or physician designee and culture or non-culture-based testing of the superficial incision or subcutaneous tissue is not performed.
+A culture or non-culture-based test from the deep soft tissues of the incision that has a negative finding does not meet this criterion.
++
+**AND**
++
+Patient has at least one of the following signs or symptoms: localized pain or tenderness, localized swelling, erythema or heat.
+.. Diagnosis of a superficial incisional SSI by a physician* or physician designee.
+****
+
+*The term physician for the purpose of application of the NeoIPC SSI criteria may be interpreted to mean a surgeon, infectious disease physician, emergency physician, another physician on the case, or physician’s designee (nurse practitioner or physician’s assistant).
+
+The following do not qualify as criteria for meeting the definition of superficial incisional SSI
+
+* Diagnosis/treatment of cellulitis (redness/warmth/swelling), by itself, does not meet superficial incisional SSI criterion ‘d’. 
+* A stitch abscess alone (minimal inflammation and discharge confined to the points of suture penetration). 
+* A localized stab wound or pin site infection. Note: A laparoscopic trocar site is considered a surgical incision and not a stab wound.
+If a surgeon uses a laparoscopic trocar site to place a drain at the end of a procedure this is considered a surgical incision.

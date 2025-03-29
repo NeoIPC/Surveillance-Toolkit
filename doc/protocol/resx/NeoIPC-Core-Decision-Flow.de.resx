@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+    <data name="yes" xml:space="preserve">
+        <value>Ja</value>
+    </data>
+    <data name="no" xml:space="preserve">
+        <value>Nein</value>
+    </data>
+    <data name="admitted" xml:space="preserve">
+        <value>Innerhalb von 120 Tagen nach der Geburt in Ihre Abteilung aufgenommen?</value>
+    </data>
+    <data name="not_admitted" xml:space="preserve">
+        <value>z. B. Stillgeburten, Versterben im Kreißsaal, Lebenstag &gt; 120</value>
+    </data>
+    <data name="gestational_age" xml:space="preserve">
+        <value>Gestationsalter &lt; 32 Wochen?</value>
+    </data>
+    <data name="birthweight" xml:space="preserve">
+        <value>Geburtsgewicht &lt; 1500 g?</value>
+    </data>
+    <data name="eligible" xml:space="preserve">
+        <value>Einschluss</value>
+    </data>
+    <data name="ineligible" xml:space="preserve">
+        <value>Kein Einschluss</value>
+    </data>
+</root>
