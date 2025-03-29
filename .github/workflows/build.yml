@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - ProtocolV2
     tags:
       - '*'
   pull_request:
