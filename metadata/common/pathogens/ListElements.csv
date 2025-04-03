@@ -1,0 +1,30 @@
+id,value
+3gcr,3GCR
+assumed_pathogenicity,Assumed Pathogenicity
+bacterial_genus,Bacterial genus
+bacterial_group,Group of bacterial species
+bacterial_serotype,Bacterial serotype
+bacterial_species,Bacterial species
+bacterial_species_complex,Bacterial species complex
+bacterial_subspecies,Bacterial subspecies
+carbapenems,Carbapenems
+colistin,Colistin
+common_commensal,Common commensal
+fungal_genus,Fungal genus
+fungal_species,Fungal species
+fungal_species_complex,Fungal species complex
+fungal_variety,Fungal variety
+mrsa,MRSA
+name,Name
+recognised_pathogen,Recognised pathogen
+recorded_resistances,Recorded Resistances
+synonym_for,synonym for
+type,Type
+unknown,Unknown
+viral_clade,Viral clade
+viral_family,Viral family
+viral_genus,Viral genus
+viral_group,Viral group
+viral_serotype,Viral serotype
+viral_species,Viral species
+vre,VRE

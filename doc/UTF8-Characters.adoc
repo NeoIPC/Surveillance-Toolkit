@@ -1,0 +1,74 @@
+= Handling of special typographic characters
+
+Since this repository is about reusing stuff in multiple places (e. g. use the same text elements in both, the protocol, and the online data collection and reporting platform), we try to avoid tying ourselves to a specific format or technology as much as possible.
+
+Regarding "special" typographic characters this means that we try to avoid https://docs.asciidoctor.org/asciidoc/latest/subs/replacements/[AsciiDoc character replacement substitution] (like `--` for the em dash `—`) and https://html.spec.whatwg.org/multipage/syntax.html#character-references[HTML character references] (like `\&hellip;`, `\&#x2026;`, or `\&#8230;` for the horizontal ellipsis `…​`) and rather use the generic UTF-8 character regarding on the Unicode safety of the tools we select to process and display our content as an immediate prerequisite.
+
+== List of commonly used characters
+
+[cols="^1,4,^3l,^3l,5"]
+|===
+|UTF-8 Character |Unicode name |HTML Entity (hex) | UTF-8 (hex) | Comment
+
+|' ' |NO-BREAK SPACE |&#x00A0; |C2A0 |
+|' ' |NARROW NO-BREAK SPACE |&#x202F; |E280AF |a narrow form of a no-break space, typically the width of a thin space or a mid space
+|' '|EN SPACE |&#x2002; |E28082 |nut +
+half an em
+|' '|EM SPACE |&#x2003; |E28083 |mutton +
+nominally, a space equal to the type size in points +
+may scale by the condensation factor of a font
+|' '|THREE-PER-EM SPACE |&#x2004; |E28084 |thick space
+|' '|FOUR-PER-EM SPACE |&#x2005; |E28085 |mid space
+|' '|SIX-PER-EM SPACE |&#x2006; |E28086 |in computer typography sometimes equated to thin space
+|' '|FIGURE SPACE |&#x2007; |E28087 |space equal to tabular width of a font +
+this is equivalent to the digit width of fonts with fixed-width digits
+|' '|PUNCTUATION SPACE |&#x2008; |E28088 |space equal to narrow punctuation of a font
+|' '|THIN SPACE |&#x2009; |E28089 |a fifth of an em (or sometimes a sixth)
+|' '|HAIR SPACE |&#x200A; |E2808A |thinner than a thin space +
+in traditional typography, the thinnest space available
+|' '|MEDIUM MATHEMATICAL SPACE |&#x205F; |E2819F |four-eighteenths of an em
+|‘ |LEFT SINGLE QUOTATION MARK |&#x2018; |E28098 |single turned comma quotation mark
+|’ |RIGHT SINGLE QUOTATION MARK |&#x2019; |E28099 |single comma quotation mark
+|‚ |SINGLE LOW-9 QUOTATION MARK |&#x201A; |E2809A |low single comma quotation mark
+|‛ |SINGLE HIGH-REVERSED-9 QUOTATION MARK |&#x201B; |E2809B |single reversed comma quotation mark
+|“ |LEFT DOUBLE QUOTATION MARK |&#x201C; |E2809C |double turned comma quotation mark
+|” |RIGHT DOUBLE QUOTATION MARK |&#x201D; |E2809D |double comma quotation mark
+|„ |DOUBLE LOW-9 QUOTATION MARK |&#x201E; |E2809E |low double comma quotation mark
+|‟ |DOUBLE HIGH-REVERSED-9 QUOTATION MARK |&#x201F; |E2809F |double reversed comma quotation mark
+|« |LEFT-POINTING DOUBLE ANGLE QUOTATION MARK |&#x00AB; |C2AB |left guillemet +
+chevrons (in typography)
+|» |RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK |&#x00BB; |C2BB |right guillemet
+|‹ |SINGLE LEFT-POINTING ANGLE QUOTATION MARK |&#x2039; |E280B9 |left pointing single guillemet
+|› |SINGLE RIGHT-POINTING ANGLE QUOTATION MARK |&#x203A; |E280BA |right pointing single guillemet
+|¹ |SUPERSCRIPT ONE |&#x00B9; |C2B9 |
+|² |SUPERSCRIPT TWO |&#x00B2; |C2B2 |
+|³ |SUPERSCRIPT THREE |&#x00B3; |C2B3 |
+|⁴ |SUPERSCRIPT FOUR |&#x2074; |E281B4 |
+|⁵ |SUPERSCRIPT FIVE |&#x2075; |E281B5 |
+|⁶ |SUPERSCRIPT SIX |&#x2076; |E281B6 |
+|⁷ |SUPERSCRIPT SEVEN |&#x2077; |E281B7 |
+|⁸ |SUPERSCRIPT EIGHT |&#x2078; |E281B8 |
+|⁹ |SUPERSCRIPT NINE |&#x2079; |E281B9 |
+|⁻ |SUPERSCRIPT MINUS |&#x207B; |E281BB |
+|₁ |SUBSCRIPT ONE |&#x2081; |E28281 |
+|₂ |SUBSCRIPT TWO |&#x2082; |E28282 |
+|₃ |SUBSCRIPT THREE |&#x2083; |E28283 |
+|₄ |SUBSCRIPT FOUR |&#x2084; |E28284 |
+|₅ |SUBSCRIPT FIVE |&#x2085; |E28285 |
+|₆ |SUBSCRIPT SIX |&#x2086; |E28286 |
+|₇ |SUBSCRIPT SEVEN |&#x2087; |E28287 |
+|₈ |SUBSCRIPT EIGHT |&#x2088; |E28288 |
+|₉ |SUBSCRIPT NINE |&#x2089; |E28289 |
+|… |HORIZONTAL ELLIPSIS |&#x2026; |E280A6 |
+|⋮ |VERTICAL ELLIPSIS |&#x22EE; |E28BAE |
+|✓ |CHECK MARK |&#x2713; |E29C93 |
+|✔ |HEAVY CHECK MARK |&#x2714; |E29C94 |
+|🗸 |LIGHT CHECK MARK |&#x1F5F8; |F09F97B8 |
+|✗ |BALLOT X |&#x2717; |E29C97 |
+|✘ |HEAVY BALLOT X |&#x2718; |E29C98 |
+|❌ |CROSS MARK |&#x274C; |E29D8C |
+|⭕ |HEAVY LARGE CIRCLE |&#x2B55; |E2AD95 |
+|👍 |THUMBS UP SIGN |&#x1F44D; |F09F918D |
+|👎 |THUMBS DOWN SIGN |&#x1F44E; |F09F918E |
+|ğ |LATIN SMALL LETTER G WITH BREVE |&#x011F; |C49F |This one is for Gizem
+|===

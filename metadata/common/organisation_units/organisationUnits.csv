@@ -1,0 +1,40 @@
+code,name,shortName,openingDate,parent_code
+NEOIPC,The NeoIPC Project,NeoIPC,2023-01-01,
+AL,Shqipëria,Shqipëria,2023-01-01,NEOIPC
+AT,Österreich,Österreich,2023-01-01,NEOIPC
+BE,Belgique/België,Belgique/België,2023-01-01,NEOIPC
+BG,България [Bulgaria],България,2023-01-01,NEOIPC
+CH,Schweiz/Suisse/Svizzera,Schweiz/Suisse/Svizzera,2023-01-01,NEOIPC
+CY,Κύπρος [Kýpros],Κύπρος,2023-01-01,NEOIPC
+CZ,Česko,Česko,2023-01-01,NEOIPC
+DE,Deutschland,Deutschland,2023-01-01,NEOIPC
+DK,Danmark,Danmark,2023-01-01,NEOIPC
+EE,Eesti,Eesti,2023-01-01,NEOIPC
+EL,Ελλάδα [Elláda],Ελλάδα,2023-01-01,NEOIPC
+ES,España,España,2023-01-01,NEOIPC
+FI,Suomi/Finland,Suomi/Finland,2023-01-01,NEOIPC
+FR,France,France,2023-01-01,NEOIPC
+HR,Hrvatska,Hrvatska,2023-01-01,NEOIPC
+HU,Magyarország,Magyarország,2023-01-01,NEOIPC
+IE,Éire/Ireland,Éire/Ireland,2023-01-01,NEOIPC
+IS,Ísland,Ísland,2023-01-01,NEOIPC
+IT,Italia,Italia,2023-01-01,NEOIPC
+LI,Liechtenstein,Liechtenstein,2023-01-01,NEOIPC
+LT,Lietuva,Lietuva,2023-01-01,NEOIPC
+LU,Luxembourg,Luxembourg,2023-01-01,NEOIPC
+LV,Latvija,Latvija,2023-01-01,NEOIPC
+ME,Црна Гора [Crna Gora],Црна Гора,2023-01-01,NEOIPC
+MK,Северна Македонија [Severna Makedonija],Северна Македонија,2023-01-01,NEOIPC
+MT,Malta,Malta,2023-01-01,NEOIPC
+NL,Nederland,Nederland,2023-01-01,NEOIPC
+NO,Norge,Norge,2023-01-01,NEOIPC
+PL,Polska,Polska,2023-01-01,NEOIPC
+PT,Portugal,Portugal,2023-01-01,NEOIPC
+RO,România,România,2023-01-01,NEOIPC
+RS,Srbija/Сpбија [Serbia],Srbija/Сpбија,2023-01-01,NEOIPC
+SE,Sverige,Sverige,2023-01-01,NEOIPC
+SI,Slovenija,Slovenija,2023-01-01,NEOIPC
+SK,Slovensko,Slovensko,2023-01-01,NEOIPC
+TR,Türkiye,Türkiye,2023-01-01,NEOIPC
+UK,United Kingdom,United Kingdom,2023-01-01,NEOIPC
+ZA,Aforika Borwa/Afrika Borwa/Afrika-Dzonga/Afurika Tshipembe/iNingizimu Afrika/iSewula Afrika/South Africa/Suid-Afrika/uMzantsi Afrika,South Africa,2023-01-01,NEOIPC

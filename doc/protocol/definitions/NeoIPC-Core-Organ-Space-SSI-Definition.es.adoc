@@ -1,0 +1,16 @@
+.Órgano/espacio ISQ
+[%unbreakable]
+****
+. **Los primeros síntomas aparecen entre 30 y 90^#^ días después de la operación**
++
+**Y**
+. **La infección afecta a cualquier parte del cuerpo más profunda que las capas fascial/muscular que se haya abierto o manipulado durante la intervención quirúrgica**
++
+**Y**
+. **El paciente presenta al menos UNO de los siguientes síntomas:**
+.. Drenaje purulento de un drenaje colocado en el órgano/espacio (por ejemplo, sistema cerrado de drenaje por succión, drenaje abierto, drenaje con tubo en T, drenaje guiado por TC).
+.. Organismo(s) identificado(s) a partir de líquido o tejido en el órgano/espacio mediante un método de análisis microbiológico basado o no en cultivo que se realiza con fines de diagnóstico clínico o tratamiento (por ejemplo, cultivo/prueba de vigilancia no activa (ASC/AST)).
+.. Un absceso u otra evidencia de infección que afecte al órgano/espacio que se detectado en un examen anatómico o histopatológico macroscópico, o pruebas de imagen sugestivas de infección.
+****
+
+^#^ Se aplica un seguimiento de 90 días cuando se ha dejado un implante en su sitio.

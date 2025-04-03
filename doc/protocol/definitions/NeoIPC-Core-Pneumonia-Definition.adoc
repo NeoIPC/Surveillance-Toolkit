@@ -1,0 +1,46 @@
+.Pneumonia
+[%unbreakable]
+****
+. **At least ONE of the following imaging findings (imaging technologies: X-ray, CT, MRI, ultrasound) shows new changes suggestive of pneumonia, such as infiltrate, shadowing, opacification, increased density, fluid in the intrapleural cavity or interlobar fissure**
++
+**AND** 
+. **New initiation of respiratory support or escalation of existing level of respiratory support for ≥ 2 days$$*$$ after at least 2 days of stability or improvement**
++
+**AND**
+. **At least FOUR of the following clinical or laboratory criteria:** 
+* Organisms identified^+^ from respiratory tract
+* New/more frequent bradycardia episodes (<80/min) or unexplained tachycardia (>200/min)
+* New or more frequent tachypnoea (>60/min) or new or more frequent apnoea (> 20 s)
+* Purulent tracheal aspirate
+* New or more frequent symptoms of respiratory distress (retraction, nasal flaring, grunting, chest indrawing)
+* Temperature instability or fever (>38 °C) or hypothermia (<36.5 °C)
+* Increased respiratory secretion (more frequent endotracheal suctioning required)
+* CRP > 10 mg/L (> 1 mg/dL) or increased levels of interleukin (IL) 6 or 8^#^
+* I/T - ratio > 0.2
+****
+
+*New initiation of respiratory support or escalation of existing level of respiratory support that does not improve within less than two days:
+
+* Increase in need for FiO~2~ ≥ 0.25 (25 points) within 24 hours (daily minimum FiO~2~ values must be taken into account)
++
+OR
+* begin of non-invasive ventilatory support (excluding switch from invasive ventilation) 
++
+OR
+* begin of invasive mechanical ventilation (including switch from non-invasive ventilatory support)
+
+…that does not improve within less than 2 days: The above-mentioned condition should not improve within two days.
+
+…after at least 2 days of stability or improvement: A stable or improving baseline period of at least two days is required before the above condition occurs.
+
+ 
+
+^+^At least one organism (see below) has been identified from respiratory tract by a culture or non-culture based microbiologic testing method which is performed for purposes of clinical diagnosis or treatment (for example, NOT Active Surveillance Culture/Testing (ASC/AST)):
+
+* Fungal or bacterial pathogen from secretions of lower respiratory tract
++
+OR
+* Viral gene, antigen or antibody from secretions of upper or lower respiratory tract (e.g. EIA, FAMA, shell vial assay, PCR)
+
+
+^#^Interleukin should be used as a parameter when laboratory specifications for a pathological value have been fulfilled.

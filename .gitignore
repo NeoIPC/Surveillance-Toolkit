@@ -6,3 +6,13 @@
 reports/**/*.html
 reports/**/*.md
 reports/**/*_files/**
+build
+artifacts
+doc/protocol/NeoIPC-Antibiotics*.adoc
+doc/protocol/NeoIPC-Infectious-Agents*.adoc
+doc/protocol/NeoIPC-Core-Protocol*.xml
+doc/protocol/img/NeoIPC-Core-Decision-Flow*.svg
+doc/protocol/img/NeoIPC-Core-Master-Data-Collection-Sheet-Image*.svg
+doc/protocol/img/NeoIPC-Core-Master-Data-Collection-Sheet*.svg
+doc/protocol/img/NeoIPC-Core-Title-Page*.svg
+doc/protocol/img/Preview-Watermark*.svg

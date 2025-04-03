@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+    <data name="title" xml:space="preserve">
+        <value>Master Data Collection Sheet</value>
+    </data>
+    <data name="subtitle" xml:space="preserve">
+        <value>NeoIPC – Core Module</value>
+    </data>
+</root>

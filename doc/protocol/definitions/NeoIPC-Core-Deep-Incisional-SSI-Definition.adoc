@@ -1,0 +1,26 @@
+.Deep incisional SSI
+[%unbreakable]
+****
+. **First symptoms occur within 30 or 90^#^ days after the operation**
++
+**AND**
+. **Infection involves deep soft tissues of the incision (for example, fascial and muscle layers)**
++
+**AND**
+. **Patient has at least ONE of the following:**
+.. Purulent drainage from the deep incision.
+.. A deep incision that spontaneously dehisces, or is deliberately opened or aspirated by a surgeon, physician* or physician designee
++
+**AND**
++
+Organism(s) identified from the deep soft tissues of the incision by a culture or non-culture based microbiologic testing method which is performed for purposes of clinical diagnosis or treatment (for example, not Active Surveillance Culture/Testing (ASC/AST)) or culture or non-culture based microbiologic testing method is not performed. A culture or non-culture-based test from the deep soft tissues of the incision that has a negative finding does not meet this criterion.
++
+**AND** 
++
+Patient has at least one of the following signs or symptoms: Temperature instability, fever (> 38 °C) or hypothermia (< 36.5 °C); localized pain or tenderness.
+.. An abscess or other evidence of infection involving the deep incision that is detected on gross anatomical or histopathologic exam, or imaging test.
+****
+
+^#^Follow-up of 90 days applies when an implant was left in place.
+
+*The term physician for the purpose of application of the NHSN SSI criteria may be interpreted to mean a surgeon, infectious disease physician, emergency physician, another physician on the case, or physician’s designee (nurse practitioner or physician’s assistant).

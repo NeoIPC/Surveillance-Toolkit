@@ -1,0 +1,32 @@
+.Clinical Sepsis
+[%unbreakable]
+****
+. **Absence of positive microbiological blood and/or cerebrospinal fluid culture**
++
+**AND**
+. **Treatment with FIVE or more days of intravenous antibiotics was initiated$$*$$**
++
+**AND**
+. **Patient has at least TWO of the following clinical or laboratory features of generalized infection:**
+* Temperature instability, fever (> 38 °C) or hypothermia (< 36.5 °C)
+* New/more frequent bradycardia episodes (<80/min) or unexplained tachycardia (>200/min)
+* Impaired peripheral perfusion (Capillary refill time of > 3s or skin mottling or core/peripheral temperature gap > 2 °C)
+* New/more frequent episodes of apnoea (>20s) or increase in oxygen demand or ventilatory support
+* Enteral feeding intolerance, abdominal distension or ileus
+* Irritability, lethargy, apathy or unstable condition
+* Unexplained metabolic acidosis (base excess < −10 mmol/L; <−10 mEq/L)
+* New and unexplained hyperglycaemia (> 140 mg/dl; > 7.8 mmol/L) or hypoglycaemia (< 40 mg/dl; <2.2 mmol/L)
+* At least one of the following laboratory findings:
+** Platelet count of < 100 × 10^9^/L (<100 × 10^3^/μL)
+** WBC < 4 × 10^9^/L or > 20 × 10^9^/L (< 4 × 10^3^/μL or > 20 × 10^3^/μL)
+** CRP > 10 mg/L (> 1 mg/dL)
+** Procalcitonin ≥ 2μg/L (2 ng/mL; 200 ng/dL)
+** I/T-Ratio > 0.2 (ratio of immature granulocytes to total granulocytes)
+** Increased levels of interleukin (IL) 6 or 8
+****
+
+*Antibiotic treatment for at least five days was initiated.
+The day of the first dose and the day of the last dose are counted.
+Days where no dose was administered between the first and the last dose (e.g., skipped doses because of high drug levels in therapeutic drug monitoring) are counted as if a dose had been administered.
+Days after the last dose are not counted regardless of the patient's measured or assumed drug level.
+If the infant died, was discharged, or transferred before the end of the five-day course of intravenous antibiotics, this condition is met if treatment was scheduled for five days or more.

@@ -1,0 +1,41 @@
+optionSet_code,code,property,needs_translation,default,translated
+NEOIPC_ASA_SCORE,1,NAME,t,ASA I - A normal healthy patient,ASA I - Ein normaler gesunder Patient
+NEOIPC_ASA_SCORE,2,NAME,t,ASA II - A patient with mild systemic disease,ASA II – Ein Patient mit leichter systemischer Erkrankung
+NEOIPC_ASA_SCORE,3,NAME,t,ASA III - A patient with severe systemic disease,ASA III – Ein Patient mit schwerer systemischer Erkrankung
+NEOIPC_ASA_SCORE,4,NAME,t,ASA IV - A patient with severe systemic disease that is a constant threat to life,"ASA IV - Ein Patient mit schwerer systemischer Erkrankung, die eine ständige Bedrohung für das Leben darstellt"
+NEOIPC_ASA_SCORE,5,NAME,t,ASA V - A moribund patient who is not expected to survive without the operation,"ASA V - Ein moribunder (todkranker) Patient, der ohne die Operation voraussichtlich nicht überleben wird"
+NEOIPC_ADMISSION_TYPES,1,NAME,t,Delivered here; for infants delivered in your hospital,Hier entbunden; für in Ihrem Krankenhaus entbundene Säuglinge
+NEOIPC_ADMISSION_TYPES,2,NAME,t,Transferred to your hospital on the day of birth,Am Tag der Geburt in Ihr Zentrum verlegt
+NEOIPC_ADMISSION_TYPES,3,NAME,t,Transferred to your hospital the day after birth or later,Am Tag nach der Geburt oder später in Ihr Krankenhaus verlegt
+NEOIPC_DELIVERY_MODES,1,NAME,f,Vaginal,
+NEOIPC_DELIVERY_MODES,2,NAME,t,Caesarean section (elective),Sectio caesarea (elektiv)
+NEOIPC_DELIVERY_MODES,3,NAME,t,Caesarean section (emergency),Sectio caesarea (Notfall)
+NEOIPC_HAP_RESPIRATORY_TRACT_SAMPLE_SOURCES,1,NAME,t,Upper respiratory tract,Obere Atemwege
+NEOIPC_HAP_RESPIRATORY_TRACT_SAMPLE_SOURCES,2,NAME,t,Lower respiratory tract,Untere Atemwege
+NEOIPC_SEX_VALUES,f,NAME,t,Female,Weiblich
+NEOIPC_SEX_VALUES,m,NAME,t,Male,Männlich
+NEOIPC_SEX_VALUES,u,NAME,t,Undetermined,Unbestimmt
+NEOIPC_WOUND_CLASSES,1,NAME,t,Clean,Sauber
+NEOIPC_WOUND_CLASSES,2,NAME,t,Clean-Contaminated,Sauber-Kontaminiert
+NEOIPC_WOUND_CLASSES,3,NAME,t,Contaminated,Kontaminiert
+NEOIPC_WOUND_CLASSES,4,NAME,t,Infected,Infiziert
+NEOIPC_YES_NO_NO_FOLLOWUP,1,NAME,t,Yes,Ja
+NEOIPC_YES_NO_NO_FOLLOWUP,0,NAME,t,No,Nein
+NEOIPC_YES_NO_NO_FOLLOWUP,-1,NAME,t,No follow-up,Keine Nachverfolgung
+NEOIPC_BSI_DEVICE_ASS,0,NAME,t,Not catheter-associated,Nicht Gefäßkatheter-assoziiert
+NEOIPC_BSI_DEVICE_ASS,1,NAME,t,CVC-associated,ZVK-assoziiert
+NEOIPC_BSI_DEVICE_ASS,2,NAME,t,PVC-associated,PVK-assoziiert
+NEOIPC_BSI_PATHOGEN_RECOVERED_FROM,1,NAME,t,Blood,Blut
+NEOIPC_BSI_PATHOGEN_RECOVERED_FROM,2,NAME,t,Cerebrospinal fluid,Liquor
+NEOIPC_BSI_PATHOGEN_RECOVERED_FROM,3,NAME,t,Blood and Cerebrospinal fluid,Blut und Liquor
+NEOIPC_HAP_DEVICE_ASS,0,NAME,t,Not ventilatory support associated,Nicht beatmungsassoziiert
+NEOIPC_HAP_DEVICE_ASS,1,NAME,t,"Non-invasive ventilatory support (CPAP, HFNC)",Non-Invasive Beatmung
+NEOIPC_HAP_DEVICE_ASS,2,NAME,t,Invasive ventilation (intubation),Invasive Beatumung
+NEOIPC_SSI_TYPE,1,NAME,t,...only skin and subcutaneous tissue of the incision,...nur Haut und subkutanes Gewebe der OP-Wunde
+NEOIPC_SSI_TYPE,2,NAME,t,...deep soft tissues of the incision,...tiefes Weichgewebe der OP-Wunde
+NEOIPC_SSI_TYPE,3,NAME,t,"...tissue deeper than fascial/muscle layer, opened/manipulated during the procedure","...Gewebe tiefer als Faszien-/Muskelschicht, während der Prozedur eröffnet/manipuliert"
+NEOIPC_SURVEILLANCE_END_REASON,1,NAME,t,Discharge/Transfer,Entlassung/Verlegung
+NEOIPC_SURVEILLANCE_END_REASON,2,NAME,t,Death,Tod
+NEOIPC_YES_NO_NOT_TESTED,1,NAME,t,Yes,Ja
+NEOIPC_YES_NO_NOT_TESTED,0,NAME,t,No,Nein
+NEOIPC_YES_NO_NOT_TESTED,-1,NAME,t,Not tested,Nicht getested

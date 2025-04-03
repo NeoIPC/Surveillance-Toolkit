@@ -1,0 +1,5 @@
+.Infección del torrente sanguíneo confirmada por laboratorio con patógeno reconocido.
+[%unbreakable]
+****
+**Patógeno reconocido recuperado de un cultivo de sangre y/o de líquido cefalorraquídeo**.
+****

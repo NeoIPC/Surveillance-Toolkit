@@ -1,0 +1,16 @@
+.Infektion von Organen und Körperhöhlen im Operationsgebiet
+[%unbreakable]
+****
+. **Erste Symptome treten innerhalb von 30 oder 90^#^ Tagen nach der Operation auf**
++
+**UND**
+. **Die Infektion betrifft irgendeinen Teil des Körpers, der tiefer als die Faszien-/Muskelschichten liegt und während des operativen Eingriffs geöffnet oder manipuliert wurde.**
++
+**UND**
+. **Der Patient hat mindestens EINES der folgenden Symptome:**
+.. Eitrige Drainage aus einer in das Organ/die Körperhöhle eingebrachten Drainage (z. B. geschlossenes Saugdrainagesystem, offene Drainage, T-Drainage, CT-gestützte Drainage).
+.. Erreger, die aus der Flüssigkeit oder dem Gewebe des Organs/der Körperhöhle durch eine Kultur oder eine nicht auf Kulturen basierende mikrobiologische Testmethode identifiziert wurden, die zu Zwecken der klinischen Diagnose oder Behandlung durchgeführt wird (z. B. keine Befunde aus Diagnostik zum Zweck des mikrobiologischen Screenings). 
+.. Ein Abszess oder andere Anzeichen einer Infektion des Organs/der Körperhöhle, die bei einer körperlichen oder histopathologischen Untersuchung festgestellt werden, oder bildgebende Tests, die auf eine Infektion hindeuten.
+****
+
+^#^Eine Nachverfolgungszeit von 90 Tagen gilt, wenn ein Implantat an Ort und Stelle belassen wurde.

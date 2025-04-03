@@ -1,0 +1,31 @@
+.Symptombasierte NEC
+[%unbreakable]
+****
+. **Mindestens EINES der folgenden radiologischen Zeichen (bildgebende Verfahren: Röntgen, CT, MRT, Ultraschall):**
++
+--
+* Pneumoperitoneum
+* Pneumatosis intestinalis
+* Portalvenöses Gas (hepatobiliäres Gas)
+* Stehende Darmschlingen (≥ 24h) 
+--
+**UND**
+. **Mindestens EINES der folgenden klinischen Anzeichen:**
+* Aufgeblähtes Abdomen
+* Verfärbung des Abdomens oder glänzende/rötliche Hautfarbe
+* Wiederholtes okkultes (Guajak-Test) oder sichtbares Blut im Stuhl (keine Analfissur)
+* Zunehmendes/ausgeprägtes Erbrechen (z. B. gallig oder blutig)
+* Vermehrte Magenreste von der vorherigen Fütterung
+* Galliges Magenaspirat (nicht von transpylorischer Ernährungssonde)
+****
+
+**ODER**
+
+.Chirurgische NEC
+[%unbreakable]
+****
+**Mindestens EINER der folgenden chirurgischen oder pathologischen Befunde:**
+
+* Ausgedehnte Darmnekrose (> 2 cm des Darms betroffen)
+* Pneumatosis intestinalis
+****

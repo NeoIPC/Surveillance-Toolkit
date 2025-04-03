@@ -1,0 +1,46 @@
+.Neumonía
+[%unbreakable]
+****
+. **Al menos UNO de los siguientes hallazgos de imagen (tecnologías de imagen: radiografía, TC, RM, ecografía) muestra nuevos cambios sugestivos de neumonía, como infiltrado, sombra, opacificación, aumento de densidad, líquido en la cavidad intrapleural o fisura interlobar**
++
+**Y**
+. **Nuevo inicio de asistencia respiratoria o aumento del nivel de asistencia respiratoria existente durante ≥ 2 días$$*$$ tras al menos 2 días de estabilidad o mejoría**
++
+**Y**
+. **Al menos CUATRO de los siguientes criterios clínicos o de laboratorio:**
+* Organismos identificados^+^ de las vías respiratorias
+* Episodios nuevos o más frecuentes de bradicardia (<80/min) o taquicardia inexplicada (>200/min)
+* Taquipnea nueva o más frecuente (>60/min) o apnea nueva o más frecuente (> 20 s)
+* Aspirado traqueal purulento
+* Síntomas nuevos o más frecuentes de dificultad respiratoria (retracción, aleteo nasal, gruñidos, distensión torácica).
+* Inestabilidad térmica o fiebre (>38 °C) o hipotermia (<36,5 °C)
+* Aumento de la secreción respiratoria (necesidad de aspiración endotraqueal más frecuente)
+* PCR > 10 mg/L (> 1 mg/dL) o aumento de los niveles de interleucina (IL) 6 u 8^#^.
+* Relación I/T > 0,2
+****
+
+* Nuevo inicio de asistencia respiratoria o aumento del nivel existente de asistencia respiratoria que no mejora en menos de dos días:
+
+* Aumento de la necesidad de FiO~2~ ≥ 0,25 (25 puntos) en 24 horas (deben tenerse en cuenta los valores mínimos diarios de FiO~2~).
++
+O
+* Inicio de soporte ventilatorio no invasivo (excluido el cambio de ventilación invasiva).
++
+O
+* inicio de ventilación mecánica invasiva (incluido el cambio de soporte ventilatorio no invasivo)
+
+…that no mejora en menos de 2 días: Que no mejore en menos de 2 días.
+
+…después de al menos 2 días de estabilidad o mejoría: Se requiere un periodo basal de estabilidad o mejoría de al menos dos días antes de que se produzca la condición anterior.
+
+
+
+^+^Se ha identificado al menos un organismo (véase a continuación) en las vías respiratorias mediante un cultivo o un método de prueba microbiológica no basado en cultivos que se realiza con fines de diagnóstico clínico o tratamiento (por ejemplo, cultivo/prueba de vigilancia NO activa (ASC/AST)):
+
+* Patógeno fúngico o bacteriano de secreciones del tracto respiratorio inferior
++
+O
+* Gen, antígeno o anticuerpo viral de secreciones del tracto respiratorio superior o inferior (por ejemplo, EIA, FAMA, ensayo en vial de concha, PCR)
+
+
+^#^La interleucina debe utilizarse como parámetro cuando se cumplan las especificaciones del laboratorio para un valor patológico.

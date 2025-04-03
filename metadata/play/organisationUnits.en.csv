@@ -1,0 +1,767 @@
+code,property,needs_translation,default,translated
+AL_TEST,NAME,t,Testhospital - Shqipëria,Testhospital - Albania
+AL_TEST,SHORT_NAME,f,Testhosp. AL,
+AL_TEST_TEST,NAME,t,Testdepartment - Shqipëria,Testdepartment - Albania
+AL_TEST_TEST,SHORT_NAME,f,Testdep. AL,
+AT1,NAME,t,Ostösterreich,East Austria
+AT1,SHORT_NAME,t,Ostösterreich,East Austria
+AT1_TEST,NAME,t,Testhospital - Ostösterreich,Testhospital - East Austria
+AT1_TEST,SHORT_NAME,f,Testhosp. AT1,
+AT1_TEST_TEST,NAME,t,Testdepartment - Ostösterreich,Testdepartment - East Austria
+AT1_TEST_TEST,SHORT_NAME,f,Testdep. AT1,
+AT2,NAME,t,Südösterreich,South Austria
+AT2,SHORT_NAME,t,Südösterreich,South Austria
+AT2_TEST,NAME,t,Testhospital - Südösterreich,Testhospital - South Austria
+AT2_TEST,SHORT_NAME,f,Testhosp. AT2,
+AT2_TEST_TEST,NAME,t,Testdepartment - Südösterreich,Testdepartment - South Austria
+AT2_TEST_TEST,SHORT_NAME,f,Testdep. AT2,
+AT3,NAME,t,Westösterreich,West Austria
+AT3,SHORT_NAME,t,Westösterreich,West Austria
+AT3_TEST,NAME,t,Testhospital - Westösterreich,Testhospital - West Austria
+AT3_TEST,SHORT_NAME,f,Testhosp. AT3,
+AT3_TEST_TEST,NAME,t,Testdepartment - Westösterreich,Testdepartment - West Austria
+AT3_TEST_TEST,SHORT_NAME,f,Testdep. AT3,
+BE1,NAME,t,Région de Bruxelles-Capitale/Brussels Hoofdstedelijk Gewest,Brussels-Capital Region
+BE1,SHORT_NAME,t,Bruxelles-Capitale/Brussels Hoofdstedelijk,Brussels-Capital Region
+BE1_TEST,NAME,t,Testhospital - Région de Bruxelles-Capitale/Brussels Hoofdstedelijk Gewest,Testhospital - Brussels-Capital Region
+BE1_TEST,SHORT_NAME,f,Testhosp. BE1,
+BE1_TEST_TEST,NAME,t,Testdepartment - Région de Bruxelles-Capitale/Brussels Hoofdstedelijk Gewest,Testdepartment - Brussels-Capital Region
+BE1_TEST_TEST,SHORT_NAME,f,Testdep. BE1,
+BE2,NAME,t,Vlaams Gewest,Flemish Region
+BE2,SHORT_NAME,t,Vlaams Gewest,Flemish Region
+BE2_TEST,NAME,t,Testhospital - Vlaams Gewest,Testhospital - Flemish Region
+BE2_TEST,SHORT_NAME,f,Testhosp. BE2,
+BE2_TEST_TEST,NAME,t,Testdepartment - Vlaams Gewest,Testdepartment - Flemish Region
+BE2_TEST_TEST,SHORT_NAME,f,Testdep. BE2,
+BE3,NAME,t,Région wallonne,Walloon Region
+BE3,SHORT_NAME,t,Région wallonne,Walloon Region
+BE3_TEST,NAME,t,Testhospital - Région wallonne,Testhospital - Walloon Region
+BE3_TEST,SHORT_NAME,f,Testhosp. BE3,
+BE3_TEST_TEST,NAME,t,Testdepartment - Région wallonne,Testdepartment - Walloon Region
+BE3_TEST_TEST,SHORT_NAME,f,Testdep. BE3,
+BG3,NAME,t,Северна и Югоизточна България [Severna i Yugoiztochna Bulgaria],Northern and Eastern Bulgaria
+BG3,SHORT_NAME,t,Северна и Югоизточна България,Northern and Eastern Bulgaria
+BG3_TEST,NAME,t,Testhospital - Северна и Югоизточна България,Testhospital - Northern and Eastern Bulgaria
+BG3_TEST,SHORT_NAME,f,Testhosp. BG3,
+BG3_TEST_TEST,NAME,t,Testdepartment - Северна и Югоизточна България,Testdepartment - Northern and Eastern Bulgaria
+BG3_TEST_TEST,SHORT_NAME,f,Testdep. BG3,
+BG4,NAME,t,Югозападна и Южна централна България [Yugozapadna i Yuzhna tsentralna Bulgaria],South-Western and South-Central Bulgaria
+BG4,SHORT_NAME,t,Югозападна и Южна централна България,South-Western and South-Central Bulgaria
+BG4_TEST,NAME,t,Testhospital - Югозападна и Южна централна България,Testhospital - South-Western and South-Central Bulgaria
+BG4_TEST,SHORT_NAME,f,Testhosp. BG4,
+BG4_TEST_TEST,NAME,t,Testdepartment - Югозападна и Южна централна България,Testdepartment - South-Western and South-Central Bulgaria
+BG4_TEST_TEST,SHORT_NAME,f,Testdep. BG4,
+CH_TEST,NAME,t,Testhospital - Schweiz/Suisse/Svizzera,Testhospital - Switzerland
+CH_TEST,SHORT_NAME,f,Testhosp. CH,
+CH_TEST_TEST,NAME,t,Testdepartment - Schweiz/Suisse/Svizzera,Testdepartment - Switzerland
+CH_TEST_TEST,SHORT_NAME,f,Testdep. CH,
+CY_TEST,NAME,t,Testhospital - Κύπρος,Testhospital - Cyprus
+CY_TEST,SHORT_NAME,f,Testhosp. CY,
+CY_TEST_TEST,NAME,t,Testdepartment - Κύπρος,Testdepartment - Cyprus
+CY_TEST_TEST,SHORT_NAME,f,Testdep. CY,
+CZ_TEST,NAME,t,Testhospital - Česko,Testhospital - Czech Republic
+CZ_TEST,SHORT_NAME,f,Testhosp. CZ,
+CZ_TEST_TEST,NAME,t,Testdepartment - Česko,Testdepartment - Czech Republic
+CZ_TEST_TEST,SHORT_NAME,f,Testdep. CZ,
+DE1,NAME,f,Baden-Württemberg,
+DE1,SHORT_NAME,f,Baden-Württemberg,
+DE1_TEST,NAME,f,Testhospital - Baden-Württemberg,
+DE1_TEST,SHORT_NAME,f,Testhosp. DE1,
+DE1_TEST_TEST,NAME,f,Testdepartment - Baden-Württemberg,
+DE1_TEST_TEST,SHORT_NAME,f,Testdep. DE1,
+DE2,NAME,t,Bayern,Bavaria
+DE2,SHORT_NAME,t,Bayern,Bavaria
+DE2_TEST,NAME,t,Testhospital - Bayern,Testhospital - Bavaria
+DE2_TEST,SHORT_NAME,f,Testhosp. DE2,
+DE2_TEST_TEST,NAME,t,Testdepartment - Bayern,Testdepartment - Bavaria
+DE2_TEST_TEST,SHORT_NAME,f,Testdep. DE2,
+DE3,NAME,f,Berlin,
+DE3,SHORT_NAME,f,Berlin,
+DE3_TEST,NAME,f,Testhospital - Berlin,
+DE3_TEST,SHORT_NAME,f,Testhosp. DE3,
+DE3_TEST_TEST,NAME,f,Testdepartment - Berlin,
+DE3_TEST_TEST,SHORT_NAME,f,Testdep. DE3,
+DE4,NAME,f,Brandenburg,
+DE4,SHORT_NAME,f,Brandenburg,
+DE4_TEST,NAME,f,Testhospital - Brandenburg,
+DE4_TEST,SHORT_NAME,f,Testhosp. DE4,
+DE4_TEST_TEST,NAME,f,Testdepartment - Brandenburg,
+DE4_TEST_TEST,SHORT_NAME,f,Testdep. DE4,
+DE5,NAME,f,Bremen,
+DE5,SHORT_NAME,f,Bremen,
+DE5_TEST,NAME,f,Testhospital - Bremen,
+DE5_TEST,SHORT_NAME,f,Testhosp. DE5,
+DE5_TEST_TEST,NAME,f,Testdepartment - Bremen,
+DE5_TEST_TEST,SHORT_NAME,f,Testdep. DE5,
+DE6,NAME,f,Hamburg,
+DE6,SHORT_NAME,f,Hamburg,
+DE6_TEST,NAME,f,Testhospital - Hamburg,
+DE6_TEST,SHORT_NAME,f,Testhosp. DE6,
+DE6_TEST_TEST,NAME,f,Testdepartment - Hamburg,
+DE6_TEST_TEST,SHORT_NAME,f,Testdep. DE6,
+DE7,NAME,t,Hessen,Hesse
+DE7,SHORT_NAME,t,Hessen,Hesse
+DE7_TEST,NAME,t,Testhospital - Hessen,Testhospital - Hesse
+DE7_TEST,SHORT_NAME,f,Testhosp. DE7,
+DE7_TEST_TEST,NAME,t,Testdepartment - Hessen,Testdepartment - Hesse
+DE7_TEST_TEST,SHORT_NAME,f,Testdep. DE7,
+DE8,NAME,f,Mecklenburg-Vorpommern,
+DE8,SHORT_NAME,f,Mecklenburg-Vorpommern,
+DE8_TEST,NAME,f,Testhospital - Mecklenburg-Vorpommern,
+DE8_TEST,SHORT_NAME,f,Testhosp. DE8,
+DE8_TEST_TEST,NAME,f,Testdepartment - Mecklenburg-Vorpommern,
+DE8_TEST_TEST,SHORT_NAME,f,Testdep. DE8,
+DE9,NAME,t,Niedersachsen,Lower Saxony
+DE9,SHORT_NAME,t,Niedersachsen,Lower Saxony
+DE9_TEST,NAME,t,Testhospital - Niedersachsen,Testhospital - Lower Saxony
+DE9_TEST,SHORT_NAME,f,Testhosp. DE9,
+DE9_TEST_TEST,NAME,t,Testdepartment - Niedersachsen,Testdepartment - Lower Saxony
+DE9_TEST_TEST,SHORT_NAME,f,Testdep. DE9,
+DEA,NAME,t,Nordrhein-Westfalen,North Rhine-Westphalia
+DEA,SHORT_NAME,t,Nordrhein-Westfalen,North Rhine-Westphalia
+DEA_TEST,NAME,t,Testhospital - Nordrhein-Westfalen,Testhospital - North Rhine-Westphalia
+DEA_TEST,SHORT_NAME,f,Testhosp. DEA,
+DEA_TEST_TEST,NAME,t,Testdepartment - Nordrhein-Westfalen,Testdepartment - North Rhine-Westphalia
+DEA_TEST_TEST,SHORT_NAME,f,Testdep. DEA,
+DEB,NAME,t,Rheinland-Pfalz,Rhineland-Palatinate
+DEB,SHORT_NAME,t,Rheinland-Pfalz,Rhineland-Palatinate
+DEB_TEST,NAME,t,Testhospital - Rheinland-Pfalz,Testhospital - Rhineland-Palatinate
+DEB_TEST,SHORT_NAME,f,Testhosp. DEB,
+DEB_TEST_TEST,NAME,t,Testdepartment - Rheinland-Pfalz,Testdepartment - Rhineland-Palatinate
+DEB_TEST_TEST,SHORT_NAME,f,Testdep. DEB,
+DEC,NAME,f,Saarland,
+DEC,SHORT_NAME,f,Saarland,
+DEC_TEST,NAME,f,Testhospital - Saarland,
+DEC_TEST,SHORT_NAME,f,Testhosp. DEC,
+DEC_TEST_TEST,NAME,f,Testdepartment - Saarland,
+DEC_TEST_TEST,SHORT_NAME,f,Testdep. DEC,
+DED,NAME,t,Sachsen,Saxony
+DED,SHORT_NAME,t,Sachsen,Saxony
+DED_TEST,NAME,t,Testhospital - Sachsen,Testhospital - Saxony
+DED_TEST,SHORT_NAME,f,Testhosp. DED,
+DED_TEST_TEST,NAME,t,Testdepartment - Sachsen,Testdepartment - Saxony
+DED_TEST_TEST,SHORT_NAME,f,Testdep. DED,
+DEE,NAME,t,Sachsen-Anhalt,Saxony-Anhalt
+DEE,SHORT_NAME,t,Sachsen-Anhalt,Saxony-Anhalt
+DEE_TEST,NAME,t,Testhospital - Sachsen-Anhalt,Testhospital - Saxony-Anhalt
+DEE_TEST,SHORT_NAME,f,Testhosp. DEE,
+DEE_TEST_TEST,NAME,t,Testdepartment - Sachsen-Anhalt,Testdepartment - Saxony-Anhalt
+DEE_TEST_TEST,SHORT_NAME,f,Testdep. DEE,
+DEF,NAME,f,Schleswig-Holstein,
+DEF,SHORT_NAME,f,Schleswig-Holstein,
+DEF_TEST,NAME,f,Testhospital - Schleswig-Holstein,
+DEF_TEST,SHORT_NAME,f,Testhosp. DEF,
+DEF_TEST_TEST,NAME,f,Testdepartment - Schleswig-Holstein,
+DEF_TEST_TEST,SHORT_NAME,f,Testdep. DEF,
+DEG,NAME,t,Thüringen,Thuringia
+DEG,SHORT_NAME,t,Thüringen,Thuringia
+DEG_TEST,NAME,t,Testhospital - Thüringen,Testhospital - Thuringia
+DEG_TEST,SHORT_NAME,f,Testhosp. DEG,
+DEG_TEST_TEST,NAME,t,Testdepartment - Thüringen,Testdepartment - Thuringia
+DEG_TEST_TEST,SHORT_NAME,f,Testdep. DEG,
+DK_TEST,NAME,t,Testhospital - Danmark,Testhospital - Denmark
+DK_TEST,SHORT_NAME,f,Testhosp. DK,
+DK_TEST_TEST,NAME,t,Testdepartment - Danmark,Testdepartment - Denmark
+DK_TEST_TEST,SHORT_NAME,f,Testdep. DK,
+EE_TEST,NAME,t,Testhospital - Eesti,Testhospital - Estonia
+EE_TEST,SHORT_NAME,f,Testhosp. EE,
+EE_TEST_TEST,NAME,t,Testdepartment - Eesti,Testdepartment - Estonia
+EE_TEST_TEST,SHORT_NAME,f,Testdep. EE,
+EL3,NAME,t,Αττική [Attiki],Attica
+EL3,SHORT_NAME,t,Αττική,Attica
+EL3_TEST,NAME,t,Testhospital - Αττική,Testhospital - Attica
+EL3_TEST,SHORT_NAME,f,Testhosp. EL3,
+EL3_TEST_TEST,NAME,t,Testdepartment - Αττική,Testdepartment - Attica
+EL3_TEST_TEST,SHORT_NAME,f,Testdep. EL3,
+EL4,NAME,t,"Νησιά Αιγαίου, Κρήτη [Nisia Aigaiou, Kriti]","Nisia Aigaiou, Kriti"
+EL4,SHORT_NAME,t,"Νησιά Αιγαίου, Κρήτη","Nisia Aigaiou, Kriti"
+EL4_TEST,NAME,t,"Testhospital - Νησιά Αιγαίου, Κρήτη","Testhospital - Nisia Aigaiou, Kriti"
+EL4_TEST,SHORT_NAME,f,Testhosp. EL4,
+EL4_TEST_TEST,NAME,t,"Testdepartment - Νησιά Αιγαίου, Κρήτη","Testdepartment - Nisia Aigaiou, Kriti"
+EL4_TEST_TEST,SHORT_NAME,f,Testdep. EL4,
+EL5,NAME,t,Βόρεια Ελλάδα [Voreia Elláda],Voreia Ellada
+EL5,SHORT_NAME,t,Βόρεια Ελλάδα,Voreia Ellada
+EL5_TEST,NAME,t,Testhospital - Βόρεια Ελλάδα,Testhospital - Voreia Ellada
+EL5_TEST,SHORT_NAME,f,Testhosp. EL5,
+EL5_TEST_TEST,NAME,t,Testdepartment - Βόρεια Ελλάδα,Testdepartment - Voreia Ellada
+EL5_TEST_TEST,SHORT_NAME,f,Testdep. EL5,
+EL6,NAME,t,Κεντρική Ελλάδα [Kentriki Elláda],Kentriki Ellada
+EL6,SHORT_NAME,t,Κεντρική Ελλάδα,Kentriki Ellada
+EL6_TEST,NAME,t,Testhospital - Κεντρική Ελλάδα,Testhospital - Kentriki Ellada
+EL6_TEST,SHORT_NAME,f,Testhosp. EL6,
+EL6_TEST_TEST,NAME,t,Testdepartment - Κεντρική Ελλάδα,Testdepartment - Kentriki Ellada
+EL6_TEST_TEST,SHORT_NAME,f,Testdep. EL6,
+ES1,NAME,t,Noroeste,North West
+ES1,SHORT_NAME,t,Noroeste,North West
+ES1_TEST,NAME,t,Testhospital - Noroeste,Testhospital - North West
+ES1_TEST,SHORT_NAME,f,Testhosp. ES1,
+ES1_TEST_TEST,NAME,t,Testdepartment - Noroeste,Testdepartment - North West
+ES1_TEST_TEST,SHORT_NAME,f,Testdep. ES1,
+ES2,NAME,t,Noreste,North East
+ES2,SHORT_NAME,t,Noreste,North East
+ES2_TEST,NAME,t,Testhospital - Noreste,Testhospital - North East
+ES2_TEST,SHORT_NAME,f,Testhosp. ES2,
+ES2_TEST_TEST,NAME,t,Testdepartment - Noreste,Testdepartment - North East
+ES2_TEST_TEST,SHORT_NAME,f,Testdep. ES2,
+ES3,NAME,t,Comunidad de Madrid,Community of Madrid
+ES3,SHORT_NAME,t,Comunidad de Madrid,Community of Madrid
+ES3_TEST,NAME,t,Testhospital - Comunidad de Madrid,Testhospital - Community of Madrid
+ES3_TEST,SHORT_NAME,f,Testhosp. ES3,
+ES3_TEST_TEST,NAME,t,Testdepartment - Comunidad de Madrid,Testdepartment - Community of Madrid
+ES3_TEST_TEST,SHORT_NAME,f,Testdep. ES3,
+ES4,NAME,t,Centro (ES),Centre
+ES4,SHORT_NAME,t,Centro (ES),Centre
+ES4_TEST,NAME,t,Testhospital - Centro (ES),Testhospital - Centre
+ES4_TEST,SHORT_NAME,f,Testhosp. ES4,
+ES4_TEST_TEST,NAME,t,Testdepartment - Centro (ES),Testdepartment - Centre
+ES4_TEST_TEST,SHORT_NAME,f,Testdep. ES4,
+ES5,NAME,t,Este,East
+ES5,SHORT_NAME,t,Este,East
+ES5_TEST,NAME,t,Testhospital - Este,Testhospital - East
+ES5_TEST,SHORT_NAME,f,Testhosp. ES5,
+ES5_TEST_TEST,NAME,t,Testdepartment - Este,Testdepartment - East
+ES5_TEST_TEST,SHORT_NAME,f,Testdep. ES5,
+ES6,NAME,t,Sur,South
+ES6,SHORT_NAME,t,Sur,South
+ES6_TEST,NAME,t,Testhospital - Sur,Testhospital - South
+ES6_TEST,SHORT_NAME,f,Testhosp. ES6,
+ES6_TEST_TEST,NAME,t,Testdepartment - Sur,Testdepartment - South
+ES6_TEST_TEST,SHORT_NAME,f,Testdep. ES6,
+ES7,NAME,t,Canarias,Canary Islands
+ES7,SHORT_NAME,t,Canarias,Canary Islands
+ES7_TEST,NAME,t,Testhospital - Canarias,Testhospital - Canary Islands
+ES7_TEST,SHORT_NAME,f,Testhosp. ES7,
+ES7_TEST_TEST,NAME,t,Testdepartment - Canarias,Testdepartment - Canary Islands
+ES7_TEST_TEST,SHORT_NAME,f,Testdep. ES7,
+FI1,NAME,t,Manner-Suomi,Mainland Finland
+FI1,SHORT_NAME,t,Manner-Suomi,Mainland Finland
+FI1_TEST,NAME,t,Testhospital - Manner-Suomi,Testhospital - Mainland Finland
+FI1_TEST,SHORT_NAME,f,Testhosp. FI1,
+FI1_TEST_TEST,NAME,t,Testdepartment - Manner-Suomi,Testdepartment - Mainland Finland
+FI1_TEST_TEST,SHORT_NAME,f,Testdep. FI1,
+FI2,NAME,f,Åland,
+FI2,SHORT_NAME,f,Åland,
+FI2_TEST,NAME,f,Testhospital - Åland,
+FI2_TEST,SHORT_NAME,f,Testhosp. FI2,
+FI2_TEST_TEST,NAME,f,Testdepartment - Åland,
+FI2_TEST_TEST,SHORT_NAME,f,Testdep. FI2,
+FR1,NAME,f,Ile-de-France,
+FR1,SHORT_NAME,f,Ile-de-France,
+FR1_TEST,NAME,f,Testhospital - Île-de-France,
+FR1_TEST,SHORT_NAME,f,Testhosp. FR1,
+FR1_TEST_TEST,NAME,f,Testdepartment - Île-de-France,
+FR1_TEST_TEST,SHORT_NAME,f,Testdep. FR1,
+FRB,NAME,f,Centre — Val de Loire,
+FRB,SHORT_NAME,f,Centre — Val de Loire,
+FRB_TEST,NAME,f,Testhospital - Centre — Val de Loire,
+FRB_TEST,SHORT_NAME,f,Testhosp. FRB,
+FRB_TEST_TEST,NAME,f,Testdepartment - Centre — Val de Loire,
+FRB_TEST_TEST,SHORT_NAME,f,Testdep. FRB,
+FRC,NAME,f,Bourgogne-Franche-Comté,
+FRC,SHORT_NAME,f,Bourgogne-Franche-Comté,
+FRC_TEST,NAME,f,Testhospital - Bourgogne-Franche-Comté,
+FRC_TEST,SHORT_NAME,f,Testhosp. FRC,
+FRC_TEST_TEST,NAME,f,Testdepartment - Bourgogne-Franche-Comté,
+FRC_TEST_TEST,SHORT_NAME,f,Testdep. FRC,
+FRD,NAME,t,Normandie,Normandy
+FRD,SHORT_NAME,t,Normandie,Normandy
+FRD_TEST,NAME,t,Testhospital - Normandie,Testhospital - Normandy
+FRD_TEST,SHORT_NAME,f,Testhosp. FRD,
+FRD_TEST_TEST,NAME,t,Testdepartment - Normandie,Testdepartment - Normandy
+FRD_TEST_TEST,SHORT_NAME,f,Testdep. FRD,
+FRE,NAME,f,Hauts-de-France,
+FRE,SHORT_NAME,f,Hauts-de-France,
+FRE_TEST,NAME,f,Testhospital - Hauts-de-France,
+FRE_TEST,SHORT_NAME,f,Testhosp. FRE,
+FRE_TEST_TEST,NAME,f,Testdepartment - Hauts-de-France,
+FRE_TEST_TEST,SHORT_NAME,f,Testdep. FRE,
+FRF,NAME,f,Grand Est,
+FRF,SHORT_NAME,f,Grand Est,
+FRF_TEST,NAME,f,Testhospital - Grand Est,
+FRF_TEST,SHORT_NAME,f,Testhosp. FRF,
+FRF_TEST_TEST,NAME,f,Testdepartment - Grand Est,
+FRF_TEST_TEST,SHORT_NAME,f,Testdep. FRF,
+FRG,NAME,f,Pays de la Loire,
+FRG,SHORT_NAME,f,Pays de la Loire,
+FRG_TEST,NAME,f,Testhospital - Pays de la Loire,
+FRG_TEST,SHORT_NAME,f,Testhosp. FRG,
+FRG_TEST_TEST,NAME,f,Testdepartment - Pays de la Loire,
+FRG_TEST_TEST,SHORT_NAME,f,Testdep. FRG,
+FRH,NAME,t,Bretagne,Brittany
+FRH,SHORT_NAME,t,Bretagne,Brittany
+FRH_TEST,NAME,t,Testhospital - Bretagne,Testhospital - Brittany
+FRH_TEST,SHORT_NAME,f,Testhosp. FRH,
+FRH_TEST_TEST,NAME,t,Testdepartment - Bretagne,Testdepartment - Brittany
+FRH_TEST_TEST,SHORT_NAME,f,Testdep. FRH,
+FRI,NAME,f,Nouvelle-Aquitaine,
+FRI,SHORT_NAME,f,Nouvelle-Aquitaine,
+FRI_TEST,NAME,f,Testhospital - Nouvelle-Aquitaine,
+FRI_TEST,SHORT_NAME,f,Testhosp. FRI,
+FRI_TEST_TEST,NAME,f,Testdepartment - Nouvelle-Aquitaine,
+FRI_TEST_TEST,SHORT_NAME,f,Testdep. FRI,
+FRJ,NAME,f,Occitanie,
+FRJ,SHORT_NAME,f,Occitanie,
+FRJ_TEST,NAME,f,Testhospital - Occitanie,
+FRJ_TEST,SHORT_NAME,f,Testhosp. FRJ,
+FRJ_TEST_TEST,NAME,f,Testdepartment - Occitanie,
+FRJ_TEST_TEST,SHORT_NAME,f,Testdep. FRJ,
+FRK,NAME,f,Auvergne-Rhône-Alpes,
+FRK,SHORT_NAME,f,Auvergne-Rhône-Alpes,
+FRK_TEST,NAME,f,Testhospital - Auvergne-Rhône-Alpes,
+FRK_TEST,SHORT_NAME,f,Testhosp. FRK,
+FRK_TEST_TEST,NAME,f,Testdepartment - Auvergne-Rhône-Alpes,
+FRK_TEST_TEST,SHORT_NAME,f,Testdep. FRK,
+FRL,NAME,f,Provence-Alpes-Côte d’Azur,
+FRL,SHORT_NAME,f,Provence-Alpes-Côte d’Azur,
+FRL_TEST,NAME,f,Testhospital - Provence-Alpes-Côte d’Azur,
+FRL_TEST,SHORT_NAME,f,Testhosp. FRL,
+FRL_TEST_TEST,NAME,f,Testdepartment - Provence-Alpes-Côte d’Azur,
+FRL_TEST_TEST,SHORT_NAME,f,Testdep. FRL,
+FRM,NAME,t,Corse,Corsica
+FRM,SHORT_NAME,t,Corse,Corsica
+FRM_TEST,NAME,t,Testhospital - Corse,Testhospital - Corsica
+FRM_TEST,SHORT_NAME,f,Testhosp. FRM,
+FRM_TEST_TEST,NAME,t,Testdepartment - Corse,Testdepartment - Corsica
+FRM_TEST_TEST,SHORT_NAME,f,Testdep. FRM,
+FRY,NAME,t,RUP FR — Régions Ultrapériphériques Françaises,Overseas departments and regions
+FRY,SHORT_NAME,t,RUP FR — Régions Ultrapériphériques Françaises,Overseas departments and regions
+FRY_TEST,NAME,t,Testhospital - RUP FR — Régions Ultrapériphériques Françaises,Testhospital - Overseas departments and regions
+FRY_TEST,SHORT_NAME,f,Testhosp. FRY,
+FRY_TEST_TEST,NAME,t,Testdepartment - RUP FR — Régions Ultrapériphériques Françaises,Testdepartment - Overseas departments and regions
+FRY_TEST_TEST,SHORT_NAME,f,Testdep. FRY,
+HR_TEST,NAME,t,Testhospital - Hrvatska,Testhospital - Croatia
+HR_TEST,SHORT_NAME,f,Testhosp. HR,
+HR_TEST_TEST,NAME,t,Testdepartment - Hrvatska,Testdepartment - Croatia
+HR_TEST_TEST,SHORT_NAME,f,Testdep. HR,
+HU1,NAME,t,Közép-Magyarország,Central Hungary
+HU1,SHORT_NAME,t,Közép-Magyarország,Central Hungary
+HU1_TEST,NAME,t,Testhospital - Közép-Magyarország,Testhospital - Central Hungary
+HU1_TEST,SHORT_NAME,f,Testhosp. HU1,
+HU1_TEST_TEST,NAME,t,Testdepartment - Közép-Magyarország,Testdepartment - Central Hungary
+HU1_TEST_TEST,SHORT_NAME,f,Testdep. HU1,
+HU2,NAME,t,Dunántúl,Transdanubia
+HU2,SHORT_NAME,t,Dunántúl,Transdanubia
+HU2_TEST,NAME,t,Testhospital - Dunántúl,Testhospital - Transdanubia
+HU2_TEST,SHORT_NAME,f,Testhosp. HU2,
+HU2_TEST_TEST,NAME,t,Testdepartment - Dunántúl,Testdepartment - Transdanubia
+HU2_TEST_TEST,SHORT_NAME,f,Testdep. HU2,
+HU3,NAME,t,Alföld és Észak,Great Plain and North
+HU3,SHORT_NAME,t,Alföld és Észak,Great Plain and North
+HU3_TEST,NAME,t,Testhospital - Alföld és Észak,Testhospital - Great Plain and North
+HU3_TEST,SHORT_NAME,f,Testhosp. HU3,
+HU3_TEST_TEST,NAME,t,Testdepartment - Alföld és Észak,Testdepartment - Great Plain and North
+HU3_TEST_TEST,SHORT_NAME,f,Testdep. HU3,
+IE_TEST,NAME,f,Testhospital - Ireland,
+IE_TEST,SHORT_NAME,f,Testhosp. IE,
+IE_TEST_TEST,NAME,f,Testdepartment - Ireland,
+IE_TEST_TEST,SHORT_NAME,f,Testdep. IE,
+IS_TEST,NAME,t,Testhospital - Ísland,Testhospital - Iceland
+IS_TEST,SHORT_NAME,f,Testhosp. IS,
+IS_TEST_TEST,NAME,t,Testdepartment - Ísland,Testdepartment - Iceland
+IS_TEST_TEST,SHORT_NAME,f,Testdep. IS,
+ITC,NAME,t,Nord-Ovest,North West
+ITC,SHORT_NAME,t,Nord-Ovest,North West
+ITC_TEST,NAME,t,Testhospital - Nord-Ovest,Testhospital - North West
+ITC_TEST,SHORT_NAME,f,Testhosp. ITC,
+ITC_TEST_TEST,NAME,t,Testdepartment - Nord-Ovest,Testdepartment - North West
+ITC_TEST_TEST,SHORT_NAME,f,Testdep. ITC,
+ITF,NAME,t,Sud,South
+ITF,SHORT_NAME,t,Sud,South
+ITF_TEST,NAME,t,Testhospital - Sud,Testhospital - South
+ITF_TEST,SHORT_NAME,f,Testhosp. ITF,
+ITF_TEST_TEST,NAME,t,Testdepartment - Sud,Testdepartment - South
+ITF_TEST_TEST,SHORT_NAME,f,Testdep. ITF,
+ITG,NAME,t,Isole,Islands
+ITG,SHORT_NAME,t,Isole,Islands
+ITG_TEST,NAME,t,Testhospital - Isole,Testhospital - Islands
+ITG_TEST,SHORT_NAME,f,Testhosp. ITG,
+ITG_TEST_TEST,NAME,t,Testdepartment - Isole,Testdepartment - Islands
+ITG_TEST_TEST,SHORT_NAME,f,Testdep. ITG,
+ITH,NAME,t,Nord-Est,North East
+ITH,SHORT_NAME,t,Nord-Est,North East
+ITH_TEST,NAME,t,Testhospital - Nord-Est,Testhospital - North East
+ITH_TEST,SHORT_NAME,f,Testhosp. ITH,
+ITH_TEST_TEST,NAME,t,Testdepartment - Nord-Est,Testdepartment - North East
+ITH_TEST_TEST,SHORT_NAME,f,Testdep. ITH,
+ITI,NAME,t,Centro (IT),Centre
+ITI,SHORT_NAME,t,Centro (IT),Centre
+ITI_TEST,NAME,t,Testhospital - Centro (IT),Testhospital - Centre
+ITI_TEST,SHORT_NAME,f,Testhosp. ITI,
+ITI_TEST_TEST,NAME,t,Testdepartment - Centro (IT),Testdepartment - Centre
+ITI_TEST_TEST,SHORT_NAME,f,Testdep. ITI,
+LI_TEST,NAME,f,Testhospital - Liechtenstein,
+LI_TEST,SHORT_NAME,f,Testhosp. LI,
+LI_TEST_TEST,NAME,f,Testdepartment - Liechtenstein,
+LI_TEST_TEST,SHORT_NAME,f,Testdep. LI,
+LT_TEST,NAME,t,Testhospital - Lietuva,Testhospital - Lithuania
+LT_TEST,SHORT_NAME,f,Testhosp. LT,
+LT_TEST_TEST,NAME,t,Testdepartment - Lietuva,Testdepartment - Lithuania
+LT_TEST_TEST,SHORT_NAME,f,Testdep. LT,
+LU_TEST,NAME,f,Testhospital - Luxembourg,
+LU_TEST,SHORT_NAME,f,Testhosp. LU,
+LU_TEST_TEST,NAME,f,Testdepartment - Luxembourg,
+LU_TEST_TEST,SHORT_NAME,f,Testdep. LU,
+LV_TEST,NAME,t,Testhospital - Latvija,Testhospital - Latvia
+LV_TEST,SHORT_NAME,f,Testhosp. LV,
+LV_TEST_TEST,NAME,t,Testdepartment - Latvija,Testdepartment - Latvia
+LV_TEST_TEST,SHORT_NAME,f,Testdep. LV,
+ME_TEST,NAME,t,Testhospital - Црна Гора,Testhospital - Montenegro
+ME_TEST,SHORT_NAME,f,Testhosp. ME,
+ME_TEST_TEST,NAME,t,Testdepartment - Црна Гора,Testdepartment - Montenegro
+ME_TEST_TEST,SHORT_NAME,f,Testdep. ME,
+MK_TEST,NAME,t,Testhospital - Северна Македонија,Testhospital - North Macedonia
+MK_TEST,SHORT_NAME,f,Testhosp. MK,
+MK_TEST_TEST,NAME,t,Testdepartment - Северна Македонија,Testdepartment - North Macedonia
+MK_TEST_TEST,SHORT_NAME,f,Testdep. MK,
+MT_TEST,NAME,f,Testhospital - Malta,
+MT_TEST,SHORT_NAME,f,Testhosp. MT,
+MT_TEST_TEST,NAME,f,Testdepartment - Malta,
+MT_TEST_TEST,SHORT_NAME,f,Testdep. MT,
+NL1,NAME,t,Noord-Nederland,North Netherlands
+NL1,SHORT_NAME,t,Noord-Nederland,North Netherlands
+NL1_TEST,NAME,t,Testhospital - Noord-Nederland,Testhospital - North Netherlands
+NL1_TEST,SHORT_NAME,f,Testhosp. NL1,
+NL1_TEST_TEST,NAME,t,Testdepartment - Noord-Nederland,Testdepartment - North Netherlands
+NL1_TEST_TEST,SHORT_NAME,f,Testdep. NL1,
+NL2,NAME,t,Oost-Nederland,East Netherlands
+NL2,SHORT_NAME,t,Oost-Nederland,East Netherlands
+NL2_TEST,NAME,t,Testhospital - Oost-Nederland,Testhospital - East Netherlands
+NL2_TEST,SHORT_NAME,f,Testhosp. NL2,
+NL2_TEST_TEST,NAME,t,Testdepartment - Oost-Nederland,Testdepartment - East Netherlands
+NL2_TEST_TEST,SHORT_NAME,f,Testdep. NL2,
+NL3,NAME,t,West-Nederland,West Netherlands
+NL3,SHORT_NAME,t,West-Nederland,West Netherlands
+NL3_TEST,NAME,t,Testhospital - West-Nederland,Testhospital - West Netherlands
+NL3_TEST,SHORT_NAME,f,Testhosp. NL3,
+NL3_TEST_TEST,NAME,t,Testdepartment - West-Nederland,Testdepartment - West Netherlands
+NL3_TEST_TEST,SHORT_NAME,f,Testdep. NL3,
+NL4,NAME,t,Zuid-Nederland,South Netherlands
+NL4,SHORT_NAME,t,Zuid-Nederland,South Netherlands
+NL4_TEST,NAME,t,Testhospital - Zuid-Nederland,Testhospital - South Netherlands
+NL4_TEST,SHORT_NAME,f,Testhosp. NL4,
+NL4_TEST_TEST,NAME,t,Testdepartment - Zuid-Nederland,Testdepartment - South Netherlands
+NL4_TEST_TEST,SHORT_NAME,f,Testdep. NL4,
+NO_TEST,NAME,t,Testhospital - Norge,Testhospital - Norway
+NO_TEST,SHORT_NAME,f,Testhosp. NO,
+NO_TEST_TEST,NAME,t,Testdepartment - Norge,Testdepartment - Norway
+NO_TEST_TEST,SHORT_NAME,f,Testdep. NO,
+PL2,NAME,t,Makroregion południowy,South Macroregion
+PL2,SHORT_NAME,t,Makroregion południowy,South Macroregion
+PL2_TEST,NAME,t,Testhospital - Makroregion południowy,Testhospital - South Macroregion
+PL2_TEST,SHORT_NAME,f,Testhosp. PL2,
+PL2_TEST_TEST,NAME,t,Testdepartment - Makroregion południowy,Testdepartment - South Macroregion
+PL2_TEST_TEST,SHORT_NAME,f,Testdep. PL2,
+PL4,NAME,t,Makroregion północno-zachodni,North-west Macroregion
+PL4,SHORT_NAME,t,Makroregion północno-zachodni,North-west Macroregion
+PL4_TEST,NAME,t,Testhospital - Makroregion północno-zachodni,Testhospital - North-west Macroregion
+PL4_TEST,SHORT_NAME,f,Testhosp. PL4,
+PL4_TEST_TEST,NAME,t,Testdepartment - Makroregion północno-zachodni,Testdepartment - North-west Macroregion
+PL4_TEST_TEST,SHORT_NAME,f,Testdep. PL4,
+PL5,NAME,t,Makroregion południowo-zachodni,South-west Macroregion
+PL5,SHORT_NAME,t,Makroregion południowo-zachodni,South-west Macroregion
+PL5_TEST,NAME,t,Testhospital - Makroregion południowo-zachodni,Testhospital - South-west Macroregion
+PL5_TEST,SHORT_NAME,f,Testhosp. PL5,
+PL5_TEST_TEST,NAME,t,Testdepartment - Makroregion południowo-zachodni,Testdepartment - South-west Macroregion
+PL5_TEST_TEST,SHORT_NAME,f,Testdep. PL5,
+PL6,NAME,t,Makroregion północny,North Macroregion
+PL6,SHORT_NAME,t,Makroregion północny,North Macroregion
+PL6_TEST,NAME,t,Testhospital - Makroregion północny,Testhospital - North Macroregion
+PL6_TEST,SHORT_NAME,f,Testhosp. PL6,
+PL6_TEST_TEST,NAME,t,Testdepartment - Makroregion północny,Testdepartment - North Macroregion
+PL6_TEST_TEST,SHORT_NAME,f,Testdep. PL6,
+PL7,NAME,t,Makroregion centralny,Central Macroregion
+PL7,SHORT_NAME,t,Makroregion centralny,Central Macroregion
+PL7_TEST,NAME,t,Testhospital - Makroregion centralny,Testhospital - Central Macroregion
+PL7_TEST,SHORT_NAME,f,Testhosp. PL7,
+PL7_TEST_TEST,NAME,t,Testdepartment - Makroregion centralny,Testdepartment - Central Macroregion
+PL7_TEST_TEST,SHORT_NAME,f,Testdep. PL7,
+PL8,NAME,t,Makroregion wschodni,East Macroregion
+PL8,SHORT_NAME,t,Makroregion wschodni,East Macroregion
+PL8_TEST,NAME,t,Testhospital - Makroregion wschodni,Testhospital - East Macroregion
+PL8_TEST,SHORT_NAME,f,Testhosp. PL8,
+PL8_TEST_TEST,NAME,t,Testdepartment - Makroregion wschodni,Testdepartment - East Macroregion
+PL8_TEST_TEST,SHORT_NAME,f,Testdep. PL8,
+PL9,NAME,t,Makroregion województwo mazowieckie,Masovian Macroregion
+PL9,SHORT_NAME,t,Makroregion województwo mazowieckie,Masovian Macroregion
+PL9_TEST,NAME,t,Testhospital - Makroregion województwo mazowieckie,Testhospital - Masovian Macroregion
+PL9_TEST,SHORT_NAME,f,Testhosp. PL9,
+PL9_TEST_TEST,NAME,t,Testdepartment - Makroregion województwo mazowieckie,Testdepartment - Masovian Macroregion
+PL9_TEST_TEST,SHORT_NAME,f,Testdep. PL9,
+PT1,NAME,t,Continente,Continental Portugal
+PT1,SHORT_NAME,t,Continente,Continental Portugal
+PT1_TEST,NAME,t,Testhospital - Continente,Testhospital - Continental Portugal
+PT1_TEST,SHORT_NAME,f,Testhosp. PT1,
+PT1_TEST_TEST,NAME,t,Testdepartment - Continente,Testdepartment - Continental Portugal
+PT1_TEST_TEST,SHORT_NAME,f,Testdep. PT1,
+PT2,NAME,t,Região Autónoma dos Açores,Azores
+PT2,SHORT_NAME,t,Região Autónoma dos Açores,Azores
+PT2_TEST,NAME,t,Testhospital - Região Autónoma dos Açores,Testhospital - Azores
+PT2_TEST,SHORT_NAME,f,Testhosp. PT2,
+PT2_TEST_TEST,NAME,t,Testdepartment - Região Autónoma dos Açores,Testdepartment - Azores
+PT2_TEST_TEST,SHORT_NAME,f,Testdep. PT2,
+PT3,NAME,t,Região Autónoma da Madeira,Madeira
+PT3,SHORT_NAME,t,Região Autónoma da Madeira,Madeira
+PT3_TEST,NAME,t,Testhospital - Região Autónoma da Madeira,Testhospital - Madeira
+PT3_TEST,SHORT_NAME,f,Testhosp. PT3,
+PT3_TEST_TEST,NAME,t,Testdepartment - Região Autónoma da Madeira,Testdepartment - Madeira
+PT3_TEST_TEST,SHORT_NAME,f,Testdep. PT3,
+RO1,NAME,t,Macroregiunea Unu,Macroregion One
+RO1,SHORT_NAME,t,Macroregiunea Unu,Macroregion One
+RO1_TEST,NAME,t,Testhospital - Macroregiunea Unu,Testhospital - Macroregion One
+RO1_TEST,SHORT_NAME,f,Testhosp. RO1,
+RO1_TEST_TEST,NAME,t,Testdepartment - Macroregiunea Unu,Testdepartment - Macroregion One
+RO1_TEST_TEST,SHORT_NAME,f,Testdep. RO1,
+RO2,NAME,t,Macroregiunea Doi,Macroregion Two
+RO2,SHORT_NAME,t,Macroregiunea Doi,Macroregion Two
+RO2_TEST,NAME,t,Testhospital - Macroregiunea Doi,Testhospital - Macroregion Two
+RO2_TEST,SHORT_NAME,f,Testhosp. RO2,
+RO2_TEST_TEST,NAME,t,Testdepartment - Macroregiunea Doi,Testdepartment - Macroregion Two
+RO2_TEST_TEST,SHORT_NAME,f,Testdep. RO2,
+RO3,NAME,t,Macroregiunea Trei,Macroregion Three
+RO3,SHORT_NAME,t,Macroregiunea Trei,Macroregion Three
+RO3_TEST,NAME,t,Testhospital - Macroregiunea Trei,Testhospital - Macroregion Three
+RO3_TEST,SHORT_NAME,f,Testhosp. RO3,
+RO3_TEST_TEST,NAME,t,Testdepartment - Macroregiunea Trei,Testdepartment - Macroregion Three
+RO3_TEST_TEST,SHORT_NAME,f,Testdep. RO3,
+RO4,NAME,t,Macroregiunea Patru,Macroregion Four
+RO4,SHORT_NAME,t,Macroregiunea Patru,Macroregion Four
+RO4_TEST,NAME,t,Testhospital - Macroregiunea Patru,Testhospital - Macroregion Four
+RO4_TEST,SHORT_NAME,f,Testhosp. RO4,
+RO4_TEST_TEST,NAME,t,Testdepartment - Macroregiunea Patru,Testdepartment - Macroregion Four
+RO4_TEST_TEST,SHORT_NAME,f,Testdep. RO4,
+RS1,NAME,t,Србија - север [Serbia - sever],Serbia - north
+RS1,SHORT_NAME,t,Србија - север,Serbia - north
+RS1_TEST,NAME,t,Testhospital - Србија - север,Testhospital - Serbia - sever
+RS1_TEST,SHORT_NAME,f,Testhosp. RS1,
+RS1_TEST_TEST,NAME,t,Testdepartment - Србија - север,Testdepartment - Serbia - sever
+RS1_TEST_TEST,SHORT_NAME,f,Testdep. RS1,
+RS2,NAME,t,Србија - југ [Serbia - jug],Serbia - south
+RS2,SHORT_NAME,t,Србија - југ,Serbia - south
+RS2_TEST,NAME,t,Testhospital - Србија - југ,Testhospital - Serbia - jug 
+RS2_TEST,SHORT_NAME,f,Testhosp. RS2,
+RS2_TEST_TEST,NAME,t,Testdepartment - Србија - југ,Testdepartment - Serbia - jug 
+RS2_TEST_TEST,SHORT_NAME,f,Testdep. RS2,
+SE1,NAME,t,Östra Sverige,East Sweden
+SE1,SHORT_NAME,t,Östra Sverige,East Sweden
+SE1_TEST,NAME,t,Testhospital - Östra Sverige,Testhospital - East Sweden
+SE1_TEST,SHORT_NAME,f,Testhosp. SE1,
+SE1_TEST_TEST,NAME,t,Testdepartment - Östra Sverige,Testdepartment - East Sweden
+SE1_TEST_TEST,SHORT_NAME,f,Testdep. SE1,
+SE2,NAME,t,Södra Sverige,South Sweden
+SE2,SHORT_NAME,t,Södra Sverige,South Sweden
+SE2_TEST,NAME,t,Testhospital - Södra Sverige,Testhospital - South Sweden
+SE2_TEST,SHORT_NAME,f,Testhosp. SE2,
+SE2_TEST_TEST,NAME,t,Testdepartment - Södra Sverige,Testdepartment - South Sweden
+SE2_TEST_TEST,SHORT_NAME,f,Testdep. SE2,
+SE3,NAME,t,Norra Sverige,North Sweden
+SE3,SHORT_NAME,t,Norra Sverige,North Sweden
+SE3_TEST,NAME,t,Testhospital - Norra Sverige,Testhospital - North Sweden
+SE3_TEST,SHORT_NAME,f,Testhosp. SE3,
+SE3_TEST_TEST,NAME,t,Testdepartment - Norra Sverige,Testdepartment - North Sweden
+SE3_TEST_TEST,SHORT_NAME,f,Testdep. SE3,
+SI_TEST,NAME,t,Testhospital - Slovenija,Testhospital - Slovenia
+SI_TEST,SHORT_NAME,f,Testhosp. SI,
+SI_TEST_TEST,NAME,t,Testdepartment - Slovenija,Testdepartment - Slovenia
+SI_TEST_TEST,SHORT_NAME,f,Testdep. SI,
+SK_TEST,NAME,t,Testhospital - Slovensko,Testhospital - Slovakia
+SK_TEST,SHORT_NAME,f,Testhosp. SK,
+SK_TEST_TEST,NAME,t,Testdepartment - Slovensko,Testdepartment - Slovakia
+SK_TEST_TEST,SHORT_NAME,f,Testdep. SK,
+TR1,NAME,t,İstanbul,Istanbul Region
+TR1,SHORT_NAME,t,İstanbul,Istanbul Region
+TR1_TEST,NAME,t,Testhospital - İstanbul,Testhospital - Istanbul Region
+TR1_TEST,SHORT_NAME,f,Testhosp. TR1,
+TR1_TEST_TEST,NAME,t,Testdepartment - İstanbul,Testdepartment - Istanbul Region
+TR1_TEST_TEST,SHORT_NAME,f,Testdep. TR1,
+TR2,NAME,t,Batı Marmara,West Marmara Region
+TR2,SHORT_NAME,t,Batı Marmara,West Marmara Region
+TR2_TEST,NAME,t,Testhospital - Batı Marmara,Testhospital - West Marmara Region
+TR2_TEST,SHORT_NAME,f,Testhosp. TR2,
+TR2_TEST_TEST,NAME,t,Testdepartment - Batı Marmara,Testdepartment - West Marmara Region
+TR2_TEST_TEST,SHORT_NAME,f,Testdep. TR2,
+TR3,NAME,t,Ege,Aegean Region
+TR3,SHORT_NAME,t,Ege,Aegean Region
+TR3_TEST,NAME,t,Testhospital - Ege,Testhospital - Aegean Region
+TR3_TEST,SHORT_NAME,f,Testhosp. TR3,
+TR3_TEST_TEST,NAME,t,Testdepartment - Ege,Testdepartment - Aegean Region
+TR3_TEST_TEST,SHORT_NAME,f,Testdep. TR3,
+TR4,NAME,t,Doğu Marmara,East Marmara Region
+TR4,SHORT_NAME,t,Doğu Marmara,East Marmara Region
+TR4_TEST,NAME,t,Testhospital - Doğu Marmara,Testhospital - East Marmara Region
+TR4_TEST,SHORT_NAME,f,Testhosp. TR4,
+TR4_TEST_TEST,NAME,t,Testdepartment - Doğu Marmara,Testdepartment - East Marmara Region
+TR4_TEST_TEST,SHORT_NAME,f,Testdep. TR4,
+TR5,NAME,t,Batı Anadolu,West Anatolia Region
+TR5,SHORT_NAME,t,Batı Anadolu,West Anatolia Region
+TR5_TEST,NAME,t,Testhospital - Batı Anadolu,Testhospital - West Anatolia Region
+TR5_TEST,SHORT_NAME,f,Testhosp. TR5,
+TR5_TEST_TEST,NAME,t,Testdepartment - Batı Anadolu,Testdepartment - West Anatolia Region
+TR5_TEST_TEST,SHORT_NAME,f,Testdep. TR5,
+TR6,NAME,t,Akdeniz,Mediterranean Region
+TR6,SHORT_NAME,t,Akdeniz,Mediterranean Region
+TR6_TEST,NAME,t,Testhospital - Akdeniz,Testhospital - Mediterranean Region
+TR6_TEST,SHORT_NAME,f,Testhosp. TR6,
+TR6_TEST_TEST,NAME,t,Testdepartment - Akdeniz,Testdepartment - Mediterranean Region
+TR6_TEST_TEST,SHORT_NAME,f,Testdep. TR6,
+TR7,NAME,t,Orta Anadolu,Central Anatolia Region
+TR7,SHORT_NAME,t,Orta Anadolu,Central Anatolia Region
+TR7_TEST,NAME,t,Testhospital - Orta Anadolu,Testhospital - Central Anatolia Region
+TR7_TEST,SHORT_NAME,f,Testhosp. TR7,
+TR7_TEST_TEST,NAME,t,Testdepartment - Orta Anadolu,Testdepartment - Central Anatolia Region
+TR7_TEST_TEST,SHORT_NAME,f,Testdep. TR7,
+TR8,NAME,t,Batı Karadeniz,West Black Sea Region
+TR8,SHORT_NAME,t,Batı Karadeniz,West Black Sea Region
+TR8_TEST,NAME,t,Testhospital - Batı Karadeniz,Testhospital - West Black Sea Region
+TR8_TEST,SHORT_NAME,f,Testhosp. TR8,
+TR8_TEST_TEST,NAME,t,Testdepartment - Batı Karadeniz,Testdepartment - West Black Sea Region
+TR8_TEST_TEST,SHORT_NAME,f,Testdep. TR8,
+TR9,NAME,t,Doğu Karadeniz,East Black Sea Region
+TR9,SHORT_NAME,t,Doğu Karadeniz,East Black Sea Region
+TR9_TEST,NAME,t,Testhospital - Doğu Karadeniz,Testhospital - East Black Sea Region
+TR9_TEST,SHORT_NAME,f,Testhosp. TR9,
+TR9_TEST_TEST,NAME,t,Testdepartment - Doğu Karadeniz,Testdepartment - East Black Sea Region
+TR9_TEST_TEST,SHORT_NAME,f,Testdep. TR9,
+TRA,NAME,t,Kuzeydoğu Anadolu,Northeast Anatolia Region
+TRA,SHORT_NAME,t,Kuzeydoğu Anadolu,Northeast Anatolia Region
+TRA_TEST,NAME,t,Testhospital - Kuzeydoğu Anadolu,Testhospital - Northeast Anatolia Region
+TRA_TEST,SHORT_NAME,f,Testhosp. TRA,
+TRA_TEST_TEST,NAME,t,Testdepartment - Kuzeydoğu Anadolu,Testdepartment - Northeast Anatolia Region
+TRA_TEST_TEST,SHORT_NAME,f,Testdep. TRA,
+TRB,NAME,t,Ortadoğu Anadolu,Central East Anatolia Region
+TRB,SHORT_NAME,t,Ortadoğu Anadolu,Central East Anatolia Region
+TRB_TEST,NAME,t,Testhospital - Ortadoğu Anadolu,Testhospital - Central East Anatolia Region
+TRB_TEST,SHORT_NAME,f,Testhosp. TRB,
+TRB_TEST_TEST,NAME,t,Testdepartment - Ortadoğu Anadolu,Testdepartment - Central East Anatolia Region
+TRB_TEST_TEST,SHORT_NAME,f,Testdep. TRB,
+TRC,NAME,t,Güneydoğu Anadolu,Southeast Anatolia Region
+TRC,SHORT_NAME,t,Güneydoğu Anadolu,Southeast Anatolia Region
+TRC_TEST,NAME,t,Testhospital - Güneydoğu Anadolu,Testhospital - Southeast Anatolia Region
+TRC_TEST,SHORT_NAME,f,Testhosp. TRC,
+TRC_TEST_TEST,NAME,t,Testdepartment - Güneydoğu Anadolu,Testdepartment - Southeast Anatolia Region
+TRC_TEST_TEST,SHORT_NAME,f,Testdep. TRC,
+UKC,NAME,f,North East (England),
+UKC,SHORT_NAME,f,North East (England),
+UKC_TEST,NAME,f,Testhospital - North East (England),
+UKC_TEST,SHORT_NAME,f,Testhosp. UKC,
+UKC_TEST_TEST,NAME,f,Testdepartment - North East (England),
+UKC_TEST_TEST,SHORT_NAME,f,Testdep. UKC,
+UKD,NAME,f,North West (England),
+UKD,SHORT_NAME,f,North West (England),
+UKD_TEST,NAME,f,Testhospital - North West (England),
+UKD_TEST,SHORT_NAME,f,Testhosp. UKD,
+UKD_TEST_TEST,NAME,f,Testdepartment - North West (England),
+UKD_TEST_TEST,SHORT_NAME,f,Testdep. UKD,
+UKE,NAME,f,Yorkshire and the Humber,
+UKE,SHORT_NAME,f,Yorkshire and the Humber,
+UKE_TEST,NAME,f,Testhospital - Yorkshire and the Humber,
+UKE_TEST,SHORT_NAME,f,Testhosp. UKE,
+UKE_TEST_TEST,NAME,f,Testdepartment - Yorkshire and the Humber,
+UKE_TEST_TEST,SHORT_NAME,f,Testdep. UKE,
+UKF,NAME,f,East Midlands (England),
+UKF,SHORT_NAME,f,East Midlands (England),
+UKF_TEST,NAME,f,Testhospital - East Midlands (England),
+UKF_TEST,SHORT_NAME,f,Testhosp. UKF,
+UKF_TEST_TEST,NAME,f,Testdepartment - East Midlands (England),
+UKF_TEST_TEST,SHORT_NAME,f,Testdep. UKF,
+UKG,NAME,f,West Midlands (England),
+UKG,SHORT_NAME,f,West Midlands (England),
+UKG_TEST,NAME,f,Testhospital - West Midlands (England),
+UKG_TEST,SHORT_NAME,f,Testhosp. UKG,
+UKG_TEST_TEST,NAME,f,Testdepartment - West Midlands (England),
+UKG_TEST_TEST,SHORT_NAME,f,Testdep. UKG,
+UKH,NAME,f,East of England,
+UKH,SHORT_NAME,f,East of England,
+UKH_TEST,NAME,f,Testhospital - East of England,
+UKH_TEST,SHORT_NAME,f,Testhosp. UKH,
+UKH_TEST_TEST,NAME,f,Testdepartment - East of England,
+UKH_TEST_TEST,SHORT_NAME,f,Testdep. UKH,
+UKI,NAME,f,London,
+UKI,SHORT_NAME,f,London,
+UKI_TEST,NAME,f,Testhospital - London,
+UKI_TEST,SHORT_NAME,f,Testhosp. UKI,
+UKI_TEST_TEST,NAME,f,Testdepartment - London,
+UKI_TEST_TEST,SHORT_NAME,f,Testdep. UKI,
+UKJ,NAME,f,South East (England),
+UKJ,SHORT_NAME,f,South East (England),
+UKJ_TEST,NAME,f,Testhospital - South East (England),
+UKJ_TEST,SHORT_NAME,f,Testhosp. UKJ,
+UKJ_TEST_TEST,NAME,f,Testdepartment - South East (England),
+UKJ_TEST_TEST,SHORT_NAME,f,Testdep. UKJ,
+UKK,NAME,f,South West (England),
+UKK,SHORT_NAME,f,South West (England),
+UKK_TEST,NAME,f,Testhospital - South West (England),
+UKK_TEST,SHORT_NAME,f,Testhosp. UKK,
+UKK_TEST_TEST,NAME,f,Testdepartment - South West (England),
+UKK_TEST_TEST,SHORT_NAME,f,Testdep. UKK,
+UKL,NAME,f,Wales,
+UKL,SHORT_NAME,f,Wales,
+UKL_TEST,NAME,f,Testhospital - Wales,
+UKL_TEST,SHORT_NAME,f,Testhosp. UKL,
+UKL_TEST_TEST,NAME,f,Testdepartment - Wales,
+UKL_TEST_TEST,SHORT_NAME,f,Testdep. UKL,
+UKM,NAME,f,Scotland,
+UKM,SHORT_NAME,f,Scotland,
+UKM_TEST,NAME,f,Testhospital - Scotland,
+UKM_TEST,SHORT_NAME,f,Testhosp. UKM,
+UKM_TEST_TEST,NAME,f,Testdepartment - Scotland,
+UKM_TEST_TEST,SHORT_NAME,f,Testdep. UKM,
+UKN,NAME,f,Northern Ireland,
+UKN,SHORT_NAME,f,Northern Ireland,
+UKN_TEST,NAME,f,Testhospital - Northern Ireland,
+UKN_TEST,SHORT_NAME,f,Testhosp. UKN,
+UKN_TEST_TEST,NAME,f,Testdepartment - Northern Ireland,
+UKN_TEST_TEST,SHORT_NAME,f,Testdep. UKN,
+ZA_EC,NAME,f,Eastern Cape,
+ZA_EC,SHORT_NAME,f,Eastern Cape,
+ZA_EC_TEST,NAME,f,Testhospital - Eastern Cape,
+ZA_EC_TEST,SHORT_NAME,f,Testhosp. ZA_EC,
+ZA_EC_TEST_TEST,NAME,f,Testdepartment - Eastern Cape,
+ZA_EC_TEST_TEST,SHORT_NAME,f,Testdep. ZA_EC,
+ZA_FS,NAME,f,Free State,
+ZA_FS,SHORT_NAME,f,Free State,
+ZA_FS_TEST,NAME,f,Testhospital - Free State,
+ZA_FS_TEST,SHORT_NAME,f,Testhosp. ZA_FS,
+ZA_FS_TEST_TEST,NAME,f,Testdepartment - Free State,
+ZA_FS_TEST_TEST,SHORT_NAME,f,Testdep. ZA_FS,
+ZA_GP,NAME,f,Gauteng,
+ZA_GP,SHORT_NAME,f,Gauteng,
+ZA_GP_TEST,NAME,f,Testhospital - Gauteng,
+ZA_GP_TEST,SHORT_NAME,f,Testhosp. ZA_GP,
+ZA_GP_TEST_TEST,NAME,f,Testdepartment - Gauteng,
+ZA_GP_TEST_TEST,SHORT_NAME,f,Testdep. ZA_GP,
+ZA_KZN,NAME,f,KwaZulu-Natal,
+ZA_KZN,SHORT_NAME,f,KwaZulu-Natal,
+ZA_KZN_TEST,NAME,f,Testhospital - KwaZulu-Natal,
+ZA_KZN_TEST,SHORT_NAME,f,Testhosp. ZA_KZN,
+ZA_KZN_TEST_TEST,NAME,f,Testdepartment - KwaZulu-Natal,
+ZA_KZN_TEST_TEST,SHORT_NAME,f,Testdep. ZA_KZN,
+ZA_LP,NAME,f,Limpopo,
+ZA_LP,SHORT_NAME,f,Limpopo,
+ZA_LP_TEST,NAME,f,Testhospital - Limpopo,
+ZA_LP_TEST,SHORT_NAME,f,Testhosp. ZA_LP,
+ZA_LP_TEST_TEST,NAME,f,Testdepartment - Limpopo,
+ZA_LP_TEST_TEST,SHORT_NAME,f,Testdep. ZA_LP,
+ZA_MP,NAME,f,Mpumalanga,
+ZA_MP,SHORT_NAME,f,Mpumalanga,
+ZA_MP_TEST,NAME,f,Testhospital - Mpumalanga,
+ZA_MP_TEST,SHORT_NAME,f,Testhosp. ZA_MP,
+ZA_MP_TEST_TEST,NAME,f,Testdepartment - Mpumalanga,
+ZA_MP_TEST_TEST,SHORT_NAME,f,Testdep. ZA_MP,
+ZA_NC,NAME,f,Northern Cape,
+ZA_NC,SHORT_NAME,f,Northern Cape,
+ZA_NC_TEST,NAME,f,Testhospital - Northern Cape,
+ZA_NC_TEST,SHORT_NAME,f,Testhosp. ZA_NC,
+ZA_NC_TEST_TEST,NAME,f,Testdepartment - Northern Cape,
+ZA_NC_TEST_TEST,SHORT_NAME,f,Testdep. ZA_NC,
+ZA_NW,NAME,f,North West,
+ZA_NW,SHORT_NAME,f,North West,
+ZA_NW_TEST,NAME,f,Testhospital - North West,
+ZA_NW_TEST,SHORT_NAME,f,Testhosp. ZA_NW,
+ZA_NW_TEST_TEST,NAME,f,Testdepartment - North West,
+ZA_NW_TEST_TEST,SHORT_NAME,f,Testdep. ZA_NW,
+ZA_WC,NAME,f,Western Cape,
+ZA_WC,SHORT_NAME,f,Western Cape,
+ZA_WC_TEST,NAME,f,Testhospital - Western Cape,
+ZA_WC_TEST,SHORT_NAME,f,Testhosp. ZA_WC,
+ZA_WC_TEST_TEST,NAME,f,Testdepartment - Western Cape,
+ZA_WC_TEST_TEST,SHORT_NAME,f,Testdep. ZA_WC,

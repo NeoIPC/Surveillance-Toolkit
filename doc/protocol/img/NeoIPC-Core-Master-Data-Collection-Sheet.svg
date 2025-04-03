@@ -1,0 +1,662 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg
+   version="1.1"
+   viewBox="0 0 21000 29700"
+   id="neoipc-core-master-data-collection-sheet"
+   aria-labelledby="Form-Title Module-Name"
+   role="form"
+   width="210mm"
+   height="297mm"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg">
+  <style
+     type="text/css"
+     id="style2"><![CDATA[
+            
+                svg {
+                    font-size: 400px;
+                    background: #FFF;
+                    font-family: "Noto Sans", Arial, Helvetica, sans-serif;
+                    dominant-baseline: middle;
+                }
+                .title {
+                    font-size: 800px;
+                    fill: #0D4F6C;
+                }
+                .subtitle {
+                    font-size: 600px;
+                    fill: #1F271B;
+                }
+                .form {
+                    fill: #FFF;
+                    stroke: black;
+                    stroke-width: 10;
+                }
+                rect.header {
+                    fill: #E6FAFC;
+                }
+                text.header {
+                    font-size: 600px;
+                    fill: #000;
+                    font-weight: bold;
+                    text-anchor: middle;
+                }
+                .note_bg {
+                    fill: #E0D3DE;
+                }
+                .label {
+                    font-weight: bold;
+                }
+                text.note {
+                    font-size: 300px;
+                    font-style: italic;
+                }
+            
+        ]]></style>
+  <rect
+     class="form"
+     width="21000"
+     height="29700"
+     id="Form-Border"
+     aria-hidden="true" />
+  <text
+     x="1000"
+     y="1600"
+     dominant-baseline="auto"
+     class="title"
+     id="Form-Title"
+     style="display:inline">Master Data Collection Sheet</text>
+  <text
+     x="1000"
+     y="2200"
+     dominant-baseline="auto"
+     class="subtitle"
+     id="Module-Name">NeoIPC – Core Module</text>
+  <image
+     xlink:href="../../build/img/img/LOGO_NEOIPC_2.png"
+     x="14300"
+     y="-20"
+     width="6344"
+     height="2810"
+     id="NeoIPC-Logo"
+     aria-hidden="true" />
+  <g
+     id="Enrolment-Group"
+     role="region"
+     aria-labelledby="Enrolment-Title">
+    <rect
+       class="form header"
+       x="1000"
+       y="2500"
+       width="19000"
+       height="1000"
+       id="Enrolment-Title-Box"
+       aria-hidden="true" />
+    <text
+       class="header"
+       x="10000"
+       y="3000"
+       id="Enrolment-Title">Enrolment</text>
+    <g
+       id="Private-Fields-Group">
+      <g
+         class="form note_bg"
+         id="Private-Fields-Box-Group"
+         aria-hidden="true">
+        <rect
+           x="1000"
+           y="3500"
+           width="10000"
+           height="750"
+           id="Patient-Id-Box" />
+        <rect
+           x="1000"
+           y="4250"
+           width="10000"
+           height="750"
+           id="Patient-Name-Box" />
+        <rect
+           x="11000"
+           y="3500"
+           width="9000"
+           height="1500"
+           id="Privacy-Note-Box" />
+      </g>
+      <text
+         x="1200"
+         y="3875"
+         id="Patient-Id"><tspan
+           id="Patient-Id-Label"
+           class="label">Patient ID:</tspan><tspan
+           id="Patient-Id-Value"
+           dx="400"
+           role="textbox"
+           contenteditable="true"
+           aria-labelledby="Patient-Id-Label"
+           aria-readonly="true" /></text>
+      <text
+         x="1200"
+         y="4625"
+         id="Patient-Name"><tspan
+           id="Patient-Name-Label"
+           class="label">Patient name:</tspan><tspan
+           id="Patient-Name-Value"
+           dx="400"
+           role="textbox"
+           contenteditable="true"
+           aria-labelledby="Patient-Name-Label"
+           aria-readonly="true" /></text>
+      <text
+         class="note"
+         x="11150"
+         y="3850"
+         id="Privacy-Note"
+         role="note"><tspan
+           x="11150"
+           dy="0"
+           id="Privacy-Note-Line-1">These fields serve to unambiguously identify the patient within</tspan><tspan
+           x="11150"
+           dy="315"
+           id="Privacy-Note-Line-2">the hospital. They are not part of the NeoIPC surveillance</tspan><tspan
+           x="11150"
+           dy="315"
+           id="Privacy-Note-Line-3">dataset and must not be transmitted to the data collection</tspan><tspan
+           x="11150"
+           dy="315"
+           id="Privacy-Note-Line-4">platform.</tspan></text>
+    </g>
+    <rect
+       class="form"
+       x="1000"
+       y="5000"
+       width="19000"
+       height="750"
+       id="Gestational-Age-Box" />
+    <text
+       x="1200"
+       y="5375"
+       id="Gestational-Age"><tspan
+         id="Gestational-Age-Label"
+         class="label">Gestational age:</tspan><tspan
+         id="Gestational-Age-Value"
+         role="textbox"
+         contenteditable="true"
+         aria-labelledby="Gestational-Age-Label"
+         aria-readonly="true"
+         dx="500" /><tspan
+         id="Gestational-Age-Hint"
+         role="note"
+         x="10000">weeks + days (e.g., 25+4)</tspan></text>
+    <rect
+       class="form"
+       x="1000"
+       y="5750"
+       width="19000"
+       height="750"
+       id="Birthweight-Box" />
+    <text
+       x="1200"
+       y="6125"
+       id="Birthweight"><tspan
+         id="Birthweight-Label"
+         class="label">Birthweight:</tspan><tspan
+         id="Birthweight-Value"
+         role="textbox"
+         contenteditable="true"
+         aria-labelledby="Birthweight-Label"
+         aria-readonly="true"
+         dx="500" /><tspan
+         id="Birthweight-Hint"
+         role="note"
+         x="10000">grams</tspan></text>
+    <rect
+       class="form"
+       x="1000"
+       y="6500"
+       width="19000"
+       height="750"
+       id="Sex-Box" />
+    <text
+       x="1200"
+       y="6875"
+       id="Sex"
+       role="radiogroup"
+       aria-labelledby="Sex-Label"
+       aria-readonly="true"><tspan
+         class="label"
+         id="Sex-Label">Sex:</tspan><tspan
+         dx="500"
+         id="Sex-Female-Radio"
+         role="radio"
+         aria-labelledby="Sex-Female-Label"
+         aria-checked="false">🔘</tspan><tspan
+         dx="0"
+         id="Sex-Female-Label">Female</tspan><tspan
+         dx="500"
+         id="Sex-Male-Radio"
+         role="radio"
+         aria-labelledby="Sex-Male-Label"
+         aria-checked="false">🔘</tspan><tspan
+         dx="0"
+         id="Sex-Male-Label">Male</tspan><tspan
+         dx="500"
+         id="Sex-Undetermined-Radio"
+         role="radio"
+         aria-labelledby="Sex-Undetermined-Label"
+         aria-checked="false">🔘</tspan><tspan
+         dx="0"
+         id="Sex-Undetermined-Label">Undetermined</tspan></text>
+    <rect
+       class="form"
+       x="1000"
+       y="7250"
+       width="19000"
+       height="750"
+       id="Delivery-Mode-Box" />
+    <text
+       x="1200"
+       y="7625"
+       id="Delivery-Mode"
+       role="radiogroup"
+       aria-labelledby="Delivery-Mode-Label"
+       aria-readonly="true"><tspan
+         class="label"
+         id="Delivery-Mode-Label">Delivery mode:</tspan><tspan
+         dx="300"
+         id="Delivery-Mode-Vaginal-Radio"
+         role="radio"
+         aria-labelledby="Delivery-Mode-Vaginal-Label"
+         aria-checked="false">🔘</tspan><tspan
+         dx="0"
+         id="Delivery-Mode-Vaginal-Label">Vaginal</tspan><tspan
+         dx="300"
+         id="Delivery-Mode-C-Section-Elective-Radio"
+         role="radio"
+         aria-labelledby="Delivery-Mode-C-Section-Elective-Label"
+         aria-checked="false">🔘</tspan><tspan
+         dx="0"
+         id="Delivery-Mode-C-Section-Elective-Label">Caesarean section (elective)</tspan><tspan
+         dx="300"
+         id="Delivery-Mode-C-Section-Emergency-Radio"
+         role="radio"
+         aria-labelledby="Delivery-Mode-C-Section-Emergency-Label"
+         aria-checked="false">🔘</tspan><tspan
+         dx="0"
+         id="Delivery-Mode-C-Section-Emergency-Label">Caesarean section (emergency)</tspan></text>
+    <rect
+       class="form"
+       x="1000"
+       y="8000"
+       width="19000"
+       height="750"
+       id="Multiple-Birth-Box" />
+    <text
+       x="1200"
+       y="8375"
+       id="Multiple-Birth"
+       role="radiogroup"
+       aria-labelledby="Multiple-Birth-Label"
+       aria-readonly="true"><tspan
+         class="label"
+         id="Multiple-Birth-Label">Multiple birth:</tspan><tspan
+         dx="500"
+         id="Multiple-Birth-Yes-Radio"
+         role="radio"
+         aria-labelledby="Multiple-Birth-Yes-Label"
+         aria-checked="false">🔘</tspan><tspan
+         dx="0"
+         id="Multiple-Birth-Yes-Label">Yes,</tspan><tspan
+         dx="100"
+         id="Number-Of-Infants-Label">total number of infants at birth:</tspan><tspan
+         id="Number-Of-Infants-Value"
+         role="textbox"
+         contenteditable="true"
+         aria-labelledby="Number-Of-Infants-Label"
+         aria-readonly="true"
+         dx="0">___________</tspan><tspan
+         dx="500"
+         id="Multiple-Birth-No-Radio"
+         role="radio"
+         aria-labelledby="Multiple-Birth-No-Label"
+         aria-checked="false">🔘</tspan><tspan
+         dx="0"
+         id="Multiple-Birth-No-Label">No</tspan></text>
+  </g>
+  <g
+     id="Admission-Information-Group"
+     role="region"
+     aria-labelledby="Admission-Information-Title">
+    <rect
+       class="form header"
+       x="1000"
+       y="8750"
+       width="19000"
+       height="1000"
+       id="Admission-Information-Title-Box" />
+    <text
+       class="header"
+       x="10000"
+       y="9250"
+       id="Admission-Information-Title">Admission Information</text>
+    <rect
+       class="form"
+       x="1000"
+       y="9750"
+       width="19000"
+       height="750"
+       id="Admission-Date-Box" />
+    <text
+       x="1200"
+       y="10125"
+       id="Admission-Date"><tspan
+         id="Admission-Date-Label"
+         class="label">Admission date:</tspan><tspan
+         id="Admission-Date-Value"
+         dx="400"
+         role="textbox"
+         contenteditable="true"
+         aria-labelledby="Admission-Date-Label"
+         aria-readonly="true" /></text>
+    <rect
+       class="form"
+       x="1000"
+       y="10500"
+       width="19000"
+       height="3750"
+       id="Admission-Type-Box" />
+    <text
+       x="1200"
+       y="10875"
+       id="Admission-Type"
+       role="radiogroup"
+       aria-labelledby="Admission-Type-Label"
+       aria-readonly="true"><tspan
+         class="label"
+         id="Admission-Type-Label">Admission type:</tspan><tspan
+         id="Admission-Type-Inborn-Radio"
+         role="radio"
+         aria-labelledby="Admission-Type-Inborn-Label"
+         aria-checked="false"
+         dy="750"
+         x="2000">🔘</tspan><tspan
+         dx="0"
+         id="Admission-Type-Inborn-Label">Admitted from delivery room (initial admission for infants delivered in your hospital)</tspan><tspan
+         id="Admission-Type-Day-Of-Birth-Radio"
+         role="radio"
+         aria-labelledby="Admission-Type-Day-Of-Birth-Label"
+         aria-checked="false"
+         dy="750"
+         x="2000">🔘</tspan><tspan
+         dx="0"
+         id="Admission-Type-Day-Of-Birth-Label">Transferred/readmitted to your hospital on the day of birth</tspan><tspan
+         id="Admission-Type-After-Day-Of-Birth-Radio"
+         role="radio"
+         aria-labelledby="Admission-Type-After-Day-Of-Birth-Label"
+         aria-checked="false"
+         x="2000"
+         dy="750">🔘</tspan><tspan
+         id="Admission-Type-After-Day-Of-Birth-Label"
+         dx="0">Transferred/readmitted to your hospital the day after birth or later</tspan><tspan
+         id="Admission-On-Day-Of-Life-Label"
+         dy="750"
+         x="3500"
+         class="label">Admission on day of life:</tspan><tspan
+         id="Admission-On-Day-Of-Life-Value"
+         role="textbox"
+         contenteditable="true"
+         aria-labelledby="Admission-On-Day-Of-Life-Label"
+         aria-readonly="true"
+         dx="0">___________</tspan></text>
+  </g>
+  <g
+     id="Surveillance-End-Group"
+     role="region"
+     aria-labelledby="Surveillance-End-Title">
+    <rect
+       class="form header"
+       x="1000"
+       y="14250"
+       width="19000"
+       height="1000"
+       id="Surveillance-End-Title-Box" />
+    <text
+       class="header"
+       x="10000"
+       y="14750"
+       id="Surveillance-End-Title">Surveillance End</text>
+    <rect
+       class="form"
+       x="1000"
+       y="15250"
+       width="19000"
+       height="750"
+       id="Surveillance-End-Date-Box" />
+    <text
+       x="1200"
+       y="15625"
+       id="Surveillance-End-Date"><tspan
+         id="Surveillance-End-Date-Label"
+         class="label">Surveillance end date:</tspan><tspan
+         id="Surveillance-End-Date-Value"
+         dx="400"
+         role="textbox"
+         contenteditable="true"
+         aria-labelledby="Surveillance-End-Date-Label"
+         aria-readonly="true" /></text>
+    <rect
+       class="form"
+       x="1000"
+       y="16000"
+       width="19000"
+       height="750"
+       id="Surveillance-End-Reason-Box" />
+    <text
+       x="1200"
+       y="16375"
+       id="Surveillance-End-Reason"
+       role="radiogroup"
+       aria-labelledby="Surveillance-End-Reason-Label"
+       aria-readonly="true"><tspan
+         class="label"
+         id="Surveillance-End-Reason-Label">Reason:</tspan><tspan
+         dx="500"
+         id="Surveillance-End-Reason-Discharge-Transfer-Radio"
+         role="radio"
+         aria-labelledby="Surveillance-End-Reason-Discharge-Transfer-Label"
+         aria-checked="false">🔘</tspan><tspan
+         dx="0"
+         id="Surveillance-End-Reason-Discharge-Transfer-Label">Discharge / Transfer</tspan><tspan
+         dx="500"
+         id="Surveillance-End-Reason-Death-Radio"
+         role="radio"
+         aria-labelledby="Surveillance-End-Reason-Death-Label"
+         aria-checked="false">🔘</tspan><tspan
+         dx="0"
+         id="Surveillance-End-Reason-Death-Label">Death</tspan></text>
+    <rect
+       class="form"
+       x="1000"
+       y="16750"
+       width="9500"
+       height="750"
+       id="Patient-Days-Box" />
+    <text
+       x="1200"
+       y="17125"
+       id="Patient-Days"><tspan
+         id="Patient-Days-Label"
+         class="label">Patient days:</tspan><tspan
+         id="Patient-Days-Value"
+         dx="400"
+         role="textbox"
+         contenteditable="true"
+         aria-labelledby="Patient-Days-Label"
+         aria-readonly="true" /></text>
+    <rect
+       class="form"
+       x="10500"
+       y="16750"
+       width="9500"
+       height="750"
+       id="Kangaroo-Care-Days-Box" />
+    <text
+       x="10700"
+       y="17125"
+       id="Kangaroo-Care-Days"><tspan
+         id="Kangaroo-Care-Days-Label"
+         class="label">Kangaroo care days:</tspan><tspan
+         id="Kangaroo-Care-Days-Value"
+         dx="400"
+         role="textbox"
+         contenteditable="true"
+         aria-labelledby="Kangaroo-Care-Days-Label"
+         aria-readonly="true" /></text>
+    <rect
+       class="form"
+       x="1000"
+       y="17500"
+       width="9500"
+       height="750"
+       id="CVC-Days-Box" />
+    <text
+       x="1200"
+       y="17875"
+       id="CVC-Days"><tspan
+         id="CVC-Days-Label"
+         class="label">CVC days:</tspan><tspan
+         id="CVC-Days-Value"
+         dx="400"
+         role="textbox"
+         contenteditable="true"
+         aria-labelledby="CVC-Days-Label"
+         aria-readonly="true" /></text>
+    <rect
+       class="form"
+       x="10500"
+       y="17500"
+       width="9500"
+       height="750"
+       id="PVC-Days-Box" />
+    <text
+       x="10700"
+       y="17875"
+       id="PVC-Days"><tspan
+         id="PVC-Days-Label"
+         class="label">PVC days:</tspan><tspan
+         id="PVC-Days-Value"
+         dx="400"
+         role="textbox"
+         contenteditable="true"
+         aria-labelledby="PVC-Days-Label"
+         aria-readonly="true" /></text>
+    <rect
+       class="form"
+       x="1000"
+       y="18250"
+       width="9500"
+       height="750"
+       id="INV-Days-Box" />
+    <text
+       x="1200"
+       y="18625"
+       id="INV-Days"><tspan
+         id="INV-Days-Label"
+         class="label">INV days:</tspan><tspan
+         id="INV-Days-Value"
+         dx="400"
+         role="textbox"
+         contenteditable="true"
+         aria-labelledby="INV-Days-Label"
+         aria-readonly="true" /></text>
+    <rect
+       class="form"
+       x="10500"
+       y="18250"
+       width="9500"
+       height="750"
+       id="NIV-Days-Box" />
+    <text
+       x="10700"
+       y="18625"
+       id="NIV-Days"><tspan
+         id="NIV-Days-Label"
+         class="label">NIV days:</tspan><tspan
+         id="NIV-Days-Value"
+         dx="400"
+         role="textbox"
+         contenteditable="true"
+         aria-labelledby="NIV-Days-Label"
+         aria-readonly="true" /></text>
+    <rect
+       class="form"
+       x="1000"
+       y="19000"
+       width="9500"
+       height="750"
+       id="Human-Milk-Days-Box" />
+    <text
+       x="1200"
+       y="19375"
+       id="Human-Milk-Days"><tspan
+         id="Human-Milk-Days-Label"
+         class="label">Human milk days:</tspan><tspan
+         id="Human-Milk-Days-Value"
+         dx="400"
+         role="textbox"
+         contenteditable="true"
+         aria-labelledby="Human-Milk-Days-Label"
+         aria-readonly="true" /></text>
+    <rect
+       class="form"
+       x="10500"
+       y="19000"
+       width="9500"
+       height="750"
+       id="Probiotic-Days-Box" />
+    <text
+       x="10700"
+       y="19375"
+       id="Probiotic-Days"><tspan
+         id="Probiotic-Days-Label"
+         class="label">Probiotic days:</tspan><tspan
+         id="Probiotic-Days-Value"
+         dx="400"
+         role="textbox"
+         contenteditable="true"
+         aria-labelledby="Probiotic-Days-Label"
+         aria-readonly="true" /></text>
+    <rect
+       class="form"
+       x="1000"
+       y="19750"
+       width="19000"
+       height="750"
+       id="Antibiotic-Days-Box" />
+    <text
+       x="1200"
+       y="20125"
+       id="Antibiotic-Days"><tspan
+         id="Antibiotic-Days-Label"
+         class="label">Antibiotic days (total):</tspan><tspan
+         id="Antibiotic-Days-Value"
+         dx="400"
+         role="textbox"
+         contenteditable="true"
+         aria-labelledby="Antibiotic-Days-Label"
+         aria-readonly="true" /></text>
+    <rect
+       class="form"
+       x="1000"
+       y="20500"
+       width="19000"
+       height="7500"
+       id="Substance-Days-Box" />
+    <text
+       x="1200"
+       y="20825"
+       id="Substance-Days"><tspan
+         id="Substance-Days-Label"
+         class="label">Antibiotic days (per substance):</tspan></text>
+  </g>
+</svg>

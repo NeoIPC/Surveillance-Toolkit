@@ -1,0 +1,266 @@
+﻿id,property,needs_translation,default,translated
+J01AA01,NAME,t,Demeclocycline,Demeclociclina
+J01FA11,NAME,t,Miocamycin,Mioamicina
+J01FA12,NAME,t,Rokitamycin,Rokitamicina
+J01FA13,NAME,t,Dirithromycin,Diritromicina
+J01FA14,NAME,t,Flurithromycin,Fluritromicina
+J01FA15,NAME,t,Telithromycin,Telitromicina
+J01FA16,NAME,t,Solithromycin,Solitromicina
+J01FF01,NAME,t,Clindamycin,Clindamicina
+J01FF02,NAME,t,Lincomycin,Lincomicina
+J01FG01,NAME,t,Pristinamycin,Pristinamicina
+J01FG02,NAME,t,Quinupristin/dalfopristin,Quinupristina/dalfopristina
+J01GA01,NAME,t,Streptomycin,Estreptomicina
+J01GA02,NAME,t,Streptoduocin,Estreptoduocina
+J01GB01,NAME,t,Tobramycin,Tobramicina
+J01GB03,NAME,t,Gentamicin,Gentamicina
+J01GB04,NAME,t,Kanamycin,Kanamicina
+J01GB05,NAME,t,Neomycin,Neomicina
+J01GB06,NAME,t,Amikacin,Amikacina
+J01GB07,NAME,t,Netilmicin,Netilmicina
+J01GB08,NAME,t,Sisomicin,Sisomicina
+J01GB09,NAME,t,Dibekacin,Dibekacina
+J01GB10,NAME,t,Ribostamycin,Ribostamicina
+J01GB11,NAME,t,Isepamicin,Isepamicina
+J01GB12,NAME,t,Arbekacin,Arbekacina
+J01GB13,NAME,t,Bekanamycin,Bekanamicina
+J01GB14,NAME,t,Plazomicin,Plazomicina
+J01MA01,NAME,t,Ofloxacin,Ofloxacina
+J01MA02,NAME,t,Ciprofloxacin,Ciprofloxacino
+J01MA03,NAME,t,Pefloxacin,Pefloxacina
+J01MA04,NAME,t,Enoxacin,Enoxacina
+J01FA10,NAME,t,Azithromycin,Azitromicina
+J01MA05,NAME,t,Temafloxacin,Temafloxacina
+J01FA09,NAME,t,Clarithromycin,Claritromicina
+J01FA07,NAME,t,Josamycin,Josamicina
+J01EB04,NAME,t,Sulfapyridine,Sulfapiridina
+J01EB05,NAME,t,Sulfafurazole,Sulfafurazol
+J01EB06,NAME,t,Sulfanilamide,Sulfanilamida
+J01EB07,NAME,t,Sulfathiazole,Sulfatiazol
+J01EB08,NAME,t,Sulfathiourea,Sulfatiourea
+J01EC01,NAME,t,Sulfamethoxazole,Sulfametoxazol
+J01EC02,NAME,t,Sulfadiazine,Sulfadiazina
+J01EC03,NAME,t,Sulfamoxole,Sulfamoxol
+J01ED01,NAME,t,Sulfadimethoxine,Sulfadimetoxina
+J01ED02,NAME,t,Sulfalene,Sulfaleno
+J01ED03,NAME,t,Sulfametomidine,Sulfametomidina
+J01ED04,NAME,t,Sulfametoxydiazine,Sulfametoxidiazina
+J01ED05,NAME,t,Sulfamethoxypyridazine,Sulfametoxipiridazina
+J01ED06,NAME,t,Sulfaperin,Sulfaperina
+J01ED07,NAME,t,Sulfamerazine,Sulfamerazina
+J01ED08,NAME,t,Sulfaphenazole,Sulfafenazol
+J01ED09,NAME,t,Sulfamazone,Sulfamazona
+J01EE01,NAME,t,Sulfamethoxazole and trimethoprim,Sulfametoxazol y trimetoprima
+J01EE02,NAME,t,Sulfadiazine and trimethoprim,Sulfadiazina y trimetoprima
+J01EE03,NAME,t,Sulfametrole and trimethoprim,Sulfametrol y trimetoprima
+J01EE04,NAME,t,Sulfamoxole and trimethoprim,Sulfamoxol y trimetoprima
+J01EE05,NAME,t,Sulfadimidine and trimethoprim,Sulfadimidina y trimetoprima
+J01EE06,NAME,t,Sulfadiazine and tetroxoprim,Sulfadiazina y tetroxoprima
+J01EE07,NAME,t,Sulfamerazine and trimethoprim,Sulfamerazina y trimetoprima
+J01FA01,NAME,t,Erythromycin,Eritromicina
+J01FA02,NAME,t,Spiramycin,Espiramicina
+J01FA03,NAME,t,Midecamycin,Midecamicina
+J01FA05,NAME,t,Oleandomycin,Oleandomicina
+J01FA06,NAME,t,Roxithromycin,Roxitromicina
+J01FA08,NAME,t,Troleandomycin,Troleandomicina
+J01EB03,NAME,t,Sulfadimidine,Sulfadimidina
+J01MA06,NAME,t,Norfloxacin,Norfloxacina
+J01MA08,NAME,t,Fleroxacin,Fleroxacina
+J01RA12,NAME,t,Ciprofloxacin and ornidazole,Ciprofloxacino y ornidazol
+J01RA13,NAME,t,Norfloxacin and tinidazole,Norfloxacino y tinidazol
+J01RA14,NAME,t,Norfloxacin and metronidazole,Norfloxacino y metronidazol
+J01RA15,NAME,t,Cefixime and ornidazole,Cefixima y ornidazol
+J01RA16,NAME,t,Cefixime and azithromycin,Cefixima y azitromicina
+J01XA01,NAME,t,Vancomycin,Vancomicina
+J01XA02,NAME,t,Teicoplanin,Teicoplanina
+J01XA03,NAME,t,Telavancin,Telavancina
+J01XA04,NAME,t,Dalbavancin,Dalbavancina
+J01XA05,NAME,t,Oritavancin,Oritavancina
+J01XB01,NAME,t,Colistin,Colistina
+J01XB02,NAME,t,Polymyxin B,Polimixina B
+J01XC01,NAME,t,Fusidic acid,Ácido fusídico
+J01XD01,NAME,t,Metronidazole,Metronidazol
+J01XD02,NAME,t,Tinidazole,Tinidazol
+J01XD03,NAME,t,Ornidazole,Ornidazol
+J01XE01,NAME,t,Nitrofurantoin,Nitrofurantoína
+J01XE02,NAME,f,Nifurtoinol,
+J01XE03,NAME,t,Furazidin,Furazidina
+J01XX01_O,NAME,t,Fosfomycin (oral),Fosfomicina (oral)
+J01XX01_P,NAME,t,Fosfomycin (parenteral),Fosfomicina (parenteral)
+J01XX02,NAME,f,Xibornol,
+J01XX03,NAME,f,Clofoctol,
+J01XX04,NAME,t,Spectinomycin,Espectinomicina
+J01XX05,NAME,t,Methenamine,Metenamina
+J01XX06,NAME,t,Mandelic acid,Ácido mandélico
+J01XX07,NAME,t,Nitroxoline,Nitroxolina
+J01XX08,NAME,f,Linezolid,
+J01XX09,NAME,t,Daptomycin,Daptomicina
+J01XX10,NAME,t,Bacitracin,Bacitracina
+J01RA11,NAME,t,Ciprofloxacin and tinidazole,Ciprofloxacino y tinidazol
+J01MA07,NAME,t,Lomefloxacin,Lomefloxacina
+J01RA10,NAME,t,Ciprofloxacin and metronidazole,Ciprofloxacino y metronidazol
+J01RA08,NAME,t,Tetracycline and oleandomycin,Tetraciclina y oleandomicina
+J01MA09,NAME,t,Sparfloxacin,Esparfloxacino
+J01MA10,NAME,t,Rufloxacin,Rufloxacino
+J01MA11,NAME,t,Grepafloxacin,Grepafloxacino
+J01MA12,NAME,t,Levofloxacin,Levofloxacino
+J01MA13,NAME,t,Trovafloxacin,Trovafloxacino
+J01MA14,NAME,t,Moxifloxacin,Moxifloxacino
+J01MA15,NAME,t,Gemifloxacin,Gemifloxacino
+J01MA16,NAME,t,Gatifloxacin,Gatifloxacino
+J01MA17,NAME,t,Prulifloxacin,Prulifloxacino
+J01MA18,NAME,t,Pazufloxacin,Pazufloxacino
+J01MA19,NAME,t,Garenoxacin,Garenoxacino
+J01MA21,NAME,t,Sitafloxacin,Sitafloxacino
+J01MA22,NAME,t,Tosufloxacin,Tosufloxacino
+J01MA23,NAME,t,Delafloxacin,Delafloxacino
+J01MA24,NAME,t,Levonadifloxacin,Levonadifloxacino
+J01MA25,NAME,t,Lascufloxacin,Lascufloxacino
+J01MB01,NAME,t,Rosoxacin,Rosoxacina
+J01MB02,NAME,t,Nalidixic acid,Ácido nalidíxico
+J01MB03,NAME,t,Piromidic acid,Ácido piromídico
+J01MB04,NAME,t,Pipemidic acid,Ácido pipemídico
+J01MB05,NAME,t,Oxolinic acid,Ácido oxolínico
+J01MB06,NAME,t,Cinoxacin,Cinoxacina
+J01MB07,NAME,t,Flumequine,Flumequina
+J01MB08,NAME,t,Nemonoxacin,Nemonoxacina
+J01RA03,NAME,t,Cefuroxime and metronidazole,Cefuroxima y metronidazol
+J01RA04,NAME,t,Spiramycin and metronidazole,Espiramicina y metronidazol
+J01RA05,NAME,t,Levofloxacin and ornidazole,Levofloxacina y ornidazol
+J01RA06,NAME,t,Cefepime and amikacin,Cefepime y amikacina
+J01RA07,NAME,t,"Azithromycin, fluconazole and secnidazole","Azitromicina, fluconazol y secnidazol"
+J01RA09,NAME,t,Ofloxacin and ornidazole,Ofloxacina y ornidazol
+J01XX11,NAME,f,Tedizolid,
+J01EB02,NAME,t,Sulfamethizole,Sulfametozol
+J01EA03,NAME,f,Iclaprim,
+J01CA18,NAME,t,Hetacillin,Hetacilina
+J01CA19,NAME,t,Aspoxicillin,Aspoxicilina
+J01CE01,NAME,t,Benzylpenicillin,Bencilpenicilina
+J01CE02,NAME,t,Phenoxymethylpenicillin,Fenoximetilpenicilina
+J01CE03,NAME,t,Propicillin,Propicilina
+J01CE04,NAME,t,Azidocillin,Azidocilina
+J01CE05,NAME,t,Pheneticillin,Feneticilina
+J01CE06,NAME,t,Penamecillin,Penamecilina
+J01CE07,NAME,t,Clometocillin,Clometocilina
+J01CE08,NAME,t,Benzathine benzylpenicillin,Bencilpenicilina benzatina
+J01CE09,NAME,t,Procaine benzylpenicillin,Bencilpenicilina procaína
+J01CE10,NAME,t,Benzathine phenoxymethylpenicillin,Fenoximetilpenicilina benzatínica
+J01CF01,NAME,t,Dicloxacillin,Dicloxacilina
+J01CF02,NAME,t,Cloxacillin,Cloxacilina
+J01CF03,NAME,t,Meticillin,Meticilina
+J01CF04,NAME,t,Oxacillin,Oxacilina
+J01CF05,NAME,t,Flucloxacillin,Flucloxacilina
+J01CF06,NAME,t,Nafcillin,Nafcilina
+J01CG01,NAME,f,Sulbactam,
+J01CG02,NAME,f,Tazobactam,
+J01CR01,NAME,t,Ampicillin and beta-lactamase inhibitor,Ampicilina e inhibidor de la betalactamasa
+J01CR02,NAME,t,Amoxicillin and beta-lactamase inhibitor,Amoxicilina e inhibidor de la betalactamasa
+J01CR03,NAME,t,Ticarcillin and beta-lactamase inhibitor,Ticarcilina e inhibidor de la betalactamasa
+J01CR04,NAME,t,Sultamicillin,Sultamicilina
+J01CR05,NAME,t,Piperacillin and beta-lactamase inhibitor,Piperacilina e inhibidor de la betalactamasa
+J01DB01,NAME,t,Cefalexin,Cefalexina
+J01DB02,NAME,t,Cefaloridine,Cefaloridina
+J01DB03,NAME,t,Cefalotin,Cefalotina
+J01DB04,NAME,t,Cefazolin,Cefazolina
+J01CA17,NAME,t,Temocillin,Temocilina
+J01DB05,NAME,f,Cefadroxil,
+J01CA16,NAME,t,Sulbenicillin,Sulbenicilina
+J01CA14,NAME,t,Metampicillin,Metampicilina
+J01AA02,NAME,t,Doxycycline,Doxiciclina
+J01AA03,NAME,t,Chlortetracycline,Clortetraciclina
+J01AA04,NAME,t,Lymecycline,Limeciclina
+J01AA05,NAME,t,Metacycline,Metaciclina
+J01AA06,NAME,t,Oxytetracycline,Oxitetraciclina
+J01AA07,NAME,t,Tetracycline,Tetraciclina
+J01AA08_O,NAME,t,Minocycline (oral),Minociclina (oral)
+J01AA08_P,NAME,t,Minocycline (parenteral),Minociclina (parenteral)
+J01AA09,NAME,t,Rolitetracycline,Rolitetraciclina
+J01AA10,NAME,t,Penimepicycline,Penimepiciclina
+J01AA11,NAME,t,Clomocycline,Clomociclina
+J01AA12,NAME,t,Tigecycline,Tigeciclina
+J01AA13,NAME,t,Eravacycline,Eravaciclina
+J01AA14,NAME,t,Sarecycline,Sareciclina
+J01AA15,NAME,t,Omadacycline,Omadaciclina
+J01BA01,NAME,t,Chloramphenicol,Cloranfenicol
+J01BA02,NAME,t,Thiamphenicol,Tiamfenicol
+J01CA01,NAME,t,Ampicillin,Ampicilina
+J01CA02,NAME,t,Pivampicillin,Pivampicilina
+J01CA03,NAME,t,Carbenicillin,Carbenicilina
+J01CA04,NAME,t,Amoxicillin,Amoxicilina
+J01CA05,NAME,t,Carindacillin,Carindacilina
+J01CA06,NAME,t,Bacampicillin,Bacampicilina
+J01CA07,NAME,t,Epicillin,Epicilina
+J01CA08,NAME,f,Pivmecillinam,
+J01CA09,NAME,t,Azlocillin,Azlocilina
+J01CA10,NAME,t,Mezlocillin,Mezlocilina
+J01CA11,NAME,f,Mecillinam,
+J01CA12,NAME,t,Piperacillin,Piperacilina
+J01CA13,NAME,t,Ticarcillin,Ticarcilina
+J01CA15,NAME,t,Talampicillin,Talampicilina
+J01EB01,NAME,t,Sulfaisodimidine,Sulfaisodimidina
+J01DB06,NAME,t,Cefazedone,Cefazedona
+J01DB08,NAME,t,Cefapirin,Cefapirina
+J01DD16,NAME,f,Cefditoren,
+J01DD17,NAME,t,Cefcapene,Cefcapeno
+J01DD18,NAME,f,Cefteram,
+J01DD51,NAME,t,Cefotaxime and beta-lactamase inhibitor,Cefotaxima e inhibidor de la betalactamasa
+J01DD52,NAME,t,Ceftazidime and beta-lactamase inhibitor,Ceftazidima e inhibidor de la betalactamasa
+J01DD62,NAME,t,Cefoperazone and beta-lactamase inhibitor,Cefoperazona e inhibidor de la betalactamasa
+J01DD63,NAME,t,Ceftriaxone and beta-lactamase inhibitor,Ceftriaxona e inhibidor de la betalactamasa
+J01DD64,NAME,t,Cefpodoxime and beta-lactamase inhibitor,Cefpodoxima e inhibidor de la betalactamasa
+J01DE01,NAME,t,Cefepime,Cefepima
+J01DE02,NAME,f,Cefpirome,
+J01DE03,NAME,f,Cefozopran,
+J01DF01,NAME,f,Aztreonam,
+J01DF02,NAME,f,Carumonam,
+J01DH02,NAME,f,Meropenem,
+J01DH03,NAME,f,Ertapenem,
+J01DH04,NAME,f,Doripenem,
+J01DH05,NAME,f,Biapenem,
+J01DH06,NAME,f,Tebipenem pivoxil,
+J01DH51,NAME,t,Imipenem and cilastatin,Imipenem y cilastatina
+J01DH52,NAME,t,Meropenem and vaborbactam,Meropenem y vaborbactam
+J01DH55,NAME,t,Panipenem and betamipron,Panipenem y betamipron
+J01DH56,NAME,t,"Imipenem, cilastatin and relebactam","Imipenem, cilastatina y relebactam"
+J01DI01,NAME,t,Ceftobiprole medocaril,Ceftobiprol medocaril
+J01DI02,NAME,t,Ceftaroline fosamil,Ceftarolina fosamil
+J01DI03,NAME,f,Faropenem,
+J01DI04,NAME,f,Cefiderocol,
+J01DI54,NAME,t,Ceftolozane and beta-lactamase inhibitor,Ceftolozane e inhibidor de la betalactamasa
+J01EA01,NAME,t,Trimethoprim,Trimetoprima
+J01EA02,NAME,f,Brodimoprim,
+J01DD15,NAME,f,Cefdinir,
+J01DB07,NAME,t,Cefatrizine,Cefatrizina
+J01DD14,NAME,f,Ceftibuten,
+J01DD12,NAME,t,Cefoperazone,Cefoperazona
+J01DB09,NAME,t,Cefradine,Cefradina
+J01DB10,NAME,t,Cefacetrile,Cefacetrilo
+J01DB11,NAME,t,Cefroxadine,Cefroxadina
+J01DB12,NAME,t,Ceftezole,Ceftezol
+J01DC01,NAME,t,Cefoxitin,Cefoxitina
+J01DC02,NAME,t,Cefuroxime,Cefuroxima
+J01DC03,NAME,f,Cefamandole,
+J01DC04,NAME,f,Cefaclor,
+J01DC05,NAME,f,Cefotetan,
+J01DC06,NAME,f,Cefonicid,
+J01DC07,NAME,f,Cefotiam,
+J01DC08,NAME,f,Loracarbef,
+J01DC09,NAME,t,Cefmetazole,Cefmetazol
+J01DC10,NAME,f,Cefprozil,
+J01DC11,NAME,t,Ceforanide,Ceforanida
+J01DC12,NAME,f,Cefminox,
+J01DC13,NAME,t,Cefbuperazone,Cefbuperazona
+J01DC14,NAME,f,Flomoxef,
+J01DD01,NAME,t,Cefotaxime,Cefotaxima
+J01DD02,NAME,t,Ceftazidime,Ceftazidima
+J01DD03,NAME,t,Cefsulodin,Cefsulodina
+J01DD04,NAME,t,Ceftriaxone,Ceftriaxona
+J01DD05,NAME,t,Cefmenoxime,Cefmenoxima
+J01DD06,NAME,f,Latamoxef,
+J01DD07,NAME,t,Ceftizoxime,Ceftizoxima
+J01DD08,NAME,t,Cefixime,Cefixima
+J01DD09,NAME,t,Cefodizime,Cefodizima
+J01DD10,NAME,f,Cefetamet,
+J01DD11,NAME,t,Cefpiramide,Cefpiramida
+J01DD13,NAME,t,Cefpodoxime,Cefpodoxima
+J01XX12,NAME,t,Lefamulin,Lefamulina

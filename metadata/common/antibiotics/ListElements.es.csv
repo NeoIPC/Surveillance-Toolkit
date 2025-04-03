@@ -1,0 +1,4 @@
+id,property,needs_translation,default,translated
+atc_code,VALUE,t,ATC-Code,Código ATC
+aware_category,VALUE,t,AWaRe Category,Categoría AWaRe
+substance,VALUE,t,Substance,Sustancia

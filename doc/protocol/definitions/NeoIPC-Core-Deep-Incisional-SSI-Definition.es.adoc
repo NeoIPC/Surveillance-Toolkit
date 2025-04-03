@@ -1,0 +1,26 @@
+.ISQ incisional profunda
+[%unbreakable]
+****
+. **Los primeros síntomas aparecen entre 30 y 90^#^ días después de la operación**
++
+**Y**
+. **La infección afecta a los tejidos blandos profundos de la incisión (por ejemplo, las capas fasciales y musculares)**.
++
+**Y**
+. **El paciente presenta al menos UNO de los siguientes síntomas:**
+.. Drenaje purulento de la incisión profunda.
+.. Una incisión profunda que se dehace espontáneamente, o es abierta o aspirada deliberadamente por un cirujano, médico* o médico designado.
++
+**Y**
++
+Organismo(s) identificado(s) a partir de los tejidos blandos profundos de la incisión mediante un método de prueba microbiológica basado en cultivo o no basado en cultivo que se realiza con fines de diagnóstico clínico o tratamiento (por ejemplo, cultivo/prueba de vigilancia no activa (ASC/AST)) o no se realiza un método de prueba microbiológica basado en cultivo o no basado en cultivo. Un cultivo o prueba no basada en cultivo de los tejidos blandos profundos de la incisión que tenga un resultado negativo no cumple este criterio.
++
+**Y**
++
+El paciente presenta al menos uno de los siguientes signos o síntomas: Inestabilidad térmica, fiebre (> 38 °C) o hipotermia (< 36,5 °C); dolor o sensibilidad localizados.
+.. Un absceso u otra evidencia de infección que afecte a la incisión profunda y que se detecte en un examen anatómico o histopatológico macroscópico, o en una prueba de imagen.
+****
+
+^#^Se aplica un seguimiento de 90 días cuando se ha dejado un implante en su sitio.
+
+*El término médico a efectos de la aplicación de los criterios de ISQ de la NHSN puede interpretarse como un cirujano, un médico especialista en enfermedades infecciosas, un médico de urgencias, otro médico del caso o una persona designada por el médico (enfermero o asistente médico).

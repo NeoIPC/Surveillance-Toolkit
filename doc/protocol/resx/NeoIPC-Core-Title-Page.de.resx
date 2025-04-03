@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+    <data name="funding_statement" xml:space="preserve">
+        <value>Dieses Projekt wurde durch das Forschungs- und Innovationsprogramm Horizont 2020 der Europäischen Union unter der Finanzhilfevereinbarung Nr. 965328 finanziert.</value>
+    </data>
+    <data name="neoipc_project" xml:space="preserve">
+        <value>NeoIPC Projekt</value>
+    </data>
+    <data name="translated_by" xml:space="preserve">
+        <value>Übersetzt von Brar Piening</value>
+    </data>
+    <data name="licensed_under" xml:space="preserve">
+        <value>lizensiert unter</value>
+    </data>
+    <data name="license_url" xml:space="preserve">
+        <value>https://creativecommons.org/licenses/by/4.0/deed.de</value>
+    </data>
+</root>

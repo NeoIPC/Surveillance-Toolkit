@@ -1,0 +1,37 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - main
+      - ProtocolV2
+    tags:
+      - '*'
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+    build-docs:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Prepare environment
+              shell: bash
+              run: |
+                sudo apt-get update -qq
+                sudo apt-get install -qq pandoc librsvg2-bin fnt bison flex libffi-dev libxml2-dev libgdk-pixbuf2.0-dev libcairo2-dev libpango1.0-dev libwebp-dev fonts-lyx
+                sudo gem install mathematical:1.6.18 asciidoctor-pdf asciidoctor-bibtex asciidoctor-diagram asciimath asciidoctor-mathematical
+                sudo npm install -g @linthtml/linthtml
+                sudo fnt update
+                sudo fnt install notosans
+
+            - name: Build
+              shell: pwsh
+              run: ./scripts/Make-NeoIPC-Core-Protocol.ps1 -InformationAction Continue -WarningAction:Stop
+
+            - name: Upload artifacts
+              uses: actions/upload-artifact@v4
+              with:
+                name: NeoIPC-Docs-Preview
+                path: ./artifacts/

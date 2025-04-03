@@ -1,0 +1,32 @@
+.Klinische Sepsis
+[%unbreakable]
+****
+. **Fehlen einer positiven mikrobiologischen Blut- und/oder Liquorkultur**
++
+**UND**
+. **Eine Behandlung mit intravenösen Antibiotika über FÜNF oder mehr Tage wurde eingeleitet$$*$$**
++
+**UND**
+. **Der Patient weist mindestens ZWEI der folgenden klinischen oder Labormerkmale einer generalisierten Infektion auf:**
+* Temperaturinstabilität, Fieber (> 38 °C) oder Hypothermie (< 36,5 °C)
+* Neue/häufigere Bradykardie-Episoden (< 80/min) oder ungeklärte Tachykardie (> 200/min)
+* Beeinträchtigte periphere Durchblutung (Rekapillarisierungszeit von > 3 s oder marmorierte Haut oder Kern-/Peripherietemperaturunterschied > 2 °C)
+* Neue/häufigere Episoden von Apnoe (> 20 s) oder Anstieg des Sauerstoffbedarfs oder der Beatmungsunterstützung
+* Intoleranz gegenüber enteraler Ernährung, aufgeblähtes Abdomen oder Ileus
+* Irritabilität, Lethargie, Apathie oder instabiler Allgemenzustand
+* Ungeklärte metabolische Azidose (Basenüberschuss < -10 mmol/l; (< -10 mEq/l)
+* Neue und ungeklärte Hyperglykämie (> 140 mg/dl; > 7,8 mmol/l) oder Hypoglykämie (< 40 mg/dl; < 2,2 mmol/l)
+* Mindestens einer der folgenden Laborbefunde:
+** Thrombozytenzahl von < 100 × 10⁹/l (< 100 × 10³/μl)
+** Leukozyten < 4 × 10⁹/l oder > 20 × 10⁹/l (< 4 × 10³/μl oder > 20 × 10³/μl)
+** CRP > 10 mg/l (> 1 mg/dl)
+** Procalcitonin ≥ 2 μg/l (≥ 2 ng/ml oder ≥ 200 ng/dl)
+** I/T-Ratio > 0,2 (Verhältnis von unreifen Granulozyten zu den gesamten Granulozyten)
+** Erhöhte Werte von Interleukin (IL) 6 oder 8
+****
+
+*Es wurde eine Antibiotikabehandlung von mindestens fünf Tagen eingeleitet.
+Gezählt werden der Tag der ersten Dosis und der Tag der letzten Dosis.
+Tage, an denen zwischen der ersten und der letzten Dosis keine Dosis verabreicht wurde (z. B. ausgelassene Dosen aufgrund hoher Arzneimittelspiegel in der therapeutischen Arzneimittelüberwachung), werden gezählt, als ob eine Dosis verabreicht worden wäre.
+Tage nach der letzten Dosis werden nicht gezählt, unabhängig vom gemessenen oder angenommenen Medikamentenspiegel des Patienten.
+Wenn das Kind vor dem Ende der fünftägigen Behandlung mit intravenösen Antibiotika verstirbt, entlassen oder verlegt wird, ist diese Bedingung erfüllt, wenn die Behandlung für fünf oder mehr Tage geplant war.

@@ -1,0 +1,79 @@
+code,property,needs_translation,default,translated
+NEOIPC,NAME,t,The NeoIPC Project,Das NeoIPC Projekt
+NEOIPC,SHORT_NAME,f,NeoIPC,
+AL,NAME,t,Shqipëria,Albanien
+AL,SHORT_NAME,t,Shqipëria,Albanien
+AT,NAME,f,Österreich,
+AT,SHORT_NAME,f,Österreich,
+BE,NAME,t,Belgique/België,Belgien
+BE,SHORT_NAME,t,Belgique/België,Belgien
+BG,NAME,t,България [Bulgaria],Bulgarien
+BG,SHORT_NAME,t,България,Bulgarien
+CH,NAME,t,Schweiz/Suisse/Svizzera,Schweiz
+CH,SHORT_NAME,t,Schweiz/Suisse/Svizzera,Schweiz
+CY,NAME,t,Κύπρος [Kýpros],Zypern
+CY,SHORT_NAME,t,Κύπρος,Zypern
+CZ,NAME,t,Česko,Tschechien
+CZ,SHORT_NAME,t,Česko,Tschechien
+DE,NAME,f,Deutschland,
+DE,SHORT_NAME,f,Deutschland,
+DK,NAME,t,Danmark,Dänemark
+DK,SHORT_NAME,t,Danmark,Dänemark
+EE,NAME,t,Eesti,Estland
+EE,SHORT_NAME,t,Eesti,Estland
+EL,NAME,t,Ελλάδα [Elláda],Griechenland
+EL,SHORT_NAME,t,Ελλάδα,Griechenland
+ES,NAME,t,España,Spanien
+ES,SHORT_NAME,t,España,Spanien
+FI,NAME,t,Suomi/Finland,Finnland
+FI,SHORT_NAME,t,Suomi/Finland,Finnland
+FR,NAME,t,France,Frankreich
+FR,SHORT_NAME,t,France,Frankreich
+HR,NAME,t,Hrvatska,Kroatien
+HR,SHORT_NAME,t,Hrvatska,Kroatien
+HU,NAME,t,Magyarország,Ungarn
+HU,SHORT_NAME,t,Magyarország,Ungarn
+IE,NAME,t,Éire/Ireland,Irland
+IE,SHORT_NAME,t,Éire/Ireland,Irland
+IS,NAME,t,Ísland,Island
+IS,SHORT_NAME,t,Ísland,Island
+IT,NAME,t,Italia,Italien
+IT,SHORT_NAME,t,Italia,Italien
+LI,NAME,f,Liechtenstein,
+LI,SHORT_NAME,f,Liechtenstein,
+LT,NAME,t,Lietuva,Litauen
+LT,SHORT_NAME,t,Lietuva,Litauen
+LU,NAME,t,Luxembourg,Luxemburg
+LU,SHORT_NAME,t,Luxembourg,Luxemburg
+LV,NAME,t,Latvija,Lettland
+LV,SHORT_NAME,t,Latvija,Lettland
+ME,NAME,t,Црна Гора [Crna Gora],Montenegro
+ME,SHORT_NAME,t,Црна Гора,Montenegro
+MK,NAME,t,Северна Македонија [Severna Makedonija],Nordmazedonien
+MK,SHORT_NAME,t,Северна Македонија,Nordmazedonien
+MT,NAME,f,Malta,
+MT,SHORT_NAME,f,Malta,
+NL,NAME,t,Nederland,Niederlande
+NL,SHORT_NAME,t,Nederland,Niederlande
+NO,NAME,t,Norge,Norwegen
+NO,SHORT_NAME,t,Norge,Norwegen
+PL,NAME,t,Polska,Polen
+PL,SHORT_NAME,t,Polska,Polen
+PT,NAME,f,Portugal,
+PT,SHORT_NAME,f,Portugal,
+RO,NAME,t,România,Rumänien
+RO,SHORT_NAME,t,România,Rumänien
+RS,NAME,t,Srbija/Сpбија [Serbia],Serbien
+RS,SHORT_NAME,t,Srbija/Сpбија,Serbien
+SE,NAME,t,Sverige,Schweden
+SE,SHORT_NAME,t,Sverige,Schweden
+SI,NAME,t,Slovenija,Slowenien
+SI,SHORT_NAME,t,Slovenija,Slowenien
+SK,NAME,t,Slovensko,Slowakei
+SK,SHORT_NAME,t,Slovensko,Slowakei
+TR,NAME,t,Türkiye,Türkei
+TR,SHORT_NAME,t,Türkiye,Türkei
+UK,NAME,t,United Kingdom,Vereinigtes Königreich
+UK,SHORT_NAME,t,United Kingdom,Vereinigtes Königreich
+ZA,NAME,t,Aforika Borwa/Afrika Borwa/Afrika-Dzonga/Afurika Tshipembe/iNingizimu Afrika/iSewula Afrika/South Africa/Suid-Afrika/uMzantsi Afrika,Südafrika
+ZA,SHORT_NAME,t,South Africa,Südafrika

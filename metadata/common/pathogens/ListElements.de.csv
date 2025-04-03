@@ -1,0 +1,30 @@
+id,property,needs_translation,default,translated
+3gcr,VALUE,f,3GCR,
+assumed_pathogenicity,VALUE,t,Assumed Pathogenicity,Angenommene Pathogenität
+bacterial_genus,VALUE,t,Bacterial genus,Bakteriengattung
+bacterial_group,VALUE,t,Group of bacterial species,Bakteriengruppe
+bacterial_serotype,VALUE,t,Bacterial serotype,Bakterieller Serotyp
+bacterial_species,VALUE,t,Bacterial species,Bakterienart
+bacterial_species_complex,VALUE,t,Bacterial species complex,Bakterieller Artenkomplex
+bacterial_subspecies,VALUE,t,Bacterial subspecies,Bakterielle Unterart
+carbapenems,VALUE,t,Carbapenems,Carbapeneme
+colistin,VALUE,f,Colistin,
+common_commensal,VALUE,t,Common commensal,Gewöhnlicher Kommensale
+fungal_genus,VALUE,t,Fungal genus,Pilzgattung
+fungal_species,VALUE,t,Fungal species,Pilzart
+fungal_species_complex,VALUE,t,Fungal species complex,Artenkomplex von Pilzen
+fungal_variety,VALUE,t,Fungal variety,Pilzvarietät
+mrsa,VALUE,f,MRSA,
+name,VALUE,f,Name,
+recognised_pathogen,VALUE,t,Recognised pathogen,Anerkannter Krankheitserreger
+recorded_resistances,VALUE,t,Recorded Resistances,Erfasste Resistenzen
+synonym_for,VALUE,t,synonym for,Synonym für
+type,VALUE,t,Type,Typ
+unknown,VALUE,t,Unknown,Unbekannt
+viral_clade,VALUE,t,Viral clade,Virale Klade
+viral_family,VALUE,t,Viral family,Virenfamilie
+viral_genus,VALUE,t,Viral genus,Virengattung
+viral_group,VALUE,t,Viral group,Virengruppe
+viral_serotype,VALUE,t,Viral serotype,Viraler Serotyp
+viral_species,VALUE,t,Viral species,Virenart
+vre,VALUE,f,VRE,

@@ -1,0 +1,30 @@
+.ISQ incisional superficial
+[%unbreakable]
+****
+. **Los primeros síntomas aparecen en los 30 días siguientes a la operación**
++
+**Y**
+. **La infección sólo afecta a la piel y al tejido subcutáneo de la incisión**.
++
+**Y**
+. **El paciente presenta al menos UNO de los siguientes síntomas:**
+[loweralpha]
+.. Drenaje purulento de la incisión superficial.
+.. Organismo(s) identificado(s) a partir de una muestra obtenida asépticamente de la incisión superficial o del tejido subcutáneo mediante un método de prueba microbiológica basado en cultivo o no basado en cultivo que se realiza con fines de diagnóstico clínico o tratamiento (por ejemplo, no cultivo/prueba de vigilancia activa (ASC/AST)).
+.. Incisión superficial abierta deliberadamente por un cirujano, médico* o persona designada por éste y en la que no se realiza un cultivo o una prueba no basada en cultivos de la incisión superficial o el tejido subcutáneo.
+Un cultivo o una prueba no basada en cultivos de los tejidos blandos profundos de la incisión con resultado negativo no cumple este criterio.
++
+**Y**
++
+El paciente presenta al menos uno de los siguientes signos o síntomas: dolor o sensibilidad localizados, hinchazón localizada, eritema o calor.
+.. Diagnóstico de una ISQ incisional superficial por un médico* o una persona designada por éste.
+****
+
+*El término médico, a efectos de la aplicación de los criterios de ISQ de la NeoIPC, puede interpretarse como un cirujano, un médico de enfermedades infecciosas, un médico de urgencias, otro médico del caso o la persona designada por el médico (enfermero o asistente médico).
+
+No se consideran criterios para cumplir la definición de ISQ incisional superficial los siguientes
+
+* El diagnóstico/tratamiento de celulitis (enrojecimiento/calor/hinchazón), por sí solo, no cumple el criterio "d" de ISQ incisional superficial.
+* Un absceso de sutura solo (inflamación mínima y secreción limitada a los puntos de penetración de la sutura).
+* Una herida punzante localizada o una infección del sitio del clavo. Nota: Un trocar laparoscópico se considera una incisión quirúrgica y no una herida punzante.
+Si un cirujano utiliza un trocar laparoscópico para colocar un drenaje al final de una intervención, se considera una incisión quirúrgica.

@@ -1,0 +1,60 @@
+id,concept,concept_type,pathogen_type
+1,Not listed,unknown,unknown
+2,Mycobacterium avium complex,species complex,bacterial
+7,Human coronavirus,group,viral
+8,Human rhinovirus,group,viral
+9,Human papillomavirus,group,viral
+12,Human herpes simplex virus,group,viral
+13,Human coxsackievirus,group,viral
+14,Human coxsackievirus A,group,viral
+15,Human coxsackievirus B,group,viral
+16,Human bocavirus,group,viral
+17,Hepatitis D virus,group,viral
+19,Human immunodeficiency virus,group,viral
+20,Poliovirus,group,viral
+22,Influenza virus,group,viral
+23,Human parainfluenza virus,group,viral
+24,Human herpesvirus 6,group,viral
+27,Echovirus,group,viral
+28,Human adenovirus,group,viral
+30,Candida parapsilosis complex,species complex,fungal
+31,Acinetobacter calcoaceticus-Acinetobacter baumannii complex,species complex,bacterial
+32,Enterobacter cloacae complex,species complex,bacterial
+33,Salmonella enterica enterica Choleraesuis,serotype,bacterial
+34,Salmonella enterica enterica Enteritidis,serotype,bacterial
+35,Salmonella enterica enterica Infantis,serotype,bacterial
+37,Salmonella enterica enterica Bareilly,serotype,bacterial
+39,Salmonella enterica enterica Isangi,serotype,bacterial
+41,Salmonella enterica enterica Kottbus,serotype,bacterial
+43,Salmonella enterica enterica Livingstone,serotype,bacterial
+45,Salmonella enterica enterica Montevideo,serotype,bacterial
+47,Salmonella enterica enterica Newport,serotype,bacterial
+49,Salmonella enterica enterica Ohio,serotype,bacterial
+51,Salmonella enterica enterica Senftenberg,serotype,bacterial
+53,Salmonella enterica enterica Tennessee,serotype,bacterial
+55,Salmonella enterica enterica Urbana,serotype,bacterial
+57,Salmonella enterica enterica Virchow,serotype,bacterial
+59,Salmonella enterica enterica Worthington,serotype,bacterial
+61,Salmonella enterica enterica Typhi,serotype,bacterial
+62,Salmonella enterica enterica Typhimurium,serotype,bacterial
+63,Coagulase-negative staphylococcus,group,bacterial
+64,Coagulase-positive staphylococcus,group,bacterial
+65,Alpha-hemolytic streptococci,group,bacterial
+66,Beta-hemolytic streptococci,group,bacterial
+67,Gamma-hemolytic streptococci,group,bacterial
+68,Viridans streptococci,group,bacterial
+69,Streptococcus anginosus group,group,bacterial
+71,Streptococcus bovis group,group,bacterial
+72,Streptococcus mitis group,group,bacterial
+73,Streptococcus mutans group,group,bacterial
+74,Streptococcus salivarius group,group,bacterial
+75,Streptococcus sanguinis group,group,bacterial
+76,Bacillus cereus group,group,bacterial
+77,Bacillus subtilis group,group,bacterial
+78,Bacteroides fragilis group,group,bacterial
+79,Burkholderia cepacia complex,species complex,bacterial
+80,Mycobacterium fortuitum complex,species complex,bacterial
+81,Mycobacterium terrae complex,species complex,bacterial
+82,Mycobacterium tuberculosis complex,species complex,bacterial
+83,Nocardia asteroides complex,species complex,bacterial
+84,Prevotella oralis group,group,bacterial
