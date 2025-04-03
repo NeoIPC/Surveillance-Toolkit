@@ -472,22 +472,20 @@ The following surveillance times apply in detail (day 1 = the procedure date):
 Follow-up for SSIs can be terminated preliminarily for a surgical procedure for two reasons:
 
 * Death, transfer, or discharge of the patient.
-* A revision procedure in the same area.
-This will start a new follow-up period for the revision procedure though.
+* A revision procedure in the same area. +
+  This will start a new follow-up period for the revision procedure though.
 
 Minor interventions such as simple punctures of hematoma/seroma do not count as revision procedures.
 Surveillance cannot be terminated by such minor procedures, and they do not start a new follow-up period.
 
 The following inclusion criteria apply to all SSIs:
 
-* Record the main procedure and the associated ICHIfootnote:[International Classification of Health Interventionspass:p[ +]
-https://www.who.int/standards/classifications/international-classification-of-health-interventions] code.
-Only in complex surgical interventions where one main procedure is not sufficient to adequately describe the procedure, up to 2 further ICHI codes can be recorded.
-* The type of SSI (superficial incisional, deep incisional, or organ/space) reported must reflect the deepest tissue level where SSI criteria are met during the surveillance period.
-+
-**Example:** An SSI started as a deep incisional SSI on day 10 of the SSI surveillance period and then a week later (Day 17) meets the criteria for an organ/space SSI.
-You must report it as organ/space SSI regardless of superficial or deep tissue involvement.
-The day of infection in this case would be “Day 17”.
+* Record the main procedure and the associated ICHIfootnote:[International Classification of Health Interventionspass:p[ +] https://www.who.int/standards/classifications/international-classification-of-health-interventions] code. +
+  Only in complex surgical interventions where one main procedure is not sufficient to adequately describe the procedure, up to 2 further ICHI codes can be recorded.
+* The type of SSI (superficial incisional, deep incisional, or organ/space) reported must reflect the deepest tissue level where SSI criteria are met during the surveillance period. +
+  **Example:** An SSI started as a deep incisional SSI on day 10 of the SSI surveillance period and then a week later (Day 17) meets the criteria for an organ/space SSI.
+  You must report it as organ/space SSI regardless of superficial or deep tissue involvement.
+  The day of infection in this case would be “Day 17”.
 
 * The patient must not be deceased (e.g., post-mortem surgery in case of organ donation is excluded).
 
@@ -646,14 +644,14 @@ If a surgical site infection occurs, this information will be used to determine 
 .Signs of infection at time of surgery
 ====
 * Examples that indicate evidence of infection include but are not limited to: abscess, infection, purulence/pus, phlegmon, or “feculent peritonitis”.
-A ruptured/perforated appendix is evidence of infection at the organ/space level.
+  A ruptured/perforated appendix is evidence of infection at the organ/space level.
 * Examples of verbiage that is not considered evidence of infection include but are not limited to: colon perforation, contamination, necrosis, gangrene, fecal spillage, nicked bowel during procedure, murky fluid, or documentation of inflammation.
 * The use of the ending “itis” in an operative note/report of surgery does not automatically count as evidence of infection, as it may only reflect inflammation which is not infectious in nature (for example, diverticulitis, peritonitis, and appendicitis).
 * Pathology report findings and imaging test findings cannot be used as evidence of infection.
 * Identification of an organism using culture or non-culture based microbiologic testing method or on a pathology report from a surgical specimen cannot be used as evidence of infection.
 * Wound class cannot be used as evidence of infection.
 * Trauma resulting in a contaminated case does not automatically count as evidence of infection.
-For example, a fresh gunshot wound to the abdomen may be a trauma with a high wound class but there would not be time for infection to develop.
+  For example, a fresh gunshot wound to the abdomen may be a trauma with a high wound class but there would not be time for infection to develop.
 * Procedural complications such as bowel perforation during surgery cannot be used as evidence of infection since there was no infection present at time of surgery.
 ====
 

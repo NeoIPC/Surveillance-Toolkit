@@ -432,7 +432,7 @@ Das früheste Datum des Ereignisses ist Tag 3 der Beatmung.
 
 **Beispiele**
 
-Nosokomiale Pneumonie – keine Device-Assoziation
+.Nosokomiale Pneumonie – keine Device-Assoziation
 [%unbreakable, cols=">1,1,2"]
 |===
 |Patiententag |Zustand des Patienten |Kommentare
@@ -444,7 +444,7 @@ Nosokomiale Pneumonie – keine Device-Assoziation
 |5 |Keine Verbesserung, CPAP wird fortgesetzt |
 |===
 
-Nosokomiale Pneumonie – Device-assoziiert
+.Nosokomiale Pneumonie – Device-assoziiert
 [%unbreakable, cols=">1,1,2"]
 |===
 |NIV/INV Tag |Tägliches Minimum FiO~2~ (Sauerstoffkonzentration, %) |Bemerkungen
@@ -472,22 +472,20 @@ Im Einzelnen gelten die folgenden Surveillancezeiten (Tag 1 = das Datum des Eing
 Die Nachverfolgung von SSI nach einem chirurgischen Eingriff kannaus zwei Gründen vorzeitig abgebrochen werden:
 
 * Tod, Verlegung oder Entlassung des Patienten.
-* Ein Revisionsverfahren im selben Bereich.
-Damit beginnt jedoch ein neuer Nachbeobachtungszeitraum für den Revisionseingriff.
+* Ein Revisionsverfahren im selben Bereich. +
+  Damit beginnt jedoch ein neuer Nachbeobachtungszeitraum für den Revisionseingriff.
 
 Kleinere Eingriffe wie einfache Punktionen von Hämatomen/Seromen gelten nicht als Revisionseingriffe.
 Die Surveillance kann durch solche kleineren Eingriffe nicht beendet werden, und es beginnt kein neuer Nachbeobachtungszeitraum.
 
 Die folgenden Einschlusskriterien gelten für alle SSI:
 
-* Erfassen Sie das Haupteingriffsverfahren und den zugehörigen ICHIfootnote:[International Classification of Health Interventionspass:p[ +]
-https://www.who.int/standards/classifications/international-classification-of-health-interventions] Code.
-Nur bei komplexen chirurgischen Eingriffen, bei denen ein Hauptverfahren nicht ausreicht, um den Eingriff angemessen zu beschreiben, können bis zu 2 weitere ICHI-Codes erfasst werden.
-* Die Art der erfassten SSI (oberflächliche WI, tiefe WI oder Organ/Körperhöhle) muss die tiefste Gewebeebene widerspiegeln, in der während des Surveillancezeitraums SSI-Kriterien erfüllt sind.
-+
-**Beispiel:** Eine SSI, die am Tag 10 des SSI-Surveillancezeitraums als tiefe Inzisions-SSI begann und dann eine Woche später (Tag 17) die Kriterien für eine Wundinfektion an Organen oder in Körperhöhlen erfüllt.
-Sie müssen dies als Wundinfektion an Organen oder in Körperhöhlen melden, unabhängig davon, ob oberflächliches oder tiefes Gewebe betroffen ist.
-Der Tag der Infektion wäre in diesem Fall der „Tag 17“.
+* Erfassen Sie das Haupteingriffsverfahren und den zugehörigen ICHIfootnote:[International Classification of Health Interventionspass:p[ +] https://www.who.int/standards/classifications/international-classification-of-health-interventions] Code. +
+  Nur bei komplexen chirurgischen Eingriffen, bei denen ein Hauptverfahren nicht ausreicht, um den Eingriff angemessen zu beschreiben, können bis zu 2 weitere ICHI-Codes erfasst werden.
+* Die Art der erfassten SSI (oberflächliche WI, tiefe WI oder Organ/Körperhöhle) muss die tiefste Gewebeebene widerspiegeln, in der während des Surveillancezeitraums SSI-Kriterien erfüllt sind. +
+  **Beispiel:** Eine SSI, die am Tag 10 des SSI-Surveillancezeitraums als tiefe Inzisions-SSI begann und dann eine Woche später (Tag 17) die Kriterien für eine Wundinfektion an Organen oder in Körperhöhlen erfüllt.
+  Sie müssen dies als Wundinfektion an Organen oder in Körperhöhlen melden, unabhängig davon, ob oberflächliches oder tiefes Gewebe betroffen ist.
+  Der Tag der Infektion wäre in diesem Fall der „Tag 17“.
 
 * Der Patient darf nicht verstorben sein (z. B. ist eine postmortale Organentnahme zum Zweck der Organspende ausgeschlossen).
 
@@ -643,17 +641,17 @@ Mit einem Revisionseingriff wird die Nachsorge für den Primäreingriff beendet 
 Die Anzeichen einer Infektion müssen intraoperativ festgestellt und im narrativen Teil der Operationsnotiz oder des Operationsberichts dokumentiert werden.
 Wenn eine Infektion der Operationsstelle auftritt, werden diese Informationen verwendet, um festzustellen, ob die in diesem Abschnitt aufgeführten Anzeichen als „Infektion zum Zeitpunkt der Operation vorhanden“ interpretiert werden können.
 
-Anzeichen einer Infektion zum Zeitpunkt der Operation
+.Anzeichen einer Infektion zum Zeitpunkt der Operation
 ====
 * Beispiele, die auf eine Infektion hinweisen, sind unter anderem: Abszess, Infektion, Eiter, Phlegma oder „fäkale Peritonitis“.
-Ein durchgebrochener/perforierter Blinddarm ist ein Hinweis auf eine Infektion auf der Ebene des Organs/Raums.
+  Ein durchgebrochener/perforierter Blinddarm ist ein Hinweis auf eine Infektion auf der Ebene des Organs/Raums.
 * Beispiele für Formulierungen, die nicht als Beweis für eine Infektion gelten, sind u. a.: Dickdarmperforation, Kontamination, Nekrose, Gangrän, Verschütten von Fäkalien, während des Eingriffs eingekerbter Darm, trübe Flüssigkeit oder Dokumentation einer Entzündung.
 * Die Verwendung der Endung „itis“ in einer Operationsnotiz/einem Operationsbericht gilt nicht automatisch als Beweis für eine Infektion, da sie nur eine Entzündung widerspiegeln kann, die nicht infektiöser Natur ist (z. B. Divertikulitis, Peritonitis und Appendizitis).
 * Befunde aus Pathologieberichten und bildgebenden Verfahren können nicht als Nachweis für eine Infektion herangezogen werden.
 * Die Identifizierung eines Organismus mit Hilfe einer Kultur oder einer nicht kulturbasierten mikrobiologischen Testmethode oder in einem Pathologiebericht einer chirurgischen Probe kann nicht als Nachweis für eine Infektion herangezogen werden.
 * Die Klasse der Wunde kann nicht als Beweis für eine Infektion herangezogen werden.
 * Ein Trauma, das zu einem kontaminierten Fall führt, gilt nicht automatisch als Nachweis einer Infektion.
-Zum Beispiel kann eine frische Schusswunde im Bauch ein Trauma mit einer hohen Wundklasse sein, aber es wäre nicht genug Zeit, um eine Infektion zu entwickeln.
+  Zum Beispiel kann eine frische Schusswunde im Bauch ein Trauma mit einer hohen Wundklasse sein, aber es wäre nicht genug Zeit, um eine Infektion zu entwickeln.
 * Verfahrensbedingte Komplikationen wie eine Darmperforation während einer Operation können nicht als Beweis für eine Infektion gelten, da zum Zeitpunkt der Operation keine Infektion vorlag.
 ====
 
@@ -745,7 +743,7 @@ Wenn das Kind vor dem Ende der fünftägigen Behandlung mit intravenösen Antibi
 ==== NEC-spezifische Daten
 [[data-dictionary-nec-specific-data-portal-veinous-gas]]Portalvenöses Gas:: Ansammlung von Gas (-bläschen) in der Pfortader und ihren Verzweigungen.
 
-Pfortadergas:: Ansammlung von Gas in der Pfortader und ihren Verzweigungen [#data-dictionary-pneumonia-specific-data]
+[#data-dictionary-pneumonia-specific-data]
 ==== Pneumoniesspezifische Daten
 [[data-dictionary-pneumonia-specific-data-increase-in-respiratory-support]]Beginn oder Erhöhung der Atemunterstützung::
 +

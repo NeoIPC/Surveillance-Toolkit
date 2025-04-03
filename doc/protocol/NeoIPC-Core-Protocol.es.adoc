@@ -166,10 +166,10 @@ Cualquier lactante nacido vivo,
 
 ingresados en una sala de su unidad neonatal **dentro de los 120 días siguientes al nacimiento** son elegibles para su inclusión en el módulo básico del Programa de Vigilancia NeoIPC.
 
-Flujo de decisión para identificar a los lactantes elegibles para el módulo básico
+.Flujo de decisión para identificar a los lactantes elegibles para el módulo básico
 image::NeoIPC-Core-Decision-Flow.es.svg[Flujo de decisiones para identificar a los lactantes aptos para el módulo básico,{full-width},opts=inline]
 
-Ejemplos de lactantes aptos/no aptos para el módulo básico una vez ingresados en la planta
+.Ejemplos de lactantes aptos/no aptos para el módulo básico una vez ingresados en la planta
 [cols=">2,>3,>4,>4",stripes=odd]
 |===
 |Día de vida |Peso al nacer (gramos) |Edad gestacional (semanas+días) |Elegible para el módulo de MBPN/VPT
@@ -205,7 +205,7 @@ Para la generación de informes de referencia, NeoIPC no necesita realizar un se
 
 NOTE: Para crear una lista de pseudonimización puede utilizar las plantillas (hoja de cálculo Excel y hoja de datos en papel) disponibles en la https://neoipc.org/surveillance/resources/[sección de recursos] de nuestro sitio web.
 
-Ejemplo de lista de seudonimización
+.Ejemplo de lista de seudonimización
 [cols=">1,^2,^2,^3,^2,^4",stripes=odd]
 |===
 |№ |NeoIPC-ID |Patient-ID |Nombre del paciente |Fecha de nacimiento |Comentarios
@@ -261,7 +261,7 @@ Por esta razón, cada procedimiento quirúrgico que se realiza en un lactante el
 Puede utilizar la hoja de papel de procedimientos quirúrgicos para la documentación local o introducir la información correspondiente directamente en el sistema de notificación.
 Además de registrar el procedimiento, debe iniciar el seguimiento del lactante afectado por infecciones del sitio quirúrgico durante 30 o 90 días, dependiendo de si se ha dejado un implante durante el procedimiento.
 
-Hoja de recogida de datos del procedimiento quirúrgico
+.Hoja de recogida de datos del procedimiento quirúrgico
 //image::NeoIPC-Core-Surgical-Procedure-Data-Collection-Sheet-Image.es.svg[Hoja de recogida de datos de la intervención quirúrgica,{full-width},pdfwidth=75%,opts=inline,align="center"]
 image::NeoIPC-Core-Surgical-Procedure-Data-Collection-Sheet-Image.png[Ficha de recogida de datos de procedimientos quirúrgicos,{full-width},pdfwidth=75%,align="center"]
 
@@ -291,7 +291,7 @@ Se requiere un mínimo de 14 días y un periodo sin síntomas relevantes de infe
 ==== Sepsis primaria/BSI
 Si un lactante elegible desarrolla una sepsis primaria/infección del torrente sanguíneo adquirida en el hospital de acuerdo con los criterios de vigilancia de NeoIPC (ver Definiciones de infección: sepsis primaria/infección del torrente sanguíneo) durante el periodo de vigilancia, debe registrar y enviar los datos requeridos utilizando la hoja de recogida de datos que aparece a continuación y/o a través de la plataforma de notificación en línea.
 
-Hoja de recogida de datos de sepsis primaria/infección del torrente sanguíneo
+.Hoja de recogida de datos de sepsis primaria/infección del torrente sanguíneo
 //image::NeoIPC-Core-Primary-Sepsis-BSI-Reporting-Sheet-Image.es.svg[Hoja de notificación de sepsis primaria/ISB,{full-width},pdfwidth=75%,opts=inline,align="center"]
 image::NeoIPC-Core-Primary-Sepsis-BSI-Reporting-Sheet-Image.png[Hoja de información sobre sepsis/BSI primaria,{full-width},pdfwidth=75%,align="center"]
 
@@ -300,7 +300,7 @@ image::NeoIPC-Core-Primary-Sepsis-BSI-Reporting-Sheet-Image.png[Hoja de informac
 ==== Enterocolitis necrotizante
 Si un lactante elegible desarrolla una enterocolitis necrotizante según los criterios de vigilancia del NeoIPC (ver Definiciones de infección: Enterocolitis necrotizante (ECN)) durante el periodo de vigilancia, deberá registrar y enviar los datos requeridos utilizando la hoja de recogida de datos que figura a continuación y/o a través de la plataforma de notificación en línea.
 
-Hoja de notificación de ECN
+.Hoja de notificación de ECN
 //image::NeoIPC-Core-NEC-Reporting-Sheet-Image.es.svg[Hoja de notificación de ECN,{full-width},pdfwidth=75%,opts=inline,align="center"]
 image::NeoIPC-Core-NEC-Reporting-Sheet-Image.png[Hoja de informe del NEC,{full-width},pdfwidth=75%,align="center"]
 
@@ -309,7 +309,7 @@ image::NeoIPC-Core-NEC-Reporting-Sheet-Image.png[Hoja de informe del NEC,{full-w
 ==== Neumonía
 Si un lactante elegible desarrolla una neumonía adquirida en el hospital de acuerdo con los criterios de vigilancia de NeoIPC (ver Definiciones de infección: neumonía) durante el periodo de vigilancia, debe registrar y enviar los datos requeridos utilizando la hoja de recogida de datos que aparece a continuación y/o a través de la plataforma de notificación online.
 
-Hoja de notificación de neumonía
+.Hoja de notificación de neumonía
 //image::NeoIPC-Core-Pneumonia-Reporting-Sheet-Image.es.svg[Hoja de notificación de neumonía,{full-width},pdfwidth=75%,opts=inline,align="center"]
 image::NeoIPC-Core-Pneumonia-Reporting-Sheet-Image.png[Hoja de informe de neumonía,{full-width},pdfwidth=75%,align="center"]
 
@@ -338,7 +338,7 @@ En NeoIPC se registran las siguientes asociaciones a dispositivos:
 Dado que el establecimiento de una relación causal entre un dispositivo y una infección hospitalaria es difícil e inviable en muchos entornos de neonatología, NeoIPC se centra únicamente en una asociación basada en el tiempo.
 Para crear una asociación entre un dispositivo y la infección, el dispositivo debe haber estado en uso durante un periodo definido antes de la infección.
 
-Ejemplo que muestra la relación entre infección y dispositivo para las infecciones asociadas a dispositivos
+.Ejemplo que muestra la relación entre infección y dispositivo para las infecciones asociadas a dispositivos
 [cols="1,^1,^2,5"]
 |===
 |Días |Dispositivo colocado |Asociación del dispositivo (si es el día de la infección) |Comentarios
@@ -368,7 +368,7 @@ Para asignar una infección secundaria del torrente sanguíneo a una neumonía, 
 **Y
 . Al menos un microorganismo de la muestra de sangre coincide con un microorganismo identificado en el foco de infección primaria.
 
-Recogida de datos de ICB secundaria
+.Recogida de datos de ICB secundaria
 //image::NeoIPC-Core-Secondary-BSI-Image.es.svg[Recopilación de datos de BSI secundaria,{full-width},pdfwidth=100%,opts=inline,align="center"]
 image::NeoIPC-Core-Secondary-BSI-Image.png[Recopilación de datos de ICB secundaria,{full-width},pdfwidth=100%,align="center"]
 
@@ -472,22 +472,20 @@ Se aplican en detalle los siguientes tiempos de vigilancia (día 1 = fecha del p
 El seguimiento de las ISQ puede interrumpirse de forma preliminar para una intervención quirúrgica por dos motivos:
 
 * Fallecimiento, traslado o alta del paciente.
-* Un procedimiento de revisión en la misma zona.
-Sin embargo, esto iniciará un nuevo periodo de seguimiento para el procedimiento de revisión.
+* Un procedimiento de revisión en la misma zona. +
+  Sin embargo, esto iniciará un nuevo periodo de seguimiento para el procedimiento de revisión.
 
 Las intervenciones menores como simples punciones de hematoma/seroma no cuentan como procedimientos de revisión.
 La vigilancia no puede finalizar por estos procedimientos menores y no inician un nuevo periodo de seguimiento.
 
 Los siguientes criterios de inclusión se aplican a todas las ISQ:
 
-* Registrar el procedimiento principal y el código asociado ICHIfootnote:[Clasificación Internacional de Intervenciones Sanitariaspass:p[ +]
-https://www.who.int/standards/classifications/international-classification-of-health-interventions] asociado.
-Sólo en las intervenciones quirúrgicas complejas en las que un procedimiento principal no sea suficiente para describir adecuadamente la intervención, pueden registrarse hasta 2 códigos ICHI más.
-* El tipo de ISQ (incisional superficial, incisional profunda u órgano/espacio) notificado debe reflejar el nivel tisular más profundo en el que se cumplen los criterios de ISQ durante el periodo de vigilancia.
-+
-**Ejemplo:** Una ISQ que comenzó como una ISQ incisional profunda el día 10 del periodo de vigilancia de las ISQ y una semana más tarde (día 17) cumple los criterios de una ISQ órgano/espacio.
-Debe notificarla como ISQ órgano/espacio independientemente de la afectación del tejido superficial o profundo.
-El día de la infección en este caso sería el "Día 17".
+* Registrar el procedimiento principal y el código asociado ICHIfootnote:[Clasificación Internacional de Intervenciones Sanitariaspass:p[ +] https://www.who.int/standards/classifications/international-classification-of-health-interventions] asociado.
+  Sólo en las intervenciones quirúrgicas complejas en las que un procedimiento principal no sea suficiente para describir adecuadamente la intervención, pueden registrarse hasta 2 códigos ICHI más.
+* El tipo de ISQ (incisional superficial, incisional profunda u órgano/espacio) notificado debe reflejar el nivel tisular más profundo en el que se cumplen los criterios de ISQ durante el periodo de vigilancia. +
+  **Ejemplo:** Una ISQ que comenzó como una ISQ incisional profunda el día 10 del periodo de vigilancia de las ISQ y una semana más tarde (día 17) cumple los criterios de una ISQ órgano/espacio.
+  Debe notificarla como ISQ órgano/espacio independientemente de la afectación del tejido superficial o profundo.
+  El día de la infección en este caso sería el "Día 17".
 
 * El paciente no debe haber fallecido (por ejemplo, se excluye la cirugía post-mortem en caso de donación de órganos).
 
@@ -526,6 +524,7 @@ NOTE: Utilice este identificador para identificar de forma única a un paciente 
 Lo ideal es utilizar una cadena de caracteres aleatoria y única.
 Si tiene la necesidad de identificar a un paciente que ha introducido aquí, puede utilizar este identificador como clave NeoIPC para la seudonimización.
 NUNCA utilice un identificador que se utilice en otro lugar y que no controle totalmente (por ejemplo, NO utilice el identificador de paciente de su sistema de información hospitalario).
+
 [[data-dictionary-patient-master-data-enrolment-patient-id]]Patient-ID:: El identificador único del paciente en el hospital, que la mayoría de las veces procede del sistema de información del hospital (HIS) o del sistema de gestión de datos del paciente (PDMS).
 [[data-dictionary-patient-master-data-enrolment-patient-name]]Nombre del paciente:: El nombre del paciente (por ejemplo, nombre seguido del apellido).
 
@@ -645,14 +644,14 @@ Si se produce una infección del lecho quirúrgico, esta información se utiliza
 .Signos de infección en el momento de la intervención
 ====
 * Ejemplos que indican evidencia de infección incluyen pero no se limitan a: absceso, infección, purulencia/pus, flemón o "peritonitis feculenta".
-Un apéndice roto/perforado es evidencia de infección a nivel de órgano/espacio.
+  Un apéndice roto/perforado es evidencia de infección a nivel de órgano/espacio.
 * Ejemplos de verborrea que no se considera evidencia de infección incluyen pero no se limitan a: perforación de colon, contaminación, necrosis, gangrena, derrame fecal, intestino mellado durante el procedimiento, fluido turbio o documentación de inflamación.
 * El uso de la terminación "itis" en una nota o informe quirúrgico no cuenta automáticamente como prueba de infección, ya que puede reflejar únicamente una inflamación que no es de naturaleza infecciosa (por ejemplo, diverticulitis, peritonitis y apendicitis).
 * Los resultados de los informes patológicos y de las pruebas de imagen no pueden utilizarse como prueba de infección.
 * La identificación de un organismo mediante un método microbiológico basado o no en cultivos o en un informe patológico de una muestra quirúrgica no puede utilizarse como prueba de infección.
 * La clase de herida no puede utilizarse como prueba de infección.
 * Un traumatismo que dé lugar a un caso contaminado no cuenta automáticamente como prueba de infección.
-Por ejemplo, una herida de bala reciente en el abdomen puede ser un traumatismo con una clase de herida alta, pero no habría tiempo para que se desarrollara la infección.
+  Por ejemplo, una herida de bala reciente en el abdomen puede ser un traumatismo con una clase de herida alta, pero no habría tiempo para que se desarrollara la infección.
 * Las complicaciones del procedimiento, como la perforación intestinal durante la cirugía, no pueden utilizarse como prueba de infección, ya que no había infección en el momento de la cirugía.
 ====
 
@@ -925,7 +924,6 @@ A continuación, se calcula el número de infecciones esperadas (riesgo acumulad
 El SIR representa la relación entre las infecciones observadas y las infecciones esperadas en un departamento y puede ofrecer una visión general del riesgo de infección en un departamento.
 
 stem:["Tasa de infección estandarizada" = "Total de infecciones observadas" / "Total de infecciones esperadas"]
-
 Cuando la tasa de infección estandarizada es mayor que uno, se han observado más infecciones de las que cabría esperar de su composición de pacientes en comparación con los datos de referencia.
 
 Cuando la tasa de infección estandarizada es igual a uno, se ha observado el mismo número de infecciones que el que cabría esperar de la composición de los pacientes en comparación con los datos de referencia.
@@ -954,28 +952,28 @@ HIS:: Sistema de información hospitalaria
 VIH:: Virus de la inmunodeficiencia humana
 ICHI:: Clasificación internacional de intervenciones sanitarias
 INV:: Ventilación invasiva
-IPC: Prevención y control de infecciones
-Canguro
-LCBSI: infección del torrente sanguíneo confirmada por laboratorio
+IPC:: Prevención y control de infecciones
+CC:: Cuidado canguro
+LCBSI:: infección del torrente sanguíneo confirmada por laboratorio
 MDRO:: Organismo multirresistente
 SARM:: Staphylococcus aureus resistente a la meticilina
-ECN: Enterocolitis necrotizante
+ECN:: Enterocolitis necrotizante
 UCIN:: Unidad de cuidados intensivos neonatales
 VNI:: Ventilación no invasiva
 OP:: Procedimiento quirúrgico
-PDMS: Sistema de gestión de datos del paciente
+PDMS:: Sistema de gestión de datos del paciente
 PICC:: Catéter venoso central de inserción periférica
 PLT:: Plaquetas
 PVC:: Catéter venoso periférico
 ECA:: Ensayo controlado aleatorizado
 SSI:: infección del sitio quirúrgico
-UAC: catéter arterial umbilical
-UVC: catéter venoso umbilical
-VAE: Evento asociado al ventilador
-NAV: Neumonía asociada a ventilador
+UAC:: catéter arterial umbilical
+UVC:: catéter venoso umbilical
+VAE:: Evento asociado al ventilador
+NAV:: Neumonía asociada a ventilador
 MBPN:: Muy bajo peso al nacer
 VPT:: Muy prematuro
-VRE: Enterococo resistente a la vancomicina
+VRE:: Enterococo resistente a la vancomicina
 WBC:: glóbulos blancos
 
 [#imprint]

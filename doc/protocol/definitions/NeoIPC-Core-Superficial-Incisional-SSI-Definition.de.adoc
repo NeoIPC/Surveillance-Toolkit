@@ -12,7 +12,7 @@
 .. Eitrige Drainage aus der oberflächlichen Inzision.
 .. Erreger, die aus einer aseptisch gewonnenen Probe aus dem oberflächlichen Einschnitt oder dem subkutanen Gewebe durch eine Kultur oder eine nicht auf Kultur basierende mikrobiologische Testmethode identifiziert werden, die zum Zweck der klinischen Diagnose oder Behandlung durchgeführt wird (z. B. keine Befunde aus Diagnostik zum Zweck des mikrobiologischen Screenings).
 .. Die oberflächliche Inzision, wurde von einem Arzt* oder einer von ihm beauftragten Person bewusst geöffnet, und es wurde keine Kultur und kein nicht auf Kultur basierender Test der oberflächlichen Inzision oder des subkutanen Gewebes durchgeführt.
-Eine Kultur oder ein nicht auf Kultur basierender Test aus dem tiefen Weichteilgewebe der Inzision mit negativem Befund erfüllt dieses Kriterium nicht.
+   Eine Kultur oder ein nicht auf Kultur basierender Test aus dem tiefen Weichteilgewebe der Inzision mit negativem Befund erfüllt dieses Kriterium nicht.
 +
 **UND**
 +
@@ -27,4 +27,4 @@ Folgende Kriterien erfüllen nicht die Definition einer oberflächlichen postope
 * Die Diagnose/Behandlung einer Zellulitis ( Rötung/Wärme/Schwellung) erfüllt für sich genommen nicht das Kriterium der oberflächlichen postoperativen Wundinfektion "d". 
 * Ein Stichabszess allein (minimale Entzündung und Ausfluss, der sich auf die Punkte der Nahtöffnung beschränkt). 
 * Eine lokalisierte Stichwunde oder eine Infektion an der Nadelstichstelle. Hinweis: Eine laparoskopische Trokarstelle gilt als chirurgische Inzision und nicht als Stichwunde.
-Wenn ein Chirurg eine laparoskopische Trokarstelle verwendet, um am Ende eines Eingriffs eine Drainage zu legen, gilt dies als chirurgische Inzision.
+  Wenn ein Chirurg eine laparoskopische Trokarstelle verwendet, um am Ende eines Eingriffs eine Drainage zu legen, gilt dies als chirurgische Inzision.
