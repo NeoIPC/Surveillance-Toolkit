@@ -7,13 +7,13 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2025-04-03 12:00+0200\n"
+"POT-Creation-Date: 2025-04-03 15:40+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Type: text/plain; charset=utf8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
 #. type: Title =
@@ -125,7 +125,7 @@ msgstr ""
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:30
 msgid ""
-"This project has received funding from the European Unionâs Horizon 2020 "
+"This project has received funding from the European Union’s Horizon 2020 "
 "research and innovation programme under grant agreement No. 965328."
 msgstr ""
 
@@ -194,7 +194,7 @@ msgid ""
 "over a long period of time will be crucial.  In order to facilitate the "
 "collection of such data, you may want to contribute data to the NeoIPC "
 "surveillance network.  This data could be used to generate reports and "
-"benchmark your neonatal unitâs infection rates against others."
+"benchmark your neonatal unit’s infection rates against others."
 msgstr ""
 
 #. type: Plain text
@@ -345,7 +345,7 @@ msgid ""
 "Information about hospitals generally is not protected by laws but some "
 "information may be considered as company secret and in that case, as a "
 "member of staff, you are typically not allowed to disclose it.  Whether "
-"surveillance information (âhospital infection ratesâ) is a company "
+"surveillance information (“hospital infection rates”) is a company "
 "secret or should be, is a matter of extensive debate and it is "
 "understandable that patient rights organizations advocate for transparency "
 "in that regard.  Nevertheless, the publication of surveillance data can have "
@@ -363,7 +363,7 @@ msgid ""
 "leading to low rates that can no longer be acted upon.  In addition to the "
 "problem of pro-forma-surveillance, there may be very legitimate or even "
 "honourable reasons for high infection rates in a hospital, like treating "
-"those who have an especially high risk for infections, that canât be "
+"those who have an especially high risk for infections, that can’t be "
 "adjusted for by the means of standardization or stratification of the "
 "collected data.  These reasons are notoriously hard to communicate to the "
 "public which can lead to oversimplification and political abuse."
@@ -437,7 +437,7 @@ msgstr ""
 msgid ""
 "Use the NeoIPC project's https://neoipc.charite.de/[instance] of the system "
 "which is currently operated by the team at the German National Reference "
-"Centre for Surveillance of Nosocomial Infections at CharitÃ©'s Institute for "
+"Centre for Surveillance of Nosocomial Infections at Charité's Institute for "
 "Hygiene and Environmental Medicine."
 msgstr ""
 
@@ -464,7 +464,7 @@ msgstr ""
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:123
 msgid ""
-"If the web-based reporting system is temporarily unavailable (e.â¯g. due to "
+"If the web-based reporting system is temporarily unavailable (e. g. due to "
 "maintenance or technical problems), please use the paper-based datasheets "
 "for documentation during this period and remember to enter this data into "
 "the web platform as soon as possible once it becomes available again."
@@ -656,13 +656,13 @@ msgid ""
 "|Day of Life |Birth Weight (grams) |Gestational Age (weeks+days) |Eligible "
 "for VLBW/VPT Module\n"
 "\n"
-"|120 [.green]#â# |1499 [.green]#â# |31+6 [.green]#â# |Yes "
-"[.green]#â#\n"
-"|1 [.green]#â# |1500 [.red]#â# |31+6 [.green]#â# |Yes [.green]#â#\n"
-"|120 [.green]#â# |1499 [.green]#â# |32+0 [.red]#â# |Yes "
-"[.green]#â#\n"
-"|1 [.green]#â# |1500 [.red]#â# |32+0 [.red]#â# |No [.red]#â#\n"
-"|121 [.red]#â# |1499 [.green]#â# |30+5 [.green]#â# |No [.red]#â#\n"
+"|120 [.green]#☑# |1499 [.green]#☑# |31+6 [.green]#☑# |Yes "
+"[.green]#☑#\n"
+"|1 [.green]#☑# |1500 [.red]#☐# |31+6 [.green]#☑# |Yes [.green]#☑#\n"
+"|120 [.green]#☑# |1499 [.green]#☑# |32+0 [.red]#☐# |Yes "
+"[.green]#☑#\n"
+"|1 [.green]#☑# |1500 [.red]#☐# |32+0 [.red]#☐# |No [.red]#☐#\n"
+"|121 [.red]#☐# |1499 [.green]#☑# |30+5 [.green]#☑# |No [.red]#☐#\n"
 msgstr ""
 
 #. type: Plain text
@@ -758,12 +758,12 @@ msgstr ""
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:217
 #, no-wrap
 msgid ""
-"|â |NeoIPC-ID |Patient-ID |Patient Name |Date of Birth |Comments\n"
+"|№ |NeoIPC-ID |Patient-ID |Patient Name |Date of Birth |Comments\n"
 "\n"
 "|1 | | | | |\n"
 "|2 | | | | |\n"
 "|3 | | | | |\n"
-"|â® | | | | |\n"
+"|⋮ | | | | |\n"
 msgstr ""
 
 #. type: Plain text
@@ -853,7 +853,7 @@ msgid ""
 "need to end the follow-up for that patient and the sum data in the patient "
 "progress charts will be the patient's surveillance end data.  This data must "
 "be ultimately entered into the online reporting platform under the event "
-"âsurveillance endâ.  You can use the master data collection sheet to "
+"“surveillance end”.  You can use the master data collection sheet to "
 "save this data locally."
 msgstr ""
 
@@ -867,7 +867,7 @@ msgid ""
 "re-admission, you must end data collection for that patient and select "
 "\"transfer\" as the reason for the end of surveillance.  In this case, any "
 "readmission should be recorded as a new admission, and the admission type "
-"must be selected as âtransferred to your centre â¥ 24h postnatalâ."
+"must be selected as “transferred to your centre ≥ 24h postnatal”."
 msgstr ""
 
 #. image::NeoIPC-Core-Patient-Progress-Chart-Image.svg[Patient progress chart for patient data collection,{full-width},pdfwidth=100%,opts=inline,align="center"]
@@ -947,7 +947,7 @@ msgid ""
 "infections typically stem from persons or inanimate surfaces that get in "
 "close contact with the infant during neonatal care.  Since only the latter "
 "are immediately actionable for the healthcare professionals working on "
-"neonatology wards, NeoIPC puts a focus on those ânosocomialâ late-onset "
+"neonatology wards, NeoIPC puts a focus on those “nosocomial” late-onset "
 "infections but tries to also support you, when trying to perform "
 "surveillance of early-onset infections.  Although a fixed time-based cut-off "
 "value does not exactly capture whether an infection was acquired from the "
@@ -972,7 +972,7 @@ msgid ""
 "neonatology department, there is an additional cut-off value that needs to "
 "be applied.  In this case, an infection is only considered a nosocomial "
 "infection if the day of symptom onset is greater than or equal to day 3 of "
-"the patientâs hospital stay, where the day of admission is regarded as day "
+"the patient’s hospital stay, where the day of admission is regarded as day "
 "1."
 msgstr ""
 
@@ -1179,14 +1179,14 @@ msgid ""
 "|Days |Device in Place |Device Association (if this is the day of infection) "
 "|Comments\n"
 "\n"
-"|Day 1 |CVC |No [.red]#â# |<3 CVC days on the day of infection\n"
-"|Day 2 |CVC |No [.red]#â# |<3 CVC days on the day of infection\n"
-"|Day 3 |CVC |Yes [.green]#â# |â¥3 CVC days on the day of infection\n"
-"|Day 4 |No device |Yes [.green]#â# |No CVC on the day of infection but "
-"â¥3 CVC days on the Day 3 (the day before infection)\n"
-"|Day 5 |No device |No [.red]#â# |No CVC on the day of infection or on day "
+"|Day 1 |CVC |No [.red]#☐# |<3 CVC days on the day of infection\n"
+"|Day 2 |CVC |No [.red]#☐# |<3 CVC days on the day of infection\n"
+"|Day 3 |CVC |Yes [.green]#☑# |≥3 CVC days on the day of infection\n"
+"|Day 4 |No device |Yes [.green]#☑# |No CVC on the day of infection but "
+"≥3 CVC days on the Day 3 (the day before infection)\n"
+"|Day 5 |No device |No [.red]#☐# |No CVC on the day of infection or on day "
 "before infection\n"
-"|Day 6 |No device |No [.red]#â# |No CVC on the day of infection or on day "
+"|Day 6 |No device |No [.red]#☐# |No CVC on the day of infection or on day "
 "before infection\n"
 msgstr ""
 
@@ -1217,7 +1217,7 @@ msgstr ""
 msgid ""
 "Within NeoIPC surveillance, it is possible to record bloodstream infections "
 "secondary to pneumonia, NEC, and SSIs.  Collecting data on secondary BSI is "
-"optional; therefore, it is possible to select **âNo follow-upâ** if you "
+"optional; therefore, it is possible to select **“No follow-up”** if you "
 "are not following patients for secondary BSI."
 msgstr ""
 
@@ -1440,12 +1440,12 @@ msgstr ""
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:445
 #, no-wrap
 msgid ""
-"|Patient day |PatientÂ´s condition |Comments\n"
+"|Patient day |Patient´s condition |Comments\n"
 "\n"
 "|1 |No device, stable |\n"
 "|2 |No device, stable |Baseline day 1\n"
 "|3 |No device, stable |Baseline day 2\n"
-"|4 |Deteriorating ==> CPAP |[.green]#â# (infection day)\n"
+"|4 |Deteriorating ==> CPAP |[.green]#☑# (infection day)\n"
 "|5 |No improvement, CPAP continues |\n"
 msgstr ""
 
@@ -1465,7 +1465,7 @@ msgid ""
 "|2 |1.00 |\n"
 "|3 |0.70 (improving) |Baseline Day 1\n"
 "|4 |0.60 (improving) |Baseline Day 2\n"
-"|5 |0.90 |[.green]#â# (infection day)\n"
+"|5 |0.90 |[.green]#☑# (infection day)\n"
 "|6 |0.90 |No improvement\n"
 msgstr ""
 
@@ -1572,7 +1572,7 @@ msgid ""
 "surveillance period and then a week later (Day 17) meets the criteria for an "
 "organ/space SSI. You must report it as organ/space SSI regardless of "
 "superficial or deep tissue involvement. The day of infection in this case "
-"would be âDay 17â."
+"would be “Day 17”."
 msgstr ""
 
 #. type: Plain text
@@ -1754,7 +1754,7 @@ msgstr ""
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:538
 msgid ""
-"The infantâs weight immediately after birth in grams.  Typically this "
+"The infant’s weight immediately after birth in grams.  Typically this "
 "value is based on a measurement but in case the birth weigth is unknown or "
 "has a highly pathological value that does not reflect the maturity of the "
 "infant (e.g. hydrops fetalis) you can enter the birth weight that is "
@@ -2036,8 +2036,8 @@ msgstr ""
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:581
 msgid ""
-"The cumulative number of days the patientâs enteral feeding exclusively "
-"consists of (own motherâs or donor) breast milk.  Fortified breast milk is "
+"The cumulative number of days the patient’s enteral feeding exclusively "
+"consists of (own mother’s or donor) breast milk.  Fortified breast milk is "
 "considered as breast milk."
 msgstr ""
 
@@ -2100,7 +2100,7 @@ msgstr ""
 #, no-wrap
 msgid ""
 "[[data-dictionary-patient-master-data-surveillance-end-antibiotic-substance-days]]Antibiotic "
-"days, per substance 1, 2, 3, â¦"
+"days, per substance 1, 2, 3, …"
 msgstr ""
 
 #. type: Plain text
@@ -2278,7 +2278,7 @@ msgstr ""
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:614
 msgid ""
 "The American Society of Anesthesiologists' (ASA) Physical Status "
-"Classification System to assess and communicate a patientâs pre-anesthesia "
+"Classification System to assess and communicate a patient’s pre-anesthesia "
 "medical co-morbidities:"
 msgstr ""
 
@@ -2385,7 +2385,7 @@ msgstr ""
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:629
 msgid ""
-"A procedure that is documented per the facilityâs protocol to be an "
+"A procedure that is documented per the facility’s protocol to be an "
 "Emergency or Urgent procedure."
 msgstr ""
 
@@ -2488,7 +2488,7 @@ msgstr ""
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:648
 msgid ""
 "Examples that indicate evidence of infection include but are not limited to: "
-"abscess, infection, purulence/pus, phlegmon, or âfeculent peritonitisâ.  "
+"abscess, infection, purulence/pus, phlegmon, or “feculent peritonitis”.  "
 "A ruptured/perforated appendix is evidence of infection at the organ/space "
 "level."
 msgstr ""
@@ -2505,7 +2505,7 @@ msgstr ""
 #. type: delimited block =
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:650
 msgid ""
-"The use of the ending âitisâ in an operative note/report of surgery does "
+"The use of the ending “itis” in an operative note/report of surgery does "
 "not automatically count as evidence of infection, as it may only reflect "
 "inflammation which is not infectious in nature (for example, diverticulitis, "
 "peritonitis, and appendicitis)."
@@ -2621,7 +2621,7 @@ msgstr ""
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:674
 msgid ""
 "3GCR: Multi drug resistant gram-negative pathogen resistant to 3rd "
-"generation Cephalosporins according to own labâs cut-off values (refers to "
+"generation Cephalosporins according to own lab’s cut-off values (refers to "
 "phenotypic resistance or ESBL-producing organisms)"
 msgstr ""
 
@@ -2688,7 +2688,7 @@ msgstr ""
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:688
 msgid ""
 "Collecting data about the secondary BSI is optional; therefore, it is "
-"possible to select âNo follow-upâ if you are not following patients for "
+"possible to select “No follow-up” if you are not following patients for "
 "secondary BSI.  For detailed information, please see Secondary bloodstream "
 "infection."
 msgstr ""
@@ -3000,13 +3000,13 @@ msgstr ""
 #, no-wrap
 msgid ""
 "New initiation of respiratory support or escalation of existing level of "
-"respiratory support â¦"
+"respiratory support …"
 msgstr ""
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:754
 msgid ""
-"Increase in need for FiO2 â¥ 0.25 (25 points) within 24 hours (daily "
+"Increase in need for FiO2 ≥ 0.25 (25 points) within 24 hours (daily "
 "minimum FiO2 values must be taken into account here)"
 msgstr ""
 
@@ -3038,7 +3038,7 @@ msgstr ""
 #. type: Labeled list
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:761
 #, no-wrap
-msgid "â¦ that does not improve within less than 2 days"
+msgid "… that does not improve within less than 2 days"
 msgstr ""
 
 #. type: Plain text
@@ -3049,7 +3049,7 @@ msgstr ""
 #. type: Labeled list
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:763
 #, no-wrap
-msgid "â¦ after at least 2 days of stability or improvement"
+msgid "… after at least 2 days of stability or improvement"
 msgstr ""
 
 #. type: Plain text
@@ -3288,8 +3288,8 @@ msgid ""
 "If a SSI started as a deep incisional SSI on day 10 of the SSI surveillance "
 "period and then a week later (Day 17) meets criteria for an organ/space "
 "SSI.  You must report it as organ/space SSI regardless of superficial or "
-"deep tissue involvement.  The day of infection in this case would be âDay "
-"17â."
+"deep tissue involvement.  The day of infection in this case would be “Day "
+"17”."
 msgstr ""
 
 #. type: Labeled list
@@ -3318,7 +3318,7 @@ msgstr ""
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:815
 msgid ""
-"The following rates are calculated both for the departmentsâ reports and "
+"The following rates are calculated both for the departments’ reports and "
 "for the reference reports and can serve as starting point for further "
 "analyses and discussions in your department."
 msgstr ""
@@ -3332,22 +3332,22 @@ msgstr ""
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:819
-msgid "<â¯500â¯g"
+msgid "< 500 g"
 msgstr ""
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:820
-msgid "500â¯gâ¯ââ¯999â¯g"
+msgid "500 g ‑ 999 g"
 msgstr ""
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:821
-msgid "1â¯000â¯gâ¯ââ¯1â¯499â¯g"
+msgid "1 000 g ‑ 1 499 g"
 msgstr ""
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:822
-msgid ">â¯1â¯500â¯g"
+msgid "> 1 500 g"
 msgstr ""
 
 #. type: Title ===
@@ -3646,7 +3646,7 @@ msgid ""
 "500 g birth weight is a relatively crude stratification for neonatal "
 "infection risk, and it also does not account the fact that infants may be "
 "transferred to other departments (e.g., for surgery or to a department "
-"closer to the parentsâ home) long before they would normally be discharged "
+"closer to the parents’ home) long before they would normally be discharged "
 "and that the high-risk days of the stabilization phase would accumulate in "
 "some neonatology departments while others would accumulate the low risk days "
 "of already stabilized infants.  To account for this, NeoIPC calculates a "
@@ -4285,7 +4285,7 @@ msgstr ""
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:41
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:62
 #, no-wrap
-msgid "Temperature instability, fever (> 38 Â°C) or hypothermia (< 36.5 Â°C)\n"
+msgid "Temperature instability, fever (> 38 °C) or hypothermia (< 36.5 °C)\n"
 msgstr ""
 
 #. type: delimited block *
@@ -4308,7 +4308,7 @@ msgstr ""
 #, no-wrap
 msgid ""
 "Impaired peripheral perfusion (Capillary refill time of > 3s or skin "
-"mottling or core/peripheral temperature gap > 2 Â°C)\n"
+"mottling or core/peripheral temperature gap > 2 °C)\n"
 msgstr ""
 
 #. type: delimited block *
@@ -4345,7 +4345,7 @@ msgstr ""
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:47
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:68
 #, no-wrap
-msgid "Unexplained metabolic acidosis (base excess < â10 mmol/L; <â10 mEq/L)\n"
+msgid "Unexplained metabolic acidosis (base excess < −10 mmol/L; <−10 mEq/L)\n"
 msgstr ""
 
 #. type: delimited block *
@@ -4373,7 +4373,7 @@ msgstr ""
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:49
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:71
 #, no-wrap
-msgid "Platelet count of < 100 Ã 10^9^/L (<100 Ã 10^3^/Î¼L)\n"
+msgid "Platelet count of < 100 × 10^9^/L (<100 × 10^3^/μL)\n"
 msgstr ""
 
 #. type: delimited block *
@@ -4383,8 +4383,8 @@ msgstr ""
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:72
 #, no-wrap
 msgid ""
-"WBC < 4 Ã 10^9^/L or > 20 Ã 10^9^/L (< 4 Ã 10^3^/Î¼L or > 20 Ã "
-"10^3^/Î¼L)\n"
+"WBC < 4 × 10^9^/L or > 20 × 10^9^/L (< 4 × 10^3^/μL or > 20 × "
+"10^3^/μL)\n"
 msgstr ""
 
 #. type: delimited block *
@@ -4402,7 +4402,7 @@ msgstr ""
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:35
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:74
 #, no-wrap
-msgid "Procalcitonin â¥ 2Î¼g/L (2 ng/mL; 200 ng/dL)\n"
+msgid "Procalcitonin ≥ 2μg/L (2 ng/mL; 200 ng/dL)\n"
 msgstr ""
 
 #. type: delimited block *
@@ -4505,7 +4505,7 @@ msgstr ""
 #: doc/protocol/definitions/NeoIPC-Core-Deep-Incisional-SSI-Definition.adoc:21
 msgid ""
 "Patient has at least one of the following signs or symptoms: Temperature "
-"instability, fever (> 38 Â°C) or hypothermia (< 36.5 Â°C); localized pain or "
+"instability, fever (> 38 °C) or hypothermia (< 36.5 °C); localized pain or "
 "tenderness."
 msgstr ""
 
@@ -4528,8 +4528,8 @@ msgstr ""
 msgid ""
 "*The term physician for the purpose of application of the NHSN SSI criteria "
 "may be interpreted to mean a surgeon, infectious disease physician, "
-"emergency physician, another physician on the case, or physicianâs "
-"designee (nurse practitioner or physicianâs assistant).\n"
+"emergency physician, another physician on the case, or physician’s "
+"designee (nurse practitioner or physician’s assistant).\n"
 msgstr ""
 
 #. type: Block title
@@ -4656,7 +4656,7 @@ msgstr ""
 
 #. type: delimited block *
 #: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:11
-msgid "Fixed bowel loops (â¥ 24h)"
+msgid "Fixed bowel loops (≥ 24h)"
 msgstr ""
 
 #. type: delimited block *
@@ -4781,7 +4781,7 @@ msgstr ""
 #, no-wrap
 msgid ""
 "**New initiation of respiratory support or escalation of existing level of "
-"respiratory support for â¥ 2 days$$*$$ after at least 2 days of stability "
+"respiratory support for ≥ 2 days$$*$$ after at least 2 days of stability "
 "or improvement**\n"
 msgstr ""
 
@@ -4822,7 +4822,7 @@ msgstr ""
 #. type: delimited block *
 #: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:17
 #, no-wrap
-msgid "Temperature instability or fever (>38 Â°C) or hypothermia (<36.5 Â°C)\n"
+msgid "Temperature instability or fever (>38 °C) or hypothermia (<36.5 °C)\n"
 msgstr ""
 
 #. type: delimited block *
@@ -4858,21 +4858,21 @@ msgstr ""
 #. type: Plain text
 #: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:25
 msgid ""
-"Increase in need for FiO~2~ â¥ 0.25 (25 points) within 24 hours (daily "
+"Increase in need for FiO~2~ ≥ 0.25 (25 points) within 24 hours (daily "
 "minimum FiO~2~ values must be taken into account)"
 msgstr ""
 
 #. type: Plain text
 #: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:33
 msgid ""
-"â¦that does not improve within less than 2 days: The above-mentioned "
+"…that does not improve within less than 2 days: The above-mentioned "
 "condition should not improve within two days."
 msgstr ""
 
 #. type: Plain text
 #: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:35
 msgid ""
-"â¦after at least 2 days of stability or improvement: A stable or improving "
+"…after at least 2 days of stability or improvement: A stable or improving "
 "baseline period of at least two days is required before the above condition "
 "occurs."
 msgstr ""
@@ -4968,8 +4968,8 @@ msgstr ""
 msgid ""
 "*The term physician for the purpose of application of the NeoIPC SSI "
 "criteria may be interpreted to mean a surgeon, infectious disease physician, "
-"emergency physician, another physician on the case, or physicianâs "
-"designee (nurse practitioner or physicianâs assistant).\n"
+"emergency physician, another physician on the case, or physician’s "
+"designee (nurse practitioner or physician’s assistant).\n"
 msgstr ""
 
 #. type: Plain text
@@ -4983,7 +4983,7 @@ msgstr ""
 #: doc/protocol/definitions/NeoIPC-Core-Superficial-Incisional-SSI-Definition.adoc:28
 msgid ""
 "Diagnosis/treatment of cellulitis (redness/warmth/swelling), by itself, does "
-"not meet superficial incisional SSI criterion âdâ."
+"not meet superficial incisional SSI criterion ‘d’."
 msgstr ""
 
 #. type: Plain text
