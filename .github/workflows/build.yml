@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - ProtocolV2
     tags:
       - '*'
   pull_request:
@@ -20,11 +19,15 @@ jobs:
               shell: bash
               run: |
                 sudo apt-get update -qq
-                sudo apt-get install -qq pandoc librsvg2-bin fnt bison flex libffi-dev libxml2-dev libgdk-pixbuf2.0-dev libcairo2-dev libpango1.0-dev libwebp-dev fonts-lyx
+                sudo apt-get install -qq pandoc librsvg2-bin fnt bison flex libffi-dev libxml2-dev libgdk-pixbuf2.0-dev libcairo2-dev libpango1.0-dev libwebp-dev fonts-lyx po4a
                 sudo gem install mathematical:1.6.18 asciidoctor-pdf asciidoctor-bibtex asciidoctor-diagram asciimath asciidoctor-mathematical
                 sudo npm install -g @linthtml/linthtml
                 sudo fnt update
                 sudo fnt install notosans
+
+            - name: Run po4a
+              shell: bash
+              run: po4a --master-charset utf8 --localized-charset utf8 --verbose po4a.cfg
 
             - name: Build
               shell: pwsh
