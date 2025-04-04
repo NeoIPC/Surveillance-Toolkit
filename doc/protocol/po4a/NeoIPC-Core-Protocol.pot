@@ -5001,3 +5001,43 @@ msgid ""
 "uses a laparoscopic trocar site to place a drain at the end of a procedure "
 "this is considered a surgical incision."
 msgstr ""
+
+#. type: Content of: <root><data><value>
+#: doc/protocol/resx/NeoIPC-Core-Decision-Flow.resx:4
+msgid "Yes"
+msgstr ""
+
+#. type: Content of: <root><data><value>
+#: doc/protocol/resx/NeoIPC-Core-Decision-Flow.resx:7
+msgid "No"
+msgstr ""
+
+#. type: Content of: <root><data><value>
+#: doc/protocol/resx/NeoIPC-Core-Decision-Flow.resx:10
+msgid "Admitted to your department within 120 days after birth?"
+msgstr ""
+
+#. type: Content of: <root><data><value>
+#: doc/protocol/resx/NeoIPC-Core-Decision-Flow.resx:13
+msgid "i.e., stillborn babies, delivery room death, day of life &gt; 120"
+msgstr ""
+
+#. type: Content of: <root><data><value>
+#: doc/protocol/resx/NeoIPC-Core-Decision-Flow.resx:16
+msgid "Gestational age &lt; 32 weeks?"
+msgstr ""
+
+#. type: Content of: <root><data><value>
+#: doc/protocol/resx/NeoIPC-Core-Decision-Flow.resx:19
+msgid "Birthweight &lt; 1500g?"
+msgstr ""
+
+#. type: Content of: <root><data><value>
+#: doc/protocol/resx/NeoIPC-Core-Decision-Flow.resx:22
+msgid "Eligible"
+msgstr ""
+
+#. type: Content of: <root><data><value>
+#: doc/protocol/resx/NeoIPC-Core-Decision-Flow.resx:25
+msgid "Ineligible"
+msgstr ""

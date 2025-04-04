@@ -6512,3 +6512,51 @@ msgstr ""
 "site is considered a surgical incision and not a stab wound.  If a surgeon "
 "uses a laparoscopic trocar site to place a drain at the end of a procedure "
 "this is considered a surgical incision."
+
+#. type: Content of: <root><data><value>
+#: doc/protocol/resx/NeoIPC-Core-Decision-Flow.resx:4
+#, fuzzy, no-wrap
+msgid "Yes"
+msgstr "Ja"
+
+#. type: Content of: <root><data><value>
+#: doc/protocol/resx/NeoIPC-Core-Decision-Flow.resx:7
+#, fuzzy, no-wrap
+msgid "No"
+msgstr "Nein"
+
+#. type: Content of: <root><data><value>
+#: doc/protocol/resx/NeoIPC-Core-Decision-Flow.resx:10
+#, fuzzy, no-wrap
+msgid "Admitted to your department within 120 days after birth?"
+msgstr "Innerhalb von 120 Tagen nach der Geburt in Ihre Abteilung aufgenommen?"
+
+#. type: Content of: <root><data><value>
+#: doc/protocol/resx/NeoIPC-Core-Decision-Flow.resx:13
+#, fuzzy, no-wrap
+msgid "i.e., stillborn babies, delivery room death, day of life &gt; 120"
+msgstr "z. B. Stillgeburten, Versterben im Kreißsaal, Lebenstag &gt; 120"
+
+#. type: Content of: <root><data><value>
+#: doc/protocol/resx/NeoIPC-Core-Decision-Flow.resx:16
+#, fuzzy, no-wrap
+msgid "Gestational age &lt; 32 weeks?"
+msgstr "Gestationsalter &lt; 32 Wochen?"
+
+#. type: Content of: <root><data><value>
+#: doc/protocol/resx/NeoIPC-Core-Decision-Flow.resx:19
+#, fuzzy, no-wrap
+msgid "Birthweight &lt; 1500g?"
+msgstr "Geburtsgewicht &lt; 1500 g?"
+
+#. type: Content of: <root><data><value>
+#: doc/protocol/resx/NeoIPC-Core-Decision-Flow.resx:22
+#, fuzzy, no-wrap
+msgid "Eligible"
+msgstr "Einschluss"
+
+#. type: Content of: <root><data><value>
+#: doc/protocol/resx/NeoIPC-Core-Decision-Flow.resx:25
+#, fuzzy, no-wrap
+msgid "Ineligible"
+msgstr "Kein Einschluss"
