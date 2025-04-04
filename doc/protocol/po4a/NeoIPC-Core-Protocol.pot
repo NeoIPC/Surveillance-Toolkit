@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2025-04-03 15:40+0200\n"
+"POT-Creation-Date: 2025-04-04 09:45+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2350,9 +2350,10 @@ msgstr ""
 msgid "[[data-dictionary-surgical-procedure-endoscopic]]Endoscopic procedure"
 msgstr ""
 
-#. type: Labeled list
+#. type: Content of: <root><data><value>
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:625
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:628
+#: doc/protocol/resx/NeoIPC-Core-Decision-Flow.resx:4
 #, no-wrap
 msgid "Yes"
 msgstr ""
@@ -2362,9 +2363,10 @@ msgstr ""
 msgid "The operation was performed entirely endoscopically,"
 msgstr ""
 
-#. type: Labeled list
+#. type: Content of: <root><data><value>
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:626
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:629
+#: doc/protocol/resx/NeoIPC-Core-Decision-Flow.resx:7
 #, no-wrap
 msgid "No"
 msgstr ""
@@ -5003,41 +5005,37 @@ msgid ""
 msgstr ""
 
 #. type: Content of: <root><data><value>
-#: doc/protocol/resx/NeoIPC-Core-Decision-Flow.resx:4
-msgid "Yes"
-msgstr ""
-
-#. type: Content of: <root><data><value>
-#: doc/protocol/resx/NeoIPC-Core-Decision-Flow.resx:7
-msgid "No"
-msgstr ""
-
-#. type: Content of: <root><data><value>
 #: doc/protocol/resx/NeoIPC-Core-Decision-Flow.resx:10
+#, no-wrap
 msgid "Admitted to your department within 120 days after birth?"
 msgstr ""
 
 #. type: Content of: <root><data><value>
 #: doc/protocol/resx/NeoIPC-Core-Decision-Flow.resx:13
+#, no-wrap
 msgid "i.e., stillborn babies, delivery room death, day of life &gt; 120"
 msgstr ""
 
 #. type: Content of: <root><data><value>
 #: doc/protocol/resx/NeoIPC-Core-Decision-Flow.resx:16
+#, no-wrap
 msgid "Gestational age &lt; 32 weeks?"
 msgstr ""
 
 #. type: Content of: <root><data><value>
 #: doc/protocol/resx/NeoIPC-Core-Decision-Flow.resx:19
+#, no-wrap
 msgid "Birthweight &lt; 1500g?"
 msgstr ""
 
 #. type: Content of: <root><data><value>
 #: doc/protocol/resx/NeoIPC-Core-Decision-Flow.resx:22
+#, no-wrap
 msgid "Eligible"
 msgstr ""
 
 #. type: Content of: <root><data><value>
 #: doc/protocol/resx/NeoIPC-Core-Decision-Flow.resx:25
+#, no-wrap
 msgid "Ineligible"
 msgstr ""
