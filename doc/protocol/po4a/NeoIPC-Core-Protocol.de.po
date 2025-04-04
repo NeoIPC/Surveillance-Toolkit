@@ -6,11 +6,11 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2025-04-03 15:40+0200\n"
+"POT-Creation-Date: 2025-04-04 09:45+0200\n"
 "PO-Revision-Date: 2025-04-03 14:00+0000\n"
 "Last-Translator: Brar Piening <brar@gmx.de>\n"
-"Language-Team: German <https://hosted.weblate.org/projects/neoipc/"
-"neoipc-core-surveillance-protocol/de/>\n"
+"Language-Team: German <https://hosted.weblate.org/projects/neoipc/neoipc-"
+"core-surveillance-protocol/de/>\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -22,9 +22,7 @@ msgstr ""
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:1
 #, no-wrap
 msgid "Infection Surveillance for Neonatology: Core Module for Very Low Birth Weight (VLBW) and Very Preterm (VPT) Infants"
-msgstr ""
-"Infektionssurveillance für die Neonatologie: Kernmodul für Hochrisiko-"
-"Neugeborene mit < 1500 g Geburtsgewicht oder < 32 Wochen Gestationsalter"
+msgstr "Infektionssurveillance für die Neonatologie: Kernmodul für Hochrisiko-Neugeborene mit < 1500 g Geburtsgewicht oder < 32 Wochen Gestationsalter"
 
 #. type: Title ==
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:7
@@ -678,8 +676,8 @@ msgid ""
 "for documentation during this period and remember to enter this data into "
 "the web platform as soon as possible once it becomes available again."
 msgstr ""
-"Sollte das webbasierte Erfassungssystem vorübergehend nicht verfügbar sein ("
-"z. B. aufgrund von Wartungsarbeiten oder technischen Problemen), verwenden "
+"Sollte das webbasierte Erfassungssystem vorübergehend nicht verfügbar sein "
+"(z. B. aufgrund von Wartungsarbeiten oder technischen Problemen), verwenden "
 "Sie in dieser Zeit bitte die Erfassungsbögen in Papierform zur Dokumentation "
 "und denken Sie daran, diese Daten so schnell wie möglich in die Webplattform "
 "einzugeben, sobald diese wieder verfügbar ist."
@@ -873,9 +871,7 @@ msgstr "**UND/ODER**\n"
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:166
 #, no-wrap
 msgid "whose gestational age is less than 32 weeks (31 weeks 6 days inclusive)\n"
-msgstr ""
-"dessen Gestationsalter weniger als 32 Wochen (einschließlich 31 Wochen und 6 "
-"Tage) beträgt\n"
+msgstr "dessen Gestationsalter weniger als 32 Wochen (einschließlich 31 Wochen und 6 Tage) beträgt\n"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:168
@@ -895,10 +891,8 @@ msgstr ""
 msgid "Decision flow to identify eligible infants for the core module"
 msgstr ""
 "#-#-#-#-#  NeoIPC-Core-Protocol.de.adoc:169 (type Block title)  #-#-#-#-#\n"
-"Entscheidungsbaum zur Identifikation einzuschließender Kinder für das "
-"Kernmodul\n"
-"#-#-#-#-#  NeoIPC-Core-Protocol.de.adoc:170 (type: Positional ($1) "
-"AttributeList argument for macro 'image')  #-#-#-#-#\n"
+"Entscheidungsbaum zur Identifikation einzuschließender Kinder für das Kernmodul\n"
+"#-#-#-#-#  NeoIPC-Core-Protocol.de.adoc:170 (type: Positional ($1) AttributeList argument for macro 'image')  #-#-#-#-#\n"
 "Case eligibility decision flow"
 
 #. type: Target for macro image
@@ -911,9 +905,7 @@ msgstr "NeoIPC-Core-Decision-Flow.de.svg"
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:172
 #, no-wrap
 msgid "Examples of infants eligible/not eligible for core module once admitted to the ward"
-msgstr ""
-"Beispiele für Kinder, die für das Kernmodul in Frage kommen/nicht in Frage "
-"kommen, sobald sie auf der Station aufgenommen wurden"
+msgstr "Beispiele für Kinder, die für das Kernmodul in Frage kommen/nicht in Frage kommen, sobald sie auf der Station aufgenommen wurden"
 
 #. type: Table
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:182
@@ -927,8 +919,7 @@ msgid ""
 "|1 [.green]#☑# |1500 [.red]#☐# |32+0 [.red]#☐# |No [.red]#☐#\n"
 "|121 [.red]#☐# |1499 [.green]#☑# |30+5 [.green]#☑# |No [.red]#☐#\n"
 msgstr ""
-"|Lebenstag |Geburtsgewicht (Gramm) |Gestationsalter (Wochen+Tage) |"
-"Einschluss im Kernmodul\n"
+"|Lebenstag |Geburtsgewicht (Gramm) |Gestationsalter (Wochen+Tage) |Einschluss im Kernmodul\n"
 "\n"
 "|120 [.green]#☑# |1499 [.green]#☑# |31+6 [.green]#☑# |Ja [.green]#☑#\n"
 "|1 [.green]#☑# |1500 [.red]#☐# |31+6 [.green]#☑# |Ja [.green]#☑#\n"
@@ -1149,8 +1140,7 @@ msgid "Master data collection sheet for patient data collection"
 msgstr ""
 "#-#-#-#-#  NeoIPC-Core-Protocol.de.adoc:229 (type Block title)  #-#-#-#-#\n"
 "Stammblatt zur Datenerfassung für Patientendaten\n"
-"#-#-#-#-#  NeoIPC-Core-Protocol.de.adoc:231 (type: Positional ($1) "
-"AttributeList argument for macro 'image')  #-#-#-#-#\n"
+"#-#-#-#-#  NeoIPC-Core-Protocol.de.adoc:231 (type: Positional ($1) AttributeList argument for macro 'image')  #-#-#-#-#\n"
 "Stammblatt für die Erfassung von Patientendaten"
 
 #. image::NeoIPC-Core-Master-Data-Collection-Sheet-Image.svg[Master data collection sheet for patient data collection,{full-width},pdfwidth=75%,opts=inline,align="center"]
@@ -1340,8 +1330,8 @@ msgid ""
 "not evident at birth, like toxoplasmosis, CMV, HIV, rubella, and syphilis), "
 "this cut-off value can be ignored."
 msgstr ""
-"Neugeboreneninfektionen lassen sich grob in Früh- und Spätinfektionen (early-"
-" und late-onset) unterteilen.  Die meisten Frühinfektionen sind auf "
+"Neugeboreneninfektionen lassen sich grob in Früh- und Spätinfektionen "
+"(early- und late-onset) unterteilen.  Die meisten Frühinfektionen sind auf "
 "schwangerschafts- und geburtsbedingte Risiken zurückzuführen, bei denen die "
 "verursachenden Erreger typischerweise die Mutter in Form einer mikrobiellen "
 "Kolonisation oder Infektion befallen, bevor sie eine Infektion beim Kind "
@@ -1395,8 +1385,8 @@ msgstr ""
 "Die NeoIPC Surveillance sieht keinen strikten Zeitrahmen für das Auftreten "
 "von Elementen der Definitionen vor, aber in der Regel treten alle Elemente, "
 "die zur Erfüllung einer Infektionsdefinition erforderlich sind, innerhalb "
-"eines Zeitrahmens von 7-10 Tagen auf, wobei typischerweise nicht mehr als 2-"
-"3 Tage zwischen den einzelnen Elementen liegen."
+"eines Zeitrahmens von 7-10 Tagen auf, wobei typischerweise nicht mehr als "
+"2-3 Tage zwischen den einzelnen Elementen liegen."
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:288
@@ -1466,8 +1456,8 @@ msgid ""
 "the online reporting platform."
 msgstr ""
 "Wenn bei einem eingeschlossenen Kind während des Surveillance-Zeitraums eine "
-"nekrotisierende Enterokolitis (NEC) gemäß den NeoIPC-Surveillance-Kriterien ("
-"siehe Infektionsdefinitionen: NEC) auftritt, sind die erforderlichen Daten "
+"nekrotisierende Enterokolitis (NEC) gemäß den NeoIPC-Surveillance-Kriterien "
+"(siehe Infektionsdefinitionen: NEC) auftritt, sind die erforderlichen Daten "
 "mit dem nachstehenden Datenerfassungsbogen zu erfassen und/oder über die "
 "Online-Erfassungsplattform übermitteln."
 
@@ -1496,8 +1486,8 @@ msgid ""
 "platform."
 msgstr ""
 "Wenn bei einem eingeschlossenen Kind während des Surveillance-Zeitraums eine "
-"im Krankenhaus erworbene Pneumonie gemäß den NeoIPC-Surveillance-Kriterien ("
-"siehe Infektionsdefinitionen: Pneumonie) auftritt, sind die erforderlichen "
+"im Krankenhaus erworbene Pneumonie gemäß den NeoIPC-Surveillance-Kriterien "
+"(siehe Infektionsdefinitionen: Pneumonie) auftritt, sind die erforderlichen "
 "Daten mit dem nachstehenden Datenerfassungsbogen zu erfassen und/oder über "
 "die Online-Erfassungsplattform übermitteln."
 
@@ -1510,8 +1500,7 @@ msgid "Pneumonia reporting sheet"
 msgstr ""
 "#-#-#-#-#  NeoIPC-Core-Protocol.de.adoc:312 (type Block title)  #-#-#-#-#\n"
 "Erfassungsbogen Pneumonie\n"
-"#-#-#-#-#  NeoIPC-Core-Protocol.de.adoc:314 (type: Positional ($1) "
-"AttributeList argument for macro 'image')  #-#-#-#-#\n"
+"#-#-#-#-#  NeoIPC-Core-Protocol.de.adoc:314 (type: Positional ($1) AttributeList argument for macro 'image')  #-#-#-#-#\n"
 "Pneumonie-Erfassungsbogen"
 
 #. image::NeoIPC-Core-Pneumonia-Reporting-Sheet-Image.svg[Pneumonia reporting sheet,{full-width},pdfwidth=75%,opts=inline,align="center"]
@@ -1623,9 +1612,7 @@ msgstr ""
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:341
 #, no-wrap
 msgid "Example showing the relationship between infection and device for device associated infections"
-msgstr ""
-"Beispiel für den Zusammenhang zwischen Infektion und Device bei Device-"
-"assoziierten Infektionen"
+msgstr "Beispiel für den Zusammenhang zwischen Infektion und Device bei Device-assoziierten Infektionen"
 
 #. type: Table
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:352
@@ -1640,18 +1627,14 @@ msgid ""
 "|Day 5 |No device |No [.red]#☐# |No CVC on the day of infection or on day before infection\n"
 "|Day 6 |No device |No [.red]#☐# |No CVC on the day of infection or on day before infection\n"
 msgstr ""
-"|Tage |Device vorhanden |Device-Assoziation (wenn dies der Tag der Infektion "
-"ist) |Kommentare\n"
+"|Tage |Device vorhanden |Device-Assoziation (wenn dies der Tag der Infektion ist) |Kommentare\n"
 "\n"
 "|Tag 1 |ZVK |Nein [.red]#☐# |<3 ZVK-Tage am Tag der Infektion\n"
 "|Tag 2 |ZVK |Nein [.red]#☐# |<3 ZVK-Tage am Tag der Infektion\n"
 "|Tag 3 |ZVK |Ja [.green]#☑# |≥3 ZVK-Tage am Tag der Infektion\n"
-"|Tag 4 |Kein Device |Ja [.green]#☑# |Kein ZVK am Tag der Infektion, aber ≥3 "
-"ZVK-Tage am Tag 3 (dem Tag vor der Infektion)\n"
-"|Tag 5 |Kein Device |Nein [.red]#☐# |Kein ZVK am Tag der Infektion oder am "
-"Tag vor der Infektion\n"
-"|Tag 6 |Kein Device |Nein [.red]#☐# |Kein ZVK am Tag der Infektion oder am "
-"Tag vor der Infektion\n"
+"|Tag 4 |Kein Device |Ja [.green]#☑# |Kein ZVK am Tag der Infektion, aber ≥3 ZVK-Tage am Tag 3 (dem Tag vor der Infektion)\n"
+"|Tag 5 |Kein Device |Nein [.red]#☐# |Kein ZVK am Tag der Infektion oder am Tag vor der Infektion\n"
+"|Tag 6 |Kein Device |Nein [.red]#☐# |Kein ZVK am Tag der Infektion oder am Tag vor der Infektion\n"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:355
@@ -1691,8 +1674,9 @@ msgid ""
 msgstr ""
 "Im Rahmen der NeoIPC-Surveillance ist es möglich, Blutstrominfektionen "
 "sekundär zu Pneumonie, NEC und SSI zu erfassen.  Die Erfassung von Daten zu "
-"sekundären BSI ist optional; daher ist es möglich, **„Keine Nachverfolgung“**"
-" auszuwählen, wenn Sie Patienten nicht auf sekundäre BSI überwachen."
+"sekundären BSI ist optional; daher ist es möglich, **„Keine "
+"Nachverfolgung“** auszuwählen, wenn Sie Patienten nicht auf sekundäre BSI "
+"überwachen."
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:365
@@ -1736,48 +1720,23 @@ msgstr ""
 #, no-wrap
 msgid "**AND**\n"
 msgstr ""
-"#-#-#-#-#  NeoIPC-Core-Protocol.de.adoc:369 definitions/NeoIPC-Core-Clinical-"
-"Sepsis-Definition.de.adoc:7 definitions/NeoIPC-Core-Clinical-Sepsis-"
-"Definition.de.adoc:10 definitions/NeoIPC-Core-Deep-Incisional-SSI-"
-"Definition.de.adoc:7 definitions/NeoIPC-Core-Deep-Incisional-SSI-"
-"Definition.de.adoc:10 definitions/NeoIPC-Core-Deep-Incisional-SSI-"
-"Definition.de.adoc:15 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:7 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:31 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:39 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:57 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:60 definitions/NeoIPC-Core-Necrotising-Enterocolitis-"
-"Definition.de.adoc:13 definitions/NeoIPC-Core-Organ-Space-SSI-"
-"Definition.de.adoc:7 definitions/NeoIPC-Core-Organ-Space-SSI-"
-"Definition.de.adoc:10 definitions/NeoIPC-Core-Pneumonia-Definition.de.adoc:"
-"10 (type Plain text)  #-#-#-#-#\n"
+"#-#-#-#-#  NeoIPC-Core-Protocol.de.adoc:369 definitions/NeoIPC-Core-Clinical-Sepsis-Definition.de.adoc:7 definitions/NeoIPC-Core-Clinical-Sepsis-Definition.de.adoc:10 definitions/NeoIPC-Core-Deep-Incisional-SSI-Definition.de.adoc:7 definitions/NeoIPC-Core-Deep-Incisional-SSI-Definition.de.adoc:10 definitions/NeoIPC-Core-Deep-Incisional-SSI-Definition.de.adoc:15 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:7 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:31 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:39 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:57 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:60 definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.de.adoc:13 definitions/NeoIPC-Core-Organ-Space-SSI-Definition.de.adoc:7 definitions/NeoIPC-Core-Organ-Space-SSI-Definition.de.adoc:10 definitions/NeoIPC-Core-Pneumonia-Definition.de.adoc:10 (type Plain text)  #-#-#-#-#\n"
 "**UND**\n"
 "\n"
-"#-#-#-#-#  definitions/NeoIPC-Core-Superficial-Incisional-SSI-"
-"Definition.adoc:7 definitions/NeoIPC-Core-Superficial-Incisional-SSI-"
-"Definition.adoc:10 definitions/NeoIPC-Core-Superficial-Incisional-SSI-"
-"Definition.adoc:18 (type: delimited block *)  #-#-#-#-#\n"
+"#-#-#-#-#  definitions/NeoIPC-Core-Superficial-Incisional-SSI-Definition.adoc:7 definitions/NeoIPC-Core-Superficial-Incisional-SSI-Definition.adoc:10 definitions/NeoIPC-Core-Superficial-Incisional-SSI-Definition.adoc:18 (type: delimited block *)  #-#-#-#-#\n"
 "**AND**\n"
 "\n"
-"#-#-#-#-#  definitions/NeoIPC-Core-Superficial-Incisional-SSI-"
-"Definition.adoc:7 definitions/NeoIPC-Core-Superficial-Incisional-SSI-"
-"Definition.adoc:10 definitions/NeoIPC-Core-Superficial-Incisional-SSI-"
-"Definition.adoc:18 (type: delimited block *)  #-#-#-#-#\n"
+"#-#-#-#-#  definitions/NeoIPC-Core-Superficial-Incisional-SSI-Definition.adoc:7 definitions/NeoIPC-Core-Superficial-Incisional-SSI-Definition.adoc:10 definitions/NeoIPC-Core-Superficial-Incisional-SSI-Definition.adoc:18 (type: delimited block *)  #-#-#-#-#\n"
 "**AND**\n"
 "\n"
-"#-#-#-#-#  definitions/NeoIPC-Core-Superficial-Incisional-SSI-"
-"Definition.adoc:7 definitions/NeoIPC-Core-Superficial-Incisional-SSI-"
-"Definition.adoc:10 definitions/NeoIPC-Core-Superficial-Incisional-SSI-"
-"Definition.adoc:18 (type: delimited block *)  #-#-#-#-#\n"
+"#-#-#-#-#  definitions/NeoIPC-Core-Superficial-Incisional-SSI-Definition.adoc:7 definitions/NeoIPC-Core-Superficial-Incisional-SSI-Definition.adoc:10 definitions/NeoIPC-Core-Superficial-Incisional-SSI-Definition.adoc:18 (type: delimited block *)  #-#-#-#-#\n"
 "**AND**\n"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:370
 #, no-wrap
 msgid "At least one organism from the blood specimen matches an organism identified from the primary infection site.\n"
-msgstr ""
-"Mindestens ein Organismus aus der Blutprobe stimmt mit einem Organismus "
-"überein, der an der Stelle der Primärinfektion identifiziert wurde.\n"
+msgstr "Mindestens ein Organismus aus der Blutprobe stimmt mit einem Organismus überein, der an der Stelle der Primärinfektion identifiziert wurde.\n"
 
 #. image::NeoIPC-Core-Secondary-BSI-Image.svg[Secondary BSI data collection,{full-width},pdfwidth=100%,opts=inline,align="center"]
 #. type: Positional ($1) AttributeList argument for macro 'image'
@@ -1814,10 +1773,11 @@ msgid ""
 "\"Laboratory-confirmed bloodstream infection\") is classified into two "
 "categories based on the culture result."
 msgstr ""
-"Sepsis wird im NeoIPC-Surveillance-System entweder als klinis (kulturnegativ)"
-" oder mikrobiologisch bestätigt eingestuft.  Die mikrobiologisch bestätigte "
-"Sepsis (LCBSI = „Laboratory-confirmed bloodstream infection“) wird auf der "
-"Grundlage des Kulturergebnisses in zwei weitere Unterkategorien eingeteilt."
+"Sepsis wird im NeoIPC-Surveillance-System entweder als klinis "
+"(kulturnegativ) oder mikrobiologisch bestätigt eingestuft.  Die "
+"mikrobiologisch bestätigte Sepsis (LCBSI = „Laboratory-confirmed bloodstream "
+"infection“) wird auf der Grundlage des Kulturergebnisses in zwei weitere "
+"Unterkategorien eingeteilt."
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:384
@@ -1832,8 +1792,8 @@ msgstr ""
 "primären Infektionsstelle in die Blutbahn gelangen (mit Ausnahme von "
 "Katheter-assoziierten Infektionen), werden in diesem Abschnitt nicht "
 "berücksichtigt.  Ausführliche Informationen finden Sie unter xref:data-"
-"collection-infection-data-collection-secondary-bloodstream-infection"
-"[Secondary Bloodstream Infection]."
+"collection-infection-data-collection-secondary-bloodstream-"
+"infection[Secondary Bloodstream Infection]."
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:386
@@ -1859,9 +1819,7 @@ msgstr "LCBSI, verursacht durch einen gewöhnlichen Kommensalen* ."
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:391
 #, no-wrap
 msgid "*See xref:appendix-list-of-list-of-infectious-agents[List of Infectious Agents]\n"
-msgstr ""
-"*Siehe xref:appendix-list-of-list-of-infectious-agents"
-"[Liste der Infektionserreger]\n"
+msgstr "*Siehe xref:appendix-list-of-list-of-infectious-agents[Liste der Infektionserreger]\n"
 
 #. type: Block title
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:394
@@ -2036,8 +1994,7 @@ msgid ""
 "|5 |0.90 |[.green]#☑# (infection day)\n"
 "|6 |0.90 |No improvement\n"
 msgstr ""
-"|NIV/INV Tag |Tägliches Minimum FiO~2~ (Sauerstoffkonzentration, %) |"
-"Bemerkungen\n"
+"|NIV/INV Tag |Tägliches Minimum FiO~2~ (Sauerstoffkonzentration, %) |Bemerkungen\n"
 "\n"
 "|1 |1.00 |\n"
 "|2 |1.00 |\n"
@@ -2075,8 +2032,8 @@ msgid ""
 msgstr ""
 "SSIs, die bei Patienten auftreten, für die kein chirurgischer Eingriff im "
 "NeoIPC-Surveillance-System erfasst wurde (z. B. ein Patient, der nach einem "
-"chirurgischen Eingriff in einem anderen Zentrum in Ihr Zentrum verlegt wurde)"
-", werden nicht erfasst."
+"chirurgischen Eingriff in einem anderen Zentrum in Ihr Zentrum verlegt "
+"wurde), werden nicht erfasst."
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:467
@@ -2130,8 +2087,7 @@ msgid ""
 "This will start a new follow-up period for the revision procedure though."
 msgstr ""
 "Ein Revisionsverfahren im selben Bereich.\n"
-"Damit beginnt jedoch ein neuer Nachbeobachtungszeitraum für den "
-"Revisionseingriff."
+"Damit beginnt jedoch ein neuer Nachbeobachtungszeitraum für den Revisionseingriff."
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:480
@@ -2157,13 +2113,8 @@ msgid ""
 "Record the main procedure and the associated ICHIfootnote:[International Classification of Health Interventionspass:p[ +] https://www.who.int/standards/classifications/international-classification-of-health-interventions] code.\n"
 "Only in complex surgical interventions where one main procedure is not sufficient to adequately describe the procedure, up to 2 further ICHI codes can be recorded."
 msgstr ""
-"Erfassen Sie das Haupteingriffsverfahren und den zugehörigen ICHIfootnote:"
-"[International Classification of Health Interventionspass:p[ +] https://"
-"www.who.int/standards/classifications/international-classification-of-health-"
-"interventions] Code.\n"
-"Nur bei komplexen chirurgischen Eingriffen, bei denen ein Hauptverfahren "
-"nicht ausreicht, um den Eingriff angemessen zu beschreiben, können bis zu 2 "
-"weitere ICHI-Codes erfasst werden."
+"Erfassen Sie das Haupteingriffsverfahren und den zugehörigen ICHIfootnote:[International Classification of Health Interventionspass:p[ +] https://www.who.int/standards/classifications/international-classification-of-health-interventions] Code.\n"
+"Nur bei komplexen chirurgischen Eingriffen, bei denen ein Hauptverfahren nicht ausreicht, um den Eingriff angemessen zu beschreiben, können bis zu 2 weitere ICHI-Codes erfasst werden."
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:489
@@ -2172,15 +2123,8 @@ msgid ""
 "The type of SSI (superficial incisional, deep incisional, or organ/space) reported must reflect the deepest tissue level where SSI criteria are met during the surveillance period.\n"
 "**Example:** An SSI started as a deep incisional SSI on day 10 of the SSI surveillance period and then a week later (Day 17) meets the criteria for an organ/space SSI. You must report it as organ/space SSI regardless of superficial or deep tissue involvement. The day of infection in this case would be “Day 17”."
 msgstr ""
-"Die Art der erfassten SSI (oberflächliche WI, tiefe WI oder Organ/"
-"Körperhöhle) muss die tiefste Gewebeebene widerspiegeln, in der während des "
-"Surveillancezeitraums SSI-Kriterien erfüllt sind.\n"
-"**Beispiel:** Eine SSI, die am Tag 10 des SSI-Surveillancezeitraums als "
-"tiefe Inzisions-SSI begann und dann eine Woche später (Tag 17) die Kriterien "
-"für eine Wundinfektion an Organen oder in Körperhöhlen erfüllt. Sie müssen "
-"dies als Wundinfektion an Organen oder in Körperhöhlen melden, unabhängig "
-"davon, ob oberflächliches oder tiefes Gewebe betroffen ist. Der Tag der "
-"Infektion wäre in diesem Fall der „Tag 17“."
+"Die Art der erfassten SSI (oberflächliche WI, tiefe WI oder Organ/Körperhöhle) muss die tiefste Gewebeebene widerspiegeln, in der während des Surveillancezeitraums SSI-Kriterien erfüllt sind.\n"
+"**Beispiel:** Eine SSI, die am Tag 10 des SSI-Surveillancezeitraums als tiefe Inzisions-SSI begann und dann eine Woche später (Tag 17) die Kriterien für eine Wundinfektion an Organen oder in Körperhöhlen erfüllt. Sie müssen dies als Wundinfektion an Organen oder in Körperhöhlen melden, unabhängig davon, ob oberflächliches oder tiefes Gewebe betroffen ist. Der Tag der Infektion wäre in diesem Fall der „Tag 17“."
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:491
@@ -2273,9 +2217,7 @@ msgstr "Aufnahme"
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:519
 #, no-wrap
 msgid "[[data-dictionary-patient-master-data-enrolment-enroling-organisation-unit]]Enroling organisation unit"
-msgstr ""
-"[[data-dictionary-patient-master-data-enrolment-enroling-organisation-unit]]"
-"Aufnehmende Abteilung"
+msgstr "[[data-dictionary-patient-master-data-enrolment-enroling-organisation-unit]]Aufnehmende Abteilung"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:520
@@ -2286,9 +2228,7 @@ msgstr "Die Abteilung, in der Sie den neuen Patienten erfassen möchten."
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:520
 #, no-wrap
 msgid "[[data-dictionary-patient-master-data-enrolment-neoipc-id]]NeoIPC-ID (NeoIPC patient identifier)"
-msgstr ""
-"[[data-dictionary-patient-master-data-enrolment-neoipc-id]]NeoIPC-ID (NeoIPC-"
-"Patientenidentifikator)"
+msgstr "[[data-dictionary-patient-master-data-enrolment-neoipc-id]]NeoIPC-ID (NeoIPC-Patientenidentifikator)"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:522
@@ -2324,8 +2264,7 @@ msgstr ""
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:528
 #, no-wrap
 msgid "[[data-dictionary-patient-master-data-enrolment-patient-id]]Patient-ID"
-msgstr ""
-"[[data-dictionary-patient-master-data-enrolment-patient-id]]Patienten-ID"
+msgstr "[[data-dictionary-patient-master-data-enrolment-patient-id]]Patienten-ID"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:529
@@ -2342,8 +2281,7 @@ msgstr ""
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:529
 #, no-wrap
 msgid "[[data-dictionary-patient-master-data-enrolment-patient-name]]Patient name"
-msgstr ""
-"[[data-dictionary-patient-master-data-enrolment-patient-name]]Patientenname"
+msgstr "[[data-dictionary-patient-master-data-enrolment-patient-name]]Patientenname"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:530
@@ -2370,9 +2308,7 @@ msgstr ""
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:534
 #, no-wrap
 msgid "[[data-dictionary-patient-master-data-enrolment-gestational-age]]Gestational age (GA)"
-msgstr ""
-"[[data-dictionary-patient-master-data-enrolment-gestational-age]]"
-"Gestationsalter (GA)"
+msgstr "[[data-dictionary-patient-master-data-enrolment-gestational-age]]Gestationsalter (GA)"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:536
@@ -2395,9 +2331,7 @@ msgstr ""
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:536
 #, no-wrap
 msgid "[[data-dictionary-patient-master-data-enrolment-birthweight]]Birthweight (BW)"
-msgstr ""
-"[[data-dictionary-patient-master-data-enrolment-birthweight]]Geburtsgewicht "
-"(BW)"
+msgstr "[[data-dictionary-patient-master-data-enrolment-birthweight]]Geburtsgewicht (BW)"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:538
@@ -2451,8 +2385,7 @@ msgstr "Unbestimmt"
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:544
 #, no-wrap
 msgid "[[data-dictionary-patient-master-data-enrolment-delivery-mode]]Delivery mode"
-msgstr ""
-"[[data-dictionary-patient-master-data-enrolment-delivery-mode]]Geburtsmodus"
+msgstr "[[data-dictionary-patient-master-data-enrolment-delivery-mode]]Geburtsmodus"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:546
@@ -2480,9 +2413,7 @@ msgstr "Not-Kaiserschnitt"
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:550
 #, no-wrap
 msgid "[[data-dictionary-patient-master-data-enrolment-multiple-birth]]Multiple birth"
-msgstr ""
-"[[data-dictionary-patient-master-data-enrolment-multiple-birth]"
-"]Mehrlingsgeburt"
+msgstr "[[data-dictionary-patient-master-data-enrolment-multiple-birth]]Mehrlingsgeburt"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:551
@@ -2494,9 +2425,7 @@ msgstr ""
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:551
 #, no-wrap
 msgid "[[data-dictionary-patient-master-data-enrolment-number-of-infants]]Number of infants at birth"
-msgstr ""
-"[[data-dictionary-patient-master-data-enrolment-number-of-infants]]Anzahl "
-"der Kinder bei der Geburt"
+msgstr "[[data-dictionary-patient-master-data-enrolment-number-of-infants]]Anzahl der Kinder bei der Geburt"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:553
@@ -2519,9 +2448,7 @@ msgstr "Informationen zur Aufnahme"
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:556
 #, no-wrap
 msgid "[[data-dictionary-patient-master-data-admission-information-admission-date]]Admission date"
-msgstr ""
-"[[data-dictionary-patient-master-data-admission-information-admission-date]"
-"]Aufnahmedatum"
+msgstr "[[data-dictionary-patient-master-data-admission-information-admission-date]]Aufnahmedatum"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:558
@@ -2536,9 +2463,7 @@ msgstr ""
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:558
 #, no-wrap
 msgid "[[data-dictionary-patient-master-data-admission-information-admission-type]]Admission type"
-msgstr ""
-"[[data-dictionary-patient-master-data-admission-information-admission-type]"
-"]Aufnahmeart"
+msgstr "[[data-dictionary-patient-master-data-admission-information-admission-type]]Aufnahmeart"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:559
@@ -2574,9 +2499,7 @@ msgstr ""
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:563
 #, no-wrap
 msgid "[[data-dictionary-patient-master-data-admission-information-admission-day-of-life]]Admission on day of life"
-msgstr ""
-"[[data-dictionary-patient-master-data-admission-information-admission-day-of-"
-"life]]Aufnahme am Tag des Lebens"
+msgstr "[[data-dictionary-patient-master-data-admission-information-admission-day-of-life]]Aufnahme am Tag des Lebens"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:565
@@ -2600,9 +2523,7 @@ msgstr "Surveillance-Ende"
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:568
 #, no-wrap
 msgid "[[data-dictionary-patient-master-data-surveillance-end-date]]Surveillance end date"
-msgstr ""
-"[[data-dictionary-patient-master-data-surveillance-end-date]]Surveillance "
-"end date"
+msgstr "[[data-dictionary-patient-master-data-surveillance-end-date]]Surveillance end date"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:569
@@ -2616,9 +2537,7 @@ msgstr ""
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:569
 #, no-wrap
 msgid "[[data-dictionary-patient-master-data-surveillance-end-reason]]Surveillance end reason"
-msgstr ""
-"[[data-dictionary-patient-master-data-surveillance-end-reason]]Grund für das "
-"Ende der Surveillance"
+msgstr "[[data-dictionary-patient-master-data-surveillance-end-reason]]Grund für das Ende der Surveillance"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:571
@@ -2640,9 +2559,7 @@ msgstr "Tod."
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:574
 #, no-wrap
 msgid "[[data-dictionary-patient-master-data-surveillance-end-patient-days]]Patient days"
-msgstr ""
-"[[data-dictionary-patient-master-data-surveillance-end-patient-days]"
-"]Patiententage"
+msgstr "[[data-dictionary-patient-master-data-surveillance-end-patient-days]]Patiententage"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:575
@@ -2659,8 +2576,7 @@ msgstr ""
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:575
 #, no-wrap
 msgid "[[data-dictionary-patient-master-data-surveillance-end-cvc-days]]CVC days"
-msgstr ""
-"[[data-dictionary-patient-master-data-surveillance-end-cvc-days]]ZVK-Tage"
+msgstr "[[data-dictionary-patient-master-data-surveillance-end-cvc-days]]ZVK-Tage"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:576
@@ -2675,8 +2591,7 @@ msgstr ""
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:576
 #, no-wrap
 msgid "[[data-dictionary-patient-master-data-surveillance-end-pvc-days]]PVC days"
-msgstr ""
-"[[data-dictionary-patient-master-data-surveillance-end-pvc-days]]PVC-Tage"
+msgstr "[[data-dictionary-patient-master-data-surveillance-end-pvc-days]]PVC-Tage"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:577
@@ -2691,8 +2606,7 @@ msgstr ""
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:577
 #, no-wrap
 msgid "[[data-dictionary-patient-master-data-surveillance-end-inv-days]]INV days"
-msgstr ""
-"[[data-dictionary-patient-master-data-surveillance-end-inv-days]]INV-Tage"
+msgstr "[[data-dictionary-patient-master-data-surveillance-end-inv-days]]INV-Tage"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:578
@@ -2707,8 +2621,7 @@ msgstr ""
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:578
 #, no-wrap
 msgid "[[data-dictionary-patient-master-data-surveillance-end-niv-days]]NIV days"
-msgstr ""
-"[[data-dictionary-patient-master-data-surveillance-end-niv-days]]NIV-Tage"
+msgstr "[[data-dictionary-patient-master-data-surveillance-end-niv-days]]NIV-Tage"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:579
@@ -2725,9 +2638,7 @@ msgstr ""
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:579
 #, no-wrap
 msgid "[[data-dictionary-patient-master-data-surveillance-end-human-milk-days]]Human milk days"
-msgstr ""
-"[[data-dictionary-patient-master-data-surveillance-end-human-milk-days]"
-"]Humanmilchtage"
+msgstr "[[data-dictionary-patient-master-data-surveillance-end-human-milk-days]]Humanmilchtage"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:581
@@ -2745,9 +2656,7 @@ msgstr ""
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:581
 #, no-wrap
 msgid "[[data-dictionary-patient-master-data-surveillance-end-kangaroo-care-days]]Cangaroo care days"
-msgstr ""
-"[[data-dictionary-patient-master-data-surveillance-end-kangaroo-care-days]"
-"]Känguru-Pflege-Tage"
+msgstr "[[data-dictionary-patient-master-data-surveillance-end-kangaroo-care-days]]Känguru-Pflege-Tage"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:582
@@ -2755,16 +2664,14 @@ msgid ""
 "The cumulative number of days the patient received kangaroo care (intensive "
 "skin-to-skin-contact) for at least 2 hours."
 msgstr ""
-"Die kumulative Anzahl der Tage, an denen der Patient Känguru-Pflege ("
-"intensiver Haut-zu-Haut-Kontakt) für mindestens 2 Stunden erhielt."
+"Die kumulative Anzahl der Tage, an denen der Patient Känguru-Pflege "
+"(intensiver Haut-zu-Haut-Kontakt) für mindestens 2 Stunden erhielt."
 
 #. type: Labeled list
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:582
 #, no-wrap
 msgid "[[data-dictionary-patient-master-data-surveillance-end-probiotic-days]]Probiotic days"
-msgstr ""
-"[[data-dictionary-patient-master-data-surveillance-end-probiotic-days]]"
-"Probiotische Tage"
+msgstr "[[data-dictionary-patient-master-data-surveillance-end-probiotic-days]]Probiotische Tage"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:583
@@ -2781,9 +2688,7 @@ msgstr ""
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:583
 #, no-wrap
 msgid "[[data-dictionary-patient-master-data-surveillance-end-total-antibiotic-days]]Antibiotic days, total"
-msgstr ""
-"[[data-dictionary-patient-master-data-surveillance-end-total-antibiotic-days"
-"]]Antibiotika-Tage, gesamt"
+msgstr "[[data-dictionary-patient-master-data-surveillance-end-total-antibiotic-days]]Antibiotika-Tage, gesamt"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:587
@@ -2815,9 +2720,7 @@ msgstr ""
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:587
 #, no-wrap
 msgid "[[data-dictionary-patient-master-data-surveillance-end-antibiotic-substance-days]]Antibiotic days, per substance 1, 2, 3, …"
-msgstr ""
-"[[data-dictionary-patient-master-data-surveillance-end-antibiotic-substance-"
-"days]]Antibiotikatage, je Substanz 1, 2, 3, …"
+msgstr "[[data-dictionary-patient-master-data-surveillance-end-antibiotic-substance-days]]Antibiotikatage, je Substanz 1, 2, 3, …"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:589
@@ -2850,8 +2753,7 @@ msgstr "Der Tag des chirurgischen Eingriffs."
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:593
 #, no-wrap
 msgid "[[data-dictionary-surgical-procedure-description]]Procedure description"
-msgstr ""
-"[[data-dictionary-surgical-procedure-description]]Beschreibung des Eingriffs"
+msgstr "[[data-dictionary-surgical-procedure-description]]Beschreibung des Eingriffs"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:594
@@ -2868,8 +2770,7 @@ msgstr ""
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:594
 #, no-wrap
 msgid "[[data-dictionary-surgical-procedure-main-procedure-code]]Main procedure code"
-msgstr ""
-"[[data-dictionary-surgical-procedure-main-procedure-code]]Main procedure code"
+msgstr "[[data-dictionary-surgical-procedure-main-procedure-code]]Main procedure code"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:597
@@ -2891,8 +2792,7 @@ msgstr ""
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:597
 #, no-wrap
 msgid "[[data-dictionary-surgical-procedure-side-procedure-code]]Side procedure code"
-msgstr ""
-"[[data-dictionary-surgical-procedure-side-procedure-code]]Side procedure code"
+msgstr "[[data-dictionary-surgical-procedure-side-procedure-code]]Side procedure code"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:599
@@ -2967,9 +2867,7 @@ msgstr ""
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:606
 #, no-wrap
 msgid "[[data-dictionary-surgical-procedure-wound-class-ii]]Class II/Clean-Contaminated"
-msgstr ""
-"[[data-dictionary-surgical-procedure-wound-class-ii]]Klasse II/Sauber-"
-"Kontaminiert"
+msgstr "[[data-dictionary-surgical-procedure-wound-class-ii]]Klasse II/Sauber-Kontaminiert"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:608
@@ -2991,9 +2889,7 @@ msgstr ""
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:608
 #, no-wrap
 msgid "[[data-dictionary-surgical-procedure-wound-class-iii]]Class III/Contaminated"
-msgstr ""
-"[[data-dictionary-surgical-procedure-wound-class-iii]]Klasse III/"
-"Kontaminierte Wunden"
+msgstr "[[data-dictionary-surgical-procedure-wound-class-iii]]Klasse III/Kontaminierte Wunden"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:610
@@ -3012,9 +2908,7 @@ msgstr ""
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:610
 #, no-wrap
 msgid "[[data-dictionary-surgical-procedure-wound-class-iv]]Class IV/Dirty-Infected"
-msgstr ""
-"[[data-dictionary-surgical-procedure-wound-class-iv]]Klasse IV/schmutzig-"
-"infizierte Wunden"
+msgstr "[[data-dictionary-surgical-procedure-wound-class-iv]]Klasse IV/schmutzig-infizierte Wunden"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:612
@@ -3121,12 +3015,12 @@ msgstr ""
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:624
 #, no-wrap
 msgid "[[data-dictionary-surgical-procedure-endoscopic]]Endoscopic procedure"
-msgstr ""
-"[[data-dictionary-surgical-procedure-endoscopic]]Endoskopisches Verfahren"
+msgstr "[[data-dictionary-surgical-procedure-endoscopic]]Endoskopisches Verfahren"
 
-#. type: Labeled list
+#. type: Content of: <root><data><value>
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:625
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:628
+#: doc/protocol/resx/NeoIPC-Core-Decision-Flow.resx:4
 #, no-wrap
 msgid "Yes"
 msgstr "Ja"
@@ -3136,9 +3030,10 @@ msgstr "Ja"
 msgid "The operation was performed entirely endoscopically,"
 msgstr "Die Operation wurde vollständig endoskopisch durchgeführt,"
 
-#. type: Labeled list
+#. type: Content of: <root><data><value>
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:626
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:629
+#: doc/protocol/resx/NeoIPC-Core-Decision-Flow.resx:7
 #, no-wrap
 msgid "No"
 msgstr "Nein"
@@ -3188,8 +3083,7 @@ msgstr "Keine Informationen verfügbar."
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:631
 #, no-wrap
 msgid "[[data-dictionary-surgical-procedure-primary-closure]]Primary closure"
-msgstr ""
-"[[data-dictionary-surgical-procedure-primary-closure]]Primärer Verschluss"
+msgstr "[[data-dictionary-surgical-procedure-primary-closure]]Primärer Verschluss"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:634
@@ -3224,8 +3118,7 @@ msgstr ""
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:637
 #, no-wrap
 msgid "[[data-dictionary-surgical-procedure-revision-procedure]]Revision procedure"
-msgstr ""
-"[[data-dictionary-surgical-procedure-revision-procedure]]Revisionsverfahren"
+msgstr "[[data-dictionary-surgical-procedure-revision-procedure]]Revisionsverfahren"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:639
@@ -3261,9 +3154,7 @@ msgstr ""
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:640
 #, no-wrap
 msgid "[[data-dictionary-surgical-procedure-signs-of-infetion]]Signs of infection at time of surgery"
-msgstr ""
-"[[data-dictionary-surgical-procedure-signs-of-infetion]]Anzeichen einer "
-"Infektion zum Zeitpunkt der Operation"
+msgstr "[[data-dictionary-surgical-procedure-signs-of-infetion]]Anzeichen einer Infektion zum Zeitpunkt der Operation"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:643
@@ -3326,8 +3217,8 @@ msgid ""
 msgstr ""
 "Die Verwendung der Endung „itis“ in einer Operationsnotiz/einem "
 "Operationsbericht gilt nicht automatisch als Beweis für eine Infektion, da "
-"sie nur eine Entzündung widerspiegeln kann, die nicht infektiöser Natur ist ("
-"z. B. Divertikulitis, Peritonitis und Appendizitis)."
+"sie nur eine Entzündung widerspiegeln kann, die nicht infektiöser Natur ist "
+"(z. B. Divertikulitis, Peritonitis und Appendizitis)."
 
 #. type: delimited block =
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:651
@@ -3397,8 +3288,7 @@ msgstr "Allgemeine Infektionsdaten"
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:662
 #, no-wrap
 msgid "[[data-dictionary-general-infection-data-infection-date]]Infection date"
-msgstr ""
-"[[data-dictionary-general-infection-data-infection-date]]Infektionsdatum"
+msgstr "[[data-dictionary-general-infection-data-infection-date]]Infektionsdatum"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:664
@@ -3414,8 +3304,7 @@ msgstr ""
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:665
 #, no-wrap
 msgid "[[data-dictionary-general-infection-data-common-commensal]]Common commensal"
-msgstr ""
-"[[data-dictionary-general-infection-data-common-commensal]]Common commensal"
+msgstr "[[data-dictionary-general-infection-data-common-commensal]]Common commensal"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:668
@@ -3436,9 +3325,7 @@ msgstr ""
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:669
 #, no-wrap
 msgid "[[data-dictionary-general-infection-data-mdros]]Multidrug-resistant organisms (MDROs)"
-msgstr ""
-"[[data-dictionary-general-infection-data-mdros]]Multiresistente Organismen "
-"(MDROs)"
+msgstr "[[data-dictionary-general-infection-data-mdros]]Multiresistente Organismen (MDROs)"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:670
@@ -3471,8 +3358,8 @@ msgid ""
 "phenotypic resistance or ESBL-producing organisms)"
 msgstr ""
 "3GCR: Multiresistente gramnegative Erreger, die nach den Cut-off-Werten des "
-"eigenen Labors gegen Cephalosporine der 3. Generation resistent sind ("
-"bezieht sich auf phänotypische Resistenz oder ESBL-produzierende Organismen)"
+"eigenen Labors gegen Cephalosporine der 3. Generation resistent sind "
+"(bezieht sich auf phänotypische Resistenz oder ESBL-produzierende Organismen)"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:675
@@ -3505,8 +3392,8 @@ msgstr "Optionen für jede Gruppe:"
 msgid ""
 "Yes: the isolated organism is resistant to the specified antibiotic group(s)."
 msgstr ""
-"Ja: Der isolierte Organismus ist gegen die angegebene(n) Antibiotikagruppe(n)"
-" resistent."
+"Ja: Der isolierte Organismus ist gegen die angegebene(n) "
+"Antibiotikagruppe(n) resistent."
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:681
@@ -3530,9 +3417,7 @@ msgstr ""
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:683
 #, no-wrap
 msgid "[[data-dictionary-general-infection-data-secondary-bsi]]Secondary bloodstream infection"
-msgstr ""
-"[[data-dictionary-general-infection-data-secondary-bsi]]Sekundäre "
-"Blutstrominfektion"
+msgstr "[[data-dictionary-general-infection-data-secondary-bsi]]Sekundäre Blutstrominfektion"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:685
@@ -3571,8 +3456,8 @@ msgid ""
 "a field below where you can enter identified organisms)"
 msgstr ""
 "Ja: wenn Sie Patienten wegen sekundärer BSI verfolgen und der Patient eine "
-"sekundäre Sepsis entwickelt hat, die der Definition von NeoIPC entspricht ("
-"aktiviert ein Feld unten, in das Sie identifizierte Organismen eingeben "
+"sekundäre Sepsis entwickelt hat, die der Definition von NeoIPC entspricht "
+"(aktiviert ein Feld unten, in das Sie identifizierte Organismen eingeben "
 "können)"
 
 #. type: Plain text
@@ -3708,8 +3593,7 @@ msgstr "Nabelarterie/-vene"
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:719
 #, no-wrap
 msgid "[[data-dictionary-bsi-specific-data-cvc-associated-bsi]]CVC-associated BSI"
-msgstr ""
-"[[data-dictionary-bsi-specific-data-cvc-associated-bsi]]ZVK-associated BSI"
+msgstr "[[data-dictionary-bsi-specific-data-cvc-associated-bsi]]ZVK-associated BSI"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:720
@@ -3758,8 +3642,7 @@ msgstr ""
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:725
 #, no-wrap
 msgid "[[data-dictionary-bsi-specific-data-pvc-associated-bsi]]PVC-associated BSI"
-msgstr ""
-"[[data-dictionary-bsi-specific-data-pvc-associated-bsi]]PVC-assoziierte BSI"
+msgstr "[[data-dictionary-bsi-specific-data-pvc-associated-bsi]]PVC-assoziierte BSI"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:727
@@ -3802,9 +3685,7 @@ msgstr ""
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:730
 #, no-wrap
 msgid "[[data-dictionary-bsi-specific-data-iv-ab-therapy-initiated]]Intravenous antibiotic therapy for five or more days initiated"
-msgstr ""
-"[[data-dictionary-bsi-specific-data-iv-ab-therapy-initiated]]Intravenöse "
-"Antibiotikatherapie für fünf oder mehr Tage eingeleitet"
+msgstr "[[data-dictionary-bsi-specific-data-iv-ab-therapy-initiated]]Intravenöse Antibiotikatherapie für fünf oder mehr Tage eingeleitet"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:735
@@ -3835,10 +3716,7 @@ msgstr ""
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:736
 #, no-wrap
 msgid "[[data-dictionary-bsi-specific-data-increased-oxygen-demand-or-ventilatory-support]]New/more frequent episodes of apnoea or increases in oxygen demand or ventilatory support"
-msgstr ""
-"[[data-dictionary-bsi-specific-data-increased-oxygen-demand-or-ventilatory-support]]Neue/"
-"häufigere Episoden von Apnoe oder Erhöhung des Sauerstoffbedarfs oder der "
-"Beatmungsunterstützung"
+msgstr "[[data-dictionary-bsi-specific-data-increased-oxygen-demand-or-ventilatory-support]]Neue/häufigere Episoden von Apnoe oder Erhöhung des Sauerstoffbedarfs oder der Beatmungsunterstützung"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:737
@@ -3858,9 +3736,7 @@ msgstr ""
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:738
 #, no-wrap
 msgid "[[data-dictionary-bsi-specific-data-enteral-feeding-intolerance]]Enteral feeding intolerance, abdominal distension or ileus"
-msgstr ""
-"[[data-dictionary-bsi-specific-data-enteral-feeding-intolerance]]Intoleranz "
-"bei enteraler Ernährung, abdominale Distension oder Ileus"
+msgstr "[[data-dictionary-bsi-specific-data-enteral-feeding-intolerance]]Intoleranz bei enteraler Ernährung, abdominale Distension oder Ileus"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:739
@@ -3877,9 +3753,7 @@ msgstr ""
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:740
 #, no-wrap
 msgid "[[data-dictionary-bsi-specific-data-unexplained-metabolic-acidosis]]Unexplained metabolic acidosis"
-msgstr ""
-"[[data-dictionary-bsi-specific-data-unexplained-metabolic-acidosis]]"
-"Ungeklärte metabolische Azidose"
+msgstr "[[data-dictionary-bsi-specific-data-unexplained-metabolic-acidosis]]Ungeklärte metabolische Azidose"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:741
@@ -3900,8 +3774,7 @@ msgstr "NEC-spezifische Daten"
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:744
 #, no-wrap
 msgid "[[data-dictionary-nec-specific-data-portal-veinous-gas]]Portal veinous gas"
-msgstr ""
-"[[data-dictionary-nec-specific-data-portal-veinous-gas]]Portalvenöses Gas"
+msgstr "[[data-dictionary-nec-specific-data-portal-veinous-gas]]Portalvenöses Gas"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:745
@@ -3919,17 +3792,13 @@ msgstr "Pneumoniesspezifische Daten"
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:748
 #, no-wrap
 msgid "[[data-dictionary-pneumonia-specific-data-increase-in-respiratory-support]]Beginning or Increase in Respiratory Support"
-msgstr ""
-"[[data-dictionary-pneumonia-specific-data-increase-in-respiratory-support]]"
-"Beginn oder Erhöhung der Atemunterstützung"
+msgstr "[[data-dictionary-pneumonia-specific-data-increase-in-respiratory-support]]Beginn oder Erhöhung der Atemunterstützung"
 
 #. type: Labeled list
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:751
 #, no-wrap
 msgid "New initiation of respiratory support or escalation of existing level of respiratory support …"
-msgstr ""
-"Neuaufnahme der Beatmungsunterstützung oder Erhöhung des bestehenden Niveaus "
-"der Beatmungsunterstützung …"
+msgstr "Neuaufnahme der Beatmungsunterstützung oder Erhöhung des bestehenden Niveaus der Beatmungsunterstützung …"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:754
@@ -3937,8 +3806,8 @@ msgid ""
 "Increase in need for FiO2 ≥ 0.25 (25 points) within 24 hours (daily minimum "
 "FiO2 values must be taken into account here)"
 msgstr ""
-"Anstieg des Bedarfs an FiO2 ≥ 0,25 (25 Punkte) innerhalb von 24 Stunden ("
-"tägliche Mindest-FiO2-Werte müssen hier berücksichtigt werden)"
+"Anstieg des Bedarfs an FiO2 ≥ 0,25 (25 Punkte) innerhalb von 24 Stunden "
+"(tägliche Mindest-FiO2-Werte müssen hier berücksichtigt werden)"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:756
@@ -4014,9 +3883,7 @@ msgstr ""
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:768
 #, no-wrap
 msgid "[[data-dictionary-pneumonia-specific-data-inv]]Invasive mechanical ventilation (INV)"
-msgstr ""
-"[[data-dictionary-pneumonia-specific-data-inv]]Invasive mechanische Beatmung "
-"(INV)"
+msgstr "[[data-dictionary-pneumonia-specific-data-inv]]Invasive mechanische Beatmung (INV)"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:769
@@ -4027,9 +3894,7 @@ msgstr "Beatmung über einen Endotracheal- oder Tracheostomietubus."
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:770
 #, no-wrap
 msgid "[[data-dictionary-pneumonia-specific-data-inv-associated-pneumonia]]INV-Associated Pneumonia"
-msgstr ""
-"[[data-dictionary-pneumonia-specific-data-inv-associated-pneumonia]]INV-"
-"Associated Pneumonia"
+msgstr "[[data-dictionary-pneumonia-specific-data-inv-associated-pneumonia]]INV-Associated Pneumonia"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:771
@@ -4063,9 +3928,7 @@ msgstr ""
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:774
 #, no-wrap
 msgid "[[data-dictionary-pneumonia-specific-data-niv]]Non-invasive ventilatory support (NIV)"
-msgstr ""
-"[[data-dictionary-pneumonia-specific-data-niv]]Nicht-invasive "
-"Beatmungsunterstützung (NIV)"
+msgstr "[[data-dictionary-pneumonia-specific-data-niv]]Nicht-invasive Beatmungsunterstützung (NIV)"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:775
@@ -4076,9 +3939,7 @@ msgstr "Beatmungsunterstützung über CPAP oder High-Flow-Nasenkanüle."
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:776
 #, no-wrap
 msgid "[[data-dictionary-pneumonia-specific-data-niv-associated-pneumonia]]NIV-Associated Pneumonia"
-msgstr ""
-"[[data-dictionary-pneumonia-specific-data-niv-associated-pneumonia]]NIV-"
-"assoziierte Pneumonie"
+msgstr "[[data-dictionary-pneumonia-specific-data-niv-associated-pneumonia]]NIV-assoziierte Pneumonie"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:777
@@ -4089,9 +3950,10 @@ msgid ""
 "(=first symptoms or first positive culture) or on the day before."
 msgstr ""
 "Eine Pneumonie ist <<pneumonie-spezifische-daten_niv,NIV>>-assoziiert, wenn "
-"der Patient am Tag der Infektion (=erste Symptome oder erste positive Kultur)"
-" oder am Tag davor an mindestens 3 aufeinanderfolgenden Tagen nicht-invasive "
-"Beatmungsunterstützung (z. B. CPAP oder High-Flow-Nasenkanüle) erhalten hat."
+"der Patient am Tag der Infektion (=erste Symptome oder erste positive "
+"Kultur) oder am Tag davor an mindestens 3 aufeinanderfolgenden Tagen nicht-"
+"invasive Beatmungsunterstützung (z. B. CPAP oder High-Flow-Nasenkanüle) "
+"erhalten hat."
 
 #. type: Labeled list
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:778
@@ -4113,9 +3975,7 @@ msgstr ""
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:780
 #, no-wrap
 msgid "[[data-dictionary-pneumonia-specific-data-organisms-rt]]Organisms Identified From Respiratory Tract"
-msgstr ""
-"[[data-dictionary-pneumonia-specific-data-organisms-rt]]Identifizierte "
-"Organismen aus den Atemwegen"
+msgstr "[[data-dictionary-pneumonia-specific-data-organisms-rt]]Identifizierte Organismen aus den Atemwegen"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:781
@@ -4134,9 +3994,7 @@ msgstr ""
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:782
 #, no-wrap
 msgid "[[data-dictionary-pneumonia-specific-data-organisms-lrt]]Recovered from lower respiratory tract"
-msgstr ""
-"[[data-dictionary-pneumonia-specific-data-organisms-lrt]]Wiedergewonnen aus "
-"den unteren Atemwegen"
+msgstr "[[data-dictionary-pneumonia-specific-data-organisms-lrt]]Wiedergewonnen aus den unteren Atemwegen"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:783
@@ -4153,9 +4011,7 @@ msgstr ""
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:783
 #, no-wrap
 msgid "[[data-dictionary-pneumonia-specific-data-organisms-urt]]Recovered from upper respiratory tract"
-msgstr ""
-"[[data-dictionary-pneumonia-specific-data-organisms-urt]]Aus den oberen "
-"Atemwegen gewonnen"
+msgstr "[[data-dictionary-pneumonia-specific-data-organisms-urt]]Aus den oberen Atemwegen gewonnen"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:784
@@ -4174,9 +4030,7 @@ msgstr "SSI-spezifische Daten"
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:787
 #, no-wrap
 msgid "[[data-dictionary-ssi-specific-data-infection-present]]Infection Present at Time of Surgery"
-msgstr ""
-"[[data-dictionary-ssi-specific-data-infection-present]]Infektion zum "
-"Zeitpunkt der Operation vorhanden"
+msgstr "[[data-dictionary-ssi-specific-data-infection-present]]Infektion zum Zeitpunkt der Operation vorhanden"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:788
@@ -4288,9 +4142,7 @@ msgstr ""
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:810
 #, no-wrap
 msgid "[[data-dictionary-ssi-specific-data-organism-identified]]Organism(s) Identified From Surgical Site"
-msgstr ""
-"[[data-dictionary-ssi-specific-data-organism-identified]]An der "
-"Operationsstelle identifizierte(r) Organismus(e)"
+msgstr "[[data-dictionary-ssi-specific-data-organism-identified]]An der Operationsstelle identifizierte(r) Organismus(e)"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:811
@@ -4494,9 +4346,8 @@ msgid ""
 "stem:[\"Substance Group Use Rate\" = \"Total Therapy Days for Substance "
 "Group\" / \"Total Patient Days\" xx 100]"
 msgstr ""
-"stem:[\"Substanzgruppen-Konsumrate\" = "
-"\"Gesamte Therapietage für Substanzgruppe\" / \"Gesamte Patiententage\" xx "
-"100]"
+"stem:[\"Substanzgruppen-Konsumrate\" = \"Gesamte Therapietage für "
+"Substanzgruppe\" / \"Gesamte Patiententage\" xx 100]"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:858
@@ -4520,8 +4371,8 @@ msgid ""
 "xx 100]"
 msgstr ""
 "stem:[\"Anteil der Patienten, die eine AB-Substanz oder -Gruppe erhalten\" = "
-"\"Gesamte Therapietage für diese Substanz oder Gruppe\" / "
-"\"Gesamte Patiententage\" xx 100]"
+"\"Gesamte Therapietage für diese Substanz oder Gruppe\" / \"Gesamte "
+"Patiententage\" xx 100]"
 
 #. type: Title ====
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:862
@@ -4550,8 +4401,8 @@ msgid ""
 "stem:[\"Breast Milk Intake Rate\" = \"Total Breast Milk Days\" / \"Total "
 "Patient Days\" xx 100]"
 msgstr ""
-"stem:[\"Breast Milk Intake Rate\" = \"Total Breast Milk Days\" / "
-"\"Total Patient Days\" xx 100]"
+"stem:[\"Breast Milk Intake Rate\" = \"Total Breast Milk Days\" / \"Total "
+"Patient Days\" xx 100]"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:869
@@ -4559,8 +4410,8 @@ msgid ""
 "stem:[\"Probiotic Usage Rate\" = \"Total Probiotic Days\" / \"Total Patient "
 "Days\" xx 100]"
 msgstr ""
-"stem:[\"Probiotic Usage Rate\" = \"Total Probiotic Days\" / "
-"\"Total Patient Days\" xx 100]"
+"stem:[\"Probiotic Usage Rate\" = \"Total Probiotic Days\" / \"Total Patient "
+"Days\" xx 100]"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:871
@@ -4568,8 +4419,8 @@ msgid ""
 "stem:[\"Kangaroo Care Implementation Rate\" = \"Total Kangaroo Care Days\" / "
 "\"Total Patient Days\" xx 100]"
 msgstr ""
-"stem:[\"Känguru-Pflege-Umsetzungsrate\" = \"Känguru-Pflege-Tage insgesamt\" /"
-" \"Patiententage insgesamt\" xx 100]"
+"stem:[\"Känguru-Pflege-Umsetzungsrate\" = \"Känguru-Pflege-Tage "
+"insgesamt\" / \"Patiententage insgesamt\" xx 100]"
 
 #. type: Title ===
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:873
@@ -4603,8 +4454,8 @@ msgid ""
 "stem:[\"BSI Incidence Density\" = \"Total BSI Cases\" / \"Total Patient "
 "Days\" xx 1000]"
 msgstr ""
-"stem:[\"BSI-Inzidenzdichte\" = \"BSI-Fälle insgesamt\" / "
-"\"Patiententage insgesamt\" xx 1000]"
+"stem:[\"BSI-Inzidenzdichte\" = \"BSI-Fälle insgesamt\" / \"Patiententage "
+"insgesamt\" xx 1000]"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:882
@@ -4621,8 +4472,8 @@ msgid ""
 "stem:[\"NEC Incidence Density\" = \"Total NEC Cases\" / \"Total Patient "
 "Days\" xx 1000]"
 msgstr ""
-"stem:[\"NEC-Inzidenzdichte\" = \"NEC-Fälle insgesamt\" / "
-"\"Patiententage insgesamt\" xx 1000]"
+"stem:[\"NEC-Inzidenzdichte\" = \"NEC-Fälle insgesamt\" / \"Patiententage "
+"insgesamt\" xx 1000]"
 
 #. type: Title ====
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:886
@@ -4654,8 +4505,8 @@ msgid ""
 "stem:[\"CVC-associated BSI Rate\" = \"Total BSI Cases in Patients With "
 "CVC\" / \"Total CVC Days\" xx 1000]"
 msgstr ""
-"stem:[\"ZVK-associated BSI Rate\" = \"Total BSI Cases in Patients With ZVK\" "
-"/ \"Total ZVK Days\" xx 1000]"
+"stem:[\"ZVK-associated BSI Rate\" = \"Total BSI Cases in Patients With "
+"ZVK\" / \"Total ZVK Days\" xx 1000]"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:893
@@ -4663,8 +4514,8 @@ msgid ""
 "stem:[\"PVC-associated BSI Rate\" = \"Total BSI Cases in Patients With "
 "PVC\" / \"Total PVC Days\" xx 1000]"
 msgstr ""
-"stem:[\"PVC-assoziierte BSI-Rate\" = "
-"\"Gesamte BSI-Fälle bei Patienten mit PVC\" / \"Gesamte PVC-Tage\" xx 1000]"
+"stem:[\"PVC-assoziierte BSI-Rate\" = \"Gesamte BSI-Fälle bei Patienten mit "
+"PVC\" / \"Gesamte PVC-Tage\" xx 1000]"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:895
@@ -4672,9 +4523,8 @@ msgid ""
 "stem:[\"INV-associated Pneumonia Rate\" = \"Total Pneumonia Cases in "
 "Patients With INV\" / \"Total INV Days\" xx 1000]"
 msgstr ""
-"stem:[\"INV-assoziierte Pneumonie-Rate\" = "
-"\"Summe der Pneumonie-Fälle bei Patienten mit INV\" / \"Summe der INV-Tage\" "
-"xx 1000]"
+"stem:[\"INV-assoziierte Pneumonie-Rate\" = \"Summe der Pneumonie-Fälle bei "
+"Patienten mit INV\" / \"Summe der INV-Tage\" xx 1000]"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:897
@@ -4682,9 +4532,8 @@ msgid ""
 "stem:[\"NIV-associated Pneumonia Rate\" = \"Total Pneumonia Cases in "
 "Patients With NIV\" / \"Total NIV Days\" xx 1000]"
 msgstr ""
-"stem:[\"NIV-assoziierte Pneumonie-Rate\" = "
-"\"Summe der Pneumonie-Fälle bei Patienten mit NIV\" / \"Summe der NIV-Tage\" "
-"xx 1000]"
+"stem:[\"NIV-assoziierte Pneumonie-Rate\" = \"Summe der Pneumonie-Fälle bei "
+"Patienten mit NIV\" / \"Summe der NIV-Tage\" xx 1000]"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:904
@@ -4718,8 +4567,8 @@ msgid ""
 "stem:[\"Overall SSI Rate\" = \"Total SSI Cases\" / \"Total Number of "
 "Surgeries\" xx 100]"
 msgstr ""
-"stem:[\"SSI-Gesamtrate\" = \"SSI-Fälle insgesamt\" / "
-"\"Gesamtzahl der Operationen\" xx 100]"
+"stem:[\"SSI-Gesamtrate\" = \"SSI-Fälle insgesamt\" / \"Gesamtzahl der "
+"Operationen\" xx 100]"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:908
@@ -4728,8 +4577,8 @@ msgid ""
 "in This Group\" / \"Total Number of Procedures in This Group\" xx 100]"
 msgstr ""
 "stem:[\"Gruppierte SSI-Rate\" = \"Summe der SSI-Fälle, die nach den "
-"Eingriffen in dieser Gruppe beobachtet wurden\" / "
-"\"Gesamtzahl der Eingriffe in dieser Gruppe\" xx 100]"
+"Eingriffen in dieser Gruppe beobachtet wurden\" / \"Gesamtzahl der Eingriffe "
+"in dieser Gruppe\" xx 100]"
 
 #. type: Title ====
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:910
@@ -4824,11 +4673,11 @@ msgid ""
 "greater than one, you observed more infections than you would expect from "
 "your patient composition when compared to the reference data."
 msgstr ""
-"stem:[\"Standardisierte Infektionsrate\" = "
-"\"Beobachtete Infektionen insgesamt\" / \"Erwartete Infektionen insgesamt\"] "
-"Wenn die standardisierte Infektionsrate größer als eins ist, haben Sie mehr "
-"Infektionen beobachtet, als Sie bei Ihrer Patientenzusammensetzung im "
-"Vergleich zu den Referenzdaten erwarten würden."
+"stem:[\"Standardisierte Infektionsrate\" = \"Beobachtete Infektionen "
+"insgesamt\" / \"Erwartete Infektionen insgesamt\"] Wenn die standardisierte "
+"Infektionsrate größer als eins ist, haben Sie mehr Infektionen beobachtet, "
+"als Sie bei Ihrer Patientenzusammensetzung im Vergleich zu den Referenzdaten "
+"erwarten würden."
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:930
@@ -5401,16 +5250,13 @@ msgstr "Liste der Infektionserreger"
 #: doc/protocol/definitions/NeoIPC-Core-Clinical-Sepsis-Definition.adoc:5
 #, no-wrap
 msgid "**Absence of positive microbiological blood and/or cerebrospinal fluid culture**\n"
-msgstr ""
-"**Fehlen einer positiven mikrobiologischen Blut- und/oder Liquorkultur**\n"
+msgstr "**Fehlen einer positiven mikrobiologischen Blut- und/oder Liquorkultur**\n"
 
 #. type: delimited block *
 #: doc/protocol/definitions/NeoIPC-Core-Clinical-Sepsis-Definition.adoc:8
 #, no-wrap
 msgid "**Treatment with FIVE or more days of intravenous antibiotics was initiated$$*$$**\n"
-msgstr ""
-"**Eine Behandlung mit intravenösen Antibiotika über FÜNF oder mehr Tage "
-"wurde eingeleitet$$*$$**\n"
+msgstr "**Eine Behandlung mit intravenösen Antibiotika über FÜNF oder mehr Tage wurde eingeleitet$$*$$**\n"
 
 #. type: delimited block *
 #: doc/protocol/definitions/NeoIPC-Core-Clinical-Sepsis-Definition.adoc:11
@@ -5419,9 +5265,7 @@ msgstr ""
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:61
 #, no-wrap
 msgid "**Patient has at least TWO of the following clinical or laboratory features of generalized infection:**\n"
-msgstr ""
-"**Der Patient weist mindestens ZWEI der folgenden klinischen oder "
-"Labormerkmale einer generalisierten Infektion auf:**\n"
+msgstr "**Der Patient weist mindestens ZWEI der folgenden klinischen oder Labormerkmale einer generalisierten Infektion auf:**\n"
 
 #. type: delimited block *
 #: doc/protocol/definitions/NeoIPC-Core-Clinical-Sepsis-Definition.adoc:12
@@ -5431,22 +5275,16 @@ msgstr ""
 #, no-wrap
 msgid "Temperature instability, fever (> 38 °C) or hypothermia (< 36.5 °C)\n"
 msgstr ""
-"#-#-#-#-#  definitions/NeoIPC-Core-Clinical-Sepsis-Definition.de.adoc:12 ("
-"type delimited block *)  #-#-#-#-#\n"
+"#-#-#-#-#  definitions/NeoIPC-Core-Clinical-Sepsis-Definition.de.adoc:12 (type delimited block *)  #-#-#-#-#\n"
 "Temperaturinstabilität, Fieber (> 38 °C) oder Hypothermie (< 36,5 °C)\n"
 "\n"
-"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:9 (type: delimited block *)  #-#-#-#-#\n"
+"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:9 (type: delimited block *)  #-#-#-#-#\n"
 "Temperaturinstabilität, Fieber (> 38 °C) oder Hypothermie (< 36,5 °C)\n"
 "\n"
-"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:41 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:62 (type: delimited block *)  #-#-#-#-#\n"
+"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:41 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:62 (type: delimited block *)  #-#-#-#-#\n"
 "Temperaturinstabilität, Fieber (> 38 °C) oder Unterkühlung (< 36,5 °C)\n"
 "\n"
-"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:41 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:62 (type: delimited block *)  #-#-#-#-#\n"
+"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:41 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:62 (type: delimited block *)  #-#-#-#-#\n"
 "Temperaturinstabilität, Fieber (> 38 °C) oder Unterkühlung (< 36,5 °C)\n"
 
 #. type: delimited block *
@@ -5458,36 +5296,20 @@ msgstr ""
 #, no-wrap
 msgid "New/more frequent bradycardia episodes (<80/min) or unexplained tachycardia (>200/min)\n"
 msgstr ""
-"#-#-#-#-#  definitions/NeoIPC-Core-Clinical-Sepsis-Definition.de.adoc:13 ("
-"type delimited block *)  #-#-#-#-#\n"
-"Neue/häufigere Bradykardie-Episoden (< 80/min) oder ungeklärte Tachykardie ("
-"> 200/min)\n"
+"#-#-#-#-#  definitions/NeoIPC-Core-Clinical-Sepsis-Definition.de.adoc:13 (type delimited block *)  #-#-#-#-#\n"
+"Neue/häufigere Bradykardie-Episoden (< 80/min) oder ungeklärte Tachykardie (> 200/min)\n"
 "\n"
-"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:10 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:42 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:63 (type: delimited block *)  #-#-#-#-#\n"
-"Neue/häufigere Bradykardie-Episoden (<80/min) oder ungeklärte Tachykardie (>"
-"200/min)\n"
+"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:10 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:42 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:63 (type: delimited block *)  #-#-#-#-#\n"
+"Neue/häufigere Bradykardie-Episoden (<80/min) oder ungeklärte Tachykardie (>200/min)\n"
 "\n"
-"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:10 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:42 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:63 (type: delimited block *)  #-#-#-#-#\n"
-"Neue/häufigere Bradykardie-Episoden (<80/min) oder ungeklärte Tachykardie (>"
-"200/min)\n"
+"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:10 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:42 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:63 (type: delimited block *)  #-#-#-#-#\n"
+"Neue/häufigere Bradykardie-Episoden (<80/min) oder ungeklärte Tachykardie (>200/min)\n"
 "\n"
-"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:10 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:42 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:63 (type: delimited block *)  #-#-#-#-#\n"
-"Neue/häufigere Bradykardie-Episoden (<80/min) oder ungeklärte Tachykardie (>"
-"200/min)\n"
+"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:10 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:42 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:63 (type: delimited block *)  #-#-#-#-#\n"
+"Neue/häufigere Bradykardie-Episoden (<80/min) oder ungeklärte Tachykardie (>200/min)\n"
 "\n"
-"#-#-#-#-#  definitions/NeoIPC-Core-Pneumonia-Definition.de.adoc:13 (type: "
-"delimited block *)  #-#-#-#-#\n"
-"Neue/vermehrte Bradykardie-Episoden (<80/min) oder ungeklärte Tachykardie (>"
-"200/min)\n"
+"#-#-#-#-#  definitions/NeoIPC-Core-Pneumonia-Definition.de.adoc:13 (type: delimited block *)  #-#-#-#-#\n"
+"Neue/vermehrte Bradykardie-Episoden (<80/min) oder ungeklärte Tachykardie (>200/min)\n"
 
 #. type: delimited block *
 #: doc/protocol/definitions/NeoIPC-Core-Clinical-Sepsis-Definition.adoc:14
@@ -5497,29 +5319,17 @@ msgstr ""
 #, no-wrap
 msgid "Impaired peripheral perfusion (Capillary refill time of > 3s or skin mottling or core/peripheral temperature gap > 2 °C)\n"
 msgstr ""
-"#-#-#-#-#  definitions/NeoIPC-Core-Clinical-Sepsis-Definition.de.adoc:14 ("
-"type delimited block *)  #-#-#-#-#\n"
-"Beeinträchtigte periphere Durchblutung (Rekapillarisierungszeit von > 3 s "
-"oder marmorierte Haut oder Kern-/Peripherietemperaturunterschied > 2 °C)\n"
+"#-#-#-#-#  definitions/NeoIPC-Core-Clinical-Sepsis-Definition.de.adoc:14 (type delimited block *)  #-#-#-#-#\n"
+"Beeinträchtigte periphere Durchblutung (Rekapillarisierungszeit von > 3 s oder marmorierte Haut oder Kern-/Peripherietemperaturunterschied > 2 °C)\n"
 "\n"
-"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:11 (type: delimited block *)  #-#-#-#-#\n"
-"Beeinträchtigte periphere Durchblutung (Rekapillarisierungszeit von > 3s "
-"oder marmorierte Haut oder Kern-/periphere Temperaturdifferenz > 2 °C)\n"
+"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:11 (type: delimited block *)  #-#-#-#-#\n"
+"Beeinträchtigte periphere Durchblutung (Rekapillarisierungszeit von > 3s oder marmorierte Haut oder Kern-/periphere Temperaturdifferenz > 2 °C)\n"
 "\n"
-"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:43 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:64 (type: delimited block *)  #-#-#-#-#\n"
-"Beeinträchtigte periphere Perfusion (Rekapillarisierungszeit von > 3s oder "
-"marmorierte Haut oder Temperaturdifferenz zwischen Kern und Peripherie > 2 "
-"°C)\n"
+"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:43 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:64 (type: delimited block *)  #-#-#-#-#\n"
+"Beeinträchtigte periphere Perfusion (Rekapillarisierungszeit von > 3s oder marmorierte Haut oder Temperaturdifferenz zwischen Kern und Peripherie > 2 °C)\n"
 "\n"
-"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:43 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:64 (type: delimited block *)  #-#-#-#-#\n"
-"Beeinträchtigte periphere Perfusion (Rekapillarisierungszeit von > 3s oder "
-"marmorierte Haut oder Temperaturdifferenz zwischen Kern und Peripherie > 2 "
-"°C)\n"
+"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:43 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:64 (type: delimited block *)  #-#-#-#-#\n"
+"Beeinträchtigte periphere Perfusion (Rekapillarisierungszeit von > 3s oder marmorierte Haut oder Temperaturdifferenz zwischen Kern und Peripherie > 2 °C)\n"
 
 #. type: delimited block *
 #: doc/protocol/definitions/NeoIPC-Core-Clinical-Sepsis-Definition.adoc:15
@@ -5528,20 +5338,14 @@ msgstr ""
 #, no-wrap
 msgid "New/more frequent episodes of apnoea (>20s) or increase in oxygen demand or ventilatory support\n"
 msgstr ""
-"#-#-#-#-#  definitions/NeoIPC-Core-Clinical-Sepsis-Definition.de.adoc:15 ("
-"type delimited block *)  #-#-#-#-#\n"
-"Neue/häufigere Episoden von Apnoe (> 20 s) oder Anstieg des "
-"Sauerstoffbedarfs oder der Beatmungsunterstützung\n"
+"#-#-#-#-#  definitions/NeoIPC-Core-Clinical-Sepsis-Definition.de.adoc:15 (type delimited block *)  #-#-#-#-#\n"
+"Neue/häufigere Episoden von Apnoe (> 20 s) oder Anstieg des Sauerstoffbedarfs oder der Beatmungsunterstützung\n"
 "\n"
-"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:12 (type: delimited block *)  #-#-#-#-#\n"
-"Neue/häufigere Episoden von Apnoen (>20s) oder Anstieg des Sauerstoffbedarfs "
-"oder der Beatmungsunterstützung\n"
+"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:12 (type: delimited block *)  #-#-#-#-#\n"
+"Neue/häufigere Episoden von Apnoen (>20s) oder Anstieg des Sauerstoffbedarfs oder der Beatmungsunterstützung\n"
 "\n"
-"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:65 (type: delimited block *)  #-#-#-#-#\n"
-"Neue/häufigere Episoden von Apnoe (>20s) oder Anstieg des Sauerstoffbedarfs "
-"oder der Beatmungsunterstützung\n"
+"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:65 (type: delimited block *)  #-#-#-#-#\n"
+"Neue/häufigere Episoden von Apnoe (>20s) oder Anstieg des Sauerstoffbedarfs oder der Beatmungsunterstützung\n"
 
 #. type: delimited block *
 #: doc/protocol/definitions/NeoIPC-Core-Clinical-Sepsis-Definition.adoc:16
@@ -5551,26 +5355,16 @@ msgstr ""
 #, no-wrap
 msgid "Enteral feeding intolerance, abdominal distension or ileus\n"
 msgstr ""
-"#-#-#-#-#  definitions/NeoIPC-Core-Clinical-Sepsis-Definition.de.adoc:16 ("
-"type delimited block *)  #-#-#-#-#\n"
+"#-#-#-#-#  definitions/NeoIPC-Core-Clinical-Sepsis-Definition.de.adoc:16 (type delimited block *)  #-#-#-#-#\n"
 "Intoleranz gegenüber enteraler Ernährung, aufgeblähtes Abdomen oder Ileus\n"
 "\n"
-"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:13 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:45 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:66 (type: delimited block *)  #-#-#-#-#\n"
+"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:13 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:45 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:66 (type: delimited block *)  #-#-#-#-#\n"
 "Intoleranz gegenüber enteraler Ernährung, abdominale Distension oder Ileus\n"
 "\n"
-"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:13 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:45 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:66 (type: delimited block *)  #-#-#-#-#\n"
+"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:13 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:45 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:66 (type: delimited block *)  #-#-#-#-#\n"
 "Intoleranz gegenüber enteraler Ernährung, abdominale Distension oder Ileus\n"
 "\n"
-"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:13 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:45 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:66 (type: delimited block *)  #-#-#-#-#\n"
+"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:13 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:45 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:66 (type: delimited block *)  #-#-#-#-#\n"
 "Intoleranz gegenüber enteraler Ernährung, abdominale Distension oder Ileus\n"
 
 #. type: delimited block *
@@ -5581,26 +5375,16 @@ msgstr ""
 #, no-wrap
 msgid "Irritability, lethargy, apathy or unstable condition\n"
 msgstr ""
-"#-#-#-#-#  definitions/NeoIPC-Core-Clinical-Sepsis-Definition.de.adoc:17 ("
-"type delimited block *)  #-#-#-#-#\n"
+"#-#-#-#-#  definitions/NeoIPC-Core-Clinical-Sepsis-Definition.de.adoc:17 (type delimited block *)  #-#-#-#-#\n"
 "Irritabilität, Lethargie, Apathie oder instabiler Allgemenzustand\n"
 "\n"
-"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:14 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:46 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:67 (type: delimited block *)  #-#-#-#-#\n"
+"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:14 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:46 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:67 (type: delimited block *)  #-#-#-#-#\n"
 "Irritabilität, Lethargie, Apathie oder instabiler Zustand\n"
 "\n"
-"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:14 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:46 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:67 (type: delimited block *)  #-#-#-#-#\n"
+"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:14 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:46 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:67 (type: delimited block *)  #-#-#-#-#\n"
 "Irritabilität, Lethargie, Apathie oder instabiler Zustand\n"
 "\n"
-"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:14 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:46 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:67 (type: delimited block *)  #-#-#-#-#\n"
+"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:14 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:46 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:67 (type: delimited block *)  #-#-#-#-#\n"
 "Irritabilität, Lethargie, Apathie oder instabiler Zustand\n"
 
 #. type: delimited block *
@@ -5611,27 +5395,16 @@ msgstr ""
 #, no-wrap
 msgid "Unexplained metabolic acidosis (base excess < −10 mmol/L; <−10 mEq/L)\n"
 msgstr ""
-"#-#-#-#-#  definitions/NeoIPC-Core-Clinical-Sepsis-Definition.de.adoc:18 ("
-"type delimited block *)  #-#-#-#-#\n"
-"Ungeklärte metabolische Azidose (Basenüberschuss < -10 mmol/l; (< -10 mEq/l)"
+"#-#-#-#-#  definitions/NeoIPC-Core-Clinical-Sepsis-Definition.de.adoc:18 (type delimited block *)  #-#-#-#-#\n"
+"Ungeklärte metabolische Azidose (Basenüberschuss < -10 mmol/l; (< -10 mEq/l)\n"
 "\n"
-"\n"
-"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:15 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:47 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:68 (type: delimited block *)  #-#-#-#-#\n"
+"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:15 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:47 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:68 (type: delimited block *)  #-#-#-#-#\n"
 "Ungeklärte metabolische Azidose (Basenüberschuss < -10 mmol/L; <-10 mEq/L)\n"
 "\n"
-"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:15 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:47 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:68 (type: delimited block *)  #-#-#-#-#\n"
+"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:15 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:47 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:68 (type: delimited block *)  #-#-#-#-#\n"
 "Ungeklärte metabolische Azidose (Basenüberschuss < -10 mmol/L; <-10 mEq/L)\n"
 "\n"
-"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:15 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:47 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:68 (type: delimited block *)  #-#-#-#-#\n"
+"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:15 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:47 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:68 (type: delimited block *)  #-#-#-#-#\n"
 "Ungeklärte metabolische Azidose (Basenüberschuss < -10 mmol/L; <-10 mEq/L)\n"
 
 #. type: delimited block *
@@ -5642,31 +5415,17 @@ msgstr ""
 #, no-wrap
 msgid "New and unexplained hyperglycaemia (> 140 mg/dl; > 7.8 mmol/L) or hypoglycaemia (< 40 mg/dl; <2.2 mmol/L)\n"
 msgstr ""
-"#-#-#-#-#  definitions/NeoIPC-Core-Clinical-Sepsis-Definition.de.adoc:19 ("
-"type delimited block *)  #-#-#-#-#\n"
-"Neue und ungeklärte Hyperglykämie (> 140 mg/dl; > 7,8 mmol/l) oder "
-"Hypoglykämie (< 40 mg/dl; < 2,2 mmol/l)\n"
+"#-#-#-#-#  definitions/NeoIPC-Core-Clinical-Sepsis-Definition.de.adoc:19 (type delimited block *)  #-#-#-#-#\n"
+"Neue und ungeklärte Hyperglykämie (> 140 mg/dl; > 7,8 mmol/l) oder Hypoglykämie (< 40 mg/dl; < 2,2 mmol/l)\n"
 "\n"
-"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:16 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:48 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:69 (type: delimited block *)  #-#-#-#-#\n"
-"Neue und ungeklärte Hyperglykämie (> 140 mg/dl; > 7,8 mmol/L) oder "
-"Hypoglykämie (< 40 mg/dl; <2,2 mmol/L)\n"
+"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:16 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:48 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:69 (type: delimited block *)  #-#-#-#-#\n"
+"Neue und ungeklärte Hyperglykämie (> 140 mg/dl; > 7,8 mmol/L) oder Hypoglykämie (< 40 mg/dl; <2,2 mmol/L)\n"
 "\n"
-"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:16 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:48 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:69 (type: delimited block *)  #-#-#-#-#\n"
-"Neue und ungeklärte Hyperglykämie (> 140 mg/dl; > 7,8 mmol/L) oder "
-"Hypoglykämie (< 40 mg/dl; <2,2 mmol/L)\n"
+"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:16 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:48 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:69 (type: delimited block *)  #-#-#-#-#\n"
+"Neue und ungeklärte Hyperglykämie (> 140 mg/dl; > 7,8 mmol/L) oder Hypoglykämie (< 40 mg/dl; <2,2 mmol/L)\n"
 "\n"
-"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:16 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:48 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:69 (type: delimited block *)  #-#-#-#-#\n"
-"Neue und ungeklärte Hyperglykämie (> 140 mg/dl; > 7,8 mmol/L) oder "
-"Hypoglykämie (< 40 mg/dl; <2,2 mmol/L)\n"
+"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:16 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:48 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:69 (type: delimited block *)  #-#-#-#-#\n"
+"Neue und ungeklärte Hyperglykämie (> 140 mg/dl; > 7,8 mmol/L) oder Hypoglykämie (< 40 mg/dl; <2,2 mmol/L)\n"
 
 #. type: delimited block *
 #: doc/protocol/definitions/NeoIPC-Core-Clinical-Sepsis-Definition.adoc:20
@@ -5684,26 +5443,16 @@ msgstr "Mindestens einer der folgenden Laborbefunde:\n"
 #, no-wrap
 msgid "Platelet count of < 100 × 10^9^/L (<100 × 10^3^/μL)\n"
 msgstr ""
-"#-#-#-#-#  definitions/NeoIPC-Core-Clinical-Sepsis-Definition.de.adoc:21 ("
-"type delimited block *)  #-#-#-#-#\n"
+"#-#-#-#-#  definitions/NeoIPC-Core-Clinical-Sepsis-Definition.de.adoc:21 (type delimited block *)  #-#-#-#-#\n"
 "Thrombozytenzahl von < 100 × 10⁹/l (< 100 × 10³/μl)\n"
 "\n"
-"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:18 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:49 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:71 (type: delimited block *)  #-#-#-#-#\n"
+"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:18 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:49 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:71 (type: delimited block *)  #-#-#-#-#\n"
 "Thrombozytenzahl von < 100 × 10^9^/L (<100 × 10^3^/μL)\n"
 "\n"
-"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:18 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:49 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:71 (type: delimited block *)  #-#-#-#-#\n"
+"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:18 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:49 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:71 (type: delimited block *)  #-#-#-#-#\n"
 "Thrombozytenzahl von < 100 × 10^9^/L (<100 × 10^3^/μL)\n"
 "\n"
-"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:18 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:49 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:71 (type: delimited block *)  #-#-#-#-#\n"
+"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:18 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:49 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:71 (type: delimited block *)  #-#-#-#-#\n"
 "Thrombozytenzahl von < 100 × 10^9^/L (<100 × 10^3^/μL)\n"
 
 #. type: delimited block *
@@ -5714,30 +5463,17 @@ msgstr ""
 #, no-wrap
 msgid "WBC < 4 × 10^9^/L or > 20 × 10^9^/L (< 4 × 10^3^/μL or > 20 × 10^3^/μL)\n"
 msgstr ""
-"#-#-#-#-#  definitions/NeoIPC-Core-Clinical-Sepsis-Definition.de.adoc:22 ("
-"type delimited block *)  #-#-#-#-#\n"
+"#-#-#-#-#  definitions/NeoIPC-Core-Clinical-Sepsis-Definition.de.adoc:22 (type delimited block *)  #-#-#-#-#\n"
 "Leukozyten < 4 × 10⁹/l oder > 20 × 10⁹/l (< 4 × 10³/μl oder > 20 × 10³/μl)\n"
 "\n"
-"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:19 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:33 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:72 (type: delimited block *)  #-#-#-#-#\n"
-"Leukozyten < 4 × 10^9^/L oder > 20 × 10^9^/L (< 4 × 10^3^/μL oder > 20 × "
-"10^3^/μL)\n"
+"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:19 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:33 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:72 (type: delimited block *)  #-#-#-#-#\n"
+"Leukozyten < 4 × 10^9^/L oder > 20 × 10^9^/L (< 4 × 10^3^/μL oder > 20 × 10^3^/μL)\n"
 "\n"
-"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:19 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:33 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:72 (type: delimited block *)  #-#-#-#-#\n"
-"Leukozyten < 4 × 10^9^/L oder > 20 × 10^9^/L (< 4 × 10^3^/μL oder > 20 × "
-"10^3^/μL)\n"
+"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:19 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:33 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:72 (type: delimited block *)  #-#-#-#-#\n"
+"Leukozyten < 4 × 10^9^/L oder > 20 × 10^9^/L (< 4 × 10^3^/μL oder > 20 × 10^3^/μL)\n"
 "\n"
-"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:19 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:33 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:72 (type: delimited block *)  #-#-#-#-#\n"
-"Leukozyten < 4 × 10^9^/L oder > 20 × 10^9^/L (< 4 × 10^3^/μL oder > 20 × "
-"10^3^/μL)\n"
+"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:19 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:33 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:72 (type: delimited block *)  #-#-#-#-#\n"
+"Leukozyten < 4 × 10^9^/L oder > 20 × 10^9^/L (< 4 × 10^3^/μL oder > 20 × 10^3^/μL)\n"
 
 #. type: delimited block *
 #: doc/protocol/definitions/NeoIPC-Core-Clinical-Sepsis-Definition.adoc:23
@@ -5747,26 +5483,16 @@ msgstr ""
 #, no-wrap
 msgid "CRP > 10 mg/L (> 1 mg/dL)\n"
 msgstr ""
-"#-#-#-#-#  definitions/NeoIPC-Core-Clinical-Sepsis-Definition.de.adoc:23 ("
-"type delimited block *)  #-#-#-#-#\n"
+"#-#-#-#-#  definitions/NeoIPC-Core-Clinical-Sepsis-Definition.de.adoc:23 (type delimited block *)  #-#-#-#-#\n"
 "CRP > 10 mg/l (> 1 mg/dl)\n"
 "\n"
-"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:20 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:34 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:73 (type: delimited block *)  #-#-#-#-#\n"
+"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:20 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:34 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:73 (type: delimited block *)  #-#-#-#-#\n"
 "CRP > 10 mg/L (> 1 mg/dL)\n"
 "\n"
-"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:20 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:34 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:73 (type: delimited block *)  #-#-#-#-#\n"
+"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:20 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:34 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:73 (type: delimited block *)  #-#-#-#-#\n"
 "CRP > 10 mg/L (> 1 mg/dL)\n"
 "\n"
-"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:20 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:34 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:73 (type: delimited block *)  #-#-#-#-#\n"
+"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:20 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:34 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:73 (type: delimited block *)  #-#-#-#-#\n"
 "CRP > 10 mg/L (> 1 mg/dL)\n"
 
 #. type: delimited block *
@@ -5777,26 +5503,16 @@ msgstr ""
 #, no-wrap
 msgid "Procalcitonin ≥ 2μg/L (2 ng/mL; 200 ng/dL)\n"
 msgstr ""
-"#-#-#-#-#  definitions/NeoIPC-Core-Clinical-Sepsis-Definition.de.adoc:24 ("
-"type delimited block *)  #-#-#-#-#\n"
+"#-#-#-#-#  definitions/NeoIPC-Core-Clinical-Sepsis-Definition.de.adoc:24 (type delimited block *)  #-#-#-#-#\n"
 "Procalcitonin ≥ 2 μg/l (≥ 2 ng/ml oder ≥ 200 ng/dl)\n"
 "\n"
-"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:21 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:35 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:74 (type: delimited block *)  #-#-#-#-#\n"
+"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:21 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:35 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:74 (type: delimited block *)  #-#-#-#-#\n"
 "Procalcitonin ≥ 2μg/L (2 ng/mL; 200 ng/dL)\n"
 "\n"
-"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:21 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:35 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:74 (type: delimited block *)  #-#-#-#-#\n"
+"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:21 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:35 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:74 (type: delimited block *)  #-#-#-#-#\n"
 "Procalcitonin ≥ 2μg/L (2 ng/mL; 200 ng/dL)\n"
 "\n"
-"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:21 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:35 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:74 (type: delimited block *)  #-#-#-#-#\n"
+"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:21 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:35 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:74 (type: delimited block *)  #-#-#-#-#\n"
 "Procalcitonin ≥ 2μg/L (2 ng/mL; 200 ng/dL)\n"
 
 #. type: delimited block *
@@ -5807,31 +5523,17 @@ msgstr ""
 #, no-wrap
 msgid "I/T-Ratio > 0.2 (ratio of immature granulocytes to total granulocytes)\n"
 msgstr ""
-"#-#-#-#-#  definitions/NeoIPC-Core-Clinical-Sepsis-Definition.de.adoc:25 ("
-"type delimited block *)  #-#-#-#-#\n"
-"I/T-Ratio > 0,2 (Verhältnis von unreifen Granulozyten zu den gesamten "
-"Granulozyten)\n"
+"#-#-#-#-#  definitions/NeoIPC-Core-Clinical-Sepsis-Definition.de.adoc:25 (type delimited block *)  #-#-#-#-#\n"
+"I/T-Ratio > 0,2 (Verhältnis von unreifen Granulozyten zu den gesamten Granulozyten)\n"
 "\n"
-"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:22 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:36 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:75 (type: delimited block *)  #-#-#-#-#\n"
-"I/T-Ratio > 0,2 (Verhältnis von unreifen Granulozyten zu den gesamten "
-"Granulozyten)\n"
+"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:22 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:36 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:75 (type: delimited block *)  #-#-#-#-#\n"
+"I/T-Ratio > 0,2 (Verhältnis von unreifen Granulozyten zu den gesamten Granulozyten)\n"
 "\n"
-"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:22 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:36 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:75 (type: delimited block *)  #-#-#-#-#\n"
-"I/T-Ratio > 0,2 (Verhältnis von unreifen Granulozyten zu den gesamten "
-"Granulozyten)\n"
+"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:22 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:36 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:75 (type: delimited block *)  #-#-#-#-#\n"
+"I/T-Ratio > 0,2 (Verhältnis von unreifen Granulozyten zu den gesamten Granulozyten)\n"
 "\n"
-"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:22 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:36 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-"
-"Definition.de.adoc:75 (type: delimited block *)  #-#-#-#-#\n"
-"I/T-Ratio > 0,2 (Verhältnis von unreifen Granulozyten zu den gesamten "
-"Granulozyten)\n"
+"#-#-#-#-#  definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:22 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:36 definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.de.adoc:75 (type: delimited block *)  #-#-#-#-#\n"
+"I/T-Ratio > 0,2 (Verhältnis von unreifen Granulozyten zu den gesamten Granulozyten)\n"
 
 #. type: delimited block *
 #: doc/protocol/definitions/NeoIPC-Core-Clinical-Sepsis-Definition.adoc:26
@@ -5854,15 +5556,9 @@ msgid ""
 msgstr ""
 "*Es wurde eine Antibiotikabehandlung von mindestens fünf Tagen eingeleitet.\n"
 "Gezählt werden der Tag der ersten Dosis und der Tag der letzten Dosis.\n"
-"Tage, an denen zwischen der ersten und der letzten Dosis keine Dosis "
-"verabreicht wurde (z. B. ausgelassene Dosen aufgrund hoher "
-"Arzneimittelspiegel in der therapeutischen Arzneimittelüberwachung), werden "
-"gezählt, als ob eine Dosis verabreicht worden wäre.\n"
-"Tage nach der letzten Dosis werden nicht gezählt, unabhängig vom gemessenen "
-"oder angenommenen Medikamentenspiegel des Patienten.\n"
-"Wenn das Kind vor dem Ende der fünftägigen Behandlung mit intravenösen "
-"Antibiotika verstirbt, entlassen oder verlegt wird, ist diese Bedingung "
-"erfüllt, wenn die Behandlung für fünf oder mehr Tage geplant war.\n"
+"Tage, an denen zwischen der ersten und der letzten Dosis keine Dosis verabreicht wurde (z. B. ausgelassene Dosen aufgrund hoher Arzneimittelspiegel in der therapeutischen Arzneimittelüberwachung), werden gezählt, als ob eine Dosis verabreicht worden wäre.\n"
+"Tage nach der letzten Dosis werden nicht gezählt, unabhängig vom gemessenen oder angenommenen Medikamentenspiegel des Patienten.\n"
+"Wenn das Kind vor dem Ende der fünftägigen Behandlung mit intravenösen Antibiotika verstirbt, entlassen oder verlegt wird, ist diese Bedingung erfüllt, wenn die Behandlung für fünf oder mehr Tage geplant war.\n"
 
 #. type: Block title
 #: doc/protocol/definitions/NeoIPC-Core-Deep-Incisional-SSI-Definition.adoc:1
@@ -5875,17 +5571,13 @@ msgstr "Tiefe postoperative Wundinfektion"
 #: doc/protocol/definitions/NeoIPC-Core-Organ-Space-SSI-Definition.adoc:5
 #, no-wrap
 msgid "**First symptoms occur within 30 or 90^#^ days after the operation**\n"
-msgstr ""
-"**Erste Symptome treten innerhalb von 30 oder 90^#^ Tagen nach der Operation "
-"auf**\n"
+msgstr "**Erste Symptome treten innerhalb von 30 oder 90^#^ Tagen nach der Operation auf**\n"
 
 #. type: delimited block *
 #: doc/protocol/definitions/NeoIPC-Core-Deep-Incisional-SSI-Definition.adoc:8
 #, no-wrap
 msgid "**Infection involves deep soft tissues of the incision (for example, fascial and muscle layers)**\n"
-msgstr ""
-"**Die Infektion betrifft tiefe Weichteile der Inzision (z. B. Faszien- und "
-"Muskelschichten)**\n"
+msgstr "**Die Infektion betrifft tiefe Weichteile der Inzision (z. B. Faszien- und Muskelschichten)**\n"
 
 #. type: delimited block *
 #: doc/protocol/definitions/NeoIPC-Core-Deep-Incisional-SSI-Definition.adoc:11
@@ -5894,13 +5586,10 @@ msgstr ""
 #, no-wrap
 msgid "**Patient has at least ONE of the following:**\n"
 msgstr ""
-"#-#-#-#-#  definitions/NeoIPC-Core-Deep-Incisional-SSI-Definition.de.adoc:11 "
-"definitions/NeoIPC-Core-Organ-Space-SSI-Definition.de.adoc:11 (type "
-"delimited block *)  #-#-#-#-#\n"
+"#-#-#-#-#  definitions/NeoIPC-Core-Deep-Incisional-SSI-Definition.de.adoc:11 definitions/NeoIPC-Core-Organ-Space-SSI-Definition.de.adoc:11 (type delimited block *)  #-#-#-#-#\n"
 "**Der Patient hat mindestens EINES der folgenden Symptome:**\n"
 "\n"
-"#-#-#-#-#  definitions/NeoIPC-Core-Superficial-Incisional-SSI-"
-"Definition.adoc:11 (type: delimited block *)  #-#-#-#-#\n"
+"#-#-#-#-#  definitions/NeoIPC-Core-Superficial-Incisional-SSI-Definition.adoc:11 (type: delimited block *)  #-#-#-#-#\n"
 "**Patient has at least ONE of the following:**\n"
 
 #. type: delimited block *
@@ -5913,10 +5602,7 @@ msgstr "Eitrige Drainage aus der tiefen Inzision.\n"
 #: doc/protocol/definitions/NeoIPC-Core-Deep-Incisional-SSI-Definition.adoc:13
 #, no-wrap
 msgid "A deep incision that spontaneously dehisces, or is deliberately opened or aspirated by a surgeon, physician* or physician designee\n"
-msgstr ""
-"Eine tiefe Inzision, die sich spontan öffnet oder absichtlich von einem "
-"Chirurgen, Arzt* oder einem von ihm beauftragten Arzt eröffnet oder "
-"aspiriert wird\n"
+msgstr "Eine tiefe Inzision, die sich spontan öffnet oder absichtlich von einem Chirurgen, Arzt* oder einem von ihm beauftragten Arzt eröffnet oder aspiriert wird\n"
 
 #. type: delimited block *
 #: doc/protocol/definitions/NeoIPC-Core-Deep-Incisional-SSI-Definition.adoc:17
@@ -5979,44 +5665,32 @@ msgstr ""
 #: doc/protocol/definitions/NeoIPC-Core-Deep-Incisional-SSI-Definition.adoc:26
 #, no-wrap
 msgid "*The term physician for the purpose of application of the NHSN SSI criteria may be interpreted to mean a surgeon, infectious disease physician, emergency physician, another physician on the case, or physician’s designee (nurse practitioner or physician’s assistant).\n"
-msgstr ""
-"*Der Begriff \"Arzt\" für die Anwendung der NeoIPC-SSI-Kriterien kann so "
-"ausgelegt werden, dass er einen Chirurgen, einen Infektionsmediziner, einen "
-"Notfallmediziner, einen anderen an dem Fall beteiligten Arzt oder eine von "
-"dem Arzt benannte Person (Krankenpfleger oder Arzthelfer) umfasst.\n"
+msgstr "*Der Begriff \"Arzt\" für die Anwendung der NeoIPC-SSI-Kriterien kann so ausgelegt werden, dass er einen Chirurgen, einen Infektionsmediziner, einen Notfallmediziner, einen anderen an dem Fall beteiligten Arzt oder eine von dem Arzt benannte Person (Krankenpfleger oder Arzthelfer) umfasst.\n"
 
 #. type: Block title
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:1
 #, no-wrap
 msgid "Laboratory-Confirmed Bloodstream Infection with Common Commensal Detected Twice"
-msgstr ""
-"Zweifach im Labor bestätigte Blutstrominfektion mit gewöhnlichen Kommensalen"
+msgstr "Zweifach im Labor bestätigte Blutstrominfektion mit gewöhnlichen Kommensalen"
 
 #. type: delimited block *
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:5
 #, no-wrap
 msgid "**The same common commensal is recovered from at least TWO blood and/or CSF culture specimen collected on separate occasions**\n"
-msgstr ""
-"**Derselbe gewöhnliche Kommensale wird in mindestens ZWEI Blut- und/oder "
-"Liquorkulturproben nachgewiesen, die bei verschiedenen Gelegenheiten "
-"entnommen wurden**\n"
+msgstr "**Derselbe gewöhnliche Kommensale wird in mindestens ZWEI Blut- und/oder Liquorkulturproben nachgewiesen, die bei verschiedenen Gelegenheiten entnommen wurden**\n"
 
 #. type: Block title
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:25
 #, no-wrap
 msgid "Laboratory-Confirmed Bloodstream Infection with Common Commensal and Laboratory Finding"
-msgstr ""
-"Im Labor bestätigte Blutstrominfektion mit gewöhnlichen Kommensalen und "
-"Laborbefund"
+msgstr "Im Labor bestätigte Blutstrominfektion mit gewöhnlichen Kommensalen und Laborbefund"
 
 #. type: delimited block *
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:29
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:55
 #, no-wrap
 msgid "**A common commensal is recovered from ONE blood culture and/or CSF culture specimen**\n"
-msgstr ""
-"**Ein gewöhnlicher Kommensale wird aus EINER Blutkultur und/oder "
-"Liquorkulturprobe gewonnen**\n"
+msgstr "**Ein gewöhnlicher Kommensale wird aus EINER Blutkultur und/oder Liquorkulturprobe gewonnen**\n"
 
 #. type: delimited block *
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:32
@@ -6028,25 +5702,19 @@ msgstr "**Mindestens einer der folgenden Laborbefunde:**\n"
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:44
 #, no-wrap
 msgid "New/more frequent episodes of apnoea (>20s) or increase in oxygen demand or ventilatory support \n"
-msgstr ""
-"Neue/häufigere Episoden von Apnoe (>20s) oder Anstieg des Sauerstoffbedarfs "
-"oder der Beatmungsunterstützung \n"
+msgstr "Neue/häufigere Episoden von Apnoe (>20s) oder Anstieg des Sauerstoffbedarfs oder der Beatmungsunterstützung \n"
 
 #. type: Block title
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:51
 #, no-wrap
 msgid "Laboratory-Confirmed Bloodstream Infection with Common Commensal and Five Day Treatment"
-msgstr ""
-"Im Labor bestätigte Blutstrominfektion mit gewöhnlichen Kommensalen und "
-"fünftägiger Behandlung"
+msgstr "Im Labor bestätigte Blutstrominfektion mit gewöhnlichen Kommensalen und fünftägiger Behandlung"
 
 #. type: delimited block *
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:58
 #, no-wrap
 msgid "**Treatment with five or more days of intravenous antibiotics was initiated$$*$$** \n"
-msgstr ""
-"**Eine Behandlung mit intravenösen Antibiotika über fünf oder mehr Tage "
-"wurde eingeleitet$$*$$** \n"
+msgstr "**Eine Behandlung mit intravenösen Antibiotika über fünf oder mehr Tage wurde eingeleitet$$*$$** \n"
 
 #. type: Plain text
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:81
@@ -6058,31 +5726,21 @@ msgid ""
 "If the infant died, was discharged, or transferred before the end of the five-day course of intravenous antibiotics, this condition is met if treatment was scheduled for five days or more.\n"
 msgstr ""
 "*Gezählt werden der Tag der ersten Dosis und der Tag der letzten Dosis.\n"
-"Tage, an denen zwischen der ersten und der letzten Dosis keine Dosis "
-"verabreicht wurde (z. B. ausgelassene Dosen aufgrund hoher "
-"Arzneimittelspiegel in der therapeutischen Arzneimittelüberwachung), werden "
-"gezählt, als ob eine Dosis verabreicht worden wäre.\n"
-"Tage nach der letzten Dosis werden nicht gezählt, unabhängig vom gemessenen "
-"oder angenommenen Medikamentenspiegel des Patienten.\n"
-"Wenn das Kind vor dem Ende der fünftägigen Behandlung mit intravenösen "
-"Antibiotika verstirbt, entlassen oder verlegt wird, ist diese Bedingung "
-"erfüllt, wenn die Behandlung für fünf oder mehr Tage geplant war.\n"
+"Tage, an denen zwischen der ersten und der letzten Dosis keine Dosis verabreicht wurde (z. B. ausgelassene Dosen aufgrund hoher Arzneimittelspiegel in der therapeutischen Arzneimittelüberwachung), werden gezählt, als ob eine Dosis verabreicht worden wäre.\n"
+"Tage nach der letzten Dosis werden nicht gezählt, unabhängig vom gemessenen oder angenommenen Medikamentenspiegel des Patienten.\n"
+"Wenn das Kind vor dem Ende der fünftägigen Behandlung mit intravenösen Antibiotika verstirbt, entlassen oder verlegt wird, ist diese Bedingung erfüllt, wenn die Behandlung für fünf oder mehr Tage geplant war.\n"
 
 #. type: Block title
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Recognised-Pathogen-Definition.adoc:1
 #, no-wrap
 msgid "Laboratory-confirmed bloodstream infection with recognised pathogen"
-msgstr ""
-"Mikrobiologisch bestätigte Blutbahninfektion mit anerkanntem "
-"Infektionserreger"
+msgstr "Mikrobiologisch bestätigte Blutbahninfektion mit anerkanntem Infektionserreger"
 
 #. type: delimited block *
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Recognised-Pathogen-Definition.adoc:5
 #, no-wrap
 msgid "**Recognised pathogen is recovered from a blood and/or cerebrospinal fluid culture**\n"
-msgstr ""
-"**Anerkannter Infektionserreger wurde aus einer Blut- und/oder Liquorkultur "
-"gewonnen**\n"
+msgstr "**Anerkannter Infektionserreger wurde aus einer Blut- und/oder Liquorkultur gewonnen**\n"
 
 #. type: Block title
 #: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:1
@@ -6094,9 +5752,7 @@ msgstr "Symptombasierte NEC"
 #: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:5
 #, no-wrap
 msgid "**At least of ONE the following radiological signs (imaging technologies: X-ray, CT, MRI, ultrasound):**\n"
-msgstr ""
-"**Mindestens EINES der folgenden radiologischen Zeichen (bildgebende "
-"Verfahren: Röntgen, CT, MRT, Ultraschall):**\n"
+msgstr "**Mindestens EINES der folgenden radiologischen Zeichen (bildgebende Verfahren: Röntgen, CT, MRT, Ultraschall):**\n"
 
 #. type: delimited block *
 #: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:8
@@ -6141,9 +5797,7 @@ msgstr "Verfärbung des Abdomens oder glänzende/rötliche Hautfarbe\n"
 #: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:17
 #, no-wrap
 msgid "Repeated occult (guaiac test) or visible blood in stool (no anal fissure)\n"
-msgstr ""
-"Wiederholtes okkultes (Guajak-Test) oder sichtbares Blut im Stuhl (keine "
-"Analfissur)\n"
+msgstr "Wiederholtes okkultes (Guajak-Test) oder sichtbares Blut im Stuhl (keine Analfissur)\n"
 
 #. type: delimited block *
 #: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:18
@@ -6179,9 +5833,7 @@ msgstr "Chirurgische NEC"
 #: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:28
 #, no-wrap
 msgid "**At least of ONE the following surgical or pathological findings:**\n"
-msgstr ""
-"**Mindestens EINER der folgenden chirurgischen oder pathologischen Befunde:**"
-"\n"
+msgstr "**Mindestens EINER der folgenden chirurgischen oder pathologischen Befunde:**\n"
 
 #. type: delimited block *
 #: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:30
@@ -6198,60 +5850,37 @@ msgstr "Infektion von Organen und Körperhöhlen im Operationsgebiet"
 #: doc/protocol/definitions/NeoIPC-Core-Organ-Space-SSI-Definition.adoc:8
 #, no-wrap
 msgid "**Infection involves any part of the body deeper than the fascial/muscle layers that is opened or manipulated during the operative procedure**\n"
-msgstr ""
-"**Die Infektion betrifft irgendeinen Teil des Körpers, der tiefer als die "
-"Faszien-/Muskelschichten liegt und während des operativen Eingriffs geöffnet "
-"oder manipuliert wurde.**\n"
+msgstr "**Die Infektion betrifft irgendeinen Teil des Körpers, der tiefer als die Faszien-/Muskelschichten liegt und während des operativen Eingriffs geöffnet oder manipuliert wurde.**\n"
 
 #. type: delimited block *
 #: doc/protocol/definitions/NeoIPC-Core-Organ-Space-SSI-Definition.adoc:12
 #, no-wrap
 msgid "Purulent drainage from a drain that is placed into the organ/space (for example, closed suction drainage system, open drain, T-tube drain, CT-guided drainage).\n"
-msgstr ""
-"Eitrige Drainage aus einer in das Organ/die Körperhöhle eingebrachten "
-"Drainage (z. B. geschlossenes Saugdrainagesystem, offene Drainage, T-"
-"Drainage, CT-gestützte Drainage).\n"
+msgstr "Eitrige Drainage aus einer in das Organ/die Körperhöhle eingebrachten Drainage (z. B. geschlossenes Saugdrainagesystem, offene Drainage, T-Drainage, CT-gestützte Drainage).\n"
 
 #. type: delimited block *
 #: doc/protocol/definitions/NeoIPC-Core-Organ-Space-SSI-Definition.adoc:13
 #, no-wrap
 msgid "Organism(s) identified from fluid or tissue in the organ/space by a culture or non-culture based microbiologic testing method which is performed for purposes of clinical diagnosis or treatment (for example, not Active Surveillance Culture/Testing (ASC/AST)).\n"
-msgstr ""
-"Erreger, die aus der Flüssigkeit oder dem Gewebe des Organs/der Körperhöhle "
-"durch eine Kultur oder eine nicht auf Kulturen basierende mikrobiologische "
-"Testmethode identifiziert wurden, die zu Zwecken der klinischen Diagnose "
-"oder Behandlung durchgeführt wird (z. B. keine Befunde aus Diagnostik zum "
-"Zweck des mikrobiologischen Screenings). \n"
+msgstr "Erreger, die aus der Flüssigkeit oder dem Gewebe des Organs/der Körperhöhle durch eine Kultur oder eine nicht auf Kulturen basierende mikrobiologische Testmethode identifiziert wurden, die zu Zwecken der klinischen Diagnose oder Behandlung durchgeführt wird (z. B. keine Befunde aus Diagnostik zum Zweck des mikrobiologischen Screenings). \n"
 
 #. type: delimited block *
 #: doc/protocol/definitions/NeoIPC-Core-Organ-Space-SSI-Definition.adoc:14
 #, no-wrap
 msgid "An abscess or other evidence of infection involving the organ/space that is detected on gross anatomical or histopathologic exam, or imaging test evidence suggestive of infection.\n"
-msgstr ""
-"Ein Abszess oder andere Anzeichen einer Infektion des Organs/der "
-"Körperhöhle, die bei einer körperlichen oder histopathologischen "
-"Untersuchung festgestellt werden, oder bildgebende Tests, die auf eine "
-"Infektion hindeuten.\n"
+msgstr "Ein Abszess oder andere Anzeichen einer Infektion des Organs/der Körperhöhle, die bei einer körperlichen oder histopathologischen Untersuchung festgestellt werden, oder bildgebende Tests, die auf eine Infektion hindeuten.\n"
 
 #. type: delimited block *
 #: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:5
 #, no-wrap
 msgid "**At least ONE of the following imaging findings (imaging technologies: X-ray, CT, MRI, ultrasound) shows new changes suggestive of pneumonia, such as infiltrate, shadowing, opacification, increased density, fluid in the intrapleural cavity or interlobar fissure**\n"
-msgstr ""
-"**Mindestens EINER der folgenden bildgebenden Befunde (bildgebende Verfahren:"
-" Röntgen, CT, MRT, Ultraschall) zeigt neue Veränderungen, die auf eine "
-"Pneumonie hindeuten, wie z. B. Infiltrate, Verschattungen, Eintrübungen, "
-"erhöhte Dichte, Flüssigkeit in der Pleurahöhle oder in der Interlobarfissur**"
-"\n"
+msgstr "**Mindestens EINER der folgenden bildgebenden Befunde (bildgebende Verfahren: Röntgen, CT, MRT, Ultraschall) zeigt neue Veränderungen, die auf eine Pneumonie hindeuten, wie z. B. Infiltrate, Verschattungen, Eintrübungen, erhöhte Dichte, Flüssigkeit in der Pleurahöhle oder in der Interlobarfissur**\n"
 
 #. type: delimited block *
 #: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:8
 #, no-wrap
 msgid "**New initiation of respiratory support or escalation of existing level of respiratory support for ≥ 2 days$$*$$ after at least 2 days of stability or improvement**\n"
-msgstr ""
-"**Neueinleitung von Atemunterstützung oder Eskalation der bestehenden Stufe "
-"der Atemunterstützung für ≥ 2 Tage$$*$$ nach mindestens 2 Tagen der "
-"Stabilität oder Verbesserung**\n"
+msgstr "**Neueinleitung von Atemunterstützung oder Eskalation der bestehenden Stufe der Atemunterstützung für ≥ 2 Tage$$*$$ nach mindestens 2 Tagen der Stabilität oder Verbesserung**\n"
 
 #. type: delimited block *
 #: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:11
@@ -6269,9 +5898,7 @@ msgstr "Erreger aus den Atemwegen identifiziert^+^\n"
 #: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:14
 #, no-wrap
 msgid "New or more frequent tachypnoea (>60/min) or new or more frequent apnoea (> 20 s)\n"
-msgstr ""
-"Neue oder vermehrte Tachypnoe (>60/min) oder neue oder vermehrte Apnoe (> 20 "
-"s)\n"
+msgstr "Neue oder vermehrte Tachypnoe (>60/min) oder neue oder vermehrte Apnoe (> 20 s)\n"
 
 #. type: delimited block *
 #: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:15
@@ -6283,32 +5910,25 @@ msgstr "Eitriges Trachealaspirat\n"
 #: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:16
 #, no-wrap
 msgid "New or more frequent symptoms of respiratory distress (retraction, nasal flaring, grunting, chest indrawing)\n"
-msgstr ""
-"Neue oder vermehrte Symptome von Atemnot (Einziehungen, Nasenflügel, "
-"Stöhnen, eingezogener Brustkorb)\n"
+msgstr "Neue oder vermehrte Symptome von Atemnot (Einziehungen, Nasenflügel, Stöhnen, eingezogener Brustkorb)\n"
 
 #. type: delimited block *
 #: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:17
 #, no-wrap
 msgid "Temperature instability or fever (>38 °C) or hypothermia (<36.5 °C)\n"
-msgstr ""
-"Temperaturinstabilität oder Fieber (>38 °C) oder Hypothermie (<36,5 °C)\n"
+msgstr "Temperaturinstabilität oder Fieber (>38 °C) oder Hypothermie (<36,5 °C)\n"
 
 #. type: delimited block *
 #: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:18
 #, no-wrap
 msgid "Increased respiratory secretion (more frequent endotracheal suctioning required)\n"
-msgstr ""
-"Vermehrte Sekretion der Atemwege ( häufigeres endotracheales Absaugen "
-"erforderlich)\n"
+msgstr "Vermehrte Sekretion der Atemwege ( häufigeres endotracheales Absaugen erforderlich)\n"
 
 #. type: delimited block *
 #: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:19
 #, no-wrap
 msgid "CRP > 10 mg/L (> 1 mg/dL) or increased levels of interleukin (IL) 6 or 8^#^\n"
-msgstr ""
-"CRP > 10 mg/L (> 1 mg/dL) oder erhöhte Werte von Interleukin (IL) 6 oder 8^#^"
-"\n"
+msgstr "CRP > 10 mg/L (> 1 mg/dL) oder erhöhte Werte von Interleukin (IL) 6 oder 8^#^\n"
 
 #. type: delimited block *
 #: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:20
@@ -6320,10 +5940,7 @@ msgstr "I/T-Ratio > 0,2\n"
 #: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:23
 #, no-wrap
 msgid "*New initiation of respiratory support or escalation of existing level of respiratory support that does not improve within less than two days:\n"
-msgstr ""
-"*Neueinleitung einer Atemunterstützung oder Erhöhung des bestehenden Niveaus "
-"der Atemunterstützung, die sich nicht innerhalb von weniger als zwei Tagen "
-"verbessert:\n"
+msgstr "*Neueinleitung einer Atemunterstützung oder Erhöhung des bestehenden Niveaus der Atemunterstützung, die sich nicht innerhalb von weniger als zwei Tagen verbessert:\n"
 
 #. type: Plain text
 #: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:25
@@ -6331,8 +5948,8 @@ msgid ""
 "Increase in need for FiO~2~ ≥ 0.25 (25 points) within 24 hours (daily "
 "minimum FiO~2~ values must be taken into account)"
 msgstr ""
-"Anstieg des Bedarfs an FiO~2~ ≥ 0,25 (25 Punkte) innerhalb von 24 Stunden ("
-"tägliche Mindestwerte für FiO~2~ müssen berücksichtigt werden)"
+"Anstieg des Bedarfs an FiO~2~ ≥ 0,25 (25 Punkte) innerhalb von 24 Stunden "
+"(tägliche Mindestwerte für FiO~2~ müssen berücksichtigt werden)"
 
 #. type: Plain text
 #: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:33
@@ -6407,8 +6024,7 @@ msgstr "**First symptoms occur within 30 days after the operation**\n"
 #: doc/protocol/definitions/NeoIPC-Core-Superficial-Incisional-SSI-Definition.adoc:8
 #, no-wrap
 msgid "**Infection involves only skin and subcutaneous tissue of the incision**\n"
-msgstr ""
-"**Infection involves only skin and subcutaneous tissue of the incision**\n"
+msgstr "**Infection involves only skin and subcutaneous tissue of the incision**\n"
 
 #. type: delimited block *
 #: doc/protocol/definitions/NeoIPC-Core-Superficial-Incisional-SSI-Definition.adoc:13
@@ -6467,11 +6083,7 @@ msgstr ""
 #: doc/protocol/definitions/NeoIPC-Core-Superficial-Incisional-SSI-Definition.adoc:24
 #, no-wrap
 msgid "*The term physician for the purpose of application of the NeoIPC SSI criteria may be interpreted to mean a surgeon, infectious disease physician, emergency physician, another physician on the case, or physician’s designee (nurse practitioner or physician’s assistant).\n"
-msgstr ""
-"*The term physician for the purpose of application of the NeoIPC SSI "
-"criteria may be interpreted to mean a surgeon, infectious disease physician, "
-"emergency physician, another physician on the case, or physician’s designee ("
-"nurse practitioner or physician’s assistant).\n"
+msgstr "*The term physician for the purpose of application of the NeoIPC SSI criteria may be interpreted to mean a surgeon, infectious disease physician, emergency physician, another physician on the case, or physician’s designee (nurse practitioner or physician’s assistant).\n"
 
 #. type: Plain text
 #: doc/protocol/definitions/NeoIPC-Core-Superficial-Incisional-SSI-Definition.adoc:26
@@ -6512,3 +6124,39 @@ msgstr ""
 "site is considered a surgical incision and not a stab wound.  If a surgeon "
 "uses a laparoscopic trocar site to place a drain at the end of a procedure "
 "this is considered a surgical incision."
+
+#. type: Content of: <root><data><value>
+#: doc/protocol/resx/NeoIPC-Core-Decision-Flow.resx:10
+#, no-wrap
+msgid "Admitted to your department within 120 days after birth?"
+msgstr "Innerhalb von 120 Tagen nach der Geburt in Ihre Abteilung aufgenommen?"
+
+#. type: Content of: <root><data><value>
+#: doc/protocol/resx/NeoIPC-Core-Decision-Flow.resx:13
+#, no-wrap
+msgid "i.e., stillborn babies, delivery room death, day of life &gt; 120"
+msgstr "z. B. Stillgeburten, Versterben im Kreißsaal, Lebenstag &gt; 120"
+
+#. type: Content of: <root><data><value>
+#: doc/protocol/resx/NeoIPC-Core-Decision-Flow.resx:16
+#, no-wrap
+msgid "Gestational age &lt; 32 weeks?"
+msgstr "Gestationsalter &lt; 32 Wochen?"
+
+#. type: Content of: <root><data><value>
+#: doc/protocol/resx/NeoIPC-Core-Decision-Flow.resx:19
+#, no-wrap
+msgid "Birthweight &lt; 1500g?"
+msgstr "Geburtsgewicht &lt; 1500 g?"
+
+#. type: Content of: <root><data><value>
+#: doc/protocol/resx/NeoIPC-Core-Decision-Flow.resx:22
+#, no-wrap
+msgid "Eligible"
+msgstr "Einschluss"
+
+#. type: Content of: <root><data><value>
+#: doc/protocol/resx/NeoIPC-Core-Decision-Flow.resx:25
+#, no-wrap
+msgid "Ineligible"
+msgstr "Kein Einschluss"
