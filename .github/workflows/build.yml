@@ -25,7 +25,9 @@ jobs:
 
             - name: Run po4a
               shell: bash
-              run: po4a --master-charset utf8 --localized-charset utf8 --verbose po4a.cfg
+              run: |
+                po4a --verbose po4a.cfg
+                po4a --verbose metadata/common/pathogens/po4a.cfg
 
             - name: Build
               shell: pwsh
