@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "POT-Creation-Date: 2025-08-17 16:26+0200\n"
-"PO-Revision-Date: 2025-08-17 19:54+0000\n"
-"Last-Translator: Prefill add-on <noreply-addon-prefill@weblate.org>\n"
+"PO-Revision-Date: 2025-08-17 20:23+0000\n"
+"Last-Translator: Brar Piening <brar@gmx.de>\n"
 "Language-Team: German <https://hosted.weblate.org/projects/neoipc/neoipc-infectious-agents/de/>\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
@@ -43,9 +43,9 @@ msgstr "Simplexvirus humanalpha1"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Children Synonyms Name
 #: metadata/common/pathogens/NeoIPC-Infectious-Agents.yaml:1
-#, fuzzy, no-wrap
+#, no-wrap
 msgid "Herpes simplex virus type 1"
-msgstr "Herpes simplex virus type 1"
+msgstr "Herpes-simplex-Virus Typ 1"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Children Synonyms Name
 #: metadata/common/pathogens/NeoIPC-Infectious-Agents.yaml:1
@@ -61,9 +61,9 @@ msgstr "Simplexvirus humanalpha2"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Children Synonyms Name
 #: metadata/common/pathogens/NeoIPC-Infectious-Agents.yaml:1
-#, fuzzy, no-wrap
+#, no-wrap
 msgid "Herpes simplex virus type 2"
-msgstr "Herpes simplex virus type 2"
+msgstr "Herpes-simplex-Virus Typ 2"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Children Synonyms Name
 #: metadata/common/pathogens/NeoIPC-Infectious-Agents.yaml:1
@@ -79,9 +79,9 @@ msgstr "Gruppe"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Name
 #: metadata/common/pathogens/NeoIPC-Infectious-Agents.yaml:1
-#, fuzzy, no-wrap
+#, no-wrap
 msgid "Human herpes simplex virus"
-msgstr "Human herpes simplex virus"
+msgstr "Humanes Herpes-simplex-Virus"
 
 #. type: Hash Value: Hierarchies Children Children ConceptType
 #: metadata/common/pathogens/NeoIPC-Infectious-Agents.yaml:1
