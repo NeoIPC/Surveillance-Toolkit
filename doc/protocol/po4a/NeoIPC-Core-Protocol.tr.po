@@ -1,0 +1,5040 @@
+# SOME DESCRIPTIVE TITLE
+# Copyright (C) YEAR Free Software Foundation, Inc.
+# This file is distributed under the same license as the PACKAGE package.
+# Languages add-on <noreply-addon-languages@weblate.org>, 2025.
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2025-04-04 09:45+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"Language: tr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+
+#. type: Title =
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:1
+#, no-wrap
+msgid ""
+"Infection Surveillance for Neonatology: Core Module for Very Low Birth "
+"Weight (VLBW) and Very Preterm (VPT) Infants"
+msgstr ""
+
+#. type: Title ==
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:7
+#, no-wrap
+msgid "Introduction"
+msgstr ""
+
+#. type: Title ===
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:9
+#, no-wrap
+msgid "What are you reading here?"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:13
+msgid ""
+"This document is the surveillance protocol for the core module of the NeoIPC "
+"surveillance which covers surveillance of nosocomial infections in Very Low "
+"Birth Weight (VLBW)/ Very Preterm (VPT) Infants.  It is part of a toolkit "
+"for the surveillance of healthcare-associated infections (HAI) in "
+"neonatology that we developed within the NeoIPC project.  If you want to "
+"perform surveillance of early-onset infections or of healthcare-associated "
+"infections in infants with a birth weight above 1500 g and a gestational age "
+"greater than 32 weeks, the toolkit provides additional methods that are "
+"covered in separate protocols."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:16
+msgid ""
+"This protocol provides methodological reference and support for HAI "
+"surveillance in neonatal units or for those planning to develop an HAI "
+"surveillance programme.  By adhering to the methods and definitions we "
+"specify here, you can ensure that the surveillance data you generate is "
+"comparable to the reference data in the NeoIPC project, even if you are not "
+"actively participating in the project."
+msgstr ""
+
+#. type: Title ===
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:18
+#, no-wrap
+msgid "What is the NeoIPC Project"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:21
+msgid ""
+"Within the NeoIPC project, we want to support you with infection prevention "
+"and control (IPC) interventions and strategies in your neonatal intensive "
+"care unit, especially if you observe a high prevalence of hospital-acquired "
+"infections or multidrug-resistant (MDR) bacteria.  We are an international "
+"team of clinicians and scientists from 13 collaborating partner institutions "
+"with a proven record in the areas of neonatal intensive care, neonatal "
+"infection, infection prevention and control (IPC), implementation science, "
+"microbiology, and surveillance, who collaborate in this project to achieve "
+"two overarching goals:"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:23
+msgid ""
+"Develop and implement an innovative approach towards the evaluation of IPC "
+"interventions in neonatology via:"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:24
+msgid ""
+"Robust assessment of the effectiveness of interventions in a randomised "
+"controlled trial (RCT)"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:25
+msgid "Identification of a suitable implementation strategy."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:26
+msgid ""
+"Generate widely relevant and globally transferable outputs to improve IPC in "
+"neonatal care through:"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:27
+msgid ""
+"Formation of a clinical practice network to support the implementation of "
+"IPC in neonatal care, including a variety of practice settings like neonatal "
+"intensive care unit (NICU), high care, special care, and kangaroo care (KC)."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:28
+msgid ""
+"Development of an open structure for targeted surveillance of IPC processes "
+"and outcomes across a large variety of settings."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:30
+msgid ""
+"This project has received funding from the European Union’s Horizon 2020 "
+"research and innovation programme under grant agreement No. 965328."
+msgstr ""
+
+#. type: Title ===
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:32
+#, no-wrap
+msgid "Background"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:39
+msgid ""
+"Worldwide, neonates and especially preterm infants are among the patient "
+"groups with the highest incidence of nosocomial infections.  Some of these "
+"infections can be prevented by infection-prevention measures, which must be "
+"implemented in each individual neonatal unit and adapted to the specific "
+"infection risks of the patients.  In many hospitals in Europe and worldwide, "
+"healthcare professionals do not have good data to assess the burden of "
+"healthcare-associated infections and the risk factors contributing to their "
+"development or to evaluate the effectiveness of infection prevention "
+"interventions.  Support for surveillance of healthcare-associated infections "
+"in neonates or reference data for benchmarking is not available in most "
+"countries.  Where national and supranational data collection systems exist, "
+"they frequently have a broad approach that is limited in its ability to "
+"assess the situation with respect to infection prevention and control.  In "
+"the short term, we aim to improve this situation by providing those "
+"interested in IPC surveillance in neonatology with tools and methods to get "
+"started, and in the longer term by potentially contributing to the formation "
+"of regional surveillance infrastructures."
+msgstr ""
+
+#. type: Title ===
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:41
+#, no-wrap
+msgid "Advice for Use and Requirements for Participation"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:44
+msgid ""
+"If you want to start collecting data using the NeoIPC surveillance methods "
+"and tools, you can just do so without asking us for permission or paying any "
+"fees.  All manuals and tools are free to use, and you can start using them "
+"right away if you think they will assist in quality improvement for "
+"infection control in your department."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:47
+msgid ""
+"By starting with paper forms and performing calculations with pen and paper "
+"or by using a spreadsheet, you have a very low barrier of entry, and it may "
+"even help you to gain a thorough understanding of the calculations that are "
+"performed internally by the more advanced tools.  If you want to keep things "
+"running effectively over an extended period and you have the necessary "
+"resources, you may want to benefit from those tools by using the advanced "
+"surveillance software locally or by participating in NeoIPC or a regional "
+"surveillance network based on its methods."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:51
+msgid ""
+"For long-term success in surveillance of nosocomial infections, collecting "
+"data and producing reliable and comparable information in your department "
+"over a long period of time will be crucial.  In order to facilitate the "
+"collection of such data, you may want to contribute data to the NeoIPC "
+"surveillance network.  This data could be used to generate reports and "
+"benchmark your neonatal unit’s infection rates against others."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:53
+msgid ""
+"If you collect and submit data, and are responsible for quality improvement, "
+"it is essential that you have a clear understanding of the following:"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:55
+msgid "Patient eligibility criteria"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:56
+msgid "Data definitions for each data Item"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:57
+msgid "Procedures for filling and storing forms"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:58
+msgid ""
+"Data security and data privacy (protection of information that might be used "
+"to identify a patient outside of your department or hospital)"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:59
+msgid "Procedures for collecting, submitting, and correcting data"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:60
+msgid "Procedures for data management and data finalization"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:61
+msgid "Use of NeoIPC reports for monitoring and improving patient care"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:64
+msgid ""
+"You should make sure that the whole data collection team in your centre "
+"accept the data definitions contained in this protocol and submit their data "
+"accordingly.  To be able to generate up-to-date reference reports on a "
+"regular schedule, NeoIPC requires participants to regularly submit data via "
+"the web-based interface and to ensure that their software and hardware "
+"systems meet the minimum requirements."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:68
+msgid ""
+"Your center's policies and procedures must ensure patient privacy and data "
+"security.  It is important to protect patients' personal information and "
+"other information that can lead to their identification in accordance with "
+"the laws and policies applicable to your center.  Do not send patient "
+"personal information to the NeoIPC network."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:70
+msgid ""
+"We will ensure to keep the disaggregated data submitted by each department "
+"strictly confidential and provide you with regular standardized and "
+"stratified reference reports that contain aggregated data so that no "
+"individual patient or department can be identified."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:73
+msgid ""
+"To help you navigate and better utilize the tools provided, we offer "
+"surveillance manuals, datasheets and training materials at "
+"https://neoipc.org/surveillance/.  While our resources for personal "
+"interaction are limited, we will also try to support your team if you send "
+"your questions to neoipc-support@charite.de."
+msgstr ""
+
+#. type: Title ==
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:75
+#, no-wrap
+msgid "Data Management"
+msgstr ""
+
+#. type: Title ===
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:77
+#, no-wrap
+msgid "Data Protection and Security"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:81
+msgid ""
+"Routine surveillance of healthcare-associated infections is not research but "
+"is rather a way of performing quality assurance which is part of regular "
+"patient care.  Because of this, the associated data collection is typically "
+"covered by the regular hospital treatment contracts or special legislation "
+"that mandates it and does not need explicit consent from the affected "
+"patients or their legal guardians.  Nevertheless, you should make sure that "
+"this applies in your country before starting to collect any data and in "
+"addition adhere to some universal minimum standards that should apply "
+"irrespective of the legal framework."
+msgstr ""
+
+#. type: Title ====
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:83
+#, no-wrap
+msgid "Patient Information"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:89
+msgid ""
+"Healthcare information is among the most private categories of information "
+"about humans in most cultures and should be handled with special care.  When "
+"information that can lead to the identification of an individual patient is "
+"stored or transmitted, this should generally happen in a way that no "
+"unauthorized third party can access it.  While this is usually very clear "
+"for typical human identifiers like the combination of family name, given "
+"name, and birth date, in the case of neonates even a very rare birth weight "
+"or gestational age may lead to the identification of an individual patient "
+"if combined with enough other information like birth date or the hospital "
+"the patient is treated in.  Think about this special phenomenon whenever you "
+"publish data or information that results from your surveillance-related "
+"activities or transmit it to a system that is not approved by your "
+"hospital.  This may even apply to an externally maintained NeoIPC "
+"surveillance software if there are no contracts that govern the data "
+"processing and ownership."
+msgstr ""
+
+#. type: Title ====
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:91
+#, no-wrap
+msgid "Hospital Information"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:95
+msgid ""
+"Information about hospitals generally is not protected by laws but some "
+"information may be considered as company secret and in that case, as a "
+"member of staff, you are typically not allowed to disclose it.  Whether "
+"surveillance information (“hospital infection rates”) is a company "
+"secret or should be, is a matter of extensive debate and it is "
+"understandable that patient rights organizations advocate for transparency "
+"in that regard.  Nevertheless, the publication of surveillance data can have "
+"a detrimental effect on both the perception of the treatment quality of a "
+"hospital and the ability of the surveillance team to perform surveillance in "
+"an honest and self-critical way."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:99
+msgid ""
+"Being a self-assessment tool, surveillance cannot rule out all forms of "
+"subjectivity and dishonesty and public pressure tends to shift data "
+"collection towards an overly critical assessment of infection records "
+"leading to low rates that can no longer be acted upon.  In addition to the "
+"problem of pro-forma-surveillance, there may be very legitimate or even "
+"honourable reasons for high infection rates in a hospital, like treating "
+"those who have an especially high risk for infections, that can’t be "
+"adjusted for by the means of standardization or stratification of the "
+"collected data.  These reasons are notoriously hard to communicate to the "
+"public which can lead to oversimplification and political abuse."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:101
+msgid ""
+"Since there is no easy solution for these problems NeoIPC will not disclose "
+"the identity of individual participating hospitals and make sure that "
+"publications and reports will not contain information that may lead to the "
+"identification of an individual hospital."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:103
+msgid ""
+"When publishing data yourself or as a regional network you should carefully "
+"consider the potential effects of including hospital-level information and "
+"do so in close coordination with your stakeholders."
+msgstr ""
+
+#. type: Title ===
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:105
+#, no-wrap
+msgid "Data Submission"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:107
+msgid ""
+"As stated "
+"xref:introduction-advice-for-use-and-requirements-for-participation[above], "
+"you can use the tools and methods developed by the NeoIPC project to perform "
+"surveillance of nosocomial infections in your neonatology department without "
+"submitting any information to the NeoIPC project or a regional network."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:109
+msgid ""
+"If you decide to submit data, however, we strongly advise you to use the "
+"web-based reporting system we have developed based on the "
+"https://dhis2.org/[DHIS2] health information management system."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:111
+msgid ""
+"Since DHIS2 is a freely available open source system, you have multiple "
+"options to use it:"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:113
+msgid ""
+"Deploy it locally at your hospital and use it for the NeoIPC data collection "
+"within your hospital as well as for other potential use cases."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:114
+msgid ""
+"Deploy it nationally or regionally (or use an existing national or regional "
+"deployment) to form a national or regional network of units performing "
+"surveillance."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:115
+msgid ""
+"Use the NeoIPC project's https://neoipc.charite.de/[instance] of the system "
+"which is currently operated by the team at the German National Reference "
+"Centre for Surveillance of Nosocomial Infections at Charité's Institute for "
+"Hygiene and Environmental Medicine."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:117
+msgid ""
+"One of the advantages of using the web-based reporting system is the fact "
+"that you can use it to create standardised unit-based reports at any time "
+"with a few clicks and compare them to the NeoIPC reference reports that are "
+"published annually."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:121
+msgid ""
+"To create the reference report, we carry out a calculation at a specified "
+"time every year using the data available in the NeoIPC database at that "
+"point in time.  In order to make this possible, you must have completed all "
+"data entry and addition of missing information from the previous year within "
+"6 weeks after the end of a calendar year.  This applies to patients whose "
+"surveillance period ended in the previous year."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:123
+msgid ""
+"If the web-based reporting system is temporarily unavailable (e. g. due to "
+"maintenance or technical problems), please use the paper-based datasheets "
+"for documentation during this period and remember to enter this data into "
+"the web platform as soon as possible once it becomes available again."
+msgstr ""
+
+#. type: Title ==
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:125
+#, no-wrap
+msgid "Data Collection"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:127
+msgid ""
+"The primary aim of the methods used by NeoIPC surveillance system is to "
+"support internal quality assurance standards, to make valid statements about "
+"the frequency of healthcare-associated infections in eligible infants during "
+"their inpatient stay and to promote implementation of IPC strategies in a "
+"neonatal unit."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:133
+msgid ""
+"Based on our experience, we anticipate that you will collect data both "
+"through the review of medical charts as well as through the interaction with "
+"the colleagues who are involved in treatment and care of the patient under "
+"surveillance.  For this reason, your data collection should ideally occur at "
+"the patient's bedside, to maximize the amount of information available (by "
+"allowing attending clinicians to clarify unclear or incomplete chart "
+"entries), and to minimize the amount of time involved in tracking down "
+"medical records once the patient has left the hospital.  You will typically "
+"identify patients with healthcare-associated infections through the regular "
+"examination of existing departmental patient records, including laboratory "
+"results.  The success of your participation in NeoIPC surveillance will very "
+"much depend on the close communication between those who perform the "
+"surveillance (typically infection prevention and control professionals) and "
+"those who care for the patient (typically neonatology professionals).  Since "
+"the collected data will ultimately need to be entered into a computer, by "
+"combining data collection and data entry into a single procedure you have "
+"the potential to save time and reduce the risk of data copying errors."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:135
+msgid ""
+"There are two patient data collection sheets that must be fulfilled for all "
+"eligible patients for the NeoIPC surveillance programme:"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:137
+msgid "Master data collection sheet"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:138
+msgid "Patient progress chart"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:140
+msgid ""
+"A third data collection sheet must also be fulfilled, if the patient "
+"undergoes a surgical procedure:"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:142
+msgid "Surgical procedure data collection form"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:144
+msgid ""
+"In addition, if an eligible infant develops a healthcare-associated "
+"infection within the NeoIPC follow-up period, the corresponding infection "
+"data collection sheet/sheets should also be fulfilled:"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:146
+msgid "Blood stream infection"
+msgstr ""
+
+#. type: Block title
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:147
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:309
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:425
+#: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:1
+#, no-wrap
+msgid "Pneumonia"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:148
+msgid "Necrotising enterocilitis"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:149
+msgid "Surgical site infection"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:151
+msgid ""
+"Only these infections acquired in participating neonatology departments "
+"should be recorded."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:153
+msgid ""
+"All eligible infants should be observed until the end of the surveillance "
+"period, defined as the time when the infant dies, is transferred, or is "
+"discharged from the hospital."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:156
+msgid ""
+"Patients are additionally followed up for SSIs in case of a surgical "
+"procedure for 30 or 90 days, depending on whether an implant is present.  "
+"For detailed information, see Surgical site infections."
+msgstr ""
+
+#. type: Title ===
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:158
+#, no-wrap
+msgid "Case Eligibility Criteria for the Core Module"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:160
+msgid "Any live born infant,"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:163
+msgid "whose birth weight is less than 1500 grams"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:165
+#, no-wrap
+msgid "**AND/OR**\n"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:166
+#, no-wrap
+msgid "whose gestational age is less than 32 weeks (31 weeks 6 days inclusive)\n"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:168
+msgid ""
+"admitted to a ward in your neonatal unit **within 120 days of birth** is "
+"eligible for inclusion in the Core Module of the NeoIPC Surveillance "
+"Programme."
+msgstr ""
+
+#. type: Positional ($1) AttributeList argument for macro 'image'
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:169
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:170
+#, no-wrap
+msgid "Decision flow to identify eligible infants for the core module"
+msgstr ""
+
+#. type: Target for macro image
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:170
+#, no-wrap
+msgid "NeoIPC-Core-Decision-Flow.svg"
+msgstr ""
+
+#. type: Block title
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:172
+#, no-wrap
+msgid ""
+"Examples of infants eligible/not eligible for core module once admitted to "
+"the ward"
+msgstr ""
+
+#. type: Table
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:182
+#, no-wrap
+msgid ""
+"|Day of Life |Birth Weight (grams) |Gestational Age (weeks+days) |Eligible "
+"for VLBW/VPT Module\n"
+"\n"
+"|120 [.green]#☑# |1499 [.green]#☑# |31+6 [.green]#☑# |Yes "
+"[.green]#☑#\n"
+"|1 [.green]#☑# |1500 [.red]#☐# |31+6 [.green]#☑# |Yes [.green]#☑#\n"
+"|120 [.green]#☑# |1499 [.green]#☑# |32+0 [.red]#☐# |Yes "
+"[.green]#☑#\n"
+"|1 [.green]#☑# |1500 [.red]#☐# |32+0 [.red]#☐# |No [.red]#☐#\n"
+"|121 [.red]#☐# |1499 [.green]#☑# |30+5 [.green]#☑# |No [.red]#☐#\n"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:185
+msgid ""
+"An infant that is not eligible in the core module may still be eligible in "
+"another NeoIPC Surveillance module."
+msgstr ""
+
+#. type: Title ===
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:187
+#, no-wrap
+msgid "Patient Data Collection"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:189
+msgid ""
+"Whenever an eligible patient is admitted or readmitted to one of the wards "
+"in your neonatology department, you should enrol this patient, preferably "
+"directly into the online reporting platform."
+msgstr ""
+
+#. type: Title ====
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:191
+#, no-wrap
+msgid "Pseudonymisation Table"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:195
+msgid ""
+"If you have a legal or other requirement to unambiguously identify patients "
+"in the online reporting platform, you must assign each patient a NeoIPC-ID "
+"at the time of enrolment.  The NeoIPC-ID is a unique random identifier, "
+"which allows you to identify that patient within your department.  This "
+"makes it possible for you to use the anonymous data stored in the system to "
+"refer to specific patients, e.g. in case of readmission or data correction, "
+"but makes it impossible for third parties to do the same."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:198
+msgid ""
+"Each patient can only have one NeoIPC identification number.  When a patient "
+"is discharged and then readmitted, the initial follow-up ends at the time of "
+"discharge, and a new enrolment must be made using the same NeoIPC ID number "
+"when the patient is readmitted."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:203
+msgid ""
+"You are responsible for organizing patient data retrieval based on unique "
+"ids.  We advise you to generate a pseudonymisation list that contains NeoIPC "
+"ID (unique random numbers) together with other identifying information "
+"(name, birthdate, patient id from the hospital information system) or to "
+"note that information on the paper-based patient surveillance master data "
+"sheet.  You must store the pseudonymisation list and the paper sheets under "
+"the same conditions you store secret patient healthcare data and destroy it "
+"or the contained information in a secure way as soon as it is no longer "
+"needed.  To ensure data privacy, you should never use an identifier that is "
+"used in any context other than the NeoIPC Surveillance and that you do not "
+"fully control (e.g. do **not** use the patient id from your hospital "
+"information system, the patient name, or any unique identifier that is used "
+"elsewhere) while creating NeoIPC ID."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:205
+msgid ""
+"For the generation of reference reports, NeoIPC does not need to track "
+"individual patients and the IDs you assign will not be used by NeoIPC in any "
+"way."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:207
+msgid ""
+"To create a pseudonymisation list you can use the templates (excel "
+"spreadsheet and paper datasheet) available in the "
+"https://neoipc.org/surveillance/resources/[resources section] of our "
+"website."
+msgstr ""
+
+#. type: Block title
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:208
+#, no-wrap
+msgid "Example pseudonymisation list"
+msgstr ""
+
+#. type: Table
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:217
+#, no-wrap
+msgid ""
+"|№ |NeoIPC-ID |Patient-ID |Patient Name |Date of Birth |Comments\n"
+"\n"
+"|1 | | | | |\n"
+"|2 | | | | |\n"
+"|3 | | | | |\n"
+"|⋮ | | | | |\n"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:220
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:234
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:257
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:290
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:299
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:308
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:317
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:326
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:359
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:393
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:398
+msgid "<<<"
+msgstr ""
+
+#. type: Title ====
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:221
+#, no-wrap
+msgid "Master Data Collection Sheet"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:225
+msgid ""
+"Whenever an eligible patient is admitted or readmitted in your neonatology "
+"department, you should enrol this patient, preferably directly into the "
+"online reporting platform.  After enrolling a patient, you must enter "
+"admission information and keep collecting the follow-up data using patient "
+"progress charts.  When the patient is discharged, transferred to another "
+"hospital or dies, you must end the follow-up for this patient, total the "
+"data recorded in the xref:patient-progress-chart[patient progress chart] and "
+"transfer it to the master data sheet or enter it directly into the online "
+"data entry system."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:228
+msgid ""
+"You can use the master data collection sheet to save enrolment, admission "
+"information and surveillance end data locally.  However, if you submit data "
+"to NeoIPC, the information you collect on the master data collection sheet "
+"must ultimately be entered into the online data entry system."
+msgstr ""
+
+#. image::NeoIPC-Core-Master-Data-Collection-Sheet-Image.svg[Master data collection sheet for patient data collection,{full-width},pdfwidth=75%,opts=inline,align="center"]
+#. type: Positional ($1) AttributeList argument for macro 'image'
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:229
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:231
+#, no-wrap
+msgid "Master data collection sheet for patient data collection"
+msgstr ""
+
+#. image::NeoIPC-Core-Master-Data-Collection-Sheet-Image.svg[Master data collection sheet for patient data collection,{full-width},pdfwidth=75%,opts=inline,align="center"]
+#. type: Target for macro image
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:231
+#, no-wrap
+msgid "NeoIPC-Core-Master-Data-Collection-Sheet-Image.png"
+msgstr ""
+
+#. type: Title ====
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:235
+#, no-wrap
+msgid "Patient Progress Chart"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:242
+msgid ""
+"Eligible patients who have been enrolled in the system must be followed up "
+"using patient progress charts until death, transfer, or discharge.  "
+"Cumulative risk and protective factors such as patient days, device days, "
+"and antibiotic days are recorded in the chart, if possible on a daily "
+"basis.  This chart must be kept at your facility and to simplify data "
+"collection and patient follow-up.  You must maintain patient progress "
+"chart(s) for every eligible infant during the surveillance period.  It is "
+"possible to enter up to six different antibiotic substances in one chart.  "
+"If your patient has received more than six types of antibiotics, please use "
+"an additional chart to document them."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:246
+msgid ""
+"When a patient is discharged, transferred to another hospital, or dies, you "
+"need to end the follow-up for that patient and the sum data in the patient "
+"progress charts will be the patient's surveillance end data.  This data must "
+"be ultimately entered into the online reporting platform under the event "
+"“surveillance end”.  You can use the master data collection sheet to "
+"save this data locally."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:251
+msgid ""
+"For simplicity, patients who leave their department for up to two days "
+"(i.e., for surgery) are not considered transferred or discharged.  You "
+"should record the data for days not spent in the department upon "
+"re-admission.  If there are more than 48 hours between transfer and "
+"re-admission, you must end data collection for that patient and select "
+"\"transfer\" as the reason for the end of surveillance.  In this case, any "
+"readmission should be recorded as a new admission, and the admission type "
+"must be selected as “transferred to your centre ≥ 24h postnatal”."
+msgstr ""
+
+#. image::NeoIPC-Core-Patient-Progress-Chart-Image.svg[Patient progress chart for patient data collection,{full-width},pdfwidth=100%,opts=inline,align="center"]
+#. type: Positional ($1) AttributeList argument for macro 'image'
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:252
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:254
+#, no-wrap
+msgid "Patient progress chart for patient data collection"
+msgstr ""
+
+#. image::NeoIPC-Core-Patient-Progress-Chart-Image.svg[Patient progress chart for patient data collection,{full-width},pdfwidth=100%,opts=inline,align="center"]
+#. type: Target for macro image
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:254
+#, no-wrap
+msgid "NeoIPC-Core-Patient-Progress-Chart-Image.png"
+msgstr ""
+
+#. type: Title ===
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:258
+#, no-wrap
+msgid "Surgical Procedure Data Collection"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:263
+msgid ""
+"Whenever surgery must happen in neonates and especially in VLBW/VPT infants "
+"it is an indicator for a complicated course and an additional risk factor "
+"for nosocomial infections and the occurrence of multidrug-resistant "
+"pathogens.  For this reason, every surgical procedure that is performed on "
+"an eligible infant is recorded in NeoIPC.  You can use the surgical "
+"procedure paper sheet for local documentation or enter the respective "
+"information directly into the reporting system.  In addition to the "
+"recording of the procedure, you need to start following up the concerned "
+"infant for surgical site infections for 30 or 90 days depending on whether "
+"an implant has been left in place during the procedure."
+msgstr ""
+
+#. image::NeoIPC-Core-Surgical-Procedure-Data-Collection-Sheet-Image.svg[Surgical procedure data collection sheet,{full-width},pdfwidth=75%,opts=inline,align="center"]
+#. type: Positional ($1) AttributeList argument for macro 'image'
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:264
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:266
+#, no-wrap
+msgid "Surgical procedure data collection sheet"
+msgstr ""
+
+#. image::NeoIPC-Core-Surgical-Procedure-Data-Collection-Sheet-Image.svg[Surgical procedure data collection sheet,{full-width},pdfwidth=75%,opts=inline,align="center"]
+#. type: Target for macro image
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:266
+#, no-wrap
+msgid "NeoIPC-Core-Surgical-Procedure-Data-Collection-Sheet-Image.png"
+msgstr ""
+
+#. type: Title ===
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:269
+#, no-wrap
+msgid "Infection Data Collection"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:271
+msgid ""
+"Hospital-acquired bloodstream infections, pneumonia, NEC, and surgical site "
+"infections in eligible patients should be documented until the end of the "
+"surveillance period."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:280
+msgid ""
+"Neonatal infections can broadly be separated into early-onset and late-onset "
+"infections.  Most of the early-onset infections result from pregnancy- and "
+"delivery-associated risks where the causative pathogens typically affect the "
+"mother in the form of microbial colonisation or infection before causing an "
+"infection in the child.  Most of the late-onset infections, in contrast, "
+"result from healthcare-associated risks, and the pathogens causing these "
+"infections typically stem from persons or inanimate surfaces that get in "
+"close contact with the infant during neonatal care.  Since only the latter "
+"are immediately actionable for the healthcare professionals working on "
+"neonatology wards, NeoIPC puts a focus on those “nosocomial” late-onset "
+"infections but tries to also support you, when trying to perform "
+"surveillance of early-onset infections.  Although a fixed time-based cut-off "
+"value does not exactly capture whether an infection was acquired from the "
+"NICU environment, there is a relatively broad international consensus that a "
+"72-hour cut-off value serves as a good estimator for nosocomial infections "
+"in neonatology.  For this reason, infections, where the first symptoms occur "
+"within a 72-hour window after birth, should not be considered nosocomial "
+"infections and therefore should not be recorded in the NeoIPC core module.  "
+"It is, however, possible to record them separately as early-onset infections "
+"if you opt into the NeoIPC early-onset infection module.  If an infection "
+"begins before 72 hours and is clearly hospital-acquired (i.e., there are "
+"clear signs of infection on the catheter entry site) or starts after 72 "
+"hours and is clearly vertical (e.g., all transplacental infections that are "
+"not evident at birth, like toxoplasmosis, CMV, HIV, rubella, and syphilis), "
+"this cut-off value can be ignored."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:283
+msgid ""
+"For patients that are transferred or re-admitted to a ward in your "
+"neonatology department, there is an additional cut-off value that needs to "
+"be applied.  In this case, an infection is only considered a nosocomial "
+"infection if the day of symptom onset is greater than or equal to day 3 of "
+"the patient’s hospital stay, where the day of admission is regarded as day "
+"1."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:285
+msgid ""
+"NeoIPC guidelines do not offer a strict timeframe for elements of "
+"definitions to occur but usually, all elements required to meet an infection "
+"definition usually occur within a 7-10 day timeframe with typically no more "
+"than 2-3 days between elements."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:288
+msgid ""
+"In the presence of a previously recorded infection, when a new pathogen is "
+"isolated in the same organ system, we cannot record this as a new "
+"infection.  A minimum of 14 days and a period without any relevant symptoms "
+"of infection are required to register the same type of infection again."
+msgstr ""
+
+#. type: Title ====
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:291
+#, no-wrap
+msgid "Primary Sepsis/BSI"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:293
+msgid ""
+"If an eligible infant develops a hospital-acquired primary "
+"sepsis/bloodstream infection according to the NeoIPC surveillance criteria "
+"(see Infection Definitions: Primary sepsis/bloodstream infection) during the "
+"surveillance period, you should record and submit the required data using "
+"the data collection sheet below and/or via the online reporting platform."
+msgstr ""
+
+#. image::NeoIPC-Core-Primary-Sepsis-BSI-Reporting-Sheet-Image.svg[Primary sepsis/BSI reporting sheet,{full-width},pdfwidth=75%,opts=inline,align="center"]
+#. type: Positional ($1) AttributeList argument for macro 'image'
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:294
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:296
+#, no-wrap
+msgid "Primary sepsis/BSI reporting sheet"
+msgstr ""
+
+#. image::NeoIPC-Core-Primary-Sepsis-BSI-Reporting-Sheet-Image.svg[Primary sepsis/BSI reporting sheet,{full-width},pdfwidth=75%,opts=inline,align="center"]
+#. type: Target for macro image
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:296
+#, no-wrap
+msgid "NeoIPC-Core-Primary-Sepsis-BSI-Reporting-Sheet-Image.png"
+msgstr ""
+
+#. type: Title ===
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:300
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:416
+#, no-wrap
+msgid "Necrotising Enterocolitis"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:302
+msgid ""
+"If an eligible infant develops a necrotizing enterocolitis according to the "
+"NeoIPC surveillance criteria (see Infection Definitions: Necrotising "
+"Enterocolitis (NEC)) during the surveillance period, you should record and "
+"submit the required data using the data collection sheet below and/or via "
+"the online reporting platform."
+msgstr ""
+
+#. image::NeoIPC-Core-NEC-Reporting-Sheet-Image.svg[NEC reporting sheet,{full-width},pdfwidth=75%,opts=inline,align="center"]
+#. type: Positional ($1) AttributeList argument for macro 'image'
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:303
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:305
+#, no-wrap
+msgid "NEC reporting sheet"
+msgstr ""
+
+#. image::NeoIPC-Core-NEC-Reporting-Sheet-Image.svg[NEC reporting sheet,{full-width},pdfwidth=75%,opts=inline,align="center"]
+#. type: Target for macro image
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:305
+#, no-wrap
+msgid "NeoIPC-Core-NEC-Reporting-Sheet-Image.png"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:311
+msgid ""
+"If an eligible infant develops a hospital-acquired pneumonia according to "
+"the NeoIPC surveillance criteria (see Infection Definitions: Pneumonia) "
+"during the surveillance period, you should record and submit the required "
+"data using the data collection sheet below and/or via the online reporting "
+"platform."
+msgstr ""
+
+#. image::NeoIPC-Core-Pneumonia-Reporting-Sheet-Image.svg[Pneumonia reporting sheet,{full-width},pdfwidth=75%,opts=inline,align="center"]
+#. type: Positional ($1) AttributeList argument for macro 'image'
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:312
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:314
+#, no-wrap
+msgid "Pneumonia reporting sheet"
+msgstr ""
+
+#. image::NeoIPC-Core-Pneumonia-Reporting-Sheet-Image.svg[Pneumonia reporting sheet,{full-width},pdfwidth=75%,opts=inline,align="center"]
+#. type: Target for macro image
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:314
+#, no-wrap
+msgid "NeoIPC-Core-Pneumonia-Reporting-Sheet-Image.png"
+msgstr ""
+
+#. type: Title ====
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:318
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:899
+#, no-wrap
+msgid "Surgical Site Infections"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:320
+msgid ""
+"If an eligible infant develops a surgical site infection according to the "
+"NeoIPC surveillance criteria (see Definitions: Surgical Site Infection "
+"(SSI)) during the surveillance period, you should record and submit the "
+"required data using the data collection sheet below and/or via the online "
+"reporting platform."
+msgstr ""
+
+#. image::NeoIPC-Core-SSI-Reporting-Sheet-Image.svg[SSI reporting sheet,{full-width},pdfwidth=75%,opts=inline,align="center"]
+#. type: Positional ($1) AttributeList argument for macro 'image'
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:321
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:323
+#, no-wrap
+msgid "SSI reporting sheet"
+msgstr ""
+
+#. image::NeoIPC-Core-SSI-Reporting-Sheet-Image.svg[SSI reporting sheet,{full-width},pdfwidth=75%,opts=inline,align="center"]
+#. type: Target for macro image
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:323
+#, no-wrap
+msgid "NeoIPC-Core-SSI-Reporting-Sheet-Image.png"
+msgstr ""
+
+#. type: Title ====
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:327
+#, no-wrap
+msgid "Device-associated Infection"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:330
+msgid ""
+"Intravenous therapy and mechanical ventilation are established risk factors "
+"for nosocomial infections in neonatology.  These kinds of infections are "
+"typically considered device-associated infections and are recorded in "
+"association with medical devices like vascular catheters or intubation."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:332
+msgid "In NeoIPC the following device associations are recorded:"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:334
+msgid "Invasive ventilation (INV) associated infections"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:335
+msgid "Non-invasive ventilation (NIV) associated infections"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:336
+msgid "Central venous catheter (CVC) associated infections"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:337
+msgid "Peripheral venous catheter (PVC) associated infections"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:340
+msgid ""
+"Since the establishment of a causative relationship between a device and a "
+"hospital-acquired infection is difficult and infeasible in many neonatology "
+"settings, NeoIPC focuses on a time-based association only.  To create an "
+"association between a device and infection, the device must have been in use "
+"for a defined period prior to infection."
+msgstr ""
+
+#. type: Block title
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:341
+#, no-wrap
+msgid ""
+"Example showing the relationship between infection and device for device "
+"associated infections"
+msgstr ""
+
+#. type: Table
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:352
+#, no-wrap
+msgid ""
+"|Days |Device in Place |Device Association (if this is the day of infection) "
+"|Comments\n"
+"\n"
+"|Day 1 |CVC |No [.red]#☐# |<3 CVC days on the day of infection\n"
+"|Day 2 |CVC |No [.red]#☐# |<3 CVC days on the day of infection\n"
+"|Day 3 |CVC |Yes [.green]#☑# |≥3 CVC days on the day of infection\n"
+"|Day 4 |No device |Yes [.green]#☑# |No CVC on the day of infection but "
+"≥3 CVC days on the Day 3 (the day before infection)\n"
+"|Day 5 |No device |No [.red]#☐# |No CVC on the day of infection or on day "
+"before infection\n"
+"|Day 6 |No device |No [.red]#☐# |No CVC on the day of infection or on day "
+"before infection\n"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:355
+msgid ""
+"If a patient developing a bloodstream infection meets the criteria for both, "
+"PVC and CVC association, the CVC is considered as the device with the "
+"relatively higher infection risk and the BSI should be recorded as "
+"CVC-associated BSI."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:357
+msgid ""
+"If both invasive and non-invasive ventilation were used intermittently, "
+"pneumonia should be recorded as INV-associated pneumonia."
+msgstr ""
+
+#. type: Title ====
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:360
+#, no-wrap
+msgid "Secondary Bloodstream Infection"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:363
+msgid ""
+"Within NeoIPC surveillance, it is possible to record bloodstream infections "
+"secondary to pneumonia, NEC, and SSIs.  Collecting data on secondary BSI is "
+"optional; therefore, it is possible to select **“No follow-up”** if you "
+"are not following patients for secondary BSI."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:365
+msgid ""
+"To assign a secondary bloodstream infection to a pneumonia, NEC, or an SSI, "
+"the following criteria must be met:"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:367
+msgid ""
+"The blood specimen is collected in the period between 3 days prior and 13 "
+"days after the day of primary infection (day of primary infection=first "
+"symptoms or first positive culture at the primary infection site)."
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:369
+#: doc/protocol/definitions/NeoIPC-Core-Clinical-Sepsis-Definition.adoc:7
+#: doc/protocol/definitions/NeoIPC-Core-Clinical-Sepsis-Definition.adoc:10
+#: doc/protocol/definitions/NeoIPC-Core-Deep-Incisional-SSI-Definition.adoc:7
+#: doc/protocol/definitions/NeoIPC-Core-Deep-Incisional-SSI-Definition.adoc:10
+#: doc/protocol/definitions/NeoIPC-Core-Deep-Incisional-SSI-Definition.adoc:15
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:7
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:31
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:39
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:57
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:60
+#: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:13
+#: doc/protocol/definitions/NeoIPC-Core-Organ-Space-SSI-Definition.adoc:7
+#: doc/protocol/definitions/NeoIPC-Core-Organ-Space-SSI-Definition.adoc:10
+#: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:10
+#: doc/protocol/definitions/NeoIPC-Core-Superficial-Incisional-SSI-Definition.adoc:7
+#: doc/protocol/definitions/NeoIPC-Core-Superficial-Incisional-SSI-Definition.adoc:10
+#: doc/protocol/definitions/NeoIPC-Core-Superficial-Incisional-SSI-Definition.adoc:18
+#, no-wrap
+msgid "**AND**\n"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:370
+#, no-wrap
+msgid ""
+"At least one organism from the blood specimen matches an organism identified "
+"from the primary infection site.\n"
+msgstr ""
+
+#. image::NeoIPC-Core-Secondary-BSI-Image.svg[Secondary BSI data collection,{full-width},pdfwidth=100%,opts=inline,align="center"]
+#. type: Positional ($1) AttributeList argument for macro 'image'
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:371
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:373
+#, no-wrap
+msgid "Secondary BSI data collection"
+msgstr ""
+
+#. image::NeoIPC-Core-Secondary-BSI-Image.svg[Secondary BSI data collection,{full-width},pdfwidth=100%,opts=inline,align="center"]
+#. type: Target for macro image
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:373
+#, no-wrap
+msgid "NeoIPC-Core-Secondary-BSI-Image.png"
+msgstr ""
+
+#. type: Title ==
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:376
+#, no-wrap
+msgid "Infection Definitions"
+msgstr ""
+
+#. type: Title ===
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:378
+#, no-wrap
+msgid "Primary Sepsis / Bloodstream Infection"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:381
+msgid ""
+"Sepsis is classified as either culture negative or culture proven in the "
+"NeoIPC surveillance system.  As well, culture proven sepsis (LCBSI = "
+"\"Laboratory-confirmed bloodstream infection\") is classified into two "
+"categories based on the culture result."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:384
+msgid ""
+"Infections caused by microorganisms that enter the bloodstream from a "
+"primary infection site (except for catheter-associated infections) are not "
+"counted in this section.  For detailed information, please see "
+"xref:data-collection-infection-data-collection-secondary-bloodstream-infection[Secondary "
+"Bloodstream Infection]."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:386
+msgid "Clinical sepsis (infection without a detected organism)"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:387
+msgid "Laboratory-confirmed bloodstream infection"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:388
+msgid "LCBSI caused by a recognised pathogen*"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:389
+msgid "LCBSI caused by a common commensal*"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:391
+#, no-wrap
+msgid ""
+"*See xref:appendix-list-of-list-of-infectious-agents[List of Infectious "
+"Agents]\n"
+msgstr ""
+
+#. type: Block title
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:394
+#: doc/protocol/definitions/NeoIPC-Core-Clinical-Sepsis-Definition.adoc:1
+#, no-wrap
+msgid "Clinical Sepsis"
+msgstr ""
+
+#. type: Title ====
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:399
+#, no-wrap
+msgid "LCBSI caused by a Recognised Pathogen"
+msgstr ""
+
+#. type: Title ====
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:403
+#, no-wrap
+msgid "LCBSI caused by Common Commensals"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:407
+msgid ""
+"If blood cultures show growth of one or multiple common commensals (e.g., "
+"coagulase-negative staphylococci), it is unclear in many cases, if the "
+"detected bacteria are the causative agent of a suspected infection or if a "
+"contamination leads to a wrong diagnosis.  There have been multiple "
+"approaches to solve this issue by adapting surveillance definitions to this "
+"fact.  Unfortunately, all these approaches are limited by diagnostic habits "
+"and availability of resources, rendering comparison of data from different "
+"settings close to impossible."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:410
+msgid ""
+"Since NeoIPC aims at providing tools and definitions that work in a wide "
+"range of different settings we offer 3 different definitions for LCBSI "
+"caused by common commensals that can be used in a wide range of settings.  "
+"As the tools collect the raw data leading to the diagnosis of an infection "
+"it is possible to assess the application of different definitions in various "
+"settings and possibly assess the effect on calculated incidences."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:412
+msgid ""
+"In any case, because of this fact, you should be very careful when comparing "
+"rates of LCBSI caused by common commensals across different settings."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:421
+msgid ""
+"Necrotising Enterocolitis (NEC) surveillance criteria consist of either a "
+"combination of radiological findings and clinical signs or a diagnosis based "
+"on surgical and/or pathological evidence.  The NEC dataset includes "
+"information on whether the patient has an intestinal perforation.  However, "
+"this is not one of the surveillance definition criteria.  This means that "
+"you should not report cases where you have surgical evidence of intestinal "
+"perforation without evidence of primary necrosis or pneumatosis intestinalis "
+"(e.g. spontaneous bowel perforation) as NEC."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:427
+msgid ""
+"Pneumonia in neonates is an entity that is very difficult to define for "
+"surveillance purposes as one can infer from the fact that many surveillance "
+"systems abstain from recording it at all, while others record "
+"ventilator-associated events where surveillance is limited to ventilated "
+"patients and pneumonia is only one of the entities captured by the "
+"definition."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:432
+msgid ""
+"To meet the criteria of device associated hospital-acquired pneumonia, "
+"patients must be ventilated for at least 4 calendar days (day 1 is the day "
+"invasive/non-invasive ventilation starts).  The earliest date of the event "
+"is day 3 of ventilation."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:434
+#, no-wrap
+msgid "**Examples**\n"
+msgstr ""
+
+#. type: Block title
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:435
+#, no-wrap
+msgid "Hospital-acquired pneumonia - no device association"
+msgstr ""
+
+#. type: Table
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:445
+#, no-wrap
+msgid ""
+"|Patient day |Patient´s condition |Comments\n"
+"\n"
+"|1 |No device, stable |\n"
+"|2 |No device, stable |Baseline day 1\n"
+"|3 |No device, stable |Baseline day 2\n"
+"|4 |Deteriorating ==> CPAP |[.green]#☑# (infection day)\n"
+"|5 |No improvement, CPAP continues |\n"
+msgstr ""
+
+#. type: Block title
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:447
+#, no-wrap
+msgid "Hospital-acquired pneumonia - device associated"
+msgstr ""
+
+#. type: Table
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:458
+#, no-wrap
+msgid ""
+"|NIV/INV Day |Daily minimum FiO~2~ (oxygen concentration, %) |Comments\n"
+"\n"
+"|1 |1.00 |\n"
+"|2 |1.00 |\n"
+"|3 |0.70 (improving) |Baseline Day 1\n"
+"|4 |0.60 (improving) |Baseline Day 2\n"
+"|5 |0.90 |[.green]#☑# (infection day)\n"
+"|6 |0.90 |No improvement\n"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:461
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:970
+#, no-wrap
+msgid "Surgical Site Infection"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:463
+msgid ""
+"A wound infection that occurs at the incision or surgical site is recorded "
+"as a surgical site infection (SSI) if it occurs in a certain time window "
+"after a surgical procedure that was also recorded in the NeoIPC surveillance "
+"system."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:465
+msgid ""
+"SSIs occurring in patients without a surgical procedure record in the NeoIPC "
+"surveillance system (e.g. a patient transferred to your centre after a "
+"surgical procedure performed at another centre) are not eligible."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:467
+msgid ""
+"The following surveillance times apply in detail (day 1 = the procedure "
+"date):"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:469
+msgid "Superficial incisional SSI: 30 days"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:470
+msgid "Deep incisional SSI: 30 days or 90 days if an implant has been left in place"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:471
+msgid "Organ/Space SSI: 30 days or 90 days if an implant has been left in place"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:473
+msgid ""
+"Follow-up for SSIs can be terminated preliminarily for a surgical procedure "
+"for two reasons:"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:475
+msgid "Death, transfer, or discharge of the patient."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:477
+#, no-wrap
+msgid ""
+"A revision procedure in the same area.\n"
+"This will start a new follow-up period for the revision procedure though."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:480
+msgid ""
+"Minor interventions such as simple punctures of hematoma/seroma do not count "
+"as revision procedures.  Surveillance cannot be terminated by such minor "
+"procedures, and they do not start a new follow-up period."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:482
+msgid "The following inclusion criteria apply to all SSIs:"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:485
+#, no-wrap
+msgid ""
+"Record the main procedure and the associated ICHIfootnote:[International "
+"Classification of Health Interventionspass:p[ +] "
+"https://www.who.int/standards/classifications/international-classification-of-health-interventions] "
+"code.\n"
+"Only in complex surgical interventions where one main procedure is not "
+"sufficient to adequately describe the procedure, up to 2 further ICHI codes "
+"can be recorded."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:489
+#, no-wrap
+msgid ""
+"The type of SSI (superficial incisional, deep incisional, or organ/space) "
+"reported must reflect the deepest tissue level where SSI criteria are met "
+"during the surveillance period.\n"
+"**Example:** An SSI started as a deep incisional SSI on day 10 of the SSI "
+"surveillance period and then a week later (Day 17) meets the criteria for an "
+"organ/space SSI. You must report it as organ/space SSI regardless of "
+"superficial or deep tissue involvement. The day of infection in this case "
+"would be “Day 17”."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:491
+msgid ""
+"The patient must not be deceased (e.g., post-mortem surgery in case of organ "
+"donation is excluded)."
+msgstr ""
+
+#. type: Title ====
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:493
+#, no-wrap
+msgid "Superficial Incisional SSI"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:495
+msgid ""
+"Surgical site infections involving only the skin and subcutaneous tissue "
+"belong to this category."
+msgstr ""
+
+#. type: Title ====
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:499
+#, no-wrap
+msgid "Deep Incisional SSI"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:501
+msgid ""
+"Surgical site infections involving deep soft tissues of the incision (for "
+"example, fascial and muscle layers) belong to this category."
+msgstr ""
+
+#. type: Title ====
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:505
+#, no-wrap
+msgid "Organ/Space SSI"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:507
+msgid ""
+"Surgical site infections involving any part of the body deeper than the "
+"fascial/muscle layers that is opened or manipulated during the operative "
+"procedure belong to this category."
+msgstr ""
+
+#. type: Title ==
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:511
+#, no-wrap
+msgid "Data Dictionary"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:514
+msgid ""
+"The following data items appear in the NeoIPC documentation sheets or in the "
+"reporting platform.  Some of them (e.g., patient id and patient name) are "
+"used for your local documentation only and not used in the central NeoIPC "
+"software tools."
+msgstr ""
+
+#. type: Title ===
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:516
+#, no-wrap
+msgid "Patient Master Data"
+msgstr ""
+
+#. type: Title ====
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:518
+#, no-wrap
+msgid "Enrolment"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:519
+#, no-wrap
+msgid ""
+"[[data-dictionary-patient-master-data-enrolment-enroling-organisation-unit]]Enroling "
+"organisation unit"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:520
+msgid "The unit you want to register the new patient."
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:520
+#, no-wrap
+msgid ""
+"[[data-dictionary-patient-master-data-enrolment-neoipc-id]]NeoIPC-ID (NeoIPC "
+"patient identifier)"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:522
+msgid ""
+"The unique id you assign to the patient for tracking in the reporting "
+"platform.  We advise you to store this information in a pseudonymisation "
+"list."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:527
+msgid ""
+"Use this identifier to uniquely identify a patient in the system.  Ideally "
+"use a unique random string of characters.  If you have a requirement to "
+"identify a patient you have entered here, you can use this identifier as the "
+"NeoIPC key for pseudonymisation.  NEVER use an identifier that is used "
+"anywhere else and that you do not fully control (e.g. do NOT use the patient "
+"id from your hospital information system)."
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:528
+#, no-wrap
+msgid "[[data-dictionary-patient-master-data-enrolment-patient-id]]Patient-ID"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:529
+msgid ""
+"The unique id of the patient in the hospital, which most of the time comes "
+"from the hospital information system (HIS) or the patient data management "
+"system (PDMS)."
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:529
+#, no-wrap
+msgid "[[data-dictionary-patient-master-data-enrolment-patient-name]]Patient name"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:530
+msgid "The patient's name (e.g., given name followed by family name)."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:533
+msgid ""
+"The patient ID and the patient name are not part of the NeoIPC dataset and "
+"must not be submitted to the data collection platform (e.g., do NOT use any "
+"of them as NeoIPC-ID).  They are available on the data collection paper "
+"sheets so that you can identify the patient within the hospital and to look "
+"up the file in the hospital information system."
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:534
+#, no-wrap
+msgid ""
+"[[data-dictionary-patient-master-data-enrolment-gestational-age]]Gestational "
+"age (GA)"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:536
+msgid ""
+"The gestational age, expressed in completed weeks and days (e.g., 25 weeks "
+"and 4 days: 25+4) at the time of birth.  Typically this refers to the "
+"gestational age as it was calculated or estimated by the mother's "
+"obstetrician but where this is not available (e.g. in unobserved "
+"pregnancies) the gestational age assesed by the treating physician (e.g. via "
+"the Ballard score) may be recorded."
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:536
+#, no-wrap
+msgid ""
+"[[data-dictionary-patient-master-data-enrolment-birthweight]]Birthweight "
+"(BW)"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:538
+msgid ""
+"The infant’s weight immediately after birth in grams.  Typically this "
+"value is based on a measurement but in case the birth weigth is unknown or "
+"has a highly pathological value that does not reflect the maturity of the "
+"infant (e.g. hydrops fetalis) you can enter the birth weight that is "
+"estimated by the treating physician."
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:538
+#, no-wrap
+msgid "[[data-dictionary-patient-master-data-enrolment-sex]]Sex"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:540
+msgid ""
+"Typically the phenotypic sex of the patient.  If sex cannot be determined "
+"from the patient's phenotype or genotype, or if the genotype is neither XX "
+"nor XY, it is considered undetermined for purposes of surveillance."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:542
+msgid "Female"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:543
+msgid "Male"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:544
+msgid "Undetermined"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:544
+#, no-wrap
+msgid "[[data-dictionary-patient-master-data-enrolment-delivery-mode]]Delivery mode"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:546
+msgid "The mode of the infant's delivery.  This can be one of the following:"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:548
+msgid "Vaginal (including assisted vaginal delivery)"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:549
+msgid "Elective caesarean section"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:550
+msgid "Emergency caesarean section"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:550
+#, no-wrap
+msgid ""
+"[[data-dictionary-patient-master-data-enrolment-multiple-birth]]Multiple "
+"birth"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:551
+msgid "Check this field if the infant is part of a multiple birth."
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:551
+#, no-wrap
+msgid ""
+"[[data-dictionary-patient-master-data-enrolment-number-of-infants]]Number of "
+"infants at birth"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:553
+msgid ""
+"The number of infants delivered from the (multiple) pregnancy this infant "
+"belongs to.  Please report the total number of infants including the one you "
+"are recording here."
+msgstr ""
+
+#. type: Title ====
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:555
+#, no-wrap
+msgid "Admission Information"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:556
+#, no-wrap
+msgid ""
+"[[data-dictionary-patient-master-data-admission-information-admission-date]]Admission "
+"date"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:558
+msgid ""
+"The day the patient is admitted to the hospital.  For infants born in your "
+"hospital this is the same as the date of birth."
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:558
+#, no-wrap
+msgid ""
+"[[data-dictionary-patient-master-data-admission-information-admission-type]]Admission "
+"type"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:559
+msgid ""
+"Describes if the infant was born in your hospital or if it was admitted "
+"after birth and if so, how long after birth:"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:561
+msgid ""
+"Admitted from delivery room (initial admission for infants delivered in your "
+"hospital)"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:562
+msgid "Transferred/readmitted to your hospital on the day of birth"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:563
+msgid "Transferred/readmitted to your hospital the day after birth or later"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:563
+#, no-wrap
+msgid ""
+"[[data-dictionary-patient-master-data-admission-information-admission-day-of-life]]Admission "
+"on day of life"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:565
+msgid ""
+"For infants that have not been delivered in your own hospital, record the "
+"infant's day of life on the day of admission (Day of birth = Day of Life 1.  "
+"The next day, starting at 00:00, is the second day of life.)"
+msgstr ""
+
+#. type: Title ====
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:567
+#, no-wrap
+msgid "Surveillance End"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:568
+#, no-wrap
+msgid ""
+"[[data-dictionary-patient-master-data-surveillance-end-date]]Surveillance "
+"end date"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:569
+msgid "The day the data collection and follow-up for the patient has been stopped."
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:569
+#, no-wrap
+msgid ""
+"[[data-dictionary-patient-master-data-surveillance-end-reason]]Surveillance "
+"end reason"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:571
+msgid "The reason for ending data collection.  One of the following:"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:573
+msgid "Discharge or transfer"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:574
+msgid "Death."
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:574
+#, no-wrap
+msgid ""
+"[[data-dictionary-patient-master-data-surveillance-end-patient-days]]Patient "
+"days"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:575
+msgid ""
+"The cumulative number of days the patient stayed in the department, "
+"including the day of admission and the day of discharge/transfer/death (no "
+"minimum duration of stay)."
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:575
+#, no-wrap
+msgid "[[data-dictionary-patient-master-data-surveillance-end-cvc-days]]CVC days"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:576
+msgid ""
+"The cumulative number of days when a central venous catheter was in place "
+"for at least 12 hours/day."
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:576
+#, no-wrap
+msgid "[[data-dictionary-patient-master-data-surveillance-end-pvc-days]]PVC days"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:577
+msgid ""
+"The cumulative number of days when a peripheral vascular catheter was in "
+"place for at least 12 hours/day."
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:577
+#, no-wrap
+msgid "[[data-dictionary-patient-master-data-surveillance-end-inv-days]]INV days"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:578
+msgid ""
+"The cumulative number of days when the infant was on invasive ventilation "
+"(intubated) for at least 12 hours/day."
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:578
+#, no-wrap
+msgid "[[data-dictionary-patient-master-data-surveillance-end-niv-days]]NIV days"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:579
+msgid ""
+"The cumulative number of days when the infant was on non-invasive "
+"ventilation (not intubated; e.g. high flow nasal cannulae or CPAP) for at "
+"least 12 hours/day."
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:579
+#, no-wrap
+msgid ""
+"[[data-dictionary-patient-master-data-surveillance-end-human-milk-days]]Human "
+"milk days"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:581
+msgid ""
+"The cumulative number of days the patient’s enteral feeding exclusively "
+"consists of (own mother’s or donor) breast milk.  Fortified breast milk is "
+"considered as breast milk."
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:581
+#, no-wrap
+msgid ""
+"[[data-dictionary-patient-master-data-surveillance-end-kangaroo-care-days]]Cangaroo "
+"care days"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:582
+msgid ""
+"The cumulative number of days the patient received kangaroo care (intensive "
+"skin-to-skin-contact) for at least 2 hours."
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:582
+#, no-wrap
+msgid ""
+"[[data-dictionary-patient-master-data-surveillance-end-probiotic-days]]Probiotic "
+"days"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:583
+msgid ""
+"The cumulative number of days the patient receives an oral probiotic "
+"containing at least one of Lactobacillus spp. or Bifidobacterium spp., "
+"regardless of the amount."
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:583
+#, no-wrap
+msgid ""
+"[[data-dictionary-patient-master-data-surveillance-end-total-antibiotic-days]]Antibiotic "
+"days, total"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:587
+msgid ""
+"The cumulative number of daysfootnote:ab-days-comment[The day of the first "
+"dose and the day of the last dose of an antibiotic therapy as well as all "
+"the days in between are counted.  Days where no doses were applied between "
+"the first and the last dose (e.g., skipped doses because of high drug levels "
+"in therapeutic drug monitoring) are counted as if a dose was applied.  Days "
+"after the last dose are not counted irrespective of the measured or assumed "
+"drug level in the patient.] when the infant received (any) systemic "
+"antibiotics.  Only one antibiotic day can be recorded per day, which means "
+"that a day when the patient received multiple antibiotics is still counted "
+"as one antibiotic day."
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:587
+#, no-wrap
+msgid ""
+"[[data-dictionary-patient-master-data-surveillance-end-antibiotic-substance-days]]Antibiotic "
+"days, per substance 1, 2, 3, …"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:589
+msgid ""
+"The cumulative number of daysfootnote:ab-days-comment[] when the infant "
+"received a specified systemic antibiotic substance.  Exp.: Gentamicin days"
+msgstr ""
+
+#. type: Title ===
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:591
+#, no-wrap
+msgid "Surgical Procedure"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:592
+#, no-wrap
+msgid "[[data-dictionary-surgical-procedure-date]]Procedure date"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:593
+msgid "The day of the surgical procedure."
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:593
+#, no-wrap
+msgid "[[data-dictionary-surgical-procedure-description]]Procedure description"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:594
+msgid ""
+"A human-readable name or description of the surgical procedure as it is "
+"typically called by surgeons in your institution (e.g.; ligation of patent "
+"arterial duct)."
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:594
+#, no-wrap
+msgid ""
+"[[data-dictionary-surgical-procedure-main-procedure-code]]Main procedure "
+"code"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:597
+msgid ""
+"The International Classification of Health Interventions (ICHI) code of the "
+"main procedure performed.  If multiple different procedures are performed "
+"during one surgery, the surgeon decides which one is the main procedure "
+"(typically the most complex procedure or the one causing the highest risk "
+"for infection).  Please visit https://icd.who.int/dev11/l-ichi/en"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:597
+#, no-wrap
+msgid ""
+"[[data-dictionary-surgical-procedure-side-procedure-code]]Side procedure "
+"code"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:599
+msgid ""
+"The International Classification of Health Interventions (ICHI) code of the "
+"side procedure(s) performed.  It is possible to capture up to two side "
+"procedures."
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:599
+#, no-wrap
+msgid "[[data-dictionary-surgical-procedure-duration]]Duration"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:600
+msgid ""
+"The duration of the surgical procedure in minutes (incision-to-suture time "
+"if available)."
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:600
+#, no-wrap
+msgid "[[data-dictionary-surgical-procedure-wound-class]]Wound class"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:603
+msgid ""
+"An assessment of the degree of contamination of a surgical wound at the time "
+"of the surgical procedure according to the CDC Guidelines.  It is assigned "
+"by a person involved in the surgical procedure (for example, surgeon, "
+"circulating nurse, etc.).  The four wound classifications are:"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:603
+#, no-wrap
+msgid "[[data-dictionary-surgical-procedure-wound-class-i]]Class I/Clean"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:606
+msgid ""
+"An uninfected operative wound in which no inflammation is encountered, and "
+"the respiratory, alimentary, genital, or uninfected urinary tract is not "
+"entered.  In addition, clean wounds are primarily closed and, if necessary, "
+"drained with closed drainage.  Operative incisional wounds that follow no "
+"penetrating (blunt) trauma should be included in this category if they meet "
+"the criteria."
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:606
+#, no-wrap
+msgid ""
+"[[data-dictionary-surgical-procedure-wound-class-ii]]Class "
+"II/Clean-Contaminated"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:608
+msgid ""
+"An operative wound in which the respiratory, alimentary, genital, or urinary "
+"tracts are entered under controlled conditions and without unusual "
+"contamination.  Specifically, operations involving the biliary tract, "
+"appendix, vagina, and oropharynx are included in this category, provided no "
+"evidence of infection or major break in a sterile technique is encountered."
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:608
+#, no-wrap
+msgid "[[data-dictionary-surgical-procedure-wound-class-iii]]Class III/Contaminated"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:610
+msgid ""
+"Open, fresh, accidental wounds.  In addition, operations with major breaks "
+"in a sterile technique (eg, open cardiac massage) or gross spillage from the "
+"gastrointestinal tract, and incisions in which acute or no purulent "
+"inflammation is encountered are included in this category."
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:610
+#, no-wrap
+msgid "[[data-dictionary-surgical-procedure-wound-class-iv]]Class IV/Dirty-Infected"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:612
+msgid ""
+"Old traumatic wounds with retained devitalized tissue and those that involve "
+"existing clinical infection or perforated viscera.  This definition suggests "
+"that the organisms causing postoperative infection were present in the "
+"operative field before the operation."
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:613
+#, no-wrap
+msgid "[[data-dictionary-surgical-procedure-asa-score]]ASA score"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:614
+msgid ""
+"The American Society of Anesthesiologists' (ASA) Physical Status "
+"Classification System to assess and communicate a patient’s pre-anesthesia "
+"medical co-morbidities:"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:616
+#, no-wrap
+msgid "[[data-dictionary-surgical-procedure-asa-score-i]]ASA I"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:617
+msgid "A normal healthy patient"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:617
+#, no-wrap
+msgid "[[data-dictionary-surgical-procedure-asa-score-ii]]ASA II"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:618
+msgid "A patient with mild systemic disease"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:618
+#, no-wrap
+msgid "[[data-dictionary-surgical-procedure-asa-score-iii]]ASA III"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:619
+msgid "A patient with severe systemic disease"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:619
+#, no-wrap
+msgid "[[data-dictionary-surgical-procedure-asa-score-iv]]ASA IV"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:620
+msgid "A patient with severe systemic disease that is a constant threat to life"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:620
+#, no-wrap
+msgid "[[data-dictionary-surgical-procedure-asa-score-v]]ASA V"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:621
+msgid "A moribund patient who is not expected to survive without the operation"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:624
+msgid ""
+"Visit "
+"https://www.asahq.org/standards-and-guidelines/statement-on-asa-physical-status-classification-system."
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:624
+#, no-wrap
+msgid "[[data-dictionary-surgical-procedure-endoscopic]]Endoscopic procedure"
+msgstr ""
+
+#. type: Content of: <root><data><value>
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:625
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:628
+#: doc/protocol/resx/NeoIPC-Core-Decision-Flow.resx:4
+#, no-wrap
+msgid "Yes"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:626
+msgid "The operation was performed entirely endoscopically,"
+msgstr ""
+
+#. type: Content of: <root><data><value>
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:626
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:629
+#: doc/protocol/resx/NeoIPC-Core-Decision-Flow.resx:7
+#, no-wrap
+msgid "No"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:627
+msgid ""
+"The procedure was performed open or endoscopically assisted, or switched to "
+"an open technique during an endoscopic procedure."
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:627
+#, no-wrap
+msgid "[[data-dictionary-surgical-procedure-emergency]]Emergency procedure"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:629
+msgid ""
+"A procedure that is documented per the facility’s protocol to be an "
+"Emergency or Urgent procedure."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:630
+msgid "The intervention is initiated and performed in a planned manner."
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:630
+#, no-wrap
+msgid "Unknown"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:631
+msgid "No information available."
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:631
+#, no-wrap
+msgid "[[data-dictionary-surgical-procedure-primary-closure]]Primary closure"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:634
+msgid ""
+"The closure of the skin level during the original surgery, regardless of the "
+"presence of wires, wicks, drains, or other devices or objects extruding "
+"through the incision.  This category includes surgeries where the skin is "
+"closed by some means.  Thus, if any portion of the incision is closed at the "
+"skin level, by any manner, a designation of primary closure should be "
+"assigned to the surgery."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:636
+msgid ""
+"If a procedure has multiple incision/laparoscopic trocar sites and any of "
+"the incisions are closed primarily then the procedure technique is recorded "
+"as primary closed."
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:637
+#, no-wrap
+msgid "[[data-dictionary-surgical-procedure-revision-procedure]]Revision procedure"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:639
+msgid ""
+"Revision procedures are follow-up, replacement or corrective procedures "
+"after an initial procedure.  A revision procedure terminates the follow-up "
+"for the primary procedure and starts a new follow-up period."
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:639
+#, no-wrap
+msgid "[[data-dictionary-surgical-procedure-implant]]Implant"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:640
+msgid ""
+"An implant is a foreign body of non-human origin that is permanently placed "
+"into a patient during an operation and is not routinely manipulated for "
+"diagnostic or therapeutic purposes (e.g., vascular prostheses, screws, "
+"wires, meshes)."
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:640
+#, no-wrap
+msgid ""
+"[[data-dictionary-surgical-procedure-signs-of-infetion]]Signs of infection "
+"at time of surgery"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:643
+msgid ""
+"Complete this field if signs of infection were identified during the "
+"surgical procedure.  The signs of infection must be noted intraoperatively "
+"and documented in the narrative part of the operation note or report of "
+"surgery.  If a surgical site infection occurs, this information will be used "
+"to determine if the signs listed in this section can be interpreted as "
+"\"Infection present at time of surgery\"."
+msgstr ""
+
+#. type: Block title
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:644
+#, no-wrap
+msgid "Signs of infection at time of surgery"
+msgstr ""
+
+#. type: delimited block =
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:648
+msgid ""
+"Examples that indicate evidence of infection include but are not limited to: "
+"abscess, infection, purulence/pus, phlegmon, or “feculent peritonitis”.  "
+"A ruptured/perforated appendix is evidence of infection at the organ/space "
+"level."
+msgstr ""
+
+#. type: delimited block =
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:649
+msgid ""
+"Examples of verbiage that is not considered evidence of infection include "
+"but are not limited to: colon perforation, contamination, necrosis, "
+"gangrene, fecal spillage, nicked bowel during procedure, murky fluid, or "
+"documentation of inflammation."
+msgstr ""
+
+#. type: delimited block =
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:650
+msgid ""
+"The use of the ending “itis” in an operative note/report of surgery does "
+"not automatically count as evidence of infection, as it may only reflect "
+"inflammation which is not infectious in nature (for example, diverticulitis, "
+"peritonitis, and appendicitis)."
+msgstr ""
+
+#. type: delimited block =
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:651
+msgid ""
+"Pathology report findings and imaging test findings cannot be used as "
+"evidence of infection."
+msgstr ""
+
+#. type: delimited block =
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:652
+msgid ""
+"Identification of an organism using culture or non-culture based "
+"microbiologic testing method or on a pathology report from a surgical "
+"specimen cannot be used as evidence of infection."
+msgstr ""
+
+#. type: delimited block =
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:653
+msgid "Wound class cannot be used as evidence of infection."
+msgstr ""
+
+#. type: delimited block =
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:655
+msgid ""
+"Trauma resulting in a contaminated case does not automatically count as "
+"evidence of infection.  For example, a fresh gunshot wound to the abdomen "
+"may be a trauma with a high wound class but there would not be time for "
+"infection to develop."
+msgstr ""
+
+#. type: delimited block =
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:656
+msgid ""
+"Procedural complications such as bowel perforation during surgery cannot be "
+"used as evidence of infection since there was no infection present at time "
+"of surgery."
+msgstr ""
+
+#. type: Title ===
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:659
+#, no-wrap
+msgid "Infection Data"
+msgstr ""
+
+#. type: Title ====
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:661
+#, no-wrap
+msgid "General Infection Data"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:662
+#, no-wrap
+msgid "[[data-dictionary-general-infection-data-infection-date]]Infection date"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:664
+msgid ""
+"The day the first infection symptoms appeared.  If no symptoms occur, the "
+"day of first positive culture at the primary infection site."
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:665
+#, no-wrap
+msgid "[[data-dictionary-general-infection-data-common-commensal]]Common commensal"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:668
+msgid ""
+"A type of micro-organism (e.g., coagulase-negative staphylococci), that is "
+"commonly present on epithelium-covered body surfaces (e.g., skin).  When one "
+"or multiple of these species grow in a blood culture, a contamination is "
+"more likely than when a recognised pathogen grows.  See Master Organism List "
+"on https://neoipc.org/surveillance/resources/"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:669
+#, no-wrap
+msgid ""
+"[[data-dictionary-general-infection-data-mdros]]Multidrug-resistant "
+"organisms (MDROs)"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:670
+msgid "Select the one(s) applicable to the isolated organism;"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:671
+msgid "MRSA/VRE/3GCR: Choose if one of the following applies:"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:672
+msgid "MRSA: Methicillin-resistant Staphylococcus aureus"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:673
+msgid "VRE: Vancomycin-resistant Enterococci"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:674
+msgid ""
+"3GCR: Multi drug resistant gram-negative pathogen resistant to 3rd "
+"generation Cephalosporins according to own lab’s cut-off values (refers to "
+"phenotypic resistance or ESBL-producing organisms)"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:675
+msgid ""
+"Carbapenem resistant: Resistant to at least one of the following (Imipenem, "
+"Meropenem, Ertapenem) according to own lab's cut-off values (refers to "
+"phenotypic resistance or carbapenemase-producing organisms.)"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:676
+msgid ""
+"Colistin resistant: Resistant to colistin according to own lab's cut-off "
+"values."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:678
+msgid "Options for each group:"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:680
+msgid ""
+"Yes: the isolated organism is resistant to the specified antibiotic "
+"group(s)."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:681
+msgid ""
+"No: the isolated organism is not resistant to the specified antibiotic "
+"group(s)."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:682
+msgid ""
+"Not tested: the isolated organism was not tested for resistance to the "
+"specified antibiotic group(s)."
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:683
+#, no-wrap
+msgid ""
+"[[data-dictionary-general-infection-data-secondary-bsi]]Secondary "
+"bloodstream infection"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:685
+msgid ""
+"A BSI that is thought to be seeded from a site-specific infection at another "
+"body site (except for catheter-associated infections).  A BSI can be "
+"attributed to a site-specific infection (NEC, PN or SSI) if it occurs in a "
+"17-day period that includes the day of infection (=first symptoms of "
+"site-specific infection), 3 days prior, and 13 days after."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:688
+msgid ""
+"Collecting data about the secondary BSI is optional; therefore, it is "
+"possible to select “No follow-up” if you are not following patients for "
+"secondary BSI.  For detailed information, please see Secondary bloodstream "
+"infection."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:690
+msgid ""
+"Yes: if you are following patients for secondary BSI and the patient has "
+"developed a secondary sepsis that meets the definition of NeoIPC (activates "
+"a field below where you can enter identified organisms)"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:691
+msgid ""
+"No: if you are following patients for secondary BSI and the patient has not "
+"developed a secondary sepsis that meets the definition of NeoIPC"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:692
+msgid "No follow-up: if you are not following patients for secondary BSI."
+msgstr ""
+
+#. type: Title ====
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:694
+#, no-wrap
+msgid "BSI Specific Data"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:695
+#, no-wrap
+msgid "[[data-dictionary-bsi-specific-data-cvc]]Central vascular catheter (CVC)"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:696
+msgid ""
+"An intravascular catheter that terminates at or close to the heart or in one "
+"of the great vessels which is used for infusion, withdrawal of blood, or "
+"hemodynamic monitoring."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:699
+msgid ""
+"Central venous catheter (CVC), including non-tunnelled, tunnelled and "
+"implanted central venous catheters."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:700
+msgid "Peripherally inserted central venous catheter (PICC)"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:701
+msgid "Umbilical artery catheter (UAC) or umbilical venous catheter (UVC)"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:703
+msgid ""
+"Extracorporeal membrane oxygenation (ECMO) and arterial catheters (except "
+"pulmonary artery, aorta, or umbilical artery) are NOT considered as CVC."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:705
+msgid ""
+"The following are considered great vessels for the purpose of reporting "
+"CVCs:"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:707
+msgid "Aorta"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:708
+msgid "Pulmonary artery"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:709
+msgid "Superior vena cava"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:710
+msgid "Inferior vena cava"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:711
+msgid "Brachiocephalic veins"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:712
+msgid "Internal jugular veins"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:713
+msgid "Subclavian veins"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:714
+msgid "External iliac veins"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:715
+msgid "Common iliac veins"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:716
+msgid "Femoral veins"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:717
+msgid "Umbilical artery/vein"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:719
+#, no-wrap
+msgid "[[data-dictionary-bsi-specific-data-cvc-associated-bsi]]CVC-associated BSI"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:720
+msgid ""
+"A primary bloodstream infection is considered "
+"<<bsi-specific-data_cvc,CVC>>-associated if the CVC has been in place for at "
+"least three consecutive days on the day of infection (=first symptoms or "
+"first positive diagnostic test; e.g. culture) or the day before."
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:721
+#, no-wrap
+msgid "[[data-dictionary-bsi-specific-data-cvc-day]]CVC-day"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:722
+msgid ""
+"A day in which the patient had a <<bsi-specific-data_cvc,CVC>> placed for at "
+"least 12 hours cumulatively."
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:723
+#, no-wrap
+msgid "[[data-dictionary-bsi-specific-data-pvc]]Peripheral vascular catheter (PVC)"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:724
+msgid ""
+"A PVC is a catheter placed into a peripheral vein and does not reach one of "
+"the great vessels mentioned under CVC."
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:725
+#, no-wrap
+msgid "[[data-dictionary-bsi-specific-data-pvc-associated-bsi]]PVC-associated BSI"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:727
+msgid ""
+"A primary bloodstream infection is considered "
+"<<bsi-specific-data_pvc,PVC>>-associated if the PVC has been present for at "
+"least three consecutive days on the day of infection (=first symptoms or "
+"first positive diagnostic test; e.g. culture) or the day before and does not "
+"meet the criteria for CVC-associated BSI.  That means, if a patient "
+"developing a bloodstream infection meets the criteria for both, PVC- and "
+"CVC-association, the CVC is considered as the device with the relatively "
+"higher infection risk and the BSI should be recorded as CVC-associated BSI."
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:728
+#, no-wrap
+msgid "[[data-dictionary-bsi-specific-data-pvc-day]]PVC-day"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:729
+msgid ""
+"A day in which the patient had a <<bsi-specific-data_pvc,PVC>> placed for at "
+"least 12 hours cumulatively."
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:730
+#, no-wrap
+msgid ""
+"[[data-dictionary-bsi-specific-data-iv-ab-therapy-initiated]]Intravenous "
+"antibiotic therapy for five or more days initiated"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:735
+msgid ""
+"Antibiotic treatment for at least five days was initiated.  The day of the "
+"first dose and the day of the last dose are counted.  Days where no dose was "
+"administered between the first and the last dose (e.g., skipped doses "
+"because of high drug levels in therapeutic drug monitoring) are counted as "
+"if a dose had been administered.  Days after the last dose are not counted "
+"regardless of the patient's measured or assumed drug level.  If the infant "
+"died, was discharged, or transferred before the end of the five-day course "
+"of intravenous antibiotics, this condition is met if treatment was scheduled "
+"for five days or more."
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:736
+#, no-wrap
+msgid ""
+"[[data-dictionary-bsi-specific-data-increased-oxygen-demand-or-ventilatory-support]]New/more "
+"frequent episodes of apnoea or increases in oxygen demand or ventilatory "
+"support"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:737
+msgid ""
+"New or increased frequency of episodes of apnea lasting more than 20 "
+"seconds, or an increase in the amount of oxygen required to maintain "
+"adequate oxygenation, or an escalation of ventilatory support, such as "
+"increased flow with high-flow therapy or intubation for invasive "
+"ventilation."
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:738
+#, no-wrap
+msgid ""
+"[[data-dictionary-bsi-specific-data-enteral-feeding-intolerance]]Enteral "
+"feeding intolerance, abdominal distension or ileus"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:739
+msgid ""
+"Enteral feeding intolerance, abdominal distension or ileus without imaging "
+"findings or surgical findings that would otherwise suggest a necrotizing "
+"entrocolitis or a spontaneous intestinal perforation."
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:740
+#, no-wrap
+msgid ""
+"[[data-dictionary-bsi-specific-data-unexplained-metabolic-acidosis]]Unexplained "
+"metabolic acidosis"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:741
+msgid ""
+"Unexplained metabolic acidosis with a base deficit greater (more negative) "
+"than 10 mmol/L (10 mEq/L)."
+msgstr ""
+
+#. type: Title ====
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:743
+#, no-wrap
+msgid "NEC Specific Data"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:744
+#, no-wrap
+msgid "[[data-dictionary-nec-specific-data-portal-veinous-gas]]Portal veinous gas"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:745
+msgid "Accumulation of gas (-bubbles) in the portal vein and its branches."
+msgstr ""
+
+#. type: Title ====
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:747
+#, no-wrap
+msgid "Pneumonia Specific Data"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:748
+#, no-wrap
+msgid ""
+"[[data-dictionary-pneumonia-specific-data-increase-in-respiratory-support]]Beginning "
+"or Increase in Respiratory Support"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:751
+#, no-wrap
+msgid ""
+"New initiation of respiratory support or escalation of existing level of "
+"respiratory support …"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:754
+msgid ""
+"Increase in need for FiO2 ≥ 0.25 (25 points) within 24 hours (daily "
+"minimum FiO2 values must be taken into account here)"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:756
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:759
+#: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:27
+#: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:30
+#: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:43
+msgid "OR"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:757
+#: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:28
+msgid ""
+"begin of non-invasive ventilatory support (excluding switch from invasive "
+"ventilation)"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:760
+#: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:31
+msgid ""
+"begin of invasive mechanical ventilation (including switch from non-invasive "
+"ventilatory support)"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:761
+#, no-wrap
+msgid "… that does not improve within less than 2 days"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:762
+msgid "The above-mentioned condition should not improve within two days."
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:763
+#, no-wrap
+msgid "… after at least 2 days of stability or improvement"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:764
+msgid ""
+"A stable or improving baseline period of at least two days is required "
+"before the above condition occurs."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:766
+msgid ""
+"To meet the criteria of device associated hospital-acquired pneumonia, "
+"patients must be ventilated for at least 4 calendar days (day 1 is the day "
+"invasive/non-invasive ventilation starts). The earliest date of the event is "
+"day 3 of ventilation."
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:768
+#, no-wrap
+msgid ""
+"[[data-dictionary-pneumonia-specific-data-inv]]Invasive mechanical "
+"ventilation (INV)"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:769
+msgid "Ventilation via endotracheal or tracheostomy tube."
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:770
+#, no-wrap
+msgid ""
+"[[data-dictionary-pneumonia-specific-data-inv-associated-pneumonia]]INV-Associated "
+"Pneumonia"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:771
+msgid ""
+"A pneumonia is associated with <<pneumonia-specific-data_inv,INV>> if the "
+"patient had an endotracheal or tracheostomy tube for at least 3 consecutive "
+"days on the day of infection (=first symptoms or first positive culture) or "
+"on the day before."
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:772
+#, no-wrap
+msgid "[[data-dictionary-pneumonia-specific-data-inv-day]]INV-Day"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:773
+msgid ""
+"A day in which the patient was ventilated invasively via endotracheal or "
+"tracheostomy tube for at least 12 hours cumulatively."
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:774
+#, no-wrap
+msgid ""
+"[[data-dictionary-pneumonia-specific-data-niv]]Non-invasive ventilatory "
+"support (NIV)"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:775
+msgid "Ventilatory support via CPAP or High-Flow Nasal Cannula."
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:776
+#, no-wrap
+msgid ""
+"[[data-dictionary-pneumonia-specific-data-niv-associated-pneumonia]]NIV-Associated "
+"Pneumonia"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:777
+msgid ""
+"A pneumonia is associated with <<pneumonia-specific-data_niv,NIV>> if the "
+"patient received non-invasive ventilatory support (e.g., CPAP or High-Flow "
+"Nasal Cannula) for at least 3 consecutive days on the day of infection "
+"(=first symptoms or first positive culture) or on the day before."
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:778
+#, no-wrap
+msgid "[[data-dictionary-pneumonia-specific-data-niv-day]]NIV-Day"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:779
+msgid ""
+"A day in which the patient received non-invasive ventilatory support via "
+"CPAP or High-Flow Nasal Cannula for at least 12 hours cumulatively."
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:780
+#, no-wrap
+msgid ""
+"[[data-dictionary-pneumonia-specific-data-organisms-rt]]Organisms Identified "
+"From Respiratory Tract"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:781
+msgid ""
+"At least one organism has been identified from respiratory tract by a "
+"culture or non-culture based microbiologic testing method which is performed "
+"for purposes of clinical diagnosis or treatment (for example, NOT Active "
+"Surveillance Culture/Testing (ASC/AST))."
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:782
+#, no-wrap
+msgid ""
+"[[data-dictionary-pneumonia-specific-data-organisms-lrt]]Recovered from "
+"lower respiratory tract"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:783
+msgid ""
+"Select if fungal, bacterial or viral pathogens (viral gene, antigen or "
+"antibody via e.g. EIA, FAMA, shell vial assay, PCR) are detected in lower "
+"respiratory tract."
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:783
+#, no-wrap
+msgid ""
+"[[data-dictionary-pneumonia-specific-data-organisms-urt]]Recovered from "
+"upper respiratory tract"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:784
+msgid "Select only if viral pathogens are detected in upper respiratory tract."
+msgstr ""
+
+#. type: Title ====
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:786
+#, no-wrap
+msgid "SSI Specific Data"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:787
+#, no-wrap
+msgid ""
+"[[data-dictionary-ssi-specific-data-infection-present]]Infection Present at "
+"Time of Surgery"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:788
+msgid ""
+"Select YES, only if the sign of infection identified during the surgical "
+"procedure applies to the depth of the SSI that is being attributed to the "
+"procedure."
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:790
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:804
+#, no-wrap
+msgid "Example"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:792
+msgid ""
+"If a patient has documentation of an intra-abdominal infection at time of "
+"surgery and then later returns with an organ/space SSI = YES."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:793
+msgid ""
+"If a patient has documentation of an intra-abdominal infection at time of "
+"surgery and then later returns with a superficial or deep incisional SSI = "
+"NO."
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:795
+#, no-wrap
+msgid "[[data-dictionary-ssi-specific-data-ssi-type]]SSI Type"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:799
+msgid ""
+"A superficial incisional SSI involves only skin and subcutaneous tissue of "
+"the incision and first symptoms occur within 30 days after the operation."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:800
+msgid ""
+"A deep incisional SSI involves deep soft tissues of the incision (for "
+"example, fascial and muscle layers) and first symptoms occur within 30 days "
+"after the operation or 90 days after the operation when an implant was left "
+"in place."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:801
+msgid ""
+"An organ/space SSI involves any part of the body deeper than the "
+"fascial/muscle layers that is opened or manipulated during the operative "
+"procedure and first symptoms occur within 30 days after the operation or 90 "
+"days after the operation when an implant was left in place."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:803
+msgid ""
+"The SSI reported must reflect the deepest tissue level where SSI criteria "
+"are met during the surveillance period."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:808
+msgid ""
+"If a SSI started as a deep incisional SSI on day 10 of the SSI surveillance "
+"period and then a week later (Day 17) meets criteria for an organ/space "
+"SSI.  You must report it as organ/space SSI regardless of superficial or "
+"deep tissue involvement.  The day of infection in this case would be “Day "
+"17”."
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:810
+#, no-wrap
+msgid ""
+"[[data-dictionary-ssi-specific-data-organism-identified]]Organism(s) "
+"Identified From Surgical Site"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:811
+msgid ""
+"At least one organism has been identified from surgical site by a culture or "
+"non-culture based microbiologic testing method which is performed for "
+"purposes of clinical diagnosis or treatment (for example, NOT Active "
+"Surveillance Culture/Testing (ASC/AST))."
+msgstr ""
+
+#. type: Title ==
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:813
+#, no-wrap
+msgid "Data Analysis"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:815
+msgid ""
+"The following rates are calculated both for the departments’ reports and "
+"for the reference reports and can serve as starting point for further "
+"analyses and discussions in your department."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:817
+msgid ""
+"For the core module, the rates are generally stratified into 4 groups "
+"according to the birth weight of the infants:"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:819
+msgid "< 500 g"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:820
+msgid "500 g ‑ 999 g"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:821
+msgid "1 000 g ‑ 1 499 g"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:822
+msgid "> 1 500 g"
+msgstr ""
+
+#. type: Title ===
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:824
+#, no-wrap
+msgid "Risk Factors and Protective Factors"
+msgstr ""
+
+#. type: Title ====
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:826
+#, no-wrap
+msgid "Device Utilization"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:829
+msgid ""
+"A device utilization rate describes the percentage of patient days on which "
+"a specific device was used.  It is calculated by dividing the number of "
+"device days by the number of patient days and multiplying the result by 100."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:831
+msgid ""
+"stem:[\"CVC Utilisation Rate\" = \"Total CVC Days\" / \"Total Patient Days\" "
+"xx 100 ]"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:833
+msgid ""
+"stem:[\"PVC Utilisation Rate\" = \"Total PVC Days\" / \"Total Patient Days\" "
+"xx 100 ]"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:835
+msgid ""
+"stem:[\"INV Utilisation Rate\" = \"Total INV Days\" / \"Total Patient Days\" "
+"xx 100 ]"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:837
+msgid ""
+"stem:[\"NIV Utilisation Rate\" = \"Total NIV Days\" / \"Total Patient Days\" "
+"xx 100]"
+msgstr ""
+
+#. type: Title ====
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:839
+#, no-wrap
+msgid "Antibiotic Use"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:842
+msgid ""
+"Antibiotic use rate describes the percentage of patient days on which "
+"systemic antibiotics were used in relation to the total patient days.  It is "
+"calculated by dividing the number of antibiotic days by the number of "
+"patient days and multiplying the result by 100."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:844
+msgid ""
+"stem:[\"Antibiotic Use Rate\" = \"Total Antibiotic Days\" / \"Total Patient "
+"Days\" xx 100]"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:846
+msgid ""
+"In addition to the overall antibiotic use rate, antibiotic use rates and "
+"proportions of patients receiving a substance are calculated for individual "
+"substances and groups of substances."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:850
+msgid ""
+"The substances and groups are derived from the Anatomical Therapeutic "
+"Chemical (ATC) Classificationfootnote:[Anatomical Therapeutic Chemical "
+"Classificationpass:p[ +] "
+"https://www.who.int/tools/atc-ddd-toolkit/atc-classification] as published "
+"in the most recent ATC/DDD Indexfootnote:[ATC/DDD Indexpass:p[ +] "
+"https://www.whocc.no/atc_ddd_index/]."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:852
+msgid ""
+"Currently the ATC 1st, 2nd, 4th and 5th level are used for grouping "
+"substances."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:854
+msgid ""
+"Since the numbers in the individual groups usually get very small, the "
+"substance and group specific use rates are calculated by dividing the number "
+"of substance (group) days by the number of patient days and multiplying the "
+"result by 1000."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:856
+msgid ""
+"stem:[\"Substance Group Use Rate\" = \"Total Therapy Days for Substance "
+"Group\" / \"Total Patient Days\" xx 100]"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:858
+msgid ""
+"The proportion of patients receiving any specific substance(s) of a "
+"substance group is calculated as ratio between the total number of patients "
+"receiving a specific substance or group of antibiotics and the total number "
+"of patients receiving any kind of antibiotic multiplied by 100."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:860
+msgid ""
+"stem:[\"Proportion of Patients Receiving an AB Substance or Group\" = "
+"\"Total Therapy Days for that Substance or Group\" / \"Total Patient Days\" "
+"xx 100]"
+msgstr ""
+
+#. type: Title ====
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:862
+#, no-wrap
+msgid "Protective Factor Implementation"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:865
+msgid ""
+"A protective factor utilization rate describes the percentage of patient "
+"days on which a patient received a specific protective factor, such as "
+"breast milk, probiotic or kangaroo mother care.  It is calculated by "
+"dividing the number of protective factor days by the number of patient days "
+"and multiplying the result by 100."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:867
+msgid ""
+"stem:[\"Breast Milk Intake Rate\" = \"Total Breast Milk Days\" / \"Total "
+"Patient Days\" xx 100]"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:869
+msgid ""
+"stem:[\"Probiotic Usage Rate\" = \"Total Probiotic Days\" / \"Total Patient "
+"Days\" xx 100]"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:871
+msgid ""
+"stem:[\"Kangaroo Care Implementation Rate\" = \"Total Kangaroo Care Days\" / "
+"\"Total Patient Days\" xx 100]"
+msgstr ""
+
+#. type: Title ===
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:873
+#, no-wrap
+msgid "Infections"
+msgstr ""
+
+#. type: Title ====
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:875
+#, no-wrap
+msgid "Incidence Densities"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:878
+msgid ""
+"Since a substantial proportion of infections cannot be linked to a specific "
+"risk factor, incidence densities are calculated for bloodstream infections, "
+"pneumonia, NEC.  The risk factor here represents the cumulative number of "
+"patient days and is standardized as 1000 patient days."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:880
+msgid ""
+"stem:[\"BSI Incidence Density\" = \"Total BSI Cases\" / \"Total Patient "
+"Days\" xx 1000]"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:882
+msgid ""
+"stem:[\"Pneumonia Incidence Density\" = \"Total Pneumonia Cases\" / \"Total "
+"Patient Days\" xx 1000]"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:884
+msgid ""
+"stem:[\"NEC Incidence Density\" = \"Total NEC Cases\" / \"Total Patient "
+"Days\" xx 1000]"
+msgstr ""
+
+#. type: Title ====
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:886
+#, no-wrap
+msgid "Device-associated Infections"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:889
+msgid ""
+"A device-associated infection rate is an important quality management metric "
+"and describes how many device-associated infections occur per 1000 device "
+"days.  In this process called standardization, infections (e.g., BSI) "
+"occurring in the presence of a certain risk factor (e.g., CVC) are "
+"associated with the total number of days at risk (e.g., CVC Days) and the "
+"result is multiplied by 1000."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:891
+msgid ""
+"stem:[\"CVC-associated BSI Rate\" = \"Total BSI Cases in Patients With CVC\" "
+"/ \"Total CVC Days\" xx 1000]"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:893
+msgid ""
+"stem:[\"PVC-associated BSI Rate\" = \"Total BSI Cases in Patients With PVC\" "
+"/ \"Total PVC Days\" xx 1000]"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:895
+msgid ""
+"stem:[\"INV-associated Pneumonia Rate\" = \"Total Pneumonia Cases in "
+"Patients With INV\" / \"Total INV Days\" xx 1000]"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:897
+msgid ""
+"stem:[\"NIV-associated Pneumonia Rate\" = \"Total Pneumonia Cases in "
+"Patients With NIV\" / \"Total NIV Days\" xx 1000]"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:904
+msgid ""
+"Surgical site infection (SSI) rates define the percentage of SSI that occur "
+"during the observation period after an operative procedure.  It is "
+"calculated by dividing the number of SSIs occurring after a surgical "
+"procedure by the number of surgical procedures and multiplying the result by "
+"100.  Since the risk of developing a SSI depends on the type of surgical "
+"procedure, multiple SSI rates are calculated for groups of similar "
+"procedures.  Nevertheless, an overall SSI rate will be calculated to account "
+"for the fact that surgery in VLBW/VPT infants is less frequent than in "
+"adults and grouping procedures may result in very low procedure counts per "
+"group."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:906
+msgid ""
+"stem:[\"Overall SSI Rate\" = \"Total SSI Cases\" / \"Total Number of "
+"Surgeries\" xx 100]"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:908
+msgid ""
+"stem:[\"Grouped SSI Rate\" = \"Total SSI Cases Observed After the Procedures "
+"in This Group\" / \"Total Number of Procedures in This Group\" xx 100]"
+msgstr ""
+
+#. type: Title ====
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:910
+#, no-wrap
+msgid "Standardized Infection Rate"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:914
+msgid ""
+"With the infection rates described above, it is possible to observe risk "
+"factors and infections for the 3 birthweight classes in detail.  However, "
+"500 g birth weight is a relatively crude stratification for neonatal "
+"infection risk, and it also does not account the fact that infants may be "
+"transferred to other departments (e.g., for surgery or to a department "
+"closer to the parents’ home) long before they would normally be discharged "
+"and that the high-risk days of the stabilization phase would accumulate in "
+"some neonatology departments while others would accumulate the low risk days "
+"of already stabilized infants.  To account for this, NeoIPC calculates a "
+"standardized infection rate (SIR) , which compares infection frequencies "
+"between departments based on their patient population composition."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:916
+msgid "Standardized infection rates are calculated based on two factors:"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:918
+msgid "Risk of infection for a certain birth weight"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:919
+msgid "Risk of infection for a certain day of life"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:921
+msgid ""
+"From the reference database, the average risk of BSI or pneumonia for a "
+"certain day of life of an infant with a certain birth weight is calculated."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:923
+msgid ""
+"After this, the number of expected infections (cumulated risk) for a "
+"department is calculated by summing the average risks of the infants and the "
+"respective days they spent in the department."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:925
+msgid ""
+"The SIR represents the ratio of observed infections to expected infections "
+"in a department and can give a general overview of the infection risk in a "
+"department."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:928
+msgid ""
+"stem:[\"Standardized Infection Rate\" = \"Total Infections Observed\" / "
+"\"Total infections expected\"] When the standardized infection rate is "
+"greater than one, you observed more infections than you would expect from "
+"your patient composition when compared to the reference data."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:930
+msgid ""
+"When the standardized infection rate equals one, you observed the same "
+"number of infections as you would expect from your patient composition when "
+"compared to the reference data."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:932
+msgid ""
+"When the standardized infection rate is less than one, you observed less "
+"infections than you would expect from your patient composition when compared "
+"to the reference data."
+msgstr ""
+
+#. type: Title ==
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:934
+#, no-wrap
+msgid "Abbreviations"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:936
+#, no-wrap
+msgid "3GCR"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:937
+msgid ""
+"Multi drug resistant gram-negative pathogen resistant to 3^rd^ generation "
+"Cephalosporins"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:937
+#, no-wrap
+msgid "AB"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:938
+msgid "Antibiotic"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:938
+#, no-wrap
+msgid "ASA"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:939
+msgid "American Society of Anaesthesiologists"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:939
+#, no-wrap
+msgid "BE"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:940
+msgid "Base Excess"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:940
+#, no-wrap
+msgid "BSI"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:941
+msgid "Bloodstream Infection"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:941
+#, no-wrap
+msgid "BW"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:942
+msgid "Birthweight"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:942
+#, no-wrap
+msgid "CDC"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:943
+msgid "Centers for Disease Control and Prevention"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:943
+#, no-wrap
+msgid "CMV"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:944
+msgid "Cytomegalovirus"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:944
+#, no-wrap
+msgid "CRP"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:945
+msgid "C-reactive Protein"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:945
+#, no-wrap
+msgid "CSF"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:946
+msgid "Cerebrospinal Fluid"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:946
+#, no-wrap
+msgid "CT"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:947
+msgid "Computer Tomography"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:947
+#, no-wrap
+msgid "CVC"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:948
+msgid "Central Venous Catheter"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:948
+#, no-wrap
+msgid "ECMO"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:949
+msgid "Extracorporeal Membrane Oxygenation"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:949
+#, no-wrap
+msgid "ESBL"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:950
+msgid "Extended spectrum beta-lactamase"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:950
+#, no-wrap
+msgid "GA"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:951
+msgid "Gestational Age"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:951
+#, no-wrap
+msgid "HIS"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:952
+msgid "Hospital Information System"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:952
+#, no-wrap
+msgid "HIV"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:953
+msgid "Human Immunodeficiency Virus"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:953
+#, no-wrap
+msgid "ICHI"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:954
+msgid "International classification of health interventions"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:954
+#, no-wrap
+msgid "INV"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:955
+msgid "Invasive Ventilation"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:955
+#, no-wrap
+msgid "IPC"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:956
+msgid "Infection Prevention and Control"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:956
+#, no-wrap
+msgid "KC"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:957
+msgid "Kangaroo care"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:957
+#, no-wrap
+msgid "LCBSI"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:958
+msgid "Laboratory Confirmed Bloodstream Infection"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:958
+#, no-wrap
+msgid "MDRO"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:959
+msgid "Multidrug Resistant Organism"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:959
+#, no-wrap
+msgid "MRSA"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:960
+msgid "Methicillin-resistant Staphylococcus aureus"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:960
+#, no-wrap
+msgid "NEC"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:961
+msgid "Necrotizing Enterocolitis"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:961
+#, no-wrap
+msgid "NICU"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:962
+msgid "Neonatal intensive care unit"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:962
+#, no-wrap
+msgid "NIV"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:963
+msgid "Non-invasive Ventilation"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:963
+#, no-wrap
+msgid "OP"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:964
+msgid "Operative Procedure"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:964
+#, no-wrap
+msgid "PDMS"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:965
+msgid "Patient Data Management System"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:965
+#, no-wrap
+msgid "PICC"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:966
+msgid "Peripherally Inserted Central Venous Catheter"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:966
+#, no-wrap
+msgid "PLT"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:967
+msgid "Platelet"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:967
+#, no-wrap
+msgid "PVC"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:968
+msgid "Peripheral Venous Catheter"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:968
+#, no-wrap
+msgid "RCT"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:969
+msgid "Randomised Controlled Trial"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:969
+#, no-wrap
+msgid "SSI"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:970
+#, no-wrap
+msgid "UAC"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:971
+msgid "Umbilical Artery Catheter"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:971
+#, no-wrap
+msgid "UVC"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:972
+msgid "Umbilical Venous Catheter"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:972
+#, no-wrap
+msgid "VAE"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:973
+msgid "Ventilator Associated Event"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:973
+#, no-wrap
+msgid "VAP"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:974
+msgid "Ventilator Associated Pneumonia"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:974
+#, no-wrap
+msgid "VLBW"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:975
+msgid "Very Low Birthweight"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:975
+#, no-wrap
+msgid "VPT"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:976
+msgid "Very Preterm"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:976
+#, no-wrap
+msgid "VRE"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:977
+msgid "Vancomycin-resistant Enterococcus"
+msgstr ""
+
+#. type: Labeled list
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:977
+#, no-wrap
+msgid "WBC"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:978
+msgid "White Blood Cells"
+msgstr ""
+
+#. type: Title ==
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:980
+#, no-wrap
+msgid "Imprint"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:982
+msgid "NeoIPC Project"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:987
+#, no-wrap
+msgid ""
+"Fondazione Penta Onlus\n"
+"Corso Stati Uniti, 4\n"
+"35127 Padova\n"
+"ITALY"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:989
+msgid "https://neoipc.org/"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:991
+msgid "To learn more about NeoIPC, write to:"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:993
+msgid "communication@pentafoundation.org"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:995
+msgid ""
+"To learn more about the NeoDeco Trial and the Clinical Practice Network, "
+"write to:"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:997
+msgid "neoipc@sgul.ac.uk"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:999
+msgid "To learn more about Surveillance, write to:"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:1001
+msgid "neoipc-support@charite.de"
+msgstr ""
+
+#. type: Title ==
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:1004
+#, no-wrap
+msgid "List of Antibiotics"
+msgstr ""
+
+#. type: Title ==
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:1010
+#, no-wrap
+msgid "List of Infectious Agents"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Clinical-Sepsis-Definition.adoc:5
+#, no-wrap
+msgid ""
+"**Absence of positive microbiological blood and/or cerebrospinal fluid "
+"culture**\n"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Clinical-Sepsis-Definition.adoc:8
+#, no-wrap
+msgid ""
+"**Treatment with FIVE or more days of intravenous antibiotics was "
+"initiated$$*$$**\n"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Clinical-Sepsis-Definition.adoc:11
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:8
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:40
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:61
+#, no-wrap
+msgid ""
+"**Patient has at least TWO of the following clinical or laboratory features "
+"of generalized infection:**\n"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Clinical-Sepsis-Definition.adoc:12
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:9
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:41
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:62
+#, no-wrap
+msgid "Temperature instability, fever (> 38 °C) or hypothermia (< 36.5 °C)\n"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Clinical-Sepsis-Definition.adoc:13
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:10
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:42
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:63
+#: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:13
+#, no-wrap
+msgid ""
+"New/more frequent bradycardia episodes (<80/min) or unexplained tachycardia "
+"(>200/min)\n"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Clinical-Sepsis-Definition.adoc:14
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:11
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:43
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:64
+#, no-wrap
+msgid ""
+"Impaired peripheral perfusion (Capillary refill time of > 3s or skin "
+"mottling or core/peripheral temperature gap > 2 °C)\n"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Clinical-Sepsis-Definition.adoc:15
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:12
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:65
+#, no-wrap
+msgid ""
+"New/more frequent episodes of apnoea (>20s) or increase in oxygen demand or "
+"ventilatory support\n"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Clinical-Sepsis-Definition.adoc:16
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:13
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:45
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:66
+#, no-wrap
+msgid "Enteral feeding intolerance, abdominal distension or ileus\n"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Clinical-Sepsis-Definition.adoc:17
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:14
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:46
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:67
+#, no-wrap
+msgid "Irritability, lethargy, apathy or unstable condition\n"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Clinical-Sepsis-Definition.adoc:18
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:15
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:47
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:68
+#, no-wrap
+msgid "Unexplained metabolic acidosis (base excess < −10 mmol/L; <−10 mEq/L)\n"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Clinical-Sepsis-Definition.adoc:19
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:16
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:48
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:69
+#, no-wrap
+msgid ""
+"New and unexplained hyperglycaemia (> 140 mg/dl; > 7.8 mmol/L) or "
+"hypoglycaemia (< 40 mg/dl; <2.2 mmol/L)\n"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Clinical-Sepsis-Definition.adoc:20
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:17
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:70
+#, no-wrap
+msgid "At least one of the following laboratory findings:\n"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Clinical-Sepsis-Definition.adoc:21
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:18
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:49
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:71
+#, no-wrap
+msgid "Platelet count of < 100 × 10^9^/L (<100 × 10^3^/μL)\n"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Clinical-Sepsis-Definition.adoc:22
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:19
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:33
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:72
+#, no-wrap
+msgid ""
+"WBC < 4 × 10^9^/L or > 20 × 10^9^/L (< 4 × 10^3^/μL or > 20 × "
+"10^3^/μL)\n"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Clinical-Sepsis-Definition.adoc:23
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:20
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:34
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:73
+#, no-wrap
+msgid "CRP > 10 mg/L (> 1 mg/dL)\n"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Clinical-Sepsis-Definition.adoc:24
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:21
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:35
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:74
+#, no-wrap
+msgid "Procalcitonin ≥ 2μg/L (2 ng/mL; 200 ng/dL)\n"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Clinical-Sepsis-Definition.adoc:25
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:22
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:36
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:75
+#, no-wrap
+msgid "I/T-Ratio > 0.2 (ratio of immature granulocytes to total granulocytes)\n"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Clinical-Sepsis-Definition.adoc:26
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:23
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:37
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:76
+#, no-wrap
+msgid "Increased levels of interleukin (IL) 6 or 8\n"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/definitions/NeoIPC-Core-Clinical-Sepsis-Definition.adoc:32
+#, no-wrap
+msgid ""
+"*Antibiotic treatment for at least five days was initiated.\n"
+"The day of the first dose and the day of the last dose are counted.\n"
+"Days where no dose was administered between the first and the last dose "
+"(e.g., skipped doses because of high drug levels in therapeutic drug "
+"monitoring) are counted as if a dose had been administered.\n"
+"Days after the last dose are not counted regardless of the patient's "
+"measured or assumed drug level.\n"
+"If the infant died, was discharged, or transferred before the end of the "
+"five-day course of intravenous antibiotics, this condition is met if "
+"treatment was scheduled for five days or more.\n"
+msgstr ""
+
+#. type: Block title
+#: doc/protocol/definitions/NeoIPC-Core-Deep-Incisional-SSI-Definition.adoc:1
+#, no-wrap
+msgid "Deep incisional SSI"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Deep-Incisional-SSI-Definition.adoc:5
+#: doc/protocol/definitions/NeoIPC-Core-Organ-Space-SSI-Definition.adoc:5
+#, no-wrap
+msgid "**First symptoms occur within 30 or 90^#^ days after the operation**\n"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Deep-Incisional-SSI-Definition.adoc:8
+#, no-wrap
+msgid ""
+"**Infection involves deep soft tissues of the incision (for example, fascial "
+"and muscle layers)**\n"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Deep-Incisional-SSI-Definition.adoc:11
+#: doc/protocol/definitions/NeoIPC-Core-Organ-Space-SSI-Definition.adoc:11
+#: doc/protocol/definitions/NeoIPC-Core-Superficial-Incisional-SSI-Definition.adoc:11
+#, no-wrap
+msgid "**Patient has at least ONE of the following:**\n"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Deep-Incisional-SSI-Definition.adoc:12
+#, no-wrap
+msgid "Purulent drainage from the deep incision.\n"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Deep-Incisional-SSI-Definition.adoc:13
+#, no-wrap
+msgid ""
+"A deep incision that spontaneously dehisces, or is deliberately opened or "
+"aspirated by a surgeon, physician* or physician designee\n"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Deep-Incisional-SSI-Definition.adoc:17
+msgid ""
+"Organism(s) identified from the deep soft tissues of the incision by a "
+"culture or non-culture based microbiologic testing method which is performed "
+"for purposes of clinical diagnosis or treatment (for example, not Active "
+"Surveillance Culture/Testing (ASC/AST)) or culture or non-culture based "
+"microbiologic testing method is not performed. A culture or "
+"non-culture-based test from the deep soft tissues of the incision that has a "
+"negative finding does not meet this criterion."
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Deep-Incisional-SSI-Definition.adoc:19
+#: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:7
+#, no-wrap
+msgid "**AND** \n"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Deep-Incisional-SSI-Definition.adoc:21
+msgid ""
+"Patient has at least one of the following signs or symptoms: Temperature "
+"instability, fever (> 38 °C) or hypothermia (< 36.5 °C); localized pain or "
+"tenderness."
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Deep-Incisional-SSI-Definition.adoc:22
+msgid ""
+"An abscess or other evidence of infection involving the deep incision that "
+"is detected on gross anatomical or histopathologic exam, or imaging test."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/definitions/NeoIPC-Core-Deep-Incisional-SSI-Definition.adoc:25
+#: doc/protocol/definitions/NeoIPC-Core-Organ-Space-SSI-Definition.adoc:16
+msgid "^#^Follow-up of 90 days applies when an implant was left in place."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/definitions/NeoIPC-Core-Deep-Incisional-SSI-Definition.adoc:26
+#, no-wrap
+msgid ""
+"*The term physician for the purpose of application of the NHSN SSI criteria "
+"may be interpreted to mean a surgeon, infectious disease physician, "
+"emergency physician, another physician on the case, or physician’s "
+"designee (nurse practitioner or physician’s assistant).\n"
+msgstr ""
+
+#. type: Block title
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:1
+#, no-wrap
+msgid ""
+"Laboratory-Confirmed Bloodstream Infection with Common Commensal Detected "
+"Twice"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:5
+#, no-wrap
+msgid ""
+"**The same common commensal is recovered from at least TWO blood and/or CSF "
+"culture specimen collected on separate occasions**\n"
+msgstr ""
+
+#. type: Block title
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:25
+#, no-wrap
+msgid ""
+"Laboratory-Confirmed Bloodstream Infection with Common Commensal and "
+"Laboratory Finding"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:29
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:55
+#, no-wrap
+msgid ""
+"**A common commensal is recovered from ONE blood culture and/or CSF culture "
+"specimen**\n"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:32
+#, no-wrap
+msgid "**At least one of the following laboratory findings:**\n"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:44
+#, no-wrap
+msgid ""
+"New/more frequent episodes of apnoea (>20s) or increase in oxygen demand or "
+"ventilatory support \n"
+msgstr ""
+
+#. type: Block title
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:51
+#, no-wrap
+msgid ""
+"Laboratory-Confirmed Bloodstream Infection with Common Commensal and Five "
+"Day Treatment"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:58
+#, no-wrap
+msgid ""
+"**Treatment with five or more days of intravenous antibiotics was "
+"initiated$$*$$** \n"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:81
+#, no-wrap
+msgid ""
+"*The day of the first dose and the day of the last dose are counted.\n"
+"Days where no dose was administered between the first and the last dose "
+"(e.g., skipped doses because of high drug levels in therapeutic drug "
+"monitoring) are counted as if a dose had been administered.\n"
+"Days after the last dose are not counted regardless of the patient's "
+"measured or assumed drug level.\n"
+"If the infant died, was discharged, or transferred before the end of the "
+"five-day course of intravenous antibiotics, this condition is met if "
+"treatment was scheduled for five days or more.\n"
+msgstr ""
+
+#. type: Block title
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Recognised-Pathogen-Definition.adoc:1
+#, no-wrap
+msgid "Laboratory-confirmed bloodstream infection with recognised pathogen"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Recognised-Pathogen-Definition.adoc:5
+#, no-wrap
+msgid ""
+"**Recognised pathogen is recovered from a blood and/or cerebrospinal fluid "
+"culture**\n"
+msgstr ""
+
+#. type: Block title
+#: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:1
+#, no-wrap
+msgid "Symptom-based NEC"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:5
+#, no-wrap
+msgid ""
+"**At least of ONE the following radiological signs (imaging technologies: "
+"X-ray, CT, MRI, ultrasound):**\n"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:8
+msgid "Pneumoperitoneum"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:9
+#: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:31
+msgid "Pneumatosis intestinalis"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:10
+msgid "Portal venous gas (Hepatobiliary gas)"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:11
+msgid "Fixed bowel loops (≥ 24h)"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:14
+#, no-wrap
+msgid "**At least ONE of the following clinical signs:**\n"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:15
+#, no-wrap
+msgid "Abdominal distention\n"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:16
+#, no-wrap
+msgid "Abdominal discoloration or shiny/reddish skin tone\n"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:17
+#, no-wrap
+msgid "Repeated occult (guaiac test) or visible blood in stool (no anal fissure)\n"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:18
+#, no-wrap
+msgid "Increasing/pronounced vomiting (e.g. bilious or bloody)\n"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:19
+#, no-wrap
+msgid "Increased gastric residuals from previous feeding\n"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:20
+#, no-wrap
+msgid "Bilious gastric aspirate (not from transpyloric feeding tube)\n"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:23
+#, no-wrap
+msgid "**OR**\n"
+msgstr ""
+
+#. type: Block title
+#: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:24
+#, no-wrap
+msgid "Surgical NEC"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:28
+#, no-wrap
+msgid "**At least of ONE the following surgical or pathological findings:**\n"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:30
+msgid "Extensive bowel necrosis (> 2 cm of bowel affected)"
+msgstr ""
+
+#. type: Block title
+#: doc/protocol/definitions/NeoIPC-Core-Organ-Space-SSI-Definition.adoc:1
+#, no-wrap
+msgid "Organ/space SSI"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Organ-Space-SSI-Definition.adoc:8
+#, no-wrap
+msgid ""
+"**Infection involves any part of the body deeper than the fascial/muscle "
+"layers that is opened or manipulated during the operative procedure**\n"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Organ-Space-SSI-Definition.adoc:12
+#, no-wrap
+msgid ""
+"Purulent drainage from a drain that is placed into the organ/space (for "
+"example, closed suction drainage system, open drain, T-tube drain, CT-guided "
+"drainage).\n"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Organ-Space-SSI-Definition.adoc:13
+#, no-wrap
+msgid ""
+"Organism(s) identified from fluid or tissue in the organ/space by a culture "
+"or non-culture based microbiologic testing method which is performed for "
+"purposes of clinical diagnosis or treatment (for example, not Active "
+"Surveillance Culture/Testing (ASC/AST)).\n"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Organ-Space-SSI-Definition.adoc:14
+#, no-wrap
+msgid ""
+"An abscess or other evidence of infection involving the organ/space that is "
+"detected on gross anatomical or histopathologic exam, or imaging test "
+"evidence suggestive of infection.\n"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:5
+#, no-wrap
+msgid ""
+"**At least ONE of the following imaging findings (imaging technologies: "
+"X-ray, CT, MRI, ultrasound) shows new changes suggestive of pneumonia, such "
+"as infiltrate, shadowing, opacification, increased density, fluid in the "
+"intrapleural cavity or interlobar fissure**\n"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:8
+#, no-wrap
+msgid ""
+"**New initiation of respiratory support or escalation of existing level of "
+"respiratory support for ≥ 2 days$$*$$ after at least 2 days of stability "
+"or improvement**\n"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:11
+#, no-wrap
+msgid "**At least FOUR of the following clinical or laboratory criteria:** \n"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:12
+#, no-wrap
+msgid "Organisms identified^+^ from respiratory tract\n"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:14
+#, no-wrap
+msgid ""
+"New or more frequent tachypnoea (>60/min) or new or more frequent apnoea (> "
+"20 s)\n"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:15
+#, no-wrap
+msgid "Purulent tracheal aspirate\n"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:16
+#, no-wrap
+msgid ""
+"New or more frequent symptoms of respiratory distress (retraction, nasal "
+"flaring, grunting, chest indrawing)\n"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:17
+#, no-wrap
+msgid "Temperature instability or fever (>38 °C) or hypothermia (<36.5 °C)\n"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:18
+#, no-wrap
+msgid ""
+"Increased respiratory secretion (more frequent endotracheal suctioning "
+"required)\n"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:19
+#, no-wrap
+msgid ""
+"CRP > 10 mg/L (> 1 mg/dL) or increased levels of interleukin (IL) 6 or "
+"8^#^\n"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:20
+#, no-wrap
+msgid "I/T - ratio > 0.2\n"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:23
+#, no-wrap
+msgid ""
+"*New initiation of respiratory support or escalation of existing level of "
+"respiratory support that does not improve within less than two days:\n"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:25
+msgid ""
+"Increase in need for FiO~2~ ≥ 0.25 (25 points) within 24 hours (daily "
+"minimum FiO~2~ values must be taken into account)"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:33
+msgid ""
+"…that does not improve within less than 2 days: The above-mentioned "
+"condition should not improve within two days."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:35
+msgid ""
+"…after at least 2 days of stability or improvement: A stable or improving "
+"baseline period of at least two days is required before the above condition "
+"occurs."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:39
+msgid ""
+"^+^At least one organism (see below) has been identified from respiratory "
+"tract by a culture or non-culture based microbiologic testing method which "
+"is performed for purposes of clinical diagnosis or treatment (for example, "
+"NOT Active Surveillance Culture/Testing (ASC/AST)):"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:41
+msgid "Fungal or bacterial pathogen from secretions of lower respiratory tract"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:44
+msgid ""
+"Viral gene, antigen or antibody from secretions of upper or lower "
+"respiratory tract (e.g. EIA, FAMA, shell vial assay, PCR)"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:46
+msgid ""
+"^#^Interleukin should be used as a parameter when laboratory specifications "
+"for a pathological value have been fulfilled."
+msgstr ""
+
+#. type: Block title
+#: doc/protocol/definitions/NeoIPC-Core-Superficial-Incisional-SSI-Definition.adoc:1
+#, no-wrap
+msgid "Superficial incisional SSI"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Superficial-Incisional-SSI-Definition.adoc:5
+#, no-wrap
+msgid "**First symptoms occur within 30 days after the operation**\n"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Superficial-Incisional-SSI-Definition.adoc:8
+#, no-wrap
+msgid "**Infection involves only skin and subcutaneous tissue of the incision**\n"
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Superficial-Incisional-SSI-Definition.adoc:13
+msgid "Purulent drainage from the superficial incision."
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Superficial-Incisional-SSI-Definition.adoc:14
+msgid ""
+"Organism(s) identified from an aseptically obtained specimen from the "
+"superficial incision or subcutaneous tissue by a culture or non-culture "
+"based microbiologic testing method which is performed for purposes of "
+"clinical diagnosis or treatment (for example, not Active Surveillance "
+"Culture/Testing (ASC/AST))."
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Superficial-Incisional-SSI-Definition.adoc:16
+msgid ""
+"Superficial incision that is deliberately opened by a surgeon, physician* or "
+"physician designee and culture or non-culture-based testing of the "
+"superficial incision or subcutaneous tissue is not performed.  A culture or "
+"non-culture-based test from the deep soft tissues of the incision that has a "
+"negative finding does not meet this criterion."
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Superficial-Incisional-SSI-Definition.adoc:20
+msgid ""
+"Patient has at least one of the following signs or symptoms: localized pain "
+"or tenderness, localized swelling, erythema or heat."
+msgstr ""
+
+#. type: delimited block *
+#: doc/protocol/definitions/NeoIPC-Core-Superficial-Incisional-SSI-Definition.adoc:21
+msgid ""
+"Diagnosis of a superficial incisional SSI by a physician* or physician "
+"designee."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/definitions/NeoIPC-Core-Superficial-Incisional-SSI-Definition.adoc:24
+#, no-wrap
+msgid ""
+"*The term physician for the purpose of application of the NeoIPC SSI "
+"criteria may be interpreted to mean a surgeon, infectious disease physician, "
+"emergency physician, another physician on the case, or physician’s "
+"designee (nurse practitioner or physician’s assistant).\n"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/definitions/NeoIPC-Core-Superficial-Incisional-SSI-Definition.adoc:26
+msgid ""
+"The following do not qualify as criteria for meeting the definition of "
+"superficial incisional SSI"
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/definitions/NeoIPC-Core-Superficial-Incisional-SSI-Definition.adoc:28
+msgid ""
+"Diagnosis/treatment of cellulitis (redness/warmth/swelling), by itself, does "
+"not meet superficial incisional SSI criterion ‘d’."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/definitions/NeoIPC-Core-Superficial-Incisional-SSI-Definition.adoc:29
+msgid ""
+"A stitch abscess alone (minimal inflammation and discharge confined to the "
+"points of suture penetration)."
+msgstr ""
+
+#. type: Plain text
+#: doc/protocol/definitions/NeoIPC-Core-Superficial-Incisional-SSI-Definition.adoc:30
+msgid ""
+"A localized stab wound or pin site infection. Note: A laparoscopic trocar "
+"site is considered a surgical incision and not a stab wound.  If a surgeon "
+"uses a laparoscopic trocar site to place a drain at the end of a procedure "
+"this is considered a surgical incision."
+msgstr ""
+
+#. type: Content of: <root><data><value>
+#: doc/protocol/resx/NeoIPC-Core-Decision-Flow.resx:10
+#, no-wrap
+msgid "Admitted to your department within 120 days after birth?"
+msgstr ""
+
+#. type: Content of: <root><data><value>
+#: doc/protocol/resx/NeoIPC-Core-Decision-Flow.resx:13
+#, no-wrap
+msgid "i.e., stillborn babies, delivery room death, day of life &gt; 120"
+msgstr ""
+
+#. type: Content of: <root><data><value>
+#: doc/protocol/resx/NeoIPC-Core-Decision-Flow.resx:16
+#, no-wrap
+msgid "Gestational age &lt; 32 weeks?"
+msgstr ""
+
+#. type: Content of: <root><data><value>
+#: doc/protocol/resx/NeoIPC-Core-Decision-Flow.resx:19
+#, no-wrap
+msgid "Birthweight &lt; 1500g?"
+msgstr ""
+
+#. type: Content of: <root><data><value>
+#: doc/protocol/resx/NeoIPC-Core-Decision-Flow.resx:22
+#, no-wrap
+msgid "Eligible"
+msgstr ""
+
+#. type: Content of: <root><data><value>
+#: doc/protocol/resx/NeoIPC-Core-Decision-Flow.resx:25
+#, no-wrap
+msgid "Ineligible"
+msgstr ""
