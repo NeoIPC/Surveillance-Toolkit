@@ -2,12 +2,11 @@
 # Copyright (C) 2025 The NeoIPC Project Consortium
 # This file is distributed under the Creative Commons Attribution 4.0 International license
 # Brar Piening <brar@gmx.de>, 2025.
-#
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "POT-Creation-Date: 2025-08-17 16:26+0200\n"
-"PO-Revision-Date: 2025-08-17 19:23+0000\n"
+"PO-Revision-Date: 2025-08-17 19:54+0000\n"
 "Last-Translator: Brar Piening <brar@gmx.de>\n"
 "Language-Team: German <https://hosted.weblate.org/projects/neoipc/neoipc-infectious-agents/de/>\n"
 "Language: de\n"
@@ -37,9 +36,9 @@ msgstr "Spezies"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Children Name
 #: metadata/common/pathogens/NeoIPC-Infectious-Agents.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Simplexvirus humanalpha1"
-msgstr ""
+msgstr "Simplexvirus humanalpha1"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Children Synonyms Name
 #: metadata/common/pathogens/NeoIPC-Infectious-Agents.yaml:1
