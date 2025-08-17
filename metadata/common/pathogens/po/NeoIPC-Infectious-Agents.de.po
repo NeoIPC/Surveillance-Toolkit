@@ -7,33 +7,33 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "POT-Creation-Date: 2025-08-17 16:26+0200\n"
-"PO-Revision-Date: 2025-08-17 16:26+0200\n"
+"PO-Revision-Date: 2025-08-17 19:23+0000\n"
 "Last-Translator: Brar Piening <brar@gmx.de>\n"
-"Language-Team: German <https://hosted.weblate.org/projects/neoipc/"
-"neoipc-infectious-agents/de/>\n"
+"Language-Team: German <https://hosted.weblate.org/projects/neoipc/neoipc-infectious-agents/de/>\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 5.13\n"
 
 #. type: Hash Value: Hierarchies ConceptType
 #: metadata/common/pathogens/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
 msgid "Unknown"
-msgstr ""
+msgstr "Unbekannt"
 
 #. type: Hash Value: Hierarchies Name
 #: metadata/common/pathogens/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
 msgid "Not listed"
-msgstr ""
+msgstr "Nicht aufgeführt"
 
 #. type: Hash Value: Hierarchies Children Children Children Children ConceptType
 #: metadata/common/pathogens/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
 msgid "Species"
-msgstr ""
+msgstr "Spezies"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Children Name
 #: metadata/common/pathogens/NeoIPC-Infectious-Agents.yaml:1
@@ -75,7 +75,7 @@ msgstr ""
 #: metadata/common/pathogens/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
 msgid "Group"
-msgstr ""
+msgstr "Gruppe"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Name
 #: metadata/common/pathogens/NeoIPC-Infectious-Agents.yaml:1
@@ -6657,7 +6657,7 @@ msgstr ""
 #: metadata/common/pathogens/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
 msgid "Bacillus cereus group"
-msgstr ""
+msgstr "Bacillus cereus-Gruppe"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Name
 #: metadata/common/pathogens/NeoIPC-Infectious-Agents.yaml:1
@@ -9021,7 +9021,7 @@ msgstr ""
 #: metadata/common/pathogens/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
 msgid "Abiotrophia defectiva"
-msgstr ""
+msgstr "Abiotrophia defectiva"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Synonyms Name
 #: metadata/common/pathogens/NeoIPC-Infectious-Agents.yaml:1
@@ -9033,7 +9033,7 @@ msgstr ""
 #: metadata/common/pathogens/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
 msgid "Abiotrophia"
-msgstr ""
+msgstr "Abiotrophia"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Name
 #: metadata/common/pathogens/NeoIPC-Infectious-Agents.yaml:1
@@ -9213,7 +9213,7 @@ msgstr ""
 #: metadata/common/pathogens/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
 msgid "Abiotrophia adiacens"
-msgstr ""
+msgstr "Abiotrophia adiacens"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Synonyms Name
 #: metadata/common/pathogens/NeoIPC-Infectious-Agents.yaml:1
@@ -9231,7 +9231,7 @@ msgstr ""
 #: metadata/common/pathogens/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
 msgid "Abiotrophia elegans"
-msgstr ""
+msgstr "Abiotrophia elegans"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Name
 #: metadata/common/pathogens/NeoIPC-Infectious-Agents.yaml:1
@@ -9897,7 +9897,7 @@ msgstr ""
 #: metadata/common/pathogens/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
 msgid "Alpha-hemolytic streptococci"
-msgstr ""
+msgstr "Alpha-hämolysierende Streptokokken"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Name
 #: metadata/common/pathogens/NeoIPC-Infectious-Agents.yaml:1
@@ -12447,31 +12447,31 @@ msgstr ""
 #: metadata/common/pathogens/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
 msgid "Acholeplasma laidlawii"
-msgstr ""
+msgstr "Acholeplasma laidlawii"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Name
 #: metadata/common/pathogens/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
 msgid "Acholeplasma oculi"
-msgstr ""
+msgstr "Acholeplasma oculi"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Name
 #: metadata/common/pathogens/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
 msgid "Acholeplasma"
-msgstr ""
+msgstr "Acholeplasma"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Name
 #: metadata/common/pathogens/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
 msgid "Acholeplasmataceae"
-msgstr ""
+msgstr "Acholeplasmataceae"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Name
 #: metadata/common/pathogens/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
 msgid "Acholeplasmatales"
-msgstr ""
+msgstr "Acholeplasmatales"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Name
 #: metadata/common/pathogens/NeoIPC-Infectious-Agents.yaml:1
@@ -14589,7 +14589,7 @@ msgstr ""
 #: metadata/common/pathogens/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
 msgid "Acetobacteraceae"
-msgstr ""
+msgstr "Acetobacteraceae"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Name
 #: metadata/common/pathogens/NeoIPC-Infectious-Agents.yaml:1
@@ -18531,7 +18531,7 @@ msgstr ""
 #: metadata/common/pathogens/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
 msgid "Acinetobacter calcoaceticus-Acinetobacter baumannii complex"
-msgstr ""
+msgstr "Acinetobacter calcoaceticus-Acinetobacter baumannii-Komplex"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Name
 #: metadata/common/pathogens/NeoIPC-Infectious-Agents.yaml:1
@@ -21933,7 +21933,7 @@ msgstr ""
 #: metadata/common/pathogens/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
 msgid "Acaulium acremonium"
-msgstr ""
+msgstr "Acaulium acremonium"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Children Synonyms Name
 #: metadata/common/pathogens/NeoIPC-Infectious-Agents.yaml:1
@@ -21945,7 +21945,7 @@ msgstr ""
 #: metadata/common/pathogens/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
 msgid "Acaulium"
-msgstr ""
+msgstr "Acaulium"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Children Name
 #: metadata/common/pathogens/NeoIPC-Infectious-Agents.yaml:1
