@@ -1,0 +1,42 @@
+# SOME DESCRIPTIVE TITLE
+# Copyright (C) YEAR Free Software Foundation, Inc.
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr "Project-Id-Version: PACKAGE VERSION\nPOT-Creation-Date: 2025-09-04 05:50+0200\nPO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\nLast-Translator: FULL NAME <EMAIL@ADDRESS>\nLanguage-Team: LANGUAGE <LL@li.org>\nLanguage: \nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\n"
+
+#. type: Plain text
+#: scripts/en/Convert-InfectiousAgentList-MessageStrings.psd1:2
+msgid "ConvertFrom-Yaml @'"
+msgstr ""
+
+#. type: Plain text
+#: scripts/en/Convert-InfectiousAgentList-MessageStrings.psd1:4
+#, no-wrap
+msgid "CreatingInfoMsg: \"Creating infectious agent list for language ‘{0}’\"\n"
+msgstr ""
+
+#. type: Plain text
+#: scripts/en/Convert-InfectiousAgentList-MessageStrings.psd1:6
+#, no-wrap
+msgid "FormatInfoMsg: \"...in {0} format\"\n"
+msgstr ""
+
+#. type: Plain text
+#: scripts/en/Convert-InfectiousAgentList-MessageStrings.psd1:8
+#, no-wrap
+msgid "ExternalCmdErrorMsg: \"The execution of the command '{0}' was terminated with the following error message:\"\n"
+msgstr ""
+
+#. type: Plain text
+#: scripts/en/Convert-InfectiousAgentList-MessageStrings.psd1:10
+#, no-wrap
+msgid "ExternalCmdWarningMsg: \"The execution of the command '{0}' resulted in the following warning message:\"\n"
+msgstr ""
+
+#. type: Plain text
+#: scripts/en/Convert-InfectiousAgentList-MessageStrings.psd1:11
+msgid "'@"
+msgstr ""

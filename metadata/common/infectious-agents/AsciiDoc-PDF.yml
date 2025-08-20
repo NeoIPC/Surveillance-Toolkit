@@ -1,0 +1,32 @@
+extends: base
+font:
+  catalog:
+    Noto Serif:
+      normal: notoserif-regular-subset.ttf
+      bold: notoserif-bold-subset.ttf
+      italic: notoserif-italic-subset.ttf
+      bold_italic: notoserif-bold_italic-subset.ttf
+    M+ 1mn:
+      normal: mplus1mn-regular-subset.ttf
+      bold: mplus1mn-bold-subset.ttf
+      italic: mplus1mn-italic-subset.ttf
+      bold_italic: mplus1mn-bold_italic-subset.ttf
+    EB Garamond:
+      normal: EBGaramond-Regular.ttf
+      bold: EBGaramond-Bold.ttf
+      italic: EBGaramond-Italic.ttf
+      bold_italic: EBGaramond-BoldItalic.ttf
+base:
+  font-family: EB Garamond
+code:
+  font-family: M+ 1mn
+codespan:
+  font-family: $code-font-family
+kbd:
+  font-family: $code-font-family
+button:
+  font-family: $base-font-family
+ulist:
+  marker:
+    font-family: Noto Serif
+base-font-size: 8
