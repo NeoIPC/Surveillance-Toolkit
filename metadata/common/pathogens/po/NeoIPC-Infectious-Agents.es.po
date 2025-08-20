@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "POT-Creation-Date: 2025-08-17 16:26+0200\n"
-"PO-Revision-Date: 2025-08-20 18:11+0000\n"
+"PO-Revision-Date: 2025-08-20 20:31+0000\n"
 "Last-Translator: Brar Piening <brar@gmx.de>\n"
 "Language-Team: Spanish <https://hosted.weblate.org/projects/neoipc/neoipc-infectious-agents/es/>\n"
 "Language: es\n"
@@ -2131,9 +2131,9 @@ msgstr "Varidnaviria"
 
 #. type: Hash Value: Hierarchies Name
 #: metadata/common/pathogens/NeoIPC-Infectious-Agents.yaml:1
-#, fuzzy, no-wrap
+#, no-wrap
 msgid "Viruses"
-msgstr "Viruses"
+msgstr "Virus"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Name
 #: metadata/common/pathogens/NeoIPC-Infectious-Agents.yaml:1
@@ -19999,9 +19999,9 @@ msgstr "Dominio"
 
 #. type: Hash Value: Hierarchies Name
 #: metadata/common/pathogens/NeoIPC-Infectious-Agents.yaml:1
-#, fuzzy, no-wrap
+#, no-wrap
 msgid "Bacteria"
-msgstr "Bacteria"
+msgstr "Bacterias"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Name
 #: metadata/common/pathogens/NeoIPC-Infectious-Agents.yaml:1
@@ -24001,9 +24001,9 @@ msgstr "Zoopagomyceta"
 
 #. type: Hash Value: Hierarchies Children Name
 #: metadata/common/pathogens/NeoIPC-Infectious-Agents.yaml:1
-#, fuzzy, no-wrap
+#, no-wrap
 msgid "Fungi"
-msgstr "Fungi"
+msgstr "Hongos"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Name
 #: metadata/common/pathogens/NeoIPC-Infectious-Agents.yaml:1
@@ -24067,12 +24067,12 @@ msgstr "Rhinosporidium"
 
 #. type: Hash Value: Hierarchies Children Name
 #: metadata/common/pathogens/NeoIPC-Infectious-Agents.yaml:1
-#, fuzzy, no-wrap
+#, no-wrap
 msgid "Protozoa"
-msgstr "Protozoa"
+msgstr "Protozoos"
 
 #. type: Hash Value: Hierarchies Name
 #: metadata/common/pathogens/NeoIPC-Infectious-Agents.yaml:1
-#, fuzzy, no-wrap
+#, no-wrap
 msgid "Eukaryota"
-msgstr "Eukaryota"
+msgstr "Eucariota"
