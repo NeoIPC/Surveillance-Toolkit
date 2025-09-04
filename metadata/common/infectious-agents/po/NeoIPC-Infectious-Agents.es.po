@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "POT-Creation-Date: 2025-08-30 08:46+0200\n"
-"PO-Revision-Date: 2025-08-20 18:11+0000\n"
-"Last-Translator: Brar Piening <brar@gmx.de>\n"
+"PO-Revision-Date: 2025-09-04 06:55+0000\n"
+"Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Spanish <https://hosted.weblate.org/projects/neoipc/neoipc-infectious-agents/es/>\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.13\n"
+"X-Generator: Weblate 5.13.1-rc\n"
 
 #. type: Hash Value: Hierarchies ConceptType
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
@@ -24201,18 +24201,14 @@ msgstr "[[[nhsn-organism-list,NHSN]]]"
 msgid ""
 "NHSN Organism List: https://www.cdc.gov/nhsn/xls/master-organism-com-"
 "commensals-lists.xlsx"
-msgstr ""
-"Lista de organismos de la NHSN: https://www.cdc.gov/nhsn/xls/master-organism-"
-"com-commensals-lists.xlsx"
+msgstr "Lista de organismos de la NHSN: https://www.cdc.gov/nhsn/xls/master-organism-com-commensals-lists.xlsx"
 
 #. type: Plain text
 #: metadata/common/infectious-agents/Output-Footer.adoc:9
 msgid ""
 "Source: https://www.cdc.gov/nhsn/index.html[Centers for Disease Control and "
 "Prevention National Healthcare Safety Network (NHSN)]"
-msgstr ""
-"Fuente: https://www.cdc.gov/nhsn/index.html[Centers for Disease Control and "
-"Prevention National Healthcare Safety Network (NHSN)]"
+msgstr "Fuente: https://www.cdc.gov/nhsn/index.html[Centers for Disease Control and Prevention National Healthcare Safety Network (NHSN)]"
 
 #. type: Plain text
 #: metadata/common/infectious-agents/Output-Footer.adoc:11
@@ -24226,20 +24222,14 @@ msgid ""
 "trademarks does not constitute its endorsement or recommendation by the U.S. "
 "Government, Department of Health and Human Services, or Centers for Disease "
 "Control and Prevention."
-msgstr ""
-"La referencia a productos comerciales específicos, fabricantes, empresas o "
-"marcas registradas no constituye su respaldo o recomendación por parte del "
-"Gobierno de los Estados Unidos, el Department of Health and Human Services o "
-"los Centers for Disease Control and Prevention."
+msgstr "La referencia a productos comerciales específicos, fabricantes, empresas o marcas registradas no constituye su respaldo o recomendación por parte del Gobierno de los Estados Unidos, el Department of Health and Human Services o los Centers for Disease Control and Prevention."
 
 #. type: Plain text
 #: metadata/common/infectious-agents/Output-Footer.adoc:17
 msgid ""
 "Not subject to copyright but some https://www.cdc.gov/other/agencymaterials."
 "html[requirements] must be followed."
-msgstr ""
-"No está sujeto a derechos de autor, pero deben cumplirse algunos https://www."
-"cdc.gov/other/agencymaterials.html[requisitos]."
+msgstr "No está sujeto a derechos de autor, pero deben cumplirse algunos https://www.cdc.gov/other/agencymaterials.html[requisitos]."
 
 #. type: Plain text
 #: metadata/common/infectious-agents/Output-Footer.adoc:19
@@ -24251,9 +24241,7 @@ msgstr "[[[lpsn,LPSN]]]"
 msgid ""
 "List of Prokaryotic names with Standing in Nomenclature: https://lpsn.dsmz."
 "de/"
-msgstr ""
-"List of Prokaryotic names with Standing in Nomenclature: https://lpsn.dsmz."
-"de/"
+msgstr "List of Prokaryotic names with Standing in Nomenclature: https://lpsn.dsmz.de/"
 
 #. type: Plain text
 #: metadata/common/infectious-agents/Output-Footer.adoc:27
@@ -24263,22 +24251,14 @@ msgid ""
 "moves to the DSMZ.  __International Journal of Systematic and Evolutionary "
 "Microbiology__, **Volume 70, Issue 11**, 23 July 2020, Pages 5607-5612; DOI: "
 "https://doi.org/10.1099/ijsem.0.004332[10.1099/ijsem.0.004332]"
-msgstr ""
-"Parte, A.C., Sardà Carbasse, J., Meier-Kolthoff, J.P., Reimer, L.C. and "
-"Göker, M.  List of Prokaryotic names with Standing in Nomenclature (LPSN) "
-"moves to the DSMZ.  __International Journal of Systematic and Evolutionary "
-"Microbiology__, **Volume 70, Issue 11**, 23 July 2020, Pages 5607-5612; DOI: "
-"https://doi.org/10.1099/ijsem.0.004332[10.1099/ijsem.0.004332]"
+msgstr "Parte, A.C., Sardà Carbasse, J., Meier-Kolthoff, J.P., Reimer, L.C. and Göker, M.  List of Prokaryotic names with Standing in Nomenclature (LPSN) moves to the DSMZ.  __International Journal of Systematic and Evolutionary Microbiology__, **Volume 70, Issue 11**, 23 July 2020, Pages 5607-5612; DOI: https://doi.org/10.1099/ijsem.0.004332[10.1099/ijsem.0.004332]"
 
 #. type: Plain text
 #: metadata/common/infectious-agents/Output-Footer.adoc:29
 msgid ""
 "Licensed under the Creative Commons https://creativecommons.org/licenses/by-"
 "nc/4.0/[Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)] license."
-msgstr ""
-"Licenciado bajo la licencia Creative Commons https://creativecommons.org/"
-"licenses/by-nc/4.0/deed.es[Atribución/Reconocimiento-NoComercial 4.0 "
-"Internacional (CC BY-NC 4.0)]."
+msgstr "Licenciado bajo la licencia Creative Commons https://creativecommons.org/licenses/by-nc/4.0/deed.es[Atribución/Reconocimiento-NoComercial 4.0 Internacional (CC BY-NC 4.0)]."
 
 #. type: Plain text
 #: metadata/common/infectious-agents/Output-Footer.adoc:31
@@ -24304,18 +24284,7 @@ msgid ""
 "Crous.  MycoBank gearing up for new horizons.  __IMA Fungus__, **Volume 4, "
 "No 2**, 17 December 2013, Pages 371–379; DOI: https://doi.org/10.5598/"
 "imafungus.2013.04.02.16[10.5598/imafungus.2013.04.02.16]"
-msgstr ""
-"Vincent Robert, Duong Vu, Ammar Ben Hadj Amor, Nathalie van de Wiele, Carlo "
-"Brouwer, Bernard Jabas, Szaniszlo Szoke, Ahmed Dridi, Maher Triki, Samy ben "
-"Daoud, Oussema Chouchen, Lea Vaas, Arthur de Cock, Joost A. Stalpers, Dora "
-"Stalpers, Gerard J.M. Verkley, Marizeth Groenewald, Felipe Borges dos "
-"Santos, Gerrit Stegehuis, Wei Li, Linhuan Wu, Run Zhang, Juncai Ma, Miaomiao "
-"Zhou, Sergio Pérez Gorjón, Lily Eurwilaichitr, Supawadee Ingsriswang, Karen "
-"Hansen, Conrad Schoch, Barbara Robbertse, Laszlo Irinyi, Wieland Meyer, "
-"Gianluigi Cardinali, David L. Hawksworth, John W. Taylor, and Pedro W. "
-"Crous.  MycoBank gearing up for new horizons.  __IMA Fungus__, **Volume 4, "
-"No 2**, 17 December 2013, Pages 371–379; DOI: https://doi.org/10.5598/"
-"imafungus.2013.04.02.16[10.5598/imafungus.2013.04.02.16]"
+msgstr "Vincent Robert, Duong Vu, Ammar Ben Hadj Amor, Nathalie van de Wiele, Carlo Brouwer, Bernard Jabas, Szaniszlo Szoke, Ahmed Dridi, Maher Triki, Samy ben Daoud, Oussema Chouchen, Lea Vaas, Arthur de Cock, Joost A. Stalpers, Dora Stalpers, Gerard J.M. Verkley, Marizeth Groenewald, Felipe Borges dos Santos, Gerrit Stegehuis, Wei Li, Linhuan Wu, Run Zhang, Juncai Ma, Miaomiao Zhou, Sergio Pérez Gorjón, Lily Eurwilaichitr, Supawadee Ingsriswang, Karen Hansen, Conrad Schoch, Barbara Robbertse, Laszlo Irinyi, Wieland Meyer, Gianluigi Cardinali, David L. Hawksworth, John W. Taylor, and Pedro W. Crous.  MycoBank gearing up for new horizons.  __IMA Fungus__, **Volume 4, No 2**, 17 December 2013, Pages 371–379; DOI: https://doi.org/10.5598/imafungus.2013.04.02.16[10.5598/imafungus.2013.04.02.16]"
 
 #. type: Plain text
 #: metadata/common/infectious-agents/Output-Footer.adoc:46
@@ -24323,10 +24292,7 @@ msgid ""
 "Licensed under the Creative Commons https://creativecommons.org/licenses/by-"
 "nc-nd/4.0/[Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-"
 "NC-ND 4.0)] license."
-msgstr ""
-"Licenciado bajo la licencia Creative Commons https://creativecommons.org/"
-"licenses/by-nc-nd/4.0/deed.es[Atribución/Reconocimiento-NoComercial-"
-"SinDerivados 4.0 Internacional (CC BY-NC-ND 4.0)]."
+msgstr "Licenciado bajo la licencia Creative Commons https://creativecommons.org/licenses/by-nc-nd/4.0/deed.es[Atribución/Reconocimiento-NoComercial-SinDerivados 4.0 Internacional (CC BY-NC-ND 4.0)]."
 
 #. type: Plain text
 #: metadata/common/infectious-agents/Output-Footer.adoc:48
@@ -24338,9 +24304,7 @@ msgstr "[[[ictv,ICTV]]]"
 msgid ""
 "International Committee on Taxonomy of Viruses (ICTV) database: https://ictv."
 "global/taxonomy/"
-msgstr ""
-"Base de datos del International Committee on Taxonomy of Viruses (ICTV): "
-"https://ictv.global/taxonomy/"
+msgstr "Base de datos del International Committee on Taxonomy of Viruses (ICTV): https://ictv.global/taxonomy/"
 
 #. type: Plain text
 #: metadata/common/infectious-agents/Output-Footer.adoc:56
@@ -24350,22 +24314,14 @@ msgid ""
 "Viruses (ICTV)  __Nucleic Acids Research__, **Volume 46, Issue D1**, 4 "
 "January 2018, Pages D708–D717, DOI: https://doi.org/10.1093/nar/"
 "gkx932[10.1093/nar/gkx932]"
-msgstr ""
-"Lefkowitz EJ, Dempsey DM, Hendrickson RC, Orton RJ, Siddell SG, Smith DB.  "
-"Virus taxonomy: the database of the International Committee on Taxonomy of "
-"Viruses (ICTV)  __Nucleic Acids Research__, **Volume 46, Issue D1**, 4 "
-"January 2018, Pages D708–D717, DOI: https://doi.org/10.1093/nar/"
-"gkx932[10.1093/nar/gkx932]"
+msgstr "Lefkowitz EJ, Dempsey DM, Hendrickson RC, Orton RJ, Siddell SG, Smith DB.  Virus taxonomy: the database of the International Committee on Taxonomy of Viruses (ICTV)  __Nucleic Acids Research__, **Volume 46, Issue D1**, 4 January 2018, Pages D708–D717, DOI: https://doi.org/10.1093/nar/gkx932[10.1093/nar/gkx932]"
 
 #. type: Plain text
 #: metadata/common/infectious-agents/Output-Footer.adoc:57
 msgid ""
 "Licensed under the Creative Commons http://creativecommons.org/licenses/by-"
 "sa/4.0/[Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)] license."
-msgstr ""
-"Licenciado bajo la licencia Creative Commons https://creativecommons.org/"
-"licenses/by-nc-nd/4.0/deed.es[AAtribución/Reconocimiento-CompartirIgual 4.0 "
-"Internacional (CC BY-SA 4.0)]."
+msgstr "Licenciado bajo la licencia Creative Commons https://creativecommons.org/licenses/by-nc-nd/4.0/deed.es[AAtribución/Reconocimiento-CompartirIgual 4.0 Internacional (CC BY-SA 4.0)]."
 
 #. type: Title =
 #: metadata/common/infectious-agents/Output-Header.adoc:1
@@ -24379,11 +24335,7 @@ msgid ""
 "The following list contains the current taxonomic names and common synonyms "
 "of the infectious agent species and genera as well as some diagnostic groups "
 "that can currently be recorded in the NeoIPC Surveillance."
-msgstr ""
-"La siguiente lista contiene los nombres taxonómicos actuales y sinónimos "
-"comunes de las especies y géneros de agentes infecciosos, así como algunos "
-"grupos diagnósticos que actualmente pueden registrarse en la Vigilancia "
-"NeoIPC."
+msgstr "La siguiente lista contiene los nombres taxonómicos actuales y sinónimos comunes de las especies y géneros de agentes infecciosos, así como algunos grupos diagnósticos que actualmente pueden registrarse en la Vigilancia NeoIPC."
 
 #. type: Plain text
 #: metadata/common/infectious-agents/Output-Header.adoc:9
@@ -24392,17 +24344,11 @@ msgid ""
 "regularly updated with current information from the List of Prokaryotic "
 "names with Standing in Nomenclature <<lpsn>>, the MycoBank database "
 "<<mycobank>> and the ICTV database <<ictv>>."
-msgstr ""
-"Derivada originalmente de la Lista de Organismos de la NHSN <<nhsn-organism-"
-"list>>, se actualiza periódicamente con información actualizada de la «List "
-"of Prokaryotic names with Standing in Nomenclature» <<lpsn>>, la base de "
-"datos MycoBank <<mycobank>> y la base de datos ICTV <<ictv>>."
+msgstr "Derivada originalmente de la Lista de Organismos de la NHSN <<nhsn-organism-list>>, se actualiza periódicamente con información actualizada de la «List of Prokaryotic names with Standing in Nomenclature» <<lpsn>>, la base de datos MycoBank <<mycobank>> y la base de datos ICTV <<ictv>>."
 
 #. type: Plain text
 #: metadata/common/infectious-agents/Output-Header.adoc:11
 msgid ""
 "We thank these organisations for generously publishing their data under a "
 "permissive licence, enabling its use in the NeoIPC Surveillance."
-msgstr ""
-"Agradecemos a estas organizaciones por publicar generosamente sus datos bajo "
-"una licencia permisiva, lo que permite su uso en la vigilancia NeoIPC."
+msgstr "Agradecemos a estas organizaciones por publicar generosamente sus datos bajo una licencia permisiva, lo que permite su uso en la vigilancia NeoIPC."
