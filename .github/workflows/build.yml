@@ -27,7 +27,7 @@ jobs:
               shell: bash
               run: |
                 po4a --verbose po4a.cfg
-                po4a --verbose metadata/common/pathogens/po4a.cfg
+                po4a --verbose metadata/common/infectious-agents/po4a.cfg
 
             - name: Build
               shell: pwsh
