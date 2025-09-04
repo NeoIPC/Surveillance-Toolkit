@@ -440,19 +440,19 @@ function New-PathogenList {
         [switch]$AsciiDoc
     )
 
-    $pathogensFolderPath = Join-Path -Resolve -Path $MetadataPath -ChildPath 'common' -AdditionalChildPath 'pathogens'
-    $listElementsFile = Join-Path -Resolve -Path $pathogensFolderPath -ChildPath 'ListElements.csv'
-    $ownedPathogenConceptsFile = Join-Path -Resolve -Path $pathogensFolderPath -ChildPath 'NeoIPC-Owned-Pathogen-Concepts.csv'
-    $pathogenConceptsFile = Join-Path -Resolve -Path $pathogensFolderPath -ChildPath 'NeoIPC-Pathogen-Concepts.csv'
-    $pathogenSynonymsFile = Join-Path -Resolve -Path $pathogensFolderPath -ChildPath 'NeoIPC-Pathogen-Synonyms.csv'
+    $infectiousAgentsFolderPath = Join-Path -Resolve -Path $MetadataPath -ChildPath 'common' -AdditionalChildPath 'infectious-agents'
+    $listElementsFile = Join-Path -Resolve -Path $infectiousAgentsFolderPath -ChildPath 'ListElements.csv'
+    $ownedPathogenConceptsFile = Join-Path -Resolve -Path $infectiousAgentsFolderPath -ChildPath 'NeoIPC-Owned-Pathogen-Concepts.csv'
+    $infectiousAgentConceptsFile = Join-Path -Resolve -Path $infectiousAgentsFolderPath -ChildPath 'NeoIPC-Pathogen-Concepts.csv'
+    $infectiousAgentSynonymsFile = Join-Path -Resolve -Path $infectiousAgentsFolderPath -ChildPath 'NeoIPC-Pathogen-Synonyms.csv'
     if ($TargetCulture.Name) {
         $listElementsTranslations = Import-Translations -LiteralPath $listElementsFile -TargetCulture $TargetCulture -ExpectedProperties 'VALUE'
-        $pathogenConceptsTranslations = Import-Translations -LiteralPath $pathogenConceptsFile -TargetCulture $TargetCulture -ExpectedProperties 'CONCEPT'
-        $pathogenSynonymsTranslations = Import-Translations -LiteralPath $pathogenSynonymsFile -TargetCulture $TargetCulture -ExpectedProperties 'SYNONYM'
+        $infectiousAgentConceptsTranslations = Import-Translations -LiteralPath $infectiousAgentConceptsFile -TargetCulture $TargetCulture -ExpectedProperties 'CONCEPT'
+        $infectiousAgentSynonymsTranslations = Import-Translations -LiteralPath $infectiousAgentSynonymsFile -TargetCulture $TargetCulture -ExpectedProperties 'SYNONYM'
     } else {
         $listElementsTranslations = @()
-        $pathogenConceptsTranslations = @()
-        $pathogenSynonymsTranslations = @()
+        $infectiousAgentConceptsTranslations = @()
+        $infectiousAgentSynonymsTranslations = @()
     }
 
     $ownedPathogenConcepts = [System.Collections.Generic.Dictionary[uint, string]]::new()
@@ -491,126 +491,126 @@ function New-PathogenList {
     $recordedResistancesString = $listElements['recorded_resistances']
     $typeString = $listElements['type']
 
-    $pathogenConcepts = Import-Csv -LiteralPath $pathogenConceptsFile -Encoding utf8NoBOM
-    $pathogenList = [System.Collections.Generic.List[PSCustomObject]]::new()
-    $pathogenConceptDictionary = [System.Collections.Generic.Dictionary[uint,PSCustomObject]]::new()
+    $infectiousAgentConcepts = Import-Csv -LiteralPath $infectiousAgentConceptsFile -Encoding utf8NoBOM
+    $infectiousAgentList = [System.Collections.Generic.List[PSCustomObject]]::new()
+    $infectiousAgentConceptDictionary = [System.Collections.Generic.Dictionary[uint,PSCustomObject]]::new()
     $lineNo = 1
-    foreach ($pathogenConcept in $pathogenConcepts) {
+    foreach ($infectiousAgentConcept in $infectiousAgentConcepts) {
         $lineNo++
         # Validate the input file
-        if ($pathogenConcept.concept.Trim().Length -eq 0) {
-            throw "Missing concept value in line $lineNo in file '$pathogenConceptsFile'."
+        if ($infectiousAgentConcept.concept.Trim().Length -eq 0) {
+            throw "Missing concept value in line $lineNo in file '$infectiousAgentConceptsFile'."
         }
-        if ($pathogenConcept.concept.Trim() -cne $pathogenConcept.concept) {
-            throw "Concept value with superflous whitespace in line $lineNo in file '$pathogenConceptsFile'."
+        if ($infectiousAgentConcept.concept.Trim() -cne $infectiousAgentConcept.concept) {
+            throw "Concept value with superflous whitespace in line $lineNo in file '$infectiousAgentConceptsFile'."
         }
-        if ($pathogenConcept.concept_type -cnotin 'clade','family','genus','group','serotype','species','species complex','subspecies','unknown','variety') {
-            throw "Unknown concept type in line $lineNo in file '$pathogenConceptsFile'."
+        if ($infectiousAgentConcept.concept_type -cnotin 'clade','family','genus','group','serotype','species','species complex','subspecies','unknown','variety') {
+            throw "Unknown concept type in line $lineNo in file '$infectiousAgentConceptsFile'."
         }
-        switch -casesensitive ($pathogenConcept.concept_source) {
+        switch -casesensitive ($infectiousAgentConcept.concept_source) {
             'LPSN' {
                 $urlTemplate = $LspnUrlTemplate
-                $listElementKey = 'bacterial_' + $pathogenConcept.concept_type -creplace '\s', '_'
+                $listElementKey = 'bacterial_' + $infectiousAgentConcept.concept_type -creplace '\s', '_'
                 break
             }
             'MycoBank' {
                 $urlTemplate = $MycoBankUrlTemplate
-                $listElementKey = 'fungal_' + $pathogenConcept.concept_type -creplace '\s', '_'
+                $listElementKey = 'fungal_' + $infectiousAgentConcept.concept_type -creplace '\s', '_'
                 break
             }
             'ICTV' {
                 $urlTemplate = $IctvUrlTemplate
-                $listElementKey = 'viral_' + $pathogenConcept.concept_type -creplace '\s', '_'
+                $listElementKey = 'viral_' + $infectiousAgentConcept.concept_type -creplace '\s', '_'
                 break
             }
             'NeoIPC' {
                 $urlTemplate = $null
-                $listElementKey = if ($pathogenConcept.concept_type -ceq 'unknown') { 'unknown' } else { $ownedPathogenConcepts[[uint]::Parse($pathogenConcept.concept_id)] }
+                $listElementKey = if ($infectiousAgentConcept.concept_type -ceq 'unknown') { 'unknown' } else { $ownedPathogenConcepts[[uint]::Parse($infectiousAgentConcept.concept_id)] }
                 break
             }
             default {
-                throw "Unknown concept source '$($pathogenConcept.concept_source)' in line $lineNo in file '$pathogenConceptsFile'."
+                throw "Unknown concept source '$($infectiousAgentConcept.concept_source)' in line $lineNo in file '$infectiousAgentConceptsFile'."
             }
         }
 
-        $url = if ($urlTemplate) { $urlTemplate -f $pathogenConcept.concept_id } else { $null }
-        $pathogenConceptType = $listElements[$listElementKey]
+        $url = if ($urlTemplate) { $urlTemplate -f $infectiousAgentConcept.concept_id } else { $null }
+        $infectiousAgentConceptType = $listElements[$listElementKey]
 
-        $pathogenName = $pathogenConcept.concept
-        foreach ($translation in $pathogenConceptsTranslations) {
+        $infectiousAgentName = $infectiousAgentConcept.concept
+        foreach ($translation in $infectiousAgentConceptsTranslations) {
             $translationInfo = $null
-            if ($translation.CONCEPT.TryGetValue($pathogenConcept.id, [ref]$translationInfo)) {
-                if ($pathogenConcept.concept -cne $translationInfo.DefaultValue) {
-                    Write-Warning "The default value '$($translationInfo.DefaultValue)' for id '$($pathogenConcept.id)' in translation file '$($translation.TranslationFile)' does not match the value '$($pathogenConcept.concept)' in '$pathogenConceptsFile'."
+            if ($translation.CONCEPT.TryGetValue($infectiousAgentConcept.id, [ref]$translationInfo)) {
+                if ($infectiousAgentConcept.concept -cne $translationInfo.DefaultValue) {
+                    Write-Warning "The default value '$($translationInfo.DefaultValue)' for id '$($infectiousAgentConcept.id)' in translation file '$($translation.TranslationFile)' does not match the value '$($infectiousAgentConcept.concept)' in '$infectiousAgentConceptsFile'."
                 }
                 if ($translationInfo.NeedsTranslation) {
-                    $pathogenName = $translationInfo.TranslatedValue
+                    $infectiousAgentName = $translationInfo.TranslatedValue
                 }
                 break
             }
         }
 
-        if ($pathogenConcept.is_cc -ceq 't') {
+        if ($infectiousAgentConcept.is_cc -ceq 't') {
             $pathogenicity = $commonCommensalString
-        } elseif ($pathogenConcept.is_cc -ceq 'f') {
+        } elseif ($infectiousAgentConcept.is_cc -ceq 'f') {
             $pathogenicity = $recognisedPathogenString
         }  else {
-            throw "Unexpected boolen value '$($pathogenConcept.is_cc)' in line $lineNo file '$pathogenConceptsFile'."
+            throw "Unexpected boolen value '$($infectiousAgentConcept.is_cc)' in line $lineNo file '$infectiousAgentConceptsFile'."
         }
 
         $recordedResistances = [System.Collections.Generic.List[string]]::new()
-        if ($pathogenConcept.show_mrsa -ceq 't') {
+        if ($infectiousAgentConcept.show_mrsa -ceq 't') {
             $recordedResistances.Add($MRSAString)
-        } elseif (-not($pathogenConcept.show_mrsa -ceq 'f')) {
-            throw "Unexpected boolen value '$($pathogenConcept.show_mrsa)' in line $lineNo file '$pathogenConceptsFile'."
+        } elseif (-not($infectiousAgentConcept.show_mrsa -ceq 'f')) {
+            throw "Unexpected boolen value '$($infectiousAgentConcept.show_mrsa)' in line $lineNo file '$infectiousAgentConceptsFile'."
         }
-        if ($pathogenConcept.show_vre -ceq 't') {
+        if ($infectiousAgentConcept.show_vre -ceq 't') {
             $recordedResistances.Add($VREString)
-        } elseif (-not($pathogenConcept.show_vre -ceq 'f')) {
-            throw "Unexpected boolen value '$($pathogenConcept.show_vre)' in line $lineNo file '$pathogenConceptsFile'."
+        } elseif (-not($infectiousAgentConcept.show_vre -ceq 'f')) {
+            throw "Unexpected boolen value '$($infectiousAgentConcept.show_vre)' in line $lineNo file '$infectiousAgentConceptsFile'."
         }
-        if ($pathogenConcept.show_3gcr -ceq 't') {
+        if ($infectiousAgentConcept.show_3gcr -ceq 't') {
             $recordedResistances.Add($3GCRString)
-        } elseif (-not($pathogenConcept.show_3gcr -ceq 'f')) {
-            throw "Unexpected boolen value '$($pathogenConcept.show_3gcr)' in line $lineNo file '$pathogenConceptsFile'."
+        } elseif (-not($infectiousAgentConcept.show_3gcr -ceq 'f')) {
+            throw "Unexpected boolen value '$($infectiousAgentConcept.show_3gcr)' in line $lineNo file '$infectiousAgentConceptsFile'."
         }
-        if ($pathogenConcept.show_carb_r -ceq 't') {
+        if ($infectiousAgentConcept.show_carb_r -ceq 't') {
             $recordedResistances.Add($carbapenemsString)
-        } elseif (-not($pathogenConcept.show_carb_r -ceq 'f')) {
-            throw "Unexpected boolen value '$($pathogenConcept.show_carb_r)' in line $lineNo file '$pathogenConceptsFile'."
+        } elseif (-not($infectiousAgentConcept.show_carb_r -ceq 'f')) {
+            throw "Unexpected boolen value '$($infectiousAgentConcept.show_carb_r)' in line $lineNo file '$infectiousAgentConceptsFile'."
         }
-        if ($pathogenConcept.show_coli_r -ceq 't') {
+        if ($infectiousAgentConcept.show_coli_r -ceq 't') {
             $recordedResistances.Add($colistinString)
-        } elseif (-not($pathogenConcept.show_coli_r -ceq 'f')) {
-            throw "Unexpected boolen value '$($pathogenConcept.show_coli_r)' in line $lineNo file '$pathogenConceptsFile'."
+        } elseif (-not($infectiousAgentConcept.show_coli_r -ceq 'f')) {
+            throw "Unexpected boolen value '$($infectiousAgentConcept.show_coli_r)' in line $lineNo file '$infectiousAgentConceptsFile'."
         }
 
-        $pathogenConceptId = [uint]::Parse($pathogenConcept.id)
-        $pathogenConceptObject = [PSCustomObject]@{
-            Id = $pathogenConceptId
-            Name = $pathogenName
-            Type = $pathogenConceptType
+        $infectiousAgentConceptId = [uint]::Parse($infectiousAgentConcept.id)
+        $infectiousAgentConceptObject = [PSCustomObject]@{
+            Id = $infectiousAgentConceptId
+            Name = $infectiousAgentName
+            Type = $infectiousAgentConceptType
             AssumedPathogenicity = $pathogenicity
             RecordedResistances = $recordedResistances.ToArray()
             Url = $url
             SynonymFor = $null
         }
-        $pathogenConceptDictionary.Add($pathogenConceptId, $pathogenConceptObject)
-        $pathogenList.Add($pathogenConceptObject)
+        $infectiousAgentConceptDictionary.Add($infectiousAgentConceptId, $infectiousAgentConceptObject)
+        $infectiousAgentList.Add($infectiousAgentConceptObject)
     }
 
-    $pathogenSynonyms = Import-Csv -LiteralPath $pathogenSynonymsFile -Encoding utf8NoBOM
+    $infectiousAgentSynonyms = Import-Csv -LiteralPath $infectiousAgentSynonymsFile -Encoding utf8NoBOM
     $lineNo = 1
-    foreach ($pathogenSynonym in $pathogenSynonyms) {
+    foreach ($infectiousAgentSynonym in $infectiousAgentSynonyms) {
         $lineNo++
         # Validate the input file
-        if ($pathogenSynonym.synonym.Trim().Length -eq 0) {
-            throw "Missing concept value in line $lineNo in file '$pathogenSynonymsFile'."
+        if ($infectiousAgentSynonym.synonym.Trim().Length -eq 0) {
+            throw "Missing concept value in line $lineNo in file '$infectiousAgentSynonymsFile'."
         }
-        if ($pathogenSynonym.synonym.Trim() -cne $pathogenSynonym.synonym) {
-            throw "Concept value with superflous whitespace in line $lineNo in file '$pathogenSynonymsFile'."
+        if ($infectiousAgentSynonym.synonym.Trim() -cne $infectiousAgentSynonym.synonym) {
+            throw "Concept value with superflous whitespace in line $lineNo in file '$infectiousAgentSynonymsFile'."
         }
-        switch -casesensitive ($pathogenSynonym.concept_source) {
+        switch -casesensitive ($infectiousAgentSynonym.concept_source) {
             'LPSN' {
                 $urlTemplate = $LspnUrlTemplate
                 break
@@ -628,28 +628,28 @@ function New-PathogenList {
                 break
             }
             default {
-                throw "Unknown concept source '$($pathogenSynonym.concept_source)' in line $lineNo in file '$pathogenSynonymsFile'."
+                throw "Unknown concept source '$($infectiousAgentSynonym.concept_source)' in line $lineNo in file '$infectiousAgentSynonymsFile'."
             }
         }
 
-        $url = if ($urlTemplate) { $urlTemplate -f $pathogenSynonym.concept_id } else { $null }
-        $pathogenSynonymName = $pathogenSynonym.synonym
-        foreach ($translation in $pathogenSynonymsTranslations) {
+        $url = if ($urlTemplate) { $urlTemplate -f $infectiousAgentSynonym.concept_id } else { $null }
+        $infectiousAgentSynonymName = $infectiousAgentSynonym.synonym
+        foreach ($translation in $infectiousAgentSynonymsTranslations) {
             $translationInfo = $null
-            if ($translation.SYNONYM.TryGetValue($pathogenSynonym.id, [ref]$translationInfo)) {
-                if ($pathogenSynonym.synonym -cne $translationInfo.DefaultValue) {
-                    Write-Warning "The default value '$($translationInfo.DefaultValue)' for id '$($pathogenSynonym.id)' in translation file '$($translation.TranslationFile)' does not match the value '$($pathogenSynonym.synonym)' in '$pathogenSynonymsFile'."
+            if ($translation.SYNONYM.TryGetValue($infectiousAgentSynonym.id, [ref]$translationInfo)) {
+                if ($infectiousAgentSynonym.synonym -cne $translationInfo.DefaultValue) {
+                    Write-Warning "The default value '$($translationInfo.DefaultValue)' for id '$($infectiousAgentSynonym.id)' in translation file '$($translation.TranslationFile)' does not match the value '$($infectiousAgentSynonym.synonym)' in '$infectiousAgentSynonymsFile'."
                 }
                 if ($translationInfo.NeedsTranslation) {
-                    $pathogenSynonymName = $translationInfo.TranslatedValue
+                    $infectiousAgentSynonymName = $translationInfo.TranslatedValue
                 }
                 break
             }
         }
-        $parentConcept = $pathogenConceptDictionary[[uint]::Parse($pathogenSynonym.synonym_for)]
-        $pathogenList.Add([PSCustomObject]@{
-            Id = [uint]::Parse($pathogenSynonym.id)
-            Name = $pathogenSynonymName
+        $parentConcept = $infectiousAgentConceptDictionary[[uint]::Parse($infectiousAgentSynonym.synonym_for)]
+        $infectiousAgentList.Add([PSCustomObject]@{
+            Id = [uint]::Parse($infectiousAgentSynonym.id)
+            Name = $infectiousAgentSynonymName
             Type = $parentConcept.Type
             AssumedPathogenicity = $parentConcept.AssumedPathogenicity
             RecordedResistances = $parentConcept.RecordedResistances
@@ -658,7 +658,7 @@ function New-PathogenList {
         })
     }
 
-    $pathogenList |
+    $infectiousAgentList |
     Sort-Object -Property Name -Culture $TargetCulture.Name |
     ForEach-Object -Begin {
         if ($AsciiDoc) {
@@ -671,9 +671,9 @@ function New-PathogenList {
         if ($AsciiDoc) {
             $type = if ($_.Url) { "$($_.Url)[$($_.Type),window=_blank]" } else { $_.Type }
             if ($_.SynonymFor) {
-                $type += " ($synonymForString xref:pathogen-concept-$($_.SynonymFor.Id)[$($_.SynonymFor.Name)])"
+                $type += " ($synonymForString xref:infectious-agent-concept-$($_.SynonymFor.Id)[$($_.SynonymFor.Name)])"
             }
-            Write-Output "|[[pathogen-concept-$($_.Id)]]$($_.Name) |$type |$($_.AssumedPathogenicity) |$($_.RecordedResistances -join ', ')"
+            Write-Output "|[[infectious-agent-concept-$($_.Id)]]$($_.Name) |$type |$($_.AssumedPathogenicity) |$($_.RecordedResistances -join ', ')"
         } else {
             $_
         }

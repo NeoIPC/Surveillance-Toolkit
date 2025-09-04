@@ -71,19 +71,19 @@ $inputFileInfos = @(
         translatedProperties = @('name','shortName')
     }
     @{
-        path = Join-Path -Path $workspaceFolder -ChildPath 'metadata' -AdditionalChildPath 'common','pathogens','ListElements.csv' -Resolve
+        path = Join-Path -Path $workspaceFolder -ChildPath 'metadata' -AdditionalChildPath 'common','infectious-agents','ListElements.csv' -Resolve
         type = 'csv'
         key = 'id'
         translatedProperties = @('value')
     }
     @{
-        path = Join-Path -Path $workspaceFolder -ChildPath 'metadata' -AdditionalChildPath 'common','pathogens','NeoIPC-Pathogen-Concepts.csv' -Resolve
+        path = Join-Path -Path $workspaceFolder -ChildPath 'metadata' -AdditionalChildPath 'common','infectious-agents','NeoIPC-Pathogen-Concepts.csv' -Resolve
         type = 'csv'
         key = 'id'
         translatedProperties = @('concept')
     }
     @{
-        path = Join-Path -Path $workspaceFolder -ChildPath 'metadata' -AdditionalChildPath 'common','pathogens','NeoIPC-Pathogen-Synonyms.csv' -Resolve
+        path = Join-Path -Path $workspaceFolder -ChildPath 'metadata' -AdditionalChildPath 'common','infectious-agents','NeoIPC-Pathogen-Synonyms.csv' -Resolve
         type = 'csv'
         key = 'id'
         translatedProperties = @('synonym')
