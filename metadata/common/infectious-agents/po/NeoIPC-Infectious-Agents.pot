@@ -1,14 +1,13 @@
 # SOME DESCRIPTIVE TITLE
 # Copyright (C) YEAR Free Software Foundation, Inc.
 # This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-#
+# Brar Piening <brar@gmx.de>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "POT-Creation-Date: 2025-08-30 08:46+0200\n"
 "PO-Revision-Date: 2025-09-04 06:55+0000\n"
-"Last-Translator: Anonymous <noreply@weblate.org>\n"
+"Last-Translator: Brar Piening <brar@gmx.de>\n"
 "Language-Team: English <https://hosted.weblate.org/projects/neoipc/neoipc-infectious-agents/en/>\n"
 "Language: en\n"
 "MIME-Version: 1.0\n"
@@ -21,19 +20,19 @@ msgstr ""
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
 msgid "Unknown"
-msgstr ""
+msgstr "Unknown"
 
 #. type: Hash Value: Hierarchies Name
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
 msgid "Not listed"
-msgstr ""
+msgstr "Not listed"
 
 #. type: Hash Value: Hierarchies Children Children Children Children ConceptType
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
 msgid "Species"
-msgstr ""
+msgstr "Species"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Children Name
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
@@ -75,7 +74,7 @@ msgstr "Human alphaherpesvirus 2"
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
 msgid "Group"
-msgstr ""
+msgstr "Group"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Name
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
@@ -87,7 +86,7 @@ msgstr "Human herpes simplex virus"
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
 msgid "Genus"
-msgstr ""
+msgstr "Genus"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Name
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
@@ -123,7 +122,7 @@ msgstr "Varicellovirus"
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
 msgid "Subfamily"
-msgstr ""
+msgstr "Subfamily"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Name
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
@@ -153,7 +152,7 @@ msgstr "Human cytomegalovirus"
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
 msgid "Cytomegalovirus"
-msgstr ""
+msgstr "Cytomegalovirus"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Children Name
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
@@ -273,7 +272,7 @@ msgstr "Gammaherpesvirinae"
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
 msgid "Family"
-msgstr ""
+msgstr "Family"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Name
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
@@ -291,7 +290,7 @@ msgstr "Herpesviridae"
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
 msgid "Order"
-msgstr ""
+msgstr "Order"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Name
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
@@ -303,7 +302,7 @@ msgstr "Herpesvirales"
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
 msgid "Class"
-msgstr ""
+msgstr "Class"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Name
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
@@ -315,7 +314,7 @@ msgstr "Herviviricetes"
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
 msgid "Phylum"
-msgstr ""
+msgstr "Phylum"
 
 #. type: Hash Value: Hierarchies Children Children Children Name
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
@@ -327,7 +326,7 @@ msgstr "Peploviricota"
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
 msgid "Kingdom"
-msgstr ""
+msgstr "Kingdom"
 
 #. type: Hash Value: Hierarchies Children Children Name
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
@@ -339,7 +338,7 @@ msgstr "Heunggongvirae"
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
 msgid "Realm"
-msgstr ""
+msgstr "Realm"
 
 #. type: Hash Value: Hierarchies Children Name
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
@@ -1215,7 +1214,7 @@ msgstr "Monjiviricetes"
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
 msgid "Subphylum"
-msgstr ""
+msgstr "Subphylum"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Name
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
@@ -1497,7 +1496,7 @@ msgstr "Human coronavirus"
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
 msgid "Serotype"
-msgstr ""
+msgstr "Serotype"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Children Children Children Name
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
@@ -1527,7 +1526,7 @@ msgstr "Severe acute respiratory syndrome-related coronavirus"
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
 msgid "Subgenus"
-msgstr ""
+msgstr "Subgenus"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Children Name
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
@@ -1557,7 +1556,7 @@ msgstr "Coronaviridae"
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
 msgid "Suborder"
-msgstr ""
+msgstr "Suborder"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Name
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
@@ -2133,7 +2132,7 @@ msgstr "Varidnaviria"
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
 msgid "Viruses"
-msgstr ""
+msgstr "Viruses"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Name
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
@@ -2577,7 +2576,7 @@ msgstr "Bifidobacterium gallicum"
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
 msgid "Subspecies"
-msgstr ""
+msgstr "Subspecies"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Name
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
@@ -6657,7 +6656,7 @@ msgstr "Bacillus thuringiensis"
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
 msgid "Bacillus cereus group"
-msgstr ""
+msgstr "Bacillus cereus group"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Name
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
@@ -17463,7 +17462,7 @@ msgstr "Providencia stuartii"
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
 msgid "Providencia"
-msgstr ""
+msgstr "Providencia"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Name
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
@@ -18531,7 +18530,7 @@ msgstr "Acinetobacter pittii"
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
 msgid "Acinetobacter calcoaceticus-Acinetobacter baumannii complex"
-msgstr ""
+msgstr "Acinetobacter calcoaceticus-Acinetobacter baumannii complex"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Name
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
@@ -19995,13 +19994,13 @@ msgstr "Thermotogati"
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
 msgid "Domain"
-msgstr ""
+msgstr "Domain"
 
 #. type: Hash Value: Hierarchies Name
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
 msgid "Bacteria"
-msgstr ""
+msgstr "Bacteria"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Name
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
@@ -20067,7 +20066,7 @@ msgstr "Basidiobolomycota"
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
 msgid "Subkingdom"
-msgstr ""
+msgstr "Subkingdom"
 
 #. type: Hash Value: Hierarchies Children Children Name
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
@@ -20361,7 +20360,7 @@ msgstr "Mycosphaerellales"
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
 msgid "Subclass"
-msgstr ""
+msgstr "Subclass"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Name
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
@@ -21081,7 +21080,7 @@ msgstr "Aspergillus flavipes"
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
 msgid "Variety"
-msgstr ""
+msgstr "Variety"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Children Children Name
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
@@ -24003,7 +24002,7 @@ msgstr "Zoopagomyceta"
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
 msgid "Fungi"
-msgstr ""
+msgstr "Fungi"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Name
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
@@ -24069,13 +24068,13 @@ msgstr "Rhinosporidium"
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
 msgid "Protozoa"
-msgstr ""
+msgstr "Protozoa"
 
 #. type: Hash Value: Hierarchies Name
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
 msgid "Eukaryota"
-msgstr ""
+msgstr "Eukaryota"
 
 #. type: Hash Value: Metadata ListTerms 3GCR Value
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
