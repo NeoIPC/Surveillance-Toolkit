@@ -1,0 +1,12 @@
+= NeoIPC Infectious Agent List
+
+[.normal]
+The following list contains the current taxonomic names and common synonyms of the infectious agent
+species and genera as well as some diagnostic groups that can currently be recorded in the NeoIPC Surveillance.
+
+Originally derived from the NHSN Organism List <<nhsn-organism-list>>, it is regularly updated with current
+information from the List of Prokaryotic names with Standing in Nomenclature <<lpsn>>,
+the MycoBank database <<mycobank>> and the ICTV database <<ictv>>.
+
+We thank these organisations for generously publishing their data under a permissive licence, enabling its use in
+the NeoIPC Surveillance.

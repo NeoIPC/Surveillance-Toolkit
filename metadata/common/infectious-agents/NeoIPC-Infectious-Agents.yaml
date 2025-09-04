@@ -1,8 +1,46 @@
-UrlTemplates:
-  ICTV: https://ictv.global/taxonomy/taxondetails?taxnode_id={0}
-  LPSN: https://lpsn.dsmz.de/{0}
-  MycoBank: http://www.mycobank.org/page/Name%20details%20page/field/Mycobank%20%23/{0}
-  NeoIPC: 'TODO: Create URIs for NeoIPC-owned pathogen concepts'
+Metadata:
+  UrlTemplates:
+    ICTV: https://ictv.global/taxonomy/taxondetails?taxnode_id={0}
+    LPSN: https://lpsn.dsmz.de/{0}
+    MycoBank: https://www.mycobank.org/page/Name%20details%20page/{0}
+    NeoIPC: 'TODO: Create URIs for NeoIPC-owned pathogen concepts'
+  ListTerms:
+    Yes:
+      Value: Yes
+    MRSA:
+      Value:  MRSA
+    VRE:
+      Value:  VRE
+    3GCR:
+      Value:  3GCR
+    Carbapenems:
+      Value:  Carbapenems
+    Colistin:
+      Value:  Colistin
+    Bacterium:
+      Value:  Bacterium
+    Fungus:
+      Value:  Fungus
+    Virus:
+      Value:  Virus
+    Protozoon:
+      Value:  Protozoon
+    Id:
+      Value:  Id
+    Name:
+      Value:  Name
+    Type:
+      Value:  Type
+    CommonCommensal:
+      Value:  Common Commensal
+    ParentId:
+      Value:  Parent Id
+    RecordedResistances:
+      Value:  Recorded Resistances
+    URL:
+      Value:  URL
+    SynonymFor:
+      Value:  synonym for
 Hierarchies:
 - Name: Not listed
   ConceptType: Unknown
@@ -15,6 +53,7 @@ Hierarchies:
   Carbapenems: true
   Colistin: true
 - Name: Viruses
+  ConceptId: 100
   ConceptSource: NeoIPC
   Children:
   - Name: Duplodnaviria
@@ -80,7 +119,7 @@ Hierarchies:
                       IctvId: 19710176
                       Synonyms:
                       - Name: Herpes simplex virus type 1
-                        ConceptId: "88"
+                        ConceptId: 88
                         ConceptSource: NeoIPC
                         Id: 2617
                       - Name: Human alphaherpesvirus 1
@@ -96,7 +135,7 @@ Hierarchies:
                       IctvId: 19760237
                       Synonyms:
                       - Name: Herpes simplex virus type 2
-                        ConceptId: "89"
+                        ConceptId: 93
                         ConceptSource: NeoIPC
                         Id: 2619
                       - Name: Human alphaherpesvirus 2
@@ -124,7 +163,7 @@ Hierarchies:
                       Id: 2620
                       IctvId: 19840518
                     - Name: Varicella zoster virus
-                      ConceptId: "92"
+                      ConceptId: 94
                       ConceptSource: NeoIPC
                       Id: 876
               - Name: Betaherpesvirinae
@@ -152,7 +191,7 @@ Hierarchies:
                       Id: 2604
                       IctvId: 19790333
                     - Name: Human cytomegalovirus
-                      ConceptId: "5"
+                      ConceptId: 5
                       ConceptSource: NeoIPC
                       Id: 2605
                 - Name: Roseolovirus
@@ -254,7 +293,7 @@ Hierarchies:
                       Id: 2631
                       IctvId: 19991019
                     - Name: Kaposi's sarcoma-associated herpesvirus
-                      ConceptId: "91"
+                      ConceptId: 92
                       ConceptSource: NeoIPC
                       Id: 2630
               Synonyms:
@@ -377,7 +416,7 @@ Hierarchies:
                 Children:
                 - Name: Human papillomavirus
                   ConceptType: Group
-                  ConceptId: Human papillomavirus
+                  ConceptId: 9
                   ConceptSource: NeoIPC
                   Id: 2611
         - Name: Quintoviricetes
@@ -436,11 +475,11 @@ Hierarchies:
                     IctvId: 20132595
                     Synonyms:
                     - Name: B19 virus
-                      ConceptId: "10"
+                      ConceptId: 10
                       ConceptSource: NeoIPC
                       Id: 2614
                     - Name: Erythrovirus B19
-                      ConceptId: "11"
+                      ConceptId: 11
                       ConceptSource: NeoIPC
                       Id: 2615
                     - Name: Primate erythroparvovirus 1
@@ -648,7 +687,7 @@ Hierarchies:
                     Id: 905
                     IctvId: 19710075
                   - Name: North American eastern equine encephalitis virus
-                    ConceptId: "86"
+                    ConceptId: 86
                     ConceptSource: NeoIPC
                     Id: 2646
                 - Name: Alphavirus madariaga
@@ -664,7 +703,7 @@ Hierarchies:
                     Id: 2647
                     IctvId: 20125921
                   - Name: South American eastern equine encephalitis virus
-                    ConceptId: "87"
+                    ConceptId: 85
                     ConceptSource: NeoIPC
                     Id: 2648
                 - Name: Alphavirus venezuelan
@@ -830,7 +869,7 @@ Hierarchies:
                 Children:
                 - Name: Human pegivirus
                   ConceptType: Group
-                  ConceptId: Human pegivirus
+                  ConceptId: 96
                   ConceptSource: NeoIPC
                   Id: 2652
                 - Name: Pegivirus hominis
@@ -841,7 +880,7 @@ Hierarchies:
                   IctvId: 20165296
                   Synonyms:
                   - Name: Hepatitis G virus
-                    ConceptId: "21"
+                    ConceptId: 21
                     ConceptSource: NeoIPC
                     Id: 2653
                   - Name: Pegivirus C
@@ -911,7 +950,7 @@ Hierarchies:
                 Children:
                 - Name: Human parainfluenza virus
                   ConceptType: Group
-                  ConceptId: Human parainfluenza virus
+                  ConceptId: 23
                   ConceptSource: NeoIPC
                   Id: 2660
                 - Name: Feraresvirinae
@@ -1420,12 +1459,12 @@ Hierarchies:
                   ConceptId: 202401847
                   ConceptSource: ICTV
                   IctvId: 20090624
-                  Synonyms:
+                  Children:
                   - Name: Human coronavirus
+                    ConceptType: Group
                     ConceptId: 7
                     ConceptSource: NeoIPC
                     Id: 2609
-                  Children:
                   - Name: Betacoronavirus
                     ConceptType: Genus
                     ConceptId: 202401860
@@ -1446,12 +1485,12 @@ Hierarchies:
                         Children:
                         - Name: Severe acute respiratory syndrome coronavirus 2
                           ConceptType: Serotype
-                          ConceptId: Severe acute respiratory syndrome coronavirus 2
+                          ConceptId: 95
                           ConceptSource: NeoIPC
                           Id: 2607
                           Synonyms:
                           - Name: SARS-CoV-2
-                            ConceptId: "6"
+                            ConceptId: 6
                             ConceptSource: NeoIPC
                             Id: 2608
                         Id: 3549
@@ -1535,7 +1574,7 @@ Hierarchies:
                     Id: 2625
                   - Name: Human rhinovirus
                     ConceptType: Group
-                    ConceptId: Human rhinovirus
+                    ConceptId: 8
                     ConceptSource: NeoIPC
                     Id: 2610
                   - Name: Enterovirus betacoxsackie
@@ -1559,22 +1598,22 @@ Hierarchies:
                     Children:
                     - Name: Poliovirus
                       ConceptType: Serotype
-                      ConceptId: 87
+                      ConceptId: 20
                       ConceptSource: NeoIPC
                       Id: 2635
                     - Name: Poliovirus 1
                       ConceptType: Serotype
-                      ConceptId: 88
+                      ConceptId: 89
                       ConceptSource: NeoIPC
                       Id: 2637
                     - Name: Poliovirus 2
                       ConceptType: Serotype
-                      ConceptId: 89
+                      ConceptId: 90
                       ConceptSource: NeoIPC
                       Id: 2638
                     - Name: Poliovirus 3
                       ConceptType: Serotype
-                      ConceptId: 90
+                      ConceptId: 91
                       ConceptSource: NeoIPC
                       Id: 2639
                     Synonyms:
@@ -1710,7 +1749,7 @@ Hierarchies:
                     IctvId: 19911434
                     Synonyms:
                     - Name: Human T-lymphotropic virus 1
-                      ConceptId: "25"
+                      ConceptId: 25
                       ConceptSource: NeoIPC
                       Id: 2676
                     - Name: Primate T-lymphotropic virus 1
@@ -1726,7 +1765,7 @@ Hierarchies:
                     IctvId: 19911435
                     Synonyms:
                     - Name: Human T-lymphotropic virus 2
-                      ConceptId: "26"
+                      ConceptId: 26
                       ConceptSource: NeoIPC
                       Id: 2678
                     - Name: Primate T-lymphotropic virus 2
@@ -1802,7 +1841,7 @@ Hierarchies:
         IctvId: 19930250
         Synonyms:
         - Name: Hepatitis D virus
-          ConceptId: "17"
+          ConceptId: 17
           ConceptSource: NeoIPC
           Id: 2628
   - Name: Varidnaviria
@@ -10314,17 +10353,17 @@ Hierarchies:
               Children:
               - Name: Alpha-hemolytic streptococci
                 ConceptType: Group
-                ConceptId: Alpha-hemolytic streptococci
+                ConceptId: 65
                 ConceptSource: NeoIPC
                 Id: 2795
               - Name: Beta-hemolytic streptococci
                 ConceptType: Group
-                ConceptId: Beta-hemolytic streptococci
+                ConceptId: 66
                 ConceptSource: NeoIPC
                 Id: 2796
               - Name: Gamma-hemolytic streptococci
                 ConceptType: Group
-                ConceptId: Gamma-hemolytic streptococci
+                ConceptId: 67
                 ConceptSource: NeoIPC
                 Id: 2797
               - Name: Viridans streptococci
@@ -10377,7 +10416,7 @@ Hierarchies:
                     CommonCommensal: true
                   Synonyms:
                   - Name: Streptococcus milleri group
-                    ConceptId: "70"
+                    ConceptId: 70
                     ConceptSource: NeoIPC
                     Id: 2800
                 - Name: Streptococcus bovis group
@@ -10665,7 +10704,7 @@ Hierarchies:
                 LpsnRecordNumber: 781297
                 Synonyms:
                 - Name: Group B streptococcus
-                  ConceptId: "4"
+                  ConceptId: 4
                   ConceptSource: NeoIPC
                   Id: 2602
               - Name: Streptococcus alactolyticus
@@ -10881,7 +10920,7 @@ Hierarchies:
                 LpsnRecordNumber: 781379
                 Synonyms:
                 - Name: Group A streptococcus
-                  ConceptId: "3"
+                  ConceptId: 3
                   ConceptSource: NeoIPC
                   Id: 2601
               - Name: Streptococcus sinensis
@@ -17735,17 +17774,17 @@ Hierarchies:
                   Children:
                   - Name: Salmonella enterica subsp. enterica Bareilly
                     ConceptType: Serotype
-                    ConceptId: Salmonella enterica subsp. enterica Bareilly
+                    ConceptId: 37
                     ConceptSource: NeoIPC
                     Id: 2740
                     Synonyms:
                     - Name: Salmonella Bareilly
-                      ConceptId: "38"
+                      ConceptId: 38
                       ConceptSource: NeoIPC
                       Id: 2741
                   - Name: Salmonella enterica subsp. enterica Choleraesuis
                     ConceptType: Serotype
-                    ConceptId: Salmonella enterica subsp. enterica Choleraesuis
+                    ConceptId: 33
                     ConceptSource: NeoIPC
                     Id: 2734
                     Synonyms:
@@ -17756,7 +17795,7 @@ Hierarchies:
                       LpsnRecordNumber: 780746
                   - Name: Salmonella enterica subsp. enterica Enteritidis
                     ConceptType: Serotype
-                    ConceptId: Salmonella enterica subsp. enterica Enteritidis
+                    ConceptId: 34
                     ConceptSource: NeoIPC
                     Id: 2736
                     Synonyms:
@@ -17767,97 +17806,97 @@ Hierarchies:
                       LpsnRecordNumber: 780762
                   - Name: Salmonella enterica subsp. enterica Infantis
                     ConceptType: Serotype
-                    ConceptId: Salmonella enterica subsp. enterica Infantis
+                    ConceptId: 35
                     ConceptSource: NeoIPC
                     Id: 2738
                     Synonyms:
                     - Name: Salmonella Infantis
-                      ConceptId: "36"
+                      ConceptId: 36
                       ConceptSource: NeoIPC
                       Id: 2739
                   - Name: Salmonella enterica subsp. enterica Isangi
                     ConceptType: Serotype
-                    ConceptId: Salmonella enterica subsp. enterica Isangi
+                    ConceptId: 39
                     ConceptSource: NeoIPC
                     Id: 2742
                     Synonyms:
                     - Name: Salmonella Isangi
-                      ConceptId: "40"
+                      ConceptId: 40
                       ConceptSource: NeoIPC
                       Id: 2743
                   - Name: Salmonella enterica subsp. enterica Kottbus
                     ConceptType: Serotype
-                    ConceptId: Salmonella enterica subsp. enterica Kottbus
+                    ConceptId: 41
                     ConceptSource: NeoIPC
                     Id: 2744
                     Synonyms:
                     - Name: Salmonella Kottbus
-                      ConceptId: "42"
+                      ConceptId: 42
                       ConceptSource: NeoIPC
                       Id: 2745
                   - Name: Salmonella enterica subsp. enterica Livingstone
                     ConceptType: Serotype
-                    ConceptId: Salmonella enterica subsp. enterica Livingstone
+                    ConceptId: 43
                     ConceptSource: NeoIPC
                     Id: 2746
                     Synonyms:
                     - Name: Salmonella Livingstone
-                      ConceptId: "44"
+                      ConceptId: 44
                       ConceptSource: NeoIPC
                       Id: 2747
                   - Name: Salmonella enterica subsp. enterica Montevideo
                     ConceptType: Serotype
-                    ConceptId: Salmonella enterica subsp. enterica Montevideo
+                    ConceptId: 45
                     ConceptSource: NeoIPC
                     Id: 2748
                     Synonyms:
                     - Name: Salmonella Montevideo
-                      ConceptId: "46"
+                      ConceptId: 46
                       ConceptSource: NeoIPC
                       Id: 2749
                   - Name: Salmonella enterica subsp. enterica Newport
                     ConceptType: Serotype
-                    ConceptId: Salmonella enterica subsp. enterica Newport
+                    ConceptId: 47
                     ConceptSource: NeoIPC
                     Id: 2750
                     Synonyms:
                     - Name: Salmonella Newport
-                      ConceptId: "48"
+                      ConceptId: 48
                       ConceptSource: NeoIPC
                       Id: 2751
                   - Name: Salmonella enterica subsp. enterica Ohio
                     ConceptType: Serotype
-                    ConceptId: Salmonella enterica subsp. enterica Ohio
+                    ConceptId: 49
                     ConceptSource: NeoIPC
                     Id: 2752
                     Synonyms:
                     - Name: Salmonella Ohio
-                      ConceptId: "50"
+                      ConceptId: 50
                       ConceptSource: NeoIPC
                       Id: 2753
                   - Name: Salmonella enterica subsp. enterica Senftenberg
                     ConceptType: Serotype
-                    ConceptId: Salmonella enterica subsp. enterica Senftenberg
+                    ConceptId: 51
                     ConceptSource: NeoIPC
                     Id: 2754
                     Synonyms:
                     - Name: Salmonella Senftenberg
-                      ConceptId: "52"
+                      ConceptId: 52
                       ConceptSource: NeoIPC
                       Id: 2755
                   - Name: Salmonella enterica subsp. enterica Tennessee
                     ConceptType: Serotype
-                    ConceptId: Salmonella enterica subsp. enterica Tennessee
+                    ConceptId: 53
                     ConceptSource: NeoIPC
                     Id: 2756
                     Synonyms:
                     - Name: Salmonella Tennessee
-                      ConceptId: "54"
+                      ConceptId: 54
                       ConceptSource: NeoIPC
                       Id: 2757
                   - Name: Salmonella enterica subsp. enterica Typhi
                     ConceptType: Serotype
-                    ConceptId: Salmonella enterica subsp. enterica Typhi
+                    ConceptId: 61
                     ConceptSource: NeoIPC
                     Id: 2764
                     Synonyms:
@@ -17868,7 +17907,7 @@ Hierarchies:
                       LpsnRecordNumber: 784859
                   - Name: Salmonella enterica subsp. enterica Typhimurium
                     ConceptType: Serotype
-                    ConceptId: Salmonella enterica subsp. enterica Typhimurium
+                    ConceptId: 62
                     ConceptSource: NeoIPC
                     Id: 2766
                     Synonyms:
@@ -17879,32 +17918,32 @@ Hierarchies:
                       LpsnRecordNumber: 780770
                   - Name: Salmonella enterica subsp. enterica Urbana
                     ConceptType: Serotype
-                    ConceptId: Salmonella enterica subsp. enterica Urbana
+                    ConceptId: 55
                     ConceptSource: NeoIPC
                     Id: 2758
                     Synonyms:
                     - Name: Salmonella Urbana
-                      ConceptId: "56"
+                      ConceptId: 56
                       ConceptSource: NeoIPC
                       Id: 2759
                   - Name: Salmonella enterica subsp. enterica Virchow
                     ConceptType: Serotype
-                    ConceptId: Salmonella enterica subsp. enterica Virchow
+                    ConceptId: 57
                     ConceptSource: NeoIPC
                     Id: 2760
                     Synonyms:
                     - Name: Salmonella Virchow
-                      ConceptId: "58"
+                      ConceptId: 58
                       ConceptSource: NeoIPC
                       Id: 2761
                   - Name: Salmonella enterica subsp. enterica Worthington
                     ConceptType: Serotype
-                    ConceptId: Salmonella enterica subsp. enterica Worthington
+                    ConceptId: 59
                     ConceptSource: NeoIPC
                     Id: 2762
                     Synonyms:
                     - Name: Salmonella Worthington
-                      ConceptId: "60"
+                      ConceptId: 60
                       ConceptSource: NeoIPC
                       Id: 2763
                 - Name: Salmonella enterica subsp. houtenae
@@ -21304,6 +21343,7 @@ Hierarchies:
               LpsnRecordNumber: 515482
 - Name: Eukaryota
   ConceptType: Domain
+  ConceptId: 99
   ConceptSource: NeoIPC
   Children:
   - Name: Fungi
@@ -22054,25 +22094,6 @@ Hierarchies:
                   ConceptSource: MycoBank
                   MycoBankNr: 563117
                   Children:
-                  - Name: Ochroconis
-                    ConceptType: Genus
-                    ConceptId: 57037
-                    ConceptSource: MycoBank
-                    Id: 2081
-                    MycoBankNr: 9136
-                    Children:
-                    - Name: Ochroconis humicola
-                      ConceptType: Species
-                      ConceptId: 17804
-                      ConceptSource: MycoBank
-                      Id: 861
-                      MycoBankNr: 318849
-                      Synonyms:
-                      - Name: Scolecobasidium humicola
-                        ConceptId: 35599
-                        ConceptSource: MycoBank
-                        Id: 952
-                        MycoBankNr: 338922
                   - Name: Scolecobasidium
                     ConceptType: Genus
                     ConceptId: 39423
@@ -22103,6 +22124,19 @@ Hierarchies:
                       ConceptSource: MycoBank
                       Id: 2081
                       MycoBankNr: 9136
+                      Children:
+                      - Name: Ochroconis humicola
+                        ConceptType: Species
+                        ConceptId: 17804
+                        ConceptSource: MycoBank
+                        Id: 861
+                        MycoBankNr: 318849
+                        Synonyms:
+                        - Name: Scolecobasidium humicola
+                          ConceptId: 35599
+                          ConceptSource: MycoBank
+                          Id: 952
+                          MycoBankNr: 338922
                   - Name: Verruconis
                     ConceptType: Genus
                     ConceptId: 474623
@@ -22904,7 +22938,7 @@ Hierarchies:
                       MycoBankNr: 308114
                       Synonyms:
                       - Name: Acremonium alabamensis
-                        ConceptId: "29"
+                        ConceptId: 29
                         ConceptSource: NeoIPC
                         Id: 2699
                     - Name: Acremonium potronii
@@ -24050,17 +24084,12 @@ Hierarchies:
                       ConceptSource: MycoBank
                       Id: 3348
                       MycoBankNr: 417304
-                      Synonyms:
-                      - Name: Candida pintolopesii
-                        ConceptId: 107989
-                        ConceptSource: MycoBank
-                        Id: 396
-                        MycoBankNr: 310322
-                      - Name: Torulopsis pintolopesii
-                        ConceptId: 107990
-                        ConceptSource: MycoBank
-                        Id: 1284
-                        MycoBankNr: 306944
+                    Synonyms:
+                    - Name: Torulopsis pintolopesii
+                      ConceptId: 107990
+                      ConceptSource: MycoBank
+                      Id: 1284
+                      MycoBankNr: 306944
                   - Name: Candida sake
                     ConceptType: Species
                     ConceptId: 105733
@@ -24110,6 +24139,24 @@ Hierarchies:
                     ConceptSource: MycoBank
                     Id: 2254
                     MycoBankNr: 4918
+                    Children:
+                    - Name: Schwanniomyces polymorphus
+                      ConceptType: Species
+                      ConceptId: 459852
+                      ConceptSource: MycoBank
+                      Id: 782
+                      MycoBankNr: 513478
+                      Synonyms:
+                      - Name: Debaryomyces polymorphus
+                        ConceptId: 106415
+                        ConceptSource: MycoBank
+                        Id: 2534
+                        MycoBankNr: 312744
+                      - Name: Pichia polymorpha
+                        ConceptId: 106413
+                        ConceptSource: MycoBank
+                        Id: 1475
+                        MycoBankNr: 226743
                 - Name: Diutina
                   ConceptType: Genus
                   ConceptId: 545142
@@ -24229,30 +24276,6 @@ Hierarchies:
                       ConceptSource: MycoBank
                       Id: 456
                       MycoBankNr: 226618
-                - Name: Schwanniomyces
-                  ConceptType: Genus
-                  ConceptId: 102771
-                  ConceptSource: MycoBank
-                  Id: 2254
-                  MycoBankNr: 4918
-                  Children:
-                  - Name: Schwanniomyces polymorphus
-                    ConceptType: Species
-                    ConceptId: 459852
-                    ConceptSource: MycoBank
-                    Id: 782
-                    MycoBankNr: 513478
-                    Synonyms:
-                    - Name: Debaryomyces polymorphus
-                      ConceptId: 106415
-                      ConceptSource: MycoBank
-                      Id: 2534
-                      MycoBankNr: 312744
-                    - Name: Pichia polymorpha
-                      ConceptId: 106413
-                      ConceptSource: MycoBank
-                      Id: 1475
-                      MycoBankNr: 226743
               - Name: Metschnikowiaceae
                 ConceptType: Family
                 ConceptId: 92937
