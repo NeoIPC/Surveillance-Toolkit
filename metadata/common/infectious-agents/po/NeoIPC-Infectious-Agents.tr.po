@@ -8,16 +8,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "POT-Creation-Date: 2025-08-30 08:46+0200\n"
-"PO-Revision-Date: 2025-08-20 17:23+0000\n"
-"Last-Translator: Brar Piening <brar@gmx.de>\n"
-"Language-Team: Turkish <https://hosted.weblate.org/projects/neoipc/neoipc-"
-"infectious-agents/tr/>\n"
+"PO-Revision-Date: 2025-09-04 04:29+0000\n"
+"Last-Translator: Prefill add-on <noreply-addon-prefill@weblate.org>\n"
+"Language-Team: Turkish <https://hosted.weblate.org/projects/neoipc/neoipc-infectious-agents/tr/>\n"
 "Language: tr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.13\n"
+"X-Generator: Weblate 5.13.1-rc\n"
 
 #. type: Hash Value: Hierarchies ConceptType
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
@@ -24081,9 +24080,9 @@ msgstr "Eukaryota"
 
 #. type: Hash Value: Metadata ListTerms 3GCR Value
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "3GCR"
-msgstr ""
+msgstr "3GCR"
 
 #. type: Hash Value: Metadata ListTerms Bacterium Value
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
@@ -24093,21 +24092,21 @@ msgstr "Bacteria"
 
 #. type: Hash Value: Metadata ListTerms Carbapenems Value
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Carbapenems"
-msgstr ""
+msgstr "Carbapenems"
 
 #. type: Hash Value: Metadata ListTerms Colistin Value
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Colistin"
-msgstr ""
+msgstr "Colistin"
 
 #. type: Hash Value: Metadata ListTerms CommonCommensal Value
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Common Commensal"
-msgstr ""
+msgstr "Common Commensal"
 
 #. type: Hash Value: Metadata ListTerms Fungus Value
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
@@ -24117,27 +24116,27 @@ msgstr "Fungi"
 
 #. type: Hash Value: Metadata ListTerms Id Value
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Id"
-msgstr ""
+msgstr "Id"
 
 #. type: Hash Value: Metadata ListTerms MRSA Value
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "MRSA"
-msgstr ""
+msgstr "MRSA"
 
 #. type: Hash Value: Metadata ListTerms Name Value
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Name"
-msgstr ""
+msgstr "Name"
 
 #. type: Hash Value: Metadata ListTerms ParentId Value
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Parent Id"
-msgstr ""
+msgstr "Parent Id"
 
 #. type: Hash Value: Metadata ListTerms Protozoon Value
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
@@ -24147,33 +24146,33 @@ msgstr "Protozoa"
 
 #. type: Hash Value: Metadata ListTerms RecordedResistances Value
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Recorded Resistances"
-msgstr ""
+msgstr "Recorded Resistances"
 
 #. type: Hash Value: Metadata ListTerms SynonymFor Value
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "synonym for"
-msgstr ""
+msgstr "synonym for"
 
 #. type: Hash Value: Metadata ListTerms Type Value
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Type"
-msgstr ""
+msgstr "Type"
 
 #. type: Hash Value: Metadata ListTerms URL Value
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "URL"
-msgstr ""
+msgstr "URL"
 
 #. type: Hash Value: Metadata ListTerms VRE Value
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "VRE"
-msgstr ""
+msgstr "VRE"
 
 #. type: Hash Value: Metadata ListTerms Virus Value
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
@@ -24183,97 +24182,110 @@ msgstr "Viruses"
 
 #. type: Hash Value: Metadata ListTerms Yes Value
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Yes"
-msgstr ""
+msgstr "Yes"
 
 #. type: Title ==
 #: metadata/common/infectious-agents/Output-Footer.adoc:2
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "References"
-msgstr ""
+msgstr "References"
 
 #. type: Plain text
 #: metadata/common/infectious-agents/Output-Footer.adoc:5
+#, fuzzy
 msgid "[[[nhsn-organism-list,NHSN]]]"
-msgstr ""
+msgstr "[[[nhsn-organism-list,NHSN]]]"
 
 #. type: Plain text
 #: metadata/common/infectious-agents/Output-Footer.adoc:7
+#, fuzzy
 msgid ""
 "NHSN Organism List: https://www.cdc.gov/nhsn/xls/master-organism-com-"
 "commensals-lists.xlsx"
-msgstr ""
+msgstr "NHSN Organism List: https://www.cdc.gov/nhsn/xls/master-organism-com-commensals-lists.xlsx"
 
 #. type: Plain text
 #: metadata/common/infectious-agents/Output-Footer.adoc:9
+#, fuzzy
 msgid ""
 "Source: https://www.cdc.gov/nhsn/index.html[Centers for Disease Control and "
 "Prevention National Healthcare Safety Network (NHSN)]"
-msgstr ""
+msgstr "Source: https://www.cdc.gov/nhsn/index.html[Centers for Disease Control and Prevention National Healthcare Safety Network (NHSN)]"
 
 #. type: Plain text
 #: metadata/common/infectious-agents/Output-Footer.adoc:11
+#, fuzzy
 msgid "Available on the NHSN website for no charge."
-msgstr ""
+msgstr "Available on the NHSN website for no charge."
 
 #. type: Plain text
 #: metadata/common/infectious-agents/Output-Footer.adoc:15
+#, fuzzy
 msgid ""
 "Reference to specific commercial products, manufacturers, companies, or "
 "trademarks does not constitute its endorsement or recommendation by the U.S. "
 "Government, Department of Health and Human Services, or Centers for Disease "
 "Control and Prevention."
-msgstr ""
+msgstr "Reference to specific commercial products, manufacturers, companies, or trademarks does not constitute its endorsement or recommendation by the U.S. Government, Department of Health and Human Services, or Centers for Disease Control and Prevention."
 
 #. type: Plain text
 #: metadata/common/infectious-agents/Output-Footer.adoc:17
+#, fuzzy
 msgid ""
 "Not subject to copyright but some https://www.cdc.gov/other/agencymaterials."
 "html[requirements] must be followed."
-msgstr ""
+msgstr "Not subject to copyright but some https://www.cdc.gov/other/agencymaterials.html[requirements] must be followed."
 
 #. type: Plain text
 #: metadata/common/infectious-agents/Output-Footer.adoc:19
+#, fuzzy
 msgid "[[[lpsn,LPSN]]]"
-msgstr ""
+msgstr "[[[lpsn,LPSN]]]"
 
 #. type: Plain text
 #: metadata/common/infectious-agents/Output-Footer.adoc:21
+#, fuzzy
 msgid ""
 "List of Prokaryotic names with Standing in Nomenclature: https://lpsn.dsmz."
 "de/"
-msgstr ""
+msgstr "List of Prokaryotic names with Standing in Nomenclature: https://lpsn.dsmz.de/"
 
 #. type: Plain text
 #: metadata/common/infectious-agents/Output-Footer.adoc:27
+#, fuzzy
 msgid ""
 "Parte, A.C., Sardà Carbasse, J., Meier-Kolthoff, J.P., Reimer, L.C. and "
 "Göker, M.  List of Prokaryotic names with Standing in Nomenclature (LPSN) "
 "moves to the DSMZ.  __International Journal of Systematic and Evolutionary "
 "Microbiology__, **Volume 70, Issue 11**, 23 July 2020, Pages 5607-5612; DOI: "
 "https://doi.org/10.1099/ijsem.0.004332[10.1099/ijsem.0.004332]"
-msgstr ""
+msgstr "Parte, A.C., Sardà Carbasse, J., Meier-Kolthoff, J.P., Reimer, L.C. and Göker, M.  List of Prokaryotic names with Standing in Nomenclature (LPSN) moves to the DSMZ.  __International Journal of Systematic and Evolutionary Microbiology__, **Volume 70, Issue 11**, 23 July 2020, Pages 5607-5612; DOI: https://doi.org/10.1099/ijsem.0.004332[10.1099/ijsem.0.004332]"
 
 #. type: Plain text
 #: metadata/common/infectious-agents/Output-Footer.adoc:29
+#, fuzzy
 msgid ""
 "Licensed under the Creative Commons https://creativecommons.org/licenses/by-"
 "nc/4.0/[Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)] license."
-msgstr ""
+msgstr "Licensed under the Creative Commons https://creativecommons.org/licenses/by-nc/4.0/[Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)] license."
 
 #. type: Plain text
 #: metadata/common/infectious-agents/Output-Footer.adoc:31
+#, fuzzy
 msgid "[[[mycobank,MycoBank]]]"
-msgstr ""
+msgstr "[[[mycobank,MycoBank]]]"
 
 #. type: Plain text
 #: metadata/common/infectious-agents/Output-Footer.adoc:33
+#, fuzzy
 msgid "MycoBank database: https://www.mycobank.org/"
-msgstr ""
+msgstr "MycoBank database: https://www.mycobank.org/"
 
 #. type: Plain text
 #: metadata/common/infectious-agents/Output-Footer.adoc:44
+#, fuzzy
 msgid ""
 "Vincent Robert, Duong Vu, Ammar Ben Hadj Amor, Nathalie van de Wiele, Carlo "
 "Brouwer, Bernard Jabas, Szaniszlo Szoke, Ahmed Dridi, Maher Triki, Samy ben "
@@ -24286,74 +24298,82 @@ msgid ""
 "Crous.  MycoBank gearing up for new horizons.  __IMA Fungus__, **Volume 4, "
 "No 2**, 17 December 2013, Pages 371–379; DOI: https://doi.org/10.5598/"
 "imafungus.2013.04.02.16[10.5598/imafungus.2013.04.02.16]"
-msgstr ""
+msgstr "Vincent Robert, Duong Vu, Ammar Ben Hadj Amor, Nathalie van de Wiele, Carlo Brouwer, Bernard Jabas, Szaniszlo Szoke, Ahmed Dridi, Maher Triki, Samy ben Daoud, Oussema Chouchen, Lea Vaas, Arthur de Cock, Joost A. Stalpers, Dora Stalpers, Gerard J.M. Verkley, Marizeth Groenewald, Felipe Borges dos Santos, Gerrit Stegehuis, Wei Li, Linhuan Wu, Run Zhang, Juncai Ma, Miaomiao Zhou, Sergio Pérez Gorjón, Lily Eurwilaichitr, Supawadee Ingsriswang, Karen Hansen, Conrad Schoch, Barbara Robbertse, Laszlo Irinyi, Wieland Meyer, Gianluigi Cardinali, David L. Hawksworth, John W. Taylor, and Pedro W. Crous.  MycoBank gearing up for new horizons.  __IMA Fungus__, **Volume 4, No 2**, 17 December 2013, Pages 371–379; DOI: https://doi.org/10.5598/imafungus.2013.04.02.16[10.5598/imafungus.2013.04.02.16]"
 
 #. type: Plain text
 #: metadata/common/infectious-agents/Output-Footer.adoc:46
+#, fuzzy
 msgid ""
 "Licensed under the Creative Commons https://creativecommons.org/licenses/by-"
 "nc-nd/4.0/[Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-"
 "NC-ND 4.0)] license."
-msgstr ""
+msgstr "Licensed under the Creative Commons https://creativecommons.org/licenses/by-nc-nd/4.0/[Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)] license."
 
 #. type: Plain text
 #: metadata/common/infectious-agents/Output-Footer.adoc:48
+#, fuzzy
 msgid "[[[ictv,ICTV]]]"
-msgstr ""
+msgstr "[[[ictv,ICTV]]]"
 
 #. type: Plain text
 #: metadata/common/infectious-agents/Output-Footer.adoc:50
+#, fuzzy
 msgid ""
 "International Committee on Taxonomy of Viruses (ICTV) database: https://ictv."
 "global/taxonomy/"
-msgstr ""
+msgstr "International Committee on Taxonomy of Viruses (ICTV) database: https://ictv.global/taxonomy/"
 
 #. type: Plain text
 #: metadata/common/infectious-agents/Output-Footer.adoc:56
+#, fuzzy
 msgid ""
 "Lefkowitz EJ, Dempsey DM, Hendrickson RC, Orton RJ, Siddell SG, Smith DB.  "
 "Virus taxonomy: the database of the International Committee on Taxonomy of "
 "Viruses (ICTV)  __Nucleic Acids Research__, **Volume 46, Issue D1**, 4 "
 "January 2018, Pages D708–D717, DOI: https://doi.org/10.1093/nar/"
 "gkx932[10.1093/nar/gkx932]"
-msgstr ""
+msgstr "Lefkowitz EJ, Dempsey DM, Hendrickson RC, Orton RJ, Siddell SG, Smith DB.  Virus taxonomy: the database of the International Committee on Taxonomy of Viruses (ICTV)  __Nucleic Acids Research__, **Volume 46, Issue D1**, 4 January 2018, Pages D708–D717, DOI: https://doi.org/10.1093/nar/gkx932[10.1093/nar/gkx932]"
 
 #. type: Plain text
 #: metadata/common/infectious-agents/Output-Footer.adoc:57
+#, fuzzy
 msgid ""
 "Licensed under the Creative Commons http://creativecommons.org/licenses/by-"
 "sa/4.0/[Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)] license."
-msgstr ""
+msgstr "Licensed under the Creative Commons http://creativecommons.org/licenses/by-sa/4.0/[Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)] license."
 
 #. type: Title =
 #: metadata/common/infectious-agents/Output-Header.adoc:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "NeoIPC Infectious Agent List"
-msgstr ""
+msgstr "NeoIPC Infectious Agent List"
 
 #. type: Plain text
 #: metadata/common/infectious-agents/Output-Header.adoc:5
+#, fuzzy
 msgid ""
 "The following list contains the current taxonomic names and common synonyms "
 "of the infectious agent species and genera as well as some diagnostic groups "
 "that can currently be recorded in the NeoIPC Surveillance."
-msgstr ""
+msgstr "The following list contains the current taxonomic names and common synonyms of the infectious agent species and genera as well as some diagnostic groups that can currently be recorded in the NeoIPC Surveillance."
 
 #. type: Plain text
 #: metadata/common/infectious-agents/Output-Header.adoc:9
+#, fuzzy
 msgid ""
 "Originally derived from the NHSN Organism List <<nhsn-organism-list>>, it is "
 "regularly updated with current information from the List of Prokaryotic "
 "names with Standing in Nomenclature <<lpsn>>, the MycoBank database "
 "<<mycobank>> and the ICTV database <<ictv>>."
-msgstr ""
+msgstr "Originally derived from the NHSN Organism List <<nhsn-organism-list>>, it is regularly updated with current information from the List of Prokaryotic names with Standing in Nomenclature <<lpsn>>, the MycoBank database <<mycobank>> and the ICTV database <<ictv>>."
 
 #. type: Plain text
 #: metadata/common/infectious-agents/Output-Header.adoc:11
+#, fuzzy
 msgid ""
 "We thank these organisations for generously publishing their data under a "
 "permissive licence, enabling its use in the NeoIPC Surveillance."
-msgstr ""
+msgstr "We thank these organisations for generously publishing their data under a permissive licence, enabling its use in the NeoIPC Surveillance."
 
 #, fuzzy, no-wrap
 #~ msgid "Bacterium: Bacterium\n"
