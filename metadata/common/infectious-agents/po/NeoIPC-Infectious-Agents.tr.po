@@ -24153,8 +24153,8 @@ msgstr "Kaydedilen dirençler"
 #. type: Hash Value: Metadata ListTerms SynonymFor Value
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
-msgid "synonym for"
-msgstr "'nın eşanlamlısı"
+msgid "synonym for {0}"
+msgstr " {0}'nın eşanlamlısı"
 
 #. type: Hash Value: Metadata ListTerms Type Value
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1

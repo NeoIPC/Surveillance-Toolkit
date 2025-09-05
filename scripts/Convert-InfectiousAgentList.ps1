@@ -76,15 +76,15 @@ function AppendChildrenRecursive {
 
             switch ($item.ConceptSource) {
                 LPSN {
-                    $newItem[$contentStrings.URL] = $data.UrlTemplates.LPSN -f $item.ConceptId
+                    $newItem[$contentStrings.URL] = $data.Metadata.UrlTemplates.LPSN -f $item.ConceptId
                     break
                 }
                 MycoBank {
-                    $newItem[$contentStrings.URL] = $data.UrlTemplates.MycoBank -f $item.ConceptId
+                    $newItem[$contentStrings.URL] = $data.Metadata.UrlTemplates.MycoBank -f $item.ConceptId
                     break
                 }
                 ICTV {
-                    $newItem[$contentStrings.URL] = $data.UrlTemplates.ICTV -f $item.ConceptId
+                    $newItem[$contentStrings.URL] = $data.Metadata.UrlTemplates.ICTV -f $item.ConceptId
                     break
                 }
             }
@@ -148,15 +148,15 @@ function AppendSynonyms {
 
             switch ($item.ConceptSource) {
                 LPSN {
-                    $newItem[$contentStrings.URL] = $data.UrlTemplates.LPSN -f $item.ConceptId
+                    $newItem[$contentStrings.URL] = $data.Metadata.UrlTemplates.LPSN -f $item.ConceptId
                     break
                 }
                 MycoBank {
-                    $newItem[$contentStrings.URL] = $data.UrlTemplates.MycoBank -f $item.ConceptId
+                    $newItem[$contentStrings.URL] = $data.Metadata.UrlTemplates.MycoBank -f $item.ConceptId
                     break
                 }
                 ICTV {
-                    $newItem[$contentStrings.URL] = $data.UrlTemplates.ICTV -f $item.ConceptId
+                    $newItem[$contentStrings.URL] = $data.Metadata.UrlTemplates.ICTV -f $item.ConceptId
                     break
                 }
             }
@@ -260,7 +260,7 @@ foreach ($iaList in $translationPaths) {
             $idNameDict[$_."$($contentStrings.Id)"] = $_."$($contentStrings.Name)"
             $_
         } |
-        Sort-Object Name -Culture ([cultureinfo]::GetCultureInfo($iaList.Language))
+        Sort-Object -Property $contentStrings.Name -Culture ([cultureinfo]::GetCultureInfo($iaList.Language))
     $outputBasePath = Join-Path -Path $OutputDirectory -ChildPath "NeoIPC-Infectious-Agents.$($culture.Name)."
     switch ($intermediaryOutputFormats) {
         'AsciiDoc' {
@@ -294,7 +294,7 @@ foreach ($iaList in $translationPaths) {
                             "[[pathogen-concept-$($_."$($contentStrings.Id)")]]$($_."$($contentStrings.Name)")"
                         }
                         if ($_."$($contentStrings.ParentId)") {
-                            "$($_."$($contentStrings.Type)") ($($contentStrings.SynonymFor) xref:pathogen-concept-$($_."$($contentStrings.ParentId)")[$($idNameDict[$_."$($contentStrings.ParentId)"])])"
+                            "$($_."$($contentStrings.Type)") ($($contentStrings.SynonymFor -f "xref:pathogen-concept-$($_."$($contentStrings.ParentId)")[$($idNameDict[$_."$($contentStrings.ParentId)"])]"))"
                         } else {
                             $_."$($contentStrings.Type)"
                         }

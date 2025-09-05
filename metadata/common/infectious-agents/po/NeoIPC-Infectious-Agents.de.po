@@ -24152,8 +24152,8 @@ msgstr "Erfasste Resistenzen"
 #. type: Hash Value: Metadata ListTerms SynonymFor Value
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
-msgid "synonym for"
-msgstr "Synonym für"
+msgid "synonym for {0}"
+msgstr "Synonym für {0}"
 
 #. type: Hash Value: Metadata ListTerms Type Value
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1

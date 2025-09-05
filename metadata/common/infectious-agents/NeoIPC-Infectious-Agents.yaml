@@ -40,7 +40,7 @@ Metadata:
     URL:
       Value:  URL
     SynonymFor:
-      Value:  synonym for
+      Value:  synonym for {0}
 Hierarchies:
 - Name: Not listed
   ConceptType: Unknown
