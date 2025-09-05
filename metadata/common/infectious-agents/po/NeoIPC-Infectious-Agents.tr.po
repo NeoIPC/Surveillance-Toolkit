@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "POT-Creation-Date: 2025-08-30 08:46+0200\n"
-"PO-Revision-Date: 2025-09-05 20:23+0000\n"
+"PO-Revision-Date: 2025-09-05 21:59+0000\n"
 "Last-Translator: Brar Piening <brar@gmx.de>\n"
 "Language-Team: Turkish <https://hosted.weblate.org/projects/neoipc/neoipc-infectious-agents/tr/>\n"
 "Language: tr\n"
@@ -24086,9 +24086,9 @@ msgstr "3NSD"
 
 #. type: Hash Value: Metadata ListTerms Bacterium Value
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
-#, fuzzy, no-wrap
+#, no-wrap
 msgid "Bacterium"
-msgstr "Bacteria"
+msgstr "Bakteri"
 
 #. type: Hash Value: Metadata ListTerms Carbapenems Value
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
@@ -24110,9 +24110,9 @@ msgstr "Sıradan komensal"
 
 #. type: Hash Value: Metadata ListTerms Fungus Value
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
-#, fuzzy, no-wrap
+#, no-wrap
 msgid "Fungus"
-msgstr "Fungi"
+msgstr "Mantar"
 
 #. type: Hash Value: Metadata ListTerms Id Value
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
@@ -24154,7 +24154,7 @@ msgstr "Kaydedilen dirençler"
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
 msgid "synonym for {0}"
-msgstr " {0}'nın eşanlamlısı"
+msgstr "{0}'nın eşanlamlısı"
 
 #. type: Hash Value: Metadata ListTerms Type Value
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
@@ -24176,9 +24176,9 @@ msgstr "VRE"
 
 #. type: Hash Value: Metadata ListTerms Virus Value
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
-#, fuzzy, no-wrap
+#, no-wrap
 msgid "Virus"
-msgstr "Viruses"
+msgstr "Virüs"
 
 #. type: Hash Value: Metadata ListTerms Yes Value
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
