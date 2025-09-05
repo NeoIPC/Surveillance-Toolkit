@@ -24151,8 +24151,8 @@ msgstr "Recorded Resistances"
 #. type: Hash Value: Metadata ListTerms SynonymFor Value
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
-msgid "synonym for"
-msgstr "synonym for"
+msgid "synonym for {0}"
+msgstr "synonym for {0}"
 
 #. type: Hash Value: Metadata ListTerms Type Value
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1

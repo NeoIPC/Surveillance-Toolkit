@@ -294,7 +294,7 @@ foreach ($iaList in $translationPaths) {
                             "[[pathogen-concept-$($_."$($contentStrings.Id)")]]$($_."$($contentStrings.Name)")"
                         }
                         if ($_."$($contentStrings.ParentId)") {
-                            "$($_."$($contentStrings.Type)") ($($contentStrings.SynonymFor) xref:pathogen-concept-$($_."$($contentStrings.ParentId)")[$($idNameDict[$_."$($contentStrings.ParentId)"])])"
+                            "$($_."$($contentStrings.Type)") ($($contentStrings.SynonymFor -f "xref:pathogen-concept-$($_."$($contentStrings.ParentId)")[$($idNameDict[$_."$($contentStrings.ParentId)"])]"))"
                         } else {
                             $_."$($contentStrings.Type)"
                         }
