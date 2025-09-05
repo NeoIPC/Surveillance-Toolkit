@@ -1,0 +1,111 @@
+```{r}
+#| label: tbl-abr-infection-rate
+#| tbl-cap: "Nosocomial infections with resistant pathogens"
+#| tbl-cap-location: top
+
+reference_data |>
+  neoipcr::get_abr_infection_rate_table() |>
+  dplyr::rename(
+    "N"="n",
+    "Pooled"="pooled",
+    "Q₁"="q1",
+    "Q₂"="q2",
+    "Q₃"="q3") |>
+  dplyr::mutate(
+    abr = dplyr::case_match(
+      .data$abr,
+      "3gcr"~"3rd gen. cephalosporin resistance",
+      "car"~"Carbapenem resistance",
+      "cor"~"Colistin resistance",
+      "mrsa"~"Methicillin-resistant Staphylococcus aureus (MRSA)",
+      "vre"~"Vancomycin-resistant Enterococcus (VRE)"),
+    level = .data$level + 2) |>
+  dplyr::group_by(.data$abr) |>
+  gt(rowname_col = "group") |>
+  sub_missing() |>
+  gt::tab_options(
+    table.font.size = 13,
+    footnotes.marks = "extended"
+  ) |>
+  gt::tab_options(
+    table.font.size = 15
+  ) |>
+  fmt_number(decimals = 1) |>
+  fmt_number(columns = "N", decimals = 0) |>
+  cols_width(matches("group") ~ pct(40)) |>
+  cols_width(starts_with("Q") ~ pct(7)) |>
+  gt::tab_stub_indent(
+    rows = gt::everything(),
+    indent = gt::from_column(column = "level")
+  ) |>
+  tab_row_group(
+    label = gt::md("3^rd^ gen. cephalosporin resistance"),
+    rows = abr == "3rd gen. cephalosporin resistance"
+  ) |>
+  tab_style(
+    style = cell_text(
+      weight = "bold"
+    ),
+    locations = cells_row_groups()
+  ) |>
+  tab_style(
+    style = cell_text(
+      weight = "bold"
+    ),
+    locations = cells_stub(
+      rows = taxon %in% c(
+        "none",
+        "domain",
+        "kingdom",
+        "order",
+        "genus",
+        "coag_type")
+    )
+  ) |>
+  tab_style(
+    style = cell_text(
+      style = "italic"
+      ),
+    locations = cells_stub(
+      rows = taxon == "species"
+    )
+  ) |>
+  cols_hide(columns = any_of(c("level","taxon"))) |>
+  tab_spanner(
+    label = "Resistant pathogen infection rate",
+    columns = c("Pooled","Q₁","Q₂","Q₃"),
+    id = "resistant_pathogen_infection_rate"
+  ) |>
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = list(
+      cells_column_spanners(),
+      cells_column_labels(),
+      cells_row_groups()
+    )
+  ) |>
+  tab_footnote(
+    footnote = md(
+      paste0(
+        "$$\\text{",
+        "Resistant pathogen infection rate",
+        "} = \\frac{\\text{",
+        "Number of antibiotic resistant pathogens in infections",
+        "}}{\\text{",
+        "Number of infections where a pathogen was detected",
+        "}} \\times ",
+        format(100, big.mark = locale_sep_mark),
+        "$$"
+      )),
+    locations = cells_column_spanners(spanners = "resistant_pathogen_infection_rate")
+  ) |>
+  tab_footnote(
+    footnote = "N: The aggregated number of antibiotic resistant pathogens in all infections.",
+    locations = cells_column_labels(columns = "N")) |>
+  tab_footnote(
+    footnote = "Pooled: The resistant pathogen infection rate calculated across all infants from all departments.",
+    locations = cells_column_labels(columns = "Pooled")) |>
+  tab_footnote(
+    footnote = "Q₁, Q₂, Q₃: The quartiles (25%, 50% and 75% quantiles) of the resistant pathogen infection rates of the partner departments.",
+    locations = cells_column_labels(columns = c("Q₁","Q₂","Q₃")))
+```

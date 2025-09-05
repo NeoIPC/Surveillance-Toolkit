@@ -1,0 +1,81 @@
+```{r}
+#| label: tbl-incidence-density-rates
+#| tbl-cap: "Incidence Density Rates of nosocomial infections"
+#| tbl-cap-location: top
+
+reference_data |>
+  neoipcr::get_incidence_density_rate_table() |>
+  dplyr::rename(
+    "Infection"="inf",
+    "N"="n",
+    "Pooled"="pooled",
+    "Q₁"="q1",
+    "Q₂"="q2",
+    "Q₃"="q3") |>
+  dplyr::mutate(
+    Infection = dplyr::case_match(
+      as.character(.data$Infection),
+      "si" ~ "Severe infection",
+      "bsi" ~ "Primary sepsis/BSI",
+      "hap" ~ "Pneumonia",
+      "nec" ~ "Necrotising Enterocolitis")) |>
+  gt(rowname_col = "Infection") |>
+  sub_missing() |>
+  gt::tab_options(
+    latex.use_longtable = TRUE,
+    table.width = pct(100),
+    table.font.size = 13,
+    footnotes.marks = "extended"
+  ) |>
+  fmt_number(decimals = 1) |>
+  fmt_number(columns = "N", decimals = 0) |>
+  cols_width(
+    stub() ~ pct(25),
+    N ~ pct(15),
+    Pooled ~ pct(15),
+    starts_with("Q") ~ pct(15)
+  ) |>
+  tab_row_group(label = "Primary sepsis/BSI/Pneumonia", rows = 1:3, id = "grp_si") |>
+  tab_row_group(label = "Other", rows = 4, id = "grp_othr") |>
+  row_group_order(groups = c("grp_si", "grp_othr")) |>
+  tab_spanner(
+    label = "Incidence Density Rate",
+    columns = c("Pooled","Q₁","Q₂","Q₃"),
+    id = "incidence_density_rate"
+  ) |>
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = list(
+      cells_column_spanners(),
+      cells_column_labels(),
+      cells_row_groups()
+    )
+  ) |>
+  tab_footnote(
+    footnote = md(
+      paste0(
+        "$$\\text{",
+        "Incidence Density Rate",
+        "} = \\frac{\\text{",
+        "Number of infections",
+        "}}{\\text{",
+        "Patient days",
+        "}} \\times ",
+        format(1000, big.mark = locale_sep_mark),
+        "$$"
+      )),
+    locations = cells_column_spanners(spanners = "incidence_density_rate")
+  ) |>
+  tab_footnote(
+    footnote = "N: The aggregated number of infections in all infants.",
+    locations = cells_column_labels(columns = "N")) |>
+  tab_footnote(
+    footnote = "Pooled: The Incidence Density Rate calculated across all infants from all departments.",
+    locations = cells_column_labels(columns = "Pooled")) |>
+  tab_footnote(
+    footnote = "Q₁, Q₂, Q₃: The quartiles (25%, 50% and 75% quantiles) of the Incidence Density Rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected infections is greater than or equal to one according to the pooled Incidence Density Rate.",
+    locations = cells_column_labels(columns = c("Q₁","Q₂","Q₃"))) |>
+  tab_footnote(
+    footnote = "Combines the outcomes primary sepsis/BSI and pneumonia",
+    locations = gt::cells_stub(rows = "Severe infection"))
+```

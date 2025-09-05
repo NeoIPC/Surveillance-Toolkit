@@ -1,0 +1,130 @@
+```{r}
+#| label: tbl-secondary-bsi-rates
+#| tbl-cap: "Secondary bloodstream infections"
+#| tbl-cap-location: top
+
+data$events |>
+    dplyr::filter(event_type_key %in% c("nec","ssi","hap")) |>
+    dplyr::semi_join(
+        data$infectiousAgentFindings |>
+          dplyr::filter(secondary_bsi),
+        dplyr::join_by(event_key)) |>
+    dplyr::group_by(event_type_key) |>
+    dplyr::summarise(infections_with_sec_bsi_n = dplyr::n(), .groups = "drop") |>
+  dplyr::right_join(
+    tibble::tibble(
+  event_type_key = c("nec","hap","ssi"),
+  infections_with_sec_bsi_followup_n = c(
+    data$necData |> dplyr::filter(sec_bsi != -1) |> nrow(),
+    data$pneumoniaData |> dplyr::filter(sec_bsi != -1) |> nrow(),
+    data$ssiData |> dplyr::filter(sec_bsi != -1) |> nrow())),
+    dplyr::join_by(event_type_key)) |>
+  dplyr::mutate(
+    infections_with_sec_bsi_n = tidyr::replace_na(infections_with_sec_bsi_n, 0),
+    secondary_bsi_rate = infections_with_sec_bsi_n / infections_with_sec_bsi_followup_n * 100) |>
+  dplyr::inner_join(
+    data$events |>
+      dplyr::filter(event_type_key %in% c("nec","ssi","hap")) |>
+      dplyr::semi_join(
+        data$infectiousAgentFindings |>
+          dplyr::filter(secondary_bsi),
+        dplyr::join_by(event_key)) |>
+      dplyr::group_by(department_key,event_type_key) |>
+      dplyr::summarise(infections_with_sec_bsi_n = dplyr::n(), .groups = "drop") |>
+      dplyr::right_join(
+        data$events |>
+          dplyr::semi_join(
+            data$necData |>
+              dplyr::filter(sec_bsi != -1),
+            dplyr::join_by(event_key)) |>
+          dplyr::group_by(department_key) |>
+          dplyr::summarise(
+            infections_with_sec_bsi_followup_n = dplyr::n(),
+            event_type_key = "nec",
+            .groups = "drop") |>
+          dplyr::union(
+            data$events |>
+              dplyr::semi_join(
+                data$pneumoniaData |>
+                  dplyr::filter(sec_bsi != -1),
+                dplyr::join_by(event_key)) |>
+              dplyr::group_by(department_key) |>
+              dplyr::summarise(
+                infections_with_sec_bsi_followup_n = dplyr::n(),
+                event_type_key = "hap",
+                .groups = "drop")) |>
+          dplyr::union(
+            data$events |>
+              dplyr::semi_join(
+                data$ssiData |>
+                  dplyr::filter(sec_bsi != -1),
+                dplyr::join_by(event_key)) |>
+              dplyr::group_by(department_key) |>
+              dplyr::summarise(
+                infections_with_sec_bsi_followup_n = dplyr::n(),
+                event_type_key = "ssi",
+                .groups = "drop")),
+        dplyr::join_by(department_key,event_type_key)) |>
+      dplyr::mutate(
+        infections_with_sec_bsi_n = tidyr::replace_na(infections_with_sec_bsi_n, 0),
+        secondary_bsi_rate = infections_with_sec_bsi_n / infections_with_sec_bsi_followup_n * 100,
+        .keep = "unused") |>
+      tidyr::pivot_wider(
+        names_from = event_type_key,
+        values_from = secondary_bsi_rate) |>
+      select(any_of(c("nec","hap","ssi"))) |>
+      dplyr::reframe(
+        dplyr::across(
+          tidyselect::everything(),
+          ~quantile(.x, prob = c(.25,.5,.75), na.rm = TRUE))) |>
+      dplyr::bind_cols(tibble::tibble(Q = c("q1","q2","q3"))) |>
+      tidyr::pivot_longer(!"Q", names_to = "event_type_key") |>
+      tidyr::pivot_wider(names_from = Q),
+    dplyr::join_by(event_type_key)) |>
+  dplyr::select(!infections_with_sec_bsi_followup_n) |>
+  dplyr::rename(
+    "No of inf. w. sec. BSI"="infections_with_sec_bsi_n",
+    "Pooled mean"="secondary_bsi_rate",
+    "Q₁"="q1",
+    "Q₂"="q2",
+    "Q₃"="q3") |>
+  dplyr::mutate(
+    Infection = dplyr::case_match(
+      as.character(.data$event_type_key),
+      "nec" ~ "Necrotising Enterocolitis",
+      "ssi" ~ "Surgical site infection",
+      "hap" ~ "Pneumonia"),
+    .keep = "unused") |>
+  gt(rowname_col = "Infection") |>
+  fmt_number(decimals = 1) |>
+  fmt_number(columns = "No of inf. w. sec. BSI", decimals = 0) |>
+  tab_spanner(
+    label = "Secondary BSI rate",
+    columns = c("Pooled mean","Q₁","Q₂","Q₃"),
+    id = "secondary_bsi_rate"
+  ) |>
+  tab_footnote(
+    footnote = md(
+      paste0(
+        "$$\\text{",
+        "Secondary BSI rate",
+        "} = \\frac{\\text{",
+        "No of infections with secondary BSI",
+        "}}{\\text{",
+        "No of infections with follow-up for secondary BSI",
+        "}} \\times ",
+        format(100, big.mark = locale_sep_mark),
+        "$$"
+      )),
+    locations = cells_column_spanners(spanners = "secondary_bsi_rate")
+  ) |>
+  tab_footnote(
+    footnote = "No of infections with secondary BSI: The number of infections where a secondary BSI was recorded, aggregated across all infants.",
+    locations = cells_column_labels(columns = "No of inf. w. sec. BSI")) |>
+  tab_footnote(
+    footnote = "Pooled mean: The secondary bsi rate calculated as infections with secondary bsi per 100 infections with follow-up for secondary bsi calculated across all infants.",
+    locations = cells_column_labels(columns = "Pooled mean")) |>
+  tab_footnote(
+    footnote = "Q₁, Q₂, Q₃: The quartiles (25%, 50% and 75% quantiles) of the secondary bsi rates of the partner departments",
+    locations = cells_column_labels(columns = c("Q₁","Q₂","Q₃")))
+```

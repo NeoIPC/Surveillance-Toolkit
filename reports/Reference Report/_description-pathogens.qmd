@@ -1,0 +1,23 @@
+---
+title: "Random Info on Pathogens"
+format: pdf
+echo: true
+params:
+  reportingPeriodFrom: NULL
+  reportingPeriodTo: NULL
+  birthWeightFrom: NULL
+  birthWeightTo: NULL
+  gestationalAgeFrom: NULL
+  gestationalAgeTo: NULL
+  countryFilter: NULL
+  hospitalFilter: NULL
+  testUnitFilter: true
+  defaultPatientFilter: true
+  token: NULL
+---
+
+{{< include _setup.qmd >}}
+
+```{r}
+
+```

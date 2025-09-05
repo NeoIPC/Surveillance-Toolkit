@@ -1,0 +1,76 @@
+```{r}
+#| label: tbl-infectious-agent-detection-rate
+#| tbl-cap: "Infections in which an infectious agent has been identified, including secondary BSI following the infection."
+#| tbl-cap-location: top
+
+reference_data |>
+  neoipcr::get_infectious_agent_detection_rate_per_inf_type_table() |>
+  dplyr::rename(
+    "N"="n",
+    "Pooled"="pooled",
+    "Q₁"="q1",
+    "Q₂"="q2",
+    "Q₃"="q3") |>
+  dplyr::mutate(
+    Infection = dplyr::case_match(
+      as.character(.data$inf),
+      "all" ~ "Total",
+      "bsi" ~ "Primary sepsis/BSI",
+      "nec" ~ "Necrotising Enterocolitis",
+      "ssi" ~ "Surgical site infection",
+      "hap" ~ "Pneumonia"),
+    .keep = "unused") |>
+  gt(rowname_col = "Infection") |>
+  sub_missing() |>
+  gt::tab_options(
+    latex.use_longtable = TRUE,
+    table.width = pct(100),
+    table.font.size = 13,
+    footnotes.marks = "extended"
+  ) |>
+  fmt_number(decimals = 1) |>
+  fmt_number(columns = "N", decimals = 0) |>
+  cols_width(
+    stub() ~ pct(25),
+    N ~ pct(15),
+    Pooled ~ pct(15),
+    starts_with("Q") ~ pct(15)
+  ) |>
+  tab_spanner(
+    label = "Infectious Agent Detection Rate",
+    columns = c("Pooled","Q₁","Q₂","Q₃"),
+    id = "infectious_agent_detection_rate"
+  ) |>
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = list(
+      cells_column_spanners(),
+      cells_column_labels(),
+      cells_row_groups()
+    )
+  ) |>
+  tab_footnote(
+    footnote = md(
+      paste0(
+        "$$\\text{",
+        "Infectious Agent Detection Rate",
+        "} = \\frac{\\text{",
+        "No of infections with agent",
+        "}}{\\text{",
+        "No of infections",
+        "}} \\times ",
+        format(100, big.mark = locale_sep_mark),
+        "$$"
+      )),
+    locations = cells_column_spanners(spanners = "infectious_agent_detection_rate")
+  ) |>
+  tab_footnote(
+    footnote = "N: The aggregated number of infections where at least one infectious agent was recorded.",
+    locations = cells_column_labels(columns = "N")) |>
+  tab_footnote(
+    footnote = "Pooled: The Infectious Agent Detection Rate calculated across all infants from all departments.",
+    locations = cells_column_labels(columns = "Pooled")) |>
+  tab_footnote(
+    footnote = "Q₁, Q₂, Q₃: The quartiles (25%, 50% and 75% quantiles) of the Infectious Agent Detection Rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected infections with an agents is greater than or equal to one according to the pooled Infectious Agent Detection Rate.",
+    locations = cells_column_labels(columns = c("Q₁","Q₂","Q₃")))
+```

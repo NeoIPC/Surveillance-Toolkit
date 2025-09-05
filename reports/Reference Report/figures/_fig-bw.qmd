@@ -1,0 +1,113 @@
+```{r}
+#| label: bw-figure
+#| fig-cap: "A histogram in 50 g steps with density curve and a boxplot of the birth weights of the patients contained in this analysis"
+
+label_bw <- function(x) paste(format(x, big.mark =" "), "g", sep = " ")
+breaks_bw <- function(x) pretty(x, as.integer((as.integer(x[2]) + 1 - as.integer(x[1])) / 100))
+min_bw <- min(data$patients$birth_weight)
+max_bw <- max(data$patients$birth_weight)
+
+NeoIPC.pallette <- c("#FF9015","#0083C1","#0D4F6C","#E6FAFC","#E0D3DE","#1F271B")
+#pal <- viridisLite::viridis(n = 3, direction = -1, option = "F")
+pal <- c(NeoIPC.pallette[5],NeoIPC.pallette[2],NeoIPC.pallette[6])
+
+bw_50 <- function(x, as_factor = TRUE)
+{
+  m <- as.integer((x-25)/50)*50+50
+  if(!as_factor)
+    return(m)
+
+  lb <- m-25
+  ub <- m+24
+  ordered(
+    m,
+    levels = seq(min(m), max(m), 50),
+    labels = paste0(format(seq(min(lb), max(lb), 50))," g - ",format(seq(min(ub), max(ub), 50))," g"))
+}
+
+refq <- data$patients$birth_weight |> quantile() |> unname()
+boxplot_data <- c(as.integer(refq[1]/50)*50,refq[2:4],as.integer(refq[5]/50)*50+50*ceiling(refq[5]%%50/50))
+histogram_data <- data$patients$birth_weight |> bw_50(F) |> sort() |> rle()
+density_data <- data$patients$birth_weight |> density()
+
+cmp <- data$patients |>
+  dplyr::select(birth_weight) |>
+  dplyr::bind_cols(cat = factor("Reference", levels = c("Reference","Own unit"))) |>
+  dplyr::bind_rows(
+    data$patients |>
+      dplyr::filter(department_key == 17) |>
+      dplyr::select(birth_weight) |>
+      dplyr::bind_cols(cat = factor("Own unit", levels = c("Reference","Own unit"))))
+
+cmp2 <- data$patients |>
+  dplyr::select(birth_weight) |>
+  dplyr::bind_cols(cat = factor("Reference", levels = c("Reference","Own unit"))) |>
+  dplyr::bind_rows(
+    data$patients |>
+      dplyr::filter(department_key == 17) |>
+      dplyr::select(birth_weight) |>
+      dplyr::bind_cols(cat = factor("Own unit", levels = c("Reference","Own unit")))) |>
+dplyr::mutate(birth_weight = bw_50(birth_weight, F))
+
+bwCombined2 <- cmp2 |>
+  ggplot(aes(x = birth_weight, colour = cat)) +
+  geom_histogram(data = cmp2 |> dplyr::filter(cat=="Own unit"), aes(y = after_stat(density)), colour = pal[3], fill = "white", binwidth = 50, boundary = 25, closed = "left") +
+  geom_density() +
+  geom_density() +
+  scale_x_continuous(breaks = breaks_bw) +
+  scale_colour_manual(values = pal[2:3]) +
+  coord_cartesian(xlim = c(min_bw - 50, max_bw + 50)) +
+  theme(
+    legend.title = element_blank(),
+    legend.box.background = element_rect(colour = "white"),
+    legend.position = "top",
+    axis.title=element_blank(),
+    axis.text=element_blank(),
+    axis.ticks=element_blank(),
+    panel.background = element_rect(fill = "white"),
+    panel.grid.major.x = element_line(colour = pal[1]),
+    panel.grid.minor.x =  element_line(colour = pal[1]),
+    panel.grid.major.y=element_blank(),
+    panel.grid.minor.y=element_blank())
+
+bwCombined <- cmp |>
+  ggplot(aes(x = birth_weight, colour = cat)) +
+  geom_histogram(data = cmp |> dplyr::filter(cat=="Own unit"), aes(y = after_stat(density)), colour = pal[3], fill = "white", binwidth = 50, boundary = 25, closed = "left") +
+  geom_density() +
+  scale_x_continuous(breaks = breaks_bw) +
+  scale_colour_manual(values = pal[2:3]) +
+  coord_cartesian(xlim = c(min_bw - 50, max_bw + 50)) +
+  theme(
+    legend.title = element_blank(),
+    legend.box.background = element_rect(colour = "white"),
+    legend.position = "top",
+    axis.title=element_blank(),
+    axis.text=element_blank(),
+    axis.ticks=element_blank(),
+    panel.background = element_rect(fill = "white"),
+    panel.grid.major.x = element_line(colour = pal[1]),
+    panel.grid.minor.x =  element_line(colour = pal[1]),
+    panel.grid.major.y=element_blank(),
+    panel.grid.minor.y=element_blank())
+
+bwBoxPlot <- cmp |>
+  ggplot(aes(x=cat, y = birth_weight, colour = cat)) +
+  geom_boxplot(outlier.shape = NA, coef = 0) +
+  stat_summary(fun = "mean", geom = "point", shape = 23, size = 3, fill = "white") +
+  scale_y_continuous(breaks = breaks_bw, labels = label_bw) +
+  scale_colour_manual(values = pal[2:3]) +
+  coord_flip(ylim = c(min_bw - 50, max_bw + 50)) +
+  theme(
+    legend.position = "none",
+    axis.title=element_blank(),
+    axis.text.x=element_text(angle = 45, hjust = 1, vjust = 1),
+    axis.text.y=element_blank(),
+    axis.ticks.y=element_blank(),
+    panel.background = element_rect(fill = "white"),
+    panel.grid.major.x = element_line(colour = pal[1]),
+    panel.grid.minor.x =  element_line(colour = pal[1]),
+    panel.grid.major.y=element_blank(),
+    panel.grid.minor.y=element_blank())
+
+bwCombined / bwCombined2 / bwBoxPlot
+```
