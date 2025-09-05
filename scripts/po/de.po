@@ -36,13 +36,13 @@ msgstr "FormatInfoMsg: \"...im {0}-Format\"\n"
 #: scripts/en/Convert-InfectiousAgentList-MessageStrings.psd1:8
 #, no-wrap
 msgid "ExternalCmdErrorMsg: \"The execution of the command '{0}' was terminated with the following error message:\"\n"
-msgstr "ExternalCmdErrorMsg: \"Die Ausführung des Befehls ‚{0}‘ wurde mit der folgenden Fehlermeldung beendet:\"\n"
+msgstr "ExternalCmdErrorMsg: \"Die Ausführung des Befehls '{0}' wurde mit der folgenden Fehlermeldung beendet:\"\n"
 
 #. type: Plain text
 #: scripts/en/Convert-InfectiousAgentList-MessageStrings.psd1:10
 #, no-wrap
 msgid "ExternalCmdWarningMsg: \"The execution of the command '{0}' resulted in the following warning message:\"\n"
-msgstr "ExternalCmdWarningMsg: \"Die Ausführung des Befehls ‚{0}‘ führte zu folgender Warnmeldung:\"\n"
+msgstr "ExternalCmdWarningMsg: \"Die Ausführung des Befehls '{0}' führte zu folgender Warnmeldung:\"\n"
 
 #. type: Plain text
 #: scripts/en/Convert-InfectiousAgentList-MessageStrings.psd1:11
