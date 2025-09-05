@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "POT-Creation-Date: 2025-08-30 08:46+0200\n"
-"PO-Revision-Date: 2025-09-04 06:55+0000\n"
-"Last-Translator: Anonymous <noreply@weblate.org>\n"
+"PO-Revision-Date: 2025-09-05 20:23+0000\n"
+"Last-Translator: Brar Piening <brar@gmx.de>\n"
 "Language-Team: Spanish <https://hosted.weblate.org/projects/neoipc/neoipc-infectious-agents/es/>\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
@@ -2131,7 +2131,7 @@ msgstr "Varidnaviria"
 
 #. type: Hash Value: Hierarchies Name
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
-#, fuzzy, no-wrap
+#, no-wrap
 msgid "Viruses"
 msgstr "Viruses"
 
@@ -19999,7 +19999,7 @@ msgstr "Dominio"
 
 #. type: Hash Value: Hierarchies Name
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
-#, fuzzy, no-wrap
+#, no-wrap
 msgid "Bacteria"
 msgstr "Bacteria"
 
