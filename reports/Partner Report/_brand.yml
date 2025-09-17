@@ -1,0 +1,15 @@
+meta:
+  name:
+    full: NeoIPC Consortium
+    short: NeoIPC
+  link:
+    home: https://www.neoipc.org
+    docs: https://neoipc.org/surveillance/resources/
+    github: https://github.com/NeoIPC
+  description: |
+    We want to reduce the transmission of resistant bacteria in neonatal
+    intensive care units across Europe and globally.
+logo:
+  small: logos/LOGO_NEOIPC_2.png
+  medium: logos/LOGO_NEOIPC.png
+  large: logos/LOGO_NEOIPC.png

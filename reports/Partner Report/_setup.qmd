@@ -1,0 +1,5 @@
+```{r General setup and parameter preparation}
+pak::pkg_install("Brar/neoipcr@PartnerReport")
+library(neoipcr)
+stopifnot(exists("params") && file.exists(params$PartnerDataFile))
+```

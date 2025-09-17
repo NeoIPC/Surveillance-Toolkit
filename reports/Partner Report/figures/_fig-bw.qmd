@@ -1,0 +1,56 @@
+```{r}
+#| label: bw-figure
+#| fig-cap: "A histogram in 50 g steps with density curve and a boxplot of the birth weights of the patients contained in this analysis"
+
+label_bw <- function(x) paste(format(x, big.mark =" "), "g", sep = " ")
+breaks_bw <- function(x) pretty(x, as.integer((as.integer(x[2]) + 1 - as.integer(x[1])) / 100))
+min_bw <- min(data$patients$birth_weight)
+max_bw <- max(data$patients$birth_weight)
+
+NeoIPC.pallette <- c("#FF9015","#0083C1","#0D4F6C","#E6FAFC","#E0D3DE","#1F271B")
+pal <- c(NeoIPC.pallette[5],NeoIPC.pallette[2],NeoIPC.pallette[6])
+
+bw_50 <- function(x, as_factor = TRUE)
+{
+  m <- as.integer((x-25)/50)*50+50
+  if(!as_factor)
+    return(m)
+
+  lb <- m-25
+  ub <- m+24
+  ordered(
+    m,
+    levels = seq(min(m), max(m), 50),
+    labels = paste0(format(seq(min(lb), max(lb), 50))," g - ",format(seq(min(ub), max(ub), 50))," g"))
+}
+
+refq <- ref_data$patients$birth_weight |> quantile(probs = c(0.25,0.5,0.75)) |> unname()
+depq <- data$patients$birth_weight |> quantile(probs = c(0.25,0.5,0.75)) |> unname()
+birthweight_quartiles <- data.frame(
+  x = factor(c("own","ref")),
+  q1 = c(depq[1],refq[1]),
+  median = c(depq[2],refq[2]),
+  q3 = c(depq[3],refq[3]))
+
+ggplot2::ggplot(birthweight_quartiles, ggplot2::aes(x = x, colour = x)) +
+  ggplot2::geom_boxplot(
+   ggplot2::aes(ymin = q1, lower = q1, middle = median, upper = q3, ymax = q3),
+   outlier.shape = NA,
+   stat = "identity"
+ ) +
+ggplot2::scale_y_continuous(breaks = breaks_bw, labels = label_bw) +
+ggplot2::scale_colour_manual(values = pal[2:3]) +
+ggplot2::coord_flip(ylim = c(min_bw - 50, max_bw + 50)) +
+ggplot2::theme(
+  legend.position = "none",
+  axis.title = ggplot2::element_blank(),
+  axis.text.x = ggplot2::element_text(angle = 45, hjust = 1, vjust = 1),
+  axis.text.y = ggplot2::element_blank(),
+  axis.ticks.y = ggplot2::element_blank(),
+  panel.background = ggplot2::element_rect(fill = "white"),
+  panel.grid.major.x = ggplot2::element_line(colour = pal[1]),
+  panel.grid.minor.x =  ggplot2::element_line(colour = pal[1]),
+  panel.grid.major.y = ggplot2::element_blank(),
+  panel.grid.minor.y = ggplot2::element_blank())
+
+```

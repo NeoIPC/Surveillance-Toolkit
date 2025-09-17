@@ -1,0 +1,29 @@
+---
+lang: en
+title: "NeoIPC Surveillance Partner Report"
+params:
+  PartnerDataFile: NULL
+  ReferenceDataFile: NULL
+---
+
+```{r}
+pak::pkg_install("Brar/neoipcr@PartnerReport")
+library(neoipcr)
+
+Sys.setenv(NEOIPC_DHIS2_TOKEN='../../../token2.txt')
+
+data <- import_dhis2(dataset_options = dhis2_dataset_options(include_ineligible_patients = params$includeNonCorePatients))
+
+if (!is.null(params$referenceDataFile)) {
+  if (!file.exists(params$referenceDataFile))
+    stop(sprintf("The file '%s' does not exist.", params$referenceDataFile))
+  reference_data <- jsonlite::unserializeJSON(readChar(params$referenceDataFile, file.info(params$referenceDataFile)$size))
+} else {
+  reference_data <- NULL
+}
+
+```
+
+## Introduction
+
+This is a [NeoIPC Surveillance](https://neoipc.org/surveillance/ "Link to the surveillance section of the NeoIPC website") analysis that you can use to assess infection rates in your neonatal unit. If you have your own data collected using the same or a comparable method, you can compare them with the reference values presented in this document and identify any anomalies and potential for improvement.
