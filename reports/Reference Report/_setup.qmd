@@ -26,7 +26,13 @@ reportingCountries = params[["reportingCountries"]]
 hospitalFilter = params[["hospitalFilter"]]
 defaultPatientFilter = coalesce(params[["defaultPatientFilter"]], TRUE)
 testUnitFilter = coalesce(params[["testUnitFilter"]], TRUE)
-validation_exceptions <- read_csv("../../../validation-exceptions_ref.csv")
+validationExceptionFile = coalesce(params[["validationExceptionFile"]], "validation-exceptions_ref.csv")
+if (file.exists(validationExceptionFile)) {
+  includeInvalidPatients <- read_csv(validationExceptionFile)
+} else {
+  warning(sprintf("Validation ecxeption file not found: '%s'", validationExceptionFile))
+  includeInvalidPatients <- FALSE
+}
 
 dataset_options <- dhis2_dataset_options(
     include_country = "yes",
@@ -38,7 +44,7 @@ dataset_options <- dhis2_dataset_options(
     gestational_age_from = gestationWeeksFrom,
     gestational_age_to = gestationWeeksTo,
     country_filter = reportingCountries,
-    include_invalid_patients = validation_exceptions)
+    include_invalid_patients = includeInvalidPatients)
 
 language <- dplyr::coalesce(params$language, "en")
 default_countries <- list(

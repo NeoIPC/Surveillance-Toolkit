@@ -65,3 +65,6 @@ rsconnect/
 
 /.quarto/
 _output
+
+# Validation exception file
+validation-exceptions_ref.csv
