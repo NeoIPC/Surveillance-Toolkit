@@ -68,3 +68,5 @@ _output
 
 # Validation exception file
 validation-exceptions_ref.csv
+
+**/*.quarto_ipynb

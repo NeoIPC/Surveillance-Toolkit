@@ -83,9 +83,6 @@ reference_data |>
   jsonlite::serializeJSON() |>
   readr::write_file(file = "_output/ReferenceInformation.json")
 
-ichi_health_interventions <- read_csv("../../../Surveillance-Private/metadata/WHO/ICHI/Health interventions.csv", col_names = c("code","intervention","url"), col_types = "ccc")
-ichi_targets <- read_csv("../../../Surveillance-Private/metadata/WHO/ICHI/Targets.csv", col_names = c("code","target","url"), col_types = "ccc")
-
 if(file.exists(translation_file)) {
   translations <- readr::read_file(translation_file) |> jsonlite::fromJSON()
 } else {
