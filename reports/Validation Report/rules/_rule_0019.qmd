@@ -34,26 +34,27 @@ problems <- problems |>
         EVENT_TYPE = event_types("SSI"),
         EVENT_DATE = SSI_DATE,
         PROBLEM_ID = 19L,
-        HAS_SURGERY = replace_na(SSI_OFFSET > 0 & (
+        FOLLOW_UP = case_when(NEOIPC_SSI_INFECTION_TYPE == 1 | !NEOIPC_SURGERY_IMPLANT ~ 30, NEOIPC_SURGERY_IMPLANT ~ 90),
+        HAS_SURGERY = as.integer(replace_na(SSI_OFFSET > 0 & (
           (NEOIPC_SSI_INFECTION_TYPE == 1 & SSI_OFFSET <= 30) |
             (NEOIPC_SSI_INFECTION_TYPE != 1 & NEOIPC_SURGERY_IMPLANT & SSI_OFFSET <= 90) |
-            (NEOIPC_SSI_INFECTION_TYPE != 1 & !NEOIPC_SURGERY_IMPLANT & SSI_OFFSET <= 30)), FALSE)) |>
-      filter(!HAS_SURGERY) |>
-      select(
-        SITE_CODE,
-        DEPARTMENT_CODE,
-        DEPARTMENT_NAME,
-        DEPARTMENT_OU,
-        NEOIPC_PATIENT_ID,
-        PATIENT_TEI,
-        ENROLMENT_ID,
-        ENROLMENT_DATE,
-        EVENT_ID,
-        EVENT_TYPE,
-        EVENT_DATE,
-        PROBLEM_ID,
-        NEOIPC_SSI_INFECTION_TYPE
-        ) |>
+            (NEOIPC_SSI_INFECTION_TYPE != 1 & !NEOIPC_SURGERY_IMPLANT & SSI_OFFSET <= 30)), FALSE)))
+    |> group_by(SITE_CODE,
+                DEPARTMENT_CODE,
+                DEPARTMENT_NAME,
+                DEPARTMENT_OU,
+                NEOIPC_PATIENT_ID,
+                PATIENT_TEI,
+                ENROLMENT_ID,
+                ENROLMENT_DATE,
+                EVENT_ID,
+                EVENT_TYPE,
+                EVENT_DATE,
+                PROBLEM_ID,
+                NEOIPC_SSI_INFECTION_TYPE) |>
+      summarise(HAS_SURGERY = max(HAS_SURGERY), .groups = "drop") |>
+      filter(HAS_SURGERY == 0L) |>
+      select(!HAS_SURGERY) |>
       distinct() |>
       anti_join(
         exceptions,
