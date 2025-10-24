@@ -1,0 +1,138 @@
+# Italian translations for the NeoIPC Surveillance Reports
+# Copyright (C) 2025 Charité - Universitätsmedizin Berlin
+# This file is distributed under the same license as the NeoIPC Surveillance Toolkit.
+# Automatically generated, 2025.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: NeoIPC Surveillance Reports 0.9\n"
+"Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
+"POT-Creation-Date: 2025-10-23 23:20+0200\n"
+"PO-Revision-Date: 2025-10-22 23:54+0200\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"Language: it\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. type: Yaml Front Matter Hash Value: title
+#: reports/Partner Certificate/Partner Certificate.qmd:1
+#, no-wrap
+msgid "NeoIPC Surveillance Partner Certificate"
+msgstr ""
+
+#. type: Fenced code block ({r})
+#: reports/Partner Certificate/Partner Certificate.qmd:34
+#, no-wrap
+msgid ""
+"\n"
+"# Initialize our report data from the data file if one is provided\n"
+"if (!is.null(params$dataFilePath) && file.exists(params$dataFilePath)) {\n"
+"  data <- jsonlite::fromJSON(params$dataFilePath)\n"
+"} else {\n"
+"  data <- list()\n"
+"}\n"
+"\n"
+"# Add report data values from parameters potentially overriding values from the\n"
+"# data file\n"
+"if (!is.null(params$startYear)) data$startYear <- params$startYear\n"
+"if (!is.null(params$endYear)) data$endYear <- params$endYear\n"
+"if (!is.null(params$hospitalName)) data$hospitalName <- params$hospitalName\n"
+"if (!is.null(params$nPatients)) data$nPatients <- params$nPatients\n"
+"if (!is.null(params$signatory)) data$signatory <- params$signatory\n"
+"\n"
+"# Set a default signatory if none was provided\n"
+"if (is.null(data$signatory)) data$signatory <- \"Dr. med. Brar Piening\"\n"
+"\n"
+"# if we are missing any essential information we try fetch it directly from the\n"
+"# NeoIPC Surveillance Platform\n"
+"if (is.null(data$startYear) || is.null(data$endYear) || is.null(data$hospitalName) || is.null(data$nPatients)) {\n"
+"  if(is.null(params$departmentCode)) stop(\"There was insufficient data to generate a partner certificate.\\nIf you don't have all the information please pass a department code so that the system can acquire the information from the NeoIPC Surveillance Platform.\")\n"
+"  ds <- neoipcr::import_dhis2(dataset_options = neoipcr::dhis2_dataset_options())\n"
+"}\n"
+"\n"
+"# Make sure numbers aren't strings\n"
+"data$startYear <- as.integer(data$startYear)\n"
+"data$endYear <- as.integer(data$endYear)\n"
+"data$nPatients <- as.integer(data$nPatients)\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Partner Certificate/Partner Certificate.qmd:68
+#, no-wrap
+msgid "\\selectlanguage{british}\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Partner Certificate/Partner Certificate.qmd:70
+#, no-wrap
+msgid "\\begin{center}\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Partner Certificate/Partner Certificate.qmd:72
+#, no-wrap
+msgid "`r if (data$startYear == data$endYear) {'In'} else {'During the period'}`\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Partner Certificate/Partner Certificate.qmd:74 Certificate.qmd:78
+#: Certificate.qmd:82 Certificate.qmd:86 Certificate.qmd:92
+#, no-wrap
+msgid "\\vspace*{1.25\\baselineskip}\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Partner Certificate/Partner Certificate.qmd:76
+#, no-wrap
+msgid "\\Huge \\bfseries `r if (data$startYear == data$endYear) {data$startYear} else {paste0(data$startYear, \"-\", data$endYear)}`\\normalsize \\normalfont\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Partner Certificate/Partner Certificate.qmd:80
+#, no-wrap
+msgid "the neonatology unit at\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Partner Certificate/Partner Certificate.qmd:84
+#, no-wrap
+msgid "\\large \\bfseries `r data$hospitalName`\\normalsize \\normalfont\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Partner Certificate/Partner Certificate.qmd:88
+#, no-wrap
+msgid "participated in the NeoIPC Surveillance Network.\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Partner Certificate/Partner Certificate.qmd:90
+#, no-wrap
+msgid "\\end{center}\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Partner Certificate/Partner Certificate.qmd:94
+#, no-wrap
+msgid "By actively tracking a total of `r paste0('**', format(data$nPatients), ' patients**')`, the team provided valuable benchmarking data that can be used to assess and mitigate infection risks in neonatology units. We are proud and happy to have them as partners in our quest to enhance infection prevention and control in neonatology.\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Partner Certificate/Partner Certificate.qmd:96
+#, no-wrap
+msgid "\\vspace*{6\\baselineskip}\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Partner Certificate/Partner Certificate.qmd:102
+#, no-wrap
+msgid ""
+"\\hfill\n"
+"\\begin{minipage}[t]{0.48\\textwidth}\n"
+"`r data$signatory`\\\\\n"
+"for the NeoIPC Surveillance team\\\\\n"
+"\\end{minipage}\n"
+msgstr ""

@@ -1,0 +1,102 @@
+---
+title: "NeoIPC Surveillance Partner Certificate"
+params:
+  startYear: 2025
+  endYear: 2025
+  nPatients: 999
+  hospitalName: Test Hospital
+  signatory: NULL
+  dataFilePath: NULL
+  departmentCode: NULL
+engine: knitr
+format:
+  pdf:
+    template-partials:
+      - before-body.tex
+    documentclass: scrartcl
+    mainfont: "Noto Sans"
+    fontsize: 12pt
+    papersize: a4paper
+    geometry:
+      - top=25mm
+      - bottom=20mm
+      - left=25mm
+      - right=25mm
+      - heightrounded
+    keep-md: true
+    keep-tex: true
+    include-in-header: 
+      text: |
+        \usepackage[estonian,greek,italian,ngerman,spanish,british]{babel}
+        \usepackage{microtype}
+        \pagenumbering{gobble}
+---
+```{r}
+
+# Initialize our report data from the data file if one is provided
+if (!is.null(params$dataFilePath) && file.exists(params$dataFilePath)) {
+  data <- jsonlite::fromJSON(params$dataFilePath)
+} else {
+  data <- list()
+}
+
+# Add report data values from parameters potentially overriding values from the
+# data file
+if (!is.null(params$startYear)) data$startYear <- params$startYear
+if (!is.null(params$endYear)) data$endYear <- params$endYear
+if (!is.null(params$hospitalName)) data$hospitalName <- params$hospitalName
+if (!is.null(params$nPatients)) data$nPatients <- params$nPatients
+if (!is.null(params$signatory)) data$signatory <- params$signatory
+
+# Set a default signatory if none was provided
+if (is.null(data$signatory)) data$signatory <- "Dr. med. Brar Piening"
+
+# if we are missing any essential information we try fetch it directly from the
+# NeoIPC Surveillance Platform
+if (is.null(data$startYear) || is.null(data$endYear) || is.null(data$hospitalName) || is.null(data$nPatients)) {
+  if(is.null(params$departmentCode)) stop("There was insufficient data to generate a partner certificate.\nIf you don't have all the information please pass a department code so that the system can acquire the information from the NeoIPC Surveillance Platform.")
+  ds <- neoipcr::import_dhis2(dataset_options = neoipcr::dhis2_dataset_options())
+}
+
+# Make sure numbers aren't strings
+data$startYear <- as.integer(data$startYear)
+data$endYear <- as.integer(data$endYear)
+data$nPatients <- as.integer(data$nPatients)
+```
+
+\selectlanguage{british}
+
+\begin{center}
+
+`r if (data$startYear == data$endYear) {'In'} else {'During the period'}`
+
+\vspace*{1.25\baselineskip}
+
+\Huge \bfseries `r if (data$startYear == data$endYear) {data$startYear} else {paste0(data$startYear, "-", data$endYear)}`\normalsize \normalfont
+
+\vspace*{1.25\baselineskip}
+
+the neonatology unit at
+
+\vspace*{1.25\baselineskip}
+
+\large \bfseries `r data$hospitalName`\normalsize \normalfont
+
+\vspace*{1.25\baselineskip}
+
+participated in the NeoIPC Surveillance Network.
+
+\end{center}
+
+\vspace*{1.25\baselineskip}
+
+By actively tracking a total of `r paste0('**', format(data$nPatients), ' patients**')`, the team provided valuable benchmarking data that can be used to assess and mitigate infection risks in neonatology units. We are proud and happy to have them as partners in our quest to enhance infection prevention and control in neonatology.
+
+\vspace*{6\baselineskip}
+
+\hfill
+\begin{minipage}[t]{0.48\textwidth}
+`r data$signatory`\\
+for the NeoIPC Surveillance team\\
+\end{minipage}
+
