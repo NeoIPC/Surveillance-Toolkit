@@ -1,13 +1,13 @@
-# German translations for PACKAGE package
-# Copyright (C) 2025 Free Software Foundation, Inc.
-# This file is distributed under the same license as the PACKAGE package.
+# German translations for the NeoIPC Surveillance Reports
+# Copyright (C) 2025 Charité - Universitätsmedizin Berlin
+# This file is distributed under the same license as the NeoIPC Surveillance Toolkit.
 # Automatically generated, 2025.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: NeoIPC Surveillance Reports 0.9\n"
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2025-10-24 22:20+0200\n"
+"POT-Creation-Date: 2025-10-24 23:34+0200\n"
 "PO-Revision-Date: 2025-10-23 10:32+0200\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -21,7 +21,7 @@ msgstr ""
 #: reports/Partner Certificate/Partner Certificate.qmd:1
 #, no-wrap
 msgid "NeoIPC Surveillance Partner Certificate"
-msgstr ""
+msgstr "NeoIPC Surveillance Partner-Zertifikat"
 
 #. type: Fenced code block ({r})
 #: reports/Partner Certificate/Partner Certificate.qmd:36
@@ -127,7 +127,7 @@ msgstr ""
 #: reports/Partner Certificate/Partner Certificate.qmd:134
 #, no-wrap
 msgid "\\selectlanguage{british}\n"
-msgstr ""
+msgstr "\\selectlanguage{ngerman}\n"
 
 #. type: Plain text
 #: reports/Partner Certificate/Partner Certificate.qmd:136
@@ -139,7 +139,7 @@ msgstr ""
 #: reports/Partner Certificate/Partner Certificate.qmd:138
 #, no-wrap
 msgid "`r if (data$startYear == data$endYear) {'In'} else {'During the period'}`\n"
-msgstr ""
+msgstr "`r if (data$startYear == data$endYear) {'Im Jahr'} else {'Im Zeitraum'}`\n"
 
 #. type: Plain text
 #: reports/Partner Certificate/Partner Certificate.qmd:140 Certificate.qmd:144
@@ -158,7 +158,7 @@ msgstr ""
 #: reports/Partner Certificate/Partner Certificate.qmd:146
 #, no-wrap
 msgid "the neonatology unit at\n"
-msgstr ""
+msgstr "hat sich die neonatologische Abteilung der\n"
 
 #. type: Plain text
 #: reports/Partner Certificate/Partner Certificate.qmd:150
@@ -170,7 +170,7 @@ msgstr ""
 #: reports/Partner Certificate/Partner Certificate.qmd:154
 #, no-wrap
 msgid "participated in the NeoIPC Surveillance network.\n"
-msgstr ""
+msgstr "am NeoIPC Surveillance Netzwerk beteiligt.\n"
 
 #. type: Plain text
 #: reports/Partner Certificate/Partner Certificate.qmd:156
@@ -182,7 +182,7 @@ msgstr ""
 #: reports/Partner Certificate/Partner Certificate.qmd:160
 #, no-wrap
 msgid "By actively tracking a total of `r paste0('**', format(data$nPatients), '**')` newborns with a birth weight below 1,500 g and/or a gestational age of less than 32 weeks, the team provided valuable benchmarking data that can be used to assess and mitigate infection risks in neonatology units. We are proud and happy to have them as partners in our quest to enhance infection prevention and control in neonatology.\n"
-msgstr ""
+msgstr "Durch die aktive Nachverfolgung von insgesamt `r paste0('**', format(data$nPatients), '**')` Neugeborenen mit einem Geburtsgewicht unter 1.500 g und/oder einem Gestationsalter von weniger als 32 Wochen lieferte das Team wertvolle Vergleichsdaten, die zur Bewertung und Reduzierung von Infektionsrisiken in neonatologischen Abteilungen verwendet werden können. Wir sind stolz und glücklich, sie als Partner bei unserem Bestreben zu haben, die Infektionsprävention und -kontrolle in der Neonatologie zu verbessern.\n"
 
 #. type: Plain text
 #: reports/Partner Certificate/Partner Certificate.qmd:166
@@ -195,3 +195,9 @@ msgid ""
 "\\end{textblock*}\n"
 "![](`{r} data$signatureImagePath`){fig-align=\"right\"}\n"
 msgstr ""
+"\\vspace*{4\\baselineskip}\n"
+"\\begin{textblock*}{10cm}(12cm,27cm)\n"
+"`r data$signatory`\\\\\n"
+"für das NeoIPC Surveillance Team\\\\\n"
+"\\end{textblock*}\n"
+"![](`{r} data$signatureImagePath`){fig-align=\"right\"}\n"
