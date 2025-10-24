@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NeoIPC Surveillance Reports 0.9\n"
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2025-10-23 23:20+0200\n"
+"POT-Creation-Date: 2025-10-24 22:45+0200\n"
 "PO-Revision-Date: 2025-10-22 23:54+0200\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -21,10 +21,10 @@ msgstr ""
 #: reports/Partner Certificate/Partner Certificate.qmd:1
 #, no-wrap
 msgid "NeoIPC Surveillance Partner Certificate"
-msgstr ""
+msgstr "Certificato di partner di NeoIPC Surveillance"
 
 #. type: Fenced code block ({r})
-#: reports/Partner Certificate/Partner Certificate.qmd:34
+#: reports/Partner Certificate/Partner Certificate.qmd:36
 #, no-wrap
 msgid ""
 "\n"
@@ -41,16 +41,80 @@ msgid ""
 "if (!is.null(params$endYear)) data$endYear <- params$endYear\n"
 "if (!is.null(params$hospitalName)) data$hospitalName <- params$hospitalName\n"
 "if (!is.null(params$nPatients)) data$nPatients <- params$nPatients\n"
+"if (!is.null(params$signatureImagePath)) data$signatureImagePath <- params$signatureImagePath\n"
 "if (!is.null(params$signatory)) data$signatory <- params$signatory\n"
+"if (!is.null(params$departmentCode)) data$departmentCode <- params$departmentCode\n"
 "\n"
-"# Set a default signatory if none was provided\n"
-"if (is.null(data$signatory)) data$signatory <- \"Dr. med. Brar Piening\"\n"
+"# Abort if we don't have a signatory\n"
+"if (is.null(data$signatory)) stop(\"You have to provide a signatory\")\n"
+"\n"
+"# Abort if we don't have a signature image path\n"
+"if (is.null(data$signatureImagePath)) stop(\"You have to provide a signatureImagePath\")\n"
 "\n"
 "# if we are missing any essential information we try fetch it directly from the\n"
 "# NeoIPC Surveillance Platform\n"
 "if (is.null(data$startYear) || is.null(data$endYear) || is.null(data$hospitalName) || is.null(data$nPatients)) {\n"
-"  if(is.null(params$departmentCode)) stop(\"There was insufficient data to generate a partner certificate.\\nIf you don't have all the information please pass a department code so that the system can acquire the information from the NeoIPC Surveillance Platform.\")\n"
-"  ds <- neoipcr::import_dhis2(dataset_options = neoipcr::dhis2_dataset_options())\n"
+"  if(is.null(data$departmentCode)) stop(\"There was insufficient data to generate a partner certificate.\\nIf you don't have all the information please provide a department code so that the system can acquire the information from the NeoIPC Surveillance Platform.\")\n"
+"\n"
+"  # Initialize our query dates to startYear and/or endYear or NULL\n"
+"  if (is.null(data$startYear))\n"
+"    startFrom <- NULL\n"
+"  else\n"
+"    startFrom <- as.Date(paste0(data$startYear,'-01-01'))\n"
+"  if (is.null(data$endYear))\n"
+"    endTo <- NULL\n"
+"  else\n"
+"    endTo <- as.Date(paste0(data$endYear,'-12-31'))\n"
+"\n"
+"  # Import date from our DHIS2 server\n"
+"  ds <- suppressWarnings(neoipcr::import_dhis2(\n"
+"    connection_options = neoipcr::dhis2_connection_options(\n"
+"      token = Sys.getenv(\"NEOIPC_DHIS2_TOKEN\")\n"
+"    ),\n"
+"    dataset_options = neoipcr::dhis2_dataset_options(\n"
+"      surveillance_end_from = startFrom,\n"
+"      surveillance_end_to = endTo,\n"
+"      include_hospital = \"yes\",\n"
+"      include_department = \"yes\"\n"
+"      )))\n"
+"\n"
+"  department <- ds$metadata$departments |>\n"
+"    dplyr::filter(code == data$departmentCode) |>\n"
+"    dplyr::select(department_key, hospital_key)\n"
+"\n"
+"  if (nrow(department) < 1)\n"
+"    stop(paste0(\"Could not find a department with the code '\", data$departmentCode, \"'.\"))\n"
+"\n"
+"  if (is.null(data$nPatients))\n"
+"    data$nPatients <- ds$enrollments |>\n"
+"    dplyr::semi_join(department, dplyr::join_by(department_key)) |>\n"
+"    dplyr::pull(patient_key) |>\n"
+"    unique() |>\n"
+"    length()\n"
+"\n"
+"  if (is.null(data$startYear))\n"
+"    data$startYear <- ds$events |>\n"
+"    dplyr::semi_join(department, dplyr::join_by(department_key)) |>\n"
+"    dplyr::filter(event_type_key == \"end\") |>\n"
+"    dplyr::pull(occurredAt) |>\n"
+"    lubridate::year() |>\n"
+"    min()\n"
+"\n"
+"  if (is.null(data$endYear))\n"
+"    data$endYear <- ds$events |>\n"
+"    dplyr::semi_join(department, dplyr::join_by(department_key)) |>\n"
+"    dplyr::filter(event_type_key == \"end\") |>\n"
+"    dplyr::pull(occurredAt) |>\n"
+"    lubridate::year() |>\n"
+"    max()\n"
+"\n"
+"  if (is.null(data$hospitalName))\n"
+"    data$hospitalName <- ds$metadata$hospitals  |>\n"
+"    dplyr::semi_join(department, dplyr::join_by(hospital_key)) |>\n"
+"    dplyr::pull(displayName)\n"
+"\n"
+"  rm(department)\n"
+"  rm(ds)\n"
 "}\n"
 "\n"
 "# Make sure numbers aren't strings\n"
@@ -60,79 +124,80 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: reports/Partner Certificate/Partner Certificate.qmd:68
+#: reports/Partner Certificate/Partner Certificate.qmd:134
 #, no-wrap
 msgid "\\selectlanguage{british}\n"
-msgstr ""
+msgstr "\\selectlanguage{italian}\n"
 
 #. type: Plain text
-#: reports/Partner Certificate/Partner Certificate.qmd:70
+#: reports/Partner Certificate/Partner Certificate.qmd:136
 #, no-wrap
 msgid "\\begin{center}\n"
 msgstr ""
 
 #. type: Plain text
-#: reports/Partner Certificate/Partner Certificate.qmd:72
+#: reports/Partner Certificate/Partner Certificate.qmd:138
 #, no-wrap
 msgid "`r if (data$startYear == data$endYear) {'In'} else {'During the period'}`\n"
-msgstr ""
+msgstr "`r if (data$startYear == data$endYear) {'Nel'} else {'Nel periodo'}`\n"
 
 #. type: Plain text
-#: reports/Partner Certificate/Partner Certificate.qmd:74 Certificate.qmd:78
-#: Certificate.qmd:82 Certificate.qmd:86 Certificate.qmd:92
+#: reports/Partner Certificate/Partner Certificate.qmd:140 Certificate.qmd:144
+#: Certificate.qmd:148 Certificate.qmd:152 Certificate.qmd:158
 #, no-wrap
 msgid "\\vspace*{1.25\\baselineskip}\n"
 msgstr ""
 
 #. type: Plain text
-#: reports/Partner Certificate/Partner Certificate.qmd:76
+#: reports/Partner Certificate/Partner Certificate.qmd:142
 #, no-wrap
 msgid "\\Huge \\bfseries `r if (data$startYear == data$endYear) {data$startYear} else {paste0(data$startYear, \"-\", data$endYear)}`\\normalsize \\normalfont\n"
 msgstr ""
 
 #. type: Plain text
-#: reports/Partner Certificate/Partner Certificate.qmd:80
+#: reports/Partner Certificate/Partner Certificate.qmd:146
 #, no-wrap
 msgid "the neonatology unit at\n"
-msgstr ""
+msgstr "l'unità di neonatologia dell'\n"
 
 #. type: Plain text
-#: reports/Partner Certificate/Partner Certificate.qmd:84
+#: reports/Partner Certificate/Partner Certificate.qmd:150
 #, no-wrap
 msgid "\\large \\bfseries `r data$hospitalName`\\normalsize \\normalfont\n"
 msgstr ""
 
 #. type: Plain text
-#: reports/Partner Certificate/Partner Certificate.qmd:88
+#: reports/Partner Certificate/Partner Certificate.qmd:154
 #, no-wrap
-msgid "participated in the NeoIPC Surveillance Network.\n"
-msgstr ""
+msgid "participated in the NeoIPC Surveillance network.\n"
+msgstr "ha partecipato alla rete di NeoIPC Surveillance\n"
 
 #. type: Plain text
-#: reports/Partner Certificate/Partner Certificate.qmd:90
+#: reports/Partner Certificate/Partner Certificate.qmd:156
 #, no-wrap
 msgid "\\end{center}\n"
 msgstr ""
 
 #. type: Plain text
-#: reports/Partner Certificate/Partner Certificate.qmd:94
+#: reports/Partner Certificate/Partner Certificate.qmd:160
 #, no-wrap
-msgid "By actively tracking a total of `r paste0('**', format(data$nPatients), ' patients**')`, the team provided valuable benchmarking data that can be used to assess and mitigate infection risks in neonatology units. We are proud and happy to have them as partners in our quest to enhance infection prevention and control in neonatology.\n"
-msgstr ""
+msgid "By actively tracking a total of `r paste0('**', format(data$nPatients), '**')` newborns with a birth weight below 1,500 g and/or a gestational age of less than 32 weeks, the team provided valuable benchmarking data that can be used to assess and mitigate infection risks in neonatology units. We are proud and happy to have them as partners in our quest to enhance infection prevention and control in neonatology.\n"
+msgstr "Monitorando attivamente un totale di `r paste0('**', format(data$nPatients), '**')` neonati con peso alla nascita inferiore a 1.500 g e/o età gestazionale inferiore a 32 settimane, il team ha fornito preziosi dati di riferimento che possono essere utilizzati per valutare e mitigare i rischi di infezione nelle unità di neonatologia. Siamo orgogliosi e felici di averli come partner nella nostra missione di migliorare la prevenzione e il controllo delle infezioni in neonatologia.\n"
 
 #. type: Plain text
-#: reports/Partner Certificate/Partner Certificate.qmd:96
-#, no-wrap
-msgid "\\vspace*{6\\baselineskip}\n"
-msgstr ""
-
-#. type: Plain text
-#: reports/Partner Certificate/Partner Certificate.qmd:102
+#: reports/Partner Certificate/Partner Certificate.qmd:166
 #, no-wrap
 msgid ""
-"\\hfill\n"
-"\\begin{minipage}[t]{0.48\\textwidth}\n"
+"\\vspace*{4\\baselineskip}\n"
+"\\begin{textblock*}{10cm}(12cm,27cm)\n"
 "`r data$signatory`\\\\\n"
 "for the NeoIPC Surveillance team\\\\\n"
-"\\end{minipage}\n"
+"\\end{textblock*}\n"
+"![](`{r} data$signatureImagePath`){fig-align=\"right\"}\n"
 msgstr ""
+"\\vspace*{2\\baselineskip}\n"
+"\\begin{textblock*}{10cm}(12cm,27cm)\n"
+"`r data$signatory`\\\\\n"
+"per il team di NeoIPC Surveillance\\\\\n"
+"\\end{textblock*}\n"
+"![](`{r} data$signatureImagePath`){fig-align=\"right\"}\n"

@@ -1,11 +1,12 @@
 ---
 title: "NeoIPC Surveillance Partner Certificate"
 params:
-  startYear: 2025
-  endYear: 2025
-  nPatients: 999
-  hospitalName: Test Hospital
+  startYear: NULL
+  endYear: NULL
+  nPatients: NULL
+  hospitalName: NULL
   signatory: NULL
+  signatureImagePath: NULL
   dataFilePath: NULL
   departmentCode: NULL
 engine: knitr
@@ -18,7 +19,7 @@ format:
     fontsize: 12pt
     papersize: a4paper
     geometry:
-      - top=25mm
+      - top=15mm
       - bottom=20mm
       - left=25mm
       - right=25mm
@@ -29,6 +30,7 @@ format:
       text: |
         \usepackage[estonian,greek,italian,ngerman,spanish,british]{babel}
         \usepackage{microtype}
+        \usepackage[absolute]{textpos}
         \pagenumbering{gobble}
 ---
 ```{r}
@@ -46,16 +48,80 @@ if (!is.null(params$startYear)) data$startYear <- params$startYear
 if (!is.null(params$endYear)) data$endYear <- params$endYear
 if (!is.null(params$hospitalName)) data$hospitalName <- params$hospitalName
 if (!is.null(params$nPatients)) data$nPatients <- params$nPatients
+if (!is.null(params$signatureImagePath)) data$signatureImagePath <- params$signatureImagePath
 if (!is.null(params$signatory)) data$signatory <- params$signatory
+if (!is.null(params$departmentCode)) data$departmentCode <- params$departmentCode
 
-# Set a default signatory if none was provided
-if (is.null(data$signatory)) data$signatory <- "Dr. med. Brar Piening"
+# Abort if we don't have a signatory
+if (is.null(data$signatory)) stop("You have to provide a signatory")
+
+# Abort if we don't have a signature image path
+if (is.null(data$signatureImagePath)) stop("You have to provide a signatureImagePath")
 
 # if we are missing any essential information we try fetch it directly from the
 # NeoIPC Surveillance Platform
 if (is.null(data$startYear) || is.null(data$endYear) || is.null(data$hospitalName) || is.null(data$nPatients)) {
-  if(is.null(params$departmentCode)) stop("There was insufficient data to generate a partner certificate.\nIf you don't have all the information please pass a department code so that the system can acquire the information from the NeoIPC Surveillance Platform.")
-  ds <- neoipcr::import_dhis2(dataset_options = neoipcr::dhis2_dataset_options())
+  if(is.null(data$departmentCode)) stop("There was insufficient data to generate a partner certificate.\nIf you don't have all the information please provide a department code so that the system can acquire the information from the NeoIPC Surveillance Platform.")
+
+  # Initialize our query dates to startYear and/or endYear or NULL
+  if (is.null(data$startYear))
+    startFrom <- NULL
+  else
+    startFrom <- as.Date(paste0(data$startYear,'-01-01'))
+  if (is.null(data$endYear))
+    endTo <- NULL
+  else
+    endTo <- as.Date(paste0(data$endYear,'-12-31'))
+
+  # Import date from our DHIS2 server
+  ds <- suppressWarnings(neoipcr::import_dhis2(
+    connection_options = neoipcr::dhis2_connection_options(
+      token = Sys.getenv("NEOIPC_DHIS2_TOKEN")
+    ),
+    dataset_options = neoipcr::dhis2_dataset_options(
+      surveillance_end_from = startFrom,
+      surveillance_end_to = endTo,
+      include_hospital = "yes",
+      include_department = "yes"
+      )))
+
+  department <- ds$metadata$departments |>
+    dplyr::filter(code == data$departmentCode) |>
+    dplyr::select(department_key, hospital_key)
+
+  if (nrow(department) < 1)
+    stop(paste0("Could not find a department with the code '", data$departmentCode, "'."))
+
+  if (is.null(data$nPatients))
+    data$nPatients <- ds$enrollments |>
+    dplyr::semi_join(department, dplyr::join_by(department_key)) |>
+    dplyr::pull(patient_key) |>
+    unique() |>
+    length()
+
+  if (is.null(data$startYear))
+    data$startYear <- ds$events |>
+    dplyr::semi_join(department, dplyr::join_by(department_key)) |>
+    dplyr::filter(event_type_key == "end") |>
+    dplyr::pull(occurredAt) |>
+    lubridate::year() |>
+    min()
+
+  if (is.null(data$endYear))
+    data$endYear <- ds$events |>
+    dplyr::semi_join(department, dplyr::join_by(department_key)) |>
+    dplyr::filter(event_type_key == "end") |>
+    dplyr::pull(occurredAt) |>
+    lubridate::year() |>
+    max()
+
+  if (is.null(data$hospitalName))
+    data$hospitalName <- ds$metadata$hospitals  |>
+    dplyr::semi_join(department, dplyr::join_by(hospital_key)) |>
+    dplyr::pull(displayName)
+
+  rm(department)
+  rm(ds)
 }
 
 # Make sure numbers aren't strings
@@ -84,19 +150,17 @@ the neonatology unit at
 
 \vspace*{1.25\baselineskip}
 
-participated in the NeoIPC Surveillance Network.
+participated in the NeoIPC Surveillance network.
 
 \end{center}
 
 \vspace*{1.25\baselineskip}
 
-By actively tracking a total of `r paste0('**', format(data$nPatients), ' patients**')`, the team provided valuable benchmarking data that can be used to assess and mitigate infection risks in neonatology units. We are proud and happy to have them as partners in our quest to enhance infection prevention and control in neonatology.
+By actively tracking a total of `r paste0('**', format(data$nPatients), '**')` newborns with a birth weight below 1,500 g and/or a gestational age of less than 32 weeks, the team provided valuable benchmarking data that can be used to assess and mitigate infection risks in neonatology units. We are proud and happy to have them as partners in our quest to enhance infection prevention and control in neonatology.
 
-\vspace*{6\baselineskip}
-
-\hfill
-\begin{minipage}[t]{0.48\textwidth}
+\vspace*{4\baselineskip}
+\begin{textblock*}{10cm}(12cm,27cm)
 `r data$signatory`\\
 for the NeoIPC Surveillance team\\
-\end{minipage}
-
+\end{textblock*}
+![](`{r} data$signatureImagePath`){fig-align="right"}
