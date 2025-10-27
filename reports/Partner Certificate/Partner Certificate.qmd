@@ -1,5 +1,10 @@
 ---
+lang: en
 title: "NeoIPC Surveillance Partner Certificate"
+author-meta: "NeoIPC Surveillance team"
+subject: "Partner certificate for the NeoIPC Surveillance network."
+keywords: "NeoIPC, Surveillance, Certificate"
+date-meta: now
 params:
   startYear: NULL
   endYear: NULL
@@ -9,6 +14,7 @@ params:
   signatureImagePath: NULL
   dataFilePath: NULL
   departmentCode: NULL
+  token: NULL
 engine: knitr
 format:
   pdf:
@@ -28,12 +34,12 @@ format:
     keep-tex: true
     include-in-header: 
       text: |
-        \usepackage[estonian,greek,italian,ngerman,spanish,british]{babel}
         \usepackage{microtype}
         \usepackage[absolute]{textpos}
         \pagenumbering{gobble}
 ---
 ```{r}
+#| label: Setup
 
 # Initialize our report data from the data file if one is provided
 if (!is.null(params$dataFilePath) && file.exists(params$dataFilePath)) {
@@ -55,8 +61,9 @@ if (!is.null(params$departmentCode)) data$departmentCode <- params$departmentCod
 # Abort if we don't have a signatory
 if (is.null(data$signatory)) stop("You have to provide a signatory")
 
-# Abort if we don't have a signature image path
+# Abort if we don't have a valid signature image path
 if (is.null(data$signatureImagePath)) stop("You have to provide a signatureImagePath")
+if (!file.exists(data$signatureImagePath)) stop(paste0("'", data$signatureImagePath,"' is not a valid file path."))
 
 # if we are missing any essential information we try fetch it directly from the
 # NeoIPC Surveillance Platform
@@ -73,11 +80,15 @@ if (is.null(data$startYear) || is.null(data$endYear) || is.null(data$hospitalNam
   else
     endTo <- as.Date(paste0(data$endYear,'-12-31'))
 
+  if (is.null(params$token)){
+    connection_options <- neoipcr::dhis2_connection_options(token = Sys.getenv("NEOIPC_DHIS2_TOKEN"))
+  } else {
+    connection_options <- neoipcr::dhis2_connection_options(token = params$token)
+  }
+
   # Import date from our DHIS2 server
   ds <- suppressWarnings(neoipcr::import_dhis2(
-    connection_options = neoipcr::dhis2_connection_options(
-      token = Sys.getenv("NEOIPC_DHIS2_TOKEN")
-    ),
+    connection_options = connection_options,
     dataset_options = neoipcr::dhis2_dataset_options(
       surveillance_end_from = startFrom,
       surveillance_end_to = endTo,
@@ -130,6 +141,18 @@ data$endYear <- as.integer(data$endYear)
 data$nPatients <- as.integer(data$nPatients)
 ```
 
+```{r}
+#| label: Initialise Locale
+locale <- "en_GB.UTF-8"
+big_mark <- ","
+```
+
+```{r}
+#| label: Set Locale
+invisible(Sys.setlocale(category = "LC_ALL", locale = locale))
+invisible(Sys.setLanguage(locale))
+```
+
 \selectlanguage{british}
 
 \begin{center}
@@ -156,11 +179,14 @@ participated in the NeoIPC Surveillance network.
 
 \vspace*{1.25\baselineskip}
 
-By actively tracking a total of `r paste0('**', format(data$nPatients), '**')` newborns with a birth weight below 1,500 g and/or a gestational age of less than 32 weeks, the team provided valuable benchmarking data that can be used to assess and mitigate infection risks in neonatology units. We are proud and happy to have them as partners in our quest to enhance infection prevention and control in neonatology.
+By actively tracking a total of `r paste0('**', format(data$nPatients, big.mark = big_mark), '**')` newborns with a birth weight below `r format(1500L, big.mark = big_mark)` g and/or a gestational age of less than 32 weeks, the team provided valuable benchmarking data that can be used to assess and mitigate infection risks in neonatology units. We are proud and happy to have them as partners in our quest to enhance infection prevention and control in neonatology.
 
 \vspace*{4\baselineskip}
 \begin{textblock*}{10cm}(12cm,27cm)
 `r data$signatory`\\
 for the NeoIPC Surveillance team\\
+\end{textblock*}
+\begin{textblock*}{10cm}(2.5cm,27cm)
+Berlin, `r format(Sys.Date(), format = "%x")`
 \end{textblock*}
 ![](`{r} data$signatureImagePath`){fig-align="right"}
