@@ -38,8 +38,9 @@ param(
 )
 
 if ($Token) {
-    if ([System.IO.File]::Exists($Token)) {
-        $Token = Get-Content -LiteralPath $Token -TotalCount 1 -Encoding utf8
+    $tokenPath = Resolve-Path -LiteralPath $Token -ErrorAction SilentlyContinue
+    if ([System.IO.File]::Exists($tokenPath)) {
+        $Token = Get-Content -LiteralPath $tokenPath -TotalCount 1 -Encoding utf8
     }
 } elseif ($env:NEOIPC_DHIS2_TOKEN) {
     $Token = $env:NEOIPC_DHIS2_TOKEN
@@ -86,7 +87,7 @@ function HandleQuartoResult {
 
 $currentDir = Get-Location
 $reportDir = Resolve-Path -LiteralPath "$PSScriptRoot/../reports/Partner Certificate/"
-$SignatureImagePath = Resolve-Path -LiteralPath $SignatureImagePath -Relative -RelativeBasePath $reportDir
+$SignatureImagePath = Resolve-Path -LiteralPath (Resolve-Path -LiteralPath $SignatureImagePath) -Relative -RelativeBasePath $reportDir
 
 $exitCode = 0
 try {
