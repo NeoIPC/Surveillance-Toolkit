@@ -37,26 +37,6 @@ param(
     [string]$Token
 )
 
-if ($Token) {
-    $tokenPath = Resolve-Path -LiteralPath $Token -ErrorAction SilentlyContinue
-    if ([System.IO.File]::Exists($tokenPath)) {
-        $Token = Get-Content -LiteralPath $tokenPath -TotalCount 1 -Encoding utf8
-    }
-} elseif ($env:NEOIPC_DHIS2_TOKEN) {
-    $Token = $env:NEOIPC_DHIS2_TOKEN
-    if ([System.IO.File]::Exists($Token)) {
-        $Token = Get-Content -LiteralPath $Token -TotalCount 1 -Encoding utf8
-    }
-} else {
-    throw "Failed to detect a DHIS2 personal access token in the environment. Please set the 'NEOIPC_DHIS2_TOKEN' environment variable or pass the token via the -Token parameter."
-}
-
-if ($Language -eq 'en') {
-    $quartoFile = 'Partner Certificate.qmd'
-} else {
-    $quartoFile = "Partner Certificate.$Language.qmd"
-}
-
 function HandleQuartoResult {
     param ($QuartoResult)
     $errorLine = ''
@@ -85,9 +65,29 @@ function HandleQuartoResult {
     }
 }
 
+if ($Token) {
+    $tokenPath = Resolve-Path -LiteralPath $Token -ErrorAction SilentlyContinue
+    if ([System.IO.File]::Exists($tokenPath)) {
+        $Token = Get-Content -LiteralPath $tokenPath -TotalCount 1 -Encoding utf8
+    }
+} elseif ($env:NEOIPC_DHIS2_TOKEN) {
+    $Token = $env:NEOIPC_DHIS2_TOKEN
+    if ([System.IO.File]::Exists($Token)) {
+        $Token = Get-Content -LiteralPath $Token -TotalCount 1 -Encoding utf8
+    }
+} else {
+    throw "Failed to detect a DHIS2 personal access token in the environment. Please set the 'NEOIPC_DHIS2_TOKEN' environment variable or pass the token via the -Token parameter."
+}
+
+if ($Language -eq 'en') {
+    $quartoFile = 'Partner Certificate.qmd'
+} else {
+    $quartoFile = "Partner Certificate.$Language.qmd"
+}
+
 $currentDir = Get-Location
 $reportDir = Resolve-Path -LiteralPath "$PSScriptRoot/../reports/Partner Certificate/"
-$SignatureImagePath = Resolve-Path -LiteralPath (Resolve-Path -LiteralPath $SignatureImagePath) -Relative -RelativeBasePath $reportDir
+$SignatureImagePath = Resolve-Path -LiteralPath $SignatureImagePath.FullName -Relative -RelativeBasePath $reportDir
 
 $exitCode = 0
 try {
@@ -98,9 +98,10 @@ try {
 
         if ($LASTEXITCODE -ne 0) {
             if ($deptsQueryResult -match '\D401\D?.*$') {
-                throw "Authorisation failed"
+                Write-Host "Authorisation failed" -ForegroundColor Red
                 exit 401
             } else {
+                Write-Host $deptsQueryResult -ForegroundColor Red
                 exit 1
             }
         }
