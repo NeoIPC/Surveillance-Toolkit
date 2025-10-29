@@ -109,7 +109,7 @@ try {
         $sites = ($deptsQueryResult | ConvertFrom-Json -Depth 10).organisationUnitGroups[0].organisationUnits.code | Where-Object -FilterScript {  foreach ($d in $DepartmentCode) { if ($_ -match $d) { return $true } } } | Sort-Object
 
         foreach ($site in $sites) {
-            Write-Host "Generating validation report for $site..."
+            Write-Host "Generating partner certificate for $site..."
             $outFile = "$([datetime]::Now.ToString('yyyy-MM-dd_HHmmss'))_NeoIPC-Surveillance-Partner-Certificate_$($site).$($Language).pdf"
             $quartoResult = quarto render $quartoFile -P "signatory:$Signatory" -P "signatureImagePath:$SignatureImagePath" -P "departmentCode:$site" -P "token:$Token" -o $outFile 2>&1
             $exitCode = [System.Math]::Max($LASTEXITCODE, $exitCode)
@@ -117,7 +117,7 @@ try {
         }
         exit $exitCode
     } else {
-        Write-Host "Generating validation report for $HospitalName..."
+        Write-Host "Generating partner certificate for $HospitalName..."
         $outFile = "$([datetime]::Now.ToString('yyyy-MM-dd_HHmmss'))_NeoIPC-Surveillance-Partner-Certificate_$($HospitalName).$($Language).pdf"
         $quartoResult = quarto render "'$quartoFile'" -P "signatory:$Signatory" -P "signatureImagePath:$SignatureImagePath" -P "startYear:$StartYear" -P "endYear:$EndYear" -P "nPatients:$NumberOfPatients" -P "hospitalName:$HospitalName" -P "token:$Token" -o $outFile 2>&1
         $exitCode = $LASTEXITCODE
