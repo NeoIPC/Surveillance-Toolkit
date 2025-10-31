@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NeoIPC Surveillance Reports 0.9\n"
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2025-10-29 19:26+0100\n"
+"POT-Creation-Date: 2025-10-31 07:59+0100\n"
 "PO-Revision-Date: 2025-10-22 23:54+0200\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -35,17 +35,11 @@ msgstr "NeoIPC, Surveillance, Certificato"
 msgid "en"
 msgstr "it"
 
-#. type: Yaml Front Matter Hash Value: subject
-#: reports/Partner Certificate/Partner Certificate.qmd:1
-#, no-wrap
-msgid "Partner certificate for the NeoIPC Surveillance network."
-msgstr "Certificato di partner per la rete di sorveglianza NeoIPC."
-
 #. type: Yaml Front Matter Hash Value: title
 #: reports/Partner Certificate/Partner Certificate.qmd:1
 #, no-wrap
-msgid "NeoIPC Surveillance Partner Certificate"
-msgstr "Certificato di partner di NeoIPC Surveillance"
+msgid "Certificate of participation in the NeoIPC project surveillance system (NeoIPC Surveillance)"
+msgstr "Certificato di partecipazione al sistema di sorveglianza del progetto NeoIPC (NeoIPC Surveillance)"
 
 #. type: Fenced code block ({r})
 #: reports/Partner Certificate/Partner Certificate.qmd:55
@@ -76,80 +70,82 @@ msgstr ""
 "\\selectlanguage{italian}\n"
 
 #. type: Plain text
-#: reports/Partner Certificate/Partner Certificate.qmd:67
+#: reports/Partner Certificate/Partner Certificate.qmd:68
 #, no-wrap
-msgid "\\begin{center}\n"
+msgid ""
+"\\begin{center}\n"
+"\\vspace*{-1.25\\baselineskip}\n"
 msgstr ""
 
 #. type: Plain text
-#: reports/Partner Certificate/Partner Certificate.qmd:69
+#: reports/Partner Certificate/Partner Certificate.qmd:70
 #, no-wrap
 msgid "`r if (data$startYear == data$endYear) {'In'} else {'During the period'}`\n"
 msgstr "`r if (data$startYear == data$endYear) {'Nel'} else {'Nel periodo'}`\n"
 
 #. type: Plain text
-#: reports/Partner Certificate/Partner Certificate.qmd:71 Certificate.qmd:75
-#: Certificate.qmd:79 Certificate.qmd:83 Certificate.qmd:89
+#: reports/Partner Certificate/Partner Certificate.qmd:72 Certificate.qmd:76
+#: Certificate.qmd:80 Certificate.qmd:84 Certificate.qmd:90
 #, no-wrap
 msgid "\\vspace*{1.25\\baselineskip}\n"
 msgstr ""
 
 #. type: Plain text
-#: reports/Partner Certificate/Partner Certificate.qmd:73
+#: reports/Partner Certificate/Partner Certificate.qmd:74
 #, no-wrap
 msgid "\\Huge \\bfseries `r if (data$startYear == data$endYear) {data$startYear} else {paste0(data$startYear, \"-\", data$endYear)}`\\normalsize \\normalfont\n"
 msgstr ""
 
 #. type: Plain text
-#: reports/Partner Certificate/Partner Certificate.qmd:77
+#: reports/Partner Certificate/Partner Certificate.qmd:78
 #, no-wrap
 msgid "the neonatology unit at\n"
 msgstr "l'unità di neonatologia dell'\n"
 
 #. type: Plain text
-#: reports/Partner Certificate/Partner Certificate.qmd:81
+#: reports/Partner Certificate/Partner Certificate.qmd:82
 #, no-wrap
 msgid "\\large \\bfseries `r data$hospitalName`\\normalsize \\normalfont\n"
 msgstr ""
 
 #. type: Plain text
-#: reports/Partner Certificate/Partner Certificate.qmd:85
+#: reports/Partner Certificate/Partner Certificate.qmd:86
 #, no-wrap
 msgid "participated in the NeoIPC Surveillance network.\n"
 msgstr "ha partecipato alla rete di NeoIPC Surveillance\n"
 
 #. type: Plain text
-#: reports/Partner Certificate/Partner Certificate.qmd:87
+#: reports/Partner Certificate/Partner Certificate.qmd:88
 #, no-wrap
 msgid "\\end{center}\n"
 msgstr ""
 
 #. type: Plain text
-#: reports/Partner Certificate/Partner Certificate.qmd:91
+#: reports/Partner Certificate/Partner Certificate.qmd:92
 #, no-wrap
-msgid "By actively tracking a total of `r paste0('**', format(data$nPatients, big.mark = big_mark), '**')` newborns with a birth weight below `r format(1500L, big.mark = big_mark)` g and/or a gestational age of less than 32 weeks, the team provided valuable benchmarking data that can be used to assess and mitigate infection risks in neonatology units. We are proud and happy to have them as partners in our quest to enhance infection prevention and control in neonatology.\n"
-msgstr "Monitorando attivamente un totale di `r paste0('**', format(data$nPatients, big.mark = big_mark), '**')` neonati con peso alla nascita inferiore a `r format(1500L, big.mark = big_mark)` g e/o età gestazionale inferiore a 32 settimane, il team ha fornito preziosi dati di riferimento che possono essere utilizzati per valutare e mitigare i rischi di infezione nelle unità di neonatologia. Siamo orgogliosi e felici di averli come partner nella nostra missione di migliorare la prevenzione e il controllo delle infezioni in neonatologia.\n"
+msgid "Through active monitoring of `r paste0('**', format(data$nPatients, big.mark = big_mark), '**')` newborns with birth weights below `r format(1500L, big.mark = big_mark)` grams and/or gestational ages below 32 weeks, the team collected valuable reference data that will be useful for assessing and reducing infection risks in neonatal units. We are proud and delighted to have them as partners in our mission to improve infection prevention and control in the neonatal setting.\n"
+msgstr "Grazie al monitoraggio attivo di `r paste0('**', format(data$nPatients, big.mark = big_mark), '**')`  neonati con peso alla nascita inferiore a `r format(1500L, big.mark = big_mark)` grammi e/o età gestazionale inferiore a 32 settimane, il team ha raccolto dati di riferimento preziosi, utili per valutare e ridurre i rischi di infezione nelle unità di neonatologia. Siamo orgogliosi e felici di averli come partner nella nostra missione di migliorare la prevenzione e il controllo delle infezioni in ambito neonatale.\n"
 
 #. type: Plain text
-#: reports/Partner Certificate/Partner Certificate.qmd:100
+#: reports/Partner Certificate/Partner Certificate.qmd:101
 #, no-wrap
 msgid ""
-"\\vspace*{4\\baselineskip}\n"
-"\\begin{textblock*}{10cm}(12cm,27cm)\n"
+"\\vspace*{3.25\\baselineskip}\n"
+"\\begin{textblock*}{10cm}(12cm,26cm)\n"
 "`r data$signatory`\\\\\n"
 "for the NeoIPC Surveillance team\\\\\n"
 "\\end{textblock*}\n"
-"\\begin{textblock*}{10cm}(2.5cm,27cm)\n"
+"\\begin{textblock*}{10cm}(2.5cm,26cm)\n"
 "Berlin, `r format(Sys.Date(), format = \"%x\")`\n"
 "\\end{textblock*}\n"
 "![](`{r} data$signatureImagePath`){fig-align=\"right\"}\n"
 msgstr ""
-"\\vspace*{2\\baselineskip}\n"
-"\\begin{textblock*}{10cm}(12cm,27cm)\n"
+"\\vspace*{3.25\\baselineskip}\n"
+"\\begin{textblock*}{10cm}(12cm,26cm)\n"
 "`r data$signatory`\\\\\n"
 "per il team di NeoIPC Surveillance\\\\\n"
 "\\end{textblock*}\n"
-"\\begin{textblock*}{10cm}(2.5cm,27cm)\n"
+"\\begin{textblock*}{10cm}(2.5cm,26cm)\n"
 "Berlin, `r format(Sys.Date(), format = \"%x\")`\n"
 "\\end{textblock*}\n"
 "![](`{r} data$signatureImagePath`){fig-align=\"right\"}\n"
