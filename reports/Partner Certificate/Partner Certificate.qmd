@@ -1,8 +1,7 @@
 ---
 lang: en
-title: "NeoIPC Surveillance Partner Certificate"
+title: "Certificate of participation in the NeoIPC project surveillance system (NeoIPC Surveillance)"
 author-meta: "NeoIPC Surveillance team"
-subject: "Partner certificate for the NeoIPC Surveillance network."
 keywords: "NeoIPC, Surveillance, Certificate"
 date-meta: now
 params:
@@ -20,6 +19,7 @@ format:
   pdf:
     template-partials:
       - before-body.tex
+      - title.tex
     documentclass: scrartcl
     classoption:
       - footsepline=true
@@ -64,6 +64,7 @@ big_mark <- ","
 \selectlanguage{british}
 
 \begin{center}
+\vspace*{-1.25\baselineskip}
 
 `r if (data$startYear == data$endYear) {'In'} else {'During the period'}`
 
@@ -87,14 +88,14 @@ participated in the NeoIPC Surveillance network.
 
 \vspace*{1.25\baselineskip}
 
-By actively tracking a total of `r paste0('**', format(data$nPatients, big.mark = big_mark), '**')` newborns with a birth weight below `r format(1500L, big.mark = big_mark)` g and/or a gestational age of less than 32 weeks, the team provided valuable benchmarking data that can be used to assess and mitigate infection risks in neonatology units. We are proud and happy to have them as partners in our quest to enhance infection prevention and control in neonatology.
+Through active monitoring of `r paste0('**', format(data$nPatients, big.mark = big_mark), '**')` newborns with birth weights below `r format(1500L, big.mark = big_mark)` grams and/or gestational ages below 32 weeks, the team collected valuable reference data that will be useful for assessing and reducing infection risks in neonatal units. We are proud and delighted to have them as partners in our mission to improve infection prevention and control in the neonatal setting.
 
-\vspace*{4\baselineskip}
-\begin{textblock*}{10cm}(12cm,27cm)
+\vspace*{3.25\baselineskip}
+\begin{textblock*}{10cm}(12cm,26cm)
 `r data$signatory`\\
 for the NeoIPC Surveillance team\\
 \end{textblock*}
-\begin{textblock*}{10cm}(2.5cm,27cm)
+\begin{textblock*}{10cm}(2.5cm,26cm)
 Berlin, `r format(Sys.Date(), format = "%x")`
 \end{textblock*}
 ![](`{r} data$signatureImagePath`){fig-align="right"}
