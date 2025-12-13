@@ -17,31 +17,31 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 #. type: Yaml Front Matter Hash Value: author-meta
-#: reports/Partner Certificate/Partner Certificate.qmd:1
+#: reports/Partner-Certificate/Partner-Certificate.qmd:1
 #, no-wrap
 msgid "NeoIPC Surveillance team"
 msgstr ""
 
 #. type: Yaml Front Matter Hash Value: keywords
-#: reports/Partner Certificate/Partner Certificate.qmd:1
+#: reports/Partner-Certificate/Partner-Certificate.qmd:1
 #, no-wrap
 msgid "NeoIPC, Surveillance, Certificate"
 msgstr ""
 
 #. type: Yaml Front Matter Hash Value: lang
-#: reports/Partner Certificate/Partner Certificate.qmd:1
+#: reports/Partner-Certificate/Partner-Certificate.qmd:1
 #, no-wrap
 msgid "en"
 msgstr ""
 
 #. type: Yaml Front Matter Hash Value: title
-#: reports/Partner Certificate/Partner Certificate.qmd:1
+#: reports/Partner-Certificate/Partner-Certificate.qmd:1
 #, no-wrap
 msgid "Certificate of participation in the NeoIPC project surveillance system (NeoIPC Surveillance)"
 msgstr ""
 
 #. type: Fenced code block ({r})
-#: reports/Partner Certificate/Partner Certificate.qmd:55
+#: reports/Partner-Certificate/Partner-Certificate.qmd:55
 #, no-wrap
 msgid ""
 "#| label: Initialise Locale\n"
@@ -50,13 +50,13 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: reports/Partner Certificate/Partner Certificate.qmd:62
+#: reports/Partner-Certificate/Partner-Certificate.qmd:62
 #, markdown-text, no-wrap
 msgid "{{< include _setup.qmd >}}\n"
 msgstr ""
 
 #. type: Plain text
-#: reports/Partner Certificate/Partner Certificate.qmd:65
+#: reports/Partner-Certificate/Partner-Certificate.qmd:65
 #, markdown-text, no-wrap
 msgid ""
 "\\cfoot*{\\raggedright \\hspace{1.5cm}This project has received funding from the European Union’s Horizon 2020 research and\\\\ \\hspace{1.5cm}innovation programme under grant agreement No 965328.}\n"
@@ -64,7 +64,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: reports/Partner Certificate/Partner Certificate.qmd:68
+#: reports/Partner-Certificate/Partner-Certificate.qmd:68
 #, markdown-text, no-wrap
 msgid ""
 "\\begin{center}\n"
@@ -72,58 +72,58 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: reports/Partner Certificate/Partner Certificate.qmd:70
+#: reports/Partner-Certificate/Partner-Certificate.qmd:70
 #, markdown-text, no-wrap
 msgid "`r if (data$startYear == data$endYear) {'In'} else {'During the period'}`\n"
 msgstr ""
 
 #. type: Plain text
-#: reports/Partner Certificate/Partner Certificate.qmd:72 reports/Partner
-#: Certificate/Partner Certificate.qmd:76 reports/Partner Certificate/Partner
-#: Certificate.qmd:80 reports/Partner Certificate/Partner Certificate.qmd:84
-#: reports/Partner Certificate/Partner Certificate.qmd:90
+#: reports/Partner-Certificate/Partner-Certificate.qmd:72 reports/Partner
+#: Certificate/Partner-Certificate.qmd:76 reports/Partner-Certificate/Partner
+#: Certificate.qmd:80 reports/Partner-Certificate/Partner-Certificate.qmd:84
+#: reports/Partner-Certificate/Partner-Certificate.qmd:90
 #, markdown-text, no-wrap
 msgid "\\vspace*{1.25\\baselineskip}\n"
 msgstr ""
 
 #. type: Plain text
-#: reports/Partner Certificate/Partner Certificate.qmd:74
+#: reports/Partner-Certificate/Partner-Certificate.qmd:74
 #, markdown-text, no-wrap
 msgid "\\Huge \\bfseries `r if (data$startYear == data$endYear) {data$startYear} else {paste0(data$startYear, \"-\", data$endYear)}`\\normalsize \\normalfont\n"
 msgstr ""
 
 #. type: Plain text
-#: reports/Partner Certificate/Partner Certificate.qmd:78
+#: reports/Partner-Certificate/Partner-Certificate.qmd:78
 #, markdown-text, no-wrap
 msgid "the neonatology unit at\n"
 msgstr ""
 
 #. type: Plain text
-#: reports/Partner Certificate/Partner Certificate.qmd:82
+#: reports/Partner-Certificate/Partner-Certificate.qmd:82
 #, markdown-text, no-wrap
 msgid "\\large \\bfseries `r data$hospitalName`\\normalsize \\normalfont\n"
 msgstr ""
 
 #. type: Plain text
-#: reports/Partner Certificate/Partner Certificate.qmd:86
+#: reports/Partner-Certificate/Partner-Certificate.qmd:86
 #, markdown-text, no-wrap
 msgid "participated in the NeoIPC Surveillance network.\n"
 msgstr ""
 
 #. type: Plain text
-#: reports/Partner Certificate/Partner Certificate.qmd:88
+#: reports/Partner-Certificate/Partner-Certificate.qmd:88
 #, markdown-text, no-wrap
 msgid "\\end{center}\n"
 msgstr ""
 
 #. type: Plain text
-#: reports/Partner Certificate/Partner Certificate.qmd:92
+#: reports/Partner-Certificate/Partner-Certificate.qmd:92
 #, markdown-text, no-wrap
 msgid "Through active monitoring of `r paste0('**', format(data$nPatients, big.mark = big_mark), '**')` newborns with birth weights below `r format(1500L, big.mark = big_mark)` grams and/or gestational ages below 32 weeks, the team collected valuable reference data that will be useful for assessing and reducing infection risks in neonatal units. We are proud and delighted to have them as partners in our mission to improve infection prevention and control in the neonatal setting.\n"
 msgstr ""
 
 #. type: Plain text
-#: reports/Partner Certificate/Partner Certificate.qmd:101
+#: reports/Partner-Certificate/Partner-Certificate.qmd:101
 #, markdown-text, no-wrap
 msgid ""
 "\\vspace*{3.25\\baselineskip}\n"

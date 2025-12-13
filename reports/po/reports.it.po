@@ -18,31 +18,31 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. type: Yaml Front Matter Hash Value: author-meta
-#: reports/Partner Certificate/Partner Certificate.qmd:1
+#: reports/Partner-Certificate/Partner-Certificate.qmd:1
 #, no-wrap
 msgid "NeoIPC Surveillance team"
 msgstr "Team di NeoIPC Surveillance"
 
 #. type: Yaml Front Matter Hash Value: keywords
-#: reports/Partner Certificate/Partner Certificate.qmd:1
+#: reports/Partner-Certificate/Partner-Certificate.qmd:1
 #, no-wrap
 msgid "NeoIPC, Surveillance, Certificate"
 msgstr "NeoIPC, Surveillance, Certificato"
 
 #. type: Yaml Front Matter Hash Value: lang
-#: reports/Partner Certificate/Partner Certificate.qmd:1
+#: reports/Partner-Certificate/Partner-Certificate.qmd:1
 #, no-wrap
 msgid "en"
 msgstr "it"
 
 #. type: Yaml Front Matter Hash Value: title
-#: reports/Partner Certificate/Partner Certificate.qmd:1
+#: reports/Partner-Certificate/Partner-Certificate.qmd:1
 #, no-wrap
 msgid "Certificate of participation in the NeoIPC project surveillance system (NeoIPC Surveillance)"
 msgstr "Certificato di partecipazione al sistema di sorveglianza del progetto NeoIPC (NeoIPC Surveillance)"
 
 #. type: Fenced code block ({r})
-#: reports/Partner Certificate/Partner Certificate.qmd:55
+#: reports/Partner-Certificate/Partner-Certificate.qmd:55
 #, no-wrap
 msgid ""
 "#| label: Initialise Locale\n"
@@ -54,13 +54,13 @@ msgstr ""
 "big_mark <- \".\"\n"
 
 #. type: Plain text
-#: reports/Partner Certificate/Partner Certificate.qmd:62
+#: reports/Partner-Certificate/Partner-Certificate.qmd:62
 #, no-wrap
 msgid "{{< include _setup.qmd >}}\n"
 msgstr ""
 
 #. type: Plain text
-#: reports/Partner Certificate/Partner Certificate.qmd:65
+#: reports/Partner-Certificate/Partner-Certificate.qmd:65
 #, no-wrap
 msgid ""
 "\\cfoot*{\\raggedright \\hspace{1.5cm}This project has received funding from the European Union’s Horizon 2020 research and\\\\ \\hspace{1.5cm}innovation programme under grant agreement No 965328.}\n"
@@ -70,7 +70,7 @@ msgstr ""
 "\\selectlanguage{italian}\n"
 
 #. type: Plain text
-#: reports/Partner Certificate/Partner Certificate.qmd:68
+#: reports/Partner-Certificate/Partner-Certificate.qmd:68
 #, no-wrap
 msgid ""
 "\\begin{center}\n"
@@ -78,56 +78,56 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: reports/Partner Certificate/Partner Certificate.qmd:70
+#: reports/Partner-Certificate/Partner-Certificate.qmd:70
 #, no-wrap
 msgid "`r if (data$startYear == data$endYear) {'In'} else {'During the period'}`\n"
 msgstr "`r if (data$startYear == data$endYear) {'Nel'} else {'Nel periodo'}`\n"
 
 #. type: Plain text
-#: reports/Partner Certificate/Partner Certificate.qmd:72 Certificate.qmd:76
+#: reports/Partner-Certificate/Partner-Certificate.qmd:72 Certificate.qmd:76
 #: Certificate.qmd:80 Certificate.qmd:84 Certificate.qmd:90
 #, no-wrap
 msgid "\\vspace*{1.25\\baselineskip}\n"
 msgstr ""
 
 #. type: Plain text
-#: reports/Partner Certificate/Partner Certificate.qmd:74
+#: reports/Partner-Certificate/Partner-Certificate.qmd:74
 #, no-wrap
 msgid "\\Huge \\bfseries `r if (data$startYear == data$endYear) {data$startYear} else {paste0(data$startYear, \"-\", data$endYear)}`\\normalsize \\normalfont\n"
 msgstr ""
 
 #. type: Plain text
-#: reports/Partner Certificate/Partner Certificate.qmd:78
+#: reports/Partner-Certificate/Partner-Certificate.qmd:78
 #, no-wrap
 msgid "the neonatology unit at\n"
 msgstr "l'unità di neonatologia dell'\n"
 
 #. type: Plain text
-#: reports/Partner Certificate/Partner Certificate.qmd:82
+#: reports/Partner-Certificate/Partner-Certificate.qmd:82
 #, no-wrap
 msgid "\\large \\bfseries `r data$hospitalName`\\normalsize \\normalfont\n"
 msgstr ""
 
 #. type: Plain text
-#: reports/Partner Certificate/Partner Certificate.qmd:86
+#: reports/Partner-Certificate/Partner-Certificate.qmd:86
 #, no-wrap
 msgid "participated in the NeoIPC Surveillance network.\n"
 msgstr "ha partecipato alla rete di NeoIPC Surveillance\n"
 
 #. type: Plain text
-#: reports/Partner Certificate/Partner Certificate.qmd:88
+#: reports/Partner-Certificate/Partner-Certificate.qmd:88
 #, no-wrap
 msgid "\\end{center}\n"
 msgstr ""
 
 #. type: Plain text
-#: reports/Partner Certificate/Partner Certificate.qmd:92
+#: reports/Partner-Certificate/Partner-Certificate.qmd:92
 #, no-wrap
 msgid "Through active monitoring of `r paste0('**', format(data$nPatients, big.mark = big_mark), '**')` newborns with birth weights below `r format(1500L, big.mark = big_mark)` grams and/or gestational ages below 32 weeks, the team collected valuable reference data that will be useful for assessing and reducing infection risks in neonatal units. We are proud and delighted to have them as partners in our mission to improve infection prevention and control in the neonatal setting.\n"
 msgstr "Grazie al monitoraggio attivo di `r paste0('**', format(data$nPatients, big.mark = big_mark), '**')`  neonati con peso alla nascita inferiore a `r format(1500L, big.mark = big_mark)` grammi e/o età gestazionale inferiore a 32 settimane, il team ha raccolto dati di riferimento preziosi, utili per valutare e ridurre i rischi di infezione nelle unità di neonatologia. Siamo orgogliosi e felici di averli come partner nella nostra missione di migliorare la prevenzione e il controllo delle infezioni in ambito neonatale.\n"
 
 #. type: Plain text
-#: reports/Partner Certificate/Partner Certificate.qmd:101
+#: reports/Partner-Certificate/Partner-Certificate.qmd:101
 #, no-wrap
 msgid ""
 "\\vspace*{3.25\\baselineskip}\n"
