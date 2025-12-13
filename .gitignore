@@ -3,11 +3,8 @@
 .RData
 .Ruserdata
 .quarto
-reports/**/*.html
-reports/**/*.md
-reports/**/*_files/**
-build
 artifacts
+build
 doc/protocol/NeoIPC-Antibiotics*.adoc
 doc/protocol/NeoIPC-Infectious-Agents*.adoc
 doc/protocol/NeoIPC-Core-Protocol*.xml
@@ -19,5 +16,8 @@ doc/protocol/img/Preview-Watermark*.svg
 metadata/common/infectious-agents/NeoIPC-Infectious-Agents.*.yaml
 metadata/common/infectious-agents/Output-Footer.*.adoc
 metadata/common/infectious-agents/Output-Header.*.adoc
+reports/**/*.html
+reports/**/*.md
+reports/**/*_files/**
+reports/**/_output
 reports/ICHE-Health-Intervention-Codes.csv
-reports/Reference Report/_output
