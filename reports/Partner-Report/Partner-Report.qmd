@@ -2,8 +2,15 @@
 lang: en
 title: "NeoIPC Surveillance Partner Report"
 params:
-  PartnerDataFile: NULL
   ReferenceDataFile: NULL
+  ReportingPeriodFrom: NULL
+  ReportingPeriodTo: NULL
+  BirthWeightFrom: NULL
+  BirthWeightTo: NULL
+  GestationWeeksFrom: NULL
+  GestationWeeksTo: NULL
+  IncludeNonCorePatients: false
+
 ---
 
 ```{r}
@@ -12,7 +19,7 @@ library(neoipcr)
 
 Sys.setenv(NEOIPC_DHIS2_TOKEN='../../../token2.txt')
 
-data <- import_dhis2(dataset_options = dhis2_dataset_options(include_ineligible_patients = params$includeNonCorePatients))
+data <- import_dhis2(dataset_options = dhis2_dataset_options(include_ineligible_patients = params$IncludeNonCorePatients))
 
 if (!is.null(params$referenceDataFile)) {
   if (!file.exists(params$referenceDataFile))
