@@ -3,33 +3,17 @@ lang: en
 title: "NeoIPC Surveillance Partner Report"
 params:
   ReferenceDataFile: NULL
+  UnitCodes: NULL
   ReportingPeriodFrom: NULL
   ReportingPeriodTo: NULL
   BirthWeightFrom: NULL
   BirthWeightTo: NULL
   GestationWeeksFrom: NULL
   GestationWeeksTo: NULL
-  IncludeNonCorePatients: false
-
+  IncludeNonCorePatients: NULL
 ---
 
-```{r}
-pak::pkg_install("Brar/neoipcr@PartnerReport")
-library(neoipcr)
-
-Sys.setenv(NEOIPC_DHIS2_TOKEN='../../../token2.txt')
-
-data <- import_dhis2(dataset_options = dhis2_dataset_options(include_ineligible_patients = params$IncludeNonCorePatients))
-
-if (!is.null(params$referenceDataFile)) {
-  if (!file.exists(params$referenceDataFile))
-    stop(sprintf("The file '%s' does not exist.", params$referenceDataFile))
-  reference_data <- jsonlite::unserializeJSON(readChar(params$referenceDataFile, file.info(params$referenceDataFile)$size))
-} else {
-  reference_data <- NULL
-}
-
-```
+{{< include _setup.qmd >}}
 
 ## Introduction
 

@@ -8,4 +8,4 @@ execute:
 filters: ["../filters/pandoc-quotes.lua"]
 profile:
   group:
-    - [pdf,html,minimal]
+    - [html,pdf,minimal]

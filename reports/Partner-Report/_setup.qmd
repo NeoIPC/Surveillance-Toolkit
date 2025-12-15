@@ -1,5 +1,39 @@
 ```{r General setup and parameter preparation}
-pak::pkg_install("Brar/neoipcr@PartnerReport")
 library(neoipcr)
-stopifnot(exists("params") && file.exists(params$PartnerDataFile))
+
+if(!exists("params")) params <- list()
+
+if (!is.null(params$ReferenceDataFile)) {
+  if (!file.exists(params$ReferenceDataFile))
+    stop(sprintf("The file '%s' does not exist.", params$ReferenceDataFile))
+  reference_data <- jsonlite::unserializeJSON(
+    readChar(
+        params$ReferenceDataFile,
+        file.info(params$ReferenceDataFile)$size))
+} else {
+  ref_data <- NULL
+}
+
+typedParams <- list(
+  ReferenceDataFile = params$ReferenceDataFile,
+  UnitCodes = params$UnitCodes,
+  ReportingPeriodFrom = if (!is.null(params$ReportingPeriodFrom)) as.Date(params$ReportingPeriodFrom) else NULL,
+  ReportingPeriodTo = if (!is.null(params$ReportingPeriodTo)) as.Date(params$ReportingPeriodTo) else NULL,
+  BirthWeightFrom = if (!is.null(params$BirthWeightFrom)) as.integer(params$BirthWeightFrom) else NULL,
+  BirthWeightTo = if (!is.null(params$BirthWeightTo)) as.integer(params$BirthWeightTo) else NULL,
+  GestationWeeksFrom = if (!is.null(params$GestationWeeksFrom)) as.integer(params$GestationWeeksFrom) else NULL,
+  GestationWeeksTo = if (!is.null(params$GestationWeeksTo)) as.integer(params$GestationWeeksTo) else NULL,
+  IncludeNonCorePatients = if (!is.null(params$IncludeNonCorePatients)) as.logical(params$GestationWeeksTo) else FALSE
+)
+
+data <- suppressWarnings(import_dhis2(
+    dataset_options = dhis2_dataset_options(
+      surveillance_end_from = typedParams$ReportingPeriodFrom,
+      surveillance_end_to = typedParams$ReportingPeriodTo,
+      birth_weight_from = typedParams$BirthWeightFrom,
+      birth_weight_to = typedParams$BirthWeightTo,
+      gestational_age_from = typedParams$GestationWeeksFrom,
+      gestational_age_to = typedParams$GestationWeeksTo,
+      include_ineligible_patients = typedParams$IncludeNonCorePatients,
+      include_department = "yes")))
 ```
