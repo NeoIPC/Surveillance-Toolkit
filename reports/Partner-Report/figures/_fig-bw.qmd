@@ -1,56 +1,44 @@
 ```{r}
 #| label: bw-figure
 #| fig-cap: "A histogram in 50 g steps with density curve and a boxplot of the birth weights of the patients contained in this analysis"
-
 label_bw <- function(x) paste(format(x, big.mark =" "), "g", sep = " ")
 breaks_bw <- function(x) pretty(x, as.integer((as.integer(x[2]) + 1 - as.integer(x[1])) / 100))
-min_bw <- min(data$patients$birth_weight)
-max_bw <- max(data$patients$birth_weight)
+NeoIPC_pallette <- c("#FF9015","#0083C1","#0D4F6C","#E6FAFC","#E0D3DE","#1F271B")
+pal <- c(NeoIPC_pallette[5],NeoIPC_pallette[2],NeoIPC_pallette[6])
 
-NeoIPC.pallette <- c("#FF9015","#0083C1","#0D4F6C","#E6FAFC","#E0D3DE","#1F271B")
-pal <- c(NeoIPC.pallette[5],NeoIPC.pallette[2],NeoIPC.pallette[6])
+pdq <- data$patients$birth_weight |>
+  quantile(seq(0.25, 0.75, 0.25)) |>
+  unname()
+mean_bw <-data$patients$birth_weight |>
+  mean()
+bw_scale_min <- min(c(as.integer(min(data$patients$birth_weight) / 50L) * 50L - 50L, ref_data$meta$bw_scale_min))
+bw_scale_max <- min(c(as.integer(max(data$patients$birth_weight) / 50L) * 50L + 100L, ref_data$meta$bw_scale_max))
 
-bw_50 <- function(x, as_factor = TRUE)
-{
-  m <- as.integer((x-25)/50)*50+50
-  if(!as_factor)
-    return(m)
+df <- data.frame(
+  Database = factor(c('own','ref')),
+  q1 = c(pdq[1], ref_data$birth_weight$q1),
+  q2 = c(pdq[2], ref_data$birth_weight$q2),
+  q3 = c(pdq[3], ref_data$birth_weight$q3),
+  mean = c(mean_bw, ref_data$birth_weight$mean)
+)
 
-  lb <- m-25
-  ub <- m+24
-  ordered(
-    m,
-    levels = seq(min(m), max(m), 50),
-    labels = paste0(format(seq(min(lb), max(lb), 50))," g - ",format(seq(min(ub), max(ub), 50))," g"))
-}
-
-refq <- ref_data$patients$birth_weight |> quantile(probs = c(0.25,0.5,0.75)) |> unname()
-depq <- data$patients$birth_weight |> quantile(probs = c(0.25,0.5,0.75)) |> unname()
-birthweight_quartiles <- data.frame(
-  x = factor(c("own","ref")),
-  q1 = c(depq[1],refq[1]),
-  median = c(depq[2],refq[2]),
-  q3 = c(depq[3],refq[3]))
-
-ggplot2::ggplot(birthweight_quartiles, ggplot2::aes(x = x, colour = x)) +
-  ggplot2::geom_boxplot(
-   ggplot2::aes(ymin = q1, lower = q1, middle = median, upper = q3, ymax = q3),
-   outlier.shape = NA,
-   stat = "identity"
- ) +
-ggplot2::scale_y_continuous(breaks = breaks_bw, labels = label_bw) +
-ggplot2::scale_colour_manual(values = pal[2:3]) +
-ggplot2::coord_flip(ylim = c(min_bw - 50, max_bw + 50)) +
-ggplot2::theme(
-  legend.position = "none",
-  axis.title = ggplot2::element_blank(),
-  axis.text.x = ggplot2::element_text(angle = 45, hjust = 1, vjust = 1),
-  axis.text.y = ggplot2::element_blank(),
-  axis.ticks.y = ggplot2::element_blank(),
-  panel.background = ggplot2::element_rect(fill = "white"),
-  panel.grid.major.x = ggplot2::element_line(colour = pal[1]),
-  panel.grid.minor.x =  ggplot2::element_line(colour = pal[1]),
-  panel.grid.major.y = ggplot2::element_blank(),
-  panel.grid.minor.y = ggplot2::element_blank())
-
+ggplot(df, aes(Database, colour = Database)) +
+  geom_boxplot(
+    aes(ymin = q1, lower = q1, middle = q2, upper = q3, ymax = q3),
+    stat = "identity",
+    outlier.shape = NA,
+    ) +
+  geom_point(aes(y = mean), shape = 23, size = 3, fill = "white") +
+  scale_y_continuous(breaks = breaks_bw, labels = label_bw) +
+  scale_colour_manual(values = pal[2:3]) +
+  coord_flip(ylim = c(bw_scale_min, bw_scale_max)) +
+  theme(
+    plot.tag = element_text(size = 9),
+    axis.title=element_blank(),
+    axis.text.x=element_text(angle = 45, hjust = 1, vjust = 1),
+    axis.text.y=element_blank(),
+    axis.ticks.y=element_blank(),
+    panel.grid.major.y=element_blank(),
+    panel.grid.minor.y=element_blank()) +
+  labs(tag = "B")
 ```

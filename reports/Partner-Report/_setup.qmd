@@ -1,5 +1,10 @@
 ```{r General setup and parameter preparation}
-library(neoipcr)
+library(tidyverse, warn.conflicts = FALSE, quietly = TRUE)
+library(smplot2, warn.conflicts = FALSE, quietly = TRUE)
+library(scales, warn.conflicts = FALSE, quietly = TRUE)
+library(patchwork, warn.conflicts = FALSE, quietly = TRUE)
+library(gt, warn.conflicts = FALSE, quietly = TRUE)
+library(neoipcr, warn.conflicts = FALSE, quietly = TRUE)
 
 if(!exists("params")) params <- list()
 
@@ -36,4 +41,40 @@ data <- suppressWarnings(import_dhis2(
       gestational_age_to = typedParams$GestationWeeksTo,
       include_ineligible_patients = typedParams$IncludeNonCorePatients,
       include_department = "yes")))
+
+# temporary for development
+
+typedParams$UnitCodes <- c('DE_BER_CHARITE_CCM_NEO', 'DE_BER_CHARITE_CVK_NEO')
+
+refq <- data$patients$birth_weight |>
+  quantile(seq(0.25, 0.75, 0.25)) |>
+  unname() |>
+  as.integer()
+
+ref_data <- list(
+  birth_weight = list(
+    density = list(
+      # ToDo...
+    ),
+    q1 = refq[1],
+    q2 = refq[2],
+    q3 = refq[3],
+    mean = data$patients$birth_weight |> mean() |> as.integer()
+  ),
+  meta = list(
+    bw_scale_min = as.integer(min(data$patients$birth_weight) / 50L) * 50L - 50L,
+    bw_scale_max = as.integer(max(data$patients$birth_weight) / 50L) * 50L + 100L
+  )
+)
+rm(refq)
+
+data$patients <- data$patients |>
+  filter(
+    department_key %in% (
+      data$metadata$departments |>
+        filter(code %in% typedParams$UnitCodes) |>
+        pull(department_key)))
+
+data <- neoipcr:::apply_postfilter(data)
+
 ```
