@@ -11,18 +11,52 @@ pdq <- data$patients$birth_weight |>
   unname()
 mean_bw <-data$patients$birth_weight |>
   mean()
-bw_scale_min <- min(c(as.integer(min(data$patients$birth_weight) / 50L) * 50L - 50L, ref_data$meta$bw_scale_min))
-bw_scale_max <- min(c(as.integer(max(data$patients$birth_weight) / 50L) * 50L + 100L, ref_data$meta$bw_scale_max))
+bw_scale_min <- min(c(as.integer(min(data$patients$birth_weight) / 50L) * 50L - 50L, ref_data$birth_weight$scale$min))
+bw_scale_max <- max(c(as.integer(max(data$patients$birth_weight) / 50L) * 50L + 100L, ref_data$birth_weight$scale$max))
 
-df <- data.frame(
-  Database = factor(c('own','ref')),
+histogram_data <- data$patients |>
+  mutate(
+    bw50 = neoipcr:::bw50(birth_weight, as_factor = F)
+    ) |>
+  group_by(bw50) |>
+  summarise(n = n())
+
+bw_d <- data$patients$birth_weight |>
+  neoipcr:::bw50(as_factor = F) |>
+  density(from = bw_scale_min, to = bw_scale_max)
+
+density_data <- data.frame(
+      bw50 = bw_d$x,
+      density = bw_d$y / sum(bw_d$y))
+
+density_factor <- sum(histogram_data$n) * (nrow(density_data) / nrow(histogram_data))
+
+boxplot_data <- data.frame(
+  Database = factor(c('Own department','Reference data')),
   q1 = c(pdq[1], ref_data$birth_weight$q1),
   q2 = c(pdq[2], ref_data$birth_weight$q2),
   q3 = c(pdq[3], ref_data$birth_weight$q3),
   mean = c(mean_bw, ref_data$birth_weight$mean)
 )
 
-ggplot(df, aes(Database, colour = Database)) +
+A_plot <- ggplot() +
+  geom_col(data = histogram_data, aes(x=bw50, y=n, colour = "own"), fill = "white") +
+  geom_line(data = ref_data$birth_weight$density, aes(x=bw50, y=density * density_factor, colour = "ref")) +
+  geom_line(data = density_data, aes(x=bw50, y=density * density_factor, colour = "own")) +
+  scale_x_continuous(breaks = breaks_bw) +
+  scale_colour_manual(values = rev(pal[2:3])) +
+  coord_cartesian(xlim = c(bw_scale_min, bw_scale_max)) +
+  theme(
+    legend.position = "none",
+    plot.tag = element_text(size = 9),
+    axis.title = element_blank(),
+    axis.text = element_blank(),
+    axis.ticks = element_blank(),
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.y = element_blank()) +
+  labs(tag = "A")
+
+B_plot <- ggplot(boxplot_data, aes(Database, colour = Database)) +
   geom_boxplot(
     aes(ymin = q1, lower = q1, middle = q2, upper = q3, ymax = q3),
     stat = "identity",
@@ -30,15 +64,19 @@ ggplot(df, aes(Database, colour = Database)) +
     ) +
   geom_point(aes(y = mean), shape = 23, size = 3, fill = "white") +
   scale_y_continuous(breaks = breaks_bw, labels = label_bw) +
-  scale_colour_manual(values = pal[2:3]) +
+  scale_colour_manual(values = rev(pal[2:3])) +
   coord_flip(ylim = c(bw_scale_min, bw_scale_max)) +
   theme(
+    legend.title = element_blank(),
+    legend.position = "bottom",
     plot.tag = element_text(size = 9),
-    axis.title=element_blank(),
-    axis.text.x=element_text(angle = 45, hjust = 1, vjust = 1),
-    axis.text.y=element_blank(),
-    axis.ticks.y=element_blank(),
-    panel.grid.major.y=element_blank(),
-    panel.grid.minor.y=element_blank()) +
+    axis.title = element_blank(),
+    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1),
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.y = element_blank()) +
   labs(tag = "B")
+
+A_plot / B_plot
 ```

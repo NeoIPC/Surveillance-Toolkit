@@ -1,4 +1,7 @@
 ```{r General setup and parameter preparation}
+#| message: false
+#| warning: false
+#| include: false
 library(tidyverse, warn.conflicts = FALSE, quietly = TRUE)
 library(smplot2, warn.conflicts = FALSE, quietly = TRUE)
 library(scales, warn.conflicts = FALSE, quietly = TRUE)
@@ -44,29 +47,48 @@ data <- suppressWarnings(import_dhis2(
 
 # temporary for development
 
-typedParams$UnitCodes <- c('DE_BER_CHARITE_CCM_NEO', 'DE_BER_CHARITE_CVK_NEO')
+#typedParams$UnitCodes <- c('DE_BER_CHARITE_CCM_NEO', 'DE_BER_CHARITE_CVK_NEO')
+#typedParams$UnitCodes <- 'DE_BER_CHARITE_CCM_NEO'
+typedParams$UnitCodes <- 'DE_BER_CHARITE_CVK_NEO'
 
-refq <- data$patients$birth_weight |>
+bw_refq <- data$patients$birth_weight |>
   quantile(seq(0.25, 0.75, 0.25)) |>
   unname() |>
   as.integer()
 
+bw_scale_min = as.integer(min(data$patients$birth_weight) / 50L) * 50L - 50L
+bw_scale_max = as.integer(max(data$patients$birth_weight) / 50L) * 50L + 100L
+
+bw_refd <- data$patients$birth_weight |>
+  neoipcr:::bw50(as_factor = F) |>
+  density(from = bw_scale_min, to = bw_scale_max)
+
+
 ref_data <- list(
   birth_weight = list(
-    density = list(
-      # ToDo...
+    density = data.frame(
+      bw50 = bw_refd$x,
+      density = bw_refd$y / sum(bw_refd$y)
     ),
-    q1 = refq[1],
-    q2 = refq[2],
-    q3 = refq[3],
-    mean = data$patients$birth_weight |> mean() |> as.integer()
-  ),
-  meta = list(
-    bw_scale_min = as.integer(min(data$patients$birth_weight) / 50L) * 50L - 50L,
-    bw_scale_max = as.integer(max(data$patients$birth_weight) / 50L) * 50L + 100L
+    frequency = data.frame(
+      bw50 = data$patients$birth_weight |>
+        neoipcr:::bw50(as_factor = F)
+      ) |>
+      group_by(bw50) |>
+      summarise(n = n()),
+    q1 = bw_refq[1],
+    q2 = bw_refq[2],
+    q3 = bw_refq[3],
+    mean = data$patients$birth_weight |>
+      mean() |>
+      as.integer(),
+    scale = list(
+      min = bw_scale_min,
+      max = bw_scale_max
+    )
   )
 )
-rm(refq)
+rm(bw_refq, bw_refd, bw_scale_min, bw_scale_max)
 
 data$patients <- data$patients |>
   filter(
