@@ -1,6 +1,6 @@
 ```{r}
 #| label: bw-figure
-#| fig-cap: "A histogram in 50 g steps with density curve and a boxplot of the birth weights of the patients contained in this analysis"
+#| fig-cap: "Distribution of birth weights of the infants included in this report. A is a histogram in 50 g steps with a density curve of your own unit's data and a density curve of the reference data and B are tow boxplots, one of your own unit's data and one of the reference data. Vertical lines in the boxplot represent the 25%, 50% and 75% quantiles, the diamond represents the pooled arithmetic mean."
 label_bw <- function(x) paste(format(x, big.mark =" "), "g", sep = " ")
 breaks_bw <- function(x) pretty(x, as.integer((as.integer(x[2]) + 1 - as.integer(x[1])) / 100))
 NeoIPC_pallette <- c("#FF9015","#0083C1","#0D4F6C","#E6FAFC","#E0D3DE","#1F271B")
