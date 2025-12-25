@@ -14,7 +14,7 @@ ga_scale_max <- as.integer(max(data$patients$total_gestation_days) / 7L) * 7L + 
 legend_position <- 'none'
 
 p <- data$patients |>
-  mutate(ga7 = ga7(total_gestation_days))
+  mutate(ga7 = neoipcr:::ga7(total_gestation_days))
 
 histogram_data <- p |>
   group_by(ga7) |>
