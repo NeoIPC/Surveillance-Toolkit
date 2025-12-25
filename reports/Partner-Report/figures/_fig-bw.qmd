@@ -1,11 +1,9 @@
 ```{r}
-#| label: bw-figure
-#| fig-cap: !expr 'paste("Distribution of birth weights of the infants included in this report. A is a histogram in 50 g steps with a density curve", if(!is.null(reference_data)) "of your own unit''s data and a density curve of the reference data and B are two boxplots, one of your own unit''s data and one of the reference data." else "and B is a boxplot.", "Vertical lines in the boxplot represent the 25%, 50% and 75% quantiles, the diamond represents the pooled arithmetic mean.")'
+#| label: fig-bw
+#| fig-cap: !expr 'paste0("Distribution of birth weights of the infants included in this report. A is a histogram in 50 g steps with a density curve ", if(!is.null(reference_data)) "of your own unit''s data and a density curve of the reference data and B are two boxplots, one of your own unit''s data and one of the reference data. " else "and B is a boxplot. ", " Vertical lines in the boxplot", if(!is.null(reference_data)) "s", " represent the 25%, 50% and 75% quantiles, the diamond", if(!is.null(reference_data)) "s", " represent", if(is.null(reference_data)) "s", " the pooled arithmetic mean", if(!is.null(reference_data)) "s", ".")'
 
 label_bw <- function(x) paste(format(x, big.mark =" "), "g", sep = " ")
 breaks_bw <- function(x) pretty(x, as.integer((as.integer(x[2]) + 1 - as.integer(x[1])) / 100))
-NeoIPC_pallette <- c("#FF9015","#0083C1","#0D4F6C","#E6FAFC","#E0D3DE","#1F271B")
-pal <- c(NeoIPC_pallette[5],NeoIPC_pallette[2],NeoIPC_pallette[6])
 
 pdq <- data$patients$birth_weight |>
   quantile(seq(0.25, 0.75, 0.25)) |>

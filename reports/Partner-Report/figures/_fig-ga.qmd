@@ -1,0 +1,99 @@
+```{r}
+#| label: fig-ga
+#| fig-cap: !expr 'paste0("Distribution of birth weights of the infants included in this report. A is a histogram in 50 g steps with a density curve ", if(!is.null(reference_data)) "of your own unit''s data and a density curve of the reference data and B are two boxplots, one of your own unit''s data and one of the reference data. " else "and B is a boxplot. ", "Vertical lines in the boxplot", if(!is.null(reference_data)) "s", " represent the 25%, 50% and 75% quantiles, the diamond", if(!is.null(reference_data)) "s", " represent", if(is.null(reference_data)) "s", "  the pooled arithmetic mean", if(!is.null(reference_data)) "s", ".")'
+
+week_breaks <- function(x) pretty(x / 7, as.integer((as.integer(x[2] / 7) + 1 - as.integer(x[1] / 7)) / 2)) * 7
+week_labels <- function(x) paste(format(as.integer(x / 7), big.mark =" "), "w", sep = " ")
+pdq <- data$patients$total_gestation_days |>
+  quantile(seq(0.25, 0.75, 0.25)) |>
+  unname()
+mean_ga <-data$patients$total_gestation_days |>
+  mean()
+ga_scale_min <- as.integer(min(data$patients$total_gestation_days) / 7L) * 7L - 7L
+ga_scale_max <- as.integer(max(data$patients$total_gestation_days) / 7L) * 7L + 14L
+legend_position <- 'none'
+
+p <- data$patients |>
+  mutate(ga7 = ga7(total_gestation_days))
+
+histogram_data <- p |>
+  group_by(ga7) |>
+  summarise(n = n())
+
+ga_d <- p$ga7 |>
+  density(from = ga_scale_min, to = ga_scale_max)
+
+density_data <- data.frame(
+      ga7 = ga_d$x,
+      density = ga_d$y / sum(ga_d$y))
+
+density_factor <- sum(histogram_data$n) * (nrow(density_data) / nrow(histogram_data))
+
+A_plot <- ggplot() +
+  geom_col(data = histogram_data, aes(x=ga7, y=n, colour = "own"), fill = "white")
+
+boxplot_data <- data.frame(
+  Database = factor('Own department', levels = c('Own department','Reference data')),
+  q1 = pdq[1],
+  q2 = pdq[2],
+  q3 = pdq[3],
+  mean = mean_ga
+)
+
+if (!is.null(reference_data)) {
+  ga_scale_min <- min(c(ga_scale_min, reference_data$gestational_age$scale$min))
+  ga_scale_max <- max(c(ga_scale_max, reference_data$gestational_age$scale$max))
+  legend_position <- 'bottom'
+
+  A_plot <- A_plot +
+    geom_line(data = reference_data$gestational_age$density, aes(x=ga7, y=density * density_factor, colour = "ref"))
+
+  boxplot_data <- boxplot_data |>
+    add_row(
+      Database = factor('Reference data', levels = c('Own department','Reference data')),
+      q1 = reference_data$gestational_age$q1,
+      q2 = reference_data$gestational_age$q2,
+      q3 = reference_data$gestational_age$q3,
+      mean = reference_data$gestational_age$mean
+    )
+}
+
+A_plot <- A_plot +
+  geom_line(data = density_data, aes(x=ga7, y=density * density_factor, colour = "own")) +
+  scale_x_continuous(breaks = week_breaks) +
+  scale_colour_manual(values = rev(pal[2:3])) +
+  coord_cartesian(xlim = c(ga_scale_min, ga_scale_max)) +
+  theme(
+    legend.position = "none",
+    plot.tag = element_text(size = 9),
+    axis.title = element_blank(),
+    axis.text = element_blank(),
+    axis.ticks = element_blank(),
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.y = element_blank()) +
+  labs(tag = "A")
+
+B_plot <- ggplot(boxplot_data, aes(Database, colour = Database)) +
+  geom_boxplot(
+    aes(ymin = q1, lower = q1, middle = q2, upper = q3, ymax = q3),
+    stat = "identity",
+    outlier.shape = NA,
+    ) +
+  geom_point(aes(y = mean), shape = 23, size = 3, fill = "white") +
+  scale_y_continuous(breaks = week_breaks, labels = week_labels) +
+  scale_colour_manual(values = rev(pal[2:3])) +
+  coord_flip(ylim = c(ga_scale_min, ga_scale_max)) +
+  theme(
+    legend.title = element_blank(),
+    legend.position = legend_position,
+    plot.tag = element_text(size = 9),
+    axis.title = element_blank(),
+    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1),
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.y = element_blank()) +
+  labs(tag = "B")
+
+A_plot / B_plot
+```

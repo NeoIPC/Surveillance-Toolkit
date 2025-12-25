@@ -45,6 +45,9 @@ data <- suppressWarnings(import_dhis2(
       include_ineligible_patients = typedParams$IncludeNonCorePatients,
       include_department = "yes")))
 
+NeoIPC_pallette <- c("#FF9015","#0083C1","#0D4F6C","#E6FAFC","#E0D3DE","#1F271B")
+pal <- c(NeoIPC_pallette[5],NeoIPC_pallette[2],NeoIPC_pallette[6])
+
 # temporary for development
 
 #typedParams$UnitCodes <- c('DE_BER_CHARITE_CCM_NEO', 'DE_BER_CHARITE_CVK_NEO')
@@ -63,6 +66,27 @@ bw_refd <- data$patients$birth_weight |>
   neoipcr:::bw50(as_factor = F) |>
   density(from = bw_scale_min, to = bw_scale_max)
 
+ga7 <- function(x) 7 * case_match(
+  as.integer(x %% 7),
+  0L ~ as.integer(x / 7),
+  1L ~ as.integer(x / 7),
+  2L ~ as.integer(x / 7),
+  3L ~ as.integer(x / 7),
+  4L ~ as.integer(x / 7) + 1,
+  5L ~ as.integer(x / 7) + 1,
+  6L ~ as.integer(x / 7) + 1)
+
+ga_refq <- data$patients$total_gestation_days |>
+  quantile(seq(0.25, 0.75, 0.25)) |>
+  unname() |>
+  as.integer()
+
+ga_scale_min = as.integer(min(data$patients$total_gestation_days) / 7L) * 7L - 7L
+ga_scale_max = as.integer(max(data$patients$total_gestation_days) / 7L) * 7L + 14L
+
+ga_refd <- data$patients$total_gestation_days |>
+  ga7() |>
+  density(from = ga_scale_min, to = ga_scale_max)
 
 reference_data <- list(
   birth_weight = list(
@@ -86,11 +110,34 @@ reference_data <- list(
       min = bw_scale_min,
       max = bw_scale_max
     )
+  ),
+  gestational_age = list(
+    density = data.frame(
+      ga7 = ga_refd$x,
+      density = ga_refd$y / sum(ga_refd$y)
+    ),
+    frequency = data.frame(
+      ga7 = data$patients$total_gestation_days |>
+        ga7()
+      ) |>
+      group_by(ga7) |>
+      summarise(n = n()),
+    q1 = ga_refq[1],
+    q2 = ga_refq[2],
+    q3 = ga_refq[3],
+    mean = data$patients$total_gestation_days |>
+      mean() |>
+      as.integer(),
+    scale = list(
+      min = ga_scale_min,
+      max = ga_scale_max
+    )
   )
 )
 rm(bw_refq, bw_refd, bw_scale_min, bw_scale_max)
 
 data_bkp <- data
+reference_data_bkp <- reference_data
 
 data$patients <- data$patients |>
   filter(
