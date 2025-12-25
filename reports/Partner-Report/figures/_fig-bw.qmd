@@ -1,6 +1,7 @@
 ```{r}
 #| label: bw-figure
-#| fig-cap: "Distribution of birth weights of the infants included in this report. A is a histogram in 50 g steps with a density curve of your own unit's data and a density curve of the reference data and B are tow boxplots, one of your own unit's data and one of the reference data. Vertical lines in the boxplot represent the 25%, 50% and 75% quantiles, the diamond represents the pooled arithmetic mean."
+#| fig-cap: !expr 'paste("Distribution of birth weights of the infants included in this report. A is a histogram in 50 g steps with a density curve", if(!is.null(reference_data)) "of your own unit''s data and a density curve of the reference data and B are two boxplots, one of your own unit''s data and one of the reference data." else "and B is a boxplot.", "Vertical lines in the boxplot represent the 25%, 50% and 75% quantiles, the diamond represents the pooled arithmetic mean.")'
+
 label_bw <- function(x) paste(format(x, big.mark =" "), "g", sep = " ")
 breaks_bw <- function(x) pretty(x, as.integer((as.integer(x[2]) + 1 - as.integer(x[1])) / 100))
 NeoIPC_pallette <- c("#FF9015","#0083C1","#0D4F6C","#E6FAFC","#E0D3DE","#1F271B")
@@ -11,8 +12,9 @@ pdq <- data$patients$birth_weight |>
   unname()
 mean_bw <-data$patients$birth_weight |>
   mean()
-bw_scale_min <- min(c(as.integer(min(data$patients$birth_weight) / 50L) * 50L - 50L, ref_data$birth_weight$scale$min))
-bw_scale_max <- max(c(as.integer(max(data$patients$birth_weight) / 50L) * 50L + 100L, ref_data$birth_weight$scale$max))
+bw_scale_min <- as.integer(min(data$patients$birth_weight) / 50L) * 50L - 50L
+bw_scale_max <- as.integer(max(data$patients$birth_weight) / 50L) * 50L + 100L
+legend_position <- 'none'
 
 histogram_data <- data$patients |>
   mutate(
@@ -31,17 +33,36 @@ density_data <- data.frame(
 
 density_factor <- sum(histogram_data$n) * (nrow(density_data) / nrow(histogram_data))
 
+A_plot <- ggplot() +
+  geom_col(data = histogram_data, aes(x=bw50, y=n, colour = "own"), fill = "white")
+
 boxplot_data <- data.frame(
-  Database = factor(c('Own department','Reference data')),
-  q1 = c(pdq[1], ref_data$birth_weight$q1),
-  q2 = c(pdq[2], ref_data$birth_weight$q2),
-  q3 = c(pdq[3], ref_data$birth_weight$q3),
-  mean = c(mean_bw, ref_data$birth_weight$mean)
+  Database = factor('Own department', levels = c('Own department','Reference data')),
+  q1 = pdq[1],
+  q2 = pdq[2],
+  q3 = pdq[3],
+  mean = mean_bw
 )
 
-A_plot <- ggplot() +
-  geom_col(data = histogram_data, aes(x=bw50, y=n, colour = "own"), fill = "white") +
-  geom_line(data = ref_data$birth_weight$density, aes(x=bw50, y=density * density_factor, colour = "ref")) +
+if (!is.null(reference_data)) {
+  bw_scale_min <- min(c(bw_scale_min, reference_data$birth_weight$scale$min))
+  bw_scale_max <- max(c(bw_scale_max, reference_data$birth_weight$scale$max))
+  legend_position <- 'bottom'
+
+  A_plot <- A_plot +
+    geom_line(data = reference_data$birth_weight$density, aes(x=bw50, y=density * density_factor, colour = "ref"))
+
+  boxplot_data <- boxplot_data |>
+    add_row(
+      Database = factor('Reference data', levels = c('Own department','Reference data')),
+      q1 = reference_data$birth_weight$q1,
+      q2 = reference_data$birth_weight$q2,
+      q3 = reference_data$birth_weight$q3,
+      mean = reference_data$birth_weight$mean
+    )
+}
+
+A_plot <- A_plot +
   geom_line(data = density_data, aes(x=bw50, y=density * density_factor, colour = "own")) +
   scale_x_continuous(breaks = breaks_bw) +
   scale_colour_manual(values = rev(pal[2:3])) +
@@ -68,7 +89,7 @@ B_plot <- ggplot(boxplot_data, aes(Database, colour = Database)) +
   coord_flip(ylim = c(bw_scale_min, bw_scale_max)) +
   theme(
     legend.title = element_blank(),
-    legend.position = "bottom",
+    legend.position = legend_position,
     plot.tag = element_text(size = 9),
     axis.title = element_blank(),
     axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1),

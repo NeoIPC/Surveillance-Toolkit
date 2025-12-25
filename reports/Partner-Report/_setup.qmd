@@ -19,7 +19,7 @@ if (!is.null(params$ReferenceDataFile)) {
         params$ReferenceDataFile,
         file.info(params$ReferenceDataFile)$size))
 } else {
-  ref_data <- NULL
+  reference_data <- NULL
 }
 
 typedParams <- list(
@@ -64,7 +64,7 @@ bw_refd <- data$patients$birth_weight |>
   density(from = bw_scale_min, to = bw_scale_max)
 
 
-ref_data <- list(
+reference_data <- list(
   birth_weight = list(
     density = data.frame(
       bw50 = bw_refd$x,
@@ -89,6 +89,8 @@ ref_data <- list(
   )
 )
 rm(bw_refq, bw_refd, bw_scale_min, bw_scale_max)
+
+data_bkp <- data
 
 data$patients <- data$patients |>
   filter(
