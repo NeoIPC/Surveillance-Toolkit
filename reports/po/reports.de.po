@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NeoIPC Surveillance Reports 0.9\n"
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2025-10-31 07:59+0100\n"
+"POT-Creation-Date: 2025-12-26 04:49+0100\n"
 "PO-Revision-Date: 2025-10-23 10:32+0200\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -84,8 +84,11 @@ msgid "`r if (data$startYear == data$endYear) {'In'} else {'During the period'}`
 msgstr "`r if (data$startYear == data$endYear) {'Im Jahr'} else {'Im Zeitraum'}`\n"
 
 #. type: Plain text
-#: reports/Partner-Certificate/Partner-Certificate.qmd:72 Certificate.qmd:76
-#: Certificate.qmd:80 Certificate.qmd:84 Certificate.qmd:90
+#: reports/Partner-Certificate/Partner-Certificate.qmd:72
+#: reports/Partner-Certificate/Partner-Certificate.qmd:76
+#: reports/Partner-Certificate/Partner-Certificate.qmd:80
+#: reports/Partner-Certificate/Partner-Certificate.qmd:84
+#: reports/Partner-Certificate/Partner-Certificate.qmd:90
 #, no-wrap
 msgid "\\vspace*{1.25\\baselineskip}\n"
 msgstr ""
@@ -149,3 +152,22 @@ msgstr ""
 "Berlin, `r format(Sys.Date(), format = \"%x\")`\n"
 "\\end{textblock*}\n"
 "![](`{r} data$signatureImagePath`){fig-align=\"right\"}\n"
+
+#. type: Hash Value: title
+#: reports/Partner-Report/_variables.yml:1
+#, fuzzy, no-wrap
+#| msgid "NeoIPC Surveillance team"
+msgid "NeoIPC Surveillance Partner Report"
+msgstr "NeoIPC Surveillance Team"
+
+#. type: Title ##
+#: reports/Partner-Report/content/_introduction.qmd:1
+#, no-wrap
+msgid "Introduction"
+msgstr ""
+
+#. type: Plain text
+#: reports/Partner-Report/content/_introduction.qmd:3
+#, no-wrap
+msgid "This is a [NeoIPC Surveillance](https://neoipc.org/surveillance/ \"Link to the surveillance section of the NeoIPC website\") analysis that you can use to assess infection rates in your neonatal unit. If you have your own data collected using the same or a comparable method, you can compare them with the reference values presented in this document and identify any anomalies and potential for improvement.\n"
+msgstr ""

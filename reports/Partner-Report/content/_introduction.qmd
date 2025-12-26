@@ -1,0 +1,3 @@
+## Introduction
+
+This is a [NeoIPC Surveillance](https://neoipc.org/surveillance/ "Link to the surveillance section of the NeoIPC website") analysis that you can use to assess infection rates in your neonatal unit. If you have your own data collected using the same or a comparable method, you can compare them with the reference values presented in this document and identify any anomalies and potential for improvement.

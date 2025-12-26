@@ -1,6 +1,4 @@
 ---
-lang: en
-title: "NeoIPC Surveillance Partner Report"
 params:
   ReferenceDataFile: NULL
   UnitCodes: NULL
@@ -15,10 +13,32 @@ params:
 
 {{< include _setup.qmd >}}
 
-## Introduction
+::: {.content-visible when-profile="en"}
 
-This is a [NeoIPC Surveillance](https://neoipc.org/surveillance/ "Link to the surveillance section of the NeoIPC website") analysis that you can use to assess infection rates in your neonatal unit. If you have your own data collected using the same or a comparable method, you can compare them with the reference values presented in this document and identify any anomalies and potential for improvement.
+{{< include content/_main.qmd >}}
 
-{{< include figures/_fig-bw.qmd >}}
+:::
 
-{{< include figures/_fig-ga.qmd >}}
+::: {.content-visible when-profile="de"}
+
+{{< include content.de/_main.qmd >}}
+
+:::
+
+::: {.content-visible when-profile="es"}
+
+{{< include content.es/_main.qmd >}}
+
+:::
+
+::: {.content-visible when-profile="it"}
+
+{{< include content.it/_main.qmd >}}
+
+:::
+
+::: {.content-visible when-profile="tr"}
+
+{{< include content.tr/_main.qmd >}}
+
+:::

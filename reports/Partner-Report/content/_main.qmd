@@ -1,0 +1,5 @@
+{{< include content/_introduction.qmd >}}
+
+{{< include figures/_fig-bw.qmd >}}
+
+{{< include figures/_fig-ga.qmd >}}
