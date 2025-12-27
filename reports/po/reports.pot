@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NeoIPC Surveillance Reports 0.9\n"
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2025-12-27 07:55+0100\n"
+"POT-Creation-Date: 2025-12-27 17:54+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -205,6 +205,12 @@ msgstr ""
 msgid "Own unit"
 msgstr ""
 
+#. type: Hash Value: patient_days
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Patient days"
+msgstr ""
+
 #. type: Hash Value: percent_symbol
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
@@ -215,6 +221,144 @@ msgstr ""
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Reference data"
+msgstr ""
+
+#. type: Hash Value: table_headers pooled
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Pooled"
+msgstr ""
+
+#. type: Hash Value: table_headers q1
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Q₁"
+msgstr ""
+
+#. type: Hash Value: table_headers q2
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Q₂"
+msgstr ""
+
+#. type: Hash Value: table_headers q3
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Q₃"
+msgstr ""
+
+#. type: Hash Value: table_headers rate
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Rate"
+msgstr ""
+
+#. type: Hash Value: tbl-risk-density-rates access
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Access"
+msgstr ""
+
+#. type: Hash Value: tbl-risk-density-rates antibiotics
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Antibiotics"
+msgstr ""
+
+#. type: Hash Value: tbl-risk-density-rates any
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Any"
+msgstr ""
+
+#. type: Hash Value: tbl-risk-density-rates any_antibiotic
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Any antibiotic"
+msgstr ""
+
+#. type: Hash Value: tbl-risk-density-rates cvc
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "CVC"
+msgstr ""
+
+#. type: Hash Value: tbl-risk-density-rates days_with_risk_factor
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Days with risk/protective factor"
+msgstr ""
+
+#. type: Hash Value: tbl-risk-density-rates human_milk
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Human milk"
+msgstr ""
+
+#. type: Hash Value: tbl-risk-density-rates inv
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "INV"
+msgstr ""
+
+#. type: Hash Value: tbl-risk-density-rates kangaroo_care
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Kangaroo care"
+msgstr ""
+
+#. type: Hash Value: tbl-risk-density-rates niv
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "NIV"
+msgstr ""
+
+#. type: Hash Value: tbl-risk-density-rates other
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Other"
+msgstr ""
+
+#. type: Hash Value: tbl-risk-density-rates probiotic
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Probiotics"
+msgstr ""
+
+#. type: Hash Value: tbl-risk-density-rates pvc
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "PVC"
+msgstr ""
+
+#. type: Hash Value: tbl-risk-density-rates reserve
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Reserve"
+msgstr ""
+
+#. type: Hash Value: tbl-risk-density-rates risk_density_rate
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Risk Density Rate"
+msgstr ""
+
+#. type: Hash Value: tbl-risk-density-rates vascular_catheter
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Vascular catheter"
+msgstr ""
+
+#. type: Hash Value: tbl-risk-density-rates ventilatory_support
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Ventilatory support"
+msgstr ""
+
+#. type: Hash Value: tbl-risk-density-rates watch
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Watch"
 msgstr ""
 
 #. type: Hash Value: unit_separator

@@ -17,7 +17,7 @@ params:
 {{< include _setup.qmd >}}
 
 ```{r}
-sR <- read_yaml("content.de/_sR.yaml")
+sR <- read_yaml("content.de/_sR.yaml", handlers = list('bool#no' = function(x) x))
 ```
 
 {{< include content.de/_introduction.qmd >}}
@@ -25,3 +25,5 @@ sR <- read_yaml("content.de/_sR.yaml")
 {{< include figures/_fig-bw.qmd >}}
 
 {{< include figures/_fig-ga.qmd >}}
+
+{{< include tables/_tbl-risk-density-rates.qmd >}}

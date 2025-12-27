@@ -25,3 +25,5 @@ sR <- read_yaml("content/_sR.yaml")
 {{< include figures/_fig-bw.qmd >}}
 
 {{< include figures/_fig-ga.qmd >}}
+
+{{< include tables/_tbl-risk-density-rates.qmd >}}

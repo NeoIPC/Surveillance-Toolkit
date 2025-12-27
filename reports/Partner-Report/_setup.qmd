@@ -62,7 +62,7 @@ reference_data <- data |>
 data_bkp <- data
 reference_data_bkp <- reference_data
 
-data$patients <- data$patients |>
+data$enrollments <- data$enrollments |>
   filter(
     department_key %in% (
       data$metadata$departments |>
@@ -71,4 +71,12 @@ data$patients <- data$patients |>
 
 data <- neoipcr:::apply_postfilter(data)
 
+neoipcr:::clean_cache(data)
+
+unit_data <- data |>
+  neoipcr:::calculate_department_data()
+
+benchmark_data <- neoipcr:::get_benchmark_data(own = unit_data, ref = reference_data)
+
+#reference_data <- NULL
 ```
