@@ -1,8 +1,8 @@
 ```{r}
 #| label: fig-bw
-#| fig-cap: !expr 'paste0("Distribution of birth weights of the infants included in this report. A is a histogram in 50 g steps with a density curve ", if(!is.null(reference_data)) "of your own unit''s data and a density curve of the reference data and B are two boxplots, one of your own unit''s data and one of the reference data. " else "and B is a boxplot. ", " Vertical lines in the boxplot", if(!is.null(reference_data)) "s", " represent the 25%, 50% and 75% quantiles, the diamond", if(!is.null(reference_data)) "s", " represent", if(is.null(reference_data)) "s", " the pooled arithmetic mean", if(!is.null(reference_data)) "s", ".")'
+#| fig-cap: !expr 'paste(sR$`fig-bw`$`fig-cap`[[1]], sprintf(if(is.null(reference_data)) sR$`fig-bw`$`fig-cap`[[2]]$`no-ref` else sR$`fig-bw`$`fig-cap`[[2]]$ref, sprintf("%i%s%s", 50L, sR$unit_separator, sR$gramm_abbreviation)), sprintf(if(is.null(reference_data)) sR$`fig-bw`$`fig-cap`[[3]]$`no-ref` else sR$`fig-bw`$`fig-cap`[[3]]$ref, sprintf("%i%s", 25L, sR$percent_symbol), sprintf("%i%s", 50L, sR$percent_symbol), sprintf("%i%s", 75L, sR$percent_symbol)))'
 
-label_bw <- function(x) paste(format(x, big.mark =" "), "g", sep = " ")
+label_bw <- function(x) paste(format(x, big.mark = sR$digit_group_separator), sR$gramm_abbreviation, sep = sR$unit_separator)
 breaks_bw <- function(x) pretty(x, as.integer((as.integer(x[2]) + 1 - as.integer(x[1])) / 100))
 
 pdq <- data$patients$birth_weight |>
@@ -35,7 +35,7 @@ A_plot <- ggplot() +
   geom_col(data = histogram_data, aes(x=bw50, y=n, colour = "own"), fill = "white")
 
 boxplot_data <- data.frame(
-  Database = factor('Own department', levels = c('Own department','Reference data')),
+  Database = factor(sR$own_unit, levels = c(sR$own_unit, sR$reference_data)),
   q1 = pdq[1],
   q2 = pdq[2],
   q3 = pdq[3],
@@ -52,7 +52,7 @@ if (!is.null(reference_data)) {
 
   boxplot_data <- boxplot_data |>
     add_row(
-      Database = factor('Reference data', levels = c('Own department','Reference data')),
+      Database = factor(sR$reference_data, levels = c(sR$own_unit, sR$reference_data)),
       q1 = reference_data$birth_weight$q1,
       q2 = reference_data$birth_weight$q2,
       q3 = reference_data$birth_weight$q3,

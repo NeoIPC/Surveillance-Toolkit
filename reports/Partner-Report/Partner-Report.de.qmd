@@ -1,7 +1,7 @@
 ---
-lang: en
+lang: de
 profile:
-  default: en
+  default: de
 params:
   ReferenceDataFile: NULL
   UnitCodes: NULL
@@ -17,10 +17,10 @@ params:
 {{< include _setup.qmd >}}
 
 ```{r}
-sR <- read_yaml("content/_sR.yaml")
+sR <- read_yaml("content.de/_sR.yaml")
 ```
 
-{{< include content/_introduction.qmd >}}
+{{< include content.de/_introduction.qmd >}}
 
 {{< include figures/_fig-bw.qmd >}}
 

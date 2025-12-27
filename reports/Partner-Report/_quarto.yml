@@ -6,8 +6,6 @@ execute:
   keep-md: true
   error: true
 filters: ["../filters/pandoc-quotes.lua"]
-profile:
-  default: en
 format:
   html:
     link-external-icon: true

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NeoIPC Surveillance Reports 0.9\n"
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2025-12-26 04:49+0100\n"
+"POT-Creation-Date: 2025-12-27 07:55+0100\n"
 "PO-Revision-Date: 2025-10-23 10:32+0200\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -154,20 +154,103 @@ msgstr ""
 "![](`{r} data$signatureImagePath`){fig-align=\"right\"}\n"
 
 #. type: Hash Value: title
-#: reports/Partner-Report/_variables.yml:1
-#, fuzzy, no-wrap
-#| msgid "NeoIPC Surveillance team"
+#: reports/Partner-Report/_quarto-en.yml:1
+#, no-wrap
 msgid "NeoIPC Surveillance Partner Report"
-msgstr "NeoIPC Surveillance Team"
+msgstr "NeoIPC Surveillance Partner-Auswertung"
+
+#. type: Hash Value: day
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "day"
+msgstr "Tage"
+
+#. type: Hash Value: digit_group_separator
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid " "
+msgstr " "
+
+#. type: Array Element: fig-bw fig-cap
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Distribution of birth weights of the infants included in this report."
+msgstr "Verteilung der Geburtsgewichte der in diese Auswertung eingeschlossenen Kinder."
+
+#. type: Hash Value: fig-ga fig-cap no-ref
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "A is a histogram in %s steps with a density curve and B is a boxplot."
+msgstr "A ist ein Histogramm in %s-Schritten mit einer Dichte-Kurve und B ist ein Boxplot."
+
+#. type: Hash Value: fig-ga fig-cap ref
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "A is a histogram in %s steps with a density curve of your own unit’s data and a density curve of the reference data and B are two boxplots, one of your own unit’s data and one of the reference data."
+msgstr "A ist ein Histogramm in %s-Schritten mit einer Dichte-Kurve der Daten Ihrer eigenen Abteilung und einer Dichte-Kurve der Referenzdaten, und B sind zwei Boxplots, einer mit den Daten Ihrer eigenen Abteilung und einer mit den Referenzdaten."
+
+#. type: Hash Value: fig-ga fig-cap no-ref
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Vertical lines in the boxplot represent the %s, %s and %s quantiles, the diamond represents the pooled arithmetic mean."
+msgstr "Die vertikalen Linien im Boxplot stellen die %s-, %s- und %s-Quantile dar, die Raute stellt das gepoolte arithmetische Mittel dar."
+
+#. type: Hash Value: fig-ga fig-cap ref
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Vertical lines in the boxplots represent the %s, %s and %s quantiles, the diamonds represent the pooled arithmetic means."
+msgstr "Die vertikalen Linien in den Boxplots stellen die %s-, %s- und %s-Quantile dar, die Rauten stellen die gepoolten arithmetischen Mittelwerte dar."
+
+#. type: Array Element: fig-ga fig-cap
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Distribution of gestational ages of the infants included in this report."
+msgstr "Verteilung des Gestationsalters der in diese Auswertung eingeschlossenen Kinder."
+
+#. type: Hash Value: gramm_abbreviation
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "g"
+msgstr "g"
+
+#. type: Hash Value: own_unit
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Own unit"
+msgstr "Eigene Abteilunng"
+
+#. type: Hash Value: percent_symbol
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "%"
+msgstr "%"
+
+#. type: Hash Value: reference_data
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Reference data"
+msgstr "Referenzdaten"
+
+#. type: Hash Value: unit_separator
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid " "
+msgstr " "
+
+#. type: Hash Value: week_abbreviation
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "w"
+msgstr "w"
 
 #. type: Title ##
 #: reports/Partner-Report/content/_introduction.qmd:1
 #, no-wrap
 msgid "Introduction"
-msgstr ""
+msgstr "Einführung"
 
 #. type: Plain text
 #: reports/Partner-Report/content/_introduction.qmd:3
 #, no-wrap
 msgid "This is a [NeoIPC Surveillance](https://neoipc.org/surveillance/ \"Link to the surveillance section of the NeoIPC website\") analysis that you can use to assess infection rates in your neonatal unit. If you have your own data collected using the same or a comparable method, you can compare them with the reference values presented in this document and identify any anomalies and potential for improvement.\n"
-msgstr ""
+msgstr "Dies ist eine Auswertung der [NeoIPC-Surveillance](https://neoipc.org/surveillance/ \"Link zum Abschnitt „Surveillance“ auf der NeoIPC-Website\"), die Sie zur Beurteilung der Infektionsraten in Ihrer neonatologischen Abteilung verwenden können. Wenn Sie eigene Daten haben, die mit derselben oder einer vergleichbaren Methode erhoben wurden, können Sie diese mit den in diesem Dokument dargestellten Referenzwerten vergleichen und so Auffälligkeiten und Verbesserungspotenziale identifizieren.\n"

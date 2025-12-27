@@ -3,6 +3,10 @@
 .RData
 .Ruserdata
 .quarto
+*.aux
+*.log
+*.tex
+!before-body.tex
 artifacts
 build
 doc/protocol/NeoIPC-Antibiotics*.adoc

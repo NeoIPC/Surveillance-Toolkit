@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NeoIPC Surveillance Reports 0.9\n"
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2025-12-26 04:49+0100\n"
+"POT-Creation-Date: 2025-12-27 07:55+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -140,9 +140,93 @@ msgid ""
 msgstr ""
 
 #. type: Hash Value: title
-#: reports/Partner-Report/_variables.yml:1
+#: reports/Partner-Report/_quarto-en.yml:1
 #, no-wrap
 msgid "NeoIPC Surveillance Partner Report"
+msgstr ""
+
+#. type: Hash Value: day
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "day"
+msgstr ""
+
+#. type: Hash Value: digit_group_separator
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid " "
+msgstr ""
+
+#. type: Array Element: fig-bw fig-cap
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Distribution of birth weights of the infants included in this report."
+msgstr ""
+
+#. type: Hash Value: fig-ga fig-cap no-ref
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "A is a histogram in %s steps with a density curve and B is a boxplot."
+msgstr ""
+
+#. type: Hash Value: fig-ga fig-cap ref
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "A is a histogram in %s steps with a density curve of your own unit’s data and a density curve of the reference data and B are two boxplots, one of your own unit’s data and one of the reference data."
+msgstr ""
+
+#. type: Hash Value: fig-ga fig-cap no-ref
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Vertical lines in the boxplot represent the %s, %s and %s quantiles, the diamond represents the pooled arithmetic mean."
+msgstr ""
+
+#. type: Hash Value: fig-ga fig-cap ref
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Vertical lines in the boxplots represent the %s, %s and %s quantiles, the diamonds represent the pooled arithmetic means."
+msgstr ""
+
+#. type: Array Element: fig-ga fig-cap
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Distribution of gestational ages of the infants included in this report."
+msgstr ""
+
+#. type: Hash Value: gramm_abbreviation
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "g"
+msgstr ""
+
+#. type: Hash Value: own_unit
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Own unit"
+msgstr ""
+
+#. type: Hash Value: percent_symbol
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "%"
+msgstr ""
+
+#. type: Hash Value: reference_data
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Reference data"
+msgstr ""
+
+#. type: Hash Value: unit_separator
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid " "
+msgstr ""
+
+#. type: Hash Value: week_abbreviation
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "w"
 msgstr ""
 
 #. type: Title ##
