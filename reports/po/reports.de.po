@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NeoIPC Surveillance Reports 0.9\n"
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2025-12-27 17:54+0100\n"
+"POT-Creation-Date: 2025-12-28 11:56+0100\n"
 "PO-Revision-Date: 2025-10-23 10:32+0200\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -291,6 +291,12 @@ msgstr "Atemunterstützung (gesamt)"
 msgid "Any antibiotic"
 msgstr "Antibiotika (gesamt)"
 
+#. type: Hash Value: tbl-risk-density-rates aware_footnote
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "WHO AWaRe group (see %s). As cumulative treatment days for individual substances are recorded per patient, combination therapies using several substances on one day are counted as multiple days."
+msgstr "WHO AWaRe-Gruppe (siehe %s). Da die kumulativen Behandlungstage für einzelne Substanzen pro Patient erfasst werden, werden Kombinationstherapien mit mehreren Substanzen an einem Tag als mehrere Tage gezählt."
+
 #. type: Hash Value: tbl-risk-density-rates cvc
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
@@ -321,6 +327,12 @@ msgstr "INV"
 msgid "Kangaroo care"
 msgstr "Känguruhpflege"
 
+#. type: Hash Value: tbl-risk-density-rates n_footnote
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "%s: The aggregated number of days the risk/protective factor was present in your unit's infants."
+msgstr "%s: Die Gesamtzahl der Tage, an denen der Risiko-/Schutzfaktor bei den Kindern Ihrer Abteilung vorhanden war."
+
 #. type: Hash Value: tbl-risk-density-rates niv
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
@@ -332,6 +344,12 @@ msgstr "NIV"
 #, no-wrap
 msgid "Other"
 msgstr "Andere"
+
+#. type: Hash Value: tbl-risk-density-rates pooled_footnote
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "%s: The Risk Density Rate calculated across all infants from all departments in the reference data."
+msgstr "%s: Die Risikofaktor-Anwendungsrate, berechnet für alle Kinder aus allen Abteilungen in den Referenzdaten."
 
 #. type: Hash Value: tbl-risk-density-rates probiotic
 #: reports/Partner-Report/content/_sR.yaml:1
@@ -345,6 +363,18 @@ msgstr "Probiotika"
 msgid "PVC"
 msgstr "PVK"
 
+#. type: Hash Value: tbl-risk-density-rates quartile_footnote
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Risk Density Rates of the departments in the reference data. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of device days is greater than or equal to one according to the pooled Risk Density Rate."
+msgstr "%s, %s, %s: Die Quartile (%s, %s und %s Quantile) der Risikofaktor-Anwendungsraten der Abteilungen in den Referenzdaten. Diese Quartile werden nur angezeigt, wenn die Anzahl der Abteilungen, die zum Nenner beitragen, größer oder gleich fünf ist und wenn die mittlere Anzahl der Device-Tag gemäß der gepoolten Risikofaktor-Anwendungsrate größer oder gleich eins ist."
+
+#. type: Hash Value: tbl-risk-density-rates rate_footnote
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "%s: The Risk Density Rate calculated for your unit's infants."
+msgstr "%s: Die für die Kinder Ihrer Abteilung berechnete Risikofaktor-Anwendungsrate."
+
 #. type: Hash Value: tbl-risk-density-rates reserve
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
@@ -355,7 +385,13 @@ msgstr "Reserve"
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Risk Density Rate"
-msgstr "Risikodichte"
+msgstr "Risikofaktor-Anwendungsrate"
+
+#. type: Hash Value: tbl-risk-density-rates tbl-cap
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Factors influencing the infants' risk of developing an infection or acquiring antibitic-resistant pathogens."
+msgstr "Faktoren, die das Risiko von Kindern beeinflussen, eine Infektion zu entwickeln oder antibiotikaresistente Erreger zu erwerben."
 
 #. type: Hash Value: tbl-risk-density-rates vascular_catheter
 #: reports/Partner-Report/content/_sR.yaml:1

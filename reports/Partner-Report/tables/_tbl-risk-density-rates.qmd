@@ -1,6 +1,6 @@
 ```{r}
 #| label: tbl-risk-density-rates
-#| tbl-cap: "Factors influencing the infants' risk of developing an infection or acquiring a drug-resistant pathogen."
+#| tbl-cap: !expr 'sR$`tbl-risk-density-rates`$`tbl-cap`'
 #| tbl-cap-location: top
 
 benchmark_data$usage_density_rate_table |>
@@ -97,19 +97,39 @@ benchmark_data$usage_density_rate_table |>
        "$$"
        )),
    locations = cells_column_spanners(spanners = "risk_density_rate")
+  ) |>
+  tab_footnote(
+    footnote = sprintf(sR$`tbl-risk-density-rates`$n_footnote, sR$table_headers$n_),
+    locations = cells_column_labels(columns = sR$table_headers$n_)) |>
+  tab_footnote(
+    footnote = sprintf(sR$`tbl-risk-density-rates`$rate_footnote, sR$table_headers$rate),
+    locations = cells_column_labels(columns = sR$table_headers$rate)) |>
+  tab_footnote(
+    footnote = sprintf(sR$`tbl-risk-density-rates`$pooled_footnote, sR$table_headers$pooled),
+    locations = cells_column_labels(columns = sR$table_headers$pooled)) |>
+  tab_footnote(
+    footnote = sprintf(
+      sR$`tbl-risk-density-rates`$quartile_footnote,
+      sR$table_headers$q1,
+      sR$table_headers$q2,
+      sR$table_headers$q3,
+      sprintf("%i%s", 25L, sR$percent_symbol),
+      sprintf("%i%s", 50L, sR$percent_symbol),
+      sprintf("%i%s", 75L, sR$percent_symbol)
+      ),
+    locations = cells_column_labels(columns = c(
+      sR$table_headers$q1,
+      sR$table_headers$q2,
+      sR$table_headers$q3))) |>
+  tab_footnote(
+    footnote = md(
+      sprintf(
+        sR$`tbl-risk-density-rates`$aware_footnote,
+        "[aware.essentialmeds.org](https://aware.essentialmeds.org/)")),
+    locations = gt::cells_stub(
+      rows = c(
+        sR$`tbl-risk-density-rates`$access,
+        sR$`tbl-risk-density-rates`$watch,
+        sR$`tbl-risk-density-rates`$reserve))
   )
-  # tab_footnote(
-  #   footnote = "N: The aggregated number of days the risk/protective factor was present in all infants.",
-  #   locations = cells_column_labels(columns = "N")) |>
-  # tab_footnote(
-  #   footnote = "Pooled: The Risk Density Rate calculated across all infants from all departments.",
-  #   locations = cells_column_labels(columns = "Pooled")) |>
-  # tab_footnote(
-  #   footnote = "Q₁, Q₂, Q₃: The quartiles (25%, 50% and 75% quantiles) of the Risk Density Rates of the departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of device days is greater than or equal to one according to the pooled Risk Density Rate.",
-  #   locations = cells_column_labels(columns = c("Q₁","Q₂","Q₃"))) |>
-  # tab_footnote(
-  #   footnote = md("WHO AWaRe group (see [aware.essentialmeds.org](https://aware.essentialmeds.org/)). As cumulative treatment days for individual substances are recorded per patient, combination therapies using several substances on one day are counted as multiple days."),
-  #   locations = gt::cells_stub(
-  #     rows = c("Access","Watch","Reserve"))
-  # )
 ```

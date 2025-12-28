@@ -30,6 +30,7 @@ fig-ga:
     - ref: "Vertical lines in the boxplots represent the %s, %s and %s quantiles, the diamonds represent the pooled arithmetic means."
       no-ref: "Vertical lines in the boxplot represent the %s, %s and %s quantiles, the diamond represents the pooled arithmetic mean."
 tbl-risk-density-rates:
+  tbl-cap: "Factors influencing the infants' risk of developing an infection or acquiring antibitic-resistant pathogens."
   risk_density_rate: "Risk Density Rate"
   vascular_catheter: "Vascular catheter"
   cvc: "CVC"
@@ -48,3 +49,8 @@ tbl-risk-density-rates:
   watch: "Watch"
   reserve: "Reserve"
   days_with_risk_factor: "Days with risk/protective factor"
+  n_footnote: "%s: The aggregated number of days the risk/protective factor was present in your unit's infants."
+  rate_footnote: "%s: The Risk Density Rate calculated for your unit's infants."
+  pooled_footnote: "%s: The Risk Density Rate calculated across all infants from all departments in the reference data."
+  quartile_footnote: "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Risk Density Rates of the departments in the reference data. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of device days is greater than or equal to one according to the pooled Risk Density Rate."
+  aware_footnote: "WHO AWaRe group (see %s). As cumulative treatment days for individual substances are recorded per patient, combination therapies using several substances on one day are counted as multiple days."
