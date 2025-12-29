@@ -1,437 +1,379 @@
-# Italian translations for the NeoIPC Surveillance Reports
+# German translations for the NeoIPC Surveillance Reports
 # Copyright (C) 2025 Charité - Universitätsmedizin Berlin
-# This file is distributed under the same license as the NeoIPC Surveillance Toolkit.
-# Automatically generated, 2025.
+# This file is distributed under the Creative Commons Attribution 4.0 International license
+# Brar Piening <brar.piening@charite.de>, 2025.
+# Prefill add-on <noreply-addon-prefill@weblate.org>, 2025.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: NeoIPC Surveillance Reports 0.9\n"
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2025-12-28 11:56+0100\n"
-"PO-Revision-Date: 2025-10-22 23:54+0200\n"
-"Last-Translator: Automatically generated\n"
+"POT-Creation-Date: 2025-12-30 19:35+0100\n"
+"PO-Revision-Date: 2025-12-30 19:48+0100\n"
+"Last-Translator: Brar Piening <brar.piening@charite.de>\n"
 "Language-Team: none\n"
-"Language: it\n"
+"Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#. type: Yaml Front Matter Hash Value: author-meta
-#: reports/Partner-Certificate/Partner-Certificate.qmd:1
+#. type: Hash Value: digit_group_separator
+#: reports/common.yaml:1
 #, no-wrap
-msgid "NeoIPC Surveillance team"
-msgstr "Team di NeoIPC Surveillance"
+msgid " "
+msgstr " "
 
-#. type: Yaml Front Matter Hash Value: keywords
-#: reports/Partner-Certificate/Partner-Certificate.qmd:1
+#. type: Hash Value: unit_separator
+#: reports/common.yaml:1
 #, no-wrap
-msgid "NeoIPC, Surveillance, Certificate"
-msgstr "NeoIPC, Surveillance, Certificato"
-
-#. type: Yaml Front Matter Hash Value: lang
-#: reports/Partner-Certificate/Partner-Certificate.qmd:1
-#, no-wrap
-msgid "en"
-msgstr "it"
-
-#. type: Yaml Front Matter Hash Value: title
-#: reports/Partner-Certificate/Partner-Certificate.qmd:1
-#, no-wrap
-msgid "Certificate of participation in the NeoIPC project surveillance system (NeoIPC Surveillance)"
-msgstr "Certificato di partecipazione al sistema di sorveglianza del progetto NeoIPC (NeoIPC Surveillance)"
-
-#. type: Fenced code block ({r})
-#: reports/Partner-Certificate/Partner-Certificate.qmd:55
-#, no-wrap
-msgid ""
-"#| label: Initialise Locale\n"
-"locale <- \"en_GB.UTF-8\"\n"
-"big_mark <- \",\"\n"
-msgstr ""
-"#| label: Initialise Locale\n"
-"locale <- \"it_IT.UTF-8\"\n"
-"big_mark <- \".\"\n"
-
-#. type: Plain text
-#: reports/Partner-Certificate/Partner-Certificate.qmd:62
-#, no-wrap
-msgid "{{< include _setup.qmd >}}\n"
-msgstr ""
-
-#. type: Plain text
-#: reports/Partner-Certificate/Partner-Certificate.qmd:65
-#, no-wrap
-msgid ""
-"\\cfoot*{\\raggedright \\hspace{1.5cm}This project has received funding from the European Union’s Horizon 2020 research and\\\\ \\hspace{1.5cm}innovation programme under grant agreement No 965328.}\n"
-"\\selectlanguage{british}\n"
-msgstr ""
-"\\cfoot*{\\raggedright \\hspace{1.5cm}Questo progetto ha ricevuto finanziamenti dal programma di ricerca e innovazione Horizon\\\\ \\hspace{1.5cm}2020 dell'Unione Europea nell'ambito della convenzione di sovvenzione n. 965328.}\n"
-"\\selectlanguage{italian}\n"
-
-#. type: Plain text
-#: reports/Partner-Certificate/Partner-Certificate.qmd:68
-#, no-wrap
-msgid ""
-"\\begin{center}\n"
-"\\vspace*{-1.25\\baselineskip}\n"
-msgstr ""
-
-#. type: Plain text
-#: reports/Partner-Certificate/Partner-Certificate.qmd:70
-#, no-wrap
-msgid "`r if (data$startYear == data$endYear) {'In'} else {'During the period'}`\n"
-msgstr "`r if (data$startYear == data$endYear) {'Nel'} else {'Nel periodo'}`\n"
-
-#. type: Plain text
-#: reports/Partner-Certificate/Partner-Certificate.qmd:72
-#: reports/Partner-Certificate/Partner-Certificate.qmd:76
-#: reports/Partner-Certificate/Partner-Certificate.qmd:80
-#: reports/Partner-Certificate/Partner-Certificate.qmd:84
-#: reports/Partner-Certificate/Partner-Certificate.qmd:90
-#, no-wrap
-msgid "\\vspace*{1.25\\baselineskip}\n"
-msgstr ""
-
-#. type: Plain text
-#: reports/Partner-Certificate/Partner-Certificate.qmd:74
-#, no-wrap
-msgid "\\Huge \\bfseries `r if (data$startYear == data$endYear) {data$startYear} else {paste0(data$startYear, \"-\", data$endYear)}`\\normalsize \\normalfont\n"
-msgstr ""
-
-#. type: Plain text
-#: reports/Partner-Certificate/Partner-Certificate.qmd:78
-#, no-wrap
-msgid "the neonatology unit at\n"
-msgstr "l'unità di neonatologia dell'\n"
-
-#. type: Plain text
-#: reports/Partner-Certificate/Partner-Certificate.qmd:82
-#, no-wrap
-msgid "\\large \\bfseries `r data$hospitalName`\\normalsize \\normalfont\n"
-msgstr ""
-
-#. type: Plain text
-#: reports/Partner-Certificate/Partner-Certificate.qmd:86
-#, no-wrap
-msgid "participated in the NeoIPC Surveillance network.\n"
-msgstr "ha partecipato alla rete di NeoIPC Surveillance\n"
-
-#. type: Plain text
-#: reports/Partner-Certificate/Partner-Certificate.qmd:88
-#, no-wrap
-msgid "\\end{center}\n"
-msgstr ""
-
-#. type: Plain text
-#: reports/Partner-Certificate/Partner-Certificate.qmd:92
-#, no-wrap
-msgid "Through active monitoring of `r paste0('**', format(data$nPatients, big.mark = big_mark), '**')` newborns with birth weights below `r format(1500L, big.mark = big_mark)` grams and/or gestational ages below 32 weeks, the team collected valuable reference data that will be useful for assessing and reducing infection risks in neonatal units. We are proud and delighted to have them as partners in our mission to improve infection prevention and control in the neonatal setting.\n"
-msgstr "Grazie al monitoraggio attivo di `r paste0('**', format(data$nPatients, big.mark = big_mark), '**')`  neonati con peso alla nascita inferiore a `r format(1500L, big.mark = big_mark)` grammi e/o età gestazionale inferiore a 32 settimane, il team ha raccolto dati di riferimento preziosi, utili per valutare e ridurre i rischi di infezione nelle unità di neonatologia. Siamo orgogliosi e felici di averli come partner nella nostra missione di migliorare la prevenzione e il controllo delle infezioni in ambito neonatale.\n"
-
-#. type: Plain text
-#: reports/Partner-Certificate/Partner-Certificate.qmd:101
-#, no-wrap
-msgid ""
-"\\vspace*{3.25\\baselineskip}\n"
-"\\begin{textblock*}{10cm}(12cm,26cm)\n"
-"`r data$signatory`\\\\\n"
-"for the NeoIPC Surveillance team\\\\\n"
-"\\end{textblock*}\n"
-"\\begin{textblock*}{10cm}(2.5cm,26cm)\n"
-"Berlin, `r format(Sys.Date(), format = \"%x\")`\n"
-"\\end{textblock*}\n"
-"![](`{r} data$signatureImagePath`){fig-align=\"right\"}\n"
-msgstr ""
-"\\vspace*{3.25\\baselineskip}\n"
-"\\begin{textblock*}{10cm}(12cm,26cm)\n"
-"`r data$signatory`\\\\\n"
-"per il team di NeoIPC Surveillance\\\\\n"
-"\\end{textblock*}\n"
-"\\begin{textblock*}{10cm}(2.5cm,26cm)\n"
-"Berlin, `r format(Sys.Date(), format = \"%x\")`\n"
-"\\end{textblock*}\n"
-"![](`{r} data$signatureImagePath`){fig-align=\"right\"}\n"
+msgid " "
+msgstr " "
 
 #. type: Hash Value: title
 #: reports/Partner-Report/_quarto-en.yml:1
-#, fuzzy, no-wrap
-#| msgid "NeoIPC Surveillance team"
+#, no-wrap
 msgid "NeoIPC Surveillance Partner Report"
-msgstr "Team di NeoIPC Surveillance"
+msgstr "NeoIPC Surveillance Partner-Auswertung"
 
 #. type: Hash Value: day
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "day"
-msgstr ""
-
-#. type: Hash Value: digit_group_separator
-#: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
-msgid " "
-msgstr ""
+msgstr "Tage"
 
 #. type: Array Element: fig-bw fig-cap
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Distribution of birth weights of the infants included in this report."
-msgstr ""
+msgstr "Verteilung der Geburtsgewichte der in diese Auswertung eingeschlossenen Kinder."
 
 #. type: Hash Value: fig-ga fig-cap no-ref
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "A is a histogram in %s steps with a density curve and B is a boxplot."
-msgstr ""
+msgstr "A ist ein Histogramm in %s-Schritten mit einer Dichte-Kurve und B ist ein Boxplot."
 
 #. type: Hash Value: fig-ga fig-cap ref
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "A is a histogram in %s steps with a density curve of your own unit’s data and a density curve of the reference data and B are two boxplots, one of your own unit’s data and one of the reference data."
-msgstr ""
+msgstr "A ist ein Histogramm in %s-Schritten mit einer Dichte-Kurve der Daten Ihrer eigenen Abteilung und einer Dichte-Kurve der Referenzdaten, und B sind zwei Boxplots, einer mit den Daten Ihrer eigenen Abteilung und einer mit den Referenzdaten."
 
 #. type: Hash Value: fig-ga fig-cap no-ref
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Vertical lines in the boxplot represent the %s, %s and %s quantiles, the diamond represents the pooled arithmetic mean."
-msgstr ""
+msgstr "Die vertikalen Linien im Boxplot stellen die %s-, %s- und %s-Quantile dar, die Raute stellt das gepoolte arithmetische Mittel dar."
 
 #. type: Hash Value: fig-ga fig-cap ref
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Vertical lines in the boxplots represent the %s, %s and %s quantiles, the diamonds represent the pooled arithmetic means."
-msgstr ""
+msgstr "Die vertikalen Linien in den Boxplots stellen die %s-, %s- und %s-Quantile dar, die Rauten stellen die gepoolten arithmetischen Mittelwerte dar."
 
 #. type: Array Element: fig-ga fig-cap
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Distribution of gestational ages of the infants included in this report."
-msgstr ""
+msgstr "Verteilung des Gestationsalters der in diese Auswertung eingeschlossenen Kinder."
 
 #. type: Hash Value: gramm_abbreviation
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "g"
-msgstr ""
+msgstr "g"
 
 #. type: Hash Value: own_unit
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Own unit"
-msgstr ""
+msgstr "Eigene Abteilunng"
 
 #. type: Hash Value: patient_days
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Patient days"
-msgstr ""
+msgstr "Patiententage"
 
 #. type: Hash Value: percent_symbol
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "%"
-msgstr ""
+msgstr "%"
 
 #. type: Hash Value: reference_data
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Reference data"
-msgstr ""
+msgstr "Referenzdaten"
 
 #. type: Hash Value: table_headers pooled
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Pooled"
-msgstr ""
+msgstr "Gepoolt"
 
 #. type: Hash Value: table_headers q1
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Q₁"
-msgstr ""
+msgstr "Q₁"
 
 #. type: Hash Value: table_headers q2
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Q₂"
-msgstr ""
+msgstr "Q₂"
 
 #. type: Hash Value: table_headers q3
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Q₃"
-msgstr ""
+msgstr "Q₃"
 
 #. type: Hash Value: table_headers rate
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Rate"
-msgstr ""
+msgstr "Rate"
 
 #. type: Hash Value: tbl-risk-density-rates access
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Access"
-msgstr ""
+msgstr "Access"
 
 #. type: Hash Value: tbl-risk-density-rates antibiotics
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Antibiotics"
-msgstr ""
+msgstr "Antibiotika"
 
 #. type: Hash Value: tbl-risk-density-rates any
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Any"
-msgstr ""
+msgstr "Atemunterstützung (gesamt)"
 
 #. type: Hash Value: tbl-risk-density-rates any_antibiotic
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Any antibiotic"
-msgstr ""
+msgstr "Antibiotika (gesamt)"
 
 #. type: Hash Value: tbl-risk-density-rates aware_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "WHO AWaRe group (see %s). As cumulative treatment days for individual substances are recorded per patient, combination therapies using several substances on one day are counted as multiple days."
-msgstr ""
+msgstr "WHO AWaRe-Gruppe (siehe %s). Da die kumulativen Behandlungstage für einzelne Substanzen pro Patient erfasst werden, werden Kombinationstherapien mit mehreren Substanzen an einem Tag als mehrere Tage gezählt."
 
 #. type: Hash Value: tbl-risk-density-rates cvc
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "CVC"
-msgstr ""
+msgstr "ZVK"
 
 #. type: Hash Value: tbl-risk-density-rates days_with_risk_factor
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Days with risk/protective factor"
-msgstr ""
+msgstr "Tage mit Risiko-/Schutzfaktor"
 
 #. type: Hash Value: tbl-risk-density-rates human_milk
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Human milk"
-msgstr ""
+msgstr "Humanmilch"
 
 #. type: Hash Value: tbl-risk-density-rates inv
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "INV"
-msgstr ""
+msgstr "INV"
 
 #. type: Hash Value: tbl-risk-density-rates kangaroo_care
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Kangaroo care"
-msgstr ""
+msgstr "Känguruhpflege"
 
 #. type: Hash Value: tbl-risk-density-rates n_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "%s: The aggregated number of days the risk/protective factor was present in your unit's infants."
-msgstr ""
+msgstr "%s: Die Gesamtzahl der Tage, an denen der Risiko-/Schutzfaktor bei den Kindern Ihrer Abteilung vorhanden war."
 
 #. type: Hash Value: tbl-risk-density-rates niv
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "NIV"
-msgstr ""
+msgstr "NIV"
 
 #. type: Hash Value: tbl-risk-density-rates other
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Other"
-msgstr ""
+msgstr "Andere"
 
 #. type: Hash Value: tbl-risk-density-rates pooled_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "%s: The Risk Density Rate calculated across all infants from all departments in the reference data."
-msgstr ""
+msgstr "%s: Die Risikofaktor-Anwendungsrate, berechnet für alle Kinder aus allen Abteilungen in den Referenzdaten."
 
 #. type: Hash Value: tbl-risk-density-rates probiotic
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Probiotics"
-msgstr ""
+msgstr "Probiotika"
 
 #. type: Hash Value: tbl-risk-density-rates pvc
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "PVC"
-msgstr ""
+msgstr "PVK"
 
 #. type: Hash Value: tbl-risk-density-rates quartile_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Risk Density Rates of the departments in the reference data. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of device days is greater than or equal to one according to the pooled Risk Density Rate."
-msgstr ""
+msgstr "%s, %s, %s: Die Quartile (%s, %s und %s Quantile) der Risikofaktor-Anwendungsraten der Abteilungen in den Referenzdaten. Diese Quartile werden nur angezeigt, wenn die Anzahl der Abteilungen, die zum Nenner beitragen, größer oder gleich fünf ist und wenn die mittlere Anzahl der Device-Tag gemäß der gepoolten Risikofaktor-Anwendungsrate größer oder gleich eins ist."
 
 #. type: Hash Value: tbl-risk-density-rates rate_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "%s: The Risk Density Rate calculated for your unit's infants."
-msgstr ""
+msgstr "%s: Die für die Kinder Ihrer Abteilung berechnete Risikofaktor-Anwendungsrate."
 
 #. type: Hash Value: tbl-risk-density-rates reserve
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Reserve"
-msgstr ""
+msgstr "Reserve"
 
 #. type: Hash Value: tbl-risk-density-rates risk_density_rate
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Risk Density Rate"
-msgstr ""
+msgstr "Risikofaktor-Anwendungsrate"
 
 #. type: Hash Value: tbl-risk-density-rates tbl-cap
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Factors influencing the infants' risk of developing an infection or acquiring antibitic-resistant pathogens."
-msgstr ""
+msgstr "Faktoren, die das Risiko von Kindern beeinflussen, eine Infektion zu entwickeln oder antibiotikaresistente Erreger zu erwerben."
 
 #. type: Hash Value: tbl-risk-density-rates vascular_catheter
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Vascular catheter"
-msgstr ""
+msgstr "Gefäßkatheter"
 
 #. type: Hash Value: tbl-risk-density-rates ventilatory_support
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Ventilatory support"
-msgstr ""
+msgstr "Atemunterstützung"
 
 #. type: Hash Value: tbl-risk-density-rates watch
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Watch"
-msgstr ""
-
-#. type: Hash Value: unit_separator
-#: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
-msgid " "
-msgstr ""
+msgstr "Watch"
 
 #. type: Hash Value: week_abbreviation
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "w"
-msgstr ""
+msgstr "w"
 
 #. type: Title ##
 #: reports/Partner-Report/content/_introduction.qmd:1
 #, no-wrap
 msgid "Introduction"
-msgstr ""
+msgstr "Einführung"
 
 #. type: Plain text
 #: reports/Partner-Report/content/_introduction.qmd:3
 #, no-wrap
 msgid "This is a [NeoIPC Surveillance](https://neoipc.org/surveillance/ \"Link to the surveillance section of the NeoIPC website\") analysis that you can use to assess infection rates in your neonatal unit. If you have your own data collected using the same or a comparable method, you can compare them with the reference values presented in this document and identify any anomalies and potential for improvement.\n"
-msgstr ""
+msgstr "Dies ist eine Auswertung der [NeoIPC-Surveillance](https://neoipc.org/surveillance/ \"Link zum Abschnitt „Surveillance“ auf der NeoIPC-Website\"), die Sie zur Beurteilung der Infektionsraten in Ihrer neonatologischen Abteilung verwenden können. Wenn Sie eigene Daten haben, die mit derselben oder einer vergleichbaren Methode erhoben wurden, können Sie diese mit den in diesem Dokument dargestellten Referenzwerten vergleichen und so Auffälligkeiten und Verbesserungspotenziale identifizieren.\n"
+
+#. type: Hash Value: format pdf author-meta
+#: reports/Partner-Certificate/_quarto-en.yml:1
+#, no-wrap
+msgid "NeoIPC Surveillance team"
+msgstr "NeoIPC Surveillance Team"
+
+#. type: Array Element: format pdf keywords
+#: reports/Partner-Certificate/_quarto-en.yml:1
+#, no-wrap
+msgid "NeoIPC"
+msgstr "NeoIPC"
+
+#. type: Array Element: format pdf keywords
+#: reports/Partner-Certificate/_quarto-en.yml:1
+#, no-wrap
+msgid "Surveillance"
+msgstr "Surveillance"
+
+#. type: Array Element: format pdf keywords
+#: reports/Partner-Certificate/_quarto-en.yml:1
+#, no-wrap
+msgid "Certificate"
+msgstr "Zertifikat"
+
+#. type: Hash Value: title
+#: reports/Partner-Certificate/_quarto-en.yml:1
+#, no-wrap
+msgid "Certificate of participation in the NeoIPC project surveillance system (NeoIPC Surveillance)"
+msgstr "Zertifikat über die Teilnahme am Surveillance-System des NeoIPC-Projekts (NeoIPC Surveillance)"
+
+#. type: Array Element: content
+#: reports/Partner-Certificate/_sR.yaml:1
+#, no-wrap
+msgid "This project has received funding from the European Union’s Horizon 2020 research and%sinnovation programme under grant agreement No 965328."
+msgstr "Dieses Projekt wurde im Rahmen des Forschungs- und Innovationsprogramms Horizont 2020%sder Europäischen Union unter der Fördervereinbarung Nr. 965328 gefördert."
+
+#. type: Array Element: content
+#: reports/Partner-Certificate/_sR.yaml:1
+#, no-wrap
+msgid "In"
+msgstr "Im Jahr"
+
+#. type: Array Element: content
+#: reports/Partner-Certificate/_sR.yaml:1
+#, no-wrap
+msgid "During the period"
+msgstr "Im Zeitraum"
+
+#. type: Array Element: content
+#: reports/Partner-Certificate/_sR.yaml:1
+#, no-wrap
+msgid "the neonatology unit at %s participated in the NeoIPC Surveillance network."
+msgstr "hat sich die neonatologische Abteilung der %s am NeoIPC Surveillance Netzwerk beteiligt."
+
+#. type: Array Element: content
+#: reports/Partner-Certificate/_sR.yaml:1
+#, no-wrap
+msgid "Through active monitoring of %s newborns with birth weights below 1500 grams and/or gestational ages below 32 weeks, the team collected valuable reference data that will be useful for assessing and reducing infection risks in neonatal units. We are proud and delighted to have them as partners in our mission to improve infection prevention and control in the neonatal setting."
+msgstr "Dank der aktiven Surveillance von %s Neugeborenen mit einem Geburtsgewicht von weniger als 1500 Gramm und/oder einem Gestationsalter von weniger als 32 Wochen hat das Team wertvolle Referenzdaten gesammelt, die für die Bewertung und Verringerung des Infektionsrisikos in neonatologischen Abteilungen nützlich sind. Wir sind stolz und glücklich, sie als Partner bei unserer Mission zur Verbesserung der Infektionsprävention und -kontrolle im neonatologischen Bereich zu haben."
+
+#. type: Array Element: content
+#: reports/Partner-Certificate/_sR.yaml:1
+#, no-wrap
+msgid "for the NeoIPC Surveillance team"
+msgstr "für das NeoIPC Surveillance Team"
+
+#. type: Array Element: content
+#: reports/Partner-Certificate/_sR.yaml:1
+#, no-wrap
+msgid "Berlin,"
+msgstr "Berlin,"
+
+#. type: Hash Value: signature_offset
+#: reports/Partner-Certificate/_sR.yaml:1
+#, no-wrap
+msgid "3.25"
+msgstr "1.25"

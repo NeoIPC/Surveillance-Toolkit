@@ -9,7 +9,7 @@ include::NeoIPC-Core-Protocol-Header.adoc[]
 === What are you reading here?
 This document is the surveillance protocol for the core module of the NeoIPC surveillance which covers surveillance of nosocomial infections in Very Low Birth Weight (VLBW)/ Very Preterm (VPT) Infants.
 It is part of a toolkit for the surveillance of healthcare-associated infections (HAI) in neonatology that we developed within the NeoIPC project.
-If you want to perform surveillance of early-onset infections or of healthcare-associated infections in infants with a birth weight above 1500 g and a gestational age greater than 32 weeks, the toolkit provides additional methods that are covered in separate protocols.
+If you want to perform surveillance of early-onset infections or of healthcare-associated infections in infants with a birth weight above 1500 g and a gestational age greater than 32 weeks, the toolkit provides additional methods that are covered in separate protocols.
 
 This protocol provides methodological reference and support for HAI surveillance in neonatal units or for those planning to develop an HAI surveillance programme.
 By adhering to the methods and definitions we specify here, you can ensure that the surveillance data you generate is comparable to the reference data in the NeoIPC project, even if you are not actively participating in the project.
@@ -119,7 +119,7 @@ To create the reference report, we carry out a calculation at a specified time e
 In order to make this possible, you must have completed all data entry and addition of missing information from the previous year within 6 weeks after the end of a calendar year.
 This applies to patients whose surveillance period ended in the previous year.
 
-If the web-based reporting system is temporarily unavailable (e. g. due to maintenance or technical problems), please use the paper-based datasheets for documentation during this period and remember to enter this data into the web platform as soon as possible once it becomes available again.
+If the web-based reporting system is temporarily unavailable (e.g. due to maintenance or technical problems), please use the paper-based datasheets for documentation during this period and remember to enter this data into the web platform as soon as possible once it becomes available again.
 
 [#data-collection]
 == Data Collection
@@ -159,7 +159,7 @@ For detailed information, see Surgical site infections.
 Any live born infant,
 
 [loweralpha]
-. whose birth weight is less than 1500 grams
+. whose birth weight is less than 1500 grams
 +
 **AND/OR**
 . whose gestational age is less than 32 weeks (31 weeks 6 days inclusive)
@@ -343,10 +343,10 @@ To create an association between a device and infection, the device must have be
 |===
 |Days |Device in Place |Device Association (if this is the day of infection) |Comments
 
-|Day 1 |CVC |No [.red]#☐# |<3 CVC days on the day of infection
-|Day 2 |CVC |No [.red]#☐# |<3 CVC days on the day of infection
-|Day 3 |CVC |Yes [.green]#☑# |≥3 CVC days on the day of infection
-|Day 4 |No device |Yes [.green]#☑# |No CVC on the day of infection but ≥3 CVC days on the Day 3 (the day before infection)
+|Day 1 |CVC |No [.red]#☐# |< 3 CVC days on the day of infection
+|Day 2 |CVC |No [.red]#☐# |< 3 CVC days on the day of infection
+|Day 3 |CVC |Yes [.green]#☑# |≥ 3 CVC days on the day of infection
+|Day 4 |No device |Yes [.green]#☑# |No CVC on the day of infection but ≥ 3 CVC days on the Day 3 (the day before infection)
 |Day 5 |No device |No [.red]#☐# |No CVC on the day of infection or on day before infection
 |Day 6 |No device |No [.red]#☐# |No CVC on the day of infection or on day before infection
 |===
@@ -815,10 +815,10 @@ The following rates are calculated both for the departments’ reports and for t
 
 For the core module, the rates are generally stratified into 4 groups according to the birth weight of the infants:
 
-. < 500 g
-. 500 g ‑ 999 g
-. 1 000 g ‑ 1 499 g
-. > 1 500 g
+. < 500 g
+. 500 g ‑ 999 g
+. 1000 g ‑ 1499 g
+. > 1500 g
 
 [#data-analysis-risk-factors-and-protective-factors]
 === Risk Factors and Protective Factors
@@ -909,7 +909,7 @@ stem:["Grouped SSI Rate" = "Total SSI Cases Observed After the Procedures in Thi
 [#data-analysis-infections-standardized-infection-rate]
 ==== Standardized Infection Rate
 With the infection rates described above, it is possible to observe risk factors and infections for the 3 birthweight classes in detail.
-However, 500 g birth weight is a relatively crude stratification for neonatal infection risk, and it also does not account the fact that infants may be transferred to other departments (e.g., for surgery or to a department closer to the parents’ home) long before they would normally be discharged and that the high-risk days of the stabilization phase would accumulate in some neonatology departments while others would accumulate the low risk days of already stabilized infants.
+However, 500 g birth weight is a relatively crude stratification for neonatal infection risk, and it also does not account the fact that infants may be transferred to other departments (e.g., for surgery or to a department closer to the parents’ home) long before they would normally be discharged and that the high-risk days of the stabilization phase would accumulate in some neonatology departments while others would accumulate the low risk days of already stabilized infants.
 To account for this, NeoIPC calculates a standardized infection rate (SIR) , which compares infection frequencies between departments based on their patient population composition.
 
 Standardized infection rates are calculated based on two factors:

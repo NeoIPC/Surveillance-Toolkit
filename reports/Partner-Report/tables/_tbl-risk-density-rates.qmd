@@ -36,8 +36,8 @@ benchmark_data$usage_density_rate_table |>
    table.font.size = 13,
    footnotes.marks = "extended"
   ) |>
-  fmt_number(decimals = 1) |>
-  fmt_number(columns = "N", decimals = 0) |>
+  fmt_number(columns = !sR$table_headers$n_, decimals = 1, sep_mark = sR$digit_group_separator, min_sep_threshold = 2, locale = gt_locale) |>
+  fmt_integer(columns = sR$table_headers$n_, sep_mark = sR$digit_group_separator, min_sep_threshold = 2) |>
   cols_width(
    stub() ~ pct(34),
    sR$table_headers$n ~ pct(13),

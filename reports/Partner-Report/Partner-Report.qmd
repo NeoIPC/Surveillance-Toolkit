@@ -14,11 +14,16 @@ params:
   IncludeNonCorePatients: NULL
 ---
 
-{{< include _setup.qmd >}}
-
 ```{r}
-sR <- read_yaml("content/_sR.yaml")
+#| label: Initialise Locale
+locale <- "en_GB.UTF-8"
+sR <- modifyList(
+  yaml::read_yaml("../common.yaml", handlers = list('bool#no' = function(x) x)),
+  yaml::read_yaml("content/_sR.yaml", handlers = list('bool#no' = function(x) x))
+)
 ```
+
+{{< include _setup.qmd >}}
 
 {{< include content/_introduction.qmd >}}
 

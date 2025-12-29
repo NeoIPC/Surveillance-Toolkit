@@ -3,7 +3,6 @@ project:
 date-meta: now
 echo: false
 execute:
-  keep-md: true
   error: true
 filters: ["../filters/pandoc-quotes.lua"]
 format:

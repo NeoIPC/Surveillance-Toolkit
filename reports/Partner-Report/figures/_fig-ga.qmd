@@ -43,10 +43,17 @@ boxplot_data <- data.frame(
 if (!is.null(reference_data)) {
   ga_scale_min <- min(c(ga_scale_min, reference_data$gestational_age$scale$min))
   ga_scale_max <- max(c(ga_scale_max, reference_data$gestational_age$scale$max))
+  density_factor_ref <-  density_factor *
+    (
+      density_data$ga7 |> max() -
+        density_data$ga7 |> min()) /
+    (
+      reference_data$gestational_age$density$ga7 |> max() -
+        reference_data$gestational_age$density$ga7 |> min())
   legend_position <- 'bottom'
 
   A_plot <- A_plot +
-    geom_line(data = reference_data$gestational_age$density, aes(x=ga7, y=density * density_factor, colour = "ref"))
+    geom_line(data = reference_data$gestational_age$density, aes(x=ga7, y=density * density_factor_ref, colour = "ref"))
 
   boxplot_data <- boxplot_data |>
     add_row(

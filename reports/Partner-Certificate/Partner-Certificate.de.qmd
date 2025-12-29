@@ -1,5 +1,5 @@
 ---
-lang: en
+lang: de
 date-meta: now
 params:
   startYear: NULL
@@ -15,10 +15,10 @@ params:
 
 ```{r}
 #| label: Initialise Locale
-locale <- "en_GB.UTF-8"
+locale <- "de_DE.UTF-8"
 sR <- modifyList(
-  yaml::read_yaml("../common.yaml", handlers = list('bool#no' = function(x) x)),
-  yaml::read_yaml("_sR.yaml", handlers = list('bool#no' = function(x) x))
+  yaml::read_yaml("../common.de.yaml", handlers = list('bool#no' = function(x) x)),
+  yaml::read_yaml("_sR.de.yaml", handlers = list('bool#no' = function(x) x))
 )
 ```
 

@@ -50,11 +50,24 @@ data <- suppressWarnings(import_dhis2(
 NeoIPC_pallette <- c("#FF9015","#0083C1","#0D4F6C","#E6FAFC","#E0D3DE","#1F271B")
 pal <- c(NeoIPC_pallette[5],NeoIPC_pallette[2],NeoIPC_pallette[6])
 
-# temporary for development
+invisible(Sys.setlocale(category = "LC_ALL", locale = locale))
+invisible(Sys.setLanguage(locale))
+# Setting the gt.locale option does not seem to be overridable the the function level
+# invisible(
+#   options(
+#     `gt.locale` = if(stringr::str_detect(locale, "_")) {
+#         stringr::str_replace(locale, "^(\\w+)_(\\w+)(\\..+)?$", "\\1-\\2")
+#       } else {
+#         stringr::str_replace(locale, "^(\\w+)(\\..+)?$", "\\1")
+#       }))
 
-#typedParams$UnitCodes <- c('DE_BER_CHARITE_CCM_NEO', 'DE_BER_CHARITE_CVK_NEO')
-typedParams$UnitCodes <- 'DE_BER_CHARITE_CCM_NEO'
-#typedParams$UnitCodes <- 'DE_BER_CHARITE_CVK_NEO'
+gt_locale = if(stringr::str_detect(locale, "_")) {
+    stringr::str_replace(locale, "^(\\w+)_(\\w+)(\\..+)?$", "\\1-\\2")
+  } else {
+    stringr::str_replace(locale, "^(\\w+)(\\..+)?$", "\\1")
+  }
+
+# temporary for development
 
 reference_data <- data |>
   calculate_reference_data()

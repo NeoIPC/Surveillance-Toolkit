@@ -1,142 +1,33 @@
-# Spanish translations for NeoIPC Surveillance Reports package
-# Copyright (C) 2025 CharitÃ© â UniversitÃ¤tsmedizin Berlin
-# This file is distributed under the same license as the NeoIPC Surveillance Reports package.
-# Automatically generated, 2025.
+# Italian translations for the NeoIPC Surveillance Reports
+# Copyright (C) 2025 Charité - Universitätsmedizin Berlin
+# This file is distributed under the Creative Commons Attribution 4.0 International license
+# Brar Piening <brar.piening@charite.de>, 2025.
+# Prefill add-on <noreply-addon-prefill@weblate.org>, 2025.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: NeoIPC Surveillance Reports 0.9\n"
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2025-12-28 11:56+0100\n"
-"PO-Revision-Date: 2025-12-26 04:49+0100\n"
-"Last-Translator: Automatically generated\n"
+"POT-Creation-Date: 2025-12-30 19:35+0100\n"
+"PO-Revision-Date: 2025-12-30 19:55+0100\n"
+"Last-Translator: Brar Piening <brar.piening@charite.de>\n"
 "Language-Team: none\n"
-"Language: es\n"
+"Language: it\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#. type: Yaml Front Matter Hash Value: author-meta
-#: reports/Partner-Certificate/Partner-Certificate.qmd:1
+#. type: Hash Value: digit_group_separator
+#: reports/common.yaml:1
 #, no-wrap
-msgid "NeoIPC Surveillance team"
+msgid " "
 msgstr ""
 
-#. type: Yaml Front Matter Hash Value: keywords
-#: reports/Partner-Certificate/Partner-Certificate.qmd:1
+#. type: Hash Value: unit_separator
+#: reports/common.yaml:1
 #, no-wrap
-msgid "NeoIPC, Surveillance, Certificate"
-msgstr ""
-
-#. type: Yaml Front Matter Hash Value: lang
-#: reports/Partner-Certificate/Partner-Certificate.qmd:1
-#, no-wrap
-msgid "en"
-msgstr ""
-
-#. type: Yaml Front Matter Hash Value: title
-#: reports/Partner-Certificate/Partner-Certificate.qmd:1
-#, no-wrap
-msgid "Certificate of participation in the NeoIPC project surveillance system (NeoIPC Surveillance)"
-msgstr ""
-
-#. type: Fenced code block ({r})
-#: reports/Partner-Certificate/Partner-Certificate.qmd:55
-#, no-wrap
-msgid ""
-"#| label: Initialise Locale\n"
-"locale <- \"en_GB.UTF-8\"\n"
-"big_mark <- \",\"\n"
-msgstr ""
-
-#. type: Plain text
-#: reports/Partner-Certificate/Partner-Certificate.qmd:62
-#, no-wrap
-msgid "{{< include _setup.qmd >}}\n"
-msgstr ""
-
-#. type: Plain text
-#: reports/Partner-Certificate/Partner-Certificate.qmd:65
-#, no-wrap
-msgid ""
-"\\cfoot*{\\raggedright \\hspace{1.5cm}This project has received funding from the European Union’s Horizon 2020 research and\\\\ \\hspace{1.5cm}innovation programme under grant agreement No 965328.}\n"
-"\\selectlanguage{british}\n"
-msgstr ""
-
-#. type: Plain text
-#: reports/Partner-Certificate/Partner-Certificate.qmd:68
-#, no-wrap
-msgid ""
-"\\begin{center}\n"
-"\\vspace*{-1.25\\baselineskip}\n"
-msgstr ""
-
-#. type: Plain text
-#: reports/Partner-Certificate/Partner-Certificate.qmd:70
-#, no-wrap
-msgid "`r if (data$startYear == data$endYear) {'In'} else {'During the period'}`\n"
-msgstr ""
-
-#. type: Plain text
-#: reports/Partner-Certificate/Partner-Certificate.qmd:72
-#: reports/Partner-Certificate/Partner-Certificate.qmd:76
-#: reports/Partner-Certificate/Partner-Certificate.qmd:80
-#: reports/Partner-Certificate/Partner-Certificate.qmd:84
-#: reports/Partner-Certificate/Partner-Certificate.qmd:90
-#, no-wrap
-msgid "\\vspace*{1.25\\baselineskip}\n"
-msgstr ""
-
-#. type: Plain text
-#: reports/Partner-Certificate/Partner-Certificate.qmd:74
-#, no-wrap
-msgid "\\Huge \\bfseries `r if (data$startYear == data$endYear) {data$startYear} else {paste0(data$startYear, \"-\", data$endYear)}`\\normalsize \\normalfont\n"
-msgstr ""
-
-#. type: Plain text
-#: reports/Partner-Certificate/Partner-Certificate.qmd:78
-#, no-wrap
-msgid "the neonatology unit at\n"
-msgstr ""
-
-#. type: Plain text
-#: reports/Partner-Certificate/Partner-Certificate.qmd:82
-#, no-wrap
-msgid "\\large \\bfseries `r data$hospitalName`\\normalsize \\normalfont\n"
-msgstr ""
-
-#. type: Plain text
-#: reports/Partner-Certificate/Partner-Certificate.qmd:86
-#, no-wrap
-msgid "participated in the NeoIPC Surveillance network.\n"
-msgstr ""
-
-#. type: Plain text
-#: reports/Partner-Certificate/Partner-Certificate.qmd:88
-#, no-wrap
-msgid "\\end{center}\n"
-msgstr ""
-
-#. type: Plain text
-#: reports/Partner-Certificate/Partner-Certificate.qmd:92
-#, no-wrap
-msgid "Through active monitoring of `r paste0('**', format(data$nPatients, big.mark = big_mark), '**')` newborns with birth weights below `r format(1500L, big.mark = big_mark)` grams and/or gestational ages below 32 weeks, the team collected valuable reference data that will be useful for assessing and reducing infection risks in neonatal units. We are proud and delighted to have them as partners in our mission to improve infection prevention and control in the neonatal setting.\n"
-msgstr ""
-
-#. type: Plain text
-#: reports/Partner-Certificate/Partner-Certificate.qmd:101
-#, no-wrap
-msgid ""
-"\\vspace*{3.25\\baselineskip}\n"
-"\\begin{textblock*}{10cm}(12cm,26cm)\n"
-"`r data$signatory`\\\\\n"
-"for the NeoIPC Surveillance team\\\\\n"
-"\\end{textblock*}\n"
-"\\begin{textblock*}{10cm}(2.5cm,26cm)\n"
-"Berlin, `r format(Sys.Date(), format = \"%x\")`\n"
-"\\end{textblock*}\n"
-"![](`{r} data$signatureImagePath`){fig-align=\"right\"}\n"
+msgid " "
 msgstr ""
 
 #. type: Hash Value: title
@@ -149,12 +40,6 @@ msgstr ""
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "day"
-msgstr ""
-
-#. type: Hash Value: digit_group_separator
-#: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
-msgid " "
 msgstr ""
 
 #. type: Array Element: fig-bw fig-cap
@@ -397,12 +282,6 @@ msgstr ""
 msgid "Watch"
 msgstr ""
 
-#. type: Hash Value: unit_separator
-#: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
-msgid " "
-msgstr ""
-
 #. type: Hash Value: week_abbreviation
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
@@ -420,3 +299,81 @@ msgstr ""
 #, no-wrap
 msgid "This is a [NeoIPC Surveillance](https://neoipc.org/surveillance/ \"Link to the surveillance section of the NeoIPC website\") analysis that you can use to assess infection rates in your neonatal unit. If you have your own data collected using the same or a comparable method, you can compare them with the reference values presented in this document and identify any anomalies and potential for improvement.\n"
 msgstr ""
+
+#. type: Hash Value: format pdf author-meta
+#: reports/Partner-Certificate/_quarto-en.yml:1
+#, no-wrap
+msgid "NeoIPC Surveillance team"
+msgstr "Team di NeoIPC Surveillance"
+
+#. type: Array Element: format pdf keywords
+#: reports/Partner-Certificate/_quarto-en.yml:1
+#, no-wrap
+msgid "NeoIPC"
+msgstr "NeoIPC"
+
+#. type: Array Element: format pdf keywords
+#: reports/Partner-Certificate/_quarto-en.yml:1
+#, no-wrap
+msgid "Surveillance"
+msgstr "Sorveglianza"
+
+#. type: Array Element: format pdf keywords
+#: reports/Partner-Certificate/_quarto-en.yml:1
+#, no-wrap
+msgid "Certificate"
+msgstr "Certificato"
+
+#. type: Hash Value: title
+#: reports/Partner-Certificate/_quarto-en.yml:1
+#, no-wrap
+msgid "Certificate of participation in the NeoIPC project surveillance system (NeoIPC Surveillance)"
+msgstr "Certificato di partecipazione al sistema di sorveglianza del progetto NeoIPC (NeoIPC Surveillance)"
+
+#. type: Array Element: content
+#: reports/Partner-Certificate/_sR.yaml:1
+#, no-wrap
+msgid "This project has received funding from the European Union’s Horizon 2020 research and%sinnovation programme under grant agreement No 965328."
+msgstr "Questo progetto ha ricevuto finanziamenti dal programma di ricerca e innovazione Horizon%s2020 dell'Unione Europea nell'ambito della convenzione di sovvenzione n. 965328."
+
+#. type: Array Element: content
+#: reports/Partner-Certificate/_sR.yaml:1
+#, no-wrap
+msgid "In"
+msgstr "Nel"
+
+#. type: Array Element: content
+#: reports/Partner-Certificate/_sR.yaml:1
+#, no-wrap
+msgid "During the period"
+msgstr "Nel periodo"
+
+#. type: Array Element: content
+#: reports/Partner-Certificate/_sR.yaml:1
+#, no-wrap
+msgid "the neonatology unit at %s participated in the NeoIPC Surveillance network."
+msgstr "l'unità di neonatologia dell' %s ha partecipato alla rete di NeoIPC Surveillance."
+
+#. type: Array Element: content
+#: reports/Partner-Certificate/_sR.yaml:1
+#, no-wrap
+msgid "Through active monitoring of %s newborns with birth weights below 1500 grams and/or gestational ages below 32 weeks, the team collected valuable reference data that will be useful for assessing and reducing infection risks in neonatal units. We are proud and delighted to have them as partners in our mission to improve infection prevention and control in the neonatal setting."
+msgstr "Grazie al monitoraggio attivo di %s neonati con peso alla nascita inferiore a 1500 grammi e/o età gestazionale inferiore a 32 settimane, il team ha raccolto dati di riferimento preziosi, utili per valutare e ridurre i rischi di infezione nelle unità di neonatologia. Siamo orgogliosi e felici di averli come partner nella nostra missione di migliorare la prevenzione e il controllo delle infezioni in ambito neonatale."
+
+#. type: Array Element: content
+#: reports/Partner-Certificate/_sR.yaml:1
+#, no-wrap
+msgid "for the NeoIPC Surveillance team"
+msgstr "per il team di NeoIPC Surveillance"
+
+#. type: Array Element: content
+#: reports/Partner-Certificate/_sR.yaml:1
+#, no-wrap
+msgid "Berlin,"
+msgstr "Berlin,"
+
+#. type: Hash Value: signature_offset
+#: reports/Partner-Certificate/_sR.yaml:1
+#, no-wrap
+msgid "3.25"
+msgstr "3.25"
