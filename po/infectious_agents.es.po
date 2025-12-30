@@ -17,49 +17,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
 
-#. type: Hash Value: Metadata ListTerms Yes Value
-#: doc/protocol/NeoIPC-Core-Protocol.adoc:625
-#: doc/protocol/NeoIPC-Core-Protocol.adoc:628
-#: doc/protocol/resx/NeoIPC-Core-Decision-Flow.resx:4
-#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
-#, no-wrap
-msgid "Yes"
-msgstr "Sí"
-
 #. type: Hash Value: Hierarchies ConceptType
-#: doc/protocol/NeoIPC-Core-Protocol.adoc:630
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
 msgid "Unknown"
 msgstr "Desconocido"
-
-#. type: Hash Value: Metadata ListTerms 3GCR Value
-#: doc/protocol/NeoIPC-Core-Protocol.adoc:936
-#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
-#, no-wrap
-msgid "3GCR"
-msgstr "RC3G"
-
-#. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Name
-#: doc/protocol/NeoIPC-Core-Protocol.adoc:944
-#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
-#, fuzzy, no-wrap
-msgid "Cytomegalovirus"
-msgstr "Cytomegalovirus"
-
-#. type: Hash Value: Metadata ListTerms MRSA Value
-#: doc/protocol/NeoIPC-Core-Protocol.adoc:959
-#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
-#, no-wrap
-msgid "MRSA"
-msgstr "SARM"
-
-#. type: Hash Value: Metadata ListTerms VRE Value
-#: doc/protocol/NeoIPC-Core-Protocol.adoc:976
-#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
-#, no-wrap
-msgid "VRE"
-msgstr "EVR"
 
 #. type: Hash Value: Hierarchies Name
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
@@ -186,6 +148,12 @@ msgstr "Human betaherpesvirus 5"
 #, fuzzy, no-wrap
 msgid "Human cytomegalovirus"
 msgstr "Human cytomegalovirus"
+
+#. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, fuzzy, no-wrap
+msgid "Cytomegalovirus"
+msgstr "Cytomegalovirus"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Children Name
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
@@ -24109,6 +24077,12 @@ msgstr "Protozoos"
 msgid "Eukaryota"
 msgstr "Eucaryota"
 
+#. type: Hash Value: Metadata ListTerms 3GCR Value
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, no-wrap
+msgid "3GCR"
+msgstr "RC3G"
+
 #. type: Hash Value: Metadata ListTerms Bacterium Value
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
@@ -24144,6 +24118,12 @@ msgstr "Hongo"
 #, no-wrap
 msgid "Id"
 msgstr "Id"
+
+#. type: Hash Value: Metadata ListTerms MRSA Value
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, no-wrap
+msgid "MRSA"
+msgstr "SARM"
 
 #. type: Hash Value: Metadata ListTerms Name Value
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
@@ -24187,11 +24167,23 @@ msgstr "Tipo"
 msgid "URL"
 msgstr "LRU"
 
+#. type: Hash Value: Metadata ListTerms VRE Value
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, no-wrap
+msgid "VRE"
+msgstr "EVR"
+
 #. type: Hash Value: Metadata ListTerms Virus Value
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
 msgid "Virus"
 msgstr "Virus"
+
+#. type: Hash Value: Metadata ListTerms Yes Value
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, no-wrap
+msgid "Yes"
+msgstr "Sí"
 
 #. type: Title ==
 #: metadata/common/infectious-agents/Output-Footer.adoc:2

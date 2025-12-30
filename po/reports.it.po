@@ -22,13 +22,13 @@ msgstr ""
 #: reports/common.yaml:1
 #, no-wrap
 msgid " "
-msgstr ""
+msgstr " "
 
 #. type: Hash Value: unit_separator
 #: reports/common.yaml:1
 #, no-wrap
 msgid " "
-msgstr ""
+msgstr " "
 
 #. type: Hash Value: title
 #: reports/Partner-Report/_quarto-en.yml:1
