@@ -1,6 +1,3 @@
 [submodule "tools/po4a"]
 	path = tools/po4a
 	url = https://github.com/mquinson/po4a.git
-[submodule "tools/pikchr"]
-	path = tools/pikchr
-	url = https://github.com/drhsqlite/pikchr.git
