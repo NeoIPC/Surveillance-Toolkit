@@ -52,7 +52,7 @@ pal <- c(NeoIPC_pallette[5],NeoIPC_pallette[2],NeoIPC_pallette[6])
 
 invisible(Sys.setlocale(category = "LC_ALL", locale = locale))
 invisible(Sys.setLanguage(locale))
-# Setting the gt.locale option does not seem to be overridable the the function level
+# Setting the gt.locale option does not seem to be overridable at the function level
 # invisible(
 #   options(
 #     `gt.locale` = if(stringr::str_detect(locale, "_")) {
@@ -67,29 +67,51 @@ gt_locale = if(stringr::str_detect(locale, "_")) {
     stringr::str_replace(locale, "^(\\w+)(\\..+)?$", "\\1")
   }
 
+
+if(!is.null(typedParams$UnitCodes)) {
+  data$enrollments <- data$enrollments |>
+    dplyr::semi_join(
+      data$metadata$departments |>
+        dplyr::filter(code %in% typedParams$UnitCodes),
+      dplyr::join_by("department_key"))
+
+  data <- data |>
+    neoipcr:::apply_postfilter()
+
+  data |>
+    neoipcr:::clean_cache()
+}
+
 # temporary for development
 
 reference_data <- data |>
   calculate_reference_data()
 
-data_bkp <- data
-reference_data_bkp <- reference_data
-
-data$enrollments <- data$enrollments |>
-  filter(
-    department_key %in% (
+if(!is.null(typedParams$UnitCodes)) {
+  data$enrollments <- data$enrollments |>
+    dplyr::semi_join(
       data$metadata$departments |>
-        filter(code %in% typedParams$UnitCodes) |>
-        pull(department_key)))
+        dplyr::filter(code %in% typedParams$UnitCodes),
+      dplyr::join_by("department_key"))
 
-data <- neoipcr:::apply_postfilter(data)
+  data <- data |>
+    neoipcr:::apply_postfilter()
 
-neoipcr:::clean_cache(data)
+  data |>
+    neoipcr:::clean_cache()
+}
 
 unit_data <- data |>
   neoipcr:::calculate_department_data()
 
-benchmark_data <- neoipcr:::get_benchmark_data(own = unit_data, ref = reference_data)
+benchmark_data <- if (is.null(reference_data)) {
+  neoipcr:::get_benchmark_data(
+    own = unit_data)
+} else {
+  neoipcr:::get_benchmark_data(
+    own = unit_data,
+    ref = reference_data)
+}
 
-#reference_data <- NULL
+rm(data, data_bkp, params, reference_data_bkp, typedParams, unit_data, reference_data)
 ```

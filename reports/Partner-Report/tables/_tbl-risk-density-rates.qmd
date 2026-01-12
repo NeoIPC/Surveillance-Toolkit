@@ -3,15 +3,15 @@
 #| tbl-cap: !expr 'sR$`tbl-risk-density-rates`$`tbl-cap`'
 #| tbl-cap-location: top
 
-benchmark_data$usage_density_rate_table |>
-  dplyr::select(-n_ref) |>
+tbl <- benchmark_data$usage_density_rate_table |>
+  dplyr::select(-tidyselect::any_of("n_ref")) |>
   dplyr::rename(
       !!sR$table_headers$n_ := "days_own",
       !!sR$table_headers$rate := "rate_own",
-      !!sR$table_headers$pooled := "pooled_ref",
-      !!sR$table_headers$q1 := "q1_ref",
-      !!sR$table_headers$q2 := "q2_ref",
-      !!sR$table_headers$q3 := "q3_ref"
+      !!sR$table_headers$pooled := tidyselect::any_of("pooled_ref"),
+      !!sR$table_headers$q1 := tidyselect::any_of("q1_ref"),
+      !!sR$table_headers$q2 := tidyselect::any_of("q2_ref"),
+      !!sR$table_headers$q3 := tidyselect::any_of("q3_ref")
     ) |>
   dplyr::mutate(
    factor = dplyr::case_match(
@@ -36,43 +36,54 @@ benchmark_data$usage_density_rate_table |>
    table.font.size = 13,
    footnotes.marks = "extended"
   ) |>
-  fmt_number(columns = !sR$table_headers$n_, decimals = 1, sep_mark = sR$digit_group_separator, min_sep_threshold = 2, locale = gt_locale) |>
-  fmt_integer(columns = sR$table_headers$n_, sep_mark = sR$digit_group_separator, min_sep_threshold = 2) |>
-  cols_width(
-   stub() ~ pct(34),
-   sR$table_headers$n ~ pct(13),
-   sR$table_headers$rate ~ pct(13),
-   sR$table_headers$pooled ~ pct(13),
-   sR$table_headers$q1 ~ pct(9),
-   sR$table_headers$q2 ~ pct(9),
-   sR$table_headers$q3 ~ pct(9)
-  ) |>
-  tab_row_group(label = sR$`tbl-risk-density-rates`$vascular_catheter, rows = 1:2, id = "grp_vc") |>
-  tab_row_group(label = sR$`tbl-risk-density-rates`$ventilatory_support, rows = 3:5, id = "grp_vs") |>
-  tab_row_group(label = sR$`tbl-risk-density-rates`$other, rows = 6:8, id = "grp_othr") |>
-  tab_row_group(label = sR$`tbl-risk-density-rates`$antibiotics, rows = c(
-    sR$`tbl-risk-density-rates`$any_antibiotic,
-    sR$`tbl-risk-density-rates`$access,
-    sR$`tbl-risk-density-rates`$watch,
-    sR$`tbl-risk-density-rates`$reserve), id = "grp_ab") |>
+  fmt_number(
+    columns = !sR$table_headers$n_,
+    decimals = 1,
+    sep_mark = sR$digit_group_separator,
+    min_sep_threshold = 2,
+    locale = gt_locale) |>
+  fmt_integer(
+    columns = sR$table_headers$n_,
+    sep_mark = sR$digit_group_separator,
+    min_sep_threshold = 2) |>
+  tab_row_group(
+    label = sR$`tbl-risk-density-rates`$vascular_catheter,
+    rows = tidyselect::any_of(c(
+      sR$`tbl-risk-density-rates`$cvc,
+      sR$`tbl-risk-density-rates`$pvc)),
+    id = "grp_vc") |>
+  tab_row_group(
+    label = sR$`tbl-risk-density-rates`$ventilatory_support,
+    rows = tidyselect::any_of(c(
+      sR$`tbl-risk-density-rates`$any,
+      sR$`tbl-risk-density-rates`$inv,
+      sR$`tbl-risk-density-rates`$niv)),
+    id = "grp_vs") |>
+  tab_row_group(
+    label = sR$`tbl-risk-density-rates`$other,
+    rows = tidyselect::any_of(c(
+      sR$`tbl-risk-density-rates`$human_milk,
+      sR$`tbl-risk-density-rates`$probiotic,
+      sR$`tbl-risk-density-rates`$kangaroo_care)),
+    id = "grp_othr") |>
+  tab_row_group(
+    label = sR$`tbl-risk-density-rates`$antibiotics,
+    rows = tidyselect::any_of(c(
+      sR$`tbl-risk-density-rates`$any_antibiotic,
+      sR$`tbl-risk-density-rates`$access,
+      sR$`tbl-risk-density-rates`$watch,
+      sR$`tbl-risk-density-rates`$reserve)),
+    id = "grp_ab") |>
   row_group_order(groups = c("grp_vc", "grp_vs", "grp_ab", "grp_othr")) |>
   tab_spanner(
-   label = sR$reference_data,
-   columns = c(
-     sR$table_headers$pooled,
-     sR$table_headers$q1,
-     sR$table_headers$q2,
-     sR$table_headers$q3),
-   id = "reference_data"
-  ) |>
-  tab_spanner(
    label = sR$`tbl-risk-density-rates`$risk_density_rate,
-   columns = c(
+   columns = tidyselect::any_of(
+     c(
      sR$table_headers$rate,
      sR$table_headers$pooled,
      sR$table_headers$q1,
      sR$table_headers$q2,
-     sR$table_headers$q3),
+     sR$table_headers$q3)),
    id = "risk_density_rate"
   ) |>
   tab_style(
@@ -99,13 +110,51 @@ benchmark_data$usage_density_rate_table |>
    locations = cells_column_spanners(spanners = "risk_density_rate")
   ) |>
   tab_footnote(
-    footnote = sprintf(sR$`tbl-risk-density-rates`$n_footnote, sR$table_headers$n_),
+    footnote = sprintf(
+      sR$`tbl-risk-density-rates`$n_footnote,
+      sR$table_headers$n_),
     locations = cells_column_labels(columns = sR$table_headers$n_)) |>
   tab_footnote(
-    footnote = sprintf(sR$`tbl-risk-density-rates`$rate_footnote, sR$table_headers$rate),
+    footnote = sprintf(
+      sR$`tbl-risk-density-rates`$rate_footnote,
+      sR$table_headers$rate),
     locations = cells_column_labels(columns = sR$table_headers$rate)) |>
   tab_footnote(
-    footnote = sprintf(sR$`tbl-risk-density-rates`$pooled_footnote, sR$table_headers$pooled),
+    footnote = md(
+      sprintf(
+        sR$`tbl-risk-density-rates`$aware_footnote,
+        "[aware.essentialmeds.org](https://aware.essentialmeds.org/)")),
+    locations = gt::cells_stub(
+      rows = tidyselect::any_of(c(
+        sR$`tbl-risk-density-rates`$access,
+        sR$`tbl-risk-density-rates`$watch,
+        sR$`tbl-risk-density-rates`$reserve)))
+  )
+
+if ("ref" %in% benchmark_data$dataset_names) {
+  tbl <- tbl |>
+  cols_width(
+   stub() ~ pct(34),
+   sR$table_headers$n ~ pct(13),
+   sR$table_headers$rate ~ pct(13),
+   sR$table_headers$pooled ~ pct(13),
+   sR$table_headers$q1 ~ pct(9),
+   sR$table_headers$q2 ~ pct(9),
+   sR$table_headers$q3 ~ pct(9)
+  ) |>
+  tab_spanner(
+   label = sR$reference_data,
+   columns = c(
+     sR$table_headers$pooled,
+     sR$table_headers$q1,
+     sR$table_headers$q2,
+     sR$table_headers$q3),
+   id = "reference_data"
+  ) |>
+  tab_footnote(
+    footnote = sprintf(
+      sR$`tbl-risk-density-rates`$pooled_footnote,
+      sR$table_headers$pooled),
     locations = cells_column_labels(columns = sR$table_headers$pooled)) |>
   tab_footnote(
     footnote = sprintf(
@@ -120,16 +169,15 @@ benchmark_data$usage_density_rate_table |>
     locations = cells_column_labels(columns = c(
       sR$table_headers$q1,
       sR$table_headers$q2,
-      sR$table_headers$q3))) |>
-  tab_footnote(
-    footnote = md(
-      sprintf(
-        sR$`tbl-risk-density-rates`$aware_footnote,
-        "[aware.essentialmeds.org](https://aware.essentialmeds.org/)")),
-    locations = gt::cells_stub(
-      rows = c(
-        sR$`tbl-risk-density-rates`$access,
-        sR$`tbl-risk-density-rates`$watch,
-        sR$`tbl-risk-density-rates`$reserve))
+      sR$table_headers$q3)))
+} else {
+  tbl <- tbl |>
+  cols_width(
+   stub() ~ pct(50),
+   sR$table_headers$n ~ pct(25),
+   sR$table_headers$rate ~ pct(25)
   )
+}
+
+tbl
 ```

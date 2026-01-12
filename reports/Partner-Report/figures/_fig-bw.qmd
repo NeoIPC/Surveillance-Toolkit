@@ -1,74 +1,75 @@
 ```{r}
 #| label: fig-bw
-#| fig-cap: !expr 'paste(sR$`fig-bw`$`fig-cap`[[1]], sprintf(if(is.null(reference_data)) sR$`fig-bw`$`fig-cap`[[2]]$`no-ref` else sR$`fig-bw`$`fig-cap`[[2]]$ref, sprintf("%i%s%s", 50L, sR$unit_separator, sR$gramm_abbreviation)), sprintf(if(is.null(reference_data)) sR$`fig-bw`$`fig-cap`[[3]]$`no-ref` else sR$`fig-bw`$`fig-cap`[[3]]$ref, sprintf("%i%s", 25L, sR$percent_symbol), sprintf("%i%s", 50L, sR$percent_symbol), sprintf("%i%s", 75L, sR$percent_symbol)))'
+#| fig-cap: !expr 'paste(sR$`fig-bw`$`fig-cap`[[1]], sprintf(if("ref" %in% benchmark_data$dataset_names) sR$`fig-bw`$`fig-cap`[[2]]$ref else sR$`fig-bw`$`fig-cap`[[2]]$`no-ref`, sprintf("%i%s%s", 50L, sR$unit_separator, sR$gramm_abbreviation)), sprintf(if("ref" %in% benchmark_data$dataset_names) sR$`fig-bw`$`fig-cap`[[3]]$ref else sR$`fig-bw`$`fig-cap`[[3]]$`no-ref`, sprintf("%i%s", 25L, sR$percent_symbol), sprintf("%i%s", 50L, sR$percent_symbol), sprintf("%i%s", 75L, sR$percent_symbol)))'
 
-label_bw <- function(x) paste(format(x), sR$gramm_abbreviation, sep = sR$unit_separator)
-breaks_bw <- function(x) pretty(x, as.integer((as.integer(x[2]) + 1 - as.integer(x[1])) / 100))
-
-pdq <- data$patients$birth_weight |>
-  quantile(seq(0.25, 0.75, 0.25)) |>
-  unname()
-mean_bw <-data$patients$birth_weight |>
-  mean()
-bw_scale_min <- as.integer(min(data$patients$birth_weight) / 50L) * 50L - 50L
-bw_scale_max <- as.integer(max(data$patients$birth_weight) / 50L) * 50L + 100L
-legend_position <- 'none'
-
-histogram_data <- data$patients |>
-  mutate(
-    bw50 = neoipcr:::bw50(birth_weight, as_factor = F)
-    ) |>
-  group_by(bw50) |>
-  summarise(n = n())
-
-bw_d <- data$patients$birth_weight |>
-  neoipcr:::bw50(as_factor = F) |>
-  density(from = bw_scale_min, to = bw_scale_max)
-
-density_data <- data.frame(
-      bw50 = bw_d$x,
-      density = bw_d$y / sum(bw_d$y))
-
-density_factor <- sum(histogram_data$n) * (nrow(density_data) / nrow(histogram_data))
-
-A_plot <- ggplot() +
-  geom_col(data = histogram_data, aes(x=bw50, y=n, colour = "own"), fill = "white")
-
-boxplot_data <- data.frame(
-  Database = factor(sR$own_unit, levels = c(sR$own_unit, sR$reference_data)),
-  q1 = pdq[1],
-  q2 = pdq[2],
-  q3 = pdq[3],
-  mean = mean_bw
-)
-
-if (!is.null(reference_data)) {
-  bw_scale_min <- min(c(bw_scale_min, reference_data$birth_weight$scale$min))
-  bw_scale_max <- max(c(bw_scale_max, reference_data$birth_weight$scale$max))
-  density_factor_ref <-  density_factor *
-    (
-      density_data$bw50 |> max() -
-        density_data$bw50 |> min()) /
-    (
-      reference_data$birth_weight$density$bw50 |> max() -
-        reference_data$birth_weight$density$bw50 |> min())
-  legend_position <- 'bottom'
-
-  A_plot <- A_plot +
-    geom_line(data = reference_data$birth_weight$density, aes(x=bw50, y=density * density_factor_ref, colour = "ref"))
-
-  boxplot_data <- boxplot_data |>
-    add_row(
-      Database = factor(sR$reference_data, levels = c(sR$own_unit, sR$reference_data)),
-      q1 = reference_data$birth_weight$q1,
-      q2 = reference_data$birth_weight$q2,
-      q3 = reference_data$birth_weight$q3,
-      mean = reference_data$birth_weight$mean
+label_bw <- function(x) {
+  paste(
+    format(x),
+    sR$gramm_abbreviation,
+    sep = sR$unit_separator)
+}
+breaks_bw <- function(x) {
+  pretty(
+    x,
+    as.integer(
+      (as.integer(x[2]) + 1 - as.integer(x[1])) / 100)
     )
 }
 
+legend_position <- 'none'
+bw_scale_min <- benchmark_data$birth_weight_figure$scale$min |>
+  min()
+bw_scale_max <- benchmark_data$birth_weight_figure$scale$max |>
+  max()
+
+histogram_data <- benchmark_data$birth_weight_figure$frequency |>
+  dplyr::filter(dataset == "own")
+
+density_data <- benchmark_data$birth_weight_figure$density |>
+  dplyr::filter(dataset == "own")
+
+density_factor <- sum(histogram_data$n) *
+  (nrow(density_data) / nrow(histogram_data))
+
+A_plot <- ggplot() +
+  geom_col(
+    data = histogram_data,
+    aes(
+      x = birth_weight_cat,
+      y = n,
+      colour = "own"),
+    fill = "white")
+
+if ("ref" %in% benchmark_data$dataset_names) {
+  legend_position <- 'bottom'
+
+density_data_ref <- benchmark_data$birth_weight_figure$density |>
+  dplyr::filter(dataset == "ref")
+
+  density_factor_ref <-  density_factor *
+    (
+      density_data$birth_weight |> max() -
+        density_data$birth_weight |> min()) /
+    (
+      density_data_ref$birth_weight |> max() -
+        density_data_ref$birth_weight |> min())
+
+  A_plot <- A_plot +
+    geom_line(
+      data = density_data_ref,
+      aes(
+        x = birth_weight,
+        y = density * density_factor_ref,
+        colour = "ref"))
+}
+
 A_plot <- A_plot +
-  geom_line(data = density_data, aes(x=bw50, y=density * density_factor, colour = "own")) +
+  geom_line(
+    data = density_data,
+    aes(
+      x = birth_weight,
+      y = density * density_factor,
+      colour = "own")) +
   scale_x_continuous(breaks = breaks_bw) +
   scale_colour_manual(values = rev(pal[2:3])) +
   coord_cartesian(xlim = c(bw_scale_min, bw_scale_max)) +
@@ -82,7 +83,14 @@ A_plot <- A_plot +
     panel.grid.minor.y = element_blank()) +
   labs(tag = "A")
 
-B_plot <- ggplot(boxplot_data, aes(Database, colour = Database)) +
+B_plot <- ggplot(
+  benchmark_data$birth_weight_figure$location_parameters |>
+    mutate(
+      dataset = dplyr::case_match(
+        as.character(.data$dataset),
+        "own" ~ sR$own_unit,
+        "ref" ~ sR$reference_data)),
+  aes(dataset, colour = dataset)) +
   geom_boxplot(
     aes(ymin = q1, lower = q1, middle = q2, upper = q3, ymax = q3),
     stat = "identity",
