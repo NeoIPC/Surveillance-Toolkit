@@ -1,3 +1,29 @@
 # Language: en
 digit_group_separator: " "
 unit_separator: " "
+percent_symbol: "%"
+gramm_abbreviation: "g"
+week_abbreviation: "w"
+day: "day"
+patient_days: "Patient days"
+table_headers:
+  n: "N"
+  rate: "Rate"
+  pooled: "Pooled"
+  q1: "Q₁"
+  q2: "Q₂"
+  q3: "Q₃"
+fig-bw:
+  fig-cap:
+    - "Distribution of birth weights of the infants included in this report."
+    - bnch: "A is a histogram in %s steps with a density curve of your own unit’s data and a density curve of the reference data and B are two boxplots, one of your own unit’s data and one of the reference data."
+      no-bnch: "A is a histogram in %s steps with a density curve and B is a boxplot."
+    - bnch: "Vertical lines in the boxplots represent the %s, %s and %s quantiles, the diamonds represent the pooled arithmetic means."
+      no-bnch: "Vertical lines in the boxplot represent the %s, %s and %s quantiles, the diamond represents the pooled arithmetic mean."
+fig-ga:
+  fig-cap:
+    - "Distribution of gestational ages of the infants included in this report."
+    - bnch: "A is a histogram in %s steps with a density curve of your own unit’s data and a density curve of the reference data and B are two boxplots, one of your own unit’s data and one of the reference data."
+      no-bnch: "A is a histogram in %s steps with a density curve and B is a boxplot."
+    - bnch: "Vertical lines in the boxplots represent the %s, %s and %s quantiles, the diamonds represent the pooled arithmetic means."
+      no-bnch: "Vertical lines in the boxplot represent the %s, %s and %s quantiles, the diamond represents the pooled arithmetic mean."

@@ -1,106 +1,371 @@
-```{r General setup and parameter preparation}
+```{r Import libraries}
 #| message: false
 #| warning: false
 #| include: false
-pak::pak("Brar/neoipcr@TowardsReferenceReport")
+
+#pak::pak("Brar/neoipcr@PartnerReport")
 library(tidyverse, warn.conflicts = FALSE, quietly = TRUE)
 library(smplot2, warn.conflicts = FALSE, quietly = TRUE)
 library(scales, warn.conflicts = FALSE, quietly = TRUE)
 library(patchwork, warn.conflicts = FALSE, quietly = TRUE)
 library(gt, warn.conflicts = FALSE, quietly = TRUE)
 library(neoipcr, warn.conflicts = FALSE, quietly = TRUE)
+```
 
-if(!exists("params")) params <- list()
-reportingPeriodFrom <- as_date(coalesce(params[["reportingPeriodFrom"]], "2024-01-01"))
-reportingPeriodTo <- as_date(coalesce(params[["reportingPeriodTo"]], as.character(Sys.Date())))
-birthWeightFrom <- coalesce(params[["birthWeightFrom"]], 0L)
-birthWeightTo <- coalesce(params[["birthWeightTo"]], 2147483647L)
-gestationWeeksFrom <- coalesce(params[["gestationWeeksFrom"]], 0L)
-gestationWeeksTo <- coalesce(params[["gestationWeeksTo"]], 2147483647L)
-token <- coalesce(params$token, Sys.getenv("NEOIPC_DHIS2_TOKEN", unset = NA))
-session_id <- coalesce(params[["session_id"]], Sys.getenv("NEOIPC_DHIS2_SESSION_ID", unset = NA))
-connection_options <- if(is.na(session_id))
-  dhis2_connection_options(token = token) else
-    dhis2_connection_options(session_id = session_id)
-reportingCountries = params[["reportingCountries"]]
-hospitalFilter = params[["hospitalFilter"]]
-defaultPatientFilter = coalesce(params[["defaultPatientFilter"]], TRUE)
-testUnitFilter = coalesce(params[["testUnitFilter"]], TRUE)
-validationExceptionFile = coalesce(params[["validationExceptionFile"]], "validation-exceptions_ref.csv")
-if (file.exists(validationExceptionFile)) {
-  includeInvalidPatients <- read_csv(validationExceptionFile)
-} else {
-  warning(sprintf("Validation ecxeption file not found: '%s'", validationExceptionFile))
-  includeInvalidPatients <- FALSE
+```{r Set up functions}
+#| include: false
+
+parse_locales <- function(x) {
+  locales <- NULL
+  # split language and territory
+  lists <- strsplit(x = x, split = "_")
+
+  for(parts in lists){
+    ret <- list()
+    if(length(parts) > 1)
+    {
+      ret$language = parts[1]
+      remainder <- parts[2]
+      has_language <- TRUE
+      has_territory <- TRUE
+    } else {
+      remainder <- parts[1]
+      has_language <- FALSE
+      has_territory <- FALSE
+    }
+    parts <- strsplit(x = remainder, split = "\\.")[[1]]
+    if(length(parts) > 1)
+    {
+      if(has_territory){
+        ret$territory = parts[1]
+      } else {
+        ret$language = parts[1]
+      }
+      remainder <- parts[2]
+      has_codeset <- TRUE
+    } else {
+      remainder <- parts[1]
+      has_codeset <- FALSE
+    }
+    parts <- strsplit(x = remainder, split = "@")[[1]]
+    if(length(parts) > 1)
+    {
+      ret$modifier <- parts[2]
+      has_modifier <- TRUE
+    }
+
+    if(has_codeset){
+      ret$codeset = parts[1]
+    } else if (has_territory) {
+      ret$territory = parts[1]
+    } else {
+      ret$language = parts[1]
+    }
+    locales <- c(locales, list(ret))
+  }
+  return(locales)
 }
 
-dataset_options <- dhis2_dataset_options(
-    include_country = "yes",
-    include_department = "pseudonymised",
-    surveillance_end_from = reportingPeriodFrom,
-    surveillance_end_to = reportingPeriodTo,
-    birth_weight_from = birthWeightFrom,
-    birth_weight_to = birthWeightTo,
-    gestational_age_from = gestationWeeksFrom,
-    gestational_age_to = gestationWeeksTo,
-    country_filter = reportingCountries,
-    include_invalid_patients = includeInvalidPatients)
+get_string_resources <- function(x) {
+  handlers <- list('bool#no' = function(x) x)
+  sR <- modifyList(
+    yaml::read_yaml("../common.yaml", handlers = handlers),
+    yaml::read_yaml("content/_sR.yaml", handlers = handlers)
+  )
+  
+  yaml_path <- paste0("../common.", localeObj$language, ".yaml")
+  if(file.exists(yaml_path)) sR <- modifyList(
+    sR,
+    yaml::read_yaml(file = yaml_path, handlers = handlers))
+  
+  yaml_path <- paste0("../common.", localeObj$language, "_", localeObj$territory, ".yaml")
+  if(file.exists(yaml_path)) sR <- modifyList(
+    sR,
+    yaml::read_yaml(file = yaml_path, handlers = handlers))
+  
+  yaml_path <- paste0("content.", localeObj$language, "/_sR.yaml")
+  if(file.exists(yaml_path)) sR <- modifyList(
+    sR,
+    yaml::read_yaml(file = yaml_path, handlers = handlers))
+  
+  yaml_path <- paste0("content.", localeObj$language, "_", localeObj$territory, "/_sR.yaml")
+  if(file.exists(yaml_path)) sR <- modifyList(
+    sR,
+    yaml::read_yaml(file = yaml_path, handlers = handlers))
 
-language <- dplyr::coalesce(params$language, "en")
-default_countries <- list(
-  en = "GB",
-  de = "DE"
-)
-country <- dplyr::coalesce(params$country, default_countries[[language]], NA_character_)
-codepage <- dplyr::coalesce(params$codepage, "UTF-8")
-locale <- paste0(language, (if(is.na(country)) NULL else paste0("_", country)), ".", codepage)
-gt_locale <- paste0(language, (if(is.na(country)) NULL else paste0("-", country)))
-options(`gt.locale` = gt_locale)
-`_locales` <- (gt::info_locales(begins_with = substr(gt_locale,1,1)))$`_data`
-locale_sep_mark <- `_locales`$group[`_locales`$locale == gt_locale]
+  return(sR)
+}
+
+get_localised_path <- function(file_name, language, territory) {
+  yaml_path <- paste0("content.", language, "_", territory, "/", file_name)
+  if(file.exists(yaml_path)) {
+    return(yaml_path)
+  }
+
+  yaml_path <- paste0("content.", language, "/", file_name)
+  if(file.exists(yaml_path)) {
+      return(yaml_path)
+  }
+
+  return(paste0("content/", file_name))
+}
+
+include_localised <- function(file_name) {
+  cat(
+    sep = "\n",
+    knitr::knit_child(
+      text = readr::read_file(
+        get_localised_path(
+          file_name,
+          localeObj$language,
+          localeObj$territory)),
+      quiet = TRUE)
+  )
+}
+
+get_localised_country_names <- function(x) {
+  x |>
+    purrr::map_chr(
+      \(x) {
+        val <- sR$countryNames[[stringr::str_replace_all(x, " ", "")]]
+        if(is.null(val)) x else val
+      })
+}
+
+get_validation_exceptions <- function(x) {
+  validationExceptionFile = coalesce(x, "validation-exceptions_ref.csv")
+  if (file.exists(validationExceptionFile)) {
+    return(read_csv(validationExceptionFile, show_col_types = FALSE))
+  } else {
+    warning(sprintf("Validation ecxeption file not found: '%s'", validationExceptionFile))
+    return(FALSE)
+  }
+}
+
+get_connection_options <- function(x) {
+  token <- coalesce(x, Sys.getenv("NEOIPC_DHIS2_TOKEN", unset = NA))
+  session_id <- Sys.getenv("NEOIPC_DHIS2_SESSION_ID", unset = NA)
+  if(!is.na(session_id)) {
+    return(dhis2_connection_options(session_id = session_id))
+  } else if (!is.na(token)) {
+    return(dhis2_connection_options(token = token))
+  } else {
+    return(dhis2_connection_options())
+  }
+}
+
+get_dataset_options <- function(
+    reportingPeriodFrom,
+    reportingPeriodTo,
+    birthWeightFrom,
+    birthWeightTo,
+    gestationWeeksFrom,
+    gestationWeeksTo,
+    reportingCountries,
+    testUnitFilter,
+    defaultPatientFilter,
+    validationExceptionFile
+    )  dhis2_dataset_options(
+      include_country = "yes",
+      include_department = "pseudonymised",
+      surveillance_end_from = as_date(
+        coalesce(reportingPeriodFrom, "2024-01-01")),
+      surveillance_end_to = as_date(
+        coalesce(reportingPeriodTo, as.character(Sys.Date()))),
+      birth_weight_from = birthWeightFrom,
+      birth_weight_to = birthWeightTo,
+      gestational_age_from = gestationWeeksFrom,
+      gestational_age_to = gestationWeeksTo,
+      country_filter = reportingCountries,
+      include_test_data = !coalesce(testUnitFilter, TRUE),
+      include_ineligible_patients = !coalesce(defaultPatientFilter, TRUE),
+      include_invalid_patients = get_validation_exceptions(
+        validationExceptionFile))
+
+format_integer <- function(x, big_mark = sR$digit_group_separator)
+  dplyr::if_else(x < 10000, format(as.integer(x), big.mark = ""), format(as.integer(x), big.mark = big_mark))
+
+label_bw <- function(x) {
+  paste(
+    format_integer(x),
+    sR$gramm_abbreviation,
+    sep = sR$unit_separator)
+}
+breaks_bw <- function(x) {
+  pretty(
+    x,
+    as.integer(
+      (as.integer(x[2]) + 1 - as.integer(x[1])) / 100)
+    )
+}
+
+```
+
+```{r Initialise locale dependent information}
+#| include: false
+
+locale <- Sys.getenv("LC_ALL")
+localeObj <- parse_locales(locale)[[1]]
 invisible(Sys.setlocale(category = "LC_ALL", locale = locale))
-invisible(Sys.setLanguage(locale))
-translation_file <- paste0("translations/", stringr::str_extract(locale, "^([^.]+)"),".json")
-rm(gt_locale, `_locales`)
+invisible(Sys.setLanguage(localeObj$language))
+if(is.null(localeObj$territory)){
+  locale_gt <- localeObj$language
+  locale_stringi <- localeObj$language
+} else {
+  locale_gt <- paste0(localeObj$language, "-", localeObj$territory)
+  locale_stringi <- paste0(localeObj$language, "_", localeObj$territory)
+}
+options(`gt.locale` = locale_gt)
+
+sR <- get_string_resources(localeObj)
 ```
 
 ```{r Importing data}
 #| include: false
 
-data <- import_dhis2(
-  connection_options = connection_options,
-  dataset_options = dataset_options
-  )
+if(!exists("params")) params <- list()
 
-reference_data <- data |>
-  neoipcr::calculate_reference_data()
-
-data |>
-  jsonlite::serializeJSON() |>
-  readr::write_file(file = "_output/ReferenceData.json")
-
-reference_data |>
-  jsonlite::serializeJSON() |>
-  readr::write_file(file = "_output/ReferenceInformation.json")
-
-if(file.exists(translation_file)) {
-  translations <- readr::read_file(translation_file) |> jsonlite::fromJSON()
+if (!is.null(params$ReferenceDataFile)) {
+  if (!file.exists(params$ReferenceDataFile))
+    stop(sprintf("The file '%s' does not exist.", params$ReferenceDataFile))
+  reference_data <- jsonlite::unserializeJSON(
+    readChar(
+        params$ReferenceDataFile,
+        file.info(params$ReferenceDataFile)$size))
 } else {
-  translation_file <- paste0("translations/",stringr::str_extract(locale, "^([^_]+)"),".json")
-  if(file.exists(translation_file)) {
-    translations <- readr::read_file(translation_file) |> jsonlite::fromJSON()
-  } else {
-    rlang::abort(paste0("Failed to find translation file for locale", locale))
-  }
+  reference_data <- suppressWarnings(import_dhis2(
+    connection_options = get_connection_options(params$token),
+    dataset_options = get_dataset_options(
+      reportingPeriodFrom = params$reportingPeriodFrom,
+      reportingPeriodTo = params$reportingPeriodTo,
+      birthWeightFrom = params$birthWeightFrom,
+      birthWeightTo = params$birthWeightTo,
+      gestationWeeksFrom = params$gestationWeeksFrom,
+      gestationWeeksTo = params$gestationWeeksTo,
+      reportingCountries = params$reportingCountries,
+      testUnitFilter = params$testUnitFilter,
+      defaultPatientFilter = params$defaultPatientFilter,
+      validationExceptionFile = params$validationExceptionFile))) |>
+    neoipcr::calculate_reference_data()
 }
 
-surgery_summary <- data$events |>
-  dplyr::filter(event_type_key == "pro") |>
-  dplyr::semi_join(data$enrollments, dplyr::join_by(enrollment_key)) |>
-  dplyr::summarise(n_departments = n_distinct(department_key), n_patients = n_distinct(patient_key), n_procedures = n())
+```
 
-n_surgical_departments <- surgery_summary |> dplyr::pull("n_departments")
-n_patients <- surgery_summary |> dplyr::pull("n_patients")
-n_procedures <- surgery_summary |> dplyr::pull("n_procedures")
-n_procedures_per_patient <- n_procedures / n_patients
+```{r Preparing localised data}
+#| include: false
+
+dR <- list(
+  creationTimestamp = format(
+    lubridate::now("UTC"),
+    format = "%x %X",
+    tz = "UTC",
+    usetz = TRUE),
+  dataUpToTimestamp = format(
+    reference_data$metadata$data_up_to,
+    format = "%x %X",
+    tz = "UTC",
+    usetz = TRUE),
+  analysisPeriod = paste(
+    format(
+      reference_data$metadata$dataset_options$surveillance_end_from,
+      format = "%x"),
+    format(
+      min(
+        as_date(reference_data$metadata$data_up_to),
+        reference_data$metadata$dataset_options$surveillance_end_to
+        ),
+      format = "%x"
+      ),
+    sep = " - "),
+  countriesList = paste0(
+    reference_data$metadata$countries |>
+      as.character() |>
+      get_localised_country_names() |>
+      stringr::str_sort(locale = locale_stringi),
+    collapse = ", "),
+  birthweightFilter = if(
+    is.null(reference_data$metadata$dataset_options$birth_weight_from) &&
+    is.null(reference_data$metadata$dataset_options$birth_weight_to)) {
+      sR$headerList$allBirthweights
+    } else if(
+      is.null(reference_data$metadata$dataset_options$birth_weight_from)) {
+      paste0(
+        c(
+          "≤ ",
+          format_integer(
+            reference_data$metadata$dataset_options$birth_weight_to),
+          " g"),
+        collapse = "")
+    } else if(
+      is.null(reference_data$metadata$dataset_options$birth_weight_to)) {
+      paste0(
+        c(
+          "≥ ",
+          format_integer(
+            reference_data$metadata$dataset_options$birth_weight_from),
+          " g"),
+        collapse = "")
+    } else {
+      paste0(
+        c(
+          format_integer(
+            reference_data$metadata$dataset_options$birth_weight_from),
+          " g - ",
+          format_integer(
+            reference_data$metadata$dataset_options$birth_weight_to),
+          " g"),
+        collapse = "")
+    },
+  gestationalAgeFilter = if(
+    is.null(reference_data$metadata$dataset_options$gestational_age_from) &&
+    is.null(reference_data$metadata$dataset_options$gestational_age_to)) {
+      sR$headerList$allGestationalAges
+    } else if(
+      is.null(reference_data$metadata$dataset_options$gestational_age_from)) {
+      paste0(
+        c(
+          "≤ ",
+          format_integer(
+            reference_data$metadata$dataset_options$gestational_age_to),
+          " w"),
+        collapse = "")
+    } else if(
+      is.null(reference_data$metadata$dataset_options$gestational_age_to)) {
+      paste0(
+        c(
+          "≥ ",
+          format_integer(
+            reference_data$metadata$dataset_options$gestational_age_from),
+          " w"),
+        collapse = "")
+    } else {
+      paste0(
+        c(
+          format_integer(
+            reference_data$metadata$dataset_options$gestational_age_from),
+          " w - ",
+          format_integer(
+            reference_data$metadata$dataset_options$gestational_age_to),
+          " w"),
+        collapse = "")
+    },
+  numberOfDepartments = format_integer(reference_data$n_departments),
+  numberOfPatients = format_integer(reference_data$n_patients$total),
+  numberOfAdmissions = format_integer(reference_data$n_enrollments$total),
+  sumOfPatientDays = format_integer(reference_data$n_patient_days$total),
+  averageSurveillancePeriod = format(
+    reference_data$n_patient_days$total / reference_data$n_patients$total,
+    digits = 2,
+    nsmall = 1,
+    scientific = FALSE)
+)
+
+```
+
+```{r Set up NeoIPC layout}
+#| include: false
+
+NeoIPC_pallette <- c("#FF9015","#0083C1","#0D4F6C","#E6FAFC","#E0D3DE","#1F271B")
+pal <- c(NeoIPC_pallette[5],NeoIPC_pallette[2],NeoIPC_pallette[6])
+
 ```

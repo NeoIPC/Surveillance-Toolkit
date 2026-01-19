@@ -1,0 +1,16 @@
+title: "NeoIPC Surveillance Reference Report"
+format:
+  pdf:
+    author-meta: "NeoIPC Surveillance team"
+    keywords:
+      - NeoIPC
+      - Surveillance
+      - Reference Report
+    include-in-header:
+      - file: translations.tex
+      - text: |
+          \cfoot*{%
+            \raggedright
+            \hspace{1.5cm}\FooterLineOne\\
+            \hspace{1.5cm}\FooterLineTwo
+          }

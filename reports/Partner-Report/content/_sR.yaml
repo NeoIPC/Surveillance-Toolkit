@@ -1,32 +1,6 @@
 # Language: en
-gramm_abbreviation: "g"
-week_abbreviation: "w"
-day: "day"
-percent_symbol: "%"
 own_unit: "Own unit"
 reference_data: "Reference data"
-patient_days: "Patient days"
-table_headers:
-  n_: "N"
-  rate: "Rate"
-  pooled: "Pooled"
-  q1: "Q₁"
-  q2: "Q₂"
-  q3: "Q₃"
-fig-bw:
-  fig-cap:
-    - "Distribution of birth weights of the infants included in this report."
-    - ref: "A is a histogram in %s steps with a density curve of your own unit’s data and a density curve of the reference data and B are two boxplots, one of your own unit’s data and one of the reference data."
-      no-ref: "A is a histogram in %s steps with a density curve and B is a boxplot."
-    - ref: "Vertical lines in the boxplots represent the %s, %s and %s quantiles, the diamonds represent the pooled arithmetic means."
-      no-ref: "Vertical lines in the boxplot represent the %s, %s and %s quantiles, the diamond represents the pooled arithmetic mean."
-fig-ga:
-  fig-cap:
-    - "Distribution of gestational ages of the infants included in this report."
-    - ref: "A is a histogram in %s steps with a density curve of your own unit’s data and a density curve of the reference data and B are two boxplots, one of your own unit’s data and one of the reference data."
-      no-ref: "A is a histogram in %s steps with a density curve and B is a boxplot."
-    - ref: "Vertical lines in the boxplots represent the %s, %s and %s quantiles, the diamonds represent the pooled arithmetic means."
-      no-ref: "Vertical lines in the boxplot represent the %s, %s and %s quantiles, the diamond represents the pooled arithmetic mean."
 tbl-risk-density-rates:
   tbl-cap: "Factors influencing the infants' risk of developing an infection or acquiring antibitic-resistant pathogens."
   risk_density_rate: "Risk Density Rate"

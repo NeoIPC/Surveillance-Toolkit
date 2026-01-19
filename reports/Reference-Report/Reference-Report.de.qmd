@@ -1,5 +1,5 @@
 ---
-lang: en
+lang: de
 params:
   ReferenceDataFile: NULL
   reportingPeriodFrom: NULL
@@ -18,7 +18,7 @@ params:
 
 ```{r}
 #| label: Make sure the locale is initialised correctly
-Sys.setenv(LC_ALL = "en_GB.UTF-8")
+Sys.setenv(LC_ALL = "de_DE.UTF-8")
 ```
 
 {{< include _setup.qmd >}}

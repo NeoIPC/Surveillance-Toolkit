@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NeoIPC Surveillance Reports 0.9\n"
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2025-12-30 19:35+0100\n"
+"POT-Creation-Date: 2026-01-19 20:44+0100\n"
 "PO-Revision-Date: 2025-12-30 19:55+0100\n"
 "Last-Translator: Brar Piening <brar.piening@charite.de>\n"
 "Language-Team: none\n"
@@ -18,11 +18,107 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+#. type: Hash Value: day
+#: reports/common.yaml:1
+#, no-wrap
+msgid "day"
+msgstr ""
+
 #. type: Hash Value: digit_group_separator
 #: reports/common.yaml:1
 #, no-wrap
 msgid " "
 msgstr " "
+
+#. type: Array Element: fig-bw fig-cap
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Distribution of birth weights of the infants included in this report."
+msgstr ""
+
+#. type: Hash Value: fig-ga fig-cap bnch
+#: reports/common.yaml:1
+#, no-wrap
+msgid "A is a histogram in %s steps with a density curve of your own unit’s data and a density curve of the reference data and B are two boxplots, one of your own unit’s data and one of the reference data."
+msgstr ""
+
+#. type: Hash Value: fig-ga fig-cap no-bnch
+#: reports/common.yaml:1
+#, no-wrap
+msgid "A is a histogram in %s steps with a density curve and B is a boxplot."
+msgstr ""
+
+#. type: Hash Value: fig-ga fig-cap bnch
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Vertical lines in the boxplots represent the %s, %s and %s quantiles, the diamonds represent the pooled arithmetic means."
+msgstr ""
+
+#. type: Hash Value: fig-ga fig-cap no-bnch
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Vertical lines in the boxplot represent the %s, %s and %s quantiles, the diamond represents the pooled arithmetic mean."
+msgstr ""
+
+#. type: Array Element: fig-ga fig-cap
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Distribution of gestational ages of the infants included in this report."
+msgstr ""
+
+#. type: Hash Value: gramm_abbreviation
+#: reports/common.yaml:1
+#, no-wrap
+msgid "g"
+msgstr ""
+
+#. type: Hash Value: patient_days
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Patient days"
+msgstr ""
+
+#. type: Hash Value: percent_symbol
+#: reports/common.yaml:1
+#, no-wrap
+msgid "%"
+msgstr ""
+
+#. type: Hash Value: table_headers n
+#: reports/common.yaml:1
+#, no-wrap
+msgid "N"
+msgstr ""
+
+#. type: Hash Value: table_headers pooled
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Pooled"
+msgstr ""
+
+#. type: Hash Value: table_headers q1
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Q₁"
+msgstr ""
+
+#. type: Hash Value: table_headers q2
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Q₂"
+msgstr ""
+
+#. type: Hash Value: table_headers q3
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Q₃"
+msgstr ""
+
+#. type: Hash Value: table_headers rate
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Rate"
+msgstr ""
 
 #. type: Hash Value: unit_separator
 #: reports/common.yaml:1
@@ -30,58 +126,16 @@ msgstr " "
 msgid " "
 msgstr " "
 
+#. type: Hash Value: week_abbreviation
+#: reports/common.yaml:1
+#, no-wrap
+msgid "w"
+msgstr ""
+
 #. type: Hash Value: title
 #: reports/Partner-Report/_quarto-en.yml:1
 #, no-wrap
 msgid "NeoIPC Surveillance Partner Report"
-msgstr ""
-
-#. type: Hash Value: day
-#: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "day"
-msgstr ""
-
-#. type: Array Element: fig-bw fig-cap
-#: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "Distribution of birth weights of the infants included in this report."
-msgstr ""
-
-#. type: Hash Value: fig-ga fig-cap no-ref
-#: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "A is a histogram in %s steps with a density curve and B is a boxplot."
-msgstr ""
-
-#. type: Hash Value: fig-ga fig-cap ref
-#: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "A is a histogram in %s steps with a density curve of your own unit’s data and a density curve of the reference data and B are two boxplots, one of your own unit’s data and one of the reference data."
-msgstr ""
-
-#. type: Hash Value: fig-ga fig-cap no-ref
-#: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "Vertical lines in the boxplot represent the %s, %s and %s quantiles, the diamond represents the pooled arithmetic mean."
-msgstr ""
-
-#. type: Hash Value: fig-ga fig-cap ref
-#: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "Vertical lines in the boxplots represent the %s, %s and %s quantiles, the diamonds represent the pooled arithmetic means."
-msgstr ""
-
-#. type: Array Element: fig-ga fig-cap
-#: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "Distribution of gestational ages of the infants included in this report."
-msgstr ""
-
-#. type: Hash Value: gramm_abbreviation
-#: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "g"
 msgstr ""
 
 #. type: Hash Value: own_unit
@@ -90,52 +144,10 @@ msgstr ""
 msgid "Own unit"
 msgstr ""
 
-#. type: Hash Value: patient_days
-#: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "Patient days"
-msgstr ""
-
-#. type: Hash Value: percent_symbol
-#: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "%"
-msgstr ""
-
 #. type: Hash Value: reference_data
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Reference data"
-msgstr ""
-
-#. type: Hash Value: table_headers pooled
-#: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "Pooled"
-msgstr ""
-
-#. type: Hash Value: table_headers q1
-#: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "Q₁"
-msgstr ""
-
-#. type: Hash Value: table_headers q2
-#: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "Q₂"
-msgstr ""
-
-#. type: Hash Value: table_headers q3
-#: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "Q₃"
-msgstr ""
-
-#. type: Hash Value: table_headers rate
-#: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "Rate"
 msgstr ""
 
 #. type: Hash Value: tbl-risk-density-rates access
@@ -282,14 +294,9 @@ msgstr ""
 msgid "Watch"
 msgstr ""
 
-#. type: Hash Value: week_abbreviation
-#: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "w"
-msgstr ""
-
-#. type: Title ##
+#. type: Title #
 #: reports/Partner-Report/content/_introduction.qmd:1
+#: reports/Reference-Report/content/_introduction.Rmd:1
 #, no-wrap
 msgid "Introduction"
 msgstr ""
@@ -302,18 +309,21 @@ msgstr ""
 
 #. type: Hash Value: format pdf author-meta
 #: reports/Partner-Certificate/_quarto-en.yml:1
+#: reports/Reference-Report/_quarto-en.yml:1
 #, no-wrap
 msgid "NeoIPC Surveillance team"
 msgstr "Team di NeoIPC Surveillance"
 
 #. type: Array Element: format pdf keywords
 #: reports/Partner-Certificate/_quarto-en.yml:1
+#: reports/Reference-Report/_quarto-en.yml:1
 #, no-wrap
 msgid "NeoIPC"
 msgstr "NeoIPC"
 
 #. type: Array Element: format pdf keywords
 #: reports/Partner-Certificate/_quarto-en.yml:1
+#: reports/Reference-Report/_quarto-en.yml:1
 #, no-wrap
 msgid "Surveillance"
 msgstr "Sorveglianza"
@@ -377,3 +387,280 @@ msgstr "Berlin,"
 #, no-wrap
 msgid "3.25"
 msgstr "3.25"
+
+#. type: Hash Value: format pdf include-in-header file
+#: reports/Reference-Report/_quarto-en.yml:1
+#, no-wrap
+msgid "translations.tex"
+msgstr ""
+
+#. type: Array Element: format pdf keywords
+#: reports/Reference-Report/_quarto-en.yml:1
+#, no-wrap
+msgid "Reference Report"
+msgstr ""
+
+#. type: Hash Value: title
+#: reports/Reference-Report/_quarto-en.yml:1
+#, fuzzy, no-wrap
+#| msgid "NeoIPC Surveillance team"
+msgid "NeoIPC Surveillance Reference Report"
+msgstr "Team di NeoIPC Surveillance"
+
+#. type: Hash Value: countryNames Estonia
+#: reports/Reference-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Estonia"
+msgstr ""
+
+#. type: Hash Value: countryNames Germany
+#: reports/Reference-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Germany"
+msgstr ""
+
+#. type: Hash Value: countryNames Greece
+#: reports/Reference-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Greece"
+msgstr ""
+
+#. type: Hash Value: countryNames Italy
+#: reports/Reference-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Italy"
+msgstr ""
+
+#. type: Hash Value: countryNames SouthAfrica
+#: reports/Reference-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "South Africa"
+msgstr ""
+
+#. type: Hash Value: countryNames Spain
+#: reports/Reference-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Spain"
+msgstr ""
+
+#. type: Hash Value: countryNames Switzerland
+#: reports/Reference-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Switzerland"
+msgstr ""
+
+#. type: Hash Value: countryNames UnitedKingdom
+#: reports/Reference-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "United Kingdom"
+msgstr ""
+
+#. type: Hash Value: headerList allBirthweights
+#: reports/Reference-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "All eligible birth weights"
+msgstr ""
+
+#. type: Hash Value: headerList allGestationalAges
+#: reports/Reference-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "All eligible gestational ages"
+msgstr ""
+
+#. type: Hash Value: headerList analysisPeriod
+#: reports/Reference-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Analysis period"
+msgstr ""
+
+#. type: Hash Value: headerList and
+#: reports/Reference-Report/content/_sR.yaml:1
+#, no-wrap
+msgid " and "
+msgstr ""
+
+#. type: Hash Value: headerList birthweightFilter
+#: reports/Reference-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Birth weight filter"
+msgstr ""
+
+#. type: Hash Value: headerList countries
+#: reports/Reference-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Countries"
+msgstr ""
+
+#. type: Hash Value: headerList country
+#: reports/Reference-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Country"
+msgstr ""
+
+#. type: Hash Value: headerList createdAt
+#: reports/Reference-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Created"
+msgstr ""
+
+#. type: Hash Value: headerList dataUpTo
+#: reports/Reference-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Data up to"
+msgstr ""
+
+#. type: Hash Value: headerList gestationalAgeFilter
+#: reports/Reference-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Gestational age filter"
+msgstr ""
+
+#. type: Hash Value: headerList ignoresInclusionCriteria
+#: reports/Reference-Report/content/_sR.yaml:1
+#, fuzzy, no-wrap
+#| msgid "for the NeoIPC Surveillance team"
+msgid "ignores the NeoIPC Surveillance inclusion criteria."
+msgstr "per il team di NeoIPC Surveillance"
+
+#. type: Hash Value: headerList includesTestDepartments
+#: reports/Reference-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "includes test units"
+msgstr ""
+
+#. type: Hash Value: headerList multiCountryHint
+#: reports/Reference-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "This report aggregates data from neonatal units in several countries. This means that, while it reflects a broad spectrum of care structures, it is only suitable as a benchmark to a somewhat limited extent due to the sometimes very different healthcare systems and the resources available there."
+msgstr ""
+
+#. type: Hash Value: headerList multiCountryHintGoal
+#: reports/Reference-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The aim of NeoIPC Surveillance is therefore always to provide units with a relevant national or regional report, provided that a sufficient number of units in the respective region participate in the system."
+msgstr ""
+
+#. type: Hash Value: headerList multiCountryHintHeader
+#: reports/Reference-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Multinational analysis"
+msgstr ""
+
+#. type: Hash Value: headerList singleCountryHint
+#: reports/Reference-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "This report presents data from neonatal units in a single country. This means that, because of the relative homogeneity of the healthcare system, it is in principle a good benchmark. However, it should be noted that only a proportion of neonatal units in a country actually participate in NeoIPC Surveillance. Since participation is voluntary, these are typically hospitals that have a particular interest in infection prevention and are willing and able to provide the resources required for surveillance."
+msgstr ""
+
+#. type: Hash Value: headerList singleCountryHintHeader
+#: reports/Reference-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "National report"
+msgstr ""
+
+#. type: Hash Value: headerList singleCountryRepresentativenessHint
+#: reports/Reference-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The information presented here can therefore not fully describe the situation in the individual countries."
+msgstr ""
+
+#. type: Hash Value: headerList specialAnalysisHint
+#: reports/Reference-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "This is a special analysis that"
+msgstr ""
+
+#. type: Plain text
+#: reports/Reference-Report/content/_introduction.Rmd:4
+#, no-wrap
+msgid "This document is a reference report on the NeoIPC Surveillance. It contains information relating to nosocomial infections, their causative infectious agents, and the associated risk and protective factors in high-risk neonates which was collected by partners from multiple neonatology departments participating in the NeoIPC Surveillance. The following numbers provide an overview of the current data set. If you are interested in the surveillance definitions, data collection methods and sheets, please refer to the [surveillance resources on the NeoIPC website](https://neoipc.org/surveillance/resources/).\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Reference-Report/content/_introduction.Rmd:6
+#, no-wrap
+msgid "Number of neonatology departments contributing at least one patient record:\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Reference-Report/content/_introduction.Rmd:8
+#, no-wrap
+msgid ":   `r dR$numberOfDepartments`\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Reference-Report/content/_introduction.Rmd:10
+#, no-wrap
+msgid "Number of patient records:\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Reference-Report/content/_introduction.Rmd:12
+#, no-wrap
+msgid ":   `r dR$numberOfPatients`\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Reference-Report/content/_introduction.Rmd:14
+#, no-wrap
+msgid "Number of patient admissions:\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Reference-Report/content/_introduction.Rmd:16
+#, no-wrap
+msgid ":   `r dR$numberOfAdmissions`\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Reference-Report/content/_introduction.Rmd:18
+#, no-wrap
+msgid "Sum of patient days:\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Reference-Report/content/_introduction.Rmd:20
+#, no-wrap
+msgid ":   `r dR$sumOfPatientDays`\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Reference-Report/content/_introduction.Rmd:22
+#, no-wrap
+msgid "Average surveillance period per patient:\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Reference-Report/content/_introduction.Rmd:23
+#, no-wrap
+msgid ":   `r dR$averageSurveillancePeriod` days\n"
+msgstr ""
+
+#. type: Title #
+#: reports/Reference-Report/content/_patient_population.Rmd:1
+#, no-wrap
+msgid "Patient Population"
+msgstr ""
+
+#. type: Plain text
+#: reports/Reference-Report/content/_patient_population.Rmd:3
+#, no-wrap
+msgid "As the process, although supported by various tools, relies on the collection, interpretation and monitoring of information by qualified professionals, NeoIPC surveillance is currently being targeted at the most common nosocomial infections in high-risk neonates, in order to make it sustainable in a continuous manner in as many settings as possible. This means that patients with a birth weight below 1500 g and/or a gestational age below 32 weeks at the time of birth are included into the surveillance database if they are admitted to a participating neonatology department within the first 120 days of life. In combination with the filter settings specified above, this results in the composition of the patient population shown in @fig-bw and @fig-ga.\n"
+msgstr ""
+
+#. type: newcommand{#4}
+#: reports/Reference-Report/translations.tex:2
+#, fuzzy
+#| msgid "This project has received funding from the European Union’s Horizon 2020 research and%sinnovation programme under grant agreement No 965328."
+msgid "This project has received funding from the European Union’s Horizon 2020 research and innovation"
+msgstr "Questo progetto ha ricevuto finanziamenti dal programma di ricerca e innovazione Horizon%s2020 dell'Unione Europea nell'ambito della convenzione di sovvenzione n. 965328."
+
+#. type: newcommand{#4}
+#: reports/Reference-Report/translations.tex:2
+msgid "programme under grant agreement No 965328."
+msgstr ""
+
+#, fuzzy
+#~| msgid "This project has received funding from the European Union’s Horizon 2020 research and%sinnovation programme under grant agreement No 965328."
+#~ msgid "\\cfoot*{\\raggedright\r \\hspace{1.5cm}\\foottext{This project has received funding from the European Union’s Horizon 2020 research and innovation}\\\\\r \\hspace{1.5cm}\\foottext{programme under grant agreement No 965328.}\r }"
+#~ msgstr "Questo progetto ha ricevuto finanziamenti dal programma di ricerca e innovazione Horizon%s2020 dell'Unione Europea nell'ambito della convenzione di sovvenzione n. 965328."

@@ -1,19 +1,72 @@
-Number of partner departments contributing at least one patient record:
+`{r} sR$headerList$createdAt`:
 
-:   `{r} format(nrow(data$metadata$departments), big.mark =" ")`
+:   `{r} dR$creationTimestamp`
 
-Number of patient records:
+`{r} sR$headerList$dataUpTo`:
 
-:   `{r} format(nrow(data$patients), big.mark =" ")`
+:   `{r} dR$dataUpToTimestamp`
 
-Number of patient admissions:
+`{r} sR$headerList$analysisPeriod`:
 
-:   `{r} format(nrow(data$enrollments), big.mark =" ")`
+:   `{r} dR$analysisPeriod`
 
-Sum of patient days:
+`{r} if(length(reference_data$metadata$countries) > 1){sR$headerList$countries}else{sR$headerList$country}`:
 
-:   `{r} format(sum(data$surveillanceEndData$patient_days_value), big.mark =" ")`
+:   `{r} dR$countriesList`
 
-Average surveillance period per patient:
+`{r} sR$headerList$birthweightFilter`:
 
-:   `{r} format(sum(data$surveillanceEndData$patient_days_value) / nrow(data$patients), digits = 2, nsmall = 1, scientific = FALSE)` days
+:   `{r} dR$birthweightFilter`
+
+`{r} sR$headerList$gestationalAgeFilter`:
+
+:   `{r} dR$gestationalAgeFilter`
+
+```{r Countries hint}
+#| echo: false
+#| output: asis
+
+if(length(reference_data$metadata$countries) > 1){
+  cat(sep = "\n", c(
+    "::: {.callout-note}",
+    paste0("## ", sR$headerList$multiCountryHintHeader),
+    "",
+    sR$headerList$multiCountryHint,
+    "",
+    sR$headerList$multiCountryHintGoal,
+    ":::"))
+} else {
+  cat(sep = "\n", c(
+    "::: {.callout-note}",
+    paste0("## ", sR$headerList$singleCountryHintHeader),
+    "",
+    sR$headerList$singleCountryHint,
+    "",
+    sR$headerList$singleCountryRepresentativenessHint,
+    ":::"))
+}
+```
+
+```{r Custom report hint}
+#| echo: false
+#| output: asis
+
+if(
+  reference_data$metadata$dataset_options$include_test_data ||
+  reference_data$metadata$dataset_options$include_ineligible_patients) {
+  cat(sep = "\n", c("::: {.callout-note}", paste0(
+    c(
+    sR$headerList$specialAnalysisHint,
+    if(!testUnitFilter){
+      paste0(sR$headerList$includesTestDepartments,
+      if(!defaultPatientFilter)
+        sR$headerList$and
+      else
+        ".", collapse = "")
+    },
+    if (!defaultPatientFilter)
+      sR$headerList$ignoresInclusionCriteria
+    ), collapse = " "),
+    ":::"))
+}
+```

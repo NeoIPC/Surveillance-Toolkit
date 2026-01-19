@@ -18,6 +18,7 @@ format:
     classoption: [footsepline=true, plainfootsepline=true]
     papersize: a4paper
     fig-pos: 'H'
+    tbl-pos: 'H'
     colorlinks: true
     geometry:
       - top=30mm
