@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NeoIPC Surveillance Reports 0.9\n"
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-01-19 20:44+0100\n"
-"PO-Revision-Date: 2026-01-19 21:09+0100\n"
+"POT-Creation-Date: 2026-01-19 21:40+0100\n"
+"PO-Revision-Date: 2026-01-19 21:41+0100\n"
 "Last-Translator: Brar Piening <brar.piening@charite.de>\n"
 "Language-Team: none\n"
 "Language: de\n"
@@ -577,8 +577,8 @@ msgstr "Dieses Dokument ist ein Referenzbericht der NeoIPC-Surveillance. Es enth
 #. type: Plain text
 #: reports/Reference-Report/content/_introduction.Rmd:6
 #, no-wrap
-msgid "Number of neonatology departments contributing at least one patient record:\n"
-msgstr "Anzahl der Abteilungen, die mindestens einen Patienten eingegeben haben:\n"
+msgid "Number of departments contributing at least one patient record:\n"
+msgstr "Anzahl der Abteilungen, die mindestens einen Patienten beigetragen haben:\n"
 
 #. type: Plain text
 #: reports/Reference-Report/content/_introduction.Rmd:8
