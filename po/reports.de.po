@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NeoIPC Surveillance Reports 0.9\n"
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-01-19 21:40+0100\n"
-"PO-Revision-Date: 2026-01-19 21:41+0100\n"
+"POT-Creation-Date: 2026-01-20 00:41+0100\n"
+"PO-Revision-Date: 2026-01-20 00:49+0100\n"
 "Last-Translator: Brar Piening <brar.piening@charite.de>\n"
 "Language-Team: none\n"
 "Language: de\n"
@@ -120,6 +120,168 @@ msgstr "Q₃"
 msgid "Rate"
 msgstr "Rate"
 
+#. type: Hash Value: tbl-risk-density-rates cvc
+#: reports/common.yaml:1 reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "CVC"
+msgstr "ZVK"
+
+#. type: Hash Value: tbl-device-associated-incidence-density-rates dev_ass_incidence_density_rate
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Device-Associated Incidence Density Rate"
+msgstr "Device-assoziierte Inzidenzdichte"
+
+#. type: Hash Value: tbl-device-associated-incidence-density-rates grp_vc
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Vascular catheter associated sepsis / bloodstream infection"
+msgstr "Gefäßkatheter-assoziierte Sepsis / Blutstrominfektion"
+
+#. type: Hash Value: tbl-device-associated-incidence-density-rates grp_vs
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Ventilatory support associated pneumonia"
+msgstr "Beatmungsassoziierte Pneumonie"
+
+#. type: Hash Value: tbl-risk-density-rates inv
+#: reports/common.yaml:1 reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "INV"
+msgstr "INV"
+
+#. type: Hash Value: tbl-device-associated-incidence-density-rates n_dev_ass_inf
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Number of device-associated infections"
+msgstr "Anzahl der Device-assoziierten Infektionen"
+
+#. type: Hash Value: tbl-device-associated-incidence-density-rates n_dev_days
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Device days"
+msgstr "Device-Tage"
+
+#. type: Hash Value: tbl-device-associated-incidence-density-rates n_footnote
+#: reports/common.yaml:1
+#, no-wrap
+msgid "%s: The aggregated number of device-associated infections in all infants."
+msgstr "%s: Die Gesamtzahl der geräteassoziierten Infektionen bei allen Kindern."
+
+#. type: Hash Value: tbl-risk-density-rates niv
+#: reports/common.yaml:1 reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "NIV"
+msgstr "NIV"
+
+#. type: Hash Value: tbl-device-associated-incidence-density-rates pooled_footnote
+#: reports/common.yaml:1
+#, no-wrap
+msgid "%s: The Device-Associated Incidence Density Rate calculated across all infants from all departments."
+msgstr "%s: Die Device-assoziierte Inzidenzdichte, berechnet für alle Kinder aus allen Abteilungen."
+
+#. type: Hash Value: tbl-risk-density-rates pvc
+#: reports/common.yaml:1 reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "PVC"
+msgstr "PVK"
+
+#. type: Hash Value: tbl-device-associated-incidence-density-rates quartile_footnote
+#: reports/common.yaml:1
+#, no-wrap
+msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Device-Associated Incidence Density Rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected infections is greater than or equal to one according to the pooled Device-Associated Incidence Density Rate."
+msgstr "%s, %s, %s: Die Quartile (%s, %s und %s Quantile) der Device-assoziierten Inzidenzdichte der Partnerabteilungen. Diese Quartile werden nur angezeigt, wenn die Anzahl der Abteilungen, die zum Nenner beitragen, größer oder gleich fünf ist und wenn die mittlere Anzahl der erwarteten Infektionen gemäß der gepoolten geräteassoziierten Inzidenzdichte größer oder gleich eins ist."
+
+#. type: Hash Value: tbl-device-associated-incidence-density-rates tbl-cap
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Incidence Density Rates of device-associated infections"
+msgstr "Inzidenzdichten Device-assoziierter Infektionen"
+
+#. type: Hash Value: tbl-device-associated-incidence-density-rates vs
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Any ventilatory support"
+msgstr "Jede Form der Atemunterstützung"
+
+#. type: Hash Value: tbl-incidence-density-rates bsi
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Primary sepsis/BSI"
+msgstr "Primäre Sepsis/BSI"
+
+#. type: Hash Value: tbl-risk-density-rates other
+#: reports/common.yaml:1 reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Other"
+msgstr "Andere"
+
+#. type: Hash Value: tbl-incidence-density-rates grp_si
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Primary sepsis/BSI/Pneumonia"
+msgstr "Primäre Sepsis/BSI/Pneumonie"
+
+#. type: Hash Value: tbl-incidence-density-rates hap
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Pneumonia"
+msgstr "Pneumonie"
+
+#. type: Hash Value: tbl-incidence-density-rates incidence_density_rate
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Incidence Density Rate"
+msgstr "Inzidenzdichte"
+
+#. type: Hash Value: tbl-incidence-density-rates n_footnote
+#: reports/common.yaml:1
+#, no-wrap
+msgid "%s: The aggregated number of infections in all infants."
+msgstr "%s: Die Gesamtzahl der Infektionen bei allen Säuglingen."
+
+#. type: Hash Value: tbl-incidence-density-rates n_inf
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Number of infections"
+msgstr "Anzahl der Infektionen"
+
+#. type: Hash Value: tbl-incidence-density-rates nec
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Necrotising Enterocolitis"
+msgstr "Nekrotisierende Enterokolitis"
+
+#. type: Hash Value: tbl-incidence-density-rates pooled_footnote
+#: reports/common.yaml:1
+#, no-wrap
+msgid "%s: The Incidence Density Rate calculated across all infants from all departments."
+msgstr "%s: Die Inzidenzdichte, berechnet für alle Kinder aus allen Abteilungen."
+
+#. type: Hash Value: tbl-incidence-density-rates quartile_footnote
+#: reports/common.yaml:1
+#, no-wrap
+msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Incidence Density Rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected infections is greater than or equal to one according to the pooled Incidence Density Rate."
+msgstr "%s, %s, %s: Die Quartile (%s, %s und %s Quantile) der Inzidenzdichten der Partnerabteilungen. Diese Quartile werden nur angezeigt, wenn die Anzahl der Abteilungen, die zum Nenner beitragen, größer oder gleich fünf ist und wenn die mittlere Anzahl der erwarteten Infektionen gemäß der gepoolten Inzidenzdichte größer oder gleich eins ist."
+
+#. type: Hash Value: tbl-incidence-density-rates si
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Severe infection"
+msgstr "Schwere Infektion"
+
+#. type: Hash Value: tbl-incidence-density-rates si_footnote
+#: reports/common.yaml:1
+#, no-wrap
+msgid "%s: Combines the outcomes primary sepsis/BSI and pneumonia"
+msgstr "%s: Kombiniert die Ergebnisse primäre Sepsis/BSI und Pneumonie"
+
+#. type: Hash Value: tbl-incidence-density-rates tbl-cap
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Incidence Density Rates of nosocomial infections"
+msgstr "Inzidenzdichten nosokomialer Infektionen"
+
 #. type: Hash Value: unit_separator
 #: reports/common.yaml:1
 #, no-wrap
@@ -180,12 +342,6 @@ msgstr "Antibiotika (gesamt)"
 msgid "WHO AWaRe group (see %s). As cumulative treatment days for individual substances are recorded per patient, combination therapies using several substances on one day are counted as multiple days."
 msgstr "WHO AWaRe-Gruppe (siehe %s). Da die kumulativen Behandlungstage für einzelne Substanzen pro Patient erfasst werden, werden Kombinationstherapien mit mehreren Substanzen an einem Tag als mehrere Tage gezählt."
 
-#. type: Hash Value: tbl-risk-density-rates cvc
-#: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "CVC"
-msgstr "ZVK"
-
 #. type: Hash Value: tbl-risk-density-rates days_with_risk_factor
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
@@ -197,12 +353,6 @@ msgstr "Tage mit Risiko-/Schutzfaktor"
 #, no-wrap
 msgid "Human milk"
 msgstr "Humanmilch"
-
-#. type: Hash Value: tbl-risk-density-rates inv
-#: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "INV"
-msgstr "INV"
 
 #. type: Hash Value: tbl-risk-density-rates kangaroo_care
 #: reports/Partner-Report/content/_sR.yaml:1
@@ -216,18 +366,6 @@ msgstr "Känguruhpflege"
 msgid "%s: The aggregated number of days the risk/protective factor was present in your unit's infants."
 msgstr "%s: Die Gesamtzahl der Tage, an denen der Risiko-/Schutzfaktor bei den Kindern Ihrer Abteilung vorhanden war."
 
-#. type: Hash Value: tbl-risk-density-rates niv
-#: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "NIV"
-msgstr "NIV"
-
-#. type: Hash Value: tbl-risk-density-rates other
-#: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "Other"
-msgstr "Andere"
-
 #. type: Hash Value: tbl-risk-density-rates pooled_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
@@ -239,12 +377,6 @@ msgstr "%s: Die Risikofaktor-Anwendungsrate, berechnet für alle Kinder aus alle
 #, no-wrap
 msgid "Probiotics"
 msgstr "Probiotika"
-
-#. type: Hash Value: tbl-risk-density-rates pvc
-#: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "PVC"
-msgstr "PVK"
 
 #. type: Hash Value: tbl-risk-density-rates quartile_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
@@ -568,6 +700,16 @@ msgstr "Die hier dargestellten Informationen können daher die Situation in den 
 msgid "This is a special analysis that"
 msgstr "Dies ist eine spezielle Analyse, die"
 
+#. type: newcommand{#4}
+#: reports/Reference-Report/translations.tex:2
+msgid "This project has received funding from the European Union’s Horizon 2020 research and innovation"
+msgstr "Dieses Projekt wurde im Rahmen des Forschungs- und Innovationsprogramms Horizont 2020"
+
+#. type: newcommand{#4}
+#: reports/Reference-Report/translations.tex:2
+msgid "programme under grant agreement No 965328."
+msgstr "der Europäischen Union unter der Fördervereinbarung Nr. 965328 gefördert."
+
 #. type: Plain text
 #: reports/Reference-Report/content/_introduction.Rmd:4
 #, no-wrap
@@ -646,15 +788,23 @@ msgstr "Patientenpopulation"
 msgid "As the process, although supported by various tools, relies on the collection, interpretation and monitoring of information by qualified professionals, NeoIPC surveillance is currently being targeted at the most common nosocomial infections in high-risk neonates, in order to make it sustainable in a continuous manner in as many settings as possible. This means that patients with a birth weight below 1500 g and/or a gestational age below 32 weeks at the time of birth are included into the surveillance database if they are admitted to a participating neonatology department within the first 120 days of life. In combination with the filter settings specified above, this results in the composition of the patient population shown in @fig-bw and @fig-ga.\n"
 msgstr "Da der Prozess zwar durch verschiedene Instrumente unterstützt wird, jedoch auf der Erfassung, Auswertung und Überwachung von Informationen durch qualifizierte Fachkräfte beruht, konzentriert sich die NeoIPC-Surveillance derzeit auf die häufigsten nosokomialen Infektionen bei Hochrisikoneugeborenen, um sie in möglichst vielen Einrichtungen nachhaltig und kontinuierlich durchführen zu können. Das bedeutet, dass Patienten mit einem Geburtsgewicht unter 1500 g und/oder einem Gestationsalter unter 32 Wochen zum Zeitpunkt der Geburt in die Surveillance-Datenbank aufgenommen werden, wenn sie innerhalb der ersten 120 Lebenstage in eine teilnehmende neonatologische Abteilung aufgenommen werden. In Kombination mit den oben angegebenen Filtereinstellungen ergibt sich daraus die Zusammensetzung der Patientenpopulation, die in @fig-bw und @fig-ga dargestellt ist.\n"
 
-#. type: newcommand{#4}
-#: reports/Reference-Report/translations.tex:2
-msgid "This project has received funding from the European Union’s Horizon 2020 research and innovation"
-msgstr "Dieses Projekt wurde im Rahmen des Forschungs- und Innovationsprogramms Horizont 2020"
+#. type: Title #
+#: reports/Reference-Report/content/_nosocomial_infections.Rmd:1
+#, no-wrap
+msgid "Nosocomial Infections"
+msgstr "Nosokomiale Infektionen"
 
-#. type: newcommand{#4}
-#: reports/Reference-Report/translations.tex:2
-msgid "programme under grant agreement No 965328."
-msgstr "der Europäischen Union unter der Fördervereinbarung Nr. 965328 gefördert."
+#. type: Plain text
+#: reports/Reference-Report/content/_nosocomial_infections.Rmd:4
+#, no-wrap
+msgid "Nosocomial infections represent the primary endpoint of NeoIPC surveillance. In @tbl-incidence-density-rates, the incidence densities of sepsis/BSI, pneumonia and necrotising enterocolitis, as well as the combined endpoint 'severe infection', are displayed. Overall `r dR$numberOfSevereInfections` severe infections were recorded in `r dR$numberOfPatients` infants resulting in an average number of `r dR$averageSevereInfectionsPerPatient` infections per patient.\n"
+msgstr "Nosokomiale Infektionen stellen den primären Endpunkt der NeoIPC-Surveillance dar. In @tbl-incidence-density-rates werden die Inzidenzdichten von Sepsis/BSI, Pneumonie und nekrotisierender Enterokolitis sowie der kombinierte Endpunkt „schwere Infektion” angezeigt. Insgesamt wurden `r dR$numberOfSevereInfections` schwere Infektionen bei `r dR$numberOfPatients` Neonaten registriert, was einer durchschnittlichen Anzahl von `r dR$averageSevereInfectionsPerPatient` Infektionen pro Patient entspricht.\n"
+
+#. type: Plain text
+#: reports/Reference-Report/content/_nosocomial_infections.Rmd:5
+#, no-wrap
+msgid "Device-associated infections can be found in @tbl-device-associated-incidence-density-rates.\n"
+msgstr "Device-assoziierte Infektionen finden Sie unter @tbl-device-associated-incidence-density-rates.\n"
 
 #, no-wrap
 #~ msgid "page_footer.tex"

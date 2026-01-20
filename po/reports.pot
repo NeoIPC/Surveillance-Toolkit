@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NeoIPC Surveillance Reports 0.9\n"
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-01-19 21:40+0100\n"
+"POT-Creation-Date: 2026-01-20 00:41+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -118,6 +118,168 @@ msgstr ""
 msgid "Rate"
 msgstr ""
 
+#. type: Hash Value: tbl-risk-density-rates cvc
+#: reports/common.yaml:1 reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "CVC"
+msgstr ""
+
+#. type: Hash Value: tbl-device-associated-incidence-density-rates dev_ass_incidence_density_rate
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Device-Associated Incidence Density Rate"
+msgstr ""
+
+#. type: Hash Value: tbl-device-associated-incidence-density-rates grp_vc
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Vascular catheter associated sepsis / bloodstream infection"
+msgstr ""
+
+#. type: Hash Value: tbl-device-associated-incidence-density-rates grp_vs
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Ventilatory support associated pneumonia"
+msgstr ""
+
+#. type: Hash Value: tbl-risk-density-rates inv
+#: reports/common.yaml:1 reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "INV"
+msgstr ""
+
+#. type: Hash Value: tbl-device-associated-incidence-density-rates n_dev_ass_inf
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Number of device-associated infections"
+msgstr ""
+
+#. type: Hash Value: tbl-device-associated-incidence-density-rates n_dev_days
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Device days"
+msgstr ""
+
+#. type: Hash Value: tbl-device-associated-incidence-density-rates n_footnote
+#: reports/common.yaml:1
+#, no-wrap
+msgid "%s: The aggregated number of device-associated infections in all infants."
+msgstr ""
+
+#. type: Hash Value: tbl-risk-density-rates niv
+#: reports/common.yaml:1 reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "NIV"
+msgstr ""
+
+#. type: Hash Value: tbl-device-associated-incidence-density-rates pooled_footnote
+#: reports/common.yaml:1
+#, no-wrap
+msgid "%s: The Device-Associated Incidence Density Rate calculated across all infants from all departments."
+msgstr ""
+
+#. type: Hash Value: tbl-risk-density-rates pvc
+#: reports/common.yaml:1 reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "PVC"
+msgstr ""
+
+#. type: Hash Value: tbl-device-associated-incidence-density-rates quartile_footnote
+#: reports/common.yaml:1
+#, no-wrap
+msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Device-Associated Incidence Density Rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected infections is greater than or equal to one according to the pooled Device-Associated Incidence Density Rate."
+msgstr ""
+
+#. type: Hash Value: tbl-device-associated-incidence-density-rates tbl-cap
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Incidence Density Rates of device-associated infections"
+msgstr ""
+
+#. type: Hash Value: tbl-device-associated-incidence-density-rates vs
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Any ventilatory support"
+msgstr ""
+
+#. type: Hash Value: tbl-incidence-density-rates bsi
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Primary sepsis/BSI"
+msgstr ""
+
+#. type: Hash Value: tbl-risk-density-rates other
+#: reports/common.yaml:1 reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Other"
+msgstr ""
+
+#. type: Hash Value: tbl-incidence-density-rates grp_si
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Primary sepsis/BSI/Pneumonia"
+msgstr ""
+
+#. type: Hash Value: tbl-incidence-density-rates hap
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Pneumonia"
+msgstr ""
+
+#. type: Hash Value: tbl-incidence-density-rates incidence_density_rate
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Incidence Density Rate"
+msgstr ""
+
+#. type: Hash Value: tbl-incidence-density-rates n_footnote
+#: reports/common.yaml:1
+#, no-wrap
+msgid "%s: The aggregated number of infections in all infants."
+msgstr ""
+
+#. type: Hash Value: tbl-incidence-density-rates n_inf
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Number of infections"
+msgstr ""
+
+#. type: Hash Value: tbl-incidence-density-rates nec
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Necrotising Enterocolitis"
+msgstr ""
+
+#. type: Hash Value: tbl-incidence-density-rates pooled_footnote
+#: reports/common.yaml:1
+#, no-wrap
+msgid "%s: The Incidence Density Rate calculated across all infants from all departments."
+msgstr ""
+
+#. type: Hash Value: tbl-incidence-density-rates quartile_footnote
+#: reports/common.yaml:1
+#, no-wrap
+msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Incidence Density Rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected infections is greater than or equal to one according to the pooled Incidence Density Rate."
+msgstr ""
+
+#. type: Hash Value: tbl-incidence-density-rates si
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Severe infection"
+msgstr ""
+
+#. type: Hash Value: tbl-incidence-density-rates si_footnote
+#: reports/common.yaml:1
+#, no-wrap
+msgid "%s: Combines the outcomes primary sepsis/BSI and pneumonia"
+msgstr ""
+
+#. type: Hash Value: tbl-incidence-density-rates tbl-cap
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Incidence Density Rates of nosocomial infections"
+msgstr ""
+
 #. type: Hash Value: unit_separator
 #: reports/common.yaml:1
 #, no-wrap
@@ -178,12 +340,6 @@ msgstr ""
 msgid "WHO AWaRe group (see %s). As cumulative treatment days for individual substances are recorded per patient, combination therapies using several substances on one day are counted as multiple days."
 msgstr ""
 
-#. type: Hash Value: tbl-risk-density-rates cvc
-#: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "CVC"
-msgstr ""
-
 #. type: Hash Value: tbl-risk-density-rates days_with_risk_factor
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
@@ -194,12 +350,6 @@ msgstr ""
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Human milk"
-msgstr ""
-
-#. type: Hash Value: tbl-risk-density-rates inv
-#: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "INV"
 msgstr ""
 
 #. type: Hash Value: tbl-risk-density-rates kangaroo_care
@@ -214,18 +364,6 @@ msgstr ""
 msgid "%s: The aggregated number of days the risk/protective factor was present in your unit's infants."
 msgstr ""
 
-#. type: Hash Value: tbl-risk-density-rates niv
-#: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "NIV"
-msgstr ""
-
-#. type: Hash Value: tbl-risk-density-rates other
-#: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "Other"
-msgstr ""
-
 #. type: Hash Value: tbl-risk-density-rates pooled_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
@@ -236,12 +374,6 @@ msgstr ""
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Probiotics"
-msgstr ""
-
-#. type: Hash Value: tbl-risk-density-rates pvc
-#: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "PVC"
 msgstr ""
 
 #. type: Hash Value: tbl-risk-density-rates quartile_footnote
@@ -566,6 +698,16 @@ msgstr ""
 msgid "This is a special analysis that"
 msgstr ""
 
+#. type: newcommand{#4}
+#: reports/Reference-Report/translations.tex:2
+msgid "This project has received funding from the European Union’s Horizon 2020 research and innovation"
+msgstr ""
+
+#. type: newcommand{#4}
+#: reports/Reference-Report/translations.tex:2
+msgid "programme under grant agreement No 965328."
+msgstr ""
+
 #. type: Plain text
 #: reports/Reference-Report/content/_introduction.Rmd:4
 #, markdown-text, no-wrap
@@ -644,12 +786,20 @@ msgstr ""
 msgid "As the process, although supported by various tools, relies on the collection, interpretation and monitoring of information by qualified professionals, NeoIPC surveillance is currently being targeted at the most common nosocomial infections in high-risk neonates, in order to make it sustainable in a continuous manner in as many settings as possible. This means that patients with a birth weight below 1500 g and/or a gestational age below 32 weeks at the time of birth are included into the surveillance database if they are admitted to a participating neonatology department within the first 120 days of life. In combination with the filter settings specified above, this results in the composition of the patient population shown in @fig-bw and @fig-ga.\n"
 msgstr ""
 
-#. type: newcommand{#4}
-#: reports/Reference-Report/translations.tex:2
-msgid "This project has received funding from the European Union’s Horizon 2020 research and innovation"
+#. type: Title #
+#: reports/Reference-Report/content/_nosocomial_infections.Rmd:1
+#, markdown-text, no-wrap
+msgid "Nosocomial Infections"
 msgstr ""
 
-#. type: newcommand{#4}
-#: reports/Reference-Report/translations.tex:2
-msgid "programme under grant agreement No 965328."
+#. type: Plain text
+#: reports/Reference-Report/content/_nosocomial_infections.Rmd:4
+#, markdown-text, no-wrap
+msgid "Nosocomial infections represent the primary endpoint of NeoIPC surveillance. In @tbl-incidence-density-rates, the incidence densities of sepsis/BSI, pneumonia and necrotising enterocolitis, as well as the combined endpoint 'severe infection', are displayed. Overall `r dR$numberOfSevereInfections` severe infections were recorded in `r dR$numberOfPatients` infants resulting in an average number of `r dR$averageSevereInfectionsPerPatient` infections per patient.\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Reference-Report/content/_nosocomial_infections.Rmd:5
+#, markdown-text, no-wrap
+msgid "Device-associated infections can be found in @tbl-device-associated-incidence-density-rates.\n"
 msgstr ""

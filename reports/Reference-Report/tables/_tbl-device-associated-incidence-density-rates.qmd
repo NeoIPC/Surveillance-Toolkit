@@ -1,26 +1,25 @@
 ```{r}
 #| label: tbl-device-associated-incidence-density-rates
-#| tbl-cap: "Incidence densities of device-associated infections"
+#| tbl-cap: !expr 'sR$`tbl-device-associated-incidence-density-rates`$`tbl-cap`'
 #| tbl-cap-location: top
 
 reference_data |>
   neoipcr::get_dev_ass_incidence_density_rate_table() |>
   dplyr::rename(
-    "Device"="dev",
-    "N"="n",
-    "Pooled"="pooled",
-    "Q₁"="q1",
-    "Q₂"="q2",
-    "Q₃"="q3") |>
+    !!sR$table_headers$n := "n",
+    !!sR$table_headers$pooled := "pooled",
+    !!sR$table_headers$q1 := "q1",
+    !!sR$table_headers$q2 := "q2",
+    !!sR$table_headers$q3 := "q3") |>
   dplyr::mutate(
-    Device = dplyr::case_match(
-      as.character(.data$Device),
-      "cvc" ~ "CVC",
-      "pvc" ~ "PVC",
-      "vs" ~ "Any ventilatory support",
-      "inv" ~ "INV",
-      "niv" ~ "NIV")) |>
-  gt(rowname_col = "Device") |>
+    dev = dplyr::case_match(
+      as.character(.data$dev),
+      "cvc" ~ sR$`tbl-device-associated-incidence-density-rates`$cvc,
+      "pvc" ~ sR$`tbl-device-associated-incidence-density-rates`$pvc,
+      "vs" ~ sR$`tbl-device-associated-incidence-density-rates`$vs,
+      "inv" ~ sR$`tbl-device-associated-incidence-density-rates`$inv,
+      "niv" ~ sR$`tbl-device-associated-incidence-density-rates`$niv)) |>
+  gt(rowname_col = "dev") |>
   sub_missing() |>
   gt::tab_options(
     latex.use_longtable = TRUE,
@@ -28,20 +27,46 @@ reference_data |>
     table.font.size = 13,
     footnotes.marks = "extended"
   ) |>
-  fmt_number(decimals = 1) |>
-  fmt_number(columns = "N", decimals = 0) |>
+  fmt_number(
+    columns = !sR$table_headers$n,
+    decimals = 1,
+    sep_mark = sR$digit_group_separator,
+    min_sep_threshold = 2,
+    locale = locale_gt) |>
+  fmt_integer(
+    columns = sR$table_headers$n,
+    sep_mark = sR$digit_group_separator,
+    min_sep_threshold = 2) |>
   cols_width(
     stub() ~ pct(25),
-    N ~ pct(15),
-    Pooled ~ pct(15),
-    starts_with("Q") ~ pct(15)
+    sR$table_headers$n ~ pct(15),
+    sR$table_headers$pooled ~ pct(15),
+    sR$table_headers$q1 ~ pct(15),
+    sR$table_headers$q2 ~ pct(15),
+    sR$table_headers$q3 ~ pct(15)
   ) |>
-  tab_row_group(label = "Vascular catheter associated sepsis / bloodstream infection", rows = 1:2, id = "grp_vc") |>
-  tab_row_group(label = "Ventilatory support associated pneumonia", rows = 3:5, id = "grp_vs") |>
+  tab_row_group(
+    label = sR$`tbl-device-associated-incidence-density-rates`$grp_vc,
+    rows = tidyselect::any_of(c(
+      sR$`tbl-device-associated-incidence-density-rates`$cvc,
+      sR$`tbl-device-associated-incidence-density-rates`$pvc)),
+    id = "grp_vc") |>
+  tab_row_group(
+    label = sR$`tbl-device-associated-incidence-density-rates`$grp_vs,
+    rows = tidyselect::any_of(c(
+      sR$`tbl-device-associated-incidence-density-rates`$vs,
+      sR$`tbl-device-associated-incidence-density-rates`$inv,
+      sR$`tbl-device-associated-incidence-density-rates`$niv)),
+    id = "grp_vs") |>
   row_group_order(groups = c("grp_vc", "grp_vs")) |>
   tab_spanner(
-    label = "Device-Associated Incidence Density Rate",
-    columns = c("Pooled","Q₁","Q₂","Q₃"),
+    label = sR$`tbl-device-associated-incidence-density-rates`$dev_ass_incidence_density_rate,
+    columns = tidyselect::any_of(
+     c(
+     sR$table_headers$pooled,
+     sR$table_headers$q1,
+     sR$table_headers$q2,
+     sR$table_headers$q3)),
     id = "da_incidence_density_rate"
   ) |>
   tab_style(
@@ -56,24 +81,40 @@ reference_data |>
     footnote = md(
       paste0(
         "$$\\text{",
-        "Device-Associated Incidence Density Rate",
+        sR$`tbl-device-associated-incidence-density-rates`$dev_ass_incidence_density_rate,
         "} = \\frac{\\text{",
-        "Number of device-associated infections",
+        sR$`tbl-device-associated-incidence-density-rates`$n_dev_ass_inf,
         "}}{\\text{",
-        "Device days",
+        sR$`tbl-device-associated-incidence-density-rates`$n_dev_days,
         "}} \\times ",
-        format(1000, big.mark = locale_sep_mark),
+        format_integer(1000),
         "$$"
       )),
     locations = cells_column_spanners(spanners = "da_incidence_density_rate")
   ) |>
   tab_footnote(
-    footnote = "N: The aggregated number of device-associated infections in all infants.",
-    locations = cells_column_labels(columns = "N")) |>
+    footnote = sprintf(
+      sR$`tbl-device-associated-incidence-density-rates`$n_footnote,
+      sR$table_headers$n),
+    locations = cells_column_labels(columns = sR$table_headers$n)) |>
   tab_footnote(
-    footnote = "Pooled: The incidence density rate calculated across all infants from all departments.",
-    locations = cells_column_labels(columns = "Pooled")) |>
+    footnote = sprintf(
+      sR$`tbl-device-associated-incidence-density-rates`$pooled_footnote,
+      sR$table_headers$pooled),
+    locations = cells_column_labels(columns = sR$table_headers$pooled)) |>
   tab_footnote(
-    footnote = "Q₁, Q₂, Q₃: The quartiles (25%, 50% and 75% quantiles) of the Device-Associated Incidence Density Rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected infections is greater than or equal to one according to the pooled Device-Associated Incidence Density Rate.",
-    locations = cells_column_labels(columns = c("Q₁","Q₂","Q₃")))
+    footnote = sprintf(
+      sR$`tbl-device-associated-incidence-density-rates`$quartile_footnote,
+      sR$table_headers$q1,
+      sR$table_headers$q2,
+      sR$table_headers$q3,
+      sprintf("%i%s", 25L, sR$percent_symbol),
+      sprintf("%i%s", 50L, sR$percent_symbol),
+      sprintf("%i%s", 75L, sR$percent_symbol)
+      ),
+    locations = cells_column_labels(columns = c(
+      sR$table_headers$q1,
+      sR$table_headers$q2,
+      sR$table_headers$q3)))
+
 ```

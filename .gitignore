@@ -5,8 +5,6 @@
 .quarto
 *.aux
 *.log
-*.tex
-!before-body.tex
 artifacts
 build
 doc/protocol/NeoIPC-Antibiotics*.adoc
@@ -21,6 +19,7 @@ glossary.*.yaml
 metadata/common/infectious-agents/NeoIPC-Infectious-Agents.*.yaml
 metadata/common/infectious-agents/Output-Footer.*.adoc
 metadata/common/infectious-agents/Output-Header.*.adoc
+output/
 reports/**/*.html
 reports/**/*.md
 reports/**/*_files/**

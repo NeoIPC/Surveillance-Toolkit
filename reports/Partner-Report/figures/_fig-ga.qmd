@@ -31,7 +31,7 @@ density_data <- benchmark_data$gestational_age_figure$density |>
   dplyr::filter(dataset == "own")
 
 density_factor <- sum(histogram_data$n) *
-  (nrow(density_data) / nrow(histogram_data))
+  (nrow(density_data) / length(seq.int(from = min(density_data$gestational_age), to = max(density_data$gestational_age), by = 7L)))
 
 A_plot <- ggplot() +
   geom_col(

@@ -6,7 +6,7 @@
 tbl <- benchmark_data$usage_density_rate_table |>
   dplyr::select(-tidyselect::any_of("n_ref")) |>
   dplyr::rename(
-      !!sR$table_headers$n_ := "days_own",
+      !!sR$table_headers$n := "days_own",
       !!sR$table_headers$rate := "rate_own",
       !!sR$table_headers$pooled := tidyselect::any_of("pooled_ref"),
       !!sR$table_headers$q1 := tidyselect::any_of("q1_ref"),

@@ -29,7 +29,7 @@ density_data <- benchmark_data$birth_weight_figure$density |>
   dplyr::filter(dataset == "own")
 
 density_factor <- sum(histogram_data$n) *
-  (nrow(density_data) / nrow(histogram_data))
+  (nrow(density_data) / length(seq.int(from = min(density_data$birth_weight), to = max(density_data$birth_weight), by = 50L)))
 
 A_plot <- ggplot() +
   geom_col(

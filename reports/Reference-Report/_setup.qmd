@@ -185,7 +185,7 @@ get_dataset_options <- function(
 format_integer <- function(x, big_mark = sR$digit_group_separator)
   dplyr::if_else(x < 10000, format(as.integer(x), big.mark = ""), format(as.integer(x), big.mark = big_mark))
 
-label_bw <- function(x) {
+labels_bw <- function(x) {
   paste(
     format_integer(x),
     sR$gramm_abbreviation,
@@ -197,6 +197,22 @@ breaks_bw <- function(x) {
     as.integer(
       (as.integer(x[2]) + 1 - as.integer(x[1])) / 100)
     )
+}
+labels_wk <- function(x) {
+  paste(
+    format(
+      as.integer(x / 7),
+      big.mark = sR$digit_group_separator
+      ),
+    sR$week_abbreviation,
+    sep = sR$unit_separator)
+}
+
+breaks_wk <- function(x) {
+  pretty(
+    x / 7,
+    as.integer((as.integer(x[2] / 7) + 1 - as.integer(x[1] / 7)) / 2)
+    ) * 7
 }
 
 ```
@@ -355,6 +371,19 @@ dR <- list(
   sumOfPatientDays = format_integer(reference_data$n_patient_days$total),
   averageSurveillancePeriod = format(
     reference_data$n_patient_days$total / reference_data$n_patients$total,
+    digits = 2,
+    nsmall = 1,
+    scientific = FALSE),
+  numberOfSevereInfections = format_integer(
+    reference_data$incidence_density_rate_table |>
+      dplyr::filter(inf == "si") |>
+      dplyr::pull("n")),
+  averageSevereInfectionsPerPatient = format(
+    (
+      (reference_data$incidence_density_rate_table |>
+         dplyr::filter(inf == "si") |>
+         dplyr::pull("n")) /
+        reference_data$n_patients$total),
     digits = 2,
     nsmall = 1,
     scientific = FALSE)
