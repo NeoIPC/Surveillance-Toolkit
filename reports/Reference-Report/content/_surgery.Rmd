@@ -1,0 +1,5 @@
+## Surgery
+
+In this dataset, `{r} format(n_surgical_departments, big.mark = locale_sep_mark)` of the partner departments (`{r} format(round(n_surgical_departments / length(unique(data$enrollments$department_key)) * 100))`%) recorded a total of `{r} format(n_procedures, big.mark = locale_sep_mark)` surgical procedures performed on `{r} format(n_patients, big.mark = locale_sep_mark)` neonates, resulting in an average number of `{r} format(n_procedures_per_patient, digits = 2, nsmall = 1, scientific = FALSE)` operations per surgical patient during the surveillance period.
+
+Due to the low number of surgical site infections in this dataset (n = `{r} format(nrow(data$ssiData), digits = 2, nsmall = 1, scientific = FALSE)`) we are not currently calculating their infection rates, but @tbl-surgical-procedure-rates provides an overview of the categories of procedures performed on neonates.

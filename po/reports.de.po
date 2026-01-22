@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: NeoIPC Surveillance Reports 0.9\n"
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
 "POT-Creation-Date: 2026-01-20 00:41+0100\n"
-"PO-Revision-Date: 2026-01-20 00:49+0100\n"
+"PO-Revision-Date: 2026-01-20 01:11+0100\n"
 "Last-Translator: Brar Piening <brar.piening@charite.de>\n"
 "Language-Team: none\n"
 "Language: de\n"
@@ -668,7 +668,7 @@ msgstr "Dieser Bericht fasst Daten aus neonatologischen Abteilungen in mehreren 
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "The aim of NeoIPC Surveillance is therefore always to provide units with a relevant national or regional report, provided that a sufficient number of units in the respective region participate in the system."
-msgstr "Das Ziel von NeoIPC Surveillance ist es daher stets, den Partnern einen relevanten nationalen oder regionalen Bericht zur Verfügung zu stellen, vorausgesetzt, dass eine ausreichende Anzahl von Abteilungen in der jeweiligen Region an dem System teilnimmt."
+msgstr "Das Ziel der NeoIPC Surveillance ist es daher stets, den Partnern einen relevanten nationalen oder regionalen Bericht zur Verfügung zu stellen, vorausgesetzt, dass eine ausreichende Anzahl von Abteilungen in der jeweiligen Region an dem System teilnimmt."
 
 #. type: Hash Value: headerList multiCountryHintHeader
 #: reports/Reference-Report/content/_sR.yaml:1

@@ -1,0 +1,67 @@
+{{< include _setup.qmd >}}
+
+{{< include _header.qmd >}}
+
+{{< pagebreak >}}
+
+```{r}
+#| output: asis
+include_localised("_introduction.Rmd")
+```
+
+::: {.content-visible when-format="pdf"}
+\FloatBarrier
+:::
+
+```{r}
+#| output: asis
+include_localised("_patient_population.Rmd")
+```
+
+{{< include figures/_fig-bw.qmd >}}
+
+{{< include figures/_fig-ga.qmd >}}
+
+{{< pagebreak >}}
+
+```{r}
+#| output: asis
+include_localised("_nosocomial_infections.Rmd")
+```
+
+{{< include tables/_tbl-incidence-density-rates.qmd >}}
+
+{{< include tables/_tbl-device-associated-incidence-density-rates.qmd >}}
+
+{{< pagebreak >}}
+
+```{r}
+#| output: asis
+include_localised("_infectious_agents.Rmd")
+```
+
+{{< include tables/_tbl-agent-per-infection-rate.qmd >}}
+
+<!-- {{< include tables/_tbl-abr-infection-rate.qmd >}} -->
+
+{{< include tables/_tbl-infectious-agent-detection-rate.qmd >}}
+
+<!-- {{< include tables/_tbl-resistance-test-rate.qmd >}} -->
+
+{{< pagebreak >}}
+
+```{r}
+#| output: asis
+include_localised("_risk_and_protective_factors.Rmd")
+```
+
+{{< include tables/_tbl-risk-density-rates.qmd >}}
+
+{{< pagebreak >}}
+
+```{r}
+#| output: asis
+include_localised("_surgery.Rmd")
+```
+
+{{< include tables/_tbl-surgical-procedure-rates.qmd >}}
