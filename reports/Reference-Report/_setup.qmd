@@ -386,7 +386,29 @@ dR <- list(
         reference_data$n_patients$total),
     digits = 2,
     nsmall = 1,
-    scientific = FALSE)
+    scientific = FALSE),
+  numberOfInfectiousAgents = format_integer(
+    reference_data$infectious_agent_detection_rate_per_agent_table |>
+      dplyr::filter(group == "Total") |>
+      dplyr::pull("n")),
+  numberOfInfectionsWithAgent = format_integer(
+    reference_data$infectious_agent_detection_rate_per_inf_type_table |>
+      dplyr::filter(inf == "all") |>
+      dplyr::pull("n")),
+  overallNumberOfInfections = "ToDo",#format_integer(
+    # data |>
+    #   neoipcr:::get_infection_counts() |>
+    #   dplyr::pull("n")),
+  infectiousAgentDetectionRate = "ToDo" #format(
+    # (
+    #   (reference_data$infectious_agent_detection_rate_per_inf_type_table |>
+    #      dplyr::filter(inf == "all") |>
+    #      dplyr::pull("n")) / (
+    #        data |> neoipcr:::get_infection_counts()
+    #        |> dplyr::pull("n")) * 100),
+    # digits = 2,
+    # nsmall = 1,
+    # scientific = FALSE)
 )
 
 ```
