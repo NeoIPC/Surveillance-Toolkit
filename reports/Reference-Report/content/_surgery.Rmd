@@ -1,5 +1,5 @@
 ## Surgery
 
-In this dataset, `r dR$numberOfSurgicalDepartments` of the partner departments (`r dR$proportionOfSurgicalDepartments`) recorded a total of `r dR$numberOfSurgicalProcedures` surgical procedures performed on `r dR$numberOfSurgicalPatients` neonates, resulting in an average number of `r dR$numberOfSurgicalProceduresPerPatient` operations per surgical patient during the surveillance period.
+`r dR$numberOfSurgicalDepartments` of the partner departments in this dataset (`r dR$proportionOfSurgicalDepartments`) recorded a total of `r dR$numberOfSurgicalProcedures` surgical procedures performed on `r dR$numberOfSurgicalPatients` neonates, resulting in an average number of `r dR$numberOfSurgicalProceduresPerPatient` operations per surgical patient during the surveillance period.
 
 Due to the low number of surgical site infections in this dataset (n = `r dR$numberOfSurgicalSiteInfections`) we are not currently calculating their infection rates, but @tbl-surgical-procedure-rates provides an overview of the categories of procedures performed on neonates.

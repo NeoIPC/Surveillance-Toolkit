@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NeoIPC Surveillance Reports 0.9\n"
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-01-24 07:12+0100\n"
-"PO-Revision-Date: 2026-01-24 07:22+0100\n"
+"POT-Creation-Date: 2026-01-24 07:34+0100\n"
+"PO-Revision-Date: 2026-01-24 07:35+0100\n"
 "Last-Translator: Brar Piening <brar.piening@charite.de>\n"
 "Language-Team: none\n"
 "Language: de\n"
@@ -851,8 +851,8 @@ msgstr "Chirurgie"
 #. type: Plain text
 #: reports/Reference-Report/content/_surgery.Rmd:4
 #, no-wrap
-msgid "In this dataset, `r dR$numberOfSurgicalDepartments` of the partner departments (`r dR$proportionOfSurgicalDepartments`) recorded a total of `r dR$numberOfSurgicalProcedures` surgical procedures performed on `r dR$numberOfSurgicalPatients` neonates, resulting in an average number of `r dR$numberOfSurgicalProceduresPerPatient` operations per surgical patient during the surveillance period.\n"
-msgstr "In diesem Datensatz `r dR$numberOfSurgicalDepartments` der Partnerabteilungen (`r dR$proportionOfSurgicalDepartments`) insgesamt `r dR$numberOfSurgicalProcedures` chirurgische Eingriffe an `r dR$numberOfSurgicalPatients` Neugeborenen durchgeführt, was zu einer durchschnittlichen Anzahl von `r dR$numberOfSurgicalProceduresPerPatient` Operationen pro chirurgischem Patienten während des Überwachungszeitraums führte. \n"
+msgid "`r dR$numberOfSurgicalDepartments` of the partner departments in this dataset (`r dR$proportionOfSurgicalDepartments`) recorded a total of `r dR$numberOfSurgicalProcedures` surgical procedures performed on `r dR$numberOfSurgicalPatients` neonates, resulting in an average number of `r dR$numberOfSurgicalProceduresPerPatient` operations per surgical patient during the surveillance period.\n"
+msgstr "`r dR$numberOfSurgicalDepartments` der Partnerabteilungen in diesem Datensatz (`r dR$proportionOfSurgicalDepartments`) erfassten insgesamt `r dR$numberOfSurgicalProcedures` chirurgische Eingriffe an `r dR$numberOfSurgicalPatients` Neugeborenen, was zu einer durchschnittlichen Anzahl von `r dR$numberOfSurgicalProceduresPerPatient` Operationen pro chirurgischem Patienten während des Surveillance-Zeitraums führte.\n"
 
 #. type: Plain text
 #: reports/Reference-Report/content/_surgery.Rmd:5

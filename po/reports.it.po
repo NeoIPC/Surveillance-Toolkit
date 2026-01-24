@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NeoIPC Surveillance Reports 0.9\n"
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-01-24 07:12+0100\n"
+"POT-Creation-Date: 2026-01-24 07:34+0100\n"
 "PO-Revision-Date: 2025-12-30 19:55+0100\n"
 "Last-Translator: Brar Piening <brar.piening@charite.de>\n"
 "Language-Team: none\n"
@@ -855,7 +855,7 @@ msgstr ""
 #. type: Plain text
 #: reports/Reference-Report/content/_surgery.Rmd:4
 #, no-wrap
-msgid "In this dataset, `r dR$numberOfSurgicalDepartments` of the partner departments (`r dR$proportionOfSurgicalDepartments`) recorded a total of `r dR$numberOfSurgicalProcedures` surgical procedures performed on `r dR$numberOfSurgicalPatients` neonates, resulting in an average number of `r dR$numberOfSurgicalProceduresPerPatient` operations per surgical patient during the surveillance period.\n"
+msgid "`r dR$numberOfSurgicalDepartments` of the partner departments in this dataset (`r dR$proportionOfSurgicalDepartments`) recorded a total of `r dR$numberOfSurgicalProcedures` surgical procedures performed on `r dR$numberOfSurgicalPatients` neonates, resulting in an average number of `r dR$numberOfSurgicalProceduresPerPatient` operations per surgical patient during the surveillance period.\n"
 msgstr ""
 
 #. type: Plain text
