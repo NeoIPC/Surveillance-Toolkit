@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NeoIPC Surveillance Reports 0.9\n"
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-01-24 07:47+0100\n"
+"POT-Creation-Date: 2026-01-24 13:40+0100\n"
 "PO-Revision-Date: 2025-12-30 19:55+0100\n"
 "Last-Translator: Brar Piening <brar.piening@charite.de>\n"
 "Language-Team: none\n"
@@ -118,6 +118,30 @@ msgstr ""
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Rate"
+msgstr ""
+
+#. type: Hash Value: tbl-agent-per-infection-rate n_footnote
+#: reports/common.yaml:1
+#, no-wrap
+msgid "%s: The aggregated number of infectious agents in all infections."
+msgstr ""
+
+#. type: Hash Value: tbl-agent-per-infection-rate pooled_footnote
+#: reports/common.yaml:1
+#, no-wrap
+msgid "%s: The Agent-per-Infection Rate calculated across all infants from all departments."
+msgstr ""
+
+#. type: Hash Value: tbl-agent-per-infection-rate quartile_footnote
+#: reports/common.yaml:1
+#, no-wrap
+msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Agent-per-Infection Rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected agents detected in infections is greater than or equal to one according to the pooled Agent-per-Infection Rate."
+msgstr ""
+
+#. type: Hash Value: tbl-agent-per-infection-rate tbl-cap
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Infectious agents detected in nosocomial infections"
 msgstr ""
 
 #. type: Hash Value: tbl-risk-density-rates cvc
