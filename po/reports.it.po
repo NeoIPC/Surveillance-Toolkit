@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NeoIPC Surveillance Reports 0.9\n"
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-01-24 13:40+0100\n"
+"POT-Creation-Date: 2026-01-24 22:27+0100\n"
 "PO-Revision-Date: 2025-12-30 19:55+0100\n"
 "Last-Translator: Brar Piening <brar.piening@charite.de>\n"
 "Language-Team: none\n"
@@ -17,6 +17,30 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. type: Hash Value: 3gcr
+#: reports/common.yaml:1
+#, no-wrap
+msgid "3^rd^ gen. cephalosporin resistance (3GCR)"
+msgstr ""
+
+#. type: Hash Value: bsi
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Primary sepsis/BSI"
+msgstr ""
+
+#. type: Hash Value: car
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Carbapenem resistance (CARBR)"
+msgstr ""
+
+#. type: Hash Value: cor
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Colistin resistance (COLR)"
+msgstr ""
 
 #. type: Hash Value: day
 #: reports/common.yaml:1
@@ -72,6 +96,24 @@ msgstr ""
 msgid "g"
 msgstr ""
 
+#. type: Hash Value: hap
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Pneumonia"
+msgstr ""
+
+#. type: Hash Value: mrsa
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Methicillin-resistant Staphylococcus aureus (MRSA)"
+msgstr ""
+
+#. type: Hash Value: nec
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Necrotising Enterocolitis"
+msgstr ""
+
 #. type: Hash Value: patient_days
 #: reports/common.yaml:1
 #, no-wrap
@@ -82,6 +124,18 @@ msgstr ""
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%"
+msgstr ""
+
+#. type: Hash Value: si
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Severe infection"
+msgstr ""
+
+#. type: Hash Value: ssi
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Surgical site infection"
 msgstr ""
 
 #. type: Hash Value: table_headers n
@@ -120,6 +174,48 @@ msgstr ""
 msgid "Rate"
 msgstr ""
 
+#. type: Hash Value: tbl-abr-infection-rate n_footnote
+#: reports/common.yaml:1
+#, no-wrap
+msgid "%s: The aggregated number of antibiotic resistant pathogens in all infections."
+msgstr ""
+
+#. type: Hash Value: tbl-abr-infection-rate pooled_footnote
+#: reports/common.yaml:1
+#, no-wrap
+msgid "%s: The resistant pathogen infection rate calculated across all infants from all departments."
+msgstr ""
+
+#. type: Hash Value: tbl-abr-infection-rate quartile_footnote
+#: reports/common.yaml:1
+#, no-wrap
+msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the resistant pathogen infection rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected infections with an agents is greater than or equal to one according to the pooled resistant pathogen infection rate."
+msgstr ""
+
+#. type: Hash Value: tbl-abr-infection-rate rate_denominator
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Number of infections where a pathogen was detected"
+msgstr ""
+
+#. type: Hash Value: tbl-abr-infection-rate rate_name
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Resistant pathogen infection rate"
+msgstr ""
+
+#. type: Hash Value: tbl-abr-infection-rate rate_numerator
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Number of antibiotic resistant pathogens in infections"
+msgstr ""
+
+#. type: Hash Value: tbl-abr-infection-rate tbl-cap
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Nosocomial infections with resistant pathogens"
+msgstr ""
+
 #. type: Hash Value: tbl-agent-per-infection-rate n_footnote
 #: reports/common.yaml:1
 #, no-wrap
@@ -138,6 +234,24 @@ msgstr ""
 msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Agent-per-Infection Rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected agents detected in infections is greater than or equal to one according to the pooled Agent-per-Infection Rate."
 msgstr ""
 
+#. type: Hash Value: tbl-agent-per-infection-rate rate_denominator
+#: reports/common.yaml:1
+#, no-wrap
+msgid "No of infections where an infectious agent was detected"
+msgstr ""
+
+#. type: Hash Value: tbl-agent-per-infection-rate rate_name
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Agent-per-Infection Rate"
+msgstr ""
+
+#. type: Hash Value: tbl-agent-per-infection-rate rate_numerator
+#: reports/common.yaml:1
+#, no-wrap
+msgid "No of infectious agents that were detected in infections"
+msgstr ""
+
 #. type: Hash Value: tbl-agent-per-infection-rate tbl-cap
 #: reports/common.yaml:1
 #, no-wrap
@@ -145,7 +259,7 @@ msgid "Infectious agents detected in nosocomial infections"
 msgstr ""
 
 #. type: Hash Value: tbl-risk-density-rates cvc
-#: reports/common.yaml:1 reports/Partner-Report/content/_sR.yaml:1
+#: reports/common.yaml:1
 #, no-wrap
 msgid "CVC"
 msgstr ""
@@ -169,7 +283,7 @@ msgid "Ventilatory support associated pneumonia"
 msgstr ""
 
 #. type: Hash Value: tbl-risk-density-rates inv
-#: reports/common.yaml:1 reports/Partner-Report/content/_sR.yaml:1
+#: reports/common.yaml:1
 #, no-wrap
 msgid "INV"
 msgstr ""
@@ -193,7 +307,7 @@ msgid "%s: The aggregated number of device-associated infections in all infants.
 msgstr ""
 
 #. type: Hash Value: tbl-risk-density-rates niv
-#: reports/common.yaml:1 reports/Partner-Report/content/_sR.yaml:1
+#: reports/common.yaml:1
 #, no-wrap
 msgid "NIV"
 msgstr ""
@@ -205,7 +319,7 @@ msgid "%s: The Device-Associated Incidence Density Rate calculated across all in
 msgstr ""
 
 #. type: Hash Value: tbl-risk-density-rates pvc
-#: reports/common.yaml:1 reports/Partner-Report/content/_sR.yaml:1
+#: reports/common.yaml:1
 #, no-wrap
 msgid "PVC"
 msgstr ""
@@ -228,14 +342,8 @@ msgstr ""
 msgid "Any ventilatory support"
 msgstr ""
 
-#. type: Hash Value: tbl-incidence-density-rates bsi
+#. type: Hash Value: tbl-surgical-procedure-rates other
 #: reports/common.yaml:1
-#, no-wrap
-msgid "Primary sepsis/BSI"
-msgstr ""
-
-#. type: Hash Value: tbl-risk-density-rates other
-#: reports/common.yaml:1 reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Other"
 msgstr ""
@@ -244,12 +352,6 @@ msgstr ""
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Primary sepsis/BSI/Pneumonia"
-msgstr ""
-
-#. type: Hash Value: tbl-incidence-density-rates hap
-#: reports/common.yaml:1
-#, no-wrap
-msgid "Pneumonia"
 msgstr ""
 
 #. type: Hash Value: tbl-incidence-density-rates incidence_density_rate
@@ -270,12 +372,6 @@ msgstr ""
 msgid "Number of infections"
 msgstr ""
 
-#. type: Hash Value: tbl-incidence-density-rates nec
-#: reports/common.yaml:1
-#, no-wrap
-msgid "Necrotising Enterocolitis"
-msgstr ""
-
 #. type: Hash Value: tbl-incidence-density-rates pooled_footnote
 #: reports/common.yaml:1
 #, no-wrap
@@ -286,12 +382,6 @@ msgstr ""
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Incidence Density Rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected infections is greater than or equal to one according to the pooled Incidence Density Rate."
-msgstr ""
-
-#. type: Hash Value: tbl-incidence-density-rates si
-#: reports/common.yaml:1
-#, no-wrap
-msgid "Severe infection"
 msgstr ""
 
 #. type: Hash Value: tbl-incidence-density-rates si_footnote
@@ -306,11 +396,335 @@ msgstr ""
 msgid "Incidence Density Rates of nosocomial infections"
 msgstr ""
 
+#. type: Hash Value: tbl-infectious-agent-detection-rate n_footnote
+#: reports/common.yaml:1
+#, no-wrap
+msgid "%s: The aggregated number of infections where at least one infectious agent was recorded."
+msgstr ""
+
+#. type: Hash Value: tbl-infectious-agent-detection-rate pooled_footnote
+#: reports/common.yaml:1
+#, no-wrap
+msgid "%s: The Infectious Agent Detection Rate calculated across all infants from all departments."
+msgstr ""
+
+#. type: Hash Value: tbl-infectious-agent-detection-rate quartile_footnote
+#: reports/common.yaml:1
+#, no-wrap
+msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Infectious Agent Detection Rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected infections with an agents is greater than or equal to one according to the pooled Infectious Agent Detection Rate."
+msgstr ""
+
+#. type: Hash Value: tbl-infectious-agent-detection-rate rate_denominator
+#: reports/common.yaml:1
+#, no-wrap
+msgid "No of infections"
+msgstr ""
+
+#. type: Hash Value: tbl-infectious-agent-detection-rate rate_name
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Infectious Agent Detection Rate"
+msgstr ""
+
+#. type: Hash Value: tbl-infectious-agent-detection-rate rate_numerator
+#: reports/common.yaml:1
+#, no-wrap
+msgid "No of infections with agent"
+msgstr ""
+
+#. type: Hash Value: tbl-infectious-agent-detection-rate tbl-cap
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Infections in which an infectious agent has been identified, including secondary BSI following the infection."
+msgstr ""
+
+#. type: Hash Value: tbl-resistance-test-rate if_3gcr
+#: reports/common.yaml:1
+#, no-wrap
+msgid "in case of 3GCR"
+msgstr ""
+
+#. type: Hash Value: tbl-resistance-test-rate if_3gcr_and_car
+#: reports/common.yaml:1
+#, no-wrap
+msgid "in case of 3GCR and CARBR"
+msgstr ""
+
+#. type: Hash Value: tbl-resistance-test-rate n_footnote
+#: reports/common.yaml:1
+#, no-wrap
+msgid "%s: The aggregated number of antibiotic resistant pathogens that have a documented test for antibiotic resistance."
+msgstr ""
+
+#. type: Hash Value: tbl-resistance-test-rate pooled_footnote
+#: reports/common.yaml:1
+#, no-wrap
+msgid "%s: The antibiotic resistance test rate calculated across all infants from all departments."
+msgstr ""
+
+#. type: Hash Value: tbl-resistance-test-rate quartile_footnote
+#: reports/common.yaml:1
+#, no-wrap
+msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the antibiotic resistance test rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected infections with an agents is greater than or equal to one according to the pooled antibiotic resistance test rate."
+msgstr ""
+
+#. type: Hash Value: tbl-resistance-test-rate rate_denominator
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Number of pathogens eligible for antibiotic resistance test recording"
+msgstr ""
+
+#. type: Hash Value: tbl-resistance-test-rate rate_name
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Antibiotic resistance test rate"
+msgstr ""
+
+#. type: Hash Value: tbl-resistance-test-rate rate_numerator
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Number of pathogens with recorded test for antibiotic resistance"
+msgstr ""
+
+#. type: Hash Value: tbl-resistance-test-rate tbl-cap
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Antibiotic resistance diagnostics"
+msgstr ""
+
+#. type: Hash Value: tbl-risk-density-rates access
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Access"
+msgstr ""
+
+#. type: Hash Value: tbl-risk-density-rates antibiotics
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Antibiotics"
+msgstr ""
+
+#. type: Hash Value: tbl-risk-density-rates any
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Any"
+msgstr ""
+
+#. type: Hash Value: tbl-risk-density-rates any_antibiotic
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Any antibiotic"
+msgstr ""
+
+#. type: Hash Value: tbl-risk-density-rates aware_footnote
+#: reports/common.yaml:1
+#, no-wrap
+msgid "WHO AWaRe group (see %s). As cumulative treatment days for individual substances are recorded per patient, combination therapies using several substances on one day are counted as multiple days."
+msgstr ""
+
+#. type: Hash Value: tbl-risk-density-rates days_with_risk_factor
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Days with risk/protective factor"
+msgstr ""
+
+#. type: Hash Value: tbl-risk-density-rates human_milk
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Human milk"
+msgstr ""
+
+#. type: Hash Value: tbl-risk-density-rates kangaroo_care
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Kangaroo care"
+msgstr ""
+
+#. type: Hash Value: tbl-risk-density-rates n_footnote own
+#: reports/common.yaml:1
+#, no-wrap
+msgid "%s: The aggregated number of days the risk/protective factor was present in your unit's infants."
+msgstr ""
+
+#. type: Hash Value: tbl-risk-density-rates n_footnote ref
+#: reports/common.yaml:1
+#, no-wrap
+msgid "%s: The aggregated number of days the risk/protective factor was present in all infants."
+msgstr ""
+
+#. type: Hash Value: tbl-risk-density-rates pooled_footnote
+#: reports/common.yaml:1
+#, no-wrap
+msgid "%s: The Risk Density Rate calculated across all infants from all departments in the reference data."
+msgstr ""
+
+#. type: Hash Value: tbl-risk-density-rates probiotic
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Probiotics"
+msgstr ""
+
+#. type: Hash Value: tbl-risk-density-rates quartile_footnote
+#: reports/common.yaml:1
+#, no-wrap
+msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Risk Density Rates of the departments in the reference data. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of device days is greater than or equal to one according to the pooled Risk Density Rate."
+msgstr ""
+
+#. type: Hash Value: tbl-risk-density-rates rate_footnote
+#: reports/common.yaml:1
+#, no-wrap
+msgid "%s: The Risk Density Rate calculated for your unit's infants."
+msgstr ""
+
+#. type: Hash Value: tbl-risk-density-rates reserve
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Reserve"
+msgstr ""
+
+#. type: Hash Value: tbl-risk-density-rates risk_density_rate
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Risk Density Rate"
+msgstr ""
+
+#. type: Hash Value: tbl-risk-density-rates tbl-cap
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Factors influencing the infants' risk of developing an infection or acquiring antibitic-resistant pathogens."
+msgstr ""
+
+#. type: Hash Value: tbl-risk-density-rates vascular_catheter
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Vascular catheter"
+msgstr ""
+
+#. type: Hash Value: tbl-risk-density-rates ventilatory_support
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Ventilatory support"
+msgstr ""
+
+#. type: Hash Value: tbl-risk-density-rates watch
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Watch"
+msgstr ""
+
+#. type: Hash Value: tbl-surgical-procedure-rates abdominal_surgery
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Abdominal surgery"
+msgstr ""
+
+#. type: Hash Value: tbl-surgical-procedure-rates cardiac_and_large_vessel_surgery
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Cardiac- / large vessel surgery"
+msgstr ""
+
+#. type: Hash Value: tbl-surgical-procedure-rates inguinal_hernia_surgery
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Inguinal hernia surgery"
+msgstr ""
+
+#. type: Hash Value: tbl-surgical-procedure-rates lung_pleural_space_thoracic_surgery
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Lung- / pleural space- / thoracic surgery"
+msgstr ""
+
+#. type: Hash Value: tbl-surgical-procedure-rates n_footnote
+#: reports/common.yaml:1
+#, no-wrap
+msgid "%s: The aggregated number surgical procedures performed in all infants."
+msgstr ""
+
+#. type: Hash Value: tbl-surgical-procedure-rates neurosurgery
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Neurosurgery"
+msgstr ""
+
+#. type: Hash Value: tbl-surgical-procedure-rates not_surgery
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Not a surgical procedure"
+msgstr ""
+
+#. type: Hash Value: tbl-surgical-procedure-rates oesophageal_surgery
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Oesophageal surgery"
+msgstr ""
+
+#. type: Hash Value: tbl-surgical-procedure-rates overall
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Overall"
+msgstr ""
+
+#. type: Hash Value: tbl-surgical-procedure-rates pooled_footnote
+#: reports/common.yaml:1
+#, no-wrap
+msgid "%s: The Surgical Procedure Rate calculated across all infants from all departments."
+msgstr ""
+
+#. type: Hash Value: tbl-surgical-procedure-rates quartile_footnote
+#: reports/common.yaml:1
+#, no-wrap
+msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Surgical Procedure Rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of procedures is greater than or equal to one according to the pooled Surgical Procedure Rate."
+msgstr ""
+
+#. type: Hash Value: tbl-surgical-procedure-rates rate_denominator
+#: reports/common.yaml:1
+#, no-wrap
+msgid "No of Patients"
+msgstr ""
+
+#. type: Hash Value: tbl-surgical-procedure-rates rate_name
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Surgical Procedure Rate"
+msgstr ""
+
+#. type: Hash Value: tbl-surgical-procedure-rates rate_numerator
+#: reports/common.yaml:1
+#, no-wrap
+msgid "No of procedures"
+msgstr ""
+
+#. type: Hash Value: tbl-surgical-procedure-rates tbl-cap
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Surgical procedures by category"
+msgstr ""
+
+#. type: Hash Value: tbl-surgical-procedure-rates to_be_categorised
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Not yet categorised"
+msgstr ""
+
+#. type: Hash Value: total
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Total"
+msgstr ""
+
 #. type: Hash Value: unit_separator
 #: reports/common.yaml:1
 #, no-wrap
 msgid " "
 msgstr " "
+
+#. type: Hash Value: vre
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Vancomycin-resistant Enterococcus (VRE)"
+msgstr ""
 
 #. type: Hash Value: week_abbreviation
 #: reports/common.yaml:1
@@ -334,120 +748,6 @@ msgstr ""
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Reference data"
-msgstr ""
-
-#. type: Hash Value: tbl-risk-density-rates access
-#: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "Access"
-msgstr ""
-
-#. type: Hash Value: tbl-risk-density-rates antibiotics
-#: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "Antibiotics"
-msgstr ""
-
-#. type: Hash Value: tbl-risk-density-rates any
-#: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "Any"
-msgstr ""
-
-#. type: Hash Value: tbl-risk-density-rates any_antibiotic
-#: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "Any antibiotic"
-msgstr ""
-
-#. type: Hash Value: tbl-risk-density-rates aware_footnote
-#: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "WHO AWaRe group (see %s). As cumulative treatment days for individual substances are recorded per patient, combination therapies using several substances on one day are counted as multiple days."
-msgstr ""
-
-#. type: Hash Value: tbl-risk-density-rates days_with_risk_factor
-#: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "Days with risk/protective factor"
-msgstr ""
-
-#. type: Hash Value: tbl-risk-density-rates human_milk
-#: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "Human milk"
-msgstr ""
-
-#. type: Hash Value: tbl-risk-density-rates kangaroo_care
-#: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "Kangaroo care"
-msgstr ""
-
-#. type: Hash Value: tbl-risk-density-rates n_footnote
-#: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "%s: The aggregated number of days the risk/protective factor was present in your unit's infants."
-msgstr ""
-
-#. type: Hash Value: tbl-risk-density-rates pooled_footnote
-#: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "%s: The Risk Density Rate calculated across all infants from all departments in the reference data."
-msgstr ""
-
-#. type: Hash Value: tbl-risk-density-rates probiotic
-#: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "Probiotics"
-msgstr ""
-
-#. type: Hash Value: tbl-risk-density-rates quartile_footnote
-#: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Risk Density Rates of the departments in the reference data. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of device days is greater than or equal to one according to the pooled Risk Density Rate."
-msgstr ""
-
-#. type: Hash Value: tbl-risk-density-rates rate_footnote
-#: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "%s: The Risk Density Rate calculated for your unit's infants."
-msgstr ""
-
-#. type: Hash Value: tbl-risk-density-rates reserve
-#: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "Reserve"
-msgstr ""
-
-#. type: Hash Value: tbl-risk-density-rates risk_density_rate
-#: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "Risk Density Rate"
-msgstr ""
-
-#. type: Hash Value: tbl-risk-density-rates tbl-cap
-#: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "Factors influencing the infants' risk of developing an infection or acquiring antibitic-resistant pathogens."
-msgstr ""
-
-#. type: Hash Value: tbl-risk-density-rates vascular_catheter
-#: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "Vascular catheter"
-msgstr ""
-
-#. type: Hash Value: tbl-risk-density-rates ventilatory_support
-#: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "Ventilatory support"
-msgstr ""
-
-#. type: Hash Value: tbl-risk-density-rates watch
-#: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "Watch"
 msgstr ""
 
 #. type: Title #
@@ -887,8 +1187,3 @@ msgstr ""
 #, no-wrap
 msgid "Due to the low number of surgical site infections in this dataset (n = `r dR$numberOfSurgicalSiteInfections`) we are not currently calculating their infection rates, but @tbl-surgical-procedure-rates provides an overview of the categories of procedures performed on neonates.\n"
 msgstr ""
-
-#, fuzzy
-#~| msgid "This project has received funding from the European Union’s Horizon 2020 research and%sinnovation programme under grant agreement No 965328."
-#~ msgid "\\cfoot*{\\raggedright\r \\hspace{1.5cm}\\foottext{This project has received funding from the European Union’s Horizon 2020 research and innovation}\\\\\r \\hspace{1.5cm}\\foottext{programme under grant agreement No 965328.}\r }"
-#~ msgstr "Questo progetto ha ricevuto finanziamenti dal programma di ricerca e innovazione Horizon%s2020 dell'Unione Europea nell'ambito della convenzione di sovvenzione n. 965328."

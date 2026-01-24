@@ -14,10 +14,10 @@ reference_data |>
   dplyr::mutate(
     inf = dplyr::case_match(
       as.character(.data$inf),
-      "si" ~ sR$`tbl-incidence-density-rates`$si,
-      "bsi" ~ sR$`tbl-incidence-density-rates`$bsi,
-      "hap" ~ sR$`tbl-incidence-density-rates`$hap,
-      "nec" ~ sR$`tbl-incidence-density-rates`$nec)) |>
+      "si" ~ sR$si,
+      "bsi" ~ sR$bsi,
+      "hap" ~ sR$hap,
+      "nec" ~ sR$nec)) |>
   gt(rowname_col = "inf") |>
   sub_missing() |>
   gt::tab_options(
@@ -47,13 +47,13 @@ reference_data |>
   tab_row_group(
     label = sR$`tbl-incidence-density-rates`$grp_si,
     rows = tidyselect::any_of(c(
-      sR$`tbl-incidence-density-rates`$si,
-      sR$`tbl-incidence-density-rates`$bsi,
-      sR$`tbl-incidence-density-rates`$hap)),
+      sR$si,
+      sR$bsi,
+      sR$hap)),
     id = "grp_si") |>
   tab_row_group(
     label = sR$`tbl-incidence-density-rates`$grp_othr,
-    rows = tidyselect::any_of(sR$`tbl-incidence-density-rates`$nec),
+    rows = tidyselect::any_of(sR$nec),
     id = "grp_othr") |>
   row_group_order(groups = c("grp_si", "grp_othr")) |>
   tab_spanner(
@@ -116,6 +116,6 @@ reference_data |>
   tab_footnote(
     footnote = sprintf(
       sR$`tbl-incidence-density-rates`$si_footnote,
-      sR$`tbl-incidence-density-rates`$si),
-    locations = gt::cells_stub(rows = sR$`tbl-incidence-density-rates`$si))
+      sR$si),
+    locations = gt::cells_stub(rows = sR$si))
 ```

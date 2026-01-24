@@ -1,31 +1,31 @@
 ```{r}
 #| label: tbl-risk-density-rates
-#| tbl-cap: "Factors influencing the infants' risk of developing an infection or acquiring a drug-resistant pathogen."
+#| tbl-cap: !expr 'sR$`tbl-risk-density-rates`$`tbl-cap`'
 #| tbl-cap-location: top
 
 reference_data |>
   neoipcr::get_usage_density_rate_table() |>
   dplyr::rename(
-    "N"="n",
-    "Pooled"="pooled",
-    "Q₁"="q1",
-    "Q₂"="q2",
-    "Q₃"="q3") |>
+    !!sR$table_headers$n := "n",
+    !!sR$table_headers$pooled := "pooled",
+    !!sR$table_headers$q1 := "q1",
+    !!sR$table_headers$q2 := "q2",
+    !!sR$table_headers$q3 := "q3") |>
   dplyr::mutate(
     factor = dplyr::case_match(
       as.character(.data$factor),
-      "cvc" ~ "CVC",
-      "pvc" ~ "PVC",
-      "vs" ~ "Any",
-      "inv" ~ "INV",
-      "niv" ~ "NIV",
-      "human_milk" ~ "Human milk",
-      "probiotic" ~ "Probiotics",
-      "kangaroo_care" ~ "Kangaroo care",
-      "ab" ~ "Any antibiotic",
-      "a" ~ "Access",
-      "w" ~ "Watch",
-      "r" ~ "Reserve")) |>
+      "cvc" ~ sR$`tbl-risk-density-rates`$cvc,
+      "pvc" ~ sR$`tbl-risk-density-rates`$pvc,
+      "vs" ~ sR$`tbl-risk-density-rates`$any,
+      "inv" ~ sR$`tbl-risk-density-rates`$inv,
+      "niv" ~ sR$`tbl-risk-density-rates`$niv,
+      "human_milk" ~ sR$`tbl-risk-density-rates`$human_milk,
+      "probiotic" ~ sR$`tbl-risk-density-rates`$probiotic,
+      "kangaroo_care" ~ sR$`tbl-risk-density-rates`$kangaroo_care,
+      "ab" ~ sR$`tbl-risk-density-rates`$any_antibiotic,
+      "a" ~ sR$`tbl-risk-density-rates`$access,
+      "w" ~ sR$`tbl-risk-density-rates`$watch,
+      "r" ~ sR$`tbl-risk-density-rates`$reserve)) |>
   gt(rowname_col = "factor") |>
   sub_missing() |>
   gt::tab_options(
@@ -34,23 +34,63 @@ reference_data |>
     table.font.size = 13,
     footnotes.marks = "extended"
   ) |>
-  fmt_number(decimals = 1) |>
-  fmt_number(columns = "N", decimals = 0) |>
+  fmt_number(
+    columns = !sR$table_headers$n,
+    decimals = 1,
+    sep_mark = sR$digit_group_separator,
+    min_sep_threshold = 2,
+    locale = locale_gt) |>
+  fmt_integer(
+    columns = sR$table_headers$n,
+    sep_mark = sR$digit_group_separator,
+    min_sep_threshold = 2) |>
   cols_width(
     stub() ~ pct(25),
-    N ~ pct(15),
-    Pooled ~ pct(15),
-    starts_with("Q") ~ pct(15)
+    sR$table_headers$n ~ pct(15),
+    sR$table_headers$pooled ~ pct(15),
+    sR$table_headers$q1 ~ pct(15),
+    sR$table_headers$q2 ~ pct(15),
+    sR$table_headers$q3 ~ pct(15)
   ) |>
-  tab_row_group(label = "Vascular catheter", rows = 1:2, id = "grp_vc") |>
-  tab_row_group(label = "Ventilatory support", rows = 3:5, id = "grp_vs") |>
-  tab_row_group(label = "Other", rows = 6:8, id = "grp_othr") |>
-  tab_row_group(label = "Antibiotics", rows = c("Any antibiotic","Access","Watch","Reserve"), id = "grp_ab") |>
+  tab_row_group(
+    label = sR$`tbl-risk-density-rates`$vascular_catheter,
+    rows = tidyselect::any_of(c(
+      sR$`tbl-risk-density-rates`$cvc,
+      sR$`tbl-risk-density-rates`$pvc)),
+    id = "grp_vc") |>
+  tab_row_group(
+    label = sR$`tbl-risk-density-rates`$ventilatory_support,
+    rows = tidyselect::any_of(c(
+      sR$`tbl-risk-density-rates`$any,
+      sR$`tbl-risk-density-rates`$inv,
+      sR$`tbl-risk-density-rates`$niv)),
+    id = "grp_vs") |>
+  tab_row_group(
+    label = sR$`tbl-risk-density-rates`$other,
+    rows = tidyselect::any_of(c(
+      sR$`tbl-risk-density-rates`$human_milk,
+      sR$`tbl-risk-density-rates`$probiotic,
+      sR$`tbl-risk-density-rates`$kangaroo_care)),
+    id = "grp_othr") |>
+  tab_row_group(
+    label = sR$`tbl-risk-density-rates`$antibiotics,
+    rows = tidyselect::any_of(c(
+      sR$`tbl-risk-density-rates`$any_antibiotic,
+      sR$`tbl-risk-density-rates`$access,
+      sR$`tbl-risk-density-rates`$watch,
+      sR$`tbl-risk-density-rates`$reserve)),
+    id = "grp_ab") |>
   row_group_order(groups = c("grp_vc", "grp_vs", "grp_ab", "grp_othr")) |>
   tab_spanner(
-    label = "Risk Density Rate",
-    columns = c("Pooled","Q₁","Q₂","Q₃"),
-    id = "risk_density_rate"
+   label = sR$`tbl-risk-density-rates`$risk_density_rate,
+   columns = tidyselect::any_of(
+     c(
+     sR$table_headers$rate,
+     sR$table_headers$pooled,
+     sR$table_headers$q1,
+     sR$table_headers$q2,
+     sR$table_headers$q3)),
+   id = "risk_density_rate"
   ) |>
   tab_style(
     style = cell_text(weight = "bold"),
@@ -61,32 +101,49 @@ reference_data |>
     )
   ) |>
   tab_footnote(
-    footnote = md(
-      paste0(
-        "$$\\text{",
-        "Risk Density Rate",
-        "} = \\frac{\\text{",
-        "Days with risk/protective factor",
-        "}}{\\text{",
-        "Patient days",
-        "}} \\times ",
-        format(100, big.mark = locale_sep_mark),
-        "$$"
-      )),
-    locations = cells_column_spanners(spanners = "risk_density_rate")
+   footnote = md(
+     paste0(
+       "$$\\text{",
+       sR$`tbl-risk-density-rates`$risk_density_rate,
+       "} = \\frac{\\text{",
+       sR$`tbl-risk-density-rates`$days_with_risk_factor,
+       "}}{\\text{",
+       sR$patient_days,
+       "}} \\times ",
+       format(100L),
+       "$$"
+       )),
+   locations = cells_column_spanners(spanners = "risk_density_rate")
   ) |>
   tab_footnote(
-    footnote = "N: The aggregated number of days the risk/protective factor was present in all infants.",
-    locations = cells_column_labels(columns = "N")) |>
+    footnote = sprintf(
+      sR$`tbl-risk-density-rates`$n_footnote$ref,
+      sR$table_headers$n),
+    locations = cells_column_labels(columns = sR$table_headers$n)) |>
   tab_footnote(
-    footnote = "Pooled: The Risk Density Rate calculated across all infants from all departments.",
-    locations = cells_column_labels(columns = "Pooled")) |>
-  tab_footnote(
-    footnote = "Q₁, Q₂, Q₃: The quartiles (25%, 50% and 75% quantiles) of the Risk Density Rates of the departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of device days is greater than or equal to one according to the pooled Risk Density Rate.",
-    locations = cells_column_labels(columns = c("Q₁","Q₂","Q₃"))) |>
-  tab_footnote(
-    footnote = md("WHO AWaRe group (see [aware.essentialmeds.org](https://aware.essentialmeds.org/)). As cumulative treatment days for individual substances are recorded per patient, combination therapies using several substances on one day are counted as multiple days."),
+    footnote = md(
+      sprintf(
+        sR$`tbl-risk-density-rates`$aware_footnote,
+        "[aware.essentialmeds.org](https://aware.essentialmeds.org/)")),
     locations = gt::cells_stub(
-      rows = c("Access","Watch","Reserve"))
-  )
+      rows = tidyselect::any_of(c(
+        sR$`tbl-risk-density-rates`$access,
+        sR$`tbl-risk-density-rates`$watch,
+        sR$`tbl-risk-density-rates`$reserve)))
+  ) |>
+  tab_footnote(
+    footnote = sprintf(
+      sR$`tbl-abr-infection-rate`$quartile_footnote,
+      sR$table_headers$q1,
+      sR$table_headers$q2,
+      sR$table_headers$q3,
+      sprintf("%i%s", 25L, sR$percent_symbol),
+      sprintf("%i%s", 50L, sR$percent_symbol),
+      sprintf("%i%s", 75L, sR$percent_symbol)
+      ),
+    locations = cells_column_labels(columns = c(
+      sR$table_headers$q1,
+      sR$table_headers$q2,
+      sR$table_headers$q3)))
+
 ```

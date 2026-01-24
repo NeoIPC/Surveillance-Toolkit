@@ -1,16 +1,16 @@
 ```{r}
 #| label: tbl-resistance-test-rate
-#| tbl-cap: "Antibiotic resistance diagnostics"
+#| tbl-cap: !expr 'sR$`tbl-resistance-test-rate`$`tbl-cap`'
 #| tbl-cap-location: top
 
 reference_data |>
     neoipcr::get_resistance_test_rate_table() |>
   dplyr::rename(
-    "N"="n",
-    "Pooled"="pooled",
-    "Q₁"="q1",
-    "Q₂"="q2",
-    "Q₃"="q3") |>
+    !!sR$table_headers$n := "n",
+    !!sR$table_headers$pooled := "pooled",
+    !!sR$table_headers$q1 := "q1",
+    !!sR$table_headers$q2 := "q2",
+    !!sR$table_headers$q3 := "q3") |>
   dplyr::mutate(
     i = dplyr::if_else(
       .data$cond == "routine",
@@ -22,13 +22,19 @@ reference_data |>
       .data$cond),
     abr = dplyr::case_match(
       .data$abr,
-      "3gcr"~"3^rd^ gen. cephalosporin resistance (3GCR)",
-      "car"~"Carbapenem resistance (CARBR)",
-      "cor"~"Colistin resistance (COLR)",
-      "mrsa"~"Methicillin-resistant Staphylococcus aureus (MRSA)",
-      "vre"~"Vancomycin-resistant Enterococcus (VRE)",
-      "if_3gcr"~"\\- in case of 3GCR",
-      "if_3gcr&car"~"\\- in case of 3GCR and CARBR"),
+      "3gcr" ~ "3gcr",
+      "car" ~ sR$car,
+      "cor" ~ sR$cor,
+      "mrsa" ~ sR$mrsa,
+      "vre" ~ sR$vre,
+      "if_3gcr" ~ paste0(
+        "\\- ",
+        sR$`tbl-resistance-test-rate`$if_3gcr,
+        collapse = ""),
+      "if_3gcr&car" ~ paste0(
+        "\\- ",
+        sR$`tbl-resistance-test-rate`$if_3gcr_and_car,
+        collapse = "")),
     .before = 1) |>
   gt(rowname_col = "abr") |>
   sub_missing() |>
@@ -36,11 +42,25 @@ reference_data |>
     table.font.size = 13,
     footnotes.marks = "extended"
   ) |>
-  fmt_number(decimals = 1) |>
-  fmt_number(columns = "N", decimals = 0) |>
+  fmt_number(
+    columns = !sR$table_headers$n,
+    decimals = 1,
+    sep_mark = sR$digit_group_separator,
+    min_sep_threshold = 2,
+    locale = locale_gt) |>
+  fmt_integer(
+    columns = sR$table_headers$n,
+    sep_mark = sR$digit_group_separator,
+    min_sep_threshold = 2) |>
   fmt_markdown(columns = "abr") |>
-  cols_width("abr" ~ pct(50)) |>
-  cols_width(starts_with("Q") ~ pct(7)) |>
+  cols_width(
+    stub() ~ pct(50),
+    sR$table_headers$n ~ pct(15),
+    sR$table_headers$pooled ~ pct(14),
+    sR$table_headers$q1 ~ pct(7),
+    sR$table_headers$q2 ~ pct(7),
+    sR$table_headers$q3 ~ pct(7)
+  ) |>
   tab_stub_indent(
     rows = gt::everything(),
     indent = gt::from_column(column = "i")
@@ -55,8 +75,13 @@ reference_data |>
   ) |>
   cols_hide(columns = c("i","cond")) |>
   tab_spanner(
-    label = "Antibiotic resistance test rate",
-    columns = c("Pooled","Q₁","Q₂","Q₃"),
+    label = sR$`tbl-resistance-test-rate`$`rate_name`,
+    columns = tidyselect::any_of(
+     c(
+     sR$table_headers$pooled,
+     sR$table_headers$q1,
+     sR$table_headers$q2,
+     sR$table_headers$q3)),
     id = "antibiotic_resistance_test_rate"
   ) |>
   tab_style(
@@ -71,24 +96,40 @@ reference_data |>
     footnote = md(
       paste0(
         "$$\\text{",
-        "Antibiotic resistance test rate",
+        sR$`tbl-resistance-test-rate`$`rate_name`,
         "} = \\frac{\\text{",
-        "Number of pathogens with recorded test for antibiotic resistance",
+        sR$`tbl-resistance-test-rate`$`rate_numerator`,
         "}}{\\text{",
-        "Number of pathogens eligible for antibiotic resistance test recording",
+        sR$`tbl-resistance-test-rate`$`rate_denominator`,
         "}} \\times ",
-        format(100, big.mark = locale_sep_mark),
+        format_integer(100),
         "$$"
       )),
     locations = cells_column_spanners(spanners = "antibiotic_resistance_test_rate")
   ) |>
   tab_footnote(
-    footnote = "N: The aggregated number of antibiotic resistant pathogens that have a documented test for antibiotic resistance.",
-    locations = cells_column_labels(columns = "N")) |>
+    footnote = sprintf(
+      sR$`tbl-resistance-test-rate`$n_footnote,
+      sR$table_headers$n),
+    locations = cells_column_labels(columns = sR$table_headers$n)) |>
   tab_footnote(
-    footnote = "Pooled: The antibiotic resistance test rate calculated across all infants from all departments.",
-    locations = cells_column_labels(columns = "Pooled")) |>
+    footnote = sprintf(
+      sR$`tbl-resistance-test-rate`$pooled_footnote,
+      sR$table_headers$pooled),
+    locations = cells_column_labels(columns = sR$table_headers$pooled)) |>
   tab_footnote(
-    footnote = "Q₁, Q₂, Q₃: The quartiles (25%, 50% and 75% quantiles) of the antibiotic resistance test rates of the partner departments",
-    locations = cells_column_labels(columns = c("Q₁","Q₂","Q₃")))
+    footnote = sprintf(
+      sR$`tbl-resistance-test-rate`$quartile_footnote,
+      sR$table_headers$q1,
+      sR$table_headers$q2,
+      sR$table_headers$q3,
+      sprintf("%i%s", 25L, sR$percent_symbol),
+      sprintf("%i%s", 50L, sR$percent_symbol),
+      sprintf("%i%s", 75L, sR$percent_symbol)
+      ),
+    locations = cells_column_labels(columns = c(
+      sR$table_headers$q1,
+      sR$table_headers$q2,
+      sR$table_headers$q3)))
+
 ```

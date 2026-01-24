@@ -37,13 +37,13 @@ tbl <- benchmark_data$usage_density_rate_table |>
    footnotes.marks = "extended"
   ) |>
   fmt_number(
-    columns = !sR$table_headers$n_,
+    columns = !sR$table_headers$n,
     decimals = 1,
     sep_mark = sR$digit_group_separator,
     min_sep_threshold = 2,
     locale = gt_locale) |>
   fmt_integer(
-    columns = sR$table_headers$n_,
+    columns = sR$table_headers$n,
     sep_mark = sR$digit_group_separator,
     min_sep_threshold = 2) |>
   tab_row_group(
@@ -111,9 +111,9 @@ tbl <- benchmark_data$usage_density_rate_table |>
   ) |>
   tab_footnote(
     footnote = sprintf(
-      sR$`tbl-risk-density-rates`$n_footnote,
-      sR$table_headers$n_),
-    locations = cells_column_labels(columns = sR$table_headers$n_)) |>
+      sR$`tbl-risk-density-rates`$n_footnote$own,
+      sR$table_headers$n),
+    locations = cells_column_labels(columns = sR$table_headers$n)) |>
   tab_footnote(
     footnote = sprintf(
       sR$`tbl-risk-density-rates`$rate_footnote,

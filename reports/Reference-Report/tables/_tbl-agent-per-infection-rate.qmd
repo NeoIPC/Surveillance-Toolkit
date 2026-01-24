@@ -111,17 +111,17 @@ reference_data |>
   ) |>
   tab_footnote(
     footnote = sprintf(
-      sR$`tbl-incidence-density-rates`$n_footnote,
+      sR$`tbl-agent-per-infection-rate`$n_footnote,
       sR$table_headers$n),
     locations = cells_column_labels(columns = sR$table_headers$n)) |>
   tab_footnote(
     footnote = sprintf(
-      sR$`tbl-incidence-density-rates`$pooled_footnote,
+      sR$`tbl-agent-per-infection-rate`$pooled_footnote,
       sR$table_headers$pooled),
     locations = cells_column_labels(columns = sR$table_headers$pooled)) |>
   tab_footnote(
     footnote = sprintf(
-      sR$`tbl-incidence-density-rates`$quartile_footnote,
+      sR$`tbl-agent-per-infection-rate`$quartile_footnote,
       sR$table_headers$q1,
       sR$table_headers$q2,
       sR$table_headers$q3,
