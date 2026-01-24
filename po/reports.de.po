@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NeoIPC Surveillance Reports 0.9\n"
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-01-24 07:34+0100\n"
-"PO-Revision-Date: 2026-01-24 07:35+0100\n"
+"POT-Creation-Date: 2026-01-24 07:47+0100\n"
+"PO-Revision-Date: 2026-01-24 07:48+0100\n"
 "Last-Translator: Brar Piening <brar.piening@charite.de>\n"
 "Language-Team: none\n"
 "Language: de\n"
@@ -827,8 +827,8 @@ msgstr "<!-- Beim Vergleich der Daten mit den Informationen zu Krankheitserreger
 #. type: Plain text
 #: reports/Reference-Report/content/_infectious_agents.Rmd:7
 #, no-wrap
-msgid "In total, `r dR$numberOfInfectionsWithAgent` infectious agents were detected in the `r dR$numberOfInfectionsWithAgent` infections that were reported to have yielded at least one agent from either the primary infection and/or the secondary bloodstream infection resulting from it (@tbl-agent-per-infection-rate). These `r dR$numberOfInfectionsWithAgent` diagnostic-positive infections out of `r dR$overallNumberOfInfections` overall infections represent an Infectious Agent Detection Rate of `r dR$infectiousAgentDetectionRate` per 100 infections (@tbl-infectious-agent-detection-rate).\n"
-msgstr "Insgesamt wurden `r dR$numberOfInfectionsWithAgent` Infektionserreger in den `r dR$numberOfInfectionsWithAgent` Infektionen nachgewiesen, bei denen mindestens ein Erreger entweder aus der Primärinfektion und/oder der daraus resultierenden sekundären Blutbahninfektion gemeldet wurde (@tbl-agent-per-infection-rate). Diese `r dR$numberOfInfectionsWithAgent` diagnostisch positiven Infektionen von insgesamt `r dR$overallNumberOfInfections` Infektionen entsprechen einer Infektionserreger-Erkennungsrate von `r dR$infectiousAgentDetectionRate` pro 100 Infektionen (@tbl-infectious-agent-detection-rate).\n"
+msgid "In total, `r dR$numberOfInfectiousAgents` infectious agents were detected in the `r dR$numberOfInfectionsWithAgent` infections that were reported to have yielded at least one agent from either the primary infection and/or the secondary bloodstream infection resulting from it (@tbl-agent-per-infection-rate). These `r dR$numberOfInfectionsWithAgent` diagnostic-positive infections out of `r dR$overallNumberOfInfections` overall infections represent an Infectious Agent Detection Rate of `r dR$infectiousAgentDetectionRate` per 100 infections (@tbl-infectious-agent-detection-rate).\n"
+msgstr "Insgesamt wurden `r dR$numberOfInfectiousAgents` Infektionserreger in den `r dR$numberOfInfectionsWithAgent` Infektionen nachgewiesen, bei denen mindestens ein Erreger entweder aus der Primärinfektion und/oder der daraus resultierenden sekundären Blutbahninfektion gemeldet wurde (@tbl-agent-per-infection-rate). Diese `r dR$numberOfInfectionsWithAgent` diagnostisch positiven Infektionen von insgesamt `r dR$overallNumberOfInfections` Infektionen entsprechen einer Infektionserreger-Erkennungsrate von `r dR$infectiousAgentDetectionRate` pro 100 Infektionen (@tbl-infectious-agent-detection-rate).\n"
 
 #. type: Title #
 #: reports/Reference-Report/content/_risk_and_protective_factors.Rmd:1
