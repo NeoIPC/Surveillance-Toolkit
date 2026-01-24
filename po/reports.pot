@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NeoIPC Surveillance Reports 0.9\n"
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-01-20 00:41+0100\n"
+"POT-Creation-Date: 2026-01-24 07:12+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -802,4 +802,58 @@ msgstr ""
 #: reports/Reference-Report/content/_nosocomial_infections.Rmd:5
 #, markdown-text, no-wrap
 msgid "Device-associated infections can be found in @tbl-device-associated-incidence-density-rates.\n"
+msgstr ""
+
+#. type: Title ##
+#: reports/Reference-Report/content/_infectious_agents.Rmd:1
+#, markdown-text, no-wrap
+msgid "Infectious Agents"
+msgstr ""
+
+#. type: Plain text
+#: reports/Reference-Report/content/_infectious_agents.Rmd:4
+#, markdown-text, no-wrap
+msgid "Epidemiology of the infectious agents causing nosocomial infections in neonatology is complex and there is a lot of potential for bias. While low diagnostic sensitivity (low blood volume) and specificity (contamination) are a general problem in the neonatal population, the lack of availability of some or all means of microbiological diagnostics, or the lack of financial resources can have a strong effect on the detection rates in resource-constrained settings.\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Reference-Report/content/_infectious_agents.Rmd:6
+#, markdown-text, no-wrap
+msgid "<!-- When comparing data with the information on pathogens presented in @tbl-agent-per-infection-rate and information on drug resistance in @tbl-abr-infection-rate, please also have a look at the infectious agent detection rates presented in @tbl-infectious-agent-detection-rate and the antibiotic resistance test rates in @tbl-resistance-test-rate. -->\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Reference-Report/content/_infectious_agents.Rmd:7
+#, markdown-text, no-wrap
+msgid "In total, `r dR$numberOfInfectionsWithAgent` infectious agents were detected in the `r dR$numberOfInfectionsWithAgent` infections that were reported to have yielded at least one agent from either the primary infection and/or the secondary bloodstream infection resulting from it (@tbl-agent-per-infection-rate). These `r dR$numberOfInfectionsWithAgent` diagnostic-positive infections out of `r dR$overallNumberOfInfections` overall infections represent an Infectious Agent Detection Rate of `r dR$infectiousAgentDetectionRate` per 100 infections (@tbl-infectious-agent-detection-rate).\n"
+msgstr ""
+
+#. type: Title #
+#: reports/Reference-Report/content/_risk_and_protective_factors.Rmd:1
+#, markdown-text, no-wrap
+msgid "Risk and Protective Factors"
+msgstr ""
+
+#. type: Plain text
+#: reports/Reference-Report/content/_risk_and_protective_factors.Rmd:3
+#, markdown-text, no-wrap
+msgid "Next to the inherent risk factors gestational age and birth weight there are also a number of expositional factors that influence the risk of an infant to acquire a multi-drug-resistant pathogen or to develop an infection. @tbl-risk-density-rates shows the presence of these factors in the NeoIPC Surveillance population.\n"
+msgstr ""
+
+#. type: Title ##
+#: reports/Reference-Report/content/_surgery.Rmd:1
+#, markdown-text, no-wrap
+msgid "Surgery"
+msgstr ""
+
+#. type: Plain text
+#: reports/Reference-Report/content/_surgery.Rmd:4
+#, markdown-text, no-wrap
+msgid "In this dataset, `r dR$numberOfSurgicalDepartments` of the partner departments (`r dR$proportionOfSurgicalDepartments`) recorded a total of `r dR$numberOfSurgicalProcedures` surgical procedures performed on `r dR$numberOfSurgicalPatients` neonates, resulting in an average number of `r dR$numberOfSurgicalProceduresPerPatient` operations per surgical patient during the surveillance period.\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Reference-Report/content/_surgery.Rmd:5
+#, markdown-text, no-wrap
+msgid "Due to the low number of surgical site infections in this dataset (n = `r dR$numberOfSurgicalSiteInfections`) we are not currently calculating their infection rates, but @tbl-surgical-procedure-rates provides an overview of the categories of procedures performed on neonates.\n"
 msgstr ""

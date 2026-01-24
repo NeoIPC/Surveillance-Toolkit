@@ -133,7 +133,7 @@ get_localised_country_names <- function(x) {
 }
 
 get_validation_exceptions <- function(x) {
-  validationExceptionFile = coalesce(x, "validation-exceptions_ref.csv")
+  validationExceptionFile = dplyr::coalesce(x, "validation-exceptions_ref.csv")
   if (file.exists(validationExceptionFile)) {
     return(read_csv(validationExceptionFile, show_col_types = FALSE))
   } else {
@@ -143,7 +143,7 @@ get_validation_exceptions <- function(x) {
 }
 
 get_connection_options <- function(x) {
-  token <- coalesce(x, Sys.getenv("NEOIPC_DHIS2_TOKEN", unset = NA))
+  token <- dplyr::coalesce(x, Sys.getenv("NEOIPC_DHIS2_TOKEN", unset = NA))
   session_id <- Sys.getenv("NEOIPC_DHIS2_SESSION_ID", unset = NA)
   if(!is.na(session_id)) {
     return(dhis2_connection_options(session_id = session_id))
@@ -168,17 +168,17 @@ get_dataset_options <- function(
     )  dhis2_dataset_options(
       include_country = "yes",
       include_department = "pseudonymised",
-      surveillance_end_from = as_date(
-        coalesce(reportingPeriodFrom, "2024-01-01")),
-      surveillance_end_to = as_date(
-        coalesce(reportingPeriodTo, as.character(Sys.Date()))),
+      surveillance_end_from = lubridate::as_date(
+        dplyr::coalesce(reportingPeriodFrom, "2024-01-01")),
+      surveillance_end_to = lubridate::as_date(
+        dplyr::coalesce(reportingPeriodTo, as.character(Sys.Date()))),
       birth_weight_from = birthWeightFrom,
       birth_weight_to = birthWeightTo,
       gestational_age_from = gestationWeeksFrom,
       gestational_age_to = gestationWeeksTo,
       country_filter = reportingCountries,
-      include_test_data = !coalesce(testUnitFilter, TRUE),
-      include_ineligible_patients = !coalesce(defaultPatientFilter, TRUE),
+      include_test_data = !dplyr::coalesce(testUnitFilter, TRUE),
+      include_ineligible_patients = !dplyr::coalesce(defaultPatientFilter, TRUE),
       include_invalid_patients = get_validation_exceptions(
         validationExceptionFile))
 
@@ -287,7 +287,7 @@ dR <- list(
       format = "%x"),
     format(
       min(
-        as_date(reference_data$metadata$data_up_to),
+        lubridate::as_date(reference_data$metadata$data_up_to),
         reference_data$metadata$dataset_options$surveillance_end_to
         ),
       format = "%x"
@@ -395,20 +395,60 @@ dR <- list(
     reference_data$infectious_agent_detection_rate_per_inf_type_table |>
       dplyr::filter(inf == "all") |>
       dplyr::pull("n")),
-  overallNumberOfInfections = "ToDo",#format_integer(
-    # data |>
-    #   neoipcr:::get_infection_counts() |>
-    #   dplyr::pull("n")),
-  infectiousAgentDetectionRate = "ToDo" #format(
-    # (
-    #   (reference_data$infectious_agent_detection_rate_per_inf_type_table |>
-    #      dplyr::filter(inf == "all") |>
-    #      dplyr::pull("n")) / (
-    #        data |> neoipcr:::get_infection_counts()
-    #        |> dplyr::pull("n")) * 100),
-    # digits = 2,
-    # nsmall = 1,
-    # scientific = FALSE)
+  overallNumberOfInfections = format_integer(
+    reference_data$n_infections |>
+      dplyr::filter(inf_type == "overall") |>
+      dplyr::pull("total")),
+  infectiousAgentDetectionRate = format(
+    (
+      (reference_data$infectious_agent_detection_rate_per_inf_type_table |>
+         dplyr::filter(inf == "all") |>
+         dplyr::pull("n")) /
+        (
+          reference_data$n_infections |>
+            dplyr::filter(inf_type == "overall") |>
+            dplyr::pull("total")
+          )
+      * 100
+      ),
+    digits = 2,
+    nsmall = 1,
+    scientific = FALSE),
+  numberOfSurgicalDepartments = format_integer(
+    reference_data$n_surgical_departments),
+  proportionOfSurgicalDepartments = paste0(
+    format(
+      reference_data$n_surgical_departments /
+        reference_data$n_departments *
+        100,
+      digits = 2,
+      nsmall = 1,
+      scientific = FALSE),
+    sR$unit_separator,
+    sR$percent_symbol,
+    collapse = ""
+  ),
+  numberOfSurgicalProcedures = format_integer(
+    reference_data$n_surgical_procedures |>
+      dplyr::pull("total")
+  ),
+  numberOfSurgicalPatients = format_integer(
+    reference_data$n_surgical_patients |>
+      dplyr::pull("total")
+  ),
+  numberOfSurgicalProceduresPerPatient = format(
+    reference_data$n_surgical_procedures |>
+      dplyr::pull("total") /
+    reference_data$n_surgical_patients |>
+      dplyr::pull("total"),
+      digits = 2,
+      nsmall = 1,
+      scientific = FALSE),
+  numberOfSurgicalSiteInfections = format_integer(
+    reference_data$n_infections |>
+      dplyr::filter(inf_type == "ssi") |>
+      dplyr::pull("total")
+  )
 )
 
 ```
