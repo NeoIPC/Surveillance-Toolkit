@@ -88,6 +88,20 @@
                 "isDefault": false
             },
             "problemMatcher": []
+        },
+        {
+            "label": "Generate Reference Data",
+            "type": "shell",
+            "command": "Rscript",
+            "args": [
+                "--vanilla",
+                "${workspaceFolder}/reports/Reference-Report/Generate-ReferenceData.R"
+            ],
+            "group": {
+                "kind": "none",
+                "isDefault": false
+            },
+            "problemMatcher": []
         }
     ]
 }

@@ -39,3 +39,7 @@ format:
         \cfoot*{\raggedright \hspace{1.5cm}This project has received funding from the European Union’s Horizon 2020 research and innovation\\ \hspace{1.5cm}programme under grant agreement No 965328.}
         \ofoot{\pagemark}
     number-sections: true
+  docx:
+    highlight-style: github
+    number-sections: true
+    reference-doc: ../common/reference.docx

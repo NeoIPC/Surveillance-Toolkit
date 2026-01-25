@@ -30,6 +30,9 @@ reference_data |>
   gt(rowname_col = "group") |>
   sub_missing() |>
   gt::tab_options(
+    latex.header_repeat = TRUE,
+    latex.use_longtable = TRUE,
+    table.width = pct(100),
     table.font.size = 13,
     footnotes.marks = "extended"
   ) |>

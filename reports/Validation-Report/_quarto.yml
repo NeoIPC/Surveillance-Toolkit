@@ -11,6 +11,10 @@ format:
     papersize: a4paper
     fig-pos: 'h'
     colorlinks: true
+  docx:
+    highlight-style: github
+    number-sections: true
+    reference-doc: ../common/reference.docx
 filters: ["../filters/pandoc-quotes.lua"]
 profile:
   group: 

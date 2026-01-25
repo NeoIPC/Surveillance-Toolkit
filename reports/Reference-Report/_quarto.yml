@@ -45,3 +45,4 @@ format:
   docx:
     highlight-style: github
     number-sections: true
+    reference-doc: ../common/reference.docx

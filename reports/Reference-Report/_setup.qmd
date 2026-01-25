@@ -3,7 +3,7 @@
 #| warning: false
 #| include: false
 
-#pak::pak("Brar/neoipcr@PartnerReport")
+pak::pak("Brar/neoipcr@PartnerReport")
 library(tidyverse, warn.conflicts = FALSE, quietly = TRUE)
 library(smplot2, warn.conflicts = FALSE, quietly = TRUE)
 library(scales, warn.conflicts = FALSE, quietly = TRUE)
