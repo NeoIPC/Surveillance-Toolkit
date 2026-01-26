@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NeoIPC Surveillance Reports 0.9\n"
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-01-24 22:27+0100\n"
-"PO-Revision-Date: 2026-01-26 17:47+0100\n"
+"POT-Creation-Date: 2026-01-26 20:34+0100\n"
+"PO-Revision-Date: 2026-01-26 20:35+0100\n"
 "Last-Translator: Brar Piening <brar.piening@charite.de>\n"
 "Language-Team: none\n"
 "Language: et\n"
@@ -1024,12 +1024,12 @@ msgid "This is a special analysis that"
 msgstr "See on spetsiaalne analüüs, mis"
 
 #. type: newcommand{#4}
-#: reports/Reference-Report/translations.tex:2
+#: reports/Reference-Report/translations.tex:4
 msgid "This project has received funding from the European Union’s Horizon 2020 research and innovation"
 msgstr "See projekt on saanud rahastust Euroopa Liidu teadusuuringute ja innovatsiooni raamprogrammist Horisont 2020"
 
 #. type: newcommand{#4}
-#: reports/Reference-Report/translations.tex:2
+#: reports/Reference-Report/translations.tex:4
 msgid "programme under grant agreement No 965328."
 msgstr "toetuslepingu nr 965328 alusel."
 
