@@ -22,7 +22,7 @@ msgstr ""
 #: reports/common.yaml:1
 #, no-wrap
 msgid "3^rd^ gen. cephalosporin resistance (3GCR)"
-msgstr ""
+msgstr "Resistenza alle cefalosporine di 3^a^ generazione (3GCR)"
 
 #. type: Hash Value: bsi
 #: reports/common.yaml:1
@@ -34,19 +34,19 @@ msgstr "Septicemia primaria/BSI"
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Carbapenem resistance (CARBR)"
-msgstr ""
+msgstr "Resistenza ai carbapenemi (CARBR)"
 
 #. type: Hash Value: cor
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Colistin resistance (COLR)"
-msgstr ""
+msgstr "Resistenza alla colistina (COLR)"
 
 #. type: Hash Value: day
 #: reports/common.yaml:1
 #, no-wrap
 msgid "day"
-msgstr ""
+msgstr "giorno"
 
 #. type: Hash Value: digit_group_separator
 #: reports/common.yaml:1
@@ -64,7 +64,7 @@ msgstr "Distribuzione del peso alla nascita dei neonati inclusi in questo rappor
 #: reports/common.yaml:1
 #, no-wrap
 msgid "A is a histogram in %s steps with a density curve of your own unit’s data and a density curve of the reference data and B are two boxplots, one of your own unit’s data and one of the reference data."
-msgstr ""
+msgstr "A è un istogramma con intervalli di %s con una curva di densità dei dati della propria unità e una curva di densità dei dati di riferimento, e B sono due boxplot, uno dei dati della propria unità e uno dei dati di riferimento."
 
 #. type: Hash Value: fig-ga fig-cap no-bnch
 #: reports/common.yaml:1
@@ -76,7 +76,7 @@ msgstr "A è un istogramma con intervalli di %s e una curva di densità, mentre 
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Vertical lines in the boxplots represent the %s, %s and %s quantiles, the diamonds represent the pooled arithmetic means."
-msgstr ""
+msgstr "Le linee verticali nei boxplot rappresentano i quantili %s, %s e %s; i rombi rappresentano le medie aritmetiche aggregate."
 
 #. type: Hash Value: fig-ga fig-cap no-bnch
 #: reports/common.yaml:1
@@ -94,7 +94,7 @@ msgstr "Distribuzione dell'età gestazionale dei neonati inclusi in questo rappo
 #: reports/common.yaml:1
 #, no-wrap
 msgid "g"
-msgstr ""
+msgstr "g"
 
 #. type: Hash Value: hap
 #: reports/common.yaml:1
@@ -106,7 +106,7 @@ msgstr "Polmonite"
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Methicillin-resistant Staphylococcus aureus (MRSA)"
-msgstr ""
+msgstr "Staphylococcus aureus resistente alla meticillina (MRSA)"
 
 #. type: Hash Value: nec
 #: reports/common.yaml:1
@@ -124,7 +124,7 @@ msgstr "Giorni di degenza del paziente"
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%"
-msgstr ""
+msgstr "%"
 
 #. type: Hash Value: si
 #: reports/common.yaml:1
@@ -172,19 +172,19 @@ msgstr "Q₃"
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Rate"
-msgstr ""
+msgstr "Tasso"
 
 #. type: Hash Value: tbl-abr-infection-rate n_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The aggregated number of antibiotic resistant pathogens in all infections."
-msgstr ""
+msgstr "%s: Numero complessivo di agenti patogeni resistenti agli antibiotici in tutte le infezioni."
 
 #. type: Hash Value: tbl-abr-infection-rate pooled_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The resistant pathogen infection rate calculated across all infants from all departments."
-msgstr ""
+msgstr "%s: tasso di infezione da agenti patogeni resistenti calcolato su tutti i neonati di tutti i reparti."
 
 #. type: Hash Value: tbl-abr-infection-rate quartile_footnote
 #: reports/common.yaml:1
@@ -196,25 +196,25 @@ msgstr "%s, %s, %s: I quartili (quantili %s, %s e %s) dei tassi di infezione da 
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Number of infections where a pathogen was detected"
-msgstr ""
+msgstr "Numero di infezioni in cui è stato rilevato un agente patogeno"
 
 #. type: Hash Value: tbl-abr-infection-rate rate_name
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Resistant pathogen infection rate"
-msgstr ""
+msgstr "Tasso di infezione da agenti patogeni resistenti"
 
 #. type: Hash Value: tbl-abr-infection-rate rate_numerator
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Number of antibiotic resistant pathogens in infections"
-msgstr ""
+msgstr "Numero di agenti patogeni resistenti agli antibiotici nelle infezioni"
 
 #. type: Hash Value: tbl-abr-infection-rate tbl-cap
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Nosocomial infections with resistant pathogens"
-msgstr ""
+msgstr "Infezioni nosocomiali con agenti patogeni resistenti"
 
 #. type: Hash Value: tbl-agent-per-infection-rate n_footnote
 #: reports/common.yaml:1
@@ -442,61 +442,61 @@ msgstr "Infezioni in cui è stato identificato un agente infettivo, compresa l'i
 #: reports/common.yaml:1
 #, no-wrap
 msgid "in case of 3GCR"
-msgstr ""
+msgstr "in caso di 3GCR"
 
 #. type: Hash Value: tbl-resistance-test-rate if_3gcr_and_car
 #: reports/common.yaml:1
 #, no-wrap
 msgid "in case of 3GCR and CARBR"
-msgstr ""
+msgstr "in caso di 3GCR e CARBR"
 
 #. type: Hash Value: tbl-resistance-test-rate n_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The aggregated number of antibiotic resistant pathogens that have a documented test for antibiotic resistance."
-msgstr ""
+msgstr "%s: Numero complessivo di agenti patogeni resistenti agli antibiotici con un test documentato per la resistenza agli antibiotici."
 
 #. type: Hash Value: tbl-resistance-test-rate pooled_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The antibiotic resistance test rate calculated across all infants from all departments."
-msgstr ""
+msgstr "%s: tasso di test di resistenza agli antibiotici calcolato su tutti i neonati di tutti i reparti."
 
 #. type: Hash Value: tbl-resistance-test-rate quartile_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the antibiotic resistance test rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected infections with an agents is greater than or equal to one according to the pooled antibiotic resistance test rate."
-msgstr ""
+msgstr "%s, %s, %s: I quartili (quantili %s, %s e %s) dei tassi di test di resistenza agli antibiotici dei reparti partner. Questi quartili vengono visualizzati solo quando il numero di reparti che contribuiscono al denominatore è maggiore o uguale a cinque e quando il numero mediano di infezioni previste con un agente è maggiore o uguale a uno secondo il tasso di test di resistenza agli antibiotici aggregato."
 
 #. type: Hash Value: tbl-resistance-test-rate rate_denominator
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Number of pathogens eligible for antibiotic resistance test recording"
-msgstr ""
+msgstr "Numero di agenti patogeni idonei alla registrazione del test di resistenza agli antibiotici"
 
 #. type: Hash Value: tbl-resistance-test-rate rate_name
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Antibiotic resistance test rate"
-msgstr ""
+msgstr "Tasso di test di resistenza agli antibiotici"
 
 #. type: Hash Value: tbl-resistance-test-rate rate_numerator
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Number of pathogens with recorded test for antibiotic resistance"
-msgstr ""
+msgstr "Numero di agenti patogeni con test di resistenza agli antibiotici registrato"
 
 #. type: Hash Value: tbl-resistance-test-rate tbl-cap
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Antibiotic resistance diagnostics"
-msgstr ""
+msgstr "Diagnostica della resistenza agli antibiotici"
 
 #. type: Hash Value: tbl-risk-density-rates access
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Access"
-msgstr ""
+msgstr "Accesso"
 
 #. type: Hash Value: tbl-risk-density-rates antibiotics
 #: reports/common.yaml:1
@@ -544,7 +544,7 @@ msgstr "Cura del canguro"
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The aggregated number of days the risk/protective factor was present in your unit's infants."
-msgstr ""
+msgstr "%s: Numero complessivo di giorni in cui il fattore di rischio/protezione era presente nei neonati della propria unità."
 
 #. type: Hash Value: tbl-risk-density-rates n_footnote ref
 #: reports/common.yaml:1
@@ -556,7 +556,7 @@ msgstr "%s: Numero complessivo di giorni in cui il fattore di rischio/protezione
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The Risk Density Rate calculated across all infants from all departments in the reference data."
-msgstr ""
+msgstr "%s: tasso di densità di rischio calcolato su tutti i neonati di tutti i reparti nei dati di riferimento."
 
 #. type: Hash Value: tbl-risk-density-rates probiotic
 #: reports/common.yaml:1
@@ -568,19 +568,19 @@ msgstr "Probiotici"
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Risk Density Rates of the departments in the reference data. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of device days is greater than or equal to one according to the pooled Risk Density Rate."
-msgstr ""
+msgstr "%s, %s, %s: I quartili (quantili %s, %s e %s) dei tassi di densità di rischio dei reparti nei dati di riferimento. Questi quartili vengono visualizzati solo quando il numero di reparti che contribuiscono al denominatore è maggiore o uguale a cinque e quando il numero mediano di giorni di utilizzo del dispositivo è maggiore o uguale a uno secondo il tasso di densità di rischio aggregato."
 
 #. type: Hash Value: tbl-risk-density-rates rate_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The Risk Density Rate calculated for your unit's infants."
-msgstr ""
+msgstr "%s: tasso di densità di rischio calcolato per i neonati della propria unità."
 
 #. type: Hash Value: tbl-risk-density-rates reserve
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Reserve"
-msgstr ""
+msgstr "Riserva"
 
 #. type: Hash Value: tbl-risk-density-rates risk_density_rate
 #: reports/common.yaml:1
@@ -592,7 +592,7 @@ msgstr "Tasso di densità di rischio"
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Factors influencing the infants' risk of developing an infection or acquiring antibitic-resistant pathogens."
-msgstr ""
+msgstr "Fattori che influenzano il rischio dei neonati di sviluppare un'infezione o di acquisire agenti patogeni resistenti agli antibiotici."
 
 #. type: Hash Value: tbl-risk-density-rates vascular_catheter
 #: reports/common.yaml:1
@@ -610,7 +610,7 @@ msgstr "Supporto ventilatorio"
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Watch"
-msgstr ""
+msgstr "Sorveglianza"
 
 #. type: Hash Value: tbl-surgical-procedure-rates abdominal_surgery
 #: reports/common.yaml:1
@@ -652,7 +652,7 @@ msgstr "Neurochirurgia"
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Not a surgical procedure"
-msgstr ""
+msgstr "Non è una procedura chirurgica"
 
 #. type: Hash Value: tbl-surgical-procedure-rates oesophageal_surgery
 #: reports/common.yaml:1
@@ -706,7 +706,7 @@ msgstr "Procedure chirurgiche per categoria"
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Not yet categorised"
-msgstr ""
+msgstr "Non ancora categorizzato"
 
 #. type: Hash Value: total
 #: reports/common.yaml:1
@@ -724,31 +724,31 @@ msgstr " "
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Vancomycin-resistant Enterococcus (VRE)"
-msgstr ""
+msgstr "Enterococcus resistente alla vancomicina (VRE)"
 
 #. type: Hash Value: week_abbreviation
 #: reports/common.yaml:1
 #, no-wrap
 msgid "w"
-msgstr ""
+msgstr "sett."
 
 #. type: Hash Value: title
 #: reports/Partner-Report/_quarto-en.yml:1
 #, no-wrap
 msgid "NeoIPC Surveillance Partner Report"
-msgstr ""
+msgstr "Rapporto partner di NeoIPC Surveillance"
 
 #. type: Hash Value: own_unit
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Own unit"
-msgstr ""
+msgstr "Propria unità"
 
 #. type: Hash Value: reference_data
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Reference data"
-msgstr ""
+msgstr "Dati di riferimento"
 
 #. type: Title #
 #: reports/Partner-Report/content/_introduction.qmd:1
@@ -761,7 +761,7 @@ msgstr "Introduzione"
 #: reports/Partner-Report/content/_introduction.qmd:3
 #, no-wrap
 msgid "This is a [NeoIPC Surveillance](https://neoipc.org/surveillance/ \"Link to the surveillance section of the NeoIPC website\") analysis that you can use to assess infection rates in your neonatal unit. If you have your own data collected using the same or a comparable method, you can compare them with the reference values presented in this document and identify any anomalies and potential for improvement.\n"
-msgstr ""
+msgstr "Questa è un'analisi di [NeoIPC Surveillance](https://neoipc.org/surveillance/ \"Link alla sezione sorveglianza del sito web NeoIPC\") che potete utilizzare per valutare i tassi di infezione nella vostra unità neonatale. Se disponete di dati raccolti con lo stesso o un metodo comparabile, potete confrontarli con i valori di riferimento presentati in questo documento e identificare eventuali anomalie e potenziali aree di miglioramento.\n"
 
 #. type: Hash Value: format pdf author-meta
 #: reports/Partner-Certificate/_quarto-en.yml:1
@@ -848,13 +848,13 @@ msgstr "3.25"
 #: reports/Reference-Report/_quarto-en.yml:1
 #, no-wrap
 msgid "translations.tex"
-msgstr ""
+msgstr "translations.tex"
 
 #. type: Array Element: format pdf keywords
 #: reports/Reference-Report/_quarto-en.yml:1
 #, no-wrap
 msgid "Reference Report"
-msgstr ""
+msgstr "Rapporto di riferimento"
 
 #. type: Hash Value: title
 #: reports/Reference-Report/_quarto-en.yml:1
@@ -980,7 +980,7 @@ msgstr "ignora i criteri di inclusione della sorveglianza NeoIPC."
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "includes test units"
-msgstr ""
+msgstr "include unità di test"
 
 #. type: Hash Value: headerList multiCountryHint
 #: reports/Reference-Report/content/_sR.yaml:1
@@ -1004,25 +1004,25 @@ msgstr "Analisi multinazionale"
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "This report presents data from neonatal units in a single country. This means that, because of the relative homogeneity of the healthcare system, it is in principle a good benchmark. However, it should be noted that only a proportion of neonatal units in a country actually participate in NeoIPC Surveillance. Since participation is voluntary, these are typically hospitals that have a particular interest in infection prevention and are willing and able to provide the resources required for surveillance."
-msgstr ""
+msgstr "Il presente rapporto presenta dati provenienti da unità neonatali di un singolo paese. Ciò significa che, grazie alla relativa omogeneità del sistema sanitario, in linea di principio è un buon parametro di riferimento. Tuttavia, va notato che solo una parte delle unità neonatali di un paese partecipa effettivamente alla NeoIPC Surveillance. Poiché la partecipazione è volontaria, si tratta in genere di ospedali che hanno un particolare interesse per la prevenzione delle infezioni e che sono disposti e in grado di fornire le risorse necessarie per la sorveglianza."
 
 #. type: Hash Value: headerList singleCountryHintHeader
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "National report"
-msgstr ""
+msgstr "Rapporto nazionale"
 
 #. type: Hash Value: headerList singleCountryRepresentativenessHint
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "The information presented here can therefore not fully describe the situation in the individual countries."
-msgstr ""
+msgstr "Le informazioni qui presentate non possono quindi descrivere completamente la situazione nei singoli paesi."
 
 #. type: Hash Value: headerList specialAnalysisHint
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "This is a special analysis that"
-msgstr ""
+msgstr "Questa è un'analisi speciale che"
 
 #. type: newcommand{#4}
 #: reports/Reference-Report/translations.tex:2
@@ -1146,7 +1146,7 @@ msgstr "L'epidemiologia degli agenti infettivi che causano infezioni nosocomiali
 #: reports/Reference-Report/content/_infectious_agents.Rmd:6
 #, no-wrap
 msgid "<!-- When comparing data with the information on pathogens presented in @tbl-agent-per-infection-rate and information on drug resistance in @tbl-abr-infection-rate, please also have a look at the infectious agent detection rates presented in @tbl-infectious-agent-detection-rate and the antibiotic resistance test rates in @tbl-resistance-test-rate. -->\n"
-msgstr ""
+msgstr "<!-- Nel confrontare i dati con le informazioni sugli agenti patogeni presentate nella @tbl-agent-per-infection-rate e le informazioni sulla resistenza ai farmaci nella @tbl-abr-infection-rate, si prega di consultare anche i tassi di rilevamento degli agenti infettivi presentati nella @tbl-infectious-agent-detection-rate e i tassi di test di resistenza agli antibiotici nella @tbl-resistance-test-rate. -->\n"
 
 #. type: Plain text
 #: reports/Reference-Report/content/_infectious_agents.Rmd:7

@@ -1,0 +1,24 @@
+---
+lang: de
+params:
+  ReferenceDataFile: NULL
+  reportingPeriodFrom: NULL
+  reportingPeriodTo: NULL
+  birthWeightFrom: NULL
+  birthWeightTo: NULL
+  gestationWeeksFrom: NULL
+  gestationWeeksTo: NULL
+  reportingCountries: NULL
+  hospitalFilter: NULL
+  testUnitFilter: true
+  defaultPatientFilter: true
+  validationExceptionFile: NULL
+  token: NULL
+---
+
+```{r}
+#| label: Make sure the locale is initialised correctly
+Sys.setenv(LC_ALL = "it_IT.UTF-8")
+```
+
+{{< include _content.qmd >}}
