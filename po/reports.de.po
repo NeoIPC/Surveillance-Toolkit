@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: NeoIPC Surveillance Reports 0.9\n"
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
 "POT-Creation-Date: 2026-01-26 21:25+0100\n"
-"PO-Revision-Date: 2026-01-26 20:34+0100\n"
+"PO-Revision-Date: 2026-01-26 22:17+0100\n"
 "Last-Translator: Brar Piening <brar.piening@charite.de>\n"
 "Language-Team: none\n"
 "Language: de\n"
@@ -230,10 +230,9 @@ msgstr ""
 
 #. type: Hash Value: crossref-sec-prefix
 #: reports/common/_language.yml:1
-#, fuzzy, no-wrap
-#| msgid "Severe infection"
+#, no-wrap
 msgid "Section"
-msgstr "Schwere Infektion"
+msgstr ""
 
 #. type: Hash Value: crossref-tbl-title
 #: reports/common/_language.yml:1
@@ -267,10 +266,9 @@ msgstr ""
 
 #. type: Hash Value: environment-solution-title
 #: reports/common/_language.yml:1
-#, fuzzy, no-wrap
-#| msgid "Introduction"
+#, no-wrap
 msgid "Solution"
-msgstr "Einleitung"
+msgstr ""
 
 #. type: Hash Value: launch-binder-title
 #: reports/common/_language.yml:1
@@ -298,10 +296,9 @@ msgstr ""
 
 #. type: Hash Value: listing-page-field-categories
 #: reports/common/_language.yml:1
-#, fuzzy, no-wrap
-#| msgid "Countries"
+#, no-wrap
 msgid "Categories"
-msgstr "Länder"
+msgstr ""
 
 #. type: Hash Value: listing-page-field-date
 #: reports/common/_language.yml:1
@@ -437,10 +434,9 @@ msgstr ""
 
 #. type: Hash Value: other-links-title
 #: reports/common/_language.yml:1
-#, fuzzy, no-wrap
-#| msgid "Other"
+#, no-wrap
 msgid "Other Links"
-msgstr "Andere"
+msgstr ""
 
 #. type: Hash Value: related-formats-title
 #: reports/common/_language.yml:1
@@ -564,10 +560,9 @@ msgstr ""
 
 #. type: Hash Value: section-title-references
 #: reports/common/_language.yml:1
-#, fuzzy, no-wrap
-#| msgid "Reference data"
+#, no-wrap
 msgid "References"
-msgstr "Referenzdaten"
+msgstr ""
 
 #. type: Hash Value: section-title-reuse
 #: reports/common/_language.yml:1
