@@ -1,5 +1,5 @@
 ---
-lang: de
+lang: es
 params:
   ReferenceDataFile: NULL
   reportingPeriodFrom: NULL

@@ -1,20 +1,663 @@
-# Translations for the NeoIPC Surveillance Reports
-# Copyright (C) 2025 Charité – Universitätsmedizin Berlin
-# This file is distributed under the Creative Commons Attribution 4.0 International license
-# Automatically generated, 2025.
+# SOME DESCRIPTIVE TITLE
+# Copyright (C) YEAR CharitÃ© â UniversitÃ¤tsmedizin Berlin
+# This file is distributed under the same license as the NeoIPC Surveillance Reports package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
+#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: NeoIPC Surveillance Reports 0.9\n"
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-01-24 22:27+0100\n"
+"POT-Creation-Date: 2026-01-26 21:25+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: Automatically generated\n"
-"Language-Team: none\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: en\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+
+#. type: Hash Value: appendix-attribution-bibtex
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "BibTeX citation:"
+msgstr ""
+
+#. type: Hash Value: appendix-attribution-cite-as
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "For attribution, please cite this work as:"
+msgstr ""
+
+#. type: Hash Value: appendix-view-license
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "View License"
+msgstr ""
+
+#. type: Hash Value: article-notebook-label
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Article Notebook"
+msgstr ""
+
+#. type: Hash Value: back-to-top
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Back to top"
+msgstr ""
+
+#. type: Hash Value: callout-caution-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Caution"
+msgstr ""
+
+#. type: Hash Value: callout-important-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Important"
+msgstr ""
+
+#. type: Hash Value: callout-note-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Note"
+msgstr ""
+
+#. type: Hash Value: callout-tip-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Tip"
+msgstr ""
+
+#. type: Hash Value: callout-warning-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Warning"
+msgstr ""
+
+#. type: Hash Value: code-line
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Line"
+msgstr ""
+
+#. type: Hash Value: code-lines
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Lines"
+msgstr ""
+
+#. type: Hash Value: code-links-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Code Links"
+msgstr ""
+
+#. type: Hash Value: code-tools-menu-caption
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Code"
+msgstr ""
+
+#. type: Hash Value: code-tools-hide-all-code
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Hide All Code"
+msgstr ""
+
+#. type: Hash Value: code-tools-show-all-code
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Show All Code"
+msgstr ""
+
+#. type: Hash Value: code-tools-source-code
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Source Code"
+msgstr ""
+
+#. type: Hash Value: code-tools-view-source
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "View Source"
+msgstr ""
+
+#. type: Hash Value: copy-button-tooltip
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Copy to Clipboard"
+msgstr ""
+
+#. type: Hash Value: copy-button-tooltip-success
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Copied!"
+msgstr ""
+
+#. type: Hash Value: crossref-apx-prefix
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Appendix"
+msgstr ""
+
+#. type: Hash Value: crossref-ch-prefix
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Chapter"
+msgstr ""
+
+#. type: Hash Value: crossref-cnj-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Conjecture"
+msgstr ""
+
+#. type: Hash Value: crossref-cor-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Corollary"
+msgstr ""
+
+#. type: Hash Value: crossref-def-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Definition"
+msgstr ""
+
+#. type: Hash Value: crossref-eq-prefix
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Equation"
+msgstr ""
+
+#. type: Hash Value: crossref-exm-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Example"
+msgstr ""
+
+#. type: Hash Value: crossref-exr-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Exercise"
+msgstr ""
+
+#. type: Hash Value: crossref-fig-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Figure"
+msgstr ""
+
+#. type: Hash Value: crossref-lem-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Lemma"
+msgstr ""
+
+#. type: Hash Value: crossref-lof-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "List of Figures"
+msgstr ""
+
+#. type: Hash Value: crossref-lol-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "List of Listings"
+msgstr ""
+
+#. type: Hash Value: crossref-lot-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "List of Tables"
+msgstr ""
+
+#. type: Hash Value: crossref-lst-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Listing"
+msgstr ""
+
+#. type: Hash Value: crossref-prp-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Proposition"
+msgstr ""
+
+#. type: Hash Value: crossref-sec-prefix
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Section"
+msgstr ""
+
+#. type: Hash Value: crossref-tbl-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Table"
+msgstr ""
+
+#. type: Hash Value: crossref-thm-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Theorem"
+msgstr ""
+
+#. type: Hash Value: draft
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Draft"
+msgstr ""
+
+#. type: Hash Value: environment-proof-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Proof"
+msgstr ""
+
+#. type: Hash Value: environment-remark-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Remark"
+msgstr ""
+
+#. type: Hash Value: environment-solution-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Solution"
+msgstr ""
+
+#. type: Hash Value: launch-binder-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Launch Binder"
+msgstr ""
+
+#. type: Hash Value: launch-dev-container-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Launch Dev Container"
+msgstr ""
+
+#. type: Hash Value: listing-page-category-all
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "All"
+msgstr ""
+
+#. type: Hash Value: title-block-author-single
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Author"
+msgstr ""
+
+#. type: Hash Value: listing-page-field-categories
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Categories"
+msgstr ""
+
+#. type: Hash Value: listing-page-field-date
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Date"
+msgstr ""
+
+#. type: Hash Value: listing-page-field-description
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Description"
+msgstr ""
+
+#. type: Hash Value: title-block-modified
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Modified"
+msgstr ""
+
+#. type: Hash Value: listing-page-field-filename
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "File Name"
+msgstr ""
+
+#. type: Hash Value: listing-page-field-readingtime
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Reading Time"
+msgstr ""
+
+#. type: Hash Value: listing-page-field-subtitle
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Subtitle"
+msgstr ""
+
+#. type: Hash Value: listing-page-field-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Title"
+msgstr ""
+
+#. type: Hash Value: listing-page-field-wordcount
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Word Count"
+msgstr ""
+
+#. type: Hash Value: listing-page-filter
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Filter"
+msgstr ""
+
+#. type: Hash Value: listing-page-minutes-compact
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "{0} min"
+msgstr ""
+
+#. type: Hash Value: listing-page-no-matches
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "No matching items"
+msgstr ""
+
+#. type: Hash Value: listing-page-order-by
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Order By"
+msgstr ""
+
+#. type: Hash Value: listing-page-order-by-date-asc
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Oldest"
+msgstr ""
+
+#. type: Hash Value: listing-page-order-by-date-desc
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Newest"
+msgstr ""
+
+#. type: Hash Value: listing-page-order-by-default
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Default"
+msgstr ""
+
+#. type: Hash Value: listing-page-order-by-number-asc
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Low to High"
+msgstr ""
+
+#. type: Hash Value: listing-page-order-by-number-desc
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "High to Low"
+msgstr ""
+
+#. type: Hash Value: listing-page-words
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "{0} words"
+msgstr ""
+
+#. type: Hash Value: manuscript-meca-bundle
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "MECA Bundle"
+msgstr ""
+
+#. type: Hash Value: notebook-preview-back
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Back to Article"
+msgstr ""
+
+#. type: Hash Value: notebook-preview-download
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Download Notebook"
+msgstr ""
+
+#. type: Hash Value: notebook-preview-download-src
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Download Source"
+msgstr ""
+
+#. type: Hash Value: other-links-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Other Links"
+msgstr ""
+
+#. type: Hash Value: related-formats-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Other Formats"
+msgstr ""
+
+#. type: Hash Value: related-notebooks-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Notebooks"
+msgstr ""
+
+#. type: Hash Value: repo-action-links-edit
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Edit this page"
+msgstr ""
+
+#. type: Hash Value: repo-action-links-issue
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Report an issue"
+msgstr ""
+
+#. type: Hash Value: repo-action-links-source
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "View source"
+msgstr ""
+
+#. type: Hash Value: search-clear-button-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Clear"
+msgstr ""
+
+#. type: Hash Value: search-copy-link-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Copy link to search"
+msgstr ""
+
+#. type: Hash Value: search-detached-cancel-button-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Cancel"
+msgstr ""
+
+#. type: Hash Value: search-hide-matches-text
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Hide additional matches"
+msgstr ""
+
+#. type: Hash Value: search-label
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Search"
+msgstr ""
+
+#. type: Hash Value: search-matching-documents-text
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "matching documents"
+msgstr ""
+
+#. type: Hash Value: search-more-match-text
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "more match in this document"
+msgstr ""
+
+#. type: Hash Value: search-more-matches-text
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "more matches in this document"
+msgstr ""
+
+#. type: Hash Value: search-no-results-text
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "No results"
+msgstr ""
+
+#. type: Hash Value: search-submit-button-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Submit"
+msgstr ""
+
+#. type: Hash Value: section-title-abstract
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Abstract"
+msgstr ""
+
+#. type: Hash Value: section-title-appendices
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Appendices"
+msgstr ""
+
+#. type: Hash Value: section-title-citation
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Citation"
+msgstr ""
+
+#. type: Hash Value: section-title-copyright
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Copyright"
+msgstr ""
+
+#. type: Hash Value: section-title-footnotes
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Footnotes"
+msgstr ""
+
+#. type: Hash Value: section-title-references
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "References"
+msgstr ""
+
+#. type: Hash Value: section-title-reuse
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Reuse"
+msgstr ""
+
+#. type: Hash Value: source-notebooks-prefix
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Source"
+msgstr ""
+
+#. type: Hash Value: title-block-affiliation-plural
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Affiliations"
+msgstr ""
+
+#. type: Hash Value: title-block-affiliation-single
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Affiliation"
+msgstr ""
+
+#. type: Hash Value: title-block-author-plural
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Authors"
+msgstr ""
+
+#. type: Hash Value: title-block-keywords
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Keywords"
+msgstr ""
+
+#. type: Hash Value: title-block-published
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Published"
+msgstr ""
+
+#. type: Hash Value: toc-title-document
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Table of contents"
+msgstr ""
+
+#. type: Hash Value: toc-title-website
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "On this page"
+msgstr ""
+
+#. type: Hash Value: toggle-dark-mode
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Toggle dark mode"
+msgstr ""
+
+#. type: Hash Value: toggle-navigation
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Toggle navigation"
+msgstr ""
+
+#. type: Hash Value: toggle-reader-mode
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Toggle reader mode"
+msgstr ""
+
+#. type: Hash Value: toggle-section
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Toggle section"
+msgstr ""
+
+#. type: Hash Value: toggle-sidebar
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Toggle sidebar navigation"
+msgstr ""
+
+#. type: Hash Value: tools-download
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Download"
+msgstr ""
+
+#. type: Hash Value: tools-share
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Share"
+msgstr ""
 
 #. type: Hash Value: 3gcr
 #: reports/common.yaml:1

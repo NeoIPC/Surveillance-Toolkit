@@ -1,5 +1,6 @@
 ---
-lang: de
+lang: gr
+language: ../common/_language.gr.yml
 params:
   ReferenceDataFile: NULL
   reportingPeriodFrom: NULL

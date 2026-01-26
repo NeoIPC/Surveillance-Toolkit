@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NeoIPC Surveillance Reports 0.9\n"
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-01-26 20:34+0100\n"
+"POT-Creation-Date: 2026-01-26 21:25+0100\n"
 "PO-Revision-Date: 2026-01-26 20:35+0100\n"
 "Last-Translator: Brar Piening <brar.piening@charite.de>\n"
 "Language-Team: none\n"
@@ -15,1170 +15,1815 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 3.8\n"
+
+#. type: Hash Value: appendix-attribution-bibtex
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "BibTeX citation:"
+msgstr "Αναφορά BibTeX:"
+
+#. type: Hash Value: appendix-attribution-cite-as
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "For attribution, please cite this work as:"
+msgstr "Για απόδοση ευγνωμοσύνης, παρακαλούμε αναφερθείτε σε αυτό το έργο ως:"
+
+#. type: Hash Value: appendix-view-license
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "View License"
+msgstr "Προβολή Άδειας"
+
+#. type: Hash Value: article-notebook-label
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Article Notebook"
+msgstr "Σημειωματάριο Άρθρου"
+
+#. type: Hash Value: back-to-top
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Back to top"
+msgstr "Επιστροφή στην κορυφή"
+
+#. type: Hash Value: callout-caution-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Caution"
+msgstr "Προσοχή"
+
+#. type: Hash Value: callout-important-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Important"
+msgstr "Σημαντικό"
+
+#. type: Hash Value: callout-note-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Note"
+msgstr "Σημείωση"
+
+#. type: Hash Value: callout-tip-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Tip"
+msgstr "Συμβουλή"
+
+#. type: Hash Value: callout-warning-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Warning"
+msgstr "Προειδοποίηση"
+
+#. type: Hash Value: code-line
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Line"
+msgstr "Γραμμή"
+
+#. type: Hash Value: code-lines
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Lines"
+msgstr "Γραμμές"
+
+#. type: Hash Value: code-links-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Code Links"
+msgstr "Σύνδεσμοι κώδικα"
+
+#. type: Hash Value: code-tools-menu-caption
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Code"
+msgstr "Κώδικας"
+
+#. type: Hash Value: code-tools-hide-all-code
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Hide All Code"
+msgstr "Απόκρυψη όλου του κώδικα"
+
+#. type: Hash Value: code-tools-show-all-code
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Show All Code"
+msgstr "Εμφάνιση όλου του κώδικα"
+
+#. type: Hash Value: code-tools-source-code
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Source Code"
+msgstr "Πηγαίος κώδικας"
+
+#. type: Hash Value: code-tools-view-source
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "View Source"
+msgstr "Προβολή πηγαίου κώδικα"
+
+#. type: Hash Value: copy-button-tooltip
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Copy to Clipboard"
+msgstr "Αντιγραφή στο πρόχειρο"
+
+#. type: Hash Value: copy-button-tooltip-success
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Copied!"
+msgstr "Αντιγράφηκε!"
+
+#. type: Hash Value: crossref-apx-prefix
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Appendix"
+msgstr "Παράρτημα"
+
+#. type: Hash Value: crossref-ch-prefix
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Chapter"
+msgstr "Κεφάλαιο"
+
+#. type: Hash Value: crossref-cnj-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Conjecture"
+msgstr "Υπόθεση"
+
+#. type: Hash Value: crossref-cor-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Corollary"
+msgstr "Πόρισμα"
+
+#. type: Hash Value: crossref-def-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Definition"
+msgstr "Ορισμός"
+
+#. type: Hash Value: crossref-eq-prefix
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Equation"
+msgstr "Εξίσωση"
+
+#. type: Hash Value: crossref-exm-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Example"
+msgstr "Παράδειγμα"
+
+#. type: Hash Value: crossref-exr-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Exercise"
+msgstr "Άσκηση"
+
+#. type: Hash Value: crossref-fig-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Figure"
+msgstr "Σχήμα"
+
+#. type: Hash Value: crossref-lem-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Lemma"
+msgstr "Λήμμα"
+
+#. type: Hash Value: crossref-lof-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "List of Figures"
+msgstr "Λίστα Σχημάτων"
+
+#. type: Hash Value: crossref-lol-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "List of Listings"
+msgstr "Λίστα Καταλόγων"
+
+#. type: Hash Value: crossref-lot-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "List of Tables"
+msgstr "Λίστα Πινάκων"
+
+#. type: Hash Value: crossref-lst-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Listing"
+msgstr "Κατάλογος"
+
+#. type: Hash Value: crossref-prp-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Proposition"
+msgstr "Πρόταση"
+
+#. type: Hash Value: crossref-sec-prefix
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Section"
+msgstr "Ενότητα"
+
+#. type: Hash Value: crossref-tbl-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Table"
+msgstr "Πίνακας"
+
+#. type: Hash Value: crossref-thm-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Theorem"
+msgstr "Θεώρημα"
+
+#. type: Hash Value: draft
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Draft"
+msgstr "Σχέδιο"
+
+#. type: Hash Value: environment-proof-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Proof"
+msgstr "Απόδειξη"
+
+#. type: Hash Value: environment-remark-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Remark"
+msgstr "Παρατήρηση"
+
+#. type: Hash Value: environment-solution-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Solution"
+msgstr "Λύση"
+
+#. type: Hash Value: launch-binder-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Launch Binder"
+msgstr "Εκκίνηση Binder"
+
+#. type: Hash Value: launch-dev-container-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Launch Dev Container"
+msgstr "Εκκίνηση Dev Container"
+
+#. type: Hash Value: listing-page-category-all
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "All"
+msgstr "Όλα"
+
+#. type: Hash Value: title-block-author-single
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Author"
+msgstr "Συγγραφέας"
+
+#. type: Hash Value: listing-page-field-categories
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Categories"
+msgstr "Κατηγορίες"
+
+#. type: Hash Value: listing-page-field-date
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Date"
+msgstr "Ημερομηνία"
+
+#. type: Hash Value: listing-page-field-description
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Description"
+msgstr "Περιγραφή"
+
+#. type: Hash Value: title-block-modified
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Modified"
+msgstr ""
+"#-#-#-#-#  reports/common/_language.gr.yml:1 (type Hash Value: listing-page-field-filemodified)  #-#-#-#-#\n"
+"Τροποποιήθηκε\n"
+"#-#-#-#-#  reports/common/_language.gr.yml:1 (type: Hash Value: title-block-modified)  #-#-#-#-#\n"
+"Τροποποιημένο"
+
+#. type: Hash Value: listing-page-field-filename
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "File Name"
+msgstr "Όνομα αρχείου"
+
+#. type: Hash Value: listing-page-field-readingtime
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Reading Time"
+msgstr "Χρόνος ανάγνωσης"
+
+#. type: Hash Value: listing-page-field-subtitle
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Subtitle"
+msgstr "Υπότιτλος"
+
+#. type: Hash Value: listing-page-field-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Title"
+msgstr "Τίτλος"
+
+#. type: Hash Value: listing-page-field-wordcount
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Word Count"
+msgstr "Μέτρηση Λέξεων"
+
+#. type: Hash Value: listing-page-filter
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Filter"
+msgstr "Φίλτρο"
+
+#. type: Hash Value: listing-page-minutes-compact
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "{0} min"
+msgstr "{0} λεπτά"
+
+#. type: Hash Value: listing-page-no-matches
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "No matching items"
+msgstr "Δεν υπάρχουν αντιστοιχίες"
+
+#. type: Hash Value: listing-page-order-by
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Order By"
+msgstr "Ταξινόμηση κατά"
+
+#. type: Hash Value: listing-page-order-by-date-asc
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Oldest"
+msgstr "Παλαιότερο"
+
+#. type: Hash Value: listing-page-order-by-date-desc
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Newest"
+msgstr "Νεότερο"
+
+#. type: Hash Value: listing-page-order-by-default
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Default"
+msgstr "Προεπιλογή"
+
+#. type: Hash Value: listing-page-order-by-number-asc
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Low to High"
+msgstr "Χαμηλό προς Υψηλό"
+
+#. type: Hash Value: listing-page-order-by-number-desc
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "High to Low"
+msgstr "Υψηλό προς Χαμηλό"
+
+#. type: Hash Value: listing-page-words
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "{0} words"
+msgstr "{0} λέξεις"
+
+#. type: Hash Value: manuscript-meca-bundle
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "MECA Bundle"
+msgstr "Αρχείο MECA"
+
+#. type: Hash Value: notebook-preview-back
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Back to Article"
+msgstr "Πίσω στο Άρθρο"
+
+#. type: Hash Value: notebook-preview-download
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Download Notebook"
+msgstr "Λήψη Σημειωματαρίου"
+
+#. type: Hash Value: notebook-preview-download-src
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Download Source"
+msgstr "Λήψη πηγαίου κώδικα"
+
+#. type: Hash Value: other-links-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Other Links"
+msgstr "Άλλοι Σύνδεσμοι"
+
+#. type: Hash Value: related-formats-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Other Formats"
+msgstr "Άλλες μορφές"
+
+#. type: Hash Value: related-notebooks-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Notebooks"
+msgstr "Σημειωματάρια"
+
+#. type: Hash Value: repo-action-links-edit
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Edit this page"
+msgstr "Επεξεργασία αυτής της σελίδας"
+
+#. type: Hash Value: repo-action-links-issue
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Report an issue"
+msgstr "Αναφορά προβλήματος"
+
+#. type: Hash Value: repo-action-links-source
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "View source"
+msgstr "Προβολή πηγής"
+
+#. type: Hash Value: search-clear-button-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Clear"
+msgstr "Καθαρισμός"
+
+#. type: Hash Value: search-copy-link-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Copy link to search"
+msgstr "Αντιγραφή συνδέσμου αναζήτησης"
+
+#. type: Hash Value: search-detached-cancel-button-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Cancel"
+msgstr "Ακύρωση"
+
+#. type: Hash Value: search-hide-matches-text
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Hide additional matches"
+msgstr "Απόκρυψη επιπλέον αντιστοιχιών"
+
+#. type: Hash Value: search-label
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Search"
+msgstr "Αναζήτηση"
+
+#. type: Hash Value: search-matching-documents-text
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "matching documents"
+msgstr "ταιριάζοντα έγγραφα"
+
+#. type: Hash Value: search-more-match-text
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "more match in this document"
+msgstr "επιπλέον αντιστοιχία σε αυτό το έγγραφο"
+
+#. type: Hash Value: search-more-matches-text
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "more matches in this document"
+msgstr "επιπλέον αντιστοιχίες σε αυτό το έγγραφο"
+
+#. type: Hash Value: search-no-results-text
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "No results"
+msgstr "Δεν βρέθηκαν αποτελέσματα"
+
+#. type: Hash Value: search-submit-button-title
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Submit"
+msgstr "Υποβολή"
+
+#. type: Hash Value: section-title-abstract
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Abstract"
+msgstr "Περίληψη"
+
+#. type: Hash Value: section-title-appendices
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Appendices"
+msgstr "Παραρτήματα"
+
+#. type: Hash Value: section-title-citation
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Citation"
+msgstr "Αναφορά"
+
+#. type: Hash Value: section-title-copyright
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Copyright"
+msgstr "Πνευματικά δικαιώματα"
+
+#. type: Hash Value: section-title-footnotes
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Footnotes"
+msgstr "Υποσημειώσεις"
+
+#. type: Hash Value: section-title-references
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "References"
+msgstr "Αναφορές"
+
+#. type: Hash Value: section-title-reuse
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Reuse"
+msgstr "Επαναχρησιμοποίηση"
+
+#. type: Hash Value: source-notebooks-prefix
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Source"
+msgstr "Πηγή"
+
+#. type: Hash Value: title-block-affiliation-plural
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Affiliations"
+msgstr "Συνδρομές"
+
+#. type: Hash Value: title-block-affiliation-single
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Affiliation"
+msgstr "Συνδρομή"
+
+#. type: Hash Value: title-block-author-plural
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Authors"
+msgstr "Συγγραφείς"
+
+#. type: Hash Value: title-block-keywords
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Keywords"
+msgstr "Λέξεις-κλειδιά"
+
+#. type: Hash Value: title-block-published
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Published"
+msgstr "Δημοσιευμένο"
+
+#. type: Hash Value: toc-title-document
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Table of contents"
+msgstr "Πίνακας περιεχομένων"
+
+#. type: Hash Value: toc-title-website
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "On this page"
+msgstr "Σε αυτήν τη σελίδα"
+
+#. type: Hash Value: toggle-dark-mode
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Toggle dark mode"
+msgstr "Εναλλαγή σκοτεινού θέματος"
+
+#. type: Hash Value: toggle-navigation
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Toggle navigation"
+msgstr "Εναλλαγή πλοήγησης"
+
+#. type: Hash Value: toggle-reader-mode
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Toggle reader mode"
+msgstr "Εναλλαγή λειτουργίας ανάγνωσης"
+
+#. type: Hash Value: toggle-section
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Toggle section"
+msgstr "Εναλλαγή ενότητας"
+
+#. type: Hash Value: toggle-sidebar
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Toggle sidebar navigation"
+msgstr "Εναλλαγή πλαϊνής γραμμής πλοήγησης"
+
+#. type: Hash Value: tools-download
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Download"
+msgstr "Λήψη"
+
+#. type: Hash Value: tools-share
+#: reports/common/_language.yml:1
+#, no-wrap
+msgid "Share"
+msgstr "Μοιραστείτε"
 
 #. type: Hash Value: 3gcr
 #: reports/common.yaml:1
 #, no-wrap
 msgid "3^rd^ gen. cephalosporin resistance (3GCR)"
-msgstr "Αντοχή στις κεφαλοσπορίνες 3^ης^ γενιάς (3GCR)"
+msgstr ""
 
 #. type: Hash Value: bsi
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Primary sepsis/BSI"
-msgstr "Πρωτογενής σήψη/BSI"
+msgstr ""
 
 #. type: Hash Value: car
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Carbapenem resistance (CARBR)"
-msgstr "Αντοχή στις καρβαπενέμες (CARBR)"
+msgstr ""
 
 #. type: Hash Value: cor
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Colistin resistance (COLR)"
-msgstr "Αντοχή στην κολιστίνη (COLR)"
+msgstr ""
 
 #. type: Hash Value: day
 #: reports/common.yaml:1
 #, no-wrap
 msgid "day"
-msgstr "ημέρα"
+msgstr ""
 
 #. type: Hash Value: digit_group_separator
 #: reports/common.yaml:1
 #, no-wrap
 msgid " "
-msgstr " "
+msgstr ""
 
 #. type: Array Element: fig-bw fig-cap
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Distribution of birth weights of the infants included in this report."
-msgstr "Κατανομή του βάρους γέννησης των βρεφών που περιλαμβάνονται στην παρούσα έκθεση."
+msgstr ""
 
 #. type: Hash Value: fig-ga fig-cap bnch
 #: reports/common.yaml:1
 #, no-wrap
 msgid "A is a histogram in %s steps with a density curve of your own unit’s data and a density curve of the reference data and B are two boxplots, one of your own unit’s data and one of the reference data."
-msgstr "Το Α είναι ένα ιστόγραμμα σε βήματα των %s με καμπύλη πυκνότητας των δεδομένων της μονάδας σας και καμπύλη πυκνότητας των δεδομένων αναφοράς, και το Β αποτελείται από δύο boxplots, ένα των δεδομένων της μονάδας σας και ένα των δεδομένων αναφοράς."
+msgstr ""
 
 #. type: Hash Value: fig-ga fig-cap no-bnch
 #: reports/common.yaml:1
 #, no-wrap
 msgid "A is a histogram in %s steps with a density curve and B is a boxplot."
-msgstr "Το Α είναι ένα ιστόγραμμα σε βήματα των %s με καμπύλη πυκνότητας και το Β είναι ένα boxplot."
+msgstr ""
 
 #. type: Hash Value: fig-ga fig-cap bnch
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Vertical lines in the boxplots represent the %s, %s and %s quantiles, the diamonds represent the pooled arithmetic means."
-msgstr "Οι κάθετες γραμμές στα boxplots αντιπροσωπεύουν τα %s, %s και %s ποσοστημόρια, ενώ τα διαμάντια αντιπροσωπεύουν τους συγκεντρωτικούς αριθμητικούς μέσους όρους."
+msgstr ""
 
 #. type: Hash Value: fig-ga fig-cap no-bnch
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Vertical lines in the boxplot represent the %s, %s and %s quantiles, the diamond represents the pooled arithmetic mean."
-msgstr "Οι κάθετες γραμμές στο boxplot αντιπροσωπεύουν τα %s, %s και %s ποσοστημόρια, ενώ το διαμάντι αντιπροσωπεύει τον συγκεντρωτικό αριθμητικό μέσο όρο."
+msgstr ""
 
 #. type: Array Element: fig-ga fig-cap
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Distribution of gestational ages of the infants included in this report."
-msgstr "Κατανομή της ηλικίας κύησης των βρεφών που περιλαμβάνονται στην παρούσα έκθεση."
+msgstr ""
 
 #. type: Hash Value: gramm_abbreviation
 #: reports/common.yaml:1
 #, no-wrap
 msgid "g"
-msgstr "g"
+msgstr ""
 
 #. type: Hash Value: hap
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Pneumonia"
-msgstr "Πνευμονία"
+msgstr ""
 
 #. type: Hash Value: mrsa
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Methicillin-resistant Staphylococcus aureus (MRSA)"
-msgstr "Staphylococcus aureus ανθεκτικός στη μεθικιλλίνη (MRSA)"
+msgstr ""
 
 #. type: Hash Value: nec
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Necrotising Enterocolitis"
-msgstr "Νεκρωτική εντεροκολίτιδα"
+msgstr ""
 
 #. type: Hash Value: patient_days
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Patient days"
-msgstr "Ημέρες νοσηλείας"
+msgstr ""
 
 #. type: Hash Value: percent_symbol
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%"
-msgstr "%"
+msgstr ""
 
 #. type: Hash Value: si
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Severe infection"
-msgstr "Σοβαρή λοίμωξη"
+msgstr "Ενότητα"
 
 #. type: Hash Value: ssi
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Surgical site infection"
-msgstr "Λοίμωξη χειρουργικού πεδίου"
+msgstr ""
 
 #. type: Hash Value: table_headers n
 #: reports/common.yaml:1
 #, no-wrap
 msgid "N"
-msgstr "N"
+msgstr ""
 
 #. type: Hash Value: table_headers pooled
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Pooled"
-msgstr "Συγκεντρωτικός"
+msgstr ""
 
 #. type: Hash Value: table_headers q1
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Q₁"
-msgstr "Q₁"
+msgstr ""
 
 #. type: Hash Value: table_headers q2
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Q₂"
-msgstr "Q₂"
+msgstr ""
 
 #. type: Hash Value: table_headers q3
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Q₃"
-msgstr "Q₃"
+msgstr ""
 
 #. type: Hash Value: table_headers rate
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Rate"
-msgstr "Ποσοστό"
+msgstr ""
 
 #. type: Hash Value: tbl-abr-infection-rate n_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The aggregated number of antibiotic resistant pathogens in all infections."
-msgstr "%s: Ο συνολικός αριθμός παθογόνων ανθεκτικών στα αντιβιοτικά σε όλες τις λοιμώξεις."
+msgstr ""
 
 #. type: Hash Value: tbl-abr-infection-rate pooled_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The resistant pathogen infection rate calculated across all infants from all departments."
-msgstr "%s: Το ποσοστό λοίμωξης από ανθεκτικά παθογόνα που υπολογίστηκε για όλα τα βρέφη από όλα τα τμήματα."
+msgstr ""
 
 #. type: Hash Value: tbl-abr-infection-rate quartile_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the resistant pathogen infection rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected infections with an agents is greater than or equal to one according to the pooled resistant pathogen infection rate."
-msgstr "%s, %s, %s: Τα τεταρτημόρια (%s, %s και %s ποσοστιαία διαστήματα) των ποσοστών λοίμωξης από ανθεκτικά παθογόνα των συνεργαζόμενων τμημάτων. Αυτά τα τεταρτημόρια εμφανίζονται μόνο όταν ο αριθμός των τμημάτων που συνεισφέρουν στον παρονομαστή είναι μεγαλύτερος ή ίσος με πέντε και όταν ο μέσος αριθμός των αναμενόμενων λοιμώξεων από έναν παράγοντα είναι μεγαλύτερος ή ίσος με ένα σύμφωνα με το συνολικό ποσοστό λοίμωξης από ανθεκτικά παθογόνα."
+msgstr ""
 
 #. type: Hash Value: tbl-abr-infection-rate rate_denominator
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Number of infections where a pathogen was detected"
-msgstr "Αριθμός λοιμώξεων στις οποίες ανιχνεύθηκε παθογόνο"
+msgstr ""
 
 #. type: Hash Value: tbl-abr-infection-rate rate_name
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Resistant pathogen infection rate"
-msgstr "Ποσοστό λοίμωξης από ανθεκτικά παθογόνα"
+msgstr ""
 
 #. type: Hash Value: tbl-abr-infection-rate rate_numerator
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Number of antibiotic resistant pathogens in infections"
-msgstr "Αριθμός παθογόνων ανθεκτικών στα αντιβιοτικά σε λοιμώξεις"
+msgstr ""
 
 #. type: Hash Value: tbl-abr-infection-rate tbl-cap
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Nosocomial infections with resistant pathogens"
-msgstr "Νοσοκομειακές λοιμώξεις με ανθεκτικά παθογόνα"
+msgstr ""
 
 #. type: Hash Value: tbl-agent-per-infection-rate n_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The aggregated number of infectious agents in all infections."
-msgstr "%s: Ο συνολικός αριθμός μολυσματικών παραγόντων σε όλες τις μολύνσεις."
+msgstr ""
 
 #. type: Hash Value: tbl-agent-per-infection-rate pooled_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The Agent-per-Infection Rate calculated across all infants from all departments."
-msgstr "%s: Ο δείκτης παραγόντων ανά λοίμωξη που υπολογίστηκε για όλα τα βρέφη από όλα τα τμήματα."
+msgstr ""
 
 #. type: Hash Value: tbl-agent-per-infection-rate quartile_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Agent-per-Infection Rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected agents detected in infections is greater than or equal to one according to the pooled Agent-per-Infection Rate."
-msgstr "%s, %s, %s: Τα τεταρτημόρια (%s, %s και %s ποσοστιαία διαστήματα) των ποσοστών παραγόντων ανά λοίμωξη των συνεργαζόμενων τμημάτων. Αυτά τα τεταρτημόρια εμφανίζονται μόνο όταν ο αριθμός των τμημάτων που συνεισφέρουν στον παρονομαστή είναι μεγαλύτερος ή ίσος με πέντε και όταν ο μέσος αριθμός των αναμενόμενων παραγόντων που ανιχνεύονται στις λοιμώξεις είναι μεγαλύτερος ή ίσος με ένα σύμφωνα με το συγκεντρωτικό ποσοστό παραγόντων ανά λοίμωξη."
+msgstr ""
 
 #. type: Hash Value: tbl-agent-per-infection-rate rate_denominator
 #: reports/common.yaml:1
 #, no-wrap
 msgid "No of infections where an infectious agent was detected"
-msgstr "Αριθμός λοιμώξεων όπου ανιχνεύθηκε μολυσματικός παράγοντας"
+msgstr ""
 
 #. type: Hash Value: tbl-agent-per-infection-rate rate_name
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Agent-per-Infection Rate"
-msgstr "Ποσοστό παραγόντων ανά λοίμωξη"
+msgstr ""
 
 #. type: Hash Value: tbl-agent-per-infection-rate rate_numerator
 #: reports/common.yaml:1
 #, no-wrap
 msgid "No of infectious agents that were detected in infections"
-msgstr "Αριθμός μολυσματικών παραγόντων που ανιχνεύθηκαν σε λοιμώξεις"
+msgstr ""
 
 #. type: Hash Value: tbl-agent-per-infection-rate tbl-cap
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Infectious agents detected in nosocomial infections"
-msgstr "Μολυσματικοί παράγοντες που ανιχνεύθηκαν σε νοσοκομειακές λοιμώξεις"
+msgstr ""
 
 #. type: Hash Value: tbl-risk-density-rates cvc
 #: reports/common.yaml:1
 #, no-wrap
 msgid "CVC"
-msgstr "CVC"
+msgstr ""
 
 #. type: Hash Value: tbl-device-associated-incidence-density-rates dev_ass_incidence_density_rate
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Device-Associated Incidence Density Rate"
-msgstr "Πυκνότητα περιστατικών που σχετίζονται με τη συσκευή"
+msgstr ""
 
 #. type: Hash Value: tbl-device-associated-incidence-density-rates grp_vc
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Vascular catheter associated sepsis / bloodstream infection"
-msgstr "Σύστημα αιμοφόρων αγγείων"
+msgstr ""
 
 #. type: Hash Value: tbl-device-associated-incidence-density-rates grp_vs
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Ventilatory support associated pneumonia"
-msgstr "Πνευμονία σχετιζόμενη με αναπνευστική υποστήριξη"
+msgstr ""
 
 #. type: Hash Value: tbl-risk-density-rates inv
 #: reports/common.yaml:1
 #, no-wrap
 msgid "INV"
-msgstr "INV"
+msgstr ""
 
 #. type: Hash Value: tbl-device-associated-incidence-density-rates n_dev_ass_inf
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Number of device-associated infections"
-msgstr "Αριθμός λοιμώξεων που σχετίζονται με τη συσκευή"
+msgstr ""
 
 #. type: Hash Value: tbl-device-associated-incidence-density-rates n_dev_days
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Device days"
-msgstr "Ημέρες χρήσης της συσκευής"
+msgstr ""
 
 #. type: Hash Value: tbl-device-associated-incidence-density-rates n_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The aggregated number of device-associated infections in all infants."
-msgstr "%s: Ο συνολικός αριθμός λοιμώξεων που σχετίζονται με τη χρήση συσκευών σε όλα τα βρέφη."
+msgstr ""
 
 #. type: Hash Value: tbl-risk-density-rates niv
 #: reports/common.yaml:1
 #, no-wrap
 msgid "NIV"
-msgstr "NIV"
+msgstr ""
 
 #. type: Hash Value: tbl-device-associated-incidence-density-rates pooled_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The Device-Associated Incidence Density Rate calculated across all infants from all departments."
-msgstr "%s: Το ποσοστό συχνότητας εμφάνισης σχετιζόμενων με τη συσκευή λοιμώξεων που υπολογίστηκε για όλα τα βρέφη από όλα τα τμήματα."
+msgstr ""
 
 #. type: Hash Value: tbl-risk-density-rates pvc
 #: reports/common.yaml:1
 #, no-wrap
 msgid "PVC"
-msgstr "PVC"
+msgstr ""
 
 #. type: Hash Value: tbl-device-associated-incidence-density-rates quartile_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Device-Associated Incidence Density Rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected infections is greater than or equal to one according to the pooled Device-Associated Incidence Density Rate."
-msgstr "%s, %s, %s: Τα τεταρτημόρια (%s, %s και %s ποσοστιαία διαστήματα) των ποσοστών πυκνότητας εμφάνισης λοιμώξεων που σχετίζονται με ιατρικές συσκευές των συνεργαζόμενων τμημάτων. Αυτά τα τεταρτημόρια εμφανίζονται μόνο όταν ο αριθμός των τμημάτων που συνεισφέρουν στον παρονομαστή είναι μεγαλύτερος ή ίσος με πέντε και όταν ο μέσος αριθμός των αναμενόμενων λοιμώξεων είναι μεγαλύτερος ή ίσος με ένα σύμφωνα με το συγκεντρωτικό ποσοστό πυκνότητας εμφάνισης λοιμώξεων που σχετίζονται με ιατρικές συσκευές."
+msgstr ""
 
 #. type: Hash Value: tbl-device-associated-incidence-density-rates tbl-cap
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Incidence Density Rates of device-associated infections"
-msgstr "Ποσοστά πυκνότητας εμφάνισης λοιμώξεων που σχετίζονται με ιατρικές συσκευές"
+msgstr ""
 
 #. type: Hash Value: tbl-device-associated-incidence-density-rates vs
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Any ventilatory support"
-msgstr "Οποιαδήποτε αναπνευστική υποστήριξη"
+msgstr ""
 
 #. type: Hash Value: tbl-surgical-procedure-rates other
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Other"
-msgstr "Άλλα"
+msgstr "Άλλοι Σύνδεσμοι"
 
 #. type: Hash Value: tbl-incidence-density-rates grp_si
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Primary sepsis/BSI/Pneumonia"
-msgstr "Πρωτογενής σήψη/BSI/Πνευμονία"
+msgstr ""
 
 #. type: Hash Value: tbl-incidence-density-rates incidence_density_rate
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Incidence Density Rate"
-msgstr "Ποσοστό πυκνότητας εμφάνισης"
+msgstr ""
 
 #. type: Hash Value: tbl-incidence-density-rates n_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The aggregated number of infections in all infants."
-msgstr "%s: Ο συνολικός αριθμός λοιμώξεων σε όλα τα βρέφη."
+msgstr ""
 
 #. type: Hash Value: tbl-incidence-density-rates n_inf
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Number of infections"
-msgstr "Αριθμός λοιμώξεων"
+msgstr ""
 
 #. type: Hash Value: tbl-incidence-density-rates pooled_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The Incidence Density Rate calculated across all infants from all departments."
-msgstr "%s: Ο δείκτης πυκνότητας εμφάνισης που υπολογίζεται για όλα τα βρέφη από όλα τα τμήματα."
+msgstr ""
 
 #. type: Hash Value: tbl-incidence-density-rates quartile_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Incidence Density Rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected infections is greater than or equal to one according to the pooled Incidence Density Rate."
-msgstr "%s, %s, %s: Τα τεταρτημόρια (%s, %s και %s ποσοστιαία τεταρτημόρια) των ποσοστών πυκνότητας εμφάνισης των συνεργαζόμενων τμημάτων. Αυτά τα τεταρτημόρια εμφανίζονται μόνο όταν ο αριθμός των τμημάτων που συνεισφέρουν στον παρονομαστή είναι μεγαλύτερος ή ίσος με πέντε και όταν ο μέσος αριθμός των αναμενόμενων λοιμώξεων είναι μεγαλύτερος ή ίσος με ένα σύμφωνα με το συγκεντρωτικό ποσοστό πυκνότητας εμφάνισης."
+msgstr ""
 
 #. type: Hash Value: tbl-incidence-density-rates si_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: Combines the outcomes primary sepsis/BSI and pneumonia"
-msgstr "%s: Συνδυάζει τα αποτελέσματα πρωτοπαθούς σήψης/BSI και πνευμονίας"
+msgstr ""
 
 #. type: Hash Value: tbl-incidence-density-rates tbl-cap
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Incidence Density Rates of nosocomial infections"
-msgstr "Ποσοστά πυκνότητας εμφάνισης νοσοκομειακών λοιμώξεων"
+msgstr ""
 
 #. type: Hash Value: tbl-infectious-agent-detection-rate n_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The aggregated number of infections where at least one infectious agent was recorded."
-msgstr "%s: Ο συνολικός αριθμός λοιμώξεων όπου καταγράφηκε τουλάχιστον ένας μολυσματικός παράγοντας."
+msgstr ""
 
 #. type: Hash Value: tbl-infectious-agent-detection-rate pooled_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The Infectious Agent Detection Rate calculated across all infants from all departments."
-msgstr "%s: Το ποσοστό ανίχνευσης μολυσματικών παραγόντων που υπολογίστηκε για όλα τα βρέφη από όλα τα τμήματα."
+msgstr ""
 
 #. type: Hash Value: tbl-infectious-agent-detection-rate quartile_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Infectious Agent Detection Rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected infections with an agents is greater than or equal to one according to the pooled Infectious Agent Detection Rate."
-msgstr "%s, %s, %s: Τα τεταρτημόρια (%s, %s και %s ποσοστιαία διαστήματα) των ποσοστών ανίχνευσης μολυσματικών παραγόντων των συνεργαζόμενων τμημάτων. Αυτά τα τεταρτημόρια εμφανίζονται μόνο όταν ο αριθμός των τμημάτων που συνεισφέρουν στον παρονομαστή είναι μεγαλύτερος ή ίσος με πέντε και όταν ο μέσος αριθμός των αναμενόμενων μολύνσεων με έναν παράγοντα είναι μεγαλύτερος ή ίσος με ένα σύμφωνα με το συγκεντρωτικό ποσοστό ανίχνευσης μολυσματικών παραγόντων."
+msgstr ""
 
 #. type: Hash Value: tbl-infectious-agent-detection-rate rate_denominator
 #: reports/common.yaml:1
 #, no-wrap
 msgid "No of infections"
-msgstr "Αριθμός μολύνσεων"
+msgstr ""
 
 #. type: Hash Value: tbl-infectious-agent-detection-rate rate_name
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Infectious Agent Detection Rate"
-msgstr "Ποσοστό ανίχνευσης μολυσματικού παράγοντα"
+msgstr ""
 
 #. type: Hash Value: tbl-infectious-agent-detection-rate rate_numerator
 #: reports/common.yaml:1
 #, no-wrap
 msgid "No of infections with agent"
-msgstr "Αριθμός μολύνσεων με παράγοντα"
+msgstr ""
 
 #. type: Hash Value: tbl-infectious-agent-detection-rate tbl-cap
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Infections in which an infectious agent has been identified, including secondary BSI following the infection."
-msgstr "Λοιμώξεις στις οποίες έχει ταυτοποιηθεί μολυσματικός παράγοντας, συμπεριλαμβανομένης της δευτερογενούς BSI μετά τη λοίμωξη."
+msgstr ""
 
 #. type: Hash Value: tbl-resistance-test-rate if_3gcr
 #: reports/common.yaml:1
 #, no-wrap
 msgid "in case of 3GCR"
-msgstr "σε περίπτωση 3GCR"
+msgstr ""
 
 #. type: Hash Value: tbl-resistance-test-rate if_3gcr_and_car
 #: reports/common.yaml:1
 #, no-wrap
 msgid "in case of 3GCR and CARBR"
-msgstr "σε περίπτωση 3GCR και CARBR"
+msgstr ""
 
 #. type: Hash Value: tbl-resistance-test-rate n_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The aggregated number of antibiotic resistant pathogens that have a documented test for antibiotic resistance."
-msgstr "%s: Ο συνολικός αριθμός παθογόνων ανθεκτικών στα αντιβιοτικά που έχουν τεκμηριωμένο έλεγχο αντοχής στα αντιβιοτικά."
+msgstr ""
 
 #. type: Hash Value: tbl-resistance-test-rate pooled_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The antibiotic resistance test rate calculated across all infants from all departments."
-msgstr "%s: Το ποσοστό ελέγχου αντοχής στα αντιβιοτικά που υπολογίστηκε για όλα τα βρέφη από όλα τα τμήματα."
+msgstr ""
 
 #. type: Hash Value: tbl-resistance-test-rate quartile_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the antibiotic resistance test rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected infections with an agents is greater than or equal to one according to the pooled antibiotic resistance test rate."
-msgstr "%s, %s, %s: Τα τεταρτημόρια (%s, %s και %s ποσοστημόρια) των ποσοστών ελέγχου αντοχής στα αντιβιοτικά των συνεργαζόμενων τμημάτων. Αυτά τα τεταρτημόρια εμφανίζονται μόνο όταν ο αριθμός των τμημάτων που συνεισφέρουν στον παρονομαστή είναι μεγαλύτερος ή ίσος με πέντε και όταν ο μέσος αριθμός των αναμενόμενων λοιμώξεων με έναν παράγοντα είναι μεγαλύτερος ή ίσος με ένα σύμφωνα με το συγκεντρωτικό ποσοστό ελέγχου αντοχής στα αντιβιοτικά."
+msgstr ""
 
 #. type: Hash Value: tbl-resistance-test-rate rate_denominator
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Number of pathogens eligible for antibiotic resistance test recording"
-msgstr "Αριθμός παθογόνων που είναι επιλέξιμα για καταγραφή ελέγχου αντοχής στα αντιβιοτικά"
+msgstr ""
 
 #. type: Hash Value: tbl-resistance-test-rate rate_name
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Antibiotic resistance test rate"
-msgstr "Ποσοστό ελέγχου αντοχής στα αντιβιοτικά"
+msgstr ""
 
 #. type: Hash Value: tbl-resistance-test-rate rate_numerator
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Number of pathogens with recorded test for antibiotic resistance"
-msgstr "Αριθμός παθογόνων με καταγεγραμμένο έλεγχο αντοχής στα αντιβιοτικά"
+msgstr ""
 
 #. type: Hash Value: tbl-resistance-test-rate tbl-cap
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Antibiotic resistance diagnostics"
-msgstr "Διαγνωστική αντοχής στα αντιβιοτικά"
+msgstr ""
 
 #. type: Hash Value: tbl-risk-density-rates access
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Access"
-msgstr "Πρόσβαση"
+msgstr ""
 
 #. type: Hash Value: tbl-risk-density-rates antibiotics
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Antibiotics"
-msgstr "Αντιβιοτικά"
+msgstr ""
 
 #. type: Hash Value: tbl-risk-density-rates any
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Any"
-msgstr "Οποιαδήποτε"
+msgstr ""
 
 #. type: Hash Value: tbl-risk-density-rates any_antibiotic
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Any antibiotic"
-msgstr "Οποιοδήποτε αντιβιοτικό"
+msgstr ""
 
 #. type: Hash Value: tbl-risk-density-rates aware_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "WHO AWaRe group (see %s). As cumulative treatment days for individual substances are recorded per patient, combination therapies using several substances on one day are counted as multiple days."
-msgstr "Ομάδα WHO AWaRe (βλ. %s). Καθώς οι συσσωρευμένες ημέρες θεραπείας για μεμονωμένες ουσίες καταγράφονται ανά ασθενή, οι συνδυαστικές θεραπείες που χρησιμοποιούν διάφορες ουσίες σε μία ημέρα υπολογίζονται ως πολλαπλές ημέρες."
+msgstr ""
 
 #. type: Hash Value: tbl-risk-density-rates days_with_risk_factor
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Days with risk/protective factor"
-msgstr "Ημέρες με παράγοντα κινδύνου/προστασίας"
+msgstr ""
 
 #. type: Hash Value: tbl-risk-density-rates human_milk
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Human milk"
-msgstr "Ανθρώπινο γάλα"
+msgstr ""
 
 #. type: Hash Value: tbl-risk-density-rates kangaroo_care
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Kangaroo care"
-msgstr "Φροντίδα καγκουρό"
+msgstr ""
 
 #. type: Hash Value: tbl-risk-density-rates n_footnote own
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The aggregated number of days the risk/protective factor was present in your unit's infants."
-msgstr "%s: Ο συνολικός αριθμός ημερών κατά τις οποίες ο παράγοντας κινδύνου/προστασίας ήταν παρών στα βρέφη της μονάδας σας."
+msgstr ""
 
 #. type: Hash Value: tbl-risk-density-rates n_footnote ref
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The aggregated number of days the risk/protective factor was present in all infants."
-msgstr "%s: Ο συνολικός αριθμός ημερών κατά τις οποίες ο παράγοντας κινδύνου/προστασίας ήταν παρών σε όλα τα βρέφη."
+msgstr ""
 
 #. type: Hash Value: tbl-risk-density-rates pooled_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The Risk Density Rate calculated across all infants from all departments in the reference data."
-msgstr "%s: Το ποσοστό πυκνότητας κινδύνου που υπολογίστηκε για όλα τα βρέφη από όλα τα τμήματα στα δεδομένα αναφοράς."
+msgstr ""
 
 #. type: Hash Value: tbl-risk-density-rates probiotic
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Probiotics"
-msgstr "Προβιοτικά"
+msgstr ""
 
 #. type: Hash Value: tbl-risk-density-rates quartile_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Risk Density Rates of the departments in the reference data. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of device days is greater than or equal to one according to the pooled Risk Density Rate."
-msgstr "%s, %s, %s: Τα τεταρτημόρια (%s, %s και %s ποσοστημόρια) των ποσοστών πυκνότητας κινδύνου των τμημάτων στα δεδομένα αναφοράς. Αυτά τα τεταρτημόρια εμφανίζονται μόνο όταν ο αριθμός των τμημάτων που συνεισφέρουν στον παρονομαστή είναι μεγαλύτερος ή ίσος με πέντε και όταν ο μέσος αριθμός ημερών χρήσης της συσκευής είναι μεγαλύτερος ή ίσος με ένα σύμφωνα με το συγκεντρωτικό ποσοστό πυκνότητας κινδύνου."
+msgstr ""
 
 #. type: Hash Value: tbl-risk-density-rates rate_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The Risk Density Rate calculated for your unit's infants."
-msgstr "%s: Το ποσοστό πυκνότητας κινδύνου που υπολογίστηκε για τα βρέφη της μονάδας σας."
+msgstr ""
 
 #. type: Hash Value: tbl-risk-density-rates reserve
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Reserve"
-msgstr "Αποθεματικό"
+msgstr ""
 
 #. type: Hash Value: tbl-risk-density-rates risk_density_rate
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Risk Density Rate"
-msgstr "Ποσοστό πυκνότητας κινδύνου"
+msgstr ""
 
 #. type: Hash Value: tbl-risk-density-rates tbl-cap
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Factors influencing the infants' risk of developing an infection or acquiring antibitic-resistant pathogens."
-msgstr "Παράγοντες που επηρεάζουν τον κίνδυνο των βρεφών να αναπτύξουν λοίμωξη ή να αποκτήσουν παθογόνα ανθεκτικά στα αντιβιοτικά."
+msgstr ""
 
 #. type: Hash Value: tbl-risk-density-rates vascular_catheter
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Vascular catheter"
-msgstr "Αγγειακός καθετήρας"
+msgstr ""
 
 #. type: Hash Value: tbl-risk-density-rates ventilatory_support
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Ventilatory support"
-msgstr "Αναπνευστική υποστήριξη"
+msgstr ""
 
 #. type: Hash Value: tbl-risk-density-rates watch
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Watch"
-msgstr "Παρακολούθηση"
+msgstr ""
 
 #. type: Hash Value: tbl-surgical-procedure-rates abdominal_surgery
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Abdominal surgery"
-msgstr "Κοιλιακή χειρουργική επέμβαση"
+msgstr ""
 
 #. type: Hash Value: tbl-surgical-procedure-rates cardiac_and_large_vessel_surgery
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Cardiac- / large vessel surgery"
-msgstr "Χειρουργική καρδιάς / μεγάλων αγγείων"
+msgstr ""
 
 #. type: Hash Value: tbl-surgical-procedure-rates inguinal_hernia_surgery
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Inguinal hernia surgery"
-msgstr "Χειρουργική επέμβαση για βουβωνοκήλη"
+msgstr ""
 
 #. type: Hash Value: tbl-surgical-procedure-rates lung_pleural_space_thoracic_surgery
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Lung- / pleural space- / thoracic surgery"
-msgstr "Χειρουργική πνευμόνων/πλευρικού χώρου/θώρακα"
+msgstr ""
 
 #. type: Hash Value: tbl-surgical-procedure-rates n_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The aggregated number surgical procedures performed in all infants."
-msgstr "%s: Ο συνολικός αριθμός χειρουργικών επεμβάσεων που πραγματοποιήθηκαν σε όλα τα βρέφη."
+msgstr ""
 
 #. type: Hash Value: tbl-surgical-procedure-rates neurosurgery
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Neurosurgery"
-msgstr "Νευροχειρουργική"
+msgstr ""
 
 #. type: Hash Value: tbl-surgical-procedure-rates not_surgery
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Not a surgical procedure"
-msgstr "Δεν πρόκειται για χειρουργική επέμβαση"
+msgstr ""
 
 #. type: Hash Value: tbl-surgical-procedure-rates oesophageal_surgery
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Oesophageal surgery"
-msgstr "Χειρουργική επέμβαση οισοφάγου"
+msgstr ""
 
 #. type: Hash Value: tbl-surgical-procedure-rates overall
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Overall"
-msgstr "Συνολικά"
+msgstr ""
 
 #. type: Hash Value: tbl-surgical-procedure-rates pooled_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The Surgical Procedure Rate calculated across all infants from all departments."
-msgstr "%s: Το ποσοστό χειρουργικών επεμβάσεων που υπολογίστηκε για όλα τα βρέφη από όλα τα τμήματα."
+msgstr ""
 
 #. type: Hash Value: tbl-surgical-procedure-rates quartile_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Surgical Procedure Rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of procedures is greater than or equal to one according to the pooled Surgical Procedure Rate."
-msgstr "%s, %s, %s: Τα τεταρτημόρια (%s, %s και %s ποσοστιαία διαστήματα) των ποσοστών χειρουργικών επεμβάσεων των συνεργαζόμενων τμημάτων. Αυτά τα τεταρτημόρια εμφανίζονται μόνο όταν ο αριθμός των τμημάτων που συνεισφέρουν στον παρονομαστή είναι μεγαλύτερος ή ίσος με πέντε και όταν ο μέσος αριθμός επεμβάσεων είναι μεγαλύτερος ή ίσος με ένα σύμφωνα με το συγκεντρωτικό ποσοστό χειρουργικών επεμβάσεων."
+msgstr ""
 
 #. type: Hash Value: tbl-surgical-procedure-rates rate_denominator
 #: reports/common.yaml:1
 #, no-wrap
 msgid "No of Patients"
-msgstr "Αριθμός ασθενών"
+msgstr ""
 
 #. type: Hash Value: tbl-surgical-procedure-rates rate_name
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Surgical Procedure Rate"
-msgstr "Ποσοστό χειρουργικών επεμβάσεων"
+msgstr ""
 
 #. type: Hash Value: tbl-surgical-procedure-rates rate_numerator
 #: reports/common.yaml:1
 #, no-wrap
 msgid "No of procedures"
-msgstr "Αριθμός επεμβάσεων"
+msgstr ""
 
 #. type: Hash Value: tbl-surgical-procedure-rates tbl-cap
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Surgical procedures by category"
-msgstr "Χειρουργικές επεμβάσεις ανά κατηγορία"
+msgstr ""
 
 #. type: Hash Value: tbl-surgical-procedure-rates to_be_categorised
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Not yet categorised"
-msgstr "Δεν έχει κατηγοριοποιηθεί ακόμη"
+msgstr ""
 
 #. type: Hash Value: total
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Total"
-msgstr "Σύνολο"
+msgstr ""
 
 #. type: Hash Value: unit_separator
 #: reports/common.yaml:1
 #, no-wrap
 msgid " "
-msgstr " "
+msgstr ""
 
 #. type: Hash Value: vre
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Vancomycin-resistant Enterococcus (VRE)"
-msgstr "Εντερόκοκκος ανθεκτικός στη βανκομυκίνη (VRE)"
+msgstr ""
 
 #. type: Hash Value: week_abbreviation
 #: reports/common.yaml:1
 #, no-wrap
 msgid "w"
-msgstr "εβδ"
+msgstr ""
 
 #. type: Hash Value: title
 #: reports/Partner-Report/_quarto-en.yml:1
 #, no-wrap
 msgid "NeoIPC Surveillance Partner Report"
-msgstr "Έκθεση συνεργάτη επιτήρησης NeoIPC"
+msgstr ""
 
 #. type: Hash Value: own_unit
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Own unit"
-msgstr "Δική σας μονάδα"
+msgstr ""
 
 #. type: Hash Value: reference_data
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Reference data"
-msgstr "Δεδομένα αναφοράς"
+msgstr "Αναφορές"
 
 #. type: Title #
 #: reports/Partner-Report/content/_introduction.qmd:1
 #: reports/Reference-Report/content/_introduction.Rmd:1
 #, no-wrap
 msgid "Introduction"
-msgstr "Εισαγωγή"
+msgstr "Λύση"
 
 #. type: Plain text
 #: reports/Partner-Report/content/_introduction.qmd:3
 #, no-wrap
 msgid "This is a [NeoIPC Surveillance](https://neoipc.org/surveillance/ \"Link to the surveillance section of the NeoIPC website\") analysis that you can use to assess infection rates in your neonatal unit. If you have your own data collected using the same or a comparable method, you can compare them with the reference values presented in this document and identify any anomalies and potential for improvement.\n"
-msgstr "Πρόκειται για μια ανάλυση [NeoIPC Surveillance](https://neoipc.org/surveillance/ \"Σύνδεσμος προς την ενότητα επιτήρησης του ιστότοπου NeoIPC\") που μπορείτε να χρησιμοποιήσετε για να αξιολογήσετε τα ποσοστά λοιμώξεων στη νεογνική σας μονάδα. Εάν διαθέτετε δικά σας δεδομένα που συλλέχθηκαν με την ίδια ή συγκρίσιμη μέθοδο, μπορείτε να τα συγκρίνετε με τις τιμές αναφοράς που παρουσιάζονται σε αυτό το έγγραφο και να εντοπίσετε τυχόν ανωμαλίες και δυνατότητες βελτίωσης.\n"
+msgstr ""
 
 #. type: Hash Value: format pdf author-meta
 #: reports/Partner-Certificate/_quarto-en.yml:1
 #: reports/Reference-Report/_quarto-en.yml:1
 #, no-wrap
 msgid "NeoIPC Surveillance team"
-msgstr "Ομάδα επιτήρησης NeoIPC"
+msgstr ""
 
 #. type: Array Element: format pdf keywords
 #: reports/Partner-Certificate/_quarto-en.yml:1
 #: reports/Reference-Report/_quarto-en.yml:1
 #, no-wrap
 msgid "NeoIPC"
-msgstr "NeoIPC"
+msgstr ""
 
 #. type: Array Element: format pdf keywords
 #: reports/Partner-Certificate/_quarto-en.yml:1
 #: reports/Reference-Report/_quarto-en.yml:1
 #, no-wrap
 msgid "Surveillance"
-msgstr "Επιτήρηση"
+msgstr ""
 
 #. type: Array Element: format pdf keywords
 #: reports/Partner-Certificate/_quarto-en.yml:1
 #, no-wrap
 msgid "Certificate"
-msgstr "Πιστοποιητικό"
+msgstr ""
 
 #. type: Hash Value: title
 #: reports/Partner-Certificate/_quarto-en.yml:1
 #, no-wrap
 msgid "Certificate of participation in the NeoIPC project surveillance system (NeoIPC Surveillance)"
-msgstr "Πιστοποιητικό συμμετοχής στο σύστημα επιτήρησης του έργου NeoIPC (NeoIPC Surveillance)"
+msgstr ""
 
 #. type: Array Element: content
 #: reports/Partner-Certificate/_sR.yaml:1
 #, no-wrap
 msgid "This project has received funding from the European Union’s Horizon 2020 research and%sinnovation programme under grant agreement No 965328."
-msgstr "Το έργο αυτό έλαβε χρηματοδότηση από το πρόγραμμα έρευνας και%sκαινοτομίας Horizon 2020 της Ευρωπαϊκής Ένωσης στο πλαίσιο της συμφωνίας επιχορήγησης αρ. 965328."
+msgstr ""
 
 #. type: Array Element: content
 #: reports/Partner-Certificate/_sR.yaml:1
 #, no-wrap
 msgid "In"
-msgstr "Στο"
+msgstr ""
 
 #. type: Array Element: content
 #: reports/Partner-Certificate/_sR.yaml:1
 #, no-wrap
 msgid "During the period"
-msgstr "Κατά την περίοδο"
+msgstr ""
 
 #. type: Array Element: content
 #: reports/Partner-Certificate/_sR.yaml:1
 #, no-wrap
 msgid "the neonatology unit at %s participated in the NeoIPC Surveillance network."
-msgstr "η νεογνολογική μονάδα στο %s συμμετείχε στο δίκτυο επιτήρησης NeoIPC."
+msgstr ""
 
 #. type: Array Element: content
 #: reports/Partner-Certificate/_sR.yaml:1
 #, no-wrap
 msgid "Through active monitoring of %s newborns with birth weights below 1500 grams and/or gestational ages below 32 weeks, the team collected valuable reference data that will be useful for assessing and reducing infection risks in neonatal units. We are proud and delighted to have them as partners in our mission to improve infection prevention and control in the neonatal setting."
-msgstr "Μέσω της ενεργού παρακολούθησης %s νεογνών με βάρος γέννησης κάτω από 1500 γραμμάρια και/ή ηλικία κύησης κάτω από 32 εβδομάδες, η ομάδα συνέλεξε πολύτιμα δεδομένα αναφοράς που θα είναι χρήσιμα για την αξιολόγηση και τη μείωση των κινδύνων λοίμωξης στις νεογνικές μονάδες. Είμαστε περήφανοι και ιδιαίτερα χαρούμενοι που τους έχουμε ως εταίρους στην αποστολή μας να βελτιώσουμε την πρόληψη και τον έλεγχο των λοιμώξεων στο νεογνικό περιβάλλον."
+msgstr ""
 
 #. type: Array Element: content
 #: reports/Partner-Certificate/_sR.yaml:1
 #, no-wrap
 msgid "for the NeoIPC Surveillance team"
-msgstr "για την ομάδα επιτήρησης NeoIPC"
+msgstr ""
 
 #. type: Array Element: content
 #: reports/Partner-Certificate/_sR.yaml:1
 #, no-wrap
 msgid "Berlin,"
-msgstr "Βερολίνο,"
+msgstr ""
 
 #. type: Hash Value: signature_offset
 #: reports/Partner-Certificate/_sR.yaml:1
 #, no-wrap
 msgid "3.25"
-msgstr "3.25"
+msgstr ""
 
 #. type: Hash Value: format pdf include-in-header file
 #: reports/Reference-Report/_quarto-en.yml:1
 #, no-wrap
 msgid "translations.tex"
-msgstr "translations.tex"
+msgstr ""
 
 #. type: Array Element: format pdf keywords
 #: reports/Reference-Report/_quarto-en.yml:1
 #, no-wrap
 msgid "Reference Report"
-msgstr "Έκθεση αναφοράς"
+msgstr "Αναφορές"
 
 #. type: Hash Value: title
 #: reports/Reference-Report/_quarto-en.yml:1
 #, no-wrap
 msgid "NeoIPC Surveillance Reference Report"
-msgstr "Έκθεση αναφοράς επιτήρησης NeoIPC"
+msgstr ""
 
 #. type: Hash Value: countryNames Estonia
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Estonia"
-msgstr "Εσθονία"
+msgstr ""
 
 #. type: Hash Value: countryNames Germany
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Germany"
-msgstr "Γερμανία"
+msgstr ""
 
 #. type: Hash Value: countryNames Greece
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Greece"
-msgstr "Ελλάδα"
+msgstr ""
 
 #. type: Hash Value: countryNames Italy
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Italy"
-msgstr "Ιταλία"
+msgstr ""
 
 #. type: Hash Value: countryNames SouthAfrica
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "South Africa"
-msgstr "Νότια Αφρική"
+msgstr ""
 
 #. type: Hash Value: countryNames Spain
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Spain"
-msgstr "Ισπανία"
+msgstr ""
 
 #. type: Hash Value: countryNames Switzerland
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Switzerland"
-msgstr "Ελβετία"
+msgstr ""
 
 #. type: Hash Value: countryNames UnitedKingdom
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "United Kingdom"
-msgstr "Ηνωμένο Βασίλειο"
+msgstr ""
 
 #. type: Hash Value: headerList allBirthweights
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "All eligible birth weights"
-msgstr "Όλα τα επιλέξιμα βάρη γέννησης"
+msgstr ""
 
 #. type: Hash Value: headerList allGestationalAges
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "All eligible gestational ages"
-msgstr "Όλες οι επιλέξιμες ηλικίες κύησης"
+msgstr ""
 
 #. type: Hash Value: headerList analysisPeriod
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Analysis period"
-msgstr "Περίοδος ανάλυσης"
+msgstr ""
 
 #. type: Hash Value: headerList and
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid " and "
-msgstr " και "
+msgstr ""
 
 #. type: Hash Value: headerList birthweightFilter
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Birth weight filter"
-msgstr "Φίλτρο βάρους γέννησης"
+msgstr ""
 
 #. type: Hash Value: headerList countries
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Countries"
-msgstr "Χώρες"
+msgstr "Κατηγορίες"
 
 #. type: Hash Value: headerList country
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Country"
-msgstr "Χώρα"
+msgstr ""
 
 #. type: Hash Value: headerList createdAt
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Created"
-msgstr "Δημιουργία"
+msgstr ""
 
 #. type: Hash Value: headerList dataUpTo
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Data up to"
-msgstr "Δεδομένα έως"
+msgstr ""
 
 #. type: Hash Value: headerList gestationalAgeFilter
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Gestational age filter"
-msgstr "Φίλτρο ηλικίας κύησης"
+msgstr ""
 
 #. type: Hash Value: headerList ignoresInclusionCriteria
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "ignores the NeoIPC Surveillance inclusion criteria."
-msgstr "αγνοεί τα κριτήρια ένταξης της επιτήρησης NeoIPC."
+msgstr ""
 
 #. type: Hash Value: headerList includesTestDepartments
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "includes test units"
-msgstr "περιλαμβάνει δοκιμαστικές μονάδες"
+msgstr ""
 
 #. type: Hash Value: headerList multiCountryHint
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "This report aggregates data from neonatal units in several countries. This means that, while it reflects a broad spectrum of care structures, it is only suitable as a benchmark to a somewhat limited extent due to the sometimes very different healthcare systems and the resources available there."
-msgstr "Η παρούσα έκθεση συγκεντρώνει δεδομένα από νεογνικές μονάδες σε διάφορες χώρες. Αυτό σημαίνει ότι, ενώ αντικατοπτρίζει ένα ευρύ φάσμα δομών περίθαλψης, είναι κατάλληλη ως σημείο αναφοράς μόνο σε περιορισμένο βαθμό, λόγω των ενίοτε πολύ διαφορετικών συστημάτων υγειονομικής περίθαλψης και των διαθέσιμων πόρων."
+msgstr ""
 
 #. type: Hash Value: headerList multiCountryHintGoal
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "The aim of NeoIPC Surveillance is therefore always to provide units with a relevant national or regional report, provided that a sufficient number of units in the respective region participate in the system."
-msgstr "Στόχος της NeoIPC Surveillance είναι επομένως να παρέχει πάντα στις μονάδες μια σχετική εθνική ή περιφερειακή έκθεση, υπό την προϋπόθεση ότι επαρκής αριθμός μονάδων στην αντίστοιχη περιοχή συμμετέχει στο σύστημα."
+msgstr ""
 
 #. type: Hash Value: headerList multiCountryHintHeader
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Multinational analysis"
-msgstr "Πολυεθνική ανάλυση"
+msgstr ""
 
 #. type: Hash Value: headerList singleCountryHint
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "This report presents data from neonatal units in a single country. This means that, because of the relative homogeneity of the healthcare system, it is in principle a good benchmark. However, it should be noted that only a proportion of neonatal units in a country actually participate in NeoIPC Surveillance. Since participation is voluntary, these are typically hospitals that have a particular interest in infection prevention and are willing and able to provide the resources required for surveillance."
-msgstr "Η παρούσα έκθεση παρουσιάζει δεδομένα από νεογνικές μονάδες σε μία μόνο χώρα. Αυτό σημαίνει ότι, λόγω της σχετικής ομοιογένειας του συστήματος υγειονομικής περίθαλψης, αποτελεί κατ’ αρχήν ένα καλό σημείο αναφοράς. Ωστόσο, θα πρέπει να σημειωθεί ότι μόνο ένα μέρος των νεογνικών μονάδων μιας χώρας συμμετέχει πραγματικά στην επιτήρηση NeoIPC. Καθώς η συμμετοχή είναι εθελοντική, πρόκειται συνήθως για νοσοκομεία που έχουν ιδιαίτερο ενδιαφέρον για την πρόληψη λοιμώξεων και είναι πρόθυμα και ικανά να διαθέσουν τους πόρους που απαιτούνται για την επιτήρηση."
+msgstr ""
 
 #. type: Hash Value: headerList singleCountryHintHeader
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "National report"
-msgstr "Εθνική έκθεση"
+msgstr ""
 
 #. type: Hash Value: headerList singleCountryRepresentativenessHint
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "The information presented here can therefore not fully describe the situation in the individual countries."
-msgstr "Οι πληροφορίες που παρουσιάζονται εδώ δεν μπορούν επομένως να περιγράψουν πλήρως την κατάσταση στις επιμέρους χώρες."
+msgstr ""
 
 #. type: Hash Value: headerList specialAnalysisHint
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "This is a special analysis that"
-msgstr "Πρόκειται για μια ειδική ανάλυση που"
+msgstr ""
 
 #. type: newcommand{#4}
 #: reports/Reference-Report/translations.tex:4
 msgid "This project has received funding from the European Union’s Horizon 2020 research and innovation"
-msgstr "Το έργο αυτό έλαβε χρηματοδότηση από το πρόγραμμα έρευνας και καινοτομίας Horizon 2020 της Ευρωπαϊκής Ένωσης"
+msgstr ""
 
 #. type: newcommand{#4}
 #: reports/Reference-Report/translations.tex:4
 msgid "programme under grant agreement No 965328."
-msgstr "στο πλαίσιο της συμφωνίας επιχορήγησης αρ. 965328."
+msgstr ""
 
 #. type: Plain text
 #: reports/Reference-Report/content/_introduction.Rmd:4
 #, no-wrap
 msgid "This document is a reference report on the NeoIPC Surveillance. It contains information relating to nosocomial infections, their causative infectious agents, and the associated risk and protective factors in high-risk neonates which was collected by partners from multiple neonatology departments participating in the NeoIPC Surveillance. The following numbers provide an overview of the current data set. If you are interested in the surveillance definitions, data collection methods and sheets, please refer to the [surveillance resources on the NeoIPC website](https://neoipc.org/surveillance/resources/).\n"
-msgstr "Το παρόν έγγραφο αποτελεί έκθεση αναφοράς σχετικά με την επιτήρηση NeoIPC. Περιέχει πληροφορίες σχετικά με τις νοσοκομειακές λοιμώξεις, τους αιτιολογικούς παράγοντες που τις προκαλούν, καθώς και τους σχετικούς παράγοντες κινδύνου και προστασίας σε νεογνά υψηλού κινδύνου, οι οποίες συλλέχθηκαν από συνεργάτες από διάφορα τμήματα νεογνολογίας που συμμετέχουν στην επιτήρηση NeoIPC. Οι παρακάτω αριθμοί παρέχουν μια γενική εικόνα του τρέχοντος συνόλου δεδομένων. Εάν ενδιαφέρεστε για τους ορισμούς της επιτήρησης, τις μεθόδους συλλογής δεδομένων και τα φύλλα δεδομένων, ανατρέξτε στους πόρους επιτήρησης στον ιστότοπο NeoIPC.\n"
+msgstr ""
 
 #. type: Plain text
 #: reports/Reference-Report/content/_introduction.Rmd:6
 #, no-wrap
 msgid "Number of departments contributing at least one patient record:\n"
-msgstr "Αριθμός τμημάτων που συνέβαλαν με τουλάχιστον ένα αρχείο ασθενούς:\n"
+msgstr ""
 
 #. type: Plain text
 #: reports/Reference-Report/content/_introduction.Rmd:8
 #, no-wrap
 msgid ":   `r dR$numberOfDepartments`\n"
-msgstr ":   `r dR$numberOfDepartments`\n"
+msgstr ""
 
 #. type: Plain text
 #: reports/Reference-Report/content/_introduction.Rmd:10
 #, no-wrap
 msgid "Number of patient records:\n"
-msgstr "Αριθμός αρχείων ασθενών:\n"
+msgstr ""
 
 #. type: Plain text
 #: reports/Reference-Report/content/_introduction.Rmd:12
 #, no-wrap
 msgid ":   `r dR$numberOfPatients`\n"
-msgstr ":   `r dR$numberOfPatients`\n"
+msgstr ""
 
 #. type: Plain text
 #: reports/Reference-Report/content/_introduction.Rmd:14
 #, no-wrap
 msgid "Number of patient admissions:\n"
-msgstr "Αριθμός εισαγωγών ασθενών:\n"
+msgstr ""
 
 #. type: Plain text
 #: reports/Reference-Report/content/_introduction.Rmd:16
 #, no-wrap
 msgid ":   `r dR$numberOfAdmissions`\n"
-msgstr ":   `r dR$numberOfAdmissions`\n"
+msgstr ""
 
 #. type: Plain text
 #: reports/Reference-Report/content/_introduction.Rmd:18
 #, no-wrap
 msgid "Sum of patient days:\n"
-msgstr "Άθροισμα ημερών νοσηλείας:\n"
+msgstr ""
 
 #. type: Plain text
 #: reports/Reference-Report/content/_introduction.Rmd:20
 #, no-wrap
 msgid ":   `r dR$sumOfPatientDays`\n"
-msgstr ":   `r dR$sumOfPatientDays`\n"
+msgstr ""
 
 #. type: Plain text
 #: reports/Reference-Report/content/_introduction.Rmd:22
 #, no-wrap
 msgid "Average surveillance period per patient:\n"
-msgstr "Μέση περίοδος παρακολούθησης ανά ασθενή:\n"
+msgstr ""
 
 #. type: Plain text
 #: reports/Reference-Report/content/_introduction.Rmd:23
 #, no-wrap
 msgid ":   `r dR$averageSurveillancePeriod` days\n"
-msgstr ":   `r dR$averageSurveillancePeriod` ημέρες\n"
+msgstr ""
 
 #. type: Title #
 #: reports/Reference-Report/content/_patient_population.Rmd:1
 #, no-wrap
 msgid "Patient Population"
-msgstr "Πληθυσμός ασθενών"
+msgstr ""
 
 #. type: Plain text
 #: reports/Reference-Report/content/_patient_population.Rmd:3
 #, no-wrap
 msgid "As the process, although supported by various tools, relies on the collection, interpretation and monitoring of information by qualified professionals, NeoIPC surveillance is currently being targeted at the most common nosocomial infections in high-risk neonates, in order to make it sustainable in a continuous manner in as many settings as possible. This means that patients with a birth weight below 1500 g and/or a gestational age below 32 weeks at the time of birth are included into the surveillance database if they are admitted to a participating neonatology department within the first 120 days of life. In combination with the filter settings specified above, this results in the composition of the patient population shown in @fig-bw and @fig-ga.\n"
-msgstr "Δεδομένου ότι η διαδικασία, αν και υποστηρίζεται από διάφορα εργαλεία, βασίζεται στη συλλογή, ερμηνεία και παρακολούθηση πληροφοριών από εξειδικευμένους επαγγελματίες, η επιτήρηση NeoIPC στοχεύει επί του παρόντος στις πιο συχνές νοσοκομειακές λοιμώξεις σε νεογνά υψηλού κινδύνου, προκειμένου να είναι βιώσιμη σε συνεχή βάση σε όσο το δυνατόν περισσότερα περιβάλλοντα. Αυτό σημαίνει ότι οι ασθενείς με βάρος γέννησης κάτω των 1500 g και/ή ηλικία κύησης κάτω των 32 εβδομάδων κατά τη στιγμή της γέννησης περιλαμβάνονται στη βάση δεδομένων επιτήρησης εάν εισάγονται σε συμμετέχον τμήμα νεογνολογίας εντός των πρώτων 120 ημερών της ζωής τους. Σε συνδυασμό με τις ρυθμίσεις φίλτρου που καθορίζονται παραπάνω, αυτό έχει ως αποτέλεσμα τη σύνθεση του πληθυσμού ασθενών που φαίνεται @fig-bw και @fig-ga.\n"
+msgstr ""
 
 #. type: Title #
 #: reports/Reference-Report/content/_nosocomial_infections.Rmd:1
 #, no-wrap
 msgid "Nosocomial Infections"
-msgstr "Νοσοκομειακές λοιμώξεις"
+msgstr ""
 
 #. type: Plain text
 #: reports/Reference-Report/content/_nosocomial_infections.Rmd:4
 #, no-wrap
 msgid "Nosocomial infections represent the primary endpoint of NeoIPC surveillance. In @tbl-incidence-density-rates, the incidence densities of sepsis/BSI, pneumonia and necrotising enterocolitis, as well as the combined endpoint 'severe infection', are displayed. Overall `r dR$numberOfSevereInfections` severe infections were recorded in `r dR$numberOfPatients` infants resulting in an average number of `r dR$averageSevereInfectionsPerPatient` infections per patient.\n"
-msgstr "Οι νοσοκομειακές λοιμώξεις αποτελούν τον πρωταρχικό τελικό στόχο της επιτήρησης NeoIPC. Στον @tbl-incidence-density-rates, εμφανίζονται οι πυκνότητες εμφάνισης της σήψης/BSI, της πνευμονίας και της νεκρωτικής εντεροκολίτιδας, καθώς και ο συνδυασμένος τελικός στόχος «σοβαρή λοίμωξη». Συνολικά, καταγράφηκαν `r dR$numberOfSevereInfections` σοβαρές λοιμώξεις σε `r dR$numberOfPatients` βρέφη, με αποτέλεσμα έναν μέσο αριθμό `r dR$averageSevereInfectionsPerPatient` λοιμώξεων ανά ασθενή.\n"
+msgstr ""
 
 #. type: Plain text
 #: reports/Reference-Report/content/_nosocomial_infections.Rmd:5
 #, no-wrap
 msgid "Device-associated infections can be found in @tbl-device-associated-incidence-density-rates.\n"
-msgstr "Οι λοιμώξεις που σχετίζονται με ιατρικές συσκευές παρουσιάζονται στον @tbl-device-associated-incidence-density-rates.\n"
+msgstr ""
 
 #. type: Title ##
 #: reports/Reference-Report/content/_infectious_agents.Rmd:1
 #, no-wrap
 msgid "Infectious Agents"
-msgstr "Μολυσματικοί παράγοντες"
+msgstr ""
 
 #. type: Plain text
 #: reports/Reference-Report/content/_infectious_agents.Rmd:4
 #, no-wrap
 msgid "Epidemiology of the infectious agents causing nosocomial infections in neonatology is complex and there is a lot of potential for bias. While low diagnostic sensitivity (low blood volume) and specificity (contamination) are a general problem in the neonatal population, the lack of availability of some or all means of microbiological diagnostics, or the lack of financial resources can have a strong effect on the detection rates in resource-constrained settings.\n"
-msgstr "Η επιδημιολογία των μολυσματικών παραγόντων που προκαλούν νοσοκομειακές λοιμώξεις στη νεονατολογία είναι πολύπλοκη και υπάρχει μεγάλη πιθανότητα μεροληψίας. Ενώ η χαμηλή διαγνωστική ευαισθησία (χαμηλός όγκος αίματος) και ειδικότητα (μόλυνση) αποτελούν γενικό πρόβλημα στον νεογνικό πληθυσμό, η έλλειψη διαθεσιμότητας ορισμένων ή όλων των μέσων μικροβιολογικής διάγνωσης ή η έλλειψη οικονομικών πόρων μπορεί να έχει ισχυρή επίδραση στα ποσοστά ανίχνευσης σε περιβάλλοντα με περιορισμένους πόρους.\n"
+msgstr ""
 
 #. type: Plain text
 #: reports/Reference-Report/content/_infectious_agents.Rmd:6
 #, no-wrap
 msgid "<!-- When comparing data with the information on pathogens presented in @tbl-agent-per-infection-rate and information on drug resistance in @tbl-abr-infection-rate, please also have a look at the infectious agent detection rates presented in @tbl-infectious-agent-detection-rate and the antibiotic resistance test rates in @tbl-resistance-test-rate. -->\n"
-msgstr "<!-- Κατά τη σύγκριση των δεδομένων με τις πληροφορίες για τα παθογόνα που παρουσιάζονται στον @tbl-agent-per-infection-rate και τις πληροφορίες για την αντοχή στα φάρμακα στον @tbl-abr-infection-rate, παρακαλούμε δείτε επίσης τα ποσοστά ανίχνευσης μολυσματικών παραγόντων στον @tbl-infectious-agent-detection-rate και τα ποσοστά ελέγχου αντοχής στα αντιβιοτικά στον @tbl-resistance-test-rate. -->\n"
+msgstr ""
 
 #. type: Plain text
 #: reports/Reference-Report/content/_infectious_agents.Rmd:7
 #, no-wrap
 msgid "In total, `r dR$numberOfInfectiousAgents` infectious agents were detected in the `r dR$numberOfInfectionsWithAgent` infections that were reported to have yielded at least one agent from either the primary infection and/or the secondary bloodstream infection resulting from it (@tbl-agent-per-infection-rate). These `r dR$numberOfInfectionsWithAgent` diagnostic-positive infections out of `r dR$overallNumberOfInfections` overall infections represent an Infectious Agent Detection Rate of `r dR$infectiousAgentDetectionRate` per 100 infections (@tbl-infectious-agent-detection-rate).\n"
-msgstr "Συνολικά, ανιχνεύθηκαν `r dR$numberOfInfectiousAgents` μολυσματικοί παράγοντες στις `r dR$numberOfInfectionsWithAgent` λοιμώξεις που αναφέρθηκαν ότι είχαν αποδώσει τουλάχιστον έναν παράγοντα είτε από την πρωτογενή λοίμωξη είτε από τη δευτερογενή λοίμωξη του αίματος που προέκυψε από αυτήν (@tbl-agent-per-infection-rate). Αυτές οι `r dR$numberOfInfectionsWithAgent` διαγνωστικά θετικές λοιμώξεις από τις `r dR$overallNumberOfInfections` συνολικές λοιμώξεις αντιπροσωπεύουν ένα ποσοστό ανίχνευσης μολυσματικών παραγόντων `r dR$infectiousAgentDetectionRate` ανά 100 λοιμώξεις (@tbl-infectious-agent-detection-rate).\n"
+msgstr ""
 
 #. type: Title #
 #: reports/Reference-Report/content/_risk_and_protective_factors.Rmd:1
 #, no-wrap
 msgid "Risk and Protective Factors"
-msgstr "Παράγοντες κινδύνου και προστασίας"
+msgstr ""
 
 #. type: Plain text
 #: reports/Reference-Report/content/_risk_and_protective_factors.Rmd:3
 #, no-wrap
 msgid "Next to the inherent risk factors gestational age and birth weight there are also a number of expositional factors that influence the risk of an infant to acquire a multi-drug-resistant pathogen or to develop an infection. @tbl-risk-density-rates shows the presence of these factors in the NeoIPC Surveillance population.\n"
-msgstr "Εκτός από τους εγγενείς παράγοντες κινδύνου, όπως η ηλικία κύησης και το βάρος γέννησης, υπάρχουν επίσης διάφοροι παράγοντες έκθεσης που επηρεάζουν τον κίνδυνο ενός βρέφους να προσβληθεί από έναν πολυανθεκτικό παθογόνο παράγοντα ή να αναπτύξει λοίμωξη. @tbl-risk-density-rates δείχνει την παρουσία αυτών των παραγόντων στον πληθυσμό της επιτήρησης NeoIPC.\n"
+msgstr ""
 
 #. type: Title ##
 #: reports/Reference-Report/content/_surgery.Rmd:1
 #, no-wrap
 msgid "Surgery"
-msgstr "Χειρουργική"
+msgstr ""
 
 #. type: Plain text
 #: reports/Reference-Report/content/_surgery.Rmd:4
 #, no-wrap
 msgid "`r dR$numberOfSurgicalDepartments` of the partner departments in this dataset (`r dR$proportionOfSurgicalDepartments`) recorded a total of `r dR$numberOfSurgicalProcedures` surgical procedures performed on `r dR$numberOfSurgicalPatients` neonates, resulting in an average number of `r dR$numberOfSurgicalProceduresPerPatient` operations per surgical patient during the surveillance period.\n"
-msgstr "`r dR$numberOfSurgicalDepartments` από τα συνεργαζόμενα τμήματα σε αυτό το σύνολο δεδομένων (`r dR$proportionOfSurgicalDepartments` %) κατέγραψαν συνολικά `r dR$numberOfSurgicalProcedures` χειρουργικές επεμβάσεις που πραγματοποιήθηκαν σε `r dR$numberOfSurgicalPatients` νεογνά, με αποτέλεσμα έναν μέσο αριθμό `r dR$numberOfSurgicalProceduresPerPatient` επεμβάσεων ανά χειρουργούμενο ασθενή κατά τη διάρκεια της περιόδου επιτήρησης.\n"
+msgstr ""
 
 #. type: Plain text
 #: reports/Reference-Report/content/_surgery.Rmd:5
 #, no-wrap
 msgid "Due to the low number of surgical site infections in this dataset (n = `r dR$numberOfSurgicalSiteInfections`) we are not currently calculating their infection rates, but @tbl-surgical-procedure-rates provides an overview of the categories of procedures performed on neonates.\n"
-msgstr "Λόγω του χαμηλού αριθμού λοιμώξεων στο χειρουργικό πεδίο σε αυτό το σύνολο δεδομένων (n = `r dR$numberOfSurgicalSiteInfections`), δεν υπολογίζουμε επί του παρόντος τα ποσοστά λοίμωξης, αλλά @tbl-surgical-procedure-rates παρέχει μια επισκόπηση των κατηγοριών επεμβάσεων που πραγματοποιήθηκαν σε νεογνά.\n"
+msgstr ""
