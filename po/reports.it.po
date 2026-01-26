@@ -232,7 +232,7 @@ msgstr "%s: tasso di agenti per infezione calcolato su tutti i neonati di tutti 
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Agent-per-Infection Rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected agents detected in infections is greater than or equal to one according to the pooled Agent-per-Infection Rate."
-msgstr "Q₁, %s, %s: I quartili (quantili %s, %s e %s) dei tassi di agenti per infezione dei reparti partner. Questi quartili vengono visualizzati solo quando il numero di reparti che contribuiscono al denominatore è maggiore o uguale a cinque e quando il numero mediano di agenti previsti rilevati nelle infezioni è maggiore o uguale a uno secondo il tasso aggregato di agenti per infezione."
+msgstr "%s, %s, %s: I quartili (quantili %s, %s e %s) dei tassi di agenti per infezione dei reparti partner. Questi quartili vengono visualizzati solo quando il numero di reparti che contribuiscono al denominatore è maggiore o uguale a cinque e quando il numero mediano di agenti previsti rilevati nelle infezioni è maggiore o uguale a uno secondo il tasso aggregato di agenti per infezione."
 
 #. type: Hash Value: tbl-agent-per-infection-rate rate_denominator
 #: reports/common.yaml:1
@@ -328,7 +328,7 @@ msgstr "PVC"
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Device-Associated Incidence Density Rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected infections is greater than or equal to one according to the pooled Device-Associated Incidence Density Rate."
-msgstr "Q₁, %s, %s: I quartili (quantili %s, %s e %s) dei tassi di incidenza associati al dispositivo dei reparti partner. Questi quartili vengono visualizzati solo quando il numero di reparti che contribuiscono al denominatore è maggiore o uguale a cinque e quando il numero mediano di infezioni previste è maggiore o uguale a uno secondo il tasso di incidenza aggregato associato al dispositivo."
+msgstr "%s, %s, %s: I quartili (quantili %s, %s e %s) dei tassi di incidenza associati al dispositivo dei reparti partner. Questi quartili vengono visualizzati solo quando il numero di reparti che contribuiscono al denominatore è maggiore o uguale a cinque e quando il numero mediano di infezioni previste è maggiore o uguale a uno secondo il tasso di incidenza aggregato associato al dispositivo."
 
 #. type: Hash Value: tbl-device-associated-incidence-density-rates tbl-cap
 #: reports/common.yaml:1
@@ -382,7 +382,7 @@ msgstr "%s: tasso di incidenza calcolato su tutti i neonati di tutti i reparti."
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Incidence Density Rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected infections is greater than or equal to one according to the pooled Incidence Density Rate."
-msgstr "Q₁, %s, %s: I quartili (quantili %s, %s e %s) dei tassi di incidenza dei reparti partner. Questi quartili vengono visualizzati solo quando il numero di reparti che contribuiscono al denominatore è maggiore o uguale a cinque e quando il numero mediano di infezioni previste è maggiore o uguale a uno secondo il tasso di incidenza aggregato."
+msgstr "%s, %s, %s: I quartili (quantili %s, %s e %s) dei tassi di incidenza dei reparti partner. Questi quartili vengono visualizzati solo quando il numero di reparti che contribuiscono al denominatore è maggiore o uguale a cinque e quando il numero mediano di infezioni previste è maggiore o uguale a uno secondo il tasso di incidenza aggregato."
 
 #. type: Hash Value: tbl-incidence-density-rates si_footnote
 #: reports/common.yaml:1
@@ -412,7 +412,7 @@ msgstr "%s: tasso di rilevamento dell'agente infettivo calcolato su tutti i neon
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Infectious Agent Detection Rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected infections with an agents is greater than or equal to one according to the pooled Infectious Agent Detection Rate."
-msgstr "Q₁, %s, %s: i quartili (quantili del %s, %s e %s) dei tassi di rilevamento degli agenti infettivi dei dipartimenti partner. Questi quartili vengono visualizzati solo quando il numero di dipartimenti che contribuiscono al denominatore è maggiore o uguale a cinque e quando il numero mediano di infezioni previste con un agente è maggiore o uguale a uno secondo il tasso di rilevamento degli agenti infettivi aggregato."
+msgstr "%s, %s, %s: i quartili (quantili del %s, %s e %s) dei tassi di rilevamento degli agenti infettivi dei dipartimenti partner. Questi quartili vengono visualizzati solo quando il numero di dipartimenti che contribuiscono al denominatore è maggiore o uguale a cinque e quando il numero mediano di infezioni previste con un agente è maggiore o uguale a uno secondo il tasso di rilevamento degli agenti infettivi aggregato."
 
 #. type: Hash Value: tbl-infectious-agent-detection-rate rate_denominator
 #: reports/common.yaml:1
@@ -676,7 +676,7 @@ msgstr "%s: tasso di interventi chirurgici calcolato su tutti i neonati di tutti
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Surgical Procedure Rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of procedures is greater than or equal to one according to the pooled Surgical Procedure Rate."
-msgstr "s%, %s, %s: I quartili (quantili %s, %s e %s) dei tassi di interventi chirurgici dei reparti partner. Questi quartili vengono visualizzati solo quando il numero di reparti che contribuiscono al denominatore è maggiore o uguale a cinque e quando il numero mediano di interventi è maggiore o uguale a uno secondo il tasso di interventi chirurgici aggregato."
+msgstr "%s, %s, %s: I quartili (quantili %s, %s e %s) dei tassi di interventi chirurgici dei reparti partner. Questi quartili vengono visualizzati solo quando il numero di reparti che contribuiscono al denominatore è maggiore o uguale a cinque e quando il numero mediano di interventi è maggiore o uguale a uno secondo il tasso di interventi chirurgici aggregato."
 
 #. type: Hash Value: tbl-surgical-procedure-rates rate_denominator
 #: reports/common.yaml:1

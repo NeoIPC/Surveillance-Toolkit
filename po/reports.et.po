@@ -411,7 +411,7 @@ msgstr "%s: nakkusetekitaja avastamise määr, mis on arvutatud kõigi osakondad
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Infectious Agent Detection Rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected infections with an agents is greater than or equal to one according to the pooled Infectious Agent Detection Rate."
-msgstr "%s, %s, %s: partnerosakondade nakkusetekitajate avastamise määrade kvartiilid (25 %, 50 % ja 75 % kvantiilid). Need kvartiilid kuvatakse ainult juhul, kui nimetajas osalevate osakondade arv on vähemalt viis ja kui nakkusetekitajate avastamise määra keskmine oodatav nakatumiste arv on vähemalt üks."
+msgstr "%s, %s, %s: partnerosakondade nakkusetekitajate avastamise määrade kvartiilid (%s, %s ja %s kvantiilid). Need kvartiilid kuvatakse ainult juhul, kui nimetajas osalevate osakondade arv on vähemalt viis ja kui nakkusetekitajate avastamise määra keskmine oodatav nakatumiste arv on vähemalt üks."
 
 #. type: Hash Value: tbl-infectious-agent-detection-rate rate_denominator
 #: reports/common.yaml:1
@@ -799,7 +799,7 @@ msgstr "NeoIPC projekti seiresüsteemis osalemise sertifikaat (NeoIPC Surveillan
 #: reports/Partner-Certificate/_sR.yaml:1
 #, no-wrap
 msgid "This project has received funding from the European Union’s Horizon 2020 research and%sinnovation programme under grant agreement No 965328."
-msgstr "See projekt on saanud rahastust Euroopa Liidu teadusuuringute ja innovatsiooni programmi Horisont 2020 raames toetuslepingu nr 965328 alusel."
+msgstr "See projekt on saanud rahastust Euroopa Liidu teadusuuringute ja innovatsiooni programmi%sHorisont 2020 raames toetuslepingu nr 965328 alusel."
 
 #. type: Array Element: content
 #: reports/Partner-Certificate/_sR.yaml:1
@@ -1151,7 +1151,7 @@ msgstr "<!-- Kui võrdlete andmeid @tbl-agent-per-infection-rate esitatud patoge
 #: reports/Reference-Report/content/_infectious_agents.Rmd:7
 #, no-wrap
 msgid "In total, `r dR$numberOfInfectiousAgents` infectious agents were detected in the `r dR$numberOfInfectionsWithAgent` infections that were reported to have yielded at least one agent from either the primary infection and/or the secondary bloodstream infection resulting from it (@tbl-agent-per-infection-rate). These `r dR$numberOfInfectionsWithAgent` diagnostic-positive infections out of `r dR$overallNumberOfInfections` overall infections represent an Infectious Agent Detection Rate of `r dR$infectiousAgentDetectionRate` per 100 infections (@tbl-infectious-agent-detection-rate).\n"
-msgstr "Kokku tuvastati 335 nakkusetekitajat 288 nakkusjuhtumi puhul, mille puhul teatati vähemalt ühe nakkusetekitaja esinemisest esmase nakkuse ja/või sellest tuleneva teisese vereringe nakkuse korral (@tbl-agent-per-infection-rate). Need 288 diagnoosipositiivset nakkusjuhtu 685 nakkusjuhtumi koguarvust tähendavad nakkusetekitajate avastamismäära 42,0 100 nakkusjuhtumi kohta (@tbl-infectious-agent-detection-rate).\n"
+msgstr "Kokku tuvastati `r dR$numberOfInfectiousAgents` nakkusetekitajat `r dR$numberOfInfectionsWithAgent` nakkusjuhtumi puhul, mille puhul teatati vähemalt ühe nakkusetekitaja esinemisest esmase nakkuse ja/või sellest tuleneva teisese vereringe nakkuse korral (@tbl-agent-per-infection-rate). Need `r dR$numberOfInfectionsWithAgent` diagnoosipositiivset nakkusjuhtu `r dR$overallNumberOfInfections` nakkusjuhtumi koguarvust tähendavad nakkusetekitajate avastamismäära `r dR$infectiousAgentDetectionRate` 100 nakkusjuhtumi kohta (@tbl-infectious-agent-detection-rate).\n"
 
 #. type: Title #
 #: reports/Reference-Report/content/_risk_and_protective_factors.Rmd:1
