@@ -1,53 +1,51 @@
-# German translations for the NeoIPC Surveillance Reports
-# Copyright (C) 2025 Charité - Universitätsmedizin Berlin
+# Translations for the NeoIPC Surveillance Reports
+# Copyright (C) 2025 Charité – Universitätsmedizin Berlin
 # This file is distributed under the Creative Commons Attribution 4.0 International license
-# Brar Piening <brar.piening@charite.de>, 2025.
-# Prefill add-on <noreply-addon-prefill@weblate.org>, 2025.
+# Automatically generated, 2025.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: NeoIPC Surveillance Reports 0.9\n"
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
 "POT-Creation-Date: 2026-01-24 22:27+0100\n"
-"PO-Revision-Date: 2026-01-24 20:33+0100\n"
+"PO-Revision-Date: 2026-01-26 17:38+0100\n"
 "Last-Translator: Brar Piening <brar.piening@charite.de>\n"
 "Language-Team: none\n"
-"Language: de\n"
+"Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 3.8\n"
 
 #. type: Hash Value: 3gcr
 #: reports/common.yaml:1
 #, no-wrap
 msgid "3^rd^ gen. cephalosporin resistance (3GCR)"
-msgstr "3. Generation-Cephalosporin-Resistenz (3GCR)"
+msgstr "Resistencia a las cefalosporinas de tercera generación (3GCR)"
 
 #. type: Hash Value: bsi
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Primary sepsis/BSI"
-msgstr "Primäre Sepsis/BSI"
+msgstr "Sepsis primaria/BSI"
 
 #. type: Hash Value: car
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Carbapenem resistance (CARBR)"
-msgstr "Carbapenem-Resistenz (CARBR)"
+msgstr "Resistencia a los carbapenémicos (CARBR)"
 
 #. type: Hash Value: cor
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Colistin resistance (COLR)"
-msgstr "Colistin-Resistenz (COLR)"
+msgstr "Resistencia a la colistina (COLR)"
 
 #. type: Hash Value: day
 #: reports/common.yaml:1
 #, no-wrap
 msgid "day"
-msgstr "Tag"
+msgstr "día"
 
 #. type: Hash Value: digit_group_separator
 #: reports/common.yaml:1
@@ -59,37 +57,37 @@ msgstr " "
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Distribution of birth weights of the infants included in this report."
-msgstr "Verteilung der Geburtsgewichte der in dieser Auswertung berücksichtigten Kinder."
+msgstr "Distribución del peso al nacer de los lactantes incluidos en este informe."
 
 #. type: Hash Value: fig-ga fig-cap bnch
 #: reports/common.yaml:1
 #, no-wrap
 msgid "A is a histogram in %s steps with a density curve of your own unit’s data and a density curve of the reference data and B are two boxplots, one of your own unit’s data and one of the reference data."
-msgstr "A ist ein Histogramm in %s-Schritten mit einer Dichte-Kurve der Daten Ihrer eigenen Abteilung und einer Dichte-Kurve der Referenzdaten, und B sind zwei Boxplots, einer mit den Daten Ihrer eigenen Abteilung und einer mit den Referenzdaten."
+msgstr "A es un histograma en %s pasos con una curva de densidad de los datos de su propia unidad y una curva de densidad de los datos de referencia, y B son dos diagramas de caja, uno de los datos de su propia unidad y otro de los datos de referencia."
 
 #. type: Hash Value: fig-ga fig-cap no-bnch
 #: reports/common.yaml:1
 #, no-wrap
 msgid "A is a histogram in %s steps with a density curve and B is a boxplot."
-msgstr "A ist ein Histogramm in %s-Schritten mit einer Dichte-Kurve und B ist ein Boxplot."
+msgstr "A es un histograma en intervalos de %s con una curva de densidad y B es un diagrama de caja."
 
 #. type: Hash Value: fig-ga fig-cap bnch
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Vertical lines in the boxplots represent the %s, %s and %s quantiles, the diamonds represent the pooled arithmetic means."
-msgstr "Die vertikalen Linien in den Boxplots stellen die %s-, %s- und %s-Quantile dar, die Rauten stellen die gepoolten arithmetischen Mittelwerte dar."
+msgstr "Las líneas verticales del diagrama de caja representan los cuantiles %s, %s y %s, y el rombo representa la media aritmética combinada."
 
 #. type: Hash Value: fig-ga fig-cap no-bnch
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Vertical lines in the boxplot represent the %s, %s and %s quantiles, the diamond represents the pooled arithmetic mean."
-msgstr "Die vertikalen Linien im Boxplot stellen die %s-, %s- und %s-Quantile dar, der Diamant steht für den gepoolten arithmetischen Mittelwert."
+msgstr "Las líneas verticales del diagrama de caja representan los cuantiles %s, %s y %s, y el rombo representa la media aritmética combinada."
 
 #. type: Array Element: fig-ga fig-cap
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Distribution of gestational ages of the infants included in this report."
-msgstr "Verteilung der Gestationsalter der in dieser Auswertung berücksichtigten Kinder."
+msgstr "Distribución de las edades gestacionales de los bebés incluidos en este informe."
 
 #. type: Hash Value: gramm_abbreviation
 #: reports/common.yaml:1
@@ -101,25 +99,25 @@ msgstr "g"
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Pneumonia"
-msgstr "Pneumonie"
+msgstr "Neumonía"
 
 #. type: Hash Value: mrsa
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Methicillin-resistant Staphylococcus aureus (MRSA)"
-msgstr "Methicillin-resistenter Staphylococcus aureus (MRSA)"
+msgstr "Staphylococcus aureus resistente a la meticilina (SARM)"
 
 #. type: Hash Value: nec
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Necrotising Enterocolitis"
-msgstr "Nekrotisierende Enterokolitis"
+msgstr "Enterocolitis necrotizante"
 
 #. type: Hash Value: patient_days
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Patient days"
-msgstr "Patiententage"
+msgstr "Días de hospitalización"
 
 #. type: Hash Value: percent_symbol
 #: reports/common.yaml:1
@@ -131,13 +129,13 @@ msgstr "%"
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Severe infection"
-msgstr "Schwere Infektion"
+msgstr "Infección grave"
 
 #. type: Hash Value: ssi
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Surgical site infection"
-msgstr "Postoperative Wundinfektion"
+msgstr "Infección del sitio quirúrgico"
 
 #. type: Hash Value: table_headers n
 #: reports/common.yaml:1
@@ -149,7 +147,7 @@ msgstr "N"
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Pooled"
-msgstr "Gepoolt"
+msgstr "Agrupado"
 
 #. type: Hash Value: table_headers q1
 #: reports/common.yaml:1
@@ -173,115 +171,115 @@ msgstr "Q₃"
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Rate"
-msgstr "Rate"
+msgstr "Tasa"
 
 #. type: Hash Value: tbl-abr-infection-rate n_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The aggregated number of antibiotic resistant pathogens in all infections."
-msgstr "%s: Die Gesamtzahl der antibiotikaresistenten Erreger bei allen Infektionen."
+msgstr "%s: Número total de patógenos resistentes a los antibióticos en todas las infecciones."
 
 #. type: Hash Value: tbl-abr-infection-rate pooled_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The resistant pathogen infection rate calculated across all infants from all departments."
-msgstr "%s: Die Infektionsrate mit resistenten Erregern, berechnet für alle Kinder aus allen Abteilungen."
+msgstr "%s: Tasa de infección por patógenos resistentes calculada entre todos los bebés de todos los departamentos."
 
 #. type: Hash Value: tbl-abr-infection-rate quartile_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the resistant pathogen infection rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected infections with an agents is greater than or equal to one according to the pooled resistant pathogen infection rate."
-msgstr "%s, %s, %s: Die Quartile (%s, %s und %s Quantile) der Infektionsraten mit resistenten Erregern in den Partnerabteilungen. Diese Quartile werden nur angezeigt, wenn die Anzahl der Abteilungen, die zum Nenner beitragen, größer oder gleich fünf ist und wenn die mittlere Anzahl der erwarteten Infektionen mit einem Erreger gemäß der gepoolten Infektionsrate mit resistenten Erregern größer oder gleich eins ist."
+msgstr "%s, %s, %s: Los cuartiles (cuartiles del %s, %s y %s) de las tasas de infección por patógenos resistentes de los departamentos asociados. Estos cuartiles solo se muestran cuando el número de departamentos que contribuyen al denominador es mayor o igual a cinco, y cuando el número medio de infecciones esperadas con un agente es mayor o igual a uno según la tasa de infección por patógenos resistentes agrupada."
 
 #. type: Hash Value: tbl-abr-infection-rate rate_denominator
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Number of infections where a pathogen was detected"
-msgstr "Anzahl der Infektionen, bei denen ein Erreger nachgewiesen wurde"
+msgstr "Número de infecciones en las que se detectó un patógeno"
 
 #. type: Hash Value: tbl-abr-infection-rate rate_name
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Resistant pathogen infection rate"
-msgstr "Infektionsrate mit resistente Pathogenen"
+msgstr "Tasa de infección por patógenos resistentes"
 
 #. type: Hash Value: tbl-abr-infection-rate rate_numerator
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Number of antibiotic resistant pathogens in infections"
-msgstr "Anzahl antibiotikaresistenter Erreger bei Infektionen"
+msgstr "Número de patógenos resistentes a los antibióticos en infecciones"
 
 #. type: Hash Value: tbl-abr-infection-rate tbl-cap
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Nosocomial infections with resistant pathogens"
-msgstr "Nosokomiale Infektionen mit resistenten Erregern"
+msgstr "Infecciones nosocomiales por patógenos resistentes"
 
 #. type: Hash Value: tbl-agent-per-infection-rate n_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The aggregated number of infectious agents in all infections."
-msgstr "%s: Die Gesamtzahl der Infektionserreger in allen Infektionen."
+msgstr "%s: Número total de agentes infecciosos en todas las infecciones."
 
 #. type: Hash Value: tbl-agent-per-infection-rate pooled_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The Agent-per-Infection Rate calculated across all infants from all departments."
-msgstr "%s: Die Erreger-pro-Infektion-Rate, berechnet für alle Kinder aus allen Abteilungen."
+msgstr "%s: tasa de agentes por infección calculada entre todos los bebés de todos los departamentos."
 
 #. type: Hash Value: tbl-agent-per-infection-rate quartile_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Agent-per-Infection Rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected agents detected in infections is greater than or equal to one according to the pooled Agent-per-Infection Rate."
-msgstr "%s, %s, %s: Die Quartile (%s, %s und %s Quantile) der Erreger-pro-Infektion-Raten der Partnerabteilungen. Diese Quartile werden nur angezeigt, wenn die Anzahl der Abteilungen, die zum Nenner beitragen, größer oder gleich fünf ist und wenn die mittlere Anzahl der erwarteten Erreger, die bei Infektionen nachgewiesen werden, gemäß der gepoolten Erreger-pro-Infektion-Rate größer oder gleich eins ist."
+msgstr "%s, %s, %s: Los cuartiles (cuartiles del %s, %s y %s) de las tasas de agentes por infección de los departamentos asociados. Estos cuartiles solo se muestran cuando el número de departamentos que contribuyen al denominador es mayor o igual a cinco, y cuando el número medio de agentes esperados detectados en las infecciones es mayor o igual a uno según la tasa de agentes por infección agrupada."
 
 #. type: Hash Value: tbl-agent-per-infection-rate rate_denominator
 #: reports/common.yaml:1
 #, no-wrap
 msgid "No of infections where an infectious agent was detected"
-msgstr "Anzahl der Infektionen, bei denen ein Infektionserreger nachgewiesen wurde"
+msgstr "Número de infecciones en las que se detectó un agente infeccioso"
 
 #. type: Hash Value: tbl-agent-per-infection-rate rate_name
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Agent-per-Infection Rate"
-msgstr "Erreger-pro-Infektion-Rate"
+msgstr "Tasa de agentes por infección"
 
 #. type: Hash Value: tbl-agent-per-infection-rate rate_numerator
 #: reports/common.yaml:1
 #, no-wrap
 msgid "No of infectious agents that were detected in infections"
-msgstr "Anzahl der bei Infektionen nachgewiesenen Infektionserreger"
+msgstr "Número de agentes infecciosos detectados en infecciones"
 
 #. type: Hash Value: tbl-agent-per-infection-rate tbl-cap
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Infectious agents detected in nosocomial infections"
-msgstr "Bei nosokomialen Infektionen nachgewiesene Infektionserreger"
+msgstr "Agentes infecciosos detectados en infecciones nosocomiales"
 
 #. type: Hash Value: tbl-risk-density-rates cvc
 #: reports/common.yaml:1
 #, no-wrap
 msgid "CVC"
-msgstr "ZVK"
+msgstr "CVC"
 
 #. type: Hash Value: tbl-device-associated-incidence-density-rates dev_ass_incidence_density_rate
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Device-Associated Incidence Density Rate"
-msgstr "Device-assoziierte Inzidenzdichte"
+msgstr "Tasa de incidencia asociada al dispositivo"
 
 #. type: Hash Value: tbl-device-associated-incidence-density-rates grp_vc
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Vascular catheter associated sepsis / bloodstream infection"
-msgstr "Gefäßkatheter-assoziierte Sepsis / Blutstrominfektion"
+msgstr "Sepsis asociada a catéter vascular / infección del torrente sanguíneo"
 
 #. type: Hash Value: tbl-device-associated-incidence-density-rates grp_vs
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Ventilatory support associated pneumonia"
-msgstr "Beatmungsassoziierte Pneumonie"
+msgstr "Neumonía asociada al soporte ventilatorio"
 
 #. type: Hash Value: tbl-risk-density-rates inv
 #: reports/common.yaml:1
@@ -293,19 +291,19 @@ msgstr "INV"
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Number of device-associated infections"
-msgstr "Anzahl der Device-assoziierten Infektionen"
+msgstr "Número de infecciones asociadas al dispositivo"
 
 #. type: Hash Value: tbl-device-associated-incidence-density-rates n_dev_days
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Device days"
-msgstr "Device-Tage"
+msgstr "Días de uso del dispositivo"
 
 #. type: Hash Value: tbl-device-associated-incidence-density-rates n_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The aggregated number of device-associated infections in all infants."
-msgstr "%s: Die Gesamtzahl der geräteassoziierten Infektionen bei allen Kindern."
+msgstr "%s: Número agregado de infecciones asociadas a dispositivos en todos los lactantes."
 
 #. type: Hash Value: tbl-risk-density-rates niv
 #: reports/common.yaml:1
@@ -317,403 +315,403 @@ msgstr "NIV"
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The Device-Associated Incidence Density Rate calculated across all infants from all departments."
-msgstr "%s: Die Device-assoziierte Inzidenzdichte, berechnet für alle Kinder aus allen Abteilungen."
+msgstr "%s: tasa de incidencia asociada al dispositivo calculada entre todos los bebés de todos los departamentos."
 
 #. type: Hash Value: tbl-risk-density-rates pvc
 #: reports/common.yaml:1
 #, no-wrap
 msgid "PVC"
-msgstr "PVK"
+msgstr "PVC"
 
 #. type: Hash Value: tbl-device-associated-incidence-density-rates quartile_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Device-Associated Incidence Density Rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected infections is greater than or equal to one according to the pooled Device-Associated Incidence Density Rate."
-msgstr "%s, %s, %s: Die Quartile (%s, %s und %s Quantile) der Device-assoziierten Inzidenzdichten der Partnerabteilungen. Diese Quartile werden nur angezeigt, wenn die Anzahl der Abteilungen, die zum Nenner beitragen, größer oder gleich fünf ist und wenn die mittlere Anzahl der erwarteten Infektionen gemäß der gepoolten Device-assoziierten Inzidenzdichte größer oder gleich eins ist."
+msgstr "%s, %s, %s: Los cuartiles (cuartiles del %s, %s y %s) de las tasas de densidad de incidencia asociadas al dispositivo de los departamentos asociados. Estos cuartiles solo se muestran cuando el número de departamentos que contribuyen al denominador es mayor o igual a cinco, y cuando el número medio de infecciones esperadas es mayor o igual a uno según la tasa de densidad de incidencia asociada al dispositivo agrupada."
 
 #. type: Hash Value: tbl-device-associated-incidence-density-rates tbl-cap
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Incidence Density Rates of device-associated infections"
-msgstr "Inzidenzdichten Device-assoziierter Infektionen"
+msgstr "Tasas de densidad de incidencia de infecciones asociadas a dispositivos"
 
 #. type: Hash Value: tbl-device-associated-incidence-density-rates vs
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Any ventilatory support"
-msgstr "Jede Form der Atemunterstützung"
+msgstr "Cualquier asistencia respiratoria"
 
 #. type: Hash Value: tbl-surgical-procedure-rates other
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Other"
-msgstr "Andere"
+msgstr "Otros"
 
 #. type: Hash Value: tbl-incidence-density-rates grp_si
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Primary sepsis/BSI/Pneumonia"
-msgstr "Primäre Sepsis/BSI/Pneumonie"
+msgstr "Sepsis primaria/BSI/Neumonía"
 
 #. type: Hash Value: tbl-incidence-density-rates incidence_density_rate
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Incidence Density Rate"
-msgstr "Inzidenzdichte"
+msgstr "Tasa de densidad de incidencia"
 
 #. type: Hash Value: tbl-incidence-density-rates n_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The aggregated number of infections in all infants."
-msgstr "%s: Die Gesamtzahl der Infektionen bei allen Kindern."
+msgstr "%s: Número total de infecciones en todos los bebés."
 
 #. type: Hash Value: tbl-incidence-density-rates n_inf
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Number of infections"
-msgstr "Anzahl der Infektionen"
+msgstr "Número de infecciones"
 
 #. type: Hash Value: tbl-incidence-density-rates pooled_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The Incidence Density Rate calculated across all infants from all departments."
-msgstr "%s: Die Inzidenzdichte, berechnet für alle Kinder aus allen Abteilungen."
+msgstr "%s: la tasa de densidad de incidencia calculada para todos los bebés de todos los departamentos."
 
 #. type: Hash Value: tbl-incidence-density-rates quartile_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Incidence Density Rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected infections is greater than or equal to one according to the pooled Incidence Density Rate."
-msgstr "%s, %s, %s: Die Quartile (%s, %s und %s Quantile) der Inzidenzdichten der Partnerabteilungen. Diese Quartile werden nur angezeigt, wenn die Anzahl der Abteilungen, die zum Nenner beitragen, größer oder gleich fünf ist und wenn die mittlere Anzahl der erwarteten Infektionen gemäß der gepoolten Inzidenzdichte größer oder gleich eins ist."
+msgstr "%s, %s, %s: Los cuartiles (cuartiles del %s, %s y %s) de las tasas de densidad de incidencia de los departamentos asociados. Estos cuartiles solo se muestran cuando el número de departamentos que contribuyen al denominador es mayor o igual a cinco, y cuando el número medio de infecciones esperadas es mayor o igual a uno según la tasa de densidad de incidencia agrupada."
 
 #. type: Hash Value: tbl-incidence-density-rates si_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: Combines the outcomes primary sepsis/BSI and pneumonia"
-msgstr "%s: Kombiniert die Ergebnisse primäre Sepsis/BSI und Pneumonie"
+msgstr "%s: combina los resultados de sepsis primaria/BSI y neumonía"
 
 #. type: Hash Value: tbl-incidence-density-rates tbl-cap
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Incidence Density Rates of nosocomial infections"
-msgstr "Inzidenzdichten nosokomialer Infektionen"
+msgstr "Tasas de densidad de incidencia de infecciones nosocomiales"
 
 #. type: Hash Value: tbl-infectious-agent-detection-rate n_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The aggregated number of infections where at least one infectious agent was recorded."
-msgstr "%s: Die Gesamtzahl der Infektionen, bei denen mindestens ein Infektionserreger festgestellt wurde."
+msgstr "%s: Número agregado de infecciones en las que se registró al menos un agente infeccioso."
 
 #. type: Hash Value: tbl-infectious-agent-detection-rate pooled_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The Infectious Agent Detection Rate calculated across all infants from all departments."
-msgstr "%s: Die Infektionserreger-Nachweisrate, berechnet für alle Kinder aus allen Abteilungen."
+msgstr "%s: tasa de detección de agentes infecciosos calculada entre todos los bebés de todos los departamentos."
 
 #. type: Hash Value: tbl-infectious-agent-detection-rate quartile_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Infectious Agent Detection Rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected infections with an agents is greater than or equal to one according to the pooled Infectious Agent Detection Rate."
-msgstr "%s, %s, %s: Die Quartile (%s, %s und %s Quantile) der Infektionserreger-Nachweisraten der Partnerabteilungen. Diese Quartile werden nur angezeigt, wenn die Anzahl der Abteilungen, die zum Nenner beitragen, größer oder gleich fünf ist und wenn die Medianzahl der erwarteten Infektionen mit einem Erreger gemäß der gepoolten Infektionserreger-Nachweisrate größer oder gleich eins ist."
+msgstr "%s, %s, %s: Los cuartiles (cuartiles del %s, %s y %s) de las tasas de detección de agentes infecciosos de los departamentos asociados. Estos cuartiles solo se muestran cuando el número de departamentos que contribuyen al denominador es mayor o igual a cinco, y cuando el número medio de infecciones esperadas con un agente es mayor o igual a uno según la tasa de detección de agentes infecciosos agrupada."
 
 #. type: Hash Value: tbl-infectious-agent-detection-rate rate_denominator
 #: reports/common.yaml:1
 #, no-wrap
 msgid "No of infections"
-msgstr "Anzahl der Infektionen"
+msgstr "Número de infecciones"
 
 #. type: Hash Value: tbl-infectious-agent-detection-rate rate_name
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Infectious Agent Detection Rate"
-msgstr "Infektionserreger-Nachweisrate"
+msgstr "Tasa de detección de agentes infecciosos"
 
 #. type: Hash Value: tbl-infectious-agent-detection-rate rate_numerator
 #: reports/common.yaml:1
 #, no-wrap
 msgid "No of infections with agent"
-msgstr "Anzahl der Infektionen mit Erreger"
+msgstr "Número de infecciones con el agente"
 
 #. type: Hash Value: tbl-infectious-agent-detection-rate tbl-cap
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Infections in which an infectious agent has been identified, including secondary BSI following the infection."
-msgstr "Infektionen, bei denen ein Infektionserreger identifiziert wurde, einschließlich sekundärer BSI nach der Infektion."
+msgstr "Infecciones en las que se ha identificado un agente infeccioso, incluida la BSI secundaria tras la infección."
 
 #. type: Hash Value: tbl-resistance-test-rate if_3gcr
 #: reports/common.yaml:1
 #, no-wrap
 msgid "in case of 3GCR"
-msgstr "im Falle von 3GCR"
+msgstr "en caso de 3GCR"
 
 #. type: Hash Value: tbl-resistance-test-rate if_3gcr_and_car
 #: reports/common.yaml:1
 #, no-wrap
 msgid "in case of 3GCR and CARBR"
-msgstr "im Falle von 3GCR und CARBR"
+msgstr "en caso de 3GCR y CARBR"
 
 #. type: Hash Value: tbl-resistance-test-rate n_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The aggregated number of antibiotic resistant pathogens that have a documented test for antibiotic resistance."
-msgstr "%s: Die Gesamtzahl der antibiotikaresistenten Krankheitserreger, für die ein Test auf Antibiotikaresistenz dokumentiert ist."
+msgstr "%s: El número agregado de patógenos resistentes a los antibióticos que cuentan con una prueba documentada de resistencia a los antibióticos."
 
 #. type: Hash Value: tbl-resistance-test-rate pooled_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The antibiotic resistance test rate calculated across all infants from all departments."
-msgstr "%s: Die Antibiotikaresistenz-Testrate, berechnet für alle Säuglinge aus allen Abteilungen."
+msgstr "%s: Tasa de pruebas de resistencia a los antibióticos calculada entre todos los bebés de todos los departamentos."
 
 #. type: Hash Value: tbl-resistance-test-rate quartile_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the antibiotic resistance test rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected infections with an agents is greater than or equal to one according to the pooled antibiotic resistance test rate."
-msgstr "%s, %s, %s: Die Quartile (%s, %s und %s Quantile) der Antibiotikaresistenztestraten der Partnerabteilungen. Diese Quartile werden nur angezeigt, wenn die Anzahl der Abteilungen, die zum Nenner beitragen, größer oder gleich fünf ist und wenn die Medianzahl der erwarteten Infektionen mit einem Erreger gemäß der gepoolten Antibiotikaresistenztestrate größer oder gleich eins ist."
+msgstr "%s, %s, %s: Los cuartiles (%s, %s y %s cuantiles) de las tasas de pruebas de resistencia a los antibióticos de los departamentos asociados. Estos cuartiles solo se muestran cuando el número de departamentos que contribuyen al denominador es mayor o igual a cinco, y cuando el número medio de infecciones esperadas con un agente es mayor o igual a uno según la tasa combinada de pruebas de resistencia a los antibióticos."
 
 #. type: Hash Value: tbl-resistance-test-rate rate_denominator
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Number of pathogens eligible for antibiotic resistance test recording"
-msgstr "Anzahl der Krankheitserreger, die für die Erfassung von Antibiotikaresistenztests in Frage kommen"
+msgstr "Número de patógenos aptos para el registro de pruebas de resistencia a los antibióticos"
 
 #. type: Hash Value: tbl-resistance-test-rate rate_name
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Antibiotic resistance test rate"
-msgstr "Antibiotikaresistenz-Testrate"
+msgstr "Tasa de pruebas de resistencia a los antibióticos"
 
 #. type: Hash Value: tbl-resistance-test-rate rate_numerator
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Number of pathogens with recorded test for antibiotic resistance"
-msgstr "Anzahl der Krankheitserreger mit dokumentierten Tests auf Antibiotikaresistenz"
+msgstr "Número de patógenos con pruebas registradas de resistencia a los antibióticos"
 
 #. type: Hash Value: tbl-resistance-test-rate tbl-cap
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Antibiotic resistance diagnostics"
-msgstr "Diagnostik von Antibiotikaresistenzen"
+msgstr "Diagnóstico de la resistencia a los antibióticos"
 
 #. type: Hash Value: tbl-risk-density-rates access
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Access"
-msgstr "Access"
+msgstr "Acceso"
 
 #. type: Hash Value: tbl-risk-density-rates antibiotics
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Antibiotics"
-msgstr "Antibiotika"
+msgstr "Antibióticos"
 
 #. type: Hash Value: tbl-risk-density-rates any
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Any"
-msgstr "Atemunterstützung (gesamt)"
+msgstr "Cualquiera"
 
 #. type: Hash Value: tbl-risk-density-rates any_antibiotic
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Any antibiotic"
-msgstr "Antibiotika (gesamt)"
+msgstr "Cualquier antibiótico"
 
 #. type: Hash Value: tbl-risk-density-rates aware_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "WHO AWaRe group (see %s). As cumulative treatment days for individual substances are recorded per patient, combination therapies using several substances on one day are counted as multiple days."
-msgstr "WHO AWaRe-Gruppe (siehe %s). Da die kumulativen Behandlungstage für einzelne Substanzen pro Patient erfasst werden, werden Kombinationstherapien mit mehreren Substanzen an einem Tag als mehrere Tage gezählt."
+msgstr "Grupo WHO AWaRe (véase %s). Dado que los días de tratamiento acumulativos para cada sustancia se registran por paciente, las terapias combinadas que utilizan varias sustancias en un mismo día se cuentan como varios días."
 
 #. type: Hash Value: tbl-risk-density-rates days_with_risk_factor
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Days with risk/protective factor"
-msgstr "Tage mit Risiko-/Schutzfaktor"
+msgstr "Días con factor de riesgo/protección"
 
 #. type: Hash Value: tbl-risk-density-rates human_milk
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Human milk"
-msgstr "Humanmilch"
+msgstr "Leche materna"
 
 #. type: Hash Value: tbl-risk-density-rates kangaroo_care
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Kangaroo care"
-msgstr "Känguruhpflege"
+msgstr "Cuidado canguro"
 
 #. type: Hash Value: tbl-risk-density-rates n_footnote own
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The aggregated number of days the risk/protective factor was present in your unit's infants."
-msgstr "%s: Die Gesamtzahl der Tage, an denen der Risiko-/Schutzfaktor bei den Kindern Ihrer Abteilung vorhanden war."
+msgstr "%s: El número total de días en que el factor de riesgo/protección estuvo presente en los bebés de su unidad."
 
 #. type: Hash Value: tbl-risk-density-rates n_footnote ref
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The aggregated number of days the risk/protective factor was present in all infants."
-msgstr "%s: Die Gesamtzahl der Tage bei allen Kindern, an denen der Risiko-/Schutzfaktor vorhanden war."
+msgstr "%s: Número total de días en los que el factor de riesgo/protección estuvo presente en todos los bebés."
 
 #. type: Hash Value: tbl-risk-density-rates pooled_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The Risk Density Rate calculated across all infants from all departments in the reference data."
-msgstr "%s: Die Risikofaktor-Anwendungsrate, berechnet für alle Kinder aus allen Abteilungen in den Referenzdaten."
+msgstr "%s: La tasa de densidad de riesgo calculada para todos los bebés de todos los departamentos en los datos de referencia."
 
 #. type: Hash Value: tbl-risk-density-rates probiotic
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Probiotics"
-msgstr "Probiotika"
+msgstr "Probióticos"
 
 #. type: Hash Value: tbl-risk-density-rates quartile_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Risk Density Rates of the departments in the reference data. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of device days is greater than or equal to one according to the pooled Risk Density Rate."
-msgstr "%s, %s, %s: Die Quartile (%s, %s und %s Quantile) der Risikofaktor-Anwendungsraten der Abteilungen in den Referenzdaten. Diese Quartile werden nur angezeigt, wenn die Anzahl der Abteilungen, die zum Nenner beitragen, größer oder gleich fünf ist und wenn die mittlere Anzahl der Device-Tag gemäß der gepoolten Risikofaktor-Anwendungsrate größer oder gleich eins ist."
+msgstr "%s, %s, %s: Los cuartiles (%s, %s y %s cuantiles) de las tasas de densidad de riesgo de los departamentos en los datos de referencia. Estos cuartiles solo se muestran cuando el número de departamentos que contribuyen al denominador es mayor o igual a cinco, y cuando el número medio de días de dispositivo es mayor o igual a uno según la tasa de densidad de riesgo agrupada."
 
 #. type: Hash Value: tbl-risk-density-rates rate_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The Risk Density Rate calculated for your unit's infants."
-msgstr "%s: Die für die Kinder Ihrer Abteilung berechnete Risikofaktor-Anwendungsrate."
+msgstr "%s: La tasa de densidad de riesgo calculada para los bebés de su unidad."
 
 #. type: Hash Value: tbl-risk-density-rates reserve
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Reserve"
-msgstr "Reserve"
+msgstr "Reserva"
 
 #. type: Hash Value: tbl-risk-density-rates risk_density_rate
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Risk Density Rate"
-msgstr "Risikofaktor-Anwendungsrate"
+msgstr "Tasa de densidad de riesgo"
 
 #. type: Hash Value: tbl-risk-density-rates tbl-cap
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Factors influencing the infants' risk of developing an infection or acquiring antibitic-resistant pathogens."
-msgstr "Faktoren, die das Risiko von Kindern beeinflussen, eine Infektion zu entwickeln oder antibiotikaresistente Erreger zu erwerben."
+msgstr "Factores que influyen en el riesgo de los bebés de desarrollar una infección o contraer patógenos resistentes a los antibióticos."
 
 #. type: Hash Value: tbl-risk-density-rates vascular_catheter
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Vascular catheter"
-msgstr "Gefäßkatheter"
+msgstr "Catéter vascular"
 
 #. type: Hash Value: tbl-risk-density-rates ventilatory_support
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Ventilatory support"
-msgstr "Atemunterstützung"
+msgstr "Asistencia respiratoria"
 
 #. type: Hash Value: tbl-risk-density-rates watch
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Watch"
-msgstr "Watch"
+msgstr "Ver"
 
 #. type: Hash Value: tbl-surgical-procedure-rates abdominal_surgery
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Abdominal surgery"
-msgstr "Abdominalchirurgie"
+msgstr "Cirugía abdominal"
 
 #. type: Hash Value: tbl-surgical-procedure-rates cardiac_and_large_vessel_surgery
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Cardiac- / large vessel surgery"
-msgstr "Herz- und Großgefäßchirurgie"
+msgstr "Cirugía cardíaca/de vasos grandes"
 
 #. type: Hash Value: tbl-surgical-procedure-rates inguinal_hernia_surgery
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Inguinal hernia surgery"
-msgstr "Leistenhernienchirurgie"
+msgstr "Cirugía de hernia inguinal"
 
 #. type: Hash Value: tbl-surgical-procedure-rates lung_pleural_space_thoracic_surgery
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Lung- / pleural space- / thoracic surgery"
-msgstr "Lungen-, Pleura- und Thoraxchirurgie"
+msgstr "Cirugía pulmonar/pleural/torácica"
 
 #. type: Hash Value: tbl-surgical-procedure-rates n_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The aggregated number surgical procedures performed in all infants."
-msgstr "%s: Die Gesamtzahl der chirurgischen Eingriffe, die bei allen Kindern durchgeführt wurden."
+msgstr "%s: Número total de procedimientos quirúrgicos realizados en todos los bebés."
 
 #. type: Hash Value: tbl-surgical-procedure-rates neurosurgery
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Neurosurgery"
-msgstr "Neurochirurgie"
+msgstr "Neurocirugía"
 
 #. type: Hash Value: tbl-surgical-procedure-rates not_surgery
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Not a surgical procedure"
-msgstr "Kein chirurgischer Eingriff"
+msgstr "No es un procedimiento quirúrgico"
 
 #. type: Hash Value: tbl-surgical-procedure-rates oesophageal_surgery
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Oesophageal surgery"
-msgstr "Ösophaguschirurgie"
+msgstr "Cirugía esofágica"
 
 #. type: Hash Value: tbl-surgical-procedure-rates overall
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Overall"
-msgstr "Gesamt"
+msgstr "Total"
 
 #. type: Hash Value: tbl-surgical-procedure-rates pooled_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The Surgical Procedure Rate calculated across all infants from all departments."
-msgstr "%s: Die chirurgische Eingriffsrate, berechnet für alle Kinder aus allen Abteilungen."
+msgstr "%s: tasa de procedimientos quirúrgicos calculada para todos los bebés de todos los departamentos."
 
 #. type: Hash Value: tbl-surgical-procedure-rates quartile_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Surgical Procedure Rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of procedures is greater than or equal to one according to the pooled Surgical Procedure Rate."
-msgstr "%s, %s, %s: Die Quartile (%s, %s und %s Quantile) der chirurgischen Eingriffsraten der Partnerabteilungen. Diese Quartile werden nur angezeigt, wenn die Anzahl der Abteilungen, die zum Nenner beitragen, größer oder gleich fünf ist und wenn die mittlere Anzahl der Eingriffe gemäß der gepoolten chirurgischen Eingriffsrate größer oder gleich eins ist."
+msgstr "%s, %s, %s: Los cuartiles (cuartiles del %s, %s y %s) de las tasas de procedimientos quirúrgicos de los departamentos asociados. Estos cuartiles solo se muestran cuando el número de departamentos que contribuyen al denominador es mayor o igual a cinco, y cuando el número medio de procedimientos es mayor o igual a uno según la tasa de procedimientos quirúrgicos agrupada."
 
 #. type: Hash Value: tbl-surgical-procedure-rates rate_denominator
 #: reports/common.yaml:1
 #, no-wrap
 msgid "No of Patients"
-msgstr "Anzahl der Patienten"
+msgstr "Número de pacientes"
 
 #. type: Hash Value: tbl-surgical-procedure-rates rate_name
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Surgical Procedure Rate"
-msgstr "Chirurgische Eingriffsrate"
+msgstr "Tasa de procedimientos quirúrgicos"
 
 #. type: Hash Value: tbl-surgical-procedure-rates rate_numerator
 #: reports/common.yaml:1
 #, no-wrap
 msgid "No of procedures"
-msgstr "Anzahl der Prozeduren"
+msgstr "Número de procedimientos"
 
 #. type: Hash Value: tbl-surgical-procedure-rates tbl-cap
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Surgical procedures by category"
-msgstr "Chirurgische Eingriffe nach Kategorie"
+msgstr "Procedimientos quirúrgicos por categoría"
 
 #. type: Hash Value: tbl-surgical-procedure-rates to_be_categorised
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Not yet categorised"
-msgstr "Noch nicht kategorisiert"
+msgstr "Aún sin clasificar"
 
 #. type: Hash Value: total
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Total"
-msgstr "Gesamt"
+msgstr "Total"
 
 #. type: Hash Value: unit_separator
 #: reports/common.yaml:1
@@ -725,7 +723,7 @@ msgstr " "
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Vancomycin-resistant Enterococcus (VRE)"
-msgstr "Vancomycin-resistente Enterokokken (VRE)"
+msgstr "Enterococos resistentes a la vancomicina (VRE)"
 
 #. type: Hash Value: week_abbreviation
 #: reports/common.yaml:1
@@ -737,39 +735,39 @@ msgstr "w"
 #: reports/Partner-Report/_quarto-en.yml:1
 #, no-wrap
 msgid "NeoIPC Surveillance Partner Report"
-msgstr "NeoIPC Surveillance Partner-Auswertung"
+msgstr "Informe del socio de vigilancia NeoIPC"
 
 #. type: Hash Value: own_unit
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Own unit"
-msgstr "Eigene Abteilunng"
+msgstr "Unidad propia"
 
 #. type: Hash Value: reference_data
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Reference data"
-msgstr "Referenzdaten"
+msgstr "Datos de referencia"
 
 #. type: Title #
 #: reports/Partner-Report/content/_introduction.qmd:1
 #: reports/Reference-Report/content/_introduction.Rmd:1
 #, no-wrap
 msgid "Introduction"
-msgstr "Einleitung"
+msgstr "Introducción"
 
 #. type: Plain text
 #: reports/Partner-Report/content/_introduction.qmd:3
 #, no-wrap
 msgid "This is a [NeoIPC Surveillance](https://neoipc.org/surveillance/ \"Link to the surveillance section of the NeoIPC website\") analysis that you can use to assess infection rates in your neonatal unit. If you have your own data collected using the same or a comparable method, you can compare them with the reference values presented in this document and identify any anomalies and potential for improvement.\n"
-msgstr "Dies ist eine Auswertung der [NeoIPC-Surveillance](https://neoipc.org/surveillance/ \"Link zum Abschnitt „Surveillance“ auf der NeoIPC-Website\"), die Sie zur Beurteilung der Infektionsraten in Ihrer neonatologischen Abteilung verwenden können. Wenn Sie eigene Daten haben, die mit derselben oder einer vergleichbaren Methode erhoben wurden, können Sie diese mit den in diesem Dokument dargestellten Referenzwerten vergleichen und so Auffälligkeiten und Verbesserungspotenziale identifizieren.\n"
+msgstr "Este es un análisis de [NeoIPC Surveillance](https://neoipc.org/surveillance/ «Enlace a la sección de vigilancia del sitio web de NeoIPC») que puede utilizar para evaluar las tasas de infección en su unidad neonatal. Si dispone de datos propios recopilados mediante el mismo método o uno similar, puede compararlos con los valores de referencia que se presentan en este documento e identificar cualquier anomalía y posible mejora.\n"
 
 #. type: Hash Value: format pdf author-meta
 #: reports/Partner-Certificate/_quarto-en.yml:1
 #: reports/Reference-Report/_quarto-en.yml:1
 #, no-wrap
 msgid "NeoIPC Surveillance team"
-msgstr "NeoIPC Surveillance Team"
+msgstr "Equipo de vigilancia NeoIPC"
 
 #. type: Array Element: format pdf keywords
 #: reports/Partner-Certificate/_quarto-en.yml:1
@@ -783,269 +781,269 @@ msgstr "NeoIPC"
 #: reports/Reference-Report/_quarto-en.yml:1
 #, no-wrap
 msgid "Surveillance"
-msgstr "Surveillance"
+msgstr "Vigilancia"
 
 #. type: Array Element: format pdf keywords
 #: reports/Partner-Certificate/_quarto-en.yml:1
 #, no-wrap
 msgid "Certificate"
-msgstr "Zertifikat"
+msgstr "Certificado"
 
 #. type: Hash Value: title
 #: reports/Partner-Certificate/_quarto-en.yml:1
 #, no-wrap
 msgid "Certificate of participation in the NeoIPC project surveillance system (NeoIPC Surveillance)"
-msgstr "Zertifikat über die Teilnahme am Surveillance-System des NeoIPC-Projekts (NeoIPC Surveillance)"
+msgstr "Certificado de participación en el sistema de vigilancia del proyecto NeoIPC (NeoIPC Surveillance)"
 
 #. type: Array Element: content
 #: reports/Partner-Certificate/_sR.yaml:1
 #, no-wrap
 msgid "This project has received funding from the European Union’s Horizon 2020 research and%sinnovation programme under grant agreement No 965328."
-msgstr "Dieses Projekt wurde im Rahmen des Forschungs- und Innovationsprogramms Horizont 2020%sder Europäischen Union unter der Fördervereinbarung Nr. 965328 gefördert."
+msgstr "Este proyecto ha recibido financiación del programa de investigación e innovación Horizonte 2020 de la Unión Europea en virtud del acuerdo de subvención n.º 965328."
 
 #. type: Array Element: content
 #: reports/Partner-Certificate/_sR.yaml:1
 #, no-wrap
 msgid "In"
-msgstr "Im Jahr"
+msgstr "En"
 
 #. type: Array Element: content
 #: reports/Partner-Certificate/_sR.yaml:1
 #, no-wrap
 msgid "During the period"
-msgstr "Im Zeitraum"
+msgstr "Durante el período"
 
 #. type: Array Element: content
 #: reports/Partner-Certificate/_sR.yaml:1
 #, no-wrap
 msgid "the neonatology unit at %s participated in the NeoIPC Surveillance network."
-msgstr "hat sich die neonatologische Abteilung der %s am NeoIPC Surveillance Netzwerk beteiligt."
+msgstr "la unidad de neonatología de %s participó en la red de vigilancia NeoIPC."
 
 #. type: Array Element: content
 #: reports/Partner-Certificate/_sR.yaml:1
 #, no-wrap
 msgid "Through active monitoring of %s newborns with birth weights below 1500 grams and/or gestational ages below 32 weeks, the team collected valuable reference data that will be useful for assessing and reducing infection risks in neonatal units. We are proud and delighted to have them as partners in our mission to improve infection prevention and control in the neonatal setting."
-msgstr "Dank der aktiven Surveillance von %s Neugeborenen mit einem Geburtsgewicht von weniger als 1500 Gramm und/oder einem Gestationsalter von weniger als 32 Wochen hat das Team wertvolle Referenzdaten gesammelt, die für die Bewertung und Verringerung des Infektionsrisikos in neonatologischen Abteilungen nützlich sind. Wir sind stolz und glücklich, sie als Partner bei unserer Mission zur Verbesserung der Infektionsprävention und -kontrolle im neonatologischen Bereich zu haben."
+msgstr "Mediante el seguimiento activo de %s recién nacidos con un peso inferior a 1500 gramos y/o una edad gestacional inferior a 32 semanas, el equipo recopiló valiosos datos de referencia que serán útiles para evaluar y reducir los riesgos de infección en las unidades neonatales. Estamos orgullosos y encantados de contar con ellos como socios en nuestra misión de mejorar la prevención y el control de las infecciones en el ámbito neonatal."
 
 #. type: Array Element: content
 #: reports/Partner-Certificate/_sR.yaml:1
 #, no-wrap
 msgid "for the NeoIPC Surveillance team"
-msgstr "für das NeoIPC Surveillance Team"
+msgstr "para el equipo de vigilancia de NeoIPC"
 
 #. type: Array Element: content
 #: reports/Partner-Certificate/_sR.yaml:1
 #, no-wrap
 msgid "Berlin,"
-msgstr "Berlin,"
+msgstr "Berlín,"
 
 #. type: Hash Value: signature_offset
 #: reports/Partner-Certificate/_sR.yaml:1
 #, no-wrap
 msgid "3.25"
-msgstr "1.25"
+msgstr "3,25"
 
 #. type: Hash Value: format pdf include-in-header file
 #: reports/Reference-Report/_quarto-en.yml:1
 #, no-wrap
 msgid "translations.tex"
-msgstr "translations.de.tex"
+msgstr "translations.es.tex"
 
 #. type: Array Element: format pdf keywords
 #: reports/Reference-Report/_quarto-en.yml:1
 #, no-wrap
 msgid "Reference Report"
-msgstr "Referenz-Auswertung"
+msgstr "Informe de Referencias"
 
 #. type: Hash Value: title
 #: reports/Reference-Report/_quarto-en.yml:1
 #, no-wrap
 msgid "NeoIPC Surveillance Reference Report"
-msgstr "NeoIPC Surveillance Referenz-Auswertung"
+msgstr "Informe de referencia de vigilancia NeoIPC"
 
 #. type: Hash Value: countryNames Estonia
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Estonia"
-msgstr "Estland"
+msgstr "Estonia"
 
 #. type: Hash Value: countryNames Germany
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Germany"
-msgstr "Deutschland"
+msgstr "Alemania"
 
 #. type: Hash Value: countryNames Greece
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Greece"
-msgstr "Griechenland"
+msgstr "Grecia"
 
 #. type: Hash Value: countryNames Italy
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Italy"
-msgstr "Italien"
+msgstr "Italia"
 
 #. type: Hash Value: countryNames SouthAfrica
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "South Africa"
-msgstr "Südafrika"
+msgstr "Sudáfrica"
 
 #. type: Hash Value: countryNames Spain
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Spain"
-msgstr "Spanien"
+msgstr "España"
 
 #. type: Hash Value: countryNames Switzerland
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Switzerland"
-msgstr "Schweiz"
+msgstr "Suiza"
 
 #. type: Hash Value: countryNames UnitedKingdom
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "United Kingdom"
-msgstr "Vereinigtes Königreich"
+msgstr "Reino Unido"
 
 #. type: Hash Value: headerList allBirthweights
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "All eligible birth weights"
-msgstr "Alle gültigen Geburtsgewichte"
+msgstr "Todos los pesos al nacer elegibles"
 
 #. type: Hash Value: headerList allGestationalAges
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "All eligible gestational ages"
-msgstr "Alle gültigen Gestationsalter"
+msgstr "Todas las edades gestacionales elegibles"
 
 #. type: Hash Value: headerList analysisPeriod
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Analysis period"
-msgstr "Analysezeitraum"
+msgstr "Período de análisis"
 
 #. type: Hash Value: headerList and
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid " and "
-msgstr " und "
+msgstr " y "
 
 #. type: Hash Value: headerList birthweightFilter
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Birth weight filter"
-msgstr "Geburtsgewicht-Filter"
+msgstr "Filtro de peso al nacer"
 
 #. type: Hash Value: headerList countries
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Countries"
-msgstr "Länder"
+msgstr "Países"
 
 #. type: Hash Value: headerList country
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Country"
-msgstr "Land"
+msgstr "País"
 
 #. type: Hash Value: headerList createdAt
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Created"
-msgstr "Erstellt"
+msgstr "Creado"
 
 #. type: Hash Value: headerList dataUpTo
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Data up to"
-msgstr "Daten bis"
+msgstr "Datos hasta"
 
 #. type: Hash Value: headerList gestationalAgeFilter
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Gestational age filter"
-msgstr "Gestationsalter-Filter"
+msgstr "Filtro de edad gestacional"
 
 #. type: Hash Value: headerList ignoresInclusionCriteria
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "ignores the NeoIPC Surveillance inclusion criteria."
-msgstr "ignoriert die Einschlusskriterien für die NeoIPC-Surveillance."
+msgstr "ignora los criterios de inclusión de NeoIPC Surveillance."
 
 #. type: Hash Value: headerList includesTestDepartments
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "includes test units"
-msgstr "schließt Test-Abteilungen mit ein"
+msgstr "incluye unidades de prueba"
 
 #. type: Hash Value: headerList multiCountryHint
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "This report aggregates data from neonatal units in several countries. This means that, while it reflects a broad spectrum of care structures, it is only suitable as a benchmark to a somewhat limited extent due to the sometimes very different healthcare systems and the resources available there."
-msgstr "Dieser Bericht fasst Daten aus neonatologischen Abteilungen in mehreren Ländern zusammen. Das bedeutet, dass er zwar ein breites Spektrum an Versorgungsstrukturen widerspiegelt, aufgrund der teilweise sehr unterschiedlichen Gesundheitssysteme und der dort verfügbaren Ressourcen jedoch nur in begrenztem Umfang als Benchmark geeignet ist."
+msgstr "Este informe recopila datos de unidades neonatales de varios países. Esto significa que, aunque refleja un amplio espectro de estructuras asistenciales, solo es adecuado como referencia en una medida algo limitada debido a que los sistemas sanitarios y los recursos disponibles en cada uno de ellos son a veces muy diferentes."
 
 #. type: Hash Value: headerList multiCountryHintGoal
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "The aim of NeoIPC Surveillance is therefore always to provide units with a relevant national or regional report, provided that a sufficient number of units in the respective region participate in the system."
-msgstr "Das Ziel der NeoIPC Surveillance ist es daher stets, den Partnern einen relevanten nationalen oder regionalen Bericht zur Verfügung zu stellen, vorausgesetzt, dass eine ausreichende Anzahl von Abteilungen in der jeweiligen Region an dem System teilnimmt."
+msgstr "Por lo tanto, el objetivo de NeoIPC Surveillance es siempre proporcionar a las unidades un informe nacional o regional relevante, siempre que un número suficiente de unidades de la región respectiva participe en el sistema."
 
 #. type: Hash Value: headerList multiCountryHintHeader
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Multinational analysis"
-msgstr "Multinationale Analyse"
+msgstr "Análisis multinacional"
 
 #. type: Hash Value: headerList singleCountryHint
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "This report presents data from neonatal units in a single country. This means that, because of the relative homogeneity of the healthcare system, it is in principle a good benchmark. However, it should be noted that only a proportion of neonatal units in a country actually participate in NeoIPC Surveillance. Since participation is voluntary, these are typically hospitals that have a particular interest in infection prevention and are willing and able to provide the resources required for surveillance."
-msgstr "Dieser Bericht enthält Daten aus neonatologischen Abteilungen eines einzelnen Landes. Aufgrund der relativen Homogenität des Gesundheitssystems handelt es sich dabei grundsätzlich um einen guten Vergleichsmaßstab. Es ist jedoch zu beachten, dass nur ein Teil der neonatologischen Abteilungen eines Landes tatsächlich an der NeoIPC-Surveillance teilnimmt. Da die Teilnahme freiwillig ist, handelt es sich in der Regel um Krankenhäuser, die ein besonderes Interesse an der Infektionsprävention haben und bereit und in der Lage sind, die für die Überwachung erforderlichen Ressourcen bereitzustellen."
+msgstr "Este informe presenta datos de unidades neonatales de un solo país. Esto significa que, debido a la relativa homogeneidad del sistema sanitario, en principio es un buen punto de referencia. Sin embargo, cabe señalar que solo una parte de las unidades neonatales de un país participan realmente en la vigilancia NeoIPC. Dado que la participación es voluntaria, se trata normalmente de hospitales que tienen un interés particular en la prevención de infecciones y que están dispuestos y son capaces de proporcionar los recursos necesarios para la vigilancia."
 
 #. type: Hash Value: headerList singleCountryHintHeader
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "National report"
-msgstr "Nationale Auswertung"
+msgstr "Informe nacional"
 
 #. type: Hash Value: headerList singleCountryRepresentativenessHint
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "The information presented here can therefore not fully describe the situation in the individual countries."
-msgstr "Die hier dargestellten Informationen können daher die Situation in den einzelnen Ländern nicht vollständig beschreiben."
+msgstr "Por lo tanto, la información aquí presentada no puede describir completamente la situación en cada uno de los países."
 
 #. type: Hash Value: headerList specialAnalysisHint
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "This is a special analysis that"
-msgstr "Dies ist eine spezielle Analyse, die"
+msgstr "Este es un análisis especial que"
 
 #. type: newcommand{#4}
 #: reports/Reference-Report/translations.tex:2
 msgid "This project has received funding from the European Union’s Horizon 2020 research and innovation"
-msgstr "Dieses Projekt wurde im Rahmen des Forschungs- und Innovationsprogramms Horizont 2020"
+msgstr "Este proyecto ha recibido financiación del programa de investigación e innovación Horizonte 2020 de la Unión Europea"
 
 #. type: newcommand{#4}
 #: reports/Reference-Report/translations.tex:2
 msgid "programme under grant agreement No 965328."
-msgstr "der Europäischen Union unter der Fördervereinbarung Nr. 965328 gefördert."
+msgstr "programa en virtud del acuerdo de subvención n.º 965328."
 
 #. type: Plain text
 #: reports/Reference-Report/content/_introduction.Rmd:4
 #, no-wrap
 msgid "This document is a reference report on the NeoIPC Surveillance. It contains information relating to nosocomial infections, their causative infectious agents, and the associated risk and protective factors in high-risk neonates which was collected by partners from multiple neonatology departments participating in the NeoIPC Surveillance. The following numbers provide an overview of the current data set. If you are interested in the surveillance definitions, data collection methods and sheets, please refer to the [surveillance resources on the NeoIPC website](https://neoipc.org/surveillance/resources/).\n"
-msgstr "Dieses Dokument ist ein Referenzbericht der NeoIPC-Surveillance. Es enthält Informationen zu nosokomialen Infektionen, ihren verursachenden Infektionserregern und den damit verbundenen Risiko- und Schutzfaktoren bei Hochrisikoneugeborenen, die von Partnern aus mehreren an der NeoIPC-Surveillance teilnehmenden neonatologischen Abteilungen erhoben wurden. Die folgenden Zahlen geben einen Überblick über den aktuellen Datensatz. Wenn Sie sich für die Surveillance-Definitionen, die Methoden der Datenerhebung und die Datenerfassungsbögen interessieren, finden Sie weitere Informationen in den [Surveillance-Ressourcen auf der NeoIPC-Website](https://neoipc.org/surveillance/resources/). \n"
+msgstr "Este documento es un informe de referencia sobre la vigilancia NeoIPC. Contiene información relacionada con las infecciones nosocomiales, sus agentes infecciosos causantes y los factores de riesgo y protección asociados en neonatos de alto riesgo, recopilada por socios de múltiples departamentos de neonatología que participan en la vigilancia NeoIPC. Las siguientes cifras ofrecen una visión general del conjunto de datos actual. Si está interesado en las definiciones de vigilancia, los métodos de recopilación de datos y las hojas de datos, consulte los recursos de vigilancia en el sitio web de NeoIPC.\n"
 
 #. type: Plain text
 #: reports/Reference-Report/content/_introduction.Rmd:6
 #, no-wrap
 msgid "Number of departments contributing at least one patient record:\n"
-msgstr "Anzahl der Abteilungen, die mindestens einen Patienten beigetragen haben:\n"
+msgstr "Número de departamentos que aportan al menos un registro de paciente:\n"
 
 #. type: Plain text
 #: reports/Reference-Report/content/_introduction.Rmd:8
@@ -1057,7 +1055,7 @@ msgstr ":   `r dR$numberOfDepartments`\n"
 #: reports/Reference-Report/content/_introduction.Rmd:10
 #, no-wrap
 msgid "Number of patient records:\n"
-msgstr "Anzahl der Patienten:\n"
+msgstr "Número de registros de pacientes:\n"
 
 #. type: Plain text
 #: reports/Reference-Report/content/_introduction.Rmd:12
@@ -1069,7 +1067,7 @@ msgstr ":   `r dR$numberOfPatients`\n"
 #: reports/Reference-Report/content/_introduction.Rmd:14
 #, no-wrap
 msgid "Number of patient admissions:\n"
-msgstr "Anzahl der Patientenaufnahmen:\n"
+msgstr "Número de ingresos de pacientes:\n"
 
 #. type: Plain text
 #: reports/Reference-Report/content/_introduction.Rmd:16
@@ -1081,7 +1079,7 @@ msgstr ":   `r dR$numberOfAdmissions`\n"
 #: reports/Reference-Report/content/_introduction.Rmd:18
 #, no-wrap
 msgid "Sum of patient days:\n"
-msgstr "Summe der Patiententage:\n"
+msgstr "Suma de días de hospitalización:\n"
 
 #. type: Plain text
 #: reports/Reference-Report/content/_introduction.Rmd:20
@@ -1093,94 +1091,94 @@ msgstr ":   `r dR$sumOfPatientDays`\n"
 #: reports/Reference-Report/content/_introduction.Rmd:22
 #, no-wrap
 msgid "Average surveillance period per patient:\n"
-msgstr "Durchschnittliche Surveillance-Dauer pro Patient:\n"
+msgstr "Periodo medio de seguimiento por paciente:\n"
 
 #. type: Plain text
 #: reports/Reference-Report/content/_introduction.Rmd:23
 #, no-wrap
 msgid ":   `r dR$averageSurveillancePeriod` days\n"
-msgstr ":   `r dR$averageSurveillancePeriod` Tage\n"
+msgstr ":   `r dR$averageSurveillancePeriod` días\n"
 
 #. type: Title #
 #: reports/Reference-Report/content/_patient_population.Rmd:1
 #, no-wrap
 msgid "Patient Population"
-msgstr "Patientenpopulation"
+msgstr "Población de pacientes"
 
 #. type: Plain text
 #: reports/Reference-Report/content/_patient_population.Rmd:3
 #, no-wrap
 msgid "As the process, although supported by various tools, relies on the collection, interpretation and monitoring of information by qualified professionals, NeoIPC surveillance is currently being targeted at the most common nosocomial infections in high-risk neonates, in order to make it sustainable in a continuous manner in as many settings as possible. This means that patients with a birth weight below 1500 g and/or a gestational age below 32 weeks at the time of birth are included into the surveillance database if they are admitted to a participating neonatology department within the first 120 days of life. In combination with the filter settings specified above, this results in the composition of the patient population shown in @fig-bw and @fig-ga.\n"
-msgstr "Da der Prozess zwar durch verschiedene Instrumente unterstützt wird, jedoch auf der Erfassung, Auswertung und Überwachung von Informationen durch qualifizierte Fachkräfte beruht, konzentriert sich die NeoIPC-Surveillance derzeit auf die häufigsten nosokomialen Infektionen bei Hochrisikoneugeborenen, um sie in möglichst vielen Einrichtungen nachhaltig und kontinuierlich durchführen zu können. Das bedeutet, dass Patienten mit einem Geburtsgewicht unter 1500 g und/oder einem Gestationsalter unter 32 Wochen zum Zeitpunkt der Geburt in die Surveillance-Datenbank aufgenommen werden, wenn sie innerhalb der ersten 120 Lebenstage in eine teilnehmende neonatologische Abteilung aufgenommen werden. In Kombination mit den oben angegebenen Filtereinstellungen ergibt sich daraus die Zusammensetzung der Patientenpopulation, die in @fig-bw und @fig-ga dargestellt ist.\n"
+msgstr "Dado que el proceso, aunque cuenta con el apoyo de diversas herramientas, se basa en la recopilación, interpretación y seguimiento de la información por parte de profesionales cualificados, la vigilancia NeoIPC se centra actualmente en las infecciones nosocomiales más comunes en neonatos de alto riesgo, con el fin de que sea sostenible de forma continua en el mayor número posible de entornos. Esto significa que los pacientes con un peso al nacer inferior a 1500 g y/o una edad gestacional inferior a 32 semanas en el momento del nacimiento se incluyen en la base de datos de vigilancia si son ingresados en un departamento de neonatología participante en los primeros 120 días de vida. En combinación con los ajustes de filtro especificados anteriormente, esto da como resultado la composición de la población de pacientes que se muestra en @fig-bw y @fig-ga.\n"
 
 #. type: Title #
 #: reports/Reference-Report/content/_nosocomial_infections.Rmd:1
 #, no-wrap
 msgid "Nosocomial Infections"
-msgstr "Nosokomiale Infektionen"
+msgstr "Infecciones nosocomiales"
 
 #. type: Plain text
 #: reports/Reference-Report/content/_nosocomial_infections.Rmd:4
 #, no-wrap
 msgid "Nosocomial infections represent the primary endpoint of NeoIPC surveillance. In @tbl-incidence-density-rates, the incidence densities of sepsis/BSI, pneumonia and necrotising enterocolitis, as well as the combined endpoint 'severe infection', are displayed. Overall `r dR$numberOfSevereInfections` severe infections were recorded in `r dR$numberOfPatients` infants resulting in an average number of `r dR$averageSevereInfectionsPerPatient` infections per patient.\n"
-msgstr "Nosokomiale Infektionen stellen den primären Endpunkt der NeoIPC-Surveillance dar. In @tbl-incidence-density-rates werden die Inzidenzdichten von Sepsis/BSI, Pneumonie und nekrotisierender Enterokolitis sowie der kombinierte Endpunkt „schwere Infektion” angezeigt. Insgesamt wurden `r dR$numberOfSevereInfections` schwere Infektionen bei `r dR$numberOfPatients` Neonaten registriert, was einer durchschnittlichen Anzahl von `r dR$averageSevereInfectionsPerPatient` Infektionen pro Patient entspricht.\n"
+msgstr "Las infecciones nosocomiales representan el criterio de valoración principal de la vigilancia del NeoIPC. En @tbl-incidence-density-rates se muestran las densidades de incidencia de sepsis/BSI, neumonía y enterocolitis necrotizante, así como el criterio de valoración combinado «infección grave». En total, se registraron `r dR$numberOfSevereInfections` infecciones graves en `r dR$numberOfPatients` lactantes, lo que supone una media de `r dR$averageSevereInfectionsPerPatient` infecciones por paciente.\n"
 
 #. type: Plain text
 #: reports/Reference-Report/content/_nosocomial_infections.Rmd:5
 #, no-wrap
 msgid "Device-associated infections can be found in @tbl-device-associated-incidence-density-rates.\n"
-msgstr "Device-assoziierte Infektionen finden Sie unter @tbl-device-associated-incidence-density-rates.\n"
+msgstr "Las infecciones asociadas a dispositivos se pueden consultar en @tbl-device-associated-incidence-density-rates.\n"
 
 #. type: Title ##
 #: reports/Reference-Report/content/_infectious_agents.Rmd:1
 #, no-wrap
 msgid "Infectious Agents"
-msgstr "Infektionserreger"
+msgstr "Agentes infecciosos"
 
 #. type: Plain text
 #: reports/Reference-Report/content/_infectious_agents.Rmd:4
 #, no-wrap
 msgid "Epidemiology of the infectious agents causing nosocomial infections in neonatology is complex and there is a lot of potential for bias. While low diagnostic sensitivity (low blood volume) and specificity (contamination) are a general problem in the neonatal population, the lack of availability of some or all means of microbiological diagnostics, or the lack of financial resources can have a strong effect on the detection rates in resource-constrained settings.\n"
-msgstr "Die Epidemiologie der Infektionserreger, die nosokomiale Infektionen in der Neonatologie verursachen, ist komplex und birgt ein hohes Potenzial für Verzerrungen. Während eine geringe diagnostische Sensitivität (geringes Blutvolumen) und Spezifität (Kontamination) ein allgemeines Problem in der neonatologischen Population darstellen, können die mangelnde Verfügbarkeit einiger oder aller mikrobiologischer Diagnosemittel oder fehlende finanzielle Ressourcen einen starken Einfluss auf die Erkennungsraten in ressourcenbeschränkten Umgebungen haben.\n"
+msgstr "La epidemiología de los agentes infecciosos que causan infecciones nosocomiales en neonatología es compleja y existe un gran potencial de sesgo. Si bien la baja sensibilidad diagnóstica (bajo volumen sanguíneo) y la especificidad (contaminación) son un problema general en la población neonatal, la falta de disponibilidad de algunos o todos los medios de diagnóstico microbiológico, o la falta de recursos financieros, pueden tener un fuerte efecto en las tasas de detección en entornos con recursos limitados.\n"
 
 #. type: Plain text
 #: reports/Reference-Report/content/_infectious_agents.Rmd:6
 #, no-wrap
 msgid "<!-- When comparing data with the information on pathogens presented in @tbl-agent-per-infection-rate and information on drug resistance in @tbl-abr-infection-rate, please also have a look at the infectious agent detection rates presented in @tbl-infectious-agent-detection-rate and the antibiotic resistance test rates in @tbl-resistance-test-rate. -->\n"
-msgstr "<!-- Beim Vergleich der Daten mit den Informationen zu Krankheitserregern in @tbl-agent-per-infection-rate und den Informationen zur Arzneimittelresistenz in @tbl-abr-infection-rate beachten Sie bitte auch die Erreger-Nachweisraten in @tbl-infectious-agent-detection-rate und die Antibiotikaresistenz-Testraten in @tbl-resistance-test-rate. -->\n"
+msgstr "<!-- Al comparar los datos con la información sobre patógenos presentada en @tbl-agent-per-infection-rate y la información sobre resistencia a los medicamentos en @tbl-abr-infection-rate, consulte también las tasas de detección de agentes infecciosos presentadas en @tbl-infectious-agent-detection-rate y las tasas de pruebas de resistencia a los antibióticos en @tbl-resistance-test-rate. -->\n"
 
 #. type: Plain text
 #: reports/Reference-Report/content/_infectious_agents.Rmd:7
 #, no-wrap
 msgid "In total, `r dR$numberOfInfectiousAgents` infectious agents were detected in the `r dR$numberOfInfectionsWithAgent` infections that were reported to have yielded at least one agent from either the primary infection and/or the secondary bloodstream infection resulting from it (@tbl-agent-per-infection-rate). These `r dR$numberOfInfectionsWithAgent` diagnostic-positive infections out of `r dR$overallNumberOfInfections` overall infections represent an Infectious Agent Detection Rate of `r dR$infectiousAgentDetectionRate` per 100 infections (@tbl-infectious-agent-detection-rate).\n"
-msgstr "Insgesamt wurden `r dR$numberOfInfectiousAgents` Infektionserreger in den `r dR$numberOfInfectionsWithAgent` Infektionen nachgewiesen, bei denen mindestens ein Erreger entweder aus der Primärinfektion und/oder der daraus resultierenden sekundären Blutbahninfektion gemeldet wurde (@tbl-agent-per-infection-rate). Diese `r dR$numberOfInfectionsWithAgent` diagnostisch positiven Infektionen von insgesamt `r dR$overallNumberOfInfections` Infektionen entsprechen einer Infektionserreger-Erkennungsrate von `r dR$infectiousAgentDetectionRate` pro 100 Infektionen (@tbl-infectious-agent-detection-rate).\n"
+msgstr "En total, se detectaron 335 agentes infecciosos en las 288 infecciones que, según se informó, habían producido al menos un agente, ya fuera de la infección primaria o de la infección secundaria del torrente sanguíneo resultante de ella (@tbl-agent-per-infection-rate). Estas 288 infecciones con diagnóstico positivo de un total de 685 infecciones representan una tasa de detección de agentes infecciosos del 42,0 por cada 100 infecciones (@tbl-infectious-agent-detection-rate).\n"
 
 #. type: Title #
 #: reports/Reference-Report/content/_risk_and_protective_factors.Rmd:1
 #, no-wrap
 msgid "Risk and Protective Factors"
-msgstr "Risiko- und Schutzfaktoren"
+msgstr "Factores de riesgo y de protección"
 
 #. type: Plain text
 #: reports/Reference-Report/content/_risk_and_protective_factors.Rmd:3
 #, no-wrap
 msgid "Next to the inherent risk factors gestational age and birth weight there are also a number of expositional factors that influence the risk of an infant to acquire a multi-drug-resistant pathogen or to develop an infection. @tbl-risk-density-rates shows the presence of these factors in the NeoIPC Surveillance population.\n"
-msgstr "Neben den inhärenten Risikofaktoren Gestationsalter und Geburtsgewicht gibt es auch eine Reihe von Expositionsfaktoren, die das Risiko eines Säuglings beeinflussen, sich mit einem multiresistenten Erreger zu infizieren oder eine Infektion zu entwickeln. @tbl-risk-density-rates zeigt das Vorhandensein dieser Faktoren in der NeoIPC-Überwachungspopulation.\n"
+msgstr "Además de los factores de riesgo inherentes, como la edad gestacional y el peso al nacer, también hay una serie de factores de exposición que influyen en el riesgo de que un bebé contraiga un patógeno multirresistente o desarrolle una infección. @tbl-risk-density-rates muestra la presencia de estos factores en la población de vigilancia del NeoIPC.\n"
 
 #. type: Title ##
 #: reports/Reference-Report/content/_surgery.Rmd:1
 #, no-wrap
 msgid "Surgery"
-msgstr "Chirurgie"
+msgstr "Cirugía"
 
 #. type: Plain text
 #: reports/Reference-Report/content/_surgery.Rmd:4
 #, no-wrap
 msgid "`r dR$numberOfSurgicalDepartments` of the partner departments in this dataset (`r dR$proportionOfSurgicalDepartments`) recorded a total of `r dR$numberOfSurgicalProcedures` surgical procedures performed on `r dR$numberOfSurgicalPatients` neonates, resulting in an average number of `r dR$numberOfSurgicalProceduresPerPatient` operations per surgical patient during the surveillance period.\n"
-msgstr "`r dR$numberOfSurgicalDepartments` der Partnerabteilungen in diesem Datensatz (`r dR$proportionOfSurgicalDepartments`) erfassten insgesamt `r dR$numberOfSurgicalProcedures` chirurgische Eingriffe an `r dR$numberOfSurgicalPatients` Neugeborenen, was zu einer durchschnittlichen Anzahl von `r dR$numberOfSurgicalProceduresPerPatient` Operationen pro chirurgischem Patienten während des Surveillance-Zeitraums führte.\n"
+msgstr "`r dR$numberOfSurgicalDepartments` de los departamentos asociados a este conjunto de datos (`r dR$proportionOfSurgicalDepartments` %) registraron un total de `r dR$numberOfSurgicalProcedures` procedimientos quirúrgicos realizados a `r dR$numberOfSurgicalPatients` neonatos, lo que supone una media de `r dR$numberOfSurgicalProceduresPerPatient` operaciones por paciente quirúrgico durante el periodo de vigilancia.\n"
 
 #. type: Plain text
 #: reports/Reference-Report/content/_surgery.Rmd:5
 #, no-wrap
 msgid "Due to the low number of surgical site infections in this dataset (n = `r dR$numberOfSurgicalSiteInfections`) we are not currently calculating their infection rates, but @tbl-surgical-procedure-rates provides an overview of the categories of procedures performed on neonates.\n"
-msgstr "Aufgrund der geringen Anzahl von postoperativen Wundinfektionen in diesem Datensatz (n = `r dR$numberOfSurgicalSiteInfections`) berechnen wir derzeit keine Infektionsraten, aber @tbl-surgical-procedure-rates bietet einen Überblick über die Kategorien der an Neugeborenen durchgeführten Eingriffe. \n"
+msgstr "Debido al bajo número de infecciones del sitio quirúrgico en este conjunto de datos (n = `r dR$numberOfSurgicalSiteInfections`), actualmente no estamos calculando sus tasas de infección, pero @tbl-surgical-procedure-rates ofrece una visión general de las categorías de procedimientos realizados en neonatos.\n"
