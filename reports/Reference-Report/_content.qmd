@@ -31,6 +31,8 @@ include_localised("_nosocomial_infections.Rmd")
 
 {{< include tables/_tbl-incidence-density-rates.qmd >}}
 
+{{< pagebreak >}}
+
 {{< include tables/_tbl-device-associated-incidence-density-rates.qmd >}}
 
 {{< pagebreak >}}
@@ -43,6 +45,8 @@ include_localised("_infectious_agents.Rmd")
 {{< include tables/_tbl-agent-per-infection-rate.qmd >}}
 
 <!-- {{< include tables/_tbl-abr-infection-rate.qmd >}} -->
+
+{{< pagebreak >}}
 
 {{< include tables/_tbl-infectious-agent-detection-rate.qmd >}}
 

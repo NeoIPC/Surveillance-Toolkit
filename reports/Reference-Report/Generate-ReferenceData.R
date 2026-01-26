@@ -7,13 +7,9 @@ isQuietStartup <- function() {
 
 suppressPackageStartupMessages({
   if (requireNamespace("pak", quietly = TRUE)) {
-    if (isQuietStartup()) {
-      suppressMessages(suppressWarnings(
-        pak::pak("Brar/neoipcr@PartnerReport")
-      ))
-    } else {
+    suppressMessages(suppressWarnings(
       pak::pak("Brar/neoipcr@PartnerReport")
-    }
+    ))
   }
   library(jsonlite)
   library(neoipcr)
@@ -54,6 +50,7 @@ printUsage <- function() {
     "  --includeTestUnits, -t               Include test departments\n",
     "  --includeNonCorePatients, -n         Include non-core patients\n",
     "  --validationExceptionFile, -v <path> Input CSV file path\n",
+    "  --backup-dataset, -B <path>          Encrypted JSON backup (.7z)\n",
     "  --quiet, -q                          Suppress non-critical output\n",
     "  --verbose, -V                        Verbose output\n",
     "  --debug, -D                          Debug output\n",
@@ -63,6 +60,9 @@ printUsage <- function() {
 }
 
 parseArgs <- function(args) {
+  longMap <- list(
+    "backup-dataset" = "backupDataset"
+  )
   shortMap <- list(
     f = "file",
     s = "reportingPeriodFrom",
@@ -75,6 +75,7 @@ parseArgs <- function(args) {
     t = "includeTestUnits",
     n = "includeNonCorePatients",
     v = "validationExceptionFile",
+    B = "backupDataset",
     q = "quiet",
     V = "verbose",
     D = "debug",
@@ -86,9 +87,12 @@ parseArgs <- function(args) {
     arg <- args[[i]]
     if (startsWith(arg, "--")) {
       key <- sub("^--", "", arg)
+      if (!is.null(longMap[[key]])) key <- longMap[[key]]
       if (grepl("=", key, fixed = TRUE)) {
         parts <- strsplit(key, "=", fixed = TRUE)[[1]]
-        parsed[[parts[[1]]]] <- parts[[2]]
+        longKey <- parts[[1]]
+        if (!is.null(longMap[[longKey]])) longKey <- longMap[[longKey]]
+        parsed[[longKey]] <- parts[[2]]
       } else {
         hasNext <- i < length(args)
         if (hasNext) {
@@ -287,6 +291,110 @@ getDatasetOptions <- function(
   )
 }
 
+backupReferenceDataset <- function(data, backupPath) {
+  timeoutSeconds <- 60
+  sevenZip <- Sys.which("7z")
+  if (is.na(sevenZip) || sevenZip == "") {
+    if (.Platform$OS.type == "windows") {
+      candidates <- c(
+        file.path(
+          Sys.getenv("ProgramFiles"),
+          "7-Zip",
+          "7z.exe"
+        ),
+        file.path(
+          Sys.getenv("ProgramFiles(x86)"),
+          "7-Zip",
+          "7z.exe"
+        )
+      )
+      candidates <- candidates[file.exists(candidates)]
+      if (length(candidates) > 0) {
+        sevenZip <- candidates[[1]]
+      }
+    }
+  }
+  if (is.na(sevenZip) || sevenZip == "") {
+    stop("7z is required for --backup-dataset but was not found in PATH.")
+  }
+  password <- Sys.getenv("NEOIPC_BACKUP_PASSWORD", unset = NA)
+  if (is.na(password) || identical(password, "")) {
+    password <- readline("Backup password: ")
+  }
+  json <- jsonlite::serializeJSON(
+    data,
+    pretty = FALSE
+  )
+  args <- c(
+    "a",
+    "-t7z",
+    "-mx=9",
+    "-m0=lzma2",
+    "-ms=on",
+    "-mhe=on",
+    "-y",
+    "-aoa",
+    paste0("-p", password),
+    backupPath,
+    "-siReferenceData.json"
+  )
+  if (verbosity == "quiet") {
+    args <- c(args, "-bso0", "-bse0", "-bd")
+  }
+  escapePosixArg <- function(value) {
+    if (value == "") {
+      "''"
+    } else {
+      paste0("'", gsub("'", "'\\''", value, fixed = TRUE), "'")
+    }
+  }
+  escapeCmdArg <- function(value) {
+    escaped <- gsub("\"", "\\\"", value)
+    escaped <- gsub("\\^", "^^", escaped)
+    escaped <- gsub("&", "^&", escaped, fixed = TRUE)
+    escaped <- gsub("\\|", "^|", escaped)
+    escaped <- gsub("<", "^<", escaped, fixed = TRUE)
+    escaped <- gsub(">", "^>", escaped, fixed = TRUE)
+    paste0("\"", escaped, "\"")
+  }
+  if (.Platform$OS.type == "windows") {
+    escapedArgs <- vapply(args, escapeCmdArg, character(1))
+    command <- paste0(
+      "cmd /s /c \"\"",
+      sevenZip,
+      "\" ",
+      paste(escapedArgs, collapse = " "),
+      "\""
+    )
+  } else {
+    escapedArgs <- vapply(args, escapePosixArg, character(1))
+    command <- paste(
+      escapePosixArg(sevenZip),
+      paste(escapedArgs, collapse = " ")
+    )
+  }
+  con <- pipe(command, "wb")
+  on.exit(
+    if (!is.null(con)) {
+      close(con)
+    },
+    add = TRUE
+  )
+  setTimeLimit(elapsed = timeoutSeconds, transient = TRUE)
+  on.exit(setTimeLimit(elapsed = Inf, transient = FALSE), add = TRUE)
+  writeBin(charToRaw(json), con)
+  flush(con)
+  status <- close(con)
+  con <- NULL
+  if (!is.null(status) && status != 0) {
+    stop("7z backup failed with exit code: ", status)
+  }
+  if (!file.exists(backupPath)) {
+    stop("7z backup did not create archive: ", backupPath)
+  }
+  invisible(TRUE)
+}
+
 args <- parseArgs(commandArgs(trailingOnly = TRUE))
 
 if (isTRUE(args$help)) {
@@ -316,6 +424,7 @@ includeNonCorePatients <- asBool(
   default = FALSE
 )
 validationExceptionFile <- asNull(args$validationExceptionFile)
+backupDataset <- asNull(args$backupDataset)
 
 connectionOptions <- getConnectionOptions()
 datasetOptions <- getDatasetOptions(
@@ -332,13 +441,21 @@ datasetOptions <- getDatasetOptions(
 )
 
 logVerbose("Importing DHIS2 data...")
-referenceData <- suppressWarnings(
+rawData <- suppressWarnings(
   neoipcr::import_dhis2(
     connection_options = connectionOptions,
     dataset_options = datasetOptions
   )
-) |>
-  neoipcr::calculate_reference_data()
+)
+if (!is.null(backupDataset)) {
+  backupPath <- backupDataset
+  if (is.na(backupPath) || backupPath == "") {
+    stop("--backup-dataset requires a file path.")
+  }
+  logVerbose("Creating encrypted backup: ", backupPath)
+  backupReferenceDataset(rawData, backupPath)
+}
+referenceData <- neoipcr::calculate_reference_data(rawData)
 
 logDebug("Reference data calculation completed.")
 
@@ -354,5 +471,6 @@ if (is.null(referenceDataFile)) {
     dir.create(outputDir, recursive = TRUE, showWarnings = FALSE)
   }
   writeLines(json, referenceDataFile, useBytes = TRUE)
+  logVerbose("Reference data written to: ", referenceDataFile)
   logInfo("Reference data written to: ", referenceDataFile)
 }

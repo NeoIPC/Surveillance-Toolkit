@@ -30,6 +30,8 @@ param(
     [Parameter()]
     [switch]$IncludeNonCorePatients,
     [Parameter()]
+    [switch]$BackupDataset,
+    [Parameter()]
     [switch]$Quiet
 )
 
@@ -49,11 +51,7 @@ if (-not $outputDirPath) {
 }
 $outputDirPath = $outputDirPath.Path
 
-$buildReportDir = Resolve-Path -LiteralPath (Join-Path $repoRoot 'output')
-if (-not $buildReportDir) {
-    $buildReportDir = New-Item -ItemType Directory -Path (Join-Path $repoRoot 'output') -Force
-}
-$buildReportPath = Join-Path $buildReportDir "reference-report-build.$scriptTimestamp.json"
+$buildReportPath = Join-Path $outputDirPath "$scriptTimestamp.reference-report-build.json"
 
 $quartoCmd = Get-Command -Name quarto -ErrorAction SilentlyContinue
 if (-not $quartoCmd) {
@@ -99,12 +97,13 @@ $needsJson = $false
 $wantsJson = $formats -contains 'json'
 $renderFormats = $formats | Where-Object { $_ -ne 'json' }
 $renderCount = $renderFormats.Count * $locales.Count
-if ($wantsJson -or $renderCount -gt 1) {
+if ($wantsJson -or $renderCount -gt 1 -or $BackupDataset) {
     $needsJson = $true
 }
 
-$jsonPath = Join-Path $outputDirPath "Reference-Report.$scriptTimestamp.json"
+$jsonPath = Join-Path $outputDirPath "$scriptTimestamp.Reference-Report.json"
 $jsonIntermediate = $needsJson -and (-not $wantsJson)
+$backupPath = Join-Path $outputDirPath "$scriptTimestamp.Reference-Report.dataset.json.7z"
 
 $paramHashSource = [ordered]@{
     reportingPeriodFrom = $ReportingPeriodFrom
@@ -116,6 +115,7 @@ $paramHashSource = [ordered]@{
     reportingCountries = $ReportingCountries
     includeTestUnits = [bool]$IncludeTestUnits
     includeNonCorePatients = [bool]$IncludeNonCorePatients
+    backupDataset = [bool]$BackupDataset
     validationExceptionFile = $ValidationExceptionFile
 }
 $paramHashJson = ($paramHashSource | ConvertTo-Json -Depth 100 -Compress)
@@ -125,6 +125,18 @@ $paramHash = [System.BitConverter]::ToString(
     )
 ).Replace('-', '').ToLowerInvariant()
 
+$originalEnv = @{}
+foreach ($name in @(
+    'NEOIPC_DHIS2_USERNAME',
+    'NEOIPC_DHIS2_PASSWORD',
+    'NEOIPC_BACKUP_PASSWORD'
+)) {
+    $originalEnv[$name] = [Environment]::GetEnvironmentVariable(
+        $name,
+        'Process'
+    )
+}
+
 if (-not $env:NEOIPC_DHIS2_SESSION_ID -and -not $env:NEOIPC_DHIS2_TOKEN) {
     if (-not $env:NEOIPC_DHIS2_USERNAME) {
         $env:NEOIPC_DHIS2_USERNAME = Read-Host -Prompt 'DHIS2 username'
@@ -133,6 +145,12 @@ if (-not $env:NEOIPC_DHIS2_SESSION_ID -and -not $env:NEOIPC_DHIS2_TOKEN) {
         $securePassword = Read-Host -Prompt 'DHIS2 password' -AsSecureString
         $env:NEOIPC_DHIS2_PASSWORD = [System.Net.NetworkCredential]::new('', $securePassword).Password
     }
+}
+
+if ($BackupDataset -and [string]::IsNullOrWhiteSpace($env:NEOIPC_BACKUP_PASSWORD)) {
+    $secureBackupPassword = Read-Host -Prompt 'Backup password' -AsSecureString
+    $env:NEOIPC_BACKUP_PASSWORD =
+        [System.Net.NetworkCredential]::new('', $secureBackupPassword).Password
 }
 
 $commonParams = @{}
@@ -164,6 +182,8 @@ try {
             Write-Verbose "Generating reference data JSON: $jsonPath"
             $rArgs = @('--vanilla', (Join-Path $reportDir 'Generate-ReferenceData.R'), '--file', $jsonPath)
             if ($Quiet) { $rArgs += @('--quiet') }
+            if ($PSBoundParameters.Debug) { $rArgs += @('--debug') }
+            if ($PSBoundParameters.Verbose) { $rArgs += @('--verbose') }
             foreach ($kvp in $commonParams.GetEnumerator()) {
                 if ($null -ne $kvp.Value -and '' -ne $kvp.Value) {
                     $rArgs += @("--$($kvp.Key)", "$($kvp.Value)")
@@ -171,11 +191,20 @@ try {
             }
             if ($IncludeTestUnits) { $rArgs += '--includeTestUnits' }
             if ($IncludeNonCorePatients) { $rArgs += '--includeNonCorePatients' }
-            & $rscriptCmd @rArgs
+            if ($BackupDataset) { $rArgs += @('--backup-dataset', $backupPath) }
+            $rResult = & $rscriptCmd @rArgs 2>&1
             if ($LASTEXITCODE -ne 0) {
+                $rResult | Write-Error
                 throw "Generate-Reference-Data failed with exit code $LASTEXITCODE."
+            } else {
+                $rResult | Write-Verbose
             }
             $outputFiles += $jsonPath
+            Write-Verbose "Generated output: $jsonPath"
+            if ($BackupDataset) {
+                $outputFiles += $backupPath
+                Write-Verbose "Generated output: $backupPath"
+            }
         }
     }
 
@@ -199,16 +228,17 @@ try {
     try {
         foreach ($locale in $locales) {
             $qmd = $localeMap[$locale].Qmd
-            $profile = $localeMap[$locale].Profile
+            $profileName = $localeMap[$locale].Profile
             foreach ($format in $renderFormats) {
                 $completedSteps++
                 $percentComplete = if ($totalSteps -gt 0) { [int](100 * $completedSteps / $totalSteps) } else { 0 }
-                Write-Progress -Activity 'Reference Report Build' -Status "Rendering $format for $locale" -PercentComplete $percentComplete
-                $outFileName = "Reference-Report.$locale.$scriptTimestamp.$format"
+                Write-Progress -Activity 'Reference Report Build' `
+                    -Status "Rendering $format for $locale" -PercentComplete $percentComplete
+                $outFileName = "$scriptTimestamp.Reference-Report.$locale.$format"
                 $outFile = Join-Path $outputDirPath $outFileName
-                $quartoArgs = @('render', $qmd, '--profile', $profile, '--to', $format, '-o', $outFileName)
+                $quartoArgs = @('render', $qmd, '--profile', $profileName, '--to', $format, '-o', $outFileName)
                 foreach ($kvp in $commonParams.GetEnumerator()) {
-                    if ($kvp.Value -ne $null -and $kvp.Value -ne '') {
+                    if ($null -ne $kvp.Value -and '' -ne $kvp.Value) {
                         $quartoArgs += @('-P', "$($kvp.Key):$($kvp.Value)")
                     }
                 }
@@ -225,6 +255,7 @@ try {
                     }
                     $quartoResult | Write-Verbose
                     $outputFiles += $outFile
+                    Write-Verbose "Generated output: $outFile"
                 }
             }
         }
@@ -240,6 +271,7 @@ catch {
 finally {
     $completedAt = (Get-Date -AsUTC).ToString('o')
     $status = if ($errors.Count -gt 0) { 'failed' } else { 'success' }
+    $outputFiles += $buildReportPath
     $buildReport = [ordered]@{
         name = 'Reference Report Build'
         status = $status
@@ -253,6 +285,10 @@ finally {
             requested = $wantsJson
             intermediate = $jsonIntermediate
         }
+        backup = [ordered]@{
+            enabled = [bool]$BackupDataset
+            path = if ($BackupDataset) { $backupPath } else { $null }
+        }
         locales = $locales
         formats = $formats
         parameterHash = $paramHash
@@ -260,6 +296,7 @@ finally {
         errors = $errors
     }
     $buildReport | ConvertTo-Json -Depth 100 | Set-Content -LiteralPath $buildReportPath
+    Write-Verbose "Generated output: $buildReportPath"
 
     if ($jsonIntermediate -and $errors.Count -eq 0 -and (Test-Path -LiteralPath $jsonPath)) {
         if ($PSCmdlet.ShouldProcess($jsonPath, 'Remove intermediate JSON')) {
@@ -273,4 +310,17 @@ finally {
     Write-Host "Outputs:"
     $buildReport.outputs | ForEach-Object { Write-Host "  $_" }
     Write-Host "Build report: $buildReportPath"
+
+    foreach ($name in $originalEnv.Keys) {
+        $originalValue = $originalEnv[$name]
+        if ([string]::IsNullOrEmpty($originalValue)) {
+            [Environment]::SetEnvironmentVariable($name, $null, 'Process')
+        } else {
+            [Environment]::SetEnvironmentVariable(
+                $name,
+                $originalValue,
+                'Process'
+            )
+        }
+    }
 }
