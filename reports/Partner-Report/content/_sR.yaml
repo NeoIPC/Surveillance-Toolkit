@@ -1,3 +1,9 @@
 # Language: en
 own_unit: "Own unit"
 reference_data: "Reference data"
+tbl-incidence-density-rates:
+  rate_footnote: "%s: The Incidence Density Rate for your unit (infections per 1000 patient-days)."
+
+tbl-risk-density-rates:
+  n_footnote: "%s: The aggregated number of days the risk/protective factor was present in your unit's infants."
+  rate_footnote: "%s: The Risk Density Rate calculated for your unit's infants."

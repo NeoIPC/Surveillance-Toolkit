@@ -111,7 +111,7 @@ tbl <- benchmark_data$usage_density_rate_table |>
   ) |>
   tab_footnote(
     footnote = sprintf(
-      sR$`tbl-risk-density-rates`$n_footnote$own,
+      sR$`tbl-risk-density-rates`$n_footnote,
       sR$table_headers$n),
     locations = cells_column_labels(columns = sR$table_headers$n)) |>
   tab_footnote(

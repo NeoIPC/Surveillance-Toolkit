@@ -32,3 +32,5 @@ sR <- modifyList(
 {{< include figures/_fig-ga.qmd >}}
 
 {{< include tables/_tbl-risk-density-rates.qmd >}}
+
+{{< include tables/_tbl-incidence-density-rates.qmd >}}

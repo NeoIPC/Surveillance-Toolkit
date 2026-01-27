@@ -182,8 +182,7 @@ get_dataset_options <- function(
       include_invalid_patients = get_validation_exceptions(
         validationExceptionFile))
 
-format_integer <- function(x, big_mark = sR$digit_group_separator)
-  dplyr::if_else(x < 10000, format(as.integer(x), big.mark = ""), format(as.integer(x), big.mark = big_mark))
+source("../common/helpers.R")
 
 labels_bw <- function(x) {
   paste(

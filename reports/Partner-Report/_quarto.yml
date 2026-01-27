@@ -1,4 +1,6 @@
 project:
+  render:
+    - Partner-Report.qmd
   output-dir: _output
 date-meta: now
 echo: false

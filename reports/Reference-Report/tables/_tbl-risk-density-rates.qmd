@@ -117,7 +117,7 @@ reference_data |>
   ) |>
   tab_footnote(
     footnote = sprintf(
-      sR$`tbl-risk-density-rates`$n_footnote$ref,
+      sR$`tbl-risk-density-rates`$n_footnote,
       sR$table_headers$n),
     locations = cells_column_labels(columns = sR$table_headers$n)) |>
   tab_footnote(
