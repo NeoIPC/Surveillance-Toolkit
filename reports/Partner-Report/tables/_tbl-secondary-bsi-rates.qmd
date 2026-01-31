@@ -1,0 +1,164 @@
+```{r}
+#| label: tbl-secondary-bsi-rates
+#| tbl-cap: !expr 'sR$`tbl-secondary-bsi-rates`$`tbl-cap`'
+#| tbl-cap-location: top
+
+# Conditionally render table only if department data exists
+if (!is.null(benchmark_data$secondary_bsi_rate_table) && 
+    sum(benchmark_data$secondary_bsi_rate_table$n_own, na.rm = TRUE) > 0) {
+  
+  # Check if reference data columns exist
+  has_reference <- "pooled_ref" %in% names(benchmark_data$secondary_bsi_rate_table)
+  
+  tbl <- benchmark_data$secondary_bsi_rate_table |>
+    dplyr::rename(
+      !!sR$table_headers$n := "n_own",
+      !!sR$table_headers$rate := "pooled_own",
+      !!sR$table_headers$pooled := tidyselect::any_of("pooled_ref"),
+      !!sR$table_headers$q1 := tidyselect::any_of("q1_ref"),
+      !!sR$table_headers$q2 := tidyselect::any_of("q2_ref"),
+      !!sR$table_headers$q3 := tidyselect::any_of("q3_ref")) |>
+    dplyr::mutate(
+      Infection = dplyr::case_match(
+        as.character(.data$event_type_key),
+        "nec" ~ sR$`tbl-secondary-bsi-rates`$nec,
+        "ssi" ~ sR$`tbl-secondary-bsi-rates`$ssi,
+        "hap" ~ sR$`tbl-secondary-bsi-rates`$hap),
+      .keep = "unused") |>
+    gt(rowname_col = "Infection") |>
+    sub_missing() |>
+    gt::tab_options(
+      table.font.size = 13,
+      footnotes.marks = "extended"
+    ) |>
+    fmt_number(
+      columns = c(
+        tidyselect::any_of(sR$table_headers$rate),
+        tidyselect::any_of(sR$table_headers$pooled),
+        tidyselect::any_of(sR$table_headers$q1),
+        tidyselect::any_of(sR$table_headers$q2),
+        tidyselect::any_of(sR$table_headers$q3)),
+      decimals = 1,
+      sep_mark = sR$digit_group_separator,
+      min_sep_threshold = 2,
+      locale = locale_gt) |>
+    fmt_integer(
+      columns = sR$table_headers$n,
+      sep_mark = sR$digit_group_separator,
+      min_sep_threshold = 2) |>
+    tab_style(
+      style = cell_text(weight = "bold"),
+      locations = list(
+        cells_column_spanners(),
+        cells_column_labels(),
+        cells_row_groups()
+      )
+    ) |>
+    tab_footnote(
+      footnote = sprintf(
+        sR$`tbl-secondary-bsi-rates`$n_footnote,
+        sR$table_headers$n),
+      locations = cells_column_labels(columns = sR$table_headers$n)
+    ) |>
+    tab_footnote(
+      footnote = sprintf(
+        sR$`tbl-secondary-bsi-rates`$rate_footnote,
+        sR$table_headers$rate),
+      locations = cells_column_labels(columns = sR$table_headers$rate)
+    )
+  
+  if (has_reference) {
+    tbl <- tbl |>
+      cols_width(
+        stub() ~ pct(40),
+        sR$table_headers$n ~ pct(12),
+        sR$table_headers$rate ~ pct(12),
+        sR$table_headers$pooled ~ pct(13),
+        sR$table_headers$q1 ~ pct(8),
+        sR$table_headers$q2 ~ pct(8),
+        sR$table_headers$q3 ~ pct(7)
+      ) |>
+      tab_spanner(
+        label = sR$department_data,
+        columns = c(
+          sR$table_headers$n,
+          sR$table_headers$rate),
+        id = "department_data"
+      ) |>
+      tab_spanner(
+        label = sR$reference_data,
+        columns = c(
+          sR$table_headers$pooled,
+          sR$table_headers$q1,
+          sR$table_headers$q2,
+          sR$table_headers$q3),
+        id = "reference_data"
+      ) |>
+      tab_spanner(
+        label = sR$`tbl-secondary-bsi-rates`$rate_name,
+        columns = tidyselect::any_of(
+          c(
+            sR$table_headers$rate,
+            sR$table_headers$pooled,
+            sR$table_headers$q1,
+            sR$table_headers$q2,
+            sR$table_headers$q3)),
+        id = "secondary_bsi_rate",
+        level = 2
+      ) |>
+      tab_footnote(
+        footnote = md(
+          paste0(
+            "$$\\text{",
+            sR$`tbl-secondary-bsi-rates`$rate_name,
+            "} = \\frac{\\text{",
+            sR$`tbl-secondary-bsi-rates`$rate_numerator,
+            "}}{\\text{",
+            sR$`tbl-secondary-bsi-rates`$rate_denominator,
+            "}} \\times ",
+            format_integer(100),
+            "$$"
+          )),
+        locations = cells_column_spanners(spanners = "secondary_bsi_rate")
+      ) |>
+      tab_footnote(
+        footnote = sprintf(
+          sR$`tbl-secondary-bsi-rates`$pooled_footnote,
+          sR$table_headers$pooled),
+        locations = cells_column_labels(columns = sR$table_headers$pooled)) |>
+      tab_footnote(
+        footnote = sprintf(
+          sR$`tbl-secondary-bsi-rates`$quartile_footnote,
+          sR$table_headers$q1,
+          sR$table_headers$q2,
+          sR$table_headers$q3,
+          sprintf("%i%s", 25L, sR$percent_symbol),
+          sprintf("%i%s", 50L, sR$percent_symbol),
+          sprintf("%i%s", 75L, sR$percent_symbol)
+        ),
+        locations = cells_column_labels(columns = c(
+          sR$table_headers$q1,
+          sR$table_headers$q2,
+          sR$table_headers$q3)))
+  } else {
+    tbl <- tbl |>
+      cols_width(
+        stub() ~ pct(60),
+        sR$table_headers$n ~ pct(20),
+        sR$table_headers$rate ~ pct(20)
+      ) |>
+      tab_spanner(
+        label = sR$`tbl-secondary-bsi-rates`$rate_name,
+        columns = tidyselect::any_of(
+          c(
+            sR$table_headers$rate)),
+        id = "secondary_bsi_rate"
+      )
+  }
+  
+  tbl
+} else {
+  cat(sR$`tbl-secondary-bsi-rates`$no_data)
+}
+
+```

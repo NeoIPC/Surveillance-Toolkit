@@ -1,9 +1,40 @@
 # Language: en
 own_unit: "Own unit"
 reference_data: "Reference data"
-tbl-incidence-density-rates:
-  rate_footnote: "%s: The Incidence Density Rate for your unit (infections per 1000 patient-days)."
+department_data: "Your data"
 
 tbl-risk-density-rates:
   n_footnote: "%s: The aggregated number of days the risk/protective factor was present in your unit's infants."
   rate_footnote: "%s: The Risk Density Rate calculated for your unit's infants."
+
+tbl-surgical-procedure-rates:
+  n_footnote: "%s: The aggregated number of surgical procedures performed in your unit's infants."
+  rate_footnote: "%s: The Surgical Procedure Rate for your unit (procedures per 100 admissions)."
+
+tbl-incidence-density-rates:
+  n_footnote: "%s: The aggregated number of infections in your unit's infants."
+  rate_footnote: "%s: The Incidence Density Rate for your unit (infections per 1000 patient-days)."
+
+tbl-device-associated-incidence-density-rates:
+  n_footnote: "%s: The aggregated number of device-associated infections in your unit's infants."
+  rate_footnote: "%s: The Device-Associated Incidence Density Rate for your unit (infections per 1000 device-days)."
+
+tbl-infectious-agent-detection-rate:
+  n_footnote: "%s: The aggregated number of infections with identified infectious agents in your unit's infants."
+  rate_footnote: "%s: The Infectious Agent Detection Rate for your unit (percentage of infections with identified agent)."
+
+tbl-agent-per-infection-rate:
+  n_footnote: "%s: The aggregated number of infections with this infectious agent detected in your unit's infants."
+  rate_footnote: "%s: The percentage of infections in your unit where this infectious agent was detected."
+
+tbl-abr-infection-rate:
+  n_footnote: "%s: The aggregated number of infections with resistant pathogens in your unit's infants."
+  rate_footnote: "%s: The Antibiotic-Resistant Infection Rate for your unit (percentage of infections with resistant pathogens)."
+
+tbl-secondary-bsi-rates:
+  n_footnote: "%s: The aggregated number of infections with secondary bloodstream infection in your unit's infants."
+  rate_footnote: "%s: The Secondary Bloodstream Infection Rate for your unit (percentage of infections with secondary BSI)."
+
+tbl-resistance-test-rate:
+  n_footnote: "%s: The aggregated number of eligible pathogens in your unit's infants."
+  rate_footnote: "%s: The Antibiotic Resistance Test Rate for your unit (percentage of eligible pathogens with documented resistance testing)."

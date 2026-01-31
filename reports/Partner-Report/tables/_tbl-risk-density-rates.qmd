@@ -41,7 +41,7 @@ tbl <- benchmark_data$usage_density_rate_table |>
     decimals = 1,
     sep_mark = sR$digit_group_separator,
     min_sep_threshold = 2,
-    locale = gt_locale) |>
+    locale = locale_gt) |>
   fmt_integer(
     columns = sR$table_headers$n,
     sep_mark = sR$digit_group_separator,
@@ -143,6 +143,13 @@ if ("ref" %in% benchmark_data$dataset_names) {
    sR$table_headers$q3 ~ pct(9)
   ) |>
   tab_spanner(
+    label = sR$department_data,
+    columns = c(
+      sR$table_headers$n,
+      sR$table_headers$rate),
+    id = "department_data"
+  ) |>
+  tab_spanner(
    label = sR$reference_data,
    columns = c(
      sR$table_headers$pooled,
@@ -165,7 +172,7 @@ if ("ref" %in% benchmark_data$dataset_names) {
       sprintf("%i%s", 25L, sR$percent_symbol),
       sprintf("%i%s", 50L, sR$percent_symbol),
       sprintf("%i%s", 75L, sR$percent_symbol)
-      ),
+    ),
     locations = cells_column_labels(columns = c(
       sR$table_headers$q1,
       sR$table_headers$q2,

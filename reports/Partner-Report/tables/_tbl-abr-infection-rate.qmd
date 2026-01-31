@@ -1,0 +1,215 @@
+```{r}
+#| label: tbl-abr-infection-rate
+#| tbl-cap: !expr 'sR$`tbl-abr-infection-rate`$`tbl-cap`'
+#| tbl-cap-location: top
+
+# Conditionally render table only if department data exists
+if (!is.null(benchmark_data$abr_infection_rate_table)) {
+  
+  # Check if reference data columns exist
+  has_reference <- "pooled_ref" %in% names(benchmark_data$abr_infection_rate_table)
+  
+  tbl <- benchmark_data$abr_infection_rate_table |>
+    dplyr::select(-tidyselect::any_of("n_ref")) |>
+    dplyr::mutate(
+      group = dplyr::if_else(
+        stringr::str_detect(group, "spp."),
+        paste0("*", stringr::str_extract(group, "^(.+) spp\\.(.*)$", 1), "* spp.", stringr::str_extract(group, "^(.+) spp\\.(.*)$", 2)),
+        group
+      )) |>
+    dplyr::rename(
+      !!sR$table_headers$n := "n_own",
+      !!sR$table_headers$rate := "pooled_own",
+      !!sR$table_headers$pooled := tidyselect::any_of("pooled_ref"),
+      !!sR$table_headers$q1 := tidyselect::any_of("q1_ref"),
+      !!sR$table_headers$q2 := tidyselect::any_of("q2_ref"),
+      !!sR$table_headers$q3 := tidyselect::any_of("q3_ref")) |>
+    dplyr::mutate(
+      abr = dplyr::case_match(
+        .data$abr,
+        "3gcr" ~ "3gcr",
+        "car" ~ sR$car,
+        "cor" ~ sR$cor,
+        "mrsa" ~ sR$mrsa,
+        "vre" ~ sR$vre),
+      level = .data$level + 2) |>
+    dplyr::group_by(.data$abr) |>
+    gt(rowname_col = "group") |>
+    sub_missing() |>
+    gt::tab_options(
+      latex.header_repeat = TRUE,
+      latex.use_longtable = TRUE,
+      table.width = pct(100),
+      table.font.size = 13,
+      footnotes.marks = "extended"
+    ) |>
+    gt::tab_options(
+      table.font.size = 15
+    ) |>
+    fmt_number(
+      columns = c(
+        tidyselect::any_of(sR$table_headers$rate),
+        tidyselect::any_of(sR$table_headers$pooled),
+        tidyselect::any_of(sR$table_headers$q1),
+        tidyselect::any_of(sR$table_headers$q2),
+        tidyselect::any_of(sR$table_headers$q3)),
+      decimals = 1,
+      sep_mark = sR$digit_group_separator,
+      min_sep_threshold = 2,
+      locale = locale_gt) |>
+    fmt_integer(
+      columns = sR$table_headers$n,
+      sep_mark = sR$digit_group_separator,
+      min_sep_threshold = 2) |>
+    gt::fmt_markdown(
+      columns = "group"
+    ) |>
+    gt::tab_stub_indent(
+      rows = gt::everything(),
+      indent = gt::from_column(column = "level")
+    ) |>
+    tab_row_group(
+      label = gt::md(sR$`3gcr`),
+      rows = abr == "3gcr"
+    ) |>
+    tab_style(
+      style = cell_text(
+        weight = "bold"
+      ),
+      locations = cells_row_groups()
+    ) |>
+    tab_style(
+      style = cell_text(
+        weight = "bold"
+      ),
+      locations = cells_stub(
+        rows = taxon %in% c(
+          "none",
+          "domain",
+          "kingdom",
+          "order",
+          "genus",
+          "coag_type")
+      )
+    ) |>
+    tab_style(
+      style = cell_text(
+        style = "italic"
+      ),
+      locations = cells_stub(
+        rows = taxon %in% c(
+          "domain",
+          "kingdom",
+          "order",
+          "species")
+      )
+    ) |>
+    cols_hide(columns = any_of(c("level","taxon"))) |>
+    tab_style(
+      style = cell_text(weight = "bold"),
+      locations = list(
+        cells_column_spanners(),
+        cells_column_labels(),
+        cells_row_groups()
+      )
+    ) |>
+      tab_spanner(
+        label = sR$`tbl-abr-infection-rate`$`rate_name`,
+        columns = tidyselect::any_of(
+          c(
+            sR$table_headers$rate,
+            sR$table_headers$pooled,
+            sR$table_headers$q1,
+            sR$table_headers$q2,
+            sR$table_headers$q3)),
+        id = "resistant_pathogen_infection_rate",
+        level = 2
+      ) |>
+    tab_footnote(
+      footnote = md(
+        paste0(
+          "$$\\text{",
+          sR$`tbl-abr-infection-rate`$`rate_name`,
+          "} = \\frac{\\text{",
+          sR$`tbl-abr-infection-rate`$`rate_numerator`,
+          "}}{\\text{",
+          sR$`tbl-abr-infection-rate`$`rate_denominator`,
+          "}} \\times ",
+          format_integer(100),
+          "$$"
+        )),
+      locations = cells_column_spanners(spanners = "resistant_pathogen_infection_rate")
+    ) |>
+    tab_footnote(
+      footnote = sprintf(
+        sR$`tbl-abr-infection-rate`$n_footnote,
+        sR$table_headers$n),
+      locations = cells_column_labels(columns = sR$table_headers$n)
+    ) |>
+    tab_footnote(
+      footnote = sprintf(
+        sR$`tbl-abr-infection-rate`$rate_footnote,
+        sR$table_headers$rate),
+      locations = cells_column_labels(columns = sR$table_headers$rate)
+    )
+  
+  if (has_reference) {
+    tbl <- tbl |>
+      cols_width(
+        stub() ~ pct(40),
+        sR$table_headers$n ~ pct(12),
+        sR$table_headers$rate ~ pct(12),
+        sR$table_headers$pooled ~ pct(13),
+        sR$table_headers$q1 ~ pct(8),
+        sR$table_headers$q2 ~ pct(8),
+        sR$table_headers$q3 ~ pct(7)
+      ) |>
+      tab_spanner(
+        label = sR$department_data,
+        columns = c(
+          sR$table_headers$n,
+          sR$table_headers$rate),
+        id = "department_data"
+      ) |>
+      tab_spanner(
+        label = sR$reference_data,
+        columns = c(
+          sR$table_headers$pooled,
+          sR$table_headers$q1,
+          sR$table_headers$q2,
+          sR$table_headers$q3),
+        id = "reference_data"
+      ) |>
+      tab_footnote(
+        footnote = sprintf(
+          sR$`tbl-abr-infection-rate`$pooled_footnote,
+          sR$table_headers$pooled),
+        locations = cells_column_labels(columns = sR$table_headers$pooled)) |>
+      tab_footnote(
+        footnote = sprintf(
+          sR$`tbl-abr-infection-rate`$quartile_footnote,
+          sR$table_headers$q1,
+          sR$table_headers$q2,
+          sR$table_headers$q3,
+          sprintf("%i%s", 25L, sR$percent_symbol),
+          sprintf("%i%s", 50L, sR$percent_symbol),
+          sprintf("%i%s", 75L, sR$percent_symbol)
+        ),
+        locations = cells_column_labels(columns = c(
+          sR$table_headers$q1,
+          sR$table_headers$q2,
+          sR$table_headers$q3)))
+  } else {
+    tbl <- tbl |>
+      cols_width(
+        stub() ~ pct(60),
+        sR$table_headers$n ~ pct(20),
+        sR$table_headers$rate ~ pct(20)
+      )
+  }
+  
+  tbl
+} else {
+  cat(sR$`tbl-abr-infection-rate`$no_data)
+}
+```

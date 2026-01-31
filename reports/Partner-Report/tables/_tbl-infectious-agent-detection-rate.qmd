@@ -1,0 +1,153 @@
+```{r}
+#| label: tbl-infectious-agent-detection-rate
+#| tbl-cap: !expr 'sR$`tbl-infectious-agent-detection-rate`$`tbl-cap`'
+#| tbl-cap-location: top
+
+# Conditionally render table only if department data exists
+if (!is.null(benchmark_data$infectious_agent_detection_rate_per_inf_type_table) && 
+    sum(benchmark_data$infectious_agent_detection_rate_per_inf_type_table$n_own, na.rm = TRUE) > 0) {
+  
+  # Check if reference data columns exist
+  has_reference <- "pooled_ref" %in% names(benchmark_data$infectious_agent_detection_rate_per_inf_type_table)
+  
+  tbl <- benchmark_data$infectious_agent_detection_rate_per_inf_type_table |>
+    dplyr::select(-tidyselect::any_of("n_ref")) |>
+    dplyr::rename(
+      !!sR$table_headers$n := "n_own",
+      !!sR$table_headers$rate := "pooled_own",
+      !!sR$table_headers$pooled := tidyselect::any_of("pooled_ref"),
+      !!sR$table_headers$q1 := tidyselect::any_of("q1_ref"),
+      !!sR$table_headers$q2 := tidyselect::any_of("q2_ref"),
+      !!sR$table_headers$q3 := tidyselect::any_of("q3_ref")) |>
+    dplyr::mutate(
+      inf = dplyr::case_match(
+        as.character(.data$inf),
+        "all" ~ sR$total,
+        "bsi" ~ sR$bsi,
+        "nec" ~ sR$nec,
+        "ssi" ~ sR$ssi,
+        "hap" ~ sR$hap)) |>
+    gt(rowname_col = "inf") |>
+    sub_missing() |>
+    gt::tab_options(
+      latex.use_longtable = TRUE,
+      table.width = pct(100),
+      table.font.size = 13,
+      footnotes.marks = "extended"
+    ) |>
+    fmt_number(
+      columns = c(
+        tidyselect::any_of(sR$table_headers$rate),
+        tidyselect::any_of(sR$table_headers$pooled),
+        tidyselect::any_of(sR$table_headers$q1),
+        tidyselect::any_of(sR$table_headers$q2),
+        tidyselect::any_of(sR$table_headers$q3)),
+      decimals = 1,
+      sep_mark = sR$digit_group_separator,
+      min_sep_threshold = 2,
+      locale = locale_gt) |>
+    fmt_integer(
+      columns = sR$table_headers$n,
+      sep_mark = sR$digit_group_separator,
+      min_sep_threshold = 2) |>
+    tab_style(
+      style = cell_text(weight = "bold"),
+      locations = list(
+        cells_column_spanners(),
+        cells_column_labels(),
+        cells_row_groups()
+      )
+    )
+  
+  # Add reference data spanner (only if reference data exists)
+  if (has_reference) {
+    tbl <- tbl |>
+      tab_spanner(
+        label = sR$department_data,
+        columns = c(sR$table_headers$n, sR$table_headers$rate),
+        id = "department_data"
+      ) |>
+      tab_spanner(
+        label = sR$reference_data,
+        columns = tidyselect::any_of(c(
+          sR$table_headers$pooled,
+          sR$table_headers$q1,
+          sR$table_headers$q2,
+          sR$table_headers$q3)),
+        id = "reference_data"
+      ) |>
+      cols_width(
+        stub() ~ pct(20),
+        sR$table_headers$n ~ pct(13),
+        sR$table_headers$rate ~ pct(13),
+        sR$table_headers$pooled ~ pct(13),
+        sR$table_headers$q1 ~ pct(13),
+        sR$table_headers$q2 ~ pct(13),
+        sR$table_headers$q3 ~ pct(13)
+      )
+  } else {
+    tbl <- tbl |>
+      cols_width(
+        stub() ~ pct(50),
+        sR$table_headers$n ~ pct(25),
+        sR$table_headers$rate ~ pct(25)
+      )
+  }
+  
+  # Add footnotes
+  tbl <- tbl |>
+    tab_footnote(
+      footnote = sprintf(
+        sR$`tbl-infectious-agent-detection-rate`$n_footnote,
+        sR$table_headers$n),
+      locations = cells_column_labels(columns = sR$table_headers$n)) |>
+    tab_footnote(
+      footnote = sprintf(
+        sR$`tbl-infectious-agent-detection-rate`$rate_footnote,
+        sR$table_headers$rate),
+      locations = cells_column_labels(columns = sR$table_headers$rate))
+  
+  # Add reference data footnotes if reference data exists
+  if (has_reference) {
+    tbl <- tbl |>
+      tab_footnote(
+        footnote = md(
+          paste0(
+            "$$\\text{",
+            sR$`tbl-infectious-agent-detection-rate`$`rate_name`,
+            "} = \\frac{\\text{",
+            sR$`tbl-infectious-agent-detection-rate`$`rate_numerator`,
+            "}}{\\text{",
+            sR$`tbl-infectious-agent-detection-rate`$`rate_denominator`,
+            "}} \\times ",
+            format_integer(100),
+            "$$"
+          )),
+        locations = cells_column_spanners(spanners = "department_data")
+      )
+    tbl <- tbl |>
+      tab_footnote(
+        footnote = sprintf(
+          sR$`tbl-infectious-agent-detection-rate`$pooled_footnote,
+          sR$table_headers$pooled),
+        locations = cells_column_labels(columns = sR$table_headers$pooled)) |>
+      tab_footnote(
+        footnote = sprintf(
+          sR$`tbl-infectious-agent-detection-rate`$quartile_footnote,
+          sR$table_headers$q1,
+          sR$table_headers$q2,
+          sR$table_headers$q3,
+          sprintf("%i%s", 25L, sR$percent_symbol),
+          sprintf("%i%s", 50L, sR$percent_symbol),
+          sprintf("%i%s", 75L, sR$percent_symbol)
+        ),
+        locations = cells_column_labels(columns = tidyselect::any_of(c(
+          sR$table_headers$q1,
+          sR$table_headers$q2,
+          sR$table_headers$q3))))
+  }
+  
+  tbl
+}
+
+```

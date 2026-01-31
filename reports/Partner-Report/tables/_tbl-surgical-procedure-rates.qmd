@@ -1,0 +1,164 @@
+```{r}
+#| label: tbl-surgical-procedure-rates
+#| tbl-cap: !expr 'sR$`tbl-surgical-procedure-rates`$`tbl-cap`'
+#| tbl-cap-location: top
+
+# Conditionally render table only if department data exists
+if (!is.null(benchmark_data$surgery_rate_table) && 
+    sum(benchmark_data$surgery_rate_table$n_own, na.rm = TRUE) > 0) {
+  
+  # Check if reference data columns exist
+  has_reference <- "pooled_ref" %in% names(benchmark_data$surgery_rate_table)
+  
+  tbl <- benchmark_data$surgery_rate_table |>
+    dplyr::select(-tidyselect::any_of("n_ref")) |>
+    dplyr::rename(
+      !!sR$table_headers$n := "n_own",
+      !!sR$table_headers$rate := "pooled_own",
+      !!sR$table_headers$pooled := tidyselect::any_of("pooled_ref"),
+      !!sR$table_headers$q1 := tidyselect::any_of("q1_ref"),
+      !!sR$table_headers$q2 := tidyselect::any_of("q2_ref"),
+      !!sR$table_headers$q3 := tidyselect::any_of("q3_ref")) |>
+    dplyr::mutate(
+      pro_cat = dplyr::case_match(
+        .data$pro_cat,
+        "overall" ~ sR$`tbl-surgical-procedure-rates`$overall,
+        "abdominal_surgery" ~ sR$`tbl-surgical-procedure-rates`$abdominal_surgery,
+        "neurosurgery" ~ sR$`tbl-surgical-procedure-rates`$neurosurgery,
+        "inguinal_hernia_surgery" ~ sR$`tbl-surgical-procedure-rates`$inguinal_hernia_surgery,
+        "cardiac_and_large_vessel_surgery" ~ sR$`tbl-surgical-procedure-rates`$cardiac_and_large_vessel_surgery,
+        "lung_pleural_space_thoracic_surgery" ~ sR$`tbl-surgical-procedure-rates`$lung_pleural_space_thoracic_surgery,
+        "oesophageal_surgery" ~ sR$`tbl-surgical-procedure-rates`$oesophageal_surgery,
+        "other" ~ sR$`tbl-surgical-procedure-rates`$other,
+        "not_surgery" ~ sR$`tbl-surgical-procedure-rates`$not_surgery,
+        "to_be_categorised" ~ sR$`tbl-surgical-procedure-rates`$to_be_categorised)) |>
+    gt(rowname_col = "pro_cat") |>
+    sub_missing() |>
+    gt::tab_options(
+      latex.use_longtable = TRUE,
+      table.width = pct(100),
+      table.font.size = 13,
+      footnotes.marks = "extended"
+    ) |>
+    fmt_number(
+      columns = c(
+        tidyselect::any_of(sR$table_headers$rate),
+        tidyselect::any_of(sR$table_headers$pooled),
+        tidyselect::any_of(sR$table_headers$q1),
+        tidyselect::any_of(sR$table_headers$q2),
+        tidyselect::any_of(sR$table_headers$q3)),
+      decimals = 1,
+      sep_mark = sR$digit_group_separator,
+      min_sep_threshold = 2,
+      locale = locale_gt) |>
+    fmt_integer(
+      columns = sR$table_headers$n,
+      sep_mark = sR$digit_group_separator,
+      min_sep_threshold = 2) |>
+    tab_spanner(
+      label = sR$`tbl-surgical-procedure-rates`$rate_name,
+      columns = tidyselect::any_of(
+        c(
+          sR$table_headers$rate,
+          sR$table_headers$pooled,
+          sR$table_headers$q1,
+          sR$table_headers$q2,
+          sR$table_headers$q3)),
+      id = "procedure_rate"
+      ) |>
+    tab_style(
+      style = cell_text(weight = "bold"),
+      locations = list(
+        cells_column_spanners(),
+        cells_column_labels(),
+        cells_row_groups()
+      )
+    ) |>
+    tab_footnote(
+      footnote = sprintf(
+        sR$`tbl-surgical-procedure-rates`$n_footnote,
+        sR$table_headers$n),
+      locations = cells_column_labels(columns = sR$table_headers$n)
+    ) |>
+    tab_footnote(
+      footnote = sprintf(
+        sR$`tbl-surgical-procedure-rates`$rate_footnote,
+        sR$table_headers$rate),
+      locations = cells_column_labels(columns = sR$table_headers$rate)
+    ) |>
+      tab_footnote(
+        footnote = md(
+          paste0(
+            "$$\\text{",
+            sR$`tbl-surgical-procedure-rates`$rate_name,
+            "} = \\frac{\\text{",
+            sR$`tbl-surgical-procedure-rates`$rate_numerator,
+            "}}{\\text{",
+            sR$`tbl-surgical-procedure-rates`$rate_denominator,
+            "}} \\times ",
+            format_integer(100),
+            "$$"
+          )),
+        locations = cells_column_spanners(spanners = "procedure_rate")
+      )
+  
+  if (has_reference) {
+    tbl <- tbl |>
+      cols_width(
+        stub() ~ pct(50),
+        sR$table_headers$n ~ pct(10),
+        sR$table_headers$rate ~ pct(10),
+        sR$table_headers$pooled ~ pct(12),
+        sR$table_headers$q1 ~ pct(6),
+        sR$table_headers$q2 ~ pct(6),
+        sR$table_headers$q3 ~ pct(6)
+      ) |>
+      tab_spanner(
+        label = sR$department_data,
+        columns = c(
+          sR$table_headers$n,
+          sR$table_headers$rate),
+        id = "department_data"
+      ) |>
+      tab_spanner(
+        label = sR$reference_data,
+        columns = c(
+          sR$table_headers$pooled,
+          sR$table_headers$q1,
+          sR$table_headers$q2,
+          sR$table_headers$q3),
+        id = "reference_data"
+      ) |>
+      tab_footnote(
+        footnote = sprintf(
+          sR$`tbl-surgical-procedure-rates`$pooled_footnote,
+          sR$table_headers$pooled),
+        locations = cells_column_labels(columns = sR$table_headers$pooled)) |>
+      tab_footnote(
+        footnote = sprintf(
+          sR$`tbl-surgical-procedure-rates`$quartile_footnote,
+          sR$table_headers$q1,
+          sR$table_headers$q2,
+          sR$table_headers$q3,
+          sprintf("%i%s", 25L, sR$percent_symbol),
+          sprintf("%i%s", 50L, sR$percent_symbol),
+          sprintf("%i%s", 75L, sR$percent_symbol)
+        ),
+        locations = cells_column_labels(columns = c(
+          sR$table_headers$q1,
+          sR$table_headers$q2,
+          sR$table_headers$q3)))
+  } else {
+    tbl <- tbl |>
+      cols_width(
+        stub() ~ pct(60),
+        sR$table_headers$n ~ pct(20),
+        sR$table_headers$rate ~ pct(20)
+      )
+  }
+  
+  tbl
+} else {
+  cat(sR$`tbl-surgical-procedure-rates`$no_data)
+}
+```

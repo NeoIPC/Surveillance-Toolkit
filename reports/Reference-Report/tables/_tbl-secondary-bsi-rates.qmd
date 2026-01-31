@@ -3,7 +3,54 @@
 #| tbl-cap: "Secondary bloodstream infections"
 #| tbl-cap-location: top
 
-data$events |>
+reference_data |>
+  neoipcr::get_secondary_bsi_rate_table() |>
+  dplyr::rename(
+    "No of inf. w. sec. BSI" = "n",
+    "Pooled mean" = "pooled",
+    "Q₁" = "q1",
+    "Q₂" = "q2",
+    "Q₃" = "q3") |>
+  dplyr::mutate(
+    Infection = dplyr::case_match(
+      as.character(.data$event_type_key),
+      "nec" ~ "Necrotising Enterocolitis",
+      "ssi" ~ "Surgical site infection",
+      "hap" ~ "Pneumonia"),
+    .keep = "unused") |>
+  gt(rowname_col = "Infection") |>
+  fmt_number(decimals = 1) |>
+  fmt_number(columns = "No of inf. w. sec. BSI", decimals = 0) |>
+  tab_spanner(
+    label = "Secondary BSI rate",
+    columns = c("Pooled mean","Q₁","Q₂","Q₃"),
+    id = "secondary_bsi_rate"
+  ) |>
+  tab_footnote(
+    footnote = md(
+      paste0(
+        "$$\\text{",
+        "Secondary BSI rate",
+        "} = \\frac{\\text{",
+        "No of infections with secondary BSI",
+        "}}{\\text{",
+        "No of infections with follow-up for secondary BSI",
+        "}} \\times ",
+        format(100, big.mark = locale_sep_mark),
+        "$$"
+      )),
+    locations = cells_column_spanners(spanners = "secondary_bsi_rate")
+  ) |>
+  tab_footnote(
+    footnote = "No of infections with secondary BSI: The number of infections where a secondary BSI was recorded, aggregated across all infants.",
+    locations = cells_column_labels(columns = "No of inf. w. sec. BSI")) |>
+  tab_footnote(
+    footnote = "Pooled mean: The secondary bsi rate calculated as infections with secondary bsi per 100 infections with follow-up for secondary bsi calculated across all infants.",
+    locations = cells_column_labels(columns = "Pooled mean")) |>
+  tab_footnote(
+    footnote = "Q₁, Q₂, Q₃: The quartiles (25%, 50% and 75% quantiles) of the secondary bsi rates of the partner departments",
+    locations = cells_column_labels(columns = c("Q₁","Q₂","Q₃")))
+```
     dplyr::filter(event_type_key %in% c("nec","ssi","hap")) |>
     dplyr::semi_join(
         data$infectiousAgentFindings |>

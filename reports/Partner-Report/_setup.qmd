@@ -1,4 +1,4 @@
-```{r General setup and parameter preparation}
+```{r Import libraries}
 #| message: false
 #| warning: false
 #| include: false
@@ -10,6 +10,38 @@ library(scales, warn.conflicts = FALSE, quietly = TRUE)
 library(patchwork, warn.conflicts = FALSE, quietly = TRUE)
 library(gt, warn.conflicts = FALSE, quietly = TRUE)
 library(neoipcr, warn.conflicts = FALSE, quietly = TRUE)
+```
+
+```{r Set up functions}
+#| include: false
+
+source("../common/helpers.R")
+
+```
+
+```{r Initialise locale dependent information}
+#| include: false
+
+locale <- Sys.getenv("LC_ALL")
+localeObj <- parse_locales(locale)[[1]]
+invisible(Sys.setlocale(category = "LC_ALL", locale = locale))
+invisible(Sys.setLanguage(localeObj$language))
+if(is.null(localeObj$territory)){
+  locale_gt <- localeObj$language
+  locale_stringi <- localeObj$language
+} else {
+  locale_gt <- paste0(localeObj$language, "-", localeObj$territory)
+  locale_stringi <- paste0(localeObj$language, "_", localeObj$territory)
+}
+options(`gt.locale` = locale_gt)
+
+sR <- get_string_resources(localeObj)
+```
+
+```{r General setup and parameter preparation}
+#| message: false
+#| warning: false
+#| include: false
 
 if(!exists("params")) params <- list()
 
@@ -36,28 +68,6 @@ typedParams <- list(
   IncludeNonCorePatients = if (!is.null(params$IncludeNonCorePatients)) as.logical(params$GestationWeeksTo) else FALSE
 )
 
-
-NeoIPC_pallette <- c("#FF9015","#0083C1","#0D4F6C","#E6FAFC","#E0D3DE","#1F271B")
-pal <- c(NeoIPC_pallette[5],NeoIPC_pallette[2],NeoIPC_pallette[6])
-
-invisible(Sys.setlocale(category = "LC_ALL", locale = locale))
-invisible(Sys.setLanguage(locale))
-# Setting the gt.locale option does not seem to be overridable at the function level
-# Check this from time to time
-# invisible(
-#   options(
-#     `gt.locale` = if(stringr::str_detect(locale, "_")) {
-#         stringr::str_replace(locale, "^(\\w+)_(\\w+)(\\..+)?$", "\\1-\\2")
-#       } else {
-#         stringr::str_replace(locale, "^(\\w+)(\\..+)?$", "\\1")
-#       }))
-
-gt_locale = if(stringr::str_detect(locale, "_")) {
-    stringr::str_replace(locale, "^(\\w+)_(\\w+)(\\..+)?$", "\\1-\\2")
-  } else {
-    stringr::str_replace(locale, "^(\\w+)(\\..+)?$", "\\1")
-  }
-
 get_unit_data <- function() suppressWarnings(
   import_dhis2(
     dataset_options = dhis2_dataset_options(
@@ -82,5 +92,12 @@ benchmark_data <- if (is.null(reference_data)) {
     ref = reference_data)
 }
 
-source("../common/helpers.R")
+```
+
+```{r Set up NeoIPC layout}
+#| include: false
+
+NeoIPC_pallette <- c("#FF9015","#0083C1","#0D4F6C","#E6FAFC","#E0D3DE","#1F271B")
+pal <- c(NeoIPC_pallette[5],NeoIPC_pallette[2],NeoIPC_pallette[6])
+
 ```

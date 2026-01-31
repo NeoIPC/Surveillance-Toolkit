@@ -1,0 +1,34 @@
+{{< include _setup.qmd >}}
+
+{{< pagebreak >}}
+
+```{r}
+#| output: asis
+include_localised("_introduction.Rmd")
+```
+
+::: {.content-visible when-format="pdf"}
+\FloatBarrier
+:::
+
+{{< include figures/_fig-bw.qmd >}}
+
+{{< include figures/_fig-ga.qmd >}}
+
+{{< include tables/_tbl-incidence-density-rates.qmd >}}
+
+{{< include tables/_tbl-device-associated-incidence-density-rates.qmd >}}
+
+{{< include tables/_tbl-agent-per-infection-rate.qmd >}}
+
+{{< include tables/_tbl-abr-infection-rate.qmd >}}
+
+{{< include tables/_tbl-infectious-agent-detection-rate.qmd >}}
+
+{{< include tables/_tbl-resistance-test-rate.qmd >}}
+
+{{< include tables/_tbl-risk-density-rates.qmd >}}
+
+{{< include tables/_tbl-surgical-procedure-rates.qmd >}}
+
+{{< include tables/_tbl-secondary-bsi-rates.qmd >}}

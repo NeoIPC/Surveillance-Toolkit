@@ -1,9 +1,10 @@
 project:
-  render:
-    - Partner-Report.qmd
   output-dir: _output
 date-meta: now
 echo: false
+profile:
+  group:
+    - [en, de]
 execute:
   error: true
 filters: ["../filters/pandoc-quotes.lua"]
