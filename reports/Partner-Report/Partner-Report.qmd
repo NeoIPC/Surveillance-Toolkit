@@ -1,7 +1,5 @@
 ---
 lang: en
-profile:
-  default: en
 params:
   ReferenceDataFile: NULL
   UnitCodes: NULL

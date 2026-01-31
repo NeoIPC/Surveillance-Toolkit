@@ -15,20 +15,38 @@ include_localised("_introduction.Rmd")
 
 {{< include figures/_fig-ga.qmd >}}
 
+{{< pagebreak >}}
+
 {{< include tables/_tbl-incidence-density-rates.qmd >}}
+
+{{< pagebreak >}}
 
 {{< include tables/_tbl-device-associated-incidence-density-rates.qmd >}}
 
+{{< pagebreak >}}
+
 {{< include tables/_tbl-agent-per-infection-rate.qmd >}}
+
+{{< pagebreak >}}
 
 {{< include tables/_tbl-abr-infection-rate.qmd >}}
 
+{{< pagebreak >}}
+
 {{< include tables/_tbl-infectious-agent-detection-rate.qmd >}}
+
+{{< pagebreak >}}
 
 {{< include tables/_tbl-resistance-test-rate.qmd >}}
 
+{{< pagebreak >}}
+
 {{< include tables/_tbl-risk-density-rates.qmd >}}
 
+{{< pagebreak >}}
+
 {{< include tables/_tbl-surgical-procedure-rates.qmd >}}
+
+{{< pagebreak >}}
 
 {{< include tables/_tbl-secondary-bsi-rates.qmd >}}

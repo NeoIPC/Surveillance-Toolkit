@@ -32,6 +32,7 @@ format:
     include-in-header:
       text: |
         \usepackage{float}
+        \usepackage{placeins}
         \usepackage{graphicx}
         \usepackage{wrapfig}
         \usepackage{scrlayer-scrpage}
@@ -39,7 +40,6 @@ format:
         \ModifyLayer[addvoffset=-.6ex]{plain.scrheadings.foot.above.line}
         \ihead{\includegraphics[width=4cm]{../logos/LOGO_NEOIPC_2.png}}
         \ifoot*{\includegraphics[width=1.37cm]{../logos/eu-flag.png}}
-        \cfoot*{\raggedright \hspace{1.5cm}This project has received funding from the European Union’s Horizon 2020 research and innovation\\ \hspace{1.5cm}programme under grant agreement No 965328.}
         \ofoot{\pagemark}
     number-sections: true
   docx:
