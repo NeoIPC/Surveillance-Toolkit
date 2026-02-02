@@ -81,13 +81,13 @@ get_unit_data <- function() suppressWarnings(
       include_ineligible_patients = typedParams$IncludeNonCorePatients,
       include_department = "yes"
       ))) |>
-  neoipcr:::calculate_department_data()
+  neoipcr::calculate_department_data()
 
 benchmark_data <- if (is.null(reference_data)) {
-  neoipcr:::get_benchmark_data(
+  neoipcr::get_benchmark_data(
     own = get_unit_data())
 } else {
-  neoipcr:::get_benchmark_data(
+  neoipcr::get_benchmark_data(
     own = get_unit_data(),
     ref = reference_data)
 }

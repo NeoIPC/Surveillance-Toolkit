@@ -7,7 +7,7 @@ param(
     [ValidateSet('en','de','es','et','gr','it','fr','af','tr','ne')]
     [string[]]$Locales = @('en'),
     [Parameter()]
-    [string]$OutputDir = "${PSScriptRoot}\..\reports\Reference-Report\_output",
+    [string]$OutputDir = "${PSScriptRoot}/../reports/Reference-Report/_output",
     [Parameter()]
     [string]$ReportingPeriodFrom,
     [Parameter()]
@@ -271,7 +271,6 @@ catch {
 finally {
     $completedAt = (Get-Date -AsUTC).ToString('o')
     $status = if ($errors.Count -gt 0) { 'failed' } else { 'success' }
-    $outputFiles += $buildReportPath
     $buildReport = [ordered]@{
         name = 'Reference Report Build'
         status = $status
