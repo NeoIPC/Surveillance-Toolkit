@@ -109,7 +109,7 @@ tbl-secondary-bsi-rates:
   rate_footnote: "%s: The secondary BSI rate for the department calculated as infections with secondary BSI per 100 infections with follow-up for secondary BSI."
   pooled_footnote: "%s: The secondary BSI rate calculated across all infants from all departments."
   quartile_footnote: "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the secondary BSI rates of the partner departments. These quartiles are only displayed when the number of departments contributing is greater than or equal to five."
-  no_data: "No secondary BSI data available for this reporting period."
+  no_data: "No secondary BSI data available for this report settings."
 tbl-risk-density-rates:
   tbl-cap: "Factors influencing the infants' risk of developing an infection or acquiring antibitic-resistant pathogens."
   risk_density_rate: "Risk Density Rate"

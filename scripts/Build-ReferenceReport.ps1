@@ -32,7 +32,44 @@ param(
     [Parameter()]
     [switch]$BackupDataset,
     [Parameter()]
-    [switch]$Quiet
+    [switch]$Quiet,
+    [Parameter()]
+    [ValidateSet(
+        'Header',
+        'Introduction',
+        'PatientPopulation',
+        'NosocomialInfections',
+        'InfectiousAgents',
+        'RiskFactors',
+        'Surgery',
+        'BirthWeightDistribution',
+        'GestationalAgeDistribution',
+        'IncidenceDensityRates',
+        'DeviceAssociatedRates',
+        'AgentPerInfectionRates',
+        'AntibioticResistanceRates',
+        'InfectiousAgentDetectionRates',
+        'ResistanceTestRates',
+        'RiskDensityRates',
+        'SurgicalProcedureRates'
+    )]
+    [string[]]$IncludeElements = @(
+        'Header',
+        'Introduction',
+        'PatientPopulation',
+        'NosocomialInfections',
+        'InfectiousAgents',
+        'RiskFactors',
+        'Surgery',
+        'BirthWeightDistribution',
+        'GestationalAgeDistribution',
+        'IncidenceDensityRates',
+        'DeviceAssociatedRates',
+        'AgentPerInfectionRates',
+        'InfectiousAgentDetectionRates',
+        'RiskDensityRates',
+        'SurgicalProcedureRates'
+    )
 )
 
 if ($Quiet) {
@@ -165,6 +202,34 @@ if ($ValidationExceptionFile) { $commonParams.validationExceptionFile = $Validat
 $commonParams.testUnitFilter = (-not $IncludeTestUnits)
 $commonParams.defaultPatientFilter = (-not $IncludeNonCorePatients)
 
+# Map user-friendly element names to internal Quarto parameter names
+$elementMapping = @{
+    'Header' = 'includeHeader'
+    'Introduction' = 'includeIntroduction'
+    'PatientPopulation' = 'includeTextPatientPopulation'
+    'NosocomialInfections' = 'includeTextNosocomial'
+    'InfectiousAgents' = 'includeTextInfectiousAgents'
+    'RiskFactors' = 'includeTextRiskFactors'
+    'Surgery' = 'includeTextSurgery'
+    'BirthWeightDistribution' = 'includeBirthWeightFigure'
+    'GestationalAgeDistribution' = 'includeGestationalAgeFigure'
+    'IncidenceDensityRates' = 'includeIncidenceDensityTable'
+    'DeviceAssociatedRates' = 'includeDeviceAssociatedIncidenceDensityTable'
+    'AgentPerInfectionRates' = 'includeAgentPerInfectionRateTable'
+    'AntibioticResistanceRates' = 'includeResistantPathogenInfectionRateTable'
+    'InfectiousAgentDetectionRates' = 'includeInfectiousAgentDetectionRateTable'
+    'ResistanceTestRates' = 'includeAntibioticResistanceTestRateTable'
+    'RiskDensityRates' = 'includeRiskDensityRateTable'
+    'SurgicalProcedureRates' = 'includeSurgicalProcedureRateTable'
+    'SecondaryBloodstreamInfectionRates' = 'includeSecondaryBsiRateTable'
+}
+
+# Convert user-friendly array to Quarto boolean parameters
+foreach ($mapping in $elementMapping.GetEnumerator()) {
+    $includeValue = $IncludeElements -contains $mapping.Key
+    $commonParams[$mapping.Value] = $includeValue
+}
+
 $errors = @()
 $outputFiles = @()
 $startedAt = (Get-Date -AsUTC).ToString('o')
@@ -239,7 +304,12 @@ try {
                 $quartoArgs = @('render', $qmd, '--profile', $profileName, '--to', $format, '-o', $outFileName)
                 foreach ($kvp in $commonParams.GetEnumerator()) {
                     if ($null -ne $kvp.Value -and '' -ne $kvp.Value) {
-                        $quartoArgs += @('-P', "$($kvp.Key):$($kvp.Value)")
+                        # Use -M for include* metadata flags, -P for other params
+                        if ($kvp.Key -like 'include*') {
+                            $quartoArgs += @('-M', "$($kvp.Key):$($kvp.Value)")
+                        } else {
+                            $quartoArgs += @('-P', "$($kvp.Key):$($kvp.Value)")
+                        }
                     }
                 }
                 if ($needsJson) {

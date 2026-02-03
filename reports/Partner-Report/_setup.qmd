@@ -79,6 +79,7 @@ get_unit_data <- function() suppressWarnings(
       gestational_age_from = typedParams$GestationWeeksFrom,
       gestational_age_to = typedParams$GestationWeeksTo,
       include_ineligible_patients = typedParams$IncludeNonCorePatients,
+      include_country = "yes",
       include_department = "yes"
       ))) |>
   neoipcr::calculate_department_data()
@@ -90,6 +91,246 @@ benchmark_data <- if (is.null(reference_data)) {
   neoipcr::get_benchmark_data(
     own = get_unit_data(),
     ref = reference_data)
+}
+
+```
+
+```{r Preparing localised data}
+#| include: false
+
+# Format own department metadata
+dR_own <- list(
+  creationTimestamp = format(
+    lubridate::now("UTC"),
+    format = "%x %X",
+    tz = "UTC",
+    usetz = TRUE),
+  dataUpToTimestamp = if (!is.null(benchmark_data$metadata$own$data_up_to)) {
+    format(
+      benchmark_data$metadata$own$data_up_to,
+      format = "%x %X",
+      tz = "UTC",
+      usetz = TRUE)
+  } else {
+    format(
+      lubridate::now("UTC"),
+      format = "%x %X",
+      tz = "UTC",
+      usetz = TRUE)
+  },
+  analysisPeriod = paste(
+    format(
+      benchmark_data$metadata$own$dataset_options$surveillance_end_from,
+      format = "%x"),
+    format(
+      min(
+        if (!is.null(benchmark_data$metadata$own$data_up_to)) {
+          lubridate::as_date(benchmark_data$metadata$own$data_up_to)
+        } else {
+          Sys.Date()
+        },
+        benchmark_data$metadata$own$dataset_options$surveillance_end_to
+        ),
+      format = "%x"
+      ),
+    sep = " - "),
+  countriesList = paste0(
+    benchmark_data$metadata$own$countries |>
+      as.character() |>
+      get_localised_country_names() |>
+      stringr::str_sort(locale = locale_stringi),
+    collapse = ", "),
+  birthweightFilter = if(
+    is.null(benchmark_data$metadata$own$dataset_options$birth_weight_from) &&
+    is.null(benchmark_data$metadata$own$dataset_options$birth_weight_to)) {
+      sR$headerList$allBirthweights
+    } else if(
+      is.null(benchmark_data$metadata$own$dataset_options$birth_weight_from)) {
+      paste0(
+        c(
+          "≤ ",
+          format_integer(
+            benchmark_data$metadata$own$dataset_options$birth_weight_to),
+          " g"),
+        collapse = "")
+    } else if(
+      is.null(benchmark_data$metadata$own$dataset_options$birth_weight_to)) {
+      paste0(
+        c(
+          "≥ ",
+          format_integer(
+            benchmark_data$metadata$own$dataset_options$birth_weight_from),
+          " g"),
+        collapse = "")
+    } else {
+      paste0(
+        c(
+          format_integer(
+            benchmark_data$metadata$own$dataset_options$birth_weight_from),
+          " g - ",
+          format_integer(
+            benchmark_data$metadata$own$dataset_options$birth_weight_to),
+          " g"),
+        collapse = "")
+    },
+  gestationalAgeFilter = if(
+    is.null(benchmark_data$metadata$own$dataset_options$gestational_age_from) &&
+    is.null(benchmark_data$metadata$own$dataset_options$gestational_age_to)) {
+      sR$headerList$allGestationalAges
+    } else if(
+      is.null(benchmark_data$metadata$own$dataset_options$gestational_age_from)) {
+      paste0(
+        c(
+          "≤ ",
+          format_integer(
+            benchmark_data$metadata$own$dataset_options$gestational_age_to),
+          " w"),
+        collapse = "")
+    } else if(
+      is.null(benchmark_data$metadata$own$dataset_options$gestational_age_to)) {
+      paste0(
+        c(
+          "≥ ",
+          format_integer(
+            benchmark_data$metadata$own$dataset_options$gestational_age_from),
+          " w"),
+        collapse = "")
+    } else {
+      paste0(
+        c(
+          format_integer(
+            benchmark_data$metadata$own$dataset_options$gestational_age_from),
+          " w - ",
+          format_integer(
+            benchmark_data$metadata$own$dataset_options$gestational_age_to),
+          " w"),
+        collapse = "")
+    },
+  numberOfDepartments = format_integer(benchmark_data$n_departments$n_own),
+  numberOfPatients = format_integer(benchmark_data$n_patients$total_own),
+  numberOfAdmissions = format_integer(benchmark_data$n_enrollments$total_own),
+  sumOfPatientDays = format_integer(benchmark_data$n_patient_days$total_own)
+)
+
+# Format reference metadata if available
+dR_ref <- if ("ref" %in% benchmark_data$dataset_names) {
+  list(
+    creationTimestamp = format(
+      benchmark_data$metadata$ref$calculated,
+      format = "%x %X",
+      tz = "UTC",
+      usetz = TRUE),
+    dataUpToTimestamp = format(
+      benchmark_data$metadata$ref$data_up_to,
+      format = "%x %X",
+      tz = "UTC",
+      usetz = TRUE),
+    analysisPeriod = paste(
+      format(
+        benchmark_data$metadata$ref$dataset_options$surveillance_end_from,
+        format = "%x"),
+      format(
+        min(
+          lubridate::as_date(benchmark_data$metadata$ref$data_up_to),
+          benchmark_data$metadata$ref$dataset_options$surveillance_end_to
+          ),
+        format = "%x"
+        ),
+      sep = " - "),
+    countriesList = paste0(
+      benchmark_data$metadata$ref$countries |>
+        as.character() |>
+        get_localised_country_names() |>
+        stringr::str_sort(locale = locale_stringi),
+      collapse = ", "),
+    birthweightFilter = if(
+      is.null(benchmark_data$metadata$ref$dataset_options$birth_weight_from) &&
+      is.null(benchmark_data$metadata$ref$dataset_options$birth_weight_to)) {
+        sR$headerList$allBirthweights
+      } else if(
+        is.null(benchmark_data$metadata$ref$dataset_options$birth_weight_from)) {
+        paste0(
+          c(
+            "≤ ",
+            format_integer(
+              benchmark_data$metadata$ref$dataset_options$birth_weight_to),
+            " g"),
+          collapse = "")
+      } else if(
+        is.null(benchmark_data$metadata$ref$dataset_options$birth_weight_to)) {
+        paste0(
+          c(
+            "≥ ",
+            format_integer(
+              benchmark_data$metadata$ref$dataset_options$birth_weight_from),
+            " g"),
+          collapse = "")
+      } else {
+        paste0(
+          c(
+            format_integer(
+              benchmark_data$metadata$ref$dataset_options$birth_weight_from),
+            " g - ",
+            format_integer(
+              benchmark_data$metadata$ref$dataset_options$birth_weight_to),
+            " g"),
+          collapse = "")
+      },
+    gestationalAgeFilter = if(
+      is.null(benchmark_data$metadata$ref$dataset_options$gestational_age_from) &&
+      is.null(benchmark_data$metadata$ref$dataset_options$gestational_age_to)) {
+        sR$headerList$allGestationalAges
+      } else if(
+        is.null(benchmark_data$metadata$ref$dataset_options$gestational_age_from)) {
+        paste0(
+          c(
+            "≤ ",
+            format_integer(
+              benchmark_data$metadata$ref$dataset_options$gestational_age_to),
+            " w"),
+          collapse = "")
+      } else if(
+        is.null(benchmark_data$metadata$ref$dataset_options$gestational_age_to)) {
+        paste0(
+          c(
+            "≥ ",
+            format_integer(
+              benchmark_data$metadata$ref$dataset_options$gestational_age_from),
+            " w"),
+          collapse = "")
+      } else {
+        paste0(
+          c(
+            format_integer(
+              benchmark_data$metadata$ref$dataset_options$gestational_age_from),
+            " w - ",
+            format_integer(
+              benchmark_data$metadata$ref$dataset_options$gestational_age_to),
+            " w"),
+          collapse = "")
+      },
+    numberOfDepartments = format_integer(benchmark_data$n_departments$n_ref),
+    numberOfPatients = format_integer(benchmark_data$n_patients$total_ref),
+    numberOfAdmissions = format_integer(benchmark_data$n_enrollments$total_ref),
+    sumOfPatientDays = format_integer(benchmark_data$n_patient_days$total_ref)
+  )
+} else {
+  NULL
+}
+
+# Detect metadata differences for highlighting
+metadata_diff <- if (!is.null(dR_ref)) {
+  list(
+    birthweight_differs = (dR_own$birthweightFilter != dR_ref$birthweightFilter),
+    gestational_age_differs = (dR_own$gestationalAgeFilter != dR_ref$gestationalAgeFilter),
+    countries_differ = (dR_own$countriesList != dR_ref$countriesList)
+  )
+} else {
+  list(
+    birthweight_differs = FALSE,
+    gestational_age_differs = FALSE,
+    countries_differ = FALSE
+  )
 }
 
 ```

@@ -3,6 +3,32 @@ own_unit: "Own unit"
 reference_data: "Reference data"
 department_data: "Your data"
 
+headerList:
+  createdAt: Created
+  dataUpTo: Data up to
+  analysisPeriod: Analysis period
+  country: Country
+  countries: Countries
+  birthweightFilter: Birth weight filter
+  allBirthweights: All eligible birth weights
+  gestationalAgeFilter: Gestational age filter
+  allGestationalAges: All eligible gestational ages
+  numberOfDepartments: Number of units contributing at least one patient record
+  numberOfPatients: Number of patient records
+  numberOfAdmissions: Number of patient admissions
+  sumOfPatientDays: Sum of patient days
+  averageSurveillancePeriod: Average surveillance period per patient
+  multiCountryHintHeader: Multinational benchmark
+  multiCountryHint: The reference data aggregates information from neonatal units in several countries. This means that, while it reflects a broad spectrum of care structures, comparability may be limited due to sometimes very different healthcare systems and resources available.
+  singleCountryHintHeader: National benchmark
+  singleCountryHint: The reference data presents information from neonatal units in a single country. This provides a more relevant benchmark due to the relative homogeneity of the healthcare system.
+  countryMismatchHint: Your unit's country differs from the reference data countries. This may limit comparability.
+  filterDiffersFootnote: "Note: This filter differs from the reference dataset."
+  specialAnalysisHint: This is a special analysis that
+  includesTestDepartments: includes test units
+  and: ' and '
+  ignoresInclusionCriteria: ignores the NeoIPC Surveillance inclusion criteria.
+
 tbl-risk-density-rates:
   n_footnote: "%s: The aggregated number of days the risk/protective factor was present in your unit's infants."
   rate_footnote: "%s: The Risk Density Rate calculated for your unit's infants."

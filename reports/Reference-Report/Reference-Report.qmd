@@ -1,5 +1,22 @@
 ---
 lang: en
+includeHeader: true
+includeTextIntroduction: true
+includeTextPatientPopulation: true
+includeTextNosocomial: true
+includeTextInfectiousAgents: true
+includeTextRiskFactors: true
+includeTextSurgery: true
+includeFigBirthWeight: true
+includeFigGestationalAge: true
+includeTblIncidenceDensity: true
+includeTblDeviceAssociated: true
+includeTblAgentPerInfection: true
+includeTblAbrInfection: false
+includeTblInfectiousAgentDetection: true
+includeTblResistanceTest: false
+includeTblRiskDensity: true
+includeTblSurgicalProcedure: true
 params:
   ReferenceDataFile: NULL
   reportingPeriodFrom: NULL
