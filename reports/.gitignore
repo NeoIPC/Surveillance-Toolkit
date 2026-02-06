@@ -1,6 +1,8 @@
 _quarto-*.yml
 !_quarto-en.yml
 !_quarto-minimal.yml
+!_quarto-default.yml
+!_quarto-full.yml
 common.*.yaml
 content.*/
 *.tex

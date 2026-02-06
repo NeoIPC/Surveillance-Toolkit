@@ -1,7 +1,16 @@
+::: {.content-visible when-meta="includeTableIntroductions"}
+```{r}
+#| output: asis
+include_localised("_tbl-intro-infectious-agent-detection.qmd")
+```
+:::
+
 ```{r}
 #| label: tbl-infectious-agent-detection-rate
 #| tbl-cap: !expr 'sR$`tbl-infectious-agent-detection-rate`$`tbl-cap`'
 #| tbl-cap-location: top
+
+check_outlier_interpretation <- FALSE
 
 # Conditionally render table only if department data exists
 if (!is.null(benchmark_data$infectious_agent_detection_rate_per_inf_type_table) && 
@@ -9,7 +18,8 @@ if (!is.null(benchmark_data$infectious_agent_detection_rate_per_inf_type_table) 
   
   # Check if reference data columns exist
   has_reference <- "pooled_ref" %in% names(benchmark_data$infectious_agent_detection_rate_per_inf_type_table)
-  
+  check_outlier_interpretation <- has_reference
+
   tbl <- benchmark_data$infectious_agent_detection_rate_per_inf_type_table |>
     dplyr::select(-tidyselect::any_of("n_ref")) |>
     dplyr::rename(
@@ -148,6 +158,26 @@ if (!is.null(benchmark_data$infectious_agent_detection_rate_per_inf_type_table) 
   }
   
   tbl
+} else {
+  cat(sR$`tbl-infectious-agent-detection-rate`$no_data)
 }
-
 ```
+
+::: {.content-visible when-meta="includeOutlierInterpretation"}
+```{r}
+#| output: asis
+if (check_outlier_interpretation) {
+  outliers <- detect_outliers(benchmark_data$infectious_agent_detection_rate_per_inf_type_table)
+  if (length(outliers$below_q1) > 0 || length(outliers$above_q3) > 0) {
+    grouped <- group_outliers(outliers, "infectious_agent_detection")
+    outlier_text <- format_outlier_text(grouped, sR)
+    if (nchar(outlier_text) > 0) {
+      cat("\n\n::: {.callout-note}\n")
+      cat("## ", sR$outlier$heading, "\n\n")
+      cat(outlier_text, "\n")
+      cat(":::\n")
+    }
+  }
+}
+```
+:::

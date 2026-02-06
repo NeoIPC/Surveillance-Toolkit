@@ -24,6 +24,20 @@ table_headers:
   q1: "Q₁"
   q2: "Q₂"
   q3: "Q₃"
+countryNames:
+  Estonia: Estonia
+  Germany: Germany
+  Greece: Greece
+  Italy: Italy
+  SouthAfrica: South Africa
+  Spain: Spain
+  Switzerland: Switzerland
+  UnitedKingdom: United Kingdom
+worldBankClassNames:
+  H: High income
+  UM: Upper middle income
+  LM: Lower middle income
+  L: Low income
 fig-bw:
   fig-cap:
     - "Distribution of birth weights of the infants included in this report."
@@ -48,6 +62,7 @@ tbl-incidence-density-rates:
   pooled_footnote: "%s: The Incidence Density Rate calculated across all infants from all departments."
   quartile_footnote: "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Incidence Density Rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected infections is greater than or equal to one according to the pooled Incidence Density Rate."
   si_footnote: "%s: Combines the outcomes primary sepsis/BSI and pneumonia"
+  no_data: "No infection data available for this report settings."
 tbl-device-associated-incidence-density-rates:
   tbl-cap: "Incidence Density Rates of device-associated infections"
   cvc: "CVC"
@@ -63,6 +78,7 @@ tbl-device-associated-incidence-density-rates:
   n_footnote: "%s: The aggregated number of device-associated infections in all infants."
   pooled_footnote: "%s: The Device-Associated Incidence Density Rate calculated across all infants from all departments."
   quartile_footnote: "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Device-Associated Incidence Density Rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected infections is greater than or equal to one according to the pooled Device-Associated Incidence Density Rate."
+  no_data: "No device-associated infection data available for this report settings."
 tbl-agent-per-infection-rate:
   tbl-cap: "Infectious agents detected in nosocomial infections"
   rate_name: "Agent-per-Infection Rate"
@@ -71,6 +87,7 @@ tbl-agent-per-infection-rate:
   n_footnote: "%s: The aggregated number of infectious agents in all infections."
   pooled_footnote: "%s: The Agent-per-Infection Rate calculated across all infants from all departments."
   quartile_footnote: "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Agent-per-Infection Rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected agents detected in infections is greater than or equal to one according to the pooled Agent-per-Infection Rate."
+  no_data: "No infectious agent data available for this report settings."
 tbl-abr-infection-rate:
   tbl-cap: "Nosocomial infections with resistant pathogens"
   rate_name: "Resistant pathogen infection rate"
@@ -79,6 +96,7 @@ tbl-abr-infection-rate:
   n_footnote: "%s: The aggregated number of antibiotic resistant pathogens in all infections."
   pooled_footnote: "%s: The resistant pathogen infection rate calculated across all infants from all departments."
   quartile_footnote: "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the resistant pathogen infection rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected infections with an agents is greater than or equal to one according to the pooled resistant pathogen infection rate."
+  no_data: "No resistant pathogen infection data available for this report settings."
 tbl-infectious-agent-detection-rate:
   tbl-cap: "Infections in which an infectious agent has been identified, including secondary BSI following the infection."
   rate_name: "Infectious Agent Detection Rate"
@@ -87,6 +105,7 @@ tbl-infectious-agent-detection-rate:
   n_footnote: "%s: The aggregated number of infections where at least one infectious agent was recorded."
   pooled_footnote: "%s: The Infectious Agent Detection Rate calculated across all infants from all departments."
   quartile_footnote: "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Infectious Agent Detection Rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected infections with an agents is greater than or equal to one according to the pooled Infectious Agent Detection Rate."
+  no_data: "No infectious agent detection data available for this report settings."
 tbl-resistance-test-rate:
   tbl-cap: "Antibiotic resistance diagnostics"
   if_3gcr: "in case of 3GCR"
@@ -97,6 +116,7 @@ tbl-resistance-test-rate:
   n_footnote: "%s: The aggregated number of antibiotic resistant pathogens that have a documented test for antibiotic resistance."
   pooled_footnote: "%s: The antibiotic resistance test rate calculated across all infants from all departments."
   quartile_footnote: "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the antibiotic resistance test rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected infections with an agents is greater than or equal to one according to the pooled antibiotic resistance test rate."
+  no_data: "No antibiotic resistance diagnostics data available for this report settings."
 tbl-secondary-bsi-rates:
   tbl-cap: "Secondary bloodstream infections"
   nec: "Necrotising Enterocolitis"
@@ -133,6 +153,7 @@ tbl-risk-density-rates:
   pooled_footnote: "%s: The Risk Density Rate calculated across all infants from all departments in the reference data."
   quartile_footnote: "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Risk Density Rates of the departments in the reference data. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of device days is greater than or equal to one according to the pooled Risk Density Rate."
   aware_footnote: "WHO AWaRe group (see %s). As cumulative treatment days for individual substances are recorded per patient, combination therapies using several substances on one day are counted as multiple days."
+  no_data: "No risk/protective factor data available for this report settings."
 tbl-surgical-procedure-rates:
   tbl-cap: "Surgical procedures by category"
   overall: "Overall"
@@ -151,3 +172,4 @@ tbl-surgical-procedure-rates:
   n_footnote: "%s: The aggregated number surgical procedures performed in all infants."
   pooled_footnote: "%s: The Surgical Procedure Rate calculated across all infants from all departments."
   quartile_footnote: "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Surgical Procedure Rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of procedures is greater than or equal to one according to the pooled Surgical Procedure Rate."
+  no_data: "No surgical procedure data available for this report settings."

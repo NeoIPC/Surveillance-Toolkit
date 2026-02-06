@@ -1,190 +1,229 @@
+::: {.content-visible when-meta="includeTableIntroductions"}
+```{r}
+#| output: asis
+include_localised("_tbl-intro-risk-density.qmd")
+```
+:::
+
 ```{r}
 #| label: tbl-risk-density-rates
 #| tbl-cap: !expr 'sR$`tbl-risk-density-rates`$`tbl-cap`'
 #| tbl-cap-location: top
 
-tbl <- benchmark_data$usage_density_rate_table |>
-  dplyr::select(-tidyselect::any_of("n_ref")) |>
-  dplyr::rename(
-      !!sR$table_headers$n := "days_own",
-      !!sR$table_headers$rate := "rate_own",
-      !!sR$table_headers$pooled := tidyselect::any_of("pooled_ref"),
-      !!sR$table_headers$q1 := tidyselect::any_of("q1_ref"),
-      !!sR$table_headers$q2 := tidyselect::any_of("q2_ref"),
-      !!sR$table_headers$q3 := tidyselect::any_of("q3_ref")
+check_outlier_interpretation <- FALSE
+
+# Conditionally render table only if department data exists
+if (!is.null(benchmark_data$usage_density_rate_table) &&
+    sum(benchmark_data$usage_density_rate_table$days_own, na.rm = TRUE) > 0) {
+
+  # Check if reference data columns exist
+  has_reference <- "pooled_ref" %in% names(benchmark_data$usage_density_rate_table)
+  check_outlier_interpretation <- has_reference
+
+  tbl <- benchmark_data$usage_density_rate_table |>
+    dplyr::select(-tidyselect::any_of("n_ref")) |>
+    dplyr::rename(
+        !!sR$table_headers$n := "days_own",
+        !!sR$table_headers$rate := "rate_own",
+        !!sR$table_headers$pooled := tidyselect::any_of("pooled_ref"),
+        !!sR$table_headers$q1 := tidyselect::any_of("q1_ref"),
+        !!sR$table_headers$q2 := tidyselect::any_of("q2_ref"),
+        !!sR$table_headers$q3 := tidyselect::any_of("q3_ref")
+      ) |>
+    dplyr::mutate(
+    factor = dplyr::case_match(
+      as.character(.data$factor),
+      "cvc" ~ sR$`tbl-risk-density-rates`$cvc,
+      "pvc" ~ sR$`tbl-risk-density-rates`$pvc,
+      "vs" ~ sR$`tbl-risk-density-rates`$any,
+      "inv" ~ sR$`tbl-risk-density-rates`$inv,
+      "niv" ~ sR$`tbl-risk-density-rates`$niv,
+      "human_milk" ~ sR$`tbl-risk-density-rates`$human_milk,
+      "probiotic" ~ sR$`tbl-risk-density-rates`$probiotic,
+      "kangaroo_care" ~ sR$`tbl-risk-density-rates`$kangaroo_care,
+      "ab" ~ sR$`tbl-risk-density-rates`$any_antibiotic,
+      "a" ~ sR$`tbl-risk-density-rates`$access,
+      "w" ~ sR$`tbl-risk-density-rates`$watch,
+      "r" ~ sR$`tbl-risk-density-rates`$reserve)) |>
+    gt(rowname_col = "factor") |>
+    sub_missing() |>
+    gt::tab_options(
+    latex.use_longtable = TRUE,
+    table.width = pct(100),
+    table.font.size = 13,
+    footnotes.marks = "extended"
     ) |>
-  dplyr::mutate(
-   factor = dplyr::case_match(
-     as.character(.data$factor),
-     "cvc" ~ sR$`tbl-risk-density-rates`$cvc,
-     "pvc" ~ sR$`tbl-risk-density-rates`$pvc,
-     "vs" ~ sR$`tbl-risk-density-rates`$any,
-     "inv" ~ sR$`tbl-risk-density-rates`$inv,
-     "niv" ~ sR$`tbl-risk-density-rates`$niv,
-     "human_milk" ~ sR$`tbl-risk-density-rates`$human_milk,
-     "probiotic" ~ sR$`tbl-risk-density-rates`$probiotic,
-     "kangaroo_care" ~ sR$`tbl-risk-density-rates`$kangaroo_care,
-     "ab" ~ sR$`tbl-risk-density-rates`$any_antibiotic,
-     "a" ~ sR$`tbl-risk-density-rates`$access,
-     "w" ~ sR$`tbl-risk-density-rates`$watch,
-     "r" ~ sR$`tbl-risk-density-rates`$reserve)) |>
-  gt(rowname_col = "factor") |>
-  sub_missing() |>
-  gt::tab_options(
-   latex.use_longtable = TRUE,
-   table.width = pct(100),
-   table.font.size = 13,
-   footnotes.marks = "extended"
-  ) |>
-  fmt_number(
-    columns = !sR$table_headers$n,
-    decimals = 1,
-    sep_mark = sR$digit_group_separator,
-    min_sep_threshold = 2,
-    locale = locale_gt) |>
-  fmt_integer(
-    columns = sR$table_headers$n,
-    sep_mark = sR$digit_group_separator,
-    min_sep_threshold = 2) |>
-  tab_row_group(
-    label = sR$`tbl-risk-density-rates`$vascular_catheter,
-    rows = tidyselect::any_of(c(
-      sR$`tbl-risk-density-rates`$cvc,
-      sR$`tbl-risk-density-rates`$pvc)),
-    id = "grp_vc") |>
-  tab_row_group(
-    label = sR$`tbl-risk-density-rates`$ventilatory_support,
-    rows = tidyselect::any_of(c(
-      sR$`tbl-risk-density-rates`$any,
-      sR$`tbl-risk-density-rates`$inv,
-      sR$`tbl-risk-density-rates`$niv)),
-    id = "grp_vs") |>
-  tab_row_group(
-    label = sR$`tbl-risk-density-rates`$other,
-    rows = tidyselect::any_of(c(
-      sR$`tbl-risk-density-rates`$human_milk,
-      sR$`tbl-risk-density-rates`$probiotic,
-      sR$`tbl-risk-density-rates`$kangaroo_care)),
-    id = "grp_othr") |>
-  tab_row_group(
-    label = sR$`tbl-risk-density-rates`$antibiotics,
-    rows = tidyselect::any_of(c(
-      sR$`tbl-risk-density-rates`$any_antibiotic,
-      sR$`tbl-risk-density-rates`$access,
-      sR$`tbl-risk-density-rates`$watch,
-      sR$`tbl-risk-density-rates`$reserve)),
-    id = "grp_ab") |>
-  row_group_order(groups = c("grp_vc", "grp_vs", "grp_ab", "grp_othr")) |>
-  tab_spanner(
-   label = sR$`tbl-risk-density-rates`$risk_density_rate,
-   columns = tidyselect::any_of(
-     c(
-     sR$table_headers$rate,
-     sR$table_headers$pooled,
-     sR$table_headers$q1,
-     sR$table_headers$q2,
-     sR$table_headers$q3)),
-   id = "risk_density_rate"
-  ) |>
-  tab_style(
-   style = cell_text(weight = "bold"),
-   locations = list(
-     cells_column_spanners(),
-     cells_column_labels(),
-     cells_row_groups()
-   )
-  ) |>
-  tab_footnote(
-   footnote = md(
-     paste0(
-       "$$\\text{",
-       sR$`tbl-risk-density-rates`$risk_density_rate,
-       "} = \\frac{\\text{",
-       sR$`tbl-risk-density-rates`$days_with_risk_factor,
-       "}}{\\text{",
-       sR$patient_days,
-       "}} \\times ",
-       format(100L),
-       "$$"
-       )),
-   locations = cells_column_spanners(spanners = "risk_density_rate")
-  ) |>
-  tab_footnote(
-    footnote = sprintf(
-      sR$`tbl-risk-density-rates`$n_footnote,
-      sR$table_headers$n),
-    locations = cells_column_labels(columns = sR$table_headers$n)) |>
-  tab_footnote(
-    footnote = sprintf(
-      sR$`tbl-risk-density-rates`$rate_footnote,
-      sR$table_headers$rate),
-    locations = cells_column_labels(columns = sR$table_headers$rate)) |>
-  tab_footnote(
-    footnote = md(
-      sprintf(
-        sR$`tbl-risk-density-rates`$aware_footnote,
-        "[aware.essentialmeds.org](https://aware.essentialmeds.org/)")),
-    locations = gt::cells_stub(
+    fmt_number(
+      columns = !sR$table_headers$n,
+      decimals = 1,
+      sep_mark = sR$digit_group_separator,
+      min_sep_threshold = 2,
+      locale = locale_gt) |>
+    fmt_integer(
+      columns = sR$table_headers$n,
+      sep_mark = sR$digit_group_separator,
+      min_sep_threshold = 2) |>
+    tab_row_group(
+      label = sR$`tbl-risk-density-rates`$vascular_catheter,
       rows = tidyselect::any_of(c(
+        sR$`tbl-risk-density-rates`$cvc,
+        sR$`tbl-risk-density-rates`$pvc)),
+      id = "grp_vc") |>
+    tab_row_group(
+      label = sR$`tbl-risk-density-rates`$ventilatory_support,
+      rows = tidyselect::any_of(c(
+        sR$`tbl-risk-density-rates`$any,
+        sR$`tbl-risk-density-rates`$inv,
+        sR$`tbl-risk-density-rates`$niv)),
+      id = "grp_vs") |>
+    tab_row_group(
+      label = sR$`tbl-risk-density-rates`$other,
+      rows = tidyselect::any_of(c(
+        sR$`tbl-risk-density-rates`$human_milk,
+        sR$`tbl-risk-density-rates`$probiotic,
+        sR$`tbl-risk-density-rates`$kangaroo_care)),
+      id = "grp_othr") |>
+    tab_row_group(
+      label = sR$`tbl-risk-density-rates`$antibiotics,
+      rows = tidyselect::any_of(c(
+        sR$`tbl-risk-density-rates`$any_antibiotic,
         sR$`tbl-risk-density-rates`$access,
         sR$`tbl-risk-density-rates`$watch,
-        sR$`tbl-risk-density-rates`$reserve)))
-  )
+        sR$`tbl-risk-density-rates`$reserve)),
+      id = "grp_ab") |>
+    row_group_order(groups = c("grp_vc", "grp_vs", "grp_ab", "grp_othr")) |>
+    tab_spanner(
+    label = sR$`tbl-risk-density-rates`$risk_density_rate,
+    columns = tidyselect::any_of(
+      c(
+      sR$table_headers$rate,
+      sR$table_headers$pooled,
+      sR$table_headers$q1,
+      sR$table_headers$q2,
+      sR$table_headers$q3)),
+    id = "risk_density_rate"
+    ) |>
+    tab_style(
+    style = cell_text(weight = "bold"),
+    locations = list(
+      cells_column_spanners(),
+      cells_column_labels(),
+      cells_row_groups()
+    )
+    ) |>
+    tab_footnote(
+    footnote = md(
+      paste0(
+        "$$\\text{",
+        sR$`tbl-risk-density-rates`$risk_density_rate,
+        "} = \\frac{\\text{",
+        sR$`tbl-risk-density-rates`$days_with_risk_factor,
+        "}}{\\text{",
+        sR$patient_days,
+        "}} \\times ",
+        format(100L),
+        "$$"
+        )),
+    locations = cells_column_spanners(spanners = "risk_density_rate")
+    ) |>
+    tab_footnote(
+      footnote = sprintf(
+        sR$`tbl-risk-density-rates`$n_footnote,
+        sR$table_headers$n),
+      locations = cells_column_labels(columns = sR$table_headers$n)) |>
+    tab_footnote(
+      footnote = sprintf(
+        sR$`tbl-risk-density-rates`$rate_footnote,
+        sR$table_headers$rate),
+      locations = cells_column_labels(columns = sR$table_headers$rate)) |>
+    tab_footnote(
+      footnote = md(
+        sprintf(
+          sR$`tbl-risk-density-rates`$aware_footnote,
+          "[aware.essentialmeds.org](https://aware.essentialmeds.org/)")),
+      locations = gt::cells_stub(
+        rows = tidyselect::any_of(c(
+          sR$`tbl-risk-density-rates`$access,
+          sR$`tbl-risk-density-rates`$watch,
+          sR$`tbl-risk-density-rates`$reserve)))
+    )
 
-if ("ref" %in% benchmark_data$dataset_names) {
-  tbl <- tbl |>
-  cols_width(
-   stub() ~ pct(34),
-   sR$table_headers$n ~ pct(13),
-   sR$table_headers$rate ~ pct(13),
-   sR$table_headers$pooled ~ pct(13),
-   sR$table_headers$q1 ~ pct(9),
-   sR$table_headers$q2 ~ pct(9),
-   sR$table_headers$q3 ~ pct(9)
-  ) |>
-  tab_spanner(
-    label = sR$department_data,
+  if ("ref" %in% benchmark_data$dataset_names) {
+    tbl <- tbl |>
+    cols_width(
+    stub() ~ pct(34),
+    sR$table_headers$n ~ pct(13),
+    sR$table_headers$rate ~ pct(13),
+    sR$table_headers$pooled ~ pct(13),
+    sR$table_headers$q1 ~ pct(9),
+    sR$table_headers$q2 ~ pct(9),
+    sR$table_headers$q3 ~ pct(9)
+    ) |>
+    tab_spanner(
+      label = sR$department_data,
+      columns = c(
+        sR$table_headers$n,
+        sR$table_headers$rate),
+      id = "department_data"
+    ) |>
+    tab_spanner(
+    label = sR$reference_data,
     columns = c(
-      sR$table_headers$n,
-      sR$table_headers$rate),
-    id = "department_data"
-  ) |>
-  tab_spanner(
-   label = sR$reference_data,
-   columns = c(
-     sR$table_headers$pooled,
-     sR$table_headers$q1,
-     sR$table_headers$q2,
-     sR$table_headers$q3),
-   id = "reference_data"
-  ) |>
-  tab_footnote(
-    footnote = sprintf(
-      sR$`tbl-risk-density-rates`$pooled_footnote,
-      sR$table_headers$pooled),
-    locations = cells_column_labels(columns = sR$table_headers$pooled)) |>
-  tab_footnote(
-    footnote = sprintf(
-      sR$`tbl-risk-density-rates`$quartile_footnote,
+      sR$table_headers$pooled,
       sR$table_headers$q1,
       sR$table_headers$q2,
-      sR$table_headers$q3,
-      sprintf("%i%s", 25L, sR$percent_symbol),
-      sprintf("%i%s", 50L, sR$percent_symbol),
-      sprintf("%i%s", 75L, sR$percent_symbol)
-    ),
-    locations = cells_column_labels(columns = c(
-      sR$table_headers$q1,
-      sR$table_headers$q2,
-      sR$table_headers$q3)))
-} else {
-  tbl <- tbl |>
-  cols_width(
-   stub() ~ pct(50),
-   sR$table_headers$n ~ pct(25),
-   sR$table_headers$rate ~ pct(25)
-  )
-}
+      sR$table_headers$q3),
+    id = "reference_data"
+    ) |>
+    tab_footnote(
+      footnote = sprintf(
+        sR$`tbl-risk-density-rates`$pooled_footnote,
+        sR$table_headers$pooled),
+      locations = cells_column_labels(columns = sR$table_headers$pooled)) |>
+    tab_footnote(
+      footnote = sprintf(
+        sR$`tbl-risk-density-rates`$quartile_footnote,
+        sR$table_headers$q1,
+        sR$table_headers$q2,
+        sR$table_headers$q3,
+        sprintf("%i%s", 25L, sR$percent_symbol),
+        sprintf("%i%s", 50L, sR$percent_symbol),
+        sprintf("%i%s", 75L, sR$percent_symbol)
+      ),
+      locations = cells_column_labels(columns = c(
+        sR$table_headers$q1,
+        sR$table_headers$q2,
+        sR$table_headers$q3)))
+  } else {
+    tbl <- tbl |>
+    cols_width(
+    stub() ~ pct(50),
+    sR$table_headers$n ~ pct(25),
+    sR$table_headers$rate ~ pct(25)
+    )
+  }
 
-tbl
+  tbl
+} else {
+  cat(sR$`tbl-risk-density-rates`$no_data)
+}
 ```
+
+::: {.content-visible when-meta="includeOutlierInterpretation"}
+```{r}
+#| output: asis
+if (check_outlier_interpretation) {
+  outliers <- detect_outliers(benchmark_data$usage_density_rate_table)
+  if (length(outliers$below_q1) > 0 || length(outliers$above_q3) > 0) {
+    grouped <- group_outliers(outliers, "risk_density")
+    outlier_text <- format_outlier_text(grouped, sR)
+    if (nchar(outlier_text) > 0) {
+      cat("\n\n::: {.callout-note}\n")
+      cat("## ", sR$outlier$heading, "\n\n")
+      cat(outlier_text, "\n")
+      cat(":::\n")
+    }
+  }
+}
+```
+:::

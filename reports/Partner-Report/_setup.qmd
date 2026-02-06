@@ -2,7 +2,10 @@
 #| message: false
 #| warning: false
 #| include: false
-# pak::pak("Brar/neoipcr@PartnerReport")  # Commented during development - using local installation
+# Commented during development - using local installation
+# pak::pak("Brar/neoipcr@PartnerReport")
+# Uncommented during development - using local installation
+devtools::load_all("../../../neoipcr", recompile = TRUE)
 library(tidyverse, warn.conflicts = FALSE, quietly = TRUE)
 library(yaml, warn.conflicts = FALSE, quietly = TRUE)
 library(smplot2, warn.conflicts = FALSE, quietly = TRUE)
@@ -16,6 +19,355 @@ library(neoipcr, warn.conflicts = FALSE, quietly = TRUE)
 #| include: false
 
 source("../common/helpers.R")
+
+# Outlier detection configuration - groups of related metrics
+outlier_groupings <- list(
+  device_days = list(
+    metrics = c("CVC", "PVC", "IV"),
+    template_low = "grouped_device_days_low",
+    template_high = "grouped_device_days_high"
+  ),
+  ventilation = list(
+    metrics = c("INV", "VAP"),
+    template_low = "grouped_ventilation_low",
+    template_high = "grouped_ventilation_high"
+  ),
+  infections = list(
+    metrics = c("BSI", "HAP", "NEC", "SI"),
+    template_low = "grouped_infections_low",
+    template_high = "grouped_infections_high"
+  ),
+  protective_factors = list(
+    metrics = c("human_milk", "kangaroo_care", "probiotic"),
+    template_low = "grouped_protective_factors_low",
+    template_high = "grouped_protective_factors_high"
+  )
+)
+
+# Detect outliers by comparing department values to reference quartiles
+detect_outliers <- function(table_data, identifier_col = NULL, combine_cols = NULL) {
+  if (is.null(table_data) || nrow(table_data) == 0) {
+    return(list(below_q1 = character(0), above_q3 = character(0)))
+  }
+  
+  # Check for required columns
+  if (!all(c("pooled_own", "q1_ref", "q3_ref") %in% names(table_data))) {
+    return(list(below_q1 = character(0), above_q3 = character(0)))
+  }
+  
+  # Get row identifiers
+  if (!is.null(combine_cols) && all(combine_cols %in% names(table_data))) {
+    # Combine multiple columns (e.g., "3gcr: Enterobacteriaceae")
+    identifiers <- apply(table_data[, combine_cols, drop = FALSE], 1, function(row) {
+      paste(row, collapse = ":")
+    })
+  } else if (!is.null(identifier_col) && identifier_col %in% names(table_data)) {
+    # Use specified column
+    identifiers <- as.character(table_data[[identifier_col]])
+  } else if (!is.null(rownames(table_data)) && !all(rownames(table_data) == as.character(1:nrow(table_data)))) {
+    # Use row names if available
+    identifiers <- rownames(table_data)
+  } else if (ncol(table_data) > 0) {
+    # Fall back to first column
+    identifiers <- as.character(table_data[[1]])
+  } else {
+    identifiers <- as.character(1:nrow(table_data))
+  }
+  
+  # Detect values below Q1
+  below_q1 <- identifiers[!is.na(table_data$pooled_own) & 
+                          !is.na(table_data$q1_ref) & 
+                          table_data$pooled_own < table_data$q1_ref]
+  
+  # Detect values above Q3
+  above_q3 <- identifiers[!is.na(table_data$pooled_own) & 
+                          !is.na(table_data$q3_ref) & 
+                          table_data$pooled_own > table_data$q3_ref]
+  
+  list(below_q1 = below_q1, above_q3 = above_q3)
+}
+
+# Group related outliers based on predefined groupings
+group_outliers <- function(outliers, table_name) {
+  if (length(outliers$below_q1) == 0 && length(outliers$above_q3) == 0) {
+    return(list())
+  }
+  
+  grouped <- list(
+    below_q1 = list(
+      grouped = list(),
+      ungrouped = outliers$below_q1
+    ),
+    above_q3 = list(
+      grouped = list(),
+      ungrouped = outliers$above_q3
+    )
+  )
+  
+  # Try to match and group outliers
+  for (group_name in names(outlier_groupings)) {
+    group_config <- outlier_groupings[[group_name]]
+    
+    # Check for matches in below_q1
+    matches_below <- intersect(outliers$below_q1, group_config$metrics)
+    if (length(matches_below) > 0) {
+      grouped$below_q1$grouped[[group_name]] <- list(
+        metrics = matches_below,
+        template = group_config$template_low
+      )
+      grouped$below_q1$ungrouped <- setdiff(grouped$below_q1$ungrouped, matches_below)
+    }
+    
+    # Check for matches in above_q3
+    matches_above <- intersect(outliers$above_q3, group_config$metrics)
+    if (length(matches_above) > 0) {
+      grouped$above_q3$grouped[[group_name]] <- list(
+        metrics = matches_above,
+        template = group_config$template_high
+      )
+      grouped$above_q3$ungrouped <- setdiff(grouped$above_q3$ungrouped, matches_above)
+    }
+  }
+  
+  return(grouped)
+}
+
+# Localize metric name by looking up in string resources
+localize_metric_name <- function(metric_id, sR) {
+  # Check for combined identifiers (e.g., "3gcr:Enterobacteriaceae")
+  if (grepl(":", metric_id)) {
+    parts <- strsplit(metric_id, ":", fixed = TRUE)[[1]]
+    if (length(parts) == 2) {
+      abr_key <- parts[1]
+      pathogen_name <- parts[2]
+      # Localize the resistance mechanism
+      localized_abr <- if (!is.null(sR[[abr_key]])) sR[[abr_key]] else abr_key
+      return(paste(localized_abr, pathogen_name, sep = ": "))
+    }
+  }
+  
+  # Try top-level keys first (infections: bsi, hap, nec, si, ssi)
+  if (!is.null(sR[[metric_id]])) {
+    return(sR[[metric_id]])
+  }
+  
+  # Try tbl-risk-density-rates (devices and protective factors: CVC, PVC, INV, human_milk, etc.)
+  if (!is.null(sR$`tbl-risk-density-rates`[[tolower(metric_id)]])) {
+    return(sR$`tbl-risk-density-rates`[[tolower(metric_id)]])
+  }
+  
+  # Try tbl-device-associated-incidence-density-rates
+  if (!is.null(sR$`tbl-device-associated-incidence-density-rates`[[tolower(metric_id)]])) {
+    return(sR$`tbl-device-associated-incidence-density-rates`[[tolower(metric_id)]])
+  }
+  
+  # Fall back to the raw identifier if no localization found
+  return(metric_id)
+}
+
+# Format outlier text for display in callout boxes
+format_outlier_text <- function(outlier_groups, sR) {
+  if (is.null(outlier_groups) || length(outlier_groups) == 0) {
+    return("")
+  }
+  
+  text_parts <- character(0)
+  
+  # Process grouped outliers below Q1
+  if (length(outlier_groups$below_q1$grouped) > 0) {
+    for (group_name in names(outlier_groups$below_q1$grouped)) {
+      group <- outlier_groups$below_q1$grouped[[group_name]]
+      template_key <- group$template
+      if (!is.null(sR$outlier[[template_key]])) {
+        text_parts <- c(text_parts, sR$outlier[[template_key]])
+      }
+    }
+  }
+  
+  # Process ungrouped outliers below Q1
+  if (length(outlier_groups$below_q1$ungrouped) > 0) {
+    localized_metrics <- sapply(outlier_groups$below_q1$ungrouped, localize_metric_name, sR = sR)
+    metrics_list <- paste(paste("*", localized_metrics), collapse = "\n")
+    if (!is.null(sR$outlier$below_q1_group)) {
+      # Split template at METRIC_LIST placeholder and rebuild with proper newlines
+      template_parts <- strsplit(sR$outlier$below_q1_group, "METRIC_LIST", fixed = TRUE)[[1]]
+      if (length(template_parts) == 2) {
+        text <- paste0(
+          trimws(template_parts[1]),
+          "\n\n",
+          metrics_list,
+          "\n\n",
+          trimws(template_parts[2])
+        )
+      } else {
+        text <- sR$outlier$below_q1_group
+      }
+      text_parts <- c(text_parts, text)
+    }
+  }
+  
+  # Process grouped outliers above Q3
+  if (length(outlier_groups$above_q3$grouped) > 0) {
+    for (group_name in names(outlier_groups$above_q3$grouped)) {
+      group <- outlier_groups$above_q3$grouped[[group_name]]
+      template_key <- group$template
+      if (!is.null(sR$outlier[[template_key]])) {
+        text_parts <- c(text_parts, sR$outlier[[template_key]])
+      }
+    }
+  }
+  
+  # Process ungrouped outliers above Q3
+  if (length(outlier_groups$above_q3$ungrouped) > 0) {
+    localized_metrics <- sapply(outlier_groups$above_q3$ungrouped, localize_metric_name, sR = sR)
+    metrics_list <- paste(paste("*", localized_metrics), collapse = "\n")
+    if (!is.null(sR$outlier$above_q3_group)) {
+      # Split template at METRIC_LIST placeholder and rebuild with proper newlines
+      template_parts <- strsplit(sR$outlier$above_q3_group, "METRIC_LIST", fixed = TRUE)[[1]]
+      if (length(template_parts) == 2) {
+        text <- paste0(
+          trimws(template_parts[1]),
+          "\n\n",
+          metrics_list,
+          "\n\n",
+          trimws(template_parts[2])
+        )
+      } else {
+        text <- sR$outlier$above_q3_group
+      }
+      text_parts <- c(text_parts, text)
+    }
+  }
+  
+  # Combine all text parts
+  if (length(text_parts) > 0) {
+    paste(text_parts, collapse = "\n\n")
+  } else {
+    ""
+  }
+}
+
+# Interpret distribution comparison for figures
+interpret_distribution <- function(figure_data, metric_type, sR) {
+  if (is.null(figure_data)) {
+    return("")
+  }
+
+  location_params <- figure_data$location_parameters
+  if (is.null(location_params) ||
+      nrow(location_params) < 2 ||
+      !"ref" %in% location_params$dataset) {
+    return("")
+  }
+
+  own_data <- location_params[location_params$dataset == "own", ]
+  ref_data <- location_params[location_params$dataset == "ref", ]
+  
+  if (nrow(own_data) == 0 || nrow(ref_data) == 0) {
+    return("")
+  }
+
+  text_parts <- character(0)
+
+  # Compare medians (using q2 which is median)
+  own_median <- own_data$q2
+  ref_median <- ref_data$q2
+
+  # Calculate difference as percentage of reference median
+  median_diff_pct <- ((own_median - ref_median) / ref_median) * 100
+
+  # Determine median comparison (using 5% threshold for "similar")
+  if (abs(median_diff_pct) < 5) {
+    template_key <- paste0(metric_type, "_similar_median")
+  } else if (own_median < ref_median) {
+    template_key <- paste0(metric_type, "_lower_median")
+  } else {
+    template_key <- paste0(metric_type, "_higher_median")
+  }
+
+  if (!is.null(sR$figure_interpretation[[template_key]])) {
+    text_parts <- c(text_parts, sR$figure_interpretation[[template_key]])
+  }
+
+  # Compare distribution spread (IQR)
+  own_iqr <- own_data$q3 - own_data$q1
+  ref_iqr <- ref_data$q3 - ref_data$q1
+  iqr_diff_pct <- ((own_iqr - ref_iqr) / ref_iqr) * 100
+
+  # Note distribution width difference if substantial (>20% difference)
+  if (abs(iqr_diff_pct) > 20) {
+    if (own_iqr < ref_iqr) {
+      if (!is.null(sR$figure_interpretation$narrower_distribution)) {
+        text_parts <- c(text_parts, sR$figure_interpretation$narrower_distribution)
+      }
+    } else {
+      if (!is.null(sR$figure_interpretation$wider_distribution)) {
+        text_parts <- c(text_parts, sR$figure_interpretation$wider_distribution)
+      }
+    }
+  }
+
+  # Combine all text parts
+  if (length(text_parts) > 0) {
+    paste(text_parts, collapse = " ")
+  } else {
+    ""
+  }
+}
+
+#' Detect if own and reference data have different World Bank classes (Partner Report)
+#' @param own_countries Tibble with own countries (name, wb_class)
+#' @param ref_countries Tibble with reference countries (name, wb_class)
+#' @param include_wb_class Whether WB class is included ("no", "pseudonymised", "yes")
+#' @return List with has_mismatch (logical) and details (character) or NULL
+detect_wb_class_mismatch <- function(own_countries, ref_countries, include_wb_class) {
+  # Only detect mismatches when include_wb_class = "yes"
+  if (include_wb_class != "yes" ||
+      is.null(own_countries) ||
+      is.null(ref_countries)) {
+    return(NULL)
+  }
+
+  # For character vectors, no WB class info available
+  if (is.character(own_countries) || is.character(ref_countries) ||
+      !("wb_class" %in% names(own_countries)) ||
+      !("wb_class" %in% names(ref_countries))) {
+    return(NULL)
+  }
+
+  # Get unique WB classes
+  own_classes <- own_countries |>
+    dplyr::pull("wb_class") |>
+    as.character() |>
+    unique() |>
+    sort()
+
+  ref_classes <- ref_countries |>
+    dplyr::pull("wb_class") |>
+    as.character() |>
+    unique() |>
+    sort()
+
+  # Check if they differ
+  has_mismatch <- !setequal(own_classes, ref_classes)
+
+  if (!has_mismatch) {
+    return(list(has_mismatch = FALSE))
+  }
+
+  # Get localized display names for the classes
+  own_class_names <- get_localised_world_bank_class_names(own_classes) |>
+    paste(collapse = ", ")
+
+  ref_class_names <- get_localised_world_bank_class_names(ref_classes) |>
+    paste(collapse = ", ")
+
+  return(list(
+    has_mismatch = TRUE,
+    own_classes = own_class_names,
+    ref_classes = ref_class_names
+  ))
+}
 
 ```
 
@@ -79,6 +431,7 @@ get_unit_data <- function() suppressWarnings(
       gestational_age_from = typedParams$GestationWeeksFrom,
       gestational_age_to = typedParams$GestationWeeksTo,
       include_ineligible_patients = typedParams$IncludeNonCorePatients,
+      include_world_bank_class = "yes",
       include_country = "yes",
       include_department = "yes"
       ))) |>
@@ -98,8 +451,9 @@ benchmark_data <- if (is.null(reference_data)) {
 ```{r Preparing localised data}
 #| include: false
 
-# Format own department metadata
-dR_own <- list(
+# Format department metadata
+dR <- list(
+  own = list(
   creationTimestamp = format(
     lubridate::now("UTC"),
     format = "%x %X",
@@ -118,28 +472,25 @@ dR_own <- list(
       tz = "UTC",
       usetz = TRUE)
   },
-  analysisPeriod = paste(
-    format(
-      benchmark_data$metadata$own$dataset_options$surveillance_end_from,
-      format = "%x"),
-    format(
-      min(
-        if (!is.null(benchmark_data$metadata$own$data_up_to)) {
-          lubridate::as_date(benchmark_data$metadata$own$data_up_to)
-        } else {
-          Sys.Date()
-        },
-        benchmark_data$metadata$own$dataset_options$surveillance_end_to
-        ),
-      format = "%x"
-      ),
-    sep = " - "),
-  countriesList = paste0(
-    benchmark_data$metadata$own$countries |>
-      as.character() |>
-      get_localised_country_names() |>
-      stringr::str_sort(locale = locale_stringi),
-    collapse = ", "),
+  effectiveAnalysisPeriod = if (!is.null(benchmark_data$metadata$own$effective_analysis_period)) {
+    paste(
+      format(benchmark_data$metadata$own$effective_analysis_period$from, format = "%x"),
+      format(benchmark_data$metadata$own$effective_analysis_period$to, format = "%x"),
+      sep = " - "
+    )
+  } else {
+    "Not available"
+  },
+  countriesList = {
+    countries_data <- benchmark_data$metadata$own$countries
+
+    if (!is.data.frame(countries_data)) {
+      countries_data <- tibble::tibble(name = countries_data)
+    }
+
+    # Format with or without WB class
+    format_countries(countries_data)
+  },
   birthweightFilter = if(
     is.null(benchmark_data$metadata$own$dataset_options$birth_weight_from) &&
     is.null(benchmark_data$metadata$own$dataset_options$birth_weight_to)) {
@@ -209,11 +560,14 @@ dR_own <- list(
   numberOfDepartments = format_integer(benchmark_data$n_departments$n_own),
   numberOfPatients = format_integer(benchmark_data$n_patients$total_own),
   numberOfAdmissions = format_integer(benchmark_data$n_enrollments$total_own),
-  sumOfPatientDays = format_integer(benchmark_data$n_patient_days$total_own)
-)
-
-# Format reference metadata if available
-dR_ref <- if ("ref" %in% benchmark_data$dataset_names) {
+  sumOfPatientDays = format_integer(benchmark_data$n_patient_days$total_own),
+  averageSurveillancePeriod = format(
+    benchmark_data$n_patient_days$total_own / benchmark_data$n_patients$total_own,
+    digits = 2,
+    nsmall = 1,
+    scientific = FALSE)
+  ),
+  ref = if ("ref" %in% benchmark_data$dataset_names) {
   list(
     creationTimestamp = format(
       benchmark_data$metadata$ref$calculated,
@@ -225,24 +579,25 @@ dR_ref <- if ("ref" %in% benchmark_data$dataset_names) {
       format = "%x %X",
       tz = "UTC",
       usetz = TRUE),
-    analysisPeriod = paste(
-      format(
-        benchmark_data$metadata$ref$dataset_options$surveillance_end_from,
-        format = "%x"),
-      format(
-        min(
-          lubridate::as_date(benchmark_data$metadata$ref$data_up_to),
-          benchmark_data$metadata$ref$dataset_options$surveillance_end_to
-          ),
-        format = "%x"
-        ),
-      sep = " - "),
-    countriesList = paste0(
-      benchmark_data$metadata$ref$countries |>
-        as.character() |>
-        get_localised_country_names() |>
-        stringr::str_sort(locale = locale_stringi),
-      collapse = ", "),
+    effectiveAnalysisPeriod = if (!is.null(benchmark_data$metadata$ref$effective_analysis_period)) {
+      paste(
+        format(benchmark_data$metadata$ref$effective_analysis_period$from, format = "%x"),
+        format(benchmark_data$metadata$ref$effective_analysis_period$to, format = "%x"),
+        sep = " - "
+      )
+    } else {
+      "Not available"
+    },
+    countriesList = {
+      countries_data <- benchmark_data$metadata$ref$countries
+
+      if (!is.data.frame(countries_data)) {
+        countries_data <- tibble::tibble(name = countries_data)
+      }
+
+      # Format with or without WB class
+      format_countries(countries_data)
+    },
     birthweightFilter = if(
       is.null(benchmark_data$metadata$ref$dataset_options$birth_weight_from) &&
       is.null(benchmark_data$metadata$ref$dataset_options$birth_weight_to)) {
@@ -312,18 +667,24 @@ dR_ref <- if ("ref" %in% benchmark_data$dataset_names) {
     numberOfDepartments = format_integer(benchmark_data$n_departments$n_ref),
     numberOfPatients = format_integer(benchmark_data$n_patients$total_ref),
     numberOfAdmissions = format_integer(benchmark_data$n_enrollments$total_ref),
-    sumOfPatientDays = format_integer(benchmark_data$n_patient_days$total_ref)
+    sumOfPatientDays = format_integer(benchmark_data$n_patient_days$total_ref),
+    averageSurveillancePeriod = format(
+      benchmark_data$n_patient_days$total_own / benchmark_data$n_patients$total_own,
+      digits = 2,
+      nsmall = 1,
+      scientific = FALSE)
   )
-} else {
-  NULL
-}
+  } else {
+    NULL
+  }
+)
 
 # Detect metadata differences for highlighting
-metadata_diff <- if (!is.null(dR_ref)) {
+metadata_diff <- if (!is.null(dR$ref)) {
   list(
-    birthweight_differs = (dR_own$birthweightFilter != dR_ref$birthweightFilter),
-    gestational_age_differs = (dR_own$gestationalAgeFilter != dR_ref$gestationalAgeFilter),
-    countries_differ = (dR_own$countriesList != dR_ref$countriesList)
+    birthweight_differs = (dR$own$birthweightFilter != dR$ref$birthweightFilter),
+    gestational_age_differs = (dR$own$gestationalAgeFilter != dR$ref$gestationalAgeFilter),
+    countries_differ = (dR$own$countriesList != dR$ref$countriesList)
   )
 } else {
   list(
@@ -331,6 +692,17 @@ metadata_diff <- if (!is.null(dR_ref)) {
     gestational_age_differs = FALSE,
     countries_differ = FALSE
   )
+}
+
+# Detect World Bank class mismatches
+wb_class_mismatch <- if (!is.null(dR$ref)) {
+  detect_wb_class_mismatch(
+    own_countries = benchmark_data$metadata$own$countries,
+    ref_countries = benchmark_data$metadata$ref$countries,
+    include_wb_class = benchmark_data$metadata$own$dataset_options$include_world_bank_class
+  )
+} else {
+  NULL
 }
 
 ```

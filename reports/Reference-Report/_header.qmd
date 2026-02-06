@@ -1,50 +1,66 @@
-`{r} sR$headerList$createdAt`:
-
-:   `{r} dR$creationTimestamp`
-
-`{r} sR$headerList$dataUpTo`:
-
-:   `{r} dR$dataUpToTimestamp`
-
-`{r} sR$headerList$analysisPeriod`:
-
-:   `{r} dR$analysisPeriod`
-
-`{r} if(length(reference_data$metadata$countries) > 1){sR$headerList$countries}else{sR$headerList$country}`:
-
-:   `{r} dR$countriesList`
-
-`{r} sR$headerList$birthweightFilter`:
-
-:   `{r} dR$birthweightFilter`
-
-`{r} sR$headerList$gestationalAgeFilter`:
-
-:   `{r} dR$gestationalAgeFilter`
-
-```{r Countries hint}
+```{r Create header as definition list}
 #| echo: false
 #| output: asis
 
+cat(sep = "\n", c(
+  paste0(sR$headerList$createdAt,":"),
+  "",
+  paste0(":   ",dR$creationTimestamp),
+  "",
+  paste0(sR$headerList$dataUpTo,":"),
+  "",
+  paste0(":   ",dR$dataUpToTimestamp),
+  "",
+  paste0(sR$headerList$effectiveAnalysisPeriod,":"),
+  "",
+  paste0(":   ",dR$effectiveAnalysisPeriod, "^[", sR$headerList$effectiveAnalysisPeriodFootnote, "]"),
+  "",
+  paste0(if(length(reference_data$metadata$countries) > 1)sR$headerList$countries else sR$headerList$country, ":"),
+  "",
+  paste0(":   ",dR$countriesList),
+  "",
+  paste0(sR$headerList$birthweightFilter,":"),
+  "",
+  paste0(":   ",dR$birthweightFilter),
+  "",
+  paste0(sR$headerList$gestationalAgeFilter,":"),
+  "",
+  paste0(":   ",dR$gestationalAgeFilter)
+))
+```
+
+```{r Show dataset composition callout}
+#| echo: false
+#| output: asis
+
+# Determine base message based on country count
 if(length(reference_data$metadata$countries) > 1){
-  cat(sep = "\n", c(
-    "::: {.callout-note}",
-    paste0("## ", sR$headerList$multiCountryHintHeader),
-    "",
-    sR$headerList$multiCountryHint,
-    "",
-    sR$headerList$multiCountryHintGoal,
-    ":::"))
+  base_message <- sR$headerList$multiCountryDatasetHint
 } else {
-  cat(sep = "\n", c(
-    "::: {.callout-note}",
-    paste0("## ", sR$headerList$singleCountryHintHeader),
-    "",
-    sR$headerList$singleCountryHint,
-    "",
-    sR$headerList$singleCountryRepresentativenessHint,
-    ":::"))
+  base_message <- sR$headerList$singleCountryDatasetHint
 }
+
+# Add World Bank class mixing addendum if applicable
+if (!is.null(mixed_wb_classes) && mixed_wb_classes$has_mixed) {
+  full_message <- paste0(
+    base_message,
+    " ",
+    sprintf(
+      sR$headerList$mixedWbClassAddendum,
+      mixed_wb_classes$class_names
+    )
+  )
+} else {
+  full_message <- base_message
+}
+
+cat(sep = "\n", c(
+  "::: {.callout-tip}",
+  paste0("## ", sR$headerList$datasetCompositionHeader),
+  "",
+  full_message,
+  ":::"
+))
 ```
 
 ```{r Custom report hint}

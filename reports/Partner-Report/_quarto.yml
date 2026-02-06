@@ -18,6 +18,8 @@ includeAntibioticResistanceTestRateTable: false
 includeRiskDensityRateTable: true
 includeSurgicalProcedureRateTable: true
 includeSecondaryBsiRateTable: false
+includeTableIntroductions: true
+includeOutlierInterpretation: true
 execute:
   error: true
 filters: ["../filters/pandoc-quotes.lua"]

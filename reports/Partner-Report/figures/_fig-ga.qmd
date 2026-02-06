@@ -1,6 +1,15 @@
+:::  {.content-visible when-meta="includeTableIntroductions"}
+```{r}
+#| output: asis
+include_localised("_fig-intro-gestational-age.qmd")
+```
+:::
+
 ```{r}
 #| label: fig-ga
 #| fig-cap: !expr 'paste(sR$`fig-ga`$`fig-cap`[[1]], sprintf(if("ref" %in% benchmark_data$dataset_names) sR$`fig-ga`$`fig-cap`[[2]]$bnch else sR$`fig-ga`$`fig-cap`[[2]]$`no-bnch`, sprintf("%i%s%s", 7L, sR$unit_separator, sR$day)), sprintf(if("ref" %in% benchmark_data$dataset_names) sR$`fig-ga`$`fig-cap`[[3]]$bnch else sR$`fig-ga`$`fig-cap`[[3]]$`no-bnch`, sprintf("%i%s", 25L, sR$percent_symbol), sprintf("%i%s", 50L, sR$percent_symbol), sprintf("%i%s", 75L, sR$percent_symbol)))'
+
+check_figure_interpretation <- "ref" %in% benchmark_data$dataset_names
 
 week_breaks <- function(x) {
   pretty(
@@ -116,3 +125,23 @@ B_plot <- ggplot(
 
 A_plot / B_plot
 ```
+
+::: {.content-visible when-meta="includeOutlierInterpretation"}
+```{r}
+#| output: asis
+if (check_figure_interpretation) {
+  interpretation_text <- interpret_distribution(
+    benchmark_data$gestational_age_figure,
+    "gestational_age",
+    sR
+  )
+
+  if (nchar(interpretation_text) > 0) {
+    cat("::: {.callout-note}\n")
+    cat("##", sR$figure_interpretation$heading, "\n\n")
+    cat(interpretation_text, "\n")
+    cat(":::\n")
+  }
+}
+```
+:::

@@ -58,22 +58,22 @@ get_string_resources <- function(x) {
     yaml::read_yaml("../common.yaml", handlers = handlers),
     yaml::read_yaml("content/_sR.yaml", handlers = handlers)
   )
-  
+
   yaml_path <- paste0("../common.", localeObj$language, ".yaml")
   if(file.exists(yaml_path)) sR <- modifyList(
     sR,
     yaml::read_yaml(file = yaml_path, handlers = handlers))
-  
+
   yaml_path <- paste0("../common.", localeObj$language, "_", localeObj$territory, ".yaml")
   if(file.exists(yaml_path)) sR <- modifyList(
     sR,
     yaml::read_yaml(file = yaml_path, handlers = handlers))
-  
+
   yaml_path <- paste0("content.", localeObj$language, "/_sR.yaml")
   if(file.exists(yaml_path)) sR <- modifyList(
     sR,
     yaml::read_yaml(file = yaml_path, handlers = handlers))
-  
+
   yaml_path <- paste0("content.", localeObj$language, "_", localeObj$territory, "/_sR.yaml")
   if(file.exists(yaml_path)) sR <- modifyList(
     sR,
@@ -113,7 +113,16 @@ get_localised_country_names <- function(x) {
   x |>
     purrr::map_chr(
       \(x) {
-        val <- sR$countryNames[[stringr::str_replace_all(x, " ", "")]]
+        val <- sR$countryNames[[stringr::str_replace_all(as.character(x), " ", "")]]
+        if(is.null(val)) x else val
+      })
+}
+
+get_localised_world_bank_class_names <- function(x) {
+  x |>
+    purrr::map_chr(
+      \(x) {
+        val <- sR$worldBankClassNames[[as.character(x)]]
         if(is.null(val)) x else val
       })
 }
@@ -152,6 +161,7 @@ get_dataset_options <- function(
     defaultPatientFilter,
     validationExceptionFile
     )  neoipcr::dhis2_dataset_options(
+      include_world_bank_class = "yes",
       include_country = "yes",
       include_department = "pseudonymised",
       surveillance_end_from = lubridate::as_date(
@@ -174,3 +184,40 @@ get_dataset_options <- function(
 #' @return formatted string
 format_integer <- function(x, big_mark = sR$digit_group_separator)
   dplyr::if_else(x < 10000, format(as.integer(x), big.mark = ""), format(as.integer(x), big.mark = big_mark))
+
+#' Format countries grouped by World Bank class
+#' @param countries Tibble with displayName and optionally wb_class_name
+#' @param include_wb_class Whether to include WB class ("no", "pseudonymised", "yes")
+#' @return Formatted string with countries grouped by WB class, or simple list if not showing WB class
+format_countries <- function(countries) {
+  if (is.null(countries)) {
+    return(NULL)
+  }
+
+  countries <- countries |>
+    dplyr::mutate(
+      name = get_localised_country_names(.data$name))
+
+  # Group by WB class and format
+  if("wb_class" %in% rlang::names2(countries)) {
+    formatted <- countries |>
+      dplyr::arrange(.data$wb_class, .data$name) |>
+      dplyr::group_by(
+        wb_class = get_localised_world_bank_class_names(.data$wb_class)) |>
+      dplyr::summarise(
+        country_list = paste(.data$name, collapse = ", "),
+        .groups = "drop")|>
+      dplyr::mutate(
+        formatted = paste0(.data$wb_class, ": ", .data$country_list)
+      ) |>
+      dplyr::pull("formatted") |>
+      paste(collapse = "; ")
+  } else {
+    formatted <- countries |>
+      dplyr::arrange(.data$name) |>
+      dplyr::pull("name") |>
+      paste(collapse = ", ")
+  }
+
+  return(formatted)
+}

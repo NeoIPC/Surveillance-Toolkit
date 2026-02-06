@@ -264,6 +264,7 @@ getDatasetOptions <- function(
   neoipcr::dhis2_dataset_options(
     include_country = "yes",
     include_department = "pseudonymised",
+    include_world_bank_class = "yes",
     surveillance_end_from = as.Date(
       if (is.null(reportingPeriodFrom)) {
         "2024-01-01"

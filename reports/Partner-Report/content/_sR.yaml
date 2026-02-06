@@ -6,7 +6,8 @@ department_data: "Your data"
 headerList:
   createdAt: Created
   dataUpTo: Data up to
-  analysisPeriod: Analysis period
+  effectiveAnalysisPeriod: Effective analysis period
+  effectiveAnalysisPeriodFootnote: "The effective analysis period is the time span between the surveillance end date of the earliest included patient and the surveillance end date of the latest included patient in the dataset."
   country: Country
   countries: Countries
   birthweightFilter: Birth weight filter
@@ -18,11 +19,12 @@ headerList:
   numberOfAdmissions: Number of patient admissions
   sumOfPatientDays: Sum of patient days
   averageSurveillancePeriod: Average surveillance period per patient
-  multiCountryHintHeader: Multinational benchmark
-  multiCountryHint: The reference data aggregates information from neonatal units in several countries. This means that, while it reflects a broad spectrum of care structures, comparability may be limited due to sometimes very different healthcare systems and resources available.
-  singleCountryHintHeader: National benchmark
-  singleCountryHint: The reference data presents information from neonatal units in a single country. This provides a more relevant benchmark due to the relative homogeneity of the healthcare system.
-  countryMismatchHint: Your unit's country differs from the reference data countries. This may limit comparability.
+  benchmarkComparabilityHeader: Benchmark composition
+  singleCountryBenchmarkHint: The reference data presents information from neonatal units in a single country. While this provides a more relevant benchmark due to the relative homogeneity of the healthcare system, your unit's country differs from the reference country, which may affect comparability.
+  multiCountryBenchmarkHint: The reference data aggregates information from neonatal units in several countries. While ideally a single-country benchmark would be preferable, aggregating data across multiple countries is pragmatically necessary when sufficient data from a single country is not available. This means that comparability may be limited due to different healthcare systems and resources available in different countries.
+  wbClassMismatchAddendum: "Additionally, the World Bank income classifications differ between your data and the reference data (%s: %s; %s: %s), which may indicate even more substantial differences in healthcare system resources and infrastructure, further affecting comparability of certain indicators."
+  ownDataLabel: Your data
+  refDataLabel: Reference data
   filterDiffersFootnote: "Note: This filter differs from the reference dataset."
   specialAnalysisHint: This is a special analysis that
   includesTestDepartments: includes test units
@@ -64,3 +66,94 @@ tbl-secondary-bsi-rates:
 tbl-resistance-test-rate:
   n_footnote: "%s: The aggregated number of eligible pathogens in your unit's infants."
   rate_footnote: "%s: The Antibiotic Resistance Test Rate for your unit (percentage of eligible pathogens with documented resistance testing)."
+
+outlier:
+  heading: "Comparison with reference data"
+  below_q1_single: >
+    Your department's METRIC_NAME is below the 25th percentile of the reference population.
+    This may indicate effective practices that could be shared, or alternatively, may warrant
+    investigation to ensure adequate screening and detection.
+  above_q3_single: >
+    Your department's METRIC_NAME is above the 75th percentile of the reference population.
+    This elevated rate warrants review to identify potential factors contributing to this
+    difference and to evaluate whether additional prevention measures may be beneficial.
+  below_q1_group: |
+    The following metrics are below the 25th percentile of the reference population:
+    METRIC_LIST
+    These lower values may reflect successful prevention strategies or reduced exposure to risk factors in your unit.
+  above_q3_group: |
+    The following metrics are above the 75th percentile of the reference population:
+    METRIC_LIST
+    These elevated values warrant further investigation to identify potential causes and opportunities for targeted interventions.
+  grouped_device_days_low: >
+    Your device utilization (including CVC, PVC, and other vascular access) is notably lower
+    than reference ranges. This reduced device exposure may contribute to lower infection rates
+    and reflects judicious use of invasive procedures.
+  grouped_device_days_high: >
+    Your device utilization (including CVC, PVC, and other vascular access) is notably higher
+    than reference ranges. This increased exposure to invasive devices may elevate infection
+    risk and warrants review of indication criteria and removal protocols.
+  grouped_ventilation_low: >
+    Your ventilation-related metrics (including INV days and VAP rates) are below reference
+    ranges. This may indicate effective respiratory management strategies, less severe patient
+    acuity, or successful implementation of ventilator weaning protocols.
+  grouped_ventilation_high: >
+    Your ventilation-related metrics (including INV days and VAP rates) are above reference
+    ranges. This may reflect higher patient acuity, differences in ventilation practices, or
+    opportunities to enhance ventilator-associated pneumonia prevention bundles.
+  grouped_infections_low: >
+    Your infection rates (including BSI, HAP, and NEC) are below the reference population's
+    25th percentile. This favorable outcome suggests effective implementation of infection
+    prevention strategies and warrants documentation of successful practices.
+  grouped_infections_high: >
+    Your infection rates (including BSI, HAP, and NEC) exceed the reference population's 75th
+    percentile. This requires comprehensive review of surveillance definitions, hand hygiene
+    compliance, environmental cleaning, and other core infection prevention practices.
+  grouped_protective_factors_low: >
+    Your utilization of protective factors (such as human milk, kangaroo care, and probiotics)
+    is below reference ranges. Increasing these evidence-based interventions may help reduce
+    infection risk and improve outcomes.
+  grouped_protective_factors_high: >
+    Your utilization of protective factors (such as human milk, kangaroo care, and probiotics)
+    exceeds reference ranges. This demonstrates strong implementation of evidence-based protective
+    interventions that may contribute to favorable infection outcomes.
+  caution_limited_data: >
+    Note: The reference data is based on fewer than 5 contributing departments. Comparisons
+    should be interpreted with caution due to limited sample size.
+
+figure_interpretation:
+  heading: "Comparison with reference population"
+  birth_weight_lower_median: >
+    Your unit's median birth weight is lower than the reference population, suggesting you care
+    for a higher-risk population with more very low birth weight infants. This case mix difference
+    should be considered when interpreting infection rates and other clinical outcomes.
+  birth_weight_higher_median: >
+    Your unit's median birth weight is higher than the reference population, indicating a relatively
+    less vulnerable patient population in terms of birth weight. This difference in case mix may
+    contribute to variations in infection rates and other outcomes.
+  birth_weight_similar_median: >
+    Your unit's median birth weight is similar to the reference population, suggesting comparable
+    case mix in terms of birth weight distribution. This facilitates direct comparison of infection
+    rates and clinical outcomes.
+  gestational_age_lower_median: >
+    Your unit's median gestational age is lower than the reference population, indicating you care
+    for more extremely premature infants. This higher-risk patient population should be considered
+    when comparing infection rates and clinical outcomes.
+  gestational_age_higher_median: >
+    Your unit's median gestational age is higher than the reference population, suggesting a
+    relatively more mature patient population. This case mix difference may influence infection
+    rates and other clinical outcomes.
+  gestational_age_similar_median: >
+    Your unit's median gestational age is similar to the reference population, indicating comparable
+    patient maturity profiles. This similarity in case mix facilitates meaningful comparison of
+    infection prevention outcomes.
+  narrower_distribution: >
+    Your unit shows a narrower distribution (smaller interquartile range), suggesting more
+    homogeneous patient characteristics compared to the reference population.
+  wider_distribution: >
+    Your unit shows a wider distribution (larger interquartile range), indicating more heterogeneous
+    patient characteristics compared to the reference population.
+  no_outliers: >
+    All metrics fall within the interquartile range (25th-75th percentile) of the reference
+    population, suggesting performance consistent with typical practice patterns.
+
