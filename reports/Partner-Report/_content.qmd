@@ -2,19 +2,30 @@
 
 {{< include _header.qmd >}}
 
-::: {.content-visible when-meta="includeIntroduction"}
-{{< pagebreak >}}
+::: {.content-visible when-format="pdf"}
+\FloatBarrier
+:::
+
+::: {.content-visible when-meta="includeIntroductionTexts"}
 
 ```{r}
 #| output: asis
 include_localised("_introduction.Rmd")
 ```
 
+:::
+
 {{< include content/_introduction-list.qmd >}}
 
 ::: {.content-visible when-format="pdf"}
 \FloatBarrier
 :::
+
+::: {.content-visible when-meta="includeIntroductionTexts"}
+```{r}
+#| output: asis
+include_localised("_section-patient-population.Rmd")
+```
 :::
 
 ::: {.content-visible when-meta="includeBirthWeightFigure"}
@@ -27,6 +38,17 @@ include_localised("_introduction.Rmd")
 {{< pagebreak >}}
 :::
 
+::: {.content-visible when-format="pdf"}
+\FloatBarrier
+:::
+
+::: {.content-visible when-meta="includeIntroductionTexts"}
+```{r}
+#| output: asis
+include_localised("_section-nosocomial.Rmd")
+```
+:::
+
 ::: {.content-visible when-meta="includeIncidenceDensityTable"}
 {{< include tables/_tbl-incidence-density-rates.qmd >}}
 
@@ -37,6 +59,17 @@ include_localised("_introduction.Rmd")
 {{< include tables/_tbl-device-associated-incidence-density-rates.qmd >}}
 
 {{< pagebreak >}}
+:::
+
+::: {.content-visible when-format="pdf"}
+\FloatBarrier
+:::
+
+::: {.content-visible when-meta="includeIntroductionTexts"}
+```{r}
+#| output: asis
+include_localised("_section-infectious-agents.Rmd")
+```
 :::
 
 ::: {.content-visible when-meta="includeAgentPerInfectionRateTable"}
@@ -63,18 +96,40 @@ include_localised("_introduction.Rmd")
 {{< pagebreak >}}
 :::
 
+::: {.content-visible when-meta="includeSecondaryBsiRateTable"}
+{{< include tables/_tbl-secondary-bsi-rates.qmd >}}
+
+{{< pagebreak >}}
+:::
+
+::: {.content-visible when-format="pdf"}
+\FloatBarrier
+:::
+
+::: {.content-visible when-meta="includeIntroductionTexts"}
+```{r}
+#| output: asis
+include_localised("_section-risk-factors.Rmd")
+```
+:::
+
 ::: {.content-visible when-meta="includeRiskDensityRateTable"}
 {{< include tables/_tbl-risk-density-rates.qmd >}}
 
 {{< pagebreak >}}
 :::
 
-::: {.content-visible when-meta="includeSurgicalProcedureRateTable"}
-{{< include tables/_tbl-surgical-procedure-rates.qmd >}}
-
-{{< pagebreak >}}
+::: {.content-visible when-format="pdf"}
+\FloatBarrier
 :::
 
-::: {.content-visible when-meta="includeSecondaryBsiRateTable"}
-{{< include tables/_tbl-secondary-bsi-rates.qmd >}}
+::: {.content-visible when-meta="includeIntroductionTexts"}
+```{r}
+#| output: asis
+include_localised("_section-surgery.Rmd")
+```
+:::
+
+::: {.content-visible when-meta="includeSurgicalProcedureRateTable"}
+{{< include tables/_tbl-surgical-procedure-rates.qmd >}}
 :::

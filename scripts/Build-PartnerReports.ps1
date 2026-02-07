@@ -65,6 +65,14 @@ param(
     $IncludeNonCorePatients,
 
     [Parameter()]
+    [switch]
+    $HideIntroductionTexts,
+
+    [Parameter()]
+    [switch]
+    $HideOutlierInterpretation,
+
+    [Parameter()]
     [ValidateSet('pdf','html','docx','json')]
     [string[]]
     $Formats = @('pdf'),
@@ -75,7 +83,6 @@ param(
 
     [Parameter()]
     [ValidateSet(
-        'Introduction',
         'BirthWeightDistribution',
         'GestationalAgeDistribution',
         'IncidenceDensityRates',
@@ -89,7 +96,6 @@ param(
         'SecondaryBloodstreamInfectionRates'
     )]
     [string[]]$IncludeElements = @(
-        'Introduction',
         'BirthWeightDistribution',
         'GestationalAgeDistribution',
         'IncidenceDensityRates',
@@ -190,8 +196,6 @@ function Build-QmdParamPairs {
 
 # Map user-friendly element names to internal Quarto parameter names
 $elementMapping = @{
-    'Header' = 'includeHeader'
-    'Introduction' = 'includeIntroduction'
     'BirthWeightDistribution' = 'includeBirthWeightFigure'
     'GestationalAgeDistribution' = 'includeGestationalAgeFigure'
     'IncidenceDensityRates' = 'includeIncidenceDensityTable'
@@ -314,6 +318,8 @@ try {
             if ($GestationWeeksFrom -ne $null) { $qmdParams['GestationWeeksFrom'] = $GestationWeeksFrom.Value }
             if ($GestationWeeksTo -ne $null) { $qmdParams['GestationWeeksTo'] = $GestationWeeksTo.Value }
             if ($IncludeNonCorePatients.IsPresent) { $qmdParams['IncludeNonCorePatients'] = 'true' }
+            if ($HideIntroductionTexts.IsPresent) { $qmdParams['includeIntroductionTexts'] = 'false' }
+            if ($HideOutlierInterpretation.IsPresent) { $qmdParams['includeOutlierInterpretation'] = 'false' }
 
             # Convert user-friendly element names to Quarto boolean parameters
             foreach ($mapping in $elementMapping.GetEnumerator()) {
@@ -358,12 +364,27 @@ try {
                     $quartoArgs += '--output-dir'
                     $quartoArgs += $resolvedOutputDir
                 }
-                
+
+                $metadataParameters = @(
+                    'includeIntroductionTexts'
+                    'includeOutlierInterpretation'
+                    'includeBirthWeightFigure'
+                    'includeGestationalAgeFigure'
+                    'includeIncidenceDensityTable'
+                    'includeDeviceAssociatedIncidenceDensityTable'
+                    'includeAgentPerInfectionRateTable'
+                    'includeInfectiousAgentDetectionRateTable'
+                    'includeRiskDensityRateTable'
+                    'includeSurgicalProcedureRateTable'
+                    'includeResistantPathogenInfectionRateTable'
+                    'includeAntibioticResistanceTestRateTable'
+                    'includeSecondaryBsiRateTable'
+                )
                 # Add parameters - use -M for include* metadata, -P for others
                 foreach ($pair in $paramPairs) {
                     if ($pair -eq '-P') {
                         $quartoArgs += $pair
-                    } elseif ($pair -like 'include*') {
+                    } elseif ($pair -match ':' -and ($pair -split ':')[0] -iin $metadataParameters) {
                         # Replace last -P with -M for include flags
                         $quartoArgs[$quartoArgs.Count - 1] = '-M'
                         $quartoArgs += $pair
@@ -380,6 +401,12 @@ try {
                     $skipRest = $false
                     $errorLine = ''
                     $isError = $false
+
+                    # Debug: show full Quarto command as it will be executed (args with spaces quoted)
+                    $quartoArgsQuoted = $quartoArgs | ForEach-Object {
+                        if ($_ -match '\s') { '"' + ($_.ToString().Replace('"', '\"')) + '"' } else { $_.ToString() }
+                    }
+                    Write-Debug "Quarto command: quarto $($quartoArgsQuoted -join ' ')"
 
                     & quarto @quartoArgs 2>&1 | ForEach-Object -Process {
                         if ($skipRest) { return }

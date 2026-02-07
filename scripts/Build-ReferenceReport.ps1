@@ -36,7 +36,6 @@ param(
     [Parameter()]
     [ValidateSet(
         'Header',
-        'Introduction',
         'PatientPopulation',
         'NosocomialInfections',
         'InfectiousAgents',
@@ -55,7 +54,6 @@ param(
     )]
     [string[]]$IncludeElements = @(
         'Header',
-        'Introduction',
         'PatientPopulation',
         'NosocomialInfections',
         'InfectiousAgents',
@@ -205,7 +203,7 @@ $commonParams.defaultPatientFilter = (-not $IncludeNonCorePatients)
 # Map user-friendly element names to internal Quarto parameter names
 $elementMapping = @{
     'Header' = 'includeHeader'
-    'Introduction' = 'includeIntroduction'
+    'Introduction' = 'includeIntroductionTexts'
     'PatientPopulation' = 'includeTextPatientPopulation'
     'NosocomialInfections' = 'includeTextNosocomial'
     'InfectiousAgents' = 'includeTextInfectiousAgents'

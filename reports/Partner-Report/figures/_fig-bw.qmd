@@ -1,4 +1,4 @@
-::: {.content-visible when-meta="includeTableIntroductions"}
+::: {.content-visible when-meta="includeIntroductionTexts"}
 ```{r}
 #| output: asis
 include_localised("_fig-intro-birth-weight.qmd")

@@ -5,24 +5,25 @@ echo: false
 profile:
   group:
     - [en, de]
-    - [default, full]
-includeIntroduction: true
+    - [full, default]
+includeIntroductionTexts: true
+includeOutlierInterpretation: true
 includeBirthWeightFigure: true
 includeGestationalAgeFigure: true
 includeIncidenceDensityTable: true
 includeDeviceAssociatedIncidenceDensityTable: true
 includeAgentPerInfectionRateTable: true
-includeResistantPathogenInfectionRateTable: false
 includeInfectiousAgentDetectionRateTable: true
-includeAntibioticResistanceTestRateTable: false
 includeRiskDensityRateTable: true
 includeSurgicalProcedureRateTable: true
+includeResistantPathogenInfectionRateTable: false
+includeAntibioticResistanceTestRateTable: false
 includeSecondaryBsiRateTable: false
-includeTableIntroductions: true
-includeOutlierInterpretation: true
 execute:
   error: true
-filters: ["../filters/pandoc-quotes.lua"]
+filters:
+  - "../filters/pandoc-quotes.lua"
+  - "../filters/remove-empty-sections.lua"
 format:
   html:
     link-external-icon: true

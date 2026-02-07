@@ -134,6 +134,10 @@ if (!has_reference) {
 }
 ```
 
+::: {.content-visible when-format="pdf"}
+\FloatBarrier
+:::
+
 ```{r Show benchmark comparability callout}
 #| echo: false
 #| output: asis
