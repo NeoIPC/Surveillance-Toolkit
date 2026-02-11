@@ -22,37 +22,63 @@ source("../common/helpers.R")
 
 # Outlier detection configuration - groups of related metrics
 outlier_groupings <- list(
-  device_days = list(
-    metrics = c("CVC", "PVC", "IV"),
-    template_low = "grouped_device_days_low",
-    template_high = "grouped_device_days_high"
+  incidence_density_rate_table = list(
+    severe_infection = list(
+      metrics = c("si", "bsi", "hap"),
+      template_prefix = "grouped_severe_infection",
+      mode = "all_or_ungrouped"
+    )
   ),
-  ventilation = list(
-    metrics = c("INV", "VAP"),
-    template_low = "grouped_ventilation_low",
-    template_high = "grouped_ventilation_high"
-  ),
-  infections = list(
-    metrics = c("BSI", "HAP", "NEC", "SI"),
-    template_low = "grouped_infections_low",
-    template_high = "grouped_infections_high"
-  ),
-  protective_factors = list(
-    metrics = c("human_milk", "kangaroo_care", "probiotic"),
-    template_low = "grouped_protective_factors_low",
-    template_high = "grouped_protective_factors_high"
+  usage_density_rate_table = list(
+    vascular_catheter_rates = list(
+      metrics = c("cvc", "pvc"),
+      signature_order = c("pvc", "cvc"),
+      template_prefix = "grouped_vascular_catheter_rates",
+      mode = "signature",
+      impossible_signatures = character(0)
+    ),
+    ventilatory_support_rates = list(
+      metrics = c("vs", "niv", "inv"),
+      signature_order = c("vs", "niv", "inv"),
+      template_prefix = "grouped_ventilatory_support_rates",
+      mode = "signature",
+      impossible_signatures = character(0)
+    ),
+    protective_factors = list(
+      metrics = c("human_milk", "kangaroo_care", "probiotic"),
+      template_prefix = "grouped_protective_factors",
+      mode = "all_or_ungrouped"
+    ),
+    antibiotic_rates = list(
+      metrics = c("ab", "a", "w", "r"),
+      template_prefix = "grouped_antibiotic_rates",
+      mode = "all_or_ungrouped"
+    )
   )
 )
 
 # Detect outliers by comparing department values to reference quartiles
 detect_outliers <- function(table_data, identifier_col = NULL, combine_cols = NULL) {
   if (is.null(table_data) || nrow(table_data) == 0) {
-    return(list(below_q1 = character(0), above_q3 = character(0)))
+    return(list(
+      below_q1 = character(0),
+      above_q3 = character(0),
+      state_map = c()
+    ))
   }
+
+  # detect own rate column
+  col_names <- names(table_data)
+  own_col_name_candidates <- c("pooled_own", "rate_own")
+  own_col_name <- own_col_name_candidates[own_col_name_candidates %in% col_names]
   
   # Check for required columns
-  if (!all(c("pooled_own", "q1_ref", "q3_ref") %in% names(table_data))) {
-    return(list(below_q1 = character(0), above_q3 = character(0)))
+  if (!(length(own_col_name) == 1 && all(c("q1_ref", "q3_ref") %in% col_names))) {
+    return(list(
+      below_q1 = character(0),
+      above_q3 = character(0),
+      state_map = c()
+    ))
   }
   
   # Get row identifiers
@@ -73,62 +99,127 @@ detect_outliers <- function(table_data, identifier_col = NULL, combine_cols = NU
   } else {
     identifiers <- as.character(1:nrow(table_data))
   }
-  
-  # Detect values below Q1
-  below_q1 <- identifiers[!is.na(table_data$pooled_own) & 
-                          !is.na(table_data$q1_ref) & 
-                          table_data$pooled_own < table_data$q1_ref]
-  
-  # Detect values above Q3
-  above_q3 <- identifiers[!is.na(table_data$pooled_own) & 
-                          !is.na(table_data$q3_ref) & 
-                          table_data$pooled_own > table_data$q3_ref]
-  
-  list(below_q1 = below_q1, above_q3 = above_q3)
+
+  own_values <- table_data[[own_col_name]]
+  has_ref_quartiles <- !is.na(table_data$q1_ref) & !is.na(table_data$q3_ref)
+  has_own_rate <- !is.na(own_values)
+  comparable <- has_ref_quartiles & has_own_rate
+
+  states <- rep("no_quartile_ref", length(identifiers))
+  states[comparable] <- "within_q1_q3"
+  states[comparable & own_values < table_data$q1_ref] <- "below_q1"
+  states[comparable & own_values > table_data$q3_ref] <- "above_q3"
+
+  below_q1 <- identifiers[states == "below_q1"]
+  above_q3 <- identifiers[states == "above_q3"]
+
+  state_map <- stats::setNames(states, tolower(identifiers))
+
+  list(
+    below_q1 = below_q1,
+    above_q3 = above_q3,
+    state_map = state_map
+  )
 }
 
 # Group related outliers based on predefined groupings
-group_outliers <- function(outliers, table_name) {
+group_outliers <- function(outliers, table_name = NULL) {
   if (length(outliers$below_q1) == 0 && length(outliers$above_q3) == 0) {
     return(list())
   }
   
   grouped <- list(
-    below_q1 = list(
-      grouped = list(),
-      ungrouped = outliers$below_q1
+    grouped_templates = list(),
+    ungrouped = list(
+      below_q1 = outliers$below_q1,
+      above_q3 = outliers$above_q3
     ),
-    above_q3 = list(
-      grouped = list(),
-      ungrouped = outliers$above_q3
-    )
+    state_map = outliers$state_map
   )
-  
+
+  remove_case_insensitive <- function(values, values_to_remove) {
+    values[!(tolower(values) %in% tolower(values_to_remove))]
+  }
+
+  visible_states <- c("below_q1", "above_q3")
+
   # Try to match and group outliers
-  for (group_name in names(outlier_groupings)) {
-    group_config <- outlier_groupings[[group_name]]
-    
-    # Check for matches in below_q1
-    matches_below <- intersect(outliers$below_q1, group_config$metrics)
-    if (length(matches_below) > 0) {
-      grouped$below_q1$grouped[[group_name]] <- list(
-        metrics = matches_below,
-        template = group_config$template_low
+  table_groupings <- outlier_groupings[[table_name]]
+  if (!is.null(table_groupings)) {
+    for (group_name in names(table_groupings)) {
+      group_config <- table_groupings[[group_name]]
+
+      group_metrics <- tolower(group_config$metrics)
+      state_map <- grouped$state_map
+      available_metrics <- group_metrics[group_metrics %in% names(state_map)]
+
+      if (length(available_metrics) == 0) {
+        next
+      }
+
+      visible_metrics <- available_metrics[state_map[available_metrics] %in% visible_states]
+
+      if (length(visible_metrics) == 0) {
+        next
+      }
+
+      metric_suffixes <- dplyr::if_else(
+        state_map[visible_metrics] == "below_q1",
+        "low",
+        "high"
       )
-      grouped$below_q1$ungrouped <- setdiff(grouped$below_q1$ungrouped, matches_below)
-    }
-    
-    # Check for matches in above_q3
-    matches_above <- intersect(outliers$above_q3, group_config$metrics)
-    if (length(matches_above) > 0) {
-      grouped$above_q3$grouped[[group_name]] <- list(
-        metrics = matches_above,
-        template = group_config$template_high
-      )
-      grouped$above_q3$ungrouped <- setdiff(grouped$above_q3$ungrouped, matches_above)
+      names(metric_suffixes) <- visible_metrics
+
+      group_mode <- if (is.null(group_config$mode)) "all_or_ungrouped" else group_config$mode
+      template_key <- NULL
+
+      if (group_mode == "all_or_ungrouped") {
+        all_group_metrics_visible <- length(visible_metrics) == length(group_metrics)
+        all_same_direction <- length(unique(metric_suffixes)) == 1
+
+        if (all_group_metrics_visible && all_same_direction) {
+          template_key <- paste0(group_config$template_prefix, "_", metric_suffixes[1])
+        }
+      } else if (group_mode == "signature") {
+        all_group_metrics_visible <- length(visible_metrics) == length(group_metrics)
+        all_same_direction <- length(unique(metric_suffixes)) == 1
+
+        if (length(visible_metrics) == 1) {
+          template_key <- paste0(
+            group_config$template_prefix,
+            "_",
+            visible_metrics[1],
+            "_",
+            metric_suffixes[1]
+          )
+        } else if (all_group_metrics_visible && all_same_direction) {
+          template_key <- paste0(group_config$template_prefix, "_", metric_suffixes[1])
+        } else {
+          signature_order <- if (is.null(group_config$signature_order)) group_metrics else group_config$signature_order
+          ordered_visible <- signature_order[signature_order %in% visible_metrics]
+          signature <- paste(
+            purrr::map_chr(
+              ordered_visible,
+              \(metric) paste0(metric, "_", metric_suffixes[[metric]])
+            ),
+            collapse = "_"
+          )
+
+          impossible_signatures <- if (is.null(group_config$impossible_signatures)) character(0) else group_config$impossible_signatures
+          if (!(signature %in% impossible_signatures)) {
+            template_key <- paste0(group_config$template_prefix, "_", signature)
+          }
+        }
+      }
+
+      if (!is.null(template_key)) {
+        grouped$grouped_templates[[group_name]] <- template_key
+        grouped$ungrouped$below_q1 <- remove_case_insensitive(grouped$ungrouped$below_q1, visible_metrics)
+        grouped$ungrouped$above_q3 <- remove_case_insensitive(grouped$ungrouped$above_q3, visible_metrics)
+      }
     }
   }
-  
+
   return(grouped)
 }
 
@@ -172,21 +263,20 @@ format_outlier_text <- function(outlier_groups, sR) {
   }
   
   text_parts <- character(0)
-  
-  # Process grouped outliers below Q1
-  if (length(outlier_groups$below_q1$grouped) > 0) {
-    for (group_name in names(outlier_groups$below_q1$grouped)) {
-      group <- outlier_groups$below_q1$grouped[[group_name]]
-      template_key <- group$template
+
+  # Process grouped outliers
+  if (length(outlier_groups$grouped_templates) > 0) {
+    for (group_name in names(outlier_groups$grouped_templates)) {
+      template_key <- outlier_groups$grouped_templates[[group_name]]
       if (!is.null(sR$outlier[[template_key]])) {
         text_parts <- c(text_parts, sR$outlier[[template_key]])
       }
     }
   }
-  
+
   # Process ungrouped outliers below Q1
-  if (length(outlier_groups$below_q1$ungrouped) > 0) {
-    localized_metrics <- sapply(outlier_groups$below_q1$ungrouped, localize_metric_name, sR = sR)
+  if (length(outlier_groups$ungrouped$below_q1) > 0) {
+    localized_metrics <- sapply(outlier_groups$ungrouped$below_q1, localize_metric_name, sR = sR)
     metrics_list <- paste(paste("*", localized_metrics), collapse = "\n")
     if (!is.null(sR$outlier$below_q1_group)) {
       # Split template at METRIC_LIST placeholder and rebuild with proper newlines
@@ -205,21 +295,10 @@ format_outlier_text <- function(outlier_groups, sR) {
       text_parts <- c(text_parts, text)
     }
   }
-  
-  # Process grouped outliers above Q3
-  if (length(outlier_groups$above_q3$grouped) > 0) {
-    for (group_name in names(outlier_groups$above_q3$grouped)) {
-      group <- outlier_groups$above_q3$grouped[[group_name]]
-      template_key <- group$template
-      if (!is.null(sR$outlier[[template_key]])) {
-        text_parts <- c(text_parts, sR$outlier[[template_key]])
-      }
-    }
-  }
-  
+
   # Process ungrouped outliers above Q3
-  if (length(outlier_groups$above_q3$ungrouped) > 0) {
-    localized_metrics <- sapply(outlier_groups$above_q3$ungrouped, localize_metric_name, sR = sR)
+  if (length(outlier_groups$ungrouped$above_q3) > 0) {
+    localized_metrics <- sapply(outlier_groups$ungrouped$above_q3, localize_metric_name, sR = sR)
     metrics_list <- paste(paste("*", localized_metrics), collapse = "\n")
     if (!is.null(sR$outlier$above_q3_group)) {
       # Split template at METRIC_LIST placeholder and rebuild with proper newlines
@@ -238,7 +317,7 @@ format_outlier_text <- function(outlier_groups, sR) {
       text_parts <- c(text_parts, text)
     }
   }
-  
+
   # Combine all text parts
   if (length(text_parts) > 0) {
     paste(text_parts, collapse = "\n\n")

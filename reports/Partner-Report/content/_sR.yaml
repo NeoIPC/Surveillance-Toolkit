@@ -85,28 +85,164 @@ outlier:
     The following metrics are above the 75th percentile of the reference population:
     METRIC_LIST
     These elevated values warrant further investigation to identify potential causes and opportunities for targeted interventions.
-  grouped_device_days_low: >
+  grouped_vascular_catheter_rates_low: >
     Your device utilization (including CVC, PVC, and other vascular access) is notably lower
     than reference ranges. This reduced device exposure may contribute to lower infection rates
     and reflects judicious use of invasive procedures.
-  grouped_device_days_high: >
+  grouped_vascular_catheter_rates_high: >
     Your device utilization (including CVC, PVC, and other vascular access) is notably higher
     than reference ranges. This increased exposure to invasive devices may elevate infection
     risk and warrants review of indication criteria and removal protocols.
-  grouped_ventilation_low: >
-    Your ventilation-related metrics (including INV days and VAP rates) are below reference
+  grouped_vascular_catheter_rates_cvc_high: >
+    Central venous catheter (CVC) utilization is above the reference interquartile range.
+    This may reflect higher clinical acuity or differences in central-access thresholds,
+    and supports review of insertion indications, maintenance bundles, and early removal practices.
+  grouped_vascular_catheter_rates_cvc_low: >
+    Central venous catheter (CVC) utilization is below the reference interquartile range.
+    This may indicate comparatively lower central-access exposure or successful line-avoidance
+    strategies, while maintaining access adequacy should be confirmed in clinical context.
+  grouped_vascular_catheter_rates_pvc_high: >
+    Peripheral venous catheter (PVC) utilization is above the reference interquartile range.
+    This suggests greater peripheral-access exposure and warrants review of indication criteria,
+    replacement frequency, and opportunities to reduce unnecessary cannulation.
+  grouped_vascular_catheter_rates_pvc_low: >
+    Peripheral venous catheter (PVC) utilization is below the reference interquartile range.
+    This may indicate reduced peripheral-access exposure or more selective use, and should be
+    interpreted alongside treatment intensity and vascular access requirements.
+  grouped_vascular_catheter_rates_pvc_low_cvc_high: >
+    PVC utilization is below the reference range while CVC utilization is above it. This pattern
+    may indicate earlier escalation to central access or lower use of peripheral bridging
+    approaches, and supports review of vascular access decision pathways.
+  grouped_vascular_catheter_rates_pvc_low_cvc_low: >
+    Both PVC and CVC utilization are below reference ranges. This indicates consistently lower
+    vascular-device exposure and may reflect successful minimization of invasive access, provided
+    that timely and appropriate treatment access is maintained.
+  grouped_vascular_catheter_rates_pvc_high_cvc_low: >
+    PVC utilization is above the reference range while CVC utilization is below it. This pattern
+    may suggest greater reliance on peripheral access and lower central-line use, and merits
+    review of escalation criteria and peripheral-line management burden.
+  grouped_vascular_catheter_rates_pvc_high_cvc_high: >
+    Both PVC and CVC utilization are above reference ranges, indicating broad elevation in
+    vascular-device exposure. This warrants assessment of patient acuity, insertion indications,
+    and opportunities to reduce avoidable device days.
+  grouped_ventilatory_support_rates_low: >
+    Your ventilation-related metrics (including INV rates and NIV rates) are below reference
     ranges. This may indicate effective respiratory management strategies, less severe patient
     acuity, or successful implementation of ventilator weaning protocols.
-  grouped_ventilation_high: >
-    Your ventilation-related metrics (including INV days and VAP rates) are above reference
+  grouped_ventilatory_support_rates_high: >
+    Your ventilation-related metrics (including INV rates and NIV rates) are above reference
     ranges. This may reflect higher patient acuity, differences in ventilation practices, or
-    opportunities to enhance ventilator-associated pneumonia prevention bundles.
-  grouped_infections_low: >
-    Your infection rates (including BSI, HAP, and NEC) are below the reference population's
+    opportunities to enhance implementation of ventilator weaning protocols.
+  grouped_ventilatory_support_rates_vs_high: >
+    Overall ventilatory support utilization is above the reference interquartile range.
+    This may reflect higher respiratory acuity or lower thresholds for respiratory assistance,
+    and warrants review in conjunction with local case mix and support protocols.
+  grouped_ventilatory_support_rates_vs_low: >
+    Overall ventilatory support utilization is below the reference interquartile range.
+    This may indicate lower respiratory support requirements or different support thresholds,
+    and should be interpreted alongside patient severity and escalation practices.
+  grouped_ventilatory_support_rates_niv_high: >
+    Non-invasive ventilatory support utilization is above the reference interquartile range.
+    This may indicate stronger preference for non-invasive support pathways and should be
+    interpreted in the context of respiratory severity and escalation outcomes.
+  grouped_ventilatory_support_rates_niv_low: >
+    Non-invasive ventilatory support utilization is below the reference interquartile range.
+    This may reflect lower use of non-invasive strategies or earlier progression to invasive
+    modes in selected infants, requiring contextual clinical review.
+  grouped_ventilatory_support_rates_inv_high: >
+    Invasive ventilatory support utilization is above the reference interquartile range.
+    This may reflect higher respiratory acuity or different intubation thresholds and warrants
+    review of invasive-support indications, weaning practices, and prevention bundles.
+  grouped_ventilatory_support_rates_inv_low: >
+    Invasive ventilatory support utilization is below the reference interquartile range.
+    This may indicate lower invasive-support exposure or successful non-invasive management
+    strategies, while adequacy of escalation pathways should be confirmed.
+  grouped_ventilatory_support_rates_vs_low_inv_low: >
+    Both overall ventilatory support and invasive ventilatory support are below reference ranges.
+    This suggests lower total respiratory support burden with reduced invasive exposure and may
+    reflect favorable respiratory trajectories in the current case mix.
+  grouped_ventilatory_support_rates_vs_low_inv_high: >
+    Overall ventilatory support is below the reference range while invasive support is above it.
+    This discordant profile may indicate concentration of support in a smaller high-acuity
+    subgroup and should prompt review of escalation and weaning patterns.
+  grouped_ventilatory_support_rates_vs_high_inv_low: >
+    Overall ventilatory support is above the reference range while invasive support is below it.
+    This pattern is compatible with greater reliance on non-invasive modalities and supports
+    review of non-invasive protocols, failure rates, and escalation thresholds.
+  grouped_ventilatory_support_rates_vs_high_inv_high: >
+    Both overall ventilatory support and invasive support are above reference ranges. This may
+    reflect substantial respiratory disease burden and warrants review of prevention strategies,
+    ventilation practices, and opportunities to reduce invasive exposure.
+  grouped_ventilatory_support_rates_vs_low_niv_low: >
+    Both overall ventilatory support and non-invasive support are below reference ranges.
+    This suggests lower respiratory support exposure overall, including lower use of non-invasive
+    modalities, and should be interpreted with local case mix.
+  grouped_ventilatory_support_rates_vs_low_niv_high: >
+    Overall ventilatory support is below the reference range while non-invasive support is above
+    it. This may indicate selective concentration of support within non-invasive pathways and
+    merits review of denominator effects and treatment thresholds.
+  grouped_ventilatory_support_rates_vs_high_niv_low: >
+    Overall ventilatory support is above the reference range while non-invasive support is below
+    it. This pattern may indicate heavier use of invasive support among ventilated infants and
+    supports review of non-invasive initiation and escalation criteria.
+  grouped_ventilatory_support_rates_vs_high_niv_high: >
+    Both overall ventilatory support and non-invasive support are above reference ranges.
+    This is consistent with increased respiratory support burden with high non-invasive modality
+    use and should be interpreted alongside patient acuity and outcomes.
+  grouped_ventilatory_support_rates_niv_low_inv_low: >
+    Both non-invasive and invasive ventilatory support are below reference ranges. This indicates
+    broadly reduced respiratory support exposure and may reflect lower respiratory acuity in the
+    analyzed population.
+  grouped_ventilatory_support_rates_niv_low_inv_high: >
+    Non-invasive support is below the reference range while invasive support is above it.
+    This profile may indicate earlier transition to invasive modes or limited non-invasive trial,
+    and supports review of modality-selection and escalation practice.
+  grouped_ventilatory_support_rates_niv_high_inv_low: >
+    Non-invasive support is above the reference range while invasive support is below it.
+    This suggests emphasis on non-invasive respiratory management and may represent a favorable
+    exposure profile if escalation safety and outcomes remain adequate.
+  grouped_ventilatory_support_rates_niv_high_inv_high: >
+    Both non-invasive and invasive support are above reference ranges, indicating elevated use of
+    respiratory support across modalities. This warrants assessment of respiratory disease burden
+    and opportunities to optimize duration and modality transitions.
+  grouped_ventilatory_support_rates_vs_low_niv_low_inv_low: >
+    Overall, non-invasive, and invasive ventilatory support rates are all below reference ranges.
+    This consistently low respiratory support profile may reflect lower respiratory acuity or
+    effective prevention and weaning strategies in the analyzed population.
+  grouped_ventilatory_support_rates_vs_high_niv_high_inv_high: >
+    Overall, non-invasive, and invasive ventilatory support rates are all above reference ranges.
+    This indicates substantially elevated respiratory support burden and supports comprehensive
+    review of respiratory management pathways and duration of support.
+  grouped_ventilatory_support_rates_vs_high_niv_low_inv_low: >
+    Overall ventilatory support is above the reference range, while both non-invasive and
+    invasive component rates are below reference ranges. This discordant pattern warrants review
+    of metric definitions, data completeness, and support-classification workflows.
+  grouped_ventilatory_support_rates_vs_low_niv_high_inv_low: >
+    Overall ventilatory support is below the reference range, with non-invasive support above and
+    invasive support below reference ranges. This may reflect selective concentration of support
+    in non-invasive modalities and should be interpreted in context.
+  grouped_ventilatory_support_rates_vs_low_niv_low_inv_high: >
+    Overall ventilatory support is below the reference range, while non-invasive support is below
+    and invasive support is above reference ranges. This pattern may indicate support concentrated
+    in a smaller high-acuity subgroup and warrants focused review.
+  grouped_ventilatory_support_rates_vs_low_niv_high_inv_high: >
+    Overall ventilatory support is below the reference range despite both non-invasive and
+    invasive component rates above reference ranges. This discordant profile should prompt
+    verification of definitions, denominators, and data capture consistency.
+  grouped_ventilatory_support_rates_vs_high_niv_low_inv_high: >
+    Overall ventilatory support is above the reference range, with non-invasive support below and
+    invasive support above reference ranges. This may indicate stronger reliance on invasive
+    support and supports review of non-invasive initiation and escalation thresholds.
+  grouped_ventilatory_support_rates_vs_high_niv_high_inv_low: >
+    Overall ventilatory support is above the reference range, with non-invasive support above and
+    invasive support below reference ranges. This may indicate emphasis on non-invasive pathways
+    and should be interpreted with attention to failure and escalation outcomes.
+  grouped_severe_infection_low: >
+    Your severe infection rates (BSI, and HAP) are below the reference population's
     25th percentile. This favorable outcome suggests effective implementation of infection
     prevention strategies and warrants documentation of successful practices.
-  grouped_infections_high: >
-    Your infection rates (including BSI, HAP, and NEC) exceed the reference population's 75th
+  grouped_severe_infection_high: >
+    Your severe infection rates (BSI, and HAP) exceed the reference population's 75th
     percentile. This requires comprehensive review of surveillance definitions, hand hygiene
     compliance, environmental cleaning, and other core infection prevention practices.
   grouped_protective_factors_low: >
@@ -117,6 +253,14 @@ outlier:
     Your utilization of protective factors (such as human milk, kangaroo care, and probiotics)
     exceeds reference ranges. This demonstrates strong implementation of evidence-based protective
     interventions that may contribute to favorable infection outcomes.
+  grouped_antibiotic_rates_low: >
+    Antibiotic exposure metrics are below reference ranges across the grouped indicators.
+    This may reflect prudent antimicrobial use; however, appropriateness of treatment coverage
+    and timeliness should be reviewed in the context of local pathogen burden and acuity.
+  grouped_antibiotic_rates_high: >
+    Antibiotic exposure metrics are above reference ranges across the grouped indicators.
+    This warrants review of prescribing indications, AWaRe stewardship alignment, treatment
+    duration, and opportunities to reduce avoidable antibiotic exposure.
   caution_limited_data: >
     Note: The reference data is based on fewer than 5 contributing departments. Comparisons
     should be interpreted with caution due to limited sample size.
@@ -155,5 +299,5 @@ figure_interpretation:
     patient characteristics compared to the reference population.
   no_outliers: >
     All metrics fall within the interquartile range (25th-75th percentile) of the reference
-    population, suggesting performance consistent with typical practice patterns.
+    population, suggesting patient characteristics similiar to the reference population.
 

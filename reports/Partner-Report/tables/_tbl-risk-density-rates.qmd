@@ -210,12 +210,14 @@ if (!is.null(benchmark_data$usage_density_rate_table) &&
 ```
 
 ::: {.content-visible when-meta="includeOutlierInterpretation"}
-```{r}
+```{r tbl-risk-density-rates outlier-interpretation}
 #| output: asis
-if (check_outlier_interpretation) {
-  outliers <- detect_outliers(benchmark_data$usage_density_rate_table)
+  if (check_outlier_interpretation) {
+    outliers <- detect_outliers(
+      benchmark_data$usage_density_rate_table,
+      identifier_col = "factor")
   if (length(outliers$below_q1) > 0 || length(outliers$above_q3) > 0) {
-    grouped <- group_outliers(outliers, "risk_density")
+    grouped <- group_outliers(outliers, "usage_density_rate_table")
     outlier_text <- format_outlier_text(grouped, sR)
     if (nchar(outlier_text) > 0) {
       cat("\n\n::: {.callout-note}\n")
