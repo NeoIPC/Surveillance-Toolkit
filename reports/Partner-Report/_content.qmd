@@ -6,6 +6,8 @@
 \FloatBarrier
 :::
 
+## `{r} sR$headings$introduction`
+
 ::: {.content-visible when-meta="includeIntroductionTexts"}
 
 ```{r}
@@ -21,10 +23,12 @@ include_localised("_introduction.Rmd")
 \FloatBarrier
 :::
 
+## `{r} sR$headings$patient_population`
+
 ::: {.content-visible when-meta="includeIntroductionTexts"}
 ```{r}
 #| output: asis
-include_localised("_section-patient-population.Rmd")
+include_localised("_patient-population.Rmd")
 ```
 :::
 
@@ -32,20 +36,30 @@ include_localised("_section-patient-population.Rmd")
 {{< include figures/_fig-bw.qmd >}}
 :::
 
-::: {.content-visible when-meta="includeGestationalAgeFigure"}
-{{< include figures/_fig-ga.qmd >}}
-
+::: {.content-visible unless-meta="includeGestationalAgeFigure"}
 {{< pagebreak >}}
-:::
 
 ::: {.content-visible when-format="pdf"}
 \FloatBarrier
 :::
+:::
+
+::: {.content-visible when-meta="includeGestationalAgeFigure"}
+{{< include figures/_fig-ga.qmd >}}
+
+{{< pagebreak >}}
+
+::: {.content-visible when-format="pdf"}
+\FloatBarrier
+:::
+:::
+
+## `{r} sR$headings$nosocomial_infections`
 
 ::: {.content-visible when-meta="includeIntroductionTexts"}
 ```{r}
 #| output: asis
-include_localised("_section-nosocomial.Rmd")
+include_localised("_nosocomial_infections.Rmd")
 ```
 :::
 
@@ -61,14 +75,22 @@ include_localised("_section-nosocomial.Rmd")
 {{< pagebreak >}}
 :::
 
+::: {.content-visible when-meta="includeSecondaryBsiRateTable"}
+{{< include tables/_tbl-secondary-bsi-rates.qmd >}}
+
+{{< pagebreak >}}
+:::
+
 ::: {.content-visible when-format="pdf"}
 \FloatBarrier
 :::
 
+### `{r} sR$headings$infectious_agents`
+
 ::: {.content-visible when-meta="includeIntroductionTexts"}
 ```{r}
 #| output: asis
-include_localised("_section-infectious-agents.Rmd")
+include_localised("_infectious-agents.Rmd")
 ```
 :::
 
@@ -84,6 +106,8 @@ include_localised("_section-infectious-agents.Rmd")
 {{< pagebreak >}}
 :::
 
+### `{r} sR$headings$diagnostics`
+
 ::: {.content-visible when-meta="includeInfectiousAgentDetectionRateTable"}
 {{< include tables/_tbl-infectious-agent-detection-rate.qmd >}}
 
@@ -96,20 +120,16 @@ include_localised("_section-infectious-agents.Rmd")
 {{< pagebreak >}}
 :::
 
-::: {.content-visible when-meta="includeSecondaryBsiRateTable"}
-{{< include tables/_tbl-secondary-bsi-rates.qmd >}}
-
-{{< pagebreak >}}
-:::
-
 ::: {.content-visible when-format="pdf"}
 \FloatBarrier
 :::
 
+## `{r} sR$headings$risk_and_protective_factors`
+
 ::: {.content-visible when-meta="includeIntroductionTexts"}
 ```{r}
 #| output: asis
-include_localised("_section-risk-factors.Rmd")
+include_localised("_risk-factors.Rmd")
 ```
 :::
 
@@ -123,10 +143,12 @@ include_localised("_section-risk-factors.Rmd")
 \FloatBarrier
 :::
 
+### `{r} sR$headings$surgical_procedures`
+
 ::: {.content-visible when-meta="includeIntroductionTexts"}
 ```{r}
 #| output: asis
-include_localised("_section-surgery.Rmd")
+include_localised("_surgery.Rmd")
 ```
 :::
 

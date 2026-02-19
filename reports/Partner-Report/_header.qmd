@@ -32,7 +32,7 @@ if (!has_reference) {
     paste0(":   ",dR$own$gestationalAgeFilter)
   ))
 } else {
-  metadata_tbl <- tibble::tibble(
+  tbl <- tibble::tibble(
     parameter = c(
       sR$headerList$createdAt,
       sR$headerList$dataUpTo,
@@ -61,9 +61,7 @@ if (!has_reference) {
       dR$ref$birthweightFilter,
       dR$ref$gestationalAgeFilter
     )
-  )
-
-  tbl <- metadata_tbl |>
+  ) |>
     gt(rowname_col = "parameter") |>
     cols_label(
       own_value = sR$department_data,
@@ -86,7 +84,8 @@ if (!has_reference) {
     tab_footnote(
       footnote = sR$headerList$effectiveAnalysisPeriodFootnote,
       locations = cells_stub(rows = parameter == sR$headerList$effectiveAnalysisPeriod)
-    )
+    ) |>
+    fmt_markdown(columns = !1, rows = 4)
 
   # Highlight rows with differences
   if (metadata_diff$birthweight_differs) {
@@ -169,7 +168,7 @@ if (metadata_diff$countries_differ) {
   }
 
   cat(sep = "\n", c(
-    "::: {.callout-tip}",
+    "::: {.callout-caution}",
     paste0("## ", sR$headerList$benchmarkComparabilityHeader),
     "",
     full_message,
@@ -182,13 +181,15 @@ if (metadata_diff$countries_differ) {
 #| echo: false
 #| output: asis
 
-if (
-  benchmark_data$metadata$own$dataset_options$include_test_data ||
+includes_reference_test_data <- "ref" %in% benchmark_data$dataset_names &&
+  benchmark_data$metadata$ref$dataset_options$include_test_data
+
+if (includes_reference_test_data ||
   benchmark_data$metadata$own$dataset_options$include_ineligible_patients) {
-  cat(sep = "\n", c("::: {.callout-note}", paste0(
+  cat(sep = "\n", c("::: {.callout-tip}", paste0(
     c(
     sR$headerList$specialAnalysisHint,
-    if(benchmark_data$metadata$own$dataset_options$include_test_data){
+    if(includes_reference_test_data){
       paste0(sR$headerList$includesTestDepartments,
       if(benchmark_data$metadata$own$dataset_options$include_ineligible_patients)
         sR$headerList$and

@@ -22,12 +22,29 @@ source("../common/helpers.R")
 
 # Outlier detection configuration - groups of related metrics
 outlier_groupings <- list(
+  abr_infection_rate_table = list(
+
+  ),
+  infectious_agent_detection_rate_per_agent_table = list(
+
+  ),
+  dev_ass_incidence_density_rate_table = list(
+
+  ),
   incidence_density_rate_table = list(
     severe_infection = list(
       metrics = c("si", "bsi", "hap"),
-      template_prefix = "grouped_severe_infection",
-      mode = "all_or_ungrouped"
+      signature_order = c("si", "bsi", "hap"),
+      template_prefix = "grouped_severe_infection_rates",
+      mode = "signature",
+      hidden_signatures = character(0)
     )
+  ),
+  infectious_agent_detection_rate_per_inf_type_table = list(
+
+  ),
+  resistance_test_rate_table = list(
+
   ),
   usage_density_rate_table = list(
     vascular_catheter_rates = list(
@@ -35,25 +52,35 @@ outlier_groupings <- list(
       signature_order = c("pvc", "cvc"),
       template_prefix = "grouped_vascular_catheter_rates",
       mode = "signature",
-      impossible_signatures = character(0)
+      hidden_signatures = character(0)
     ),
     ventilatory_support_rates = list(
       metrics = c("vs", "niv", "inv"),
       signature_order = c("vs", "niv", "inv"),
       template_prefix = "grouped_ventilatory_support_rates",
       mode = "signature",
-      impossible_signatures = character(0)
+      hidden_signatures = character(0)
     ),
     protective_factors = list(
-      metrics = c("human_milk", "kangaroo_care", "probiotic"),
-      template_prefix = "grouped_protective_factors",
-      mode = "all_or_ungrouped"
+      metrics = c("human_milk", "probiotic"),
+      signature_order = c("human_milk", "probiotic"),
+      template_prefix = "grouped_intestinal_microbiome_factors",
+      mode = "signature",
+      hidden_signatures = character(0)
     ),
     antibiotic_rates = list(
       metrics = c("ab", "a", "w", "r"),
+      signature_order = c("ab", "a", "w", "r"),
       template_prefix = "grouped_antibiotic_rates",
-      mode = "all_or_ungrouped"
+      mode = "signature",
+      hidden_signatures = character(0)
     )
+  ),
+  secondary_bsi_rate_table = list(
+
+  ),
+  surgery_rate_table = list(
+
   )
 )
 
@@ -71,7 +98,7 @@ detect_outliers <- function(table_data, identifier_col = NULL, combine_cols = NU
   col_names <- names(table_data)
   own_col_name_candidates <- c("pooled_own", "rate_own")
   own_col_name <- own_col_name_candidates[own_col_name_candidates %in% col_names]
-  
+
   # Check for required columns
   if (!(length(own_col_name) == 1 && all(c("q1_ref", "q3_ref") %in% col_names))) {
     return(list(
@@ -80,7 +107,7 @@ detect_outliers <- function(table_data, identifier_col = NULL, combine_cols = NU
       state_map = c()
     ))
   }
-  
+
   # Get row identifiers
   if (!is.null(combine_cols) && all(combine_cols %in% names(table_data))) {
     # Combine multiple columns (e.g., "3gcr: Enterobacteriaceae")
@@ -127,7 +154,7 @@ group_outliers <- function(outliers, table_name = NULL) {
   if (length(outliers$below_q1) == 0 && length(outliers$above_q3) == 0) {
     return(list())
   }
-  
+
   grouped <- list(
     grouped_templates = list(),
     ungrouped = list(
@@ -141,7 +168,7 @@ group_outliers <- function(outliers, table_name = NULL) {
     values[!(tolower(values) %in% tolower(values_to_remove))]
   }
 
-  visible_states <- c("below_q1", "above_q3")
+  visible_states <- c("below_q1", "within_q1_q3", "above_q3")
 
   # Try to match and group outliers
   table_groupings <- outlier_groupings[[table_name]]
@@ -163,11 +190,18 @@ group_outliers <- function(outliers, table_name = NULL) {
         next
       }
 
-      metric_suffixes <- dplyr::if_else(
-        state_map[visible_metrics] == "below_q1",
-        "low",
-        "high"
+      metric_suffixes <- dplyr::case_match(
+        state_map[visible_metrics],
+        "below_q1" ~ "low",
+        "within_q1_q3" ~ "inbetween",
+        "above_q3" ~ "high"
       )
+
+      # If all values are in between no hint is warranted
+      if (all(metric_suffixes == "inbetween")) {
+        next
+      }
+
       names(metric_suffixes) <- visible_metrics
 
       group_mode <- if (is.null(group_config$mode)) "all_or_ungrouped" else group_config$mode
@@ -205,8 +239,8 @@ group_outliers <- function(outliers, table_name = NULL) {
             collapse = "_"
           )
 
-          impossible_signatures <- if (is.null(group_config$impossible_signatures)) character(0) else group_config$impossible_signatures
-          if (!(signature %in% impossible_signatures)) {
+          hidden_signatures <- if (is.null(group_config$hidden_signatures)) character(0) else group_config$hidden_signatures
+          if (!(signature %in% hidden_signatures)) {
             template_key <- paste0(group_config$template_prefix, "_", signature)
           }
         }
@@ -236,22 +270,22 @@ localize_metric_name <- function(metric_id, sR) {
       return(paste(localized_abr, pathogen_name, sep = ": "))
     }
   }
-  
+
   # Try top-level keys first (infections: bsi, hap, nec, si, ssi)
   if (!is.null(sR[[metric_id]])) {
     return(sR[[metric_id]])
   }
-  
+
   # Try tbl-risk-density-rates (devices and protective factors: CVC, PVC, INV, human_milk, etc.)
   if (!is.null(sR$`tbl-risk-density-rates`[[tolower(metric_id)]])) {
     return(sR$`tbl-risk-density-rates`[[tolower(metric_id)]])
   }
-  
+
   # Try tbl-device-associated-incidence-density-rates
   if (!is.null(sR$`tbl-device-associated-incidence-density-rates`[[tolower(metric_id)]])) {
     return(sR$`tbl-device-associated-incidence-density-rates`[[tolower(metric_id)]])
   }
-  
+
   # Fall back to the raw identifier if no localization found
   return(metric_id)
 }
@@ -261,7 +295,19 @@ format_outlier_text <- function(outlier_groups, sR) {
   if (is.null(outlier_groups) || length(outlier_groups) == 0) {
     return("")
   }
-  
+
+  to_list_item <- function(text) {
+    lines <- strsplit(trimws(text), "\n", fixed = TRUE)[[1]]
+    lines <- lines[nzchar(trimws(lines))]
+    if (length(lines) == 0) {
+      return("")
+    }
+    if (length(lines) == 1) {
+      return(paste0("- ", lines[1]))
+    }
+    paste0("- ", lines[1], "\n  ", paste(lines[-c(1, length(lines))], collapse = "\n  "), "\n\n  ", lines[length(lines)])
+  }
+
   text_parts <- character(0)
 
   # Process grouped outliers
@@ -277,7 +323,7 @@ format_outlier_text <- function(outlier_groups, sR) {
   # Process ungrouped outliers below Q1
   if (length(outlier_groups$ungrouped$below_q1) > 0) {
     localized_metrics <- sapply(outlier_groups$ungrouped$below_q1, localize_metric_name, sR = sR)
-    metrics_list <- paste(paste("*", localized_metrics), collapse = "\n")
+    metrics_list <- paste(paste("-", localized_metrics), collapse = "\n")
     if (!is.null(sR$outlier$below_q1_group)) {
       # Split template at METRIC_LIST placeholder and rebuild with proper newlines
       template_parts <- strsplit(sR$outlier$below_q1_group, "METRIC_LIST", fixed = TRUE)[[1]]
@@ -299,7 +345,7 @@ format_outlier_text <- function(outlier_groups, sR) {
   # Process ungrouped outliers above Q3
   if (length(outlier_groups$ungrouped$above_q3) > 0) {
     localized_metrics <- sapply(outlier_groups$ungrouped$above_q3, localize_metric_name, sR = sR)
-    metrics_list <- paste(paste("*", localized_metrics), collapse = "\n")
+    metrics_list <- paste(paste("-", localized_metrics), collapse = "\n")
     if (!is.null(sR$outlier$above_q3_group)) {
       # Split template at METRIC_LIST placeholder and rebuild with proper newlines
       template_parts <- strsplit(sR$outlier$above_q3_group, "METRIC_LIST", fixed = TRUE)[[1]]
@@ -320,7 +366,13 @@ format_outlier_text <- function(outlier_groups, sR) {
 
   # Combine all text parts
   if (length(text_parts) > 0) {
-    paste(text_parts, collapse = "\n\n")
+    list_items <- vapply(text_parts, to_list_item, character(1), USE.NAMES = FALSE)
+    list_items <- list_items[nzchar(list_items)]
+    if (length(list_items) > 0) {
+      paste(list_items, collapse = "\n")
+    } else {
+      ""
+    }
   } else {
     ""
   }
@@ -341,7 +393,7 @@ interpret_distribution <- function(figure_data, metric_type, sR) {
 
   own_data <- location_params[location_params$dataset == "own", ]
   ref_data <- location_params[location_params$dataset == "ref", ]
-  
+
   if (nrow(own_data) == 0 || nrow(ref_data) == 0) {
     return("")
   }
@@ -355,8 +407,11 @@ interpret_distribution <- function(figure_data, metric_type, sR) {
   # Calculate difference as percentage of reference median
   median_diff_pct <- ((own_median - ref_median) / ref_median) * 100
 
-  # Determine median comparison (using 5% threshold for "similar")
-  if (abs(median_diff_pct) < 5) {
+  # Determine median comparison
+  # Threshold for "similar" is 2 for gestational age and 5 for birth weight
+  similar_threshold <- if (metric_type == "gestational_age") 2 else 5
+
+  if (abs(median_diff_pct) < similar_threshold) {
     template_key <- paste0(metric_type, "_similar_median")
   } else if (own_median < ref_median) {
     template_key <- paste0(metric_type, "_lower_median")
@@ -400,6 +455,9 @@ interpret_distribution <- function(figure_data, metric_type, sR) {
 #' @param include_wb_class Whether WB class is included ("no", "pseudonymised", "yes")
 #' @return List with has_mismatch (logical) and details (character) or NULL
 detect_wb_class_mismatch <- function(own_countries, ref_countries, include_wb_class) {
+  # ToDo: Refactor to detect availability of World Bank class from data instead of relying
+  #       on include_wb_class and look if removing get_localised_world_bank_class_names
+  #       makse sense
   # Only detect mismatches when include_wb_class = "yes"
   if (include_wb_class != "yes" ||
       is.null(own_countries) ||
@@ -496,7 +554,8 @@ typedParams <- list(
   BirthWeightTo = if (!is.null(params$BirthWeightTo)) as.integer(params$BirthWeightTo) else NULL,
   GestationWeeksFrom = if (!is.null(params$GestationWeeksFrom)) as.integer(params$GestationWeeksFrom) else NULL,
   GestationWeeksTo = if (!is.null(params$GestationWeeksTo)) as.integer(params$GestationWeeksTo) else NULL,
-  IncludeNonCorePatients = if (!is.null(params$IncludeNonCorePatients)) as.logical(params$GestationWeeksTo) else FALSE
+  IncludeNonCorePatients = if (!is.null(params$IncludeNonCorePatients)) as.logical(params$GestationWeeksTo) else FALSE,
+  IncludeInvalidPatients = get_validation_exceptions(params$ValidationExceptionFile)
 )
 
 get_unit_data <- function() suppressWarnings(
@@ -510,9 +569,16 @@ get_unit_data <- function() suppressWarnings(
       gestational_age_from = typedParams$GestationWeeksFrom,
       gestational_age_to = typedParams$GestationWeeksTo,
       include_ineligible_patients = typedParams$IncludeNonCorePatients,
+      include_invalid_patients = typedParams$IncludeInvalidPatients,
       include_world_bank_class = "yes",
       include_country = "yes",
-      include_department = "yes"
+      include_hospital = "yes",
+      include_department = "yes",
+      # For now test data is data from special test departments in DHIS.
+      # It does not hurt to include it because we'll typically also have
+      # a department filter which will remove these departments again if
+      # we're not interested in them
+      include_test_data = TRUE
       ))) |>
   neoipcr::calculate_department_data()
 
@@ -558,7 +624,7 @@ dR <- list(
       sep = " - "
     )
   } else {
-    "Not available"
+    sR$not_available
   },
   countriesList = {
     countries_data <- benchmark_data$metadata$own$countries
@@ -644,7 +710,20 @@ dR <- list(
     benchmark_data$n_patient_days$total_own / benchmark_data$n_patients$total_own,
     digits = 2,
     nsmall = 1,
-    scientific = FALSE)
+    scientific = FALSE),
+  numberOfSevereInfections = format_integer(
+     benchmark_data$incidence_density_rate_table |>
+       dplyr::filter(inf == "si") |>
+       dplyr::pull("n_own")),
+   averageSevereInfectionsPerPatient = format(
+     (
+       (benchmark_data$incidence_density_rate_table |>
+          dplyr::filter(inf == "si") |>
+          dplyr::pull("n_own")) /
+         benchmark_data$n_patients$total_own),
+     digits = 2,
+     nsmall = 1,
+     scientific = FALSE)
   ),
   ref = if ("ref" %in% benchmark_data$dataset_names) {
   list(
@@ -665,7 +744,7 @@ dR <- list(
         sep = " - "
       )
     } else {
-      "Not available"
+      sR$not_available
     },
     countriesList = {
       countries_data <- benchmark_data$metadata$ref$countries
@@ -751,7 +830,20 @@ dR <- list(
       benchmark_data$n_patient_days$total_own / benchmark_data$n_patients$total_own,
       digits = 2,
       nsmall = 1,
-      scientific = FALSE)
+      scientific = FALSE),
+  numberOfSevereInfections = format_integer(
+     benchmark_data$incidence_density_rate_table |>
+       dplyr::filter(inf == "si") |>
+       dplyr::pull("n_ref")),
+   averageSevereInfectionsPerPatient = format(
+     (
+       (benchmark_data$incidence_density_rate_table |>
+          dplyr::filter(inf == "si") |>
+          dplyr::pull("n_ref")) /
+         benchmark_data$n_patients$total_ref),
+     digits = 2,
+     nsmall = 1,
+     scientific = FALSE)
   )
   } else {
     NULL

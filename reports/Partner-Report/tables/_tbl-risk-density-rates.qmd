@@ -1,3 +1,5 @@
+### `{r} sR$headings$presence_of_risk_and_protective_factors`
+
 ::: {.content-visible when-meta="includeIntroductionTexts"}
 ```{r}
 #| output: asis
@@ -6,6 +8,7 @@ include_localised("_tbl-intro-risk-density.qmd")
 :::
 
 ```{r}
+#| output: asis
 #| label: tbl-risk-density-rates
 #| tbl-cap: !expr 'sR$`tbl-risk-density-rates`$`tbl-cap`'
 #| tbl-cap-location: top
@@ -151,13 +154,13 @@ if (!is.null(benchmark_data$usage_density_rate_table) &&
   if ("ref" %in% benchmark_data$dataset_names) {
     tbl <- tbl |>
     cols_width(
-    stub() ~ pct(34),
-    sR$table_headers$n ~ pct(13),
-    sR$table_headers$rate ~ pct(13),
-    sR$table_headers$pooled ~ pct(13),
-    sR$table_headers$q1 ~ pct(9),
-    sR$table_headers$q2 ~ pct(9),
-    sR$table_headers$q3 ~ pct(9)
+    stub() ~ pct(40),
+    sR$table_headers$n ~ pct(10),
+    sR$table_headers$rate ~ pct(10),
+    sR$table_headers$pooled ~ pct(10),
+    sR$table_headers$q1 ~ pct(10),
+    sR$table_headers$q2 ~ pct(10),
+    sR$table_headers$q3 ~ pct(10)
     ) |>
     tab_spanner(
       label = sR$department_data,
@@ -197,20 +200,20 @@ if (!is.null(benchmark_data$usage_density_rate_table) &&
   } else {
     tbl <- tbl |>
     cols_width(
-    stub() ~ pct(50),
-    sR$table_headers$n ~ pct(25),
-    sR$table_headers$rate ~ pct(25)
+    stub() ~ pct(60),
+    sR$table_headers$n ~ pct(20),
+    sR$table_headers$rate ~ pct(20)
     )
   }
 
   tbl
 } else {
-  cat(sR$`tbl-risk-density-rates`$no_data)
+  no_data_table()
 }
 ```
 
 ::: {.content-visible when-meta="includeOutlierInterpretation"}
-```{r tbl-risk-density-rates outlier-interpretation}
+```{r}
 #| output: asis
   if (check_outlier_interpretation) {
     outliers <- detect_outliers(
@@ -220,7 +223,7 @@ if (!is.null(benchmark_data$usage_density_rate_table) &&
     grouped <- group_outliers(outliers, "usage_density_rate_table")
     outlier_text <- format_outlier_text(grouped, sR)
     if (nchar(outlier_text) > 0) {
-      cat("\n\n::: {.callout-note}\n")
+      cat("\n\n::: {.callout-tip}\n")
       cat("## ", sR$outlier$heading, "\n\n")
       cat(outlier_text, "\n")
       cat(":::\n")

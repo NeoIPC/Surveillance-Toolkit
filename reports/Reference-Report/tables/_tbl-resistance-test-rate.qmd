@@ -5,37 +5,39 @@
 
 reference_data |>
     neoipcr::get_resistance_test_rate_table() |>
+    dplyr::rowwise() |>
+    dplyr::mutate(
+      i = dplyr::if_else(.data$cond == "routine", 0, 2),
+      abr = ordered(
+        paste0(c(.data$abr, .data$cond), collapse = "_"),
+        levels = c("3gcr_routine", "car_routine", "car_if_3gcr", "cor_routine",
+                   "cor_if_3gcr&car", "mrsa_routine", "vre_routine")),
+      .keep = "unused") |>
+    dplyr::ungroup() |>
+    dplyr::arrange(.data$abr) |>
+    dplyr::mutate(
+      abr = dplyr::case_match(
+        .data$abr,
+        "3gcr_routine" ~ sR$`3gcr`,
+        "car_routine" ~ sR$car,
+        "car_if_3gcr" ~ paste0(
+          "\\- ",
+          sR$`tbl-resistance-test-rate`$car_if_3gcr,
+          collapse = ""),
+        "cor_routine" ~ sR$cor,
+        "cor_if_3gcr&car" ~ paste0(
+          "\\- ",
+          sR$`tbl-resistance-test-rate`$cor_if_3gcr_and_car,
+          collapse = ""),
+        "mrsa_routine" ~ sR$mrsa,
+        "vre_routine" ~ sR$vre),
+      .before = 1) |>
   dplyr::rename(
     !!sR$table_headers$n := "n",
     !!sR$table_headers$pooled := "pooled",
     !!sR$table_headers$q1 := "q1",
     !!sR$table_headers$q2 := "q2",
     !!sR$table_headers$q3 := "q3") |>
-  dplyr::mutate(
-    i = dplyr::if_else(
-      .data$cond == "routine",
-      0,
-      2),
-    abr = dplyr::if_else(
-      .data$cond == "routine",
-      .data$abr,
-      .data$cond),
-    abr = dplyr::case_match(
-      .data$abr,
-      "3gcr" ~ "3gcr",
-      "car" ~ sR$car,
-      "cor" ~ sR$cor,
-      "mrsa" ~ sR$mrsa,
-      "vre" ~ sR$vre,
-      "if_3gcr" ~ paste0(
-        "\\- ",
-        sR$`tbl-resistance-test-rate`$if_3gcr,
-        collapse = ""),
-      "if_3gcr&car" ~ paste0(
-        "\\- ",
-        sR$`tbl-resistance-test-rate`$if_3gcr_and_car,
-        collapse = "")),
-    .before = 1) |>
   gt(rowname_col = "abr") |>
   sub_missing() |>
   gt::tab_options(

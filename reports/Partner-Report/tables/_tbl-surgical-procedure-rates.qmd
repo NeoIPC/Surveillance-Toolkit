@@ -1,3 +1,5 @@
+#### `{r} sR$headings$surgical_procedures_by_category`
+
 ::: {.content-visible when-meta="includeIntroductionTexts"}
 ```{r}
 #| output: asis
@@ -6,15 +8,15 @@ include_localised("_tbl-intro-surgical-procedure.qmd")
 :::
 
 ```{r}
+#| output: asis
 #| label: tbl-surgical-procedure-rates
 #| tbl-cap: !expr 'sR$`tbl-surgical-procedure-rates`$`tbl-cap`'
 #| tbl-cap-location: top
-
+has_data <- !is.null(benchmark_data$surgery_rate_table) && 
+    sum(benchmark_data$surgery_rate_table$n_own, na.rm = TRUE) > 0
 check_outlier_interpretation <- FALSE
 
-# Conditionally render table only if department data exists
-if (!is.null(benchmark_data$surgery_rate_table) && 
-    sum(benchmark_data$surgery_rate_table$n_own, na.rm = TRUE) > 0) {
+if (has_data) {
   
   # Check if reference data columns exist
   has_reference <- "pooled_ref" %in% names(benchmark_data$surgery_rate_table)
@@ -115,10 +117,10 @@ if (!is.null(benchmark_data$surgery_rate_table) &&
   if (has_reference) {
     tbl <- tbl |>
       cols_width(
-        stub() ~ pct(50),
+        stub() ~ pct(52),
         sR$table_headers$n ~ pct(10),
         sR$table_headers$rate ~ pct(10),
-        sR$table_headers$pooled ~ pct(12),
+        sR$table_headers$pooled ~ pct(10),
         sR$table_headers$q1 ~ pct(6),
         sR$table_headers$q2 ~ pct(6),
         sR$table_headers$q3 ~ pct(6)
@@ -166,10 +168,9 @@ if (!is.null(benchmark_data$surgery_rate_table) &&
         sR$table_headers$rate ~ pct(20)
       )
   }
-  
   tbl
 } else {
-  cat(sR$`tbl-surgical-procedure-rates`$no_data)
+  no_data_table()
 }
 ```
 
@@ -179,10 +180,10 @@ if (!is.null(benchmark_data$surgery_rate_table) &&
 if (check_outlier_interpretation) {
   outliers <- detect_outliers(benchmark_data$surgery_rate_table)
   if (length(outliers$below_q1) > 0 || length(outliers$above_q3) > 0) {
-    grouped <- group_outliers(outliers, "surgical_procedure")
+    grouped <- group_outliers(outliers, "surgery_rate_table")
     outlier_text <- format_outlier_text(grouped, sR)
     if (nchar(outlier_text) > 0) {
-      cat("\n\n::: {.callout-note}\n")
+      cat("\n\n::: {.callout-tip}\n")
       cat("## ", sR$outlier$heading, "\n\n")
       cat(outlier_text, "\n")
       cat(":::\n")

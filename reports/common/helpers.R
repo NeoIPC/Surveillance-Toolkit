@@ -109,15 +109,6 @@ include_localised <- function(file_name) {
   )
 }
 
-get_localised_country_names <- function(x) {
-  x |>
-    purrr::map_chr(
-      \(x) {
-        val <- sR$countryNames[[stringr::str_replace_all(as.character(x), " ", "")]]
-        if(is.null(val)) x else val
-      })
-}
-
 get_localised_world_bank_class_names <- function(x) {
   x |>
     purrr::map_chr(
@@ -190,25 +181,21 @@ format_integer <- function(x, big_mark = sR$digit_group_separator)
 #' @param include_wb_class Whether to include WB class ("no", "pseudonymised", "yes")
 #' @return Formatted string with countries grouped by WB class, or simple list if not showing WB class
 format_countries <- function(countries) {
-  if (is.null(countries)) {
-    return(NULL)
+  if (is.null(countries) || nrow(countries) == 0) {
+    return(sR$not_available)
   }
-
-  countries <- countries |>
-    dplyr::mutate(
-      name = get_localised_country_names(.data$name))
 
   # Group by WB class and format
   if("wb_class" %in% rlang::names2(countries)) {
     formatted <- countries |>
       dplyr::arrange(.data$wb_class, .data$name) |>
       dplyr::group_by(
-        wb_class = get_localised_world_bank_class_names(.data$wb_class)) |>
+        wb_class =(sR$worldBankClassNames |> unlist())[gsub("\\s+", "", .data$wb_class)]) |>
       dplyr::summarise(
-        country_list = paste(.data$name, collapse = ", "),
+        country_list = paste((sR$countryNames |> unlist())[gsub("\\s+", "", .data$name)], collapse = "*, *"),
         .groups = "drop")|>
       dplyr::mutate(
-        formatted = paste0(.data$wb_class, ": ", .data$country_list)
+        formatted = paste0(.data$wb_class, ": *", .data$country_list, "*")
       ) |>
       dplyr::pull("formatted") |>
       paste(collapse = "; ")
@@ -220,4 +207,19 @@ format_countries <- function(countries) {
   }
 
   return(formatted)
+}
+
+no_data_table <- function() {
+  cat(
+    '::: {.content-visible when-format="html"}',
+    sR$no_data,
+    ":::",
+    "",
+    '::: {.content-visible unless-format="html"}',
+    "\\begin{longtable}{l}",
+    sR$no_data,
+    "\\end{longtable}",
+    ":::",
+    sep = "\n"
+  )
 }

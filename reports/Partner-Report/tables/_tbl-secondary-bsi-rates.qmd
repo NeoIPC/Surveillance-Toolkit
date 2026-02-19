@@ -1,3 +1,5 @@
+### `{r} sR$headings$secondary_bsi`
+
 ::: {.content-visible when-meta="includeIntroductionTexts"}
 ```{r}
 #| output: asis
@@ -5,7 +7,12 @@ include_localised("_tbl-intro-secondary-bsi.qmd")
 ```
 :::
 
+::: {.content-visible when-format="pdf"}
+\FloatBarrier
+:::
+
 ```{r}
+#| output: asis
 #| label: tbl-secondary-bsi-rates
 #| tbl-cap: !expr 'sR$`tbl-secondary-bsi-rates`$`tbl-cap`'
 #| tbl-cap-location: top
@@ -39,6 +46,9 @@ if (!is.null(benchmark_data$secondary_bsi_rate_table) &&
     gt(rowname_col = "Infection") |>
     sub_missing() |>
     gt::tab_options(
+      latex.header_repeat = TRUE,
+      latex.use_longtable = TRUE,
+      table.width = pct(100),
       table.font.size = 13,
       footnotes.marks = "extended"
     ) |>
@@ -82,12 +92,12 @@ if (!is.null(benchmark_data$secondary_bsi_rate_table) &&
     tbl <- tbl |>
       cols_width(
         stub() ~ pct(40),
-        sR$table_headers$n ~ pct(12),
-        sR$table_headers$rate ~ pct(12),
-        sR$table_headers$pooled ~ pct(13),
-        sR$table_headers$q1 ~ pct(8),
-        sR$table_headers$q2 ~ pct(8),
-        sR$table_headers$q3 ~ pct(7)
+        sR$table_headers$n ~ pct(10),
+        sR$table_headers$rate ~ pct(10),
+        sR$table_headers$pooled ~ pct(10),
+        sR$table_headers$q1 ~ pct(10),
+        sR$table_headers$q2 ~ pct(10),
+        sR$table_headers$q3 ~ pct(10)
       ) |>
       tab_spanner(
         label = sR$department_data,
@@ -169,7 +179,7 @@ if (!is.null(benchmark_data$secondary_bsi_rate_table) &&
   
   tbl
 } else {
-  cat(sR$`tbl-secondary-bsi-rates`$no_data)
+  no_data_table()
 }
 ```
 
@@ -179,10 +189,10 @@ if (!is.null(benchmark_data$secondary_bsi_rate_table) &&
 if (check_outlier_interpretation) {
   outliers <- detect_outliers(benchmark_data$secondary_bsi_rate_table)
   if (length(outliers$below_q1) > 0 || length(outliers$above_q3) > 0) {
-    grouped <- group_outliers(outliers, "secondary_bsi")
+    grouped <- group_outliers(outliers, "secondary_bsi_rate_table")
     outlier_text <- format_outlier_text(grouped, sR)
     if (nchar(outlier_text) > 0) {
-      cat("\n\n::: {.callout-note}\n")
+      cat("\n\n::: {.callout-tip}\n")
       cat("## ", sR$outlier$heading, "\n\n")
       cat(outlier_text, "\n")
       cat(":::\n")

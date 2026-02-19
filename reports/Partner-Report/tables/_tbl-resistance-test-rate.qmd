@@ -1,3 +1,5 @@
+#### `{r} sR$headings$antimicrobial_susceptibility_testing`
+
 ::: {.content-visible when-meta="includeIntroductionTexts"}
 ```{r}
 #| output: asis
@@ -5,7 +7,12 @@ include_localised("_tbl-intro-resistance-test.qmd")
 ```
 :::
 
+::: {.content-visible when-format="pdf"}
+\FloatBarrier
+:::
+
 ```{r}
+#| output: asis
 #| label: tbl-resistance-test-rate
 #| tbl-cap: !expr 'sR$`tbl-resistance-test-rate`$`tbl-cap`'
 #| tbl-cap-location: top
@@ -13,7 +20,8 @@ include_localised("_tbl-intro-resistance-test.qmd")
 check_outlier_interpretation <- FALSE
 
 # Conditionally render table only if department data exists
-if (!is.null(benchmark_data$resistance_test_rate_table) && 
+if (!is.null(benchmark_data$resistance_test_rate_table) &&
+    "n_own" %in% rlang::names2(benchmark_data$resistance_test_rate_table) && 
     sum(benchmark_data$resistance_test_rate_table$n_own, na.rm = TRUE) > 0) {
   
   # Check if reference data columns exist
@@ -22,6 +30,33 @@ if (!is.null(benchmark_data$resistance_test_rate_table) &&
 
   tbl <- benchmark_data$resistance_test_rate_table |>
     dplyr::select(-tidyselect::any_of("n_ref")) |>
+    dplyr::rowwise() |>
+    dplyr::mutate(
+      i = dplyr::if_else(.data$cond == "routine", 0, 2),
+      abr = ordered(
+        paste0(c(.data$abr, .data$cond), collapse = "_"),
+        levels = c("3gcr_routine", "car_routine", "car_if_3gcr", "cor_routine",
+                   "cor_if_3gcr&car", "mrsa_routine", "vre_routine")),
+      .keep = "unused") |>
+    dplyr::ungroup() |>
+    dplyr::arrange(.data$abr) |>
+    dplyr::mutate(
+      abr = dplyr::case_match(
+        .data$abr,
+        "3gcr_routine" ~ sR$`3gcr`,
+        "car_routine" ~ sR$car,
+        "car_if_3gcr" ~ paste0(
+          "\\- ",
+          sR$`tbl-resistance-test-rate`$car_if_3gcr,
+          collapse = ""),
+        "cor_routine" ~ sR$cor,
+        "cor_if_3gcr&car" ~ paste0(
+          "\\- ",
+          sR$`tbl-resistance-test-rate`$cor_if_3gcr_and_car,
+          collapse = ""),
+        "mrsa_routine" ~ sR$mrsa,
+        "vre_routine" ~ sR$vre),
+      .before = 1) |>
     dplyr::rename(
       !!sR$table_headers$n := "n_own",
       !!sR$table_headers$rate := "pooled_own",
@@ -29,34 +64,12 @@ if (!is.null(benchmark_data$resistance_test_rate_table) &&
       !!sR$table_headers$q1 := tidyselect::any_of("q1_ref"),
       !!sR$table_headers$q2 := tidyselect::any_of("q2_ref"),
       !!sR$table_headers$q3 := tidyselect::any_of("q3_ref")) |>
-    dplyr::mutate(
-      i = dplyr::if_else(
-        .data$cond == "routine",
-        0,
-        2),
-      abr = dplyr::if_else(
-        .data$cond == "routine",
-        .data$abr,
-        .data$cond),
-      abr = dplyr::case_match(
-        .data$abr,
-        "3gcr" ~ sR$`3gcr`,
-        "car" ~ sR$car,
-        "cor" ~ sR$cor,
-        "mrsa" ~ sR$mrsa,
-        "vre" ~ sR$vre,
-        "if_3gcr" ~ paste0(
-          "\\- ",
-          sR$`tbl-resistance-test-rate`$if_3gcr,
-          collapse = ""),
-        "if_3gcr&car" ~ paste0(
-          "\\- ",
-          sR$`tbl-resistance-test-rate`$if_3gcr_and_car,
-          collapse = "")),
-      .before = 1) |>
     gt(rowname_col = "abr") |>
     sub_missing() |>
     gt::tab_options(
+      latex.header_repeat = TRUE,
+      latex.use_longtable = TRUE,
+      table.width = pct(100),
       table.font.size = 13,
       footnotes.marks = "extended"
     ) |>
@@ -85,10 +98,10 @@ if (!is.null(benchmark_data$resistance_test_rate_table) &&
         style = "italic"
         ),
       locations = cells_stub(
-        rows = cond %in% c("if_3gcr","if_3gcr&car")
+        rows = abr %in% c("car_if_3gcr","cor_if_3gcr&car")
       )
     ) |>
-    cols_hide(columns = c("i","cond")) |>
+    cols_hide(columns = "i") |>
     tab_style(
       style = cell_text(weight = "bold"),
       locations = list(
@@ -116,20 +129,20 @@ if (!is.null(benchmark_data$resistance_test_rate_table) &&
         id = "reference_data"
       ) |>
       cols_width(
-        stub() ~ pct(40),
+        stub() ~ pct(52),
         sR$table_headers$n ~ pct(10),
         sR$table_headers$rate ~ pct(10),
         sR$table_headers$pooled ~ pct(10),
-        sR$table_headers$q1 ~ pct(10),
-        sR$table_headers$q2 ~ pct(10),
-        sR$table_headers$q3 ~ pct(10)
+        sR$table_headers$q1 ~ pct(6),
+        sR$table_headers$q2 ~ pct(6),
+        sR$table_headers$q3 ~ pct(6)
       )
   } else {
     tbl <- tbl |>
       cols_width(
-        stub() ~ pct(50),
-        sR$table_headers$n ~ pct(25),
-        sR$table_headers$rate ~ pct(25)
+        stub() ~ pct(60),
+        sR$table_headers$n ~ pct(20),
+        sR$table_headers$rate ~ pct(20)
       )
   }
   
@@ -188,7 +201,7 @@ if (!is.null(benchmark_data$resistance_test_rate_table) &&
   
   tbl
 } else {
-  cat(sR$`tbl-resistance-test-rate`$no_data)
+  no_data_table()
 }
 ```
 
@@ -198,10 +211,10 @@ if (!is.null(benchmark_data$resistance_test_rate_table) &&
 if (check_outlier_interpretation) {
   outliers <- detect_outliers(benchmark_data$resistance_test_rate_table)
   if (length(outliers$below_q1) > 0 || length(outliers$above_q3) > 0) {
-    grouped <- group_outliers(outliers, "resistance_test")
+    grouped <- group_outliers(outliers, "resistance_test_rate_table")
     outlier_text <- format_outlier_text(grouped, sR)
     if (nchar(outlier_text) > 0) {
-      cat("\n\n::: {.callout-note}\n")
+      cat("\n\n::: {.callout-tip}\n")
       cat("## ", sR$outlier$heading, "\n\n")
       cat(outlier_text, "\n")
       cat(":::\n")

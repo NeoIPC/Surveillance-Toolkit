@@ -1,3 +1,5 @@
+### `{r} sR$headings$birth_weight_distribution`
+
 ::: {.content-visible when-meta="includeIntroductionTexts"}
 ```{r}
 #| output: asis
@@ -7,121 +9,141 @@ include_localised("_fig-intro-birth-weight.qmd")
 
 ```{r}
 #| label: fig-bw
+#| results: asis
 #| fig-cap: !expr 'paste(sR$`fig-bw`$`fig-cap`[[1]], sprintf(if("ref" %in% benchmark_data$dataset_names) sR$`fig-bw`$`fig-cap`[[2]]$bnch else sR$`fig-bw`$`fig-cap`[[2]]$`no-bnch`, sprintf("%i%s%s", 50L, sR$unit_separator, sR$gramm_abbreviation)), sprintf(if("ref" %in% benchmark_data$dataset_names) sR$`fig-bw`$`fig-cap`[[3]]$bnch else sR$`fig-bw`$`fig-cap`[[3]]$`no-bnch`, sprintf("%i%s", 25L, sR$percent_symbol), sprintf("%i%s", 50L, sR$percent_symbol), sprintf("%i%s", 75L, sR$percent_symbol)))'
 
-check_figure_interpretation <- "ref" %in% benchmark_data$dataset_names
-
-label_bw <- function(x) {
-  paste(
-    format(x),
-    sR$gramm_abbreviation,
-    sep = sR$unit_separator)
-}
-breaks_bw <- function(x) {
-  pretty(
-    x,
-    as.integer(
-      (as.integer(x[2]) + 1 - as.integer(x[1])) / 100)
-    )
+has_bw <- FALSE
+if (!is.null(benchmark_data) && !is.null(benchmark_data$birth_weight_figure)) {
+  fr <- benchmark_data$birth_weight_figure$frequency |> dplyr::filter(dataset == "own")
+  de <- benchmark_data$birth_weight_figure$density |> dplyr::filter(dataset == "own")
+  lp <- benchmark_data$birth_weight_figure$location_parameters |> dplyr::filter(dataset == "own" & !is.na(q1))
+  has_bw <- !is.null(fr) && NROW(fr) > 0 && !is.null(de) && NROW(de) > 0 && !is.null(lp) && NROW(lp) > 0
 }
 
-legend_position <- 'none'
-bw_scale_min <- benchmark_data$birth_weight_figure$scale$min |>
-  min()
-bw_scale_max <- benchmark_data$birth_weight_figure$scale$max |>
-  max()
+check_figure_interpretation <- has_bw && "ref" %in% benchmark_data$dataset_names
 
-histogram_data <- benchmark_data$birth_weight_figure$frequency |>
-  dplyr::filter(dataset == "own")
+if (has_bw) {
+  label_bw <- function(x) {
+    paste(
+      format(x),
+      sR$gramm_abbreviation,
+      sep = sR$unit_separator)
+  }
+  breaks_bw <- function(x) {
+    pretty(
+      x,
+      as.integer(
+        (as.integer(x[2]) + 1 - as.integer(x[1])) / 100)
+      )
+  }
 
-density_data <- benchmark_data$birth_weight_figure$density |>
-  dplyr::filter(dataset == "own")
+  legend_position <- 'none'
+  bw_scale_min <- benchmark_data$birth_weight_figure$scale$min |>
+    min()
+  bw_scale_max <- benchmark_data$birth_weight_figure$scale$max |>
+    max()
 
-density_factor <- sum(histogram_data$n) *
-  (nrow(density_data) / length(seq.int(from = min(density_data$birth_weight), to = max(density_data$birth_weight), by = 50L)))
+  histogram_data <- benchmark_data$birth_weight_figure$frequency |>
+    dplyr::filter(dataset == "own")
 
-A_plot <- ggplot() +
-  geom_col(
-    data = histogram_data,
-    aes(
-      x = birth_weight_cat,
-      y = n,
-      colour = "own"),
-    fill = "white")
+  density_data <- benchmark_data$birth_weight_figure$density |>
+    dplyr::filter(dataset == "own")
 
-if ("ref" %in% benchmark_data$dataset_names) {
-  legend_position <- 'bottom'
+  density_factor <- sum(histogram_data$n) *
+    (nrow(density_data) / length(seq.int(from = min(density_data$birth_weight), to = max(density_data$birth_weight), by = 50L)))
 
-density_data_ref <- benchmark_data$birth_weight_figure$density |>
-  dplyr::filter(dataset == "ref")
+  A_plot <- ggplot() +
+    geom_col(
+      data = histogram_data,
+      aes(
+        x = birth_weight_cat,
+        y = n,
+        colour = "own"),
+      fill = "white")
 
-  density_factor_ref <-  density_factor *
-    (
-      density_data$birth_weight |> max() -
-        density_data$birth_weight |> min()) /
-    (
-      density_data_ref$birth_weight |> max() -
-        density_data_ref$birth_weight |> min())
+  if ("ref" %in% benchmark_data$dataset_names) {
+    legend_position <- 'bottom'
+
+    density_data_ref <- benchmark_data$birth_weight_figure$density |>
+      dplyr::filter(dataset == "ref")
+
+    density_factor_ref <-  density_factor *
+      (
+        density_data$birth_weight |> max() -
+          density_data$birth_weight |> min()) /
+      (
+        density_data_ref$birth_weight |> max() -
+          density_data_ref$birth_weight |> min())
+
+    A_plot <- A_plot +
+      geom_line(
+        data = density_data_ref,
+        aes(
+          x = birth_weight,
+          y = density * density_factor_ref,
+          colour = "ref"))
+  }
 
   A_plot <- A_plot +
     geom_line(
-      data = density_data_ref,
+      data = density_data,
       aes(
         x = birth_weight,
-        y = density * density_factor_ref,
-        colour = "ref"))
-}
+        y = density * density_factor,
+        colour = "own")) +
+    scale_x_continuous(breaks = breaks_bw) +
+    scale_colour_manual(values = rev(pal[2:3])) +
+    coord_cartesian(xlim = c(bw_scale_min, bw_scale_max)) +
+    theme(
+      legend.position = "none",
+      plot.tag = element_text(size = 9),
+      axis.title = element_blank(),
+      axis.text = element_blank(),
+      axis.ticks = element_blank(),
+      panel.grid.major.y = element_blank(),
+      panel.grid.minor.y = element_blank()) +
+    labs(tag = "A")
 
-A_plot <- A_plot +
-  geom_line(
-    data = density_data,
-    aes(
-      x = birth_weight,
-      y = density * density_factor,
-      colour = "own")) +
-  scale_x_continuous(breaks = breaks_bw) +
-  scale_colour_manual(values = rev(pal[2:3])) +
-  coord_cartesian(xlim = c(bw_scale_min, bw_scale_max)) +
-  theme(
-    legend.position = "none",
-    plot.tag = element_text(size = 9),
-    axis.title = element_blank(),
-    axis.text = element_blank(),
-    axis.ticks = element_blank(),
-    panel.grid.major.y = element_blank(),
-    panel.grid.minor.y = element_blank()) +
-  labs(tag = "A")
-
-B_plot <- ggplot(
-  benchmark_data$birth_weight_figure$location_parameters |>
-    mutate(
-      dataset = dplyr::case_match(
-        as.character(.data$dataset),
-        "own" ~ sR$own_unit,
-        "ref" ~ sR$reference_data)),
-  aes(dataset, colour = dataset)) +
-  geom_boxplot(
-    aes(ymin = q1, lower = q1, middle = q2, upper = q3, ymax = q3),
-    stat = "identity",
-    outlier.shape = NA,
+  B_plot <- ggplot(
+    benchmark_data$birth_weight_figure$location_parameters |>
+      mutate(
+        dataset = dplyr::case_match(
+          as.character(.data$dataset),
+          "own" ~ sR$own_unit,
+          "ref" ~ sR$reference_data)),
+    aes(dataset, colour = dataset)) +
+    geom_boxplot(
+      aes(ymin = q1, lower = q1, middle = q2, upper = q3, ymax = q3),
+      stat = "identity",
+      outlier.shape = NA,
     ) +
-  geom_point(aes(y = mean), shape = 23, size = 3, fill = "white") +
-  scale_y_continuous(breaks = breaks_bw, labels = label_bw) +
-  scale_colour_manual(values = rev(pal[2:3])) +
-  coord_flip(ylim = c(bw_scale_min, bw_scale_max)) +
-  theme(
-    legend.title = element_blank(),
-    legend.position = legend_position,
-    plot.tag = element_text(size = 9),
-    axis.title = element_blank(),
-    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1),
-    axis.text.y = element_blank(),
-    axis.ticks.y = element_blank(),
-    panel.grid.major.y = element_blank(),
-    panel.grid.minor.y = element_blank()) +
-  labs(tag = "B")
+    geom_point(aes(y = mean), shape = 23, size = 3, fill = "white") +
+    scale_y_continuous(breaks = breaks_bw, labels = label_bw) +
+    scale_colour_manual(values = rev(pal[2:3])) +
+    coord_flip(ylim = c(bw_scale_min, bw_scale_max)) +
+    theme(
+      legend.title = element_blank(),
+      legend.position = legend_position,
+      plot.tag = element_text(size = 9),
+      axis.title = element_blank(),
+      axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1),
+      axis.text.y = element_blank(),
+      axis.ticks.y = element_blank(),
+      panel.grid.major.y = element_blank(),
+      panel.grid.minor.y = element_blank()) +
+    labs(tag = "B")
 
-A_plot / B_plot
+  A_plot / B_plot
+} else {
+  cat(
+    "",
+    "::: {#fig-bw}",
+    "Not enough data.",
+    "",
+    "To display this figure, your filter settings must include at least two birthweight measurements.",
+    ":::",
+    sep = "\n")
+}
 ```
 
 ::: {.content-visible when-meta="includeOutlierInterpretation"}
@@ -135,7 +157,7 @@ if (check_figure_interpretation) {
   )
 
   if (nchar(interpretation_text) > 0) {
-    cat("::: {.callout-note}\n")
+    cat("::: {.callout-tip}\n")
     cat("##", sR$figure_interpretation$heading, "\n\n")
     cat(interpretation_text, "\n")
     cat(":::\n")

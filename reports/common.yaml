@@ -17,6 +17,9 @@ car: "Carbapenem resistance (CARBR)"
 cor: "Colistin resistance (COLR)"
 mrsa: "Methicillin-resistant Staphylococcus aureus (MRSA)"
 vre: "Vancomycin-resistant Enterococcus (VRE)"
+not_available: Not available.
+no_data: No data.
+not_enough_data: Not enough data.
 table_headers:
   n: "N"
   rate: "Rate"
@@ -108,8 +111,8 @@ tbl-infectious-agent-detection-rate:
   no_data: "No infectious agent detection data available for this report settings."
 tbl-resistance-test-rate:
   tbl-cap: "Antibiotic resistance diagnostics"
-  if_3gcr: "in case of 3GCR"
-  if_3gcr_and_car: "in case of 3GCR and CARBR"
+  car_if_3gcr: "in case of 3GCR"
+  cor_if_3gcr_and_car: "in case of 3GCR and CARBR"
   rate_name: "Antibiotic resistance test rate"
   rate_numerator: "Number of pathogens with recorded test for antibiotic resistance"
   rate_denominator: "Number of pathogens eligible for antibiotic resistance test recording"
@@ -172,4 +175,4 @@ tbl-surgical-procedure-rates:
   n_footnote: "%s: The aggregated number surgical procedures performed in all infants."
   pooled_footnote: "%s: The Surgical Procedure Rate calculated across all infants from all departments."
   quartile_footnote: "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Surgical Procedure Rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of procedures is greater than or equal to one according to the pooled Surgical Procedure Rate."
-  no_data: "No surgical procedure data available for this report settings."
+  no_data: "No surgical procedure data available for this report."

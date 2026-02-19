@@ -1,3 +1,5 @@
+#### `{r} sR$headings$detection_of_infectious_agents`
+
 ::: {.content-visible when-meta="includeIntroductionTexts"}
 ```{r}
 #| output: asis
@@ -6,6 +8,7 @@ include_localised("_tbl-intro-infectious-agent-detection.qmd")
 :::
 
 ```{r}
+#| output: asis
 #| label: tbl-infectious-agent-detection-rate
 #| tbl-cap: !expr 'sR$`tbl-infectious-agent-detection-rate`$`tbl-cap`'
 #| tbl-cap-location: top
@@ -87,20 +90,20 @@ if (!is.null(benchmark_data$infectious_agent_detection_rate_per_inf_type_table) 
         id = "reference_data"
       ) |>
       cols_width(
-        stub() ~ pct(20),
-        sR$table_headers$n ~ pct(13),
-        sR$table_headers$rate ~ pct(13),
-        sR$table_headers$pooled ~ pct(13),
-        sR$table_headers$q1 ~ pct(13),
-        sR$table_headers$q2 ~ pct(13),
-        sR$table_headers$q3 ~ pct(13)
+        stub() ~ pct(40),
+        sR$table_headers$n ~ pct(10),
+        sR$table_headers$rate ~ pct(10),
+        sR$table_headers$pooled ~ pct(10),
+        sR$table_headers$q1 ~ pct(10),
+        sR$table_headers$q2 ~ pct(10),
+        sR$table_headers$q3 ~ pct(10)
       )
   } else {
     tbl <- tbl |>
       cols_width(
-        stub() ~ pct(50),
-        sR$table_headers$n ~ pct(25),
-        sR$table_headers$rate ~ pct(25)
+        stub() ~ pct(60),
+        sR$table_headers$n ~ pct(20),
+        sR$table_headers$rate ~ pct(20)
       )
   }
   
@@ -159,7 +162,7 @@ if (!is.null(benchmark_data$infectious_agent_detection_rate_per_inf_type_table) 
   
   tbl
 } else {
-  cat(sR$`tbl-infectious-agent-detection-rate`$no_data)
+  no_data_table()
 }
 ```
 
@@ -169,10 +172,10 @@ if (!is.null(benchmark_data$infectious_agent_detection_rate_per_inf_type_table) 
 if (check_outlier_interpretation) {
   outliers <- detect_outliers(benchmark_data$infectious_agent_detection_rate_per_inf_type_table)
   if (length(outliers$below_q1) > 0 || length(outliers$above_q3) > 0) {
-    grouped <- group_outliers(outliers, "infectious_agent_detection")
+    grouped <- group_outliers(outliers, "infectious_agent_detection_rate_per_inf_type_table")
     outlier_text <- format_outlier_text(grouped, sR)
     if (nchar(outlier_text) > 0) {
-      cat("\n\n::: {.callout-note}\n")
+      cat("\n\n::: {.callout-tip}\n")
       cat("## ", sR$outlier$heading, "\n\n")
       cat(outlier_text, "\n")
       cat(":::\n")

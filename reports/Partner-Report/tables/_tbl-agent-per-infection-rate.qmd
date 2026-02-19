@@ -1,3 +1,5 @@
+#### `{r} sR$headings$infectious_agents_in_nosocomial_infections`
+
 ::: {.content-visible when-meta="includeIntroductionTexts"}
 ```{r}
 #| output: asis
@@ -6,6 +8,7 @@ include_localised("_tbl-intro-agent-per-infection.qmd")
 :::
 
 ```{r}
+#| output: asis
 #| label: tbl-agent-per-infection-rate
 #| tbl-cap: !expr 'sR$`tbl-agent-per-infection-rate`$`tbl-cap`'
 #| tbl-cap-location: top
@@ -115,10 +118,10 @@ if (!is.null(benchmark_data$infectious_agent_detection_rate_per_agent_table) &&
   if (has_reference) {
     tbl <- tbl |>
       cols_width(
-        stub() ~ pct(50),
+        stub() ~ pct(52),
         sR$table_headers$n ~ pct(10),
         sR$table_headers$rate ~ pct(10),
-        sR$table_headers$pooled ~ pct(12),
+        sR$table_headers$pooled ~ pct(10),
         sR$table_headers$q1 ~ pct(6),
         sR$table_headers$q2 ~ pct(6),
         sR$table_headers$q3 ~ pct(6)
@@ -203,7 +206,7 @@ if (!is.null(benchmark_data$infectious_agent_detection_rate_per_agent_table) &&
   
   tbl
 } else {
-  cat(sR$`tbl-agent-per-infection-rate`$no_data)
+  no_data_table()
 }
 ```
 
@@ -213,10 +216,10 @@ if (!is.null(benchmark_data$infectious_agent_detection_rate_per_agent_table) &&
 if (check_outlier_interpretation) {
   outliers <- detect_outliers(benchmark_data$infectious_agent_detection_rate_per_agent_table, identifier_col = "group")
   if (length(outliers$below_q1) > 0 || length(outliers$above_q3) > 0) {
-    grouped <- group_outliers(outliers, "agent_per_infection")
+    grouped <- group_outliers(outliers, "infectious_agent_detection_rate_per_agent_table")
     outlier_text <- format_outlier_text(grouped, sR)
     if (nchar(outlier_text) > 0) {
-      cat("\n\n::: {.callout-note}\n")
+      cat("\n\n::: {.callout-tip}\n")
       cat("## ", sR$outlier$heading, "\n\n")
       cat(outlier_text, "\n")
       cat(":::\n")

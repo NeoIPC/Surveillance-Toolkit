@@ -10,6 +10,8 @@ params:
   GestationWeeksFrom: NULL
   GestationWeeksTo: NULL
   IncludeNonCorePatients: NULL
+  ValidationExceptionFile: NULL
+subtitle: '`r paste0(params$UnitCodes, collapse = ", ")`'
 ---
 
 

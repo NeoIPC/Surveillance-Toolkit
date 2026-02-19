@@ -11,6 +11,5 @@ format:
       - text: |
           \cfoot*{%
             \raggedright
-            \hspace{1.5cm}\FooterLineOne\\
-            \hspace{1.5cm}\FooterLineTwo
+            \hspace{1.6cm}\parbox{0.8\textwidth}{\FooterText}
           }

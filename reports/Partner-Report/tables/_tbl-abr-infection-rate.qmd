@@ -1,3 +1,5 @@
+#### `{r} sR$headings$resistant_pathogens`
+
 ::: {.content-visible when-meta="includeIntroductionTexts"}
 ```{r}
 #| output: asis
@@ -6,6 +8,7 @@ include_localised("_tbl-intro-abr-infection.qmd")
 :::
 
 ```{r}
+#| output: asis
 #| label: tbl-abr-infection-rate
 #| tbl-cap: !expr 'sR$`tbl-abr-infection-rate`$`tbl-cap`'
 #| tbl-cap-location: top
@@ -14,6 +17,7 @@ check_outlier_interpretation <- FALSE
 
 # Conditionally render table only if department data exists
 if (!is.null(benchmark_data$abr_infection_rate_table) &&
+    "n_own" %in% rlang::names2(benchmark_data$abr_infection_rate_table) &&
     sum(benchmark_data$abr_infection_rate_table$n_own, na.rm = TRUE) > 0) {
 
   # Check if reference data columns exist
@@ -167,13 +171,13 @@ if (!is.null(benchmark_data$abr_infection_rate_table) &&
   if (has_reference) {
     tbl <- tbl |>
       cols_width(
-        stub() ~ pct(40),
-        sR$table_headers$n ~ pct(12),
-        sR$table_headers$rate ~ pct(12),
-        sR$table_headers$pooled ~ pct(13),
-        sR$table_headers$q1 ~ pct(8),
-        sR$table_headers$q2 ~ pct(8),
-        sR$table_headers$q3 ~ pct(7)
+        stub() ~ pct(52),
+        sR$table_headers$n ~ pct(10),
+        sR$table_headers$rate ~ pct(10),
+        sR$table_headers$pooled ~ pct(10),
+        sR$table_headers$q1 ~ pct(6),
+        sR$table_headers$q2 ~ pct(6),
+        sR$table_headers$q3 ~ pct(6)
       ) |>
       tab_spanner(
         label = sR$department_data,
@@ -221,7 +225,7 @@ if (!is.null(benchmark_data$abr_infection_rate_table) &&
   
   tbl
 } else {
-  cat(sR$`tbl-abr-infection-rate`$no_data)
+  no_data_table()
 }
 
 ```
@@ -232,10 +236,10 @@ if (!is.null(benchmark_data$abr_infection_rate_table) &&
 if (check_outlier_interpretation) {
   outliers <- detect_outliers(benchmark_data$abr_infection_rate_table, combine_cols = c("abr", "group"))
   if (length(outliers$below_q1) > 0 || length(outliers$above_q3) > 0) {
-    grouped <- group_outliers(outliers, "abr_infection")
+    grouped <- group_outliers(outliers, "abr_infection_rate_table")
     outlier_text <- format_outlier_text(grouped, sR)
     if (nchar(outlier_text) > 0) {
-      cat("\n\n::: {.callout-note}\n")
+      cat("\n\n::: {.callout-tip}\n")
       cat("## ", sR$outlier$heading, "\n\n")
       cat(outlier_text, "\n")
       cat(":::\n")
