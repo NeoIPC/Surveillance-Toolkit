@@ -10,23 +10,13 @@ params:
   GestationWeeksFrom: NULL
   GestationWeeksTo: NULL
   IncludeNonCorePatients: NULL
+  ValidationExceptionFile: NULL
+subtitle: '`r paste0(params$UnitCodes, collapse = ", ")`'
 ---
 
 ```{r}
-#| label: Initialise Locale
-locale <- "de_DE.UTF-8"
-sR <- modifyList(
-  yaml::read_yaml("../common.de.yaml", handlers = list('bool#no' = function(x) x)),
-  yaml::read_yaml("content.de/_sR.yaml", handlers = list('bool#no' = function(x) x))
-)
+#| label: Make sure the locale is initialised correctly
+Sys.setenv(LC_ALL = "de_DE.UTF-8")
 ```
 
-{{< include _setup.qmd >}}
-
-{{< include content.de/_introduction.qmd >}}
-
-{{< include figures/_fig-bw.qmd >}}
-
-{{< include figures/_fig-ga.qmd >}}
-
-{{< include tables/_tbl-risk-density-rates.qmd >}}
+{{< include _content.qmd >}}

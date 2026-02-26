@@ -14,7 +14,6 @@ params:
 subtitle: '`r paste0(params$UnitCodes, collapse = ", ")`'
 ---
 
-
 ```{r}
 #| label: Make sure the locale is initialised correctly
 Sys.setenv(LC_ALL = "en_GB.UTF-8")
