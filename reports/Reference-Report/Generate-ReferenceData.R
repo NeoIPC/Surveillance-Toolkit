@@ -5,14 +5,12 @@ isQuietStartup <- function() {
   any(args %in% c("--quiet", "-q"))
 }
 
+script_dir <- dirname(
+  sub("--file=", "", grep("--file=", commandArgs(FALSE), value = TRUE)[1]))
 suppressPackageStartupMessages({
-  if (requireNamespace("pak", quietly = TRUE)) {
-    suppressMessages(suppressWarnings(
-      pak::pak("Brar/neoipcr@PartnerReport")
-    ))
-  }
+  source(file.path(script_dir, "../common/load-neoipcr.R"))
+  load_neoipcr(dev_pkg_path = file.path(script_dir, "../../../neoipcr"))
   library(jsonlite)
-  library(neoipcr)
 })
 
 verbosity <- "normal"

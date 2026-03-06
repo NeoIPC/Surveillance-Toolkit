@@ -1,10 +1,7 @@
-```{r Install neoipcr, message=FALSE, warning=FALSE}
-suppressMessages(pak::pak("Brar/neoipcr@initial_tests"))
-```
-
 ```{r Attach packages, message=FALSE, warning=FALSE}
+source("../common/load-neoipcr.R")
+load_neoipcr(dev_pkg_path = "../../../neoipcr")
 suppressMessages(library(tidyverse, warn.conflicts = FALSE, quietly = TRUE))
-suppressMessages(library(neoipcr, warn.conflicts = FALSE, quietly = TRUE))
 ```
 
 ```{r Initialize variables}

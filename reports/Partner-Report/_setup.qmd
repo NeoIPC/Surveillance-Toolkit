@@ -2,17 +2,14 @@
 #| message: false
 #| warning: false
 #| include: false
-# Commented during development - using local installation
-# pak::pak("Brar/neoipcr@PartnerReport")
-# Uncommented during development - using local installation
-devtools::load_all("../../../neoipcr", recompile = TRUE)
+source("../common/load-neoipcr.R")
+load_neoipcr(dev_pkg_path = "../../../neoipcr")
 library(tidyverse, warn.conflicts = FALSE, quietly = TRUE)
 library(yaml, warn.conflicts = FALSE, quietly = TRUE)
 library(smplot2, warn.conflicts = FALSE, quietly = TRUE)
 library(scales, warn.conflicts = FALSE, quietly = TRUE)
 library(patchwork, warn.conflicts = FALSE, quietly = TRUE)
 library(gt, warn.conflicts = FALSE, quietly = TRUE)
-library(neoipcr, warn.conflicts = FALSE, quietly = TRUE)
 ```
 
 ```{r Set up functions}

@@ -82,9 +82,10 @@ $repoRoot = Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..')
 $reportDir = Resolve-Path -LiteralPath (Join-Path $repoRoot 'reports/Reference-Report')
 $outputDirPath = Resolve-Path -LiteralPath $OutputDir -ErrorAction SilentlyContinue
 if (-not $outputDirPath) {
-    $outputDirPath = New-Item -ItemType Directory -Path $OutputDir -Force
+    $outputDirPath = (New-Item -ItemType Directory -Path $OutputDir -Force).FullName
+} else {
+    $outputDirPath = $outputDirPath.Path
 }
-$outputDirPath = $outputDirPath.Path
 
 $buildReportPath = Join-Path $outputDirPath "$scriptTimestamp.reference-report-build.json"
 
