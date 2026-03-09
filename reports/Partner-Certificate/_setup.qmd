@@ -1,5 +1,6 @@
 ```{r}
 #| label: Setup
+source("../common/helpers.R")
 
 # Initialize our report data from the data file if one is provided
 if (!is.null(params$dataFilePath) && file.exists(params$dataFilePath)) {
@@ -40,11 +41,9 @@ if (is.null(data$startYear) || is.null(data$endYear) || is.null(data$hospitalNam
   else
     endTo <- as.Date(paste0(data$endYear,'-12-31'))
 
-  if (is.null(params$token)){
-    connection_options <- neoipcr::dhis2_connection_options(token = Sys.getenv("NEOIPC_DHIS2_TOKEN"))
-  } else {
-    connection_options <- neoipcr::dhis2_connection_options(token = params$token)
-  }
+  connection_options <- get_connection_options(params$token,
+    scheme = params$dhis2Scheme, hostname = params$dhis2Hostname,
+    port = params$dhis2Port, path = params$dhis2Path)
 
   # Import date from our DHIS2 server
   ds <- suppressWarnings(neoipcr::import_dhis2(

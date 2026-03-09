@@ -128,15 +128,25 @@ get_validation_exceptions <- function(x) {
   }
 }
 
-get_connection_options <- function(x) {
+get_connection_options <- function(x, scheme = NULL, hostname = NULL,
+                                    port = NULL, path = NULL) {
   token <- dplyr::coalesce(x, Sys.getenv("NEOIPC_DHIS2_TOKEN", unset = NA))
   session_id <- Sys.getenv("NEOIPC_DHIS2_SESSION_ID", unset = NA)
+
+  server_args <- list()
+  if (!is.null(scheme)) server_args$scheme <- scheme
+  if (!is.null(hostname)) server_args$hostname <- hostname
+  if (!is.null(port)) server_args$port <- port
+  if (!is.null(path)) server_args$path <- path
+
   if(!is.na(session_id)) {
-    return(neoipcr::dhis2_connection_options(session_id = session_id))
+    return(do.call(neoipcr::dhis2_connection_options,
+                   c(list(session_id = session_id), server_args)))
   } else if (!is.na(token)) {
-    return(neoipcr::dhis2_connection_options(token = token))
+    return(do.call(neoipcr::dhis2_connection_options,
+                   c(list(token = token), server_args)))
   } else {
-    return(neoipcr::dhis2_connection_options())
+    return(do.call(neoipcr::dhis2_connection_options, server_args))
   }
 }
 

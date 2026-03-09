@@ -11,6 +11,10 @@ params:
   GestationWeeksTo: NULL
   IncludeNonCorePatients: NULL
   ValidationExceptionFile: NULL
+  dhis2Scheme: NULL
+  dhis2Hostname: NULL
+  dhis2Port: NULL
+  dhis2Path: NULL
 subtitle: '`r paste0(params$UnitCodes, collapse = ", ")`'
 ---
 

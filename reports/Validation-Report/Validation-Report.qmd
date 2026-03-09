@@ -5,6 +5,10 @@ params:
   country: NULL
   departmentFilter: NULL
   testUnitFilter: TRUE
+  dhis2Scheme: NULL
+  dhis2Hostname: NULL
+  dhis2Port: NULL
+  dhis2Path: NULL
 ---
 
 {{< include _setup.qmd >}}

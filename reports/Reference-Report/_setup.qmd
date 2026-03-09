@@ -121,7 +121,9 @@ if (!is.null(params$ReferenceDataFile)) {
         file.info(params$ReferenceDataFile)$size))
 } else {
   reference_data <- suppressWarnings(import_dhis2(
-    connection_options = get_connection_options(params$token),
+    connection_options = get_connection_options(params$token,
+      scheme = params$dhis2Scheme, hostname = params$dhis2Hostname,
+      port = params$dhis2Port, path = params$dhis2Path),
     dataset_options = get_dataset_options(
       reportingPeriodFrom = params$reportingPeriodFrom,
       reportingPeriodTo = params$reportingPeriodTo,

@@ -11,6 +11,10 @@ params:
   dataFilePath: NULL
   departmentCode: "DE_BER_CHARITE_CVK_NEO"
   token: NULL
+  dhis2Scheme: NULL
+  dhis2Hostname: NULL
+  dhis2Port: NULL
+  dhis2Path: NULL
 ---
 
 ```{r}
