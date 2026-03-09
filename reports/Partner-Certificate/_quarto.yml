@@ -6,6 +6,7 @@ profile:
 date-meta: now
 echo: false
 engine: knitr
+filters: ["../filters/pandoc-quotes.lua"]
 format:
   pdf:
     template-partials:
