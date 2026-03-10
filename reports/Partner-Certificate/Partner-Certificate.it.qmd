@@ -10,7 +10,6 @@ params:
   signatureImagePath: "demo_signature.png"
   dataFilePath: NULL
   departmentCode: "DE_BER_CHARITE_CVK_NEO"
-  token: NULL
 ---
 
 ```{r}

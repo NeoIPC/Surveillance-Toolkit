@@ -25,3 +25,4 @@ reports/**/*.md
 reports/**/*_files/**
 reports/**/_output
 reports/ICHE-Health-Intervention-Codes.csv
+data/local/

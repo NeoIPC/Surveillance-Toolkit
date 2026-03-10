@@ -13,7 +13,6 @@ params:
   testUnitFilter: true
   defaultPatientFilter: true
   validationExceptionFile: NULL
-  token: NULL
 ---
 
 ```{r}

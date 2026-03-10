@@ -41,7 +41,7 @@ if (is.null(data$startYear) || is.null(data$endYear) || is.null(data$hospitalNam
   else
     endTo <- as.Date(paste0(data$endYear,'-12-31'))
 
-  connection_options <- get_connection_options(params$token,
+  connection_options <- get_connection_options(
     scheme = params$dhis2Scheme, hostname = params$dhis2Hostname,
     port = params$dhis2Port, path = params$dhis2Path)
 

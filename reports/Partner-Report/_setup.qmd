@@ -558,7 +558,7 @@ typedParams <- list(
 get_unit_data <- function() suppressWarnings(
   import_dhis2(
     connection_options = get_connection_options(
-      NULL, scheme = params$dhis2Scheme, hostname = params$dhis2Hostname,
+      scheme = params$dhis2Scheme, hostname = params$dhis2Hostname,
       port = params$dhis2Port, path = params$dhis2Path),
     dataset_options = dhis2_dataset_options(
       department_filter = typedParams$UnitCodes,

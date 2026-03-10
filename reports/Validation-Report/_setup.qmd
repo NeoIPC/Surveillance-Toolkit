@@ -7,7 +7,6 @@ suppressMessages(library(tidyverse, warn.conflicts = FALSE, quietly = TRUE))
 
 ```{r Initialize variables}
 if(!exists("params")) params <- list()
-token <- dplyr::coalesce(params$token, Sys.getenv("NEOIPC_DHIS2_TOKEN", unset = NA_character_))
 language <- dplyr::coalesce(params$language, "en")
 default_countries <- list(
   en = "GB",
@@ -38,7 +37,7 @@ problems <- tibble(
 ```
 
 ```{r Data Import, message=FALSE, warning=FALSE}
-connection_options <- get_connection_options(token,
+connection_options <- get_connection_options(
   scheme = params$dhis2Scheme, hostname = params$dhis2Hostname,
   port = params$dhis2Port, path = params$dhis2Path)
 data <- import_dhis2(connection_options = connection_options, locale = locale)

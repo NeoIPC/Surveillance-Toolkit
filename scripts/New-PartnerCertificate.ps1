@@ -4,6 +4,15 @@ param(
     [string]$Signatory,
     [Parameter(Mandatory, Position = 1)]
     [System.IO.DirectoryInfo]$SignatureImagePath,
+    [ArgumentCompleter({
+        param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
+        $cacheFile = Join-Path $PSScriptRoot '..' 'data' 'local' 'site-codes.txt'
+        if (Test-Path -LiteralPath $cacheFile) {
+            Get-Content -LiteralPath $cacheFile |
+                Where-Object { $_ -like "$wordToComplete*" } |
+                Sort-Object
+        }
+    })]
     [Parameter(Mandatory, Position = 2, ParameterSetName = 'Acquire')]
     [string[]]$DepartmentCode,
     [Parameter(Mandatory, Position = 2, ParameterSetName = 'Pass')]
@@ -37,94 +46,61 @@ param(
     [string]$Token
 )
 
-function HandleQuartoResult {
-    param ($QuartoResult)
-    $errorLine = ''
-    $isError = $false
-    foreach ($line in $QuartoResult) {
-        $s = "$line"
-        if ($s -eq 'System.Management.Automation.RemoteException') {
-            continue
-        }
-        if ($isError) {
-            $errorLine += $s
-        }
-        elseif ($s -match '^(Error)|(Fehler)') {
-            $isError = $true
-            $errorLine = $s
-        }
-        else {
-            $s | Write-Verbose
-        }
-    }
-    if ($isError) {
-        Write-Host $errorLine -ForegroundColor Red
-    }
-    else {
-        Write-Host "done." -ForegroundColor Green
-    }
-}
-
-if ($Token) {
-    $tokenPath = Resolve-Path -LiteralPath $Token -ErrorAction SilentlyContinue
-    if ([System.IO.File]::Exists($tokenPath)) {
-        $Token = Get-Content -LiteralPath $tokenPath -TotalCount 1 -Encoding utf8
-    }
-} elseif ($env:NEOIPC_DHIS2_TOKEN) {
-    $Token = $env:NEOIPC_DHIS2_TOKEN
-    if ([System.IO.File]::Exists($Token)) {
-        $Token = Get-Content -LiteralPath $Token -TotalCount 1 -Encoding utf8
-    }
-} else {
-    throw "Failed to detect a DHIS2 personal access token in the environment. Please set the 'NEOIPC_DHIS2_TOKEN' environment variable or pass the token via the -Token parameter."
-}
-
-if ($Language -eq 'en') {
-    $quartoFile = 'Partner Certificate.qmd'
-} else {
-    $quartoFile = "Partner Certificate.$Language.qmd"
-}
+. "$PSScriptRoot/NeoipcReportHelpers.ps1"
+$auth = Resolve-NeoipcAuth -Token $Token
 
 $currentDir = Get-Location
 $reportDir = Resolve-Path -LiteralPath "$PSScriptRoot/../reports/Partner Certificate/"
+$quartoFile = Resolve-NeoipcLocaleQmd -ReportDir $reportDir -BaseName 'Partner Certificate' -Language $Language
 $SignatureImagePath = Resolve-Path -LiteralPath $SignatureImagePath.FullName -Relative -RelativeBasePath $reportDir
+
+$originalEnv = @{}
+foreach ($name in @('NEOIPC_DHIS2_TOKEN', 'NEOIPC_DHIS2_USER', 'NEOIPC_DHIS2_PASSWORD', 'NEOIPC_DHIS2_SESSION_ID')) {
+    $originalEnv[$name] = [Environment]::GetEnvironmentVariable($name, 'Process')
+}
+foreach ($name in @('NEOIPC_DHIS2_TOKEN', 'NEOIPC_DHIS2_USER', 'NEOIPC_DHIS2_PASSWORD', 'NEOIPC_DHIS2_SESSION_ID')) {
+    [Environment]::SetEnvironmentVariable($name, $null, 'Process')
+}
+if ($auth.AuthType -eq 'Token') {
+    $env:NEOIPC_DHIS2_TOKEN = $auth.Token
+} elseif ($auth.AuthType -eq 'Basic') {
+    $env:NEOIPC_DHIS2_USER = $auth.Username
+    $env:NEOIPC_DHIS2_PASSWORD = Get-NeoipcAuthPassword -Auth $auth
+}
 
 $exitCode = 0
 try {
     Set-Location -LiteralPath $reportDir
     if ($DepartmentCode) {
-        $deptsQueryResult = curl -sfSH "Authorization: ApiToken $Token" `
-        'https://neoipc.charite.de/api/organisationUnitGroups.json?paging=false&filter=code:eq:NEO_DEPARTMENT&fields=organisationUnits%5Bcode%5D' 2>&1
+        $allSites = Get-NeoipcDepartments -Auth $auth
 
-        if ($LASTEXITCODE -ne 0) {
-            if ($deptsQueryResult -match '\D401\D?.*$') {
-                Write-Host "Authorisation failed" -ForegroundColor Red
-                exit 401
-            } else {
-                Write-Host $deptsQueryResult -ForegroundColor Red
-                exit 1
-            }
-        }
-
-        $sites = ($deptsQueryResult | ConvertFrom-Json -Depth 10).organisationUnitGroups[0].organisationUnits.code | Where-Object -FilterScript {  foreach ($d in $DepartmentCode) { if ($_ -match $d) { return $true } } } | Sort-Object
+        $sites = $allSites | Where-Object -FilterScript { foreach ($d in $DepartmentCode) { if ($_ -match $d) { return $true } } } | Sort-Object
 
         foreach ($site in $sites) {
             Write-Host "Generating partner certificate for $site..."
             $outFile = "$([datetime]::Now.ToString('yyyy-MM-dd_HHmmss'))_NeoIPC-Surveillance-Partner-Certificate_$($site).$($Language).pdf"
-            $quartoResult = quarto render $quartoFile -P "signatory:$Signatory" -P "signatureImagePath:$SignatureImagePath" -P "departmentCode:$site" -P "token:$Token" -o $outFile 2>&1
-            $exitCode = [System.Math]::Max($LASTEXITCODE, $exitCode)
-            HandleQuartoResult $quartoResult
+            $quartoArgs = @('render', $quartoFile, '-P', "signatory:$Signatory", '-P', "signatureImagePath:$SignatureImagePath", '-P', "departmentCode:$site", '-o', $outFile)
+            $result = Invoke-QuartoRender -Arguments $quartoArgs -Description "partner certificate for $site"
+            $exitCode = [System.Math]::Max($result.ExitCode, $exitCode)
         }
         exit $exitCode
     } else {
         Write-Host "Generating partner certificate for $HospitalName..."
         $outFile = "$([datetime]::Now.ToString('yyyy-MM-dd_HHmmss'))_NeoIPC-Surveillance-Partner-Certificate_$($HospitalName).$($Language).pdf"
-        $quartoResult = quarto render "'$quartoFile'" -P "signatory:$Signatory" -P "signatureImagePath:$SignatureImagePath" -P "startYear:$StartYear" -P "endYear:$EndYear" -P "nPatients:$NumberOfPatients" -P "hospitalName:$HospitalName" -P "token:$Token" -o $outFile 2>&1
-        $exitCode = $LASTEXITCODE
-        HandleQuartoResult $quartoResult
+        $quartoArgs = @('render', $quartoFile, '-P', "signatory:$Signatory", '-P', "signatureImagePath:$SignatureImagePath", '-P', "startYear:$StartYear", '-P', "endYear:$EndYear", '-P', "nPatients:$NumberOfPatients", '-P', "hospitalName:$HospitalName", '-o', $outFile)
+        $result = Invoke-QuartoRender -Arguments $quartoArgs -Description "partner certificate for $HospitalName"
+        $exitCode = $result.ExitCode
         exit $exitCode
     }
 }
 finally {
     Set-Location -LiteralPath $currentDir
+    foreach ($name in $originalEnv.Keys) {
+        $originalValue = $originalEnv[$name]
+        if ($null -eq $originalValue) {
+            [Environment]::SetEnvironmentVariable($name, $null, 'Process')
+        } else {
+            [Environment]::SetEnvironmentVariable($name, $originalValue, 'Process')
+        }
+    }
 }

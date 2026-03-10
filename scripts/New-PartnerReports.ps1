@@ -12,14 +12,32 @@ It requires a DHIS2 API token provided as the -Token parameter or via the NEOIPC
 
 .EXAMPLE
 .
-    .\build-partner-reports.ps1 -SiteCodeFilter 'NEO_.*' -Language @('en','de') -OutputDir 'C:\tmp\partner-reports' -ReferenceDataFile '2026-01-28_124237Z.Reference-Report.json' -IncludeNonCorePatients -Verbose
+    .\New-PartnerReports.ps1 -SiteCodeFilter 'NEO_.*' -Language @('en','de') -OutputDir 'C:\tmp\partner-reports' -ReferenceDataFile '2026-01-28_124237Z.Reference-Report.json' -IncludeNonCorePatients -Verbose
 #>
 [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Low')]
 param(
+    [ArgumentCompleter({
+        param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
+        $cacheFile = Join-Path $PSScriptRoot '..' 'data' 'local' 'site-codes.txt'
+        if (Test-Path -LiteralPath $cacheFile) {
+            Get-Content -LiteralPath $cacheFile |
+                Where-Object { $_ -like "$wordToComplete*" } |
+                Sort-Object
+        }
+    })]
     [Parameter(Position=0)]
     [string]
     $SiteCodeFilter = '.+',
 
+    [ArgumentCompleter({
+        param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
+        @(
+            Get-ChildItem -LiteralPath "$PSScriptRoot/../reports/Partner-Report/" -File -Filter 'Partner-Report.*.qmd' |
+            Select-Object -ExpandProperty Name |
+            ForEach-Object { if ($_ -match 'Partner-Report\.(.+)\.qmd') { $Matches[1] } }) + 'en' |
+            Where-Object { $_ -like "$wordToComplete*" } |
+            Sort-Object
+    })]
     [Parameter(Position=1)]
     [string[]]
     $Language = @('en'),
@@ -65,121 +83,122 @@ param(
     $IncludeNonCorePatients,
 
     [Parameter()]
+    [switch]
+    $HideIntroductionTexts,
+
+    [Parameter()]
+    [switch]
+    $HideOutlierInterpretation,
+
+    [Parameter()]
     [ValidateSet('pdf','html','docx','json')]
     [string[]]
     $Formats = @('pdf'),
 
     [Parameter()]
     [switch]
-    $JsonReport
+    $JsonReport,
+
+    [Parameter()]
+    [ValidateSet(
+        'BirthWeightDistribution',
+        'GestationalAgeDistribution',
+        'IncidenceDensityRates',
+        'DeviceAssociatedRates',
+        'AgentPerInfectionRates',
+        'AntibioticResistanceRates',
+        'InfectiousAgentDetectionRates',
+        'ResistanceTestRates',
+        'RiskDensityRates',
+        'SurgicalProcedureRates',
+        'SecondaryBloodstreamInfectionRates'
+    )]
+    [string[]]$IncludeElements = @(
+        'BirthWeightDistribution',
+        'GestationalAgeDistribution',
+        'IncidenceDensityRates',
+        'DeviceAssociatedRates',
+        'AgentPerInfectionRates',
+        'AntibioticResistanceRates',
+        'InfectiousAgentDetectionRates',
+        'ResistanceTestRates',
+        'RiskDensityRates',
+        'SurgicalProcedureRates',
+        'SecondaryBloodstreamInfectionRates'
+    )
 )
 
-function Resolve-Token {
-    param([string]$TokenParam)
-    # Prefer explicit param, otherwise env var
-    $tokenCandidate = $TokenParam
-    if ([string]::IsNullOrWhiteSpace($tokenCandidate)) {
-        $tokenCandidate = $env:NEOIPC_DHIS2_TOKEN
-    }
+. "$PSScriptRoot/NeoipcReportHelpers.ps1"
 
-    if (-not [string]::IsNullOrWhiteSpace($tokenCandidate)) {
-        # If it's a path to a file, read the first non-empty line
-        if (Test-Path -LiteralPath $tokenCandidate -PathType Leaf) {
-            try {
-                # Use .NET ReadAllText to correctly handle BOM and encodings
-                $content = Get-Content -LiteralPath $tokenCandidate -Head 1 -Encoding UTF8 -ErrorAction Stop
-                return $content
-            }
-            catch {
-                throw "Token file '$tokenCandidate' could not be read: $($_.Exception.Message)"
-            }
-        }
-        else {
-            return $tokenCandidate
-        }
-    }
-    throw 'No DHIS2 token provided. Set -Token <token-or-path> or environment variable NEOIPC_DHIS2_TOKEN.'
-}
-
-function Ensure-QuartoAvailable {
-    # Run Quarto self-checks to ensure a functional installation and knitr support
-    $errors = [System.Collections.Generic.List[string]]::new()
-
-    try {
-        $outInstall = & quarto check install 2>&1
-        if ($LASTEXITCODE -ne 0) {
-            $errors.Add("'quarto check install' failed with exit code $LASTEXITCODE. Output: $([string]::Join("`n", $outInstall))")
-        }
-        else {
-            Write-Verbose "quarto check install output:`n$([string]::Join("`n", $outInstall))"
-            if ($outInstall -match 'Error|ERROR|FAILED|NOT FOUND') {
-                $errors.Add("'quarto check install' output indicates problems: $([string]::Join("`n", $outInstall))")
-            }
-        }
-    }
-    catch {
-        $errors.Add("Failed to run 'quarto check install': $($_.Exception.Message)")
-    }
-
-    try {
-        $outKnitr = & quarto check knitr 2>&1
-        if ($LASTEXITCODE -ne 0) {
-            $errors.Add("'quarto check knitr' failed with exit code $LASTEXITCODE. Output: $([string]::Join("`n", $outKnitr))")
-        }
-        else {
-            Write-Verbose "quarto check knitr output:`n$([string]::Join("`n", $outKnitr))"
-            if ($outKnitr -match 'Error|ERROR|FAILED|NOT FOUND') {
-                $errors.Add("'quarto check knitr' output indicates problems: $([string]::Join("`n", $outKnitr))")
-            }
-        }
-    }
-    catch {
-        $errors.Add("Failed to run 'quarto check knitr': $($_.Exception.Message)")
-    }
-
-    if ($errors.Count -gt 0) {
-        throw ("Quarto checks failed:`n" + ($errors -join "`n`n"))
-    }
-}
-
-function Build-QmdParamPairs {
-    param(
-        [hashtable]$Values
-    )
-
-    $pairs = @()
-    foreach ($k in $Values.Keys) {
-        $v = $Values[$k]
-        if ($null -ne $v -and -not ([string]::IsNullOrWhiteSpace([string]$v))) {
-            $pairs += '-P'
-            $pairs += "${k}:$v"
-        }
-    }
-    return $pairs
+# Map user-friendly element names to internal Quarto parameter names
+$elementMapping = @{
+    'BirthWeightDistribution' = 'includeBirthWeightFigure'
+    'GestationalAgeDistribution' = 'includeGestationalAgeFigure'
+    'IncidenceDensityRates' = 'includeIncidenceDensityTable'
+    'DeviceAssociatedRates' = 'includeDeviceAssociatedIncidenceDensityTable'
+    'AgentPerInfectionRates' = 'includeAgentPerInfectionRateTable'
+    'AntibioticResistanceRates' = 'includeResistantPathogenInfectionRateTable'
+    'InfectiousAgentDetectionRates' = 'includeInfectiousAgentDetectionRateTable'
+    'ResistanceTestRates' = 'includeAntibioticResistanceTestRateTable'
+    'RiskDensityRates' = 'includeRiskDensityRateTable'
+    'SurgicalProcedureRates' = 'includeSurgicalProcedureRateTable'
+    'SecondaryBloodstreamInfectionRates' = 'includeSecondaryBsiRateTable'
 }
 
 # --- Start script ---
 $wd = Get-Location
-try {
-    Set-Location -LiteralPath $PSScriptRoot
+$partnerReportDir = Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..' 'reports' 'Partner-Report')
 
-    # Resolve token (throws if missing)
-    $resolvedToken = Resolve-Token -TokenParam $Token
+# Resolve ReferenceDataFile if provided BEFORE changing directory
+# ReferenceDataFile is relative to current directory; resolve it absolutely first,
+# then make it relative to partnerReportDir for Quarto
+$resolvedReferenceDataFile = $null
+if ($ReferenceDataFile) {
+    # Resolve absolute path from current directory
+    $absoluteRefPath = Resolve-Path -LiteralPath $ReferenceDataFile -ErrorAction SilentlyContinue
+    if (-not $absoluteRefPath) {
+        throw "Reference data file not found: $ReferenceDataFile"
+    }
+    $absoluteRefPath = $absoluteRefPath.Path
+    
+    # Convert to path relative to partnerReportDir for Quarto
+    $resolvedReferenceDataFile = Resolve-Path -LiteralPath $absoluteRefPath -Relative -RelativeBasePath $partnerReportDir
+}
+
+try {
+    Set-Location -LiteralPath $partnerReportDir
+
+    # Resolve auth (throws if missing)
+    $auth = Resolve-NeoipcAuth -Token $Token
 
     # Fetch departments
-    $deptsUrl = 'https://neoipc.charite.de/api/organisationUnitGroups.json?paging=false&filter=code:eq:NEO_DEPARTMENT&fields=organisationUnits%5Bcode%5D'
-    try {
-        $resp = Invoke-RestMethod -Method Get -Headers @{'Authorization' = "ApiToken $resolvedToken" } -Uri $deptsUrl -ErrorAction Stop
-        $sites = if ($resp.organisationUnitGroups -and $resp.organisationUnitGroups[0].organisationUnits) { $resp.organisationUnitGroups[0].organisationUnits.code } else { @() }
-        $sites = $sites | Where-Object { $_ -match $SiteCodeFilter } | Sort-Object
-    }
-    catch {
-        throw "Failed to fetch department list from DHIS2: $($_.Exception.Message)"
-    }
+    $sites = Get-NeoipcDepartments -Auth $auth -SiteCodeFilter $SiteCodeFilter
 
     if (-not $sites -or $sites.Count -eq 0) {
         Write-Warning "No sites matched filter '$SiteCodeFilter'. Nothing to do.";
         return
+    }
+
+    # Save current auth env vars, clear them, then set only the resolved ones
+    # so that R/Quarto child processes pick up credentials via neoipcr's get_auth_data()
+    $originalEnv = @{}
+    foreach ($name in @(
+        'NEOIPC_DHIS2_TOKEN',
+        'NEOIPC_DHIS2_USER',
+        'NEOIPC_DHIS2_PASSWORD',
+        'NEOIPC_DHIS2_SESSION_ID'
+    )) {
+        $originalEnv[$name] = [Environment]::GetEnvironmentVariable($name, 'Process')
+    }
+    foreach ($name in @('NEOIPC_DHIS2_TOKEN', 'NEOIPC_DHIS2_USER',
+                        'NEOIPC_DHIS2_PASSWORD', 'NEOIPC_DHIS2_SESSION_ID')) {
+        [Environment]::SetEnvironmentVariable($name, $null, 'Process')
+    }
+    if ($auth.AuthType -eq 'Token') {
+        $env:NEOIPC_DHIS2_TOKEN = $auth.Token
+    } elseif ($auth.AuthType -eq 'Basic') {
+        $env:NEOIPC_DHIS2_USER = $auth.Username
+        $env:NEOIPC_DHIS2_PASSWORD = Get-NeoipcAuthPassword -Auth $auth
     }
 
     # Resolve OutputDir if provided
@@ -199,7 +218,7 @@ try {
 
     # Check Quarto once before iterating (time-consuming; no need to repeat)
     try {
-        Ensure-QuartoAvailable
+        Test-QuartoInstallation
     }
     catch {
         throw "Quarto checks failed: $($_.Exception.Message)"
@@ -207,18 +226,7 @@ try {
 
     # Loop by language and site
     foreach ($lang in $Language) {
-        # Select QMD for language, fallback to default
-        $qmdLang = Join-Path -Path $PSScriptRoot -ChildPath "Partner-Report.$lang.qmd"
-        $qmdDefault = Join-Path -Path $PSScriptRoot -ChildPath 'Partner-Report.qmd'
-        if (Test-Path -LiteralPath $qmdLang) {
-            $qmdToUse = $qmdLang
-        }
-        elseif (Test-Path -LiteralPath $qmdDefault) {
-            $qmdToUse = $qmdDefault
-        }
-        else {
-            throw "No Partner-Report QMD found for language '$lang' or default. Expected '$qmdLang' or '$qmdDefault'."
-        }
+        $qmdToUse = Resolve-NeoipcLocaleQmd -ReportDir $partnerReportDir -BaseName 'Partner-Report' -Language $lang
 
         foreach ($site in $sites) {
             Write-Host "Generating partner report for $site (lang: $lang)..."
@@ -241,7 +249,7 @@ try {
 
             # UnitCodes must receive the current site code
             $qmdParams['UnitCodes'] = $site
-            if ($ReferenceDataFile) { $qmdParams['ReferenceDataFile'] = $ReferenceDataFile }
+            if ($resolvedReferenceDataFile) { $qmdParams['ReferenceDataFile'] = $resolvedReferenceDataFile }
             if ($ReportingPeriodFrom -ne $null) { $qmdParams['ReportingPeriodFrom'] = $ReportingPeriodFrom.ToString('yyyy-MM-dd') }
             if ($ReportingPeriodTo -ne $null) { $qmdParams['ReportingPeriodTo'] = $ReportingPeriodTo.ToString('yyyy-MM-dd') }
             if ($BirthWeightFrom -ne $null) { $qmdParams['BirthWeightFrom'] = $BirthWeightFrom.Value }
@@ -249,18 +257,26 @@ try {
             if ($GestationWeeksFrom -ne $null) { $qmdParams['GestationWeeksFrom'] = $GestationWeeksFrom.Value }
             if ($GestationWeeksTo -ne $null) { $qmdParams['GestationWeeksTo'] = $GestationWeeksTo.Value }
             if ($IncludeNonCorePatients.IsPresent) { $qmdParams['IncludeNonCorePatients'] = 'true' }
+            if ($HideIntroductionTexts.IsPresent) { $qmdParams['includeIntroductionTexts'] = 'false' }
+            if ($HideOutlierInterpretation.IsPresent) { $qmdParams['includeOutlierInterpretation'] = 'false' }
+
+            # Convert user-friendly element names to Quarto boolean parameters
+            foreach ($mapping in $elementMapping.GetEnumerator()) {
+                $includeValue = $IncludeElements -contains $mapping.Key
+                $qmdParams[$mapping.Value] = if ($includeValue) { 'true' } else { 'false' }
+            }
 
             $paramPairs = Build-QmdParamPairs -Values $qmdParams
 
             # For each requested output format, render a report
             foreach ($format in $Formats) {
                 # Perform cleanup once per site (respecting WhatIf)
-                # if ($PSCmdlet.ShouldProcess($PSScriptRoot, "Clean Quarto temp files")) {
-                #     Clean-QuartoTemp -BaseDir $PSScriptRoot
+                # if ($PSCmdlet.ShouldProcess($partnerReportDir, "Clean Quarto temp files")) {
+                #     Clean-QuartoTemp -BaseDir $partnerReportDir
                 #     $cleanupMessage = "Cleaned Quarto temp files"
                 # }
                 # else {
-                #     $cleanupMessage = "WhatIf: would clean Quarto temp files in $PSScriptRoot"
+                #     $cleanupMessage = "WhatIf: would clean Quarto temp files in $partnerReportDir"
                 # }
                 $fileName = "${timestamp}_NeoIPC-Surveillance-Partner-Report_${site}.${lang}.${format}"
 
@@ -287,7 +303,34 @@ try {
                     $quartoArgs += '--output-dir'
                     $quartoArgs += $resolvedOutputDir
                 }
-                $quartoArgs += $paramPairs
+
+                $metadataParameters = @(
+                    'includeIntroductionTexts'
+                    'includeOutlierInterpretation'
+                    'includeBirthWeightFigure'
+                    'includeGestationalAgeFigure'
+                    'includeIncidenceDensityTable'
+                    'includeDeviceAssociatedIncidenceDensityTable'
+                    'includeAgentPerInfectionRateTable'
+                    'includeInfectiousAgentDetectionRateTable'
+                    'includeRiskDensityRateTable'
+                    'includeSurgicalProcedureRateTable'
+                    'includeResistantPathogenInfectionRateTable'
+                    'includeAntibioticResistanceTestRateTable'
+                    'includeSecondaryBsiRateTable'
+                )
+                # Add parameters - use -M for include* metadata, -P for others
+                foreach ($pair in $paramPairs) {
+                    if ($pair -eq '-P') {
+                        $quartoArgs += $pair
+                    } elseif ($pair -match ':' -and ($pair -split ':')[0] -iin $metadataParameters) {
+                        # Replace last -P with -M for include flags
+                        $quartoArgs[$quartoArgs.Count - 1] = '-M'
+                        $quartoArgs += $pair
+                    } else {
+                        $quartoArgs += $pair
+                    }
+                }
 
                 # Render (or report) - respect WhatIf via ShouldProcess
                 $target = "$fileName for site $site (lang: $lang, format: $format)"
@@ -297,6 +340,12 @@ try {
                     $skipRest = $false
                     $errorLine = ''
                     $isError = $false
+
+                    # Debug: show full Quarto command as it will be executed (args with spaces quoted)
+                    $quartoArgsQuoted = $quartoArgs | ForEach-Object {
+                        if ($_ -match '\s') { '"' + ($_.ToString().Replace('"', '\"')) + '"' } else { $_.ToString() }
+                    }
+                    Write-Debug "Quarto command: quarto $($quartoArgsQuoted -join ' ')"
 
                     & quarto @quartoArgs 2>&1 | ForEach-Object -Process {
                         if ($skipRest) { return }
@@ -359,7 +408,7 @@ try {
     if ($JsonReport) {
         $jsonTimestamp = [datetime]::Now.ToString('yyyy-MM-dd_HHmmss')
         if ($resolvedOutputDir) { $jsonPath = Join-Path $resolvedOutputDir "partner-report-build_$jsonTimestamp.json" }
-        else { $jsonPath = Join-Path $PSScriptRoot '_output' "partner-report-build_$jsonTimestamp.json" }
+        else { $jsonPath = Join-Path $partnerReportDir '_output' "partner-report-build_$jsonTimestamp.json" }
         try {
             $buildLog | ConvertTo-Json -Depth 5 | Out-File -FilePath $jsonPath -Encoding utf8
             Write-Host "Wrote JSON build report to $jsonPath" -ForegroundColor Green
@@ -371,4 +420,12 @@ try {
 }
 finally {
     Set-Location -LiteralPath $wd
+    foreach ($name in $originalEnv.Keys) {
+        $originalValue = $originalEnv[$name]
+        if ($null -eq $originalValue) {
+            [Environment]::SetEnvironmentVariable($name, $null, 'Process')
+        } else {
+            [Environment]::SetEnvironmentVariable($name, $originalValue, 'Process')
+        }
+    }
 }

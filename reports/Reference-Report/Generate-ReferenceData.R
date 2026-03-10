@@ -10,6 +10,7 @@ script_dir <- dirname(
 suppressPackageStartupMessages({
   source(file.path(script_dir, "../common/load-neoipcr.R"))
   load_neoipcr(dev_pkg_path = file.path(script_dir, "../../../neoipcr"))
+  source(file.path(script_dir, "../common/parse-args.R"))
   library(jsonlite)
 })
 
@@ -57,161 +58,31 @@ printUsage <- function() {
   )
 }
 
-parseArgs <- function(args) {
-  longMap <- list(
-    "backup-dataset" = "backupDataset"
-  )
-  shortMap <- list(
-    f = "file",
-    s = "reportingPeriodFrom",
-    e = "reportingPeriodTo",
-    w = "birthWeightFrom",
-    W = "birthWeightTo",
-    g = "gestationWeeksFrom",
-    G = "gestationWeeksTo",
-    c = "reportingCountries",
-    t = "includeTestUnits",
-    n = "includeNonCorePatients",
-    v = "validationExceptionFile",
-    B = "backupDataset",
-    q = "quiet",
-    V = "verbose",
-    D = "debug",
-    h = "help"
-  )
-  parsed <- list()
-  i <- 1
-  while (i <= length(args)) {
-    arg <- args[[i]]
-    if (startsWith(arg, "--")) {
-      key <- sub("^--", "", arg)
-      if (!is.null(longMap[[key]])) key <- longMap[[key]]
-      if (grepl("=", key, fixed = TRUE)) {
-        parts <- strsplit(key, "=", fixed = TRUE)[[1]]
-        longKey <- parts[[1]]
-        if (!is.null(longMap[[longKey]])) longKey <- longMap[[longKey]]
-        parsed[[longKey]] <- parts[[2]]
-      } else {
-        hasNext <- i < length(args)
-        if (hasNext) {
-          nextArg <- args[[i + 1]]
-          hasValue <- !startsWith(nextArg, "--")
-          hasValue <- hasValue && !startsWith(nextArg, "-")
-        } else {
-          hasValue <- FALSE
-        }
-        if (hasValue) {
-          parsed[[key]] <- args[[i + 1]]
-          i <- i + 1
-        } else {
-          parsed[[key]] <- TRUE
-        }
-      }
-    } else if (startsWith(arg, "-")) {
-      key <- sub("^-", "", arg)
-      if (nchar(key) >= 2 && grepl("=", key, fixed = TRUE)) {
-        parts <- strsplit(key, "=", fixed = TRUE)[[1]]
-        short <- parts[[1]]
-        long <- shortMap[[short]]
-        if (!is.null(long)) parsed[[long]] <- parts[[2]]
-      } else {
-        long <- shortMap[[key]]
-        if (!is.null(long)) {
-          hasNext <- i < length(args)
-          if (hasNext) {
-            nextArg <- args[[i + 1]]
-            hasValue <- !startsWith(nextArg, "--")
-            hasValue <- hasValue && !startsWith(nextArg, "-")
-          } else {
-            hasValue <- FALSE
-          }
-          if (hasValue) {
-            parsed[[long]] <- args[[i + 1]]
-            i <- i + 1
-          } else {
-            parsed[[long]] <- TRUE
-          }
-        }
-      }
-    }
-    i <- i + 1
-  }
-  parsed
-}
+long_map <- list(
+  "backup-dataset" = "backupDataset"
+)
 
-asNull <- function(x) {
-  if (is.null(x)) return(NULL)
-  if (length(x) == 0) return(NULL)
-  if (is.logical(x)) return(x)
-  val <- trimws(as.character(x))
-  if (val == "" ||
-      tolower(val) %in% c("null", "na", "none")
-  ) return(NULL)
-  val
-}
-
-asBool <- function(x, default = NULL) {
-  x <- asNull(x)
-  if (is.null(x)) return(default)
-  if (is.logical(x)) return(x)
-  val <- tolower(as.character(x))
-  if (val %in% c("true", "t", "1", "yes", "y")) return(TRUE)
-  if (val %in% c("false", "f", "0", "no", "n")) return(FALSE)
-  default
-}
-
-asDateOrNull <- function(x) {
-  x <- asNull(x)
-  if (is.null(x)) return(NULL)
-  as.Date(x)
-}
-
-asNumberOrNull <- function(x) {
-  x <- asNull(x)
-  if (is.null(x)) return(NULL)
-  as.numeric(x)
-}
-
-asVectorOrNull <- function(x) {
-  x <- asNull(x)
-  if (is.null(x)) return(NULL)
-  if (length(x) > 1) return(as.character(x))
-  parts <- strsplit(as.character(x), ",", fixed = TRUE)[[1]]
-  parts <- trimws(parts)
-  parts[nzchar(parts)]
-}
-
-getConnectionOptions <- function() {
-  sessionId <- Sys.getenv("NEOIPC_DHIS2_SESSION_ID", unset = NA)
-  token <- Sys.getenv("NEOIPC_DHIS2_TOKEN", unset = NA)
-  username <- Sys.getenv("NEOIPC_DHIS2_USERNAME", unset = NA)
-  passwordEnv <- Sys.getenv("NEOIPC_DHIS2_PASSWORD", unset = NA)
-  if (!is.na(sessionId)) {
-    return(neoipcr::dhis2_connection_options(
-      session_id = sessionId
-    ))
-  }
-  if (!is.na(token)) {
-    return(neoipcr::dhis2_connection_options(
-      token = token
-    ))
-  }
-  if (is.na(username)) {
-    username <- readline("DHIS2 username: ")
-  }
-  if (is.na(passwordEnv)) {
-    password <- readline("DHIS2 password: ")
-  } else {
-    password <- passwordEnv
-  }
-  neoipcr::dhis2_connection_options(
-    username = username,
-    password = password
-  )
-}
+short_map <- list(
+  f = "file",
+  s = "reportingPeriodFrom",
+  e = "reportingPeriodTo",
+  w = "birthWeightFrom",
+  W = "birthWeightTo",
+  g = "gestationWeeksFrom",
+  G = "gestationWeeksTo",
+  c = "reportingCountries",
+  t = "includeTestUnits",
+  n = "includeNonCorePatients",
+  v = "validationExceptionFile",
+  B = "backupDataset",
+  q = "quiet",
+  V = "verbose",
+  D = "debug",
+  h = "help"
+)
 
 getValidationExceptions <- function(x) {
-  x <- asNull(x)
+  x <- as_null(x)
   if (is.null(x)) {
     return(FALSE)
   }
@@ -394,7 +265,8 @@ backupReferenceDataset <- function(data, backupPath) {
   invisible(TRUE)
 }
 
-args <- parseArgs(commandArgs(trailingOnly = TRUE))
+args <- parse_args(commandArgs(trailingOnly = TRUE),
+  long_map = long_map, short_map = short_map)
 
 if (isTRUE(args$help)) {
   printUsage()
@@ -409,23 +281,23 @@ if (isTRUE(args$quiet)) {
   verbosity <- "verbose"
 }
 
-referenceDataFile <- asNull(args$file)
-reportingPeriodFrom <- asDateOrNull(args$reportingPeriodFrom)
-reportingPeriodTo <- asDateOrNull(args$reportingPeriodTo)
-birthWeightFrom <- asNumberOrNull(args$birthWeightFrom)
-birthWeightTo <- asNumberOrNull(args$birthWeightTo)
-gestationWeeksFrom <- asNumberOrNull(args$gestationWeeksFrom)
-gestationWeeksTo <- asNumberOrNull(args$gestationWeeksTo)
-reportingCountries <- asVectorOrNull(args$reportingCountries)
-includeTestUnits <- asBool(args$includeTestUnits, default = FALSE)
-includeNonCorePatients <- asBool(
+referenceDataFile <- as_null(args$file)
+reportingPeriodFrom <- as_date_or_null(args$reportingPeriodFrom)
+reportingPeriodTo <- as_date_or_null(args$reportingPeriodTo)
+birthWeightFrom <- as_number_or_null(args$birthWeightFrom)
+birthWeightTo <- as_number_or_null(args$birthWeightTo)
+gestationWeeksFrom <- as_number_or_null(args$gestationWeeksFrom)
+gestationWeeksTo <- as_number_or_null(args$gestationWeeksTo)
+reportingCountries <- as_vector_or_null(args$reportingCountries)
+includeTestUnits <- as_bool(args$includeTestUnits, default = FALSE)
+includeNonCorePatients <- as_bool(
   args$includeNonCorePatients,
   default = FALSE
 )
-validationExceptionFile <- asNull(args$validationExceptionFile)
-backupDataset <- asNull(args$backupDataset)
+validationExceptionFile <- as_null(args$validationExceptionFile)
+backupDataset <- as_null(args$backupDataset)
 
-connectionOptions <- getConnectionOptions()
+connectionOptions <- neoipcr::dhis2_connection_options()
 datasetOptions <- getDatasetOptions(
   reportingPeriodFrom = reportingPeriodFrom,
   reportingPeriodTo = reportingPeriodTo,

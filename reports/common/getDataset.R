@@ -1,170 +1,97 @@
 #!/usr/bin/env Rscript
-library("argparse")
-library("neoipcr")
-library("jsonlite")
 
-parser <- ArgumentParser(description='Get a NeoIPC Surveiullance dataset from a DHIS2 server')
+script_dir <- dirname(
+  sub("--file=", "", grep("--file=", commandArgs(FALSE), value = TRUE)[1]))
+suppressPackageStartupMessages({
+  source(file.path(script_dir, "load-neoipcr.R"))
+  load_neoipcr(dev_pkg_path = file.path(script_dir, "../../neoipcr"))
+  source(file.path(script_dir, "parse-args.R"))
+  library(jsonlite)
+})
 
-parser$add_argument(
-  "--output",
-  type="character",
-  default="",
-  help="Path of the output file (STDOUT if not specified)",
-  metavar="FILE"
+print_usage <- function() {
+  cat(
+    "Usage: Rscript --vanilla reports/common/getDataset.R [options]\n\n",
+    "Get a NeoIPC Surveillance dataset from a DHIS2 server.\n",
+    "Authentication is handled by neoipcr via environment variables\n",
+    "(NEOIPC_DHIS2_TOKEN or NEOIPC_DHIS2_SESSION_ID) or interactive\n",
+    "prompts.\n\n",
+    "Options:\n",
+    "  --output, -o <path>                  Output file path (stdout if omitted)\n",
+    "  --raw, -r                            Write raw JSON instead of serialized\n",
+    "                                       S3 objects (default: TRUE)\n",
+    "  --no-raw                             Write serialized S3 objects\n\n",
+    "Filter settings:\n",
+    "  --date-from <date>                   Minimum surveillance end date\n",
+    "  --date-to <date>                     Maximum surveillance end date\n",
+    "  --birth-weight-from <grams>          Minimum birth weight (grams)\n",
+    "  --birth-weight-to <grams>            Maximum birth weight (grams)\n",
+    "  --gestational-age-from <weeks>       Minimum gestational age (weeks)\n",
+    "  --gestational-age-to <weeks>         Maximum gestational age (weeks)\n",
+    "  --countries <codes>                  Comma-separated ISO 3166 codes\n",
+    "  --include-invalid-patients <val>     TRUE, FALSE, or CSV exception file\n\n",
+    "Connection settings:\n",
+    "  --scheme <scheme>                    URL scheme (default: https)\n",
+    "  --host <hostname>                    DHIS2 hostname\n",
+    "  --port <port>                        DHIS2 port\n",
+    "  --path <path>                        API base path\n\n",
+    "  --help, -h                           Show this help\n",
+    sep = ""
+  )
+}
+
+long_map <- list(
+  "date-from" = "dateFrom",
+  "date-to" = "dateTo",
+  "birth-weight-from" = "birthWeightFrom",
+  "birth-weight-to" = "birthWeightTo",
+  "gestational-age-from" = "gestationalAgeFrom",
+  "gestational-age-to" = "gestationalAgeTo",
+  "include-invalid-patients" = "includeInvalidPatients",
+  "no-raw" = "noRaw"
 )
 
-parser$add_argument(
-  "--raw",
-  type="logical",
-  default=TRUE,
-  help="Write raw JSON instead of serialized S3 objects"
+short_map <- list(
+  o = "output",
+  r = "raw",
+  h = "help"
 )
 
-filter_group <- parser$add_argument_group("Filter settings")
-filter_group$add_argument(
-  "--date-from",
-  type="character",
-  default=NULL,
-  help="Minimum surveillance end date of patient records to include",
-  metavar="DATE")
-filter_group$add_argument(
-  "--date-to",
-  type="character",
-  default=NULL,
-  help="Maximum surveillance end date of patient records to include",
-  metavar="DATE")
-filter_group$add_argument(
-  "--birth-weight-from",
-  type="integer",
-  default=NULL,
-  help="Minimum birth weight (in grams) of patient records to include",
-  metavar="GRAMS")
-filter_group$add_argument(
-  "--birth-weight-to",
-  type="integer",
-  default=NULL,
-  help="Maximum birth weight (in grams) of patient records to include",
-  metavar="GRAMS")
-filter_group$add_argument(
-  "--gestational-age-from",
-  type="integer",
-  default=NULL,
-  help="Minimum gestational age (in completed weeks) of patient records to include",
-  metavar="WEEKS")
-filter_group$add_argument(
-  "--gestational-age-to",
-  type="integer",
-  default=NULL,
-  help="Maximum gestational age (in completed weeks) of patient records to include",
-  metavar="WEEKS")
-filter_group$add_argument(
-  "--countries",
-  type="character",
-  default=NULL,
-  help="ISO 3166 country codes of the countries the enrolling departments are located in to include",
-  metavar="COUNTRY_CODE[,...]")
-filter_group$add_argument(
-  "--include-invalid-patients",
-  type="character",
-  default="FALSE",
-  help="TRUE to include data from patient records that have validation errors. A CSV-file containing the exceptions if validation should be skipped for some records only.",
-  metavar="FILE")
+args <- parse_args(commandArgs(trailingOnly = TRUE),
+  long_map = long_map, short_map = short_map)
 
-url_group <- parser$add_argument_group("Connection settings")
-url_group$add_argument(
-  "--scheme",
-  type="character",
-  default="https",
-  help="URL scheme of the DHIS2 host")
-url_group$add_argument(
-  "--host",
-  type="character",
-  default="neoipc.charite.de",
-  help="Name of the DHIS2 host")
-url_group$add_argument(
-  "--port",
-  type="integer",
-  default=NULL,
-  help="Port of the DHIS2 host")
-url_group$add_argument(
-  "--path",
-  type="character",
-  default="/api",
-  help="API base path on the DHIS2 host")
-
-credential_group <- parser$add_argument_group("Credential settings")
-ecg <- credential_group$add_mutually_exclusive_group()
-#ecg <- parser$add_mutually_exclusive_group()
-ecg$add_argument(
-  "--token",
-  type="character",
-  default=NULL,
-  help="DHIS2 personal access token or path to a file containing the token")
-ecg$add_argument(
-  "--username",
-  type="character",
-  default=NULL,
-  help="DHIS2 username")
-ecg$add_argument(
-  "--session-id",
-  type="character",
-  default=NULL,
-  help="DHIS2 session id")
-
-
-opt <- parser$parse_args()
-
-if (!is.null(opt$token)) {
-  conn_opt <- dhis2_connection_options(token = opt$token, scheme = opt$scheme, hostname = opt$host, port = opt$port, path = opt$path)
-} else if(!is.null(opt$username)) {
-  conn_opt <- dhis2_connection_options(username = opt$username, scheme = opt$scheme, hostname = opt$host, port = opt$port, path = opt$path)
-} else if (!is.null(opt$session_id)) {
-  conn_opt <- dhis2_connection_options(session_id = opt$session_id, scheme = opt$scheme, hostname = opt$host, port = opt$port, path = opt$path)
-} else {
-  conn_opt <- dhis2_connection_options(scheme = opt$scheme, hostname = opt$host, port = opt$port, path = opt$path)
+if (isTRUE(args$help)) {
+  print_usage()
+  quit(status = 0)
 }
 
-surveillance_end_from <- as.Date(opt$date_from)
-if (length(surveillance_end_from) == 0) {
-  surveillance_end_from <- NULL
+# Connection options — auth handled by neoipcr via env vars or interactive prompt
+conn_args <- list()
+if (!is.null(args$scheme)) conn_args$scheme <- args$scheme
+if (!is.null(args$host)) conn_args$hostname <- args$host
+if (!is.null(args$port)) conn_args$port <- args$port
+if (!is.null(args$path)) conn_args$path <- args$path
+conn_opt <- do.call(neoipcr::dhis2_connection_options, conn_args)
+
+# Dataset options
+surveillance_end_from <- as_date_or_null(args$dateFrom)
+surveillance_end_to <- as_date_or_null(args$dateTo)
+birth_weight_from <- as_number_or_null(args$birthWeightFrom)
+birth_weight_to <- as_number_or_null(args$birthWeightTo)
+gestational_age_from <- as_number_or_null(args$gestationalAgeFrom)
+gestational_age_to <- as_number_or_null(args$gestationalAgeTo)
+country_filter <- as_vector_or_null(args$countries)
+
+include_invalid_patients <- as_null(args$includeInvalidPatients)
+if (!is.null(include_invalid_patients)) {
+  bool_val <- as_bool(include_invalid_patients)
+  if (!is.null(bool_val)) {
+    include_invalid_patients <- bool_val
+  }
+  # else it's a file path — pass as-is
 }
 
-surveillance_end_to <- as.Date(opt$date_to)
-if (length(surveillance_end_to) == 0) {
-  surveillance_end_to <- NULL
-}
-
-birth_weight_from <- as.integer(opt$birth_weight_from)
-if (length(birth_weight_from) == 0) {
-  birth_weight_from <- NULL
-}
-
-birth_weight_to <- as.integer(opt$birth_weight_to)
-if (length(birth_weight_to) == 0) {
-  birth_weight_to <- NULL
-}
-
-gestational_age_from <- as.integer(opt$gestational_age_from)
-if (length(gestational_age_from) == 0) {
-  gestational_age_from <- NULL
-}
-
-gestational_age_to <- as.integer(opt$gestational_age_to)
-if (length(gestational_age_to) == 0) {
-  gestational_age_to <- NULL
-}
-
-country_filter <- opt$countries
-if (!is.null(country_filter)) {
-  country_filter <- strsplit(opt$countries, ",", fixed = TRUE)
-}
-
-include_invalid_patients <- as.logical(opt$include_invalid_patients)
-if (is.na(include_invalid_patients) || length(include_invalid_patients) == 0) {
-  include_invalid_patients <- opt$include_invalid_patients
-}
-
-ds_opt <- dhis2_dataset_options(
+ds_opt <- neoipcr::dhis2_dataset_options(
   surveillance_end_from = surveillance_end_from,
   surveillance_end_to = surveillance_end_to,
   birth_weight_from = birth_weight_from,
@@ -177,12 +104,18 @@ ds_opt <- dhis2_dataset_options(
   include_world_bank_class = "yes"
 )
 
-ds <- import_dhis2(connection_options = conn_opt, dataset_options = ds_opt)
+ds <- neoipcr::import_dhis2(connection_options = conn_opt, dataset_options = ds_opt)
 
-if (opt$raw) {
-  out <- serializeJSON(ds)
+use_raw <- !isTRUE(args$noRaw)
+if (use_raw) {
+  out <- jsonlite::serializeJSON(ds)
 } else {
-  out <- toJSON(ds)
+  out <- jsonlite::toJSON(ds)
 }
 
-write(out, opt$output)
+output_path <- as_null(args$output)
+if (is.null(output_path)) {
+  cat(out)
+} else {
+  writeLines(out, output_path, useBytes = TRUE)
+}

@@ -1,10 +1,20 @@
 [CmdletBinding(SupportsShouldProcess = $true)]
 param(
     [Parameter()]
+    [string]$Token,
+    [Parameter()]
     [ValidateSet('pdf','html','docx','json')]
     [string[]]$Formats = @('pdf'),
+    [ArgumentCompleter({
+        param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
+        @(
+            Get-ChildItem -LiteralPath "$PSScriptRoot/../reports/Reference-Report/" -File -Filter 'Reference-Report.*.qmd' |
+            Select-Object -ExpandProperty Name |
+            ForEach-Object { if ($_ -match 'Reference-Report\.(.+)\.qmd') { $Matches[1] } }) + 'en' |
+            Where-Object { $_ -like "$wordToComplete*" } |
+            Sort-Object
+    })]
     [Parameter()]
-    [ValidateSet('en','de','es','et','gr','it','fr','af','tr','ne')]
     [string[]]$Locales = @('en'),
     [Parameter()]
     [string]$OutputDir = "${PSScriptRoot}/../reports/Reference-Report/_output",
@@ -69,6 +79,8 @@ param(
         'SurgicalProcedureRates'
     )
 )
+
+. "$PSScriptRoot/NeoipcReportHelpers.ps1"
 
 if ($Quiet) {
     $VerbosePreference = 'SilentlyContinue'
@@ -161,26 +173,29 @@ $paramHash = [System.BitConverter]::ToString(
     )
 ).Replace('-', '').ToLowerInvariant()
 
+$auth = Resolve-NeoipcAuth -Token $Token
+
 $originalEnv = @{}
 foreach ($name in @(
-    'NEOIPC_DHIS2_USERNAME',
+    'NEOIPC_DHIS2_TOKEN',
+    'NEOIPC_DHIS2_USER',
     'NEOIPC_DHIS2_PASSWORD',
+    'NEOIPC_DHIS2_SESSION_ID',
     'NEOIPC_BACKUP_PASSWORD'
 )) {
-    $originalEnv[$name] = [Environment]::GetEnvironmentVariable(
-        $name,
-        'Process'
-    )
+    $originalEnv[$name] = [Environment]::GetEnvironmentVariable($name, 'Process')
 }
 
-if (-not $env:NEOIPC_DHIS2_SESSION_ID -and -not $env:NEOIPC_DHIS2_TOKEN) {
-    if (-not $env:NEOIPC_DHIS2_USERNAME) {
-        $env:NEOIPC_DHIS2_USERNAME = Read-Host -Prompt 'DHIS2 username'
-    }
-    if (-not $env:NEOIPC_DHIS2_PASSWORD) {
-        $securePassword = Read-Host -Prompt 'DHIS2 password' -AsSecureString
-        $env:NEOIPC_DHIS2_PASSWORD = [System.Net.NetworkCredential]::new('', $securePassword).Password
-    }
+# Clear all auth env vars, then set only the resolved ones
+foreach ($name in @('NEOIPC_DHIS2_TOKEN', 'NEOIPC_DHIS2_USER',
+                    'NEOIPC_DHIS2_PASSWORD', 'NEOIPC_DHIS2_SESSION_ID')) {
+    [Environment]::SetEnvironmentVariable($name, $null, 'Process')
+}
+if ($auth.AuthType -eq 'Token') {
+    $env:NEOIPC_DHIS2_TOKEN = $auth.Token
+} elseif ($auth.AuthType -eq 'Basic') {
+    $env:NEOIPC_DHIS2_USER = $auth.Username
+    $env:NEOIPC_DHIS2_PASSWORD = Get-NeoipcAuthPassword -Auth $auth
 }
 
 if ($BackupDataset -and [string]::IsNullOrWhiteSpace($env:NEOIPC_BACKUP_PASSWORD)) {

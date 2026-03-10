@@ -1,6 +1,5 @@
 ---
 params:
-  token: NULL
   language: "en"
   country: NULL
   departmentFilter: NULL
