@@ -2,7 +2,7 @@ project:
   output-dir: _output
 profile:
   group:
-    - [en, de]
+    - [en, de, es, et, gr, it]
 date-meta: now
 includeHeader: true
 includeTextIntroduction: true
@@ -34,6 +34,7 @@ format:
       - before-body.tex
     documentclass: scrartcl
     mainfont: "EB Garamond"
+    monofont: "EB Garamond"
     fontsize: 10pt
     classoption: [footsepline=true, plainfootsepline=true]
     papersize: a4paper

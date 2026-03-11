@@ -17,6 +17,7 @@ format:
       - footsepline=true
       - plainfootsepline=true
     mainfont: "Noto Sans"
+    monofont: "Noto Sans"
     fontsize: 12pt
     papersize: a4paper
     geometry:
