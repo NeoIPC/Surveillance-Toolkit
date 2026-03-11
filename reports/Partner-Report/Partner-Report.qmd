@@ -1,21 +1,21 @@
 ---
 lang: en
 params:
-  ReferenceDataFile: NULL
-  UnitCodes: NULL
-  ReportingPeriodFrom: NULL
-  ReportingPeriodTo: NULL
-  BirthWeightFrom: NULL
-  BirthWeightTo: NULL
-  GestationWeeksFrom: NULL
-  GestationWeeksTo: NULL
-  IncludeNonCorePatients: NULL
-  ValidationExceptionFile: NULL
+  referenceDataFile: NULL
+  unitCodes: "DEMO_UNIT"
+  reportingPeriodFrom: NULL
+  reportingPeriodTo: NULL
+  birthWeightFrom: NULL
+  birthWeightTo: NULL
+  gestationWeeksFrom: NULL
+  gestationWeeksTo: NULL
+  includeNonCorePatients: NULL
+  validationExceptionFile: NULL
   dhis2Scheme: NULL
   dhis2Hostname: NULL
   dhis2Port: NULL
   dhis2Path: NULL
-subtitle: '`r paste0(params$UnitCodes, collapse = ", ")`'
+subtitle: '`r paste0(params$unitCodes, collapse = ", ")`'
 ---
 
 ```{r}

@@ -1,3 +1,5 @@
+{{< include _setup.qmd >}}
+
 ```{r}
 #| label: Generate output
 #| echo: false

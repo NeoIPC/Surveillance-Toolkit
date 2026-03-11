@@ -248,15 +248,15 @@ try {
             $qmdParams = @{}
 
             # UnitCodes must receive the current site code
-            $qmdParams['UnitCodes'] = $site
-            if ($resolvedReferenceDataFile) { $qmdParams['ReferenceDataFile'] = $resolvedReferenceDataFile }
-            if ($ReportingPeriodFrom -ne $null) { $qmdParams['ReportingPeriodFrom'] = $ReportingPeriodFrom.ToString('yyyy-MM-dd') }
-            if ($ReportingPeriodTo -ne $null) { $qmdParams['ReportingPeriodTo'] = $ReportingPeriodTo.ToString('yyyy-MM-dd') }
-            if ($BirthWeightFrom -ne $null) { $qmdParams['BirthWeightFrom'] = $BirthWeightFrom.Value }
-            if ($BirthWeightTo -ne $null) { $qmdParams['BirthWeightTo'] = $BirthWeightTo.Value }
-            if ($GestationWeeksFrom -ne $null) { $qmdParams['GestationWeeksFrom'] = $GestationWeeksFrom.Value }
-            if ($GestationWeeksTo -ne $null) { $qmdParams['GestationWeeksTo'] = $GestationWeeksTo.Value }
-            if ($IncludeNonCorePatients.IsPresent) { $qmdParams['IncludeNonCorePatients'] = 'true' }
+            $qmdParams['unitCodes'] = $site
+            if ($resolvedReferenceDataFile) { $qmdParams['referenceDataFile'] = $resolvedReferenceDataFile }
+            if ($ReportingPeriodFrom -ne $null) { $qmdParams['reportingPeriodFrom'] = $ReportingPeriodFrom.ToString('yyyy-MM-dd') }
+            if ($ReportingPeriodTo -ne $null) { $qmdParams['reportingPeriodTo'] = $ReportingPeriodTo.ToString('yyyy-MM-dd') }
+            if ($BirthWeightFrom -ne $null) { $qmdParams['birthWeightFrom'] = $BirthWeightFrom.Value }
+            if ($BirthWeightTo -ne $null) { $qmdParams['birthWeightTo'] = $BirthWeightTo.Value }
+            if ($GestationWeeksFrom -ne $null) { $qmdParams['gestationWeeksFrom'] = $GestationWeeksFrom.Value }
+            if ($GestationWeeksTo -ne $null) { $qmdParams['gestationWeeksTo'] = $GestationWeeksTo.Value }
+            if ($IncludeNonCorePatients.IsPresent) { $qmdParams['includeNonCorePatients'] = 'true' }
             if ($HideIntroductionTexts.IsPresent) { $qmdParams['includeIntroductionTexts'] = 'false' }
             if ($HideOutlierInterpretation.IsPresent) { $qmdParams['includeOutlierInterpretation'] = 'false' }
 

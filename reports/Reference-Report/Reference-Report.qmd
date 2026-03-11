@@ -1,7 +1,7 @@
 ---
 lang: en
 params:
-  ReferenceDataFile: NULL
+  referenceDataFile: NULL
   reportingPeriodFrom: NULL
   reportingPeriodTo: NULL
   birthWeightFrom: NULL

@@ -10,17 +10,14 @@ params:
   signatureImagePath: "demo_signature.png"
   dataFilePath: NULL
   departmentCode: "DE_BER_CHARITE_CVK_NEO"
+  dhis2Scheme: NULL
+  dhis2Hostname: NULL
+  dhis2Port: NULL
+  dhis2Path: NULL
 ---
 
 ```{r}
 #| label: Initialise Locale
-locale <- "de_DE.UTF-8"
-sR <- modifyList(
-  yaml::read_yaml("../common.de.yaml", handlers = list('bool#no' = function(x) x)),
-  yaml::read_yaml("_sR.de.yaml", handlers = list('bool#no' = function(x) x))
-)
+Sys.setenv(LC_ALL = "de_DE.UTF-8")
 ```
-
-{{< include _setup.qmd >}}
-
 {{< include _content.qmd >}}

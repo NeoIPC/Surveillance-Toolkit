@@ -18,13 +18,7 @@ params:
 
 ```{r}
 #| label: Initialise Locale
-locale <- "en_GB.UTF-8"
-sR <- modifyList(
-  yaml::read_yaml("../common.yaml", handlers = list('bool#no' = function(x) x)),
-  yaml::read_yaml("_sR.yaml", handlers = list('bool#no' = function(x) x))
-)
+Sys.setenv(LC_ALL = "en_GB.UTF-8")
 ```
-
-{{< include _setup.qmd >}}
 
 {{< include _content.qmd >}}

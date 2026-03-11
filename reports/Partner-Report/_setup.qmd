@@ -531,28 +531,28 @@ sR <- get_string_resources(localeObj)
 
 if(!exists("params")) params <- list()
 
-if (!is.null(params$ReferenceDataFile)) {
-  if (!file.exists(params$ReferenceDataFile))
-    stop(sprintf("The file '%s' does not exist.", params$ReferenceDataFile))
+if (!is.null(params$referenceDataFile)) {
+  if (!file.exists(params$referenceDataFile))
+    stop(sprintf("The file '%s' does not exist.", params$referenceDataFile))
   reference_data <- jsonlite::unserializeJSON(
     readChar(
-        params$ReferenceDataFile,
-        file.info(params$ReferenceDataFile)$size))
+        params$referenceDataFile,
+        file.info(params$referenceDataFile)$size))
 } else {
   reference_data <- NULL
 }
 
 typedParams <- list(
-  ReferenceDataFile = params$ReferenceDataFile,
-  UnitCodes = params$UnitCodes,
-  ReportingPeriodFrom = if (!is.null(params$ReportingPeriodFrom)) as.Date(params$ReportingPeriodFrom) else NULL,
-  ReportingPeriodTo = if (!is.null(params$ReportingPeriodTo)) as.Date(params$ReportingPeriodTo) else NULL,
-  BirthWeightFrom = if (!is.null(params$BirthWeightFrom)) as.integer(params$BirthWeightFrom) else NULL,
-  BirthWeightTo = if (!is.null(params$BirthWeightTo)) as.integer(params$BirthWeightTo) else NULL,
-  GestationWeeksFrom = if (!is.null(params$GestationWeeksFrom)) as.integer(params$GestationWeeksFrom) else NULL,
-  GestationWeeksTo = if (!is.null(params$GestationWeeksTo)) as.integer(params$GestationWeeksTo) else NULL,
-  IncludeNonCorePatients = if (!is.null(params$IncludeNonCorePatients)) as.logical(params$GestationWeeksTo) else FALSE,
-  IncludeInvalidPatients = get_validation_exceptions(params$ValidationExceptionFile)
+  referenceDataFile = params$referenceDataFile,
+  unitCodes = params$unitCodes,
+  reportingPeriodFrom = if (!is.null(params$reportingPeriodFrom)) as.Date(params$reportingPeriodFrom) else NULL,
+  reportingPeriodTo = if (!is.null(params$reportingPeriodTo)) as.Date(params$reportingPeriodTo) else NULL,
+  birthWeightFrom = if (!is.null(params$birthWeightFrom)) as.integer(params$birthWeightFrom) else NULL,
+  birthWeightTo = if (!is.null(params$birthWeightTo)) as.integer(params$birthWeightTo) else NULL,
+  gestationWeeksFrom = if (!is.null(params$gestationWeeksFrom)) as.integer(params$gestationWeeksFrom) else NULL,
+  gestationWeeksTo = if (!is.null(params$gestationWeeksTo)) as.integer(params$gestationWeeksTo) else NULL,
+  includeNonCorePatients = if (!is.null(params$includeNonCorePatients)) as.logical(params$includeNonCorePatients) else FALSE,
+  includeInvalidPatients = get_validation_exceptions(params$validationExceptionFile)
 )
 
 get_unit_data <- function() suppressWarnings(
@@ -561,15 +561,15 @@ get_unit_data <- function() suppressWarnings(
       scheme = params$dhis2Scheme, hostname = params$dhis2Hostname,
       port = params$dhis2Port, path = params$dhis2Path),
     dataset_options = dhis2_dataset_options(
-      department_filter = typedParams$UnitCodes,
-      surveillance_end_from = typedParams$ReportingPeriodFrom,
-      surveillance_end_to = typedParams$ReportingPeriodTo,
-      birth_weight_from = typedParams$BirthWeightFrom,
-      birth_weight_to = typedParams$BirthWeightTo,
-      gestational_age_from = typedParams$GestationWeeksFrom,
-      gestational_age_to = typedParams$GestationWeeksTo,
-      include_ineligible_patients = typedParams$IncludeNonCorePatients,
-      include_invalid_patients = typedParams$IncludeInvalidPatients,
+      department_filter = typedParams$unitCodes,
+      surveillance_end_from = typedParams$reportingPeriodFrom,
+      surveillance_end_to = typedParams$reportingPeriodTo,
+      birth_weight_from = typedParams$birthWeightFrom,
+      birth_weight_to = typedParams$birthWeightTo,
+      gestational_age_from = typedParams$gestationWeeksFrom,
+      gestational_age_to = typedParams$gestationWeeksTo,
+      include_ineligible_patients = typedParams$includeNonCorePatients,
+      include_invalid_patients = typedParams$includeInvalidPatients,
       include_world_bank_class = "yes",
       include_country = "yes",
       include_hospital = "yes",

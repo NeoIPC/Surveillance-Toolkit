@@ -2,6 +2,10 @@
 #| label: Setup
 source("../common/helpers.R")
 
+locale <- Sys.getenv("LC_ALL")
+localeObj <- parse_locales(locale)[[1]]
+sR <- get_string_resources(localeObj)
+
 # Initialize our report data from the data file if one is provided
 if (!is.null(params$dataFilePath) && file.exists(params$dataFilePath)) {
   data <- jsonlite::fromJSON(params$dataFilePath)

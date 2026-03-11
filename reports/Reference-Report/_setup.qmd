@@ -112,13 +112,13 @@ sR <- get_string_resources(localeObj)
 
 if(!exists("params")) params <- list()
 
-if (!is.null(params$ReferenceDataFile)) {
-  if (!file.exists(params$ReferenceDataFile))
-    stop(sprintf("The file '%s' does not exist.", params$ReferenceDataFile))
+if (!is.null(params$referenceDataFile)) {
+  if (!file.exists(params$referenceDataFile))
+    stop(sprintf("The file '%s' does not exist.", params$referenceDataFile))
   reference_data <- jsonlite::unserializeJSON(
     readChar(
-        params$ReferenceDataFile,
-        file.info(params$ReferenceDataFile)$size))
+        params$referenceDataFile,
+        file.info(params$referenceDataFile)$size))
 } else {
   reference_data <- suppressWarnings(import_dhis2(
     connection_options = get_connection_options(

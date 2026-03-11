@@ -2,7 +2,7 @@
 lang: et
 #language: ../common/_language.et.yml
 params:
-  ReferenceDataFile: NULL
+  referenceDataFile: NULL
   reportingPeriodFrom: NULL
   reportingPeriodTo: NULL
   birthWeightFrom: NULL

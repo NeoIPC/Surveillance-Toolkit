@@ -327,7 +327,7 @@ try {
                     }
                 }
                 if ($needsJson) {
-                    $quartoArgs += @('-P', "ReferenceDataFile:$jsonPath")
+                    $quartoArgs += @('-P', "referenceDataFile:$jsonPath")
                 }
                 $quartoArgs += $quartoArgsCommon
                 if ($PSCmdlet.ShouldProcess($outFile, "Render $format for $locale")) {

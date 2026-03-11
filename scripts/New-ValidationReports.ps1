@@ -35,7 +35,9 @@ param(
     [string]$Language = 'en',
 
     [Parameter(Position = 2)]
-    [string]$Token
+    [string]$Token,
+
+    [string]$ValidationExceptionFile
 )
 
 . "$PSScriptRoot/NeoipcReportHelpers.ps1"
@@ -71,10 +73,15 @@ try {
     foreach ($site in $sites) {
         Write-Host "Generating validation report for $site..."
         $outFile = "$([datetime]::Now.ToString('yyyy-MM-dd_HHmmss'))_NeoIPC-Surveillance-Validation-Report_$($site).$($Language).pdf"
+        $qmdFile = if ($Language -eq 'en') { 'Validation-Report.qmd' } else { "Validation-Report.$Language.qmd" }
+        $quartoArgs = @('render', $qmdFile, '--profile', $Language, '-P', "departmentFilter:$($site)", '-o', $outFile)
+        if ($ValidationExceptionFile) {
+            $quartoArgs += @('-P', "validationExceptionFile:$ValidationExceptionFile")
+        }
         $skipRest = $false
         $errorLine = ''
         $isError = $false
-        quarto render --profile $Language -P "language:$Language" -P "departmentFilter:$($site)" -o $outFile 2>&1 | ForEach-Object -Process {
+        quarto @quartoArgs 2>&1 | ForEach-Object -Process {
             if ($skipRest) {
                 return
             }
