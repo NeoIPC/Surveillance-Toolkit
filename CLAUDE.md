@@ -1,6 +1,23 @@
 # Claude Code — Surveillance-Toolkit Instructions
 
-This file documents the Surveillance-Toolkit repository. If this repository is checked out as a submodule of the `neoipc-workspace`, see the workspace-level `CLAUDE.md` for cross-cutting instructions.
+This file documents the Surveillance-Toolkit repository. If this repository is checked out as a submodule of the `neoipc-workspace`, the workspace-level `CLAUDE.md` adds additional workspace-specific guardrails (file boundary, cross-repo change order) on top of the guardrails below.
+
+---
+
+## Guardrails
+
+The first seven rules below are **universal** — mirrored in every NeoIPC repository's instruction files. If you add or change a universal guardrail here, add `<!-- SYNC: propagate to all repos -->` next to it so the change gets propagated when the workspace is next used. The last rule is specific to this repository.
+
+- **Never** put personal names or other identifying information in source code (comments, strings, commit messages, etc.).
+- **Never** read, write, or access files under `secrets/`, `data/local/`, or `.env`.
+- **Never** push directly to `main` or `master` on this repository.
+- **Never** make HTTP calls to the DHIS2 API or attempt to read JSON files returned from the DHIS2 API. These files contain sensitive surveillance data and are not needed for code-level tasks.
+- **Never** put absolute local paths into files that get checked in. Use relative paths or generic placeholders. Local checkout paths are developer-specific and meaningless to others.
+- Treat infection definitions in this repository as normative. When a conflict exists between code and definitions, **fix the code**, not the definitions.
+- **Never** introduce non-permissive dependencies (fonts, libraries, templates). All fonts must be SIL OFL or equivalent.
+- **Always** keep `CLAUDE.md` and `.github/copilot-instructions.md` in sync within this repository. When you modify one, apply the same change to the other.
+- Do not use the R `argparse` package (it requires Python). Use shared `parse-args.R` or JSON parameter files instead. *(repo-specific)*
+- **Never** use single letters or bare numbers as YAML keys in string resource files. po4a's YAML module fails to extract some single-letter keys (e.g., `u`), and short keys are not expressive. Use descriptive names instead (e.g., `female`/`male`/`undetermined` instead of `f`/`m`/`u`). When a YAML key must map to a short code from DHIS2, add a mapping in the R code. *(repo-specific)*
 
 ---
 
@@ -102,7 +119,17 @@ A recent version is required for all features. Use a git checkout of the master 
 # Typical setup (in WSL or Linux/macOS)
 cd ~/dev
 git clone https://github.com/mquinson/po4a.git
-# Run via: ~/dev/po4a/po4a <config-file>
+```
+
+**Invocation**: The dev checkout must be called with `PERLLIB` set so it finds its own libraries (not system-installed ones):
+
+```bash
+# From WSL bash (cd to the Surveillance-Toolkit repo root first):
+PERLLIB=~/dev/po4a/lib ~/dev/po4a/po4a <config-file>
+PERLLIB=~/dev/po4a/lib ~/dev/po4a/po4a-gettextize <args>
+
+# From PowerShell on Windows (adapt the path to your local checkout):
+wsl -e bash -c "cd $(wsl wslpath -a .) && PERLLIB=~/dev/po4a/lib ~/dev/po4a/po4a po/reports.po4a.cfg"
 ```
 
 ### po4a configs (in `po/`)
@@ -130,24 +157,37 @@ af, de, es, et, fr, gr, it, ne, tr (9 languages)
 
 When adding a new file to po4a that already has manual translations:
 
-1. Add the file entry to the relevant `.po4a.cfg`
-2. Use `po4a-gettextize` to import the existing translation into the `.po` file:
-   ```bash
-   po4a-gettextize -f <format> -m <master> -l <translation> -p <po-file>
+1. **Back up existing translated files** before any po4a operation. po4a overwrites generated files (`content.de/_sR.yaml`, `*.de.qmd`, etc.) — only `.po` files are version-controlled, everything else is regenerated. Use a naming convention like `content.de_/` (underscore suffix) for backups.
+2. **Run `Update-Po4aYamlKeys.ps1`** if the YAML file has nested keys. po4a's YAML module only extracts values whose keys are explicitly listed in the `keys` option. The script recursively collects all keys from the source YAML and updates the config. Without this, nested keys (e.g., `problems.1.description`, `sex.f`, `admission_type.1`) won't be extracted.
+   ```powershell
+   ./scripts/Update-Po4aYamlKeys.ps1 -ConfigFile po/reports.po4a.cfg
    ```
-3. Verify with a round-trip: `po4a <config-file>` should produce the same output
+3. Add the file entry to the relevant `.po4a.cfg` (if not already present).
+4. Use `po4a-gettextize` to import the existing translation into a **temporary** `.po` file:
+   ```bash
+   PERLLIB=~/dev/po4a/lib ~/dev/po4a/po4a-gettextize -f <format> -m <master> -l <translation> -p /tmp/<report>_<lang>.po
+   ```
+5. **Remove fuzzy flags** from the gettextize output. `po4a-gettextize` marks most translations as `fuzzy` (even correct ones), and po4a ignores fuzzy translations when generating output. Strip them before merging:
+   ```bash
+   sed -i 's/^#, fuzzy, /#, /; s/^#, fuzzy$//' /tmp/<report>_<lang>.po
+   ```
+6. **Merge with new translations first** (priority order matters). `msgcat --use-first` keeps the first file's translation for duplicate msgids. Put the new translations first so they override any empty entries in the existing `.po`:
+   ```bash
+   msgcat --use-first /tmp/<report>_<lang>.po po/reports.<lang>.po -o po/reports.<lang>.po
+   ```
+7. Verify with a round-trip: `PERLLIB=~/dev/po4a/lib ~/dev/po4a/po4a <config-file>` — check that the generated files match the backup.
+
+**Important**: Run steps 4–6 in a **single WSL session** (one `wsl -e bash -c '...'` invocation). Temp files in `/tmp` do not persist across separate WSL invocations on Windows.
+
+### Known po4a YAML limitations
+
+- **po4a owns the `.pot` file.** Do not manually add entries to `.pot` — po4a regenerates it on every run, dropping manual additions and causing `msgmerge` failures.
+- **Single-letter YAML keys may not be extracted** by po4a's YAML module (e.g., `u` fails while `f` and `m` work). Avoid single-letter and bare-number YAML keys entirely (see guardrail above).
+- **`.po` literal `\n`**: Inside `.po` quoted strings, `\n` is a literal two-character escape sequence (backslash + n), not a line break in the source. Multi-line msgstr values are split across multiple quoted lines, each ending with `\n`.
 
 ---
 
 ## Report Conventions
-
-### Licensing
-
-**Never** introduce non-permissive dependencies (fonts, libraries, templates). All fonts must be SIL OFL or equivalent. The `reference.docx`/`reference.pptx` templates need auditing for embedded proprietary fonts.
-
-### No Python Dependency
-
-Do not use the R `argparse` package (it requires Python). Use shared `parse-args.R` or JSON parameter files instead.
 
 ### Translatable Strings *(Target)*
 
