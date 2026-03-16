@@ -1,22 +1,19 @@
-headerList:
-  createdAt: Created
-  dataUpTo: Data up to
-  effectiveAnalysisPeriod: Effective analysis period
-  effectiveAnalysisPeriodFootnote: "The effective analysis period is the time span between the surveillance end date of the earliest included patient and the surveillance end date of the latest included patient in the dataset."
-  country: Country
-  countries: Countries
-  birthweightFilter: Birth weight filter
-  allBirthweights: All eligible birth weights
-  gestationalAgeFilter: Gestational age filter
-  allGestationalAges: All eligible gestational ages
-  datasetCompositionHeader: Dataset composition
-  singleCountryDatasetHint: This report presents data from neonatal units in a single country. Because of the relative homogeneity of the healthcare system, it is in principle a good benchmark. However, it should be noted that only a proportion of neonatal units in a country actually participate in NeoIPC Surveillance. Since participation is voluntary, these are typically hospitals that have a particular interest in infection prevention and are willing and able to provide the resources required for surveillance. The information presented here can therefore not fully describe the situation in the individual countries.
-  multiCountryDatasetHint: This report aggregates data from neonatal units in several countries. While ideally a single-country report would be preferable, aggregating data across multiple countries is pragmatically necessary when sufficient participation from a single country is not available. This means that, while it reflects a broad spectrum of care structures, it is only suitable as a benchmark to a somewhat limited extent due to the sometimes very different healthcare systems and the resources available there. The aim of NeoIPC Surveillance is therefore always to provide units with a relevant national or regional report, provided that a sufficient number of units in the respective region participate in the system.
-  mixedWbClassAddendum: "Additionally, this dataset includes data from countries whose economies belong to different income groups, as defined by the World Bank (%s). This means that the healthcare systems and infrastructure of the included countries may vary considerably, which could further affect the interpretation and comparability of some indicators."
-  specialAnalysisHint: This is a special analysis that
-  includesTestDepartments: includes test units
-  and: ' and '
-  ignoresInclusionCriteria: ignores the NeoIPC Surveillance inclusion criteria.
+# NeoIPC Reference Report — String Resources
+#
+# Layer 3 in the string resource cascade (after glossary.yaml, common.yaml).
+# Report-specific strings: section headings, table captions,
+# footnotes, and labels.
+#
+# Translated via po4a (po/reports.po4a.cfg) and Weblate.
+# Do not edit generated files (content.<lang>/_sR.yaml) — edit .po files instead.
+#
+# Language: en
 
+headerList:
+  datasetCompositionHeader: Dataset composition
+  effectiveAnalysisPeriodFootnote: "The effective analysis period is the time span between the surveillance end date of the earliest included patient and the surveillance end date of the latest included patient in the dataset."
+  mixedWbClassAddendum: "Additionally, this dataset includes data from countries whose economies belong to different income groups, as defined by the World Bank (%s). This means that the healthcare systems and infrastructure of the included countries may vary considerably, which could further affect the interpretation and comparability of some indicators."
+  multiCountryDatasetHint: This report aggregates data from neonatal units in several countries. While ideally a single-country report would be preferable, aggregating data across multiple countries is pragmatically necessary when sufficient participation from a single country is not available. This means that, while it reflects a broad spectrum of care structures, it is only suitable as a benchmark to a somewhat limited extent due to the sometimes very different healthcare systems and the resources available there. The aim of NeoIPC Surveillance is therefore always to provide units with a relevant national or regional report, provided that a sufficient number of units in the respective region participate in the system.
+  singleCountryDatasetHint: This report presents data from neonatal units in a single country. Because of the relative homogeneity of the healthcare system, it is in principle a good benchmark. However, it should be noted that only a proportion of neonatal units in a country actually participate in NeoIPC Surveillance. Since participation is voluntary, these are typically hospitals that have a particular interest in infection prevention and are willing and able to provide the resources required for surveillance. The information presented here can therefore not fully describe the situation in the individual countries.
 tbl-risk-density-rates:
   n_footnote: "%s: The aggregated number of days the risk/protective factor was present in all infants."

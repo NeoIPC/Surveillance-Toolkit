@@ -127,7 +127,7 @@ if (!is.null(benchmark_data$infectious_agent_detection_rate_per_agent_table) &&
         sR$table_headers$q3 ~ pct(6)
       ) |>
       tab_spanner(
-        label = sR$department_data,
+        label = sR$own_data_label,
         columns = c(
           sR$table_headers$n,
           sR$table_headers$rate),

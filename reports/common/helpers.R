@@ -54,10 +54,31 @@ parse_locales <- function(x) {
 
 get_string_resources <- function(x) {
   handlers <- list('bool#no' = function(x) x)
-  sR <- modifyList(
-    yaml::read_yaml("../common.yaml", handlers = handlers),
-    yaml::read_yaml("content/_sR.yaml", handlers = handlers)
-  )
+
+  # Layer 0: glossary (lowest priority — controlled vocabulary)
+  glossary_path <- "../../glossary.yaml"
+  if (file.exists(glossary_path)) {
+    sR <- yaml::read_yaml(glossary_path, handlers = handlers)
+  } else {
+    sR <- list()
+  }
+
+  # Layer 1: common (overrides glossary)
+  sR <- modifyList(sR, yaml::read_yaml("../common.yaml", handlers = handlers))
+
+  # Layer 2: report-specific (overrides common)
+  sR <- modifyList(sR, yaml::read_yaml("content/_sR.yaml", handlers = handlers))
+
+  # Language/territory overrides (glossary, then common, then report-specific)
+  yaml_path <- paste0("../../glossary.", localeObj$language, ".yaml")
+  if(file.exists(yaml_path)) sR <- modifyList(
+    sR,
+    yaml::read_yaml(file = yaml_path, handlers = handlers))
+
+  yaml_path <- paste0("../../glossary.", localeObj$language, "_", localeObj$territory, ".yaml")
+  if(file.exists(yaml_path)) sR <- modifyList(
+    sR,
+    yaml::read_yaml(file = yaml_path, handlers = handlers))
 
   yaml_path <- paste0("../common.", localeObj$language, ".yaml")
   if(file.exists(yaml_path)) sR <- modifyList(
@@ -205,6 +226,123 @@ format_countries <- function(countries) {
   }
 
   return(formatted)
+}
+
+#' Format a range filter (birthweight or gestational age) for display
+#' @param from Lower bound (NULL if no lower bound)
+#' @param to Upper bound (NULL if no upper bound)
+#' @param unit Unit string (e.g. "g" or "w")
+#' @param all_label Label when both bounds are NULL (e.g. sR$headerList$allBirthweights)
+#' @return Formatted filter string
+format_range_filter <- function(from, to, unit, all_label) {
+  if (is.null(from) && is.null(to)) {
+    all_label
+  } else if (is.null(from)) {
+    paste0("\u2264 ", format_integer(to), " ", unit)
+  } else if (is.null(to)) {
+    paste0("\u2265 ", format_integer(from), " ", unit)
+  } else {
+    paste0(format_integer(from), " ", unit, " - ", format_integer(to), " ", unit)
+  }
+}
+
+#' Format dataset metadata and counts into display-ready values (dR fields)
+#' @param metadata List with data_up_to, effective_analysis_period, countries, dataset_options
+#' @param counts Named list of raw numeric values (n_departments, n_patients, etc.)
+#' @param sR String resources
+#' @return Named list of formatted display values
+format_dataset_resources <- function(metadata, counts, sR) {
+  fmt_decimal <- function(x) {
+    format(x, digits = 2, nsmall = 1, scientific = FALSE)
+  }
+
+  result <- list(
+    dataUpToTimestamp = if (!is.null(metadata$data_up_to)) {
+      format(metadata$data_up_to, format = "%x %X", tz = "UTC", usetz = TRUE)
+    } else {
+      format(lubridate::now("UTC"), format = "%x %X", tz = "UTC", usetz = TRUE)
+    },
+    effectiveAnalysisPeriod = if (!is.null(metadata$effective_analysis_period)) {
+      paste(
+        format(metadata$effective_analysis_period$from, format = "%x"),
+        format(metadata$effective_analysis_period$to, format = "%x"),
+        sep = " - "
+      )
+    } else {
+      sR$not_available
+    },
+    countriesList = {
+      countries_data <- metadata$countries
+      if (!is.data.frame(countries_data)) {
+        countries_data <- tibble::tibble(name = countries_data)
+      }
+      format_countries(countries_data)
+    },
+    birthweightFilter = format_range_filter(
+      metadata$dataset_options$birth_weight_from,
+      metadata$dataset_options$birth_weight_to,
+      "g", sR$headerList$allBirthweights
+    ),
+    gestationalAgeFilter = format_range_filter(
+      metadata$dataset_options$gestational_age_from,
+      metadata$dataset_options$gestational_age_to,
+      "w", sR$headerList$allGestationalAges
+    ),
+    numberOfDepartments = format_integer(counts$n_departments),
+    numberOfPatients = format_integer(counts$n_patients),
+    numberOfAdmissions = format_integer(counts$n_enrollments),
+    sumOfPatientDays = format_integer(counts$n_patient_days),
+    averageSurveillancePeriod = fmt_decimal(
+      counts$n_patient_days / counts$n_patients
+    ),
+    numberOfSevereInfections = format_integer(counts$n_severe_infections),
+    averageSevereInfectionsPerPatient = fmt_decimal(
+      counts$n_severe_infections / counts$n_patients
+    )
+  )
+
+  # Infectious agent fields (optional — present in Reference-Report and Partner-Report)
+  if (!is.null(counts$n_infectious_agents)) {
+    result$numberOfInfectiousAgents <- format_integer(counts$n_infectious_agents)
+  }
+  if (!is.null(counts$n_infections_with_agent)) {
+    result$numberOfInfectionsWithAgent <- format_integer(counts$n_infections_with_agent)
+  }
+  if (!is.null(counts$n_infections_overall)) {
+    result$overallNumberOfInfections <- format_integer(counts$n_infections_overall)
+  }
+  if (!is.null(counts$n_infections_with_agent) && !is.null(counts$n_infections_overall)) {
+    result$infectiousAgentDetectionRate <- fmt_decimal(
+      counts$n_infections_with_agent / counts$n_infections_overall * 100
+    )
+  }
+
+  # Surgery fields (optional — present in Reference-Report)
+  if (!is.null(counts$n_surgical_departments)) {
+    result$numberOfSurgicalDepartments <- format_integer(counts$n_surgical_departments)
+    result$proportionOfSurgicalDepartments <- paste0(
+      fmt_decimal(counts$n_surgical_departments / counts$n_departments * 100),
+      sR$unit_separator, sR$percent_symbol
+    )
+  }
+  if (!is.null(counts$n_surgical_procedures)) {
+    result$numberOfSurgicalProcedures <- format_integer(counts$n_surgical_procedures)
+  }
+  if (!is.null(counts$n_surgical_patients)) {
+    result$numberOfSurgicalPatients <- format_integer(counts$n_surgical_patients)
+  }
+  if (!is.null(counts$n_surgical_procedures) && !is.null(counts$n_surgical_patients)) {
+    result$numberOfSurgicalProceduresPerPatient <- fmt_decimal(
+      counts$n_surgical_procedures / counts$n_surgical_patients
+    )
+  }
+  if (!is.null(counts$n_surgical_site_infections)) {
+    result$numberOfSurgicalSiteInfections <- format_integer(
+      counts$n_surgical_site_infections
+    )
+  }
+
+  result
 }
 
 no_data_table <- function() {

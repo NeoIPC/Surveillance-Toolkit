@@ -1,0 +1,17 @@
+---
+lang: en
+params:
+  patientId: NULL
+  departmentCode: NULL
+  dhis2Scheme: NULL
+  dhis2Hostname: NULL
+  dhis2Port: NULL
+  dhis2Path: NULL
+---
+
+```{r}
+#| label: Initialise Locale
+Sys.setenv(LC_ALL = "en_GB.UTF-8")
+```
+
+{{< include _content.qmd >}}

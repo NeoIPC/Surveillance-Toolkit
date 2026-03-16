@@ -115,7 +115,7 @@ if (!is.null(benchmark_data$resistance_test_rate_table) &&
   if (has_reference) {
     tbl <- tbl |>
       tab_spanner(
-        label = sR$department_data,
+        label = sR$own_data_label,
         columns = c(sR$table_headers$n, sR$table_headers$rate),
         id = "department_data"
       ) |>

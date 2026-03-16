@@ -36,14 +36,14 @@ if (!is.null(benchmark_data$usage_density_rate_table) &&
     dplyr::mutate(
     factor = dplyr::case_match(
       as.character(.data$factor),
-      "cvc" ~ sR$`tbl-risk-density-rates`$cvc,
-      "pvc" ~ sR$`tbl-risk-density-rates`$pvc,
+      "cvc" ~ sR$cvc,
+      "pvc" ~ sR$pvc,
       "vs" ~ sR$`tbl-risk-density-rates`$any,
-      "inv" ~ sR$`tbl-risk-density-rates`$inv,
-      "niv" ~ sR$`tbl-risk-density-rates`$niv,
-      "human_milk" ~ sR$`tbl-risk-density-rates`$human_milk,
-      "probiotic" ~ sR$`tbl-risk-density-rates`$probiotic,
-      "kangaroo_care" ~ sR$`tbl-risk-density-rates`$kangaroo_care,
+      "inv" ~ sR$inv,
+      "niv" ~ sR$niv,
+      "human_milk" ~ sR$human_milk,
+      "probiotic" ~ sR$probiotics,
+      "kangaroo_care" ~ sR$kangaroo_care,
       "ab" ~ sR$`tbl-risk-density-rates`$any_antibiotic,
       "a" ~ sR$`tbl-risk-density-rates`$access,
       "w" ~ sR$`tbl-risk-density-rates`$watch,
@@ -69,25 +69,25 @@ if (!is.null(benchmark_data$usage_density_rate_table) &&
     tab_row_group(
       label = sR$`tbl-risk-density-rates`$vascular_catheter,
       rows = tidyselect::any_of(c(
-        sR$`tbl-risk-density-rates`$cvc,
-        sR$`tbl-risk-density-rates`$pvc)),
+        sR$cvc,
+        sR$pvc)),
       id = "grp_vc") |>
     tab_row_group(
       label = sR$`tbl-risk-density-rates`$ventilatory_support,
       rows = tidyselect::any_of(c(
         sR$`tbl-risk-density-rates`$any,
-        sR$`tbl-risk-density-rates`$inv,
-        sR$`tbl-risk-density-rates`$niv)),
+        sR$inv,
+        sR$niv)),
       id = "grp_vs") |>
     tab_row_group(
-      label = sR$`tbl-risk-density-rates`$other,
+      label = sR$other,
       rows = tidyselect::any_of(c(
-        sR$`tbl-risk-density-rates`$human_milk,
-        sR$`tbl-risk-density-rates`$probiotic,
-        sR$`tbl-risk-density-rates`$kangaroo_care)),
+        sR$human_milk,
+        sR$probiotics,
+        sR$kangaroo_care)),
       id = "grp_othr") |>
     tab_row_group(
-      label = sR$`tbl-risk-density-rates`$antibiotics,
+      label = sR$antibiotics,
       rows = tidyselect::any_of(c(
         sR$`tbl-risk-density-rates`$any_antibiotic,
         sR$`tbl-risk-density-rates`$access,
@@ -163,7 +163,7 @@ if (!is.null(benchmark_data$usage_density_rate_table) &&
     sR$table_headers$q3 ~ pct(10)
     ) |>
     tab_spanner(
-      label = sR$department_data,
+      label = sR$own_data_label,
       columns = c(
         sR$table_headers$n,
         sR$table_headers$rate),

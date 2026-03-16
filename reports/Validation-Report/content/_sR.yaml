@@ -1,8 +1,28 @@
+# NeoIPC Validation Report — String Resources
+#
+# Layer 3 in the string resource cascade (after glossary.yaml, common.yaml).
+# Report-specific strings: problem descriptions, patient dashboard
+# labels, section headings, and validation messages.
+#
+# Translated via po4a (po/reports.po4a.cfg) and Weblate.
+# Do not edit generated files (content.<lang>/_sR.yaml) — edit .po files instead.
+#
 # Language: en
-patient_problem_header_prefix: Patient with the NeoIPC-ID
+
+adm_problem_header_prefix: Admission event with the admission date
+bsi_problem_header_prefix: Primary Sepsis/BSI event with the infection date
+end_problem_header_prefix: Surveillance-End event with the surveillance end date
+enrolment_problem_header_prefix: Enrolment with the admission date
+hap_problem_header_prefix: Pneumonia event with the infection date
+
+header:
+  departments: Departments
+nec_problem_header_prefix: Necrotizing enterocolitis event with the infection date
+neoipc_surveillance_partner_code: NeoIPC Surveillance Partner Code
 patient_problem_dashboard_link_description: >-
   Link to the patient's tracked entity instance dashboard on the NeoIPC Data
   Management Platform
+patient_problem_header_prefix: Patient with the NeoIPC-ID
 patient_problem_multiple_hint: >-
   We have detected more than one problem in this patient record. It can
   sometimes be difficult to fix multiple problems in a patient record, because
@@ -10,76 +30,19 @@ patient_problem_multiple_hint: >-
   may cause a new one. If you are unsure how to proceed, please get in touch
   with us via our [support e-mail address](mailto:%s) and we will be happy to
   help you.
-patient_problem_multiple_hint_email_subject: >-
-  Support request regarding complex errors in a patient record
 patient_problem_multiple_hint_email_body: |
   Dear NeoIPC Surveillance support team,
   my validation report contains multiple errors for the patient with the id '%s'.
   Can you please have a look and get in touch with me?
   Best regards,
-neoipc_surveillance_partner_code: NeoIPC Surveillance Partner Code
-enrolment_problem_header_prefix: Enrolment with the admission date
-adm_problem_header_prefix: Admission event with the admission date
-end_problem_header_prefix: Surveillance-End event with the surveillance end date
-sur_problem_header_prefix: Surgical Procedure event with the procedure date
-bsi_problem_header_prefix: Primary Sepsis/BSI event with the infection date
-hap_problem_header_prefix: Pneumonia event with the infection date
-nec_problem_header_prefix: Necrotizing enterocolitis event with the infection date
-ssi_problem_header_prefix: Surgical Site Infection event with the infection date
-
-header:
-  createdAt: Created
-  departments: Departments
-  department: Department
-
-ssi_types:
-  "1": superficial incisional SSI
-  "2": deep incisional SSI
-  "3": organ/space SSI
+patient_problem_multiple_hint_email_subject: >-
+  Support request regarding complex errors in a patient record
 
 problems:
   "1":
     description: >-
       The patient record does not have an enrolment.
       See @sec-problem-details-1.
-  "2":
-    description: >-
-      The patient record has a completed surveillance end form but the
-      enrolment is still active. See @sec-problem-details-2.
-  "3":
-    description: >-
-      The admission date in the admission form (%s) differs from the admission
-      date in the enrolment (%s). See @sec-problem-details-3.
-  "4":
-    description: >-
-      The date of the end of the surveillance (%s) is earlier than the date of
-      admission on the admission form (%s). See @sec-problem-details-4.
-  "5":
-    description: >-
-      The patient record's admission form is not completed (status is '%s').
-      See @sec-problem-details-5.
-  "6":
-    description: >-
-      The patient record has a completed enrolment but the surveillance end
-      form is not completed (status is '%s'). See @sec-problem-details-6.
-  "7":
-    description: >-
-      The patient record has a completed enrolment or surveillance end form
-      but a sepsis form is not completed (enrolment status is '%s',
-      surveillance end form status is '%s', sepsis form status is '%s').
-      See @sec-problem-details-7.
-  "8":
-    description: >-
-      The patient record has a completed enrolment or surveillance end form
-      but a necrotizing enterocolitis form is not completed (enrolment status
-      is '%s', surveillance end form status is '%s', necrotizing enterocolitis
-      form status is '%s'). See @sec-problem-details-7.
-  "9":
-    description: >-
-      The patient record has a completed enrolment or surveillance end form
-      but a pneumonia form is not completed (enrolment status is '%s',
-      surveillance end form status is '%s', pneumonia form status is '%s').
-      See @sec-problem-details-7.
   "10":
     description: >-
       The patient record has a completed enrolment or surveillance end form
@@ -143,6 +106,10 @@ problems:
       The surgical site infection (%s) did not occur during the follow-up
       period of a recorded surgical procedure.
       See @sec-problem-details-11.
+  "2":
+    description: >-
+      The patient record has a completed surveillance end form but the
+      enrolment is still active. See @sec-problem-details-2.
   "20":
     description: >-
       The pathogen manually entered as pathogen %i%s ('%s') cannot be
@@ -185,6 +152,10 @@ problems:
     description: >-
       The sepsis occurred within the first 3 days of life (day of life
       is %i). See @sec-problem-details-19.
+  "3":
+    description: >-
+      The admission date in the admission form (%s) differs from the admission
+      date in the enrolment (%s). See @sec-problem-details-3.
   "30":
     description: >-
       The sepsis occurred within the first two days of hospitalisation of a
@@ -230,6 +201,10 @@ problems:
     description: >-
       The day of life stored in the surgical procedure form (%i) does not
       match the calculated value (%i). See @sec-problem-details-17.
+  "4":
+    description: >-
+      The date of the end of the surveillance (%s) is earlier than the date of
+      admission on the admission form (%s). See @sec-problem-details-4.
   "40":
     description: >-
       The day of occurrence after admission stored in the surgical procedure
@@ -244,3 +219,35 @@ problems:
       The day of occurrence after admission stored in the surgical site
       infection form (%i) does not match the calculated value (%i).
       See @sec-problem-details-18.
+  "5":
+    description: >-
+      The patient record's admission form is not completed (status is '%s').
+      See @sec-problem-details-5.
+  "6":
+    description: >-
+      The patient record has a completed enrolment but the surveillance end
+      form is not completed (status is '%s'). See @sec-problem-details-6.
+  "7":
+    description: >-
+      The patient record has a completed enrolment or surveillance end form
+      but a sepsis form is not completed (enrolment status is '%s',
+      surveillance end form status is '%s', sepsis form status is '%s').
+      See @sec-problem-details-7.
+  "8":
+    description: >-
+      The patient record has a completed enrolment or surveillance end form
+      but a necrotizing enterocolitis form is not completed (enrolment status
+      is '%s', surveillance end form status is '%s', necrotizing enterocolitis
+      form status is '%s'). See @sec-problem-details-7.
+  "9":
+    description: >-
+      The patient record has a completed enrolment or surveillance end form
+      but a pneumonia form is not completed (enrolment status is '%s',
+      surveillance end form status is '%s', pneumonia form status is '%s').
+      See @sec-problem-details-7.
+ssi_problem_header_prefix: Surgical Site Infection event with the infection date
+ssi_types:
+  "1": superficial incisional SSI
+  "2": deep incisional SSI
+  "3": organ/space SSI
+sur_problem_header_prefix: Surgical Procedure event with the procedure date

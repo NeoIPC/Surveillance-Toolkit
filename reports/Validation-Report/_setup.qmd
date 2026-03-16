@@ -11,7 +11,7 @@ locale <- Sys.getenv("LC_ALL")
 invisible(Sys.setlocale(category = "LC_ALL", locale = locale))
 localeObj <- parse_locales(locale)[[1]]
 language <- localeObj$language
-translations <- get_string_resources(localeObj)
+sR <- get_string_resources(localeObj)
 departmentFilter <- params$departmentFilter
 NeoIPC_ProgramId <- "D8mSSpOpsKj"
 event_types <- function(x = NA) factor(x, levels = c("ADM","END","SUR","BSI","HAP","NEC","SSI"))

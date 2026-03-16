@@ -14,11 +14,11 @@ reference_data |>
   dplyr::mutate(
     dev = dplyr::case_match(
       as.character(.data$dev),
-      "cvc" ~ sR$`tbl-device-associated-incidence-density-rates`$cvc,
-      "pvc" ~ sR$`tbl-device-associated-incidence-density-rates`$pvc,
+      "cvc" ~ sR$cvc,
+      "pvc" ~ sR$pvc,
       "vs" ~ sR$`tbl-device-associated-incidence-density-rates`$vs,
-      "inv" ~ sR$`tbl-device-associated-incidence-density-rates`$inv,
-      "niv" ~ sR$`tbl-device-associated-incidence-density-rates`$niv)) |>
+      "inv" ~ sR$inv,
+      "niv" ~ sR$niv)) |>
   gt(rowname_col = "dev") |>
   sub_missing() |>
   gt::tab_options(
@@ -48,15 +48,15 @@ reference_data |>
   tab_row_group(
     label = sR$`tbl-device-associated-incidence-density-rates`$grp_vc,
     rows = tidyselect::any_of(c(
-      sR$`tbl-device-associated-incidence-density-rates`$cvc,
-      sR$`tbl-device-associated-incidence-density-rates`$pvc)),
+      sR$cvc,
+      sR$pvc)),
     id = "grp_vc") |>
   tab_row_group(
     label = sR$`tbl-device-associated-incidence-density-rates`$grp_vs,
     rows = tidyselect::any_of(c(
       sR$`tbl-device-associated-incidence-density-rates`$vs,
-      sR$`tbl-device-associated-incidence-density-rates`$inv,
-      sR$`tbl-device-associated-incidence-density-rates`$niv)),
+      sR$inv,
+      sR$niv)),
     id = "grp_vs") |>
   row_group_order(groups = c("grp_vc", "grp_vs")) |>
   tab_spanner(

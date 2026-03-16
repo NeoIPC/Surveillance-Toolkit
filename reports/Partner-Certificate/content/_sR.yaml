@@ -1,4 +1,13 @@
+# NeoIPC Partner Certificate — String Resources
+#
+# Layer 3 in the string resource cascade (after glossary.yaml, common.yaml).
+# Report-specific strings: certificate content and layout parameters.
+#
+# Translated via po4a (po/reports.po4a.cfg) and Weblate.
+# Do not edit generated files (content.<lang>/_sR.yaml) — edit .po files instead.
+#
 # Language: en
+
 signature_offset: 3.25
 content:
   - This project has received funding from the European Union’s Horizon 2020 research and%sinnovation programme under grant agreement No 965328.

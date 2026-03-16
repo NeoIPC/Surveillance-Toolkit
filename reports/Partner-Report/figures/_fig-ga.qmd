@@ -10,7 +10,7 @@ include_localised("_fig-intro-gestational-age.qmd")
 ```{r}
 #| label: fig-ga
 #| results: asis
-#| fig-cap: !expr 'paste(sR$`fig-ga`$`fig-cap`[[1]], sprintf(if("ref" %in% benchmark_data$dataset_names) sR$`fig-ga`$`fig-cap`[[2]]$bnch else sR$`fig-ga`$`fig-cap`[[2]]$`no-bnch`, sprintf("%i%s%s", 7L, sR$unit_separator, sR$day)), sprintf(if("ref" %in% benchmark_data$dataset_names) sR$`fig-ga`$`fig-cap`[[3]]$bnch else sR$`fig-ga`$`fig-cap`[[3]]$`no-bnch`, sprintf("%i%s", 25L, sR$percent_symbol), sprintf("%i%s", 50L, sR$percent_symbol), sprintf("%i%s", 75L, sR$percent_symbol)))'
+#| fig-cap: !expr 'paste(sR$`fig-cap`[[1]]$`fig-ga`, sprintf(if("ref" %in% benchmark_data$dataset_names) sR$`fig-cap`[[2]]$bnch else sR$`fig-cap`[[2]]$`no-bnch`, sprintf("%i%s%s", 7L, sR$unit_separator, sR$day)), sprintf(if("ref" %in% benchmark_data$dataset_names) sR$`fig-cap`[[3]]$bnch else sR$`fig-cap`[[3]]$`no-bnch`, sprintf("%i%s", 25L, sR$percent_symbol), sprintf("%i%s", 50L, sR$percent_symbol), sprintf("%i%s", 75L, sR$percent_symbol)))'
 
 has_ga <- FALSE
 if (!is.null(benchmark_data) && !is.null(benchmark_data$gestational_age_figure)) {

@@ -18,6 +18,8 @@ The first seven rules below are **universal** — mirrored in every NeoIPC repos
 - **Always** keep `CLAUDE.md` and `.github/copilot-instructions.md` in sync within this repository. When you modify one, apply the same change to the other.
 - Do not use the R `argparse` package (it requires Python). Use shared `parse-args.R` or JSON parameter files instead. *(repo-specific)*
 - **Never** use single letters or bare numbers as YAML keys in string resource files. po4a's YAML module fails to extract some single-letter keys (e.g., `u`), and short keys are not expressive. Use descriptive names instead (e.g., `female`/`male`/`undetermined` instead of `f`/`m`/`u`). When a YAML key must map to a short code from DHIS2, add a mapping in the R code. *(repo-specific)*
+- String values must not be duplicated across YAML layers (glossary, common, report-specific) or across report-specific files. If two reports share a string, move it to `common.yaml`. Run `scripts/Test-StringResourceLayers.ps1` to check before committing changes to string resource files. *(repo-specific)*
+- The **AMA Manual of Style** is the reference for human-language style questions (capitalisation, punctuation, terminology). The glossary may carry multiple casing variants of a term (e.g., lowercase for running text, title case for headings) — use whichever fits the context. *(repo-specific)*
 
 ---
 
@@ -57,12 +59,17 @@ Reports live under `reports/`:
 
 ### Cascade order (lowest → highest priority)
 
-1. `../common.yaml` — shared domain terms (English base)
-2. `content/_sR.yaml` — report-specific strings (English base)
-3. `../common.<lang>.yaml` — shared domain terms (language override)
-4. `../common.<lang>_<territory>.yaml` — shared domain terms (language+territory override)
-5. `content.<lang>/_sR.yaml` — report-specific strings (language override)
-6. `content.<lang>_<territory>/_sR.yaml` — report-specific strings (language+territory override)
+Paths are relative to each report's directory (e.g., `reports/Partner-Report/`).
+
+1. `../../glossary.yaml` — controlled vocabulary (English base)
+2. `../common.yaml` — shared domain terms (English base)
+3. `content/_sR.yaml` — report-specific strings (English base)
+4. `../../glossary.<lang>.yaml` — controlled vocabulary (language override)
+5. `../../glossary.<lang>_<territory>.yaml` — controlled vocabulary (language+territory override)
+6. `../common.<lang>.yaml` — shared domain terms (language override)
+7. `../common.<lang>_<territory>.yaml` — shared domain terms (language+territory override)
+8. `content.<lang>/_sR.yaml` — report-specific strings (language override)
+9. `content.<lang>_<territory>/_sR.yaml` — report-specific strings (language+territory override)
 
 Each level only needs to contain the keys it wants to override — `modifyList()` preserves unmodified keys from earlier levels.
 
@@ -84,8 +91,7 @@ sR <- get_string_resources(localeObj)           # cascading YAML merge
 
 ### Variable naming
 
-- Partner-Report and Reference-Report store the result in `sR` (accessed via `sR$key`)
-- Validation-Report stores it in `translations` (accessed via `translations$key`) for historical reasons
+All reports store the string resource result in `sR` (accessed via `sR$key`).
 
 ### YAML conventions
 
@@ -94,6 +100,24 @@ sR <- get_string_resources(localeObj)           # cascading YAML merge
 - Use `>` **only** when a trailing newline is intended (rare)
 - Quote numeric YAML keys: `"1"`, `"2"`, `"3"` (otherwise YAML interprets them as integers)
 - Use the `'bool#no' = function(x) x` handler in `yaml::read_yaml()` to prevent YAML from converting "no" to `FALSE`
+
+### Glossary naming convention
+
+`glossary.yaml` uses a suffix-based naming convention for casing and plural variants:
+
+| Suffix | Meaning | Example key | Example value |
+|--------|---------|-------------|---------------|
+| *(none)* | AMA canonical (lowercase) | `necrotising_enterocolitis` | `"necrotising enterocolitis"` |
+| `_sc` | Sentence case | `necrotising_enterocolitis_sc` | `"Necrotising enterocolitis"` |
+| `_tc` | Title case | `necrotising_enterocolitis_tc` | `"Necrotising Enterocolitis"` |
+| `_plural` | Plural form | `patient_day_plural` | `"patient days"` |
+
+- Abbreviations (CVC, HAP, INV, NEC, SSI) are always uppercase — no variants needed.
+- Proper nouns (NeoIPC Surveillance) keep their canonical casing — no variants needed.
+- Single-word terms: `_sc` and `_tc` produce the same result — use `_sc` only.
+- Suffixes can combine: `patient_day_plural_tc` = "Patient Days".
+- Weblate `variant_regex`: `_(tc|sc|plural|plural_tc|plural_sc)$` groups variants in the sidebar.
+- R code picks the appropriate variant: `sR$necrotising_enterocolitis_sc` for labels, `sR$necrotising_enterocolitis` for running text.
 
 ---
 
@@ -138,8 +162,9 @@ wsl -e bash -c "cd $(wsl wslpath -a .) && PERLLIB=~/dev/po4a/lib ~/dev/po4a/po4a
 |--------|-------|
 | `reports.po4a.cfg` | Partner-Report, Reference-Report, Partner-Certificate, Validation-Report |
 | `documentation.po4a.cfg` | Protocol AsciiDoc files |
-| `glossary.po4a.cfg` | Glossary YAML |
 | `infectious_agents.po4a.cfg` | Pathogen taxonomy |
+
+**Note:** The glossary (`glossary.yaml`) is **not** managed by po4a. It uses a custom script (`scripts/update-glossary-po.py`) that generates monolingual gettext PO with `msgctxt` for Weblate variant grouping and plural support. See the helper scripts table below.
 
 ### Target languages
 
@@ -151,7 +176,7 @@ af, de, es, et, fr, gr, it, ne, tr (9 languages)
 |--------|---------|
 | `Update-Po4aYamlKeys.ps1` | Auto-extract YAML keys for po4a config (run after changing YAML structure) |
 | `Test-PoPlaceholders.ps1` | Validate placeholder consistency between source and translations |
-| `sync-html-to-po-v2.py` | Sync translations from rendered HTML back to `.po` files |
+| `update-glossary-po.py` | Convert `glossary.yaml` to/from monolingual gettext PO (replaces po4a for glossary). Requires `ruamel.yaml` and `polib`. Run after editing `glossary.yaml` to regenerate `.pot` and merge `.po` files. Use `--generate-yaml` to produce localized `glossary.<lang>.yaml`. |
 
 ### Importing existing translations
 

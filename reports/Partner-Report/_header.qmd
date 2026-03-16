@@ -7,7 +7,7 @@ has_reference <- "ref" %in% benchmark_data$dataset_names
 
 if (!has_reference) {
   cat(sep = "\n", c(
-    paste0(sR$headerList$createdAt,":"),
+    paste0(sR$headerList$created,":"),
     "",
     paste0(":   ",dR$own$creationTimestamp),
     "",
@@ -34,7 +34,7 @@ if (!has_reference) {
 } else {
   tbl <- tibble::tibble(
     parameter = c(
-      sR$headerList$createdAt,
+      sR$headerList$created,
       sR$headerList$dataUpTo,
       sR$headerList$effectiveAnalysisPeriod,
       if(length(benchmark_data$metadata$own$countries) > 1) {
@@ -64,7 +64,7 @@ if (!has_reference) {
   ) |>
     gt(rowname_col = "parameter") |>
     cols_label(
-      own_value = sR$department_data,
+      own_value = sR$own_data_label,
       ref_value = sR$reference_data
     ) |>
     tab_options(
@@ -157,9 +157,9 @@ if (metadata_diff$countries_differ) {
       " ",
       sprintf(
         sR$headerList$wbClassMismatchAddendum,
-        sR$headerList$ownDataLabel,
+        sR$own_data_label,
         wb_class_mismatch$own_classes,
-        sR$headerList$refDataLabel,
+        sR$reference_data,
         wb_class_mismatch$ref_classes
       )
     )

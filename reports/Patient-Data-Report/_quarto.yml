@@ -1,0 +1,38 @@
+project:
+  output-dir: _output
+date-meta: now
+echo: false
+engine: knitr
+filters: ["../filters/pandoc-quotes.lua"]
+format:
+  html:
+    link-external-icon: true
+    link-external-newwindow: true
+  pdf:
+    documentclass: scrartcl
+    mainfont: "Noto Sans"
+    monofont: "Noto Sans"
+    fontsize: 10pt
+    papersize: a4paper
+    fig-pos: 'H'
+    colorlinks: true
+    geometry:
+      - top=25mm
+      - bottom=25mm
+      - left=25mm
+      - right=25mm
+      - heightrounded
+    include-in-header:
+      text: |
+        \usepackage{float}
+        \usepackage{placeins}
+        \usepackage{graphicx}
+        \usepackage{scrlayer-scrpage}
+        \ModifyLayer[addvoffset=-.6ex]{scrheadings.foot.above.line}
+        \ModifyLayer[addvoffset=-.6ex]{plain.scrheadings.foot.above.line}
+        \ihead{\includegraphics[width=4cm]{../logos/LOGO_NEOIPC_2.png}}
+        \ofoot{\pagemark}
+    classoption: [footsepline=true, plainfootsepline=true]
+profile:
+  group:
+    - [en, de]

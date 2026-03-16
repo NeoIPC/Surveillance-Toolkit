@@ -1,2 +1,70 @@
-- "Surveillance"
-- "NeoIPC Surveillance"
+# NeoIPC Surveillance Glossary
+#
+# Managed via monolingual gettext PO for Weblate (not po4a).
+# Run `python scripts/update-glossary-po.py` after editing this file.
+#
+# Weblate feature mapping (YAML → PO):
+#   Plurals       — key + key_plural paired into msgid / msgid_plural
+#   Descriptions  — YAML comments above a key become PO translator notes (#.)
+#   Context       — YAML key becomes msgctxt (enables variant_regex grouping)
+#   Location      — source file path + line number written as #: occurrence
+#   Flags         — `# flags: ...` comment line becomes PO #, flags
+#   Needs editing — fuzzy flag in .po, managed by Weblate; preserved across merges
+#
+# Naming convention:
+#   base key    = AMA canonical (lowercase)
+#   key_sc      = Sentence case (first word capitalised)
+#   key_tc      = Title case (all major words capitalised)
+#   key_plural  = Plural form
+#   Suffixes can combine: key_plural_tc
+#   Abbreviations (CVC, HAP, INV, NEC, SSI) are always uppercase — no variants.
+#   Proper nouns (NeoIPC Surveillance) keep their canonical casing.
+#
+# Available flags (see https://docs.weblate.org/en/latest/admin/checks.html):
+#   read-only          — non-editable, translation locked
+#   ignore-same        — suppress "unchanged translation" warning
+#   max-length:N       — character limit
+#   priority:N         — translation priority (default 100)
+#   placeholders:...   — expected placeholder strings
+#   regex:PATTERN      — translation must match regex
+#
+# Variant grouping is handled by the Weblate component's variant_regex
+# setting: _(tc|sc|plural|plural_tc|plural_sc)$
+
+admission: admission
+admission_sc: Admission
+antibiotics: antibiotics
+antibiotics_sc: Antibiotics
+cvc: CVC
+hap: HAP
+human_milk: "human milk"
+human_milk_sc: "Human milk"
+inv: INV
+kangaroo_care: "kangaroo care"
+kangaroo_care_sc: "Kangaroo care"
+nec: NEC
+necrotising_enterocolitis: "necrotising enterocolitis"
+necrotising_enterocolitis_sc: "Necrotising enterocolitis"
+necrotising_enterocolitis_tc: "Necrotising Enterocolitis"
+# flags: ignore-same
+neoipc_surveillance: "NeoIPC Surveillance"
+niv: NIV
+pneumonia: pneumonia
+pneumonia_sc: Pneumonia
+primary_sepsis_bsi: "primary sepsis/BSI"
+primary_sepsis_bsi_sc: "Primary sepsis/BSI"
+primary_sepsis_bsi_tc: "Primary Sepsis/BSI"
+probiotics: Probiotics
+pvc: PVC
+ssi: SSI
+surgical_procedure: "surgical procedure"
+surgical_procedure_sc: "Surgical procedure"
+surgical_procedure_tc: "Surgical Procedure"
+surgical_site_infection: "surgical site infection"
+surgical_site_infection_sc: "Surgical site infection"
+surgical_site_infection_tc: "Surgical Site Infection"
+surveillance: surveillance
+surveillance_sc: Surveillance
+surveillance_end: "surveillance end"
+surveillance_end_sc: "Surveillance end"
+surveillance_end_tc: "Surveillance End"

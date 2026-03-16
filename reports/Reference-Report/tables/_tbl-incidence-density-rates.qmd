@@ -15,9 +15,9 @@ reference_data |>
     inf = dplyr::case_match(
       as.character(.data$inf),
       "si" ~ sR$si,
-      "bsi" ~ sR$bsi,
-      "hap" ~ sR$hap,
-      "nec" ~ sR$nec)) |>
+      "bsi" ~ sR$primary_sepsis_bsi_sc,
+      "hap" ~ sR$pneumonia_sc,
+      "nec" ~ sR$necrotising_enterocolitis_sc)) |>
   gt(rowname_col = "inf") |>
   sub_missing() |>
   gt::tab_options(
@@ -48,12 +48,12 @@ reference_data |>
     label = sR$`tbl-incidence-density-rates`$grp_si,
     rows = tidyselect::any_of(c(
       sR$si,
-      sR$bsi,
-      sR$hap)),
+      sR$primary_sepsis_bsi_sc,
+      sR$pneumonia_sc)),
     id = "grp_si") |>
   tab_row_group(
-    label = sR$`tbl-incidence-density-rates`$grp_othr,
-    rows = tidyselect::any_of(sR$nec),
+    label = sR$other,
+    rows = tidyselect::any_of(sR$necrotising_enterocolitis_sc),
     id = "grp_othr") |>
   row_group_order(groups = c("grp_si", "grp_othr")) |>
   tab_spanner(

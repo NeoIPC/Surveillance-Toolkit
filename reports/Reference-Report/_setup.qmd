@@ -143,186 +143,30 @@ if (!is.null(params$referenceDataFile)) {
 ```{r Preparing localised data}
 #| include: false
 
-dR <- list(
-  creationTimestamp = format(
-    lubridate::now("UTC"),
-    format = "%x %X",
-    tz = "UTC",
-    usetz = TRUE),
-  dataUpToTimestamp = format(
-    reference_data$metadata$data_up_to,
-    format = "%x %X",
-    tz = "UTC",
-    usetz = TRUE),
-  effectiveAnalysisPeriod = if (!is.null(reference_data$metadata$effective_analysis_period)) {
-    paste(
-      format(reference_data$metadata$effective_analysis_period$from, format = "%x"),
-      format(reference_data$metadata$effective_analysis_period$to, format = "%x"),
-      sep = " - "
-    )
-  } else {
-    "Not available"
-  },
-  countriesList = {
-    countries_data <- reference_data$metadata$countries
+ref_counts <- list(
+  n_departments = reference_data$n_departments,
+  n_patients = reference_data$n_patients$total,
+  n_enrollments = reference_data$n_enrollments$total,
+  n_patient_days = reference_data$n_patient_days$total,
+  n_severe_infections = reference_data$incidence_density_rate_table |>
+    dplyr::filter(inf == "si") |> dplyr::pull("n"),
+  n_infectious_agents = reference_data$infectious_agent_detection_rate_per_agent_table |>
+    dplyr::filter(group == "Total") |> dplyr::pull("n"),
+  n_infections_with_agent = reference_data$infectious_agent_detection_rate_per_inf_type_table |>
+    dplyr::filter(inf == "all") |> dplyr::pull("n"),
+  n_infections_overall = reference_data$n_infections |>
+    dplyr::filter(inf_type == "overall") |> dplyr::pull("total"),
+  n_surgical_departments = reference_data$n_surgical_departments,
+  n_surgical_patients = reference_data$n_surgical_patients |> dplyr::pull("total"),
+  n_surgical_procedures = reference_data$n_surgical_procedures |> dplyr::pull("total"),
+  n_surgical_site_infections = reference_data$n_infections |>
+    dplyr::filter(inf_type == "ssi") |> dplyr::pull("total")
+)
 
-    if (!is.data.frame(countries_data)) {
-      countries_data <- tibble::tibble(name = countries_data)
-    }
-
-    # Format with or without WB class
-    format_countries(countries_data)
-  },
-  birthweightFilter = if(
-    is.null(reference_data$metadata$dataset_options$birth_weight_from) &&
-    is.null(reference_data$metadata$dataset_options$birth_weight_to)) {
-      sR$headerList$allBirthweights
-    } else if(
-      is.null(reference_data$metadata$dataset_options$birth_weight_from)) {
-      paste0(
-        c(
-          "≤ ",
-          format_integer(
-            reference_data$metadata$dataset_options$birth_weight_to),
-          " g"),
-        collapse = "")
-    } else if(
-      is.null(reference_data$metadata$dataset_options$birth_weight_to)) {
-      paste0(
-        c(
-          "≥ ",
-          format_integer(
-            reference_data$metadata$dataset_options$birth_weight_from),
-          " g"),
-        collapse = "")
-    } else {
-      paste0(
-        c(
-          format_integer(
-            reference_data$metadata$dataset_options$birth_weight_from),
-          " g - ",
-          format_integer(
-            reference_data$metadata$dataset_options$birth_weight_to),
-          " g"),
-        collapse = "")
-    },
-  gestationalAgeFilter = if(
-    is.null(reference_data$metadata$dataset_options$gestational_age_from) &&
-    is.null(reference_data$metadata$dataset_options$gestational_age_to)) {
-      sR$headerList$allGestationalAges
-    } else if(
-      is.null(reference_data$metadata$dataset_options$gestational_age_from)) {
-      paste0(
-        c(
-          "≤ ",
-          format_integer(
-            reference_data$metadata$dataset_options$gestational_age_to),
-          " w"),
-        collapse = "")
-    } else if(
-      is.null(reference_data$metadata$dataset_options$gestational_age_to)) {
-      paste0(
-        c(
-          "≥ ",
-          format_integer(
-            reference_data$metadata$dataset_options$gestational_age_from),
-          " w"),
-        collapse = "")
-    } else {
-      paste0(
-        c(
-          format_integer(
-            reference_data$metadata$dataset_options$gestational_age_from),
-          " w - ",
-          format_integer(
-            reference_data$metadata$dataset_options$gestational_age_to),
-          " w"),
-        collapse = "")
-    },
-  numberOfDepartments = format_integer(reference_data$n_departments),
-  numberOfPatients = format_integer(reference_data$n_patients$total),
-  numberOfAdmissions = format_integer(reference_data$n_enrollments$total),
-  sumOfPatientDays = format_integer(reference_data$n_patient_days$total),
-  averageSurveillancePeriod = format(
-    reference_data$n_patient_days$total / reference_data$n_patients$total,
-    digits = 2,
-    nsmall = 1,
-    scientific = FALSE),
-  numberOfSevereInfections = format_integer(
-    reference_data$incidence_density_rate_table |>
-      dplyr::filter(inf == "si") |>
-      dplyr::pull("n")),
-  averageSevereInfectionsPerPatient = format(
-    (
-      (reference_data$incidence_density_rate_table |>
-         dplyr::filter(inf == "si") |>
-         dplyr::pull("n")) /
-        reference_data$n_patients$total),
-    digits = 2,
-    nsmall = 1,
-    scientific = FALSE),
-  numberOfInfectiousAgents = format_integer(
-    reference_data$infectious_agent_detection_rate_per_agent_table |>
-      dplyr::filter(group == "Total") |>
-      dplyr::pull("n")),
-  numberOfInfectionsWithAgent = format_integer(
-    reference_data$infectious_agent_detection_rate_per_inf_type_table |>
-      dplyr::filter(inf == "all") |>
-      dplyr::pull("n")),
-  overallNumberOfInfections = format_integer(
-    reference_data$n_infections |>
-      dplyr::filter(inf_type == "overall") |>
-      dplyr::pull("total")),
-  infectiousAgentDetectionRate = format(
-    (
-      (reference_data$infectious_agent_detection_rate_per_inf_type_table |>
-         dplyr::filter(inf == "all") |>
-         dplyr::pull("n")) /
-        (
-          reference_data$n_infections |>
-            dplyr::filter(inf_type == "overall") |>
-            dplyr::pull("total")
-          )
-      * 100
-      ),
-    digits = 2,
-    nsmall = 1,
-    scientific = FALSE),
-  numberOfSurgicalDepartments = format_integer(
-    reference_data$n_surgical_departments),
-  proportionOfSurgicalDepartments = paste0(
-    format(
-      reference_data$n_surgical_departments /
-        reference_data$n_departments *
-        100,
-      digits = 2,
-      nsmall = 1,
-      scientific = FALSE),
-    sR$unit_separator,
-    sR$percent_symbol,
-    collapse = ""
-  ),
-  numberOfSurgicalProcedures = format_integer(
-    reference_data$n_surgical_procedures |>
-      dplyr::pull("total")
-  ),
-  numberOfSurgicalPatients = format_integer(
-    reference_data$n_surgical_patients |>
-      dplyr::pull("total")
-  ),
-  numberOfSurgicalProceduresPerPatient = format(
-    reference_data$n_surgical_procedures |>
-      dplyr::pull("total") /
-    reference_data$n_surgical_patients |>
-      dplyr::pull("total"),
-      digits = 2,
-      nsmall = 1,
-      scientific = FALSE),
-  numberOfSurgicalSiteInfections = format_integer(
-    reference_data$n_infections |>
-      dplyr::filter(inf_type == "ssi") |>
-      dplyr::pull("total")
-  )
+dR <- c(
+  list(creationTimestamp = format(
+    lubridate::now("UTC"), format = "%x %X", tz = "UTC", usetz = TRUE)),
+  format_dataset_resources(reference_data$metadata, ref_counts, sR)
 )
 
 # Detect if reference dataset has mixed World Bank classes

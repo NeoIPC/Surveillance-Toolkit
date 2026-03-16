@@ -21,7 +21,7 @@ reference_data |>
       "cardiac_and_large_vessel_surgery" ~ sR$`tbl-surgical-procedure-rates`$cardiac_and_large_vessel_surgery,
       "lung_pleural_space_thoracic_surgery" ~ sR$`tbl-surgical-procedure-rates`$lung_pleural_space_thoracic_surgery,
       "oesophageal_surgery" ~ sR$`tbl-surgical-procedure-rates`$oesophageal_surgery,
-      "other" ~ sR$`tbl-surgical-procedure-rates`$other,
+      "other" ~ sR$other,
       "not_surgery" ~ sR$`tbl-surgical-procedure-rates`$not_surgery,
       "to_be_categorised" ~ sR$`tbl-surgical-procedure-rates`$to_be_categorised)) |>
   gt(rowname_col = "pro_cat") |>

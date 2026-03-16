@@ -596,255 +596,53 @@ benchmark_data <- if (is.null(reference_data)) {
 ```{r Preparing localised data}
 #| include: false
 
-# Format department metadata
-dR <- list(
-  own = list(
-  creationTimestamp = format(
-    lubridate::now("UTC"),
-    format = "%x %X",
-    tz = "UTC",
-    usetz = TRUE),
-  dataUpToTimestamp = if (!is.null(benchmark_data$metadata$own$data_up_to)) {
-    format(
-      benchmark_data$metadata$own$data_up_to,
-      format = "%x %X",
-      tz = "UTC",
-      usetz = TRUE)
-  } else {
-    format(
-      lubridate::now("UTC"),
-      format = "%x %X",
-      tz = "UTC",
-      usetz = TRUE)
-  },
-  effectiveAnalysisPeriod = if (!is.null(benchmark_data$metadata$own$effective_analysis_period)) {
-    paste(
-      format(benchmark_data$metadata$own$effective_analysis_period$from, format = "%x"),
-      format(benchmark_data$metadata$own$effective_analysis_period$to, format = "%x"),
-      sep = " - "
-    )
-  } else {
-    sR$not_available
-  },
-  countriesList = {
-    countries_data <- benchmark_data$metadata$own$countries
-
-    if (!is.data.frame(countries_data)) {
-      countries_data <- tibble::tibble(name = countries_data)
+# Extract counts from benchmark_data for a given dataset suffix (_own or _ref)
+extract_counts <- function(bm, suffix) {
+  pull_col <- function(tbl, col) {
+    col_name <- paste0(col, suffix)
+    if (!is.null(tbl) && col_name %in% names(tbl)) tbl[[col_name]] else NULL
+  }
+  pull_filtered <- function(tbl, filter_col, filter_val, value_col) {
+    col_name <- paste0(value_col, suffix)
+    if (!is.null(tbl) && col_name %in% names(tbl)) {
+      tbl |> dplyr::filter(.data[[filter_col]] == filter_val) |> dplyr::pull(col_name)
+    } else {
+      NULL
     }
+  }
+  list(
+    n_departments = pull_col(bm$n_departments, "n"),
+    n_patients = pull_col(bm$n_patients, "total"),
+    n_enrollments = pull_col(bm$n_enrollments, "total"),
+    n_patient_days = pull_col(bm$n_patient_days, "total"),
+    n_severe_infections = pull_filtered(
+      bm$incidence_density_rate_table, "inf", "si", "n"),
+    n_infectious_agents = pull_filtered(
+      bm$infectious_agent_detection_rate_per_agent_table, "group", "Total", "n"),
+    n_infections_with_agent = pull_filtered(
+      bm$infectious_agent_detection_rate_per_inf_type_table, "inf", "all", "n"),
+    n_infections_overall = pull_filtered(
+      bm$n_infections, "inf_type", "overall", "total")
+  )
+}
 
-    # Format with or without WB class
-    format_countries(countries_data)
-  },
-  birthweightFilter = if(
-    is.null(benchmark_data$metadata$own$dataset_options$birth_weight_from) &&
-    is.null(benchmark_data$metadata$own$dataset_options$birth_weight_to)) {
-      sR$headerList$allBirthweights
-    } else if(
-      is.null(benchmark_data$metadata$own$dataset_options$birth_weight_from)) {
-      paste0(
-        c(
-          "≤ ",
-          format_integer(
-            benchmark_data$metadata$own$dataset_options$birth_weight_to),
-          " g"),
-        collapse = "")
-    } else if(
-      is.null(benchmark_data$metadata$own$dataset_options$birth_weight_to)) {
-      paste0(
-        c(
-          "≥ ",
-          format_integer(
-            benchmark_data$metadata$own$dataset_options$birth_weight_from),
-          " g"),
-        collapse = "")
-    } else {
-      paste0(
-        c(
-          format_integer(
-            benchmark_data$metadata$own$dataset_options$birth_weight_from),
-          " g - ",
-          format_integer(
-            benchmark_data$metadata$own$dataset_options$birth_weight_to),
-          " g"),
-        collapse = "")
-    },
-  gestationalAgeFilter = if(
-    is.null(benchmark_data$metadata$own$dataset_options$gestational_age_from) &&
-    is.null(benchmark_data$metadata$own$dataset_options$gestational_age_to)) {
-      sR$headerList$allGestationalAges
-    } else if(
-      is.null(benchmark_data$metadata$own$dataset_options$gestational_age_from)) {
-      paste0(
-        c(
-          "≤ ",
-          format_integer(
-            benchmark_data$metadata$own$dataset_options$gestational_age_to),
-          " w"),
-        collapse = "")
-    } else if(
-      is.null(benchmark_data$metadata$own$dataset_options$gestational_age_to)) {
-      paste0(
-        c(
-          "≥ ",
-          format_integer(
-            benchmark_data$metadata$own$dataset_options$gestational_age_from),
-          " w"),
-        collapse = "")
-    } else {
-      paste0(
-        c(
-          format_integer(
-            benchmark_data$metadata$own$dataset_options$gestational_age_from),
-          " w - ",
-          format_integer(
-            benchmark_data$metadata$own$dataset_options$gestational_age_to),
-          " w"),
-        collapse = "")
-    },
-  numberOfDepartments = format_integer(benchmark_data$n_departments$n_own),
-  numberOfPatients = format_integer(benchmark_data$n_patients$total_own),
-  numberOfAdmissions = format_integer(benchmark_data$n_enrollments$total_own),
-  sumOfPatientDays = format_integer(benchmark_data$n_patient_days$total_own),
-  averageSurveillancePeriod = format(
-    benchmark_data$n_patient_days$total_own / benchmark_data$n_patients$total_own,
-    digits = 2,
-    nsmall = 1,
-    scientific = FALSE),
-  numberOfSevereInfections = format_integer(
-     benchmark_data$incidence_density_rate_table |>
-       dplyr::filter(inf == "si") |>
-       dplyr::pull("n_own")),
-   averageSevereInfectionsPerPatient = format(
-     (
-       (benchmark_data$incidence_density_rate_table |>
-          dplyr::filter(inf == "si") |>
-          dplyr::pull("n_own")) /
-         benchmark_data$n_patients$total_own),
-     digits = 2,
-     nsmall = 1,
-     scientific = FALSE)
+dR <- list(
+  own = c(
+    list(creationTimestamp = format(
+      lubridate::now("UTC"), format = "%x %X", tz = "UTC", usetz = TRUE)),
+    format_dataset_resources(
+      benchmark_data$metadata$own,
+      extract_counts(benchmark_data, "_own"), sR)
   ),
   ref = if ("ref" %in% benchmark_data$dataset_names) {
-  list(
-    creationTimestamp = format(
-      benchmark_data$metadata$ref$calculated,
-      format = "%x %X",
-      tz = "UTC",
-      usetz = TRUE),
-    dataUpToTimestamp = format(
-      benchmark_data$metadata$ref$data_up_to,
-      format = "%x %X",
-      tz = "UTC",
-      usetz = TRUE),
-    effectiveAnalysisPeriod = if (!is.null(benchmark_data$metadata$ref$effective_analysis_period)) {
-      paste(
-        format(benchmark_data$metadata$ref$effective_analysis_period$from, format = "%x"),
-        format(benchmark_data$metadata$ref$effective_analysis_period$to, format = "%x"),
-        sep = " - "
-      )
-    } else {
-      sR$not_available
-    },
-    countriesList = {
-      countries_data <- benchmark_data$metadata$ref$countries
-
-      if (!is.data.frame(countries_data)) {
-        countries_data <- tibble::tibble(name = countries_data)
-      }
-
-      # Format with or without WB class
-      format_countries(countries_data)
-    },
-    birthweightFilter = if(
-      is.null(benchmark_data$metadata$ref$dataset_options$birth_weight_from) &&
-      is.null(benchmark_data$metadata$ref$dataset_options$birth_weight_to)) {
-        sR$headerList$allBirthweights
-      } else if(
-        is.null(benchmark_data$metadata$ref$dataset_options$birth_weight_from)) {
-        paste0(
-          c(
-            "≤ ",
-            format_integer(
-              benchmark_data$metadata$ref$dataset_options$birth_weight_to),
-            " g"),
-          collapse = "")
-      } else if(
-        is.null(benchmark_data$metadata$ref$dataset_options$birth_weight_to)) {
-        paste0(
-          c(
-            "≥ ",
-            format_integer(
-              benchmark_data$metadata$ref$dataset_options$birth_weight_from),
-            " g"),
-          collapse = "")
-      } else {
-        paste0(
-          c(
-            format_integer(
-              benchmark_data$metadata$ref$dataset_options$birth_weight_from),
-            " g - ",
-            format_integer(
-              benchmark_data$metadata$ref$dataset_options$birth_weight_to),
-            " g"),
-          collapse = "")
-      },
-    gestationalAgeFilter = if(
-      is.null(benchmark_data$metadata$ref$dataset_options$gestational_age_from) &&
-      is.null(benchmark_data$metadata$ref$dataset_options$gestational_age_to)) {
-        sR$headerList$allGestationalAges
-      } else if(
-        is.null(benchmark_data$metadata$ref$dataset_options$gestational_age_from)) {
-        paste0(
-          c(
-            "≤ ",
-            format_integer(
-              benchmark_data$metadata$ref$dataset_options$gestational_age_to),
-            " w"),
-          collapse = "")
-      } else if(
-        is.null(benchmark_data$metadata$ref$dataset_options$gestational_age_to)) {
-        paste0(
-          c(
-            "≥ ",
-            format_integer(
-              benchmark_data$metadata$ref$dataset_options$gestational_age_from),
-            " w"),
-          collapse = "")
-      } else {
-        paste0(
-          c(
-            format_integer(
-              benchmark_data$metadata$ref$dataset_options$gestational_age_from),
-            " w - ",
-            format_integer(
-              benchmark_data$metadata$ref$dataset_options$gestational_age_to),
-            " w"),
-          collapse = "")
-      },
-    numberOfDepartments = format_integer(benchmark_data$n_departments$n_ref),
-    numberOfPatients = format_integer(benchmark_data$n_patients$total_ref),
-    numberOfAdmissions = format_integer(benchmark_data$n_enrollments$total_ref),
-    sumOfPatientDays = format_integer(benchmark_data$n_patient_days$total_ref),
-    averageSurveillancePeriod = format(
-      benchmark_data$n_patient_days$total_own / benchmark_data$n_patients$total_own,
-      digits = 2,
-      nsmall = 1,
-      scientific = FALSE),
-  numberOfSevereInfections = format_integer(
-     benchmark_data$incidence_density_rate_table |>
-       dplyr::filter(inf == "si") |>
-       dplyr::pull("n_ref")),
-   averageSevereInfectionsPerPatient = format(
-     (
-       (benchmark_data$incidence_density_rate_table |>
-          dplyr::filter(inf == "si") |>
-          dplyr::pull("n_ref")) /
-         benchmark_data$n_patients$total_ref),
-     digits = 2,
-     nsmall = 1,
-     scientific = FALSE)
-  )
+    c(
+      list(creationTimestamp = format(
+        benchmark_data$metadata$ref$calculated,
+        format = "%x %X", tz = "UTC", usetz = TRUE)),
+      format_dataset_resources(
+        benchmark_data$metadata$ref,
+        extract_counts(benchmark_data, "_ref"), sR)
+    )
   } else {
     NULL
   }

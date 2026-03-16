@@ -20,11 +20,11 @@ if(nrow(problems) < 1)
   stop("No problem detected")
 ```
 
-`{r} translations$header$createdAt`:
+`{r} sR$headerList$created`:
 
 :   `{r} format(Sys.time(), format = "%x %X", tz = "UTC", usetz = TRUE)`
 
-`{r} if(nrow(departments) > 1){translations$header$departments}else{translations$header$department}`:
+`{r} if(nrow(departments) > 1){sR$header$departments}else{sR$header$department}`:
 
 :   `{r} paste(departments |> pull(code) |> sort(), sep = ", ")`
 

@@ -36,10 +36,10 @@ if (!is.null(benchmark_data$infectious_agent_detection_rate_per_inf_type_table) 
       inf = dplyr::case_match(
         as.character(.data$inf),
         "all" ~ sR$total,
-        "bsi" ~ sR$bsi,
-        "nec" ~ sR$nec,
-        "ssi" ~ sR$ssi,
-        "hap" ~ sR$hap)) |>
+        "bsi" ~ sR$primary_sepsis_bsi_sc,
+        "nec" ~ sR$necrotising_enterocolitis_sc,
+        "ssi" ~ sR$surgical_site_infection_sc,
+        "hap" ~ sR$pneumonia_sc)) |>
     gt(rowname_col = "inf") |>
     sub_missing() |>
     gt::tab_options(
@@ -76,7 +76,7 @@ if (!is.null(benchmark_data$infectious_agent_detection_rate_per_inf_type_table) 
   if (has_reference) {
     tbl <- tbl |>
       tab_spanner(
-        label = sR$department_data,
+        label = sR$own_data_label,
         columns = c(sR$table_headers$n, sR$table_headers$rate),
         id = "department_data"
       ) |>

@@ -15,10 +15,10 @@ reference_data |>
     inf = dplyr::case_match(
       as.character(.data$inf),
       "all" ~ sR$total,
-      "bsi" ~ sR$bsi,
-      "nec" ~ sR$nec,
-      "ssi" ~ sR$ssi,
-      "hap" ~ sR$hap)) |>
+      "bsi" ~ sR$primary_sepsis_bsi_sc,
+      "nec" ~ sR$necrotising_enterocolitis_sc,
+      "ssi" ~ sR$surgical_site_infection_sc,
+      "hap" ~ sR$pneumonia_sc)) |>
   gt(rowname_col = "inf") |>
   sub_missing() |>
   gt::tab_options(

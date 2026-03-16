@@ -1,6 +1,6 @@
 ```{r}
 #| label: fig-bw
-#| fig-cap: !expr 'paste(sR$`fig-bw`$`fig-cap`[[1]], sprintf(sR$`fig-bw`$`fig-cap`[[2]]$`no-bnch`, sprintf("%i%s%s", 50L, sR$unit_separator, sR$gramm_abbreviation)), sprintf(sR$`fig-bw`$`fig-cap`[[3]]$`no-bnch`, sprintf("%i%s", 25L, sR$percent_symbol), sprintf("%i%s", 50L, sR$percent_symbol), sprintf("%i%s", 75L, sR$percent_symbol)))'
+#| fig-cap: !expr 'paste(sR$`fig-cap`[[1]]$`fig-bw`, sprintf(sR$`fig-cap`[[2]]$`no-bnch`, sprintf("%i%s%s", 50L, sR$unit_separator, sR$gramm_abbreviation)), sprintf(sR$`fig-cap`[[3]]$`no-bnch`, sprintf("%i%s", 25L, sR$percent_symbol), sprintf("%i%s", 50L, sR$percent_symbol), sprintf("%i%s", 75L, sR$percent_symbol)))'
 
 bw_scale_min <- reference_data$birth_weight_figure$scale$min
 bw_scale_max <- reference_data$birth_weight_figure$scale$max

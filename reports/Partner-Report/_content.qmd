@@ -143,7 +143,7 @@ include_localised("_risk-factors.Rmd")
 \FloatBarrier
 :::
 
-### `{r} sR$headings$surgical_procedures`
+### `{r} sR$surgical_procedures`
 
 ::: {.content-visible when-meta="includeIntroductionTexts"}
 ```{r}

@@ -39,9 +39,9 @@ if (!is.null(benchmark_data$secondary_bsi_rate_table) &&
     dplyr::mutate(
       Infection = dplyr::case_match(
         as.character(.data$event_type_key),
-        "nec" ~ sR$`tbl-secondary-bsi-rates`$nec,
-        "ssi" ~ sR$`tbl-secondary-bsi-rates`$ssi,
-        "hap" ~ sR$`tbl-secondary-bsi-rates`$hap),
+        "nec" ~ sR$necrotising_enterocolitis_sc,
+        "ssi" ~ sR$surgical_site_infection_sc,
+        "hap" ~ sR$pneumonia_sc),
       .keep = "unused") |>
     gt(rowname_col = "Infection") |>
     sub_missing() |>
@@ -100,7 +100,7 @@ if (!is.null(benchmark_data$secondary_bsi_rate_table) &&
         sR$table_headers$q3 ~ pct(10)
       ) |>
       tab_spanner(
-        label = sR$department_data,
+        label = sR$own_data_label,
         columns = c(
           sR$table_headers$n,
           sR$table_headers$rate),
