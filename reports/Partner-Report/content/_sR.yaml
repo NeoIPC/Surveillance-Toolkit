@@ -52,7 +52,6 @@ figure_interpretation:
     reference population.
 
 headerList:
-  averageSurveillancePeriod: Average surveillance period per patient
   benchmarkComparabilityHeader: Benchmark composition
   effectiveAnalysisPeriodFootnote: >
     The effective analysis period is the time span between the surveillance end
@@ -67,15 +66,11 @@ headerList:
     sufficient data from a single country is not available. This means that
     comparability may be limited due to different healthcare systems and
     resources available in different countries.
-  numberOfAdmissions: Number of patient admissions
-  numberOfDepartments: Number of units contributing at least one patient record
-  numberOfPatients: Number of patient records
   singleCountryBenchmarkHint: >
     The reference data presents information from neonatal units in a single
     country. While this provides a more relevant benchmark due to the relative
     homogeneity of the healthcare system, your unit's country differs from the
     reference country, which may affect comparability.
-  sumOfPatientDays: Sum of patient days
   wbClassMismatchAddendum: >
     Additionally, the World Bank income classifications differ between your data
     and the reference data (%s: %s; %s: %s), which may indicate even more
@@ -89,15 +84,10 @@ headings:
   device_associated_infections: Device-Associated Infections
   diagnostics: Diagnostics
   gestational_age_distribution: Gestational Age Distribution
-  infectious_agents: Infectious Agents
   infectious_agents_in_nosocomial_infections: >
     Infectious Agents Detected in Nosocomial Infections
-  introduction: Introduction
-  nosocomial_infections: Nosocomial Infections
-  patient_population: Patient Population
   presence_of_risk_and_protective_factors: Presence of Risk and Protective Factors in Your Unit
   resistant_pathogens: Resistant Pathogens
-  risk_and_protective_factors: Risk and Protective Factors
   secondary_bsi: Secondary Bloodstream Infections
   severe_infections_and_nec: >
     Severe Neonatal Infections and Necrotizing Enterocolitis

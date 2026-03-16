@@ -42,10 +42,11 @@ param(
     [Parameter()]
     [switch]$BackupDataset,
     [Parameter()]
+    [switch]$HideIntroductionTexts,
+    [Parameter()]
     [switch]$Quiet,
     [Parameter()]
     [ValidateSet(
-        'Header',
         'PatientPopulation',
         'NosocomialInfections',
         'InfectiousAgents',
@@ -63,7 +64,6 @@ param(
         'SurgicalProcedureRates'
     )]
     [string[]]$IncludeElements = @(
-        'Header',
         'PatientPopulation',
         'NosocomialInfections',
         'InfectiousAgents',
@@ -186,6 +186,7 @@ foreach ($name in @(
     $originalEnv[$name] = [Environment]::GetEnvironmentVariable($name, 'Process')
 }
 
+try {
 # Clear all auth env vars, then set only the resolved ones
 foreach ($name in @('NEOIPC_DHIS2_TOKEN', 'NEOIPC_DHIS2_USER',
                     'NEOIPC_DHIS2_PASSWORD', 'NEOIPC_DHIS2_SESSION_ID')) {
@@ -215,33 +216,58 @@ if ($ReportingCountries) { $commonParams.reportingCountries = ($ReportingCountri
 if ($ValidationExceptionFile) { $commonParams.validationExceptionFile = $ValidationExceptionFile }
 $commonParams.testUnitFilter = (-not $IncludeTestUnits)
 $commonParams.defaultPatientFilter = (-not $IncludeNonCorePatients)
+if ($HideIntroductionTexts.IsPresent) { $commonParams['includeIntroductionTexts'] = 'false' }
 
-# Map user-friendly element names to internal Quarto parameter names
+# Map user-friendly element names to internal Quarto metadata keys.
+# Each element can map to multiple keys (e.g. a section includes its text,
+# figures and tables together).
 $elementMapping = @{
-    'Header' = 'includeHeader'
-    'Introduction' = 'includeIntroductionTexts'
-    'PatientPopulation' = 'includeTextPatientPopulation'
-    'NosocomialInfections' = 'includeTextNosocomial'
-    'InfectiousAgents' = 'includeTextInfectiousAgents'
-    'RiskFactors' = 'includeTextRiskFactors'
-    'Surgery' = 'includeTextSurgery'
-    'BirthWeightDistribution' = 'includeBirthWeightFigure'
-    'GestationalAgeDistribution' = 'includeGestationalAgeFigure'
-    'IncidenceDensityRates' = 'includeIncidenceDensityTable'
-    'DeviceAssociatedRates' = 'includeDeviceAssociatedIncidenceDensityTable'
-    'AgentPerInfectionRates' = 'includeAgentPerInfectionRateTable'
-    'AntibioticResistanceRates' = 'includeResistantPathogenInfectionRateTable'
-    'InfectiousAgentDetectionRates' = 'includeInfectiousAgentDetectionRateTable'
-    'ResistanceTestRates' = 'includeAntibioticResistanceTestRateTable'
-    'RiskDensityRates' = 'includeRiskDensityRateTable'
-    'SurgicalProcedureRates' = 'includeSurgicalProcedureRateTable'
-    'SecondaryBloodstreamInfectionRates' = 'includeSecondaryBsiRateTable'
+    'Header'                            = @('includeHeader')
+    'PatientPopulation'                 = @('includeTextPatientPopulation',
+                                            'includeBirthWeightFigure',
+                                            'includeGestationalAgeFigure')
+    'NosocomialInfections'              = @('includeTextNosocomial',
+                                            'includeIncidenceDensityTable',
+                                            'includeDeviceAssociatedIncidenceDensityTable')
+    'InfectiousAgents'                  = @('includeTextInfectiousAgents',
+                                            'includeAgentPerInfectionRateTable',
+                                            'includeResistantPathogenInfectionRateTable')
+    'RiskFactors'                       = @('includeTextRiskFactors',
+                                            'includeRiskDensityRateTable')
+    'Surgery'                           = @('includeTextSurgery',
+                                            'includeSurgicalProcedureRateTable')
+    'BirthWeightDistribution'           = @('includeBirthWeightFigure')
+    'GestationalAgeDistribution'        = @('includeGestationalAgeFigure')
+    'IncidenceDensityRates'             = @('includeIncidenceDensityTable')
+    'DeviceAssociatedRates'             = @('includeDeviceAssociatedIncidenceDensityTable')
+    'AgentPerInfectionRates'            = @('includeAgentPerInfectionRateTable')
+    'AntibioticResistanceRates'         = @('includeResistantPathogenInfectionRateTable')
+    'InfectiousAgentDetectionRates'     = @('includeInfectiousAgentDetectionRateTable')
+    'ResistanceTestRates'               = @('includeAntibioticResistanceTestRateTable')
+    'RiskDensityRates'                  = @('includeRiskDensityRateTable')
+    'SurgicalProcedureRates'            = @('includeSurgicalProcedureRateTable')
+    'SecondaryBloodstreamInfectionRates' = @('includeSecondaryBsiRateTable')
 }
 
-# Convert user-friendly array to Quarto boolean parameters
+# Convert user-friendly array to Quarto boolean parameters.
+# Collect all metadata keys that should be true, then set everything else false.
+# Header is always included — it provides essential context for all other sections
+$commonParams['includeHeader'] = $true
+
+$enabledKeys = [System.Collections.Generic.HashSet[string]]::new()
+foreach ($element in $IncludeElements) {
+    if ($elementMapping.ContainsKey($element)) {
+        foreach ($key in $elementMapping[$element]) {
+            [void]$enabledKeys.Add($key)
+        }
+    }
+}
 foreach ($mapping in $elementMapping.GetEnumerator()) {
-    $includeValue = $IncludeElements -contains $mapping.Key
-    $commonParams[$mapping.Value] = $includeValue
+    foreach ($key in $mapping.Value) {
+        if ($key -ne 'includeHeader') {
+            $commonParams[$key] = $enabledKeys.Contains($key)
+        }
+    }
 }
 
 $errors = @()
@@ -271,14 +297,19 @@ try {
             if ($IncludeTestUnits) { $rArgs += '--includeTestUnits' }
             if ($IncludeNonCorePatients) { $rArgs += '--includeNonCorePatients' }
             if ($BackupDataset) { $rArgs += @('--backup-dataset', $backupPath) }
-            $rResult = & $rscriptCmd @rArgs 2>&1
-            if ($LASTEXITCODE -ne 0) {
-                $rResult | Write-Error
-                throw "Generate-Reference-Data failed with exit code $LASTEXITCODE."
-            } else {
-                $rResult | Write-Verbose
+            & $rscriptCmd @rArgs 2>&1 | ForEach-Object {
+                $s = "$_"
+                if ($s -eq 'System.Management.Automation.RemoteException') { $s = '' }
+                if ($s -match '^(Error|Fehler)') { Write-Error -Message $s }
+                elseif ($s -match 'WARNING') { Write-Warning $s }
+                else { Write-Verbose $s }
             }
-            $outputFiles += $jsonPath
+            if ($LASTEXITCODE -ne 0) {
+                throw "Generate-ReferenceData.R failed with exit code $LASTEXITCODE."
+            }
+            if (-not $jsonIntermediate) {
+                $outputFiles += $jsonPath
+            }
             Write-Verbose "Generated output: $jsonPath"
             if ($BackupDataset) {
                 $outputFiles += $backupPath
@@ -332,12 +363,11 @@ try {
                 $quartoArgs += $quartoArgsCommon
                 if ($PSCmdlet.ShouldProcess($outFile, "Render $format for $locale")) {
                     Write-Verbose "Rendering $format for $locale"
-                    $quartoResult = & $quartoCmd @quartoArgs 2>&1
-                    if ($LASTEXITCODE -ne 0) {
-                        $errors += $quartoResult
+                    $renderResult = Invoke-QuartoRender -Arguments $quartoArgs -Description "$format for $locale"
+                    if ($renderResult.Status -eq 'Error') {
+                        $errors += $renderResult.Messages
                         throw "Quarto render failed for $locale/$format."
                     }
-                    $quartoResult | Write-Verbose
                     $outputFiles += $outFile
                     Write-Verbose "Generated output: $outFile"
                 }
@@ -350,7 +380,6 @@ try {
 }
 catch {
     $errors += $_.Exception.Message
-    throw
 }
 finally {
     $completedAt = (Get-Date -AsUTC).ToString('o')
@@ -389,11 +418,22 @@ finally {
 
     Write-Progress -Activity 'Reference Report Build' -Completed
 
-    Write-Host "Build status: $status"
+    if ($status -eq 'failed') {
+        Write-Host "Build status: $status" -ForegroundColor Red
+    } else {
+        Write-Host "Build status: $status" -ForegroundColor Green
+    }
     Write-Host "Outputs:"
     $buildReport.outputs | ForEach-Object { Write-Host "  $_" }
     Write-Host "Build report: $buildReportPath"
 
+    if ($status -eq 'failed') {
+        exit 1
+    }
+}
+}
+finally {
+    # Guaranteed env var restore — even if the inner finally or exit throws
     foreach ($name in $originalEnv.Keys) {
         $originalValue = $originalEnv[$name]
         if ([string]::IsNullOrEmpty($originalValue)) {

@@ -33,10 +33,17 @@ fig-cap:
 gramm_abbreviation: "g"
 header:
   department: Department
+headings:
+  infectious_agents: Infectious Agents
+  introduction: Introduction
+  nosocomial_infections: Nosocomial Infections
+  patient_population: Patient Population
+  risk_and_protective_factors: Risk and Protective Factors
 headerList:
   allBirthweights: "All eligible birth weights"
   allGestationalAges: "All eligible gestational ages"
   and: " and "
+  averageSurveillancePeriod: Average surveillance period per patient
   birthweightFilter: "Birth weight filter"
   countries: Countries
   country: Country
@@ -46,7 +53,11 @@ headerList:
   gestationalAgeFilter: "Gestational age filter"
   ignoresInclusionCriteria: "ignores the NeoIPC Surveillance inclusion criteria."
   includesTestDepartments: "includes test units"
+  numberOfAdmissions: Number of patient admissions
+  numberOfDepartments: Number of units contributing at least one patient record
+  numberOfPatients: Number of patient records
   specialAnalysisHint: "This is a special analysis that"
+  sumOfPatientDays: Sum of patient days
 mrsa: "Methicillin-resistant Staphylococcus aureus (MRSA)"
 no_data: No data.
 not_available: Not available.

@@ -73,14 +73,14 @@ if(
   cat(sep = "\n", c("::: {.callout-note}", paste0(
     c(
     sR$headerList$specialAnalysisHint,
-    if(!testUnitFilter){
+    if(!params$testUnitFilter){
       paste0(sR$headerList$includesTestDepartments,
-      if(!defaultPatientFilter)
+      if(!params$defaultPatientFilter)
         sR$headerList$and
       else
         ".", collapse = "")
     },
-    if (!defaultPatientFilter)
+    if (!params$defaultPatientFilter)
       sR$headerList$ignoresInclusionCriteria
     ), collapse = " "),
     ":::"))

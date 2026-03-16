@@ -182,7 +182,8 @@ get_dataset_options <- function(
       birth_weight_to = birthWeightTo,
       gestational_age_from = gestationWeeksFrom,
       gestational_age_to = gestationWeeksTo,
-      country_filter = reportingCountries,
+      country_filter = if (!is.null(reportingCountries))
+        unlist(strsplit(reportingCountries, ",")),
       include_test_data = !dplyr::coalesce(testUnitFilter, TRUE),
       include_ineligible_patients = !dplyr::coalesce(defaultPatientFilter, TRUE),
       include_invalid_patients = get_validation_exceptions(

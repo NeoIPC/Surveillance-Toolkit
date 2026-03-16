@@ -342,6 +342,5 @@ if (is.null(referenceDataFile)) {
     dir.create(outputDir, recursive = TRUE, showWarnings = FALSE)
   }
   writeLines(json, referenceDataFile, useBytes = TRUE)
-  logVerbose("Reference data written to: ", referenceDataFile)
   logInfo("Reference data written to: ", referenceDataFile)
 }

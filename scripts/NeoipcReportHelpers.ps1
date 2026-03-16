@@ -271,9 +271,10 @@ function Invoke-QuartoRender {
     )
 
     $messages = [System.Collections.Generic.List[string]]::new()
+    $errorLines = [System.Collections.Generic.List[string]]::new()
     $skipRest = $false
-    $errorLine = ''
     $isError = $false
+    $inBacktrace = $false
 
     Write-Debug "Quarto command: quarto $($Arguments -join ' ')"
 
@@ -289,17 +290,24 @@ function Invoke-QuartoRender {
                 Write-Host "No problem detected." -ForegroundColor DarkYellow
                 $skipRest = $true
             }
+            elseif ($s -match '^Backtrace:') {
+                $inBacktrace = $true
+            }
+            elseif ($inBacktrace) {
+                # Silently collect backtrace lines (available in Messages)
+            }
+            elseif ($s -match '^\s*$') {
+                # skip blank lines in error block
+            }
             else {
-                if ($errorLine.Length -gt 0) {
-                    Write-Error -Message $errorLine
-                    $errorLine = ''
-                }
-                Write-Error -Message $s
+                $errorLines.Add($s) | Out-Null
+                Write-Host $s -ForegroundColor Red
             }
         }
         elseif ($s -match '^(Error)|(Fehler)') {
             $isError = $true
-            $errorLine = $s
+            $errorLines.Add($s) | Out-Null
+            Write-Host $s -ForegroundColor Red
         }
         elseif ($s -match "^(`e\[39m)?(`e\[33m)?WARNING") {
             $s | Write-Warning
@@ -319,6 +327,8 @@ function Invoke-QuartoRender {
         if ($exitCode -ne 0) {
             $messages.Add("Quarto exit code $exitCode") | Out-Null
         }
+        # Error details already streamed via Write-Host above.
+        # Full output (including backtrace) available in Messages.
     }
     else {
         $status = 'Success'
