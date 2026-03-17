@@ -6,11 +6,23 @@ param(
     [System.IO.DirectoryInfo]$SignatureImagePath,
     [ArgumentCompleter({
         param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
-        $cacheFile = Join-Path $PSScriptRoot '..' 'data' 'local' 'site-codes.txt'
+        . "$PSScriptRoot/NeoipcReportHelpers.ps1"
+        $serverKey = Get-NeoipcServerKey `
+            -Scheme $fakeBoundParameters['Dhis2Scheme'] `
+            -Hostname $fakeBoundParameters['Dhis2Hostname'] `
+            -Port $fakeBoundParameters['Dhis2Port'] `
+            -Path $fakeBoundParameters['Dhis2Path']
+        $cacheFile = Join-Path $PSScriptRoot '..' 'data' 'local' $serverKey 'site-codes.txt'
         if (Test-Path -LiteralPath $cacheFile) {
             Get-Content -LiteralPath $cacheFile |
                 Where-Object { $_ -like "$wordToComplete*" } |
                 Sort-Object
+        } else {
+            $cacheBase = Join-Path $PSScriptRoot '..' 'data' 'local'
+            Get-ChildItem -LiteralPath $cacheBase -Recurse -Filter 'site-codes.txt' -ErrorAction SilentlyContinue |
+                Get-Content |
+                Sort-Object -Unique |
+                Where-Object { $_ -like "$wordToComplete*" }
         }
     })]
     [Parameter(Mandatory, Position = 2, ParameterSetName = 'Acquire')]
@@ -43,7 +55,19 @@ param(
     [string]$Language = 'en',
     [Parameter(Position = 4, ParameterSetName = 'Acquire')]
     [Parameter(Position = 7, ParameterSetName = 'Pass')]
-    [string]$Token
+    [string]$Token,
+
+    [Parameter()]
+    [string]$Dhis2Scheme = $null,
+
+    [Parameter()]
+    [string]$Dhis2Hostname = $null,
+
+    [Parameter()]
+    [Nullable[int]]$Dhis2Port = $null,
+
+    [Parameter()]
+    [string]$Dhis2Path = $null
 )
 
 . "$PSScriptRoot/NeoipcReportHelpers.ps1"
@@ -72,7 +96,12 @@ $exitCode = 0
 try {
     Set-Location -LiteralPath $reportDir
     if ($DepartmentCode) {
-        $allSites = Get-NeoipcDepartments -Auth $auth
+        $deptArgs = @{ Auth = $auth }
+        if ($Dhis2Scheme) { $deptArgs.Scheme = $Dhis2Scheme }
+        if ($Dhis2Hostname) { $deptArgs.Hostname = $Dhis2Hostname }
+        if ($Dhis2Port) { $deptArgs.Port = $Dhis2Port }
+        if ($Dhis2Path) { $deptArgs.Path = $Dhis2Path }
+        $allSites = Get-NeoipcDepartments @deptArgs
 
         $sites = $allSites | Where-Object -FilterScript { foreach ($d in $DepartmentCode) { if ($_ -match $d) { return $true } } } | Sort-Object
 
@@ -80,6 +109,10 @@ try {
             Write-Host "Generating partner certificate for $site..."
             $outFile = "$([datetime]::Now.ToString('yyyy-MM-dd_HHmmss'))_NeoIPC-Surveillance-Partner-Certificate_$($site).$($Language).pdf"
             $quartoArgs = @('render', $quartoFile, '-P', "signatory:$Signatory", '-P', "signatureImagePath:$SignatureImagePath", '-P', "departmentCode:$site", '-o', $outFile)
+            if ($Dhis2Scheme) { $quartoArgs += @('-P', "dhis2Scheme:$Dhis2Scheme") }
+            if ($Dhis2Hostname) { $quartoArgs += @('-P', "dhis2Hostname:$Dhis2Hostname") }
+            if ($Dhis2Port) { $quartoArgs += @('-P', "dhis2Port:$Dhis2Port") }
+            if ($Dhis2Path) { $quartoArgs += @('-P', "dhis2Path:$Dhis2Path") }
             $result = Invoke-QuartoRender -Arguments $quartoArgs -Description "partner certificate for $site"
             $exitCode = [System.Math]::Max($result.ExitCode, $exitCode)
         }
@@ -88,6 +121,10 @@ try {
         Write-Host "Generating partner certificate for $HospitalName..."
         $outFile = "$([datetime]::Now.ToString('yyyy-MM-dd_HHmmss'))_NeoIPC-Surveillance-Partner-Certificate_$($HospitalName).$($Language).pdf"
         $quartoArgs = @('render', $quartoFile, '-P', "signatory:$Signatory", '-P', "signatureImagePath:$SignatureImagePath", '-P', "startYear:$StartYear", '-P', "endYear:$EndYear", '-P', "nPatients:$NumberOfPatients", '-P', "hospitalName:$HospitalName", '-o', $outFile)
+        if ($Dhis2Scheme) { $quartoArgs += @('-P', "dhis2Scheme:$Dhis2Scheme") }
+        if ($Dhis2Hostname) { $quartoArgs += @('-P', "dhis2Hostname:$Dhis2Hostname") }
+        if ($Dhis2Port) { $quartoArgs += @('-P', "dhis2Port:$Dhis2Port") }
+        if ($Dhis2Path) { $quartoArgs += @('-P', "dhis2Path:$Dhis2Path") }
         $result = Invoke-QuartoRender -Arguments $quartoArgs -Description "partner certificate for $HospitalName"
         $exitCode = $result.ExitCode
         exit $exitCode

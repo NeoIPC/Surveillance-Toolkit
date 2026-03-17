@@ -1,5 +1,14 @@
 {{< include _setup.qmd >}}
 
+```{r}
+#| include: false
+footer_tex <- sprintf("\\renewcommand{\\FooterText}{%s}", sR$h2020_funding_statement)
+```
+
+::: {.content-visible when-format="pdf"}
+`r footer_tex`
+:::
+
 ::: {.content-visible when-meta="includeHeader"}
 {{< include _header.qmd >}}
 

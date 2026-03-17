@@ -7,4 +7,3 @@ common.*.yaml
 content.*/
 *.tex
 !before-body.tex
-!translations.tex

@@ -1,7 +1,12 @@
-[CmdletBinding(SupportsShouldProcess = $true)]
+[CmdletBinding(SupportsShouldProcess = $true, DefaultParameterSetName = 'Online')]
 param(
-    [Parameter()]
+    [Parameter(ParameterSetName='Online')]
     [string]$Token,
+
+    [Parameter(ParameterSetName='DataFile', Mandatory, Position=0)]
+    [ValidateScript({ Test-Path -LiteralPath $_ })]
+    [string]$DataFile,
+
     [Parameter()]
     [ValidateSet('pdf','html','docx','json')]
     [string[]]$Formats = @('pdf'),
@@ -18,33 +23,46 @@ param(
     [string[]]$Locales = @('en'),
     [Parameter()]
     [string]$OutputDir = "${PSScriptRoot}/../reports/Reference-Report/_output",
-    [Parameter()]
+    [Parameter(ParameterSetName='Online')]
     [string]$ReportingPeriodFrom,
-    [Parameter()]
+    [Parameter(ParameterSetName='Online')]
     [string]$ReportingPeriodTo,
-    [Parameter()]
+    [Parameter(ParameterSetName='Online')]
     [int]$BirthWeightFrom,
-    [Parameter()]
+    [Parameter(ParameterSetName='Online')]
     [int]$BirthWeightTo,
-    [Parameter()]
+    [Parameter(ParameterSetName='Online')]
     [int]$GestationWeeksFrom,
-    [Parameter()]
+    [Parameter(ParameterSetName='Online')]
     [int]$GestationWeeksTo,
-    [Parameter()]
+    [Parameter(ParameterSetName='Online')]
     [ValidateSet('DE','EE','GR','IT','ZA','ES','CH','GB')]
     [string[]]$ReportingCountries,
-    [Parameter()]
+    [Parameter(ParameterSetName='Online')]
     [string]$ValidationExceptionFile,
-    [Parameter()]
+    [Parameter(ParameterSetName='Online')]
     [switch]$IncludeTestUnits,
-    [Parameter()]
+    [Parameter(ParameterSetName='Online')]
     [switch]$IncludeNonCorePatients,
-    [Parameter()]
+    [Parameter(ParameterSetName='Online')]
     [switch]$BackupDataset,
     [Parameter()]
     [switch]$HideIntroductionTexts,
     [Parameter()]
     [switch]$Quiet,
+
+    [Parameter(ParameterSetName='Online')]
+    [string]$Dhis2Scheme = $null,
+
+    [Parameter(ParameterSetName='Online')]
+    [string]$Dhis2Hostname = $null,
+
+    [Parameter(ParameterSetName='Online')]
+    [Nullable[int]]$Dhis2Port = $null,
+
+    [Parameter(ParameterSetName='Online')]
+    [string]$Dhis2Path = $null,
+
     [Parameter()]
     [ValidateSet(
         'PatientPopulation',
@@ -82,6 +100,12 @@ param(
 
 . "$PSScriptRoot/NeoipcReportHelpers.ps1"
 
+$isDataFileMode = $PSCmdlet.ParameterSetName -eq 'DataFile'
+
+if ($isDataFileMode -and ($Formats -contains 'json')) {
+    throw "The 'json' format is not supported with -DataFile. The data file is already JSON."
+}
+
 if ($Quiet) {
     $VerbosePreference = 'SilentlyContinue'
     $DebugPreference = 'SilentlyContinue'
@@ -106,9 +130,12 @@ if (-not $quartoCmd) {
     throw 'Quarto CLI not found in PATH.'
 }
 
-$rscriptCmd = Get-Command -Name Rscript -ErrorAction SilentlyContinue
-if (-not $rscriptCmd) {
-    throw 'Rscript not found in PATH.'
+$rscriptCmd = $null
+if (-not $isDataFileMode) {
+    $rscriptCmd = Get-Command -Name Rscript -ErrorAction SilentlyContinue
+    if (-not $rscriptCmd) {
+        throw 'Rscript not found in PATH.'
+    }
 }
 
 $formats = $Formats | ForEach-Object { $_ -split ',' } |
@@ -141,39 +168,57 @@ foreach ($locale in $locales) {
     }
 }
 
-$needsJson = $false
 $wantsJson = $formats -contains 'json'
 $renderFormats = $formats | Where-Object { $_ -ne 'json' }
 $renderCount = $renderFormats.Count * $locales.Count
-if ($wantsJson -or $renderCount -gt 1 -or $BackupDataset) {
-    $needsJson = $true
+
+if ($isDataFileMode) {
+    # DataFile mode: data already exists, resolve its path
+    $resolvedDataFile = (Resolve-Path -LiteralPath $DataFile).Path
+    $jsonPath = $resolvedDataFile
+    $needsJson = $false
+    $jsonIntermediate = $false
+    $backupPath = $null
+    $paramHashSource = [ordered]@{ dataFile = $resolvedDataFile }
+    $paramHashJson = ($paramHashSource | ConvertTo-Json -Depth 100 -Compress)
+    $paramHash = [System.BitConverter]::ToString(
+        [System.Security.Cryptography.SHA256]::Create().ComputeHash(
+            [System.Text.Encoding]::UTF8.GetBytes($paramHashJson)
+        )
+    ).Replace('-', '').ToLowerInvariant()
+    Write-Verbose "DataFile mode: rendering from $resolvedDataFile"
+} else {
+    $needsJson = $false
+    if ($wantsJson -or $renderCount -gt 1 -or $BackupDataset) {
+        $needsJson = $true
+    }
+
+    $jsonPath = Join-Path $outputDirPath "$scriptTimestamp.Reference-Report.json"
+    $jsonIntermediate = $needsJson -and (-not $wantsJson)
+    $backupPath = Join-Path $outputDirPath "$scriptTimestamp.Reference-Report.dataset.json.7z"
+
+    $paramHashSource = [ordered]@{
+        reportingPeriodFrom = $ReportingPeriodFrom
+        reportingPeriodTo = $ReportingPeriodTo
+        birthWeightFrom = $BirthWeightFrom
+        birthWeightTo = $BirthWeightTo
+        gestationWeeksFrom = $GestationWeeksFrom
+        gestationWeeksTo = $GestationWeeksTo
+        reportingCountries = $ReportingCountries
+        includeTestUnits = [bool]$IncludeTestUnits
+        includeNonCorePatients = [bool]$IncludeNonCorePatients
+        backupDataset = [bool]$BackupDataset
+        validationExceptionFile = $ValidationExceptionFile
+    }
+    $paramHashJson = ($paramHashSource | ConvertTo-Json -Depth 100 -Compress)
+    $paramHash = [System.BitConverter]::ToString(
+        [System.Security.Cryptography.SHA256]::Create().ComputeHash(
+            [System.Text.Encoding]::UTF8.GetBytes($paramHashJson)
+        )
+    ).Replace('-', '').ToLowerInvariant()
 }
 
-$jsonPath = Join-Path $outputDirPath "$scriptTimestamp.Reference-Report.json"
-$jsonIntermediate = $needsJson -and (-not $wantsJson)
-$backupPath = Join-Path $outputDirPath "$scriptTimestamp.Reference-Report.dataset.json.7z"
-
-$paramHashSource = [ordered]@{
-    reportingPeriodFrom = $ReportingPeriodFrom
-    reportingPeriodTo = $ReportingPeriodTo
-    birthWeightFrom = $BirthWeightFrom
-    birthWeightTo = $BirthWeightTo
-    gestationWeeksFrom = $GestationWeeksFrom
-    gestationWeeksTo = $GestationWeeksTo
-    reportingCountries = $ReportingCountries
-    includeTestUnits = [bool]$IncludeTestUnits
-    includeNonCorePatients = [bool]$IncludeNonCorePatients
-    backupDataset = [bool]$BackupDataset
-    validationExceptionFile = $ValidationExceptionFile
-}
-$paramHashJson = ($paramHashSource | ConvertTo-Json -Depth 100 -Compress)
-$paramHash = [System.BitConverter]::ToString(
-    [System.Security.Cryptography.SHA256]::Create().ComputeHash(
-        [System.Text.Encoding]::UTF8.GetBytes($paramHashJson)
-    )
-).Replace('-', '').ToLowerInvariant()
-
-$auth = Resolve-NeoipcAuth -Token $Token
+$auth = if (-not $isDataFileMode) { Resolve-NeoipcAuth -Token $Token } else { $null }
 
 $originalEnv = @{}
 foreach ($name in @(
@@ -187,22 +232,24 @@ foreach ($name in @(
 }
 
 try {
-# Clear all auth env vars, then set only the resolved ones
-foreach ($name in @('NEOIPC_DHIS2_TOKEN', 'NEOIPC_DHIS2_USER',
-                    'NEOIPC_DHIS2_PASSWORD', 'NEOIPC_DHIS2_SESSION_ID')) {
-    [Environment]::SetEnvironmentVariable($name, $null, 'Process')
-}
-if ($auth.AuthType -eq 'Token') {
-    $env:NEOIPC_DHIS2_TOKEN = $auth.Token
-} elseif ($auth.AuthType -eq 'Basic') {
-    $env:NEOIPC_DHIS2_USER = $auth.Username
-    $env:NEOIPC_DHIS2_PASSWORD = Get-NeoipcAuthPassword -Auth $auth
-}
+if (-not $isDataFileMode) {
+    # Clear all auth env vars, then set only the resolved ones
+    foreach ($name in @('NEOIPC_DHIS2_TOKEN', 'NEOIPC_DHIS2_USER',
+                        'NEOIPC_DHIS2_PASSWORD', 'NEOIPC_DHIS2_SESSION_ID')) {
+        [Environment]::SetEnvironmentVariable($name, $null, 'Process')
+    }
+    if ($auth.AuthType -eq 'Token') {
+        $env:NEOIPC_DHIS2_TOKEN = $auth.Token
+    } elseif ($auth.AuthType -eq 'Basic') {
+        $env:NEOIPC_DHIS2_USER = $auth.Username
+        $env:NEOIPC_DHIS2_PASSWORD = Get-NeoipcAuthPassword -Auth $auth
+    }
 
-if ($BackupDataset -and [string]::IsNullOrWhiteSpace($env:NEOIPC_BACKUP_PASSWORD)) {
-    $secureBackupPassword = Read-Host -Prompt 'Backup password' -AsSecureString
-    $env:NEOIPC_BACKUP_PASSWORD =
-        [System.Net.NetworkCredential]::new('', $secureBackupPassword).Password
+    if ($BackupDataset -and [string]::IsNullOrWhiteSpace($env:NEOIPC_BACKUP_PASSWORD)) {
+        $secureBackupPassword = Read-Host -Prompt 'Backup password' -AsSecureString
+        $env:NEOIPC_BACKUP_PASSWORD =
+            [System.Net.NetworkCredential]::new('', $secureBackupPassword).Password
+    }
 }
 
 $commonParams = @{}
@@ -297,6 +344,10 @@ try {
             if ($IncludeTestUnits) { $rArgs += '--includeTestUnits' }
             if ($IncludeNonCorePatients) { $rArgs += '--includeNonCorePatients' }
             if ($BackupDataset) { $rArgs += @('--backup-dataset', $backupPath) }
+            if ($Dhis2Scheme) { $rArgs += @('--scheme', $Dhis2Scheme) }
+            if ($Dhis2Hostname) { $rArgs += @('--host', $Dhis2Hostname) }
+            if ($Dhis2Port) { $rArgs += @('--port', $Dhis2Port) }
+            if ($Dhis2Path) { $rArgs += @('--path', $Dhis2Path) }
             & $rscriptCmd @rArgs 2>&1 | ForEach-Object {
                 $s = "$_"
                 if ($s -eq 'System.Management.Automation.RemoteException') { $s = '' }
@@ -357,8 +408,14 @@ try {
                         }
                     }
                 }
-                if ($needsJson) {
+                if ($needsJson -or $isDataFileMode) {
                     $quartoArgs += @('-P', "referenceDataFile:$jsonPath")
+                }
+                if (-not $isDataFileMode) {
+                    if ($Dhis2Scheme) { $quartoArgs += @('-P', "dhis2Scheme:$Dhis2Scheme") }
+                    if ($Dhis2Hostname) { $quartoArgs += @('-P', "dhis2Hostname:$Dhis2Hostname") }
+                    if ($Dhis2Port) { $quartoArgs += @('-P', "dhis2Port:$Dhis2Port") }
+                    if ($Dhis2Path) { $quartoArgs += @('-P', "dhis2Path:$Dhis2Path") }
                 }
                 $quartoArgs += $quartoArgsCommon
                 if ($PSCmdlet.ShouldProcess($outFile, "Render $format for $locale")) {

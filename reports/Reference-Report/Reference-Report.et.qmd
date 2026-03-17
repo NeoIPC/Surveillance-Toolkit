@@ -14,6 +14,10 @@ params:
   testUnitFilter: true
   defaultPatientFilter: true
   validationExceptionFile: NULL
+  dhis2Scheme: NULL
+  dhis2Hostname: NULL
+  dhis2Port: NULL
+  dhis2Path: NULL
 ---
 
 ```{r}

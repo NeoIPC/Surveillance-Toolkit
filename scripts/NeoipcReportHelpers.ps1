@@ -101,6 +101,45 @@ function Get-NeoipcAuthPassword {
 
 <#
 .SYNOPSIS
+Build a filesystem-safe key from DHIS2 connection parameters.
+
+.DESCRIPTION
+Returns a string like "https_neoipc.charite.de_api" derived from scheme,
+hostname, port, and path. Used to partition per-server cache files.
+Falls back to neoipcr defaults for any null parameter.
+
+.PARAMETER Scheme
+URL scheme. Falls back to 'https'.
+
+.PARAMETER Hostname
+DHIS2 server hostname. Falls back to 'neoipc.charite.de'.
+
+.PARAMETER Port
+TCP port. Omitted from key when null.
+
+.PARAMETER Path
+API base path. Falls back to '/api'.
+#>
+function Get-NeoipcServerKey {
+    [CmdletBinding()]
+    param(
+        [Parameter()] [string]$Scheme = $null,
+        [Parameter()] [string]$Hostname = $null,
+        [Parameter()] [Nullable[int]]$Port = $null,
+        [Parameter()] [string]$Path = $null
+    )
+
+    $s = if ($Scheme) { $Scheme } else { 'https' }
+    $h = if ($Hostname) { $Hostname } else { 'neoipc.charite.de' }
+    $p = if ($Path) { $Path } else { '/api' }
+    $key = "${s}_${h}"
+    if ($Port) { $key += "_${Port}" }
+    $key += "_$($p.TrimStart('/').Replace('/', '_'))"
+    $key
+}
+
+<#
+.SYNOPSIS
 Fetch and filter NeoIPC department codes from DHIS2.
 
 .PARAMETER Auth
@@ -108,6 +147,18 @@ Authentication hashtable from Resolve-NeoipcAuth.
 
 .PARAMETER SiteCodeFilter
 Regex pattern to filter department codes. Default: '.+' (all).
+
+.PARAMETER Scheme
+URL scheme. Defaults to 'https' when not specified.
+
+.PARAMETER Hostname
+DHIS2 server hostname. Defaults to 'neoipc.charite.de' when not specified.
+
+.PARAMETER Port
+TCP port. Not included in URL when null.
+
+.PARAMETER Path
+API base path. Defaults to '/api' when not specified.
 
 .OUTPUTS
 Sorted array of department code strings.
@@ -119,10 +170,20 @@ function Get-NeoipcDepartments {
         [hashtable]$Auth,
 
         [Parameter()]
-        [string]$SiteCodeFilter = '.+'
+        [string]$SiteCodeFilter = '.+',
+
+        [Parameter()] [string]$Scheme = $null,
+        [Parameter()] [string]$Hostname = $null,
+        [Parameter()] [Nullable[int]]$Port = $null,
+        [Parameter()] [string]$Path = $null
     )
 
-    $deptsUrl = 'https://neoipc.charite.de/api/organisationUnitGroups.json?paging=false&filter=code:eq:NEO_DEPARTMENT&fields=organisationUnits%5Bcode%5D'
+    $effectiveScheme = if ($Scheme) { $Scheme } else { 'https' }
+    $effectiveHost = if ($Hostname) { $Hostname } else { 'neoipc.charite.de' }
+    $effectivePath = if ($Path) { $Path } else { '/api' }
+    $baseUrl = "${effectiveScheme}://${effectiveHost}"
+    if ($Port) { $baseUrl += ":$Port" }
+    $deptsUrl = "${baseUrl}${effectivePath}/organisationUnitGroups.json?paging=false&filter=code:eq:NEO_DEPARTMENT&fields=organisationUnits%5Bcode%5D"
 
     $invokeParams = @{
         Method      = 'Get'
@@ -150,7 +211,7 @@ function Get-NeoipcDepartments {
         $sites = $sites | Where-Object { $_ -match $SiteCodeFilter } | Sort-Object
     }
     catch {
-        throw "Failed to fetch department list from DHIS2: $($_.Exception.Message)"
+        throw "Failed to fetch department list from DHIS2 ($deptsUrl): $($_.Exception.Message)"
     }
 
     return $sites

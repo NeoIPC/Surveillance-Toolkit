@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NeoIPC Surveillance Reports 0.9\n"
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-03-16 09:03+0100\n"
+"POT-Creation-Date: 2026-03-17 07:46+0100\n"
 "PO-Revision-Date: 2026-01-26 22:18+0100\n"
 "Last-Translator: Brar Piening <brar.piening@charite.de>\n"
 "Language-Team: none\n"
@@ -161,6 +161,13 @@ msgstr "Todas las edades gestacionales elegibles"
 msgid " and "
 msgstr " y "
 
+#. type: Hash Value: headerList averageSurveillancePeriod
+#: reports/common.yaml:1
+#, fuzzy, no-wrap
+#| msgid "Average surveillance period per patient:\n"
+msgid "Average surveillance period per patient"
+msgstr "Periodo medio de seguimiento por paciente:\n"
+
 #. type: Hash Value: headerList birthweightFilter
 #: reports/common.yaml:1
 #, no-wrap
@@ -216,11 +223,69 @@ msgstr "ignora los criterios de inclusión de NeoIPC Surveillance."
 msgid "includes test units"
 msgstr "incluye unidades de prueba"
 
+#. type: Hash Value: headerList numberOfAdmissions
+#: reports/common.yaml:1
+#, fuzzy, no-wrap
+#| msgid "Number of patient admissions:\n"
+msgid "Number of patient admissions"
+msgstr "Número de ingresos de pacientes:\n"
+
+#. type: Hash Value: headerList numberOfDepartments
+#: reports/common.yaml:1
+#, fuzzy, no-wrap
+#| msgid "Number of departments contributing at least one patient record:\n"
+msgid "Number of units contributing at least one patient record"
+msgstr "Número de departamentos que aportan al menos un registro de paciente:\n"
+
+#. type: Hash Value: headerList numberOfPatients
+#: reports/common.yaml:1
+#, fuzzy, no-wrap
+#| msgid "Number of patient records:\n"
+msgid "Number of patient records"
+msgstr "Número de registros de pacientes:\n"
+
 #. type: Hash Value: headerList specialAnalysisHint
 #: reports/common.yaml:1
 #, no-wrap
 msgid "This is a special analysis that"
 msgstr "Este es un análisis especial que"
+
+#. type: Hash Value: headerList sumOfPatientDays
+#: reports/common.yaml:1
+#, fuzzy, no-wrap
+#| msgid "Sum of patient days:\n"
+msgid "Sum of patient days"
+msgstr "Suma de días de hospitalización:\n"
+
+#. type: Hash Value: headings infectious_agents
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Infectious Agents"
+msgstr "Agentes infecciosos"
+
+#. type: Hash Value: headings introduction
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Introduction"
+msgstr "Introducción"
+
+#. type: Hash Value: headings nosocomial_infections
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Nosocomial Infections"
+msgstr "Infecciones nosocomiales"
+
+#. type: Hash Value: headings patient_population
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Patient Population"
+msgstr "Población de pacientes"
+
+#. type: Hash Value: headings risk_and_protective_factors
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Risk and Protective Factors"
+msgstr "Factores de riesgo y de protección"
 
 #. type: Hash Value: mrsa
 #: reports/common.yaml:1
@@ -937,23 +1002,6 @@ msgstr ""
 msgid "NeoIPC Surveillance team"
 msgstr "Equipo de vigilancia NeoIPC"
 
-#. type: Hash Value: format pdf include-in-header file
-#: reports/Partner-Report/_quarto-en.yml:1
-#: reports/Reference-Report/_quarto-en.yml:1
-#, no-wrap
-msgid "translations.tex"
-msgstr "translations.es.tex"
-
-#. type: Hash Value: format pdf include-in-header text
-#: reports/Partner-Report/_quarto-en.yml:1
-#, no-wrap
-msgid ""
-"\\cfoot*{%\n"
-"  \\raggedright\n"
-"  \\hspace{1.6cm}\\parbox{0.8\\textwidth}{\\FooterText}\n"
-"}\n"
-msgstr ""
-
 #. type: Array Element: format pdf keywords
 #: reports/Partner-Report/_quarto-en.yml:1
 #: reports/Partner-Certificate/_quarto-en.yml:1
@@ -1043,13 +1091,6 @@ msgstr ""
 msgid "Your unit shows a wider distribution (larger interquartile range), indicating more heterogeneous patient characteristics compared to the reference population.\n"
 msgstr ""
 
-#. type: Hash Value: headerList averageSurveillancePeriod
-#: reports/Partner-Report/content/_sR.yaml:1
-#, fuzzy, no-wrap
-#| msgid "Average surveillance period per patient:\n"
-msgid "Average surveillance period per patient"
-msgstr "Periodo medio de seguimiento por paciente:\n"
-
 #. type: Hash Value: headerList benchmarkComparabilityHeader
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
@@ -1074,39 +1115,11 @@ msgstr ""
 msgid "The reference data aggregates information from neonatal units in several countries. While ideally a single-country benchmark would be preferable, aggregating data across multiple countries is pragmatically necessary when sufficient data from a single country is not available. This means that comparability may be limited due to different healthcare systems and resources available in different countries.\n"
 msgstr ""
 
-#. type: Hash Value: headerList numberOfAdmissions
-#: reports/Partner-Report/content/_sR.yaml:1
-#, fuzzy, no-wrap
-#| msgid "Number of patient admissions:\n"
-msgid "Number of patient admissions"
-msgstr "Número de ingresos de pacientes:\n"
-
-#. type: Hash Value: headerList numberOfDepartments
-#: reports/Partner-Report/content/_sR.yaml:1
-#, fuzzy, no-wrap
-#| msgid "Number of departments contributing at least one patient record:\n"
-msgid "Number of units contributing at least one patient record"
-msgstr "Número de departamentos que aportan al menos un registro de paciente:\n"
-
-#. type: Hash Value: headerList numberOfPatients
-#: reports/Partner-Report/content/_sR.yaml:1
-#, fuzzy, no-wrap
-#| msgid "Number of patient records:\n"
-msgid "Number of patient records"
-msgstr "Número de registros de pacientes:\n"
-
 #. type: Hash Value: headerList singleCountryBenchmarkHint
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "The reference data presents information from neonatal units in a single country. While this provides a more relevant benchmark due to the relative homogeneity of the healthcare system, your unit's country differs from the reference country, which may affect comparability.\n"
 msgstr ""
-
-#. type: Hash Value: headerList sumOfPatientDays
-#: reports/Partner-Report/content/_sR.yaml:1
-#, fuzzy, no-wrap
-#| msgid "Sum of patient days:\n"
-msgid "Sum of patient days"
-msgstr "Suma de días de hospitalización:\n"
 
 #. type: Hash Value: headerList wbClassMismatchAddendum
 #: reports/Partner-Report/content/_sR.yaml:1
@@ -1154,40 +1167,12 @@ msgstr ""
 msgid "Gestational Age Distribution"
 msgstr "Filtro de edad gestacional"
 
-#. type: Title ##
-#: reports/Partner-Report/content/_sR.yaml:1
-#: reports/Reference-Report/content/_infectious_agents.Rmd:1
-#, no-wrap
-msgid "Infectious Agents"
-msgstr "Agentes infecciosos"
-
 #. type: Hash Value: headings infectious_agents_in_nosocomial_infections
 #: reports/Partner-Report/content/_sR.yaml:1
 #, fuzzy, no-wrap
 #| msgid "Infectious agents detected in nosocomial infections"
 msgid "Infectious Agents Detected in Nosocomial Infections\n"
 msgstr "Agentes infecciosos detectados en infecciones nosocomiales"
-
-#. type: Title #
-#: reports/Partner-Report/content/_sR.yaml:1
-#: reports/Reference-Report/content/_introduction.Rmd:1
-#, no-wrap
-msgid "Introduction"
-msgstr "Introducción"
-
-#. type: Title #
-#: reports/Partner-Report/content/_sR.yaml:1
-#: reports/Reference-Report/content/_nosocomial_infections.Rmd:1
-#, no-wrap
-msgid "Nosocomial Infections"
-msgstr "Infecciones nosocomiales"
-
-#. type: Title #
-#: reports/Partner-Report/content/_sR.yaml:1
-#: reports/Reference-Report/content/_patient_population.Rmd:1
-#, no-wrap
-msgid "Patient Population"
-msgstr "Población de pacientes"
 
 #. type: Hash Value: headings presence_of_risk_and_protective_factors
 #: reports/Partner-Report/content/_sR.yaml:1
@@ -1202,13 +1187,6 @@ msgstr "Factores de riesgo y de protección"
 #| msgid "Resistant pathogen infection rate"
 msgid "Resistant Pathogens"
 msgstr "Tasa de infección por patógenos resistentes"
-
-#. type: Title #
-#: reports/Partner-Report/content/_sR.yaml:1
-#: reports/Reference-Report/content/_risk_and_protective_factors.Rmd:1
-#, no-wrap
-msgid "Risk and Protective Factors"
-msgstr "Factores de riesgo y de protección"
 
 #. type: Hash Value: headings secondary_bsi
 #: reports/Partner-Report/content/_sR.yaml:1
@@ -3963,17 +3941,6 @@ msgstr "Berlín,"
 msgid "3.25"
 msgstr "3,25"
 
-#. type: Hash Value: format pdf include-in-header text
-#: reports/Reference-Report/_quarto-en.yml:1
-#, no-wrap
-msgid ""
-"\\cfoot*{%\n"
-"  \\raggedright\n"
-"  \\hspace{1.5cm}\\FooterLineOne\\\\\n"
-"  \\hspace{1.5cm}\\FooterLineTwo\n"
-"}\n"
-msgstr ""
-
 #. type: Array Element: format pdf keywords
 #: reports/Reference-Report/_quarto-en.yml:1
 #, no-wrap
@@ -4023,138 +3990,62 @@ msgstr "Este informe presenta datos de unidades neonatales de un solo país. Est
 msgid "%s: The aggregated number of days the risk/protective factor was present in all infants."
 msgstr "%s: Número total de días en los que el factor de riesgo/protección estuvo presente en todos los bebés."
 
-#. type: newcommand{#4}
-#: reports/Reference-Report/translations.tex:4
-msgid "This project has received funding from the European Union’s Horizon 2020 research and innovation"
-msgstr "Este proyecto ha recibido financiación del programa de investigación e innovación Horizonte 2020 de la Unión Europea"
-
-#. type: newcommand{#4}
-#: reports/Reference-Report/translations.tex:4
-msgid "programme under grant agreement No 965328."
-msgstr "programa en virtud del acuerdo de subvención n.º 965328."
-
 #. type: Plain text
-#: reports/Reference-Report/content/_introduction.Rmd:4
+#: reports/Reference-Report/content/_introduction.Rmd:1
 #, no-wrap
 msgid "This document is a reference report on the NeoIPC Surveillance. It contains information relating to nosocomial infections, their causative infectious agents, and the associated risk and protective factors in high-risk neonates which was collected by partners from multiple neonatology departments participating in the NeoIPC Surveillance. The following numbers provide an overview of the current data set. If you are interested in the surveillance definitions, data collection methods and sheets, please refer to the [surveillance resources on the NeoIPC website](https://neoipc.org/surveillance/resources/).\n"
 msgstr "Este documento es un informe de referencia sobre la vigilancia NeoIPC. Contiene información relacionada con las infecciones nosocomiales, sus agentes infecciosos causantes y los factores de riesgo y protección asociados en neonatos de alto riesgo, recopilada por socios de múltiples departamentos de neonatología que participan en la vigilancia NeoIPC. Las siguientes cifras ofrecen una visión general del conjunto de datos actual. Si está interesado en las definiciones de vigilancia, los métodos de recopilación de datos y las hojas de datos, consulte los recursos de vigilancia en el sitio web de NeoIPC.\n"
 
 #. type: Plain text
-#: reports/Reference-Report/content/_introduction.Rmd:6
-#, no-wrap
-msgid "Number of departments contributing at least one patient record:\n"
-msgstr "Número de departamentos que aportan al menos un registro de paciente:\n"
-
-#. type: Plain text
-#: reports/Reference-Report/content/_introduction.Rmd:8
-#, no-wrap
-msgid ":   `r dR$numberOfDepartments`\n"
-msgstr ":   `r dR$numberOfDepartments`\n"
-
-#. type: Plain text
-#: reports/Reference-Report/content/_introduction.Rmd:10
-#, no-wrap
-msgid "Number of patient records:\n"
-msgstr "Número de registros de pacientes:\n"
-
-#. type: Plain text
-#: reports/Reference-Report/content/_introduction.Rmd:12
-#, no-wrap
-msgid ":   `r dR$numberOfPatients`\n"
-msgstr ":   `r dR$numberOfPatients`\n"
-
-#. type: Plain text
-#: reports/Reference-Report/content/_introduction.Rmd:14
-#, no-wrap
-msgid "Number of patient admissions:\n"
-msgstr "Número de ingresos de pacientes:\n"
-
-#. type: Plain text
-#: reports/Reference-Report/content/_introduction.Rmd:16
-#, no-wrap
-msgid ":   `r dR$numberOfAdmissions`\n"
-msgstr ":   `r dR$numberOfAdmissions`\n"
-
-#. type: Plain text
-#: reports/Reference-Report/content/_introduction.Rmd:18
-#, no-wrap
-msgid "Sum of patient days:\n"
-msgstr "Suma de días de hospitalización:\n"
-
-#. type: Plain text
-#: reports/Reference-Report/content/_introduction.Rmd:20
-#, no-wrap
-msgid ":   `r dR$sumOfPatientDays`\n"
-msgstr ":   `r dR$sumOfPatientDays`\n"
-
-#. type: Plain text
-#: reports/Reference-Report/content/_introduction.Rmd:22
-#, no-wrap
-msgid "Average surveillance period per patient:\n"
-msgstr "Periodo medio de seguimiento por paciente:\n"
-
-#. type: Plain text
-#: reports/Reference-Report/content/_introduction.Rmd:23
-#, no-wrap
-msgid ":   `r dR$averageSurveillancePeriod` days\n"
-msgstr ":   `r dR$averageSurveillancePeriod` días\n"
-
-#. type: Plain text
-#: reports/Reference-Report/content/_patient_population.Rmd:3
+#: reports/Reference-Report/content/_patient_population.Rmd:1
 #, no-wrap
 msgid "As the process, although supported by various tools, relies on the collection, interpretation and monitoring of information by qualified professionals, NeoIPC surveillance is currently being targeted at the most common nosocomial infections in high-risk neonates, in order to make it sustainable in a continuous manner in as many settings as possible. This means that patients with a birth weight below 1500 g and/or a gestational age below 32 weeks at the time of birth are included into the surveillance database if they are admitted to a participating neonatology department within the first 120 days of life. In combination with the filter settings specified above, this results in the composition of the patient population shown in @fig-bw and @fig-ga.\n"
 msgstr "Dado que el proceso, aunque cuenta con el apoyo de diversas herramientas, se basa en la recopilación, interpretación y seguimiento de la información por parte de profesionales cualificados, la vigilancia NeoIPC se centra actualmente en las infecciones nosocomiales más comunes en neonatos de alto riesgo, con el fin de que sea sostenible de forma continua en el mayor número posible de entornos. Esto significa que los pacientes con un peso al nacer inferior a 1500 g y/o una edad gestacional inferior a 32 semanas en el momento del nacimiento se incluyen en la base de datos de vigilancia si son ingresados en un departamento de neonatología participante en los primeros 120 días de vida. En combinación con los ajustes de filtro especificados anteriormente, esto da como resultado la composición de la población de pacientes que se muestra en @fig-bw y @fig-ga.\n"
 
 #. type: Plain text
-#: reports/Reference-Report/content/_nosocomial_infections.Rmd:4
+#: reports/Reference-Report/content/_nosocomial_infections.Rmd:2
 #, no-wrap
 msgid "Nosocomial infections represent the primary endpoint of NeoIPC surveillance. In @tbl-incidence-density-rates, the incidence densities of sepsis/BSI, pneumonia and necrotising enterocolitis, as well as the combined endpoint 'severe infection', are displayed. Overall `r dR$numberOfSevereInfections` severe infections were recorded in `r dR$numberOfPatients` infants resulting in an average number of `r dR$averageSevereInfectionsPerPatient` infections per patient.\n"
 msgstr "Las infecciones nosocomiales representan el criterio de valoración principal de la vigilancia del NeoIPC. En @tbl-incidence-density-rates se muestran las densidades de incidencia de sepsis/BSI, neumonía y enterocolitis necrotizante, así como el criterio de valoración combinado «infección grave». En total, se registraron `r dR$numberOfSevereInfections` infecciones graves en `r dR$numberOfPatients` lactantes, lo que supone una media de `r dR$averageSevereInfectionsPerPatient` infecciones por paciente.\n"
 
 #. type: Plain text
-#: reports/Reference-Report/content/_nosocomial_infections.Rmd:5
+#: reports/Reference-Report/content/_nosocomial_infections.Rmd:3
 #, no-wrap
 msgid "Device-associated infections can be found in @tbl-device-associated-incidence-density-rates.\n"
 msgstr "Las infecciones asociadas a dispositivos se pueden consultar en @tbl-device-associated-incidence-density-rates.\n"
 
 #. type: Plain text
-#: reports/Reference-Report/content/_infectious_agents.Rmd:4
+#: reports/Reference-Report/content/_infectious_agents.Rmd:2
 #, no-wrap
 msgid "Epidemiology of the infectious agents causing nosocomial infections in neonatology is complex and there is a lot of potential for bias. While low diagnostic sensitivity (low blood volume) and specificity (contamination) are a general problem in the neonatal population, the lack of availability of some or all means of microbiological diagnostics, or the lack of financial resources can have a strong effect on the detection rates in resource-constrained settings.\n"
 msgstr "La epidemiología de los agentes infecciosos que causan infecciones nosocomiales en neonatología es compleja y existe un gran potencial de sesgo. Si bien la baja sensibilidad diagnóstica (bajo volumen sanguíneo) y la especificidad (contaminación) son un problema general en la población neonatal, la falta de disponibilidad de algunos o todos los medios de diagnóstico microbiológico, o la falta de recursos financieros, pueden tener un fuerte efecto en las tasas de detección en entornos con recursos limitados.\n"
 
 #. type: Plain text
-#: reports/Reference-Report/content/_infectious_agents.Rmd:6
+#: reports/Reference-Report/content/_infectious_agents.Rmd:4
 #, no-wrap
 msgid "<!-- When comparing data with the information on pathogens presented in @tbl-agent-per-infection-rate and information on drug resistance in @tbl-abr-infection-rate, please also have a look at the infectious agent detection rates presented in @tbl-infectious-agent-detection-rate and the antibiotic resistance test rates in @tbl-resistance-test-rate. -->\n"
 msgstr "<!-- Al comparar los datos con la información sobre patógenos presentada en @tbl-agent-per-infection-rate y la información sobre resistencia a los medicamentos en @tbl-abr-infection-rate, consulte también las tasas de detección de agentes infecciosos presentadas en @tbl-infectious-agent-detection-rate y las tasas de pruebas de resistencia a los antibióticos en @tbl-resistance-test-rate. -->\n"
 
 #. type: Plain text
-#: reports/Reference-Report/content/_infectious_agents.Rmd:7
+#: reports/Reference-Report/content/_infectious_agents.Rmd:5
 #, no-wrap
 msgid "In total, `r dR$numberOfInfectiousAgents` infectious agents were detected in the `r dR$numberOfInfectionsWithAgent` infections that were reported to have yielded at least one agent from either the primary infection and/or the secondary bloodstream infection resulting from it (@tbl-agent-per-infection-rate). These `r dR$numberOfInfectionsWithAgent` diagnostic-positive infections out of `r dR$overallNumberOfInfections` overall infections represent an Infectious Agent Detection Rate of `r dR$infectiousAgentDetectionRate` per 100 infections (@tbl-infectious-agent-detection-rate).\n"
 msgstr "En total, se detectaron `r dR$numberOfInfectiousAgents` agentes infecciosos en las `r dR$numberOfInfectionsWithAgent` infecciones que, según se informó, habían producido al menos un agente, ya fuera de la infección primaria o de la infección secundaria del torrente sanguíneo resultante de ella (@tbl-agent-per-infection-rate). Estas `r dR$numberOfInfectionsWithAgent` infecciones con diagnóstico positivo de un total de `r dR$overallNumberOfInfections` infecciones representan una tasa de detección de agentes infecciosos del `r dR$infectiousAgentDetectionRate` por cada 100 infecciones (@tbl-infectious-agent-detection-rate).\n"
 
 #. type: Plain text
-#: reports/Reference-Report/content/_risk_and_protective_factors.Rmd:3
+#: reports/Reference-Report/content/_risk_and_protective_factors.Rmd:1
 #, no-wrap
 msgid "Next to the inherent risk factors gestational age and birth weight there are also a number of expositional factors that influence the risk of an infant to acquire a multi-drug-resistant pathogen or to develop an infection. @tbl-risk-density-rates shows the presence of these factors in the NeoIPC Surveillance population.\n"
 msgstr "Además de los factores de riesgo inherentes, como la edad gestacional y el peso al nacer, también hay una serie de factores de exposición que influyen en el riesgo de que un bebé contraiga un patógeno multirresistente o desarrolle una infección. @tbl-risk-density-rates muestra la presencia de estos factores en la población de vigilancia del NeoIPC.\n"
 
-#. type: Title ##
-#: reports/Reference-Report/content/_surgery.Rmd:1
-#, no-wrap
-msgid "Surgery"
-msgstr "Cirugía"
-
 #. type: Plain text
-#: reports/Reference-Report/content/_surgery.Rmd:4
+#: reports/Reference-Report/content/_surgery.Rmd:2
 #, no-wrap
 msgid "`r dR$numberOfSurgicalDepartments` of the partner departments in this dataset (`r dR$proportionOfSurgicalDepartments`) recorded a total of `r dR$numberOfSurgicalProcedures` surgical procedures performed on `r dR$numberOfSurgicalPatients` neonates, resulting in an average number of `r dR$numberOfSurgicalProceduresPerPatient` operations per surgical patient during the surveillance period.\n"
 msgstr "`r dR$numberOfSurgicalDepartments` de los departamentos asociados a este conjunto de datos (`r dR$proportionOfSurgicalDepartments` %) registraron un total de `r dR$numberOfSurgicalProcedures` procedimientos quirúrgicos realizados a `r dR$numberOfSurgicalPatients` neonatos, lo que supone una media de `r dR$numberOfSurgicalProceduresPerPatient` operaciones por paciente quirúrgico durante el periodo de vigilancia.\n"
 
 #. type: Plain text
-#: reports/Reference-Report/content/_surgery.Rmd:5
+#: reports/Reference-Report/content/_surgery.Rmd:3
 #, no-wrap
 msgid "Due to the low number of surgical site infections in this dataset (n = `r dR$numberOfSurgicalSiteInfections`) we are not currently calculating their infection rates, but @tbl-surgical-procedure-rates provides an overview of the categories of procedures performed on neonates.\n"
 msgstr "Debido al bajo número de infecciones del sitio quirúrgico en este conjunto de datos (n = `r dR$numberOfSurgicalSiteInfections`), actualmente no estamos calculando sus tasas de infección, pero @tbl-surgical-procedure-rates ofrece una visión general de las categorías de procedimientos realizados en neonatos.\n"
@@ -5696,6 +5587,71 @@ msgstr ""
 #, no-wrap
 msgid "![The Next and Previous buttons in the event timeline of the Tracked Entity Instance Dashboard](img/fig-event-timeline-full.png){#fig-event-timeline-full fig-alt=\"A screenshot of the Tracked Entity Instance Dashboard with the Next and Previous buttons in the event timeline highlighted\"}\n"
 msgstr ""
+
+#, fuzzy, no-wrap
+#~| msgid "translations.tex"
+#~ msgid "../common/translations.tex"
+#~ msgstr "translations.es.tex"
+
+#, fuzzy
+#~| msgid "This project has received funding from the European Union’s Horizon 2020 research and%sinnovation programme under grant agreement No 965328."
+#~ msgid "This project has received funding from the European Union's Horizon 2020 research and innovation programme under grant agreement No 965328."
+#~ msgstr "Este proyecto ha recibido financiación del programa de investigación e innovación Horizonte%s2020 de la Unión Europea en virtud del acuerdo de subvención n.º 965328."
+
+#, fuzzy
+#~| msgid "This project has received funding from the European Union’s Horizon 2020 research and%sinnovation programme under grant agreement No 965328."
+#~ msgid "This project has received funding from the European Union’s Horizon 2020 research and innovation programme under grant agreement No 965328."
+#~ msgstr "Este proyecto ha recibido financiación del programa de investigación e innovación Horizonte%s2020 de la Unión Europea en virtud del acuerdo de subvención n.º 965328."
+
+#~ msgid "This project has received funding from the European Union’s Horizon 2020 research and innovation"
+#~ msgstr "Este proyecto ha recibido financiación del programa de investigación e innovación Horizonte 2020 de la Unión Europea"
+
+#~ msgid "programme under grant agreement No 965328."
+#~ msgstr "programa en virtud del acuerdo de subvención n.º 965328."
+
+#, no-wrap
+#~ msgid "Number of departments contributing at least one patient record:\n"
+#~ msgstr "Número de departamentos que aportan al menos un registro de paciente:\n"
+
+#, no-wrap
+#~ msgid ":   `r dR$numberOfDepartments`\n"
+#~ msgstr ":   `r dR$numberOfDepartments`\n"
+
+#, no-wrap
+#~ msgid "Number of patient records:\n"
+#~ msgstr "Número de registros de pacientes:\n"
+
+#, no-wrap
+#~ msgid ":   `r dR$numberOfPatients`\n"
+#~ msgstr ":   `r dR$numberOfPatients`\n"
+
+#, no-wrap
+#~ msgid "Number of patient admissions:\n"
+#~ msgstr "Número de ingresos de pacientes:\n"
+
+#, no-wrap
+#~ msgid ":   `r dR$numberOfAdmissions`\n"
+#~ msgstr ":   `r dR$numberOfAdmissions`\n"
+
+#, no-wrap
+#~ msgid "Sum of patient days:\n"
+#~ msgstr "Suma de días de hospitalización:\n"
+
+#, no-wrap
+#~ msgid ":   `r dR$sumOfPatientDays`\n"
+#~ msgstr ":   `r dR$sumOfPatientDays`\n"
+
+#, no-wrap
+#~ msgid "Average surveillance period per patient:\n"
+#~ msgstr "Periodo medio de seguimiento por paciente:\n"
+
+#, no-wrap
+#~ msgid ":   `r dR$averageSurveillancePeriod` days\n"
+#~ msgstr ":   `r dR$averageSurveillancePeriod` días\n"
+
+#, no-wrap
+#~ msgid "Surgery"
+#~ msgstr "Cirugía"
 
 #, no-wrap
 #~ msgid "Primary sepsis/BSI"

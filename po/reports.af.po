@@ -1,141 +1,140 @@
-# Translations for the NeoIPC Surveillance Reports
-# Copyright (C) 2025 Charité – Universitätsmedizin Berlin
-# This file is distributed under the Creative Commons Attribution 4.0 International license
-# Automatically generated, 2025.
+# Afrikaans translations for NeoIPC Surveillance Reports package
+# Copyright (C) 2026 CharitÃ© â UniversitÃ¤tsmedizin Berlin
+# This file is distributed under the same license as the NeoIPC Surveillance Reports package.
+# Automatically generated, 2026.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: NeoIPC Surveillance Reports 0.9\n"
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
 "POT-Creation-Date: 2026-03-17 07:46+0100\n"
-"PO-Revision-Date: 2026-01-26 22:19+0100\n"
-"Last-Translator: Brar Piening <brar.piening@charite.de>\n"
+"PO-Revision-Date: 2026-03-16 08:36+0100\n"
+"Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
-"Language: et\n"
+"Language: af\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. type: Hash Value: 3gcr
 #: reports/common.yaml:1
 #, no-wrap
 msgid "3^rd^ gen. cephalosporin resistance (3GCR)"
-msgstr "3. põlvkonna tsefalosporiiniresistentsus (3GCR)"
+msgstr ""
 
 #. type: Hash Value: car
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Carbapenem resistance (CARBR)"
-msgstr "Karbapeneemiresistentsus (CARBR)"
+msgstr ""
 
 #. type: Hash Value: cor
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Colistin resistance (COLR)"
-msgstr "Kolistiiniresistentsus (COLR)"
+msgstr ""
 
 #. type: Hash Value: countryNames Estonia
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Estonia"
-msgstr "Eesti"
+msgstr ""
 
 #. type: Hash Value: countryNames Germany
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Germany"
-msgstr "Saksamaa"
+msgstr ""
 
 #. type: Hash Value: countryNames Greece
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Greece"
-msgstr "Kreeka"
+msgstr ""
 
 #. type: Hash Value: countryNames Italy
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Italy"
-msgstr "Itaalia"
+msgstr ""
 
 #. type: Hash Value: countryNames SouthAfrica
 #: reports/common.yaml:1
 #, no-wrap
 msgid "South Africa"
-msgstr "Lõuna-Aafrika"
+msgstr ""
 
 #. type: Hash Value: countryNames Spain
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Spain"
-msgstr "Hispaania"
+msgstr ""
 
 #. type: Hash Value: countryNames Switzerland
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Switzerland"
-msgstr "Šveits"
+msgstr ""
 
 #. type: Hash Value: countryNames UnitedKingdom
 #: reports/common.yaml:1
 #, no-wrap
 msgid "United Kingdom"
-msgstr "Ühendkuningriik"
+msgstr ""
 
 #. type: Hash Value: day
 #: reports/common.yaml:1
 #, no-wrap
 msgid "day"
-msgstr "päev"
+msgstr ""
 
 #. type: Hash Value: digit_group_separator
 #: reports/common.yaml:1
 #, no-wrap
 msgid " "
-msgstr " "
+msgstr ""
 
 #. type: Hash Value: fig-cap fig-bw
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Distribution of birth weights of the infants included in this report."
-msgstr "Käesolevas aruandes käsitletud imikute sünnikaalude jaotus."
+msgstr ""
 
 #. type: Hash Value: fig-cap fig-ga
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Distribution of gestational ages of the infants included in this report."
-msgstr "Käesolevas aruandes käsitletud imikute gestatsioonilise vanuse jaotus."
+msgstr ""
 
 #. type: Hash Value: fig-cap bnch
 #: reports/common.yaml:1
 #, no-wrap
 msgid "A is a histogram in %s steps with a density curve of your own unit’s data and a density curve of the reference data and B are two boxplots, one of your own unit’s data and one of the reference data."
-msgstr "A on histogramm %s astmes, millel on teie üksuse andmete tiheduskõver ja võrdlusandmete tiheduskõver, ning B on kaks kastdiagrammi, üks teie üksuse andmetest ja teine võrdlusandmetest."
+msgstr ""
 
 #. type: Hash Value: fig-cap no-bnch
 #: reports/common.yaml:1
 #, no-wrap
 msgid "A is a histogram in %s steps with a density curve and B is a boxplot."
-msgstr "A on %s sammuga histogramm tiheduskõveraga ja B on kastdiagramm."
+msgstr ""
 
 #. type: Hash Value: fig-cap bnch
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Vertical lines in the boxplots represent the %s, %s and %s quantiles, the diamonds represent the pooled arithmetic means."
-msgstr "Kastdiagrammide vertikaalsed jooned tähistavad kvantiile %s, %s ja %s, rombid tähistavad koondatud aritmeetilisi keskmisi."
+msgstr ""
 
 #. type: Hash Value: fig-cap no-bnch
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Vertical lines in the boxplot represent the %s, %s and %s quantiles, the diamond represents the pooled arithmetic mean."
-msgstr "Kastdiagrammi vertikaalsed jooned tähistavad %s, %s ja %s kvantiile, romb tähistab koondatud aritmeetilist keskmist."
+msgstr ""
 
 #. type: Hash Value: gramm_abbreviation
 #: reports/common.yaml:1
 #, no-wrap
 msgid "g"
-msgstr "g"
+msgstr ""
 
 #. type: Hash Value: header department
 #: reports/common.yaml:1
@@ -147,151 +146,145 @@ msgstr ""
 #: reports/common.yaml:1
 #, no-wrap
 msgid "All eligible birth weights"
-msgstr "Kõik sobivad sünnikaalud"
+msgstr ""
 
 #. type: Hash Value: headerList allGestationalAges
 #: reports/common.yaml:1
 #, no-wrap
 msgid "All eligible gestational ages"
-msgstr "Kõik sobivad raseduse kestused"
+msgstr ""
 
 #. type: Hash Value: headerList and
 #: reports/common.yaml:1
 #, no-wrap
 msgid " and "
-msgstr " ja "
+msgstr ""
 
 #. type: Hash Value: headerList averageSurveillancePeriod
 #: reports/common.yaml:1
-#, fuzzy, no-wrap
-#| msgid "Average surveillance period per patient:\n"
+#, no-wrap
 msgid "Average surveillance period per patient"
-msgstr "Keskmine jälgimisperiood ühe patsiendi kohta:\n"
+msgstr ""
 
 #. type: Hash Value: headerList birthweightFilter
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Birth weight filter"
-msgstr "Sünnikaalu filter"
+msgstr ""
 
 #. type: Hash Value: headerList countries
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Countries"
-msgstr "Riigid"
+msgstr ""
 
 #. type: Hash Value: headerList country
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Country"
-msgstr "Riik"
+msgstr ""
 
 #. type: Hash Value: headerList created
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Created"
-msgstr "Loomise kuupäev"
+msgstr ""
 
 #. type: Hash Value: headerList dataUpTo
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Data up to"
-msgstr "Andmed kuni"
+msgstr ""
 
 #. type: Hash Value: headerList effectiveAnalysisPeriod
 #: reports/common.yaml:1
-#, fuzzy, no-wrap
-#| msgid "Analysis period"
+#, no-wrap
 msgid "Effective analysis period"
-msgstr "Analüüsiperiood"
+msgstr ""
 
 #. type: Hash Value: headerList gestationalAgeFilter
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Gestational age filter"
-msgstr "Raseduse kestuse filter"
+msgstr ""
 
 #. type: Hash Value: headerList ignoresInclusionCriteria
 #: reports/common.yaml:1
 #, no-wrap
 msgid "ignores the NeoIPC Surveillance inclusion criteria."
-msgstr "ei võta arvesse NeoIPC Surveillance kaasamise kriteeriume."
+msgstr ""
 
 #. type: Hash Value: headerList includesTestDepartments
 #: reports/common.yaml:1
 #, no-wrap
 msgid "includes test units"
-msgstr "sisaldab testüksusi"
+msgstr ""
 
 #. type: Hash Value: headerList numberOfAdmissions
 #: reports/common.yaml:1
-#, fuzzy, no-wrap
-#| msgid "Number of patient admissions:\n"
+#, no-wrap
 msgid "Number of patient admissions"
-msgstr "Patsientide vastuvõtmiste arv:\n"
+msgstr ""
 
 #. type: Hash Value: headerList numberOfDepartments
 #: reports/common.yaml:1
-#, fuzzy, no-wrap
-#| msgid "Number of departments contributing at least one patient record:\n"
+#, no-wrap
 msgid "Number of units contributing at least one patient record"
-msgstr "Vähemalt ühe patsiendi andmeid esitanud osakondade arv:\n"
+msgstr ""
 
 #. type: Hash Value: headerList numberOfPatients
 #: reports/common.yaml:1
-#, fuzzy, no-wrap
-#| msgid "Number of patient records:\n"
+#, no-wrap
 msgid "Number of patient records"
-msgstr "Patsiendiandmete arv:\n"
+msgstr ""
 
 #. type: Hash Value: headerList specialAnalysisHint
 #: reports/common.yaml:1
 #, no-wrap
 msgid "This is a special analysis that"
-msgstr "See on spetsiaalne analüüs, mis"
+msgstr ""
 
 #. type: Hash Value: headerList sumOfPatientDays
 #: reports/common.yaml:1
-#, fuzzy, no-wrap
-#| msgid "Sum of patient days:\n"
+#, no-wrap
 msgid "Sum of patient days"
-msgstr "Patsientide päevade summa:\n"
+msgstr ""
 
 #. type: Hash Value: headings infectious_agents
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Infectious Agents"
-msgstr "Nakkusetekitajad"
+msgstr ""
 
 #. type: Hash Value: headings introduction
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Introduction"
-msgstr "Sissejuhatus"
+msgstr ""
 
 #. type: Hash Value: headings nosocomial_infections
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Nosocomial Infections"
-msgstr "Haiglanakkused"
+msgstr ""
 
 #. type: Hash Value: headings patient_population
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Patient Population"
-msgstr "Patsientide populatsioon"
+msgstr ""
 
 #. type: Hash Value: headings risk_and_protective_factors
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Risk and Protective Factors"
-msgstr "Riskitegurid ja kaitsvad tegurid"
+msgstr ""
 
 #. type: Hash Value: mrsa
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Methicillin-resistant Staphylococcus aureus (MRSA)"
-msgstr "Metitsilliiniresistentne Staphylococcus aureus (MRSA)"
+msgstr ""
 
 #. type: Hash Value: no_data
 #: reports/common.yaml:1
@@ -309,202 +302,199 @@ msgstr ""
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Other"
-msgstr "Muud"
+msgstr ""
 
 #. type: Hash Value: patient_days
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Patient days"
-msgstr "Patsiendi päevad"
+msgstr ""
 
 #. type: Hash Value: percent_symbol
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%"
-msgstr "%"
+msgstr ""
 
 #. type: Hash Value: si
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Severe infection"
-msgstr "Raske infektsioon"
+msgstr ""
 
 #. type: Hash Value: surgical_procedures
 #: reports/common.yaml:1
-#, fuzzy, no-wrap
-#| msgid "Surgical Procedure Rate"
+#, no-wrap
 msgid "Surgical Procedures"
-msgstr "Kirurgiliste protseduuride määr"
+msgstr ""
 
 #. type: Hash Value: table_headers n
 #: reports/common.yaml:1
 #, no-wrap
 msgid "N"
-msgstr "N"
+msgstr ""
 
 #. type: Hash Value: table_headers pooled
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Pooled"
-msgstr "Kogutud"
+msgstr ""
 
 #. type: Hash Value: table_headers q1
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Q₁"
-msgstr "Q₁"
+msgstr ""
 
 #. type: Hash Value: table_headers q2
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Q₂"
-msgstr "Q₂"
+msgstr ""
 
 #. type: Hash Value: table_headers q3
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Q₃"
-msgstr "Q₃"
+msgstr ""
 
 #. type: Hash Value: table_headers rate
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Rate"
-msgstr "Määr"
+msgstr ""
 
 #. type: Hash Value: tbl-abr-infection-rate n_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The aggregated number of antibiotic resistant pathogens in all infections."
-msgstr "%s: Kõikide infektsioonide puhul antibiootikumiresistentsete patogeenide koguarv."
+msgstr ""
 
 #. type: Hash Value: tbl-abr-infection-rate no_data
 #: reports/common.yaml:1
-#, fuzzy, no-wrap
-#| msgid "%s: The resistant pathogen infection rate calculated across all infants from all departments."
+#, no-wrap
 msgid "No resistant pathogen infection data available for this report settings."
-msgstr "%s: Kõigi osakondade kõigi imikute seas arvutatud resistentsete patogeenide nakatumise määr."
+msgstr ""
 
 #. type: Hash Value: tbl-abr-infection-rate pooled_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The resistant pathogen infection rate calculated across all infants from all departments."
-msgstr "%s: Kõigi osakondade kõigi imikute seas arvutatud resistentsete patogeenide nakatumise määr."
+msgstr ""
 
 #. type: Hash Value: tbl-abr-infection-rate quartile_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the resistant pathogen infection rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected infections with an agents is greater than or equal to one according to the pooled resistant pathogen infection rate."
-msgstr "%s, %s, %s: partnerosakondade resistentsete patogeenide nakatumise määrade kvartiilid (%s, %s ja %s kvantiilid). Need kvartiilid kuvatakse ainult siis, kui nimetajas osalevate osakondade arv on vähemalt viis ja kui keskmine eeldatav nakatumiste arv ühe patogeeni puhul on vähemalt üks vastavalt koondatud resistentsete patogeenide nakatumise määrale."
+msgstr ""
 
 #. type: Hash Value: tbl-abr-infection-rate rate_denominator
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Number of infections where a pathogen was detected"
-msgstr "Patogeeni avastatud nakkuste arv"
+msgstr ""
 
 #. type: Hash Value: tbl-abr-infection-rate rate_name
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Resistant pathogen infection rate"
-msgstr "Resistentse patogeeni nakatumise määr"
+msgstr ""
 
 #. type: Hash Value: tbl-abr-infection-rate rate_numerator
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Number of antibiotic resistant pathogens in infections"
-msgstr "Infektsioonides esinevate antibiootikumiresistentsete patogeenide arv"
+msgstr ""
 
 #. type: Hash Value: tbl-abr-infection-rate tbl-cap
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Nosocomial infections with resistant pathogens"
-msgstr "Resistentsete patogeenidega haiglanakkused"
+msgstr ""
 
 #. type: Hash Value: tbl-agent-per-infection-rate n_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The aggregated number of infectious agents in all infections."
-msgstr "%s: Kõigi nakkuste nakkusetekitajate koguarv."
+msgstr ""
 
 #. type: Hash Value: tbl-agent-per-infection-rate no_data
 #: reports/common.yaml:1
-#, fuzzy, no-wrap
-#| msgid "No of infections with agent"
+#, no-wrap
 msgid "No infectious agent data available for this report settings."
-msgstr "Nakkusetekitajaga nakatumiste arv"
+msgstr ""
 
 #. type: Hash Value: tbl-agent-per-infection-rate pooled_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The Agent-per-Infection Rate calculated across all infants from all departments."
-msgstr "%s: nakkusetekitaja esinemissagedus, mis on arvutatud kõigi osakondade kõigi imikute kohta."
+msgstr ""
 
 #. type: Hash Value: tbl-agent-per-infection-rate quartile_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Agent-per-Infection Rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected agents detected in infections is greater than or equal to one according to the pooled Agent-per-Infection Rate."
-msgstr "%s, %s, %s: partnerosakondade nakkusetekitajate arvu nakkuse kohta kvartiilid (%s, %s ja %s kvantiilid). Need kvartiilid kuvatakse ainult juhul, kui nimetajas osalevate osakondade arv on vähemalt viis ja kui nakkuste puhul avastatud nakkusetekitajate oodatav keskmine arv on vähemalt üks koondatud nakkusetekitajate arvu nakkuse kohta järgi."
+msgstr ""
 
 #. type: Hash Value: tbl-agent-per-infection-rate rate_denominator
 #: reports/common.yaml:1
 #, no-wrap
 msgid "No of infections where an infectious agent was detected"
-msgstr "No of infections where an infectious agent was detected"
+msgstr ""
 
 #. type: Hash Value: tbl-agent-per-infection-rate rate_name
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Agent-per-Infection Rate"
-msgstr "Agent-per-Infection Rate"
+msgstr ""
 
 #. type: Hash Value: tbl-agent-per-infection-rate rate_numerator
 #: reports/common.yaml:1
 #, no-wrap
 msgid "No of infectious agents that were detected in infections"
-msgstr "No of infectious agents that were detected in infections"
+msgstr ""
 
 #. type: Hash Value: tbl-agent-per-infection-rate tbl-cap
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Infectious agents detected in nosocomial infections"
-msgstr "Haiglanakkuste puhul avastatud nakkusetekitajad"
+msgstr ""
 
 #. type: Hash Value: tbl-device-associated-incidence-density-rates dev_ass_incidence_density_rate
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Device-Associated Incidence Density Rate"
-msgstr "Seadmega seotud haigestumise tihedus"
+msgstr ""
 
 #. type: Hash Value: tbl-device-associated-incidence-density-rates grp_vc
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Vascular catheter associated sepsis / bloodstream infection"
-msgstr "Veresoonte kateetriga seotud sepsis / vereringe infektsioon"
+msgstr ""
 
 #. type: Hash Value: tbl-device-associated-incidence-density-rates grp_vs
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Ventilatory support associated pneumonia"
-msgstr "Ventilatsioonitoega seotud kopsupõletik"
+msgstr ""
 
 #. type: Hash Value: tbl-device-associated-incidence-density-rates n_dev_ass_inf
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Number of device-associated infections"
-msgstr "Seadmega seotud infektsioonide arv"
+msgstr ""
 
 #. type: Hash Value: tbl-device-associated-incidence-density-rates n_dev_days
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Device days"
-msgstr "Seadme kasutamispäevad"
+msgstr ""
 
 #. type: Hash Value: tbl-device-associated-incidence-density-rates n_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The aggregated number of device-associated infections in all infants."
-msgstr "%s: Kõigi imikute seadmetega seotud infektsioonide koguarv."
+msgstr ""
 
 #. type: Hash Value: tbl-device-associated-incidence-density-rates no_data
 #: reports/common.yaml:1
@@ -516,147 +506,145 @@ msgstr ""
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The Device-Associated Incidence Density Rate calculated across all infants from all departments."
-msgstr "%s: seadmetega seotud haigestumise tihedusmäär, mis on arvutatud kõigi osakondade kõigi imikute kohta."
+msgstr ""
 
 #. type: Hash Value: tbl-device-associated-incidence-density-rates quartile_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Device-Associated Incidence Density Rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected infections is greater than or equal to one according to the pooled Device-Associated Incidence Density Rate."
-msgstr "%s, %s, %s: Partnerosakondade seadmetega seotud infektsioonide esinemissageduse kvartiilid (%s, %s ja %s kvantiilid). Need kvartiilid kuvatakse ainult juhul, kui nimetaja moodustavate osakondade arv on vähemalt viis ja kui oodatavate infektsioonide mediaanarv on vähemalt üks koondatud seadmetega seotud infektsioonide esinemissageduse järgi."
+msgstr ""
 
 #. type: Hash Value: tbl-device-associated-incidence-density-rates tbl-cap
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Incidence Density Rates of device-associated infections"
-msgstr "Seadmetega seotud infektsioonide esinemissagedus"
+msgstr ""
 
 #. type: Hash Value: tbl-device-associated-incidence-density-rates vs
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Any ventilatory support"
-msgstr "Mis tahes ventilatsioonitoetus"
+msgstr ""
 
 #. type: Hash Value: tbl-incidence-density-rates grp_si
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Primary sepsis/BSI/Pneumonia"
-msgstr "Esmane sepsis/BSI/pneumoonia"
+msgstr ""
 
 #. type: Hash Value: tbl-incidence-density-rates incidence_density_rate
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Incidence Density Rate"
-msgstr "Haigestumise tihedus"
+msgstr ""
 
 #. type: Hash Value: tbl-incidence-density-rates n_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The aggregated number of infections in all infants."
-msgstr "%s: Kõigi imikute nakkuste koguarv."
+msgstr ""
 
 #. type: Hash Value: tbl-incidence-density-rates n_inf
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Number of infections"
-msgstr "Nakkuste arv"
+msgstr ""
 
 #. type: Hash Value: tbl-incidence-density-rates no_data
 #: reports/common.yaml:1
-#, fuzzy, no-wrap
-#| msgid "No of infections with agent"
+#, no-wrap
 msgid "No infection data available for this report settings."
-msgstr "Nakkusetekitajaga nakatumiste arv"
+msgstr ""
 
 #. type: Hash Value: tbl-incidence-density-rates pooled_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The Incidence Density Rate calculated across all infants from all departments."
-msgstr "%s: kõikide osakondade kõikide imikute haigestumise tihedus."
+msgstr ""
 
 #. type: Hash Value: tbl-incidence-density-rates quartile_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Incidence Density Rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected infections is greater than or equal to one according to the pooled Incidence Density Rate."
-msgstr "%s, %s, %s: partnerosakondade esinemissageduse kvartiilid (%s, %s ja %s kvantiilid). Need kvartiilid kuvatakse ainult juhul, kui nimetajas osalevate osakondade arv on vähemalt viis ja kui koondatud esinemissageduse alusel on oodatavate nakkuste keskmine arv vähemalt üks."
+msgstr ""
 
 #. type: Hash Value: tbl-incidence-density-rates si_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: Combines the outcomes primary sepsis/BSI and pneumonia"
-msgstr "%s: ühendab esmase sepsise/BSI ja kopsupõletiku tulemused"
+msgstr ""
 
 #. type: Hash Value: tbl-incidence-density-rates tbl-cap
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Incidence Density Rates of nosocomial infections"
-msgstr "Haiglanakkuste esinemissagedus"
+msgstr ""
 
 #. type: Hash Value: tbl-infectious-agent-detection-rate n_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The aggregated number of infections where at least one infectious agent was recorded."
-msgstr "%s: nakkuste koguarv, mille puhul registreeriti vähemalt üks nakkusetekitaja."
+msgstr ""
 
 #. type: Hash Value: tbl-infectious-agent-detection-rate no_data
 #: reports/common.yaml:1
-#, fuzzy, no-wrap
-#| msgid "No of infections with agent"
+#, no-wrap
 msgid "No infectious agent detection data available for this report settings."
-msgstr "Nakkusetekitajaga nakatumiste arv"
+msgstr ""
 
 #. type: Hash Value: tbl-infectious-agent-detection-rate pooled_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The Infectious Agent Detection Rate calculated across all infants from all departments."
-msgstr "%s: nakkusetekitaja avastamise määr, mis on arvutatud kõigi osakondade kõigi imikute kohta."
+msgstr ""
 
 #. type: Hash Value: tbl-infectious-agent-detection-rate quartile_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Infectious Agent Detection Rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected infections with an agents is greater than or equal to one according to the pooled Infectious Agent Detection Rate."
-msgstr "%s, %s, %s: partnerosakondade nakkusetekitajate avastamise määrade kvartiilid (%s, %s ja %s kvantiilid). Need kvartiilid kuvatakse ainult juhul, kui nimetajas osalevate osakondade arv on vähemalt viis ja kui nakkusetekitajate avastamise määra keskmine oodatav nakatumiste arv on vähemalt üks."
+msgstr ""
 
 #. type: Hash Value: tbl-infectious-agent-detection-rate rate_denominator
 #: reports/common.yaml:1
 #, no-wrap
 msgid "No of infections"
-msgstr "Nakatumiste arv"
+msgstr ""
 
 #. type: Hash Value: tbl-infectious-agent-detection-rate rate_name
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Infectious Agent Detection Rate"
-msgstr "Nakkusetekitaja avastamise määr"
+msgstr ""
 
 #. type: Hash Value: tbl-infectious-agent-detection-rate rate_numerator
 #: reports/common.yaml:1
 #, no-wrap
 msgid "No of infections with agent"
-msgstr "Nakkusetekitajaga nakatumiste arv"
+msgstr ""
 
 #. type: Hash Value: tbl-infectious-agent-detection-rate tbl-cap
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Infections in which an infectious agent has been identified, including secondary BSI following the infection."
-msgstr "Infektsioonid, mille puhul on nakkusetekitaja kindlaks tehtud, sealhulgas infektsioonijärgne sekundaarne BSI."
+msgstr ""
 
 #. type: Hash Value: tbl-resistance-test-rate car_if_3gcr
 #: reports/common.yaml:1
 #, no-wrap
 msgid "in case of 3GCR"
-msgstr "3GCRi korral"
+msgstr ""
 
 #. type: Hash Value: tbl-resistance-test-rate cor_if_3gcr_and_car
 #: reports/common.yaml:1
 #, no-wrap
 msgid "in case of 3GCR and CARBR"
-msgstr "3GCR ja CARBR puhul"
+msgstr ""
 
 #. type: Hash Value: tbl-resistance-test-rate n_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The aggregated number of antibiotic resistant pathogens that have a documented test for antibiotic resistance."
-msgstr "%s: Antibiootikumiresistentsuse suhtes dokumenteeritud testiga antibiootikumiresistentsete patogeenide koguarv."
+msgstr ""
 
 #. type: Hash Value: tbl-resistance-test-rate no_data
 #: reports/common.yaml:1
@@ -668,67 +656,67 @@ msgstr ""
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The antibiotic resistance test rate calculated across all infants from all departments."
-msgstr "%s: Kõigi osakondade kõikide imikute puhul arvutatud antibiootikumiresistentsuse testide määr."
+msgstr ""
 
 #. type: Hash Value: tbl-resistance-test-rate quartile_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the antibiotic resistance test rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected infections with an agents is greater than or equal to one according to the pooled antibiotic resistance test rate."
-msgstr "%s, %s, %s: Partnerosakondade antibiootikumiresistentsuse testide määrade kvartiilid (%s, %s ja %s kvantiilid). Need kvartiilid kuvatakse ainult juhul, kui nimetajas osalevate osakondade arv on vähemalt viis ja kui ühendatud antibiootikumiresistentsuse testide määra alusel on oodatavate nakkuste keskmine arv vähemalt üks."
+msgstr ""
 
 #. type: Hash Value: tbl-resistance-test-rate rate_denominator
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Number of pathogens eligible for antibiotic resistance test recording"
-msgstr "Antibiootikumiresistentsuse testi registreerimiseks sobivate patogeenide arv"
+msgstr ""
 
 #. type: Hash Value: tbl-resistance-test-rate rate_name
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Antibiotic resistance test rate"
-msgstr "Antibiootikumiresistentsuse testi määr"
+msgstr ""
 
 #. type: Hash Value: tbl-resistance-test-rate rate_numerator
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Number of pathogens with recorded test for antibiotic resistance"
-msgstr "Antibiootikumiresistentsuse suhtes testitud patogeenide arv"
+msgstr ""
 
 #. type: Hash Value: tbl-resistance-test-rate tbl-cap
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Antibiotic resistance diagnostics"
-msgstr "Antibiootikumiresistentsuse diagnostika"
+msgstr ""
 
 #. type: Hash Value: tbl-risk-density-rates access
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Access"
-msgstr "Juurdepääs"
+msgstr ""
 
 #. type: Hash Value: tbl-risk-density-rates any
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Any"
-msgstr "Mis tahes"
+msgstr ""
 
 #. type: Hash Value: tbl-risk-density-rates any_antibiotic
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Any antibiotic"
-msgstr "Mis tahes antibiootikum"
+msgstr ""
 
 #. type: Hash Value: tbl-risk-density-rates aware_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "WHO AWaRe group (see %s). As cumulative treatment days for individual substances are recorded per patient, combination therapies using several substances on one day are counted as multiple days."
-msgstr "WHO AWaRe rühm (vt %s). Kuna iga patsiendi puhul registreeritakse üksikute ravimite kumulatiivsed ravi päevad, loetakse mitme ravimi kombinatsioonravi ühel päeval mitme päeva raviks."
+msgstr ""
 
 #. type: Hash Value: tbl-risk-density-rates days_with_risk_factor
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Days with risk/protective factor"
-msgstr "Riskiga/kaitsefaktoriga päevad"
+msgstr ""
 
 #. type: Hash Value: tbl-risk-density-rates no_data
 #: reports/common.yaml:1
@@ -740,56 +728,55 @@ msgstr ""
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The Risk Density Rate calculated across all infants from all departments in the reference data."
-msgstr "%s: Riskitihedusmäär, mis on arvutatud kõigi osakondade kõigi imikute kohta võrdlusandmetes."
+msgstr ""
 
 #. type: Hash Value: tbl-risk-density-rates quartile_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Risk Density Rates of the departments in the reference data. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of device days is greater than or equal to one according to the pooled Risk Density Rate."
-msgstr "%s, %s, %s: Viitedokumendi osakondade riskitiheduse määrade kvartiilid (%s, %s ja %s kvantiilid). Need kvartiilid kuvatakse ainult juhul, kui nimetajas osalevate osakondade arv on vähemalt viis ja kui seadme päevade mediaanarv on vähemalt üks koondatud riskitiheduse määra alusel."
+msgstr ""
 
 #. type: Hash Value: tbl-risk-density-rates reserve
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Reserve"
-msgstr "Reserv"
+msgstr ""
 
 #. type: Hash Value: tbl-risk-density-rates risk_density_rate
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Risk Density Rate"
-msgstr "Riskitihedusmäär"
+msgstr ""
 
 #. type: Hash Value: tbl-risk-density-rates tbl-cap
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Factors influencing the infants' risk of developing an infection or acquiring antibitic-resistant pathogens."
-msgstr "Tegurid, mis mõjutavad imikute nakkushaiguste või antibiootikumiresistentsete patogeenide tekke riski."
+msgstr ""
 
 #. type: Hash Value: tbl-risk-density-rates vascular_catheter
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Vascular catheter"
-msgstr "Vaskulaarne kateeter"
+msgstr ""
 
 #. type: Hash Value: tbl-risk-density-rates ventilatory_support
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Ventilatory support"
-msgstr "Ventilatsioonitoetus"
+msgstr ""
 
 #. type: Hash Value: tbl-risk-density-rates watch
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Watch"
-msgstr "Vaata"
+msgstr ""
 
 #. type: Hash Value: tbl-secondary-bsi-rates n_footnote
 #: reports/common.yaml:1
-#, fuzzy, no-wrap
-#| msgid "%s: The aggregated number of infections where at least one infectious agent was recorded."
+#, no-wrap
 msgid "%s: The aggregated number of infections where a secondary BSI was recorded."
-msgstr "%s: nakkuste koguarv, mille puhul registreeriti vähemalt üks nakkusetekitaja."
+msgstr ""
 
 #. type: Hash Value: tbl-secondary-bsi-rates no_data
 #: reports/common.yaml:1
@@ -799,24 +786,21 @@ msgstr ""
 
 #. type: Hash Value: tbl-secondary-bsi-rates pooled_footnote
 #: reports/common.yaml:1
-#, fuzzy, no-wrap
-#| msgid "%s: The Incidence Density Rate calculated across all infants from all departments."
+#, no-wrap
 msgid "%s: The secondary BSI rate calculated across all infants from all departments."
-msgstr "%s: kõikide osakondade kõikide imikute haigestumise tihedus."
+msgstr ""
 
 #. type: Hash Value: tbl-secondary-bsi-rates quartile_footnote
 #: reports/common.yaml:1
-#, fuzzy, no-wrap
-#| msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Surgical Procedure Rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of procedures is greater than or equal to one according to the pooled Surgical Procedure Rate."
+#, no-wrap
 msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the secondary BSI rates of the partner departments. These quartiles are only displayed when the number of departments contributing is greater than or equal to five."
-msgstr "%s, %s, %s: partnerosakondade kirurgiliste protseduuride määrade kvartiilid (%s, %s ja %s kvantiilid). Need kvartiilid kuvatakse ainult juhul, kui nimetajas osalevate osakondade arv on vähemalt viis ja kui protseduuride keskmine arv on vähemalt üks koondatud kirurgiliste protseduuride määra alusel."
+msgstr ""
 
 #. type: Hash Value: tbl-secondary-bsi-rates rate_denominator
 #: reports/common.yaml:1
-#, fuzzy, no-wrap
-#| msgid "Number of infections where a pathogen was detected"
+#, no-wrap
 msgid "Number of infections with follow-up for secondary BSI"
-msgstr "Patogeeni avastatud nakkuste arv"
+msgstr ""
 
 #. type: Hash Value: tbl-secondary-bsi-rates rate_footnote
 #: reports/common.yaml:1
@@ -832,53 +816,51 @@ msgstr ""
 
 #. type: Hash Value: tbl-secondary-bsi-rates rate_numerator
 #: reports/common.yaml:1
-#, fuzzy, no-wrap
-#| msgid "No of infections with agent"
+#, no-wrap
 msgid "Number of infections with secondary BSI"
-msgstr "Nakkusetekitajaga nakatumiste arv"
+msgstr ""
 
 #. type: Hash Value: tbl-secondary-bsi-rates tbl-cap
 #: reports/common.yaml:1
-#, fuzzy, no-wrap
-#| msgid "Surgical site infection"
+#, no-wrap
 msgid "Secondary bloodstream infections"
-msgstr "Operatsioonikoha infektsioon"
+msgstr ""
 
 #. type: Hash Value: tbl-surgical-procedure-rates abdominal_surgery
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Abdominal surgery"
-msgstr "Kõhuoperatsioon"
+msgstr ""
 
 #. type: Hash Value: tbl-surgical-procedure-rates cardiac_and_large_vessel_surgery
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Cardiac- / large vessel surgery"
-msgstr "Südame- ja suurte veresoonte operatsioonid"
+msgstr ""
 
 #. type: Hash Value: tbl-surgical-procedure-rates inguinal_hernia_surgery
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Inguinal hernia surgery"
-msgstr "Nimmehernia operatsioon"
+msgstr ""
 
 #. type: Hash Value: tbl-surgical-procedure-rates lung_pleural_space_thoracic_surgery
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Lung- / pleural space- / thoracic surgery"
-msgstr "Kopsu-/pleura-/rinnakirurgia"
+msgstr ""
 
 #. type: Hash Value: tbl-surgical-procedure-rates n_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The aggregated number surgical procedures performed in all infants."
-msgstr "%s: Kõikidel imikutel tehtud kirurgiliste protseduuride koguarv."
+msgstr ""
 
 #. type: Hash Value: tbl-surgical-procedure-rates neurosurgery
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Neurosurgery"
-msgstr "Neurokirurgia"
+msgstr ""
 
 #. type: Hash Value: tbl-surgical-procedure-rates no_data
 #: reports/common.yaml:1
@@ -890,85 +872,85 @@ msgstr ""
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Not a surgical procedure"
-msgstr "Ei ole kirurgiline protseduur"
+msgstr ""
 
 #. type: Hash Value: tbl-surgical-procedure-rates oesophageal_surgery
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Oesophageal surgery"
-msgstr "Söögitoru operatsioon"
+msgstr ""
 
 #. type: Hash Value: tbl-surgical-procedure-rates overall
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Overall"
-msgstr "Kokku"
+msgstr ""
 
 #. type: Hash Value: tbl-surgical-procedure-rates pooled_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The Surgical Procedure Rate calculated across all infants from all departments."
-msgstr "%s: Kõikide osakondade kõikide imikute kohta arvutatud kirurgiliste protseduuride määr."
+msgstr ""
 
 #. type: Hash Value: tbl-surgical-procedure-rates quartile_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Surgical Procedure Rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of procedures is greater than or equal to one according to the pooled Surgical Procedure Rate."
-msgstr "%s, %s, %s: partnerosakondade kirurgiliste protseduuride määrade kvartiilid (%s, %s ja %s kvantiilid). Need kvartiilid kuvatakse ainult juhul, kui nimetajas osalevate osakondade arv on vähemalt viis ja kui protseduuride keskmine arv on vähemalt üks koondatud kirurgiliste protseduuride määra alusel."
+msgstr ""
 
 #. type: Hash Value: tbl-surgical-procedure-rates rate_denominator
 #: reports/common.yaml:1
 #, no-wrap
 msgid "No of Patients"
-msgstr "Patsientide arv"
+msgstr ""
 
 #. type: Hash Value: tbl-surgical-procedure-rates rate_name
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Surgical Procedure Rate"
-msgstr "Kirurgiliste protseduuride määr"
+msgstr ""
 
 #. type: Hash Value: tbl-surgical-procedure-rates rate_numerator
 #: reports/common.yaml:1
 #, no-wrap
 msgid "No of procedures"
-msgstr "Protseduuride arv"
+msgstr ""
 
 #. type: Hash Value: tbl-surgical-procedure-rates tbl-cap
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Surgical procedures by category"
-msgstr "Kirurgilised protseduurid kategooriate kaupa"
+msgstr ""
 
 #. type: Hash Value: tbl-surgical-procedure-rates to_be_categorised
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Not yet categorised"
-msgstr "Veel liigitamata"
+msgstr ""
 
 #. type: Hash Value: total
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Total"
-msgstr "Kokku"
+msgstr ""
 
 #. type: Hash Value: unit_separator
 #: reports/common.yaml:1
 #, no-wrap
 msgid " "
-msgstr " "
+msgstr ""
 
 #. type: Hash Value: vre
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Vancomycin-resistant Enterococcus (VRE)"
-msgstr "Vankomütsiiniresistentne enterokokk (VRE)"
+msgstr ""
 
 #. type: Hash Value: week_abbreviation
 #: reports/common.yaml:1
 #, no-wrap
 msgid "w"
-msgstr "w"
+msgstr ""
 
 #. type: Hash Value: worldBankClassNames H
 #: reports/common.yaml:1
@@ -1000,7 +982,7 @@ msgstr ""
 #: reports/Reference-Report/_quarto-en.yml:1
 #, no-wrap
 msgid "NeoIPC Surveillance team"
-msgstr "NeoIPC järelevalvemeeskond"
+msgstr ""
 
 #. type: Array Element: format pdf keywords
 #: reports/Partner-Report/_quarto-en.yml:1
@@ -1008,7 +990,7 @@ msgstr "NeoIPC järelevalvemeeskond"
 #: reports/Reference-Report/_quarto-en.yml:1
 #, no-wrap
 msgid "NeoIPC"
-msgstr "NeoIPC"
+msgstr ""
 
 #. type: Array Element: format pdf keywords
 #: reports/Partner-Report/_quarto-en.yml:1
@@ -1016,20 +998,19 @@ msgstr "NeoIPC"
 #: reports/Reference-Report/_quarto-en.yml:1
 #, no-wrap
 msgid "Surveillance"
-msgstr "Järelevalve"
+msgstr ""
 
 #. type: Array Element: format pdf keywords
 #: reports/Partner-Report/_quarto-en.yml:1
-#, fuzzy, no-wrap
-#| msgid "Reference Report"
+#, no-wrap
 msgid "Partner Report"
-msgstr "Viitearuanne"
+msgstr ""
 
 #. type: Hash Value: title
 #: reports/Partner-Report/_quarto-en.yml:1
 #, no-wrap
 msgid "NeoIPC Surveillance Partner Report"
-msgstr "NeoIPC järelevalvepartneri aruanne"
+msgstr ""
 
 #. type: Hash Value: figure_interpretation birth_weight_higher_median
 #: reports/Partner-Report/content/_sR.yaml:1
@@ -1135,24 +1116,21 @@ msgstr ""
 
 #. type: Hash Value: headings birth_weight_distribution
 #: reports/Partner-Report/content/_sR.yaml:1
-#, fuzzy, no-wrap
-#| msgid "Birth weight filter"
+#, no-wrap
 msgid "Birth Weight Distribution"
-msgstr "Sünnikaalu filter"
+msgstr ""
 
 #. type: Hash Value: headings detection_of_infectious_agents
 #: reports/Partner-Report/content/_sR.yaml:1
-#, fuzzy, no-wrap
-#| msgid "Infectious Agents"
+#, no-wrap
 msgid "Detection of Infectious Agents"
-msgstr "Nakkusetekitajad"
+msgstr ""
 
 #. type: Hash Value: headings device_associated_infections
 #: reports/Partner-Report/content/_sR.yaml:1
-#, fuzzy, no-wrap
-#| msgid "Number of device-associated infections"
+#, no-wrap
 msgid "Device-Associated Infections"
-msgstr "Seadmega seotud infektsioonide arv"
+msgstr ""
 
 #. type: Hash Value: headings diagnostics
 #: reports/Partner-Report/content/_sR.yaml:1
@@ -1162,38 +1140,33 @@ msgstr ""
 
 #. type: Hash Value: headings gestational_age_distribution
 #: reports/Partner-Report/content/_sR.yaml:1
-#, fuzzy, no-wrap
-#| msgid "Gestational age filter"
+#, no-wrap
 msgid "Gestational Age Distribution"
-msgstr "Raseduse kestuse filter"
+msgstr ""
 
 #. type: Hash Value: headings infectious_agents_in_nosocomial_infections
 #: reports/Partner-Report/content/_sR.yaml:1
-#, fuzzy, no-wrap
-#| msgid "Infectious agents detected in nosocomial infections"
+#, no-wrap
 msgid "Infectious Agents Detected in Nosocomial Infections\n"
-msgstr "Haiglanakkuste puhul avastatud nakkusetekitajad"
+msgstr ""
 
 #. type: Hash Value: headings presence_of_risk_and_protective_factors
 #: reports/Partner-Report/content/_sR.yaml:1
-#, fuzzy, no-wrap
-#| msgid "Risk and Protective Factors"
+#, no-wrap
 msgid "Presence of Risk and Protective Factors in Your Unit"
-msgstr "Riskitegurid ja kaitsvad tegurid"
+msgstr ""
 
 #. type: Hash Value: headings resistant_pathogens
 #: reports/Partner-Report/content/_sR.yaml:1
-#, fuzzy, no-wrap
-#| msgid "Resistant pathogen infection rate"
+#, no-wrap
 msgid "Resistant Pathogens"
-msgstr "Resistentse patogeeni nakatumise määr"
+msgstr ""
 
 #. type: Hash Value: headings secondary_bsi
 #: reports/Partner-Report/content/_sR.yaml:1
-#, fuzzy, no-wrap
-#| msgid "Surgical site infection"
+#, no-wrap
 msgid "Secondary Bloodstream Infections"
-msgstr "Operatsioonikoha infektsioon"
+msgstr ""
 
 #. type: Hash Value: headings severe_infections_and_nec
 #: reports/Partner-Report/content/_sR.yaml:1
@@ -1203,10 +1176,9 @@ msgstr ""
 
 #. type: Hash Value: headings surgical_procedures_by_category
 #: reports/Partner-Report/content/_sR.yaml:1
-#, fuzzy, no-wrap
-#| msgid "Surgical procedures by category"
+#, no-wrap
 msgid "Surgical Procedures by Category"
-msgstr "Kirurgilised protseduurid kategooriate kaupa"
+msgstr ""
 
 #. type: Hash Value: outlier above_q3_group
 #: reports/Partner-Report/content/_sR.yaml:1
@@ -3252,20 +3224,19 @@ msgstr ""
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Own unit"
-msgstr "Oma üksus"
+msgstr ""
 
 #. type: Hash Value: reference_data
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Reference data"
-msgstr "Viited"
+msgstr ""
 
 #. type: Hash Value: tbl-abr-infection-rate n_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
-#, fuzzy, no-wrap
-#| msgid "%s: The aggregated number of antibiotic resistant pathogens in all infections."
+#, no-wrap
 msgid "%s: The aggregated number of infections with resistant pathogens in your unit's infants."
-msgstr "%s: Kõikide infektsioonide puhul antibiootikumiresistentsete patogeenide koguarv."
+msgstr ""
 
 #. type: Hash Value: tbl-abr-infection-rate rate_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
@@ -3275,66 +3246,57 @@ msgstr ""
 
 #. type: Hash Value: tbl-agent-per-infection-rate n_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
-#, fuzzy, no-wrap
-#| msgid "%s: The aggregated number of days the risk/protective factor was present in your unit's infants."
+#, no-wrap
 msgid "%s: The aggregated number of infections with this infectious agent detected in your unit's infants."
-msgstr "%s: Riskiteguri/kaitseteguri esinemise päevade koguarv teie üksuse imikute seas."
+msgstr ""
 
 #. type: Hash Value: tbl-agent-per-infection-rate rate_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
-#, fuzzy, no-wrap
-#| msgid "No of infections where an infectious agent was detected"
+#, no-wrap
 msgid "%s: The percentage of infections in your unit where this infectious agent was detected."
-msgstr "No of infections where an infectious agent was detected"
+msgstr ""
 
 #. type: Hash Value: tbl-device-associated-incidence-density-rates n_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
-#, fuzzy, no-wrap
-#| msgid "%s: The aggregated number of device-associated infections in all infants."
+#, no-wrap
 msgid "%s: The aggregated number of device-associated infections in your unit's infants."
-msgstr "%s: Kõigi imikute seadmetega seotud infektsioonide koguarv."
+msgstr ""
 
 #. type: Hash Value: tbl-device-associated-incidence-density-rates rate_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
-#, fuzzy, no-wrap
-#| msgid "%s: The Device-Associated Incidence Density Rate calculated across all infants from all departments."
+#, no-wrap
 msgid "%s: The Device-Associated Incidence Density Rate for your unit (infections per 1000 device-days)."
-msgstr "%s: seadmetega seotud haigestumise tihedusmäär, mis on arvutatud kõigi osakondade kõigi imikute kohta."
+msgstr ""
 
 #. type: Hash Value: tbl-incidence-density-rates n_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
-#, fuzzy, no-wrap
-#| msgid "%s: The aggregated number of infections in all infants."
+#, no-wrap
 msgid "%s: The aggregated number of infections in your unit's infants."
-msgstr "%s: Kõigi imikute nakkuste koguarv."
+msgstr ""
 
 #. type: Hash Value: tbl-incidence-density-rates rate_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
-#, fuzzy, no-wrap
-#| msgid "%s: The Incidence Density Rate calculated across all infants from all departments."
+#, no-wrap
 msgid "%s: The Incidence Density Rate for your unit (infections per 1000 patient-days)."
-msgstr "%s: kõikide osakondade kõikide imikute haigestumise tihedus."
+msgstr ""
 
 #. type: Hash Value: tbl-infectious-agent-detection-rate n_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
-#, fuzzy, no-wrap
-#| msgid "%s: The aggregated number of days the risk/protective factor was present in your unit's infants."
+#, no-wrap
 msgid "%s: The aggregated number of infections with identified infectious agents in your unit's infants."
-msgstr "%s: Riskiteguri/kaitseteguri esinemise päevade koguarv teie üksuse imikute seas."
+msgstr ""
 
 #. type: Hash Value: tbl-infectious-agent-detection-rate rate_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
-#, fuzzy, no-wrap
-#| msgid "%s: The Infectious Agent Detection Rate calculated across all infants from all departments."
+#, no-wrap
 msgid "%s: The Infectious Agent Detection Rate for your unit (percentage of infections with identified agent)."
-msgstr "%s: nakkusetekitaja avastamise määr, mis on arvutatud kõigi osakondade kõigi imikute kohta."
+msgstr ""
 
 #. type: Hash Value: tbl-resistance-test-rate n_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
-#, fuzzy, no-wrap
-#| msgid "%s: The aggregated number of infections in all infants."
+#, no-wrap
 msgid "%s: The aggregated number of eligible pathogens in your unit's infants."
-msgstr "%s: Kõigi imikute nakkuste koguarv."
+msgstr ""
 
 #. type: Hash Value: tbl-resistance-test-rate rate_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
@@ -3344,24 +3306,21 @@ msgstr ""
 
 #. type: Hash Value: tbl-risk-density-rates n_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
-#, fuzzy, no-wrap
-#| msgid "%s: The aggregated number of days the risk/protective factor was present in your unit's infants."
+#, no-wrap
 msgid "%s: The aggregated number of days the risk/protective factor was present in your unit's infants.\n"
-msgstr "%s: Riskiteguri/kaitseteguri esinemise päevade koguarv teie üksuse imikute seas."
+msgstr ""
 
 #. type: Hash Value: tbl-risk-density-rates rate_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
-#, fuzzy, no-wrap
-#| msgid "%s: The Risk Density Rate calculated for your unit's infants."
+#, no-wrap
 msgid "%s: The Risk Density Rate calculated for your unit's infants.\n"
-msgstr "%s: Teie üksuse imikute jaoks arvutatud riskitihedusmäär."
+msgstr ""
 
 #. type: Hash Value: tbl-secondary-bsi-rates n_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
-#, fuzzy, no-wrap
-#| msgid "%s: The aggregated number of days the risk/protective factor was present in your unit's infants."
+#, no-wrap
 msgid "%s: The aggregated number of infections with secondary bloodstream infection in your unit's infants."
-msgstr "%s: Riskiteguri/kaitseteguri esinemise päevade koguarv teie üksuse imikute seas."
+msgstr ""
 
 #. type: Hash Value: tbl-secondary-bsi-rates rate_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
@@ -3371,10 +3330,9 @@ msgstr ""
 
 #. type: Hash Value: tbl-surgical-procedure-rates n_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
-#, fuzzy, no-wrap
-#| msgid "%s: The aggregated number surgical procedures performed in all infants."
+#, no-wrap
 msgid "%s: The aggregated number of surgical procedures performed in your unit's infants."
-msgstr "%s: Kõikidel imikutel tehtud kirurgiliste protseduuride koguarv."
+msgstr ""
 
 #. type: Hash Value: tbl-surgical-procedure-rates rate_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
@@ -3386,7 +3344,7 @@ msgstr ""
 #: reports/Partner-Report/content/_introduction.Rmd:2
 #, no-wrap
 msgid "This is a [NeoIPC Surveillance](https://neoipc.org/surveillance/ \"Link to the surveillance section of the NeoIPC website\") analysis that you can use to assess infection rates in your neonatal unit. If you have your own data collected using the same or a comparable method, you can compare them with the reference values presented in this document and identify any anomalies and potential for improvement.\n"
-msgstr "See on [NeoIPC Surveillance](https://neoipc.org/surveillance/ \"Link NeoIPC veebisaidi järelevalve osale\") analüüs, mida saate kasutada oma vastsündinute osakonna nakkusjuhtude määra hindamiseks. Kui teil on oma andmed, mis on kogutud sama või sarnase meetodiga, saate neid võrrelda käesolevas dokumendis esitatud võrdlusväärtustega ning tuvastada kõrvalekalded ja parandamisvõimalused. \n"
+msgstr ""
 
 #. type: Plain text
 #: reports/Partner-Report/content/_introduction.Rmd:3
@@ -3414,17 +3372,15 @@ msgstr ""
 
 #. type: Plain text
 #: reports/Partner-Report/content/_infectious-agents.Rmd:2
-#, fuzzy, no-wrap
-#| msgid "Epidemiology of the infectious agents causing nosocomial infections in neonatology is complex and there is a lot of potential for bias. While low diagnostic sensitivity (low blood volume) and specificity (contamination) are a general problem in the neonatal population, the lack of availability of some or all means of microbiological diagnostics, or the lack of financial resources can have a strong effect on the detection rates in resource-constrained settings.\n"
+#, no-wrap
 msgid "Understanding the epidemiology of infectious agents causing nosocomial infections is crucial but complex. Diagnostic challenges including low sensitivity (limited blood volume) and specificity (contamination risk) are inherent to the neonatal population. Additionally, availability of microbiological diagnostics and resources can significantly affect detection rates.\n"
-msgstr "Neonatoloogias haiglanakkusi põhjustavate nakkusetekitajate epidemioloogia on keeruline ja sisaldab palju potentsiaalset eelarvamust. Kuigi madal diagnostiline tundlikkus (madal vere maht) ja spetsiifilisus (saastumine) on üldine probleem vastsündinute populatsioonis, võib mõnede või kõigi mikrobioloogiliste diagnostikavahendite kättesaamatus või rahaliste vahendite puudus mõjutada tugevalt avastamismäära ressursipiirangutega keskkondades.\n"
+msgstr ""
 
 #. type: Plain text
 #: reports/Partner-Report/content/_infectious-agents.Rmd:3
-#, fuzzy, no-wrap
-#| msgid "In total, `r dR$numberOfInfectiousAgents` infectious agents were detected in the `r dR$numberOfInfectionsWithAgent` infections that were reported to have yielded at least one agent from either the primary infection and/or the secondary bloodstream infection resulting from it (@tbl-agent-per-infection-rate). These `r dR$numberOfInfectionsWithAgent` diagnostic-positive infections out of `r dR$overallNumberOfInfections` overall infections represent an Infectious Agent Detection Rate of `r dR$infectiousAgentDetectionRate` per 100 infections (@tbl-infectious-agent-detection-rate).\n"
+#, no-wrap
 msgid "In your data, `r dR$own$numberOfInfectiousAgents` infectious agents were detected in `r dR$own$numberOfInfectionsWithAgent` infections out of `r dR$own$overallNumberOfInfections` total infections, representing an infectious agent detection rate of `r dR$own$infectiousAgentDetectionRate` per 100 infections. The following tables provide detailed information on pathogen distribution and antimicrobial resistance patterns.\n"
-msgstr "Kokku tuvastati `r dR$numberOfInfectiousAgents` nakkusetekitajat `r dR$numberOfInfectionsWithAgent` nakkusjuhtumi puhul, mille puhul teatati vähemalt ühe nakkusetekitaja esinemisest esmase nakkuse ja/või sellest tuleneva teisese vereringe nakkuse korral (@tbl-agent-per-infection-rate). Need `r dR$numberOfInfectionsWithAgent` diagnoosipositiivset nakkusjuhtu `r dR$overallNumberOfInfections` nakkusjuhtumi koguarvust tähendavad nakkusetekitajate avastamismäära `r dR$infectiousAgentDetectionRate` 100 nakkusjuhtumi kohta (@tbl-infectious-agent-detection-rate).\n"
+msgstr ""
 
 #. type: Plain text
 #: reports/Partner-Report/content/_risk-factors.Rmd:1
@@ -3569,24 +3525,21 @@ msgstr ""
 
 #. type: Hash Value: field antibiotic_days
 #: reports/Patient-Data-Report/content/_sR.yaml:1
-#, fuzzy, no-wrap
-#| msgid "Antibiotics"
+#, no-wrap
 msgid "Total Days on Antibiotics"
-msgstr "Antibiootikumid"
+msgstr ""
 
 #. type: Hash Value: field birth_weight
 #: reports/Patient-Data-Report/content/_sR.yaml:1
-#, fuzzy, no-wrap
-#| msgid "Birth weight filter"
+#, no-wrap
 msgid "Birth Weight (g)"
-msgstr "Sünnikaalu filter"
+msgstr ""
 
 #. type: Hash Value: field created_by
 #: reports/Patient-Data-Report/content/_sR.yaml:1
-#, fuzzy, no-wrap
-#| msgid "Created"
+#, no-wrap
 msgid "Created By"
-msgstr "Loomise kuupäev"
+msgstr ""
 
 #. type: Hash Value: field date_of_birth
 #: reports/Patient-Data-Report/content/_sR.yaml:1
@@ -3620,10 +3573,9 @@ msgstr ""
 
 #. type: Hash Value: field gestational_age
 #: reports/Patient-Data-Report/content/_sR.yaml:1
-#, fuzzy, no-wrap
-#| msgid "Gestational age filter"
+#, no-wrap
 msgid "Gestational Age"
-msgstr "Raseduse kestuse filter"
+msgstr ""
 
 #. type: Hash Value: field hospital
 #: reports/Patient-Data-Report/content/_sR.yaml:1
@@ -3633,10 +3585,9 @@ msgstr ""
 
 #. type: Hash Value: field infection_type
 #: reports/Patient-Data-Report/content/_sR.yaml:1
-#, fuzzy, no-wrap
-#| msgid "Infectious Agents"
+#, no-wrap
 msgid "Infection Type"
-msgstr "Nakkusetekitajad"
+msgstr ""
 
 #. type: Hash Value: field pathogen_name
 #: reports/Patient-Data-Report/content/_sR.yaml:1
@@ -3646,17 +3597,15 @@ msgstr ""
 
 #. type: Hash Value: field patient_days
 #: reports/Patient-Data-Report/content/_sR.yaml:1
-#, fuzzy, no-wrap
-#| msgid "Patient days"
+#, no-wrap
 msgid "Patient Days"
-msgstr "Patsiendi päevad"
+msgstr ""
 
 #. type: Hash Value: field patient_id
 #: reports/Patient-Data-Report/content/_sR.yaml:1
-#, fuzzy, no-wrap
-#| msgid "Patient days"
+#, no-wrap
 msgid "Patient ID"
-msgstr "Patsiendi päevad"
+msgstr ""
 
 #. type: Hash Value: field procedure_category
 #: reports/Patient-Data-Report/content/_sR.yaml:1
@@ -3672,10 +3621,9 @@ msgstr ""
 
 #. type: Hash Value: field procedure_date
 #: reports/Patient-Data-Report/content/_sR.yaml:1
-#, fuzzy, no-wrap
-#| msgid "Surgical Procedure Rate"
+#, no-wrap
 msgid "Procedure Date"
-msgstr "Kirurgiliste protseduuride määr"
+msgstr ""
 
 #. type: Hash Value: field resistance
 #: reports/Patient-Data-Report/content/_sR.yaml:1
@@ -3703,10 +3651,9 @@ msgstr ""
 
 #. type: Hash Value: field surveillance_end_date
 #: reports/Patient-Data-Report/content/_sR.yaml:1
-#, fuzzy, no-wrap
-#| msgid "Surveillance"
+#, no-wrap
 msgid "Surveillance End Date"
-msgstr "Järelevalve"
+msgstr ""
 
 #. type: Hash Value: field surveillance_end_reason
 #: reports/Patient-Data-Report/content/_sR.yaml:1
@@ -3746,10 +3693,9 @@ msgstr ""
 
 #. type: Hash Value: no_infections
 #: reports/Patient-Data-Report/content/_sR.yaml:1
-#, fuzzy, no-wrap
-#| msgid "No of infections with agent"
+#, no-wrap
 msgid "No infections recorded for this patient."
-msgstr "Nakkusetekitajaga nakatumiste arv"
+msgstr ""
 
 #. type: Hash Value: no_procedures
 #: reports/Patient-Data-Report/content/_sR.yaml:1
@@ -3813,17 +3759,15 @@ msgstr ""
 
 #. type: Hash Value: section demographics
 #: reports/Patient-Data-Report/content/_sR.yaml:1
-#, fuzzy, no-wrap
-#| msgid "Patient days"
+#, no-wrap
 msgid "Patient Demographics"
-msgstr "Patsiendi päevad"
+msgstr ""
 
 #. type: Hash Value: section infections
 #: reports/Patient-Data-Report/content/_sR.yaml:1
-#, fuzzy, no-wrap
-#| msgid "Infectious Agents"
+#, no-wrap
 msgid "Infections"
-msgstr "Nakkusetekitajad"
+msgstr ""
 
 #. type: Hash Value: section pathogens
 #: reports/Patient-Data-Report/content/_sR.yaml:1
@@ -3857,10 +3801,9 @@ msgstr ""
 
 #. type: Hash Value: subtitle
 #: reports/Patient-Data-Report/content/_sR.yaml:1
-#, fuzzy, no-wrap
-#| msgid "NeoIPC Surveillance Partner Report"
+#, no-wrap
 msgid "NeoIPC Surveillance — GDPR Art. 15(3) Data Export"
-msgstr "NeoIPC järelevalvepartneri aruanne"
+msgstr ""
 
 #. type: Hash Value: surveillance_end_reason 1
 #: reports/Patient-Data-Report/content/_sR.yaml:1
@@ -3876,82 +3819,81 @@ msgstr ""
 
 #. type: Hash Value: title
 #: reports/Patient-Data-Report/content/_sR.yaml:1
-#, fuzzy, no-wrap
-#| msgid "Reference Report"
+#, no-wrap
 msgid "Patient Data Report"
-msgstr "Viitearuanne"
+msgstr ""
 
 #. type: Array Element: format pdf keywords
 #: reports/Partner-Certificate/_quarto-en.yml:1
 #, no-wrap
 msgid "Certificate"
-msgstr "Sertifikaat"
+msgstr ""
 
 #. type: Hash Value: title
 #: reports/Partner-Certificate/_quarto-en.yml:1
 #, no-wrap
 msgid "Certificate of participation in the NeoIPC project surveillance system (NeoIPC Surveillance)"
-msgstr "NeoIPC projekti seiresüsteemis osalemise sertifikaat (NeoIPC Surveillance)"
+msgstr ""
 
 #. type: Array Element: content
 #: reports/Partner-Certificate/content/_sR.yaml:1
 #, no-wrap
 msgid "This project has received funding from the European Union’s Horizon 2020 research and%sinnovation programme under grant agreement No 965328."
-msgstr "See projekt on saanud rahastust Euroopa Liidu teadusuuringute ja innovatsiooni programmi%sHorisont 2020 raames toetuslepingu nr 965328 alusel."
+msgstr ""
 
 #. type: Array Element: content
 #: reports/Partner-Certificate/content/_sR.yaml:1
 #, no-wrap
 msgid "In"
-msgstr "In"
+msgstr ""
 
 #. type: Array Element: content
 #: reports/Partner-Certificate/content/_sR.yaml:1
 #, no-wrap
 msgid "During the period"
-msgstr "Selle perioodi jooksul"
+msgstr ""
 
 #. type: Array Element: content
 #: reports/Partner-Certificate/content/_sR.yaml:1
 #, no-wrap
 msgid "the neonatology unit at %s participated in the NeoIPC Surveillance network."
-msgstr "%s neonatoloogiaosakond osales NeoIPC Surveillance võrgustikus."
+msgstr ""
 
 #. type: Array Element: content
 #: reports/Partner-Certificate/content/_sR.yaml:1
 #, no-wrap
 msgid "Through active monitoring of %s newborns with birth weights below 1500 grams and/or gestational ages below 32 weeks, the team collected valuable reference data that will be useful for assessing and reducing infection risks in neonatal units. We are proud and delighted to have them as partners in our mission to improve infection prevention and control in the neonatal setting."
-msgstr "Aktiivse jälgimise kaudu %s vastsündinuid, kelle sünnikaal oli alla 1500 grammi ja/või gestatsiooniga alla 32 nädala, kogus meeskond väärtuslikke võrdlusandmeid, mis on kasulikud infektsiooniriskide hindamiseks ja vähendamiseks vastsündinute osakondades. Oleme uhked ja rõõmsad, et nad on meie partnerid missioonis parandada infektsioonide ennetamist ja kontrolli vastsündinute osakondades."
+msgstr ""
 
 #. type: Array Element: content
 #: reports/Partner-Certificate/content/_sR.yaml:1
 #, no-wrap
 msgid "for the NeoIPC Surveillance team"
-msgstr "NeoIPC järelevalvemeeskonnale"
+msgstr ""
 
 #. type: Array Element: content
 #: reports/Partner-Certificate/content/_sR.yaml:1
 #, no-wrap
 msgid "Berlin,"
-msgstr "Berliin,"
+msgstr ""
 
 #. type: Hash Value: signature_offset
 #: reports/Partner-Certificate/content/_sR.yaml:1
 #, no-wrap
 msgid "3.25"
-msgstr "3,25"
+msgstr ""
 
 #. type: Array Element: format pdf keywords
 #: reports/Reference-Report/_quarto-en.yml:1
 #, no-wrap
 msgid "Reference Report"
-msgstr "Viitearuanne"
+msgstr ""
 
 #. type: Hash Value: title
 #: reports/Reference-Report/_quarto-en.yml:1
 #, no-wrap
 msgid "NeoIPC Surveillance Reference Report"
-msgstr "NeoIPC seire viitearuanne"
+msgstr ""
 
 #. type: Hash Value: headerList datasetCompositionHeader
 #: reports/Reference-Report/content/_sR.yaml:1
@@ -3979,104 +3921,99 @@ msgstr ""
 
 #. type: Hash Value: headerList singleCountryDatasetHint
 #: reports/Reference-Report/content/_sR.yaml:1
-#, fuzzy, no-wrap
-#| msgid "This report presents data from neonatal units in a single country. This means that, because of the relative homogeneity of the healthcare system, it is in principle a good benchmark. However, it should be noted that only a proportion of neonatal units in a country actually participate in NeoIPC Surveillance. Since participation is voluntary, these are typically hospitals that have a particular interest in infection prevention and are willing and able to provide the resources required for surveillance."
+#, no-wrap
 msgid "This report presents data from neonatal units in a single country. Because of the relative homogeneity of the healthcare system, it is in principle a good benchmark. However, it should be noted that only a proportion of neonatal units in a country actually participate in NeoIPC Surveillance. Since participation is voluntary, these are typically hospitals that have a particular interest in infection prevention and are willing and able to provide the resources required for surveillance. The information presented here can therefore not fully describe the situation in the individual countries."
-msgstr "Käesolevas aruandes esitatakse ühe riigi vastsündinute osakondade andmed. See tähendab, et tervishoiusüsteemi suhtelise ühtluse tõttu on tegemist põhimõtteliselt hea võrdlusalusega. Siiski tuleb märkida, et ainult osa riigi vastsündinute osakondadest osaleb tegelikult NeoIPC järelevalves. Kuna osalemine on vabatahtlik, on tegemist tavaliselt haiglatega, kes on eriti huvitatud nakkuste ennetamisest ning on valmis ja võimelised pakkuma järelevalveks vajalikke ressursse."
+msgstr ""
 
 #. type: Hash Value: tbl-risk-density-rates n_footnote
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "%s: The aggregated number of days the risk/protective factor was present in all infants."
-msgstr "%s: Kõigi imikute puhul esinenud riski-/kaitsefaktori päevade koguarv."
+msgstr ""
 
 #. type: Plain text
 #: reports/Reference-Report/content/_introduction.Rmd:1
 #, no-wrap
 msgid "This document is a reference report on the NeoIPC Surveillance. It contains information relating to nosocomial infections, their causative infectious agents, and the associated risk and protective factors in high-risk neonates which was collected by partners from multiple neonatology departments participating in the NeoIPC Surveillance. The following numbers provide an overview of the current data set. If you are interested in the surveillance definitions, data collection methods and sheets, please refer to the [surveillance resources on the NeoIPC website](https://neoipc.org/surveillance/resources/).\n"
-msgstr "Käesolev dokument on NeoIPC järelevalve viitearuanne. See sisaldab teavet haiglanakkuste, nende põhjustajate ning kõrge riskiga vastsündinute seotud riskitegurite ja kaitsvate tegurite kohta, mille on kogunud NeoIPC järelevalves osalevate mitmete neonatoloogiaosakondade partnerid. Järgmised numbrid annavad ülevaate praegusest andmekogust. Kui olete huvitatud seire määratlustest, andmete kogumise meetoditest ja lehtedest, palun tutvuge NeoIPC veebisaidil olevate seire ressurssidega.\n"
+msgstr ""
 
 #. type: Plain text
 #: reports/Reference-Report/content/_patient_population.Rmd:1
 #, no-wrap
 msgid "As the process, although supported by various tools, relies on the collection, interpretation and monitoring of information by qualified professionals, NeoIPC surveillance is currently being targeted at the most common nosocomial infections in high-risk neonates, in order to make it sustainable in a continuous manner in as many settings as possible. This means that patients with a birth weight below 1500 g and/or a gestational age below 32 weeks at the time of birth are included into the surveillance database if they are admitted to a participating neonatology department within the first 120 days of life. In combination with the filter settings specified above, this results in the composition of the patient population shown in @fig-bw and @fig-ga.\n"
-msgstr "Kuna protsess, kuigi seda toetavad mitmesugused vahendid, tugineb kvalifitseeritud spetsialistide poolt kogutud, tõlgendatud ja jälgitud teabele, on NeoIPC seire praegu suunatud kõige levinumatele haiglanakkustele kõrge riskiga vastsündinutel, et tagada selle jätkusuutlikkus võimalikult paljudes keskkondades. See tähendab, et patsiendid, kelle sünnikaal on alla 1500 g ja/või gestatsiooniga alla 32 nädala sünnihetkel, lisatakse järelevalve andmebaasi, kui nad on sünnijärgselt esimese 120 päeva jooksul võetud osalevasse neonatoloogiaosakonda. Koos eespool nimetatud filtri seadetega annab see tulemuseks patsientide populatsiooni koosseisu, mis on näidatud @fig-bw ja @fig-ga.\n"
+msgstr ""
 
 #. type: Plain text
 #: reports/Reference-Report/content/_nosocomial_infections.Rmd:2
 #, no-wrap
 msgid "Nosocomial infections represent the primary endpoint of NeoIPC surveillance. In @tbl-incidence-density-rates, the incidence densities of sepsis/BSI, pneumonia and necrotising enterocolitis, as well as the combined endpoint 'severe infection', are displayed. Overall `r dR$numberOfSevereInfections` severe infections were recorded in `r dR$numberOfPatients` infants resulting in an average number of `r dR$averageSevereInfectionsPerPatient` infections per patient.\n"
-msgstr "Haiglanakkused on NeoIPC seire peamine lõpptulemus. @tbl-incidence-density-rates on esitatud sepsise/BSI, kopsupõletiku ja nekrotiseeriva enterokoliidi esinemissagedus ning kombineeritud lõpptulemus „raske nakkus”. Kokku registreeriti `r dR$numberOfSevereInfections` imikul `r dR$numberOfPatients` rasket nakkust, mis teeb keskmiselt `r dR$averageSevereInfectionsPerPatient` nakkust patsiendi kohta.\n"
+msgstr ""
 
 #. type: Plain text
 #: reports/Reference-Report/content/_nosocomial_infections.Rmd:3
 #, no-wrap
 msgid "Device-associated infections can be found in @tbl-device-associated-incidence-density-rates.\n"
-msgstr "Seadmetega seotud infektsioonid on esitatud @tbl-device-associated-incidence-density-rates.\n"
+msgstr ""
 
 #. type: Plain text
 #: reports/Reference-Report/content/_infectious_agents.Rmd:2
 #, no-wrap
 msgid "Epidemiology of the infectious agents causing nosocomial infections in neonatology is complex and there is a lot of potential for bias. While low diagnostic sensitivity (low blood volume) and specificity (contamination) are a general problem in the neonatal population, the lack of availability of some or all means of microbiological diagnostics, or the lack of financial resources can have a strong effect on the detection rates in resource-constrained settings.\n"
-msgstr "Neonatoloogias haiglanakkusi põhjustavate nakkusetekitajate epidemioloogia on keeruline ja sisaldab palju potentsiaalset eelarvamust. Kuigi madal diagnostiline tundlikkus (madal vere maht) ja spetsiifilisus (saastumine) on üldine probleem vastsündinute populatsioonis, võib mõnede või kõigi mikrobioloogiliste diagnostikavahendite kättesaamatus või rahaliste vahendite puudus mõjutada tugevalt avastamismäära ressursipiirangutega keskkondades.\n"
+msgstr ""
 
 #. type: Plain text
 #: reports/Reference-Report/content/_infectious_agents.Rmd:4
 #, no-wrap
 msgid "<!-- When comparing data with the information on pathogens presented in @tbl-agent-per-infection-rate and information on drug resistance in @tbl-abr-infection-rate, please also have a look at the infectious agent detection rates presented in @tbl-infectious-agent-detection-rate and the antibiotic resistance test rates in @tbl-resistance-test-rate. -->\n"
-msgstr "<!-- Kui võrdlete andmeid @tbl-agent-per-infection-rate esitatud patogeenide teabe ja @tbl-abr-infection-rate esitatud ravimresistentsuse teabega, vaadake ka @tbl-infectious-agent-detection-rate esitatud nakkusetekitajate avastamise määra ja @tbl-resistance-test-rate esitatud antibiootikumiresistentsuse testide määra. -->\n"
+msgstr ""
 
 #. type: Plain text
 #: reports/Reference-Report/content/_infectious_agents.Rmd:5
 #, no-wrap
 msgid "In total, `r dR$numberOfInfectiousAgents` infectious agents were detected in the `r dR$numberOfInfectionsWithAgent` infections that were reported to have yielded at least one agent from either the primary infection and/or the secondary bloodstream infection resulting from it (@tbl-agent-per-infection-rate). These `r dR$numberOfInfectionsWithAgent` diagnostic-positive infections out of `r dR$overallNumberOfInfections` overall infections represent an Infectious Agent Detection Rate of `r dR$infectiousAgentDetectionRate` per 100 infections (@tbl-infectious-agent-detection-rate).\n"
-msgstr "Kokku tuvastati `r dR$numberOfInfectiousAgents` nakkusetekitajat `r dR$numberOfInfectionsWithAgent` nakkusjuhtumi puhul, mille puhul teatati vähemalt ühe nakkusetekitaja esinemisest esmase nakkuse ja/või sellest tuleneva teisese vereringe nakkuse korral (@tbl-agent-per-infection-rate). Need `r dR$numberOfInfectionsWithAgent` diagnoosipositiivset nakkusjuhtu `r dR$overallNumberOfInfections` nakkusjuhtumi koguarvust tähendavad nakkusetekitajate avastamismäära `r dR$infectiousAgentDetectionRate` 100 nakkusjuhtumi kohta (@tbl-infectious-agent-detection-rate).\n"
+msgstr ""
 
 #. type: Plain text
 #: reports/Reference-Report/content/_risk_and_protective_factors.Rmd:1
 #, no-wrap
 msgid "Next to the inherent risk factors gestational age and birth weight there are also a number of expositional factors that influence the risk of an infant to acquire a multi-drug-resistant pathogen or to develop an infection. @tbl-risk-density-rates shows the presence of these factors in the NeoIPC Surveillance population.\n"
-msgstr "Lisaks loomulikele riskiteguritele, nagu raseduse kestus ja sünnikaal, on ka mitmeid ekspositsioonitegureid, mis mõjutavad imiku riski nakatuda mitme ravimi suhtes resistentse patogeeniga või haigestuda infektsiooni. @tbl-risk-density-rates on näidatud nende tegurite esinemine NeoIPC järelevalve populatsioonis.\n"
+msgstr ""
 
 #. type: Plain text
 #: reports/Reference-Report/content/_surgery.Rmd:2
 #, no-wrap
 msgid "`r dR$numberOfSurgicalDepartments` of the partner departments in this dataset (`r dR$proportionOfSurgicalDepartments`) recorded a total of `r dR$numberOfSurgicalProcedures` surgical procedures performed on `r dR$numberOfSurgicalPatients` neonates, resulting in an average number of `r dR$numberOfSurgicalProceduresPerPatient` operations per surgical patient during the surveillance period.\n"
-msgstr "`r dR$numberOfSurgicalDepartments` partnerosakonnast selles andmekogus (`r dR$proportionOfSurgicalDepartments` %) registreerisid kokku `r dR$numberOfSurgicalProcedures` kirurgilist protseduuri, mis tehti `r dR$numberOfSurgicalPatients` vastsündinule, mis tähendab keskmiselt `r dR$numberOfSurgicalProceduresPerPatient` operatsiooni kirurgilise patsiendi kohta järelevalveperioodi jooksul.\n"
+msgstr ""
 
 #. type: Plain text
 #: reports/Reference-Report/content/_surgery.Rmd:3
 #, no-wrap
 msgid "Due to the low number of surgical site infections in this dataset (n = `r dR$numberOfSurgicalSiteInfections`) we are not currently calculating their infection rates, but @tbl-surgical-procedure-rates provides an overview of the categories of procedures performed on neonates.\n"
-msgstr "Kuna selles andmekogus on kirurgiliste infektsioonide arv väike (n = `r dR$numberOfSurgicalSiteInfections`), ei arvuta me praegu nende infektsioonimäärasid, kuid @tbl-surgical-procedure-rates on esitatud ülevaade vastsündinutele tehtud protseduuride kategooriatest.\n"
+msgstr ""
 
 #. type: Hash Value: author-meta
 #: reports/Validation-Report/_quarto-en.yml:1
-#, fuzzy, no-wrap
-#| msgid "NeoIPC Surveillance team"
+#, no-wrap
 msgid "The NeoIPC Surveillance team"
-msgstr "NeoIPC järelevalvemeeskond"
+msgstr ""
 
 #. type: Hash Value: keywords
 #: reports/Validation-Report/_quarto-en.yml:1
-#, fuzzy, no-wrap
-#| msgid "NeoIPC Surveillance team"
+#, no-wrap
 msgid "NeoIPC, Surveillance, Validation"
-msgstr "NeoIPC järelevalvemeeskond"
+msgstr ""
 
 #. type: Hash Value: subject
 #: reports/Validation-Report/_quarto-en.yml:1
-#, fuzzy, no-wrap
-#| msgid "for the NeoIPC Surveillance team"
+#, no-wrap
 msgid "Report on the current state of your NeoIPC Surveillance data set"
-msgstr "NeoIPC järelevalvemeeskonnale"
+msgstr ""
 
 #. type: Hash Value: title
 #: reports/Validation-Report/_quarto-en.yml:1
-#, fuzzy, no-wrap
-#| msgid "NeoIPC Surveillance Partner Report"
+#, no-wrap
 msgid "NeoIPC Surveillance Validation Report"
-msgstr "NeoIPC järelevalvepartneri aruanne"
+msgstr ""
 
 #. type: Hash Value: adm_problem_header_prefix
 #: reports/Validation-Report/content/_sR.yaml:1
@@ -4104,10 +4041,9 @@ msgstr ""
 
 #. type: Hash Value: hap_problem_header_prefix
 #: reports/Validation-Report/content/_sR.yaml:1
-#, fuzzy, no-wrap
-#| msgid "Resistant pathogen infection rate"
+#, no-wrap
 msgid "Pneumonia event with the infection date"
-msgstr "Resistentse patogeeni nakatumise määr"
+msgstr ""
 
 #. type: Hash Value: header departments
 #: reports/Validation-Report/content/_sR.yaml:1
@@ -4123,10 +4059,9 @@ msgstr ""
 
 #. type: Hash Value: neoipc_surveillance_partner_code
 #: reports/Validation-Report/content/_sR.yaml:1
-#, fuzzy, no-wrap
-#| msgid "NeoIPC Surveillance Partner Report"
+#, no-wrap
 msgid "NeoIPC Surveillance Partner Code"
-msgstr "NeoIPC järelevalvepartneri aruanne"
+msgstr ""
 
 #. type: Hash Value: patient_problem_dashboard_link_description
 #: reports/Validation-Report/content/_sR.yaml:1
@@ -4428,10 +4363,9 @@ msgstr ""
 
 #. type: Hash Value: ssi_types 1
 #: reports/Validation-Report/content/_sR.yaml:1
-#, fuzzy, no-wrap
-#| msgid "Surgical site infection"
+#, no-wrap
 msgid "superficial incisional SSI"
-msgstr "Operatsioonikoha infektsioon"
+msgstr ""
 
 #. type: Hash Value: ssi_types 2
 #: reports/Validation-Report/content/_sR.yaml:1
@@ -4447,10 +4381,9 @@ msgstr ""
 
 #. type: Hash Value: sur_problem_header_prefix
 #: reports/Validation-Report/content/_sR.yaml:1
-#, fuzzy, no-wrap
-#| msgid "Surgical Procedure Rate"
+#, no-wrap
 msgid "Surgical Procedure event with the procedure date"
-msgstr "Kirurgiliste protseduuride määr"
+msgstr ""
 
 #. type: Plain text
 #: reports/Validation-Report/en/_problems_intro.qmd:8
@@ -4820,10 +4753,9 @@ msgstr ""
 
 #. type: Bullet: '* '
 #: reports/Validation-Report/en/_problem_detail_0011.qmd:9
-#, fuzzy, no-wrap
-#| msgid "Surgical site infection"
+#, no-wrap
 msgid "Superficial incisional infection: 30 days\n"
-msgstr "Operatsioonikoha infektsioon"
+msgstr ""
 
 #. type: Bullet: '* '
 #: reports/Validation-Report/en/_problem_detail_0011.qmd:9
@@ -4867,10 +4799,9 @@ msgstr ""
 
 #. type: Bullet: '2. '
 #: reports/Validation-Report/en/_problem_detail_0011.qmd:22
-#, fuzzy, no-wrap
-#| msgid "Not a surgical procedure"
+#, no-wrap
 msgid "No form has been created for the surgical procedure\n"
-msgstr "Ei ole kirurgiline protseduur"
+msgstr ""
 
 #. type: Plain text
 #: reports/Validation-Report/en/_problem_detail_0011.qmd:24
@@ -5587,166 +5518,3 @@ msgstr ""
 #, no-wrap
 msgid "![The Next and Previous buttons in the event timeline of the Tracked Entity Instance Dashboard](img/fig-event-timeline-full.png){#fig-event-timeline-full fig-alt=\"A screenshot of the Tracked Entity Instance Dashboard with the Next and Previous buttons in the event timeline highlighted\"}\n"
 msgstr ""
-
-#, fuzzy, no-wrap
-#~| msgid "translations.tex"
-#~ msgid "../common/translations.tex"
-#~ msgstr "tõlked.tex"
-
-#, fuzzy
-#~| msgid "This project has received funding from the European Union’s Horizon 2020 research and%sinnovation programme under grant agreement No 965328."
-#~ msgid "This project has received funding from the European Union's Horizon 2020 research and innovation programme under grant agreement No 965328."
-#~ msgstr "See projekt on saanud rahastust Euroopa Liidu teadusuuringute ja innovatsiooni programmi%sHorisont 2020 raames toetuslepingu nr 965328 alusel."
-
-#, fuzzy
-#~| msgid "This project has received funding from the European Union’s Horizon 2020 research and%sinnovation programme under grant agreement No 965328."
-#~ msgid "This project has received funding from the European Union’s Horizon 2020 research and innovation programme under grant agreement No 965328."
-#~ msgstr "See projekt on saanud rahastust Euroopa Liidu teadusuuringute ja innovatsiooni programmi%sHorisont 2020 raames toetuslepingu nr 965328 alusel."
-
-#~ msgid "This project has received funding from the European Union’s Horizon 2020 research and innovation"
-#~ msgstr "See projekt on saanud rahastust Euroopa Liidu teadusuuringute ja innovatsiooni raamprogrammist Horisont 2020"
-
-#~ msgid "programme under grant agreement No 965328."
-#~ msgstr "toetuslepingu nr 965328 alusel."
-
-#, no-wrap
-#~ msgid "Number of departments contributing at least one patient record:\n"
-#~ msgstr "Vähemalt ühe patsiendi andmeid esitanud osakondade arv:\n"
-
-#, no-wrap
-#~ msgid ":   `r dR$numberOfDepartments`\n"
-#~ msgstr ":   `r dR$numberOfDepartments`\n"
-
-#, no-wrap
-#~ msgid "Number of patient records:\n"
-#~ msgstr "Patsiendiandmete arv:\n"
-
-#, no-wrap
-#~ msgid ":   `r dR$numberOfPatients`\n"
-#~ msgstr ":   `r dR$numberOfPatients`\n"
-
-#, no-wrap
-#~ msgid "Number of patient admissions:\n"
-#~ msgstr "Patsientide vastuvõtmiste arv:\n"
-
-#, no-wrap
-#~ msgid ":   `r dR$numberOfAdmissions`\n"
-#~ msgstr ":   `r dR$numberOfAdmissions`\n"
-
-#, no-wrap
-#~ msgid "Sum of patient days:\n"
-#~ msgstr "Patsientide päevade summa:\n"
-
-#, no-wrap
-#~ msgid ":   `r dR$sumOfPatientDays`\n"
-#~ msgstr ":   `r dR$sumOfPatientDays`\n"
-
-#, no-wrap
-#~ msgid "Average surveillance period per patient:\n"
-#~ msgstr "Keskmine jälgimisperiood ühe patsiendi kohta:\n"
-
-#, no-wrap
-#~ msgid ":   `r dR$averageSurveillancePeriod` days\n"
-#~ msgstr ":   `r dR$averageSurveillancePeriod` päeva\n"
-
-#, no-wrap
-#~ msgid "Surgery"
-#~ msgstr "Kirurgia"
-
-#, no-wrap
-#~ msgid "Primary sepsis/BSI"
-#~ msgstr "Esmane sepsis/BSI"
-
-#, no-wrap
-#~ msgid "Pneumonia"
-#~ msgstr "Kopsupõletik"
-
-#, no-wrap
-#~ msgid "Necrotising Enterocolitis"
-#~ msgstr "Nekrotiseeriv enterokoliit"
-
-#, no-wrap
-#~ msgid "Surgical site infection"
-#~ msgstr "Operatsioonikoha infektsioon"
-
-#, no-wrap
-#~ msgid "CVC"
-#~ msgstr "CVC"
-
-#, no-wrap
-#~ msgid "INV"
-#~ msgstr "INV"
-
-#, no-wrap
-#~ msgid "NIV"
-#~ msgstr "NIV"
-
-#, no-wrap
-#~ msgid "PVC"
-#~ msgstr "PVC"
-
-#, no-wrap
-#~ msgid "Antibiotics"
-#~ msgstr "Antibiootikumid"
-
-#, no-wrap
-#~ msgid "Human milk"
-#~ msgstr "Rinnapiim"
-
-#, no-wrap
-#~ msgid "Kangaroo care"
-#~ msgstr "Känguruhooldus"
-
-#, no-wrap
-#~ msgid "Probiotics"
-#~ msgstr "Probiootikumid"
-
-#, fuzzy, no-wrap
-#~| msgid "Primary sepsis/BSI"
-#~ msgid "Primary Sepsis / BSI"
-#~ msgstr "Esmane sepsis/BSI"
-
-#, fuzzy, no-wrap
-#~| msgid "Surveillance"
-#~ msgid "Surveillance End"
-#~ msgstr "Järelevalve"
-
-#, fuzzy, no-wrap
-#~| msgid "Surgical Procedure Rate"
-#~ msgid "Surgical Procedure"
-#~ msgstr "Kirurgiliste protseduuride määr"
-
-#, fuzzy, no-wrap
-#~| msgid "Surgical site infection"
-#~ msgid "Surgical Site Infection"
-#~ msgstr "Operatsioonikoha infektsioon"
-
-#, fuzzy, no-wrap
-#~| msgid "Human milk"
-#~ msgid "Human Milk"
-#~ msgstr "Rinnapiim"
-
-#, fuzzy, no-wrap
-#~| msgid "Kangaroo care"
-#~ msgid "Kangaroo Care"
-#~ msgstr "Känguruhooldus"
-
-#, no-wrap
-#~ msgid "This report aggregates data from neonatal units in several countries. This means that, while it reflects a broad spectrum of care structures, it is only suitable as a benchmark to a somewhat limited extent due to the sometimes very different healthcare systems and the resources available there."
-#~ msgstr "Käesolevas aruandes on koondatud andmed mitme riigi vastsündinute osakondadest. See tähendab, et kuigi aruanne kajastab laia hooldusstruktuuride spektrit, on see mõnevõrra piiratud ulatuses sobiv võrdlusaluseks, kuna tervishoiusüsteemid ja seal kättesaadavad ressursid on mõnikord väga erinevad."
-
-#, no-wrap
-#~ msgid "The aim of NeoIPC Surveillance is therefore always to provide units with a relevant national or regional report, provided that a sufficient number of units in the respective region participate in the system."
-#~ msgstr "NeoIPC Surveillance'i eesmärk on seetõttu alati pakkuda osakondadele asjakohast riiklikku või piirkondlikku aruannet, tingimusel et süsteemis osaleb piisav arv osakondi vastavas piirkonnas."
-
-#, no-wrap
-#~ msgid "Multinational analysis"
-#~ msgstr "Rahvusvaheline analüüs"
-
-#, no-wrap
-#~ msgid "National report"
-#~ msgstr "Riiklik aruanne"
-
-#, no-wrap
-#~ msgid "The information presented here can therefore not fully describe the situation in the individual countries."
-#~ msgstr "Seetõttu ei saa siin esitatud teave täielikult kirjeldada olukorda üksikutes riikides."

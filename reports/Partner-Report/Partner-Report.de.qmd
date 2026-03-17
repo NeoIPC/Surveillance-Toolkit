@@ -1,6 +1,7 @@
 ---
 lang: de
 params:
+  partnerDataFile: NULL
   referenceDataFile: NULL
   unitCodes: NULL
   reportingPeriodFrom: NULL

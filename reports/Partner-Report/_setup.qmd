@@ -555,40 +555,71 @@ typedParams <- list(
   includeInvalidPatients = get_validation_exceptions(params$validationExceptionFile)
 )
 
-get_unit_data <- function() suppressWarnings(
-  import_dhis2(
-    connection_options = get_connection_options(
-      scheme = params$dhis2Scheme, hostname = params$dhis2Hostname,
-      port = params$dhis2Port, path = params$dhis2Path),
-    dataset_options = dhis2_dataset_options(
-      department_filter = typedParams$unitCodes,
-      surveillance_end_from = typedParams$reportingPeriodFrom,
-      surveillance_end_to = typedParams$reportingPeriodTo,
-      birth_weight_from = typedParams$birthWeightFrom,
-      birth_weight_to = typedParams$birthWeightTo,
-      gestational_age_from = typedParams$gestationWeeksFrom,
-      gestational_age_to = typedParams$gestationWeeksTo,
-      include_ineligible_patients = typedParams$includeNonCorePatients,
-      include_invalid_patients = typedParams$includeInvalidPatients,
-      include_world_bank_class = "yes",
-      include_country = "yes",
-      include_hospital = "yes",
-      include_department = "yes",
-      # For now test data is data from special test departments in DHIS.
-      # It does not hurt to include it because we'll typically also have
-      # a department filter which will remove these departments again if
-      # we're not interested in them
-      include_test_data = TRUE
-      ))) |>
-  neoipcr::calculate_department_data()
+if (!is.null(params$partnerDataFile)) {
+  if (!file.exists(params$partnerDataFile))
+    stop(sprintf("The file '%s' does not exist.", params$partnerDataFile))
+  partner_data <- jsonlite::unserializeJSON(
+    readChar(params$partnerDataFile,
+             file.info(params$partnerDataFile)$size))
 
-benchmark_data <- if (is.null(reference_data)) {
-  neoipcr::get_benchmark_data(
-    own = get_unit_data())
+  if (inherits(partner_data, "neoipcr_bnch_ds")) {
+    if (!is.null(reference_data))
+      stop("partnerDataFile already contains benchmark data; referenceDataFile is not applicable.")
+    benchmark_data <- partner_data
+    # Extract unit codes from the "own" dataset's metadata
+    data_unit_codes <- partner_data$metadata$own$dataset_options$department_filter
+  } else if (inherits(partner_data, "neoipcr_rep_ds")) {
+    benchmark_data <- if (is.null(reference_data)) {
+      neoipcr::get_benchmark_data(own = partner_data)
+    } else {
+      neoipcr::get_benchmark_data(own = partner_data, ref = reference_data)
+    }
+    # Extract unit codes from the dataset's metadata
+    data_unit_codes <- partner_data$metadata$dataset_options$department_filter
+  } else {
+    stop("partnerDataFile must contain a neoipcr_bnch_ds or neoipcr_rep_ds object.")
+  }
+
+  # Override unitCodes from data metadata (more reliable than QMD param in DataFile mode)
+  if (!is.null(data_unit_codes) && length(data_unit_codes) > 0) {
+    typedParams$unitCodes <- data_unit_codes
+  }
 } else {
-  neoipcr::get_benchmark_data(
-    own = get_unit_data(),
-    ref = reference_data)
+  get_unit_data <- function() suppressWarnings(
+    import_dhis2(
+      connection_options = get_connection_options(
+        scheme = params$dhis2Scheme, hostname = params$dhis2Hostname,
+        port = params$dhis2Port, path = params$dhis2Path),
+      dataset_options = dhis2_dataset_options(
+        department_filter = typedParams$unitCodes,
+        surveillance_end_from = typedParams$reportingPeriodFrom,
+        surveillance_end_to = typedParams$reportingPeriodTo,
+        birth_weight_from = typedParams$birthWeightFrom,
+        birth_weight_to = typedParams$birthWeightTo,
+        gestational_age_from = typedParams$gestationWeeksFrom,
+        gestational_age_to = typedParams$gestationWeeksTo,
+        include_ineligible_patients = typedParams$includeNonCorePatients,
+        include_invalid_patients = typedParams$includeInvalidPatients,
+        include_world_bank_class = "yes",
+        include_country = "yes",
+        include_hospital = "yes",
+        include_department = "yes",
+        # For now test data is data from special test departments in DHIS.
+        # It does not hurt to include it because we'll typically also have
+        # a department filter which will remove these departments again if
+        # we're not interested in them
+        include_test_data = TRUE
+        ))) |>
+    neoipcr::calculate_department_data()
+
+  benchmark_data <- if (is.null(reference_data)) {
+    neoipcr::get_benchmark_data(
+      own = get_unit_data())
+  } else {
+    neoipcr::get_benchmark_data(
+      own = get_unit_data(),
+      ref = reference_data)
+  }
 }
 
 ```

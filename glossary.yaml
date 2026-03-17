@@ -36,6 +36,9 @@ admission_sc: Admission
 antibiotics: antibiotics
 antibiotics_sc: Antibiotics
 cvc: CVC
+h2020_funding_statement: >-
+  This project has received funding from the European Union's Horizon 2020
+  research and innovation programme under grant agreement No 965328.
 hap: HAP
 human_milk: "human milk"
 human_milk_sc: "Human milk"

@@ -12,11 +12,23 @@ This script fetches the department/site list from DHIS2, filters by a regex, and
 param(
     [ArgumentCompleter({
         param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
-        $cacheFile = Join-Path $PSScriptRoot '..' 'data' 'local' 'site-codes.txt'
+        . "$PSScriptRoot/NeoipcReportHelpers.ps1"
+        $serverKey = Get-NeoipcServerKey `
+            -Scheme $fakeBoundParameters['Dhis2Scheme'] `
+            -Hostname $fakeBoundParameters['Dhis2Hostname'] `
+            -Port $fakeBoundParameters['Dhis2Port'] `
+            -Path $fakeBoundParameters['Dhis2Path']
+        $cacheFile = Join-Path $PSScriptRoot '..' 'data' 'local' $serverKey 'site-codes.txt'
         if (Test-Path -LiteralPath $cacheFile) {
             Get-Content -LiteralPath $cacheFile |
                 Where-Object { $_ -like "$wordToComplete*" } |
                 Sort-Object
+        } else {
+            $cacheBase = Join-Path $PSScriptRoot '..' 'data' 'local'
+            Get-ChildItem -LiteralPath $cacheBase -Recurse -Filter 'site-codes.txt' -ErrorAction SilentlyContinue |
+                Get-Content |
+                Sort-Object -Unique |
+                Where-Object { $_ -like "$wordToComplete*" }
         }
     })]
     [Parameter(Position = 0)]
@@ -37,7 +49,19 @@ param(
     [Parameter(Position = 2)]
     [string]$Token,
 
-    [string]$ValidationExceptionFile
+    [string]$ValidationExceptionFile,
+
+    [Parameter()]
+    [string]$Dhis2Scheme = $null,
+
+    [Parameter()]
+    [string]$Dhis2Hostname = $null,
+
+    [Parameter()]
+    [Nullable[int]]$Dhis2Port = $null,
+
+    [Parameter()]
+    [string]$Dhis2Path = $null
 )
 
 . "$PSScriptRoot/NeoipcReportHelpers.ps1"
@@ -46,7 +70,12 @@ $auth = Resolve-NeoipcAuth -Token $Token
 
 $reportDir = Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..' 'reports' 'Validation-Report')
 
-$sites = Get-NeoipcDepartments -Auth $auth -SiteCodeFilter $SiteCodeFilter
+$deptArgs = @{ Auth = $auth; SiteCodeFilter = $SiteCodeFilter }
+if ($Dhis2Scheme) { $deptArgs.Scheme = $Dhis2Scheme }
+if ($Dhis2Hostname) { $deptArgs.Hostname = $Dhis2Hostname }
+if ($Dhis2Port) { $deptArgs.Port = $Dhis2Port }
+if ($Dhis2Path) { $deptArgs.Path = $Dhis2Path }
+$sites = Get-NeoipcDepartments @deptArgs
 
 if (-not $sites -or $sites.Count -eq 0) {
     Write-Warning "No sites matched filter '$SiteCodeFilter'. Nothing to do."
@@ -78,6 +107,10 @@ try {
         if ($ValidationExceptionFile) {
             $quartoArgs += @('-P', "validationExceptionFile:$ValidationExceptionFile")
         }
+        if ($Dhis2Scheme) { $quartoArgs += @('-P', "dhis2Scheme:$Dhis2Scheme") }
+        if ($Dhis2Hostname) { $quartoArgs += @('-P', "dhis2Hostname:$Dhis2Hostname") }
+        if ($Dhis2Port) { $quartoArgs += @('-P', "dhis2Port:$Dhis2Port") }
+        if ($Dhis2Path) { $quartoArgs += @('-P', "dhis2Path:$Dhis2Path") }
         $skipRest = $false
         $errorLine = ''
         $isError = $false

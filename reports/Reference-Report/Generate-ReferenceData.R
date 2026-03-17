@@ -53,13 +53,19 @@ printUsage <- function() {
     "  --quiet, -q                          Suppress non-critical output\n",
     "  --verbose, -V                        Verbose output\n",
     "  --debug, -D                          Debug output\n",
-    "  --help, -h                           Show this help\n",
+    "  --help, -h                           Show this help\n\n",
+    "Connection settings:\n",
+    "  --scheme <scheme>                    URL scheme (default: https)\n",
+    "  --host <hostname>                    DHIS2 hostname\n",
+    "  --port <port>                        DHIS2 port\n",
+    "  --path <path>                        API base path\n",
     sep = ""
   )
 }
 
 long_map <- list(
-  "backup-dataset" = "backupDataset"
+  "backup-dataset" = "backupDataset",
+  "host" = "hostname"
 )
 
 short_map <- list(
@@ -297,7 +303,12 @@ includeNonCorePatients <- as_bool(
 validationExceptionFile <- as_null(args$validationExceptionFile)
 backupDataset <- as_null(args$backupDataset)
 
-connectionOptions <- neoipcr::dhis2_connection_options()
+conn_args <- list()
+if (!is.null(args$scheme)) conn_args$scheme <- args$scheme
+if (!is.null(args$hostname)) conn_args$hostname <- args$hostname
+if (!is.null(args$port)) conn_args$port <- args$port
+if (!is.null(args$path)) conn_args$path <- args$path
+connectionOptions <- do.call(neoipcr::dhis2_connection_options, conn_args)
 datasetOptions <- getDatasetOptions(
   reportingPeriodFrom = reportingPeriodFrom,
   reportingPeriodTo = reportingPeriodTo,

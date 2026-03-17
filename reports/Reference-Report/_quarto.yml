@@ -60,6 +60,11 @@ format:
         \ihead{\includegraphics[width=4cm]{../logos/LOGO_NEOIPC_2.png}}
         \ifoot*{\includegraphics[width=1.37cm]{../logos/eu-flag.png}}
         \ofoot{\pagemark}
+        \newcommand{\FooterText}{}
+        \cfoot*{%
+          \raggedright
+          \hspace{1.6cm}\parbox{0.8\textwidth}{\FooterText}
+        }
   docx:
     highlight-style: github
     number-sections: true

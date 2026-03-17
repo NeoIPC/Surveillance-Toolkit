@@ -1,8 +1,9 @@
 ---
 lang: en
 params:
+  partnerDataFile: NULL
   referenceDataFile: NULL
-  unitCodes: "DEMO_UNIT"
+  unitCodes: NULL
   reportingPeriodFrom: NULL
   reportingPeriodTo: NULL
   birthWeightFrom: NULL

@@ -1,22 +1,19 @@
-# German translations for the NeoIPC Surveillance Glossary
-# Copyright (C) Charité – Universitätsmedizin Berlin
+# Turkish translations for the NeoIPC Surveillance Glossary
+# Copyright (C) 2026 Charité – Universitätsmedizin Berlin
 # This file is distributed under the Creative Commons Attribution 4.0 International license
-# Brar Piening <brar.piening@charite.de>
-# Prefill add-on <noreply-addon-prefill@weblate.org>
-#
+# Automatically generated, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: NeoIPC Surveillance Glossary 0.9\n"
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2025-12-30 11:06+0100\n"
+"POT-Creation-Date: 2026-03-15 11:53+0000\n"
 "PO-Revision-Date: 2026-03-16 07:25+0000\n"
-"Last-Translator: Brar Piening <brar.piening@charite.de>\n"
+"Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
-"Language: de\n"
+"Language: tr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: glossary.yaml:34
 msgctxt "admission"
@@ -49,9 +46,6 @@ msgid ""
 "This project has received funding from the European Union's Horizon 2020 "
 "research and innovation programme under grant agreement No 965328."
 msgstr ""
-"Dieses Projekt wurde im Rahmen des Forschungs- und Innovationsprogramms "
-"Horizont 2020 der Europäischen Union unter der Fördervereinbarung Nr. 965328"
-" gefördert."
 
 #: glossary.yaml:42
 msgctxt "hap"
@@ -84,10 +78,9 @@ msgid "Kangaroo care"
 msgstr ""
 
 #: glossary.yaml:48
-#, ignore-same
 msgctxt "nec"
 msgid "NEC"
-msgstr "NEC"
+msgstr ""
 
 #: glossary.yaml:49
 msgctxt "necrotising_enterocolitis"
@@ -108,7 +101,7 @@ msgstr ""
 #, ignore-same
 msgctxt "neoipc_surveillance"
 msgid "NeoIPC Surveillance"
-msgstr "NeoIPC Surveillance"
+msgstr ""
 
 #: glossary.yaml:54
 msgctxt "niv"
@@ -188,13 +181,12 @@ msgstr ""
 #: glossary.yaml:69
 msgctxt "surveillance"
 msgid "surveillance"
-msgstr "Surveillance"
+msgstr ""
 
 #: glossary.yaml:70
-#, ignore-same
 msgctxt "surveillance_sc"
 msgid "Surveillance"
-msgstr "Surveillance"
+msgstr ""
 
 #: glossary.yaml:71
 msgctxt "surveillance_end"
