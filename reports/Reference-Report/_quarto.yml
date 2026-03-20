@@ -2,7 +2,7 @@ project:
   output-dir: _output
 profile:
   group:
-    - [en, de, es, et, gr, it]
+    - [en, de, el, es, et, it]
 date-meta: now
 includeHeader: true
 includeIntroductionTexts: true
@@ -52,6 +52,8 @@ format:
       text: |
         \usepackage{float}
         \usepackage{placeins}
+        \floatplacement{figure}{H}
+        \floatplacement{table}{H}
         \usepackage{graphicx}
         \usepackage{wrapfig}
         \usepackage{scrlayer-scrpage}

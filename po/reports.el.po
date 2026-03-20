@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NeoIPC Surveillance Reports 0.9\n"
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-03-17 07:46+0100\n"
+"POT-Creation-Date: 2026-03-17 16:19+0100\n"
 "PO-Revision-Date: 2026-01-26 20:35+0100\n"
 "Last-Translator: Brar Piening <brar.piening@charite.de>\n"
 "Language-Team: none\n"
@@ -3588,9 +3588,10 @@ msgstr ""
 
 #. type: Hash Value: field infection_type
 #: reports/Patient-Data-Report/content/_sR.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
+#| msgid "Section"
 msgid "Infection Type"
-msgstr ""
+msgstr "Ενότητα"
 
 #. type: Hash Value: field pathogen_name
 #: reports/Patient-Data-Report/content/_sR.yaml:1
@@ -3600,9 +3601,10 @@ msgstr ""
 
 #. type: Hash Value: field patient_days
 #: reports/Patient-Data-Report/content/_sR.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
+#| msgid "Reference Report"
 msgid "Patient Days"
-msgstr ""
+msgstr "Αναφορές"
 
 #. type: Hash Value: field patient_id
 #: reports/Patient-Data-Report/content/_sR.yaml:1
@@ -3909,9 +3911,10 @@ msgstr "Αναφορές"
 
 #. type: Hash Value: title
 #: reports/Reference-Report/_quarto-en.yml:1
-#, no-wrap
+#, fuzzy, no-wrap
+#| msgid "Reference Report"
 msgid "NeoIPC Surveillance Reference Report"
-msgstr ""
+msgstr "Αναφορές"
 
 #. type: Hash Value: headerList datasetCompositionHeader
 #: reports/Reference-Report/content/_sR.yaml:1
@@ -4376,9 +4379,10 @@ msgstr ""
 
 #. type: Hash Value: ssi_problem_header_prefix
 #: reports/Validation-Report/content/_sR.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
+#| msgid "Severe infection"
 msgid "Surgical Site Infection event with the infection date"
-msgstr ""
+msgstr "Ενότητα"
 
 #. type: Hash Value: ssi_types 1
 #: reports/Validation-Report/content/_sR.yaml:1
@@ -5538,415 +5542,308 @@ msgstr ""
 msgid "![The Next and Previous buttons in the event timeline of the Tracked Entity Instance Dashboard](img/fig-event-timeline-full.png){#fig-event-timeline-full fig-alt=\"A screenshot of the Tracked Entity Instance Dashboard with the Next and Previous buttons in the event timeline highlighted\"}\n"
 msgstr ""
 
-#, fuzzy, no-wrap
-#~| msgid "Severe infection"
-#~ msgid "Surgical Site Infection"
-#~ msgstr "Ενότητα"
-
-#, no-wrap
 #~ msgid "BibTeX citation:"
 #~ msgstr "Αναφορά BibTeX:"
 
-#, no-wrap
 #~ msgid "For attribution, please cite this work as:"
 #~ msgstr "Για απόδοση ευγνωμοσύνης, παρακαλούμε αναφερθείτε σε αυτό το έργο ως:"
 
-#, no-wrap
 #~ msgid "View License"
 #~ msgstr "Προβολή Άδειας"
 
-#, no-wrap
 #~ msgid "Article Notebook"
 #~ msgstr "Σημειωματάριο Άρθρου"
 
-#, no-wrap
 #~ msgid "Back to top"
 #~ msgstr "Επιστροφή στην κορυφή"
 
-#, no-wrap
 #~ msgid "Caution"
 #~ msgstr "Προσοχή"
 
-#, no-wrap
 #~ msgid "Important"
 #~ msgstr "Σημαντικό"
 
-#, no-wrap
 #~ msgid "Note"
 #~ msgstr "Σημείωση"
 
-#, no-wrap
 #~ msgid "Tip"
 #~ msgstr "Συμβουλή"
 
-#, no-wrap
 #~ msgid "Warning"
 #~ msgstr "Προειδοποίηση"
 
-#, no-wrap
 #~ msgid "Line"
 #~ msgstr "Γραμμή"
 
-#, no-wrap
 #~ msgid "Lines"
 #~ msgstr "Γραμμές"
 
-#, no-wrap
 #~ msgid "Code Links"
 #~ msgstr "Σύνδεσμοι κώδικα"
 
-#, no-wrap
 #~ msgid "Code"
 #~ msgstr "Κώδικας"
 
-#, no-wrap
 #~ msgid "Hide All Code"
 #~ msgstr "Απόκρυψη όλου του κώδικα"
 
-#, no-wrap
 #~ msgid "Show All Code"
 #~ msgstr "Εμφάνιση όλου του κώδικα"
 
-#, no-wrap
 #~ msgid "Source Code"
 #~ msgstr "Πηγαίος κώδικας"
 
-#, no-wrap
 #~ msgid "View Source"
 #~ msgstr "Προβολή πηγαίου κώδικα"
 
-#, no-wrap
 #~ msgid "Copy to Clipboard"
 #~ msgstr "Αντιγραφή στο πρόχειρο"
 
-#, no-wrap
 #~ msgid "Copied!"
 #~ msgstr "Αντιγράφηκε!"
 
-#, no-wrap
 #~ msgid "Appendix"
 #~ msgstr "Παράρτημα"
 
-#, no-wrap
 #~ msgid "Chapter"
 #~ msgstr "Κεφάλαιο"
 
-#, no-wrap
 #~ msgid "Conjecture"
 #~ msgstr "Υπόθεση"
 
-#, no-wrap
 #~ msgid "Corollary"
 #~ msgstr "Πόρισμα"
 
-#, no-wrap
 #~ msgid "Definition"
 #~ msgstr "Ορισμός"
 
-#, no-wrap
 #~ msgid "Equation"
 #~ msgstr "Εξίσωση"
 
-#, no-wrap
 #~ msgid "Example"
 #~ msgstr "Παράδειγμα"
 
-#, no-wrap
 #~ msgid "Exercise"
 #~ msgstr "Άσκηση"
 
-#, no-wrap
 #~ msgid "Figure"
 #~ msgstr "Σχήμα"
 
-#, no-wrap
 #~ msgid "Lemma"
 #~ msgstr "Λήμμα"
 
-#, no-wrap
 #~ msgid "List of Figures"
 #~ msgstr "Λίστα Σχημάτων"
 
-#, no-wrap
 #~ msgid "List of Listings"
 #~ msgstr "Λίστα Καταλόγων"
 
-#, no-wrap
 #~ msgid "List of Tables"
 #~ msgstr "Λίστα Πινάκων"
 
-#, no-wrap
 #~ msgid "Listing"
 #~ msgstr "Κατάλογος"
 
-#, no-wrap
 #~ msgid "Table"
 #~ msgstr "Πίνακας"
 
-#, no-wrap
 #~ msgid "Theorem"
 #~ msgstr "Θεώρημα"
 
-#, no-wrap
 #~ msgid "Draft"
 #~ msgstr "Σχέδιο"
 
-#, no-wrap
 #~ msgid "Proof"
 #~ msgstr "Απόδειξη"
 
-#, no-wrap
 #~ msgid "Remark"
 #~ msgstr "Παρατήρηση"
 
-#, no-wrap
 #~ msgid "Solution"
 #~ msgstr "Λύση"
 
-#, no-wrap
 #~ msgid "Launch Binder"
 #~ msgstr "Εκκίνηση Binder"
 
-#, no-wrap
 #~ msgid "Launch Dev Container"
 #~ msgstr "Εκκίνηση Dev Container"
 
-#, no-wrap
 #~ msgid "All"
 #~ msgstr "Όλα"
 
-#, no-wrap
 #~ msgid "Author"
 #~ msgstr "Συγγραφέας"
 
-#, no-wrap
 #~ msgid "Date"
 #~ msgstr "Ημερομηνία"
 
-#, no-wrap
 #~ msgid "Description"
 #~ msgstr "Περιγραφή"
 
-#, no-wrap
 #~ msgid "File Name"
 #~ msgstr "Όνομα αρχείου"
 
-#, no-wrap
 #~ msgid "Reading Time"
 #~ msgstr "Χρόνος ανάγνωσης"
 
-#, no-wrap
 #~ msgid "Subtitle"
 #~ msgstr "Υπότιτλος"
 
-#, no-wrap
 #~ msgid "Title"
 #~ msgstr "Τίτλος"
 
-#, no-wrap
 #~ msgid "Word Count"
 #~ msgstr "Μέτρηση Λέξεων"
 
-#, no-wrap
 #~ msgid "Filter"
 #~ msgstr "Φίλτρο"
 
-#, no-wrap
 #~ msgid "{0} min"
 #~ msgstr "{0} λεπτά"
 
-#, no-wrap
 #~ msgid "No matching items"
 #~ msgstr "Δεν υπάρχουν αντιστοιχίες"
 
-#, no-wrap
 #~ msgid "Order By"
 #~ msgstr "Ταξινόμηση κατά"
 
-#, no-wrap
 #~ msgid "Oldest"
 #~ msgstr "Παλαιότερο"
 
-#, no-wrap
 #~ msgid "Newest"
 #~ msgstr "Νεότερο"
 
-#, no-wrap
 #~ msgid "Default"
 #~ msgstr "Προεπιλογή"
 
-#, no-wrap
 #~ msgid "Low to High"
 #~ msgstr "Χαμηλό προς Υψηλό"
 
-#, no-wrap
 #~ msgid "High to Low"
 #~ msgstr "Υψηλό προς Χαμηλό"
 
-#, no-wrap
 #~ msgid "{0} words"
 #~ msgstr "{0} λέξεις"
 
-#, no-wrap
 #~ msgid "MECA Bundle"
 #~ msgstr "Αρχείο MECA"
 
-#, no-wrap
 #~ msgid "Back to Article"
 #~ msgstr "Πίσω στο Άρθρο"
 
-#, no-wrap
 #~ msgid "Download Notebook"
 #~ msgstr "Λήψη Σημειωματαρίου"
 
-#, no-wrap
 #~ msgid "Download Source"
 #~ msgstr "Λήψη πηγαίου κώδικα"
 
-#, no-wrap
 #~ msgid "Other Links"
 #~ msgstr "Άλλοι Σύνδεσμοι"
 
-#, no-wrap
 #~ msgid "Other Formats"
 #~ msgstr "Άλλες μορφές"
 
-#, no-wrap
 #~ msgid "Notebooks"
 #~ msgstr "Σημειωματάρια"
 
-#, no-wrap
 #~ msgid "Edit this page"
 #~ msgstr "Επεξεργασία αυτής της σελίδας"
 
-#, no-wrap
 #~ msgid "Report an issue"
 #~ msgstr "Αναφορά προβλήματος"
 
-#, no-wrap
 #~ msgid "View source"
 #~ msgstr "Προβολή πηγής"
 
-#, no-wrap
 #~ msgid "Clear"
 #~ msgstr "Καθαρισμός"
 
-#, no-wrap
 #~ msgid "Copy link to search"
 #~ msgstr "Αντιγραφή συνδέσμου αναζήτησης"
 
-#, no-wrap
 #~ msgid "Cancel"
 #~ msgstr "Ακύρωση"
 
-#, no-wrap
 #~ msgid "Hide additional matches"
 #~ msgstr "Απόκρυψη επιπλέον αντιστοιχιών"
 
-#, no-wrap
 #~ msgid "Search"
 #~ msgstr "Αναζήτηση"
 
-#, no-wrap
 #~ msgid "matching documents"
 #~ msgstr "ταιριάζοντα έγγραφα"
 
-#, no-wrap
 #~ msgid "more match in this document"
 #~ msgstr "επιπλέον αντιστοιχία σε αυτό το έγγραφο"
 
-#, no-wrap
 #~ msgid "more matches in this document"
 #~ msgstr "επιπλέον αντιστοιχίες σε αυτό το έγγραφο"
 
-#, no-wrap
 #~ msgid "No results"
 #~ msgstr "Δεν βρέθηκαν αποτελέσματα"
 
-#, no-wrap
 #~ msgid "Submit"
 #~ msgstr "Υποβολή"
 
-#, no-wrap
 #~ msgid "Abstract"
 #~ msgstr "Περίληψη"
 
-#, no-wrap
 #~ msgid "Appendices"
 #~ msgstr "Παραρτήματα"
 
-#, no-wrap
 #~ msgid "Citation"
 #~ msgstr "Αναφορά"
 
-#, no-wrap
 #~ msgid "Copyright"
 #~ msgstr "Πνευματικά δικαιώματα"
 
-#, no-wrap
 #~ msgid "Footnotes"
 #~ msgstr "Υποσημειώσεις"
 
-#, no-wrap
 #~ msgid "References"
 #~ msgstr "Αναφορές"
 
-#, no-wrap
 #~ msgid "Reuse"
 #~ msgstr "Επαναχρησιμοποίηση"
 
-#, no-wrap
 #~ msgid "Affiliations"
 #~ msgstr "Συνδρομές"
 
-#, no-wrap
 #~ msgid "Affiliation"
 #~ msgstr "Συνδρομή"
 
-#, no-wrap
 #~ msgid "Authors"
 #~ msgstr "Συγγραφείς"
 
-#, no-wrap
 #~ msgid "Keywords"
 #~ msgstr "Λέξεις-κλειδιά"
 
-#, no-wrap
 #~ msgid "Published"
 #~ msgstr "Δημοσιευμένο"
 
-#, no-wrap
 #~ msgid "Table of contents"
 #~ msgstr "Πίνακας περιεχομένων"
 
-#, no-wrap
 #~ msgid "On this page"
 #~ msgstr "Σε αυτήν τη σελίδα"
 
-#, no-wrap
 #~ msgid "Toggle dark mode"
 #~ msgstr "Εναλλαγή σκοτεινού θέματος"
 
-#, no-wrap
 #~ msgid "Toggle navigation"
 #~ msgstr "Εναλλαγή πλοήγησης"
 
-#, no-wrap
 #~ msgid "Toggle reader mode"
 #~ msgstr "Εναλλαγή λειτουργίας ανάγνωσης"
 
-#, no-wrap
 #~ msgid "Toggle section"
 #~ msgstr "Εναλλαγή ενότητας"
 
-#, no-wrap
 #~ msgid "Toggle sidebar navigation"
 #~ msgstr "Εναλλαγή πλαϊνής γραμμής πλοήγησης"
 
-#, no-wrap
 #~ msgid "Download"
 #~ msgstr "Λήψη"
 
-#, no-wrap
 #~ msgid "Share"
 #~ msgstr "Μοιραστείτε"

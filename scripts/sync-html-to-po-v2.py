@@ -842,7 +842,7 @@ def main():
     parser = argparse.ArgumentParser(description='Sync HTML translations to PO files')
     parser.add_argument('--html-dir', required=True, help='Directory containing HTML files')
     parser.add_argument('--po-dir', required=True, help='Directory containing PO files')
-    parser.add_argument('--locales', nargs='+', default=['de', 'es', 'et', 'gr', 'it'],
+    parser.add_argument('--locales', nargs='+', default=['de', 'el', 'es', 'et', 'it'],
                        help='Locales to process')
     parser.add_argument('--replace-de', action='store_true',
                        help='Replace existing German translations')

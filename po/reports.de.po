@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NeoIPC Surveillance Reports 0.9\n"
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-03-17 07:46+0100\n"
+"POT-Creation-Date: 2026-03-17 16:19+0100\n"
 "PO-Revision-Date: 2026-03-16 14:49+0100\n"
 "Last-Translator: Brar Piening <brar.piening@charite.de>\n"
 "Language-Team: none\n"
@@ -5686,7 +5686,6 @@ msgstr ""
 msgid "![The Next and Previous buttons in the event timeline of the Tracked Entity Instance Dashboard](img/fig-event-timeline-full.png){#fig-event-timeline-full fig-alt=\"A screenshot of the Tracked Entity Instance Dashboard with the Next and Previous buttons in the event timeline highlighted\"}\n"
 msgstr "![Die Schaltflächen \"Next\" und \"Previous\" in der Ereignis-Zeitleiste des Tracked Entity Instance Dashboards](img/fig-event-timeline-full.png){#fig-event-timeline-full fig-alt=\"Ein Screenshot des Tracked Entity Instance Dashboards, in dem die Schaltflächen \\\"Next\\\" und \\\"Previous\\\" in der Ereignis-Zeitleiste hervorgehoben sind\"}\n"
 
-#, no-wrap
 #~ msgid ""
 #~ "\\cfoot*{%\n"
 #~ "  \\raggedright\n"
@@ -5698,14 +5697,12 @@ msgstr "![Die Schaltflächen \"Next\" und \"Previous\" in der Ereignis-Zeitleist
 #~ "  \\hspace{1.6cm}\\parbox{0.8\\textwidth}{\\FooterText}\n"
 #~ "}\n"
 
-#, no-wrap
 #~ msgid "../common/translations.tex"
 #~ msgstr "../common/translations.de.tex"
 
 #~ msgid "This project has received funding from the European Union’s Horizon 2020 research and innovation programme under grant agreement No 965328."
 #~ msgstr "Dieses Projekt wurde im Rahmen des Forschungs- und Innovationsprogramms Horizont 2020 der Europäischen Union unter der Fördervereinbarung Nr. 965328 gefördert."
 
-#, no-wrap
 #~ msgid ""
 #~ "\\cfoot*{%\n"
 #~ "  \\raggedright\n"
@@ -5725,150 +5722,113 @@ msgstr "![Die Schaltflächen \"Next\" und \"Previous\" in der Ereignis-Zeitleist
 #~ msgid "programme under grant agreement No 965328."
 #~ msgstr "der Europäischen Union unter der Fördervereinbarung Nr. 965328 gefördert."
 
-#, no-wrap
 #~ msgid "Number of departments contributing at least one patient record:\n"
 #~ msgstr "Anzahl der Abteilungen, die mindestens einen Patienten beigetragen haben:\n"
 
-#, no-wrap
 #~ msgid ":   `r dR$numberOfDepartments`\n"
 #~ msgstr ":   `r dR$numberOfDepartments`\n"
 
-#, no-wrap
 #~ msgid "Number of patient records:\n"
 #~ msgstr "Anzahl der Patienten:\n"
 
-#, no-wrap
 #~ msgid ":   `r dR$numberOfPatients`\n"
 #~ msgstr ":   `r dR$numberOfPatients`\n"
 
-#, no-wrap
 #~ msgid "Number of patient admissions:\n"
 #~ msgstr "Anzahl der Patientenaufnahmen:\n"
 
-#, no-wrap
 #~ msgid ":   `r dR$numberOfAdmissions`\n"
 #~ msgstr ":   `r dR$numberOfAdmissions`\n"
 
-#, no-wrap
 #~ msgid "Sum of patient days:\n"
 #~ msgstr "Summe der Patiententage:\n"
 
-#, no-wrap
 #~ msgid ":   `r dR$sumOfPatientDays`\n"
 #~ msgstr ":   `r dR$sumOfPatientDays`\n"
 
-#, no-wrap
 #~ msgid "Average surveillance period per patient:\n"
 #~ msgstr "Durchschnittliche Surveillance-Dauer pro Patient:\n"
 
-#, no-wrap
 #~ msgid ":   `r dR$averageSurveillancePeriod` days\n"
 #~ msgstr ":   `r dR$averageSurveillancePeriod` Tage\n"
 
-#, no-wrap
 #~ msgid "Surgery"
 #~ msgstr "Chirurgie"
 
-#, no-wrap
 #~ msgid "Primary sepsis/BSI"
 #~ msgstr "Primäre Sepsis/BSI"
 
-#, no-wrap
 #~ msgid "Pneumonia"
 #~ msgstr "Pneumonie"
 
-#, no-wrap
 #~ msgid "Necrotising Enterocolitis"
 #~ msgstr "Nekrotisierende Enterokolitis"
 
-#, no-wrap
 #~ msgid "Surgical site infection"
 #~ msgstr "Postoperative Wundinfektion"
 
-#, no-wrap
 #~ msgid "CVC"
 #~ msgstr "ZVK"
 
-#, no-wrap
 #~ msgid "INV"
 #~ msgstr "INV"
 
-#, no-wrap
 #~ msgid "NIV"
 #~ msgstr "NIV"
 
-#, no-wrap
 #~ msgid "PVC"
 #~ msgstr "PVK"
 
-#, no-wrap
 #~ msgid "Antibiotics"
 #~ msgstr "Antibiotika"
 
-#, no-wrap
 #~ msgid "Human milk"
 #~ msgstr "Humanmilch"
 
-#, no-wrap
 #~ msgid "Kangaroo care"
 #~ msgstr "Känguruhpflege"
 
-#, no-wrap
 #~ msgid "Probiotics"
 #~ msgstr "Probiotika"
 
-#, no-wrap
 #~ msgid "days"
 #~ msgstr "Tage"
 
-#, no-wrap
 #~ msgid "Admission"
 #~ msgstr "Aufnahme"
 
-#, no-wrap
 #~ msgid "Primary Sepsis / BSI"
 #~ msgstr "Primäre Sepsis / BSI"
 
-#, no-wrap
 #~ msgid "Surveillance End"
 #~ msgstr "Surveillance-Ende"
 
-#, no-wrap
 #~ msgid "Surgical Procedure"
 #~ msgstr "Chirurgischer Eingriff"
 
-#, no-wrap
 #~ msgid "Surgical Site Infection"
 #~ msgstr "Postoperative Wundinfektion"
 
-#, no-wrap
 #~ msgid "Human Milk"
 #~ msgstr "Muttermilch"
 
-#, no-wrap
 #~ msgid "Kangaroo Care"
 #~ msgstr "Känguru-Pflege"
 
-#, no-wrap
 #~ msgid "weeks"
 #~ msgstr "Wochen"
 
-#, no-wrap
 #~ msgid "This report aggregates data from neonatal units in several countries. This means that, while it reflects a broad spectrum of care structures, it is only suitable as a benchmark to a somewhat limited extent due to the sometimes very different healthcare systems and the resources available there."
 #~ msgstr "Dieser Bericht fasst Daten aus neonatologischen Abteilungen in mehreren Ländern zusammen. Das bedeutet, dass er zwar ein breites Spektrum an Versorgungsstrukturen widerspiegelt, aufgrund der teilweise sehr unterschiedlichen Gesundheitssysteme und der dort verfügbaren Ressourcen jedoch nur in begrenztem Umfang als Benchmark geeignet ist."
 
-#, no-wrap
 #~ msgid "The aim of NeoIPC Surveillance is therefore always to provide units with a relevant national or regional report, provided that a sufficient number of units in the respective region participate in the system."
 #~ msgstr "Das Ziel der NeoIPC Surveillance ist es daher stets, den Partnern einen relevanten nationalen oder regionalen Bericht zur Verfügung zu stellen, vorausgesetzt, dass eine ausreichende Anzahl von Abteilungen in der jeweiligen Region an dem System teilnimmt."
 
-#, no-wrap
 #~ msgid "Multinational analysis"
 #~ msgstr "Multinationale Analyse"
 
-#, no-wrap
 #~ msgid "National report"
 #~ msgstr "Nationale Auswertung"
 
-#, no-wrap
 #~ msgid "The information presented here can therefore not fully describe the situation in the individual countries."
 #~ msgstr "Die hier dargestellten Informationen können daher die Situation in den einzelnen Ländern nicht vollständig beschreiben."

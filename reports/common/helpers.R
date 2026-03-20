@@ -75,38 +75,46 @@ get_string_resources <- function(x) {
     sR,
     yaml::read_yaml(file = yaml_path, handlers = handlers))
 
-  yaml_path <- paste0("../../glossary.", localeObj$language, "_", localeObj$territory, ".yaml")
-  if(file.exists(yaml_path)) sR <- modifyList(
-    sR,
-    yaml::read_yaml(file = yaml_path, handlers = handlers))
+  if (!is.null(localeObj$territory)) {
+    yaml_path <- paste0("../../glossary.", localeObj$language, "_", localeObj$territory, ".yaml")
+    if(file.exists(yaml_path)) sR <- modifyList(
+      sR,
+      yaml::read_yaml(file = yaml_path, handlers = handlers))
+  }
 
   yaml_path <- paste0("../common.", localeObj$language, ".yaml")
   if(file.exists(yaml_path)) sR <- modifyList(
     sR,
     yaml::read_yaml(file = yaml_path, handlers = handlers))
 
-  yaml_path <- paste0("../common.", localeObj$language, "_", localeObj$territory, ".yaml")
-  if(file.exists(yaml_path)) sR <- modifyList(
-    sR,
-    yaml::read_yaml(file = yaml_path, handlers = handlers))
+  if (!is.null(localeObj$territory)) {
+    yaml_path <- paste0("../common.", localeObj$language, "_", localeObj$territory, ".yaml")
+    if(file.exists(yaml_path)) sR <- modifyList(
+      sR,
+      yaml::read_yaml(file = yaml_path, handlers = handlers))
+  }
 
   yaml_path <- paste0("content.", localeObj$language, "/_sR.yaml")
   if(file.exists(yaml_path)) sR <- modifyList(
     sR,
     yaml::read_yaml(file = yaml_path, handlers = handlers))
 
-  yaml_path <- paste0("content.", localeObj$language, "_", localeObj$territory, "/_sR.yaml")
-  if(file.exists(yaml_path)) sR <- modifyList(
-    sR,
-    yaml::read_yaml(file = yaml_path, handlers = handlers))
+  if (!is.null(localeObj$territory)) {
+    yaml_path <- paste0("content.", localeObj$language, "_", localeObj$territory, "/_sR.yaml")
+    if(file.exists(yaml_path)) sR <- modifyList(
+      sR,
+      yaml::read_yaml(file = yaml_path, handlers = handlers))
+  }
 
   return(sR)
 }
 
 get_localised_path <- function(file_name, language, territory) {
-  yaml_path <- paste0("content.", language, "_", territory, "/", file_name)
-  if(file.exists(yaml_path)) {
-    return(yaml_path)
+  if (!is.null(territory)) {
+    yaml_path <- paste0("content.", language, "_", territory, "/", file_name)
+    if(file.exists(yaml_path)) {
+      return(yaml_path)
+    }
   }
 
   yaml_path <- paste0("content.", language, "/", file_name)

@@ -405,11 +405,143 @@ function Invoke-QuartoRender {
 
 <#
 .SYNOPSIS
+Run an Rscript command and parse its output, handling multi-line rlang errors.
+
+.DESCRIPTION
+Executes Rscript with the given arguments, routing output to Write-Verbose,
+Write-Warning, or Write-Host (red) depending on content. Multi-line rlang
+error messages (! message, i bullets) are kept together and displayed in red.
+Backtrace lines are silently collected in Messages for debugging.
+
+Returns a result object identical in shape to Invoke-QuartoRender.
+
+.PARAMETER Arguments
+Array of arguments to pass to Rscript.
+
+.PARAMETER Description
+Label used in debug/error messages. Default: 'Rscript'.
+
+.PARAMETER Command
+The Rscript executable. Default: 'Rscript'.
+
+.OUTPUTS
+PSCustomObject with Status ('Success' or 'Error'), ExitCode, and Messages.
+#>
+function Invoke-Rscript {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string[]]$Arguments,
+
+        [Parameter()]
+        [string]$Description = 'Rscript',
+
+        [Parameter()]
+        [string]$Command = 'Rscript'
+    )
+
+    $messages = [System.Collections.Generic.List[string]]::new()
+    $errorLines = [System.Collections.Generic.List[string]]::new()
+    $isError = $false
+    $inBacktrace = $false
+
+    Write-Debug "$Description command: $Command $($Arguments -join ' ')"
+
+    & $Command @Arguments 2>&1 | ForEach-Object -Process {
+        $s = "$_"
+        if ($s -eq 'System.Management.Automation.RemoteException') { $s = '' }
+
+        $messages.Add($s) | Out-Null
+
+        if ($isError) {
+            if ($s -match '^Backtrace:') {
+                $inBacktrace = $true
+            }
+            elseif ($inBacktrace) {
+                # Silently collect backtrace lines (available in Messages)
+            }
+            elseif ($s -match '^\s*$') {
+                # skip blank lines in error block
+            }
+            elseif ($s -eq 'Execution halted') {
+                # final R line after an error — no need to display
+            }
+            else {
+                $errorLines.Add($s) | Out-Null
+                Write-Host $s -ForegroundColor Red
+            }
+        }
+        elseif ($s -match '^(Error)|(Fehler)') {
+            $isError = $true
+            $errorLines.Add($s) | Out-Null
+            Write-Host $s -ForegroundColor Red
+        }
+        elseif ($s -match "^(`e\[39m)?(`e\[33m)?WARNING") {
+            $s | Write-Warning
+        }
+        else {
+            $s | Write-Verbose
+        }
+    }
+
+    $exitCode = $LASTEXITCODE
+
+    if ($isError -or $exitCode -ne 0) {
+        $status = 'Error'
+        if ($exitCode -ne 0 -and -not $isError) {
+            $messages.Add("$Description exit code $exitCode") | Out-Null
+        }
+    }
+    else {
+        $status = 'Success'
+    }
+
+    [PSCustomObject]@{
+        Status     = $status
+        ExitCode   = $exitCode
+        Messages   = $messages
+        ErrorLines = $errorLines
+    }
+}
+
+<#
+.SYNOPSIS
+Split a locale code into its language and territory components.
+
+.DESCRIPTION
+Parses locale codes like 'de_AT', 'de', or 'en_GB' into a hashtable with
+Language, Territory, and Code fields.
+
+.PARAMETER Locale
+Locale code (e.g. 'de_AT', 'de', 'en_GB', 'en').
+
+.OUTPUTS
+Hashtable with keys: Language (always set), Territory (null when absent), Code (original input).
+#>
+function Split-NeoipcLocale {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string]$Locale
+    )
+
+    $parts = $Locale -split '_', 2
+    return @{
+        Language  = $parts[0].ToLowerInvariant()
+        Territory = if ($parts.Count -gt 1) { $parts[1] } else { $null }
+        Code      = $Locale
+    }
+}
+
+<#
+.SYNOPSIS
 Resolve the localized QMD file for a report.
 
 .DESCRIPTION
 Looks for BaseName.Language.qmd first, falls back to BaseName.qmd.
-Throws if neither exists.
+Throws if neither exists. Accepts either a bare language code ('de')
+or a full locale code ('de_AT'); when a full locale is passed, only the
+language component is used for file resolution.
 
 .PARAMETER ReportDir
 Directory containing the QMD files.
@@ -417,8 +549,8 @@ Directory containing the QMD files.
 .PARAMETER BaseName
 Base name of the report (e.g. 'Partner-Report').
 
-.PARAMETER Language
-Language code (e.g. 'en', 'de').
+.PARAMETER Locale
+Locale or language code (e.g. 'en', 'de', 'de_AT').
 #>
 function Resolve-NeoipcLocaleQmd {
     [CmdletBinding()]
@@ -430,14 +562,16 @@ function Resolve-NeoipcLocaleQmd {
         [string]$BaseName,
 
         [Parameter(Mandatory)]
-        [string]$Language
+        [string]$Locale
     )
 
-    if ($Language -eq 'en') {
+    $language = (Split-NeoipcLocale -Locale $Locale).Language
+
+    if ($language -eq 'en') {
         $qmdPath = Join-Path $ReportDir "$BaseName.qmd"
     }
     else {
-        $qmdPath = Join-Path $ReportDir "$BaseName.$Language.qmd"
+        $qmdPath = Join-Path $ReportDir "$BaseName.$language.qmd"
     }
 
     if (Test-Path -LiteralPath $qmdPath) {
@@ -450,7 +584,7 @@ function Resolve-NeoipcLocaleQmd {
         return $defaultPath
     }
 
-    throw "No QMD found for '$BaseName' in language '$Language'. Expected '$qmdPath' or '$defaultPath'."
+    throw "No QMD found for '$BaseName' in locale '$Locale'. Expected '$qmdPath' or '$defaultPath'."
 }
 
 <#
@@ -526,4 +660,113 @@ function Build-QmdParamPairs {
         }
     }
     return $pairs
+}
+
+<#
+.SYNOPSIS
+Write a standardised build report to the console and optionally to a JSON file.
+
+.DESCRIPTION
+Computes the build status from the error list and the $BuildCompleted flag,
+writes a coloured console summary, and optionally persists a JSON build report.
+
+CTRL+C (PipelineStoppedException) bypasses catch blocks, so $BuildCompleted
+distinguishes a clean finish (true) from an interrupted one (false with no errors).
+
+.PARAMETER Name
+Display name for the build (e.g. 'Reference Report Build').
+
+.PARAMETER Errors
+Array of error messages collected during the build.
+
+.PARAMETER OutputFiles
+Array of output file paths produced by the build.
+
+.PARAMETER BuildCompleted
+Set to $true at the end of the try block. If $false and no errors, status is 'cancelled'.
+
+.PARAMETER StartedAt
+ISO 8601 timestamp from when the build started.
+
+.PARAMETER BuildReportPath
+Path for the JSON build report. If null or empty, no JSON file is written.
+
+.PARAMETER ExtraFields
+Ordered hashtable of additional fields to include in the JSON report
+(e.g. timestamp, outputDir, locales, formats, parameterHash, parameters, steps).
+These are merged after the core fields.
+
+.OUTPUTS
+The status string: 'success', 'failed', or 'cancelled'.
+#>
+function Write-NeoipcBuildReport {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string]$Name,
+
+        [string[]]$Errors = @(),
+
+        [string[]]$OutputFiles = @(),
+
+        [bool]$BuildCompleted = $false,
+
+        [Parameter(Mandatory)]
+        [string]$StartedAt,
+
+        [string]$BuildReportPath,
+
+        [System.Collections.Specialized.OrderedDictionary]$ExtraFields
+    )
+
+    $completedAt = (Get-Date -AsUTC).ToString('o')
+    $status = if ($Errors.Count -gt 0) { 'failed' }
+              elseif (-not $BuildCompleted) { 'cancelled' }
+              else { 'success' }
+
+    $sortedOutputs = @($OutputFiles | Sort-Object -Unique)
+
+    # Build the report object with core fields first, then extra fields, then errors last
+    $buildReport = [ordered]@{
+        name        = $Name
+        status      = $status
+        startedAt   = $StartedAt
+        completedAt = $completedAt
+        outputs     = $sortedOutputs
+    }
+    if ($ExtraFields) {
+        foreach ($key in $ExtraFields.Keys) {
+            $buildReport[$key] = $ExtraFields[$key]
+        }
+    }
+    $buildReport['errors'] = $Errors
+
+    # Write JSON report if requested
+    if (-not [string]::IsNullOrWhiteSpace($BuildReportPath)) {
+        try {
+            $buildReport | ConvertTo-Json -Depth 100 | Set-Content -LiteralPath $BuildReportPath
+            Write-Verbose "Generated build report: $BuildReportPath"
+        }
+        catch {
+            Write-Warning "Failed to write build report: $($_.Exception.Message)"
+        }
+    }
+
+    # Console summary
+    if ($status -eq 'success') {
+        Write-Host "Build status: $status" -ForegroundColor Green
+    } elseif ($status -eq 'cancelled') {
+        Write-Host "Build status: $status" -ForegroundColor Yellow
+    } else {
+        Write-Host "Build status: $status" -ForegroundColor Red
+    }
+
+    Write-Host "Outputs:"
+    $sortedOutputs | ForEach-Object { Write-Host "  $_" }
+
+    if (-not [string]::IsNullOrWhiteSpace($BuildReportPath)) {
+        Write-Host "Build report: $BuildReportPath"
+    }
+
+    return $status
 }

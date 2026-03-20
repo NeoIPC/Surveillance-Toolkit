@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NeoIPC Surveillance Documentation 0.9\n"
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-01-05 12:22+0100\n"
+"POT-Creation-Date: 2026-03-17 16:20+0100\n"
 "PO-Revision-Date: 2025-12-30 17:59+0100\n"
 "Last-Translator: Brar Piening <brar.piening@charite.de>\n"
 "Language-Team: German <https://hosted.weblate.org/projects/neoipc/neoipc-core-surveillance-protocol/de/>\n"
@@ -1866,42 +1866,42 @@ msgstr "Dieses Feld ist auszufüllen, wenn während des chirurgischen Eingriffs 
 msgid "Signs of infection at time of surgery"
 msgstr "Anzeichen einer Infektion zum Zeitpunkt der Operation"
 
-#. type: delimited block =
+#. type: delimited block = 4
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:648
 msgid "Examples that indicate evidence of infection include but are not limited to: abscess, infection, purulence/pus, phlegmon, or “feculent peritonitis”.  A ruptured/perforated appendix is evidence of infection at the organ/space level."
 msgstr "Beispiele, die auf eine Infektion hinweisen, sind unter anderem: Abszess, Infektion, Eiter, Phlegma oder „fäkale Peritonitis“.  Ein durchgebrochener/perforierter Blinddarm ist ein Hinweis auf eine Infektion auf der Ebene des Organs/Raums."
 
-#. type: delimited block =
+#. type: delimited block = 4
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:649
 msgid "Examples of verbiage that is not considered evidence of infection include but are not limited to: colon perforation, contamination, necrosis, gangrene, fecal spillage, nicked bowel during procedure, murky fluid, or documentation of inflammation."
 msgstr "Beispiele für Formulierungen, die nicht als Beweis für eine Infektion gelten, sind u. a.: Dickdarmperforation, Kontamination, Nekrose, Gangrän, Verschütten von Fäkalien, während des Eingriffs eingekerbter Darm, trübe Flüssigkeit oder Dokumentation einer Entzündung."
 
-#. type: delimited block =
+#. type: delimited block = 4
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:650
 msgid "The use of the ending “itis” in an operative note/report of surgery does not automatically count as evidence of infection, as it may only reflect inflammation which is not infectious in nature (for example, diverticulitis, peritonitis, and appendicitis)."
 msgstr "Die Verwendung der Endung „itis“ in einer Operationsnotiz/einem Operationsbericht gilt nicht automatisch als Beweis für eine Infektion, da sie nur eine Entzündung widerspiegeln kann, die nicht infektiöser Natur ist (z. B. Divertikulitis, Peritonitis und Appendizitis)."
 
-#. type: delimited block =
+#. type: delimited block = 4
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:651
 msgid "Pathology report findings and imaging test findings cannot be used as evidence of infection."
 msgstr "Befunde aus Pathologieberichten und bildgebenden Verfahren können nicht als Nachweis für eine Infektion herangezogen werden."
 
-#. type: delimited block =
+#. type: delimited block = 4
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:652
 msgid "Identification of an organism using culture or non-culture based microbiologic testing method or on a pathology report from a surgical specimen cannot be used as evidence of infection."
 msgstr "Die Identifizierung eines Organismus mit Hilfe einer Kultur oder einer nicht kulturbasierten mikrobiologischen Testmethode oder in einem Pathologiebericht einer chirurgischen Probe kann nicht als Nachweis für eine Infektion herangezogen werden."
 
-#. type: delimited block =
+#. type: delimited block = 4
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:653
 msgid "Wound class cannot be used as evidence of infection."
 msgstr "Die Klasse der Wunde kann nicht als Beweis für eine Infektion herangezogen werden."
 
-#. type: delimited block =
+#. type: delimited block = 4
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:655
 msgid "Trauma resulting in a contaminated case does not automatically count as evidence of infection.  For example, a fresh gunshot wound to the abdomen may be a trauma with a high wound class but there would not be time for infection to develop."
 msgstr "Ein Trauma, das zu einem kontaminierten Fall führt, gilt nicht automatisch als Nachweis einer Infektion.  Zum Beispiel kann eine frische Schusswunde im Bauch ein Trauma mit einer hohen Wundklasse sein, aber es wäre nicht genug Zeit, um eine Infektion zu entwickeln."
 
-#. type: delimited block =
+#. type: delimited block = 4
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:656
 msgid "Procedural complications such as bowel perforation during surgery cannot be used as evidence of infection since there was no infection present at time of surgery."
 msgstr "Verfahrensbedingte Komplikationen wie eine Darmperforation während einer Operation können nicht als Beweis für eine Infektion gelten, da zum Zeitpunkt der Operation keine Infektion vorlag."
@@ -3310,17 +3310,17 @@ msgstr "Antibiotikaliste"
 msgid "List of Infectious Agents"
 msgstr "Liste der Infektionserreger"
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Clinical-Sepsis-Definition.adoc:5
 msgid "**Absence of positive microbiological blood and/or cerebrospinal fluid culture**"
 msgstr "**Fehlen einer positiven mikrobiologischen Blut- und/oder Liquorkultur**"
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Clinical-Sepsis-Definition.adoc:8
 msgid "**Treatment with FIVE or more days of intravenous antibiotics was initiated$$*$$**"
 msgstr "**Eine Behandlung mit intravenösen Antibiotika über FÜNF oder mehr Tage wurde eingeleitet$$*$$**"
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Clinical-Sepsis-Definition.adoc:11
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:8
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:40
@@ -3328,7 +3328,7 @@ msgstr "**Eine Behandlung mit intravenösen Antibiotika über FÜNF oder mehr Ta
 msgid "**Patient has at least TWO of the following clinical or laboratory features of generalized infection:**"
 msgstr "**Der Patient weist mindestens ZWEI der folgenden klinischen oder Labormerkmale einer generalisierten Infektion auf:**"
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Clinical-Sepsis-Definition.adoc:12
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:9
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:41
@@ -3336,7 +3336,7 @@ msgstr "**Der Patient weist mindestens ZWEI der folgenden klinischen oder Laborm
 msgid "Temperature instability, fever (> 38 °C) or hypothermia (< 36.5 °C)"
 msgstr "Temperaturinstabilität, Fieber (> 38 °C) oder Hypothermie (< 36,5 °C)"
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Clinical-Sepsis-Definition.adoc:13
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:10
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:42
@@ -3345,7 +3345,7 @@ msgstr "Temperaturinstabilität, Fieber (> 38 °C) oder Hypothermie (< 36,5
 msgid "New/more frequent bradycardia episodes (<80/min) or unexplained tachycardia (>200/min)"
 msgstr "Neue/häufigere Bradykardie-Episoden (< 80/min) oder ungeklärte Tachykardie (> 200/min)"
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Clinical-Sepsis-Definition.adoc:14
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:11
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:43
@@ -3353,7 +3353,7 @@ msgstr "Neue/häufigere Bradykardie-Episoden (< 80/min) oder ungeklärte Tachy
 msgid "Impaired peripheral perfusion (Capillary refill time of > 3s or skin mottling or core/peripheral temperature gap > 2 °C)"
 msgstr "Beeinträchtigte periphere Durchblutung (Rekapillarisierungszeit von > 3 s oder marmorierte Haut oder Kern-/Peripherietemperaturunterschied > 2 °C)"
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Clinical-Sepsis-Definition.adoc:15
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:12
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:44
@@ -3361,7 +3361,7 @@ msgstr "Beeinträchtigte periphere Durchblutung (Rekapillarisierungszeit von >�
 msgid "New/more frequent episodes of apnoea (>20s) or increase in oxygen demand or ventilatory support"
 msgstr "Neue/häufigere Episoden von Apnoe (> 20 s) oder Anstieg des Sauerstoffbedarfs oder der Beatmungsunterstützung"
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Clinical-Sepsis-Definition.adoc:16
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:13
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:45
@@ -3369,7 +3369,7 @@ msgstr "Neue/häufigere Episoden von Apnoe (> 20 s) oder Anstieg des Sauersto
 msgid "Enteral feeding intolerance, abdominal distension or ileus"
 msgstr "Intoleranz gegenüber enteraler Ernährung, aufgeblähtes Abdomen oder Ileus"
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Clinical-Sepsis-Definition.adoc:17
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:14
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:46
@@ -3377,7 +3377,7 @@ msgstr "Intoleranz gegenüber enteraler Ernährung, aufgeblähtes Abdomen oder I
 msgid "Irritability, lethargy, apathy or unstable condition"
 msgstr "Irritabilität, Lethargie, Apathie oder instabiler Allgemenzustand"
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Clinical-Sepsis-Definition.adoc:18
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:15
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:47
@@ -3385,7 +3385,7 @@ msgstr "Irritabilität, Lethargie, Apathie oder instabiler Allgemenzustand"
 msgid "Unexplained metabolic acidosis (base excess < −10 mmol/L; <−10 mEq/L)"
 msgstr "Ungeklärte metabolische Azidose (Basenüberschuss < -10 mmol/l; (< -10 mEq/l)"
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Clinical-Sepsis-Definition.adoc:19
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:16
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:48
@@ -3393,14 +3393,14 @@ msgstr "Ungeklärte metabolische Azidose (Basenüberschuss < -10 mmol/l; (<�
 msgid "New and unexplained hyperglycaemia (> 140 mg/dl; > 7.8 mmol/L) or hypoglycaemia (< 40 mg/dl; <2.2 mmol/L)"
 msgstr "Neue und ungeklärte Hyperglykämie (> 140 mg/dl; > 7,8 mmol/l) oder Hypoglykämie (< 40 mg/dl; < 2,2 mmol/l)"
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Clinical-Sepsis-Definition.adoc:20
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:17
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:70
 msgid "At least one of the following laboratory findings:"
 msgstr "Mindestens einer der folgenden Laborbefunde:"
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Clinical-Sepsis-Definition.adoc:21
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:18
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:49
@@ -3408,7 +3408,7 @@ msgstr "Mindestens einer der folgenden Laborbefunde:"
 msgid "Platelet count of < 100 × 10^9^/L (<100 × 10^3^/μL)"
 msgstr "Thrombozytenzahl von < 100 × 10⁹/l (< 100 × 10³/μl)"
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Clinical-Sepsis-Definition.adoc:22
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:19
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:33
@@ -3416,7 +3416,7 @@ msgstr "Thrombozytenzahl von < 100 × 10⁹/l (< 100 × 10³/μl)"
 msgid "WBC < 4 × 10^9^/L or > 20 × 10^9^/L (< 4 × 10^3^/μL or > 20 × 10^3^/μL)"
 msgstr "Leukozyten < 4 × 10⁹/l oder > 20 × 10⁹/l (< 4 × 10³/μl oder > 20 × 10³/μl)"
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Clinical-Sepsis-Definition.adoc:23
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:20
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:34
@@ -3424,7 +3424,7 @@ msgstr "Leukozyten < 4 × 10⁹/l oder > 20 × 10⁹/l (< 4 × 10³/
 msgid "CRP > 10 mg/L (> 1 mg/dL)"
 msgstr "CRP > 10 mg/l (> 1 mg/dl)"
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Clinical-Sepsis-Definition.adoc:24
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:21
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:35
@@ -3432,7 +3432,7 @@ msgstr "CRP > 10 mg/l (> 1 mg/dl)"
 msgid "Procalcitonin ≥ 2μg/L (2 ng/mL; 200 ng/dL)"
 msgstr "Procalcitonin ≥ 2 μg/l (≥ 2 ng/ml oder ≥ 200 ng/dl)"
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Clinical-Sepsis-Definition.adoc:25
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:22
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:36
@@ -3440,7 +3440,7 @@ msgstr "Procalcitonin ≥ 2 μg/l (≥ 2 ng/ml oder ≥ 200 ng/dl)"
 msgid "I/T-Ratio > 0.2 (ratio of immature granulocytes to total granulocytes)"
 msgstr "I/T-Ratio > 0,2 (Verhältnis von unreifen Granulozyten zu den gesamten Granulozyten)"
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Clinical-Sepsis-Definition.adoc:26
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:23
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:37
@@ -3459,45 +3459,45 @@ msgstr "Es wurde eine Antibiotikabehandlung für mindestens fünf Tage eingeleit
 msgid "Deep incisional SSI"
 msgstr "Tiefe postoperative Wundinfektion"
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Deep-Incisional-SSI-Definition.adoc:5
 #: doc/protocol/definitions/NeoIPC-Core-Organ-Space-SSI-Definition.adoc:5
 msgid "**First symptoms occur within 30 or 90^#^ days after the operation**"
 msgstr "**Erste Symptome treten innerhalb von 30 oder 90^#^ Tagen nach der Operation auf**"
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Deep-Incisional-SSI-Definition.adoc:8
 msgid "**Infection involves deep soft tissues of the incision (for example, fascial and muscle layers)**"
 msgstr "**Die Infektion betrifft tiefe Weichteile der Inzision (z. B. Faszien- und Muskelschichten)**"
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Deep-Incisional-SSI-Definition.adoc:11
 #: doc/protocol/definitions/NeoIPC-Core-Organ-Space-SSI-Definition.adoc:11
 #: doc/protocol/definitions/NeoIPC-Core-Superficial-Incisional-SSI-Definition.adoc:11
 msgid "**Patient has at least ONE of the following:**"
 msgstr "**Der Patient hat mindestens EINES der folgenden Symptome:**"
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Deep-Incisional-SSI-Definition.adoc:12
 msgid "Purulent drainage from the deep incision."
 msgstr "Eitrige Drainage aus der tiefen Inzision."
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Deep-Incisional-SSI-Definition.adoc:13
 msgid "A deep incision that spontaneously dehisces, or is deliberately opened or aspirated by a surgeon, physician* or physician designee"
 msgstr "Eine tiefe Inzision, die sich spontan öffnet oder absichtlich von einem Chirurgen, Arzt* oder einer von diesen beauftragten Person eröffnet oder aspiriert wird"
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Deep-Incisional-SSI-Definition.adoc:17
 msgid "Organism(s) identified from the deep soft tissues of the incision by a culture or non-culture based microbiologic testing method which is performed for purposes of clinical diagnosis or treatment (for example, not Active Surveillance Culture/Testing (ASC/AST)) or culture or non-culture based microbiologic testing method is not performed. A culture or non-culture-based test from the deep soft tissues of the incision that has a negative finding does not meet this criterion."
 msgstr "Erreger, die aus den tiefen Weichteilen der Inzision durch eine Kultur oder ein nicht auf Kultur basierendes mikrobiologisches Testverfahren identifiziert wurden, das zu Zwecken der klinischen Diagnose oder Behandlung durchgeführt wurde (z. B. keine Befunde aus Diagnostik zum Zweck des mikrobiologischen Screenings) oder eine Kultur oder ein nicht auf Kultur basierendes mikrobiologisches Testverfahren ist nicht durchgeführt worden. Eine Kultur oder ein nicht auf Kultur basierender Test aus den tiefen Weichteilen der Inzision, der einen negativen Befund aufweist, erfüllt dieses Kriterium nicht."
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Deep-Incisional-SSI-Definition.adoc:21
 msgid "Patient has at least one of the following signs or symptoms: Temperature instability, fever (> 38 °C) or hypothermia (< 36.5 °C); localized pain or tenderness."
 msgstr "Der Patient weist mindestens eine der folgenden Beschwerden oder Symptome auf: Temperaturinstabilität, Fieber (> 38 °C) oder Hypothermie (< 36,5 °C); örtlich begrenzte Schmerzen oder Spannungsgefühl."
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Deep-Incisional-SSI-Definition.adoc:22
 msgid "An abscess or other evidence of infection involving the deep incision that is detected on gross anatomical or histopathologic exam, or imaging test."
 msgstr "Ein Abszess oder andere Anzeichen einer Infektion im Bereich der tiefen Inzision, die bei einer körperlichen oder histopathologischen Untersuchung oder bei einer bildgebenden Untersuchung festgestellt werden."
@@ -3519,7 +3519,7 @@ msgstr "*Der Begriff \"Arzt\" für die Anwendung der NeoIPC-SSI-Kriterien kann s
 msgid "Laboratory-Confirmed Bloodstream Infection with Common Commensal Detected Twice"
 msgstr "Zweifach im Labor bestätigte Blutstrominfektion mit gewöhnlichen Kommensalen"
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:5
 msgid "**The same common commensal is recovered from at least TWO blood and/or CSF culture specimen collected on separate occasions**"
 msgstr "**Derselbe gewöhnliche Kommensale wird in mindestens ZWEI Blut- und/oder Liquorkulturproben nachgewiesen, die bei verschiedenen Gelegenheiten entnommen wurden**"
@@ -3530,13 +3530,13 @@ msgstr "**Derselbe gewöhnliche Kommensale wird in mindestens ZWEI Blut- und/ode
 msgid "Laboratory-Confirmed Bloodstream Infection with Common Commensal and Laboratory Finding"
 msgstr "Im Labor bestätigte Blutstrominfektion mit gewöhnlichen Kommensalen und Laborbefund"
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:29
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:55
 msgid "**A common commensal is recovered from ONE blood culture and/or CSF culture specimen**"
 msgstr "**Ein gewöhnlicher Kommensale wird aus EINER Blutkultur und/oder Liquorkulturprobe gewonnen**"
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:32
 msgid "**At least one of the following laboratory findings:**"
 msgstr "**Mindestens einer der folgenden Laborbefunde:**"
@@ -3547,7 +3547,7 @@ msgstr "**Mindestens einer der folgenden Laborbefunde:**"
 msgid "Laboratory-Confirmed Bloodstream Infection with Common Commensal and Five Day Treatment"
 msgstr "Im Labor bestätigte Blutstrominfektion mit gewöhnlichen Kommensalen und fünftägiger Behandlung"
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:58
 msgid "**Treatment with five or more days of intravenous antibiotics was initiated$$*$$**"
 msgstr "**Eine Behandlung mit intravenösen Antibiotika über fünf oder mehr Tage wurde eingeleitet$$*$$**"
@@ -3563,7 +3563,7 @@ msgstr "*Gezählt werden der Tag der ersten Dosis und der Tag der letzten Dosis.
 msgid "Laboratory-confirmed bloodstream infection with recognised pathogen"
 msgstr "Mikrobiologisch bestätigte Blutbahninfektion mit anerkanntem Infektionserreger"
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Recognised-Pathogen-Definition.adoc:5
 msgid "**Recognised pathogen is recovered from a blood and/or cerebrospinal fluid culture**"
 msgstr "**Anerkannter Infektionserreger wurde aus einer Blut- und/oder Liquorkultur gewonnen**"
@@ -3574,63 +3574,63 @@ msgstr "**Anerkannter Infektionserreger wurde aus einer Blut- und/oder Liquorkul
 msgid "Symptom-based NEC"
 msgstr "Symptombasierte NEC"
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:5
 msgid "**At least of ONE the following radiological signs (imaging technologies: X-ray, CT, MRI, ultrasound):**"
 msgstr "**Mindestens EINES der folgenden radiologischen Zeichen (bildgebende Verfahren: Röntgen, CT, MRT, Ultraschall):**"
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:8
 msgid "Pneumoperitoneum"
 msgstr "Pneumoperitoneum"
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:9
 #: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:31
 msgid "Pneumatosis intestinalis"
 msgstr "Pneumatosis intestinalis"
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:10
 msgid "Portal venous gas (Hepatobiliary gas)"
 msgstr "Portalvenöses Gas (hepatobiliäres Gas)"
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:11
 msgid "Fixed bowel loops (≥ 24h)"
 msgstr "Stehende Darmschlingen (≥ 24h)"
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:14
 msgid "**At least ONE of the following clinical signs:**"
 msgstr "**Mindestens EINES der folgenden klinischen Zeichen:**"
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:15
 msgid "Abdominal distention"
 msgstr "Aufgeblähtes Abdomen"
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:16
 msgid "Abdominal discoloration or shiny/reddish skin tone"
 msgstr "Verfärbung des Abdomens oder glänzende/rötliche Hautfarbe"
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:17
 msgid "Repeated occult (guaiac test) or visible blood in stool (no anal fissure)"
 msgstr "Wiederholtes okkultes (Guajak-Test) oder sichtbares Blut im Stuhl (keine Analfissur)"
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:18
 msgid "Increasing/pronounced vomiting (e.g. bilious or bloody)"
 msgstr "Zunehmendes/ausgeprägtes Erbrechen (z. B. gallig oder blutig)"
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:19
 msgid "Increased gastric residuals from previous feeding"
 msgstr "Vermehrte Magenreste von der vorherigen Fütterung"
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:20
 msgid "Bilious gastric aspirate (not from transpyloric feeding tube)"
 msgstr "Galliges Magenaspirat (nicht von transpylorischer Ernährungssonde)"
@@ -3646,12 +3646,12 @@ msgstr "**ODER**"
 msgid "Surgical NEC"
 msgstr "Chirurgische NEC"
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:28
 msgid "**At least of ONE the following surgical or pathological findings:**"
 msgstr "**Mindestens EINER der folgenden chirurgischen oder pathologischen Befunde:**"
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:30
 msgid "Extensive bowel necrosis (> 2 cm of bowel affected)"
 msgstr "Ausgedehnte Darmnekrose (> 2 cm des Darms betroffen)"
@@ -3662,77 +3662,77 @@ msgstr "Ausgedehnte Darmnekrose (> 2 cm des Darms betroffen)"
 msgid "Organ/space SSI"
 msgstr "Infektion von Organen und Körperhöhlen im Operationsgebiet"
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Organ-Space-SSI-Definition.adoc:8
 msgid "**Infection involves any part of the body deeper than the fascial/muscle layers that is opened or manipulated during the operative procedure**"
 msgstr "**Die Infektion betrifft irgendeinen Teil des Körpers, der tiefer als die Faszien-/Muskelschichten liegt und während des operativen Eingriffs geöffnet oder manipuliert wurde.**"
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Organ-Space-SSI-Definition.adoc:12
 msgid "Purulent drainage from a drain that is placed into the organ/space (for example, closed suction drainage system, open drain, T-tube drain, CT-guided drainage)."
 msgstr "Eitrige Drainage aus einer in das Organ/die Körperhöhle eingebrachten Drainage (z. B. geschlossenes Saugdrainagesystem, offene Drainage, T-Drainage, CT-gestützte Drainage)."
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Organ-Space-SSI-Definition.adoc:13
 msgid "Organism(s) identified from fluid or tissue in the organ/space by a culture or non-culture based microbiologic testing method which is performed for purposes of clinical diagnosis or treatment (for example, not Active Surveillance Culture/Testing (ASC/AST))."
 msgstr "Erreger, die aus der Flüssigkeit oder dem Gewebe des Organs/der Körperhöhle durch eine Kultur oder eine nicht auf Kulturen basierende mikrobiologische Testmethode identifiziert wurden, die zu Zwecken der klinischen Diagnose oder Behandlung durchgeführt wird (z. B. keine Befunde aus Diagnostik zum Zweck des mikrobiologischen Screenings)."
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Organ-Space-SSI-Definition.adoc:14
 msgid "An abscess or other evidence of infection involving the organ/space that is detected on gross anatomical or histopathologic exam, or imaging test evidence suggestive of infection."
 msgstr "Ein Abszess oder andere Anzeichen einer Infektion des Organs/der Körperhöhle, die bei einer körperlichen oder histopathologischen Untersuchung festgestellt werden, oder bildgebende Tests, die auf eine Infektion hindeuten."
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:5
 msgid "**At least ONE of the following imaging findings (imaging technologies: X-ray, CT, MRI, ultrasound) shows new changes suggestive of pneumonia, such as infiltrate, shadowing, opacification, increased density, fluid in the intrapleural cavity or interlobar fissure**"
 msgstr "**Mindestens EINER der folgenden bildgebenden Befunde (bildgebende Verfahren: Röntgen, CT, MRT, Ultraschall) zeigt neue Veränderungen, die auf eine Pneumonie hindeuten, wie z. B. Infiltrate, Verschattungen, Eintrübungen, erhöhte Dichte, Flüssigkeit in der Pleurahöhle oder in der Interlobarfissur**"
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:8
 msgid "**New initiation of respiratory support or escalation of existing level of respiratory support for ≥ 2 days$$*$$ after at least 2 days of stability or improvement**"
 msgstr "**Neueinleitung von Atemunterstützung oder Eskalation der bestehenden Stufe der Atemunterstützung für ≥ 2 Tage$$*$$ nach mindestens 2 Tagen der Stabilität oder Verbesserung**"
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:11
 msgid "**At least FOUR of the following clinical or laboratory criteria:**"
 msgstr "**Mindestens VIER der folgenden klinischen oder Laborkriterien:**"
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:12
 msgid "Organisms identified^+^ from respiratory tract"
 msgstr "Erreger aus den Atemwegen identifiziert^+^"
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:14
 msgid "New or more frequent tachypnoea (>60/min) or new or more frequent apnoea (> 20 s)"
 msgstr "Neue oder vermehrte Tachypnoe (>60/min) oder neue oder vermehrte Apnoe (> 20 s)"
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:15
 msgid "Purulent tracheal aspirate"
 msgstr "Eitriges Trachealaspirat"
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:16
 msgid "New or more frequent symptoms of respiratory distress (retraction, nasal flaring, grunting, chest indrawing)"
 msgstr "Neue oder vermehrte Symptome von Atemnot (Einziehungen, Nasenflügel, Stöhnen, eingezogener Brustkorb)"
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:17
 msgid "Temperature instability or fever (>38 °C) or hypothermia (<36.5 °C)"
 msgstr "Temperaturinstabilität oder Fieber (>38 °C) oder Hypothermie (<36,5 °C)"
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:18
 msgid "Increased respiratory secretion (more frequent endotracheal suctioning required)"
 msgstr "Vermehrte Sekretion der Atemwege ( häufigeres endotracheales Absaugen erforderlich)"
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:19
 msgid "CRP > 10 mg/L (> 1 mg/dL) or increased levels of interleukin (IL) 6 or 8^#^"
 msgstr "CRP > 10 mg/L (> 1 mg/dL) oder erhöhte Werte von Interleukin (IL) 6 oder 8^#^"
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:20
 msgid "I/T - ratio > 0.2"
 msgstr "I/T-Ratio > 0,2"
@@ -3783,12 +3783,12 @@ msgstr "^#^Interleukin sollte als Parameter verwendet werden, wenn die Laborspez
 msgid "Superficial incisional SSI"
 msgstr "Superficial incisional SSI"
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Superficial-Incisional-SSI-Definition.adoc:5
 msgid "**First symptoms occur within 30 days after the operation**"
 msgstr "**Erste Symptome treten innerhalb von 30 Tagen nach der Operation auf**"
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Superficial-Incisional-SSI-Definition.adoc:8
 msgid "**Infection involves only skin and subcutaneous tissue of the incision**"
 msgstr "**Die Infektion betrifft nur die Haut und das subkutane Gewebe der Inzision.**"
@@ -3818,27 +3818,27 @@ msgstr "Der Patient weist mindestens eines der folgenden Anzeichen oder Symptome
 msgid "Diagnosis of a superficial incisional SSI by a physician* or physician designee."
 msgstr "Diagnose einer oberflächlichen Wundinfektion durch einen Arzt* oder einen von ihm benannten Arzt."
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Superficial-Incisional-SSI-Definition.adoc:24
 msgid "*The term physician for the purpose of application of the NeoIPC SSI criteria may be interpreted to mean a surgeon, infectious disease physician, emergency physician, another physician on the case, or physician’s designee (nurse practitioner or physician’s assistant)."
 msgstr "*Der Begriff \"Arzt\" für die Anwendung der NeoIPC-SSI-Kriterien kann so ausgelegt werden, dass er einen Chirurgen, einen Infektionsmediziner, einen Notfallmediziner, einen anderen an dem Fall beteiligten Arzt oder eine von dem Arzt benannte Person (Krankenpfleger oder Arzthelfer) umfasst."
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Superficial-Incisional-SSI-Definition.adoc:26
 msgid "The following do not qualify as criteria for meeting the definition of superficial incisional SSI"
 msgstr "Die folgenden Kriterien erfüllen nicht die Definition einer oberflächlichen Wundinfektion"
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Superficial-Incisional-SSI-Definition.adoc:28
 msgid "Diagnosis/treatment of cellulitis (redness/warmth/swelling), by itself, does not meet superficial incisional SSI criterion ‘d’."
 msgstr "Die Diagnose/Behandlung einer Cellulitis (Rötung/Erwärmung/Schwellung) allein erfüllt nicht das Kriterium „d“ für oberflächliche Schnittwunden-SSI."
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Superficial-Incisional-SSI-Definition.adoc:29
 msgid "A stitch abscess alone (minimal inflammation and discharge confined to the points of suture penetration)."
 msgstr "Ein Fadenabszess allein (minimale Entzündung und Ausfluss, beschränkt auf die Stellen, an denen die Nähte eindringen)."
 
-#. type: delimited block *
+#. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Superficial-Incisional-SSI-Definition.adoc:30
 msgid "A localized stab wound or pin site infection. Note: A laparoscopic trocar site is considered a surgical incision and not a stab wound.  If a surgeon uses a laparoscopic trocar site to place a drain at the end of a procedure this is considered a surgical incision."
 msgstr "Eine lokalisierte Einstichstellen- oder Pin-Track-Infektion. Hinweis: Eine laparoskopische Trokarstelle gilt als OP-Wunde und nicht als Einstichstelle. Wenn ein Chirurg am Ende eines Eingriffs eine Drainage über eine laparoskopische Trokarstelle legt, gilt dies als OP-Wunde."

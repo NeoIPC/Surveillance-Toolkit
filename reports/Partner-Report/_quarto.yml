@@ -53,6 +53,8 @@ format:
       text: |
         \usepackage{float}
         \usepackage{placeins}
+        \floatplacement{figure}{H}
+        \floatplacement{table}{H}
         \usepackage{graphicx}
         \usepackage{wrapfig}
         \usepackage{scrlayer-scrpage}

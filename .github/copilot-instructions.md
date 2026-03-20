@@ -137,23 +137,29 @@ Translatable content is managed via [po4a](https://po4a.org/) with Weblate for c
 
 po4a is a Perl tool that is **incompatible with native Windows**. On Windows, always run it via **WSL**.
 
-A recent version is required for all features. Use a git checkout of the master branch:
+A recent version is required for all features. The repository includes po4a as a git submodule at `tools/po4a/`. Initialize it with:
 
 ```bash
-# Typical setup (in WSL or Linux/macOS)
-cd ~/dev
-git clone https://github.com/mquinson/po4a.git
+git submodule update --init tools/po4a
 ```
 
-**Invocation**: The dev checkout must be called with `PERLLIB` set so it finds its own libraries (not system-installed ones):
+**Preferred interface**: Use `scripts/Invoke-Localization.ps1` instead of invoking po4a directly. It handles WSL, path resolution, and the full pipeline automatically:
+
+```powershell
+./scripts/Invoke-Localization.ps1 -Update                  # full pipeline (all configs + glossary)
+./scripts/Invoke-Localization.ps1 -Update -Config reports   # po4a for reports only
+./scripts/Invoke-Localization.ps1 -Test                     # read-only string layer check
+```
+
+**Manual invocation** (if needed): The submodule must be called with `PERLLIB` set so it finds its own libraries:
 
 ```bash
 # From WSL bash (cd to the Surveillance-Toolkit repo root first):
-PERLLIB=~/dev/po4a/lib ~/dev/po4a/po4a <config-file>
-PERLLIB=~/dev/po4a/lib ~/dev/po4a/po4a-gettextize <args>
+PERLLIB=tools/po4a/lib tools/po4a/po4a <config-file>
+PERLLIB=tools/po4a/lib tools/po4a/po4a-gettextize <args>
 
-# From PowerShell on Windows (adapt the path to your local checkout):
-wsl -e bash -c "cd $(wsl wslpath -a .) && PERLLIB=~/dev/po4a/lib ~/dev/po4a/po4a po/reports.po4a.cfg"
+# From PowerShell on Windows:
+wsl -e bash -c "cd $(wsl wslpath -a .) && PERLLIB=tools/po4a/lib tools/po4a/po4a po/reports.po4a.cfg"
 ```
 
 ### po4a configs (in `po/`)
@@ -163,17 +169,19 @@ wsl -e bash -c "cd $(wsl wslpath -a .) && PERLLIB=~/dev/po4a/lib ~/dev/po4a/po4a
 | `reports.po4a.cfg` | Partner-Report, Reference-Report, Partner-Certificate, Validation-Report |
 | `documentation.po4a.cfg` | Protocol AsciiDoc files |
 | `infectious_agents.po4a.cfg` | Pathogen taxonomy |
+| `scripts/po4a.cfg` | PowerShell message strings |
 
 **Note:** The glossary (`glossary.yaml`) is **not** managed by po4a. It uses a custom script (`scripts/update-glossary-po.py`) that generates monolingual gettext PO with `msgctxt` for Weblate variant grouping and plural support. See the helper scripts table below.
 
 ### Target languages
 
-af, de, es, et, fr, gr, it, ne, tr (9 languages)
+af, de, el, es, et, fr, it, ne, tr (9 languages)
 
 ### Helper scripts (in `scripts/`)
 
 | Script | Purpose |
 |--------|---------|
+| `Invoke-Localization.ps1` | Unified localization wrapper with tab completion. `-Update` runs the full pipeline (fix layers → YAML keys → po4a → glossary). `-Test` runs read-only validation. See `-Config`, `-Force`, `-DryRun` switches. |
 | `Update-Po4aYamlKeys.ps1` | Auto-extract YAML keys for po4a config (run after changing YAML structure) |
 | `Test-PoPlaceholders.ps1` | Validate placeholder consistency between source and translations |
 | `update-glossary-po.py` | Convert `glossary.yaml` to/from monolingual gettext PO (replaces po4a for glossary). Requires `ruamel.yaml` and `polib`. Run after editing `glossary.yaml` to regenerate `.pot` and merge `.po` files. Use `--generate-yaml` to produce localized `glossary.<lang>.yaml`. |
@@ -190,7 +198,7 @@ When adding a new file to po4a that already has manual translations:
 3. Add the file entry to the relevant `.po4a.cfg` (if not already present).
 4. Use `po4a-gettextize` to import the existing translation into a **temporary** `.po` file:
    ```bash
-   PERLLIB=~/dev/po4a/lib ~/dev/po4a/po4a-gettextize -f <format> -m <master> -l <translation> -p /tmp/<report>_<lang>.po
+   PERLLIB=tools/po4a/lib tools/po4a/po4a-gettextize -f <format> -m <master> -l <translation> -p /tmp/<report>_<lang>.po
    ```
 5. **Remove fuzzy flags** from the gettextize output. `po4a-gettextize` marks most translations as `fuzzy` (even correct ones), and po4a ignores fuzzy translations when generating output. Strip them before merging:
    ```bash
@@ -200,7 +208,7 @@ When adding a new file to po4a that already has manual translations:
    ```bash
    msgcat --use-first /tmp/<report>_<lang>.po po/reports.<lang>.po -o po/reports.<lang>.po
    ```
-7. Verify with a round-trip: `PERLLIB=~/dev/po4a/lib ~/dev/po4a/po4a <config-file>` — check that the generated files match the backup.
+7. Verify with a round-trip: `PERLLIB=tools/po4a/lib tools/po4a/po4a <config-file>` — check that the generated files match the backup.
 
 **Important**: Run steps 4–6 in a **single WSL session** (one `wsl -e bash -c '...'` invocation). Temp files in `/tmp` do not persist across separate WSL invocations on Windows.
 
