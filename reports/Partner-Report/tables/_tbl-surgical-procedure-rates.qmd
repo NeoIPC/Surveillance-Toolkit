@@ -159,7 +159,8 @@ if (has_data) {
         locations = cells_column_labels(columns = c(
           sR$table_headers$q1,
           sR$table_headers$q2,
-          sR$table_headers$q3)))
+          sR$table_headers$q3))) |>
+      tab_source_note(source_note = sR$pooled_rate_note)
   } else {
     tbl <- tbl |>
       cols_width(

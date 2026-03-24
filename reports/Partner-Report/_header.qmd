@@ -168,7 +168,7 @@ if (metadata_diff$countries_differ) {
   }
 
   cat(sep = "\n", c(
-    "::: {.callout-caution}",
+    "::: {.callout-note}",
     paste0("## ", sR$headerList$benchmarkComparabilityHeader),
     "",
     full_message,

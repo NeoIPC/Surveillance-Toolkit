@@ -2,7 +2,7 @@
 
 Diese Meldung ist nicht unbedingt als Fehler zu verstehen, sondern vielmehr als Warnung vor einem möglichen Missverständnis.
 
-Da es bei der NeoIPC Surveillance um die Erfassung von nosokomialen Infektionen mit Präventionspotenzial auf neonatologischen Stationen geht, sind früh auftretende Infektionen (Early-Onset-Infektionen) in den allermeisten Fällen nicht zu erfassen.
+Da es bei der NeoIPC Surveillance um die Erfassung von nosokomialen Infektionen mit Präventionspotenzial in neonatologischen Abteilungen geht, sind früh auftretende Infektionen (Early-Onset-Infektionen) in den allermeisten Fällen nicht zu erfassen.
 Das NeoIPC-Surveillance-Protokoll legt diesbezüglich fest, dass eine Infektion, die früher als 72 Stunden nach der Geburt auftritt, nicht als nosokomiale Infektion gilt und daher nicht in der NeoIPC-Surveillance erfasst werden sollte, es sei denn, sie wurde eindeutig im Krankenhaus erworben (z. B. bei eindeutigen Hinweisen auf eine Katheterinfektion).
 
 Wir haben festgestellt, dass diese Festlegung im Protokoll manchmal übersehen wird und dass einige unserer Partner früh auftretende Infektionen erfassen, was zu einer Verzerrung der Referenzdaten und ihrer eigenen Statistiken führen kann.

@@ -26,7 +26,7 @@ digit_group_separator: " "
 fig-cap:
   - fig-bw: "Distribution of birth weights of the infants included in this report."
     fig-ga: "Distribution of gestational ages of the infants included in this report."
-  - bnch: "A is a histogram in %s steps with a density curve of your own unit’s data and a density curve of the reference data and B are two boxplots, one of your own unit’s data and one of the reference data."
+  - bnch: "A is a histogram in %s steps with a density curve of your own department’s data and a density curve of the reference data and B are two boxplots, one of your own department’s data and one of the reference data."
     no-bnch: "A is a histogram in %s steps with a density curve and B is a boxplot."
   - bnch: "Vertical lines in the boxplots represent the %s, %s and %s quantiles, the diamonds represent the pooled arithmetic means."
     no-bnch: "Vertical lines in the boxplot represent the %s, %s and %s quantiles, the diamond represents the pooled arithmetic mean."
@@ -52,11 +52,12 @@ headerList:
   effectiveAnalysisPeriod: "Effective analysis period"
   gestationalAgeFilter: "Gestational age filter"
   ignoresInclusionCriteria: "ignores the NeoIPC Surveillance inclusion criteria."
-  includesTestDepartments: "includes test units"
+  includesTestDepartments: "includes test departments"
   numberOfAdmissions: Number of patient admissions
-  numberOfDepartments: Number of units contributing at least one patient record
+  numberOfDepartments: Number of departments contributing at least one patient record
   numberOfPatients: Number of patient records
   specialAnalysisHint: "This is a special analysis that"
+  admissionsExceedRecordsNote: "admissions may exceed records when a patient had more than one admission episode during the surveillance period"
   sumOfPatientDays: Sum of patient days
 mrsa: "Methicillin-resistant Staphylococcus aureus (MRSA)"
 no_data: No data.
@@ -64,6 +65,7 @@ not_available: Not available.
 other: Other
 patient_days: "Patient days"
 percent_symbol: "%"
+pooled_rate_note: "The pooled rate is the arithmetic mean across all individual records in the reference population and can therefore fall outside the interquartile range, which is derived from department-level rates."
 si: "Severe infection"
 surgical_procedures: "Surgical Procedures"
 table_headers:
@@ -137,14 +139,15 @@ tbl-risk-density-rates:
   access: "Access"
   any: "Any"
   any_antibiotic: "Any antibiotic"
-  aware_footnote: "WHO AWaRe group (see %s). As cumulative treatment days for individual substances are recorded per patient, combination therapies using several substances on one day are counted as multiple days."
+  aware_footnote: "WHO AWaRe group (see %s). Each antibiotic substance is counted separately. A patient receiving two antibiotics on the same day contributes one day to each substance's tally — so one patient-day may be counted in both the Access and Watch group totals simultaneously."
   days_with_risk_factor: "Days with risk/protective factor"
+  kmc_day_footnote: "A kangaroo care day is recorded when the patient received intensive skin-to-skin contact for at least 2 hours on a given calendar day."
   no_data: "No risk/protective factor data available for this report settings."
   pooled_footnote: "%s: The Risk Density Rate calculated across all infants from all departments in the reference data."
   quartile_footnote: "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Risk Density Rates of the departments in the reference data. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of device days is greater than or equal to one according to the pooled Risk Density Rate."
   reserve: "Reserve"
   risk_density_rate: "Risk Density Rate"
-  tbl-cap: "Factors influencing the infants' risk of developing an infection or acquiring antibitic-resistant pathogens."
+  tbl-cap: "Factors influencing the infants' risk of developing an infection or acquiring antibiotic-resistant pathogens."
   vascular_catheter: "Vascular catheter"
   ventilatory_support: "Ventilatory support"
   watch: "Watch"

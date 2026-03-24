@@ -155,21 +155,6 @@ if (!is.null(benchmark_data$infectious_agent_detection_rate_per_agent_table) &&
         level = 2
       ) |>
       tab_footnote(
-        footnote = md(
-          paste0(
-            "$$\\text{",
-            sR$`tbl-agent-per-infection-rate`$rate_name,
-            "} = \\frac{\\text{",
-            sR$`tbl-agent-per-infection-rate`$rate_numerator,
-            "}}{\\text{",
-            sR$`tbl-agent-per-infection-rate`$rate_denominator,
-            "}} \\times ",
-            format_integer(100),
-            "$$"
-          )),
-        locations = cells_column_spanners(spanners = "infectious_agent_detection_rate")
-      ) |>
-      tab_footnote(
         footnote = sprintf(
           sR$`tbl-agent-per-infection-rate`$pooled_footnote,
           sR$table_headers$pooled),
@@ -187,7 +172,8 @@ if (!is.null(benchmark_data$infectious_agent_detection_rate_per_agent_table) &&
         locations = cells_column_labels(columns = c(
           sR$table_headers$q1,
           sR$table_headers$q2,
-          sR$table_headers$q3)))
+          sR$table_headers$q3))) |>
+      tab_source_note(source_note = sR$pooled_rate_note)
   } else {
     tbl <- tbl |>
       cols_width(
@@ -203,7 +189,25 @@ if (!is.null(benchmark_data$infectious_agent_detection_rate_per_agent_table) &&
         id = "infectious_agent_detection_rate"
       )
   }
-  
+
+  # Formula footnote shown in all variants (GAP-04)
+  tbl <- tbl |>
+    tab_footnote(
+      footnote = md(
+        paste0(
+          "$$\\text{",
+          sR$`tbl-agent-per-infection-rate`$rate_name,
+          "} = \\frac{\\text{",
+          sR$`tbl-agent-per-infection-rate`$rate_numerator,
+          "}}{\\text{",
+          sR$`tbl-agent-per-infection-rate`$rate_denominator,
+          "}} \\times ",
+          format_integer(100),
+          "$$"
+        )),
+      locations = cells_column_spanners(spanners = "infectious_agent_detection_rate")
+    )
+
   tbl
 } else {
   no_data_table()

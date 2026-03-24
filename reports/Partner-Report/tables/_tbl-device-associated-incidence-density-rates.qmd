@@ -170,9 +170,10 @@ if (!is.null(benchmark_data$dev_ass_incidence_density_rate_table) &&
         locations = cells_column_labels(columns = tidyselect::any_of(c(
           sR$table_headers$q1,
           sR$table_headers$q2,
-          sR$table_headers$q3))))
+          sR$table_headers$q3)))) |>
+      tab_source_note(source_note = sR$pooled_rate_note)
   }
-  
+
   tbl
 } else {
   no_data_table()

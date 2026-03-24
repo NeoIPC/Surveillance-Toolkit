@@ -149,6 +149,11 @@ if (!is.null(benchmark_data$usage_density_rate_table) &&
           sR$`tbl-risk-density-rates`$access,
           sR$`tbl-risk-density-rates`$watch,
           sR$`tbl-risk-density-rates`$reserve)))
+    ) |>
+    tab_footnote(
+      footnote = sR$`tbl-risk-density-rates`$kmc_day_footnote,
+      locations = gt::cells_stub(
+        rows = tidyselect::any_of(sR$kangaroo_care))
     )
 
   if ("ref" %in% benchmark_data$dataset_names) {
@@ -196,7 +201,8 @@ if (!is.null(benchmark_data$usage_density_rate_table) &&
       locations = cells_column_labels(columns = c(
         sR$table_headers$q1,
         sR$table_headers$q2,
-        sR$table_headers$q3)))
+        sR$table_headers$q3))) |>
+    tab_source_note(source_note = sR$pooled_rate_note)
   } else {
     tbl <- tbl |>
     cols_width(

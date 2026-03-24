@@ -71,6 +71,13 @@ outlier_groupings <- list(
       template_prefix = "grouped_antibiotic_rates",
       mode = "signature",
       hidden_signatures = character(0)
+    ),
+    kangaroo_care_rate = list(
+      metrics = c("kangaroo_care"),
+      signature_order = c("kangaroo_care"),
+      template_prefix = "grouped_kangaroo_care",
+      mode = "signature",
+      hidden_signatures = character(0)
     )
   ),
   secondary_bsi_rate_table = list(
@@ -268,22 +275,51 @@ localize_metric_name <- function(metric_id, sR) {
     }
   }
 
-  # Try top-level keys first (infections: bsi, hap, nec, si, ssi)
+  # Explicit metric identifier mappings for identifiers that don't match their
+  # display label key directly. Uses sR keys that the table rendering code uses.
+  metric_key_map <- list(
+    bsi = "primary_sepsis_bsi_sc",
+    hap = "pneumonia_sc",
+    all = "total"
+  )
+
+  mapped_key <- metric_key_map[[tolower(metric_id)]]
+  if (!is.null(mapped_key) && !is.null(sR[[mapped_key]])) {
+    return(sR[[mapped_key]])
+  }
+
+  # Try top-level keys (infections: nec, si, ssi; devices: cvc, pvc, etc.)
   if (!is.null(sR[[metric_id]])) {
     return(sR[[metric_id]])
   }
 
-  # Try tbl-risk-density-rates (devices and protective factors: CVC, PVC, INV, human_milk, etc.)
-  if (!is.null(sR$`tbl-risk-density-rates`[[tolower(metric_id)]])) {
-    return(sR$`tbl-risk-density-rates`[[tolower(metric_id)]])
+  # Try case-insensitive top-level lookup
+  if (!is.null(sR[[tolower(metric_id)]])) {
+    return(sR[[tolower(metric_id)]])
   }
 
-  # Try tbl-device-associated-incidence-density-rates
-  if (!is.null(sR$`tbl-device-associated-incidence-density-rates`[[tolower(metric_id)]])) {
-    return(sR$`tbl-device-associated-incidence-density-rates`[[tolower(metric_id)]])
+  # Try table-specific sections
+  table_sections <- c(
+    "tbl-risk-density-rates",
+    "tbl-device-associated-incidence-density-rates",
+    "tbl-surgical-procedure-rates",
+    "tbl-incidence-density-rates",
+    "tbl-infectious-agent-detection-rate",
+    "tbl-resistance-test-rate"
+  )
+
+  for (section in table_sections) {
+    if (!is.null(sR[[section]][[tolower(metric_id)]])) {
+      return(sR[[section]][[tolower(metric_id)]])
+    }
   }
 
-  # Fall back to the raw identifier if no localization found
+  # Fall back to the raw identifier with a warning
+  rlang::warn(paste0(
+    "localize_metric_name: no display label found for metric identifier '",
+    metric_id,
+    "'. Using raw identifier as fallback."
+  ))
   return(metric_id)
 }
 
@@ -482,18 +518,27 @@ detect_wb_class_mismatch <- function(own_countries, ref_countries, include_wb_cl
     unique() |>
     sort()
 
+  # Filter out NA/empty WB classes for comparison purposes
+  own_classes_valid <- own_classes[!is.na(own_classes) & nzchar(trimws(own_classes))]
+  ref_classes_valid <- ref_classes[!is.na(ref_classes) & nzchar(trimws(ref_classes))]
+
+  # Skip mismatch detection if either side has no valid WB classes
+  if (length(own_classes_valid) == 0 || length(ref_classes_valid) == 0) {
+    return(list(has_mismatch = FALSE))
+  }
+
   # Check if they differ
-  has_mismatch <- !setequal(own_classes, ref_classes)
+  has_mismatch <- !setequal(own_classes_valid, ref_classes_valid)
 
   if (!has_mismatch) {
     return(list(has_mismatch = FALSE))
   }
 
   # Get localized display names for the classes
-  own_class_names <- get_localised_world_bank_class_names(own_classes) |>
+  own_class_names <- get_localised_world_bank_class_names(own_classes_valid) |>
     paste(collapse = ", ")
 
-  ref_class_names <- get_localised_world_bank_class_names(ref_classes) |>
+  ref_class_names <- get_localised_world_bank_class_names(ref_classes_valid) |>
     paste(collapse = ", ")
 
   return(list(

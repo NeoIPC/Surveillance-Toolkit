@@ -213,7 +213,8 @@ if (!is.null(benchmark_data$abr_infection_rate_table) &&
         locations = cells_column_labels(columns = c(
           sR$table_headers$q1,
           sR$table_headers$q2,
-          sR$table_headers$q3)))
+          sR$table_headers$q3))) |>
+      tab_source_note(source_note = sR$pooled_rate_note)
   } else {
     tbl <- tbl |>
       cols_width(
@@ -222,12 +223,24 @@ if (!is.null(benchmark_data$abr_infection_rate_table) &&
         sR$table_headers$rate ~ pct(20)
       )
   }
-  
+
   tbl
 } else {
   no_data_table()
 }
 
+```
+
+```{r}
+#| output: asis
+# Show explanation when no resistant pathogens were detected
+if (is.null(benchmark_data$abr_infection_rate_table) ||
+    !("n_own" %in% rlang::names2(benchmark_data$abr_infection_rate_table)) ||
+    sum(benchmark_data$abr_infection_rate_table$n_own, na.rm = TRUE) == 0) {
+  cat("\n\n::: {.callout-note}\n")
+  cat(sR$`tbl-abr-infection-rate`$no_resistant_pathogens_note, "\n")
+  cat(":::\n")
+}
 ```
 
 ::: {.content-visible when-meta="includeOutlierInterpretation"}

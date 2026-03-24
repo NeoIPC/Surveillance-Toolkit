@@ -160,7 +160,8 @@ if (!is.null(benchmark_data$secondary_bsi_rate_table) &&
         locations = cells_column_labels(columns = c(
           sR$table_headers$q1,
           sR$table_headers$q2,
-          sR$table_headers$q3)))
+          sR$table_headers$q3))) |>
+      tab_source_note(source_note = sR$pooled_rate_note)
   } else {
     tbl <- tbl |>
       cols_width(
@@ -197,6 +198,12 @@ if (check_outlier_interpretation) {
       cat(outlier_text, "\n")
       cat(":::\n")
     }
+  } else if (length(outliers$state_map) > 0 &&
+             all(outliers$state_map == "no_quartile_ref")) {
+    cat("\n\n::: {.callout-tip}\n")
+    cat("## ", sR$outlier$heading, "\n\n")
+    cat("- ", sR$outlier$caution_limited_data, "\n")
+    cat(":::\n")
   }
 }
 ```

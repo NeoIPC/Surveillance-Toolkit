@@ -2,7 +2,7 @@
 
 This message should not necessarily be interpreted as an error, but rather as a warning of a possible misunderstanding.
 
-As the purpose of NeoIPC surveillance is to monitor nosocomial infections with the potential for prevention in neonatal units, early-onset infections generally cannot be recorded.
+As the purpose of NeoIPC surveillance is to monitor nosocomial infections with the potential for prevention in neonatal departments, early-onset infections generally cannot be recorded.
 The NeoIPC Surveillance Protocol states that if an infection occurs earlier than 72 hours after birth, it is not considered a nosocomial infection and should not be included in NeoIPC surveillance unless it is clearly hospital-acquired (e.g. there is clear evidence of catheter infection).
 
 We have found that this protocol specification is sometimes overlooked and that some of our partners are recording early-onset infections, which can distort the reference data and their own statistics.

@@ -11,43 +11,43 @@
 
 figure_interpretation:
   birth_weight_higher_median: >
-    Your unit's median birth weight is higher than the reference population,
+    Your department's median birth weight is higher than the reference population,
     indicating a shift toward higher birth weights in your population. This
     should be considered when interpreting infection rates and other clinical
     outcomes.
   birth_weight_lower_median: >
-    Your unit’s median birth weight is lower than the reference population,
+    Your department’s median birth weight is lower than the reference population,
     indicating a shift toward lower birth weights in your population. This
     should be considered when interpreting infection rates and other clinical
     outcomes.
   birth_weight_similar_median: >
-    Your unit's median birth weight is similar to the reference population,
+    Your department's median birth weight is similar to the reference population,
     suggesting comparable case mix in terms of birth weight distribution.
     This facilitates direct comparison of infection rates and clinical outcomes.
   gestational_age_higher_median: >
-    Your unit's median gestational age is higher than the reference population,
+    Your department's median gestational age is higher than the reference population,
     indicating a shift toward higher gestational ages in your population. This
     should be considered when interpreting infection rates and other clinical
     outcomes.
   gestational_age_lower_median: >
-    Your unit's median gestational age is lower than the reference population,
+    Your department's median gestational age is lower than the reference population,
     indicating a shift toward lower gestational ages in your population. This
     should be considered when interpreting infection rates and other clinical
     outcomes.
   gestational_age_similar_median: >
-    Your unit's median gestational age is similar to the reference population,
+    Your department's median gestational age is similar to the reference population,
     indicating comparable patient maturity profiles. This similarity in case mix
     facilitates meaningful comparison of infection prevention outcomes.
   heading: "Comparison with reference population"
   narrower_distribution: >
-    Your unit shows a narrower distribution (smaller interquartile range),
+    Your department shows a narrower distribution (smaller interquartile range),
     suggesting more homogeneous patient characteristics compared to the
     reference population.
   no_outliers: >
     All metrics fall within the interquartile range (25th-75th percentile) of
     the reference population, suggesting similiar patient characteristics.
   wider_distribution: >
-    Your unit shows a wider distribution (larger interquartile range),
+    Your department shows a wider distribution (larger interquartile range),
     indicating more heterogeneous patient characteristics compared to the
     reference population.
 
@@ -60,16 +60,16 @@ headerList:
   filterDiffersFootnote: >
     Note: This filter differs from the reference dataset.
   multiCountryBenchmarkHint: >
-    The reference data aggregates information from neonatal units in several
+    The reference data aggregates information from neonatal departments in several
     countries. While ideally a single-country benchmark would be preferable,
     aggregating data across multiple countries is pragmatically necessary when
     sufficient data from a single country is not available. This means that
     comparability may be limited due to different healthcare systems and
     resources available in different countries.
   singleCountryBenchmarkHint: >
-    The reference data presents information from neonatal units in a single
+    The reference data presents information from neonatal departments in a single
     country. While this provides a more relevant benchmark due to the relative
-    homogeneity of the healthcare system, your unit's country differs from the
+    homogeneity of the healthcare system, your department's country differs from the
     reference country, which may affect comparability.
   wbClassMismatchAddendum: >
     Additionally, the World Bank income classifications differ between your data
@@ -86,7 +86,7 @@ headings:
   gestational_age_distribution: Gestational Age Distribution
   infectious_agents_in_nosocomial_infections: >
     Infectious Agents Detected in Nosocomial Infections
-  presence_of_risk_and_protective_factors: Presence of Risk and Protective Factors in Your Unit
+  presence_of_risk_and_protective_factors: Presence of Risk and Protective Factors in Your Department
   resistant_pathogens: Resistant Pathogens
   secondary_bsi: Secondary Bloodstream Infections
   severe_infections_and_nec: >
@@ -97,19 +97,21 @@ outlier:
   above_q3_group: |
     The following metrics are above the 75th percentile of the reference population:
     METRIC_LIST
-    These elevated values warrant further investigation to identify potential causes and opportunities for targeted interventions.
+    These values are notably different from the reference population and should be reviewed in the context of your department's clinical setting and case mix.
   above_q3_single: >
     Your department's METRIC_NAME is above the 75th percentile of the reference population.
-    This elevated rate warrants review to identify potential factors contributing to this
-    difference and to evaluate whether additional prevention measures may be beneficial.
+    This difference should be reviewed in the context of your department's clinical setting and
+    case mix to determine whether it reflects department-specific characteristics or warrants
+    further investigation.
   below_q1_group: |
     The following metrics are below the 25th percentile of the reference population:
     METRIC_LIST
-    These lower values may reflect successful prevention strategies or reduced exposure to risk factors in your unit.
+    These values are notably different from the reference population and should be reviewed in the context of your department's clinical setting and case mix.
   below_q1_single: >
     Your department's METRIC_NAME is below the 25th percentile of the reference population.
-    This may indicate effective practices that could be shared, or alternatively, may warrant
-    investigation to ensure adequate screening and detection.
+    This difference should be reviewed in the context of your department's clinical setting and
+    case mix to determine whether it reflects department-specific characteristics or warrants
+    further investigation.
   caution_limited_data: >
     Note: The reference data is based on fewer than 5 contributing departments. Comparisons
     should be interpreted with caution due to limited sample size.
@@ -2068,7 +2070,7 @@ outlier:
   grouped_antibiotic_rates_w_inbetween: >
     AWaRe Watch-group antibiotic exposure is within the reference interquartile
     range. This suggests use of broader-spectrum agents is broadly comparable to
-    peer units. Continue close review of indications, step-down decisions, and
+    peer departments. Continue close review of indications, step-down decisions, and
     duration control.
   grouped_antibiotic_rates_w_inbetween_r_high: >
     Combined AWaRe profile: AWaRe Watch-group exposure is within the reference range;
@@ -2184,11 +2186,22 @@ outlier:
     availability of safe, approved neonatal probiotic products. Review local
     eligibility criteria, procurement and regulatory constraints, prescribing
     pathways, and documentation quality.
-  grouped_severe_infection_high: >
+  grouped_kangaroo_care_kangaroo_care_high: >
+    Kangaroo mother care (KMC) utilization is above the reference interquartile
+    range. High uptake of this WHO-recommended protective intervention is a
+    positive finding, reflecting strong implementation of skin-to-skin care
+    practices in your department.
+  grouped_kangaroo_care_kangaroo_care_low: >
+    Kangaroo mother care (KMC) utilization is below the reference interquartile
+    range. This may indicate barriers to implementation such as staffing
+    constraints, department layout, parental access restrictions, or documentation
+    practices. Review your department's KMC policy and identify opportunities to
+    support increased skin-to-skin care.
+  grouped_severe_infection_rates_high: >
     Your severe infection rates (BSI, and HAP) exceed the reference population's 75th
     percentile. This requires comprehensive review of surveillance definitions, hand hygiene
     compliance, environmental cleaning, and other core infection prevention practices.
-  grouped_severe_infection_low: >
+  grouped_severe_infection_rates_low: >
     Your severe infection rates (BSI, and HAP) are below the reference population's
     25th percentile. This favorable outcome suggests effective implementation of infection
     prevention strategies and warrants documentation of successful practices.
@@ -2574,44 +2587,48 @@ outlier:
     readiness and modality access for infants who require support.
   heading: "Comparison with reference data"
 own_data_label: "Your data"
-own_unit: Own unit
+own_unit: Own department
 reference_data: Reference data
 
 tbl-abr-infection-rate:
-  n_footnote: "%s: The aggregated number of infections with resistant pathogens in your unit's infants."
-  rate_footnote: "%s: The Antibiotic-Resistant Infection Rate for your unit (percentage of infections with resistant pathogens)."
+  n_footnote: "%s: The aggregated number of infections with resistant pathogens in your department's infants."
+  no_resistant_pathogens_note: >
+    No resistant pathogens were detected in your department's infections during this period.
+    If antimicrobial susceptibility testing rates in @tbl-resistance-test-rate are low,
+    under-detection of resistant organisms cannot be excluded.
+  rate_footnote: "%s: The Antibiotic-Resistant Infection Rate for your department (percentage of infections with resistant pathogens)."
 
 tbl-agent-per-infection-rate:
-  n_footnote: "%s: The aggregated number of infections with this infectious agent detected in your unit's infants."
-  rate_footnote: "%s: The percentage of infections in your unit where this infectious agent was detected."
+  n_footnote: "%s: The aggregated number of infections with this infectious agent detected in your department's infants."
+  rate_footnote: "%s: The percentage of infections in your department where this infectious agent was detected."
 
 tbl-device-associated-incidence-density-rates:
-  n_footnote: "%s: The aggregated number of device-associated infections in your unit's infants."
-  rate_footnote: "%s: The Device-Associated Incidence Density Rate for your unit (infections per 1000 device-days)."
+  n_footnote: "%s: The aggregated number of device-associated infections in your department's infants."
+  rate_footnote: "%s: The Device-Associated Incidence Density Rate for your department (infections per 1000 device-days)."
 
 tbl-incidence-density-rates:
-  n_footnote: "%s: The aggregated number of infections in your unit's infants."
-  rate_footnote: "%s: The Incidence Density Rate for your unit (infections per 1000 patient-days)."
+  n_footnote: "%s: The aggregated number of infections in your department's infants."
+  rate_footnote: "%s: The Incidence Density Rate for your department (infections per 1000 patient-days)."
 
 tbl-infectious-agent-detection-rate:
-  n_footnote: "%s: The aggregated number of infections with identified infectious agents in your unit's infants."
-  rate_footnote: "%s: The Infectious Agent Detection Rate for your unit (percentage of infections with identified agent)."
+  n_footnote: "%s: The aggregated number of infections with identified infectious agents in your department's infants."
+  rate_footnote: "%s: The Infectious Agent Detection Rate for your department (percentage of infections with identified agent)."
 
 tbl-resistance-test-rate:
-  n_footnote: "%s: The aggregated number of eligible pathogens in your unit's infants."
-  rate_footnote: "%s: The Antibiotic Resistance Test Rate for your unit (percentage of eligible pathogens with documented resistance testing)."
+  n_footnote: "%s: The aggregated number of eligible pathogens in your department's infants."
+  rate_footnote: "%s: The Antibiotic Resistance Test Rate for your department (percentage of eligible pathogens with documented resistance testing)."
 
 tbl-risk-density-rates:
   n_footnote: >
     %s: The aggregated number of days the risk/protective factor was present in
-    your unit's infants.
+    your department's infants.
   rate_footnote: >
-    %s: The Risk Density Rate calculated for your unit's infants.
+    %s: The Risk Density Rate calculated for your department's infants.
 
 tbl-secondary-bsi-rates:
-  n_footnote: "%s: The aggregated number of infections with secondary bloodstream infection in your unit's infants."
-  rate_footnote: "%s: The Secondary Bloodstream Infection Rate for your unit (percentage of infections with secondary BSI)."
+  n_footnote: "%s: The aggregated number of infections with secondary bloodstream infection in your department's infants."
+  rate_footnote: "%s: The Secondary Bloodstream Infection Rate for your department (percentage of infections with secondary BSI)."
 
 tbl-surgical-procedure-rates:
-  n_footnote: "%s: The aggregated number of surgical procedures performed in your unit's infants."
-  rate_footnote: "%s: The Surgical Procedure Rate for your unit (procedures per 100 admissions)."
+  n_footnote: "%s: The aggregated number of surgical procedures performed in your department's infants."
+  rate_footnote: "%s: The Surgical Procedure Rate for your department (procedures per 100 admissions)."

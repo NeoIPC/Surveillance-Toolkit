@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NeoIPC Surveillance Reports 0.9\n"
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-03-17 16:19+0100\n"
+"POT-Creation-Date: 2026-03-24 07:43+0100\n"
 "PO-Revision-Date: 2026-03-16 14:49+0100\n"
 "Last-Translator: Brar Piening <brar.piening@charite.de>\n"
 "Language-Team: none\n"
@@ -110,7 +110,7 @@ msgstr "Verteilung der Gestationsalter der in dieser Auswertung berücksichtigte
 #. type: Hash Value: fig-cap bnch
 #: reports/common.yaml:1
 #, no-wrap
-msgid "A is a histogram in %s steps with a density curve of your own unit’s data and a density curve of the reference data and B are two boxplots, one of your own unit’s data and one of the reference data."
+msgid "A is a histogram in %s steps with a density curve of your own department’s data and a density curve of the reference data and B are two boxplots, one of your own department’s data and one of the reference data."
 msgstr "A ist ein Histogramm in %s-Schritten mit einer Dichte-Kurve der Daten Ihrer eigenen Abteilung und einer Dichte-Kurve der Referenzdaten, und B sind zwei Boxplots, einer mit den Daten Ihrer eigenen Abteilung und einer mit den Referenzdaten."
 
 #. type: Hash Value: fig-cap no-bnch
@@ -142,6 +142,12 @@ msgstr "g"
 #, no-wrap
 msgid "Department"
 msgstr "Abteilung"
+
+#. type: Hash Value: headerList admissionsExceedRecordsNote
+#: reports/common.yaml:1
+#, no-wrap
+msgid "admissions may exceed records when a patient had more than one admission episode during the surveillance period"
+msgstr ""
 
 #. type: Hash Value: headerList allBirthweights
 #: reports/common.yaml:1
@@ -218,7 +224,7 @@ msgstr "ignoriert die Einschlusskriterien für die NeoIPC-Surveillance."
 #. type: Hash Value: headerList includesTestDepartments
 #: reports/common.yaml:1
 #, no-wrap
-msgid "includes test units"
+msgid "includes test departments"
 msgstr "schließt Test-Abteilungen mit ein"
 
 #. type: Hash Value: headerList numberOfAdmissions
@@ -230,8 +236,8 @@ msgstr "Anzahl der Patientenaufnahmen"
 #. type: Hash Value: headerList numberOfDepartments
 #: reports/common.yaml:1
 #, no-wrap
-msgid "Number of units contributing at least one patient record"
-msgstr "Anzahl der Abteilungen, die mindestens eine Patientenakte beigesteuert haben"
+msgid "Number of departments contributing at least one patient record"
+msgstr "Anzahl der Abteilungen, die mindestens einen Patienten beigetragen haben"
 
 #. type: Hash Value: headerList numberOfPatients
 #: reports/common.yaml:1
@@ -316,6 +322,12 @@ msgstr "Patiententage"
 #, no-wrap
 msgid "%"
 msgstr "%"
+
+#. type: Hash Value: pooled_rate_note
+#: reports/common.yaml:1
+#, no-wrap
+msgid "The pooled rate is the arithmetic mean across all individual records in the reference population and can therefore fall outside the interquartile range, which is derived from department-level rates."
+msgstr ""
 
 #. type: Hash Value: si
 #: reports/common.yaml:1
@@ -710,14 +722,20 @@ msgstr "Antibiotika (gesamt)"
 #. type: Hash Value: tbl-risk-density-rates aware_footnote
 #: reports/common.yaml:1
 #, no-wrap
-msgid "WHO AWaRe group (see %s). As cumulative treatment days for individual substances are recorded per patient, combination therapies using several substances on one day are counted as multiple days."
-msgstr "WHO AWaRe-Gruppe (siehe %s). Da die kumulativen Behandlungstage für einzelne Substanzen pro Patient erfasst werden, werden Kombinationstherapien mit mehreren Substanzen an einem Tag als mehrere Tage gezählt."
+msgid "WHO AWaRe group (see %s). Each antibiotic substance is counted separately. A patient receiving two antibiotics on the same day contributes one day to each substance's tally — so one patient-day may be counted in both the Access and Watch group totals simultaneously."
+msgstr ""
 
 #. type: Hash Value: tbl-risk-density-rates days_with_risk_factor
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Days with risk/protective factor"
 msgstr "Tage mit Risiko-/Schutzfaktor"
+
+#. type: Hash Value: tbl-risk-density-rates kmc_day_footnote
+#: reports/common.yaml:1
+#, no-wrap
+msgid "A kangaroo care day is recorded when the patient received intensive skin-to-skin contact for at least 2 hours on a given calendar day."
+msgstr ""
 
 #. type: Hash Value: tbl-risk-density-rates no_data
 #: reports/common.yaml:1
@@ -751,8 +769,9 @@ msgstr "Risikofaktor-Anwendungsrate"
 
 #. type: Hash Value: tbl-risk-density-rates tbl-cap
 #: reports/common.yaml:1
-#, no-wrap
-msgid "Factors influencing the infants' risk of developing an infection or acquiring antibitic-resistant pathogens."
+#, fuzzy, no-wrap
+#| msgid "Factors influencing the infants' risk of developing an infection or acquiring antibitic-resistant pathogens."
+msgid "Factors influencing the infants' risk of developing an infection or acquiring antibiotic-resistant pathogens."
 msgstr "Faktoren, die das Risiko von Kindern beeinflussen, eine Infektion zu entwickeln oder antibiotikaresistente Erreger zu erwerben."
 
 #. type: Hash Value: tbl-risk-density-rates vascular_catheter
@@ -1016,37 +1035,37 @@ msgstr "NeoIPC Surveillance Partner-Auswertung"
 #. type: Hash Value: figure_interpretation birth_weight_higher_median
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "Your unit's median birth weight is higher than the reference population, indicating a shift toward higher birth weights in your population. This should be considered when interpreting infection rates and other clinical outcomes.\n"
+msgid "Your department's median birth weight is higher than the reference population, indicating a shift toward higher birth weights in your population. This should be considered when interpreting infection rates and other clinical outcomes.\n"
 msgstr "Das mittlere Geburtsgewicht in Ihrer Abteilung liegt über dem der Referenzpopulation, was auf eine Tendenz zu höheren Geburtsgewichten in Ihrer Population hindeutet. Dies sollte bei der Interpretation von Infektionsraten und anderen klinischen Ergebnissen berücksichtigt werden.\n"
 
 #. type: Hash Value: figure_interpretation birth_weight_lower_median
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "Your unit’s median birth weight is lower than the reference population, indicating a shift toward lower birth weights in your population. This should be considered when interpreting infection rates and other clinical outcomes.\n"
+msgid "Your department’s median birth weight is lower than the reference population, indicating a shift toward lower birth weights in your population. This should be considered when interpreting infection rates and other clinical outcomes.\n"
 msgstr "Das mittlere Geburtsgewicht in Ihrer Abteilung liegt unter dem der Referenzpopulation, was auf eine Tendenz zu niedrigeren Geburtsgewichten in Ihrer Population hindeutet. Dies sollte bei der Interpretation von Infektionsraten und anderen klinischen Ergebnissen berücksichtigt werden.\n"
 
 #. type: Hash Value: figure_interpretation birth_weight_similar_median
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "Your unit's median birth weight is similar to the reference population, suggesting comparable case mix in terms of birth weight distribution. This facilitates direct comparison of infection rates and clinical outcomes.\n"
+msgid "Your department's median birth weight is similar to the reference population, suggesting comparable case mix in terms of birth weight distribution. This facilitates direct comparison of infection rates and clinical outcomes.\n"
 msgstr "Das mittlere Geburtsgewicht in Ihrer Abteilung entspricht dem der Referenzpopulation, was auf eine vergleichbare Patientengruppe hinsichtlich der Verteilung des Geburtsgewichts hindeutet. Dies erleichtert den direkten Vergleich von Infektionsraten und klinischen Ergebnissen.\n"
 
 #. type: Hash Value: figure_interpretation gestational_age_higher_median
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "Your unit's median gestational age is higher than the reference population, indicating a shift toward higher gestational ages in your population. This should be considered when interpreting infection rates and other clinical outcomes.\n"
+msgid "Your department's median gestational age is higher than the reference population, indicating a shift toward higher gestational ages in your population. This should be considered when interpreting infection rates and other clinical outcomes.\n"
 msgstr "Das mittlere Gestationsalter in Ihrer Abteilung liegt über dem der Referenzpopulation, was auf eine Verschiebung hin zu höheren Gestationsaltern in Ihrer Population hindeutet. Dies sollte bei der Interpretation von Infektionsraten und anderen klinischen Ergebnissen berücksichtigt werden.\n"
 
 #. type: Hash Value: figure_interpretation gestational_age_lower_median
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "Your unit's median gestational age is lower than the reference population, indicating a shift toward lower gestational ages in your population. This should be considered when interpreting infection rates and other clinical outcomes.\n"
+msgid "Your department's median gestational age is lower than the reference population, indicating a shift toward lower gestational ages in your population. This should be considered when interpreting infection rates and other clinical outcomes.\n"
 msgstr "Das mittlere Gestationsalter in Ihrer Abteilung liegt unter dem der Referenzpopulation, was auf eine Verschiebung hin zu niedrigeren Gestationsaltern in Ihrer Population hindeutet. Dies sollte bei der Interpretation von Infektionsraten und anderen klinischen Ergebnissen berücksichtigt werden.\n"
 
 #. type: Hash Value: figure_interpretation gestational_age_similar_median
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "Your unit's median gestational age is similar to the reference population, indicating comparable patient maturity profiles. This similarity in case mix facilitates meaningful comparison of infection prevention outcomes.\n"
+msgid "Your department's median gestational age is similar to the reference population, indicating comparable patient maturity profiles. This similarity in case mix facilitates meaningful comparison of infection prevention outcomes.\n"
 msgstr "Das mittlere Gestationsalter in Ihrer Abteilung entspricht in etwa dem der Referenzpopulation, was auf vergleichbare Reifeprofile der Patienten hindeutet. Diese Ähnlichkeit im Behandlungsspektrum ermöglicht einen aussagekräftigen Vergleich der Ergebnisse im Bereich der Infektionsprävention.\n"
 
 #. type: Hash Value: figure_interpretation heading
@@ -1058,7 +1077,7 @@ msgstr "Vergleich mit der Referenzpopulation"
 #. type: Hash Value: figure_interpretation narrower_distribution
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "Your unit shows a narrower distribution (smaller interquartile range), suggesting more homogeneous patient characteristics compared to the reference population.\n"
+msgid "Your department shows a narrower distribution (smaller interquartile range), suggesting more homogeneous patient characteristics compared to the reference population.\n"
 msgstr "Ihre Abteilung weist eine engere Streuung (geringere Interquartilsbreite) auf, was darauf hindeutet, dass die Patientenmerkmale im Vergleich zur Referenzpopulation homogener sind.\n"
 
 #. type: Hash Value: figure_interpretation no_outliers
@@ -1070,7 +1089,7 @@ msgstr "Alle Messwerte liegen innerhalb des Interquartilsbereichs (25.–75. Per
 #. type: Hash Value: figure_interpretation wider_distribution
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "Your unit shows a wider distribution (larger interquartile range), indicating more heterogeneous patient characteristics compared to the reference population.\n"
+msgid "Your department shows a wider distribution (larger interquartile range), indicating more heterogeneous patient characteristics compared to the reference population.\n"
 msgstr "Ihre Gruppe weist eine breitere Streuung (größerer Interquartilsabstand) auf, was auf heterogenere Patientenmerkmale im Vergleich zur Referenzpopulation hindeutet.\n"
 
 #. type: Hash Value: headerList benchmarkComparabilityHeader
@@ -1094,14 +1113,14 @@ msgstr "Hinweis: Dieser Filter weicht vom Referenzdatensatz ab.\n"
 #. type: Hash Value: headerList multiCountryBenchmarkHint
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The reference data aggregates information from neonatal units in several countries. While ideally a single-country benchmark would be preferable, aggregating data across multiple countries is pragmatically necessary when sufficient data from a single country is not available. This means that comparability may be limited due to different healthcare systems and resources available in different countries.\n"
+msgid "The reference data aggregates information from neonatal departments in several countries. While ideally a single-country benchmark would be preferable, aggregating data across multiple countries is pragmatically necessary when sufficient data from a single country is not available. This means that comparability may be limited due to different healthcare systems and resources available in different countries.\n"
 msgstr "Die Referenzdaten fassen Informationen aus neonatologischen Abteilungen in mehreren Ländern zusammen. Zwar wäre im Idealfall ein länderinterner Vergleich vorzuziehen, doch ist eine Zusammenfassung der Daten aus mehreren Ländern aus praktischen Gründen notwendig, wenn aus einem einzelnen Land keine ausreichenden Daten vorliegen. Dies bedeutet, dass die Vergleichbarkeit aufgrund unterschiedlicher Gesundheitssysteme und Ressourcen in den einzelnen Ländern eingeschränkt sein kann.\n"
 
 #. type: Hash Value: headerList singleCountryBenchmarkHint
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The reference data presents information from neonatal units in a single country. While this provides a more relevant benchmark due to the relative homogeneity of the healthcare system, your unit's country differs from the reference country, which may affect comparability.\n"
-msgstr "Die Referenzdaten stammen aus neonatologischen Abteilungen eines einzigen Landes. Dies bietet zwar aufgrund der relativen Homogenität des Gesundheitssystems einen aussagekräftigeren Vergleichsmaßstab, doch unterscheidet sich das Land Ihrer Station vom Referenzland, was die Vergleichbarkeit beeinträchtigen kann.\n"
+msgid "The reference data presents information from neonatal departments in a single country. While this provides a more relevant benchmark due to the relative homogeneity of the healthcare system, your department's country differs from the reference country, which may affect comparability.\n"
+msgstr "Die Referenzdaten stammen aus neonatologischen Abteilungen eines einzigen Landes. Dies bietet zwar aufgrund der relativen Homogenität des Gesundheitssystems einen aussagekräftigeren Vergleichsmaßstab, doch unterscheidet sich das Land Ihrer Abteilung vom Referenzland, was die Vergleichbarkeit beeinträchtigen kann.\n"
 
 #. type: Hash Value: headerList wbClassMismatchAddendum
 #: reports/Partner-Report/content/_sR.yaml:1
@@ -1154,7 +1173,7 @@ msgstr "Bei nosokomialen Infektionen nachgewiesene Infektionserreger\n"
 #. type: Hash Value: headings presence_of_risk_and_protective_factors
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "Presence of Risk and Protective Factors in Your Unit"
+msgid "Presence of Risk and Protective Factors in Your Department"
 msgstr "Vorhandensein von Risiko- und protektiven Faktoren in Ihrer Abteilung"
 
 #. type: Hash Value: headings resistant_pathogens
@@ -1187,17 +1206,17 @@ msgstr "Chirurgische Eingriffe nach Kategorie"
 msgid ""
 "The following metrics are above the 75th percentile of the reference population:\n"
 "METRIC_LIST\n"
-"These elevated values warrant further investigation to identify potential causes and opportunities for targeted interventions.\n"
+"These values are notably different from the reference population and should be reviewed in the context of your department's clinical setting and case mix.\n"
 msgstr ""
 "Die folgenden Kennzahlen liegen über dem 75. Perzentil der Referenzpopulation:\n"
 "METRIC_LIST\n"
-"Diese erhöhten Werte erfordern eine eingehendere Untersuchung, um mögliche Ursachen zu ermitteln und Möglichkeiten für gezielte Maßnahmen zu identifizieren.\n"
+"Diese Werte unterscheiden sich deutlich von der Referenzpopulation und sollten im Kontext der klinischen Gegebenheiten und des Behandlungsspektrums Ihrer Abteilung bewertet werden.\n"
 
 #. type: Hash Value: outlier above_q3_single
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "Your department's METRIC_NAME is above the 75th percentile of the reference population. This elevated rate warrants review to identify potential factors contributing to this difference and to evaluate whether additional prevention measures may be beneficial.\n"
-msgstr "Der METRIC_NAME Ihrer Abteilung liegt über dem 75. Perzentil der Referenzpopulation. Diese erhöhte Rate rechtfertigt eine Überprüfung, um mögliche Faktoren zu ermitteln, die zu diesem Unterschied beitragen, und um zu beurteilen, ob zusätzliche Präventionsmaßnahmen von Nutzen sein könnten.\n"
+msgid "Your department's METRIC_NAME is above the 75th percentile of the reference population. This difference should be reviewed in the context of your department's clinical setting and case mix to determine whether it reflects department-specific characteristics or warrants further investigation.\n"
+msgstr "Der METRIC_NAME Ihrer Abteilung liegt über dem 75. Perzentil der Referenzpopulation. Dieser Unterschied sollte im Kontext der klinischen Gegebenheiten und des Behandlungsspektrums Ihrer Abteilung bewertet werden, um festzustellen, ob er abteilungsspezifische Besonderheiten widerspiegelt oder eine weitergehende Untersuchung erfordert.\n"
 
 #. type: Hash Value: outlier below_q1_group
 #: reports/Partner-Report/content/_sR.yaml:1
@@ -1205,17 +1224,17 @@ msgstr "Der METRIC_NAME Ihrer Abteilung liegt über dem 75. Perzentil der Refere
 msgid ""
 "The following metrics are below the 25th percentile of the reference population:\n"
 "METRIC_LIST\n"
-"These lower values may reflect successful prevention strategies or reduced exposure to risk factors in your unit.\n"
+"These values are notably different from the reference population and should be reviewed in the context of your department's clinical setting and case mix.\n"
 msgstr ""
 "Die folgenden Kennzahlen liegen unter dem 25. Perzentil der Referenzpopulation:\n"
 "METRIC_LIST\n"
-"Diese niedrigeren Werte könnten auf erfolgreiche Präventionsstrategien oder eine geringere Exposition gegenüber Risikofaktoren in Ihrer Einheit hindeuten.\n"
+"Diese Werte unterscheiden sich deutlich von der Referenzpopulation und sollten im Kontext der klinischen Gegebenheiten und des Behandlungsspektrums Ihrer Abteilung bewertet werden.\n"
 
 #. type: Hash Value: outlier below_q1_single
 #: reports/Partner-Report/content/_sR.yaml:1
-#, fuzzy, no-wrap
-msgid "Your department's METRIC_NAME is below the 25th percentile of the reference population. This may indicate effective practices that could be shared, or alternatively, may warrant investigation to ensure adequate screening and detection.\n"
-msgstr "Der METRIC_NAME Ihrer Abteilung liegt unter dem 25. Perzentil der Referenzpopulation. Dies könnte auf bewährte Verfahren hindeuten, die weitergegeben werden könnten, oder aber eine Untersuchung rechtfertigen, um eine angemessene Vorsorge und Früherkennung sicherzustellen.\n"
+#, no-wrap
+msgid "Your department's METRIC_NAME is below the 25th percentile of the reference population. This difference should be reviewed in the context of your department's clinical setting and case mix to determine whether it reflects department-specific characteristics or warrants further investigation.\n"
+msgstr "Der METRIC_NAME Ihrer Abteilung liegt unter dem 25. Perzentil der Referenzpopulation. Dieser Unterschied sollte im Kontext der klinischen Gegebenheiten und des Behandlungsspektrums Ihrer Abteilung bewertet werden, um festzustellen, ob er abteilungsspezifische Besonderheiten widerspiegelt oder eine weitergehende Untersuchung erfordert.\n"
 
 #. type: Hash Value: outlier caution_limited_data
 #: reports/Partner-Report/content/_sR.yaml:1
@@ -2707,9 +2726,9 @@ msgstr "Kombiniertes AWaRe-Profil: Die Exposition in der AWaRe-Watch-Gruppe lieg
 
 #. type: Hash Value: outlier grouped_antibiotic_rates_w_inbetween
 #: reports/Partner-Report/content/_sR.yaml:1
-#, fuzzy, no-wrap
-msgid "AWaRe Watch-group antibiotic exposure is within the reference interquartile range. This suggests use of broader-spectrum agents is broadly comparable to peer units. Continue close review of indications, step-down decisions, and duration control.\n"
-msgstr "Die Antibiotikaexposition der AWaRe-Watch-Gruppe liegt innerhalb des Referenz-Interquartilsbereichs. Dies deutet darauf hin, dass der Einsatz von Breitbandantibiotika im Großen und Ganzen mit dem anderer vergleichbarer Einrichtungen vergleichbar ist. Setzen Sie die genaue Überprüfung der Indikationen, der Entscheidungen zur Reduzierung der Dosierung und der Dauer der Behandlung fort.\n"
+#, no-wrap
+msgid "AWaRe Watch-group antibiotic exposure is within the reference interquartile range. This suggests use of broader-spectrum agents is broadly comparable to peer departments. Continue close review of indications, step-down decisions, and duration control.\n"
+msgstr "Die Antibiotikaexposition der AWaRe-Watch-Gruppe liegt innerhalb des Referenz-Interquartilsbereichs. Dies deutet darauf hin, dass der Einsatz von Breitspektrumantibiotika im Großen und Ganzen mit dem anderer vergleichbarer Abteilungen vergleichbar ist. Setzen Sie die genaue Überprüfung der Indikationen, der Deeskalationsentscheidungen und der Therapiedauer fort.\n"
 
 #. type: Hash Value: outlier grouped_antibiotic_rates_w_inbetween_r_high
 #: reports/Partner-Report/content/_sR.yaml:1
@@ -2825,17 +2844,30 @@ msgstr "Die Verwendung von Probiotika liegt über dem Referenz-Interquartilsbere
 msgid "Probiotic use is below the reference interquartile range. This may indicate selective implementation, barriers in care pathways, or limited availability of safe, approved neonatal probiotic products. Review local eligibility criteria, procurement and regulatory constraints, prescribing pathways, and documentation quality.\n"
 msgstr "Die Verwendung von Probiotika liegt unterhalb des Referenz-Interquartilsbereichs. Dies könnte auf eine selektive Anwendung, Hindernisse in den Versorgungswegen oder eine begrenzte Verfügbarkeit sicherer, zugelassener Probiotika für Neugeborene hindeuten. Überprüfen Sie die lokalen Zulassungskriterien, Beschaffungs- und regulatorische Auflagen, Verschreibungswege sowie die Qualität der Dokumentation.\n"
 
-#. type: Hash Value: outlier grouped_severe_infection_high
+#. type: Hash Value: outlier grouped_kangaroo_care_kangaroo_care_high
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Kangaroo mother care (KMC) utilization is above the reference interquartile range. High uptake of this WHO-recommended protective intervention is a positive finding, reflecting strong implementation of skin-to-skin care practices in your department.\n"
+msgstr ""
+
+#. type: Hash Value: outlier grouped_kangaroo_care_kangaroo_care_low
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Kangaroo mother care (KMC) utilization is below the reference interquartile range. This may indicate barriers to implementation such as staffing constraints, department layout, parental access restrictions, or documentation practices. Review your department's KMC policy and identify opportunities to support increased skin-to-skin care.\n"
+msgstr ""
+
+#. type: Hash Value: outlier grouped_severe_infection_rates_high
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Your severe infection rates (BSI, and HAP) exceed the reference population's 75th percentile. This requires comprehensive review of surveillance definitions, hand hygiene compliance, environmental cleaning, and other core infection prevention practices.\n"
 msgstr "Ihre Raten schwerer Infektionen (BSI und HAP) liegen über dem 75. Perzentil der Referenzpopulation. Dies erfordert eine umfassende Überprüfung der Surveillancedefinitionen, der Einhaltung der Handhygiene, der Reinigung der Räumlichkeiten sowie anderer zentraler Maßnahmen zur Infektionsprävention.\n"
 
-#. type: Hash Value: outlier grouped_severe_infection_low
+#. type: Hash Value: outlier grouped_severe_infection_rates_low
 #: reports/Partner-Report/content/_sR.yaml:1
 #, fuzzy, no-wrap
+#| msgid "Your severe infection rates (BSI, and HAP) exceed the reference population's 75th percentile. This requires comprehensive review of surveillance definitions, hand hygiene compliance, environmental cleaning, and other core infection prevention practices.\n"
 msgid "Your severe infection rates (BSI, and HAP) are below the reference population's 25th percentile. This favorable outcome suggests effective implementation of infection prevention strategies and warrants documentation of successful practices.\n"
-msgstr "Ihre Raten schwerer Infektionen (BSI und HAP) liegen unter dem 25. Perzentil der Referenzpopulation. Dieses positive Ergebnis deutet auf eine wirksame Umsetzung von Strategien zur Infektionsprävention hin und rechtfertigt die Dokumentation erfolgreicher Vorgehensweisen.\n"
+msgstr "Ihre Raten schwerer Infektionen (BSI und HAP) liegen über dem 75. Perzentil der Referenzpopulation. Dies erfordert eine umfassende Überprüfung der Surveillancedefinitionen, der Einhaltung der Handhygiene, der Reinigung der Räumlichkeiten sowie anderer zentraler Maßnahmen zur Infektionsprävention.\n"
 
 #. type: Hash Value: outlier grouped_vascular_catheter_rates_cvc_high
 #: reports/Partner-Report/content/_sR.yaml:1
@@ -3230,8 +3262,8 @@ msgstr "Ihre Daten"
 #. type: Hash Value: own_unit
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "Own unit"
-msgstr "Eigene Abteilunng"
+msgid "Own department"
+msgstr "Eigene Abteilung"
 
 #. type: Hash Value: reference_data
 #: reports/Partner-Report/content/_sR.yaml:1
@@ -3242,115 +3274,121 @@ msgstr "Referenzdaten"
 #. type: Hash Value: tbl-abr-infection-rate n_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "%s: The aggregated number of infections with resistant pathogens in your unit's infants."
+msgid "%s: The aggregated number of infections with resistant pathogens in your department's infants."
 msgstr "%s: Die Gesamtzahl der antibiotikaresistenten Erreger bei allen Infektionen."
+
+#. type: Hash Value: tbl-abr-infection-rate no_resistant_pathogens_note
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "No resistant pathogens were detected in your department's infections during this period. If antimicrobial susceptibility testing rates in @tbl-resistance-test-rate are low, under-detection of resistant organisms cannot be excluded.\n"
+msgstr ""
 
 #. type: Hash Value: tbl-abr-infection-rate rate_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "%s: The Antibiotic-Resistant Infection Rate for your unit (percentage of infections with resistant pathogens)."
+msgid "%s: The Antibiotic-Resistant Infection Rate for your department (percentage of infections with resistant pathogens)."
 msgstr "%s: Die Rate antibiotikaresistenter Infektionen in Ihrer Abteilung (Prozentsatz der Infektionen mit resistenten Erregern)."
 
 #. type: Hash Value: tbl-agent-per-infection-rate n_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "%s: The aggregated number of infections with this infectious agent detected in your unit's infants."
+msgid "%s: The aggregated number of infections with this infectious agent detected in your department's infants."
 msgstr "%s: Die Gesamtzahl der Tage, an denen der Risiko-/Schutzfaktor bei den Kindern Ihrer Abteilung vorhanden war."
 
 #. type: Hash Value: tbl-agent-per-infection-rate rate_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "%s: The percentage of infections in your unit where this infectious agent was detected."
+msgid "%s: The percentage of infections in your department where this infectious agent was detected."
 msgstr "Anzahl der Infektionen, bei denen ein Infektionserreger nachgewiesen wurde."
 
 #. type: Hash Value: tbl-device-associated-incidence-density-rates n_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "%s: The aggregated number of device-associated infections in your unit's infants."
+msgid "%s: The aggregated number of device-associated infections in your department's infants."
 msgstr "%s: Die Gesamtzahl der Device-assoziierten Infektionen bei allen Kindern."
 
 #. type: Hash Value: tbl-device-associated-incidence-density-rates rate_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "%s: The Device-Associated Incidence Density Rate for your unit (infections per 1000 device-days)."
+msgid "%s: The Device-Associated Incidence Density Rate for your department (infections per 1000 device-days)."
 msgstr "%s: Die Device-assoziierte Inzidenzdichte, berechnet für alle Kinder aus allen Abteilungen."
 
 #. type: Hash Value: tbl-incidence-density-rates n_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "%s: The aggregated number of infections in your unit's infants."
+msgid "%s: The aggregated number of infections in your department's infants."
 msgstr "%s: Die Gesamtzahl der Infektionen bei allen Kindern."
 
 #. type: Hash Value: tbl-incidence-density-rates rate_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "%s: The Incidence Density Rate for your unit (infections per 1000 patient-days)."
+msgid "%s: The Incidence Density Rate for your department (infections per 1000 patient-days)."
 msgstr "%s: Die Inzidenzdichte, berechnet für alle Kinder aus allen Abteilungen."
 
 #. type: Hash Value: tbl-infectious-agent-detection-rate n_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "%s: The aggregated number of infections with identified infectious agents in your unit's infants."
+msgid "%s: The aggregated number of infections with identified infectious agents in your department's infants."
 msgstr "%s: Die Gesamtzahl der Tage, an denen der Risiko-/Schutzfaktor bei den Kindern Ihrer Abteilung vorhanden war."
 
 #. type: Hash Value: tbl-infectious-agent-detection-rate rate_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "%s: The Infectious Agent Detection Rate for your unit (percentage of infections with identified agent)."
+msgid "%s: The Infectious Agent Detection Rate for your department (percentage of infections with identified agent)."
 msgstr "%s: Die Infektionserreger-Nachweisrate, berechnet für alle Kinder aus allen Abteilungen."
 
 #. type: Hash Value: tbl-resistance-test-rate n_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "%s: The aggregated number of eligible pathogens in your unit's infants."
+msgid "%s: The aggregated number of eligible pathogens in your department's infants."
 msgstr "%s: Die Gesamtzahl der Infektionen bei allen Kindern."
 
 #. type: Hash Value: tbl-resistance-test-rate rate_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "%s: The Antibiotic Resistance Test Rate for your unit (percentage of eligible pathogens with documented resistance testing)."
+msgid "%s: The Antibiotic Resistance Test Rate for your department (percentage of eligible pathogens with documented resistance testing)."
 msgstr "%s: Die Antibiotikaresistenz-Testquote Ihrer Abteilung (Prozentsatz der in Frage kommenden Erreger, bei denen Resistenztests dokumentiert sind)."
 
 #. type: Hash Value: tbl-risk-density-rates n_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "%s: The aggregated number of days the risk/protective factor was present in your unit's infants.\n"
+msgid "%s: The aggregated number of days the risk/protective factor was present in your department's infants.\n"
 msgstr "%s: Die Gesamtzahl der Tage, an denen der Risiko-/Schutzfaktor bei den Kindern Ihrer Abteilung vorhanden war.\n"
 
 #. type: Hash Value: tbl-risk-density-rates rate_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "%s: The Risk Density Rate calculated for your unit's infants.\n"
+msgid "%s: The Risk Density Rate calculated for your department's infants.\n"
 msgstr "%s: Die für die Kinder Ihrer Abteilung berechnete Risikofaktor-Anwendungsrate.\n"
 
 #. type: Hash Value: tbl-secondary-bsi-rates n_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "%s: The aggregated number of infections with secondary bloodstream infection in your unit's infants."
+msgid "%s: The aggregated number of infections with secondary bloodstream infection in your department's infants."
 msgstr "%s: Die Gesamtzahl der Tage, an denen der Risiko-/Schutzfaktor bei den Kindern Ihrer Abteilung vorhanden war."
 
 #. type: Hash Value: tbl-secondary-bsi-rates rate_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "%s: The Secondary Bloodstream Infection Rate for your unit (percentage of infections with secondary BSI)."
+msgid "%s: The Secondary Bloodstream Infection Rate for your department (percentage of infections with secondary BSI)."
 msgstr "%s: Die Rate der sekundären Blutstrominfektionen für Ihre Abteilung (Prozentsatz der Infektionen mit sekundären Blutstrominfektionen)."
 
 #. type: Hash Value: tbl-surgical-procedure-rates n_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "%s: The aggregated number of surgical procedures performed in your unit's infants."
+msgid "%s: The aggregated number of surgical procedures performed in your department's infants."
 msgstr "%s: Die Gesamtzahl der chirurgischen Eingriffe, die bei allen Kindern durchgeführt wurden."
 
 #. type: Hash Value: tbl-surgical-procedure-rates rate_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "%s: The Surgical Procedure Rate for your unit (procedures per 100 admissions)."
+msgid "%s: The Surgical Procedure Rate for your department (procedures per 100 admissions)."
 msgstr "%s: Die Rate der chirurgischen Eingriffe in Ihrer Abteilung (Eingriffe pro 100 Aufnahmen)."
 
 #. type: Plain text
 #: reports/Partner-Report/content/_introduction.Rmd:2
 #, no-wrap
-msgid "This is a [NeoIPC Surveillance](https://neoipc.org/surveillance/ \"Link to the surveillance section of the NeoIPC website\") analysis that you can use to assess infection rates in your neonatal unit. If you have your own data collected using the same or a comparable method, you can compare them with the reference values presented in this document and identify any anomalies and potential for improvement.\n"
+msgid "This is a [NeoIPC Surveillance](https://neoipc.org/surveillance/ \"Link to the surveillance section of the NeoIPC website\") analysis that you can use to assess infection rates in your neonatal department. If you have your own data collected using the same or a comparable method, you can compare them with the reference values presented in this document and identify any anomalies and potential for improvement.\n"
 msgstr "Dies ist eine Auswertung der [NeoIPC-Surveillance](https://neoipc.org/surveillance/ \"Link zum Abschnitt „Surveillance“ auf der NeoIPC-Website\"), die Sie zur Beurteilung der Infektionsraten in Ihrer neonatologischen Abteilung verwenden können. Wenn Sie eigene Daten haben, die mit derselben oder einer vergleichbaren Methode erhoben wurden, können Sie diese mit den in diesem Dokument dargestellten Referenzwerten vergleichen und so Auffälligkeiten und Verbesserungspotenziale identifizieren.\n"
 
 #. type: Plain text
@@ -3368,7 +3406,7 @@ msgstr "Das NeoIPC Surveillancessystem konzentriert sich auf Risikoneugeborene, 
 #. type: Plain text
 #: reports/Partner-Report/content/_nosocomial_infections.Rmd:2
 #, no-wrap
-msgid "Healthcare-associated infections represent the primary endpoint of NeoIPC surveillance. In your unit, `r dR$own$numberOfSevereInfections` severe infections were recorded in `r dR$own$numberOfPatients` patients, resulting in an average of `r dR$own$averageSevereInfectionsPerPatient` infections per patient`r if (!is.null(dR$ref)) paste0(\", compared to \", dR$ref$numberOfSevereInfections, \" infections in \", dR$ref$numberOfPatients, \" reference patients (average: \", dR$ref$averageSevereInfectionsPerPatient, \")\")`.\n"
+msgid "Healthcare-associated infections represent the primary endpoint of NeoIPC surveillance. In your department, `r dR$own$numberOfSevereInfections` severe infections were recorded in `r dR$own$numberOfPatients` patients, resulting in an average of `r dR$own$averageSevereInfectionsPerPatient` infections per patient`r if (!is.null(dR$ref)) paste0(\", compared to \", dR$ref$numberOfSevereInfections, \" infections in \", dR$ref$numberOfPatients, \" reference patients (average: \", dR$ref$averageSevereInfectionsPerPatient, \")\")`.\n"
 msgstr "Nosokomiale Infektionen stellen den primären Endpunkt der NeoIPC Surveillance dar. In Ihrer Abteilung wurden `r dR$own$numberOfSevereInfections` schwere Infektionen bei `r dR$own$numberOfPatients` Patienten verzeichnet, was einem Durchschnitt von `r dR$own$averageSevereInfectionsPerPatient` Infektionen pro Patient entspricht`r if (!is.null(dR$ref)) paste0(\", im Vergleich zu \", dR$ref$numberOfSevereInfections, \" Infektionen bei \", dR$ref$numberOfPatients, \" Referenzpatienten (Durchschnitt: \", dR$ref$averageSevereInfectionsPerPatient, \")\")`.\n"
 
 #. type: Plain text
@@ -3392,8 +3430,8 @@ msgstr "Insgesamt wurden `r dR$numberOfInfectiousAgents` Infektionserreger in de
 #. type: Plain text
 #: reports/Partner-Report/content/_risk-factors.Rmd:1
 #, no-wrap
-msgid "Exposure to invasive devices and protective interventions significantly influence infection risk in neonatal intensive care. The following table presents the density rates for central venous catheters, peripheral venous catheters, invasive ventilation, as well as protective factors including human milk feeding, kangaroo mother care, and probiotic administration.\n"
-msgstr "Der Einsatz invasiver Verfahren und schützender Maßnahmen hat einen erheblichen Einfluss auf das Infektionsrisiko in der neonatologischen Intensivstation. Die folgende Tabelle zeigt die Anwendiungsraten für zentralvenöse Katheter, periphervenöse Katheter und invasive Beatmung sowie schützende Faktoren wie Stillen, Känguru-Pflege und die Gabe von Probiotika.\n"
+msgid "Exposure to invasive devices, ventilatory support, antibiotics, and protective interventions significantly influence infection risk in neonatal intensive care. The following table presents the density rates for vascular catheters (central and peripheral), ventilatory support (invasive and non-invasive), antibiotic exposure (overall and by AWaRe classification), as well as protective factors including human milk feeding, kangaroo mother care, and probiotic administration.\n"
+msgstr "Der Einsatz invasiver Verfahren, respiratorischer Unterstützung, Antibiotika und schützender Maßnahmen hat einen erheblichen Einfluss auf das Infektionsrisiko in der neonatologischen Intensivmedizin. Die folgende Tabelle zeigt die Anwendungsraten für Gefäßkatheter (zentral und peripher), respiratorische Unterstützung (invasiv und nicht-invasiv), Antibiotikaexposition (insgesamt und nach AWaRe-Klassifikation) sowie schützende Faktoren wie Stillen, Känguru-Pflege und die Gabe von Probiotika.\n"
 
 #. type: Plain text
 #: reports/Partner-Report/content/_surgery.Rmd:1
@@ -3404,38 +3442,45 @@ msgstr "Chirurgische Eingriffe bei Neugeborenen bergen ein intrinsisches Infekti
 #. type: Plain text
 #: reports/Partner-Report/content/_fig-intro-birth-weight.qmd:1
 #, no-wrap
-msgid "Birth weight distribution is a key indicator of your unit's patient population characteristics. Understanding the weight distribution of admitted neonates helps contextualize infection rates and other outcomes, as lower birth weight is associated with increased vulnerability to healthcare-associated infections. @fig-bw shows both the frequency distribution (histogram with density curve) and summary statistics (boxplot with quartiles) of birth weights in your unit, enabling comparison with your patient case mix relative to reference data when available.\n"
+msgid "Birth weight distribution is a key indicator of your department's patient population characteristics. Understanding the weight distribution of admitted neonates helps contextualize infection rates and other outcomes, as lower birth weight is associated with increased vulnerability to healthcare-associated infections. @fig-bw shows both the frequency distribution (histogram with density curve) and summary statistics (boxplot with quartiles) of birth weights in your department, enabling comparison with your patient case mix relative to reference data when available.\n"
 msgstr "Die Verteilung des Geburtsgewichts ist ein wichtiger Indikator für die Merkmale der Patientenpopulation Ihrer Abteilung. Das Verständnis der Gewichtsverteilung der aufgenommenen Neugeborenen hilft dabei, Infektionsraten und andere Ergebnisse in einen Zusammenhang zu setzen, da ein niedrigeres Geburtsgewicht mit einem erhöhten Risiko für nosokomiale Infektionen einhergeht. @fig-bw zeigt sowohl die Häufigkeitsverteilung (Histogramm mit Dichtekurve) als auch die zusammenfassenden Statistiken (Boxplot mit Quartilen) der Geburtsgewichte in Ihrer Abteilung und ermöglicht so einen Vergleich Ihres Patientenmixes mit Referenzdaten, sofern diese verfügbar sind.\n"
 
 #. type: Plain text
 #: reports/Partner-Report/content/_fig-intro-gestational-age.qmd:1
 #, no-wrap
-msgid "Gestational age distribution provides essential context for interpreting clinical outcomes in your neonatal unit. Extremely premature infants face substantially higher risks of complications and infections compared to more mature neonates. @fig-ga illustrates both the frequency distribution (histogram with density curve) and summary statistics (boxplot with quartiles) of gestational ages at birth, allowing you to assess how your patient population's maturity profile compares to reference data when available.\n"
+msgid "Gestational age distribution provides essential context for interpreting clinical outcomes in your neonatal department. Extremely premature infants face substantially higher risks of complications and infections compared to more mature neonates. @fig-ga illustrates both the frequency distribution (histogram with density curve) and summary statistics (boxplot with quartiles) of gestational ages at birth, allowing you to assess how your patient population's maturity profile compares to reference data when available.\n"
 msgstr ""
 "Die Verteilung des Gestationsalters liefert wichtige Hintergrundinformationen für die Interpretation klinischer Ergebnisse in Ihrer neonatologischen Abteilung. Extrem frühgeborene Kinder sind im Vergleich zu reiferen Neugeborenen einem deutlich höheren Risiko für Komplikationen und Infektionen ausgesetzt. @fig-ga veranschaulicht sowohl die Häufigkeitsverteilung (Histogramm mit Dichtekurve) als auch die zusammenfassenden Statistiken (Boxplot mit Quartilen) des Gestationsalters bei der Geburt, sodass Sie beurteilen können, wie sich das Reifeprofil Ihrer Patientengruppe im Vergleich zu Referenzdaten darstellt, sofern diese verfügbar sind.\n"
 "\n"
 
 #. type: Plain text
 #: reports/Partner-Report/content/_tbl-intro-incidence-density.qmd:1
-#, no-wrap
-msgid "@tbl-incidence-density-rates presents the incidence density rates for the most important healthcare-associated infections (HAI) in your neonatal unit. Incidence density rates are calculated per 1,000 patient days, allowing for meaningful comparison between units with different patient volumes and lengths of stay. Regular monitoring of these rates enables you to identify trends, evaluate the effectiveness of infection prevention measures, and compare your performance against reference data from other participating units.\n"
+#, fuzzy, no-wrap
+#| msgid "@tbl-incidence-density-rates presents the incidence density rates for the most important healthcare-associated infections (HAI) in your neonatal department. Incidence density rates are calculated per 1,000 patient days, allowing for meaningful comparison between departments with different patient volumes and lengths of stay. The primary sepsis/BSI category includes both clinically diagnosed sepsis and microbiologically confirmed cases; the infectious agent detection rate table reflects only cases where diagnostic cultures identified an infectious agent. Regular monitoring of these rates enables you to identify trends, evaluate the effectiveness of infection prevention measures, and compare your performance against reference data from other participating departments.\n"
+msgid "@tbl-incidence-density-rates presents the incidence density rates for the most important healthcare-associated infections (HAI) in your neonatal department. Incidence density rates are calculated per 1,000 patient days, allowing for meaningful comparison between departments with different patient volumes and lengths of stay. The primary sepsis/BSI category includes both clinical sepsis and laboratory-confirmed bloodstream infections (LCBSI); the infectious agent detection rate table reflects only cases where diagnostic cultures identified an infectious agent. Regular monitoring of these rates enables you to identify trends, evaluate the effectiveness of infection prevention measures, and compare your performance against reference data from other participating departments.\n"
 msgstr ""
-"@tbl-incidence-density-rates zeigt die Inzidenzdichte der wichtigsten nosokomialen Infektionen (NI) in Ihrer Neugeborenenstation an. Die Inzidenzdichte wird pro 1.000 Patiententage berechnet, was einen aussagekräftigen Vergleich zwischen Stationen mit unterschiedlichem Patientenaufkommen und unterschiedlichen Aufenthaltsdauern ermöglicht. Durch die regelmäßige Überwachung dieser Werte können Sie Trends erkennen, die Wirksamkeit von Infektionspräventionsmaßnahmen bewerten und Ihre Leistung mit Referenzdaten anderer teilnehmender Stationen vergleichen.\n"
+"@tbl-incidence-density-rates zeigt die Inzidenzdichte der wichtigsten nosokomialen Infektionen (NI) in Ihrer neonatologischen Abteilung. Die Inzidenzdichte wird pro 1.000 Patiententage berechnet, was einen aussagekräftigen Vergleich zwischen Abteilungen mit unterschiedlichem Patientenaufkommen und unterschiedlichen Aufenthaltsdauern ermöglicht. Die Kategorie der primären Sepsis/BSI umfasst sowohl klinisch diagnostizierte Sepsisfälle als auch mikrobiologisch bestätigte Fälle; die Tabelle zur Erreger-Nachweisrate bezieht sich nur auf Fälle, in denen diagnostische Kulturen einen Infektionserreger identifiziert haben. Durch die regelmäßige Überwachung dieser Werte können Sie Trends erkennen, die Wirksamkeit von Infektionspräventionsmaßnahmen bewerten und Ihre Leistung mit Referenzdaten anderer teilnehmender Abteilungen vergleichen.\n"
 "\n"
 
 #. type: Plain text
 #: reports/Partner-Report/content/_tbl-intro-device-associated.qmd:2
-#, no-wrap
-msgid "Device-associated infections represent a significant burden in neonatal intensive care. @tbl-device-associated-incidence-density-rates shows infection rates specifically linked to the use of invasive devices such as central venous catheters and mechanical ventilation. By tracking device-associated infection rates separately, you can assess the safety of device utilization in your unit and identify specific areas where targeted interventions may reduce infection risk. Lower rates may indicate successful implementation of device care bundles and infection prevention protocols.\n"
+#, fuzzy, no-wrap
+#| msgid "Device-associated infections represent a significant burden in neonatal intensive care. @tbl-device-associated-incidence-density-rates shows infection rates specifically linked to the use of invasive devices such as central venous catheters and mechanical ventilation. By tracking device-associated infection rates separately, you can assess the safety of device utilization in your department and identify specific areas where targeted interventions may reduce infection risk. Lower rates may indicate successful implementation of device care bundles and infection prevention protocols.\n"
+msgid "Device-associated infections represent a significant burden in neonatal intensive care. @tbl-device-associated-incidence-density-rates shows infection rates associated with central venous catheters (CVC), peripheral venous catheters (PVC), invasive ventilation (INV), and non-invasive ventilatory support (NIV). By tracking device-associated infection rates separately, you can assess the safety of device utilization in your department and identify specific areas where targeted interventions may reduce infection risk. Lower rates may indicate successful implementation of device care bundles and infection prevention protocols.\n"
 msgstr "Device-assoziierte Infektionen stellen in der neonatologischen Intensivmedizin eine erhebliche Belastung dar. @tbl-device-associated-incidence-density-rates zeigt Infektionsraten, die speziell mit der Anwendung invasiver Maßnahmen wie zentralvenöser Katheter und mechanischer Beatmung in Verbindung stehen. Durch die separate Erfassung der Raten für Device-assoziierte Infektionen können Sie die Sicherheit des Einsatzes invasiver Verfahren in Ihrer Abteilung bewerten und konkrete Bereiche identifizieren, in denen gezielte Maßnahmen das Infektionsrisiko senken könnten. Niedrigere Raten können auf eine erfolgreiche Umsetzung von Device-Care-Bundles und Protokollen zur Infektionsprävention hindeuten.\n"
 
 #. type: Fenced div block ({.callout-note})
 #: reports/Partner-Report/content/_tbl-intro-device-associated.qmd:3
-#, no-wrap
+#, fuzzy, no-wrap
+#| msgid ""
+#| "Device-associated infections are defined temporally according to the\n"
+#| "[NeoIPC Core Protocol](https://neoipc.org/wp-content/uploads/2023/08/NeoIPC-Surveillance_Core-Module-Protocol.pdf).\n"
+#| "Infections occurring during device use represent potential rather than proven causal relationships.\n"
 msgid ""
-"Device-associated infections are defined temporally according to the\n"
-"[NeoIPC Core Protocol](https://neoipc.org/wp-content/uploads/2023/08/NeoIPC-Surveillance_Core-Module-Protocol.pdf).\n"
-"Infections occurring during device use represent potential rather than proven causal relationships.\n"
+"Device-associated infections are defined by a time-based association according to the\n"
+"[NeoIPC Core Protocol](https://neoipc.org/wp-content/uploads/2023/08/NeoIPC-Surveillance_Core-Module-Protocol.pdf):\n"
+"a device must have been in use for a defined period prior to infection.\n"
+"This represents a temporal rather than a proven causal relationship.\n"
 msgstr ""
 "Device-assoziierte Infektionen werden gemäß dem\n"
 "[NeoIPC Core Protocol](https://neoipc.org/wp-content/uploads/2023/08/NeoIPC-Surveillance_Core-Module-Protocol.pdf) zeitlich definiert.\n"
@@ -3445,43 +3490,44 @@ msgstr ""
 #. type: Plain text
 #: reports/Partner-Report/content/_tbl-intro-agent-per-infection.qmd:1
 #, no-wrap
-msgid "Understanding which pathogens cause infections in your unit is essential for targeted prevention strategies and empirical treatment decisions. @tbl-agent-per-infection-rate presents the detection rates of infectious agents per infection type, highlighting the microbial epidemiology of healthcare-associated infections in your neonatal population. Patterns in pathogen distribution can inform antimicrobial stewardship efforts and help identify potential sources of transmission requiring specific control measures.\n"
+msgid "Understanding which pathogens cause infections in your department is essential for targeted prevention strategies and empirical treatment decisions. @tbl-agent-per-infection-rate presents the detection rates of infectious agents per infection type, highlighting the microbial epidemiology of healthcare-associated infections in your neonatal population. Patterns in pathogen distribution can inform antimicrobial stewardship efforts and help identify potential sources of transmission requiring specific control measures.\n"
 msgstr "Zu wissen, welche Erreger in Ihrer Abteilung Infektionen verursachen, ist für gezielte Präventionsstrategien und fundierte Behandlungsentscheidungen von entscheidender Bedeutung. @tbl-agent-per-infection-rate zeigt die Nachweisraten von Infektionserregern nach Infektionsart auf und verdeutlicht damit die mikrobielle Epidemiologie nosokomialer Infektionen in Ihrer Neugeborenenpopulation. Muster in der Verteilung der Erreger können als Grundlage für Maßnahmen zum verantwortungsvollen Umgang mit Antibiotika dienen und dabei helfen, potenzielle Übertragungsquellen zu identifizieren, die spezifische Kontrollmaßnahmen erfordern.\n"
 
 #. type: Plain text
 #: reports/Partner-Report/content/_tbl-intro-abr-infection.qmd:1
 #, no-wrap
-msgid "Antimicrobial resistance poses a critical threat to vulnerable neonatal patients. @tbl-abr-infection-rate displays infection rates caused by resistant pathogens such as MRSA, VRE, and third-generation cephalosporin-resistant organisms. Monitoring these rates is crucial for assessing the burden of drug-resistant infections in your unit and evaluating the effectiveness of antimicrobial stewardship programs. Elevated rates may signal the need for enhanced infection control measures, antibiotic prescribing review, or environmental screening protocols.\n"
-msgstr "Antibiotikaresistenzen stellen eine erhebliche Gefahr für vulnerable Neugeborene dar. @tbl-abr-infection-rate zeigt die Infektionsraten an, die durch resistente Erreger wie MRSA, VRE und gegen Cephalosporine der dritten Generation resistente Organismen verursacht werden. Die Überwachung dieser Raten ist entscheidend, um die Belastung der Abteilung aufgrund von Infektionen mit resistenten Erregern einzuschätzen und die Wirksamkeit von Antibiotika-Stewardship-Programmen zu bewerten. Erhöhte Raten können darauf hindeuten, dass erweiterte Maßnahmen zum Infektionsschutz, eine Überprüfung der Antibiotikaverordnung oder Protokolle zur Umgebungsuntersuchung erforderlich sind.\n"
+msgid "Antimicrobial resistance poses a critical threat to vulnerable neonatal patients. @tbl-abr-infection-rate displays infection rates caused by resistant pathogens such as MRSA, VRE, and third-generation cephalosporin-resistant organisms. This section reports *detected* resistant pathogens in infections; @tbl-resistance-test-rate reports how completely susceptibility testing was performed. Both are needed to interpret resistance burden. Monitoring these rates is crucial for assessing the burden of drug-resistant infections in your department and evaluating the effectiveness of antimicrobial stewardship programs. Elevated rates may signal the need for enhanced infection control measures, antibiotic prescribing review, or environmental screening protocols.\n"
+msgstr "Antibiotikaresistenzen stellen eine erhebliche Gefahr für vulnerable Neugeborene dar. @tbl-abr-infection-rate zeigt die Infektionsraten an, die durch resistente Erreger wie MRSA, VRE und gegen Cephalosporine der dritten Generation resistente Organismen verursacht werden. Dieser Abschnitt berichtet über *nachgewiesene* resistente Erreger bei Infektionen; @tbl-resistance-test-rate zeigt, wie vollständig Empfindlichkeitsprüfungen durchgeführt wurden. Beide Informationen sind für die Interpretation der Resistenzbelastung erforderlich. Die Überwachung dieser Raten ist entscheidend, um die Belastung Ihrer Abteilung aufgrund von Infektionen mit resistenten Erregern einzuschätzen und die Wirksamkeit von Antibiotika-Stewardship-Programmen zu bewerten. Erhöhte Raten können darauf hindeuten, dass erweiterte Maßnahmen zum Infektionsschutz, eine Überprüfung der Antibiotikaverordnung oder Protokolle zur Umgebungsuntersuchung erforderlich sind.\n"
 
 #. type: Plain text
 #: reports/Partner-Report/content/_tbl-intro-infectious-agent-detection.qmd:1
 #, no-wrap
-msgid "The pattern of pathogen detection across different infection types provides valuable insights into your unit's microbial ecology. @tbl-infectious-agent-detection-rate shows how frequently specific infectious agents are identified in various types of healthcare-associated infections. Understanding these detection patterns helps in developing targeted surveillance strategies, appropriate empirical therapy guidelines, and infection prevention protocols tailored to your unit's specific pathogen profile.\n"
-msgstr "Das Muster der Erkennung von Krankheitserregern bei verschiedenen Infektionsarten liefert wertvolle Einblicke in die mikrobielle Ökologie Ihrer Station. @tbl-infectious-agent-detection-rate zeigt, wie häufig bestimmte Infektionserreger bei verschiedenen Arten von nosokomialen Infektionen nachgewiesen werden. Das Verständnis dieser Erkennungsmuster hilft bei der Entwicklung gezielter Surveillancestrategien, geeigneter Leitlinien für die empirische Therapie und von Infektionspräventionsprotokollen, die auf das spezifische Erregerprofil Ihrer Station zugeschnitten sind.\n"
+msgid "The pattern of pathogen detection across different infection types provides valuable insights into your department's microbial ecology. @tbl-infectious-agent-detection-rate shows how frequently specific infectious agents are identified in various types of healthcare-associated infections. Understanding these detection patterns helps in developing targeted surveillance strategies, appropriate empirical therapy guidelines, and infection prevention protocols tailored to your department's specific pathogen profile.\n"
+msgstr "Das Muster der Erkennung von Krankheitserregern bei verschiedenen Infektionsarten liefert wertvolle Einblicke in die mikrobielle Ökologie Ihrer Abteilung. @tbl-infectious-agent-detection-rate zeigt, wie häufig bestimmte Infektionserreger bei verschiedenen Arten von nosokomialen Infektionen nachgewiesen werden. Das Verständnis dieser Erkennungsmuster hilft bei der Entwicklung gezielter Surveillancestrategien, geeigneter Leitlinien für die empirische Therapie und von Infektionspräventionsprotokollen, die auf das spezifische Erregerprofil Ihrer Abteilung zugeschnitten sind.\n"
 
 #. type: Plain text
 #: reports/Partner-Report/content/_tbl-intro-resistance-test.qmd:1
 #, no-wrap
-msgid "Antimicrobial susceptibility testing (AST) is fundamental to both individual patient management and population-level surveillance. @tbl-resistance-test-rate presents the rate at which pathogens isolated from infections undergo testing for certain relevant antimicrobial resistances. High testing rates ensure reliable data for antimicrobial stewardship programs and enable accurate assessment of resistance trends. Lower rates may indicate gaps in microbiological diagnostic capacity or protocols that could limit your ability to detect and respond to emerging resistance patterns.\n"
-msgstr "Die Prüfung der Empfindlichkeit gegenüber Antibiotika (AST) ist sowohl für die Behandlung einzelner Patienten als auch für die Überwachung auf Bevölkerungsebene von grundlegender Bedeutung. @tbl-resistance-test-rate gibt die Rate an, mit der aus Infektionen isolierte Krankheitserreger auf bestimmte relevante Antibiotikaresistenzen getestet werden. Hohe Testraten gewährleisten zuverlässige Daten für Antibiotika-Stewardship-Programme und ermöglichen eine genaue Einschätzung von Resistenztrends. Niedrigere Raten können auf Lücken in der diagnostischen Kapazität oder in den Protokollen hinweisen, was Ihre Fähigkeit einschränken könnte, neu auftretende Resistenzmuster zu erkennen und darauf zu reagieren.\n"
+msgid "Antimicrobial susceptibility testing (AST) is fundamental to both individual patient management and population-level surveillance. @tbl-resistance-test-rate presents the rate at which pathogens isolated from infections undergo testing for certain relevant antimicrobial resistances. This section assesses testing *completeness*; @tbl-abr-infection-rate reports the detected resistant pathogens themselves. High testing rates ensure reliable data for antimicrobial stewardship programs and enable accurate assessment of resistance trends. Lower rates may indicate gaps in microbiological diagnostic capacity or protocols that could limit your ability to detect and respond to emerging resistance patterns.\n"
+msgstr "Die Prüfung der Empfindlichkeit gegenüber Antibiotika (AST) ist sowohl für die Behandlung einzelner Patienten als auch für die Überwachung auf Bevölkerungsebene von grundlegender Bedeutung. @tbl-resistance-test-rate gibt die Rate an, mit der aus Infektionen isolierte Krankheitserreger auf bestimmte relevante Antibiotikaresistenzen getestet werden. Dieser Abschnitt bewertet die *Vollständigkeit* der Testung; @tbl-abr-infection-rate zeigt die tatsächlich nachgewiesenen resistenten Erreger. Hohe Testraten gewährleisten zuverlässige Daten für Antibiotika-Stewardship-Programme und ermöglichen eine genaue Einschätzung von Resistenztrends. Niedrigere Raten können auf Lücken in der diagnostischen Kapazität oder in den Protokollen hinweisen, was Ihre Fähigkeit einschränken könnte, neu auftretende Resistenzmuster zu erkennen und darauf zu reagieren.\n"
 
 #. type: Plain text
 #: reports/Partner-Report/content/_tbl-intro-risk-density.qmd:1
 #, no-wrap
-msgid "Risk factors and protective factors significantly influence infection outcomes in neonatal care. @tbl-risk-density-rates shows the utilization density of key interventions including invasive devices (which increase infection risk) and protective measures such as human milk feeding, kangaroo care, and probiotics. Benchmarking these utilization rates helps identify opportunities to reduce unnecessary device use while optimizing evidence-based protective interventions. The balance between risk and protective factors reflects your unit's overall approach to infection prevention.\n"
-msgstr "Risiko- und Schutzfaktoren haben einen erheblichen Einfluss auf die Entwicklung von Infektionen in der Neugeborenenversorgung. @tbl-risk-density-rates zeigt die Anwendungshäufigkeit wichtiger Maßnahmen, darunter invasive Verfahren (die das Infektionsrisiko erhöhen) und Schutzmaßnahmen wie Stillen, Känguru-Pflege und die Gabe von Probiotika. Ein Vergleich dieser Anwendungsraten hilft dabei, Möglichkeiten zur Reduzierung unnötiger Maßnahmen zu identifizieren und gleichzeitig evidenzbasierte Präventionsmaßnahmen zu optimieren. Das Gleichgewicht zwischen Risiko- und Schutzfaktoren spiegelt den Ansatz Ihrer Station zur Infektionsprävention wider.\n"
+msgid "Risk factors and protective factors significantly influence infection outcomes in neonatal care. @tbl-risk-density-rates shows the utilization density of key interventions including invasive devices (which increase infection risk) and protective measures such as human milk feeding, kangaroo care, and probiotics. Benchmarking these utilization rates helps identify opportunities to reduce unnecessary device use while optimizing evidence-based protective interventions. The balance between risk and protective factors reflects your department's overall approach to infection prevention.\n"
+msgstr "Risiko- und Schutzfaktoren haben einen erheblichen Einfluss auf die Entwicklung von Infektionen in der Neugeborenenversorgung. @tbl-risk-density-rates zeigt die Anwendungshäufigkeit wichtiger Maßnahmen, darunter invasive Verfahren (die das Infektionsrisiko erhöhen) und Schutzmaßnahmen wie Stillen, Känguru-Pflege und die Gabe von Probiotika. Ein Vergleich dieser Anwendungsraten hilft dabei, Möglichkeiten zur Reduzierung unnötiger Maßnahmen zu identifizieren und gleichzeitig evidenzbasierte Präventionsmaßnahmen zu optimieren. Das Gleichgewicht zwischen Risiko- und Schutzfaktoren spiegelt den Ansatz Ihrer Abteilung zur Infektionsprävention wider.\n"
 
 #. type: Plain text
 #: reports/Partner-Report/content/_tbl-intro-surgical-procedure.qmd:1
 #, no-wrap
-msgid "Surgical procedures represent a major risk factor for healthcare-associated infections in neonatal intensive care. @tbl-surgical-procedure-rates presents rates of various surgical procedures performed in your unit, normalized per 1,000 patient days. Understanding your surgical case mix is essential for interpreting infection rates and implementing appropriate surgical site infection prevention protocols. Comparison with reference data helps contextualize your unit's surgical workload and associated infection risks.\n"
-msgstr "Chirurgische Eingriffe stellen einen wesentlichen Risikofaktor für nosokomiale Infektionen auf neonatologischen Intensivstationen dar. @tbl-surgical-procedure-rates zeigt die Raten verschiedener chirurgischer Eingriffe, die auf Ihrer Station durchgeführt werden, normiert auf 1.000 Patiententage. Ein Verständnis Ihres chirurgischen Behandlungsspektrums ist unerlässlich, um Infektionsraten zu interpretieren und geeignete Protokolle zur Prävention von Wundinfektionen umzusetzen. Ein Vergleich mit Referenzdaten hilft dabei, die chirurgische Arbeit Ihrer Station und die damit verbundenen Infektionsrisiken einzuordnen.\n"
+msgid "Surgical procedures represent a major risk factor for healthcare-associated infections in neonatal intensive care. @tbl-surgical-procedure-rates presents rates of various surgical procedures performed in your department, normalized per 100 admissions. Understanding your surgical case mix is essential for interpreting infection rates and implementing appropriate surgical site infection prevention protocols. Comparison with reference data helps contextualize your department's surgical workload and associated infection risks.\n"
+msgstr "Chirurgische Eingriffe stellen einen wesentlichen Risikofaktor für nosokomiale Infektionen auf neonatologischen Intensivstationen dar. @tbl-surgical-procedure-rates zeigt die Raten verschiedener chirurgischer Eingriffe, die in Ihrer Abteilung durchgeführt werden, normiert auf 100 Aufnahmen. Ein Verständnis Ihres chirurgischen Behandlungsspektrums ist unerlässlich, um Infektionsraten zu interpretieren und geeignete Protokolle zur Prävention von Wundinfektionen umzusetzen. Ein Vergleich mit Referenzdaten hilft dabei, die chirurgische Arbeitslast Ihrer Abteilung und die damit verbundenen Infektionsrisiken einzuordnen.\n"
 
 #. type: Plain text
 #: reports/Partner-Report/content/_tbl-intro-secondary-bsi.qmd:1
-#, no-wrap
-msgid "Secondary bloodstream infections occur when primary infections at other sites seed the bloodstream, representing serious complications that significantly impact patient outcomes. @tbl-secondary-bsi-rates shows the rate at which different primary infection types progress to secondary bloodstream involvement. High rates of secondary BSI may indicate delayed diagnosis, inadequate source control, or particularly virulent pathogens, and warrant careful review of clinical protocols and infection management strategies.\n"
+#, fuzzy, no-wrap
+#| msgid "Secondary bloodstream infections occur when primary infections at other sites seed the bloodstream, representing serious complications that significantly impact patient outcomes. @tbl-secondary-bsi-rates shows the rate at which different primary infection types progress to secondary bloodstream involvement. High rates of secondary BSI may indicate delayed diagnosis, inadequate source control, or particularly virulent pathogens, and warrant careful review of clinical protocols and infection management strategies.\n"
+msgid "A secondary bloodstream infection is a BSI that is seeded from a site-specific infection (pneumonia, NEC, or SSI) at another body site, except for catheter-associated infections. @tbl-secondary-bsi-rates shows the rate at which a secondary BSI is attributed to different primary infection types based on the NeoIPC criteria (organism match within a 17-day window around the primary infection). High rates of secondary BSI may indicate delayed diagnosis, inadequate source control, or particularly virulent pathogens, and warrant careful review of clinical protocols and infection management strategies.\n"
 msgstr "Sekundäre Blutbahninfektionen treten auf, wenn Primärinfektionen an anderen Stellen auf die Blutbahn übergreifen; sie stellen schwerwiegende Komplikationen dar, die den Krankheitsverlauf der Patienten erheblich beeinträchtigen. @tbl-secondary-bsi-rates zeigt die Rate, mit der verschiedene Arten von Primärinfektionen zu einer sekundären Beteiligung der Blutbahn führen. Hohe Raten sekundärer Blutbahninfektionen können auf eine verzögerte Diagnose, eine unzureichende Erregerkontrolle oder besonders virulente Krankheitserreger hindeuten und erfordern eine sorgfältige Überprüfung der klinischen Protokolle und Strategien zum Infektionsmanagement.\n"
 
 #. type: Hash Value: admission_type 1
@@ -3871,13 +3917,13 @@ msgstr "Im Zeitraum"
 #. type: Array Element: content
 #: reports/Partner-Certificate/content/_sR.yaml:1
 #, no-wrap
-msgid "the neonatology unit at %s participated in the NeoIPC Surveillance network."
+msgid "the neonatal department at %s participated in the NeoIPC Surveillance network."
 msgstr "hat sich die neonatologische Abteilung der %s am NeoIPC Surveillance Netzwerk beteiligt."
 
 #. type: Array Element: content
 #: reports/Partner-Certificate/content/_sR.yaml:1
 #, no-wrap
-msgid "Through active monitoring of %s newborns with birth weights below 1500 grams and/or gestational ages below 32 weeks, the team collected valuable reference data that will be useful for assessing and reducing infection risks in neonatal units. We are proud and delighted to have them as partners in our mission to improve infection prevention and control in the neonatal setting."
+msgid "Through active monitoring of %s newborns with birth weights below 1500 grams and/or gestational ages below 32 weeks, the team collected valuable reference data that will be useful for assessing and reducing infection risks in neonatal departments. We are proud and delighted to have them as partners in our mission to improve infection prevention and control in the neonatal setting."
 msgstr "Dank der aktiven Surveillance von %s Neugeborenen mit einem Geburtsgewicht von weniger als 1500 Gramm und/oder einem Gestationsalter von weniger als 32 Wochen hat das Team wertvolle Referenzdaten gesammelt, die für die Bewertung und Verringerung des Infektionsrisikos in neonatologischen Abteilungen nützlich sind. Wir sind stolz und glücklich, sie als Partner bei unserer Mission zur Verbesserung der Infektionsprävention und -kontrolle im neonatologischen Bereich zu haben."
 
 #. type: Array Element: content
@@ -3931,13 +3977,13 @@ msgstr "Zudem umfasst dieser Datensatz Daten aus Ländern, deren Volkswirtschaft
 #. type: Hash Value: headerList multiCountryDatasetHint
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "This report aggregates data from neonatal units in several countries. While ideally a single-country report would be preferable, aggregating data across multiple countries is pragmatically necessary when sufficient participation from a single country is not available. This means that, while it reflects a broad spectrum of care structures, it is only suitable as a benchmark to a somewhat limited extent due to the sometimes very different healthcare systems and the resources available there. The aim of NeoIPC Surveillance is therefore always to provide units with a relevant national or regional report, provided that a sufficient number of units in the respective region participate in the system."
+msgid "This report aggregates data from neonatal departments in several countries. While ideally a single-country report would be preferable, aggregating data across multiple countries is pragmatically necessary when sufficient participation from a single country is not available. This means that, while it reflects a broad spectrum of care structures, it is only suitable as a benchmark to a somewhat limited extent due to the sometimes very different healthcare systems and the resources available there. The aim of NeoIPC Surveillance is therefore always to provide departments with a relevant national or regional report, provided that a sufficient number of departments in the respective region participate in the system."
 msgstr "Dieser Bericht fasst Daten aus neonatologischen Abteilungen mehrerer Länder zusammen. Zwar wäre ein Bericht, der sich auf ein einzelnes Land beschränkt, idealerweise vorzuziehen, doch ist eine Zusammenfassung der Daten aus mehreren Ländern aus praktischen Gründen notwendig, wenn aus einem einzelnen Land keine ausreichende Beteiligung vorliegt. Das bedeutet, dass der Bericht zwar ein breites Spektrum an Versorgungsstrukturen widerspiegelt, sich jedoch aufgrund der teilweise sehr unterschiedlichen Gesundheitssysteme und der dort verfügbaren Ressourcen nur in begrenztem Umfang als Vergleichsmaßstab eignet. Das Ziel von NeoIPC Surveillance ist es daher stets, den Abteilungen einen relevanten nationalen oder regionalen Bericht zur Verfügung zu stellen, sofern eine ausreichende Anzahl von Abteilungen in der jeweiligen Region am System teilnimmt."
 
 #. type: Hash Value: headerList singleCountryDatasetHint
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "This report presents data from neonatal units in a single country. Because of the relative homogeneity of the healthcare system, it is in principle a good benchmark. However, it should be noted that only a proportion of neonatal units in a country actually participate in NeoIPC Surveillance. Since participation is voluntary, these are typically hospitals that have a particular interest in infection prevention and are willing and able to provide the resources required for surveillance. The information presented here can therefore not fully describe the situation in the individual countries."
+msgid "This report presents data from neonatal departments in a single country. Because of the relative homogeneity of the healthcare system, it is in principle a good benchmark. However, it should be noted that only a proportion of neonatal departments in a country actually participate in NeoIPC Surveillance. Since participation is voluntary, these are typically hospitals that have a particular interest in infection prevention and are willing and able to provide the resources required for surveillance. The information presented here can therefore not fully describe the situation in the individual countries."
 msgstr "Dieser Bericht enthält Daten von neonatologischen Abteilungen in einem einzelnen Land. Aufgrund der relativen Homogenität des Gesundheitssystems stellt er grundsätzlich einen guten Vergleichsmaßstab dar. Es ist jedoch zu beachten, dass nur ein Teil der neonatologischen Abteilungen eines Landes tatsächlich an der NeoIPC Surveillance teilnimmt. Da die Teilnahme freiwillig ist, handelt es sich in der Regel um Krankenhäuser, die ein besonderes Interesse an der Infektionsprävention haben und bereit sowie in der Lage sind, die für die Surveillance erforderlichen Ressourcen bereitzustellen. Die hier dargestellten Informationen können daher die Situation in den einzelnen Ländern nicht vollständig beschreiben."
 
 #. type: Hash Value: tbl-risk-density-rates n_footnote
@@ -5127,10 +5173,10 @@ msgstr "Diese Meldung ist nicht unbedingt als Fehler zu verstehen, sondern vielm
 #: reports/Validation-Report/en/_problem_detail_0019.qmd:7
 #, no-wrap
 msgid ""
-"As the purpose of NeoIPC surveillance is to monitor nosocomial infections with the potential for prevention in neonatal units, early-onset infections generally cannot be recorded.\n"
+"As the purpose of NeoIPC surveillance is to monitor nosocomial infections with the potential for prevention in neonatal departments, early-onset infections generally cannot be recorded.\n"
 "The NeoIPC Surveillance Protocol states that if an infection occurs earlier than 72 hours after birth, it is not considered a nosocomial infection and should not be included in NeoIPC surveillance unless it is clearly hospital-acquired (e.g. there is clear evidence of catheter infection).\n"
 msgstr ""
-"Da es bei der NeoIPC Surveillance um die Erfassung von nosokomialen Infektionen mit Präventionspotenzial auf neonatologischen Stationen geht, sind früh auftretende Infektionen (Early-Onset-Infektionen) in den allermeisten Fällen nicht zu erfassen.\n"
+"Da es bei der NeoIPC Surveillance um die Erfassung von nosokomialen Infektionen mit Präventionspotenzial in neonatologischen Abteilungen geht, sind früh auftretende Infektionen (Early-Onset-Infektionen) in den allermeisten Fällen nicht zu erfassen.\n"
 "Das NeoIPC-Surveillance-Protokoll legt diesbezüglich fest, dass eine Infektion, die früher als 72 Stunden nach der Geburt auftritt, nicht als nosokomiale Infektion gilt und daher nicht in der NeoIPC-Surveillance erfasst werden sollte, es sei denn, sie wurde eindeutig im Krankenhaus erworben (z. B. bei eindeutigen Hinweisen auf eine Katheterinfektion).\n"
 
 #. type: Plain text
@@ -5343,8 +5389,7 @@ msgstr "In jedem Fall müssen Sie zunächst das Tracked Entity Instance Dashboar
 
 #. type: Plain text
 #: reports/Validation-Report/en/_solution_0006.qmd:15
-#, fuzzy, no-wrap
-#| msgid "If the patient enrolment for which you need to change the admission date has already been closed, it must first be reopened. See @sec-solution-5.\n"
+#, no-wrap
 msgid "If the patient enrolment for which you need to change the admission date has already been closed, it must first be reopened. See @sec-solution-5. \n"
 msgstr "Wenn die Patientenregistrierung, für die Sie das Aufnahmedatum ändern müssen, bereits abgeschlossen ist, muss diese zunächst wieder geöffnet werden. Siehe dazu @sec-solution-5.\n"
 
@@ -5686,6 +5731,15 @@ msgstr ""
 msgid "![The Next and Previous buttons in the event timeline of the Tracked Entity Instance Dashboard](img/fig-event-timeline-full.png){#fig-event-timeline-full fig-alt=\"A screenshot of the Tracked Entity Instance Dashboard with the Next and Previous buttons in the event timeline highlighted\"}\n"
 msgstr "![Die Schaltflächen \"Next\" und \"Previous\" in der Ereignis-Zeitleiste des Tracked Entity Instance Dashboards](img/fig-event-timeline-full.png){#fig-event-timeline-full fig-alt=\"Ein Screenshot des Tracked Entity Instance Dashboards, in dem die Schaltflächen \\\"Next\\\" und \\\"Previous\\\" in der Ereignis-Zeitleiste hervorgehoben sind\"}\n"
 
+#~ msgid "Number of units contributing at least one patient record"
+#~ msgstr "Anzahl der Abteilungen, die mindestens eine Patientenakte beigesteuert haben"
+
+#~ msgid "WHO AWaRe group (see %s). As cumulative treatment days for individual substances are recorded per patient, combination therapies using several substances on one day are counted as multiple days."
+#~ msgstr "WHO AWaRe-Gruppe (siehe %s). Da die kumulativen Behandlungstage für einzelne Substanzen pro Patient erfasst werden, werden Kombinationstherapien mit mehreren Substanzen an einem Tag als mehrere Tage gezählt."
+
+#~ msgid "Own unit"
+#~ msgstr "Eigene Abteilunng"
+
 #~ msgid ""
 #~ "\\cfoot*{%\n"
 #~ "  \\raggedright\n"
@@ -5721,9 +5775,6 @@ msgstr "![Die Schaltflächen \"Next\" und \"Previous\" in der Ereignis-Zeitleist
 
 #~ msgid "programme under grant agreement No 965328."
 #~ msgstr "der Europäischen Union unter der Fördervereinbarung Nr. 965328 gefördert."
-
-#~ msgid "Number of departments contributing at least one patient record:\n"
-#~ msgstr "Anzahl der Abteilungen, die mindestens einen Patienten beigetragen haben:\n"
 
 #~ msgid ":   `r dR$numberOfDepartments`\n"
 #~ msgstr ":   `r dR$numberOfDepartments`\n"
