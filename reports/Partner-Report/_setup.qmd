@@ -1177,6 +1177,11 @@ if(is.null(localeObj$territory)){
 options(`gt.locale` = locale_gt)
 
 sR <- get_string_resources(localeObj)
+
+# Feature flag: confidence interval display (default TRUE from _quarto.yml)
+include_ci <- !identical(
+  knitr::opts_knit$get("quarto.document_metadata")$includeConfidenceIntervals,
+  FALSE)
 ```
 
 ```{r General setup and parameter preparation}

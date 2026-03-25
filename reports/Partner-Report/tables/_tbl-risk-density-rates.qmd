@@ -23,7 +23,9 @@ if (!is.null(benchmark_data$usage_density_rate_table) &&
   has_reference <- "pooled_ref" %in% names(benchmark_data$usage_density_rate_table)
   check_outlier_interpretation <- has_reference
 
-  tbl <- benchmark_data$usage_density_rate_table |>
+  tbl_data <- benchmark_data$usage_density_rate_table
+
+  tbl <- tbl_data |>
     dplyr::select(-tidyselect::any_of("n_ref")) |>
     dplyr::rename(
         !!sR$table_headers$n := "days_own",
@@ -32,7 +34,25 @@ if (!is.null(benchmark_data$usage_density_rate_table) &&
         !!sR$table_headers$q1 := tidyselect::any_of("q1_ref"),
         !!sR$table_headers$q2 := tidyselect::any_of("q2_ref"),
         !!sR$table_headers$q3 := tidyselect::any_of("q3_ref")
+      )
+
+  if (include_ci) {
+    tbl <- tbl |>
+      dplyr::rename(
+        !!sR$table_headers$ci := tidyselect::any_of("ci_lower_own"),
+        ci_upper_hide = tidyselect::any_of("ci_upper_own")
       ) |>
+      dplyr::select(-tidyselect::any_of(c("ci_lower_ref", "ci_upper_ref")))
+  } else {
+    tbl <- tbl |>
+      dplyr::select(-tidyselect::any_of(c(
+        "ci_lower_own", "ci_upper_own", "ci_lower_ref", "ci_upper_ref",
+        "q1_ci_lower_ref", "q1_ci_upper_ref",
+        "q2_ci_lower_ref", "q2_ci_upper_ref",
+        "q3_ci_lower_ref", "q3_ci_upper_ref")))
+  }
+
+  tbl <- tbl |>
     dplyr::mutate(
     factor = dplyr::case_match(
       as.character(.data$factor),
@@ -156,22 +176,61 @@ if (!is.null(benchmark_data$usage_density_rate_table) &&
         rows = tidyselect::any_of(sR$kangaroo_care_sc))
     )
 
-  if ("ref" %in% benchmark_data$dataset_names) {
+  if (include_ci && sR$table_headers$ci %in% colnames(tbl$`_data`)) {
     tbl <- tbl |>
-    cols_width(
-    stub() ~ pct(40),
-    sR$table_headers$n ~ pct(10),
-    sR$table_headers$rate ~ pct(10),
-    sR$table_headers$pooled ~ pct(10),
-    sR$table_headers$q1 ~ pct(10),
-    sR$table_headers$q2 ~ pct(10),
-    sR$table_headers$q3 ~ pct(10)
-    ) |>
+      gt::cols_merge(
+        columns = c(sR$table_headers$ci, "ci_upper_hide"),
+        pattern = "{1}\u2013{2}"
+      )
+    if ("q1_ci_lower_ref" %in% colnames(tbl$`_data`)) {
+      tbl <- tbl |>
+        gt::cols_merge(
+          columns = c(sR$table_headers$q1, "q1_ci_lower_ref", "q1_ci_upper_ref"),
+          pattern = "{1} ({2}\u2013{3})"
+        ) |>
+        gt::cols_merge(
+          columns = c(sR$table_headers$q2, "q2_ci_lower_ref", "q2_ci_upper_ref"),
+          pattern = "{1} ({2}\u2013{3})"
+        ) |>
+        gt::cols_merge(
+          columns = c(sR$table_headers$q3, "q3_ci_lower_ref", "q3_ci_upper_ref"),
+          pattern = "{1} ({2}\u2013{3})"
+        )
+    }
+  }
+
+  if ("ref" %in% benchmark_data$dataset_names) {
+    ci_in_own <- include_ci && sR$table_headers$ci %in% colnames(tbl$`_data`)
+    if (ci_in_own) {
+      tbl <- tbl |>
+        cols_width(
+          stub() ~ pct(28),
+          sR$table_headers$n ~ pct(8),
+          sR$table_headers$rate ~ pct(10),
+          sR$table_headers$ci ~ pct(12),
+          sR$table_headers$pooled ~ pct(10),
+          sR$table_headers$q1 ~ pct(10),
+          sR$table_headers$q2 ~ pct(10),
+          sR$table_headers$q3 ~ pct(12)
+        )
+    } else {
+      tbl <- tbl |>
+        cols_width(
+          stub() ~ pct(40),
+          sR$table_headers$n ~ pct(10),
+          sR$table_headers$rate ~ pct(10),
+          sR$table_headers$pooled ~ pct(10),
+          sR$table_headers$q1 ~ pct(10),
+          sR$table_headers$q2 ~ pct(10),
+          sR$table_headers$q3 ~ pct(10)
+        )
+    }
+    own_cols <- c(sR$table_headers$n, sR$table_headers$rate)
+    if (ci_in_own) own_cols <- c(own_cols, sR$table_headers$ci)
+    tbl <- tbl |>
     tab_spanner(
       label = sR$own_data_label,
-      columns = c(
-        sR$table_headers$n,
-        sR$table_headers$rate),
+      columns = tidyselect::any_of(own_cols),
       id = "department_data"
     ) |>
     tab_spanner(
@@ -210,6 +269,12 @@ if (!is.null(benchmark_data$usage_density_rate_table) &&
     sR$table_headers$n ~ pct(20),
     sR$table_headers$rate ~ pct(20)
     )
+  }
+
+  if (any(tbl_data$days_own < 10, na.rm = TRUE)) {
+    sparse_note <- if (include_ci) sR$sparse_data_footnote else sR$sparse_data_footnote_no_ci
+    tbl <- tbl |>
+      gt::tab_footnote(footnote = sparse_note)
   }
 
   tbl

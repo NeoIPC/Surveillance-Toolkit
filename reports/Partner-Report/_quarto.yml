@@ -22,6 +22,7 @@ includeSurgicalProcedureRateTable: true
 includeResistantPathogenInfectionRateTable: false
 includeAntibioticResistanceTestRateTable: false
 includeSecondaryBsiRateTable: false
+includeConfidenceIntervals: true
 execute:
   error: true
 filters:

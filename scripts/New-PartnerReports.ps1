@@ -111,6 +111,10 @@ param(
 
     [Parameter()]
     [switch]
+    $HideConfidenceIntervals,
+
+    [Parameter()]
+    [switch]
     $HideOutlierInterpretation,
 
     [Parameter()]
@@ -460,6 +464,7 @@ if (inherits(x, 'neoipcr_bnch_ds')) {
 
                 if ($resolvedReferenceDataFile) { $qmdParams['referenceDataFile'] = $resolvedReferenceDataFile }
                 if ($HideIntroductionTexts.IsPresent) { $qmdParams['includeIntroductionTexts'] = 'false' }
+                if ($HideConfidenceIntervals.IsPresent) { $qmdParams['includeConfidenceIntervals'] = 'false' }
                 if ($HideOutlierInterpretation.IsPresent) { $qmdParams['includeOutlierInterpretation'] = 'false' }
                 if ($DebugReport) { $qmdParams['debug'] = 'true' }
 
