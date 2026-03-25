@@ -5,6 +5,7 @@
 
 reference_data |>
   neoipcr::get_infectious_agent_detection_rate_per_agent_table() |>
+  dplyr::select(-tidyselect::any_of(".ontology_path")) |>
   dplyr::mutate(
     group = dplyr::if_else(
       stringr::str_detect(group, "spp."),

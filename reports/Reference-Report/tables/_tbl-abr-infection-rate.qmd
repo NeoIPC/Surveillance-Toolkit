@@ -5,6 +5,7 @@
 
 reference_data |>
   neoipcr::get_abr_infection_rate_table() |>
+  dplyr::select(-tidyselect::any_of(".ontology_path")) |>
   dplyr::mutate(
     group = dplyr::if_else(
       stringr::str_detect(group, "spp."),

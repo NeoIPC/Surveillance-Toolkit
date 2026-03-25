@@ -35,11 +35,11 @@ if (!is.null(benchmark_data$dev_ass_incidence_density_rate_table) &&
     dplyr::mutate(
       dev = dplyr::case_match(
         as.character(.data$dev),
-        "cvc" ~ sR$cvc,
-        "pvc" ~ sR$pvc,
+        "cvc" ~ sR$`tbl-device-associated-incidence-density-rates`$cvc,
+        "pvc" ~ sR$`tbl-device-associated-incidence-density-rates`$pvc,
         "vs" ~ sR$`tbl-device-associated-incidence-density-rates`$vs,
-        "inv" ~ sR$inv,
-        "niv" ~ sR$niv)) |>
+        "inv" ~ sR$`tbl-device-associated-incidence-density-rates`$inv,
+        "niv" ~ sR$`tbl-device-associated-incidence-density-rates`$niv)) |>
     gt(rowname_col = "dev") |>
     sub_missing() |>
     gt::tab_options(
@@ -66,15 +66,15 @@ if (!is.null(benchmark_data$dev_ass_incidence_density_rate_table) &&
     tab_row_group(
       label = sR$`tbl-device-associated-incidence-density-rates`$grp_vc,
       rows = tidyselect::any_of(c(
-        sR$cvc,
-        sR$pvc)),
+        sR$`tbl-device-associated-incidence-density-rates`$cvc,
+        sR$`tbl-device-associated-incidence-density-rates`$pvc)),
       id = "grp_vc") |>
     tab_row_group(
       label = sR$`tbl-device-associated-incidence-density-rates`$grp_vs,
       rows = tidyselect::any_of(c(
         sR$`tbl-device-associated-incidence-density-rates`$vs,
-        sR$inv,
-        sR$niv)),
+        sR$`tbl-device-associated-incidence-density-rates`$inv,
+        sR$`tbl-device-associated-incidence-density-rates`$niv)),
       id = "grp_vs") |>
     row_group_order(groups = c("grp_vc", "grp_vs")) |>
     tab_style(
@@ -184,9 +184,9 @@ if (!is.null(benchmark_data$dev_ass_incidence_density_rate_table) &&
 ```{r}
 #| output: asis
 if (check_outlier_interpretation) {
-  outliers <- detect_outliers(benchmark_data$dev_ass_incidence_density_rate_table)
-  if (length(outliers$below_q1) > 0 || length(outliers$above_q3) > 0) {
-    grouped <- group_outliers(outliers, "dev_ass_incidence_density_rate_table")
+  states <- metric_registry$dev_ass_incidence_density_rate_table
+  if (has_outliers(states)) {
+    grouped <- group_outliers(states, "dev_ass_incidence_density_rate_table", sR, metric_registry)
     outlier_text <- format_outlier_text(grouped, sR)
     if (nchar(outlier_text) > 0) {
       cat("\n\n::: {.callout-tip}\n")

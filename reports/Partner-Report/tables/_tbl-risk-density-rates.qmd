@@ -41,9 +41,9 @@ if (!is.null(benchmark_data$usage_density_rate_table) &&
       "vs" ~ sR$`tbl-risk-density-rates`$any,
       "inv" ~ sR$inv,
       "niv" ~ sR$niv,
-      "human_milk" ~ sR$human_milk,
+      "human_milk" ~ sR$human_milk_sc,
       "probiotic" ~ sR$probiotics,
-      "kangaroo_care" ~ sR$kangaroo_care,
+      "kangaroo_care" ~ sR$kangaroo_care_sc,
       "ab" ~ sR$`tbl-risk-density-rates`$any_antibiotic,
       "a" ~ sR$`tbl-risk-density-rates`$access,
       "w" ~ sR$`tbl-risk-density-rates`$watch,
@@ -82,12 +82,12 @@ if (!is.null(benchmark_data$usage_density_rate_table) &&
     tab_row_group(
       label = sR$other,
       rows = tidyselect::any_of(c(
-        sR$human_milk,
+        sR$human_milk_sc,
         sR$probiotics,
-        sR$kangaroo_care)),
+        sR$kangaroo_care_sc)),
       id = "grp_othr") |>
     tab_row_group(
-      label = sR$antibiotics,
+      label = sR$antibiotics_sc,
       rows = tidyselect::any_of(c(
         sR$`tbl-risk-density-rates`$any_antibiotic,
         sR$`tbl-risk-density-rates`$access,
@@ -96,7 +96,7 @@ if (!is.null(benchmark_data$usage_density_rate_table) &&
       id = "grp_ab") |>
     row_group_order(groups = c("grp_vc", "grp_vs", "grp_ab", "grp_othr")) |>
     tab_spanner(
-    label = sR$`tbl-risk-density-rates`$risk_density_rate,
+    label = sR$`tbl-risk-density-rates`$exposure_density_rate,
     columns = tidyselect::any_of(
       c(
       sR$table_headers$rate,
@@ -104,7 +104,7 @@ if (!is.null(benchmark_data$usage_density_rate_table) &&
       sR$table_headers$q1,
       sR$table_headers$q2,
       sR$table_headers$q3)),
-    id = "risk_density_rate"
+    id = "exposure_density_rate"
     ) |>
     tab_style(
     style = cell_text(weight = "bold"),
@@ -118,7 +118,7 @@ if (!is.null(benchmark_data$usage_density_rate_table) &&
     footnote = md(
       paste0(
         "$$\\text{",
-        sR$`tbl-risk-density-rates`$risk_density_rate,
+        sR$`tbl-risk-density-rates`$exposure_density_rate,
         "} = \\frac{\\text{",
         sR$`tbl-risk-density-rates`$days_with_risk_factor,
         "}}{\\text{",
@@ -127,7 +127,7 @@ if (!is.null(benchmark_data$usage_density_rate_table) &&
         format(100L),
         "$$"
         )),
-    locations = cells_column_spanners(spanners = "risk_density_rate")
+    locations = cells_column_spanners(spanners = "exposure_density_rate")
     ) |>
     tab_footnote(
       footnote = sprintf(
@@ -153,7 +153,7 @@ if (!is.null(benchmark_data$usage_density_rate_table) &&
     tab_footnote(
       footnote = sR$`tbl-risk-density-rates`$kmc_day_footnote,
       locations = gt::cells_stub(
-        rows = tidyselect::any_of(sR$kangaroo_care))
+        rows = tidyselect::any_of(sR$kangaroo_care_sc))
     )
 
   if ("ref" %in% benchmark_data$dataset_names) {
@@ -222,11 +222,9 @@ if (!is.null(benchmark_data$usage_density_rate_table) &&
 ```{r}
 #| output: asis
   if (check_outlier_interpretation) {
-    outliers <- detect_outliers(
-      benchmark_data$usage_density_rate_table,
-      identifier_col = "factor")
-  if (length(outliers$below_q1) > 0 || length(outliers$above_q3) > 0) {
-    grouped <- group_outliers(outliers, "usage_density_rate_table")
+    states <- metric_registry$usage_density_rate_table
+  if (has_outliers(states)) {
+    grouped <- group_outliers(states, "usage_density_rate_table", sR, metric_registry)
     outlier_text <- format_outlier_text(grouped, sR)
     if (nchar(outlier_text) > 0) {
       cat("\n\n::: {.callout-tip}\n")

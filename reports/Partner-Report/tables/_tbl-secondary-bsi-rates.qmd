@@ -188,9 +188,9 @@ if (!is.null(benchmark_data$secondary_bsi_rate_table) &&
 ```{r}
 #| output: asis
 if (check_outlier_interpretation) {
-  outliers <- detect_outliers(benchmark_data$secondary_bsi_rate_table)
-  if (length(outliers$below_q1) > 0 || length(outliers$above_q3) > 0) {
-    grouped <- group_outliers(outliers, "secondary_bsi_rate_table")
+  states <- metric_registry$secondary_bsi_rate_table
+  if (has_outliers(states)) {
+    grouped <- group_outliers(states, "secondary_bsi_rate_table", sR, metric_registry)
     outlier_text <- format_outlier_text(grouped, sR)
     if (nchar(outlier_text) > 0) {
       cat("\n\n::: {.callout-tip}\n")
@@ -198,8 +198,8 @@ if (check_outlier_interpretation) {
       cat(outlier_text, "\n")
       cat(":::\n")
     }
-  } else if (length(outliers$state_map) > 0 &&
-             all(outliers$state_map == "no_quartile_ref")) {
+  } else if (!is.null(states) && length(states) > 0 &&
+             all(states == "no_benchmark")) {
     cat("\n\n::: {.callout-tip}\n")
     cat("## ", sR$outlier$heading, "\n\n")
     cat("- ", sR$outlier$caution_limited_data, "\n")

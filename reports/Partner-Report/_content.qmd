@@ -28,6 +28,13 @@ include_localised("_introduction.Rmd")
 
 {{< include content/_introduction-list.qmd >}}
 
+::: {.content-visible when-meta="includeIntroductionTexts"}
+```{r}
+#| output: asis
+include_localised("_introduction-caution.Rmd")
+```
+:::
+
 ::: {.content-visible when-format="pdf"}
 \FloatBarrier
 :::
@@ -116,6 +123,13 @@ include_localised("_infectious-agents.Rmd")
 :::
 
 ### `{r} sR$headings$diagnostics`
+
+::: {.content-visible when-meta="includeIntroductionTexts"}
+```{r}
+#| output: asis
+include_localised("_diagnostics.Rmd")
+```
+:::
 
 ::: {.content-visible when-meta="includeInfectiousAgentDetectionRateTable"}
 {{< include tables/_tbl-infectious-agent-detection-rate.qmd >}}

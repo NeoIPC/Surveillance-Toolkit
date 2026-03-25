@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NeoIPC Surveillance Documentation 0.9\n"
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-03-24 08:24+0100\n"
+"POT-Creation-Date: 2026-03-24 19:00+0100\n"
 "PO-Revision-Date: 2025-12-30 18:49+0100\n"
 "Last-Translator: Brar Piening <brar.piening@charite.de>\n"
 "Language-Team: German <https://hosted.weblate.org/projects/neoipc/neoipc-core-surveillance-protocol/es/>\n"
@@ -2256,7 +2256,7 @@ msgstr "[[data-dictionary-general-infection-data-secondary-bsi]]Infección secun
 #. type: #data-dictionary-general-infection-data
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:689
 #, fuzzy
-msgid "A BSI that is seeded from a site-specific infection at another body site (except for catheter-associated infections).  A BSI can be attributed to a site-specific infection (NEC, PN or SSI) if it occurs in a 17-day period that includes the day of infection (=first symptoms of site-specific infection), 3 days prior, and 13 days after."
+msgid "A BSI that is seeded from a site-specific infection at another body site (except for vascular catheter-associated infections).  A BSI can be attributed to a site-specific infection (NEC, PN or SSI) if it occurs in a 17-day period that includes the day of infection (=first symptoms of site-specific infection), 3 days prior, and 13 days after."
 msgstr "Una ISB que se cree que se ha sembrado a partir de una infección específica de otro lugar del cuerpo (excepto en el caso de las infecciones asociadas a catéteres).  Una ISB puede atribuirse a una infección específica del lugar (ECN, NP o ISQ) si se produce en un periodo de 17 días que incluye el día de la infección (=primeros síntomas de la infección específica del lugar), 3 días antes y 13 días después."
 
 #. type: #data-dictionary-general-infection-data

@@ -15,245 +15,797 @@ library(gt, warn.conflicts = FALSE, quietly = TRUE)
 ```{r Set up functions}
 #| include: false
 
+# Debug mode: when false (default), suppress warnings from rendered output.
+# Warnings still appear in the build log. Pass -P debug:true to enable.
+debug_mode <- isTRUE(as.logical(params$debug))
+knitr::opts_chunk$set(warning = debug_mode)
+
 source("../common/helpers.R")
+
+# Map factual states to coarse clinical categories for pattern matching.
+coarse_state <- function(state) {
+  dplyr::case_match(
+    state,
+    c("zero", "below_q1") ~ "low",
+    c("q1_to_q2", "q2_to_q3") ~ "mid",
+    "above_q3" ~ "high",
+    .default = NA_character_
+  )
+}
+
+# ── Composable interpretation framework ─────────────────────────
+# Assembles interpretation strings from: opening + clause + action.
+# Each metric pairing definition lives in sR$outlier$pairing_<name>.
+
+# Determine concordance between triggering metric direction and paired
+# metric state. Returns "concordant", "discordant", "within_iqr",
+# or "no_quartiles".
+classify_concordance <- function(metric_state, paired_state, above_is_concerning) {
+  if (is.na(paired_state) || paired_state == "no_benchmark")
+    return("no_quartiles")
+  paired_coarse <- coarse_state(paired_state)
+  if (is.na(paired_coarse)) return("no_quartiles")
+  if (paired_coarse == "mid") return("within_iqr")
+
+  # Determine if paired direction is clinically consistent with trigger
+  metric_coarse <- coarse_state(metric_state)
+  if (above_is_concerning) {
+    # high trigger + high paired = concordant (both concerning)
+    # high trigger + low paired = discordant
+    # low trigger + low paired = concordant (both favorable)
+    # low trigger + high paired = discordant
+    same_direction <- metric_coarse == paired_coarse
+  } else {
+    # Inverted for protective factors (not currently used, but future-proof)
+    same_direction <- metric_coarse != paired_coarse
+  }
+  if (same_direction) "concordant" else "discordant"
+}
+
+# Select the cross-reference clause template and fill placeholders.
+select_clause <- function(concordance, paired_coarse, pairing, sR) {
+  templates <- sR$outlier$composed
+  clause_template <- switch(concordance,
+    concordant = if (paired_coarse == "high")
+      templates$clause_concordant_high else templates$clause_concordant_low,
+    discordant = if (paired_coarse == "high")
+      templates$clause_discordant_high else templates$clause_discordant_low,
+    within_iqr = templates$clause_within_iqr,
+    no_quartiles = templates$clause_no_quartiles,
+    ""
+  )
+  if (is.null(clause_template) || !nzchar(clause_template)) return("")
+  as.character(glue::glue(clause_template,
+    paired_label = pairing$paired_label %||% "",
+    paired_label_sc = pairing$paired_label_sc %||%
+      tools::toTitleCase(pairing$paired_label %||% ""),
+    paired_ref = pairing$paired_ref %||% "",
+    .open = "{", .close = "}"))
+}
+
+# Select the action string based on direction and concordance.
+select_action <- function(metric_coarse, concordance, pairing) {
+  if (metric_coarse == "high") {
+    if (concordance == "discordant")
+      pairing$action_elevated_narrowed %||% pairing$action_elevated
+    else
+      pairing$action_elevated
+  } else {
+    if (concordance == "discordant")
+      pairing$action_low_narrowed %||% pairing$action_low
+    else
+      pairing$action_low
+  }
+}
+
+# Assemble a complete interpretation string from parts.
+# Returns NULL if the metric is not an outlier or pairing is NULL.
+compose_interpretation <- function(metric_state, pairing, paired_state, sR) {
+  if (is.null(pairing)) return(NULL)
+  metric_coarse <- coarse_state(metric_state)
+  if (is.na(metric_coarse) || metric_coarse == "mid") return(NULL)
+
+  # Part 1: Opening
+  templates <- sR$outlier$composed
+  opening_template <- if (metric_coarse == "high")
+    templates$opening_above else templates$opening_below
+  opening <- as.character(glue::glue(opening_template,
+    metric_label = pairing$metric_label, .open = "{", .close = "}"))
+
+  # Part 2: Clause (empty for unpaired metrics)
+  clause <- ""
+  if (!is.null(pairing$paired_label) && !is.null(paired_state)) {
+    concordance <- classify_concordance(
+      metric_state, paired_state, pairing$above_is_concerning %||% TRUE)
+    paired_coarse <- coarse_state(paired_state)
+    clause <- select_clause(concordance, paired_coarse, pairing, sR)
+  } else {
+    concordance <- "no_quartiles"
+  }
+
+  # Part 3: Action
+  action <- select_action(metric_coarse, concordance, pairing)
+  if (is.null(action)) return(paste0(opening, clause, "."))
+
+  paste0(opening, clause, ". ", action)
+}
+
+# Helper: look up an interpretation string, returning it or NULL.
+interp <- function(sR, key) {
+  text <- sR$outlier[[key]]
+  if (!is.null(text)) text else NULL
+}
+
+# ── Interpret functions ─────────────────────────────────────────────
+# Each examines the combined state profile and returns 0-N strings.
+# All accept an optional registry parameter for cross-table context.
+
+interpret_antibiotic_rates <- function(state_map, sR, registry = NULL) {
+  cs <- sapply(c(a = "a", w = "w", r = "r"), \(m) {
+    if (m %in% names(state_map)) coarse_state(state_map[[m]]) else NA
+  })
+  cs <- cs[!is.na(cs)]
+  if (length(cs) == 0) return(character(0))
+  parts <- character(0)
+  if (length(cs) == 3 && all(cs == "high"))
+    parts <- c(parts, interp(sR, "antibiotic_rate_interpretation_all_above"))
+  else if (length(cs) == 3 && all(cs == "low"))
+    parts <- c(parts, interp(sR, "antibiotic_rate_interpretation_all_below"))
+  if (length(cs) >= 2) {
+    if (isTRUE(cs["r"] == "high") && all(cs[names(cs) != "r"] != "high"))
+      parts <- c(parts, interp(sR, "antibiotic_rate_interpretation_reserve_isolated_high"))
+    ord <- match(cs, c("low", "mid", "high"))
+    if (length(ord) == 3 && !is.unsorted(ord) && ord[1] < ord[3])
+      parts <- c(parts, interp(sR, "antibiotic_rate_interpretation_gradient_ascending"))
+    if (length(ord) == 3 && !is.unsorted(rev(ord)) && ord[1] > ord[3])
+      parts <- c(parts, interp(sR, "antibiotic_rate_interpretation_gradient_descending"))
+  }
+  if (any(cs == "high"))
+    parts <- c(parts, interp(sR, "antibiotic_rate_interpretation_review_resistance"))
+  # Direction-aware Watch interpretation
+  if (isTRUE(cs["w"] == "low"))
+    parts <- c(parts, interp(sR, "antibiotic_rate_interpretation_watch_low"))
+  if (isTRUE(cs["w"] == "high"))
+    parts <- c(parts, interp(sR, "antibiotic_rate_interpretation_watch_high"))
+  unique(Filter(Negate(is.null), parts))
+}
+
+interpret_ventilatory_support <- function(state_map, sR, registry = NULL) {
+  cs <- sapply(c(niv = "niv", inv = "inv"), \(m) {
+    if (m %in% names(state_map)) coarse_state(state_map[[m]]) else NA
+  })
+  cs <- cs[!is.na(cs)]
+  if (length(cs) < 2) return(character(0))
+  parts <- character(0)
+  if (all(cs == "high"))
+    parts <- c(parts, interp(sR, "ventilatory_support_interpretation_all_above"))
+  else if (all(cs == "low"))
+    parts <- c(parts, interp(sR, "ventilatory_support_interpretation_all_below"))
+  if (cs["inv"] == "high" && cs["niv"] == "low")
+    parts <- c(parts, interp(sR, "ventilatory_support_interpretation_inv_high_niv_low"))
+  if (cs["niv"] == "high" && cs["inv"] == "low")
+    parts <- c(parts, interp(sR, "ventilatory_support_interpretation_niv_high_inv_low"))
+  Filter(Negate(is.null), parts)
+}
+
+interpret_severe_infection <- function(state_map, sR, registry = NULL) {
+  parts <- character(0)
+  dev_ass <- registry$dev_ass_incidence_density_rate_table
+
+  # Definition 1: Severe infection (unpaired — directs to components)
+  si_state <- state_map[["si"]]
+  if (!is.null(si_state)) {
+    si_text <- compose_interpretation(
+      si_state, sR$outlier$pairing_severe_infection, NULL, sR)
+    if (!is.null(si_text)) parts <- c(parts, si_text)
+  }
+
+  # Definition 2: Primary sepsis/BSI ↔ device-associated BSI (composite)
+  bsi_state <- state_map[["bsi"]]
+  if (!is.null(bsi_state) && coarse_state(bsi_state) %in% c("high", "low")) {
+    # Composite resolution: check CVC BSI and PVC BSI from Table 2
+    paired_state <- NULL
+    if (!is.null(dev_ass)) {
+      cvc_state <- dev_ass[["cvc"]]
+      pvc_state <- dev_ass[["pvc"]]
+      if (is.na(cvc_state) || is.na(pvc_state) ||
+          cvc_state == "no_benchmark" || pvc_state == "no_benchmark") {
+        paired_state <- "no_benchmark"
+      } else {
+        cvc_c <- coarse_state(cvc_state)
+        pvc_c <- coarse_state(pvc_state)
+        bsi_c <- coarse_state(bsi_state)
+        # Either concordant → concordant
+        if ((!is.na(cvc_c) && cvc_c == bsi_c) ||
+            (!is.na(pvc_c) && pvc_c == bsi_c)) {
+          paired_state <- bsi_state  # concordant
+        } else {
+          # Both within IQR → discordant (not explained by dev-ass BSI)
+          paired_state <- "q1_to_q2"  # maps to "mid" → "within_iqr"
+        }
+      }
+    }
+    bsi_text <- compose_interpretation(
+      bsi_state, sR$outlier$pairing_bsi, paired_state, sR)
+    if (!is.null(bsi_text)) parts <- c(parts, bsi_text)
+  }
+
+  # Definition 3: Pneumonia ↔ VAP (primary) + VS util (fallback)
+  hap_state <- state_map[["hap"]]
+  if (!is.null(hap_state) && coarse_state(hap_state) %in% c("high", "low")) {
+    pairing <- sR$outlier$pairing_hap
+    vs_dev_state <- if (!is.null(dev_ass)) dev_ass[["vs"]] else NULL
+    usage <- registry$usage_density_rate_table
+    vs_util_state <- if (!is.null(usage)) usage[["vs"]] else NULL
+
+    if (!is.null(vs_dev_state) && !is.na(vs_dev_state) &&
+        vs_dev_state != "no_benchmark") {
+      # Primary: VAP has quartiles — use it directly
+      simple_pairing <- list(
+        metric_label = pairing$metric_label,
+        paired_label = pairing$primary_paired_label,
+        paired_label_sc = tools::toTitleCase(pairing$primary_paired_label),
+        paired_ref = pairing$primary_paired_ref,
+        above_is_concerning = pairing$above_is_concerning,
+        action_elevated = pairing$action_elevated,
+        action_elevated_narrowed = pairing$action_elevated_narrowed,
+        action_low = pairing$action_low,
+        action_low_narrowed = pairing$action_low_narrowed)
+      hap_text <- compose_interpretation(hap_state, simple_pairing, vs_dev_state, sR)
+    } else if (!is.null(vs_util_state) && !is.na(vs_util_state) &&
+               vs_util_state != "no_benchmark") {
+      # Fallback: VAP has no quartiles, use VS utilization with combined clause
+      fallback_coarse <- coarse_state(vs_util_state)
+      fallback_position <- if (!is.na(fallback_coarse) && fallback_coarse == "high") "above"
+        else if (!is.na(fallback_coarse) && fallback_coarse == "low") "below"
+        else "within"
+      hap_coarse <- coarse_state(hap_state)
+      opening_template <- if (hap_coarse == "high")
+        sR$outlier$composed$opening_above else sR$outlier$composed$opening_below
+      opening <- as.character(glue::glue(opening_template,
+        metric_label = pairing$metric_label, .open = "{", .close = "}"))
+      clause <- as.character(glue::glue(sR$outlier$composed$clause_fallback,
+        primary_paired_label = pairing$primary_paired_label,
+        primary_paired_ref = pairing$primary_paired_ref,
+        fallback_paired_label_sc = pairing$fallback_paired_label_sc,
+        fallback_position = fallback_position,
+        fallback_paired_ref = pairing$fallback_paired_ref,
+        .open = "{", .close = "}"))
+      # Determine concordance for action selection using fallback metric
+      concordance <- classify_concordance(
+        hap_state, vs_util_state, pairing$above_is_concerning %||% TRUE)
+      action <- select_action(hap_coarse, concordance, pairing)
+      hap_text <- paste0(opening, clause, ". ", action)
+    } else {
+      # Both unavailable
+      hap_text <- compose_interpretation(hap_state, pairing, NULL, sR)
+    }
+    if (!is.null(hap_text)) parts <- c(parts, hap_text)
+  }
+
+  Filter(Negate(is.null), parts)
+}
+
+interpret_vascular_catheter <- function(state_map, sR, registry = NULL) {
+  cs <- sapply(c(cvc = "cvc", pvc = "pvc"), \(m) {
+    if (m %in% names(state_map)) coarse_state(state_map[[m]]) else NA
+  })
+  cs <- cs[!is.na(cs)]
+  if (length(cs) < 2) return(character(0))
+  parts <- character(0)
+  if (all(cs == "high"))
+    parts <- c(parts, interp(sR, "vascular_catheter_interpretation_both_above"))
+  else if (all(cs == "low"))
+    parts <- c(parts, interp(sR, "vascular_catheter_interpretation_both_below"))
+  if (cs["pvc"] == "high" && cs["cvc"] == "low")
+    parts <- c(parts, interp(sR, "vascular_catheter_interpretation_pvc_high_cvc_low"))
+  if (cs["cvc"] == "high" && cs["pvc"] == "low")
+    parts <- c(parts, interp(sR, "vascular_catheter_interpretation_cvc_high_pvc_low"))
+  Filter(Negate(is.null), parts)
+}
+
+interpret_intestinal_microbiome <- function(state_map, sR, registry = NULL) {
+  cs <- sapply(c(hm = "human_milk", pro = "probiotic"), \(m) {
+    if (m %in% names(state_map)) coarse_state(state_map[[m]]) else NA
+  })
+  cs <- cs[!is.na(cs)]
+  if (length(cs) == 0) return(character(0))
+  parts <- character(0)
+  # Combined patterns (both metrics available)
+  if (length(cs) == 2) {
+    if (all(cs == "high"))
+      parts <- c(parts, interp(sR, "intestinal_microbiome_interpretation_both_above"))
+    else if (all(cs == "low"))
+      parts <- c(parts, interp(sR, "intestinal_microbiome_interpretation_both_below"))
+    if (cs["hm"] == "high" && cs["pro"] == "low")
+      parts <- c(parts, interp(sR, "intestinal_microbiome_interpretation_hm_high_pro_low"))
+    if (cs["hm"] == "low" && cs["pro"] == "high")
+      parts <- c(parts, interp(sR, "intestinal_microbiome_interpretation_hm_low_pro_high"))
+  }
+  # Single-metric direction-aware interpretation
+  if (length(parts) == 0) {
+    if (isTRUE(cs["hm"] == "low"))
+      parts <- c(parts, interp(sR, "intestinal_microbiome_interpretation_hm_low"))
+    if (isTRUE(cs["hm"] == "high"))
+      parts <- c(parts, interp(sR, "intestinal_microbiome_interpretation_hm_high"))
+    if (isTRUE(cs["pro"] == "low"))
+      parts <- c(parts, interp(sR, "intestinal_microbiome_interpretation_pro_low"))
+    if (isTRUE(cs["pro"] == "high"))
+      parts <- c(parts, interp(sR, "intestinal_microbiome_interpretation_pro_high"))
+  }
+  Filter(Negate(is.null), parts)
+}
+
+interpret_nec <- function(state_map, sR, registry = NULL) {
+  nec_state <- state_map[["nec"]]
+  nec_coarse <- coarse_state(nec_state)
+  if (is.na(nec_coarse) || nec_coarse == "mid") return(character(0))
+
+  pairing <- sR$outlier$pairing_nec
+  if (is.null(pairing)) return(character(0))
+  usage <- registry$usage_density_rate_table
+
+  hm_state <- if (!is.null(usage)) usage[["human_milk"]] else NULL
+  pro_state <- if (!is.null(usage)) usage[["probiotic"]] else NULL
+  hm_coarse <- if (!is.null(hm_state)) coarse_state(hm_state) else NA
+  pro_coarse <- if (!is.null(pro_state)) coarse_state(pro_state) else NA
+
+  # Opening
+  templates <- sR$outlier$composed
+  opening_template <- if (nec_coarse == "high")
+    templates$opening_above else templates$opening_below
+  opening <- as.character(glue::glue(opening_template,
+    metric_label = pairing$metric_label, .open = "{", .close = "}"))
+
+  # Priority resolution: human milk (primary), then probiotics (secondary)
+  # Step 1: Check primary (human milk)
+  primary_pairing <- list(
+    paired_label = pairing$primary_paired_label,
+    paired_label_sc = pairing$primary_paired_label_sc,
+    paired_ref = pairing$primary_paired_ref,
+    above_is_concerning = pairing$above_is_concerning)
+
+  hm_concordance <- if (!is.null(hm_state))
+    classify_concordance(nec_state, hm_state, pairing$above_is_concerning)
+  else "no_quartiles"
+
+  if (hm_concordance %in% c("concordant", "discordant")) {
+    # Primary explains or contradicts — use it
+    clause <- select_clause(hm_concordance, hm_coarse, primary_pairing, sR)
+    # Special case: NEC high + HM high = "despite" → narrowed action
+    if (nec_coarse == "high" && hm_concordance == "discordant")
+      action <- pairing$action_elevated_narrowed
+    else
+      action <- select_action(nec_coarse, hm_concordance, pairing)
+    return(paste0(opening, clause, ". ", action))
+  }
+
+  # Step 2: HM is within IQR or no quartiles — check secondary (probiotics)
+  if (!is.na(pro_coarse) && pro_coarse != "mid") {
+    secondary_pairing <- list(
+      paired_label = pairing$secondary_paired_label,
+      paired_label_sc = pairing$secondary_paired_label_sc,
+      paired_ref = pairing$secondary_paired_ref,
+      above_is_concerning = pairing$above_is_concerning)
+    pro_concordance <- classify_concordance(
+      nec_state, pro_state, pairing$above_is_concerning)
+    clause_parts <- character(0)
+    # Include HM status as context
+    if (hm_concordance == "within_iqr") {
+      clause_parts <- c(clause_parts,
+        select_clause("within_iqr", hm_coarse, primary_pairing, sR))
+    } else {
+      clause_parts <- c(clause_parts,
+        select_clause("no_quartiles", NA, primary_pairing, sR))
+    }
+    clause_parts <- c(clause_parts,
+      select_clause(pro_concordance, pro_coarse, secondary_pairing, sR))
+    clause <- paste0(clause_parts, collapse = "")
+    # Use secondary action if NEC is elevated and probiotics are concordant (low)
+    action <- if (nec_coarse == "high" && pro_concordance == "concordant")
+      pairing$action_elevated_secondary %||% pairing$action_elevated
+    else
+      select_action(nec_coarse, pro_concordance, pairing)
+    return(paste0(opening, clause, ". ", action))
+  }
+
+  # Step 3: Neither explains — use primary with its concordance
+  clause <- select_clause(hm_concordance, hm_coarse, primary_pairing, sR)
+  action <- select_action(nec_coarse, hm_concordance, pairing)
+  paste0(opening, clause, ". ", action)
+}
+
+interpret_kangaroo_care <- function(state_map, sR, registry = NULL) {
+  cs <- coarse_state(state_map[["kangaroo_care"]])
+  if (is.na(cs)) return(character(0))
+  if (cs == "low")
+    return(Filter(Negate(is.null), interp(sR, "kangaroo_care_interpretation_low")))
+  if (cs == "high")
+    return(Filter(Negate(is.null), interp(sR, "kangaroo_care_interpretation_high")))
+  character(0)
+}
+
+# Device-associated interpret functions use the composable framework.
+# Each device metric gets its own simple pairing with the corresponding
+# utilization metric from Table 8.
+interpret_dev_ass_vascular_catheter <- function(state_map, sR, registry = NULL) {
+  usage <- registry$usage_density_rate_table
+  parts <- character(0)
+  for (dev in c("cvc", "pvc")) {
+    dev_state <- state_map[[dev]]
+    if (is.null(dev_state)) next
+    pairing <- sR$outlier[[paste0("pairing_dev_ass_", dev)]]
+    if (is.null(pairing)) next
+    paired_state <- if (!is.null(usage)) usage[[dev]] else NULL
+    text <- compose_interpretation(dev_state, pairing, paired_state, sR)
+    if (!is.null(text)) parts <- c(parts, text)
+  }
+  parts
+}
+
+interpret_dev_ass_ventilatory_support <- function(state_map, sR, registry = NULL) {
+  usage <- registry$usage_density_rate_table
+  parts <- character(0)
+  for (dev in c("vs", "inv", "niv")) {
+    dev_state <- state_map[[dev]]
+    if (is.null(dev_state)) next
+    pairing <- sR$outlier[[paste0("pairing_dev_ass_", dev)]]
+    if (is.null(pairing)) next
+    paired_state <- if (!is.null(usage)) usage[[dev]] else NULL
+    text <- compose_interpretation(dev_state, pairing, paired_state, sR)
+    if (!is.null(text)) parts <- c(parts, text)
+  }
+  parts
+}
+
+interpret_surgery <- function(state_map, sR, registry = NULL) {
+  categories <- c("abdominal_surgery", "neurosurgery",
+                   "inguinal_hernia_surgery",
+                   "cardiac_and_large_vessel_surgery",
+                   "lung_pleural_space_thoracic_surgery",
+                   "oesophageal_surgery", "other")
+  cs <- sapply(categories, \(m) {
+    if (m %in% names(state_map)) coarse_state(state_map[[m]]) else NA
+  })
+  cs <- cs[!is.na(cs)]
+  if (sum(cs == "high", na.rm = TRUE) >= 2)
+    return(Filter(Negate(is.null), interp(sR, "surgery_rate_interpretation_multiple_above")))
+  character(0)
+}
+
+interpret_resistance_test <- function(state_map, sR, registry = NULL) {
+  cs <- sapply(names(state_map), \(m) coarse_state(state_map[[m]]))
+  cs <- cs[!is.na(cs)]
+  parts <- character(0)
+  if (any(cs == "low"))
+    parts <- c(parts, interp(sR, "resistance_test_interpretation_routine_low"))
+  if (any(cs == "high"))
+    parts <- c(parts, interp(sR, "resistance_test_interpretation_routine_high"))
+  Filter(Negate(is.null), parts)
+}
+
+interpret_agent_detection_per_inf_type <- function(state_map, sR, registry = NULL) {
+  components <- c("bsi", "hap", "nec", "ssi")
+  cs <- sapply(components, \(m) {
+    if (m %in% names(state_map)) coarse_state(state_map[[m]]) else NA
+  })
+  cs <- cs[!is.na(cs)]
+  if (length(cs) == 0) return(character(0))
+  if (all(cs == "low"))
+    return(Filter(Negate(is.null), interp(sR, "agent_detection_per_inf_type_interpretation_all_below")))
+  if (all(cs == "high"))
+    return(Filter(Negate(is.null), interp(sR, "agent_detection_per_inf_type_interpretation_all_above")))
+  parts <- character(0)
+  if (any(cs == "high"))
+    parts <- c(parts, interp(sR, "agent_detection_per_inf_type_interpretation_some_above"))
+  if (any(cs == "low"))
+    parts <- c(parts, interp(sR, "agent_detection_per_inf_type_interpretation_some_below"))
+  Filter(Negate(is.null), parts)
+}
+
+interpret_secondary_bsi <- function(state_map, sR, registry = NULL) {
+  cs <- sapply(c("nec", "hap", "ssi"), \(m) {
+    if (m %in% names(state_map)) coarse_state(state_map[[m]]) else NA
+  })
+  cs <- cs[!is.na(cs)]
+  if (sum(cs == "high", na.rm = TRUE) >= 2)
+    return(Filter(Negate(is.null), interp(sR, "secondary_bsi_interpretation_multiple_above")))
+  character(0)
+}
 
 # Outlier detection configuration - groups of related metrics
 outlier_groupings <- list(
-  abr_infection_rate_table = list(
-
-  ),
-  infectious_agent_detection_rate_per_agent_table = list(
-
-  ),
-  dev_ass_incidence_density_rate_table = list(
-
-  ),
   incidence_density_rate_table = list(
     severe_infection = list(
       metrics = c("si", "bsi", "hap"),
-      signature_order = c("si", "bsi", "hap"),
-      template_prefix = "grouped_severe_infection_rates",
-      mode = "signature",
-      hidden_signatures = character(0)
+      total_metric = "si",
+      template_prefix = "severe_infection",
+      interpret = interpret_severe_infection
+    ),
+    nec = list(
+      metrics = c("nec"),
+      template_prefix = "nec_rate",
+      interpret = interpret_nec
     )
   ),
-  infectious_agent_detection_rate_per_inf_type_table = list(
-
-  ),
-  resistance_test_rate_table = list(
-
-  ),
   usage_density_rate_table = list(
-    vascular_catheter_rates = list(
+    vascular_catheter = list(
       metrics = c("cvc", "pvc"),
-      signature_order = c("pvc", "cvc"),
-      template_prefix = "grouped_vascular_catheter_rates",
-      mode = "signature",
-      hidden_signatures = character(0)
+      template_prefix = "vascular_catheter",
+      interpret = interpret_vascular_catheter
     ),
-    ventilatory_support_rates = list(
+    ventilatory_support = list(
       metrics = c("vs", "niv", "inv"),
-      signature_order = c("vs", "niv", "inv"),
-      template_prefix = "grouped_ventilatory_support_rates",
-      mode = "signature",
-      hidden_signatures = character(0)
+      total_metric = "vs",
+      template_prefix = "ventilatory_support",
+      interpret = interpret_ventilatory_support
     ),
-    protective_factors = list(
+    intestinal_microbiome = list(
       metrics = c("human_milk", "probiotic"),
-      signature_order = c("human_milk", "probiotic"),
-      template_prefix = "grouped_intestinal_microbiome_factors",
-      mode = "signature",
-      hidden_signatures = character(0)
+      template_prefix = "intestinal_microbiome",
+      interpret = interpret_intestinal_microbiome
     ),
     antibiotic_rates = list(
       metrics = c("ab", "a", "w", "r"),
-      signature_order = c("ab", "a", "w", "r"),
-      template_prefix = "grouped_antibiotic_rates",
-      mode = "signature",
-      hidden_signatures = character(0)
+      total_metric = "ab",
+      template_prefix = "antibiotic_rate",
+      interpret = interpret_antibiotic_rates
     ),
-    kangaroo_care_rate = list(
+    kangaroo_care = list(
       metrics = c("kangaroo_care"),
-      signature_order = c("kangaroo_care"),
-      template_prefix = "grouped_kangaroo_care",
-      mode = "signature",
-      hidden_signatures = character(0)
+      template_prefix = "kangaroo_care_rate",
+      interpret = interpret_kangaroo_care
+    )
+  ),
+  dev_ass_incidence_density_rate_table = list(
+    dev_ass_vascular_catheter = list(
+      metrics = c("cvc", "pvc"),
+      template_prefix = "dev_ass_vascular_catheter",
+      interpret = interpret_dev_ass_vascular_catheter
+    ),
+    dev_ass_ventilatory_support = list(
+      metrics = c("vs", "niv", "inv"),
+      total_metric = "vs",
+      template_prefix = "dev_ass_ventilatory_support",
+      interpret = interpret_dev_ass_ventilatory_support
+    )
+  ),
+  surgery_rate_table = list(
+    surgery = list(
+      metrics = c("overall", "abdominal_surgery", "neurosurgery",
+                   "inguinal_hernia_surgery",
+                   "cardiac_and_large_vessel_surgery",
+                   "lung_pleural_space_thoracic_surgery",
+                   "oesophageal_surgery", "other"),
+      total_metric = "overall",
+      template_prefix = "surgery_rate",
+      interpret = interpret_surgery
+    )
+  ),
+  resistance_test_rate_table = list(
+    resistance_test = list(
+      metrics = c("3gcr:routine", "3gcr:if_3gcr",
+                   "car:routine", "car:if_3gcr", "car:if_3gcr&car",
+                   "cor:routine", "mrsa:routine", "vre:routine"),
+      template_prefix = "resistance_test",
+      interpret = interpret_resistance_test
+    )
+  ),
+  infectious_agent_detection_rate_per_inf_type_table = list(
+    agent_detection_per_inf_type = list(
+      metrics = c("all", "bsi", "hap", "nec", "ssi"),
+      total_metric = "all",
+      template_prefix = "agent_detection_per_inf_type",
+      interpret = interpret_agent_detection_per_inf_type
     )
   ),
   secondary_bsi_rate_table = list(
-
+    secondary_bsi = list(
+      metrics = c("nec", "hap", "ssi"),
+      template_prefix = "secondary_bsi",
+      interpret = interpret_secondary_bsi
+    )
   ),
-  surgery_rate_table = list(
-
-  )
+  infectious_agent_detection_rate_per_agent_table = list(),
+  abr_infection_rate_table = list()
 )
 
-# Detect outliers by comparing department values to reference quartiles
-detect_outliers <- function(table_data, identifier_col = NULL, combine_cols = NULL) {
+# ── Metric state levels (ordered) ──────────────────────────────────
+metric_state_levels <- c("na", "no_benchmark", "zero", "below_q1",
+                          "q1_to_q2", "q2_to_q3", "above_q3")
+
+# Classify each metric in a table into a state relative to reference quartiles.
+# Returns a named ordered factor (metric_id → state).
+classify_metrics <- function(table_data, identifier_col = NULL, combine_cols = NULL) {
   if (is.null(table_data) || nrow(table_data) == 0) {
-    return(list(
-      below_q1 = character(0),
-      above_q3 = character(0),
-      state_map = c()
-    ))
+    return(factor(character(0), levels = metric_state_levels, ordered = TRUE))
   }
 
-  # detect own rate column
   col_names <- names(table_data)
   own_col_name_candidates <- c("pooled_own", "rate_own")
   own_col_name <- own_col_name_candidates[own_col_name_candidates %in% col_names]
 
-  # Check for required columns
   if (!(length(own_col_name) == 1 && all(c("q1_ref", "q3_ref") %in% col_names))) {
-    return(list(
-      below_q1 = character(0),
-      above_q3 = character(0),
-      state_map = c()
-    ))
+    return(factor(character(0), levels = metric_state_levels, ordered = TRUE))
   }
 
   # Get row identifiers
   if (!is.null(combine_cols) && all(combine_cols %in% names(table_data))) {
-    # Combine multiple columns (e.g., "3gcr: Enterobacteriaceae")
     identifiers <- apply(table_data[, combine_cols, drop = FALSE], 1, function(row) {
       paste(row, collapse = ":")
     })
   } else if (!is.null(identifier_col) && identifier_col %in% names(table_data)) {
-    # Use specified column
     identifiers <- as.character(table_data[[identifier_col]])
   } else if (!is.null(rownames(table_data)) && !all(rownames(table_data) == as.character(1:nrow(table_data)))) {
-    # Use row names if available
     identifiers <- rownames(table_data)
   } else if (ncol(table_data) > 0) {
-    # Fall back to first column
     identifiers <- as.character(table_data[[1]])
   } else {
     identifiers <- as.character(1:nrow(table_data))
   }
 
   own_values <- table_data[[own_col_name]]
-  has_ref_quartiles <- !is.na(table_data$q1_ref) & !is.na(table_data$q3_ref)
-  has_own_rate <- !is.na(own_values)
-  comparable <- has_ref_quartiles & has_own_rate
+  q1 <- table_data$q1_ref
+  q3 <- table_data$q3_ref
+  q2 <- if ("q2_ref" %in% col_names) table_data$q2_ref else q1 + (q3 - q1) / 2
 
-  states <- rep("no_quartile_ref", length(identifiers))
-  states[comparable] <- "within_q1_q3"
-  states[comparable & own_values < table_data$q1_ref] <- "below_q1"
-  states[comparable & own_values > table_data$q3_ref] <- "above_q3"
+  # Classify states (check order matters)
+  states <- character(length(identifiers))
+  for (i in seq_along(identifiers)) {
+    own <- own_values[i]
+    if (is.na(own)) {
+      states[i] <- "na"
+    } else if (is.na(q1[i]) || is.na(q3[i])) {
+      states[i] <- "no_benchmark"
+    } else if (own == 0) {
+      states[i] <- "zero"
+    } else if (own < q1[i]) {
+      states[i] <- "below_q1"
+    } else if (!is.na(q2[i]) && own <= q2[i]) {
+      states[i] <- "q1_to_q2"
+    } else if (own <= q3[i]) {
+      states[i] <- "q2_to_q3"
+    } else {
+      states[i] <- "above_q3"
+    }
+  }
 
-  below_q1 <- identifiers[states == "below_q1"]
-  above_q3 <- identifiers[states == "above_q3"]
-
-  state_map <- stats::setNames(states, tolower(identifiers))
-
-  list(
-    below_q1 = below_q1,
-    above_q3 = above_q3,
-    state_map = state_map
+  stats::setNames(
+    factor(states, levels = metric_state_levels, ordered = TRUE),
+    tolower(identifiers)
   )
 }
 
-# Group related outliers based on predefined groupings
-group_outliers <- function(outliers, table_name = NULL) {
-  if (length(outliers$below_q1) == 0 && length(outliers$above_q3) == 0) {
-    return(list())
+# ── Metric state query helpers ────────────────────────────────────
+
+# Get metric IDs in a specific state (or set of states)
+get_metrics_in_state <- function(state_map, states) {
+  names(state_map[state_map %in% states])
+}
+
+# Does this state_map contain any outliers?
+has_outliers <- function(state_map) {
+  !is.null(state_map) && length(state_map) > 0 &&
+    any(state_map %in% c("zero", "below_q1", "above_q3"))
+}
+
+# Get outlier metric IDs by direction
+get_outliers_below <- function(state_map) {
+  get_metrics_in_state(state_map, c("zero", "below_q1"))
+}
+
+get_outliers_above <- function(state_map) {
+  get_metrics_in_state(state_map, "above_q3")
+}
+
+# Compose structured output for a single group.
+# Returns NULL (skip), a string (zero early-exit), or a list with:
+#   $sections       — list of list(framing, labels) per outlier direction
+#   $interpretation — character vector (0-N interpretation sentences)
+compose_group_text <- function(group_config, state_map, sR, registry = NULL, table_name = NULL) {
+  prefix <- group_config$template_prefix
+  metrics <- tolower(group_config$metrics)
+  total_metric <- group_config$total_metric
+  available <- metrics[metrics %in% names(state_map)]
+
+  if (length(available) == 0) return(NULL)
+
+  # Zero early-exit on total metric (only "zero" — na and no_benchmark
+  # are handled by has_outliers() gating the callout entirely)
+  if (!is.null(total_metric)) {
+    total_metric <- tolower(total_metric)
+    if (total_metric %in% names(state_map)) {
+      total_state <- as.character(state_map[[total_metric]])
+      if (total_state == "zero") {
+        key <- paste0(prefix, "_", total_metric, "_zero")
+        text <- sR$outlier[[key]]
+        if (!is.null(text)) return(text)
+        return(NULL)
+      }
+    }
   }
 
+  # Determine component metrics (exclude total_metric)
+  components <- if (!is.null(total_metric)) {
+    available[available != tolower(total_metric)]
+  } else {
+    available
+  }
+
+  # Partition into below/above lists (localized labels)
+  below_labels <- character(0)
+  above_labels <- character(0)
+  for (metric in components) {
+    s <- as.character(state_map[[metric]])
+    if (s %in% c("zero", "below_q1")) {
+      below_labels <- c(below_labels, localize_metric_name(metric, sR, table_name))
+    } else if (s == "above_q3") {
+      above_labels <- c(above_labels, localize_metric_name(metric, sR, table_name))
+    }
+  }
+
+  # Build sections (one per non-empty direction)
+  sections <- list()
+  if (length(below_labels) > 0) {
+    sections <- c(sections, list(list(
+      framing = sR$outlier$framing_below_q1,
+      labels = below_labels
+    )))
+  }
+  if (length(above_labels) > 0) {
+    sections <- c(sections, list(list(
+      framing = sR$outlier$framing_above_q3,
+      labels = above_labels
+    )))
+  }
+
+  # Interpretation (pass full state_map + registry for cross-table context)
+  interpretation <- character(0)
+  if (!is.null(group_config$interpret) && is.function(group_config$interpret)) {
+    interpretation <- group_config$interpret(state_map, sR, registry)
+  }
+
+  if (length(sections) == 0 && length(interpretation) == 0) return(NULL)
+
+  # Generic fallback is handled by format_outlier_text() — it collects labels
+  # from groups without specific interpretation and renders one summary at the end.
+  list(
+    sections = sections,
+    interpretation = if (is.character(interpretation)) interpretation else character(0)
+  )
+}
+
+# Group related outliers using the compose approach.
+# state_map: named ordered factor from classify_metrics()
+# registry: full metric_registry for cross-table context
+group_outliers <- function(state_map, table_name = NULL, sR = NULL, registry = NULL) {
+  below <- get_outliers_below(state_map)
+  above <- get_outliers_above(state_map)
+
   grouped <- list(
-    grouped_templates = list(),
-    ungrouped = list(
-      below_q1 = outliers$below_q1,
-      above_q3 = outliers$above_q3
-    ),
-    state_map = outliers$state_map
+    grouped_text = list(),
+    ungrouped = list(below_q1 = below, above_q3 = above),
+    table_name = table_name
   )
 
   remove_case_insensitive <- function(values, values_to_remove) {
     values[!(tolower(values) %in% tolower(values_to_remove))]
   }
 
-  visible_states <- c("below_q1", "within_q1_q3", "above_q3")
-
-  # Try to match and group outliers
   table_groupings <- outlier_groupings[[table_name]]
-  if (!is.null(table_groupings)) {
+  if (!is.null(table_groupings) && !is.null(sR)) {
     for (group_name in names(table_groupings)) {
       group_config <- table_groupings[[group_name]]
-
+      if (!is.null(group_config$classify_args)) next
       group_metrics <- tolower(group_config$metrics)
-      state_map <- grouped$state_map
-      available_metrics <- group_metrics[group_metrics %in% names(state_map)]
 
-      if (length(available_metrics) == 0) {
-        next
-      }
-
-      visible_metrics <- available_metrics[state_map[available_metrics] %in% visible_states]
-
-      if (length(visible_metrics) == 0) {
-        next
-      }
-
-      metric_suffixes <- dplyr::case_match(
-        state_map[visible_metrics],
-        "below_q1" ~ "low",
-        "within_q1_q3" ~ "inbetween",
-        "above_q3" ~ "high"
-      )
-
-      # If all values are in between no hint is warranted
-      if (all(metric_suffixes == "inbetween")) {
-        next
-      }
-
-      names(metric_suffixes) <- visible_metrics
-
-      group_mode <- if (is.null(group_config$mode)) "all_or_ungrouped" else group_config$mode
-      template_key <- NULL
-
-      if (group_mode == "all_or_ungrouped") {
-        all_group_metrics_visible <- length(visible_metrics) == length(group_metrics)
-        all_same_direction <- length(unique(metric_suffixes)) == 1
-
-        if (all_group_metrics_visible && all_same_direction) {
-          template_key <- paste0(group_config$template_prefix, "_", metric_suffixes[1])
-        }
-      } else if (group_mode == "signature") {
-        all_group_metrics_visible <- length(visible_metrics) == length(group_metrics)
-        all_same_direction <- length(unique(metric_suffixes)) == 1
-
-        if (length(visible_metrics) == 1) {
-          template_key <- paste0(
-            group_config$template_prefix,
-            "_",
-            visible_metrics[1],
-            "_",
-            metric_suffixes[1]
-          )
-        } else if (all_group_metrics_visible && all_same_direction) {
-          template_key <- paste0(group_config$template_prefix, "_", metric_suffixes[1])
-        } else {
-          signature_order <- if (is.null(group_config$signature_order)) group_metrics else group_config$signature_order
-          ordered_visible <- signature_order[signature_order %in% visible_metrics]
-          signature <- paste(
-            purrr::map_chr(
-              ordered_visible,
-              \(metric) paste0(metric, "_", metric_suffixes[[metric]])
-            ),
-            collapse = "_"
-          )
-
-          hidden_signatures <- if (is.null(group_config$hidden_signatures)) character(0) else group_config$hidden_signatures
-          if (!(signature %in% hidden_signatures)) {
-            template_key <- paste0(group_config$template_prefix, "_", signature)
-          }
-        }
-      }
-
-      if (!is.null(template_key)) {
-        grouped$grouped_templates[[group_name]] <- template_key
-        grouped$ungrouped$below_q1 <- remove_case_insensitive(grouped$ungrouped$below_q1, visible_metrics)
-        grouped$ungrouped$above_q3 <- remove_case_insensitive(grouped$ungrouped$above_q3, visible_metrics)
+      composed <- compose_group_text(group_config, state_map, sR, registry, table_name)
+      if (!is.null(composed)) {
+        grouped$grouped_text[[group_name]] <- composed
+        grouped$ungrouped$below_q1 <- remove_case_insensitive(
+          grouped$ungrouped$below_q1, group_metrics)
+        grouped$ungrouped$above_q3 <- remove_case_insensitive(
+          grouped$ungrouped$above_q3, group_metrics)
       }
     }
   }
@@ -261,17 +813,37 @@ group_outliers <- function(outliers, table_name = NULL) {
   return(grouped)
 }
 
-# Localize metric name by looking up in string resources
-localize_metric_name <- function(metric_id, sR) {
+# Localize metric name by looking up in string resources.
+# When table_name is provided, that table's section is checked first so that
+# table-specific labels (e.g., "CVC-associated sepsis/BSI" in Table 2 vs
+# plain "CVC" in Table 8) take precedence over the generic glossary entry.
+localize_metric_name <- function(metric_id, sR, table_name = NULL) {
   # Check for combined identifiers (e.g., "3gcr:Enterobacteriaceae")
   if (grepl(":", metric_id)) {
     parts <- strsplit(metric_id, ":", fixed = TRUE)[[1]]
     if (length(parts) == 2) {
       abr_key <- parts[1]
-      pathogen_name <- parts[2]
+      condition_key <- parts[2]
       # Localize the resistance mechanism
       localized_abr <- if (!is.null(sR[[abr_key]])) sR[[abr_key]] else abr_key
-      return(paste(localized_abr, pathogen_name, sep = ": "))
+      # Routine is the default — omit the suffix. Only show the condition
+      # for non-routine cases (e.g., "in case of 3GCR").
+      if (condition_key == "routine") {
+        return(localized_abr)
+      }
+      # Known testing conditions → parenthesized qualifier
+      condition_map <- list(
+        if_3gcr = "car_if_3gcr",
+        "if_3gcr&car" = "cor_if_3gcr_and_car"
+      )
+      cond_sR_key <- condition_map[[condition_key]]
+      if (!is.null(cond_sR_key) &&
+          !is.null(sR[["tbl-resistance-test-rate"]][[cond_sR_key]])) {
+        localized_cond <- sR[["tbl-resistance-test-rate"]][[cond_sR_key]]
+        return(paste0(localized_abr, " (", localized_cond, ")"))
+      }
+      # Other composite IDs (e.g., pathogen groups) → colon separator
+      return(paste0(localized_abr, ": ", tools::toTitleCase(condition_key)))
     }
   }
 
@@ -280,25 +852,28 @@ localize_metric_name <- function(metric_id, sR) {
   metric_key_map <- list(
     bsi = "primary_sepsis_bsi_sc",
     hap = "pneumonia_sc",
-    all = "total"
+    all = "total",
+    a = "access",
+    w = "watch",
+    r = "reserve"
   )
 
+  # Apply key mapping (e.g., "a" → "access", "bsi" → "primary_sepsis_bsi_sc")
   mapped_key <- metric_key_map[[tolower(metric_id)]]
-  if (!is.null(mapped_key) && !is.null(sR[[mapped_key]])) {
-    return(sR[[mapped_key]])
+  lookup_key <- if (!is.null(mapped_key)) mapped_key else tolower(metric_id)
+
+  # When a table_name is provided, check that table's section first so that
+  # table-specific overrides take precedence over the generic glossary.
+  if (!is.null(table_name) && !is.null(sR[[table_name]][[lookup_key]])) {
+    return(sR[[table_name]][[lookup_key]])
   }
 
-  # Try top-level keys (infections: nec, si, ssi; devices: cvc, pvc, etc.)
-  if (!is.null(sR[[metric_id]])) {
-    return(sR[[metric_id]])
+  # Try top-level keys
+  if (!is.null(sR[[lookup_key]])) {
+    return(sR[[lookup_key]])
   }
 
-  # Try case-insensitive top-level lookup
-  if (!is.null(sR[[tolower(metric_id)]])) {
-    return(sR[[tolower(metric_id)]])
-  }
-
-  # Try table-specific sections
+  # Try table-specific sections (fallback when no table_name provided)
   table_sections <- c(
     "tbl-risk-density-rates",
     "tbl-device-associated-incidence-density-rates",
@@ -309,106 +884,113 @@ localize_metric_name <- function(metric_id, sR) {
   )
 
   for (section in table_sections) {
-    if (!is.null(sR[[section]][[tolower(metric_id)]])) {
-      return(sR[[section]][[tolower(metric_id)]])
+    if (!is.null(sR[[section]][[lookup_key]])) {
+      return(sR[[section]][[lookup_key]])
     }
   }
 
-  # Fall back to the raw identifier with a warning
-  rlang::warn(paste0(
-    "localize_metric_name: no display label found for metric identifier '",
-    metric_id,
-    "'. Using raw identifier as fallback."
-  ))
+  # Fall back to the raw identifier. Warn in debug mode so it renders into
+  # the document for diagnosis; silently fall back otherwise.
+  if (isTRUE(debug_mode)) {
+    rlang::warn(paste0(
+      "localize_metric_name: no display label found for metric identifier '",
+      metric_id, "'. Using raw identifier as fallback."
+    ))
+  }
   return(metric_id)
 }
 
-# Format outlier text for display in callout boxes
+# Render a directional section (framing + bullet list of metric labels)
+render_outlier_section <- function(framing, labels) {
+  bullets <- paste(paste("-", labels), collapse = "\n")
+  paste(framing, bullets, sep = "\n\n")
+}
+
+# Format outlier text for display in callout boxes.
+# Aggregates across all groups within a table: directional sections first,
+# then specific interpretations, then generic summary (with metric names) last.
 format_outlier_text <- function(outlier_groups, sR) {
-  if (is.null(outlier_groups) || length(outlier_groups) == 0) {
-    return("")
-  }
+  if (is.null(outlier_groups) || length(outlier_groups) == 0) return("")
 
-  to_list_item <- function(text) {
-    lines <- strsplit(trimws(text), "\n", fixed = TRUE)[[1]]
-    lines <- lines[nzchar(trimws(lines))]
-    if (length(lines) == 0) {
-      return("")
-    }
-    if (length(lines) == 1) {
-      return(paste0("- ", lines[1]))
-    }
-    paste0("- ", lines[1], "\n  ", paste(lines[-c(1, length(lines))], collapse = "\n  "), "\n\n  ", lines[length(lines)])
-  }
+  table_name <- outlier_groups$table_name
+  early_exits <- character(0)
+  all_below_labels <- character(0)
+  all_above_labels <- character(0)
+  specific_interpretations <- character(0)
+  generic_labels <- character(0)
 
-  text_parts <- character(0)
-
-  # Process grouped outliers
-  if (length(outlier_groups$grouped_templates) > 0) {
-    for (group_name in names(outlier_groups$grouped_templates)) {
-      template_key <- outlier_groups$grouped_templates[[group_name]]
-      if (!is.null(sR$outlier[[template_key]])) {
-        text_parts <- c(text_parts, sR$outlier[[template_key]])
+  # Collect from grouped items
+  if (length(outlier_groups$grouped_text) > 0) {
+    for (group_name in names(outlier_groups$grouped_text)) {
+      item <- outlier_groups$grouped_text[[group_name]]
+      if (is.character(item)) {
+        early_exits <- c(early_exits, item)
+      } else if (is.list(item)) {
+        group_labels <- character(0)
+        for (section in item$sections) {
+          if (identical(section$framing, sR$outlier$framing_below_q1)) {
+            all_below_labels <- c(all_below_labels, section$labels)
+          } else {
+            all_above_labels <- c(all_above_labels, section$labels)
+          }
+          group_labels <- c(group_labels, section$labels)
+        }
+        if (length(item$interpretation) > 0 && any(nzchar(item$interpretation))) {
+          specific_interpretations <- c(
+            specific_interpretations,
+            paste(item$interpretation, collapse = " ")
+          )
+        } else {
+          generic_labels <- c(generic_labels, group_labels)
+        }
       }
     }
   }
 
-  # Process ungrouped outliers below Q1
-  if (length(outlier_groups$ungrouped$below_q1) > 0) {
-    localized_metrics <- sapply(outlier_groups$ungrouped$below_q1, localize_metric_name, sR = sR)
-    metrics_list <- paste(paste("-", localized_metrics), collapse = "\n")
-    if (!is.null(sR$outlier$below_q1_group)) {
-      # Split template at METRIC_LIST placeholder and rebuild with proper newlines
-      template_parts <- strsplit(sR$outlier$below_q1_group, "METRIC_LIST", fixed = TRUE)[[1]]
-      if (length(template_parts) == 2) {
-        text <- paste0(
-          trimws(template_parts[1]),
-          "\n\n",
-          metrics_list,
-          "\n\n",
-          trimws(template_parts[2])
-        )
+  # Collect from ungrouped items (always use generic fallback)
+  for (direction in c("below_q1", "above_q3")) {
+    metrics <- outlier_groups$ungrouped[[direction]]
+    if (length(metrics) > 0) {
+      labels <- sapply(metrics, localize_metric_name, sR = sR, table_name = table_name, USE.NAMES = FALSE)
+      if (direction == "below_q1") {
+        all_below_labels <- c(all_below_labels, labels)
       } else {
-        text <- sR$outlier$below_q1_group
+        all_above_labels <- c(all_above_labels, labels)
       }
-      text_parts <- c(text_parts, text)
+      generic_labels <- c(generic_labels, labels)
     }
   }
 
-  # Process ungrouped outliers above Q3
-  if (length(outlier_groups$ungrouped$above_q3) > 0) {
-    localized_metrics <- sapply(outlier_groups$ungrouped$above_q3, localize_metric_name, sR = sR)
-    metrics_list <- paste(paste("-", localized_metrics), collapse = "\n")
-    if (!is.null(sR$outlier$above_q3_group)) {
-      # Split template at METRIC_LIST placeholder and rebuild with proper newlines
-      template_parts <- strsplit(sR$outlier$above_q3_group, "METRIC_LIST", fixed = TRUE)[[1]]
-      if (length(template_parts) == 2) {
-        text <- paste0(
-          trimws(template_parts[1]),
-          "\n\n",
-          metrics_list,
-          "\n\n",
-          trimws(template_parts[2])
-        )
-      } else {
-        text <- sR$outlier$above_q3_group
-      }
-      text_parts <- c(text_parts, text)
+  # Render: early-exits, directional sections, specific interpretations, generic
+  parts <- early_exits
+
+  if (length(all_above_labels) > 0) {
+    parts <- c(parts, render_outlier_section(
+      sR$outlier$framing_above_q3, all_above_labels
+    ))
+  }
+  if (length(all_below_labels) > 0) {
+    parts <- c(parts, render_outlier_section(
+      sR$outlier$framing_below_q1, all_below_labels
+    ))
+  }
+
+  parts <- c(parts, unique(specific_interpretations))
+
+  # Generic summary last, naming the metrics without specific interpretation
+  if (length(generic_labels) > 0) {
+    metric_names <- knitr::combine_words(paste0('"', generic_labels, '"'))
+    template <- sR$outlier$generic_summary
+    if (!is.null(template)) {
+      parts <- c(parts, as.character(glue::glue(
+        template, metric_names = metric_names,
+        .open = "{", .close = "}"
+      )))
     }
   }
 
-  # Combine all text parts
-  if (length(text_parts) > 0) {
-    list_items <- vapply(text_parts, to_list_item, character(1), USE.NAMES = FALSE)
-    list_items <- list_items[nzchar(list_items)]
-    if (length(list_items) > 0) {
-      paste(list_items, collapse = "\n")
-    } else {
-      ""
-    }
-  } else {
-    ""
-  }
+  parts <- parts[nzchar(parts)]
+  if (length(parts) > 0) paste(parts, collapse = "\n\n") else ""
 }
 
 # Interpret distribution comparison for figures
@@ -667,6 +1249,30 @@ if (!is.null(params$partnerDataFile)) {
   }
 }
 
+```
+
+```{r Classify metrics}
+#| include: false
+
+# Tables needing non-default args for row identification
+metric_classify_args <- list(
+  usage_density_rate_table = list(identifier_col = "factor"),
+  infectious_agent_detection_rate_per_agent_table = list(identifier_col = "group"),
+  abr_infection_rate_table = list(combine_cols = c("abr", "group")),
+  resistance_test_rate_table = list(combine_cols = c("abr", "cond"))
+)
+
+# Classify all tables: table_name → named ordered factor (metric_id → state)
+metric_registry <- list()
+for (tbl_name in names(benchmark_data)) {
+  tbl_data <- benchmark_data[[tbl_name]]
+  if (!is.data.frame(tbl_data)) next
+  args <- metric_classify_args[[tbl_name]] %||% list()
+  metric_registry[[tbl_name]] <- do.call(
+    classify_metrics,
+    c(list(table_data = tbl_data), args)
+  )
+}
 ```
 
 ```{r Preparing localised data}

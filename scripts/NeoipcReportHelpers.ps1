@@ -597,8 +597,13 @@ function Test-QuartoInstallation {
 
     $errors = [System.Collections.Generic.List[string]]::new()
 
+    # Quarto emits terminal spinner frames (|), (/), (-), (\) that clutter
+    # captured output. Filter them out before logging or error-checking.
+    $spinnerPattern = '^\([|/\-\\]\) '
+
     try {
-        $outInstall = & quarto check install 2>&1
+        $outInstall = & quarto check install 2>&1 |
+            Where-Object { $_ -notmatch $spinnerPattern }
         if ($LASTEXITCODE -ne 0) {
             $errors.Add("'quarto check install' failed with exit code $LASTEXITCODE. Output: $([string]::Join("`n", $outInstall))")
         }
@@ -614,7 +619,8 @@ function Test-QuartoInstallation {
     }
 
     try {
-        $outKnitr = & quarto check knitr 2>&1
+        $outKnitr = & quarto check knitr 2>&1 |
+            Where-Object { $_ -notmatch $spinnerPattern }
         if ($LASTEXITCODE -ne 0) {
             $errors.Add("'quarto check knitr' failed with exit code $LASTEXITCODE. Output: $([string]::Join("`n", $outKnitr))")
         }

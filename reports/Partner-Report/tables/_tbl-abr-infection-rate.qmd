@@ -25,7 +25,7 @@ if (!is.null(benchmark_data$abr_infection_rate_table) &&
   check_outlier_interpretation <- has_reference
   
   tbl <- benchmark_data$abr_infection_rate_table |>
-    dplyr::select(-tidyselect::any_of("n_ref")) |>
+    dplyr::select(-tidyselect::any_of(c("n_ref", ".ontology_path"))) |>
     dplyr::mutate(
       group = dplyr::if_else(
         stringr::str_detect(group, "spp."),
@@ -247,9 +247,9 @@ if (is.null(benchmark_data$abr_infection_rate_table) ||
 ```{r}
 #| output: asis
 if (check_outlier_interpretation) {
-  outliers <- detect_outliers(benchmark_data$abr_infection_rate_table, combine_cols = c("abr", "group"))
-  if (length(outliers$below_q1) > 0 || length(outliers$above_q3) > 0) {
-    grouped <- group_outliers(outliers, "abr_infection_rate_table")
+  states <- metric_registry$abr_infection_rate_table
+  if (has_outliers(states)) {
+    grouped <- group_outliers(states, "abr_infection_rate_table", sR, metric_registry)
     outlier_text <- format_outlier_text(grouped, sR)
     if (nchar(outlier_text) > 0) {
       cat("\n\n::: {.callout-tip}\n")

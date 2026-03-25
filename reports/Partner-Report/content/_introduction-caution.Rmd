@@ -1,0 +1,1 @@
+Rates based on small numbers of events should be interpreted with caution, as they are inherently unstable and may not reflect systematic patterns. This applies to any rate in this report, whether in your department's data or the reference data.

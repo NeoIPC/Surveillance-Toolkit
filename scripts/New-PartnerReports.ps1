@@ -114,6 +114,10 @@ param(
     $HideOutlierInterpretation,
 
     [Parameter()]
+    [switch]
+    $DebugReport,
+
+    [Parameter()]
     [ValidateSet('pdf','html','docx','json')]
     [string[]]
     $Formats = @('pdf'),
@@ -237,6 +241,17 @@ if ($OutputDir) {
     $resolvedOutputDir = $resolvedOutputDir.Path
 }
 
+# Prepare build tracking before try block so variables are always initialized,
+# even if an early exception (e.g. auth failure) skips the rest of the try body
+$errors = @()
+$outputFiles = @()
+$buildCompleted = $false
+$startedAt = (Get-Date -AsUTC).ToString('o')
+$scriptTimestamp = [datetime]::UtcNow.ToString("yyyy-MM-dd_HHmmss'Z'")
+$buildLog = @()
+$totalSteps = 0
+$completedSteps = 0
+
 try {
     Set-Location -LiteralPath $partnerReportDir
 
@@ -310,15 +325,7 @@ if (inherits(x, 'neoipcr_bnch_ds')) {
 
     # $resolvedOutputDir already resolved before Set-Location
 
-    # Prepare build tracking (aligned with Reference Report build report structure)
-    $errors = @()
-    $outputFiles = @()
-    $buildCompleted = $false
-    $startedAt = (Get-Date -AsUTC).ToString('o')
-    $scriptTimestamp = [datetime]::UtcNow.ToString("yyyy-MM-dd_HHmmss'Z'")
-    $buildLog = @()
-    $totalSteps = 0
-    $completedSteps = 0
+    # Step counts depend on $sites which is resolved inside the try block
     if ($wantsJson -and -not $isDataFileMode) { $totalSteps += $sites.Count }
     if ($renderFormats.Count -gt 0) { $totalSteps += ($sites.Count * $Locale.Count * $renderFormats.Count) }
 
@@ -366,10 +373,10 @@ if (inherits(x, 'neoipcr_bnch_ds')) {
                 }
                 if ($ReportingPeriodFrom -ne $null) { $rArgs += @('--reportingPeriodFrom', $ReportingPeriodFrom.ToString('yyyy-MM-dd')) }
                 if ($ReportingPeriodTo -ne $null) { $rArgs += @('--reportingPeriodTo', $ReportingPeriodTo.ToString('yyyy-MM-dd')) }
-                if ($BirthWeightFrom -ne $null) { $rArgs += @('--birthWeightFrom', $BirthWeightFrom.Value) }
-                if ($BirthWeightTo -ne $null) { $rArgs += @('--birthWeightTo', $BirthWeightTo.Value) }
-                if ($GestationWeeksFrom -ne $null) { $rArgs += @('--gestationWeeksFrom', $GestationWeeksFrom.Value) }
-                if ($GestationWeeksTo -ne $null) { $rArgs += @('--gestationWeeksTo', $GestationWeeksTo.Value) }
+                if ($BirthWeightFrom -ne $null) { $rArgs += @('--birthWeightFrom', $BirthWeightFrom) }
+                if ($BirthWeightTo -ne $null) { $rArgs += @('--birthWeightTo', $BirthWeightTo) }
+                if ($GestationWeeksFrom -ne $null) { $rArgs += @('--gestationWeeksFrom', $GestationWeeksFrom) }
+                if ($GestationWeeksTo -ne $null) { $rArgs += @('--gestationWeeksTo', $GestationWeeksTo) }
                 if ($IncludeNonCorePatients.IsPresent) { $rArgs += '--includeNonCorePatients' }
                 if ($Dhis2Scheme) { $rArgs += @('--scheme', $Dhis2Scheme) }
                 if ($Dhis2Hostname) { $rArgs += @('--host', $Dhis2Hostname) }
@@ -440,10 +447,10 @@ if (inherits(x, 'neoipcr_bnch_ds')) {
                     # Online mode: pass data params
                     if ($ReportingPeriodFrom -ne $null) { $qmdParams['reportingPeriodFrom'] = $ReportingPeriodFrom.ToString('yyyy-MM-dd') }
                     if ($ReportingPeriodTo -ne $null) { $qmdParams['reportingPeriodTo'] = $ReportingPeriodTo.ToString('yyyy-MM-dd') }
-                    if ($BirthWeightFrom -ne $null) { $qmdParams['birthWeightFrom'] = $BirthWeightFrom.Value }
-                    if ($BirthWeightTo -ne $null) { $qmdParams['birthWeightTo'] = $BirthWeightTo.Value }
-                    if ($GestationWeeksFrom -ne $null) { $qmdParams['gestationWeeksFrom'] = $GestationWeeksFrom.Value }
-                    if ($GestationWeeksTo -ne $null) { $qmdParams['gestationWeeksTo'] = $GestationWeeksTo.Value }
+                    if ($BirthWeightFrom -ne $null) { $qmdParams['birthWeightFrom'] = $BirthWeightFrom }
+                    if ($BirthWeightTo -ne $null) { $qmdParams['birthWeightTo'] = $BirthWeightTo }
+                    if ($GestationWeeksFrom -ne $null) { $qmdParams['gestationWeeksFrom'] = $GestationWeeksFrom }
+                    if ($GestationWeeksTo -ne $null) { $qmdParams['gestationWeeksTo'] = $GestationWeeksTo }
                     if ($IncludeNonCorePatients.IsPresent) { $qmdParams['includeNonCorePatients'] = 'true' }
                     if ($Dhis2Scheme) { $qmdParams['dhis2Scheme'] = $Dhis2Scheme }
                     if ($Dhis2Hostname) { $qmdParams['dhis2Hostname'] = $Dhis2Hostname }
@@ -454,6 +461,7 @@ if (inherits(x, 'neoipcr_bnch_ds')) {
                 if ($resolvedReferenceDataFile) { $qmdParams['referenceDataFile'] = $resolvedReferenceDataFile }
                 if ($HideIntroductionTexts.IsPresent) { $qmdParams['includeIntroductionTexts'] = 'false' }
                 if ($HideOutlierInterpretation.IsPresent) { $qmdParams['includeOutlierInterpretation'] = 'false' }
+                if ($DebugReport) { $qmdParams['debug'] = 'true' }
 
                 # Convert user-friendly element names to Quarto boolean parameters
                 foreach ($mapping in $elementMapping.GetEnumerator()) {
