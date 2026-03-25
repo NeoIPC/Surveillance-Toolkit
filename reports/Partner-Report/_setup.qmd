@@ -26,9 +26,9 @@ source("../common/helpers.R")
 coarse_state <- function(state) {
   dplyr::case_match(
     state,
-    c("zero", "below_q1") ~ "low",
+    c("zero", "below_q1", "extreme_below_pooled") ~ "low",
     c("q1_to_q2", "q2_to_q3") ~ "mid",
-    "above_q3" ~ "high",
+    c("above_q3", "extreme_above_pooled") ~ "high",
     .default = NA_character_
   )
 }
@@ -611,7 +611,9 @@ outlier_groupings <- list(
 )
 
 # ── Metric state levels (ordered) ──────────────────────────────────
-metric_state_levels <- c("na", "no_benchmark", "zero", "below_q1",
+metric_state_levels <- c("na", "no_benchmark",
+                          "extreme_below_pooled", "extreme_above_pooled",
+                          "zero", "below_q1",
                           "q1_to_q2", "q2_to_q3", "above_q3")
 
 # Classify each metric in a table into a state relative to reference quartiles.
@@ -649,6 +651,14 @@ classify_metrics <- function(table_data, identifier_col = NULL, combine_cols = N
   q3 <- table_data$q3_ref
   q2 <- if ("q2_ref" %in% col_names) table_data$q2_ref else q1 + (q3 - q1) / 2
 
+  # Pooled-rate CI columns for extreme-deviation classification when quartiles
+  # are suppressed. These columns are present when benchmark_data was generated
+  # with CI-enabled neoipcr (Phase 2).
+  pooled_ref <- if ("pooled_ref" %in% col_names) table_data$pooled_ref else NULL
+  ci_lower_ref <- if ("ci_lower_ref" %in% col_names) table_data$ci_lower_ref else NULL
+  ci_upper_ref <- if ("ci_upper_ref" %in% col_names) table_data$ci_upper_ref else NULL
+  has_pooled_ci <- !is.null(pooled_ref) && !is.null(ci_lower_ref) && !is.null(ci_upper_ref)
+
   # Classify states (check order matters)
   states <- character(length(identifiers))
   for (i in seq_along(identifiers)) {
@@ -656,7 +666,25 @@ classify_metrics <- function(table_data, identifier_col = NULL, combine_cols = N
     if (is.na(own)) {
       states[i] <- "na"
     } else if (is.na(q1[i]) || is.na(q3[i])) {
-      states[i] <- "no_benchmark"
+      # Quartiles suppressed — check if pooled-rate CI indicates extreme
+      # deviation. Triple gate: outside CI, magnitude > 10×, CI not too wide.
+      if (has_pooled_ci && !is.na(pooled_ref[i]) &&
+          !is.na(ci_lower_ref[i]) && !is.na(ci_upper_ref[i]) &&
+          pooled_ref[i] > 0) {
+        outside_ci <- own < ci_lower_ref[i] || own > ci_upper_ref[i]
+        magnitude <- own / pooled_ref[i]
+        extreme_magnitude <- magnitude > 10 || magnitude < 0.1
+        ci_width_ratio <- (ci_upper_ref[i] - ci_lower_ref[i]) / pooled_ref[i]
+        narrow_enough <- ci_width_ratio < 2.0
+        if (outside_ci && extreme_magnitude && narrow_enough) {
+          states[i] <- if (own > pooled_ref[i]) "extreme_above_pooled"
+                       else "extreme_below_pooled"
+        } else {
+          states[i] <- "no_benchmark"
+        }
+      } else {
+        states[i] <- "no_benchmark"
+      }
     } else if (own == 0) {
       states[i] <- "zero"
     } else if (own < q1[i]) {
