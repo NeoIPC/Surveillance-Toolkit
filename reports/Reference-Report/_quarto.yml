@@ -21,6 +21,7 @@ includeInfectiousAgentDetectionRateTable: true
 includeAntibioticResistanceTestRateTable: false
 includeRiskDensityRateTable: true
 includeSurgicalProcedureRateTable: true
+includeConfidenceIntervals: true
 echo: false
 execute:
   error: true

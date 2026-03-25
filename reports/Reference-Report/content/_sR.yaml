@@ -15,5 +15,27 @@ headerList:
   mixedWbClassAddendum: "Additionally, this dataset includes data from countries whose economies belong to different income groups, as defined by the World Bank (%s). This means that the healthcare systems and infrastructure of the included countries may vary considerably, which could further affect the interpretation and comparability of some indicators."
   multiCountryDatasetHint: This report aggregates data from neonatal departments in several countries. While ideally a single-country report would be preferable, aggregating data across multiple countries is pragmatically necessary when sufficient participation from a single country is not available. This means that, while it reflects a broad spectrum of care structures, it is only suitable as a benchmark to a somewhat limited extent due to the sometimes very different healthcare systems and the resources available there. The aim of NeoIPC Surveillance is therefore always to provide departments with a relevant national or regional report, provided that a sufficient number of departments in the respective region participate in the system.
   singleCountryDatasetHint: This report presents data from neonatal departments in a single country. Because of the relative homogeneity of the healthcare system, it is in principle a good benchmark. However, it should be noted that only a proportion of neonatal departments in a country actually participate in NeoIPC Surveillance. Since participation is voluntary, these are typically hospitals that have a particular interest in infection prevention and are willing and able to provide the resources required for surveillance. The information presented here can therefore not fully describe the situation in the individual countries.
+aware_combination_therapy_footnote: >-
+  Days with any antibiotic represents the number of patient-days during which
+  at least one antibiotic was administered, expressed per 100 patient-days.
+  AWaRe category and substance-specific indicators count each antibiotic
+  administered per day and may exceed the total number of patient-days when
+  combination therapy is used.
+benchmarking_guidance: >-
+  For benchmarking at unit level, the departmental median (Q₂) is generally
+  more representative than the pooled rate, as it is less influenced by
+  differences in unit size. The pooled rate reflects overall patient-level
+  burden across the network.
+methodology_note: >-
+  Confidence intervals for incidence density rates and other
+  count-over-exposure-time metrics are calculated using exact Poisson methods.
+  Proportion-based indicators (infectious agent detection rate, proportion of
+  patients receiving specific antibiotics) use Wilson binomial confidence
+  intervals, which provide better coverage properties than exact
+  (Clopper–Pearson) intervals, particularly for small samples. Confidence
+  intervals for the benchmark quartiles (Q₁, Q₂, Q₃) are calculated using a
+  two-level parametric bootstrap that propagates both within-department
+  sampling uncertainty and cross-department quantile estimation uncertainty.
+  All confidence intervals are reported at the 95% level.
 tbl-risk-density-rates:
   n_footnote: "%s: The aggregated number of days the risk/protective factor was present in all infants."

@@ -49,6 +49,8 @@ param(
     [Parameter()]
     [switch]$HideIntroductionTexts,
     [Parameter()]
+    [switch]$HideConfidenceIntervals,
+    [Parameter()]
     [switch]$JsonReport,
     [Parameter()]
     [switch]$Quiet,
@@ -252,6 +254,7 @@ if ($ValidationExceptionFile) { $commonParams.validationExceptionFile = $Validat
 $commonParams.testUnitFilter = (-not $IncludeTestUnits)
 $commonParams.defaultPatientFilter = (-not $IncludeNonCorePatients)
 if ($HideIntroductionTexts.IsPresent) { $commonParams['includeIntroductionTexts'] = 'false' }
+if ($HideConfidenceIntervals.IsPresent) { $commonParams['includeConfidenceIntervals'] = 'false' }
 
 # Map user-friendly element names to internal Quarto metadata keys.
 # Each element can map to multiple keys (e.g. a section includes its text,

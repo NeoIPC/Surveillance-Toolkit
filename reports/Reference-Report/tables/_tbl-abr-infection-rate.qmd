@@ -3,8 +3,10 @@
 #| tbl-cap: !expr 'sR$`tbl-abr-infection-rate`$`tbl-cap`'
 #| tbl-cap-location: top
 
-reference_data |>
-  neoipcr::get_abr_infection_rate_table() |>
+tbl_data <- reference_data |>
+  neoipcr::get_abr_infection_rate_table()
+
+tbl <- tbl_data |>
   dplyr::select(-tidyselect::any_of(".ontology_path")) |>
   dplyr::mutate(
     group = dplyr::if_else(
@@ -27,7 +29,23 @@ reference_data |>
       "mrsa" ~ sR$mrsa,
       "vre" ~ sR$vre),
     level = .data$level + 2) |>
-  dplyr::group_by(.data$abr) |>
+  dplyr::group_by(.data$abr)
+
+if (include_ci) {
+  tbl <- tbl |>
+    dplyr::rename(
+      !!sR$table_headers$ci := "ci_lower",
+      ci_upper_hide = "ci_upper")
+} else {
+  tbl <- tbl |>
+    dplyr::select(!tidyselect::any_of(c(
+      "ci_lower", "ci_upper",
+      "q1_ci_lower", "q1_ci_upper",
+      "q2_ci_lower", "q2_ci_upper",
+      "q3_ci_lower", "q3_ci_upper")))
+}
+
+gt_tbl <- tbl |>
   gt(rowname_col = "group") |>
   sub_missing() |>
   gt::tab_options(
@@ -52,15 +70,47 @@ reference_data |>
     min_sep_threshold = 2) |>
   gt::fmt_markdown(
     columns = "group",
-  ) |>
-  cols_width(
-    stub() ~ pct(40),
-    sR$table_headers$n ~ pct(15),
-    sR$table_headers$pooled ~ pct(15),
-    sR$table_headers$q1 ~ pct(10),
-    sR$table_headers$q2 ~ pct(10),
-    sR$table_headers$q3 ~ pct(10)
-  ) |>
+  )
+
+if (include_ci) {
+  gt_tbl <- gt_tbl |>
+    cols_merge(
+      columns = c(sR$table_headers$ci, "ci_upper_hide"),
+      pattern = "{1}\u2013{2}") |>
+    cols_width(
+      stub() ~ pct(30),
+      sR$table_headers$n ~ pct(10),
+      sR$table_headers$pooled ~ pct(10),
+      sR$table_headers$ci ~ pct(15),
+      sR$table_headers$q1 ~ pct(11),
+      sR$table_headers$q2 ~ pct(12),
+      sR$table_headers$q3 ~ pct(12))
+
+  # Merge bootstrap CIs into quartile columns (parenthetical)
+  if (all(c("q1_ci_lower", "q1_ci_upper") %in% names(tbl))) {
+    gt_tbl <- gt_tbl |>
+      cols_merge(
+        columns = c(sR$table_headers$q1, "q1_ci_lower", "q1_ci_upper"),
+        pattern = "{1} ({2}\u2013{3})") |>
+      cols_merge(
+        columns = c(sR$table_headers$q2, "q2_ci_lower", "q2_ci_upper"),
+        pattern = "{1} ({2}\u2013{3})") |>
+      cols_merge(
+        columns = c(sR$table_headers$q3, "q3_ci_lower", "q3_ci_upper"),
+        pattern = "{1} ({2}\u2013{3})")
+  }
+} else {
+  gt_tbl <- gt_tbl |>
+    cols_width(
+      stub() ~ pct(40),
+      sR$table_headers$n ~ pct(15),
+      sR$table_headers$pooled ~ pct(15),
+      sR$table_headers$q1 ~ pct(10),
+      sR$table_headers$q2 ~ pct(10),
+      sR$table_headers$q3 ~ pct(10))
+}
+
+gt_tbl <- gt_tbl |>
   gt::tab_stub_indent(
     rows = gt::everything(),
     indent = gt::from_column(column = "level")
@@ -107,6 +157,7 @@ reference_data |>
     columns = tidyselect::any_of(
      c(
      sR$table_headers$pooled,
+     sR$table_headers$ci,
      sR$table_headers$q1,
      sR$table_headers$q2,
      sR$table_headers$q3)),
@@ -160,4 +211,17 @@ reference_data |>
       sR$table_headers$q2,
       sR$table_headers$q3)))
 
+# Sparse-data footnote for N < 10
+sparse_rows <- which(tbl_data$n < 10 & !is.na(tbl_data$n) & tbl_data$n > 0)
+if (length(sparse_rows) > 0) {
+  fn_text <- if (include_ci) sR$sparse_data_footnote else sR$sparse_data_footnote_no_ci
+  gt_tbl <- gt_tbl |>
+    tab_footnote(
+      footnote = fn_text,
+      locations = cells_body(
+        columns = sR$table_headers$pooled,
+        rows = sparse_rows))
+}
+
+gt_tbl
 ```
