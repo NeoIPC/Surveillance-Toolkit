@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NeoIPC Surveillance Reports 0.9\n"
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-03-25 18:01+0100\n"
+"POT-Creation-Date: 2026-03-28 20:52+0100\n"
 "PO-Revision-Date: 2026-01-26 20:35+0100\n"
 "Last-Translator: Brar Piening <brar.piening@charite.de>\n"
 "Language-Team: none\n"
@@ -287,6 +287,108 @@ msgstr ""
 msgid "Risk and Protective Factors"
 msgstr ""
 
+#. type: Hash Value: methods agent_per_infection
+#: reports/common.yaml:1
+#, no-wrap
+msgid "The agent-per-infection rate measures how frequently specific pathogens are detected relative to the number of infections in which any infectious agent was identified. Values above 100% are expected and indicate polymicrobial infections. Diagnostic challenges specific to neonates — including low blood volume reducing culture sensitivity and elevated contamination risk — may influence detection patterns."
+msgstr ""
+
+#. type: Hash Value: methods ci_quartile_auto_note
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Bootstrap confidence intervals for reference quartiles are displayed only for metrics where quartile values are not suppressed."
+msgstr ""
+
+#. type: Hash Value: methods ci_quartile_bootstrap
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Confidence intervals for reference quartiles are computed using a parametric bootstrap that propagates both within-department sampling uncertainty and cross-department distributional uncertainty. Department-level rates are resampled 2,000 times using non-informative prior distributions, and quartiles are recalculated for each iteration. The reported bounds represent the 2.5th and 97.5th percentiles of the bootstrap distribution."
+msgstr ""
+
+#. type: Hash Value: methods ci_rates
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Confidence intervals for rates use exact Poisson methods when the denominator is an exposure measure (such as patient-days or device-days) and Wilson score intervals when the denominator is a count of discrete entities (such as the number of infections or pathogens tested). Both methods provide reliable coverage for small counts including zero."
+msgstr ""
+
+#. type: Hash Value: methods device_associated
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Device-associated infections are defined by a time-based association according to the NeoIPC Core Protocol: a vascular catheter must have been in place for at least three consecutive days, and ventilatory support for at least four calendar days, before an infection on that day or the day before qualifies as device-associated. This represents a temporal rather than a proven causal relationship. The denominator is device-days — only days on which the device was present."
+msgstr ""
+
+#. type: Hash Value: methods heading
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Methodology"
+msgstr ""
+
+#. type: Hash Value: methods incidence_density
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Incidence density rates are calculated per 1,000 patient-days, allowing comparison between departments with different patient volumes and lengths of stay. The primary sepsis/BSI category includes both clinical sepsis and laboratory-confirmed bloodstream infections."
+msgstr ""
+
+#. type: Hash Value: methods infectious_agent_detection
+#: reports/common.yaml:1
+#, no-wrap
+msgid "The infectious agent detection rate measures the proportion of infections in which at least one infectious agent was identified. Higher detection rates for sepsis/BSI may reflect thorough microbiological workup practices. Lower detection rates for NEC are expected because the NEC surveillance definition is based on radiological and clinical criteria, and pathogens are only recorded when a secondary bloodstream infection occurs."
+msgstr ""
+
+#. type: Hash Value: methods patient_population
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Birth weight and gestational age are the primary case-mix descriptors in neonatal surveillance. Lower birth weight and earlier gestational age are associated with increased vulnerability to healthcare-associated infections. The figures show both the frequency distribution (histogram with density curve) and summary statistics (boxplot with quartiles and pooled arithmetic mean)."
+msgstr ""
+
+#. type: Hash Value: methods pooled_rate
+#: reports/common.yaml:1
+#, no-wrap
+msgid "The pooled rate is the arithmetic mean across all individual records in the reference population. Because it is calculated at the patient level rather than as an average of department-level rates, the pooled rate can fall outside the interquartile range, which is derived from department-level rates."
+msgstr ""
+
+#. type: Hash Value: methods quartiles
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Reference data quartiles represent the 25th percentile (Q₁), median (Q₂) and 75th percentile (Q₃) of department-level rates. Quartiles are displayed only when at least five departments contribute to the denominator and the metric is frequent enough that a typical department would be expected to observe at least one event based on the pooled rate. When these conditions are not met, quartiles are suppressed to avoid presenting unreliable distributional estimates."
+msgstr ""
+
+#. type: Hash Value: methods resistance_test
+#: reports/common.yaml:1
+#, no-wrap
+msgid "The antimicrobial susceptibility testing (AST) rate measures the proportion of eligible pathogens for which a resistance test result was recorded. Low AST rates may indicate gaps in microbiological diagnostic capacity and can limit the ability to detect resistant organisms."
+msgstr ""
+
+#. type: Hash Value: methods resistant_pathogens
+#: reports/common.yaml:1
+#, no-wrap
+msgid "This section reports the rate at which detected pathogens carry specific resistance markers. An empty table indicates that no resistant organisms were detected among tested pathogens — it does not indicate that testing was not performed. Resistance testing completeness is reported separately in the antimicrobial susceptibility testing section."
+msgstr ""
+
+#. type: Hash Value: methods risk_density
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Exposure density rates measure the number of days a risk or protective factor was present per 100 patient-days. Device and ventilation days require the device or support to be in place for at least 12 hours on that calendar day. A human milk day requires that the patient's enteral feeding exclusively consists of human milk (including donor milk and fortified breast milk). Probiotic days require an oral probiotic containing Lactobacillus spp. or Bifidobacterium spp. A kangaroo care day is recorded when the patient received intensive skin-to-skin contact for at least 2 hours on a given calendar day. Antibiotic days are counted from the first dose to the last dose of a therapy inclusive, including days where doses were skipped, but not days after the last dose. Antibiotic exposure is recorded per individual substance. For reporting, substance-days are aggregated into WHO AWaRe categories (Access, Watch, Reserve); combination therapy means a single patient-day may contribute substance-days to multiple categories."
+msgstr ""
+
+#. type: Hash Value: methods secondary_bsi
+#: reports/common.yaml:1
+#, no-wrap
+msgid "A secondary bloodstream infection is a BSI attributed to a site-specific infection (pneumonia, NEC, or SSI) when the same organism is identified within a 17-day window around the primary infection (3 days before through 13 days after). Catheter-associated infections are excluded. Secondary BSI rates tend to have small event counts, which frequently leads to quartile suppression."
+msgstr ""
+
+#. type: Hash Value: methods sparse_data
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Rates based on small numbers of events are inherently unstable and may not reflect systematic patterns. Where this applies, individual table rows are flagged accordingly."
+msgstr ""
+
+#. type: Hash Value: methods surgical_procedures
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Surgical procedure rates are calculated per 100 patients, not per 1,000 patient-days. One patient may contribute multiple procedures."
+msgstr ""
+
 #. type: Hash Value: mrsa
 #: reports/common.yaml:1
 #, no-wrap
@@ -323,17 +425,23 @@ msgstr ""
 msgid "%"
 msgstr ""
 
-#. type: Hash Value: pooled_rate_note
-#: reports/common.yaml:1
-#, no-wrap
-msgid "The pooled rate is the arithmetic mean across all individual records in the reference population and can therefore fall outside the interquartile range, which is derived from department-level rates."
-msgstr ""
-
 #. type: Hash Value: si
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Severe infection"
 msgstr "Ενότητα"
+
+#. type: Hash Value: sparse_data_footnote
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Fewer than 10 events; interpret rate and confidence interval with caution."
+msgstr ""
+
+#. type: Hash Value: sparse_data_footnote_no_ci
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Fewer than 10 events; interpret rate with caution."
+msgstr ""
 
 #. type: Hash Value: surgical_procedures
 #: reports/common.yaml:1
@@ -398,7 +506,7 @@ msgstr ""
 #. type: Hash Value: tbl-abr-infection-rate quartile_footnote
 #: reports/common.yaml:1
 #, no-wrap
-msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the resistant pathogen infection rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected infections with an agents is greater than or equal to one according to the pooled resistant pathogen infection rate."
+msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the resistant pathogen infection rates of the partner departments. Q₂ represents the median. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected infections with an agents is greater than or equal to one according to the pooled resistant pathogen infection rate."
 msgstr ""
 
 #. type: Hash Value: tbl-abr-infection-rate rate_denominator
@@ -446,7 +554,7 @@ msgstr ""
 #. type: Hash Value: tbl-agent-per-infection-rate quartile_footnote
 #: reports/common.yaml:1
 #, no-wrap
-msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Agent-per-Infection Rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected agents detected in infections is greater than or equal to one according to the pooled Agent-per-Infection Rate."
+msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Agent-per-Infection Rates of the partner departments. Q₂ represents the median. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected agents detected in infections is greater than or equal to one according to the pooled Agent-per-Infection Rate."
 msgstr ""
 
 #. type: Hash Value: tbl-agent-per-infection-rate rate_denominator
@@ -473,6 +581,12 @@ msgstr ""
 msgid "Infectious agents detected in nosocomial infections"
 msgstr ""
 
+#. type: Hash Value: tbl-device-associated-incidence-density-rates cvc
+#: reports/common.yaml:1
+#, no-wrap
+msgid "CVC-associated sepsis/BSI"
+msgstr ""
+
 #. type: Hash Value: tbl-device-associated-incidence-density-rates dev_ass_incidence_density_rate
 #: reports/common.yaml:1
 #, no-wrap
@@ -489,6 +603,12 @@ msgstr ""
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Ventilatory support associated pneumonia"
+msgstr ""
+
+#. type: Hash Value: tbl-device-associated-incidence-density-rates inv
+#: reports/common.yaml:1
+#, no-wrap
+msgid "INV-associated pneumonia"
 msgstr ""
 
 #. type: Hash Value: tbl-device-associated-incidence-density-rates n_dev_ass_inf
@@ -509,6 +629,12 @@ msgstr ""
 msgid "%s: The aggregated number of device-associated infections in all infants."
 msgstr ""
 
+#. type: Hash Value: tbl-device-associated-incidence-density-rates niv
+#: reports/common.yaml:1
+#, no-wrap
+msgid "NIV-associated pneumonia"
+msgstr ""
+
 #. type: Hash Value: tbl-device-associated-incidence-density-rates no_data
 #: reports/common.yaml:1
 #, no-wrap
@@ -521,10 +647,16 @@ msgstr ""
 msgid "%s: The Device-Associated Incidence Density Rate calculated across all infants from all departments."
 msgstr ""
 
+#. type: Hash Value: tbl-device-associated-incidence-density-rates pvc
+#: reports/common.yaml:1
+#, no-wrap
+msgid "PVC-associated sepsis/BSI"
+msgstr ""
+
 #. type: Hash Value: tbl-device-associated-incidence-density-rates quartile_footnote
 #: reports/common.yaml:1
 #, no-wrap
-msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Device-Associated Incidence Density Rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected infections is greater than or equal to one according to the pooled Device-Associated Incidence Density Rate."
+msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Device-Associated Incidence Density Rates of the partner departments. Q₂ represents the median. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected infections is greater than or equal to one according to the pooled Device-Associated Incidence Density Rate."
 msgstr ""
 
 #. type: Hash Value: tbl-device-associated-incidence-density-rates tbl-cap
@@ -578,7 +710,7 @@ msgstr ""
 #. type: Hash Value: tbl-incidence-density-rates quartile_footnote
 #: reports/common.yaml:1
 #, no-wrap
-msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Incidence Density Rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected infections is greater than or equal to one according to the pooled Incidence Density Rate."
+msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Incidence Density Rates of the partner departments. Q₂ represents the median. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected infections is greater than or equal to one according to the pooled Incidence Density Rate."
 msgstr ""
 
 #. type: Hash Value: tbl-incidence-density-rates si_footnote
@@ -614,7 +746,7 @@ msgstr ""
 #. type: Hash Value: tbl-infectious-agent-detection-rate quartile_footnote
 #: reports/common.yaml:1
 #, no-wrap
-msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Infectious Agent Detection Rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected infections with an agents is greater than or equal to one according to the pooled Infectious Agent Detection Rate."
+msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Infectious Agent Detection Rates of the partner departments. Q₂ represents the median. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected infections with an agents is greater than or equal to one according to the pooled Infectious Agent Detection Rate."
 msgstr ""
 
 #. type: Hash Value: tbl-infectious-agent-detection-rate rate_denominator
@@ -674,7 +806,7 @@ msgstr ""
 #. type: Hash Value: tbl-resistance-test-rate quartile_footnote
 #: reports/common.yaml:1
 #, no-wrap
-msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the antibiotic resistance test rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected infections with an agents is greater than or equal to one according to the pooled antibiotic resistance test rate."
+msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the antibiotic resistance test rates of the partner departments. Q₂ represents the median. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected infections with an agents is greater than or equal to one according to the pooled antibiotic resistance test rate."
 msgstr ""
 
 #. type: Hash Value: tbl-resistance-test-rate rate_denominator
@@ -731,6 +863,12 @@ msgstr ""
 msgid "Days with risk/protective factor"
 msgstr ""
 
+#. type: Hash Value: tbl-risk-density-rates exposure_density_rate
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Exposure Density Rate"
+msgstr ""
+
 #. type: Hash Value: tbl-risk-density-rates kmc_day_footnote
 #: reports/common.yaml:1
 #, no-wrap
@@ -752,7 +890,7 @@ msgstr ""
 #. type: Hash Value: tbl-risk-density-rates quartile_footnote
 #: reports/common.yaml:1
 #, no-wrap
-msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Exposure Density Rates of the departments in the reference data. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of device days is greater than or equal to one according to the pooled Exposure Density Rate."
+msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Exposure Density Rates of the departments in the reference data. Q₂ represents the median. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of device days is greater than or equal to one according to the pooled Exposure Density Rate."
 msgstr ""
 
 #. type: Hash Value: tbl-risk-density-rates reserve
@@ -806,7 +944,7 @@ msgstr ""
 #. type: Hash Value: tbl-secondary-bsi-rates quartile_footnote
 #: reports/common.yaml:1
 #, no-wrap
-msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the secondary BSI rates of the partner departments. These quartiles are only displayed when the number of departments contributing is greater than or equal to five."
+msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the secondary BSI rates of the partner departments. Q₂ represents the median. These quartiles are only displayed when the number of departments contributing is greater than or equal to five."
 msgstr ""
 
 #. type: Hash Value: tbl-secondary-bsi-rates rate_denominator
@@ -908,7 +1046,7 @@ msgstr ""
 #. type: Hash Value: tbl-surgical-procedure-rates quartile_footnote
 #: reports/common.yaml:1
 #, no-wrap
-msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Surgical Procedure Rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of procedures is greater than or equal to one according to the pooled Surgical Procedure Rate."
+msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Surgical Procedure Rates of the partner departments. Q₂ represents the median. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of procedures is greater than or equal to one according to the pooled Surgical Procedure Rate."
 msgstr ""
 
 #. type: Hash Value: tbl-surgical-procedure-rates rate_denominator
@@ -1189,16 +1327,873 @@ msgstr ""
 msgid "Surgical Procedures by Category"
 msgstr ""
 
+#. type: Hash Value: outlier agent_detection_per_inf_type_all_zero
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "No pathogens were detected across any infection type during the surveillance period."
+msgstr ""
+
+#. type: Hash Value: outlier agent_detection_per_inf_type_interpretation_all_above
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Pathogen detection rates are above the reference range across infection types. Higher detection rates may reflect thorough microbiological workup practices."
+msgstr ""
+
+#. type: Hash Value: outlier agent_detection_per_inf_type_interpretation_all_below
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Pathogen detection rates are below the reference range across infection types. Lower detection rates may reflect differences in microbiological sampling practices or laboratory capacity."
+msgstr ""
+
+#. type: Hash Value: outlier agent_detection_per_inf_type_interpretation_some_above
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Higher pathogen detection rates may reflect thorough microbiological workup practices for these infection types."
+msgstr ""
+
+#. type: Hash Value: outlier agent_detection_per_inf_type_interpretation_some_below
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Lower pathogen detection rates may reflect differences in microbiological sampling practices or laboratory capacity for these infection types."
+msgstr ""
+
+#. type: Hash Value: outlier antibiotic_rate_ab_zero
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "No antibiotic exposure was recorded during the surveillance period despite available patient day data. This is unusual in a neonatal setting and may indicate incomplete data capture, a very small population resulting from narrow filter criteria, or generation of the report very early after starting surveillance."
+msgstr ""
+
+#. type: Hash Value: outlier antibiotic_rate_interpretation_all_above
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "All AWaRe components are above the reference range, suggesting broad prescribing intensity rather than a single-category signal. This may be considered together with resistance and pathogen detection results."
+msgstr ""
+
+#. type: Hash Value: outlier antibiotic_rate_interpretation_all_below
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "All AWaRe components are below the reference range. This may reflect lower treatment burden or narrower indications."
+msgstr ""
+
+#. type: Hash Value: outlier antibiotic_rate_interpretation_gradient_ascending
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The AWaRe profile shows increasing exposure from Access towards Watch and Reserve groups, suggesting broader-spectrum prescribing. De-escalation practices and indication quality may warrant attention."
+msgstr ""
+
+#. type: Hash Value: outlier antibiotic_rate_interpretation_gradient_descending
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The AWaRe profile follows a de-escalation gradient from Access towards lower Watch and Reserve exposure, consistent with more conservative spectrum use."
+msgstr ""
+
+#. type: Hash Value: outlier antibiotic_rate_interpretation_reserve_isolated_high
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "AWaRe Reserve-group exposure is elevated while other components are not, suggesting selective use of last-resort agents. This pattern is typically associated with documented resistant pathogens rather than empirical prescribing."
+msgstr ""
+
+#. type: Hash Value: outlier antibiotic_rate_interpretation_review_resistance
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "This may be considered together with resistance and pathogen detection results, as Watch- and Reserve-group use may be expected to increase where resistant or multidrug-resistant pathogens are common."
+msgstr ""
+
+#. type: Hash Value: outlier antibiotic_rate_interpretation_watch_high
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Elevated Watch-group exposure may reflect broader-spectrum empirical prescribing. De-escalation practices and indication quality may be relevant considerations."
+msgstr ""
+
+#. type: Hash Value: outlier antibiotic_rate_interpretation_watch_low
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Low Watch-group exposure may reflect conservative prescribing that favours Access-group agents. This may be consistent with appropriate antibiotic stewardship practices."
+msgstr ""
+
 #. type: Hash Value: outlier caution_limited_data
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "The reference data is based on fewer than 5 contributing departments. Comparisons should be interpreted with caution due to limited sample size."
 msgstr ""
 
+#. type: Hash Value: outlier composed clause_concordant_high
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid ", consistent with elevated {paired_label} ({paired_ref})"
+msgstr ""
+
+#. type: Hash Value: outlier composed clause_concordant_high_pooled
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid ", consistent with elevated {paired_label} ({paired_ref}), noting that reference quartiles for this metric are not yet available"
+msgstr ""
+
+#. type: Hash Value: outlier composed clause_concordant_low
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid ", consistent with low {paired_label} ({paired_ref})"
+msgstr ""
+
+#. type: Hash Value: outlier composed clause_concordant_low_pooled
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid ", consistent with low {paired_label} ({paired_ref}), noting that reference quartiles for this metric are not yet available"
+msgstr ""
+
+#. type: Hash Value: outlier composed clause_discordant_high
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid " despite elevated {paired_label} ({paired_ref})"
+msgstr ""
+
+#. type: Hash Value: outlier composed clause_discordant_high_pooled
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "despite elevated {paired_label} ({paired_ref}), noting that reference quartiles for this metric are not yet available"
+msgstr ""
+
+#. type: Hash Value: outlier composed clause_discordant_low
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid " despite low {paired_label} ({paired_ref})"
+msgstr ""
+
+#. type: Hash Value: outlier composed clause_discordant_low_pooled
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "despite low {paired_label} ({paired_ref}), noting that reference quartiles for this metric are not yet available"
+msgstr ""
+
+#. type: Hash Value: outlier composed clause_fallback
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid ". Reference quartiles for {primary_paired_label} ({primary_paired_ref}) are not yet available. {fallback_paired_label_sc} is {fallback_position} the reference range ({fallback_paired_ref})"
+msgstr ""
+
+#. type: Hash Value: outlier composed clause_no_quartiles
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid ". Reference quartiles for {paired_label} ({paired_ref}) are not yet available"
+msgstr ""
+
+#. type: Hash Value: outlier composed clause_within_iqr
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid ". {paired_label_sc} is within the reference range ({paired_ref})"
+msgstr ""
+
+#. type: Hash Value: outlier composed opening_above
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The {metric_label} is above the reference range"
+msgstr ""
+
+#. type: Hash Value: outlier composed opening_above_pooled
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The {metric_label} is above the pooled reference rate"
+msgstr ""
+
+#. type: Hash Value: outlier composed opening_below
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The {metric_label} is below the reference range"
+msgstr ""
+
+#. type: Hash Value: outlier composed opening_below_pooled
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The {metric_label} is below the pooled reference rate"
+msgstr ""
+
+#. type: Hash Value: outlier dev_ass_vascular_catheter_interpretation_both_above
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Both CVC-associated sepsis/BSI and PVC-associated sepsis/BSI rates are above the reference range. This may suggest broader vascular access-associated infection prevention challenges."
+msgstr ""
+
+#. type: Hash Value: outlier dev_ass_vascular_catheter_interpretation_cvc_high
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The CVC-associated sepsis/BSI rate is above the reference range, which may reflect central-line insertion and maintenance practices or case mix differences."
+msgstr ""
+
+#. type: Hash Value: outlier dev_ass_vascular_catheter_interpretation_cvc_high_pvc_low
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The CVC-associated sepsis/BSI rate is above the reference range while the PVC-associated sepsis/BSI rate is below it. Central-line insertion and maintenance practices may be a relevant area for assessment."
+msgstr ""
+
+#. type: Hash Value: outlier dev_ass_vascular_catheter_interpretation_cvc_low
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The CVC-associated sepsis/BSI rate is below the reference range, which may reflect effective central-line care practices."
+msgstr ""
+
+#. type: Hash Value: outlier dev_ass_vascular_catheter_interpretation_pvc_high
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The PVC-associated sepsis/BSI rate is above the reference range, which may reflect peripheral-line management practices or case mix differences."
+msgstr ""
+
+#. type: Hash Value: outlier dev_ass_vascular_catheter_interpretation_pvc_high_cvc_low
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The PVC-associated sepsis/BSI rate is above the reference range while the CVC-associated sepsis/BSI rate is below it. Peripheral-line management practices may be a relevant area for assessment."
+msgstr ""
+
+#. type: Hash Value: outlier dev_ass_vascular_catheter_interpretation_pvc_low
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The PVC-associated sepsis/BSI rate is below the reference range, which may reflect effective peripheral-line care practices."
+msgstr ""
+
+#. type: Hash Value: outlier dev_ass_vc_interpretation_cvc_high_usage_high
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The CVC-associated sepsis/BSI rate is above the reference range in a context where CVC utilization is also high. Higher device exposure increases opportunity for infection."
+msgstr ""
+
+#. type: Hash Value: outlier dev_ass_vc_interpretation_cvc_high_usage_low
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The CVC-associated sepsis/BSI rate is above the reference range despite relatively low CVC utilization. Insertion and maintenance practices may be a relevant area for assessment."
+msgstr ""
+
+#. type: Hash Value: outlier dev_ass_ventilatory_support_interpretation_all_above
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Both NIV-associated pneumonia and INV-associated pneumonia rates are above the reference range. This may suggest broader respiratory care-associated infection prevention challenges."
+msgstr ""
+
+#. type: Hash Value: outlier dev_ass_ventilatory_support_interpretation_inv_high
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The INV-associated pneumonia rate is above the reference range, which may reflect invasive ventilation care practices or case mix differences."
+msgstr ""
+
+#. type: Hash Value: outlier dev_ass_ventilatory_support_interpretation_inv_high_niv_low
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The INV-associated pneumonia rate is above the reference range while the NIV-associated pneumonia rate is below it. Invasive ventilation care practices may be a relevant area for assessment."
+msgstr ""
+
+#. type: Hash Value: outlier dev_ass_ventilatory_support_interpretation_inv_low
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The INV-associated pneumonia rate is below the reference range, which may reflect effective invasive ventilation care practices."
+msgstr ""
+
+#. type: Hash Value: outlier dev_ass_ventilatory_support_interpretation_niv_high
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The NIV-associated pneumonia rate is above the reference range, which may reflect non-invasive ventilation practices or case mix differences."
+msgstr ""
+
+#. type: Hash Value: outlier dev_ass_ventilatory_support_interpretation_niv_low
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The NIV-associated pneumonia rate is below the reference range, which may reflect effective non-invasive ventilation care practices."
+msgstr ""
+
+#. type: Hash Value: outlier dev_ass_ventilatory_support_vs_zero
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "No ventilatory support-associated infections were recorded during the surveillance period despite available denominator data."
+msgstr ""
+
+#. type: Hash Value: outlier dev_ass_vs_interpretation_inv_high_usage_high
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The INV-associated pneumonia rate is above the reference range in a context where invasive ventilation utilization is also high."
+msgstr ""
+
+#. type: Hash Value: outlier dev_ass_vs_interpretation_inv_high_usage_low
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The INV-associated pneumonia rate is above the reference range despite relatively low invasive ventilation utilization. Ventilation care practices may be a relevant area for assessment."
+msgstr ""
+
+#. type: Hash Value: outlier framing_above_q3
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The following metrics are above the 75th percentile of the reference population:"
+msgstr ""
+
+#. type: Hash Value: outlier framing_below_q1
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The following metrics are below the 25th percentile of the reference population:"
+msgstr ""
+
+#. type: Hash Value: outlier generic_summary
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The values for {metric_names} are notably different from the reference population and should be reviewed in the context of your department's clinical setting and case mix."
+msgstr ""
+
 #. type: Hash Value: outlier heading
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Comparison with reference data"
+msgstr ""
+
+#. type: Hash Value: outlier intestinal_microbiome_interpretation_both_above
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Human milk feeding and probiotic use are both above the reference range, suggesting broad implementation of microbiome-supportive strategies."
+msgstr ""
+
+#. type: Hash Value: outlier intestinal_microbiome_interpretation_both_below
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Human milk feeding and probiotic use are both below the reference range. This pattern may suggest reduced use of microbiome-supportive strategies and may also reflect limited availability of approved probiotic products."
+msgstr ""
+
+#. type: Hash Value: outlier intestinal_microbiome_interpretation_hm_high
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "High human milk feeding reflects strong implementation of a protective feeding strategy associated with lower infection and NEC risk."
+msgstr ""
+
+#. type: Hash Value: outlier intestinal_microbiome_interpretation_hm_high_pro_low
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Human milk feeding is above the reference range while probiotic use is below it. In settings with high human milk exposure, the incremental benefit from routine probiotics may be smaller and remains uncertain."
+msgstr ""
+
+#. type: Hash Value: outlier intestinal_microbiome_interpretation_hm_low
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Low human milk feeding may indicate opportunities to strengthen lactation support, donor milk availability, or feeding pathways. Human milk exposure is associated with lower infection and NEC risk."
+msgstr ""
+
+#. type: Hash Value: outlier intestinal_microbiome_interpretation_hm_low_pro_high
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Human milk feeding is below the reference range while probiotic use is above it. This may indicate greater reliance on probiotics in a setting with lower human milk exposure. Probiotics are typically intended to complement rather than replace human milk-based protection."
+msgstr ""
+
+#. type: Hash Value: outlier intestinal_microbiome_interpretation_pro_high
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "High probiotic use suggests broad implementation of a microbiome-support strategy where products are available and approved."
+msgstr ""
+
+#. type: Hash Value: outlier intestinal_microbiome_interpretation_pro_low
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Low probiotic use may reflect selective implementation, barriers in care pathways, or limited availability of safe, approved neonatal probiotic products."
+msgstr ""
+
+#. type: Hash Value: outlier kangaroo_care_interpretation_high
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "High kangaroo mother care (KMC) uptake of this WHO-recommended protective intervention is a positive finding, reflecting strong implementation of skin-to-skin care practices."
+msgstr ""
+
+#. type: Hash Value: outlier kangaroo_care_interpretation_low
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Low kangaroo mother care (KMC) utilization may indicate barriers to implementation such as staffing constraints, department layout, parental access restrictions, or documentation practices."
+msgstr ""
+
+#. type: Hash Value: outlier nec_interpretation_high_despite_microbiome
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The necrotising enterocolitis rate is above the reference range despite high human milk feeding and probiotic use. Other contributing factors may warrant assessment."
+msgstr ""
+
+#. type: Hash Value: outlier nec_interpretation_high_low_microbiome
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The necrotising enterocolitis rate is above the reference range in a context where human milk feeding or probiotic use is below it. Microbiome-supportive strategies may be a relevant consideration."
+msgstr ""
+
+#. type: Hash Value: outlier pairing_bsi action_elevated
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Vascular catheter indication criteria and care bundle adherence may be relevant areas for assessment."
+msgstr ""
+
+#. type: Hash Value: outlier pairing_bsi action_elevated_narrowed
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The elevation may be concentrated in non-device-associated infections. Blood culture practices and clinical sepsis diagnostic criteria may warrant review."
+msgstr ""
+
+#. type: Hash Value: outlier pairing_bsi action_low
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Pathogen detection rates (@tbl-infectious-agent-detection-rate) may help confirm this reflects effective prevention rather than differences in diagnostic practices."
+msgstr ""
+
+#. type: Hash Value: outlier pairing_bsi action_low_narrowed
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "This pattern may reflect low non-device-associated BSI. Pathogen detection rates (@tbl-infectious-agent-detection-rate) may help confirm adequate diagnostic workup."
+msgstr ""
+
+#. type: Hash Value: outlier pairing_bsi metric_label
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "primary sepsis/BSI rate"
+msgstr ""
+
+#. type: Hash Value: outlier pairing_bsi paired_label
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "device-associated BSI rates"
+msgstr ""
+
+#. type: Hash Value: outlier pairing_dev_ass_cvc action_elevated
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Central line indication criteria and care bundle adherence may be relevant areas for assessment."
+msgstr ""
+
+#. type: Hash Value: outlier pairing_dev_ass_cvc action_elevated_narrowed
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "A focused review of central line insertion and maintenance practices may be warranted rather than utilization patterns."
+msgstr ""
+
+#. type: Hash Value: outlier pairing_dev_ass_cvc action_low
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Pathogen detection rates (@tbl-infectious-agent-detection-rate) may help confirm this reflects effective central line care rather than differences in diagnostic practices."
+msgstr ""
+
+#. type: Hash Value: outlier pairing_dev_ass_cvc action_low_narrowed
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The low infection rate may partly reflect lower device exposure rather than care practices alone."
+msgstr ""
+
+#. type: Hash Value: outlier pairing_dev_ass_cvc metric_label
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "CVC-associated sepsis/BSI rate"
+msgstr ""
+
+#. type: Hash Value: outlier pairing_dev_ass_cvc paired_label
+#: reports/Partner-Report/content/_sR.yaml:1
+#, fuzzy, no-wrap
+#| msgid "Affiliation"
+msgid "CVC utilization"
+msgstr "Συνδρομή"
+
+#. type: Hash Value: outlier pairing_dev_ass_inv action_elevated
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Invasive ventilation care practices and pneumonia prevention measures may be relevant areas for assessment."
+msgstr ""
+
+#. type: Hash Value: outlier pairing_dev_ass_inv action_elevated_narrowed
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "A focused review of invasive ventilation care practices may be warranted rather than utilization patterns."
+msgstr ""
+
+#. type: Hash Value: outlier pairing_dev_ass_inv action_low
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Pathogen detection for pneumonia (@tbl-infectious-agent-detection-rate) may help confirm this reflects effective invasive ventilation care rather than differences in diagnostic practices."
+msgstr ""
+
+#. type: Hash Value: outlier pairing_dev_ass_inv action_low_narrowed
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The low pneumonia rate may partly reflect lower invasive ventilation exposure rather than care practices alone."
+msgstr ""
+
+#. type: Hash Value: outlier pairing_dev_ass_inv metric_label
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "INV-associated pneumonia rate"
+msgstr ""
+
+#. type: Hash Value: outlier pairing_dev_ass_inv paired_label
+#: reports/Partner-Report/content/_sR.yaml:1
+#, fuzzy, no-wrap
+#| msgid "Affiliation"
+msgid "INV utilization"
+msgstr "Συνδρομή"
+
+#. type: Hash Value: outlier pairing_dev_ass_niv action_elevated
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Non-invasive ventilation practices and pneumonia prevention measures may be relevant areas for assessment."
+msgstr ""
+
+#. type: Hash Value: outlier pairing_dev_ass_niv action_elevated_narrowed
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "A focused review of non-invasive ventilation care practices may be warranted rather than utilization patterns."
+msgstr ""
+
+#. type: Hash Value: outlier pairing_dev_ass_niv action_low
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "This may reflect effective non-invasive ventilation care practices."
+msgstr ""
+
+#. type: Hash Value: outlier pairing_dev_ass_niv action_low_narrowed
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The low pneumonia rate may partly reflect lower non-invasive ventilation exposure rather than care practices alone."
+msgstr ""
+
+#. type: Hash Value: outlier pairing_dev_ass_niv metric_label
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "NIV-associated pneumonia rate"
+msgstr ""
+
+#. type: Hash Value: outlier pairing_dev_ass_niv paired_label
+#: reports/Partner-Report/content/_sR.yaml:1
+#, fuzzy, no-wrap
+#| msgid "Affiliation"
+msgid "NIV utilization"
+msgstr "Συνδρομή"
+
+#. type: Hash Value: outlier pairing_dev_ass_pvc action_elevated
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Peripheral line management and dwell time policies may be relevant areas for assessment."
+msgstr ""
+
+#. type: Hash Value: outlier pairing_dev_ass_pvc action_elevated_narrowed
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "A focused review of peripheral line management practices may be warranted."
+msgstr ""
+
+#. type: Hash Value: outlier pairing_dev_ass_pvc action_low
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "This may reflect effective peripheral line management practices."
+msgstr ""
+
+#. type: Hash Value: outlier pairing_dev_ass_pvc action_low_narrowed
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The low infection rate may partly reflect lower peripheral line exposure rather than care practices alone."
+msgstr ""
+
+#. type: Hash Value: outlier pairing_dev_ass_pvc metric_label
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "PVC-associated sepsis/BSI rate"
+msgstr ""
+
+#. type: Hash Value: outlier pairing_dev_ass_pvc paired_label
+#: reports/Partner-Report/content/_sR.yaml:1
+#, fuzzy, no-wrap
+#| msgid "Affiliation"
+msgid "PVC utilization"
+msgstr "Συνδρομή"
+
+#. type: Hash Value: outlier pairing_dev_ass_vs action_elevated
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Respiratory care practices and pneumonia prevention measures may be relevant areas for assessment."
+msgstr ""
+
+#. type: Hash Value: outlier pairing_dev_ass_vs action_elevated_narrowed
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "A focused review of respiratory care practices and pneumonia prevention measures may be warranted rather than utilization patterns."
+msgstr ""
+
+#. type: Hash Value: outlier pairing_dev_ass_vs action_low
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Pathogen detection rates (@tbl-infectious-agent-detection-rate) may help confirm this reflects effective ventilatory care rather than differences in diagnostic practices."
+msgstr ""
+
+#. type: Hash Value: outlier pairing_dev_ass_vs action_low_narrowed
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The low pneumonia rate may partly reflect lower ventilatory support exposure rather than care practices alone."
+msgstr ""
+
+#. type: Hash Value: outlier pairing_dev_ass_vs metric_label
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "ventilatory support-associated pneumonia rate"
+msgstr ""
+
+#. type: Hash Value: outlier pairing_hap fallback_paired_label
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "ventilatory support utilization"
+msgstr ""
+
+#. type: Hash Value: outlier pairing_hap fallback_paired_label_sc
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Ventilatory support utilization"
+msgstr ""
+
+#. type: Hash Value: outlier pairing_hap action_elevated
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Ventilatory support practices, including ventilator care bundles and weaning protocols, may be relevant areas for assessment."
+msgstr ""
+
+#. type: Hash Value: outlier pairing_hap action_elevated_narrowed
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The elevation may be concentrated in non-ventilator-associated pneumonia. Pneumonia diagnostic criteria and pathogen detection (@tbl-infectious-agent-detection-rate) may warrant review."
+msgstr ""
+
+#. type: Hash Value: outlier pairing_hap action_low
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Pathogen detection for pneumonia (@tbl-infectious-agent-detection-rate) may help confirm this reflects effective respiratory care rather than differences in diagnostic practices."
+msgstr ""
+
+#. type: Hash Value: outlier pairing_hap action_low_narrowed
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Pneumonia diagnostic criteria and case ascertainment practices may warrant review."
+msgstr ""
+
+#. type: Hash Value: outlier pairing_hap metric_label
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "pneumonia rate"
+msgstr ""
+
+#. type: Hash Value: outlier pairing_hap primary_paired_label
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "ventilator-associated pneumonia rates"
+msgstr ""
+
+#. type: Hash Value: outlier pairing_nec action_elevated
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Strengthening lactation support, donor milk availability, or feeding pathways may help reduce necrotising enterocolitis risk."
+msgstr ""
+
+#. type: Hash Value: outlier pairing_nec action_elevated_narrowed
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Case mix, feeding advancement protocols, and necrotising enterocolitis diagnostic criteria may warrant review."
+msgstr ""
+
+#. type: Hash Value: outlier pairing_nec action_elevated_secondary
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Feeding protocols, probiotic administration practices, and antibiotic stewardship may be relevant considerations."
+msgstr ""
+
+#. type: Hash Value: outlier pairing_nec action_low
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "This may reflect effective feeding and protective care practices or case mix differences."
+msgstr ""
+
+#. type: Hash Value: outlier pairing_nec metric_label
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "necrotising enterocolitis rate"
+msgstr ""
+
+#. type: Hash Value: outlier pairing_nec primary_paired_label
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "human milk exposure"
+msgstr ""
+
+#. type: Hash Value: outlier pairing_nec primary_paired_label_sc
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Human milk exposure"
+msgstr ""
+
+#. type: Hash Value: outlier pairing_nec secondary_paired_label
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "probiotic exposure"
+msgstr ""
+
+#. type: Hash Value: outlier pairing_nec secondary_paired_label_sc
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Probiotic exposure"
+msgstr ""
+
+#. type: Hash Value: outlier pairing_severe_infection action_elevated
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The component rates (primary sepsis/BSI and pneumonia) and the device-associated infection rates (@tbl-device-associated-incidence-density-rates) may help identify where the elevation is concentrated."
+msgstr ""
+
+#. type: Hash Value: outlier pairing_severe_infection action_low
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Diagnostic completeness (@tbl-infectious-agent-detection-rate) may help confirm this is supported by thorough microbiological workup."
+msgstr ""
+
+#. type: Hash Value: outlier pairing_severe_infection metric_label
+#: reports/Partner-Report/content/_sR.yaml:1
+#, fuzzy, no-wrap
+#| msgid "Severe infection"
+msgid "overall severe infection rate"
+msgstr "Ενότητα"
+
+#. type: Hash Value: outlier resistance_test_interpretation_routine_high
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "High resistance testing rates suggest thorough screening practices, which may improve detection of resistant organisms."
+msgstr ""
+
+#. type: Hash Value: outlier resistance_test_interpretation_routine_low
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Low resistance testing rates may limit the ability to detect resistant organisms. This could affect both clinical management and the accuracy of reported resistance rates."
+msgstr ""
+
+#. type: Hash Value: outlier secondary_bsi_interpretation_multiple_above
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Secondary bloodstream infection rates are above the reference range for multiple primary infection types. This may suggest broader challenges related to secondary bloodstream infections following primary infection events."
+msgstr ""
+
+#. type: Hash Value: outlier severe_infection_interpretation_all_above
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Both primary sepsis/BSI and pneumonia rates are above the reference range. This pattern may suggest broader infection prevention challenges rather than a single-pathway issue."
+msgstr ""
+
+#. type: Hash Value: outlier severe_infection_interpretation_all_below
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Both primary sepsis/BSI and pneumonia rates are below the reference range. This favourable pattern may reflect effective infection prevention across multiple pathways."
+msgstr ""
+
+#. type: Hash Value: outlier severe_infection_interpretation_bsi_high
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The primary sepsis/BSI rate is above the reference range, which may reflect vascular access practices, diagnostic intensity, or case mix differences."
+msgstr ""
+
+#. type: Hash Value: outlier severe_infection_interpretation_bsi_high_cvc_high
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The primary sepsis/BSI rate is above the reference range in a context where CVC utilization is also high. Vascular access practices may be a relevant area for assessment."
+msgstr ""
+
+#. type: Hash Value: outlier severe_infection_interpretation_bsi_high_hap_low
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The primary sepsis/BSI rate is above the reference range while the pneumonia rate is below it. This may point to vascular access-related factors as a primary area for further assessment."
+msgstr ""
+
+#. type: Hash Value: outlier severe_infection_interpretation_bsi_low
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The primary sepsis/BSI rate is below the reference range, which may reflect effective vascular access-related infection prevention practices."
+msgstr ""
+
+#. type: Hash Value: outlier severe_infection_interpretation_hap_high
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The pneumonia rate is above the reference range, which may reflect ventilatory care practices, diagnostic criteria, or case mix differences."
+msgstr ""
+
+#. type: Hash Value: outlier severe_infection_interpretation_hap_high_bsi_low
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The pneumonia rate is above the reference range while the primary sepsis/BSI rate is below it. This may point to ventilatory care-related factors as a primary area for further assessment."
+msgstr ""
+
+#. type: Hash Value: outlier severe_infection_interpretation_hap_high_inv_high
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The pneumonia rate is above the reference range in a context where invasive ventilation utilization is also high. Ventilation care practices may be a relevant area for assessment."
+msgstr ""
+
+#. type: Hash Value: outlier severe_infection_interpretation_hap_low
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The pneumonia rate is below the reference range, which may reflect effective respiratory care-related infection prevention practices."
+msgstr ""
+
+#. type: Hash Value: outlier severe_infection_si_zero
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "No severe infections (primary sepsis/BSI or pneumonia) were recorded during the surveillance period despite available patient day data. This may indicate incomplete data capture, a very small population, or generation of the report very early after starting surveillance."
+msgstr ""
+
+#. type: Hash Value: outlier surgery_rate_interpretation_multiple_above
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Multiple surgery categories are above the reference range. This may reflect a higher-acuity case mix or a surgical referral centre profile."
+msgstr ""
+
+#. type: Hash Value: outlier surgery_rate_overall_zero
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "No surgical procedures were recorded during the surveillance period despite available patient data."
+msgstr ""
+
+#. type: Hash Value: outlier vascular_catheter_interpretation_both_above
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Both CVC and PVC utilization are above the reference range, suggesting higher overall vascular access burden. This may reflect case mix or clinical practice differences."
+msgstr ""
+
+#. type: Hash Value: outlier vascular_catheter_interpretation_both_below
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Both CVC and PVC utilization are below the reference range. This may reflect lower acuity or successful line-reduction strategies."
+msgstr ""
+
+#. type: Hash Value: outlier vascular_catheter_interpretation_cvc_high_pvc_low
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "CVC utilization is above the reference range while PVC utilization is below it. This may suggest greater reliance on central access, which is associated with different complication profiles."
+msgstr ""
+
+#. type: Hash Value: outlier vascular_catheter_interpretation_pvc_high_cvc_low
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "PVC utilization is above the reference range while CVC utilization is below it. This pattern may suggest a peripheral-access preference that reduces central-line exposure."
+msgstr ""
+
+#. type: Hash Value: outlier ventilatory_support_interpretation_all_above
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Both non-invasive and invasive ventilation are above the reference range, suggesting higher overall respiratory support burden. This may reflect differences in case mix or ventilation practices."
+msgstr ""
+
+#. type: Hash Value: outlier ventilatory_support_interpretation_all_below
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Both non-invasive and invasive ventilation are below the reference range. This may reflect lower acuity or different respiratory management strategies."
+msgstr ""
+
+#. type: Hash Value: outlier ventilatory_support_interpretation_inv_high_niv_low
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Invasive ventilation is above the reference range while non-invasive ventilation is below it. This pattern may suggest a higher threshold for initiating non-invasive support or differences in escalation and weaning practices."
+msgstr ""
+
+#. type: Hash Value: outlier ventilatory_support_interpretation_niv_high_inv_low
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Non-invasive ventilation is above the reference range while invasive ventilation is below it. This pattern may be consistent with a non-invasive-first strategy that reduces the need for intubation."
+msgstr ""
+
+#. type: Hash Value: outlier ventilatory_support_vs_zero
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "No ventilatory support exposure was recorded during the surveillance period despite available patient day data. This may indicate incomplete data capture, a very small population, or generation of the report very early after starting surveillance."
 msgstr ""
 
 #. type: Hash Value: own_data_label
@@ -1919,6 +2914,18 @@ msgstr "Αναφορές"
 msgid "NeoIPC Surveillance Reference Report"
 msgstr "Αναφορές"
 
+#. type: Hash Value: aware_combination_therapy_footnote
+#: reports/Reference-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Days with any antibiotic represents the number of patient-days during which at least one antibiotic was administered, expressed per 100 patient-days. AWaRe category and substance-specific indicators count each antibiotic administered per day and may exceed the total number of patient-days when combination therapy is used."
+msgstr ""
+
+#. type: Hash Value: benchmarking_guidance
+#: reports/Reference-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "For benchmarking at unit level, the departmental median (Q₂) is generally more representative than the pooled rate, as it is less influenced by differences in unit size. The pooled rate reflects overall patient-level burden across the network."
+msgstr ""
+
 #. type: Hash Value: headerList datasetCompositionHeader
 #: reports/Reference-Report/content/_sR.yaml:1
 #, fuzzy, no-wrap
@@ -1950,6 +2957,12 @@ msgstr ""
 msgid "This report presents data from neonatal departments in a single country. Because of the relative homogeneity of the healthcare system, it is in principle a good benchmark. However, it should be noted that only a proportion of neonatal departments in a country actually participate in NeoIPC Surveillance. Since participation is voluntary, these are typically hospitals that have a particular interest in infection prevention and are willing and able to provide the resources required for surveillance. The information presented here can therefore not fully describe the situation in the individual countries."
 msgstr ""
 
+#. type: Hash Value: methodology_note
+#: reports/Reference-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Confidence intervals for incidence density rates and other count-over-exposure-time metrics are calculated using exact Poisson methods. Proportion-based indicators (infectious agent detection rate, proportion of patients receiving specific antibiotics) use Wilson binomial confidence intervals, which provide better coverage properties than exact (Clopper–Pearson) intervals, particularly for small samples. Confidence intervals for the benchmark quartiles (Q₁, Q₂, Q₃) are calculated using a two-level parametric bootstrap that propagates both within-department sampling uncertainty and cross-department quantile estimation uncertainty. All confidence intervals are reported at the 95% level."
+msgstr ""
+
 #. type: Hash Value: tbl-risk-density-rates n_footnote
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
@@ -1957,9 +2970,15 @@ msgid "%s: The aggregated number of days the risk/protective factor was present 
 msgstr ""
 
 #. type: Plain text
-#: reports/Reference-Report/content/_introduction.Rmd:1
+#: reports/Reference-Report/content/_introduction.Rmd:2
 #, no-wrap
 msgid "This document is a reference report on the NeoIPC Surveillance. It contains information relating to nosocomial infections, their causative infectious agents, and the associated risk and protective factors in high-risk neonates which was collected by partners from multiple neonatology departments participating in the NeoIPC Surveillance. The following numbers provide an overview of the current data set. If you are interested in the surveillance definitions, data collection methods and sheets, please refer to the [surveillance resources on the NeoIPC website](https://neoipc.org/surveillance/resources/).\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Reference-Report/content/_introduction.Rmd:3
+#, no-wrap
+msgid "`r sR$methodology_note`\n"
 msgstr ""
 
 #. type: Plain text
@@ -1975,7 +2994,13 @@ msgid "Nosocomial infections represent the primary endpoint of NeoIPC surveillan
 msgstr ""
 
 #. type: Plain text
-#: reports/Reference-Report/content/_nosocomial_infections.Rmd:3
+#: reports/Reference-Report/content/_nosocomial_infections.Rmd:4
+#, no-wrap
+msgid "`r sR$benchmarking_guidance`\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Reference-Report/content/_nosocomial_infections.Rmd:5
 #, no-wrap
 msgid "Device-associated infections can be found in @tbl-device-associated-incidence-density-rates.\n"
 msgstr ""
@@ -3811,9 +4836,6 @@ msgstr ""
 
 #~ msgid "Affiliations"
 #~ msgstr "Συνδρομές"
-
-#~ msgid "Affiliation"
-#~ msgstr "Συνδρομή"
 
 #~ msgid "Authors"
 #~ msgstr "Συγγραφείς"

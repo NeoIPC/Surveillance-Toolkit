@@ -26,6 +26,17 @@ include_localised("_introduction.Rmd")
 
 {{< include content/_introduction-list.qmd >}}
 
+::: {.content-visible when-meta="includeMethodsTexts"}
+
+## `{r} sR$methods$heading`
+
+```{r}
+#| output: asis
+include_localised("_methods.Rmd")
+```
+
+:::
+
 ::: {.content-visible when-meta="includeTextPatientPopulation"}
 ::: {.content-visible when-format="pdf"}
 \FloatBarrier
@@ -37,6 +48,13 @@ include_localised("_introduction.Rmd")
 ```{r}
 #| output: asis
 include_localised("_patient_population.Rmd")
+```
+:::
+
+::: {.content-visible when-meta="includeMethodsTexts"}
+```{r}
+#| output: asis
+include_localised("_methods-patient-population.qmd")
 ```
 :::
 :::
@@ -63,10 +81,24 @@ include_localised("_nosocomial_infections.Rmd")
 :::
 :::
 
+::: {.content-visible when-meta="includeMethodsTexts"}
+```{r}
+#| output: asis
+include_localised("_methods-incidence-density.qmd")
+```
+:::
+
 ::: {.content-visible when-meta="includeIncidenceDensityTable"}
 {{< include tables/_tbl-incidence-density-rates.qmd >}}
 
 {{< pagebreak >}}
+:::
+
+::: {.content-visible when-meta="includeMethodsTexts"}
+```{r}
+#| output: asis
+include_localised("_methods-device-associated.qmd")
+```
 :::
 
 ::: {.content-visible when-meta="includeDeviceAssociatedIncidenceDensityTable"}
@@ -87,8 +119,22 @@ include_localised("_infectious_agents.Rmd")
 :::
 :::
 
+::: {.content-visible when-meta="includeMethodsTexts"}
+```{r}
+#| output: asis
+include_localised("_methods-agent-per-infection.qmd")
+```
+:::
+
 ::: {.content-visible when-meta="includeAgentPerInfectionRateTable"}
 {{< include tables/_tbl-agent-per-infection-rate.qmd >}}
+:::
+
+::: {.content-visible when-meta="includeMethodsTexts"}
+```{r}
+#| output: asis
+include_localised("_methods-abr-infection.qmd")
+```
 :::
 
 ::: {.content-visible when-meta="includeResistantPathogenInfectionRateTable"}
@@ -97,8 +143,22 @@ include_localised("_infectious_agents.Rmd")
 {{< pagebreak >}}
 :::
 
+::: {.content-visible when-meta="includeMethodsTexts"}
+```{r}
+#| output: asis
+include_localised("_methods-infectious-agent-detection.qmd")
+```
+:::
+
 ::: {.content-visible when-meta="includeInfectiousAgentDetectionRateTable"}
 {{< include tables/_tbl-infectious-agent-detection-rate.qmd >}}
+:::
+
+::: {.content-visible when-meta="includeMethodsTexts"}
+```{r}
+#| output: asis
+include_localised("_methods-resistance-test.qmd")
+```
 :::
 
 ::: {.content-visible when-meta="includeAntibioticResistanceTestRateTable"}
@@ -119,6 +179,13 @@ include_localised("_risk_and_protective_factors.Rmd")
 :::
 :::
 
+::: {.content-visible when-meta="includeMethodsTexts"}
+```{r}
+#| output: asis
+include_localised("_methods-risk-density.qmd")
+```
+:::
+
 ::: {.content-visible when-meta="includeRiskDensityRateTable"}
 {{< include tables/_tbl-risk-density-rates.qmd >}}
 
@@ -135,6 +202,13 @@ include_localised("_risk_and_protective_factors.Rmd")
 include_localised("_surgery.Rmd")
 ```
 :::
+:::
+
+::: {.content-visible when-meta="includeMethodsTexts"}
+```{r}
+#| output: asis
+include_localised("_methods-surgical-procedures.qmd")
+```
 :::
 
 ::: {.content-visible when-meta="includeSurgicalProcedureRateTable"}

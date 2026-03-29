@@ -7,6 +7,13 @@ include_localised("_tbl-intro-infectious-agent-detection.qmd")
 ```
 :::
 
+::: {.content-visible when-meta="includeMethodsTexts"}
+```{r}
+#| output: asis
+include_localised("_methods-infectious-agent-detection.qmd")
+```
+:::
+
 ```{r}
 #| output: asis
 #| label: tbl-infectious-agent-detection-rate
@@ -24,6 +31,7 @@ if (!is.null(benchmark_data$infectious_agent_detection_rate_per_inf_type_table) 
   check_outlier_interpretation <- has_reference
 
   tbl_data <- benchmark_data$infectious_agent_detection_rate_per_inf_type_table
+  cw <- compute_col_widths(tbl_data, stub_min = 18, has_reference = has_reference)
 
   tbl <- tbl_data |>
     dplyr::select(-tidyselect::any_of("n_ref")) |>
@@ -35,21 +43,18 @@ if (!is.null(benchmark_data$infectious_agent_detection_rate_per_inf_type_table) 
       !!sR$table_headers$q2 := tidyselect::any_of("q2_ref"),
       !!sR$table_headers$q3 := tidyselect::any_of("q3_ref"))
 
-  if (include_ci) {
-    tbl <- tbl |>
-      dplyr::rename(
-        !!sR$table_headers$ci := tidyselect::any_of("ci_lower_own"),
-        ci_upper_hide = tidyselect::any_of("ci_upper_own")
-      ) |>
-      dplyr::select(-tidyselect::any_of(c("ci_lower_ref", "ci_upper_ref")))
-  } else {
-    tbl <- tbl |>
-      dplyr::select(-tidyselect::any_of(c(
-        "ci_lower_own", "ci_upper_own", "ci_lower_ref", "ci_upper_ref",
-        "q1_ci_lower_ref", "q1_ci_upper_ref",
-        "q2_ci_lower_ref", "q2_ci_upper_ref",
-        "q3_ci_lower_ref", "q3_ci_upper_ref")))
-  }
+  ci_cols_to_drop <- character(0)
+  if (!include_rate_ci)
+    ci_cols_to_drop <- c(ci_cols_to_drop, "ci_lower_own", "ci_upper_own")
+  if (!include_pooled_ci)
+    ci_cols_to_drop <- c(ci_cols_to_drop, "ci_lower_ref", "ci_upper_ref")
+  if (!include_quartile_ci)
+    ci_cols_to_drop <- c(ci_cols_to_drop,
+      "q1_ci_lower_ref", "q1_ci_upper_ref",
+      "q2_ci_lower_ref", "q2_ci_upper_ref",
+      "q3_ci_lower_ref", "q3_ci_upper_ref")
+  if (length(ci_cols_to_drop) > 0)
+    tbl <- tbl |> dplyr::select(-tidyselect::any_of(ci_cols_to_drop))
 
   tbl <- tbl |>
     dplyr::mutate(
@@ -65,16 +70,11 @@ if (!is.null(benchmark_data$infectious_agent_detection_rate_per_inf_type_table) 
     gt::tab_options(
       latex.use_longtable = TRUE,
       table.width = pct(100),
-      table.font.size = 13,
+      table.font.size = cw$font_size,
       footnotes.marks = "extended"
     ) |>
     fmt_number(
-      columns = c(
-        tidyselect::any_of(sR$table_headers$rate),
-        tidyselect::any_of(sR$table_headers$pooled),
-        tidyselect::any_of(sR$table_headers$q1),
-        tidyselect::any_of(sR$table_headers$q2),
-        tidyselect::any_of(sR$table_headers$q3)),
+      columns = !(tidyselect::any_of(sR$table_headers$n) | tidyselect::matches("^inf$")),
       decimals = 1,
       sep_mark = sR$digit_group_separator,
       min_sep_threshold = 2,
@@ -92,38 +92,57 @@ if (!is.null(benchmark_data$infectious_agent_detection_rate_per_inf_type_table) 
       )
     )
 
-  if (include_ci && sR$table_headers$ci %in% colnames(tbl$`_data`)) {
+  if (include_rate_ci && "ci_lower_own" %in% colnames(tbl$`_data`)) {
     tbl <- tbl |>
       gt::cols_merge(
-        columns = c(sR$table_headers$ci, "ci_upper_hide"),
-        pattern = "{1}\u2013{2}"
+        columns = c(sR$table_headers$rate, "ci_lower_own", "ci_upper_own"),
+        pattern = "{1} ({2}\u2013{3})",
+        rows = !is.na(tbl_data$pooled_own)
       )
-    if ("q1_ci_lower_ref" %in% colnames(tbl$`_data`)) {
+  }
+  if (include_pooled_ci && "ci_lower_ref" %in% colnames(tbl$`_data`)) {
+    tbl <- tbl |>
+      gt::cols_merge(
+        columns = c(sR$table_headers$pooled, "ci_lower_ref", "ci_upper_ref"),
+        pattern = "{1} ({2}\u2013{3})",
+        rows = !is.na(tbl_data$pooled_ref)
+      )
+  }
+  if ("q1_ci_lower_ref" %in% colnames(tbl$`_data`)) {
+    if (include_quartile_ci) {
+      has_boot <- !is.na(tbl$`_data`[["q1_ci_lower_ref"]])
+      if (auto_quartile_ci)
+        has_boot <- has_boot & !is.na(tbl$`_data`[[sR$table_headers$q1]])
       tbl <- tbl |>
         gt::cols_merge(
           columns = c(sR$table_headers$q1, "q1_ci_lower_ref", "q1_ci_upper_ref"),
-          pattern = "{1} ({2}\u2013{3})"
+          pattern = "{1} ({2}\u2013{3})",
+          rows = has_boot
         ) |>
         gt::cols_merge(
           columns = c(sR$table_headers$q2, "q2_ci_lower_ref", "q2_ci_upper_ref"),
-          pattern = "{1} ({2}\u2013{3})"
+          pattern = "{1} ({2}\u2013{3})",
+          rows = has_boot
         ) |>
         gt::cols_merge(
           columns = c(sR$table_headers$q3, "q3_ci_lower_ref", "q3_ci_upper_ref"),
-          pattern = "{1} ({2}\u2013{3})"
+          pattern = "{1} ({2}\u2013{3})",
+          rows = has_boot
         )
+    } else {
+      tbl <- tbl |> gt::cols_hide(columns = tidyselect::any_of(c(
+        "q1_ci_lower_ref", "q1_ci_upper_ref",
+        "q2_ci_lower_ref", "q2_ci_upper_ref",
+        "q3_ci_lower_ref", "q3_ci_upper_ref")))
     }
   }
 
   # Add reference data spanner (only if reference data exists)
   if (has_reference) {
-    ci_in_own <- include_ci && sR$table_headers$ci %in% colnames(tbl$`_data`)
-    own_cols <- c(sR$table_headers$n, sR$table_headers$rate)
-    if (ci_in_own) own_cols <- c(own_cols, sR$table_headers$ci)
     tbl <- tbl |>
       tab_spanner(
         label = sR$own_data_label,
-        columns = tidyselect::any_of(own_cols),
+        columns = tidyselect::any_of(c(sR$table_headers$n, sR$table_headers$rate)),
         id = "department_data"
       ) |>
       tab_spanner(
@@ -134,40 +153,25 @@ if (!is.null(benchmark_data$infectious_agent_detection_rate_per_inf_type_table) 
           sR$table_headers$q2,
           sR$table_headers$q3)),
         id = "reference_data"
+      ) |>
+      cols_width(
+        stub() ~ pct(cw$stub),
+        sR$table_headers$n ~ pct(cw$n),
+        sR$table_headers$rate ~ pct(cw$rate),
+        sR$table_headers$pooled ~ pct(cw$pooled),
+        sR$table_headers$q1 ~ pct(cw$q),
+        sR$table_headers$q2 ~ pct(cw$q),
+        sR$table_headers$q3 ~ pct(cw$q)
       )
-    if (ci_in_own) {
-      tbl <- tbl |>
-        cols_width(
-          stub() ~ pct(28),
-          sR$table_headers$n ~ pct(8),
-          sR$table_headers$rate ~ pct(10),
-          sR$table_headers$ci ~ pct(12),
-          sR$table_headers$pooled ~ pct(10),
-          sR$table_headers$q1 ~ pct(10),
-          sR$table_headers$q2 ~ pct(10),
-          sR$table_headers$q3 ~ pct(12)
-        )
-    } else {
-      tbl <- tbl |>
-        cols_width(
-          stub() ~ pct(40),
-          sR$table_headers$n ~ pct(10),
-          sR$table_headers$rate ~ pct(10),
-          sR$table_headers$pooled ~ pct(10),
-          sR$table_headers$q1 ~ pct(10),
-          sR$table_headers$q2 ~ pct(10),
-          sR$table_headers$q3 ~ pct(10)
-        )
-    }
   } else {
     tbl <- tbl |>
       cols_width(
-        stub() ~ pct(60),
-        sR$table_headers$n ~ pct(20),
-        sR$table_headers$rate ~ pct(20)
+        stub() ~ pct(cw$stub),
+        sR$table_headers$n ~ pct(cw$n),
+        sR$table_headers$rate ~ pct(cw$rate)
       )
   }
-  
+
   # Add footnotes
   tbl <- tbl |>
     tab_footnote(
@@ -204,26 +208,11 @@ if (!is.null(benchmark_data$infectious_agent_detection_rate_per_inf_type_table) 
         footnote = sprintf(
           sR$`tbl-infectious-agent-detection-rate`$pooled_footnote,
           sR$table_headers$pooled),
-        locations = cells_column_labels(columns = sR$table_headers$pooled)) |>
-      tab_footnote(
-        footnote = sprintf(
-          sR$`tbl-infectious-agent-detection-rate`$quartile_footnote,
-          sR$table_headers$q1,
-          sR$table_headers$q2,
-          sR$table_headers$q3,
-          sprintf("%i%s", 25L, sR$percent_symbol),
-          sprintf("%i%s", 50L, sR$percent_symbol),
-          sprintf("%i%s", 75L, sR$percent_symbol)
-        ),
-        locations = cells_column_labels(columns = tidyselect::any_of(c(
-          sR$table_headers$q1,
-          sR$table_headers$q2,
-          sR$table_headers$q3)))) |>
-      tab_source_note(source_note = sR$pooled_rate_note)
+        locations = cells_column_labels(columns = sR$table_headers$pooled))
   }
 
   if (any(tbl_data$n_own < 10, na.rm = TRUE)) {
-    sparse_note <- if (include_ci) sR$sparse_data_footnote else sR$sparse_data_footnote_no_ci
+    sparse_note <- if (include_rate_ci) sR$sparse_data_footnote else sR$sparse_data_footnote_no_ci
     tbl <- tbl |>
       gt::tab_footnote(footnote = sparse_note)
   }

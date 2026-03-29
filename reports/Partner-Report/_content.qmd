@@ -35,6 +35,17 @@ include_localised("_introduction-caution.Rmd")
 ```
 :::
 
+::: {.content-visible when-meta="includeMethodsTexts"}
+
+## `{r} sR$methods$heading`
+
+```{r}
+#| output: asis
+include_localised("_methods.Rmd")
+```
+
+:::
+
 ::: {.content-visible when-format="pdf"}
 \FloatBarrier
 :::
@@ -45,6 +56,13 @@ include_localised("_introduction-caution.Rmd")
 ```{r}
 #| output: asis
 include_localised("_patient-population.Rmd")
+```
+:::
+
+::: {.content-visible when-meta="includeMethodsTexts"}
+```{r}
+#| output: asis
+include_localised("_methods-patient-population.qmd")
 ```
 :::
 

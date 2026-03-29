@@ -6,6 +6,7 @@ profile:
 date-meta: now
 includeHeader: true
 includeIntroductionTexts: true
+includeMethodsTexts: true
 includeTextPatientPopulation: true
 includeTextNosocomial: true
 includeTextInfectiousAgents: true

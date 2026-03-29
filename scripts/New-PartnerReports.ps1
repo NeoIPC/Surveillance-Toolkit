@@ -110,8 +110,13 @@ param(
     $HideIntroductionTexts,
 
     [Parameter()]
+    [ValidateSet('all', 'none', 'rate', 'rate_pooled', 'auto')]
+    [string]
+    $ConfidenceIntervals,
+
+    [Parameter()]
     [switch]
-    $HideConfidenceIntervals,
+    $HideMethodsTexts,
 
     [Parameter()]
     [switch]
@@ -464,7 +469,8 @@ if (inherits(x, 'neoipcr_bnch_ds')) {
 
                 if ($resolvedReferenceDataFile) { $qmdParams['referenceDataFile'] = $resolvedReferenceDataFile }
                 if ($HideIntroductionTexts.IsPresent) { $qmdParams['includeIntroductionTexts'] = 'false' }
-                if ($HideConfidenceIntervals.IsPresent) { $qmdParams['includeConfidenceIntervals'] = 'false' }
+                if ($ConfidenceIntervals) { $qmdParams['includeConfidenceIntervals'] = $ConfidenceIntervals }
+                if ($HideMethodsTexts.IsPresent) { $qmdParams['includeMethodsTexts'] = 'false' }
                 if ($HideOutlierInterpretation.IsPresent) { $qmdParams['includeOutlierInterpretation'] = 'false' }
                 if ($DebugReport) { $qmdParams['debug'] = 'true' }
 
@@ -506,6 +512,7 @@ if (inherits(x, 'neoipcr_bnch_ds')) {
 
                     $metadataParameters = @(
                         'includeIntroductionTexts'
+                        'includeMethodsTexts'
                         'includeOutlierInterpretation'
                         'includeBirthWeightFigure'
                         'includeGestationalAgeFigure'

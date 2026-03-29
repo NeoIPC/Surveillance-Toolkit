@@ -10,6 +10,7 @@ profile:
     - [en, de]
     - [full, default]
 includeIntroductionTexts: true
+includeMethodsTexts: true
 includeOutlierInterpretation: true
 includeBirthWeightFigure: true
 includeGestationalAgeFigure: true
@@ -22,7 +23,6 @@ includeSurgicalProcedureRateTable: true
 includeResistantPathogenInfectionRateTable: false
 includeAntibioticResistanceTestRateTable: false
 includeSecondaryBsiRateTable: false
-includeConfidenceIntervals: true
 execute:
   error: true
 filters:

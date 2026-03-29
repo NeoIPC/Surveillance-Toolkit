@@ -178,9 +178,26 @@ outlier:
     clause_no_quartiles: >-
       . Reference quartiles for {paired_label} ({paired_ref}) are
       not yet available
+    clause_concordant_high_pooled: >-
+      , consistent with elevated {paired_label} ({paired_ref}),
+      noting that reference quartiles for this metric are not
+      yet available
+    clause_concordant_low_pooled: >-
+      , consistent with low {paired_label} ({paired_ref}),
+      noting that reference quartiles for this metric are not
+      yet available
+    clause_discordant_high_pooled: >-
+      despite elevated {paired_label} ({paired_ref}), noting
+      that reference quartiles for this metric are not yet
+      available
+    clause_discordant_low_pooled: >-
+      despite low {paired_label} ({paired_ref}), noting that
+      reference quartiles for this metric are not yet available
     clause_within_iqr: ". {paired_label_sc} is within the reference range ({paired_ref})"
     opening_above: "The {metric_label} is above the reference range"
+    opening_above_pooled: "The {metric_label} is above the pooled reference rate"
     opening_below: "The {metric_label} is below the reference range"
+    opening_below_pooled: "The {metric_label} is below the pooled reference rate"
 
   # ── Device-associated vascular catheter interpretation ──────────────
   dev_ass_vascular_catheter_interpretation_both_above: >-

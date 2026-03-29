@@ -22,6 +22,22 @@ knitr::opts_chunk$set(warning = debug_mode)
 
 source("../common/helpers.R")
 
+# Cross-reference table IDs for metric pairings. These are Quarto
+# cross-references (invariant across languages), not translatable strings,
+# so they live in code rather than in the YAML string resource layer.
+pairing_table_refs <- list(
+  pairing_bsi             = list(paired_ref = "@tbl-device-associated-incidence-density-rates"),
+  pairing_dev_ass_cvc     = list(paired_ref = "@tbl-risk-density-rates"),
+  pairing_dev_ass_pvc     = list(paired_ref = "@tbl-risk-density-rates"),
+  pairing_dev_ass_vs      = list(paired_ref = "@tbl-risk-density-rates"),
+  pairing_dev_ass_inv     = list(paired_ref = "@tbl-risk-density-rates"),
+  pairing_dev_ass_niv     = list(paired_ref = "@tbl-risk-density-rates"),
+  pairing_hap             = list(primary_paired_ref = "@tbl-device-associated-incidence-density-rates",
+                                 fallback_paired_ref = "@tbl-risk-density-rates"),
+  pairing_nec             = list(primary_paired_ref = "@tbl-risk-density-rates",
+                                 secondary_paired_ref = "@tbl-risk-density-rates")
+)
+
 # Map factual states to coarse clinical categories for pattern matching.
 coarse_state <- function(state) {
   dplyr::case_match(
@@ -63,13 +79,23 @@ classify_concordance <- function(metric_state, paired_state, above_is_concerning
 }
 
 # Select the cross-reference clause template and fill placeholders.
-select_clause <- function(concordance, paired_coarse, pairing, sR) {
+# When paired_is_pooled is TRUE, use _pooled clause variants if available.
+select_clause <- function(concordance, paired_coarse, pairing, sR,
+                          paired_is_pooled = FALSE) {
   templates <- sR$outlier$composed
   clause_template <- switch(concordance,
-    concordant = if (paired_coarse == "high")
-      templates$clause_concordant_high else templates$clause_concordant_low,
-    discordant = if (paired_coarse == "high")
-      templates$clause_discordant_high else templates$clause_discordant_low,
+    concordant = {
+      base <- if (paired_coarse == "high") "clause_concordant_high"
+              else "clause_concordant_low"
+      if (paired_is_pooled && !is.null(templates[[paste0(base, "_pooled")]]))
+        templates[[paste0(base, "_pooled")]] else templates[[base]]
+    },
+    discordant = {
+      base <- if (paired_coarse == "high") "clause_discordant_high"
+              else "clause_discordant_low"
+      if (paired_is_pooled && !is.null(templates[[paste0(base, "_pooled")]]))
+        templates[[paste0(base, "_pooled")]] else templates[[base]]
+    },
     within_iqr = templates$clause_within_iqr,
     no_quartiles = templates$clause_no_quartiles,
     ""
@@ -105,10 +131,19 @@ compose_interpretation <- function(metric_state, pairing, paired_state, sR) {
   metric_coarse <- coarse_state(metric_state)
   if (is.na(metric_coarse) || metric_coarse == "mid") return(NULL)
 
-  # Part 1: Opening
+  metric_is_pooled <- grepl("^extreme_", as.character(metric_state))
+  paired_is_pooled <- !is.null(paired_state) &&
+    grepl("^extreme_", as.character(paired_state))
+
+  # Part 1: Opening — use _pooled variant when metric is pooled-rate-based
   templates <- sR$outlier$composed
-  opening_template <- if (metric_coarse == "high")
-    templates$opening_above else templates$opening_below
+  if (metric_coarse == "high") {
+    opening_template <- if (metric_is_pooled && !is.null(templates$opening_above_pooled))
+      templates$opening_above_pooled else templates$opening_above
+  } else {
+    opening_template <- if (metric_is_pooled && !is.null(templates$opening_below_pooled))
+      templates$opening_below_pooled else templates$opening_below
+  }
   opening <- as.character(glue::glue(opening_template,
     metric_label = pairing$metric_label, .open = "{", .close = "}"))
 
@@ -118,7 +153,8 @@ compose_interpretation <- function(metric_state, pairing, paired_state, sR) {
     concordance <- classify_concordance(
       metric_state, paired_state, pairing$above_is_concerning %||% TRUE)
     paired_coarse <- coarse_state(paired_state)
-    clause <- select_clause(concordance, paired_coarse, pairing, sR)
+    clause <- select_clause(concordance, paired_coarse, pairing, sR,
+                            paired_is_pooled = paired_is_pooled)
   } else {
     concordance <- "no_quartiles"
   }
@@ -425,37 +461,124 @@ interpret_kangaroo_care <- function(state_map, sR, registry = NULL) {
   character(0)
 }
 
-# Device-associated interpret functions use the composable framework.
-# Each device metric gets its own simple pairing with the corresponding
-# utilization metric from Table 8.
-interpret_dev_ass_vascular_catheter <- function(state_map, sR, registry = NULL) {
+# ── Device-associated grouped interpretation ───────────────────────
+# Generic helper for composing device-associated interpretations with
+# deduplication.  Handles two patterns:
+#   Total + components (e.g., vs / inv+niv): when the total is an
+#     outlier, report only the total with a component mention.
+#   Peer group (e.g., cvc + pvc): when all peers share the same outlier
+#     direction AND the same concordance with usage, consolidate.
+compose_grouped_dev_ass <- function(devices, total_device, state_map,
+                                    sR, registry, pairing_prefix) {
   usage <- registry$usage_density_rate_table
+  coarse_states <- sapply(devices, function(d) {
+    s <- state_map[[d]]
+    if (is.null(s)) NA_character_ else coarse_state(s)
+  })
+  outlier_devs <- names(coarse_states[
+    coarse_states %in% c("high", "low") & !is.na(coarse_states)])
+  if (length(outlier_devs) == 0) return(character(0))
+
   parts <- character(0)
-  for (dev in c("cvc", "pvc")) {
-    dev_state <- state_map[[dev]]
-    if (is.null(dev_state)) next
-    pairing <- sR$outlier[[paste0("pairing_dev_ass_", dev)]]
+
+  # ── Case 1: total + components ──────────────────────────────────
+  if (!is.null(total_device) && total_device %in% outlier_devs) {
+    pairing <- sR$outlier[[paste0(pairing_prefix, total_device)]]
+    if (!is.null(pairing)) {
+      components <- setdiff(devices, total_device)
+      same_dir_components <- components[
+        coarse_states[components] == coarse_states[[total_device]] &
+        !is.na(coarse_states[components])]
+
+      # Build component-mention suffix for the metric label
+      if (length(same_dir_components) > 0) {
+        comp_labels <- vapply(same_dir_components, function(d) {
+          p <- sR$outlier[[paste0(pairing_prefix, d)]]
+          if (!is.null(p)) p$metric_label else d
+        }, character(1))
+        extended_label <- paste0(
+          pairing$metric_label, " (including ",
+          paste(comp_labels, collapse = " and "), ")")
+        extended_pairing <- modifyList(pairing,
+          list(metric_label = extended_label))
+      } else {
+        extended_pairing <- pairing
+      }
+
+      paired_state <- if (!is.null(usage)) usage[[total_device]] else NULL
+      text <- compose_interpretation(
+        state_map[[total_device]], extended_pairing, paired_state, sR)
+      if (!is.null(text)) parts <- c(parts, text)
+    }
+
+    # Add individual text only for components that diverge from the total
+    divergent <- setdiff(outlier_devs, c(total_device,
+      names(coarse_states[coarse_states == coarse_states[[total_device]] &
+                          !is.na(coarse_states)])))
+    for (dev in divergent) {
+      pairing <- sR$outlier[[paste0(pairing_prefix, dev)]]
+      if (is.null(pairing)) next
+      paired_state <- if (!is.null(usage)) usage[[dev]] else NULL
+      text <- compose_interpretation(state_map[[dev]], pairing, paired_state, sR)
+      if (!is.null(text)) parts <- c(parts, text)
+    }
+    return(parts)
+  }
+
+  # ── Case 2: peer group ─────────────────────────────────────────
+  if (length(outlier_devs) >= 2) {
+    # Check if all outliers share the same direction
+    dirs <- unique(coarse_states[outlier_devs])
+    dirs <- dirs[!is.na(dirs)]
+    if (length(dirs) == 1) {
+      # Same direction — compose for the first, mention the rest
+      first_dev <- outlier_devs[1]
+      rest_devs <- outlier_devs[-1]
+      pairing <- sR$outlier[[paste0(pairing_prefix, first_dev)]]
+      if (!is.null(pairing)) {
+        paired_state <- if (!is.null(usage)) usage[[first_dev]] else NULL
+        text <- compose_interpretation(
+          state_map[[first_dev]], pairing, paired_state, sR)
+        if (!is.null(text)) {
+          rest_labels <- vapply(rest_devs, function(d) {
+            p <- sR$outlier[[paste0(pairing_prefix, d)]]
+            if (!is.null(p)) p$metric_label else d
+          }, character(1))
+          suffix <- paste0(
+            " A similar pattern is observed for ",
+            paste(rest_labels, collapse = " and "), ".")
+          parts <- c(parts, paste0(text, suffix))
+        }
+      }
+      return(parts)
+    }
+  }
+
+  # ── Case 3: single outlier or divergent peers — individual text ─
+  for (dev in outlier_devs) {
+    pairing <- sR$outlier[[paste0(pairing_prefix, dev)]]
     if (is.null(pairing)) next
     paired_state <- if (!is.null(usage)) usage[[dev]] else NULL
-    text <- compose_interpretation(dev_state, pairing, paired_state, sR)
+    text <- compose_interpretation(state_map[[dev]], pairing, paired_state, sR)
     if (!is.null(text)) parts <- c(parts, text)
   }
   parts
 }
 
+interpret_dev_ass_vascular_catheter <- function(state_map, sR, registry = NULL) {
+  compose_grouped_dev_ass(
+    devices = c("cvc", "pvc"),
+    total_device = NULL,
+    state_map = state_map, sR = sR, registry = registry,
+    pairing_prefix = "pairing_dev_ass_")
+}
+
 interpret_dev_ass_ventilatory_support <- function(state_map, sR, registry = NULL) {
-  usage <- registry$usage_density_rate_table
-  parts <- character(0)
-  for (dev in c("vs", "inv", "niv")) {
-    dev_state <- state_map[[dev]]
-    if (is.null(dev_state)) next
-    pairing <- sR$outlier[[paste0("pairing_dev_ass_", dev)]]
-    if (is.null(pairing)) next
-    paired_state <- if (!is.null(usage)) usage[[dev]] else NULL
-    text <- compose_interpretation(dev_state, pairing, paired_state, sR)
-    if (!is.null(text)) parts <- c(parts, text)
-  }
-  parts
+  compose_grouped_dev_ass(
+    devices = c("vs", "inv", "niv"),
+    total_device = "vs",
+    state_map = state_map, sR = sR, registry = registry,
+    pairing_prefix = "pairing_dev_ass_")
 }
 
 interpret_surgery <- function(state_map, sR, registry = NULL) {
@@ -651,13 +774,17 @@ classify_metrics <- function(table_data, identifier_col = NULL, combine_cols = N
   q3 <- table_data$q3_ref
   q2 <- if ("q2_ref" %in% col_names) table_data$q2_ref else q1 + (q3 - q1) / 2
 
-  # Pooled-rate CI columns for extreme-deviation classification when quartiles
-  # are suppressed. These columns are present when benchmark_data was generated
-  # with CI-enabled neoipcr (Phase 2).
+  # CI columns for extreme-deviation classification when quartiles are
+  # suppressed. Uses CI overlap test: the department CI and pooled CI must
+  # not overlap, which is stronger than comparing the department point
+  # estimate alone (which ignores the department's own imprecision).
   pooled_ref <- if ("pooled_ref" %in% col_names) table_data$pooled_ref else NULL
   ci_lower_ref <- if ("ci_lower_ref" %in% col_names) table_data$ci_lower_ref else NULL
   ci_upper_ref <- if ("ci_upper_ref" %in% col_names) table_data$ci_upper_ref else NULL
+  ci_lower_own <- if ("ci_lower_own" %in% col_names) table_data$ci_lower_own else NULL
+  ci_upper_own <- if ("ci_upper_own" %in% col_names) table_data$ci_upper_own else NULL
   has_pooled_ci <- !is.null(pooled_ref) && !is.null(ci_lower_ref) && !is.null(ci_upper_ref)
+  has_own_ci <- !is.null(ci_lower_own) && !is.null(ci_upper_own)
 
   # Classify states (check order matters)
   states <- character(length(identifiers))
@@ -666,12 +793,21 @@ classify_metrics <- function(table_data, identifier_col = NULL, combine_cols = N
     if (is.na(own)) {
       states[i] <- "na"
     } else if (is.na(q1[i]) || is.na(q3[i])) {
-      # Quartiles suppressed — check if pooled-rate CI indicates extreme
-      # deviation. Triple gate: outside CI, magnitude > 10×, CI not too wide.
+      # Quartiles suppressed — check if CIs indicate extreme deviation.
+      # Triple gate: non-overlapping CIs, magnitude > 10×, pooled CI
+      # narrow enough to be meaningful.
       if (has_pooled_ci && !is.na(pooled_ref[i]) &&
           !is.na(ci_lower_ref[i]) && !is.na(ci_upper_ref[i]) &&
           pooled_ref[i] > 0) {
-        outside_ci <- own < ci_lower_ref[i] || own > ci_upper_ref[i]
+        # Gate 1: CI non-overlap test. When the department CI is available,
+        # require that the two CIs don't overlap at all. Fall back to
+        # point-vs-CI when department CI is unavailable.
+        if (has_own_ci && !is.na(ci_lower_own[i]) && !is.na(ci_upper_own[i])) {
+          outside_ci <- ci_upper_own[i] < ci_lower_ref[i] ||
+                        ci_lower_own[i] > ci_upper_ref[i]
+        } else {
+          outside_ci <- own < ci_lower_ref[i] || own > ci_upper_ref[i]
+        }
         magnitude <- own / pooled_ref[i]
         extreme_magnitude <- magnitude > 10 || magnitude < 0.1
         ci_width_ratio <- (ci_upper_ref[i] - ci_lower_ref[i]) / pooled_ref[i]
@@ -1178,10 +1314,77 @@ options(`gt.locale` = locale_gt)
 
 sR <- get_string_resources(localeObj)
 
-# Feature flag: confidence interval display (default TRUE from _quarto.yml)
-include_ci <- !identical(
-  knitr::opts_knit$get("quarto.document_metadata")$includeConfidenceIntervals,
-  FALSE)
+# Inject non-translatable table cross-references into pairing definitions
+for (pairing_name in names(pairing_table_refs)) {
+  if (!is.null(sR$outlier[[pairing_name]])) {
+    sR$outlier[[pairing_name]] <- modifyList(
+      sR$outlier[[pairing_name]], pairing_table_refs[[pairing_name]])
+  }
+}
+
+# ── Confidence interval display ─────────────────────────────────────
+# Supported values: "all" (or TRUE), "none" (or FALSE), "rate",
+# "rate_pooled", "auto".  Default: "rate".
+ci_config <- params$includeConfidenceIntervals
+if (is.null(ci_config)) ci_config <- "rate"
+if (identical(ci_config, TRUE))  ci_config <- "all"
+if (identical(ci_config, FALSE)) ci_config <- "none"
+
+include_rate_ci     <- ci_config != "none"
+include_pooled_ci   <- ci_config %in% c("all", "rate_pooled", "auto")
+include_quartile_ci <- ci_config %in% c("all", "auto")
+auto_quartile_ci    <- identical(ci_config, "auto")
+
+# Compute adaptive column widths and font size for benchmark tables.
+# Bare-number columns get a fixed width; CI-annotated columns share the
+# remaining space equally; stub absorbs the rest (never below stub_min).
+# For no-reference tables (3 columns: stub, N, Rate), wider base widths
+# are used since there is more space.
+# Returns a named list: stub, n, rate, pooled, q, font_size.
+# Sum of widths = 100% by construction.
+compute_col_widths <- function(tbl_data, stub_min, has_reference = TRUE,
+                               base_font_size = 11L,
+                               bare_w = 9, n_w = 5) {
+  rate_has_ci <- include_rate_ci &&
+    "ci_lower_own" %in% names(tbl_data) && any(!is.na(tbl_data$ci_lower_own))
+
+  if (has_reference) {
+    pooled_has_ci <- include_pooled_ci &&
+      "ci_lower_ref" %in% names(tbl_data) && any(!is.na(tbl_data$ci_lower_ref))
+    q_has_ci <- include_quartile_ci &&
+      "q1_ci_lower_ref" %in% names(tbl_data) && any(!is.na(tbl_data$q1_ci_lower_ref))
+    n_data_cols <- 5L
+  } else {
+    pooled_has_ci <- FALSE
+    q_has_ci      <- FALSE
+    n_data_cols   <- 1L
+    bare_w <- 20   # wider bare columns in 3-column layout
+    n_w    <- 20
+  }
+
+  n_ci      <- sum(rate_has_ci) + sum(pooled_has_ci) + 3 * sum(q_has_ci)
+  remaining <- 100 - n_w - (n_data_cols - n_ci) * bare_w
+  per_ci    <- if (n_ci > 0) min(floor((remaining - stub_min) / n_ci), 25) else 0
+  stub_w    <- remaining - n_ci * per_ci
+
+  # Font size: larger when no CIs, smaller for dense tables with Q CIs
+  font_size <- if (ci_config == "none") {
+    base_font_size + 1L
+  } else if (q_has_ci) {
+    base_font_size - 1L
+  } else {
+    base_font_size
+  }
+
+  list(
+    stub      = stub_w,
+    n         = n_w,
+    rate      = if (rate_has_ci)   per_ci else bare_w,
+    pooled    = if (pooled_has_ci) per_ci else bare_w,
+    q         = if (q_has_ci)      per_ci else bare_w,
+    font_size = font_size
+  )
+}
 ```
 
 ```{r General setup and parameter preparation}
