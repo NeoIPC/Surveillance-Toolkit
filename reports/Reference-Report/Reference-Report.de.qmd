@@ -17,6 +17,26 @@ params:
   dhis2Hostname: NULL
   dhis2Port: NULL
   dhis2Path: NULL
+  sparseDataThreshold: 16
+  includeConfidenceIntervals: "all"
+  includeIntroductionTexts: true
+  includeMethodsTexts: true
+  includeTextPatientPopulation: true
+  includeTextNosocomial: true
+  includeTextInfectiousAgents: true
+  includeTextRiskFactors: true
+  includeTextSurgery: true
+  includeBirthWeightFigure: true
+  includeGestationalAgeFigure: true
+  includeIncidenceDensityTable: true
+  includeDeviceAssociatedIncidenceDensityTable: true
+  includeAgentPerInfectionRateTable: true
+  includeResistantPathogenInfectionRateTable: false
+  includeInfectiousAgentDetectionRateTable: true
+  includeAntibioticResistanceTestRateTable: false
+  includeRiskDensityRateTable: true
+  includeSurgicalProcedureRateTable: true
+  includeSecondaryBsiRateTable: false
 ---
 
 ```{r}

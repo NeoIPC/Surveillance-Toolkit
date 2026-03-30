@@ -9,208 +9,351 @@ footer_tex <- sprintf("\\renewcommand{\\FooterText}{%s}", sR$h2020_funding_state
 `r footer_tex`
 :::
 
-::: {.content-visible when-meta="includeHeader"}
+```{r}
+#| output: asis
+.show(params$includeHeader %||% TRUE)
+```
+
 {{< include _header.qmd >}}
 
-{{< pagebreak >}}
+::: {.content-visible when-format="pdf"}
+\FloatBarrier
 :::
+
+```{r}
+#| output: asis
+.end()
+```
 
 ## `{r} sR$headings$introduction`
 
-::: {.content-visible when-meta="includeIntroductionTexts"}
+```{r}
+#| output: asis
+.show(params$includeIntroductionTexts)
+```
+
 ```{r}
 #| output: asis
 include_localised("_introduction.Rmd")
 ```
-:::
+
+```{r}
+#| output: asis
+.end()
+```
 
 {{< include content/_introduction-list.qmd >}}
 
-::: {.content-visible when-meta="includeMethodsTexts"}
+```{r}
+#| output: asis
+if (params$includeMethodsTexts)
+  cat('::: {.content-visible when-meta="alwaysTrue"}\n\n##',
+      sR$methods$heading, '\n\n:::\n')
+```
 
-## `{r} sR$methods$heading`
+```{r}
+#| output: asis
+.show(params$includeMethodsTexts)
+```
 
 ```{r}
 #| output: asis
 include_localised("_methods.Rmd")
 ```
 
-:::
+```{r}
+#| output: asis
+.end()
+```
 
-::: {.content-visible when-meta="includeTextPatientPopulation"}
+```{r}
+#| output: asis
+.show(params$includeTextPatientPopulation)
+```
+
 ::: {.content-visible when-format="pdf"}
 \FloatBarrier
 :::
 
-## `{r} sR$headings$patient_population`
+```{r}
+#| output: asis
+if (params$includeTextPatientPopulation)
+  cat('::: {.content-visible when-meta="alwaysTrue"}\n\n##',
+      sR$headings$patient_population, '\n\n:::\n')
+```
 
-::: {.content-visible when-meta="includeIntroductionTexts"}
+```{r}
+#| output: asis
+.show(params$includeIntroductionTexts && params$includeTextPatientPopulation)
+```
+
 ```{r}
 #| output: asis
 include_localised("_patient_population.Rmd")
 ```
-:::
 
-::: {.content-visible when-meta="includeMethodsTexts"}
+```{r}
+#| output: asis
+.end()
+```
+
+```{r}
+#| output: asis
+.show(params$includeMethodsTexts && params$includeTextPatientPopulation)
+```
+
 ```{r}
 #| output: asis
 include_localised("_methods-patient-population.qmd")
 ```
-:::
-:::
 
-::: {.content-visible when-meta="includeBirthWeightFigure"}
+```{r}
+#| output: asis
+.end()
+```
+
+```{r}
+#| output: asis
+.end()
+```
+
+```{r}
+#| output: asis
+.show(params$includeBirthWeightFigure)
+```
+
 {{< include figures/_fig-bw.qmd >}}
-:::
 
-::: {.content-visible when-meta="includeGestationalAgeFigure"}
+```{r}
+#| output: asis
+.end()
+```
+
+```{r}
+#| output: asis
+.show(params$includeGestationalAgeFigure)
+```
+
 {{< include figures/_fig-ga.qmd >}}
 
 {{< pagebreak >}}
-:::
 
-::: {.content-visible when-meta="includeTextNosocomial"}
+```{r}
+#| output: asis
+.end()
+```
 
-## `{r} sR$headings$nosocomial_infections`
+```{r}
+#| output: asis
+if (show_section_nosocomial)
+  cat('::: {.content-visible when-meta="alwaysTrue"}\n\n##',
+      sR$headings$nosocomial_infections, '\n\n:::\n')
+```
 
-::: {.content-visible when-meta="includeIntroductionTexts"}
+```{r}
+#| output: asis
+.show(params$includeIntroductionTexts && show_section_nosocomial)
+```
+
 ```{r}
 #| output: asis
 include_localised("_nosocomial_infections.Rmd")
 ```
-:::
-:::
 
-::: {.content-visible when-meta="includeMethodsTexts"}
 ```{r}
 #| output: asis
-include_localised("_methods-incidence-density.qmd")
+.end()
 ```
-:::
 
-::: {.content-visible when-meta="includeIncidenceDensityTable"}
+```{r}
+#| output: asis
+.show(params$includeIncidenceDensityTable)
+```
+
 {{< include tables/_tbl-incidence-density-rates.qmd >}}
 
 {{< pagebreak >}}
-:::
 
-::: {.content-visible when-meta="includeMethodsTexts"}
 ```{r}
 #| output: asis
-include_localised("_methods-device-associated.qmd")
+.end()
 ```
-:::
 
-::: {.content-visible when-meta="includeDeviceAssociatedIncidenceDensityTable"}
+```{r}
+#| output: asis
+.show(params$includeDeviceAssociatedIncidenceDensityTable)
+```
+
 {{< include tables/_tbl-device-associated-incidence-density-rates.qmd >}}
 
 {{< pagebreak >}}
-:::
 
-::: {.content-visible when-meta="includeTextInfectiousAgents"}
+```{r}
+#| output: asis
+.end()
+```
 
-### `{r} sR$headings$infectious_agents`
+```{r}
+#| output: asis
+.show(params$includeSecondaryBsiRateTable)
+```
 
-::: {.content-visible when-meta="includeIntroductionTexts"}
+{{< include tables/_tbl-secondary-bsi-rates.qmd >}}
+
+{{< pagebreak >}}
+
+```{r}
+#| output: asis
+.end()
+```
+
+```{r}
+#| output: asis
+if (show_section_infectious)
+  cat('::: {.content-visible when-meta="alwaysTrue"}\n\n###',
+      sR$headings$infectious_agents, '\n\n:::\n')
+```
+
+```{r}
+#| output: asis
+.show(params$includeIntroductionTexts && show_section_infectious)
+```
+
 ```{r}
 #| output: asis
 include_localised("_infectious_agents.Rmd")
 ```
-:::
-:::
 
-::: {.content-visible when-meta="includeMethodsTexts"}
 ```{r}
 #| output: asis
-include_localised("_methods-agent-per-infection.qmd")
+.end()
 ```
-:::
 
-::: {.content-visible when-meta="includeAgentPerInfectionRateTable"}
+```{r}
+#| output: asis
+.show(params$includeAgentPerInfectionRateTable)
+```
+
 {{< include tables/_tbl-agent-per-infection-rate.qmd >}}
-:::
 
-::: {.content-visible when-meta="includeMethodsTexts"}
 ```{r}
 #| output: asis
-include_localised("_methods-abr-infection.qmd")
+.end()
 ```
-:::
 
-::: {.content-visible when-meta="includeResistantPathogenInfectionRateTable"}
+```{r}
+#| output: asis
+.show(params$includeResistantPathogenInfectionRateTable)
+```
+
 {{< include tables/_tbl-abr-infection-rate.qmd >}}
 
 {{< pagebreak >}}
-:::
 
-::: {.content-visible when-meta="includeMethodsTexts"}
 ```{r}
 #| output: asis
-include_localised("_methods-infectious-agent-detection.qmd")
+.end()
 ```
-:::
 
-::: {.content-visible when-meta="includeInfectiousAgentDetectionRateTable"}
+```{r}
+#| output: asis
+if (show_section_diagnostics)
+  cat('::: {.content-visible when-meta="alwaysTrue"}\n\n###',
+      sR$headings$diagnostics, '\n\n:::\n')
+```
+
+```{r}
+#| output: asis
+.show(params$includeInfectiousAgentDetectionRateTable)
+```
+
 {{< include tables/_tbl-infectious-agent-detection-rate.qmd >}}
-:::
 
-::: {.content-visible when-meta="includeMethodsTexts"}
 ```{r}
 #| output: asis
-include_localised("_methods-resistance-test.qmd")
+.end()
 ```
-:::
 
-::: {.content-visible when-meta="includeAntibioticResistanceTestRateTable"}
+```{r}
+#| output: asis
+.show(params$includeAntibioticResistanceTestRateTable)
+```
+
 {{< include tables/_tbl-resistance-test-rate.qmd >}}
 
 {{< pagebreak >}}
-:::
 
-::: {.content-visible when-meta="includeTextRiskFactors"}
+```{r}
+#| output: asis
+.end()
+```
 
-## `{r} sR$headings$risk_and_protective_factors`
+```{r}
+#| output: asis
+if (show_section_risk)
+  cat('::: {.content-visible when-meta="alwaysTrue"}\n\n##',
+      sR$headings$risk_and_protective_factors, '\n\n:::\n')
+```
 
-::: {.content-visible when-meta="includeIntroductionTexts"}
+```{r}
+#| output: asis
+.show(params$includeIntroductionTexts && show_section_risk)
+```
+
 ```{r}
 #| output: asis
 include_localised("_risk_and_protective_factors.Rmd")
 ```
-:::
-:::
 
-::: {.content-visible when-meta="includeMethodsTexts"}
 ```{r}
 #| output: asis
-include_localised("_methods-risk-density.qmd")
+.end()
 ```
-:::
 
-::: {.content-visible when-meta="includeRiskDensityRateTable"}
+```{r}
+#| output: asis
+.show(params$includeRiskDensityRateTable)
+```
+
 {{< include tables/_tbl-risk-density-rates.qmd >}}
 
 {{< pagebreak >}}
-:::
 
-::: {.content-visible when-meta="includeTextSurgery"}
+```{r}
+#| output: asis
+.end()
+```
 
-### `{r} sR$surgical_procedures`
+```{r}
+#| output: asis
+if (show_section_surgical)
+  cat('::: {.content-visible when-meta="alwaysTrue"}\n\n###',
+      sR$surgical_procedures, '\n\n:::\n')
+```
 
-::: {.content-visible when-meta="includeIntroductionTexts"}
+```{r}
+#| output: asis
+.show(params$includeIntroductionTexts && show_section_surgical)
+```
+
 ```{r}
 #| output: asis
 include_localised("_surgery.Rmd")
 ```
-:::
-:::
 
-::: {.content-visible when-meta="includeMethodsTexts"}
 ```{r}
 #| output: asis
-include_localised("_methods-surgical-procedures.qmd")
+.end()
 ```
-:::
 
-::: {.content-visible when-meta="includeSurgicalProcedureRateTable"}
+```{r}
+#| output: asis
+.show(params$includeSurgicalProcedureRateTable)
+```
+
 {{< include tables/_tbl-surgical-procedure-rates.qmd >}}
-:::
+
+```{r}
+#| output: asis
+.end()
+```

@@ -34,11 +34,22 @@ gramm_abbreviation: "g"
 header:
   department: Department
 headings:
+  antimicrobial_susceptibility_testing: Antimicrobial Susceptibility Testing
+  detection_of_infectious_agents: Detection of Infectious Agents
+  device_associated_infections: Device-Associated Infections
+  diagnostics: Diagnostics
   infectious_agents: Infectious Agents
+  infectious_agents_in_nosocomial_infections: >
+    Infectious Agents Detected in Nosocomial Infections
   introduction: Introduction
   nosocomial_infections: Nosocomial Infections
   patient_population: Patient Population
+  resistant_pathogens: Resistant Pathogens
   risk_and_protective_factors: Risk and Protective Factors
+  secondary_bsi: Secondary Bloodstream Infections
+  severe_infections_and_nec: >
+    Severe Neonatal Infections and Necrotizing Enterocolitis
+  surgical_procedures_by_category: Surgical Procedures by Category
 headerList:
   allBirthweights: "All eligible birth weights"
   allGestationalAges: "All eligible gestational ages"
@@ -57,7 +68,7 @@ headerList:
   numberOfDepartments: Number of departments contributing at least one patient record
   numberOfPatients: Number of patient records
   specialAnalysisHint: "This is a special analysis that"
-  admissionsExceedRecordsNote: "admissions may exceed records when a patient had more than one admission episode during the surveillance period"
+  admissionsExceedRecordsNote: "Admissions may exceed records when a patient had more than one admission episode during the surveillance period"
   sumOfPatientDays: Sum of patient days
 mrsa: "Methicillin-resistant Staphylococcus aureus (MRSA)"
 no_data: No data.
@@ -67,8 +78,8 @@ patient_days: "Patient days"
 percent_symbol: "%"
 si: "Severe infection"
 surgical_procedures: "Surgical Procedures"
-sparse_data_footnote: "Fewer than 10 events; interpret rate and confidence interval with caution."
-sparse_data_footnote_no_ci: "Fewer than 10 events; interpret rate with caution."
+sparse_data_footnote: "Fewer than {threshold} events; interpret rate and confidence interval with caution."
+sparse_data_footnote_no_ci: "Fewer than {threshold} events; interpret rate with caution."
 table_headers:
   n: "N"
   pooled: "Pooled"
@@ -259,7 +270,9 @@ methods:
     This section reports the rate at which detected pathogens carry specific
     resistance markers. An empty table indicates that no resistant organisms were
     detected among tested pathogens — it does not indicate that testing was not
-    performed. Resistance testing completeness is reported separately in the
+    performed.
+  resistant_pathogens_ast_ref: >-
+    Resistance testing completeness is reported separately in the
     antimicrobial susceptibility testing section.
   infectious_agent_detection: >-
     The infectious agent detection rate measures the proportion of infections in

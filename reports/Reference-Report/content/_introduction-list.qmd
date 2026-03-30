@@ -13,7 +13,10 @@ cat(sep = "\n", c(
   "",
   paste0(sR$headerList$numberOfAdmissions, ":"),
   "",
-  paste0(":   ", dR$numberOfAdmissions),
+  paste0(":   ", dR$numberOfAdmissions,
+    if (dR$numberOfAdmissions != dR$numberOfPatients)
+      paste0("^[", sR$headerList$admissionsExceedRecordsNote, "]")
+    else ""),
   "",
   paste0(sR$headerList$sumOfPatientDays, ":"),
   "",

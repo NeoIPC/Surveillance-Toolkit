@@ -50,6 +50,16 @@ param(
     [switch]$HideIntroductionTexts,
     [Parameter()]
     [switch]$HideMethodsTexts,
+    # Rows with fewer than this many events are flagged with a footnote
+    # indicating statistical instability. Based on the relative standard
+    # error of the Poisson distribution (1/sqrt(n)):
+    #   n=10 -> 31.6%  n=16 -> 25.0%  n=20 -> 22.4%
+    # Default 16 aligns with the 25% threshold recommended by the
+    # Washington State Department of Health for flagging unstable rates.
+    # Source: https://doh.wa.gov/sites/default/files/legacy/Documents/1500/SmallNumbers.pdf
+    [Parameter()]
+    [ValidateRange(1, 100)]
+    [int]$SparseDataThreshold,
     [Parameter()]
     [switch]$HideConfidenceIntervals,
     [Parameter()]
@@ -85,7 +95,8 @@ param(
         'InfectiousAgentDetectionRates',
         'ResistanceTestRates',
         'RiskDensityRates',
-        'SurgicalProcedureRates'
+        'SurgicalProcedureRates',
+        'SecondaryBloodstreamInfectionRates'
     )]
     [string[]]$IncludeElements = @(
         'PatientPopulation',
@@ -98,10 +109,17 @@ param(
         'IncidenceDensityRates',
         'DeviceAssociatedRates',
         'AgentPerInfectionRates',
+        'AntibioticResistanceRates',
         'InfectiousAgentDetectionRates',
+        'ResistanceTestRates',
         'RiskDensityRates',
-        'SurgicalProcedureRates'
-    )
+        'SurgicalProcedureRates',
+        'SecondaryBloodstreamInfectionRates'
+    ),
+    # Elements to remove from the default IncludeElements list.
+    # Processed after IncludeElements: the effective set is IncludeElements minus ExcludeElements.
+    [Parameter()]
+    [string[]]$ExcludeElements = @()
 )
 
 . "$PSScriptRoot/NeoipcReportHelpers.ps1"
@@ -257,13 +275,13 @@ $commonParams.testUnitFilter = (-not $IncludeTestUnits)
 $commonParams.defaultPatientFilter = (-not $IncludeNonCorePatients)
 if ($HideIntroductionTexts.IsPresent) { $commonParams['includeIntroductionTexts'] = 'false' }
 if ($HideMethodsTexts.IsPresent) { $commonParams['includeMethodsTexts'] = 'false' }
+if ($SparseDataThreshold) { $commonParams['sparseDataThreshold'] = $SparseDataThreshold }
 if ($HideConfidenceIntervals.IsPresent) { $commonParams['includeConfidenceIntervals'] = 'false' }
 
 # Map user-friendly element names to internal Quarto metadata keys.
 # Each element can map to multiple keys (e.g. a section includes its text,
 # figures and tables together).
 $elementMapping = @{
-    'Header'                            = @('includeHeader')
     'PatientPopulation'                 = @('includeTextPatientPopulation',
                                             'includeBirthWeightFigure',
                                             'includeGestationalAgeFigure')
@@ -290,10 +308,14 @@ $elementMapping = @{
     'SecondaryBloodstreamInfectionRates' = @('includeSecondaryBsiRateTable')
 }
 
+# Apply exclusions: remove ExcludeElements from the effective IncludeElements list
+if ($ExcludeElements.Count -gt 0) {
+    $IncludeElements = @($IncludeElements | Where-Object { $_ -notin $ExcludeElements })
+}
+
 # Convert user-friendly array to Quarto boolean parameters.
 # Collect all metadata keys that should be true, then set everything else false.
-# Header is always included — it provides essential context for all other sections
-$commonParams['includeHeader'] = $true
+# Header is always included (unconditional in _content.qmd)
 
 $enabledKeys = [System.Collections.Generic.HashSet[string]]::new()
 foreach ($element in $IncludeElements) {
@@ -398,14 +420,11 @@ try {
                 $outFileName = "${scriptTimestamp}_NeoIPC-Surveillance-Reference-Report.${locale}.${format}"
                 $outFile = Join-Path $outputDirPath $outFileName
                 $quartoArgs = @('render', $qmd, '--profile', $profileName, '--to', $format, '-o', $outFileName)
+                # All parameters via -P (R reads params$, conditional
+                # blocks use cat() + when-meta="alwaysTrue" wrappers)
                 foreach ($kvp in $commonParams.GetEnumerator()) {
                     if ($null -ne $kvp.Value -and '' -ne $kvp.Value) {
-                        # Use -M for include* metadata flags, -P for other params
-                        if ($kvp.Key -like 'include*') {
-                            $quartoArgs += @('-M', "$($kvp.Key):$($kvp.Value)")
-                        } else {
-                            $quartoArgs += @('-P', "$($kvp.Key):$($kvp.Value)")
-                        }
+                        $quartoArgs += @('-P', "$($kvp.Key):$($kvp.Value)")
                     }
                 }
                 if ($needsJson -or $isDataFileMode) {

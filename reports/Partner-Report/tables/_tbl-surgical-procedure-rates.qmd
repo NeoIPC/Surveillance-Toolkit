@@ -218,10 +218,14 @@ if (has_data) {
       )
   }
 
-  if (any(tbl_data$n_own < 10, na.rm = TRUE)) {
-    sparse_note <- if (include_rate_ci) sR$sparse_data_footnote else sR$sparse_data_footnote_no_ci
+  if (any(tbl_data$n_own < sparse_threshold, na.rm = TRUE)) {
+    sparse_note <- glue::glue(if (include_rate_ci) sR$sparse_data_footnote else sR$sparse_data_footnote_no_ci, threshold = sparse_threshold)
     tbl <- tbl |>
-      gt::tab_footnote(footnote = sparse_note)
+      gt::tab_footnote(
+        footnote = sparse_note,
+        locations = cells_body(
+          columns = sR$table_headers$n,
+          rows = tbl_data$n_own < sparse_threshold))
   }
 
   tbl

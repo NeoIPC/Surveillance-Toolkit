@@ -1,17 +1,20 @@
-`r sR$methods$pooled_rate`
-
-`r sR$methods$quartiles`
-
 ```{r}
 #| output: asis
+# Reference-specific methodology (pooled rate, quartiles, CIs) is only
+# shown when reference data is present.
+has_ref <- exists("has_reference") && has_reference
+
+if (has_ref) cat(sR$methods$pooled_rate, "\n")
+if (has_ref) cat("\n", sR$methods$quartiles, "\n")
+
 # CI flags: Partner Report has granular flags; Reference Report has include_ci.
 has_any_ci <- if (exists("include_rate_ci")) include_rate_ci || include_pooled_ci else if (exists("include_ci")) include_ci else TRUE
 has_q_ci <- if (exists("include_quartile_ci")) include_quartile_ci else if (exists("include_ci")) include_ci else TRUE
 has_auto <- if (exists("auto_quartile_ci")) auto_quartile_ci else FALSE
 
-if (has_any_ci) cat(sR$methods$ci_rates, "\n")
-if (has_q_ci) cat("\n", sR$methods$ci_quartile_bootstrap, "\n")
-if (has_auto) cat("\n", sR$methods$ci_quartile_auto_note, "\n")
+if (has_any_ci) cat("\n", sR$methods$ci_rates, "\n")
+if (has_ref && has_q_ci) cat("\n", sR$methods$ci_quartile_bootstrap, "\n")
+if (has_ref && has_auto) cat("\n", sR$methods$ci_quartile_auto_note, "\n")
 ```
 
 `r sR$methods$sparse_data`

@@ -106,10 +106,59 @@ options(`gt.locale` = locale_gt)
 
 sR <- get_string_resources(localeObj)
 
-# Feature flag: confidence interval display (default TRUE from _quarto.yml)
-include_ci <- !identical(
-  knitr::opts_knit$get("quarto.document_metadata")$includeConfidenceIntervals,
-  FALSE)
+# ── Confidence interval display ─────────────────────────────────────
+# Supported values: "all" (or TRUE), "none" (or FALSE), "rate",
+# "rate_pooled", "auto".  Default: "all" (Reference Report shows everything).
+ci_config <- params$includeConfidenceIntervals
+if (is.null(ci_config)) ci_config <- "all"
+if (identical(ci_config, TRUE) || identical(ci_config, "true"))   ci_config <- "all"
+if (identical(ci_config, FALSE) || identical(ci_config, "false")) ci_config <- "none"
+
+# Granular flags — Reference Report has no "own" rate column, so
+# include_rate_ci controls the pooled rate CI (the only rate column).
+include_rate_ci     <- ci_config != "none"
+include_pooled_ci   <- FALSE  # no separate pooled column in Reference Report
+include_quartile_ci <- ci_config %in% c("all", "auto")
+auto_quartile_ci    <- identical(ci_config, "auto")
+
+# ── Adaptive column widths ─────────────────────────────────────────
+# Reference Report layout: stub | N | Pooled(CI) | Q1(CI) | Q2(CI) | Q3(CI)
+# 4 data columns (Pooled + 3 quartiles) plus N.
+compute_col_widths <- function(tbl_data, stub_min = 25,
+                               base_font_size = 11L,
+                               bare_w = 15, n_w = 8) {
+  pooled_has_ci <- include_rate_ci &&
+    "ci_lower" %in% names(tbl_data) && any(!is.na(tbl_data$ci_lower))
+  q_has_ci <- include_quartile_ci &&
+    "q1_ci_lower" %in% names(tbl_data) && any(!is.na(tbl_data$q1_ci_lower))
+
+  n_data_cols <- 4L  # pooled + q1 + q2 + q3
+  n_ci      <- sum(pooled_has_ci) + 3 * sum(q_has_ci)
+  remaining <- 100 - n_w - (n_data_cols - n_ci) * bare_w
+  per_ci    <- if (n_ci > 0) min(floor((remaining - stub_min) / n_ci), 25) else 0
+  stub_w    <- remaining - n_ci * per_ci
+
+  font_size <- if (ci_config == "none") {
+    base_font_size + 1L
+  } else if (q_has_ci) {
+    base_font_size - 1L
+  } else {
+    base_font_size
+  }
+
+  list(
+    stub      = stub_w,
+    n         = n_w,
+    pooled    = if (pooled_has_ci) per_ci else bare_w,
+    q         = if (q_has_ci)      per_ci else bare_w,
+    font_size = font_size
+  )
+}
+
+# Sparse data threshold: rows with fewer than this many events are flagged.
+# Default: 16 (relative standard error ≥ 25%, aligned with WA DOH criterion).
+# Relative standard error = 1/√n: n=10 → 31.6%, n=16 → 25.0%, n=20 → 22.4%.
+sparse_threshold <- as.integer(params$sparseDataThreshold %||% 16L)
 ```
 
 ```{r Importing data}
@@ -145,6 +194,19 @@ if (!is.null(params$referenceDataFile)) {
 
 ```
 
+```{r Department minimum check}
+#| include: false
+# Warn when fewer than 5 departments contribute — reference data from very
+# small groups may expose which departments had specific rare events.
+if (reference_data$n_departments < 5L) {
+  warning(sprintf(
+    paste0("Reference data contains only %d department(s). ",
+           "Publishing reference reports based on fewer than 5 departments ",
+           "is not recommended due to organizational data protection concerns."),
+    reference_data$n_departments))
+}
+```
+
 ```{r Preparing localised data}
 #| include: false
 
@@ -163,7 +225,11 @@ ref_counts <- list(
     dplyr::filter(inf_type == "overall") |> dplyr::pull("total"),
   n_surgical_departments = reference_data$n_surgical_departments,
   n_surgical_patients = reference_data$n_surgical_patients |> dplyr::pull("total"),
-  n_surgical_procedures = reference_data$n_surgical_procedures |> dplyr::pull("total"),
+  # Use the table's Overall row to match the displayed N (excludes "not_surgery")
+  n_surgical_procedures = if (!is.null(reference_data$surgery_rate_table))
+    reference_data$surgery_rate_table |>
+      dplyr::filter(.data$pro_cat == "overall") |> dplyr::pull("n")
+    else 0L,
   n_surgical_site_infections = reference_data$n_infections |>
     dplyr::filter(inf_type == "ssi") |> dplyr::pull("total")
 )
@@ -173,6 +239,35 @@ dR <- c(
     lubridate::now("UTC"), format = "%x %X", tz = "UTC", usetz = TRUE)),
   format_dataset_resources(reference_data$metadata, ref_counts, sR)
 )
+
+# ── Conditional cross-references ──────────────────────────────────
+dR$refDetectionTable <- if (params$includeInfectiousAgentDetectionRateTable)
+  " (@tbl-infectious-agent-detection-rate)" else ""
+dR$refAgentPerInfTable <- if (params$includeAgentPerInfectionRateTable)
+  " (@tbl-agent-per-infection-rate)" else ""
+dR$refIDRTable <- if (params$includeIncidenceDensityTable)
+  " (@tbl-incidence-density-rates)" else ""
+dR$refDevAssTable <- if (params$includeDeviceAssociatedIncidenceDensityTable)
+  " (@tbl-device-associated-incidence-density-rates)" else ""
+
+# ── Section visibility flags ─────────────────────────────────────
+show_section_surgical    <- params$includeSurgicalProcedureRateTable
+show_section_infectious  <- params$includeAgentPerInfectionRateTable ||
+  params$includeResistantPathogenInfectionRateTable
+show_section_diagnostics <- params$includeInfectiousAgentDetectionRateTable ||
+  params$includeAntibioticResistanceTestRateTable
+show_section_nosocomial  <- params$includeIncidenceDensityTable ||
+  params$includeDeviceAssociatedIncidenceDensityTable ||
+  params$includeSecondaryBsiRateTable ||
+  show_section_infectious || show_section_diagnostics
+show_section_risk        <- params$includeRiskDensityRateTable ||
+  show_section_surgical
+
+# ── Conditional block helpers ────────────────────────────────────
+.show <- function(flag) cat('::: {.content-',
+  if (flag) 'visible' else 'hidden',
+  ' when-meta="alwaysTrue"}\n', sep = '')
+.end <- function() cat(':::\n')
 
 # Detect if reference dataset has mixed World Bank classes
 mixed_wb_classes <- detect_mixed_wb_classes(

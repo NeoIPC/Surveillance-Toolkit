@@ -77,20 +77,9 @@ headerList:
     further affecting comparability of certain indicators.
 
 headings:
-  antimicrobial_susceptibility_testing: Antimicrobial Susceptibility Testing
   birth_weight_distribution: Birth Weight Distribution
-  detection_of_infectious_agents: Detection of Infectious Agents
-  device_associated_infections: Device-Associated Infections
-  diagnostics: Diagnostics
   gestational_age_distribution: Gestational Age Distribution
-  infectious_agents_in_nosocomial_infections: >
-    Infectious Agents Detected in Nosocomial Infections
   presence_of_risk_and_protective_factors: Presence of Risk and Protective Factors in Your Department
-  resistant_pathogens: Resistant Pathogens
-  secondary_bsi: Secondary Bloodstream Infections
-  severe_infections_and_nec: >
-    Severe Neonatal Infections and Necrotizing Enterocolitis
-  surgical_procedures_by_category: Surgical Procedures by Category
 
 outlier:
 
@@ -166,34 +155,34 @@ outlier:
     to limited sample size.
   # ── Composable interpretation framework ───────────────────────
   composed:
-    clause_concordant_high: ", consistent with elevated {paired_label} ({paired_ref})"
-    clause_concordant_low: ", consistent with low {paired_label} ({paired_ref})"
-    clause_discordant_high: " despite elevated {paired_label} ({paired_ref})"
-    clause_discordant_low: " despite low {paired_label} ({paired_ref})"
+    clause_concordant_high: ", consistent with elevated {paired_label}{paired_ref}"
+    clause_concordant_low: ", consistent with low {paired_label}{paired_ref}"
+    clause_discordant_high: " despite elevated {paired_label}{paired_ref}"
+    clause_discordant_low: " despite low {paired_label}{paired_ref}"
     clause_fallback: >-
       . Reference quartiles for {primary_paired_label}
       ({primary_paired_ref}) are not yet available.
       {fallback_paired_label_sc} is {fallback_position} the reference
       range ({fallback_paired_ref})
     clause_no_quartiles: >-
-      . Reference quartiles for {paired_label} ({paired_ref}) are
+      . Reference quartiles for {paired_label}{paired_ref} are
       not yet available
     clause_concordant_high_pooled: >-
-      , consistent with elevated {paired_label} ({paired_ref}),
+      , consistent with elevated {paired_label}{paired_ref},
       noting that reference quartiles for this metric are not
       yet available
     clause_concordant_low_pooled: >-
-      , consistent with low {paired_label} ({paired_ref}),
+      , consistent with low {paired_label}{paired_ref},
       noting that reference quartiles for this metric are not
       yet available
     clause_discordant_high_pooled: >-
-      despite elevated {paired_label} ({paired_ref}), noting
+      despite elevated {paired_label}{paired_ref}, noting
       that reference quartiles for this metric are not yet
       available
     clause_discordant_low_pooled: >-
-      despite low {paired_label} ({paired_ref}), noting that
+      despite low {paired_label}{paired_ref}, noting that
       reference quartiles for this metric are not yet available
-    clause_within_iqr: ". {paired_label_sc} is within the reference range ({paired_ref})"
+    clause_within_iqr: ". {paired_label_sc} is within the reference range{paired_ref}"
     opening_above: "The {metric_label} is above the reference range"
     opening_above_pooled: "The {metric_label} is above the pooled reference rate"
     opening_below: "The {metric_label} is below the reference range"
@@ -358,21 +347,19 @@ outlier:
       infections. Blood culture practices and clinical sepsis
       diagnostic criteria may warrant review.
     action_low: >-
-      Pathogen detection rates
-      (@tbl-infectious-agent-detection-rate) may help confirm this
-      reflects effective prevention rather than differences in
+      Pathogen detection rates{ref_detection_table} may help confirm
+      this reflects effective prevention rather than differences in
       diagnostic practices.
     action_low_narrowed: >-
       This pattern may reflect low non-device-associated BSI.
-      Pathogen detection rates
-      (@tbl-infectious-agent-detection-rate) may help confirm
-      adequate diagnostic workup.
+      Pathogen detection rates{ref_detection_table} may help
+      confirm adequate diagnostic workup.
     metric_label: "primary sepsis/BSI rate"
     paired_label: "device-associated BSI rates"
 
   # Definition 5: CVC-associated sepsis/BSI ↔ CVC utilization (simple)
   pairing_dev_ass_cvc:
-    above_is_concerning: true
+    above_is_concerning: false
     action_elevated: >-
       Central line indication criteria and care bundle adherence may
       be relevant areas for assessment.
@@ -380,17 +367,16 @@ outlier:
       A focused review of central line insertion and maintenance
       practices may be warranted rather than utilization patterns.
     action_low: >-
-      Pathogen detection rates
-      (@tbl-infectious-agent-detection-rate) may help confirm this
-      reflects effective central line care rather than differences
-      in diagnostic practices.
+      Pathogen detection rates{ref_detection_table} may help confirm
+      this reflects effective central line care rather than
+      differences in diagnostic practices.
     action_low_narrowed: >-
       The low infection rate may partly reflect lower device exposure
       rather than care practices alone.
     metric_label: "CVC-associated sepsis/BSI rate"
     paired_label: "CVC utilization"
   pairing_dev_ass_inv:
-    above_is_concerning: true
+    above_is_concerning: false
     action_elevated: >-
       Invasive ventilation care practices and pneumonia prevention
       measures may be relevant areas for assessment.
@@ -398,17 +384,16 @@ outlier:
       A focused review of invasive ventilation care practices may be
       warranted rather than utilization patterns.
     action_low: >-
-      Pathogen detection for pneumonia
-      (@tbl-infectious-agent-detection-rate) may help confirm this
-      reflects effective invasive ventilation care rather than
-      differences in diagnostic practices.
+      Pathogen detection for pneumonia{ref_detection_table} may help
+      confirm this reflects effective invasive ventilation care
+      rather than differences in diagnostic practices.
     action_low_narrowed: >-
       The low pneumonia rate may partly reflect lower invasive
       ventilation exposure rather than care practices alone.
     metric_label: "INV-associated pneumonia rate"
     paired_label: "INV utilization"
   pairing_dev_ass_niv:
-    above_is_concerning: true
+    above_is_concerning: false
     action_elevated: >-
       Non-invasive ventilation practices and pneumonia prevention
       measures may be relevant areas for assessment.
@@ -425,7 +410,7 @@ outlier:
     paired_label: "NIV utilization"
   # Definition 6: PVC-associated sepsis/BSI ↔ PVC utilization (simple)
   pairing_dev_ass_pvc:
-    above_is_concerning: true
+    above_is_concerning: false
     action_elevated: >-
       Peripheral line management and dwell time policies may be
       relevant areas for assessment.
@@ -442,7 +427,7 @@ outlier:
     paired_label: "PVC utilization"
   # Definitions 7–9: VS/INV/NIV-associated pneumonia ↔ utilization (simple)
   pairing_dev_ass_vs:
-    above_is_concerning: true
+    above_is_concerning: false
     action_elevated: >-
       Respiratory care practices and pneumonia prevention measures may
       be relevant areas for assessment.
@@ -451,10 +436,9 @@ outlier:
       prevention measures may be warranted rather than utilization
       patterns.
     action_low: >-
-      Pathogen detection rates
-      (@tbl-infectious-agent-detection-rate) may help confirm this
-      reflects effective ventilatory care rather than differences in
-      diagnostic practices.
+      Pathogen detection rates{ref_detection_table} may help confirm
+      this reflects effective ventilatory care rather than differences
+      in diagnostic practices.
     action_low_narrowed: >-
       The low pneumonia rate may partly reflect lower ventilatory
       support exposure rather than care practices alone.
@@ -469,13 +453,12 @@ outlier:
       and weaning protocols, may be relevant areas for assessment.
     action_elevated_narrowed: >-
       The elevation may be concentrated in non-ventilator-associated
-      pneumonia. Pneumonia diagnostic criteria and pathogen detection
-      (@tbl-infectious-agent-detection-rate) may warrant review.
+      pneumonia. Pneumonia diagnostic criteria and pathogen
+      detection{ref_detection_table} may warrant review.
     action_low: >-
-      Pathogen detection for pneumonia
-      (@tbl-infectious-agent-detection-rate) may help confirm this
-      reflects effective respiratory care rather than differences in
-      diagnostic practices.
+      Pathogen detection for pneumonia{ref_detection_table} may help
+      confirm this reflects effective respiratory care rather than
+      differences in diagnostic practices.
     action_low_narrowed: >-
       Pneumonia diagnostic criteria and case ascertainment practices
       may warrant review.
@@ -509,13 +492,11 @@ outlier:
   pairing_severe_infection:
     action_elevated: >-
       The component rates (primary sepsis/BSI and pneumonia) and the
-      device-associated infection rates
-      (@tbl-device-associated-incidence-density-rates) may help
+      device-associated infection rates{ref_dev_ass_table} may help
       identify where the elevation is concentrated.
     action_low: >-
-      Diagnostic completeness (@tbl-infectious-agent-detection-rate)
-      may help confirm this is supported by thorough microbiological
-      workup.
+      Diagnostic completeness{ref_detection_table} may help confirm
+      this is supported by thorough microbiological workup.
     metric_label: "overall severe infection rate"
   resistance_test_interpretation_routine_high: >-
     High resistance testing rates suggest thorough screening
@@ -622,16 +603,80 @@ outlier:
     non-invasive ventilation is below it. This pattern may suggest
     a higher threshold for initiating non-invasive support or
     differences in escalation and weaning practices.
+  ventilatory_support_interpretation_inv_high_niv_mid: >-
+    Invasive ventilation is above the reference range while
+    non-invasive ventilation is within it, indicating a higher
+    proportion of invasive ventilation relative to the reference.
+    This may suggest opportunities for earlier transition to
+    non-invasive support or differences in weaning practices.
   ventilatory_support_interpretation_niv_high_inv_low: >-
     Non-invasive ventilation is above the reference range while
     invasive ventilation is below it. This pattern may be consistent
     with a non-invasive-first strategy that reduces the need for
     intubation.
+  ventilatory_support_interpretation_niv_high_inv_mid: >-
+    Non-invasive ventilation is above the reference range while
+    invasive ventilation is within it. This may reflect broader use
+    of non-invasive respiratory support relative to the reference.
   ventilatory_support_vs_zero: >-
     No ventilatory support exposure was recorded during the
     surveillance period despite available patient day data. This may
     indicate incomplete data capture, a very small population, or
     generation of the report very early after starting surveillance.
+
+  # ── Table 4: Infectious agent groupings ──────────────────────────
+  agent_staphylococci_cns_low: >-
+    Low coagulase-negative staphylococci detection rates may reflect
+    strict blood culture criteria or effective contamination prevention
+    practices. Coagulase-negative staphylococci are common skin
+    commensals, and detection rates are influenced by both true infection
+    and contamination.
+  agent_staphylococci_cns_high: >-
+    Elevated coagulase-negative staphylococci detection rates may reflect
+    higher contamination rates, more liberal blood culture criteria, or
+    a genuine increase in coagulase-negative staphylococcal infections.
+    These organisms are common skin commensals and elevated rates may
+    warrant review of blood culture collection practices.
+  agent_staphylococci_cops_high: >-
+    Elevated coagulase-positive staphylococci detection rates may
+    indicate increased Staphylococcus aureus burden. This may warrant
+    review of skin care protocols and vascular catheter management
+    practices.
+  agent_enterobacterales_high: >-
+    Elevated Enterobacterales detection rates may suggest
+    environmental or hygiene-related transmission patterns. Collective
+    elevation across Gram-negative organisms may warrant environmental
+    surveillance and review of hand hygiene and surface disinfection
+    practices.
+  agent_enterobacterales_low: >-
+    Low Enterobacterales detection rates relative to the reference
+    may reflect differences in patient population, antibiotic exposure
+    patterns, or microbiological sampling practices.
+
+  # ── Table 5: Resistance groupings ────────────────────────────────
+  abr_gram_negative_3gcr_high_only: >-
+    Elevated third-generation cephalosporin resistance (3GCR) without
+    corresponding carbapenem resistance elevation may indicate
+    extended-spectrum beta-lactamase (ESBL) production. Carbapenems
+    may remain effective for these organisms.
+  abr_gram_negative_3gcr_and_car_high: >-
+    Both third-generation cephalosporin resistance (3GCR) and
+    carbapenem resistance (CARBR) are elevated, indicating broad
+    Gram-negative resistance. This significantly limits treatment
+    options and may warrant enhanced infection control measures and
+    antimicrobial stewardship review.
+  abr_gram_negative_cor_high: >-
+    Elevated colistin resistance (COLR) is a critical concern as
+    colistin is often a last-resort agent for multidrug-resistant
+    Gram-negative infections.
+  abr_gram_positive_mrsa_high: >-
+    Elevated methicillin-resistant Staphylococcus aureus (MRSA)
+    rates may warrant review of screening, decolonisation, and
+    contact isolation practices.
+  abr_gram_positive_vre_high: >-
+    Elevated vancomycin-resistant Enterococcus (VRE) rates may
+    warrant review of antibiotic stewardship and environmental
+    cleaning practices.
 own_data_label: "Your data"
 own_unit: Own department
 reference_data: Reference data
@@ -640,6 +685,7 @@ tbl-abr-infection-rate:
   n_footnote: "%s: The aggregated number of infections with resistant pathogens in your department's infants."
   no_resistant_pathogens_note: >
     No resistant pathogens were detected in your department's infections during this period.
+  no_resistant_pathogens_note_ast_ref: >
     If antimicrobial susceptibility testing rates in @tbl-resistance-test-rate are low,
     under-detection of resistant organisms cannot be excluded.
   rate_footnote: "%s: The Antibiotic-Resistant Infection Rate for your department (percentage of infections with resistant pathogens)."

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NeoIPC Surveillance Reports 0.9\n"
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-03-28 20:52+0100\n"
+"POT-Creation-Date: 2026-03-30 08:36+0200\n"
 "PO-Revision-Date: 2026-03-16 08:36+0100\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -145,7 +145,7 @@ msgstr ""
 #. type: Hash Value: headerList admissionsExceedRecordsNote
 #: reports/common.yaml:1
 #, no-wrap
-msgid "admissions may exceed records when a patient had more than one admission episode during the surveillance period"
+msgid "Admissions may exceed records when a patient had more than one admission episode during the surveillance period"
 msgstr ""
 
 #. type: Hash Value: headerList allBirthweights
@@ -256,10 +256,40 @@ msgstr ""
 msgid "Sum of patient days"
 msgstr ""
 
+#. type: Hash Value: headings antimicrobial_susceptibility_testing
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Antimicrobial Susceptibility Testing"
+msgstr ""
+
+#. type: Hash Value: headings detection_of_infectious_agents
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Detection of Infectious Agents"
+msgstr ""
+
+#. type: Hash Value: headings device_associated_infections
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Device-Associated Infections"
+msgstr ""
+
+#. type: Hash Value: headings diagnostics
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Diagnostics"
+msgstr ""
+
 #. type: Hash Value: headings infectious_agents
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Infectious Agents"
+msgstr ""
+
+#. type: Hash Value: headings infectious_agents_in_nosocomial_infections
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Infectious Agents Detected in Nosocomial Infections\n"
 msgstr ""
 
 #. type: Hash Value: headings introduction
@@ -280,10 +310,34 @@ msgstr ""
 msgid "Patient Population"
 msgstr ""
 
+#. type: Hash Value: headings resistant_pathogens
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Resistant Pathogens"
+msgstr ""
+
 #. type: Hash Value: headings risk_and_protective_factors
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Risk and Protective Factors"
+msgstr ""
+
+#. type: Hash Value: headings secondary_bsi
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Secondary Bloodstream Infections"
+msgstr ""
+
+#. type: Hash Value: headings severe_infections_and_nec
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Severe Neonatal Infections and Necrotizing Enterocolitis\n"
+msgstr ""
+
+#. type: Hash Value: headings surgical_procedures_by_category
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Surgical Procedures by Category"
 msgstr ""
 
 #. type: Hash Value: methods agent_per_infection
@@ -361,7 +415,13 @@ msgstr ""
 #. type: Hash Value: methods resistant_pathogens
 #: reports/common.yaml:1
 #, no-wrap
-msgid "This section reports the rate at which detected pathogens carry specific resistance markers. An empty table indicates that no resistant organisms were detected among tested pathogens — it does not indicate that testing was not performed. Resistance testing completeness is reported separately in the antimicrobial susceptibility testing section."
+msgid "This section reports the rate at which detected pathogens carry specific resistance markers. An empty table indicates that no resistant organisms were detected among tested pathogens — it does not indicate that testing was not performed."
+msgstr ""
+
+#. type: Hash Value: methods resistant_pathogens_ast_ref
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Resistance testing completeness is reported separately in the antimicrobial susceptibility testing section."
 msgstr ""
 
 #. type: Hash Value: methods risk_density
@@ -433,13 +493,13 @@ msgstr ""
 #. type: Hash Value: sparse_data_footnote
 #: reports/common.yaml:1
 #, no-wrap
-msgid "Fewer than 10 events; interpret rate and confidence interval with caution."
+msgid "Fewer than {threshold} events; interpret rate and confidence interval with caution."
 msgstr ""
 
 #. type: Hash Value: sparse_data_footnote_no_ci
 #: reports/common.yaml:1
 #, no-wrap
-msgid "Fewer than 10 events; interpret rate with caution."
+msgid "Fewer than {threshold} events; interpret rate with caution."
 msgstr ""
 
 #. type: Hash Value: surgical_procedures
@@ -1252,34 +1312,10 @@ msgstr ""
 msgid "Additionally, the World Bank income classifications differ between your data and the reference data (%s: %s; %s: %s), which may indicate even more substantial differences in healthcare system resources and infrastructure, further affecting comparability of certain indicators.\n"
 msgstr ""
 
-#. type: Hash Value: headings antimicrobial_susceptibility_testing
-#: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "Antimicrobial Susceptibility Testing"
-msgstr ""
-
 #. type: Hash Value: headings birth_weight_distribution
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Birth Weight Distribution"
-msgstr ""
-
-#. type: Hash Value: headings detection_of_infectious_agents
-#: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "Detection of Infectious Agents"
-msgstr ""
-
-#. type: Hash Value: headings device_associated_infections
-#: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "Device-Associated Infections"
-msgstr ""
-
-#. type: Hash Value: headings diagnostics
-#: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "Diagnostics"
 msgstr ""
 
 #. type: Hash Value: headings gestational_age_distribution
@@ -1288,40 +1324,40 @@ msgstr ""
 msgid "Gestational Age Distribution"
 msgstr ""
 
-#. type: Hash Value: headings infectious_agents_in_nosocomial_infections
-#: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "Infectious Agents Detected in Nosocomial Infections\n"
-msgstr ""
-
 #. type: Hash Value: headings presence_of_risk_and_protective_factors
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Presence of Risk and Protective Factors in Your Department"
 msgstr ""
 
-#. type: Hash Value: headings resistant_pathogens
+#. type: Hash Value: outlier abr_gram_negative_3gcr_and_car_high
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "Resistant Pathogens"
+msgid "Both third-generation cephalosporin resistance (3GCR) and carbapenem resistance (CARBR) are elevated, indicating broad Gram-negative resistance. This significantly limits treatment options and may warrant enhanced infection control measures and antimicrobial stewardship review."
 msgstr ""
 
-#. type: Hash Value: headings secondary_bsi
+#. type: Hash Value: outlier abr_gram_negative_3gcr_high_only
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "Secondary Bloodstream Infections"
+msgid "Elevated third-generation cephalosporin resistance (3GCR) without corresponding carbapenem resistance elevation may indicate extended-spectrum beta-lactamase (ESBL) production. Carbapenems may remain effective for these organisms."
 msgstr ""
 
-#. type: Hash Value: headings severe_infections_and_nec
+#. type: Hash Value: outlier abr_gram_negative_cor_high
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "Severe Neonatal Infections and Necrotizing Enterocolitis\n"
+msgid "Elevated colistin resistance (COLR) is a critical concern as colistin is often a last-resort agent for multidrug-resistant Gram-negative infections."
 msgstr ""
 
-#. type: Hash Value: headings surgical_procedures_by_category
+#. type: Hash Value: outlier abr_gram_positive_mrsa_high
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "Surgical Procedures by Category"
+msgid "Elevated methicillin-resistant Staphylococcus aureus (MRSA) rates may warrant review of screening, decolonisation, and contact isolation practices."
+msgstr ""
+
+#. type: Hash Value: outlier abr_gram_positive_vre_high
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Elevated vancomycin-resistant Enterococcus (VRE) rates may warrant review of antibiotic stewardship and environmental cleaning practices."
 msgstr ""
 
 #. type: Hash Value: outlier agent_detection_per_inf_type_all_zero
@@ -1352,6 +1388,36 @@ msgstr ""
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Lower pathogen detection rates may reflect differences in microbiological sampling practices or laboratory capacity for these infection types."
+msgstr ""
+
+#. type: Hash Value: outlier agent_enterobacterales_high
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Elevated Enterobacterales detection rates may suggest environmental or hygiene-related transmission patterns. Collective elevation across Gram-negative organisms may warrant environmental surveillance and review of hand hygiene and surface disinfection practices."
+msgstr ""
+
+#. type: Hash Value: outlier agent_enterobacterales_low
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Low Enterobacterales detection rates relative to the reference may reflect differences in patient population, antibiotic exposure patterns, or microbiological sampling practices."
+msgstr ""
+
+#. type: Hash Value: outlier agent_staphylococci_cns_high
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Elevated coagulase-negative staphylococci detection rates may reflect higher contamination rates, more liberal blood culture criteria, or a genuine increase in coagulase-negative staphylococcal infections. These organisms are common skin commensals and elevated rates may warrant review of blood culture collection practices."
+msgstr ""
+
+#. type: Hash Value: outlier agent_staphylococci_cns_low
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Low coagulase-negative staphylococci detection rates may reflect strict blood culture criteria or effective contamination prevention practices. Coagulase-negative staphylococci are common skin commensals, and detection rates are influenced by both true infection and contamination."
+msgstr ""
+
+#. type: Hash Value: outlier agent_staphylococci_cops_high
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Elevated coagulase-positive staphylococci detection rates may indicate increased Staphylococcus aureus burden. This may warrant review of skin care protocols and vascular catheter management practices."
 msgstr ""
 
 #. type: Hash Value: outlier antibiotic_rate_ab_zero
@@ -1417,49 +1483,49 @@ msgstr ""
 #. type: Hash Value: outlier composed clause_concordant_high
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid ", consistent with elevated {paired_label} ({paired_ref})"
+msgid ", consistent with elevated {paired_label}{paired_ref}"
 msgstr ""
 
 #. type: Hash Value: outlier composed clause_concordant_high_pooled
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid ", consistent with elevated {paired_label} ({paired_ref}), noting that reference quartiles for this metric are not yet available"
+msgid ", consistent with elevated {paired_label}{paired_ref}, noting that reference quartiles for this metric are not yet available"
 msgstr ""
 
 #. type: Hash Value: outlier composed clause_concordant_low
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid ", consistent with low {paired_label} ({paired_ref})"
+msgid ", consistent with low {paired_label}{paired_ref}"
 msgstr ""
 
 #. type: Hash Value: outlier composed clause_concordant_low_pooled
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid ", consistent with low {paired_label} ({paired_ref}), noting that reference quartiles for this metric are not yet available"
+msgid ", consistent with low {paired_label}{paired_ref}, noting that reference quartiles for this metric are not yet available"
 msgstr ""
 
 #. type: Hash Value: outlier composed clause_discordant_high
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid " despite elevated {paired_label} ({paired_ref})"
+msgid " despite elevated {paired_label}{paired_ref}"
 msgstr ""
 
 #. type: Hash Value: outlier composed clause_discordant_high_pooled
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "despite elevated {paired_label} ({paired_ref}), noting that reference quartiles for this metric are not yet available"
+msgid "despite elevated {paired_label}{paired_ref}, noting that reference quartiles for this metric are not yet available"
 msgstr ""
 
 #. type: Hash Value: outlier composed clause_discordant_low
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid " despite low {paired_label} ({paired_ref})"
+msgid " despite low {paired_label}{paired_ref}"
 msgstr ""
 
 #. type: Hash Value: outlier composed clause_discordant_low_pooled
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "despite low {paired_label} ({paired_ref}), noting that reference quartiles for this metric are not yet available"
+msgid "despite low {paired_label}{paired_ref}, noting that reference quartiles for this metric are not yet available"
 msgstr ""
 
 #. type: Hash Value: outlier composed clause_fallback
@@ -1471,13 +1537,13 @@ msgstr ""
 #. type: Hash Value: outlier composed clause_no_quartiles
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid ". Reference quartiles for {paired_label} ({paired_ref}) are not yet available"
+msgid ". Reference quartiles for {paired_label}{paired_ref} are not yet available"
 msgstr ""
 
 #. type: Hash Value: outlier composed clause_within_iqr
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid ". {paired_label_sc} is within the reference range ({paired_ref})"
+msgid ". {paired_label_sc} is within the reference range{paired_ref}"
 msgstr ""
 
 #. type: Hash Value: outlier composed opening_above
@@ -1723,13 +1789,13 @@ msgstr ""
 #. type: Hash Value: outlier pairing_bsi action_low
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "Pathogen detection rates (@tbl-infectious-agent-detection-rate) may help confirm this reflects effective prevention rather than differences in diagnostic practices."
+msgid "Pathogen detection rates{ref_detection_table} may help confirm this reflects effective prevention rather than differences in diagnostic practices."
 msgstr ""
 
 #. type: Hash Value: outlier pairing_bsi action_low_narrowed
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "This pattern may reflect low non-device-associated BSI. Pathogen detection rates (@tbl-infectious-agent-detection-rate) may help confirm adequate diagnostic workup."
+msgid "This pattern may reflect low non-device-associated BSI. Pathogen detection rates{ref_detection_table} may help confirm adequate diagnostic workup."
 msgstr ""
 
 #. type: Hash Value: outlier pairing_bsi metric_label
@@ -1759,7 +1825,7 @@ msgstr ""
 #. type: Hash Value: outlier pairing_dev_ass_cvc action_low
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "Pathogen detection rates (@tbl-infectious-agent-detection-rate) may help confirm this reflects effective central line care rather than differences in diagnostic practices."
+msgid "Pathogen detection rates{ref_detection_table} may help confirm this reflects effective central line care rather than differences in diagnostic practices."
 msgstr ""
 
 #. type: Hash Value: outlier pairing_dev_ass_cvc action_low_narrowed
@@ -1795,7 +1861,7 @@ msgstr ""
 #. type: Hash Value: outlier pairing_dev_ass_inv action_low
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "Pathogen detection for pneumonia (@tbl-infectious-agent-detection-rate) may help confirm this reflects effective invasive ventilation care rather than differences in diagnostic practices."
+msgid "Pathogen detection for pneumonia{ref_detection_table} may help confirm this reflects effective invasive ventilation care rather than differences in diagnostic practices."
 msgstr ""
 
 #. type: Hash Value: outlier pairing_dev_ass_inv action_low_narrowed
@@ -1903,7 +1969,7 @@ msgstr ""
 #. type: Hash Value: outlier pairing_dev_ass_vs action_low
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "Pathogen detection rates (@tbl-infectious-agent-detection-rate) may help confirm this reflects effective ventilatory care rather than differences in diagnostic practices."
+msgid "Pathogen detection rates{ref_detection_table} may help confirm this reflects effective ventilatory care rather than differences in diagnostic practices."
 msgstr ""
 
 #. type: Hash Value: outlier pairing_dev_ass_vs action_low_narrowed
@@ -1939,13 +2005,13 @@ msgstr ""
 #. type: Hash Value: outlier pairing_hap action_elevated_narrowed
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The elevation may be concentrated in non-ventilator-associated pneumonia. Pneumonia diagnostic criteria and pathogen detection (@tbl-infectious-agent-detection-rate) may warrant review."
+msgid "The elevation may be concentrated in non-ventilator-associated pneumonia. Pneumonia diagnostic criteria and pathogen detection{ref_detection_table} may warrant review."
 msgstr ""
 
 #. type: Hash Value: outlier pairing_hap action_low
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "Pathogen detection for pneumonia (@tbl-infectious-agent-detection-rate) may help confirm this reflects effective respiratory care rather than differences in diagnostic practices."
+msgid "Pathogen detection for pneumonia{ref_detection_table} may help confirm this reflects effective respiratory care rather than differences in diagnostic practices."
 msgstr ""
 
 #. type: Hash Value: outlier pairing_hap action_low_narrowed
@@ -2023,13 +2089,13 @@ msgstr ""
 #. type: Hash Value: outlier pairing_severe_infection action_elevated
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The component rates (primary sepsis/BSI and pneumonia) and the device-associated infection rates (@tbl-device-associated-incidence-density-rates) may help identify where the elevation is concentrated."
+msgid "The component rates (primary sepsis/BSI and pneumonia) and the device-associated infection rates{ref_dev_ass_table} may help identify where the elevation is concentrated."
 msgstr ""
 
 #. type: Hash Value: outlier pairing_severe_infection action_low
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "Diagnostic completeness (@tbl-infectious-agent-detection-rate) may help confirm this is supported by thorough microbiological workup."
+msgid "Diagnostic completeness{ref_detection_table} may help confirm this is supported by thorough microbiological workup."
 msgstr ""
 
 #. type: Hash Value: outlier pairing_severe_infection metric_label
@@ -2176,10 +2242,22 @@ msgstr ""
 msgid "Invasive ventilation is above the reference range while non-invasive ventilation is below it. This pattern may suggest a higher threshold for initiating non-invasive support or differences in escalation and weaning practices."
 msgstr ""
 
+#. type: Hash Value: outlier ventilatory_support_interpretation_inv_high_niv_mid
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Invasive ventilation is above the reference range while non-invasive ventilation is within it, indicating a higher proportion of invasive ventilation relative to the reference. This may suggest opportunities for earlier transition to non-invasive support or differences in weaning practices."
+msgstr ""
+
 #. type: Hash Value: outlier ventilatory_support_interpretation_niv_high_inv_low
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Non-invasive ventilation is above the reference range while invasive ventilation is below it. This pattern may be consistent with a non-invasive-first strategy that reduces the need for intubation."
+msgstr ""
+
+#. type: Hash Value: outlier ventilatory_support_interpretation_niv_high_inv_mid
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Non-invasive ventilation is above the reference range while invasive ventilation is within it. This may reflect broader use of non-invasive respiratory support relative to the reference."
 msgstr ""
 
 #. type: Hash Value: outlier ventilatory_support_vs_zero
@@ -2215,7 +2293,13 @@ msgstr ""
 #. type: Hash Value: tbl-abr-infection-rate no_resistant_pathogens_note
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "No resistant pathogens were detected in your department's infections during this period. If antimicrobial susceptibility testing rates in @tbl-resistance-test-rate are low, under-detection of resistant organisms cannot be excluded.\n"
+msgid "No resistant pathogens were detected in your department's infections during this period.\n"
+msgstr ""
+
+#. type: Hash Value: tbl-abr-infection-rate no_resistant_pathogens_note_ast_ref
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "If antimicrobial susceptibility testing rates in @tbl-resistance-test-rate are low, under-detection of resistant organisms cannot be excluded.\n"
 msgstr ""
 
 #. type: Hash Value: tbl-abr-infection-rate rate_footnote
@@ -2405,19 +2489,9 @@ msgid "@tbl-incidence-density-rates presents the incidence density rates for the
 msgstr ""
 
 #. type: Plain text
-#: reports/Partner-Report/content/_tbl-intro-device-associated.qmd:2
+#: reports/Partner-Report/content/_tbl-intro-device-associated.qmd:1
 #, no-wrap
 msgid "Device-associated infections represent a significant burden in neonatal intensive care. @tbl-device-associated-incidence-density-rates shows infection rates associated with central venous catheters (CVC), peripheral venous catheters (PVC), invasive ventilation (INV), and non-invasive ventilatory support (NIV). By tracking device-associated infection rates separately, you can assess the safety of device utilization in your department and identify specific areas where targeted interventions may reduce infection risk. Lower rates may indicate successful implementation of device care bundles and infection prevention protocols.\n"
-msgstr ""
-
-#. type: Fenced div block ({.callout-note})
-#: reports/Partner-Report/content/_tbl-intro-device-associated.qmd:3
-#, no-wrap
-msgid ""
-"Device-associated infections are defined by a time-based association according to the\n"
-"[NeoIPC Core Protocol](https://neoipc.org/wp-content/uploads/2023/08/NeoIPC-Surveillance_Core-Module-Protocol.pdf):\n"
-"a device must have been in use for a defined period prior to infection.\n"
-"This represents a temporal rather than a proven causal relationship.\n"
 msgstr ""
 
 #. type: Plain text
@@ -2429,7 +2503,7 @@ msgstr ""
 #. type: Plain text
 #: reports/Partner-Report/content/_tbl-intro-abr-infection.qmd:1
 #, no-wrap
-msgid "Antimicrobial resistance poses a critical threat to vulnerable neonatal patients. @tbl-abr-infection-rate displays infection rates caused by resistant pathogens such as MRSA, VRE, and third-generation cephalosporin-resistant organisms. This section reports *detected* resistant pathogens in infections; @tbl-resistance-test-rate reports how completely susceptibility testing was performed. Both are needed to interpret resistance burden. Monitoring these rates is crucial for assessing the burden of drug-resistant infections in your department and evaluating the effectiveness of antimicrobial stewardship programs. Elevated rates may signal the need for enhanced infection control measures, antibiotic prescribing review, or environmental screening protocols.\n"
+msgid "Antimicrobial resistance poses a critical threat to vulnerable neonatal patients. @tbl-abr-infection-rate displays infection rates caused by resistant pathogens such as MRSA, VRE, and third-generation cephalosporin-resistant organisms. This section reports *detected* resistant pathogens in infections`r if (nzchar(ref_ast_table)) \"; @tbl-resistance-test-rate reports how completely susceptibility testing was performed. Both are needed to interpret resistance burden.\" else \".\"` Monitoring these rates is crucial for assessing the burden of drug-resistant infections in your department and evaluating the effectiveness of antimicrobial stewardship programs. Elevated rates may signal the need for enhanced infection control measures, antibiotic prescribing review, or environmental screening protocols.\n"
 msgstr ""
 
 #. type: Plain text
@@ -2441,7 +2515,7 @@ msgstr ""
 #. type: Plain text
 #: reports/Partner-Report/content/_tbl-intro-resistance-test.qmd:1
 #, no-wrap
-msgid "Antimicrobial susceptibility testing (AST) is fundamental to both individual patient management and population-level surveillance. @tbl-resistance-test-rate presents the rate at which pathogens isolated from infections undergo testing for certain relevant antimicrobial resistances. This section assesses testing *completeness*; @tbl-abr-infection-rate reports the detected resistant pathogens themselves. High testing rates ensure reliable data for antimicrobial stewardship programs and enable accurate assessment of resistance trends. Lower rates may indicate gaps in microbiological diagnostic capacity or protocols that could limit your ability to detect and respond to emerging resistance patterns.\n"
+msgid "Antimicrobial susceptibility testing (AST) is fundamental to both individual patient management and population-level surveillance. @tbl-resistance-test-rate presents the rate at which pathogens isolated from infections undergo testing for certain relevant antimicrobial resistances. This section assesses testing *completeness*`r if (nzchar(ref_abr_table)) \"; @tbl-abr-infection-rate reports the detected resistant pathogens themselves.\" else \".\"` High testing rates ensure reliable data for antimicrobial stewardship programs and enable accurate assessment of resistance trends. Lower rates may indicate gaps in microbiological diagnostic capacity or protocols that could limit your ability to detect and respond to emerging resistance patterns.\n"
 msgstr ""
 
 #. type: Plain text
@@ -2930,10 +3004,10 @@ msgstr ""
 msgid "This report presents data from neonatal departments in a single country. Because of the relative homogeneity of the healthcare system, it is in principle a good benchmark. However, it should be noted that only a proportion of neonatal departments in a country actually participate in NeoIPC Surveillance. Since participation is voluntary, these are typically hospitals that have a particular interest in infection prevention and are willing and able to provide the resources required for surveillance. The information presented here can therefore not fully describe the situation in the individual countries."
 msgstr ""
 
-#. type: Hash Value: methodology_note
+#. type: Hash Value: headings presence_of_risk_and_protective_factors
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "Confidence intervals for incidence density rates and other count-over-exposure-time metrics are calculated using exact Poisson methods. Proportion-based indicators (infectious agent detection rate, proportion of patients receiving specific antibiotics) use Wilson binomial confidence intervals, which provide better coverage properties than exact (Clopper–Pearson) intervals, particularly for small samples. Confidence intervals for the benchmark quartiles (Q₁, Q₂, Q₃) are calculated using a two-level parametric bootstrap that propagates both within-department sampling uncertainty and cross-department quantile estimation uncertainty. All confidence intervals are reported at the 95% level."
+msgid "Presence of Risk and Protective Factors"
 msgstr ""
 
 #. type: Hash Value: tbl-risk-density-rates n_footnote
@@ -2943,15 +3017,9 @@ msgid "%s: The aggregated number of days the risk/protective factor was present 
 msgstr ""
 
 #. type: Plain text
-#: reports/Reference-Report/content/_introduction.Rmd:2
+#: reports/Reference-Report/content/_introduction.Rmd:1
 #, no-wrap
 msgid "This document is a reference report on the NeoIPC Surveillance. It contains information relating to nosocomial infections, their causative infectious agents, and the associated risk and protective factors in high-risk neonates which was collected by partners from multiple neonatology departments participating in the NeoIPC Surveillance. The following numbers provide an overview of the current data set. If you are interested in the surveillance definitions, data collection methods and sheets, please refer to the [surveillance resources on the NeoIPC website](https://neoipc.org/surveillance/resources/).\n"
-msgstr ""
-
-#. type: Plain text
-#: reports/Reference-Report/content/_introduction.Rmd:3
-#, no-wrap
-msgid "`r sR$methodology_note`\n"
 msgstr ""
 
 #. type: Plain text
@@ -2963,7 +3031,7 @@ msgstr ""
 #. type: Plain text
 #: reports/Reference-Report/content/_nosocomial_infections.Rmd:2
 #, no-wrap
-msgid "Nosocomial infections represent the primary endpoint of NeoIPC surveillance. In @tbl-incidence-density-rates, the incidence densities of sepsis/BSI, pneumonia and necrotising enterocolitis, as well as the combined endpoint 'severe infection', are displayed. Overall `r dR$numberOfSevereInfections` severe infections were recorded in `r dR$numberOfPatients` infants resulting in an average number of `r dR$averageSevereInfectionsPerPatient` infections per patient.\n"
+msgid "Nosocomial infections represent the primary endpoint of NeoIPC surveillance. In`r dR$refIDRTable` the incidence densities of sepsis/BSI, pneumonia and necrotising enterocolitis, as well as the combined endpoint 'severe infection', are displayed. Overall `r dR$numberOfSevereInfections` severe infections were recorded in `r dR$numberOfPatients` infants resulting in an average number of `r dR$averageSevereInfectionsPerPatient` infections per patient.\n"
 msgstr ""
 
 #. type: Plain text
@@ -2975,7 +3043,7 @@ msgstr ""
 #. type: Plain text
 #: reports/Reference-Report/content/_nosocomial_infections.Rmd:5
 #, no-wrap
-msgid "Device-associated infections can be found in @tbl-device-associated-incidence-density-rates.\n"
+msgid "`r if (nzchar(dR$refDevAssTable)) paste0(\"Device-associated infections can be found in\", dR$refDevAssTable, \".\")`\n"
 msgstr ""
 
 #. type: Plain text
@@ -2993,7 +3061,7 @@ msgstr ""
 #. type: Plain text
 #: reports/Reference-Report/content/_infectious_agents.Rmd:5
 #, no-wrap
-msgid "In total, `r dR$numberOfInfectiousAgents` infectious agents were detected in the `r dR$numberOfInfectionsWithAgent` infections that were reported to have yielded at least one agent from either the primary infection and/or the secondary bloodstream infection resulting from it (@tbl-agent-per-infection-rate). These `r dR$numberOfInfectionsWithAgent` diagnostic-positive infections out of `r dR$overallNumberOfInfections` overall infections represent an Infectious Agent Detection Rate of `r dR$infectiousAgentDetectionRate` per 100 infections (@tbl-infectious-agent-detection-rate).\n"
+msgid "In total, `r dR$numberOfInfectiousAgents` infectious agents were detected in the `r dR$numberOfInfectionsWithAgent` infections that were reported to have yielded at least one agent from either the primary infection and/or the secondary bloodstream infection resulting from it`r dR$refAgentPerInfTable`. These `r dR$numberOfInfectionsWithAgent` diagnostic-positive infections out of `r dR$overallNumberOfInfections` overall infections represent an Infectious Agent Detection Rate of `r dR$infectiousAgentDetectionRate` per 100 infections`r dR$refDetectionTable`.\n"
 msgstr ""
 
 #. type: Plain text

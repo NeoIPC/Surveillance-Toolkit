@@ -4,25 +4,7 @@ profile:
   group:
     - [en, de, el, es, et, it]
 date-meta: now
-includeHeader: true
-includeIntroductionTexts: true
-includeMethodsTexts: true
-includeTextPatientPopulation: true
-includeTextNosocomial: true
-includeTextInfectiousAgents: true
-includeTextRiskFactors: true
-includeTextSurgery: true
-includeBirthWeightFigure: true
-includeGestationalAgeFigure: true
-includeIncidenceDensityTable: true
-includeDeviceAssociatedIncidenceDensityTable: true
-includeAgentPerInfectionRateTable: true
-includeResistantPathogenInfectionRateTable: false
-includeInfectiousAgentDetectionRateTable: true
-includeAntibioticResistanceTestRateTable: false
-includeRiskDensityRateTable: true
-includeSurgicalProcedureRateTable: true
-includeConfidenceIntervals: true
+alwaysTrue: true
 echo: false
 execute:
   error: true

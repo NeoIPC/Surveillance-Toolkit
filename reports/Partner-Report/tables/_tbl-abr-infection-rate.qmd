@@ -269,10 +269,14 @@ if (!is.null(benchmark_data$abr_infection_rate_table) &&
       )
   }
 
-  if (any(tbl_data$n_own < 10, na.rm = TRUE)) {
-    sparse_note <- if (include_rate_ci) sR$sparse_data_footnote else sR$sparse_data_footnote_no_ci
+  if (any(tbl_data$n_own < sparse_threshold, na.rm = TRUE)) {
+    sparse_note <- glue::glue(if (include_rate_ci) sR$sparse_data_footnote else sR$sparse_data_footnote_no_ci, threshold = sparse_threshold)
     tbl <- tbl |>
-      gt::tab_footnote(footnote = sparse_note)
+      gt::tab_footnote(
+        footnote = sparse_note,
+        locations = cells_body(
+          columns = sR$table_headers$n,
+          rows = tbl_data$n_own < sparse_threshold))
   }
 
   tbl
@@ -288,8 +292,12 @@ if (!is.null(benchmark_data$abr_infection_rate_table) &&
 if (is.null(benchmark_data$abr_infection_rate_table) ||
     !("n_own" %in% rlang::names2(benchmark_data$abr_infection_rate_table)) ||
     sum(benchmark_data$abr_infection_rate_table$n_own, na.rm = TRUE) == 0) {
+  note <- sR$`tbl-abr-infection-rate`$no_resistant_pathogens_note
+  ast_enabled <- params$includeAntibioticResistanceTestRateTable
+  if (ast_enabled && !is.null(sR$`tbl-abr-infection-rate`$no_resistant_pathogens_note_ast_ref))
+    note <- paste(note, sR$`tbl-abr-infection-rate`$no_resistant_pathogens_note_ast_ref)
   cat("\n\n::: {.callout-note}\n")
-  cat(sR$`tbl-abr-infection-rate`$no_resistant_pathogens_note, "\n")
+  cat(note, "\n")
   cat(":::\n")
 }
 ```

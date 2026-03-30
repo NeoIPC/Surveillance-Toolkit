@@ -25,17 +25,24 @@ source("../common/helpers.R")
 # Cross-reference table IDs for metric pairings. These are Quarto
 # cross-references (invariant across languages), not translatable strings,
 # so they live in code rather than in the YAML string resource layer.
+# Paired refs are conditional: when a target table is excluded, the
+# cross-reference resolves to "" so callout text reads naturally.
+.ref_devass <- if (params$includeDeviceAssociatedIncidenceDensityTable)
+  " (@tbl-device-associated-incidence-density-rates)" else ""
+.ref_risk <- if (params$includeRiskDensityRateTable)
+  " (@tbl-risk-density-rates)" else ""
+
 pairing_table_refs <- list(
-  pairing_bsi             = list(paired_ref = "@tbl-device-associated-incidence-density-rates"),
-  pairing_dev_ass_cvc     = list(paired_ref = "@tbl-risk-density-rates"),
-  pairing_dev_ass_pvc     = list(paired_ref = "@tbl-risk-density-rates"),
-  pairing_dev_ass_vs      = list(paired_ref = "@tbl-risk-density-rates"),
-  pairing_dev_ass_inv     = list(paired_ref = "@tbl-risk-density-rates"),
-  pairing_dev_ass_niv     = list(paired_ref = "@tbl-risk-density-rates"),
-  pairing_hap             = list(primary_paired_ref = "@tbl-device-associated-incidence-density-rates",
-                                 fallback_paired_ref = "@tbl-risk-density-rates"),
-  pairing_nec             = list(primary_paired_ref = "@tbl-risk-density-rates",
-                                 secondary_paired_ref = "@tbl-risk-density-rates")
+  pairing_bsi             = list(paired_ref = .ref_devass),
+  pairing_dev_ass_cvc     = list(paired_ref = .ref_risk),
+  pairing_dev_ass_pvc     = list(paired_ref = .ref_risk),
+  pairing_dev_ass_vs      = list(paired_ref = .ref_risk),
+  pairing_dev_ass_inv     = list(paired_ref = .ref_risk),
+  pairing_dev_ass_niv     = list(paired_ref = .ref_risk),
+  pairing_hap             = list(primary_paired_ref = .ref_devass,
+                                 fallback_paired_ref = .ref_risk),
+  pairing_nec             = list(primary_paired_ref = .ref_risk,
+                                 secondary_paired_ref = .ref_risk)
 )
 
 # Map factual states to coarse clinical categories for pattern matching.
@@ -163,7 +170,10 @@ compose_interpretation <- function(metric_state, pairing, paired_state, sR) {
   action <- select_action(metric_coarse, concordance, pairing)
   if (is.null(action)) return(paste0(opening, clause, "."))
 
-  paste0(opening, clause, ". ", action)
+  # Resolve conditional cross-reference placeholders ({ref_detection_table} etc.)
+  result <- paste0(opening, clause, ". ", action)
+  as.character(glue::glue(result, .envir = parent.frame(),
+                           .open = "{", .close = "}"))
 }
 
 # Helper: look up an interpretation string, returning it or NULL.
@@ -206,6 +216,67 @@ interpret_antibiotic_rates <- function(state_map, sR, registry = NULL) {
   unique(Filter(Negate(is.null), parts))
 }
 
+# ── Table 4: Infectious agent groupings ─────────────────────────────
+# Note: classify_metrics() lowercases all metric IDs (identifiers).
+interpret_agent_staphylococci <- function(state_map, sR, registry = NULL) {
+  cns <- if ("coagulase-negative staphylococci" %in% names(state_map))
+    coarse_state(state_map[["coagulase-negative staphylococci"]]) else NA
+  cops <- if ("coagulase-positive staphylococci" %in% names(state_map))
+    coarse_state(state_map[["coagulase-positive staphylococci"]]) else NA
+  parts <- character(0)
+  if (!is.na(cns) && cns == "low")
+    parts <- c(parts, interp(sR, "agent_staphylococci_cns_low"))
+  if (!is.na(cns) && cns == "high")
+    parts <- c(parts, interp(sR, "agent_staphylococci_cns_high"))
+  if (!is.na(cops) && cops == "high")
+    parts <- c(parts, interp(sR, "agent_staphylococci_cops_high"))
+  Filter(Negate(is.null), parts)
+}
+
+interpret_agent_enterobacterales <- function(state_map, sR, registry = NULL) {
+  ent <- if ("enterobacterales" %in% names(state_map))
+    coarse_state(state_map[["enterobacterales"]]) else NA
+  parts <- character(0)
+  if (!is.na(ent) && ent == "high")
+    parts <- c(parts, interp(sR, "agent_enterobacterales_high"))
+  if (!is.na(ent) && ent == "low")
+    parts <- c(parts, interp(sR, "agent_enterobacterales_low"))
+  Filter(Negate(is.null), parts)
+}
+
+# ── Table 5: Resistance groupings ──────────────────────────────────
+# Note: classify_metrics() uses combine_cols = c("abr", "group") and
+# lowercases the combined identifier.
+interpret_abr_gram_negative <- function(state_map, sR, registry = NULL) {
+  gcr <- if ("3gcr:total" %in% names(state_map))
+    coarse_state(state_map[["3gcr:total"]]) else NA
+  car <- if ("car:total" %in% names(state_map))
+    coarse_state(state_map[["car:total"]]) else NA
+  cor <- if ("cor:total" %in% names(state_map))
+    coarse_state(state_map[["cor:total"]]) else NA
+  parts <- character(0)
+  if (!is.na(gcr) && gcr == "high" && (is.na(car) || car != "high"))
+    parts <- c(parts, interp(sR, "abr_gram_negative_3gcr_high_only"))
+  if (!is.na(gcr) && gcr == "high" && !is.na(car) && car == "high")
+    parts <- c(parts, interp(sR, "abr_gram_negative_3gcr_and_car_high"))
+  if (!is.na(cor) && cor == "high")
+    parts <- c(parts, interp(sR, "abr_gram_negative_cor_high"))
+  Filter(Negate(is.null), parts)
+}
+
+interpret_abr_gram_positive <- function(state_map, sR, registry = NULL) {
+  mrsa <- if ("mrsa:staphylococcus aureus" %in% names(state_map))
+    coarse_state(state_map[["mrsa:staphylococcus aureus"]]) else NA
+  vre <- if ("vre:enterococcus spp." %in% names(state_map))
+    coarse_state(state_map[["vre:enterococcus spp."]]) else NA
+  parts <- character(0)
+  if (!is.na(mrsa) && mrsa == "high")
+    parts <- c(parts, interp(sR, "abr_gram_positive_mrsa_high"))
+  if (!is.na(vre) && vre == "high")
+    parts <- c(parts, interp(sR, "abr_gram_positive_vre_high"))
+  Filter(Negate(is.null), parts)
+}
+
 interpret_ventilatory_support <- function(state_map, sR, registry = NULL) {
   cs <- sapply(c(niv = "niv", inv = "inv"), \(m) {
     if (m %in% names(state_map)) coarse_state(state_map[[m]]) else NA
@@ -219,8 +290,12 @@ interpret_ventilatory_support <- function(state_map, sR, registry = NULL) {
     parts <- c(parts, interp(sR, "ventilatory_support_interpretation_all_below"))
   if (cs["inv"] == "high" && cs["niv"] == "low")
     parts <- c(parts, interp(sR, "ventilatory_support_interpretation_inv_high_niv_low"))
+  else if (cs["inv"] == "high" && cs["niv"] == "mid")
+    parts <- c(parts, interp(sR, "ventilatory_support_interpretation_inv_high_niv_mid"))
   if (cs["niv"] == "high" && cs["inv"] == "low")
     parts <- c(parts, interp(sR, "ventilatory_support_interpretation_niv_high_inv_low"))
+  else if (cs["niv"] == "high" && cs["inv"] == "mid")
+    parts <- c(parts, interp(sR, "ventilatory_support_interpretation_niv_high_inv_mid"))
   Filter(Negate(is.null), parts)
 }
 
@@ -729,8 +804,33 @@ outlier_groupings <- list(
       interpret = interpret_secondary_bsi
     )
   ),
-  infectious_agent_detection_rate_per_agent_table = list(),
-  abr_infection_rate_table = list()
+  infectious_agent_detection_rate_per_agent_table = list(
+    staphylococci = list(
+      metrics = c("Staphylococcus spp.", "Coagulase-negative staphylococci",
+                  "Coagulase-positive staphylococci", "Staphylococcus epidermidis",
+                  "Staphylococcus aureus"),
+      template_prefix = "agent_staphylococci",
+      interpret = interpret_agent_staphylococci
+    ),
+    enterobacterales = list(
+      metrics = c("Enterobacterales", "Klebsiella spp.", "Escherichia spp.",
+                  "Enterobacter spp.", "Serratia spp."),
+      template_prefix = "agent_enterobacterales",
+      interpret = interpret_agent_enterobacterales
+    )
+  ),
+  abr_infection_rate_table = list(
+    gram_negative_resistance = list(
+      metrics = c("3gcr:Total", "car:Total", "cor:Total"),
+      template_prefix = "abr_gram_negative",
+      interpret = interpret_abr_gram_negative
+    ),
+    gram_positive_resistance = list(
+      metrics = c("mrsa:Staphylococcus aureus", "vre:Enterococcus spp."),
+      template_prefix = "abr_gram_positive",
+      interpret = interpret_abr_gram_positive
+    )
+  )
 )
 
 # ── Metric state levels (ordered) ──────────────────────────────────
@@ -1066,6 +1166,11 @@ localize_metric_name <- function(metric_id, sR, table_name = NULL) {
 
 # Render a directional section (framing + bullet list of metric labels)
 render_outlier_section <- function(framing, labels) {
+  # HACK: capitalise first letter for bullet display. ASCII-centric — will not
+  # work for scripts without uppercase (Chinese, Arabic) or with different
+  # capitalisation rules. Proper fix: use _sc casing variants from the
+  # infectious agent ontology (NeoIPC-Infectious-Agents.yaml).
+  labels <- sub("^(\\w)", "\\U\\1", labels, perl = TRUE)
   bullets <- paste(paste("-", labels), collapse = "\n")
   paste(framing, bullets, sep = "\n\n")
 }
@@ -1322,13 +1427,56 @@ for (pairing_name in names(pairing_table_refs)) {
   }
 }
 
+# ── Conditional cross-reference variables for glue placeholders ────
+# When the target table is disabled, the reference resolves to empty
+# and the text reads naturally without the cross-reference.
+ref_detection_table <- if (params$includeInfectiousAgentDetectionRateTable)
+  " (@tbl-infectious-agent-detection-rate)" else ""
+ref_dev_ass_table <- if (params$includeDeviceAssociatedIncidenceDensityTable)
+  " (@tbl-device-associated-incidence-density-rates)" else ""
+ref_abr_table <- if (params$includeResistantPathogenInfectionRateTable)
+  " (@tbl-abr-infection-rate)" else ""
+ref_ast_table <- if (params$includeAntibioticResistanceTestRateTable)
+  " (@tbl-resistance-test-rate)" else ""
+
+# ── Section visibility flags ─────────────────────────────────────
+# A section heading is shown iff at least one table in that section
+# (or a child section) will be rendered. Computed bottom-up.
+show_section_surgical    <- params$includeSurgicalProcedureRateTable
+show_section_infectious  <- params$includeAgentPerInfectionRateTable ||
+  params$includeResistantPathogenInfectionRateTable
+show_section_diagnostics <- params$includeInfectiousAgentDetectionRateTable ||
+  params$includeAntibioticResistanceTestRateTable
+show_section_nosocomial  <- params$includeIncidenceDensityTable ||
+  params$includeDeviceAssociatedIncidenceDensityTable ||
+  params$includeSecondaryBsiRateTable ||
+  show_section_infectious || show_section_diagnostics
+show_section_risk        <- params$includeRiskDensityRateTable ||
+  show_section_surgical
+
+# ── Conditional block helpers ────────────────────────────────────
+# Emit fenced div markers for R-controlled conditional content.
+# content-visible when flag is TRUE, content-hidden when FALSE.
+# Both reference alwaysTrue (a dummy metadata key that is always true).
+.show <- function(flag) cat('::: {.content-',
+  if (flag) 'visible' else 'hidden',
+  ' when-meta="alwaysTrue"}\n', sep = '')
+.end <- function() cat(':::\n')
+
+# ── Sparse data threshold ──────────────────────────────────────────
+# Rows with fewer than this many events are flagged with a footnote.
+# Default: 16 (relative standard error ≥ 25%, aligned with WA DOH criterion).
+# Relative standard error = 1/√n: n=10 → 31.6%, n=16 → 25.0%, n=20 → 22.4%.
+# Source: https://doh.wa.gov/sites/default/files/legacy/Documents/1500/SmallNumbers.pdf
+sparse_threshold <- as.integer(params$sparseDataThreshold %||% 16L)
+
 # ── Confidence interval display ─────────────────────────────────────
 # Supported values: "all" (or TRUE), "none" (or FALSE), "rate",
 # "rate_pooled", "auto".  Default: "rate".
 ci_config <- params$includeConfidenceIntervals
 if (is.null(ci_config)) ci_config <- "rate"
-if (identical(ci_config, TRUE))  ci_config <- "all"
-if (identical(ci_config, FALSE)) ci_config <- "none"
+if (identical(ci_config, TRUE) || identical(ci_config, "true"))   ci_config <- "all"
+if (identical(ci_config, FALSE) || identical(ci_config, "false")) ci_config <- "none"
 
 include_rate_ci     <- ci_config != "none"
 include_pooled_ci   <- ci_config %in% c("all", "rate_pooled", "auto")

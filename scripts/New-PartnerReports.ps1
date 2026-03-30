@@ -122,6 +122,18 @@ param(
     [switch]
     $HideOutlierInterpretation,
 
+    # Rows with fewer than this many events are flagged with a footnote
+    # indicating statistical instability. Based on the relative standard
+    # error of the Poisson distribution (1/sqrt(n)):
+    #   n=10 -> 31.6%  n=16 -> 25.0%  n=20 -> 22.4%
+    # Default 16 aligns with the 25% threshold recommended by the
+    # Washington State Department of Health for flagging unstable rates.
+    # Source: https://doh.wa.gov/sites/default/files/legacy/Documents/1500/SmallNumbers.pdf
+    [Parameter()]
+    [ValidateRange(1, 100)]
+    [int]
+    $SparseDataThreshold,
+
     [Parameter()]
     [switch]
     $DebugReport,
@@ -177,7 +189,11 @@ param(
         'RiskDensityRates',
         'SurgicalProcedureRates',
         'SecondaryBloodstreamInfectionRates'
-    )
+    ),
+    # Elements to remove from the default IncludeElements list.
+    # Processed after IncludeElements: the effective set is IncludeElements minus ExcludeElements.
+    [Parameter()]
+    [string[]]$ExcludeElements = @()
 )
 
 . "$PSScriptRoot/NeoipcReportHelpers.ps1"
@@ -471,12 +487,16 @@ if (inherits(x, 'neoipcr_bnch_ds')) {
                 if ($HideIntroductionTexts.IsPresent) { $qmdParams['includeIntroductionTexts'] = 'false' }
                 if ($ConfidenceIntervals) { $qmdParams['includeConfidenceIntervals'] = $ConfidenceIntervals }
                 if ($HideMethodsTexts.IsPresent) { $qmdParams['includeMethodsTexts'] = 'false' }
+                if ($SparseDataThreshold) { $qmdParams['sparseDataThreshold'] = $SparseDataThreshold }
                 if ($HideOutlierInterpretation.IsPresent) { $qmdParams['includeOutlierInterpretation'] = 'false' }
                 if ($DebugReport) { $qmdParams['debug'] = 'true' }
 
+                # Apply exclusions
+                $effectiveElements = @($IncludeElements | Where-Object { $_ -notin $ExcludeElements })
+
                 # Convert user-friendly element names to Quarto boolean parameters
                 foreach ($mapping in $elementMapping.GetEnumerator()) {
-                    $includeValue = $IncludeElements -contains $mapping.Key
+                    $includeValue = $effectiveElements -contains $mapping.Key
                     $qmdParams[$mapping.Value] = if ($includeValue) { 'true' } else { 'false' }
                 }
 
@@ -510,34 +530,9 @@ if (inherits(x, 'neoipcr_bnch_ds')) {
                         $quartoArgs += $resolvedOutputDir
                     }
 
-                    $metadataParameters = @(
-                        'includeIntroductionTexts'
-                        'includeMethodsTexts'
-                        'includeOutlierInterpretation'
-                        'includeBirthWeightFigure'
-                        'includeGestationalAgeFigure'
-                        'includeIncidenceDensityTable'
-                        'includeDeviceAssociatedIncidenceDensityTable'
-                        'includeAgentPerInfectionRateTable'
-                        'includeInfectiousAgentDetectionRateTable'
-                        'includeRiskDensityRateTable'
-                        'includeSurgicalProcedureRateTable'
-                        'includeResistantPathogenInfectionRateTable'
-                        'includeAntibioticResistanceTestRateTable'
-                        'includeSecondaryBsiRateTable'
-                    )
-                    # Add parameters - use -M for include* metadata, -P for others
-                    foreach ($pair in $paramPairs) {
-                        if ($pair -eq '-P') {
-                            $quartoArgs += $pair
-                        } elseif ($pair -match ':' -and ($pair -split ':')[0] -iin $metadataParameters) {
-                            # Replace last -P with -M for include flags
-                            $quartoArgs[$quartoArgs.Count - 1] = '-M'
-                            $quartoArgs += $pair
-                        } else {
-                            $quartoArgs += $pair
-                        }
-                    }
+                    # All parameters via -P (R reads params$, conditional
+                    # blocks use cat() + when-meta="alwaysTrue" wrappers)
+                    $quartoArgs += $paramPairs
 
                     # Render (or report) - respect WhatIf via ShouldProcess
                     $completedSteps++

@@ -9,20 +9,7 @@ profile:
   group:
     - [en, de]
     - [full, default]
-includeIntroductionTexts: true
-includeMethodsTexts: true
-includeOutlierInterpretation: true
-includeBirthWeightFigure: true
-includeGestationalAgeFigure: true
-includeIncidenceDensityTable: true
-includeDeviceAssociatedIncidenceDensityTable: true
-includeAgentPerInfectionRateTable: true
-includeInfectiousAgentDetectionRateTable: true
-includeRiskDensityRateTable: true
-includeSurgicalProcedureRateTable: true
-includeResistantPathogenInfectionRateTable: false
-includeAntibioticResistanceTestRateTable: false
-includeSecondaryBsiRateTable: false
+alwaysTrue: true
 execute:
   error: true
 filters:

@@ -17,6 +17,21 @@ params:
   dhis2Port: NULL
   dhis2Path: NULL
   includeConfidenceIntervals: "rate"
+  includeIntroductionTexts: true
+  includeMethodsTexts: true
+  includeOutlierInterpretation: true
+  includeBirthWeightFigure: true
+  includeGestationalAgeFigure: true
+  includeIncidenceDensityTable: true
+  includeDeviceAssociatedIncidenceDensityTable: true
+  includeAgentPerInfectionRateTable: true
+  includeInfectiousAgentDetectionRateTable: true
+  includeRiskDensityRateTable: true
+  includeSurgicalProcedureRateTable: true
+  includeResistantPathogenInfectionRateTable: false
+  includeAntibioticResistanceTestRateTable: false
+  includeSecondaryBsiRateTable: false
+  sparseDataThreshold: 16
   debug: false
 subtitle: '`r paste0(params$unitCodes, collapse = ", ")`'
 ---

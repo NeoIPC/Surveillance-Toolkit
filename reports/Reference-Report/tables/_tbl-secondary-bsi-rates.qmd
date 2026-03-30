@@ -1,3 +1,12 @@
+### `{r} sR$headings$secondary_bsi`
+
+::: {.content-visible when-meta="includeMethodsTexts"}
+```{r}
+#| output: asis
+include_localised("_methods-secondary-bsi.qmd")
+```
+:::
+
 ```{r}
 #| label: tbl-secondary-bsi-rates
 #| tbl-cap: !expr 'sR$`tbl-secondary-bsi-rates`$`tbl-cap`'
@@ -21,14 +30,7 @@ tbl <- tbl_data |>
       "hap" ~ sR$pneumonia_sc),
     .keep = "unused")
 
-if (!include_ci) {
-  tbl <- tbl |>
-    dplyr::select(!tidyselect::any_of(c(
-      "ci_lower", "ci_upper",
-      "q1_ci_lower", "q1_ci_upper",
-      "q2_ci_lower", "q2_ci_upper",
-      "q3_ci_lower", "q3_ci_upper")))
-}
+cw <- compute_col_widths(tbl_data, stub_min = 25)
 
 gt_tbl <- tbl |>
   gt(rowname_col = "Infection") |>
@@ -36,7 +38,7 @@ gt_tbl <- tbl |>
   gt::tab_options(
     latex.use_longtable = TRUE,
     table.width = pct(100),
-    table.font.size = 11,
+    table.font.size = cw$font_size,
     footnotes.marks = "extended"
   ) |>
   fmt_number(
@@ -50,42 +52,52 @@ gt_tbl <- tbl |>
     sep_mark = sR$digit_group_separator,
     min_sep_threshold = 2)
 
-if (include_ci) {
-  # Merge pooled rate CI as parenthetical: "6.7 (5.9–7.6)"
+# Pooled rate CI merge
+if (include_rate_ci && "ci_lower" %in% colnames(gt_tbl$`_data`)) {
   gt_tbl <- gt_tbl |>
     cols_merge(
       columns = c(sR$table_headers$pooled, "ci_lower", "ci_upper"),
       pattern = "{1} ({2}\u2013{3})",
       rows = !is.na(tbl_data$pooled))
+} else if ("ci_lower" %in% colnames(gt_tbl$`_data`)) {
+  gt_tbl <- gt_tbl |> gt::cols_hide(columns = c("ci_lower", "ci_upper"))
+}
 
-  # Merge bootstrap CIs into quartile columns: "5.2 (4.1–6.8)"
-  # Only on rows where bootstrap CIs are non-NA (Bug 8: avoid "— (—–—)")
-  if (all(c("q1_ci_lower", "q1_ci_upper") %in% names(tbl))) {
-    has_boot <- !is.na(tbl$q1_ci_lower)
+# Quartile bootstrap CI merge
+if ("q1_ci_lower" %in% colnames(gt_tbl$`_data`)) {
+  if (include_quartile_ci) {
+    has_boot <- !is.na(gt_tbl$`_data`[["q1_ci_lower"]])
+    if (auto_quartile_ci)
+      has_boot <- has_boot & !is.na(gt_tbl$`_data`[[sR$table_headers$q1]])
     gt_tbl <- gt_tbl |>
-      cols_merge(
+      gt::cols_merge(
         columns = c(sR$table_headers$q1, "q1_ci_lower", "q1_ci_upper"),
         pattern = "{1} ({2}\u2013{3})",
         rows = has_boot) |>
-      cols_merge(
+      gt::cols_merge(
         columns = c(sR$table_headers$q2, "q2_ci_lower", "q2_ci_upper"),
         pattern = "{1} ({2}\u2013{3})",
         rows = has_boot) |>
-      cols_merge(
+      gt::cols_merge(
         columns = c(sR$table_headers$q3, "q3_ci_lower", "q3_ci_upper"),
         pattern = "{1} ({2}\u2013{3})",
         rows = has_boot)
+  } else {
+    gt_tbl <- gt_tbl |> gt::cols_hide(columns = tidyselect::any_of(c(
+      "q1_ci_lower", "q1_ci_upper",
+      "q2_ci_lower", "q2_ci_upper",
+      "q3_ci_lower", "q3_ci_upper")))
   }
 }
 
 gt_tbl <- gt_tbl |>
   cols_width(
-    stub() ~ pct(25),
-    sR$table_headers$n ~ pct(8),
-    sR$table_headers$pooled ~ pct(22),
-    sR$table_headers$q1 ~ pct(15),
-    sR$table_headers$q2 ~ pct(15),
-    sR$table_headers$q3 ~ pct(15))
+    stub() ~ pct(cw$stub),
+    sR$table_headers$n ~ pct(cw$n),
+    sR$table_headers$pooled ~ pct(cw$pooled),
+    sR$table_headers$q1 ~ pct(cw$q),
+    sR$table_headers$q2 ~ pct(cw$q),
+    sR$table_headers$q3 ~ pct(cw$q))
 
 gt_tbl <- gt_tbl |>
   tab_spanner(
@@ -132,16 +144,16 @@ gt_tbl <- gt_tbl |>
       sR$table_headers$pooled),
     locations = cells_column_labels(columns = sR$table_headers$pooled))
 
-# Sparse-data footnote for N < 10
-sparse_rows <- which(tbl_data$n < 10 & !is.na(tbl_data$n) & tbl_data$n > 0)
-if (length(sparse_rows) > 0) {
-  fn_text <- if (include_ci) sR$sparse_data_footnote else sR$sparse_data_footnote_no_ci
+# Sparse-data footnote for N < sparse_threshold
+if (any(tbl_data$n < sparse_threshold, na.rm = TRUE)) {
+  fn_text <- if (include_rate_ci) sR$sparse_data_footnote else sR$sparse_data_footnote_no_ci
+  fn_text <- glue::glue(fn_text, threshold = sparse_threshold)
   gt_tbl <- gt_tbl |>
-    tab_footnote(
+    gt::tab_footnote(
       footnote = fn_text,
       locations = cells_body(
-        columns = sR$table_headers$pooled,
-        rows = sparse_rows))
+        columns = sR$table_headers$n,
+        rows = tbl_data$n < sparse_threshold))
 }
 
 gt_tbl

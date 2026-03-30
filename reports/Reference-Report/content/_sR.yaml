@@ -26,16 +26,7 @@ benchmarking_guidance: >-
   more representative than the pooled rate, as it is less influenced by
   differences in unit size. The pooled rate reflects overall patient-level
   burden across the network.
-methodology_note: >-
-  Confidence intervals for incidence density rates and other
-  count-over-exposure-time metrics are calculated using exact Poisson methods.
-  Proportion-based indicators (infectious agent detection rate, proportion of
-  patients receiving specific antibiotics) use Wilson binomial confidence
-  intervals, which provide better coverage properties than exact
-  (Clopper–Pearson) intervals, particularly for small samples. Confidence
-  intervals for the benchmark quartiles (Q₁, Q₂, Q₃) are calculated using a
-  two-level parametric bootstrap that propagates both within-department
-  sampling uncertainty and cross-department quantile estimation uncertainty.
-  All confidence intervals are reported at the 95% level.
+headings:
+  presence_of_risk_and_protective_factors: Presence of Risk and Protective Factors
 tbl-risk-density-rates:
   n_footnote: "%s: The aggregated number of days the risk/protective factor was present in all infants."
