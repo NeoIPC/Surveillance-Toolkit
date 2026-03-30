@@ -1,11 +1,19 @@
 #### `{r} sR$headings$infectious_agents_in_nosocomial_infections`
 
-::: {.content-visible when-meta="includeMethodsTexts"}
 ```{r}
 #| output: asis
-include_localised("_methods-agent-per-infection.qmd")
+.show(params$includeMethodsTexts)
 ```
-:::
+
+```{r}
+#| output: asis
+include_localised("_methods-agent-per-infection.Rmd")
+```
+
+```{r}
+#| output: asis
+.end()
+```
 
 ```{r}
 #| label: tbl-agent-per-infection-rate

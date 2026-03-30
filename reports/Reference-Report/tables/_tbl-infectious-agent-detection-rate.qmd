@@ -1,11 +1,19 @@
 #### `{r} sR$headings$detection_of_infectious_agents`
 
-::: {.content-visible when-meta="includeMethodsTexts"}
 ```{r}
 #| output: asis
-include_localised("_methods-infectious-agent-detection.qmd")
+.show(params$includeMethodsTexts)
 ```
-:::
+
+```{r}
+#| output: asis
+include_localised("_methods-infectious-agent-detection.Rmd")
+```
+
+```{r}
+#| output: asis
+.end()
+```
 
 ```{r}
 #| label: tbl-infectious-agent-detection-rate

@@ -1,11 +1,19 @@
 #### `{r} sR$headings$resistant_pathogens`
 
-::: {.content-visible when-meta="includeMethodsTexts"}
 ```{r}
 #| output: asis
-include_localised("_methods-abr-infection.qmd")
+.show(params$includeMethodsTexts)
 ```
-:::
+
+```{r}
+#| output: asis
+include_localised("_methods-abr-infection.Rmd")
+```
+
+```{r}
+#| output: asis
+.end()
+```
 
 ```{r}
 #| label: tbl-abr-infection-rate

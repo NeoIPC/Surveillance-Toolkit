@@ -1,18 +1,34 @@
 ### `{r} sR$headings$presence_of_risk_and_protective_factors`
 
-::: {.content-visible when-meta="includeIntroductionTexts"}
 ```{r}
 #| output: asis
-include_localised("_tbl-intro-risk-density.qmd")
+.show(params$includeIntroductionTexts)
 ```
-:::
 
-::: {.content-visible when-meta="includeMethodsTexts"}
 ```{r}
 #| output: asis
-include_localised("_methods-risk-density.qmd")
+include_localised("_tbl-intro-risk-density.Rmd")
 ```
-:::
+
+```{r}
+#| output: asis
+.end()
+```
+
+```{r}
+#| output: asis
+.show(params$includeMethodsTexts)
+```
+
+```{r}
+#| output: asis
+include_localised("_methods-risk-density.Rmd")
+```
+
+```{r}
+#| output: asis
+.end()
+```
 
 ```{r}
 #| output: asis
@@ -281,7 +297,11 @@ if (!is.null(benchmark_data$usage_density_rate_table) &&
 }
 ```
 
-::: {.content-visible when-meta="includeOutlierInterpretation"}
+```{r}
+#| output: asis
+.show(params$includeOutlierInterpretation)
+```
+
 ```{r}
 #| output: asis
   if (check_outlier_interpretation) {
@@ -298,4 +318,8 @@ if (!is.null(benchmark_data$usage_density_rate_table) &&
   }
 }
 ```
-:::
+
+```{r}
+#| output: asis
+.end()
+```

@@ -104,7 +104,7 @@ include_localised("_patient_population.Rmd")
 
 ```{r}
 #| output: asis
-include_localised("_methods-patient-population.qmd")
+include_localised("_methods-patient-population.Rmd")
 ```
 
 ```{r}

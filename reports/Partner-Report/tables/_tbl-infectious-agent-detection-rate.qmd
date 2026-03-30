@@ -1,18 +1,34 @@
 #### `{r} sR$headings$detection_of_infectious_agents`
 
-::: {.content-visible when-meta="includeIntroductionTexts"}
 ```{r}
 #| output: asis
-include_localised("_tbl-intro-infectious-agent-detection.qmd")
+.show(params$includeIntroductionTexts)
 ```
-:::
 
-::: {.content-visible when-meta="includeMethodsTexts"}
 ```{r}
 #| output: asis
-include_localised("_methods-infectious-agent-detection.qmd")
+include_localised("_tbl-intro-infectious-agent-detection.Rmd")
 ```
-:::
+
+```{r}
+#| output: asis
+.end()
+```
+
+```{r}
+#| output: asis
+.show(params$includeMethodsTexts)
+```
+
+```{r}
+#| output: asis
+include_localised("_methods-infectious-agent-detection.Rmd")
+```
+
+```{r}
+#| output: asis
+.end()
+```
 
 ```{r}
 #| output: asis
@@ -227,7 +243,11 @@ if (!is.null(benchmark_data$infectious_agent_detection_rate_per_inf_type_table) 
 }
 ```
 
-::: {.content-visible when-meta="includeOutlierInterpretation"}
+```{r}
+#| output: asis
+.show(params$includeOutlierInterpretation)
+```
+
 ```{r}
 #| output: asis
 if (check_outlier_interpretation) {
@@ -244,4 +264,8 @@ if (check_outlier_interpretation) {
   }
 }
 ```
-:::
+
+```{r}
+#| output: asis
+.end()
+```

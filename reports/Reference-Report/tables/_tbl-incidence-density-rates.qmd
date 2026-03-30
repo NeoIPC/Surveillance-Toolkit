@@ -1,11 +1,19 @@
 ### `{r} sR$headings$severe_infections_and_nec`
 
-::: {.content-visible when-meta="includeMethodsTexts"}
 ```{r}
 #| output: asis
-include_localised("_methods-incidence-density.qmd")
+.show(params$includeMethodsTexts)
 ```
-:::
+
+```{r}
+#| output: asis
+include_localised("_methods-incidence-density.Rmd")
+```
+
+```{r}
+#| output: asis
+.end()
+```
 
 ```{r}
 #| label: tbl-incidence-density-rates

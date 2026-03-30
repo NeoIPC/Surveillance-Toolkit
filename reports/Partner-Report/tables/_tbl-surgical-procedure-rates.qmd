@@ -1,18 +1,34 @@
 #### `{r} sR$headings$surgical_procedures_by_category`
 
-::: {.content-visible when-meta="includeIntroductionTexts"}
 ```{r}
 #| output: asis
-include_localised("_tbl-intro-surgical-procedure.qmd")
+.show(params$includeIntroductionTexts)
 ```
-:::
 
-::: {.content-visible when-meta="includeMethodsTexts"}
 ```{r}
 #| output: asis
-include_localised("_methods-surgical-procedures.qmd")
+include_localised("_tbl-intro-surgical-procedure.Rmd")
 ```
-:::
+
+```{r}
+#| output: asis
+.end()
+```
+
+```{r}
+#| output: asis
+.show(params$includeMethodsTexts)
+```
+
+```{r}
+#| output: asis
+include_localised("_methods-surgical-procedures.Rmd")
+```
+
+```{r}
+#| output: asis
+.end()
+```
 
 ```{r}
 #| output: asis
@@ -234,7 +250,11 @@ if (has_data) {
 }
 ```
 
-::: {.content-visible when-meta="includeOutlierInterpretation"}
+```{r}
+#| output: asis
+.show(params$includeOutlierInterpretation)
+```
+
 ```{r}
 #| output: asis
 if (check_outlier_interpretation) {
@@ -251,4 +271,8 @@ if (check_outlier_interpretation) {
   }
 }
 ```
-:::
+
+```{r}
+#| output: asis
+.end()
+```

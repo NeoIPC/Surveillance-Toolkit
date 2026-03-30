@@ -1126,10 +1126,22 @@ localize_metric_name <- function(metric_id, sR, table_name = NULL) {
   mapped_key <- metric_key_map[[tolower(metric_id)]]
   lookup_key <- if (!is.null(mapped_key)) mapped_key else tolower(metric_id)
 
+  # Map R internal table names to sR YAML keys
+  table_name_map <- list(
+    incidence_density_rate_table = "tbl-incidence-density-rates",
+    dev_ass_incidence_density_rate_table = "tbl-device-associated-incidence-density-rates",
+    usage_density_rate_table = "tbl-risk-density-rates",
+    surgery_rate_table = "tbl-surgical-procedure-rates",
+    infectious_agent_detection_rate_per_inf_type_table = "tbl-infectious-agent-detection-rate",
+    resistance_test_rate_table = "tbl-resistance-test-rate",
+    secondary_bsi_rate_table = "tbl-secondary-bsi-rates"
+  )
+  sR_table_key <- table_name_map[[table_name]] %||% table_name
+
   # When a table_name is provided, check that table's section first so that
   # table-specific overrides take precedence over the generic glossary.
-  if (!is.null(table_name) && !is.null(sR[[table_name]][[lookup_key]])) {
-    return(sR[[table_name]][[lookup_key]])
+  if (!is.null(sR_table_key) && !is.null(sR[[sR_table_key]][[lookup_key]])) {
+    return(sR[[sR_table_key]][[lookup_key]])
   }
 
   # Try top-level keys
@@ -1209,7 +1221,7 @@ format_outlier_text <- function(outlier_groups, sR) {
             specific_interpretations,
             paste(item$interpretation, collapse = " ")
           )
-        } else {
+        } else if (length(item$sections) == 0) {
           generic_labels <- c(generic_labels, group_labels)
         }
       }

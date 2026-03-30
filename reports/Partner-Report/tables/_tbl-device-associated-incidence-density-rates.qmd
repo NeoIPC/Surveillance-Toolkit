@@ -1,18 +1,34 @@
 ### `{r} sR$headings$device_associated_infections`
 
-::: {.content-visible when-meta="includeIntroductionTexts"}
 ```{r}
 #| output: asis
-include_localised("_tbl-intro-device-associated.qmd")
+.show(params$includeIntroductionTexts)
 ```
-:::
 
-::: {.content-visible when-meta="includeMethodsTexts"}
 ```{r}
 #| output: asis
-include_localised("_methods-device-associated.qmd")
+include_localised("_tbl-intro-device-associated.Rmd")
 ```
-:::
+
+```{r}
+#| output: asis
+.end()
+```
+
+```{r}
+#| output: asis
+.show(params$includeMethodsTexts)
+```
+
+```{r}
+#| output: asis
+include_localised("_methods-device-associated.Rmd")
+```
+
+```{r}
+#| output: asis
+.end()
+```
 
 ```{r}
 #| output: asis
@@ -240,7 +256,11 @@ if (!is.null(benchmark_data$dev_ass_incidence_density_rate_table) &&
 }
 ```
 
-::: {.content-visible when-meta="includeOutlierInterpretation"}
+```{r}
+#| output: asis
+.show(params$includeOutlierInterpretation)
+```
+
 ```{r}
 #| output: asis
 if (check_outlier_interpretation) {
@@ -257,4 +277,8 @@ if (check_outlier_interpretation) {
   }
 }
 ```
-:::
+
+```{r}
+#| output: asis
+.end()
+```

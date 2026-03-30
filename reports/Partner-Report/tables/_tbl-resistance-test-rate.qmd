@@ -1,18 +1,34 @@
 #### `{r} sR$headings$antimicrobial_susceptibility_testing`
 
-::: {.content-visible when-meta="includeIntroductionTexts"}
 ```{r}
 #| output: asis
-include_localised("_tbl-intro-resistance-test.qmd")
+.show(params$includeIntroductionTexts)
 ```
-:::
 
-::: {.content-visible when-meta="includeMethodsTexts"}
 ```{r}
 #| output: asis
-include_localised("_methods-resistance-test.qmd")
+include_localised("_tbl-intro-resistance-test.Rmd")
 ```
-:::
+
+```{r}
+#| output: asis
+.end()
+```
+
+```{r}
+#| output: asis
+.show(params$includeMethodsTexts)
+```
+
+```{r}
+#| output: asis
+include_localised("_methods-resistance-test.Rmd")
+```
+
+```{r}
+#| output: asis
+.end()
+```
 
 ::: {.content-visible when-format="pdf"}
 \FloatBarrier
@@ -268,7 +284,11 @@ if (!is.null(benchmark_data$resistance_test_rate_table) &&
 }
 ```
 
-::: {.content-visible when-meta="includeOutlierInterpretation"}
+```{r}
+#| output: asis
+.show(params$includeOutlierInterpretation)
+```
+
 ```{r}
 #| output: asis
 if (check_outlier_interpretation) {
@@ -285,4 +305,8 @@ if (check_outlier_interpretation) {
   }
 }
 ```
-:::
+
+```{r}
+#| output: asis
+.end()
+```

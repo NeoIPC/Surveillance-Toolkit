@@ -1,11 +1,19 @@
 #### `{r} sR$headings$antimicrobial_susceptibility_testing`
 
-::: {.content-visible when-meta="includeMethodsTexts"}
 ```{r}
 #| output: asis
-include_localised("_methods-resistance-test.qmd")
+.show(params$includeMethodsTexts)
 ```
-:::
+
+```{r}
+#| output: asis
+include_localised("_methods-resistance-test.Rmd")
+```
+
+```{r}
+#| output: asis
+.end()
+```
 
 ```{r}
 #| label: tbl-resistance-test-rate
@@ -23,7 +31,7 @@ tbl <- tbl_data |>
         paste0(c(.data$abr, .data$cond), collapse = "_"),
         levels = c("3gcr_routine", "car_routine", "car_if_3gcr", "cor_routine",
                    "cor_if_3gcr&car", "mrsa_routine", "vre_routine")),
-      .keep = "unused") |>
+      ) |>
     dplyr::ungroup() |>
     dplyr::arrange(.data$abr) |>
     dplyr::mutate(

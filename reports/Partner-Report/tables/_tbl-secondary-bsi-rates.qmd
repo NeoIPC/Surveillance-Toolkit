@@ -1,18 +1,34 @@
 ### `{r} sR$headings$secondary_bsi`
 
-::: {.content-visible when-meta="includeIntroductionTexts"}
 ```{r}
 #| output: asis
-include_localised("_tbl-intro-secondary-bsi.qmd")
+.show(params$includeIntroductionTexts)
 ```
-:::
 
-::: {.content-visible when-meta="includeMethodsTexts"}
 ```{r}
 #| output: asis
-include_localised("_methods-secondary-bsi.qmd")
+include_localised("_tbl-intro-secondary-bsi.Rmd")
 ```
-:::
+
+```{r}
+#| output: asis
+.end()
+```
+
+```{r}
+#| output: asis
+.show(params$includeMethodsTexts)
+```
+
+```{r}
+#| output: asis
+include_localised("_methods-secondary-bsi.Rmd")
+```
+
+```{r}
+#| output: asis
+.end()
+```
 
 ::: {.content-visible when-format="pdf"}
 \FloatBarrier
@@ -242,7 +258,11 @@ if (!is.null(benchmark_data$secondary_bsi_rate_table) &&
 }
 ```
 
-::: {.content-visible when-meta="includeOutlierInterpretation"}
+```{r}
+#| output: asis
+.show(params$includeOutlierInterpretation)
+```
+
 ```{r}
 #| output: asis
 if (check_outlier_interpretation) {
@@ -265,4 +285,8 @@ if (check_outlier_interpretation) {
   }
 }
 ```
-:::
+
+```{r}
+#| output: asis
+.end()
+```
