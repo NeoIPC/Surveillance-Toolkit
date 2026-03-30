@@ -15,7 +15,7 @@ cat(sep = "\n", c(
   "",
   paste0(":   ",dR$effectiveAnalysisPeriod, "^[", sR$headerList$effectiveAnalysisPeriodFootnote, "]"),
   "",
-  paste0(if(length(reference_data$metadata$countries) > 1)sR$headerList$countries else sR$headerList$country, ":"),
+  paste0(if(nrow(reference_data$metadata$countries) > 1)sR$headerList$countries else sR$headerList$country, ":"),
   "",
   paste0(":   ",dR$countriesList),
   "",
@@ -34,7 +34,7 @@ cat(sep = "\n", c(
 #| output: asis
 
 # Determine base message based on country count
-if(length(reference_data$metadata$countries) > 1){
+if(nrow(reference_data$metadata$countries) > 1){
   base_message <- sR$headerList$multiCountryDatasetHint
 } else {
   base_message <- sR$headerList$singleCountryDatasetHint
