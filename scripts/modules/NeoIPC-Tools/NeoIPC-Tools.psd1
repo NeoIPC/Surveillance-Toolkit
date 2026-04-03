@@ -1,141 +1,87 @@
+# Module manifest for module 'NeoIPC-Tools'
 #
-# Module manifest for module 'AsciiDocTools'
+# Author: Brar Piening
 #
 @{
+    # Script module file associated with this manifest.
+    RootModule = 'NeoIPC-Tools.psm1'
 
-# Script module or binary module file associated with this manifest.
-RootModule = 'NeoIPC-Tools.psm1'
+    # Version number of this module.
+    ModuleVersion = '0.1.0.0'
 
-# Version number of this module.
-ModuleVersion = '0.0.1'
+    # ID used to uniquely identify this module
+    GUID = 'd8df5879-3dff-4c3d-ba9e-cbc1205340c1'
 
-# Supported PSEditions
-# CompatiblePSEditions = @()
+    # Author of this module
+    Author = 'Brar Piening'
 
-# ID used to uniquely identify this module
-GUID = '71ee8091-613e-418d-bf9f-b519af33e3c1'
+    # Company or vendor of this module
+    CompanyName = 'NeoIPC Project'
 
-# Author of this module
-Author = 'Brar Piening'
+    # Copyright statement for this module
+    Copyright = '(c) 2025, NeoIPC Project.'
 
-# Company or vendor of this module
-CompanyName = 'NeoIPC Project'
+    # Description of the functionality provided by this module
+    Description = 'PowerShell tools for NeoIPC Surveillance: DHIS2 admin, report generation helpers, and pipeline-composable data inspection.'
 
-# Copyright statement for this module
-Copyright = '2024 NeoIPC Project.'
+    # Minimum version of the PowerShell engine required by this module
+    PowerShellVersion = '7.5'
 
-# Description of the functionality provided by this module
-Description = 'A set of PowerShell tools for the NeoIPC Surveillance Toolkit'
+    # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
+    FunctionsToExport = @(
+        # Auth
+        'Resolve-NeoipcToken'
+        'Resolve-NeoipcAuth'
+        'Get-NeoipcAuthPassword'
+        'Test-DHIS2PersonalAccessToken'
+        # OrgUnits
+        'Get-NeoipcDepartments'
+        'Get-NeoipcServerKey'
+        'Read-OrgUnitInfo'
+        # QuartoHelpers
+        'Invoke-WithNeoipcAuth'
+        'Invoke-QuartoRender'
+        'Invoke-Rscript'
+        'Build-QmdParamPairs'
+        'Write-NeoipcBuildReport'
+        'Test-QuartoInstallation'
+        'Split-NeoipcLocale'
+        'Resolve-NeoipcLocaleQmd'
+        # PAT
+        'Read-DHIS2PersonalAccessToken'
+        'Remove-DHIS2PersonalAccessToken'
+        'Clear-DHIS2PersonalAccessTokens'
+        # UserInfo
+        'Read-UserInfo'
+        # Tracker
+        'Read-PatientInfo'
+        'Read-EnrolmentInfo'
+        'Read-EventSummary'
+    )
 
-# Minimum version of the PowerShell engine required by this module
-PowerShellVersion = '7.2'
+    # Cmdlets to export from this module
+    CmdletsToExport = @()
 
-# Name of the PowerShell host required by this module
-# PowerShellHostName = ''
+    # Variables to export from this module
+    VariablesToExport = @()
 
-# Minimum version of the PowerShell host required by this module
-# PowerShellHostVersion = ''
+    # Aliases to export from this module
+    AliasesToExport = @(
+        'Read-PAT'
+        'Remove-PAT'
+        'Clear-PATs'
+    )
 
-# Minimum version of Microsoft .NET Framework required by this module. This prerequisite is valid for the PowerShell Desktop edition only.
-# DotNetFrameworkVersion = ''
+    # Private data to pass to the module specified in RootModule/ModuleToProcess.
+    PrivateData = @{
 
-# Minimum version of the common language runtime (CLR) required by this module. This prerequisite is valid for the PowerShell Desktop edition only.
-# ClrVersion = ''
-
-# Processor architecture (None, X86, Amd64) required by this module
-# ProcessorArchitecture = ''
-
-# Modules that must be imported into the global environment prior to importing this module
-# RequiredModules = @()
-
-# Assemblies that must be loaded prior to importing this module
-# RequiredAssemblies = @()
-
-# Script files (.ps1) that are run in the caller's environment prior to importing this module.
-# ScriptsToProcess = @()
-
-# Type files (.ps1xml) to be loaded when importing this module
-# TypesToProcess = @()
-
-# Format files (.ps1xml) to be loaded when importing this module
-# FormatsToProcess = @()
-
-# Modules to import as nested modules of the module specified in RootModule/ModuleToProcess
-# NestedModules = @()
-
-# Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-FunctionsToExport = @(
-    'Build-Target'
-    'Export-AsciiDocIds'
-    'Export-AsciiDocReferences'
-    'Get-LocalisedPath'
-    'Import-Translations'
-    'New-AntibioticsList'
-    'New-PathogenList'
-    'Test-ChildObject'
-    'Get-ChildObject'
-    'Get-Properties'
-    'Initialize-ObjectDirectory'
-    'Get-CodeMap'
-    'Get-ObjectProperties'
-)
-
-# Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
-CmdletsToExport = @()
-
-# Variables to export from this module
-VariablesToExport = '*'
-
-# Aliases to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no aliases to export.
-AliasesToExport = @()
-
-# DSC resources to export from this module
-# DscResourcesToExport = @()
-
-# List of all modules packaged with this module
-# ModuleList = @()
-
-# List of all files packaged with this module
-# FileList = @()
-
-# Private data to pass to the module specified in RootModule/ModuleToProcess. This may also contain a PSData hashtable with additional module metadata used by PowerShell.
-PrivateData = @{
-
-    PSData = @{
-
-        # Tags applied to this module. These help with module discovery in online galleries.
-        # Tags = @()
-
-        # A URL to the license for this module.
-        # LicenseUri = ''
-
-        # A URL to the main website for this project.
-        ProjectUri = 'https://neoipc.org/'
-
-        # A URL to an icon representing this module.
-        # IconUri = ''
-
-        # ReleaseNotes of this module
-        # ReleaseNotes = ''
-
-        # Prerelease string of this module
-        # Prerelease = ''
-
-        # Flag to indicate whether the module requires explicit user acceptance for install/update/save
-        # RequireLicenseAcceptance = $false
-
-        # External dependent modules of this module
-        # ExternalModuleDependencies = @()
-
-    } # End of PSData hashtable
-
-} # End of PrivateData hashtable
-
-# HelpInfo URI of this module
-# HelpInfoURI = ''
-
-# Default prefix for commands exported from this module. Override the default prefix using Import-Module -Prefix.
-# DefaultCommandPrefix = ''
-
+        PSData = @{
+            Tags = 'NeoIPC', 'Surveillance', 'DHIS2'
+            LicenseUri = 'https://opensource.org/license/mit'
+            ProjectUri = 'https://neoipc.org'
+            IconUri = 'https://neoipc.org/wp-content/uploads/2021/06/LOGO-NEOIPC-SQUARE-COLOR.png'
+            Prerelease = 'Alpha1'
+            RequireLicenseAcceptance = $false
+        }
+    }
 }
-

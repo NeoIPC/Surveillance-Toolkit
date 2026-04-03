@@ -24,7 +24,7 @@ In DataFile mode (-DataFile), the script renders a formatted report from a pre-c
 param(
     [ArgumentCompleter({
         param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
-        . "$PSScriptRoot/NeoipcReportHelpers.ps1"
+        Import-Module (Join-Path $PSScriptRoot 'modules' 'NeoIPC-Tools') -Force -Verbose:$false
         $serverKey = Get-NeoipcServerKey `
             -Scheme $fakeBoundParameters['Dhis2Scheme'] `
             -Hostname $fakeBoundParameters['Dhis2Hostname'] `
@@ -196,7 +196,7 @@ param(
     [string[]]$ExcludeElements = @()
 )
 
-. "$PSScriptRoot/NeoipcReportHelpers.ps1"
+Import-Module (Join-Path $PSScriptRoot 'modules' 'NeoIPC-Tools') -Force -Verbose:$false
 
 # --- Runtime validation ---
 $isDataFileMode = $PSCmdlet.ParameterSetName -eq 'DataFile'
@@ -266,6 +266,12 @@ if ($OutputDir) {
     $resolvedOutputDir = $resolvedOutputDir.Path
 }
 
+# In DataFile mode no DHIS2 auth is needed, but we still scope LC_ALL.
+# Pass a dummy auth hashtable that clears env vars without setting new ones.
+$authForEnv = if ($isDataFileMode) { @{ AuthType = 'None' } } else { Resolve-NeoipcAuth -Token $Token }
+
+Invoke-WithNeoipcAuth -Auth $authForEnv -ExtraEnvVars @{ 'LC_ALL' = $null } -ScriptBlock {
+
 # Prepare build tracking before try block so variables are always initialized,
 # even if an early exception (e.g. auth failure) skips the rest of the try body
 $errors = @()
@@ -306,8 +312,8 @@ if (inherits(x, 'neoipcr_bnch_ds')) {
         $sites = @($siteString -split ',')
         Write-Verbose "DataFile mode: rendering from $DataFile (sites: $($sites -join ', '))"
     } else {
-        # Online mode: resolve auth and fetch departments
-        $auth = Resolve-NeoipcAuth -Token $Token
+        # Online mode: auth already resolved as $authForEnv above
+        $auth = $authForEnv
 
         # Fetch departments
         $deptArgs = @{ Auth = $auth; SiteCodeFilter = $SiteCodeFilter }
@@ -320,31 +326,6 @@ if (inherits(x, 'neoipcr_bnch_ds')) {
         if (-not $sites -or $sites.Count -eq 0) {
             Write-Warning "No sites matched filter '$SiteCodeFilter'. Nothing to do.";
             return
-        }
-    }
-
-    # Save current auth env vars, clear them, then set only the resolved ones
-    # so that R/Quarto child processes pick up credentials via neoipcr's get_auth_data()
-    $originalEnv = @{}
-    foreach ($name in @(
-        'NEOIPC_DHIS2_TOKEN',
-        'NEOIPC_DHIS2_USER',
-        'NEOIPC_DHIS2_PASSWORD',
-        'NEOIPC_DHIS2_SESSION_ID',
-        'LC_ALL'
-    )) {
-        $originalEnv[$name] = [Environment]::GetEnvironmentVariable($name, 'Process')
-    }
-    if (-not $isDataFileMode) {
-        foreach ($name in @('NEOIPC_DHIS2_TOKEN', 'NEOIPC_DHIS2_USER',
-                            'NEOIPC_DHIS2_PASSWORD', 'NEOIPC_DHIS2_SESSION_ID')) {
-            [Environment]::SetEnvironmentVariable($name, $null, 'Process')
-        }
-        if ($auth.AuthType -eq 'Token') {
-            $env:NEOIPC_DHIS2_TOKEN = $auth.Token
-        } elseif ($auth.AuthType -eq 'Basic') {
-            $env:NEOIPC_DHIS2_USER = $auth.Username
-            $env:NEOIPC_DHIS2_PASSWORD = Get-NeoipcAuthPassword -Auth $auth
         }
     }
 
@@ -623,14 +604,6 @@ catch {
 }
 finally {
     Set-Location -LiteralPath $wd
-    foreach ($name in $originalEnv.Keys) {
-        $originalValue = $originalEnv[$name]
-        if ($null -eq $originalValue) {
-            [Environment]::SetEnvironmentVariable($name, $null, 'Process')
-        } else {
-            [Environment]::SetEnvironmentVariable($name, $originalValue, 'Process')
-        }
-    }
 
     Write-Progress -Activity 'Partner Report Build' -Completed
 
@@ -653,3 +626,5 @@ finally {
         exit 1
     }
 }
+
+} # end Invoke-WithNeoipcAuth

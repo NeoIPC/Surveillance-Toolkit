@@ -5,7 +5,7 @@ param(
 
     [ArgumentCompleter({
         param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
-        . "$PSScriptRoot/NeoipcReportHelpers.ps1"
+        Import-Module (Join-Path $PSScriptRoot 'modules' 'NeoIPC-Tools') -Force -Verbose:$false
         $serverKey = Get-NeoipcServerKey `
             -Scheme $fakeBoundParameters['Dhis2Scheme'] `
             -Hostname $fakeBoundParameters['Dhis2Hostname'] `
@@ -62,26 +62,14 @@ param(
     [string]$Dhis2Path = $null
 )
 
-. "$PSScriptRoot/NeoipcReportHelpers.ps1"
+Import-Module (Join-Path $PSScriptRoot 'modules' 'NeoIPC-Tools') -Force -Verbose:$false
 $auth = Resolve-NeoipcAuth -Token $Token
 
 $currentDir = Get-Location
 $reportDir = Resolve-Path -LiteralPath "$PSScriptRoot/../reports/Patient-Data-Report/"
 $outputDirPath = Join-Path $reportDir '_output'
 
-$originalEnv = @{}
-foreach ($name in @('NEOIPC_DHIS2_TOKEN', 'NEOIPC_DHIS2_USER', 'NEOIPC_DHIS2_PASSWORD', 'NEOIPC_DHIS2_SESSION_ID', 'LC_ALL')) {
-    $originalEnv[$name] = [Environment]::GetEnvironmentVariable($name, 'Process')
-}
-foreach ($name in @('NEOIPC_DHIS2_TOKEN', 'NEOIPC_DHIS2_USER', 'NEOIPC_DHIS2_PASSWORD', 'NEOIPC_DHIS2_SESSION_ID')) {
-    [Environment]::SetEnvironmentVariable($name, $null, 'Process')
-}
-if ($auth.AuthType -eq 'Token') {
-    $env:NEOIPC_DHIS2_TOKEN = $auth.Token
-} elseif ($auth.AuthType -eq 'Basic') {
-    $env:NEOIPC_DHIS2_USER = $auth.Username
-    $env:NEOIPC_DHIS2_PASSWORD = Get-NeoipcAuthPassword -Auth $auth
-}
+Invoke-WithNeoipcAuth -Auth $auth -ExtraEnvVars @{ 'LC_ALL' = $null } -ScriptBlock {
 
 $errors = @()
 $outputFiles = @()
@@ -154,14 +142,6 @@ catch {
 }
 finally {
     Set-Location -LiteralPath $currentDir
-    foreach ($name in $originalEnv.Keys) {
-        $originalValue = $originalEnv[$name]
-        if ($null -eq $originalValue) {
-            [Environment]::SetEnvironmentVariable($name, $null, 'Process')
-        } else {
-            [Environment]::SetEnvironmentVariable($name, $originalValue, 'Process')
-        }
-    }
 
     Write-Progress -Activity 'Patient Data Report Build' -Completed
 
@@ -183,3 +163,5 @@ finally {
         exit 1
     }
 }
+
+} # end Invoke-WithNeoipcAuth

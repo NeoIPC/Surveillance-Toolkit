@@ -8,7 +8,7 @@ This file documents the Surveillance-Toolkit repository. If this repository is c
 
 The first ten rules below (those without a *(repo-specific)* tag) are **universal** — mirrored in every NeoIPC repository's instruction files. If you add or change a universal guardrail here, add `<!-- SYNC: propagate to all repos -->` next to it so the change gets propagated when the workspace is next used. The remaining rules are specific to this repository.
 
-- **Never** put personal names or other identifying information in source code (comments, strings, commit messages, etc.).
+- **Never** put personal names or other identifying information in source code (comments, strings, commit messages, etc.), except in copyright statements and file-header attribution lines (e.g. `Author:`, `@author`, `Copyright (c)` fields).
 - **Never** read, write, or access files under `secrets/`, `data/local/`, or `.env`. This includes listing, globbing, searching, or interacting with these paths in any way — not just reading file contents. If the user provides a path under these directories, use it as-is without exploring the directory.
 - **Never** push directly to `main` or `master` on this repository.
 - **Never** make HTTP calls to the DHIS2 API or attempt to read JSON files returned from the DHIS2 API. These files contain sensitive surveillance data and are not needed for code-level tasks.

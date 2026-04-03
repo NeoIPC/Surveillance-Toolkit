@@ -122,7 +122,7 @@ param(
     [string[]]$ExcludeElements = @()
 )
 
-. "$PSScriptRoot/NeoipcReportHelpers.ps1"
+Import-Module (Join-Path $PSScriptRoot 'modules' 'NeoIPC-Tools') -Force -Verbose:$false
 
 $isDataFileMode = $PSCmdlet.ParameterSetName -eq 'DataFile'
 
@@ -142,7 +142,11 @@ $repoRoot = Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..')
 $reportDir = Resolve-Path -LiteralPath (Join-Path $repoRoot 'reports/Reference-Report')
 $outputDirPath = Resolve-Path -LiteralPath $OutputDir -ErrorAction SilentlyContinue
 if (-not $outputDirPath) {
-    $outputDirPath = (New-Item -ItemType Directory -Path $OutputDir -Force).FullName
+    # Resolve to absolute path without requiring the directory to exist.
+    # New-Item respects -WhatIf and won't create it during dry runs, so
+    # Resolve-Path would fail. The directory is created on first write by
+    # Set-Content / ConvertTo-Json inside the build report function.
+    $outputDirPath = [System.IO.Path]::GetFullPath($OutputDir)
 } else {
     $outputDirPath = $outputDirPath.Path
 }
@@ -227,39 +231,14 @@ if ($isDataFileMode) {
     ).Replace('-', '').ToLowerInvariant()
 }
 
-$auth = if (-not $isDataFileMode) { Resolve-NeoipcAuth -Token $Token } else { $null }
+$authForEnv = if (-not $isDataFileMode) { Resolve-NeoipcAuth -Token $Token } else { @{ AuthType = 'None' } }
 
-$originalEnv = @{}
-foreach ($name in @(
-    'NEOIPC_DHIS2_TOKEN',
-    'NEOIPC_DHIS2_USER',
-    'NEOIPC_DHIS2_PASSWORD',
-    'NEOIPC_DHIS2_SESSION_ID',
-    'NEOIPC_BACKUP_PASSWORD',
-    'LC_ALL'
-)) {
-    $originalEnv[$name] = [Environment]::GetEnvironmentVariable($name, 'Process')
-}
+Invoke-WithNeoipcAuth -Auth $authForEnv -ExtraEnvVars @{ 'LC_ALL' = $null; 'NEOIPC_BACKUP_PASSWORD' = $null } -ScriptBlock {
 
-try {
-if (-not $isDataFileMode) {
-    # Clear all auth env vars, then set only the resolved ones
-    foreach ($name in @('NEOIPC_DHIS2_TOKEN', 'NEOIPC_DHIS2_USER',
-                        'NEOIPC_DHIS2_PASSWORD', 'NEOIPC_DHIS2_SESSION_ID')) {
-        [Environment]::SetEnvironmentVariable($name, $null, 'Process')
-    }
-    if ($auth.AuthType -eq 'Token') {
-        $env:NEOIPC_DHIS2_TOKEN = $auth.Token
-    } elseif ($auth.AuthType -eq 'Basic') {
-        $env:NEOIPC_DHIS2_USER = $auth.Username
-        $env:NEOIPC_DHIS2_PASSWORD = Get-NeoipcAuthPassword -Auth $auth
-    }
-
-    if ($BackupDataset -and [string]::IsNullOrWhiteSpace($env:NEOIPC_BACKUP_PASSWORD)) {
-        $secureBackupPassword = Read-Host -Prompt 'Backup password' -AsSecureString
-        $env:NEOIPC_BACKUP_PASSWORD =
-            [System.Net.NetworkCredential]::new('', $secureBackupPassword).Password
-    }
+if (-not $isDataFileMode -and $BackupDataset -and [string]::IsNullOrWhiteSpace($env:NEOIPC_BACKUP_PASSWORD)) {
+    $secureBackupPassword = Read-Host -Prompt 'Backup password' -AsSecureString
+    $env:NEOIPC_BACKUP_PASSWORD =
+        [System.Net.NetworkCredential]::new('', $secureBackupPassword).Password
 }
 
 $commonParams = @{}
@@ -393,7 +372,7 @@ try {
             $quartoArgsCommon += @('--log-level', 'error')
         }
     }
-    $outputDirRelative = Resolve-Path -LiteralPath $outputDirPath -Relative -RelativeBasePath $reportDir
+    $outputDirRelative = [System.IO.Path]::GetRelativePath($reportDir, $outputDirPath)
     $quartoArgsCommon += @('--output-dir', $outputDirRelative)
 
     Push-Location -LiteralPath $reportDir
@@ -494,19 +473,5 @@ finally {
         exit 1
     }
 }
-}
-finally {
-    # Guaranteed env var restore — even if the inner finally or exit throws
-    foreach ($name in $originalEnv.Keys) {
-        $originalValue = $originalEnv[$name]
-        if ([string]::IsNullOrEmpty($originalValue)) {
-            [Environment]::SetEnvironmentVariable($name, $null, 'Process')
-        } else {
-            [Environment]::SetEnvironmentVariable(
-                $name,
-                $originalValue,
-                'Process'
-            )
-        }
-    }
-}
+
+} # end Invoke-WithNeoipcAuth

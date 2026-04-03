@@ -10,7 +10,7 @@ param(
     [switch]$ForExcel
 )
 
-Import-Module -Name (Join-Path -Resolve -Path $PSScriptRoot -ChildPath 'modules' -AdditionalChildPath 'NeoIPC-Tools') -Force -Verbose:$false
+Import-Module -Name (Join-Path -Resolve -Path $PSScriptRoot -ChildPath 'modules' -AdditionalChildPath 'NeoIPC-BuildTools') -Force -Verbose:$false
 
 # Dev mode
 $ForExcel = $true

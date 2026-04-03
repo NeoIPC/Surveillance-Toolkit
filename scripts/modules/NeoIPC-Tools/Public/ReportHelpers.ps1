@@ -1,224 +1,5 @@
 <#
 .SYNOPSIS
-Shared helper functions for NeoIPC report generation scripts.
-
-.DESCRIPTION
-Dot-source this file to get shared functions for authentication resolution,
-DHIS2 API access, Quarto rendering, and locale handling.
-
-.EXAMPLE
-. "$PSScriptRoot/NeoipcReportHelpers.ps1"
-$auth = Resolve-NeoipcAuth -Token $Token
-$sites = Get-NeoipcDepartments -Auth $auth -SiteCodeFilter 'NEO_AT.*'
-Invoke-WithNeoipcAuth -Auth $auth -ScriptBlock { quarto render ... }
-#>
-
-. "$PSScriptRoot/Resolve-NeoipcToken.ps1"
-
-<#
-.SYNOPSIS
-Resolve DHIS2 authentication credentials.
-
-.DESCRIPTION
-Tries token-based auth first (parameter, env var, file), then falls back
-to prompting for username/password if no token is available.
-
-Returns a hashtable with:
-  @{ AuthType = 'Token'; Token = '...' }
-  @{ AuthType = 'Basic'; Username = '...'; Password = <SecureString> }
-
-.PARAMETER Token
-Optional token string or path to a file containing the token.
-#>
-function Resolve-NeoipcAuth {
-    [CmdletBinding()]
-    param(
-        [Parameter(Position = 0)]
-        [string]$Token
-    )
-
-    # Try token first: explicit param → env var → file
-    $candidate = $Token
-    if ([string]::IsNullOrWhiteSpace($candidate)) {
-        $candidate = $env:NEOIPC_DHIS2_TOKEN
-    }
-
-    if (-not [string]::IsNullOrWhiteSpace($candidate)) {
-        # If it's a file path, read the token from it
-        if (Test-Path -LiteralPath $candidate -PathType Leaf) {
-            try {
-                $content = Get-Content -LiteralPath $candidate -TotalCount 1 -Encoding UTF8 -ErrorAction Stop
-                if ([string]::IsNullOrWhiteSpace($content)) {
-                    throw "Token file '$candidate' is empty."
-                }
-                $candidate = $content.Trim()
-            }
-            catch [System.Management.Automation.ItemNotFoundException] {
-                throw "Token file '$candidate' not found."
-            }
-            catch {
-                throw "Token file '$candidate' could not be read: $($_.Exception.Message)"
-            }
-        }
-        return @{
-            AuthType = 'Token'
-            Token    = $candidate.Trim()
-        }
-    }
-
-    # No token available — prompt for username/password
-    $username = Read-Host -Prompt 'DHIS2 username'
-    if ([string]::IsNullOrWhiteSpace($username)) {
-        throw 'No username provided.'
-    }
-    $securePassword = Read-Host -Prompt 'DHIS2 password' -AsSecureString
-
-    return @{
-        AuthType = 'Basic'
-        Username = $username
-        Password = $securePassword
-    }
-}
-
-<#
-.SYNOPSIS
-Get the plaintext password from a Resolve-NeoipcAuth result.
-
-.DESCRIPTION
-Converts the SecureString password in a Basic auth result to plaintext.
-Returns $null for Token auth.
-#>
-function Get-NeoipcAuthPassword {
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory)]
-        [hashtable]$Auth
-    )
-
-    if ($Auth.AuthType -ne 'Basic') { return $null }
-    [System.Net.NetworkCredential]::new('', $Auth.Password).Password
-}
-
-<#
-.SYNOPSIS
-Build a filesystem-safe key from DHIS2 connection parameters.
-
-.DESCRIPTION
-Returns a string like "https_neoipc.charite.de_api" derived from scheme,
-hostname, port, and path. Used to partition per-server cache files.
-Falls back to neoipcr defaults for any null parameter.
-
-.PARAMETER Scheme
-URL scheme. Falls back to 'https'.
-
-.PARAMETER Hostname
-DHIS2 server hostname. Falls back to 'neoipc.charite.de'.
-
-.PARAMETER Port
-TCP port. Omitted from key when null.
-
-.PARAMETER Path
-API base path. Falls back to '/api'.
-#>
-function Get-NeoipcServerKey {
-    [CmdletBinding()]
-    param(
-        [Parameter()] [string]$Scheme = $null,
-        [Parameter()] [string]$Hostname = $null,
-        [Parameter()] [Nullable[int]]$Port = $null,
-        [Parameter()] [string]$Path = $null
-    )
-
-    $s = if ($Scheme) { $Scheme } else { 'https' }
-    $h = if ($Hostname) { $Hostname } else { 'neoipc.charite.de' }
-    $p = if ($Path) { $Path } else { '/api' }
-    $key = "${s}_${h}"
-    if ($Port) { $key += "_${Port}" }
-    $key += "_$($p.TrimStart('/').Replace('/', '_'))"
-    $key
-}
-
-<#
-.SYNOPSIS
-Fetch and filter NeoIPC department codes from DHIS2.
-
-.PARAMETER Auth
-Authentication hashtable from Resolve-NeoipcAuth.
-
-.PARAMETER SiteCodeFilter
-Regex pattern to filter department codes. Default: '.+' (all).
-
-.PARAMETER Scheme
-URL scheme. Defaults to 'https' when not specified.
-
-.PARAMETER Hostname
-DHIS2 server hostname. Defaults to 'neoipc.charite.de' when not specified.
-
-.PARAMETER Port
-TCP port. Not included in URL when null.
-
-.PARAMETER Path
-API base path. Defaults to '/api' when not specified.
-
-.OUTPUTS
-Sorted array of department code strings.
-#>
-function Get-NeoipcDepartments {
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory)]
-        [hashtable]$Auth,
-
-        [Parameter()]
-        [string]$SiteCodeFilter = '.+',
-
-        [Parameter()] [string]$Scheme = $null,
-        [Parameter()] [string]$Hostname = $null,
-        [Parameter()] [Nullable[int]]$Port = $null,
-        [Parameter()] [string]$Path = $null
-    )
-
-    $effectiveScheme = if ($Scheme) { $Scheme } else { 'https' }
-    $effectiveHost = if ($Hostname) { $Hostname } else { 'neoipc.charite.de' }
-    $effectivePath = if ($Path) { $Path } else { '/api' }
-    $baseUrl = "${effectiveScheme}://${effectiveHost}"
-    if ($Port) { $baseUrl += ":$Port" }
-    $deptsUrl = "${baseUrl}${effectivePath}/organisationUnitGroups.json?paging=false&filter=code:eq:NEO_DEPARTMENT&fields=organisationUnits%5Bcode%5D"
-
-    $invokeParams = @{
-        Method      = 'Get'
-        Uri         = $deptsUrl
-        ErrorAction = 'Stop'
-    }
-
-    if ($Auth.AuthType -eq 'Token') {
-        $invokeParams.Headers = @{ 'Authorization' = "ApiToken $($Auth.Token)" }
-    }
-    else {
-        $cred = [System.Management.Automation.PSCredential]::new(
-            $Auth.Username,
-            $Auth.Password)
-        $invokeParams.Authentication = 'Basic'
-        $invokeParams.Credential = $cred
-    }
-
-    try {
-        $resp = Invoke-RestMethod @invokeParams
-        $sites = if ($resp.organisationUnitGroups -and $resp.organisationUnitGroups[0].organisationUnits) {
-            $resp.organisationUnitGroups[0].organisationUnits.code
-        }
-        else { @() }
-        $sites = $sites | Where-Object { $_ -match $SiteCodeFilter } | Sort-Object
-    }
-    catch {
-        throw "Failed to fetch department list from DHIS2 ($deptsUrl): $($_.Exception.Message)"
-    }
-
-    return $sites
-}
-
-<#
-.SYNOPSIS
 Run a script block with NeoIPC auth environment variables scoped.
 
 .DESCRIPTION
@@ -388,8 +169,6 @@ function Invoke-QuartoRender {
         if ($exitCode -ne 0) {
             $messages.Add("Quarto exit code $exitCode") | Out-Null
         }
-        # Error details already streamed via Write-Host above.
-        # Full output (including backtrace) available in Messages.
     }
     else {
         $status = 'Success'
@@ -407,14 +186,6 @@ function Invoke-QuartoRender {
 .SYNOPSIS
 Run an Rscript command and parse its output, handling multi-line rlang errors.
 
-.DESCRIPTION
-Executes Rscript with the given arguments, routing output to Write-Verbose,
-Write-Warning, or Write-Host (red) depending on content. Multi-line rlang
-error messages (! message, i bullets) are kept together and displayed in red.
-Backtrace lines are silently collected in Messages for debugging.
-
-Returns a result object identical in shape to Invoke-QuartoRender.
-
 .PARAMETER Arguments
 Array of arguments to pass to Rscript.
 
@@ -425,7 +196,7 @@ Label used in debug/error messages. Default: 'Rscript'.
 The Rscript executable. Default: 'Rscript'.
 
 .OUTPUTS
-PSCustomObject with Status ('Success' or 'Error'), ExitCode, and Messages.
+PSCustomObject with Status ('Success' or 'Error'), ExitCode, Messages, and ErrorLines.
 #>
 function Invoke-Rscript {
     [CmdletBinding()]
@@ -464,7 +235,7 @@ function Invoke-Rscript {
                 # skip blank lines in error block
             }
             elseif ($s -eq 'Execution halted') {
-                # final R line after an error — no need to display
+                # final R line after an error
             }
             else {
                 $errorLines.Add($s) | Out-Null
@@ -508,10 +279,6 @@ function Invoke-Rscript {
 .SYNOPSIS
 Split a locale code into its language and territory components.
 
-.DESCRIPTION
-Parses locale codes like 'de_AT', 'de', or 'en_GB' into a hashtable with
-Language, Territory, and Code fields.
-
 .PARAMETER Locale
 Locale code (e.g. 'de_AT', 'de', 'en_GB', 'en').
 
@@ -539,9 +306,7 @@ Resolve the localized QMD file for a report.
 
 .DESCRIPTION
 Looks for BaseName.Language.qmd first, falls back to BaseName.qmd.
-Throws if neither exists. Accepts either a bare language code ('de')
-or a full locale code ('de_AT'); when a full locale is passed, only the
-language component is used for file resolution.
+Throws if neither exists.
 
 .PARAMETER ReportDir
 Directory containing the QMD files.
@@ -644,11 +409,11 @@ function Test-QuartoInstallation {
 .SYNOPSIS
 Convert a hashtable of parameter values into Quarto -P key:value argument pairs.
 
-.DESCRIPTION
-Skips null and empty values. Returns an array of alternating '-P' and 'key:value' strings.
-
 .PARAMETER Values
 Hashtable of parameter names and values.
+
+.OUTPUTS
+Array of alternating '-P' and 'key:value' strings.
 #>
 function Build-QmdParamPairs {
     [CmdletBinding()]
@@ -678,29 +443,6 @@ writes a coloured console summary, and optionally persists a JSON build report.
 
 CTRL+C (PipelineStoppedException) bypasses catch blocks, so $BuildCompleted
 distinguishes a clean finish (true) from an interrupted one (false with no errors).
-
-.PARAMETER Name
-Display name for the build (e.g. 'Reference Report Build').
-
-.PARAMETER Errors
-Array of error messages collected during the build.
-
-.PARAMETER OutputFiles
-Array of output file paths produced by the build.
-
-.PARAMETER BuildCompleted
-Set to $true at the end of the try block. If $false and no errors, status is 'cancelled'.
-
-.PARAMETER StartedAt
-ISO 8601 timestamp from when the build started.
-
-.PARAMETER BuildReportPath
-Path for the JSON build report. If null or empty, no JSON file is written.
-
-.PARAMETER ExtraFields
-Ordered hashtable of additional fields to include in the JSON report
-(e.g. timestamp, outputDir, locales, formats, parameterHash, parameters, steps).
-These are merged after the core fields.
 
 .OUTPUTS
 The status string: 'success', 'failed', or 'cancelled'.

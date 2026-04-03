@@ -6,7 +6,7 @@ param(
     [System.IO.DirectoryInfo]$SignatureImagePath,
     [ArgumentCompleter({
         param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
-        . "$PSScriptRoot/NeoipcReportHelpers.ps1"
+        Import-Module (Join-Path $PSScriptRoot 'modules' 'NeoIPC-Tools') -Force -Verbose:$false
         $serverKey = Get-NeoipcServerKey `
             -Scheme $fakeBoundParameters['Dhis2Scheme'] `
             -Hostname $fakeBoundParameters['Dhis2Hostname'] `
@@ -38,9 +38,9 @@ param(
     [ArgumentCompleter({
         param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
         @(
-            Get-ChildItem -LiteralPath "$PSScriptRoot/../reports/Partner Certificate/" -File -Filter 'Partner Certificate.*.qmd' |
+            Get-ChildItem -LiteralPath "$PSScriptRoot/../reports/Partner-Certificate/" -File -Filter 'Partner-Certificate.*.qmd' |
             Select-Object -ExpandProperty Name |
-            ForEach-Object { if($_ -match 'Partner Certificate\.(.+)\.qmd') { $Matches[1] } }) + 'en' |
+            ForEach-Object { if($_ -match 'Partner-Certificate\.(.+)\.qmd') { $Matches[1] } }) + 'en' |
             Where-Object { $_ -like "$wordToComplete*" } |
             Sort-Object
      })]
@@ -67,29 +67,17 @@ param(
     [string]$Dhis2Path = $null
 )
 
-. "$PSScriptRoot/NeoipcReportHelpers.ps1"
+Import-Module (Join-Path $PSScriptRoot 'modules' 'NeoIPC-Tools') -Force -Verbose:$false
 $auth = Resolve-NeoipcAuth -Token $Token
 
 $currentDir = Get-Location
-$reportDir = Resolve-Path -LiteralPath "$PSScriptRoot/../reports/Partner Certificate/"
+$reportDir = Resolve-Path -LiteralPath "$PSScriptRoot/../reports/Partner-Certificate/"
 $outputDirPath = Join-Path $reportDir '_output'
 $localeParts = Split-NeoipcLocale -Locale $Locale
-$quartoFile = Resolve-NeoipcLocaleQmd -ReportDir $reportDir -BaseName 'Partner Certificate' -Locale $Locale
+$quartoFile = Resolve-NeoipcLocaleQmd -ReportDir $reportDir -BaseName 'Partner-Certificate' -Locale $Locale
 $SignatureImagePath = Resolve-Path -LiteralPath $SignatureImagePath.FullName -Relative -RelativeBasePath $reportDir
 
-$originalEnv = @{}
-foreach ($name in @('NEOIPC_DHIS2_TOKEN', 'NEOIPC_DHIS2_USER', 'NEOIPC_DHIS2_PASSWORD', 'NEOIPC_DHIS2_SESSION_ID', 'LC_ALL')) {
-    $originalEnv[$name] = [Environment]::GetEnvironmentVariable($name, 'Process')
-}
-foreach ($name in @('NEOIPC_DHIS2_TOKEN', 'NEOIPC_DHIS2_USER', 'NEOIPC_DHIS2_PASSWORD', 'NEOIPC_DHIS2_SESSION_ID')) {
-    [Environment]::SetEnvironmentVariable($name, $null, 'Process')
-}
-if ($auth.AuthType -eq 'Token') {
-    $env:NEOIPC_DHIS2_TOKEN = $auth.Token
-} elseif ($auth.AuthType -eq 'Basic') {
-    $env:NEOIPC_DHIS2_USER = $auth.Username
-    $env:NEOIPC_DHIS2_PASSWORD = Get-NeoipcAuthPassword -Auth $auth
-}
+Invoke-WithNeoipcAuth -Auth $auth -ExtraEnvVars @{ 'LC_ALL' = $null } -ScriptBlock {
 
 $errors = @()
 $outputFiles = @()
@@ -122,7 +110,7 @@ try {
         foreach ($site in $sites) {
             $completedSteps++
             $pct = if ($totalSteps -gt 0) { [int](100 * $completedSteps / $totalSteps) } else { 0 }
-            Write-Progress -Activity 'Partner Certificate Build' -Status "Rendering certificate for $site" -PercentComplete $pct
+            Write-Progress -Activity 'Partner-Certificate Build' -Status "Rendering certificate for $site" -PercentComplete $pct
 
             $outFile = "$([datetime]::Now.ToString('yyyy-MM-dd_HHmmss'))_NeoIPC-Surveillance-Partner-Certificate_${site}.${Locale}.pdf"
             $quartoArgs = @('render', $quartoFile, '-P', "signatory:$Signatory", '-P', "signatureImagePath:$SignatureImagePath", '-P', "departmentCode:$site", '-o', $outFile)
@@ -144,7 +132,7 @@ try {
     } else {
         $totalSteps = 1
         $completedSteps = 1
-        Write-Progress -Activity 'Partner Certificate Build' -Status "Rendering certificate for $HospitalName" -PercentComplete 100
+        Write-Progress -Activity 'Partner-Certificate Build' -Status "Rendering certificate for $HospitalName" -PercentComplete 100
 
         $outFile = "$([datetime]::Now.ToString('yyyy-MM-dd_HHmmss'))_NeoIPC-Surveillance-Partner-Certificate_${HospitalName}.${Locale}.pdf"
         $quartoArgs = @('render', $quartoFile, '-P', "signatory:$Signatory", '-P', "signatureImagePath:$SignatureImagePath", '-P', "startYear:$StartYear", '-P', "endYear:$EndYear", '-P', "nPatients:$NumberOfPatients", '-P', "hospitalName:$HospitalName", '-o', $outFile)
@@ -171,16 +159,8 @@ catch {
 }
 finally {
     Set-Location -LiteralPath $currentDir
-    foreach ($name in $originalEnv.Keys) {
-        $originalValue = $originalEnv[$name]
-        if ($null -eq $originalValue) {
-            [Environment]::SetEnvironmentVariable($name, $null, 'Process')
-        } else {
-            [Environment]::SetEnvironmentVariable($name, $originalValue, 'Process')
-        }
-    }
 
-    Write-Progress -Activity 'Partner Certificate Build' -Completed
+    Write-Progress -Activity 'Partner-Certificate Build' -Completed
 
     $buildReportPath = Join-Path $outputDirPath "${scriptTimestamp}_NeoIPC-Surveillance-Partner-Certificate-Build.json"
     $extraFields = [ordered]@{
@@ -189,7 +169,7 @@ finally {
         locale = $Locale
     }
     $reportPath = if ($JsonReport) { $buildReportPath } else { $null }
-    $status = Write-NeoipcBuildReport -Name 'Partner Certificate Build' `
+    $status = Write-NeoipcBuildReport -Name 'Partner-Certificate Build' `
         -Errors $errors -OutputFiles $outputFiles -BuildCompleted $buildCompleted `
         -StartedAt $startedAt -BuildReportPath $reportPath -ExtraFields $extraFields
 
@@ -197,3 +177,5 @@ finally {
         exit 1
     }
 }
+
+} # end Invoke-WithNeoipcAuth
