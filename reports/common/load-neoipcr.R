@@ -9,7 +9,7 @@ load_neoipcr <- function(dev_pkg_path = NULL) {
         file = stderr())
       install.packages("devtools", repos = "https://cloud.r-project.org")
     }
-    devtools::load_all(dev_pkg_path, recompile = TRUE)
+    devtools::load_all(dev_pkg_path)
   } else {
     if (!is.null(dev_pkg_path)) {
       checked <- normalizePath(

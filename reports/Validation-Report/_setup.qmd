@@ -46,9 +46,9 @@ if (!is.null(params$validationExceptionFile) && file.exists(params$validationExc
     SITE_CODE = character(),
     DEPARTMENT_CODE = character(),
     NEOIPC_PATIENT_ID = character(),
-    VALID_UNTIL = Date(),
+    VALID_UNTIL = as.Date(character()),
     REASON = character(),
-    CREATED = Date())
+    CREATED = as.Date(character()))
 }
 ```
 

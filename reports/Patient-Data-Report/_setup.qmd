@@ -45,7 +45,7 @@ ds <- suppressWarnings(neoipcr::import_dhis2(
 #| label: Filter to patient
 
 patient <- ds$patients |>
-  dplyr::filter(patient_id == !!patient_id)
+  dplyr::filter(.data$patient_id == !!patient_id)
 
 patient_found <- nrow(patient) == 1
 

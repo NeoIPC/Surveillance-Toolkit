@@ -1,5 +1,5 @@
 ---
-lang: gr
+lang: el
 #language: ../common/_language.gr.yml
 params:
   referenceDataFile: NULL

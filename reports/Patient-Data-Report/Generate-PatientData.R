@@ -91,7 +91,7 @@ ds_opt <- neoipcr::dhis2_dataset_options(
 ds <- neoipcr::import_dhis2(connection_options = conn_opt, dataset_options = ds_opt)
 
 # Filter to the requested patient
-patient <- ds$patients |> dplyr::filter(patient_id == !!patient_id)
+patient <- ds$patients |> dplyr::filter(.data$patient_id == !!patient_id)
 
 if (nrow(patient) == 0) {
   cat(sprintf("Error: No patient with ID '%s' found in department '%s'.\n",
