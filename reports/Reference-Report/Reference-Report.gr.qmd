@@ -1,0 +1,28 @@
+---
+lang: gr
+#language: ../common/_language.gr.yml
+params:
+  referenceDataFile: NULL
+  reportingPeriodFrom: NULL
+  reportingPeriodTo: NULL
+  birthWeightFrom: NULL
+  birthWeightTo: NULL
+  gestationWeeksFrom: NULL
+  gestationWeeksTo: NULL
+  reportingCountries: NULL
+  hospitalFilter: NULL
+  testUnitFilter: true
+  defaultPatientFilter: true
+  validationExceptionFile: NULL
+  dhis2Scheme: NULL
+  dhis2Hostname: NULL
+  dhis2Port: NULL
+  dhis2Path: NULL
+---
+
+```{r}
+#| label: Make sure the locale is initialised correctly
+Sys.setenv(LC_ALL = "el_GR.UTF-8")
+```
+
+{{< include _content.qmd >}}

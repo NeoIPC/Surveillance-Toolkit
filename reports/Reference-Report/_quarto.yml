@@ -1,11 +1,71 @@
 project:
   output-dir: _output
-date-meta: now
-echo: false
-execute:
-  keep-md: true
-  error: true
-filters: ["../filters/pandoc-quotes.lua"]
 profile:
   group:
-    - [pdf,html,minimal]
+    - [en, de, es, et, gr, it]
+date-meta: now
+includeHeader: true
+includeIntroductionTexts: true
+includeTextPatientPopulation: true
+includeTextNosocomial: true
+includeTextInfectiousAgents: true
+includeTextRiskFactors: true
+includeTextSurgery: true
+includeBirthWeightFigure: true
+includeGestationalAgeFigure: true
+includeIncidenceDensityTable: true
+includeDeviceAssociatedIncidenceDensityTable: true
+includeAgentPerInfectionRateTable: true
+includeResistantPathogenInfectionRateTable: false
+includeInfectiousAgentDetectionRateTable: true
+includeAntibioticResistanceTestRateTable: false
+includeRiskDensityRateTable: true
+includeSurgicalProcedureRateTable: true
+echo: false
+execute:
+  error: true
+filters: ["../filters/pandoc-quotes.lua"]
+format:
+  html:
+    link-external-icon: true
+    link-external-newwindow: true
+  pdf:
+    template-partials:
+      - before-body.tex
+    documentclass: scrartcl
+    mainfont: "EB Garamond"
+    monofont: "EB Garamond"
+    fontsize: 10pt
+    classoption: [footsepline=true, plainfootsepline=true]
+    papersize: a4paper
+    fig-pos: 'H'
+    tbl-pos: 'H'
+    colorlinks: true
+    geometry:
+      - top=30mm
+      - bottom=30mm
+      - left=25mm
+      - right=25mm
+      - heightrounded
+    number-sections: true
+    include-in-header:
+      text: |
+        \usepackage{float}
+        \usepackage{placeins}
+        \usepackage{graphicx}
+        \usepackage{wrapfig}
+        \usepackage{scrlayer-scrpage}
+        \ModifyLayer[addvoffset=-.6ex]{scrheadings.foot.above.line}
+        \ModifyLayer[addvoffset=-.6ex]{plain.scrheadings.foot.above.line}
+        \ihead{\includegraphics[width=4cm]{../logos/LOGO_NEOIPC_2.png}}
+        \ifoot*{\includegraphics[width=1.37cm]{../logos/eu-flag.png}}
+        \ofoot{\pagemark}
+        \newcommand{\FooterText}{}
+        \cfoot*{%
+          \raggedright
+          \hspace{1.6cm}\parbox{0.8\textwidth}{\FooterText}
+        }
+  docx:
+    highlight-style: github
+    number-sections: true
+    reference-doc: ../common/reference.docx

@@ -1,101 +1,24 @@
 ---
 lang: en
-title: "Certificate of participation in the NeoIPC project surveillance system (NeoIPC Surveillance)"
-author-meta: "NeoIPC Surveillance team"
-keywords: "NeoIPC, Surveillance, Certificate"
 date-meta: now
 params:
   startYear: NULL
   endYear: NULL
   nPatients: NULL
   hospitalName: NULL
-  signatory: NULL
-  signatureImagePath: NULL
+  signatory: "Demo Signatory"
+  signatureImagePath: "demo_signature.png"
   dataFilePath: NULL
-  departmentCode: NULL
-  token: NULL
-engine: knitr
-format:
-  pdf:
-    template-partials:
-      - before-body.tex
-      - title.tex
-    documentclass: scrartcl
-    classoption:
-      - footsepline=true
-      - plainfootsepline=true
-    mainfont: "Noto Sans"
-    fontsize: 12pt
-    papersize: a4paper
-    geometry:
-      - top=15mm
-      - bottom=20mm
-      - left=25mm
-      - right=25mm
-      - heightrounded
-    keep-md: true
-    keep-tex: true
-    include-in-header: 
-      text: |
-        \usepackage{microtype}
-        \usepackage[absolute]{textpos}
-        \usepackage{float}
-        \usepackage{placeins}
-        \usepackage{graphicx}
-        \usepackage{wrapfig}
-        \usepackage{scrlayer-scrpage}
-        \pagenumbering{gobble}
-        \setlength{\footheight}{1.5cm}
-        \ModifyLayer[addvoffset=-.6ex]{scrheadings.foot.above.line}
-        \ModifyLayer[addvoffset=-.6ex]{plain.scrheadings.foot.above.line}
-        \addtokomafont{pagefoot}{\footnotesize}
-        \ifoot*{\includegraphics[width=1.37cm]{../images/eu-flag.png}}
+  departmentCode: "DE_BER_CHARITE_CVK_NEO"
+  dhis2Scheme: NULL
+  dhis2Hostname: NULL
+  dhis2Port: NULL
+  dhis2Path: NULL
 ---
 
 ```{r}
 #| label: Initialise Locale
-locale <- "en_GB.UTF-8"
-big_mark <- ","
+Sys.setenv(LC_ALL = "en_GB.UTF-8")
 ```
 
-{{< include _setup.qmd >}}
-
-\cfoot*{\raggedright \hspace{1.5cm}This project has received funding from the European Union’s Horizon 2020 research and\\ \hspace{1.5cm}innovation programme under grant agreement No 965328.}
-\selectlanguage{british}
-
-\begin{center}
-\vspace*{-1.25\baselineskip}
-
-`r if (data$startYear == data$endYear) {'In'} else {'During the period'}`
-
-\vspace*{1.25\baselineskip}
-
-\Huge \bfseries `r if (data$startYear == data$endYear) {data$startYear} else {paste0(data$startYear, "-", data$endYear)}`\normalsize \normalfont
-
-\vspace*{1.25\baselineskip}
-
-the neonatology unit at
-
-\vspace*{1.25\baselineskip}
-
-\large \bfseries `r data$hospitalName`\normalsize \normalfont
-
-\vspace*{1.25\baselineskip}
-
-participated in the NeoIPC Surveillance network.
-
-\end{center}
-
-\vspace*{1.25\baselineskip}
-
-Through active monitoring of `r paste0('**', format(data$nPatients, big.mark = big_mark), '**')` newborns with birth weights below `r format(1500L, big.mark = big_mark)` grams and/or gestational ages below 32 weeks, the team collected valuable reference data that will be useful for assessing and reducing infection risks in neonatal units. We are proud and delighted to have them as partners in our mission to improve infection prevention and control in the neonatal setting.
-
-\vspace*{3.25\baselineskip}
-\begin{textblock*}{10cm}(12cm,26cm)
-`r data$signatory`\\
-for the NeoIPC Surveillance team\\
-\end{textblock*}
-\begin{textblock*}{10cm}(2.5cm,26cm)
-Berlin, `r format(Sys.Date(), format = "%x")`
-\end{textblock*}
-![](`{r} data$signatureImagePath`){fig-align="right"}
+{{< include _content.qmd >}}

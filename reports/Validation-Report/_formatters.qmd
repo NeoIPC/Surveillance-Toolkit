@@ -134,7 +134,7 @@ formatters <- list(
       "* ",
       sprintf(
         problem_translation$description,
-        translations$ssi_types[[as.character(problem_context$NEOIPC_SSI_INFECTION_TYPE)]])
+        sR$ssi_types[[as.character(problem_context$NEOIPC_SSI_INFECTION_TYPE)]])
       ),
     `20` = function(problem_translation, problem_context) paste0(
       "* ",

@@ -1,0 +1,16 @@
+# String Resource Layer Allowlist
+#
+# Entries listed here are excluded from detection by
+# Test-StringResourceLayers.ps1.
+#
+# Duplicate suppression:
+#   <report-name>:<dotted-key-path>        (for report-specific entries)
+#   <layer>:<dotted-key-path>              (for glossary/common entries)
+#
+# Dead key suppression (keys accessed dynamically):
+#   dead:<layer>:<dotted-key-path>         (e.g., dead:common:ssi_types)
+#   dead:<layer>:<report>:<dotted-key-path>  (e.g., dead:report:Validation-Report:ssi_types)
+#
+# Only same-value duplicates need to be listed. Entries where the
+# values differ across layers are automatically excluded (those are
+# intentional overrides).

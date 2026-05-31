@@ -1,0 +1,23 @@
+---
+lang: de
+date-meta: now
+params:
+  startYear: NULL
+  endYear: NULL
+  nPatients: NULL
+  hospitalName: NULL
+  signatory: "Demo Signatory"
+  signatureImagePath: "demo_signature.png"
+  dataFilePath: NULL
+  departmentCode: "DE_BER_CHARITE_CVK_NEO"
+  dhis2Scheme: NULL
+  dhis2Hostname: NULL
+  dhis2Port: NULL
+  dhis2Path: NULL
+---
+
+```{r}
+#| label: Initialise Locale
+Sys.setenv(LC_ALL = "de_DE.UTF-8")
+```
+{{< include _content.qmd >}}

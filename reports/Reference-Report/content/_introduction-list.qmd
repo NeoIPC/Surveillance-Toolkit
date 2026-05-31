@@ -1,0 +1,26 @@
+```{r}
+#| echo: false
+#| output: asis
+
+cat(sep = "\n", c(
+  paste0(sR$headerList$numberOfDepartments, ":"),
+  "",
+  paste0(":   ", dR$numberOfDepartments),
+  "",
+  paste0(sR$headerList$numberOfPatients, ":"),
+  "",
+  paste0(":   ", dR$numberOfPatients),
+  "",
+  paste0(sR$headerList$numberOfAdmissions, ":"),
+  "",
+  paste0(":   ", dR$numberOfAdmissions),
+  "",
+  paste0(sR$headerList$sumOfPatientDays, ":"),
+  "",
+  paste0(":   ", dR$sumOfPatientDays),
+  "",
+  paste0(sR$headerList$averageSurveillancePeriod, ":"),
+  "",
+  paste0(":   ", dR$averageSurveillancePeriod, " days")
+))
+```

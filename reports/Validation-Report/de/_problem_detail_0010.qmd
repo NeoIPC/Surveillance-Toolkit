@@ -8,7 +8,9 @@ Wenn diese Fehlermeldung im Validierungsbericht erscheint, haben wir festgestell
 Dies kann zwei Gründe haben:
 
 1. Ein Fehler in unserer automatischen Berechnung vor dem `r format(lubridate::date("2024-08-21"), format = "%x")` hat dazu geführt, dass der Wert für die Patiententage um einen Tag zu klein ist.
+
 2. Das Aufnahmedatum der Patientenregistrierung wurde nach dem Abschließen des Formulars für das Ende der Surveillance geändert.
+
 
 Was den ersten Grund betrifft, tut es uns wirklich leid, denn es ist ein Problem, das wir verursacht haben, und das für Sie zu Arbeit führt.
 Normalerweise würden wir alles tun, um dies zu vermeiden, und bei automatisch berechneten Werten wäre dies - trotz unserer grundsätzlichen Politik, die von unseren Partnern eingegebenen Werte niemals ohne Rücksprache zu ändern - prinzipiell auch möglich, aber leider ergibt sich in diesem Fall, durch die Validierung der Eingaben, in manchen Fällen ein zusätzliches Problem, das wir mit den uns zur Verfügung stehenden Informationen nicht selbst lösen können.

@@ -6,11 +6,21 @@ date-meta: now
 number-sections: true
 echo: false
 format:
+  html:
+    link-external-icon: true
+    link-external-newwindow: true
   pdf:
     documentclass: scrartcl
+    mainfont: "Noto Sans"
+    monofont: "Noto Sans"
+    fontsize: 10pt
     papersize: a4paper
     fig-pos: 'h'
     colorlinks: true
+  docx:
+    highlight-style: github
+    number-sections: true
+    reference-doc: ../common/reference.docx
 filters: ["../filters/pandoc-quotes.lua"]
 profile:
   group: 

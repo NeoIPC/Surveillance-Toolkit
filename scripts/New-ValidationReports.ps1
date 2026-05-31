@@ -1,0 +1,164 @@
+<#
+.SYNOPSIS
+Batch-generate Validation Reports for one or more sites.
+
+.DESCRIPTION
+This script fetches the department/site list from DHIS2, filters by a regex, and renders the Validation Report for each site using Quarto.
+
+.EXAMPLE
+    .\New-ValidationReports.ps1 -SiteCodeFilter 'NEO_AT.*' -Language 'de' -Token $myToken -Verbose
+#>
+[CmdletBinding()]
+param(
+    [ArgumentCompleter({
+        param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
+        . "$PSScriptRoot/NeoipcReportHelpers.ps1"
+        $serverKey = Get-NeoipcServerKey `
+            -Scheme $fakeBoundParameters['Dhis2Scheme'] `
+            -Hostname $fakeBoundParameters['Dhis2Hostname'] `
+            -Port $fakeBoundParameters['Dhis2Port'] `
+            -Path $fakeBoundParameters['Dhis2Path']
+        $cacheFile = Join-Path $PSScriptRoot '..' 'data' 'local' $serverKey 'site-codes.txt'
+        if (Test-Path -LiteralPath $cacheFile) {
+            Get-Content -LiteralPath $cacheFile |
+                Where-Object { $_ -like "$wordToComplete*" } |
+                Sort-Object
+        } else {
+            $cacheBase = Join-Path $PSScriptRoot '..' 'data' 'local'
+            Get-ChildItem -LiteralPath $cacheBase -Recurse -Filter 'site-codes.txt' -ErrorAction SilentlyContinue |
+                Get-Content |
+                Sort-Object -Unique |
+                Where-Object { $_ -like "$wordToComplete*" }
+        }
+    })]
+    [Parameter(Position = 0)]
+    [string]$SiteCodeFilter = '.+',
+
+    [ArgumentCompleter({
+        param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
+        @(
+            Get-ChildItem -LiteralPath "$PSScriptRoot/../reports/Validation-Report/" -File -Filter '_quarto-*.yml' |
+            Select-Object -ExpandProperty Name |
+            ForEach-Object { if ($_ -match '_quarto-(.+)\.yml') { $Matches[1] } }) |
+            Where-Object { $_ -like "$wordToComplete*" } |
+            Sort-Object
+    })]
+    [Parameter(Position = 1)]
+    [string]$Language = 'en',
+
+    [Parameter(Position = 2)]
+    [string]$Token,
+
+    [string]$ValidationExceptionFile,
+
+    [Parameter()]
+    [string]$Dhis2Scheme = $null,
+
+    [Parameter()]
+    [string]$Dhis2Hostname = $null,
+
+    [Parameter()]
+    [Nullable[int]]$Dhis2Port = $null,
+
+    [Parameter()]
+    [string]$Dhis2Path = $null
+)
+
+. "$PSScriptRoot/NeoipcReportHelpers.ps1"
+
+$auth = Resolve-NeoipcAuth -Token $Token
+
+$reportDir = Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..' 'reports' 'Validation-Report')
+
+$deptArgs = @{ Auth = $auth; SiteCodeFilter = $SiteCodeFilter }
+if ($Dhis2Scheme) { $deptArgs.Scheme = $Dhis2Scheme }
+if ($Dhis2Hostname) { $deptArgs.Hostname = $Dhis2Hostname }
+if ($Dhis2Port) { $deptArgs.Port = $Dhis2Port }
+if ($Dhis2Path) { $deptArgs.Path = $Dhis2Path }
+$sites = Get-NeoipcDepartments @deptArgs
+
+if (-not $sites -or $sites.Count -eq 0) {
+    Write-Warning "No sites matched filter '$SiteCodeFilter'. Nothing to do."
+    return
+}
+
+$wd = Get-Location
+$originalEnv = @{}
+foreach ($name in @('NEOIPC_DHIS2_TOKEN', 'NEOIPC_DHIS2_USER', 'NEOIPC_DHIS2_PASSWORD', 'NEOIPC_DHIS2_SESSION_ID')) {
+    $originalEnv[$name] = [Environment]::GetEnvironmentVariable($name, 'Process')
+}
+foreach ($name in @('NEOIPC_DHIS2_TOKEN', 'NEOIPC_DHIS2_USER', 'NEOIPC_DHIS2_PASSWORD', 'NEOIPC_DHIS2_SESSION_ID')) {
+    [Environment]::SetEnvironmentVariable($name, $null, 'Process')
+}
+if ($auth.AuthType -eq 'Token') {
+    $env:NEOIPC_DHIS2_TOKEN = $auth.Token
+} elseif ($auth.AuthType -eq 'Basic') {
+    $env:NEOIPC_DHIS2_USER = $auth.Username
+    $env:NEOIPC_DHIS2_PASSWORD = Get-NeoipcAuthPassword -Auth $auth
+}
+try {
+    Set-Location -LiteralPath $reportDir
+
+    foreach ($site in $sites) {
+        Write-Host "Generating validation report for $site..."
+        $outFile = "$([datetime]::Now.ToString('yyyy-MM-dd_HHmmss'))_NeoIPC-Surveillance-Validation-Report_$($site).$($Language).pdf"
+        $qmdFile = if ($Language -eq 'en') { 'Validation-Report.qmd' } else { "Validation-Report.$Language.qmd" }
+        $quartoArgs = @('render', $qmdFile, '--profile', $Language, '-P', "departmentFilter:$($site)", '-o', $outFile)
+        if ($ValidationExceptionFile) {
+            $quartoArgs += @('-P', "validationExceptionFile:$ValidationExceptionFile")
+        }
+        if ($Dhis2Scheme) { $quartoArgs += @('-P', "dhis2Scheme:$Dhis2Scheme") }
+        if ($Dhis2Hostname) { $quartoArgs += @('-P', "dhis2Hostname:$Dhis2Hostname") }
+        if ($Dhis2Port) { $quartoArgs += @('-P', "dhis2Port:$Dhis2Port") }
+        if ($Dhis2Path) { $quartoArgs += @('-P', "dhis2Path:$Dhis2Path") }
+        $skipRest = $false
+        $errorLine = ''
+        $isError = $false
+        quarto @quartoArgs 2>&1 | ForEach-Object -Process {
+            if ($skipRest) {
+                return
+            }
+            $s = "$_"
+            if ($s -eq 'System.Management.Automation.RemoteException') {
+                $s = ''
+            }
+            if ($isError) {
+                if ($s -eq '! No problem detected') {
+                    Write-Host "No problem detected." -ForegroundColor DarkYellow
+                    $skipRest = $true
+                }
+                else {
+                    if ($errorLine.Length -gt 0) {
+                        Write-Error -Message $errorLine
+                        $errorLine = ''
+                    }
+                    Write-Error -Message $s
+                }
+            }
+            elseif ($s -match '^(Error)|(Fehler)') {
+                $isError = $true
+                $errorLine = $s
+            }
+            elseif ($s -match "^(`e\[39m)?(`e\[33m)?WARNING") {
+                $s | Write-Warning
+            }
+            else {
+                $s | Write-Verbose
+            }
+        }
+        if (-not $skipRest -and -not $isError) {
+            Write-Host "done." -ForegroundColor Green
+        }
+    }
+}
+finally {
+    Set-Location -LiteralPath $wd
+    foreach ($name in $originalEnv.Keys) {
+        $originalValue = $originalEnv[$name]
+        if ($null -eq $originalValue) {
+            [Environment]::SetEnvironmentVariable($name, $null, 'Process')
+        } else {
+            [Environment]::SetEnvironmentVariable($name, $originalValue, 'Process')
+        }
+    }
+}

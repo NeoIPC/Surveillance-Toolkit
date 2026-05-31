@@ -1,0 +1,204 @@
+```{r Create header as definition list or as as comparative table depending on reference data availability}
+#| echo: false
+#| output: asis
+
+# Check if reference data is available
+has_reference <- "ref" %in% benchmark_data$dataset_names
+
+if (!has_reference) {
+  cat(sep = "\n", c(
+    paste0(sR$headerList$created,":"),
+    "",
+    paste0(":   ",dR$own$creationTimestamp),
+    "",
+    paste0(sR$headerList$dataUpTo,":"),
+    "",
+    paste0(":   ",dR$own$dataUpToTimestamp),
+    "",
+    paste0(sR$headerList$effectiveAnalysisPeriod,":"),
+    "",
+    paste0(":   ",dR$own$effectiveAnalysisPeriod, "^[", sR$headerList$effectiveAnalysisPeriodFootnote, "]"),
+    "",
+    paste0(if(length(benchmark_data$metadata$own$countries) > 1)sR$headerList$countries else sR$headerList$country, ":"),
+    "",
+    paste0(":   ",dR$own$countriesList),
+    "",
+    paste0(sR$headerList$birthweightFilter,":"),
+    "",
+    paste0(":   ",dR$own$birthweightFilter),
+    "",
+    paste0(sR$headerList$gestationalAgeFilter,":"),
+    "",
+    paste0(":   ",dR$own$gestationalAgeFilter)
+  ))
+} else {
+  tbl <- tibble::tibble(
+    parameter = c(
+      sR$headerList$created,
+      sR$headerList$dataUpTo,
+      sR$headerList$effectiveAnalysisPeriod,
+      if(length(benchmark_data$metadata$own$countries) > 1) {
+        sR$headerList$countries
+      } else {
+        sR$headerList$country
+      },
+      sR$headerList$birthweightFilter,
+      sR$headerList$gestationalAgeFilter
+    ),
+    own_value = c(
+      dR$own$creationTimestamp,
+      dR$own$dataUpToTimestamp,
+      dR$own$effectiveAnalysisPeriod,
+      dR$own$countriesList,
+      dR$own$birthweightFilter,
+      dR$own$gestationalAgeFilter
+    ),
+    ref_value = c(
+      dR$ref$creationTimestamp,
+      dR$ref$dataUpToTimestamp,
+      dR$ref$effectiveAnalysisPeriod,
+      dR$ref$countriesList,
+      dR$ref$birthweightFilter,
+      dR$ref$gestationalAgeFilter
+    )
+  ) |>
+    gt(rowname_col = "parameter") |>
+    cols_label(
+      own_value = sR$own_data_label,
+      ref_value = sR$reference_data
+    ) |>
+    tab_options(
+      table.width = pct(100),
+      table.font.size = 13,
+      footnotes.marks = "extended"
+    ) |>
+    tab_style(
+      style = cell_text(weight = "bold"),
+      locations = cells_column_labels()
+    ) |>
+    cols_width(
+      stub() ~ pct(30),
+      own_value ~ pct(35),
+      ref_value ~ pct(35)
+    ) |>
+    tab_footnote(
+      footnote = sR$headerList$effectiveAnalysisPeriodFootnote,
+      locations = cells_stub(rows = parameter == sR$headerList$effectiveAnalysisPeriod)
+    ) |>
+    fmt_markdown(columns = !1, rows = 4)
+
+  # Highlight rows with differences
+  if (metadata_diff$birthweight_differs) {
+    tbl <- tbl |>
+      tab_style(
+        style = cell_fill(color = "#FFFACD"),
+        locations = cells_body(
+          columns = c(own_value, ref_value),
+          rows = parameter == sR$headerList$birthweightFilter
+        )
+      ) |>
+      tab_footnote(
+        footnote = sR$headerList$filterDiffersFootnote,
+        locations = cells_stub(rows = parameter == sR$headerList$birthweightFilter)
+      )
+  }
+
+  if (metadata_diff$gestational_age_differs) {
+    tbl <- tbl |>
+      tab_style(
+        style = cell_fill(color = "#FFFACD"),
+        locations = cells_body(
+          columns = c(own_value, ref_value),
+          rows = parameter == sR$headerList$gestationalAgeFilter
+        )
+      ) |>
+      tab_footnote(
+        footnote = sR$headerList$filterDiffersFootnote,
+        locations = cells_stub(rows = parameter == sR$headerList$gestationalAgeFilter)
+      )
+  }
+
+  if (metadata_diff$countries_differ) {
+    tbl <- tbl |>
+      tab_style(
+        style = cell_fill(color = "#FFFACD"),
+        locations = cells_body(
+          columns = c(own_value, ref_value),
+          rows = parameter %in% c(sR$headerList$country, sR$headerList$countries)
+        )
+      )
+  }
+
+  tbl
+}
+```
+
+::: {.content-visible when-format="pdf"}
+\FloatBarrier
+:::
+
+```{r Show benchmark comparability callout}
+#| echo: false
+#| output: asis
+#| eval: !expr 'has_reference'
+
+if (metadata_diff$countries_differ) {
+  # Determine base message based on reference country count
+  if(length(benchmark_data$metadata$ref$countries) > 1){
+    base_message <- sR$headerList$multiCountryBenchmarkHint
+  } else {
+    base_message <- sR$headerList$singleCountryBenchmarkHint
+  }
+
+  # Add World Bank class mismatch addendum if applicable
+  if (!is.null(wb_class_mismatch) && wb_class_mismatch$has_mismatch) {
+    full_message <- paste0(
+      base_message,
+      " ",
+      sprintf(
+        sR$headerList$wbClassMismatchAddendum,
+        sR$own_data_label,
+        wb_class_mismatch$own_classes,
+        sR$reference_data,
+        wb_class_mismatch$ref_classes
+      )
+    )
+  } else {
+    full_message <- base_message
+  }
+
+  cat(sep = "\n", c(
+    "::: {.callout-caution}",
+    paste0("## ", sR$headerList$benchmarkComparabilityHeader),
+    "",
+    full_message,
+    ":::"
+  ))
+}
+```
+
+```{r Show special analysis hint if test data or ineligible patients included}
+#| echo: false
+#| output: asis
+
+includes_reference_test_data <- "ref" %in% benchmark_data$dataset_names &&
+  benchmark_data$metadata$ref$dataset_options$include_test_data
+
+if (includes_reference_test_data ||
+  benchmark_data$metadata$own$dataset_options$include_ineligible_patients) {
+  cat(sep = "\n", c("::: {.callout-tip}", paste0(
+    c(
+    sR$headerList$specialAnalysisHint,
+    if(includes_reference_test_data){
+      paste0(sR$headerList$includesTestDepartments,
+      if(benchmark_data$metadata$own$dataset_options$include_ineligible_patients)
+        sR$headerList$and
+      else
+        ".", collapse = "")
+    },
+    if (benchmark_data$metadata$own$dataset_options$include_ineligible_patients)
+      sR$headerList$ignoresInclusionCriteria
+    ), collapse = " "),
+    ":::"))
+}
+```

@@ -1,0 +1,424 @@
+{{< include _setup.qmd >}}
+
+```{r}
+#| label: Title
+#| output: asis
+cat("# ", sR$title, "\n\n")
+cat("## ", sR$subtitle, "\n\n")
+cat(glue::glue(sR$generated_on, date = format(Sys.Date(), format = "%x")), "\n\n")
+```
+
+```{r}
+#| label: Patient not found
+#| output: asis
+#| eval: !expr '!patient_found'
+cat(glue::glue(sR$patient_not_found,
+  patient_id = patient_id, department_code = department_code), "\n")
+```
+
+```{r}
+#| label: Demographics
+#| output: asis
+#| eval: !expr 'patient_found'
+
+cat("## ", sR$section$demographics, "\n\n")
+
+ga_weeks <- patient$total_gestation_days %/% 7
+ga_days <- patient$total_gestation_days %% 7
+ga_display <- if (!is.na(patient$total_gestation_days)) {
+  glue::glue(sR$gestational_age_format, weeks = ga_weeks, days = ga_days)
+} else {
+  sR$not_available
+}
+
+sex_code <- as.character(patient$sex)
+sex_key <- switch(sex_code, f = "female", m = "male", u = "undetermined", sex_code)
+sex_display <- sR$sex[[sex_key]] %||% sex_code
+
+dept_name <- if (nrow(department) > 0) department$displayName else ""
+hosp_name <- if (nrow(hospital) > 0) hospital$displayName else ""
+
+demo_df <- tibble::tibble(
+  Field = c(
+    sR$field$patient_id,
+    sR$field$sex,
+    sR$field$birth_weight,
+    sR$field$gestational_age,
+    sR$header$department,
+    sR$field$hospital
+  ),
+  Value = c(
+    patient$patient_id,
+    sex_display,
+    as.character(patient$birth_weight),
+    as.character(ga_display),
+    dept_name,
+    hosp_name
+  )
+)
+
+knitr::kable(demo_df, col.names = NULL)
+```
+
+```{r}
+#| label: Enrollment and Admission
+#| output: asis
+#| eval: !expr 'patient_found'
+
+cat("\n\n## ", sR$admission_sc, "\n\n")
+
+if (nrow(enrollment) > 0) {
+  enr <- enrollment[1, ]
+  enr_df <- tibble::tibble(
+    Field = c(sR$field$enrolled_at),
+    Value = c(format(enr$enrolledAt, format = "%x"))
+  )
+
+  if (nrow(admission) > 0) {
+    adm <- admission[1, ]
+    adm_fields <- c()
+    adm_values <- c()
+    if ("type" %in% names(adm) && !is.na(adm$type)) {
+      type_label <- sR$admission_type[[as.character(adm$type)]]
+      if (is.null(type_label)) type_label <- as.character(adm$type)
+      adm_fields <- c(adm_fields, sR$field$admission_type)
+      adm_values <- c(adm_values, type_label)
+    }
+    if ("dol" %in% names(adm) && !is.na(adm$dol)) {
+      adm_fields <- c(adm_fields, sR$field$day_of_life)
+      adm_values <- c(adm_values, as.character(adm$dol))
+    }
+    if (length(adm_fields) > 0) {
+      enr_df <- dplyr::bind_rows(enr_df,
+        tibble::tibble(Field = adm_fields, Value = adm_values))
+    }
+  }
+
+  knitr::kable(enr_df, col.names = NULL)
+}
+```
+
+```{r}
+#| label: Infections
+#| output: asis
+#| eval: !expr 'patient_found'
+
+cat("\n\n## ", sR$section$infections, "\n\n")
+
+pathogen_taxonomy <- neoipcr::get_pathogen_taxonomy()
+
+format_pathogens <- function(agent_findings, taxonomy) {
+  if (is.null(agent_findings) || nrow(agent_findings) == 0) return(NULL)
+
+  result <- agent_findings |>
+    dplyr::left_join(
+      taxonomy |>
+        dplyr::distinct(input_id, .keep_all = TRUE) |>
+        dplyr::select(pathogen_key = input_id, name = output_name),
+      by = "pathogen_key") |>
+    dplyr::mutate(
+      resistance_flags = purrr::pmap_chr(
+        list(
+          `3gcr` = if ("3gcr" %in% names(agent_findings)) `3gcr` else NA,
+          car = if ("car" %in% names(agent_findings)) car else NA,
+          cor = if ("cor" %in% names(agent_findings)) cor else NA,
+          mrsa = if ("mrsa" %in% names(agent_findings)) mrsa else NA,
+          vre = if ("vre" %in% names(agent_findings)) vre else NA
+        ),
+        function(`3gcr`, car, cor, mrsa, vre) {
+          flags <- c()
+          if (!is.na(`3gcr`) && `3gcr` == "yes") flags <- c(flags, "3GCR")
+          if (!is.na(car) && car == "yes") flags <- c(flags, "CARBR")
+          if (!is.na(cor) && cor == "yes") flags <- c(flags, "COLR")
+          if (!is.na(mrsa) && mrsa == "yes") flags <- c(flags, "MRSA")
+          if (!is.na(vre) && vre == "yes") flags <- c(flags, "VRE")
+          if (length(flags) == 0) return("")
+          paste(flags, collapse = ", ")
+        }
+      )
+    )
+
+  if ("source" %in% names(result)) {
+    result <- result |>
+      dplyr::mutate(
+        source_label = purrr::map_chr(
+          as.character(source),
+          ~ sR$pathogen_source[[.x]] %||% .x))
+    result |>
+      dplyr::select(
+        !!sR$field$pathogen_name := name,
+        !!sR$field$resistance := resistance_flags,
+        !!sR$field$source := source_label)
+  } else {
+    result |>
+      dplyr::select(
+        !!sR$field$pathogen_name := name,
+        !!sR$field$resistance := resistance_flags)
+  }
+}
+
+has_infections <- any(nrow(bsi) > 0, nrow(nec) > 0, nrow(hap) > 0, nrow(ssi) > 0)
+
+if (!has_infections) {
+  cat(sR$no_infections, "\n")
+}
+```
+
+```{r}
+#| label: BSI
+#| output: asis
+#| eval: !expr 'patient_found && nrow(bsi) > 0'
+
+cat("\n\n### ", sR$primary_sepsis_bsi_sc, "\n\n")
+
+for (i in seq_len(nrow(bsi))) {
+  ev <- events |> dplyr::filter(event_key == bsi$event_key[i])
+  cat("**", sR$field$event_date, ":** ", format(ev$occurredAt, format = "%x"), "\n\n", sep = "")
+
+  bsi_pathogens <- pathogens |>
+    dplyr::filter(event_key == bsi$event_key[i], !secondary_bsi)
+  if (nrow(bsi_pathogens) > 0) {
+    ptbl <- format_pathogens(bsi_pathogens, pathogen_taxonomy)
+    if (!is.null(ptbl)) print(knitr::kable(ptbl))
+    cat("\n\n")
+  }
+
+  bsi_sec <- pathogens |>
+    dplyr::filter(event_key == bsi$event_key[i], secondary_bsi)
+  if (nrow(bsi_sec) > 0) {
+    cat("#### ", sR$section$secondary_bsi, "\n\n")
+    ptbl <- format_pathogens(bsi_sec, pathogen_taxonomy)
+    if (!is.null(ptbl)) print(knitr::kable(ptbl))
+    cat("\n\n")
+  }
+}
+```
+
+```{r}
+#| label: NEC
+#| output: asis
+#| eval: !expr 'patient_found && nrow(nec) > 0'
+
+cat("\n\n### ", sR$necrotising_enterocolitis_sc, "\n\n")
+
+for (i in seq_len(nrow(nec))) {
+  ev <- events |> dplyr::filter(event_key == nec$event_key[i])
+  cat("**", sR$field$event_date, ":** ", format(ev$occurredAt, format = "%x"), "\n\n", sep = "")
+
+  nec_sec <- pathogens |>
+    dplyr::filter(event_key == nec$event_key[i], secondary_bsi)
+  if (nrow(nec_sec) > 0) {
+    cat("#### ", sR$section$secondary_bsi, "\n\n")
+    ptbl <- format_pathogens(nec_sec, pathogen_taxonomy)
+    if (!is.null(ptbl)) print(knitr::kable(ptbl))
+    cat("\n\n")
+  }
+}
+```
+
+```{r}
+#| label: HAP
+#| output: asis
+#| eval: !expr 'patient_found && nrow(hap) > 0'
+
+cat("\n\n### ", sR$pneumonia_sc, "\n\n")
+
+for (i in seq_len(nrow(hap))) {
+  ev <- events |> dplyr::filter(event_key == hap$event_key[i])
+  cat("**", sR$field$event_date, ":** ", format(ev$occurredAt, format = "%x"), "\n\n", sep = "")
+
+  hap_pathogens <- pathogens |>
+    dplyr::filter(event_key == hap$event_key[i], !secondary_bsi)
+  if (nrow(hap_pathogens) > 0) {
+    ptbl <- format_pathogens(hap_pathogens, pathogen_taxonomy)
+    if (!is.null(ptbl)) print(knitr::kable(ptbl))
+    cat("\n\n")
+  }
+
+  hap_sec <- pathogens |>
+    dplyr::filter(event_key == hap$event_key[i], secondary_bsi)
+  if (nrow(hap_sec) > 0) {
+    cat("#### ", sR$section$secondary_bsi, "\n\n")
+    ptbl <- format_pathogens(hap_sec, pathogen_taxonomy)
+    if (!is.null(ptbl)) print(knitr::kable(ptbl))
+    cat("\n\n")
+  }
+}
+```
+
+```{r}
+#| label: SSI
+#| output: asis
+#| eval: !expr 'patient_found && nrow(ssi) > 0'
+
+cat("\n\n### ", sR$surgical_site_infection_sc, "\n\n")
+
+for (i in seq_len(nrow(ssi))) {
+  ev <- events |> dplyr::filter(event_key == ssi$event_key[i])
+  cat("**", sR$field$event_date, ":** ", format(ev$occurredAt, format = "%x"), "\n\n", sep = "")
+
+  ssi_pathogens <- pathogens |>
+    dplyr::filter(event_key == ssi$event_key[i], !secondary_bsi)
+  if (nrow(ssi_pathogens) > 0) {
+    ptbl <- format_pathogens(ssi_pathogens, pathogen_taxonomy)
+    if (!is.null(ptbl)) print(knitr::kable(ptbl))
+    cat("\n\n")
+  }
+
+  ssi_sec <- pathogens |>
+    dplyr::filter(event_key == ssi$event_key[i], secondary_bsi)
+  if (nrow(ssi_sec) > 0) {
+    cat("#### ", sR$section$secondary_bsi, "\n\n")
+    ptbl <- format_pathogens(ssi_sec, pathogen_taxonomy)
+    if (!is.null(ptbl)) print(knitr::kable(ptbl))
+    cat("\n\n")
+  }
+}
+```
+
+```{r}
+#| label: Surgical Procedures
+#| output: asis
+#| eval: !expr 'patient_found'
+
+cat("\n\n## ", sR$surgical_procedures, "\n\n")
+
+if (nrow(surgery) == 0) {
+  cat(sR$no_procedures, "\n")
+} else {
+  surgery_display <- surgery |>
+    dplyr::left_join(events |> dplyr::select(event_key, occurredAt),
+      by = "event_key") |>
+    dplyr::transmute(
+      !!sR$field$procedure_date := format(occurredAt, format = "%x"),
+      !!sR$field$procedure_code := main_procedure_code,
+      !!sR$field$procedure_category :=
+        neoipcr::get_procedure_category(main_procedure_code)
+    )
+  knitr::kable(surgery_display)
+}
+```
+
+```{r}
+#| label: Surveillance End
+#| output: asis
+#| eval: !expr 'patient_found && nrow(surveillance_end) > 0'
+
+cat("\n\n## ", sR$surveillance_end_sc, "\n\n")
+
+se <- surveillance_end[1, ]
+se_event <- events |> dplyr::filter(event_key == se$event_key)
+
+format_days_value <- function(n) paste(n, sR$days)
+
+# Summary table: date, reason, patient days
+se_fields <- c(sR$field$surveillance_end_date)
+se_values <- c(format(se_event$occurredAt, format = "%x"))
+
+if ("reason" %in% names(se) && !is.na(se$reason)) {
+  reason_label <- sR$surveillance_end_reason[[as.character(se$reason)]]
+  if (is.null(reason_label)) reason_label <- as.character(se$reason)
+  se_fields <- c(se_fields, sR$field$surveillance_end_reason)
+  se_values <- c(se_values, reason_label)
+}
+
+if ("patient_days" %in% names(se) && !is.na(se$patient_days)) {
+  se_fields <- c(se_fields, sR$field$patient_days)
+  se_values <- c(se_values, format_days_value(se$patient_days))
+}
+
+# Individual device days
+if ("cvc_days" %in% names(se) && !is.na(se$cvc_days)) {
+  se_fields <- c(se_fields, sR$device$cvc)
+  se_values <- c(se_values, format_days_value(se$cvc_days))
+}
+if ("pvc_days" %in% names(se) && !is.na(se$pvc_days)) {
+  se_fields <- c(se_fields, sR$device$pvc)
+  se_values <- c(se_values, format_days_value(se$pvc_days))
+}
+if ("inv_days" %in% names(se) && !is.na(se$inv_days)) {
+  se_fields <- c(se_fields, sR$device$inv)
+  se_values <- c(se_values, format_days_value(se$inv_days))
+}
+if ("niv_days" %in% names(se) && !is.na(se$niv_days)) {
+  se_fields <- c(se_fields, sR$device$niv)
+  se_values <- c(se_values, format_days_value(se$niv_days))
+}
+
+# Individual protective factor days
+if ("human_milk_days" %in% names(se) && !is.na(se$human_milk_days)) {
+  se_fields <- c(se_fields, sR$human_milk)
+  se_values <- c(se_values, format_days_value(se$human_milk_days))
+}
+if ("kangaroo_care_days" %in% names(se) && !is.na(se$kangaroo_care_days)) {
+  se_fields <- c(se_fields, sR$kangaroo_care)
+  se_values <- c(se_values, format_days_value(se$kangaroo_care_days))
+}
+if ("probiotic_days" %in% names(se) && !is.na(se$probiotic_days)) {
+  se_fields <- c(se_fields, sR$probiotics)
+  se_values <- c(se_values, format_days_value(se$probiotic_days))
+}
+
+knitr::kable(tibble::tibble(Field = se_fields, Value = se_values),
+  col.names = NULL)
+
+# Antibiotics subsection with substance sub-list
+if ("ab_days" %in% names(se) && !is.na(se$ab_days)) {
+  cat("\n\n### ", sR$antibiotics, "\n\n")
+  cat("- **", sR$field$antibiotic_days, ":** ",
+    format_days_value(se$ab_days), "\n", sep = "")
+
+  subst <- substance_days |>
+    dplyr::filter(!is.na(substance_code), !is.na(days))
+
+  if (nrow(subst) > 0) {
+    substance_names <- ds$metadata$options |>
+      dplyr::filter(optionSet_code == "NEOIPC_ANTIMICROBIAL_SUBSTANCES") |>
+      dplyr::select(code, displayName)
+
+    subst_named <- subst |>
+      dplyr::left_join(substance_names, by = c("substance_code" = "code")) |>
+      dplyr::mutate(name = dplyr::coalesce(displayName, substance_code))
+    for (j in seq_len(nrow(subst_named))) {
+      cat("  - ", subst_named$name[j], ": ",
+        format_days_value(subst_named$days[j]), "\n", sep = "")
+    }
+  }
+}
+```
+
+```{r}
+#| label: Audit Trail
+#| output: asis
+#| eval: !expr 'patient_found'
+
+cat("\n\n## ", sR$section$audit_trail, "\n\n")
+
+if (nrow(event_details) > 0 && "createdAt" %in% names(event_details)) {
+  event_type_labels <- list(
+    adm = sR$admission_sc,
+    bsi = sR$primary_sepsis_bsi_sc,
+    end = sR$surveillance_end_sc,
+    hap = sR$pneumonia_sc,
+    nec = sR$necrotising_enterocolitis_sc,
+    pro = sR$surgical_procedure_sc,
+    ssi = sR$surgical_site_infection_sc
+  )
+
+  audit_rows <- events |>
+    dplyr::left_join(event_details, by = "event_key") |>
+    dplyr::mutate(
+      type_label = purrr::map_chr(
+        as.character(event_type_key),
+        ~ event_type_labels[[.x]] %||% .x)) |>
+    dplyr::transmute(
+      !!sR$field$event_type := type_label,
+      !!sR$field$event_date := format(occurredAt, format = "%x"),
+      !!sR$headerList$created := format(createdAt, format = "%x %X"),
+      !!sR$field$updated_at := format(updatedAt, format = "%x %X")
+    )
+  knitr::kable(audit_rows)
+} else {
+  cat(sR$no_audit_data, "\n")
+}
+```
