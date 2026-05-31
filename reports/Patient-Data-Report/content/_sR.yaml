@@ -1,0 +1,78 @@
+# NeoIPC Patient Data Report — String Resources
+#
+# Layer 3 in the string resource cascade (after glossary.yaml, common.yaml).
+# Report-specific strings: admission types, event labels,
+# section headings, and GDPR Art. 15(3) content.
+#
+# Translated via po4a (po/reports.po4a.cfg) and Weblate.
+# Do not edit generated files (content.<lang>/_sR.yaml) — edit .po files instead.
+#
+# Language: en
+
+admission_type:
+  "1": "Inborn (delivered at this hospital)"
+  "2": "Transferred on day of birth"
+  "3": "Transferred after day of birth"
+days: Days
+device:
+  cvc: "Central Venous Catheter (CVC)"
+  inv: "Invasive Ventilation"
+  niv: "Non-invasive Ventilation"
+  pvc: "Peripheral Venous Catheter (PVC)"
+field:
+  admission_type: "Admission Type"
+  antibiotic_days: "Total Days on Antibiotics"
+  birth_weight: "Birth Weight (g)"
+  created_by: "Created By"
+  date_of_birth: "Date of Birth"
+  day_of_life: "Day of Life"
+  enrolled_at: "Enrolled"
+  event_date: "Event Date"
+  event_type: "Event Type"
+  gestational_age: "Gestational Age"
+  hospital: "Hospital"
+  infection_type: "Infection Type"
+  pathogen_name: "Pathogen"
+  patient_days: "Patient Days"
+  patient_id: "Patient ID"
+  procedure_category: "Category"
+  procedure_code: "Procedure Code (ICHI)"
+  procedure_date: "Procedure Date"
+  resistance: "Resistance"
+  sex: "Sex"
+  source: "Source"
+  substance: "Substance"
+  surveillance_end_date: "Surveillance End Date"
+  surveillance_end_reason: "Reason"
+  updated_at: "Last Modified"
+  updated_by: "Modified By"
+generated_on: "Generated on {date}"
+gestational_age_format: "{weeks}+{days}"
+no_audit_data: "No audit trail data available."
+no_infections: "No infections recorded for this patient."
+no_procedures: "No surgical procedures recorded for this patient."
+not_available: "N/A"
+pathogen_source:
+  B: "Blood"
+  B+C: "Blood and cerebrospinal fluid"
+  C: "Cerebrospinal fluid"
+  L: "Lower respiratory tract"
+  U: "Upper respiratory tract"
+  U+L: "Upper and lower respiratory tract"
+patient_not_found: "No patient with ID '{patient_id}' was found in department '{department_code}'."
+protective:
+section:
+  audit_trail: "Audit Trail"
+  demographics: "Patient Demographics"
+  infections: "Infections"
+  pathogens: "Pathogens"
+  secondary_bsi: "Secondary BSI Pathogens"
+sex:
+  female: "Female"
+  male: "Male"
+  undetermined: "Undetermined"
+subtitle: "NeoIPC Surveillance — GDPR Art. 15(3) Data Export"
+surveillance_end_reason:
+  "1": "Discharge/Transfer"
+  "2": "Death"
+title: "Patient Data Report"
