@@ -273,7 +273,7 @@ if (inherits(x, 'neoipcr_bnch_ds')) {
         $deptArgs = @{ Auth = $auth; SiteCodeFilter = $SiteCodeFilter }
         if ($Dhis2Scheme) { $deptArgs.Scheme = $Dhis2Scheme }
         if ($Dhis2Hostname) { $deptArgs.Hostname = $Dhis2Hostname }
-        if ($Dhis2Port) { $deptArgs.Port = $Dhis2Port }
+        if ($null -ne $Dhis2Port) { $deptArgs.Port = $Dhis2Port }
         if ($Dhis2Path) { $deptArgs.Path = $Dhis2Path }
         $sites = Get-NeoipcDepartments @deptArgs
 
@@ -363,7 +363,7 @@ if (inherits(x, 'neoipcr_bnch_ds')) {
                 if ($IncludeNonCorePatients.IsPresent) { $rArgs += '--includeNonCorePatients' }
                 if ($Dhis2Scheme) { $rArgs += @('--scheme', $Dhis2Scheme) }
                 if ($Dhis2Hostname) { $rArgs += @('--host', $Dhis2Hostname) }
-                if ($Dhis2Port) { $rArgs += @('--port', $Dhis2Port) }
+                if ($null -ne $Dhis2Port) { $rArgs += @('--port', $Dhis2Port) }
                 if ($Dhis2Path) { $rArgs += @('--path', $Dhis2Path) }
 
                 $currentMessages = New-Object System.Collections.Generic.List[string]
@@ -437,7 +437,7 @@ if (inherits(x, 'neoipcr_bnch_ds')) {
                     if ($IncludeNonCorePatients.IsPresent) { $qmdParams['includeNonCorePatients'] = 'true' }
                     if ($Dhis2Scheme) { $qmdParams['dhis2Scheme'] = $Dhis2Scheme }
                     if ($Dhis2Hostname) { $qmdParams['dhis2Hostname'] = $Dhis2Hostname }
-                    if ($Dhis2Port) { $qmdParams['dhis2Port'] = $Dhis2Port }
+                    if ($null -ne $Dhis2Port) { $qmdParams['dhis2Port'] = $Dhis2Port }
                     if ($Dhis2Path) { $qmdParams['dhis2Path'] = $Dhis2Path }
                 }
 

@@ -99,7 +99,7 @@ try {
         $deptArgs = @{ Auth = $auth }
         if ($Dhis2Scheme) { $deptArgs.Scheme = $Dhis2Scheme }
         if ($Dhis2Hostname) { $deptArgs.Hostname = $Dhis2Hostname }
-        if ($Dhis2Port) { $deptArgs.Port = $Dhis2Port }
+        if ($null -ne $Dhis2Port) { $deptArgs.Port = $Dhis2Port }
         if ($Dhis2Path) { $deptArgs.Path = $Dhis2Path }
         $allSites = Get-NeoipcDepartments @deptArgs
 
@@ -111,7 +111,7 @@ try {
             $quartoArgs = @('render', $quartoFile, '-P', "signatory:$Signatory", '-P', "signatureImagePath:$SignatureImagePath", '-P', "departmentCode:$site", '-o', $outFile)
             if ($Dhis2Scheme) { $quartoArgs += @('-P', "dhis2Scheme:$Dhis2Scheme") }
             if ($Dhis2Hostname) { $quartoArgs += @('-P', "dhis2Hostname:$Dhis2Hostname") }
-            if ($Dhis2Port) { $quartoArgs += @('-P', "dhis2Port:$Dhis2Port") }
+            if ($null -ne $Dhis2Port) { $quartoArgs += @('-P', "dhis2Port:$Dhis2Port") }
             if ($Dhis2Path) { $quartoArgs += @('-P', "dhis2Path:$Dhis2Path") }
             $result = Invoke-QuartoRender -Arguments $quartoArgs -Description "partner certificate for $site"
             $exitCode = [System.Math]::Max($result.ExitCode, $exitCode)
@@ -123,7 +123,7 @@ try {
         $quartoArgs = @('render', $quartoFile, '-P', "signatory:$Signatory", '-P', "signatureImagePath:$SignatureImagePath", '-P', "startYear:$StartYear", '-P', "endYear:$EndYear", '-P', "nPatients:$NumberOfPatients", '-P', "hospitalName:$HospitalName", '-o', $outFile)
         if ($Dhis2Scheme) { $quartoArgs += @('-P', "dhis2Scheme:$Dhis2Scheme") }
         if ($Dhis2Hostname) { $quartoArgs += @('-P', "dhis2Hostname:$Dhis2Hostname") }
-        if ($Dhis2Port) { $quartoArgs += @('-P', "dhis2Port:$Dhis2Port") }
+        if ($null -ne $Dhis2Port) { $quartoArgs += @('-P', "dhis2Port:$Dhis2Port") }
         if ($Dhis2Path) { $quartoArgs += @('-P', "dhis2Path:$Dhis2Path") }
         $result = Invoke-QuartoRender -Arguments $quartoArgs -Description "partner certificate for $HospitalName"
         $exitCode = $result.ExitCode

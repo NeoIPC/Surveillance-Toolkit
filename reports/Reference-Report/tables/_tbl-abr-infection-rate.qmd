@@ -36,9 +36,6 @@ reference_data |>
     table.font.size = 13,
     footnotes.marks = "extended"
   ) |>
-  gt::tab_options(
-    table.font.size = 15
-  ) |>
   fmt_number(
     columns = !sR$table_headers$n,
     decimals = 1,

@@ -346,7 +346,7 @@ try {
             if ($BackupDataset) { $rArgs += @('--backup-dataset', $backupPath) }
             if ($Dhis2Scheme) { $rArgs += @('--scheme', $Dhis2Scheme) }
             if ($Dhis2Hostname) { $rArgs += @('--host', $Dhis2Hostname) }
-            if ($Dhis2Port) { $rArgs += @('--port', $Dhis2Port) }
+            if ($null -ne $Dhis2Port) { $rArgs += @('--port', $Dhis2Port) }
             if ($Dhis2Path) { $rArgs += @('--path', $Dhis2Path) }
             & $rscriptCmd @rArgs 2>&1 | ForEach-Object {
                 $s = "$_"
@@ -414,7 +414,7 @@ try {
                 if (-not $isDataFileMode) {
                     if ($Dhis2Scheme) { $quartoArgs += @('-P', "dhis2Scheme:$Dhis2Scheme") }
                     if ($Dhis2Hostname) { $quartoArgs += @('-P', "dhis2Hostname:$Dhis2Hostname") }
-                    if ($Dhis2Port) { $quartoArgs += @('-P', "dhis2Port:$Dhis2Port") }
+                    if ($null -ne $Dhis2Port) { $quartoArgs += @('-P', "dhis2Port:$Dhis2Port") }
                     if ($Dhis2Path) { $quartoArgs += @('-P', "dhis2Path:$Dhis2Path") }
                 }
                 $quartoArgs += $quartoArgsCommon

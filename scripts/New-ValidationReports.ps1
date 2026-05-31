@@ -73,7 +73,7 @@ $reportDir = Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..' 'reports' '
 $deptArgs = @{ Auth = $auth; SiteCodeFilter = $SiteCodeFilter }
 if ($Dhis2Scheme) { $deptArgs.Scheme = $Dhis2Scheme }
 if ($Dhis2Hostname) { $deptArgs.Hostname = $Dhis2Hostname }
-if ($Dhis2Port) { $deptArgs.Port = $Dhis2Port }
+if ($null -ne $Dhis2Port) { $deptArgs.Port = $Dhis2Port }
 if ($Dhis2Path) { $deptArgs.Path = $Dhis2Path }
 $sites = Get-NeoipcDepartments @deptArgs
 
@@ -109,7 +109,7 @@ try {
         }
         if ($Dhis2Scheme) { $quartoArgs += @('-P', "dhis2Scheme:$Dhis2Scheme") }
         if ($Dhis2Hostname) { $quartoArgs += @('-P', "dhis2Hostname:$Dhis2Hostname") }
-        if ($Dhis2Port) { $quartoArgs += @('-P', "dhis2Port:$Dhis2Port") }
+        if ($null -ne $Dhis2Port) { $quartoArgs += @('-P', "dhis2Port:$Dhis2Port") }
         if ($Dhis2Path) { $quartoArgs += @('-P', "dhis2Path:$Dhis2Path") }
         $skipRest = $false
         $errorLine = ''

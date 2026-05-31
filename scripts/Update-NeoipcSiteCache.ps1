@@ -43,7 +43,7 @@ $auth = Resolve-NeoipcAuth -Token $Token
 $deptArgs = @{ Auth = $auth }
 if ($Dhis2Scheme) { $deptArgs.Scheme = $Dhis2Scheme }
 if ($Dhis2Hostname) { $deptArgs.Hostname = $Dhis2Hostname }
-if ($Dhis2Port) { $deptArgs.Port = $Dhis2Port }
+if ($null -ne $Dhis2Port) { $deptArgs.Port = $Dhis2Port }
 if ($Dhis2Path) { $deptArgs.Path = $Dhis2Path }
 $sites = Get-NeoipcDepartments @deptArgs
 

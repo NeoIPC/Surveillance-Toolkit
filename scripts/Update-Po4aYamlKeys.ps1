@@ -101,6 +101,12 @@ foreach ($line in $lines) {
 
         $keys = $allKeys | Where-Object { $exclude -notcontains $_ }
 
+        if (-not $keys -or $keys.Count -eq 0) {
+            Write-Warning "No translatable keys found in $yamlPath after filtering; leaving line unchanged so po4a's default key behaviour is preserved."
+            $newLines += $line
+            continue
+        }
+
         $keyString = ($keys -join " ")
 
         $updatedLine = Update-KeysOption -Line $line -KeyString $keyString
