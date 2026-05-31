@@ -138,6 +138,13 @@ result <- list(
     dplyr::filter(hospital_key == patient$hospital_key)
 )
 
+# Plain `jsonlite::toJSON` (not `serializeJSON`) — the Patient-Data-Report
+# JSON output is intended for external/human consumption (downstream
+# pipelines, manual inspection), not for round-trip back into a Quarto
+# render. The Reference- and Partner-Report generators use `serializeJSON`
+# because their reports consume the output via a DataFile mode that needs
+# to restore tibbles, factors, dates and S3 classes faithfully; that mode
+# is deliberately not wired up here.
 out <- jsonlite::toJSON(result, pretty = TRUE, auto_unbox = TRUE,
   Date = "ISO8601", POSIXt = "ISO8601", null = "null", na = "null")
 

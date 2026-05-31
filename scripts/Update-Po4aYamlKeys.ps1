@@ -38,7 +38,12 @@ function Get-YamlKeysRecursive {
 function Get-ExcludedKeys {
     param($line)
 
-    if ($line -match '#\s*exclude:\s*(.+)$') {
+    # Match only the trailing comment, anchored after the close of the last
+    # quoted opt:"…" clause. Without that anchor, `exclude:` substrings that
+    # happen to appear inside a quoted keys='…' list (e.g. a YAML key like
+    # `excluded_taxa`) would silently steal real keys from the next regen.
+    if ($line -match '"[^"]*"\s+#\s*exclude:\s*(.+)$' -or
+        $line -match '^[^"]*#\s*exclude:\s*(.+)$') {
         return $Matches[1] -split '\s+'
     }
 

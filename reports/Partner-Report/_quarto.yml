@@ -2,9 +2,9 @@ project:
   output-dir: _output
 date-meta: now
 echo: false
-# Uncomment for to debug Markdown or LaTeX files
-keep-md: true
-keep-tex: true
+# Uncomment to debug Markdown or LaTeX files
+# keep-md: true
+# keep-tex: true
 profile:
   group:
     - [en, de]

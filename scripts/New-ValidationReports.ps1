@@ -99,44 +99,7 @@ try {
             if ($Dhis2Hostname) { $quartoArgs += @('-P', "dhis2Hostname:$Dhis2Hostname") }
             if ($null -ne $Dhis2Port) { $quartoArgs += @('-P', "dhis2Port:$Dhis2Port") }
             if ($Dhis2Path) { $quartoArgs += @('-P', "dhis2Path:$Dhis2Path") }
-            $skipRest = $false
-            $errorLine = ''
-            $isError = $false
-            quarto @quartoArgs 2>&1 | ForEach-Object -Process {
-                if ($skipRest) {
-                    return
-                }
-                $s = "$_"
-                if ($s -eq 'System.Management.Automation.RemoteException') {
-                    $s = ''
-                }
-                if ($isError) {
-                    if ($s -eq '! No problem detected') {
-                        Write-Host "No problem detected." -ForegroundColor DarkYellow
-                        $skipRest = $true
-                    }
-                    else {
-                        if ($errorLine.Length -gt 0) {
-                            Write-Error -Message $errorLine
-                            $errorLine = ''
-                        }
-                        Write-Error -Message $s
-                    }
-                }
-                elseif ($s -match '^(Error)|(Fehler)') {
-                    $isError = $true
-                    $errorLine = $s
-                }
-                elseif ($s -match "^(`e\[39m)?(`e\[33m)?WARNING") {
-                    $s | Write-Warning
-                }
-                else {
-                    $s | Write-Verbose
-                }
-            }
-            if (-not $skipRest -and -not $isError) {
-                Write-Host "done." -ForegroundColor Green
-            }
+            $null = Invoke-QuartoRender -Arguments $quartoArgs -Description "validation report for $site"
         }
     }
 }

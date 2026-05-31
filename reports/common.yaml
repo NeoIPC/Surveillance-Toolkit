@@ -33,6 +33,7 @@ fig-cap:
 gramm_abbreviation: "g"
 header:
   department: Department
+  departments: Departments
 headings:
   infectious_agents: Infectious Agents
   introduction: Introduction
