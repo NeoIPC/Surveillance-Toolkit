@@ -3,6 +3,7 @@
 source("../common/helpers.R")
 
 locale <- Sys.getenv("LC_ALL")
+if (!nzchar(locale)) locale <- "en_GB.UTF-8"
 localeObj <- parse_locales(locale)[[1]]
 sR <- get_string_resources(localeObj)
 

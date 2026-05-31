@@ -83,82 +83,63 @@ if (-not $sites -or $sites.Count -eq 0) {
 }
 
 $wd = Get-Location
-$originalEnv = @{}
-foreach ($name in @('NEOIPC_DHIS2_TOKEN', 'NEOIPC_DHIS2_USER', 'NEOIPC_DHIS2_PASSWORD', 'NEOIPC_DHIS2_SESSION_ID')) {
-    $originalEnv[$name] = [Environment]::GetEnvironmentVariable($name, 'Process')
-}
-foreach ($name in @('NEOIPC_DHIS2_TOKEN', 'NEOIPC_DHIS2_USER', 'NEOIPC_DHIS2_PASSWORD', 'NEOIPC_DHIS2_SESSION_ID')) {
-    [Environment]::SetEnvironmentVariable($name, $null, 'Process')
-}
-if ($auth.AuthType -eq 'Token') {
-    $env:NEOIPC_DHIS2_TOKEN = $auth.Token
-} elseif ($auth.AuthType -eq 'Basic') {
-    $env:NEOIPC_DHIS2_USER = $auth.Username
-    $env:NEOIPC_DHIS2_PASSWORD = Get-NeoipcAuthPassword -Auth $auth
-}
 try {
-    Set-Location -LiteralPath $reportDir
+    Invoke-WithNeoipcAuth -Auth $auth -ScriptBlock {
+        Set-Location -LiteralPath $reportDir
 
-    foreach ($site in $sites) {
-        Write-Host "Generating validation report for $site..."
-        $outFile = "$([datetime]::Now.ToString('yyyy-MM-dd_HHmmss'))_NeoIPC-Surveillance-Validation-Report_$($site).$($Language).pdf"
-        $qmdFile = if ($Language -eq 'en') { 'Validation-Report.qmd' } else { "Validation-Report.$Language.qmd" }
-        $quartoArgs = @('render', $qmdFile, '--profile', $Language, '-P', "departmentFilter:$($site)", '-o', $outFile)
-        if ($ValidationExceptionFile) {
-            $quartoArgs += @('-P', "validationExceptionFile:$ValidationExceptionFile")
-        }
-        if ($Dhis2Scheme) { $quartoArgs += @('-P', "dhis2Scheme:$Dhis2Scheme") }
-        if ($Dhis2Hostname) { $quartoArgs += @('-P', "dhis2Hostname:$Dhis2Hostname") }
-        if ($null -ne $Dhis2Port) { $quartoArgs += @('-P', "dhis2Port:$Dhis2Port") }
-        if ($Dhis2Path) { $quartoArgs += @('-P', "dhis2Path:$Dhis2Path") }
-        $skipRest = $false
-        $errorLine = ''
-        $isError = $false
-        quarto @quartoArgs 2>&1 | ForEach-Object -Process {
-            if ($skipRest) {
-                return
+        foreach ($site in $sites) {
+            Write-Host "Generating validation report for $site..."
+            $outFile = "$([datetime]::Now.ToString('yyyy-MM-dd_HHmmss'))_NeoIPC-Surveillance-Validation-Report_$($site).$($Language).pdf"
+            $qmdFile = Resolve-NeoipcLocaleQmd -ReportDir $reportDir -BaseName 'Validation-Report' -Language $Language
+            $quartoArgs = @('render', $qmdFile, '--profile', $Language, '-P', "departmentFilter:$($site)", '-o', $outFile)
+            if ($ValidationExceptionFile) {
+                $quartoArgs += @('-P', "validationExceptionFile:$ValidationExceptionFile")
             }
-            $s = "$_"
-            if ($s -eq 'System.Management.Automation.RemoteException') {
-                $s = ''
-            }
-            if ($isError) {
-                if ($s -eq '! No problem detected') {
-                    Write-Host "No problem detected." -ForegroundColor DarkYellow
-                    $skipRest = $true
+            if ($Dhis2Scheme) { $quartoArgs += @('-P', "dhis2Scheme:$Dhis2Scheme") }
+            if ($Dhis2Hostname) { $quartoArgs += @('-P', "dhis2Hostname:$Dhis2Hostname") }
+            if ($null -ne $Dhis2Port) { $quartoArgs += @('-P', "dhis2Port:$Dhis2Port") }
+            if ($Dhis2Path) { $quartoArgs += @('-P', "dhis2Path:$Dhis2Path") }
+            $skipRest = $false
+            $errorLine = ''
+            $isError = $false
+            quarto @quartoArgs 2>&1 | ForEach-Object -Process {
+                if ($skipRest) {
+                    return
+                }
+                $s = "$_"
+                if ($s -eq 'System.Management.Automation.RemoteException') {
+                    $s = ''
+                }
+                if ($isError) {
+                    if ($s -eq '! No problem detected') {
+                        Write-Host "No problem detected." -ForegroundColor DarkYellow
+                        $skipRest = $true
+                    }
+                    else {
+                        if ($errorLine.Length -gt 0) {
+                            Write-Error -Message $errorLine
+                            $errorLine = ''
+                        }
+                        Write-Error -Message $s
+                    }
+                }
+                elseif ($s -match '^(Error)|(Fehler)') {
+                    $isError = $true
+                    $errorLine = $s
+                }
+                elseif ($s -match "^(`e\[39m)?(`e\[33m)?WARNING") {
+                    $s | Write-Warning
                 }
                 else {
-                    if ($errorLine.Length -gt 0) {
-                        Write-Error -Message $errorLine
-                        $errorLine = ''
-                    }
-                    Write-Error -Message $s
+                    $s | Write-Verbose
                 }
             }
-            elseif ($s -match '^(Error)|(Fehler)') {
-                $isError = $true
-                $errorLine = $s
+            if (-not $skipRest -and -not $isError) {
+                Write-Host "done." -ForegroundColor Green
             }
-            elseif ($s -match "^(`e\[39m)?(`e\[33m)?WARNING") {
-                $s | Write-Warning
-            }
-            else {
-                $s | Write-Verbose
-            }
-        }
-        if (-not $skipRest -and -not $isError) {
-            Write-Host "done." -ForegroundColor Green
         }
     }
 }
 finally {
     Set-Location -LiteralPath $wd
-    foreach ($name in $originalEnv.Keys) {
-        $originalValue = $originalEnv[$name]
-        if ($null -eq $originalValue) {
-            [Environment]::SetEnvironmentVariable($name, $null, 'Process')
-        } else {
-            [Environment]::SetEnvironmentVariable($name, $originalValue, 'Process')
-        }
-    }
 }

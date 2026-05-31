@@ -13,8 +13,6 @@ $sites = Get-NeoipcDepartments -Auth $auth -SiteCodeFilter 'NEO_AT.*'
 Invoke-WithNeoipcAuth -Auth $auth -ScriptBlock { quarto render ... }
 #>
 
-. "$PSScriptRoot/Resolve-NeoipcToken.ps1"
-
 <#
 .SYNOPSIS
 Resolve DHIS2 authentication credentials.

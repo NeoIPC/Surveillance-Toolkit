@@ -8,6 +8,7 @@ suppressMessages(library(tidyverse, warn.conflicts = FALSE, quietly = TRUE))
 ```{r Initialize variables}
 if(!exists("params")) params <- list()
 locale <- Sys.getenv("LC_ALL")
+if (!nzchar(locale)) locale <- "en_GB.UTF-8"
 invisible(Sys.setlocale(category = "LC_ALL", locale = locale))
 localeObj <- parse_locales(locale)[[1]]
 language <- localeObj$language

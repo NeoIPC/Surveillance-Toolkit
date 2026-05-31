@@ -6,10 +6,10 @@ params:
   endYear: NULL
   nPatients: NULL
   hospitalName: NULL
-  signatory: "Demo Signatory"
-  signatureImagePath: "demo_signature.png"
+  signatory: NULL
+  signatureImagePath: NULL
   dataFilePath: NULL
-  departmentCode: "DE_BER_CHARITE_CVK_NEO"
+  departmentCode: NULL
   dhis2Scheme: NULL
   dhis2Hostname: NULL
   dhis2Port: NULL

@@ -6,6 +6,7 @@ source("../common/helpers.R")
 suppressMessages(library(tidyverse, warn.conflicts = FALSE, quietly = TRUE))
 
 locale <- Sys.getenv("LC_ALL")
+if (!nzchar(locale)) locale <- "en_GB.UTF-8"
 invisible(Sys.setlocale(category = "LC_ALL", locale = locale))
 localeObj <- parse_locales(locale)[[1]]
 sR <- get_string_resources(localeObj)
