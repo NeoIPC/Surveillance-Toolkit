@@ -5,7 +5,7 @@ param(
     [Parameter(Position=1)]
     [string]$OutputDirectory = (Join-Path -Path (Resolve-Path -LiteralPath (Join-Path -Path $PSScriptRoot -ChildPath '..' -AdditionalChildPath 'metadata') -Relative) -ChildPath (Get-Date -AsUTC -Format FileDateTimeUniversal)),
     [string[]]$TranslationLanguages = @('de', 'el', 'es', 'fr', 'it'),
-    [switch]$IncudeIds,
+    [switch]$IncludeIds,
     [switch]$NoSharing,
     [switch]$ForExcel
 )
@@ -46,17 +46,17 @@ $metadata | Get-ChildObject | Foreach-Object {
         'attributes' {
             $exportSharing = -not $NoSharing.IsPresent
             $sortProperties = 'name'
-            $properties = Get-ObjectProperties -ObjectName $objectName -AddIdProperty:$IncudeIds.IsPresent -AddSharingProperties:$exportSharing
+            $properties = Get-ObjectProperties -ObjectName $objectName -AddIdProperty:$IncludeIds.IsPresent -AddSharingProperties:$exportSharing
         }
         'dataElements' {
             $exportSharing = -not $NoSharing.IsPresent
             $sortProperties = 'name'
-            $properties = Get-ObjectProperties -ObjectName $objectName -AddIdProperty:$IncudeIds.IsPresent -AddSharingProperties:$exportSharing
+            $properties = Get-ObjectProperties -ObjectName $objectName -AddIdProperty:$IncludeIds.IsPresent -AddSharingProperties:$exportSharing
         }
         'optionSets' {
             $exportSharing = -not $NoSharing.IsPresent
             $sortProperties = 'name'
-            $properties = Get-ObjectProperties -ObjectName $objectName -AddIdProperty:$IncudeIds.IsPresent -AddSharingProperties:$exportSharing
+            $properties = Get-ObjectProperties -ObjectName $objectName -AddIdProperty:$IncludeIds.IsPresent -AddSharingProperties:$exportSharing
         }
         Default {
             Write-Warning "Metadata object '$objectName' is not handled"
