@@ -5,7 +5,7 @@ get_problem_text <- function(problem_ids, contexts) {
   for (i in 1:length(problem_ids)) {
     problem_id <- as.character(problem_ids[i])
     formatter <- formatters$problems[[problem_id]]
-    translation <- translations$problems[[problem_id]]
+    translation <- sR$problems[[problem_id]]
     context <- contexts[i][[1]]
     ret <- c(ret, list(data.frame(PROBLEM_TEXT = formatter(translation, context))))
   }
@@ -41,32 +41,32 @@ header <- function(text, level, numbered = FALSE) paste0(c(rep("#", level), " ",
 event_problem_header_prefix <- function(type) {
   switch (
     as.character(type),
-    ADM = translations$adm_problem_header_prefix,
-    END = translations$end_problem_header_prefix,
-    SUR = translations$sur_problem_header_prefix,
-    BSI = translations$bsi_problem_header_prefix,
-    HAP = translations$hap_problem_header_prefix,
-    NEC = translations$nec_problem_header_prefix,
-    SSI = translations$ssi_problem_header_prefix)
+    ADM = sR$adm_problem_header_prefix,
+    END = sR$end_problem_header_prefix,
+    SUR = sR$sur_problem_header_prefix,
+    BSI = sR$bsi_problem_header_prefix,
+    HAP = sR$hap_problem_header_prefix,
+    NEC = sR$nec_problem_header_prefix,
+    SSI = sR$ssi_problem_header_prefix)
 }
 
 multiple_problems_hint <- function(partner_code, patient_id) {
   mailto_subject <- paste0(
-    translations$patient_problem_multiple_hint_email_subject,
+    sR$patient_problem_multiple_hint_email_subject,
     " (",
-    translations$neoipc_surveillance_partner_code,
+    sR$neoipc_surveillance_partner_code,
     ": ",
     partner_code,
     ")",
     collapse = "")
-  mailto_body <- sprintf(translations$patient_problem_multiple_hint_email_body, patient_id)
+  mailto_body <- sprintf(sR$patient_problem_multiple_hint_email_body, patient_id)
   mailto_content <- paste0(
     support_email_address,
     "?subject=",
     URLencode(mailto_subject, reserved = TRUE),
     "&body=",
     URLencode(mailto_body, reserved = TRUE))
-  sprintf(translations$patient_problem_multiple_hint, mailto_content)
+  sprintf(sR$patient_problem_multiple_hint, mailto_content)
 }
 
 report_problems <- NULL
@@ -121,7 +121,7 @@ if(exists("problem_results")) {
         pat_tei <- report_patients[pat_index,"PATIENT_TEI"] |> pull()
         pat_header_level <- dept_header_level + 1
         cat(header(paste0(
-          translations$patient_problem_header_prefix,
+          sR$patient_problem_header_prefix,
           " \"[",
           pat_id,
           "](https://neoipc.charite.de/dhis-web-tracker-capture/index.html#/dashboard?program=",
@@ -131,7 +131,7 @@ if(exists("problem_results")) {
           "&tei=",
           pat_tei,
           ' "',
-          translations$patient_problem_dashboard_link_description,
+          sR$patient_problem_dashboard_link_description,
           '")"',
           collapse = ""), pat_header_level))
   
@@ -172,7 +172,7 @@ if(exists("problem_results")) {
           ep_date <- enrolments_by_id[ep_index,"ENROLMENT_DATE"] |> pull()
           ep_header_level <- pat_header_level + 1
           cat(header(paste0(
-            translations$enrolment_problem_header_prefix,
+            sR$enrolment_problem_header_prefix,
             " ",
             format(ep_date, format = "%x"),
             # Only print the id if the enrolment date is ambiguous

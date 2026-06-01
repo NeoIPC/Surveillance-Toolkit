@@ -1,4 +1,43 @@
 project:
   output-dir: _output
+profile:
+  group:
+    - [en, de, it]
 date-meta: now
 echo: false
+engine: knitr
+filters: ["../filters/pandoc-quotes.lua"]
+format:
+  pdf:
+    template-partials:
+      - before-body.tex
+      - title.tex
+    documentclass: scrartcl
+    classoption:
+      - footsepline=true
+      - plainfootsepline=true
+    mainfont: "Noto Sans"
+    monofont: "Noto Sans"
+    fontsize: 12pt
+    papersize: a4paper
+    geometry:
+      - top=15mm
+      - bottom=20mm
+      - left=25mm
+      - right=25mm
+      - heightrounded
+    include-in-header: 
+      text: |
+        \usepackage{microtype}
+        \usepackage[absolute]{textpos}
+        \usepackage{float}
+        \usepackage{placeins}
+        \usepackage{graphicx}
+        \usepackage{wrapfig}
+        \usepackage{scrlayer-scrpage}
+        \pagenumbering{gobble}
+        \setlength{\footheight}{1.5cm}
+        \ModifyLayer[addvoffset=-.6ex]{scrheadings.foot.above.line}
+        \ModifyLayer[addvoffset=-.6ex]{plain.scrheadings.foot.above.line}
+        \addtokomafont{pagefoot}{\footnotesize}
+        \ifoot*{\includegraphics[width=1.37cm]{../logos/eu-flag.png}}

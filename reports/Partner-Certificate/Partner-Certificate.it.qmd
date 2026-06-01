@@ -1,0 +1,24 @@
+---
+lang: it
+date-meta: now
+params:
+  startYear: NULL
+  endYear: NULL
+  nPatients: NULL
+  hospitalName: NULL
+  signatory: NULL
+  signatureImagePath: NULL
+  dataFilePath: NULL
+  departmentCode: NULL
+  dhis2Scheme: NULL
+  dhis2Hostname: NULL
+  dhis2Port: NULL
+  dhis2Path: NULL
+---
+
+```{r}
+#| label: Initialise Locale
+Sys.setenv(LC_ALL = "it_IT.UTF-8")
+```
+
+{{< include _content.qmd >}}

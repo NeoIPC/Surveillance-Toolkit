@@ -1,0 +1,203 @@
+### `{r} sR$headings$secondary_bsi`
+
+::: {.content-visible when-meta="includeIntroductionTexts"}
+```{r}
+#| output: asis
+include_localised("_tbl-intro-secondary-bsi.qmd")
+```
+:::
+
+::: {.content-visible when-format="pdf"}
+\FloatBarrier
+:::
+
+```{r}
+#| output: asis
+#| label: tbl-secondary-bsi-rates
+#| tbl-cap: !expr 'sR$`tbl-secondary-bsi-rates`$`tbl-cap`'
+#| tbl-cap-location: top
+
+check_outlier_interpretation <- FALSE
+
+# Conditionally render table only if department data exists
+if (!is.null(benchmark_data$secondary_bsi_rate_table) && 
+    sum(benchmark_data$secondary_bsi_rate_table$n_own, na.rm = TRUE) > 0) {
+  
+  # Check if reference data columns exist
+  has_reference <- "pooled_ref" %in% names(benchmark_data$secondary_bsi_rate_table)
+  check_outlier_interpretation <- has_reference
+
+  tbl <- benchmark_data$secondary_bsi_rate_table |>
+    dplyr::select(-tidyselect::any_of("n_ref")) |>
+    dplyr::rename(
+      !!sR$table_headers$n := "n_own",
+      !!sR$table_headers$rate := "pooled_own",
+      !!sR$table_headers$pooled := tidyselect::any_of("pooled_ref"),
+      !!sR$table_headers$q1 := tidyselect::any_of("q1_ref"),
+      !!sR$table_headers$q2 := tidyselect::any_of("q2_ref"),
+      !!sR$table_headers$q3 := tidyselect::any_of("q3_ref")) |>
+    dplyr::mutate(
+      Infection = dplyr::case_match(
+        as.character(.data$event_type_key),
+        "nec" ~ sR$necrotising_enterocolitis_sc,
+        "ssi" ~ sR$surgical_site_infection_sc,
+        "hap" ~ sR$pneumonia_sc),
+      .keep = "unused") |>
+    gt(rowname_col = "Infection") |>
+    sub_missing() |>
+    gt::tab_options(
+      latex.header_repeat = TRUE,
+      latex.use_longtable = TRUE,
+      table.width = pct(100),
+      table.font.size = 13,
+      footnotes.marks = "extended"
+    ) |>
+    fmt_number(
+      columns = c(
+        tidyselect::any_of(sR$table_headers$rate),
+        tidyselect::any_of(sR$table_headers$pooled),
+        tidyselect::any_of(sR$table_headers$q1),
+        tidyselect::any_of(sR$table_headers$q2),
+        tidyselect::any_of(sR$table_headers$q3)),
+      decimals = 1,
+      sep_mark = sR$digit_group_separator,
+      min_sep_threshold = 2,
+      locale = locale_gt) |>
+    fmt_integer(
+      columns = sR$table_headers$n,
+      sep_mark = sR$digit_group_separator,
+      min_sep_threshold = 2) |>
+    tab_style(
+      style = cell_text(weight = "bold"),
+      locations = list(
+        cells_column_spanners(),
+        cells_column_labels(),
+        cells_row_groups()
+      )
+    ) |>
+    tab_footnote(
+      footnote = sprintf(
+        sR$`tbl-secondary-bsi-rates`$n_footnote,
+        sR$table_headers$n),
+      locations = cells_column_labels(columns = sR$table_headers$n)
+    ) |>
+    tab_footnote(
+      footnote = sprintf(
+        sR$`tbl-secondary-bsi-rates`$rate_footnote,
+        sR$table_headers$rate),
+      locations = cells_column_labels(columns = sR$table_headers$rate)
+    )
+  
+  if (has_reference) {
+    tbl <- tbl |>
+      cols_width(
+        stub() ~ pct(40),
+        sR$table_headers$n ~ pct(10),
+        sR$table_headers$rate ~ pct(10),
+        sR$table_headers$pooled ~ pct(10),
+        sR$table_headers$q1 ~ pct(10),
+        sR$table_headers$q2 ~ pct(10),
+        sR$table_headers$q3 ~ pct(10)
+      ) |>
+      tab_spanner(
+        label = sR$own_data_label,
+        columns = c(
+          sR$table_headers$n,
+          sR$table_headers$rate),
+        id = "department_data"
+      ) |>
+      tab_spanner(
+        label = sR$reference_data,
+        columns = c(
+          sR$table_headers$pooled,
+          sR$table_headers$q1,
+          sR$table_headers$q2,
+          sR$table_headers$q3),
+        id = "reference_data"
+      ) |>
+      tab_spanner(
+        label = sR$`tbl-secondary-bsi-rates`$rate_name,
+        columns = tidyselect::any_of(
+          c(
+            sR$table_headers$rate,
+            sR$table_headers$pooled,
+            sR$table_headers$q1,
+            sR$table_headers$q2,
+            sR$table_headers$q3)),
+        id = "secondary_bsi_rate",
+        level = 2
+      ) |>
+      tab_footnote(
+        footnote = md(
+          paste0(
+            "$$\\text{",
+            sR$`tbl-secondary-bsi-rates`$rate_name,
+            "} = \\frac{\\text{",
+            sR$`tbl-secondary-bsi-rates`$rate_numerator,
+            "}}{\\text{",
+            sR$`tbl-secondary-bsi-rates`$rate_denominator,
+            "}} \\times ",
+            format_integer(100),
+            "$$"
+          )),
+        locations = cells_column_spanners(spanners = "secondary_bsi_rate")
+      ) |>
+      tab_footnote(
+        footnote = sprintf(
+          sR$`tbl-secondary-bsi-rates`$pooled_footnote,
+          sR$table_headers$pooled),
+        locations = cells_column_labels(columns = sR$table_headers$pooled)) |>
+      tab_footnote(
+        footnote = sprintf(
+          sR$`tbl-secondary-bsi-rates`$quartile_footnote,
+          sR$table_headers$q1,
+          sR$table_headers$q2,
+          sR$table_headers$q3,
+          sprintf("%i%s", 25L, sR$percent_symbol),
+          sprintf("%i%s", 50L, sR$percent_symbol),
+          sprintf("%i%s", 75L, sR$percent_symbol)
+        ),
+        locations = cells_column_labels(columns = c(
+          sR$table_headers$q1,
+          sR$table_headers$q2,
+          sR$table_headers$q3)))
+  } else {
+    tbl <- tbl |>
+      cols_width(
+        stub() ~ pct(60),
+        sR$table_headers$n ~ pct(20),
+        sR$table_headers$rate ~ pct(20)
+      ) |>
+      tab_spanner(
+        label = sR$`tbl-secondary-bsi-rates`$rate_name,
+        columns = tidyselect::any_of(
+          c(
+            sR$table_headers$rate)),
+        id = "secondary_bsi_rate"
+      )
+  }
+  
+  tbl
+} else {
+  no_data_table()
+}
+```
+
+::: {.content-visible when-meta="includeOutlierInterpretation"}
+```{r}
+#| output: asis
+if (check_outlier_interpretation) {
+  outliers <- detect_outliers(benchmark_data$secondary_bsi_rate_table)
+  if (length(outliers$below_q1) > 0 || length(outliers$above_q3) > 0) {
+    grouped <- group_outliers(outliers, "secondary_bsi_rate_table")
+    outlier_text <- format_outlier_text(grouped, sR)
+    if (nchar(outlier_text) > 0) {
+      cat("\n\n::: {.callout-tip}\n")
+      cat("## ", sR$outlier$heading, "\n\n")
+      cat(outlier_text, "\n")
+      cat(":::\n")
+    }
+  }
+}
+```
+:::

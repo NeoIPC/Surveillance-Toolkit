@@ -1,18 +1,30 @@
 ```{r}
 #| label: tbl-surgical-procedure-rates
-#| tbl-cap: "Surgical procedures by category"
+#| tbl-cap: !expr 'sR$`tbl-surgical-procedure-rates`$`tbl-cap`'
 #| tbl-cap-location: top
 
-tmp <- reference_data |>
-  neoipcr::get_surgery_rate_table() |>
-  neoipcr::pretty_names()
-
-col_names <- attr(tmp, "names.pretty")
-row_names <- attr(tmp, "row.names.pretty")
-pro_cat <- col_names[["pro_cat"]]
-
-tmp |>
-  gt(rowname_col = pro_cat) |>
+reference_data |>
+  neoipcr::get_ref_surgery_rate_table() |>
+  dplyr::rename(
+    !!sR$table_headers$n := "n",
+    !!sR$table_headers$pooled := "pooled",
+    !!sR$table_headers$q1 := "q1",
+    !!sR$table_headers$q2 := "q2",
+    !!sR$table_headers$q3 := "q3") |>
+  dplyr::mutate(
+    pro_cat = dplyr::case_match(
+      .data$pro_cat,
+      "overall" ~ sR$`tbl-surgical-procedure-rates`$overall,
+      "abdominal_surgery" ~ sR$`tbl-surgical-procedure-rates`$abdominal_surgery,
+      "neurosurgery" ~ sR$`tbl-surgical-procedure-rates`$neurosurgery,
+      "inguinal_hernia_surgery" ~ sR$`tbl-surgical-procedure-rates`$inguinal_hernia_surgery,
+      "cardiac_and_large_vessel_surgery" ~ sR$`tbl-surgical-procedure-rates`$cardiac_and_large_vessel_surgery,
+      "lung_pleural_space_thoracic_surgery" ~ sR$`tbl-surgical-procedure-rates`$lung_pleural_space_thoracic_surgery,
+      "oesophageal_surgery" ~ sR$`tbl-surgical-procedure-rates`$oesophageal_surgery,
+      "other" ~ sR$other,
+      "not_surgery" ~ sR$`tbl-surgical-procedure-rates`$not_surgery,
+      "to_be_categorised" ~ sR$`tbl-surgical-procedure-rates`$to_be_categorised)) |>
+  gt(rowname_col = "pro_cat") |>
   sub_missing() |>
   gt::tab_options(
     latex.use_longtable = TRUE,
@@ -20,18 +32,32 @@ tmp |>
     table.font.size = 13,
     footnotes.marks = "extended"
   ) |>
-  fmt_number(decimals = 1) |>
-  fmt_number(columns = col_names[["n"]], decimals = 0) |>
+  fmt_number(
+    columns = !sR$table_headers$n,
+    decimals = 1,
+    sep_mark = sR$digit_group_separator,
+    min_sep_threshold = 2,
+    locale = locale_gt) |>
+  fmt_integer(
+    columns = sR$table_headers$n,
+    sep_mark = sR$digit_group_separator,
+    min_sep_threshold = 2) |>
   cols_width(
-    matches(pro_cat) ~ pct(50),
-    starts_with("Q") ~ pct(7)) |>
+    stub() ~ pct(50),
+    sR$table_headers$n ~ pct(15),
+    sR$table_headers$pooled ~ pct(14),
+    sR$table_headers$q1 ~ pct(7),
+    sR$table_headers$q2 ~ pct(7),
+    sR$table_headers$q3 ~ pct(7)
+  ) |>
   tab_spanner(
-    label = "Surgical Procedure Rate",
-    columns = c(
-      col_names[["pooled"]],
-      col_names[["q1"]],
-      col_names[["q2"]],
-      col_names[["q3"]]),
+    label = sR$`tbl-surgical-procedure-rates`$`rate_name`,
+    columns = tidyselect::any_of(
+     c(
+     sR$table_headers$pooled,
+     sR$table_headers$q1,
+     sR$table_headers$q2,
+     sR$table_headers$q3)),
     id = "procedure_rate"
   ) |>
   tab_style(
@@ -46,24 +72,40 @@ tmp |>
     footnote = md(
       paste0(
         "$$\\text{",
-        "Surgical Procedure Rate",
+        sR$`tbl-surgical-procedure-rates`$`rate_name`,
         "} = \\frac{\\text{",
-        "Number of procedures",
+        sR$`tbl-surgical-procedure-rates`$`rate_numerator`,
         "}}{\\text{",
-        "Number of Patients",
+        sR$`tbl-surgical-procedure-rates`$`rate_denominator`,
         "}} \\times ",
-        format(100, big.mark = locale_sep_mark),
+        format_integer(100),
         "$$"
       )),
     locations = cells_column_spanners(spanners = "procedure_rate")
   ) |>
   tab_footnote(
-    footnote = "N: The aggregated number surgical procedures performed in all infants.",
-    locations = cells_column_labels(columns = col_names[["n"]])) |>
+    footnote = sprintf(
+      sR$`tbl-surgical-procedure-rates`$n_footnote,
+      sR$table_headers$n),
+    locations = cells_column_labels(columns = sR$table_headers$n)) |>
   tab_footnote(
-    footnote = "Pooled: The Surgical Procedure Rate calculated across all infants from all departments.",
-    locations = cells_column_labels(columns = col_names[["pooled"]])) |>
+    footnote = sprintf(
+      sR$`tbl-surgical-procedure-rates`$pooled_footnote,
+      sR$table_headers$pooled),
+    locations = cells_column_labels(columns = sR$table_headers$pooled)) |>
   tab_footnote(
-    footnote = paste(paste(col_names[["q1"]],col_names[["q2"]],col_names[["q3"]], sep = ", "), ": The quartiles (25%, 50% and 75% quantiles) of the Surgical Procedure Rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of procedures is greater than or equal to one according to the pooled Surgical Procedure Rate."),
-    locations = cells_column_labels(columns = c(col_names[["q1"]],col_names[["q2"]],col_names[["q3"]])))
+    footnote = sprintf(
+      sR$`tbl-surgical-procedure-rates`$quartile_footnote,
+      sR$table_headers$q1,
+      sR$table_headers$q2,
+      sR$table_headers$q3,
+      sprintf("%i%s", 25L, sR$percent_symbol),
+      sprintf("%i%s", 50L, sR$percent_symbol),
+      sprintf("%i%s", 75L, sR$percent_symbol)
+      ),
+    locations = cells_column_labels(columns = c(
+      sR$table_headers$q1,
+      sR$table_headers$q2,
+      sR$table_headers$q3)))
+
 ```

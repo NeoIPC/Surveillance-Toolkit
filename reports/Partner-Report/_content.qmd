@@ -1,0 +1,166 @@
+{{< include _setup.qmd >}}
+
+```{r}
+#| include: false
+footer_tex <- sprintf("\\renewcommand{\\FooterText}{%s}", sR$h2020_funding_statement)
+```
+
+::: {.content-visible when-format="pdf"}
+`r footer_tex`
+:::
+
+{{< include _header.qmd >}}
+
+::: {.content-visible when-format="pdf"}
+\FloatBarrier
+:::
+
+## `{r} sR$headings$introduction`
+
+::: {.content-visible when-meta="includeIntroductionTexts"}
+
+```{r}
+#| output: asis
+include_localised("_introduction.Rmd")
+```
+
+:::
+
+{{< include content/_introduction-list.qmd >}}
+
+::: {.content-visible when-format="pdf"}
+\FloatBarrier
+:::
+
+## `{r} sR$headings$patient_population`
+
+::: {.content-visible when-meta="includeIntroductionTexts"}
+```{r}
+#| output: asis
+include_localised("_patient-population.Rmd")
+```
+:::
+
+::: {.content-visible when-meta="includeBirthWeightFigure"}
+{{< include figures/_fig-bw.qmd >}}
+:::
+
+::: {.content-visible unless-meta="includeGestationalAgeFigure"}
+{{< pagebreak >}}
+
+::: {.content-visible when-format="pdf"}
+\FloatBarrier
+:::
+:::
+
+::: {.content-visible when-meta="includeGestationalAgeFigure"}
+{{< include figures/_fig-ga.qmd >}}
+
+{{< pagebreak >}}
+
+::: {.content-visible when-format="pdf"}
+\FloatBarrier
+:::
+:::
+
+## `{r} sR$headings$nosocomial_infections`
+
+::: {.content-visible when-meta="includeIntroductionTexts"}
+```{r}
+#| output: asis
+include_localised("_nosocomial_infections.Rmd")
+```
+:::
+
+::: {.content-visible when-meta="includeIncidenceDensityTable"}
+{{< include tables/_tbl-incidence-density-rates.qmd >}}
+
+{{< pagebreak >}}
+:::
+
+::: {.content-visible when-meta="includeDeviceAssociatedIncidenceDensityTable"}
+{{< include tables/_tbl-device-associated-incidence-density-rates.qmd >}}
+
+{{< pagebreak >}}
+:::
+
+::: {.content-visible when-meta="includeSecondaryBsiRateTable"}
+{{< include tables/_tbl-secondary-bsi-rates.qmd >}}
+
+{{< pagebreak >}}
+:::
+
+::: {.content-visible when-format="pdf"}
+\FloatBarrier
+:::
+
+### `{r} sR$headings$infectious_agents`
+
+::: {.content-visible when-meta="includeIntroductionTexts"}
+```{r}
+#| output: asis
+include_localised("_infectious-agents.Rmd")
+```
+:::
+
+::: {.content-visible when-meta="includeAgentPerInfectionRateTable"}
+{{< include tables/_tbl-agent-per-infection-rate.qmd >}}
+
+{{< pagebreak >}}
+:::
+
+::: {.content-visible when-meta="includeResistantPathogenInfectionRateTable"}
+{{< include tables/_tbl-abr-infection-rate.qmd >}}
+
+{{< pagebreak >}}
+:::
+
+### `{r} sR$headings$diagnostics`
+
+::: {.content-visible when-meta="includeInfectiousAgentDetectionRateTable"}
+{{< include tables/_tbl-infectious-agent-detection-rate.qmd >}}
+
+{{< pagebreak >}}
+:::
+
+::: {.content-visible when-meta="includeAntibioticResistanceTestRateTable"}
+{{< include tables/_tbl-resistance-test-rate.qmd >}}
+
+{{< pagebreak >}}
+:::
+
+::: {.content-visible when-format="pdf"}
+\FloatBarrier
+:::
+
+## `{r} sR$headings$risk_and_protective_factors`
+
+::: {.content-visible when-meta="includeIntroductionTexts"}
+```{r}
+#| output: asis
+include_localised("_risk-factors.Rmd")
+```
+:::
+
+::: {.content-visible when-meta="includeRiskDensityRateTable"}
+{{< include tables/_tbl-risk-density-rates.qmd >}}
+
+{{< pagebreak >}}
+:::
+
+::: {.content-visible when-format="pdf"}
+\FloatBarrier
+:::
+
+### `{r} sR$surgical_procedures`
+
+::: {.content-visible when-meta="includeIntroductionTexts"}
+```{r}
+#| output: asis
+include_localised("_surgery.Rmd")
+```
+:::
+
+::: {.content-visible when-meta="includeSurgicalProcedureRateTable"}
+{{< include tables/_tbl-surgical-procedure-rates.qmd >}}
+:::

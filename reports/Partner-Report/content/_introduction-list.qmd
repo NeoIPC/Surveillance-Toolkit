@@ -1,0 +1,30 @@
+```{r}
+#| echo: false
+#| output: asis
+
+cat(sep = "\n", c(
+  if (dR$own$numberOfDepartments != "1") {
+    c(
+      paste0(sR$headerList$numberOfDepartments, ":"),
+      "",
+      paste0(":   ", dR$own$numberOfDepartments),
+      ""
+    )
+  },
+  paste0(sR$headerList$numberOfPatients, ":"),
+  "",
+  paste0(":   ", dR$own$numberOfPatients),
+  "",
+  paste0(sR$headerList$numberOfAdmissions, ":"),
+  "",
+  paste0(":   ", dR$own$numberOfAdmissions),
+  "",
+  paste0(sR$headerList$sumOfPatientDays, ":"),
+  "",
+  paste0(":   ", dR$own$sumOfPatientDays),
+  "",
+  paste0(sR$headerList$averageSurveillancePeriod, ":"),
+  "",
+  paste0(":   ",dR$own$averageSurveillancePeriod, " days")
+))
+```

@@ -1,46 +1,69 @@
 ```{r}
 #| label: tbl-abr-infection-rate
-#| tbl-cap: "Nosocomial infections with resistant pathogens"
+#| tbl-cap: !expr 'sR$`tbl-abr-infection-rate`$`tbl-cap`'
 #| tbl-cap-location: top
 
 reference_data |>
   neoipcr::get_abr_infection_rate_table() |>
+  dplyr::mutate(
+    group = dplyr::if_else(
+      stringr::str_detect(group, "spp."),
+      paste0("*", stringr::str_extract(group, "^(.+) spp\\.(.*)$", 1), "* spp.", stringr::str_extract(group, "^(.+) spp\\.(.*)$", 2)),
+      group
+      )) |>
   dplyr::rename(
-    "N"="n",
-    "Pooled"="pooled",
-    "Q₁"="q1",
-    "Q₂"="q2",
-    "Q₃"="q3") |>
+    !!sR$table_headers$n := "n",
+    !!sR$table_headers$pooled := "pooled",
+    !!sR$table_headers$q1 := "q1",
+    !!sR$table_headers$q2 := "q2",
+    !!sR$table_headers$q3 := "q3") |>
   dplyr::mutate(
     abr = dplyr::case_match(
       .data$abr,
-      "3gcr"~"3rd gen. cephalosporin resistance",
-      "car"~"Carbapenem resistance",
-      "cor"~"Colistin resistance",
-      "mrsa"~"Methicillin-resistant Staphylococcus aureus (MRSA)",
-      "vre"~"Vancomycin-resistant Enterococcus (VRE)"),
+      "3gcr" ~ "3gcr",
+      "car" ~ sR$car,
+      "cor" ~ sR$cor,
+      "mrsa" ~ sR$mrsa,
+      "vre" ~ sR$vre),
     level = .data$level + 2) |>
   dplyr::group_by(.data$abr) |>
   gt(rowname_col = "group") |>
   sub_missing() |>
   gt::tab_options(
+    latex.header_repeat = TRUE,
+    latex.use_longtable = TRUE,
+    table.width = pct(100),
     table.font.size = 13,
     footnotes.marks = "extended"
   ) |>
-  gt::tab_options(
-    table.font.size = 15
+  fmt_number(
+    columns = !sR$table_headers$n,
+    decimals = 1,
+    sep_mark = sR$digit_group_separator,
+    min_sep_threshold = 2,
+    locale = locale_gt) |>
+  fmt_integer(
+    columns = sR$table_headers$n,
+    sep_mark = sR$digit_group_separator,
+    min_sep_threshold = 2) |>
+  gt::fmt_markdown(
+    columns = "group"
   ) |>
-  fmt_number(decimals = 1) |>
-  fmt_number(columns = "N", decimals = 0) |>
-  cols_width(matches("group") ~ pct(40)) |>
-  cols_width(starts_with("Q") ~ pct(7)) |>
+  cols_width(
+    stub() ~ pct(40),
+    sR$table_headers$n ~ pct(15),
+    sR$table_headers$pooled ~ pct(15),
+    sR$table_headers$q1 ~ pct(10),
+    sR$table_headers$q2 ~ pct(10),
+    sR$table_headers$q3 ~ pct(10)
+  ) |>
   gt::tab_stub_indent(
     rows = gt::everything(),
     indent = gt::from_column(column = "level")
   ) |>
   tab_row_group(
-    label = gt::md("3^rd^ gen. cephalosporin resistance"),
-    rows = abr == "3rd gen. cephalosporin resistance"
+    label = gt::md(sR$`3gcr`),
+    rows = abr == "3gcr"
   ) |>
   tab_style(
     style = cell_text(
@@ -67,13 +90,22 @@ reference_data |>
       style = "italic"
       ),
     locations = cells_stub(
-      rows = taxon == "species"
+      rows = taxon %in% c(
+        "domain",
+        "kingdom",
+        "order",
+        "species")
     )
   ) |>
   cols_hide(columns = any_of(c("level","taxon"))) |>
   tab_spanner(
-    label = "Resistant pathogen infection rate",
-    columns = c("Pooled","Q₁","Q₂","Q₃"),
+    label = sR$`tbl-abr-infection-rate`$`rate_name`,
+    columns = tidyselect::any_of(
+     c(
+     sR$table_headers$pooled,
+     sR$table_headers$q1,
+     sR$table_headers$q2,
+     sR$table_headers$q3)),
     id = "resistant_pathogen_infection_rate"
   ) |>
   tab_style(
@@ -88,24 +120,40 @@ reference_data |>
     footnote = md(
       paste0(
         "$$\\text{",
-        "Resistant pathogen infection rate",
+        sR$`tbl-abr-infection-rate`$`rate_name`,
         "} = \\frac{\\text{",
-        "Number of antibiotic resistant pathogens in infections",
+        sR$`tbl-abr-infection-rate`$`rate_numerator`,
         "}}{\\text{",
-        "Number of infections where a pathogen was detected",
+        sR$`tbl-abr-infection-rate`$`rate_denominator`,
         "}} \\times ",
-        format(100, big.mark = locale_sep_mark),
+        format_integer(100),
         "$$"
       )),
     locations = cells_column_spanners(spanners = "resistant_pathogen_infection_rate")
   ) |>
   tab_footnote(
-    footnote = "N: The aggregated number of antibiotic resistant pathogens in all infections.",
-    locations = cells_column_labels(columns = "N")) |>
+    footnote = sprintf(
+      sR$`tbl-abr-infection-rate`$n_footnote,
+      sR$table_headers$n),
+    locations = cells_column_labels(columns = sR$table_headers$n)) |>
   tab_footnote(
-    footnote = "Pooled: The resistant pathogen infection rate calculated across all infants from all departments.",
-    locations = cells_column_labels(columns = "Pooled")) |>
+    footnote = sprintf(
+      sR$`tbl-abr-infection-rate`$pooled_footnote,
+      sR$table_headers$pooled),
+    locations = cells_column_labels(columns = sR$table_headers$pooled)) |>
   tab_footnote(
-    footnote = "Q₁, Q₂, Q₃: The quartiles (25%, 50% and 75% quantiles) of the resistant pathogen infection rates of the partner departments.",
-    locations = cells_column_labels(columns = c("Q₁","Q₂","Q₃")))
+    footnote = sprintf(
+      sR$`tbl-abr-infection-rate`$quartile_footnote,
+      sR$table_headers$q1,
+      sR$table_headers$q2,
+      sR$table_headers$q3,
+      sprintf("%i%s", 25L, sR$percent_symbol),
+      sprintf("%i%s", 50L, sR$percent_symbol),
+      sprintf("%i%s", 75L, sR$percent_symbol)
+      ),
+    locations = cells_column_labels(columns = c(
+      sR$table_headers$q1,
+      sR$table_headers$q2,
+      sR$table_headers$q3)))
+
 ```

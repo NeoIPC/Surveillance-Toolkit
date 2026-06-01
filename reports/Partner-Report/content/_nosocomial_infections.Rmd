@@ -1,0 +1,3 @@
+Healthcare-associated infections represent the primary endpoint of NeoIPC surveillance. In your unit, `r dR$own$numberOfSevereInfections` severe infections were recorded in `r dR$own$numberOfPatients` patients, resulting in an average of `r dR$own$averageSevereInfectionsPerPatient` infections per patient`r if (!is.null(dR$ref)) paste0(", compared to ", dR$ref$numberOfSevereInfections, " infections in ", dR$ref$numberOfPatients, " reference patients (average: ", dR$ref$averageSevereInfectionsPerPatient, ")")`.
+
+The following tables present incidence density rates for sepsis/bloodstream infections, pneumonia, and necrotizing enterocolitis, as well as device-associated infection rates.

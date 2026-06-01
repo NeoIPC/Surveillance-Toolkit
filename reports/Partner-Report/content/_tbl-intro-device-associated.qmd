@@ -1,0 +1,7 @@
+Device-associated infections represent a significant burden in neonatal intensive care. @tbl-device-associated-incidence-density-rates shows infection rates specifically linked to the use of invasive devices such as central venous catheters and mechanical ventilation. By tracking device-associated infection rates separately, you can assess the safety of device utilization in your unit and identify specific areas where targeted interventions may reduce infection risk. Lower rates may indicate successful implementation of device care bundles and infection prevention protocols.
+
+:::{.callout-note}
+Device-associated infections are defined temporally according to the
+[NeoIPC Core Protocol](https://neoipc.org/wp-content/uploads/2023/08/NeoIPC-Surveillance_Core-Module-Protocol.pdf).
+Infections occurring during device use represent potential rather than proven causal relationships.
+:::

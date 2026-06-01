@@ -1,25 +1,24 @@
 ```{r}
 #| label: tbl-incidence-density-rates
-#| tbl-cap: "Incidence Density Rates of nosocomial infections"
+#| tbl-cap: !expr 'sR$`tbl-incidence-density-rates`$`tbl-cap`'
 #| tbl-cap-location: top
 
 reference_data |>
   neoipcr::get_incidence_density_rate_table() |>
   dplyr::rename(
-    "Infection"="inf",
-    "N"="n",
-    "Pooled"="pooled",
-    "Q₁"="q1",
-    "Q₂"="q2",
-    "Q₃"="q3") |>
+    !!sR$table_headers$n := "n",
+    !!sR$table_headers$pooled := "pooled",
+    !!sR$table_headers$q1 := "q1",
+    !!sR$table_headers$q2 := "q2",
+    !!sR$table_headers$q3 := "q3") |>
   dplyr::mutate(
-    Infection = dplyr::case_match(
-      as.character(.data$Infection),
-      "si" ~ "Severe infection",
-      "bsi" ~ "Primary sepsis/BSI",
-      "hap" ~ "Pneumonia",
-      "nec" ~ "Necrotising Enterocolitis")) |>
-  gt(rowname_col = "Infection") |>
+    inf = dplyr::case_match(
+      as.character(.data$inf),
+      "si" ~ sR$si,
+      "bsi" ~ sR$primary_sepsis_bsi_sc,
+      "hap" ~ sR$pneumonia_sc,
+      "nec" ~ sR$necrotising_enterocolitis_sc)) |>
+  gt(rowname_col = "inf") |>
   sub_missing() |>
   gt::tab_options(
     latex.use_longtable = TRUE,
@@ -27,20 +26,44 @@ reference_data |>
     table.font.size = 13,
     footnotes.marks = "extended"
   ) |>
-  fmt_number(decimals = 1) |>
-  fmt_number(columns = "N", decimals = 0) |>
+  fmt_number(
+    columns = !sR$table_headers$n,
+    decimals = 1,
+    sep_mark = sR$digit_group_separator,
+    min_sep_threshold = 2,
+    locale = locale_gt) |>
+  fmt_integer(
+    columns = sR$table_headers$n,
+    sep_mark = sR$digit_group_separator,
+    min_sep_threshold = 2) |>
   cols_width(
     stub() ~ pct(25),
-    N ~ pct(15),
-    Pooled ~ pct(15),
-    starts_with("Q") ~ pct(15)
+    sR$table_headers$n ~ pct(15),
+    sR$table_headers$pooled ~ pct(15),
+    sR$table_headers$q1 ~ pct(15),
+    sR$table_headers$q2 ~ pct(15),
+    sR$table_headers$q3 ~ pct(15)
   ) |>
-  tab_row_group(label = "Primary sepsis/BSI/Pneumonia", rows = 1:3, id = "grp_si") |>
-  tab_row_group(label = "Other", rows = 4, id = "grp_othr") |>
+  tab_row_group(
+    label = sR$`tbl-incidence-density-rates`$grp_si,
+    rows = tidyselect::any_of(c(
+      sR$si,
+      sR$primary_sepsis_bsi_sc,
+      sR$pneumonia_sc)),
+    id = "grp_si") |>
+  tab_row_group(
+    label = sR$other,
+    rows = tidyselect::any_of(sR$necrotising_enterocolitis_sc),
+    id = "grp_othr") |>
   row_group_order(groups = c("grp_si", "grp_othr")) |>
   tab_spanner(
-    label = "Incidence Density Rate",
-    columns = c("Pooled","Q₁","Q₂","Q₃"),
+    label = sR$`tbl-incidence-density-rates`$incidence_density_rate,
+    columns = tidyselect::any_of(
+     c(
+     sR$table_headers$pooled,
+     sR$table_headers$q1,
+     sR$table_headers$q2,
+     sR$table_headers$q3)),
     id = "incidence_density_rate"
   ) |>
   tab_style(
@@ -55,27 +78,44 @@ reference_data |>
     footnote = md(
       paste0(
         "$$\\text{",
-        "Incidence Density Rate",
+        sR$`tbl-incidence-density-rates`$incidence_density_rate,
         "} = \\frac{\\text{",
-        "Number of infections",
+        sR$`tbl-incidence-density-rates`$n_inf,
         "}}{\\text{",
-        "Patient days",
+        sR$patient_days,
         "}} \\times ",
-        format(1000, big.mark = locale_sep_mark),
+        format_integer(1000),
         "$$"
       )),
     locations = cells_column_spanners(spanners = "incidence_density_rate")
   ) |>
   tab_footnote(
-    footnote = "N: The aggregated number of infections in all infants.",
-    locations = cells_column_labels(columns = "N")) |>
+    footnote = sprintf(
+      sR$`tbl-incidence-density-rates`$n_footnote,
+      sR$table_headers$n),
+    locations = cells_column_labels(columns = sR$table_headers$n)) |>
   tab_footnote(
-    footnote = "Pooled: The Incidence Density Rate calculated across all infants from all departments.",
-    locations = cells_column_labels(columns = "Pooled")) |>
+    footnote = sprintf(
+      sR$`tbl-incidence-density-rates`$pooled_footnote,
+      sR$table_headers$pooled),
+    locations = cells_column_labels(columns = sR$table_headers$pooled)) |>
   tab_footnote(
-    footnote = "Q₁, Q₂, Q₃: The quartiles (25%, 50% and 75% quantiles) of the Incidence Density Rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected infections is greater than or equal to one according to the pooled Incidence Density Rate.",
-    locations = cells_column_labels(columns = c("Q₁","Q₂","Q₃"))) |>
+    footnote = sprintf(
+      sR$`tbl-incidence-density-rates`$quartile_footnote,
+      sR$table_headers$q1,
+      sR$table_headers$q2,
+      sR$table_headers$q3,
+      sprintf("%i%s", 25L, sR$percent_symbol),
+      sprintf("%i%s", 50L, sR$percent_symbol),
+      sprintf("%i%s", 75L, sR$percent_symbol)
+      ),
+    locations = cells_column_labels(columns = c(
+      sR$table_headers$q1,
+      sR$table_headers$q2,
+      sR$table_headers$q3))) |>
   tab_footnote(
-    footnote = "Combines the outcomes primary sepsis/BSI and pneumonia",
-    locations = gt::cells_stub(rows = "Severe infection"))
+    footnote = sprintf(
+      sR$`tbl-incidence-density-rates`$si_footnote,
+      sR$si),
+    locations = gt::cells_stub(rows = sR$si))
 ```

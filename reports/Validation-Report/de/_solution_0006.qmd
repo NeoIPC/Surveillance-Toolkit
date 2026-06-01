@@ -11,7 +11,7 @@ Jenachdem, ob Sie das Aufnahmedatum in der Patientenregistrierung, im Aufnahme-F
 
 In jedem Fall müssen Sie zunächst das Tracked Entity Instance Dashboard der betreffenden Patientenakte (siehe @sec-solution-1) und evtl. auch die entsprechende Patientenregistierung (siehe @sec-solution-10) öffnen.
 
-Wenn die Patientenregistrierung, für die Sie das Aufnahmedatum ändern müssen, bereits abgeschlossen ist, muss diese zunächst wieder geöffnet werden. Siehe dazu @sec-solution-5. 
+Wenn die Patientenregistrierung, für die Sie das Aufnahmedatum ändern müssen, bereits abgeschlossen ist, muss diese zunächst wieder geöffnet werden. Siehe dazu @sec-solution-5.
 
 #### Ändern des Aufnahmedatums im Aufnahme-Formular {#sec-solution-6-1}
 

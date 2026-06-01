@@ -38,6 +38,12 @@
             "request": "launch",
             "script": "& \"${workspaceFolder}/scripts/Make-NeoIPC-Core-Protocol.ps1\" -Clean -Verbose",
             "args": []
+        },
+        {
+            "name": "Debug Generate-ReferenceData",
+            "type": "R-Debugger",
+            "request": "launch",
+            "file": "${workspaceFolder}/reports/Reference-Report/Generate-ReferenceData.R"
         }
     ]
 }

@@ -1,0 +1,65 @@
+```{r}
+#| label: fig-ga
+#| fig-cap: !expr 'paste(sR$`fig-cap`[[1]]$`fig-ga`, sprintf(sR$`fig-cap`[[2]]$`no-bnch`, sprintf("%i%s%s", 7L, sR$unit_separator, sR$day)), sprintf(sR$`fig-cap`[[3]]$`no-bnch`, sprintf("%i%s", 25L, sR$percent_symbol), sprintf("%i%s", 50L, sR$percent_symbol), sprintf("%i%s", 75L, sR$percent_symbol)))'
+
+ga_scale_min <- reference_data$gestational_age_figure$scale$min
+ga_scale_max <- reference_data$gestational_age_figure$scale$max
+histogram_data <- reference_data$gestational_age_figure$frequency
+density_data <- reference_data$gestational_age_figure$density
+
+density_factor <- sum(histogram_data$n) *
+  (nrow(density_data) / length(seq.int(from = min(density_data$gestational_age), to = max(density_data$gestational_age), by = 7L)))
+
+A_plot <- ggplot() +
+  geom_col(
+    data = histogram_data,
+    aes(
+      x = gestational_age_cat,
+      y = n),
+    fill = "white",
+    colour = NeoIPC_pallette[6]) +
+  geom_line(
+    data = density_data,
+    aes(
+      x = gestational_age,
+      y = density * density_factor)) +
+  scale_x_continuous(breaks = breaks_wk) +
+  scale_colour_manual(values = rev(pal[2:3])) +
+  coord_cartesian(xlim = c(ga_scale_min, ga_scale_max)) +
+  theme(
+    legend.position = "none",
+    plot.tag = element_text(size = 9),
+    axis.title = element_blank(),
+    axis.text = element_blank(),
+    axis.ticks = element_blank(),
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.y = element_blank()) +
+  labs(tag = "A")
+
+B_plot <- ggplot(
+  reference_data$gestational_age_figure$location_parameters |>
+    dplyr::bind_cols(x = 1),
+  aes(x)) +
+  geom_boxplot(
+    aes(ymin = q1, lower = q1, middle = q2, upper = q3, ymax = q3),
+    stat = "identity",
+    outlier.shape = NA,
+    ) +
+  geom_point(aes(y = mean), shape = 23, size = 3, fill = "white") +
+  scale_y_continuous(breaks = breaks_wk, labels = labels_wk) +
+  scale_colour_manual(values = rev(pal[2:3])) +
+  coord_flip(ylim = c(ga_scale_min, ga_scale_max)) +
+  theme(
+    legend.title = element_blank(),
+    legend.position = "none",
+    plot.tag = element_text(size = 9),
+    axis.title = element_blank(),
+    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1),
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.y = element_blank()) +
+  labs(tag = "B")
+
+A_plot / B_plot
+```

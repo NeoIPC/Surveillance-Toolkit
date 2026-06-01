@@ -1,0 +1,9 @@
+{
+  "editor.rulers": [120],
+  "[r]": {
+    "editor.rulers": [80]
+  },
+  "[powershell]": {
+    "editor.rulers": [120]
+  }
+}

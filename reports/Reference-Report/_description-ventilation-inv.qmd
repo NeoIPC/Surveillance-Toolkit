@@ -13,7 +13,6 @@ params:
   hospitalFilter: NULL
   testUnitFilter: true
   defaultPatientFilter: true
-  token: NULL
 ---
 
 {{< include _setup2.qmd >}}

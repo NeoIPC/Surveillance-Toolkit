@@ -1,26 +1,19 @@
-```{r Install neoipcr, message=FALSE, warning=FALSE}
-suppressMessages(pak::pak("Brar/neoipcr@initial_tests"))
-```
-
 ```{r Attach packages, message=FALSE, warning=FALSE}
+source("../common/load-neoipcr.R")
+load_neoipcr(dev_pkg_path = "../../../neoipcr")
+source("../common/helpers.R")
 suppressMessages(library(tidyverse, warn.conflicts = FALSE, quietly = TRUE))
-suppressMessages(library(neoipcr, warn.conflicts = FALSE, quietly = TRUE))
 ```
 
 ```{r Initialize variables}
 if(!exists("params")) params <- list()
-token <- dplyr::coalesce(params$token, Sys.getenv("NEOIPC_DHIS2_TOKEN", unset = NA_character_))
-language <- dplyr::coalesce(params$language, "en")
-default_countries <- list(
-  en = "GB",
-  de = "DE"
-)
-country <- dplyr::coalesce(params$country, default_countries[[language]], NA_character_)
-codepage <- dplyr::coalesce(params$codepage, "UTF-8")
-locale <- paste0(language, (if(is.na(country)) NULL else paste0("_", country)), ".", codepage)
+locale <- Sys.getenv("LC_ALL")
+if (!nzchar(locale)) locale <- "en_GB.UTF-8"
 invisible(Sys.setlocale(category = "LC_ALL", locale = locale))
+localeObj <- parse_locales(locale)[[1]]
+language <- localeObj$language
+sR <- get_string_resources(localeObj)
 departmentFilter <- params$departmentFilter
-testUnitFilter <- dplyr::coalesce(params$testUnitFilter, TRUE)
 NeoIPC_ProgramId <- "D8mSSpOpsKj"
 event_types <- function(x = NA) factor(x, levels = c("ADM","END","SUR","BSI","HAP","NEC","SSI"))
 support_email_address <- "NeoIPC-Support@charite.de"
@@ -40,8 +33,24 @@ problems <- tibble(
 ```
 
 ```{r Data Import, message=FALSE, warning=FALSE}
-data <- if(rlang::is_na(token)) import_dhis2(locale = language) else import_dhis2(connection_options = dhis2_connection_options(token = token), locale = locale)
-exceptions <- read_csv("../../../validation-exceptions.csv", col_types = "icccDcD")
+connection_options <- get_connection_options(
+  scheme = params$dhis2Scheme, hostname = params$dhis2Hostname,
+  port = params$dhis2Port, path = params$dhis2Path)
+data <- import_dhis2(connection_options = connection_options, locale = locale)
+if (!is.null(params$validationExceptionFile) && file.exists(params$validationExceptionFile)) {
+  exceptions <- read_csv(params$validationExceptionFile, col_types = "icccDcD")
+} else {
+  if (!is.null(params$validationExceptionFile))
+    warning(sprintf("Validation exception file not found: '%s'", params$validationExceptionFile))
+  exceptions <- tibble(
+    PROBLEM_ID = integer(),
+    SITE_CODE = character(),
+    DEPARTMENT_CODE = character(),
+    NEOIPC_PATIENT_ID = character(),
+    VALID_UNTIL = as.Date(character()),
+    REASON = character(),
+    CREATED = as.Date(character()))
+}
 ```
 
 ```{r Filtering}
@@ -55,10 +64,6 @@ departments <- data$metadata$departments
 if(!rlang::is_null(departmentFilter))
   departments <- departments |>
     dplyr::filter(code %in% departmentFilter)
-
-if(testUnitFilter)
-  departments <- departments |>
-      dplyr::filter(isTestUnit == FALSE)
 
 enrollments <- data$enrollments |>
   mutate(

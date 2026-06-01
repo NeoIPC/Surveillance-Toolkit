@@ -1,5 +1,8 @@
 /.quarto/
 /_output/
 **/*.quarto_ipynb
+_quarto-*.yml
+!_quarto-en.yml
+content.*/
 Partner*Certificate*.md
 Partner*Certificate*.tex

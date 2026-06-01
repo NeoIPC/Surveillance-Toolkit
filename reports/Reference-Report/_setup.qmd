@@ -1,106 +1,186 @@
-```{r General setup and parameter preparation}
+```{r Import libraries}
 #| message: false
 #| warning: false
 #| include: false
-pak::pak("Brar/neoipcr@TowardsReferenceReport")
+source("../common/load-neoipcr.R")
+load_neoipcr(dev_pkg_path = "../../../neoipcr")
 library(tidyverse, warn.conflicts = FALSE, quietly = TRUE)
 library(smplot2, warn.conflicts = FALSE, quietly = TRUE)
 library(scales, warn.conflicts = FALSE, quietly = TRUE)
 library(patchwork, warn.conflicts = FALSE, quietly = TRUE)
 library(gt, warn.conflicts = FALSE, quietly = TRUE)
-library(neoipcr, warn.conflicts = FALSE, quietly = TRUE)
+```
 
-if(!exists("params")) params <- list()
-reportingPeriodFrom <- as_date(coalesce(params[["reportingPeriodFrom"]], "2024-01-01"))
-reportingPeriodTo <- as_date(coalesce(params[["reportingPeriodTo"]], as.character(Sys.Date())))
-birthWeightFrom <- coalesce(params[["birthWeightFrom"]], 0L)
-birthWeightTo <- coalesce(params[["birthWeightTo"]], 2147483647L)
-gestationWeeksFrom <- coalesce(params[["gestationWeeksFrom"]], 0L)
-gestationWeeksTo <- coalesce(params[["gestationWeeksTo"]], 2147483647L)
-token <- coalesce(params$token, Sys.getenv("NEOIPC_DHIS2_TOKEN", unset = NA))
-session_id <- coalesce(params[["session_id"]], Sys.getenv("NEOIPC_DHIS2_SESSION_ID", unset = NA))
-connection_options <- if(is.na(session_id))
-  dhis2_connection_options(token = token) else
-    dhis2_connection_options(session_id = session_id)
-reportingCountries = params[["reportingCountries"]]
-hospitalFilter = params[["hospitalFilter"]]
-defaultPatientFilter = coalesce(params[["defaultPatientFilter"]], TRUE)
-testUnitFilter = coalesce(params[["testUnitFilter"]], TRUE)
-validationExceptionFile = coalesce(params[["validationExceptionFile"]], "validation-exceptions_ref.csv")
-if (file.exists(validationExceptionFile)) {
-  includeInvalidPatients <- read_csv(validationExceptionFile)
-} else {
-  warning(sprintf("Validation ecxeption file not found: '%s'", validationExceptionFile))
-  includeInvalidPatients <- FALSE
+```{r Set up functions}
+#| include: false
+
+source("../common/helpers.R")
+
+labels_bw <- function(x) {
+  paste(
+    format_integer(x),
+    sR$gramm_abbreviation,
+    sep = sR$unit_separator)
+}
+breaks_bw <- function(x) {
+  pretty(
+    x,
+    as.integer(
+      (as.integer(x[2]) + 1 - as.integer(x[1])) / 100)
+    )
+}
+labels_wk <- function(x) {
+  paste(
+    format(
+      as.integer(x / 7),
+      big.mark = sR$digit_group_separator
+      ),
+    sR$week_abbreviation,
+    sep = sR$unit_separator)
+}
+breaks_wk <- function(x) {
+  pretty(
+    x / 7,
+    as.integer((as.integer(x[2] / 7) + 1 - as.integer(x[1] / 7)) / 2)
+    ) * 7
 }
 
-dataset_options <- dhis2_dataset_options(
-    include_country = "yes",
-    include_department = "pseudonymised",
-    surveillance_end_from = reportingPeriodFrom,
-    surveillance_end_to = reportingPeriodTo,
-    birth_weight_from = birthWeightFrom,
-    birth_weight_to = birthWeightTo,
-    gestational_age_from = gestationWeeksFrom,
-    gestational_age_to = gestationWeeksTo,
-    country_filter = reportingCountries,
-    include_invalid_patients = includeInvalidPatients)
+#' Detect if reference dataset contains countries from different World Bank classes
+#' @param ref_countries Tibble with reference countries (name, wb_class)
+#' @param include_wb_class Whether WB class is included ("no", "pseudonymised", "yes")
+#' @return List with has_mixed (logical) and class_names (character) or NULL
+detect_mixed_wb_classes <- function(ref_countries, include_wb_class) {
+  # Only detect when include_wb_class = "yes"
+  if (include_wb_class != "yes" ||
+      is.null(ref_countries)) {
+    return(NULL)
+  }
 
-language <- dplyr::coalesce(params$language, "en")
-default_countries <- list(
-  en = "GB",
-  de = "DE"
-)
-country <- dplyr::coalesce(params$country, default_countries[[language]], NA_character_)
-codepage <- dplyr::coalesce(params$codepage, "UTF-8")
-locale <- paste0(language, (if(is.na(country)) NULL else paste0("_", country)), ".", codepage)
-gt_locale <- paste0(language, (if(is.na(country)) NULL else paste0("-", country)))
-options(`gt.locale` = gt_locale)
-`_locales` <- (gt::info_locales(begins_with = substr(gt_locale,1,1)))$`_data`
-locale_sep_mark <- `_locales`$group[`_locales`$locale == gt_locale]
+  # For character vector, no WB class info available
+  if (is.character(ref_countries) ||
+      !("wb_class" %in% names(ref_countries))) {
+    return(NULL)
+  }
+
+  # Get unique WB classes
+  ref_classes <- ref_countries |>
+    dplyr::pull("wb_class") |>
+    as.character() |>
+    unique() |>
+    sort()
+
+  # Check if more than one class
+  has_mixed <- length(ref_classes) > 1
+
+  if (!has_mixed) {
+    return(list(has_mixed = FALSE))
+  }
+
+  # Get localized display names for all classes
+  class_names <- get_localised_world_bank_class_names(ref_classes) |>
+    paste(collapse = ", ")
+
+  return(list(
+    has_mixed = TRUE,
+    class_names = class_names
+  ))
+}
+
+```
+
+```{r Initialise locale dependent information}
+#| include: false
+
+locale <- Sys.getenv("LC_ALL")
+localeObj <- parse_locales(locale)[[1]]
 invisible(Sys.setlocale(category = "LC_ALL", locale = locale))
-invisible(Sys.setLanguage(locale))
-translation_file <- paste0("translations/", stringr::str_extract(locale, "^([^.]+)"),".json")
-rm(gt_locale, `_locales`)
+invisible(Sys.setLanguage(localeObj$language))
+if(is.null(localeObj$territory)){
+  locale_gt <- localeObj$language
+  locale_stringi <- localeObj$language
+} else {
+  locale_gt <- paste0(localeObj$language, "-", localeObj$territory)
+  locale_stringi <- paste0(localeObj$language, "_", localeObj$territory)
+}
+options(`gt.locale` = locale_gt)
+
+sR <- get_string_resources(localeObj)
 ```
 
 ```{r Importing data}
 #| include: false
 
-data <- import_dhis2(
-  connection_options = connection_options,
-  dataset_options = dataset_options
-  )
+if(!exists("params")) params <- list()
 
-reference_data <- data |>
-  neoipcr::calculate_reference_data()
-
-data |>
-  jsonlite::serializeJSON() |>
-  readr::write_file(file = "_output/ReferenceData.json")
-
-reference_data |>
-  jsonlite::serializeJSON() |>
-  readr::write_file(file = "_output/ReferenceInformation.json")
-
-if(file.exists(translation_file)) {
-  translations <- readr::read_file(translation_file) |> jsonlite::fromJSON()
+if (!is.null(params$referenceDataFile)) {
+  if (!file.exists(params$referenceDataFile))
+    stop(sprintf("The file '%s' does not exist.", params$referenceDataFile))
+  reference_data <- jsonlite::unserializeJSON(
+    readChar(
+        params$referenceDataFile,
+        file.info(params$referenceDataFile)$size))
 } else {
-  translation_file <- paste0("translations/",stringr::str_extract(locale, "^([^_]+)"),".json")
-  if(file.exists(translation_file)) {
-    translations <- readr::read_file(translation_file) |> jsonlite::fromJSON()
-  } else {
-    rlang::abort(paste0("Failed to find translation file for locale", locale))
-  }
+  reference_data <- suppressWarnings(import_dhis2(
+    connection_options = get_connection_options(
+      scheme = params$dhis2Scheme, hostname = params$dhis2Hostname,
+      port = params$dhis2Port, path = params$dhis2Path),
+    dataset_options = get_dataset_options(
+      reportingPeriodFrom = params$reportingPeriodFrom,
+      reportingPeriodTo = params$reportingPeriodTo,
+      birthWeightFrom = params$birthWeightFrom,
+      birthWeightTo = params$birthWeightTo,
+      gestationWeeksFrom = params$gestationWeeksFrom,
+      gestationWeeksTo = params$gestationWeeksTo,
+      reportingCountries = params$reportingCountries,
+      testUnitFilter = params$testUnitFilter,
+      defaultPatientFilter = params$defaultPatientFilter,
+      validationExceptionFile = params$validationExceptionFile))) |>
+    neoipcr::calculate_reference_data()
 }
 
-surgery_summary <- data$events |>
-  dplyr::filter(event_type_key == "pro") |>
-  dplyr::semi_join(data$enrollments, dplyr::join_by(enrollment_key)) |>
-  dplyr::summarise(n_departments = n_distinct(department_key), n_patients = n_distinct(patient_key), n_procedures = n())
+```
 
-n_surgical_departments <- surgery_summary |> dplyr::pull("n_departments")
-n_patients <- surgery_summary |> dplyr::pull("n_patients")
-n_procedures <- surgery_summary |> dplyr::pull("n_procedures")
-n_procedures_per_patient <- n_procedures / n_patients
+```{r Preparing localised data}
+#| include: false
+
+ref_counts <- list(
+  n_departments = reference_data$n_departments,
+  n_patients = reference_data$n_patients$total,
+  n_enrollments = reference_data$n_enrollments$total,
+  n_patient_days = reference_data$n_patient_days$total,
+  n_severe_infections = reference_data$incidence_density_rate_table |>
+    dplyr::filter(inf == "si") |> dplyr::pull("n"),
+  n_infectious_agents = reference_data$infectious_agent_detection_rate_per_agent_table |>
+    dplyr::filter(group == "Total") |> dplyr::pull("n"),
+  n_infections_with_agent = reference_data$infectious_agent_detection_rate_per_inf_type_table |>
+    dplyr::filter(inf == "all") |> dplyr::pull("n"),
+  n_infections_overall = reference_data$n_infections |>
+    dplyr::filter(inf_type == "overall") |> dplyr::pull("total"),
+  n_surgical_departments = reference_data$n_surgical_departments,
+  n_surgical_patients = reference_data$n_surgical_patients |> dplyr::pull("total"),
+  n_surgical_procedures = reference_data$n_surgical_procedures |> dplyr::pull("total"),
+  n_surgical_site_infections = reference_data$n_infections |>
+    dplyr::filter(inf_type == "ssi") |> dplyr::pull("total")
+)
+
+dR <- c(
+  list(creationTimestamp = format(
+    lubridate::now("UTC"), format = "%x %X", tz = "UTC", usetz = TRUE)),
+  format_dataset_resources(reference_data$metadata, ref_counts, sR)
+)
+
+# Detect if reference dataset has mixed World Bank classes
+mixed_wb_classes <- detect_mixed_wb_classes(
+  ref_countries = reference_data$metadata$countries,
+  include_wb_class = reference_data$metadata$dataset_options$include_world_bank_class
+)
+
+```
+
+```{r Set up NeoIPC layout}
+#| include: false
+
+NeoIPC_pallette <- c("#FF9015","#0083C1","#0D4F6C","#E6FAFC","#E0D3DE","#1F271B")
+pal <- c(NeoIPC_pallette[5],NeoIPC_pallette[2],NeoIPC_pallette[6])
+
 ```
