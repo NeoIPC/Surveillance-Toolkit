@@ -50,16 +50,21 @@ function Read-UserInfo {
         $filters += $codes
     }
 
+    # Treat -Path as the DHIS2 API base path (default '/api'); the endpoint
+    # is always '<api-base>/users'. The UI base URL is derived by stripping a
+    # trailing '/api' (which lives only under the API path, not the web UI).
+    $apiBase = if ($Path) { $Path.TrimEnd('/') } else { '/api' }
+    $uiSubPath = $apiBase -replace '/api$', ''
+
     $getParams = @{
         Auth   = $auth
-        Path   = 'api/users'
+        Path   = ($apiBase + '/users').TrimStart('/')
         Fields = $fields
     }
     if ($filters.Count -gt 0) { $getParams.Filter = $filters }
     if ($Scheme)   { $getParams.Scheme   = $Scheme }
     if ($Hostname) { $getParams.Hostname = $Hostname }
     if ($Port)     { $getParams.Port     = $Port }
-    if ($Path)     { $getParams.Path     = (($Path.TrimEnd('/') + '/') + $getParams.Path) }
 
     $obj = Invoke-NeoipcDhis2Get @getParams
 
@@ -68,7 +73,7 @@ function Read-UserInfo {
     $effectiveHost = if ($Hostname) { $Hostname } else { 'neoipc.charite.de' }
     $baseUrl = "${effectiveScheme}://${effectiveHost}"
     if ($Port) { $baseUrl += ":$Port" }
-    if ($Path) { $baseUrl += '/' + $Path.Trim('/') }
+    if ($uiSubPath) { $baseUrl += $uiSubPath }
 
     foreach ($user in $obj.users) {
         [PSCustomObject]@{
