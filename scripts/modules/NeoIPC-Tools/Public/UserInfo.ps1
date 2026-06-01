@@ -14,7 +14,7 @@ function Read-UserInfo {
         [Parameter(Position = 0)]
         [ArgumentCompleter({
             param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
-            $serverKey = Get-NeoipcServerKey -Scheme $fakeBoundParameters['Scheme'] -Hostname $fakeBoundParameters['Hostname'] -Port $fakeBoundParameters['Port']
+            $serverKey = Get-NeoipcServerKey -Scheme $fakeBoundParameters['Scheme'] -Hostname $fakeBoundParameters['Hostname'] -Port $fakeBoundParameters['Port'] -Path $fakeBoundParameters['Path']
             $cacheDir = Join-Path (Split-Path (Split-Path (Split-Path (Split-Path $PSScriptRoot)))) 'data' 'local' $serverKey
             $cacheFile = Join-Path $cacheDir 'site-codes.txt'
             if (Test-Path $cacheFile) {
@@ -31,7 +31,8 @@ function Read-UserInfo {
 
         [Parameter()] [string]$Scheme = $null,
         [Parameter()] [string]$Hostname = $null,
-        [Parameter()] [Nullable[int]]$Port = $null
+        [Parameter()] [Nullable[int]]$Port = $null,
+        [Parameter()] [string]$Path = $null
     )
 
     $auth = Resolve-NeoipcAuth -Token $Token -UserName $UserName
@@ -58,6 +59,7 @@ function Read-UserInfo {
     if ($Scheme)   { $getParams.Scheme   = $Scheme }
     if ($Hostname) { $getParams.Hostname = $Hostname }
     if ($Port)     { $getParams.Port     = $Port }
+    if ($Path)     { $getParams.Path     = (($Path.TrimEnd('/') + '/') + $getParams.Path) }
 
     $obj = Invoke-NeoipcDhis2Get @getParams
 
@@ -66,6 +68,7 @@ function Read-UserInfo {
     $effectiveHost = if ($Hostname) { $Hostname } else { 'neoipc.charite.de' }
     $baseUrl = "${effectiveScheme}://${effectiveHost}"
     if ($Port) { $baseUrl += ":$Port" }
+    if ($Path) { $baseUrl += '/' + $Path.Trim('/') }
 
     foreach ($user in $obj.users) {
         [PSCustomObject]@{
