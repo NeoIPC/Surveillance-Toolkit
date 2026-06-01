@@ -99,6 +99,12 @@ if (nrow(patient) == 0) {
   quit(status = 1)
 }
 
+if (nrow(patient) > 1) {
+  cat(sprintf("Error: %d patient records share ID '%s' in department '%s' — refusing to render ambiguous report.\n",
+    nrow(patient), patient_id, department_code), file = stderr())
+  quit(status = 1)
+}
+
 pk <- patient$patient_key
 
 result <- list(
