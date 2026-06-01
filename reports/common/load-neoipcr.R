@@ -5,9 +5,12 @@ load_neoipcr <- function(dev_pkg_path = NULL) {
     resolved <- normalizePath(dev_pkg_path, mustWork = FALSE)
     cat(sprintf("Loading neoipcr from source: %s\n", resolved), file = stderr())
     if (!requireNamespace("devtools", quietly = TRUE)) {
-      cat("Installing devtools (needed to load neoipcr from local source)...\n",
-        file = stderr())
-      install.packages("devtools", repos = "https://cloud.r-project.org")
+      stop(paste0(
+        "load_neoipcr(dev_pkg_path = ...) requires the 'devtools' package, ",
+        "which is not installed. Install it manually with ",
+        "install.packages('devtools'), or omit dev_pkg_path / unset the ",
+        "NEOIPCR_DEV_PATH env var to use the installed neoipcr instead."),
+        call. = FALSE)
     }
     devtools::load_all(dev_pkg_path)
   } else {
