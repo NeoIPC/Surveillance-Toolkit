@@ -7,7 +7,10 @@ param(
     [switch]$DryRun
 )
 
-Import-Module powershell-yaml
+Import-Module powershell-yaml -ErrorAction Stop
+
+$configFullPath = (Resolve-Path -LiteralPath $ConfigFile -ErrorAction Stop).Path
+$configDir = Split-Path -Parent $configFullPath
 
 # -------------------------------------------------
 # Recursively collect YAML keys
@@ -80,7 +83,7 @@ function Update-KeysOption {
 # -------------------------------------------------
 # Main
 # -------------------------------------------------
-$lines = Get-Content $ConfigFile
+$lines = Get-Content -LiteralPath $configFullPath
 $newLines = @()
 
 foreach ($line in $lines) {
@@ -89,14 +92,23 @@ foreach ($line in $lines) {
 
         $yamlPath = $Matches[1]
 
-        if (-not (Test-Path $yamlPath)) {
+        # po4a paths in [type: yaml] lines are relative to the config file.
+        # Resolve against the config's directory so the script works regardless
+        # of the caller's cwd. Absolute paths pass through Join-Path unchanged.
+        $yamlFullPath = if ([System.IO.Path]::IsPathRooted($yamlPath)) {
+            $yamlPath
+        } else {
+            Join-Path $configDir $yamlPath
+        }
+
+        if (-not (Test-Path -LiteralPath $yamlFullPath)) {
             $newLines += $line
             continue
         }
 
         Write-Host "Processing $yamlPath"
 
-        $yaml = Get-Content $yamlPath -Raw | ConvertFrom-Yaml
+        $yaml = Get-Content -LiteralPath $yamlFullPath -Raw | ConvertFrom-Yaml
 
         $allKeys = Get-YamlKeysRecursive $yaml |
                    Where-Object { $_ } |
@@ -127,6 +139,6 @@ if ($DryRun) {
     $newLines | Out-Host
 }
 else {
-    $newLines | Set-Content $ConfigFile
+    $newLines | Set-Content -LiteralPath $configFullPath -Encoding utf8NoBOM
     Write-Host "Config updated successfully."
 }

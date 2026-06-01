@@ -68,6 +68,12 @@ param(
 
 $auth = Resolve-NeoipcAuth -Token $Token
 
+# Resolve the exception file against the caller's cwd before we Set-Location
+# into the report dir; otherwise a relative path becomes report-dir-relative.
+if ($ValidationExceptionFile) {
+    $ValidationExceptionFile = (Resolve-Path -LiteralPath $ValidationExceptionFile -ErrorAction Stop).Path
+}
+
 $reportDir = Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..' 'reports' 'Validation-Report')
 
 $deptArgs = @{ Auth = $auth; SiteCodeFilter = $SiteCodeFilter }
