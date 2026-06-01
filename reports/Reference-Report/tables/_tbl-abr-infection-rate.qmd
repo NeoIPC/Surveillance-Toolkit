@@ -47,7 +47,7 @@ reference_data |>
     sep_mark = sR$digit_group_separator,
     min_sep_threshold = 2) |>
   gt::fmt_markdown(
-    columns = "group",
+    columns = "group"
   ) |>
   cols_width(
     stub() ~ pct(40),
