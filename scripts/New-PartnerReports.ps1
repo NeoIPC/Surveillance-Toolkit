@@ -14,17 +14,17 @@ In DataFile mode (-DataFile), the script renders a formatted report from a pre-c
 
 .EXAMPLE
 .
-    .\New-PartnerReports.ps1 -SiteCodeFilter 'NEO_.*' -Language @('en','de') -OutputDir 'C:\tmp\partner-reports' -ReferenceDataFile '2026-01-28_124237Z.Reference-Report.json' -IncludeNonCorePatients -Verbose
+    .\New-PartnerReports.ps1 -SiteCodeFilter 'NEO_.*' -Locale @('en','de') -OutputDir 'C:\tmp\partner-reports' -ReferenceDataFile '2026-01-28_124237Z.Reference-Report.json' -IncludeNonCorePatients -Verbose
 
 .EXAMPLE
 .
-    .\New-PartnerReports.ps1 -DataFile 'partner-data.json' -Language @('en','de') -Formats pdf -OutputDir 'C:\tmp\partner-reports' -Verbose
+    .\New-PartnerReports.ps1 -DataFile 'partner-data.json' -Locale @('en','de') -Formats pdf -OutputDir 'C:\tmp\partner-reports' -Verbose
 #>
 [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Low', DefaultParameterSetName='Online')]
 param(
     [ArgumentCompleter({
         param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
-        . "$PSScriptRoot/NeoipcReportHelpers.ps1"
+        Import-Module (Join-Path $PSScriptRoot 'modules' 'NeoIPC-Tools') -Force -Verbose:$false
         $serverKey = Get-NeoipcServerKey `
             -Scheme $fakeBoundParameters['Dhis2Scheme'] `
             -Hostname $fakeBoundParameters['Dhis2Hostname'] `
@@ -63,7 +63,7 @@ param(
     })]
     [Parameter(Position=1)]
     [string[]]
-    $Language = @('en'),
+    $Locale = @('en'),
 
     [Parameter(ParameterSetName='Online')]
     [string]
@@ -110,8 +110,33 @@ param(
     $HideIntroductionTexts,
 
     [Parameter()]
+    [ValidateSet('all', 'none', 'rate', 'rate_pooled', 'auto')]
+    [string]
+    $ConfidenceIntervals,
+
+    [Parameter()]
+    [switch]
+    $HideMethodsTexts,
+
+    [Parameter()]
     [switch]
     $HideOutlierInterpretation,
+
+    # Rows with fewer than this many events are flagged with a footnote
+    # indicating statistical instability. Based on the relative standard
+    # error of the Poisson distribution (1/sqrt(n)):
+    #   n=10 -> 31.6%  n=16 -> 25.0%  n=20 -> 22.4%
+    # Default 16 aligns with the 25% threshold recommended by the
+    # Washington State Department of Health for flagging unstable rates.
+    # Source: https://doh.wa.gov/sites/default/files/legacy/Documents/1500/SmallNumbers.pdf
+    [Parameter()]
+    [ValidateRange(1, 100)]
+    [int]
+    $SparseDataThreshold,
+
+    [Parameter()]
+    [switch]
+    $DebugReport,
 
     [Parameter()]
     [ValidateSet('pdf','html','docx','json')]
@@ -164,10 +189,14 @@ param(
         'RiskDensityRates',
         'SurgicalProcedureRates',
         'SecondaryBloodstreamInfectionRates'
-    )
+    ),
+    # Elements to remove from the default IncludeElements list.
+    # Processed after IncludeElements: the effective set is IncludeElements minus ExcludeElements.
+    [Parameter()]
+    [string[]]$ExcludeElements = @()
 )
 
-. "$PSScriptRoot/NeoipcReportHelpers.ps1"
+Import-Module (Join-Path $PSScriptRoot 'modules' 'NeoIPC-Tools') -Force -Verbose:$false
 
 # --- Runtime validation ---
 $isDataFileMode = $PSCmdlet.ParameterSetName -eq 'DataFile'
@@ -237,6 +266,23 @@ if ($OutputDir) {
     $resolvedOutputDir = $resolvedOutputDir.Path
 }
 
+# In DataFile mode no DHIS2 auth is needed, but we still scope LC_ALL.
+# Pass a dummy auth hashtable that clears env vars without setting new ones.
+$authForEnv = if ($isDataFileMode) { @{ AuthType = 'None' } } else { Resolve-NeoipcAuth -Token $Token }
+
+Invoke-WithNeoipcAuth -Auth $authForEnv -ExtraEnvVars @{ 'LC_ALL' = $null } -ScriptBlock {
+
+# Prepare build tracking before try block so variables are always initialized,
+# even if an early exception (e.g. auth failure) skips the rest of the try body
+$errors = @()
+$outputFiles = @()
+$buildCompleted = $false
+$startedAt = (Get-Date -AsUTC).ToString('o')
+$scriptTimestamp = [datetime]::UtcNow.ToString("yyyy-MM-dd_HHmmss'Z'")
+$buildLog = @()
+$totalSteps = 0
+$completedSteps = 0
+
 try {
     Set-Location -LiteralPath $partnerReportDir
 
@@ -266,8 +312,8 @@ if (inherits(x, 'neoipcr_bnch_ds')) {
         $sites = @($siteString -split ',')
         Write-Verbose "DataFile mode: rendering from $DataFile (sites: $($sites -join ', '))"
     } else {
-        # Online mode: resolve auth and fetch departments
-        $auth = Resolve-NeoipcAuth -Token $Token
+        # Online mode: auth already resolved as $authForEnv above
+        $auth = $authForEnv
 
         # Fetch departments
         $deptArgs = @{ Auth = $auth; SiteCodeFilter = $SiteCodeFilter }
@@ -283,38 +329,11 @@ if (inherits(x, 'neoipcr_bnch_ds')) {
         }
     }
 
-    # Save current auth env vars, clear them, then set only the resolved ones
-    # so that R/Quarto child processes pick up credentials via neoipcr's get_auth_data()
-    $originalEnv = @{}
-    foreach ($name in @(
-        'NEOIPC_DHIS2_TOKEN',
-        'NEOIPC_DHIS2_USER',
-        'NEOIPC_DHIS2_PASSWORD',
-        'NEOIPC_DHIS2_SESSION_ID'
-    )) {
-        $originalEnv[$name] = [Environment]::GetEnvironmentVariable($name, 'Process')
-    }
-    if (-not $isDataFileMode) {
-        foreach ($name in @('NEOIPC_DHIS2_TOKEN', 'NEOIPC_DHIS2_USER',
-                            'NEOIPC_DHIS2_PASSWORD', 'NEOIPC_DHIS2_SESSION_ID')) {
-            [Environment]::SetEnvironmentVariable($name, $null, 'Process')
-        }
-        if ($auth.AuthType -eq 'Token') {
-            $env:NEOIPC_DHIS2_TOKEN = $auth.Token
-        } elseif ($auth.AuthType -eq 'Basic') {
-            $env:NEOIPC_DHIS2_USER = $auth.Username
-            $env:NEOIPC_DHIS2_PASSWORD = Get-NeoipcAuthPassword -Auth $auth
-        }
-    }
-
     # $resolvedOutputDir already resolved before Set-Location
 
-    # Prepare build tracking (aligned with Reference Report build report structure)
-    $errors = @()
-    $outputFiles = @()
-    $startedAt = (Get-Date -AsUTC).ToString('o')
-    $scriptTimestamp = [datetime]::UtcNow.ToString("yyyy-MM-dd_HHmmss'Z'")
-    $buildLog = @()
+    # Step counts depend on $sites which is resolved inside the try block
+    if ($wantsJson -and -not $isDataFileMode) { $totalSteps += $sites.Count }
+    if ($renderFormats.Count -gt 0) { $totalSteps += ($sites.Count * $Locale.Count * $renderFormats.Count) }
 
     # --- JSON data generation (Online mode only) ---
     if ($wantsJson -and -not $isDataFileMode) {
@@ -345,6 +364,10 @@ if (inherits(x, 'neoipcr_bnch_ds')) {
                 ExitCode = $null
             }
 
+            $completedSteps++
+            $pct = if ($totalSteps -gt 0) { [int](100 * $completedSteps / $totalSteps) } else { 0 }
+            Write-Progress -Activity 'Partner Report Build' -Status "Generating JSON for $site" -PercentComplete $pct
+
             if ($PSCmdlet.ShouldProcess($jsonOutPath, "Generate partner data JSON for $site")) {
                 Write-Host "Generating partner data JSON for $site..."
                 $rArgs = @('--vanilla', (Join-Path $partnerReportDir 'Generate-PartnerData.R'),
@@ -356,35 +379,26 @@ if (inherits(x, 'neoipcr_bnch_ds')) {
                 }
                 if ($ReportingPeriodFrom -ne $null) { $rArgs += @('--reportingPeriodFrom', $ReportingPeriodFrom.ToString('yyyy-MM-dd')) }
                 if ($ReportingPeriodTo -ne $null) { $rArgs += @('--reportingPeriodTo', $ReportingPeriodTo.ToString('yyyy-MM-dd')) }
-                if ($BirthWeightFrom -ne $null) { $rArgs += @('--birthWeightFrom', $BirthWeightFrom.Value) }
-                if ($BirthWeightTo -ne $null) { $rArgs += @('--birthWeightTo', $BirthWeightTo.Value) }
-                if ($GestationWeeksFrom -ne $null) { $rArgs += @('--gestationWeeksFrom', $GestationWeeksFrom.Value) }
-                if ($GestationWeeksTo -ne $null) { $rArgs += @('--gestationWeeksTo', $GestationWeeksTo.Value) }
+                if ($BirthWeightFrom -ne $null) { $rArgs += @('--birthWeightFrom', $BirthWeightFrom) }
+                if ($BirthWeightTo -ne $null) { $rArgs += @('--birthWeightTo', $BirthWeightTo) }
+                if ($GestationWeeksFrom -ne $null) { $rArgs += @('--gestationWeeksFrom', $GestationWeeksFrom) }
+                if ($GestationWeeksTo -ne $null) { $rArgs += @('--gestationWeeksTo', $GestationWeeksTo) }
                 if ($IncludeNonCorePatients.IsPresent) { $rArgs += '--includeNonCorePatients' }
                 if ($Dhis2Scheme) { $rArgs += @('--scheme', $Dhis2Scheme) }
                 if ($Dhis2Hostname) { $rArgs += @('--host', $Dhis2Hostname) }
                 if ($null -ne $Dhis2Port) { $rArgs += @('--port', $Dhis2Port) }
                 if ($Dhis2Path) { $rArgs += @('--path', $Dhis2Path) }
 
-                $currentMessages = New-Object System.Collections.Generic.List[string]
-                Write-Debug "Rscript command: Rscript $($rArgs -join ' ')"
-                & $rscriptCmd @rArgs 2>&1 | ForEach-Object {
-                    $s = "$_"
-                    if ($s -eq 'System.Management.Automation.RemoteException') { $s = '' }
-                    $currentMessages.Add($s) | Out-Null
-                    if ($s -match '^(Error|Fehler)') { Write-Error -Message $s }
-                    elseif ($s -match 'WARNING') { Write-Warning $s }
-                    else { Write-Verbose $s }
-                }
+                $rResult = Invoke-Rscript -Arguments $rArgs -Command $rscriptCmd -Description "Generate-PartnerData.R ($site)"
 
-                $currentEntry.ExitCode = $LASTEXITCODE
-                $currentEntry.Messages = $currentMessages
-                if ($LASTEXITCODE -eq 0) {
+                $currentEntry.ExitCode = $rResult.ExitCode
+                $currentEntry.Messages = $rResult.Messages
+                if ($rResult.Status -eq 'Success') {
                     Write-Host "done." -ForegroundColor Green
                     $currentEntry.Status = 'Success'
                     $outputFiles += $jsonOutPath
                 } else {
-                    $errMsg = "Generate-PartnerData.R failed with exit code $LASTEXITCODE for site $site."
+                    $errMsg = "Generate-PartnerData.R failed (exit code $($rResult.ExitCode)) for site $site."
                     Write-Error $errMsg
                     $errors += $errMsg
                     $currentEntry.Status = 'Error'
@@ -408,12 +422,21 @@ if (inherits(x, 'neoipcr_bnch_ds')) {
             throw "Quarto checks failed: $($_.Exception.Message)"
         }
 
-        # Loop by language and site
-        foreach ($lang in $Language) {
-            $qmdToUse = Resolve-NeoipcLocaleQmd -ReportDir $partnerReportDir -BaseName 'Partner-Report' -Language $lang
+        # Loop by locale and site
+        foreach ($loc in $Locale) {
+            $localeParts = Split-NeoipcLocale -Locale $loc
+            $lang = $localeParts.Language
+            $qmdToUse = Resolve-NeoipcLocaleQmd -ReportDir $partnerReportDir -BaseName 'Partner-Report' -Locale $loc
+
+            # Set LC_ALL so R picks up the full locale (territory-specific resources)
+            if ($localeParts.Territory) {
+                $env:LC_ALL = "${loc}.UTF-8"
+            } else {
+                [Environment]::SetEnvironmentVariable('LC_ALL', $null, 'Process')
+            }
 
             foreach ($site in $sites) {
-                Write-Host "Generating partner report for $site (lang: $lang)..."
+                Write-Host "Generating partner report for $site (locale: $loc)..."
 
                 # Build file name and paths
                 $timestamp = [datetime]::Now.ToString('yyyy-MM-dd_HHmmss')
@@ -430,10 +453,10 @@ if (inherits(x, 'neoipcr_bnch_ds')) {
                     # Online mode: pass data params
                     if ($ReportingPeriodFrom -ne $null) { $qmdParams['reportingPeriodFrom'] = $ReportingPeriodFrom.ToString('yyyy-MM-dd') }
                     if ($ReportingPeriodTo -ne $null) { $qmdParams['reportingPeriodTo'] = $ReportingPeriodTo.ToString('yyyy-MM-dd') }
-                    if ($BirthWeightFrom -ne $null) { $qmdParams['birthWeightFrom'] = $BirthWeightFrom.Value }
-                    if ($BirthWeightTo -ne $null) { $qmdParams['birthWeightTo'] = $BirthWeightTo.Value }
-                    if ($GestationWeeksFrom -ne $null) { $qmdParams['gestationWeeksFrom'] = $GestationWeeksFrom.Value }
-                    if ($GestationWeeksTo -ne $null) { $qmdParams['gestationWeeksTo'] = $GestationWeeksTo.Value }
+                    if ($BirthWeightFrom -ne $null) { $qmdParams['birthWeightFrom'] = $BirthWeightFrom }
+                    if ($BirthWeightTo -ne $null) { $qmdParams['birthWeightTo'] = $BirthWeightTo }
+                    if ($GestationWeeksFrom -ne $null) { $qmdParams['gestationWeeksFrom'] = $GestationWeeksFrom }
+                    if ($GestationWeeksTo -ne $null) { $qmdParams['gestationWeeksTo'] = $GestationWeeksTo }
                     if ($IncludeNonCorePatients.IsPresent) { $qmdParams['includeNonCorePatients'] = 'true' }
                     if ($Dhis2Scheme) { $qmdParams['dhis2Scheme'] = $Dhis2Scheme }
                     if ($Dhis2Hostname) { $qmdParams['dhis2Hostname'] = $Dhis2Hostname }
@@ -443,11 +466,18 @@ if (inherits(x, 'neoipcr_bnch_ds')) {
 
                 if ($resolvedReferenceDataFile) { $qmdParams['referenceDataFile'] = $resolvedReferenceDataFile }
                 if ($HideIntroductionTexts.IsPresent) { $qmdParams['includeIntroductionTexts'] = 'false' }
+                if ($ConfidenceIntervals) { $qmdParams['includeConfidenceIntervals'] = $ConfidenceIntervals }
+                if ($HideMethodsTexts.IsPresent) { $qmdParams['includeMethodsTexts'] = 'false' }
+                if ($SparseDataThreshold) { $qmdParams['sparseDataThreshold'] = $SparseDataThreshold }
                 if ($HideOutlierInterpretation.IsPresent) { $qmdParams['includeOutlierInterpretation'] = 'false' }
+                if ($DebugReport) { $qmdParams['debug'] = 'true' }
+
+                # Apply exclusions
+                $effectiveElements = @($IncludeElements | Where-Object { $_ -notin $ExcludeElements })
 
                 # Convert user-friendly element names to Quarto boolean parameters
                 foreach ($mapping in $elementMapping.GetEnumerator()) {
-                    $includeValue = $IncludeElements -contains $mapping.Key
+                    $includeValue = $effectiveElements -contains $mapping.Key
                     $qmdParams[$mapping.Value] = if ($includeValue) { 'true' } else { 'false' }
                 }
 
@@ -455,7 +485,7 @@ if (inherits(x, 'neoipcr_bnch_ds')) {
 
                 # For each requested output format, render a report
                 foreach ($format in $renderFormats) {
-                    $fileName = "${timestamp}_NeoIPC-Surveillance-Partner-Report_${site}.${lang}.${format}"
+                    $fileName = "${timestamp}_NeoIPC-Surveillance-Partner-Report_${site}.${loc}.${format}"
 
                     # QUARTO requires the -o value to be filename-only (no path component). Use GetFileName just to be safe.
                     $outFileForQuarto = [System.IO.Path]::GetFileName($fileName)
@@ -481,35 +511,15 @@ if (inherits(x, 'neoipcr_bnch_ds')) {
                         $quartoArgs += $resolvedOutputDir
                     }
 
-                    $metadataParameters = @(
-                        'includeIntroductionTexts'
-                        'includeOutlierInterpretation'
-                        'includeBirthWeightFigure'
-                        'includeGestationalAgeFigure'
-                        'includeIncidenceDensityTable'
-                        'includeDeviceAssociatedIncidenceDensityTable'
-                        'includeAgentPerInfectionRateTable'
-                        'includeInfectiousAgentDetectionRateTable'
-                        'includeRiskDensityRateTable'
-                        'includeSurgicalProcedureRateTable'
-                        'includeResistantPathogenInfectionRateTable'
-                        'includeAntibioticResistanceTestRateTable'
-                        'includeSecondaryBsiRateTable'
-                    )
-                    # Add parameters - use -M for include* metadata, -P for others
-                    foreach ($pair in $paramPairs) {
-                        if ($pair -eq '-P') {
-                            $quartoArgs += $pair
-                        } elseif ($pair -match ':' -and ($pair -split ':')[0] -iin $metadataParameters) {
-                            # Replace last -P with -M for include flags
-                            $quartoArgs[$quartoArgs.Count - 1] = '-M'
-                            $quartoArgs += $pair
-                        } else {
-                            $quartoArgs += $pair
-                        }
-                    }
+                    # All parameters via -P (R reads params$, conditional
+                    # blocks use cat() + when-meta="alwaysTrue" wrappers)
+                    $quartoArgs += $paramPairs
 
                     # Render (or report) - respect WhatIf via ShouldProcess
+                    $completedSteps++
+                    $pct = if ($totalSteps -gt 0) { [int](100 * $completedSteps / $totalSteps) } else { 0 }
+                    Write-Progress -Activity 'Partner Report Build' -Status "Rendering $format for $site ($lang)" -PercentComplete $pct
+
                     $target = "$fileName for site $site (lang: $lang, format: $format)"
                     $currentMessages = New-Object System.Collections.Generic.List[string]
                     if ($PSCmdlet.ShouldProcess($target, "Render Partner Report")) {
@@ -586,64 +596,35 @@ if (inherits(x, 'neoipcr_bnch_ds')) {
         }
     }
 
+
+    $buildCompleted = $true
 }
 catch {
     $errors += $_.Exception.Message
 }
 finally {
     Set-Location -LiteralPath $wd
-    foreach ($name in $originalEnv.Keys) {
-        $originalValue = $originalEnv[$name]
-        if ($null -eq $originalValue) {
-            [Environment]::SetEnvironmentVariable($name, $null, 'Process')
-        } else {
-            [Environment]::SetEnvironmentVariable($name, $originalValue, 'Process')
-        }
-    }
 
-    $completedAt = (Get-Date -AsUTC).ToString('o')
-    $status = if ($errors.Count -gt 0) { 'failed' } else { 'success' }
+    Write-Progress -Activity 'Partner Report Build' -Completed
 
-    # Write JSON build report if requested
-    if ($JsonReport) {
-        $buildReportDir = if ($resolvedOutputDir) { $resolvedOutputDir } else { Join-Path $partnerReportDir '_output' }
-        $buildReportPath = Join-Path $buildReportDir "$scriptTimestamp.partner-report-build.json"
-        $buildReport = [ordered]@{
-            name = 'Partner Report Build'
-            status = $status
-            startedAt = $startedAt
-            completedAt = $completedAt
-            timestamp = $scriptTimestamp
-            outputDir = if ($resolvedOutputDir) { $resolvedOutputDir } else { Join-Path $partnerReportDir '_output' }
-            outputs = $outputFiles | Sort-Object -Unique
-            sites = $sites
-            languages = $Language
-            formats = $Formats
-            errors = $errors
-            steps = $buildLog
-        }
-        try {
-            $buildReport | ConvertTo-Json -Depth 100 | Set-Content -LiteralPath $buildReportPath
-            Write-Verbose "Generated output: $buildReportPath"
-        }
-        catch {
-            Write-Warning "Failed to write build report: $($_.Exception.Message)"
-        }
+    $buildReportDir = if ($resolvedOutputDir) { $resolvedOutputDir } else { Join-Path $partnerReportDir '_output' }
+    $buildReportPath = Join-Path $buildReportDir "${scriptTimestamp}_NeoIPC-Surveillance-Partner-Report-Build.json"
+    $extraFields = [ordered]@{
+        timestamp = $scriptTimestamp
+        outputDir = $buildReportDir
+        sites = $sites
+        locales = $Locale
+        formats = $Formats
+        steps = $buildLog
     }
+    $reportPath = if ($JsonReport) { $buildReportPath } else { $null }
+    $status = Write-NeoipcBuildReport -Name 'Partner Report Build' `
+        -Errors $errors -OutputFiles $outputFiles -BuildCompleted $buildCompleted `
+        -StartedAt $startedAt -BuildReportPath $reportPath -ExtraFields $extraFields
 
-    # Console summary (always)
-    if ($status -eq 'failed') {
-        Write-Host "Build status: $status" -ForegroundColor Red
-    } else {
-        Write-Host "Build status: $status" -ForegroundColor Green
-    }
-    Write-Host "Outputs:"
-    $outputFiles | Sort-Object -Unique | ForEach-Object { Write-Host "  $_" }
-    if ($JsonReport -and $buildReportPath) {
-        Write-Host "Build report: $buildReportPath"
-    }
-
-    if ($status -eq 'failed') {
+    if ($status -ne 'success') {
         exit 1
     }
 }
+
+} # end Invoke-WithNeoipcAuth

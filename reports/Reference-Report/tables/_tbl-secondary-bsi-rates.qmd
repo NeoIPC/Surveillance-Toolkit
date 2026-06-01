@@ -1,52 +1,156 @@
+### `{r} sR$headings$secondary_bsi`
+
+```{r}
+#| output: asis
+.show(params$includeMethodsTexts)
+```
+
+```{r}
+#| output: asis
+include_localised("_methods-secondary-bsi.Rmd")
+```
+
+```{r}
+#| output: asis
+.end()
+```
+
 ```{r}
 #| label: tbl-secondary-bsi-rates
-#| tbl-cap: "Secondary bloodstream infections"
+#| tbl-cap: !expr 'sR$`tbl-secondary-bsi-rates`$`tbl-cap`'
 #| tbl-cap-location: top
 
-reference_data |>
-  neoipcr::get_secondary_bsi_rate_table() |>
+tbl_data <- reference_data |>
+  neoipcr::get_secondary_bsi_rate_table()
+
+tbl <- tbl_data |>
   dplyr::rename(
-    "No of inf. w. sec. BSI" = "n",
-    "Pooled mean" = "pooled",
-    "Q₁" = "q1",
-    "Q₂" = "q2",
-    "Q₃" = "q3") |>
+    !!sR$table_headers$n := "n",
+    !!sR$table_headers$pooled := "pooled",
+    !!sR$table_headers$q1 := "q1",
+    !!sR$table_headers$q2 := "q2",
+    !!sR$table_headers$q3 := "q3") |>
   dplyr::mutate(
     Infection = dplyr::case_match(
       as.character(.data$event_type_key),
-      "nec" ~ "Necrotising Enterocolitis",
-      "ssi" ~ "Surgical site infection",
-      "hap" ~ "Pneumonia"),
-    .keep = "unused") |>
+      "nec" ~ sR$necrotising_enterocolitis_sc,
+      "ssi" ~ sR$surgical_site_infection_sc,
+      "hap" ~ sR$pneumonia_sc),
+    .keep = "unused")
+
+cw <- compute_col_widths(tbl_data, stub_min = 25)
+
+gt_tbl <- tbl |>
   gt(rowname_col = "Infection") |>
-  fmt_number(decimals = 1) |>
-  fmt_number(columns = "No of inf. w. sec. BSI", decimals = 0) |>
+  sub_missing() |>
+  gt::tab_options(
+    latex.use_longtable = TRUE,
+    table.width = pct(100),
+    table.font.size = cw$font_size,
+    footnotes.marks = "extended"
+  ) |>
+  fmt_number(
+    columns = !sR$table_headers$n,
+    decimals = 1,
+    sep_mark = sR$digit_group_separator,
+    min_sep_threshold = 2,
+    locale = locale_gt) |>
+  fmt_integer(
+    columns = sR$table_headers$n,
+    sep_mark = sR$digit_group_separator,
+    min_sep_threshold = 2)
+
+# Pooled rate CI merge
+if (include_rate_ci && "ci_lower" %in% colnames(gt_tbl$`_data`)) {
+  gt_tbl <- gt_tbl |>
+    cols_merge(
+      columns = c(sR$table_headers$pooled, "ci_lower", "ci_upper"),
+      pattern = "{1} ({2}\u2013{3})",
+      rows = !is.na(tbl_data$pooled))
+} else if ("ci_lower" %in% colnames(gt_tbl$`_data`)) {
+  gt_tbl <- gt_tbl |> gt::cols_hide(columns = c("ci_lower", "ci_upper"))
+}
+
+# Quartile bootstrap CI merge
+if ("q1_ci_lower" %in% colnames(gt_tbl$`_data`)) {
+  if (include_quartile_ci) {
+    has_boot <- !is.na(gt_tbl$`_data`[["q1_ci_lower"]])
+    if (auto_quartile_ci)
+      has_boot <- has_boot & !is.na(gt_tbl$`_data`[[sR$table_headers$q1]])
+    gt_tbl <- gt_tbl |>
+      gt::cols_merge(
+        columns = c(sR$table_headers$q1, "q1_ci_lower", "q1_ci_upper"),
+        pattern = "{1} ({2}\u2013{3})",
+        rows = has_boot) |>
+      gt::cols_merge(
+        columns = c(sR$table_headers$q2, "q2_ci_lower", "q2_ci_upper"),
+        pattern = "{1} ({2}\u2013{3})",
+        rows = has_boot) |>
+      gt::cols_merge(
+        columns = c(sR$table_headers$q3, "q3_ci_lower", "q3_ci_upper"),
+        pattern = "{1} ({2}\u2013{3})",
+        rows = has_boot)
+  } else {
+    gt_tbl <- gt_tbl |> gt::cols_hide(columns = tidyselect::any_of(c(
+      "q1_ci_lower", "q1_ci_upper",
+      "q2_ci_lower", "q2_ci_upper",
+      "q3_ci_lower", "q3_ci_upper")))
+  }
+}
+
+gt_tbl <- gt_tbl |>
+  cols_width(
+    stub() ~ pct(cw$stub),
+    sR$table_headers$n ~ pct(cw$n),
+    sR$table_headers$pooled ~ pct(cw$pooled),
+    sR$table_headers$q1 ~ pct(cw$q),
+    sR$table_headers$q2 ~ pct(cw$q),
+    sR$table_headers$q3 ~ pct(cw$q))
+
+gt_tbl <- gt_tbl |>
   tab_spanner(
-    label = "Secondary BSI rate",
-    columns = c("Pooled mean","Q₁","Q₂","Q₃"),
+    label = sR$`tbl-secondary-bsi-rates`$rate_name,
+    columns = tidyselect::any_of(
+      c(
+        sR$table_headers$pooled,
+        sR$table_headers$q1,
+        sR$table_headers$q2,
+        sR$table_headers$q3)),
     id = "secondary_bsi_rate"
+  ) |>
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = list(
+      cells_column_spanners(),
+      cells_column_labels(),
+      cells_row_groups()
+    )
   ) |>
   tab_footnote(
     footnote = md(
       paste0(
         "$$\\text{",
-        "Secondary BSI rate",
+        sR$`tbl-secondary-bsi-rates`$rate_name,
         "} = \\frac{\\text{",
-        "No of infections with secondary BSI",
+        sR$`tbl-secondary-bsi-rates`$rate_numerator,
         "}}{\\text{",
-        "No of infections with follow-up for secondary BSI",
+        sR$`tbl-secondary-bsi-rates`$rate_denominator,
         "}} \\times ",
-        format(100, big.mark = locale_sep_mark),
+        format_integer(100),
         "$$"
       )),
     locations = cells_column_spanners(spanners = "secondary_bsi_rate")
   ) |>
   tab_footnote(
-    footnote = "No of infections with secondary BSI: The number of infections where a secondary BSI was recorded, aggregated across all infants.",
-    locations = cells_column_labels(columns = "No of inf. w. sec. BSI")) |>
+    footnote = sprintf(
+      sR$`tbl-secondary-bsi-rates`$n_footnote,
+      sR$table_headers$n),
+    locations = cells_column_labels(columns = sR$table_headers$n)) |>
   tab_footnote(
-    footnote = "Pooled mean: The secondary bsi rate calculated as infections with secondary bsi per 100 infections with follow-up for secondary bsi calculated across all infants.",
-    locations = cells_column_labels(columns = "Pooled mean")) |>
+    footnote = sprintf(
+      sR$`tbl-secondary-bsi-rates`$pooled_footnote,
+      sR$table_headers$pooled),
+    locations = cells_column_labels(columns = sR$table_headers$pooled)) |>
   tab_footnote(
     footnote = "Q₁, Q₂, Q₃: The quartiles (25%, 50% and 75% quantiles) of the secondary bsi rates of the partner departments",
     locations = cells_column_labels(columns = c("Q₁","Q₂","Q₃")))

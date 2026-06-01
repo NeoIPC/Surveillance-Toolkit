@@ -9,19 +9,7 @@ profile:
   group:
     - [en, de]
     - [full, default]
-includeIntroductionTexts: true
-includeOutlierInterpretation: true
-includeBirthWeightFigure: true
-includeGestationalAgeFigure: true
-includeIncidenceDensityTable: true
-includeDeviceAssociatedIncidenceDensityTable: true
-includeAgentPerInfectionRateTable: true
-includeInfectiousAgentDetectionRateTable: true
-includeRiskDensityRateTable: true
-includeSurgicalProcedureRateTable: true
-includeResistantPathogenInfectionRateTable: false
-includeAntibioticResistanceTestRateTable: false
-includeSecondaryBsiRateTable: false
+alwaysTrue: true
 execute:
   error: true
 filters:
@@ -53,6 +41,8 @@ format:
       text: |
         \usepackage{float}
         \usepackage{placeins}
+        \floatplacement{figure}{H}
+        \floatplacement{table}{H}
         \usepackage{graphicx}
         \usepackage{wrapfig}
         \usepackage{scrlayer-scrpage}

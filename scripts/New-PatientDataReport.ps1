@@ -1,11 +1,11 @@
-[CmdletBinding(DefaultParameterSetName = 'Render')]
+[CmdletBinding(SupportsShouldProcess = $true, DefaultParameterSetName = 'Render')]
 param(
     [Parameter(Mandatory, Position = 0)]
     [string]$PatientId,
 
     [ArgumentCompleter({
         param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
-        . "$PSScriptRoot/NeoipcReportHelpers.ps1"
+        Import-Module (Join-Path $PSScriptRoot 'modules' 'NeoIPC-Tools') -Force -Verbose:$false
         $serverKey = Get-NeoipcServerKey `
             -Scheme $fakeBoundParameters['Dhis2Scheme'] `
             -Hostname $fakeBoundParameters['Dhis2Hostname'] `
@@ -31,12 +31,6 @@ param(
     [Parameter(Position = 2)]
     [string]$Format = 'pdf',
 
-    [ValidateScript({
-        if (-not ($_ -ceq 'en' -or (Get-Item -LiteralPath "$PSScriptRoot/../reports/Patient-Data-Report/Patient-Data-Report.$_.qmd" -ErrorAction Ignore))) {
-            throw "The language '$_' is not supported."
-        }
-        return $true
-    })]
     [ArgumentCompleter({
         param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
         @(
@@ -47,10 +41,13 @@ param(
             Sort-Object
     })]
     [Parameter(Position = 3)]
-    [string]$Language = 'en',
+    [string]$Locale = 'en',
 
     [Parameter()]
     [string]$Token,
+
+    [Parameter()]
+    [switch]$JsonReport,
 
     [Parameter()]
     [string]$Dhis2Scheme = $null,
@@ -65,59 +62,106 @@ param(
     [string]$Dhis2Path = $null
 )
 
-. "$PSScriptRoot/NeoipcReportHelpers.ps1"
+Import-Module (Join-Path $PSScriptRoot 'modules' 'NeoIPC-Tools') -Force -Verbose:$false
 $auth = Resolve-NeoipcAuth -Token $Token
 
 $currentDir = Get-Location
 $reportDir = Resolve-Path -LiteralPath "$PSScriptRoot/../reports/Patient-Data-Report/"
-$timestamp = [datetime]::Now.ToString('yyyy-MM-dd_HHmmss')
+$outputDirPath = Join-Path $reportDir '_output'
 
-$exitCode = 0
+Invoke-WithNeoipcAuth -Auth $auth -ExtraEnvVars @{ 'LC_ALL' = $null } -ScriptBlock {
+
+$errors = @()
+$outputFiles = @()
+$buildCompleted = $false
+$startedAt = (Get-Date -AsUTC).ToString('o')
+$scriptTimestamp = [datetime]::UtcNow.ToString("yyyy-MM-dd_HHmmss'Z'")
+
 try {
-    Invoke-WithNeoipcAuth -Auth $auth -ScriptBlock {
-        Set-Location -LiteralPath $reportDir
+    Set-Location -LiteralPath $reportDir
 
-        if ($Format -eq 'json') {
-            $script:outFile = "${timestamp}_NeoIPC-Patient-Data_${PatientId}.json"
+    Write-Progress -Activity 'Patient Data Report Build' -Status "Generating $Format for $PatientId" -PercentComplete 50
+
+    $localeParts = Split-NeoipcLocale -Locale $Locale
+
+    if ($localeParts.Territory) {
+        $env:LC_ALL = "${Locale}.UTF-8"
+    } else {
+        [Environment]::SetEnvironmentVariable('LC_ALL', $null, 'Process')
+    }
+
+    if ($Format -eq 'json') {
+        $outFile = "${scriptTimestamp}_NeoIPC-Surveillance-Patient-Data-Report_${PatientId}.json"
+
+        if ($PSCmdlet.ShouldProcess($outFile, "Generate patient data JSON for $PatientId")) {
             Write-Host "Generating patient data JSON for $PatientId..."
             $rArgs = @('--vanilla', 'Generate-PatientData.R',
                 '--patient-id', $PatientId,
                 '--department', $DepartmentCode,
-                '--output', $script:outFile)
+                '--output', $outFile)
             if ($Dhis2Scheme) { $rArgs += @('--scheme', $Dhis2Scheme) }
             if ($Dhis2Hostname) { $rArgs += @('--host', $Dhis2Hostname) }
             if ($null -ne $Dhis2Port) { $rArgs += @('--port', $Dhis2Port) }
             if ($Dhis2Path) { $rArgs += @('--path', $Dhis2Path) }
-            Rscript @rArgs 2>&1 | ForEach-Object {
-                $s = "$_"
-                if ($s -match '^Error') { Write-Error $s }
-                else { Write-Verbose $s }
+            $rResult = Invoke-Rscript -Arguments $rArgs -Description "Generate-PatientData.R"
+            if ($rResult.Status -eq 'Error') {
+                $errors += "Generate-PatientData.R failed (exit code $($rResult.ExitCode))."
+            } else {
+                $outputFiles += (Join-Path $outputDirPath $outFile)
             }
-            $script:exitCode = $LASTEXITCODE
-            if ($script:exitCode -eq 0) {
-                Write-Host "done. Output: $($script:outFile)" -ForegroundColor Green
-            }
-        } else {
-            $quartoFile = Resolve-NeoipcLocaleQmd -ReportDir $reportDir -BaseName 'Patient-Data-Report' -Language $Language
-            $script:outFile = "${timestamp}_NeoIPC-Patient-Data_${PatientId}.${Language}.${Format}"
+        }
+    } else {
+        $quartoFile = Resolve-NeoipcLocaleQmd -ReportDir $reportDir -BaseName 'Patient-Data-Report' -Locale $Locale
+        $outFile = "${scriptTimestamp}_NeoIPC-Surveillance-Patient-Data-Report_${PatientId}.${Locale}.${Format}"
 
+        if ($PSCmdlet.ShouldProcess($outFile, "Render patient data report for $PatientId")) {
             Write-Host "Generating patient data report ($Format) for $PatientId..."
             $quartoArgs = @('render', $quartoFile,
-                '--profile', $Language,
+                '--profile', $localeParts.Language,
                 '--to', $Format,
                 '-P', "patientId:$PatientId",
                 '-P', "departmentCode:$DepartmentCode",
-                '-o', $script:outFile)
+                '-o', $outFile)
             if ($Dhis2Scheme) { $quartoArgs += @('-P', "dhis2Scheme:$Dhis2Scheme") }
             if ($Dhis2Hostname) { $quartoArgs += @('-P', "dhis2Hostname:$Dhis2Hostname") }
             if ($null -ne $Dhis2Port) { $quartoArgs += @('-P', "dhis2Port:$Dhis2Port") }
             if ($Dhis2Path) { $quartoArgs += @('-P', "dhis2Path:$Dhis2Path") }
             $result = Invoke-QuartoRender -Arguments $quartoArgs -Description "patient data report for $PatientId"
-            $script:exitCode = $result.ExitCode
+            if ($result.Status -eq 'Error') {
+                $errors += "Quarto render failed for $PatientId (exit code $($result.ExitCode))."
+            } else {
+                $outputFiles += (Join-Path $outputDirPath $outFile)
+            }
         }
     }
+
+    $buildCompleted = $true
+}
+catch {
+    $errors += $_.Exception.Message
 }
 finally {
     Set-Location -LiteralPath $currentDir
+
+    Write-Progress -Activity 'Patient Data Report Build' -Completed
+
+    $buildReportPath = Join-Path $outputDirPath "${scriptTimestamp}_NeoIPC-Surveillance-Patient-Data-Report-Build.json"
+    $extraFields = [ordered]@{
+        timestamp = $scriptTimestamp
+        outputDir = $outputDirPath
+        patientId = $PatientId
+        departmentCode = $DepartmentCode
+        format = $Format
+        locale = $Locale
+    }
+    $reportPath = if ($JsonReport) { $buildReportPath } else { $null }
+    $status = Write-NeoipcBuildReport -Name 'Patient Data Report Build' `
+        -Errors $errors -OutputFiles $outputFiles -BuildCompleted $buildCompleted `
+        -StartedAt $startedAt -BuildReportPath $reportPath -ExtraFields $extraFields
+
+    if ($status -ne 'success') {
+        exit 1
+    }
 }
-exit $exitCode
+
+} # end Invoke-WithNeoipcAuth

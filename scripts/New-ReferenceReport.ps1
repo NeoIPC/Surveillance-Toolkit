@@ -49,6 +49,22 @@ param(
     [Parameter()]
     [switch]$HideIntroductionTexts,
     [Parameter()]
+    [switch]$HideMethodsTexts,
+    # Rows with fewer than this many events are flagged with a footnote
+    # indicating statistical instability. Based on the relative standard
+    # error of the Poisson distribution (1/sqrt(n)):
+    #   n=10 -> 31.6%  n=16 -> 25.0%  n=20 -> 22.4%
+    # Default 16 aligns with the 25% threshold recommended by the
+    # Washington State Department of Health for flagging unstable rates.
+    # Source: https://doh.wa.gov/sites/default/files/legacy/Documents/1500/SmallNumbers.pdf
+    [Parameter()]
+    [ValidateRange(1, 100)]
+    [int]$SparseDataThreshold,
+    [Parameter()]
+    [switch]$HideConfidenceIntervals,
+    [Parameter()]
+    [switch]$JsonReport,
+    [Parameter()]
     [switch]$Quiet,
 
     [Parameter(ParameterSetName='Online')]
@@ -79,7 +95,8 @@ param(
         'InfectiousAgentDetectionRates',
         'ResistanceTestRates',
         'RiskDensityRates',
-        'SurgicalProcedureRates'
+        'SurgicalProcedureRates',
+        'SecondaryBloodstreamInfectionRates'
     )]
     [string[]]$IncludeElements = @(
         'PatientPopulation',
@@ -92,13 +109,20 @@ param(
         'IncidenceDensityRates',
         'DeviceAssociatedRates',
         'AgentPerInfectionRates',
+        'AntibioticResistanceRates',
         'InfectiousAgentDetectionRates',
+        'ResistanceTestRates',
         'RiskDensityRates',
-        'SurgicalProcedureRates'
-    )
+        'SurgicalProcedureRates',
+        'SecondaryBloodstreamInfectionRates'
+    ),
+    # Elements to remove from the default IncludeElements list.
+    # Processed after IncludeElements: the effective set is IncludeElements minus ExcludeElements.
+    [Parameter()]
+    [string[]]$ExcludeElements = @()
 )
 
-. "$PSScriptRoot/NeoipcReportHelpers.ps1"
+Import-Module (Join-Path $PSScriptRoot 'modules' 'NeoIPC-Tools') -Force -Verbose:$false
 
 $isDataFileMode = $PSCmdlet.ParameterSetName -eq 'DataFile'
 
@@ -118,12 +142,16 @@ $repoRoot = Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..')
 $reportDir = Resolve-Path -LiteralPath (Join-Path $repoRoot 'reports/Reference-Report')
 $outputDirPath = Resolve-Path -LiteralPath $OutputDir -ErrorAction SilentlyContinue
 if (-not $outputDirPath) {
-    $outputDirPath = (New-Item -ItemType Directory -Path $OutputDir -Force).FullName
+    # Resolve to absolute path without requiring the directory to exist.
+    # New-Item respects -WhatIf and won't create it during dry runs, so
+    # Resolve-Path would fail. The directory is created on first write by
+    # Set-Content / ConvertTo-Json inside the build report function.
+    $outputDirPath = [System.IO.Path]::GetFullPath($OutputDir)
 } else {
     $outputDirPath = $outputDirPath.Path
 }
 
-$buildReportPath = Join-Path $outputDirPath "$scriptTimestamp.reference-report-build.json"
+$buildReportPath = Join-Path $outputDirPath "${scriptTimestamp}_NeoIPC-Surveillance-Reference-Report-Build.json"
 
 $quartoCmd = Get-Command -Name quarto -ErrorAction SilentlyContinue
 if (-not $quartoCmd) {
@@ -148,24 +176,9 @@ $locales = $Locales | ForEach-Object { $_ -split ',' } |
     Where-Object { $_ } |
     Select-Object -Unique
 
-$localeMap = @{}
-foreach ($locale in @('en','de','es','et','gr','it','fr','af','tr','ne')) {
-    if ($locale -eq 'en') {
-        $localeMap[$locale] = @{ Qmd = 'Reference-Report.qmd'; Profile = 'en' }
-    } else {
-        $localeMap[$locale] = @{ Qmd = "Reference-Report.$locale.qmd"; Profile = $locale }
-    }
-}
-
+# Validate locale inputs and resolve QMD files
 foreach ($locale in $locales) {
-    $qmdPath = Join-Path $reportDir $localeMap[$locale].Qmd
-    if (-not (Test-Path -LiteralPath $qmdPath)) {
-        throw "Missing QMD for locale '$locale': $qmdPath"
-    }
-    $profilePath = Join-Path $reportDir "_quarto-$($localeMap[$locale].Profile).yml"
-    if (-not (Test-Path -LiteralPath $profilePath)) {
-        throw "Missing Quarto profile for locale '$locale': $profilePath"
-    }
+    $null = Resolve-NeoipcLocaleQmd -ReportDir $reportDir -BaseName 'Reference-Report' -Locale $locale
 }
 
 $wantsJson = $formats -contains 'json'
@@ -193,9 +206,9 @@ if ($isDataFileMode) {
         $needsJson = $true
     }
 
-    $jsonPath = Join-Path $outputDirPath "$scriptTimestamp.Reference-Report.json"
+    $jsonPath = Join-Path $outputDirPath "${scriptTimestamp}_NeoIPC-Surveillance-Reference-Report.json"
     $jsonIntermediate = $needsJson -and (-not $wantsJson)
-    $backupPath = Join-Path $outputDirPath "$scriptTimestamp.Reference-Report.dataset.json.7z"
+    $backupPath = Join-Path $outputDirPath "${scriptTimestamp}_NeoIPC-Surveillance-Reference-Report.dataset.json.7z"
 
     $paramHashSource = [ordered]@{
         reportingPeriodFrom = $ReportingPeriodFrom
@@ -218,38 +231,14 @@ if ($isDataFileMode) {
     ).Replace('-', '').ToLowerInvariant()
 }
 
-$auth = if (-not $isDataFileMode) { Resolve-NeoipcAuth -Token $Token } else { $null }
+$authForEnv = if (-not $isDataFileMode) { Resolve-NeoipcAuth -Token $Token } else { @{ AuthType = 'None' } }
 
-$originalEnv = @{}
-foreach ($name in @(
-    'NEOIPC_DHIS2_TOKEN',
-    'NEOIPC_DHIS2_USER',
-    'NEOIPC_DHIS2_PASSWORD',
-    'NEOIPC_DHIS2_SESSION_ID',
-    'NEOIPC_BACKUP_PASSWORD'
-)) {
-    $originalEnv[$name] = [Environment]::GetEnvironmentVariable($name, 'Process')
-}
+Invoke-WithNeoipcAuth -Auth $authForEnv -ExtraEnvVars @{ 'LC_ALL' = $null; 'NEOIPC_BACKUP_PASSWORD' = $null } -ScriptBlock {
 
-try {
-if (-not $isDataFileMode) {
-    # Clear all auth env vars, then set only the resolved ones
-    foreach ($name in @('NEOIPC_DHIS2_TOKEN', 'NEOIPC_DHIS2_USER',
-                        'NEOIPC_DHIS2_PASSWORD', 'NEOIPC_DHIS2_SESSION_ID')) {
-        [Environment]::SetEnvironmentVariable($name, $null, 'Process')
-    }
-    if ($auth.AuthType -eq 'Token') {
-        $env:NEOIPC_DHIS2_TOKEN = $auth.Token
-    } elseif ($auth.AuthType -eq 'Basic') {
-        $env:NEOIPC_DHIS2_USER = $auth.Username
-        $env:NEOIPC_DHIS2_PASSWORD = Get-NeoipcAuthPassword -Auth $auth
-    }
-
-    if ($BackupDataset -and [string]::IsNullOrWhiteSpace($env:NEOIPC_BACKUP_PASSWORD)) {
-        $secureBackupPassword = Read-Host -Prompt 'Backup password' -AsSecureString
-        $env:NEOIPC_BACKUP_PASSWORD =
-            [System.Net.NetworkCredential]::new('', $secureBackupPassword).Password
-    }
+if (-not $isDataFileMode -and $BackupDataset -and [string]::IsNullOrWhiteSpace($env:NEOIPC_BACKUP_PASSWORD)) {
+    $secureBackupPassword = Read-Host -Prompt 'Backup password' -AsSecureString
+    $env:NEOIPC_BACKUP_PASSWORD =
+        [System.Net.NetworkCredential]::new('', $secureBackupPassword).Password
 }
 
 $commonParams = @{}
@@ -264,12 +253,14 @@ if ($ValidationExceptionFile) { $commonParams.validationExceptionFile = $Validat
 $commonParams.testUnitFilter = (-not $IncludeTestUnits)
 $commonParams.defaultPatientFilter = (-not $IncludeNonCorePatients)
 if ($HideIntroductionTexts.IsPresent) { $commonParams['includeIntroductionTexts'] = 'false' }
+if ($HideMethodsTexts.IsPresent) { $commonParams['includeMethodsTexts'] = 'false' }
+if ($SparseDataThreshold) { $commonParams['sparseDataThreshold'] = $SparseDataThreshold }
+if ($HideConfidenceIntervals.IsPresent) { $commonParams['includeConfidenceIntervals'] = 'false' }
 
 # Map user-friendly element names to internal Quarto metadata keys.
 # Each element can map to multiple keys (e.g. a section includes its text,
 # figures and tables together).
 $elementMapping = @{
-    'Header'                            = @('includeHeader')
     'PatientPopulation'                 = @('includeTextPatientPopulation',
                                             'includeBirthWeightFigure',
                                             'includeGestationalAgeFigure')
@@ -296,10 +287,14 @@ $elementMapping = @{
     'SecondaryBloodstreamInfectionRates' = @('includeSecondaryBsiRateTable')
 }
 
+# Apply exclusions: remove ExcludeElements from the effective IncludeElements list
+if ($ExcludeElements.Count -gt 0) {
+    $IncludeElements = @($IncludeElements | Where-Object { $_ -notin $ExcludeElements })
+}
+
 # Convert user-friendly array to Quarto boolean parameters.
 # Collect all metadata keys that should be true, then set everything else false.
-# Header is always included — it provides essential context for all other sections
-$commonParams['includeHeader'] = $true
+# Header is always included (unconditional in _content.qmd)
 
 $enabledKeys = [System.Collections.Generic.HashSet[string]]::new()
 foreach ($element in $IncludeElements) {
@@ -319,6 +314,7 @@ foreach ($mapping in $elementMapping.GetEnumerator()) {
 
 $errors = @()
 $outputFiles = @()
+$buildCompleted = $false
 $startedAt = (Get-Date -AsUTC).ToString('o')
 $totalSteps = 0
 $completedSteps = 0
@@ -348,15 +344,9 @@ try {
             if ($Dhis2Hostname) { $rArgs += @('--host', $Dhis2Hostname) }
             if ($null -ne $Dhis2Port) { $rArgs += @('--port', $Dhis2Port) }
             if ($Dhis2Path) { $rArgs += @('--path', $Dhis2Path) }
-            & $rscriptCmd @rArgs 2>&1 | ForEach-Object {
-                $s = "$_"
-                if ($s -eq 'System.Management.Automation.RemoteException') { $s = '' }
-                if ($s -match '^(Error|Fehler)') { Write-Error -Message $s }
-                elseif ($s -match 'WARNING') { Write-Warning $s }
-                else { Write-Verbose $s }
-            }
-            if ($LASTEXITCODE -ne 0) {
-                throw "Generate-ReferenceData.R failed with exit code $LASTEXITCODE."
+            $rResult = Invoke-Rscript -Arguments $rArgs -Command $rscriptCmd -Description "Generate-ReferenceData.R"
+            if ($rResult.Status -eq 'Error') {
+                throw "Generate-ReferenceData.R failed (exit code $($rResult.ExitCode))."
             }
             if (-not $jsonIntermediate) {
                 $outputFiles += $jsonPath
@@ -382,30 +372,38 @@ try {
             $quartoArgsCommon += @('--log-level', 'error')
         }
     }
-    $outputDirRelative = Resolve-Path -LiteralPath $outputDirPath -Relative -RelativeBasePath $reportDir
+    $outputDirRelative = [System.IO.Path]::GetRelativePath($reportDir, $outputDirPath)
     $quartoArgsCommon += @('--output-dir', $outputDirRelative)
 
     Push-Location -LiteralPath $reportDir
     try {
         foreach ($locale in $locales) {
-            $qmd = $localeMap[$locale].Qmd
-            $profileName = $localeMap[$locale].Profile
+            $localeParts = Split-NeoipcLocale -Locale $locale
+            $qmdPath = Resolve-NeoipcLocaleQmd -ReportDir $reportDir -BaseName 'Reference-Report' -Locale $locale
+            $qmd = [System.IO.Path]::GetFileName($qmdPath)
+            $profileName = $localeParts.Language
+
+            # Set LC_ALL so R picks up the full locale (territory-specific resources)
+            if ($localeParts.Territory) {
+                $env:LC_ALL = "${locale}.UTF-8"
+            } else {
+                # Let the QMD file set its own default LC_ALL
+                [Environment]::SetEnvironmentVariable('LC_ALL', $null, 'Process')
+            }
+
             foreach ($format in $renderFormats) {
                 $completedSteps++
                 $percentComplete = if ($totalSteps -gt 0) { [int](100 * $completedSteps / $totalSteps) } else { 0 }
                 Write-Progress -Activity 'Reference Report Build' `
                     -Status "Rendering $format for $locale" -PercentComplete $percentComplete
-                $outFileName = "$scriptTimestamp.Reference-Report.$locale.$format"
+                $outFileName = "${scriptTimestamp}_NeoIPC-Surveillance-Reference-Report.${locale}.${format}"
                 $outFile = Join-Path $outputDirPath $outFileName
                 $quartoArgs = @('render', $qmd, '--profile', $profileName, '--to', $format, '-o', $outFileName)
+                # All parameters via -P (R reads params$, conditional
+                # blocks use cat() + when-meta="alwaysTrue" wrappers)
                 foreach ($kvp in $commonParams.GetEnumerator()) {
                     if ($null -ne $kvp.Value -and '' -ne $kvp.Value) {
-                        # Use -M for include* metadata flags, -P for other params
-                        if ($kvp.Key -like 'include*') {
-                            $quartoArgs += @('-M', "$($kvp.Key):$($kvp.Value)")
-                        } else {
-                            $quartoArgs += @('-P', "$($kvp.Key):$($kvp.Value)")
-                        }
+                        $quartoArgs += @('-P', "$($kvp.Key):$($kvp.Value)")
                     }
                 }
                 if ($needsJson -or $isDataFileMode) {
@@ -434,21 +432,24 @@ try {
     finally {
         Pop-Location
     }
+
+    $buildCompleted = $true
 }
 catch {
     $errors += $_.Exception.Message
 }
 finally {
-    $completedAt = (Get-Date -AsUTC).ToString('o')
-    $status = if ($errors.Count -gt 0) { 'failed' } else { 'success' }
-    $buildReport = [ordered]@{
-        name = 'Reference Report Build'
-        status = $status
-        startedAt = $startedAt
-        completedAt = $completedAt
+    if ($jsonIntermediate -and $errors.Count -eq 0 -and (Test-Path -LiteralPath $jsonPath)) {
+        if ($PSCmdlet.ShouldProcess($jsonPath, 'Remove intermediate JSON')) {
+            Remove-Item -LiteralPath $jsonPath -Force
+        }
+    }
+
+    Write-Progress -Activity 'Reference Report Build' -Completed
+
+    $extraFields = [ordered]@{
         timestamp = $scriptTimestamp
         outputDir = $outputDirPath
-        outputs = $outputFiles | Sort-Object -Unique
         json = [ordered]@{
             path = if ($needsJson) { $jsonPath } else { $null }
             requested = $wantsJson
@@ -462,45 +463,15 @@ finally {
         formats = $formats
         parameterHash = $paramHash
         parameters = $paramHashSource
-        errors = $errors
     }
-    $buildReport | ConvertTo-Json -Depth 100 | Set-Content -LiteralPath $buildReportPath
-    Write-Verbose "Generated output: $buildReportPath"
+    $reportPath = if ($JsonReport) { $buildReportPath } else { $null }
+    $status = Write-NeoipcBuildReport -Name 'Reference Report Build' `
+        -Errors $errors -OutputFiles $outputFiles -BuildCompleted $buildCompleted `
+        -StartedAt $startedAt -BuildReportPath $reportPath -ExtraFields $extraFields
 
-    if ($jsonIntermediate -and $errors.Count -eq 0 -and (Test-Path -LiteralPath $jsonPath)) {
-        if ($PSCmdlet.ShouldProcess($jsonPath, 'Remove intermediate JSON')) {
-            Remove-Item -LiteralPath $jsonPath -Force
-        }
-    }
-
-    Write-Progress -Activity 'Reference Report Build' -Completed
-
-    if ($status -eq 'failed') {
-        Write-Host "Build status: $status" -ForegroundColor Red
-    } else {
-        Write-Host "Build status: $status" -ForegroundColor Green
-    }
-    Write-Host "Outputs:"
-    $buildReport.outputs | ForEach-Object { Write-Host "  $_" }
-    Write-Host "Build report: $buildReportPath"
-
-    if ($status -eq 'failed') {
+    if ($status -ne 'success') {
         exit 1
     }
 }
-}
-finally {
-    # Guaranteed env var restore — even if the inner finally or exit throws
-    foreach ($name in $originalEnv.Keys) {
-        $originalValue = $originalEnv[$name]
-        if ([string]::IsNullOrEmpty($originalValue)) {
-            [Environment]::SetEnvironmentVariable($name, $null, 'Process')
-        } else {
-            [Environment]::SetEnvironmentVariable(
-                $name,
-                $originalValue,
-                'Process'
-            )
-        }
-    }
-}
+
+} # end Invoke-WithNeoipcAuth

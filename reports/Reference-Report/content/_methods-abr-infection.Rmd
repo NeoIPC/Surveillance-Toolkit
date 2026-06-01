@@ -1,0 +1,1 @@
+`r paste(sR$methods$resistant_pathogens, if (params$includeAntibioticResistanceTestRateTable) sR$methods$resistant_pathogens_ast_ref)`

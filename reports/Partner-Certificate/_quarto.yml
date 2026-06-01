@@ -26,7 +26,7 @@ format:
       - left=25mm
       - right=25mm
       - heightrounded
-    include-in-header: 
+    include-in-header:
       text: |
         \usepackage{microtype}
         \usepackage[absolute]{textpos}

@@ -6,20 +6,27 @@ This file documents the Surveillance-Toolkit repository. If this repository is c
 
 ## Guardrails
 
-The first seven rules below are **universal** — mirrored in every NeoIPC repository's instruction files. If you add or change a universal guardrail here, add `<!-- SYNC: propagate to all repos -->` next to it so the change gets propagated when the workspace is next used. The last rule is specific to this repository.
+The first ten rules below (those without a *(repo-specific)* tag) are **universal** — mirrored in every NeoIPC repository's instruction files. If you add or change a universal guardrail here, add `<!-- SYNC: propagate to all repos -->` next to it so the change gets propagated when the workspace is next used. The remaining rules are specific to this repository.
 
-- **Never** put personal names or other identifying information in source code (comments, strings, commit messages, etc.).
-- **Never** read, write, or access files under `secrets/`, `data/local/`, or `.env`.
+- **Never** put personal names or other identifying information in source code (comments, strings, commit messages, etc.), except in copyright statements and file-header attribution lines (e.g. `Author:`, `@author`, `Copyright (c)` fields).
+- **Never** read, write, or access files under `secrets/`, `data/local/`, or `.env`. This includes listing, globbing, searching, or interacting with these paths in any way — not just reading file contents. If the user provides a path under these directories, use it as-is without exploring the directory.
 - **Never** push directly to `main` or `master` on this repository.
 - **Never** make HTTP calls to the DHIS2 API or attempt to read JSON files returned from the DHIS2 API. These files contain sensitive surveillance data and are not needed for code-level tasks.
 - **Never** put absolute local paths into files that get checked in. Use relative paths or generic placeholders. Local checkout paths are developer-specific and meaningless to others.
 - Treat infection definitions in this repository as normative. When a conflict exists between code and definitions, **fix the code**, not the definitions.
+- **Never** invent or paraphrase clinical definitions, thresholds, or measurement criteria. Always look up the normative text in `doc/protocol/` (or the relevant definition file) before writing or modifying footnotes, tooltips, or explanatory text that describes how a metric is defined or measured. If no protocol definition exists for the concept, flag it rather than guessing. *(repo-specific)*
 - **Never** introduce non-permissive dependencies (fonts, libraries, templates). All fonts must be SIL OFL or equivalent.
 - **Always** keep `CLAUDE.md` and `.github/copilot-instructions.md` in sync within this repository. When you modify one, apply the same change to the other.
+- **Always** push back when evidence contradicts the user's suggestion or implied assumption. Do not defer to the user's position when authoritative sources (AMA Manual of Style, protocol definitions, language specifications, etc.) say otherwise. Present the evidence clearly and let the user decide.
+- **Always** consider both personal data protection (GDPR) and organizational/reputational concerns when making decisions about data shared between partners, published in reports, or exposed through APIs. Small cell counts in shared reports can expose which departments had specific rare pathogens or resistance patterns.
+- **Never** add an unconditional reference (formal `@tbl-*`/`@fig-*` or textual) to content that is conditionally included. If a table, figure, section, or any content depends on a configuration flag, all references to it must be conditional on the same flag. This applies to all conditionally present content: tables, figures, sections, reference data, confidence intervals, and any other content whose presence depends on configuration. When a text contains a cross-reference to conditional content, split it into a base string (always shown) and a conditional suffix (shown only when the target is present), provide two complete variants, or use a glue placeholder that resolves to the cross-reference when the target is present and to empty when it is not. *(repo-specific)*
 - Do not use the R `argparse` package (it requires Python). Use shared `parse-args.R` or JSON parameter files instead. *(repo-specific)*
 - **Never** use single letters or bare numbers as YAML keys in string resource files. po4a's YAML module fails to extract some single-letter keys (e.g., `u`), and short keys are not expressive. Use descriptive names instead (e.g., `female`/`male`/`undetermined` instead of `f`/`m`/`u`). When a YAML key must map to a short code from DHIS2, add a mapping in the R code. *(repo-specific)*
 - String values must not be duplicated across YAML layers (glossary, common, report-specific) or across report-specific files. If two reports share a string, move it to `common.yaml`. Run `scripts/Test-StringResourceLayers.ps1` to check before committing changes to string resource files. *(repo-specific)*
-- The **AMA Manual of Style** is the reference for human-language style questions (capitalisation, punctuation, terminology). The glossary may carry multiple casing variants of a term (e.g., lowercase for running text, title case for headings) — use whichever fits the context. *(repo-specific)*
+- The **AMA Manual of Style** is the reference for human-language style questions (capitalisation, punctuation, terminology). The glossary may carry multiple casing variants of a term (e.g., lowercase for running text, title case for headings) — use whichever fits the context. Disease names are common nouns and are lowercase in running text (e.g., "necrotising enterocolitis", "pneumonia") unless they contain a proper noun (e.g., "Crohn's disease"). The sentence-case glossary variants (`_sc`) exist for labels and headings, not because the terms are proper nouns. *(repo-specific)*
+- **Never** use imperative voice in Partner Report string resources (outlier interpretation, callout text, or any user-facing prose in `_sR.yaml`). The report cannot know the full clinical context; use suggestive phrasing ("this may indicate…", "…may warrant attention") instead of directives ("Review…", "Confirm…", "Read this…"). *(repo-specific)*
+- **Always** use table-visible labels in outlier interpretation strings. The terms in callout prose must match the row labels shown in the corresponding table so readers can identify the referenced metric — but apply running-text casing, not label casing. For example, use "pneumonia" (from the Table 1 row label "Pneumonia") not "HAP", and "CVC-associated sepsis/BSI" (from the Table 2 row label) not "CVC-associated infection rate". When the same metric ID appears in multiple tables with different display labels (e.g., "CVC" in Table 2 vs Table 8), the `localize_metric_name()` function uses `table_name` context to resolve the correct label. *(repo-specific)*
+- **Never** edit files that are generated by po4a or by `scripts/update-glossary-po.py`. These files are overwritten on every pipeline run. Generated files include: `common.<lang>.yaml`, `content.<lang>/` directories, `_quarto-<lang>.yml`, `Validation-Report/<lang>/` directories, `doc/protocol/<lang>/`, `glossary.<lang>.yaml`, and any other file that appears as a translation target in `po/*.po4a.cfg`. **Never** edit `.pot` files either — they are regenerated by po4a / the glossary script. When changing translatable content, follow this order: **(1)** edit the English source file (e.g., `common.yaml`, `content/_sR.yaml`, `glossary.yaml`), **(2)** run `scripts/Invoke-Localization.ps1 -Update` (or the appropriate po4a / `scripts/update-glossary-po.py` command) so the pipeline regenerates the `.pot` and updates the `msgid` entries in the `.po` files, **(3)** only then edit `msgstr` values in `po/<scope>.<lang>.po` (or use Weblate) to provide or fix translations against the now-current `msgid`. Editing `.po` files before step 2 risks writing translations against stale `msgid` strings that po4a will mark fuzzy or discard on the next run. *(repo-specific)*
 
 ---
 
@@ -137,23 +144,29 @@ Translatable content is managed via [po4a](https://po4a.org/) with Weblate for c
 
 po4a is a Perl tool that is **incompatible with native Windows**. On Windows, always run it via **WSL**.
 
-A recent version is required for all features. Use a git checkout of the master branch:
+A recent version is required for all features. The repository includes po4a as a git submodule at `tools/po4a/`. Initialize it with:
 
 ```bash
-# Typical setup (in WSL or Linux/macOS)
-cd ~/dev
-git clone https://github.com/mquinson/po4a.git
+git submodule update --init tools/po4a
 ```
 
-**Invocation**: The dev checkout must be called with `PERLLIB` set so it finds its own libraries (not system-installed ones):
+**Preferred interface**: Use `scripts/Invoke-Localization.ps1` instead of invoking po4a directly. It handles WSL, path resolution, and the full pipeline automatically:
+
+```powershell
+./scripts/Invoke-Localization.ps1 -Update                  # full pipeline (all configs + glossary)
+./scripts/Invoke-Localization.ps1 -Update -Config reports   # po4a for reports only
+./scripts/Invoke-Localization.ps1 -Test                     # read-only string layer check
+```
+
+**Manual invocation** (if needed): The submodule must be called with `PERLLIB` set so it finds its own libraries:
 
 ```bash
 # From WSL bash (cd to the Surveillance-Toolkit repo root first):
-PERLLIB=~/dev/po4a/lib ~/dev/po4a/po4a <config-file>
-PERLLIB=~/dev/po4a/lib ~/dev/po4a/po4a-gettextize <args>
+PERLLIB=tools/po4a/lib tools/po4a/po4a <config-file>
+PERLLIB=tools/po4a/lib tools/po4a/po4a-gettextize <args>
 
-# From PowerShell on Windows (adapt the path to your local checkout):
-wsl -e bash -c "cd $(wsl wslpath -a .) && PERLLIB=~/dev/po4a/lib ~/dev/po4a/po4a po/reports.po4a.cfg"
+# From PowerShell on Windows:
+wsl -e bash -c "cd $(wsl wslpath -a .) && PERLLIB=tools/po4a/lib tools/po4a/po4a po/reports.po4a.cfg"
 ```
 
 ### po4a configs (in `po/`)
@@ -163,17 +176,19 @@ wsl -e bash -c "cd $(wsl wslpath -a .) && PERLLIB=~/dev/po4a/lib ~/dev/po4a/po4a
 | `reports.po4a.cfg` | Partner-Report, Reference-Report, Partner-Certificate, Validation-Report |
 | `documentation.po4a.cfg` | Protocol AsciiDoc files |
 | `infectious_agents.po4a.cfg` | Pathogen taxonomy |
+| `scripts/po4a.cfg` | PowerShell message strings |
 
 **Note:** The glossary (`glossary.yaml`) is **not** managed by po4a. It uses a custom script (`scripts/update-glossary-po.py`) that generates monolingual gettext PO with `msgctxt` for Weblate variant grouping and plural support. See the helper scripts table below.
 
 ### Target languages
 
-af, de, es, et, fr, gr, it, ne, tr (9 languages)
+af, de, el, es, et, fr, it, ne, tr (9 languages)
 
 ### Helper scripts (in `scripts/`)
 
 | Script | Purpose |
 |--------|---------|
+| `Invoke-Localization.ps1` | Unified localization wrapper with tab completion. `-Update` runs the full pipeline (fix layers → YAML keys → po4a → glossary). `-Test` runs read-only validation. See `-Config`, `-Force`, `-DryRun` switches. |
 | `Update-Po4aYamlKeys.ps1` | Auto-extract YAML keys for po4a config (run after changing YAML structure) |
 | `Test-PoPlaceholders.ps1` | Validate placeholder consistency between source and translations |
 | `update-glossary-po.py` | Convert `glossary.yaml` to/from monolingual gettext PO (replaces po4a for glossary). Requires `ruamel.yaml` and `polib`. Run after editing `glossary.yaml` to regenerate `.pot` and merge `.po` files. Use `--generate-yaml` to produce localized `glossary.<lang>.yaml`. |
@@ -190,7 +205,7 @@ When adding a new file to po4a that already has manual translations:
 3. Add the file entry to the relevant `.po4a.cfg` (if not already present).
 4. Use `po4a-gettextize` to import the existing translation into a **temporary** `.po` file:
    ```bash
-   PERLLIB=~/dev/po4a/lib ~/dev/po4a/po4a-gettextize -f <format> -m <master> -l <translation> -p /tmp/<report>_<lang>.po
+   PERLLIB=tools/po4a/lib tools/po4a/po4a-gettextize -f <format> -m <master> -l <translation> -p /tmp/<report>_<lang>.po
    ```
 5. **Remove fuzzy flags** from the gettextize output. `po4a-gettextize` marks most translations as `fuzzy` (even correct ones), and po4a ignores fuzzy translations when generating output. Strip them before merging:
    ```bash
@@ -200,7 +215,7 @@ When adding a new file to po4a that already has manual translations:
    ```bash
    msgcat --use-first /tmp/<report>_<lang>.po po/reports.<lang>.po -o po/reports.<lang>.po
    ```
-7. Verify with a round-trip: `PERLLIB=~/dev/po4a/lib ~/dev/po4a/po4a <config-file>` — check that the generated files match the backup.
+7. Verify with a round-trip: `PERLLIB=tools/po4a/lib tools/po4a/po4a <config-file>` — check that the generated files match the backup.
 
 **Important**: Run steps 4–6 in a **single WSL session** (one `wsl -e bash -c '...'` invocation). Temp files in `/tmp` do not persist across separate WSL invocations on Windows.
 

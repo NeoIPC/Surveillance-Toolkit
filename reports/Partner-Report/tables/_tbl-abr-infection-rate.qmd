@@ -1,11 +1,34 @@
 #### `{r} sR$headings$resistant_pathogens`
 
-::: {.content-visible when-meta="includeIntroductionTexts"}
 ```{r}
 #| output: asis
-include_localised("_tbl-intro-abr-infection.qmd")
+.show(params$includeIntroductionTexts)
 ```
-:::
+
+```{r}
+#| output: asis
+include_localised("_tbl-intro-abr-infection.Rmd")
+```
+
+```{r}
+#| output: asis
+.end()
+```
+
+```{r}
+#| output: asis
+.show(params$includeMethodsTexts)
+```
+
+```{r}
+#| output: asis
+include_localised("_methods-abr-infection.Rmd")
+```
+
+```{r}
+#| output: asis
+.end()
+```
 
 ```{r}
 #| output: asis
@@ -24,8 +47,11 @@ if (!is.null(benchmark_data$abr_infection_rate_table) &&
   has_reference <- "pooled_ref" %in% names(benchmark_data$abr_infection_rate_table)
   check_outlier_interpretation <- has_reference
   
-  tbl <- benchmark_data$abr_infection_rate_table |>
-    dplyr::select(-tidyselect::any_of("n_ref")) |>
+  tbl_data <- benchmark_data$abr_infection_rate_table
+  cw <- compute_col_widths(tbl_data, stub_min = 25, has_reference = has_reference)
+
+  tbl <- tbl_data |>
+    dplyr::select(-tidyselect::any_of(c("n_ref", ".ontology_path"))) |>
     dplyr::mutate(
       group = dplyr::if_else(
         stringr::str_detect(group, "spp."),
@@ -38,7 +64,22 @@ if (!is.null(benchmark_data$abr_infection_rate_table) &&
       !!sR$table_headers$pooled := tidyselect::any_of("pooled_ref"),
       !!sR$table_headers$q1 := tidyselect::any_of("q1_ref"),
       !!sR$table_headers$q2 := tidyselect::any_of("q2_ref"),
-      !!sR$table_headers$q3 := tidyselect::any_of("q3_ref")) |>
+      !!sR$table_headers$q3 := tidyselect::any_of("q3_ref"))
+
+  ci_cols_to_drop <- character(0)
+  if (!include_rate_ci)
+    ci_cols_to_drop <- c(ci_cols_to_drop, "ci_lower_own", "ci_upper_own")
+  if (!include_pooled_ci)
+    ci_cols_to_drop <- c(ci_cols_to_drop, "ci_lower_ref", "ci_upper_ref")
+  if (!include_quartile_ci)
+    ci_cols_to_drop <- c(ci_cols_to_drop,
+      "q1_ci_lower_ref", "q1_ci_upper_ref",
+      "q2_ci_lower_ref", "q2_ci_upper_ref",
+      "q3_ci_lower_ref", "q3_ci_upper_ref")
+  if (length(ci_cols_to_drop) > 0)
+    tbl <- tbl |> dplyr::select(-tidyselect::any_of(ci_cols_to_drop))
+
+  tbl <- tbl |>
     dplyr::mutate(
       abr = dplyr::case_match(
         .data$abr,
@@ -55,19 +96,11 @@ if (!is.null(benchmark_data$abr_infection_rate_table) &&
       latex.header_repeat = TRUE,
       latex.use_longtable = TRUE,
       table.width = pct(100),
-      table.font.size = 13,
+      table.font.size = cw$font_size,
       footnotes.marks = "extended"
     ) |>
-    gt::tab_options(
-      table.font.size = 15
-    ) |>
     fmt_number(
-      columns = c(
-        tidyselect::any_of(sR$table_headers$rate),
-        tidyselect::any_of(sR$table_headers$pooled),
-        tidyselect::any_of(sR$table_headers$q1),
-        tidyselect::any_of(sR$table_headers$q2),
-        tidyselect::any_of(sR$table_headers$q3)),
+      columns = !(tidyselect::any_of(sR$table_headers$n) | tidyselect::matches("^(group|level|taxon|abr)$")),
       decimals = 1,
       sep_mark = sR$digit_group_separator,
       min_sep_threshold = 2,
@@ -167,23 +200,66 @@ if (!is.null(benchmark_data$abr_infection_rate_table) &&
         sR$table_headers$rate),
       locations = cells_column_labels(columns = sR$table_headers$rate)
     )
-  
+
+  if (include_rate_ci && "ci_lower_own" %in% colnames(tbl$`_data`)) {
+    tbl <- tbl |>
+      gt::cols_merge(
+        columns = c(sR$table_headers$rate, "ci_lower_own", "ci_upper_own"),
+        pattern = "{1} ({2}\u2013{3})",
+        rows = !is.na(tbl_data$pooled_own)
+      )
+  }
+  if (include_pooled_ci && "ci_lower_ref" %in% colnames(tbl$`_data`)) {
+    tbl <- tbl |>
+      gt::cols_merge(
+        columns = c(sR$table_headers$pooled, "ci_lower_ref", "ci_upper_ref"),
+        pattern = "{1} ({2}\u2013{3})",
+        rows = !is.na(tbl_data$pooled_ref)
+      )
+  }
+  if ("q1_ci_lower_ref" %in% colnames(tbl$`_data`)) {
+    if (include_quartile_ci) {
+      has_boot <- !is.na(tbl$`_data`[["q1_ci_lower_ref"]])
+      if (auto_quartile_ci)
+        has_boot <- has_boot & !is.na(tbl$`_data`[[sR$table_headers$q1]])
+      tbl <- tbl |>
+        gt::cols_merge(
+          columns = c(sR$table_headers$q1, "q1_ci_lower_ref", "q1_ci_upper_ref"),
+          pattern = "{1} ({2}\u2013{3})",
+          rows = has_boot
+        ) |>
+        gt::cols_merge(
+          columns = c(sR$table_headers$q2, "q2_ci_lower_ref", "q2_ci_upper_ref"),
+          pattern = "{1} ({2}\u2013{3})",
+          rows = has_boot
+        ) |>
+        gt::cols_merge(
+          columns = c(sR$table_headers$q3, "q3_ci_lower_ref", "q3_ci_upper_ref"),
+          pattern = "{1} ({2}\u2013{3})",
+          rows = has_boot
+        )
+    } else {
+      tbl <- tbl |> gt::cols_hide(columns = tidyselect::any_of(c(
+        "q1_ci_lower_ref", "q1_ci_upper_ref",
+        "q2_ci_lower_ref", "q2_ci_upper_ref",
+        "q3_ci_lower_ref", "q3_ci_upper_ref")))
+    }
+  }
+
   if (has_reference) {
     tbl <- tbl |>
       cols_width(
-        stub() ~ pct(52),
-        sR$table_headers$n ~ pct(10),
-        sR$table_headers$rate ~ pct(10),
-        sR$table_headers$pooled ~ pct(10),
-        sR$table_headers$q1 ~ pct(6),
-        sR$table_headers$q2 ~ pct(6),
-        sR$table_headers$q3 ~ pct(6)
+        stub() ~ pct(cw$stub),
+        sR$table_headers$n ~ pct(cw$n),
+        sR$table_headers$rate ~ pct(cw$rate),
+        sR$table_headers$pooled ~ pct(cw$pooled),
+        sR$table_headers$q1 ~ pct(cw$q),
+        sR$table_headers$q2 ~ pct(cw$q),
+        sR$table_headers$q3 ~ pct(cw$q)
       ) |>
       tab_spanner(
         label = sR$own_data_label,
-        columns = c(
-          sR$table_headers$n,
-          sR$table_headers$rate),
+        columns = tidyselect::any_of(c(sR$table_headers$n, sR$table_headers$rate)),
         id = "department_data"
       ) |>
       tab_spanner(
@@ -199,30 +275,26 @@ if (!is.null(benchmark_data$abr_infection_rate_table) &&
         footnote = sprintf(
           sR$`tbl-abr-infection-rate`$pooled_footnote,
           sR$table_headers$pooled),
-        locations = cells_column_labels(columns = sR$table_headers$pooled)) |>
-      tab_footnote(
-        footnote = sprintf(
-          sR$`tbl-abr-infection-rate`$quartile_footnote,
-          sR$table_headers$q1,
-          sR$table_headers$q2,
-          sR$table_headers$q3,
-          sprintf("%i%s", 25L, sR$percent_symbol),
-          sprintf("%i%s", 50L, sR$percent_symbol),
-          sprintf("%i%s", 75L, sR$percent_symbol)
-        ),
-        locations = cells_column_labels(columns = c(
-          sR$table_headers$q1,
-          sR$table_headers$q2,
-          sR$table_headers$q3)))
+        locations = cells_column_labels(columns = sR$table_headers$pooled))
   } else {
     tbl <- tbl |>
       cols_width(
-        stub() ~ pct(60),
-        sR$table_headers$n ~ pct(20),
-        sR$table_headers$rate ~ pct(20)
+        stub() ~ pct(cw$stub),
+        sR$table_headers$n ~ pct(cw$n),
+        sR$table_headers$rate ~ pct(cw$rate)
       )
   }
-  
+
+  if (any(tbl_data$n_own < sparse_threshold, na.rm = TRUE)) {
+    sparse_note <- glue::glue(if (include_rate_ci) sR$sparse_data_footnote else sR$sparse_data_footnote_no_ci, threshold = sparse_threshold)
+    tbl <- tbl |>
+      gt::tab_footnote(
+        footnote = sparse_note,
+        locations = cells_body(
+          columns = sR$table_headers$n,
+          rows = tbl_data$n_own < sparse_threshold))
+  }
+
   tbl
 } else {
   no_data_table()
@@ -230,13 +302,33 @@ if (!is.null(benchmark_data$abr_infection_rate_table) &&
 
 ```
 
-::: {.content-visible when-meta="includeOutlierInterpretation"}
+```{r}
+#| output: asis
+# Show explanation when no resistant pathogens were detected
+if (is.null(benchmark_data$abr_infection_rate_table) ||
+    !("n_own" %in% rlang::names2(benchmark_data$abr_infection_rate_table)) ||
+    sum(benchmark_data$abr_infection_rate_table$n_own, na.rm = TRUE) == 0) {
+  note <- sR$`tbl-abr-infection-rate`$no_resistant_pathogens_note
+  ast_enabled <- params$includeAntibioticResistanceTestRateTable
+  if (ast_enabled && !is.null(sR$`tbl-abr-infection-rate`$no_resistant_pathogens_note_ast_ref))
+    note <- paste(note, sR$`tbl-abr-infection-rate`$no_resistant_pathogens_note_ast_ref)
+  cat("\n\n::: {.callout-note}\n")
+  cat(note, "\n")
+  cat(":::\n")
+}
+```
+
+```{r}
+#| output: asis
+.show(params$includeOutlierInterpretation)
+```
+
 ```{r}
 #| output: asis
 if (check_outlier_interpretation) {
-  outliers <- detect_outliers(benchmark_data$abr_infection_rate_table, combine_cols = c("abr", "group"))
-  if (length(outliers$below_q1) > 0 || length(outliers$above_q3) > 0) {
-    grouped <- group_outliers(outliers, "abr_infection_rate_table")
+  states <- metric_registry$abr_infection_rate_table
+  if (has_outliers(states)) {
+    grouped <- group_outliers(states, "abr_infection_rate_table", sR, metric_registry)
     outlier_text <- format_outlier_text(grouped, sR)
     if (nchar(outlier_text) > 0) {
       cat("\n\n::: {.callout-tip}\n")
@@ -248,4 +340,7 @@ if (check_outlier_interpretation) {
 }
 ```
 
-:::
+```{r}
+#| output: asis
+.end()
+```

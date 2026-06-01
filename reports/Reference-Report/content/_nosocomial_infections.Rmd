@@ -1,3 +1,5 @@
-Nosocomial infections represent the primary endpoint of NeoIPC surveillance. In @tbl-incidence-density-rates, the incidence densities of sepsis/BSI, pneumonia and necrotising enterocolitis, as well as the combined endpoint 'severe infection', are displayed. Overall `r dR$numberOfSevereInfections` severe infections were recorded in `r dR$numberOfPatients` infants resulting in an average number of `r dR$averageSevereInfectionsPerPatient` infections per patient.
+Nosocomial infections represent the primary endpoint of NeoIPC surveillance. In`r dR$refIDRTable` the incidence densities of sepsis/BSI, pneumonia and necrotising enterocolitis, as well as the combined endpoint 'severe infection', are displayed. Overall `r dR$numberOfSevereInfections` severe infections were recorded in `r dR$numberOfPatients` infants resulting in an average number of `r dR$averageSevereInfectionsPerPatient` infections per patient.
 
-Device-associated infections can be found in @tbl-device-associated-incidence-density-rates.
+`r sR$benchmarking_guidance`
+
+`r if (nzchar(dR$refDevAssTable)) paste0("Device-associated infections can be found in", dR$refDevAssTable, ".")`

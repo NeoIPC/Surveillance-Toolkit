@@ -1,11 +1,19 @@
 ### `{r} sR$headings$birth_weight_distribution`
 
-::: {.content-visible when-meta="includeIntroductionTexts"}
 ```{r}
 #| output: asis
-include_localised("_fig-intro-birth-weight.qmd")
+.show(params$includeIntroductionTexts)
 ```
-:::
+
+```{r}
+#| output: asis
+include_localised("_fig-intro-birth-weight.Rmd")
+```
+
+```{r}
+#| output: asis
+.end()
+```
 
 ```{r}
 #| label: fig-bw
@@ -146,7 +154,11 @@ if (has_bw) {
 }
 ```
 
-::: {.content-visible when-meta="includeOutlierInterpretation"}
+```{r}
+#| output: asis
+.show(params$includeOutlierInterpretation)
+```
+
 ```{r}
 #| output: asis
 if (check_figure_interpretation) {
@@ -164,4 +176,8 @@ if (check_figure_interpretation) {
   }
 }
 ```
-:::
+
+```{r}
+#| output: asis
+.end()
+```

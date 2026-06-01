@@ -4,8 +4,8 @@ CreatingInfoMsg: "Erstelle die Liste der Infektionserreger für die Sprache „{
 
 FormatInfoMsg: "...im {0}-Format"
 
-ExternalCmdErrorMsg: "Die Ausführung des Befehls ‚{0}‘ wurde mit der folgenden Fehlermeldung beendet:"
+ExternalCmdErrorMsg: "Die Ausführung des Befehls '{0}' wurde mit der folgenden Fehlermeldung beendet:"
 
-ExternalCmdWarningMsg: "Die Ausführung des Befehls ‚{0}‘ führte zu folgender Warnmeldung:"
+ExternalCmdWarningMsg: "Die Ausführung des Befehls '{0}' führte zu folgender Warnmeldung:"
 
 '@

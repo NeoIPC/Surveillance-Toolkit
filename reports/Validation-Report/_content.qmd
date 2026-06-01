@@ -7,7 +7,7 @@
 ```{r Execute validation rules}
 options(knitr.duplicate.label = "allow")
 
-rule_files <- Sys.glob("rules/_rule_[0-9][0-9][0-9][0-9].qmd") |>
+rule_files <- Sys.glob("rules/_rule_[0-9][0-9][0-9][0-9].Rmd") |>
   sort()
 
 for (rule_file in rule_files) {
@@ -33,7 +33,7 @@ if(nrow(problems) < 1)
 
 cat(
   sep = "\n",
-  knitr::knit_child(text = readr::read_file(Sys.glob(paste0(language, "/_problems_intro.qmd"))), quiet = TRUE)
+  knitr::knit_child(text = readr::read_file(Sys.glob(paste0(language, "/_problems_intro.Rmd"))), quiet = TRUE)
 )
 ```
 
@@ -46,7 +46,7 @@ cat(
 # Problem details intro
 cat(
   sep = "\n",
-  knitr::knit_child(text = readr::read_file(Sys.glob(paste0(language, "/_problem_details_intro.qmd"))), quiet = TRUE)
+  knitr::knit_child(text = readr::read_file(Sys.glob(paste0(language, "/_problem_details_intro.Rmd"))), quiet = TRUE)
 )
 
 # Problem details
@@ -58,7 +58,7 @@ sortedDetails <- problem_detail_info |>
       tidyr::unnest_longer(usedDetails),
     dplyr::join_by(id == usedDetails)) |>
   dplyr::arrange(sortOrder) |>
-  dplyr::mutate(filePath = paste0(language, "/_problem_detail_", sprintf("%04d", id), ".qmd")) |>
+  dplyr::mutate(filePath = paste0(language, "/_problem_detail_", sprintf("%04d", id), ".Rmd")) |>
   dplyr::select(filePath, usedSolutions) |>
   dplyr::distinct()
 
@@ -76,7 +76,7 @@ for (problem_detail_file in problem_detail_files) {
 # Solutions intro
 cat(
   sep = "\n",
-  knitr::knit_child(text = readr::read_file(Sys.glob(paste0(language, "/_solutions_intro.qmd"))), quiet = TRUE)
+  knitr::knit_child(text = readr::read_file(Sys.glob(paste0(language, "/_solutions_intro.Rmd"))), quiet = TRUE)
 )
 
 # Solutions
@@ -87,7 +87,7 @@ solution_files <- solution_info |>
       tidyr::unnest_longer(usedSolutions),
     dplyr::join_by(id == usedSolutions)) |>
   dplyr::arrange(sortOrder) |>
-  dplyr::mutate(filePath = paste0(language, "/_solution_", sprintf("%04d", id), ".qmd"), .keep = "none") |>
+  dplyr::mutate(filePath = paste0(language, "/_solution_", sprintf("%04d", id), ".Rmd"), .keep = "none") |>
   dplyr::distinct() |>
   dplyr::pull(filePath) |>
   Sys.glob()

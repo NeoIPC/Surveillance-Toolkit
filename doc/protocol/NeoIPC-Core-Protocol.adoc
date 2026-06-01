@@ -11,7 +11,7 @@ This document is the surveillance protocol for the core module of the NeoIPC sur
 It is part of a toolkit for the surveillance of healthcare-associated infections (HAI) in neonatology that we developed within the NeoIPC project.
 If you want to perform surveillance of early-onset infections or of healthcare-associated infections in infants with a birth weight above 1500 g and a gestational age greater than 32 weeks, the toolkit provides additional methods that are covered in separate protocols.
 
-This protocol provides methodological reference and support for HAI surveillance in neonatal units or for those planning to develop an HAI surveillance programme.
+This protocol provides methodological reference and support for HAI surveillance in neonatal departments or for those planning to develop an HAI surveillance programme.
 By adhering to the methods and definitions we specify here, you can ensure that the surveillance data you generate is comparable to the reference data in the NeoIPC project, even if you are not actively participating in the project.
 
 [#introduction-what-is-the-neo-ipc-project]
@@ -31,7 +31,7 @@ This project has received funding from the European Union’s Horizon 2020 resea
 [#introduction-background]
 === Background
 Worldwide, neonates and especially preterm infants are among the patient groups with the highest incidence of nosocomial infections.
-Some of these infections can be prevented by infection-prevention measures, which must be implemented in each individual neonatal unit and adapted to the specific infection risks of the patients.
+Some of these infections can be prevented by infection-prevention measures, which must be implemented in each individual neonatal department and adapted to the specific infection risks of the patients.
 In many hospitals in Europe and worldwide, healthcare professionals do not have good data to assess the burden of healthcare-associated infections and the risk factors contributing to their development or to evaluate the effectiveness of infection prevention interventions.
 Support for surveillance of healthcare-associated infections in neonates or reference data for benchmarking is not available in most countries.
 Where national and supranational data collection systems exist, they frequently have a broad approach that is limited in its ability to assess the situation with respect to infection prevention and control.
@@ -47,7 +47,7 @@ If you want to keep things running effectively over an extended period and you h
 
 For long-term success in surveillance of nosocomial infections, collecting data and producing reliable and comparable information in your department over a long period of time will be crucial.
 In order to facilitate the collection of such data, you may want to contribute data to the NeoIPC surveillance network.
-This data could be used to generate reports and benchmark your neonatal unit’s infection rates against others.
+This data could be used to generate reports and benchmark your neonatal department’s infection rates against others.
 
 If you collect and submit data, and are responsible for quality improvement, it is essential that you have a clear understanding of the following:
 
@@ -113,7 +113,7 @@ Since DHIS2 is a freely available open source system, you have multiple options 
 * Deploy it nationally or regionally (or use an existing national or regional deployment) to form a national or regional network of units performing surveillance.
 * Use the NeoIPC project's https://neoipc.charite.de/[instance] of the system which is currently operated by the team at the German National Reference Centre for Surveillance of Nosocomial Infections at Charité's Institute for Hygiene and Environmental Medicine.
 
-One of the advantages of using the web-based reporting system is the fact that you can use it to create standardised unit-based reports at any time with a few clicks and compare them to the NeoIPC reference reports that are published annually.
+One of the advantages of using the web-based reporting system is the fact that you can use it to create standardised department-based reports at any time with a few clicks and compare them to the NeoIPC reference reports that are published annually.
 
 To create the reference report, we carry out a calculation at a specified time every year using the data available in the NeoIPC database at that point in time.
 In order to make this possible, you must have completed all data entry and addition of missing information from the previous year within 6 weeks after the end of a calendar year.
@@ -123,7 +123,7 @@ If the web-based reporting system is temporarily unavailable (e.g. due to mainte
 
 [#data-collection]
 == Data Collection
-The primary aim of the methods used by NeoIPC surveillance system is to support internal quality assurance standards, to make valid statements about the frequency of healthcare-associated infections in eligible infants during their inpatient stay and to promote implementation of IPC strategies in a neonatal unit.
+The primary aim of the methods used by NeoIPC surveillance system is to support internal quality assurance standards, to make valid statements about the frequency of healthcare-associated infections in eligible infants during their inpatient stay and to promote implementation of IPC strategies in a neonatal department.
 
 Based on our experience, we anticipate that you will collect data both through the review of medical charts as well as through the interaction with the colleagues who are involved in treatment and care of the patient under surveillance.
 For this reason, your data collection should ideally occur at the patient's bedside, to maximize the amount of information available (by allowing attending clinicians to clarify unclear or incomplete chart entries), and to minimize the amount of time involved in tracking down medical records once the patient has left the hospital.
@@ -164,7 +164,7 @@ Any live born infant,
 **AND/OR**
 . whose gestational age is less than 32 weeks (31 weeks 6 days inclusive)
 
-admitted to a ward in your neonatal unit **within 120 days of birth** is eligible for inclusion in the Core Module of the NeoIPC Surveillance Programme.
+admitted to a ward in your neonatal department **within 120 days of birth** is eligible for inclusion in the Core Module of the NeoIPC Surveillance Programme.
 
 .Decision flow to identify eligible infants for the core module
 image::NeoIPC-Core-Decision-Flow.svg[Decision flow to identify eligible infants for the core module,{full-width},opts=inline]
@@ -376,8 +376,12 @@ image::NeoIPC-Core-Secondary-BSI-Image.png[Secondary BSI data collection,{full-w
 == Infection Definitions
 [#infection-definitions-primary-sepsis-bloodstream-infection]
 === Primary Sepsis / Bloodstream Infection
-Sepsis is classified as either culture negative or culture proven in the NeoIPC surveillance system.
-As well, culture proven sepsis (LCBSI = "Laboratory-confirmed bloodstream infection") is classified into two categories based on the culture result.
+Blood culture diagnostics in neonates face two inherent challenges.
+First, the small blood volumes obtainable from very low birth weight infants limit the sensitivity of cultures, meaning that a negative culture result does not rule out a bloodstream infection.
+Second, the technical difficulty of venipuncture in very small infants increases the risk of skin flora contamination, which reduces the specificity of a positive culture when common commensal organisms are grown.
+
+To account for these limitations, sepsis is classified as either culture negative (clinical sepsis) or culture proven (Laboratory-confirmed bloodstream infection = LCBSI) in the NeoIPC surveillance system.
+A LCBSI is further classified into two categories based on the culture result, distinguishing recognised pathogens from common commensals, because for the latter it is often unclear whether growth represents true infection or contamination, and NeoIPC therefore applies additional criteria to improve the specificity of surveillance in this category (see <<infection-definitions-lcbsi-caused-by-common-commensals>>).
 
 Infections caused by microorganisms that enter the bloodstream from a primary infection site (except for catheter-associated infections) are not counted in this section.
 For detailed information, please see xref:data-collection-infection-data-collection-secondary-bloodstream-infection[Secondary Bloodstream Infection].
@@ -680,7 +684,7 @@ Options for each group:
 * No: the isolated organism is not resistant to the specified antibiotic group(s).
 * Not tested: the isolated organism was not tested for resistance to the specified antibiotic group(s).
 
-[[data-dictionary-general-infection-data-secondary-bsi]]Secondary bloodstream infection:: A BSI that is thought to be seeded from a site-specific infection at another body site (except for catheter-associated infections).
+[[data-dictionary-general-infection-data-secondary-bsi]]Secondary bloodstream infection:: A BSI that is seeded from a site-specific infection at another body site (except for vascular catheter-associated infections).
 A BSI can be attributed to a site-specific infection (NEC, PN or SSI) if it occurs in a 17-day period that includes the day of infection (=first symptoms of site-specific infection), 3 days prior, and 13 days after.
 
 Collecting data about the secondary BSI is optional; therefore, it is possible to select “No follow-up” if you are not following patients for secondary BSI.

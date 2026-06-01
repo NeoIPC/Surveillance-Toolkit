@@ -18,7 +18,7 @@ param(
     [switch]$Clean
     )
 
-Import-Module -Name (Join-Path -Resolve -Path $PSScriptRoot -ChildPath 'modules' -AdditionalChildPath 'NeoIPC-Tools') -Force -Verbose:$false
+Import-Module -Name (Join-Path -Resolve -Path $PSScriptRoot -ChildPath 'modules' -AdditionalChildPath 'NeoIPC-BuildTools') -Force -Verbose:$false
 
 if ($Clean -or $Html -or $Pdf -or $Docx) { $All = $false } else { $All = $true }
 
