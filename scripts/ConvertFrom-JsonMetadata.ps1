@@ -4,13 +4,13 @@ param(
     [string]$LiteralPath,
     [Parameter(Position=1)]
     [string]$OutputDirectory = (Join-Path -Path (Resolve-Path -LiteralPath (Join-Path -Path $PSScriptRoot -ChildPath '..' -AdditionalChildPath 'metadata') -Relative) -ChildPath (Get-Date -AsUTC -Format FileDateTimeUniversal)),
-    [string[]]$TranslationLanguages = @('de', 'es', 'fr', 'gr', 'it'),
+    [string[]]$TranslationLanguages = @('de', 'el', 'es', 'fr', 'it'),
     [switch]$IncudeIds,
     [switch]$NoSharing,
     [switch]$ForExcel
 )
 
-Import-Module -Name (Join-Path -Resolve -Path $PSScriptRoot -ChildPath 'modules' -AdditionalChildPath 'NeoIPC-Tools') -Force -Verbose:$false
+Import-Module -Name (Join-Path -Resolve -Path $PSScriptRoot -ChildPath 'modules' -AdditionalChildPath 'NeoIPC-BuildTools') -Force -Verbose:$false
 
 # Dev mode
 $ForExcel = $true

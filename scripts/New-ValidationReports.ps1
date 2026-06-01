@@ -1,18 +1,22 @@
 <#
 .SYNOPSIS
-Batch-generate Validation Reports for one or more sites.
+Generate Validation Reports for one or more sites, or a combined report for all departments.
 
 .DESCRIPTION
 This script fetches the department/site list from DHIS2, filters by a regex, and renders the Validation Report for each site using Quarto.
+With -Combined, it renders a single report covering all departments (no departmentFilter).
 
 .EXAMPLE
-    .\New-ValidationReports.ps1 -SiteCodeFilter 'NEO_AT.*' -Language 'de' -Token $myToken -Verbose
+    .\New-ValidationReports.ps1 -SiteCodeFilter 'NEO_AT.*' -Locale 'de' -Token $myToken -Verbose
+
+.EXAMPLE
+    .\New-ValidationReports.ps1 -Combined -Locale 'en' -Token $myToken -JsonReport
 #>
-[CmdletBinding()]
+[CmdletBinding(SupportsShouldProcess = $true, DefaultParameterSetName = 'PerSite')]
 param(
     [ArgumentCompleter({
         param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
-        . "$PSScriptRoot/NeoipcReportHelpers.ps1"
+        Import-Module (Join-Path $PSScriptRoot 'modules' 'NeoIPC-Tools') -Force -Verbose:$false
         $serverKey = Get-NeoipcServerKey `
             -Scheme $fakeBoundParameters['Dhis2Scheme'] `
             -Hostname $fakeBoundParameters['Dhis2Hostname'] `
@@ -31,8 +35,11 @@ param(
                 Where-Object { $_ -like "$wordToComplete*" }
         }
     })]
-    [Parameter(Position = 0)]
+    [Parameter(ParameterSetName = 'PerSite', Position = 0)]
     [string]$SiteCodeFilter = '.+',
+
+    [Parameter(ParameterSetName = 'Combined', Mandatory)]
+    [switch]$Combined,
 
     [ArgumentCompleter({
         param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
@@ -44,12 +51,15 @@ param(
             Sort-Object
     })]
     [Parameter(Position = 1)]
-    [string]$Language = 'en',
+    [string]$Locale = 'en',
 
     [Parameter(Position = 2)]
     [string]$Token,
 
     [string]$ValidationExceptionFile,
+
+    [Parameter()]
+    [switch]$JsonReport,
 
     [Parameter()]
     [string]$Dhis2Scheme = $null,
@@ -64,7 +74,7 @@ param(
     [string]$Dhis2Path = $null
 )
 
-. "$PSScriptRoot/NeoipcReportHelpers.ps1"
+Import-Module (Join-Path $PSScriptRoot 'modules' 'NeoIPC-Tools') -Force -Verbose:$false
 
 $auth = Resolve-NeoipcAuth -Token $Token
 
@@ -75,6 +85,7 @@ if ($ValidationExceptionFile) {
 }
 
 $reportDir = Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..' 'reports' 'Validation-Report')
+$outputDirPath = Join-Path $reportDir '_output'
 
 $deptArgs = @{ Auth = $auth; SiteCodeFilter = $SiteCodeFilter }
 if ($Dhis2Scheme) { $deptArgs.Scheme = $Dhis2Scheme }
@@ -83,9 +94,18 @@ if ($null -ne $Dhis2Port) { $deptArgs.Port = $Dhis2Port }
 if ($Dhis2Path) { $deptArgs.Path = $Dhis2Path }
 $sites = Get-NeoipcDepartments @deptArgs
 
-if (-not $sites -or $sites.Count -eq 0) {
-    Write-Warning "No sites matched filter '$SiteCodeFilter'. Nothing to do."
-    return
+if (-not $isCombined) {
+    $deptArgs = @{ Auth = $auth; SiteCodeFilter = $SiteCodeFilter }
+    if ($Dhis2Scheme) { $deptArgs.Scheme = $Dhis2Scheme }
+    if ($Dhis2Hostname) { $deptArgs.Hostname = $Dhis2Hostname }
+    if ($Dhis2Port) { $deptArgs.Port = $Dhis2Port }
+    if ($Dhis2Path) { $deptArgs.Path = $Dhis2Path }
+    $sites = Get-NeoipcDepartments @deptArgs
+
+    if (-not $sites -or $sites.Count -eq 0) {
+        Write-Warning "No sites matched filter '$SiteCodeFilter'. Nothing to do."
+        return
+    }
 }
 
 $wd = Get-Location
@@ -108,7 +128,14 @@ try {
             $null = Invoke-QuartoRender -Arguments $quartoArgs -Description "validation report for $site"
         }
     }
+
+    $buildCompleted = $true
+}
+catch {
+    $errors += $_.Exception.Message
 }
 finally {
     Set-Location -LiteralPath $wd
 }
+
+} # end Invoke-WithNeoipcAuth

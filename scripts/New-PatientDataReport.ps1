@@ -1,11 +1,11 @@
-[CmdletBinding(DefaultParameterSetName = 'Render')]
+[CmdletBinding(SupportsShouldProcess = $true, DefaultParameterSetName = 'Render')]
 param(
     [Parameter(Mandatory, Position = 0)]
     [string]$PatientId,
 
     [ArgumentCompleter({
         param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
-        . "$PSScriptRoot/NeoipcReportHelpers.ps1"
+        Import-Module (Join-Path $PSScriptRoot 'modules' 'NeoIPC-Tools') -Force -Verbose:$false
         $serverKey = Get-NeoipcServerKey `
             -Scheme $fakeBoundParameters['Dhis2Scheme'] `
             -Hostname $fakeBoundParameters['Dhis2Hostname'] `
@@ -31,12 +31,6 @@ param(
     [Parameter(Position = 2)]
     [string]$Format = 'pdf',
 
-    [ValidateScript({
-        if (-not ($_ -ceq 'en' -or (Get-Item -LiteralPath "$PSScriptRoot/../reports/Patient-Data-Report/Patient-Data-Report.$_.qmd" -ErrorAction Ignore))) {
-            throw "The language '$_' is not supported."
-        }
-        return $true
-    })]
     [ArgumentCompleter({
         param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
         @(
@@ -47,10 +41,13 @@ param(
             Sort-Object
     })]
     [Parameter(Position = 3)]
-    [string]$Language = 'en',
+    [string]$Locale = 'en',
 
     [Parameter()]
     [string]$Token,
+
+    [Parameter()]
+    [switch]$JsonReport,
 
     [Parameter()]
     [string]$Dhis2Scheme = $null,
@@ -65,12 +62,12 @@ param(
     [string]$Dhis2Path = $null
 )
 
-. "$PSScriptRoot/NeoipcReportHelpers.ps1"
+Import-Module (Join-Path $PSScriptRoot 'modules' 'NeoIPC-Tools') -Force -Verbose:$false
 $auth = Resolve-NeoipcAuth -Token $Token
 
 $currentDir = Get-Location
 $reportDir = Resolve-Path -LiteralPath "$PSScriptRoot/../reports/Patient-Data-Report/"
-$timestamp = [datetime]::Now.ToString('yyyy-MM-dd_HHmmss')
+$outputDirPath = Join-Path $reportDir '_output'
 
 $exitCode = 0
 try {

@@ -1,11 +1,19 @@
 ### `{r} sR$headings$gestational_age_distribution`
 
-::: {.content-visible when-meta="includeIntroductionTexts"}
 ```{r}
 #| output: asis
-include_localised("_fig-intro-gestational-age.qmd")
+.show(params$includeIntroductionTexts)
 ```
-:::
+
+```{r}
+#| output: asis
+include_localised("_fig-intro-gestational-age.Rmd")
+```
+
+```{r}
+#| output: asis
+.end()
+```
 
 ```{r}
 #| label: fig-ga
@@ -147,7 +155,11 @@ if (has_ga) {
 }
 ```
 
-::: {.content-visible when-meta="includeOutlierInterpretation"}
+```{r}
+#| output: asis
+.show(params$includeOutlierInterpretation)
+```
+
 ```{r}
 #| output: asis
 if (check_figure_interpretation) {
@@ -159,10 +171,14 @@ if (check_figure_interpretation) {
 
   if (nchar(interpretation_text) > 0) {
     cat("::: {.callout-tip}\n")
-    cat("##", sR$figure_interpretation$heading, "\n\n")
+    cat("##", sR$outlier$heading, "\n\n")
     cat(interpretation_text, "\n")
     cat(":::\n")
   }
 }
 ```
-:::
+
+```{r}
+#| output: asis
+.end()
+```

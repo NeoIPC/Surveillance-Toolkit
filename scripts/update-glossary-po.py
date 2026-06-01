@@ -48,7 +48,7 @@ except ImportError:
 VARIANT_SUFFIXES = re.compile(r"_(tc|sc|plural(?:_tc|_sc)?)$")
 PLURAL_SUFFIX = re.compile(r"_plural(?:_(tc|sc))?$")
 FLAGS_LINE = re.compile(r"^flags:\s*(.+)$", re.IGNORECASE)
-DEFAULT_LANGUAGES = ["af", "de", "es", "et", "fr", "gr", "it", "ne", "tr"]
+DEFAULT_LANGUAGES = ["af", "de", "el", "es", "et", "fr", "it", "ne", "tr"]
 
 POT_HEADER_COMMENT = (
     "Translations for the NeoIPC Surveillance Glossary\n"
@@ -219,7 +219,7 @@ def _merge_flags(pot_flags, po_flags):
 
 LANGUAGE_NAMES = {
     "af": "Afrikaans", "de": "German", "es": "Spanish", "et": "Estonian",
-    "fr": "French", "gr": "Greek", "it": "Italian", "ne": "Nepali",
+    "el": "Greek", "fr": "French", "it": "Italian", "ne": "Nepali",
     "tr": "Turkish",
 }
 

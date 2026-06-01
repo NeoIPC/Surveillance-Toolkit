@@ -1,10 +1,30 @@
+#### `{r} sR$headings$resistant_pathogens`
+
+```{r}
+#| output: asis
+.show(params$includeMethodsTexts)
+```
+
+```{r}
+#| output: asis
+include_localised("_methods-abr-infection.Rmd")
+```
+
+```{r}
+#| output: asis
+.end()
+```
+
 ```{r}
 #| label: tbl-abr-infection-rate
 #| tbl-cap: !expr 'sR$`tbl-abr-infection-rate`$`tbl-cap`'
 #| tbl-cap-location: top
 
-reference_data |>
-  neoipcr::get_abr_infection_rate_table() |>
+tbl_data <- reference_data |>
+  neoipcr::get_abr_infection_rate_table()
+
+tbl <- tbl_data |>
+  dplyr::select(-tidyselect::any_of(".ontology_path")) |>
   dplyr::mutate(
     group = dplyr::if_else(
       stringr::str_detect(group, "spp."),
@@ -26,14 +46,18 @@ reference_data |>
       "mrsa" ~ sR$mrsa,
       "vre" ~ sR$vre),
     level = .data$level + 2) |>
-  dplyr::group_by(.data$abr) |>
+  dplyr::group_by(.data$abr)
+
+cw <- compute_col_widths(tbl_data, stub_min = 30)
+
+gt_tbl <- tbl |>
   gt(rowname_col = "group") |>
   sub_missing() |>
   gt::tab_options(
     latex.header_repeat = TRUE,
     latex.use_longtable = TRUE,
     table.width = pct(100),
-    table.font.size = 13,
+    table.font.size = cw$font_size,
     footnotes.marks = "extended"
   ) |>
   fmt_number(
@@ -140,20 +164,19 @@ reference_data |>
     footnote = sprintf(
       sR$`tbl-abr-infection-rate`$pooled_footnote,
       sR$table_headers$pooled),
-    locations = cells_column_labels(columns = sR$table_headers$pooled)) |>
-  tab_footnote(
-    footnote = sprintf(
-      sR$`tbl-abr-infection-rate`$quartile_footnote,
-      sR$table_headers$q1,
-      sR$table_headers$q2,
-      sR$table_headers$q3,
-      sprintf("%i%s", 25L, sR$percent_symbol),
-      sprintf("%i%s", 50L, sR$percent_symbol),
-      sprintf("%i%s", 75L, sR$percent_symbol)
-      ),
-    locations = cells_column_labels(columns = c(
-      sR$table_headers$q1,
-      sR$table_headers$q2,
-      sR$table_headers$q3)))
+    locations = cells_column_labels(columns = sR$table_headers$pooled))
 
+# Sparse-data footnote for N < sparse_threshold
+if (any(tbl_data$n < sparse_threshold, na.rm = TRUE)) {
+  fn_text <- if (include_rate_ci) sR$sparse_data_footnote else sR$sparse_data_footnote_no_ci
+  fn_text <- glue::glue(fn_text, threshold = sparse_threshold)
+  gt_tbl <- gt_tbl |>
+    gt::tab_footnote(
+      footnote = fn_text,
+      locations = cells_body(
+        columns = sR$table_headers$n,
+        rows = tbl_data$n < sparse_threshold))
+}
+
+gt_tbl
 ```

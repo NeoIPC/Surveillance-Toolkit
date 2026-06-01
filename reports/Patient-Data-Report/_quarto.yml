@@ -26,6 +26,7 @@ format:
       text: |
         \usepackage{float}
         \usepackage{placeins}
+        \floatplacement{figure}{H}
         \usepackage{graphicx}
         \usepackage{scrlayer-scrpage}
         \ModifyLayer[addvoffset=-.6ex]{scrheadings.foot.above.line}

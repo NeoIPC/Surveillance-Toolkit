@@ -1,11 +1,34 @@
 ### `{r} sR$headings$presence_of_risk_and_protective_factors`
 
-::: {.content-visible when-meta="includeIntroductionTexts"}
 ```{r}
 #| output: asis
-include_localised("_tbl-intro-risk-density.qmd")
+.show(params$includeIntroductionTexts)
 ```
-:::
+
+```{r}
+#| output: asis
+include_localised("_tbl-intro-risk-density.Rmd")
+```
+
+```{r}
+#| output: asis
+.end()
+```
+
+```{r}
+#| output: asis
+.show(params$includeMethodsTexts)
+```
+
+```{r}
+#| output: asis
+include_localised("_methods-risk-density.Rmd")
+```
+
+```{r}
+#| output: asis
+.end()
+```
 
 ```{r}
 #| output: asis
@@ -23,7 +46,10 @@ if (!is.null(benchmark_data$usage_density_rate_table) &&
   has_reference <- "pooled_ref" %in% names(benchmark_data$usage_density_rate_table)
   check_outlier_interpretation <- has_reference
 
-  tbl <- benchmark_data$usage_density_rate_table |>
+  tbl_data <- benchmark_data$usage_density_rate_table
+  cw <- compute_col_widths(tbl_data, stub_min = 18, has_reference = has_reference, n_w = 10)
+
+  tbl <- tbl_data |>
     dplyr::select(-tidyselect::any_of("n_ref")) |>
     dplyr::rename(
         !!sR$table_headers$n := "days_own",
@@ -32,7 +58,22 @@ if (!is.null(benchmark_data$usage_density_rate_table) &&
         !!sR$table_headers$q1 := tidyselect::any_of("q1_ref"),
         !!sR$table_headers$q2 := tidyselect::any_of("q2_ref"),
         !!sR$table_headers$q3 := tidyselect::any_of("q3_ref")
-      ) |>
+      )
+
+  ci_cols_to_drop <- character(0)
+  if (!include_rate_ci)
+    ci_cols_to_drop <- c(ci_cols_to_drop, "ci_lower_own", "ci_upper_own")
+  if (!include_pooled_ci)
+    ci_cols_to_drop <- c(ci_cols_to_drop, "ci_lower_ref", "ci_upper_ref")
+  if (!include_quartile_ci)
+    ci_cols_to_drop <- c(ci_cols_to_drop,
+      "q1_ci_lower_ref", "q1_ci_upper_ref",
+      "q2_ci_lower_ref", "q2_ci_upper_ref",
+      "q3_ci_lower_ref", "q3_ci_upper_ref")
+  if (length(ci_cols_to_drop) > 0)
+    tbl <- tbl |> dplyr::select(-tidyselect::any_of(ci_cols_to_drop))
+
+  tbl <- tbl |>
     dplyr::mutate(
     factor = dplyr::case_match(
       as.character(.data$factor),
@@ -41,9 +82,9 @@ if (!is.null(benchmark_data$usage_density_rate_table) &&
       "vs" ~ sR$`tbl-risk-density-rates`$any,
       "inv" ~ sR$inv,
       "niv" ~ sR$niv,
-      "human_milk" ~ sR$human_milk,
+      "human_milk" ~ sR$human_milk_sc,
       "probiotic" ~ sR$probiotics,
-      "kangaroo_care" ~ sR$kangaroo_care,
+      "kangaroo_care" ~ sR$kangaroo_care_sc,
       "ab" ~ sR$`tbl-risk-density-rates`$any_antibiotic,
       "a" ~ sR$`tbl-risk-density-rates`$access,
       "w" ~ sR$`tbl-risk-density-rates`$watch,
@@ -53,11 +94,11 @@ if (!is.null(benchmark_data$usage_density_rate_table) &&
     gt::tab_options(
     latex.use_longtable = TRUE,
     table.width = pct(100),
-    table.font.size = 13,
+    table.font.size = cw$font_size,
     footnotes.marks = "extended"
     ) |>
     fmt_number(
-      columns = !sR$table_headers$n,
+      columns = !(tidyselect::any_of(sR$table_headers$n) | tidyselect::matches("^factor$")),
       decimals = 1,
       sep_mark = sR$digit_group_separator,
       min_sep_threshold = 2,
@@ -82,12 +123,12 @@ if (!is.null(benchmark_data$usage_density_rate_table) &&
     tab_row_group(
       label = sR$other,
       rows = tidyselect::any_of(c(
-        sR$human_milk,
+        sR$human_milk_sc,
         sR$probiotics,
-        sR$kangaroo_care)),
+        sR$kangaroo_care_sc)),
       id = "grp_othr") |>
     tab_row_group(
-      label = sR$antibiotics,
+      label = sR$antibiotics_sc,
       rows = tidyselect::any_of(c(
         sR$`tbl-risk-density-rates`$any_antibiotic,
         sR$`tbl-risk-density-rates`$access,
@@ -96,7 +137,7 @@ if (!is.null(benchmark_data$usage_density_rate_table) &&
       id = "grp_ab") |>
     row_group_order(groups = c("grp_vc", "grp_vs", "grp_ab", "grp_othr")) |>
     tab_spanner(
-    label = sR$`tbl-risk-density-rates`$risk_density_rate,
+    label = sR$`tbl-risk-density-rates`$exposure_density_rate,
     columns = tidyselect::any_of(
       c(
       sR$table_headers$rate,
@@ -104,7 +145,7 @@ if (!is.null(benchmark_data$usage_density_rate_table) &&
       sR$table_headers$q1,
       sR$table_headers$q2,
       sR$table_headers$q3)),
-    id = "risk_density_rate"
+    id = "exposure_density_rate"
     ) |>
     tab_style(
     style = cell_text(weight = "bold"),
@@ -118,7 +159,7 @@ if (!is.null(benchmark_data$usage_density_rate_table) &&
     footnote = md(
       paste0(
         "$$\\text{",
-        sR$`tbl-risk-density-rates`$risk_density_rate,
+        sR$`tbl-risk-density-rates`$exposure_density_rate,
         "} = \\frac{\\text{",
         sR$`tbl-risk-density-rates`$days_with_risk_factor,
         "}}{\\text{",
@@ -127,7 +168,7 @@ if (!is.null(benchmark_data$usage_density_rate_table) &&
         format(100L),
         "$$"
         )),
-    locations = cells_column_spanners(spanners = "risk_density_rate")
+    locations = cells_column_spanners(spanners = "exposure_density_rate")
     ) |>
     tab_footnote(
       footnote = sprintf(
@@ -149,24 +190,72 @@ if (!is.null(benchmark_data$usage_density_rate_table) &&
           sR$`tbl-risk-density-rates`$access,
           sR$`tbl-risk-density-rates`$watch,
           sR$`tbl-risk-density-rates`$reserve)))
+    ) |>
+    tab_footnote(
+      footnote = sR$`tbl-risk-density-rates`$kmc_day_footnote,
+      locations = gt::cells_stub(
+        rows = tidyselect::any_of(sR$kangaroo_care_sc))
     )
+
+  if (include_rate_ci && "ci_lower_own" %in% colnames(tbl$`_data`)) {
+    tbl <- tbl |>
+      gt::cols_merge(
+        columns = c(sR$table_headers$rate, "ci_lower_own", "ci_upper_own"),
+        pattern = "{1} ({2}\u2013{3})",
+        rows = !is.na(tbl_data$rate_own)
+      )
+  }
+  if (include_pooled_ci && "ci_lower_ref" %in% colnames(tbl$`_data`)) {
+    tbl <- tbl |>
+      gt::cols_merge(
+        columns = c(sR$table_headers$pooled, "ci_lower_ref", "ci_upper_ref"),
+        pattern = "{1} ({2}\u2013{3})",
+        rows = !is.na(tbl_data$pooled_ref)
+      )
+  }
+  if ("q1_ci_lower_ref" %in% colnames(tbl$`_data`)) {
+    if (include_quartile_ci) {
+      has_boot <- !is.na(tbl$`_data`[["q1_ci_lower_ref"]])
+      if (auto_quartile_ci)
+        has_boot <- has_boot & !is.na(tbl$`_data`[[sR$table_headers$q1]])
+      tbl <- tbl |>
+        gt::cols_merge(
+          columns = c(sR$table_headers$q1, "q1_ci_lower_ref", "q1_ci_upper_ref"),
+          pattern = "{1} ({2}\u2013{3})",
+          rows = has_boot
+        ) |>
+        gt::cols_merge(
+          columns = c(sR$table_headers$q2, "q2_ci_lower_ref", "q2_ci_upper_ref"),
+          pattern = "{1} ({2}\u2013{3})",
+          rows = has_boot
+        ) |>
+        gt::cols_merge(
+          columns = c(sR$table_headers$q3, "q3_ci_lower_ref", "q3_ci_upper_ref"),
+          pattern = "{1} ({2}\u2013{3})",
+          rows = has_boot
+        )
+    } else {
+      tbl <- tbl |> gt::cols_hide(columns = tidyselect::any_of(c(
+        "q1_ci_lower_ref", "q1_ci_upper_ref",
+        "q2_ci_lower_ref", "q2_ci_upper_ref",
+        "q3_ci_lower_ref", "q3_ci_upper_ref")))
+    }
+  }
 
   if ("ref" %in% benchmark_data$dataset_names) {
     tbl <- tbl |>
     cols_width(
-    stub() ~ pct(40),
-    sR$table_headers$n ~ pct(10),
-    sR$table_headers$rate ~ pct(10),
-    sR$table_headers$pooled ~ pct(10),
-    sR$table_headers$q1 ~ pct(10),
-    sR$table_headers$q2 ~ pct(10),
-    sR$table_headers$q3 ~ pct(10)
+      stub() ~ pct(cw$stub),
+      sR$table_headers$n ~ pct(cw$n),
+      sR$table_headers$rate ~ pct(cw$rate),
+      sR$table_headers$pooled ~ pct(cw$pooled),
+      sR$table_headers$q1 ~ pct(cw$q),
+      sR$table_headers$q2 ~ pct(cw$q),
+      sR$table_headers$q3 ~ pct(cw$q)
     ) |>
     tab_spanner(
       label = sR$own_data_label,
-      columns = c(
-        sR$table_headers$n,
-        sR$table_headers$rate),
+      columns = tidyselect::any_of(c(sR$table_headers$n, sR$table_headers$rate)),
       id = "department_data"
     ) |>
     tab_spanner(
@@ -182,28 +271,24 @@ if (!is.null(benchmark_data$usage_density_rate_table) &&
       footnote = sprintf(
         sR$`tbl-risk-density-rates`$pooled_footnote,
         sR$table_headers$pooled),
-      locations = cells_column_labels(columns = sR$table_headers$pooled)) |>
-    tab_footnote(
-      footnote = sprintf(
-        sR$`tbl-risk-density-rates`$quartile_footnote,
-        sR$table_headers$q1,
-        sR$table_headers$q2,
-        sR$table_headers$q3,
-        sprintf("%i%s", 25L, sR$percent_symbol),
-        sprintf("%i%s", 50L, sR$percent_symbol),
-        sprintf("%i%s", 75L, sR$percent_symbol)
-      ),
-      locations = cells_column_labels(columns = c(
-        sR$table_headers$q1,
-        sR$table_headers$q2,
-        sR$table_headers$q3)))
+      locations = cells_column_labels(columns = sR$table_headers$pooled))
   } else {
     tbl <- tbl |>
     cols_width(
-    stub() ~ pct(60),
-    sR$table_headers$n ~ pct(20),
-    sR$table_headers$rate ~ pct(20)
+    stub() ~ pct(cw$stub),
+    sR$table_headers$n ~ pct(cw$n),
+    sR$table_headers$rate ~ pct(cw$rate)
     )
+  }
+
+  if (any(tbl_data$days_own < sparse_threshold, na.rm = TRUE)) {
+    sparse_note <- glue::glue(if (include_rate_ci) sR$sparse_data_footnote else sR$sparse_data_footnote_no_ci, threshold = sparse_threshold)
+    tbl <- tbl |>
+      gt::tab_footnote(
+        footnote = sparse_note,
+        locations = cells_body(
+          columns = sR$table_headers$n,
+          rows = tbl_data$days_own < sparse_threshold))
   }
 
   tbl
@@ -212,15 +297,17 @@ if (!is.null(benchmark_data$usage_density_rate_table) &&
 }
 ```
 
-::: {.content-visible when-meta="includeOutlierInterpretation"}
+```{r}
+#| output: asis
+.show(params$includeOutlierInterpretation)
+```
+
 ```{r}
 #| output: asis
   if (check_outlier_interpretation) {
-    outliers <- detect_outliers(
-      benchmark_data$usage_density_rate_table,
-      identifier_col = "factor")
-  if (length(outliers$below_q1) > 0 || length(outliers$above_q3) > 0) {
-    grouped <- group_outliers(outliers, "usage_density_rate_table")
+    states <- metric_registry$usage_density_rate_table
+  if (has_outliers(states)) {
+    grouped <- group_outliers(states, "usage_density_rate_table", sR, metric_registry)
     outlier_text <- format_outlier_text(grouped, sR)
     if (nchar(outlier_text) > 0) {
       cat("\n\n::: {.callout-tip}\n")
@@ -231,4 +318,8 @@ if (!is.null(benchmark_data$usage_density_rate_table) &&
   }
 }
 ```
-:::
+
+```{r}
+#| output: asis
+.end()
+```

@@ -14,3 +14,10 @@
 # Only same-value duplicates need to be listed. Entries where the
 # values differ across layers are automatically excluded (those are
 # intentional overrides).
+
+# Composable callout framework: pairing_hap's fallback references VS
+# utilization — the same concept as pairing_dev_ass_vs's paired label.
+# Both need their own copy because they serve different structural roles
+# (fallback vs primary paired label) in their respective pairing definitions.
+Partner-Report:outlier.pairing_hap.fallback_paired_label
+Partner-Report:outlier.pairing_hap.fallback_paired_label_sc

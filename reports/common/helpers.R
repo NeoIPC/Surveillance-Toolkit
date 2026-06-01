@@ -75,38 +75,46 @@ get_string_resources <- function(x) {
     sR,
     yaml::read_yaml(file = yaml_path, handlers = handlers))
 
-  yaml_path <- paste0("../../glossary.", localeObj$language, "_", localeObj$territory, ".yaml")
-  if(file.exists(yaml_path)) sR <- modifyList(
-    sR,
-    yaml::read_yaml(file = yaml_path, handlers = handlers))
+  if (!is.null(localeObj$territory)) {
+    yaml_path <- paste0("../../glossary.", localeObj$language, "_", localeObj$territory, ".yaml")
+    if(file.exists(yaml_path)) sR <- modifyList(
+      sR,
+      yaml::read_yaml(file = yaml_path, handlers = handlers))
+  }
 
   yaml_path <- paste0("../common.", localeObj$language, ".yaml")
   if(file.exists(yaml_path)) sR <- modifyList(
     sR,
     yaml::read_yaml(file = yaml_path, handlers = handlers))
 
-  yaml_path <- paste0("../common.", localeObj$language, "_", localeObj$territory, ".yaml")
-  if(file.exists(yaml_path)) sR <- modifyList(
-    sR,
-    yaml::read_yaml(file = yaml_path, handlers = handlers))
+  if (!is.null(localeObj$territory)) {
+    yaml_path <- paste0("../common.", localeObj$language, "_", localeObj$territory, ".yaml")
+    if(file.exists(yaml_path)) sR <- modifyList(
+      sR,
+      yaml::read_yaml(file = yaml_path, handlers = handlers))
+  }
 
   yaml_path <- paste0("content.", localeObj$language, "/_sR.yaml")
   if(file.exists(yaml_path)) sR <- modifyList(
     sR,
     yaml::read_yaml(file = yaml_path, handlers = handlers))
 
-  yaml_path <- paste0("content.", localeObj$language, "_", localeObj$territory, "/_sR.yaml")
-  if(file.exists(yaml_path)) sR <- modifyList(
-    sR,
-    yaml::read_yaml(file = yaml_path, handlers = handlers))
+  if (!is.null(localeObj$territory)) {
+    yaml_path <- paste0("content.", localeObj$language, "_", localeObj$territory, "/_sR.yaml")
+    if(file.exists(yaml_path)) sR <- modifyList(
+      sR,
+      yaml::read_yaml(file = yaml_path, handlers = handlers))
+  }
 
   return(sR)
 }
 
 get_localised_path <- function(file_name, language, territory) {
-  yaml_path <- paste0("content.", language, "_", territory, "/", file_name)
-  if(file.exists(yaml_path)) {
-    return(yaml_path)
+  if (!is.null(territory)) {
+    yaml_path <- paste0("content.", language, "_", territory, "/", file_name)
+    if(file.exists(yaml_path)) {
+      return(yaml_path)
+    }
   }
 
   yaml_path <- paste0("content.", language, "/", file_name)
@@ -134,6 +142,7 @@ get_localised_world_bank_class_names <- function(x) {
   x |>
     purrr::map_chr(
       \(x) {
+        if (is.na(x) || !nzchar(trimws(x))) return(sR$not_available)
         val <- sR$worldBankClassNames[[as.character(x)]]
         if(is.null(val)) x else val
       })
@@ -209,13 +218,22 @@ format_countries <- function(countries) {
   if("wb_class" %in% rlang::names2(countries)) {
     formatted <- countries |>
       dplyr::arrange(.data$wb_class, .data$name) |>
-      dplyr::group_by(
-        wb_class =(sR$worldBankClassNames |> unlist())[gsub("\\s+", "", .data$wb_class)]) |>
+      dplyr::mutate(
+        wb_class_label = dplyr::if_else(
+          is.na(.data$wb_class) | !nzchar(trimws(.data$wb_class)),
+          sR$not_available,
+          (sR$worldBankClassNames |> unlist())[gsub("\\s+", "", .data$wb_class)]
+        )
+      ) |>
+      dplyr::mutate(
+        wb_class_label = dplyr::coalesce(.data$wb_class_label, sR$not_available)
+      ) |>
+      dplyr::group_by(.data$wb_class_label) |>
       dplyr::summarise(
         country_list = paste((sR$countryNames |> unlist())[gsub("\\s+", "", .data$name)], collapse = "*, *"),
         .groups = "drop")|>
       dplyr::mutate(
-        formatted = paste0(.data$wb_class, ": *", .data$country_list, "*")
+        formatted = paste0(.data$wb_class_label, ": *", .data$country_list, "*")
       ) |>
       dplyr::pull("formatted") |>
       paste(collapse = "; ")
