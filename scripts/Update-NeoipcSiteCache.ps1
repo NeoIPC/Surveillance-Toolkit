@@ -53,6 +53,6 @@ if (-not (Test-Path -LiteralPath $cacheDir)) {
     New-Item -ItemType Directory -Path $cacheDir -Force | Out-Null
 }
 $cachePath = Join-Path $cacheDir 'site-codes.txt'
-$sites | Set-Content -LiteralPath $cachePath -Encoding UTF8
+$sites | Set-Content -LiteralPath $cachePath -Encoding utf8NoBOM
 
 Write-Host "Cached $($sites.Count) site codes to $cachePath" -ForegroundColor Green
