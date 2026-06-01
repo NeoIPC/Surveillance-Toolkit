@@ -86,19 +86,14 @@ if ($ValidationExceptionFile) {
 
 $reportDir = Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..' 'reports' 'Validation-Report')
 $outputDirPath = Join-Path $reportDir '_output'
+$timestamp = [datetime]::Now.ToString('yyyy-MM-dd_HHmmss')
+$language = (Split-NeoipcLocale -Locale $Locale).Language
 
-$deptArgs = @{ Auth = $auth; SiteCodeFilter = $SiteCodeFilter }
-if ($Dhis2Scheme) { $deptArgs.Scheme = $Dhis2Scheme }
-if ($Dhis2Hostname) { $deptArgs.Hostname = $Dhis2Hostname }
-if ($null -ne $Dhis2Port) { $deptArgs.Port = $Dhis2Port }
-if ($Dhis2Path) { $deptArgs.Path = $Dhis2Path }
-$sites = Get-NeoipcDepartments @deptArgs
-
-if (-not $isCombined) {
+if (-not $Combined) {
     $deptArgs = @{ Auth = $auth; SiteCodeFilter = $SiteCodeFilter }
     if ($Dhis2Scheme) { $deptArgs.Scheme = $Dhis2Scheme }
     if ($Dhis2Hostname) { $deptArgs.Hostname = $Dhis2Hostname }
-    if ($Dhis2Port) { $deptArgs.Port = $Dhis2Port }
+    if ($null -ne $Dhis2Port) { $deptArgs.Port = $Dhis2Port }
     if ($Dhis2Path) { $deptArgs.Path = $Dhis2Path }
     $sites = Get-NeoipcDepartments @deptArgs
 
@@ -113,11 +108,12 @@ try {
     Invoke-WithNeoipcAuth -Auth $auth -ScriptBlock {
         Set-Location -LiteralPath $reportDir
 
-        foreach ($site in $sites) {
-            Write-Host "Generating validation report for $site..."
-            $outFile = "$([datetime]::Now.ToString('yyyy-MM-dd_HHmmss'))_NeoIPC-Surveillance-Validation-Report_$($site).$($Language).pdf"
-            $qmdFile = Resolve-NeoipcLocaleQmd -ReportDir $reportDir -BaseName 'Validation-Report' -Language $Language
-            $quartoArgs = @('render', $qmdFile, '--profile', $Language, '-P', "departmentFilter:$($site)", '-o', $outFile)
+        $qmdFile = Resolve-NeoipcLocaleQmd -ReportDir $reportDir -BaseName 'Validation-Report' -Locale $Locale
+
+        if ($Combined) {
+            Write-Host "Generating combined validation report..."
+            $outFile = "${timestamp}_NeoIPC-Surveillance-Validation-Report.${language}.pdf"
+            $quartoArgs = @('render', $qmdFile, '--profile', $language, '-o', $outFile)
             if ($ValidationExceptionFile) {
                 $quartoArgs += @('-P', "validationExceptionFile:$ValidationExceptionFile")
             }
@@ -125,17 +121,24 @@ try {
             if ($Dhis2Hostname) { $quartoArgs += @('-P', "dhis2Hostname:$Dhis2Hostname") }
             if ($null -ne $Dhis2Port) { $quartoArgs += @('-P', "dhis2Port:$Dhis2Port") }
             if ($Dhis2Path) { $quartoArgs += @('-P', "dhis2Path:$Dhis2Path") }
-            $null = Invoke-QuartoRender -Arguments $quartoArgs -Description "validation report for $site"
+            $null = Invoke-QuartoRender -Arguments $quartoArgs -Description "combined validation report"
+        } else {
+            foreach ($site in $sites) {
+                Write-Host "Generating validation report for $site..."
+                $outFile = "${timestamp}_NeoIPC-Surveillance-Validation-Report_${site}.${language}.pdf"
+                $quartoArgs = @('render', $qmdFile, '--profile', $language, '-P', "departmentFilter:$site", '-o', $outFile)
+                if ($ValidationExceptionFile) {
+                    $quartoArgs += @('-P', "validationExceptionFile:$ValidationExceptionFile")
+                }
+                if ($Dhis2Scheme) { $quartoArgs += @('-P', "dhis2Scheme:$Dhis2Scheme") }
+                if ($Dhis2Hostname) { $quartoArgs += @('-P', "dhis2Hostname:$Dhis2Hostname") }
+                if ($null -ne $Dhis2Port) { $quartoArgs += @('-P', "dhis2Port:$Dhis2Port") }
+                if ($Dhis2Path) { $quartoArgs += @('-P', "dhis2Path:$Dhis2Path") }
+                $null = Invoke-QuartoRender -Arguments $quartoArgs -Description "validation report for $site"
+            }
         }
     }
-
-    $buildCompleted = $true
-}
-catch {
-    $errors += $_.Exception.Message
 }
 finally {
     Set-Location -LiteralPath $wd
 }
-
-} # end Invoke-WithNeoipcAuth

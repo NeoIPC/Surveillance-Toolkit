@@ -65,6 +65,8 @@ param(
 Import-Module (Join-Path $PSScriptRoot 'modules' 'NeoIPC-Tools') -Force -Verbose:$false
 $auth = Resolve-NeoipcAuth -Token $Token
 
+$timestamp = [datetime]::Now.ToString('yyyy-MM-dd_HHmmss')
+$language = (Split-NeoipcLocale -Locale $Locale).Language
 $currentDir = Get-Location
 $reportDir = Resolve-Path -LiteralPath "$PSScriptRoot/../reports/Patient-Data-Report/"
 $outputDirPath = Join-Path $reportDir '_output'
@@ -95,12 +97,12 @@ try {
                 Write-Host "done. Output: $($script:outFile)" -ForegroundColor Green
             }
         } else {
-            $quartoFile = Resolve-NeoipcLocaleQmd -ReportDir $reportDir -BaseName 'Patient-Data-Report' -Language $Language
-            $script:outFile = "${timestamp}_NeoIPC-Patient-Data_${PatientId}.${Language}.${Format}"
+            $quartoFile = Resolve-NeoipcLocaleQmd -ReportDir $reportDir -BaseName 'Patient-Data-Report' -Locale $Locale
+            $script:outFile = "${timestamp}_NeoIPC-Patient-Data_${PatientId}.${language}.${Format}"
 
             Write-Host "Generating patient data report ($Format) for $PatientId..."
             $quartoArgs = @('render', $quartoFile,
-                '--profile', $Language,
+                '--profile', $language,
                 '--to', $Format,
                 '-P', "patientId:$PatientId",
                 '-P', "departmentCode:$DepartmentCode",

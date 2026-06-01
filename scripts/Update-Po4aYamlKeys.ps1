@@ -90,14 +90,16 @@ foreach ($line in $lines) {
 
     if ($line -match '^\[type:\s*yaml\]\s+([^\s]+)') {
 
+        # Capture before the manual-keys check below, since that `-match` would
+        # overwrite $Matches and lose the YAML path captured by the first regex.
+        $yamlPath = $Matches[1]
+
         # Skip lines with manual-keys marker — these have a curated key list
         if ($line -match '#\s*manual-keys') {
-            Write-Host "Skipping (manual-keys): $($Matches[1])"
+            Write-Host "Skipping (manual-keys): $yamlPath"
             $newLines += $line
             continue
         }
-
-        $yamlPath = $Matches[1]
 
         # po4a paths in [type: yaml] lines are relative to the config file.
         # Resolve against the config's directory so the script works regardless

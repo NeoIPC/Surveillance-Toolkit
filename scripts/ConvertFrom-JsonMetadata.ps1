@@ -12,9 +12,6 @@ param(
 
 Import-Module -Name (Join-Path -Resolve -Path $PSScriptRoot -ChildPath 'modules' -AdditionalChildPath 'NeoIPC-BuildTools') -Force -Verbose:$false
 
-# Dev mode
-$ForExcel = $true
-
 if ($ForExcel) {
     $csvOutputEncoding = 'utf8BOM'
     $useCultureInCsvOutput = $true

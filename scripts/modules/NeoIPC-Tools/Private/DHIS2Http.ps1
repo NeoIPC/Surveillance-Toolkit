@@ -44,7 +44,7 @@ function Invoke-NeoipcDhis2Get {
         }
     }
 
-    $uriBuilder.Query = '?' + ($queryParts -join '&')
+    $uriBuilder.Query = ($queryParts -join '&')
 
     # Build Invoke-RestMethod parameters from auth hashtable
     $invokeParams = @{
