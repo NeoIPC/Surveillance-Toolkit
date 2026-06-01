@@ -119,7 +119,7 @@ function Invoke-NeoipcDhis2Delete {
             "Delete DHIS2 data via DELETE $($uriBuilder.Uri)?",
             'Removing DHIS2 data')) {
         Write-Debug "DELETE $($uriBuilder.Uri)"
-        $($result = . { Invoke-RestMethod @invokeParams }) 4>&1 | Write-Debug
+        $result = Invoke-RestMethod @invokeParams
 
         # DHIS2 can return HTTP 200 with an error in the JSON body on DELETE.
         # Throw rather than Write-Error so callers can't silently miss the failure.
