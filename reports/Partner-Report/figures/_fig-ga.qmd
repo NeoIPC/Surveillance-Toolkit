@@ -171,7 +171,7 @@ if (check_figure_interpretation) {
 
   if (nchar(interpretation_text) > 0) {
     cat("::: {.callout-tip}\n")
-    cat("##", sR$outlier$heading, "\n\n")
+    cat("##", sR$figure_interpretation$heading, "\n\n")
     cat(interpretation_text, "\n")
     cat(":::\n")
   }
