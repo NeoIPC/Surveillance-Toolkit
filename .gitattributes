@@ -1,0 +1,8 @@
+# Mark po4a / gettext machine-generated translation artefacts as generated
+# so GitHub's "Files changed" UI auto-collapses them in diffs and they're
+# excluded from the repo's language stats. (Note: as of GitHub community
+# discussion #195507, this does NOT exclude them from Copilot PR-review
+# size limits — Copilot still counts them. The collapse is purely a UI win.)
+*.po       linguist-generated=true
+*.pot      linguist-generated=true
+*.mo       linguist-generated=true binary
