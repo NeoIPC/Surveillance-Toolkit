@@ -1,4 +1,4 @@
-### Der chirurgische Eingriff hat einen ungülitgen ICHE-Code {#sec-problem-details-14}
+### Der chirurgische Eingriff hat einen ungültigen ICHE-Code {#sec-problem-details-14}
 
 Die Standardisierung operativer Prozeduren in der NeoIPC Surveillance wird dadurch erschwert, dass es keine international gebräuchliche Kodierung für Operationen und Prozeduren gibt.
 Zwar verwenden viele Länder Varianten der "International Classification Of Procedures In Medicine" (ICPM) der WHO, aber fast alle haben nationale Varianten, was die Situation für einen internationalen Vergleich erheblich verkompliziert.
