@@ -83,7 +83,7 @@ try {
             $rArgs = @('--vanilla', 'Generate-PatientData.R',
                 '--patient-id', $PatientId,
                 '--department', $DepartmentCode,
-                '--output', $outFile)
+                '--output', $script:outFile)
             if ($Dhis2Scheme) { $rArgs += @('--scheme', $Dhis2Scheme) }
             if ($Dhis2Hostname) { $rArgs += @('--host', $Dhis2Hostname) }
             if ($null -ne $Dhis2Port) { $rArgs += @('--port', $Dhis2Port) }
@@ -94,12 +94,12 @@ try {
                 else { Write-Verbose $s }
             }
             $script:exitCode = $LASTEXITCODE
-            if ($exitCode -eq 0) {
-                Write-Host "done. Output: $outFile" -ForegroundColor Green
+            if ($script:exitCode -eq 0) {
+                Write-Host "done. Output: $($script:outFile)" -ForegroundColor Green
             }
         } else {
             $quartoFile = Resolve-NeoipcLocaleQmd -ReportDir $reportDir -BaseName 'Patient-Data-Report' -Language $Language
-            $outFile = "${timestamp}_NeoIPC-Patient-Data_${PatientId}.${Language}.${Format}"
+            $script:outFile = "${timestamp}_NeoIPC-Patient-Data_${PatientId}.${Language}.${Format}"
 
             Write-Host "Generating patient data report ($Format) for $PatientId..."
             $quartoArgs = @('render', $quartoFile,
@@ -107,7 +107,7 @@ try {
                 '--to', $Format,
                 '-P', "patientId:$PatientId",
                 '-P', "departmentCode:$DepartmentCode",
-                '-o', $outFile)
+                '-o', $script:outFile)
             if ($Dhis2Scheme) { $quartoArgs += @('-P', "dhis2Scheme:$Dhis2Scheme") }
             if ($Dhis2Hostname) { $quartoArgs += @('-P', "dhis2Hostname:$Dhis2Hostname") }
             if ($null -ne $Dhis2Port) { $quartoArgs += @('-P', "dhis2Port:$Dhis2Port") }
