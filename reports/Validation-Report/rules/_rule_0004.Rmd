@@ -1,4 +1,4 @@
-```{r Validation rule 4: "The surveillance end date is the same as or earlier than the admission date"}
+```{r Validation rule 4: "The surveillance end date is earlier than the admission date"}
 
 problems <- problems |>
   bind_rows(
