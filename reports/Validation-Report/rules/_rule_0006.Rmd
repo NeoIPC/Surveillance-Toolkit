@@ -8,7 +8,7 @@ problems <- problems |>
       mutate(
         EVENT_ID = surveillanceEnd_event,
         EVENT_TYPE = event_types("END"),
-        EVENT_DATE = admission_occurredAt,
+        EVENT_DATE = SURVEILLANCE_END_DATE,
         PROBLEM_ID = 6L,
         SURVEILLANCE_END_STATUS = surveillanceEnd_status,
         .keep = "unused") |>
