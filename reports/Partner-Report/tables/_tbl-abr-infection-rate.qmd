@@ -83,7 +83,7 @@ if (!is.null(benchmark_data$abr_infection_rate_table) &&
 
   tbl <- tbl |>
     dplyr::mutate(
-      abr = dplyr::case_match(
+      abr = dplyr::recode_values(
         .data$abr,
         "3gcr" ~ "3gcr",
         "car" ~ sR$car,

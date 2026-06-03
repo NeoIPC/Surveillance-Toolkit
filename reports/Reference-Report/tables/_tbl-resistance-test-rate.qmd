@@ -35,7 +35,7 @@ tbl <- tbl_data |>
     dplyr::ungroup() |>
     dplyr::arrange(.data$abr) |>
     dplyr::mutate(
-      abr = dplyr::case_match(
+      abr = dplyr::recode_values(
         .data$abr,
         "3gcr_routine" ~ sR$`3gcr`,
         "car_routine" ~ sR$car,

@@ -77,7 +77,7 @@ if (!is.null(benchmark_data$usage_density_rate_table) &&
 
   tbl <- tbl |>
     dplyr::mutate(
-    factor = dplyr::case_match(
+    factor = dplyr::recode_values(
       as.character(.data$factor),
       "cvc" ~ sR$cvc,
       "pvc" ~ sR$pvc,

@@ -49,12 +49,12 @@ if (!is.null(benchmark_data$antibiotic_utilisation_table) &&
   aware_text_colors <- c(A = "white", W = "black", R = "white")
   tbl_data <- tbl_data |>
     dplyr::mutate(
-      aware = dplyr::case_match(
+      aware = dplyr::recode_values(
         as.character(.data$aware),
         "WHO_AWARE_ACCESS" ~ "A",
         "WHO_AWARE_WATCH" ~ "W",
         "WHO_AWARE_RESERVE" ~ "R",
-        .default = ""))
+        default = ""))
 
   if (knitr::is_html_output()) {
     tbl_data <- tbl_data |>

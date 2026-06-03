@@ -38,6 +38,8 @@
         'Get-NeoipcDepartments'
         'Get-NeoipcServerKey'
         'Read-OrgUnitInfo'
+        # DataElements
+        'Get-NeoipcDataElementCodes'
         # QuartoHelpers
         'Invoke-WithNeoipcAuth'
         'Invoke-QuartoRender'
@@ -56,7 +58,9 @@
         # Tracker
         'Read-PatientInfo'
         'Read-EnrolmentInfo'
-        'Read-EventSummary'
+        'Read-EventInfo'
+        # InfectiousAgents
+        'Find-NextFreeInfectiousAgentId'
     )
 
     # Cmdlets to export from this module

@@ -31,7 +31,7 @@ tbl <- tbl_data |>
     !!sR$table_headers$q2 := "q2",
     !!sR$table_headers$q3 := "q3") |>
   dplyr::mutate(
-    factor = dplyr::case_match(
+    factor = dplyr::recode_values(
       as.character(.data$factor),
       "cvc" ~ sR$cvc,
       "pvc" ~ sR$pvc,

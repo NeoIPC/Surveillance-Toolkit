@@ -80,7 +80,7 @@ if (!is.null(benchmark_data$secondary_bsi_rate_table) &&
 
   tbl <- tbl |>
     dplyr::mutate(
-      Infection = dplyr::case_match(
+      Infection = dplyr::recode_values(
         as.character(.data$event_type_key),
         "nec" ~ sR$necrotising_enterocolitis_sc,
         "ssi" ~ sR$surgical_site_infection_sc,

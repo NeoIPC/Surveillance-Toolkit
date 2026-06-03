@@ -38,7 +38,7 @@ tbl <- tbl_data |>
     !!sR$table_headers$q2 := "q2",
     !!sR$table_headers$q3 := "q3") |>
   dplyr::mutate(
-    abr = dplyr::case_match(
+    abr = dplyr::recode_values(
       .data$abr,
       "3gcr" ~ "3gcr",
       "car" ~ sR$car,

@@ -47,12 +47,12 @@ pairing_table_refs <- list(
 
 # Map factual states to coarse clinical categories for pattern matching.
 coarse_state <- function(state) {
-  dplyr::case_match(
+  dplyr::recode_values(
     state,
     c("zero", "below_q1", "extreme_below_pooled") ~ "low",
     c("q1_to_q2", "q2_to_q3") ~ "mid",
     c("above_q3", "extreme_above_pooled") ~ "high",
-    .default = NA_character_
+    default = NA_character_
   )
 }
 

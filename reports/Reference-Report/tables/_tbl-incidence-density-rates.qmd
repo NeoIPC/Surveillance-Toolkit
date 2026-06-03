@@ -31,7 +31,7 @@ tbl <- tbl_data |>
     !!sR$table_headers$q2 := "q2",
     !!sR$table_headers$q3 := "q3") |>
   dplyr::mutate(
-    inf = dplyr::case_match(
+    inf = dplyr::recode_values(
       as.character(.data$inf),
       "si" ~ sR$si,
       "bsi" ~ sR$primary_sepsis_bsi_sc,

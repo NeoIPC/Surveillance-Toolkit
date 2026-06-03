@@ -77,7 +77,7 @@ if (!is.null(benchmark_data$incidence_density_rate_table) &&
 
   tbl <- tbl |>
     dplyr::mutate(
-      inf = dplyr::case_match(
+      inf = dplyr::recode_values(
         as.character(.data$inf),
         "si" ~ sR$si,
         "bsi" ~ sR$primary_sepsis_bsi_sc,

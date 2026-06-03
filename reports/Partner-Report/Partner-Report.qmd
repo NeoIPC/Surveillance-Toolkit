@@ -1,40 +1,164 @@
 ---
 lang: en
 params:
+  # Path to a JSON partner dataset (admin-uploaded or pre-computed).
+  # When set, the report renders the stored partner data; live-fetch
+  # filter parameters are not used in this mode.
+  # @type character
   partnerDataFile: NULL
+
+  # Path to a JSON reference dataset (admin-uploaded). Required so the
+  # report can compare the partner unit's metrics against the reference
+  # benchmark.
+  # @type character
   referenceDataFile: NULL
+
+  # Department codes (NeoIPC site codes) to include in this report.
+  # Multiple codes are aggregated into one combined render; the
+  # subtitle lists them, comma-separated.
+  # @type character[]
   unitCodes: NULL
+
+  # Start of the reporting period (inclusive).
+  # @type Date
   reportingPeriodFrom: NULL
+
+  # End of the reporting period (inclusive).
+  # @type Date
   reportingPeriodTo: NULL
+
+  # Lower bound (inclusive) of the birth-weight filter, in grams.
+  # @type integer
+  # @range 0..65535
   birthWeightFrom: NULL
+
+  # Upper bound (inclusive) of the birth-weight filter, in grams.
+  # @type integer
+  # @range 0..65535
   birthWeightTo: NULL
+
+  # Lower bound (inclusive) of the gestational-age filter, in weeks.
+  # @type integer
+  # @range 0..52
   gestationWeeksFrom: NULL
+
+  # Upper bound (inclusive) of the gestational-age filter, in weeks.
+  # @type integer
+  # @range 0..52
   gestationWeeksTo: NULL
+
+  # Include patients not in the surveillance core cohort.
+  # @type logical
   includeNonCorePatients: NULL
+
+  # Path to a validation-exception file (admin-uploaded) used to
+  # suppress specific known false-positive validation findings during
+  # this render.
+  # @type character
   validationExceptionFile: NULL
+
+  # Include departments flagged as test units.
+  # @type logical
   includeTestData: false
+
+  # DHIS2 endpoint scheme (http or https). Server-side override; not
+  # exposed via the public API.
+  # @type character
+  # @values [http, https]
   dhis2Scheme: NULL
+
+  # DHIS2 endpoint hostname. Server-side override; not exposed via the
+  # public API.
+  # @type character
   dhis2Hostname: NULL
+
+  # DHIS2 endpoint TCP port. Server-side override; not exposed via the
+  # public API.
+  # @type integer
+  # @range 1..65535
   dhis2Port: NULL
+
+  # DHIS2 API path prefix. Server-side override; not exposed via the
+  # public API.
+  # @type character
   dhis2Path: NULL
+
+  # Confidence-interval display mode.
+  # @type character
+  # @values [all, rate, none]
   includeConfidenceIntervals: "rate"
+
+  # Include report-section introduction texts.
+  # @type logical
   includeIntroductionTexts: true
+
+  # Include report-section methods texts.
+  # @type logical
   includeMethodsTexts: true
+
+  # Include outlier-interpretation prose alongside outlier callouts.
+  # @type logical
   includeOutlierInterpretation: false
+
+  # Include the birth-weight distribution figure.
+  # @type logical
   includeBirthWeightFigure: true
+
+  # Include the gestational-age distribution figure.
+  # @type logical
   includeGestationalAgeFigure: true
+
+  # Include the incidence-density table.
+  # @type logical
   includeIncidenceDensityTable: true
+
+  # Include the device-associated incidence-density table.
+  # @type logical
   includeDeviceAssociatedIncidenceDensityTable: true
+
+  # Include the agent-per-infection rate table.
+  # @type logical
   includeAgentPerInfectionRateTable: true
+
+  # Include the infectious-agent-detection rate table.
+  # @type logical
   includeInfectiousAgentDetectionRateTable: true
+
+  # Include the risk-density rate table.
+  # @type logical
   includeRiskDensityRateTable: true
+
+  # Include the antibiotic-utilisation table.
+  # @type logical
   includeAntibioticUtilisationTable: false
+
+  # Include the surgical-procedure rate table.
+  # @type logical
   includeSurgicalProcedureRateTable: true
+
+  # Include the resistant-pathogen-infection rate table.
+  # @type logical
   includeResistantPathogenInfectionRateTable: false
+
+  # Include the organism-resistance rate table.
+  # @type logical
   includeOrganismResistanceRateTable: false
+
+  # Include the antibiotic-resistance-test rate table.
+  # @type logical
   includeAntibioticResistanceTestRateTable: false
+
+  # Include the secondary-BSI rate table.
+  # @type logical
   includeSecondaryBsiRateTable: false
+
+  # Threshold for sparse-data handling.
+  # @type integer
+  # @range 1..
   sparseDataThreshold: 16
+
+  # Render in debug mode (extra diagnostics).
+  # @type logical
   debug: false
 subtitle: '`r paste0(params$unitCodes, collapse = ", ")`'
 ---

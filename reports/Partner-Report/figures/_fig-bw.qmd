@@ -115,7 +115,7 @@ if (has_bw) {
   B_plot <- ggplot(
     benchmark_data$birth_weight_figure$location_parameters |>
       mutate(
-        dataset = dplyr::case_match(
+        dataset = dplyr::recode_values(
           as.character(.data$dataset),
           "own" ~ sR$own_unit,
           "ref" ~ sR$reference_data)),

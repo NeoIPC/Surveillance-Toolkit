@@ -49,8 +49,9 @@ Read-OrgUnitInfo -Token $env:NEOIPC_DHIS2_TOKEN
 # Filter by country
 Read-OrgUnitInfo -CountryCode DE
 
-# Filter by partner codes
-Read-OrgUnitInfo -PartnerCodes NEO_DE_01, NEO_DE_02
+# Filter by OU codes (friendly form) or UIDs
+Read-OrgUnitInfo -OrgUnitCode NEO_DE_01, NEO_DE_02
+Read-OrgUnitInfo -OrgUnitId abc123, def456
 ```
 
 ## User inspection
@@ -60,32 +61,79 @@ Read-OrgUnitInfo -PartnerCodes NEO_DE_01, NEO_DE_02
 Read-UserInfo
 
 # Users assigned to specific sites
-Read-UserInfo -PartnerCodes NEO_AT_01
+Read-UserInfo -OrgUnitCode NEO_AT_01
 ```
 
-## Enrollment & event inspection (pipeline-composable)
+## Patient, enrolment, event inspection (pipeline-composable)
+
+Each `Read-*Info` cmdlet emits parent IDs and child ID lists on its
+output objects, and accepts pipeline-bound filter parameters with
+matching property names. Cross-cmdlet composition works by exact
+property-name match — no `[Alias]` indirection, no `Select-Object`
+renames.
 
 ```powershell
-# All enrollments at Austrian sites
-Read-EnrolmentInfo -PartnerCodes NEO_AT_01, NEO_AT_02
+# All enrolments at Austrian sites
+Read-EnrolmentInfo -OrgUnitCode NEO_AT_01, NEO_AT_02
 
-# Pipe from org units
+# Pipe from org units (OrgUnitCode binds to -OrgUnitCode)
 Read-OrgUnitInfo -CountryCode AT | Read-EnrolmentInfo
 
 # Filter by date range
 Read-EnrolmentInfo -AdmissionDateFrom 2025-01-01 -AdmissionDateTo 2025-06-30
 
-# Search by patient ID
-Read-EnrolmentInfo -NeoIpcId 'NEO_AT_01-0042'
+# Search by patient ID (lives on Read-PatientInfo — its endpoint is the
+# only one with attribute filters). Compose to get enrolments:
+Read-PatientInfo -NeoIpcId 'NEO_AT_01-0042' | Read-EnrolmentInfo
 
-# Events from enrollments (no extra API call)
-Read-EnrolmentInfo -PartnerCodes NEO_DE_01 | Read-EventSummary
+# Reverse direction: enrolments → patients (TrackedEntityId binds)
+Read-EnrolmentInfo -OrgUnitCode NEO_DE_01 | Read-PatientInfo
 
-# Filter to specific event type
-Read-EnrolmentInfo -PartnerCodes NEO_DE_01 | Read-EventSummary -EventType 'Primary Sepsis/BSI'
+# Search events directly (new — replaces Read-EventSummary)
+Read-EventInfo -OrgUnitCode NEO_DE_01 -EventType 'Primary Sepsis/BSI' `
+  -OccurredAfter (Get-Date).AddDays(-90)
 
-# Patient demographics
-Read-OrgUnitInfo -PartnerCodes NEO_DE_01 | Read-PatientInfo
+# "Who created events with custom organism names recently?" — the
+# spike-investigation use case. -DataElementCode OR-composes
+# client-side; supply each DE code the partners might have populated.
+$codes = @(
+    'NEOIPC_BSI_PATHOGEN_1_NAME','NEOIPC_BSI_PATHOGEN_2_NAME','NEOIPC_BSI_PATHOGEN_3_NAME',
+    'NEOIPC_HAP_PATHOGEN_1_NAME','NEOIPC_HAP_PATHOGEN_2_NAME','NEOIPC_HAP_PATHOGEN_3_NAME'
+    # …add more codes as needed (use Tab completion: -DataElementCode NEOIPC_<Tab>)
+)
+Read-EventInfo -DataElementCode $codes -UpdatedAfter (Get-Date).AddDays(-30) `
+  | Group-Object OrgUnitId, CreatedBy `
+  | Sort-Object Count -Descending `
+  | Select-Object `
+      @{ Name = 'OrgUnitCode'; Expression = { (Read-OrgUnitInfo -OrgUnitId ($_.Name -split ', ')[0]).OrgUnitCode } }, `
+      @{ Name = 'CreatedBy';   Expression = { ($_.Name -split ', ')[1] } }, `
+      Count
+
+# Events at a partner (no DE filter — DataValues omitted from output)
+Read-OrgUnitInfo -CountryCode DE | Read-EventInfo -EventType Pneumonia
+
+# Reverse pipe: events → parent enrolments (gets DashboardUrl, etc.)
+Read-EventInfo -OrgUnitCode NEO_DE_01 -EventType Pneumonia `
+  | Read-EnrolmentInfo
+```
+
+## Working with event dataValues
+
+`Read-EventInfo` returns a `DataValues` PSCustomObject keyed by the DE
+codes you passed in `-DataElementCode` (omitted from output when the
+parameter is absent — UIDs aren't decoded to codes without a separate
+metadata call).
+
+```powershell
+$events = Read-EventInfo -DataElementCode 'NEOIPC_BSI_PATHOGEN_1_NAME' `
+  -OccurredAfter (Get-Date).AddDays(-30)
+
+# Direct access by code
+$events[0].DataValues.NEOIPC_BSI_PATHOGEN_1_NAME.Value
+$events[0].DataValues.NEOIPC_BSI_PATHOGEN_1_NAME.StoredBy
+
+# Flatten into a tabular form with one column per DE code
+$events | Select-Object EventId, OccurredAt, CreatedBy -ExpandProperty DataValues
 ```
 
 ## PAT lifecycle management
@@ -177,14 +225,19 @@ $pairs = Build-QmdParamPairs -Values @{
 
 ## Tab completion
 
-Functions that accept `-PartnerCodes` support tab completion from the local
-site-codes cache. Run `Update-NeoipcSiteCache.ps1` once to populate the cache:
+`-OrgUnitCode` (on `Read-OrgUnitInfo`, `Read-UserInfo`, `Read-PatientInfo`,
+`Read-EnrolmentInfo`, `Read-EventInfo`) and `-DataElementCode` (on
+`Read-EventInfo`) support tab completion from local caches. Populate
+them once with the unified cache-refresh script:
 
 ```powershell
-./scripts/Update-NeoipcSiteCache.ps1 -Token $env:NEOIPC_DHIS2_TOKEN
+./scripts/Update-NeoipcCache.ps1                # refresh everything
+./scripts/Update-NeoipcCache.ps1 -Sites         # only site-codes cache
+./scripts/Update-NeoipcCache.ps1 -DataElements  # only DE-codes cache
 ```
 
-After that, `-PartnerCodes NEO_<Tab>` completes from cached site codes.
+After that, `-OrgUnitCode NEO_<Tab>` and `-DataElementCode NEOIPC_<Tab>`
+complete from the cached lists.
 
 ## Exported functions
 
@@ -192,7 +245,9 @@ After that, `-PartnerCodes NEO_<Tab>` completes from cached site codes.
 |----------|-----------|
 | Auth | `Resolve-NeoipcToken`, `Resolve-NeoipcAuth`, `Get-NeoipcAuthPassword`, `Test-DHIS2PersonalAccessToken` |
 | OrgUnits | `Get-NeoipcDepartments`, `Get-NeoipcServerKey`, `Read-OrgUnitInfo` |
-| Tracker | `Read-PatientInfo`, `Read-EnrolmentInfo`, `Read-EventSummary` |
+| Tracker | `Read-PatientInfo`, `Read-EnrolmentInfo`, `Read-EventInfo` |
+| DataElements | `Get-NeoipcDataElementCodes` |
 | PAT | `Read-DHIS2PersonalAccessToken`, `Remove-DHIS2PersonalAccessToken`, `Clear-DHIS2PersonalAccessTokens` |
 | User | `Read-UserInfo` |
 | Quarto | `Invoke-WithNeoipcAuth`, `Invoke-QuartoRender`, `Invoke-Rscript`, `Build-QmdParamPairs`, `Write-NeoipcBuildReport`, `Test-QuartoInstallation`, `Split-NeoipcLocale`, `Resolve-NeoipcLocaleQmd` |
+| InfectiousAgents | `Find-NextFreeInfectiousAgentId` |

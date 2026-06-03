@@ -69,7 +69,7 @@ if (nrow(problems) > 0) {
     dplyr::left_join(enrollment_lookup, dplyr::join_by("enrollment_key")) |>
     dplyr::left_join(event_lookup, dplyr::join_by("event_key")) |>
     dplyr::mutate(
-      event_type = dplyr::case_match(
+      event_type = dplyr::recode_values(
         as.character(.data$event_type_key),
         "adm" ~ "ADM", "pro" ~ "SUR", "bsi" ~ "BSI",
         "nec" ~ "NEC", "ssi" ~ "SSI", "hap" ~ "HAP",
