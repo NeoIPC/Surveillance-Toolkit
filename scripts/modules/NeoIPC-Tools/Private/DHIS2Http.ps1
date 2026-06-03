@@ -1,5 +1,5 @@
-# Private DHIS2 HTTP layer for shared GET/DELETE helpers — not exported from the module.
-# Preferred entry point for new public cmdlets that call the DHIS2 API.
+# Private DHIS2 HTTP layer — not exported from the module.
+# All public functions that call the DHIS2 API should go through these two functions.
 
 function Invoke-NeoipcDhis2Get {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]
@@ -44,7 +44,7 @@ function Invoke-NeoipcDhis2Get {
         }
     }
 
-    $uriBuilder.Query = ($queryParts -join '&')
+    $uriBuilder.Query = '?' + ($queryParts -join '&')
 
     # Build Invoke-RestMethod parameters from auth hashtable
     $invokeParams = @{
@@ -119,10 +119,9 @@ function Invoke-NeoipcDhis2Delete {
             "Delete DHIS2 data via DELETE $($uriBuilder.Uri)?",
             'Removing DHIS2 data')) {
         Write-Debug "DELETE $($uriBuilder.Uri)"
-        $result = Invoke-RestMethod @invokeParams
+        $($result = . { Invoke-RestMethod @invokeParams }) 4>&1 | Write-Debug
 
-        # DHIS2 can return HTTP 200 with an error in the JSON body on DELETE.
-        # Throw rather than Write-Error so callers can't silently miss the failure.
+        # DHIS2 can return HTTP 200 with an error in the JSON body on DELETE
         if ($null -ne $result.httpStatusCode -and ($result.httpStatusCode -lt 200 -or $result.httpStatusCode -ge 300)) {
             $errorMessage = "DELETE '$Path' failed with HTTP $($result.httpStatusCode) ('$($result.httpStatus)'), DHIS2 status $($result.status)"
             if ($null -ne $result.errorCode) {
@@ -130,7 +129,7 @@ function Invoke-NeoipcDhis2Delete {
             } else {
                 $errorMessage += ", message: '$($result.message)'"
             }
-            throw $errorMessage
+            Write-Error $errorMessage
         }
         $result
     }

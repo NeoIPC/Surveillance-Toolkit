@@ -1,0 +1,319 @@
+#### `{r} sR$headings$organism_resistance`
+
+```{r}
+#| output: asis
+.show(params$includeIntroductionTexts)
+```
+
+```{r}
+#| output: asis
+include_localised("_tbl-intro-organism-resistance.Rmd")
+```
+
+```{r}
+#| output: asis
+.end()
+```
+
+```{r}
+#| output: asis
+.show(params$includeMethodsTexts)
+```
+
+```{r}
+#| output: asis
+include_localised("_methods-organism-resistance.Rmd")
+```
+
+```{r}
+#| output: asis
+.end()
+```
+
+```{r}
+#| output: asis
+#| label: tbl-organism-resistance-rate
+#| tbl-cap: !expr 'sR$`tbl-organism-resistance-rate`$`tbl-cap`'
+#| tbl-cap-location: top
+
+# Conditionally render table only if department data exists
+if (!is.null(benchmark_data$organism_resistance_rate_table) &&
+    "n_own" %in% rlang::names2(benchmark_data$organism_resistance_rate_table) &&
+    sum(benchmark_data$organism_resistance_rate_table$n_own, na.rm = TRUE) > 0) {
+
+  # Check if reference data columns exist
+  has_reference <- "pooled_ref" %in% names(benchmark_data$organism_resistance_rate_table)
+
+  tbl_data <- benchmark_data$organism_resistance_rate_table
+  cw <- compute_col_widths(tbl_data, stub_min = 27, has_reference = has_reference)
+
+  ci_pattern <- ci_pattern_inline
+
+  tbl <- tbl_data |>
+    dplyr::select(-tidyselect::any_of(c("n_ref", ".ontology_path", "ia_tst_tot_own"))) |>
+    dplyr::mutate(
+      group = dplyr::if_else(
+        stringr::str_detect(group, "spp."),
+        paste0("*", stringr::str_extract(group, "^(.+) spp\\.(.*)$", 1), "* spp.", stringr::str_extract(group, "^(.+) spp\\.(.*)$", 2)),
+        group
+      )) |>
+    dplyr::rename(
+      !!sR$table_headers$n := "n_own",
+      !!sR$table_headers$rate := "pooled_own",
+      !!sR$table_headers$pooled := tidyselect::any_of("pooled_ref"),
+      !!sR$table_headers$q1 := tidyselect::any_of("q1_ref"),
+      !!sR$table_headers$q2 := tidyselect::any_of("q2_ref"),
+      !!sR$table_headers$q3 := tidyselect::any_of("q3_ref"))
+
+  ci_cols_to_drop <- character(0)
+  if (!include_rate_ci)
+    ci_cols_to_drop <- c(ci_cols_to_drop, "ci_lower_own", "ci_upper_own")
+  if (!include_pooled_ci)
+    ci_cols_to_drop <- c(ci_cols_to_drop, "ci_lower_ref", "ci_upper_ref")
+  if (!include_quartile_ci)
+    ci_cols_to_drop <- c(ci_cols_to_drop,
+      "q1_ci_lower_ref", "q1_ci_upper_ref",
+      "q2_ci_lower_ref", "q2_ci_upper_ref",
+      "q3_ci_lower_ref", "q3_ci_upper_ref")
+  if (length(ci_cols_to_drop) > 0)
+    tbl <- tbl |> dplyr::select(-tidyselect::any_of(ci_cols_to_drop))
+
+  tbl <- tbl |>
+    dplyr::select(-tidyselect::any_of(c("ia_tst_tot_ref"))) |>
+    dplyr::mutate(
+      abr = dplyr::case_match(
+        .data$abr,
+        "3gcr" ~ "3gcr",
+        "car" ~ sR$car,
+        "cor" ~ sR$cor,
+        "mrsa" ~ sR$mrsa,
+        "vre" ~ sR$vre),
+      level = .data$level + 2) |>
+    dplyr::group_by(.data$abr) |>
+    gt(rowname_col = "group") |>
+    sub_missing() |>
+    gt::tab_options(
+      latex.header_repeat = TRUE,
+      latex.use_longtable = TRUE,
+      table.width = pct(100),
+      table.font.size = cw$font_size,
+      footnotes.marks = "extended"
+    ) |>
+    fmt_number(
+      columns = !(tidyselect::any_of(sR$table_headers$n) | tidyselect::matches("^(group|level|taxon|abr)$")),
+      decimals = 1,
+      sep_mark = sR$digit_group_separator,
+      min_sep_threshold = 2,
+      locale = locale_gt) |>
+    fmt_integer(
+      columns = tidyselect::any_of(sR$table_headers$n),
+      sep_mark = sR$digit_group_separator,
+      min_sep_threshold = 2) |>
+    gt::fmt_markdown(
+      columns = "group"
+    ) |>
+    gt::tab_stub_indent(
+      rows = gt::everything(),
+      indent = gt::from_column(column = "level")
+    ) |>
+    tab_row_group(
+      label = gt::md(sR$`3gcr`),
+      rows = abr == "3gcr"
+    ) |>
+    tab_style(
+      style = cell_text(
+        weight = "bold"
+      ),
+      locations = cells_row_groups()
+    ) |>
+    tab_style(
+      style = cell_text(
+        weight = "bold"
+      ),
+      locations = cells_stub(
+        rows = taxon %in% c("genus")
+      )
+    ) |>
+    tab_style(
+      style = cell_text(
+        style = "italic"
+      ),
+      locations = cells_stub(
+        rows = taxon %in% c("species")
+      )
+    ) |>
+    cols_hide(columns = any_of(c("level","taxon"))) |>
+    tab_style(
+      style = cell_text(weight = "bold"),
+      locations = list(
+        cells_column_spanners(),
+        cells_column_labels(),
+        cells_row_groups()
+      )
+    ) |>
+      tab_spanner(
+        label = sR$`tbl-organism-resistance-rate`$`rate_name`,
+        columns = tidyselect::any_of(
+          c(
+            sR$table_headers$rate,
+            sR$table_headers$pooled,
+            sR$table_headers$q1,
+            sR$table_headers$q2,
+            sR$table_headers$q3)),
+        id = "organism_resistance_rate",
+        level = 2
+      ) |>
+    tab_footnote(
+      footnote = md(
+        paste0(
+          "$$\\text{",
+          sR$`tbl-organism-resistance-rate`$`rate_name`,
+          "} = \\frac{\\text{",
+          sR$`tbl-organism-resistance-rate`$`rate_numerator`,
+          "}}{\\text{",
+          sR$`tbl-organism-resistance-rate`$`rate_denominator`,
+          "}} \\times ",
+          format_integer(100),
+          "$$"
+        )),
+      locations = cells_column_spanners(spanners = "organism_resistance_rate"),
+      placement = "right"
+    ) |>
+    tab_footnote(
+      footnote = sprintf(
+        sR$`tbl-organism-resistance-rate`$n_footnote,
+        sR$table_headers$n),
+      locations = cells_column_labels(columns = sR$table_headers$n),
+      placement = "right"
+    ) |>
+    tab_footnote(
+      footnote = sprintf(
+        sR$`tbl-organism-resistance-rate`$rate_footnote,
+        sR$table_headers$rate),
+      locations = cells_column_labels(columns = sR$table_headers$rate),
+      placement = "right"
+    )
+
+  if (include_rate_ci && "ci_lower_own" %in% colnames(tbl$`_data`)) {
+    tbl <- tbl |>
+      gt::cols_merge(
+        columns = c(sR$table_headers$rate, "ci_lower_own", "ci_upper_own"),
+        pattern = ci_pattern,
+        rows = !is.na(tbl_data$pooled_own)
+      )
+  }
+  if (include_pooled_ci && "ci_lower_ref" %in% colnames(tbl$`_data`)) {
+    tbl <- tbl |>
+      gt::cols_merge(
+        columns = c(sR$table_headers$pooled, "ci_lower_ref", "ci_upper_ref"),
+        pattern = ci_pattern,
+        rows = !is.na(tbl_data$pooled_ref)
+      )
+  }
+  if ("q1_ci_lower_ref" %in% colnames(tbl$`_data`)) {
+    if (include_quartile_ci) {
+      has_boot <- !is.na(tbl$`_data`[["q1_ci_lower_ref"]])
+      tbl <- tbl |>
+        gt::cols_merge(
+          columns = c(sR$table_headers$q1, "q1_ci_lower_ref", "q1_ci_upper_ref"),
+          pattern = ci_pattern,
+          rows = has_boot
+        ) |>
+        gt::cols_merge(
+          columns = c(sR$table_headers$q2, "q2_ci_lower_ref", "q2_ci_upper_ref"),
+          pattern = ci_pattern,
+          rows = has_boot
+        ) |>
+        gt::cols_merge(
+          columns = c(sR$table_headers$q3, "q3_ci_lower_ref", "q3_ci_upper_ref"),
+          pattern = ci_pattern,
+          rows = has_boot
+        )
+    } else {
+      tbl <- tbl |> gt::cols_hide(columns = tidyselect::any_of(c(
+        "q1_ci_lower_ref", "q1_ci_upper_ref",
+        "q2_ci_lower_ref", "q2_ci_upper_ref",
+        "q3_ci_lower_ref", "q3_ci_upper_ref")))
+    }
+  }
+
+  if (has_reference) {
+    tbl <- tbl |>
+      cols_width(
+        stub() ~ pct(cw$stub),
+        sR$table_headers$n ~ pct(cw$n),
+        sR$table_headers$rate ~ pct(cw$rate),
+        sR$table_headers$pooled ~ pct(cw$pooled),
+        sR$table_headers$q1 ~ pct(cw$q),
+        sR$table_headers$q2 ~ pct(cw$q),
+        sR$table_headers$q3 ~ pct(cw$q)
+      ) |>
+      tab_spanner(
+        label = sR$own_data_label,
+        columns = tidyselect::any_of(c(sR$table_headers$n, sR$table_headers$rate)),
+        id = "department_data"
+      ) |>
+      tab_spanner(
+        label = sR$reference_data,
+        columns = c(
+          sR$table_headers$pooled,
+          sR$table_headers$q1,
+          sR$table_headers$q2,
+          sR$table_headers$q3),
+        id = "reference_data"
+      ) |>
+      tab_footnote(
+        footnote = sprintf(
+          sR$`tbl-organism-resistance-rate`$pooled_footnote,
+          sR$table_headers$pooled),
+        locations = cells_column_labels(columns = sR$table_headers$pooled),
+        placement = "right")
+  } else {
+    tbl <- tbl |>
+      cols_width(
+        stub() ~ pct(cw$stub),
+        sR$table_headers$n ~ pct(cw$n),
+        sR$table_headers$rate ~ pct(cw$rate)
+      )
+  }
+
+  if (any(!is.na(tbl_data$pooled_own) & tbl_data$n_own < sparse_threshold, na.rm = TRUE)) {
+    sparse_note <- glue::glue(if (include_rate_ci) sR$sparse_data_footnote else sR$sparse_data_footnote_no_ci, threshold = sparse_threshold)
+    tbl <- tbl |>
+      gt::tab_footnote(
+        footnote = sparse_note,
+        locations = cells_body(
+          columns = sR$table_headers$n,
+          rows = !is.na(tbl_data$pooled_own) & tbl_data$n_own < sparse_threshold),
+        placement = "right")
+  }
+
+  # Resistance category overlap source note
+  tbl <- tbl |>
+    gt::tab_source_note(
+      source_note = sR$`tbl-abr-infection-rate`$resistance_overlap_footnote)
+
+  # n.o.s. definition source note
+  if (any(tbl_data$taxon == "species_nos", na.rm = TRUE)) {
+    tbl <- tbl |>
+      gt::tab_source_note(source_note = sR$nos_footnote)
+  }
+
+  tbl
+} else {
+  no_data_table()
+}
+
+```
+
+```{r}
+#| output: asis
+# Show explanation when no organism-specific data exists
+if (is.null(benchmark_data$organism_resistance_rate_table) ||
+    !("n_own" %in% rlang::names2(benchmark_data$organism_resistance_rate_table)) ||
+    sum(benchmark_data$organism_resistance_rate_table$n_own, na.rm = TRUE) == 0) {
+  cat("\n\n::: {.callout-note}\n")
+  cat(sR$`tbl-organism-resistance-rate`$no_data, "\n")
+  cat(":::\n")
+}
+```

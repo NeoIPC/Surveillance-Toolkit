@@ -7,10 +7,13 @@ This script fetches the department/site list from DHIS2, filters by a regex, and
 With -Combined, it renders a single report covering all departments (no departmentFilter).
 
 .EXAMPLE
-    .\New-ValidationReports.ps1 -SiteCodeFilter 'NEO_AT.*' -Locale 'de' -Token $myToken -Verbose
+    .\New-ValidationReport.ps1 -SiteCodeFilter 'NEO_AT.*' -OutputLocale 'de' -Token $myToken -Verbose
 
 .EXAMPLE
-    .\New-ValidationReports.ps1 -Combined -Locale 'en' -Token $myToken -JsonReport
+    .\New-ValidationReport.ps1 -Combined -OutputLocale 'en' -Token $myToken -JsonReport
+
+.EXAMPLE
+    .\New-ValidationReport.ps1 -Combined -OutputDir ./data/local -ValidationExceptionFile ../NeoIPC/validation-exceptions_ref.csv -JsonReport
 #>
 [CmdletBinding(SupportsShouldProcess = $true, DefaultParameterSetName = 'PerSite')]
 param(
@@ -51,12 +54,18 @@ param(
             Sort-Object
     })]
     [Parameter(Position = 1)]
-    [string]$Locale = 'en',
+    [string]$OutputLocale = 'en',
 
     [Parameter(Position = 2)]
     [string]$Token,
 
     [string]$ValidationExceptionFile,
+
+    [Parameter()]
+    [switch]$IncludeTestData,
+
+    [Parameter()]
+    [string]$OutputDir = $null,
 
     [Parameter()]
     [switch]$JsonReport,
@@ -78,20 +87,45 @@ Import-Module (Join-Path $PSScriptRoot 'modules' 'NeoIPC-Tools') -Force -Verbose
 
 $auth = Resolve-NeoipcAuth -Token $Token
 
-$reportDir = Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..' 'reports' 'Validation-Report')
-$outputDirPath = Join-Path $reportDir '_output'
+$reportDirPath = Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..' 'reports' 'Validation-Report')
+
+# Resolve OutputDir BEFORE changing directory (it's relative to the caller's CWD)
+if ($OutputDir) {
+    $outputDirPath = Resolve-Path -LiteralPath $OutputDir -ErrorAction SilentlyContinue
+    if (-not $outputDirPath) {
+        New-Item -ItemType Directory -Path $OutputDir -Force | Out-Null
+        $outputDirPath = Resolve-Path -LiteralPath $OutputDir
+    }
+    $outputDirPath = $outputDirPath.Path
+    $outputDirExplicit = $true
+} else {
+    $outputDirPath = Join-Path $reportDirPath '_output'
+    $outputDirExplicit = $false
+}
 
 $isCombined = $PSCmdlet.ParameterSetName -eq 'Combined'
 
+# Resolve ValidationExceptionFile BEFORE changing directory (it's relative to the caller's CWD)
+$validationExceptionPath = $null
+if ($ValidationExceptionFile) {
+    $resolvedPath = Resolve-Path -LiteralPath $ValidationExceptionFile -ErrorAction SilentlyContinue
+    if ($resolvedPath) {
+        $validationExceptionPath = $resolvedPath.Path
+    } else {
+        Write-Warning "Validation exception file not found: '$ValidationExceptionFile'"
+    }
+}
+
 if (-not $isCombined) {
     $deptArgs = @{ Auth = $auth; SiteCodeFilter = $SiteCodeFilter }
+    if (-not $IncludeTestData) { $deptArgs.ExcludeTestUnits = $true }
     if ($Dhis2Scheme) { $deptArgs.Scheme = $Dhis2Scheme }
     if ($Dhis2Hostname) { $deptArgs.Hostname = $Dhis2Hostname }
-    if ($null -ne $Dhis2Port) { $deptArgs.Port = $Dhis2Port }
+    if ($Dhis2Port) { $deptArgs.Port = $Dhis2Port }
     if ($Dhis2Path) { $deptArgs.Path = $Dhis2Path }
-    $sites = Get-NeoipcDepartments @deptArgs
+    $siteCodes = Get-NeoipcDepartments @deptArgs
 
-    if (-not $sites -or $sites.Count -eq 0) {
+    if (-not $siteCodes -or $siteCodes.Count -eq 0) {
         Write-Warning "No sites matched filter '$SiteCodeFilter'. Nothing to do."
         return
     }
@@ -106,19 +140,19 @@ $outputFiles = @()
 $buildCompleted = $false
 $startedAt = (Get-Date -AsUTC).ToString('o')
 $scriptTimestamp = [datetime]::UtcNow.ToString("yyyy-MM-dd_HHmmss'Z'")
-$totalSteps = if ($isCombined) { 1 } else { $sites.Count }
+$totalSteps = if ($isCombined) { 1 } else { $siteCodes.Count }
 $completedSteps = 0
 
 try {
-    Set-Location -LiteralPath $reportDir
+    Set-Location -LiteralPath $reportDirPath
 
-    $localeParts = Split-NeoipcLocale -Locale $Locale
+    $localeParts = Split-NeoipcLocale -Locale $OutputLocale
     $language = $localeParts.Language
-    $qmdPath = Resolve-NeoipcLocaleQmd -ReportDir $reportDir -BaseName 'Validation-Report' -Locale $Locale
+    $qmdPath = Resolve-NeoipcLocaleQmd -ReportDir $reportDirPath -BaseName 'Validation-Report' -Locale $OutputLocale
     $qmdFile = [System.IO.Path]::GetFileName($qmdPath)
 
     if ($localeParts.Territory) {
-        $env:LC_ALL = "${Locale}.UTF-8"
+        $env:LC_ALL = "${OutputLocale}.UTF-8"
     } else {
         [Environment]::SetEnvironmentVariable('LC_ALL', $null, 'Process')
     }
@@ -129,14 +163,18 @@ try {
         $pct = [int](100 * $completedSteps / $totalSteps)
         Write-Progress -Activity 'Validation Report Build' -Status 'Rendering combined report' -PercentComplete $pct
 
-        $outFile = "${scriptTimestamp}_NeoIPC-Surveillance-Validation-Report.${Locale}.pdf"
-        $quartoArgs = @('render', $qmdFile, '--profile', $language, '-o', $outFile)
-        if ($ValidationExceptionFile) {
-            $quartoArgs += @('-P', "validationExceptionFile:$ValidationExceptionFile")
+        $outFile = "${scriptTimestamp}_NeoIPC-Surveillance-Validation-Report.${OutputLocale}.pdf"
+        $quartoArgs = @('render', $qmdFile, '--profile', $language, '--to', 'pdf', '-o', $outFile)
+        if ($outputDirExplicit) { $quartoArgs += @('--output-dir', $outputDirPath) }
+        if ($IncludeTestData) {
+            $quartoArgs += @('-P', 'includeTestData:true')
+        }
+        if ($validationExceptionPath) {
+            $quartoArgs += @('-P', "validationExceptionFile:$validationExceptionPath")
         }
         if ($Dhis2Scheme) { $quartoArgs += @('-P', "dhis2Scheme:$Dhis2Scheme") }
         if ($Dhis2Hostname) { $quartoArgs += @('-P', "dhis2Hostname:$Dhis2Hostname") }
-        if ($null -ne $Dhis2Port) { $quartoArgs += @('-P', "dhis2Port:$Dhis2Port") }
+        if ($Dhis2Port) { $quartoArgs += @('-P', "dhis2Port:$Dhis2Port") }
         if ($Dhis2Path) { $quartoArgs += @('-P', "dhis2Path:$Dhis2Path") }
 
         if ($PSCmdlet.ShouldProcess($outFile, 'Render combined validation report')) {
@@ -150,26 +188,30 @@ try {
         }
     } else {
         # PerSite mode: one report per site
-        foreach ($site in $sites) {
+        foreach ($siteCode in $siteCodes) {
             $completedSteps++
             $pct = [int](100 * $completedSteps / $totalSteps)
-            Write-Progress -Activity 'Validation Report Build' -Status "Rendering report for $site" -PercentComplete $pct
+            Write-Progress -Activity 'Validation Report Build' -Status "Rendering report for $siteCode" -PercentComplete $pct
 
-            $outFile = "$([datetime]::Now.ToString('yyyy-MM-dd_HHmmss'))_NeoIPC-Surveillance-Validation-Report_${site}.${Locale}.pdf"
-            $quartoArgs = @('render', $qmdFile, '--profile', $language, '-P', "departmentFilter:$($site)", '-o', $outFile)
-            if ($ValidationExceptionFile) {
-                $quartoArgs += @('-P', "validationExceptionFile:$ValidationExceptionFile")
+            $outFile = "$([datetime]::Now.ToString('yyyy-MM-dd_HHmmss'))_NeoIPC-Surveillance-Validation-Report_${siteCode}.${OutputLocale}.pdf"
+            $quartoArgs = @('render', $qmdFile, '--profile', $language, '--to', 'pdf', '-P', "departmentFilter:$($siteCode)", '-o', $outFile)
+            if ($outputDirExplicit) { $quartoArgs += @('--output-dir', $outputDirPath) }
+            if ($IncludeTestData) {
+                $quartoArgs += @('-P', 'includeTestData:true')
+            }
+            if ($validationExceptionPath) {
+                $quartoArgs += @('-P', "validationExceptionFile:$validationExceptionPath")
             }
             if ($Dhis2Scheme) { $quartoArgs += @('-P', "dhis2Scheme:$Dhis2Scheme") }
             if ($Dhis2Hostname) { $quartoArgs += @('-P', "dhis2Hostname:$Dhis2Hostname") }
-            if ($null -ne $Dhis2Port) { $quartoArgs += @('-P', "dhis2Port:$Dhis2Port") }
+            if ($Dhis2Port) { $quartoArgs += @('-P', "dhis2Port:$Dhis2Port") }
             if ($Dhis2Path) { $quartoArgs += @('-P', "dhis2Path:$Dhis2Path") }
 
-            if ($PSCmdlet.ShouldProcess($outFile, "Render validation report for $site")) {
-                Write-Host "Generating validation report for $site..."
-                $result = Invoke-QuartoRender -Arguments $quartoArgs -Description "validation report for $site"
+            if ($PSCmdlet.ShouldProcess($outFile, "Render validation report for $siteCode")) {
+                Write-Host "Generating validation report for $siteCode..."
+                $result = Invoke-QuartoRender -Arguments $quartoArgs -Description "validation report for $siteCode"
                 if ($result.Status -eq 'Error') {
-                    $errors += "Quarto render failed for $site."
+                    $errors += "Quarto render failed for $siteCode."
                 } elseif ($result.Status -ne 'NoData') {
                     $outputFiles += (Join-Path $outputDirPath $outFile)
                 }
@@ -187,15 +229,15 @@ finally {
 
     Write-Progress -Activity 'Validation Report Build' -Completed
 
-    $buildReportPath = Join-Path $outputDirPath "${scriptTimestamp}_NeoIPC-Surveillance-Validation-Report-Build.json"
+    $buildReportFilePath = Join-Path $outputDirPath "${scriptTimestamp}_NeoIPC-Surveillance-Validation-Report-Build.json"
     $extraFields = [ordered]@{
-        timestamp = $scriptTimestamp
-        outputDir = $outputDirPath
-        mode = if ($isCombined) { 'combined' } else { 'per-site' }
-        sites = if ($isCombined) { $null } else { $sites }
-        locale = $Locale
+        scriptTimestamp = $scriptTimestamp
+        outputDirPath = $outputDirPath
+        outputLayout = if ($isCombined) { 'combined' } else { 'per-site' }
+        siteCodes = if ($isCombined) { $null } else { $siteCodes }
+        outputLocale = $OutputLocale
     }
-    $reportPath = if ($JsonReport) { $buildReportPath } else { $null }
+    $reportPath = if ($JsonReport) { $buildReportFilePath } else { $null }
     $status = Write-NeoipcBuildReport -Name 'Validation Report Build' `
         -Errors $errors -OutputFiles $outputFiles -BuildCompleted $buildCompleted `
         -StartedAt $startedAt -BuildReportPath $reportPath -ExtraFields $extraFields

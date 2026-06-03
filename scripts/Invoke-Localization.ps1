@@ -58,6 +58,17 @@
     Run the full pipeline, generating localized files for all languages
     regardless of translation completeness.
 
+.PARAMETER NonInteractive
+    Suppress interactive prompts. Runs read-only string layer validation
+    before the update pipeline; aborts with a non-zero exit code if
+    validation fails instead of attempting interactive fixes.
+    Intended for CI/CD and scripted usage.
+
+.EXAMPLE
+    Invoke-Localization -Update -NonInteractive
+    Run the full pipeline non-interactively: validate string layers first,
+    abort on failure, then update all configs and glossary.
+
 .EXAMPLE
     Invoke-Localization -Test
     Check for string resource duplicates across YAML layers (read-only).
@@ -79,7 +90,10 @@ param(
     [switch]$Force,
 
     [Parameter(ParameterSetName = 'Update')]
-    [switch]$DryRun
+    [switch]$DryRun,
+
+    [Parameter(ParameterSetName = 'Update')]
+    [switch]$NonInteractive
 )
 
 Set-StrictMode -Version Latest
@@ -257,8 +271,7 @@ function Invoke-TestStringLayers {
 
     Write-Host "Checking string layer duplicates (read-only)"
     & $script
-    # Propagate exit code to caller
-    exit $LASTEXITCODE
+    return $LASTEXITCODE
 }
 
 # ---------------------------------------------------------------------------
@@ -270,9 +283,17 @@ if ($Update) {
     $runPo4a     = $Config -eq 'all' -or $po4aConfigs -contains $Config
     $runGlossary = $Config -eq 'all' -or $Config -eq 'glossary'
 
-    # Step 1: Fix string layers (may move keys between YAML files)
+    # Step 1: Validate/fix string layers (may move keys between YAML files)
     if ($runLayers) {
-        Invoke-FixStringLayers
+        if ($NonInteractive) {
+            $rc = Invoke-TestStringLayers
+            if ($rc -ne 0) {
+                Write-Error "String layer validation failed (exit code $rc). Fix duplicates before running -NonInteractive -Update."
+                exit $rc
+            }
+        } else {
+            Invoke-FixStringLayers
+        }
     }
 
     # Step 2-3: Update YAML keys then run po4a
@@ -293,5 +314,5 @@ if ($Update) {
     Write-Host "`nLocalization update complete."
 }
 elseif ($Test) {
-    Invoke-TestStringLayers
+    exit (Invoke-TestStringLayers)
 }

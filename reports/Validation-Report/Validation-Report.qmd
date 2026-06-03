@@ -2,6 +2,7 @@
 lang: en
 params:
   departmentFilter: NULL
+  includeTestData: false
   validationExceptionFile: NULL
   dhis2Scheme: NULL
   dhis2Hostname: NULL

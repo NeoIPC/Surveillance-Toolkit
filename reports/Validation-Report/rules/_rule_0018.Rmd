@@ -1,42 +1,29 @@
-```{r Validation rule 18: "The number of patient days does not match the calculated value"}
-
+```{r Validation rule 18: patient-days mismatch}
 problems <- problems |>
-  bind_rows(
-    patients |>
-      inner_join(enrollments, join_by(key == patient)) |>
-      mutate(
-        PROBLEM_ID = 18L,
-        EVENT_ID = surveillanceEnd_event,
-        EVENT_TYPE = event_types("END"),
-        EVENT_DATE = SURVEILLANCE_END_DATE,
-        PATIENT_DAYS = NEOIPC_SURVEILLANCE_END_PATIENT_DAYS,
-        PATIENT_DAYS_CALCULATED = 1L + as.integer(SURVEILLANCE_END_DATE - ENROLMENT_DATE)) |>
-      filter(PATIENT_DAYS != PATIENT_DAYS_CALCULATED) |>
-      select(
-        SITE_CODE,
-        DEPARTMENT_CODE,
-        DEPARTMENT_NAME,
-        DEPARTMENT_OU,
-        NEOIPC_PATIENT_ID,
-        PATIENT_TEI,
-        ENROLMENT_ID,
-        ENROLMENT_DATE,
-        EVENT_ID,
-        EVENT_TYPE,
-        EVENT_DATE,
-        PROBLEM_ID,
-        PATIENT_DAYS,
-        PATIENT_DAYS_CALCULATED
-        ) |>
-      anti_join(
-        exceptions,
-        join_by(
-          PROBLEM_ID,
-          SITE_CODE,
-          DEPARTMENT_CODE,
-          NEOIPC_PATIENT_ID,
-          ENROLMENT_DATE,
-          EVENT_TYPE,
-          EVENT_DATE)) |>
-      select(!DEPARTMENT_CODE))
+  dplyr::bind_rows(
+    data$enrollments |>
+      dplyr::select("patient_key", "enrollment_key", "enrolledAt") |>
+      dplyr::inner_join(
+        data$events |>
+          dplyr::filter(.data$event_type_key == "end") |>
+          dplyr::select("enrollment_key", "event_key", "occurredAt"),
+        dplyr::join_by("enrollment_key")) |>
+      dplyr::inner_join(
+        data$surveillanceEndData |>
+          dplyr::select("event_key", "patient_days"),
+        dplyr::join_by("event_key")) |>
+      dplyr::mutate(
+        patient_days_calculated = 1L + as.integer(.data$occurredAt - .data$enrolledAt)) |>
+      dplyr::filter(.data$patient_days != .data$patient_days_calculated) |>
+      dplyr::anti_join(
+        exceptions |> dplyr::filter(.data$rule_id == 18L),
+        dplyr::join_by("enrollment_key")) |>
+      tidyr::nest(context = c("patient_days", "patient_days_calculated")) |>
+      dplyr::mutate(
+        rule_id        = 18L,
+        patient_key    = .data$patient_key,
+        enrollment_key = .data$enrollment_key,
+        event_key      = .data$event_key,
+        context        = .data$context,
+        .keep = "none"))
 ```

@@ -48,6 +48,8 @@ if (has_data) {
   tbl_data <- benchmark_data$surgery_rate_table
   cw <- compute_col_widths(tbl_data, stub_min = 23, has_reference = has_reference, base_font_size = 10)
 
+  ci_pattern <- ci_pattern_inline
+
   tbl <- tbl_data |>
     dplyr::select(-tidyselect::any_of("n_ref")) |>
     dplyr::rename(
@@ -126,13 +128,15 @@ if (has_data) {
       footnote = sprintf(
         sR$`tbl-surgical-procedure-rates`$n_footnote,
         sR$table_headers$n),
-      locations = cells_column_labels(columns = sR$table_headers$n)
+      locations = cells_column_labels(columns = sR$table_headers$n),
+      placement = "right"
     ) |>
     tab_footnote(
       footnote = sprintf(
         sR$`tbl-surgical-procedure-rates`$rate_footnote,
         sR$table_headers$rate),
-      locations = cells_column_labels(columns = sR$table_headers$rate)
+      locations = cells_column_labels(columns = sR$table_headers$rate),
+      placement = "right"
     ) |>
       tab_footnote(
         footnote = md(
@@ -147,14 +151,15 @@ if (has_data) {
             format_integer(100),
             "$$"
           )),
-        locations = cells_column_spanners(spanners = "procedure_rate")
+        locations = cells_column_spanners(spanners = "procedure_rate"),
+        placement = "right"
       )
 
   if (include_rate_ci && "ci_lower_own" %in% colnames(tbl$`_data`)) {
     tbl <- tbl |>
       gt::cols_merge(
         columns = c(sR$table_headers$rate, "ci_lower_own", "ci_upper_own"),
-        pattern = "{1} ({2}\u2013{3})",
+        pattern = ci_pattern,
         rows = !is.na(tbl_data$pooled_own)
       )
   }
@@ -162,29 +167,27 @@ if (has_data) {
     tbl <- tbl |>
       gt::cols_merge(
         columns = c(sR$table_headers$pooled, "ci_lower_ref", "ci_upper_ref"),
-        pattern = "{1} ({2}\u2013{3})",
+        pattern = ci_pattern,
         rows = !is.na(tbl_data$pooled_ref)
       )
   }
   if ("q1_ci_lower_ref" %in% colnames(tbl$`_data`)) {
     if (include_quartile_ci) {
       has_boot <- !is.na(tbl$`_data`[["q1_ci_lower_ref"]])
-      if (auto_quartile_ci)
-        has_boot <- has_boot & !is.na(tbl$`_data`[[sR$table_headers$q1]])
       tbl <- tbl |>
         gt::cols_merge(
           columns = c(sR$table_headers$q1, "q1_ci_lower_ref", "q1_ci_upper_ref"),
-          pattern = "{1} ({2}\u2013{3})",
+          pattern = ci_pattern,
           rows = has_boot
         ) |>
         gt::cols_merge(
           columns = c(sR$table_headers$q2, "q2_ci_lower_ref", "q2_ci_upper_ref"),
-          pattern = "{1} ({2}\u2013{3})",
+          pattern = ci_pattern,
           rows = has_boot
         ) |>
         gt::cols_merge(
           columns = c(sR$table_headers$q3, "q3_ci_lower_ref", "q3_ci_upper_ref"),
-          pattern = "{1} ({2}\u2013{3})",
+          pattern = ci_pattern,
           rows = has_boot
         )
     } else {
@@ -224,7 +227,8 @@ if (has_data) {
         footnote = sprintf(
           sR$`tbl-surgical-procedure-rates`$pooled_footnote,
           sR$table_headers$pooled),
-        locations = cells_column_labels(columns = sR$table_headers$pooled))
+        locations = cells_column_labels(columns = sR$table_headers$pooled),
+        placement = "right")
   } else {
     tbl <- tbl |>
       cols_width(
@@ -234,14 +238,15 @@ if (has_data) {
       )
   }
 
-  if (any(tbl_data$n_own < sparse_threshold, na.rm = TRUE)) {
+  if (any(!is.na(tbl_data$pooled_own) & tbl_data$n_own < sparse_threshold, na.rm = TRUE)) {
     sparse_note <- glue::glue(if (include_rate_ci) sR$sparse_data_footnote else sR$sparse_data_footnote_no_ci, threshold = sparse_threshold)
     tbl <- tbl |>
       gt::tab_footnote(
         footnote = sparse_note,
         locations = cells_body(
           columns = sR$table_headers$n,
-          rows = tbl_data$n_own < sparse_threshold))
+          rows = !is.na(tbl_data$pooled_own) & tbl_data$n_own < sparse_threshold),
+        placement = "right")
   }
 
   tbl

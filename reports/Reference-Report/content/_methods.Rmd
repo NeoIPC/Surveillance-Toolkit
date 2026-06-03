@@ -3,9 +3,8 @@
 cat(sR$methods$pooled_rate, "\n")
 cat("\n", sR$methods$quartiles, "\n")
 
-if (include_rate_ci) cat("\n", sR$methods$ci_rates, "\n")
+if (include_pooled_ci) cat("\n", sR$methods$ci_rates, "\n")
 if (include_quartile_ci) cat("\n", sR$methods$ci_quartile_bootstrap, "\n")
-if (auto_quartile_ci) cat("\n", sR$methods$ci_quartile_auto_note, "\n")
 ```
 
 `r sR$methods$sparse_data`

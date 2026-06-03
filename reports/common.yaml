@@ -30,11 +30,12 @@ fig-cap:
     no-bnch: "A is a histogram in %s steps with a density curve and B is a boxplot."
   - bnch: "Vertical lines in the boxplots represent the %s, %s and %s quantiles, the diamonds represent the pooled arithmetic means."
     no-bnch: "Vertical lines in the boxplot represent the %s, %s and %s quantiles, the diamond represents the pooled arithmetic mean."
+fig_sample_size: "(N = %s patients)"
 gramm_abbreviation: "g"
 header:
   department: Department
-  departments: Departments
 headings:
+  antibiotic_utilisation: Antibiotic Utilisation
   antimicrobial_susceptibility_testing: Antimicrobial Susceptibility Testing
   detection_of_infectious_agents: Detection of Infectious Agents
   device_associated_infections: Device-Associated Infections
@@ -45,6 +46,7 @@ headings:
   introduction: Introduction
   nosocomial_infections: Nosocomial Infections
   patient_population: Patient Population
+  organism_resistance: Organism-Specific Resistance Rates
   resistant_pathogens: Resistant Pathogens
   risk_and_protective_factors: Risk and Protective Factors
   secondary_bsi: Secondary Bloodstream Infections
@@ -79,6 +81,7 @@ patient_days: "Patient days"
 percent_symbol: "%"
 si: "Severe infection"
 surgical_procedures: "Surgical Procedures"
+nos_footnote: "n.o.s. = not otherwise specified; isolates identified to genus but not species level."
 sparse_data_footnote: "Fewer than {threshold} events; interpret rate and confidence interval with caution."
 sparse_data_footnote_no_ci: "Fewer than {threshold} events; interpret rate with caution."
 table_headers:
@@ -90,6 +93,14 @@ table_headers:
   rate: "Rate"
 tbl-abr-infection-rate:
   n_footnote: "%s: The aggregated number of antibiotic resistant pathogens in all infections."
+  resistance_overlap_footnote: >-
+    Resistance categories are not mutually exclusive. An organism may meet the
+    criteria for more than one category and will appear under each applicable one.
+  total_dedup_footnote: >-
+    The Total row counts infections in which at least one resistant pathogen of
+    this resistance category was detected. Because a single infection may involve
+    resistant organisms from more than one organism group, the organism-level
+    subtotals may sum to more than the Total.
   no_data: "No resistant pathogen infection data available for this report settings."
   pooled_footnote: "%s: The resistant pathogen infection rate calculated across all infants from all departments."
   quartile_footnote: "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the resistant pathogen infection rates of the partner departments. Q₂ represents the median. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected infections with an agents is greater than or equal to one according to the pooled resistant pathogen infection rate."
@@ -97,6 +108,37 @@ tbl-abr-infection-rate:
   rate_name: "Resistant pathogen infection rate"
   rate_numerator: "Number of antibiotic resistant pathogens in infections"
   tbl-cap: "Nosocomial infections with resistant pathogens"
+tbl-antibiotic-utilisation:
+  aware_column_footnote: >-
+    WHO AWaRe classification (Access, Watch, Reserve). See %s.
+  atc_footnote: >-
+    ATC: Anatomical Therapeutic Chemical classification (WHO). Substances are
+    grouped by pharmacological subgroup (ATC 5th level). See %s for details.
+  exposure_density_rate: "Antibiotic Exposure Density Rate"
+  n_footnote: >-
+    %s: The aggregated number of substance-days recorded across all infants.
+  no_data: "No antibiotic utilisation data available for this report settings."
+  pooled_footnote: >-
+    %s: The Antibiotic Exposure Density Rate calculated across all infants from
+    all departments in the reference data.
+  quartile_footnote: >-
+    %s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Antibiotic
+    Exposure Density Rates of the departments in the reference data. Q₂
+    represents the median. These quartiles are only displayed when the number of
+    departments contributing to the denominator is greater than or equal to five,
+    and when the median number of substance-days is greater than or equal to one
+    according to the pooled rate.
+  substance_days: "Substance-days"
+  tbl-cap: "Antibiotic utilisation by pharmacological subgroup and substance"
+tbl-organism-resistance-rate:
+  n_footnote: "%s: The aggregated number of resistant detections of the organism."
+  no_data: "No organism-specific resistance data available for this report settings."
+  pooled_footnote: "%s: The organism-specific resistance rate calculated across all infants from all departments."
+  quartile_footnote: "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the organism-specific resistance rates of the partner departments. Q₂ represents the median. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of tested detections is greater than or equal to one."
+  rate_denominator: "Number of tested detections of the organism"
+  rate_name: "Organism-specific resistance rate"
+  rate_numerator: "Number of resistant detections of the organism"
+  tbl-cap: "Organism-specific resistance rates"
 tbl-agent-per-infection-rate:
   n_footnote: "%s: The aggregated number of infectious agents in all infections."
   no_data: "No infectious agent data available for this report settings."
@@ -130,7 +172,7 @@ tbl-incidence-density-rates:
   no_data: "No infection data available for this report settings."
   pooled_footnote: "%s: The Incidence Density Rate calculated across all infants from all departments."
   quartile_footnote: "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Incidence Density Rates of the partner departments. Q₂ represents the median. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected infections is greater than or equal to one according to the pooled Incidence Density Rate."
-  si_footnote: "%s: Combines the outcomes primary sepsis/BSI and pneumonia"
+  si_footnote: "%s is a composite endpoint combining primary sepsis/BSI and pneumonia."
   tbl-cap: "Incidence Density Rates of nosocomial infections"
 tbl-infectious-agent-detection-rate:
   n_footnote: "%s: The aggregated number of infections where at least one infectious agent was recorded."
@@ -240,6 +282,15 @@ methods:
     The figures show both the frequency distribution (histogram with density
     curve) and summary statistics (boxplot with quartiles and pooled arithmetic
     mean).
+  antibiotic_utilisation: >-
+    Antibiotic utilisation is reported per individual substance, grouped by ATC
+    pharmacological subgroup. The exposure density rate measures substance-days
+    per 100 patient-days. Antibiotic days are counted from the first dose to the
+    last dose of a therapy inclusive. Each substance is counted separately; a
+    patient receiving two antibiotics on the same day contributes one day to each
+    substance's tally. Because of combination therapy, the sum of individual
+    substance rates can exceed the total antibiotic exposure rate shown in the
+    risk and protective factors table.
   incidence_density: >-
     Incidence density rates are calculated per 1,000 patient-days, allowing
     comparison between departments with different patient volumes and lengths of
@@ -275,6 +326,13 @@ methods:
   resistant_pathogens_ast_ref: >-
     Resistance testing completeness is reported separately in the
     antimicrobial susceptibility testing section.
+  organism_resistance: >-
+    This section reports organism-specific resistance rates — the proportion
+    of each detected organism that carries a given resistance marker. Unlike
+    the resistant pathogen infection rate, which uses infections as the
+    denominator, this metric uses organism-level detections: for example,
+    the proportion of all tested Klebsiella pneumoniae detections that are
+    carbapenem-resistant.
   infectious_agent_detection: >-
     The infectious agent detection rate measures the proportion of infections in
     which at least one infectious agent was identified. Higher detection rates

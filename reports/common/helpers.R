@@ -180,9 +180,14 @@ get_dataset_options <- function(
     defaultPatientFilter,
     validationExceptionFile
     )  neoipcr::dhis2_dataset_options(
-      include_world_bank_class = "yes",
-      include_country = "yes",
-      include_department = "pseudonymised",
+      include_world_bank_class = "full",
+      include_country = "full",
+      include_department = "pseudo",
+      include_patient = "full",
+      patient_columns = c("id", "sex", "birth_weight", "gestational_age",
+                           "delivery_mode", "siblings"),
+      include_enrollment = "full",
+      include_event = "full",
       surveillance_end_from = lubridate::as_date(
         dplyr::coalesce(reportingPeriodFrom, "2024-01-01")),
       surveillance_end_to = lubridate::as_date(
@@ -207,7 +212,7 @@ format_integer <- function(x, big_mark = sR$digit_group_separator)
 
 #' Format countries grouped by World Bank class
 #' @param countries Tibble with displayName and optionally wb_class_name
-#' @param include_wb_class Whether to include WB class ("no", "pseudonymised", "yes")
+#' @param include_wb_class Whether to include WB class ("no", "pseudo", "full")
 #' @return Formatted string with countries grouped by WB class, or simple list if not showing WB class
 format_countries <- function(countries) {
   if (is.null(countries) || nrow(countries) == 0) {
@@ -295,6 +300,8 @@ format_dataset_resources <- function(metadata, counts, sR) {
       if (!is.data.frame(countries_data)) {
         countries_data <- tibble::tibble(name = countries_data)
       }
+      # format_countries expects `name` (the raw, locale-independent
+      # DHIS2 org unit name) as the lookup key into sR$countryNames.
       format_countries(countries_data)
     },
     birthweightFilter = format_range_filter(

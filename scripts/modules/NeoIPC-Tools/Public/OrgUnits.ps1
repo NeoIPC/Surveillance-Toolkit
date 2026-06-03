@@ -53,15 +53,23 @@ function Get-NeoipcDepartments {
         [Parameter()]
         [string]$SiteCodeFilter = '.+',
 
+        [Parameter()]
+        [switch]$ExcludeTestUnits,
+
         [Parameter()] [string]$Scheme = $null,
         [Parameter()] [string]$Hostname = $null,
         [Parameter()] [Nullable[int]]$Port = $null
     )
 
+    $fields = @('code')
+    if ($ExcludeTestUnits) {
+        $fields += 'organisationUnitGroups[code]'
+    }
+
     $getParams = @{
         Auth     = $Auth
         Path     = 'api/organisationUnits'
-        Fields   = @('code')
+        Fields   = $fields
         Filter   = @('organisationUnitGroups.code:eq:NEO_DEPARTMENT')
         QueryParameters = @{ 'withinUserHierarchy' = 'true' }
     }
@@ -71,10 +79,20 @@ function Get-NeoipcDepartments {
 
     try {
         $resp = Invoke-NeoipcDhis2Get @getParams
-        $sites = if ($resp.organisationUnits) {
-            $resp.organisationUnits.code
+        $units = if ($resp.organisationUnits) {
+            $resp.organisationUnits
         } else { @() }
-        $sites = $sites | Where-Object { $_ -match $SiteCodeFilter } | Sort-Object
+
+        if ($ExcludeTestUnits) {
+            $units = $units | Where-Object {
+                $groupCodes = @($_.organisationUnitGroups | ForEach-Object { $_.code })
+                $groupCodes -notcontains 'TEST_UNITS'
+            }
+        }
+
+        $sites = @($units | ForEach-Object { $_.code }) |
+            Where-Object { $_ -match $SiteCodeFilter } |
+            Sort-Object
     }
     catch {
         throw "Failed to fetch department list from DHIS2: $($_.Exception.Message)"
@@ -120,7 +138,7 @@ function Read-OrgUnitInfo {
         [ArgumentCompleter({
             param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
             $serverKey = Get-NeoipcServerKey -Scheme $fakeBoundParameters['Scheme'] -Hostname $fakeBoundParameters['Hostname'] -Port $fakeBoundParameters['Port']
-            $cacheDir = Join-Path (Split-Path (Split-Path (Split-Path (Split-Path $PSScriptRoot)))) 'data' 'local' $serverKey
+            $cacheDir = Join-Path (Split-Path (Split-Path (Split-Path $PSScriptRoot))) 'data' 'local' $serverKey
             $cacheFile = Join-Path $cacheDir 'site-codes.txt'
             if (Test-Path $cacheFile) {
                 Get-Content $cacheFile | Where-Object { $_ -like "$wordToComplete*" }

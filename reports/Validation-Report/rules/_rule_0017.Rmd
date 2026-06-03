@@ -1,51 +1,33 @@
-```{r Validation rule 17: "The patient record contains an enrolment whose time interval overlaps with that of another enrolment."}
+```{r Validation rule 17: overlapping enrolments}
+enrolment_intervals <- data$enrollments |>
+  dplyr::select("patient_key", "enrollment_key", "enrolledAt") |>
+  dplyr::left_join(
+    data$events |>
+      dplyr::filter(.data$event_type_key == "end") |>
+      dplyr::select("enrollment_key", "endOccurredAt" = "occurredAt"),
+    dplyr::join_by("enrollment_key")) |>
+  dplyr::mutate(
+    surveillanceInterval = lubridate::interval(.data$enrolledAt, .data$endOccurredAt))
 
 problems <- problems |>
-  bind_rows(
-    patients |>
-      inner_join(
-        enrollments |>
-          inner_join(
-            enrollments,
-            join_by(patient),
-            relationship = "many-to-many") |>
-          filter(
-            key.x != key.y & (
-              int_overlaps(ADMISSION_INTERVAL.x, ADMISSION_INTERVAL.y) |
-                ENROLMENT_DATE.x == ENROLMENT_DATE.y
-            )),
-        join_by(key == patient)) |>
-      mutate(
-        ENROLMENT_ID = ENROLMENT_ID.x,
-        ENROLMENT_DATE = ENROLMENT_DATE.x,
-        PROBLEM_ID = 17L,
-        ENROLMENT_1_ADMISSION_DATE = ENROLMENT_DATE.x,
-        ENROLMENT_2_ADMISSION_DATE = ENROLMENT_DATE.y,
-        ENROLMENT_1_SURVEILLANCE_END_DATE = SURVEILLANCE_END_DATE.x,
-        ENROLMENT_2_SURVEILLANCE_END_DATE = SURVEILLANCE_END_DATE.y,
-        .keep = "unused") |>
-      select(
-        SITE_CODE,
-        DEPARTMENT_CODE,
-        DEPARTMENT_NAME,
-        DEPARTMENT_OU,
-        NEOIPC_PATIENT_ID,
-        PATIENT_TEI,
-        ENROLMENT_ID,
-        ENROLMENT_DATE,
-        PROBLEM_ID,
-        ENROLMENT_1_ADMISSION_DATE,
-        ENROLMENT_2_ADMISSION_DATE,
-        ENROLMENT_1_SURVEILLANCE_END_DATE,
-        ENROLMENT_2_SURVEILLANCE_END_DATE
-        ) |>
-      anti_join(
-        exceptions,
-        join_by(
-          PROBLEM_ID,
-          SITE_CODE,
-          DEPARTMENT_CODE,
-          NEOIPC_PATIENT_ID,
-          ENROLMENT_DATE)) |>
-      select(!DEPARTMENT_CODE))
+  dplyr::bind_rows(
+    enrolment_intervals |>
+      dplyr::inner_join(enrolment_intervals,
+        dplyr::join_by("patient_key"),
+        relationship = "many-to-many",
+        suffix = c("_this", "_other")) |>
+      dplyr::filter(.data$enrollment_key_this != .data$enrollment_key_other &
+                    (lubridate::int_overlaps(.data$surveillanceInterval_this, .data$surveillanceInterval_other) |
+                     .data$enrolledAt_this == .data$enrolledAt_other)) |>
+      dplyr::anti_join(
+        exceptions |> dplyr::filter(.data$rule_id == 17L),
+        dplyr::join_by("enrollment_key_this" == "enrollment_key")) |>
+      tidyr::nest(context = c("enrolledAt_this", "endOccurredAt_this", "enrolledAt_other", "endOccurredAt_other")) |>
+      dplyr::mutate(
+        rule_id        = 17L,
+        patient_key    = .data$patient_key,
+        enrollment_key = .data$enrollment_key_this,
+        event_key      = NA_integer_,
+        context        = .data$context,
+        .keep = "none"))
 ```

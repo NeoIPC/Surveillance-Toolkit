@@ -12,6 +12,7 @@ params:
   gestationWeeksTo: NULL
   includeNonCorePatients: NULL
   validationExceptionFile: NULL
+  includeTestData: false
   dhis2Scheme: NULL
   dhis2Hostname: NULL
   dhis2Port: NULL
@@ -19,7 +20,7 @@ params:
   includeConfidenceIntervals: "rate"
   includeIntroductionTexts: true
   includeMethodsTexts: true
-  includeOutlierInterpretation: true
+  includeOutlierInterpretation: false
   includeBirthWeightFigure: true
   includeGestationalAgeFigure: true
   includeIncidenceDensityTable: true
@@ -27,8 +28,10 @@ params:
   includeAgentPerInfectionRateTable: true
   includeInfectiousAgentDetectionRateTable: true
   includeRiskDensityRateTable: true
+  includeAntibioticUtilisationTable: false
   includeSurgicalProcedureRateTable: true
   includeResistantPathogenInfectionRateTable: false
+  includeOrganismResistanceRateTable: false
   includeAntibioticResistanceTestRateTable: false
   includeSecondaryBsiRateTable: false
   sparseDataThreshold: 16

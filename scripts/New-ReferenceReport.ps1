@@ -9,7 +9,7 @@ param(
 
     [Parameter()]
     [ValidateSet('pdf','html','docx','json')]
-    [string[]]$Formats = @('pdf'),
+    [string[]]$OutputFormats = @('pdf'),
     [ArgumentCompleter({
         param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
         @(
@@ -20,9 +20,9 @@ param(
             Sort-Object
     })]
     [Parameter()]
-    [string[]]$Locales = @('en'),
+    [string[]]$OutputLocales = @('en'),
     [Parameter()]
-    [string]$OutputDir = "${PSScriptRoot}/../reports/Reference-Report/_output",
+    [string]$OutputDir = $null,
     [Parameter(ParameterSetName='Online')]
     [string]$ReportingPeriodFrom,
     [Parameter(ParameterSetName='Online')]
@@ -61,7 +61,8 @@ param(
     [ValidateRange(1, 100)]
     [int]$SparseDataThreshold,
     [Parameter()]
-    [switch]$HideConfidenceIntervals,
+    [ValidateSet('all', 'none', 'pooled', 'quartiles')]
+    [string[]]$ConfidenceIntervals,
     [Parameter()]
     [switch]$JsonReport,
     [Parameter()]
@@ -79,6 +80,8 @@ param(
     [Parameter(ParameterSetName='Online')]
     [string]$Dhis2Path = $null,
 
+    # Elements to enable on top of the QMD defaults. Each listed element
+    # has its visibility flag(s) forced to true.
     [Parameter()]
     [ValidateSet(
         'PatientPopulation',
@@ -92,13 +95,20 @@ param(
         'DeviceAssociatedRates',
         'AgentPerInfectionRates',
         'AntibioticResistanceRates',
+        'OrganismResistanceRates',
         'InfectiousAgentDetectionRates',
         'ResistanceTestRates',
+        'AntibioticUtilisationRates',
         'RiskDensityRates',
         'SurgicalProcedureRates',
         'SecondaryBloodstreamInfectionRates'
     )]
-    [string[]]$IncludeElements = @(
+    [string[]]$EnableElements = @(),
+    # Elements to disable on top of the QMD defaults. Each listed element
+    # has its visibility flag(s) forced to false. If an element appears in
+    # both -EnableElements and -DisableElements, -DisableElements wins.
+    [Parameter()]
+    [ValidateSet(
         'PatientPopulation',
         'NosocomialInfections',
         'InfectiousAgents',
@@ -110,23 +120,22 @@ param(
         'DeviceAssociatedRates',
         'AgentPerInfectionRates',
         'AntibioticResistanceRates',
+        'OrganismResistanceRates',
         'InfectiousAgentDetectionRates',
         'ResistanceTestRates',
+        'AntibioticUtilisationRates',
         'RiskDensityRates',
         'SurgicalProcedureRates',
         'SecondaryBloodstreamInfectionRates'
-    ),
-    # Elements to remove from the default IncludeElements list.
-    # Processed after IncludeElements: the effective set is IncludeElements minus ExcludeElements.
-    [Parameter()]
-    [string[]]$ExcludeElements = @()
+    )]
+    [string[]]$DisableElements = @()
 )
 
 Import-Module (Join-Path $PSScriptRoot 'modules' 'NeoIPC-Tools') -Force -Verbose:$false
 
 $isDataFileMode = $PSCmdlet.ParameterSetName -eq 'DataFile'
 
-if ($isDataFileMode -and ($Formats -contains 'json')) {
+if ($isDataFileMode -and ($OutputFormats -contains 'json')) {
     throw "The 'json' format is not supported with -DataFile. The data file is already JSON."
 }
 
@@ -139,19 +148,22 @@ if ($Quiet) {
 
 $scriptTimestamp = (Get-Date -AsUTC).ToString("yyyy-MM-dd_HHmmss'Z'")
 $repoRoot = Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..')
-$reportDir = Resolve-Path -LiteralPath (Join-Path $repoRoot 'reports/Reference-Report')
-$outputDirPath = Resolve-Path -LiteralPath $OutputDir -ErrorAction SilentlyContinue
+$reportDirPath = Resolve-Path -LiteralPath (Join-Path $repoRoot 'reports/Reference-Report')
+
+# Resolve OutputDir (relative to caller's CWD); fall back to the report's _output
+$effectiveOutputDir = if ($OutputDir) { $OutputDir } else { Join-Path $reportDirPath '_output' }
+$outputDirPath = Resolve-Path -LiteralPath $effectiveOutputDir -ErrorAction SilentlyContinue
 if (-not $outputDirPath) {
     # Resolve to absolute path without requiring the directory to exist.
     # New-Item respects -WhatIf and won't create it during dry runs, so
     # Resolve-Path would fail. The directory is created on first write by
     # Set-Content / ConvertTo-Json inside the build report function.
-    $outputDirPath = [System.IO.Path]::GetFullPath($OutputDir)
+    $outputDirPath = [System.IO.Path]::GetFullPath($effectiveOutputDir)
 } else {
     $outputDirPath = $outputDirPath.Path
 }
 
-$buildReportPath = Join-Path $outputDirPath "${scriptTimestamp}_NeoIPC-Surveillance-Reference-Report-Build.json"
+$buildReportFilePath = Join-Path $outputDirPath "${scriptTimestamp}_NeoIPC-Surveillance-Reference-Report-Build.json"
 
 $quartoCmd = Get-Command -Name quarto -ErrorAction SilentlyContinue
 if (-not $quartoCmd) {
@@ -166,24 +178,24 @@ if (-not $isDataFileMode) {
     }
 }
 
-$formats = $Formats | ForEach-Object { $_ -split ',' } |
+$OutputFormats = $OutputFormats | ForEach-Object { $_ -split ',' } |
     ForEach-Object { $_.Trim().ToLowerInvariant() } |
     Where-Object { $_ } |
     Select-Object -Unique
 
-$locales = $Locales | ForEach-Object { $_ -split ',' } |
+$OutputLocales = $OutputLocales | ForEach-Object { $_ -split ',' } |
     ForEach-Object { $_.Trim().ToLowerInvariant() } |
     Where-Object { $_ } |
     Select-Object -Unique
 
 # Validate locale inputs and resolve QMD files
-foreach ($locale in $locales) {
-    $null = Resolve-NeoipcLocaleQmd -ReportDir $reportDir -BaseName 'Reference-Report' -Locale $locale
+foreach ($locale in $OutputLocales) {
+    $null = Resolve-NeoipcLocaleQmd -ReportDir $reportDirPath -BaseName 'Reference-Report' -Locale $locale
 }
 
-$wantsJson = $formats -contains 'json'
-$renderFormats = $formats | Where-Object { $_ -ne 'json' }
-$renderCount = $renderFormats.Count * $locales.Count
+$wantsJson = $OutputFormats -contains 'json'
+$renderFormats = $OutputFormats | Where-Object { $_ -ne 'json' }
+$renderCount = $renderFormats.Count * $OutputLocales.Count
 
 if ($isDataFileMode) {
     # DataFile mode: data already exists, resolve its path
@@ -233,6 +245,13 @@ if ($isDataFileMode) {
 
 $authForEnv = if (-not $isDataFileMode) { Resolve-NeoipcAuth -Token $Token } else { @{ AuthType = 'None' } }
 
+# $PSBoundParameters is per-invocation; inside the Invoke-WithNeoipcAuth
+# scriptblock it refers to the scriptblock's own (empty) parameter dictionary,
+# not this script's. Snapshot common-parameter flags here so the scriptblock
+# can read them via lexical closure.
+$debugRequested   = $PSBoundParameters.ContainsKey('Debug')
+$verboseRequested = $PSBoundParameters.ContainsKey('Verbose')
+
 Invoke-WithNeoipcAuth -Auth $authForEnv -ExtraEnvVars @{ 'LC_ALL' = $null; 'NEOIPC_BACKUP_PASSWORD' = $null } -ScriptBlock {
 
 if (-not $isDataFileMode -and $BackupDataset -and [string]::IsNullOrWhiteSpace($env:NEOIPC_BACKUP_PASSWORD)) {
@@ -241,21 +260,23 @@ if (-not $isDataFileMode -and $BackupDataset -and [string]::IsNullOrWhiteSpace($
         [System.Net.NetworkCredential]::new('', $secureBackupPassword).Password
 }
 
-$commonParams = @{}
-if ($ReportingPeriodFrom) { $commonParams.reportingPeriodFrom = $ReportingPeriodFrom }
-if ($ReportingPeriodTo) { $commonParams.reportingPeriodTo = $ReportingPeriodTo }
-if ($BirthWeightFrom) { $commonParams.birthWeightFrom = $BirthWeightFrom }
-if ($BirthWeightTo) { $commonParams.birthWeightTo = $BirthWeightTo }
-if ($GestationWeeksFrom) { $commonParams.gestationWeeksFrom = $GestationWeeksFrom }
-if ($GestationWeeksTo) { $commonParams.gestationWeeksTo = $GestationWeeksTo }
-if ($ReportingCountries) { $commonParams.reportingCountries = ($ReportingCountries -join ',') }
-if ($ValidationExceptionFile) { $commonParams.validationExceptionFile = $ValidationExceptionFile }
-$commonParams.testUnitFilter = (-not $IncludeTestUnits)
-$commonParams.defaultPatientFilter = (-not $IncludeNonCorePatients)
-if ($HideIntroductionTexts.IsPresent) { $commonParams['includeIntroductionTexts'] = 'false' }
-if ($HideMethodsTexts.IsPresent) { $commonParams['includeMethodsTexts'] = 'false' }
-if ($SparseDataThreshold) { $commonParams['sparseDataThreshold'] = $SparseDataThreshold }
-if ($HideConfidenceIntervals.IsPresent) { $commonParams['includeConfidenceIntervals'] = 'false' }
+$qmdParams = @{}
+if ($ReportingPeriodFrom) { $qmdParams.reportingPeriodFrom = $ReportingPeriodFrom }
+if ($ReportingPeriodTo) { $qmdParams.reportingPeriodTo = $ReportingPeriodTo }
+if ($BirthWeightFrom) { $qmdParams.birthWeightFrom = $BirthWeightFrom }
+if ($BirthWeightTo) { $qmdParams.birthWeightTo = $BirthWeightTo }
+if ($GestationWeeksFrom) { $qmdParams.gestationWeeksFrom = $GestationWeeksFrom }
+if ($GestationWeeksTo) { $qmdParams.gestationWeeksTo = $GestationWeeksTo }
+if ($ReportingCountries) { $qmdParams.reportingCountries = ($ReportingCountries -join ',') }
+if ($ValidationExceptionFile) { $qmdParams.validationExceptionFile = $ValidationExceptionFile }
+$qmdParams.testUnitFilter = (-not $IncludeTestUnits)
+$qmdParams.defaultPatientFilter = (-not $IncludeNonCorePatients)
+if ($HideIntroductionTexts.IsPresent) { $qmdParams['includeIntroductionTexts'] = 'false' }
+if ($HideMethodsTexts.IsPresent) { $qmdParams['includeMethodsTexts'] = 'false' }
+if ($SparseDataThreshold) { $qmdParams['sparseDataThreshold'] = $SparseDataThreshold }
+if ($ConfidenceIntervals) {
+    $qmdParams['includeConfidenceIntervals'] = $ConfidenceIntervals -join ','
+}
 
 # Map user-friendly element names to internal Quarto metadata keys.
 # Each element can map to multiple keys (e.g. a section includes its text,
@@ -280,35 +301,27 @@ $elementMapping = @{
     'DeviceAssociatedRates'             = @('includeDeviceAssociatedIncidenceDensityTable')
     'AgentPerInfectionRates'            = @('includeAgentPerInfectionRateTable')
     'AntibioticResistanceRates'         = @('includeResistantPathogenInfectionRateTable')
+    'OrganismResistanceRates'           = @('includeOrganismResistanceRateTable')
     'InfectiousAgentDetectionRates'     = @('includeInfectiousAgentDetectionRateTable')
     'ResistanceTestRates'               = @('includeAntibioticResistanceTestRateTable')
+    'AntibioticUtilisationRates'        = @('includeAntibioticUtilisationTable')
     'RiskDensityRates'                  = @('includeRiskDensityRateTable')
     'SurgicalProcedureRates'            = @('includeSurgicalProcedureRateTable')
     'SecondaryBloodstreamInfectionRates' = @('includeSecondaryBsiRateTable')
 }
 
-# Apply exclusions: remove ExcludeElements from the effective IncludeElements list
-if ($ExcludeElements.Count -gt 0) {
-    $IncludeElements = @($IncludeElements | Where-Object { $_ -notin $ExcludeElements })
-}
-
-# Convert user-friendly array to Quarto boolean parameters.
-# Collect all metadata keys that should be true, then set everything else false.
-# Header is always included (unconditional in _content.qmd)
-
-$enabledKeys = [System.Collections.Generic.HashSet[string]]::new()
-foreach ($element in $IncludeElements) {
-    if ($elementMapping.ContainsKey($element)) {
-        foreach ($key in $elementMapping[$element]) {
-            [void]$enabledKeys.Add($key)
-        }
+# Apply per-element overrides on top of QMD defaults.
+# -EnableElements forces listed elements ON; -DisableElements forces them OFF.
+# Elements in neither list keep their QMD defaults (no -P flag emitted).
+# If an element appears in both lists, -DisableElements wins (disables run second).
+foreach ($element in $EnableElements) {
+    foreach ($key in $elementMapping[$element]) {
+        $qmdParams[$key] = $true
     }
 }
-foreach ($mapping in $elementMapping.GetEnumerator()) {
-    foreach ($key in $mapping.Value) {
-        if ($key -ne 'includeHeader') {
-            $commonParams[$key] = $enabledKeys.Contains($key)
-        }
+foreach ($element in $DisableElements) {
+    foreach ($key in $elementMapping[$element]) {
+        $qmdParams[$key] = $false
     }
 }
 
@@ -319,7 +332,7 @@ $startedAt = (Get-Date -AsUTC).ToString('o')
 $totalSteps = 0
 $completedSteps = 0
 if ($needsJson) { $totalSteps++ }
-$totalSteps += ($renderFormats.Count * $locales.Count)
+$totalSteps += ($renderFormats.Count * $OutputLocales.Count)
 
 try {
     if ($needsJson) {
@@ -328,11 +341,11 @@ try {
         Write-Progress -Activity 'Reference Report Build' -Status 'Generating JSON' -PercentComplete $percentComplete
         if ($PSCmdlet.ShouldProcess($jsonPath, 'Generate reference data JSON')) {
             Write-Verbose "Generating reference data JSON: $jsonPath"
-            $rArgs = @('--vanilla', (Join-Path $reportDir 'Generate-ReferenceData.R'), '--file', $jsonPath)
+            $rArgs = @('--vanilla', (Join-Path $reportDirPath 'Generate-ReferenceData.R'), '--file', $jsonPath)
             if ($Quiet) { $rArgs += @('--quiet') }
-            if ($PSBoundParameters.Debug) { $rArgs += @('--debug') }
-            if ($PSBoundParameters.Verbose) { $rArgs += @('--verbose') }
-            foreach ($kvp in $commonParams.GetEnumerator()) {
+            if ($debugRequested) { $rArgs += @('--debug') }
+            if ($verboseRequested) { $rArgs += @('--verbose') }
+            foreach ($kvp in $qmdParams.GetEnumerator()) {
                 if ($null -ne $kvp.Value -and '' -ne $kvp.Value) {
                     $rArgs += @("--$($kvp.Key)", "$($kvp.Value)")
                 }
@@ -342,7 +355,7 @@ try {
             if ($BackupDataset) { $rArgs += @('--backup-dataset', $backupPath) }
             if ($Dhis2Scheme) { $rArgs += @('--scheme', $Dhis2Scheme) }
             if ($Dhis2Hostname) { $rArgs += @('--host', $Dhis2Hostname) }
-            if ($null -ne $Dhis2Port) { $rArgs += @('--port', $Dhis2Port) }
+            if ($Dhis2Port) { $rArgs += @('--port', $Dhis2Port) }
             if ($Dhis2Path) { $rArgs += @('--path', $Dhis2Path) }
             $rResult = Invoke-Rscript -Arguments $rArgs -Command $rscriptCmd -Description "Generate-ReferenceData.R"
             if ($rResult.Status -eq 'Error') {
@@ -361,10 +374,10 @@ try {
 
     $quartoArgsCommon = @()
     if ($Quiet) {$quartoArgsCommon += '--quiet' }
-    if ($PSBoundParameters.Debug) {
+    if ($debugRequested) {
         $quartoArgsCommon += '--debug'
         $quartoArgsCommon += @('--log-level', 'debug')
-    } elseif ($PSBoundParameters.Verbose) {
+    } elseif ($verboseRequested) {
         $quartoArgsCommon += '--verbose'
         $quartoArgsCommon += @('--log-level', 'info')
     } else {
@@ -372,14 +385,14 @@ try {
             $quartoArgsCommon += @('--log-level', 'error')
         }
     }
-    $outputDirRelative = [System.IO.Path]::GetRelativePath($reportDir, $outputDirPath)
+    $outputDirRelative = [System.IO.Path]::GetRelativePath($reportDirPath, $outputDirPath)
     $quartoArgsCommon += @('--output-dir', $outputDirRelative)
 
-    Push-Location -LiteralPath $reportDir
+    Push-Location -LiteralPath $reportDirPath
     try {
-        foreach ($locale in $locales) {
+        foreach ($locale in $OutputLocales) {
             $localeParts = Split-NeoipcLocale -Locale $locale
-            $qmdPath = Resolve-NeoipcLocaleQmd -ReportDir $reportDir -BaseName 'Reference-Report' -Locale $locale
+            $qmdPath = Resolve-NeoipcLocaleQmd -ReportDir $reportDirPath -BaseName 'Reference-Report' -Locale $locale
             $qmd = [System.IO.Path]::GetFileName($qmdPath)
             $profileName = $localeParts.Language
 
@@ -401,7 +414,7 @@ try {
                 $quartoArgs = @('render', $qmd, '--profile', $profileName, '--to', $format, '-o', $outFileName)
                 # All parameters via -P (R reads params$, conditional
                 # blocks use cat() + when-meta="alwaysTrue" wrappers)
-                foreach ($kvp in $commonParams.GetEnumerator()) {
+                foreach ($kvp in $qmdParams.GetEnumerator()) {
                     if ($null -ne $kvp.Value -and '' -ne $kvp.Value) {
                         $quartoArgs += @('-P', "$($kvp.Key):$($kvp.Value)")
                     }
@@ -412,7 +425,7 @@ try {
                 if (-not $isDataFileMode) {
                     if ($Dhis2Scheme) { $quartoArgs += @('-P', "dhis2Scheme:$Dhis2Scheme") }
                     if ($Dhis2Hostname) { $quartoArgs += @('-P', "dhis2Hostname:$Dhis2Hostname") }
-                    if ($null -ne $Dhis2Port) { $quartoArgs += @('-P', "dhis2Port:$Dhis2Port") }
+                    if ($Dhis2Port) { $quartoArgs += @('-P', "dhis2Port:$Dhis2Port") }
                     if ($Dhis2Path) { $quartoArgs += @('-P', "dhis2Path:$Dhis2Path") }
                 }
                 $quartoArgs += $quartoArgsCommon
@@ -448,23 +461,23 @@ finally {
     Write-Progress -Activity 'Reference Report Build' -Completed
 
     $extraFields = [ordered]@{
-        timestamp = $scriptTimestamp
-        outputDir = $outputDirPath
+        scriptTimestamp = $scriptTimestamp
+        outputDirPath = $outputDirPath
         json = [ordered]@{
-            path = if ($needsJson) { $jsonPath } else { $null }
+            filePath = if ($needsJson) { $jsonPath } else { $null }
             requested = $wantsJson
             intermediate = $jsonIntermediate
         }
         backup = [ordered]@{
             enabled = [bool]$BackupDataset
-            path = if ($BackupDataset) { $backupPath } else { $null }
+            filePath = if ($BackupDataset) { $backupPath } else { $null }
         }
-        locales = $locales
-        formats = $formats
+        outputLocales = $OutputLocales
+        outputFormats = $OutputFormats
         parameterHash = $paramHash
         parameters = $paramHashSource
     }
-    $reportPath = if ($JsonReport) { $buildReportPath } else { $null }
+    $reportPath = if ($JsonReport) { $buildReportFilePath } else { $null }
     $status = Write-NeoipcBuildReport -Name 'Reference Report Build' `
         -Errors $errors -OutputFiles $outputFiles -BuildCompleted $buildCompleted `
         -StartedAt $startedAt -BuildReportPath $reportPath -ExtraFields $extraFields

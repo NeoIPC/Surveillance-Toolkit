@@ -1,10 +1,11 @@
 project:
   output-dir: _output
-execute:
-  keep-md: true
 date-meta: now
-number-sections: true
 echo: false
+# Uncomment for to debug Markdown or LaTeX files
+#keep-md: true
+#keep-tex: true
+number-sections: true
 format:
   html:
     link-external-icon: true
@@ -17,11 +18,9 @@ format:
     papersize: a4paper
     fig-pos: 'h'
     colorlinks: true
-  docx:
-    highlight-style: github
-    number-sections: true
-    reference-doc: ../common/reference.docx
-filters: ["../filters/pandoc-quotes.lua"]
+filters:
+  - "../filters/pandoc-quotes.lua"
+  - "../filters/fix-unnumbered-bookmarks.lua"
 profile:
   group: 
     - [en, de]

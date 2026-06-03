@@ -1,41 +1,23 @@
-```{r Validation rule 5: "The admission event is not completed"}
-
+```{r Validation rule 5: admission event not completed}
 problems <- problems |>
-  bind_rows(
-    patients |>
-      inner_join(enrollments, join_by(key == patient)) |>
-      filter(admission_status != 'COMPLETED') |>
-      mutate(
-        EVENT_ID = admission_event,
-        EVENT_TYPE = event_types("ADM"),
-        EVENT_DATE = admission_occurredAt,
-        PROBLEM_ID = 5L,
-        ADMISSION_STATUS = admission_status,
-        .keep = "unused") |>
-      select(
-        SITE_CODE,
-        DEPARTMENT_CODE,
-        DEPARTMENT_NAME,
-        DEPARTMENT_OU,
-        NEOIPC_PATIENT_ID,
-        PATIENT_TEI,
-        ENROLMENT_ID,
-        ENROLMENT_DATE,
-        EVENT_ID,
-        EVENT_TYPE,
-        EVENT_DATE,
-        PROBLEM_ID,
-        ADMISSION_STATUS
-        ) |>
-      anti_join(
-        exceptions,
-        join_by(
-          PROBLEM_ID,
-          SITE_CODE,
-          DEPARTMENT_CODE,
-          NEOIPC_PATIENT_ID,
-          ENROLMENT_DATE,
-          EVENT_TYPE,
-          EVENT_DATE)) |>
-      select(!DEPARTMENT_CODE))
+  dplyr::bind_rows(
+    data$enrollments |>
+      dplyr::select("patient_key", "enrollment_key") |>
+      dplyr::inner_join(
+        data$events |>
+          dplyr::filter(.data$event_type_key == "adm" &
+                        .data$status != "COMPLETED") |>
+          dplyr::select("enrollment_key", "event_key", "status"),
+        dplyr::join_by("enrollment_key")) |>
+      dplyr::anti_join(
+        exceptions |> dplyr::filter(.data$rule_id == 5L),
+        dplyr::join_by("enrollment_key")) |>
+      tidyr::nest(context = "status") |>
+      dplyr::mutate(
+        rule_id        = 5L,
+        patient_key    = .data$patient_key,
+        enrollment_key = .data$enrollment_key,
+        event_key      = .data$event_key,
+        context        = .data$context,
+        .keep = "none"))
 ```

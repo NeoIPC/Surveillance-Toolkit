@@ -1,0 +1,1 @@
+@tbl-antibiotic-utilisation details antibiotic exposure at the level of individual substances, grouped by ATC pharmacological subgroup. Bold rows show the aggregated rate for each subgroup; indented rows show the rate for each substance within that subgroup. Comparing substance-level patterns with the reference data can help identify opportunities for antibiotic stewardship.

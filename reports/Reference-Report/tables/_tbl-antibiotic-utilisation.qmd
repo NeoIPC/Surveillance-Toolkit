@@ -1,0 +1,221 @@
+### `{r} sR$headings$antibiotic_utilisation`
+
+```{r}
+#| output: asis
+.show(params$includeMethodsTexts)
+```
+
+```{r}
+#| output: asis
+include_localised("_methods-antibiotic-utilisation.Rmd")
+```
+
+```{r}
+#| output: asis
+.end()
+```
+
+```{r}
+#| label: tbl-antibiotic-utilisation
+#| tbl-cap: !expr 'sR$`tbl-antibiotic-utilisation`$`tbl-cap`'
+#| tbl-cap-location: top
+
+tbl_data <- reference_data |>
+  neoipcr::get_antibiotic_utilisation_table()
+
+if (nrow(tbl_data) > 0 && sum(tbl_data$n, na.rm = TRUE) > 0) {
+
+  # Map AWaRe factor to inline badge (HTML) or letter (PDF)
+  aware_colors <- c(A = "#6eb43d", W = "#fddf01", R = "#ee2d24")
+  aware_text_colors <- c(A = "white", W = "black", R = "white")
+  tbl_data <- tbl_data |>
+    dplyr::mutate(
+      aware = dplyr::case_match(
+        as.character(.data$aware),
+        "WHO_AWARE_ACCESS" ~ "A",
+        "WHO_AWARE_WATCH" ~ "W",
+        "WHO_AWARE_RESERVE" ~ "R",
+        .default = ""))
+
+  if (knitr::is_html_output()) {
+    tbl_data <- tbl_data |>
+      dplyr::mutate(
+        aware = dplyr::if_else(
+          .data$aware != "",
+          paste0(
+            '<span style="display:inline-block;width:18px;height:18px;',
+            'border-radius:50%;background:', aware_colors[.data$aware],
+            ';color:', aware_text_colors[.data$aware],
+            ';text-align:center;line-height:18px;font-weight:bold;',
+            'font-size:11px">', .data$aware, '</span>'),
+          ""))
+  }
+
+  cw <- compute_col_widths(tbl_data, stub_min = 30)
+  ci_pattern <- ci_pattern_inline
+
+  tbl <- tbl_data |>
+    dplyr::rename(
+      !!sR$table_headers$n := "n",
+      !!sR$table_headers$pooled := "pooled",
+      !!sR$table_headers$q1 := tidyselect::any_of("q1"),
+      !!sR$table_headers$q2 := tidyselect::any_of("q2"),
+      !!sR$table_headers$q3 := tidyselect::any_of("q3"))
+
+  gt_tbl <- tbl |>
+    gt(rowname_col = "display_name") |>
+    sub_missing() |>
+    gt::cols_hide(columns = tidyselect::any_of(
+      c("row_id", "atc5_group", "row_type"))) |>
+    gt::tab_options(
+      latex.use_longtable = TRUE,
+      table.width = pct(100),
+      table.font.size = cw$font_size,
+      footnotes.marks = "extended"
+    ) |>
+    fmt_number(
+      columns = !c(sR$table_headers$n, "aware"),
+      decimals = 1,
+      sep_mark = sR$digit_group_separator,
+      min_sep_threshold = 2,
+      locale = locale_gt) |>
+    fmt_integer(
+      columns = sR$table_headers$n,
+      sep_mark = sR$digit_group_separator,
+      min_sep_threshold = 2) |>
+    gt::fmt_markdown(columns = "aware")
+
+  # Move AWaRe column right after stub and set column widths
+  gt_tbl <- gt_tbl |>
+    gt::cols_move(columns = "aware", after = 1) |>
+    gt::cols_label(aware = sR$aware) |>
+    cols_width(
+      stub() ~ pct(cw$stub - 3),
+      "aware" ~ pct(3),
+      sR$table_headers$n ~ pct(cw$n),
+      sR$table_headers$pooled ~ pct(cw$pooled),
+      sR$table_headers$q1 ~ pct(cw$q),
+      sR$table_headers$q2 ~ pct(cw$q),
+      sR$table_headers$q3 ~ pct(cw$q))
+
+  # Bold ATC5 rows, indent substance rows
+  gt_tbl <- gt_tbl |>
+    tab_style(
+      style = cell_text(weight = "bold"),
+      locations = cells_stub(rows = tbl_data$row_type == "atc5")) |>
+    tab_style(
+      style = cell_text(weight = "bold"),
+      locations = cells_body(rows = tbl_data$row_type == "atc5")) |>
+    tab_stub_indent(
+      rows = tbl_data$row_type == "substance",
+      indent = 5)
+
+  # Pooled rate CI merge
+  if (include_pooled_ci && "ci_lower" %in% colnames(gt_tbl$`_data`)) {
+    gt_tbl <- gt_tbl |>
+      cols_merge(
+        columns = c(sR$table_headers$pooled, "ci_lower", "ci_upper"),
+        pattern = ci_pattern,
+        rows = !is.na(tbl_data$pooled))
+  } else if ("ci_lower" %in% colnames(gt_tbl$`_data`)) {
+    gt_tbl <- gt_tbl |> gt::cols_hide(columns = c("ci_lower", "ci_upper"))
+  }
+
+  # Quartile bootstrap CI merge
+  if ("q1_ci_lower" %in% colnames(gt_tbl$`_data`)) {
+    if (include_quartile_ci) {
+      has_boot <- !is.na(gt_tbl$`_data`[["q1_ci_lower"]])
+      gt_tbl <- gt_tbl |>
+        gt::cols_merge(
+          columns = c(sR$table_headers$q1, "q1_ci_lower", "q1_ci_upper"),
+          pattern = ci_pattern,
+          rows = has_boot) |>
+        gt::cols_merge(
+          columns = c(sR$table_headers$q2, "q2_ci_lower", "q2_ci_upper"),
+          pattern = ci_pattern,
+          rows = has_boot) |>
+        gt::cols_merge(
+          columns = c(sR$table_headers$q3, "q3_ci_lower", "q3_ci_upper"),
+          pattern = ci_pattern,
+          rows = has_boot)
+    } else {
+      gt_tbl <- gt_tbl |> gt::cols_hide(columns = tidyselect::any_of(c(
+        "q1_ci_lower", "q1_ci_upper",
+        "q2_ci_lower", "q2_ci_upper",
+        "q3_ci_lower", "q3_ci_upper")))
+    }
+  }
+
+  gt_tbl <- gt_tbl |>
+    tab_spanner(
+      label = sR$`tbl-antibiotic-utilisation`$exposure_density_rate,
+      columns = tidyselect::any_of(
+        c(sR$table_headers$pooled,
+          sR$table_headers$q1,
+          sR$table_headers$q2,
+          sR$table_headers$q3)),
+      id = "exposure_density_rate"
+    ) |>
+    tab_style(
+      style = cell_text(weight = "bold"),
+      locations = list(
+        cells_column_spanners(),
+        cells_column_labels()
+      )
+    ) |>
+    tab_footnote(
+      footnote = md(
+        paste0(
+          "$$\\text{",
+          sR$`tbl-antibiotic-utilisation`$exposure_density_rate,
+          "} = \\frac{\\text{",
+          sR$`tbl-antibiotic-utilisation`$substance_days,
+          "}}{\\text{",
+          sR$patient_days,
+          "}} \\times ",
+          format(100L),
+          "$$"
+        )),
+      locations = cells_column_spanners(spanners = "exposure_density_rate"),
+      placement = "right"
+    ) |>
+    tab_footnote(
+      footnote = sprintf(
+        sR$`tbl-antibiotic-utilisation`$n_footnote,
+        sR$table_headers$n),
+      locations = cells_column_labels(columns = sR$table_headers$n),
+      placement = "right") |>
+    tab_footnote(
+      footnote = md(
+        sprintf(
+          sR$`tbl-antibiotic-utilisation`$atc_footnote,
+          "[whocc.no/atc_ddd_index/](https://www.whocc.no/atc_ddd_index/)")),
+      locations = cells_stub(rows = tbl_data$row_type == "atc5"),
+      placement = "right") |>
+    tab_footnote(
+      footnote = md(
+        sprintf(
+          sR$`tbl-antibiotic-utilisation`$aware_column_footnote,
+          "[aware.essentialmeds.org](https://aware.essentialmeds.org/)")),
+      locations = cells_column_labels(columns = "aware"),
+      placement = "right") |>
+    tab_source_note(source_note = sR$aware_combination_therapy_footnote)
+
+  # Sparse-data footnote for N < sparse_threshold
+  if (any(!is.na(tbl_data$pooled) & tbl_data$n < sparse_threshold, na.rm = TRUE)) {
+    fn_text <- if (include_pooled_ci) sR$sparse_data_footnote else sR$sparse_data_footnote_no_ci
+    fn_text <- glue::glue(fn_text, threshold = sparse_threshold)
+    gt_tbl <- gt_tbl |>
+      gt::tab_footnote(
+        footnote = fn_text,
+        locations = cells_body(
+          columns = sR$table_headers$n,
+          rows = !is.na(tbl_data$pooled) & tbl_data$n < sparse_threshold),
+        placement = "right")
+  }
+
+  gt_tbl
+} else {
+  no_data_table(sR$`tbl-antibiotic-utilisation`$no_data)
+}
+```

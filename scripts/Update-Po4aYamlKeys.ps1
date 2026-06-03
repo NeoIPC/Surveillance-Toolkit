@@ -7,10 +7,7 @@ param(
     [switch]$DryRun
 )
 
-Import-Module powershell-yaml -ErrorAction Stop
-
-$configFullPath = (Resolve-Path -LiteralPath $ConfigFile -ErrorAction Stop).Path
-$configDir = Split-Path -Parent $configFullPath
+Import-Module powershell-yaml
 
 # -------------------------------------------------
 # Recursively collect YAML keys
@@ -41,12 +38,7 @@ function Get-YamlKeysRecursive {
 function Get-ExcludedKeys {
     param($line)
 
-    # Match only the trailing comment, anchored after the close of the last
-    # quoted opt:"…" clause. Without that anchor, `exclude:` substrings that
-    # happen to appear inside a quoted keys='…' list (e.g. a YAML key like
-    # `excluded_taxa`) would silently steal real keys from the next regen.
-    if ($line -match '"[^"]*"\s+#\s*exclude:\s*(.+)$' -or
-        $line -match '^[^"]*#\s*exclude:\s*(.+)$') {
+    if ($line -match '#\s*exclude:\s*(.+)$') {
         return $Matches[1] -split '\s+'
     }
 
@@ -83,41 +75,30 @@ function Update-KeysOption {
 # -------------------------------------------------
 # Main
 # -------------------------------------------------
-$lines = Get-Content -LiteralPath $configFullPath
+$lines = Get-Content $ConfigFile
 $newLines = @()
 
 foreach ($line in $lines) {
 
     if ($line -match '^\[type:\s*yaml\]\s+([^\s]+)') {
 
-        # Capture before the manual-keys check below, since that `-match` would
-        # overwrite $Matches and lose the YAML path captured by the first regex.
-        $yamlPath = $Matches[1]
-
         # Skip lines with manual-keys marker — these have a curated key list
         if ($line -match '#\s*manual-keys') {
-            Write-Host "Skipping (manual-keys): $yamlPath"
+            Write-Host "Skipping (manual-keys): $($Matches[1])"
             $newLines += $line
             continue
         }
 
-        # po4a paths in [type: yaml] lines are relative to the config file.
-        # Resolve against the config's directory so the script works regardless
-        # of the caller's cwd. Absolute paths pass through Join-Path unchanged.
-        $yamlFullPath = if ([System.IO.Path]::IsPathRooted($yamlPath)) {
-            $yamlPath
-        } else {
-            Join-Path $configDir $yamlPath
-        }
+        $yamlPath = $Matches[1]
 
-        if (-not (Test-Path -LiteralPath $yamlFullPath)) {
+        if (-not (Test-Path $yamlPath)) {
             $newLines += $line
             continue
         }
 
         Write-Host "Processing $yamlPath"
 
-        $yaml = Get-Content -LiteralPath $yamlFullPath -Raw | ConvertFrom-Yaml
+        $yaml = Get-Content $yamlPath -Raw | ConvertFrom-Yaml
 
         $allKeys = Get-YamlKeysRecursive $yaml |
                    Where-Object { $_ } |
@@ -126,12 +107,6 @@ foreach ($line in $lines) {
         $exclude = Get-ExcludedKeys $line
 
         $keys = $allKeys | Where-Object { $exclude -notcontains $_ }
-
-        if (-not $keys -or $keys.Count -eq 0) {
-            Write-Warning "No translatable keys found in $yamlPath after filtering; leaving line unchanged so po4a's default key behaviour is preserved."
-            $newLines += $line
-            continue
-        }
 
         $keyString = ($keys -join " ")
 
@@ -148,6 +123,6 @@ if ($DryRun) {
     $newLines | Out-Host
 }
 else {
-    $newLines | Set-Content -LiteralPath $configFullPath -Encoding utf8NoBOM
+    $newLines | Set-Content $ConfigFile
     Write-Host "Config updated successfully."
 }

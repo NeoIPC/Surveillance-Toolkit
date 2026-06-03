@@ -1,70 +1,48 @@
-```{r Validation rule 19: "The surgical site infection did not occur during the follow-up period of a surgical procedure"}
+```{r Validation rule 19: SSI outside surgery follow-up window}
+if (all("infection_type" %in% colnames(data$ssiData),
+        "implant" %in% colnames(data$surgeryData))) {
+
+ssi_events <- data$events |>
+  dplyr::filter(.data$event_type_key == "ssi") |>
+  dplyr::select("patient_key", "enrollment_key", "event_key", "ssiOccurredAt" = "occurredAt") |>
+  dplyr::inner_join(
+    data$ssiData |> dplyr::select("event_key", "infection_type"),
+    dplyr::join_by("event_key"))
+
+surgery_events <- data$events |>
+  dplyr::filter(.data$event_type_key == "pro") |>
+  dplyr::select("patient_key", "event_key", "surgeryOccurredAt" = "occurredAt") |>
+  dplyr::inner_join(
+    data$surgeryData |> dplyr::select("event_key", "implant"),
+    dplyr::join_by("event_key")) |>
+  dplyr::select(!"event_key")
 
 problems <- problems |>
-  bind_rows(
-    patients |>
-      select(SITE_CODE, DEPARTMENT_CODE, DEPARTMENT_NAME, DEPARTMENT_OU, NEOIPC_PATIENT_ID, PATIENT_TEI, key) |>
-      rename(patient_key = key) |>
-      inner_join(
-        enrollments |>
-          select(ENROLMENT_ID, ENROLMENT_DATE, key, patient) |>
-          rename(enrollment_key = key),
-        join_by(patient_key == patient)) |>
-      inner_join(
-        data$ssis |>
-          select(enrollment, NEOIPC_SSI_INFECTION_TYPE, event, occurredAt) |>
-          rename(EVENT_ID = event, SSI_DATE = occurredAt) |>
-          inner_join(
-            enrollments |>
-              select(key, patient),
-            join_by(enrollment == key)) |>
-          left_join(
-            data$surgeries |>
-              select(enrollment, occurredAt, NEOIPC_SURGERY_IMPLANT) |>
-              rename(SURGERY_DATE = occurredAt) |>
-              inner_join(
-                enrollments |>
-                  select(key, patient),
-                join_by(enrollment == key)) |>
-              select(!enrollment),
-            join_by(patient)),
-        join_by(enrollment_key == enrollment)) |>
-      mutate(
-        SSI_OFFSET = as.integer(SSI_DATE - SURGERY_DATE),
-        EVENT_TYPE = event_types("SSI"),
-        EVENT_DATE = SSI_DATE,
-        PROBLEM_ID = 19L,
-        FOLLOW_UP = case_when(NEOIPC_SSI_INFECTION_TYPE == 1 | !NEOIPC_SURGERY_IMPLANT ~ 30, NEOIPC_SURGERY_IMPLANT ~ 90),
-        HAS_SURGERY = as.integer(replace_na(SSI_OFFSET > 0 & (
-          (NEOIPC_SSI_INFECTION_TYPE == 1 & SSI_OFFSET <= 30) |
-            (NEOIPC_SSI_INFECTION_TYPE != 1 & NEOIPC_SURGERY_IMPLANT & SSI_OFFSET <= 90) |
-            (NEOIPC_SSI_INFECTION_TYPE != 1 & !NEOIPC_SURGERY_IMPLANT & SSI_OFFSET <= 30)), FALSE)))
-    |> group_by(SITE_CODE,
-                DEPARTMENT_CODE,
-                DEPARTMENT_NAME,
-                DEPARTMENT_OU,
-                NEOIPC_PATIENT_ID,
-                PATIENT_TEI,
-                ENROLMENT_ID,
-                ENROLMENT_DATE,
-                EVENT_ID,
-                EVENT_TYPE,
-                EVENT_DATE,
-                PROBLEM_ID,
-                NEOIPC_SSI_INFECTION_TYPE) |>
-      summarise(HAS_SURGERY = max(HAS_SURGERY), .groups = "drop") |>
-      filter(HAS_SURGERY == 0L) |>
-      select(!HAS_SURGERY) |>
-      distinct() |>
-      anti_join(
-        exceptions,
-        join_by(
-          PROBLEM_ID,
-          SITE_CODE,
-          DEPARTMENT_CODE,
-          NEOIPC_PATIENT_ID,
-          ENROLMENT_DATE,
-          EVENT_TYPE,
-          EVENT_DATE)) |>
-      select(!DEPARTMENT_CODE))
+  dplyr::bind_rows(
+    ssi_events |>
+      dplyr::left_join(surgery_events, dplyr::join_by("patient_key"), relationship = "many-to-many") |>
+      dplyr::mutate(
+        ssi_offset = as.integer(.data$ssiOccurredAt - .data$surgeryOccurredAt),
+        covered = tidyr::replace_na(
+          .data$ssi_offset > 0L & (
+            (.data$infection_type == "1" & .data$ssi_offset <= 30L) |
+            (.data$infection_type != "1" &  .data$implant & .data$ssi_offset <= 90L) |
+            (.data$infection_type != "1" & !.data$implant & .data$ssi_offset <= 30L)),
+          FALSE)) |>
+      dplyr::group_by(.data$patient_key, .data$enrollment_key, .data$event_key, .data$infection_type) |>
+      dplyr::summarise(any_covering = any(.data$covered), .groups = "drop") |>
+      dplyr::filter(!.data$any_covering) |>
+      dplyr::anti_join(
+        exceptions |> dplyr::filter(.data$rule_id == 19L),
+        dplyr::join_by("event_key")) |>
+      tidyr::nest(context = "infection_type") |>
+      dplyr::mutate(
+        rule_id        = 19L,
+        patient_key    = .data$patient_key,
+        enrollment_key = .data$enrollment_key,
+        event_key      = .data$event_key,
+        context        = .data$context,
+        .keep = "none"))
+
+}
 ```

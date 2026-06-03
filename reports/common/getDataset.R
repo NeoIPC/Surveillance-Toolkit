@@ -18,12 +18,9 @@ print_usage <- function() {
     "prompts.\n\n",
     "Options:\n",
     "  --output, -o <path>                  Output file path (stdout if omitted)\n",
-    "  --raw, -r                            Write raw R-object JSON via\n",
-    "                                       jsonlite::serializeJSON (preserves\n",
-    "                                       S3 types, round-trips via\n",
-    "                                       unserializeJSON; default)\n",
-    "  --no-raw                             Write clean JSON via jsonlite::toJSON\n",
-    "                                       (loses R type info)\n\n",
+    "  --raw, -r                            Write raw JSON instead of serialized\n",
+    "                                       S3 objects (default: TRUE)\n",
+    "  --no-raw                             Write serialized S3 objects\n\n",
     "Filter settings:\n",
     "  --date-from <date>                   Minimum surveillance end date\n",
     "  --date-to <date>                     Maximum surveillance end date\n",
@@ -103,15 +100,18 @@ ds_opt <- neoipcr::dhis2_dataset_options(
   gestational_age_to = gestational_age_to,
   country_filter = country_filter,
   include_invalid_patients = include_invalid_patients,
-  include_country = "yes",
-  include_world_bank_class = "yes"
+  include_country = "full",
+  include_world_bank_class = "full",
+  include_patient = "full",
+  patient_columns = c("id", "sex", "birth_weight", "gestational_age",
+                       "delivery_mode", "siblings"),
+  include_enrollment = "full",
+  include_event = "full"
 )
 
 ds <- neoipcr::import_dhis2(connection_options = conn_opt, dataset_options = ds_opt)
 
-use_raw <- if (isTRUE(args$noRaw)) FALSE
-           else if (isTRUE(args$raw)) TRUE
-           else TRUE  # default: --raw on (serializeJSON, preserves S3 types)
+use_raw <- !isTRUE(args$noRaw)
 if (use_raw) {
   out <- jsonlite::serializeJSON(ds)
 } else {

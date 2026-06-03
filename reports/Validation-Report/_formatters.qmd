@@ -1,285 +1,306 @@
 ```{r Formatters}
+#| include: false
+
+# Per-rule closures that turn a validation-rule context list into the
+# user-facing problem text. Populated one entry at a time as each rule is
+# rewritten. Closures read snake_case / camelCase fields from the context
+# (e.g. x$dol, x$enrolledAt, x$pathogen_name) produced by the rule file in
+# rules/_rule_NNNN.Rmd.
+#
+# Each closure has the signature
+#   function(problem_translation, problem_context) -> character scalar
+# where `problem_translation` is sR$problems[[id]] (a list with at least
+# a `description` field, a sprintf/format template) and `problem_context`
+# is the rule-emitted list for one detected problem row.
 formatters <- list(
   problems = list(
-    `1` = function(problem_translation, problem_context) paste0("* ", problem_translation$description),
-    `2` = function(problem_translation, problem_context) paste0("* ", problem_translation$description),
-    `3` = function(problem_translation, problem_context) paste0(
-      "* ",
-      sprintf(
+    # Rule 1 — patient record has no enrolment. Description has no placeholders.
+    `1` = function(problem_translation, problem_context)
+      paste0("* ", problem_translation$description),
+    # Rule 2 — active enrolment with completed surveillance-end form. No placeholders.
+    `2` = function(problem_translation, problem_context)
+      paste0("* ", problem_translation$description),
+    # Rule 3 — admission date mismatch (admission form vs enrolment).
+    # %1$s = admission form date (event.occurredAt)
+    # %2$s = enrolment date (enrollment.enrolledAt)
+    `3` = function(problem_translation, problem_context)
+      paste0("* ", sprintf(
         problem_translation$description,
-        format(problem_context$ADMISSION_ADMISSION_DATE, format = "%x"),
-        format(problem_context$ENROLMENT_ADMISSION_DATE, format = "%x"))
-      ),
-    `4` = function(problem_translation, problem_context) paste0(
-      "* ",
-      sprintf(
+        format(problem_context$occurredAt, format = "%x"),
+        format(problem_context$enrolledAt, format = "%x"))),
+    # Rule 4 — surveillance end date earlier than admission date.
+    # %1$s = surveillance-end date (end event.occurredAt)
+    # %2$s = admission form date (adm event.occurredAt)
+    `4` = function(problem_translation, problem_context)
+      paste0("* ", sprintf(
         problem_translation$description,
-        format(problem_context$SURVEILLANCE_END_DATE, format = "%x"),
-        format(problem_context$ADMISSION_ADMISSION_DATE, format = "%x"))
-      ),
-    `5` = function(problem_translation, problem_context) paste0(
-      "* ",
-      sprintf(
+        format(problem_context$endOccurredAt, format = "%x"),
+        format(problem_context$admOccurredAt, format = "%x"))),
+    # Rule 5 — admission event not completed. %s = event status.
+    `5` = function(problem_translation, problem_context)
+      paste0("* ", sprintf(
         problem_translation$description,
-        problem_context$ADMISSION_STATUS)
-      ),
-    `6` = function(problem_translation, problem_context) paste0(
-      "* ",
-      sprintf(
+        as.character(problem_context$status))),
+    # Rule 6 — completed enrolment with incomplete surveillance-end event. %s = event status.
+    `6` = function(problem_translation, problem_context)
+      paste0("* ", sprintf(
         problem_translation$description,
-        problem_context$SURVEILLANCE_END_STATUS)
-      ),
-    `7` = function(problem_translation, problem_context) paste0(
-      "* ",
-      sprintf(
+        as.character(problem_context$status))),
+    # Rule 7 — sepsis event not completed while enrolment/end is completed.
+    # %1$s = enrolment status, %2$s = surveillance-end status, %3$s = sepsis form status.
+    `7` = function(problem_translation, problem_context)
+      paste0("* ", sprintf(
         problem_translation$description,
-        problem_context$ENROLMENT_STATUS,
-        problem_context$SURVEILLANCE_END_STATUS,
-        problem_context$SEPSIS_STATUS)
-      ),
-    `8` = function(problem_translation, problem_context) paste0(
-      "* ",
-      sprintf(
+        as.character(problem_context$enrollment_status),
+        as.character(problem_context$end_status),
+        as.character(problem_context$bsi_status))),
+    # Rule 8 — NEC event not completed while enrolment/end is completed.
+    # %1$s = enrolment status, %2$s = surveillance-end status, %3$s = NEC form status.
+    `8` = function(problem_translation, problem_context)
+      paste0("* ", sprintf(
         problem_translation$description,
-        problem_context$ENROLMENT_STATUS,
-        problem_context$SURVEILLANCE_END_STATUS,
-        problem_context$NEC_STATUS)
-      ),
-    `9` = function(problem_translation, problem_context) paste0(
-      "* ",
-      sprintf(
+        as.character(problem_context$enrollment_status),
+        as.character(problem_context$end_status),
+        as.character(problem_context$nec_status))),
+    # Rule 9 — pneumonia (HAP) event not completed while enrolment/end is completed.
+    # %1$s = enrolment status, %2$s = surveillance-end status, %3$s = HAP form status.
+    `9` = function(problem_translation, problem_context)
+      paste0("* ", sprintf(
         problem_translation$description,
-        problem_context$ENROLMENT_STATUS,
-        problem_context$SURVEILLANCE_END_STATUS,
-        problem_context$PNEUMONIA_STATUS)
-      ),
-    `10` = function(problem_translation, problem_context) paste0(
-      "* ",
-      sprintf(
+        as.character(problem_context$enrollment_status),
+        as.character(problem_context$end_status),
+        as.character(problem_context$hap_status))),
+    # Rule 10 — surgery (pro) event not completed while enrolment/end is completed.
+    # %1$s = enrolment status, %2$s = surveillance-end status, %3$s = surgery form status.
+    `10` = function(problem_translation, problem_context)
+      paste0("* ", sprintf(
         problem_translation$description,
-        problem_context$ENROLMENT_STATUS,
-        problem_context$SURVEILLANCE_END_STATUS,
-        problem_context$SURGERY_STATUS)
-      ),
-    `11` = function(problem_translation, problem_context) paste0(
-      "* ",
-      sprintf(
+        as.character(problem_context$enrollment_status),
+        as.character(problem_context$end_status),
+        as.character(problem_context$pro_status))),
+    # Rule 11 — SSI event not completed while enrolment/end is completed.
+    # %1$s = enrolment status, %2$s = surveillance-end status, %3$s = SSI form status.
+    `11` = function(problem_translation, problem_context)
+      paste0("* ", sprintf(
         problem_translation$description,
-        problem_context$ENROLMENT_STATUS,
-        problem_context$SURVEILLANCE_END_STATUS,
-        problem_context$SSI_STATUS)
-      ),
-    `12` = function(problem_translation, problem_context) paste0(
-      "* ",
-      sprintf(
+        as.character(problem_context$enrollment_status),
+        as.character(problem_context$end_status),
+        as.character(problem_context$ssi_status))),
+    # Rule 12 — sepsis date outside enrolment window.
+    # %1$s = enrolment's enrolledAt, %2$s = adm event's occurredAt,
+    # %3$s = end event's occurredAt, %4$s = bsi event's occurredAt.
+    `12` = function(problem_translation, problem_context)
+      paste0("* ", sprintf(
         problem_translation$description,
-        format(problem_context$ENROLMENT_ADMISSION_DATE, format = "%x"),
-        format(problem_context$ADMISSION_ADMISSION_DATE, format = "%x"),
-        format(problem_context$SURVEILLANCE_END_DATE, format = "%x"),
-        format(problem_context$SEPSIS_DATE, format = "%x"))
-      ),
-    `13` = function(problem_translation, problem_context) paste0(
-      "* ",
-      sprintf(
+        format(problem_context$enrolledAt, format = "%x"),
+        format(problem_context$admOccurredAt, format = "%x"),
+        format(problem_context$endOccurredAt, format = "%x"),
+        format(problem_context$bsiOccurredAt, format = "%x"))),
+    # Rule 13 — NEC date outside enrolment window.
+    # %1$s = enrolment's enrolledAt, %2$s = adm event's occurredAt,
+    # %3$s = end event's occurredAt, %4$s = nec event's occurredAt.
+    `13` = function(problem_translation, problem_context)
+      paste0("* ", sprintf(
         problem_translation$description,
-        format(problem_context$ENROLMENT_ADMISSION_DATE, format = "%x"),
-        format(problem_context$ADMISSION_ADMISSION_DATE, format = "%x"),
-        format(problem_context$SURVEILLANCE_END_DATE, format = "%x"),
-        format(problem_context$NEC_DATE, format = "%x"))
-      ),
-    `14` = function(problem_translation, problem_context) paste0(
-      "* ",
-      sprintf(
+        format(problem_context$enrolledAt, format = "%x"),
+        format(problem_context$admOccurredAt, format = "%x"),
+        format(problem_context$endOccurredAt, format = "%x"),
+        format(problem_context$necOccurredAt, format = "%x"))),
+    # Rule 14 — HAP date outside enrolment window.
+    # %1$s = enrolment's enrolledAt, %2$s = adm event's occurredAt,
+    # %3$s = end event's occurredAt, %4$s = hap event's occurredAt.
+    `14` = function(problem_translation, problem_context)
+      paste0("* ", sprintf(
         problem_translation$description,
-        format(problem_context$ENROLMENT_ADMISSION_DATE, format = "%x"),
-        format(problem_context$ADMISSION_ADMISSION_DATE, format = "%x"),
-        format(problem_context$SURVEILLANCE_END_DATE, format = "%x"),
-        format(problem_context$PNEUMONIA_DATE, format = "%x"))
-      ),
-    `15` = function(problem_translation, problem_context) paste0(
-      "* ",
-      sprintf(
+        format(problem_context$enrolledAt, format = "%x"),
+        format(problem_context$admOccurredAt, format = "%x"),
+        format(problem_context$endOccurredAt, format = "%x"),
+        format(problem_context$hapOccurredAt, format = "%x"))),
+    # Rule 15 — surgery (pro) date outside enrolment window.
+    # %1$s = enrolment's enrolledAt, %2$s = adm event's occurredAt,
+    # %3$s = end event's occurredAt, %4$s = pro event's occurredAt.
+    `15` = function(problem_translation, problem_context)
+      paste0("* ", sprintf(
         problem_translation$description,
-        format(problem_context$ENROLMENT_ADMISSION_DATE, format = "%x"),
-        format(problem_context$ADMISSION_ADMISSION_DATE, format = "%x"),
-        format(problem_context$SURVEILLANCE_END_DATE, format = "%x"),
-        format(problem_context$SURGERY_DATE, format = "%x"))
-      ),
-    `16` = function(problem_translation, problem_context) paste0(
-      "* ",
-      sprintf(
+        format(problem_context$enrolledAt, format = "%x"),
+        format(problem_context$admOccurredAt, format = "%x"),
+        format(problem_context$endOccurredAt, format = "%x"),
+        format(problem_context$proOccurredAt, format = "%x"))),
+    # Rule 16 — SSI date outside enrolment window.
+    # %1$s = enrolment's enrolledAt, %2$s = adm event's occurredAt,
+    # %3$s = end event's occurredAt, %4$s = ssi event's occurredAt.
+    `16` = function(problem_translation, problem_context)
+      paste0("* ", sprintf(
         problem_translation$description,
-        format(problem_context$ENROLMENT_ADMISSION_DATE, format = "%x"),
-        format(problem_context$ADMISSION_ADMISSION_DATE, format = "%x"),
-        format(problem_context$SURVEILLANCE_END_DATE, format = "%x"),
-        format(problem_context$SSI_DATE, format = "%x"))
-      ),
-    `17` = function(problem_translation, problem_context) paste0(
-      "* ",
-      sprintf(
+        format(problem_context$enrolledAt, format = "%x"),
+        format(problem_context$admOccurredAt, format = "%x"),
+        format(problem_context$endOccurredAt, format = "%x"),
+        format(problem_context$ssiOccurredAt, format = "%x"))),
+    # Rule 17 — overlapping enrolments.
+    # %1$s = this enrolment's enrolledAt, %2$s = this enrolment's endOccurredAt,
+    # %3$s = other enrolment's enrolledAt, %4$s = other enrolment's endOccurredAt.
+    `17` = function(problem_translation, problem_context)
+      paste0("* ", sprintf(
         problem_translation$description,
-        format(problem_context$ENROLMENT_1_ADMISSION_DATE, format = "%x"),
-        format(problem_context$ENROLMENT_1_SURVEILLANCE_END_DATE, format = "%x"),
-        format(problem_context$ENROLMENT_2_ADMISSION_DATE, format = "%x"),
-        format(problem_context$ENROLMENT_2_SURVEILLANCE_END_DATE, format = "%x"))
-      ),
-    `18` = function(problem_translation, problem_context) paste0(
-      "* ",
-      sprintf(
+        format(problem_context$enrolledAt_this, format = "%x"),
+        format(problem_context$endOccurredAt_this, format = "%x"),
+        format(problem_context$enrolledAt_other, format = "%x"),
+        format(problem_context$endOccurredAt_other, format = "%x"))),
+    # Rule 18 — patient-days mismatch.
+    # %1$s = stored patient_days, %2$s = calculated patient_days.
+    `18` = function(problem_translation, problem_context)
+      paste0("* ", sprintf(
         problem_translation$description,
-        problem_context$PATIENT_DAYS,
-        problem_context$PATIENT_DAYS_CALCULATED)
-      ),
-    `19` = function(problem_translation, problem_context) paste0(
-      "* ",
-      sprintf(
+        as.character(problem_context$patient_days),
+        as.character(problem_context$patient_days_calculated))),
+    # Rule 19 — SSI outside surgery follow-up window.
+    # %1$s = localised SSI-type label (via sR$ssi_types).
+    `19` = function(problem_translation, problem_context)
+      paste0("* ", sprintf(
         problem_translation$description,
-        sR$ssi_types[[as.character(problem_context$NEOIPC_SSI_INFECTION_TYPE)]])
-      ),
-    `20` = function(problem_translation, problem_context) paste0(
-      "* ",
-      sprintf(
+        sR$ssi_types[[as.character(problem_context$infection_type)]])),
+    # Rule 20 — manually-entered pathogen that cannot be assigned.
+    # %1$i = pathogen index (1..N), %2$s = " causing secondary sepsis" when a
+    # secondary-BSI pathogen, otherwise empty, %3$s = the free-text pathogen
+    # name the user typed (NA if no free-text was entered).
+    `20` = function(problem_translation, problem_context)
+      paste0("* ", sprintf(
         problem_translation$description,
-        problem_context$PATHOGEN_INDEX,
-        if_else(problem_context$IS_SECONDARY_BSI, problem_translation$sec_bsi_part, ""),
-        problem_context$PATHOGEN_NAME)
-      ),
-    `21` = function(problem_translation, problem_context) paste0(
-      "* ",
-      sprintf(
+        as.integer(problem_context$index),
+        if (isTRUE(problem_context$secondary_bsi)) problem_translation$sec_bsi_part else "",
+        as.character(problem_context$name))),
+    # Rule 21 — antibiotic substance-day sum < total antibiotic days.
+    # %1$i = sum of substance days across all AB substance entries on the
+    # surveillance-end form, %2$i = the total ab_days value on the same form.
+    `21` = function(problem_translation, problem_context)
+      paste0("* ", sprintf(
         problem_translation$description,
-        problem_context$AB_SUBSTANCE_DAYS,
-        problem_context$NEOIPC_SURVEILLANCE_END_AB_DAYS)
-      ),
-    `22` = function(problem_translation, problem_context) paste0(
-      "* ",
-      sprintf(
+        as.integer(problem_context$ab_substance_days),
+        as.integer(problem_context$ab_days))),
+    # Rule 22 — invalid ICHI main procedure code.
+    # %1$s = procedure description (free-text), %2$s = the main procedure code.
+    `22` = function(problem_translation, problem_context)
+      paste0("* ", sprintf(
         problem_translation$description,
-        problem_context$PROCEDURE_DESCRIPTION,
-        problem_context$PROCEDURE_CODE)
-      ),
-    `23` = function(problem_translation, problem_context) paste0(
-      "* ",
-      sprintf(
+        as.character(problem_context$procedure_description),
+        as.character(problem_context$procedure_code))),
+    # Rule 23 — invalid ICHI first side procedure code.
+    # %1$s = procedure description, %2$s = the first side procedure code.
+    `23` = function(problem_translation, problem_context)
+      paste0("* ", sprintf(
         problem_translation$description,
-        problem_context$PROCEDURE_DESCRIPTION,
-        problem_context$PROCEDURE_CODE)
-      ),
-    `24` = function(problem_translation, problem_context) paste0(
-      "* ",
-      sprintf(
+        as.character(problem_context$procedure_description),
+        as.character(problem_context$procedure_code))),
+    # Rule 24 — invalid ICHI second side procedure code.
+    # %1$s = procedure description, %2$s = the second side procedure code.
+    `24` = function(problem_translation, problem_context)
+      paste0("* ", sprintf(
         problem_translation$description,
-        problem_context$PROCEDURE_DESCRIPTION,
-        problem_context$PROCEDURE_CODE)
-      ),
-    `25` = function(problem_translation, problem_context) paste0("* ", problem_translation$description),
-    `26` = function(problem_translation, problem_context) paste0("* ", problem_translation$description),
-    `27` = function(problem_translation, problem_context) paste0(
-      "* ",
-      sprintf(
+        as.character(problem_context$procedure_description),
+        as.character(problem_context$procedure_code))),
+    # Rule 25 — completed enrolment without surveillance-end event. No placeholders.
+    `25` = function(problem_translation, problem_context)
+      paste0("* ", problem_translation$description),
+    # Rule 26 — completed enrolment without admission event. No placeholders.
+    `26` = function(problem_translation, problem_context)
+      paste0("* ", problem_translation$description),
+    # Rule 27 — sepsis DOL mismatch.
+    # %1$i = stored dol on sepsis form, %2$i = calculated dol
+    # (admission.dol + (bsi.occurredAt - enrolment.enrolledAt)).
+    `27` = function(problem_translation, problem_context)
+      paste0("* ", sprintf(
         problem_translation$description,
-        problem_context$NEOIPC_BSI_DOL,
-        problem_context$BSI_DOL_CALCULATED)
-      ),
-    `28` = function(problem_translation, problem_context) paste0(
-      "* ",
-      sprintf(
+        as.integer(problem_context$dol),
+        as.integer(problem_context$dol_calc))),
+    # Rule 28 — sepsis LOS mismatch.
+    # %1$i = stored los on sepsis form, %2$i = calculated los
+    # (bsi.occurredAt - enrolment.enrolledAt).
+    `28` = function(problem_translation, problem_context)
+      paste0("* ", sprintf(
         problem_translation$description,
-        problem_context$NEOIPC_BSI_LOS,
-        problem_context$BSI_LOS_CALCULATED)
-      ),
-    `29` = function(problem_translation, problem_context) paste0(
-      "* ",
-      sprintf(
+        as.integer(problem_context$los),
+        as.integer(problem_context$los_calc))),
+    # Rule 29 — sepsis occurred within the first 3 days of life.
+    # %1$i = stored dol on sepsis form.
+    `29` = function(problem_translation, problem_context)
+      paste0("* ", sprintf(
         problem_translation$description,
-        problem_context$NEOIPC_BSI_DOL)
-      ),
-    `30` = function(problem_translation, problem_context) paste0(
-      "* ",
-      sprintf(
+        as.integer(problem_context$dol))),
+    # Rule 30 — sepsis on day 1 or 2 of hospitalisation for a referred or
+    # (re-)admitted patient.
+    # %1$i = computed day of stay (dos = los + 1).
+    `30` = function(problem_translation, problem_context)
+      paste0("* ", sprintf(
         problem_translation$description,
-        problem_context$BSI_DOS)
-      ),
-    `31` = function(problem_translation, problem_context) paste0(
-      "* ",
-      sprintf(
+        as.integer(problem_context$dos))),
+    # Rule 31 — pneumonia DOL mismatch. %1$i = stored, %2$i = calculated.
+    `31` = function(problem_translation, problem_context)
+      paste0("* ", sprintf(
         problem_translation$description,
-        problem_context$NEOIPC_HAP_DOL,
-        problem_context$HAP_DOL_CALCULATED)
-      ),
-    `32` = function(problem_translation, problem_context) paste0(
-      "* ",
-      sprintf(
+        as.integer(problem_context$dol),
+        as.integer(problem_context$dol_calc))),
+    # Rule 32 — pneumonia LOS mismatch. %1$i = stored, %2$i = calculated.
+    `32` = function(problem_translation, problem_context)
+      paste0("* ", sprintf(
         problem_translation$description,
-        problem_context$NEOIPC_HAP_LOS,
-        problem_context$HAP_LOS_CALCULATED)
-      ),
-    `33` = function(problem_translation, problem_context) paste0(
-      "* ",
-      sprintf(
+        as.integer(problem_context$los),
+        as.integer(problem_context$los_calc))),
+    # Rule 33 — pneumonia in first 3 days of life. %1$i = stored dol.
+    `33` = function(problem_translation, problem_context)
+      paste0("* ", sprintf(
         problem_translation$description,
-        problem_context$NEOIPC_HAP_DOL)
-      ),
-    `34` = function(problem_translation, problem_context) paste0(
-      "* ",
-      sprintf(
+        as.integer(problem_context$dol))),
+    # Rule 34 — pneumonia on day 1 or 2 of hospitalisation (re-admission). %1$i = dos.
+    `34` = function(problem_translation, problem_context)
+      paste0("* ", sprintf(
         problem_translation$description,
-        problem_context$HAP_DOS)
-      ),
-    `35` = function(problem_translation, problem_context) paste0(
-      "* ",
-      sprintf(
+        as.integer(problem_context$dos))),
+    # Rule 35 — NEC DOL mismatch. %1$i = stored, %2$i = calculated.
+    `35` = function(problem_translation, problem_context)
+      paste0("* ", sprintf(
         problem_translation$description,
-        problem_context$NEOIPC_NEC_DOL,
-        problem_context$NEC_DOL_CALCULATED)
-      ),
-    `36` = function(problem_translation, problem_context) paste0(
-      "* ",
-      sprintf(
+        as.integer(problem_context$dol),
+        as.integer(problem_context$dol_calc))),
+    # Rule 36 — NEC LOS mismatch. %1$i = stored, %2$i = calculated.
+    `36` = function(problem_translation, problem_context)
+      paste0("* ", sprintf(
         problem_translation$description,
-        problem_context$NEOIPC_NEC_LOS,
-        problem_context$NEC_LOS_CALCULATED)
-      ),
-    `37` = function(problem_translation, problem_context) paste0(
-      "* ",
-      sprintf(
+        as.integer(problem_context$los),
+        as.integer(problem_context$los_calc))),
+    # Rule 37 — NEC in first 3 days of life. %1$i = stored dol.
+    `37` = function(problem_translation, problem_context)
+      paste0("* ", sprintf(
         problem_translation$description,
-        problem_context$NEOIPC_NEC_DOL)
-      ),
-    `38` = function(problem_translation, problem_context) paste0(
-      "* ",
-      sprintf(
+        as.integer(problem_context$dol))),
+    # Rule 38 — NEC on day 1 or 2 of hospitalisation (re-admission). %1$i = dos.
+    `38` = function(problem_translation, problem_context)
+      paste0("* ", sprintf(
         problem_translation$description,
-        problem_context$NEC_DOS)
-      ),
-    `39` = function(problem_translation, problem_context) paste0(
-      "* ",
-      sprintf(
+        as.integer(problem_context$dos))),
+    # Rule 39 — surgery (pro) DOL mismatch. %1$i = stored, %2$i = calculated.
+    `39` = function(problem_translation, problem_context)
+      paste0("* ", sprintf(
         problem_translation$description,
-        problem_context$NEOIPC_SURGERY_DOL,
-        problem_context$SURGERY_DOL_CALCULATED)
-      ),
-    `40` = function(problem_translation, problem_context) paste0(
-      "* ",
-      sprintf(
+        as.integer(problem_context$dol),
+        as.integer(problem_context$dol_calc))),
+    # Rule 40 — surgery (pro) LOS mismatch. %1$i = stored, %2$i = calculated.
+    `40` = function(problem_translation, problem_context)
+      paste0("* ", sprintf(
         problem_translation$description,
-        problem_context$NEOIPC_SURGERY_LOS,
-        problem_context$SURGERY_LOS_CALCULATED)
-      ),
-    `41` = function(problem_translation, problem_context) paste0(
-      "* ",
-      sprintf(
+        as.integer(problem_context$los),
+        as.integer(problem_context$los_calc))),
+    # Rule 41 — SSI DOL mismatch. %1$i = stored, %2$i = calculated.
+    `41` = function(problem_translation, problem_context)
+      paste0("* ", sprintf(
         problem_translation$description,
-        problem_context$NEOIPC_SSI_DOL,
-        problem_context$SSI_DOL_CALCULATED)
-      ),
-    `42` = function(problem_translation, problem_context) paste0(
-      "* ",
-      sprintf(
+        as.integer(problem_context$dol),
+        as.integer(problem_context$dol_calc))),
+    # Rule 42 — SSI LOS mismatch. %1$i = stored, %2$i = calculated.
+    `42` = function(problem_translation, problem_context)
+      paste0("* ", sprintf(
         problem_translation$description,
-        problem_context$NEOIPC_SSI_LOS,
-        problem_context$SSI_LOS_CALCULATED)
-      )
+        as.integer(problem_context$los),
+        as.integer(problem_context$los_calc)))
   )
 )
 ```

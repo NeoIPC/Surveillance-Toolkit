@@ -1,49 +1,38 @@
-```{r Validation rule 31: "The day of life stored in the pneumonia event does not match the calculated value"}
-problems <- problems |>
-  bind_rows(
-    patients |>
-      select(SITE_CODE, DEPARTMENT_CODE, DEPARTMENT_NAME, DEPARTMENT_OU, NEOIPC_PATIENT_ID, PATIENT_TEI, key) |>
-      rename(patient_key = key) |>
-      inner_join(
-        enrollments |>
-          select(ENROLMENT_ID, ENROLMENT_DATE, NEOIPC_ADMISSION_DOL, key, patient) |>
-          rename(enrollment_key = key),
-        join_by(patient_key == patient)) |>
-      inner_join(
-        data$pneumonias |>
-          select(event, occurredAt, enrollment, NEOIPC_HAP_DOL) |>
-          rename(EVENT_DATE = occurredAt, EVENT_ID = event),
-        join_by(enrollment_key == enrollment)) |>
-      mutate(
-        PROBLEM_ID = 31L,
-        EVENT_TYPE = event_types("HAP"),
-        HAP_DOL_CALCULATED = NEOIPC_ADMISSION_DOL + as.integer(EVENT_DATE - ENROLMENT_DATE)) |>
-      filter(HAP_DOL_CALCULATED != NEOIPC_HAP_DOL) |>
-      select(
-        SITE_CODE,
-        DEPARTMENT_CODE,
-        DEPARTMENT_NAME,
-        DEPARTMENT_OU,
-        NEOIPC_PATIENT_ID,
-        PATIENT_TEI,
-        ENROLMENT_ID,
-        ENROLMENT_DATE,
-        EVENT_ID,
-        EVENT_TYPE,
-        EVENT_DATE,
-        PROBLEM_ID,
-        HAP_DOL_CALCULATED,
-        NEOIPC_HAP_DOL
-        ) |>
-      anti_join(
-        exceptions,
-        join_by(
-          PROBLEM_ID,
-          SITE_CODE,
-          DEPARTMENT_CODE,
-          NEOIPC_PATIENT_ID,
-          ENROLMENT_DATE,
-          EVENT_TYPE,
-          EVENT_DATE)) |>
-      select(!DEPARTMENT_CODE))
+```{r Validation rule 31: pneumonia DOL mismatch}
+if ("dol" %in% colnames(data$pneumoniaData))
+  problems <- problems |>
+    dplyr::bind_rows(
+      data$enrollments |>
+        dplyr::select("patient_key", "enrollment_key", "enrolledAt") |>
+        dplyr::inner_join(
+          data$events |>
+            dplyr::filter(.data$event_type_key == "adm") |>
+            dplyr::select("enrollment_key", "adm_event_key" = "event_key"),
+          dplyr::join_by("enrollment_key")) |>
+        dplyr::inner_join(
+          data$admissionData |>
+            dplyr::select("event_key", "admission_dol" = "dol"),
+          dplyr::join_by("adm_event_key" == "event_key")) |>
+        dplyr::inner_join(
+          data$events |>
+            dplyr::filter(.data$event_type_key == "hap") |>
+            dplyr::select("enrollment_key", "event_key", "occurredAt"),
+          dplyr::join_by("enrollment_key")) |>
+        dplyr::inner_join(
+          data$pneumoniaData |>
+            dplyr::select("event_key", "dol"),
+          dplyr::join_by("event_key")) |>
+        dplyr::mutate(dol_calc = .data$admission_dol + as.integer(.data$occurredAt - .data$enrolledAt)) |>
+        dplyr::filter(.data$dol != .data$dol_calc) |>
+        dplyr::anti_join(
+          exceptions |> dplyr::filter(.data$rule_id == 31L),
+          dplyr::join_by("event_key")) |>
+        tidyr::nest(context = c("dol", "dol_calc")) |>
+        dplyr::mutate(
+          rule_id        = 31L,
+          patient_key    = .data$patient_key,
+          enrollment_key = .data$enrollment_key,
+          event_key      = .data$event_key,
+          context        = .data$context,
+          .keep = "none"))
 ```

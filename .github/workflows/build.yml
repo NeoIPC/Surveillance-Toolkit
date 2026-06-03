@@ -14,26 +14,20 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v4
-              with:
-                submodules: true
 
             - name: Prepare environment
               shell: bash
               run: |
                 sudo apt-get update -qq
-                sudo apt-get install -qq pandoc librsvg2-bin bison flex libffi-dev libxml2-dev libgdk-pixbuf2.0-dev libcairo2-dev libpango1.0-dev libwebp-dev fonts-lyx fonts-noto-core gettext liblocale-gettext-perl libtext-wrapi18n-perl libsyntax-keyword-try-perl libtimedate-perl libyaml-tiny-perl libpod-parser-perl libmodule-build-perl
+                sudo apt-get install -qq pandoc librsvg2-bin bison flex libffi-dev libxml2-dev libgdk-pixbuf2.0-dev libcairo2-dev libpango1.0-dev libwebp-dev fonts-lyx po4a fonts-noto-core
                 sudo gem install mathematical:1.6.18 asciidoctor-pdf asciidoctor-bibtex asciidoctor-diagram asciimath asciidoctor-mathematical
                 sudo npm install -g @linthtml/linthtml
 
             - name: Run po4a
               shell: bash
               run: |
-                # Use the pinned po4a submodule (tools/po4a) — the Ubuntu apt
-                # po4a is too old to recognise the --width / --wrap-po options
-                # that our po4a configs use. Invocation pattern matches the
-                # Surveillance-Toolkit CLAUDE.md "po4a setup" section.
-                PERLLIB=tools/po4a/lib tools/po4a/po4a --verbose po/documentation.po4a.cfg
-                PERLLIB=tools/po4a/lib tools/po4a/po4a --verbose po/infectious_agents.po4a.cfg
+                po4a --verbose po4a.cfg
+                po4a --verbose metadata/common/infectious-agents/po4a.cfg
 
             - name: Build
               shell: pwsh
