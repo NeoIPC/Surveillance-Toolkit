@@ -17,7 +17,7 @@ Dafür kann es verschiedene Gründe geben:
 1. Es wurde ein Formular für den operativen Eingriff angelegt, aber der Abstand zur Infektion ist zu groß.
 
 
-    Es ist sehr unwahrscheilich, dass die Infektion nach so langer Zeit noch in Zusammenhang mit dem Eingriff steht.
+    Es ist sehr unwahrscheinlich, dass die Infektion nach so langer Zeit noch in Zusammenhang mit dem Eingriff steht.
     Bitte prüfen Sie die dokumentierten Befunde nochmal genau und halten Sie ggf. mit dem behandelnden Neonatologen und/oder Chirurgen Rücksprache.
     Wenn Sie danach immer noch der Meinung sind, dass es sich um eine postoperative Wundinfektion handelt, setzen Sie sich bitte mit uns in Verbindung (z. B. über unsere [Support-E-Mail-Adresse](mailto:NeoIPC-Support@charite.de)).
     Sind Sie nach Prüfung zu dem Schluss gekommen, dass es sich nicht um eine postoperative Wundinfektion handelt, löschen Sie bitte das Ereignis-Formular (siehe @sec-solution-12)

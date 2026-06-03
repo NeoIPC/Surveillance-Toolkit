@@ -7,9 +7,9 @@ The disadvantage of this decision is that none of our partners can use their fam
 
 Please always enter valid ICHI codes in the ‘Main procedure code (ICHI)’ and ‘Side procedure code (ICHI)’ fields.
 
-You can find the these codes by entering the English name of the procedure (or part of it) in the ‘Search’ field at the top left of the ICHE Reference Classification at https://icd.who.int/dev11/l-ichi/en.
+You can find these codes by entering the English name of the procedure (or part of it) in the ‘Search’ field at the top left of the ICHI Reference Classification at https://icd.who.int/dev11/l-ichi/en.
 
 If you have any problems finding the correct code, please contact us and we will be happy to help.
 
-To correct the reported error, please open the form (see @sec-solution-15) and enter the ICHE code for the procedure instead of the existing code.
-If the form has already been completed, it will need to bebe reopened for editing (see @sec-solution-9). If the patient registration has also already been completed, you will also need reopen it for editing beforehand (see @sec-solution-5).
+To correct the reported error, please open the form (see @sec-solution-15) and enter the ICHI code for the procedure instead of the existing code.
+If the form has already been completed, it will need to be reopened for editing (see @sec-solution-9). If the patient registration has also already been completed, you will also need to reopen it for editing beforehand (see @sec-solution-5).

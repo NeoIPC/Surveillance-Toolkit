@@ -36,6 +36,7 @@ params:
   includeInfectiousAgentDetectionRateTable: true
   includeAntibioticResistanceTestRateTable: false
   includeRiskDensityRateTable: true
+  includeAntibioticUtilisationTable: false
   includeSurgicalProcedureRateTable: true
   includeSecondaryBsiRateTable: false
 ---
