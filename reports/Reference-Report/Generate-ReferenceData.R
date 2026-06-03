@@ -137,9 +137,14 @@ getDatasetOptions <- function(
   validationExceptionFile
 ) {
   neoipcr::dhis2_dataset_options(
-    include_country = "yes",
-    include_department = "pseudonymised",
-    include_world_bank_class = "yes",
+    include_country = "full",
+    include_department = "pseudo",
+    include_world_bank_class = "full",
+    include_patient = "full",
+    patient_columns = c("id", "sex", "birth_weight", "gestational_age",
+                         "delivery_mode", "siblings"),
+    include_enrollment = "full",
+    include_event = "full",
     surveillance_end_from = as.Date(
       if (is.null(reportingPeriodFrom)) {
         "2024-01-01"

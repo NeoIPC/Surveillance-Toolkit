@@ -53,6 +53,7 @@ printUsage <- function() {
     "  --gestationWeeksFrom, -g <number> Minimal included gestational age\n",
     "  --gestationWeeksTo, -G <number>   Maximal included gestational age\n",
     "  --includeNonCorePatients, -n      Include non-core patients\n",
+    "  --includeTestData, -t             Include test departments\n",
     "  --validationExceptionFile, -v <path> Input CSV file path\n",
     "  --quiet, -q                       Suppress non-critical output\n",
     "  --verbose, -V                     Verbose output\n",
@@ -82,6 +83,7 @@ short_map <- list(
   g = "gestationWeeksFrom",
   G = "gestationWeeksTo",
   n = "includeNonCorePatients",
+  t = "includeTestData",
   v = "validationExceptionFile",
   q = "quiet",
   V = "verbose",
@@ -138,6 +140,7 @@ birthWeightTo <- as_number_or_null(args$birthWeightTo)
 gestationWeeksFrom <- as_number_or_null(args$gestationWeeksFrom)
 gestationWeeksTo <- as_number_or_null(args$gestationWeeksTo)
 includeNonCorePatients <- as_bool(args$includeNonCorePatients, default = FALSE)
+includeTestData <- as_bool(args$includeTestData, default = FALSE)
 validationExceptionFile <- as_null(args$validationExceptionFile)
 
 if (is.null(unitCodes)) {
@@ -164,11 +167,16 @@ datasetOptions <- neoipcr::dhis2_dataset_options(
   gestational_age_to = gestationWeeksTo,
   include_ineligible_patients = includeNonCorePatients,
   include_invalid_patients = getValidationExceptions(validationExceptionFile),
-  include_world_bank_class = "yes",
-  include_country = "yes",
-  include_hospital = "yes",
-  include_department = "yes",
-  include_test_data = TRUE
+  include_world_bank_class = "full",
+  include_country = "full",
+  include_hospital = "full",
+  include_department = "full",
+  include_patient = "full",
+  patient_columns = c("id", "sex", "birth_weight", "gestational_age",
+                       "delivery_mode", "siblings"),
+  include_enrollment = "full",
+  include_event = "full",
+  include_test_data = includeTestData
 )
 
 logVerbose("Importing DHIS2 data...")

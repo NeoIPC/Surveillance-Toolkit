@@ -5,87 +5,163 @@ source("../common/helpers.R")
 suppressMessages(library(tidyverse, warn.conflicts = FALSE, quietly = TRUE))
 ```
 
-```{r Initialize variables}
+```{r Initialise locale dependent information}
+#| include: false
+
 if(!exists("params")) params <- list()
+
 locale <- Sys.getenv("LC_ALL")
-if (!nzchar(locale)) locale <- "en_GB.UTF-8"
-invisible(Sys.setlocale(category = "LC_ALL", locale = locale))
 localeObj <- parse_locales(locale)[[1]]
+invisible(Sys.setlocale(category = "LC_ALL", locale = locale))
+invisible(Sys.setLanguage(localeObj$language))
 language <- localeObj$language
 sR <- get_string_resources(localeObj)
+
 departmentFilter <- params$departmentFilter
 NeoIPC_ProgramId <- "D8mSSpOpsKj"
-event_types <- function(x = NA) factor(x, levels = c("ADM","END","SUR","BSI","HAP","NEC","SSI"))
 support_email_address <- "NeoIPC-Support@charite.de"
-
-problems <- tibble(
-  SITE_CODE = character(),
-  DEPARTMENT_NAME = character(),
-  DEPARTMENT_OU = character(),
-  NEOIPC_PATIENT_ID = character(),
-  PATIENT_TEI = character(),
-  ENROLMENT_ID = character(),
-  ENROLMENT_DATE = Date(),
-  EVENT_ID = character(),
-  EVENT_TYPE = event_types(),
-  EVENT_DATE = Date(),
-  PROBLEM_ID = integer())
 ```
 
 ```{r Data Import, message=FALSE, warning=FALSE}
 connection_options <- get_connection_options(
-  scheme = params$dhis2Scheme, hostname = params$dhis2Hostname,
-  port = params$dhis2Port, path = params$dhis2Path)
-data <- import_dhis2(connection_options = connection_options, locale = locale)
-if (!is.null(params$validationExceptionFile) && file.exists(params$validationExceptionFile)) {
-  exceptions <- read_csv(params$validationExceptionFile, col_types = "icccDcD")
-} else {
-  if (!is.null(params$validationExceptionFile))
-    warning(sprintf("Validation exception file not found: '%s'", params$validationExceptionFile))
-  exceptions <- tibble(
-    PROBLEM_ID = integer(),
-    SITE_CODE = character(),
-    DEPARTMENT_CODE = character(),
-    NEOIPC_PATIENT_ID = character(),
-    VALID_UNTIL = as.Date(character()),
-    REASON = character(),
-    CREATED = as.Date(character()))
+  scheme = params$dhis2Scheme,
+  hostname = params$dhis2Hostname,
+  port = params$dhis2Port,
+  path = params$dhis2Path)
+
+dataset_options <- neoipcr::dhis2_dataset_options(
+  department_filter = departmentFilter,
+  include_department = "full",
+  include_hospital = "full",
+  include_country = "full",
+  include_world_bank_class = "full",
+  include_patient = "full",
+  patient_columns = c("id", "sex", "birth_weight", "gestational_age",
+                       "delivery_mode", "siblings"),
+  include_enrollment = "full",
+  include_event = "full",
+  include_dhis2_ids = c("departments","patients","enrollments","events"),
+  include_incomplete = c("enrollments","events"),
+  include_test_data = isTRUE(params$includeTestData),
+  include_ineligible_patients = TRUE,
+  include_unenrolled_patients = TRUE,
+  include_invalid_patients = TRUE,
+  locale = locale)
+
+data <- neoipcr::import_dhis2(
+  connection_options = connection_options,
+  dataset_options = dataset_options)
+```
+
+```{r Filter metadata to in-scope departments}
+#| include: false
+
+# departmentFilter narrows which departments the validation runs over.
+# When NULL, every department returned by import_dhis2 is in scope.
+departments <- data$metadata$departments
+if (!rlang::is_null(departmentFilter))
+  departments <- departments |>
+    dplyr::filter(.data$code %in% departmentFilter)
+```
+
+```{r Load and key-transform validation exceptions}
+#| include: false
+
+# User-supplied exceptions arrive in CSV form with
+# RULE_ID, DEPARTMENT_CODE, NEOIPC_PATIENT_ID, ENROLMENT_DATE, EVENT_TYPE, EVENT_DATE.
+# Translate once here into key form (rule_id, patient_key, enrollment_key, event_key)
+# so rule files can anti_join on keys only.
+exception_cols <- tibble(
+  rule_id        = integer(),
+  patient_key    = integer(),
+  enrollment_key = integer(),
+  event_key      = integer())
+
+exceptions <- exception_cols
+
+if (!is.null(params$validationExceptionFile) &&
+    file.exists(params$validationExceptionFile)) {
+  raw_exceptions <- readr::read_csv(
+    params$validationExceptionFile,
+    col_types = "iccDcD",
+    show_col_types = FALSE)
+
+  expected_cols <- c("RULE_ID", "DEPARTMENT_CODE", "NEOIPC_PATIENT_ID",
+                     "ENROLMENT_DATE", "EVENT_TYPE", "EVENT_DATE")
+  actual_cols <- names(raw_exceptions)
+  if (!identical(actual_cols, expected_cols)) {
+    rlang::abort(c(
+      sprintf("Validation exception file has unexpected columns: '%s'",
+              params$validationExceptionFile),
+      i = paste("Expected:", paste(expected_cols, collapse = ", ")),
+      i = paste("Got:",      paste(actual_cols, collapse = ", "))))
+  }
+
+  if (nrow(raw_exceptions) > 0) {
+    # Map DEPARTMENT_CODE → department_key
+    with_dept <- raw_exceptions |>
+      dplyr::inner_join(
+        data$metadata$departments |>
+          dplyr::select("department_key", "code"),
+        dplyr::join_by("DEPARTMENT_CODE" == "code"))
+
+    # Map (department_key, NEOIPC_PATIENT_ID) → patient_key
+    with_pat <- with_dept |>
+      dplyr::left_join(
+        data$patients |>
+          dplyr::select("department_key", "patient_key", "patient_id"),
+        dplyr::join_by("department_key",
+          "NEOIPC_PATIENT_ID" == "patient_id"))
+
+    # Map (patient_key, ENROLMENT_DATE) → enrollment_key
+    with_enr <- with_pat |>
+      dplyr::left_join(
+        data$enrollments |>
+          dplyr::select("patient_key", "enrollment_key", "enrolledAt"),
+        dplyr::join_by("patient_key",
+          "ENROLMENT_DATE" == "enrolledAt"))
+
+    # Map (enrollment_key, EVENT_TYPE, EVENT_DATE) → event_key via events
+    # EVENT_TYPE in the CSV is ADM/PRO/BSI/NEC/SSI/HAP/END; event_type_key is
+    # lower-cased factor adm/pro/bsi/nec/ssi/hap/end.
+    with_evt <- with_enr |>
+      dplyr::mutate(
+        event_type_key = factor(
+          tolower(.data$EVENT_TYPE),
+          levels = c("adm","pro","bsi","nec","ssi","hap","end"))) |>
+      dplyr::left_join(
+        data$events |>
+          dplyr::select("enrollment_key", "event_type_key",
+            "event_key", "occurredAt"),
+        dplyr::join_by("enrollment_key", "event_type_key",
+          "EVENT_DATE" == "occurredAt"))
+
+    exceptions <- with_evt |>
+      dplyr::mutate(
+        rule_id        = as.integer(.data$RULE_ID),
+        patient_key    = .data$patient_key,
+        enrollment_key = .data$enrollment_key,
+        event_key      = .data$event_key,
+        .keep = "none")
+  }
+} else if (!is.null(params$validationExceptionFile)) {
+  rlang::abort(sprintf(
+    "Validation exception file not found: '%s'",
+    params$validationExceptionFile))
 }
 ```
 
-```{r Filtering}
-countries <- data$metadata$countries
+```{r Initialise empty problems tibble}
+#| include: false
 
-hospitals <- data$metadata$hospitals |>
-  dplyr::semi_join(countries, dplyr::join_by(country_code == code))
-
-departments <- data$metadata$departments
-
-if(!rlang::is_null(departmentFilter))
-  departments <- departments |>
-    dplyr::filter(code %in% departmentFilter)
-
-enrollments <- data$enrollments |>
-  mutate(
-    ENROLMENT_ID = enrollment,
-    ADMISSION_INTERVAL = interval(enrollment_enrolledAt, surveillanceEnd_occurredAt),
-    ENROLMENT_DATE = enrollment_enrolledAt,
-    SURVEILLANCE_END_DATE = surveillanceEnd_occurredAt,
-    .keep = "unused") |>
-  dplyr::semi_join(departments, dplyr::join_by(enrollment_department == key))
-
-patients <- hospitals |>
-  mutate(hospital = key, SITE_CODE = code, .keep = "none") |>
-  inner_join(
-    departments |>
-      mutate(
-        department = key,
-        hospital = hospital,
-        DEPARTMENT_CODE = code,
-        DEPARTMENT_NAME = displayShortName,
-        DEPARTMENT_OU = id,
-        .keep = "none"), join_by(hospital)) |>
-  inner_join(data$patients |> mutate(PATIENT_TEI = trackedEntity, .keep = "unused"), dplyr::join_by(department)) |>
-  select(!c("hospital", "department"))
-
+# Modern problem shape: keys plus a per-rule context list-column.
+# Identifier resolution (SITE_CODE, DEPARTMENT_NAME, NEOIPC_PATIENT_ID,
+# PATIENT_TEI, ENROLMENT_ID, EVENT_ID, …) happens at render time in
+# _problems.qmd by joining against metadata, patients, enrollments, events.
+problems <- tibble::tibble(
+  rule_id        = integer(),
+  patient_key    = integer(),
+  enrollment_key = integer(),
+  event_key      = integer(),
+  context        = list())
 ```

@@ -1,66 +1,24 @@
-```{r Validation rule 24: "The surgical procedure has an invalid second side procedure code"}
-
-valid_iche_codes <- read_csv("ICHE-Health-Intervention-Codes.csv", col_names = FALSE, col_types = "c") |>
-  pull(1)
-
-problems <- problems |>
-  bind_rows(
-    patients |>
-      select(SITE_CODE, DEPARTMENT_CODE, DEPARTMENT_NAME, DEPARTMENT_OU, NEOIPC_PATIENT_ID, PATIENT_TEI, key) |>
-      rename(patient_key = key) |>
-      inner_join(
-        enrollments |>
-          select(ENROLMENT_ID, ENROLMENT_DATE, key, patient) |>
-          rename(enrollment_key = key),
-        join_by(patient_key == patient)) |>
-      left_join(
-        data$surgeries |>
-          select(
-            enrollment,
-            event,
-            occurredAt,
-            NEOIPC_SURGERY_PROCEDURE_DESCRIPTION,
-            NEOIPC_SURGERY_SIDE_PROCEDURE_CODE_2) |>
-          rename(
-            EVENT_ID = event,
-            EVENT_DATE = occurredAt,
-            PROCEDURE_DESCRIPTION = NEOIPC_SURGERY_PROCEDURE_DESCRIPTION,
-            PROCEDURE_CODE = NEOIPC_SURGERY_SIDE_PROCEDURE_CODE_2),
-        join_by(enrollment_key == enrollment)) |>
-      mutate(
-        EVENT_TYPE = event_types("SUR"),
-        PROBLEM_ID = 24L,
-        PROCEDURE_CODE_VALID = if_else(
-          is.na(PROCEDURE_CODE),
-          TRUE,
-          PROCEDURE_CODE %in% valid_iche_codes)) |>
-      filter(!PROCEDURE_CODE_VALID) |>
-      select(
-        SITE_CODE,
-        DEPARTMENT_CODE,
-        DEPARTMENT_NAME,
-        DEPARTMENT_OU,
-        NEOIPC_PATIENT_ID,
-        PATIENT_TEI,
-        ENROLMENT_ID,
-        ENROLMENT_DATE,
-        EVENT_ID,
-        EVENT_TYPE,
-        EVENT_DATE,
-        PROBLEM_ID,
-        PROCEDURE_CODE,
-        PROCEDURE_DESCRIPTION
-        ) |>
-      distinct() |>
-      anti_join(
-        exceptions,
-        join_by(
-          PROBLEM_ID,
-          SITE_CODE,
-          DEPARTMENT_CODE,
-          NEOIPC_PATIENT_ID,
-          ENROLMENT_DATE,
-          EVENT_TYPE,
-          EVENT_DATE)) |>
-      select(!DEPARTMENT_CODE))
+```{r Validation rule 24: invalid ICHI second side procedure code}
+if (all(c("procedure_description", "side_procedure_code_2") %in% colnames(data$surgeryData)))
+  problems <- problems |>
+    dplyr::bind_rows(
+      data$events |>
+        dplyr::filter(.data$event_type_key == "pro") |>
+        dplyr::select("patient_key", "enrollment_key", "event_key") |>
+        dplyr::inner_join(
+          data$surgeryData |>
+            dplyr::select("event_key", "procedure_description", "procedure_code" = "side_procedure_code_2"),
+          dplyr::join_by("event_key")) |>
+        dplyr::filter(!is.na(.data$procedure_code) & !neoipcr::is_valid_ichi_code(.data$procedure_code)) |>
+        dplyr::anti_join(
+          exceptions |> dplyr::filter(.data$rule_id == 24L),
+          dplyr::join_by("event_key")) |>
+        tidyr::nest(context = c("procedure_description", "procedure_code")) |>
+        dplyr::mutate(
+          rule_id        = 24L,
+          patient_key    = .data$patient_key,
+          enrollment_key = .data$enrollment_key,
+          event_key      = .data$event_key,
+          context        = .data$context,
+          .keep = "none"))
 ```

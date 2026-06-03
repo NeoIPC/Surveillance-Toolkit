@@ -394,7 +394,7 @@ if ("ab_days" %in% names(se) && !is.na(se$ab_days)) {
 
 cat("\n\n## ", sR$section$audit_trail, "\n\n")
 
-if (nrow(event_details) > 0 && "createdAt" %in% names(event_details)) {
+if (nrow(events) > 0 && "createdAt" %in% names(events)) {
   event_type_labels <- list(
     adm = sR$admission_sc,
     bsi = sR$primary_sepsis_bsi_sc,
@@ -405,8 +405,9 @@ if (nrow(event_details) > 0 && "createdAt" %in% names(event_details)) {
     ssi = sR$surgical_site_infection_sc
   )
 
+  # `createdAt` / `updatedAt` moved from `ds$eventDetails` onto
+  # `ds$events` in the neoipcr schema arc (phase-b-event-details).
   audit_rows <- events |>
-    dplyr::left_join(event_details, by = "event_key") |>
     dplyr::mutate(
       type_label = purrr::map_chr(
         as.character(event_type_key),

@@ -1,45 +1,91 @@
 ```{r Aggregating problems}
+#| include: false
 
-get_problem_text <- function(problem_ids, contexts) {
+# Build per-row problem text by invoking the formatter closure registered in
+# _formatters.qmd for the corresponding rule id. Each context is a list
+# produced by the rule file (e.g. x$dol, x$enrolledAt, x$pathogen_name).
+get_problem_text <- function(rule_ids, contexts) {
   ret <- list()
-  for (i in 1:length(problem_ids)) {
-    problem_id <- as.character(problem_ids[i])
-    formatter <- formatters$problems[[problem_id]]
-    translation <- sR$problems[[problem_id]]
-    context <- contexts[i][[1]]
-    ret <- c(ret, list(data.frame(PROBLEM_TEXT = formatter(translation, context))))
+  for (i in seq_along(rule_ids)) {
+    id_str <- as.character(rule_ids[i])
+    formatter <- formatters$problems[[id_str]]
+    translation <- sR$problems[[id_str]]
+    ret <- c(ret, list(
+      data.frame(problem_text = formatter(translation, contexts[[i]]))))
   }
-  return(ret)
+  ret
 }
 
-if(nrow(problems) > 0)
-problem_results <- problems |>
-  distinct() |>
-  nest(
-    .by = c(
-      SITE_CODE,
-      DEPARTMENT_OU,
-      DEPARTMENT_NAME,
-      PATIENT_TEI,
-      NEOIPC_PATIENT_ID,
-      ENROLMENT_ID,
-      ENROLMENT_DATE,
-      EVENT_ID,
-      EVENT_TYPE,
-      EVENT_DATE,
-      PROBLEM_ID),
-    .key = "CONTEXT") |>
-  mutate(PROBLEM_TEXT = get_problem_text(PROBLEM_ID, CONTEXT), .keep = "all") |>
-  select(!CONTEXT)
+if (nrow(problems) > 0) {
+  # Resolve display identifiers from the keys carried by `problems`.
+  # Kept distinct so downstream code can group/iterate on them. The raw
+  # `context` list-column rides along for the formatter.
+  # Under the schema contract's inheritance rule, patients does NOT
+
+  # carry `hospital_key` directly when `include_department = "full"`
+  # (departments already has it via pre-join). Join through departments
+  # to reach hospital_key, then join hospitals for the site code.
+  patient_lookup <- data$patients |>
+    dplyr::left_join(
+      data$metadata$departments |>
+        dplyr::select(tidyselect::any_of(c(
+          "department_key",
+          "code", "displayShortName", "orgUnit",
+          "hospital_key"))),
+      dplyr::join_by("department_key")) |>
+    dplyr::rename(
+      department_code    = "code",
+      department_name    = "displayShortName",
+      department_orgunit = "orgUnit") |>
+    dplyr::left_join(
+      data$metadata$hospitals |>
+        dplyr::select("hospital_key", "site_code" = "code"),
+      dplyr::join_by("hospital_key")) |>
+    dplyr::select(
+      "patient_key",
+      "patient_id",
+      "patient_trackedentity" = "trackedEntity",
+      "department_code",
+      "department_name",
+      "department_orgunit",
+      "site_code")
+
+  enrollment_lookup <- data$enrollments |>
+    dplyr::select(
+      "enrollment_key",
+      "enrollment_id" = "enrollment",
+      "enrollment_date" = "enrolledAt")
+
+  event_lookup <- data$events |>
+    dplyr::select(
+      "event_key",
+      "event_id" = "event",
+      "event_date" = "occurredAt",
+      "event_type_key")
+
+  problem_results <- problems |>
+    dplyr::distinct() |>
+    dplyr::inner_join(patient_lookup, dplyr::join_by("patient_key")) |>
+    dplyr::left_join(enrollment_lookup, dplyr::join_by("enrollment_key")) |>
+    dplyr::left_join(event_lookup, dplyr::join_by("event_key")) |>
+    dplyr::mutate(
+      event_type = dplyr::case_match(
+        as.character(.data$event_type_key),
+        "adm" ~ "ADM", "pro" ~ "SUR", "bsi" ~ "BSI",
+        "nec" ~ "NEC", "ssi" ~ "SSI", "hap" ~ "HAP",
+        "end" ~ "END"),
+      problem_text = get_problem_text(.data$rule_id, .data$context))
+}
 ```
 
 ```{r Write problems}
 #| output: asis
 
-header <- function(text, level, numbered = FALSE) paste0(c(rep("#", level), " ", text, (if(!numbered) " {.unnumbered}"), "\n"), collapse = "")
+header <- function(text, level, numbered = FALSE) 
+  paste0(c(rep("#", level), " ", text, (if(!numbered) " {.unnumbered}"), "\n"), collapse = "")
 
 event_problem_header_prefix <- function(type) {
-  switch (
+  switch(
     as.character(type),
     ADM = sR$adm_problem_header_prefix,
     END = sR$end_problem_header_prefix,
@@ -59,7 +105,8 @@ multiple_problems_hint <- function(partner_code, patient_id) {
     partner_code,
     ")",
     collapse = "")
-  mailto_body <- sprintf(sR$patient_problem_multiple_hint_email_body, patient_id)
+  mailto_body <- sprintf(
+    sR$patient_problem_multiple_hint_email_body, patient_id)
   mailto_content <- paste0(
     support_email_address,
     "?subject=",
@@ -71,149 +118,170 @@ multiple_problems_hint <- function(partner_code, patient_id) {
 
 report_problems <- NULL
 
-if(exists("problem_results")) {
-  report_problems <- problem_results |> pull(PROBLEM_ID) |> unique() |> sort()
-  report_sites <- problem_results |> pull(SITE_CODE) |> unique() |> sort()
+if (exists("problem_results")) {
+  report_problems <- problem_results |> dplyr::pull("rule_id") |>
+    unique() |> sort()
+  report_sites <- problem_results |> dplyr::pull("site_code") |>
+    unique() |> sort()
   multiple_report_sites <- length(report_sites) > 1
-  
+
   # Iterate sites
   for (site in report_sites) {
-    if(multiple_report_sites) {
+    if (multiple_report_sites) {
       site_header_level <- 3
       cat(header(site, site_header_level))
     } else {
       site_header_level <- 2
     }
-  
+
     report_departments <- problem_results |>
-      filter(SITE_CODE == site) |>
-      select(DEPARTMENT_NAME, DEPARTMENT_OU) |>
-      distinct() |>
-      arrange(DEPARTMENT_NAME)
-  
+      dplyr::filter(.data$site_code == site) |>
+      dplyr::select("department_name", "department_orgunit") |>
+      dplyr::distinct() |>
+      dplyr::arrange(.data$department_name)
+
     multiple_report_departments <- nrow(report_departments) > 1
     # Iterate departments of the site
-    for (dept_index in 1:nrow(report_departments)) {
-      dept_name <- report_departments[dept_index,"DEPARTMENT_NAME"] |> pull()
-      dept_ou <- report_departments[dept_index,"DEPARTMENT_OU"] |> pull()
-      if(multiple_report_departments){
+    for (dept_index in seq_len(nrow(report_departments))) {
+      dept_name <- report_departments[dept_index, "department_name"] |>
+        dplyr::pull()
+      dept_ou <- report_departments[dept_index, "department_orgunit"] |>
+        dplyr::pull()
+      if (multiple_report_departments) {
         dept_header_level <- site_header_level + 1
         cat(header(dept_name, dept_header_level))
       } else {
         dept_header_level <- site_header_level
       }
-  
-      # If the patient ids contain a numeric part sort this part numerically first
+
+      # If the patient ids contain a numeric part, sort that part numerically
       report_patients <- problem_results |>
-        filter(SITE_CODE == site & DEPARTMENT_OU == dept_ou) |>
-        mutate(
-          NEOIPC_PATIENT_ID = NEOIPC_PATIENT_ID,
-          PATIENT_TEI = PATIENT_TEI,
-          sort = replace_na(suppressWarnings(as.integer(str_replace_all(NEOIPC_PATIENT_ID, "[^0-9]", ""))), -999),
+        dplyr::filter(.data$site_code == site &
+          .data$department_orgunit == dept_ou) |>
+        dplyr::mutate(
+          patient_id = .data$patient_id,
+          patient_trackedentity = .data$patient_trackedentity,
+          sort = tidyr::replace_na(
+            suppressWarnings(
+              as.integer(stringr::str_replace_all(
+                .data$patient_id, "[^0-9]", ""))),
+            -999),
           .keep = "none") |>
-        distinct() |>
-        arrange(sort, NEOIPC_PATIENT_ID) |>
-        select(!sort)
-  
-      # Iterate the patients of the department
-      for (pat_index in 1:nrow(report_patients)) {
-        pat_id <- report_patients[pat_index,"NEOIPC_PATIENT_ID"] |> pull()
-        pat_tei <- report_patients[pat_index,"PATIENT_TEI"] |> pull()
+        dplyr::distinct() |>
+        dplyr::arrange(.data$sort, .data$patient_id) |>
+        dplyr::select(!"sort")
+
+      # Iterate patients of the department
+      for (pat_index in seq_len(nrow(report_patients))) {
+        pat_id <- report_patients[pat_index, "patient_id"] |> dplyr::pull()
+        pat_tei <- report_patients[pat_index, "patient_trackedentity"] |>
+          dplyr::pull()
         pat_header_level <- dept_header_level + 1
-        cat(header(paste0(
-          sR$patient_problem_header_prefix,
-          " \"[",
-          pat_id,
-          "](https://neoipc.charite.de/dhis-web-tracker-capture/index.html#/dashboard?program=",
-          NeoIPC_ProgramId,
-          "&ou=",
-          dept_ou,
-          "&tei=",
-          pat_tei,
-          ' "',
-          sR$patient_problem_dashboard_link_description,
-          '")"',
-          collapse = ""), pat_header_level))
-  
+          cat(header(paste0(
+            sR$patient_problem_header_prefix,
+            " \"[", pat_id,
+            "](https://neoipc.charite.de/dhis-web-tracker-capture/index.html",
+            "#/dashboard?program=", NeoIPC_ProgramId,
+            "&ou=", dept_ou,
+            "&tei=", pat_tei,
+            ' "', sR$patient_problem_dashboard_link_description, '")"',
+            collapse = ""),
+            pat_header_level))
+
         patient_problems <- problem_results |>
-          filter(SITE_CODE == site & DEPARTMENT_OU == dept_ou & PATIENT_TEI == pat_tei)
-  
+          dplyr::filter(.data$site_code == site &
+            .data$department_orgunit == dept_ou &
+            .data$patient_trackedentity == pat_tei)
+
         if (nrow(patient_problems) > 1) {
-          cat("::: {.callout-tip}", multiple_problems_hint(site, pat_id), ":::", sep= "\n")
+          cat("::: {.callout-tip}",
+            multiple_problems_hint(site, pat_id),
+            ":::",
+            sep = "\n")
           cat("\n")
         }
-  
+
         enrolment_problems <- patient_problems |>
-          filter(!is.na(ENROLMENT_ID)) |>
-          distinct() |>
-          arrange(ENROLMENT_DATE)
-  
+          dplyr::filter(!is.na(.data$enrollment_id)) |>
+          dplyr::distinct() |>
+          dplyr::arrange(.data$enrollment_date)
+
         enrolments_by_id <- enrolment_problems |>
-          select(ENROLMENT_ID, ENROLMENT_DATE) |>
-          distinct() |>
-          arrange(ENROLMENT_DATE, ENROLMENT_ID)
-  
+          dplyr::select("enrollment_id", "enrollment_date") |>
+          dplyr::distinct() |>
+          dplyr::arrange(.data$enrollment_date, .data$enrollment_id)
+
         non_enrolment_problems <- patient_problems |>
-          filter(is.na(ENROLMENT_ID)) |>
-          unnest(cols = c(PROBLEM_TEXT)) |>
-          select(PROBLEM_ID, PROBLEM_TEXT) |>
-          distinct() |>
-          arrange(PROBLEM_ID)
-  
-        if(nrow(non_enrolment_problems) > 0){
-          cat(non_enrolment_problems$PROBLEM_TEXT, sep = "\n")
+          dplyr::filter(is.na(.data$enrollment_id)) |>
+          tidyr::unnest(cols = c("problem_text")) |>
+          dplyr::select("rule_id", "problem_text") |>
+          dplyr::distinct() |>
+          dplyr::arrange(.data$rule_id)
+
+        if (nrow(non_enrolment_problems) > 0) {
+          cat(non_enrolment_problems$problem_text, sep = "\n")
           cat("\n")
         }
-  
-        # Iterate the enrolments of the patient
-        if(nrow(enrolments_by_id) > 0)
-        for (ep_index in 1:nrow(enrolments_by_id)) {
-          ep_id <- enrolments_by_id[ep_index,"ENROLMENT_ID"] |> pull()
-          ep_date <- enrolments_by_id[ep_index,"ENROLMENT_DATE"] |> pull()
+
+        # Iterate enrolments of the patient
+        if (nrow(enrolments_by_id) > 0)
+        for (ep_index in seq_len(nrow(enrolments_by_id))) {
+          ep_id <- enrolments_by_id[ep_index, "enrollment_id"] |>
+            dplyr::pull()
+          ep_date <- enrolments_by_id[ep_index, "enrollment_date"] |>
+            dplyr::pull()
           ep_header_level <- pat_header_level + 1
           cat(header(paste0(
             sR$enrolment_problem_header_prefix,
             " ",
             format(ep_date, format = "%x"),
             # Only print the id if the enrolment date is ambiguous
-            if(nrow(enrolments_by_id) > nrow(enrolments_by_id |> select(ENROLMENT_DATE) |> distinct())){
+            if (nrow(enrolments_by_id) >
+                nrow(enrolments_by_id |>
+                  dplyr::select("enrollment_date") |>
+                  dplyr::distinct())) {
               paste0(" (", ep_id, ")", collapse = "")
             },
             collapse = ""),
             ep_header_level))
-  
+
           event_problems <- enrolment_problems |>
-            filter(ENROLMENT_ID == ep_id & !is.na(EVENT_ID)) |>
-            distinct() |>
-            arrange(EVENT_TYPE, EVENT_DATE)
-  
+            dplyr::filter(.data$enrollment_id == ep_id &
+              !is.na(.data$event_id)) |>
+            dplyr::distinct() |>
+            dplyr::arrange(.data$event_type, .data$event_date)
+
           event_problems_by_id <- event_problems |>
-            select(EVENT_ID, EVENT_TYPE, EVENT_DATE) |>
-            distinct() |>
-            arrange(EVENT_TYPE, EVENT_DATE)
-    
+            dplyr::select("event_id", "event_type", "event_date") |>
+            dplyr::distinct() |>
+            dplyr::arrange(.data$event_type, .data$event_date)
+
           non_event_problems <- enrolment_problems |>
-            filter(ENROLMENT_ID == ep_id & is.na(EVENT_DATE)) |>
-            unnest(cols = c(PROBLEM_TEXT)) |>
-            select(PROBLEM_ID, PROBLEM_TEXT) |>
-            distinct() |>
-            arrange(PROBLEM_ID)
-  
-          if(nrow(non_event_problems) > 0){
-            cat(non_event_problems$PROBLEM_TEXT, sep = "\n")
+            dplyr::filter(.data$enrollment_id == ep_id &
+              is.na(.data$event_date)) |>
+            tidyr::unnest(cols = c("problem_text")) |>
+            dplyr::select("rule_id", "problem_text") |>
+            dplyr::distinct() |>
+            dplyr::arrange(.data$rule_id)
+
+          if (nrow(non_event_problems) > 0) {
+            cat(non_event_problems$problem_text, sep = "\n")
             cat("\n")
           }
-  
+
           ev_header_level <- ep_header_level + 1
-          if(nrow(event_problems_by_id) > 0)
-          for (ev_index in 1:nrow(event_problems_by_id)) {
-            ev_id <- event_problems_by_id[ev_index,"EVENT_ID"] |> pull()
-            ev_type <- event_problems_by_id[ev_index,"EVENT_TYPE"] |> pull()
-            ev_date <- event_problems_by_id[ev_index,"EVENT_DATE"] |> pull()
-  
+          if (nrow(event_problems_by_id) > 0)
+          for (ev_index in seq_len(nrow(event_problems_by_id))) {
+            ev_id <- event_problems_by_id[ev_index, "event_id"] |>
+              dplyr::pull()
+            ev_type <- event_problems_by_id[ev_index, "event_type"] |>
+              dplyr::pull()
+            ev_date <- event_problems_by_id[ev_index, "event_date"] |>
+              dplyr::pull()
+
             specific_event_problems <- event_problems |>
-              filter(EVENT_ID == ev_id)
-  
+              dplyr::filter(.data$event_id == ev_id)
+
             cat(header(
               paste0(
                 event_problem_header_prefix(ev_type),
@@ -221,9 +289,12 @@ if(exists("problem_results")) {
                 format(ev_date, format = "%x"),
                 collapse = ""),
               ev_header_level))
-            
-              cat(specific_event_problems  |> unnest(cols = c(PROBLEM_TEXT)) |> pull(PROBLEM_TEXT), sep = "\n")
-              cat("\n")
+
+            cat(specific_event_problems |>
+              tidyr::unnest(cols = c("problem_text")) |>
+              dplyr::pull("problem_text"),
+              sep = "\n")
+            cat("\n")
           }
         }
       }

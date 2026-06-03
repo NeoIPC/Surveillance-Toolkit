@@ -14,8 +14,8 @@ function Read-UserInfo {
         [Parameter(Position = 0)]
         [ArgumentCompleter({
             param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
-            $serverKey = Get-NeoipcServerKey -Scheme $fakeBoundParameters['Scheme'] -Hostname $fakeBoundParameters['Hostname'] -Port $fakeBoundParameters['Port'] -Path $fakeBoundParameters['Path']
-            $cacheDir = Join-Path (Split-Path (Split-Path (Split-Path (Split-Path $PSScriptRoot)))) 'data' 'local' $serverKey
+            $serverKey = Get-NeoipcServerKey -Scheme $fakeBoundParameters['Scheme'] -Hostname $fakeBoundParameters['Hostname'] -Port $fakeBoundParameters['Port']
+            $cacheDir = Join-Path (Split-Path (Split-Path (Split-Path $PSScriptRoot))) 'data' 'local' $serverKey
             $cacheFile = Join-Path $cacheDir 'site-codes.txt'
             if (Test-Path $cacheFile) {
                 Get-Content $cacheFile | Where-Object { $_ -like "$wordToComplete*" }
@@ -31,8 +31,7 @@ function Read-UserInfo {
 
         [Parameter()] [string]$Scheme = $null,
         [Parameter()] [string]$Hostname = $null,
-        [Parameter()] [Nullable[int]]$Port = $null,
-        [Parameter()] [string]$Path = $null
+        [Parameter()] [Nullable[int]]$Port = $null
     )
 
     $auth = Resolve-NeoipcAuth -Token $Token -UserName $UserName
@@ -50,15 +49,9 @@ function Read-UserInfo {
         $filters += $codes
     }
 
-    # Treat -Path as the DHIS2 API base path (default '/api'); the endpoint
-    # is always '<api-base>/users'. The UI base URL is derived by stripping a
-    # trailing '/api' (which lives only under the API path, not the web UI).
-    $apiBase = if ($Path) { $Path.TrimEnd('/') } else { '/api' }
-    $uiSubPath = $apiBase -replace '/api$', ''
-
     $getParams = @{
         Auth   = $auth
-        Path   = ($apiBase + '/users').TrimStart('/')
+        Path   = 'api/users'
         Fields = $fields
     }
     if ($filters.Count -gt 0) { $getParams.Filter = $filters }
@@ -73,7 +66,6 @@ function Read-UserInfo {
     $effectiveHost = if ($Hostname) { $Hostname } else { 'neoipc.charite.de' }
     $baseUrl = "${effectiveScheme}://${effectiveHost}"
     if ($Port) { $baseUrl += ":$Port" }
-    if ($uiSubPath) { $baseUrl += $uiSubPath }
 
     foreach ($user in $obj.users) {
         [PSCustomObject]@{

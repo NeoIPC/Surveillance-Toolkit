@@ -1348,14 +1348,14 @@ interpret_distribution <- function(figure_data, metric_type, sR) {
 #' Detect if own and reference data have different World Bank classes (Partner Report)
 #' @param own_countries Tibble with own countries (name, wb_class)
 #' @param ref_countries Tibble with reference countries (name, wb_class)
-#' @param include_wb_class Whether WB class is included ("no", "pseudonymised", "yes")
+#' @param include_wb_class Whether WB class is included ("no", "pseudo", "full")
 #' @return List with has_mismatch (logical) and details (character) or NULL
 detect_wb_class_mismatch <- function(own_countries, ref_countries, include_wb_class) {
   # ToDo: Refactor to detect availability of World Bank class from data instead of relying
   #       on include_wb_class and look if removing get_localised_world_bank_class_names
   #       makse sense
-  # Only detect mismatches when include_wb_class = "yes"
-  if (include_wb_class != "yes" ||
+  # Only detect mismatches when include_wb_class = "full"
+  if (include_wb_class != "full" ||
       is.null(own_countries) ||
       is.null(ref_countries)) {
     return(NULL)
@@ -1448,6 +1448,8 @@ ref_dev_ass_table <- if (params$includeDeviceAssociatedIncidenceDensityTable)
   " (@tbl-device-associated-incidence-density-rates)" else ""
 ref_abr_table <- if (params$includeResistantPathogenInfectionRateTable)
   " (@tbl-abr-infection-rate)" else ""
+ref_org_rr_table <- if (params$includeOrganismResistanceRateTable)
+  " (@tbl-organism-resistance-rate)" else ""
 ref_ast_table <- if (params$includeAntibioticResistanceTestRateTable)
   " (@tbl-resistance-test-rate)" else ""
 
@@ -1456,7 +1458,8 @@ ref_ast_table <- if (params$includeAntibioticResistanceTestRateTable)
 # (or a child section) will be rendered. Computed bottom-up.
 show_section_surgical    <- params$includeSurgicalProcedureRateTable
 show_section_infectious  <- params$includeAgentPerInfectionRateTable ||
-  params$includeResistantPathogenInfectionRateTable
+  params$includeResistantPathogenInfectionRateTable ||
+  params$includeOrganismResistanceRateTable
 show_section_diagnostics <- params$includeInfectiousAgentDetectionRateTable ||
   params$includeAntibioticResistanceTestRateTable
 show_section_nosocomial  <- params$includeIncidenceDensityTable ||
@@ -1464,6 +1467,7 @@ show_section_nosocomial  <- params$includeIncidenceDensityTable ||
   params$includeSecondaryBsiRateTable ||
   show_section_infectious || show_section_diagnostics
 show_section_risk        <- params$includeRiskDensityRateTable ||
+  params$includeAntibioticUtilisationTable ||
   show_section_surgical
 
 # ── Conditional block helpers ────────────────────────────────────
@@ -1483,17 +1487,43 @@ show_section_risk        <- params$includeRiskDensityRateTable ||
 sparse_threshold <- as.integer(params$sparseDataThreshold %||% 16L)
 
 # ── Confidence interval display ─────────────────────────────────────
-# Supported values: "all" (or TRUE), "none" (or FALSE), "rate",
-# "rate_pooled", "auto".  Default: "rate".
+# Composable CI components: "rate", "pooled", "quartiles".
+# Pass individually or combined (comma-separated).
+# Convenience values: "all" (= rate,pooled,quartiles), "none" (= empty).
+# Default: "rate" (Partner Report shows own-rate CI only).
 ci_config <- params$includeConfidenceIntervals
 if (is.null(ci_config)) ci_config <- "rate"
-if (identical(ci_config, TRUE) || identical(ci_config, "true"))   ci_config <- "all"
-if (identical(ci_config, FALSE) || identical(ci_config, "false")) ci_config <- "none"
 
-include_rate_ci     <- ci_config != "none"
-include_pooled_ci   <- ci_config %in% c("all", "rate_pooled", "auto")
-include_quartile_ci <- ci_config %in% c("all", "auto")
-auto_quartile_ci    <- identical(ci_config, "auto")
+# Expand convenience values and split comma-separated components
+ci_components <- if (identical(ci_config, "all")) {
+  c("rate", "pooled", "quartiles")
+} else if (identical(ci_config, "none")) {
+  character(0)
+} else {
+  trimws(unlist(strsplit(as.character(ci_config), ",")))
+}
+
+include_rate_ci     <- "rate" %in% ci_components
+include_pooled_ci   <- "pooled" %in% ci_components
+include_quartile_ci <- "quartiles" %in% ci_components
+
+# CI display patterns for cols_merge().  Tables set wrap_ci (TRUE/FALSE)
+# to select between wrapped (CI on its own line) and inline display.
+# The default is TRUE when multiple CI columns compete for space.
+ci_pattern_inline <- "{1} ({2}\u2013{3})"
+ci_pattern_wrap   <- if (knitr::is_latex_output()) {
+  "{1} \\newline({2}\u2013{3})"
+} else {
+  "{1}<br>({2}\u2013{3})"
+}
+# Wrapping is needed when many CI columns compete for space.
+# In practice this means quartile CIs are shown (4 CI columns at ~16% each).
+wrap_ci_default    <- include_quartile_ci && (include_rate_ci || include_pooled_ci)
+# `ci_pattern_default` is the stable default. Per-table overrides assign to
+# `ci_pattern`, which is shared across chunks; tables that want the default
+# back must opt in explicitly via `ci_pattern <- ci_pattern_default`.
+ci_pattern_default <- if (wrap_ci_default) ci_pattern_wrap else ci_pattern_inline
+ci_pattern         <- ci_pattern_default
 
 # Compute adaptive column widths and font size for benchmark tables.
 # Bare-number columns get a fixed width; CI-annotated columns share the
@@ -1623,15 +1653,16 @@ if (!is.null(params$partnerDataFile)) {
         gestational_age_to = typedParams$gestationWeeksTo,
         include_ineligible_patients = typedParams$includeNonCorePatients,
         include_invalid_patients = typedParams$includeInvalidPatients,
-        include_world_bank_class = "yes",
-        include_country = "yes",
-        include_hospital = "yes",
-        include_department = "yes",
-        # For now test data is data from special test departments in DHIS.
-        # It does not hurt to include it because we'll typically also have
-        # a department filter which will remove these departments again if
-        # we're not interested in them
-        include_test_data = TRUE
+        include_world_bank_class = "full",
+        include_country = "full",
+        include_hospital = "full",
+        include_department = "full",
+        include_patient = "full",
+        patient_columns = c("id", "sex", "birth_weight", "gestational_age",
+                             "delivery_mode", "siblings"),
+        include_enrollment = "full",
+        include_event = "full",
+        include_test_data = isTRUE(params$includeTestData)
         ))) |>
     neoipcr::calculate_department_data()
 
@@ -1653,6 +1684,7 @@ if (!is.null(params$partnerDataFile)) {
 # Tables needing non-default args for row identification
 metric_classify_args <- list(
   usage_density_rate_table = list(identifier_col = "factor"),
+  antibiotic_utilisation_table = list(identifier_col = "row_id"),
   infectious_agent_detection_rate_per_agent_table = list(identifier_col = "group"),
   abr_infection_rate_table = list(combine_cols = c("abr", "group")),
   resistance_test_rate_table = list(combine_cols = c("abr", "cond"))

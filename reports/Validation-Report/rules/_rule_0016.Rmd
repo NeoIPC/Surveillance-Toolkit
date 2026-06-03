@@ -1,51 +1,35 @@
-```{r Validation rule 16: "The patient record contains a SSI form with an infection date that is not within the time frame of a documented enrolment."}
-
+```{r Validation rule 16: SSI date outside enrolment window}
 problems <- problems |>
-  bind_rows(
-    patients |>
-      inner_join(
-        enrollments |>
-          inner_join(data$ssis, join_by(key == enrollment)),
-        join_by(key == patient)) |>
-      filter(occurredAt < ENROLMENT_DATE | occurredAt < admission_occurredAt | occurredAt > SURVEILLANCE_END_DATE) |>
-      mutate(
-        ENROLMENT_DATE = ENROLMENT_DATE,
-        EVENT_ID = event,
-        EVENT_TYPE = event_types("SSI"),
-        EVENT_DATE = occurredAt,
-        PROBLEM_ID = 16L,
-        ENROLMENT_ADMISSION_DATE = ENROLMENT_DATE,
-        ADMISSION_ADMISSION_DATE = admission_occurredAt,
-        SURVEILLANCE_END_DATE = SURVEILLANCE_END_DATE,
-        SSI_DATE = occurredAt,
-        .keep = "unused") |>
-      select(
-        SITE_CODE,
-        DEPARTMENT_CODE,
-        DEPARTMENT_NAME,
-        DEPARTMENT_OU,
-        NEOIPC_PATIENT_ID,
-        PATIENT_TEI,
-        ENROLMENT_ID,
-        ENROLMENT_DATE,
-        EVENT_ID,
-        EVENT_TYPE,
-        EVENT_DATE,
-        PROBLEM_ID,
-        ENROLMENT_ADMISSION_DATE,
-        ADMISSION_ADMISSION_DATE,
-        SURVEILLANCE_END_DATE,
-        SSI_DATE
-        ) |>
-      anti_join(
-        exceptions,
-        join_by(
-          PROBLEM_ID,
-          SITE_CODE,
-          DEPARTMENT_CODE,
-          NEOIPC_PATIENT_ID,
-          ENROLMENT_DATE,
-          EVENT_TYPE,
-          EVENT_DATE)) |>
-      select(!DEPARTMENT_CODE))
+  dplyr::bind_rows(
+    data$enrollments |>
+      dplyr::select("patient_key", "enrollment_key", "enrolledAt") |>
+      dplyr::inner_join(
+        data$events |>
+          dplyr::filter(.data$event_type_key == "adm") |>
+          dplyr::select("enrollment_key", "admOccurredAt" = "occurredAt"),
+        dplyr::join_by("enrollment_key")) |>
+      dplyr::inner_join(
+        data$events |>
+          dplyr::filter(.data$event_type_key == "end") |>
+          dplyr::select("enrollment_key", "endOccurredAt" = "occurredAt"),
+        dplyr::join_by("enrollment_key")) |>
+      dplyr::inner_join(
+        data$events |>
+          dplyr::filter(.data$event_type_key == "ssi") |>
+          dplyr::select("enrollment_key", "event_key", "ssiOccurredAt" = "occurredAt"),
+        dplyr::join_by("enrollment_key")) |>
+      dplyr::filter(.data$ssiOccurredAt < .data$enrolledAt |
+                    .data$ssiOccurredAt < .data$admOccurredAt |
+                    .data$ssiOccurredAt > .data$endOccurredAt) |>
+      dplyr::anti_join(
+        exceptions |> dplyr::filter(.data$rule_id == 16L),
+        dplyr::join_by("event_key")) |>
+      tidyr::nest(context = c("enrolledAt", "admOccurredAt", "endOccurredAt", "ssiOccurredAt")) |>
+      dplyr::mutate(
+        rule_id        = 16L,
+        patient_key    = .data$patient_key,
+        enrollment_key = .data$enrollment_key,
+        event_key      = .data$event_key,
+        context        = .data$context,
+        .keep = "none"))
 ```

@@ -32,9 +32,11 @@ params:
   includeDeviceAssociatedIncidenceDensityTable: true
   includeAgentPerInfectionRateTable: true
   includeResistantPathogenInfectionRateTable: false
+  includeOrganismResistanceRateTable: false
   includeInfectiousAgentDetectionRateTable: true
   includeAntibioticResistanceTestRateTable: false
   includeRiskDensityRateTable: true
+  includeAntibioticUtilisationTable: false
   includeSurgicalProcedureRateTable: true
   includeSecondaryBsiRateTable: false
 ---

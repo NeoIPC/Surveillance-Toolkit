@@ -14,11 +14,11 @@ In DataFile mode (-DataFile), the script renders a formatted report from a pre-c
 
 .EXAMPLE
 .
-    .\New-PartnerReports.ps1 -SiteCodeFilter 'NEO_.*' -Locale @('en','de') -OutputDir 'C:\tmp\partner-reports' -ReferenceDataFile '2026-01-28_124237Z.Reference-Report.json' -IncludeNonCorePatients -Verbose
+    .\New-PartnerReports.ps1 -SiteCodeFilter 'NEO_.*' -OutputLocales @('en','de') -OutputDir 'C:\tmp\partner-reports' -ReferenceDataFile '2026-01-28_124237Z.Reference-Report.json' -IncludeNonCorePatients -Verbose
 
 .EXAMPLE
 .
-    .\New-PartnerReports.ps1 -DataFile 'partner-data.json' -Locale @('en','de') -Formats pdf -OutputDir 'C:\tmp\partner-reports' -Verbose
+    .\New-PartnerReports.ps1 -DataFile 'partner-data.json' -OutputLocales @('en','de') -OutputFormats pdf -OutputDir 'C:\tmp\partner-reports' -Verbose
 #>
 [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Low', DefaultParameterSetName='Online')]
 param(
@@ -63,7 +63,7 @@ param(
     })]
     [Parameter(Position=1)]
     [string[]]
-    $Locale = @('en'),
+    $OutputLocales = @('en'),
 
     [Parameter(ParameterSetName='Online')]
     [string]
@@ -105,13 +105,21 @@ param(
     [switch]
     $IncludeNonCorePatients,
 
+    [Parameter(ParameterSetName='Online')]
+    [string]
+    $ValidationExceptionFile,
+
+    [Parameter(ParameterSetName='Online')]
+    [switch]
+    $IncludeTestData,
+
     [Parameter()]
     [switch]
     $HideIntroductionTexts,
 
     [Parameter()]
-    [ValidateSet('all', 'none', 'rate', 'rate_pooled', 'auto')]
-    [string]
+    [ValidateSet('all', 'none', 'rate', 'pooled', 'quartiles')]
+    [string[]]
     $ConfidenceIntervals,
 
     [Parameter()]
@@ -141,7 +149,7 @@ param(
     [Parameter()]
     [ValidateSet('pdf','html','docx','json')]
     [string[]]
-    $Formats = @('pdf'),
+    $OutputFormats = @('pdf'),
 
     [Parameter()]
     [switch]
@@ -163,6 +171,8 @@ param(
     [string]
     $Dhis2Path = $null,
 
+    # Elements to enable on top of the QMD defaults. Each listed element
+    # has its visibility flag forced to true.
     [Parameter()]
     [ValidateSet(
         'BirthWeightDistribution',
@@ -171,29 +181,35 @@ param(
         'DeviceAssociatedRates',
         'AgentPerInfectionRates',
         'AntibioticResistanceRates',
+        'OrganismResistanceRates',
         'InfectiousAgentDetectionRates',
         'ResistanceTestRates',
+        'AntibioticUtilisationRates',
         'RiskDensityRates',
         'SurgicalProcedureRates',
         'SecondaryBloodstreamInfectionRates'
     )]
-    [string[]]$IncludeElements = @(
+    [string[]]$EnableElements = @(),
+    # Elements to disable on top of the QMD defaults. Each listed element
+    # has its visibility flag forced to false. If an element appears in
+    # both -EnableElements and -DisableElements, -DisableElements wins.
+    [Parameter()]
+    [ValidateSet(
         'BirthWeightDistribution',
         'GestationalAgeDistribution',
         'IncidenceDensityRates',
         'DeviceAssociatedRates',
         'AgentPerInfectionRates',
         'AntibioticResistanceRates',
+        'OrganismResistanceRates',
         'InfectiousAgentDetectionRates',
         'ResistanceTestRates',
+        'AntibioticUtilisationRates',
         'RiskDensityRates',
         'SurgicalProcedureRates',
         'SecondaryBloodstreamInfectionRates'
-    ),
-    # Elements to remove from the default IncludeElements list.
-    # Processed after IncludeElements: the effective set is IncludeElements minus ExcludeElements.
-    [Parameter()]
-    [string[]]$ExcludeElements = @()
+    )]
+    [string[]]$DisableElements = @()
 )
 
 Import-Module (Join-Path $PSScriptRoot 'modules' 'NeoIPC-Tools') -Force -Verbose:$false
@@ -201,13 +217,13 @@ Import-Module (Join-Path $PSScriptRoot 'modules' 'NeoIPC-Tools') -Force -Verbose
 # --- Runtime validation ---
 $isDataFileMode = $PSCmdlet.ParameterSetName -eq 'DataFile'
 
-if ($isDataFileMode -and ($Formats -contains 'json')) {
+if ($isDataFileMode -and ($OutputFormats -contains 'json')) {
     throw "The 'json' format is not supported with -DataFile. The data file is already JSON."
 }
 
 # Separate json from Quarto-renderable formats
-$wantsJson = $Formats -contains 'json'
-$renderFormats = @($Formats | Where-Object { $_ -ne 'json' })
+$wantsJson = $OutputFormats -contains 'json'
+$renderFormats = @($OutputFormats | Where-Object { $_ -ne 'json' })
 
 # Map user-friendly element names to internal Quarto parameter names
 $elementMapping = @{
@@ -217,8 +233,10 @@ $elementMapping = @{
     'DeviceAssociatedRates' = 'includeDeviceAssociatedIncidenceDensityTable'
     'AgentPerInfectionRates' = 'includeAgentPerInfectionRateTable'
     'AntibioticResistanceRates' = 'includeResistantPathogenInfectionRateTable'
+    'OrganismResistanceRates' = 'includeOrganismResistanceRateTable'
     'InfectiousAgentDetectionRates' = 'includeInfectiousAgentDetectionRateTable'
     'ResistanceTestRates' = 'includeAntibioticResistanceTestRateTable'
+    'AntibioticUtilisationRates' = 'includeAntibioticUtilisationTable'
     'RiskDensityRates' = 'includeRiskDensityRateTable'
     'SurgicalProcedureRates' = 'includeSurgicalProcedureRateTable'
     'SecondaryBloodstreamInfectionRates' = 'includeSecondaryBsiRateTable'
@@ -226,7 +244,7 @@ $elementMapping = @{
 
 # --- Start script ---
 $wd = Get-Location
-$partnerReportDir = Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..' 'reports' 'Partner-Report')
+$reportDirPath = Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..' 'reports' 'Partner-Report')
 
 # Resolve ReferenceDataFile if provided BEFORE changing directory
 # ReferenceDataFile is relative to current directory; resolve it absolutely first,
@@ -241,7 +259,7 @@ if ($ReferenceDataFile) {
     $absoluteRefPath = $absoluteRefPath.Path
 
     # Convert to path relative to partnerReportDir for Quarto
-    $resolvedReferenceDataFile = Resolve-Path -LiteralPath $absoluteRefPath -Relative -RelativeBasePath $partnerReportDir
+    $resolvedReferenceDataFile = Resolve-Path -LiteralPath $absoluteRefPath -Relative -RelativeBasePath $reportDirPath
 }
 
 # Resolve DataFile if provided
@@ -252,18 +270,28 @@ if ($DataFile) {
         throw "Data file not found: $DataFile"
     }
     $absoluteDataPath = $absoluteDataPath.Path
-    $resolvedDataFile = Resolve-Path -LiteralPath $absoluteDataPath -Relative -RelativeBasePath $partnerReportDir
+    $resolvedDataFile = Resolve-Path -LiteralPath $absoluteDataPath -Relative -RelativeBasePath $reportDirPath
 }
 
 # Resolve OutputDir BEFORE changing directory (it's relative to the caller's CWD)
-$resolvedOutputDir = $null
+$outputDirPath = $null
 if ($OutputDir) {
-    $resolvedOutputDir = Resolve-Path -LiteralPath $OutputDir -ErrorAction SilentlyContinue
-    if (-not $resolvedOutputDir) {
+    $outputDirPath = Resolve-Path -LiteralPath $OutputDir -ErrorAction SilentlyContinue
+    if (-not $outputDirPath) {
         New-Item -ItemType Directory -Path $OutputDir -Force | Out-Null
-        $resolvedOutputDir = Resolve-Path -LiteralPath $OutputDir
+        $outputDirPath = Resolve-Path -LiteralPath $OutputDir
     }
-    $resolvedOutputDir = $resolvedOutputDir.Path
+    $outputDirPath = $outputDirPath.Path
+}
+
+# Resolve ValidationExceptionFile BEFORE changing directory (relative to caller's CWD)
+$resolvedValidationExceptionFile = $null
+if ($ValidationExceptionFile) {
+    $absolutePath = Resolve-Path -LiteralPath $ValidationExceptionFile -ErrorAction SilentlyContinue
+    if (-not $absolutePath) {
+        throw "Validation exception file not found: $ValidationExceptionFile"
+    }
+    $resolvedValidationExceptionFile = Resolve-Path -LiteralPath $absolutePath.Path -Relative -RelativeBasePath $reportDirPath
 }
 
 # In DataFile mode no DHIS2 auth is needed, but we still scope LC_ALL.
@@ -284,7 +312,7 @@ $totalSteps = 0
 $completedSteps = 0
 
 try {
-    Set-Location -LiteralPath $partnerReportDir
+    Set-Location -LiteralPath $reportDirPath
 
     if ($isDataFileMode) {
         # DataFile mode: no auth, no department fetch
@@ -309,8 +337,8 @@ if (inherits(x, 'neoipcr_bnch_ds')) {
         if (-not $siteString) {
             throw "Could not extract unit codes from data file: $DataFile"
         }
-        $sites = @($siteString -split ',')
-        Write-Verbose "DataFile mode: rendering from $DataFile (sites: $($sites -join ', '))"
+        $siteCodes = @($siteString -split ',')
+        Write-Verbose "DataFile mode: rendering from $DataFile (sites: $($siteCodes -join ', '))"
     } else {
         # Online mode: auth already resolved as $authForEnv above
         $auth = $authForEnv
@@ -319,21 +347,21 @@ if (inherits(x, 'neoipcr_bnch_ds')) {
         $deptArgs = @{ Auth = $auth; SiteCodeFilter = $SiteCodeFilter }
         if ($Dhis2Scheme) { $deptArgs.Scheme = $Dhis2Scheme }
         if ($Dhis2Hostname) { $deptArgs.Hostname = $Dhis2Hostname }
-        if ($null -ne $Dhis2Port) { $deptArgs.Port = $Dhis2Port }
+        if ($Dhis2Port) { $deptArgs.Port = $Dhis2Port }
         if ($Dhis2Path) { $deptArgs.Path = $Dhis2Path }
-        $sites = Get-NeoipcDepartments @deptArgs
+        $siteCodes = Get-NeoipcDepartments @deptArgs
 
-        if (-not $sites -or $sites.Count -eq 0) {
+        if (-not $siteCodes -or $siteCodes.Count -eq 0) {
             Write-Warning "No sites matched filter '$SiteCodeFilter'. Nothing to do.";
             return
         }
     }
 
-    # $resolvedOutputDir already resolved before Set-Location
+    # $outputDirPath already resolved before Set-Location
 
-    # Step counts depend on $sites which is resolved inside the try block
-    if ($wantsJson -and -not $isDataFileMode) { $totalSteps += $sites.Count }
-    if ($renderFormats.Count -gt 0) { $totalSteps += ($sites.Count * $Locale.Count * $renderFormats.Count) }
+    # Step counts depend on $siteCodes which is resolved inside the try block
+    if ($wantsJson -and -not $isDataFileMode) { $totalSteps += $siteCodes.Count }
+    if ($renderFormats.Count -gt 0) { $totalSteps += ($siteCodes.Count * $OutputLocales.Count * $renderFormats.Count) }
 
     # --- JSON data generation (Online mode only) ---
     if ($wantsJson -and -not $isDataFileMode) {
@@ -342,17 +370,17 @@ if (inherits(x, 'neoipcr_bnch_ds')) {
             throw 'Rscript not found in PATH.'
         }
 
-        foreach ($site in $sites) {
+        foreach ($siteCode in $siteCodes) {
             $jsonTimestamp = [datetime]::Now.ToString('yyyy-MM-dd_HHmmss')
-            $jsonFileName = "${jsonTimestamp}_NeoIPC-Surveillance-Partner-Data_${site}.json"
-            $jsonOutPath = if ($resolvedOutputDir) {
-                Join-Path $resolvedOutputDir $jsonFileName
+            $jsonFileName = "${jsonTimestamp}_NeoIPC-Surveillance-Partner-Data_${siteCode}.json"
+            $jsonOutPath = if ($outputDirPath) {
+                Join-Path $outputDirPath $jsonFileName
             } else {
-                Join-Path $partnerReportDir '_output' $jsonFileName
+                Join-Path $reportDirPath '_output' $jsonFileName
             }
 
             $currentEntry = [ordered]@{
-                Site = $site
+                Site = $siteCode
                 Language = $null
                 Format = 'json'
                 Timestamp = (Get-Date).ToString('o')
@@ -366,15 +394,15 @@ if (inherits(x, 'neoipcr_bnch_ds')) {
 
             $completedSteps++
             $pct = if ($totalSteps -gt 0) { [int](100 * $completedSteps / $totalSteps) } else { 0 }
-            Write-Progress -Activity 'Partner Report Build' -Status "Generating JSON for $site" -PercentComplete $pct
+            Write-Progress -Activity 'Partner Report Build' -Status "Generating JSON for $siteCode" -PercentComplete $pct
 
-            if ($PSCmdlet.ShouldProcess($jsonOutPath, "Generate partner data JSON for $site")) {
-                Write-Host "Generating partner data JSON for $site..."
-                $rArgs = @('--vanilla', (Join-Path $partnerReportDir 'Generate-PartnerData.R'),
-                           '--file', $jsonOutPath, '--unitCodes', $site)
+            if ($PSCmdlet.ShouldProcess($jsonOutPath, "Generate partner data JSON for $siteCode")) {
+                Write-Host "Generating partner data JSON for $siteCode..."
+                $rArgs = @('--vanilla', (Join-Path $reportDirPath 'Generate-PartnerData.R'),
+                           '--file', $jsonOutPath, '--unitCodes', $siteCode)
                 if ($resolvedReferenceDataFile) {
                     # Resolve to absolute path for R script (it doesn't run from partnerReportDir)
-                    $absRefForR = Join-Path $partnerReportDir $resolvedReferenceDataFile
+                    $absRefForR = Join-Path $reportDirPath $resolvedReferenceDataFile
                     $rArgs += @('--referenceDataFile', $absRefForR)
                 }
                 if ($ReportingPeriodFrom -ne $null) { $rArgs += @('--reportingPeriodFrom', $ReportingPeriodFrom.ToString('yyyy-MM-dd')) }
@@ -384,12 +412,17 @@ if (inherits(x, 'neoipcr_bnch_ds')) {
                 if ($GestationWeeksFrom -ne $null) { $rArgs += @('--gestationWeeksFrom', $GestationWeeksFrom) }
                 if ($GestationWeeksTo -ne $null) { $rArgs += @('--gestationWeeksTo', $GestationWeeksTo) }
                 if ($IncludeNonCorePatients.IsPresent) { $rArgs += '--includeNonCorePatients' }
+                if ($IncludeTestData.IsPresent) { $rArgs += '--includeTestData' }
+                if ($resolvedValidationExceptionFile) {
+                    $absVefForR = Join-Path $reportDirPath $resolvedValidationExceptionFile
+                    $rArgs += @('--validationExceptionFile', $absVefForR)
+                }
                 if ($Dhis2Scheme) { $rArgs += @('--scheme', $Dhis2Scheme) }
                 if ($Dhis2Hostname) { $rArgs += @('--host', $Dhis2Hostname) }
-                if ($null -ne $Dhis2Port) { $rArgs += @('--port', $Dhis2Port) }
+                if ($Dhis2Port) { $rArgs += @('--port', $Dhis2Port) }
                 if ($Dhis2Path) { $rArgs += @('--path', $Dhis2Path) }
 
-                $rResult = Invoke-Rscript -Arguments $rArgs -Command $rscriptCmd -Description "Generate-PartnerData.R ($site)"
+                $rResult = Invoke-Rscript -Arguments $rArgs -Command $rscriptCmd -Description "Generate-PartnerData.R ($siteCode)"
 
                 $currentEntry.ExitCode = $rResult.ExitCode
                 $currentEntry.Messages = $rResult.Messages
@@ -398,14 +431,14 @@ if (inherits(x, 'neoipcr_bnch_ds')) {
                     $currentEntry.Status = 'Success'
                     $outputFiles += $jsonOutPath
                 } else {
-                    $errMsg = "Generate-PartnerData.R failed (exit code $($rResult.ExitCode)) for site $site."
+                    $errMsg = "Generate-PartnerData.R failed (exit code $($rResult.ExitCode)) for site $siteCode."
                     Write-Error $errMsg
                     $errors += $errMsg
                     $currentEntry.Status = 'Error'
                 }
             } else {
                 $currentEntry.Status = 'Planned'
-                $currentEntry.Messages += "WhatIf: would generate partner data JSON for $site"
+                $currentEntry.Messages += "WhatIf: would generate partner data JSON for $siteCode"
             }
 
             $buildLog += (New-Object PSObject -Property $currentEntry)
@@ -423,20 +456,20 @@ if (inherits(x, 'neoipcr_bnch_ds')) {
         }
 
         # Loop by locale and site
-        foreach ($loc in $Locale) {
-            $localeParts = Split-NeoipcLocale -Locale $loc
+        foreach ($locale in $OutputLocales) {
+            $localeParts = Split-NeoipcLocale -Locale $locale
             $lang = $localeParts.Language
-            $qmdToUse = Resolve-NeoipcLocaleQmd -ReportDir $partnerReportDir -BaseName 'Partner-Report' -Locale $loc
+            $qmdToUse = Resolve-NeoipcLocaleQmd -ReportDir $reportDirPath -BaseName 'Partner-Report' -Locale $locale
 
             # Set LC_ALL so R picks up the full locale (territory-specific resources)
             if ($localeParts.Territory) {
-                $env:LC_ALL = "${loc}.UTF-8"
+                $env:LC_ALL = "${locale}.UTF-8"
             } else {
                 [Environment]::SetEnvironmentVariable('LC_ALL', $null, 'Process')
             }
 
-            foreach ($site in $sites) {
-                Write-Host "Generating partner report for $site (locale: $loc)..."
+            foreach ($siteCode in $siteCodes) {
+                Write-Host "Generating partner report for $siteCode (locale: $locale)..."
 
                 # Build file name and paths
                 $timestamp = [datetime]::Now.ToString('yyyy-MM-dd_HHmmss')
@@ -444,7 +477,7 @@ if (inherits(x, 'neoipcr_bnch_ds')) {
                 # Build -P parameter list (only supported QMD params)
                 $qmdParams = @{}
 
-                $qmdParams['unitCodes'] = $site
+                $qmdParams['unitCodes'] = $siteCode
 
                 if ($isDataFileMode) {
                     # DataFile mode: pass data file to QMD
@@ -458,41 +491,45 @@ if (inherits(x, 'neoipcr_bnch_ds')) {
                     if ($GestationWeeksFrom -ne $null) { $qmdParams['gestationWeeksFrom'] = $GestationWeeksFrom }
                     if ($GestationWeeksTo -ne $null) { $qmdParams['gestationWeeksTo'] = $GestationWeeksTo }
                     if ($IncludeNonCorePatients.IsPresent) { $qmdParams['includeNonCorePatients'] = 'true' }
+                    if ($IncludeTestData.IsPresent) { $qmdParams['includeTestData'] = 'true' }
+                    if ($resolvedValidationExceptionFile) { $qmdParams['validationExceptionFile'] = $resolvedValidationExceptionFile }
                     if ($Dhis2Scheme) { $qmdParams['dhis2Scheme'] = $Dhis2Scheme }
                     if ($Dhis2Hostname) { $qmdParams['dhis2Hostname'] = $Dhis2Hostname }
-                    if ($null -ne $Dhis2Port) { $qmdParams['dhis2Port'] = $Dhis2Port }
+                    if ($Dhis2Port) { $qmdParams['dhis2Port'] = $Dhis2Port }
                     if ($Dhis2Path) { $qmdParams['dhis2Path'] = $Dhis2Path }
                 }
 
                 if ($resolvedReferenceDataFile) { $qmdParams['referenceDataFile'] = $resolvedReferenceDataFile }
                 if ($HideIntroductionTexts.IsPresent) { $qmdParams['includeIntroductionTexts'] = 'false' }
-                if ($ConfidenceIntervals) { $qmdParams['includeConfidenceIntervals'] = $ConfidenceIntervals }
+                if ($ConfidenceIntervals) { $qmdParams['includeConfidenceIntervals'] = $ConfidenceIntervals -join ',' }
                 if ($HideMethodsTexts.IsPresent) { $qmdParams['includeMethodsTexts'] = 'false' }
                 if ($SparseDataThreshold) { $qmdParams['sparseDataThreshold'] = $SparseDataThreshold }
                 if ($HideOutlierInterpretation.IsPresent) { $qmdParams['includeOutlierInterpretation'] = 'false' }
                 if ($DebugReport) { $qmdParams['debug'] = 'true' }
 
-                # Apply exclusions
-                $effectiveElements = @($IncludeElements | Where-Object { $_ -notin $ExcludeElements })
-
-                # Convert user-friendly element names to Quarto boolean parameters
-                foreach ($mapping in $elementMapping.GetEnumerator()) {
-                    $includeValue = $effectiveElements -contains $mapping.Key
-                    $qmdParams[$mapping.Value] = if ($includeValue) { 'true' } else { 'false' }
+                # Apply per-element overrides on top of QMD defaults.
+                # -EnableElements forces listed elements ON; -DisableElements forces them OFF.
+                # Elements in neither list keep their QMD defaults (no -P flag emitted).
+                # If an element appears in both lists, -DisableElements wins (disables run second).
+                foreach ($element in $EnableElements) {
+                    $qmdParams[$elementMapping[$element]] = 'true'
+                }
+                foreach ($element in $DisableElements) {
+                    $qmdParams[$elementMapping[$element]] = 'false'
                 }
 
                 $paramPairs = Build-QmdParamPairs -Values $qmdParams
 
                 # For each requested output format, render a report
                 foreach ($format in $renderFormats) {
-                    $fileName = "${timestamp}_NeoIPC-Surveillance-Partner-Report_${site}.${loc}.${format}"
+                    $fileName = "${timestamp}_NeoIPC-Surveillance-Partner-Report_${siteCode}.${locale}.${format}"
 
                     # QUARTO requires the -o value to be filename-only (no path component). Use GetFileName just to be safe.
                     $outFileForQuarto = [System.IO.Path]::GetFileName($fileName)
 
                     # Prepare log entry for this run/format
                     $currentEntry = [ordered]@{
-                        Site = $site
+                        Site = $siteCode
                         Language = $lang
                         Format = $format
                         Timestamp = (Get-Date).ToString('o')
@@ -506,9 +543,9 @@ if (inherits(x, 'neoipcr_bnch_ds')) {
 
                     # Build Quarto argument list for this format
                     $quartoArgs = @('render', '--profile', $lang, $qmdToUse, '--to', $format, '-o', $outFileForQuarto)
-                    if ($resolvedOutputDir) {
+                    if ($outputDirPath) {
                         $quartoArgs += '--output-dir'
-                        $quartoArgs += $resolvedOutputDir
+                        $quartoArgs += $outputDirPath
                     }
 
                     # All parameters via -P (R reads params$, conditional
@@ -518,9 +555,9 @@ if (inherits(x, 'neoipcr_bnch_ds')) {
                     # Render (or report) - respect WhatIf via ShouldProcess
                     $completedSteps++
                     $pct = if ($totalSteps -gt 0) { [int](100 * $completedSteps / $totalSteps) } else { 0 }
-                    Write-Progress -Activity 'Partner Report Build' -Status "Rendering $format for $site ($lang)" -PercentComplete $pct
+                    Write-Progress -Activity 'Partner Report Build' -Status "Rendering $format for $siteCode ($lang)" -PercentComplete $pct
 
-                    $target = "$fileName for site $site (lang: $lang, format: $format)"
+                    $target = "$fileName for site $siteCode (lang: $lang, format: $format)"
                     $currentMessages = New-Object System.Collections.Generic.List[string]
                     if ($PSCmdlet.ShouldProcess($target, "Render Partner Report")) {
                         # Execute the render and collect messages
@@ -570,11 +607,11 @@ if (inherits(x, 'neoipcr_bnch_ds')) {
                         if (-not $skipRest -and -not $isError -and $LASTEXITCODE -eq 0) {
                             Write-Host "done." -ForegroundColor Green
                             $currentEntry.Status = 'Success'
-                            $outPath = if ($resolvedOutputDir) { Join-Path $resolvedOutputDir $fileName } else { Join-Path $partnerReportDir '_output' $fileName }
+                            $outPath = if ($outputDirPath) { Join-Path $outputDirPath $fileName } else { Join-Path $reportDirPath '_output' $fileName }
                             $outputFiles += $outPath
                         }
                         elseif ($LASTEXITCODE -ne 0 -or $isError) {
-                            $errMsg = "Quarto returned exit code $LASTEXITCODE for site $site (lang: $lang, format: $format)."
+                            $errMsg = "Quarto returned exit code $LASTEXITCODE for site $siteCode (lang: $lang, format: $format)."
                             Write-Error $errMsg
                             $errors += $errMsg
                             $currentEntry.Status = 'Error'
@@ -607,17 +644,17 @@ finally {
 
     Write-Progress -Activity 'Partner Report Build' -Completed
 
-    $buildReportDir = if ($resolvedOutputDir) { $resolvedOutputDir } else { Join-Path $partnerReportDir '_output' }
-    $buildReportPath = Join-Path $buildReportDir "${scriptTimestamp}_NeoIPC-Surveillance-Partner-Report-Build.json"
+    $buildReportDirPath = if ($outputDirPath) { $outputDirPath } else { Join-Path $reportDirPath '_output' }
+    $buildReportFilePath = Join-Path $buildReportDirPath "${scriptTimestamp}_NeoIPC-Surveillance-Partner-Report-Build.json"
     $extraFields = [ordered]@{
-        timestamp = $scriptTimestamp
-        outputDir = $buildReportDir
-        sites = $sites
-        locales = $Locale
-        formats = $Formats
-        steps = $buildLog
+        scriptTimestamp = $scriptTimestamp
+        outputDirPath = $buildReportDirPath
+        siteCodes = $siteCodes
+        outputLocales = $OutputLocales
+        outputFormats = $OutputFormats
+        buildSteps = $buildLog
     }
-    $reportPath = if ($JsonReport) { $buildReportPath } else { $null }
+    $reportPath = if ($JsonReport) { $buildReportFilePath } else { $null }
     $status = Write-NeoipcBuildReport -Name 'Partner Report Build' `
         -Errors $errors -OutputFiles $outputFiles -BuildCompleted $buildCompleted `
         -StartedAt $startedAt -BuildReportPath $reportPath -ExtraFields $extraFields

@@ -40,6 +40,8 @@ tbl <- tbl_data |>
 
 cw <- compute_col_widths(tbl_data, stub_min = 25)
 
+ci_pattern <- ci_pattern_inline
+
 gt_tbl <- tbl |>
   gt(rowname_col = "Infection") |>
   sub_missing() |>
@@ -61,11 +63,11 @@ gt_tbl <- tbl |>
     min_sep_threshold = 2)
 
 # Pooled rate CI merge
-if (include_rate_ci && "ci_lower" %in% colnames(gt_tbl$`_data`)) {
+if (include_pooled_ci && "ci_lower" %in% colnames(gt_tbl$`_data`)) {
   gt_tbl <- gt_tbl |>
     cols_merge(
       columns = c(sR$table_headers$pooled, "ci_lower", "ci_upper"),
-      pattern = "{1} ({2}\u2013{3})",
+      pattern = ci_pattern,
       rows = !is.na(tbl_data$pooled))
 } else if ("ci_lower" %in% colnames(gt_tbl$`_data`)) {
   gt_tbl <- gt_tbl |> gt::cols_hide(columns = c("ci_lower", "ci_upper"))
@@ -75,20 +77,18 @@ if (include_rate_ci && "ci_lower" %in% colnames(gt_tbl$`_data`)) {
 if ("q1_ci_lower" %in% colnames(gt_tbl$`_data`)) {
   if (include_quartile_ci) {
     has_boot <- !is.na(gt_tbl$`_data`[["q1_ci_lower"]])
-    if (auto_quartile_ci)
-      has_boot <- has_boot & !is.na(gt_tbl$`_data`[[sR$table_headers$q1]])
     gt_tbl <- gt_tbl |>
       gt::cols_merge(
         columns = c(sR$table_headers$q1, "q1_ci_lower", "q1_ci_upper"),
-        pattern = "{1} ({2}\u2013{3})",
+        pattern = ci_pattern,
         rows = has_boot) |>
       gt::cols_merge(
         columns = c(sR$table_headers$q2, "q2_ci_lower", "q2_ci_upper"),
-        pattern = "{1} ({2}\u2013{3})",
+        pattern = ci_pattern,
         rows = has_boot) |>
       gt::cols_merge(
         columns = c(sR$table_headers$q3, "q3_ci_lower", "q3_ci_upper"),
-        pattern = "{1} ({2}\u2013{3})",
+        pattern = ci_pattern,
         rows = has_boot)
   } else {
     gt_tbl <- gt_tbl |> gt::cols_hide(columns = tidyselect::any_of(c(
@@ -139,19 +139,34 @@ gt_tbl <- gt_tbl |>
         format_integer(100),
         "$$"
       )),
-    locations = cells_column_spanners(spanners = "secondary_bsi_rate")
+    locations = cells_column_spanners(spanners = "secondary_bsi_rate"),
+    placement = "right"
   ) |>
   tab_footnote(
     footnote = sprintf(
       sR$`tbl-secondary-bsi-rates`$n_footnote,
       sR$table_headers$n),
-    locations = cells_column_labels(columns = sR$table_headers$n)) |>
+    locations = cells_column_labels(columns = sR$table_headers$n),
+    placement = "right") |>
   tab_footnote(
     footnote = sprintf(
       sR$`tbl-secondary-bsi-rates`$pooled_footnote,
       sR$table_headers$pooled),
-    locations = cells_column_labels(columns = sR$table_headers$pooled)) |>
-  tab_footnote(
-    footnote = "Q₁, Q₂, Q₃: The quartiles (25%, 50% and 75% quantiles) of the secondary bsi rates of the partner departments",
-    locations = cells_column_labels(columns = c("Q₁","Q₂","Q₃")))
+    locations = cells_column_labels(columns = sR$table_headers$pooled),
+    placement = "right")
+
+# Sparse-data footnote for N < sparse_threshold
+if (any(!is.na(tbl_data$pooled) & tbl_data$n < sparse_threshold, na.rm = TRUE)) {
+  fn_text <- if (include_pooled_ci) sR$sparse_data_footnote else sR$sparse_data_footnote_no_ci
+  fn_text <- glue::glue(fn_text, threshold = sparse_threshold)
+  gt_tbl <- gt_tbl |>
+    gt::tab_footnote(
+      footnote = fn_text,
+      locations = cells_body(
+        columns = sR$table_headers$n,
+        rows = !is.na(tbl_data$pooled) & tbl_data$n < sparse_threshold),
+      placement = "right")
+}
+
+gt_tbl
 ```

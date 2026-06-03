@@ -1,35 +1,20 @@
-```{r Validation rule 25: "The patient has a completed enrollment but no surveillance end event form"}
-
+```{r Validation rule 25: completed enrolment without surveillance-end event}
 problems <- problems |>
-  bind_rows(
-    patients |>
-      select(SITE_CODE, DEPARTMENT_CODE, DEPARTMENT_NAME, DEPARTMENT_OU, NEOIPC_PATIENT_ID, PATIENT_TEI, key) |>
-      rename(patient_key = key) |>
-      inner_join(
-        enrollments |>
-          select(ENROLMENT_ID, ENROLMENT_DATE, enrollment_status, surveillanceEnd_status, patient),
-        join_by(patient_key == patient)) |>
-      filter(enrollment_status == "COMPLETED" & is.na(surveillanceEnd_status)) |>
-      mutate(
-        PROBLEM_ID = 25L) |>
-      select(
-        SITE_CODE,
-        DEPARTMENT_CODE,
-        DEPARTMENT_NAME,
-        DEPARTMENT_OU,
-        NEOIPC_PATIENT_ID,
-        PATIENT_TEI,
-        ENROLMENT_ID,
-        ENROLMENT_DATE,
-        PROBLEM_ID
-        ) |>
-      anti_join(
-        exceptions,
-        join_by(
-          PROBLEM_ID,
-          SITE_CODE,
-          DEPARTMENT_CODE,
-          NEOIPC_PATIENT_ID,
-          ENROLMENT_DATE)) |>
-      select(!DEPARTMENT_CODE))
+  dplyr::bind_rows(
+    data$enrollments |>
+      dplyr::filter(.data$status == "COMPLETED") |>
+      dplyr::select("patient_key", "enrollment_key") |>
+      dplyr::anti_join(
+        data$events |> dplyr::filter(.data$event_type_key == "end"),
+        dplyr::join_by("enrollment_key")) |>
+      dplyr::anti_join(
+        exceptions |> dplyr::filter(.data$rule_id == 25L),
+        dplyr::join_by("enrollment_key")) |>
+      dplyr::mutate(
+        rule_id        = 25L,
+        patient_key    = .data$patient_key,
+        enrollment_key = .data$enrollment_key,
+        event_key      = NA_integer_,
+        context        = list(list()),
+        .keep = "none"))
 ```

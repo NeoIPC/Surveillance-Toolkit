@@ -1,48 +1,32 @@
-```{r Validation rule 8: "The patient record has a completed enrolment or surveillance end form but a NEC form is not completed"}
-
+```{r Validation rule 8: NEC event not completed on completed enrolment/end}
 problems <- problems |>
-  bind_rows(
-    patients |>
-      inner_join(
-        enrollments |>
-          inner_join(data$necs, join_by(key == enrollment)),
-        join_by(key == patient)) |>
-      filter((enrollment_status == "COMPLETED" | surveillanceEnd_status == "COMPLETED") & status != "COMPLETED") |>
-      mutate(
-        EVENT_ID = event,
-        EVENT_TYPE = event_types("NEC"),
-        EVENT_DATE = occurredAt,
-        PROBLEM_ID = 8L,
-        ENROLMENT_STATUS = enrollment_status,
-        SURVEILLANCE_END_STATUS = surveillanceEnd_status,
-        NEC_STATUS = status,
-        .keep = "unused") |>
-      select(
-        SITE_CODE,
-        DEPARTMENT_CODE,
-        DEPARTMENT_NAME,
-        DEPARTMENT_OU,
-        NEOIPC_PATIENT_ID,
-        PATIENT_TEI,
-        ENROLMENT_ID,
-        ENROLMENT_DATE,
-        EVENT_ID,
-        EVENT_TYPE,
-        EVENT_DATE,
-        PROBLEM_ID,
-        ENROLMENT_STATUS,
-        SURVEILLANCE_END_STATUS,
-        NEC_STATUS
-        ) |>
-      anti_join(
-        exceptions,
-        join_by(
-          PROBLEM_ID,
-          SITE_CODE,
-          DEPARTMENT_CODE,
-          NEOIPC_PATIENT_ID,
-          ENROLMENT_DATE,
-          EVENT_TYPE,
-          EVENT_DATE)) |>
-      select(!DEPARTMENT_CODE))
+  dplyr::bind_rows(
+    data$enrollments |>
+      dplyr::select("patient_key", "enrollment_key",
+        "enrollment_status" = "status") |>
+      dplyr::left_join(
+        data$events |>
+          dplyr::filter(.data$event_type_key == "end") |>
+          dplyr::select("enrollment_key", "end_status" = "status"),
+        dplyr::join_by("enrollment_key")) |>
+      dplyr::inner_join(
+        data$events |>
+          dplyr::filter(.data$event_type_key == "nec" &
+                        .data$status != "COMPLETED") |>
+          dplyr::select("enrollment_key", "event_key",
+            "nec_status" = "status"),
+        dplyr::join_by("enrollment_key")) |>
+      dplyr::filter(.data$enrollment_status == "COMPLETED" |
+                    .data$end_status == "COMPLETED") |>
+      dplyr::anti_join(
+        exceptions |> dplyr::filter(.data$rule_id == 8L),
+        dplyr::join_by("event_key")) |>
+      tidyr::nest(context = c("enrollment_status", "end_status", "nec_status")) |>
+      dplyr::mutate(
+        rule_id        = 8L,
+        patient_key    = .data$patient_key,
+        enrollment_key = .data$enrollment_key,
+        event_key      = .data$event_key,
+        context        = .data$context,
+        .keep = "none"))
 ```

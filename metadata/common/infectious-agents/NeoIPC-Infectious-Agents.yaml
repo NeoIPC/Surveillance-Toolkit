@@ -9288,19 +9288,49 @@ Hierarchies:
                 ConceptSource: NeoIPC
                 Id: 2777
                 Children:
-                - Name: Staphylococcus argenteus
-                  ConceptType: Species
-                  ConceptId: species/staphylococcus-argenteus
-                  ConceptSource: LPSN
-                  Id: 2778
-                  LpsnRecordNumber: 792442
-                - Name: Staphylococcus aureus
-                  ConceptType: Species
-                  ConceptId: species/staphylococcus-aureus
-                  ConceptSource: LPSN
-                  Id: 934
-                  LpsnRecordNumber: 781168
+                - Name: Staphylococcus aureus complex
+                  ConceptType: Group
+                  ConceptId: ToDo
+                  ConceptSource: NeoIPC
                   MRSA: true
+                  Children:
+                  - Name: Staphylococcus argenteus
+                    ConceptType: Species
+                    ConceptId: species/staphylococcus-argenteus
+                    ConceptSource: LPSN
+                    Id: 2778
+                    LpsnRecordNumber: 792442
+                    MRSA: true
+                  - Name: Staphylococcus aureus
+                    ConceptType: Species
+                    ConceptId: species/staphylococcus-aureus
+                    ConceptSource: LPSN
+                    Id: 934
+                    LpsnRecordNumber: 781168
+                    MRSA: true
+                    Children:
+                    - Name: Staphylococcus aureus subsp. anaerobius
+                      ConceptId: subspecies/staphylococcus-aureus-anaerobius
+                      ConceptSource: LPSN
+                      LpsnRecordNumber:   781169
+                      MRSA: true
+                    - Name: Staphylococcus aureus subsp. aureus
+                      ConceptId: subspecies/staphylococcus-aureus-aureus
+                      ConceptSource: LPSN
+                      LpsnRecordNumber:  781170
+                      MRSA: true
+                    Synonyms:
+                    - Name: Staphylococcus roterodami
+                      ConceptId: species/staphylococcus-roterodami
+                      ConceptSource: LPSN
+                      LpsnRecordNumber:  22650
+                      MRSA: true
+                  - Name: Staphylococcus schweitzeri
+                    ConceptType: Species
+                    ConceptId: species/staphylococcus-schweitzeri
+                    ConceptSource: LPSN
+                    LpsnRecordNumber:  792443
+                    MRSA: true
                 - Name: Staphylococcus coagulans
                   ConceptType: Species
                   ConceptId: species/staphylococcus-coagulans

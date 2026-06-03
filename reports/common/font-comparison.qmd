@@ -1,0 +1,89 @@
+---
+title: "NeoIPC Font Comparison"
+format:
+  pdf:
+    documentclass: scrartcl
+    papersize: a4paper
+    fontsize: 10pt
+    geometry:
+      - top=25mm
+      - bottom=25mm
+      - left=25mm
+      - right=25mm
+    include-in-header:
+      text: |
+        \usepackage{fontspec}
+        \newfontfamily\ebgaramond{EB Garamond}
+        \newfontfamily\notoserif{Noto Serif Condensed}
+        \newfontfamily\notosans{Noto Sans}
+---
+
+## Purpose
+
+This document compares the three fonts used across NeoIPC reports, rendered
+side by side. Use it to verify that all fonts are installed and rendering
+correctly.
+
+- **EB Garamond** --- Partner-Report & Reference-Report (Latin scripts)
+- **Noto Serif Condensed** --- Partner-Report & Reference-Report (non-Latin scripts, e.g. Greek)
+- **Noto Sans** --- Validation-Report & Partner-Certificate
+
+\bigskip
+
+## Latin Sample (English)
+
+\begin{tabular}{p{3.5cm} p{11cm}}
+\textbf{EB Garamond} & {\ebgaramond The NeoIPC Surveillance Network monitors healthcare-associated infections in neonatal intensive care units across 47 countries. In 2024, a total of 12,345 patient records were validated.} \\[6pt]
+\textbf{Noto Serif Cond.} & {\notoserif The NeoIPC Surveillance Network monitors healthcare-associated infections in neonatal intensive care units across 47 countries. In 2024, a total of 12,345 patient records were validated.} \\[6pt]
+\textbf{Noto Sans} & {\notosans The NeoIPC Surveillance Network monitors healthcare-associated infections in neonatal intensive care units across 47 countries. In 2024, a total of 12,345 patient records were validated.} \\
+\end{tabular}
+
+\bigskip
+
+## Latin Sample (German)
+
+\begin{tabular}{p{3.5cm} p{11cm}}
+\textbf{EB Garamond} & {\ebgaramond Das NeoIPC-Surveillance-Netzwerk überwacht nosokomiale Infektionen in neonatologischen Intensivstationen in 47 Ländern. Im Jahr 2024 wurden insgesamt 12.345 Patientenakten validiert.} \\[6pt]
+\textbf{Noto Serif Cond.} & {\notoserif Das NeoIPC-Surveillance-Netzwerk überwacht nosokomiale Infektionen in neonatologischen Intensivstationen in 47 Ländern. Im Jahr 2024 wurden insgesamt 12.345 Patientenakten validiert.} \\[6pt]
+\textbf{Noto Sans} & {\notosans Das NeoIPC-Surveillance-Netzwerk überwacht nosokomiale Infektionen in neonatologischen Intensivstationen in 47 Ländern. Im Jahr 2024 wurden insgesamt 12.345 Patientenakten validiert.} \\
+\end{tabular}
+
+\bigskip
+
+## Greek Sample
+
+\begin{tabular}{p{3.5cm} p{11cm}}
+\textbf{EB Garamond} & {\ebgaramond Το δίκτυο επιτήρησης NeoIPC παρακολουθεί τις νοσοκομειακές λοιμώξεις σε μονάδες εντατικής θεραπείας νεογνών.} \\[6pt]
+\textbf{Noto Serif Cond.} & {\notoserif Το δίκτυο επιτήρησης NeoIPC παρακολουθεί τις νοσοκομειακές λοιμώξεις σε μονάδες εντατικής θεραπείας νεογνών.} \\[6pt]
+\textbf{Noto Sans} & {\notosans Το δίκτυο επιτήρησης NeoIPC παρακολουθεί τις νοσοκομειακές λοιμώξεις σε μονάδες εντατικής θεραπείας νεογνών.} \\
+\end{tabular}
+
+\bigskip
+
+## Numeric and Table-Like Content
+
+\begin{tabular}{p{3.5cm} p{11cm}}
+\textbf{EB Garamond} & {\ebgaramond Incidence: 3.45 / 1,000 patient-days (95\% CI: 2.81--4.09). BSI rate: 12.7\%. N = 1,234.} \\[6pt]
+\textbf{Noto Serif Cond.} & {\notoserif Incidence: 3.45 / 1,000 patient-days (95\% CI: 2.81--4.09). BSI rate: 12.7\%. N = 1,234.} \\[6pt]
+\textbf{Noto Sans} & {\notosans Incidence: 3.45 / 1,000 patient-days (95\% CI: 2.81--4.09). BSI rate: 12.7\%. N = 1,234.} \\
+\end{tabular}
+
+\bigskip
+
+## Bold and Italic Variants
+
+\begin{tabular}{p{3.5cm} p{11cm}}
+\textbf{EB Garamond} & {\ebgaramond Regular, \textbf{Bold}, \textit{Italic}, \textbf{\textit{Bold Italic}}} \\[6pt]
+\textbf{Noto Serif Cond.} & {\notoserif Regular, \textbf{Bold}, \textit{Italic}, \textbf{\textit{Bold Italic}}} \\[6pt]
+\textbf{Noto Sans} & {\notosans Regular, \textbf{Bold}, \textit{Italic}, \textbf{\textit{Bold Italic}}} \\
+\end{tabular}
+
+\bigskip
+
+## Headings Preview
+
+\begin{tabular}{p{3.5cm} p{11cm}}
+\textbf{EB Garamond} & {\ebgaramond\Large Section Heading \normalsize \\ Subsection text with numbers: 12,345 patients across 47 NICUs.} \\[6pt]
+\textbf{Noto Serif Cond.} & {\notoserif\Large Section Heading \normalsize \\ Subsection text with numbers: 12,345 patients across 47 NICUs.} \\[6pt]
+\textbf{Noto Sans} & {\notosans\Large Section Heading \normalsize \\ Subsection text with numbers: 12,345 patients across 47 NICUs.} \\
+\end{tabular}

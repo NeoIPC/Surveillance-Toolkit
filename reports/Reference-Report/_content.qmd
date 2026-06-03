@@ -257,6 +257,20 @@ include_localised("_infectious_agents.Rmd")
 
 ```{r}
 #| output: asis
+.show(params$includeOrganismResistanceRateTable)
+```
+
+{{< include tables/_tbl-organism-resistance-rate.qmd >}}
+
+{{< pagebreak >}}
+
+```{r}
+#| output: asis
+.end()
+```
+
+```{r}
+#| output: asis
 if (show_section_diagnostics)
   cat('::: {.content-visible when-meta="alwaysTrue"}\n\n###',
       sR$headings$diagnostics, '\n\n:::\n')
@@ -316,6 +330,20 @@ include_localised("_risk_and_protective_factors.Rmd")
 ```
 
 {{< include tables/_tbl-risk-density-rates.qmd >}}
+
+{{< pagebreak >}}
+
+```{r}
+#| output: asis
+.end()
+```
+
+```{r}
+#| output: asis
+.show(params$includeAntibioticUtilisationTable)
+```
+
+{{< include tables/_tbl-antibiotic-utilisation.qmd >}}
 
 {{< pagebreak >}}
 

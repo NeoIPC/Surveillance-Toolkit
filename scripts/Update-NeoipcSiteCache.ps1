@@ -43,7 +43,7 @@ $auth = Resolve-NeoipcAuth -Token $Token
 $deptArgs = @{ Auth = $auth }
 if ($Dhis2Scheme) { $deptArgs.Scheme = $Dhis2Scheme }
 if ($Dhis2Hostname) { $deptArgs.Hostname = $Dhis2Hostname }
-if ($null -ne $Dhis2Port) { $deptArgs.Port = $Dhis2Port }
+if ($Dhis2Port) { $deptArgs.Port = $Dhis2Port }
 if ($Dhis2Path) { $deptArgs.Path = $Dhis2Path }
 $sites = Get-NeoipcDepartments @deptArgs
 
@@ -53,6 +53,6 @@ if (-not (Test-Path -LiteralPath $cacheDir)) {
     New-Item -ItemType Directory -Path $cacheDir -Force | Out-Null
 }
 $cachePath = Join-Path $cacheDir 'site-codes.txt'
-$sites | Set-Content -LiteralPath $cachePath -Encoding utf8NoBOM
+$sites | Set-Content -LiteralPath $cachePath -Encoding UTF8
 
 Write-Host "Cached $($sites.Count) site codes to $cachePath" -ForegroundColor Green

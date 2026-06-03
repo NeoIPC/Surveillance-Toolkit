@@ -212,6 +212,6 @@ function Clear-DHIS2PersonalAccessTokens {
         Remove-DHIS2PersonalAccessToken -Token $Token -UserName $UserName -Scheme $Scheme -Hostname $Hostname -Port $Port -Force:$Force
 }
 
-New-Alias -Name Read-PAT -Value Read-DHIS2PersonalAccessToken
-New-Alias -Name Remove-PAT -Value Remove-DHIS2PersonalAccessToken
-New-Alias -Name Clear-PATs -Value Clear-DHIS2PersonalAccessTokens
+New-Alias -Name Read-PAT -Value Read-DHIS2PersonalAccessToken -Force
+New-Alias -Name Remove-PAT -Value Remove-DHIS2PersonalAccessToken -Force
+New-Alias -Name Clear-PATs -Value Clear-DHIS2PersonalAccessTokens -Force

@@ -121,15 +121,15 @@ problems:
       number of antibiotic days (%i). See @sec-problem-details-13.
   "22":
     description: >-
-      The surgical procedure ('%s') has an invalid ICHE code ('%s') as the
+      The surgical procedure ('%s') has an invalid ICHI code ('%s') as the
       main procedure code. See @sec-problem-details-14.
   "23":
     description: >-
-      The surgical procedure ('%s') has an invalid ICHE code ('%s') as the
+      The surgical procedure ('%s') has an invalid ICHI code ('%s') as the
       first side procedure code. See @sec-problem-details-14.
   "24":
     description: >-
-      The surgical procedure ('%s') has an invalid ICHE code ('%s') as the
+      The surgical procedure ('%s') has an invalid ICHI code ('%s') as the
       second side procedure code. See @sec-problem-details-14.
   "25":
     description: >-

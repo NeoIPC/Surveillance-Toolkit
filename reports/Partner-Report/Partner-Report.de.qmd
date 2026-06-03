@@ -12,11 +12,29 @@ params:
   gestationWeeksTo: NULL
   includeNonCorePatients: NULL
   validationExceptionFile: NULL
+  includeTestData: false
   dhis2Scheme: NULL
   dhis2Hostname: NULL
   dhis2Port: NULL
   dhis2Path: NULL
   includeConfidenceIntervals: "rate"
+  includeIntroductionTexts: true
+  includeMethodsTexts: true
+  includeOutlierInterpretation: false
+  includeBirthWeightFigure: true
+  includeGestationalAgeFigure: true
+  includeIncidenceDensityTable: true
+  includeDeviceAssociatedIncidenceDensityTable: true
+  includeAgentPerInfectionRateTable: true
+  includeInfectiousAgentDetectionRateTable: true
+  includeRiskDensityRateTable: true
+  includeAntibioticUtilisationTable: false
+  includeSurgicalProcedureRateTable: true
+  includeResistantPathogenInfectionRateTable: false
+  includeOrganismResistanceRateTable: false
+  includeAntibioticResistanceTestRateTable: false
+  includeSecondaryBsiRateTable: false
+  sparseDataThreshold: 16
   debug: false
 subtitle: '`r paste0(params$unitCodes, collapse = ", ")`'
 ---

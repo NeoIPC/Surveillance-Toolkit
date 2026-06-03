@@ -35,6 +35,8 @@ admission: admission
 admission_sc: Admission
 antibiotics: antibiotics
 antibiotics_sc: Antibiotics
+# AWaRe is a WHO acronym (Access, Watch, Reserve) — not translatable
+aware: "AWaRe"
 cvc: CVC
 h2020_funding_statement: >-
   This project has received funding from the European Union's Horizon 2020

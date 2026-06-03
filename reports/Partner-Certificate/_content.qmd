@@ -49,7 +49,7 @@ cat(
   "",
   sprintf(
     sR$content[5],
-    paste0('**', format_integer(data$nPatients), '**')
+    paste0('**', format(data$nPatients), '**')
   ),
   "",
   paste0("\\vspace*{", sR$signature_offset, "\\baselineskip}"),

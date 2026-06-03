@@ -74,11 +74,15 @@ conn_opt <- do.call(neoipcr::dhis2_connection_options, conn_args)
 
 ds_opt <- neoipcr::dhis2_dataset_options(
   department_filter = department_code,
-  include_patient_id = TRUE,
-  include_country = "yes",
-  include_hospital = "yes",
-  include_department = "yes",
-  include_user = "pseudonymised",
+  include_patient = "full",
+  patient_columns = c("id", "sex", "birth_weight", "gestational_age",
+                       "delivery_mode", "siblings"),
+  include_enrollment = "full",
+  include_event = "full",
+  include_country = "full",
+  include_hospital = "full",
+  include_department = "full",
+  include_user = "pseudo",
   include_timestamps = TRUE,
   include_notes = c("enrollments", "events"),
   include_test_data = TRUE,
@@ -91,17 +95,11 @@ ds_opt <- neoipcr::dhis2_dataset_options(
 ds <- neoipcr::import_dhis2(connection_options = conn_opt, dataset_options = ds_opt)
 
 # Filter to the requested patient
-patient <- ds$patients |> dplyr::filter(.data$patient_id == !!patient_id)
+patient <- ds$patients |> dplyr::filter(patient_id == !!patient_id)
 
 if (nrow(patient) == 0) {
   cat(sprintf("Error: No patient with ID '%s' found in department '%s'.\n",
     patient_id, department_code), file = stderr())
-  quit(status = 1)
-}
-
-if (nrow(patient) > 1) {
-  cat(sprintf("Error: %d patient records share ID '%s' in department '%s' — refusing to render ambiguous report.\n",
-    nrow(patient), patient_id, department_code), file = stderr())
   quit(status = 1)
 }
 
@@ -144,13 +142,6 @@ result <- list(
     dplyr::filter(hospital_key == patient$hospital_key)
 )
 
-# Plain `jsonlite::toJSON` (not `serializeJSON`) — the Patient-Data-Report
-# JSON output is intended for external/human consumption (downstream
-# pipelines, manual inspection), not for round-trip back into a Quarto
-# render. The Reference- and Partner-Report generators use `serializeJSON`
-# because their reports consume the output via a DataFile mode that needs
-# to restore tibbles, factors, dates and S3 classes faithfully; that mode
-# is deliberately not wired up here.
 out <- jsonlite::toJSON(result, pretty = TRUE, auto_unbox = TRUE,
   Date = "ISO8601", POSIXt = "ISO8601", null = "null", na = "null")
 

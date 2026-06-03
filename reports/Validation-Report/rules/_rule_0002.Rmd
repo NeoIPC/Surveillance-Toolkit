@@ -1,28 +1,22 @@
-```{r Validation rule 2: "The patient has a completed surveillance end event but an active enrollment"}
-
+```{r Validation rule 2: active enrolment with completed surveillance end}
 problems <- problems |>
-  bind_rows(
-    patients |>
-      inner_join(enrollments, join_by(key == patient)) |>
-      filter(enrollment_status == "ACTIVE" & surveillanceEnd_status == "COMPLETED") |>
-      select(
-        SITE_CODE,
-        DEPARTMENT_CODE,
-        DEPARTMENT_NAME,
-        DEPARTMENT_OU,
-        NEOIPC_PATIENT_ID,
-        PATIENT_TEI,
-        ENROLMENT_ID,
-        ENROLMENT_DATE
-        ) |>
-      bind_cols(PROBLEM_ID = c(2L)) |>
-      anti_join(
-        exceptions,
-        join_by(
-          PROBLEM_ID,
-          SITE_CODE,
-          DEPARTMENT_CODE,
-          NEOIPC_PATIENT_ID,
-          ENROLMENT_DATE)) |>
-      select(!DEPARTMENT_CODE))
+  dplyr::bind_rows(
+    data$enrollments |>
+      dplyr::filter(.data$status == "ACTIVE") |>
+      dplyr::inner_join(
+        data$events |>
+          dplyr::filter(.data$event_type_key == "end" &
+                        .data$status == "COMPLETED") |>
+          dplyr::select("enrollment_key", "event_key"),
+        dplyr::join_by("enrollment_key")) |>
+      dplyr::anti_join(
+        exceptions |> dplyr::filter(.data$rule_id == 2L),
+        dplyr::join_by("enrollment_key")) |>
+      dplyr::mutate(
+        rule_id        = 2L,
+        patient_key    = .data$patient_key,
+        enrollment_key = .data$enrollment_key,
+        event_key      = .data$event_key,
+        context        = list(list()),
+        .keep = "none"))
 ```

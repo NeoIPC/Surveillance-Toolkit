@@ -1,222 +1,5 @@
 <#
 .SYNOPSIS
-Shared helper functions for NeoIPC report generation scripts.
-
-.DESCRIPTION
-Dot-source this file to get shared functions for authentication resolution,
-DHIS2 API access, Quarto rendering, and locale handling.
-
-.EXAMPLE
-. "$PSScriptRoot/NeoipcReportHelpers.ps1"
-$auth = Resolve-NeoipcAuth -Token $Token
-$sites = Get-NeoipcDepartments -Auth $auth -SiteCodeFilter 'NEO_AT.*'
-Invoke-WithNeoipcAuth -Auth $auth -ScriptBlock { quarto render ... }
-#>
-
-<#
-.SYNOPSIS
-Resolve DHIS2 authentication credentials.
-
-.DESCRIPTION
-Tries token-based auth first (parameter, env var, file), then falls back
-to prompting for username/password if no token is available.
-
-Returns a hashtable with:
-  @{ AuthType = 'Token'; Token = '...' }
-  @{ AuthType = 'Basic'; Username = '...'; Password = <SecureString> }
-
-.PARAMETER Token
-Optional token string or path to a file containing the token.
-#>
-function Resolve-NeoipcAuth {
-    [CmdletBinding()]
-    param(
-        [Parameter(Position = 0)]
-        [string]$Token
-    )
-
-    # Try token first: explicit param → env var → file
-    $candidate = $Token
-    if ([string]::IsNullOrWhiteSpace($candidate)) {
-        $candidate = $env:NEOIPC_DHIS2_TOKEN
-    }
-
-    if (-not [string]::IsNullOrWhiteSpace($candidate)) {
-        # If it's a file path, read the token from it
-        if (Test-Path -LiteralPath $candidate -PathType Leaf) {
-            try {
-                $content = Get-Content -LiteralPath $candidate -TotalCount 1 -Encoding UTF8 -ErrorAction Stop
-                if ([string]::IsNullOrWhiteSpace($content)) {
-                    throw "Token file '$candidate' is empty."
-                }
-                $candidate = $content.Trim()
-            }
-            catch [System.Management.Automation.ItemNotFoundException] {
-                throw "Token file '$candidate' not found."
-            }
-            catch {
-                throw "Token file '$candidate' could not be read: $($_.Exception.Message)"
-            }
-        }
-        return @{
-            AuthType = 'Token'
-            Token    = $candidate.Trim()
-        }
-    }
-
-    # No token available — prompt for username/password
-    $username = Read-Host -Prompt 'DHIS2 username'
-    if ([string]::IsNullOrWhiteSpace($username)) {
-        throw 'No username provided.'
-    }
-    $securePassword = Read-Host -Prompt 'DHIS2 password' -AsSecureString
-
-    return @{
-        AuthType = 'Basic'
-        Username = $username
-        Password = $securePassword
-    }
-}
-
-<#
-.SYNOPSIS
-Get the plaintext password from a Resolve-NeoipcAuth result.
-
-.DESCRIPTION
-Converts the SecureString password in a Basic auth result to plaintext.
-Returns $null for Token auth.
-#>
-function Get-NeoipcAuthPassword {
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory)]
-        [hashtable]$Auth
-    )
-
-    if ($Auth.AuthType -ne 'Basic') { return $null }
-    [System.Net.NetworkCredential]::new('', $Auth.Password).Password
-}
-
-<#
-.SYNOPSIS
-Build a filesystem-safe key from DHIS2 connection parameters.
-
-.DESCRIPTION
-Returns a string like "https_neoipc.charite.de_api" derived from scheme,
-hostname, port, and path. Used to partition per-server cache files.
-Falls back to neoipcr defaults for any null parameter.
-
-.PARAMETER Scheme
-URL scheme. Falls back to 'https'.
-
-.PARAMETER Hostname
-DHIS2 server hostname. Falls back to 'neoipc.charite.de'.
-
-.PARAMETER Port
-TCP port. Omitted from key when null.
-
-.PARAMETER Path
-API base path. Falls back to '/api'.
-#>
-function Get-NeoipcServerKey {
-    [CmdletBinding()]
-    param(
-        [Parameter()] [string]$Scheme = $null,
-        [Parameter()] [string]$Hostname = $null,
-        [Parameter()] [Nullable[int]]$Port = $null,
-        [Parameter()] [string]$Path = $null
-    )
-
-    $s = if ($Scheme) { $Scheme } else { 'https' }
-    $h = if ($Hostname) { $Hostname } else { 'neoipc.charite.de' }
-    $p = if ($Path) { $Path } else { '/api' }
-    $key = "${s}_${h}"
-    if ($Port) { $key += "_${Port}" }
-    $key += "_$($p.TrimStart('/').Replace('/', '_'))"
-    $key
-}
-
-<#
-.SYNOPSIS
-Fetch and filter NeoIPC department codes from DHIS2.
-
-.PARAMETER Auth
-Authentication hashtable from Resolve-NeoipcAuth.
-
-.PARAMETER SiteCodeFilter
-Regex pattern to filter department codes. Default: '.+' (all).
-
-.PARAMETER Scheme
-URL scheme. Defaults to 'https' when not specified.
-
-.PARAMETER Hostname
-DHIS2 server hostname. Defaults to 'neoipc.charite.de' when not specified.
-
-.PARAMETER Port
-TCP port. Not included in URL when null.
-
-.PARAMETER Path
-API base path. Defaults to '/api' when not specified.
-
-.OUTPUTS
-Sorted array of department code strings.
-#>
-function Get-NeoipcDepartments {
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory)]
-        [hashtable]$Auth,
-
-        [Parameter()]
-        [string]$SiteCodeFilter = '.+',
-
-        [Parameter()] [string]$Scheme = $null,
-        [Parameter()] [string]$Hostname = $null,
-        [Parameter()] [Nullable[int]]$Port = $null,
-        [Parameter()] [string]$Path = $null
-    )
-
-    $effectiveScheme = if ($Scheme) { $Scheme } else { 'https' }
-    $effectiveHost = if ($Hostname) { $Hostname } else { 'neoipc.charite.de' }
-    $effectivePath = if ($Path) { $Path } else { '/api' }
-    $baseUrl = "${effectiveScheme}://${effectiveHost}"
-    if ($Port) { $baseUrl += ":$Port" }
-    $deptsUrl = "${baseUrl}${effectivePath}/organisationUnitGroups.json?paging=false&filter=code:eq:NEO_DEPARTMENT&fields=organisationUnits%5Bcode%5D"
-
-    $invokeParams = @{
-        Method      = 'Get'
-        Uri         = $deptsUrl
-        ErrorAction = 'Stop'
-    }
-
-    if ($Auth.AuthType -eq 'Token') {
-        $invokeParams.Headers = @{ 'Authorization' = "ApiToken $($Auth.Token)" }
-    }
-    else {
-        $cred = [System.Management.Automation.PSCredential]::new(
-            $Auth.Username,
-            $Auth.Password)
-        $invokeParams.Authentication = 'Basic'
-        $invokeParams.Credential = $cred
-    }
-
-    try {
-        $resp = Invoke-RestMethod @invokeParams
-        $sites = if ($resp.organisationUnitGroups -and $resp.organisationUnitGroups[0].organisationUnits) {
-            $resp.organisationUnitGroups[0].organisationUnits.code
-        }
-        else { @() }
-        $sites = $sites | Where-Object { $_ -match $SiteCodeFilter } | Sort-Object
-    }
-    catch {
-        throw "Failed to fetch department list from DHIS2 ($deptsUrl): $($_.Exception.Message)"
-    }
-
-    return $sites
-}
-
-<#
-.SYNOPSIS
 Run a script block with NeoIPC auth environment variables scoped.
 
 .DESCRIPTION
@@ -334,6 +117,7 @@ function Invoke-QuartoRender {
     $skipRest = $false
     $isError = $false
     $inBacktrace = $false
+    $pendingErrorLine = $null
 
     Write-Debug "Quarto command: quarto $($Arguments -join ' ')"
 
@@ -351,6 +135,11 @@ function Invoke-QuartoRender {
             }
             elseif ($s -match '^Backtrace:') {
                 $inBacktrace = $true
+                if ($pendingErrorLine) {
+                    $errorLines.Add($pendingErrorLine) | Out-Null
+                    Write-Host $pendingErrorLine -ForegroundColor Red
+                    $pendingErrorLine = $null
+                }
             }
             elseif ($inBacktrace) {
                 # Silently collect backtrace lines (available in Messages)
@@ -359,14 +148,21 @@ function Invoke-QuartoRender {
                 # skip blank lines in error block
             }
             else {
+                if ($pendingErrorLine) {
+                    $errorLines.Add($pendingErrorLine) | Out-Null
+                    Write-Host $pendingErrorLine -ForegroundColor Red
+                    $pendingErrorLine = $null
+                }
                 $errorLines.Add($s) | Out-Null
                 Write-Host $s -ForegroundColor Red
             }
         }
-        elseif ($s -match '^(Error)|(Fehler)') {
+        elseif ($s -match '^(Error|Fehler|! )') {
+            # ^Error / ^Fehler — R / knitr / Quarto wrapper errors.
+            # ^! ...  — LaTeX-style errors (e.g. "! Undefined control sequence").
+            # -match is case-insensitive, so ERROR / error also match.
             $isError = $true
-            $errorLines.Add($s) | Out-Null
-            Write-Host $s -ForegroundColor Red
+            $pendingErrorLine = $s
         }
         elseif ($s -match "^(`e\[39m)?(`e\[33m)?WARNING") {
             $s | Write-Warning
@@ -374,6 +170,11 @@ function Invoke-QuartoRender {
         else {
             $s | Write-Verbose
         }
+    }
+
+    if ($pendingErrorLine -and -not $skipRest) {
+        $errorLines.Add($pendingErrorLine) | Out-Null
+        Write-Host $pendingErrorLine -ForegroundColor Red
     }
 
     $exitCode = $LASTEXITCODE
@@ -385,6 +186,17 @@ function Invoke-QuartoRender {
         $status = 'Error'
         if ($exitCode -ne 0) {
             $messages.Add("Quarto exit code $exitCode") | Out-Null
+        }
+        # Safety net: if the process failed but nothing got classified as an
+        # error above (regex didn't match), the user sees nothing useful.
+        # Dump the tail of the captured output so at least some diagnostic
+        # text reaches the console.
+        if ($errorLines.Count -eq 0) {
+            $tailCount = [math]::Min(40, $messages.Count)
+            Write-Host "Quarto render failed (exit code $exitCode) but no recognised error line was captured. Last $tailCount lines of output:" -ForegroundColor Red
+            $messages | Select-Object -Last $tailCount | ForEach-Object {
+                if ($_ -ne '') { Write-Host "  $_" -ForegroundColor Red }
+            }
         }
     }
     else {
@@ -459,7 +271,10 @@ function Invoke-Rscript {
                 Write-Host $s -ForegroundColor Red
             }
         }
-        elseif ($s -match '^(Error)|(Fehler)') {
+        elseif ($s -match '^(Error|Fehler|! )') {
+            # ^Error / ^Fehler — R / rlang errors.
+            # ^! ...  — LaTeX-style errors (rare in Rscript but possible via knitr).
+            # -match is case-insensitive, so ERROR / error also match.
             $isError = $true
             $errorLines.Add($s) | Out-Null
             Write-Host $s -ForegroundColor Red
@@ -478,6 +293,17 @@ function Invoke-Rscript {
         $status = 'Error'
         if ($exitCode -ne 0 -and -not $isError) {
             $messages.Add("$Description exit code $exitCode") | Out-Null
+        }
+        # Safety net: if the process failed but nothing got classified as an
+        # error above (regex didn't match), the user sees nothing useful.
+        # Dump the tail of the captured output so at least some diagnostic
+        # text reaches the console.
+        if ($errorLines.Count -eq 0) {
+            $tailCount = [math]::Min(40, $messages.Count)
+            Write-Host "$Description failed (exit code $exitCode) but no recognised error line was captured. Last $tailCount lines of output:" -ForegroundColor Red
+            $messages | Select-Object -Last $tailCount | ForEach-Object {
+                if ($_ -ne '') { Write-Host "  $_" -ForegroundColor Red }
+            }
         }
     }
     else {

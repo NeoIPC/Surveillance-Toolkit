@@ -1,0 +1,362 @@
+### `{r} sR$headings$antibiotic_utilisation`
+
+```{r}
+#| output: asis
+.show(params$includeIntroductionTexts)
+```
+
+```{r}
+#| output: asis
+include_localised("_tbl-intro-antibiotic-utilisation.Rmd")
+```
+
+```{r}
+#| output: asis
+.end()
+```
+
+```{r}
+#| output: asis
+.show(params$includeMethodsTexts)
+```
+
+```{r}
+#| output: asis
+include_localised("_methods-antibiotic-utilisation.Rmd")
+```
+
+```{r}
+#| output: asis
+.end()
+```
+
+```{r}
+#| output: asis
+#| label: tbl-antibiotic-utilisation
+#| tbl-cap: !expr 'sR$`tbl-antibiotic-utilisation`$`tbl-cap`'
+#| tbl-cap-location: top
+
+# Conditionally render table only if department data exists
+if (!is.null(benchmark_data$antibiotic_utilisation_table) &&
+    sum(benchmark_data$antibiotic_utilisation_table$n_own, na.rm = TRUE) > 0) {
+
+  has_reference <- "pooled_ref" %in% names(benchmark_data$antibiotic_utilisation_table)
+
+  tbl_data <- benchmark_data$antibiotic_utilisation_table
+
+  # Map AWaRe factor to inline badge (HTML) or letter (PDF)
+  aware_colors <- c(A = "#6eb43d", W = "#fddf01", R = "#ee2d24")
+  aware_text_colors <- c(A = "white", W = "black", R = "white")
+  tbl_data <- tbl_data |>
+    dplyr::mutate(
+      aware = dplyr::case_match(
+        as.character(.data$aware),
+        "WHO_AWARE_ACCESS" ~ "A",
+        "WHO_AWARE_WATCH" ~ "W",
+        "WHO_AWARE_RESERVE" ~ "R",
+        .default = ""))
+
+  if (knitr::is_html_output()) {
+    tbl_data <- tbl_data |>
+      dplyr::mutate(
+        aware = dplyr::if_else(
+          .data$aware != "",
+          paste0(
+            '<span style="display:inline-block;width:18px;height:18px;',
+            'border-radius:50%;background:', aware_colors[.data$aware],
+            ';color:', aware_text_colors[.data$aware],
+            ';text-align:center;line-height:18px;font-weight:bold;',
+            'font-size:11px">', .data$aware, '</span>'),
+          ""))
+  }
+
+  cw <- compute_col_widths(tbl_data, stub_min = 33, has_reference = has_reference, n_w = 10)
+  ci_pattern <- ci_pattern_default
+
+  tbl <- tbl_data |>
+    dplyr::select(-tidyselect::any_of("n_ref")) |>
+    dplyr::rename(
+      !!sR$table_headers$n := "n_own",
+      !!sR$table_headers$rate := tidyselect::any_of("pooled_own"),
+      !!sR$table_headers$pooled := tidyselect::any_of("pooled_ref"),
+      !!sR$table_headers$q1 := tidyselect::any_of("q1_ref"),
+      !!sR$table_headers$q2 := tidyselect::any_of("q2_ref"),
+      !!sR$table_headers$q3 := tidyselect::any_of("q3_ref"))
+
+  ci_cols_to_drop <- character(0)
+  if (!include_rate_ci)
+    ci_cols_to_drop <- c(ci_cols_to_drop, "ci_lower_own", "ci_upper_own")
+  if (!include_pooled_ci)
+    ci_cols_to_drop <- c(ci_cols_to_drop, "ci_lower_ref", "ci_upper_ref")
+  if (!include_quartile_ci)
+    ci_cols_to_drop <- c(ci_cols_to_drop,
+      "q1_ci_lower_ref", "q1_ci_upper_ref",
+      "q2_ci_lower_ref", "q2_ci_upper_ref",
+      "q3_ci_lower_ref", "q3_ci_upper_ref")
+  if (length(ci_cols_to_drop) > 0)
+    tbl <- tbl |> dplyr::select(-tidyselect::any_of(ci_cols_to_drop))
+
+  gt_tbl <- tbl |>
+    gt(rowname_col = "display_name") |>
+    sub_missing() |>
+    gt::cols_hide(columns = tidyselect::any_of(
+      c("row_id", "atc5_group", "row_type"))) |>
+    gt::tab_options(
+      latex.use_longtable = TRUE,
+      table.width = pct(100),
+      table.font.size = cw$font_size,
+      footnotes.marks = "extended"
+    ) |>
+    fmt_number(
+      columns = !c(sR$table_headers$n, "aware"),
+      decimals = 1,
+      sep_mark = sR$digit_group_separator,
+      min_sep_threshold = 2,
+      locale = locale_gt) |>
+    fmt_integer(
+      columns = sR$table_headers$n,
+      sep_mark = sR$digit_group_separator,
+      min_sep_threshold = 2) |>
+    gt::fmt_markdown(columns = "aware")
+
+  # Move AWaRe column right after stub and set column widths
+  gt_tbl <- gt_tbl |>
+    gt::cols_move(columns = "aware", after = 1) |>
+    gt::cols_label(aware = sR$aware) |>
+    cols_width(
+      stub() ~ pct(cw$stub - 3),
+      "aware" ~ pct(3),
+      sR$table_headers$n ~ pct(cw$n),
+      sR$table_headers$rate ~ pct(cw$rate %||% cw$pooled),
+      tidyselect::any_of(sR$table_headers$pooled) ~ pct(cw$pooled),
+      tidyselect::any_of(sR$table_headers$q1) ~ pct(cw$q),
+      tidyselect::any_of(sR$table_headers$q2) ~ pct(cw$q),
+      tidyselect::any_of(sR$table_headers$q3) ~ pct(cw$q))
+
+  # Bold ATC5 rows, indent substance rows
+  gt_tbl <- gt_tbl |>
+    tab_style(
+      style = cell_text(weight = "bold"),
+      locations = cells_stub(rows = tbl_data$row_type == "atc5")) |>
+    tab_style(
+      style = cell_text(weight = "bold"),
+      locations = cells_body(rows = tbl_data$row_type == "atc5")) |>
+    tab_stub_indent(
+      rows = tbl_data$row_type == "substance",
+      indent = 5)
+
+  # Own rate CI merge
+  if (include_rate_ci && "ci_lower_own" %in% colnames(gt_tbl$`_data`)) {
+    gt_tbl <- gt_tbl |>
+      cols_merge(
+        columns = c(sR$table_headers$rate, "ci_lower_own", "ci_upper_own"),
+        pattern = ci_pattern,
+        rows = !is.na(tbl_data[[if ("pooled_own" %in% names(tbl_data)) "pooled_own" else "rate"]]))
+  } else if ("ci_lower_own" %in% colnames(gt_tbl$`_data`)) {
+    gt_tbl <- gt_tbl |> gt::cols_hide(columns = c("ci_lower_own", "ci_upper_own"))
+  }
+
+  # Pooled reference rate CI merge
+  if (has_reference && include_pooled_ci &&
+      "ci_lower_ref" %in% colnames(gt_tbl$`_data`)) {
+    gt_tbl <- gt_tbl |>
+      cols_merge(
+        columns = c(sR$table_headers$pooled, "ci_lower_ref", "ci_upper_ref"),
+        pattern = ci_pattern,
+        rows = !is.na(tbl_data$pooled_ref))
+  } else if ("ci_lower_ref" %in% colnames(gt_tbl$`_data`)) {
+    gt_tbl <- gt_tbl |> gt::cols_hide(
+      columns = tidyselect::any_of(c("ci_lower_ref", "ci_upper_ref")))
+  }
+
+  # Quartile bootstrap CI merge
+  if ("q1_ci_lower_ref" %in% colnames(gt_tbl$`_data`)) {
+    if (include_quartile_ci) {
+      has_boot <- !is.na(gt_tbl$`_data`[["q1_ci_lower_ref"]])
+      gt_tbl <- gt_tbl |>
+        gt::cols_merge(
+          columns = c(sR$table_headers$q1, "q1_ci_lower_ref", "q1_ci_upper_ref"),
+          pattern = ci_pattern,
+          rows = has_boot) |>
+        gt::cols_merge(
+          columns = c(sR$table_headers$q2, "q2_ci_lower_ref", "q2_ci_upper_ref"),
+          pattern = ci_pattern,
+          rows = has_boot) |>
+        gt::cols_merge(
+          columns = c(sR$table_headers$q3, "q3_ci_lower_ref", "q3_ci_upper_ref"),
+          pattern = ci_pattern,
+          rows = has_boot)
+    } else {
+      gt_tbl <- gt_tbl |> gt::cols_hide(columns = tidyselect::any_of(c(
+        "q1_ci_lower_ref", "q1_ci_upper_ref",
+        "q2_ci_lower_ref", "q2_ci_upper_ref",
+        "q3_ci_lower_ref", "q3_ci_upper_ref")))
+    }
+  }
+
+  gt_tbl <- gt_tbl |>
+    tab_spanner(
+      label = sR$`tbl-antibiotic-utilisation`$exposure_density_rate,
+      columns = tidyselect::any_of(
+        c(sR$table_headers$rate,
+          sR$table_headers$pooled,
+          sR$table_headers$q1,
+          sR$table_headers$q2,
+          sR$table_headers$q3)),
+      id = "exposure_density_rate"
+    )
+
+  if (has_reference) {
+    gt_tbl <- gt_tbl |>
+      tab_spanner(
+        label = sR$own_data_label,
+        columns = tidyselect::any_of(
+          c(sR$table_headers$n, sR$table_headers$rate)),
+        id = "department_data"
+      ) |>
+      tab_spanner(
+        label = sR$reference_data,
+        columns = tidyselect::any_of(
+          c(sR$table_headers$pooled,
+            sR$table_headers$q1,
+            sR$table_headers$q2,
+            sR$table_headers$q3)),
+        id = "reference_data"
+      ) |>
+      tab_footnote(
+        footnote = sprintf(
+          sR$`tbl-antibiotic-utilisation`$pooled_footnote,
+          sR$table_headers$pooled),
+        locations = cells_column_labels(columns = sR$table_headers$pooled),
+        placement = "right")
+  }
+
+  gt_tbl <- gt_tbl |>
+    tab_style(
+      style = cell_text(weight = "bold"),
+      locations = list(
+        cells_column_spanners(),
+        cells_column_labels()
+      )
+    ) |>
+    tab_footnote(
+      footnote = md(
+        paste0(
+          "$$\\text{",
+          sR$`tbl-antibiotic-utilisation`$exposure_density_rate,
+          "} = \\frac{\\text{",
+          sR$`tbl-antibiotic-utilisation`$substance_days,
+          "}}{\\text{",
+          sR$patient_days,
+          "}} \\times ",
+          format(100L),
+          "$$"
+        )),
+      locations = cells_column_spanners(spanners = "exposure_density_rate"),
+      placement = "right"
+    ) |>
+    tab_footnote(
+      footnote = sprintf(
+        sR$`tbl-antibiotic-utilisation`$n_footnote,
+        sR$table_headers$n),
+      locations = cells_column_labels(columns = sR$table_headers$n),
+      placement = "right") |>
+    tab_footnote(
+      footnote = md(
+        sprintf(
+          sR$`tbl-antibiotic-utilisation`$atc_footnote,
+          "[whocc.no/atc_ddd_index/](https://www.whocc.no/atc_ddd_index/)")),
+      locations = cells_stub(rows = tbl_data$row_type == "atc5"),
+      placement = "right") |>
+    tab_footnote(
+      footnote = md(
+        sprintf(
+          sR$`tbl-antibiotic-utilisation`$aware_column_footnote,
+          "[aware.essentialmeds.org](https://aware.essentialmeds.org/)")),
+      locations = cells_column_labels(columns = "aware"),
+      placement = "right") |>
+    tab_source_note(source_note = sR$aware_combination_therapy_footnote)
+
+  if (has_reference) {
+    gt_tbl <- gt_tbl |>
+      tab_footnote(
+        footnote = sprintf(
+          sR$`tbl-antibiotic-utilisation`$rate_footnote,
+          sR$table_headers$rate),
+        locations = cells_column_labels(
+          columns = tidyselect::any_of(sR$table_headers$rate)),
+        placement = "right")
+  }
+
+  # Sparse-data footnote for N < sparse_threshold
+  if (any(!is.na(tbl_data$pooled_own) & tbl_data$n_own < sparse_threshold, na.rm = TRUE)) {
+    fn_text <- if (include_rate_ci) sR$sparse_data_footnote else sR$sparse_data_footnote_no_ci
+    fn_text <- glue::glue(fn_text, threshold = sparse_threshold)
+    gt_tbl <- gt_tbl |>
+      gt::tab_footnote(
+        footnote = fn_text,
+        locations = cells_body(
+          columns = sR$table_headers$n,
+          rows = !is.na(tbl_data$pooled_own) & tbl_data$n_own < sparse_threshold),
+        placement = "right")
+  }
+
+  gt_tbl
+} else {
+  no_data_table(sR$`tbl-antibiotic-utilisation`$no_data)
+}
+```
+
+```{r}
+#| output: asis
+.show(params$includeOutlierInterpretation)
+```
+
+```{r}
+#| output: asis
+if (exists("has_reference") && has_reference &&
+    !is.null(benchmark_data$antibiotic_utilisation_table)) {
+  # ATC5-level outlier interpretation using metric_registry
+  states <- metric_registry$antibiotic_utilisation_table
+  if (!is.null(states) && has_outliers(states)) {
+    # Filter to ATC5 rows only
+    atc5_rows <- benchmark_data$antibiotic_utilisation_table |>
+      dplyr::filter(.data$row_type == "atc5")
+    atc5_states <- states[names(states) %in% atc5_rows$row_id]
+
+    if (has_outliers(atc5_states)) {
+      # Look up display names from the table data
+      name_lookup <- stats::setNames(atc5_rows$display_name, atc5_rows$row_id)
+
+      above <- names(atc5_states[atc5_states == "above_q3"])
+      below <- names(atc5_states[atc5_states %in% c("below_q1", "zero")])
+
+      sections <- character(0)
+      if (length(above) > 0) {
+        labels <- unname(name_lookup[above])
+        bullets <- paste(paste("-", labels), collapse = "\n")
+        sections <- c(sections, paste(
+          sR$outlier$framing_above_q3, bullets, sep = "\n\n"))
+      }
+      if (length(below) > 0) {
+        labels <- unname(name_lookup[below])
+        bullets <- paste(paste("-", labels), collapse = "\n")
+        sections <- c(sections, paste(
+          sR$outlier$framing_below_q1, bullets, sep = "\n\n"))
+      }
+
+      if (length(sections) > 0) {
+        cat("\n\n::: {.callout-tip}\n")
+        cat("## ", sR$outlier$heading, "\n\n")
+        cat(paste(sections, collapse = "\n\n"), "\n")
+        cat(":::\n")
+      }
+    }
+  }
+}
+```
+
+```{r}
+#| output: asis
+.end()
+```

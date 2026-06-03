@@ -1,43 +1,23 @@
-```{r Validation rule 3: "The admission date in admission event differs from admission date in the enrollment"}
-
+```{r Validation rule 3: enrolment admission date differs from admission form}
 problems <- problems |>
-  bind_rows(
-    patients |>
-      inner_join(enrollments, join_by(key == patient)) |>
-      filter(ENROLMENT_DATE != admission_occurredAt) |>
-      mutate(
-        ENROLMENT_DATE = ENROLMENT_DATE,
-        EVENT_ID = admission_event,
-        EVENT_TYPE = event_types("ADM"),
-        EVENT_DATE = admission_occurredAt,
-        PROBLEM_ID = 3L,
-        ENROLMENT_ADMISSION_DATE = ENROLMENT_DATE,
-        ADMISSION_ADMISSION_DATE = admission_occurredAt,
-        .keep = "unused") |>
-      select(
-        SITE_CODE,
-        DEPARTMENT_CODE,
-        DEPARTMENT_NAME,
-        DEPARTMENT_OU,
-        NEOIPC_PATIENT_ID,
-        PATIENT_TEI,
-        ENROLMENT_ID,
-        ENROLMENT_DATE,
-        EVENT_ID,
-        EVENT_TYPE,
-        EVENT_DATE,
-        PROBLEM_ID,
-        ENROLMENT_ADMISSION_DATE,
-        ADMISSION_ADMISSION_DATE) |>
-      anti_join(
-        exceptions,
-        join_by(
-          PROBLEM_ID,
-          SITE_CODE,
-          DEPARTMENT_CODE,
-          NEOIPC_PATIENT_ID,
-          ENROLMENT_DATE,
-          EVENT_TYPE,
-          EVENT_DATE)) |>
-      select(!DEPARTMENT_CODE))
+  dplyr::bind_rows(
+    data$enrollments |>
+      dplyr::select("patient_key", "enrollment_key", "enrolledAt") |>
+      dplyr::inner_join(
+        data$events |>
+          dplyr::filter(.data$event_type_key == "adm") |>
+          dplyr::select("enrollment_key", "event_key", "occurredAt"),
+        dplyr::join_by("enrollment_key")) |>
+      dplyr::filter(.data$enrolledAt != .data$occurredAt) |>
+      dplyr::anti_join(
+        exceptions |> dplyr::filter(.data$rule_id == 3L),
+        dplyr::join_by("enrollment_key")) |>
+      tidyr::nest(context = c("enrolledAt", "occurredAt")) |>
+      dplyr::mutate(
+        rule_id        = 3L,
+        patient_key    = .data$patient_key,
+        enrollment_key = .data$enrollment_key,
+        event_key      = .data$event_key,
+        context        = .data$context,
+        .keep = "none"))
 ```

@@ -6,7 +6,6 @@ source("../common/helpers.R")
 suppressMessages(library(tidyverse, warn.conflicts = FALSE, quietly = TRUE))
 
 locale <- Sys.getenv("LC_ALL")
-if (!nzchar(locale)) locale <- "en_GB.UTF-8"
 invisible(Sys.setlocale(category = "LC_ALL", locale = locale))
 localeObj <- parse_locales(locale)[[1]]
 sR <- get_string_resources(localeObj)
@@ -26,11 +25,15 @@ ds <- suppressWarnings(neoipcr::import_dhis2(
   connection_options = connection_options,
   dataset_options = neoipcr::dhis2_dataset_options(
     department_filter = department_code,
-    include_patient_id = TRUE,
-    include_country = "yes",
-    include_hospital = "yes",
-    include_department = "yes",
-    include_user = "pseudonymised",
+    include_patient = "full",
+    patient_columns = c("id", "sex", "birth_weight", "gestational_age",
+                         "delivery_mode", "siblings"),
+    include_enrollment = "full",
+    include_event = "full",
+    include_country = "full",
+    include_hospital = "full",
+    include_department = "full",
+    include_user = "pseudo",
     include_timestamps = TRUE,
     include_notes = c("enrollments", "events"),
     include_test_data = TRUE,
@@ -46,7 +49,7 @@ ds <- suppressWarnings(neoipcr::import_dhis2(
 #| label: Filter to patient
 
 patient <- ds$patients |>
-  dplyr::filter(.data$patient_id == !!patient_id)
+  dplyr::filter(patient_id == !!patient_id)
 
 patient_found <- nrow(patient) == 1
 
@@ -87,11 +90,10 @@ if (patient_found) {
   pathogens <- ds$infectiousAgentFindings |>
     dplyr::semi_join(events, dplyr::join_by(event_key))
 
-  event_details <- if (!is.null(ds$eventDetails))
-    ds$eventDetails |>
-      dplyr::semi_join(events, dplyr::join_by(event_key))
-  else
-    tibble::tibble(event_key = character())
+  # `ds$eventDetails` was merged into `ds$events` in the neoipcr
+  # schema arc (phase-b-event-details). Entity-level timestamps
+  # (`createdAt`, `updatedAt`) and user-attribution fields now live on
+  # `events` directly; downstream code reads them off `events`.
 
   department <- ds$metadata$departments |>
     dplyr::filter(department_key == patient$department_key)

@@ -17,7 +17,7 @@ for (rule_file in rule_files) {
 
 ```{r Abort if the current configuration did not yield any problems}
 if(nrow(problems) < 1)
-  stop("No problem detected")
+  rlang::abort("No problem detected")
 ```
 
 `{r} sR$headerList$created`:

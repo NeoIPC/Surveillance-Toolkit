@@ -1,24 +1,18 @@
-```{r Validation rule 1: "The patient does not have an enrollment"}
-
+```{r Validation rule 1: patient without enrolment}
 problems <- problems |>
-  bind_rows(
-    patients |>
-      anti_join(enrollments, join_by(key == patient)) |>
-      select(
-        SITE_CODE,
-        DEPARTMENT_CODE,
-        DEPARTMENT_NAME,
-        DEPARTMENT_OU,
-        NEOIPC_PATIENT_ID,
-        PATIENT_TEI
-        ) |>
-      bind_cols(PROBLEM_ID = c(1L)) |>
-      anti_join(
-        exceptions,
-        join_by(
-          PROBLEM_ID,
-          SITE_CODE,
-          DEPARTMENT_CODE,
-          NEOIPC_PATIENT_ID)) |>
-      select(!DEPARTMENT_CODE))
+  dplyr::bind_rows(
+    data$patients |>
+      dplyr::anti_join(
+        data$enrollments,
+        dplyr::join_by("patient_key")) |>
+      dplyr::anti_join(
+        exceptions |> dplyr::filter(.data$rule_id == 1L),
+        dplyr::join_by("patient_key")) |>
+      dplyr::mutate(
+        rule_id        = 1L,
+        patient_key    = .data$patient_key,
+        enrollment_key = NA_integer_,
+        event_key      = NA_integer_,
+        context        = list(list()),
+        .keep = "none"))
 ```
