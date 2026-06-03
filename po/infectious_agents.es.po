@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NeoIPC Surveillance Infectious Agents List 0.9\n"
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-03-24 08:35+0100\n"
+"POT-Creation-Date: 2026-04-07 06:38+0200\n"
 "PO-Revision-Date: 2025-12-30 11:14+0100\n"
 "Last-Translator: Brar Piening <brar.piening@charite.de>\n"
 "Language-Team: Spanish <https://hosted.weblate.org/projects/neoipc/neoipc-infectious-agents/es/>\n"
@@ -8873,16 +8873,46 @@ msgstr "Staphylococcus xylosus"
 msgid "Coagulase-negative staphylococci"
 msgstr "Coagulase-negative staphylococci"
 
-#. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Name
+#. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Name
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
 #, fuzzy, no-wrap
 msgid "Staphylococcus argenteus"
 msgstr "Staphylococcus argenteus"
 
-#. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Name
+#. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Children Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, fuzzy, no-wrap
+msgid "Staphylococcus aureus subsp. anaerobius"
+msgstr "Staphylococcus carnosus subsp. carnosus"
+
+#. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Children Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, fuzzy, no-wrap
+msgid "Staphylococcus aureus subsp. aureus"
+msgstr "Staphylococcus carnosus subsp. carnosus"
+
+#. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Name
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
 #, fuzzy, no-wrap
 msgid "Staphylococcus aureus"
+msgstr "Staphylococcus aureus"
+
+#. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Synonyms Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, fuzzy, no-wrap
+msgid "Staphylococcus roterodami"
+msgstr "Staphylococcus warneri"
+
+#. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, fuzzy, no-wrap
+msgid "Staphylococcus schweitzeri"
+msgstr "Staphylococcus schleiferi"
+
+#. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, fuzzy, no-wrap
+msgid "Staphylococcus aureus complex"
 msgstr "Staphylococcus aureus"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Name

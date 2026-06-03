@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NeoIPC Surveillance Reports 0.9\n"
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-03-30 08:36+0200\n"
+"POT-Creation-Date: 2026-06-03 22:11+0200\n"
 "PO-Revision-Date: 2026-03-16 14:49+0100\n"
 "Last-Translator: Brar Piening <brar.piening@charite.de>\n"
 "Language-Team: none\n"
@@ -130,6 +130,13 @@ msgstr "Die vertikalen Linien in den Boxplots stellen die %s-, %s- und %s-Quanti
 #, no-wrap
 msgid "Vertical lines in the boxplot represent the %s, %s and %s quantiles, the diamond represents the pooled arithmetic mean."
 msgstr "Die vertikalen Linien im Boxplot stellen die %s-, %s- und %s-Quantile dar, der Diamant steht für den gepoolten arithmetischen Mittelwert."
+
+#. type: Hash Value: fig_sample_size
+#: reports/common.yaml:1
+#, fuzzy, no-wrap
+#| msgid "No of Patients"
+msgid "(N = %s patients)"
+msgstr "Anzahl der Patienten"
 
 #. type: Hash Value: gramm_abbreviation
 #: reports/common.yaml:1
@@ -257,6 +264,13 @@ msgstr "Dies ist eine spezielle Analyse, die"
 msgid "Sum of patient days"
 msgstr "Summe der Patiententage"
 
+#. type: Hash Value: headings antibiotic_utilisation
+#: reports/common.yaml:1
+#, fuzzy, no-wrap
+#| msgid "Antibiotics"
+msgid "Antibiotic Utilisation"
+msgstr "Antibiotika"
+
 #. type: Hash Value: headings antimicrobial_susceptibility_testing
 #: reports/common.yaml:1
 #, no-wrap
@@ -305,6 +319,12 @@ msgstr "Einleitung"
 msgid "Nosocomial Infections"
 msgstr "Nosokomiale Infektionen"
 
+#. type: Hash Value: headings organism_resistance
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Organism-Specific Resistance Rates"
+msgstr ""
+
 #. type: Hash Value: headings patient_population
 #: reports/common.yaml:1
 #, no-wrap
@@ -347,6 +367,12 @@ msgstr "Chirurgische Eingriffe nach Kategorie"
 msgid "The agent-per-infection rate measures how frequently specific pathogens are detected relative to the number of infections in which any infectious agent was identified. Values above 100% are expected and indicate polymicrobial infections. Diagnostic challenges specific to neonates — including low blood volume reducing culture sensitivity and elevated contamination risk — may influence detection patterns."
 msgstr ""
 
+#. type: Hash Value: methods antibiotic_utilisation
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Antibiotic utilisation is reported per individual substance, grouped by ATC pharmacological subgroup. The exposure density rate measures substance-days per 100 patient-days. Antibiotic days are counted from the first dose to the last dose of a therapy inclusive. Each substance is counted separately; a patient receiving two antibiotics on the same day contributes one day to each substance's tally. Because of combination therapy, the sum of individual substance rates can exceed the total antibiotic exposure rate shown in the risk and protective factors table."
+msgstr ""
+
 #. type: Hash Value: methods ci_quartile_auto_note
 #: reports/common.yaml:1
 #, no-wrap
@@ -387,6 +413,12 @@ msgstr ""
 #: reports/common.yaml:1
 #, no-wrap
 msgid "The infectious agent detection rate measures the proportion of infections in which at least one infectious agent was identified. Higher detection rates for sepsis/BSI may reflect thorough microbiological workup practices. Lower detection rates for NEC are expected because the NEC surveillance definition is based on radiological and clinical criteria, and pathogens are only recorded when a secondary bloodstream infection occurs."
+msgstr ""
+
+#. type: Hash Value: methods organism_resistance
+#: reports/common.yaml:1
+#, no-wrap
+msgid "This section reports organism-specific resistance rates — the proportion of each detected organism that carries a given resistance marker. Unlike the resistant pathogen infection rate, which uses infections as the denominator, this metric uses organism-level detections: for example, the proportion of all tested Klebsiella pneumoniae detections that are carbapenem-resistant."
 msgstr ""
 
 #. type: Hash Value: methods patient_population
@@ -461,6 +493,12 @@ msgstr "Methicillin-resistenter Staphylococcus aureus (MRSA)"
 #, no-wrap
 msgid "No data."
 msgstr "Keine Daten."
+
+#. type: Hash Value: nos_footnote
+#: reports/common.yaml:1
+#, no-wrap
+msgid "n.o.s. = not otherwise specified; isolates identified to genus but not species level."
+msgstr ""
 
 #. type: Hash Value: not_available
 #: reports/common.yaml:1
@@ -589,11 +627,23 @@ msgstr "Infektionsrate mit resistente Pathogenen"
 msgid "Number of antibiotic resistant pathogens in infections"
 msgstr "Anzahl antibiotikaresistenter Erreger bei Infektionen"
 
+#. type: Hash Value: tbl-abr-infection-rate resistance_overlap_footnote
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Resistance categories are not mutually exclusive. An organism may meet the criteria for more than one category and will appear under each applicable one."
+msgstr ""
+
 #. type: Hash Value: tbl-abr-infection-rate tbl-cap
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Nosocomial infections with resistant pathogens"
 msgstr "Nosokomiale Infektionen mit resistenten Erregern"
+
+#. type: Hash Value: tbl-abr-infection-rate total_dedup_footnote
+#: reports/common.yaml:1
+#, no-wrap
+msgid "The Total row counts infections in which at least one resistant pathogen of this resistance category was detected. Because a single infection may involve resistant organisms from more than one organism group, the organism-level subtotals may sum to more than the Total."
+msgstr ""
 
 #. type: Hash Value: tbl-agent-per-infection-rate n_footnote
 #: reports/common.yaml:1
@@ -643,6 +693,66 @@ msgstr "Anzahl der bei Infektionen nachgewiesenen Infektionserreger"
 #, no-wrap
 msgid "Infectious agents detected in nosocomial infections"
 msgstr "Bei nosokomialen Infektionen nachgewiesene Infektionserreger"
+
+#. type: Hash Value: tbl-antibiotic-utilisation atc_footnote
+#: reports/common.yaml:1
+#, no-wrap
+msgid "ATC: Anatomical Therapeutic Chemical classification (WHO). Substances are grouped by pharmacological subgroup (ATC 5th level). See %s for details."
+msgstr ""
+
+#. type: Hash Value: tbl-antibiotic-utilisation aware_column_footnote
+#: reports/common.yaml:1
+#, no-wrap
+msgid "WHO AWaRe classification (Access, Watch, Reserve). See %s."
+msgstr ""
+
+#. type: Hash Value: tbl-antibiotic-utilisation exposure_density_rate
+#: reports/common.yaml:1
+#, fuzzy, no-wrap
+#| msgid "Risk Density Rate"
+msgid "Antibiotic Exposure Density Rate"
+msgstr "Risikofaktor-Anwendungsrate"
+
+#. type: Hash Value: tbl-antibiotic-utilisation n_footnote
+#: reports/common.yaml:1
+#, fuzzy, no-wrap
+#| msgid "%s: The aggregated number of device-associated infections in all infants."
+msgid "%s: The aggregated number of substance-days recorded across all infants."
+msgstr "%s: Die Gesamtzahl der Device-assoziierten Infektionen bei allen Kindern."
+
+#. type: Hash Value: tbl-antibiotic-utilisation no_data
+#: reports/common.yaml:1
+#, fuzzy, no-wrap
+#| msgid "No infection data available for this report settings."
+msgid "No antibiotic utilisation data available for this report settings."
+msgstr "Für diese Berichtseinstellungen liegen keine Infektionsdaten vor."
+
+#. type: Hash Value: tbl-antibiotic-utilisation pooled_footnote
+#: reports/common.yaml:1
+#, fuzzy, no-wrap
+#| msgid "%s: The Risk Density Rate calculated across all infants from all departments in the reference data."
+msgid "%s: The Antibiotic Exposure Density Rate calculated across all infants from all departments in the reference data."
+msgstr "%s: Die Risikofaktor-Anwendungsrate, berechnet für alle Kinder aus allen Abteilungen in den Referenzdaten."
+
+#. type: Hash Value: tbl-antibiotic-utilisation quartile_footnote
+#: reports/common.yaml:1
+#, fuzzy, no-wrap
+#| msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Risk Density Rates of the departments in the reference data. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of device days is greater than or equal to one according to the pooled Risk Density Rate."
+msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Antibiotic Exposure Density Rates of the departments in the reference data. Q₂ represents the median. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of substance-days is greater than or equal to one according to the pooled rate."
+msgstr "%s, %s, %s: Die Quartile (%s, %s und %s Quantile) der Risikofaktor-Anwendungsraten der Abteilungen in den Referenzdaten. Diese Quartile werden nur angezeigt, wenn die Anzahl der Abteilungen, die zum Nenner beitragen, größer oder gleich fünf ist und wenn die mittlere Anzahl der Device-Tag gemäß der gepoolten Risikofaktor-Anwendungsrate größer oder gleich eins ist."
+
+#. type: Hash Value: tbl-antibiotic-utilisation substance_days
+#: reports/common.yaml:1
+#, fuzzy, no-wrap
+#| msgid "Substance"
+msgid "Substance-days"
+msgstr "Substanz"
+
+#. type: Hash Value: tbl-antibiotic-utilisation tbl-cap
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Antibiotic utilisation by pharmacological subgroup and substance"
+msgstr ""
 
 #. type: Hash Value: tbl-device-associated-incidence-density-rates cvc
 #: reports/common.yaml:1
@@ -785,8 +895,9 @@ msgstr "%s, %s, %s: Die Quartile (%s, %s und %s Quantile) der Inzidenzdichten de
 
 #. type: Hash Value: tbl-incidence-density-rates si_footnote
 #: reports/common.yaml:1
-#, no-wrap
-msgid "%s: Combines the outcomes primary sepsis/BSI and pneumonia"
+#, fuzzy, no-wrap
+#| msgid "%s: Combines the outcomes primary sepsis/BSI and pneumonia"
+msgid "%s is a composite endpoint combining primary sepsis/BSI and pneumonia."
 msgstr "%s: Kombiniert die Ergebnisse primäre Sepsis/BSI und Pneumonie"
 
 #. type: Hash Value: tbl-incidence-density-rates tbl-cap
@@ -843,6 +954,61 @@ msgstr "Anzahl der Infektionen mit Erreger"
 #, no-wrap
 msgid "Infections in which an infectious agent has been identified, including secondary BSI following the infection."
 msgstr "Infektionen, bei denen ein Infektionserreger identifiziert wurde, einschließlich sekundärer BSI nach der Infektion."
+
+#. type: Hash Value: tbl-organism-resistance-rate n_footnote
+#: reports/common.yaml:1
+#, fuzzy, no-wrap
+#| msgid "%s: The aggregated number of infections in all infants."
+msgid "%s: The aggregated number of resistant detections of the organism."
+msgstr "%s: Die Gesamtzahl der Infektionen bei allen Kindern."
+
+#. type: Hash Value: tbl-organism-resistance-rate no_data
+#: reports/common.yaml:1
+#, fuzzy, no-wrap
+#| msgid "No antibiotic resistance diagnostics data available for this report settings."
+msgid "No organism-specific resistance data available for this report settings."
+msgstr "Für diese Berichtseinstellungen liegen keine Daten zur Antibiotikaresistenzdiagnostik vor."
+
+#. type: Hash Value: tbl-organism-resistance-rate pooled_footnote
+#: reports/common.yaml:1
+#, fuzzy, no-wrap
+#| msgid "%s: The antibiotic resistance test rate calculated across all infants from all departments."
+msgid "%s: The organism-specific resistance rate calculated across all infants from all departments."
+msgstr "%s: Die Antibiotikaresistenz-Testrate, berechnet für alle Säuglinge aus allen Abteilungen."
+
+#. type: Hash Value: tbl-organism-resistance-rate quartile_footnote
+#: reports/common.yaml:1
+#, fuzzy, no-wrap
+#| msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Incidence Density Rates of the partner departments. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected infections is greater than or equal to one according to the pooled Incidence Density Rate."
+msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the organism-specific resistance rates of the partner departments. Q₂ represents the median. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of tested detections is greater than or equal to one."
+msgstr "%s, %s, %s: Die Quartile (%s, %s und %s Quantile) der Inzidenzdichten der Partnerabteilungen. Diese Quartile werden nur angezeigt, wenn die Anzahl der Abteilungen, die zum Nenner beitragen, größer oder gleich fünf ist und wenn die mittlere Anzahl der erwarteten Infektionen gemäß der gepoolten Inzidenzdichte größer oder gleich eins ist."
+
+#. type: Hash Value: tbl-organism-resistance-rate rate_denominator
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Number of tested detections of the organism"
+msgstr ""
+
+#. type: Hash Value: tbl-organism-resistance-rate rate_name
+#: reports/common.yaml:1
+#, fuzzy, no-wrap
+#| msgid "Antibiotic resistance test rate"
+msgid "Organism-specific resistance rate"
+msgstr "Antibiotikaresistenz-Testrate"
+
+#. type: Hash Value: tbl-organism-resistance-rate rate_numerator
+#: reports/common.yaml:1
+#, fuzzy, no-wrap
+#| msgid "Number of antibiotic resistant pathogens in infections"
+msgid "Number of resistant detections of the organism"
+msgstr "Anzahl antibiotikaresistenter Erreger bei Infektionen"
+
+#. type: Hash Value: tbl-organism-resistance-rate tbl-cap
+#: reports/common.yaml:1
+#, fuzzy, no-wrap
+#| msgid "Antibiotic resistance test rate"
+msgid "Organism-specific resistance rates"
+msgstr "Antibiotikaresistenz-Testrate"
 
 #. type: Hash Value: tbl-resistance-test-rate car_if_3gcr
 #: reports/common.yaml:1
@@ -2363,6 +2529,20 @@ msgstr "%s: Die Gesamtzahl der Tage, an denen der Risiko-/Schutzfaktor bei den K
 msgid "%s: The percentage of infections in your department where this infectious agent was detected."
 msgstr "Anzahl der Infektionen, bei denen ein Infektionserreger nachgewiesen wurde."
 
+#. type: Hash Value: tbl-antibiotic-utilisation n_footnote
+#: reports/Partner-Report/content/_sR.yaml:1
+#, fuzzy, no-wrap
+#| msgid "%s: The aggregated number of surgical procedures performed in your department's infants."
+msgid "%s: The aggregated number of substance-days recorded in your department's infants."
+msgstr "%s: Die Gesamtzahl der chirurgischen Eingriffe, die bei allen Kindern durchgeführt wurden."
+
+#. type: Hash Value: tbl-antibiotic-utilisation rate_footnote
+#: reports/Partner-Report/content/_sR.yaml:1
+#, fuzzy, no-wrap
+#| msgid "%s: The Risk Density Rate calculated for your department's infants.\n"
+msgid "%s: The Antibiotic Exposure Density Rate calculated for your department's infants."
+msgstr "%s: Die für die Kinder Ihrer Abteilung berechnete Risikofaktor-Anwendungsrate.\n"
+
 #. type: Hash Value: tbl-device-associated-incidence-density-rates n_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
@@ -2398,6 +2578,20 @@ msgstr "%s: Die Gesamtzahl der Tage, an denen der Risiko-/Schutzfaktor bei den K
 #, no-wrap
 msgid "%s: The Infectious Agent Detection Rate for your department (percentage of infections with identified agent)."
 msgstr "%s: Die Infektionserreger-Nachweisrate, berechnet für alle Kinder aus allen Abteilungen."
+
+#. type: Hash Value: tbl-organism-resistance-rate n_footnote
+#: reports/Partner-Report/content/_sR.yaml:1
+#, fuzzy, no-wrap
+#| msgid "%s: The aggregated number of infections with resistant pathogens in your department's infants."
+msgid "%s: The number of resistant detections of this organism in your department's infants."
+msgstr "%s: Die Gesamtzahl der antibiotikaresistenten Erreger bei allen Infektionen."
+
+#. type: Hash Value: tbl-organism-resistance-rate rate_footnote
+#: reports/Partner-Report/content/_sR.yaml:1
+#, fuzzy, no-wrap
+#| msgid "%s: The Antibiotic-Resistant Infection Rate for your department (percentage of infections with resistant pathogens)."
+msgid "%s: The organism-specific resistance rate for your department (percentage of tested detections that are resistant)."
+msgstr "%s: Die Rate antibiotikaresistenter Infektionen in Ihrer Abteilung (Prozentsatz der Infektionen mit resistenten Erregern)."
 
 #. type: Hash Value: tbl-resistance-test-rate n_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
@@ -2458,8 +2652,8 @@ msgstr ""
 #. type: Plain text
 #: reports/Partner-Report/content/_introduction.Rmd:3
 #, no-wrap
-msgid "The following summary presents key surveillance metrics for this report:\n"
-msgstr "Die folgende Zusammenfassung enthält die wichtigsten Surveillancekennzahlen für diesen Bericht: \n"
+msgid "The following summary presents key surveillance metrics for this report. A patient record represents an individual patient; patient admissions count separately each admission episode during the surveillance period. Rates in this report use different denominators depending on the metric; each table's formula footnote specifies the exact denominator used.\n"
+msgstr ""
 
 #. type: Plain text
 #: reports/Partner-Report/content/_patient-population.Rmd:1
@@ -2519,13 +2713,13 @@ msgid "Rates based on small numbers of events should be interpreted with caution
 msgstr ""
 
 #. type: Plain text
-#: reports/Partner-Report/content/_fig-intro-birth-weight.qmd:1
+#: reports/Partner-Report/content/_fig-intro-birth-weight.Rmd:1
 #, no-wrap
 msgid "Birth weight distribution is a key indicator of your department's patient population characteristics. Understanding the weight distribution of admitted neonates helps contextualize infection rates and other outcomes, as lower birth weight is associated with increased vulnerability to healthcare-associated infections. @fig-bw shows both the frequency distribution (histogram with density curve) and summary statistics (boxplot with quartiles) of birth weights in your department, enabling comparison with your patient case mix relative to reference data when available.\n"
 msgstr "Die Verteilung des Geburtsgewichts ist ein wichtiger Indikator für die Merkmale der Patientenpopulation Ihrer Abteilung. Das Verständnis der Gewichtsverteilung der aufgenommenen Neugeborenen hilft dabei, Infektionsraten und andere Ergebnisse in einen Zusammenhang zu setzen, da ein niedrigeres Geburtsgewicht mit einem erhöhten Risiko für nosokomiale Infektionen einhergeht. @fig-bw zeigt sowohl die Häufigkeitsverteilung (Histogramm mit Dichtekurve) als auch die zusammenfassenden Statistiken (Boxplot mit Quartilen) der Geburtsgewichte in Ihrer Abteilung und ermöglicht so einen Vergleich Ihres Patientenmixes mit Referenzdaten, sofern diese verfügbar sind.\n"
 
 #. type: Plain text
-#: reports/Partner-Report/content/_fig-intro-gestational-age.qmd:1
+#: reports/Partner-Report/content/_fig-intro-gestational-age.Rmd:1
 #, no-wrap
 msgid "Gestational age distribution provides essential context for interpreting clinical outcomes in your neonatal department. Extremely premature infants face substantially higher risks of complications and infections compared to more mature neonates. @fig-ga illustrates both the frequency distribution (histogram with density curve) and summary statistics (boxplot with quartiles) of gestational ages at birth, allowing you to assess how your patient population's maturity profile compares to reference data when available.\n"
 msgstr ""
@@ -2533,7 +2727,7 @@ msgstr ""
 "\n"
 
 #. type: Plain text
-#: reports/Partner-Report/content/_tbl-intro-incidence-density.qmd:1
+#: reports/Partner-Report/content/_tbl-intro-incidence-density.Rmd:1
 #, fuzzy, no-wrap
 #| msgid "@tbl-incidence-density-rates presents the incidence density rates for the most important healthcare-associated infections (HAI) in your neonatal department. Incidence density rates are calculated per 1,000 patient days, allowing for meaningful comparison between departments with different patient volumes and lengths of stay. The primary sepsis/BSI category includes both clinically diagnosed sepsis and microbiologically confirmed cases; the infectious agent detection rate table reflects only cases where diagnostic cultures identified an infectious agent. Regular monitoring of these rates enables you to identify trends, evaluate the effectiveness of infection prevention measures, and compare your performance against reference data from other participating departments.\n"
 msgid "@tbl-incidence-density-rates presents the incidence density rates for the most important healthcare-associated infections (HAI) in your neonatal department. Incidence density rates are calculated per 1,000 patient days, allowing for meaningful comparison between departments with different patient volumes and lengths of stay. The primary sepsis/BSI category includes both clinical sepsis and laboratory-confirmed bloodstream infections (LCBSI). Regular monitoring of these rates enables you to identify trends, evaluate the effectiveness of infection prevention measures, and compare your performance against reference data from other participating departments.\n"
@@ -2542,54 +2736,73 @@ msgstr ""
 "\n"
 
 #. type: Plain text
-#: reports/Partner-Report/content/_tbl-intro-device-associated.qmd:1
+#: reports/Partner-Report/content/_tbl-intro-device-associated.Rmd:1
 #, fuzzy, no-wrap
 #| msgid "Device-associated infections represent a significant burden in neonatal intensive care. @tbl-device-associated-incidence-density-rates shows infection rates specifically linked to the use of invasive devices such as central venous catheters and mechanical ventilation. By tracking device-associated infection rates separately, you can assess the safety of device utilization in your department and identify specific areas where targeted interventions may reduce infection risk. Lower rates may indicate successful implementation of device care bundles and infection prevention protocols.\n"
 msgid "Device-associated infections represent a significant burden in neonatal intensive care. @tbl-device-associated-incidence-density-rates shows infection rates associated with central venous catheters (CVC), peripheral venous catheters (PVC), invasive ventilation (INV), and non-invasive ventilatory support (NIV). By tracking device-associated infection rates separately, you can assess the safety of device utilization in your department and identify specific areas where targeted interventions may reduce infection risk. Lower rates may indicate successful implementation of device care bundles and infection prevention protocols.\n"
 msgstr "Device-assoziierte Infektionen stellen in der neonatologischen Intensivmedizin eine erhebliche Belastung dar. @tbl-device-associated-incidence-density-rates zeigt Infektionsraten, die speziell mit der Anwendung invasiver Maßnahmen wie zentralvenöser Katheter und mechanischer Beatmung in Verbindung stehen. Durch die separate Erfassung der Raten für Device-assoziierte Infektionen können Sie die Sicherheit des Einsatzes invasiver Verfahren in Ihrer Abteilung bewerten und konkrete Bereiche identifizieren, in denen gezielte Maßnahmen das Infektionsrisiko senken könnten. Niedrigere Raten können auf eine erfolgreiche Umsetzung von Device-Care-Bundles und Protokollen zur Infektionsprävention hindeuten.\n"
 
 #. type: Plain text
-#: reports/Partner-Report/content/_tbl-intro-agent-per-infection.qmd:1
+#: reports/Partner-Report/content/_tbl-intro-agent-per-infection.Rmd:1
 #, no-wrap
 msgid "Understanding which pathogens cause infections in your department is essential for targeted prevention strategies and empirical treatment decisions. @tbl-agent-per-infection-rate presents the detection rates of infectious agents per infection type, highlighting the microbial epidemiology of healthcare-associated infections in your neonatal population. Patterns in pathogen distribution can inform antimicrobial stewardship efforts and help identify potential sources of transmission requiring specific control measures.\n"
 msgstr "Zu wissen, welche Erreger in Ihrer Abteilung Infektionen verursachen, ist für gezielte Präventionsstrategien und fundierte Behandlungsentscheidungen von entscheidender Bedeutung. @tbl-agent-per-infection-rate zeigt die Nachweisraten von Infektionserregern nach Infektionsart auf und verdeutlicht damit die mikrobielle Epidemiologie nosokomialer Infektionen in Ihrer Neugeborenenpopulation. Muster in der Verteilung der Erreger können als Grundlage für Maßnahmen zum verantwortungsvollen Umgang mit Antibiotika dienen und dabei helfen, potenzielle Übertragungsquellen zu identifizieren, die spezifische Kontrollmaßnahmen erfordern.\n"
 
 #. type: Plain text
-#: reports/Partner-Report/content/_tbl-intro-abr-infection.qmd:1
+#: reports/Partner-Report/content/_tbl-intro-abr-infection.Rmd:1
 #, fuzzy, no-wrap
 #| msgid "Antimicrobial resistance poses a critical threat to vulnerable neonatal patients. @tbl-abr-infection-rate displays infection rates caused by resistant pathogens such as MRSA, VRE, and third-generation cephalosporin-resistant organisms. This section reports *detected* resistant pathogens in infections; @tbl-resistance-test-rate reports how completely susceptibility testing was performed. Both are needed to interpret resistance burden. Monitoring these rates is crucial for assessing the burden of drug-resistant infections in your department and evaluating the effectiveness of antimicrobial stewardship programs. Elevated rates may signal the need for enhanced infection control measures, antibiotic prescribing review, or environmental screening protocols.\n"
 msgid "Antimicrobial resistance poses a critical threat to vulnerable neonatal patients. @tbl-abr-infection-rate displays infection rates caused by resistant pathogens such as MRSA, VRE, and third-generation cephalosporin-resistant organisms. This section reports *detected* resistant pathogens in infections`r if (nzchar(ref_ast_table)) \"; @tbl-resistance-test-rate reports how completely susceptibility testing was performed. Both are needed to interpret resistance burden.\" else \".\"` Monitoring these rates is crucial for assessing the burden of drug-resistant infections in your department and evaluating the effectiveness of antimicrobial stewardship programs. Elevated rates may signal the need for enhanced infection control measures, antibiotic prescribing review, or environmental screening protocols.\n"
 msgstr "Antibiotikaresistenzen stellen eine erhebliche Gefahr für vulnerable Neugeborene dar. @tbl-abr-infection-rate zeigt die Infektionsraten an, die durch resistente Erreger wie MRSA, VRE und gegen Cephalosporine der dritten Generation resistente Organismen verursacht werden. Dieser Abschnitt berichtet über *nachgewiesene* resistente Erreger bei Infektionen; @tbl-resistance-test-rate zeigt, wie vollständig Empfindlichkeitsprüfungen durchgeführt wurden. Beide Informationen sind für die Interpretation der Resistenzbelastung erforderlich. Die Überwachung dieser Raten ist entscheidend, um die Belastung Ihrer Abteilung aufgrund von Infektionen mit resistenten Erregern einzuschätzen und die Wirksamkeit von Antibiotika-Stewardship-Programmen zu bewerten. Erhöhte Raten können darauf hindeuten, dass erweiterte Maßnahmen zum Infektionsschutz, eine Überprüfung der Antibiotikaverordnung oder Protokolle zur Umgebungsuntersuchung erforderlich sind.\n"
 
 #. type: Plain text
-#: reports/Partner-Report/content/_tbl-intro-infectious-agent-detection.qmd:1
+#: reports/Partner-Report/content/_tbl-intro-organism-resistance.Rmd:1
+#, no-wrap
+msgid "@tbl-organism-resistance-rate presents organism-specific resistance rates, showing the proportion of each detected pathogen species that carries a given resistance marker.`r if (nzchar(ref_abr_table)) paste0(\" While\", ref_abr_table, \" reports the rate of infections involving resistant pathogens, this table uses organism-level detections as the denominator.\")` This distinction is clinically important: a high organism-specific resistance rate for a particular species may indicate local selective pressure, clonal spread, or gaps in antimicrobial stewardship targeting that organism.\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Partner-Report/content/_tbl-intro-infectious-agent-detection.Rmd:1
 #, no-wrap
 msgid "The pattern of pathogen detection across different infection types provides valuable insights into your department's microbial ecology. @tbl-infectious-agent-detection-rate shows how frequently specific infectious agents are identified in various types of healthcare-associated infections. Understanding these detection patterns helps in developing targeted surveillance strategies, appropriate empirical therapy guidelines, and infection prevention protocols tailored to your department's specific pathogen profile.\n"
 msgstr "Das Muster der Erkennung von Krankheitserregern bei verschiedenen Infektionsarten liefert wertvolle Einblicke in die mikrobielle Ökologie Ihrer Abteilung. @tbl-infectious-agent-detection-rate zeigt, wie häufig bestimmte Infektionserreger bei verschiedenen Arten von nosokomialen Infektionen nachgewiesen werden. Das Verständnis dieser Erkennungsmuster hilft bei der Entwicklung gezielter Surveillancestrategien, geeigneter Leitlinien für die empirische Therapie und von Infektionspräventionsprotokollen, die auf das spezifische Erregerprofil Ihrer Abteilung zugeschnitten sind.\n"
 
 #. type: Plain text
-#: reports/Partner-Report/content/_tbl-intro-resistance-test.qmd:1
+#: reports/Partner-Report/content/_tbl-intro-resistance-test.Rmd:1
 #, fuzzy, no-wrap
 #| msgid "Antimicrobial susceptibility testing (AST) is fundamental to both individual patient management and population-level surveillance. @tbl-resistance-test-rate presents the rate at which pathogens isolated from infections undergo testing for certain relevant antimicrobial resistances. This section assesses testing *completeness*; @tbl-abr-infection-rate reports the detected resistant pathogens themselves. High testing rates ensure reliable data for antimicrobial stewardship programs and enable accurate assessment of resistance trends. Lower rates may indicate gaps in microbiological diagnostic capacity or protocols that could limit your ability to detect and respond to emerging resistance patterns.\n"
 msgid "Antimicrobial susceptibility testing (AST) is fundamental to both individual patient management and population-level surveillance. @tbl-resistance-test-rate presents the rate at which pathogens isolated from infections undergo testing for certain relevant antimicrobial resistances. This section assesses testing *completeness*`r if (nzchar(ref_abr_table)) \"; @tbl-abr-infection-rate reports the detected resistant pathogens themselves.\" else \".\"` High testing rates ensure reliable data for antimicrobial stewardship programs and enable accurate assessment of resistance trends. Lower rates may indicate gaps in microbiological diagnostic capacity or protocols that could limit your ability to detect and respond to emerging resistance patterns.\n"
 msgstr "Die Prüfung der Empfindlichkeit gegenüber Antibiotika (AST) ist sowohl für die Behandlung einzelner Patienten als auch für die Überwachung auf Bevölkerungsebene von grundlegender Bedeutung. @tbl-resistance-test-rate gibt die Rate an, mit der aus Infektionen isolierte Krankheitserreger auf bestimmte relevante Antibiotikaresistenzen getestet werden. Dieser Abschnitt bewertet die *Vollständigkeit* der Testung; @tbl-abr-infection-rate zeigt die tatsächlich nachgewiesenen resistenten Erreger. Hohe Testraten gewährleisten zuverlässige Daten für Antibiotika-Stewardship-Programme und ermöglichen eine genaue Einschätzung von Resistenztrends. Niedrigere Raten können auf Lücken in der diagnostischen Kapazität oder in den Protokollen hinweisen, was Ihre Fähigkeit einschränken könnte, neu auftretende Resistenzmuster zu erkennen und darauf zu reagieren.\n"
 
 #. type: Plain text
-#: reports/Partner-Report/content/_tbl-intro-risk-density.qmd:1
+#: reports/Partner-Report/content/_tbl-intro-antibiotic-utilisation.Rmd:1
+#, no-wrap
+msgid "@tbl-antibiotic-utilisation details antibiotic exposure at the level of individual substances, grouped by ATC pharmacological subgroup. Bold rows show the aggregated rate for each subgroup; indented rows show the rate for each substance within that subgroup. Comparing substance-level patterns with the reference data can help identify opportunities for antibiotic stewardship.\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Partner-Report/content/_tbl-intro-risk-density.Rmd:1
 #, fuzzy, no-wrap
 #| msgid "Risk factors and protective factors significantly influence infection outcomes in neonatal care. @tbl-risk-density-rates shows the utilization density of key interventions including invasive devices (which increase infection risk) and protective measures such as human milk feeding, kangaroo care, and probiotics. Benchmarking these utilization rates helps identify opportunities to reduce unnecessary device use while optimizing evidence-based protective interventions. The balance between risk and protective factors reflects your department's overall approach to infection prevention.\n"
 msgid "@tbl-risk-density-rates shows the utilization density of key interventions including invasive devices, ventilatory support, antibiotics, and protective measures such as human milk feeding, kangaroo care, and probiotics. Benchmarking these utilization rates helps identify opportunities to reduce unnecessary device use while optimizing evidence-based protective interventions.\n"
 msgstr "Risiko- und Schutzfaktoren haben einen erheblichen Einfluss auf die Entwicklung von Infektionen in der Neugeborenenversorgung. @tbl-risk-density-rates zeigt die Anwendungshäufigkeit wichtiger Maßnahmen, darunter invasive Verfahren (die das Infektionsrisiko erhöhen) und Schutzmaßnahmen wie Stillen, Känguru-Pflege und die Gabe von Probiotika. Ein Vergleich dieser Anwendungsraten hilft dabei, Möglichkeiten zur Reduzierung unnötiger Maßnahmen zu identifizieren und gleichzeitig evidenzbasierte Präventionsmaßnahmen zu optimieren. Das Gleichgewicht zwischen Risiko- und Schutzfaktoren spiegelt den Ansatz Ihrer Abteilung zur Infektionsprävention wider.\n"
 
 #. type: Plain text
-#: reports/Partner-Report/content/_tbl-intro-surgical-procedure.qmd:1
+#: reports/Partner-Report/content/_tbl-intro-surgical-procedure.Rmd:1
 #, fuzzy, no-wrap
 #| msgid "Surgical procedures represent a major risk factor for healthcare-associated infections in neonatal intensive care. @tbl-surgical-procedure-rates presents rates of various surgical procedures performed in your department, normalized per 100 admissions. Understanding your surgical case mix is essential for interpreting infection rates and implementing appropriate surgical site infection prevention protocols. Comparison with reference data helps contextualize your department's surgical workload and associated infection risks.\n"
 msgid "@tbl-surgical-procedure-rates presents rates of various surgical procedures performed in your department, normalized per 100 patients. Understanding your surgical case mix is essential for interpreting infection rates and implementing appropriate surgical site infection prevention protocols. Comparison with reference data helps contextualize your department's surgical workload and associated infection risks.\n"
 msgstr "Chirurgische Eingriffe stellen einen wesentlichen Risikofaktor für nosokomiale Infektionen auf neonatologischen Intensivstationen dar. @tbl-surgical-procedure-rates zeigt die Raten verschiedener chirurgischer Eingriffe, die in Ihrer Abteilung durchgeführt werden, normiert auf 100 Aufnahmen. Ein Verständnis Ihres chirurgischen Behandlungsspektrums ist unerlässlich, um Infektionsraten zu interpretieren und geeignete Protokolle zur Prävention von Wundinfektionen umzusetzen. Ein Vergleich mit Referenzdaten hilft dabei, die chirurgische Arbeitslast Ihrer Abteilung und die damit verbundenen Infektionsrisiken einzuordnen.\n"
 
 #. type: Plain text
-#: reports/Partner-Report/content/_tbl-intro-secondary-bsi.qmd:1
+#: reports/Partner-Report/content/_methods-antibiotic-utilisation.Rmd:1
+#: reports/Reference-Report/content/_methods-antibiotic-utilisation.Rmd:1
+#, no-wrap
+msgid "`r sR$methods$antibiotic_utilisation`\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Partner-Report/content/_tbl-intro-secondary-bsi.Rmd:1
 #, fuzzy, no-wrap
 #| msgid "Secondary bloodstream infections occur when primary infections at other sites seed the bloodstream, representing serious complications that significantly impact patient outcomes. @tbl-secondary-bsi-rates shows the rate at which different primary infection types progress to secondary bloodstream involvement. High rates of secondary BSI may indicate delayed diagnosis, inadequate source control, or particularly virulent pathogens, and warrant careful review of clinical protocols and infection management strategies.\n"
 msgid "A secondary bloodstream infection is a BSI that is seeded from a site-specific infection (pneumonia, NEC, or SSI) at another body site, except for catheter-associated infections. @tbl-secondary-bsi-rates shows the rate at which a secondary BSI is attributed to different primary infection types based on the NeoIPC criteria (organism match within a 17-day window around the primary infection). High rates of secondary BSI may indicate delayed diagnosis, inadequate source control, or particularly virulent pathogens, and warrant careful review of clinical protocols and infection management strategies.\n"
@@ -3070,6 +3283,13 @@ msgstr "Dieser Bericht enthält Daten von neonatologischen Abteilungen in einem 
 msgid "Presence of Risk and Protective Factors"
 msgstr "Risiko- und Schutzfaktoren"
 
+#. type: Hash Value: tbl-antibiotic-utilisation n_footnote
+#: reports/Reference-Report/content/_sR.yaml:1
+#, fuzzy, no-wrap
+#| msgid "%s: The aggregated number of infections in all infants."
+msgid "%s: The aggregated number of substance-days recorded in all infants."
+msgstr "%s: Die Gesamtzahl der Infektionen bei allen Kindern."
+
 #. type: Hash Value: tbl-risk-density-rates n_footnote
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
@@ -3077,10 +3297,23 @@ msgid "%s: The aggregated number of days the risk/protective factor was present 
 msgstr "%s: Die Gesamtzahl der Tage bei allen Kindern, an denen der Risiko-/Schutzfaktor vorhanden war."
 
 #. type: Plain text
-#: reports/Reference-Report/content/_introduction.Rmd:1
-#, no-wrap
-msgid "This document is a reference report on the NeoIPC Surveillance. It contains information relating to nosocomial infections, their causative infectious agents, and the associated risk and protective factors in high-risk neonates which was collected by partners from multiple neonatology departments participating in the NeoIPC Surveillance. The following numbers provide an overview of the current data set. If you are interested in the surveillance definitions, data collection methods and sheets, please refer to the [surveillance resources on the NeoIPC website](https://neoipc.org/surveillance/resources/).\n"
+#: reports/Reference-Report/content/_introduction.Rmd:2
+#, fuzzy, no-wrap
+#| msgid "This document is a reference report on the NeoIPC Surveillance. It contains information relating to nosocomial infections, their causative infectious agents, and the associated risk and protective factors in high-risk neonates which was collected by partners from multiple neonatology departments participating in the NeoIPC Surveillance. The following numbers provide an overview of the current data set. If you are interested in the surveillance definitions, data collection methods and sheets, please refer to the [surveillance resources on the NeoIPC website](https://neoipc.org/surveillance/resources/).\n"
+msgid "This document is a reference report on the NeoIPC Surveillance. It contains information relating to nosocomial infections, their causative infectious agents, and the associated risk and protective factors in high-risk neonates which was collected by partners from multiple neonatology departments participating in the NeoIPC Surveillance. If you are interested in the surveillance definitions, data collection methods and sheets, please refer to the [surveillance resources on the NeoIPC website](https://neoipc.org/surveillance/resources/).\n"
 msgstr "Dieses Dokument ist ein Referenzbericht der NeoIPC-Surveillance. Es enthält Informationen zu nosokomialen Infektionen, ihren verursachenden Infektionserregern und den damit verbundenen Risiko- und Schutzfaktoren bei Hochrisikoneugeborenen, die von Partnern aus mehreren an der NeoIPC-Surveillance teilnehmenden neonatologischen Abteilungen erhoben wurden. Die folgenden Zahlen geben einen Überblick über den aktuellen Datensatz. Wenn Sie sich für die Surveillance-Definitionen, die Methoden der Datenerhebung und die Datenerfassungsbögen interessieren, finden Sie weitere Informationen in den [Surveillance-Ressourcen auf der NeoIPC-Website](https://neoipc.org/surveillance/resources/).\n"
+
+#. type: Plain text
+#: reports/Reference-Report/content/_introduction.Rmd:4
+#, no-wrap
+msgid "The following numbers provide an overview of the current data set. A patient record represents an individual patient; patient admissions count separately each admission episode during the surveillance period, so a patient who was readmitted will have more than one admission. Patient days are the cumulative days of surveillance across all patients.\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Reference-Report/content/_introduction.Rmd:5
+#, no-wrap
+msgid "Rates in this report use different denominators depending on the metric. Incidence density rates and risk and protective factor rates are expressed per patient days. Infectious agent detection rates and resistant pathogen infection rates are expressed per infections in which a pathogen was detected. Surgical procedure rates are expressed per patients. Each table's formula footnote specifies the exact denominator used.\n"
+msgstr ""
 
 #. type: Plain text
 #: reports/Reference-Report/content/_patient_population.Rmd:1
@@ -3346,20 +3579,23 @@ msgstr "Die Summe aller Tage mit antibiotischen Substanzen (%i) ist geringer als
 
 #. type: Hash Value: problems 22 description
 #: reports/Validation-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "The surgical procedure ('%s') has an invalid ICHE code ('%s') as the main procedure code. See @sec-problem-details-14."
+#, fuzzy, no-wrap
+#| msgid "The surgical procedure ('%s') has an invalid ICHE code ('%s') as the main procedure code. See @sec-problem-details-14."
+msgid "The surgical procedure ('%s') has an invalid ICHI code ('%s') as the main procedure code. See @sec-problem-details-14."
 msgstr "Der chirurgische Eingriff (\"%s\") hat als Haupteingriffs-Code einen ungülitgen ICHE-Code (\"%s\"). Siehe @sec-problem-details-14."
 
 #. type: Hash Value: problems 23 description
 #: reports/Validation-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "The surgical procedure ('%s') has an invalid ICHE code ('%s') as the first side procedure code. See @sec-problem-details-14."
+#, fuzzy, no-wrap
+#| msgid "The surgical procedure ('%s') has an invalid ICHE code ('%s') as the first side procedure code. See @sec-problem-details-14."
+msgid "The surgical procedure ('%s') has an invalid ICHI code ('%s') as the first side procedure code. See @sec-problem-details-14."
 msgstr "Der chirurgische Eingriff (\"%s\") hat als ersten Nebeneingriffs-Code einen ungülitgen ICHE-Code (\"%s\"). Siehe @sec-problem-details-14."
 
 #. type: Hash Value: problems 24 description
 #: reports/Validation-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "The surgical procedure ('%s') has an invalid ICHE code ('%s') as the second side procedure code. See @sec-problem-details-14."
+#, fuzzy, no-wrap
+#| msgid "The surgical procedure ('%s') has an invalid ICHE code ('%s') as the second side procedure code. See @sec-problem-details-14."
+msgid "The surgical procedure ('%s') has an invalid ICHI code ('%s') as the second side procedure code. See @sec-problem-details-14."
 msgstr "Der chirurgische Eingriff (\"%s\") hat als zweiten Nebeneingriffs-Code einen ungülitgen ICHE-Code (\"%s\"). Siehe @sec-problem-details-14."
 
 #. type: Hash Value: problems 25 description
@@ -3543,7 +3779,7 @@ msgid "Surgical Procedure event with the procedure date"
 msgstr "Chirurgischer-Eingriff-Ereignis mit dem Eingriffsdatum"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problems_intro.qmd:8
+#: reports/Validation-Report/en/_problems_intro.Rmd:8
 #, no-wrap
 msgid ""
 "To ensure that all partners can base their decisions on valid data, we strive for the highest possible data quality for the individual analyses and reference reports of the NeoIPC surveillance.\n"
@@ -3563,7 +3799,7 @@ msgstr ""
 "In @sec-solutions haben wir auch die verschiedenen Schritte dargestellt, die zur Lösung des Problems unternommen werden können.\n"
 
 #. type: Fenced div block ({.callout-warning})
-#: reports/Validation-Report/en/_problems_intro.qmd:9
+#: reports/Validation-Report/en/_problems_intro.Rmd:9
 #, no-wrap
 msgid ""
 "## Clicking on Links in Documents Received by Email\n"
@@ -3584,35 +3820,35 @@ msgstr ""
 "\n"
 "Sollte dies nicht der Fall sein, schließen Sie bitte das Browserfenster und informieren Sie uns über unsere [Support-E-Mail-Adresse](mailto:`r support_email_address`).\n"
 
-#. type: Plain text
-#: reports/Validation-Report/en/_problems_intro.qmd:21
-#: reports/Validation-Report/en/_problem_detail_0003.qmd:3
-#: reports/Validation-Report/en/_solution_0002.qmd:3
-#: reports/Validation-Report/en/_solution_0003.qmd:3
-#: reports/Validation-Report/en/_solution_0004.qmd:3
-#: reports/Validation-Report/en/_solution_0005.qmd:3
-#: reports/Validation-Report/en/_solution_0006.qmd:3
-#: reports/Validation-Report/en/_solution_0007.qmd:3
-#: reports/Validation-Report/en/_solution_0008.qmd:3
-#: reports/Validation-Report/en/_solution_0009.qmd:3
-#: reports/Validation-Report/en/_solution_0010.qmd:3
-#: reports/Validation-Report/en/_solution_0011.qmd:3
-#: reports/Validation-Report/en/_solution_0012.qmd:3
-#: reports/Validation-Report/en/_solution_0013.qmd:3
-#: reports/Validation-Report/en/_solution_0014.qmd:3
-#: reports/Validation-Report/en/_solution_0015.qmd:3
+#. type: Fenced div block ({.content-visible unless-format="html"})
+#: reports/Validation-Report/en/_problems_intro.Rmd:20
+#: reports/Validation-Report/en/_problem_detail_0003.Rmd:2
+#: reports/Validation-Report/en/_solution_0002.Rmd:2
+#: reports/Validation-Report/en/_solution_0003.Rmd:2
+#: reports/Validation-Report/en/_solution_0004.Rmd:2
+#: reports/Validation-Report/en/_solution_0005.Rmd:2
+#: reports/Validation-Report/en/_solution_0006.Rmd:2
+#: reports/Validation-Report/en/_solution_0007.Rmd:2
+#: reports/Validation-Report/en/_solution_0008.Rmd:2
+#: reports/Validation-Report/en/_solution_0009.Rmd:2
+#: reports/Validation-Report/en/_solution_0010.Rmd:2
+#: reports/Validation-Report/en/_solution_0011.Rmd:2
+#: reports/Validation-Report/en/_solution_0012.Rmd:2
+#: reports/Validation-Report/en/_solution_0013.Rmd:2
+#: reports/Validation-Report/en/_solution_0014.Rmd:2
+#: reports/Validation-Report/en/_solution_0015.Rmd:2
 #, no-wrap
-msgid "{{< pagebreak >}}\n"
-msgstr "{{< pagebreak >}}\n"
+msgid "\\newpage\n"
+msgstr ""
 
 #. type: Title ##
-#: reports/Validation-Report/en/_problems_intro.qmd:22
+#: reports/Validation-Report/en/_problems_intro.Rmd:24
 #, no-wrap
 msgid "Detected Problems {#sec-problems}"
 msgstr "Erkannte Probleme {#sec-problems}"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problems_intro.qmd:25
+#: reports/Validation-Report/en/_problems_intro.Rmd:27
 #, no-wrap
 msgid ""
 "The following is a list of patient records where we have found some kind of problem. The records are grouped by enrolment date and event date.\n"
@@ -3622,43 +3858,43 @@ msgstr ""
 "Wenn eine Patientenakte mehr als ein Problem aufweist, werden alle aufgeführt.\n"
 
 #. type: Title ##
-#: reports/Validation-Report/en/_problem_details_intro.qmd:1
+#: reports/Validation-Report/en/_problem_details_intro.Rmd:1
 #, no-wrap
 msgid "Detailed Information on the Detected Problems {#sec-problem-details}"
 msgstr "Detailinformationen zu den erkannten Problemen  {#sec-problem-details}"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_details_intro.qmd:3
+#: reports/Validation-Report/en/_problem_details_intro.Rmd:3
 #, no-wrap
 msgid "The following information is provided to help you understand the possible causes of the detected problems, how to avoid them, and how to resolve existing problems.\n"
 msgstr "Im Folgenden finden Sie Informationen zu den möglichen Ursachen der erkannten Probleme sowie Hinweise zur Vermeidung und zur Lösung der bereits bestehenden Probleme.\n"
 
 #. type: Title ##
-#: reports/Validation-Report/en/_solutions_intro.qmd:1
+#: reports/Validation-Report/en/_solutions_intro.Rmd:1
 #, no-wrap
 msgid "Solutions {#sec-solutions}"
 msgstr "Lösungen {#sec-solutions}"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_solutions_intro.qmd:3
+#: reports/Validation-Report/en/_solutions_intro.Rmd:3
 #, no-wrap
 msgid "Since the NeoIPC Surveillance currently uses the Tracker Capture App in DHIS2 for managing patient data, the [DHIS2 user documentation for Tracker Capture](https://docs.dhis2.org/en/use/user-guides/dhis-core-version-240/tracking-individual-level-data/tracker-capture.html) applies in addition to the documentation provided here.\n"
 msgstr "Da die NeoIPC Surveillance für die Bearbeitung von Patientendaten aktuell die Tracker Capture App in DHIS2 verwendet, gilt neben dem hier geschriebenen die [DHIS2-Benutzerdokumentation für Tracker Capture](https://docs.dhis2.org/en/use/user-guides/dhis-core-version-240/tracking-individual-level-data/tracker-capture.html).\n"
 
 #. type: Title ###
-#: reports/Validation-Report/en/_problem_detail_0001.qmd:1
+#: reports/Validation-Report/en/_problem_detail_0001.Rmd:1
 #, no-wrap
 msgid "The Patient Record Does Not Have an Enrolment {#sec-problem-details-1}"
 msgstr "Die Patientenakte hat keine Patientenregistrierung {#sec-problem-details-1}"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0001.qmd:4
+#: reports/Validation-Report/en/_problem_detail_0001.Rmd:4
 #, no-wrap
 msgid "This problem typically occurs when someone has tried to delete a patient's data (a patient record) but has only deleted the patient enrolment instead.\n"
 msgstr "Dieses Problem taucht typischerweise auf, wenn jemand die eingegebenen Daten eines Patienten (eine Patientenakte) löschen wollte, aber stattdessen nur die Patientenregistrierung gelöscht hat.\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0001.qmd:8
+#: reports/Validation-Report/en/_problem_detail_0001.Rmd:8
 #, no-wrap
 msgid ""
 "What remains is a patient record without patient enrolment, which exists in the system as a data orphan.\n"
@@ -3670,7 +3906,7 @@ msgstr ""
 "Wenn Sie allerdings versuchen, einen neuen Patienten mit derselben NeoIPC-Patienten-ID einzugeben, kann das System erkennen, dass diese ID bereits von einem anderen Patienten verwendet wird und verweigert die Eingabe.\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0001.qmd:11
+#: reports/Validation-Report/en/_problem_detail_0001.Rmd:11
 #, no-wrap
 msgid ""
 "Depending on whether you want to continue using the data entered in the patient record or not, you have different options for resolving this situation. However, for both, you first have to open the Tracked Entity Instance Dashboard of the patient record, which is not so easy for patient records without registration using the standard DHIS2 tools.\n"
@@ -3680,7 +3916,7 @@ msgstr ""
 "Wenn Sie noch nicht wissen, wie das funktioniert, lesen Sie bitte @sec-solution-1.\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0001.qmd:13
+#: reports/Validation-Report/en/_problem_detail_0001.Rmd:13
 #, no-wrap
 msgid ""
 "If you have opened the Tracked Entity Instance Dashboard of the patient record and do not want to keep the data, you can delete the patient record completely (see @sec-solution-2).\n"
@@ -3690,13 +3926,13 @@ msgstr ""
 "Wenn Sie die Daten erhalten und den betreffenden Patienten in die NeoIPC Surveillance einzuschließen möchten, können Sie stattdessen eine Patientenregistrierung für die Patientenakte anlegen (siehe @sec-solution-3).\n"
 
 #. type: Title ###
-#: reports/Validation-Report/en/_problem_detail_0002.qmd:1
+#: reports/Validation-Report/en/_problem_detail_0002.Rmd:1
 #, no-wrap
 msgid "The Patient Record Has a Completed Surveillance End Form but the Enrolment Is Still Active {#sec-problem-details-2}"
 msgstr "Die Patientenakte enthält ein abgeschlossenes Surveillance-Ende-Formular, aber die Patientenregistrierung ist noch offen {#sec-problem-details-2}"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0002.qmd:5
+#: reports/Validation-Report/en/_problem_detail_0002.Rmd:5
 #, no-wrap
 msgid ""
 "When you complete the surveillance end form, you should normally also complete the enrolment to mark the case as complete and ready for analysis and to protect it from accidental changes.\n"
@@ -3708,13 +3944,13 @@ msgstr ""
 "Am einfachsten geht das, indem Sie im Dialogfeld, das nach dem Klicken auf „Complete“ im Surveillance-Ende-Formular angezeigt wird, auf „Complete event and enrollment“ klicken. Wenn Sie eine Patientenregistrierung im Nachhinein abschließen möchten und nicht wissen, wie das funktionert, folgen Sie bitte der Beschreibung in @sec-solution-4.\n"
 
 #. type: Title ###
-#: reports/Validation-Report/en/_problem_detail_0003.qmd:4
+#: reports/Validation-Report/en/_problem_detail_0003.Rmd:6
 #, no-wrap
 msgid "The Admission Date in the Admission Form Differs From the Admission Date in the Enrolment {#sec-problem-details-3}"
 msgstr "Das Aufnahmedatum im Aufnahme-Formular unterscheidet sich vom Aufnahmedatum in der Patientenregistrierung {#sec-problem-details-3}"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0003.qmd:11
+#: reports/Validation-Report/en/_problem_detail_0003.Rmd:13
 #, no-wrap
 msgid ""
 "The NeoIPC Surveillance Platform requires a patient's admission date for internal calculations. The date must be present twice, once in the patient enrolment and once in the admission form (see @fig-the-two-admission-dates).\n"
@@ -3730,31 +3966,31 @@ msgstr ""
 "Das System kann fehlerhafte Berechnungen durchführen, wenn es zwei unterschiedliche Aufnahmedaten für die gleiche Patientenregistrierung hat. Deshalb muss man das verhindern.\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0003.qmd:13
+#: reports/Validation-Report/en/_problem_detail_0003.Rmd:15
 #, no-wrap
 msgid "Please ensure that the correct admission date for the patient in question is entered in both the 'Admission date' field of the enrolment form and the 'Admission date' field of the admission form (see @sec-solution-6).\n"
 msgstr "Bitte stellen Sie sicher, dass das korrekte Aufnahmedatum des betreffenden Patienten sowohl im Feld \"Aufnahmedatum\" der Patientenregistrierung als auch im Feld \"Aufnahmedatum\" des Aufnahmeformulars angegeben ist (siehe @sec-solution-6).\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0003.qmd:15
+#: reports/Validation-Report/en/_problem_detail_0003.Rmd:17
 #, no-wrap
 msgid "![The two input fields for the admission date must match](img/fig-the-two-admission-dates.png){#fig-the-two-admission-dates fig-alt=\"A screenshot in which two input fields for the admission date are highlighted by framing and marked with arrows\"}\n"
 msgstr "![Die zwei Eingabefelder für das Aufnahmedatum müssen übereinstimmen](img/fig-the-two-admission-dates.png){#fig-the-two-admission-dates fig-alt=\"Ein Screenshot, in dem zwei Eingabefelder für das Aufnahmedatum durch Umrahmung hervorgehoben und mit Pfeilen gekennzeichnet sind\"}\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0003.qmd:16
+#: reports/Validation-Report/en/_problem_detail_0003.Rmd:18
 #, no-wrap
 msgid "![If you subsequently change an admission date in the patient registration, a warning dialogue appears](img/fig-warning-enrolment-admission-date.png){#fig-warning-enrolment-admission-date fig-alt=\"A dialogue with the title 'Admission date' and the text 'Updating this date might require further action from you. Events in this program have been scheduled based on this date, but these events will not be rescheduled automatically. Do you want to continue with the date update?' and the buttons 'Cancel' and 'OK'\"}\n"
 msgstr "![Wenn man ein Aufnahmedatum in der Patientenregistrierung nachträglich ändert, erscheint ein Warndialog](img/fig-warning-enrolment-admission-date.png){#fig-warning-enrolment-admission-date fig-alt=\"Ein Dialog mit dem Titel \\\"Admission date\\\" und dem Text \\\"Updating this date might require further action from you. Events in this program have been scheduled based on this date, but these events will not be rescheduled automatically. Do you want to continue with the date update?\\\" und den Schaltflächen \\\"Cancel\\\" und  \\\"OK\\\"\"}\n"
 
 #. type: Title ###
-#: reports/Validation-Report/en/_problem_detail_0004.qmd:1
+#: reports/Validation-Report/en/_problem_detail_0004.Rmd:1
 #, no-wrap
 msgid "The Date of the End of the Surveillance Is Earlier Than the Date of Admission in the Admission Form {#sec-problem-details-4}"
 msgstr "Das Datum des Endes der Surveillance liegt vor dem Aufnahmedatum im Aufnahme-Formular {#sec-problem-details-4}"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0004.qmd:6
+#: reports/Validation-Report/en/_problem_detail_0004.Rmd:6
 #, no-wrap
 msgid ""
 "When a patient's surveillance has ended, the date on which this happened must be entered on the Surveillance End form. Naturally, the earliest the surveillance can end is on the day it started, but not before.\n"
@@ -3768,13 +4004,13 @@ msgstr ""
 "Um das Aufnahmedatum zu korrigieren, lesen Sie bitte @sec-solution-6. Um das Entlassungsdatum zu korrigieren, lesen Sie bitte @sec-solution-7.\n"
 
 #. type: Title ###
-#: reports/Validation-Report/en/_problem_detail_0005.qmd:1
+#: reports/Validation-Report/en/_problem_detail_0005.Rmd:1
 #, no-wrap
 msgid "The Patient Record’s Admission Form Is Not Completed {#sec-problem-details-5}"
 msgstr "Das Aufnahmeformular der Patientenakte ist nicht abgeschlossen {#sec-problem-details-5}"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0005.qmd:5
+#: reports/Validation-Report/en/_problem_detail_0005.Rmd:5
 #, no-wrap
 msgid ""
 "For each inpatient stay of a patient to be included in NeoIPC Surveillance, an enrolment must be created on the NeoIPC Surveillance platform.\n"
@@ -3786,13 +4022,13 @@ msgstr ""
 "\n"
 
 #. type: Title ###
-#: reports/Validation-Report/en/_problem_detail_0006.qmd:1
+#: reports/Validation-Report/en/_problem_detail_0006.Rmd:1
 #, no-wrap
 msgid "The Patient Record Has a Completed Enrolment but the Surveillance End Form Is Not Completed {#sec-problem-details-6}"
 msgstr "Die Patientenakte enthält eine abgeschlossene Patientenregistrierung, aber das Surveillance-Ende-Formular ist nicht abgeschlossen {#sec-problem-details-6}"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0006.qmd:5
+#: reports/Validation-Report/en/_problem_detail_0006.Rmd:5
 #, no-wrap
 msgid ""
 "The surveillance end form is a mandatory form that must always be completed and closed before the patient enrolment is completed so that the data can be analysed later.\n"
@@ -3802,19 +4038,19 @@ msgstr ""
 "Die Daten einer Patientenakte ohne Surveillance-Ende-Formular können nicht in Auswertungen einbezogen werden, da die wichtigsten Nennerdaten zur Berechnung der Raten fehlen.\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0006.qmd:6
+#: reports/Validation-Report/en/_problem_detail_0006.Rmd:6
 #, no-wrap
 msgid "Please reopen the enrolment (see @sec-solution-5), fill in the surveillance end form, complete it (see @sec-solution-8) and then complete the patient record again (see @sec-solution-4).\n"
 msgstr "Bitte öffnen Sie die Patientenregistrierung erneut (siehe @sec-solution-5), füllen Sie das Surveillance-Ende-Formular aus, schließen Sie es (siehe @sec-solution-8) und schließen Sie anschließend die Patientenakte wieder ab (siehe @sec-solution-4).\n"
 
 #. type: Title ###
-#: reports/Validation-Report/en/_problem_detail_0007.qmd:1
+#: reports/Validation-Report/en/_problem_detail_0007.Rmd:1
 #, no-wrap
 msgid "The Patient Record Contains a Completed Patient Enrolment or Surveillance End Form, but an Event Form Is Not Completed {#sec-problem-details-7}"
 msgstr "Die Patientenakte enthält eine abgeschlossene Patientenregistrierung oder ein abgeschlossenes Surveillance-Ende-Formular, aber ein Ereignis-Formular ist nicht abgeschlossen {#sec-problem-details-7}"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0007.qmd:5
+#: reports/Validation-Report/en/_problem_detail_0007.Rmd:5
 #, no-wrap
 msgid ""
 "When you have ended surveillance for a patient and completed enrolment, you should have all the information you need to apply the NeoIPC Surveillance definitions and to fill out and complete event forms that you have started, or to delete them if the definitions are not met.\n"
@@ -3824,19 +4060,19 @@ msgstr ""
 "Da die Validierung der Eingaben nur beim Abschließen von Formularen erfolgt, können Daten aus nicht abgeschlossenen Formularen nicht für Auswertungen berücksichtigt werden.\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0007.qmd:6
+#: reports/Validation-Report/en/_problem_detail_0007.Rmd:6
 #, no-wrap
 msgid "Please complete the form (see @sec-solution-8).\n"
 msgstr "Bitte schließen Sie daher das Formular ab (siehe @sec-solution-8).\n"
 
 #. type: Title ###
-#: reports/Validation-Report/en/_problem_detail_0008.qmd:1
+#: reports/Validation-Report/en/_problem_detail_0008.Rmd:1
 #, no-wrap
 msgid "The Patient Record Contains an Event Form With a Date That Is Not Within the Time Frame of a Documented Admission {#sec-problem-details-8}"
 msgstr "Die Patientenakte enthält ein Ereignis-Formular mit einem Datum, das nicht innerhalb des Zeitrahmens einer dokumentierten Aufnahme liegt {#sec-problem-details-8}"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0008.qmd:7
+#: reports/Validation-Report/en/_problem_detail_0008.Rmd:7
 #, no-wrap
 msgid ""
 "The surveillance period for a patient enrolled in the NeoIPC Surveillance begins on admission and ends when the patient is discharged or dies.\n"
@@ -3850,7 +4086,7 @@ msgstr ""
 "Ein Ereignisformular, dessen Datum nicht innerhalb dieses Zeitintervalls liegt, stellt entweder einen Eingabefehler oder ein Missverständnis bezüglich des vorgesehenen Vorgehens dar. Der Fehler muss nicht unbedingt im Formular selbst liegen. Auch ein falsches Aufnahmedatum oder ein falsches Datum im Surveillance-Ende-Formular kann diesen Fehler verursachen.\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0008.qmd:9
+#: reports/Validation-Report/en/_problem_detail_0008.Rmd:9
 #, no-wrap
 msgid ""
 "Please check the relevant data and correct the incorrect date (see @sec-solution-6 and @sec-solution-7).\n"
@@ -3860,13 +4096,13 @@ msgstr ""
 "Wenn Sie ein Ereignisformular begonnen haben und am Ende der Surveillance feststellen, dass die Kriterien der NeoIPC Surveillance Definitionen nicht erfüllt sind, löschen Sie bitte das Formular (siehe @sec-solution-12).\n"
 
 #. type: Title ###
-#: reports/Validation-Report/en/_problem_detail_0009.qmd:1
+#: reports/Validation-Report/en/_problem_detail_0009.Rmd:1
 #, no-wrap
 msgid "The Patient Record Contains an Enrolment Whose Time Interval Overlaps With That of Another Enrolment {#sec-problem-details-9}"
 msgstr "Die Patientenakte enthält eine Patientenregistrierung, deren Zeitintervall sich mit dem einer anderen Patientenregistrierung überschneidet. {#sec-problem-details-9}"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0009.qmd:7
+#: reports/Validation-Report/en/_problem_detail_0009.Rmd:7
 #, no-wrap
 msgid ""
 "The majority of patients included in NeoIPC have only one hospital stay during the observation period, which starts with the first admission (usually at birth) and ends with discharge.\n"
@@ -3880,25 +4116,25 @@ msgstr ""
 "Naturgemäß können sich die Zeitintervalle, in denen ein Patient stationär behandelt wird, nicht überlappen, und daraus folgt, dass auch eine erneute Patientenregistrierung in der NeoIPC Surveillance-Plattform frühestens am Tag nach der letzten Entlassung beginnen kann (im Fall, dass ein Patient am selben Tag entlassen und wieder aufgenommen wird, ignorieren wir die Entlassung).\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0009.qmd:9
+#: reports/Validation-Report/en/_problem_detail_0009.Rmd:9
 #, no-wrap
 msgid "In the case mentioned in the error message, there are multiple enrolments with overlapping surveillance periods (the period between the admission date and the surveillance end date). This may be due to either an input error in one of the date values or a misunderstanding of the purpose of the enrolment.\n"
 msgstr "In dem in der Fehlermeldung genannten Fall gibt es mehrere Patientenregistrierungen, deren Surveillance-Perioden (Zeitraum zwischen Aufnahmedatum und Datum, an dem die Surveillance endet) sich überschneiden. Dies kann entweder auf einen Eingabefehler bei einem der Datumswerte oder auf ein Missverständnis bezüglich des Zwecks der Patientenregistrierung zurückzuführen sein.\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0009.qmd:10
+#: reports/Validation-Report/en/_problem_detail_0009.Rmd:10
 #, no-wrap
 msgid "Please correct any incorrect dates (see @sec-solution-6) or delete any redundant enrolments (see @sec-solution-13) so that there is exactly one enrolment for each of the patient's hospital stays.\n"
 msgstr "Bitte korrigieren Sie ggf. falsche Datumswerte (siehe @sec-solution-6) oder löschen Sie überflüssige Patientenregistrierungen (siehe @sec-solution-13), so dass für jeden stationären Aufenthalt des betreffenden Patienten genau eine Registrierung existiert.\n"
 
 #. type: Title ###
-#: reports/Validation-Report/en/_problem_detail_0010.qmd:1
+#: reports/Validation-Report/en/_problem_detail_0010.Rmd:1
 #, no-wrap
 msgid "The Number of Patient Days Does Not Match the Calculated Value {#sec-problem-details-10}"
 msgstr "Die Anzahl der Patiententage stimmt nicht mit dem berechneten Wert überein {#sec-problem-details-10}"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0010.qmd:6
+#: reports/Validation-Report/en/_problem_detail_0010.Rmd:6
 #, no-wrap
 msgid ""
 "The patient days value entered in the End of Surveillance form is automatically calculated from the end of surveillance date and the admission date of the enrolment.\n"
@@ -3910,7 +4146,7 @@ msgstr ""
 "Aus diesen Gründen ist es sehr wichtig, dass der Wert für die Patiententage korrekt ist.\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0010.qmd:9
+#: reports/Validation-Report/en/_problem_detail_0010.Rmd:9
 #, no-wrap
 msgid ""
 "If this error message appears in the validation report, we have found that the stored value for patient days is not correct.\n"
@@ -3920,19 +4156,19 @@ msgstr ""
 "Dies kann zwei Gründe haben:\n"
 
 #. type: Bullet: '1. '
-#: reports/Validation-Report/en/_problem_detail_0010.qmd:12
+#: reports/Validation-Report/en/_problem_detail_0010.Rmd:12
 #, no-wrap
 msgid "an error in our automatic calculation prior to `r format(lubridate::date(\"2024-08-21\"), format = \"%x\")` has caused the patient days value to be one day too low.\n"
 msgstr "Ein Fehler in unserer automatischen Berechnung vor dem `r format(lubridate::date(\"2024-08-21\"), format = \"%x\")` hat dazu geführt, dass der Wert für die Patiententage um einen Tag zu klein ist.\n"
 
 #. type: Bullet: '2. '
-#: reports/Validation-Report/en/_problem_detail_0010.qmd:12
+#: reports/Validation-Report/en/_problem_detail_0010.Rmd:12
 #, no-wrap
 msgid "the admission date of the enrolment was changed after the end of surveillance form was completed.\n"
 msgstr "Das Aufnahmedatum der Patientenregistrierung wurde nach dem Abschließen des Formulars für das Ende der Surveillance geändert.\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0010.qmd:16
+#: reports/Validation-Report/en/_problem_detail_0010.Rmd:16
 #, no-wrap
 msgid ""
 "As for the first reason, we are truly sorry, because it is a problem that we have caused and that is creating work for you.\n"
@@ -3944,25 +4180,25 @@ msgstr ""
 "So kann es in Einzelfällen vorkommen, dass Sie für bestimmte Risiko- oder Schutzfaktoren die gleiche Anzahl von Tagen (\"Device-Tage\") wie die Anzahl der Patiententage eingeben wollten (z.B. gibt es regelmäßig Fälle, in denen die Anzahl der Humanmilchtage gleich der Anzahl der Patiententage ist). In diesen Fällen müsste auch der Wert für die entsprechenden Device-Tage angepasst werden, was wir nicht können, da wir den wahren Wert nicht kennen.\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0010.qmd:18
+#: reports/Validation-Report/en/_problem_detail_0010.Rmd:18
 #, no-wrap
 msgid "The second reason described above also has the input validation problem described in the previous section, which explains why the NeoIPC Surveillance Platform does not simply recalculate the value automatically when the admission date of the enrolment is changed.\n"
 msgstr "Auch beim zweiten oben beschriebenen Grund besteht das im vorigen Abschnitt beschriebene Problem mit der Eingabevalidierung, was erklärt, warum die NeoIPC Surveillance Plattform den Wert nicht einfach automatisch neu berechnet, wenn das Aufnahmedatum der Patientenregistrierung geändert wird.\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0010.qmd:19
+#: reports/Validation-Report/en/_problem_detail_0010.Rmd:19
 #, no-wrap
 msgid "Regardless of the cause of the problem, please update the patient days value in the Surveillance End form (see @sec-solution-11) and then check if other values need to be updated and adjust them if necessary.\n"
 msgstr "Unabhängig von der Ursache des Problems bitten wir Sie, den Wert der Patiententage im Surveillance End-Formular zu aktualisieren (siehe @sec-solution-11) und anschließend zu überprüfen, ob weitere Werte aktualisiert werden müssen und diese gegebenenfalls anzupassen.\n"
 
 #. type: Title ###
-#: reports/Validation-Report/en/_problem_detail_0011.qmd:1
+#: reports/Validation-Report/en/_problem_detail_0011.Rmd:1
 #, no-wrap
 msgid "The Surgical Site Infection Did Not Occur During the Follow-Up Period of a Surgical Procedure {#sec-problem-details-11}"
 msgstr "Die postoperative Wundinfektion ereignete sich nicht während des Nachbeobachtungszeitraums eines chirurgischen Eingriffs {#sec-problem-details-11}"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0011.qmd:5
+#: reports/Validation-Report/en/_problem_detail_0011.Rmd:5
 #, no-wrap
 msgid ""
 "After surgery, patients are followed up as part of NeoIPC Surveillance for surgical site infections.\n"
@@ -3972,43 +4208,43 @@ msgstr ""
 "Die Nachbeobachtungszeit ist dabei wie folgt definiert (der Tag des Eingriffs ist Tag 1):\n"
 
 #. type: Bullet: '* '
-#: reports/Validation-Report/en/_problem_detail_0011.qmd:9
+#: reports/Validation-Report/en/_problem_detail_0011.Rmd:9
 #, no-wrap
 msgid "Superficial incisional infection: 30 days\n"
 msgstr "Oberflächliche postoperative Wundinfektion: 30 Tage\n"
 
 #. type: Bullet: '* '
-#: reports/Validation-Report/en/_problem_detail_0011.qmd:9
+#: reports/Validation-Report/en/_problem_detail_0011.Rmd:9
 #, no-wrap
 msgid "Deep incisional infection: 30 days or 90 days if an implant was inserted\n"
 msgstr "Tiefe postoperative Wundinfektion: 30 Tage bzw. 90 Tage wenn ein Implantat eingesetzt wurde\n"
 
 #. type: Bullet: '* '
-#: reports/Validation-Report/en/_problem_detail_0011.qmd:9
+#: reports/Validation-Report/en/_problem_detail_0011.Rmd:9
 #, no-wrap
 msgid "Organ/space infection: 30 days or 90 days if an implant was inserted\n"
 msgstr "Postoperative Wundinfektion an Organen oder in Körperhöhlen: 30 Tage bzw. 90 Tage wenn ein Implantat eingesetzt wurde\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0011.qmd:11
+#: reports/Validation-Report/en/_problem_detail_0011.Rmd:11
 #, no-wrap
 msgid "If this message appears in the validation report, the specified patient record contains a form for a surgical site infection, but not for a surgical procedure in the 30 or 90 days prior to that, as defined above.\n"
 msgstr "Wenn diese Meldung im Validierungsbericht erscheint, enthält die angegebene Patientenakte ein Formular für eine postoperative Wundinfektion, aber keines für einen operativen Eingriff in den 30 bzw. 90 Tagen davor, wie oben definiert.\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0011.qmd:13
+#: reports/Validation-Report/en/_problem_detail_0011.Rmd:13
 #, no-wrap
 msgid "There may be different reasons for this:\n"
 msgstr "Dafür kann es verschiedene Gründe geben:\n"
 
 #. type: Bullet: '1. '
-#: reports/Validation-Report/en/_problem_detail_0011.qmd:15
+#: reports/Validation-Report/en/_problem_detail_0011.Rmd:15
 #, no-wrap
 msgid "A form was created for the surgical procedure, but the period of time between the procedure and the infection is too long.\n"
 msgstr "Es wurde ein Formular für den operativen Eingriff angelegt, aber der Abstand zur Infektion ist zu groß.\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0011.qmd:20
+#: reports/Validation-Report/en/_problem_detail_0011.Rmd:20
 #, no-wrap
 msgid ""
 "    It is very unlikely that the infection is still related to the procedure after such a long time.\n"
@@ -4022,37 +4258,37 @@ msgstr ""
 "    Sind Sie nach Prüfung zu dem Schluss gekommen, dass es sich nicht um eine postoperative Wundinfektion handelt, löschen Sie bitte das Ereignis-Formular (siehe @sec-solution-12)\n"
 
 #. type: Bullet: '2. '
-#: reports/Validation-Report/en/_problem_detail_0011.qmd:22
+#: reports/Validation-Report/en/_problem_detail_0011.Rmd:22
 #, no-wrap
 msgid "No form has been created for the surgical procedure\n"
 msgstr "Es wurde kein Formular für den operativen Eingriff angelegt\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0011.qmd:24
+#: reports/Validation-Report/en/_problem_detail_0011.Rmd:24
 #, no-wrap
 msgid "    Please create an event form for the surgical procedure in the NeoIPC Surveillance platform (see @sec-solution-14), fill it out and complete it (see @sec-solution-8).\n"
 msgstr "    Bitte legen sie ein Ereignis-Formular für den operativen Eingriff in der NeoIPC Surveillance-Plattform an (siehe @sec-solution-14), füllen Sie es aus und schließen Sie es ab (siehe @sec-solution-8).\n"
 
 #. type: Bullet: '3. '
-#: reports/Validation-Report/en/_problem_detail_0011.qmd:26
+#: reports/Validation-Report/en/_problem_detail_0011.Rmd:26
 #, no-wrap
 msgid "The date for the surgical procedure or surgical site infection was entered incorrectly.\n"
 msgstr "Das Datum für den operativen Eingriff oder die postoperative Wundinfektion wurde falsch eingegeben.\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0011.qmd:27
+#: reports/Validation-Report/en/_problem_detail_0011.Rmd:27
 #, no-wrap
 msgid "    Please correct the erroneous date in the corresponding event form (see @sec-solution-7).\n"
 msgstr "    Bitte korrigieren Sie das fehlerhafte Datum im entsprechenden Ereignis-Formular (siehe @sec-solution-7).\n"
 
 #. type: Title ###
-#: reports/Validation-Report/en/_problem_detail_0012.qmd:1
+#: reports/Validation-Report/en/_problem_detail_0012.Rmd:1
 #, no-wrap
 msgid "The Manually Entered Pathogen Cannot Be Assigned {#sec-problem-details-12}"
 msgstr "Der manuell eingegebene Erreger kann nicht zugeordnet werden {#sec-problem-details-12}"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0012.qmd:5
+#: reports/Validation-Report/en/_problem_detail_0012.Rmd:5
 #, no-wrap
 msgid ""
 "Since the pathogen list of the NeoIPC Surveillance Platform cannot contain all potential infectious agents occurring worldwide, we have created the option of adding pathogens that are not in the database as free text.\n"
@@ -4062,7 +4298,7 @@ msgstr ""
 "Wenn dies geschieht, versuchen wir herauszufinden, um welchen Erreger es sich handelt, fügen diesen in die Datenbank ein und ordnen dann den als Freitext eingegebenen Erreger diesem neuen Erreger zu, damit in Zukunft eine Gruppenbildung und Auswertung möglich ist.\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0012.qmd:8
+#: reports/Validation-Report/en/_problem_detail_0012.Rmd:8
 #, no-wrap
 msgid ""
 "If this message appears in the validation report, we were unable to find out which pathogen (species, genus, family) is involved for the free text entered and were therefore unable to make a meaningful assignment.\n"
@@ -4072,19 +4308,19 @@ msgstr ""
 "In der Konsequenz kan der eingegebene Erreger nicht in Auswertungen oder dem Referenzdatenbericht auftauchen.\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0012.qmd:9
+#: reports/Validation-Report/en/_problem_detail_0012.Rmd:9
 #, no-wrap
 msgid "If in doubt, please consult your microbiological laboratory or try to find the correct pathogen using taxonomic databases such as [LPSN](https://www.bacterio.net/), [MycoBank](https://www.mycobank.org/) or [ICTV](https://ictv.global/taxonomy) and inform us so that we can include it in the database.\n"
 msgstr "Bitte konsultieren Sie im Zweifelsfall Ihr mikrobiologisches Labor oder versuchen Sie mit Hilfe taxonomischer Datenbanken wie [LPSN](https://www.bacterio.net/), [MycoBank](https://www.mycobank.org/) oder [ICTV](https://ictv.global/taxonomy) den richtigen Erreger zu finden und uns diesen mitzuteilen, damit wir ihn in die Datenbank aufnehmen können.\n"
 
 #. type: Title ###
-#: reports/Validation-Report/en/_problem_detail_0013.qmd:1
+#: reports/Validation-Report/en/_problem_detail_0013.Rmd:1
 #, no-wrap
 msgid "The Sum of All Antibiotic Substance Days Is Less Than the Total Number of Antibiotic Days {#sec-problem-details-13}"
 msgstr "Die Summe aller Tage mit antibiotischen Substanzen ist geringer als die Gesamtzahl der Antibiotikatage {#sec-problem-details-13}"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0013.qmd:6
+#: reports/Validation-Report/en/_problem_detail_0013.Rmd:6
 #, no-wrap
 msgid ""
 "In the Surveillance End form, the number of days on which a patient received (any) antibiotic treatment (antibiotic days) and the number of days on which each antibiotic substance was used (substance days) are recorded.\n"
@@ -4096,19 +4332,20 @@ msgstr ""
 "Leider funktioniert die Eingabevalidierung, die dies überprüft, nicht ganz zuverlässig und kann umgangen werden, was zu dieser Fehlermeldung im Validierungsbericht führt.\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0013.qmd:7
+#: reports/Validation-Report/en/_problem_detail_0013.Rmd:7
 #, no-wrap
 msgid "Please reopen the Surveillance End form (see @sec-solution-9) and enter the correct values for the individual substance days or the correct value for the antibiotic days.\n"
 msgstr "Bitte öffnen Sie das Surveillance-Ende-Formular erneut (siehe @sec-solution-9) und geben Sie die korrekten Werte für die einzelnen Substanz-Tage bzw. den korrekten Wert für die Antibiotika-Tage ein.\n"
 
 #. type: Title ###
-#: reports/Validation-Report/en/_problem_detail_0014.qmd:1
-#, no-wrap
-msgid "The Surgical Procedure Has an Invalid ICHE Code {#sec-problem-details-14}"
+#: reports/Validation-Report/en/_problem_detail_0014.Rmd:1
+#, fuzzy, no-wrap
+#| msgid "The Surgical Procedure Has an Invalid ICHE Code {#sec-problem-details-14}"
+msgid "The Surgical Procedure Has an Invalid ICHI Code {#sec-problem-details-14}"
 msgstr "Der chirurgische Eingriff hat einen ungülitgen ICHE-Code {#sec-problem-details-14}"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0014.qmd:7
+#: reports/Validation-Report/en/_problem_detail_0014.Rmd:7
 #, no-wrap
 msgid ""
 "The stratification of surgical procedures in NeoIPC Surveillance is complicated by the lack of an internationally used coding system for surgical and procedural procedures.\n"
@@ -4122,41 +4359,45 @@ msgstr ""
 "Der Nachteil dieser Entscheidung ist, dass keiner unserer Partner sein vertrautes nationales Kodierungssystem für Prozeduren verwenden kann, der Vorteil ist, dass wir uns auf ein modernes und sehr umfassendes Kodierungssystem stützen, das es erlaubt, verschiedene Gruppen von Prozeduren sinnvoll zusammenzufassen und zu analysieren.\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0014.qmd:9
+#: reports/Validation-Report/en/_problem_detail_0014.Rmd:9
 #, no-wrap
 msgid "Please always enter valid ICHI codes in the ‘Main procedure code (ICHI)’ and ‘Side procedure code (ICHI)’ fields.\n"
 msgstr "Bitte geben Sie daher in den Feldern \"Main procedure code (ICHI)\" und \"Side procedure code (ICHI)\" immer gültige ICHI-Kodes ein.\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0014.qmd:11
-#, no-wrap
-msgid "You can find the these codes by entering the English name of the procedure (or part of it) in the ‘Search’ field at the top left of the ICHE Reference Classification at https://icd.who.int/dev11/l-ichi/en.\n"
+#: reports/Validation-Report/en/_problem_detail_0014.Rmd:11
+#, fuzzy, no-wrap
+#| msgid "You can find the these codes by entering the English name of the procedure (or part of it) in the ‘Search’ field at the top left of the ICHE Reference Classification at https://icd.who.int/dev11/l-ichi/en.\n"
+msgid "You can find these codes by entering the English name of the procedure (or part of it) in the ‘Search’ field at the top left of the ICHI Reference Classification at https://icd.who.int/dev11/l-ichi/en.\n"
 msgstr "Sie können die entsprechenden Codes finden, indem Sie in der ICHE Reference Classification unter https://icd.who.int/dev11/l-ichi/en oben links im Feld \"Search\" die englische Bezeichnung der Prozedur (oder einen Teil davon) eingeben.\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0014.qmd:13
+#: reports/Validation-Report/en/_problem_detail_0014.Rmd:13
 #, no-wrap
 msgid "If you have any problems finding the correct code, please contact us and we will be happy to help.\n"
 msgstr "Sollten Sie Probleme haben, den richtigen Code zu finden, kontaktieren Sie uns bitte und wir werden Ihnen gerne weiterhelfen.\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0014.qmd:15
-#, no-wrap
+#: reports/Validation-Report/en/_problem_detail_0014.Rmd:15
+#, fuzzy, no-wrap
+#| msgid ""
+#| "To correct the reported error, please open the form (see @sec-solution-15) and enter the ICHE code for the procedure instead of the existing code.\n"
+#| "If the form has already been completed, it will need to bebe reopened for editing (see @sec-solution-9). If the patient registration has also already been completed, you will also need reopen it for editing beforehand (see @sec-solution-5).\n"
 msgid ""
-"To correct the reported error, please open the form (see @sec-solution-15) and enter the ICHE code for the procedure instead of the existing code.\n"
-"If the form has already been completed, it will need to bebe reopened for editing (see @sec-solution-9). If the patient registration has also already been completed, you will also need reopen it for editing beforehand (see @sec-solution-5).\n"
+"To correct the reported error, please open the form (see @sec-solution-15) and enter the ICHI code for the procedure instead of the existing code.\n"
+"If the form has already been completed, it will need to be reopened for editing (see @sec-solution-9). If the patient registration has also already been completed, you will also need to reopen it for editing beforehand (see @sec-solution-5).\n"
 msgstr ""
 "Um den gemeldeten Fehler zu beheben, öffnen Sie bitte das Formular (siehe @sec-solution-15) und geben Sie anstelle des vorhandenen Codes den ICHE-Code der Prozedur ein.\n"
 "Falls das Formular bereits abgeschlossen wurde, muss es erneut zur Bearbeitung geöffnet werden (siehe @sec-solution-9). Wenn auch die Patientenregistrierung bereits abgeschlossen ist, müssen Sie auch diese zuvor erneut zur Bearbeitung öffnen (siehe @sec-solution-5).\n"
 
 #. type: Title ###
-#: reports/Validation-Report/en/_problem_detail_0015.qmd:1
+#: reports/Validation-Report/en/_problem_detail_0015.Rmd:1
 #, no-wrap
 msgid "The Patient Record Has a Completed Enrolment but no Surveillance End Form {#sec-problem-details-15}"
 msgstr "Die Patientenakte enthält eine abgeschlossene Patientenregistrierung, aber kein Surveillance-Ende-Formular {#sec-problem-details-15}"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0015.qmd:5
+#: reports/Validation-Report/en/_problem_detail_0015.Rmd:5
 #, no-wrap
 msgid ""
 "The Surveillance End form is a mandatory form that must always be present before you complete the enrollment so that the data can be analysed afterwards.\n"
@@ -4166,19 +4407,19 @@ msgstr ""
 "Diese Fehlermeldung erscheint im Validierungsbericht, wenn die Patientenakte eine abgeschlossene Patientenregistrierung ohne Surveillance-Ende-Formular enthält.\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0015.qmd:6
+#: reports/Validation-Report/en/_problem_detail_0015.Rmd:6
 #, no-wrap
 msgid "Please open the Tracked Entity Instance Dashboard of the patient record (see @sec-solution-1), then the patient enrolment (see @sec-solution-2), add a Surveillance End form (see @sec-solution-14), fill in the data and then complete both the form (see @sec-solution-8) and the patient enrolment (see @sec-solution-4).\n"
 msgstr "Bitte öffnen Sie das Tracked Entity Instance Dashboard der Patientenakte (siehe @sec-solution-1), dann die Patientenregistrierung (siehe @sec-solution-2), fügen Sie ein Surveillance-Ende-Formular hinzu (siehe @sec-solution-14), füllen Sie dieses vollständig aus und schließen Sie anschließend sowohl das Formular (siehe @sec-solution-8) als auch die Patientenregistrierung (siehe @sec-solution-4) ab.\n"
 
 #. type: Title ###
-#: reports/Validation-Report/en/_problem_detail_0016.qmd:1
+#: reports/Validation-Report/en/_problem_detail_0016.Rmd:1
 #, no-wrap
 msgid "The Patient Record Has a Completed Enrolment but no Admission Form {#sec-problem-details-16}"
 msgstr "Die Patientenakte enthält eine abgeschlossene Patientenregistrierung, aber kein Aufnahmeformular {#sec-problem-details-16}"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0016.qmd:5
+#: reports/Validation-Report/en/_problem_detail_0016.Rmd:5
 #, no-wrap
 msgid ""
 "The Admission Form is a mandatory form that must exist exactly once for each patient admission.\n"
@@ -4190,79 +4431,79 @@ msgstr ""
 "Wenn das Aufnahmeformular einer Patientenregistrierung gelöscht wurde, muss ein neues Aufnahmeformular angelegt und abgeschlossen werden, bevor die Patientenregistrierung abgeschlossen wird, damit die Daten später ausgewertet werden können.\n"
 
 #. type: Title ###
-#: reports/Validation-Report/en/_problem_detail_0017.qmd:1
+#: reports/Validation-Report/en/_problem_detail_0017.Rmd:1
 #, no-wrap
 msgid "The Day of Life Stored in the Form Does Not Match the Calculated Value {#sec-problem-details-17}"
 msgstr "Der im Formular gespeicherte Lebenstag stimmt nicht mit dem berechneten Wert überein {#sec-problem-details-17}"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0017.qmd:4
+#: reports/Validation-Report/en/_problem_detail_0017.Rmd:4
 #, no-wrap
 msgid "The value of the day of life at the time of the event, which appears on some forms, is automatically calculated from the date of the event, the admission date of the enrolment and the day of life at the time of admission.\n"
 msgstr "Der Wert für den Lebenstag zum Zeitpunkt des Ereignisses, der in einigen Formularen angegeben ist, wird automatisch aus dem Datum des Ereignisses, dem Aufnahmedatum der Patientenregistrierung und dem Lebenstag zum Zeitpunkt der Aufnahme berechnet.\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0017.qmd:6
+#: reports/Validation-Report/en/_problem_detail_0017.Rmd:6
 #, no-wrap
 msgid "If this error message appears in the validation report, we have determined that the stored value for the day of life is incorrect, which in most cases is due to the admission date of the enrolment having been changed after the form in question was completed.\n"
 msgstr "Wenn diese Fehlermeldung im Validierungsbericht erscheint, haben wir festgestellt, dass der gespeicherte Wert für den Lebenstag nicht korrekt ist, was in den meisten Fällen darauf zurückzuführen ist, dass das Aufnahmedatum der Patientenregistrierung nach dem Abschließen des betreffenden Formulars geändert wurde.\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0017.qmd:8
+#: reports/Validation-Report/en/_problem_detail_0017.Rmd:8
 #, no-wrap
 msgid "Please update the day of life value in the form (see @sec-solution-11).\n"
 msgstr "Bitte aktualisieren Sie den Wert für den Lebenstag im Formular (siehe @sec-solution-11).\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0017.qmd:9
+#: reports/Validation-Report/en/_problem_detail_0017.Rmd:9
 #, no-wrap
 msgid "If at the same time the error message appears that the stored day of occurrence after admission does not match the calculated value, which is the majority of cases (see @sec-problem-details-18), you only need to perform the procedure described in @sec-solution-11 once to update both values.\n"
 msgstr "Wenn gleichzeitig die Fehlermeldung erscheint, dass der gespeicherte Aufenthaltstag zum Zeitpunkt des Ereignisses nicht mit dem berechneten Wert übereinstimmt, was in der Mehrzahl der Fälle gegeben ist (siehe @sec-problem-details-18), müssen Sie die in @sec-solution-11 angegebene Prozedur nur einmal ausführen, um beide Werte zu aktualisieren.\n"
 
 #. type: Title ###
-#: reports/Validation-Report/en/_problem_detail_0018.qmd:1
+#: reports/Validation-Report/en/_problem_detail_0018.Rmd:1
 #, no-wrap
 msgid "The Day of Occurrence After Admission Stored in the Form Does Not Match the Calculated Value {#sec-problem-details-18}"
 msgstr "Der im Formular gespeicherte Aufenthaltstag zum Zeitpunkt des Ereignisses stimmt nicht mit dem berechneten Wert überein {#sec-problem-details-18}"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0018.qmd:4
+#: reports/Validation-Report/en/_problem_detail_0018.Rmd:4
 #, no-wrap
 msgid "The value of the day of occurrence after admission, which appears on some forms, is automatically calculated from the date of the event and the admission date of the enrolment.\n"
 msgstr "Der Wert für den Aufenthaltstag zum Zeitpunkt des Ereignisses, der in einigen Formularen angegeben ist, wird automatisch aus dem Datum des Ereignisses und dem Aufnahmedatum der Patientenregistrierung berechnet.\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0018.qmd:6
+#: reports/Validation-Report/en/_problem_detail_0018.Rmd:6
 #, no-wrap
 msgid "If this error message appears in the validation report, we have determined that the stored value for the day of occurrence after admission is incorrect, which in most cases is due to the admission date of the enrolment having been changed after the form in question was completed.\n"
 msgstr "Wenn diese Fehlermeldung im Validierungsbericht erscheint, haben wir festgestellt, dass der gespeicherte Wert für den Aufenthaltstag nicht korrekt ist, was in den meisten Fällen darauf zurückzuführen ist, dass das Aufnahmedatum der Patientenregistrierung nach dem Abschließen des betreffenden Formulars geändert wurde.\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0018.qmd:8
+#: reports/Validation-Report/en/_problem_detail_0018.Rmd:8
 #, no-wrap
 msgid "Please update the value of the day of occurrence after admission in the form (see @sec-solution-11).\n"
 msgstr "Bitte aktualisieren Sie den Wert für den Aufenthaltstag im Formular (siehe @sec-solution-11).\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0018.qmd:9
+#: reports/Validation-Report/en/_problem_detail_0018.Rmd:9
 #, no-wrap
 msgid "If at the same time the error message appears that the stored day of life does not match the calculated value, which is the majority of cases (see @sec-problem-details-17), you only need to perform the procedure described in @sec-solution-11 once to update both values.\n"
 msgstr "Wenn gleichzeitig die Fehlermeldung erscheint, dass der gespeicherte Lebenstag zum Zeitpunkt des Ereignisses nicht mit dem berechneten Wert übereinstimmt, was in der Mehrzahl der Fälle gegeben ist (siehe @sec-problem-details-17), müssen Sie die in @sec-solution-11 angegebene Prozedur nur einmal ausführen, um beide Werte zu aktualisieren.\n"
 
 #. type: Title ###
-#: reports/Validation-Report/en/_problem_detail_0019.qmd:1
+#: reports/Validation-Report/en/_problem_detail_0019.Rmd:1
 #, no-wrap
 msgid "The Infection Occurred Within the First Three Days of Life {#sec-problem-details-19}"
 msgstr "Die Infektion trat innerhalb der ersten drei Lebenstage auf {#sec-problem-details-19}"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0019.qmd:4
+#: reports/Validation-Report/en/_problem_detail_0019.Rmd:4
 #, no-wrap
 msgid "This message should not necessarily be interpreted as an error, but rather as a warning of a possible misunderstanding.\n"
 msgstr "Diese Meldung ist nicht unbedingt als Fehler zu verstehen, sondern vielmehr als Warnung vor einem möglichen Missverständnis.\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0019.qmd:7
+#: reports/Validation-Report/en/_problem_detail_0019.Rmd:7
 #, no-wrap
 msgid ""
 "As the purpose of NeoIPC surveillance is to monitor nosocomial infections with the potential for prevention in neonatal departments, early-onset infections generally cannot be recorded.\n"
@@ -4272,61 +4513,61 @@ msgstr ""
 "Das NeoIPC-Surveillance-Protokoll legt diesbezüglich fest, dass eine Infektion, die früher als 72 Stunden nach der Geburt auftritt, nicht als nosokomiale Infektion gilt und daher nicht in der NeoIPC-Surveillance erfasst werden sollte, es sei denn, sie wurde eindeutig im Krankenhaus erworben (z. B. bei eindeutigen Hinweisen auf eine Katheterinfektion).\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0019.qmd:9
+#: reports/Validation-Report/en/_problem_detail_0019.Rmd:9
 #, no-wrap
 msgid "We have found that this protocol specification is sometimes overlooked and that some of our partners are recording early-onset infections, which can distort the reference data and their own statistics.\n"
 msgstr "Wir haben festgestellt, dass diese Festlegung im Protokoll manchmal übersehen wird und dass einige unserer Partner früh auftretende Infektionen erfassen, was zu einer Verzerrung der Referenzdaten und ihrer eigenen Statistiken führen kann.\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0019.qmd:11
+#: reports/Validation-Report/en/_problem_detail_0019.Rmd:11
 #, no-wrap
 msgid "We have planned to allow the recording of early-onset infections as part of NeoIPC Surveillance, but this will in any case be done in a separate event form in order to separate those infections with a potential for prevention in the neonatal setting from those whose prevention is more in the domain of antenatal care and obstetrics.\n"
 msgstr "Wir haben zwar geplant, im Rahmen der NeoIPC Surveillance auch die Erfassung von Early-Onset Infektionen zu ermöglichen, dies wird aber in jedem Fall in einem separaten Ereignisformular erfolgen, um die Infektionen mit Präventionspotential im Bereich der Neonatologie von den Infektionen zu trennen, deren Prävention eher in den Bereich der Schwangerenvorsorge und Geburtsmedizin fällt.\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0019.qmd:12
+#: reports/Validation-Report/en/_problem_detail_0019.Rmd:12
 #, no-wrap
 msgid "Please delete the forms for all infections that are not nosocomial infections according to the above definition (see @sec-solution-12) or adjust the infection date (see @sec-solution-7) or the admission date (see @sec-solution-6) if it was an input error.\n"
 msgstr "Bitte löschen Sie die Formulare für alle Infektionen, die keine nosokomialen Infektionen im Sinne der obigen Definition sind (siehe @sec-solution-12) oder passen Sie das Infektionsdatum (siehe @sec-solution-7) oder das Aufnahmedatum (siehe @sec-solution-6) an, wenn es sich um einen Eingabefehler handelt.\n"
 
 #. type: Title ###
-#: reports/Validation-Report/en/_problem_detail_0020.qmd:1
+#: reports/Validation-Report/en/_problem_detail_0020.Rmd:1
 #, no-wrap
 msgid "The Infection Occurred Within the First Two Days of Hospitalisation of a Referred or (Re-)Admitted Patient {#sec-problem-details-20}"
 msgstr "Die Infektion trat innerhalb der ersten zwei Tage des Krankenhausaufenthalts eines überwiesenen oder (wieder-)aufgenommenen Patienten auf {#sec-problem-details-20}"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0020.qmd:4
+#: reports/Validation-Report/en/_problem_detail_0020.Rmd:4
 #, no-wrap
 msgid "Infections that occur within the first two days in referred or (re-)admitted patients are not considered to be nosocomial infections according to the NeoIPC Surveillance Protocol and therefore cannot be recorded.\n"
 msgstr "Infektionen, die bei überwiesenen oder (wieder-)aufgenommenen Patienten innerhalb der ersten beiden Tage auftreten, sind laut NeoIPC Surveilance Protokoll nicht als nosokomiale Infektionen zu werten und können deshalb nicht erfasst werden.\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0020.qmd:5
+#: reports/Validation-Report/en/_problem_detail_0020.Rmd:5
 #, no-wrap
 msgid "Please delete the forms for all infections that are not nosocomial infections according to this definition (see @sec-solution-12) or adjust the infection date (see @sec-solution-7) or the admission date (see @sec-solution-6) if it is an input error.\n"
 msgstr "Bitte löschen Sie die Formulare für alle Infektionen, die keine nosokomialen Infektionen im Sinne dieser Definition sind (siehe @sec-solution-12) oder passen Sie das Infektionsdatum (siehe @sec-solution-7) oder das Aufnahmedatum (siehe @sec-solution-6) an, wenn es sich um einen Eingabefehler handelt.\n"
 
 #. type: Title ###
-#: reports/Validation-Report/en/_solution_0001.qmd:1
+#: reports/Validation-Report/en/_solution_0001.Rmd:1
 #, no-wrap
 msgid "Opening the Tracked Entity Instance Dashboard of a Patient Record {#sec-solution-1}"
 msgstr "Öffnen des Tracked Entity Instance Dashboards einer Patientenakte {#sec-solution-1}"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_solution_0001.qmd:4
+#: reports/Validation-Report/en/_solution_0001.Rmd:4
 #, no-wrap
 msgid "To work with a patient record or an enrolment, you need to open the associated [Tracked Entity Instance (TEI) Dashboard](https://docs.dhis2.org/en/use/user-guides/dhis-core-version-240/tracking-individual-level-data/tracker-capture.html#about_tracked_entity_instance_dashboard) in DHIS2.\n"
 msgstr "Um mit einer Patientenakte, oder einer Patientenregistrierung zu arbeiten, müssen Sie das zugehörige [Tracked Entity Instance (TEI) Dashboard](https://docs.dhis2.org/en/use/user-guides/dhis-core-version-240/tracking-individual-level-data/tracker-capture.html#about_tracked_entity_instance_dashboard) in DHIS2 öffnen.\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_solution_0001.qmd:6
+#: reports/Validation-Report/en/_solution_0001.Rmd:6
 #, no-wrap
 msgid "Normally you do this from the [list of enrolled patients](https://docs.dhis2.org/en/use/user-guides/dhis-core-version-240/tracking-individual-level-data/tracker-capture.html#simple_tracked_entity_instance_search) by clicking on the relevant entry.\n"
 msgstr "Normalerweise tun Sie dies über die [Liste der registrierten Patienten](https://docs.dhis2.org/en/use/user-guides/dhis-core-version-240/tracking-individual-level-data/tracker-capture.html#simple_tracked_entity_instance_search), indem sie auf den entsprechenden Eintrag klicken.\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_solution_0001.qmd:9
+#: reports/Validation-Report/en/_solution_0001.Rmd:9
 #, no-wrap
 msgid ""
 "Unfortunately, this does not work for patient records without enrolment.\n"
@@ -4336,91 +4577,91 @@ msgstr ""
 "Wenn Sie aber über die NeoIPC Patienten-ID oder andere Daten verfügen, die sie zur Suche verwenden können, können Sie die [Suchfunktion von Tracker Capture](https://docs.dhis2.org/en/use/user-guides/dhis-core-version-240/tracking-individual-level-data/tracker-capture.html#advanced_tracked_entity_instance_search) nutzen, um die Patientenakte zu finden und zu öffnen.\n"
 
 #. type: Fenced div block ({.callout-tip})
-#: reports/Validation-Report/en/_solution_0001.qmd:10
+#: reports/Validation-Report/en/_solution_0001.Rmd:10
 #, no-wrap
 msgid "For the records included in this report, the easiest way to open the dashboard is to click on the link we have provided under the corresponding NeoIPC Patient ID.\n"
 msgstr "Für die in diesem Bericht aufgeführten Patientenakten ist es am einfachsten, das Dashboard zu öffnen, indem Sie auf den Link klicken, den wir unter der entsprechenden NeoIPC Patienten-ID hinterlegt haben.\n"
 
 #. type: Title ###
-#: reports/Validation-Report/en/_solution_0002.qmd:4
+#: reports/Validation-Report/en/_solution_0002.Rmd:6
 #, no-wrap
 msgid "Deleting a Patient Record {#sec-solution-2}"
 msgstr "Löschen einer Patientenakte {#sec-solution-2}"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_solution_0002.qmd:7
+#: reports/Validation-Report/en/_solution_0002.Rmd:9
 #, no-wrap
 msgid "To delete a patient record, first open the Tracked Entity Instance Dashboard as described in @sec-solution-1 and then click on the 'Delete NeoIPC Patient' button that appears in the top right corner of the Tracked Entity Instance Dashboard of the patient record after clicking on the red button, as shown in @fig-delete-patient. If you then confirm the deletion in the dialogue that appears, the patient record will be deleted.\n"
 msgstr "Um eine Patientenakte zu löschen, öffnen Sie zunächst, wie in @sec-solution-1 beschrieben, das Tracked Entity Instance Dashboard und klicken dann, wie in @fig-delete-patient dargestellt, auf die Schaltfläche \"Delete NeoIPC Patient\", die nach dem Klicken auf die rote Schaltfläche oben rechts im Tracked Entity Instance Dashboard der Patientenakte angezeigt wird. Wenn Sie anschließend den Löschvorgang im erscheinenden Dialog bestätigen, wird die Patientenakte gelöscht.\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_solution_0002.qmd:9
+#: reports/Validation-Report/en/_solution_0002.Rmd:11
 #, no-wrap
 msgid "See also '[Delete a TEI](https://docs.dhis2.org/en/use/user-guides/dhis-core-version-240/tracking-individual-level-data/tracker-capture.html#delete_tracked_entity_instance)'.\n"
 msgstr "Siehe auch \"[Delete a TEI](https://docs.dhis2.org/en/use/user-guides/dhis-core-version-240/tracking-individual-level-data/tracker-capture.html#delete_tracked_entity_instance)\".\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_solution_0002.qmd:10
+#: reports/Validation-Report/en/_solution_0002.Rmd:12
 #, no-wrap
 msgid "![Deleting a NeoIPC Patient record in DHIS2](img/fig-delete-patient.png){#fig-delete-patient fig-alt=\"The \\\"Delete NeoIPC Patient\\\" button appears after you have clicked on the red button at the top right of the patient record's tracked entity instance dashboard.\"}\n"
 msgstr "![Löschen einer NeoIPC Patientenakte in DHIS2](img/fig-delete-patient.png){#fig-delete-patient fig-alt=\"Die Schaltfläche \\\"Delete NeoIPC Patient\\\" wird angezeigt, nachdem Sie auf die rote Schaltfläche oben rechts im Tracked Entity Instance Dashboard der Patientenakte geklickt haben.\"}\n"
 
 #. type: Title ###
-#: reports/Validation-Report/en/_solution_0003.qmd:4
+#: reports/Validation-Report/en/_solution_0003.Rmd:6
 #, no-wrap
 msgid "Adding an Enrollment to a Patient Record {#sec-solution-3}"
 msgstr "Hinzufügen einer Registrierung zu einer Patientenakte {#sec-solution-3}"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_solution_0003.qmd:7
+#: reports/Validation-Report/en/_solution_0003.Rmd:9
 #, no-wrap
 msgid "To add an enrolment to a patient record, open the Tracked Entity Instance Dashboard (see @sec-solution-1) and click on the 'Add new' link (see @fig-add-enrolment). In the form that opens, you can change the pre-filled values if necessary. Then, click on 'Enrol'.\n"
 msgstr "Um einer Patientenakte eine Registrierung hinzuzufügen, öffnen Sie das Tracked Entity Instance Dashboard (siehe @sec-solution-1) und klicken auf den Link \"Add new\" (siehe @fig-add-enrolment). Im sich öffnenden Formular können Sie bei Bedarf die vorausgefüllten Werte verändern und anschließend auf \"Enroll\" klicken.\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_solution_0003.qmd:9
+#: reports/Validation-Report/en/_solution_0003.Rmd:11
 #, no-wrap
 msgid "![Adding an Enrollment in DHIS2](img/fig-add-enrolment.png){#fig-add-enrolment fig-alt=\"The 'Add new' button is in the middle of the 'Enrollment' block in the upper left corner of the Tracked Entity Instance Dashboard in the patient file.\"}\n"
 msgstr "![Hinzufügen einer Registrierung in DHIS2](img/fig-add-enrolment.png){#fig-add-enrolment fig-alt=\"Die Schaltfläche \\\"Add new\\\" (Neu hinzufügen) ist in der Mitte des Blocks \\\"Enrollment\\\" (Registrierung) oben links im Tracked Entity Instance Dashboard der Patientenakte.\"}\n"
 
 #. type: Title ###
-#: reports/Validation-Report/en/_solution_0004.qmd:4
+#: reports/Validation-Report/en/_solution_0004.Rmd:6
 #, no-wrap
 msgid "Completing an Enrolment {#sec-solution-4}"
 msgstr "Abschließen einer Patientenregistrierung {#sec-solution-4}"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_solution_0004.qmd:7
+#: reports/Validation-Report/en/_solution_0004.Rmd:9
 #, no-wrap
 msgid "To complete an enrolment, open the Tracked Entity Instance Dashboard of the patient record (see @sec-solution-1) and click on 'Complete'. See @fig-complete-enrolment.\n"
 msgstr "Zum Abschließen einer Patientenregistrierung öffnen Sie das Tracked Entity Instance Dashboard der Patientenakte (siehe @sec-solution-1) und klicken auf „Complete“. Siehe @fig-complete-enrolment.\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_solution_0004.qmd:9
+#: reports/Validation-Report/en/_solution_0004.Rmd:11
 #, no-wrap
 msgid "![Where to find the \"Complete\" button in the enrolment form](img/fig-complete-enrolment.png){#fig-complete-enrolment fig-alt=\"The \\\"Complete\\\" button is located at the bottom left of the \\\"Enrollment\\\" block which is located at the top left of the patient record's tracked entity instance dashboard.\"}\n"
 msgstr "![Wo findet man die Schaltfläche „Complete“ im Anmeldeformular?](img/fig-complete-enrolment.png){#fig-complete-enrolment fig-alt=\"Die Schaltfläche \\\"Complete\\\" befindet sich unten links im Block \\\"Enrollment\\\", der sich oben links im Tracked Entity Instance Dashboards der Patientenakte befindet.\"}\n"
 
 #. type: Title ###
-#: reports/Validation-Report/en/_solution_0005.qmd:4
+#: reports/Validation-Report/en/_solution_0005.Rmd:6
 #, no-wrap
 msgid "Reopening a Closed Enrolment to Make Changes {#sec-solution-5}"
 msgstr "Wiedereröffnung einer abgeschlossenen Patientenregistrierung, um Änderungen vorzunehmen {#sec-solution-5}"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_solution_0005.qmd:7
+#: reports/Validation-Report/en/_solution_0005.Rmd:9
 #, no-wrap
 msgid "If you want to change information in an enrolment that has already been completed and thus protected from changes, you must first reopen it for editing.\n"
 msgstr "Wenn Sie Informationen in einer Patientenregistrierung ändern möchten, die bereits abgeschlossen und damit vor Änderungen geschützt wurde, müssen Sie diese zunächst wieder zur Bearbeitung öffnen.\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_solution_0005.qmd:9
+#: reports/Validation-Report/en/_solution_0005.Rmd:11
 #, no-wrap
 msgid "To do this, first open the relevant enrolment in the tracked entity dashboard (see @sec-solution-10) and click on 'Reopen' (see @fig-reopen-enrolment). Then, usually, the corresponding event form must be opened for editing (see @sec-solution-9).\n"
 msgstr "Öffnen Sie dazu zunächst die betreffende Patientenregistrierung im Tracked Entity Dashboard (siehe @sec-solution-10) und klicken Sie auf \"Reopen\" (siehe @fig-reopen-enrolment). Anschließend muss in der Regel noch das entsprechende Ereignisformular zur Bearbeitung geöffnet werden (siehe @sec-solution-9).\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_solution_0005.qmd:12
+#: reports/Validation-Report/en/_solution_0005.Rmd:14
 #, no-wrap
 msgid ""
 "Since only one patient enrolment can be open for editing in DHIS2 at a time, another patient enrolment that is currently open for editing may have to be closed (at least temporarily) before another one can be opened for editing. To do this, first open the other patient enrolment in the tracked entity dashboard (see @sec-solution-10), then close it (see @sec-solution-4) and then open the patient enrolment you want to edit.\n"
@@ -4430,7 +4671,7 @@ msgstr ""
 "Bei Patientenakten, die nur eine Patientenregistrierung enthalten, ist dieser Schritt nicht notwendig und Sie können die betreffende Patientenregistrierung direkt zur Bearbeitung öffnen.\n"
 
 #. type: Fenced div block ({.callout-note})
-#: reports/Validation-Report/en/_solution_0005.qmd:13
+#: reports/Validation-Report/en/_solution_0005.Rmd:15
 #, no-wrap
 msgid ""
 "The NeoIPC Surveillance platform permissions system includes specific permissions for reopening patient enrolments.\n"
@@ -4444,25 +4685,25 @@ msgstr ""
 "Grundsätzlich hat die in der NeoIPC Surveillance Kooperationsvereinbarung als Projektleiter Ihrer Klinik benannte Person immer die notwendigen Berechtigungen und kann uns beauftragen, diese Berechtigungen auch anderen Personen in Ihrem Team zu erteilen oder zu entziehen.\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_solution_0005.qmd:20
+#: reports/Validation-Report/en/_solution_0005.Rmd:22
 #, no-wrap
 msgid "![Reopening a closed enrollment to make changes](img/fig-reopen-enrolment.png){#fig-reopen-enrolment fig-alt=\"Screenshot of a patient record opened in the Tracked Entity Dashboards of the DHIS2 App Tracker Capture, in which the 'Reopen' button is marked with an arrow.\"}\n"
 msgstr "![Wiedereröffnung einer abgeschlossenen Patientenregistrierung, um Änderungen vorzunehmen](img/fig-reopen-enrolment.png){#fig-reopen-enrolment fig-alt=\"Screenshot einer im Tracked Entity Dashboards der DHIS2 App Tracker Capture geöffneten Patientenakte in der die Schaltfläche \\\"Reopen\\\" mit einem Pfeil markiert ist.\"}\n"
 
 #. type: Title ###
-#: reports/Validation-Report/en/_solution_0006.qmd:4
+#: reports/Validation-Report/en/_solution_0006.Rmd:6
 #, no-wrap
 msgid "Changing the Admission Date {#sec-solution-6}"
 msgstr "Ändern des Aufnahmedatums {#sec-solution-6}"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_solution_0006.qmd:7
+#: reports/Validation-Report/en/_solution_0006.Rmd:9
 #, no-wrap
 msgid "Unfortunately, because the admission date is captured twice in the NeoIPC Surveillance platform and used for a variety of internal calculations, correcting it after the fact is sometimes a complex procedure.\n"
 msgstr "Da das Aufnahmedatum in der NeoIPC-Surveillance-Plattform zweimal erfasst und für eine Vielzahl von internen Berechnungen verwendet wird, ist eine nachträgliche Korrektur leider mitunter eine komplexe Prozedur.\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_solution_0006.qmd:11
+#: reports/Validation-Report/en/_solution_0006.Rmd:13
 #, no-wrap
 msgid ""
 "First of all, you must ensure that you use the same admission date in both the enrolment and the admission form. See also @sec-problem-details-3.\n"
@@ -4474,25 +4715,25 @@ msgstr ""
 "Jenachdem, ob Sie das Aufnahmedatum in der Patientenregistrierung, im Aufnahme-Formular, oder in beidem ändern müssen, müssen Sie evtl. zusätzlich noch weitere Schritte durchführen, damit die internen Berechnungen aktualisiert werden.\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_solution_0006.qmd:13
+#: reports/Validation-Report/en/_solution_0006.Rmd:15
 #, no-wrap
 msgid "In any case, you must first open the Tracked Entity Instance Dashboard of the relevant patient record (see @sec-solution-1) and possibly also the corresponding patient enrolment (see @sec-solution-10).\n"
 msgstr "In jedem Fall müssen Sie zunächst das Tracked Entity Instance Dashboard der betreffenden Patientenakte (siehe @sec-solution-1) und evtl. auch die entsprechende Patientenregistierung (siehe @sec-solution-10) öffnen.\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_solution_0006.qmd:15
+#: reports/Validation-Report/en/_solution_0006.Rmd:17
 #, no-wrap
 msgid "If the patient enrolment for which you need to change the admission date has already been closed, it must first be reopened. See @sec-solution-5. \n"
 msgstr "Wenn die Patientenregistrierung, für die Sie das Aufnahmedatum ändern müssen, bereits abgeschlossen ist, muss diese zunächst wieder geöffnet werden. Siehe dazu @sec-solution-5.\n"
 
 #. type: Title ####
-#: reports/Validation-Report/en/_solution_0006.qmd:16
+#: reports/Validation-Report/en/_solution_0006.Rmd:18
 #, no-wrap
 msgid "Changing the Admission Date in the Admission Form {#sec-solution-6-1}"
 msgstr "Ändern des Aufnahmedatums im Aufnahme-Formular {#sec-solution-6-1}"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_solution_0006.qmd:20
+#: reports/Validation-Report/en/_solution_0006.Rmd:22
 #, no-wrap
 msgid ""
 "To change the admission date in the admission form, you may have to reopen the admission form (see @sec-solution-9).\n"
@@ -4502,13 +4743,13 @@ msgstr ""
 "Nachdem Sie das Aufnahmedatum im Aufnahme-Formular geändert (siehe @sec-solution-7) und das Formular abgeschlossen haben (siehe @sec-solution-8) müssen Sie ggf. auch das Aufnahmedatum in der Patientenregistrierung ändern (siehe @sec-solution-6-2).\n"
 
 #. type: Title ####
-#: reports/Validation-Report/en/_solution_0006.qmd:21
+#: reports/Validation-Report/en/_solution_0006.Rmd:23
 #, no-wrap
 msgid "Changing the Admission Date in the Enrolment {#sec-solution-6-2}"
 msgstr "Ändern des Aufnahmedatums in der Patientenregistrierung {#sec-solution-6-2}"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_solution_0006.qmd:25
+#: reports/Validation-Report/en/_solution_0006.Rmd:27
 #, no-wrap
 msgid ""
 "To change the admission date in the enrolment, select the ‘Admission date’ field, enter the correct admission date using the dialogue that appears or the keyboard and confirm the change in the warning dialogue that appears (see @fig-warning-enrolment-admission-date).\n"
@@ -4518,7 +4759,7 @@ msgstr ""
 "Anschließend müssen Sie unbedingt die berechneten Werte in allen bereits eingegebenen Ereignis-Formularen aktualisieren (siehe @sec-solution-11) und evtl. auch noch das Aufnahmedatum im Aufnahme-Formular korrigieren (siehe @sec-solution-6-1).\n"
 
 #. type: Fenced div block ({.callout-important})
-#: reports/Validation-Report/en/_solution_0006.qmd:26
+#: reports/Validation-Report/en/_solution_0006.Rmd:28
 #, no-wrap
 msgid ""
 "## Updating Calculated Values After Changing the Admission Date in Patient Enrolment\n"
@@ -4536,13 +4777,13 @@ msgstr ""
 "Aus diesem Grund müssen Sie nach einer Änderung des des Aufnahmedatums in der Patientenregistrierung unbedingt alle bereits angelegten Ereignis-Formulare öffnen und die berechneten Werte aktualisieren (siehe @sec-solution-11).\n"
 
 #. type: Title ###
-#: reports/Validation-Report/en/_solution_0007.qmd:4
+#: reports/Validation-Report/en/_solution_0007.Rmd:6
 #, no-wrap
 msgid "Changing the Date of an Event in an Event Form {#sec-solution-7}"
 msgstr "Ändern des Datums eines Ereignisses in einem Ereignis-Formular {#sec-solution-7}"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_solution_0007.qmd:10
+#: reports/Validation-Report/en/_solution_0007.Rmd:12
 #, no-wrap
 msgid ""
 "First, you must open the event whose date you want to change in the Tracked Entity Instance Dashboard (see @sec-solution-15).\n"
@@ -4556,19 +4797,19 @@ msgstr ""
 "Ist das Ereignis zum Bearbeiten geöffnet (erkennbar an der gelben Farbe und dem Status \"Open\" in der Zeitleiste), wählen Sie das Datumsfeld aus (siehe @fig-change-event-date; je nach Formular kann es \"Aufnahmedatum\", \"Infektionsdatum\", \"OP-Datum\" oder \"Surveillance-Ende-Datum\" heißen) und geben Sie über den erscheinenden Dialog oder die Tastatur das korrekte Datum ein.\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_solution_0007.qmd:11
+#: reports/Validation-Report/en/_solution_0007.Rmd:13
 #, no-wrap
 msgid "![The field for the date of an event in the Tracked Entity Instance Dashboard](img/fig-change-event-date.png){#fig-change-event-date fig-alt=\"A screenshot of the Tracked Entity Instance Dashboard, in which the field for the event date is highlighted\"}\n"
 msgstr "![Das Feld für das Datums eines Ereignisses im Tracked Entity Instance Dashboard](img/fig-change-event-date.png){#fig-change-event-date fig-alt=\"Ein Screenshot des Tracked Entity Instance Dashboards, in dem das Feld für das Ereignisdatum hervorgehoben ist\"}\n"
 
 #. type: Title ###
-#: reports/Validation-Report/en/_solution_0008.qmd:4
+#: reports/Validation-Report/en/_solution_0008.Rmd:6
 #, no-wrap
 msgid "Completing an Event Form {#sec-solution-8}"
 msgstr "Abschließen eines Ereignis-Formulars {#sec-solution-8}"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_solution_0008.qmd:8
+#: reports/Validation-Report/en/_solution_0008.Rmd:10
 #, no-wrap
 msgid ""
 "First, you have to open the event you want to complete in the Tracked Entity Instance Dashboard (see @sec-solution-15).\n"
@@ -4578,13 +4819,13 @@ msgstr ""
 "Klicken Sie anschließend auf die Schaltfläche \"Complete\", die sich in der Regel links unterhalb des Ereignis-Formulars befindet (siehe @fig-complete-event).\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_solution_0008.qmd:10
+#: reports/Validation-Report/en/_solution_0008.Rmd:12
 #, no-wrap
 msgid "![The 'Complete' button in an event form of the Tracked Entity Instance Dashboard](img/fig-complete-event.png){#fig-complete-event fig-alt=\"A screenshot of an event form of the Tracked Entity Instance Dashboard, in which the 'Complete' button is highlighted\"}\n"
 msgstr "![Die Schaltfläche \"Complete\" in einem Ereignis-Formular des Tracked Entity Instance Dashboards](img/fig-complete-event.png){#fig-complete-event fig-alt=\"Ein Screenshot eines Ereignis-Formulars des Tracked Entity Instance Dashboards, in dem die Schaltfläche \\\"Complete\\\" hervorgehoben ist\"}\n"
 
 #. type: Fenced div block ({.callout-caution})
-#: reports/Validation-Report/en/_solution_0008.qmd:11
+#: reports/Validation-Report/en/_solution_0008.Rmd:13
 #, no-wrap
 msgid ""
 "## Event form validity check\n"
@@ -4604,13 +4845,13 @@ msgstr ""
 "Die Validierung führt zum Teil sehr komplexe Prüfungen durch, die auch Fehler enthalten können. Wenn Sie der Meinung sind, dass die Prüfung Sie daran hindert, Formulare mit gültigen Informationen zu speichern, kontaktieren Sie uns bitte, damit wir dies überprüfen können.\n"
 
 #. type: Title ###
-#: reports/Validation-Report/en/_solution_0009.qmd:4
+#: reports/Validation-Report/en/_solution_0009.Rmd:6
 #, no-wrap
 msgid "Incompleting a Completed Event Form to Make Changes {#sec-solution-9}"
 msgstr "Wiedereröffnung eines abgeschlossenen Ereignis-Formulars, um Änderungen vorzunehmen {#sec-solution-9}"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_solution_0009.qmd:8
+#: reports/Validation-Report/en/_solution_0009.Rmd:10
 #, no-wrap
 msgid ""
 "If you want to change information in an event form that has already been completed and is protected from changes, you must first incomplete it.\n"
@@ -4620,13 +4861,13 @@ msgstr ""
 "Wen auch die Patientenregistrierung bereits abgeschlossen ist, muss auch diese wieder zur Bearbeitung geöffnet werden, bevor das Ereignis-Formular zur Bearbeitung geöffnet werden kann (siehe @sec-solution-5).\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_solution_0009.qmd:10
+#: reports/Validation-Report/en/_solution_0009.Rmd:12
 #, no-wrap
 msgid "To incomplete it, open the relevant event form (see @sec-solution-15) in the tracked entity dashboard and then click the 'Incomplete' button, which is usually located at the bottom left of the event form (see @fig-incomplete-event).\n"
 msgstr "Um es wieder zur Bearbeitung zu öffnen, öffenen Sie das betreffende Ereignis-Formular (siehe @sec-solution-15) im Tracked Entity Dashboard und klicken Sie anschließend auf die Schaltfläche \"Incomplete\", die sich in der Regel links unterhalb des Ereignis-Formulars befindet (siehe @fig-incomplete-event).\n"
 
 #. type: Fenced div block ({.callout-note})
-#: reports/Validation-Report/en/_solution_0009.qmd:11
+#: reports/Validation-Report/en/_solution_0009.Rmd:13
 #, no-wrap
 msgid ""
 "The NeoIPC Surveillance platform permissions system includes specific permissions for incompleting event forms.\n"
@@ -4640,19 +4881,19 @@ msgstr ""
 "Grundsätzlich hat die in der NeoIPC Surveillance Kooperationsvereinbarung als Projektleiter Ihrer Klinik benannte Person immer die notwendigen Berechtigungen und kann uns beauftragen, diese Berechtigungen auch anderen Personen in Ihrem Team zu erteilen oder zu entziehen.\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_solution_0009.qmd:18
+#: reports/Validation-Report/en/_solution_0009.Rmd:20
 #, no-wrap
 msgid "![The 'Incomplete' button in an event form of the Tracked Entity Instance Dashboard](img/fig-incomplete-event.png){#fig-incomplete-event fig-alt=\"A screenshot of an event form of the Tracked Entity Instance Dashboard, in which the 'Incomplete' button is highlighted\"}\n"
 msgstr "![Die Schaltfläche \"Incomplete\" in einem Ereignis-Formular des Tracked Entity Instance Dashboards](img/fig-incomplete-event.png){#fig-incomplete-event fig-alt=\"Ein Screenshot eines Ereignis-Formulars des Tracked Entity Instance Dashboards, in dem die Schaltfläche \\\"Incomplete\\\" hervorgehoben ist\"}\n"
 
 #. type: Title ###
-#: reports/Validation-Report/en/_solution_0010.qmd:4
+#: reports/Validation-Report/en/_solution_0010.Rmd:6
 #, no-wrap
 msgid "Opening an Enrolment in the Tracked Entity Instance Dashboard {#sec-solution-10}"
 msgstr "Öffnen einer Patientenregistrierung im Tracked Entity Instance Dashboard {#sec-solution-10}"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_solution_0010.qmd:9
+#: reports/Validation-Report/en/_solution_0010.Rmd:11
 #, no-wrap
 msgid ""
 "When you open the Tracked Entity Instance Dashboard (see @sec-solution-1) of a patient record that contains an open enrolment, it opens automatically.\n"
@@ -4664,13 +4905,13 @@ msgstr ""
 "Wird dieser Link nicht angezeigt, so sind keine weiteren Patientenregistrierungen in der betreffenden Patientenakte enthalten.\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_solution_0010.qmd:11
+#: reports/Validation-Report/en/_solution_0010.Rmd:13
 #, no-wrap
 msgid "If the Tracked Entity Instance Dashboard of the patient record you are opening does not contain any open patient enrolments, the history of patient enrolments will be displayed directly.\n"
 msgstr "Wenn das Tracked Entity Instance Dashboard der Patientenakte, die Sie öffnen, keine offene Patientenregistrierung enthält, wird die Historie der Patientenregistrierungen direkt angezeigt.\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_solution_0010.qmd:14
+#: reports/Validation-Report/en/_solution_0010.Rmd:16
 #, no-wrap
 msgid ""
 "Please note that only one enrolment can be open for editing at any one time.\n"
@@ -4680,19 +4921,19 @@ msgstr ""
 "Sie müssen also eine Patientenregistrierung (zumindest temporär) abschließen, um eine andere zur Bearbeitung wiedereröffnen zu können (siehe auch @sec-solution-5).\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_solution_0010.qmd:15
+#: reports/Validation-Report/en/_solution_0010.Rmd:17
 #, no-wrap
 msgid "![The 'History' link in the Tracked Entity Instance Dashboard, which allows you to access the history of patient registrations.](img/fig-open-enrolment-multiple.png){#fig-open-enrolment-multiple fig-alt=\"A screenshot in which the 'History' link in the Tracked Entity Instance Dashboard is highlighted.\"}\n"
 msgstr "![Der Link \"History\" im Tracked Entity Instance Dashboard, über den Sie auf die Historie der Patientenregistrierungen zugreifen können](img/fig-open-enrolment-multiple.png){#fig-open-enrolment-multiple fig-alt=\"Ein Screenshot, in dem der Link \\\"History\\\" im Tracked Entity Instance Dashboard hervorgehoben ist\"}\n"
 
 #. type: Title ###
-#: reports/Validation-Report/en/_solution_0011.qmd:4
+#: reports/Validation-Report/en/_solution_0011.Rmd:6
 #, no-wrap
 msgid "Updating Calculated Values in Event Forms {#sec-solution-11}"
 msgstr "Aktualisierung berechneter Werte in Ereignis-Formularen {#sec-solution-11}"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_solution_0011.qmd:8
+#: reports/Validation-Report/en/_solution_0011.Rmd:10
 #, no-wrap
 msgid ""
 "Sometimes changes to form fields (especially the admission date in the enrolment) mean that other automatically calculated fields need to be updated.\n"
@@ -4704,19 +4945,19 @@ msgstr ""
 "Öffnen Sie dazu das betreffende Formular erneut zum Bearbeiten (siehe @sec-solution-9) und lösen Sie die Neuberechnung aus, indem Sie auf den Aktualisieren-Button Ihres Browsers klicken (auch die Tastenkombination STRG+R oder die F5-Taste aktualisieren in den meisten Browsern die Seite und lösen damit die Neuberechnung aus). Danach sollten die aktualisierten Werte in den entsprechenden Datenfeldern angezeigt werden. Überprüfen und aktualisieren Sie, wenn nötig, die übrigen übrigen Datenfelder des Formulars und schließen Sie es (siehe @sec-solution-8), und ggf. die Patientenregistrierung (siehe @sec-solution-4), wieder ab.\n"
 
 #. type: Title ###
-#: reports/Validation-Report/en/_solution_0012.qmd:4
+#: reports/Validation-Report/en/_solution_0012.Rmd:6
 #, no-wrap
 msgid "Deleting an Event Form {#sec-solution-12}"
 msgstr "Löschen eines Ereignis-Formulars {#sec-solution-12}"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_solution_0012.qmd:7
+#: reports/Validation-Report/en/_solution_0012.Rmd:9
 #, no-wrap
 msgid "To delete an event form, open it in the Tracked Entity Dashboard (see @sec-solution-15) and then click on the 'Delete' button, which is usually located at the bottom right of the event form (see @fig-delete-event).\n"
 msgstr "Um ein Ereignis-Formular zu löschen, öffenen Sie es im Tracked Entity Dashboard (siehe @sec-solution-15) und klicken Sie anschließend auf die Schaltfläche \"Delete\", die sich in der Regel rechts unterhalb des Ereignis-Formulars befindet (siehe @fig-delete-event).\n"
 
 #. type: Fenced div block ({.callout-note})
-#: reports/Validation-Report/en/_solution_0012.qmd:8
+#: reports/Validation-Report/en/_solution_0012.Rmd:10
 #, no-wrap
 msgid ""
 "The NeoIPC Surveillance platform permissions system includes specific permissions for deleting event forms.\n"
@@ -4730,25 +4971,25 @@ msgstr ""
 "Grundsätzlich hat die in der NeoIPC Surveillance Kooperationsvereinbarung als Projektleiter Ihrer Klinik benannte Person immer die notwendigen Berechtigungen und kann uns beauftragen, diese Berechtigungen auch anderen Personen in Ihrem Team zu erteilen oder zu entziehen.\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_solution_0012.qmd:15
+#: reports/Validation-Report/en/_solution_0012.Rmd:17
 #, no-wrap
 msgid "![The \"Delete\" button in an event form of the Tracked Entity Instance Dashboard](img/fig-delete-event.png){#fig-delete-event fig-alt=\"A screenshot of an event form of the Tracked Entity Instance Dashboard, in which the 'Delete' button is highlighted\"}\n"
 msgstr "![Die Schaltfläche \"Delete\" in einem Ereignis-Formular des Tracked Entity Instance Dashboards](img/fig-delete-event.png){#fig-delete-event fig-alt=\"Ein Screenshot eines Ereignis-Formulars des Tracked Entity Instance Dashboards, in dem die Schaltfläche \\\"Delete\\\" hervorgehoben ist\"}\n"
 
 #. type: Title ###
-#: reports/Validation-Report/en/_solution_0013.qmd:4
+#: reports/Validation-Report/en/_solution_0013.Rmd:6
 #, no-wrap
 msgid "Deleting an Enrolment {#sec-solution-13}"
 msgstr "Löschen einer Patientenregistrierung {#sec-solution-13}"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_solution_0013.qmd:7
+#: reports/Validation-Report/en/_solution_0013.Rmd:9
 #, no-wrap
 msgid "To delete a patient enrolment, first open the corresponding patient enrolment in the Tracked Entity Dashboard (see @sec-solution-10), then click on ‘Delete’ (see @fig-delete-enrolment) and confirm the deletion by clicking on 'Yes' in the dialogue that appears (see @fig-delete-enrolment-confirm).\n"
 msgstr "Um eine Patientenregistrierung zu löschen, öffnen Sie zunächst die entsprechende Patientenregistrierung im Tracked Entity Dashboard (siehe @sec-solution-10), klicken Sie auf \"Delete\" (siehe @fig-delete-enrolment) und bestätigen Sie den Löschvorgang mit \"Yes\" im erscheinenden Dialog (siehe @fig-delete-enrolment-confirm).\n"
 
 #. type: Fenced div block ({.callout-note})
-#: reports/Validation-Report/en/_solution_0013.qmd:8
+#: reports/Validation-Report/en/_solution_0013.Rmd:10
 #, no-wrap
 msgid ""
 "The NeoIPC Surveillance platform permissions system includes specific permissions for deleting patient enrolments.\n"
@@ -4762,25 +5003,25 @@ msgstr ""
 "Grundsätzlich hat die in der NeoIPC Surveillance Kooperationsvereinbarung als Projektleiter Ihrer Klinik benannte Person immer die notwendigen Berechtigungen und kann uns beauftragen, diese Berechtigungen auch anderen Personen in Ihrem Team zu erteilen oder zu entziehen.\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_solution_0013.qmd:16
+#: reports/Validation-Report/en/_solution_0013.Rmd:18
 #, no-wrap
 msgid "![Deleting an Enrolment](img/fig-delete-enrolment.png){#fig-delete-enrolment fig-alt=\"Screenshot of a patient file opened in the Tracked Entity Dashboards of the DHIS2 Tracker Capture App in which the 'Delete' button is marked with an arrow.\"}\n"
 msgstr "![Löschen einer Patientenregistrierung](img/fig-delete-enrolment.png){#fig-delete-enrolment fig-alt=\"Screenshot einer im Tracked Entity Dashboards der DHIS2 App Tracker Capture geöffneten Patientenakte in der die Schaltfläche \\\"Delete\\\" mit einem Pfeil markiert ist.\"}\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_solution_0013.qmd:17
+#: reports/Validation-Report/en/_solution_0013.Rmd:19
 #, no-wrap
 msgid "![Confirmation dialogue for deleting a patient registration](img/fig-delete-enrolment-confirm.png){#fig-delete-enrolment-confirm fig-alt=\"Screenshot of the confirmation dialogue for deleting a patient registration in which the 'Yes' button is marked with an arrow.\"}\n"
 msgstr "![Bestätigungsdialog zum Löschen einer Patientenregistrierung](img/fig-delete-enrolment-confirm.png){#fig-delete-enrolment-confirm fig-alt=\"Screenshot des Bestätigungsdialogs zum Löchen einer Patientenregistrierung in der die Schaltfläche \\\"Yes\\\" mit einem Pfeil markiert ist.\"}\n"
 
 #. type: Title ###
-#: reports/Validation-Report/en/_solution_0014.qmd:4
+#: reports/Validation-Report/en/_solution_0014.Rmd:6
 #, no-wrap
 msgid "Adding an Event Form {#sec-solution-14}"
 msgstr "Hinzufügen eines Ereignis-Formulars {#sec-solution-14}"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_solution_0014.qmd:8
+#: reports/Validation-Report/en/_solution_0014.Rmd:10
 #, no-wrap
 msgid ""
 "To open an event form, you must first open the corresponding enrolment in the Tracked Entity Dashboard (see @sec-solution-10).\n"
@@ -4790,25 +5031,25 @@ msgstr ""
 "Klicken sie anschließend auf die Schaltfläche mit dem \"+\"-Symbol am rechten Rand der Ereignis-Zeitleiste (siehe @fig-add-event).\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_solution_0014.qmd:10
+#: reports/Validation-Report/en/_solution_0014.Rmd:12
 #, no-wrap
 msgid "![The button with the '+' symbol on the right-hand side of the event timeline of the Tracked Entity Instance Dashboard](img/fig-add-event.png){#fig-add-event fig-alt=\"A screenshot of the Tracked Entity Instance Dashboard, in which the button with the '+' symbol on the right-hand side of the event timeline is highlighted\"}\n"
 msgstr "![Die Schaltfläche mit dem \"+\"-Symbol am rechten Rand der Ereignis-Zeitleiste des Tracked Entity Instance Dashboards](img/fig-add-event.png){#fig-add-event fig-alt=\"Ein Screenshot des Tracked Entity Instance Dashboards, in dem die Schaltfläche mit dem \\\"+\\\"-Symbol am rechten Rand der Ereignis-Zeitleiste hervorgehoben ist\"}\n"
 
 #. type: Fenced div block ({.callout-note})
-#: reports/Validation-Report/en/_solution_0014.qmd:11
+#: reports/Validation-Report/en/_solution_0014.Rmd:13
 #, no-wrap
 msgid "Since an enrolment can only contain one admission and one surveillance end event, these two events can only be added if the enrolment in question does not already contain an event of this category.\n"
 msgstr "Da eine Patientenregistrierung jeweils nur ein Aufnahme- und ein Surveillance-Ende-Ereignis enthalten kann, können diese beiden Ereignisse nur hinzugefügt werden, wenn die betreffende Patientenregistrierung nicht bereits ein Ereignis dieser Kategorie enthält.\n"
 
 #. type: Title ###
-#: reports/Validation-Report/en/_solution_0015.qmd:4
+#: reports/Validation-Report/en/_solution_0015.Rmd:6
 #, no-wrap
 msgid "Opening an Event Form {#sec-solution-15}"
 msgstr "Öffnen eines Ereignis-Formulars {#sec-solution-15}"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_solution_0015.qmd:8
+#: reports/Validation-Report/en/_solution_0015.Rmd:10
 #, no-wrap
 msgid ""
 "To open an event form you must first open the relevant enrolment in the Tracked Entity Dashboard (see @sec-solution-10) and then select the event in the event timeline.\n"
@@ -4818,10 +5059,18 @@ msgstr ""
 "Wenn die Ereignis-Zeitleiste einer Patientenregistrierung sehr viele Ereignisse enthält, enthält sie möglicherweise eine Next- und/oder Previous-Schaltfläche (siehe @fig-event-timeline-full), mit der Sie zur nächsten oder vorherigen Seite der Zeitleistenansicht wechseln können, um weitere Ereignisse anzuzeigen.\n"
 
 #. type: Plain text
-#: reports/Validation-Report/en/_solution_0015.qmd:9
+#: reports/Validation-Report/en/_solution_0015.Rmd:11
 #, no-wrap
 msgid "![The Next and Previous buttons in the event timeline of the Tracked Entity Instance Dashboard](img/fig-event-timeline-full.png){#fig-event-timeline-full fig-alt=\"A screenshot of the Tracked Entity Instance Dashboard with the Next and Previous buttons in the event timeline highlighted\"}\n"
 msgstr "![Die Schaltflächen \"Next\" und \"Previous\" in der Ereignis-Zeitleiste des Tracked Entity Instance Dashboards](img/fig-event-timeline-full.png){#fig-event-timeline-full fig-alt=\"Ein Screenshot des Tracked Entity Instance Dashboards, in dem die Schaltflächen \\\"Next\\\" und \\\"Previous\\\" in der Ereignis-Zeitleiste hervorgehoben sind\"}\n"
+
+#, no-wrap
+#~ msgid "The following summary presents key surveillance metrics for this report:\n"
+#~ msgstr "Die folgende Zusammenfassung enthält die wichtigsten Surveillancekennzahlen für diesen Bericht: \n"
+
+#, no-wrap
+#~ msgid "{{< pagebreak >}}\n"
+#~ msgstr "{{< pagebreak >}}\n"
 
 #, no-wrap
 #~ msgid "Device-associated infections can be found in @tbl-device-associated-incidence-density-rates.\n"
@@ -6275,9 +6524,6 @@ msgstr "![Die Schaltflächen \"Next\" und \"Previous\" in der Ereignis-Zeitleist
 
 #~ msgid "PVC"
 #~ msgstr "PVK"
-
-#~ msgid "Antibiotics"
-#~ msgstr "Antibiotika"
 
 #~ msgid "Kangaroo care"
 #~ msgstr "Känguruhpflege"
