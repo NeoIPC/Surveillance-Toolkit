@@ -106,9 +106,9 @@ function Get-NeoipcDepartments {
 Query DHIS2 organisation units with rich detail.
 
 .DESCRIPTION
-Returns one flat PSCustomObject per org unit with Id, Code, Name, hierarchy
-context (HospitalCode, CountryCode, Level), dates, trial memberships, World
-Bank income class, and test-unit flag.
+Returns one flat PSCustomObject per org unit with OrgUnitId, OrgUnitCode,
+OrgUnitName, hierarchy context (HospitalCode, CountryCode, Level), dates,
+trial memberships, World Bank income class, and test-unit flag.
 
 Uses /api/organisationUnits with withinUserHierarchy=true so results are
 scoped to the authenticated user's assigned hierarchy.
@@ -116,11 +116,16 @@ scoped to the authenticated user's assigned hierarchy.
 .PARAMETER Auth
 Authentication hashtable from Resolve-NeoipcAuth.
 
+.PARAMETER OrgUnitCode
+Filter to specific OU codes. Pipeline-bound from upstream cmdlets that emit
+OrgUnitCode (e.g. Read-OrgUnitInfo itself).
+
+.PARAMETER OrgUnitId
+Filter to specific OU UIDs. Pipeline-bound from upstream cmdlets that emit
+OrgUnitId (e.g. Read-EventInfo, Read-EnrolmentInfo).
+
 .PARAMETER CountryCode
 Filter to org units under a specific country code.
-
-.PARAMETER PartnerCodes
-Filter to specific partner codes.
 
 .OUTPUTS
 Flat PSCustomObject per org unit.
@@ -134,17 +139,20 @@ function Read-OrgUnitInfo {
         [Parameter()]
         [string]$Token = $env:NEOIPC_DHIS2_TOKEN,
 
-        [Parameter()]
+        [Parameter(ValueFromPipelineByPropertyName)]
         [ArgumentCompleter({
             param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
             $serverKey = Get-NeoipcServerKey -Scheme $fakeBoundParameters['Scheme'] -Hostname $fakeBoundParameters['Hostname'] -Port $fakeBoundParameters['Port']
-            $cacheDir = Join-Path (Split-Path (Split-Path (Split-Path $PSScriptRoot))) 'data' 'local' $serverKey
+            $cacheDir = Join-Path (Split-Path (Split-Path (Split-Path $PSScriptRoot))) 'data' $serverKey
             $cacheFile = Join-Path $cacheDir 'site-codes.txt'
             if (Test-Path $cacheFile) {
                 Get-Content $cacheFile | Where-Object { $_ -like "$wordToComplete*" }
             }
         })]
-        [string[]]$PartnerCodes,
+        [string[]]$OrgUnitCode,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [string[]]$OrgUnitId,
 
         [Parameter()]
         [string]$CountryCode,
@@ -154,85 +162,91 @@ function Read-OrgUnitInfo {
         [Parameter()] [Nullable[int]]$Port = $null
     )
 
-    if (-not $Auth) {
-        $Auth = Resolve-NeoipcAuth -Token $Token
+    begin {
+        if (-not $Auth) {
+            $Auth = Resolve-NeoipcAuth -Token $Token
+        }
+        $script:collectedOrgUnitCodes = [System.Collections.Generic.List[string]]::new()
+        $script:collectedOrgUnitIds = [System.Collections.Generic.List[string]]::new()
     }
 
-    $fields = @(
-        'id', 'code', 'name', 'level', 'openingDate', 'closedDate',
-        'parent[id,code,name,level,parent[id,code,name,organisationUnitGroups[code,groupSets[code]]]]',
-        'organisationUnitGroups[code,groupSets[code]]'
-    )
-
-    $filters = @('organisationUnitGroups.code:eq:NEO_DEPARTMENT')
-    if ($PartnerCodes) {
-        $codes = $PartnerCodes -join ','
-        $filters += "code:in:[$codes]"
+    process {
+        if ($OrgUnitCode) { foreach ($c in $OrgUnitCode) { $script:collectedOrgUnitCodes.Add($c) } }
+        if ($OrgUnitId)   { foreach ($i in $OrgUnitId)   { $script:collectedOrgUnitIds.Add($i) } }
     }
 
-    $getParams = @{
-        Auth     = $Auth
-        Path     = 'api/organisationUnits'
-        Fields   = $fields
-        Filter   = $filters
-        QueryParameters = @{ 'withinUserHierarchy' = 'true' }
-    }
-    if ($Scheme)   { $getParams.Scheme   = $Scheme }
-    if ($Hostname) { $getParams.Hostname = $Hostname }
-    if ($Port)     { $getParams.Port     = $Port }
+    end {
+        $fields = @(
+            'id', 'code', 'name', 'level', 'openingDate', 'closedDate',
+            'parent[id,code,name,level,parent[id,code,name,organisationUnitGroups[code,groupSets[code]]]]',
+            'organisationUnitGroups[code,groupSets[code]]'
+        )
 
-    $resp = Invoke-NeoipcDhis2Get @getParams
+        $filters = @('organisationUnitGroups.code:eq:NEO_DEPARTMENT')
+        if ($script:collectedOrgUnitCodes.Count -gt 0) {
+            $codes = ($script:collectedOrgUnitCodes | Sort-Object -Unique) -join ','
+            $filters += "code:in:[$codes]"
+        }
+        if ($script:collectedOrgUnitIds.Count -gt 0) {
+            $ids = ($script:collectedOrgUnitIds | Sort-Object -Unique) -join ','
+            $filters += "id:in:[$ids]"
+        }
 
-    foreach ($ou in $resp.organisationUnits) {
-        # Extract group memberships
-        $groupCodes = @($ou.organisationUnitGroups | ForEach-Object { $_.code })
-        $isTestUnit = $groupCodes -contains 'TEST_UNITS'
+        $getParams = @{
+            Auth     = $Auth
+            Path     = 'api/organisationUnits'
+            Fields   = $fields
+            Filter   = $filters
+            QueryParameters = @{ 'withinUserHierarchy' = 'true' }
+        }
+        if ($Scheme)   { $getParams.Scheme   = $Scheme }
+        if ($Hostname) { $getParams.Hostname = $Hostname }
+        if ($Port)     { $getParams.Port     = $Port }
 
-        # Trial codes: groups in the NEOIPC_TRIALS group set
-        $trialCodes = @($ou.organisationUnitGroups | Where-Object {
-            $_.groupSets | Where-Object { $_.code -eq 'NEOIPC_TRIALS' }
-        } | ForEach-Object { $_.code }) | Sort-Object
+        $resp = Invoke-NeoipcDhis2Get @getParams
 
-        # Hierarchy context: parent = hospital (level 3), grandparent = country (level 2)
-        # For test units the hierarchy is flattened (root -> TEST_UNITS -> department)
-        $hospitalCode = $null
-        $countryCode_ = $null
-        if ($ou.parent) {
-            if ($isTestUnit) {
-                # Test units: parent is TEST_UNITS, no hospital/country
-            }
-            else {
+        foreach ($ou in $resp.organisationUnits) {
+            $groupCodes = @($ou.organisationUnitGroups | ForEach-Object { $_.code })
+            $isTestUnit = $groupCodes -contains 'TEST_UNITS'
+
+            $trialCodes = @($ou.organisationUnitGroups | Where-Object {
+                $_.groupSets | Where-Object { $_.code -eq 'NEOIPC_TRIALS' }
+            } | ForEach-Object { $_.code }) | Sort-Object
+
+            # Hierarchy context: parent = hospital (level 3), grandparent = country (level 2)
+            # For test units the hierarchy is flattened (root -> TEST_UNITS -> department)
+            $hospitalCode = $null
+            $countryCode_ = $null
+            if ($ou.parent -and -not $isTestUnit) {
                 $hospitalCode = $ou.parent.code
                 if ($ou.parent.parent) {
                     $countryCode_ = $ou.parent.parent.code
                 }
             }
-        }
 
-        # World Bank class: from the country (grandparent) org unit's groups
-        $worldBankClass = $null
-        if (-not $isTestUnit -and $ou.parent -and $ou.parent.parent) {
-            $wbGroup = $ou.parent.parent.organisationUnitGroups | Where-Object {
-                $_.groupSets | Where-Object { $_.code -eq 'WORLD_BANK_CLASSES' }
-            } | Select-Object -First 1
-            if ($wbGroup) { $worldBankClass = $wbGroup.code }
-        }
+            $worldBankClass = $null
+            if (-not $isTestUnit -and $ou.parent -and $ou.parent.parent) {
+                $wbGroup = $ou.parent.parent.organisationUnitGroups | Where-Object {
+                    $_.groupSets | Where-Object { $_.code -eq 'WORLD_BANK_CLASSES' }
+                } | Select-Object -First 1
+                if ($wbGroup) { $worldBankClass = $wbGroup.code }
+            }
 
-        # Country filter
-        if ($CountryCode -and $countryCode_ -ne $CountryCode) { continue }
+            if ($CountryCode -and $countryCode_ -ne $CountryCode) { continue }
 
-        [PSCustomObject]@{
-            Id             = $ou.id
-            Code           = $ou.code
-            Name           = $ou.name
-            Level          = $ou.level
-            HospitalCode   = $hospitalCode
-            CountryCode    = $countryCode_
-            OpeningDate    = $ou.openingDate
-            ClosedDate     = $ou.closedDate
-            IsTestUnit     = $isTestUnit
-            TrialCodes     = $trialCodes
-            WorldBankClass = $worldBankClass
+            [PSCustomObject]@{
+                OrgUnitId      = $ou.id
+                OrgUnitCode    = $ou.code
+                OrgUnitName    = $ou.name
+                Level          = $ou.level
+                HospitalCode   = $hospitalCode
+                CountryCode    = $countryCode_
+                OpeningDate    = $ou.openingDate
+                ClosedDate     = $ou.closedDate
+                IsTestUnit     = $isTestUnit
+                TrialCodes     = $trialCodes
+                WorldBankClass = $worldBankClass
+            }
         }
     }
 }

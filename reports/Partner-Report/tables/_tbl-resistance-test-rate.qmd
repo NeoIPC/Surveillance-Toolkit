@@ -72,7 +72,7 @@ if (!is.null(benchmark_data$resistance_test_rate_table) &&
     dplyr::ungroup() |>
     dplyr::arrange(.data$abr) |>
     dplyr::mutate(
-      abr = dplyr::case_match(
+      abr = dplyr::recode_values(
         .data$abr,
         "3gcr_routine" ~ sR$`3gcr`,
         "car_routine" ~ sR$car,

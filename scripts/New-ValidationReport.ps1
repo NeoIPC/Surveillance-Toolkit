@@ -13,7 +13,7 @@ With -Combined, it renders a single report covering all departments (no departme
     .\New-ValidationReport.ps1 -Combined -OutputLocale 'en' -Token $myToken -JsonReport
 
 .EXAMPLE
-    .\New-ValidationReport.ps1 -Combined -OutputDir ./data/local -ValidationExceptionFile ../NeoIPC/validation-exceptions_ref.csv -JsonReport
+    .\New-ValidationReport.ps1 -Combined -OutputDir ./data -ValidationExceptionFile ../NeoIPC/validation-exceptions_ref.csv -JsonReport
 #>
 [CmdletBinding(SupportsShouldProcess = $true, DefaultParameterSetName = 'PerSite')]
 param(
@@ -25,13 +25,13 @@ param(
             -Hostname $fakeBoundParameters['Dhis2Hostname'] `
             -Port $fakeBoundParameters['Dhis2Port'] `
             -Path $fakeBoundParameters['Dhis2Path']
-        $cacheFile = Join-Path $PSScriptRoot '..' 'data' 'local' $serverKey 'site-codes.txt'
+        $cacheFile = Join-Path $PSScriptRoot '..' 'data' $serverKey 'site-codes.txt'
         if (Test-Path -LiteralPath $cacheFile) {
             Get-Content -LiteralPath $cacheFile |
                 Where-Object { $_ -like "$wordToComplete*" } |
                 Sort-Object
         } else {
-            $cacheBase = Join-Path $PSScriptRoot '..' 'data' 'local'
+            $cacheBase = Join-Path $PSScriptRoot '..' 'data'
             Get-ChildItem -LiteralPath $cacheBase -Recurse -Filter 'site-codes.txt' -ErrorAction SilentlyContinue |
                 Get-Content |
                 Sort-Object -Unique |

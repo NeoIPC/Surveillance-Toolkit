@@ -1,43 +1,171 @@
 ---
 lang: en
 params:
+  # Path to a JSON reference dataset (admin-uploaded). When set, the report
+  # renders the stored dataset; ad-hoc live-fetch filter parameters are
+  # not used in this mode.
+  # @type character
   referenceDataFile: NULL
+
+  # Start of the reporting period (inclusive).
+  # @type Date
   reportingPeriodFrom: NULL
+
+  # End of the reporting period (inclusive).
+  # @type Date
   reportingPeriodTo: NULL
+
+  # Lower bound (inclusive) of the birth-weight filter, in grams.
+  # @type integer
+  # @range 0..65535
   birthWeightFrom: NULL
+
+  # Upper bound (inclusive) of the birth-weight filter, in grams.
+  # @type integer
+  # @range 0..65535
   birthWeightTo: NULL
+
+  # Lower bound (inclusive) of the gestational-age filter, in weeks.
+  # @type integer
+  # @range 0..52
   gestationWeeksFrom: NULL
+
+  # Upper bound (inclusive) of the gestational-age filter, in weeks.
+  # @type integer
+  # @range 0..52
   gestationWeeksTo: NULL
+
+  # ISO 3166-1 alpha-2 country codes to include.
+  # @type character[]
   reportingCountries: NULL
+
+  # Hospital codes (NeoIPC site codes) to include.
+  # @type character[]
   hospitalFilter: NULL
+
+  # Apply the test-unit filter.
+  # @type logical
   testUnitFilter: true
+
+  # Apply the default patient filter.
+  # @type logical
   defaultPatientFilter: true
+
+  # Path to a validation-exception file (admin-uploaded) used to suppress
+  # specific known false-positive validation findings during this render.
+  # @type character
   validationExceptionFile: NULL
+
+  # DHIS2 endpoint scheme (http or https). Server-side override; not
+  # exposed via the public API.
+  # @type character
+  # @values [http, https]
   dhis2Scheme: NULL
+
+  # DHIS2 endpoint hostname. Server-side override; not exposed via the
+  # public API.
+  # @type character
   dhis2Hostname: NULL
+
+  # DHIS2 endpoint TCP port. Server-side override; not exposed via the
+  # public API.
+  # @type integer
+  # @range 1..65535
   dhis2Port: NULL
+
+  # DHIS2 API path prefix. Server-side override; not exposed via the
+  # public API.
+  # @type character
   dhis2Path: NULL
+
+  # Threshold for sparse-data handling.
+  # @type integer
+  # @range 1..
   sparseDataThreshold: 16
+
+  # Confidence-interval display mode.
+  # @type character
+  # @values [all, rate, none]
   includeConfidenceIntervals: "all"
+
+  # Include report-section introduction texts.
+  # @type logical
   includeIntroductionTexts: true
+
+  # Include report-section methods texts.
+  # @type logical
   includeMethodsTexts: true
+
+  # Include the patient-population section text.
+  # @type logical
   includeTextPatientPopulation: true
+
+  # Include the nosocomial-infection section text.
+  # @type logical
   includeTextNosocomial: true
+
+  # Include the infectious-agents section text.
+  # @type logical
   includeTextInfectiousAgents: true
+
+  # Include the risk-factors section text.
+  # @type logical
   includeTextRiskFactors: true
+
+  # Include the surgery section text.
+  # @type logical
   includeTextSurgery: true
+
+  # Include the birth-weight distribution figure.
+  # @type logical
   includeBirthWeightFigure: true
+
+  # Include the gestational-age distribution figure.
+  # @type logical
   includeGestationalAgeFigure: true
+
+  # Include the incidence-density table.
+  # @type logical
   includeIncidenceDensityTable: true
+
+  # Include the device-associated incidence-density table.
+  # @type logical
   includeDeviceAssociatedIncidenceDensityTable: true
+
+  # Include the agent-per-infection rate table.
+  # @type logical
   includeAgentPerInfectionRateTable: true
+
+  # Include the resistant-pathogen-infection rate table.
+  # @type logical
   includeResistantPathogenInfectionRateTable: false
+
+  # Include the organism-resistance rate table.
+  # @type logical
   includeOrganismResistanceRateTable: false
+
+  # Include the infectious-agent-detection rate table.
+  # @type logical
   includeInfectiousAgentDetectionRateTable: true
+
+  # Include the antibiotic-resistance-test rate table.
+  # @type logical
   includeAntibioticResistanceTestRateTable: false
+
+  # Include the risk-density rate table.
+  # @type logical
   includeRiskDensityRateTable: true
+
+  # Include the antibiotic-utilisation table.
+  # @type logical
   includeAntibioticUtilisationTable: false
+
+  # Include the surgical-procedure rate table.
+  # @type logical
   includeSurgicalProcedureRateTable: true
+
+  # Include the secondary-BSI rate table.
+  # @type logical
   includeSecondaryBsiRateTable: false
 ---
 

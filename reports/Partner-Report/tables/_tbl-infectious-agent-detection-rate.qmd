@@ -78,7 +78,7 @@ if (!is.null(benchmark_data$infectious_agent_detection_rate_per_inf_type_table) 
 
   tbl <- tbl |>
     dplyr::mutate(
-      inf = dplyr::case_match(
+      inf = dplyr::recode_values(
         as.character(.data$inf),
         "all" ~ sR$total,
         "bsi" ~ sR$primary_sepsis_bsi_sc,

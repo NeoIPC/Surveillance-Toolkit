@@ -76,7 +76,7 @@ if (!is.null(benchmark_data$dev_ass_incidence_density_rate_table) &&
 
   tbl <- tbl |>
     dplyr::mutate(
-      dev = dplyr::case_match(
+      dev = dplyr::recode_values(
         as.character(.data$dev),
         "cvc" ~ sR$`tbl-device-associated-incidence-density-rates`$cvc,
         "pvc" ~ sR$`tbl-device-associated-incidence-density-rates`$pvc,

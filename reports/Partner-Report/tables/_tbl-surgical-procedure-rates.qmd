@@ -75,7 +75,7 @@ if (has_data) {
 
   tbl <- tbl |>
     dplyr::mutate(
-      pro_cat = dplyr::case_match(
+      pro_cat = dplyr::recode_values(
         .data$pro_cat,
         "overall" ~ sR$`tbl-surgical-procedure-rates`$overall,
         "abdominal_surgery" ~ sR$`tbl-surgical-procedure-rates`$abdominal_surgery,
