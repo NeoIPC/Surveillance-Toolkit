@@ -34,6 +34,15 @@ function Read-PatientInfo {
         [string[]]$OrgUnitId,
 
         [Parameter(ValueFromPipelineByPropertyName)]
+        [ArgumentCompleter({
+            param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
+            $serverKey = Get-NeoipcServerKey -Scheme $fakeBoundParameters['Scheme'] -Hostname $fakeBoundParameters['Hostname'] -Port $fakeBoundParameters['Port']
+            $cacheDir = Join-Path $script:NeoipcRepoRoot 'data' $serverKey
+            $cacheFile = Join-Path $cacheDir 'site-codes.txt'
+            if (Test-Path $cacheFile) {
+                Get-Content $cacheFile | Where-Object { $_ -like "$wordToComplete*" }
+            }
+        })]
         [string[]]$OrgUnitCode,
 
         [Parameter()]
@@ -145,7 +154,7 @@ function Read-PatientInfo {
         if ($script:collectedNeoIpcIds.Count -gt 0) {
             $attrId = $metadata.trackedEntityAttributes[0].id
             $escaped = $script:collectedNeoIpcIds | ForEach-Object {
-                $_ -replace ',', '/, ' -replace ':', '/:' -replace '/', '//'
+                $_ -replace '/', '//' -replace ',', '/,' -replace ':', '/:'
             }
             $extraFilters += "$($attrId):in:[$($escaped -join ',')]"
         }
@@ -226,7 +235,7 @@ function Read-EnrolmentInfo {
         [ArgumentCompleter({
             param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
             $serverKey = Get-NeoipcServerKey -Scheme $fakeBoundParameters['Scheme'] -Hostname $fakeBoundParameters['Hostname'] -Port $fakeBoundParameters['Port']
-            $cacheDir = Join-Path (Split-Path (Split-Path (Split-Path $PSScriptRoot))) 'data' $serverKey
+            $cacheDir = Join-Path $script:NeoipcRepoRoot 'data' $serverKey
             $cacheFile = Join-Path $cacheDir 'site-codes.txt'
             if (Test-Path $cacheFile) {
                 Get-Content $cacheFile | Where-Object { $_ -like "$wordToComplete*" }
@@ -460,7 +469,7 @@ function Read-EventInfo {
         [ArgumentCompleter({
             param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
             $serverKey = Get-NeoipcServerKey -Scheme $fakeBoundParameters['Scheme'] -Hostname $fakeBoundParameters['Hostname'] -Port $fakeBoundParameters['Port']
-            $cacheDir = Join-Path (Split-Path (Split-Path (Split-Path $PSScriptRoot))) 'data' $serverKey
+            $cacheDir = Join-Path $script:NeoipcRepoRoot 'data' $serverKey
             $cacheFile = Join-Path $cacheDir 'site-codes.txt'
             if (Test-Path $cacheFile) {
                 Get-Content $cacheFile | Where-Object { $_ -like "$wordToComplete*" }
@@ -490,7 +499,7 @@ function Read-EventInfo {
         [ArgumentCompleter({
             param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
             $serverKey = Get-NeoipcServerKey -Scheme $fakeBoundParameters['Scheme'] -Hostname $fakeBoundParameters['Hostname'] -Port $fakeBoundParameters['Port']
-            $cacheDir = Join-Path (Split-Path (Split-Path (Split-Path $PSScriptRoot))) 'data' $serverKey
+            $cacheDir = Join-Path $script:NeoipcRepoRoot 'data' $serverKey
             $cacheFile = Join-Path $cacheDir 'de-codes.txt'
             if (Test-Path $cacheFile) {
                 Get-Content $cacheFile | Where-Object { $_ -like "$wordToComplete*" }

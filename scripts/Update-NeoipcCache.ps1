@@ -66,7 +66,8 @@ $connArgs = @{ Auth = $auth }
 if ($Dhis2Scheme)   { $connArgs.Scheme   = $Dhis2Scheme }
 if ($Dhis2Hostname) { $connArgs.Hostname = $Dhis2Hostname }
 if ($Dhis2Port)     { $connArgs.Port     = $Dhis2Port }
-if ($Dhis2Path)     { $connArgs.Path     = $Dhis2Path }
+# -Dhis2Path is used only for cache-key partitioning (Get-NeoipcServerKey
+# above); the readers hardcode 'api/<endpoint>' paths.
 
 $serverKey = Get-NeoipcServerKey -Scheme $Dhis2Scheme -Hostname $Dhis2Hostname -Port $Dhis2Port -Path $Dhis2Path
 $cacheDir = Join-Path $PSScriptRoot '..' 'data' $serverKey
