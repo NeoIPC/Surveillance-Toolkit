@@ -1,13 +1,13 @@
 # Estonian translations for the NeoIPC Surveillance Glossary
-# Copyright (C) 2026 Charité – Universitätsmedizin Berlin
+# Copyright (C) Charité – Universitätsmedizin Berlin
 # This file is distributed under the Creative Commons Attribution 4.0 International license
-# Automatically generated, 2026.
+# FIRST AUTHOR <EMAIL@ADDRESS>
 msgid ""
 msgstr ""
 "Project-Id-Version: NeoIPC Surveillance Glossary 0.9\n"
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-03-15 11:53+0000\n"
-"PO-Revision-Date: 2026-03-16 07:25+0000\n"
+"POT-Creation-Date: 2026-04-12 10:00+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "Language: et\n"
@@ -35,170 +35,176 @@ msgctxt "antibiotics_sc"
 msgid "Antibiotics"
 msgstr ""
 
-#: glossary.yaml:38
+#. AWaRe is a WHO acronym (Access, Watch, Reserve) — not translatable
+#: glossary.yaml:39
+msgctxt "aware"
+msgid "AWaRe"
+msgstr ""
+
+#: glossary.yaml:40
 msgctxt "cvc"
 msgid "CVC"
 msgstr ""
 
-#: glossary.yaml:39
+#: glossary.yaml:41
 msgctxt "h2020_funding_statement"
 msgid ""
 "This project has received funding from the European Union's Horizon 2020 "
 "research and innovation programme under grant agreement No 965328."
 msgstr ""
 
-#: glossary.yaml:42
+#: glossary.yaml:44
 msgctxt "hap"
 msgid "HAP"
 msgstr ""
 
-#: glossary.yaml:43
+#: glossary.yaml:45
 msgctxt "human_milk"
 msgid "human milk"
 msgstr ""
 
-#: glossary.yaml:44
+#: glossary.yaml:46
 msgctxt "human_milk_sc"
 msgid "Human milk"
 msgstr ""
 
-#: glossary.yaml:45
+#: glossary.yaml:47
 msgctxt "inv"
 msgid "INV"
 msgstr ""
 
-#: glossary.yaml:46
+#: glossary.yaml:48
 msgctxt "kangaroo_care"
 msgid "kangaroo care"
 msgstr ""
 
-#: glossary.yaml:47
+#: glossary.yaml:49
 msgctxt "kangaroo_care_sc"
 msgid "Kangaroo care"
 msgstr ""
 
-#: glossary.yaml:48
+#: glossary.yaml:50
 msgctxt "nec"
 msgid "NEC"
 msgstr ""
 
-#: glossary.yaml:49
+#: glossary.yaml:51
 msgctxt "necrotising_enterocolitis"
 msgid "necrotising enterocolitis"
 msgstr ""
 
-#: glossary.yaml:50
+#: glossary.yaml:52
 msgctxt "necrotising_enterocolitis_sc"
 msgid "Necrotising enterocolitis"
 msgstr ""
 
-#: glossary.yaml:51
+#: glossary.yaml:53
 msgctxt "necrotising_enterocolitis_tc"
 msgid "Necrotising Enterocolitis"
 msgstr ""
 
-#: glossary.yaml:53
+#: glossary.yaml:55
 #, ignore-same
 msgctxt "neoipc_surveillance"
 msgid "NeoIPC Surveillance"
 msgstr ""
 
-#: glossary.yaml:54
+#: glossary.yaml:56
 msgctxt "niv"
 msgid "NIV"
 msgstr ""
 
-#: glossary.yaml:55
+#: glossary.yaml:57
 msgctxt "pneumonia"
 msgid "pneumonia"
 msgstr ""
 
-#: glossary.yaml:56
+#: glossary.yaml:58
 msgctxt "pneumonia_sc"
 msgid "Pneumonia"
 msgstr ""
 
-#: glossary.yaml:57
+#: glossary.yaml:59
 msgctxt "primary_sepsis_bsi"
 msgid "primary sepsis/BSI"
 msgstr ""
 
-#: glossary.yaml:58
+#: glossary.yaml:60
 msgctxt "primary_sepsis_bsi_sc"
 msgid "Primary sepsis/BSI"
 msgstr ""
 
-#: glossary.yaml:59
+#: glossary.yaml:61
 msgctxt "primary_sepsis_bsi_tc"
 msgid "Primary Sepsis/BSI"
 msgstr ""
 
-#: glossary.yaml:60
+#: glossary.yaml:62
 msgctxt "probiotics"
 msgid "Probiotics"
 msgstr ""
 
-#: glossary.yaml:61
+#: glossary.yaml:63
 msgctxt "pvc"
 msgid "PVC"
 msgstr ""
 
-#: glossary.yaml:62
+#: glossary.yaml:64
 msgctxt "ssi"
 msgid "SSI"
 msgstr ""
 
-#: glossary.yaml:63
+#: glossary.yaml:65
 msgctxt "surgical_procedure"
 msgid "surgical procedure"
 msgstr ""
 
-#: glossary.yaml:64
+#: glossary.yaml:66
 msgctxt "surgical_procedure_sc"
 msgid "Surgical procedure"
 msgstr ""
 
-#: glossary.yaml:65
+#: glossary.yaml:67
 msgctxt "surgical_procedure_tc"
 msgid "Surgical Procedure"
 msgstr ""
 
-#: glossary.yaml:66
+#: glossary.yaml:68
 msgctxt "surgical_site_infection"
 msgid "surgical site infection"
 msgstr ""
 
-#: glossary.yaml:67
+#: glossary.yaml:69
 msgctxt "surgical_site_infection_sc"
 msgid "Surgical site infection"
 msgstr ""
 
-#: glossary.yaml:68
+#: glossary.yaml:70
 msgctxt "surgical_site_infection_tc"
 msgid "Surgical Site Infection"
 msgstr ""
 
-#: glossary.yaml:69
+#: glossary.yaml:71
 msgctxt "surveillance"
 msgid "surveillance"
 msgstr ""
 
-#: glossary.yaml:70
+#: glossary.yaml:72
 msgctxt "surveillance_sc"
 msgid "Surveillance"
 msgstr ""
 
-#: glossary.yaml:71
+#: glossary.yaml:73
 msgctxt "surveillance_end"
 msgid "surveillance end"
 msgstr ""
 
-#: glossary.yaml:72
+#: glossary.yaml:74
 msgctxt "surveillance_end_sc"
 msgid "Surveillance end"
 msgstr ""
 
-#: glossary.yaml:73
+#: glossary.yaml:75
 msgctxt "surveillance_end_tc"
 msgid "Surveillance End"
 msgstr ""
