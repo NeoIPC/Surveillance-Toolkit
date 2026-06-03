@@ -30,7 +30,7 @@ $infectiousAgentsDir = Join-Path -Resolve -Path $metadataFolder -ChildPath 'comm
 $docDir = Join-Path -Resolve -Path $workspaceFolder -ChildPath 'doc'
 $protocolDir = Join-Path -Resolve -Path $docDir -ChildPath 'protocol'
 $imgDir = Join-Path -Resolve -Path $protocolDir -ChildPath 'img'
-$commonImgDir = Join-Path -Resolve -Path $workspaceFolder -ChildPath 'reports' -AdditionalChildPath 'common', 'img'
+$commonImgDir = Join-Path -Resolve -Path $workspaceFolder -ChildPath 'common' -AdditionalChildPath 'img'
 $resDir = Join-Path -Resolve -Path $protocolDir -ChildPath 'resx'
 $transDir = Join-Path -Resolve -Path $protocolDir -ChildPath 'xslt'
 
@@ -96,17 +96,17 @@ $masterDataSheetImage = New-Object System.Xml.Xsl.XslCompiledTransform
 $masterDataSheetImage.Load((Get-ChildItem $transDir/NeoIPC-Core-Master-Data-Collection-Sheet-Image.xslt).FullName, [System.Xml.Xsl.XsltSettings]::TrustedXslt, $resolver)
 
 $AWaReASrc = (Join-Path -Resolve -Path $commonImgDir -ChildPath 'AWaRe-A.svg')
-$AWaReADest = (Join-Path -Path $artifactsFolder -ChildPath 'img' -AdditionalChildPath 'AWaRe-A.svg')
+$AWaReADest = (Join-Path -Path $imgDir -ChildPath 'AWaRe-A.svg')
 Build-Target $AWaReADest $AWaReASrc {
     Copy-Item -LiteralPath $AWaReASrc -Destination $AWaReADest
 }
 $AWaReWSrc = (Join-Path -Resolve -Path $commonImgDir -ChildPath 'AWaRe-W.svg')
-$AWaReWDest = (Join-Path -Path $artifactsFolder -ChildPath 'img' -AdditionalChildPath 'AWaRe-W.svg')
+$AWaReWDest = (Join-Path -Path $imgDir -ChildPath 'AWaRe-W.svg')
 Build-Target $AWaReWDest $AWaReWSrc {
     Copy-Item -LiteralPath $AWaReWSrc -Destination $AWaReWDest
 }
 $AWaReRSrc = (Join-Path -Resolve -Path $commonImgDir -ChildPath 'AWaRe-R.svg')
-$AWaReRDest = (Join-Path -Path $artifactsFolder -ChildPath 'img' -AdditionalChildPath 'AWaRe-R.svg')
+$AWaReRDest = (Join-Path -Path $imgDir -ChildPath 'AWaRe-R.svg')
 Build-Target $AWaReRDest $AWaReRSrc {
     Copy-Item -LiteralPath $AWaReRSrc -Destination $AWaReRDest
 }

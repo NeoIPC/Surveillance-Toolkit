@@ -1,4 +1,4 @@
-### The Surgical Procedure Has an Invalid ICHE Code {#sec-problem-details-14}
+### The Surgical Procedure Has an Invalid ICHI Code {#sec-problem-details-14}
 
 The stratification of surgical procedures in NeoIPC Surveillance is complicated by the lack of an internationally used coding system for surgical and procedural procedures.
 Although many countries use variants of the WHO's ‘International Classification Of Procedures In Medicine’ (ICPM), almost all of them have national variants, making international comparisons difficult.

@@ -59,7 +59,7 @@ problem_detail_info <- tibble::tribble(
   11L, 11L, c(1L,4L,5L,7L,8L,9L,10L,12L,14L,15L),  # The Surgical Site Infection Did Not Occur During the Follow-Up Period of a Surgical Procedure
   12L,12L, NULL,                                   # The Manually Entered Pathogen Cannot Be Assigned
   13L,13L, c(1L,4L,5L,9L,10L,15L),                 # The Sum of All Antibiotic Substance Days Is Less Than the Total Number of Antibiotic Days
-  14L, 14L, c(1L,4L,5L,9L,10L,15L),                # The Surgical Procedure Has an Invalid ICHE Code
+  14L, 14L, c(1L,4L,5L,9L,10L,15L),                # The Surgical Procedure Has an Invalid ICHI Code
   15L, 15L, c(1L,2L,4L,5L,8L,9L,10L,14L,15L),      # The Patient Record Has a Completed Enrolment but no Surveillance End Form
   16L, 16L, NULL,                                  # The Patient Record Has a Completed Enrolment but no Admission Form
   17L, 17L, c(1L,4L,5L,8L,9L,10L,11L,15L,18L),     # The Day of Life Stored in the Form Does Not Match the Calculated Value
