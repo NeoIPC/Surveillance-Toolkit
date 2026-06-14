@@ -96,26 +96,6 @@ params:
   # @type logical
   includeMethodsTexts: true
 
-  # Include the patient-population section text.
-  # @type logical
-  includeTextPatientPopulation: true
-
-  # Include the nosocomial-infection section text.
-  # @type logical
-  includeTextNosocomial: true
-
-  # Include the infectious-agents section text.
-  # @type logical
-  includeTextInfectiousAgents: true
-
-  # Include the risk-factors section text.
-  # @type logical
-  includeTextRiskFactors: true
-
-  # Include the surgery section text.
-  # @type logical
-  includeTextSurgery: true
-
   # Include the birth-weight distribution figure.
   # @type logical
   includeBirthWeightFigure: true

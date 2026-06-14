@@ -66,25 +66,15 @@ include_localised("_methods.Rmd")
 .end()
 ```
 
-```{r}
-#| output: asis
-.show(params$includeTextPatientPopulation)
-```
-
 ::: {.content-visible when-format="pdf"}
 \FloatBarrier
 :::
 
-```{r}
-#| output: asis
-if (params$includeTextPatientPopulation)
-  cat('::: {.content-visible when-meta="alwaysTrue"}\n\n##',
-      sR$headings$patient_population, '\n\n:::\n')
-```
+## `{r} sR$headings$patient_population`
 
 ```{r}
 #| output: asis
-.show(params$includeIntroductionTexts && params$includeTextPatientPopulation)
+.show(params$includeIntroductionTexts)
 ```
 
 ```{r}
@@ -99,17 +89,12 @@ include_localised("_patient_population.Rmd")
 
 ```{r}
 #| output: asis
-.show(params$includeMethodsTexts && params$includeTextPatientPopulation)
+.show(params$includeMethodsTexts)
 ```
 
 ```{r}
 #| output: asis
 include_localised("_methods-patient-population.Rmd")
-```
-
-```{r}
-#| output: asis
-.end()
 ```
 
 ```{r}

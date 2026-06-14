@@ -22,11 +22,6 @@ params:
   includeConfidenceIntervals: "all"
   includeIntroductionTexts: true
   includeMethodsTexts: true
-  includeTextPatientPopulation: true
-  includeTextNosocomial: true
-  includeTextInfectiousAgents: true
-  includeTextRiskFactors: true
-  includeTextSurgery: true
   includeBirthWeightFigure: true
   includeGestationalAgeFigure: true
   includeIncidenceDensityTable: true
