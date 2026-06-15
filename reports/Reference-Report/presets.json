@@ -1,0 +1,18 @@
+{
+  "_comment": "Content presets for the Reference Report — the single source of truth for the report's preset feature; see Partner-Report/presets.json for the model. The NeoIPC-Reporting backend reads this at runtime for GET /reference-report/presets (System.Text.Json; no parser dependency); the app applies the chosen preset client-side as -P render params. Plain preset DATA, not a Quarto profile. Each preset under 'presets' lists only the params that differ from the QMD defaults; 'default' is the empty override set.",
+  "presets": {
+    "default": {},
+    "minimal": {
+      "includeIntroductionTexts": false,
+      "includeMethodsTexts": false,
+      "includeConfidenceIntervals": "none"
+    },
+    "full": {
+      "includeAntibioticUtilisationTable": true,
+      "includeResistantPathogenInfectionRateTable": true,
+      "includeOrganismResistanceRateTable": true,
+      "includeAntibioticResistanceTestRateTable": true,
+      "includeSecondaryBsiRateTable": true
+    }
+  }
+}
