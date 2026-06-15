@@ -192,7 +192,7 @@ $OutputLocales = $OutputLocales | ForEach-Object { $_ -split ',' } |
 
 # Validate locale inputs and resolve QMD files
 foreach ($locale in $OutputLocales) {
-    $null = Resolve-NeoipcLocaleQmd -ReportDir $reportDirPath -BaseName 'Reference-Report' -Locale $locale
+    $null = Resolve-NeoIPCLocaleQmd -ReportDir $reportDirPath -BaseName 'Reference-Report' -Locale $locale
 }
 
 $wantsJson = $OutputFormats -contains 'json'
@@ -245,16 +245,16 @@ if ($isDataFileMode) {
     ).Replace('-', '').ToLowerInvariant()
 }
 
-$authForEnv = if (-not $isDataFileMode) { Resolve-NeoipcAuth -Token $Token } else { @{ AuthType = 'None' } }
+$authForEnv = if (-not $isDataFileMode) { Resolve-NeoIPCAuth -Token $Token } else { @{ AuthType = 'None' } }
 
-# $PSBoundParameters is per-invocation; inside the Invoke-WithNeoipcAuth
+# $PSBoundParameters is per-invocation; inside the Invoke-WithNeoIPCAuth
 # scriptblock it refers to the scriptblock's own (empty) parameter dictionary,
 # not this script's. Snapshot common-parameter flags here so the scriptblock
 # can read them via lexical closure.
 $debugRequested   = $PSBoundParameters.ContainsKey('Debug')
 $verboseRequested = $PSBoundParameters.ContainsKey('Verbose')
 
-Invoke-WithNeoipcAuth -Auth $authForEnv -ExtraEnvVars @{ 'LC_ALL' = $null; 'NEOIPC_BACKUP_PASSWORD' = $null } -ScriptBlock {
+Invoke-WithNeoIPCAuth -Auth $authForEnv -ExtraEnvVars @{ 'LC_ALL' = $null; 'NEOIPC_BACKUP_PASSWORD' = $null } -ScriptBlock {
 
 if (-not $isDataFileMode -and $BackupDataset -and [string]::IsNullOrWhiteSpace($env:NEOIPC_BACKUP_PASSWORD)) {
     $secureBackupPassword = Read-Host -Prompt 'Backup password' -AsSecureString
@@ -390,8 +390,8 @@ try {
     Push-Location -LiteralPath $reportDirPath
     try {
         foreach ($locale in $OutputLocales) {
-            $localeParts = Split-NeoipcLocale -Locale $locale
-            $qmdPath = Resolve-NeoipcLocaleQmd -ReportDir $reportDirPath -BaseName 'Reference-Report' -Locale $locale
+            $localeParts = Split-NeoIPCLocale -Locale $locale
+            $qmdPath = Resolve-NeoIPCLocaleQmd -ReportDir $reportDirPath -BaseName 'Reference-Report' -Locale $locale
             $qmd = [System.IO.Path]::GetFileName($qmdPath)
             $profileName = $localeParts.Language
 
@@ -477,7 +477,7 @@ finally {
         parameters = $paramHashSource
     }
     $reportPath = if ($JsonReport) { $buildReportFilePath } else { $null }
-    $status = Write-NeoipcBuildReport -Name 'Reference Report Build' `
+    $status = Write-NeoIPCBuildReport -Name 'Reference Report Build' `
         -Errors $errors -OutputFiles $outputFiles -BuildCompleted $buildCompleted `
         -StartedAt $startedAt -BuildReportPath $reportPath -ExtraFields $extraFields
 
@@ -486,4 +486,4 @@ finally {
     }
 }
 
-} # end Invoke-WithNeoipcAuth
+} # end Invoke-WithNeoIPCAuth

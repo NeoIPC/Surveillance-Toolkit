@@ -34,7 +34,7 @@ function Read-DHIS2PersonalAccessToken {
         [Parameter()] [Nullable[int]]$Port = $null
     )
 
-    $auth = Resolve-NeoipcAuth -Token $Token -UserName $UserName
+    $auth = Resolve-NeoIPCAuth -Token $Token -UserName $UserName
 
     $expand = $true
     $filterExpr = $Filter
@@ -60,7 +60,7 @@ function Read-DHIS2PersonalAccessToken {
     if ($Hostname) { $getParams.Hostname = $Hostname }
     if ($Port)     { $getParams.Port     = $Port }
 
-    $obj = Invoke-NeoipcDhis2Get @getParams
+    $obj = Invoke-NeoIPCDhis2Get @getParams
 
     $tokens = if ($expand) {
         $obj | Select-Object -ExpandProperty apiToken
@@ -116,7 +116,7 @@ function Remove-DHIS2PersonalAccessToken {
     )
 
     begin {
-        $auth = Resolve-NeoipcAuth -Token $Token -UserName $UserName
+        $auth = Resolve-NeoIPCAuth -Token $Token -UserName $UserName
         $results = [System.Collections.ArrayList]::new()
         $yesToAll = $false
         $noToAll = $false
@@ -145,7 +145,7 @@ function Remove-DHIS2PersonalAccessToken {
                     if ($Scheme)   { $deleteParams.Scheme   = $Scheme }
                     if ($Hostname) { $deleteParams.Hostname = $Hostname }
                     if ($Port)     { $deleteParams.Port     = $Port }
-                    $results.Add((Invoke-NeoipcDhis2Delete @deleteParams)) | Out-Null
+                    $results.Add((Invoke-NeoIPCDhis2Delete @deleteParams)) | Out-Null
                 } else {
                     Write-Debug "Skipping removal of token '$currentId'."
                 }
@@ -185,7 +185,7 @@ function Clear-DHIS2PersonalAccessTokens {
         [switch]$Force
     )
 
-    $auth = Resolve-NeoipcAuth -Token $Token -UserName $UserName
+    $auth = Resolve-NeoIPCAuth -Token $Token -UserName $UserName
 
     if ($All) {
         $fields = @('id')
@@ -202,7 +202,7 @@ function Clear-DHIS2PersonalAccessTokens {
     if ($Hostname) { $getParams.Hostname = $Hostname }
     if ($Port)     { $getParams.Port     = $Port }
 
-    $tokens = (Invoke-NeoipcDhis2Get @getParams -WhatIf:$false) | Select-Object -ExpandProperty apiToken
+    $tokens = (Invoke-NeoIPCDhis2Get @getParams -WhatIf:$false) | Select-Object -ExpandProperty apiToken
 
     $tokens |
         Where-Object {

@@ -36,8 +36,8 @@ function Read-PatientInfo {
         [Parameter(ValueFromPipelineByPropertyName)]
         [ArgumentCompleter({
             param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
-            $serverKey = Get-NeoipcServerKey -Scheme $fakeBoundParameters['Scheme'] -Hostname $fakeBoundParameters['Hostname'] -Port $fakeBoundParameters['Port']
-            $cacheDir = Join-Path $script:NeoipcRepoRoot 'data' $serverKey
+            $serverKey = Get-NeoIPCServerKey -Scheme $fakeBoundParameters['Scheme'] -Hostname $fakeBoundParameters['Hostname'] -Port $fakeBoundParameters['Port']
+            $cacheDir = Join-Path $script:NeoIPCRepoRoot 'data' $serverKey
             $cacheFile = Join-Path $cacheDir 'site-codes.txt'
             if (Test-Path $cacheFile) {
                 Get-Content $cacheFile | Where-Object { $_ -like "$wordToComplete*" }
@@ -58,7 +58,7 @@ function Read-PatientInfo {
 
     begin {
         if (-not $Auth) {
-            $Auth = Resolve-NeoipcAuth -Token $Token
+            $Auth = Resolve-NeoIPCAuth -Token $Token
         }
 
         # Resolve metadata once: program UID always; OU code map only when
@@ -112,7 +112,7 @@ function Read-PatientInfo {
         if ($script:metaScheme)   { $metaParams.Scheme   = $script:metaScheme }
         if ($script:metaHostname) { $metaParams.Hostname = $script:metaHostname }
         if ($script:metaPort)     { $metaParams.Port     = $script:metaPort }
-        $metadata = Invoke-NeoipcDhis2Get @metaParams
+        $metadata = Invoke-NeoIPCDhis2Get @metaParams
 
         $programId = $metadata.programs[0].id
 
@@ -170,7 +170,7 @@ function Read-PatientInfo {
         if ($script:metaHostname) { $getParams.Hostname = $script:metaHostname }
         if ($script:metaPort)     { $getParams.Port     = $script:metaPort }
 
-        $resp = Invoke-NeoipcDhis2Get @getParams
+        $resp = Invoke-NeoIPCDhis2Get @getParams
 
         foreach ($te in $resp.instances) {
             $attrs = @{}
@@ -234,8 +234,8 @@ function Read-EnrolmentInfo {
         [Parameter(Position = 0, ValueFromPipelineByPropertyName)]
         [ArgumentCompleter({
             param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
-            $serverKey = Get-NeoipcServerKey -Scheme $fakeBoundParameters['Scheme'] -Hostname $fakeBoundParameters['Hostname'] -Port $fakeBoundParameters['Port']
-            $cacheDir = Join-Path $script:NeoipcRepoRoot 'data' $serverKey
+            $serverKey = Get-NeoIPCServerKey -Scheme $fakeBoundParameters['Scheme'] -Hostname $fakeBoundParameters['Hostname'] -Port $fakeBoundParameters['Port']
+            $cacheDir = Join-Path $script:NeoIPCRepoRoot 'data' $serverKey
             $cacheFile = Join-Path $cacheDir 'site-codes.txt'
             if (Test-Path $cacheFile) {
                 Get-Content $cacheFile | Where-Object { $_ -like "$wordToComplete*" }
@@ -268,7 +268,7 @@ function Read-EnrolmentInfo {
 
     begin {
         if (-not $Auth) {
-            $Auth = Resolve-NeoipcAuth -Token $Token
+            $Auth = Resolve-NeoIPCAuth -Token $Token
         }
         $script:Auth_local = $Auth
 
@@ -315,7 +315,7 @@ function Read-EnrolmentInfo {
         if ($Scheme)   { $metaParams.Scheme   = $Scheme }
         if ($Hostname) { $metaParams.Hostname = $Hostname }
         if ($Port)     { $metaParams.Port     = $Port }
-        $metadata = Invoke-NeoipcDhis2Get @metaParams
+        $metadata = Invoke-NeoIPCDhis2Get @metaParams
 
         $programId = $metadata.programs[0].id
 
@@ -381,7 +381,7 @@ function Read-EnrolmentInfo {
             if ($Hostname) { $getParams.Hostname = $Hostname }
             if ($Port)     { $getParams.Port     = $Port }
 
-            $resp = Invoke-NeoipcDhis2Get @getParams
+            $resp = Invoke-NeoIPCDhis2Get @getParams
 
             foreach ($enr in $resp.instances) {
                 $eventIds = @($enr.events | ForEach-Object { $_.event })
@@ -468,8 +468,8 @@ function Read-EventInfo {
         [Parameter(Position = 0, ValueFromPipelineByPropertyName)]
         [ArgumentCompleter({
             param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
-            $serverKey = Get-NeoipcServerKey -Scheme $fakeBoundParameters['Scheme'] -Hostname $fakeBoundParameters['Hostname'] -Port $fakeBoundParameters['Port']
-            $cacheDir = Join-Path $script:NeoipcRepoRoot 'data' $serverKey
+            $serverKey = Get-NeoIPCServerKey -Scheme $fakeBoundParameters['Scheme'] -Hostname $fakeBoundParameters['Hostname'] -Port $fakeBoundParameters['Port']
+            $cacheDir = Join-Path $script:NeoIPCRepoRoot 'data' $serverKey
             $cacheFile = Join-Path $cacheDir 'site-codes.txt'
             if (Test-Path $cacheFile) {
                 Get-Content $cacheFile | Where-Object { $_ -like "$wordToComplete*" }
@@ -498,8 +498,8 @@ function Read-EventInfo {
         [Parameter()]
         [ArgumentCompleter({
             param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
-            $serverKey = Get-NeoipcServerKey -Scheme $fakeBoundParameters['Scheme'] -Hostname $fakeBoundParameters['Hostname'] -Port $fakeBoundParameters['Port']
-            $cacheDir = Join-Path $script:NeoipcRepoRoot 'data' $serverKey
+            $serverKey = Get-NeoIPCServerKey -Scheme $fakeBoundParameters['Scheme'] -Hostname $fakeBoundParameters['Hostname'] -Port $fakeBoundParameters['Port']
+            $cacheDir = Join-Path $script:NeoIPCRepoRoot 'data' $serverKey
             $cacheFile = Join-Path $cacheDir 'de-codes.txt'
             if (Test-Path $cacheFile) {
                 Get-Content $cacheFile | Where-Object { $_ -like "$wordToComplete*" }
@@ -528,7 +528,7 @@ function Read-EventInfo {
 
     begin {
         if (-not $Auth) {
-            $Auth = Resolve-NeoipcAuth -Token $Token
+            $Auth = Resolve-NeoIPCAuth -Token $Token
         }
         $script:Auth_local = $Auth
 
@@ -597,7 +597,7 @@ function Read-EventInfo {
         if ($Scheme)   { $metaParams.Scheme   = $Scheme }
         if ($Hostname) { $metaParams.Hostname = $Hostname }
         if ($Port)     { $metaParams.Port     = $Port }
-        $metadata = Invoke-NeoipcDhis2Get @metaParams
+        $metadata = Invoke-NeoIPCDhis2Get @metaParams
 
         $programId = $metadata.programs[0].id
 
@@ -678,7 +678,7 @@ function Read-EventInfo {
         if ($Hostname) { $getParams.Hostname = $Hostname }
         if ($Port)     { $getParams.Port     = $Port }
 
-        $resp = Invoke-NeoipcDhis2Get @getParams
+        $resp = Invoke-NeoIPCDhis2Get @getParams
 
         # Build hash sets for client-side audit-user filtering
         $filterCreatedBy = if ($script:collectedCreatedBy.Count -gt 0) {

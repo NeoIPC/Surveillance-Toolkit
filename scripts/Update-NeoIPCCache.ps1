@@ -23,10 +23,10 @@ Optional token string or path to a file containing the token. If omitted,
 uses environment variable or prompts for credentials.
 
 .EXAMPLE
-.\Update-NeoipcCache.ps1                      # default: refresh everything
-.\Update-NeoipcCache.ps1 -Sites               # only site codes
-.\Update-NeoipcCache.ps1 -DataElements        # only DE codes
-.\Update-NeoipcCache.ps1 -Dhis2Hostname neoipc-demo.charite.de
+.\Update-NeoIPCCache.ps1                      # default: refresh everything
+.\Update-NeoIPCCache.ps1 -Sites               # only site codes
+.\Update-NeoIPCCache.ps1 -DataElements        # only DE codes
+.\Update-NeoIPCCache.ps1 -Dhis2Hostname neoipc-demo.charite.de
 #>
 [CmdletBinding()]
 param(
@@ -60,30 +60,30 @@ if (-not $Sites -and -not $DataElements) {
     $DataElements = $true
 }
 
-$auth = Resolve-NeoipcAuth -Token $Token
+$auth = Resolve-NeoIPCAuth -Token $Token
 
 $connArgs = @{ Auth = $auth }
 if ($Dhis2Scheme)   { $connArgs.Scheme   = $Dhis2Scheme }
 if ($Dhis2Hostname) { $connArgs.Hostname = $Dhis2Hostname }
 if ($Dhis2Port)     { $connArgs.Port     = $Dhis2Port }
-# -Dhis2Path is used only for cache-key partitioning (Get-NeoipcServerKey
+# -Dhis2Path is used only for cache-key partitioning (Get-NeoIPCServerKey
 # above); the readers hardcode 'api/<endpoint>' paths.
 
-$serverKey = Get-NeoipcServerKey -Scheme $Dhis2Scheme -Hostname $Dhis2Hostname -Port $Dhis2Port -Path $Dhis2Path
+$serverKey = Get-NeoIPCServerKey -Scheme $Dhis2Scheme -Hostname $Dhis2Hostname -Port $Dhis2Port -Path $Dhis2Path
 $cacheDir = Join-Path $PSScriptRoot '..' 'data' $serverKey
 if (-not (Test-Path -LiteralPath $cacheDir)) {
     New-Item -ItemType Directory -Path $cacheDir -Force | Out-Null
 }
 
 if ($Sites) {
-    $siteList = Get-NeoipcDepartments @connArgs
+    $siteList = Get-NeoIPCDepartments @connArgs
     $sitePath = Join-Path $cacheDir 'site-codes.txt'
     $siteList | Set-Content -LiteralPath $sitePath -Encoding UTF8
     Write-Host "Cached $($siteList.Count) site codes to $sitePath" -ForegroundColor Green
 }
 
 if ($DataElements) {
-    $deCodes = Get-NeoipcDataElementCodes @connArgs
+    $deCodes = Get-NeoIPCDataElementCodes @connArgs
     $dePath = Join-Path $cacheDir 'de-codes.txt'
     $deCodes | Set-Content -LiteralPath $dePath -Encoding UTF8
     Write-Host "Cached $($deCodes.Count) DE codes to $dePath" -ForegroundColor Green

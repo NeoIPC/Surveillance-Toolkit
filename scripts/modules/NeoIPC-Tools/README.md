@@ -28,10 +28,10 @@ username/password.
 $env:NEOIPC_DHIS2_TOKEN = 'd2pat_...'
 
 # Token from a file
-$auth = Resolve-NeoipcAuth -Token ./secrets/my-token.txt
+$auth = Resolve-NeoIPCAuth -Token ./secrets/my-token.txt
 
 # Interactive username/password prompt
-$auth = Resolve-NeoipcAuth
+$auth = Resolve-NeoIPCAuth
 ```
 
 Tokens are validated against the DHIS2 v1 PAT format (`d2pat_` + 32 alphanum
@@ -41,7 +41,7 @@ Tokens are validated against the DHIS2 v1 PAT format (`d2pat_` + 32 alphanum
 
 ```powershell
 # List all departments the current user can see
-Get-NeoipcDepartments -Auth $auth
+Get-NeoIPCDepartments -Auth $auth
 
 # Rich org unit objects with hierarchy, trials, World Bank class
 Read-OrgUnitInfo -Token $env:NEOIPC_DHIS2_TOKEN
@@ -170,8 +170,8 @@ These functions are used by the report scripts (`New-PartnerReports.ps1`,
 
 ```powershell
 # Run a script block with DHIS2 auth env vars set (and securely cleared after)
-$auth = Resolve-NeoipcAuth -Token $Token
-Invoke-WithNeoipcAuth -Auth $auth -ScriptBlock {
+$auth = Resolve-NeoIPCAuth -Token $Token
+Invoke-WithNeoIPCAuth -Auth $auth -ScriptBlock {
     # $env:NEOIPC_DHIS2_TOKEN (or USER/PASSWORD) is set here
     # R/Quarto child processes pick it up via neoipcr::get_auth_data()
     quarto render Partner-Report.qmd
@@ -195,11 +195,11 @@ $result.Status   # 'Success' or 'Error'
 
 ```powershell
 # Split locale code
-Split-NeoipcLocale -Locale 'de_AT'
+Split-NeoIPCLocale -Locale 'de_AT'
 # @{ Language = 'de'; Territory = 'AT'; Code = 'de_AT' }
 
 # Resolve localized QMD file (with fallback)
-Resolve-NeoipcLocaleQmd -ReportDir ./reports/Partner-Report -BaseName 'Partner-Report' -Locale 'de'
+Resolve-NeoIPCLocaleQmd -ReportDir ./reports/Partner-Report -BaseName 'Partner-Report' -Locale 'de'
 # Returns Partner-Report.de.qmd if it exists, otherwise Partner-Report.qmd
 ```
 
@@ -207,7 +207,7 @@ Resolve-NeoipcLocaleQmd -ReportDir ./reports/Partner-Report -BaseName 'Partner-R
 
 ```powershell
 # Write a build summary to console and optionally to JSON
-$status = Write-NeoipcBuildReport -Name 'Partner Report Build' `
+$status = Write-NeoIPCBuildReport -Name 'Partner Report Build' `
     -Errors $errors -OutputFiles $outputFiles -BuildCompleted $true `
     -StartedAt $startedAt -BuildReportPath './build-report.json'
 ```
@@ -231,9 +231,9 @@ $pairs = Build-QmdParamPairs -Values @{
 them once with the unified cache-refresh script:
 
 ```powershell
-./scripts/Update-NeoipcCache.ps1                # refresh everything
-./scripts/Update-NeoipcCache.ps1 -Sites         # only site-codes cache
-./scripts/Update-NeoipcCache.ps1 -DataElements  # only DE-codes cache
+./scripts/Update-NeoIPCCache.ps1                # refresh everything
+./scripts/Update-NeoIPCCache.ps1 -Sites         # only site-codes cache
+./scripts/Update-NeoIPCCache.ps1 -DataElements  # only DE-codes cache
 ```
 
 After that, `-OrgUnitCode NEO_<Tab>` and `-DataElementCode NEOIPC_<Tab>`
@@ -243,11 +243,11 @@ complete from the cached lists.
 
 | Category | Functions |
 |----------|-----------|
-| Auth | `Resolve-NeoipcToken`, `Resolve-NeoipcAuth`, `Get-NeoipcAuthPassword`, `Test-DHIS2PersonalAccessToken` |
-| OrgUnits | `Get-NeoipcDepartments`, `Get-NeoipcServerKey`, `Read-OrgUnitInfo` |
+| Auth | `Resolve-NeoIPCToken`, `Resolve-NeoIPCAuth`, `Get-NeoIPCAuthPassword`, `Test-DHIS2PersonalAccessToken` |
+| OrgUnits | `Get-NeoIPCDepartments`, `Get-NeoIPCServerKey`, `Read-OrgUnitInfo` |
 | Tracker | `Read-PatientInfo`, `Read-EnrolmentInfo`, `Read-EventInfo` |
-| DataElements | `Get-NeoipcDataElementCodes` |
+| DataElements | `Get-NeoIPCDataElementCodes` |
 | PAT | `Read-DHIS2PersonalAccessToken`, `Remove-DHIS2PersonalAccessToken`, `Clear-DHIS2PersonalAccessTokens` |
 | User | `Read-UserInfo` |
-| Quarto | `Invoke-WithNeoipcAuth`, `Invoke-QuartoRender`, `Invoke-Rscript`, `Build-QmdParamPairs`, `Write-NeoipcBuildReport`, `Test-QuartoInstallation`, `Split-NeoipcLocale`, `Resolve-NeoipcLocaleQmd` |
+| Quarto | `Invoke-WithNeoIPCAuth`, `Invoke-QuartoRender`, `Invoke-Rscript`, `Build-QmdParamPairs`, `Write-NeoIPCBuildReport`, `Test-QuartoInstallation`, `Split-NeoIPCLocale`, `Resolve-NeoIPCLocaleQmd` |
 | InfectiousAgents | `Find-NextFreeInfectiousAgentId` |

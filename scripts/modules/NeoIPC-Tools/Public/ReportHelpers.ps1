@@ -10,7 +10,7 @@ This allows R/Quarto child processes to pick up credentials via neoipcr's
 get_auth_data() without passing them on the command line.
 
 .PARAMETER Auth
-Authentication hashtable from Resolve-NeoipcAuth.
+Authentication hashtable from Resolve-NeoIPCAuth.
 
 .PARAMETER ScriptBlock
 The script block to execute with scoped env vars.
@@ -19,7 +19,7 @@ The script block to execute with scoped env vars.
 Optional hashtable of additional env vars to scope (save/restore).
 Values of $null will remove the env var during the scope.
 #>
-function Invoke-WithNeoipcAuth {
+function Invoke-WithNeoIPCAuth {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)]
@@ -62,7 +62,7 @@ function Invoke-WithNeoipcAuth {
         }
         elseif ($Auth.AuthType -eq 'Basic') {
             $env:NEOIPC_DHIS2_USER = $Auth.Username
-            $env:NEOIPC_DHIS2_PASSWORD = Get-NeoipcAuthPassword -Auth $Auth
+            $env:NEOIPC_DHIS2_PASSWORD = Get-NeoIPCAuthPassword -Auth $Auth
         }
 
         # Set extra env vars
@@ -328,7 +328,7 @@ Locale code (e.g. 'de_AT', 'de', 'en_GB', 'en').
 .OUTPUTS
 Hashtable with keys: Language (always set), Territory (null when absent), Code (original input).
 #>
-function Split-NeoipcLocale {
+function Split-NeoIPCLocale {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)]
@@ -360,7 +360,7 @@ Base name of the report (e.g. 'Partner-Report').
 .PARAMETER Locale
 Locale or language code (e.g. 'en', 'de', 'de_AT').
 #>
-function Resolve-NeoipcLocaleQmd {
+function Resolve-NeoIPCLocaleQmd {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)]
@@ -373,7 +373,7 @@ function Resolve-NeoipcLocaleQmd {
         [string]$Locale
     )
 
-    $language = (Split-NeoipcLocale -Locale $Locale).Language
+    $language = (Split-NeoIPCLocale -Locale $Locale).Language
 
     if ($language -eq 'en') {
         $qmdPath = Join-Path $ReportDir "$BaseName.qmd"
@@ -490,7 +490,7 @@ distinguishes a clean finish (true) from an interrupted one (false with no error
 .OUTPUTS
 The status string: 'success', 'failed', or 'cancelled'.
 #>
-function Write-NeoipcBuildReport {
+function Write-NeoIPCBuildReport {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)]

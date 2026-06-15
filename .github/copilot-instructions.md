@@ -261,7 +261,7 @@ No `sprintf` `%s`, markdown, or LaTeX syntax in translatable strings. Use `glue`
 
 ### PowerShell Scripts
 
-Approved PS verbs + PascalCase noun (e.g., `New-PartnerReports.ps1`). All wrappers in `scripts/`. Shared helpers in `scripts/NeoipcReportHelpers.ps1` (dot-sourced).
+Approved PS verbs + PascalCase noun (e.g., `New-PartnerReports.ps1`). All wrappers in `scripts/`. Shared helpers in `scripts/NeoIPCReportHelpers.ps1` (dot-sourced).
 
 ### Argument Handling
 
@@ -272,7 +272,7 @@ Approved PS verbs + PascalCase noun (e.g., `New-PartnerReports.ps1`). All wrappe
 
 ### Auth Flow
 
-neoipcr is the single auth authority. PS scripts resolve credentials via `Resolve-NeoipcAuth` (token or username/password), then set scoped environment variables (`NEOIPC_DHIS2_TOKEN`, `NEOIPC_DHIS2_USER`, `NEOIPC_DHIS2_PASSWORD`) so neoipcr in child R/Quarto processes finds them automatically. No `-P "token:..."` in QMD renders.
+neoipcr is the single auth authority. PS scripts resolve credentials via `Resolve-NeoIPCAuth` (token or username/password), then set scoped environment variables (`NEOIPC_DHIS2_TOKEN`, `NEOIPC_DHIS2_USER`, `NEOIPC_DHIS2_PASSWORD`) so neoipcr in child R/Quarto processes finds them automatically. No `-P "token:..."` in QMD renders.
 
 Env var fallback chain in `neoipcr::get_auth_data()`:
 1. `NEOIPC_DHIS2_SESSION_ID` → session_id (Docker only)

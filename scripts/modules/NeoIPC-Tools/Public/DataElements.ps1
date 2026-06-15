@@ -8,12 +8,12 @@ de-duplicated array of code strings. Used by the cache-population script
 to feed the `-DataElementCode` argument completer on `Read-EventInfo`.
 
 .PARAMETER Auth
-Authentication hashtable from Resolve-NeoipcAuth.
+Authentication hashtable from Resolve-NeoIPCAuth.
 
 .OUTPUTS
 Sorted array of data-element code strings.
 #>
-function Get-NeoipcDataElementCodes {
+function Get-NeoIPCDataElementCodes {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)]
@@ -37,7 +37,7 @@ function Get-NeoipcDataElementCodes {
     if ($Port)     { $getParams.Port     = $Port }
 
     try {
-        $resp = Invoke-NeoipcDhis2Get @getParams
+        $resp = Invoke-NeoIPCDhis2Get @getParams
     }
     catch {
         throw "Failed to fetch data-element codes from DHIS2: $($_.Exception.Message)"
