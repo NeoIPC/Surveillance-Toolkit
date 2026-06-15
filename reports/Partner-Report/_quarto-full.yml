@@ -1,4 +1,0 @@
-includeResistantPathogenInfectionRateTable: true
-includeOrganismResistanceRateTable: true
-includeAntibioticResistanceTestRateTable: true
-includeSecondaryBsiRateTable: true

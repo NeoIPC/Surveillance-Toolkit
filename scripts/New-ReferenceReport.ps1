@@ -279,22 +279,19 @@ if ($ConfidenceIntervals) {
 }
 
 # Map user-friendly element names to internal Quarto metadata keys.
-# Each element can map to multiple keys (e.g. a section includes its text,
-# figures and tables together).
+# Each element can map to multiple keys (e.g. a section includes its
+# figures and tables together). Section introduction/methods texts are
+# gated globally by -HideIntroductionTexts / -HideMethodsTexts, not per
+# section.
 $elementMapping = @{
-    'PatientPopulation'                 = @('includeTextPatientPopulation',
-                                            'includeBirthWeightFigure',
+    'PatientPopulation'                 = @('includeBirthWeightFigure',
                                             'includeGestationalAgeFigure')
-    'NosocomialInfections'              = @('includeTextNosocomial',
-                                            'includeIncidenceDensityTable',
+    'NosocomialInfections'              = @('includeIncidenceDensityTable',
                                             'includeDeviceAssociatedIncidenceDensityTable')
-    'InfectiousAgents'                  = @('includeTextInfectiousAgents',
-                                            'includeAgentPerInfectionRateTable',
+    'InfectiousAgents'                  = @('includeAgentPerInfectionRateTable',
                                             'includeResistantPathogenInfectionRateTable')
-    'RiskFactors'                       = @('includeTextRiskFactors',
-                                            'includeRiskDensityRateTable')
-    'Surgery'                           = @('includeTextSurgery',
-                                            'includeSurgicalProcedureRateTable')
+    'RiskFactors'                       = @('includeRiskDensityRateTable')
+    'Surgery'                           = @('includeSurgicalProcedureRateTable')
     'BirthWeightDistribution'           = @('includeBirthWeightFigure')
     'GestationalAgeDistribution'        = @('includeGestationalAgeFigure')
     'IncidenceDensityRates'             = @('includeIncidenceDensityTable')
