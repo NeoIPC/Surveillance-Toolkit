@@ -1,6 +1,5 @@
 ---
 lang: el
-#language: ../common/_language.el.yml
 params:
   referenceDataFile: NULL
   reportingPeriodFrom: NULL

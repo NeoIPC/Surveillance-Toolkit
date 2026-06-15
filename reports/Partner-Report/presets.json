@@ -1,0 +1,19 @@
+{
+  "_comment": "Content presets for the Partner Report — the single source of truth for the report's preset feature. The NeoIPC-Reporting backend reads this at runtime for GET /partner-report/presets (System.Text.Json; no parser dependency); the app applies the chosen preset client-side as -P render params (the includeX / confidence-interval / section-text flags). This is plain preset DATA, not a Quarto profile: Quarto profiles cannot set document params, so presets are applied via -P. Each preset under 'presets' lists only the params that differ from the QMD defaults; 'default' is the empty override set (the QMD defaults themselves). 'Custom' is a client-only concept and is not listed here.",
+  "presets": {
+    "default": {},
+    "minimal": {
+      "includeIntroductionTexts": false,
+      "includeMethodsTexts": false,
+      "includeConfidenceIntervals": "none"
+    },
+    "full": {
+      "includeAntibioticUtilisationTable": true,
+      "includeResistantPathogenInfectionRateTable": true,
+      "includeOrganismResistanceRateTable": true,
+      "includeAntibioticResistanceTestRateTable": true,
+      "includeSecondaryBsiRateTable": true,
+      "includeConfidenceIntervals": "all"
+    }
+  }
+}

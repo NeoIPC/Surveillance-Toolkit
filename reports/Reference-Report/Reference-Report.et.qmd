@@ -1,6 +1,5 @@
 ---
 lang: et
-#language: ../common/_language.et.yml
 params:
   referenceDataFile: NULL
   reportingPeriodFrom: NULL
