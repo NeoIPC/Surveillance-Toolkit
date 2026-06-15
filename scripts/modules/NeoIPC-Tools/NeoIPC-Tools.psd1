@@ -61,6 +61,11 @@
         'Read-EventInfo'
         # InfectiousAgents
         'Find-NextFreeInfectiousAgentId'
+        # Metadata pipeline
+        'ConvertFrom-NeoIPCMetadataJson'
+        'ConvertTo-NeoIPCMetadataJson'
+        'Compare-NeoIPCMetadata'
+        'Test-NeoIPCMetadataRoundTrip'
     )
 
     # Cmdlets to export from this module
