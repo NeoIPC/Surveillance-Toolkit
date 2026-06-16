@@ -170,11 +170,11 @@ InModuleScope 'NeoIPC-Tools' {
             @($diffs).Count | Should -Be 1
             $diffs[0].Kind | Should -BeExactly 'Changed'
         }
-        It 'the comparator treats a set-mapped idArray (program.organisationUnits) as order-INSENSITIVE' {
+        It 'the comparator treats a set-mapped idArray (programs.notificationTemplates) as order-INSENSITIVE' {
             $mk = { param($order) [ordered]@{ programs = @([ordered]@{ id = 'progTESTA01'; code = 'P'; name = 'P'; programType = 'WITH_REGISTRATION'
-                            organisationUnits = @($order | ForEach-Object { [ordered]@{ id = $_ } }) }) } }
-            $a = & $mk @('ouBBBBBBBB1', 'ouAAAAAAAA1')
-            $b = & $mk @('ouAAAAAAAA1', 'ouBBBBBBBB1')
+                            notificationTemplates = @($order | ForEach-Object { [ordered]@{ id = $_ } }) }) } }
+            $a = & $mk @('pntBBBBBBB1', 'pntAAAAAAA1')
+            $b = & $mk @('pntAAAAAAA1', 'pntBBBBBBB1')
             @(Compare-NeoIPCMetadataCore -Reference $a -Difference $b).Count | Should -Be 0
         }
     }
@@ -870,14 +870,14 @@ InModuleScope 'NeoIPC-Tools' {
             $r.Equal | Should -BeTrue
             $r.Back.Contains('image') | Should -BeFalse
         }
-        It 'round-trips an organisationUnitGroup with sorted member refs (set semantics) + symbol/color styling' {
+        It 'round-trips an organisationUnitGroup (symbol/color kept), dropping the per-deployment membership' {
             $g = [ordered]@{ id = 'ougDept0001'; code = 'NEO_DEPARTMENT'; name = 'Departments'; shortName = 'Depts'; description = 'd'
                 symbol = '12'; color = '#FF0000'
-                organisationUnits = @([ordered]@{ id = 'ouZ99999999' }, [ordered]@{ id = 'ouA11111111' }, [ordered]@{ id = 'ouM55555555' })
+                organisationUnits = @([ordered]@{ id = 'ouZ99999999' }, [ordered]@{ id = 'ouA11111111' }, [ordered]@{ id = 'ouM55555555' })   # anonymised instance membership -> dropped
                 sharing = [ordered]@{ public = 'r-------' }; created = '2020' }
             $r = Get-RowRoundTrip 'organisationUnitGroups' $g
-            $r.Equal | Should -BeTrue
-            $r.Row['organisationUnits'] | Should -BeExactly 'ouA11111111 ouM55555555 ouZ99999999'
+            $r.Equal | Should -BeTrue -Because ($r.A + ' vs ' + $r.B)
+            $r.Back.Contains('organisationUnits') | Should -BeFalse   # membership stripped -> common groups carry no members (play populates it as an overlay)
             $r.Row['color'] | Should -BeExactly '#FF0000'
         }
         It 'round-trips an organisationUnitGroupSet (bools + group refs)' {
@@ -931,6 +931,197 @@ InModuleScope 'NeoIPC-Tools' {
                 }
                 $map.ContainsKey('progNEOIPC1') | Should -BeTrue   # the program itself is owned
             }
+        }
+    }
+
+    Describe 'Access-control config (userRoles / userGroups non-closure coverage)' {
+        It 'round-trips a userRole: code, description, sorted authorities (set semantics)' {
+            $role = [ordered]@{ id = 'urAdmin0001'; code = 'NEOIPC_ADMIN'; name = 'NeoIPC Admin'
+                description = 'NeoIPC reporting administration.'
+                authorities = @('F_NEOIPC_ADMIN', 'F_EXPORT_DATA'); restrictions = @()
+                sharing = [ordered]@{ public = 'rw------' }; created = '2020'; lastUpdated = '2021'; translations = @() }
+            $r = Get-RowRoundTrip 'userRoles' $role
+            $r.Equal | Should -BeTrue -Because ($r.A + ' vs ' + $r.B)
+            $r.Row['authorities'] | Should -BeExactly 'F_EXPORT_DATA F_NEOIPC_ADMIN'   # stringArray ordinal-sorted
+            $r.Row['code'] | Should -BeExactly 'NEOIPC_ADMIN'
+        }
+        It 'round-trips a userRole with no code and no authorities (both absent)' {
+            $role = [ordered]@{ id = 'urNothing01'; name = 'Nothing'; description = 'no rights'
+                authorities = @(); restrictions = @(); created = '2020' }
+            $r = Get-RowRoundTrip 'userRoles' $role
+            $r.Equal | Should -BeTrue
+            $r.Back.Contains('code') | Should -BeFalse           # absent code -> empty cell -> absent
+            $r.Back.Contains('authorities') | Should -BeFalse    # empty array -> absent
+        }
+        It 'round-trips a userGroup definition, dropping the per-deployment membership' {
+            $g = [ordered]@{ id = 'ugAdmins001'; code = 'NEOIPC_PATHOGEN_LIST_ADMINS'; name = 'NeoIPC Pathogen-List admins'
+                users = @([ordered]@{ id = 'U2632294693' }, [ordered]@{ id = 'U1641935444' })   # anonymised membership -> dropped
+                managedGroups = @([ordered]@{ id = 'ugTesters01' }, [ordered]@{ id = 'ugEditors01' })
+                sharing = [ordered]@{ public = 'rw------' }; attributeValues = @(); created = '2020'; translations = @() }
+            $r = Get-RowRoundTrip 'userGroups' $g
+            $r.Equal | Should -BeTrue -Because ($r.A + ' vs ' + $r.B)
+            $r.Back.Contains('users') | Should -BeFalse                              # membership stripped -> common groups carry no members
+            $r.Row['managedGroups'] | Should -BeExactly 'ugEditors01 ugTesters01'    # idArray ordinal-sorted
+        }
+
+        Context 'the closure does not reach the access-control types (referenced only by users / stripped sharing / non-closure)' {
+            BeforeAll {
+                $script:acPkg = [ordered]@{
+                    programs = @([ordered]@{ id = 'progNEOIPC1'; code = 'NEOIPC_CORE'; name = 'Core'; programType = 'WITH_REGISTRATION'
+                            notificationTemplates = @([ordered]@{ id = 'pntTmpl0001' }) })
+                    programNotificationTemplates = @([ordered]@{ id = 'pntTmpl0001'; name = 'T'
+                            recipientUserGroup = [ordered]@{ id = 'ugAdmins001' } })   # closure object -> userGroup by {id}
+                    userGroups = @([ordered]@{ id = 'ugAdmins001'; code = 'NEOIPC_PATHOGEN_LIST_ADMINS'; name = 'Admins' })
+                    userRoles = @([ordered]@{ id = 'urAdmin0001'; code = 'NEOIPC_ADMIN'; name = 'NeoIPC Admin'; authorities = @('F_NEOIPC_ADMIN') })
+                }
+            }
+            It 'excludes userRoles and userGroups from the closure and the pruned package' {
+                $r = Get-NeoIPCMetadataClosure -Package $script:acPkg
+                $r.IncludedIds.Contains('ugAdmins001') | Should -BeFalse
+                $r.IncludedIds.Contains('urAdmin0001') | Should -BeFalse
+                $r.Package.Contains('userGroups') | Should -BeFalse
+                $r.Package.Contains('userRoles') | Should -BeFalse
+            }
+            It 'does not flag a notification template recipientUserGroup ref as a dropped dependency' {
+                $r = Get-NeoIPCMetadataClosure -Package $script:acPkg
+                @($r.StructuredUnresolved | ForEach-Object { $_.Uid }) | Should -Not -Contain 'ugAdmins001'
+            }
+            It 'leaves the access-control types out of the UID-regeneration owned set' {
+                $map = New-NeoIPCMetadataUidMap -Package $script:acPkg
+                $map.ContainsKey('ugAdmins001') | Should -BeFalse
+                $map.ContainsKey('urAdmin0001') | Should -BeFalse
+                $map.ContainsKey('progNEOIPC1') | Should -BeTrue   # the program itself is owned
+            }
+        }
+    }
+
+    Describe 'Authored org-unit compilation (code-keyed -> UID-keyed)' {
+        BeforeAll {
+            $script:ouCommon = Join-Path $TestDrive 'ou-common.csv'
+            $script:ouPlay = Join-Path $TestDrive 'ou-play.csv'
+            @('code,name,shortName,openingDate,parent_code',
+              'ROOT,Root,Root,2023-01-01,',
+              'CtryA,Country A,CtryA,2023-01-01,ROOT') | Set-Content -LiteralPath $script:ouCommon -Encoding utf8
+            @('code,name,shortName,openingDate,parent_code',
+              'CtryA_H,Hospital A,Hosp A,2023-01-01,CtryA',
+              'CtryA_H_D,Dept A,Dept A,2023-01-01,CtryA_H') | Set-Content -LiteralPath $script:ouPlay -Encoding utf8
+        }
+        It 'mints deterministic UIDs from code, resolves parent_code across files, and computes tree depth as level' {
+            $ous = ConvertFrom-NeoIPCAuthoredOrgUnitCsv -Path $script:ouCommon, $script:ouPlay
+            $ous.Count | Should -Be 4
+            $byCode = @{}; $ous | ForEach-Object { $byCode[$_.code] = $_ }
+            $byCode['ROOT'].level | Should -Be 1
+            $byCode['ROOT'].Contains('parent') | Should -BeFalse           # a root has no parent ref
+            $byCode['CtryA'].level | Should -Be 2
+            $byCode['CtryA_H'].level | Should -Be 3                          # parent defined in the OTHER file
+            $byCode['CtryA_H_D'].level | Should -Be 4
+            Test-NeoIPCMetadataUid -Id $byCode['ROOT'].id | Should -BeTrue
+            $byCode['CtryA_H_D']['parent']['id'] | Should -BeExactly $byCode['CtryA_H'].id
+            $byCode['CtryA'].id | Should -BeExactly (New-NeoIPCMetadataUid -Type 'organisationUnits' -NaturalKey 'CtryA')
+        }
+        It 'produces valid UID-keyed content (each unit round-trips through the converter)' {
+            $ous = ConvertFrom-NeoIPCAuthoredOrgUnitCsv -Path $script:ouCommon, $script:ouPlay
+            foreach ($o in $ous) {
+                $r = Get-RowRoundTrip 'organisationUnits' $o
+                $r.Equal | Should -BeTrue -Because ($r.A + ' vs ' + $r.B)
+            }
+        }
+        It 'throws on an unknown parent_code' {
+            $bad = Join-Path $TestDrive 'ou-bad.csv'
+            @('code,name,shortName,openingDate,parent_code', 'X,X,X,2023-01-01,NOPE') | Set-Content -LiteralPath $bad -Encoding utf8
+            { ConvertFrom-NeoIPCAuthoredOrgUnitCsv -Path $bad } | Should -Throw '*unknown parent_code*'
+        }
+        It 'throws on a duplicate code' {
+            $dup = Join-Path $TestDrive 'ou-dup.csv'
+            @('code,name,shortName,openingDate,parent_code', 'D,D,D,2023-01-01,', 'D,D2,D2,2023-01-01,') | Set-Content -LiteralPath $dup -Encoding utf8
+            { ConvertFrom-NeoIPCAuthoredOrgUnitCsv -Path $dup } | Should -Throw '*Duplicate*'
+        }
+        It 'throws on an empty code' {
+            $empty = Join-Path $TestDrive 'ou-empty.csv'
+            @('code,name,shortName,openingDate,parent_code', ',Nameless,N,2023-01-01,') | Set-Content -LiteralPath $empty -Encoding utf8
+            { ConvertFrom-NeoIPCAuthoredOrgUnitCsv -Path $empty } | Should -Throw '*empty code*'
+        }
+        It 'throws on a blank shortName or openingDate (DHIS2 not-null fields the round-trip test cannot catch)' {
+            $noShort = Join-Path $TestDrive 'ou-noshort.csv'
+            @('code,name,shortName,openingDate,parent_code', 'R,Root,,2023-01-01,') | Set-Content -LiteralPath $noShort -Encoding utf8
+            { ConvertFrom-NeoIPCAuthoredOrgUnitCsv -Path $noShort } | Should -Throw '*non-empty shortName*'
+            $noDate = Join-Path $TestDrive 'ou-nodate.csv'
+            @('code,name,shortName,openingDate,parent_code', 'R,Root,Root,,') | Set-Content -LiteralPath $noDate -Encoding utf8
+            { ConvertFrom-NeoIPCAuthoredOrgUnitCsv -Path $noDate } | Should -Throw '*non-empty openingDate*'
+        }
+    }
+
+    Describe 'Authored play users (normalized code-keyed tables -> UID-keyed)' {
+        BeforeAll {
+            $script:uUsers = Join-Path $TestDrive 'users.csv'
+            $script:uRoles = Join-Path $TestDrive 'userRoleAssignments.csv'
+            $script:uOus   = Join-Path $TestDrive 'userOrgUnitAssignments.csv'
+            @('username,firstName,surname',
+              'play.a.1,Play,A One',
+              'play.admin,Play,Admin') | Set-Content -LiteralPath $script:uUsers -Encoding utf8
+            @('username,role',
+              'play.a.1,Base',
+              'play.a.1,Data entry',
+              'play.admin,Superuser') | Set-Content -LiteralPath $script:uRoles -Encoding utf8
+            @('username,organisationUnit',
+              'play.a.1,DeptA',
+              'play.admin,ROOT') | Set-Content -LiteralPath $script:uOus -Encoding utf8
+            $script:roleUid = @{ 'Base' = 'roleBase001'; 'Data entry' = 'roleData001'; 'Superuser' = 'roleSuper01' }
+            $script:ouUid = @{ 'DeptA' = 'ouDeptA0001'; 'ROOT' = 'ouRoot00001' }
+        }
+        It 'mints a UID per username, sets the password, and joins multi-role + org-unit assignments to all three scopes' {
+            $u = ConvertFrom-NeoIPCAuthoredUserCsv -UserPath $script:uUsers -RoleAssignmentPath $script:uRoles -OrgUnitAssignmentPath $script:uOus -RoleUid $script:roleUid -OrgUnitUid $script:ouUid -Password 'district'
+            $u.Count | Should -Be 2
+            $byName = @{}; $u | ForEach-Object { $byName[$_.username] = $_ }
+            $d = $byName['play.a.1']
+            Test-NeoIPCMetadataUid -Id $d.id | Should -BeTrue
+            $d.id | Should -BeExactly (New-NeoIPCMetadataUid -Type 'users' -NaturalKey 'play.a.1')
+            $d.password | Should -BeExactly 'district'
+            $d.firstName | Should -BeExactly 'Play'
+            @($d.userRoles).Count | Should -Be 2                       # Base + Data entry (two junction rows, not an in-cell array)
+            ($d.userRoles | ForEach-Object { $_.id }) -join ',' | Should -BeExactly 'roleBase001,roleData001'
+            $d.organisationUnits[0].id | Should -BeExactly 'ouDeptA0001'
+            $d.dataViewOrganisationUnits[0].id | Should -BeExactly 'ouDeptA0001'
+            $d.teiSearchOrganisationUnits[0].id | Should -BeExactly 'ouDeptA0001'
+            $d.Contains('userGroups') | Should -BeFalse                # membership is group-side (group.users[]), not on the user
+        }
+        It 'throws on an unknown role' {
+            $bad = Join-Path $TestDrive 'ur-badrole.csv'
+            @('username,role', 'play.a.1,Nope', 'play.admin,Superuser') | Set-Content -LiteralPath $bad -Encoding utf8
+            { ConvertFrom-NeoIPCAuthoredUserCsv -UserPath $script:uUsers -RoleAssignmentPath $bad -OrgUnitAssignmentPath $script:uOus -RoleUid $script:roleUid -OrgUnitUid $script:ouUid } | Should -Throw '*unknown role*'
+        }
+        It 'throws on an unknown org unit' {
+            $bad = Join-Path $TestDrive 'uo-badou.csv'
+            @('username,organisationUnit', 'play.a.1,Nowhere', 'play.admin,ROOT') | Set-Content -LiteralPath $bad -Encoding utf8
+            { ConvertFrom-NeoIPCAuthoredUserCsv -UserPath $script:uUsers -RoleAssignmentPath $script:uRoles -OrgUnitAssignmentPath $bad -RoleUid $script:roleUid -OrgUnitUid $script:ouUid } | Should -Throw '*unknown org unit*'
+        }
+        It 'throws on a user with no role assignment (DHIS2 requires at least one)' {
+            $noRole = Join-Path $TestDrive 'ur-norole.csv'
+            @('username,role', 'play.admin,Superuser') | Set-Content -LiteralPath $noRole -Encoding utf8   # play.a.1 has no role row
+            { ConvertFrom-NeoIPCAuthoredUserCsv -UserPath $script:uUsers -RoleAssignmentPath $noRole -OrgUnitAssignmentPath $script:uOus -RoleUid $script:roleUid -OrgUnitUid $script:ouUid } | Should -Throw '*no userRoles*'
+        }
+        It 'throws on an assignment targeting a user absent from users.csv' {
+            $dangling = Join-Path $TestDrive 'ur-dangling.csv'
+            @('username,role', 'play.a.1,Base', 'play.admin,Superuser', 'play.ghost,Base') | Set-Content -LiteralPath $dangling -Encoding utf8
+            { ConvertFrom-NeoIPCAuthoredUserCsv -UserPath $script:uUsers -RoleAssignmentPath $dangling -OrgUnitAssignmentPath $script:uOus -RoleUid $script:roleUid -OrgUnitUid $script:ouUid } | Should -Throw '*unknown user*'
+        }
+        It 'throws on a duplicate username in users.csv' {
+            $dup = Join-Path $TestDrive 'users-dup.csv'
+            @('username,firstName,surname', 'd,Xx,Xx', 'd,Yy,Yy') | Set-Content -LiteralPath $dup -Encoding utf8
+            $dr = Join-Path $TestDrive 'ur-for-dup.csv'
+            @('username,role', 'd,Base') | Set-Content -LiteralPath $dr -Encoding utf8
+            $do = Join-Path $TestDrive 'uo-for-dup.csv'
+            @('username,organisationUnit', 'd,DeptA') | Set-Content -LiteralPath $do -Encoding utf8
+            { ConvertFrom-NeoIPCAuthoredUserCsv -UserPath $dup -RoleAssignmentPath $dr -OrgUnitAssignmentPath $do -RoleUid $script:roleUid -OrgUnitUid $script:ouUid } | Should -Throw '*Duplicate*'
+        }
+        It 'throws on a firstName/surname shorter than 2 characters (DHIS2 @PropertyRange min)' {
+            $shortName = Join-Path $TestDrive 'users-short.csv'
+            @('username,firstName,surname', 'play.x,P,One') | Set-Content -LiteralPath $shortName -Encoding utf8   # firstName 'P' is 1 char
+            $ur = Join-Path $TestDrive 'ur-short.csv'
+            @('username,role', 'play.x,Base') | Set-Content -LiteralPath $ur -Encoding utf8
+            $uo = Join-Path $TestDrive 'uo-short.csv'
+            @('username,organisationUnit', 'play.x,DeptA') | Set-Content -LiteralPath $uo -Encoding utf8
+            { ConvertFrom-NeoIPCAuthoredUserCsv -UserPath $shortName -RoleAssignmentPath $ur -OrgUnitAssignmentPath $uo -RoleUid $script:roleUid -OrgUnitUid $script:ouUid } | Should -Throw '*at least 2 characters*'
         }
     }
 }

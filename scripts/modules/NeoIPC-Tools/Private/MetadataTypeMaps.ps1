@@ -10,6 +10,8 @@ $script:NeoIPCMetadataStripList = @(
     'created', 'lastUpdated', 'createdBy', 'lastUpdatedBy',
     'access', 'favorite', 'favorites', 'userAccesses', 'userGroupAccesses', 'externalAccess',
     'href', 'user', 'publicAccess', 'lastUpdatedDuration',
+    'users',  # the anonymised, per-deployment member list ON a userGroup object — dropped on capture, so common groups carry no members. (Does NOT affect sharing.users grants: those live inside the 'sharing' object, which Convert-NeoIPCSharing normalizes separately and preserves as authorization intent — the recursive strip never reaches into the sharing branch.)
+    'organisationUnits',  # per-deployment org-unit ASSIGNMENT / membership — organisationUnitGroups membership, the program's org-unit assignment, a categoryOption's restriction. Always references org-unit INSTANCES (anonymised in the export), never config; dropped on capture so common carries none. (Distinct from organisationUnitGroupSets.organisationUnitGroups and userGroups.managedGroups, which are definition→definition CONFIG and are kept.)
     'path'   # organisationUnit's materialised ancestor path — derived from `parent`, recomputed on import
 )
 
@@ -35,21 +37,32 @@ $script:NeoIPCMetadataDeferredFields = @('translations')
 # objects, and server-generated collections. Excluded from both emit and the comparator, so their
 # presence in a source export is not reported as a round-trip difference.
 $script:NeoIPCMetadataExcludedTypes = @(
-    'users', 'userRoles', 'userGroups', 'apiToken',   # account/PII tier
-    'categoryOptionCombos'                             # server-generated (regenerate-on-import)
+    'users', 'apiToken',           # account/PII tier (users are fully anonymised in the export; the play variant gets synthetic authored accounts)
+    'categoryOptionCombos'         # server-generated (regenerate-on-import)
 )
 
-# NON-CLOSURE types — first-class NeoIPC metadata the dependency closure cannot reach STRUCTURALLY. The
-# org-unit hierarchy, its groups / group-sets, and the level definitions are real deployment config that
-# production (not just play) needs: neoipcr reads org-unit group memberships for org-unit roles, World-Bank
-# income classes, and reference-centre / test-unit / trial-site identification. The NEOIPC_CORE program
-# references the groups only by CODE inside expression strings (d2:inOrgUnitGroup('NEO_DEPARTMENT')), never
-# by structured {id}, so the {id}-walk closure cannot pull them in. They are converted, compared, and
-# round-tripped like any other type, but the closure and the owned-id / UID-regeneration scan skip them (they
-# are packaged as deployment config, not pruned by the closure, and keep their UIDs). Distinct from excluded
-# types (not handled at all) and deferred types (not yet handled).
+# NON-CLOSURE types — first-class NeoIPC metadata the dependency closure cannot reach STRUCTURALLY, packaged
+# as deployment config with their real UIDs. They are converted, compared, and round-tripped like any other
+# type, but the closure (index + prune) and the owned-id / UID-regeneration scan skip them. Distinct from
+# excluded types (not handled at all) and deferred types (not yet handled). Two families:
+#
+#   Org-unit hierarchy, its groups / group-sets, and the level definitions — real deployment config that
+#   production (not just play) needs: neoipcr reads org-unit group memberships for org-unit roles, World-Bank
+#   income classes, and reference-centre / test-unit / trial-site identification. The NEOIPC_CORE program
+#   references the groups only by CODE inside expression strings (d2:inOrgUnitGroup('NEO_DEPARTMENT')), never
+#   by structured {id}, so the {id}-walk closure cannot pull them in.
+#
+#   userRoles and userGroups — the access-control config. userRoles (authorities + restrictions) are
+#   deployment-agnostic and referenced only by user accounts (which are excluded/synthetic), so nothing in
+#   the program closure points at them. userGroups carry the group definitions; one of them
+#   (NEOIPC_PATHOGEN_LIST_ADMINS) is the recipientUserGroup of every program notification template, so a
+#   closure object DOES reference it by {id} — but since userGroups is packaged whole, that reference is
+#   satisfied without indexing the type into the closure walk (previously it resolved only because excluded
+#   types are treated as import-time overlays). Their per-deployment membership (the anonymised users[]) is
+#   stripped on capture, so common groups carry no members.
 $script:NeoIPCMetadataNonClosureTypes = @(
-    'organisationUnits', 'organisationUnitGroups', 'organisationUnitGroupSets', 'organisationUnitLevels'
+    'organisationUnits', 'organisationUnitGroups', 'organisationUnitGroupSets', 'organisationUnitLevels',
+    'userRoles', 'userGroups'
 )
 
 # Object types not yet handled — not PII/server/env-excluded, just unhandled for now. The analytics
@@ -115,7 +128,7 @@ $script:NeoIPCMetadataTypeMaps = [ordered]@{
     'categoryCombos'        = @{ NaturalKey = 'code'; Nesting = 'TopLevel'; Properties = [ordered]@{
         code = 'string'; name = 'string'; dataDimensionType = 'string'; skipTotal = 'bool'; categories = 'idArrayOrdered' } }
     'categoryOptions'       = @{ NaturalKey = 'code'; Nesting = 'TopLevel'; Properties = [ordered]@{
-        code = 'string'; name = 'string'; shortName = 'string'; organisationUnits = 'idArray' } }
+        code = 'string'; name = 'string'; shortName = 'string' } }   # organisationUnits (restriction) is per-deployment — stripped
     'trackedEntityAttributes' = @{ NaturalKey = 'code'; Nesting = 'TopLevel'; Properties = [ordered]@{
         code = 'string'; name = 'string'; shortName = 'string'; formName = 'string'; description = 'string'; pattern = 'string'; fieldMask = 'string'
         valueType = 'string'; aggregationType = 'string'
@@ -155,7 +168,7 @@ $script:NeoIPCMetadataTypeMaps = [ordered]@{
         displayFrontPageList = 'bool'; displayIncidentDate = 'bool'; ignoreOverdueEvents = 'bool'; onlyEnrollOnce = 'bool'
         selectEnrollmentDatesInFuture = 'bool'; selectIncidentDatesInFuture = 'bool'; skipOffline = 'bool'; useFirstStageDuringRegistration = 'bool'
         categoryCombo = 'id'; trackedEntityType = 'id'
-        organisationUnits = 'idArray'; programStages = 'idArray'; programSections = 'idArray'; notificationTemplates = 'idArray' } }
+        programStages = 'idArray'; programSections = 'idArray'; notificationTemplates = 'idArray' } }   # organisationUnits (the program's org-unit assignment) is per-deployment — stripped
     'programStages'        = @{ NaturalKey = 'name'; Nesting = 'BothPlaces'; Properties = [ordered]@{
         name = 'string'; description = 'string'; executionDateLabel = 'string'; reportDateToUse = 'string'; validationStrategy = 'string'
         minDaysFromStart = 'int'; sortOrder = 'int'
@@ -186,15 +199,19 @@ $script:NeoIPCMetadataTypeMaps = [ordered]@{
         sectionAttribute = 'bool'; sqlViewAttribute = 'bool'; trackedEntityAttributeAttribute = 'bool'
         trackedEntityTypeAttribute = 'bool'; userAttribute = 'bool'; userGroupAttribute = 'bool'
         validationRuleAttribute = 'bool'; validationRuleGroupAttribute = 'bool'; visualizationAttribute = 'bool' } }
-    'organisationUnits'     = @{ NaturalKey = @('parent', 'name'); Nesting = 'TopLevel'; Properties = [ordered]@{
-        name = 'string'; shortName = 'string'; openingDate = 'string'; closedDate = 'string'; level = 'int'; parent = 'id'; image = 'id' } }
+    'organisationUnits'     = @{ NaturalKey = 'code'; Nesting = 'TopLevel'; Properties = [ordered]@{
+        code = 'string'; name = 'string'; shortName = 'string'; openingDate = 'string'; closedDate = 'string'; level = 'int'; parent = 'id'; image = 'id' } }
     'organisationUnitGroups' = @{ NaturalKey = 'code'; Nesting = 'TopLevel'; Properties = [ordered]@{
-        code = 'string'; name = 'string'; shortName = 'string'; description = 'string'; symbol = 'string'; color = 'string'; organisationUnits = 'idArray' } }
+        code = 'string'; name = 'string'; shortName = 'string'; description = 'string'; symbol = 'string'; color = 'string' } }   # organisationUnits (membership) is per-deployment — stripped (common empty, play overlay)
     'organisationUnitGroupSets' = @{ NaturalKey = 'code'; Nesting = 'TopLevel'; Properties = [ordered]@{
         code = 'string'; name = 'string'; shortName = 'string'; description = 'string'
         compulsory = 'bool'; dataDimension = 'bool'; includeSubhierarchyInAnalytics = 'bool'; organisationUnitGroups = 'idArray' } }
     'organisationUnitLevels' = @{ NaturalKey = 'level'; Nesting = 'TopLevel'; Properties = [ordered]@{
         name = 'string'; level = 'int'; offlineLevels = 'int' } }
+    'userRoles'             = @{ NaturalKey = 'name'; Nesting = 'TopLevel'; Properties = [ordered]@{
+        code = 'string'; name = 'string'; description = 'string'; authorities = 'stringArray'; restrictions = 'stringArray' } }
+    'userGroups'            = @{ NaturalKey = 'code'; Nesting = 'TopLevel'; Properties = [ordered]@{
+        code = 'string'; name = 'string'; managedGroups = 'idArray' } }
     'programStageDataElements' = @{ NaturalKey = 'id'; Nesting = 'NestedOnly'
         Parent = @{ Type = 'programStages'; ArrayProp = 'programStageDataElements'; FkProp = 'programStage'; FkSynthetic = $false }
         Properties = [ordered]@{ compulsory = 'bool'; allowFutureDate = 'bool'; allowProvidedElsewhere = 'bool'

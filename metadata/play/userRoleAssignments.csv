@@ -1,0 +1,12 @@
+username,role
+play.at1.data1,Base
+play.at1.data1,Data entry
+play.at1.data2,Base
+play.at1.data2,Data entry
+play.at1.data3,Base
+play.at1.data3,Data entry
+play.ch.data1,Base
+play.ch.data1,Data entry
+play.ch.data2,Base
+play.ch.data2,Data entry
+play.admin,Superuser
