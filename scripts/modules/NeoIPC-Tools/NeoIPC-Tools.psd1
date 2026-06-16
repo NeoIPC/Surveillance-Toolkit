@@ -70,6 +70,7 @@
         'Select-NeoIPCMetadataClosure'
         'Test-NeoIPCMetadataExpression'
         'Update-NeoIPCMetadata'
+        'New-NeoIPCMetadataPackage'
     )
 
     # Cmdlets to export from this module

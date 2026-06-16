@@ -380,3 +380,111 @@ function Select-NeoIPCMetadataClosure {
     if ($PassThru) { return $result }
     $result.Package | ConvertTo-Json -Depth 100 -Compress:$Compress
 }
+
+function New-NeoIPCMetadataPackage {
+    <#
+    .SYNOPSIS
+        Assemble an importable DHIS2 metadata package from an export plus the authored org units / users / memberships.
+    .DESCRIPTION
+        The play/test-package build. Starts from a (PII-cleaned, merged) DHIS2 export and produces one
+        importable package (push with idScheme=UID):
+          1. Prunes the export to the seed program's dependency closure (the Select-NeoIPCMetadataClosure engine).
+          2. Adds the non-closure config DEFINITIONS from the export — org-unit groups / group-sets / levels,
+             userRoles, userGroups — with their real UIDs (the closure cannot reach these: the program
+             references them only by code).
+          3. Noise-strips the whole config: audit fields, user / sharing references, the anonymised
+             per-deployment membership, and (for now) translations — leaving a clean, user-ref-free package.
+          4. Compiles the authored org units (code-keyed CSVs), users (normalized tables), and group
+             memberships, and stitches them in group-side, collision-checking every authored minted UID
+             against the captured identities (Join-NeoIPCMetadataPackage).
+        The export's anonymised org-unit instances and user accounts are excluded; the authored content
+        replaces them. By default the assembled package is emitted as JSON (returned, or written to
+        OutputPath). No DHIS2 API calls.
+
+        This combines the common + play layers into a single importable package (the integration-test / demo
+        seed). Translations are dropped pending the gettext-PO pipeline.
+    .PARAMETER ExportPath
+        Path to the merged, PII-cleaned DHIS2 export JSON (the closure seed + the non-closure definitions).
+    .PARAMETER OrgUnitPath
+        Code-keyed org-unit authoring CSV(s) — e.g. the common country scaffold + the play test hierarchy, merged.
+    .PARAMETER UserPath
+        users.csv (username, firstName, surname).
+    .PARAMETER RoleAssignmentPath
+        userRoleAssignments.csv (username, role) — role NAME resolved to the export's real userRole UID.
+    .PARAMETER OrgUnitAssignmentPath
+        userOrgUnitAssignments.csv (username, organisationUnit) — org-unit CODE resolved to the authored UID.
+    .PARAMETER OrgUnitGroupMembershipPath
+        Optional org-unit-group membership junction file(s) (organisationUnitGroup, organisationUnit) — e.g.
+        the common World-Bank-class file and the play designation file.
+    .PARAMETER UserGroupMembershipPath
+        Optional user-group membership junction file (userGroup, username).
+    .PARAMETER Password
+        Login password for every authored user (default: the DHIS2 demo password).
+    .PARAMETER SeedType
+        Top-level type of the closure seed (default: programs).
+    .PARAMETER SeedCode
+        Code of the closure seed (default: NEOIPC_CORE).
+    .PARAMETER OutputPath
+        Optional file to write the package JSON to (UTF-8, no BOM); if omitted the JSON string is returned
+        (unless -PassThru).
+    .PARAMETER Compress
+        Emit compact JSON instead of indented.
+    .PARAMETER PassThru
+        Return the result object (Package + OrgUnitCount + UserCount) instead of JSON.
+    #>
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', 'Password',
+        Justification = 'Forwards the synthetic play accounts'' known, clearly-test demo password to the authoring compiler — not a real secret.')]
+    [CmdletBinding()]
+    [OutputType([string], [hashtable])]
+    param(
+        [Parameter(Mandatory)][string]$ExportPath,
+        [Parameter(Mandatory)][string[]]$OrgUnitPath,
+        [Parameter(Mandatory)][string]$UserPath,
+        [Parameter(Mandatory)][string]$RoleAssignmentPath,
+        [Parameter(Mandatory)][string]$OrgUnitAssignmentPath,
+        [string[]]$OrgUnitGroupMembershipPath,
+        [string]$UserGroupMembershipPath,
+        [string]$Password = 'district',
+        [string]$SeedType = 'programs',
+        [string]$SeedCode = 'NEOIPC_CORE',
+        [string]$OutputPath,
+        [switch]$Compress,
+        [switch]$PassThru
+    )
+    if (-not (Test-Path -LiteralPath $ExportPath)) { throw "Export metadata file not found: '$ExportPath'." }
+    $export = ConvertFrom-NeoIPCMetadataJsonText -Json (Get-Content -LiteralPath $ExportPath -Raw)
+
+    # userRole NAME -> real UID, resolved before stripping (name and id both survive normalization anyway).
+    $roleUid = @{}
+    foreach ($r in @($export['userRoles'])) {
+        if ($r -is [System.Collections.IDictionary] -and $r['name']) { $roleUid[[string]$r['name']] = [string]$r['id'] }
+    }
+
+    # Closure + the non-closure DEFINITION types (the whole non-closure family except org-unit instances,
+    # which are authored). Then noise-strip the config so the anonymised per-deployment membership is gone
+    # BEFORE the authored membership is applied (organisationUnits / users are themselves strip-list keys).
+    $config = (Get-NeoIPCMetadataClosure -Package $export -SeedType $SeedType -SeedCode $SeedCode).Package
+    foreach ($t in $script:NeoIPCMetadataNonClosureTypes) {
+        if ($t -eq 'organisationUnits') { continue }
+        if ($export.Contains($t)) { $config[$t] = $export[$t] }
+    }
+    $config = Remove-NeoIPCMetadataNoise -Object $config
+
+    $orgUnits = ConvertFrom-NeoIPCAuthoredOrgUnitCsv -Path $OrgUnitPath
+    $ouUid = @{}
+    foreach ($o in $orgUnits) { $ouUid[[string]$o['code']] = [string]$o['id'] }
+    $users = ConvertFrom-NeoIPCAuthoredUserCsv -UserPath $UserPath -RoleAssignmentPath $RoleAssignmentPath -OrgUnitAssignmentPath $OrgUnitAssignmentPath -RoleUid $roleUid -OrgUnitUid $ouUid -Password $Password
+    $ougMembership = ConvertFrom-NeoIPCAuthoredOrgUnitGroupMembership -OrgUnit $orgUnits -MembershipPath $OrgUnitGroupMembershipPath
+    $ugMembership = if ($UserGroupMembershipPath) { ConvertFrom-NeoIPCAuthoredUserGroupMembership -MembershipPath $UserGroupMembershipPath -User $users } else { [ordered]@{} }
+
+    $package = Join-NeoIPCMetadataPackage -Config $config -OrgUnit $orgUnits -User $users -OrgUnitGroupMembership $ougMembership -UserGroupMembership $ugMembership
+    Write-Verbose ("Assembled package: {0} org units, {1} users, {2} top-level types." -f @($orgUnits).Count, @($users).Count, @($package.Keys).Count)
+
+    if ($PassThru) { return @{ Package = $package; OrgUnitCount = @($orgUnits).Count; UserCount = @($users).Count } }
+    $json = $package | ConvertTo-Json -Depth 100 -Compress:$Compress
+    if ($OutputPath) {
+        [System.IO.File]::WriteAllText($OutputPath, $json, [System.Text.UTF8Encoding]::new($false))
+        return
+    }
+    $json
+}

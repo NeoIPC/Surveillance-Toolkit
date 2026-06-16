@@ -1228,4 +1228,51 @@ InModuleScope 'NeoIPC-Tools' {
             { Set-NeoIPCGroupMembership -Group @([ordered]@{ id = 'g000000001'; code = 'HOSPITAL' }) -Membership $m -MemberProperty 'organisationUnits' } | Should -Throw '*not present*'
         }
     }
+
+    Describe 'Play-package assembly (Join + collision + group-side membership)' {
+        BeforeEach {
+            # A minimal captured config: a closure type, the non-closure group/role definitions, and a
+            # server-generated combo. Rebuilt per test because Join mutates it in place.
+            $script:asmConfig = [ordered]@{
+                programs               = @([ordered]@{ id = 'prog0000001'; code = 'NEOIPC_CORE'; name = 'Core' })
+                organisationUnitGroups = @(
+                    [ordered]@{ id = 'oug0000001'; code = 'HOSPITAL'; name = 'Hospital' },
+                    [ordered]@{ id = 'oug0000002'; code = 'COUNTRY'; name = 'Country' },
+                    [ordered]@{ id = 'oug0000003'; code = 'NEO_DEPARTMENT'; name = 'Neonatology Department' })
+                userGroups             = @([ordered]@{ id = 'ug00000001'; code = 'NEOIPC'; name = 'NeoIPC' })
+                categoryOptionCombos   = @([ordered]@{ id = 'coc0000001'; name = 'default' })
+            }
+            $script:asmOus = @(
+                [ordered]@{ id = 'ou00000001'; code = 'AT'; level = 2 },
+                [ordered]@{ id = 'ou00000002'; code = 'AT_TEST'; level = 3 },
+                [ordered]@{ id = 'ou00000003'; code = 'AT_TEST_TEST'; level = 4 })
+            $script:asmUsers = @([ordered]@{ id = 'usr0000001'; username = 'play.a' })
+        }
+        It 'recursively collects object and reference ids' {
+            $node = [ordered]@{ id = 'aaaaaaaaaa1'; child = [ordered]@{ id = 'bbbbbbbbbb2' }; list = @([ordered]@{ id = 'cccccccccc3'; ref = [ordered]@{ id = 'dddddddddd4' } }) }
+            $acc = [System.Collections.Generic.HashSet[string]]::new()
+            Add-NeoIPCMetadataId -Node $node -Accumulator $acc
+            $acc.Count | Should -Be 4
+            $acc.Contains('dddddddddd4') | Should -BeTrue
+        }
+        It 'stitches authored org units / users in, drops server-generated combos, applies memberships group-side' {
+            $oug = ConvertFrom-NeoIPCAuthoredOrgUnitGroupMembership -OrgUnit $script:asmOus   # structural: COUNTRY/HOSPITAL/NEO_DEPARTMENT
+            $ug = [ordered]@{ NEOIPC = @('usr0000001') }
+            $pkg = Join-NeoIPCMetadataPackage -Config $script:asmConfig -OrgUnit $script:asmOus -User $script:asmUsers -OrgUnitGroupMembership $oug -UserGroupMembership $ug
+            $pkg.Contains('categoryOptionCombos') | Should -BeFalse
+            @($pkg['organisationUnits']).Count | Should -Be 3
+            @($pkg['users']).Count | Should -Be 1
+            ($pkg['organisationUnitGroups'] | Where-Object { $_.code -eq 'HOSPITAL' }).organisationUnits[0].id | Should -BeExactly 'ou00000002'
+            ($pkg['organisationUnitGroups'] | Where-Object { $_.code -eq 'COUNTRY' }).organisationUnits[0].id | Should -BeExactly 'ou00000001'
+            ($pkg['userGroups'] | Where-Object { $_.code -eq 'NEOIPC' }).users[0].id | Should -BeExactly 'usr0000001'
+        }
+        It 'throws when an authored org-unit UID collides with a captured object id' {
+            $collide = @([ordered]@{ id = 'prog0000001'; code = 'X_TEST'; level = 3 })   # same id as the program
+            { Join-NeoIPCMetadataPackage -Config $script:asmConfig -OrgUnit $collide -User @() -OrgUnitGroupMembership ([ordered]@{}) -UserGroupMembership ([ordered]@{}) } | Should -Throw '*collides*'
+        }
+        It 'throws when an authored user UID collides with an authored org-unit UID (cross-check)' {
+            $u = @([ordered]@{ id = 'ou00000001'; username = 'clash' })   # same id as the AT org unit
+            { Join-NeoIPCMetadataPackage -Config $script:asmConfig -OrgUnit $script:asmOus -User $u -OrgUnitGroupMembership ([ordered]@{}) -UserGroupMembership ([ordered]@{}) } | Should -Throw '*collides*'
+        }
+    }
 }
