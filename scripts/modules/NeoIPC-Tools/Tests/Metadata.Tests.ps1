@@ -355,7 +355,7 @@ InModuleScope 'NeoIPC-Tools' {
         }
     }
 
-    Describe 'Dependency closure (the M2 prune)' {
+    Describe 'Dependency closure (the prune)' {
         BeforeAll {
             function New-ClosureFixture {
                 # A synthetic NEOIPC_CORE program package exercising every closure edge: forward {id} walk,
@@ -614,6 +614,235 @@ InModuleScope 'NeoIPC-Tools' {
             $base = New-MergeBase
             $null = Merge-NeoIPCMetadataPackage -Base $base -Supplement (New-MergeSupplement)
             $base.Contains('programNotificationTemplates') | Should -BeFalse
+        }
+    }
+
+    Describe 'Expression canonicalization (name-arg d2-functions -> quoted name)' {
+        It 'rewrites a #{name} program-rule-variable arg to the quoted form' {
+            ConvertTo-NeoIPCCanonicalExpression -Expression 'd2:hasValue(#{NeoIPC BSI Pathogen 1 value})' |
+                Should -BeExactly "d2:hasValue('NeoIPC BSI Pathogen 1 value')"
+        }
+        It 'rewrites the A{}, C{} and V{} prefixes too (all of [A#CV])' {
+            ConvertTo-NeoIPCCanonicalExpression -Expression 'd2:hasValue(A{Gestational age})' | Should -BeExactly "d2:hasValue('Gestational age')"
+            ConvertTo-NeoIPCCanonicalExpression -Expression 'd2:count(C{some const})' | Should -BeExactly "d2:count('some const')"
+            ConvertTo-NeoIPCCanonicalExpression -Expression 'd2:countIfZeroPos(V{event_count})' | Should -BeExactly "d2:countIfZeroPos('event_count')"
+        }
+        It 'preserves trailing arguments of multi-arg functions (matches only the first arg)' {
+            ConvertTo-NeoIPCCanonicalExpression -Expression "d2:countIfValue(#{my var}, 'POS')" |
+                Should -BeExactly "d2:countIfValue('my var', 'POS')"
+        }
+        It 'consumes leading spaces after the paren but leaves the trailing space (engine-faithful)' {
+            ConvertTo-NeoIPCCanonicalExpression -Expression 'd2:hasValue( #{x name} )' | Should -BeExactly "d2:hasValue('x name' )"
+        }
+        It 'rewrites every occurrence in a multi-call expression' {
+            ConvertTo-NeoIPCCanonicalExpression -Expression 'd2:hasValue(#{a}) || d2:hasValue(#{b})' |
+                Should -BeExactly "d2:hasValue('a') || d2:hasValue('b')"
+        }
+        It 'does NOT touch a function outside the avoid-replacement set' {
+            $e = 'd2:daysBetween(#{x}, V{event_date})'
+            ConvertTo-NeoIPCCanonicalExpression -Expression $e | Should -BeExactly $e
+        }
+        It 'does NOT touch a #{var} reference outside a d2-function call' {
+            $e = '#{x} > 0 && #{y} == 1'
+            ConvertTo-NeoIPCCanonicalExpression -Expression $e | Should -BeExactly $e
+        }
+        It 'is idempotent on an already-canonical expression' {
+            $e = "d2:hasValue('NeoIPC var') && #{NeoIPC var} != 1"
+            ConvertTo-NeoIPCCanonicalExpression -Expression $e | Should -BeExactly $e
+        }
+    }
+
+    Describe 'Precedence-ambiguity detector (group-scoped)' {
+        It 'flags && and || mixed directly in one group' {
+            Test-NeoIPCMetadataPrecedenceAmbiguity -Expression 'a && b || c' | Should -BeTrue
+            Test-NeoIPCMetadataPrecedenceAmbiguity -Expression '#{x} != 0 && (#{x} < 161) || (#{x} >= 310)' | Should -BeTrue
+        }
+        It 'does NOT flag sibling groups at the same depth ((a&&b) || (c&&d))' {
+            Test-NeoIPCMetadataPrecedenceAmbiguity -Expression '( a && b ) || ( c && d )' | Should -BeFalse
+        }
+        It 'does NOT flag a fully grouped sub-expression (a && (b || c))' {
+            Test-NeoIPCMetadataPrecedenceAmbiguity -Expression 'a && (b || c)' | Should -BeFalse
+        }
+        It 'does NOT flag a single-operator expression' {
+            Test-NeoIPCMetadataPrecedenceAmbiguity -Expression 'a && b && c' | Should -BeFalse
+            Test-NeoIPCMetadataPrecedenceAmbiguity -Expression 'a || b || c' | Should -BeFalse
+        }
+        It 'ignores operators inside quoted strings and {curly} names' {
+            Test-NeoIPCMetadataPrecedenceAmbiguity -Expression "d2:hasValue('a || b') && x && y" | Should -BeFalse
+            Test-NeoIPCMetadataPrecedenceAmbiguity -Expression '#{name || other} && x && z' | Should -BeFalse
+        }
+    }
+
+    Describe 'Expression linting (the three NeoIPC issue classes)' {
+        It 'flags MixedBooleanPrecedence (Warning)' {
+            $f = @(Get-NeoIPCMetadataExpressionFinding -Expression 'a && b || c' -ObjectType 'programRules' -ObjectId 'prX' -Field 'condition')
+            ($f | Where-Object Rule -eq 'MixedBooleanPrecedence').Severity | Should -BeExactly 'Warning'
+        }
+        It 'flags NegativeSentinelComparison for == -1 and != -1 only' {
+            @(Get-NeoIPCMetadataExpressionFinding -Expression '#{x} == -1' -ObjectType 'programRules' -ObjectId 'a' -Field 'condition' | Where-Object Rule -eq 'NegativeSentinelComparison').Count | Should -Be 1
+            @(Get-NeoIPCMetadataExpressionFinding -Expression '#{x} != -1' -ObjectType 'programRules' -ObjectId 'a' -Field 'condition' | Where-Object Rule -eq 'NegativeSentinelComparison').Count | Should -Be 1
+        }
+        It 'does NOT flag a comparison against -10, -1.5, or -1e5 (sentinel is exactly -1)' {
+            @(Get-NeoIPCMetadataExpressionFinding -Expression '#{x} == -10' -ObjectType 'programRules' -ObjectId 'a' -Field 'condition' | Where-Object Rule -eq 'NegativeSentinelComparison').Count | Should -Be 0
+            @(Get-NeoIPCMetadataExpressionFinding -Expression '#{x} == -1.5' -ObjectType 'programRules' -ObjectId 'a' -Field 'condition' | Where-Object Rule -eq 'NegativeSentinelComparison').Count | Should -Be 0
+            @(Get-NeoIPCMetadataExpressionFinding -Expression '#{x} == -1e5' -ObjectType 'programRules' -ObjectId 'a' -Field 'condition' | Where-Object Rule -eq 'NegativeSentinelComparison').Count | Should -Be 0
+        }
+        It 'does NOT flag a non-equality comparison against -1 (>= -1 is a legitimate range check)' {
+            @(Get-NeoIPCMetadataExpressionFinding -Expression '#{x} >= -1' -ObjectType 'programRules' -ObjectId 'a' -Field 'condition' | Where-Object Rule -eq 'NegativeSentinelComparison').Count | Should -Be 0
+        }
+        It 'flags LegacyD2FunctionArgForm (Info) and clears once canonicalized' {
+            @(Get-NeoIPCMetadataExpressionFinding -Expression 'd2:hasValue(#{x})' -ObjectType 'programRules' -ObjectId 'a' -Field 'condition' | Where-Object Rule -eq 'LegacyD2FunctionArgForm').Count | Should -Be 1
+            @(Get-NeoIPCMetadataExpressionFinding -Expression "d2:hasValue('x')" -ObjectType 'programRules' -ObjectId 'a' -Field 'condition' | Where-Object Rule -eq 'LegacyD2FunctionArgForm').Count | Should -Be 0
+        }
+        It 'does NOT flag the legacy d2-arg form in a server-side program-indicator / validation-rule field' {
+            # In a server-side expression d2:count(#{ps.de}) is a valid data-item reference, not a legacy form;
+            # the rule (and the canonicalizer) apply ONLY to the Tracker-Capture-evaluated fields.
+            @(Get-NeoIPCMetadataExpressionFinding -Expression 'd2:count(#{stageADM001.deUsed00001})' -ObjectType 'programIndicators' -Field 'expression' | Where-Object Rule -eq 'LegacyD2FunctionArgForm').Count | Should -Be 0
+            @(Get-NeoIPCMetadataExpressionFinding -Expression 'd2:count(#{stageADM001.deUsed00001})' -ObjectType 'validationRules' -Field 'leftSide.expression' | Where-Object Rule -eq 'LegacyD2FunctionArgForm').Count | Should -Be 0
+        }
+
+        Context 'Test-NeoIPCMetadataExpression over a package' {
+            BeforeAll {
+                $script:lintPkg = [ordered]@{
+                    programRules = @(
+                        [ordered]@{ id = 'prPrec00001'; name = 'Prec'; condition = 'a && b || c' }
+                        [ordered]@{ id = 'prLegacy001'; name = 'Legacy'; condition = 'd2:hasValue(#{x}) && #{x} != 1' }
+                        [ordered]@{ id = 'prClean0001'; name = 'Clean'; condition = "d2:hasValue('x') && #{x} != 1" })
+                    programRuleActions = @([ordered]@{ id = 'praSent0001'; programRuleActionType = 'SHOWERROR'; data = '#{y} == -1' })
+                    validationRules = @([ordered]@{ id = 'vrSent00001'; name = 'VR'; operator = 'not_equal_to'
+                            leftSide = [ordered]@{ expression = '#{a.b} != -1' }; rightSide = [ordered]@{ expression = 'V{zero}' } })
+                }
+            }
+            It 'returns only Warning-level findings by default' {
+                $f = @(Test-NeoIPCMetadataExpression -Package $script:lintPkg)
+                $f.Count | Should -Be 3
+                ($f | ForEach-Object Rule | Sort-Object -Unique) | Should -Be @('MixedBooleanPrecedence', 'NegativeSentinelComparison')
+                ($f | Where-Object Rule -eq 'NegativeSentinelComparison').Count | Should -Be 2
+            }
+            It 'includes the Info style findings at -MinimumSeverity Info' {
+                $f = @(Test-NeoIPCMetadataExpression -Package $script:lintPkg -MinimumSeverity Info)
+                ($f | Where-Object Rule -eq 'LegacyD2FunctionArgForm').Count | Should -Be 1
+            }
+            It 'scans the validation-rule leftSide expression and tags Field/ObjectId' {
+                $vr = @(Test-NeoIPCMetadataExpression -Package $script:lintPkg | Where-Object ObjectId -eq 'vrSent00001')
+                $vr.Count | Should -Be 1
+                $vr[0].Field | Should -BeExactly 'leftSide.expression'
+            }
+            It 'throws on a non-dictionary package instead of silently reporting clean' {
+                # A PSCustomObject (ConvertFrom-Json without -AsHashtable) would index to $null per type and
+                # scan empty — a lint tool must fail loudly, not pass dirty input.
+                $pso = [pscustomobject]@{ programRules = @([pscustomobject]@{ id = 'r1'; name = 'R'; condition = 'a && b || c' }) }
+                { Test-NeoIPCMetadataExpression -Package $pso } | Should -Throw '*dictionary/hashtable*'
+            }
+        }
+    }
+
+    Describe 'Update-NeoIPCMetadata (source transforms)' {
+        BeforeAll {
+            function New-TransformFixture {
+                [ordered]@{
+                    programs = @([ordered]@{ id = 'progAAAA001'; code = 'NEOIPC_CORE'; name = 'Core'; programType = 'WITH_REGISTRATION'
+                            organisationUnits = @([ordered]@{ id = 'ouOverlay01' })   # absent overlay ref -> must keep its UID
+                            programStages = @([ordered]@{ id = 'psAAAA00001' }) })
+                    programStages = @([ordered]@{ id = 'psAAAA00001'; name = 'Adm'; program = [ordered]@{ id = 'progAAAA001' }
+                            programStageDataElements = @([ordered]@{ id = 'psdeAAA0001'; programStage = [ordered]@{ id = 'psAAAA00001' }
+                                    dataElement = [ordered]@{ id = 'deAAAA00001' } }) })
+                    dataElements = @([ordered]@{ id = 'deAAAA00001'; code = 'NEOIPC_X'; name = 'X'; valueType = 'TEXT' })
+                    programRules = @([ordered]@{ id = 'prAAAA00001'; name = 'R'; condition = 'd2:hasValue(#{NeoIPC var}) && #{NeoIPC var} != 1'
+                            program = [ordered]@{ id = 'progAAAA001' } })
+                    programIndicators = @([ordered]@{ id = 'piAAAAA0001'; name = 'PI'; analyticsType = 'EVENT'; program = [ordered]@{ id = 'progAAAA001' }
+                            expression = '#{psAAAA00001.deAAAA00001} > 0' })
+                }
+            }
+        }
+        It 'throws when no transform is requested' {
+            { Update-NeoIPCMetadata -Package (New-TransformFixture) } | Should -Throw '*at least one transform*'
+        }
+        It 'canonicalizes program-rule conditions and counts the changed slots' {
+            $r = Update-NeoIPCMetadata -Package (New-TransformFixture) -Canonicalize -PassThru
+            $r.CanonicalizedSlots | Should -Be 1
+            $r.Package['programRules'][0]['condition'] | Should -BeExactly "d2:hasValue('NeoIPC var') && #{NeoIPC var} != 1"
+        }
+        It 'does NOT canonicalize a server-side program-indicator expression (only Tracker-Capture fields)' {
+            $pkg = [ordered]@{
+                programRules = @([ordered]@{ id = 'prAAAA00001'; name = 'R'; condition = 'd2:hasValue(#{NeoIPC var})' })
+                programIndicators = @([ordered]@{ id = 'piAAAAA0001'; name = 'PI'; analyticsType = 'EVENT'
+                        expression = 'd2:count(#{stageADM001.deUsed00001}) > 0' }) }
+            $r = Update-NeoIPCMetadata -Package $pkg -Canonicalize -PassThru
+            $r.CanonicalizedSlots | Should -Be 1   # only the program-rule condition
+            $r.Package['programRules'][0]['condition'] | Should -BeExactly "d2:hasValue('NeoIPC var')"
+            $r.Package['programIndicators'][0]['expression'] | Should -BeExactly 'd2:count(#{stageADM001.deUsed00001}) > 0'   # the data-item ref is untouched
+        }
+        It 'does not mutate the input package (transforms a clone)' {
+            $pkg = New-TransformFixture
+            $null = Update-NeoIPCMetadata -Package $pkg -Canonicalize -RegenerateUids
+            $pkg['programRules'][0]['condition'] | Should -BeExactly 'd2:hasValue(#{NeoIPC var}) && #{NeoIPC var} != 1'
+            $pkg['programs'][0]['id'] | Should -BeExactly 'progAAAA001'
+        }
+
+        Context 'UID regeneration' {
+            It 'builds a bijective map over OWNED ids only (top-level + nested children, not overlay refs)' {
+                $map = New-NeoIPCMetadataUidMap -Package (New-TransformFixture)
+                $map.Count | Should -Be 6      # program, stage, PSDE child, dataElement, programRule, programIndicator
+                $map.ContainsKey('psdeAAA0001') | Should -BeTrue -Because 'a declared nested-only child is owned'
+                $map.ContainsKey('ouOverlay01') | Should -BeFalse -Because 'an absent overlay ref is not owned'
+                ($map.Values | Sort-Object -Unique).Count | Should -Be 6
+                foreach ($v in $map.Values) { Test-NeoIPCMetadataUid -Id $v | Should -BeTrue }
+            }
+            It 'rewrites every owned id and updates structured AND expression-embedded references' {
+                $r = Update-NeoIPCMetadata -Package (New-TransformFixture) -RegenerateUids -PassThru
+                $p = $r.Package
+                $r.RegeneratedUids | Should -Be 6
+                # owned ids changed
+                $p['programs'][0]['id'] | Should -Not -BeExactly 'progAAAA001'
+                # structured ref updated to the new program id
+                $p['programStages'][0]['program']['id'] | Should -BeExactly $r.UidMap['progAAAA001']
+                $p['programStages'][0]['programStageDataElements'][0]['dataElement']['id'] | Should -BeExactly $r.UidMap['deAAAA00001']
+                # expression-embedded UIDs rewritten to the new stage/dataElement ids
+                $p['programIndicators'][0]['expression'] | Should -BeExactly ("#{{{0}.{1}}} > 0" -f $r.UidMap['psAAAA00001'], $r.UidMap['deAAAA00001'])
+            }
+            It 'leaves an absent overlay reference (org unit) untouched' {
+                $r = Update-NeoIPCMetadata -Package (New-TransformFixture) -RegenerateUids -PassThru
+                $r.Package['programs'][0]['organisationUnits'][0]['id'] | Should -BeExactly 'ouOverlay01'
+            }
+            It 'does not rewrite a UID-shaped substring embedded in a snake_case code' {
+                # The code carries a token that IS an owned UID but glued into a snake_case string; the
+                # '_' boundary must prevent the token replace from corrupting it.
+                $owned = New-NeoIPCMetadataUid -Type 'dataElements' -NaturalKey 'boundary-probe'
+                $pkg = [ordered]@{
+                    programs = @([ordered]@{ id = 'progAAAA001'; code = 'NEOIPC_CORE'; name = 'C'; programType = 'WITH_REGISTRATION' })
+                    dataElements = @([ordered]@{ id = $owned; code = ("PREFIX_{0}_SUFFIX" -f $owned); name = 'X'; valueType = 'TEXT' }) }
+                $r = Update-NeoIPCMetadata -Package $pkg -RegenerateUids -PassThru
+                $r.Package['dataElements'][0]['id'] | Should -BeExactly $r.UidMap[$owned]   # bare id field IS rewritten
+                $r.Package['dataElements'][0]['code'] | Should -BeExactly ("PREFIX_{0}_SUFFIX" -f $owned)   # embedded-in-snake_case is NOT
+            }
+            It 'is deterministic across runs (pure mint salted by old id)' {
+                $a = New-NeoIPCMetadataUidMap -Package (New-TransformFixture)
+                $b = New-NeoIPCMetadataUidMap -Package (New-TransformFixture)
+                foreach ($k in $a.Keys) { $a[$k] | Should -BeExactly $b[$k] }
+            }
+            It 'never re-mints excluded/overlay/PII ids, unmapped types, or the system default UIDs' {
+                # When a full export carries the overlay/PII/server-generated collections top-level plus the
+                # system default categoryCombo (referenced by every dataElement), those must keep their UIDs so
+                # the package still binds on import. bjDvmb4bfuf is a $NeoIPCMetadataDefaultUids member.
+                $pkg = [ordered]@{
+                    programs = @([ordered]@{ id = 'progAAAA001'; code = 'NEOIPC_CORE'; name = 'C'; programType = 'WITH_REGISTRATION' })
+                    dataElements = @([ordered]@{ id = 'deAAAA00001'; code = 'NEOIPC_X'; name = 'X'; valueType = 'TEXT'; categoryCombo = [ordered]@{ id = 'bjDvmb4bfuf' } })
+                    categoryCombos = @([ordered]@{ id = 'bjDvmb4bfuf'; code = 'default'; name = 'default'; dataDimensionType = 'DISAGGREGATION' })
+                    organisationUnits = @([ordered]@{ id = 'ouRealOrg01'; name = 'Real OU' })          # excluded overlay
+                    users = @([ordered]@{ id = 'userReal001'; name = 'Acct' })                          # excluded PII
+                    categoryOptionCombos = @([ordered]@{ id = 'cocReal0001'; name = 'COC' })            # excluded server-generated
+                    legendSets = @([ordered]@{ id = 'lgndSet0001'; name = 'L' }) }                      # unmapped top-level
+                $r = Update-NeoIPCMetadata -Package $pkg -RegenerateUids -PassThru
+                foreach ($keep in 'bjDvmb4bfuf', 'ouRealOrg01', 'userReal001', 'cocReal0001', 'lgndSet0001') {
+                    $r.UidMap.ContainsKey($keep) | Should -BeFalse -Because "$keep must keep its UID for import binding"
+                }
+                $r.UidMap.ContainsKey('deAAAA00001') | Should -BeTrue -Because 'a mapped, non-default object IS owned'
+                $r.UidMap.ContainsKey('progAAAA001') | Should -BeTrue
+                $r.Package['dataElements'][0]['categoryCombo']['id'] | Should -BeExactly 'bjDvmb4bfuf'   # default ref preserved
+                $r.Package['categoryCombos'][0]['id'] | Should -BeExactly 'bjDvmb4bfuf'
+                $r.Package['organisationUnits'][0]['id'] | Should -BeExactly 'ouRealOrg01'
+            }
         }
     }
 }

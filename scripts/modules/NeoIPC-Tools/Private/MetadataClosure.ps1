@@ -1,4 +1,4 @@
-# NeoIPC metadata pipeline — client-side dependency closure (the M2 "prune", private, not exported).
+# NeoIPC metadata pipeline — client-side dependency closure (the "prune", private, not exported).
 # Reduces a full DHIS2 metadata export to the transitive closure of everything the NEOIPC_CORE program
 # needs. Node-free: structured id-ref walk + reverse-by-program/-stage inclusion, with an expression-UID
 # SAFETY NET that proves no expression-embedded reference was dropped. DHIS2's own dependency export is

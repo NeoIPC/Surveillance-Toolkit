@@ -100,7 +100,7 @@ function Compare-NeoIPCMetadata {
 function Test-NeoIPCMetadataRoundTrip {
     <#
     .SYNOPSIS
-        Verify a metadata.json round-trips faithfully through the CSV directory (the M1 acceptance gate).
+        Verify a metadata.json round-trips faithfully through the CSV directory.
     .DESCRIPTION
         Runs ConvertFrom-NeoIPCMetadataJson -> ConvertTo-NeoIPCMetadataJson and compares the rebuilt package
         against the original with Compare-NeoIPCMetadata. Returns the diff list; empty means a faithful
@@ -163,6 +163,138 @@ function Merge-NeoIPCMetadataJson {
         return
     }
     $json
+}
+
+function Test-NeoIPCMetadataExpression {
+    <#
+    .SYNOPSIS
+        Lint the DHIS2 expressions in a metadata package for the issue classes a parser does not catch.
+    .DESCRIPTION
+        Walks every expression-bearing field (program-rule conditions, program-rule-action data, program-
+        indicator expression/filter, validation-rule left/right sides) and applies three NeoIPC-specific
+        rules. Returns finding objects (Rule, Severity, ObjectType, ObjectId, ObjectName, Field, Message,
+        Expression); an empty result means nothing at or above MinimumSeverity. No DHIS2 API calls.
+
+        Rules (all parse and validate clean in DHIS2, which is why they are linted here):
+          - MixedBooleanPrecedence (Warning): a parenthesised group mixes && and || directly; && binds
+            tighter than ||, so the grouping may not be what was intended.
+          - NegativeSentinelComparison (Warning): an == / != comparison against -1 — for a yes/no or
+            categorical data item this is almost always a typo.
+          - LegacyD2FunctionArgForm (Info): a name-argument d2-function (d2:hasValue/count/countIfValue/
+            countIfZeroPos/lastEventDate) uses the #/A/C/V{...} reference form instead of the canonical
+            quoted name; Update-NeoIPCMetadata -Canonicalize rewrites it.
+    .PARAMETER Path
+        Path to a DHIS2 metadata export JSON to lint.
+    .PARAMETER Package
+        An already-parsed metadata package (hashtable) to lint, instead of -Path.
+    .PARAMETER MinimumSeverity
+        Lowest severity to return: Info (all, incl. the style findings), Warning (default — the likely
+        bugs), or Error.
+    #>
+    [CmdletBinding(DefaultParameterSetName = 'Path')]
+    [OutputType([System.Collections.Generic.List[object]])]
+    param(
+        [Parameter(Mandatory, ParameterSetName = 'Path')][string]$Path,
+        [Parameter(Mandatory, ParameterSetName = 'Package')]$Package,
+        [ValidateSet('Info', 'Warning', 'Error')][string]$MinimumSeverity = 'Warning'
+    )
+    if ($PSCmdlet.ParameterSetName -eq 'Path') {
+        if (-not (Test-Path -LiteralPath $Path)) { throw "Metadata file not found: '$Path'." }
+        $pkg = Get-Content -LiteralPath $Path -Raw | ConvertFrom-Json -AsHashtable
+    }
+    else { $pkg = $Package }
+    # A PSCustomObject (e.g. ConvertFrom-Json WITHOUT -AsHashtable) silently yields $null for $pkg[$type], so
+    # every collection would scan empty and the linter would report clean — fail loudly instead of mis-passing.
+    if ($pkg -isnot [System.Collections.IDictionary]) {
+        throw 'Package must be a dictionary/hashtable (parse the export with ConvertFrom-Json -AsHashtable).'
+    }
+
+    $rank = @{ Info = 0; Warning = 1; Error = 2 }
+    $min = $rank[$MinimumSeverity]
+    $findings = [System.Collections.Generic.List[object]]::new()
+    foreach ($type in $script:NeoIPCMetadataExpressionFields.Keys) {
+        foreach ($o in @($pkg[$type])) {
+            if ($o -isnot [System.Collections.IDictionary]) { continue }
+            $oid = [string]$o['id']
+            $oname = [string]$o['name']
+            foreach ($slot in (Get-NeoIPCMetadataExpressionSlot -Object $o -Type $type)) {
+                foreach ($f in (Get-NeoIPCMetadataExpressionFinding -Expression $slot.Value -ObjectType $type -ObjectId $oid -ObjectName $oname -Field $slot.Path)) {
+                    if ($rank[$f.Severity] -ge $min) { $findings.Add($f) }
+                }
+            }
+        }
+    }
+    $byRule = $findings | Group-Object Rule | ForEach-Object { "$($_.Name)=$($_.Count)" }
+    Write-Verbose ("Expression lint: {0} finding(s) at >= {1} ({2})." -f $findings.Count, $MinimumSeverity, ($byRule -join ', '))
+    return $findings
+}
+
+function Update-NeoIPCMetadata {
+    <#
+    .SYNOPSIS
+        Apply source transforms to a metadata package: canonicalize expressions and/or regenerate UIDs.
+    .DESCRIPTION
+        A deliberate, reviewable rewrite of the metadata source (distinct from the faithful round-trip). The
+        input package is never mutated — a transformed copy is produced. No DHIS2 API calls.
+
+        -Canonicalize rewrites the name-argument d2-functions (d2:hasValue/lastEventDate/count/countIfZeroPos/
+        countIfValue) from the #/A/C/V{name} reference form to the quoted-name form ('name') — byte-for-byte
+        the rewrite Tracker Capture's engine applies internally, making the source engine-version-independent.
+
+        -RegenerateUids re-mints every owned object id (deterministically, salted by the old id) and rewrites
+        every reference to it — structured {id} references AND expression-embedded UIDs (#{uid.uid}, I{uid}) —
+        via one bounded-token pass. References to objects NOT in the package (import-time overlays such as org
+        units or category option combos) keep their UID. Useful for detaching a play/test package from the
+        source instance's id space.
+
+        At least one transform switch is required. By default the transformed package is emitted as JSON
+        (returned, or written to OutputPath). With -PassThru the result object (Package + counts + UidMap) is
+        returned instead.
+    .PARAMETER Path
+        Path to a DHIS2 metadata export JSON to transform.
+    .PARAMETER Package
+        An already-parsed metadata package (hashtable) to transform, instead of -Path.
+    .PARAMETER Canonicalize
+        Rewrite the name-argument d2-functions to the canonical quoted-name form.
+    .PARAMETER RegenerateUids
+        Re-mint every owned object id and rewrite all references consistently.
+    .PARAMETER OutputPath
+        Optional file to write the transformed JSON to (UTF-8, no BOM); if omitted the JSON string is
+        returned (unless -PassThru is given).
+    .PARAMETER Compress
+        Emit compact JSON instead of indented.
+    .PARAMETER PassThru
+        Return the result object (Package + CanonicalizedSlots + RegeneratedUids + UidMap) instead of JSON.
+    #>
+    [CmdletBinding(DefaultParameterSetName = 'Path')]
+    [OutputType([string], [hashtable])]
+    param(
+        [Parameter(Mandatory, ParameterSetName = 'Path')][string]$Path,
+        [Parameter(Mandatory, ParameterSetName = 'Package')]$Package,
+        [switch]$Canonicalize,
+        [switch]$RegenerateUids,
+        [string]$OutputPath,
+        [switch]$Compress,
+        [switch]$PassThru
+    )
+    if (-not ($Canonicalize -or $RegenerateUids)) { throw 'Specify at least one transform: -Canonicalize and/or -RegenerateUids.' }
+    if ($PSCmdlet.ParameterSetName -eq 'Path') {
+        if (-not (Test-Path -LiteralPath $Path)) { throw "Metadata file not found: '$Path'." }
+        $pkg = Get-Content -LiteralPath $Path -Raw | ConvertFrom-Json -AsHashtable
+    }
+    else { $pkg = $Package }
+
+    $result = Update-NeoIPCMetadataPackage -Package $pkg -Canonicalize:$Canonicalize -RegenerateUids:$RegenerateUids
+    Write-Verbose ("Metadata transform: canonicalized {0} expression slot(s), regenerated {1} UID(s)." -f $result.CanonicalizedSlots, $result.RegeneratedUids)
+
+    if ($OutputPath) {
+        $json = $result.Package | ConvertTo-Json -Depth 100 -Compress:$Compress
+        [System.IO.File]::WriteAllText($OutputPath, $json, [System.Text.UTF8Encoding]::new($false))
+        if ($PassThru) { return $result }
+        return
+    }
+    if ($PassThru) { return $result }
+    $result.Package | ConvertTo-Json -Depth 100 -Compress:$Compress
 }
 
 function Select-NeoIPCMetadataClosure {

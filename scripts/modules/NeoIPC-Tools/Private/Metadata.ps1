@@ -222,7 +222,7 @@ function ConvertFrom-NeoIPCMetadataCell {
 
 function ConvertTo-NeoIPCMetadataRow {
     # One package object -> one flat row ([ordered] cells): id + the declared typed properties +
-    # normalized sharing (compact JSON) + translations (compact JSON, comparator-ignored in M1).
+    # normalized sharing (compact JSON) + translations (compact JSON, currently comparator-ignored).
     # Audit/noise is not carried; empty cells round-trip as "property absent".
     [CmdletBinding()]
     [OutputType([System.Collections.Specialized.OrderedDictionary])]
@@ -259,7 +259,7 @@ function ConvertTo-NeoIPCMetadataRow {
 
 function ConvertFrom-NeoIPCMetadataRow {
     # One flat row -> one package object. Inverse of ConvertTo-NeoIPCMetadataRow. An empty cell means
-    # the property is absent (the absent-vs-empty-string distinction is out of scope for M1).
+    # the property is absent (an empty string and an absent property are not distinguished).
     [CmdletBinding()]
     [OutputType([System.Collections.Specialized.OrderedDictionary])]
     param([Parameter(Mandatory)][string]$Type, [Parameter(Mandatory)]$Row)

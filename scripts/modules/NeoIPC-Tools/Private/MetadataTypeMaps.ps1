@@ -24,10 +24,10 @@ $script:NeoIPCMetadataDisplayProjections = @(
     'displaySubjectTemplate', 'displayMessageTemplate'
 )
 
-# Fields deferred to a later milestone — dropped from the M1 dir AND ignored by the comparator
-# (so M1's gate is purely structural). `translations` move to gettext PO in M4b (decision 11);
-# carrying them faithfully through flat CSV cells — including the nested leftSide/rightSide.translations
-# on validation rules — is out of scope for M1. Stripped recursively by Remove-NeoIPCMetadataNoise.
+# Fields currently dropped from the directory AND ignored by the comparator, so the round-trip gate stays
+# purely structural. Carrying `translations` faithfully through flat CSV cells — including the nested
+# leftSide/rightSide.translations on validation rules — is not yet handled here; they are stripped
+# recursively by Remove-NeoIPCMetadataNoise.
 $script:NeoIPCMetadataDeferredFields = @('translations')
 
 # Whole object TYPES excluded from the package entirely (not field-stripping): account/PII-shaped
@@ -40,10 +40,9 @@ $script:NeoIPCMetadataExcludedTypes = @(
     'organisationUnitGroups', 'organisationUnitGroupSets'
 )
 
-# Object types deferred PAST Milestone 1 — not PII/server/env-excluded, just later scope.
-# The analytics favorites (verified present: eventVisualizations x8, visualizations x3) carry very
-# large, analytics-specific property sets. Comparator-ignored in M1 exactly like excluded types; a
-# later milestone adds real handlers.
+# Object types not yet handled — not PII/server/env-excluded, just unhandled for now. The analytics
+# favorites (verified present: eventVisualizations x8, visualizations x3) carry very large, analytics-
+# specific property sets, so they are comparator-ignored exactly like excluded types (no handler yet).
 $script:NeoIPCMetadataDeferredTypes = @(
     'visualizations', 'eventVisualizations'
 )
@@ -60,7 +59,7 @@ $script:NeoIPCMetadataDefaultUids = @(
 # Per-type conversion maps. Each entry:
 #   NaturalKey  - property name (or @('a','b') composite) used as the deterministic-mint SEED for
 #                 id-less authored objects. Real exports carry ids on every object, so the round-trip
-#                 matches by id (preserve-if-present); the seed is not on the M1 critical path.
+#                 matches by id (preserve-if-present); the mint seed is not used on the round-trip path.
 #                 'code' as a seed relies on the NeoIPC convention that every object carries a code:
 #                 DHIS2 itself makes code OPTIONAL (nullable `String code` in BaseIdentifiableObject)
 #                 and enforces per-type uniqueness for most types EXCEPT options
@@ -79,7 +78,7 @@ $script:NeoIPCMetadataDefaultUids = @(
 #                 Plain 'idArray' is for <set>s and for <list>s whose order is recoverable from each
 #                 element's sortOrder (e.g. optionSets.options). The synthesized 'id' key, 'sharing'
 #                 (carried as a normalized JSON cell),
-#                 'translations' (JSON cell, comparator-ignored in M1), and the audit/noise fields
+#                 'translations' (JSON cell, currently comparator-ignored), and the audit/noise fields
 #                 (handled by Remove-NeoIPCMetadataNoise) are implicit and NOT listed here.
 # Derived from the empirical per-type shapes in metadata.json, not from the prior art or the spec.
 $script:NeoIPCMetadataTypeMaps = [ordered]@{
