@@ -202,7 +202,7 @@ $script:NeoIPCMetadataTypeMaps = [ordered]@{
     'organisationUnits'     = @{ NaturalKey = 'code'; Nesting = 'TopLevel'; Properties = [ordered]@{
         code = 'string'; name = 'string'; shortName = 'string'; openingDate = 'string'; closedDate = 'string'; level = 'int'; parent = 'id'; image = 'id' } }
     'organisationUnitGroups' = @{ NaturalKey = 'code'; Nesting = 'TopLevel'; Properties = [ordered]@{
-        code = 'string'; name = 'string'; shortName = 'string'; description = 'string'; symbol = 'string'; color = 'string' } }   # organisationUnits (membership) is per-deployment — stripped (common empty, play overlay)
+        code = 'string'; name = 'string'; shortName = 'string'; description = 'string'; symbol = 'string'; color = 'string' } }   # organisationUnits (membership) is per-deployment — stripped on capture; re-authored as common + play overlays
     'organisationUnitGroupSets' = @{ NaturalKey = 'code'; Nesting = 'TopLevel'; Properties = [ordered]@{
         code = 'string'; name = 'string'; shortName = 'string'; description = 'string'
         compulsory = 'bool'; dataDimension = 'bool'; includeSubhierarchyInAnalytics = 'bool'; organisationUnitGroups = 'idArray' } }

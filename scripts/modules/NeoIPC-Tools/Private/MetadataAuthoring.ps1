@@ -196,3 +196,197 @@ function ConvertFrom-NeoIPCAuthoredUserCsv {
 
     , $users.ToArray()
 }
+
+function Add-NeoIPCMembershipEntry {
+    <#
+    .SYNOPSIS
+        Append a member UID to a group-code -> [member UID] membership map, de-duplicated, first-seen order.
+    .DESCRIPTION
+        Shared accumulator for the membership compilers: the ordered map preserves the order members are first
+        seen; the parallel per-group HashSet keeps a member from being listed twice when the structural and
+        authored sources (or two junction rows) name the same pair. Both containers are mutated in place.
+    .PARAMETER Membership
+        The group-code -> List[UID] map being built.
+    .PARAMETER MemberSet
+        The group-code -> HashSet[UID] de-dup index parallel to Membership.
+    .PARAMETER GroupCode
+        The group the member belongs to.
+    .PARAMETER Uid
+        The member object's UID.
+    #>
+    param(
+        [Parameter(Mandatory)][System.Collections.Specialized.OrderedDictionary]$Membership,
+        [Parameter(Mandatory)][hashtable]$MemberSet,
+        [Parameter(Mandatory)][string]$GroupCode,
+        [Parameter(Mandatory)][string]$Uid
+    )
+    if (-not $Membership.Contains($GroupCode)) {
+        $Membership[$GroupCode] = [System.Collections.Generic.List[string]]::new()
+        $MemberSet[$GroupCode] = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::Ordinal)
+    }
+    if ($MemberSet[$GroupCode].Add($Uid)) { $Membership[$GroupCode].Add($Uid) }
+}
+
+function ConvertFrom-NeoIPCAuthoredOrgUnitGroupMembership {
+    <#
+    .SYNOPSIS
+        Compile the play org-unit-group memberships into a group-code -> [member org-unit UID] map.
+    .DESCRIPTION
+        Per-deployment org-unit-group membership is stripped on capture (common groups carry no members), so
+        the play variant authors it here. Memberships come from two sources, merged into one map:
+
+          STRUCTURAL (derived from the org-unit set, never authored) — the identity groups neoipc-app and
+          neoipcr resolve from the hierarchy itself, keyed off the NeoIPC play code convention:
+            NEO_DEPARTMENT <- every department (code ends '_TEST_TEST')
+            HOSPITAL       <- every hospital   (code ends '_TEST', but not '_TEST_TEST')
+            COUNTRY        <- every country    (level 2 — a direct child of the root)
+          Deriving these keeps membership in lockstep with the org units instead of duplicating ~300 junction
+          rows that drift the moment a unit is added, and mirrors how the app identifies org-unit roles by
+          group code rather than by hierarchy level.
+
+          DOMAIN (authored) — memberships that are NOT a function of structure. These split across the source
+          layers by which org units they attach to: World-Bank income class sits on the COMMON countries
+          (a stable real-world fact, authored in metadata/common), while reference centre / test units /
+          trial sites / all-patients-eligible sit on the synthetic PLAY departments (authored in
+          metadata/play). Read from one or more normalized junction files (organisationUnitGroup,
+          organisationUnit), merged in order; the org-unit CODE is resolved to its UID. A row naming an org
+          unit absent from the given org-unit set is a fail-loud error (a typo, not a silent drop).
+
+        Returns an ordered map: group code -> List[UID] (de-duplicated, first-seen order). The group CODE is
+        not validated here — Set-NeoIPCGroupMembership fails loud if it names a group absent from the package.
+        No DHIS2 API calls.
+    .PARAMETER OrgUnit
+        The authored organisationUnit objects from ConvertFrom-NeoIPCAuthoredOrgUnitCsv (each carries id, code, level).
+    .PARAMETER MembershipPath
+        Optional normalized junction file(s) (organisationUnitGroup,organisationUnit) carrying the domain
+        memberships — e.g. the common World-Bank-class file and the play designation file, merged.
+    #>
+    [CmdletBinding()]
+    [OutputType([System.Collections.Specialized.OrderedDictionary])]
+    param(
+        [Parameter(Mandatory)][System.Collections.IEnumerable]$OrgUnit,
+        [string[]]$MembershipPath
+    )
+
+    $idByCode = @{}
+    $membership = [ordered]@{}
+    $memberSet = @{}
+
+    foreach ($ou in $OrgUnit) {
+        $code = [string]$ou['code']
+        if ([string]::IsNullOrEmpty($code)) { continue }
+        $uid = [string]$ou['id']
+        $idByCode[$code] = $uid
+        # Structural identity groups — a function of the hierarchy, derived here rather than authored.
+        if ($code.EndsWith('_TEST_TEST', [System.StringComparison]::Ordinal)) {
+            Add-NeoIPCMembershipEntry -Membership $membership -MemberSet $memberSet -GroupCode 'NEO_DEPARTMENT' -Uid $uid
+        }
+        elseif ($code.EndsWith('_TEST', [System.StringComparison]::Ordinal)) {
+            Add-NeoIPCMembershipEntry -Membership $membership -MemberSet $memberSet -GroupCode 'HOSPITAL' -Uid $uid
+        }
+        if (([int]$ou['level']) -eq 2) {
+            Add-NeoIPCMembershipEntry -Membership $membership -MemberSet $memberSet -GroupCode 'COUNTRY' -Uid $uid
+        }
+    }
+
+    foreach ($mp in $MembershipPath) {
+        if ([string]::IsNullOrEmpty($mp)) { continue }
+        if (-not (Test-Path -LiteralPath $mp)) { throw "Authored org-unit-group membership file not found: '$mp'." }
+        foreach ($row in (Import-Csv -LiteralPath $mp)) {
+            $group = ([string]$row.organisationUnitGroup).Trim()
+            $ouCode = ([string]$row.organisationUnit).Trim()
+            if ([string]::IsNullOrEmpty($group) -or [string]::IsNullOrEmpty($ouCode)) { continue }
+            if (-not $idByCode.ContainsKey($ouCode)) {
+                throw "Org-unit-group membership references unknown org unit '$ouCode' (not in the authored hierarchy)."
+            }
+            Add-NeoIPCMembershipEntry -Membership $membership -MemberSet $memberSet -GroupCode $group -Uid $idByCode[$ouCode]
+        }
+    }
+    $membership
+}
+
+function ConvertFrom-NeoIPCAuthoredUserGroupMembership {
+    <#
+    .SYNOPSIS
+        Compile the play user-group memberships into a group-code -> [member user UID] map.
+    .DESCRIPTION
+        userGroup.users is per-deployment, stripped on capture (common groups carry no members); the play
+        variant authors a few synthetic members here. Read from a normalized junction file
+        (userGroup,username); each username is resolved to its authored user's minted UID. A row naming a
+        username absent from the authored user set is a fail-loud error. Returns an ordered map: userGroup
+        code -> List[UID] (de-duplicated, first-seen order). The userGroup CODE is not validated here —
+        Set-NeoIPCGroupMembership fails loud if it names a group absent from the package. No DHIS2 API calls.
+    .PARAMETER MembershipPath
+        Normalized junction file (userGroup,username).
+    .PARAMETER User
+        The authored user objects from ConvertFrom-NeoIPCAuthoredUserCsv (each carries id, username).
+    #>
+    [CmdletBinding()]
+    [OutputType([System.Collections.Specialized.OrderedDictionary])]
+    param(
+        [Parameter(Mandatory)][string]$MembershipPath,
+        [Parameter(Mandatory)][System.Collections.IEnumerable]$User
+    )
+    if (-not (Test-Path -LiteralPath $MembershipPath)) { throw "Authored user-group membership file not found: '$MembershipPath'." }
+
+    $idByUsername = @{}
+    foreach ($u in $User) {
+        $un = [string]$u['username']
+        if (-not [string]::IsNullOrEmpty($un)) { $idByUsername[$un] = [string]$u['id'] }
+    }
+
+    $membership = [ordered]@{}
+    $memberSet = @{}
+    foreach ($row in (Import-Csv -LiteralPath $MembershipPath)) {
+        $group = ([string]$row.userGroup).Trim()
+        $username = ([string]$row.username).Trim()
+        if ([string]::IsNullOrEmpty($group) -or [string]::IsNullOrEmpty($username)) { continue }
+        if (-not $idByUsername.ContainsKey($username)) {
+            throw "User-group membership references unknown user '$username' (not in the authored users)."
+        }
+        Add-NeoIPCMembershipEntry -Membership $membership -MemberSet $memberSet -GroupCode $group -Uid $idByUsername[$username]
+    }
+    $membership
+}
+
+function Set-NeoIPCGroupMembership {
+    <#
+    .SYNOPSIS
+        Apply an authored membership map onto group objects, group-side (sets organisationUnits[] / users[]).
+    .DESCRIPTION
+        The play package's per-deployment membership is authored, not captured, and the round-trip strip path
+        deliberately drops the member arrays — so membership must be written straight onto the group objects
+        when the package is assembled, not carried through the type-map conversion. This sets each named
+        group's member property to {id} references (the export shape). A membership entry naming a group
+        absent from the package is a fail-loud error (a typo, not a silent drop); groups with no membership
+        entry are left untouched (member-less, as common groups are). Mutates the passed group objects in
+        place and returns the number of groups populated. No DHIS2 API calls.
+    .PARAMETER Group
+        The group objects to populate (organisationUnitGroups or userGroups), each an ordered dict with a code.
+    .PARAMETER Membership
+        Map group code -> [member UID] from ConvertFrom-NeoIPCAuthored{OrgUnit,User}GroupMembership.
+    .PARAMETER MemberProperty
+        The reference-array property to set: 'organisationUnits' (org-unit groups) or 'users' (user groups).
+    #>
+    [CmdletBinding()]
+    [OutputType([int])]
+    param(
+        [Parameter(Mandatory)][System.Collections.IEnumerable]$Group,
+        [Parameter(Mandatory)][System.Collections.IDictionary]$Membership,
+        [Parameter(Mandatory)][ValidateSet('organisationUnits', 'users')][string]$MemberProperty
+    )
+    $byCode = @{}
+    foreach ($g in $Group) {
+        $code = [string]$g['code']
+        if (-not [string]::IsNullOrEmpty($code)) { $byCode[$code] = $g }
+    }
+    $applied = 0
+    foreach ($code in $Membership.Keys) {
+        if (-not $byCode.ContainsKey($code)) {
+            throw "Membership references group '$code', which is not present among the $MemberProperty group objects."
+        }
+        $byCode[$code][$MemberProperty] = @(foreach ($uid in $Membership[$code]) { [ordered]@{ id = $uid } })
+        $applied++
+    }
+    $applied
+}

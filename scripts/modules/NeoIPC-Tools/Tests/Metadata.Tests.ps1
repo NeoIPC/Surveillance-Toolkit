@@ -1124,4 +1124,108 @@ InModuleScope 'NeoIPC-Tools' {
             { ConvertFrom-NeoIPCAuthoredUserCsv -UserPath $shortName -RoleAssignmentPath $ur -OrgUnitAssignmentPath $uo -RoleUid $script:roleUid -OrgUnitUid $script:ouUid } | Should -Throw '*at least 2 characters*'
         }
     }
+
+    Describe 'Authored group memberships (overlays applied group-side)' {
+        BeforeAll {
+            # A minimal hierarchy exercising all three structural identity groups + the _TEST/_TEST_TEST split.
+            $script:gmOu = Join-Path $TestDrive 'gm-ou.csv'
+            @('code,name,shortName,openingDate,parent_code',
+              'NEOIPC,Root,Root,2023-01-01,',
+              'CtryA,Country A,CtryA,2023-01-01,NEOIPC',
+              'CtryB,Country B,CtryB,2023-01-01,NEOIPC',
+              'CtryA_TEST,Hospital A,Hosp A,2023-01-01,CtryA',
+              'CtryA_TEST_TEST,Dept A,Dept A,2023-01-01,CtryA_TEST') | Set-Content -LiteralPath $script:gmOu -Encoding utf8
+            $script:gmOrgUnits = ConvertFrom-NeoIPCAuthoredOrgUnitCsv -Path $script:gmOu
+            $script:gmIdByCode = @{}; $script:gmOrgUnits | ForEach-Object { $script:gmIdByCode[$_.code] = $_.id }
+
+            # Synthetic users (via the user compiler) for the user-group membership map.
+            $uUsers = Join-Path $TestDrive 'gm-users.csv'
+            @('username,firstName,surname', 'play.a.1,Play,A One', 'play.admin,Play,Admin') | Set-Content -LiteralPath $uUsers -Encoding utf8
+            $uRoles = Join-Path $TestDrive 'gm-roles.csv'
+            @('username,role', 'play.a.1,Base', 'play.admin,Superuser') | Set-Content -LiteralPath $uRoles -Encoding utf8
+            $uOus = Join-Path $TestDrive 'gm-userous.csv'
+            @('username,organisationUnit', 'play.a.1,CtryA_TEST_TEST', 'play.admin,NEOIPC') | Set-Content -LiteralPath $uOus -Encoding utf8
+            $script:gmUsers = ConvertFrom-NeoIPCAuthoredUserCsv -UserPath $uUsers -RoleAssignmentPath $uRoles -OrgUnitAssignmentPath $uOus -RoleUid @{ 'Base' = 'roleBase001'; 'Superuser' = 'roleSuper01' } -OrgUnitUid @{ 'CtryA_TEST_TEST' = 'ouDeptA0001'; 'NEOIPC' = 'ouRoot00001' }
+            $script:gmIdByUser = @{}; $script:gmUsers | ForEach-Object { $script:gmIdByUser[$_.username] = $_.id }
+        }
+        It 'derives the three structural identity groups from the hierarchy (suffix + level), no _TEST/_TEST_TEST overlap' {
+            $m = ConvertFrom-NeoIPCAuthoredOrgUnitGroupMembership -OrgUnit $script:gmOrgUnits
+            @($m['COUNTRY']) | Should -Be @($script:gmIdByCode['CtryA'], $script:gmIdByCode['CtryB'])
+            @($m['HOSPITAL']) | Should -Be @($script:gmIdByCode['CtryA_TEST'])
+            @($m['NEO_DEPARTMENT']) | Should -Be @($script:gmIdByCode['CtryA_TEST_TEST'])
+            @($m['HOSPITAL']) | Should -Not -Contain $script:gmIdByCode['CtryA_TEST_TEST']   # the department is NOT also a hospital
+        }
+        It 'merges authored domain memberships, resolving org-unit code to its minted UID' {
+            $dom = Join-Path $TestDrive 'gm-domain.csv'
+            @('organisationUnitGroup,organisationUnit',
+              'WORLD_BANK_CLASS_H_FY_2026,CtryA',
+              'REFERENCE_CENTRE,CtryA_TEST_TEST') | Set-Content -LiteralPath $dom -Encoding utf8
+            $m = ConvertFrom-NeoIPCAuthoredOrgUnitGroupMembership -OrgUnit $script:gmOrgUnits -MembershipPath $dom
+            @($m['WORLD_BANK_CLASS_H_FY_2026']) | Should -Be @($script:gmIdByCode['CtryA'])
+            @($m['REFERENCE_CENTRE']) | Should -Be @($script:gmIdByCode['CtryA_TEST_TEST'])
+            @($m['COUNTRY']).Count | Should -Be 2                                              # structural still present
+        }
+        It 'merges domain memberships from multiple junction files (common World-Bank + play designations)' {
+            $common = Join-Path $TestDrive 'gm-common-mem.csv'
+            @('organisationUnitGroup,organisationUnit', 'WORLD_BANK_CLASS_H_FY_2025,CtryA') | Set-Content -LiteralPath $common -Encoding utf8
+            $play = Join-Path $TestDrive 'gm-play-mem.csv'
+            @('organisationUnitGroup,organisationUnit', 'TEST_UNITS,CtryA_TEST_TEST') | Set-Content -LiteralPath $play -Encoding utf8
+            $m = ConvertFrom-NeoIPCAuthoredOrgUnitGroupMembership -OrgUnit $script:gmOrgUnits -MembershipPath $common, $play
+            @($m['WORLD_BANK_CLASS_H_FY_2025']) | Should -Be @($script:gmIdByCode['CtryA'])
+            @($m['TEST_UNITS']) | Should -Be @($script:gmIdByCode['CtryA_TEST_TEST'])
+        }
+        It 'de-duplicates a member listed by both the structural rule and a domain row' {
+            $dom = Join-Path $TestDrive 'gm-dup.csv'
+            @('organisationUnitGroup,organisationUnit', 'COUNTRY,CtryA') | Set-Content -LiteralPath $dom -Encoding utf8
+            $m = ConvertFrom-NeoIPCAuthoredOrgUnitGroupMembership -OrgUnit $script:gmOrgUnits -MembershipPath $dom
+            @($m['COUNTRY']).Count | Should -Be 2                                              # CtryA not listed twice
+        }
+        It 'throws on a domain membership row naming an org unit not in the hierarchy' {
+            $dom = Join-Path $TestDrive 'gm-badou.csv'
+            @('organisationUnitGroup,organisationUnit', 'TEST_UNITS,NOPE') | Set-Content -LiteralPath $dom -Encoding utf8
+            { ConvertFrom-NeoIPCAuthoredOrgUnitGroupMembership -OrgUnit $script:gmOrgUnits -MembershipPath $dom } | Should -Throw '*unknown org unit*'
+        }
+        It 'compiles user-group memberships, resolving username to the authored user UID' {
+            $ug = Join-Path $TestDrive 'gm-usergroups.csv'
+            @('userGroup,username',
+              'NEOIPC,play.a.1',
+              'NEOIPC,play.admin',
+              'NEOIPC_USER_MANAGERS,play.admin') | Set-Content -LiteralPath $ug -Encoding utf8
+            $m = ConvertFrom-NeoIPCAuthoredUserGroupMembership -MembershipPath $ug -User $script:gmUsers
+            @($m['NEOIPC']) | Should -Be @($script:gmIdByUser['play.a.1'], $script:gmIdByUser['play.admin'])
+            @($m['NEOIPC_USER_MANAGERS']) | Should -Be @($script:gmIdByUser['play.admin'])
+        }
+        It 'throws on a user-group membership row naming an unknown user' {
+            $ug = Join-Path $TestDrive 'gm-baduser.csv'
+            @('userGroup,username', 'NEOIPC,play.ghost') | Set-Content -LiteralPath $ug -Encoding utf8
+            { ConvertFrom-NeoIPCAuthoredUserGroupMembership -MembershipPath $ug -User $script:gmUsers } | Should -Throw '*unknown user*'
+        }
+        It 'applies org-unit-group membership group-side as {id} refs, leaving member-less groups untouched' {
+            $groups = @(
+                [ordered]@{ id = 'gOUG000001'; code = 'COUNTRY'; name = 'Country' },
+                [ordered]@{ id = 'gOUG000002'; code = 'HOSPITAL'; name = 'Hospital' },
+                [ordered]@{ id = 'gOUG000003'; code = 'NEO_DEPARTMENT'; name = 'Neonatology Department' },
+                [ordered]@{ id = 'gOUG000004'; code = 'NEOIPC_SPAIN'; name = 'NeoIPC Spain' }   # no membership entry
+            )
+            $m = ConvertFrom-NeoIPCAuthoredOrgUnitGroupMembership -OrgUnit $script:gmOrgUnits
+            Set-NeoIPCGroupMembership -Group $groups -Membership $m -MemberProperty 'organisationUnits' | Should -Be 3
+            $dept = $groups | Where-Object { $_.code -eq 'NEO_DEPARTMENT' }
+            @($dept.organisationUnits).Count | Should -Be 1
+            $dept.organisationUnits[0].id | Should -BeExactly $script:gmIdByCode['CtryA_TEST_TEST']
+            ($groups | Where-Object { $_.code -eq 'NEOIPC_SPAIN' }).Contains('organisationUnits') | Should -BeFalse
+        }
+        It 'applies user-group membership group-side onto userGroup objects' {
+            $ug = Join-Path $TestDrive 'gm-ug-apply.csv'
+            @('userGroup,username', 'NEOIPC,play.a.1', 'NEOIPC,play.admin') | Set-Content -LiteralPath $ug -Encoding utf8
+            $m = ConvertFrom-NeoIPCAuthoredUserGroupMembership -MembershipPath $ug -User $script:gmUsers
+            $groups = @([ordered]@{ id = 'ug00000001'; code = 'NEOIPC'; name = 'NeoIPC' }, [ordered]@{ id = 'ug00000002'; code = 'NEOIPC_SPAIN'; name = 'NeoIPC Spain' })
+            Set-NeoIPCGroupMembership -Group $groups -Membership $m -MemberProperty 'users' | Should -Be 1
+            @(($groups | Where-Object { $_.code -eq 'NEOIPC' }).users).Count | Should -Be 2
+            ($groups | Where-Object { $_.code -eq 'NEOIPC_SPAIN' }).Contains('users') | Should -BeFalse
+        }
+        It 'throws when a membership names a group absent from the package' {
+            $m = [ordered]@{ 'NOPE_GROUP' = @('x') }
+            { Set-NeoIPCGroupMembership -Group @([ordered]@{ id = 'g000000001'; code = 'HOSPITAL' }) -Membership $m -MemberProperty 'organisationUnits' } | Should -Throw '*not present*'
+        }
+    }
 }
