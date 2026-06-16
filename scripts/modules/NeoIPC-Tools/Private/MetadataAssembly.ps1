@@ -90,12 +90,15 @@ function Join-NeoIPCMetadataPackage {
     $Config['users'] = @($User)
     if ($Config.Contains('categoryOptionCombos')) { $Config.Remove('categoryOptionCombos') }
 
-    # Memberships applied group-side (not via the strip/round-trip path).
-    if ($OrgUnitGroupMembership -and @($OrgUnitGroupMembership.Keys).Count -and $Config.Contains('organisationUnitGroups')) {
-        [void](Set-NeoIPCGroupMembership -Group $Config['organisationUnitGroups'] -Membership $OrgUnitGroupMembership -MemberProperty 'organisationUnits')
+    # Memberships applied group-side (not via the strip/round-trip path). No $Config.Contains(...) guard: a
+    # non-empty membership map against a missing group type must fail loud via Set-NeoIPCGroupMembership's own
+    # group-not-present check, not be silently dropped (the config always carries both group types on the live
+    # path, so this only hardens the contract for a malformed config).
+    if ($OrgUnitGroupMembership -and @($OrgUnitGroupMembership.Keys).Count) {
+        [void](Set-NeoIPCGroupMembership -Group @($Config['organisationUnitGroups']) -Membership $OrgUnitGroupMembership -MemberProperty 'organisationUnits')
     }
-    if ($UserGroupMembership -and @($UserGroupMembership.Keys).Count -and $Config.Contains('userGroups')) {
-        [void](Set-NeoIPCGroupMembership -Group $Config['userGroups'] -Membership $UserGroupMembership -MemberProperty 'users')
+    if ($UserGroupMembership -and @($UserGroupMembership.Keys).Count) {
+        [void](Set-NeoIPCGroupMembership -Group @($Config['userGroups']) -Membership $UserGroupMembership -MemberProperty 'users')
     }
     $Config
 }

@@ -235,10 +235,14 @@ function ConvertFrom-NeoIPCMetadataCell {
         'string'         { $Cell }
         'idString'       { $Cell }            # bare-string UID ref (e.g. templateUid); parsed like a string
         'id'             { [ordered]@{ id = $Cell } }
-        'idArray'        { @(Split-NeoIPCMetadataList $Cell | ForEach-Object { [ordered]@{ id = $_ } }) }
-        'idArrayOrdered' { @(Split-NeoIPCMetadataList $Cell | ForEach-Object { [ordered]@{ id = $_ } }) }
-        'stringArray'    { @(Split-NeoIPCMetadataList $Cell) }
-        'intArray'       { @(Split-NeoIPCMetadataList $Cell | ForEach-Object { [long]::Parse($_, [Globalization.NumberStyles]::Integer, [cultureinfo]::InvariantCulture) }) }
+        # Unary comma on every array case: a switch branch streams its output, so a single-element collection
+        # is unwrapped to a scalar on capture (at ConvertFrom-NeoIPCMetadataRow) — which then serializes as a
+        # JSON object, not a 1-element array, and DHIS2 import rejects it. Same hazard, same idiom as the array
+        # returns in Remove-NeoIPCMetadataNoise; the round-trip self-test is blind to it (symmetric normalize).
+        'idArray'        { , @(Split-NeoIPCMetadataList $Cell | ForEach-Object { [ordered]@{ id = $_ } }) }
+        'idArrayOrdered' { , @(Split-NeoIPCMetadataList $Cell | ForEach-Object { [ordered]@{ id = $_ } }) }
+        'stringArray'    { , @(Split-NeoIPCMetadataList $Cell) }
+        'intArray'       { , @(Split-NeoIPCMetadataList $Cell | ForEach-Object { [long]::Parse($_, [Globalization.NumberStyles]::Integer, [cultureinfo]::InvariantCulture) }) }
         default          { throw "Unknown property class '$Class'." }
     }
 }

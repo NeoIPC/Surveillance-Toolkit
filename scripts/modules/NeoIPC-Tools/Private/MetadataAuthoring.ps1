@@ -115,8 +115,9 @@ function ConvertFrom-NeoIPCAuthoredUserCsv {
         Map of org-unit code -> minted UID (from ConvertFrom-NeoIPCAuthoredOrgUnitCsv).
     .PARAMETER Password
         The login password set on every authored user. Defaults to a clearly-test value that satisfies DHIS2's
-        password policy on import (digit + uppercase + special char, 8-40 chars, no reserved word / username) —
-        the bare demo password 'district' is rejected (E4005) for imported users.
+        password policy on import (digit + uppercase + special char, >= 8 chars and within the server's
+        configurable max — default 60, no reserved word / username) — the bare demo password 'district' is
+        rejected (E4005) for imported users.
     #>
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', 'Password',
         Justification = 'Synthetic play accounts use a known, clearly-test password committed in play data by design — it is not a real secret.')]
@@ -379,6 +380,7 @@ function Set-NeoIPCGroupMembership {
     )
     $byCode = @{}
     foreach ($g in $Group) {
+        if ($g -isnot [System.Collections.IDictionary]) { continue }   # tolerate a null/empty group collection (a missing type) — membership below then fails loud
         $code = [string]$g['code']
         if (-not [string]::IsNullOrEmpty($code)) { $byCode[$code] = $g }
     }

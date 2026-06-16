@@ -61,6 +61,14 @@ InModuleScope 'NeoIPC-Tools' {
             $back = ConvertFrom-NeoIPCMetadataCell -Class idArrayOrdered -Cell 'zzz aaa mmm'
             @($back | ForEach-Object { $_.id }) | Should -Be @('zzz', 'aaa', 'mmm')
         }
+        It 'parses a single-element array cell to a 1-element array, not a scalar (else import rejects the object)' {
+            foreach ($cls in 'idArray', 'idArrayOrdered', 'stringArray', 'intArray') {
+                $cell = if ($cls -eq 'intArray') { '7' } else { 'onlyOneVal1' }
+                $parsed = ConvertFrom-NeoIPCMetadataCell -Class $cls -Cell $cell
+                $parsed -is [System.Collections.IEnumerable] -and $parsed -isnot [string] -and $parsed -isnot [System.Collections.IDictionary] | Should -BeTrue -Because "$cls must stay an array"
+                @($parsed).Count | Should -Be 1
+            }
+        }
         It 'tokenizes whitespace-collapsed lists without spurious empties' {
             (Split-NeoIPCMetadataList "  a   b`tc  ") | Should -Be @('a', 'b', 'c')
             (Split-NeoIPCMetadataList '') | Should -Be @()
@@ -1279,6 +1287,11 @@ InModuleScope 'NeoIPC-Tools' {
         It 'throws when an authored user UID collides with an authored org-unit UID (cross-check)' {
             $u = @([ordered]@{ id = 'ou00000001'; username = 'clash' })   # same id as the AT org unit
             { Join-NeoIPCMetadataPackage -Config $script:asmConfig -OrgUnit $script:asmOus -User $u -OrgUnitGroupMembership ([ordered]@{}) -UserGroupMembership ([ordered]@{}) } | Should -Throw '*collides*'
+        }
+        It 'fails loud (does not silently drop) when a membership names a group type wholly absent from the config' {
+            $config = [ordered]@{ programs = @([ordered]@{ id = 'prog0000001'; code = 'NEOIPC_CORE'; name = 'Core' }) }   # no organisationUnitGroups type at all
+            $mem = [ordered]@{ NEO_DEPARTMENT = @('ou00000003') }
+            { Join-NeoIPCMetadataPackage -Config $config -OrgUnit $script:asmOus -User $script:asmUsers -OrgUnitGroupMembership $mem -UserGroupMembership ([ordered]@{}) } | Should -Throw '*not present*'
         }
     }
 }
