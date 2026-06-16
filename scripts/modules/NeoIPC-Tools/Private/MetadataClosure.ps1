@@ -102,9 +102,11 @@ function Get-NeoIPCMetadataStringValue {
 
 function Get-NeoIPCMetadataClosure {
     # Compute the dependency closure of a parsed DHIS2 metadata package, seeded at a program (default
-    # NEOIPC_CORE). Returns the pruned package + diagnostics. Excluded types ($NeoIPCMetadataExcludedTypes:
-    # users/orgUnits/orgUnitGroups/categoryOptionCombos/…) are the stop-types — never indexed, so refs into
-    # them resolve to nothing (overlays).
+    # NEOIPC_CORE). Returns the pruned package + diagnostics. Two classes are never indexed (refs into them
+    # resolve to nothing): the EXCLUDED types ($NeoIPCMetadataExcludedTypes: users / category option combos / …,
+    # PII or server-generated) and the NON-CLOSURE types ($NeoIPCMetadataNonClosureTypes: the org-unit family,
+    # deployment config the program references only by code) — the latter are still converted/round-tripped
+    # elsewhere, just not pulled into the program closure.
     [CmdletBinding()]
     [OutputType([hashtable])]
     param(
@@ -121,7 +123,7 @@ function Get-NeoIPCMetadataClosure {
     foreach ($type in $script:NeoIPCMetadataTypeMaps.Keys) {
         $map = $script:NeoIPCMetadataTypeMaps[$type]
         if ($map.Nesting -eq 'NestedOnly') { continue }
-        if ($script:NeoIPCMetadataExcludedTypes -contains $type) { continue }
+        if ($script:NeoIPCMetadataExcludedTypes -contains $type -or $script:NeoIPCMetadataNonClosureTypes -contains $type) { continue }
         foreach ($o in @($Package[$type])) {
             if ($o -isnot [System.Collections.IDictionary]) { continue }
             $id = [string]$o['id']
@@ -208,9 +210,9 @@ function Get-NeoIPCMetadataClosure {
     #    scanning only ids not yet expression-scanned.
     #    - StructuredMiss: target IS in the indexed metadata but the structured walk didn't reach it — a real
     #      dropped dependency (the DHIS2-export bug). Pulled in here AND reported (for NeoIPC: expected none).
-    #    - Unresolved: target is NOT in the indexed metadata — a stop-type (OUG / COC, expected as an overlay),
-    #      an unmapped type (constant / dataSet / indicator / relationshipType — the type maps would need
-    #      extending if NeoIPC adopts it), or a dangling ref. Reported, never silently dropped.
+    #    - Unresolved: target is NOT in the indexed metadata — a non-closure org-unit group (OUG{…}) or an
+    #      excluded COC, an unmapped type (constant / dataSet / indicator / relationshipType — the type maps would
+    #      need extending if NeoIPC adopts it), or a dangling ref. Reported, never silently dropped.
     $structuredMiss = @{}
     $unresolved = @{}
     $scannedForExpr = [System.Collections.Generic.HashSet[string]]::new()
@@ -284,7 +286,7 @@ function Get-NeoIPCMetadataClosure {
     foreach ($type in $script:NeoIPCMetadataTypeMaps.Keys) {
         $map = $script:NeoIPCMetadataTypeMaps[$type]
         if ($map.Nesting -eq 'NestedOnly') { continue }
-        if ($script:NeoIPCMetadataExcludedTypes -contains $type) { continue }
+        if ($script:NeoIPCMetadataExcludedTypes -contains $type -or $script:NeoIPCMetadataNonClosureTypes -contains $type) { continue }
         $kept = @(@($Package[$type]) | Where-Object { $_ -is [System.Collections.IDictionary] -and $included.Contains([string]$_['id']) })
         if ($kept.Count -gt 0) { $pruned[$type] = $kept }
     }

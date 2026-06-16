@@ -190,16 +190,16 @@ function Get-NeoIPCMetadataExpressionSlot {
 }
 
 function Get-NeoIPCMetadataOwnedId {
-    # Collect every OWNED object identity in a package: each mapped, non-excluded top-level object's id + each
-    # declared nested-only child's id (programStageDataElements / programTrackedEntityAttributes /
-    # trackedEntityTypeAttributes / analyticsPeriodBoundaries, reached via their Parent.ArrayProp). Scoped to the
-    # SAME types the closure / converter / comparator handle (iterate the type maps; skip NestedOnly — reached via
-    # parent — and the excluded stop-types), so the import-time overlay / PII / server-generated collections
-    # (org units, users, category option combos, …) keep their UIDs even when present top-level in a full export.
-    # The four fixed system default UIDs are likewise never re-minted (they are present on every instance; the
-    # default categoryCombo is referenced by every dataElement). It does NOT collect arbitrary {id} ref targets,
-    # so an absent overlay reference is never mistaken for something we own. Nested-only types nest only one level
-    # under their parent in DHIS2, so a single descent is complete.
+    # Collect every OWNED object identity in a package: each mapped, non-excluded, non-non-closure top-level
+    # object's id + each declared nested-only child's id (programStageDataElements / programTrackedEntityAttributes
+    # / trackedEntityTypeAttributes / analyticsPeriodBoundaries, reached via their Parent.ArrayProp). Iterate the
+    # type maps; skip NestedOnly (reached via parent), the excluded PII / server-generated types, and the
+    # non-closure types (the org-unit family — deployment config that keeps its UIDs). So the org-unit family, the
+    # PII / server-generated collections (users, category option combos, …), and the four fixed system default
+    # UIDs are never re-minted even when present top-level (the default categoryCombo is referenced by every
+    # dataElement). It does NOT collect arbitrary {id} ref targets, so a reference to an absent object (an
+    # import-time overlay org unit / COC) is never mistaken for something we own. Nested-only types nest only one
+    # level under their parent in DHIS2, so a single descent is complete.
     [CmdletBinding()]
     [OutputType([System.Collections.Generic.HashSet[string]])]
     param([Parameter(Mandatory)]$Package)
@@ -219,7 +219,8 @@ function Get-NeoIPCMetadataOwnedId {
     }
     foreach ($type in $script:NeoIPCMetadataTypeMaps.Keys) {
         if ($script:NeoIPCMetadataTypeMaps[$type].Nesting -eq 'NestedOnly') { continue }   # reached via its parent's child array
-        if ($script:NeoIPCMetadataExcludedTypes -contains $type) { continue }              # import-time overlays / PII / server-generated
+        if ($script:NeoIPCMetadataExcludedTypes -contains $type) { continue }              # PII / server-generated, never in the package's owned set
+        if ($script:NeoIPCMetadataNonClosureTypes -contains $type) { continue }            # org-unit family: deployment config, code-referenced — keep their UIDs
         foreach ($o in @($Package[$type])) {
             if ($o -isnot [System.Collections.IDictionary]) { continue }
             & $add ([string]$o['id'])
@@ -302,7 +303,7 @@ function Update-NeoIPCMetadataPackage {
         [switch]$RegenerateUids
     )
     # Deep clone via JSON round-trip (the package is JSON-origin; PS 7.5 -AsHashtable preserves key order).
-    $clone = $Package | ConvertTo-Json -Depth 100 | ConvertFrom-Json -AsHashtable
+    $clone = ConvertFrom-NeoIPCMetadataJsonText -Json ($Package | ConvertTo-Json -Depth 100)
     $canonCount = 0
     if ($Canonicalize) {
         foreach ($type in $script:NeoIPCMetadataCanonicalFields.Keys) {

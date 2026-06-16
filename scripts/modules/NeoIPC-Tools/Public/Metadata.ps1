@@ -22,7 +22,7 @@ function ConvertFrom-NeoIPCMetadataJson {
         [Parameter(Mandatory)][string]$OutputDirectory
     )
     if (-not (Test-Path -LiteralPath $Path)) { throw "Metadata file not found: '$Path'." }
-    $package = Get-Content -LiteralPath $Path -Raw | ConvertFrom-Json -AsHashtable
+    $package = ConvertFrom-NeoIPCMetadataJsonText -Json (Get-Content -LiteralPath $Path -Raw)
     $rows = ConvertFrom-NeoIPCMetadataPackage -Package $package
     if (-not (Test-Path -LiteralPath $OutputDirectory)) {
         if ($PSCmdlet.ShouldProcess($OutputDirectory, 'Create directory')) {
@@ -92,8 +92,8 @@ function Compare-NeoIPCMetadata {
         [Parameter(Mandatory)]$Reference,
         [Parameter(Mandatory)]$Difference
     )
-    $ref = if ($Reference -is [string]) { Get-Content -LiteralPath $Reference -Raw | ConvertFrom-Json -AsHashtable } else { $Reference }
-    $dif = if ($Difference -is [string]) { Get-Content -LiteralPath $Difference -Raw | ConvertFrom-Json -AsHashtable } else { $Difference }
+    $ref = if ($Reference -is [string]) { ConvertFrom-NeoIPCMetadataJsonText -Json (Get-Content -LiteralPath $Reference -Raw) } else { $Reference }
+    $dif = if ($Difference -is [string]) { ConvertFrom-NeoIPCMetadataJsonText -Json (Get-Content -LiteralPath $Difference -Raw) } else { $Difference }
     Compare-NeoIPCMetadataCore -Reference $ref -Difference $dif
 }
 
@@ -117,8 +117,8 @@ function Test-NeoIPCMetadataRoundTrip {
     )
     $dir = if ($WorkDirectory) { $WorkDirectory } else { Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-rt-' + [System.IO.Path]::GetRandomFileName()) }
     ConvertFrom-NeoIPCMetadataJson -Path $Path -OutputDirectory $dir
-    $rebuilt = ConvertTo-NeoIPCMetadataJson -Path $dir | ConvertFrom-Json -AsHashtable
-    $baseline = Get-Content -LiteralPath $Path -Raw | ConvertFrom-Json -AsHashtable
+    $rebuilt = ConvertFrom-NeoIPCMetadataJsonText -Json (ConvertTo-NeoIPCMetadataJson -Path $dir)
+    $baseline = ConvertFrom-NeoIPCMetadataJsonText -Json (Get-Content -LiteralPath $Path -Raw)
     Compare-NeoIPCMetadataCore -Reference $baseline -Difference $rebuilt
 }
 
@@ -154,8 +154,8 @@ function Merge-NeoIPCMetadataJson {
     )
     if (-not (Test-Path -LiteralPath $BasePath)) { throw "Base metadata file not found: '$BasePath'." }
     if (-not (Test-Path -LiteralPath $SupplementPath)) { throw "Supplement metadata file not found: '$SupplementPath'." }
-    $base = Get-Content -LiteralPath $BasePath -Raw | ConvertFrom-Json -AsHashtable
-    $supplement = Get-Content -LiteralPath $SupplementPath -Raw | ConvertFrom-Json -AsHashtable
+    $base = ConvertFrom-NeoIPCMetadataJsonText -Json (Get-Content -LiteralPath $BasePath -Raw)
+    $supplement = ConvertFrom-NeoIPCMetadataJsonText -Json (Get-Content -LiteralPath $SupplementPath -Raw)
     $merged = Merge-NeoIPCMetadataPackage -Base $base -Supplement $supplement -Types $Types
     $json = $merged | ConvertTo-Json -Depth 100 -Compress:$Compress
     if ($OutputPath) {
@@ -200,7 +200,7 @@ function Test-NeoIPCMetadataExpression {
     )
     if ($PSCmdlet.ParameterSetName -eq 'Path') {
         if (-not (Test-Path -LiteralPath $Path)) { throw "Metadata file not found: '$Path'." }
-        $pkg = Get-Content -LiteralPath $Path -Raw | ConvertFrom-Json -AsHashtable
+        $pkg = ConvertFrom-NeoIPCMetadataJsonText -Json (Get-Content -LiteralPath $Path -Raw)
     }
     else { $pkg = $Package }
     # A PSCustomObject (e.g. ConvertFrom-Json WITHOUT -AsHashtable) silently yields $null for $pkg[$type], so
@@ -243,8 +243,9 @@ function Update-NeoIPCMetadata {
 
         -RegenerateUids re-mints every owned object id (deterministically, salted by the old id) and rewrites
         every reference to it — structured {id} references AND expression-embedded UIDs (#{uid.uid}, I{uid}) —
-        via one bounded-token pass. References to objects NOT in the package (import-time overlays such as org
-        units or category option combos) keep their UID. Useful for detaching a play/test package from the
+        via one bounded-token pass. The org-unit family (non-closure deployment config), the excluded PII /
+        server-generated types, the system default UIDs, and any reference to an object not present in the
+        package all keep their UID. Useful for detaching a play/test package from the
         source instance's id space.
 
         At least one transform switch is required. By default the transformed package is emitted as JSON
@@ -280,7 +281,7 @@ function Update-NeoIPCMetadata {
     if (-not ($Canonicalize -or $RegenerateUids)) { throw 'Specify at least one transform: -Canonicalize and/or -RegenerateUids.' }
     if ($PSCmdlet.ParameterSetName -eq 'Path') {
         if (-not (Test-Path -LiteralPath $Path)) { throw "Metadata file not found: '$Path'." }
-        $pkg = Get-Content -LiteralPath $Path -Raw | ConvertFrom-Json -AsHashtable
+        $pkg = ConvertFrom-NeoIPCMetadataJsonText -Json (Get-Content -LiteralPath $Path -Raw)
     }
     else { $pkg = $Package }
 
@@ -310,8 +311,10 @@ function Select-NeoIPCMetadataClosure {
         AT the program), and a grammar-complete expression-UID safety net that proves no expression-embedded
         reference was dropped. It also recovers NeoIPC metadata the program does not reference: grouping
         objects whose members intersect the closure (ATC / AWaRe option groups, data-element groups) and the
-        deployment-authored custom attributes. Stop-types (users, org units, category option combos, org-unit
-        groups) are never followed — they are import-time overlays. No DHIS2 API calls.
+        deployment-authored custom attributes. Two classes are never followed: the excluded PII / server-generated
+        types (users, category option combos) and the non-closure org-unit family (org units, org-unit groups /
+        group-sets, levels) — deployment config the program references only by code, converted and round-tripped
+        elsewhere but never pulled into the program package. No DHIS2 API calls.
 
         By default the pruned package is emitted as JSON (returned, or written to OutputPath). The closure
         diagnostics are always written to the verbose / warning streams and, with -PassThru, returned as an
@@ -348,7 +351,7 @@ function Select-NeoIPCMetadataClosure {
     )
     if ($PSCmdlet.ParameterSetName -eq 'Path') {
         if (-not (Test-Path -LiteralPath $Path)) { throw "Metadata file not found: '$Path'." }
-        $pkg = Get-Content -LiteralPath $Path -Raw | ConvertFrom-Json -AsHashtable
+        $pkg = ConvertFrom-NeoIPCMetadataJsonText -Json (Get-Content -LiteralPath $Path -Raw)
     }
     else { $pkg = $Package }
 
@@ -362,10 +365,10 @@ function Select-NeoIPCMetadataClosure {
         Write-Warning ("Dangling {0} reference {1} (on {2} {3}) has no target in the package." -f $d.Field, $d.Uid, $d.FromType, $d.FromId)
     }
     foreach ($s in $result.StructuredUnresolved) {
-        Write-Warning ("Structured reference {0} (on {1} {2}) targets a type that is neither mapped nor an excluded overlay — dropped. Map that type if NeoIPC adopts it." -f $s.Uid, $s.FromType, $s.FromId)
+        Write-Warning ("Structured reference {0} (on {1} {2}) targets a present type that is neither mapped, excluded, nor deferred — dropped. Map that type if NeoIPC adopts it." -f $s.Uid, $s.FromType, $s.FromId)
     }
     if (@($result.ExpressionUnresolved).Count -gt 0) {
-        Write-Verbose ("{0} expression reference(s) resolve to non-indexed targets (stop-type overlays / unmapped types): {1}" -f @($result.ExpressionUnresolved).Count, ((@($result.ExpressionUnresolved) | ForEach-Object { $_.Uid }) -join ', '))
+        Write-Verbose ("{0} expression reference(s) resolve to non-indexed targets (excluded / non-closure / unmapped types): {1}" -f @($result.ExpressionUnresolved).Count, ((@($result.ExpressionUnresolved) | ForEach-Object { $_.Uid }) -join ', '))
     }
 
     if ($OutputPath) {

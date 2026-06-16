@@ -9,7 +9,8 @@
 $script:NeoIPCMetadataStripList = @(
     'created', 'lastUpdated', 'createdBy', 'lastUpdatedBy',
     'access', 'favorite', 'favorites', 'userAccesses', 'userGroupAccesses', 'externalAccess',
-    'href', 'user', 'publicAccess', 'lastUpdatedDuration'
+    'href', 'user', 'publicAccess', 'lastUpdatedDuration',
+    'path'   # organisationUnit's materialised ancestor path — derived from `parent`, recomputed on import
 )
 
 # Server-derived i18n PROJECTIONS — read-only mirrors of a translatable base field, recomputed from
@@ -31,13 +32,24 @@ $script:NeoIPCMetadataDisplayProjections = @(
 $script:NeoIPCMetadataDeferredFields = @('translations')
 
 # Whole object TYPES excluded from the package entirely (not field-stripping): account/PII-shaped
-# objects, and server-generated / environment-coupled collections. Excluded from both emit and the
-# comparator, so their presence in a source export is not reported as a round-trip difference.
+# objects, and server-generated collections. Excluded from both emit and the comparator, so their
+# presence in a source export is not reported as a round-trip difference.
 $script:NeoIPCMetadataExcludedTypes = @(
     'users', 'userRoles', 'userGroups', 'apiToken',   # account/PII tier
-    'categoryOptionCombos',                            # server-generated (regenerate-on-import)
-    'organisationUnits', 'organisationUnitLevels',     # environment-coupled (separate concern)
-    'organisationUnitGroups', 'organisationUnitGroupSets'
+    'categoryOptionCombos'                             # server-generated (regenerate-on-import)
+)
+
+# NON-CLOSURE types — first-class NeoIPC metadata the dependency closure cannot reach STRUCTURALLY. The
+# org-unit hierarchy, its groups / group-sets, and the level definitions are real deployment config that
+# production (not just play) needs: neoipcr reads org-unit group memberships for org-unit roles, World-Bank
+# income classes, and reference-centre / test-unit / trial-site identification. The NEOIPC_CORE program
+# references the groups only by CODE inside expression strings (d2:inOrgUnitGroup('NEO_DEPARTMENT')), never
+# by structured {id}, so the {id}-walk closure cannot pull them in. They are converted, compared, and
+# round-tripped like any other type, but the closure and the owned-id / UID-regeneration scan skip them (they
+# are packaged as deployment config, not pruned by the closure, and keep their UIDs). Distinct from excluded
+# types (not handled at all) and deferred types (not yet handled).
+$script:NeoIPCMetadataNonClosureTypes = @(
+    'organisationUnits', 'organisationUnitGroups', 'organisationUnitGroupSets', 'organisationUnitLevels'
 )
 
 # Object types not yet handled — not PII/server/env-excluded, just unhandled for now. The analytics
@@ -174,6 +186,15 @@ $script:NeoIPCMetadataTypeMaps = [ordered]@{
         sectionAttribute = 'bool'; sqlViewAttribute = 'bool'; trackedEntityAttributeAttribute = 'bool'
         trackedEntityTypeAttribute = 'bool'; userAttribute = 'bool'; userGroupAttribute = 'bool'
         validationRuleAttribute = 'bool'; validationRuleGroupAttribute = 'bool'; visualizationAttribute = 'bool' } }
+    'organisationUnits'     = @{ NaturalKey = @('parent', 'name'); Nesting = 'TopLevel'; Properties = [ordered]@{
+        name = 'string'; shortName = 'string'; openingDate = 'string'; closedDate = 'string'; level = 'int'; parent = 'id'; image = 'id' } }
+    'organisationUnitGroups' = @{ NaturalKey = 'code'; Nesting = 'TopLevel'; Properties = [ordered]@{
+        code = 'string'; name = 'string'; shortName = 'string'; description = 'string'; symbol = 'string'; color = 'string'; organisationUnits = 'idArray' } }
+    'organisationUnitGroupSets' = @{ NaturalKey = 'code'; Nesting = 'TopLevel'; Properties = [ordered]@{
+        code = 'string'; name = 'string'; shortName = 'string'; description = 'string'
+        compulsory = 'bool'; dataDimension = 'bool'; includeSubhierarchyInAnalytics = 'bool'; organisationUnitGroups = 'idArray' } }
+    'organisationUnitLevels' = @{ NaturalKey = 'level'; Nesting = 'TopLevel'; Properties = [ordered]@{
+        name = 'string'; level = 'int'; offlineLevels = 'int' } }
     'programStageDataElements' = @{ NaturalKey = 'id'; Nesting = 'NestedOnly'
         Parent = @{ Type = 'programStages'; ArrayProp = 'programStageDataElements'; FkProp = 'programStage'; FkSynthetic = $false }
         Properties = [ordered]@{ compulsory = 'bool'; allowFutureDate = 'bool'; allowProvidedElsewhere = 'bool'

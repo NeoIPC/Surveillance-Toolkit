@@ -3,6 +3,19 @@
 # tokenizer, parent-id grouping, and the recursive noise normalizer. Static data tables
 # (strip-list, excluded types, default UIDs) live in Private/MetadataTypeMaps.ps1.
 
+function ConvertFrom-NeoIPCMetadataJsonText {
+    # The single JSON->package parse for the whole pipeline. -DateKind String is the load-bearing flag: it
+    # keeps ISO-8601 date strings (e.g. organisationUnit.openingDate / closedDate) as opaque strings instead of
+    # converting them to [datetime]. A [datetime] would then be formatted in the CURRENT CULTURE by the [string]
+    # cast in ConvertTo-NeoIPCMetadataCell's string class (e.g. "06/15/2025 00:00:00" under de-DE) when emitted to
+    # a CSV cell, breaking the round-trip. (ConvertTo-Json itself serialises a [datetime] in invariant ISO, so the
+    # comparator path is unaffected — it is the CSV-cell emit path that bites.) Dates are carried verbatim as strings.
+    [CmdletBinding()]
+    [OutputType([System.Collections.Specialized.OrderedDictionary])]
+    param([Parameter(Mandatory)][AllowEmptyString()][string]$Json)
+    $Json | ConvertFrom-Json -AsHashtable -DateKind String
+}
+
 function Test-NeoIPCMetadataUid {
     # True when $Id is a valid DHIS2 UID (11 chars, leading letter, then alphanumerics).
     # -Invert returns the negation ("this id needs minting"). Same shape as the DHIS2 CodeGenerator.
@@ -125,9 +138,14 @@ function Remove-NeoIPCMetadataNoise {
                     continue
                 }
                 $value = $Object[$key]
-                # empty string / empty collection == absent (DHIS2 treats them equivalently on import,
-                # and the flat-cell representation cannot distinguish "" from absent).
-                if (($value -is [string] -and $value -eq '') -or
+                # null / empty string / empty dict / empty collection == absent (DHIS2 treats them
+                # equivalently on import, and the flat-cell representation cannot distinguish them from
+                # absent). The export carries explicit nulls (e.g. an anonymiser nulls an org unit's
+                # address/email) and empty {} dicts (e.g. an org unit's unset image) — both must normalise
+                # to absent so a source that has them round-trips equal to a directory that omits them.
+                if ($null -eq $value -or
+                    ($value -is [string] -and $value -eq '') -or
+                    ($value -is [System.Collections.IDictionary] -and $value.Count -eq 0) -or
                     ($value -is [System.Collections.IEnumerable] -and $value -isnot [string] -and
                      $value -isnot [System.Collections.IDictionary] -and @($value).Count -eq 0)) {
                     $Object.Remove($key); continue
@@ -286,7 +304,7 @@ function ConvertFrom-NeoIPCMetadataRow {
         }
     }
     if ($Row.Contains('sharing') -and $Row['sharing']) {
-        $obj['sharing'] = $Row['sharing'] | ConvertFrom-Json -AsHashtable
+        $obj['sharing'] = ConvertFrom-NeoIPCMetadataJsonText -Json $Row['sharing']
     }
     $obj
 }

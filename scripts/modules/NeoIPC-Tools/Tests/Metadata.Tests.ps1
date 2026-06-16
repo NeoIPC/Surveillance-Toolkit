@@ -20,8 +20,8 @@ InModuleScope 'NeoIPC-Tools' {
             param([string]$Type, $Object)
             $row  = ConvertTo-NeoIPCMetadataRow -Type $Type -Object $Object
             $back = ConvertFrom-NeoIPCMetadataRow -Type $Type -Row $row
-            $o1 = $Object | ConvertTo-Json -Depth 40 | ConvertFrom-Json -AsHashtable
-            $o2 = $back   | ConvertTo-Json -Depth 40 | ConvertFrom-Json -AsHashtable
+            $o1 = ConvertFrom-NeoIPCMetadataJsonText -Json ($Object | ConvertTo-Json -Depth 40)
+            $o2 = ConvertFrom-NeoIPCMetadataJsonText -Json ($back | ConvertTo-Json -Depth 40)
             $a = (ConvertTo-NeoIPCMetadataCanonical (Remove-NeoIPCMetadataNoise -Object $o1 -WarningAction SilentlyContinue)) | ConvertTo-Json -Compress -Depth 40
             $b = (ConvertTo-NeoIPCMetadataCanonical (Remove-NeoIPCMetadataNoise -Object $o2 -WarningAction SilentlyContinue)) | ConvertTo-Json -Compress -Depth 40
             @{ Equal = ($a -eq $b); Row = $row; Back = $back; A = $a; B = $b }
@@ -227,7 +227,7 @@ InModuleScope 'NeoIPC-Tools' {
             }
         }
         It 'extracts nested-only children to their own row sets and excludes PII types' {
-            $work = $script:pkg0 | ConvertTo-Json -Depth 40 | ConvertFrom-Json -AsHashtable
+            $work = ConvertFrom-NeoIPCMetadataJsonText -Json ($script:pkg0 | ConvertTo-Json -Depth 40)
             $rows = ConvertFrom-NeoIPCMetadataPackage -Package $work
             $rows.Contains('programStageDataElements') | Should -BeTrue
             $rows.Contains('programTrackedEntityAttributes') | Should -BeTrue
@@ -236,7 +236,7 @@ InModuleScope 'NeoIPC-Tools' {
             [string]$rows['programStageDataElements'][0]['__fk'] | Should -BeExactly 'psAAAA00001'
         }
         It 're-nests children into parents and never leaks __fk / synthetic fk into output' {
-            $work = $script:pkg0 | ConvertTo-Json -Depth 40 | ConvertFrom-Json -AsHashtable
+            $work = ConvertFrom-NeoIPCMetadataJsonText -Json ($script:pkg0 | ConvertTo-Json -Depth 40)
             $rows = ConvertFrom-NeoIPCMetadataPackage -Package $work
             $pkg  = ConvertTo-NeoIPCMetadataPackage -Rows $rows
             $pkg.Contains('programStageDataElements') | Should -BeFalse
@@ -247,8 +247,8 @@ InModuleScope 'NeoIPC-Tools' {
             $pkg['programStages'][0]['programStageDataElements'][0].Contains('__fk') | Should -BeFalse
         }
         It 'round-trips the whole package with zero semantic diffs' {
-            $work     = $script:pkg0 | ConvertTo-Json -Depth 40 | ConvertFrom-Json -AsHashtable
-            $baseline = $script:pkg0 | ConvertTo-Json -Depth 40 | ConvertFrom-Json -AsHashtable
+            $work     = ConvertFrom-NeoIPCMetadataJsonText -Json ($script:pkg0 | ConvertTo-Json -Depth 40)
+            $baseline = ConvertFrom-NeoIPCMetadataJsonText -Json ($script:pkg0 | ConvertTo-Json -Depth 40)
             $rows = ConvertFrom-NeoIPCMetadataPackage -Package $work
             $pkg  = ConvertTo-NeoIPCMetadataPackage -Rows $rows
             @(Compare-NeoIPCMetadataCore -Reference $baseline -Difference $pkg).Count | Should -Be 0
@@ -361,12 +361,12 @@ InModuleScope 'NeoIPC-Tools' {
                 # A synthetic NEOIPC_CORE program package exercising every closure edge: forward {id} walk,
                 # reverse-by-program / -stage, idString (templateUid) following, the expression-UID safety net
                 # (in-package miss + non-indexed unresolved), membership recovery (option / data-element groups),
-                # ownership (attributes), stop-type refs (org units, users), and an unreachable orphan to drop.
+                # ownership (attributes), refs to a non-closure org unit + an excluded user, and an orphan to drop.
                 [ordered]@{
                     programs = @([ordered]@{ id = 'progNEOIPC1'; code = 'NEOIPC_CORE'; name = 'Core'; programType = 'WITH_REGISTRATION'
                             trackedEntityType = [ordered]@{ id = 'tetPatient1' }
                             programStages = @([ordered]@{ id = 'stageADM001' })
-                            organisationUnits = @([ordered]@{ id = 'ouOverlay01' })   # stop-type ref (overlay)
+                            organisationUnits = @([ordered]@{ id = 'ouOverlay01' })   # non-closure org-unit assignment ref
                             programTrackedEntityAttributes = @([ordered]@{ id = 'pteaCore001'; program = [ordered]@{ id = 'progNEOIPC1' }
                                     trackedEntityAttribute = [ordered]@{ id = 'teaPatID001' } }) })
                     programStages = @([ordered]@{ id = 'stageADM001'; name = 'Admission'; program = [ordered]@{ id = 'progNEOIPC1' }
@@ -417,7 +417,7 @@ InModuleScope 'NeoIPC-Tools' {
                             leftSide = [ordered]@{ expression = '#{otherStage1.otherDe0001}'; missingValueStrategy = 'NEVER_SKIP' }   # references nothing in closure -> dropped
                             rightSide = [ordered]@{ expression = 'V{zero}'; missingValueStrategy = 'NEVER_SKIP' } })
                     attributes = @([ordered]@{ id = 'attrCustom1'; code = 'IsTestunit'; name = 'IsTestunit'; valueType = 'BOOLEAN' })   # ownership -> kept wholesale
-                    organisationUnits = @([ordered]@{ id = 'ouOverlay01'; name = 'Overlay OU' })   # excluded overlay collection -> its id is harvested into stop-ids
+                    organisationUnits = @([ordered]@{ id = 'ouOverlay01'; name = 'Overlay OU' })   # non-closure type -> never indexed, assignment ref resolves to nothing
                     users = @([ordered]@{ id = 'userPII0001'; name = 'Anon' })   # excluded type
                 }
             }
@@ -511,13 +511,13 @@ InModuleScope 'NeoIPC-Tools' {
             $r.IncludedIds.Contains('valRuleOut1') | Should -BeFalse
             @($r.Package['validationRules'] | ForEach-Object { $_['id'] }) | Should -Not -Contain 'valRuleOut1'
         }
-        It 'never indexes or includes stop-types, and omits them from the pruned package' {
+        It 'never indexes or includes excluded or non-closure types, and omits them from the pruned package' {
             $r = Get-Closure
             $r.IncludedIds.Contains('ouOverlay01') | Should -BeFalse
             $r.IncludedIds.Contains('userPII0001') | Should -BeFalse
             $r.Package.Contains('users') | Should -BeFalse
             $r.Package.Contains('organisationUnits') | Should -BeFalse
-            @($r.StructuredUnresolved | ForEach-Object { $_.Uid }) | Should -Not -Contain 'ouOverlay01'   # excluded overlay, not a dropped dependency
+            @($r.StructuredUnresolved | ForEach-Object { $_.Uid }) | Should -Not -Contain 'ouOverlay01'   # non-closure type, not a dropped dependency
         }
         It 'reports a ref to a present-but-unmapped top-level object instead of dropping it silently' {
             # A data element references a top-level legendSet; legendSets is present in the package but is not a
@@ -821,15 +821,15 @@ InModuleScope 'NeoIPC-Tools' {
                 $b = New-NeoIPCMetadataUidMap -Package (New-TransformFixture)
                 foreach ($k in $a.Keys) { $a[$k] | Should -BeExactly $b[$k] }
             }
-            It 'never re-mints excluded/overlay/PII ids, unmapped types, or the system default UIDs' {
-                # When a full export carries the overlay/PII/server-generated collections top-level plus the
-                # system default categoryCombo (referenced by every dataElement), those must keep their UIDs so
-                # the package still binds on import. bjDvmb4bfuf is a $NeoIPCMetadataDefaultUids member.
+            It 'never re-mints excluded / non-closure / unmapped ids or the system default UIDs' {
+                # When a full export carries the non-closure (org-unit) / PII / server-generated collections
+                # top-level plus the system default categoryCombo (referenced by every dataElement), those must
+                # keep their UIDs so the package still binds on import. bjDvmb4bfuf is a default-UID member.
                 $pkg = [ordered]@{
                     programs = @([ordered]@{ id = 'progAAAA001'; code = 'NEOIPC_CORE'; name = 'C'; programType = 'WITH_REGISTRATION' })
                     dataElements = @([ordered]@{ id = 'deAAAA00001'; code = 'NEOIPC_X'; name = 'X'; valueType = 'TEXT'; categoryCombo = [ordered]@{ id = 'bjDvmb4bfuf' } })
                     categoryCombos = @([ordered]@{ id = 'bjDvmb4bfuf'; code = 'default'; name = 'default'; dataDimensionType = 'DISAGGREGATION' })
-                    organisationUnits = @([ordered]@{ id = 'ouRealOrg01'; name = 'Real OU' })          # excluded overlay
+                    organisationUnits = @([ordered]@{ id = 'ouRealOrg01'; name = 'Real OU' })          # non-closure (org-unit family)
                     users = @([ordered]@{ id = 'userReal001'; name = 'Acct' })                          # excluded PII
                     categoryOptionCombos = @([ordered]@{ id = 'cocReal0001'; name = 'COC' })            # excluded server-generated
                     legendSets = @([ordered]@{ id = 'lgndSet0001'; name = 'L' }) }                      # unmapped top-level
@@ -842,6 +842,94 @@ InModuleScope 'NeoIPC-Tools' {
                 $r.Package['dataElements'][0]['categoryCombo']['id'] | Should -BeExactly 'bjDvmb4bfuf'   # default ref preserved
                 $r.Package['categoryCombos'][0]['id'] | Should -BeExactly 'bjDvmb4bfuf'
                 $r.Package['organisationUnits'][0]['id'] | Should -BeExactly 'ouRealOrg01'
+            }
+        }
+    }
+
+    Describe 'Org-unit family (non-closure coverage)' {
+        It 'round-trips an organisationUnit: ISO open/closed dates, parent/image id refs, derived path stripped, null PII dropped' {
+            $ou = [ordered]@{ id = 'ouDept00001'; name = 'Department'; shortName = 'Dept'
+                openingDate = '2020-01-01T00:00:00'; closedDate = '2025-06-15T00:00:00'; level = 4   # closedDate: a closed dept
+                parent = [ordered]@{ id = 'ouHosp00001' }; image = [ordered]@{ id = 'fileRes0001' }
+                path = '/ouRoot00001/ouHosp00001/ouDept00001'                               # server-derived, stripped
+                address = $null; code = $null; comment = $null; geometry = $null            # anonymiser nulls, dropped
+                created = '2020-01-01'; lastUpdated = '2021-01-01'; translations = @() }
+            $r = Get-RowRoundTrip 'organisationUnits' $ou
+            $r.Equal | Should -BeTrue -Because ($r.A + ' vs ' + $r.B)
+            $r.Row['openingDate'] | Should -BeExactly '2020-01-01T00:00:00'   # ISO preserved, NOT culture-formatted
+            $r.Row['closedDate'] | Should -BeExactly '2025-06-15T00:00:00'    # the closing date round-trips like openingDate
+            $r.Back['parent']['id'] | Should -BeExactly 'ouHosp00001'
+            $r.Back['image']['id'] | Should -BeExactly 'fileRes0001'
+            $r.Back.Contains('path') | Should -BeFalse
+            $r.Back.Contains('address') | Should -BeFalse
+        }
+        It 'drops an empty {} image dict (== absent)' {
+            $ou = [ordered]@{ id = 'ouRoot00001'; name = 'Root'; shortName = 'Root'; openingDate = '2020-01-01T00:00:00'; level = 1
+                image = [ordered]@{}; created = '2020' }
+            $r = Get-RowRoundTrip 'organisationUnits' $ou
+            $r.Equal | Should -BeTrue
+            $r.Back.Contains('image') | Should -BeFalse
+        }
+        It 'round-trips an organisationUnitGroup with sorted member refs (set semantics) + symbol/color styling' {
+            $g = [ordered]@{ id = 'ougDept0001'; code = 'NEO_DEPARTMENT'; name = 'Departments'; shortName = 'Depts'; description = 'd'
+                symbol = '12'; color = '#FF0000'
+                organisationUnits = @([ordered]@{ id = 'ouZ99999999' }, [ordered]@{ id = 'ouA11111111' }, [ordered]@{ id = 'ouM55555555' })
+                sharing = [ordered]@{ public = 'r-------' }; created = '2020' }
+            $r = Get-RowRoundTrip 'organisationUnitGroups' $g
+            $r.Equal | Should -BeTrue
+            $r.Row['organisationUnits'] | Should -BeExactly 'ouA11111111 ouM55555555 ouZ99999999'
+            $r.Row['color'] | Should -BeExactly '#FF0000'
+        }
+        It 'round-trips an organisationUnitGroupSet (bools + group refs)' {
+            $gs = [ordered]@{ id = 'ougsCat0001'; code = 'NEOIPC_CATEGORY'; name = 'Category'; shortName = 'Cat'; description = 'd'
+                compulsory = $true; dataDimension = $false; includeSubhierarchyInAnalytics = $true
+                organisationUnitGroups = @([ordered]@{ id = 'ougDept0001' }); sharing = [ordered]@{ public = 'r-------' }; created = '2020' }
+            $r = Get-RowRoundTrip 'organisationUnitGroupSets' $gs
+            $r.Equal | Should -BeTrue
+            $r.Row['compulsory'] | Should -BeExactly 'True'
+            $r.Row['includeSubhierarchyInAnalytics'] | Should -BeExactly 'True'
+        }
+        It 'round-trips an organisationUnitLevel' {
+            $lvl = [ordered]@{ id = 'oulLevel004'; name = 'Department'; level = 4; offlineLevels = 1; created = '2020' }
+            $r = Get-RowRoundTrip 'organisationUnitLevels' $lvl
+            $r.Equal | Should -BeTrue
+            $r.Row['level'] | Should -BeExactly '4'
+        }
+
+        Context 'the closure does not reach the org-unit family (code-referenced, not structured)' {
+            BeforeAll {
+                $script:ouPkg = [ordered]@{
+                    programs = @([ordered]@{ id = 'progNEOIPC1'; code = 'NEOIPC_CORE'; name = 'Core'; programType = 'WITH_REGISTRATION'
+                            organisationUnits = @([ordered]@{ id = 'ouDept00001' })   # org-unit assignment ref (non-closure target)
+                            programStages = @([ordered]@{ id = 'stageADM001' }) })
+                    programStages = @([ordered]@{ id = 'stageADM001'; name = 'Adm'; program = [ordered]@{ id = 'progNEOIPC1' } })
+                    programRules = @([ordered]@{ id = 'prRule00001'; name = 'R'; condition = "d2:inOrgUnitGroup('NEO_DEPARTMENT')"; priority = 1
+                            program = [ordered]@{ id = 'progNEOIPC1' } })   # references the group by CODE, not {id}
+                    organisationUnits = @([ordered]@{ id = 'ouDept00001'; name = 'Dept'; shortName = 'D'; openingDate = '2020-01-01T00:00:00'; level = 1 })
+                    organisationUnitGroups = @([ordered]@{ id = 'ougDept0001'; code = 'NEO_DEPARTMENT'; name = 'Depts'; organisationUnits = @([ordered]@{ id = 'ouDept00001' }) })
+                    organisationUnitGroupSets = @([ordered]@{ id = 'ougsCat0001'; code = 'NEOIPC_CATEGORY'; name = 'Cat'; organisationUnitGroups = @([ordered]@{ id = 'ougDept0001' }) })
+                    organisationUnitLevels = @([ordered]@{ id = 'oulLevel001'; name = 'L1'; level = 1 })
+                }
+            }
+            It 'excludes every org-unit-family object from the closure and the pruned package' {
+                $r = Get-NeoIPCMetadataClosure -Package $script:ouPkg
+                foreach ($id in 'ouDept00001', 'ougDept0001', 'ougsCat0001', 'oulLevel001') {
+                    $r.IncludedIds.Contains($id) | Should -BeFalse -Because "$id is non-closure (code-referenced)"
+                }
+                foreach ($t in 'organisationUnits', 'organisationUnitGroups', 'organisationUnitGroupSets', 'organisationUnitLevels') {
+                    $r.Package.Contains($t) | Should -BeFalse
+                }
+            }
+            It 'does not flag the org-unit assignment ref as a dropped dependency' {
+                $r = Get-NeoIPCMetadataClosure -Package $script:ouPkg
+                @($r.StructuredUnresolved | ForEach-Object { $_.Uid }) | Should -Not -Contain 'ouDept00001'
+            }
+            It 'leaves the org-unit family out of the UID-regeneration owned set' {
+                $map = New-NeoIPCMetadataUidMap -Package $script:ouPkg
+                foreach ($id in 'ouDept00001', 'ougDept0001', 'ougsCat0001', 'oulLevel001') {
+                    $map.ContainsKey($id) | Should -BeFalse
+                }
+                $map.ContainsKey('progNEOIPC1') | Should -BeTrue   # the program itself is owned
             }
         }
     }
