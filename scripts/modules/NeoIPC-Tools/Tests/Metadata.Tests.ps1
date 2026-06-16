@@ -143,6 +143,17 @@ InModuleScope 'NeoIPC-Tools' {
                 programRule = [ordered]@{ id = 'prAAAA12345' }; dataElement = [ordered]@{ id = 'deAAA11111' }; created = 'x' }
             (Get-RowRoundTrip 'programRuleActions' $pra).Equal | Should -BeTrue
         }
+        It 'strips the displaySubjectTemplate/displayMessageTemplate i18n projections on a programNotificationTemplate' {
+            $t = [ordered]@{ id = 'pntTmpl0001'; name = 'T'; subjectTemplate = 'Subj'; messageTemplate = 'Msg'
+                notificationTrigger = 'COMPLETION'; notificationRecipient = 'USER_GROUP'
+                displaySubjectTemplate = 'Subj (de)'; displayMessageTemplate = 'Msg (de)'   # server-derived mirrors, must not round-trip
+                created = 'x'; sharing = [ordered]@{ public = 'rw------' } }
+            $r = Get-RowRoundTrip 'programNotificationTemplates' $t
+            $r.Equal | Should -BeTrue -Because ($r.A + ' vs ' + $r.B)
+            $r.Back.Contains('displaySubjectTemplate') | Should -BeFalse
+            $r.Back.Contains('displayMessageTemplate') | Should -BeFalse
+            $r.Back['subjectTemplate'] | Should -BeExactly 'Subj'
+        }
     }
 
     Describe 'List-order preservation (regression for form-layout scramble)' {
@@ -269,6 +280,340 @@ InModuleScope 'NeoIPC-Tools' {
             ($bytes[0] -eq 0xEF -and $bytes[1] -eq 0xBB -and $bytes[2] -eq 0xBF) | Should -BeFalse
             ($bytes -contains 0x0D) | Should -BeFalse   # no CR
             ($bytes -contains 0x0A) | Should -BeTrue    # has LF
+        }
+    }
+
+    Describe 'Expression UID extraction (grammar-complete safety-net scanner)' {
+        It 'extracts both UIDs from a 2-part data-element ref #{ps.de}' {
+            $r = Get-NeoIPCMetadataExpressionRef -Text '#{stageADM001.deUsed00001}'
+            @($r | ForEach-Object { $_.Uid }) | Should -Be @('stageADM001', 'deUsed00001')
+            $r[0].Form | Should -BeExactly '#'
+        }
+        It 'extracts all three UIDs from a #{de.coc.aoc} ref' {
+            $r = Get-NeoIPCMetadataExpressionRef -Text '#{deUsed00001.catOptCmb01.catOptCmb02}'
+            @($r | ForEach-Object { $_.Uid }) | Should -Be @('deUsed00001', 'catOptCmb01', 'catOptCmb02')
+        }
+        It 'takes only the dataSet UID from R{dataSet.REPORTING_RATE} (2nd part is not a UID)' {
+            $r = Get-NeoIPCMetadataExpressionRef -Text 'R{dataSetAAA1.REPORTING_RATE}'
+            @($r).Count | Should -Be 1
+            $r[0].Uid | Should -BeExactly 'dataSetAAA1'
+            $r[0].Form | Should -BeExactly 'R'
+        }
+        It 'extracts an org-unit-group UID from the OUG{} form' {
+            $r = Get-NeoIPCMetadataExpressionRef -Text 'OUG{ougUnres001} == 1'
+            @($r).Count | Should -Be 1
+            $r[0].Uid | Should -BeExactly 'ougUnres001'
+            $r[0].Form | Should -BeExactly 'OUG'
+        }
+        It 'yields nothing for V{} program variables' {
+            @(Get-NeoIPCMetadataExpressionRef -Text 'V{event_date}').Count | Should -Be 0
+        }
+        It 'does not mis-read the R in VAR{...} as an R{...} data item (lookbehind)' {
+            @(Get-NeoIPCMetadataExpressionRef -Text 'VAR{somevariable}').Count | Should -Be 0
+        }
+        It 'yields nothing for a program-rule NAME ref (#{name with spaces})' {
+            @(Get-NeoIPCMetadataExpressionRef -Text '#{NeoIPC BSI Pathogen 1 value}').Count | Should -Be 0
+        }
+        It 'reads the bare PS_EVENTDATE:<uid> QUIRKS tag' {
+            $r = Get-NeoIPCMetadataExpressionRef -Text 'd2:daysBetween(PS_EVENTDATE:stageADM001, V{event_date})'
+            @($r).Count | Should -Be 1
+            $r[0].Uid | Should -BeExactly 'stageADM001'
+            $r[0].Form | Should -BeExactly 'PS_EVENTDATE'
+        }
+        It 'reads the quoted UID argument of d2:relationshipCount' {
+            $r = Get-NeoIPCMetadataExpressionRef -Text "d2:relationshipCount('relTypeAAA1')"
+            @($r).Count | Should -Be 1
+            $r[0].Uid | Should -BeExactly 'relTypeAAA1'
+            $r[0].Form | Should -BeExactly 'relationshipCount'
+        }
+        It 'returns empty for empty and null input' {
+            @(Get-NeoIPCMetadataExpressionRef -Text '').Count | Should -Be 0
+            @(Get-NeoIPCMetadataExpressionRef -Text $null).Count | Should -Be 0
+        }
+        It 'strips a tag: prefix and extracts the tagged category-option UID from #{ps.co:uid}' {
+            $r = Get-NeoIPCMetadataExpressionRef -Text '#{stageADM001.co:catOptn0001}'
+            @($r | ForEach-Object { $_.Uid }) | Should -Be @('stageADM001', 'catOptn0001')
+        }
+        It 'extracts a deGroup: data-element-group UID' {
+            $r = Get-NeoIPCMetadataExpressionRef -Text '#{deGroup:dataElGrp01}'
+            @($r).Count | Should -Be 1
+            $r[0].Uid | Should -BeExactly 'dataElGrp01'
+        }
+        It 'splits an &-joined tagged UID group (#{ps.coGroup:uidA&uidB})' {
+            $r = Get-NeoIPCMetadataExpressionRef -Text '#{stageADM001.coGroup:catOGrp0001&catOGrp0002}'
+            @($r | ForEach-Object { $_.Uid }) | Should -Be @('stageADM001', 'catOGrp0001', 'catOGrp0002')
+        }
+        It 'extracts the bare UID arg of orgUnit.program(uid)' {
+            $r = Get-NeoIPCMetadataExpressionRef -Text 'orgUnit.program(progOther01) > 0'
+            @($r).Count | Should -Be 1
+            $r[0].Uid | Should -BeExactly 'progOther01'
+            $r[0].Form | Should -BeExactly 'orgUnit.program'
+        }
+        It 'extracts multiple bare UID args of orgUnit.group(uid, uid)' {
+            $r = Get-NeoIPCMetadataExpressionRef -Text 'd2:count(orgUnit.group(ougAAAA0001, ougBBBB0001))'
+            @($r | ForEach-Object { $_.Uid }) | Should -Be @('ougAAAA0001', 'ougBBBB0001')
+        }
+    }
+
+    Describe 'Dependency closure (the M2 prune)' {
+        BeforeAll {
+            function New-ClosureFixture {
+                # A synthetic NEOIPC_CORE program package exercising every closure edge: forward {id} walk,
+                # reverse-by-program / -stage, idString (templateUid) following, the expression-UID safety net
+                # (in-package miss + non-indexed unresolved), membership recovery (option / data-element groups),
+                # ownership (attributes), stop-type refs (org units, users), and an unreachable orphan to drop.
+                [ordered]@{
+                    programs = @([ordered]@{ id = 'progNEOIPC1'; code = 'NEOIPC_CORE'; name = 'Core'; programType = 'WITH_REGISTRATION'
+                            trackedEntityType = [ordered]@{ id = 'tetPatient1' }
+                            programStages = @([ordered]@{ id = 'stageADM001' })
+                            organisationUnits = @([ordered]@{ id = 'ouOverlay01' })   # stop-type ref (overlay)
+                            programTrackedEntityAttributes = @([ordered]@{ id = 'pteaCore001'; program = [ordered]@{ id = 'progNEOIPC1' }
+                                    trackedEntityAttribute = [ordered]@{ id = 'teaPatID001' } }) })
+                    programStages = @([ordered]@{ id = 'stageADM001'; name = 'Admission'; program = [ordered]@{ id = 'progNEOIPC1' }
+                            programStageDataElements = @([ordered]@{ id = 'psdeAdm0001'; programStage = [ordered]@{ id = 'stageADM001' }
+                                    dataElement = [ordered]@{ id = 'deUsed00001' } }) })
+                    programRuleVariables = @([ordered]@{ id = 'prvVar00001'; name = 'NeoIPC var'; program = [ordered]@{ id = 'progNEOIPC1' }
+                            dataElement = [ordered]@{ id = 'deVarOnly01' } })   # reverse-by-program -> pulls deVarOnly01 (sole path)
+                    programStageSections = @([ordered]@{ id = 'pssSec00001'; name = 'Section 1'; programStage = [ordered]@{ id = 'stageADM001' }
+                            dataElements = @([ordered]@{ id = 'deSecOnly01' }) })   # reverse-by-stage -> pulls deSecOnly01 (sole path)
+                    trackedEntityTypes = @([ordered]@{ id = 'tetPatient1'; name = 'Patient'
+                            trackedEntityTypeAttributes = @([ordered]@{ id = 'tetaPat0001'; trackedEntityType = [ordered]@{ id = 'tetPatient1' }
+                                    trackedEntityAttribute = [ordered]@{ id = 'teaPatID001' } }) })
+                    trackedEntityAttributes = @([ordered]@{ id = 'teaPatID001'; code = 'NEOIPC_PATIENT_ID'; name = 'Patient ID'; valueType = 'TEXT' })
+                    dataElements = @(
+                        [ordered]@{ id = 'deUsed00001'; code = 'NEOIPC_ADM_X'; name = 'Used'; valueType = 'TEXT'; optionSet = [ordered]@{ id = 'osYesNo0001' } }
+                        [ordered]@{ id = 'deExprOnly1'; code = 'NEOIPC_ADM_E'; name = 'ExprOnly'; valueType = 'NUMBER' }   # referenced ONLY in the PI expression
+                        [ordered]@{ id = 'deVarOnly01'; code = 'NEOIPC_ADM_V'; name = 'VarOnly'; valueType = 'TEXT' }       # reachable ONLY via the programRuleVariable
+                        [ordered]@{ id = 'deSecOnly01'; code = 'NEOIPC_ADM_S'; name = 'SecOnly'; valueType = 'TEXT' }       # reachable ONLY via the programStageSection
+                        [ordered]@{ id = 'deOrphan001'; code = 'NEOIPC_ORPHAN'; name = 'Orphan'; valueType = 'TEXT' })      # unreachable -> dropped
+                    optionSets = @([ordered]@{ id = 'osYesNo0001'; code = 'NEOIPC_OS'; name = 'OS'; valueType = 'TEXT'; options = @([ordered]@{ id = 'optYes00001' }) })
+                    options = @(
+                        [ordered]@{ id = 'optYes00001'; code = '1'; name = 'Yes'; optionSet = [ordered]@{ id = 'osYesNo0001' } }
+                        [ordered]@{ id = 'optOther001'; code = '1'; name = 'Other'; optionSet = [ordered]@{ id = 'osOther0001' } })   # not in closure
+                    optionGroups = @(
+                        [ordered]@{ id = 'ogAtc000001'; code = 'NEOIPC_ATC'; name = 'ATC grp'; options = @([ordered]@{ id = 'optYes00001' }) }   # intersects -> recovered
+                        [ordered]@{ id = 'ogOther0001'; code = 'OTHER'; name = 'Other grp'; options = @([ordered]@{ id = 'optOther001' }) })       # no intersection -> dropped
+                    optionGroupSets = @([ordered]@{ id = 'ogsAware001'; code = 'NEOIPC_AWARE'; name = 'AWaRe'; optionGroups = @([ordered]@{ id = 'ogAtc000001' }) })   # fixpoint after its group
+                    dataElementGroups = @([ordered]@{ id = 'degGroup001'; code = 'NEOIPC_DEG'; name = 'DE grp'; dataElements = @([ordered]@{ id = 'deUsed00001' }) })  # intersects -> recovered
+                    programRules = @([ordered]@{ id = 'prRule00001'; name = 'NeoIPC rule'; condition = 'OUG{ougUnres001} == 1'; priority = 1
+                            program = [ordered]@{ id = 'progNEOIPC1' }                                  # reached via reverse-by-program
+                            programRuleActions = @([ordered]@{ id = 'praAction01' }, [ordered]@{ id = 'praSend0001' }, [ordered]@{ id = 'praSendBad1' }) })
+                    programRuleActions = @(
+                        [ordered]@{ id = 'praAction01'; programRuleActionType = 'ASSIGN'; data = '#{stageADM001.deUsed00001}'
+                            programRule = [ordered]@{ id = 'prRule00001' }; dataElement = [ordered]@{ id = 'deUsed00001' } }
+                        [ordered]@{ id = 'praSend0001'; programRuleActionType = 'SENDMESSAGE'; templateUid = 'pntTmpl0001'        # idString -> in package
+                            programRule = [ordered]@{ id = 'prRule00001' } }
+                        [ordered]@{ id = 'praSendBad1'; programRuleActionType = 'SENDMESSAGE'; templateUid = 'pntMissing1'        # idString -> absent (dangling)
+                            programRule = [ordered]@{ id = 'prRule00001' } })
+                    programNotificationTemplates = @([ordered]@{ id = 'pntTmpl0001'; name = 'Tmpl'; notificationTrigger = 'COMPLETION'; notificationRecipient = 'USER_GROUP' })
+                    programIndicators = @([ordered]@{ id = 'piExpr00001'; name = 'PI'; analyticsType = 'EVENT'
+                            program = [ordered]@{ id = 'progNEOIPC1' }                                  # reverse-by-program
+                            expression = '#{stageADM001.deExprOnly1}' })                                # deExprOnly1 reachable ONLY here
+                    validationRules = @(
+                        [ordered]@{ id = 'valRuleIn01'; name = 'Refs closure'; operator = 'not_equal_to'; periodType = 'Monthly'
+                            leftSide = [ordered]@{ expression = 'I{piExpr00001}'; missingValueStrategy = 'NEVER_SKIP' }       # references the included PI -> recovered
+                            rightSide = [ordered]@{ expression = 'V{zero}'; missingValueStrategy = 'NEVER_SKIP' } }
+                        [ordered]@{ id = 'valRuleOut1'; name = 'Refs nothing'; operator = 'not_equal_to'; periodType = 'Monthly'
+                            leftSide = [ordered]@{ expression = '#{otherStage1.otherDe0001}'; missingValueStrategy = 'NEVER_SKIP' }   # references nothing in closure -> dropped
+                            rightSide = [ordered]@{ expression = 'V{zero}'; missingValueStrategy = 'NEVER_SKIP' } })
+                    attributes = @([ordered]@{ id = 'attrCustom1'; code = 'IsTestunit'; name = 'IsTestunit'; valueType = 'BOOLEAN' })   # ownership -> kept wholesale
+                    organisationUnits = @([ordered]@{ id = 'ouOverlay01'; name = 'Overlay OU' })   # excluded overlay collection -> its id is harvested into stop-ids
+                    users = @([ordered]@{ id = 'userPII0001'; name = 'Anon' })   # excluded type
+                }
+            }
+            function Get-Closure { Get-NeoIPCMetadataClosure -Package (New-ClosureFixture) }
+        }
+
+        It 'keeps the seed and everything structurally reachable; drops the orphan' {
+            $r = Get-Closure
+            $r.SeedId | Should -BeExactly 'progNEOIPC1'
+            foreach ($id in @('progNEOIPC1', 'stageADM001', 'tetPatient1', 'teaPatID001', 'deUsed00001')) {
+                $r.IncludedIds.Contains($id) | Should -BeTrue -Because "$id is reachable"
+            }
+            $r.IncludedIds.Contains('deOrphan001') | Should -BeFalse
+            @($r.Package['dataElements'] | ForEach-Object { $_['id'] }) | Should -Not -Contain 'deOrphan001'
+            @($r.Package['dataElements'] | ForEach-Object { $_['id'] }) | Should -Contain 'deUsed00001'
+        }
+        It 'reaches program rules / indicators by the reverse-by-program edge' {
+            $r = Get-Closure
+            $r.IncludedIds.Contains('prRule00001') | Should -BeTrue
+            $r.IncludedIds.Contains('piExpr00001') | Should -BeTrue
+            $r.IncludedIds.Contains('praAction01') | Should -BeTrue   # via the rule's forward {id} walk
+        }
+        It 'follows a SENDMESSAGE templateUid (idString edge) into the closure' {
+            $r = Get-Closure
+            $r.IncludedIds.Contains('pntTmpl0001') | Should -BeTrue
+            @($r.Package['programNotificationTemplates'] | ForEach-Object { $_['id'] }) | Should -Contain 'pntTmpl0001'
+        }
+        It 'reports a dangling templateUid (idString target absent) without dropping it silently' {
+            $dangling = @((Get-Closure).DanglingStringRefs)
+            $dangling.Count | Should -Be 1
+            $dangling[0].Uid | Should -BeExactly 'pntMissing1'
+            $dangling[0].Field | Should -BeExactly 'templateUid'
+        }
+        It 'rescues a data element referenced ONLY in an expression (the DHIS2-export bug) and reports it' {
+            $r = Get-Closure
+            $r.IncludedIds.Contains('deExprOnly1') | Should -BeTrue -Because 'the safety net must pull it in'
+            @($r.Package['dataElements'] | ForEach-Object { $_['id'] }) | Should -Contain 'deExprOnly1'
+            $misses = @($r.ExpressionMisses)
+            $misses.Count | Should -Be 1
+            $misses[0].Uid | Should -BeExactly 'deExprOnly1'
+            $misses[0].TargetType | Should -BeExactly 'dataElements'
+        }
+        It 'reports an expression ref to a non-indexed target as unresolved (overlay / unmapped)' {
+            $r = Get-Closure
+            $unres = @($r.ExpressionUnresolved)
+            $unres.Count | Should -Be 1
+            $unres[0].Uid | Should -BeExactly 'ougUnres001'
+            $r.IncludedIds.Contains('ougUnres001') | Should -BeFalse
+        }
+        It 'recovers grouping objects whose members intersect the closure (membership, with fixpoint)' {
+            $r = Get-Closure
+            $r.IncludedIds.Contains('ogAtc000001') | Should -BeTrue -Because 'its option is in the closure'
+            $r.IncludedIds.Contains('ogsAware001') | Should -BeTrue -Because 'fixpoint: picks up after its option group'
+            $r.IncludedIds.Contains('degGroup001') | Should -BeTrue -Because 'its data element is in the closure'
+            $r.IncludedIds.Contains('ogOther0001') | Should -BeFalse -Because 'no member intersects the closure'
+        }
+        It 'recovers a grouping object reachable only via another recovered group drained member (combined fixpoint)' {
+            # optionGroup A intersects the closure (optYesInClo) AND carries optCrossLnk, which is NOT otherwise
+            # in the closure (the optionSet lists only optYesInClo). optionGroup B's only member is optCrossLnk.
+            # B is reachable only after A is recovered AND drained -> needs the membership+drain combined fixpoint.
+            $pkg = [ordered]@{
+                programs = @([ordered]@{ id = 'progNEOIPC1'; code = 'NEOIPC_CORE'; name = 'Core'; programType = 'WITH_REGISTRATION'
+                        programStages = @([ordered]@{ id = 'stageADM001' }) })
+                programStages = @([ordered]@{ id = 'stageADM001'; name = 'Adm'; program = [ordered]@{ id = 'progNEOIPC1' }
+                        programStageDataElements = @([ordered]@{ id = 'psdeAdm0001'; programStage = [ordered]@{ id = 'stageADM001' }
+                                dataElement = [ordered]@{ id = 'deUsed00001' } }) })
+                dataElements = @([ordered]@{ id = 'deUsed00001'; code = 'NEOIPC_X'; name = 'X'; valueType = 'TEXT'; optionSet = [ordered]@{ id = 'osYesNo0001' } })
+                optionSets = @([ordered]@{ id = 'osYesNo0001'; code = 'OS'; name = 'OS'; valueType = 'TEXT'; options = @([ordered]@{ id = 'optYesInClo' }) })
+                options = @(
+                    [ordered]@{ id = 'optYesInClo'; code = '1'; name = 'In'; optionSet = [ordered]@{ id = 'osYesNo0001' } }
+                    [ordered]@{ id = 'optCrossLnk'; code = '2'; name = 'Cross'; optionSet = [ordered]@{ id = 'osYesNo0001' } })
+                optionGroups = @(
+                    [ordered]@{ id = 'ogAlpha0001'; code = 'A'; name = 'A'; options = @([ordered]@{ id = 'optYesInClo' }, [ordered]@{ id = 'optCrossLnk' }) }
+                    [ordered]@{ id = 'ogBeta00001'; code = 'B'; name = 'B'; options = @([ordered]@{ id = 'optCrossLnk' }) }) }
+            $r = Get-NeoIPCMetadataClosure -Package $pkg
+            $r.IncludedIds.Contains('ogAlpha0001') | Should -BeTrue
+            $r.IncludedIds.Contains('ogBeta00001') | Should -BeTrue -Because 'recovered only after A is drained (combined fixpoint)'
+        }
+        It 'keeps custom attributes wholesale (ownership) even when unreferenced' {
+            $r = Get-Closure
+            $r.IncludedIds.Contains('attrCustom1') | Should -BeTrue
+            @($r.Package['attributes'] | ForEach-Object { $_['id'] }) | Should -Contain 'attrCustom1'
+        }
+        It 'recovers a validation rule whose expression references the closure (expression-source recovery)' {
+            $r = Get-Closure
+            $r.IncludedIds.Contains('valRuleIn01') | Should -BeTrue -Because 'its leftSide references the included program indicator'
+            @($r.Package['validationRules'] | ForEach-Object { $_['id'] }) | Should -Contain 'valRuleIn01'
+        }
+        It 'drops a validation rule that references nothing in the closure' {
+            $r = Get-Closure
+            $r.IncludedIds.Contains('valRuleOut1') | Should -BeFalse
+            @($r.Package['validationRules'] | ForEach-Object { $_['id'] }) | Should -Not -Contain 'valRuleOut1'
+        }
+        It 'never indexes or includes stop-types, and omits them from the pruned package' {
+            $r = Get-Closure
+            $r.IncludedIds.Contains('ouOverlay01') | Should -BeFalse
+            $r.IncludedIds.Contains('userPII0001') | Should -BeFalse
+            $r.Package.Contains('users') | Should -BeFalse
+            $r.Package.Contains('organisationUnits') | Should -BeFalse
+            @($r.StructuredUnresolved | ForEach-Object { $_.Uid }) | Should -Not -Contain 'ouOverlay01'   # excluded overlay, not a dropped dependency
+        }
+        It 'reports a ref to a present-but-unmapped top-level object instead of dropping it silently' {
+            # A data element references a top-level legendSet; legendSets is present in the package but is not a
+            # mapped/excluded/deferred type, so the closure drops it -> must be flagged, not dropped silently.
+            $pkg = [ordered]@{
+                programs = @([ordered]@{ id = 'progNEOIPC1'; code = 'NEOIPC_CORE'; name = 'Core'; programType = 'WITH_REGISTRATION'
+                        programStages = @([ordered]@{ id = 'stageADM001' }) })
+                programStages = @([ordered]@{ id = 'stageADM001'; name = 'Adm'; program = [ordered]@{ id = 'progNEOIPC1' }
+                        programStageDataElements = @([ordered]@{ id = 'psdeAdm0001'; programStage = [ordered]@{ id = 'stageADM001' }
+                                dataElement = [ordered]@{ id = 'deUsed00001' } }) })
+                dataElements = @([ordered]@{ id = 'deUsed00001'; code = 'NEOIPC_X'; name = 'X'; valueType = 'TEXT'
+                        legendSets = @([ordered]@{ id = 'lgndSet0001' }) })
+                legendSets = @([ordered]@{ id = 'lgndSet0001'; name = 'Legend' }) }   # present top-level, unmapped -> dropped, flagged
+            $r = Get-NeoIPCMetadataClosure -Package $pkg
+            @($r.StructuredUnresolved | ForEach-Object { $_.Uid }) | Should -Contain 'lgndSet0001'
+            $r.IncludedIds.Contains('lgndSet0001') | Should -BeFalse
+        }
+        It 'reaches a programRuleVariable (reverse-by-program) and its data element (sole path)' {
+            $r = Get-Closure
+            $r.IncludedIds.Contains('prvVar00001') | Should -BeTrue
+            $r.IncludedIds.Contains('deVarOnly01') | Should -BeTrue -Because 'reachable only through the variable'
+        }
+        It 'reaches a programStageSection (reverse-by-stage) and its data element (sole path)' {
+            $r = Get-Closure
+            $r.IncludedIds.Contains('pssSec00001') | Should -BeTrue
+            $r.IncludedIds.Contains('deSecOnly01') | Should -BeTrue -Because 'reachable only through the section'
+        }
+        It 'rescues a SECOND-ORDER expression-only reference to a fixpoint (safety net is not single-pass)' {
+            # piExpr00001.expression -> deFirstOne1 (1st-order miss); deFirstOne1.description -> deSecond001
+            # (2nd-order, reachable ONLY via the rescued object's own field). A single-pass safety net drops it.
+            $pkg = [ordered]@{
+                programs = @([ordered]@{ id = 'progNEOIPC1'; code = 'NEOIPC_CORE'; name = 'Core'; programType = 'WITH_REGISTRATION'
+                        programStages = @([ordered]@{ id = 'stageADM001' }) })
+                programStages = @([ordered]@{ id = 'stageADM001'; name = 'Adm'; program = [ordered]@{ id = 'progNEOIPC1' } })
+                programIndicators = @([ordered]@{ id = 'piExpr00001'; name = 'PI'; analyticsType = 'EVENT'
+                        program = [ordered]@{ id = 'progNEOIPC1' }; expression = '#{stageADM001.deFirstOne1}' })
+                dataElements = @(
+                    [ordered]@{ id = 'deFirstOne1'; code = 'NEOIPC_F'; name = 'First'; valueType = 'NUMBER'; description = '#{stageADM001.deSecond001}' }
+                    [ordered]@{ id = 'deSecond001'; code = 'NEOIPC_S'; name = 'Second'; valueType = 'TEXT' }) }
+            $r = Get-NeoIPCMetadataClosure -Package $pkg
+            $r.IncludedIds.Contains('deFirstOne1') | Should -BeTrue -Because 'first-order rescue'
+            $r.IncludedIds.Contains('deSecond001') | Should -BeTrue -Because 'second-order rescue requires the safety-net fixpoint'
+            @($r.ExpressionMisses | ForEach-Object { $_.Uid }) | Should -Contain 'deSecond001'
+        }
+        It 'throws a clear error when the seed code is not present' {
+            { Get-NeoIPCMetadataClosure -Package (New-ClosureFixture) -SeedCode 'NOT_A_PROGRAM' } |
+                Should -Throw '*Closure seed not found*'
+        }
+        It 'is deterministic: the pruned package serializes identically across runs' {
+            # -WarningAction SilentlyContinue: the fixture deliberately carries a dangling templateUid and an
+            # expression-only data element, so the cmdlet's (expected) diagnostic warnings are suppressed here.
+            $a = Select-NeoIPCMetadataClosure -Package (New-ClosureFixture) -Compress -WarningAction SilentlyContinue
+            $b = Select-NeoIPCMetadataClosure -Package (New-ClosureFixture) -Compress -WarningAction SilentlyContinue
+            $a | Should -BeExactly $b
+        }
+    }
+
+    Describe 'Targeted package merge (full base + supplement templates)' {
+        BeforeAll {
+            function New-MergeBase {
+                [ordered]@{
+                    dataElements = @([ordered]@{ id = 'deBase00001'; code = 'BASE_DE'; name = 'Base DE' })
+                    programStages = @([ordered]@{ id = 'stageBase01'; name = 'Stage'
+                            programStageDataElements = @([ordered]@{ id = 'psdeBase001'; dataElement = [ordered]@{ id = 'deBase00001' }
+                                    compulsory = $false; allowFutureDate = $false }) })   # rich nested PSDE
+                }
+            }
+            function New-MergeSupplement {
+                [ordered]@{
+                    dataElements = @([ordered]@{ id = 'deSuppl0001'; code = 'SUPPL_DE'; name = 'Suppl DE' })   # MUST NOT replace base
+                    programStageDataElements = @([ordered]@{ id = 'psdeBase001'; dataElement = [ordered]@{ id = 'deBase00001' } })   # flattened, lower detail -> NOT taken
+                    programNotificationTemplates = @(
+                        [ordered]@{ id = 'pntTmpl0001'; name = 'T1'; notificationTrigger = 'COMPLETION' }
+                        [ordered]@{ id = 'pntTmpl0002'; name = 'T2'; notificationTrigger = 'ENROLLMENT' })
+                }
+            }
+        }
+        It 'splices the named type from the supplement and leaves every base type intact' {
+            $m = Merge-NeoIPCMetadataPackage -Base (New-MergeBase) -Supplement (New-MergeSupplement)
+            @($m['programNotificationTemplates']).Count | Should -Be 2
+            @($m['dataElements'] | ForEach-Object { $_['id'] }) | Should -Be @('deBase00001')   # base, not supplement
+        }
+        It 'does not take the supplement flattened nested-only types' {
+            $m = Merge-NeoIPCMetadataPackage -Base (New-MergeBase) -Supplement (New-MergeSupplement)
+            $m.Contains('programStageDataElements') | Should -BeFalse
+            @($m['programStages'][0]['programStageDataElements']).Count | Should -Be 1
+        }
+        It 'warns and changes nothing when the supplement lacks the requested type' {
+            $m = Merge-NeoIPCMetadataPackage -Base (New-MergeBase) -Supplement ([ordered]@{ dataElements = @() }) -WarningVariable wv -WarningAction SilentlyContinue
+            $wv | Should -Not -BeNullOrEmpty
+            $m.Contains('programNotificationTemplates') | Should -BeFalse
+        }
+        It 'does not mutate the input base package' {
+            $base = New-MergeBase
+            $null = Merge-NeoIPCMetadataPackage -Base $base -Supplement (New-MergeSupplement)
+            $base.Contains('programNotificationTemplates') | Should -BeFalse
         }
     }
 }

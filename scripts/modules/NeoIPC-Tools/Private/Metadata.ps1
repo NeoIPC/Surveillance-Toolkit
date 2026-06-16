@@ -190,6 +190,7 @@ function ConvertTo-NeoIPCMetadataCell {
         'bool'           { if ($Value -is [bool]) { $Value.ToString() } else { ([bool]::Parse([string]$Value)).ToString() } }
         'int'            { (Get-NeoIPCMetadataInt64 $Value).ToString([cultureinfo]::InvariantCulture) }
         'string'         { [string]$Value }
+        'idString'       { [string]$Value }   # bare-string UID ref (e.g. templateUid); serialized like a string
         'id'             { [string]$Value.id }
         'idArray'        { (Get-NeoIPCMetadataOrdinalSort @($Value | ForEach-Object { [string]$_.id })) -join ' ' }
         'idArrayOrdered' { (@($Value | ForEach-Object { [string]$_.id })) -join ' ' }
@@ -209,6 +210,7 @@ function ConvertFrom-NeoIPCMetadataCell {
         'bool'           { [bool]::Parse($Cell) }
         'int'            { [long]::Parse($Cell, [Globalization.NumberStyles]::Integer, [cultureinfo]::InvariantCulture) }
         'string'         { $Cell }
+        'idString'       { $Cell }            # bare-string UID ref (e.g. templateUid); parsed like a string
         'id'             { [ordered]@{ id = $Cell } }
         'idArray'        { @(Split-NeoIPCMetadataList $Cell | ForEach-Object { [ordered]@{ id = $_ } }) }
         'idArrayOrdered' { @(Split-NeoIPCMetadataList $Cell | ForEach-Object { [ordered]@{ id = $_ } }) }

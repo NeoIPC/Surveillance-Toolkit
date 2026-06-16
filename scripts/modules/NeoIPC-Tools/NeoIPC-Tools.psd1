@@ -66,6 +66,8 @@
         'ConvertTo-NeoIPCMetadataJson'
         'Compare-NeoIPCMetadata'
         'Test-NeoIPCMetadataRoundTrip'
+        'Merge-NeoIPCMetadataJson'
+        'Select-NeoIPCMetadataClosure'
     )
 
     # Cmdlets to export from this module

@@ -12,14 +12,16 @@ $script:NeoIPCMetadataStripList = @(
     'href', 'user', 'publicAccess', 'lastUpdatedDuration'
 )
 
-# Server-derived i18n PROJECTIONS — read-only mirrors of a translatable base field
-# (name / shortName / formName / description), recomputed from translations[] + locale and never
-# imported. Stripped by EXPLICIT key, NOT by a "display*" prefix: many AUTHORED config properties
-# also start with "display" (verified in metadata.json: displayInReports x251, displayInList,
-# displayInForm, displayInListNoProgram, displayOnVisitSchedule, displayGenerateEventBox,
-# displayFrontPageList, displayIncidentDate, displayDensity) and MUST round-trip.
+# Server-derived i18n PROJECTIONS — read-only mirrors of a translatable base field, recomputed from
+# translations[] + locale and never imported. Stripped by EXPLICIT key, NOT by a "display*" prefix: many
+# AUTHORED config properties also start with "display" (verified in metadata.json: displayInReports x251,
+# displayInList, displayInForm, displayInListNoProgram, displayOnVisitSchedule, displayGenerateEventBox,
+# displayFrontPageList, displayIncidentDate, displayDensity) and MUST round-trip. The base fields mirrored
+# here are name / shortName / formName / description (on most types) plus subjectTemplate / messageTemplate
+# (only on NotificationTemplateObject subtypes — programNotificationTemplates — per NotificationTemplateObject.java).
 $script:NeoIPCMetadataDisplayProjections = @(
-    'displayName', 'displayShortName', 'displayFormName', 'displayDescription'
+    'displayName', 'displayShortName', 'displayFormName', 'displayDescription',
+    'displaySubjectTemplate', 'displayMessageTemplate'
 )
 
 # Fields deferred to a later milestone — dropped from the M1 dir AND ignored by the comparator
@@ -65,8 +67,11 @@ $script:NeoIPCMetadataDefaultUids = @(
 #                 (Option.hbm.xml -> unique="false") — option codes repeat across option sets, so
 #                 'options' uses the optionSet|code composite. Verified against refs/dhis2-core.
 #   Nesting     - TopLevel | NestedOnly | BothPlaces (where the object lives in the package).
-#   Properties  - ordered prop -> class. Classes: bool | int | string | id | idArray | idArrayOrdered |
-#                 intArray | stringArray. 'idArrayOrdered' is for DHIS2 <list> ref-collections whose
+#   Properties  - ordered prop -> class. Classes: bool | int | string | idString | id | idArray |
+#                 idArrayOrdered | intArray | stringArray. 'idString' is a bare-string UID reference (not a
+#                 {id} object) — e.g. programRuleActions.templateUid -> a programNotificationTemplate; it
+#                 serializes like a string but the closure follows it as a dependency edge. 'idArrayOrdered'
+#                 is for DHIS2 <list> ref-collections whose
 #                 element order is the data and is NOT recoverable from an element-level sortOrder
 #                 (categoryCombos.categories, categories.categoryOptions, optionGroupSets.optionGroups,
 #                 programStageSections.dataElements/programIndicators, programSections.trackedEntityAttributes);
@@ -113,7 +118,7 @@ $script:NeoIPCMetadataTypeMaps = [ordered]@{
         name = 'string'; description = 'string'; condition = 'string'; priority = 'int'
         program = 'id'; programStage = 'id'; programRuleActions = 'idArray' } }
     'programRuleActions'    = @{ NaturalKey = 'id'; Nesting = 'BothPlaces'; Properties = [ordered]@{
-        programRuleActionType = 'string'; content = 'string'; data = 'string'; location = 'string'; templateUid = 'string'
+        programRuleActionType = 'string'; content = 'string'; data = 'string'; location = 'string'; templateUid = 'idString'
         programRule = 'id'; dataElement = 'id'; trackedEntityAttribute = 'id'; programStageSection = 'id'
         programStage = 'id'; programIndicator = 'id'; optionGroup = 'id'; option = 'id' } }
     'programStageSections'  = @{ NaturalKey = 'name'; Nesting = 'BothPlaces'
@@ -150,6 +155,12 @@ $script:NeoIPCMetadataTypeMaps = [ordered]@{
     'programIndicators'    = @{ NaturalKey = { if ($_['code']) { $_['code'] } else { $_['name'] } }; Nesting = 'TopLevel'; Properties = [ordered]@{
         code = 'string'; name = 'string'; shortName = 'string'; description = 'string'; expression = 'string'; filter = 'string'
         aggregationType = 'string'; analyticsType = 'string'; decimals = 'int'; displayInForm = 'bool'; program = 'id' } }
+    'programNotificationTemplates' = @{ NaturalKey = 'name'; Nesting = 'TopLevel'; Properties = [ordered]@{
+        name = 'string'; code = 'string'; subjectTemplate = 'string'; messageTemplate = 'string'
+        notificationTrigger = 'string'; notificationRecipient = 'string'
+        notifyUsersInHierarchyOnly = 'bool'; notifyParentOrganisationUnitOnly = 'bool'; sendRepeatable = 'bool'
+        relativeScheduledDays = 'int'; deliveryChannels = 'stringArray'
+        recipientUserGroup = 'id'; recipientProgramAttribute = 'id'; recipientDataElement = 'id' } }
     'attributes'           = @{ NaturalKey = 'code'; Nesting = 'TopLevel'; Properties = [ordered]@{
         code = 'string'; name = 'string'; shortName = 'string'; description = 'string'; valueType = 'string'
         mandatory = 'bool'; unique = 'bool'; objectTypes = 'stringArray'
