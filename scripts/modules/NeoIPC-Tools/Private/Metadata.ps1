@@ -164,8 +164,13 @@ function Remove-NeoIPCMetadataNoise {
             # JSON: order-insensitive AND dictionary-key-order-insensitive (a round-tripped object emits
             # 'id' first, the source emits it elsewhere; a raw ConvertTo-Json key would mis-sort
             # identical-content elements).
-            if ($PreserveOrder) { return $items }
-            return @($items | Sort-Object -CaseSensitive -Property { (ConvertTo-NeoIPCMetadataCanonical $_) | ConvertTo-Json -Compress -Depth 40 })
+            # Unary comma on every array return: `return $array` STREAMS its elements, so a single-element
+            # collection is unwrapped to a scalar on capture — which then serializes as a JSON object, not a
+            # 1-element array (DHIS2 import rejects e.g. a one-option optionGroup.options as a HashSet from an
+            # object). The round-trip self-test cannot catch this: both sides unwrap symmetrically and compare
+            # equal. `,` emits the array as a single item so it survives at any length.
+            if ($PreserveOrder) { return , $items }
+            return , @($items | Sort-Object -CaseSensitive -Property { (ConvertTo-NeoIPCMetadataCanonical $_) | ConvertTo-Json -Compress -Depth 40 })
         }
         return $Object
     }

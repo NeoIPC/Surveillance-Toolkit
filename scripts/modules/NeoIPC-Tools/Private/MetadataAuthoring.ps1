@@ -114,10 +114,12 @@ function ConvertFrom-NeoIPCAuthoredUserCsv {
     .PARAMETER OrgUnitUid
         Map of org-unit code -> minted UID (from ConvertFrom-NeoIPCAuthoredOrgUnitCsv).
     .PARAMETER Password
-        The login password set on every authored user. Defaults to the DHIS2 demo password.
+        The login password set on every authored user. Defaults to a clearly-test value that satisfies DHIS2's
+        password policy on import (digit + uppercase + special char, 8-40 chars, no reserved word / username) —
+        the bare demo password 'district' is rejected (E4005) for imported users.
     #>
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', 'Password',
-        Justification = 'Synthetic play accounts use a known, clearly-test demo password committed in play data by design — it is not a real secret.')]
+        Justification = 'Synthetic play accounts use a known, clearly-test password committed in play data by design — it is not a real secret.')]
     [CmdletBinding()]
     [OutputType([System.Collections.Specialized.OrderedDictionary])]
     param(
@@ -126,7 +128,7 @@ function ConvertFrom-NeoIPCAuthoredUserCsv {
         [Parameter(Mandatory)][string]$OrgUnitAssignmentPath,
         [Parameter(Mandatory)][hashtable]$RoleUid,
         [Parameter(Mandatory)][hashtable]$OrgUnitUid,
-        [string]$Password = 'district'
+        [string]$Password = 'NeoIPC-Play1'
     )
     foreach ($p in $UserPath, $RoleAssignmentPath, $OrgUnitAssignmentPath) {
         if (-not (Test-Path -LiteralPath $p)) { throw "Authored user file not found: '$p'." }

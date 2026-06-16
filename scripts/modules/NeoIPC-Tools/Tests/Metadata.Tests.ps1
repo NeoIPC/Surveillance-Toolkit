@@ -177,6 +177,12 @@ InModuleScope 'NeoIPC-Tools' {
             $b = & $mk @('pntAAAAAAA1', 'pntBBBBBBB1')
             @(Compare-NeoIPCMetadataCore -Reference $a -Difference $b).Count | Should -Be 0
         }
+        It 'keeps a single-element collection an array (serializes to [...], not an object — import would reject a HashSet from an object)' {
+            $obj = ConvertFrom-NeoIPCMetadataJsonText -Json '{"id":"og000000001","code":"G","options":[{"id":"opt1111aaaa"}]}'
+            $cleaned = Remove-NeoIPCMetadataNoise -Object $obj -WarningAction SilentlyContinue
+            $cleaned['options'] -is [System.Collections.IEnumerable] -and $cleaned['options'] -isnot [System.Collections.IDictionary] | Should -BeTrue
+            ($cleaned | ConvertTo-Json -Depth 6 -Compress) | Should -Match '"options":\['
+        }
     }
 
     Describe 'UID minting and collision' {

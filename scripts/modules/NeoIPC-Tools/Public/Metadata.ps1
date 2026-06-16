@@ -419,7 +419,8 @@ function New-NeoIPCMetadataPackage {
     .PARAMETER UserGroupMembershipPath
         Optional user-group membership junction file (userGroup, username).
     .PARAMETER Password
-        Login password for every authored user (default: the DHIS2 demo password).
+        Login password for every authored user. Defaults to a clearly-test value that passes DHIS2's import
+        password policy (the bare demo password 'district' is rejected — E4005 — for imported users).
     .PARAMETER SeedType
         Top-level type of the closure seed (default: programs).
     .PARAMETER SeedCode
@@ -433,7 +434,7 @@ function New-NeoIPCMetadataPackage {
         Return the result object (Package + OrgUnitCount + UserCount) instead of JSON.
     #>
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', 'Password',
-        Justification = 'Forwards the synthetic play accounts'' known, clearly-test demo password to the authoring compiler — not a real secret.')]
+        Justification = 'Forwards the synthetic play accounts'' known, clearly-test password to the authoring compiler — not a real secret.')]
     [CmdletBinding()]
     [OutputType([string], [hashtable])]
     param(
@@ -444,7 +445,7 @@ function New-NeoIPCMetadataPackage {
         [Parameter(Mandatory)][string]$OrgUnitAssignmentPath,
         [string[]]$OrgUnitGroupMembershipPath,
         [string]$UserGroupMembershipPath,
-        [string]$Password = 'district',
+        [string]$Password = 'NeoIPC-Play1',
         [string]$SeedType = 'programs',
         [string]$SeedCode = 'NEOIPC_CORE',
         [string]$OutputPath,
