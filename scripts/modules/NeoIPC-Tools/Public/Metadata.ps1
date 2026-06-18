@@ -513,3 +513,148 @@ function New-NeoIPCMetadataPackage {
     }
     $json
 }
+
+function Export-NeoIPCMetadataTranslation {
+    <#
+    .SYNOPSIS
+        Extract a metadata package's translatable strings to gettext PO (metadata.pot + per-locale metadata.<lang>.po).
+    .DESCRIPTION
+        Walks every translatable property of every object (name / shortName / description / formName /
+        subjectTemplate / ...; the DHIS2 ObjectTranslation tokens verified against refs/dhis2-core) and writes a
+        bilingual gettext PO component (msgid = English source, msgstr = translation) beside the reports'
+        documentation / glossary PO:
+          - metadata.pot — the English source template. msgctxt = <type>/<key>/<TOKEN> (key = optionSetCode/
+            optionCode for options, else code — code-stable across UID regeneration and matching the legacy
+            .<locale>.csv sidecars — else the object UID for code-less types like program rules / stages / sections,
+            which is therefore NOT regeneration-stable), msgid = the English base value, msgstr empty.
+          - metadata.<lang>.po — per language. An EXISTING .po is refreshed msgmerge-style (in code): the source
+            msgid is updated, the translator's msgstr is preserved, an entry whose source changed is kept but
+            marked fuzzy, and entries no longer in the source are dropped. A MISSING .po is created and seeded from
+            the package's existing translations[] so nothing already translated in the export is lost.
+        After the first export the .po files (Weblate) are the source of truth; Import-NeoIPCMetadataTranslation
+        pushes them back onto a package. The two domain-authored option sets (NEOIPC_PATHOGENS,
+        NEOIPC_ANTIMICROBIAL_SUBSTANCES) are excluded here as everywhere — their translations belong with the
+        option generation from the canonical YAML / antibiotics CSV. No DHIS2 API calls.
+    .PARAMETER Path
+        Path to a DHIS2 metadata export JSON to extract from.
+    .PARAMETER Package
+        An already-parsed metadata package (hashtable) to extract from, instead of -Path.
+    .PARAMETER PoDirectory
+        Directory for metadata.pot + metadata.<lang>.po (created if absent).
+    .PARAMETER Locale
+        Languages to (re)generate. Default: the nine NeoIPC target languages.
+    .PARAMETER Validate
+        Run `msgfmt -c` on each generated .po (best-effort; via WSL on Windows; skipped if gettext is unavailable).
+    #>
+    [CmdletBinding(SupportsShouldProcess, DefaultParameterSetName = 'Path')]
+    param(
+        [Parameter(Mandatory, ParameterSetName = 'Path')][string]$Path,
+        [Parameter(Mandatory, ParameterSetName = 'Package')]$Package,
+        [Parameter(Mandatory)][string]$PoDirectory,
+        [string[]]$Locale = $script:NeoIPCMetadataTranslationLocales,
+        [switch]$Validate
+    )
+    if ($PSCmdlet.ParameterSetName -eq 'Path') {
+        if (-not (Test-Path -LiteralPath $Path)) { throw "Metadata file not found: '$Path'." }
+        $pkg = ConvertFrom-NeoIPCMetadataJsonText -Json (Get-Content -LiteralPath $Path -Raw)
+    }
+    else { $pkg = $Package }
+    if ($pkg -isnot [System.Collections.IDictionary]) {
+        throw 'Package must be a dictionary/hashtable (parse the export with ConvertFrom-Json -AsHashtable).'
+    }
+    if (-not (Test-Path -LiteralPath $PoDirectory)) {
+        if ($PSCmdlet.ShouldProcess($PoDirectory, 'Create directory')) { New-Item -ItemType Directory -Path $PoDirectory -Force | Out-Null }
+    }
+
+    $units = Get-NeoIPCMetadataTranslationUnit -Package $pkg
+    $potEntries = ConvertTo-NeoIPCMetadataPoEntry -Unit $units
+    $potPath = Join-Path $PoDirectory 'metadata.pot'
+    if ($PSCmdlet.ShouldProcess($potPath, 'Write POT')) {
+        [System.IO.File]::WriteAllText($potPath, (Write-NeoIPCMetadataPoText -Entry $potEntries), [System.Text.UTF8Encoding]::new($false))
+        if ($Validate -and -not (Test-NeoIPCMetadataPoSyntax -Path $potPath)) { throw "Generated $potPath failed msgfmt validation." }
+    }
+    Write-Verbose ("metadata.pot: {0} source string(s)." -f $potEntries.Count)
+
+    foreach ($loc in $Locale) {
+        $poPath = Join-Path $PoDirectory "metadata.$loc.po"
+        if (Test-Path -LiteralPath $poPath) {
+            $existing = Read-NeoIPCMetadataPoText -Text (Get-Content -LiteralPath $poPath -Raw)
+            $entries = Merge-NeoIPCMetadataPoEntry -New $potEntries -Existing $existing
+        }
+        else {
+            $entries = ConvertTo-NeoIPCMetadataPoEntry -Unit $units -Locale $loc
+        }
+        if ($PSCmdlet.ShouldProcess($poPath, 'Write PO')) {
+            [System.IO.File]::WriteAllText($poPath, (Write-NeoIPCMetadataPoText -Entry $entries -Locale $loc), [System.Text.UTF8Encoding]::new($false))
+            if ($Validate -and -not (Test-NeoIPCMetadataPoSyntax -Path $poPath)) { throw "Generated $poPath failed msgfmt validation." }
+        }
+        $translated = @($entries | Where-Object { -not $_.Fuzzy -and -not [string]::IsNullOrEmpty([string]$_.Msgstr) }).Count
+        Write-Verbose ("metadata.{0}.po: {1}/{2} translated." -f $loc, $translated, $entries.Count)
+    }
+}
+
+function Import-NeoIPCMetadataTranslation {
+    <#
+    .SYNOPSIS
+        Apply per-language gettext PO translations onto a metadata package as translations[].
+    .DESCRIPTION
+        Reads metadata.<lang>.po from PoDirectory and injects each kept (non-fuzzy, non-empty) translation onto
+        the matching object/property as a translations[] entry ({ property = <TOKEN>, locale, value }). Objects
+        are matched by the same stable msgctxt the export uses; an object's translations[] is rebuilt entirely
+        from the PO (deterministically ordered by locale then token), so the PO is the single source of truth.
+        Fuzzy and empty entries are skipped. By default the package is emitted as JSON (returned, or written to
+        OutputPath); with -PassThru the package hashtable is returned. No DHIS2 API calls.
+    .PARAMETER Path
+        Path to the DHIS2 metadata export JSON to inject translations into.
+    .PARAMETER Package
+        An already-parsed metadata package (hashtable) to inject into, instead of -Path.
+    .PARAMETER PoDirectory
+        Directory containing metadata.<lang>.po.
+    .PARAMETER Locale
+        Languages to apply. Default: the nine NeoIPC target languages (missing .po files are skipped).
+    .PARAMETER OutputPath
+        Optional file to write the JSON to (UTF-8, no BOM); if omitted the JSON string is returned (unless -PassThru).
+    .PARAMETER Compress
+        Emit compact JSON instead of indented.
+    .PARAMETER PassThru
+        Return the package hashtable instead of JSON.
+    #>
+    [CmdletBinding(DefaultParameterSetName = 'Path')]
+    [OutputType([string], [hashtable])]
+    param(
+        [Parameter(Mandatory, ParameterSetName = 'Path')][string]$Path,
+        [Parameter(Mandatory, ParameterSetName = 'Package')]$Package,
+        [Parameter(Mandatory)][string]$PoDirectory,
+        [string[]]$Locale = $script:NeoIPCMetadataTranslationLocales,
+        [string]$OutputPath,
+        [switch]$Compress,
+        [switch]$PassThru
+    )
+    if ($PSCmdlet.ParameterSetName -eq 'Path') {
+        if (-not (Test-Path -LiteralPath $Path)) { throw "Metadata file not found: '$Path'." }
+        $pkg = ConvertFrom-NeoIPCMetadataJsonText -Json (Get-Content -LiteralPath $Path -Raw)
+    }
+    else { $pkg = $Package }
+    if ($pkg -isnot [System.Collections.IDictionary]) {
+        throw 'Package must be a dictionary/hashtable (parse the export with ConvertFrom-Json -AsHashtable).'
+    }
+    if (-not (Test-Path -LiteralPath $PoDirectory)) { throw "PO directory not found: '$PoDirectory'." }
+
+    $poByLocale = @{}
+    foreach ($loc in $Locale) {
+        $poPath = Join-Path $PoDirectory "metadata.$loc.po"
+        if (Test-Path -LiteralPath $poPath) {
+            $poByLocale[$loc] = Read-NeoIPCMetadataPoText -Text (Get-Content -LiteralPath $poPath -Raw)
+        }
+    }
+    Write-Verbose ("Applying translations from {0} PO file(s): {1}." -f $poByLocale.Count, (@($poByLocale.Keys | Sort-Object) -join ', '))
+    $result = Add-NeoIPCMetadataTranslationToPackage -Package $pkg -PoByLocale $poByLocale
+
+    if ($PassThru) { return $result }
+    $json = $result | ConvertTo-Json -Depth 100 -Compress:$Compress
+    if ($OutputPath) {
+        [System.IO.File]::WriteAllText($OutputPath, $json, [System.Text.UTF8Encoding]::new($false))
+        return
+    }
+    $json
+}

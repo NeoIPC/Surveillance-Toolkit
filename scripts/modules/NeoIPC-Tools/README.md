@@ -239,6 +239,58 @@ them once with the unified cache-refresh script:
 After that, `-OrgUnitCode NEO_<Tab>` and `-DataElementCode NEOIPC_<Tab>`
 complete from the cached lists.
 
+## Metadata translations (gettext PO)
+
+The metadata pipeline keeps DHIS2 object i18n in a translator-facing gettext PO
+component (one `po/metadata.pot` template + one `po/metadata.<lang>.po` per
+language), separate from the structural per-type CSV directory. Each object's
+`translations[]` (`{ property, locale, value }`, where `property` is the DHIS2
+ObjectTranslation token — `NAME`, `SHORT_NAME`, `DESCRIPTION`, `FORM_NAME`,
+`SUBJECT_TEMPLATE`, …) maps to a PO entry keyed by a stable msgctxt:
+
+```
+msgctxt = "<type>/<key>/<TOKEN>"   # key = optionSetCode/optionCode for options, else code, else object UID
+msgid   = the English/default base value (e.g. the object's name)
+msgstr  = the translated value (empty in the .pot)
+```
+
+The msgctxt is code-based where a code exists (so it survives UID regeneration and
+never orphans a translation in Weblate); code-less types (program rules / stages /
+sections, …) fall back to the object UID — names are not unique — so their msgctxt is
+not regeneration-stable, and the English msgid carries the readable meaning. The two
+domain-authored option sets
+(`NEOIPC_PATHOGENS`, `NEOIPC_ANTIMICROBIAL_SUBSTANCES`) are excluded — their
+translations belong with the option generation from the canonical YAML /
+antibiotics CSV.
+
+DHIS2 marks `name` translatable on every object, so the **full** surface is large
+and mostly internal labels. Nothing is dropped; instead each string gets a Weblate
+**priority** (`#, priority:NNN`) from `$NeoIPCMetadataTranslationPriorities`, so
+translators clear the user-facing strings first: form-entry labels (`200`) > option
+values / notifications / org-unit names (`150`) > user-facing titles (`100`, the
+default) > the internal remainder (program-rule / data-element names, `10`). Retune
+that table as needs change. The committed component lives in
+`po/metadata.pot` + `po/metadata.<lang>.po`.
+
+```powershell
+# Extract: a package's translatable strings to PO (regenerate the .pot,
+# msgmerge-update each existing .po preserving translator msgstr, seed a missing
+# .po from the package's existing translations[]).
+Export-NeoIPCMetadataTranslation -Path ./metadata.json -PoDirectory ./po -Locale de,es
+
+# Build from the canonical directory instead of a raw export:
+$pkg = ConvertFrom-Json (ConvertTo-NeoIPCMetadataJson -Path ./metadata/common) -AsHashtable
+Export-NeoIPCMetadataTranslation -Package $pkg -PoDirectory ./po
+
+# Apply: per-language PO back onto a package as translations[] (fuzzy and
+# empty entries skipped), emitting the importable JSON.
+Import-NeoIPCMetadataTranslation -Path ./metadata.json -PoDirectory ./po -OutputPath ./metadata.translated.json
+```
+
+PO emit/parse/merge are pure PowerShell (Pester-tested round-trip), mirroring how
+the reports' glossary PO is managed in `scripts/update-glossary-po.py`. `-Validate`
+runs `msgfmt -c` (via WSL on Windows) when gettext is available.
+
 ## Exported functions
 
 | Category | Functions |
@@ -251,3 +303,4 @@ complete from the cached lists.
 | User | `Read-UserInfo` |
 | Quarto | `Invoke-WithNeoIPCAuth`, `Invoke-QuartoRender`, `Invoke-Rscript`, `Build-QmdParamPairs`, `Write-NeoIPCBuildReport`, `Test-QuartoInstallation`, `Split-NeoIPCLocale`, `Resolve-NeoIPCLocaleQmd` |
 | InfectiousAgents | `Find-NextFreeInfectiousAgentId` |
+| Metadata pipeline | `ConvertFrom-NeoIPCMetadataJson`, `ConvertTo-NeoIPCMetadataJson`, `Compare-NeoIPCMetadata`, `Test-NeoIPCMetadataRoundTrip`, `Merge-NeoIPCMetadataJson`, `Select-NeoIPCMetadataClosure`, `Test-NeoIPCMetadataExpression`, `Update-NeoIPCMetadata`, `New-NeoIPCMetadataPackage`, `Export-NeoIPCMetadataTranslation`, `Import-NeoIPCMetadataTranslation` |

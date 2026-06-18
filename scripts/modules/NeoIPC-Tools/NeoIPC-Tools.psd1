@@ -71,6 +71,8 @@
         'Test-NeoIPCMetadataExpression'
         'Update-NeoIPCMetadata'
         'New-NeoIPCMetadataPackage'
+        'Export-NeoIPCMetadataTranslation'
+        'Import-NeoIPCMetadataTranslation'
     )
 
     # Cmdlets to export from this module

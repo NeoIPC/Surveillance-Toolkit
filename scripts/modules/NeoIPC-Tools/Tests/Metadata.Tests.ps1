@@ -1477,4 +1477,368 @@ InModuleScope 'NeoIPC-Tools' {
             { New-NeoIPCMetadataPackage -ExportPath $script:asmExportPath -MetadataDirectory $bare -WarningAction SilentlyContinue } | Should -Throw '*Common metadata directory not found*'
         }
     }
+
+    Describe 'Translation property/token model (intersection with the type maps)' {
+        It 'derives translatable fields as type-map Properties intersect the translatable-property table' {
+            $f = Get-NeoIPCMetadataTranslatableField -Type 'organisationUnitGroups'
+            @($f | ForEach-Object { $_.Property }) | Should -Be @('name', 'shortName', 'description')
+            @($f | ForEach-Object { $_.Token }) | Should -Be @('NAME', 'SHORT_NAME', 'DESCRIPTION')
+        }
+        It 'maps a property to its literal DHIS2 token, not a generic uppercase' {
+            $f = Get-NeoIPCMetadataTranslatableField -Type 'programs'
+            ($f | Where-Object { $_.Property -eq 'enrollmentDateLabel' }).Token | Should -BeExactly 'ENROLLMENT_DATE_LABEL'
+            $nt = Get-NeoIPCMetadataTranslatableField -Type 'programNotificationTemplates'
+            ($nt | Where-Object { $_.Property -eq 'subjectTemplate' }).Token | Should -BeExactly 'SUBJECT_TEMPLATE'
+        }
+        It 'omits a translatable base property the type map does not carry (options has no shortName)' {
+            @(Get-NeoIPCMetadataTranslatableField -Type 'options' | ForEach-Object { $_.Property }) | Should -Be @('name')
+        }
+        It 'returns no fields for a non-translatable type' {
+            (Get-NeoIPCMetadataTranslatableField -Type 'analyticsPeriodBoundaries').Count | Should -Be 0
+        }
+    }
+
+    Describe 'Translation msgctxt key (stable, code-based)' {
+        It 'keys an option by <optionSetCode>/<optionCode>' {
+            $opt = [ordered]@{ id = 'OPaaaaaaaa1'; code = '1'; optionSet = [ordered]@{ id = 'OSaaaaaaaa1' } }
+            Get-NeoIPCMetadataTranslationKey -Type 'options' -Object $opt -OptionSetCodeById @{ 'OSaaaaaaaa1' = 'NEOIPC_ASA_SCORE' } | Should -BeExactly 'NEOIPC_ASA_SCORE/1'
+        }
+        It 'keys a coded object by its code' {
+            Get-NeoIPCMetadataTranslationKey -Type 'organisationUnits' -Object ([ordered]@{ code = 'AT'; name = 'Austria' }) | Should -BeExactly 'AT'
+        }
+        It 'keys a code-less object by its UID, not the name (DHIS2 names are not unique)' {
+            Get-NeoIPCMetadataTranslationKey -Type 'programRules' -Object ([ordered]@{ id = 'PRabc123XYZ'; name = 'Rule X' }) | Should -BeExactly 'PRabc123XYZ'
+        }
+        It 'returns null when an option cannot resolve its set code (no stable identity)' {
+            Get-NeoIPCMetadataTranslationKey -Type 'options' -Object ([ordered]@{ code = '1'; optionSet = [ordered]@{ id = 'OSunknown01' } }) | Should -BeNullOrEmpty
+        }
+    }
+
+    Describe 'PO string escaping' {
+        It 'escapes and unescapes quote / backslash / newline / tab losslessly' {
+            $raw = "a `"quoted`" b\c`nline2`ttab"
+            $esc = ConvertTo-NeoIPCPoString $raw
+            $esc | Should -Not -Match "`n"
+            (ConvertFrom-NeoIPCPoString $esc) | Should -BeExactly $raw
+        }
+        It 'handles empty / null' {
+            (ConvertTo-NeoIPCPoString '') | Should -BeExactly ''
+            (ConvertFrom-NeoIPCPoString '') | Should -BeExactly ''
+        }
+    }
+
+    Describe 'Metadata translation extract / emit / parse / inject (PO round-trip)' {
+        BeforeAll {
+            function New-TranslationFixture {
+                [ordered]@{
+                    optionSets        = @( [ordered]@{ id = 'OSaaaaaaaa1'; code = 'NEOIPC_ASA_SCORE'; name = 'ASA score' } )
+                    options           = @(
+                        [ordered]@{ id = 'OPaaaaaaaa1'; code = '1'; name = 'ASA I'; optionSet = [ordered]@{ id = 'OSaaaaaaaa1' }
+                            translations = @( [ordered]@{ property = 'NAME'; locale = 'de'; value = 'ASA I (de)' }, [ordered]@{ property = 'NAME'; locale = 'es'; value = 'ASA I (es)' } )
+                        }
+                        [ordered]@{ id = 'OPaaaaaaaa2'; code = '2'; name = 'ASA II'; optionSet = [ordered]@{ id = 'OSaaaaaaaa1' } }
+                    )
+                    organisationUnits = @(
+                        [ordered]@{ id = 'OUaaaaaaaa1'; code = 'AT'; name = 'Austria'; shortName = 'Austria'
+                            translations = @( [ordered]@{ property = 'NAME'; locale = 'de'; value = 'Oesterreich' } )
+                        }
+                    )
+                }
+            }
+            function Get-InjectedFixture {
+                # Extract -> per-locale PO -> parse -> inject into a translations-stripped copy. Returns the package.
+                $src = New-TranslationFixture
+                $units = Get-NeoIPCMetadataTranslationUnit -Package $src
+                $po = @{}
+                foreach ($loc in 'de', 'es') {
+                    $po[$loc] = Read-NeoIPCMetadataPoText -Text (Write-NeoIPCMetadataPoText -Entry (ConvertTo-NeoIPCMetadataPoEntry -Unit $units -Locale $loc) -Locale $loc)
+                }
+                $clean = ConvertFrom-NeoIPCMetadataJsonText -Json (New-TranslationFixture | ConvertTo-Json -Depth 40)
+                foreach ($t in 'options', 'organisationUnits') { foreach ($o in @($clean[$t])) { $o.Remove('translations') | Out-Null } }
+                Add-NeoIPCMetadataTranslationToPackage -Package $clean -PoByLocale $po
+            }
+        }
+        It 'extracts one unit per (object, translatable field) with a non-empty base value' {
+            $units = Get-NeoIPCMetadataTranslationUnit -Package (New-TranslationFixture)
+            @($units | ForEach-Object { $_.Msgctxt }) | Should -Be @(
+                'options/NEOIPC_ASA_SCORE/1/NAME', 'options/NEOIPC_ASA_SCORE/2/NAME',
+                'optionSets/NEOIPC_ASA_SCORE/NAME', 'organisationUnits/AT/NAME', 'organisationUnits/AT/SHORT_NAME')
+        }
+        It 'recognises ATC level-4 (5-char) and level-5 (7-char) codes, not other codes' {
+            (Test-NeoIPCAtcCode -Code 'J01CG') | Should -BeTrue       # ATC level 4 (drug-class group)
+            (Test-NeoIPCAtcCode -Code 'J01AA01') | Should -BeTrue     # ATC level 5 (substance)
+            (Test-NeoIPCAtcCode -Code 'WHO_AWARE_ACCESS') | Should -BeFalse
+            (Test-NeoIPCAtcCode -Code 'NEOIPC_ASA_SCORE') | Should -BeFalse
+        }
+        It 'excludes ATC-coded antibiotic option groups from the metadata PO, keeping AWaRe and other groups' {
+            $pkg = [ordered]@{ optionGroups = @(
+                    [ordered]@{ id = 'OGaaaaaaaa1'; code = 'J01CG'; name = 'Beta-lactamase inhibitors' }
+                    [ordered]@{ id = 'OGaaaaaaaa2'; code = 'WHO_AWARE_ACCESS'; name = 'Access' }
+                    [ordered]@{ id = 'OGaaaaaaaa3'; code = 'NEOIPC_PATHOGEN_LIST'; name = 'Pathogen list' }
+                ) }
+            $units = Get-NeoIPCMetadataTranslationUnit -Package $pkg
+            $keys = @($units | ForEach-Object { $_.Key })
+            $keys | Should -Not -Contain 'J01CG'           # ATC-coded group excluded (separate antibiotic component)
+            $keys | Should -Contain 'WHO_AWARE_ACCESS'     # AWaRe group stays in the metadata PO
+            $keys | Should -Contain 'NEOIPC_PATHOGEN_LIST' # non-ATC group stays
+        }
+        It 'sources msgid from the English base value and gathers existing translations by locale' {
+            $units = Get-NeoIPCMetadataTranslationUnit -Package (New-TranslationFixture)
+            $u = $units | Where-Object { $_.Msgctxt -eq 'options/NEOIPC_ASA_SCORE/1/NAME' }
+            $u.Msgid | Should -BeExactly 'ASA I'
+            $u.Translations['de'] | Should -BeExactly 'ASA I (de)'
+            $u.Translations['es'] | Should -BeExactly 'ASA I (es)'
+        }
+        It 'emits a .pot with empty msgstr and a .<lang>.po with the language msgstr' {
+            $units = Get-NeoIPCMetadataTranslationUnit -Package (New-TranslationFixture)
+            $pot = Write-NeoIPCMetadataPoText -Entry (ConvertTo-NeoIPCMetadataPoEntry -Unit $units)
+            $pot | Should -Match '(?m)^msgctxt "organisationUnits/AT/NAME"'
+            $pot | Should -Match '(?m)^"Language: en\\n"'
+            $poDe = Write-NeoIPCMetadataPoText -Entry (ConvertTo-NeoIPCMetadataPoEntry -Unit $units -Locale 'de') -Locale 'de'
+            $poDe | Should -Match '(?m)^"Language: de\\n"'
+            $poDe | Should -Match 'Oesterreich'
+        }
+        It 'parses a .po back, skipping the header entry' {
+            $units = Get-NeoIPCMetadataTranslationUnit -Package (New-TranslationFixture)
+            $entries = Read-NeoIPCMetadataPoText -Text (Write-NeoIPCMetadataPoText -Entry (ConvertTo-NeoIPCMetadataPoEntry -Unit $units -Locale 'de') -Locale 'de')
+            @($entries | Where-Object { -not $_.Msgctxt }).Count | Should -Be 0          # no empty-context header entry
+            ($entries | Where-Object { $_.Msgctxt -eq 'organisationUnits/AT/NAME' }).Msgstr | Should -BeExactly 'Oesterreich'
+        }
+        It 'parses gettext multi-line continuation (msgmerge-style wrapped value)' {
+            $wrapped = "msgctxt `"x/y/NAME`"`nmsgid `"`"`n`"part one `"`n`"part two`"`nmsgstr `"`"`n`"trans one `"`n`"trans two`"`n"
+            $e = Read-NeoIPCMetadataPoText -Text $wrapped
+            $e.Count | Should -Be 1
+            $e[0].Msgid | Should -BeExactly 'part one part two'
+            $e[0].Msgstr | Should -BeExactly 'trans one trans two'
+        }
+        It 'reconstructs translations[] losslessly through PO (de + es)' {
+            $inj = Get-InjectedFixture
+            $opt1 = @($inj['options']) | Where-Object { $_['code'] -eq '1' }
+            @($opt1['translations'] | ForEach-Object { '{0}:{1}={2}' -f $_['property'], $_['locale'], $_['value'] }) |
+                Should -Be @('NAME:de=ASA I (de)', 'NAME:es=ASA I (es)')
+            $au = @($inj['organisationUnits']) | Where-Object { $_['code'] -eq 'AT' }
+            @($au['translations'] | ForEach-Object { '{0}:{1}={2}' -f $_['property'], $_['locale'], $_['value'] }) | Should -Be @('NAME:de=Oesterreich')
+        }
+        It 'keeps a single-element translations[] an array (serializes as JSON [...] for import)' {
+            $inj = Get-InjectedFixture
+            $au = @($inj['organisationUnits']) | Where-Object { $_['code'] -eq 'AT' }
+            $au['translations'] -is [System.Collections.IEnumerable] -and $au['translations'] -isnot [System.Collections.IDictionary] | Should -BeTrue
+            ($inj | ConvertTo-Json -Depth 100) | Should -Match '"translations": \['
+        }
+        It 'leaves an untranslated object without a translations property' {
+            $inj = Get-InjectedFixture
+            $opt2 = @($inj['options']) | Where-Object { $_['code'] -eq '2' }
+            $opt2.Contains('translations') | Should -BeFalse
+        }
+        It 'warns about a translations[] entry on a token the type map does not carry' {
+            $pkg = [ordered]@{ options = @( [ordered]@{ id = 'OPaaaaaaaa1'; code = '1'; name = 'ASA I'; optionSet = [ordered]@{ id = 'OSaaaaaaaa1' }
+                        translations = @( [ordered]@{ property = 'DESCRIPTION'; locale = 'de'; value = 'x' } ) } )
+                optionSets = @( [ordered]@{ id = 'OSaaaaaaaa1'; code = 'NEOIPC_ASA_SCORE'; name = 'ASA' } ) }
+            $warnings = $null
+            Get-NeoIPCMetadataTranslationUnit -Package $pkg -WarningVariable warnings -WarningAction SilentlyContinue | Out-Null
+            @($warnings | Where-Object { $_ -match 'token DESCRIPTION' }).Count | Should -BeGreaterThan 0
+        }
+    }
+
+    Describe 'PO merge + fuzzy handling (msgmerge-equivalent, in code)' {
+        BeforeAll {
+            function New-Entry { param($Ctx, $Id, $Str = '', $Fuzzy = $false) [ordered]@{ Msgctxt = $Ctx; Msgid = $Id; Msgstr = $Str; Fuzzy = $Fuzzy } }
+            function New-EntryList { $l = [System.Collections.Generic.List[object]]::new(); foreach ($e in $args) { $l.Add($e) }; return , $l }
+        }
+        It 'projects units to .pot entries with empty msgstr, and to language entries with the value' {
+            $units = Get-NeoIPCMetadataTranslationUnit -Package ([ordered]@{
+                    optionSets = @( [ordered]@{ id = 'OSaaaaaaaa1'; code = 'S'; name = 'Set' } )
+                    options    = @( [ordered]@{ id = 'OPaaaaaaaa1'; code = '1'; name = 'One'; optionSet = [ordered]@{ id = 'OSaaaaaaaa1' }
+                            translations = @( [ordered]@{ property = 'NAME'; locale = 'de'; value = 'Eins' } ) } ) })
+            $optName = $units | Where-Object { $_.Msgctxt -eq 'options/S/1/NAME' }
+            (ConvertTo-NeoIPCMetadataPoEntry -Unit (New-EntryList $optName) | ForEach-Object { $_.Msgstr }) | Should -Be @('')
+            (ConvertTo-NeoIPCMetadataPoEntry -Unit (New-EntryList $optName) -Locale 'de' | ForEach-Object { $_.Msgstr }) | Should -Be @('Eins')
+        }
+        It 'preserves a translation when the source msgid is unchanged' {
+            $new = New-EntryList (New-Entry 'a/b/NAME' 'Hello')
+            $old = New-EntryList (New-Entry 'a/b/NAME' 'Hello' 'Hallo')
+            $m = Merge-NeoIPCMetadataPoEntry -New $new -Existing $old
+            $m[0].Msgstr | Should -BeExactly 'Hallo'
+            $m[0].Fuzzy | Should -BeFalse
+        }
+        It 'keeps but fuzzies a translation when the source msgid changed' {
+            $new = New-EntryList (New-Entry 'a/b/NAME' 'Hello there')
+            $old = New-EntryList (New-Entry 'a/b/NAME' 'Hello' 'Hallo')
+            $m = Merge-NeoIPCMetadataPoEntry -New $new -Existing $old
+            $m[0].Msgstr | Should -BeExactly 'Hallo'
+            $m[0].Fuzzy | Should -BeTrue
+        }
+        It 'drops obsolete entries and leaves brand-new ones untranslated' {
+            $new = New-EntryList (New-Entry 'a/b/NAME' 'Hello') (New-Entry 'a/c/NAME' 'New')
+            $old = New-EntryList (New-Entry 'a/b/NAME' 'Hello' 'Hallo') (New-Entry 'gone/x/NAME' 'Gone' 'Weg')
+            $m = Merge-NeoIPCMetadataPoEntry -New $new -Existing $old
+            @($m | ForEach-Object { $_.Msgctxt }) | Should -Be @('a/b/NAME', 'a/c/NAME')
+            ($m | Where-Object { $_.Msgctxt -eq 'a/c/NAME' }).Msgstr | Should -BeExactly ''
+        }
+        It 'round-trips the fuzzy flag through write/read' {
+            $entries = New-EntryList (New-Entry 'a/b/NAME' 'Hello' 'Hallo' $true)
+            $back = Read-NeoIPCMetadataPoText -Text (Write-NeoIPCMetadataPoText -Entry $entries -Locale 'de')
+            $back[0].Fuzzy | Should -BeTrue
+        }
+        It 'injection skips a fuzzy entry (unreviewed translation is not applied)' {
+            $pkg = [ordered]@{ organisationUnits = @( [ordered]@{ id = 'OUaaaaaaaa1'; code = 'AT'; name = 'Austria' } ) }
+            $po = @{ de = (New-EntryList (New-Entry 'organisationUnits/AT/NAME' 'Austria' 'Oesterreich' $true)) }
+            $inj = Add-NeoIPCMetadataTranslationToPackage -Package $pkg -PoByLocale $po
+            @($inj['organisationUnits'])[0].Contains('translations') | Should -BeFalse
+        }
+    }
+
+    Describe 'Export / Import-NeoIPCMetadataTranslation (public PO cmdlets)' {
+        BeforeAll {
+            $script:trExport = Join-Path $TestDrive 'tr-export.json'
+            $script:trPoDir = Join-Path $TestDrive 'tr-po'
+            $pkg = [ordered]@{
+                optionSets        = @( [ordered]@{ id = 'OSaaaaaaaa1'; code = 'NEOIPC_ASA_SCORE'; name = 'ASA score' } )
+                options           = @( [ordered]@{ id = 'OPaaaaaaaa1'; code = '1'; name = 'ASA I'; optionSet = [ordered]@{ id = 'OSaaaaaaaa1' }
+                        translations = @( [ordered]@{ property = 'NAME'; locale = 'de'; value = 'ASA I (de)' } ) } )
+                organisationUnits = @( [ordered]@{ id = 'OUaaaaaaaa1'; code = 'AT'; name = 'Austria'; shortName = 'Austria' } )
+            }
+            [System.IO.File]::WriteAllText($script:trExport, ($pkg | ConvertTo-Json -Depth 40), [System.Text.UTF8Encoding]::new($false))
+        }
+        It 'writes metadata.pot + one metadata.<lang>.po per requested locale' {
+            Export-NeoIPCMetadataTranslation -Path $script:trExport -PoDirectory $script:trPoDir -Locale de, es
+            Test-Path (Join-Path $script:trPoDir 'metadata.pot') | Should -BeTrue
+            Test-Path (Join-Path $script:trPoDir 'metadata.de.po') | Should -BeTrue
+            Test-Path (Join-Path $script:trPoDir 'metadata.es.po') | Should -BeTrue
+        }
+        It 'seeds a new .po from the package existing translations[]' {
+            Export-NeoIPCMetadataTranslation -Path $script:trExport -PoDirectory $script:trPoDir -Locale de, es
+            (Get-Content (Join-Path $script:trPoDir 'metadata.de.po') -Raw) | Should -Match 'ASA I \(de\)'
+            (Get-Content (Join-Path $script:trPoDir 'metadata.es.po') -Raw) | Should -Not -Match 'ASA I \(de\)'
+        }
+        It 'emits an empty msgstr in the .pot template' {
+            Export-NeoIPCMetadataTranslation -Path $script:trExport -PoDirectory $script:trPoDir -Locale de
+            $pot = Get-Content (Join-Path $script:trPoDir 'metadata.pot') -Raw
+            $pot | Should -Match 'msgctxt "options/NEOIPC_ASA_SCORE/1/NAME"'
+            $pot | Should -Not -Match 'ASA I \(de\)'
+        }
+        It 'round-trips: Export then Import reconstructs translations[] from the .po files' {
+            Export-NeoIPCMetadataTranslation -Path $script:trExport -PoDirectory $script:trPoDir -Locale de, es
+            $inj = Import-NeoIPCMetadataTranslation -Path $script:trExport -PoDirectory $script:trPoDir -Locale de, es -PassThru
+            $opt = @($inj['options'])[0]
+            @($opt['translations'] | ForEach-Object { '{0}:{1}={2}' -f $_['property'], $_['locale'], $_['value'] }) | Should -Be @('NAME:de=ASA I (de)')
+        }
+        It 'preserves a translator-supplied msgstr across re-export (msgmerge-equivalent)' {
+            Export-NeoIPCMetadataTranslation -Path $script:trExport -PoDirectory $script:trPoDir -Locale es
+            $esPath = Join-Path $script:trPoDir 'metadata.es.po'
+            $entries = Read-NeoIPCMetadataPoText -Text (Get-Content $esPath -Raw)
+            ($entries | Where-Object { $_.Msgctxt -eq 'organisationUnits/AT/NAME' }).Msgstr = 'Austria (es)'
+            [System.IO.File]::WriteAllText($esPath, (Write-NeoIPCMetadataPoText -Entry $entries -Locale 'es'), [System.Text.UTF8Encoding]::new($false))
+            Export-NeoIPCMetadataTranslation -Path $script:trExport -PoDirectory $script:trPoDir -Locale es
+            (Get-Content $esPath -Raw) | Should -Match 'Austria \(es\)'
+        }
+        It 'throws on a missing export file / PO directory' {
+            { Export-NeoIPCMetadataTranslation -Path (Join-Path $TestDrive 'no.json') -PoDirectory $script:trPoDir } | Should -Throw '*not found*'
+            { Import-NeoIPCMetadataTranslation -Path $script:trExport -PoDirectory (Join-Path $TestDrive 'no-po-dir') } | Should -Throw '*not found*'
+        }
+        It '-Validate throws when msgfmt reports the generated PO invalid' {
+            Mock Test-NeoIPCMetadataPoSyntax { $false }
+            { Export-NeoIPCMetadataTranslation -Path $script:trExport -PoDirectory (Join-Path $TestDrive 'tr-val-bad') -Locale de -Validate } | Should -Throw '*failed msgfmt validation*'
+        }
+        It '-Validate does not throw when the generated PO is valid' {
+            Mock Test-NeoIPCMetadataPoSyntax { $true }
+            { Export-NeoIPCMetadataTranslation -Path $script:trExport -PoDirectory (Join-Path $TestDrive 'tr-val-ok') -Locale de -Validate } | Should -Not -Throw
+        }
+    }
+
+    Describe 'Translation priority (full surface, internal strings deprioritised)' {
+        It 'elevates a user-facing token and deprioritises an unlisted one on the same object' {
+            $pkg = [ordered]@{ dataElements = @( [ordered]@{ id = 'DEaaaaaaaa1'; code = 'DE1'; name = 'Internal element name'; formName = 'Field label' } ) }
+            $units = Get-NeoIPCMetadataTranslationUnit -Package $pkg
+            ($units | Where-Object { $_.Token -eq 'FORM_NAME' }).Priority | Should -Be 200   # data-entry label (elevated)
+            ($units | Where-Object { $_.Token -eq 'NAME' }).Priority | Should -Be 10          # internal name (deprioritised)
+        }
+        It 'deprioritises an entirely unlisted type to the low priority' {
+            $pkg = [ordered]@{ programRuleVariables = @( [ordered]@{ id = 'PRVaaaaaaa1'; name = 'myVariable' } ) }
+            (Get-NeoIPCMetadataTranslationUnit -Package $pkg)[0].Priority | Should -Be 10
+        }
+        It 'emits a priority flag only for non-default values and round-trips it through read' {
+            $e = [System.Collections.Generic.List[object]]::new()
+            $e.Add([ordered]@{ Msgctxt = 'a/b/FORM_NAME'; Msgid = 'X'; Msgstr = ''; Fuzzy = $false; Priority = 200 })
+            $e.Add([ordered]@{ Msgctxt = 'a/c/NAME'; Msgid = 'Y'; Msgstr = ''; Fuzzy = $false; Priority = 100 })
+            $e.Add([ordered]@{ Msgctxt = 'a/d/NAME'; Msgid = 'Z'; Msgstr = ''; Fuzzy = $true; Priority = 10 })
+            $txt = Write-NeoIPCMetadataPoText -Entry $e
+            $txt | Should -Match '#, priority:200'
+            $txt | Should -Match '#, fuzzy, priority:10'                          # fuzzy + priority combine
+            ($txt -split "`n" | Where-Object { $_ -eq '#, priority:100' }).Count | Should -Be 0   # default omitted
+            $back = Read-NeoIPCMetadataPoText -Text $txt
+            ($back | Where-Object { $_.Msgctxt -eq 'a/b/FORM_NAME' }).Priority | Should -Be 200
+            ($back | Where-Object { $_.Msgctxt -eq 'a/c/NAME' }).Priority | Should -Be 100   # no flag -> default
+            ($back | Where-Object { $_.Msgctxt -eq 'a/d/NAME' }).Fuzzy | Should -BeTrue
+        }
+    }
+
+    Describe 'Translation regressions (adversarial-review hardening)' {
+        BeforeAll {
+            function New-Entry { param($Ctx, $Id, $Str = '', $Fuzzy = $false) [ordered]@{ Msgctxt = $Ctx; Msgid = $Id; Msgstr = $Str; Fuzzy = $Fuzzy } }
+            function New-EntryList { $l = [System.Collections.Generic.List[object]]::new(); foreach ($e in $args) { $l.Add($e) }; return , $l }
+        }
+        It 'gives two same-named code-less objects DISTINCT (unique) msgctxt via their UIDs' {
+            $pkg = [ordered]@{ programStageSections = @(
+                    [ordered]@{ id = 'PSSaaaaaaa1'; name = 'BSI/Sepsis' }
+                    [ordered]@{ id = 'PSSaaaaaaa2'; name = 'BSI/Sepsis' } ) }
+            $units = Get-NeoIPCMetadataTranslationUnit -Package $pkg
+            @($units | ForEach-Object { $_.Msgctxt }) | Should -Be @('programStageSections/PSSaaaaaaa1/NAME', 'programStageSections/PSSaaaaaaa2/NAME')
+        }
+        It 'THROWS on a genuine duplicate msgctxt (two objects mapping to the same key)' {
+            $pkg = [ordered]@{ organisationUnits = @(
+                    [ordered]@{ id = 'OUaaaaaaaa1'; code = 'DUP'; name = 'A' }
+                    [ordered]@{ id = 'OUaaaaaaaa2'; code = 'DUP'; name = 'B' } ) }
+            { Get-NeoIPCMetadataTranslationUnit -Package $pkg } | Should -Throw '*Duplicate translation msgctxt*'
+        }
+        It 'excludes the domain option sets (pathogens / substances) from extraction' {
+            $pkg = [ordered]@{
+                optionSets = @( [ordered]@{ id = 'OSdomain001'; code = 'NEOIPC_PATHOGENS'; name = 'Pathogens' } )
+                options    = @( [ordered]@{ id = 'OPdomain001'; code = 'P1'; name = 'E. coli'; optionSet = [ordered]@{ id = 'OSdomain001' } } )
+            }
+            (Get-NeoIPCMetadataTranslationUnit -Package $pkg).Count | Should -Be 0
+        }
+        It 'Import preserves translations[] on excluded objects (ATC group + domain option) it does not own' {
+            $pkg = [ordered]@{
+                optionSets   = @( [ordered]@{ id = 'OSdomain001'; code = 'NEOIPC_ANTIMICROBIAL_SUBSTANCES'; name = 'Substances' } )
+                options      = @( [ordered]@{ id = 'OPdomain001'; code = 'J01AA01'; name = 'Demeclocycline'; optionSet = [ordered]@{ id = 'OSdomain001' }
+                        translations = @( [ordered]@{ property = 'NAME'; locale = 'de'; value = 'Demeclocyclin' } ) } )
+                optionGroups = @( [ordered]@{ id = 'OGatc000001'; code = 'J01CG'; name = 'Beta-lactamase inhibitors'
+                        translations = @( [ordered]@{ property = 'NAME'; locale = 'de'; value = 'Beta-Laktamase-Inhibitoren' } ) } )
+            }
+            $inj = Add-NeoIPCMetadataTranslationToPackage -Package $pkg -PoByLocale @{ de = (New-EntryList) }
+            @($inj['options'])[0]['translations'] | Should -Not -BeNullOrEmpty
+            @($inj['optionGroups'])[0]['translations'] | Should -Not -BeNullOrEmpty
+        }
+        It 'Merge takes the priority from the source (New) side' {
+            $new = New-EntryList (New-Entry 'a/b/NAME' 'Hello'); $new[0].Priority = 200
+            $old = New-EntryList (New-Entry 'a/b/NAME' 'Hello' 'Hallo'); $old[0].Priority = 10
+            $m = Merge-NeoIPCMetadataPoEntry -New $new -Existing $old
+            $m[0].Priority | Should -Be 200
+            $m[0].Msgstr | Should -BeExactly 'Hallo'
+        }
+        It 'injects translations[] in deterministic (locale asc, then token) order regardless of PoByLocale key order' {
+            $pkg = [ordered]@{ organisationUnits = @( [ordered]@{ id = 'OUaaaaaaaa1'; code = 'AT'; name = 'Austria'; shortName = 'AT' } ) }
+            $po = [ordered]@{}
+            $po['es'] = (New-EntryList (New-Entry 'organisationUnits/AT/NAME' 'Austria' 'Austria-es') (New-Entry 'organisationUnits/AT/SHORT_NAME' 'AT' 'AT-es'))
+            $po['de'] = (New-EntryList (New-Entry 'organisationUnits/AT/NAME' 'Austria' 'Oesterreich') (New-Entry 'organisationUnits/AT/SHORT_NAME' 'AT' 'OE'))
+            $inj = Add-NeoIPCMetadataTranslationToPackage -Package $pkg -PoByLocale $po
+            @(@($inj['organisationUnits'])[0]['translations'] | ForEach-Object { '{0}/{1}' -f $_.locale, $_.property }) |
+                Should -Be @('de/NAME', 'de/SHORT_NAME', 'es/NAME', 'es/SHORT_NAME')
+        }
+        It 'Test-NeoIPCAtcCode is case-sensitive (a lowercased code is not treated as ATC)' {
+            (Test-NeoIPCAtcCode -Code 'j01cg') | Should -BeFalse
+        }
+        It 'parses a wrapped (continuation) msgctxt' {
+            $txt = "msgctxt `"`"`n`"options/SET/`"`n`"1/NAME`"`nmsgid `"X`"`nmsgstr `"Y`"`n"
+            $e = Read-NeoIPCMetadataPoText -Text $txt
+            $e.Count | Should -Be 1
+            $e[0].Msgctxt | Should -BeExactly 'options/SET/1/NAME'
+        }
+        It 'writes PO text with LF line endings (no CRLF)' {
+            $txt = Write-NeoIPCMetadataPoText -Entry (New-EntryList (New-Entry 'a/b/NAME' 'X' 'Y'))
+            $txt.Contains("`r`n") | Should -BeFalse
+            $txt.Contains("`n") | Should -BeTrue
+        }
+    }
 }

@@ -27,10 +27,11 @@ $script:NeoIPCMetadataDisplayProjections = @(
     'displaySubjectTemplate', 'displayMessageTemplate'
 )
 
-# Fields currently dropped from the directory AND ignored by the comparator, so the round-trip gate stays
-# purely structural. Carrying `translations` faithfully through flat CSV cells — including the nested
-# leftSide/rightSide.translations on validation rules — is not yet handled here; they are stripped
-# recursively by Remove-NeoIPCMetadataNoise.
+# Fields dropped from the per-type CSV directory AND ignored by the structural comparator. `translations` is
+# deliberately NOT carried in CSV cells: i18n lives in a separate, translator-facing gettext PO component
+# (po/metadata.<lang>.po), converted to/from each object's translations[] by Export/Import-NeoIPCMetadataTranslation
+# (see Private/MetadataTranslation.ps1). So the CSV round-trip stays purely structural — translations are stripped
+# here by Remove-NeoIPCMetadataNoise and round-tripped losslessly through the PO path instead.
 $script:NeoIPCMetadataDeferredFields = @('translations')
 
 # Whole object TYPES excluded from the package entirely (not field-stripping): account/PII-shaped
@@ -256,3 +257,61 @@ $script:NeoIPCMetadataOrderedRefProps = [System.Collections.Generic.HashSet[stri
         foreach ($prop in $map.Properties.Keys) { if ($map.Properties[$prop] -eq 'idArrayOrdered') { $prop } }
     }),
     [System.StringComparer]::Ordinal)
+
+# Translatable base property -> DHIS2 ObjectTranslation TOKEN. A translations[] entry serializes as
+# { property = <TOKEN>, locale = <java-locale string, e.g. "de">, value = <translated string> }
+# (refs/dhis2-core dhis-api .../translation/Translation.java). The TOKEN is the literal @Translatable.key()
+# value, NOT a generic uppercase of the property name — three forms break that rule
+# (enrollmentDateLabel -> ENROLLMENT_DATE_LABEL, subjectTemplate -> SUBJECT_TEMPLATE,
+# messageTemplate -> MESSAGE_TEMPLATE), so the mapping is enumerated, not computed. Verified against
+# refs/dhis2-core: translation/Translatable.java, translation/TranslationProperty.java, and each type's
+# @Translatable getters (BaseIdentifiableObject/BaseNameableObject/NotificationTemplateObject + Program /
+# ProgramStage / ProgramRuleAction / ValidationRule). This is the complete set of tokens that can occur on
+# the metadata types NeoIPC carries. The per-type translatable property set is the INTERSECTION of a type's
+# mapped Properties with these keys (Get-NeoIPCMetadataTranslatableField), so it auto-tracks the type maps.
+$script:NeoIPCMetadataTranslatableProperties = [ordered]@{
+    name                = 'NAME'
+    shortName           = 'SHORT_NAME'
+    formName            = 'FORM_NAME'
+    description         = 'DESCRIPTION'
+    subjectTemplate     = 'SUBJECT_TEMPLATE'
+    messageTemplate     = 'MESSAGE_TEMPLATE'
+    content             = 'CONTENT'
+    instruction         = 'INSTRUCTION'
+    enrollmentDateLabel = 'ENROLLMENT_DATE_LABEL'
+    incidentDateLabel   = 'INCIDENT_DATE_LABEL'
+    executionDateLabel  = 'EXECUTION_DATE_LABEL'
+    dueDateLabel        = 'DUE_DATE_LABEL'
+}
+
+# Default target languages for the metadata PO component — the same nine the reports' po4a / glossary pipeline
+# targets (see Surveillance-Toolkit CLAUDE.md). Overridable per call via the cmdlets' -Locale parameter.
+$script:NeoIPCMetadataTranslationLocales = @('af', 'de', 'el', 'es', 'et', 'fr', 'it', 'ne', 'tr')
+
+# Per-string Weblate PRIORITY for the metadata PO. The converter exports the FULL @Translatable surface (DHIS2
+# marks `name` @Translatable on every object — BaseIdentifiableObject.getDisplayName — so nothing is dropped),
+# but the thousands of strings on metadata/common are dominated by internal labels no end-user sees (program-rule and
+# program-rule-variable names — #{var} expression identifiers — raw data-element / category / userRole names). So
+# every (type, TOKEN) listed below is ELEVATED to the given Weblate priority (higher = translated first); every
+# (type, TOKEN) NOT listed is DEPRIORITISED to $NeoIPCMetadataLowTranslationPriority so translators clear the
+# user-facing strings first and the internal ones sink to the bottom of the queue (nothing is excluded — the
+# whole surface stays translatable). The bands: form-entry labels (200) > option values / notifications /
+# org-unit names (150) > user-facing titles + descriptions (100, the Weblate default — no flag emitted) > the
+# unlisted internal remainder (low). Retune as translation needs change.
+$script:NeoIPCMetadataLowTranslationPriority = 10
+$script:NeoIPCMetadataTranslationPriorities = [ordered]@{
+    dataElements                 = [ordered]@{ FORM_NAME = 200 }                                                   # data-entry field labels
+    trackedEntityAttributes      = [ordered]@{ FORM_NAME = 200; NAME = 150 }
+    programStageSections         = [ordered]@{ NAME = 200; DESCRIPTION = 100 }                                     # form section headers
+    programSections              = [ordered]@{ NAME = 200 }
+    programs                     = [ordered]@{ ENROLLMENT_DATE_LABEL = 200; INCIDENT_DATE_LABEL = 200; NAME = 100; SHORT_NAME = 100; DESCRIPTION = 100 }
+    programStages                = [ordered]@{ EXECUTION_DATE_LABEL = 200; NAME = 150; DESCRIPTION = 100 }
+    options                      = [ordered]@{ NAME = 150 }                                                        # dropdown values
+    programNotificationTemplates = [ordered]@{ SUBJECT_TEMPLATE = 150; MESSAGE_TEMPLATE = 150 }                    # messages users receive
+    organisationUnits            = [ordered]@{ NAME = 150; SHORT_NAME = 150 }
+    organisationUnitGroups       = [ordered]@{ NAME = 100; SHORT_NAME = 100; DESCRIPTION = 100 }
+    organisationUnitGroupSets    = [ordered]@{ NAME = 100; SHORT_NAME = 100; DESCRIPTION = 100 }
+    optionSets                   = [ordered]@{ NAME = 100 }
+    optionGroups                 = [ordered]@{ NAME = 100; SHORT_NAME = 100; DESCRIPTION = 100 }
+    programIndicators            = [ordered]@{ NAME = 100; SHORT_NAME = 100; DESCRIPTION = 100 }
+}
