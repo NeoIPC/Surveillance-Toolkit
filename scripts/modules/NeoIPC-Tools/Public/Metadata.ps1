@@ -10,7 +10,10 @@ function ConvertFrom-NeoIPCMetadataJson {
         Reads a (PII-cleaned) DHIS2 metadata JSON file, prunes per-instance noise, extracts nested-only
         child objects (programStageDataElements, programTrackedEntityAttributes, trackedEntityTypeAttributes,
         analyticsPeriodBoundaries) into their own tables, and writes one UTF-8/no-BOM/LF CSV per object type
-        into OutputDirectory. Idempotent: replaces only the per-type files it owns. No DHIS2 API calls.
+        into OutputDirectory. The two domain-authored option sets (NEOIPC_PATHOGENS, NEOIPC_ANTIMICROBIAL_SUBSTANCES)
+        and their options are excluded — their canonical source is the infectious-agents YAML / the antibiotics CSV,
+        and the importable package gets them from the export closure via New-NeoIPCMetadataPackage, not this
+        directory. Idempotent: replaces only the per-type files it owns. No DHIS2 API calls.
     .PARAMETER Path
         Path to the DHIS2 metadata.json export.
     .PARAMETER OutputDirectory
@@ -44,7 +47,10 @@ function ConvertTo-NeoIPCMetadataJson {
     .DESCRIPTION
         Reads the per-type CSV files, coerces cells back to typed values, re-nests nested-only children
         into their parents, and emits a DHIS2 metadata package as JSON (every id a valid UID — push with
-        idScheme=UID). Returns the JSON string, or writes it to OutputPath (UTF-8, no BOM) when given.
+        idScheme=UID). The output therefore omits the two domain-authored option sets the directory does not carry
+        (NEOIPC_PATHOGENS, NEOIPC_ANTIMICROBIAL_SUBSTANCES); the complete importable package is assembled by
+        New-NeoIPCMetadataPackage (closure + authored content), not by this round-trip cmdlet. Returns the JSON
+        string, or writes it to OutputPath (UTF-8, no BOM) when given.
     .PARAMETER Path
         Directory containing the per-type CSV files.
     .PARAMETER OutputPath
@@ -384,40 +390,35 @@ function Select-NeoIPCMetadataClosure {
 function New-NeoIPCMetadataPackage {
     <#
     .SYNOPSIS
-        Assemble an importable DHIS2 metadata package from an export plus the authored org units / users / memberships.
+        Assemble an importable DHIS2 metadata package from an export plus the UID-keyed metadata directory.
     .DESCRIPTION
-        The play/test-package build. Starts from a (PII-cleaned, merged) DHIS2 export and produces one
-        importable package (push with idScheme=UID):
+        The play / production package build. Starts from a (PII-cleaned, merged) DHIS2 export for the
+        dependency-closure config, then overlays the authored content read from the canonical UID-keyed
+        directory (push with idScheme=UID):
           1. Prunes the export to the seed program's dependency closure (the Select-NeoIPCMetadataClosure engine).
           2. Adds the non-closure config DEFINITIONS from the export — org-unit groups / group-sets / levels,
              userRoles, userGroups — with their real UIDs (the closure cannot reach these: the program
              references them only by code).
           3. Noise-strips the whole config: audit fields, user / sharing references, the anonymised
              per-deployment membership, and (for now) translations — leaving a clean, user-ref-free package.
-          4. Compiles the authored org units (code-keyed CSVs), users (normalized tables), and group
-             memberships, and stitches them in group-side, collision-checking every authored minted UID
+          4. Reads the org units, users, and group memberships from the UID-keyed directory — the `common`
+             base plus the selected variant overlay — preserving the committed UIDs (real production UIDs for
+             the live org units), and stitches them in group-side, collision-checking every authored UID
              against the captured identities (Join-NeoIPCMetadataPackage).
-        The export's anonymised org-unit instances and user accounts are excluded; the authored content
+        The export's anonymised org-unit instances and user accounts are excluded; the directory content
         replaces them. By default the assembled package is emitted as JSON (returned, or written to
-        OutputPath). No DHIS2 API calls.
-
-        This combines the common + play layers into a single importable package (the integration-test / demo
-        seed). Translations are dropped pending the gettext-PO pipeline.
+        OutputPath). Translations are dropped pending the gettext-PO pipeline. No DHIS2 API calls.
     .PARAMETER ExportPath
         Path to the merged, PII-cleaned DHIS2 export JSON (the closure seed + the non-closure definitions).
-    .PARAMETER OrgUnitPath
-        Code-keyed org-unit authoring CSV(s) — e.g. the common country scaffold + the play test hierarchy, merged.
-    .PARAMETER UserPath
-        users.csv (username, firstName, surname).
-    .PARAMETER RoleAssignmentPath
-        userRoleAssignments.csv (username, role) — role NAME resolved to the export's real userRole UID.
-    .PARAMETER OrgUnitAssignmentPath
-        userOrgUnitAssignments.csv (username, organisationUnit) — org-unit CODE resolved to the authored UID.
-    .PARAMETER OrgUnitGroupMembershipPath
-        Optional org-unit-group membership junction file(s) (organisationUnitGroup, organisationUnit) — e.g.
-        the common World-Bank-class file and the play designation file.
-    .PARAMETER UserGroupMembershipPath
-        Optional user-group membership junction file (userGroup, username).
+    .PARAMETER MetadataDirectory
+        The canonical metadata directory root (contains common/ and play/). The base config is read from
+        common/; the overlay from common/ + (play/ or the production OverlayPath).
+    .PARAMETER Variant
+        play (the committed synthetic overlay under MetadataDirectory/play) or production (an uncommittable
+        real-data overlay supplied via OverlayPath). Both share the common base. Default: play.
+    .PARAMETER OverlayPath
+        For -Variant production: the uncommittable private directory of real org units / users / memberships
+        (same file layout as play/). Ignored for -Variant play.
     .PARAMETER Password
         Login password for every authored user. Defaults to a clearly-test value that passes DHIS2's import
         password policy (the bare demo password 'district' is rejected — E4005 — for imported users).
@@ -439,12 +440,9 @@ function New-NeoIPCMetadataPackage {
     [OutputType([string], [hashtable])]
     param(
         [Parameter(Mandatory)][string]$ExportPath,
-        [Parameter(Mandatory)][string[]]$OrgUnitPath,
-        [Parameter(Mandatory)][string]$UserPath,
-        [Parameter(Mandatory)][string]$RoleAssignmentPath,
-        [Parameter(Mandatory)][string]$OrgUnitAssignmentPath,
-        [string[]]$OrgUnitGroupMembershipPath,
-        [string]$UserGroupMembershipPath,
+        [Parameter(Mandatory)][string]$MetadataDirectory,
+        [ValidateSet('play', 'production')][string]$Variant = 'play',
+        [string]$OverlayPath,
         [string]$Password = 'NeoIPC-Play1',
         [string]$SeedType = 'programs',
         [string]$SeedCode = 'NEOIPC_CORE',
@@ -453,6 +451,16 @@ function New-NeoIPCMetadataPackage {
         [switch]$PassThru
     )
     if (-not (Test-Path -LiteralPath $ExportPath)) { throw "Export metadata file not found: '$ExportPath'." }
+    if (-not (Test-Path -LiteralPath $MetadataDirectory)) { throw "Metadata directory not found: '$MetadataDirectory'." }
+    $commonDir = Join-Path $MetadataDirectory 'common'
+    if (-not (Test-Path -LiteralPath $commonDir)) { throw "Common metadata directory not found: '$commonDir'." }
+    $variantDir = if ($Variant -eq 'production') {
+        if ([string]::IsNullOrEmpty($OverlayPath)) { throw '-Variant production requires -OverlayPath (the uncommittable real-data overlay).' }
+        $OverlayPath
+    }
+    else { Join-Path $MetadataDirectory 'play' }
+    if (-not (Test-Path -LiteralPath $variantDir)) { throw "Variant overlay directory not found: '$variantDir'." }
+
     $export = ConvertFrom-NeoIPCMetadataJsonText -Json (Get-Content -LiteralPath $ExportPath -Raw)
 
     # userRole NAME -> real UID, resolved before stripping (name and id both survive normalization anyway).
@@ -462,8 +470,8 @@ function New-NeoIPCMetadataPackage {
     }
 
     # Closure + the non-closure DEFINITION types (the whole non-closure family except org-unit instances,
-    # which are authored). Then noise-strip the config so the anonymised per-deployment membership is gone
-    # BEFORE the authored membership is applied (organisationUnits / users are themselves strip-list keys).
+    # which are read from the directory). Then noise-strip the config so the anonymised per-deployment
+    # membership is gone BEFORE the authored membership is applied.
     $config = (Get-NeoIPCMetadataClosure -Package $export -SeedType $SeedType -SeedCode $SeedCode).Package
     foreach ($t in $script:NeoIPCMetadataNonClosureTypes) {
         if ($t -eq 'organisationUnits') { continue }
@@ -471,15 +479,31 @@ function New-NeoIPCMetadataPackage {
     }
     $config = Remove-NeoIPCMetadataNoise -Object $config
 
-    $orgUnits = ConvertFrom-NeoIPCAuthoredOrgUnitCsv -Path $OrgUnitPath
+    # Authored content from the UID-keyed directory: common base + variant overlay. Committed UIDs preserved.
+    $orgUnits = Read-NeoIPCAuthoredOrgUnit -Path @((Join-Path $commonDir 'organisationUnits.csv'), (Join-Path $variantDir 'organisationUnits.csv'))
     $ouUid = @{}
     foreach ($o in $orgUnits) { $ouUid[[string]$o['code']] = [string]$o['id'] }
-    $users = ConvertFrom-NeoIPCAuthoredUserCsv -UserPath $UserPath -RoleAssignmentPath $RoleAssignmentPath -OrgUnitAssignmentPath $OrgUnitAssignmentPath -RoleUid $roleUid -OrgUnitUid $ouUid -Password $Password
-    $ougMembership = ConvertFrom-NeoIPCAuthoredOrgUnitGroupMembership -OrgUnit $orgUnits -MembershipPath $OrgUnitGroupMembershipPath
-    $ugMembership = if ($UserGroupMembershipPath) { ConvertFrom-NeoIPCAuthoredUserGroupMembership -MembershipPath $UserGroupMembershipPath -User $users } else { [ordered]@{} }
+
+    $userArgs = @{
+        UserPath              = (Join-Path $variantDir 'users.csv')
+        RoleAssignmentPath    = (Join-Path $variantDir 'userRoleAssignments.csv')
+        OrgUnitAssignmentPath = (Join-Path $variantDir 'userOrgUnitAssignments.csv')
+        RoleUid               = $roleUid
+        OrgUnitUid            = $ouUid
+        Password              = $Password
+    }
+    $users = ConvertFrom-NeoIPCAuthoredUserCsv @userArgs
+
+    # Org-unit-group membership: the common overlay (World-Bank class, reference centre) + the variant overlay
+    # (test units / trial sites / all-eligible). Structural identity groups are derived from the org units.
+    $ougPaths = @(@((Join-Path $commonDir 'organisationUnitGroupMemberships.csv'), (Join-Path $variantDir 'organisationUnitGroupMemberships.csv')) | Where-Object { Test-Path -LiteralPath $_ })
+    $ougMembership = ConvertFrom-NeoIPCAuthoredOrgUnitGroupMembership -OrgUnit $orgUnits -MembershipPath $ougPaths
+
+    $ugPath = Join-Path $variantDir 'userGroupMemberships.csv'
+    $ugMembership = if (Test-Path -LiteralPath $ugPath) { ConvertFrom-NeoIPCAuthoredUserGroupMembership -MembershipPath $ugPath -User $users } else { [ordered]@{} }
 
     $package = Join-NeoIPCMetadataPackage -Config $config -OrgUnit $orgUnits -User $users -OrgUnitGroupMembership $ougMembership -UserGroupMembership $ugMembership
-    Write-Verbose ("Assembled package: {0} org units, {1} users, {2} top-level types." -f @($orgUnits).Count, @($users).Count, @($package.Keys).Count)
+    Write-Verbose ("Assembled '{0}' package: {1} org units, {2} users, {3} top-level types." -f $Variant, @($orgUnits).Count, @($users).Count, @($package.Keys).Count)
 
     if ($PassThru) { return @{ Package = $package; OrgUnitCount = @($orgUnits).Count; UserCount = @($users).Count } }
     $json = $package | ConvertTo-Json -Depth 100 -Compress:$Compress

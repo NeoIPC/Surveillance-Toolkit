@@ -1,16 +1,14 @@
-code,name,valueType
-NEOIPC_ASA_SCORE,NeoIPC ASA score,INTEGER_POSITIVE
-NEOIPC_ADMISSION_TYPES,NeoIPC Admission types,INTEGER_POSITIVE
-NEOIPC_ANTIMICROBIAL_SUBSTANCES,NeoIPC Antimicrobial Substances,TEXT
-NEOIPC_BSI_DEVICE_ASS,NeoIPC BSI Device association,INTEGER_ZERO_OR_POSITIVE
-NEOIPC_BSI_PATHOGEN_RECOVERED_FROM,NeoIPC BSI Pathogen recovered from options,INTEGER_POSITIVE
-NEOIPC_DELIVERY_MODES,NeoIPC Delivery modes,INTEGER_POSITIVE
-NEOIPC_HAP_DEVICE_ASS,NeoIPC HAP Device association,INTEGER_ZERO_OR_POSITIVE
-NEOIPC_HAP_RESPIRATORY_TRACT_SAMPLE_SOURCES,NeoIPC HAP Respiratory tract sample sources,INTEGER_POSITIVE
-NEOIPC_PATHOGENS,NeoIPC Pathogen options,INTEGER_ZERO_OR_POSITIVE
-NEOIPC_SSI_TYPE,NeoIPC SSI Type options,INTEGER_POSITIVE
-NEOIPC_SEX_VALUES,NeoIPC Sex values,LETTER
-NEOIPC_SURVEILLANCE_END_REASON,NeoIPC Surveillance end reason,INTEGER_POSITIVE
-NEOIPC_WOUND_CLASSES,NeoIPC Wound classes,INTEGER_POSITIVE
-NEOIPC_YES_NO_NO_FOLLOWUP,"NeoIPC Yes, No, No follow-up",INTEGER
-NEOIPC_YES_NO_NOT_TESTED,"NeoIPC Yes, No, Not Tested",INTEGER
+id,code,name,valueType,version,options,sharing
+l6HnyhcwF28,NEOIPC_ADMISSION_TYPES,NeoIPC Admission types,INTEGER_POSITIVE,3,RtesSt4Ph3p TjXfbbUSjWX ulWJ9MJaMpn,"{""public"":""rw------""}"
+LnwdZ7gugKe,NEOIPC_ASA_SCORE,NeoIPC ASA scores,INTEGER_POSITIVE,6,FKLYee8dxtm Ncj4uvi1u0w U453P3V9JAq d5KZw4vysCf qWryohFsYer,"{""public"":""rw------""}"
+u02n1RdrOmy,NEOIPC_BSI_DEVICE_ASS,NeoIPC BSI Device associations,INTEGER_ZERO_OR_POSITIVE,6,HZsM42BCMLy ONmuPT4VF0Z o096OHAgEDH,"{""public"":""rw------""}"
+B3oP3uOI5Ef,NEOIPC_BSI_PATHOGEN_RECOVERED_FROM,NeoIPC BSI Pathogen recovered from options,INTEGER_POSITIVE,4,ky0PKFoDMjL ogrfNFoAKvp xJv47sbLuzU,"{""public"":""rw------""}"
+JQWbW9J3xGv,NEOIPC_DELIVERY_MODES,NeoIPC Delivery modes,INTEGER_POSITIVE,3,jVY9VHYMrMR lBR9sAWIrZq w2mCWHXBkh4,"{""public"":""rw------""}"
+qKgJVoh14Em,NEOIPC_HAP_DEVICE_ASS,NeoIPC HAP Device associations,INTEGER_ZERO_OR_POSITIVE,4,JUkbNY0lSrX osugmzEzhS0 uHQyZonDk1K,"{""public"":""rw------""}"
+Y64Emj9405U,NEOIPC_HAP_RESPIRATORY_TRACT_SAMPLE_SOURCES,NeoIPC HAP Respiratory tract sample sources,INTEGER_POSITIVE,3,AXvr3bq2rjE AoWWNFLzbPq k2lE1u4qwAf,"{""public"":""rw------""}"
+R2yCnsqxamL,NEOIPC_SEX_VALUES,NeoIPC Sex values,LETTER,6,Ihs2jWrqDEs eTAosn1t8qb wEmGBvxgRNg,"{""public"":""rw------""}"
+pbzarUspFrN,NEOIPC_SSI_TYPE,NeoIPC SSI Type options,INTEGER_POSITIVE,4,NSDhrXLVJVd PiaNKjuZ03R oqEEhudZyj2,"{""public"":""rw------""}"
+knhSB8VaArg,NEOIPC_SURVEILLANCE_END_REASON,NeoIPC Surveillance end reasons,INTEGER_POSITIVE,3,VhEgiaNTYRx nrchCI9sZ8m,"{""public"":""rw------""}"
+GfBMlp6BqeM,NEOIPC_WOUND_CLASSES,NeoIPC Wound classes,INTEGER_POSITIVE,5,EChkHc7YCW4 adrjdOorvSX gaLjjqurQpc wcMOtSVjaFg,"{""public"":""rw------""}"
+KfIEzWRibj7,NEOIPC_YES_NO_NO_FOLLOWUP,"NeoIPC Yes, No, No follow-up",INTEGER,6,NaxxcQjPcLD NggBQpNMQtU hfx449bMjIO,"{""public"":""rw------""}"
+TnE2yuSrqEP,NEOIPC_YES_NO_NOT_TESTED,"NeoIPC Yes, No, Not Tested",INTEGER,6,JrD0mrNVtUV jRXiD9doNPH kXSJ3ogjKaX,"{""public"":""rw------""}"

@@ -56,7 +56,7 @@ function Join-NeoIPCMetadataPackage {
     .PARAMETER Config
         The captured config package (ordered dict: type -> object array), noise-stripped.
     .PARAMETER OrgUnit
-        The authored organisationUnit objects (from ConvertFrom-NeoIPCAuthoredOrgUnitCsv).
+        The authored organisationUnit objects (from Read-NeoIPCAuthoredOrgUnit).
     .PARAMETER User
         The authored user objects (from ConvertFrom-NeoIPCAuthoredUserCsv).
     .PARAMETER OrgUnitGroupMembership

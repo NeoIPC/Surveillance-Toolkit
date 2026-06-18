@@ -269,6 +269,68 @@ InModuleScope 'NeoIPC-Tools' {
         }
     }
 
+    Describe 'Domain option-set exclusion (pathogens / substances sourced from YAML, not the directory)' {
+        BeforeAll {
+            $script:domPkg = [ordered]@{
+                optionSets = @(
+                    [ordered]@{ id = 'osPathogen1'; code = 'NEOIPC_PATHOGENS'; name = 'Pathogens'; valueType = 'INTEGER_ZERO_OR_POSITIVE'; options = @([ordered]@{ id = 'optPath0001' }, [ordered]@{ id = 'optPath0002' }) }
+                    [ordered]@{ id = 'osSubstanc1'; code = 'NEOIPC_ANTIMICROBIAL_SUBSTANCES'; name = 'Substances'; valueType = 'TEXT'; options = @([ordered]@{ id = 'optSubs0001' }) }
+                    [ordered]@{ id = 'osAsaScore1'; code = 'NEOIPC_ASA_SCORE'; name = 'ASA'; valueType = 'INTEGER_POSITIVE'; options = @([ordered]@{ id = 'optAsa00001' }, [ordered]@{ id = 'optAsa00002' }) }
+                )
+                options = @(
+                    [ordered]@{ id = 'optPath0001'; code = 'P1'; name = 'Path1'; sortOrder = 1; optionSet = [ordered]@{ id = 'osPathogen1' } }
+                    [ordered]@{ id = 'optPath0002'; code = 'P2'; name = 'Path2'; sortOrder = 2; optionSet = [ordered]@{ id = 'osPathogen1' } }
+                    [ordered]@{ id = 'optSubs0001'; code = 'S1'; name = 'Subs1'; sortOrder = 1; optionSet = [ordered]@{ id = 'osSubstanc1' } }
+                    [ordered]@{ id = 'optAsa00001'; code = 'A1'; name = 'Asa1'; sortOrder = 1; optionSet = [ordered]@{ id = 'osAsaScore1' } }
+                    [ordered]@{ id = 'optAsa00002'; code = 'A2'; name = 'Asa2'; sortOrder = 2; optionSet = [ordered]@{ id = 'osAsaScore1' } }
+                )
+            }
+        }
+        It 'drops the domain option SETS from the directory but keeps the others' {
+            $work = ConvertFrom-NeoIPCMetadataJsonText -Json ($script:domPkg | ConvertTo-Json -Depth 40)
+            $rows = ConvertFrom-NeoIPCMetadataPackage -Package $work
+            @($rows['optionSets']).Count | Should -Be 1
+            [string]$rows['optionSets'][0]['code'] | Should -BeExactly 'NEOIPC_ASA_SCORE'
+        }
+        It 'drops options belonging to the domain sets but keeps the others' {
+            $work = ConvertFrom-NeoIPCMetadataJsonText -Json ($script:domPkg | ConvertTo-Json -Depth 40)
+            $rows = ConvertFrom-NeoIPCMetadataPackage -Package $work
+            @($rows['options']).Count | Should -Be 2
+            @($rows['options'] | ForEach-Object { [string]$_['id'] } | Sort-Object) | Should -Be @('optAsa00001', 'optAsa00002')
+        }
+        It 'the comparator treats the domain content as a known non-difference (round-trip stays green)' {
+            # Baseline carries the domain sets + their options; the directory-derived (rebuilt) side does not.
+            $baseline = ConvertFrom-NeoIPCMetadataJsonText -Json ($script:domPkg | ConvertTo-Json -Depth 40)
+            $work     = ConvertFrom-NeoIPCMetadataJsonText -Json ($script:domPkg | ConvertTo-Json -Depth 40)
+            $rebuilt  = ConvertTo-NeoIPCMetadataPackage -Rows (ConvertFrom-NeoIPCMetadataPackage -Package $work)
+            @(Compare-NeoIPCMetadataCore -Reference $baseline -Difference $rebuilt).Count | Should -Be 0
+        }
+        It 'covers the domain sets when they exist ONLY on the Difference side (the union pulls UIDs from both sides)' {
+            # Mirror of the round-trip case: Reference = the rebuilt (domain-dropped) package, Difference = the
+            # baseline (domain present). If the comparator unioned domain UIDs from the Reference side only, the
+            # Difference-side sets/options would surface as spurious Added diffs — this guards the .UnionWith line.
+            $work     = ConvertFrom-NeoIPCMetadataJsonText -Json ($script:domPkg | ConvertTo-Json -Depth 40)
+            $rebuilt  = ConvertTo-NeoIPCMetadataPackage -Rows (ConvertFrom-NeoIPCMetadataPackage -Package $work)   # no domain
+            $baseline = ConvertFrom-NeoIPCMetadataJsonText -Json ($script:domPkg | ConvertTo-Json -Depth 40)        # domain present
+            @(Compare-NeoIPCMetadataCore -Reference $rebuilt -Difference $baseline).Count | Should -Be 0
+        }
+        It 'still flags a real change in a NON-domain option set' {
+            $baseline = ConvertFrom-NeoIPCMetadataJsonText -Json ($script:domPkg | ConvertTo-Json -Depth 40)
+            $mutated  = ConvertFrom-NeoIPCMetadataJsonText -Json ($script:domPkg | ConvertTo-Json -Depth 40)
+            $mutated['options'][3]['name'] = 'Asa1-CHANGED'   # optAsa00001 — a non-domain option
+            @(Compare-NeoIPCMetadataCore -Reference $baseline -Difference $mutated | Where-Object { $_.Kind -eq 'Changed' }).Count | Should -Be 1
+        }
+        It 'Test-NeoIPCMetadataDomainExcluded keys sets by code and options by parent set, sparing others' {
+            $ids = Get-NeoIPCMetadataDomainOptionSetIds -Package (ConvertFrom-NeoIPCMetadataJsonText -Json ($script:domPkg | ConvertTo-Json -Depth 40))
+            @($ids).Count | Should -Be 2
+            Test-NeoIPCMetadataDomainExcluded -Type 'optionSets' -Object ([ordered]@{ code = 'NEOIPC_PATHOGENS' }) -DomainSetIds $ids | Should -BeTrue
+            Test-NeoIPCMetadataDomainExcluded -Type 'optionSets' -Object ([ordered]@{ code = 'NEOIPC_ASA_SCORE' }) -DomainSetIds $ids | Should -BeFalse
+            Test-NeoIPCMetadataDomainExcluded -Type 'options' -Object ([ordered]@{ optionSet = [ordered]@{ id = 'osSubstanc1' } }) -DomainSetIds $ids | Should -BeTrue
+            Test-NeoIPCMetadataDomainExcluded -Type 'options' -Object ([ordered]@{ optionSet = [ordered]@{ id = 'osAsaScore1' } }) -DomainSetIds $ids | Should -BeFalse
+            Test-NeoIPCMetadataDomainExcluded -Type 'dataElements' -Object ([ordered]@{ code = 'X' }) -DomainSetIds $ids | Should -BeFalse
+        }
+    }
+
     Describe 'CSV file I/O (RFC 4180 + UTF-8/no-BOM/LF)' {
         It 'round-trips cells with comma, quote, embedded newline, and leading whitespace' {
             $cols = @('id', 'name', 'description')
@@ -1009,59 +1071,73 @@ InModuleScope 'NeoIPC-Tools' {
         }
     }
 
-    Describe 'Authored org-unit compilation (code-keyed -> UID-keyed)' {
+    Describe 'Authored org-unit reading (UID-keyed directory -> objects)' {
         BeforeAll {
-            $script:ouCommon = Join-Path $TestDrive 'ou-common.csv'
-            $script:ouPlay = Join-Path $TestDrive 'ou-play.csv'
-            @('code,name,shortName,openingDate,parent_code',
-              'ROOT,Root,Root,2023-01-01,',
-              'CtryA,Country A,CtryA,2023-01-01,ROOT') | Set-Content -LiteralPath $script:ouCommon -Encoding utf8
-            @('code,name,shortName,openingDate,parent_code',
-              'CtryA_H,Hospital A,Hosp A,2023-01-01,CtryA',
-              'CtryA_H_D,Dept A,Dept A,2023-01-01,CtryA_H') | Set-Content -LiteralPath $script:ouPlay -Encoding utf8
+            $script:ouCommon = Join-Path $TestDrive 'common-ou.csv'
+            $script:ouPlay = Join-Path $TestDrive 'play-ou.csv'
+            @('id,code,name,shortName,openingDate,closedDate,level,parent,image,sharing',
+              'ouROOT00001,ROOT,Root,Root,2023-01-01,,1,,,',
+              'ouCtryA0001,CtryA,Country A,CtryA,2023-01-01,,2,ouROOT00001,,') | Set-Content -LiteralPath $script:ouCommon -Encoding utf8
+            @('id,code,name,shortName,openingDate,closedDate,level,parent,image,sharing',
+              'ouCtryAH001,CtryA_TEST,Hospital A,Hosp A,2023-01-01,,3,ouCtryA0001,,',
+              'ouCtryAHD01,CtryA_TEST_TEST,Dept A,Dept A,2023-01-01,,4,ouCtryAH001,,') | Set-Content -LiteralPath $script:ouPlay -Encoding utf8
         }
-        It 'mints deterministic UIDs from code, resolves parent_code across files, and computes tree depth as level' {
-            $ous = ConvertFrom-NeoIPCAuthoredOrgUnitCsv -Path $script:ouCommon, $script:ouPlay
+        It 'reads UID-keyed CSVs across files, preserving committed ids, level, and parent refs' {
+            $ous = Read-NeoIPCAuthoredOrgUnit -Path $script:ouCommon, $script:ouPlay
             $ous.Count | Should -Be 4
             $byCode = @{}; $ous | ForEach-Object { $byCode[$_.code] = $_ }
-            $byCode['ROOT'].level | Should -Be 1
-            $byCode['ROOT'].Contains('parent') | Should -BeFalse           # a root has no parent ref
+            $byCode['ROOT'].id | Should -BeExactly 'ouROOT00001'              # committed UID preserved, not minted
+            $byCode['ROOT'].level | Should -Be 1                              # coerced from the cell string...
+            $byCode['ROOT'].level | Should -BeOfType [long]                   # ...to Int64 (int-class cells parse via [long]::Parse), not a left-over string
+            $byCode['ROOT'].Contains('parent') | Should -BeFalse             # root: empty parent cell -> absent
             $byCode['CtryA'].level | Should -Be 2
-            $byCode['CtryA_H'].level | Should -Be 3                          # parent defined in the OTHER file
-            $byCode['CtryA_H_D'].level | Should -Be 4
-            Test-NeoIPCMetadataUid -Id $byCode['ROOT'].id | Should -BeTrue
-            $byCode['CtryA_H_D']['parent']['id'] | Should -BeExactly $byCode['CtryA_H'].id
-            $byCode['CtryA'].id | Should -BeExactly (New-NeoIPCMetadataUid -Type 'organisationUnits' -NaturalKey 'CtryA')
+            $byCode['CtryA_TEST'].level | Should -Be 3                         # parent defined in the OTHER file
+            $byCode['CtryA_TEST_TEST'].level | Should -Be 4
+            $byCode['CtryA_TEST_TEST']['parent']['id'] | Should -BeExactly 'ouCtryAH001'   # parent UID preserved
         }
         It 'produces valid UID-keyed content (each unit round-trips through the converter)' {
-            $ous = ConvertFrom-NeoIPCAuthoredOrgUnitCsv -Path $script:ouCommon, $script:ouPlay
+            $ous = Read-NeoIPCAuthoredOrgUnit -Path $script:ouCommon, $script:ouPlay
             foreach ($o in $ous) {
                 $r = Get-RowRoundTrip 'organisationUnits' $o
                 $r.Equal | Should -BeTrue -Because ($r.A + ' vs ' + $r.B)
             }
         }
-        It 'throws on an unknown parent_code' {
-            $bad = Join-Path $TestDrive 'ou-bad.csv'
-            @('code,name,shortName,openingDate,parent_code', 'X,X,X,2023-01-01,NOPE') | Set-Content -LiteralPath $bad -Encoding utf8
-            { ConvertFrom-NeoIPCAuthoredOrgUnitCsv -Path $bad } | Should -Throw '*unknown parent_code*'
+        It 'throws on a missing file' {
+            { Read-NeoIPCAuthoredOrgUnit -Path (Join-Path $TestDrive 'nope.csv') } | Should -Throw '*Org-unit CSV not found*'
         }
-        It 'throws on a duplicate code' {
-            $dup = Join-Path $TestDrive 'ou-dup.csv'
-            @('code,name,shortName,openingDate,parent_code', 'D,D,D,2023-01-01,', 'D,D2,D2,2023-01-01,') | Set-Content -LiteralPath $dup -Encoding utf8
-            { ConvertFrom-NeoIPCAuthoredOrgUnitCsv -Path $dup } | Should -Throw '*Duplicate*'
+        It 'throws on a duplicate org-unit code across files (would clobber membership / assignment resolution)' {
+            $a = Join-Path $TestDrive 'dupcode-a.csv'
+            $b = Join-Path $TestDrive 'dupcode-b.csv'
+            @('id,code,name,shortName,openingDate,closedDate,level,parent,image,sharing', 'ouDupAAAAA1,DUP,Dup A,Dup A,2023-01-01,,2,,,') | Set-Content -LiteralPath $a -Encoding utf8
+            @('id,code,name,shortName,openingDate,closedDate,level,parent,image,sharing', 'ouDupBBBBB2,DUP,Dup B,Dup B,2023-01-01,,2,,,') | Set-Content -LiteralPath $b -Encoding utf8
+            { Read-NeoIPCAuthoredOrgUnit -Path $a, $b } | Should -Throw "*Duplicate authored org-unit code 'DUP'*"
         }
-        It 'throws on an empty code' {
-            $empty = Join-Path $TestDrive 'ou-empty.csv'
-            @('code,name,shortName,openingDate,parent_code', ',Nameless,N,2023-01-01,') | Set-Content -LiteralPath $empty -Encoding utf8
-            { ConvertFrom-NeoIPCAuthoredOrgUnitCsv -Path $empty } | Should -Throw '*empty code*'
+        It 'throws on a duplicate org-unit UID across files (would collide at idScheme=UID import)' {
+            $a = Join-Path $TestDrive 'dupid-a.csv'
+            $b = Join-Path $TestDrive 'dupid-b.csv'
+            @('id,code,name,shortName,openingDate,closedDate,level,parent,image,sharing', 'ouSameIDAA1,CODEA,A,A,2023-01-01,,2,,,') | Set-Content -LiteralPath $a -Encoding utf8
+            @('id,code,name,shortName,openingDate,closedDate,level,parent,image,sharing', 'ouSameIDAA1,CODEB,B,B,2023-01-01,,2,,,') | Set-Content -LiteralPath $b -Encoding utf8
+            { Read-NeoIPCAuthoredOrgUnit -Path $a, $b } | Should -Throw '*Duplicate authored org-unit UID*'
         }
-        It 'throws on a blank shortName or openingDate (DHIS2 not-null fields the round-trip test cannot catch)' {
-            $noShort = Join-Path $TestDrive 'ou-noshort.csv'
-            @('code,name,shortName,openingDate,parent_code', 'R,Root,,2023-01-01,') | Set-Content -LiteralPath $noShort -Encoding utf8
-            { ConvertFrom-NeoIPCAuthoredOrgUnitCsv -Path $noShort } | Should -Throw '*non-empty shortName*'
-            $noDate = Join-Path $TestDrive 'ou-nodate.csv'
-            @('code,name,shortName,openingDate,parent_code', 'R,Root,Root,,') | Set-Content -LiteralPath $noDate -Encoding utf8
-            { ConvertFrom-NeoIPCAuthoredOrgUnitCsv -Path $noDate } | Should -Throw '*non-empty openingDate*'
+        It 'throws on a malformed org-unit UID (a blank/invalid id would otherwise slip past the assembly collision guard)' {
+            $bad = Join-Path $TestDrive 'badid-ou.csv'
+            @('id,code,name,shortName,openingDate,closedDate,level,parent,image,sharing', 'not-a-uid,CODEX,X,X,2023-01-01,,2,,,') | Set-Content -LiteralPath $bad -Encoding utf8
+            { Read-NeoIPCAuthoredOrgUnit -Path $bad } | Should -Throw '*invalid UID*'
+        }
+        It 'throws on a malformed parent UID' {
+            $bad = Join-Path $TestDrive 'badparent-ou.csv'
+            @('id,code,name,shortName,openingDate,closedDate,level,parent,image,sharing', 'ouChildAAA1,CHILD,C,C,2023-01-01,,2,badparentX,,') | Set-Content -LiteralPath $bad -Encoding utf8
+            { Read-NeoIPCAuthoredOrgUnit -Path $bad } | Should -Throw '*invalid parent UID*'
+        }
+        It 'throws on a parent UID that is well-formed but resolves to no org unit in the set (dangling parent)' {
+            $bad = Join-Path $TestDrive 'danglingparent-ou.csv'
+            @('id,code,name,shortName,openingDate,closedDate,level,parent,image,sharing', 'ouChildAAA1,CHILD,Child,Child,2023-01-01,,2,ouNoSuchAA9,,') | Set-Content -LiteralPath $bad -Encoding utf8
+            { Read-NeoIPCAuthoredOrgUnit -Path $bad } | Should -Throw '*unknown parent UID*'
+        }
+        It 'throws on a blank DHIS2 not-null field (name / shortName / openingDate)' {
+            $bad = Join-Path $TestDrive 'noname-ou.csv'
+            @('id,code,name,shortName,openingDate,closedDate,level,parent,image,sharing', 'ouNoNameAA1,NONAME,,Short,2023-01-01,,2,,,') | Set-Content -LiteralPath $bad -Encoding utf8
+            { Read-NeoIPCAuthoredOrgUnit -Path $bad } | Should -Throw '*non-empty name*'
         }
     }
 
@@ -1098,6 +1174,25 @@ InModuleScope 'NeoIPC-Tools' {
             $d.dataViewOrganisationUnits[0].id | Should -BeExactly 'ouDeptA0001'
             $d.teiSearchOrganisationUnits[0].id | Should -BeExactly 'ouDeptA0001'
             $d.Contains('userGroups') | Should -BeFalse                # membership is group-side (group.users[]), not on the user
+        }
+        It 'preserves a committed UID from a UID-keyed users.csv (instead of minting)' {
+            $uidUsers = Join-Path $TestDrive 'users-uid.csv'
+            @('id,username,firstName,surname', 'uPreserved1,play.a.1,Play,A One') | Set-Content -LiteralPath $uidUsers -Encoding utf8
+            $ur = Join-Path $TestDrive 'ur-uid.csv'
+            @('username,role', 'play.a.1,Base') | Set-Content -LiteralPath $ur -Encoding utf8
+            $uo = Join-Path $TestDrive 'uo-uid.csv'
+            @('username,organisationUnit', 'play.a.1,DeptA') | Set-Content -LiteralPath $uo -Encoding utf8
+            $u = ConvertFrom-NeoIPCAuthoredUserCsv -UserPath $uidUsers -RoleAssignmentPath $ur -OrgUnitAssignmentPath $uo -RoleUid $script:roleUid -OrgUnitUid $script:ouUid
+            $u[0].id | Should -BeExactly 'uPreserved1'
+        }
+        It 'falls back to a deterministic mint when the row id is present but not a valid UID' {
+            $badId = Join-Path $TestDrive 'users-badid.csv'
+            @('id,username,firstName,surname', 'not-a-uid,play.a.1,Play,A One') | Set-Content -LiteralPath $badId -Encoding utf8
+            $ur = Join-Path $TestDrive 'ur-badid.csv'; @('username,role', 'play.a.1,Base') | Set-Content -LiteralPath $ur -Encoding utf8
+            $uo = Join-Path $TestDrive 'uo-badid.csv'; @('username,organisationUnit', 'play.a.1,DeptA') | Set-Content -LiteralPath $uo -Encoding utf8
+            $u = ConvertFrom-NeoIPCAuthoredUserCsv -UserPath $badId -RoleAssignmentPath $ur -OrgUnitAssignmentPath $uo -RoleUid $script:roleUid -OrgUnitUid $script:ouUid
+            Test-NeoIPCMetadataUid -Id $u[0].id | Should -BeTrue                                       # not the malformed 'not-a-uid'
+            $u[0].id | Should -BeExactly (New-NeoIPCMetadataUid -Type 'users' -NaturalKey 'play.a.1')   # minted from the username
         }
         It 'throws on an unknown role' {
             $bad = Join-Path $TestDrive 'ur-badrole.csv'
@@ -1143,13 +1238,13 @@ InModuleScope 'NeoIPC-Tools' {
         BeforeAll {
             # A minimal hierarchy exercising all three structural identity groups + the _TEST/_TEST_TEST split.
             $script:gmOu = Join-Path $TestDrive 'gm-ou.csv'
-            @('code,name,shortName,openingDate,parent_code',
-              'NEOIPC,Root,Root,2023-01-01,',
-              'CtryA,Country A,CtryA,2023-01-01,NEOIPC',
-              'CtryB,Country B,CtryB,2023-01-01,NEOIPC',
-              'CtryA_TEST,Hospital A,Hosp A,2023-01-01,CtryA',
-              'CtryA_TEST_TEST,Dept A,Dept A,2023-01-01,CtryA_TEST') | Set-Content -LiteralPath $script:gmOu -Encoding utf8
-            $script:gmOrgUnits = ConvertFrom-NeoIPCAuthoredOrgUnitCsv -Path $script:gmOu
+            @('id,code,name,shortName,openingDate,closedDate,level,parent,image,sharing',
+              'ouNEOIPC001,NEOIPC,Root,Root,2023-01-01,,1,,,',
+              'ouCtryA0001,CtryA,Country A,CtryA,2023-01-01,,2,ouNEOIPC001,,',
+              'ouCtryB0001,CtryB,Country B,CtryB,2023-01-01,,2,ouNEOIPC001,,',
+              'ouCtryAH001,CtryA_TEST,Hospital A,Hosp A,2023-01-01,,3,ouCtryA0001,,',
+              'ouCtryAHD01,CtryA_TEST_TEST,Dept A,Dept A,2023-01-01,,4,ouCtryAH001,,') | Set-Content -LiteralPath $script:gmOu -Encoding utf8
+            $script:gmOrgUnits = Read-NeoIPCAuthoredOrgUnit -Path $script:gmOu
             $script:gmIdByCode = @{}; $script:gmOrgUnits | ForEach-Object { $script:gmIdByCode[$_.code] = $_.id }
 
             # Synthetic users (via the user compiler) for the user-group membership map.
@@ -1292,6 +1387,94 @@ InModuleScope 'NeoIPC-Tools' {
             $config = [ordered]@{ programs = @([ordered]@{ id = 'prog0000001'; code = 'NEOIPC_CORE'; name = 'Core' }) }   # no organisationUnitGroups type at all
             $mem = [ordered]@{ NEO_DEPARTMENT = @('ou00000003') }
             { Join-NeoIPCMetadataPackage -Config $config -OrgUnit $script:asmOus -User $script:asmUsers -OrgUnitGroupMembership $mem -UserGroupMembership ([ordered]@{}) } | Should -Throw '*not present*'
+        }
+    }
+
+    Describe 'New-NeoIPCMetadataPackage (public assembler: variant switch + directory read)' {
+        BeforeAll {
+            # Minimal export: the closure seed (NEOIPC_CORE program) + the non-closure DEFINITIONS the assembler
+            # pulls — userRoles (for the role-name -> UID map) and the three structural org-unit groups that the
+            # derived membership lands on.
+            $export = [ordered]@{
+                programs               = @([ordered]@{ id = 'progNEOIPC1'; code = 'NEOIPC_CORE'; name = 'Core' })
+                userRoles              = @(
+                    [ordered]@{ id = 'roleBase001'; name = 'Base' }
+                    [ordered]@{ id = 'roleData001'; name = 'Data entry' }
+                    [ordered]@{ id = 'roleSuper01'; name = 'Superuser' })
+                organisationUnitGroups = @(
+                    [ordered]@{ id = 'oug0000001'; code = 'HOSPITAL'; name = 'Hospital' }
+                    [ordered]@{ id = 'oug0000002'; code = 'COUNTRY'; name = 'Country' }
+                    [ordered]@{ id = 'oug0000003'; code = 'NEO_DEPARTMENT'; name = 'Neonatology Department' })
+            }
+            $script:asmExportPath = Join-Path $TestDrive 'asm-export.json'
+            [System.IO.File]::WriteAllText($script:asmExportPath, ($export | ConvertTo-Json -Depth 40), [System.Text.UTF8Encoding]::new($false))
+
+            # A minimal canonical directory: common (root + AT country) + play (AT_TEST hospital + AT_TEST_TEST
+            # dept, one user). No org-unit-group / user-group membership files -> exercises the optional-file
+            # (Where-Object Test-Path) guards; the only memberships are the structural COUNTRY/HOSPITAL/NEO_DEPARTMENT
+            # derivation off the codes.
+            $script:asmDir = Join-Path $TestDrive 'asm-mdir'
+            $commonDir = Join-Path $script:asmDir 'common'
+            $playDir = Join-Path $script:asmDir 'play'
+            New-Item -ItemType Directory -Path $commonDir -Force | Out-Null
+            New-Item -ItemType Directory -Path $playDir -Force | Out-Null
+            @('id,code,name,shortName,openingDate,closedDate,level,parent,image,sharing',
+              'ouNEOIPC001,NEOIPC,NeoIPC,NeoIPC,2023-01-01,,1,,,',
+              'ouAT0000001,AT,Austria,Austria,2023-01-01,,2,ouNEOIPC001,,') | Set-Content -LiteralPath (Join-Path $commonDir 'organisationUnits.csv') -Encoding utf8
+            @('id,code,name,shortName,openingDate,closedDate,level,parent,image,sharing',
+              'ouATTEST001,AT_TEST,Hospital,Hospital,2023-01-01,,3,ouAT0000001,,',
+              'ouATTESTT01,AT_TEST_TEST,Dept,Dept,2023-01-01,,4,ouATTEST001,,') | Set-Content -LiteralPath (Join-Path $playDir 'organisationUnits.csv') -Encoding utf8
+            @('id,username,firstName,surname', 'usrPlayAT01,play.at.user1,Play,AT User 1') | Set-Content -LiteralPath (Join-Path $playDir 'users.csv') -Encoding utf8
+            @('username,role', 'play.at.user1,Base', 'play.at.user1,Data entry') | Set-Content -LiteralPath (Join-Path $playDir 'userRoleAssignments.csv') -Encoding utf8
+            @('username,organisationUnit', 'play.at.user1,AT_TEST_TEST') | Set-Content -LiteralPath (Join-Path $playDir 'userOrgUnitAssignments.csv') -Encoding utf8
+        }
+        It 'assembles the play variant from common + play, preserving committed UIDs and resolving role names' {
+            $res = New-NeoIPCMetadataPackage -ExportPath $script:asmExportPath -MetadataDirectory $script:asmDir -PassThru -WarningAction SilentlyContinue
+            $res.OrgUnitCount | Should -Be 4          # 2 common + 2 play
+            $res.UserCount | Should -Be 1
+            $pkg = $res.Package
+            @($pkg['organisationUnits']).Count | Should -Be 4
+            @($pkg['users']).Count | Should -Be 1
+            $pkg['users'][0]['id'] | Should -BeExactly 'usrPlayAT01'                                       # committed UID preserved
+            @($pkg['users'][0]['userRoles'] | ForEach-Object { [string]$_['id'] } | Sort-Object) | Should -Be @('roleBase001', 'roleData001')   # role NAME -> export UID
+            ($pkg['organisationUnitGroups'] | Where-Object { $_.code -eq 'COUNTRY' }).organisationUnits[0].id | Should -BeExactly 'ouAT0000001'
+            ($pkg['organisationUnitGroups'] | Where-Object { $_.code -eq 'HOSPITAL' }).organisationUnits[0].id | Should -BeExactly 'ouATTEST001'
+            ($pkg['organisationUnitGroups'] | Where-Object { $_.code -eq 'NEO_DEPARTMENT' }).organisationUnits[0].id | Should -BeExactly 'ouATTESTT01'
+        }
+        It 'emits JSON (no -PassThru) carrying the assembled org units' {
+            $json = New-NeoIPCMetadataPackage -ExportPath $script:asmExportPath -MetadataDirectory $script:asmDir -WarningAction SilentlyContinue
+            $json | Should -Match '"organisationUnits"'
+        }
+        It '-Variant production requires -OverlayPath' {
+            { New-NeoIPCMetadataPackage -ExportPath $script:asmExportPath -MetadataDirectory $script:asmDir -Variant production -WarningAction SilentlyContinue } | Should -Throw '*requires -OverlayPath*'
+        }
+        It '-Variant production throws when the OverlayPath does not exist' {
+            { New-NeoIPCMetadataPackage -ExportPath $script:asmExportPath -MetadataDirectory $script:asmDir -Variant production -OverlayPath (Join-Path $TestDrive 'no-such-overlay') -WarningAction SilentlyContinue } | Should -Throw '*Variant overlay directory not found*'
+        }
+        It '-Variant production reads the supplied overlay directory instead of play/' {
+            # An overlay with a DIFFERENT user set proves the overlay (not play/) is the variant source.
+            $overlay = Join-Path $TestDrive 'asm-prod-overlay'
+            New-Item -ItemType Directory -Path $overlay -Force | Out-Null
+            Copy-Item (Join-Path $playDir 'organisationUnits.csv') (Join-Path $overlay 'organisationUnits.csv')
+            @('id,username,firstName,surname', 'usrProdX0001,prod.x.1,Prod,X One', 'usrProdX0002,prod.x.2,Prod,X Two') | Set-Content -LiteralPath (Join-Path $overlay 'users.csv') -Encoding utf8
+            @('username,role', 'prod.x.1,Base', 'prod.x.2,Base') | Set-Content -LiteralPath (Join-Path $overlay 'userRoleAssignments.csv') -Encoding utf8
+            @('username,organisationUnit', 'prod.x.1,AT_TEST_TEST', 'prod.x.2,AT_TEST_TEST') | Set-Content -LiteralPath (Join-Path $overlay 'userOrgUnitAssignments.csv') -Encoding utf8
+            $res = New-NeoIPCMetadataPackage -ExportPath $script:asmExportPath -MetadataDirectory $script:asmDir -Variant production -OverlayPath $overlay -PassThru -WarningAction SilentlyContinue
+            $res.UserCount | Should -Be 2                                                                  # the overlay's users, not play's single user
+            @($res.Package['users'] | ForEach-Object { [string]$_['username'] } | Sort-Object) | Should -Be @('prod.x.1', 'prod.x.2')
+        }
+        It '-Variant play ignores a supplied -OverlayPath (reads play/)' {
+            # A nonexistent overlay path proves play never touches OverlayPath (no existence check, content unused).
+            $res = New-NeoIPCMetadataPackage -ExportPath $script:asmExportPath -MetadataDirectory $script:asmDir -Variant play -OverlayPath (Join-Path $TestDrive 'nonexistent-overlay-ignored') -PassThru -WarningAction SilentlyContinue
+            $res.UserCount | Should -Be 1                                                                  # play's single user; overlay ignored
+        }
+        It 'throws when the metadata directory is missing' {
+            { New-NeoIPCMetadataPackage -ExportPath $script:asmExportPath -MetadataDirectory (Join-Path $TestDrive 'no-such-dir') -WarningAction SilentlyContinue } | Should -Throw '*Metadata directory not found*'
+        }
+        It 'throws when the common/ subdirectory is missing' {
+            $bare = Join-Path $TestDrive 'asm-bare'
+            New-Item -ItemType Directory -Path (Join-Path $bare 'play') -Force | Out-Null
+            { New-NeoIPCMetadataPackage -ExportPath $script:asmExportPath -MetadataDirectory $bare -WarningAction SilentlyContinue } | Should -Throw '*Common metadata directory not found*'
         }
     }
 }

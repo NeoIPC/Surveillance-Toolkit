@@ -41,6 +41,18 @@ $script:NeoIPCMetadataExcludedTypes = @(
     'categoryOptionCombos'         # server-generated (regenerate-on-import)
 )
 
+# Option SETS whose member options are domain-authored elsewhere — generated from a richer canonical source, not
+# hand-maintained in the per-type CSV directory: NEOIPC_PATHOGENS from infectious-agents/NeoIPC-Infectious-Agents.yaml
+# (3269 options) and NEOIPC_ANTIMICROBIAL_SUBSTANCES from antibiotics/NeoIPC-Antibiotics.csv (242) — together
+# 3511/3557 of all options. The set definitions AND their member options are dropped from the materialised
+# directory (ConvertFrom-NeoIPCMetadataPackage) and ignored by the comparator (Compare-NeoIPCMetadataCore), so the
+# round-trip gate does not flag their absence. They are NOT dropped from the closure: New-NeoIPCMetadataPackage
+# builds the importable package from the export's closure, which carries them, so the import stays complete — the
+# closure export is the splice source for these sets. Keyed by CODE (stable across instances); the per-option
+# cascade resolves these codes to their optionSet UIDs at runtime.
+$script:NeoIPCMetadataDomainOptionSetCodes = [System.Collections.Generic.HashSet[string]]::new(
+    [string[]]@('NEOIPC_PATHOGENS', 'NEOIPC_ANTIMICROBIAL_SUBSTANCES'), [System.StringComparer]::Ordinal)
+
 # NON-CLOSURE types — first-class NeoIPC metadata the dependency closure cannot reach STRUCTURALLY, packaged
 # as deployment config with their real UIDs. They are converted, compared, and round-tripped like any other
 # type, but the closure (index + prune) and the owned-id / UID-regeneration scan skip them. Distinct from

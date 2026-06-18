@@ -1,0 +1,8 @@
+id,code,name,description,dataDimension,optionSet,optionGroups,sharing
+D1N8iz0Grqv,ATC5,ATC-5 Groups,,True,JE7ECBWKhWD,UnE76zcInvc IOGZTRxWXsr mOmiRCAgvue TdX0hsR4MSp NoZ4Hj3EEs2 dbaH76JauTC iFdzM9V7upR GfxNqaPezMZ aFHs5iApBmE GDpqfO857hI qfk4pO7gJ5M zARSMdyFU6C Ft6usbVLQxE nh6NKfB4DeT dJ30FD4K1Xw GfT6BUjHkv8 YaPyL7fWzvA ga2InMWlLxn MUSUJKa9npP OSPWgCvNfsO iV82cliCXMK x7cA9Ie15Nr A74VyMFko4u iDNrR6N4GpZ lWK62pL18s0 qHfynvPEyUS kJV1THN7Qou ftSPbuQGokT mEj1Bsgn7hc J4Ce5Tap4E5 Wvhsh2hNAmm uD7DCbZfUzs gYZHNgL1LMn RQPagZ3Q090,"{""public"":""rw------""}"
+pvQ5WMrK25p,WHO_AWARE,AWaRe Groups,"AWaRe is the WHO classification of antibiotics introduced by WHO as part of the 2017 Model List of Essential Medicines.
+In the AWaRe classification, there are three categories of antibiotics:
+• Access antibiotics that have a narrow spectrum of activity and a good safety profile in terms of side-effects.
+• Watch antibiotics that are broader-spectrum antibiotics and are recommended as first-choice options for patients with more severe clinical presentations or for infections where the causative pathogens are more likely to be resistant to Access antibiotics.
+• Reserve antibiotics that are last-choice antibiotics used to treat multidrug-resistant infections.
+This classification can be used to give an indirect indication of the appropriateness of antibiotic use. The World Health Organization (WHO) has defined a target that at least 70% of global antibiotic consumption at the national level should be from the Access group.",True,JE7ECBWKhWD,DwIHnRhQn2Z v2GD6NFtYce O8M678OescV,"{""public"":""rw------""}"

@@ -377,6 +377,46 @@ function ConvertTo-NeoIPCMetadataCanonical {
     return $Object
 }
 
+function Get-NeoIPCMetadataDomainOptionSetIds {
+    # Resolve the domain-authored optionSet CODES ($NeoIPCMetadataDomainOptionSetCodes) to their UIDs within a
+    # package. Those sets' member options live in a richer canonical source (the infectious-agents YAML / the
+    # antibiotics CSV), not the directory, so both the directory emit and the comparator drop the sets AND every
+    # option whose optionSet is one of them. Returns a HashSet of optionSet UIDs (empty when the package has none).
+    [CmdletBinding()]
+    [OutputType([System.Collections.Generic.HashSet[string]])]
+    param([Parameter(Mandatory)]$Package)
+    $ids = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::Ordinal)
+    foreach ($os in @($Package['optionSets'])) {
+        if ($os -is [System.Collections.IDictionary] -and
+            $script:NeoIPCMetadataDomainOptionSetCodes.Contains([string]$os['code'])) {
+            [void]$ids.Add([string]$os['id'])
+        }
+    }
+    # Unary comma: a HashSet is IEnumerable, so `return $ids` STREAMS its elements — an empty set then collapses
+    # to $null on capture (breaking the downstream Mandatory [HashSet] param) and a 1-element set to a scalar.
+    # `,` returns the set itself as a single object at any size (same idiom as the array returns above).
+    return , $ids
+}
+
+function Test-NeoIPCMetadataDomainExcluded {
+    # True when an object is domain-authored option content excluded from BOTH the directory and the comparator: a
+    # domain optionSet (code in $NeoIPCMetadataDomainOptionSetCodes) or an option belonging to one (its optionSet
+    # UID in $DomainSetIds). The single exclusion predicate shared by the emit and the comparator so they agree.
+    [CmdletBinding()]
+    [OutputType([bool])]
+    param(
+        [Parameter(Mandatory)][string]$Type,
+        [Parameter(Mandatory)]$Object,
+        [Parameter(Mandatory)][AllowEmptyCollection()][System.Collections.Generic.HashSet[string]]$DomainSetIds
+    )
+    if ($Type -eq 'optionSets') { return $script:NeoIPCMetadataDomainOptionSetCodes.Contains([string]$Object['code']) }
+    if ($Type -eq 'options') {
+        $os = $Object['optionSet']
+        return ($os -is [System.Collections.IDictionary] -and $DomainSetIds.Contains([string]$os['id']))
+    }
+    return $false
+}
+
 function ConvertFrom-NeoIPCMetadataPackage {
     # A parsed DHIS2 package (IDictionary: collection -> object[]) -> per-type flat rows
     # ([ordered] type -> List[row]). Extracts NestedOnly children out of their parents first
@@ -405,6 +445,7 @@ function ConvertFrom-NeoIPCMetadataPackage {
         $extracted[$type] = $list
     }
 
+    $domainSetIds = Get-NeoIPCMetadataDomainOptionSetIds -Package $Package
     $result = [ordered]@{}
     foreach ($type in $script:NeoIPCMetadataTypeMaps.Keys) {
         $map = $script:NeoIPCMetadataTypeMaps[$type]
@@ -414,6 +455,7 @@ function ConvertFrom-NeoIPCMetadataPackage {
         foreach ($obj in $objects) {
             if ($obj -isnot [System.Collections.IDictionary]) { continue }
             if ($script:NeoIPCMetadataDefaultUids -contains [string]$obj['id']) { continue }
+            if (Test-NeoIPCMetadataDomainExcluded -Type $type -Object $obj -DomainSetIds $domainSetIds) { continue }
             $row = ConvertTo-NeoIPCMetadataRow -Type $type -Object $obj
             if ($map.Nesting -eq 'NestedOnly') { $row['__fk'] = [string]$obj['__fk'] }
             $rows.Add($row)
@@ -540,14 +582,28 @@ function Compare-NeoIPCMetadataCore {
     param([Parameter(Mandatory)]$Reference, [Parameter(Mandatory)]$Difference)
     $diffs = [System.Collections.Generic.List[object]]::new()
     $types = @(@($Reference.Keys) + @($Difference.Keys) | Select-Object -Unique)
+    # Domain-authored option content (the NEOIPC_PATHOGENS / NEOIPC_ANTIMICROBIAL_SUBSTANCES sets + their options)
+    # is excluded from the directory, so a directory-derived package will not carry it; resolve the set UIDs from
+    # whichever side has them (union) and skip both sets and their options on both sides, exactly as for excluded
+    # types — their absence is a known, intentional non-difference, not a Removed/Added/Changed.
+    $domainSetIds = Get-NeoIPCMetadataDomainOptionSetIds -Package $Reference
+    $domainSetIds.UnionWith((Get-NeoIPCMetadataDomainOptionSetIds -Package $Difference))
     foreach ($type in $types) {
         if (-not $script:NeoIPCMetadataTypeMaps.Contains($type)) { continue }                  # out-of-scope top-level key
         if ($script:NeoIPCMetadataTypeMaps[$type].Nesting -eq 'NestedOnly') { continue }        # compared via its parent
         if ($script:NeoIPCMetadataExcludedTypes -contains $type -or $script:NeoIPCMetadataDeferredTypes -contains $type) { continue }
         $refById = @{}
-        foreach ($o in @($Reference[$type])) { if ($o -is [System.Collections.IDictionary] -and $script:NeoIPCMetadataDefaultUids -notcontains [string]$o['id']) { $refById[[string]$o['id']] = (Remove-NeoIPCMetadataNoise -Object $o) } }
+        foreach ($o in @($Reference[$type])) {
+            if ($o -isnot [System.Collections.IDictionary] -or $script:NeoIPCMetadataDefaultUids -contains [string]$o['id']) { continue }
+            if (Test-NeoIPCMetadataDomainExcluded -Type $type -Object $o -DomainSetIds $domainSetIds) { continue }
+            $refById[[string]$o['id']] = (Remove-NeoIPCMetadataNoise -Object $o)
+        }
         $difById = @{}
-        foreach ($o in @($Difference[$type])) { if ($o -is [System.Collections.IDictionary] -and $script:NeoIPCMetadataDefaultUids -notcontains [string]$o['id']) { $difById[[string]$o['id']] = (Remove-NeoIPCMetadataNoise -Object $o) } }
+        foreach ($o in @($Difference[$type])) {
+            if ($o -isnot [System.Collections.IDictionary] -or $script:NeoIPCMetadataDefaultUids -contains [string]$o['id']) { continue }
+            if (Test-NeoIPCMetadataDomainExcluded -Type $type -Object $o -DomainSetIds $domainSetIds) { continue }
+            $difById[[string]$o['id']] = (Remove-NeoIPCMetadataNoise -Object $o)
+        }
         foreach ($id in $refById.Keys) { if (-not $difById.ContainsKey($id)) { $diffs.Add([pscustomobject]@{ Type = $type; Id = $id; Kind = 'Removed' }) } }
         foreach ($id in $difById.Keys) { if (-not $refById.ContainsKey($id)) { $diffs.Add([pscustomobject]@{ Type = $type; Id = $id; Kind = 'Added' }) } }
         foreach ($id in $refById.Keys) {
