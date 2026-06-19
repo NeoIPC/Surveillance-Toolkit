@@ -276,12 +276,15 @@ if ($DataFile) {
 # Resolve OutputDir BEFORE changing directory (it's relative to the caller's CWD)
 $outputDirPath = $null
 if ($OutputDir) {
-    $outputDirPath = Resolve-Path -LiteralPath $OutputDir -ErrorAction SilentlyContinue
-    if (-not $outputDirPath) {
-        New-Item -ItemType Directory -Path $OutputDir -Force | Out-Null
-        $outputDirPath = Resolve-Path -LiteralPath $OutputDir
+    # Resolve a relative -OutputDir against the caller's location ($PWD), not .NET's
+    # [Environment]::CurrentDirectory (PowerShell does not keep them in sync). Fall
+    # back to the .NET CWD only when $PWD has no filesystem path (a non-FileSystem
+    # PSDrive). GetFullPath creates nothing (stays -WhatIf-safe); New-Item makes the dir.
+    $base = if ([System.IO.Path]::IsPathFullyQualified($PWD.ProviderPath)) { $PWD.ProviderPath } else { [Environment]::CurrentDirectory }
+    $outputDirPath = [System.IO.Path]::GetFullPath($OutputDir, $base)
+    if (-not (Test-Path -LiteralPath $outputDirPath -PathType Container)) {
+        New-Item -ItemType Directory -Path $outputDirPath -Force | Out-Null
     }
-    $outputDirPath = $outputDirPath.Path
 }
 
 # Resolve ValidationExceptionFile BEFORE changing directory (relative to caller's CWD)

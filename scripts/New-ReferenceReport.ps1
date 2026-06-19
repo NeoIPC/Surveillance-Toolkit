@@ -150,17 +150,19 @@ $scriptTimestamp = (Get-Date -AsUTC).ToString("yyyy-MM-dd_HHmmss'Z'")
 $repoRoot = Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..')
 $reportDirPath = Resolve-Path -LiteralPath (Join-Path $repoRoot 'reports/Reference-Report')
 
-# Resolve OutputDir (relative to caller's CWD); fall back to the report's _output
-$effectiveOutputDir = if ($OutputDir) { $OutputDir } else { Join-Path $reportDirPath '_output' }
-$outputDirPath = Resolve-Path -LiteralPath $effectiveOutputDir -ErrorAction SilentlyContinue
-if (-not $outputDirPath) {
-    # Resolve to absolute path without requiring the directory to exist.
-    # New-Item respects -WhatIf and won't create it during dry runs, so
-    # Resolve-Path would fail. The directory is created on first write by
-    # Set-Content / ConvertTo-Json inside the build report function.
-    $outputDirPath = [System.IO.Path]::GetFullPath($effectiveOutputDir)
+# Resolve OutputDir relative to the caller's location ($PWD); fall back to the report's _output.
+if ($OutputDir) {
+    # Resolve a relative -OutputDir against the caller's location ($PWD), not .NET's
+    # [Environment]::CurrentDirectory (PowerShell does not keep them in sync). Fall
+    # back to the .NET CWD only when $PWD has no filesystem path (a non-FileSystem
+    # PSDrive). GetFullPath creates nothing (stays -WhatIf-safe); New-Item makes the dir.
+    $base = if ([System.IO.Path]::IsPathFullyQualified($PWD.ProviderPath)) { $PWD.ProviderPath } else { [Environment]::CurrentDirectory }
+    $outputDirPath = [System.IO.Path]::GetFullPath($OutputDir, $base)
+    if (-not (Test-Path -LiteralPath $outputDirPath -PathType Container)) {
+        New-Item -ItemType Directory -Path $outputDirPath -Force | Out-Null
+    }
 } else {
-    $outputDirPath = $outputDirPath.Path
+    $outputDirPath = Join-Path $reportDirPath '_output'
 }
 
 $buildReportFilePath = Join-Path $outputDirPath "${scriptTimestamp}_NeoIPC-Surveillance-Reference-Report-Build.json"
