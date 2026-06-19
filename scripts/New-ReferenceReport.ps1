@@ -158,7 +158,7 @@ if ($OutputDir) {
     # PSDrive). GetFullPath creates nothing (stays -WhatIf-safe); New-Item makes the dir.
     $base = if ([System.IO.Path]::IsPathFullyQualified($PWD.ProviderPath)) { $PWD.ProviderPath } else { [Environment]::CurrentDirectory }
     $outputDirPath = [System.IO.Path]::GetFullPath($OutputDir, $base)
-    if (-not (Test-Path -LiteralPath $outputDirPath)) {
+    if (-not (Test-Path -LiteralPath $outputDirPath -PathType Container)) {
         New-Item -ItemType Directory -Path $outputDirPath -Force | Out-Null
     }
 } else {
