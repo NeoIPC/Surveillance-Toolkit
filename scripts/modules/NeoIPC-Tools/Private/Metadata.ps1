@@ -417,9 +417,58 @@ function Test-NeoIPCMetadataDomainExcluded {
     return $false
 }
 
+function Get-NeoIPCMetadataRowSortKey {
+    # Deterministic, human-reviewable row-sort key for a per-type CSV. Row order never affects the
+    # round-trip (objects match by id; nested collections are sorted/positional by the normalizer), so the
+    # rows are free to be ordered for review. The key groups nested-only rows under their parent (__fk) and
+    # options under their optionSet, then orders by sortOrder (zero-padded so 10 sorts after 2) for the types
+    # that carry one, then by the natural key (code, else name), and finally by id as a guaranteed-unique,
+    # never-empty tiebreaker. Parts are joined with the ASCII unit separator (U+001F — cannot occur in a UID /
+    # code / DHIS2 name) and the caller compares the keys ORDINALLY, so the emitted order is identical across
+    # locales and machines (matching the module's other ordinal sorts).
+    [CmdletBinding()]
+    [OutputType([string])]
+    param([Parameter(Mandatory)][string]$Type, [Parameter(Mandatory)]$Row)
+    $map = $script:NeoIPCMetadataTypeMaps[$Type]
+    $parts = [System.Collections.Generic.List[string]]::new()
+    if ($map -and $map.Nesting -eq 'NestedOnly') { $parts.Add([string]$Row['__fk']) }
+    elseif ($Type -eq 'options') { $parts.Add([string]$Row['optionSet']) }
+    if ($map -and $map.Properties.Contains('sortOrder')) {
+        $n = 0
+        $so = [string]$Row['sortOrder']
+        if ([int]::TryParse($so, [ref]$n)) { $parts.Add($n.ToString('D9', [cultureinfo]::InvariantCulture)) }
+        else { $parts.Add($so) }
+    }
+    if ($map -and $map.Properties.Contains('code') -and -not [string]::IsNullOrEmpty([string]$Row['code'])) { $parts.Add([string]$Row['code']) }
+    elseif ($map -and $map.Properties.Contains('name') -and -not [string]::IsNullOrEmpty([string]$Row['name'])) { $parts.Add([string]$Row['name']) }
+    else { $parts.Add('') }
+    $parts.Add([string]$Row['id'])
+    return ($parts -join ([char]0x1f))
+}
+
+function Get-NeoIPCMetadataSortedRowSet {
+    # Reorder a row set by a precomputed, parallel key array — ordinally and deterministically. NOTE: the
+    # 3-arg [System.Array]::Sort(keys, items, comparer) does NOT reorder under PowerShell's overload
+    # resolution (silently a no-op), so the rows are decorated with their key and sorted via
+    # List<object>.Sort with an explicit ordinal Comparison. Every type-map key ends in the unique id, so
+    # there are no ties and the (non-stable) sort is fully determined. Keys and rows must be parallel/equal.
+    [CmdletBinding()]
+    [OutputType([object[]])]
+    param(
+        [Parameter(Mandatory)][AllowEmptyCollection()][object[]]$Row,
+        [Parameter(Mandatory)][AllowEmptyCollection()][string[]]$Key
+    )
+    if ($Row.Count -ne $Key.Count) { throw "Get-NeoIPCMetadataSortedRowSet: row/key length mismatch ($($Row.Count) vs $($Key.Count))." }
+    $decorated = [System.Collections.Generic.List[object]]::new()
+    for ($i = 0; $i -lt $Row.Count; $i++) { $decorated.Add([pscustomobject]@{ K = $Key[$i]; R = $Row[$i] }) }
+    $decorated.Sort([System.Comparison[object]] { param($x, $y) [System.StringComparer]::Ordinal.Compare([string]$x.K, [string]$y.K) })
+    return , [object[]]@($decorated | ForEach-Object { $_.R })
+}
+
 function ConvertFrom-NeoIPCMetadataPackage {
     # A parsed DHIS2 package (IDictionary: collection -> object[]) -> per-type flat rows
-    # ([ordered] type -> List[row]). Extracts NestedOnly children out of their parents first
+    # ([ordered] type -> List[row]), each type's rows ordinally sorted by Get-NeoIPCMetadataRowSortKey for
+    # stable, human-reviewable diffs. Extracts NestedOnly children out of their parents first
     # (mutating the parents to drop the nested array), then converts every object to a row.
     # System-default objects and excluded/deferred types are skipped. MUTATES the input package.
     [CmdletBinding()]
@@ -460,7 +509,12 @@ function ConvertFrom-NeoIPCMetadataPackage {
             if ($map.Nesting -eq 'NestedOnly') { $row['__fk'] = [string]$obj['__fk'] }
             $rows.Add($row)
         }
-        if ($rows.Count -gt 0) { $result[$type] = $rows }
+        if ($rows.Count -gt 0) {
+            # Stable, locale-independent row order for clean diffs (does not affect the id-matched round-trip).
+            $arr = [object[]]$rows.ToArray()
+            $keys = [string[]]@(foreach ($r in $arr) { Get-NeoIPCMetadataRowSortKey -Type $type -Row $r })
+            $result[$type] = Get-NeoIPCMetadataSortedRowSet -Row $arr -Key $keys
+        }
     }
     return $result
 }

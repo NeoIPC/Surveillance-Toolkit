@@ -1,9 +1,9 @@
 id,name,valueType,mandatory,searchable,renderOptionsAsRadio,displayInList,sortOrder,program,trackedEntityAttribute,renderType_DESKTOP,renderType_MOBILE,sharing,__fk
-xZWvlXn7ovt,NeoIPC Core Module NeoIPC Patient Total gestation days,INTEGER_ZERO_OR_POSITIVE,False,True,False,False,4,D8mSSpOpsKj,Qyu9KOWyazL,,,,D8mSSpOpsKj
-AHg6X6pDrsD,NeoIPC Core Module NeoIPC Patient Gestational age,TEXT,False,True,False,True,2,D8mSSpOpsKj,qLGOhTzMVyY,,,,D8mSSpOpsKj
 IJ04pc4dMhL,NeoIPC Core Module NeoIPC Patient Identifier,TEXT,True,True,False,True,1,D8mSSpOpsKj,yQwpowV0o08,,,,D8mSSpOpsKj
-nbuUYDqSBq1,NeoIPC Core Module NeoIPC Patient Multiple birth,TRUE_ONLY,False,True,False,True,7,D8mSSpOpsKj,q2ijTWehrUh,,,,D8mSSpOpsKj
-on7j1vFRFCJ,NeoIPC Core Module NeoIPC Patient Delivery mode,INTEGER_POSITIVE,True,True,False,True,6,D8mSSpOpsKj,r0fqpUF1IF4,HORIZONTAL_RADIOBUTTONS,VERTICAL_RADIOBUTTONS,,D8mSSpOpsKj
-pLuO9G1bSUD,NeoIPC Core Module NeoIPC Patient Infants in birth,INTEGER_POSITIVE,False,True,False,True,5,D8mSSpOpsKj,RWgBBhSiu5U,,,,D8mSSpOpsKj
+AHg6X6pDrsD,NeoIPC Core Module NeoIPC Patient Gestational age,TEXT,False,True,False,True,2,D8mSSpOpsKj,qLGOhTzMVyY,,,,D8mSSpOpsKj
 W7nmjIrsYTm,NeoIPC Core Module NeoIPC Patient Birth weight,INTEGER_POSITIVE,False,True,False,True,3,D8mSSpOpsKj,ZbL9VmLRB6D,,,,D8mSSpOpsKj
+xZWvlXn7ovt,NeoIPC Core Module NeoIPC Patient Total gestation days,INTEGER_ZERO_OR_POSITIVE,False,True,False,False,4,D8mSSpOpsKj,Qyu9KOWyazL,,,,D8mSSpOpsKj
+pLuO9G1bSUD,NeoIPC Core Module NeoIPC Patient Infants in birth,INTEGER_POSITIVE,False,True,False,True,5,D8mSSpOpsKj,RWgBBhSiu5U,,,,D8mSSpOpsKj
+on7j1vFRFCJ,NeoIPC Core Module NeoIPC Patient Delivery mode,INTEGER_POSITIVE,True,True,False,True,6,D8mSSpOpsKj,r0fqpUF1IF4,HORIZONTAL_RADIOBUTTONS,VERTICAL_RADIOBUTTONS,,D8mSSpOpsKj
+nbuUYDqSBq1,NeoIPC Core Module NeoIPC Patient Multiple birth,TRUE_ONLY,False,True,False,True,7,D8mSSpOpsKj,q2ijTWehrUh,,,,D8mSSpOpsKj
 xdNWszRM7Fn,NeoIPC Core Module NeoIPC Patient Sex,LETTER,True,True,False,True,8,D8mSSpOpsKj,E5OMg8BC8be,HORIZONTAL_RADIOBUTTONS,VERTICAL_RADIOBUTTONS,,D8mSSpOpsKj

@@ -10,5 +10,5 @@ R2yCnsqxamL,NEOIPC_SEX_VALUES,NeoIPC Sex values,LETTER,6,Ihs2jWrqDEs eTAosn1t8qb
 pbzarUspFrN,NEOIPC_SSI_TYPE,NeoIPC SSI Type options,INTEGER_POSITIVE,4,NSDhrXLVJVd PiaNKjuZ03R oqEEhudZyj2,"{""public"":""rw------""}"
 knhSB8VaArg,NEOIPC_SURVEILLANCE_END_REASON,NeoIPC Surveillance end reasons,INTEGER_POSITIVE,3,VhEgiaNTYRx nrchCI9sZ8m,"{""public"":""rw------""}"
 GfBMlp6BqeM,NEOIPC_WOUND_CLASSES,NeoIPC Wound classes,INTEGER_POSITIVE,5,EChkHc7YCW4 adrjdOorvSX gaLjjqurQpc wcMOtSVjaFg,"{""public"":""rw------""}"
-KfIEzWRibj7,NEOIPC_YES_NO_NO_FOLLOWUP,"NeoIPC Yes, No, No follow-up",INTEGER,6,NaxxcQjPcLD NggBQpNMQtU hfx449bMjIO,"{""public"":""rw------""}"
 TnE2yuSrqEP,NEOIPC_YES_NO_NOT_TESTED,"NeoIPC Yes, No, Not Tested",INTEGER,6,JrD0mrNVtUV jRXiD9doNPH kXSJ3ogjKaX,"{""public"":""rw------""}"
+KfIEzWRibj7,NEOIPC_YES_NO_NO_FOLLOWUP,"NeoIPC Yes, No, No follow-up",INTEGER,6,NaxxcQjPcLD NggBQpNMQtU hfx449bMjIO,"{""public"":""rw------""}"

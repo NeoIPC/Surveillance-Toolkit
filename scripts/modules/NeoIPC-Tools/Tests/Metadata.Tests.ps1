@@ -267,6 +267,26 @@ InModuleScope 'NeoIPC-Tools' {
             $pkg  = ConvertTo-NeoIPCMetadataPackage -Rows $rows
             @(Compare-NeoIPCMetadataCore -Reference $baseline -Difference $pkg).Count | Should -Be 0
         }
+        It 'emits rows ordinally sorted by natural key (deterministic, review-stable order)' {
+            # Unsorted input -> code-ordered output. (Guards the converter sort: the 3-arg [Array]::Sort
+            # overload is a silent no-op in PowerShell, so the sort must use the List<object>.Sort path.)
+            $pkg = [ordered]@{ optionSets = @(
+                    [ordered]@{ id = 'osZZZ00001'; code = 'ZEBRA'; name = 'Z'; valueType = 'TEXT' }
+                    [ordered]@{ id = 'osAAA00001'; code = 'ALPHA'; name = 'A'; valueType = 'TEXT' }
+                    [ordered]@{ id = 'osMMM00001'; code = 'MIKE';  name = 'M'; valueType = 'TEXT' }) }
+            $work = ConvertFrom-NeoIPCMetadataJsonText -Json ($pkg | ConvertTo-Json -Depth 40)
+            $rows = ConvertFrom-NeoIPCMetadataPackage -Package $work
+            @($rows['optionSets'] | ForEach-Object { [string]$_['code'] }) | Should -Be @('ALPHA', 'MIKE', 'ZEBRA')
+        }
+        It 'orders options by their optionSet then sortOrder (not row-insertion order)' {
+            $pkg = [ordered]@{ options = @(
+                    [ordered]@{ id = 'optBBB0002'; code = 'b2'; name = 'B2'; sortOrder = 2; optionSet = [ordered]@{ id = 'osBBB00001' } }
+                    [ordered]@{ id = 'optAAA0001'; code = 'a1'; name = 'A1'; sortOrder = 1; optionSet = [ordered]@{ id = 'osAAA00001' } }
+                    [ordered]@{ id = 'optBBB0001'; code = 'b1'; name = 'B1'; sortOrder = 1; optionSet = [ordered]@{ id = 'osBBB00001' } }) }
+            $work = ConvertFrom-NeoIPCMetadataJsonText -Json ($pkg | ConvertTo-Json -Depth 40)
+            $rows = ConvertFrom-NeoIPCMetadataPackage -Package $work
+            @($rows['options'] | ForEach-Object { [string]$_['id'] }) | Should -Be @('optAAA0001', 'optBBB0001', 'optBBB0002')
+        }
     }
 
     Describe 'Domain option-set exclusion (pathogens / substances sourced from YAML, not the directory)' {
@@ -1797,6 +1817,21 @@ InModuleScope 'NeoIPC-Tools' {
                 options    = @( [ordered]@{ id = 'OPdomain001'; code = 'P1'; name = 'E. coli'; optionSet = [ordered]@{ id = 'OSdomain001' } } )
             }
             (Get-NeoIPCMetadataTranslationUnit -Package $pkg).Count | Should -Be 0
+        }
+        It 'drops the redundant FORM_NAME on nameable config types (empty base) WITHOUT warning, and never re-injects it' {
+            # programs / programStages / trackedEntityTypes carry a FORM_NAME translation that duplicates NAME
+            # while the base formName is empty; DHIS2 falls back to the NAME translation, so it is intentionally
+            # not carried (NeoIPCMetadataTranslationIgnoredTokens) — no drift warning, and import never rebuilds it.
+            $pkg = [ordered]@{ programStages = @( [ordered]@{ id = 'psFORM00001'; name = 'Admission'
+                        translations = @(
+                            [ordered]@{ property = 'NAME'; locale = 'de'; value = 'Aufnahme' }
+                            [ordered]@{ property = 'FORM_NAME'; locale = 'de'; value = 'Aufnahme' } ) } ) }
+            $units = Get-NeoIPCMetadataTranslationUnit -Package $pkg -WarningVariable warns -WarningAction SilentlyContinue
+            @($units | Where-Object { $_.Token -eq 'FORM_NAME' }).Count | Should -Be 0   # not extracted
+            @($units | Where-Object { $_.Token -eq 'NAME' }).Count | Should -Be 1         # NAME still carried
+            @($warns | Where-Object { "$_" -match 'FORM_NAME' }).Count | Should -Be 0     # no drift warning
+            $back = Add-NeoIPCMetadataTranslationToPackage -Package $pkg -PoByLocale @{ de = (New-EntryList) }
+            @(@($back['programStages'])[0]['translations'] | Where-Object { $_.property -eq 'FORM_NAME' }).Count | Should -Be 0
         }
         It 'Import preserves translations[] on excluded objects (ATC group + domain option) it does not own' {
             $pkg = [ordered]@{

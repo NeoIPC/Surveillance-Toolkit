@@ -1,7 +1,7 @@
 id,code,name,managedGroups,sharing
+EksssaYw4el,NEOIPC,NeoIPC,,"{""public"":""rw------""}"
 yAwIZSlXWqA,NEOIPC_DATA_EDITORS,NeoIPC Data editors,,"{""public"":""rw------""}"
 gIj3UEDeQyK,NEOIPC_PATHOGEN_LIST_ADMINS,"NeoIPC Pathogen-List admins ",,"{""public"":""rw------""}"
 zMDKk4Hg20T,NEOIPC_SPAIN,NeoIPC Spain,,"{""public"":""rw------""}"
 sYUratKexos,NEOIPC_TESTERS,NeoIPC Testers,,"{""public"":""rw------""}"
 bKee8TbEslM,NEOIPC_USER_MANAGERS,NeoIPC User Managers,EksssaYw4el bKee8TbEslM sYUratKexos yAwIZSlXWqA,"{""public"":""rw------""}"
-EksssaYw4el,NEOIPC,NeoIPC,,"{""public"":""rw------""}"

@@ -284,6 +284,21 @@ $script:NeoIPCMetadataTranslatableProperties = [ordered]@{
     dueDateLabel        = 'DUE_DATE_LABEL'
 }
 
+# (type -> tokens) deliberately NOT carried as translatable, even though the type's translations[] may contain
+# them: a translations[] entry on one of these is dropped from the PO WITHOUT the usual "token the type map
+# does not carry" warning, because the drop is intentional, not drift. Only FORM_NAME on the three nameable
+# config types (programs / programStages / trackedEntityTypes): in the live export their base `formName` is
+# empty and their FORM_NAME translation merely duplicates the NAME translation. DHIS2's getDisplayFormName()
+# falls back to the NAME translation when the base formName is empty (BaseNameableObject.getFormNameFallback ->
+# getDisplayName), so the displayed form name is identical with or without the FORM_NAME entry — carrying it
+# would only add a PO string duplicating NAME. (dataElements / trackedEntityAttributes DO carry a non-empty
+# base formName, so FORM_NAME stays translatable there and is not listed here.)
+$script:NeoIPCMetadataTranslationIgnoredTokens = @{
+    programs           = @('FORM_NAME')
+    programStages      = @('FORM_NAME')
+    trackedEntityTypes = @('FORM_NAME')
+}
+
 # Default target languages for the metadata PO component — the same nine the reports' po4a / glossary pipeline
 # targets (see Surveillance-Toolkit CLAUDE.md). Overridable per call via the cmdlets' -Locale parameter.
 $script:NeoIPCMetadataTranslationLocales = @('af', 'de', 'el', 'es', 'et', 'fr', 'it', 'ne', 'tr')

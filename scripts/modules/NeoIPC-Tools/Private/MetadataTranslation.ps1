@@ -141,8 +141,9 @@ function Get-NeoIPCMetadataTranslationUnit {
                         Translations = $translations
                     })
             }
+            $ignoredTokens = $script:NeoIPCMetadataTranslationIgnoredTokens[$type]
             foreach ($tok in $existing.Keys) {
-                if (-not $tokens.Contains($tok)) {
+                if (-not $tokens.Contains($tok) -and ($tok -notin $ignoredTokens)) {
                     Write-Warning ("translations[] entry on {0} '{1}' uses token {2}, which the type map does not carry as a translatable field; it is not exported to PO." -f $type, $key, $tok)
                 }
             }
