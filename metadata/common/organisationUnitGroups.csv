@@ -1,18 +1,18 @@
 id,code,name,shortName,description,symbol,color,sharing
-V9axyIuqqs6,COUNTRY,Country,Country,,,,"{""public"":""--------"",""userGroups"":{""EksssaYw4el"":{""displayName"":""NeoIPC"",""access"":""r-------"",""id"":""EksssaYw4el""}}}"
-OuU4pHxMRe1,HOSPITAL,Hospital,Hospital,,,,"{""public"":""--------"",""userGroups"":{""EksssaYw4el"":{""displayName"":""NeoIPC"",""access"":""r-------"",""id"":""EksssaYw4el""}}}"
-H1frxxJMCb4,NEOIPC_ALL_PATIENTS_ELIGIBLE,NeoIPC All patients eligible,NeoIPC All patients eligible,Units for which the NeoIPC Patient eligibility criteria regarding birth weight and gestational age are disabled,,,"{""public"":""--------"",""userGroups"":{""EksssaYw4el"":{""displayName"":""NeoIPC"",""access"":""r-------"",""id"":""EksssaYw4el""}}}"
-e98fvj9eyyT,NEOIPC_NEODECO_TRIAL_SITES,NeoIPC NeoDeco trial sites,NeoIPC NeoDeco sites,,,,"{""public"":""--------"",""userGroups"":{""EksssaYw4el"":{""displayName"":""NeoIPC"",""access"":""r-------"",""id"":""EksssaYw4el""}}}"
-aYhPCaHuOnT,NEO_DEPARTMENT,Neonatology Department,Neo,,,,"{""public"":""--------"",""userGroups"":{""EksssaYw4el"":{""displayName"":""NeoIPC"",""access"":""r-------"",""id"":""EksssaYw4el""}}}"
-rmCE1osCb4M,REFERENCE_CENTRE,Reference Centre,Reference Centre,,,,"{""public"":""--------"",""userGroups"":{""EksssaYw4el"":{""displayName"":""NeoIPC"",""access"":""r-------"",""id"":""EksssaYw4el""}}}"
-XPP6LOaflkG,TEST_UNITS,Test Units,Test Units,,,,"{""public"":""--------"",""userGroups"":{""sYUratKexos"":{""displayName"":""NeoIPC Testers"",""access"":""r-------"",""id"":""sYUratKexos""}}}"
-fs3kOGAgBwd,WORLD_BANK_CLASS_H_FY_2025,World Bank High income countries 2025,World Bank HIC 2025,High income countries according to the World Bank country classification,,,"{""public"":""--------"",""userGroups"":{""EksssaYw4el"":{""displayName"":""NeoIPC"",""access"":""r-------"",""id"":""EksssaYw4el""}}}"
-avrlCvo8wGg,WORLD_BANK_CLASS_H_FY_2026,World Bank High income countries 2026,World Bank HIC 2026,High income countries according to the World Bank country classification,,,"{""public"":""--------"",""userGroups"":{""EksssaYw4el"":{""displayName"":""NeoIPC"",""access"":""r-------"",""id"":""EksssaYw4el""}}}"
-iElwDtfOCEx,WORLD_BANK_CLASS_LM_FY_2025,World Bank Lower middle income countries 2025,World Bank LMIC 2025,Lower middle income countries according to the World Bank country classification,,,"{""public"":""--------"",""userGroups"":{""EksssaYw4el"":{""displayName"":""NeoIPC"",""access"":""r-------"",""id"":""EksssaYw4el""}}}"
-UuBqewaL0cA,WORLD_BANK_CLASS_LM_FY_2026,World Bank Lower middle income countries 2026,World Bank LMIC 2026,Lower middle income countries according to the World Bank country classification,,,"{""public"":""--------"",""userGroups"":{""EksssaYw4el"":{""displayName"":""NeoIPC"",""access"":""r-------"",""id"":""EksssaYw4el""}}}"
-wgowwnF8f4I,WORLD_BANK_CLASS_L_FY_2025,World Bank Low income countries 2025,World Bank LIC 2025,Low income countries according to the World Bank country classification,,,"{""public"":""--------"",""userGroups"":{""EksssaYw4el"":{""displayName"":""NeoIPC"",""access"":""r-------"",""id"":""EksssaYw4el""}}}"
-ubtWo66ecVA,WORLD_BANK_CLASS_L_FY_2026,World Bank Low income countries 2026,World Bank LIC 2026,Low income countries according to the World Bank country classification,,,"{""public"":""--------"",""userGroups"":{""EksssaYw4el"":{""displayName"":""NeoIPC"",""access"":""r-------"",""id"":""EksssaYw4el""}}}"
+V9axyIuqqs6,COUNTRY,Country,Country,,,,NEOIPC_READ
+OuU4pHxMRe1,HOSPITAL,Hospital,Hospital,,,,NEOIPC_READ
+H1frxxJMCb4,NEOIPC_ALL_PATIENTS_ELIGIBLE,NeoIPC All patients eligible,NeoIPC All patients eligible,Units for which the NeoIPC Patient eligibility criteria regarding birth weight and gestational age are disabled,,,NEOIPC_READ
+e98fvj9eyyT,NEOIPC_NEODECO_TRIAL_SITES,NeoIPC NeoDeco trial sites,NeoIPC NeoDeco sites,,,,NEOIPC_READ
+aYhPCaHuOnT,NEO_DEPARTMENT,Neonatology Department,Neo,,,,NEOIPC_READ
+rmCE1osCb4M,REFERENCE_CENTRE,Reference Centre,Reference Centre,,,,NEOIPC_READ
+XPP6LOaflkG,TEST_UNITS,Test Units,Test Units,,,,TESTERS_READ
+fs3kOGAgBwd,WORLD_BANK_CLASS_H_FY_2025,World Bank High income countries 2025,World Bank HIC 2025,High income countries according to the World Bank country classification,,,NEOIPC_READ
+avrlCvo8wGg,WORLD_BANK_CLASS_H_FY_2026,World Bank High income countries 2026,World Bank HIC 2026,High income countries according to the World Bank country classification,,,NEOIPC_READ
+iElwDtfOCEx,WORLD_BANK_CLASS_LM_FY_2025,World Bank Lower middle income countries 2025,World Bank LMIC 2025,Lower middle income countries according to the World Bank country classification,,,NEOIPC_READ
+UuBqewaL0cA,WORLD_BANK_CLASS_LM_FY_2026,World Bank Lower middle income countries 2026,World Bank LMIC 2026,Lower middle income countries according to the World Bank country classification,,,NEOIPC_READ
+wgowwnF8f4I,WORLD_BANK_CLASS_L_FY_2025,World Bank Low income countries 2025,World Bank LIC 2025,Low income countries according to the World Bank country classification,,,NEOIPC_READ
+ubtWo66ecVA,WORLD_BANK_CLASS_L_FY_2026,World Bank Low income countries 2026,World Bank LIC 2026,Low income countries according to the World Bank country classification,,,NEOIPC_READ
 UK9bpnhSABF,WORLD_BANK_CLASS_UM_FY_2025,World Bank Upper middle income countries 2025,World Bank UMIC 2025,"Upper middle income countries according to the World Bank country classification
-",,,"{""public"":""--------"",""userGroups"":{""EksssaYw4el"":{""displayName"":""NeoIPC"",""access"":""r-------"",""id"":""EksssaYw4el""}}}"
+",,,NEOIPC_READ
 FGXhcDCM8iI,WORLD_BANK_CLASS_UM_FY_2026,World Bank Upper middle income countries 2026,World Bank UMIC 2026,"Upper middle income countries according to the World Bank country classification
-",,,"{""public"":""--------"",""userGroups"":{""EksssaYw4el"":{""displayName"":""NeoIPC"",""access"":""r-------"",""id"":""EksssaYw4el""}}}"
+",,,NEOIPC_READ

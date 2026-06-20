@@ -10,7 +10,7 @@ $script:NeoIPCMetadataStripList = @(
     'created', 'lastUpdated', 'createdBy', 'lastUpdatedBy',
     'access', 'favorite', 'favorites', 'userAccesses', 'userGroupAccesses', 'externalAccess',
     'href', 'user', 'publicAccess', 'lastUpdatedDuration',
-    'users',  # the anonymised, per-deployment member list ON a userGroup object — dropped on capture, so common groups carry no members. (Does NOT affect sharing.users grants: those live inside the 'sharing' object, which Convert-NeoIPCSharing normalizes separately and preserves as authorization intent — the recursive strip never reaches into the sharing branch.)
+    'users',  # the anonymised, per-deployment member list ON a userGroup object — dropped on capture, so common groups carry no members. (Does NOT affect sharing.users grants: those live inside the 'sharing' object, which Convert-NeoIPCSharing normalizes separately — reducing each grant to {id, access} and preserving it as authorization intent — and the recursive strip never reaches into the sharing branch.)
     'organisationUnits',  # per-deployment org-unit ASSIGNMENT / membership — organisationUnitGroups membership, the program's org-unit assignment, a categoryOption's restriction. Always references org-unit INSTANCES (anonymised in the export), never config; dropped on capture so common carries none. (Distinct from organisationUnitGroupSets.organisationUnitGroups and userGroups.managedGroups, which are definition→definition CONFIG and are kept.)
     'path'   # organisationUnit's materialised ancestor path — derived from `parent`, recomputed on import
 )

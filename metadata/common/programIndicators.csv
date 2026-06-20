@@ -1,15 +1,15 @@
 id,code,name,shortName,description,expression,filter,aggregationType,analyticsType,decimals,displayInForm,program,sharing
-M3kiULyBxKz,BirthWeight_Indicator,BirthWeight_Indicator,BirthWeight_Indicator,,#{YGowWPumDia.FldNZAe2r9H},1==1,MAX,EVENT,0,False,D8mSSpOpsKj,"{""public"":""rw------""}"
-A2nURqk9LMx,NEOIPC_ADMISSION_COMPLETED,NeoIPC Admission Completed,NeoIPC Adm. Compl.,"1 if the admission is completed, otherwise 0."," if( isNotNull(V{completed_date}), 1,0)",V{program_stage_name} == 'Admission',,EVENT,0,False,D8mSSpOpsKj,"{""public"":""rw------""}"
-AsKrlGNQ2Iy,NEOIPC_DAY_OF_LIFE,NeoIPC Day of life,NeoIPC DOL,The day of life when an event occurs," if( isNotNull(#{YGowWPumDia.rvq4L9wWbwW}), #{YGowWPumDia.rvq4L9wWbwW}+d2:daysBetween(V{enrollment_date},V{event_date}),d2:daysBetween(V{enrollment_date},V{event_date}))",V{program_stage_name} != 'Admission',,EVENT,0,False,D8mSSpOpsKj,"{""public"":""rw------""}"
-dI2A1nsgZgR,NEOIPC_ENROLLMENT_COMPLETED,NeoIPC Enrollment Completed,NeoIPC Enr. Compl.,"1 if the enrollment is completed, otherwise 0."," if( V{enrollment_status} == 'COMPLETED', 1,0)",true,,EVENT,0,False,D8mSSpOpsKj,"{""public"":""rw------""}"
-FiF48XVTo8s,NEO_SumAllEnrollments_PI,Enrollments,NEO_SumAllEnrollments_PI,,V{enrollment_count},,COUNT,ENROLLMENT,0,False,D8mSSpOpsKj,"{""public"":""rw------""}"
+M3kiULyBxKz,BirthWeight_Indicator,BirthWeight_Indicator,BirthWeight_Indicator,,#{YGowWPumDia.FldNZAe2r9H},1==1,MAX,EVENT,0,False,D8mSSpOpsKj,PUBLIC_RW
+A2nURqk9LMx,NEOIPC_ADMISSION_COMPLETED,NeoIPC Admission Completed,NeoIPC Adm. Compl.,"1 if the admission is completed, otherwise 0."," if( isNotNull(V{completed_date}), 1,0)",V{program_stage_name} == 'Admission',,EVENT,0,False,D8mSSpOpsKj,PUBLIC_RW
+AsKrlGNQ2Iy,NEOIPC_DAY_OF_LIFE,NeoIPC Day of life,NeoIPC DOL,The day of life when an event occurs," if( isNotNull(#{YGowWPumDia.rvq4L9wWbwW}), #{YGowWPumDia.rvq4L9wWbwW}+d2:daysBetween(V{enrollment_date},V{event_date}),d2:daysBetween(V{enrollment_date},V{event_date}))",V{program_stage_name} != 'Admission',,EVENT,0,False,D8mSSpOpsKj,PUBLIC_RW
+dI2A1nsgZgR,NEOIPC_ENROLLMENT_COMPLETED,NeoIPC Enrollment Completed,NeoIPC Enr. Compl.,"1 if the enrollment is completed, otherwise 0."," if( V{enrollment_status} == 'COMPLETED', 1,0)",true,,EVENT,0,False,D8mSSpOpsKj,PUBLIC_RW
+FiF48XVTo8s,NEO_SumAllEnrollments_PI,Enrollments,NEO_SumAllEnrollments_PI,,V{enrollment_count},,COUNT,ENROLLMENT,0,False,D8mSSpOpsKj,PUBLIC_RW
 JPtrr8SWsHW,NEO_SumAllSurvEnde_PI,NEO_SumAllSurvEnde_PI,NEO_SumAllSurvEnde_PI,,"d2:condition('#{DDLi3OGC5Yh.Xn8q3giOGcB} > 0',1,0)
 
-",V{program_stage_id} == 'DDLi3OGC5Yh',COUNT,EVENT,,False,D8mSSpOpsKj,"{""public"":""rw------""}"
-bpsntltaU4y,,NeoIPC Missing surveillance end in closed enrollment,NeoIPC Missing sur. end in closed enr.,,V{event_count},"V{program_stage_name} == ""Surveillance-End""",COUNT,ENROLLMENT,0,,D8mSSpOpsKj,"{""public"":""rw------""}"
-Scio2GndATI,,NeoIPC Number of enrollments (active),No. enrollments (act.),,V{enrollment_count},V{enrollment_status} == 'ACTIVE',COUNT,ENROLLMENT,0,False,D8mSSpOpsKj,"{""public"":""--------"",""userGroups"":{""EksssaYw4el"":{""displayName"":""NeoIPC"",""access"":""r-------"",""id"":""EksssaYw4el""}}}"
-J4nrp0CYvO8,,NeoIPC Number of enrollments (cancelled),No. enrollments (canc.),,V{enrollment_count},V{enrollment_status} == 'CANCELLED',COUNT,ENROLLMENT,0,False,D8mSSpOpsKj,"{""public"":""--------"",""userGroups"":{""EksssaYw4el"":{""displayName"":""NeoIPC"",""access"":""r-------"",""id"":""EksssaYw4el""}}}"
-SFT8PJJoPRZ,,NeoIPC Number of enrollments (completed),No. enrollments (comp.),,V{enrollment_count},V{enrollment_status} == 'COMPLETED',COUNT,ENROLLMENT,0,False,D8mSSpOpsKj,"{""public"":""--------"",""userGroups"":{""EksssaYw4el"":{""displayName"":""NeoIPC"",""access"":""r-------"",""id"":""EksssaYw4el""}}}"
-ApYgClc8SVA,,NeoIPC Number of enrollments (total),No. enrollments (tot.),,V{enrollment_count},,COUNT,ENROLLMENT,0,False,D8mSSpOpsKj,"{""public"":""--------"",""userGroups"":{""EksssaYw4el"":{""displayName"":""NeoIPC"",""access"":""r-------"",""id"":""EksssaYw4el""}}}"
-taydZHWlYCt,,Surveillance-End_Completed,Surveillance-End_Completed,," if( isNotNull(V{completed_date}), 1,0)",V{program_stage_name} == 'Surveillance-End',,EVENT,,False,D8mSSpOpsKj,"{""public"":""rw------""}"
+",V{program_stage_id} == 'DDLi3OGC5Yh',COUNT,EVENT,,False,D8mSSpOpsKj,PUBLIC_RW
+bpsntltaU4y,,NeoIPC Missing surveillance end in closed enrollment,NeoIPC Missing sur. end in closed enr.,,V{event_count},"V{program_stage_name} == ""Surveillance-End""",COUNT,ENROLLMENT,0,,D8mSSpOpsKj,PUBLIC_RW
+Scio2GndATI,,NeoIPC Number of enrollments (active),No. enrollments (act.),,V{enrollment_count},V{enrollment_status} == 'ACTIVE',COUNT,ENROLLMENT,0,False,D8mSSpOpsKj,NEOIPC_READ
+J4nrp0CYvO8,,NeoIPC Number of enrollments (cancelled),No. enrollments (canc.),,V{enrollment_count},V{enrollment_status} == 'CANCELLED',COUNT,ENROLLMENT,0,False,D8mSSpOpsKj,NEOIPC_READ
+SFT8PJJoPRZ,,NeoIPC Number of enrollments (completed),No. enrollments (comp.),,V{enrollment_count},V{enrollment_status} == 'COMPLETED',COUNT,ENROLLMENT,0,False,D8mSSpOpsKj,NEOIPC_READ
+ApYgClc8SVA,,NeoIPC Number of enrollments (total),No. enrollments (tot.),,V{enrollment_count},,COUNT,ENROLLMENT,0,False,D8mSSpOpsKj,NEOIPC_READ
+taydZHWlYCt,,Surveillance-End_Completed,Surveillance-End_Completed,," if( isNotNull(V{completed_date}), 1,0)",V{program_stage_name} == 'Surveillance-End',,EVENT,,False,D8mSSpOpsKj,PUBLIC_RW

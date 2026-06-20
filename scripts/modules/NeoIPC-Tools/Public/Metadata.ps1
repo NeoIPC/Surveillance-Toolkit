@@ -17,7 +17,10 @@ function ConvertFrom-NeoIPCMetadataJson {
     .PARAMETER Path
         Path to the DHIS2 metadata.json export.
     .PARAMETER OutputDirectory
-        Directory to write the per-type CSV files into (created if absent).
+        Directory to write the per-type CSV files into (created if absent). The named sharing profiles live
+        here as sharing.yaml: an authored file is the source of truth (an unrecognized sharing shape then
+        fails loud, to be named by hand); when absent, the profiles are derived from the package and written
+        out, so the materialised directory is self-contained.
     #>
     [CmdletBinding(SupportsShouldProcess)]
     param(
@@ -26,11 +29,19 @@ function ConvertFrom-NeoIPCMetadataJson {
     )
     if (-not (Test-Path -LiteralPath $Path)) { throw "Metadata file not found: '$Path'." }
     $package = ConvertFrom-NeoIPCMetadataJsonText -Json (Get-Content -LiteralPath $Path -Raw)
+    $ugMap = Get-NeoIPCUserGroupKeyMap -UserGroups @($package['userGroups'])
+    $sharingPath = Join-Path $OutputDirectory 'sharing.yaml'
+    $writeSharing = -not (Test-Path -LiteralPath $sharingPath)
+    if ($writeSharing) { Initialize-NeoIPCSharingProfileFromPackage -Package $package }
+    else { Import-NeoIPCSharingProfile -Path $sharingPath -KeyToId $ugMap.KeyToId }
     $rows = ConvertFrom-NeoIPCMetadataPackage -Package $package
     if (-not (Test-Path -LiteralPath $OutputDirectory)) {
         if ($PSCmdlet.ShouldProcess($OutputDirectory, 'Create directory')) {
             New-Item -ItemType Directory -Path $OutputDirectory -Force | Out-Null
         }
+    }
+    if ($writeSharing -and $PSCmdlet.ShouldProcess($sharingPath, 'Write sharing profiles')) {
+        Export-NeoIPCSharingProfile -Path $sharingPath -IdToKey $ugMap.IdToKey
     }
     foreach ($type in $rows.Keys) {
         $target = Join-Path $OutputDirectory "$type.csv"
@@ -66,6 +77,9 @@ function ConvertTo-NeoIPCMetadataJson {
         [switch]$Compress
     )
     if (-not (Test-Path -LiteralPath $Path)) { throw "Metadata directory not found: '$Path'." }
+    $ugCsv = Join-Path $Path 'userGroups.csv'
+    $ugObjs = if (Test-Path -LiteralPath $ugCsv) { @(Read-NeoIPCMetadataCsv -Path $ugCsv) } else { @() }
+    Import-NeoIPCSharingProfile -Path (Join-Path $Path 'sharing.yaml') -KeyToId (Get-NeoIPCUserGroupKeyMap -UserGroups $ugObjs).KeyToId
     $rows = [ordered]@{}
     foreach ($type in $script:NeoIPCMetadataTypeMaps.Keys) {
         $csv = Join-Path $Path "$type.csv"
@@ -114,7 +128,8 @@ function Test-NeoIPCMetadataRoundTrip {
     .PARAMETER Path
         Path to the DHIS2 metadata.json export to verify.
     .PARAMETER WorkDirectory
-        Optional directory for the intermediate CSVs (a temp directory is used if omitted).
+        Optional directory for the intermediate CSVs (a temp directory is used if omitted). The intermediate
+        directory is self-contained: emit derives and writes its sharing.yaml, which the read-back reads.
     #>
     [CmdletBinding()]
     param(

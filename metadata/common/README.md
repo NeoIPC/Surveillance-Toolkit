@@ -22,3 +22,20 @@ nested-only types. Row order is purely cosmetic: the round-trip matches objects 
 sorts ref-collections, so re-ordering never changes the package. The authored junction files are ordered by
 their member/subject first — `organisationUnitGroupMemberships` by `organisationUnit` then group, the user
 files by `username`.
+
+## Sharing
+
+DHIS2 attaches a `sharing` object (a `public` access string plus optional per-user and per-user-group
+grants) to most metadata objects, but across the package only a handful of distinct shapes actually occur. They are named
+once in [`sharing.yaml`](sharing.yaml) and every per-type CSV's `sharing` column carries just the **profile
+key** (e.g. `PUBLIC_RW`, `NEOIPC_DATA_EDIT`) instead of a JSON blob repeated on hundreds of rows. The
+converter expands the key into the DHIS2 sharing object on assembly and maps a captured sharing object back
+to its key on round-trip; an unrecognized shape fails loud so a human names it in `sharing.yaml` rather than
+it being silently absorbed.
+
+Grants are keyed by the user-group **code** (falling back to its unique name for a codeless group) so the
+file stays human-editable — the converter resolves the handle to the group UID against `userGroups.csv`, and
+an unknown code/name fails loud. The grant's `displayName` is deliberately not stored (it is server-derived
+from the id, and carrying it duplicates a name that drifts — the same reason the rest of the pipeline strips
+the `display*` family). The directory is self-contained: when no `sharing.yaml` is present (a throwaway work
+directory, e.g. the round-trip gate) the converter derives the profiles from the package and writes one out.

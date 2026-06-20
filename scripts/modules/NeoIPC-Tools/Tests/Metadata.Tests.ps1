@@ -26,6 +26,27 @@ InModuleScope 'NeoIPC-Tools' {
             $b = (ConvertTo-NeoIPCMetadataCanonical (Remove-NeoIPCMetadataNoise -Object $o2 -WarningAction SilentlyContinue)) | ConvertTo-Json -Compress -Depth 40
             @{ Equal = ($a -eq $b); Row = $row; Back = $back; A = $a; B = $b }
         }
+
+        # Seed the module-scoped sharing-profile registry the row converter consults, built the same way
+        # Import-NeoIPCSharingProfile builds it (spec -> sharing object -> canonical-value index) but without
+        # a YAML file, so the suite stays self-contained. Grants are keyed by group CODE (UG_TEST), resolved
+        # to a UID through this fixture key map, exactly as the real userGroups roster does.
+        $script:TestUgKeyMap = @{
+            KeyToId = @{ UG_TEST = 'ugTestAAA01'; UG_TEST2 = 'ugTestBBB02' }
+            IdToKey = @{ ugTestAAA01 = 'UG_TEST'; ugTestBBB02 = 'UG_TEST2' }
+        }
+        $script:NeoIPCSharingProfiles = @{ ByKey = [ordered]@{}; ByValue = @{} }
+        foreach ($p in @(
+                @{ Key = 'PUBLIC_RW'; Spec = @{ public = 'rw------' } },
+                @{ Key = 'PUBLIC_R'; Spec = @{ public = 'r-------' } },
+                @{ Key = 'PRIVATE'; Spec = @{ public = '--------' } },
+                @{ Key = 'NEOIPC_READ'; Spec = @{ public = '--------'; userGroups = @{ UG_TEST = 'r-------' } } },
+                @{ Key = 'DATA_EDIT'; Spec = @{ public = '--------'; userGroups = @{ UG_TEST = 'r-r-----'; UG_TEST2 = 'r-rw----' } } }
+            )) {
+            $sharing = ConvertTo-NeoIPCSharingFromProfileSpec -Spec $p.Spec -KeyToId $script:TestUgKeyMap.KeyToId
+            $script:NeoIPCSharingProfiles.ByKey[$p.Key] = $sharing
+            $script:NeoIPCSharingProfiles.ByValue[(Get-NeoIPCSharingCanonicalKey -Sharing $sharing)] = $p.Key
+        }
     }
 
     Describe 'Cell coercion' {
@@ -161,6 +182,133 @@ InModuleScope 'NeoIPC-Tools' {
             $r.Back.Contains('displaySubjectTemplate') | Should -BeFalse
             $r.Back.Contains('displayMessageTemplate') | Should -BeFalse
             $r.Back['subjectTemplate'] | Should -BeExactly 'Subj'
+        }
+    }
+
+    Describe 'Sharing profiles' {
+        It 'resolves a normalized sharing object to its profile key (the CSV cell value)' {
+            $sharing = Convert-NeoIPCSharing ([ordered]@{ public = 'rw------'; owner = 'u'; external = $false })
+            (Resolve-NeoIPCSharingProfileKey -Sharing $sharing) | Should -BeExactly 'PUBLIC_RW'
+        }
+        It 'drops the per-grant displayName when normalizing (keeps id + access only)' {
+            $sharing = Convert-NeoIPCSharing ([ordered]@{ public = '--------'
+                    userGroups = [ordered]@{ ugTestAAA01 = [ordered]@{ id = 'ugTestAAA01'; access = 'r-------'; displayName = 'Some Group ' } } })
+            $sharing['userGroups']['ugTestAAA01'].Contains('displayName') | Should -BeFalse
+            $sharing['userGroups']['ugTestAAA01']['access'] | Should -BeExactly 'r-------'
+            (Resolve-NeoIPCSharingProfileKey -Sharing $sharing) | Should -BeExactly 'NEOIPC_READ'
+        }
+        It 'expands a profile key back into a DHIS2 sharing object' {
+            $sharing = Expand-NeoIPCSharingProfile -Key 'NEOIPC_READ'
+            $sharing['public'] | Should -BeExactly '--------'
+            $sharing['userGroups']['ugTestAAA01']['access'] | Should -BeExactly 'r-------'
+            $sharing['userGroups']['ugTestAAA01']['id'] | Should -BeExactly 'ugTestAAA01'
+        }
+        It 'builds a userGroup key map (code and name both resolve; code preferred for writing)' {
+            $map = Get-NeoIPCUserGroupKeyMap -UserGroups @(
+                [ordered]@{ id = 'ug11111aaaa'; code = 'GRP_A'; name = 'Group A' },
+                [ordered]@{ id = 'ug22222bbbb'; name = 'Codeless Group' }
+            )
+            $map.KeyToId['GRP_A'] | Should -BeExactly 'ug11111aaaa'
+            $map.KeyToId['Group A'] | Should -BeExactly 'ug11111aaaa'
+            $map.IdToKey['ug11111aaaa'] | Should -BeExactly 'GRP_A'           # code preferred
+            $map.KeyToId['Codeless Group'] | Should -BeExactly 'ug22222bbbb'
+            $map.IdToKey['ug22222bbbb'] | Should -BeExactly 'Codeless Group'  # name fallback
+        }
+        It 'resolves a userGroup code to its UID when expanding a profile spec' {
+            $sharing = ConvertTo-NeoIPCSharingFromProfileSpec -Spec @{ public = '--------'; userGroups = @{ GRP_A = 'rw------' } } -KeyToId @{ GRP_A = 'ug11111aaaa' }
+            $sharing['userGroups']['ug11111aaaa']['access'] | Should -BeExactly 'rw------'
+            $sharing['userGroups']['ug11111aaaa']['id'] | Should -BeExactly 'ug11111aaaa'
+        }
+        It 'fails loud on an unknown userGroup code/name in a profile spec' {
+            { ConvertTo-NeoIPCSharingFromProfileSpec -Spec @{ userGroups = @{ NOPE = 'r-------' } } -KeyToId @{} } | Should -Throw '*unknown user group*'
+        }
+        It 'fails loud when a userGroup name collides with another group''s code' {
+            { Get-NeoIPCUserGroupKeyMap -UserGroups @(
+                    [ordered]@{ id = 'ugAAAAAAAA1'; code = 'SHARED'; name = 'Group A' },
+                    [ordered]@{ id = 'ugBBBBBBBB2'; name = 'SHARED' }
+                ) } | Should -Throw "*Ambiguous user-group handle 'SHARED'*"
+        }
+        It 'fails loud when two codeless groups share a name' {
+            { Get-NeoIPCUserGroupKeyMap -UserGroups @(
+                    [ordered]@{ id = 'ugAAAAAAAA1'; name = 'Dup Name' },
+                    [ordered]@{ id = 'ugBBBBBBBB2'; name = 'Dup Name' }
+                ) } | Should -Throw '*Ambiguous user-group handle*'
+        }
+        It 'resolves and expands a profile with two distinct userGroup grants (canonical order-independent)' {
+            # Grants supplied in the OPPOSITE order to the profile spec — canonicalization must still match.
+            $key = Resolve-NeoIPCSharingProfileKey -Sharing (Convert-NeoIPCSharing ([ordered]@{ public = '--------'
+                        userGroups = [ordered]@{
+                            ugTestBBB02 = [ordered]@{ id = 'ugTestBBB02'; access = 'r-rw----' }
+                            ugTestAAA01 = [ordered]@{ id = 'ugTestAAA01'; access = 'r-r-----' }
+                        }
+                    }))
+            $key | Should -BeExactly 'DATA_EDIT'
+            $back = Expand-NeoIPCSharingProfile -Key 'DATA_EDIT'
+            $back['userGroups']['ugTestAAA01']['access'] | Should -BeExactly 'r-r-----'
+            $back['userGroups']['ugTestBBB02']['access'] | Should -BeExactly 'r-rw----'
+        }
+        It 'fails loud when two profiles resolve to the same sharing object' -Skip:(-not (Get-Module -ListAvailable powershell-yaml)) {
+            $tmp = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-shc-' + [System.IO.Path]::GetRandomFileName() + '.yaml')
+            $saved = $script:NeoIPCSharingProfiles
+            try {
+                @('PUBLIC_RW:', '  public: "rw------"', 'ALSO_RW:', '  public: "rw------"') | Set-Content -LiteralPath $tmp -Encoding utf8
+                { Import-NeoIPCSharingProfile -Path $tmp } | Should -Throw '*resolve to the same sharing object*'
+            }
+            finally { $script:NeoIPCSharingProfiles = $saved; Remove-Item -LiteralPath $tmp -ErrorAction SilentlyContinue }
+        }
+        It 'auto-generates a self-contained sharing.yaml from a package (Initialize -> Export -> Import, ordinal SHARING_NNN)' -Skip:(-not (Get-Module -ListAvailable powershell-yaml)) {
+            $saved = $script:NeoIPCSharingProfiles
+            $tmp = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-shg-' + [System.IO.Path]::GetRandomFileName() + '.yaml')
+            try {
+                $pkg = [ordered]@{ dataElements = @(
+                        [ordered]@{ id = 'deAAAAAAAA1'; sharing = [ordered]@{ public = 'rw------' } },
+                        [ordered]@{ id = 'deBBBBBBBB2'; sharing = [ordered]@{ public = '--------'
+                                userGroups = [ordered]@{ ugTestAAA01 = [ordered]@{ id = 'ugTestAAA01'; access = 'r-------' } } } }
+                    ) }
+                Initialize-NeoIPCSharingProfileFromPackage -Package $pkg
+                @($script:NeoIPCSharingProfiles.ByKey.Keys) | Should -Be @('SHARING_001', 'SHARING_002')
+                # Ordinal sort of the canonical JSON puts "--------" (the grant shape) before "rw------".
+                (Resolve-NeoIPCSharingProfileKey -Sharing (Convert-NeoIPCSharing ([ordered]@{ public = 'rw------' }))) | Should -BeExactly 'SHARING_002'
+                Export-NeoIPCSharingProfile -Path $tmp -IdToKey $script:TestUgKeyMap.IdToKey
+                (Get-Content -LiteralPath $tmp -Raw) | Should -Match 'UG_TEST'   # grant written by code, not UID
+                Import-NeoIPCSharingProfile -Path $tmp -KeyToId $script:TestUgKeyMap.KeyToId
+                (Expand-NeoIPCSharingProfile -Key 'SHARING_001')['userGroups']['ugTestAAA01']['access'] | Should -BeExactly 'r-------'
+            }
+            finally { $script:NeoIPCSharingProfiles = $saved; Remove-Item -LiteralPath $tmp -ErrorAction SilentlyContinue }
+        }
+        It 'writes the profile KEY (not a JSON blob) into the CSV sharing cell, and round-trips it' {
+            $de = [ordered]@{ id = 'dataElmnt09'; code = 'NEOIPC_S'; name = 'S'; shortName = 's'; valueType = 'TEXT'; domainType = 'TRACKER'
+                aggregationType = 'NONE'; zeroIsSignificant = $false
+                sharing = [ordered]@{ public = '--------'; userGroups = [ordered]@{ ugTestAAA01 = [ordered]@{ id = 'ugTestAAA01'; access = 'r-------'; displayName = 'X' } } } }
+            $row = ConvertTo-NeoIPCMetadataRow -Type 'dataElements' -Object $de
+            $row['sharing'] | Should -BeExactly 'NEOIPC_READ'
+            $back = ConvertFrom-NeoIPCMetadataRow -Type 'dataElements' -Row $row
+            $back['sharing']['public'] | Should -BeExactly '--------'
+            $back['sharing']['userGroups']['ugTestAAA01']['access'] | Should -BeExactly 'r-------'
+            $back['sharing']['userGroups']['ugTestAAA01'].Contains('displayName') | Should -BeFalse
+        }
+        It 'fails loud on an unrecognized sharing pattern (so a new shape is named in sharing.yaml)' {
+            $sharing = Convert-NeoIPCSharing ([ordered]@{ public = 'rwrw----' })
+            { Resolve-NeoIPCSharingProfileKey -Sharing $sharing } | Should -Throw '*Unrecognized sharing pattern*'
+        }
+        It 'fails loud on an unknown profile key' {
+            { Expand-NeoIPCSharingProfile -Key 'NO_SUCH_PROFILE' } | Should -Throw "*Unknown sharing profile key 'NO_SUCH_PROFILE'*"
+        }
+        It 'round-trips the registry through Export -> Import keyed by group code (YAML file form)' -Skip:(-not (Get-Module -ListAvailable powershell-yaml)) {
+            $tmp = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-sh-' + [System.IO.Path]::GetRandomFileName() + '.yaml')
+            $saved = $script:NeoIPCSharingProfiles
+            try {
+                Export-NeoIPCSharingProfile -Path $tmp -IdToKey $script:TestUgKeyMap.IdToKey
+                $text = Get-Content -LiteralPath $tmp -Raw
+                $text | Should -Match 'UG_TEST'             # grants written by group code...
+                $text | Should -Not -Match 'ugTestAAA01'    # ...never the opaque UID
+                Import-NeoIPCSharingProfile -Path $tmp -KeyToId $script:TestUgKeyMap.KeyToId
+                (Expand-NeoIPCSharingProfile -Key 'NEOIPC_READ')['userGroups']['ugTestAAA01']['access'] | Should -BeExactly 'r-------'
+            }
+            finally {
+                $script:NeoIPCSharingProfiles = $saved
+                Remove-Item -LiteralPath $tmp -ErrorAction SilentlyContinue
+            }
         }
     }
 

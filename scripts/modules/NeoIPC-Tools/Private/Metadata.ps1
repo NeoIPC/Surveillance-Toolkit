@@ -88,23 +88,239 @@ function Group-NeoIPCMetadataByParentId {
 }
 
 function Convert-NeoIPCSharing {
-    # Normalize a sharing object to {public[, non-empty users][, non-empty userGroups]}.
-    # Drops owner/external/empty grants (provenance/noise) while preserving real authorization
-    # intent (public is NOT uniform across objects, so it must round-trip as data).
+    # Normalize a sharing object to {public[, non-empty users][, non-empty userGroups]}, each grant reduced
+    # to {id, access}. Drops owner/external/empty grants (provenance/noise) and the per-grant displayName
+    # (a server-derived mirror of the id — the recursive display* strip never reaches into the sharing
+    # branch, so it is dropped explicitly here) while preserving real authorization intent (public is NOT
+    # uniform across objects, so it must round-trip as data).
     param($Sharing)
     # A non-dictionary sharing (null, or a legacy scalar grant string) carries no normalizable intent;
     # return an empty map so the emit path ($result.Count) and the comparator (@($result.Keys).Count)
     # agree to drop it, rather than one keeping a scalar the other discards.
     if ($Sharing -isnot [System.Collections.IDictionary]) { return [ordered]@{} }
     $result = [ordered]@{}
-    if ($null -ne $Sharing['public']) { $result['public'] = $Sharing['public'] }
+    if ($null -ne $Sharing['public']) { $result['public'] = [string]$Sharing['public'] }
     foreach ($grantKey in 'users', 'userGroups') {
         $grants = $Sharing[$grantKey]
         if ($grants -is [System.Collections.IDictionary] -and $grants.Count -gt 0) {
-            $result[$grantKey] = $grants
+            $normalized = [ordered]@{}
+            foreach ($gid in $grants.Keys) {
+                $grant = $grants[$gid]
+                $entry = [ordered]@{ id = [string]$gid }
+                if ($grant -is [System.Collections.IDictionary]) {
+                    if ($null -ne $grant['id']) { $entry['id'] = [string]$grant['id'] }
+                    if ($null -ne $grant['access']) { $entry['access'] = [string]$grant['access'] }
+                }
+                else {
+                    # Compact form (the profile spec): the grant value IS the access string.
+                    $entry['access'] = [string]$grant
+                }
+                $normalized[[string]$gid] = $entry
+            }
+            $result[$grantKey] = $normalized
         }
     }
     $result
+}
+
+# Named sharing profiles: a handful of distinct sharing shapes recur across the package, so they are named
+# ONCE in <metadata-dir>/sharing.yaml and each CSV `sharing` cell carries just the key. Loaded into this
+# module-scoped registry by Import-NeoIPCSharingProfile; the row converter resolves a key on emit and
+# expands it on read. Null until loaded (a directory with no non-empty sharing needs no profiles).
+$script:NeoIPCSharingProfiles = $null
+
+function Get-NeoIPCSharingCanonicalKey {
+    # The order-independent identity of a normalized sharing object: its canonical (recursively key-sorted)
+    # compact JSON. Used both to index profiles by value at load and to look one up on emit, so the two are
+    # provably the same comparison.
+    [CmdletBinding()]
+    [OutputType([string])]
+    param([Parameter(Mandatory)]$Sharing)
+    (ConvertTo-NeoIPCMetadataCanonical $Sharing) | ConvertTo-Json -Compress -Depth 10
+}
+
+function Get-NeoIPCUserGroupKeyMap {
+    # Build {KeyToId, IdToKey} from a set of userGroup objects/rows (each carrying id, code, name), so sharing
+    # profiles can key grants by a human-readable handle while the DHIS2 sharing object keeps the UID. The
+    # preferred handle is the group CODE; a codeless group falls back to its (unique) NAME. KeyToId resolves
+    # EITHER a code or a name to the UID; IdToKey gives the preferred handle (code, else name) for writing.
+    [CmdletBinding()]
+    [OutputType([hashtable])]
+    param([object[]]$UserGroups)
+    $keyToId = @{}
+    $idToKey = @{}
+    foreach ($ug in $UserGroups) {
+        if ($ug -isnot [System.Collections.IDictionary]) { continue }
+        $id = [string]$ug['id']
+        if (-not $id) { continue }
+        $code = [string]$ug['code']
+        $name = [string]$ug['name']
+        # A handle (code or name) that already maps to a DIFFERENT group is ambiguous: a sharing grant
+        # authored as that handle could resolve to the wrong UID, or two grants collapse onto one key on
+        # write. Fail loud here — the same fail-on-collision the module's other identity maps enforce —
+        # rather than silently last-wins. (A group's own code and name both pointing at its own id is fine.)
+        foreach ($handle in @($code, $name)) {
+            if (-not $handle) { continue }
+            if ($keyToId.ContainsKey($handle) -and $keyToId[$handle] -ne $id) {
+                throw "Ambiguous user-group handle '$handle' resolves to both '$($keyToId[$handle])' and '$id'; sharing grants need an unambiguous code or unique name."
+            }
+            $keyToId[$handle] = $id
+        }
+        $idToKey[$id] = if ($code) { $code } elseif ($name) { $name } else { $id }
+    }
+    @{ KeyToId = $keyToId; IdToKey = $idToKey }
+}
+
+function ConvertTo-NeoIPCSharingFromProfileSpec {
+    # Expand a profile spec (the sharing.yaml shape: {public, userGroups:{<code-or-name>:<access>}, users:{<id>:<access>}})
+    # into a normalized DHIS2 sharing object ({public, userGroups:{<id>:{id, access}}, ...}) — the same shape
+    # Convert-NeoIPCSharing produces, so the two canonicalize identically. userGroups are keyed by the group
+    # CODE (or unique NAME) for human-editability and resolved to the UID via KeyToId; an unknown handle fails
+    # loud (a human-edited typo surfaces, instead of silently writing an opaque UID). `users` grants (rare; PII)
+    # stay keyed by their UID.
+    [CmdletBinding()]
+    [OutputType([System.Collections.Specialized.OrderedDictionary])]
+    param([Parameter(Mandatory)]$Spec, [hashtable]$KeyToId = @{})
+    if ($Spec -isnot [System.Collections.IDictionary]) { throw 'Sharing profile spec must be a mapping.' }
+    $sharing = [ordered]@{}
+    if ($null -ne $Spec['public']) { $sharing['public'] = [string]$Spec['public'] }
+    foreach ($grantKey in 'users', 'userGroups') {
+        $grants = $Spec[$grantKey]
+        if ($grants -is [System.Collections.IDictionary] -and $grants.Count -gt 0) {
+            $entries = [ordered]@{}
+            foreach ($gkey in $grants.Keys) {
+                $id = [string]$gkey
+                if ($grantKey -eq 'userGroups') {
+                    if ($KeyToId.ContainsKey($id)) { $id = [string]$KeyToId[$id] }
+                    else { throw "Sharing profile references unknown user group '$gkey' (expected a userGroup code or unique name)." }
+                }
+                $entries[$id] = [ordered]@{ id = $id; access = [string]$grants[$gkey] }
+            }
+            $sharing[$grantKey] = $entries
+        }
+    }
+    $sharing
+}
+
+function Import-NeoIPCSharingProfile {
+    # Load the named sharing profiles from a sharing.yaml into the module-scoped registry the row converter
+    # consults (key -> sharing object, and sharing-value -> key). A no-op when the file is absent: a
+    # directory with no non-empty sharing needs no profiles, and resolution fails loud later if one is met
+    # without a match. Two profiles resolving to the same sharing object is an authoring error (throws).
+    [CmdletBinding()]
+    param([Parameter(Mandatory)][string]$Path, [hashtable]$KeyToId = @{})
+    if (-not (Test-Path -LiteralPath $Path)) { return }
+    Import-Module powershell-yaml -ErrorAction Stop
+    $specs = Get-Content -LiteralPath $Path -Raw | ConvertFrom-Yaml
+    if ($specs -isnot [System.Collections.IDictionary]) { throw "Sharing profiles file '$Path' is not a mapping of profile-key -> sharing spec." }
+    $byKey = [ordered]@{}
+    $byValue = @{}
+    foreach ($key in $specs.Keys) {
+        $sharing = ConvertTo-NeoIPCSharingFromProfileSpec -Spec $specs[$key] -KeyToId $KeyToId
+        $byKey[[string]$key] = $sharing
+        $canon = Get-NeoIPCSharingCanonicalKey -Sharing $sharing
+        if ($byValue.ContainsKey($canon)) { throw "Sharing profiles '$($byValue[$canon])' and '$key' resolve to the same sharing object in '$Path'." }
+        $byValue[$canon] = [string]$key
+    }
+    $script:NeoIPCSharingProfiles = @{ ByKey = $byKey; ByValue = $byValue }
+}
+
+function Resolve-NeoIPCSharingProfileKey {
+    # Map a normalized sharing object to its profile key (the value written to a CSV `sharing` cell). Fails
+    # loud on an unrecognized shape so a new sharing pattern is named in sharing.yaml, never silently
+    # serialized as an opaque blob.
+    [CmdletBinding()]
+    [OutputType([string])]
+    param([Parameter(Mandatory)]$Sharing)
+    if (-not $script:NeoIPCSharingProfiles) { throw 'No sharing profiles loaded (expected a sharing.yaml in the metadata directory).' }
+    $canon = Get-NeoIPCSharingCanonicalKey -Sharing $Sharing
+    $key = $script:NeoIPCSharingProfiles.ByValue[$canon]
+    if (-not $key) { throw "Unrecognized sharing pattern (no matching profile in sharing.yaml): $canon" }
+    $key
+}
+
+function Expand-NeoIPCSharingProfile {
+    # Inverse of Resolve-NeoIPCSharingProfileKey: a profile key from a CSV `sharing` cell -> a fresh DHIS2
+    # sharing object (callers may mutate it). Fails loud on an unknown key.
+    [CmdletBinding()]
+    [OutputType([System.Collections.Specialized.OrderedDictionary])]
+    param([Parameter(Mandatory)][string]$Key)
+    if (-not $script:NeoIPCSharingProfiles) {
+        throw "No sharing profiles loaded (expected a sharing.yaml beside the CSVs) — cannot expand sharing key '$Key'."
+    }
+    if (-not $script:NeoIPCSharingProfiles.ByKey.Contains($Key)) {
+        throw "Unknown sharing profile key '$Key' (not defined in sharing.yaml)."
+    }
+    # Deep-clone the registry template via JSON so a caller never mutates it.
+    ConvertFrom-NeoIPCMetadataJsonText -Json ($script:NeoIPCSharingProfiles.ByKey[$Key] | ConvertTo-Json -Compress -Depth 10)
+}
+
+function ConvertTo-NeoIPCSharingProfileSpec {
+    # Inverse of ConvertTo-NeoIPCSharingFromProfileSpec: a normalized sharing object -> the compact
+    # sharing.yaml spec ({public, userGroups:{<code-or-name>:<access>}, users:{<id>:<access>}}) used when
+    # writing the file. userGroups are written keyed by the preferred human handle (code, else unique name)
+    # via IdToKey; an unmapped id falls back to the literal UID.
+    [CmdletBinding()]
+    [OutputType([System.Collections.Specialized.OrderedDictionary])]
+    param([Parameter(Mandatory)]$Sharing, [hashtable]$IdToKey = @{})
+    $spec = [ordered]@{}
+    if ($null -ne $Sharing['public']) { $spec['public'] = [string]$Sharing['public'] }
+    foreach ($grantKey in 'users', 'userGroups') {
+        $grants = $Sharing[$grantKey]
+        if ($grants -is [System.Collections.IDictionary] -and $grants.Count -gt 0) {
+            $entries = [ordered]@{}
+            foreach ($gid in $grants.Keys) {
+                $key = if ($grantKey -eq 'userGroups' -and $IdToKey.ContainsKey([string]$gid)) { [string]$IdToKey[[string]$gid] } else { [string]$gid }
+                $entries[$key] = [string]$grants[$gid]['access']
+            }
+            $spec[$grantKey] = $entries
+        }
+    }
+    $spec
+}
+
+function Initialize-NeoIPCSharingProfileFromPackage {
+    # Build the sharing-profile registry by collecting every distinct sharing shape in a package and minting
+    # a deterministic key per shape (sorted by canonical value -> SHARING_NNN). Used when no authored
+    # sharing.yaml is present, so emit can still resolve and a self-contained file can be written afterwards.
+    [CmdletBinding()]
+    param([Parameter(Mandatory)]$Package)
+    $byCanon = [ordered]@{}
+    foreach ($type in $script:NeoIPCMetadataTypeMaps.Keys) {
+        foreach ($obj in @($Package[$type])) {
+            if ($obj -isnot [System.Collections.IDictionary] -or -not $obj.Contains('sharing') -or -not $obj['sharing']) { continue }
+            $sharing = Convert-NeoIPCSharing $obj['sharing']
+            if ($sharing.Count -eq 0) { continue }
+            $canon = Get-NeoIPCSharingCanonicalKey -Sharing $sharing
+            if (-not $byCanon.Contains($canon)) { $byCanon[$canon] = $sharing }
+        }
+    }
+    $byKey = [ordered]@{}
+    $byValue = @{}
+    $i = 0
+    # Ordinal (locale-independent) sort so the minted SHARING_NNN numbering is reproducible across machines.
+    foreach ($canon in (Get-NeoIPCMetadataOrdinalSort -Values @($byCanon.Keys))) {
+        $i++
+        $key = 'SHARING_{0:D3}' -f $i
+        $byKey[$key] = $byCanon[$canon]
+        $byValue[$canon] = $key
+    }
+    $script:NeoIPCSharingProfiles = @{ ByKey = $byKey; ByValue = $byValue }
+}
+
+function Export-NeoIPCSharingProfile {
+    # Write the loaded sharing-profile registry to a sharing.yaml (spec form), UTF-8 no-BOM / LF, so a
+    # freshly materialised directory is self-contained. A no-op when no profiles are loaded.
+    [CmdletBinding()]
+    param([Parameter(Mandatory)][string]$Path, [hashtable]$IdToKey = @{})
+    if (-not $script:NeoIPCSharingProfiles) { return }
+    Import-Module powershell-yaml -ErrorAction Stop
+    $doc = [ordered]@{}
+    foreach ($key in $script:NeoIPCSharingProfiles.ByKey.Keys) {
+        $doc[$key] = ConvertTo-NeoIPCSharingProfileSpec -Sharing $script:NeoIPCSharingProfiles.ByKey[$key] -IdToKey $IdToKey
+    }
+    $yaml = (ConvertTo-Yaml $doc) -replace "`r`n", "`n"
+    [System.IO.File]::WriteAllText($Path, $yaml, [System.Text.UTF8Encoding]::new($false))
 }
 
 function Remove-NeoIPCMetadataNoise {
@@ -279,7 +495,7 @@ function ConvertTo-NeoIPCMetadataRow {
     }
     if ($Object.Contains('sharing') -and $Object['sharing']) {
         $sharing = Convert-NeoIPCSharing $Object['sharing']
-        if ($sharing.Count -gt 0) { $row['sharing'] = ($sharing | ConvertTo-Json -Compress -Depth 5) }
+        if ($sharing.Count -gt 0) { $row['sharing'] = Resolve-NeoIPCSharingProfileKey -Sharing $sharing }
     }
     $row
 }
@@ -313,7 +529,7 @@ function ConvertFrom-NeoIPCMetadataRow {
         }
     }
     if ($Row.Contains('sharing') -and $Row['sharing']) {
-        $obj['sharing'] = ConvertFrom-NeoIPCMetadataJsonText -Json $Row['sharing']
+        $obj['sharing'] = Expand-NeoIPCSharingProfile -Key ([string]$Row['sharing'])
     }
     $obj
 }
