@@ -20344,6 +20344,9 @@ Hierarchies:
               ConceptId: genus/stutzerimonas
               ConceptSource: LPSN
               LpsnRecordNumber: 25637
+              3GCR: true
+              Carbapenems: true
+              Colistin: true
               Children:
               - Name: Stutzerimonas nosocomialis
                 ConceptType: Species
@@ -20351,9 +20354,6 @@ Hierarchies:
                 ConceptSource: LPSN
                 Id: 2836
                 LpsnRecordNumber: 34539
-                3GCR: true
-                Carbapenems: true
-                Colistin: true
                 Synonyms:
                 - Name: Pseudomonas nosocomialis
                   ConceptId: species/pseudomonas-nosocomialis
@@ -20393,6 +20393,8 @@ Hierarchies:
             ConceptId: family/vibrionaceae
             ConceptSource: LPSN
             LpsnRecordNumber: 1543
+            3GCR: true
+            Carbapenems: true
             Children:
             - Name: Grimontia
               ConceptType: Genus
@@ -20450,7 +20452,6 @@ Hierarchies:
               ConceptSource: LPSN
               Id: 1919
               LpsnRecordNumber: 517157
-              Colistin: true
               Children:
               - Name: Vibrio alginolyticus
                 ConceptType: Species
@@ -20458,7 +20459,6 @@ Hierarchies:
                 ConceptSource: LPSN
                 Id: 2443
                 LpsnRecordNumber: 782990
-                Colistin: true
                 Synonyms:
                 - Name: Beneckea alginolytica
                   ConceptId: species/beneckea-alginolytica
@@ -20471,35 +20471,30 @@ Hierarchies:
                 ConceptSource: LPSN
                 Id: 92
                 LpsnRecordNumber: 782995
-                Colistin: true
               - Name: Vibrio cincinnatiensis
                 ConceptType: Species
                 ConceptId: species/vibrio-cincinnatiensis
                 ConceptSource: LPSN
                 Id: 1352
                 LpsnRecordNumber: 785146
-                Colistin: true
               - Name: Vibrio fluvialis
                 ConceptType: Species
                 ConceptId: species/vibrio-fluvialis
                 ConceptSource: LPSN
                 Id: 175
                 LpsnRecordNumber: 785151
-                Colistin: true
               - Name: Vibrio furnissii
                 ConceptType: Species
                 ConceptId: species/vibrio-furnissii
                 ConceptSource: LPSN
                 Id: 1016
                 LpsnRecordNumber: 783005
-                Colistin: true
               - Name: Vibrio harveyi
                 ConceptType: Species
                 ConceptId: species/vibrio-harveyi
                 ConceptSource: LPSN
                 Id: 2261
                 LpsnRecordNumber: 783009
-                Colistin: true
                 Synonyms:
                 - Name: Beneckea harveyi
                   ConceptId: species/beneckea-harveyi
@@ -20527,21 +20522,18 @@ Hierarchies:
                 ConceptSource: LPSN
                 Id: 1267
                 LpsnRecordNumber: 785158
-                Colistin: true
               - Name: Vibrio mimicus
                 ConceptType: Species
                 ConceptId: species/vibrio-mimicus
                 ConceptSource: LPSN
                 Id: 2144
                 LpsnRecordNumber: 785159
-                Colistin: true
               - Name: Vibrio parahaemolyticus
                 ConceptType: Species
                 ConceptId: species/vibrio-parahaemolyticus
                 ConceptSource: LPSN
                 Id: 1526
                 LpsnRecordNumber: 783021
-                Colistin: true
                 Synonyms:
                 - Name: Beneckea parahaemolytica
                   ConceptId: species/beneckea-parahaemolytica
@@ -20554,7 +20546,6 @@ Hierarchies:
                 ConceptSource: LPSN
                 Id: 2095
                 LpsnRecordNumber: 783036
-                Colistin: true
                 Synonyms:
                 - Name: Beneckea vulnifica
                   ConceptId: species/beneckea-vulnifica
