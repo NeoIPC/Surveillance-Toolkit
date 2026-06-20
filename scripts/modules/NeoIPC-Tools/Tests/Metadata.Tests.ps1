@@ -2024,4 +2024,425 @@ InModuleScope 'NeoIPC-Tools' {
             $txt.Contains("`n") | Should -BeTrue
         }
     }
+
+    Describe 'Pathogen option-set generation' {
+        BeforeAll {
+            Import-Module powershell-yaml -ErrorAction Stop
+            # Author the fixture as real YAML text (the exact path the cmdlet exercises): higher-rank nodes carry
+            # no Id; genus / species / synonym nodes do; a synonym is itself an Id-bearing, selectable option.
+            $yaml = @'
+Hierarchies:
+- Name: Not listed
+  ConceptType: Unknown
+  Id: 0
+- Name: Bacteria
+  ConceptType: Domain
+  Children:
+  - Name: Escherichia
+    ConceptType: Genus
+    Id: 10
+    Children:
+    - Name: Escherichia coli
+      ConceptType: Species
+      Id: 11
+      Synonyms:
+      - Name: Bacillus coli
+        Id: 12
+'@
+            $script:GenYaml = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-onto-{0}.yaml' -f ([guid]::NewGuid().ToString('N')))
+            Set-Content -LiteralPath $script:GenYaml -Value $yaml -Encoding utf8
+            $script:GenTree = (Get-Content -LiteralPath $script:GenYaml -Raw | ConvertFrom-Yaml)
+        }
+        AfterAll {
+            if ($script:GenYaml -and (Test-Path -LiteralPath $script:GenYaml)) { Remove-Item -LiteralPath $script:GenYaml -Force }
+        }
+
+        It 'walks the tree depth-first (Hierarchies/Synonyms/Children), emitting every Id-bearing node (synonyms included)' {
+            $concepts = @(Get-NeoIPCInfectiousAgentConcept -Node $script:GenTree)
+            @($concepts | ForEach-Object { $_.Id }) | Should -Be @(0, 10, 11, 12)
+            @($concepts | ForEach-Object { $_.Name }) | Should -Be @('Not listed', 'Escherichia', 'Escherichia coli', 'Bacillus coli')
+        }
+        It 'emits a node''s synonyms before its children (deterministic visit order, not file order)' {
+            # A node carrying BOTH an Id-bearing Synonym and an Id-bearing Child, child listed first in the source.
+            $tree = [ordered]@{ Hierarchies = @(
+                    [ordered]@{ Name = 'Genus'; Id = 100; Children = @([ordered]@{ Name = 'Child species'; Id = 102 }); Synonyms = @([ordered]@{ Name = 'Old genus'; Id = 101 }) }
+                ) }
+            @(Get-NeoIPCInfectiousAgentConcept -Node $tree | ForEach-Object { $_.Id }) | Should -Be @(100, 101, 102)
+        }
+        It 'skips higher-rank nodes that carry no Id' {
+            (@(Get-NeoIPCInfectiousAgentConcept -Node $script:GenTree) | Where-Object { $_.Name -eq 'Bacteria' }).Count | Should -Be 0
+        }
+        It 'fails loud on an Id-bearing node with a blank or non-integer Id' {
+            { Get-NeoIPCInfectiousAgentConcept -Node ([ordered]@{ Hierarchies = @([ordered]@{ Name = 'X'; Id = '' }) }) } | Should -Throw '*blank or non-integer Id*'
+            { Get-NeoIPCInfectiousAgentConcept -Node ([ordered]@{ Hierarchies = @([ordered]@{ Name = 'X'; Id = 'abc' }) }) } | Should -Throw '*blank or non-integer Id*'
+        }
+        It 'fails loud on an Id-bearing node with a blank Name' {
+            { Get-NeoIPCInfectiousAgentConcept -Node ([ordered]@{ Hierarchies = @([ordered]@{ Name = ''; Id = 7 }) }) } | Should -Throw '*blank Name*'
+        }
+        It 'emits one option per Id-bearing node (code=Id, name=Name, 1-based sortOrder, document order)' {
+            $frag = New-NeoIPCPathogenOptionSet -Path $script:GenYaml
+            @($frag['optionSets']).Count | Should -Be 1
+            @($frag['options']).Count | Should -Be 4
+            $os = @($frag['optionSets'])[0]
+            $os['code'] | Should -BeExactly 'NEOIPC_PATHOGENS'
+            $os['valueType'] | Should -BeExactly 'INTEGER_ZERO_OR_POSITIVE'
+            @($os['options']).Count | Should -Be 4
+            @($frag['options'] | ForEach-Object { $_['code'] }) | Should -Be @('0', '10', '11', '12')
+            @($frag['options'] | ForEach-Object { $_['sortOrder'] }) | Should -Be @(1, 2, 3, 4)
+            (@($frag['options'])[2]['name']) | Should -BeExactly 'Escherichia coli'
+            (@($frag['options'])[0]['optionSet']['id']) | Should -BeExactly $os['id']
+            (Test-NeoIPCMetadataUid -Id $os['id']) | Should -BeTrue
+        }
+        It 'mints deterministic UIDs — pure across runs, and option uid = f(optionSet uid, code)' {
+            $a = New-NeoIPCPathogenOptionSet -Path $script:GenYaml
+            $b = New-NeoIPCPathogenOptionSet -Path $script:GenYaml
+            (@($a['optionSets'])[0]['id']) | Should -BeExactly (@($b['optionSets'])[0]['id'])
+            @($a['options'] | ForEach-Object { $_['id'] }) | Should -Be @($b['options'] | ForEach-Object { $_['id'] })
+            $osUid = @($a['optionSets'])[0]['id']
+            $expected = New-NeoIPCMetadataUid -Type 'options' -NaturalKey ('{0}|{1}' -f $osUid, '11')
+            (@($a['options'] | Where-Object { $_['code'] -eq '11' })[0]['id']) | Should -BeExactly $expected
+        }
+        It 'preserves the option-set and option UIDs (and sharing) from an existing export, by code' {
+            $existing = @{
+                optionSets = @([ordered]@{ id = 'KHMPRkX5a4r'; code = 'NEOIPC_PATHOGENS'; name = 'old'; sharing = @{ public = 'rw------' } })
+                options    = @([ordered]@{ id = 'optExist001'; code = '11'; name = 'old'; optionSet = [ordered]@{ id = 'KHMPRkX5a4r' } })
+            }
+            $frag = New-NeoIPCPathogenOptionSet -Path $script:GenYaml -ExistingPackage $existing
+            (@($frag['optionSets'])[0]['id']) | Should -BeExactly 'KHMPRkX5a4r'
+            (@($frag['optionSets'])[0]['sharing']) | Should -Not -BeNullOrEmpty
+            (@($frag['options'] | Where-Object { $_['code'] -eq '11' })[0]['id']) | Should -BeExactly 'optExist001'
+            # A code absent from the export still mints deterministically off the preserved set UID.
+            (@($frag['options'] | Where-Object { $_['code'] -eq '12' })[0]['id']) |
+                Should -BeExactly (New-NeoIPCMetadataUid -Type 'options' -NaturalKey 'KHMPRkX5a4r|12')
+        }
+        It 'fails loud when the export carries a deployed code absent from the ontology (no silent drop)' {
+            $existing = @{
+                optionSets = @([ordered]@{ id = 'KHMPRkX5a4r'; code = 'NEOIPC_PATHOGENS'; name = 'old' })
+                options    = @([ordered]@{ id = 'optGhost001'; code = '9999'; name = 'ghost'; optionSet = [ordered]@{ id = 'KHMPRkX5a4r' } })
+            }
+            { New-NeoIPCPathogenOptionSet -Path $script:GenYaml -ExistingPackage $existing } | Should -Throw '*9999*'
+        }
+        It 'fails loud on a duplicate Id in the ontology' {
+            $dupYaml = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-onto-dup-{0}.yaml' -f ([guid]::NewGuid().ToString('N')))
+            Set-Content -LiteralPath $dupYaml -Encoding utf8 -Value @'
+Hierarchies:
+- Name: A
+  Id: 5
+- Name: B
+  Id: 5
+'@
+            try { { New-NeoIPCPathogenOptionSet -Path $dupYaml } | Should -Throw '*Duplicate option code 5*' }
+            finally { Remove-Item -LiteralPath $dupYaml -Force }
+        }
+        It 're-mints deterministically when the export carries a structurally invalid option-set or option id' {
+            $existing = @{
+                optionSets = @([ordered]@{ id = 'BAD!'; code = 'NEOIPC_PATHOGENS'; name = 'old' })
+                options    = @([ordered]@{ id = 'short'; code = '11'; name = 'old'; optionSet = [ordered]@{ id = 'BAD!' } })
+            }
+            $frag = New-NeoIPCPathogenOptionSet -Path $script:GenYaml -ExistingPackage $existing
+            $osUid = @($frag['optionSets'])[0]['id']
+            (Test-NeoIPCMetadataUid -Id $osUid) | Should -BeTrue
+            $osUid | Should -BeExactly (New-NeoIPCMetadataUid -Type 'optionSets' -NaturalKey 'NEOIPC_PATHOGENS')
+            $opt = @($frag['options'] | Where-Object { $_['code'] -eq '11' })[0]['id']
+            (Test-NeoIPCMetadataUid -Id $opt) | Should -BeTrue
+            $opt | Should -BeExactly (New-NeoIPCMetadataUid -Type 'options' -NaturalKey ('{0}|{1}' -f $osUid, '11'))
+        }
+        It 'fails loud when two option codes in the export share a UID' {
+            $existing = @{
+                optionSets = @([ordered]@{ id = 'KHMPRkX5a4r'; code = 'NEOIPC_PATHOGENS'; name = 'old' })
+                options    = @(
+                    [ordered]@{ id = 'dupSharedAA'; code = '11'; name = 'a'; optionSet = [ordered]@{ id = 'KHMPRkX5a4r' } },
+                    [ordered]@{ id = 'dupSharedAA'; code = '12'; name = 'b'; optionSet = [ordered]@{ id = 'KHMPRkX5a4r' } })
+            }
+            { New-NeoIPCPathogenOptionSet -Path $script:GenYaml -ExistingPackage $existing } | Should -Throw '*UID collision*'
+        }
+        It 'fails loud when the ontology has no Id-bearing concepts (would orphan the bindings)' {
+            $emptyYaml = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-onto-empty-{0}.yaml' -f ([guid]::NewGuid().ToString('N')))
+            Set-Content -LiteralPath $emptyYaml -Encoding utf8 -Value @'
+Hierarchies:
+- Name: Bacteria
+  ConceptType: Domain
+  Children:
+  - Name: Escherichia
+    ConceptType: Genus
+'@
+            try { { New-NeoIPCPathogenOptionSet -Path $emptyYaml } | Should -Throw '*No Id-bearing concepts*' }
+            finally { Remove-Item -LiteralPath $emptyYaml -Force }
+        }
+        It 'fails loud when -ExistingPackage is supplied but lacks the target option set' {
+            $existing = @{ optionSets = @([ordered]@{ id = 'KHMPRkX5a4r'; code = 'SOME_OTHER_SET' }); options = @() }
+            { New-NeoIPCPathogenOptionSet -Path $script:GenYaml -ExistingPackage $existing } | Should -Throw '*not found in the supplied*'
+        }
+        It 'regenerates the option and set names from the ontology, not a preserved drifted name' {
+            $existing = @{
+                optionSets = @([ordered]@{ id = 'KHMPRkX5a4r'; code = 'NEOIPC_PATHOGENS'; name = 'DRIFTED SET NAME' })
+                options    = @([ordered]@{ id = 'optExist001'; code = '11'; name = 'DRIFTED OPTION'; optionSet = [ordered]@{ id = 'KHMPRkX5a4r' } })
+            }
+            $frag = New-NeoIPCPathogenOptionSet -Path $script:GenYaml -ExistingPackage $existing
+            (@($frag['optionSets'])[0]['name']) | Should -BeExactly 'NeoIPC Pathogen options'
+            (@($frag['options'] | Where-Object { $_['code'] -eq '11' })[0]['name']) | Should -BeExactly 'Escherichia coli'
+        }
+        It 'emits optionSet.options in the same order as the options list / sortOrder (the DHIS2 ordering authority)' {
+            $frag = New-NeoIPCPathogenOptionSet -Path $script:GenYaml
+            $os = @($frag['optionSets'])[0]
+            @($os['options'] | ForEach-Object { $_['id'] }) | Should -Be @($frag['options'] | ForEach-Object { $_['id'] })
+        }
+        It 'honours the -OptionSetCode / -OptionSetName / -ValueType overrides' {
+            $frag = New-NeoIPCPathogenOptionSet -Path $script:GenYaml -OptionSetCode 'MY_SET' -OptionSetName 'Custom name' -ValueType 'TEXT'
+            $os = @($frag['optionSets'])[0]
+            $os['code'] | Should -BeExactly 'MY_SET'
+            $os['name'] | Should -BeExactly 'Custom name'
+            $os['valueType'] | Should -BeExactly 'TEXT'
+            $os['id'] | Should -BeExactly (New-NeoIPCMetadataUid -Type 'optionSets' -NaturalKey 'MY_SET')
+        }
+    }
+
+    Describe 'Pathogen data-element generation' {
+        BeforeAll {
+            $script:DePlan = @(Get-NeoIPCPathogenDataElementPlan)
+            # Synthetic export covering every matrix DE (stub: id + description + categoryCombo) plus the option
+            # sets the DEs bind, so the generator can reuse content and resolve option-set codes.
+            $des = foreach ($d in $script:DePlan) {
+                [ordered]@{
+                    id            = (New-NeoIPCMetadataUid -Type 'dataElements' -NaturalKey $d.Code)
+                    code          = $d.Code
+                    description   = ('desc for {0}' -f $d.Code)
+                    categoryCombo = [ordered]@{ id = 'bjDvmb4bfuf' }
+                }
+            }
+            $script:DePackage = @{
+                dataElements = @($des)
+                optionSets   = @(
+                    [ordered]@{ id = 'KHMPRkX5a4r'; code = 'NEOIPC_PATHOGENS' },
+                    [ordered]@{ id = 'TnE2yuSrqEP'; code = 'NEOIPC_YES_NO_NOT_TESTED' },
+                    [ordered]@{ id = 'B3oP3uOI5Ef'; code = 'NEOIPC_BSI_PATHOGEN_RECOVERED_FROM' },
+                    [ordered]@{ id = 'Y64Emj9405U'; code = 'NEOIPC_HAP_RESPIRATORY_TRACT_SAMPLE_SOURCES' }
+                )
+            }
+        }
+
+        It 'expands the capability matrix to 135 per-slot data elements' {
+            $script:DePlan.Count | Should -Be 135
+        }
+        It 'gives a BSI primary slot the full suffix set (base + NAME + 5 resistance + SOURCE + MULTIPLE), in order' {
+            @($script:DePlan | Where-Object { $_.Code -like 'NEOIPC_BSI_PATHOGEN_1*' } | ForEach-Object { $_.Code }) | Should -Be @(
+                'NEOIPC_BSI_PATHOGEN_1', 'NEOIPC_BSI_PATHOGEN_1_NAME', 'NEOIPC_BSI_PATHOGEN_1_3GCR',
+                'NEOIPC_BSI_PATHOGEN_1_CAR', 'NEOIPC_BSI_PATHOGEN_1_COR', 'NEOIPC_BSI_PATHOGEN_1_MRSA',
+                'NEOIPC_BSI_PATHOGEN_1_VRE', 'NEOIPC_BSI_PATHOGEN_1_SOURCE', 'NEOIPC_BSI_PATHOGEN_1_MULTIPLE')
+        }
+        It 'gives HAP primary a SOURCE but no MULTIPLE; SSI primary neither' {
+            (@($script:DePlan | Where-Object { $_.Code -eq 'NEOIPC_HAP_PATHOGEN_1_SOURCE' }).Count) | Should -Be 1
+            (@($script:DePlan | Where-Object { $_.Code -eq 'NEOIPC_HAP_PATHOGEN_1_MULTIPLE' }).Count) | Should -Be 0
+            (@($script:DePlan | Where-Object { $_.Code -eq 'NEOIPC_SSI_PATHOGEN_1_SOURCE' }).Count) | Should -Be 0
+        }
+        It 'gives a secondary-BSI slot only base + NAME + 5 resistance (no SOURCE/MULTIPLE)' {
+            $nec1 = @($script:DePlan | Where-Object { $_.Code -like 'NEOIPC_NEC_SEC_BSI_PATHOGEN_1*' })
+            $nec1.Count | Should -Be 7
+            (@($nec1 | Where-Object { $_.Code -match '_(SOURCE|MULTIPLE)$' }).Count) | Should -Be 0
+            (@($nec1)[0].Name) | Should -BeExactly 'NeoIPC NEC Secondary BSI organism 1'
+            (@($nec1)[0].OptionSetCode) | Should -BeExactly 'NEOIPC_PATHOGENS'
+        }
+        It 'binds the correct option sets, value types and names per suffix' {
+            $base = @($script:DePlan | Where-Object { $_.Code -eq 'NEOIPC_BSI_PATHOGEN_1' })[0]
+            $base.ValueType | Should -BeExactly 'INTEGER_ZERO_OR_POSITIVE'
+            $base.OptionSetCode | Should -BeExactly 'NEOIPC_PATHOGENS'
+            $base.FormName | Should -BeExactly 'Organism 1'
+            $gcr = @($script:DePlan | Where-Object { $_.Code -eq 'NEOIPC_BSI_PATHOGEN_1_3GCR' })[0]
+            $gcr.ValueType | Should -BeExactly 'INTEGER'
+            $gcr.OptionSetCode | Should -BeExactly 'NEOIPC_YES_NO_NOT_TESTED'
+            $gcr.Name | Should -BeExactly 'NeoIPC BSI Organism 1 3GCR'
+            $gcr.FormName | Should -BeExactly '- 3GCR'
+            (@($script:DePlan | Where-Object { $_.Code -eq 'NEOIPC_BSI_PATHOGEN_1_SOURCE' })[0].OptionSetCode) | Should -BeExactly 'NEOIPC_BSI_PATHOGEN_RECOVERED_FROM'
+            (@($script:DePlan | Where-Object { $_.Code -eq 'NEOIPC_HAP_PATHOGEN_1_SOURCE' })[0].OptionSetCode) | Should -BeExactly 'NEOIPC_HAP_RESPIRATORY_TRACT_SAMPLE_SOURCES'
+            $mult = @($script:DePlan | Where-Object { $_.Code -eq 'NEOIPC_BSI_PATHOGEN_1_MULTIPLE' })[0]
+            $mult.ValueType | Should -BeExactly 'TRUE_ONLY'
+            $mult.OptionSetCode | Should -BeNullOrEmpty
+        }
+
+        It 'generates 135 DEs, reusing id/description/categoryCombo and resolving option-set bindings' {
+            $frag = New-NeoIPCPathogenDataElement -ExistingPackage $script:DePackage
+            @($frag['dataElements']).Count | Should -Be 135
+            $byCode = @{}; foreach ($de in @($frag['dataElements'])) { $byCode[[string]$de['code']] = $de }
+            $base = $byCode['NEOIPC_BSI_PATHOGEN_1']
+            $base['optionSet']['id'] | Should -BeExactly 'KHMPRkX5a4r'
+            $base['valueType'] | Should -BeExactly 'INTEGER_ZERO_OR_POSITIVE'
+            $base['name'] | Should -BeExactly 'NeoIPC BSI Organism 1'
+            $base['description'] | Should -BeExactly 'desc for NEOIPC_BSI_PATHOGEN_1'
+            $base['categoryCombo']['id'] | Should -BeExactly 'bjDvmb4bfuf'
+            $base['id'] | Should -BeExactly (New-NeoIPCMetadataUid -Type 'dataElements' -NaturalKey 'NEOIPC_BSI_PATHOGEN_1')
+            $base['zeroIsSignificant'] | Should -BeTrue
+            $byCode['NEOIPC_BSI_PATHOGEN_1_3GCR']['optionSet']['id'] | Should -BeExactly 'TnE2yuSrqEP'
+            $byCode['NEOIPC_HAP_PATHOGEN_1_SOURCE']['optionSet']['id'] | Should -BeExactly 'Y64Emj9405U'
+            $byCode['NEOIPC_BSI_PATHOGEN_1_NAME']['valueType'] | Should -BeExactly 'TEXT'
+            $byCode['NEOIPC_BSI_PATHOGEN_1_NAME'].Contains('optionSet') | Should -BeFalse
+            $byCode['NEOIPC_BSI_PATHOGEN_1_MULTIPLE']['valueType'] | Should -BeExactly 'TRUE_ONLY'
+            $byCode['NEOIPC_BSI_PATHOGEN_1_MULTIPLE'].Contains('optionSet') | Should -BeFalse
+        }
+        It 'fails loud when a matrix data element is missing from the package' {
+            $pkg = @{
+                dataElements = @($script:DePackage['dataElements'] | Where-Object { [string]$_['code'] -ne 'NEOIPC_SSI_PATHOGEN_3_VRE' })
+                optionSets   = $script:DePackage['optionSets']
+            }
+            { New-NeoIPCPathogenDataElement -ExistingPackage $pkg } | Should -Throw '*NEOIPC_SSI_PATHOGEN_3_VRE*'
+        }
+        It 'fails loud when a bound option set is absent from the package' {
+            $pkg = @{
+                dataElements = $script:DePackage['dataElements']
+                optionSets   = @($script:DePackage['optionSets'] | Where-Object { [string]$_['code'] -ne 'NEOIPC_YES_NO_NOT_TESTED' })
+            }
+            { New-NeoIPCPathogenDataElement -ExistingPackage $pkg } | Should -Throw '*NEOIPC_YES_NO_NOT_TESTED*'
+        }
+        It 'normalises _SOURCE zeroIsSignificant to false for both BSI and HAP (deployed has them inconsistent)' {
+            $frag = New-NeoIPCPathogenDataElement -ExistingPackage $script:DePackage
+            $byCode = @{}; foreach ($de in @($frag['dataElements'])) { $byCode[[string]$de['code']] = $de }
+            $byCode['NEOIPC_BSI_PATHOGEN_1_SOURCE']['zeroIsSignificant'] | Should -BeFalse
+            $byCode['NEOIPC_HAP_PATHOGEN_1_SOURCE']['zeroIsSignificant'] | Should -BeFalse
+        }
+        It 're-mints deterministically when an existing data element carries a structurally invalid id' {
+            $des = foreach ($d in $script:DePackage['dataElements']) {
+                $c = [ordered]@{}; foreach ($k in $d.Keys) { $c[$k] = $d[$k] }
+                if ($c['code'] -eq 'NEOIPC_BSI_PATHOGEN_1') { $c['id'] = 'BAD!' }
+                $c
+            }
+            $frag = New-NeoIPCPathogenDataElement -ExistingPackage @{ dataElements = @($des); optionSets = $script:DePackage['optionSets'] }
+            $id = @($frag['dataElements'] | Where-Object { $_['code'] -eq 'NEOIPC_BSI_PATHOGEN_1' })[0]['id']
+            (Test-NeoIPCMetadataUid -Id $id) | Should -BeTrue
+            $id | Should -BeExactly (New-NeoIPCMetadataUid -Type 'dataElements' -NaturalKey 'NEOIPC_BSI_PATHOGEN_1')
+        }
+        It 'regenerates name/shortName/formName from the matrix, not a drifted export value' {
+            $des = foreach ($d in $script:DePackage['dataElements']) {
+                $c = [ordered]@{}; foreach ($k in $d.Keys) { $c[$k] = $d[$k] }
+                if ($c['code'] -eq 'NEOIPC_BSI_PATHOGEN_1') { $c['name'] = 'DRIFT'; $c['shortName'] = 'DRIFT'; $c['formName'] = 'DRIFT' }
+                $c
+            }
+            $frag = New-NeoIPCPathogenDataElement -ExistingPackage @{ dataElements = @($des); optionSets = $script:DePackage['optionSets'] }
+            $base = @($frag['dataElements'] | Where-Object { $_['code'] -eq 'NEOIPC_BSI_PATHOGEN_1' })[0]
+            $base['name'] | Should -BeExactly 'NeoIPC BSI Organism 1'
+            $base['shortName'] | Should -BeExactly 'NeoIPC BSI Org. 1'
+            $base['formName'] | Should -BeExactly 'Organism 1'
+        }
+        It 'fails loud when two matrix DE codes in the export share a UID' {
+            $des = foreach ($d in $script:DePackage['dataElements']) {
+                $c = [ordered]@{}; foreach ($k in $d.Keys) { $c[$k] = $d[$k] }
+                if ($c['code'] -in 'NEOIPC_BSI_PATHOGEN_1', 'NEOIPC_BSI_PATHOGEN_2') { $c['id'] = 'dupSharedAA' }
+                $c
+            }
+            { New-NeoIPCPathogenDataElement -ExistingPackage @{ dataElements = @($des); optionSets = $script:DePackage['optionSets'] } } | Should -Throw '*Duplicate data-element id*'
+        }
+        It 'fails loud when the package carries two data elements with the same code' {
+            $des = @($script:DePackage['dataElements']) + , ([ordered]@{ id = 'extraDupAA01'; code = 'NEOIPC_BSI_PATHOGEN_1'; categoryCombo = [ordered]@{ id = 'bjDvmb4bfuf' } })
+            { New-NeoIPCPathogenDataElement -ExistingPackage @{ dataElements = @($des); optionSets = $script:DePackage['optionSets'] } } | Should -Throw '*Duplicate data-element code*'
+        }
+    }
+
+    Describe 'Pathogen program-rule-variable generation' {
+        BeforeAll {
+            $script:PrvPlan = @(Get-NeoIPCPathogenVariablePlan)
+            $baseCodes = @($script:PrvPlan | Where-Object { $_.Kind -eq 'value' } | ForEach-Object { $_.DataElementCode })
+            $des = foreach ($c in $baseCodes) { [ordered]@{ code = $c; id = (New-NeoIPCMetadataUid -Type 'dataElements' -NaturalKey $c) } }
+            $script:PrvPackage = @{
+                programs             = @([ordered]@{ code = 'NEOIPC_CORE'; id = 'D8mSSpOpsKj' })
+                dataElements         = @($des)
+                # one pre-existing PRV, to prove UID preservation by name
+                programRuleVariables = @([ordered]@{ name = 'NeoIPC BSI Pathogen 1 value'; id = 'FFHTEhKxqZB' })
+            }
+        }
+
+        It 'expands to 108 resistance variables (18 value + 90 may-be)' {
+            $script:PrvPlan.Count | Should -Be 108
+            (@($script:PrvPlan | Where-Object { $_.Kind -eq 'value' }).Count) | Should -Be 18
+            (@($script:PrvPlan | Where-Object { $_.Kind -eq 'mayBe' }).Count) | Should -Be 90
+        }
+        It 'gives each slot one value + five may-be variables with the right shapes and names' {
+            $slot = @($script:PrvPlan | Where-Object { $_.Name -like 'NeoIPC BSI Pathogen 1*' })
+            $slot.Count | Should -Be 6
+            $val = @($slot | Where-Object { $_.Kind -eq 'value' })[0]
+            $val.Name | Should -BeExactly 'NeoIPC BSI Pathogen 1 value'
+            $val.SourceType | Should -BeExactly 'DATAELEMENT_CURRENT_EVENT'
+            $val.ValueType | Should -BeExactly 'INTEGER_ZERO_OR_POSITIVE'
+            $val.UseCodeForOptionSet | Should -BeTrue
+            $val.DataElementCode | Should -BeExactly 'NEOIPC_BSI_PATHOGEN_1'
+            @($slot | Where-Object { $_.Kind -eq 'mayBe' } | ForEach-Object { $_.Name }) | Should -Be @(
+                'NeoIPC BSI Pathogen 1 may be 3GCR', 'NeoIPC BSI Pathogen 1 may be carbapenem-resistant',
+                'NeoIPC BSI Pathogen 1 may be colistin-resistant', 'NeoIPC BSI Pathogen 1 may be MRSA',
+                'NeoIPC BSI Pathogen 1 may be VRE')
+            $mb = @($slot | Where-Object { $_.Kind -eq 'mayBe' })[0]
+            $mb.SourceType | Should -BeExactly 'CALCULATED_VALUE'
+            $mb.ValueType | Should -BeExactly 'BOOLEAN'
+            $mb.DataElementCode | Should -BeNullOrEmpty
+        }
+        It 'uses the secondary-BSI name template for secondary slots' {
+            (@($script:PrvPlan | Where-Object { $_.Kind -eq 'value' -and $_.Stage -eq 'NEC' })[0].Name) |
+                Should -BeExactly 'NeoIPC NEC Secondary BSI pathogen 1 value'
+        }
+
+        It 'generates 108 PRVs, resolving the base DE + program and preserving the UID by name' {
+            $frag = New-NeoIPCPathogenVariable -ExistingPackage $script:PrvPackage
+            @($frag['programRuleVariables']).Count | Should -Be 108
+            $byName = @{}; foreach ($v in @($frag['programRuleVariables'])) { $byName[[string]$v['name']] = $v }
+            $val = $byName['NeoIPC BSI Pathogen 1 value']
+            $val['id'] | Should -BeExactly 'FFHTEhKxqZB'   # preserved from the package
+            $val['programRuleVariableSourceType'] | Should -BeExactly 'DATAELEMENT_CURRENT_EVENT'
+            $val['useCodeForOptionSet'] | Should -BeTrue
+            $val['program']['id'] | Should -BeExactly 'D8mSSpOpsKj'
+            $val['dataElement']['id'] | Should -BeExactly (New-NeoIPCMetadataUid -Type 'dataElements' -NaturalKey 'NEOIPC_BSI_PATHOGEN_1')
+            $mb = $byName['NeoIPC BSI Pathogen 1 may be 3GCR']
+            $mb['programRuleVariableSourceType'] | Should -BeExactly 'CALCULATED_VALUE'
+            $mb['valueType'] | Should -BeExactly 'BOOLEAN'
+            $mb.Contains('dataElement') | Should -BeFalse
+            # a value PRV not pre-existing is minted deterministically by name
+            $byName['NeoIPC HAP Pathogen 1 value']['id'] | Should -BeExactly (New-NeoIPCMetadataUid -Type 'programRuleVariables' -NaturalKey 'NeoIPC HAP Pathogen 1 value')
+        }
+        It 'fails loud when the program is absent from the package' {
+            $pkg = @{ programs = @(); dataElements = $script:PrvPackage['dataElements']; programRuleVariables = @() }
+            { New-NeoIPCPathogenVariable -ExistingPackage $pkg } | Should -Throw '*NEOIPC_CORE*'
+        }
+        It 'fails loud when a base data element is absent from the package' {
+            $pkg = @{
+                programs             = $script:PrvPackage['programs']
+                dataElements         = @($script:PrvPackage['dataElements'] | Where-Object { [string]$_['code'] -ne 'NEOIPC_BSI_PATHOGEN_1' })
+                programRuleVariables = @()
+            }
+            { New-NeoIPCPathogenVariable -ExistingPackage $pkg } | Should -Throw '*NEOIPC_BSI_PATHOGEN_1*'
+        }
+        It 're-mints deterministically when a pre-existing PRV carries a structurally invalid id' {
+            $pkg = @{
+                programs             = $script:PrvPackage['programs']
+                dataElements         = $script:PrvPackage['dataElements']
+                programRuleVariables = @([ordered]@{ name = 'NeoIPC BSI Pathogen 1 value'; id = 'BAD!' })
+            }
+            $id = @((New-NeoIPCPathogenVariable -ExistingPackage $pkg)['programRuleVariables'] | Where-Object { $_['name'] -eq 'NeoIPC BSI Pathogen 1 value' })[0]['id']
+            (Test-NeoIPCMetadataUid -Id $id) | Should -BeTrue
+            $id | Should -BeExactly (New-NeoIPCMetadataUid -Type 'programRuleVariables' -NaturalKey 'NeoIPC BSI Pathogen 1 value')
+        }
+        It 'fails loud when two PRV names in the export share a UID' {
+            $pkg = @{
+                programs             = $script:PrvPackage['programs']
+                dataElements         = $script:PrvPackage['dataElements']
+                programRuleVariables = @(
+                    [ordered]@{ name = 'NeoIPC BSI Pathogen 1 value'; id = 'dupSharedAA' },
+                    [ordered]@{ name = 'NeoIPC BSI Pathogen 1 may be 3GCR'; id = 'dupSharedAA' })
+            }
+            { New-NeoIPCPathogenVariable -ExistingPackage $pkg } | Should -Throw '*UID collision for program-rule variable*'
+        }
+        It 'fails loud when the package carries two PRVs with the same name' {
+            $pkg = @{
+                programs             = $script:PrvPackage['programs']
+                dataElements         = $script:PrvPackage['dataElements']
+                programRuleVariables = @(
+                    [ordered]@{ name = 'NeoIPC BSI Pathogen 1 value'; id = 'prvDupAAA01' },
+                    [ordered]@{ name = 'NeoIPC BSI Pathogen 1 value'; id = 'prvDupAAA02' })
+            }
+            { New-NeoIPCPathogenVariable -ExistingPackage $pkg } | Should -Throw '*Duplicate program-rule-variable name*'
+        }
+        It 'honours the -ProgramCode override (and fails loud without it)' {
+            $pkg = @{
+                programs             = @([ordered]@{ code = 'MY_PROGRAM'; id = 'MyProgram01' })
+                dataElements         = $script:PrvPackage['dataElements']
+                programRuleVariables = @()
+            }
+            (@((New-NeoIPCPathogenVariable -ExistingPackage $pkg -ProgramCode 'MY_PROGRAM')['programRuleVariables'])[0]['program']['id']) | Should -BeExactly 'MyProgram01'
+            { New-NeoIPCPathogenVariable -ExistingPackage $pkg } | Should -Throw '*NEOIPC_CORE*'
+        }
+    }
 }

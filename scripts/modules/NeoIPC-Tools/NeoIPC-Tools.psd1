@@ -73,6 +73,10 @@
         'New-NeoIPCMetadataPackage'
         'Export-NeoIPCMetadataTranslation'
         'Import-NeoIPCMetadataTranslation'
+        # Metadata generation (ontology / matrix-driven)
+        'New-NeoIPCPathogenOptionSet'
+        'New-NeoIPCPathogenDataElement'
+        'New-NeoIPCPathogenVariable'
     )
 
     # Cmdlets to export from this module
