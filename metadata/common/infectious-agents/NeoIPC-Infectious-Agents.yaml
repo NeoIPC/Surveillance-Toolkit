@@ -52,6 +52,14 @@ Hierarchies:
   3GCR: true
   Carbapenems: true
   Colistin: true
+- Name: Unidentifiable
+  ConceptType: Unknown
+  ConceptId: 101
+  ConceptSource: NeoIPC
+  Id: 3561
+  Description: >-
+    For a blood culture that tested positive but whose causative infectious agent could not be
+    identified to any taxonomic level with the methods available in the hospital's laboratory.
 - Name: Viruses
   ConceptId: 100
   ConceptSource: NeoIPC
@@ -475,9 +483,10 @@ Hierarchies:
                     IctvId: 20132595
                     Synonyms:
                     - Name: B19 virus
-                      ConceptId: 10
-                      ConceptSource: NeoIPC
+                      ConceptId: 20041550
+                      ConceptSource: ICTV
                       Id: 2614
+                      IctvId: 20132595
                     - Name: Erythrovirus B19
                       ConceptId: 11
                       ConceptSource: NeoIPC
@@ -486,6 +495,11 @@ Hierarchies:
                       ConceptId: 202104266
                       ConceptSource: ICTV
                       Id: 2612
+                      IctvId: 20132595
+                    - Name: Human parvovirus B19
+                      ConceptId: 20124287
+                      ConceptSource: ICTV
+                      Id: 2613
                       IctvId: 20132595
   - Name: Riboviria
     ConceptType: Realm
@@ -1749,9 +1763,10 @@ Hierarchies:
                     IctvId: 19911434
                     Synonyms:
                     - Name: Human T-lymphotropic virus 1
-                      ConceptId: 25
-                      ConceptSource: NeoIPC
+                      ConceptId: 19982463
+                      ConceptSource: ICTV
                       Id: 2676
+                      IctvId: 19911434
                     - Name: Primate T-lymphotropic virus 1
                       ConceptId: 202104999
                       ConceptSource: ICTV
@@ -1765,9 +1780,10 @@ Hierarchies:
                     IctvId: 19911435
                     Synonyms:
                     - Name: Human T-lymphotropic virus 2
-                      ConceptId: 26
-                      ConceptSource: NeoIPC
+                      ConceptId: 19982464
+                      ConceptSource: ICTV
                       Id: 2678
+                      IctvId: 19911435
                     - Name: Primate T-lymphotropic virus 2
                       ConceptId: 202105000
                       ConceptSource: ICTV
@@ -22959,9 +22975,10 @@ Hierarchies:
                       MycoBankNr: 308114
                       Synonyms:
                       - Name: Acremonium alabamensis
-                        ConceptId: 29
-                        ConceptSource: NeoIPC
+                        ConceptId: 417925
+                        ConceptSource: MycoBank
                         Id: 2699
+                        MycoBankNr: 160792
                     - Name: Acremonium potronii
                       ConceptType: Species
                       ConceptId: 481
@@ -24304,6 +24321,25 @@ Hierarchies:
                 Id: 3434
                 MycoBankNr: 80999
                 Children:
+                - Name: Metschnikowia
+                  ConceptType: Genus
+                  ConceptId: 96354
+                  ConceptSource: MycoBank
+                  Id: 3569
+                  MycoBankNr: 3147
+                  Children:
+                  - Name: Metschnikowia pulcherrima
+                    ConceptType: Species
+                    ConceptId: 105974
+                    ConceptSource: MycoBank
+                    Id: 3414
+                    MycoBankNr: 334124
+                    Synonyms:
+                    - Name: Candida pulcherrima
+                      ConceptId: 107166
+                      ConceptSource: MycoBank
+                      Id: 568
+                      MycoBankNr: 284777
                 - Name: Candidozyma
                   ConceptType: Genus
                   ConceptId: 600410
@@ -24416,6 +24452,152 @@ Hierarchies:
             ConceptSource: MycoBank
             MycoBankNr: 90790
             Children:
+            - Name: Saccharomycodales
+              ConceptType: Order
+              ConceptId: 598926
+              ConceptSource: MycoBank
+              MycoBankNr: 847266
+              Children:
+              - Name: Saccharomycodaceae
+                ConceptType: Family
+                ConceptId: 93076
+                ConceptSource: MycoBank
+                MycoBankNr: 81249
+                Children:
+                - Name: Hanseniaspora
+                  ConceptType: Genus
+                  ConceptId: 571011
+                  ConceptSource: MycoBank
+                  Id: 2961
+                  MycoBankNr: 828979
+                  Synonyms:
+                  - Name: Kloeckera
+                    ConceptId: 95875
+                    ConceptSource: MycoBank
+                    Id: 604
+                    MycoBankNr: 8675
+            - Name: Phaffomycetales
+              ConceptType: Order
+              ConceptId: 598927
+              ConceptSource: MycoBank
+              MycoBankNr: 847267
+              Children:
+              - Name: Phaffomycetaceae
+                ConceptType: Family
+                ConceptId: 93008
+                ConceptSource: MycoBank
+                MycoBankNr: 82097
+                Children:
+                - Name: Cyberlindnera
+                  ConceptType: Genus
+                  ConceptId: 461447
+                  ConceptSource: MycoBank
+                  Id: 3566
+                  MycoBankNr: 534376
+                  Children:
+                  - Name: Cyberlindnera fabianii
+                    ConceptType: Species
+                    ConceptId: 462888
+                    ConceptSource: MycoBank
+                    Id: 1132
+                    MycoBankNr: 534382
+                    Synonyms:
+                    - Name: Candida fabianii
+                      ConceptId: 105131
+                      ConceptSource: MycoBank
+                      Id: 512
+                      MycoBankNr: 327431
+                    - Name: Pichia fabianii
+                      ConceptId: 105823
+                      ConceptSource: MycoBank
+                      Id: 1837
+                      MycoBankNr: 107154
+                    - Name: Hansenula fabianii
+                      ConceptId: 105822
+                      ConceptSource: MycoBank
+                      Id: 1044
+                      MycoBankNr: 331659
+                  - Name: Cyberlindnera jadinii
+                    ConceptType: Species
+                    ConceptId: 462889
+                    ConceptSource: MycoBank
+                    Id: 3356
+                    MycoBankNr: 534383
+                    Synonyms:
+                    - Name: Candida utilis
+                      ConceptId: 107195
+                      ConceptSource: MycoBank
+                      Id: 1238
+                      MycoBankNr: 294053
+                    - Name: Torula utilis
+                      ConceptId: 107197
+                      ConceptSource: MycoBank
+                      Id: 737
+                      MycoBankNr: 456582
+                    - Name: Torulopsis utilis
+                      ConceptId: 107198
+                      ConceptSource: MycoBank
+                      Id: 1574
+                      MycoBankNr: 281224
+                    - Name: Cryptococcus utilis
+                      ConceptId: 107196
+                      ConceptSource: MycoBank
+                      Id: 2460
+                      MycoBankNr: 456262
+                - Name: Starmera
+                  ConceptType: Genus
+                  ConceptId: 98333
+                  ConceptSource: MycoBank
+                  Id: 3568
+                  MycoBankNr: 27894
+                  Children:
+                  - Name: Starmera stellimalicola
+                    ConceptType: Species
+                    ConceptId: 545770
+                    ConceptSource: MycoBank
+                    Id: 3350
+                    MycoBankNr: 814380
+                    Synonyms:
+                    - Name: Candida stellimalicola
+                      ConceptId: 105328
+                      ConceptSource: MycoBank
+                      Id: 892
+                      MycoBankNr: 363648
+              - Name: Wickerhamomycetaceae
+                ConceptType: Family
+                ConceptId: 463782
+                ConceptSource: MycoBank
+                MycoBankNr: 536878
+                Children:
+                - Name: Wickerhamomyces
+                  ConceptType: Genus
+                  ConceptId: 453229
+                  ConceptSource: MycoBank
+                  Id: 3567
+                  MycoBankNr: 508388
+                  Children:
+                  - Name: Wickerhamomyces anomalus
+                    ConceptType: Species
+                    ConceptId: 453316
+                    ConceptSource: MycoBank
+                    Id: 3386
+                    MycoBankNr: 508390
+                    Synonyms:
+                    - Name: Pichia anomala
+                      ConceptId: 108025
+                      ConceptSource: MycoBank
+                      Id: 587
+                      MycoBankNr: 107145
+                    - Name: Hansenula anomala
+                      ConceptId: 108027
+                      ConceptSource: MycoBank
+                      Id: 2474
+                      MycoBankNr: 146467
+                    - Name: Candida pelliculosa
+                      ConceptId: 107872
+                      ConceptSource: MycoBank
+                      Id: 2582
+                      MycoBankNr: 253866
             - Name: Saccharomycetidae
               ConceptType: Subclass
               ConceptId: 92409
@@ -24428,6 +24610,87 @@ Hierarchies:
                 ConceptSource: MycoBank
                 MycoBankNr: 90510
                 Children:
+                - Name: Saccharomycetaceae
+                  ConceptType: Family
+                  ConceptId: 93075
+                  ConceptSource: MycoBank
+                  MycoBankNr: 81248
+                  Children:
+                  - Name: Nakaseomyces
+                    ConceptType: Genus
+                    ConceptId: 120396
+                    ConceptSource: MycoBank
+                    Id: 3562
+                    MycoBankNr: 28811
+                    Children:
+                    - Name: Nakaseomyces glabratus
+                      ConceptType: Species
+                      ConceptId: 593804
+                      ConceptSource: MycoBank
+                      Id: 3563
+                      MycoBankNr: 843854
+                      Synonyms:
+                      - Name: Candida glabrata
+                        ConceptId: 105396
+                        ConceptSource: MycoBank
+                        Id: 2078
+                        MycoBankNr: 310265
+                    - Name: Nakaseomyces nivariensis
+                      ConceptType: Species
+                      ConceptId: 593805
+                      ConceptSource: MycoBank
+                      Id: 3564
+                      MycoBankNr: 843855
+                      Synonyms:
+                      - Name: Candida nivariensis
+                        ConceptId: 120486
+                        ConceptSource: MycoBank
+                        Id: 1322
+                        MycoBankNr: 357391
+                    - Name: Nakaseomyces bracarensis
+                      ConceptType: Species
+                      ConceptId: 593802
+                      ConceptSource: MycoBank
+                      Id: 3565
+                      MycoBankNr: 843852
+                      Synonyms:
+                      - Name: Candida bracarensis
+                        ConceptId: 415711
+                        ConceptSource: MycoBank
+                        Id: 2037
+                        MycoBankNr: 357201
+                  - Name: Saccharomyces
+                    ConceptType: Genus
+                    ConceptId: 476107
+                    ConceptSource: MycoBank
+                    Id: 2700
+                    MycoBankNr: 542401
+                    Children:
+                    - Name: Saccharomyces cerevisiae
+                      ConceptType: Species
+                      ConceptId: 425703
+                      ConceptSource: MycoBank
+                      Id: 2695
+                      MycoBankNr: 492348
+                  - Name: Kluyveromyces
+                    ConceptType: Genus
+                    ConceptId: 95876
+                    ConceptSource: MycoBank
+                    Id: 1709
+                    MycoBankNr: 2572
+                  - Name: Lachancea
+                    ConceptType: Genus
+                    ConceptId: 120397
+                    ConceptSource: MycoBank
+                    Id: 1075
+                    MycoBankNr: 28810
+                    Children:
+                    - Name: Lachancea fermentati
+                      ConceptType: Species
+                      ConceptId: 120429
+                      ConceptSource: MycoBank
+                      Id: 572
+                      MycoBankNr: 487627
                 - Name: Azymocandida
                   ConceptType: Genus
                   ConceptId: 99433
@@ -25144,6 +25407,49 @@ Hierarchies:
               ConceptSource: MycoBank
               MycoBankNr: 90437
               Children:
+              - Name: Rhizopodaceae
+                ConceptType: Family
+                ConceptId: 514338
+                ConceptSource: MycoBank
+                MycoBankNr: 550010
+                Children:
+                - Name: Rhizopus
+                  ConceptType: Genus
+                  ConceptId: 38032
+                  ConceptSource: MycoBank
+                  Id: 1708
+                  MycoBankNr: 20487
+                  Children:
+                  - Name: Rhizopus arrhizus
+                    ConceptType: Species
+                    ConceptId: 24355
+                    ConceptSource: MycoBank
+                    Id: 799
+                    MycoBankNr: 167790
+                    Synonyms:
+                    - Name: Rhizopus oryzae
+                      ConceptId: 24387
+                      ConceptSource: MycoBank
+                      Id: 517
+                      MycoBankNr: 433253
+                  - Name: Rhizopus microsporus
+                    ConceptType: Species
+                    ConceptId: 46665
+                    ConceptSource: MycoBank
+                    Id: 2586
+                    MycoBankNr: 177331
+                  - Name: Rhizopus stolonifer
+                    ConceptType: Species
+                    ConceptId: 58300
+                    ConceptSource: MycoBank
+                    Id: 227
+                    MycoBankNr: 119545
+                    Synonyms:
+                    - Name: Rhizopus nigricans
+                      ConceptId: 24386
+                      ConceptSource: MycoBank
+                      Id: 1018
+                      MycoBankNr: 177460
               - Name: Cunninghamellaceae
                 ConceptType: Family
                 ConceptId: 92771
