@@ -17,6 +17,76 @@ Import-Module ./scripts/modules/NeoIPC-Tools
 Report-generation scripts (`New-PartnerReports.ps1`, etc.) import the module
 automatically.
 
+## Architecture & subsystems
+
+The module spans two broad areas:
+
+1. **Live DHIS2 admin & inspection + report helpers** — talk to a running DHIS2
+   server (auth, org-unit / tracker / user inspection, PAT lifecycle) and drive
+   the Quarto/R report builds. This is the usage cookbook below.
+2. **The metadata pipeline + ontology-driven generation** — a **file-only**
+   subsystem (no API calls) that moves the DHIS2 metadata between an importable
+   `metadata.json` export, a reviewable per-type `metadata/` directory, and an
+   assembled play / production package, and generates the pathogen / substance /
+   field-gating objects from the infectious-agent ontology + a capability matrix.
+
+### Files at a glance
+
+`Public/` holds the exported surface; `Private/` the implementation. Each
+`.ps1` is one cohesive subsystem:
+
+| File | Role |
+|------|------|
+| `Public/Auth.ps1` + `Private/DHIS2Http.ps1` | DHIS2 auth (PAT / user-password) + the REST GET/DELETE layer every live call goes through |
+| `Public/OrgUnits.ps1`, `Tracker.ps1`, `UserInfo.ps1`, `DataElements.ps1`, `PAT.ps1` | Live, pipeline-composable inspection of org units, patients/enrolments/events, users, DE codes, and personal-access-token lifecycle |
+| `Public/ReportHelpers.ps1` | Report-build helpers — scoped auth env vars, Quarto/Rscript invocation, locale resolution, build summaries |
+| `Public/InfectiousAgents.ps1` | Infectious-agent ontology helpers (next free `Id`) |
+| `Public/Metadata.ps1` | The metadata-pipeline public surface — convert, compare, round-trip, closure, lint, update, **assemble** (`New-NeoIPCMetadataPackage`), translation export/import |
+| `Public/Generation.ps1` | The nine ontology/matrix-driven object generators (pathogen + substance + field-gating) |
+| `Private/Metadata.ps1` | Pipeline **core** — JSON parse, deterministic UID mint, row↔object cell coercion, sharing-profile registry, noise-strip, canonicalize, CSV I/O, package↔directory, semantic compare |
+| `Private/MetadataTypeMaps.ps1` | Per-type field classification (translatable vs technical vs nested), the normalization strip-list, and the non-closure type list — the data the core consults |
+| `Private/MetadataClosure.ps1` | The dependency-closure prune from `NEOIPC_CORE` (structured + expression ref-walk) + the whole-type base⊕supplement merge |
+| `Private/MetadataExpression.ps1` | Program-rule expression handling — canonicalizer, issue linter, embedded-UID scanner, UID-regeneration rewrite |
+| `Private/MetadataAuthoring.ps1` | Read the UID-keyed directory's authored content — org units, users (+ role/org-unit assignments), org-unit-group + user-group memberships |
+| `Private/MetadataAssembly.ps1` | Stitch closure config + authored content into the final package (`Join-NeoIPCMetadataPackage`) |
+| `Private/MetadataTranslation.ps1` | The gettext-PO subsystem — translation-unit extraction, PO emit/parse/merge, inject `translations[]` |
+| `Private/MetadataGeneration.ps1` | The generation **plans** — pathogen/substance/field-gating DE+PRV+rule plans, resistance + common-commensal effective-flag/code-set computation, the per-slot capability matrix |
+
+### Metadata pipeline — data flow
+
+Everything here is file-only (no DHIS2 API calls). The **canonical source** is the
+`metadata/` directory plus the infectious-agent ontology — not the export, which is
+only the dependency-closure seed and the round-trip oracle.
+
+```
+   metadata/  (per-type CSV + YAML + sharing.yaml)          <- canonical config
+   metadata/common/infectious-agents/...-Agents.yaml        <- canonical pathogen ontology
+   metadata/common/antibiotics/NeoIPC-Antibiotics.csv       <- canonical substances (ATC)
+   metadata.json export  (PII-cleaned: closure seed + round-trip oracle)
+        |
+        v
+   +------------------------------------------------------------------------+
+   | ConvertFrom / ConvertTo-NeoIPCMetadataJson   export <-> directory       |
+   | Select-NeoIPCMetadataClosure                 prune to NEOIPC_CORE       |
+   | Update-NeoIPCMetadata / Test-...Expression   lint . canonicalize .      |
+   |                                              regenerate UIDs            |
+   | New-NeoIPCPathogen* / New-NeoIPCSubstance*   ontology + matrix -> objs  |
+   | New-NeoIPCMetadataPackage                    assemble play / production |
+   | Export / Import-NeoIPCMetadataTranslation    <-> po/metadata.<lang>.po  |
+   +------------------------------------------------------------------------+
+        |
+        v
+   importable metadata.json (play / production)  +  Weblate PO component
+```
+
+`New-NeoIPCMetadataPackage` is the assembly entry point: it prunes the export to the
+`NEOIPC_CORE` closure, adds the non-closure definitions (org-unit groups, roles),
+noise-strips, then overlays the authored org units / users / memberships read from the
+`metadata/` directory and emits importable JSON. The generators produce the pathogen /
+substance / field-gating objects from the ontology + capability matrix, each preserving
+the deployed UIDs where they exist (else minting deterministically) so a regenerated
+object replaces its deployed counterpart cleanly.
+
 ## Authentication
 
 All functions that call the DHIS2 API accept a `-Token` parameter (or read
@@ -304,3 +374,4 @@ runs `msgfmt -c` (via WSL on Windows) when gettext is available.
 | Quarto | `Invoke-WithNeoIPCAuth`, `Invoke-QuartoRender`, `Invoke-Rscript`, `Build-QmdParamPairs`, `Write-NeoIPCBuildReport`, `Test-QuartoInstallation`, `Split-NeoIPCLocale`, `Resolve-NeoIPCLocaleQmd` |
 | InfectiousAgents | `Find-NextFreeInfectiousAgentId` |
 | Metadata pipeline | `ConvertFrom-NeoIPCMetadataJson`, `ConvertTo-NeoIPCMetadataJson`, `Compare-NeoIPCMetadata`, `Test-NeoIPCMetadataRoundTrip`, `Merge-NeoIPCMetadataJson`, `Select-NeoIPCMetadataClosure`, `Test-NeoIPCMetadataExpression`, `Update-NeoIPCMetadata`, `New-NeoIPCMetadataPackage`, `Export-NeoIPCMetadataTranslation`, `Import-NeoIPCMetadataTranslation` |
+| Metadata generation | `New-NeoIPCPathogenOptionSet`, `New-NeoIPCPathogenDataElement`, `New-NeoIPCPathogenVariable`, `New-NeoIPCPathogenRule`, `New-NeoIPCPathogenFieldGatingVariable`, `New-NeoIPCPathogenFieldGatingRule`, `New-NeoIPCSubstanceDataElement`, `New-NeoIPCSubstanceVariable`, `New-NeoIPCSubstanceRule` |
