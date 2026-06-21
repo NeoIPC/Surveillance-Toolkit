@@ -246,6 +246,12 @@ function New-NeoIPCPathogenDataElement {
             if (-not $osByCode.ContainsKey($osc)) { throw "Option set '$osc' (bound by data element '$code') is not present in the package." }
             $de['optionSet'] = [ordered]@{ id = $osByCode[$osc] }
         }
+        # Reuse the deployed DE's sharing (normalised), like the option-set generator — without it the regenerated
+        # DEs would import with null sharing instead of the deployed public access.
+        if ($existing.Contains('sharing')) {
+            $sh = Convert-NeoIPCSharing $existing['sharing']
+            if ($sh -and $sh.Count -gt 0) { $de['sharing'] = $sh }
+        }
         $out.Add($de)
     }
 
@@ -833,16 +839,20 @@ function New-NeoIPCSubstanceDataElement {
 
     $plan = @(Get-NeoIPCSubstanceDataElementPlan -SubstanceCount $SubstanceCount)
 
-    # Reference categoryCombo per kind for minted (growth) slots: the categoryCombo of the lowest-numbered deployed DE
-    # of that kind, resolved once in plan order so it is deterministic.
+    # Reference categoryCombo and sharing per kind for minted (growth) slots: those of the lowest-numbered deployed
+    # DE of that kind, resolved once in plan order so they are deterministic.
     $refCatCombo = @{}
+    $refSharing = @{}
     foreach ($d in $plan) {
         $kind = [string]$d['Kind']
-        if (-not $refCatCombo.ContainsKey($kind) -and $deByCode.ContainsKey([string]$d['Code'])) {
-            $ex = $deByCode[[string]$d['Code']]
-            if ($ex['categoryCombo'] -is [System.Collections.IDictionary]) {
-                $refCatCombo[$kind] = [ordered]@{ id = [string]$ex['categoryCombo']['id'] }
-            }
+        if (-not $deByCode.ContainsKey([string]$d['Code'])) { continue }
+        $ex = $deByCode[[string]$d['Code']]
+        if (-not $refCatCombo.ContainsKey($kind) -and $ex['categoryCombo'] -is [System.Collections.IDictionary]) {
+            $refCatCombo[$kind] = [ordered]@{ id = [string]$ex['categoryCombo']['id'] }
+        }
+        if (-not $refSharing.ContainsKey($kind) -and $ex.Contains('sharing')) {
+            $sh = Convert-NeoIPCSharing $ex['sharing']
+            if ($sh -and $sh.Count -gt 0) { $refSharing[$kind] = $sh }
         }
     }
 
@@ -894,6 +904,13 @@ function New-NeoIPCSubstanceDataElement {
             if (-not $osByCode.ContainsKey($cosc)) { throw "Comment option set '$cosc' (bound by data element '$code') is not present in the package." }
             $de['commentOptionSet'] = [ordered]@{ id = $osByCode[$cosc] }
         }
+        # Reuse the deployed DE's sharing (normalised), else the lowest-numbered deployed sibling's for grown slots —
+        # without it the regenerated DEs would import with null sharing instead of the deployed public access.
+        if ($existing -and $existing.Contains('sharing')) {
+            $sh = Convert-NeoIPCSharing $existing['sharing']
+            if ($sh -and $sh.Count -gt 0) { $de['sharing'] = $sh }
+        }
+        elseif ($refSharing.ContainsKey($kind)) { $de['sharing'] = $refSharing[$kind] }
         $out.Add($de)
     }
     [ordered]@{ dataElements = $out.ToArray() }

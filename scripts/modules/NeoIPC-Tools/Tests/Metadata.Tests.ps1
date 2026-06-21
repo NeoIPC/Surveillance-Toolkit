@@ -3523,4 +3523,70 @@ Hierarchies:
             Should -Invoke New-NeoIPCSubstanceRule -ParameterFilter { $SubstanceCount -eq 7 } -Times 1 -Exactly
         }
     }
+
+    Describe 'Compare-NeoIPCGeneratedMetadata (classified-diff validation gate)' {
+        # The nine generators are MOCKED to return small controlled fragments; the deployed package uses REAL
+        # generated-family codes/names (slot-1 BSI + the retired aggregate) so the real Get-NeoIPCMetadataGeneratedKeys
+        # scopes them in-family. This exercises the diff + classification (every bucket + the Unclassified failure
+        # path) without a full pathogen-machinery fixture or a real export.
+        BeforeAll {
+            function New-DiffDeployed {
+                [ordered]@{
+                    optionSets   = @([ordered]@{ id = 'osP'; code = 'NEOIPC_PATHOGENS'; version = 1 })
+                    options      = @([ordered]@{ id = 'optA'; code = '0'; name = 'Acinetobacter sp'; sortOrder = 1; optionSet = [ordered]@{ id = 'osP' } })
+                    dataElements = @(
+                        [ordered]@{ id = 'deP1'; code = 'NEOIPC_BSI_PATHOGEN_1'; name = 'Organism 1'; valueType = 'INTEGER_ZERO_OR_POSITIVE' },
+                        [ordered]@{ id = 'deSrc'; code = 'NEOIPC_BSI_PATHOGEN_1_SOURCE'; name = 'src'; valueType = 'INTEGER_POSITIVE' }
+                    )
+                    programRuleVariables = @()
+                    programRules = @(
+                        [ordered]@{ id = 'ruleAgg'; name = 'NeoIPC HAP - set pathogen attribute variables' },
+                        [ordered]@{ id = 'ruleWS'; name = 'NeoIPC BSI Pathogen 1 - when set'; programRuleActions = @([ordered]@{ id = 'actWSsrc' }, [ordered]@{ id = 'actNoPos' }) }
+                    )
+                    programRuleActions = @(
+                        [ordered]@{ id = 'actAgg'; programRule = [ordered]@{ id = 'ruleAgg' }; programRuleActionType = 'ASSIGN' },
+                        [ordered]@{ id = 'actWSsrc'; programRule = [ordered]@{ id = 'ruleWS' }; programRuleActionType = 'SETMANDATORYFIELD'; dataElement = [ordered]@{ id = 'deSrc' } },
+                        [ordered]@{ id = 'actNoPos'; programRule = [ordered]@{ id = 'ruleWS' }; programRuleActionType = 'HIDEFIELD'; dataElement = [ordered]@{ id = 'deNoPos' } }
+                    )
+                }
+            }
+        }
+        BeforeEach {
+            # Generated side: optA renamed (TaxonomicNaming) + optNEW added; osP version bump; deP1 renamed
+            # (DataElementNormalisation), deSrc unchanged; ruleSet added (+ its action); ruleWS reproduced but with
+            # only the SOURCE action (so deployed actNoPos -> BusinessInterlock, the aggregate -> Superseded).
+            Mock New-NeoIPCPathogenOptionSet { [ordered]@{ optionSets = @([ordered]@{ id = 'osP'; code = 'NEOIPC_PATHOGENS'; version = 2 }); options = @([ordered]@{ id = 'optA'; code = '0'; name = 'Acinetobacter'; sortOrder = 1; optionSet = [ordered]@{ id = 'osP' } }, [ordered]@{ id = 'optNEW'; code = '999'; name = 'New organism'; sortOrder = 2; optionSet = [ordered]@{ id = 'osP' } }) } }
+            Mock New-NeoIPCPathogenDataElement { [ordered]@{ dataElements = @([ordered]@{ id = 'deP1'; code = 'NEOIPC_BSI_PATHOGEN_1'; name = 'Organism 1 renamed'; valueType = 'INTEGER_ZERO_OR_POSITIVE' }, [ordered]@{ id = 'deSrc'; code = 'NEOIPC_BSI_PATHOGEN_1_SOURCE'; name = 'src'; valueType = 'INTEGER_POSITIVE' }) } }
+            Mock New-NeoIPCSubstanceDataElement { [ordered]@{ dataElements = @() } }
+            Mock New-NeoIPCPathogenVariable { [ordered]@{ programRuleVariables = @() } }
+            Mock New-NeoIPCPathogenFieldGatingVariable { [ordered]@{ programRuleVariables = @() } }
+            Mock New-NeoIPCSubstanceVariable { [ordered]@{ programRuleVariables = @() } }
+            Mock New-NeoIPCPathogenRule { [ordered]@{ programRules = @([ordered]@{ id = 'ruleSet'; name = 'NeoIPC BSI Pathogen 1 - set 3GCR'; programRuleActions = @([ordered]@{ id = 'actSet' }) }); programRuleActions = @([ordered]@{ id = 'actSet'; programRule = [ordered]@{ id = 'ruleSet' }; programRuleActionType = 'ASSIGN'; data = 'enum' }) } }
+            Mock New-NeoIPCPathogenFieldGatingRule { [ordered]@{ programRules = @([ordered]@{ id = 'ruleWS'; name = 'NeoIPC BSI Pathogen 1 - when set'; programRuleActions = @([ordered]@{ id = 'actWSsrc' }) }); programRuleActions = @([ordered]@{ id = 'actWSsrc'; programRule = [ordered]@{ id = 'ruleWS' }; programRuleActionType = 'SETMANDATORYFIELD'; dataElement = [ordered]@{ id = 'deSrc' } }) } }
+            Mock New-NeoIPCSubstanceRule { [ordered]@{ programRules = @(); programRuleActions = @() } }
+        }
+        It 'classifies every delta into its documented bucket and reports nothing Unclassified' {
+            $r = @(Compare-NeoIPCGeneratedMetadata -ExistingPackage (New-DiffDeployed))
+            function HasDelta($type, $kind, $class) { @($r | Where-Object { $_.Type -eq $type -and $_.Kind -eq $kind -and $_.Class -eq $class }).Count }
+            (HasDelta 'optionSets' 'Changed' 'OptionSetGrowth') | Should -BeGreaterThan 0
+            (HasDelta 'options' 'Changed' 'TaxonomicNaming') | Should -BeGreaterThan 0
+            (HasDelta 'options' 'Added' 'TaxonomicAddition') | Should -BeGreaterThan 0
+            (HasDelta 'dataElements' 'Changed' 'DataElementNormalisation') | Should -BeGreaterThan 0
+            (HasDelta 'programRules' 'Removed' 'SupersededAggregate') | Should -BeGreaterThan 0
+            (HasDelta 'programRules' 'Added' 'CoverageAddition') | Should -BeGreaterThan 0
+            (HasDelta 'programRuleActions' 'Removed' 'BusinessInterlock') | Should -BeGreaterThan 0
+            (HasDelta 'programRuleActions' 'Added' 'CoverageAddition') | Should -BeGreaterThan 0
+            @($r | Where-Object { $_.Class -eq 'Unclassified' }).Count | Should -Be 0
+        }
+        It 'flags an unexpected data-element field change (valueType) as Unclassified — the gate failure path' {
+            Mock New-NeoIPCPathogenDataElement { [ordered]@{ dataElements = @([ordered]@{ id = 'deP1'; code = 'NEOIPC_BSI_PATHOGEN_1'; name = 'Organism 1'; valueType = 'TEXT' }, [ordered]@{ id = 'deSrc'; code = 'NEOIPC_BSI_PATHOGEN_1_SOURCE'; name = 'src'; valueType = 'INTEGER_POSITIVE' }) } }
+            $r = @(Compare-NeoIPCGeneratedMetadata -ExistingPackage (New-DiffDeployed))
+            @($r | Where-Object { $_.Id -eq 'deP1' -and $_.Kind -eq 'Changed' -and $_.Class -eq 'Unclassified' }).Count | Should -Be 1
+        }
+        It 'flags an unexpected in-family rule removal (not the retired aggregate) as Unclassified' {
+            Mock New-NeoIPCPathogenFieldGatingRule { [ordered]@{ programRules = @(); programRuleActions = @() } }   # ruleWS no longer reproduced
+            $r = @(Compare-NeoIPCGeneratedMetadata -ExistingPackage (New-DiffDeployed))
+            @($r | Where-Object { $_.Id -eq 'ruleWS' -and $_.Kind -eq 'Removed' -and $_.Class -eq 'Unclassified' }).Count | Should -Be 1
+        }
+    }
 }

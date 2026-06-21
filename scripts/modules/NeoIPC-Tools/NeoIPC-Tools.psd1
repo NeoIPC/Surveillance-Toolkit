@@ -83,6 +83,7 @@
         'New-NeoIPCSubstanceDataElement'
         'New-NeoIPCSubstanceVariable'
         'New-NeoIPCSubstanceRule'
+        'Compare-NeoIPCGeneratedMetadata'
     )
 
     # Cmdlets to export from this module
