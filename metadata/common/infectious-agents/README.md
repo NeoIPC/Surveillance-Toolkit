@@ -41,7 +41,7 @@ Reference to specific commercial products, manufacturers, companies, or trademar
 
 Not subject to copyright but some [requirements](https://www.cdc.gov/other/agencymaterials.html) must be followed.
 
-The classification of pathogens as common commensals follows the classification in the NHSN Organism List.
+The `CommonCommensal` flag follows the classification in the NHSN Organism List. Conceptually it is **not about (human) commensalism per se but about blood-culture contamination**: it marks organisms for which a positive blood culture is *most likely the result of sample contamination from the immediate sampling environment* — where the patient's own skin flora plays the dominant role — rather than the genuine presence of the organism in the patient's blood. This framing is what should guide judgement whenever an organism is **not** enumerated by NHSN, or when researching a specific organism: ask *"is a positive blood culture for this organism more plausibly skin/environmental contamination at sampling than true bacteraemia?"* Human skin/mucosal flora (e.g. coagulase-negative staphylococci, viridans streptococci) answer **yes** → common commensal; animal-associated, environmental, or frankly pathogenic organisms answer **no** → not a common commensal. (NHSN's own list is the same idea applied to human flora, which is why animal/environmental species and recognised pathogens are excluded from it.)
 
 ### List of Prokaryotic names with Standing in Nomenclature (LPSN)
 

@@ -4125,6 +4125,7 @@ Hierarchies:
                 ConceptSource: LPSN
                 Id: 70
                 LpsnRecordNumber: 775178
+                CommonCommensal: false
               - Name: Corynebacterium durum
                 ConceptType: Species
                 ConceptId: species/corynebacterium-durum
@@ -6718,6 +6719,7 @@ Hierarchies:
                 ConceptSource: LPSN
                 Id: 3550
                 LpsnRecordNumber: 40058
+                CommonCommensal: true
                 Synonyms:
                 - Name: Bacillus gibsonii
                   ConceptId: species/bacillus-gibsonii
@@ -6864,6 +6866,7 @@ Hierarchies:
                   ConceptSource: LPSN
                   Id: 2032
                   LpsnRecordNumber: 773635
+                  CommonCommensal: false
                 - Name: Bacillus cereus
                   ConceptType: Species
                   ConceptId: species/bacillus-cereus
@@ -7429,6 +7432,7 @@ Hierarchies:
                 ConceptSource: LPSN
                 Id: 3528
                 LpsnRecordNumber: 39738
+                CommonCommensal: true
                 Synonyms:
                 - Name: Bacillus shackletonii
                   ConceptId: species/bacillus-shackletonii
@@ -7726,6 +7730,7 @@ Hierarchies:
                 ConceptSource: LPSN
                 Id: 3481
                 LpsnRecordNumber: 55701
+                CommonCommensal: true
                 Synonyms:
                 - Name: Bacillus badius
                   ConceptId: species/bacillus-badius
@@ -9401,6 +9406,7 @@ Hierarchies:
                     ConceptSource: LPSN
                     Id: 1748
                     LpsnRecordNumber: 781215
+                    CommonCommensal: true
               - Name: Coagulase-variable staphylococci
                 ConceptType: Group
                 ConceptId: 86
@@ -10417,6 +10423,7 @@ Hierarchies:
                 ConceptId: 68
                 ConceptSource: NeoIPC
                 Id: 2798
+                CommonCommensal: true
                 Children:
                 - Name: Streptococcus anginosus group
                   ConceptType: Group
