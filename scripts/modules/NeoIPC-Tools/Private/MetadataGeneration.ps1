@@ -116,7 +116,7 @@ function Get-NeoIPCPathogenVariablePlan {
     # The capability-matrix expansion of the resistance-gating PROGRAM-RULE VARIABLES: for each of the 18
     # pathogen slots, one `value` variable (DATAELEMENT_CURRENT_EVENT over the base organism DE, reading the option
     # CODE) plus five `may be <CAT>` calculated booleans the `set <CAT>` rule assigns and the `may be`/`not` rules
-    # read. 18 + 90 = 108 descriptors. The slot-specific housekeeping variables (name value, source value, is
+    # read. 18 + 90 = 108 descriptors. The slot-specific field-gating variables (name value, source value, is
     # recognized pathogen, recovered multiple times) are generated with their rules, not here. Pure (no package).
     # Primary slot names use "Pathogen {N}", secondary "Secondary BSI pathogen {N}" — matching the deployed names.
     # PathogenCount sets the number of slots per applicable stage (default = the module-wide count); pass the same
@@ -536,5 +536,241 @@ function Get-NeoIPCSubstanceRulePlan {
                 DataElementCode = 'NEOIPC_SURVEILLANCE_END_AB_DAYS'
                 Content         = 'The sum of all antibiotic substance days must be greater than or equal to antibiotic days'
             })
+    }
+}
+
+function Get-NeoIPCCommonCommensalFlag {
+    # Depth-first walk of a parsed NeoIPC-Infectious-Agents.yaml tree, yielding the EFFECTIVE CommonCommensal flag of
+    # every Id-bearing node as [ordered]@{ Id = <int>; CommonCommensal = <bool> }. The effective flag is the nearest
+    # explicit value on the node->root path (own value if present, else the closest ancestor that carries one); an
+    # explicit `false` overrides an inherited `true`; absence everywhere defaults to false — the same own-or-inherited
+    # model as Get-NeoIPCResistanceFlag, flowing DOWN through Hierarchies/Synonyms/Children. The NHSN Organism List is
+    # the authority for the classification (see the repo CLAUDE.md). Pipeline-emit idiom (no accumulator); operates on
+    # an in-memory tree so it is unit-testable. Fails loud on a non-boolean flag value or a non-integer Id.
+    [CmdletBinding()]
+    [OutputType([System.Collections.Specialized.OrderedDictionary])]
+    param(
+        [Parameter(Mandatory)][AllowNull()]$Node,
+        [bool]$Inherited = $false
+    )
+
+    if ($Node -is [System.Collections.IList]) {
+        foreach ($item in $Node) { Get-NeoIPCCommonCommensalFlag -Node $item -Inherited $Inherited }
+        return
+    }
+    if ($Node -isnot [System.Collections.IDictionary]) { return }
+
+    $effective = $Inherited
+    if ($Node.Contains('CommonCommensal')) {
+        $v = $Node['CommonCommensal']
+        if ($v -isnot [bool]) {
+            $parsed = $false
+            if (-not [bool]::TryParse([string]$v, [ref]$parsed)) {
+                throw "Infectious-agent node '$($Node['Name'])' has a non-boolean 'CommonCommensal' value ('$v') — the flag must be true/false."
+            }
+            $v = $parsed
+        }
+        $effective = $v
+    }
+
+    if ($Node.Contains('Id')) {
+        $idInt = 0
+        if (-not [int]::TryParse([string]$Node['Id'], [ref]$idInt)) {
+            throw "Infectious-agent node '$($Node['Name'])' has a non-integer Id ('$($Node['Id'])')."
+        }
+        [ordered]@{ Id = $idInt; CommonCommensal = $effective }
+    }
+
+    foreach ($key in 'Hierarchies', 'Synonyms', 'Children') {
+        if ($Node.Contains($key)) { Get-NeoIPCCommonCommensalFlag -Node $Node[$key] -Inherited $effective }
+    }
+}
+
+function Get-NeoIPCCommonCommensalCodeSet {
+    # The ascending set of organism Ids whose EFFECTIVE CommonCommensal flag is true — the set the BSI
+    # `set recognized pathogen` rules NEGATE (a pathogen is "recognized" iff its slot has a value and is NOT a common
+    # commensal). Aggregates Get-NeoIPCCommonCommensalFlag; Ids ascending so the generated ASSIGN expression — and the
+    # diff against the deployed rule — is stable. Pure (no package); the single source the recognized-pathogen rule
+    # generator and its tests both expand from.
+    [CmdletBinding()]
+    [OutputType([int[]])]
+    param([Parameter(Mandatory)][AllowNull()]$Node)
+
+    $ids = [System.Collections.Generic.List[int]]::new()
+    foreach ($row in @(Get-NeoIPCCommonCommensalFlag -Node $Node)) {
+        if ($row['CommonCommensal']) { $ids.Add([int]$row['Id']) }
+    }
+    @($ids | Sort-Object)
+}
+
+function Get-NeoIPCPathogenSlotSuffix {
+    # The ordered dependent-field suffixes of a pathogen slot on a given stage/kind, per the capability matrix: ''
+    # (the organism-selector value DE), then 'NAME', the five resistance suffixes, and — primary slots only — the
+    # stage-specific extras 'SOURCE' (BSI/HAP) and 'MULTIPLE' (BSI). The single source shared by the field-gating rule
+    # plan's downstream-hide field set and own-extras, aligned with Get-NeoIPCPathogenDataElementPlan's suffixes.
+    [CmdletBinding()]
+    [OutputType([string[]])]
+    param(
+        [Parameter(Mandatory)][string]$Stage,
+        [Parameter(Mandatory)][bool]$IsPrimary
+    )
+    $suffixes = [System.Collections.Generic.List[string]]::new()
+    $suffixes.AddRange([string[]]@('', 'NAME', '3GCR', 'CAR', 'COR', 'MRSA', 'VRE'))
+    if ($IsPrimary -and $Stage -in @('BSI', 'HAP')) { [void]$suffixes.Add('SOURCE') }
+    if ($IsPrimary -and $Stage -eq 'BSI') { [void]$suffixes.Add('MULTIPLE') }
+    $suffixes.ToArray()
+}
+
+function Get-NeoIPCPathogenFieldGatingVariablePlan {
+    # The slot-specific field-gating PROGRAM-RULE VARIABLES the field-gating rules require — the `is recognized
+    # pathogen` CALCULATED_VALUE boolean the BSI `set recognized pathogen` ASSIGN writes (and downstream BSI-definition
+    # rules read). BSI primary slots only, mirroring the rule coverage. Kept out of Get-NeoIPCPathogenVariablePlan (the
+    # resistance PRVs) because it is generated together with its rules. Pure (no package): PathogenCount descriptors.
+    [CmdletBinding()]
+    [OutputType([System.Collections.Specialized.OrderedDictionary])]
+    param([ValidateRange(1, 9)][int]$PathogenCount = $script:NeoIPCPathogenSlotCount)
+
+    foreach ($n in 1..$PathogenCount) {
+        [ordered]@{
+            Name                = "NeoIPC BSI Pathogen $n is recognized pathogen"
+            Kind                = 'isRecognizedPathogen'
+            Stage               = 'BSI'
+            SlotKind            = 'primary'
+            Index               = $n
+            SourceType          = 'CALCULATED_VALUE'
+            ValueType           = 'BOOLEAN'
+            UseCodeForOptionSet = $false
+            DataElementCode     = $null
+        }
+    }
+}
+
+function Get-NeoIPCPathogenFieldGatingRulePlan {
+    # The per-slot field-gating PROGRAM RULES — the non-resistance gating on each pathogen slot — expanded from the
+    # capability matrix for PathogenCount slots per group (primary BSI/HAP/SSI, secondary-BSI HAP/NEC/SSI). Five kinds,
+    # all deployed-verified, each carrying an Actions array (resolved to UIDs by the generator, like the substance rules):
+    #   recognizedPathogen (BSI primary only): cond `true`, priority 0, one ASSIGN that sets the slot's
+    #       `is recognized pathogen` boolean to "the slot has a value and is NOT a common commensal" — the common-
+    #       commensal code set NEGATED (resolved by the generator from Get-NeoIPCCommonCommensalCodeSet). Carries
+    #       UsesCommonCommensalSet so the generator knows to expand the code set into the ASSIGN `data`.
+    #   whenSet (BSI primary only): cond `d2:hasValue(#{<slot> value})`, one SETMANDATORYFIELD on the slot's `_SOURCE`
+    #       DE. (The deployed slot-1 also hid NEOIPC_BSI_NO_POS_CULTURE — a BSI-definition business rule left to the
+    #       business-rule layer, not part of this repeated cluster.)
+    #   whenEmpty (slots with downstream slots and/or own SOURCE/MULTIPLE): cond `!d2:hasValue(#{<slot> value})`, a
+    #       HIDEFIELD per own SOURCE/MULTIPLE extra + per field of every downstream slot in the group (value, name and
+    #       the five resistance fields). This is the progressive reveal: a downstream slot's own SOURCE/MULTIPLE are
+    #       hidden by THAT slot's own whenEmpty (it is empty whenever an upstream slot is), so they are not repeated
+    #       here — the uniform model that reproduces the clean BSI rules and normalises the HAP/SSI inconsistencies.
+    #   whenEmptyOrListed (all slots): cond `!d2:hasValue(#{<slot> value}) || #{<slot> value} != 0`, HIDEFIELD on the
+    #       `_NAME` free-text DE (hide it unless code 0 = "Not listed" is selected).
+    #   whenNotListed (all slots): cond `d2:hasValue(#{<slot> value}) && #{<slot> value} == 0`, SETMANDATORYFIELD on
+    #       `_NAME` (require the free-text name when "Not listed").
+    # Uniform explicit priorities (recognizedPathogen 0 so its ASSIGN runs before consumers; the rest 1) — normalising
+    # the deployed whenEmpty priority drift. Pure (no package/YAML): the negated common-commensal set is resolved later
+    # by the generator; this plan carries only the structure. Slot naming matches the DE/PRV plans.
+    [CmdletBinding()]
+    [OutputType([System.Collections.Specialized.OrderedDictionary])]
+    param([ValidateRange(1, 9)][int]$PathogenCount = $script:NeoIPCPathogenSlotCount)
+
+    $groups = @(
+        @{ Kind = 'primary'; Stages = @('BSI', 'HAP', 'SSI') },
+        @{ Kind = 'secondary'; Stages = @('HAP', 'NEC', 'SSI') }
+    )
+    # A downstream slot is hidden by its value + name + the five resistance fields only; its own SOURCE/MULTIPLE are
+    # hidden by THAT slot's own whenEmpty (it is empty whenever an upstream slot is), so they are not repeated here.
+    $coreSuffixes = @('', 'NAME', '3GCR', 'CAR', 'COR', 'MRSA', 'VRE')
+
+    foreach ($g in $groups) {
+        $isPrimary = $g.Kind -eq 'primary'
+        foreach ($stage in $g.Stages) {
+            $ownExtras = @((Get-NeoIPCPathogenSlotSuffix -Stage $stage -IsPrimary $isPrimary) | Where-Object { $_ -in @('SOURCE', 'MULTIPLE') })
+            foreach ($n in 1..$PathogenCount) {
+                $baseCode = if ($isPrimary) { "NEOIPC_${stage}_PATHOGEN_${n}" } else { "NEOIPC_${stage}_SEC_BSI_PATHOGEN_${n}" }
+                $varPrefix = if ($isPrimary) { "NeoIPC $stage Pathogen $n" } else { "NeoIPC $stage Secondary BSI pathogen $n" }
+                $namePhrase = if ($isPrimary) { "Pathogen $n" } else { "Secondary BSI pathogen $n" }
+                $valueVar = "$varPrefix value"
+                $nameCode = "${baseCode}_NAME"
+
+                if ($isPrimary -and $stage -eq 'BSI') {
+                    [ordered]@{
+                        Kind          = 'recognizedPathogen'
+                        Stage         = $stage
+                        SlotKind      = $g.Kind
+                        Index         = $n
+                        Name          = "$varPrefix - set recognized pathogen"
+                        Description   = 'Sets the recognized pathogen variable for pathogens that are not marked as common commensals.'
+                        Condition     = 'true'
+                        Priority      = 0
+                        ValueVariable = $valueVar
+                        Actions       = @([ordered]@{ Type = 'ASSIGN'; Content = "#{$varPrefix is recognized pathogen}"; UsesCommonCommensalSet = $true })
+                    }
+                    [ordered]@{
+                        Kind          = 'whenSet'
+                        Stage         = $stage
+                        SlotKind      = $g.Kind
+                        Index         = $n
+                        Name          = "$varPrefix - when set"
+                        Description   = "Makes the source field mandatory when $namePhrase is set."
+                        Condition     = "d2:hasValue(#{$valueVar})"
+                        Priority      = 1
+                        ValueVariable = $valueVar
+                        Actions       = @([ordered]@{ Type = 'SETMANDATORYFIELD'; DataElementCode = "${baseCode}_SOURCE" })
+                    }
+                }
+
+                $hideActions = [System.Collections.Generic.List[object]]::new()
+                foreach ($suf in $ownExtras) {
+                    $hideActions.Add([ordered]@{ Type = 'HIDEFIELD'; DataElementCode = "${baseCode}_$suf" })
+                }
+                if ($n -lt $PathogenCount) {
+                    foreach ($m in ($n + 1)..$PathogenCount) {
+                        $mBase = if ($isPrimary) { "NEOIPC_${stage}_PATHOGEN_${m}" } else { "NEOIPC_${stage}_SEC_BSI_PATHOGEN_${m}" }
+                        foreach ($suf in $coreSuffixes) {
+                            $c = if ($suf) { "${mBase}_$suf" } else { $mBase }
+                            $hideActions.Add([ordered]@{ Type = 'HIDEFIELD'; DataElementCode = $c })
+                        }
+                    }
+                }
+                if ($hideActions.Count -gt 0) {
+                    [ordered]@{
+                        Kind          = 'whenEmpty'
+                        Stage         = $stage
+                        SlotKind      = $g.Kind
+                        Index         = $n
+                        Name          = "$varPrefix - when empty"
+                        Description   = "Hides dependent fields when $namePhrase is empty."
+                        Condition     = "!d2:hasValue(#{$valueVar})"
+                        Priority      = 1
+                        ValueVariable = $valueVar
+                        Actions       = $hideActions.ToArray()
+                    }
+                }
+
+                [ordered]@{
+                    Kind          = 'whenEmptyOrListed'
+                    Stage         = $stage
+                    SlotKind      = $g.Kind
+                    Index         = $n
+                    Name          = "$varPrefix - when empty or listed"
+                    Description   = "Hides the pathogen name for $namePhrase unless ""Not listed"" is selected."
+                    Condition     = "!d2:hasValue(#{$valueVar}) || #{$valueVar} != 0"
+                    Priority      = 1
+                    ValueVariable = $valueVar
+                    Actions       = @([ordered]@{ Type = 'HIDEFIELD'; DataElementCode = $nameCode })
+                }
+                [ordered]@{
+                    Kind          = 'whenNotListed'
+                    Stage         = $stage
+                    SlotKind      = $g.Kind
+                    Index         = $n
+                    Name          = "$varPrefix - when not listed"
+                    Description   = "Makes the pathogen name mandatory for $namePhrase when ""Not listed"" is selected."
+                    Condition     = "d2:hasValue(#{$valueVar}) && #{$valueVar} == 0"
+                    Priority      = 1
+                    ValueVariable = $valueVar
+                    Actions       = @([ordered]@{ Type = 'SETMANDATORYFIELD'; DataElementCode = $nameCode })
+                }
+            }
+        }
     }
 }

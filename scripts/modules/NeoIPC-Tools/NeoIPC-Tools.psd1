@@ -78,6 +78,8 @@
         'New-NeoIPCPathogenDataElement'
         'New-NeoIPCPathogenVariable'
         'New-NeoIPCPathogenRule'
+        'New-NeoIPCPathogenFieldGatingVariable'
+        'New-NeoIPCPathogenFieldGatingRule'
         'New-NeoIPCSubstanceDataElement'
         'New-NeoIPCSubstanceVariable'
         'New-NeoIPCSubstanceRule'

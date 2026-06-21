@@ -2961,4 +2961,374 @@ Hierarchies:
             { New-NeoIPCSubstanceDataElement -ExistingPackage $pkg -SubstanceCount 3 } | Should -Throw '*categoryCombo*'
         }
     }
+
+    Describe 'Common-commensal effective-flag computation (own-or-inherited, false overrides)' {
+        BeforeAll {
+            Import-Module powershell-yaml -ErrorAction Stop
+            # A genus carries CommonCommensal; its species inherits it; a synonym under the species inherits it too.
+            # A sibling genus carries nothing (default false). Verifies inheritance down Children + Synonyms and the
+            # default-false fallback — the same model as the resistance flag but for the single CommonCommensal flag.
+            $yaml = @'
+Hierarchies:
+- Name: Not listed
+  Id: 0
+  CommonCommensal: true
+- Name: Bacteria
+  Children:
+  - Name: Staphylococcus
+    Id: 100
+    CommonCommensal: true
+    Children:
+    - Name: Staphylococcus epidermidis
+      Id: 101
+      Synonyms:
+      - Name: Old epidermidis name
+        Id: 102
+  - Name: Escherichia
+    Id: 200
+    Children:
+    - Name: Escherichia coli
+      Id: 201
+'@
+            $script:CcTree = ($yaml | ConvertFrom-Yaml)
+        }
+
+        It 'inherits the flag down Children and Synonyms (genus -> species -> synonym)' {
+            $flags = @(Get-NeoIPCCommonCommensalFlag -Node $script:CcTree)
+            ($flags | Where-Object { $_.Id -eq 100 })['CommonCommensal'] | Should -BeTrue
+            ($flags | Where-Object { $_.Id -eq 101 })['CommonCommensal'] | Should -BeTrue
+            ($flags | Where-Object { $_.Id -eq 102 })['CommonCommensal'] | Should -BeTrue
+        }
+        It 'defaults to false where no flag is set on the node or any ancestor' {
+            $flags = @(Get-NeoIPCCommonCommensalFlag -Node $script:CcTree)
+            ($flags | Where-Object { $_.Id -eq 200 })['CommonCommensal'] | Should -BeFalse
+            ($flags | Where-Object { $_.Id -eq 201 })['CommonCommensal'] | Should -BeFalse
+        }
+        It 'honours an explicit false that overrides an inherited true (and re-inherits below)' {
+            $tree = [ordered]@{ Hierarchies = @(
+                    [ordered]@{ Name = 'Genus'; Id = 1; CommonCommensal = $true; Children = @(
+                            [ordered]@{ Name = 'Exception species'; Id = 2; CommonCommensal = $false; Children = @(
+                                    [ordered]@{ Name = 'Sub'; Id = 3 }
+                                ) }
+                            [ordered]@{ Name = 'Normal species'; Id = 4 }
+                        ) }
+                ) }
+            $flags = @(Get-NeoIPCCommonCommensalFlag -Node $tree)
+            ($flags | Where-Object { $_.Id -eq 1 })['CommonCommensal'] | Should -BeTrue
+            ($flags | Where-Object { $_.Id -eq 2 })['CommonCommensal'] | Should -BeFalse
+            ($flags | Where-Object { $_.Id -eq 3 })['CommonCommensal'] | Should -BeFalse
+            ($flags | Where-Object { $_.Id -eq 4 })['CommonCommensal'] | Should -BeTrue
+        }
+        It 'fails loud on a non-boolean flag value' {
+            $tree = [ordered]@{ Hierarchies = @([ordered]@{ Name = 'X'; Id = 9; CommonCommensal = 'maybe' }) }
+            { Get-NeoIPCCommonCommensalFlag -Node $tree } | Should -Throw '*non-boolean*'
+        }
+        It 'fails loud on a non-integer Id' {
+            $tree = [ordered]@{ Hierarchies = @([ordered]@{ Name = 'X'; Id = 'not-a-number'; CommonCommensal = $true }) }
+            { Get-NeoIPCCommonCommensalFlag -Node $tree } | Should -Throw '*non-integer Id*'
+        }
+
+        It 'aggregates the code set ascending, true ids only' {
+            @(Get-NeoIPCCommonCommensalCodeSet -Node $script:CcTree) | Should -Be @(0, 100, 101, 102)
+        }
+        It 'sorts numerically, not lexically' {
+            $tree = [ordered]@{ Hierarchies = @(
+                    [ordered]@{ Name = 'A'; Id = 100; CommonCommensal = $true }
+                    [ordered]@{ Name = 'B'; Id = 9; CommonCommensal = $true }
+                    [ordered]@{ Name = 'C'; Id = 21; CommonCommensal = $true }
+                ) }
+            @(Get-NeoIPCCommonCommensalCodeSet -Node $tree) | Should -Be @(9, 21, 100)
+        }
+        It 'returns an empty set when nothing is flagged' {
+            $tree = [ordered]@{ Hierarchies = @([ordered]@{ Name = 'A'; Id = 1 }, [ordered]@{ Name = 'B'; Id = 2 }) }
+            @(Get-NeoIPCCommonCommensalCodeSet -Node $tree).Count | Should -Be 0
+        }
+    }
+
+    Describe 'Pathogen slot-suffix matrix' {
+        It 'gives a BSI primary slot the full suffix set (base + NAME + 5 resistance + SOURCE + MULTIPLE), in order' {
+            @(Get-NeoIPCPathogenSlotSuffix -Stage 'BSI' -IsPrimary $true) |
+                Should -Be @('', 'NAME', '3GCR', 'CAR', 'COR', 'MRSA', 'VRE', 'SOURCE', 'MULTIPLE')
+        }
+        It 'gives HAP primary a SOURCE but no MULTIPLE' {
+            @(Get-NeoIPCPathogenSlotSuffix -Stage 'HAP' -IsPrimary $true) |
+                Should -Be @('', 'NAME', '3GCR', 'CAR', 'COR', 'MRSA', 'VRE', 'SOURCE')
+        }
+        It 'gives SSI primary neither SOURCE nor MULTIPLE' {
+            @(Get-NeoIPCPathogenSlotSuffix -Stage 'SSI' -IsPrimary $true) |
+                Should -Be @('', 'NAME', '3GCR', 'CAR', 'COR', 'MRSA', 'VRE')
+        }
+        It 'gives a secondary slot the core suffixes only, on every stage that carries them' {
+            foreach ($s in 'HAP', 'NEC', 'SSI') {
+                @(Get-NeoIPCPathogenSlotSuffix -Stage $s -IsPrimary $false) |
+                    Should -Be @('', 'NAME', '3GCR', 'CAR', 'COR', 'MRSA', 'VRE')
+            }
+        }
+    }
+
+    Describe 'Pathogen field-gating generation' {
+        BeforeAll {
+            Import-Module powershell-yaml -ErrorAction Stop
+            $script:FgVarPlan = @(Get-NeoIPCPathogenFieldGatingVariablePlan)
+            $script:FgRulePlan = @(Get-NeoIPCPathogenFieldGatingRulePlan)
+
+            # Tiny ontology: Id 0 and the Staphylococcus genus (100) are common commensals; S. aureus (101) overrides
+            # to false. So the effective CC code set is {0,100} — small enough to pin the negated ASSIGN exactly.
+            $script:FgYaml = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-fg-{0}.yaml' -f ([guid]::NewGuid().ToString('N')))
+            Set-Content -LiteralPath $script:FgYaml -Encoding utf8 -Value @'
+Hierarchies:
+- Name: Not listed
+  Id: 0
+  CommonCommensal: true
+- Name: Bacteria
+  Children:
+  - Name: Staphylococcus
+    Id: 100
+    CommonCommensal: true
+    Children:
+    - Name: Staphylococcus aureus
+      Id: 101
+      CommonCommensal: false
+  - Name: Escherichia coli
+    Id: 200
+'@
+            # The four pathogen stages (BSI/HAP/SSI/NEC), each resolved via a slot-1 _3GCR anchor DE in
+            # programStageDataElements (stages carry no code), plus every pathogen DE (so every gating target resolves),
+            # the program, and empty rule/action collections. Built from the DE plan so it stays in lockstep.
+            $repDe = @{ BSI = 'NEOIPC_BSI_PATHOGEN_1_3GCR'; HAP = 'NEOIPC_HAP_PATHOGEN_1_3GCR'; SSI = 'NEOIPC_SSI_PATHOGEN_1_3GCR'; NEC = 'NEOIPC_NEC_SEC_BSI_PATHOGEN_1_3GCR' }
+            $stages = foreach ($s in 'BSI', 'HAP', 'SSI', 'NEC') {
+                [ordered]@{
+                    id                       = (New-NeoIPCMetadataUid -Type 'programStages' -NaturalKey "NEOIPC_$s")
+                    programStageDataElements = @([ordered]@{ dataElement = [ordered]@{ id = (New-NeoIPCMetadataUid -Type 'dataElements' -NaturalKey $repDe[$s]) } })
+                }
+            }
+            $des = foreach ($d in (Get-NeoIPCPathogenDataElementPlan)) {
+                [ordered]@{ code = $d.Code; id = (New-NeoIPCMetadataUid -Type 'dataElements' -NaturalKey $d.Code) }
+            }
+            $script:FgPkg = @{
+                programs           = @([ordered]@{ code = 'NEOIPC_CORE'; id = 'progCore001' })
+                programStages      = @($stages)
+                dataElements       = @($des)
+                programRules       = @()
+                programRuleActions = @()
+            }
+        }
+        AfterAll {
+            if ($script:FgYaml -and (Test-Path -LiteralPath $script:FgYaml)) { Remove-Item -LiteralPath $script:FgYaml -Force }
+        }
+
+        # ---- variable plan -------------------------------------------------------------------------------------------
+        It 'variable plan: one is-recognized-pathogen boolean per BSI primary slot, BSI only' {
+            $script:FgVarPlan.Count | Should -Be 3
+            @($script:FgVarPlan | Where-Object { $_.Stage -ne 'BSI' }).Count | Should -Be 0
+            $v = @($script:FgVarPlan | Where-Object { $_.Index -eq 1 })[0]
+            $v.Name | Should -BeExactly 'NeoIPC BSI Pathogen 1 is recognized pathogen'
+            $v.SourceType | Should -BeExactly 'CALCULATED_VALUE'
+            $v.ValueType | Should -BeExactly 'BOOLEAN'
+            $v.DataElementCode | Should -BeNullOrEmpty
+        }
+        It 'variable plan: PathogenCount drives slot expansion (1 -> 1, 9 -> 9, named up to the max slot)' {
+            @(Get-NeoIPCPathogenFieldGatingVariablePlan -PathogenCount 1).Count | Should -Be 1
+            $nine = @(Get-NeoIPCPathogenFieldGatingVariablePlan -PathogenCount 9)
+            $nine.Count | Should -Be 9
+            @($nine | Where-Object { $_.Name -eq 'NeoIPC BSI Pathogen 9 is recognized pathogen' }).Count | Should -Be 1
+        }
+
+        # ---- rule plan -----------------------------------------------------------------------------------------------
+        It 'rule plan: 56 rules at count 3, broken down by kind' {
+            # recognizedPathogen 3 (BSI primary) + whenSet 3 (BSI primary) + whenEmpty 14 + whenEmptyOrListed 18 +
+            # whenNotListed 18. whenEmpty = 14: BSI/HAP primary all 3 slots (own SOURCE/MULTIPLE always hide) = 6;
+            # SSI primary + the 3 secondary stages emit it only where a downstream slot exists (slots 1-2) = 4*2 = 8.
+            $script:FgRulePlan.Count | Should -Be 56
+            (@($script:FgRulePlan | Where-Object { $_.Kind -eq 'recognizedPathogen' }).Count) | Should -Be 3
+            (@($script:FgRulePlan | Where-Object { $_.Kind -eq 'whenSet' }).Count) | Should -Be 3
+            (@($script:FgRulePlan | Where-Object { $_.Kind -eq 'whenEmpty' }).Count) | Should -Be 14
+            (@($script:FgRulePlan | Where-Object { $_.Kind -eq 'whenEmptyOrListed' }).Count) | Should -Be 18
+            (@($script:FgRulePlan | Where-Object { $_.Kind -eq 'whenNotListed' }).Count) | Should -Be 18
+        }
+        It 'rule plan: recognizedPathogen and whenSet exist only on BSI primary slots' {
+            foreach ($k in 'recognizedPathogen', 'whenSet') {
+                @($script:FgRulePlan | Where-Object { $_.Kind -eq $k -and -not ($_.Stage -eq 'BSI' -and $_.SlotKind -eq 'primary') }).Count |
+                    Should -Be 0
+            }
+        }
+        It 'rule plan: whenEmpty is omitted only when a slot has no own-extra and no downstream slot' {
+            # SSI primary slot 3 (no SOURCE/MULTIPLE, no downstream) -> no whenEmpty; slot 1 (downstream 2,3) -> has one.
+            @($script:FgRulePlan | Where-Object { $_.Kind -eq 'whenEmpty' -and $_.Stage -eq 'SSI' -and $_.SlotKind -eq 'primary' -and $_.Index -eq 3 }).Count | Should -Be 0
+            @($script:FgRulePlan | Where-Object { $_.Kind -eq 'whenEmpty' -and $_.Stage -eq 'SSI' -and $_.SlotKind -eq 'primary' -and $_.Index -eq 1 }).Count | Should -Be 1
+            # The last secondary slot likewise drops whenEmpty; BSI primary keeps it on every slot (own SOURCE/MULTIPLE).
+            @($script:FgRulePlan | Where-Object { $_.Kind -eq 'whenEmpty' -and $_.SlotKind -eq 'secondary' -and $_.Index -eq 3 }).Count | Should -Be 0
+            @($script:FgRulePlan | Where-Object { $_.Kind -eq 'whenEmpty' -and $_.Stage -eq 'BSI' -and $_.Index -eq 3 }).Count | Should -Be 1
+        }
+        It 'rule plan: recognizedPathogen is priority 0, every other kind priority 1' {
+            (@($script:FgRulePlan | Where-Object { $_.Kind -eq 'recognizedPathogen' -and $_.Priority -ne 0 }).Count) | Should -Be 0
+            (@($script:FgRulePlan | Where-Object { $_.Kind -ne 'recognizedPathogen' -and $_.Priority -ne 1 }).Count) | Should -Be 0
+        }
+        It 'rule plan: whenNotListed is the exact De Morgan complement of whenEmptyOrListed (mandatory iff shown)' {
+            # !(hasValue && ==0) == (!hasValue || !=0): the name field is required exactly when it is not hidden.
+            foreach ($nl in @($script:FgRulePlan | Where-Object { $_.Kind -eq 'whenNotListed' })) {
+                $v = $nl.ValueVariable
+                $eol = @($script:FgRulePlan | Where-Object { $_.Kind -eq 'whenEmptyOrListed' -and $_.Stage -eq $nl.Stage -and $_.SlotKind -eq $nl.SlotKind -and $_.Index -eq $nl.Index })[0]
+                $nl.Condition | Should -BeExactly "d2:hasValue(#{$v}) && #{$v} == 0"
+                $eol.Condition | Should -BeExactly "!d2:hasValue(#{$v}) || #{$v} != 0"
+            }
+        }
+        It 'rule plan: uses the secondary-BSI name template for secondary slots' {
+            (@($script:FgRulePlan | Where-Object { $_.Kind -eq 'whenNotListed' -and $_.Stage -eq 'NEC' -and $_.Index -eq 1 })[0].Name) |
+                Should -BeExactly 'NeoIPC NEC Secondary BSI pathogen 1 - when not listed'
+        }
+
+        # ---- variable generator --------------------------------------------------------------------------------------
+        It 'variable generator: 3 PRVs, resolving the program and preserving the UID by name; mints otherwise' {
+            $pkg = $script:FgPkg.Clone()
+            $pkg['programRuleVariables'] = @([ordered]@{ name = 'NeoIPC BSI Pathogen 1 is recognized pathogen'; id = 'fgRecP1AAAA' })
+            $frag = New-NeoIPCPathogenFieldGatingVariable -ExistingPackage $pkg
+            @($frag['programRuleVariables']).Count | Should -Be 3
+            $byName = @{}; foreach ($v in @($frag['programRuleVariables'])) { $byName[[string]$v['name']] = $v }
+            $p1 = $byName['NeoIPC BSI Pathogen 1 is recognized pathogen']
+            $p1['id'] | Should -BeExactly 'fgRecP1AAAA'   # preserved
+            $p1['programRuleVariableSourceType'] | Should -BeExactly 'CALCULATED_VALUE'
+            $p1['valueType'] | Should -BeExactly 'BOOLEAN'
+            $p1['program']['id'] | Should -BeExactly 'progCore001'
+            $p1.Contains('dataElement') | Should -BeFalse
+            $byName['NeoIPC BSI Pathogen 2 is recognized pathogen']['id'] |
+                Should -BeExactly (New-NeoIPCMetadataUid -Type 'programRuleVariables' -NaturalKey 'NeoIPC BSI Pathogen 2 is recognized pathogen')
+        }
+        It 'variable generator: fail-loud paths (program absent; invalid id re-mints; duplicate name; UID collision)' {
+            { New-NeoIPCPathogenFieldGatingVariable -ExistingPackage @{ programs = @(); programRuleVariables = @() } } | Should -Throw '*NEOIPC_CORE*'
+            $badId = $script:FgPkg.Clone()
+            $badId['programRuleVariables'] = @([ordered]@{ name = 'NeoIPC BSI Pathogen 1 is recognized pathogen'; id = 'BAD!' })
+            $v = @((New-NeoIPCPathogenFieldGatingVariable -ExistingPackage $badId)['programRuleVariables'] | Where-Object { $_['name'] -eq 'NeoIPC BSI Pathogen 1 is recognized pathogen' })[0]
+            (Test-NeoIPCMetadataUid -Id $v['id']) | Should -BeTrue
+            $dupName = $script:FgPkg.Clone()
+            $dupName['programRuleVariables'] = @(
+                [ordered]@{ name = 'NeoIPC BSI Pathogen 1 is recognized pathogen'; id = 'fgDupAAAA01' },
+                [ordered]@{ name = 'NeoIPC BSI Pathogen 1 is recognized pathogen'; id = 'fgDupAAAA02' })
+            { New-NeoIPCPathogenFieldGatingVariable -ExistingPackage $dupName } | Should -Throw '*Duplicate program-rule-variable name*'
+        }
+
+        # ---- rule generator ------------------------------------------------------------------------------------------
+        It 'rule generator: 56 rules and 177 actions' {
+            $frag = New-NeoIPCPathogenFieldGatingRule -Path $script:FgYaml -ExistingPackage $script:FgPkg
+            @($frag['programRules']).Count | Should -Be 56
+            # 3 ASSIGN + 3 whenSet + 18 whenEmptyOrListed + 18 whenNotListed + 135 whenEmpty HIDEFIELDs.
+            @($frag['programRuleActions']).Count | Should -Be 177
+        }
+        It 'rule generator: forwards PathogenCount (1 -> the single-slot subset)' {
+            $frag = New-NeoIPCPathogenFieldGatingRule -Path $script:FgYaml -ExistingPackage $script:FgPkg -PathogenCount 1
+            # Per slot-1-only group: BSI {recognized, whenSet, whenEmpty, EOL, NL}=5; HAP primary {whenEmpty,EOL,NL}=3;
+            # SSI primary {EOL,NL}=2 (no own-extra, no downstream); 3 secondary stages {EOL,NL}=2 each = 6. Total 16.
+            @($frag['programRules']).Count | Should -Be 16
+        }
+        It 'rule generator: recognizedPathogen ASSIGN content = the is-recognized var, data = hasValue && negated CC set (ascending)' {
+            $frag = New-NeoIPCPathogenFieldGatingRule -Path $script:FgYaml -ExistingPackage $script:FgPkg
+            $rules = @{}; foreach ($r in @($frag['programRules'])) { $rules[[string]$r['name']] = $r }
+            $acts = @{}; foreach ($a in @($frag['programRuleActions'])) { $acts[[string]$a['id']] = $a }
+            $rp = $rules['NeoIPC BSI Pathogen 1 - set recognized pathogen']
+            $rp['condition'] | Should -BeExactly 'true'
+            $rp['priority'] | Should -Be 0
+            $act = $acts[[string]@($rp['programRuleActions'])[0]['id']]
+            $act['programRuleActionType'] | Should -BeExactly 'ASSIGN'
+            $act['content'] | Should -BeExactly '#{NeoIPC BSI Pathogen 1 is recognized pathogen}'
+            $act['data'] | Should -BeExactly 'd2:hasValue(#{NeoIPC BSI Pathogen 1 value}) && !(#{NeoIPC BSI Pathogen 1 value}==0||#{NeoIPC BSI Pathogen 1 value}==100)'
+            $act.Contains('dataElement') | Should -BeFalse
+        }
+        It 'rule generator: whenSet makes _SOURCE mandatory; condition is d2:hasValue on the slot value' {
+            $frag = New-NeoIPCPathogenFieldGatingRule -Path $script:FgYaml -ExistingPackage $script:FgPkg
+            $rules = @{}; foreach ($r in @($frag['programRules'])) { $rules[[string]$r['name']] = $r }
+            $acts = @{}; foreach ($a in @($frag['programRuleActions'])) { $acts[[string]$a['id']] = $a }
+            $ws = $rules['NeoIPC BSI Pathogen 1 - when set']
+            $ws['condition'] | Should -BeExactly 'd2:hasValue(#{NeoIPC BSI Pathogen 1 value})'
+            $ws['priority'] | Should -Be 1
+            $act = $acts[[string]@($ws['programRuleActions'])[0]['id']]
+            $act['programRuleActionType'] | Should -BeExactly 'SETMANDATORYFIELD'
+            $act['dataElement']['id'] | Should -BeExactly (New-NeoIPCMetadataUid -Type 'dataElements' -NaturalKey 'NEOIPC_BSI_PATHOGEN_1_SOURCE')
+        }
+        It 'rule generator: whenEmpty hides own SOURCE/MULTIPLE + every downstream slot field (progressive reveal)' {
+            $frag = New-NeoIPCPathogenFieldGatingRule -Path $script:FgYaml -ExistingPackage $script:FgPkg
+            $rules = @{}; foreach ($r in @($frag['programRules'])) { $rules[[string]$r['name']] = $r }
+            $acts = @{}; foreach ($a in @($frag['programRuleActions'])) { $acts[[string]$a['id']] = $a }
+            $we = $rules['NeoIPC BSI Pathogen 1 - when empty']
+            $we['condition'] | Should -BeExactly '!d2:hasValue(#{NeoIPC BSI Pathogen 1 value})'
+            $hidden = @($we['programRuleActions'] | ForEach-Object { $acts[[string]$_['id']] })
+            ($hidden | ForEach-Object { $_['programRuleActionType'] } | Select-Object -Unique) | Should -Be 'HIDEFIELD'
+            # Own SOURCE + MULTIPLE, then slots 2 and 3 x 7 core fields = 2 + 14 = 16.
+            $hidden.Count | Should -Be 16
+            $targetIds = @($hidden | ForEach-Object { $_['dataElement']['id'] })
+            foreach ($c in 'NEOIPC_BSI_PATHOGEN_1_SOURCE', 'NEOIPC_BSI_PATHOGEN_1_MULTIPLE', 'NEOIPC_BSI_PATHOGEN_2', 'NEOIPC_BSI_PATHOGEN_3_VRE') {
+                $targetIds | Should -Contain (New-NeoIPCMetadataUid -Type 'dataElements' -NaturalKey $c)
+            }
+            # A downstream slot's own SOURCE/MULTIPLE are hidden by THAT slot's own whenEmpty, never repeated here.
+            $targetIds | Should -Not -Contain (New-NeoIPCMetadataUid -Type 'dataElements' -NaturalKey 'NEOIPC_BSI_PATHOGEN_2_SOURCE')
+        }
+        It 'rule generator: whenEmptyOrListed hides _NAME; whenNotListed requires _NAME (complementary conditions)' {
+            $frag = New-NeoIPCPathogenFieldGatingRule -Path $script:FgYaml -ExistingPackage $script:FgPkg
+            $rules = @{}; foreach ($r in @($frag['programRules'])) { $rules[[string]$r['name']] = $r }
+            $acts = @{}; foreach ($a in @($frag['programRuleActions'])) { $acts[[string]$a['id']] = $a }
+            $nameId = New-NeoIPCMetadataUid -Type 'dataElements' -NaturalKey 'NEOIPC_BSI_PATHOGEN_1_NAME'
+            $eol = $rules['NeoIPC BSI Pathogen 1 - when empty or listed']
+            $eol['condition'] | Should -BeExactly '!d2:hasValue(#{NeoIPC BSI Pathogen 1 value}) || #{NeoIPC BSI Pathogen 1 value} != 0'
+            $eolAct = $acts[[string]@($eol['programRuleActions'])[0]['id']]
+            $eolAct['programRuleActionType'] | Should -BeExactly 'HIDEFIELD'
+            $eolAct['dataElement']['id'] | Should -BeExactly $nameId
+            $nl = $rules['NeoIPC BSI Pathogen 1 - when not listed']
+            $nl['condition'] | Should -BeExactly 'd2:hasValue(#{NeoIPC BSI Pathogen 1 value}) && #{NeoIPC BSI Pathogen 1 value} == 0'
+            $nlAct = $acts[[string]@($nl['programRuleActions'])[0]['id']]
+            $nlAct['programRuleActionType'] | Should -BeExactly 'SETMANDATORYFIELD'
+            $nlAct['dataElement']['id'] | Should -BeExactly $nameId
+        }
+        It 'rule generator: resolves each rule programStage via DE->stage membership (stages carry no code)' {
+            $frag = New-NeoIPCPathogenFieldGatingRule -Path $script:FgYaml -ExistingPackage $script:FgPkg
+            $rules = @{}; foreach ($r in @($frag['programRules'])) { $rules[[string]$r['name']] = $r }
+            $rules['NeoIPC BSI Pathogen 1 - when not listed']['programStage']['id'] |
+                Should -BeExactly (New-NeoIPCMetadataUid -Type 'programStages' -NaturalKey 'NEOIPC_BSI')
+            $rules['NeoIPC NEC Secondary BSI pathogen 1 - when not listed']['programStage']['id'] |
+                Should -BeExactly (New-NeoIPCMetadataUid -Type 'programStages' -NaturalKey 'NEOIPC_NEC')
+        }
+        It 'rule generator: preserves rule UID + description and the action UID from the export by name; mints otherwise' {
+            $pkg = $script:FgPkg.Clone()
+            $bsiStageId = New-NeoIPCMetadataUid -Type 'programStages' -NaturalKey 'NEOIPC_BSI'
+            $pkg['programRules'] = @([ordered]@{ name = 'NeoIPC BSI Pathogen 1 - when set'; id = 'RULEseed001'; description = 'Seeded description.' })
+            $pkg['programRuleActions'] = @([ordered]@{ id = 'ACTseed0001'; programRule = [ordered]@{ id = 'RULEseed001' }; programRuleActionType = 'SETMANDATORYFIELD'; dataElement = [ordered]@{ id = (New-NeoIPCMetadataUid -Type 'dataElements' -NaturalKey 'NEOIPC_BSI_PATHOGEN_1_SOURCE') } })
+            $frag = New-NeoIPCPathogenFieldGatingRule -Path $script:FgYaml -ExistingPackage $pkg
+            $rules = @{}; foreach ($r in @($frag['programRules'])) { $rules[[string]$r['name']] = $r }
+            $seeded = $rules['NeoIPC BSI Pathogen 1 - when set']
+            $seeded['id'] | Should -BeExactly 'RULEseed001'
+            $seeded['description'] | Should -BeExactly 'Seeded description.'
+            @($seeded['programRuleActions'])[0]['id'] | Should -BeExactly 'ACTseed0001'
+            # A rule absent from the export mints rule + action deterministically.
+            $minted = $rules['NeoIPC BSI Pathogen 1 - when not listed']
+            $minted['id'] | Should -BeExactly (New-NeoIPCMetadataUid -Type 'programRules' -NaturalKey 'NeoIPC BSI Pathogen 1 - when not listed')
+            @($minted['programRuleActions'])[0]['id'] |
+                Should -BeExactly (New-NeoIPCMetadataUid -Type 'programRuleActions' -NaturalKey 'NeoIPC BSI Pathogen 1 - when not listed|SETMANDATORYFIELD|NEOIPC_BSI_PATHOGEN_1_NAME')
+        }
+        It 'rule generator: mints deterministically across runs' {
+            $a = New-NeoIPCPathogenFieldGatingRule -Path $script:FgYaml -ExistingPackage $script:FgPkg
+            $b = New-NeoIPCPathogenFieldGatingRule -Path $script:FgYaml -ExistingPackage $script:FgPkg
+            @($a['programRules'] | ForEach-Object { $_['id'] }) | Should -Be @($b['programRules'] | ForEach-Object { $_['id'] })
+            @($a['programRuleActions'] | ForEach-Object { $_['id'] }) | Should -Be @($b['programRuleActions'] | ForEach-Object { $_['id'] })
+        }
+        It 'rule generator: fails loud when the program is absent' {
+            $pkg = @{ programs = @(); programStages = $script:FgPkg['programStages']; dataElements = $script:FgPkg['dataElements']; programRules = @(); programRuleActions = @() }
+            { New-NeoIPCPathogenFieldGatingRule -Path $script:FgYaml -ExistingPackage $pkg } | Should -Throw '*NEOIPC_CORE*'
+        }
+        It 'rule generator: fails loud when a stage anchor data element is absent (stage unresolvable)' {
+            $pkg = $script:FgPkg.Clone()
+            $pkg['dataElements'] = @($script:FgPkg['dataElements'] | Where-Object { [string]$_['code'] -ne 'NEOIPC_NEC_SEC_BSI_PATHOGEN_1_3GCR' })
+            { New-NeoIPCPathogenFieldGatingRule -Path $script:FgYaml -ExistingPackage $pkg } | Should -Throw '*program stage*'
+        }
+        It 'rule generator: fails loud when a gating target data element is absent' {
+            $pkg = $script:FgPkg.Clone()
+            $pkg['dataElements'] = @($script:FgPkg['dataElements'] | Where-Object { [string]$_['code'] -ne 'NEOIPC_BSI_PATHOGEN_1_NAME' })
+            { New-NeoIPCPathogenFieldGatingRule -Path $script:FgYaml -ExistingPackage $pkg } | Should -Throw '*NEOIPC_BSI_PATHOGEN_1_NAME*'
+        }
+        It 'rule generator: fails loud when the common-commensal set is empty (no recognized-pathogen expression)' {
+            $emptyYaml = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-fg-empty-{0}.yaml' -f ([guid]::NewGuid().ToString('N')))
+            Set-Content -LiteralPath $emptyYaml -Encoding utf8 -Value "Hierarchies:`n- Name: Bacteria`n  Id: 1`n"
+            try {
+                { New-NeoIPCPathogenFieldGatingRule -Path $emptyYaml -ExistingPackage $script:FgPkg } | Should -Throw '*common-commensal code set is empty*'
+            }
+            finally { Remove-Item -LiteralPath $emptyYaml -Force }
+        }
+    }
 }

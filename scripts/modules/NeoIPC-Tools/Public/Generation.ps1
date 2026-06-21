@@ -270,7 +270,7 @@ function New-NeoIPCPathogenVariable {
         from the package by name where present, else minted deterministically (programRuleVariables natural key =
         name), mirroring the option-set generator. The `value` variable's dataElement reference and the program
         reference are resolved by code against the package (fail-loud if the base DE or the NEOIPC_CORE program is
-        absent). The slot-specific housekeeping variables (name value, source value, is recognized pathogen,
+        absent). The slot-specific field-gating variables (name value, source value, is recognized pathogen,
         recovered multiple times) are generated with their rules, not here.
 
         Pure object processing — no DHIS2 API calls. Returns a package fragment { programRuleVariables }.
@@ -523,6 +523,259 @@ function New-NeoIPCPathogenRule {
             $action['dataElement'] = [ordered]@{ id = $deByCode[$catDeCode] }
         }
         $actions.Add($action)
+    }
+
+    [ordered]@{ programRules = $rules.ToArray(); programRuleActions = $actions.ToArray() }
+}
+
+function New-NeoIPCPathogenFieldGatingVariable {
+    <#
+    .SYNOPSIS
+        Generate the slot-specific field-gating PROGRAM-RULE VARIABLES of NEOIPC_CORE (the recognized-pathogen boolean).
+    .DESCRIPTION
+        Expands the field-gating-variable plan (Get-NeoIPCPathogenFieldGatingVariablePlan) — for each BSI primary slot
+        an `is recognized pathogen` CALCULATED_VALUE boolean. This is the variable the BSI `set recognized pathogen`
+        ASSIGN writes (and downstream BSI-definition rules read), so it must be generated alongside those rules — it is
+        deliberately NOT in New-NeoIPCPathogenVariable (the resistance PRVs). The UID is preserved from the export by
+        name where present, else minted deterministically (programRuleVariables natural key = name); the program is
+        resolved by code. Fail-loud if the program is absent. Pure object processing — no DHIS2 API calls.
+        Returns a package fragment { programRuleVariables }.
+    .PARAMETER ExistingPackage
+        An already-parsed DHIS2 package/export (hashtable) supplying UIDs to preserve and the NEOIPC_CORE program.
+    .PARAMETER ProgramCode
+        Code of the program the variables belong to. Default: NEOIPC_CORE.
+    .PARAMETER PathogenCount
+        Number of organism slots per applicable program stage (1-9, single digit). Defaults to the module-wide count (3).
+        Pass the same value to New-NeoIPCPathogenFieldGatingRule so the variables and rules stay aligned.
+    .OUTPUTS
+        [ordered] hashtable with key 'programRuleVariables' (PathogenCount at the default count of 3).
+    #>
+    [CmdletBinding()]
+    [OutputType([System.Collections.Specialized.OrderedDictionary])]
+    param(
+        [Parameter(Mandatory)][System.Collections.IDictionary]$ExistingPackage,
+        [string]$ProgramCode = 'NEOIPC_CORE',
+        [ValidateRange(1, 9)][int]$PathogenCount = $script:NeoIPCPathogenSlotCount
+    )
+
+    $programId = $null
+    foreach ($p in @($ExistingPackage['programs'])) {
+        if ($p -is [System.Collections.IDictionary] -and [string]$p['code'] -eq $ProgramCode) { $programId = [string]$p['id']; break }
+    }
+    if (-not $programId) { throw "Program '$ProgramCode' not found in the package." }
+
+    $prvByName = [System.Collections.Generic.Dictionary[string, string]]::new([System.StringComparer]::Ordinal)
+    foreach ($v in @($ExistingPackage['programRuleVariables'])) {
+        if ($v -is [System.Collections.IDictionary] -and $v['name']) {
+            $nm = [string]$v['name']
+            if ($prvByName.ContainsKey($nm)) { throw "Duplicate program-rule-variable name '$nm' in the package." }
+            $prvByName[$nm] = [string]$v['id']
+        }
+    }
+
+    $plan = @(Get-NeoIPCPathogenFieldGatingVariablePlan -PathogenCount $PathogenCount)
+    $seen = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::Ordinal)
+    $out = [System.Collections.Generic.List[object]]::new()
+    foreach ($d in $plan) {
+        $name = [string]$d['Name']
+        $existingId = if ($prvByName.ContainsKey($name)) { $prvByName[$name] } else { $null }
+        $id = if ($existingId -and (Test-NeoIPCMetadataUid -Id $existingId)) { $existingId }
+        else { New-NeoIPCMetadataUid -Type 'programRuleVariables' -NaturalKey $name }
+        if (-not $seen.Add($id)) { throw "UID collision for program-rule variable '$name' (uid '$id')." }
+
+        $out.Add([ordered]@{
+                id                            = $id
+                name                          = $name
+                programRuleVariableSourceType = [string]$d['SourceType']
+                valueType                     = [string]$d['ValueType']
+                useCodeForOptionSet           = [bool]$d['UseCodeForOptionSet']
+                program                       = [ordered]@{ id = $programId }
+            })
+    }
+    [ordered]@{ programRuleVariables = $out.ToArray() }
+}
+
+function New-NeoIPCPathogenFieldGatingRule {
+    <#
+    .SYNOPSIS
+        Generate the per-slot field-gating PROGRAM RULES + ACTIONS of NEOIPC_CORE from the ontology + capability matrix.
+    .DESCRIPTION
+        Expands the field-gating-rule plan (Get-NeoIPCPathogenFieldGatingRulePlan) — the non-resistance gating on each
+        pathogen slot — into rules and actions. Five kinds:
+          - `<slot> - set recognized pathogen` (BSI primary): condition `true`, priority 0, an ASSIGN that sets the
+            slot's `is recognized pathogen` boolean to `d2:hasValue(#{<slot> value}) && !(#{<slot> value}==c1||...)` —
+            the common-commensal code set (from Get-NeoIPCCommonCommensalCodeSet over the canonical ontology) NEGATED;
+          - `<slot> - when set` (BSI primary): condition `d2:hasValue(#{<slot> value})`, a SETMANDATORYFIELD on `_SOURCE`;
+          - `<slot> - when empty`: condition `!d2:hasValue(#{<slot> value})`, HIDEFIELD actions over the slot's own
+            SOURCE/MULTIPLE extras and every field of the downstream slots (progressive reveal);
+          - `<slot> - when empty or listed`: condition `!... || != 0`, a HIDEFIELD on `_NAME`;
+          - `<slot> - when not listed`: condition `d2:hasValue && == 0`, a SETMANDATORYFIELD on `_NAME`.
+        The recognized-pathogen code set carries the corrected taxonomy (the nearest-explicit effective CommonCommensal
+        flag), not the deployed snapshot. The deployed slot-1 NEOIPC_BSI_NO_POS_CULTURE interlock is a BSI-definition
+        business rule and is not emitted here.
+
+        Each rule's `programStage` is resolved via a slot-1 `_3GCR` resistance data element on that stage (the deployed
+        stages carry no `code`), through programStageDataElements. UID policy mirrors the rest of the pipeline: a rule
+        preserves its UID + description from the export by name where present, else mints deterministically; an action
+        preserves the UID of its owning deployed rule's action matching (action type + target data element, or just
+        type for the target-less ASSIGN), else mints from `<rule name>|<type>[|<target code>]`. Fail-loud (no silent
+        divergence): a missing program / program stage / target data element, an empty common-commensal code set, or a
+        duplicate minted UID throws.
+
+        Pure file/object processing — no DHIS2 API calls. Returns a package fragment { programRules; programRuleActions }.
+    .PARAMETER ExistingPackage
+        An already-parsed DHIS2 package/export (hashtable) supplying the NEOIPC_CORE program, the program stages (with
+        their programStageDataElements, used to resolve each rule's stage), the target data elements (by code), and the
+        deployed rules/actions whose UIDs + descriptions are preserved.
+    .PARAMETER Path
+        Path to the ontology YAML (drives the common-commensal code set). Defaults to the canonical file in the repository.
+    .PARAMETER ProgramCode
+        Code of the program the rules belong to. Default: NEOIPC_CORE.
+    .PARAMETER PathogenCount
+        Number of organism slots per applicable program stage (1-9, single digit). Defaults to the module-wide count (3).
+        Pass the same value to New-NeoIPCPathogenFieldGatingVariable so the variables and rules stay aligned.
+    .OUTPUTS
+        [ordered] hashtable with keys 'programRules' and 'programRuleActions'.
+    #>
+    [CmdletBinding()]
+    [OutputType([System.Collections.Specialized.OrderedDictionary])]
+    param(
+        [Parameter(Mandatory)][System.Collections.IDictionary]$ExistingPackage,
+        [Parameter(Position = 0)]
+        [string]$Path = (Join-Path $PSScriptRoot '..' '..' '..' '..' 'metadata' 'common' 'infectious-agents' 'NeoIPC-Infectious-Agents.yaml'),
+        [string]$ProgramCode = 'NEOIPC_CORE',
+        [ValidateRange(1, 9)][int]$PathogenCount = $script:NeoIPCPathogenSlotCount
+    )
+
+    Import-Module powershell-yaml -ErrorAction Stop
+
+    $programId = $null
+    foreach ($p in @($ExistingPackage['programs'])) {
+        if ($p -is [System.Collections.IDictionary] -and [string]$p['code'] -eq $ProgramCode) { $programId = [string]$p['id']; break }
+    }
+    if (-not $programId) { throw "Program '$ProgramCode' not found in the package." }
+
+    $deByCode = [System.Collections.Generic.Dictionary[string, string]]::new([System.StringComparer]::Ordinal)
+    foreach ($de in @($ExistingPackage['dataElements'])) {
+        if ($de -is [System.Collections.IDictionary] -and $de['code']) {
+            $c = [string]$de['code']
+            if ($deByCode.ContainsKey($c)) { throw "Duplicate data-element code '$c' in the package." }
+            $deByCode[$c] = [string]$de['id']
+        }
+    }
+    $ruleByName = [System.Collections.Generic.Dictionary[string, object]]::new([System.StringComparer]::Ordinal)
+    foreach ($r in @($ExistingPackage['programRules'])) {
+        if ($r -is [System.Collections.IDictionary] -and $r['name']) {
+            $nm = [string]$r['name']
+            if ($ruleByName.ContainsKey($nm)) { throw "Duplicate program-rule name '$nm' in the package." }
+            $ruleByName[$nm] = $r
+        }
+    }
+    $actionsByRuleId = [System.Collections.Generic.Dictionary[string, System.Collections.Generic.List[object]]]::new([System.StringComparer]::Ordinal)
+    foreach ($a in @($ExistingPackage['programRuleActions'])) {
+        if ($a -isnot [System.Collections.IDictionary]) { continue }
+        $pr = $a['programRule']
+        if ($pr -is [System.Collections.IDictionary] -and $pr['id']) {
+            $rid = [string]$pr['id']
+            if (-not $actionsByRuleId.ContainsKey($rid)) { $actionsByRuleId[$rid] = [System.Collections.Generic.List[object]]::new() }
+            $actionsByRuleId[$rid].Add($a)
+        }
+    }
+
+    $resolvedYaml = Resolve-Path -LiteralPath $Path -ErrorAction Stop
+    $tree = Get-Content -LiteralPath $resolvedYaml -Raw | ConvertFrom-Yaml
+    $commonCommensal = @(Get-NeoIPCCommonCommensalCodeSet -Node $tree)
+
+    # The deployed program stages carry no code, so resolve each pathogen stage by a slot-1 resistance DE that always
+    # exists on it (so rules for grown slots resolve too); map the stage token -> stage id once.
+    $stageByDeId = Get-NeoIPCStageByDataElementId -Package $ExistingPackage
+    $stageAnchorByToken = @{
+        BSI = 'NEOIPC_BSI_PATHOGEN_1_3GCR'
+        HAP = 'NEOIPC_HAP_PATHOGEN_1_3GCR'
+        SSI = 'NEOIPC_SSI_PATHOGEN_1_3GCR'
+        NEC = 'NEOIPC_NEC_SEC_BSI_PATHOGEN_1_3GCR'
+    }
+    $stageIdByToken = @{}
+    foreach ($tok in $stageAnchorByToken.Keys) {
+        $anchor = $stageAnchorByToken[$tok]
+        if ($deByCode.ContainsKey($anchor) -and $stageByDeId.ContainsKey($deByCode[$anchor])) {
+            $stageIdByToken[$tok] = $stageByDeId[$deByCode[$anchor]]
+        }
+    }
+
+    $plan = @(Get-NeoIPCPathogenFieldGatingRulePlan -PathogenCount $PathogenCount)
+    $rulesSeen = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::Ordinal)
+    $actionsSeen = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::Ordinal)
+    $rules = [System.Collections.Generic.List[object]]::new()
+    $actions = [System.Collections.Generic.List[object]]::new()
+
+    foreach ($d in $plan) {
+        $name = [string]$d['Name']
+        $stage = [string]$d['Stage']
+        if (-not $stageIdByToken.ContainsKey($stage)) { throw "Cannot resolve the program stage for rule '$name' — the anchor data element '$($stageAnchorByToken[$stage])' is absent from the package or not assigned to a stage." }
+        $psId = $stageIdByToken[$stage]
+
+        $deployedRule = if ($ruleByName.ContainsKey($name)) { $ruleByName[$name] } else { $null }
+        $deployedRuleId = if ($deployedRule) { [string]$deployedRule['id'] } else { $null }
+
+        $ruleId = if ($deployedRuleId -and (Test-NeoIPCMetadataUid -Id $deployedRuleId)) { $deployedRuleId }
+        else { New-NeoIPCMetadataUid -Type 'programRules' -NaturalKey $name }
+        if (-not $rulesSeen.Add($ruleId)) { throw "UID collision for program rule '$name' (uid '$ruleId')." }
+
+        $rule = [ordered]@{ id = $ruleId; name = $name }
+        $desc = if ($deployedRule -and $deployedRule.Contains('description') -and "$($deployedRule['description'])") { [string]$deployedRule['description'] } else { [string]$d['Description'] }
+        if ($desc) { $rule['description'] = $desc }
+        $rule['program'] = [ordered]@{ id = $programId }
+        $rule['programStage'] = [ordered]@{ id = $psId }
+        $rule['condition'] = [string]$d['Condition']
+        $rule['priority'] = [int]$d['Priority']
+
+        $deployedActions = if ($deployedRuleId -and $actionsByRuleId.ContainsKey($deployedRuleId)) { $actionsByRuleId[$deployedRuleId] } else { @() }
+        $actionRefs = [System.Collections.Generic.List[object]]::new()
+        foreach ($a in @($d['Actions'])) {
+            $type = [string]$a['Type']
+            $targetId = $null
+            $targetCode = $null
+            if ($a['DataElementCode']) {
+                $targetCode = [string]$a['DataElementCode']
+                if (-not $deByCode.ContainsKey($targetCode)) { throw "Data element '$targetCode' (targeted by rule '$name') is not present in the package." }
+                $targetId = $deByCode[$targetCode]
+            }
+
+            $actionId = $null
+            foreach ($da in $deployedActions) {
+                if ([string]$da['programRuleActionType'] -ne $type) { continue }
+                if ($targetId) {
+                    $deTgt = if ($da['dataElement'] -is [System.Collections.IDictionary]) { [string]$da['dataElement']['id'] } else { $null }
+                    if ($deTgt -ne $targetId) { continue }
+                }
+                if (Test-NeoIPCMetadataUid -Id ([string]$da['id'])) { $actionId = [string]$da['id']; break }
+            }
+            if (-not $actionId) {
+                $nk = if ($targetCode) { '{0}|{1}|{2}' -f $name, $type, $targetCode } else { '{0}|{1}' -f $name, $type }
+                $actionId = New-NeoIPCMetadataUid -Type 'programRuleActions' -NaturalKey $nk
+            }
+            if (-not $actionsSeen.Add($actionId)) { throw "UID collision for an action of program rule '$name' (uid '$actionId')." }
+
+            $action = [ordered]@{
+                id                    = $actionId
+                programRule           = [ordered]@{ id = $ruleId }
+                programRuleActionType = $type
+            }
+            if ($targetId) { $action['dataElement'] = [ordered]@{ id = $targetId } }
+            if ($a['UsesCommonCommensalSet']) {
+                if ($commonCommensal.Count -eq 0) { throw "The common-commensal code set is empty — cannot build the recognized-pathogen ASSIGN expression for '$name'." }
+                $valueVar = [string]$d['ValueVariable']
+                $terms = ($commonCommensal | ForEach-Object { "#{$valueVar}==$_" }) -join '||'
+                $action['content'] = [string]$a['Content']
+                $action['data'] = "d2:hasValue(#{$valueVar}) && !($terms)"
+            }
+            elseif ($a['Content']) { $action['content'] = [string]$a['Content'] }
+            $actions.Add($action)
+            $actionRefs.Add([ordered]@{ id = $actionId })
+        }
+        $rule['programRuleActions'] = $actionRefs.ToArray()
+        $rules.Add($rule)
     }
 
     [ordered]@{ programRules = $rules.ToArray(); programRuleActions = $actions.ToArray() }
