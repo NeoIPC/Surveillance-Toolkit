@@ -499,6 +499,114 @@ InModuleScope 'NeoIPC-Tools' {
         }
     }
 
+    Describe 'Generated-family exclusion (pathogen / substance / resistance / field-gating sourced from the ontology, not the directory)' {
+        BeforeAll {
+            # A package mixing the GENERATED families (excluded from the directory) with hand-authored business
+            # metadata (kept). The substance PRV / rule names are the DEPLOYED *unpadded* form ("substance 1"),
+            # exercising the slot-normalisation that matches them to the padded plan ("substance 01").
+            $script:genPkg = [ordered]@{
+                dataElements = @(
+                    [ordered]@{ id = 'deBsiPat001'; code = 'NEOIPC_BSI_PATHOGEN_1'; name = 'NeoIPC BSI Organism 1'; valueType = 'INTEGER_ZERO_OR_POSITIVE' }                          # generated
+                    [ordered]@{ id = 'deBsiPat3gc'; code = 'NEOIPC_BSI_PATHOGEN_1_3GCR'; name = 'NeoIPC BSI Organism 1 3GCR'; valueType = 'INTEGER' }                                    # generated
+                    [ordered]@{ id = 'deSubst0001'; code = 'NEOIPC_SURVEILLANCE_END_AB_SUBST_01'; name = 'NeoIPC Surveillance end Antibiotic substance 01'; valueType = 'TEXT' }          # generated
+                    [ordered]@{ id = 'deNoPosCul1'; code = 'NEOIPC_BSI_NO_POS_CULTURE'; name = 'NeoIPC BSI no positive culture'; valueType = 'TRUE_ONLY' }                                # business, kept
+                    [ordered]@{ id = 'deAdmDate01'; code = 'NEOIPC_ADM_DATE'; name = 'NeoIPC Admission date'; valueType = 'DATE' }                                                        # business, kept
+                )
+                programRuleVariables = @(
+                    [ordered]@{ id = 'prvBsiVal01'; name = 'NeoIPC BSI Pathogen 1 value'; programRuleVariableSourceType = 'DATAELEMENT_CURRENT_EVENT' }                                  # generated
+                    [ordered]@{ id = 'prvBsiMb3gc'; name = 'NeoIPC BSI Pathogen 1 may be 3GCR'; programRuleVariableSourceType = 'CALCULATED_VALUE' }                                      # generated
+                    [ordered]@{ id = 'prvSubVal01'; name = 'NeoIPC Surveillance end Antibiotic substance 1 - current event value'; programRuleVariableSourceType = 'DATAELEMENT_CURRENT_EVENT' }  # generated (unpadded)
+                    [ordered]@{ id = 'prvBizAbtv1'; name = 'NeoIPC BSI antibiotic treatment value'; programRuleVariableSourceType = 'DATAELEMENT_CURRENT_EVENT' }                         # business, kept
+                )
+                programRules = @(
+                    [ordered]@{ id = 'rlSet3gcr01'; name = 'NeoIPC BSI Pathogen 1 - set 3GCR'; condition = 'true'; programRuleActions = @([ordered]@{ id = 'acSet3gcr01' }) }            # generated
+                    [ordered]@{ id = 'rlWhenEmp01'; name = 'NeoIPC BSI Pathogen 1 - when empty'; condition = '!d2:hasValue(#{x})'; programRuleActions = @([ordered]@{ id = 'acWhenEmp01' }) }  # generated
+                    [ordered]@{ id = 'rlSubHide01'; name = 'NeoIPC Surveillance end Antibiotic substance 1 - hide'; condition = 'x'; programRuleActions = @([ordered]@{ id = 'acSubHide01' }) }  # generated (unpadded)
+                    [ordered]@{ id = 'rlHapAggr01'; name = 'NeoIPC HAP - set pathogen attribute variables'; condition = 'true'; programRuleActions = @([ordered]@{ id = 'acHapAggr01' }) }  # retired aggregate
+                    [ordered]@{ id = 'rlBizInf001'; name = 'NeoIPC BSI infection present'; condition = 'x'; programRuleActions = @([ordered]@{ id = 'acBizInf001' }) }                    # business, kept
+                )
+                programRuleActions = @(
+                    [ordered]@{ id = 'acSet3gcr01'; programRuleActionType = 'ASSIGN'; programRule = [ordered]@{ id = 'rlSet3gcr01' } }
+                    [ordered]@{ id = 'acWhenEmp01'; programRuleActionType = 'HIDEFIELD'; programRule = [ordered]@{ id = 'rlWhenEmp01' } }
+                    [ordered]@{ id = 'acSubHide01'; programRuleActionType = 'HIDEFIELD'; programRule = [ordered]@{ id = 'rlSubHide01' } }
+                    [ordered]@{ id = 'acHapAggr01'; programRuleActionType = 'ASSIGN'; programRule = [ordered]@{ id = 'rlHapAggr01' } }
+                    [ordered]@{ id = 'acBizInf001'; programRuleActionType = 'SHOWWARNING'; programRule = [ordered]@{ id = 'rlBizInf001' } }
+                )
+            }
+        }
+        It 'Get-NeoIPCMetadataGeneratedKeys resolves plan codes/names + the retired rule + in-package excluded rule ids' {
+            $gk = Get-NeoIPCMetadataGeneratedKeys -Package (ConvertFrom-NeoIPCMetadataJsonText -Json ($script:genPkg | ConvertTo-Json -Depth 40))
+            $gk.DataElementCodes.Contains('NEOIPC_BSI_PATHOGEN_1') | Should -BeTrue
+            $gk.DataElementCodes.Contains('NEOIPC_SURVEILLANCE_END_AB_SUBST_01') | Should -BeTrue
+            $gk.DataElementCodes.Contains('NEOIPC_BSI_NO_POS_CULTURE') | Should -BeFalse
+            $gk.VariableNames.Contains('NeoIPC BSI Pathogen 1 value') | Should -BeTrue
+            # The deployed unpadded substance name is normalised into the (padded) generated set.
+            $gk.VariableNames.Contains('NeoIPC Surveillance end Antibiotic substance 1 - current event value') | Should -BeTrue
+            $gk.RuleNames.Contains('NeoIPC BSI Pathogen 1 - set 3GCR') | Should -BeTrue
+            $gk.RuleNames.Contains('NeoIPC HAP - set pathogen attribute variables') | Should -BeTrue
+            $gk.RuleNames.Contains('NeoIPC BSI infection present') | Should -BeFalse
+            @($gk.ExcludedRuleIds | Sort-Object) | Should -Be @('rlHapAggr01', 'rlSet3gcr01', 'rlSubHide01', 'rlWhenEmp01')
+        }
+        It 'Test-NeoIPCMetadataGeneratedExcluded keys DEs by code, PRVs/rules by normalised name, actions by owning rule' {
+            $gk = Get-NeoIPCMetadataGeneratedKeys -Package (ConvertFrom-NeoIPCMetadataJsonText -Json ($script:genPkg | ConvertTo-Json -Depth 40))
+            Test-NeoIPCMetadataGeneratedExcluded -Type 'dataElements' -Object ([ordered]@{ code = 'NEOIPC_BSI_PATHOGEN_1' }) -GeneratedKeys $gk | Should -BeTrue
+            Test-NeoIPCMetadataGeneratedExcluded -Type 'dataElements' -Object ([ordered]@{ code = 'NEOIPC_BSI_NO_POS_CULTURE' }) -GeneratedKeys $gk | Should -BeFalse
+            Test-NeoIPCMetadataGeneratedExcluded -Type 'programRuleVariables' -Object ([ordered]@{ name = 'NeoIPC Surveillance end Antibiotic substance 1 - current event value' }) -GeneratedKeys $gk | Should -BeTrue
+            Test-NeoIPCMetadataGeneratedExcluded -Type 'programRuleVariables' -Object ([ordered]@{ name = 'NeoIPC BSI antibiotic treatment value' }) -GeneratedKeys $gk | Should -BeFalse
+            Test-NeoIPCMetadataGeneratedExcluded -Type 'programRules' -Object ([ordered]@{ name = 'NeoIPC BSI Pathogen 1 - when empty' }) -GeneratedKeys $gk | Should -BeTrue
+            Test-NeoIPCMetadataGeneratedExcluded -Type 'programRules' -Object ([ordered]@{ name = 'NeoIPC BSI infection present' }) -GeneratedKeys $gk | Should -BeFalse
+            Test-NeoIPCMetadataGeneratedExcluded -Type 'programRuleActions' -Object ([ordered]@{ programRule = [ordered]@{ id = 'rlSet3gcr01' } }) -GeneratedKeys $gk | Should -BeTrue
+            Test-NeoIPCMetadataGeneratedExcluded -Type 'programRuleActions' -Object ([ordered]@{ programRule = [ordered]@{ id = 'rlBizInf001' } }) -GeneratedKeys $gk | Should -BeFalse
+        }
+        It 'the emit drops the generated families (incl. the retired aggregate) and keeps the business metadata' {
+            $work = ConvertFrom-NeoIPCMetadataJsonText -Json ($script:genPkg | ConvertTo-Json -Depth 40)
+            $rows = ConvertFrom-NeoIPCMetadataPackage -Package $work
+            @($rows['dataElements'] | ForEach-Object { [string]$_['code'] } | Sort-Object) | Should -Be @('NEOIPC_ADM_DATE', 'NEOIPC_BSI_NO_POS_CULTURE')
+            @($rows['programRuleVariables'] | ForEach-Object { [string]$_['name'] }) | Should -Be @('NeoIPC BSI antibiotic treatment value')
+            @($rows['programRules'] | ForEach-Object { [string]$_['name'] }) | Should -Be @('NeoIPC BSI infection present')
+            @($rows['programRuleActions'] | ForEach-Object { [string]$_['id'] }) | Should -Be @('acBizInf001')
+        }
+        It 'drops a business-interlock action bundled onto a generated rule (keyed by owning rule); the assembler reinstates it from the export, not the directory' {
+            # The deployed BSI 'when set' rule bundles a hand-authored HIDEFIELD on NEOIPC_BSI_NO_POS_CULTURE (a
+            # business interlock no generator reproduces) alongside the generated SETMANDATORYFIELD on _SOURCE. Both
+            # drop from the directory because their owning rule is generated; Add-NeoIPCGeneratedMetadata salvages the
+            # interlock onto the generated rule from the export, so the importable package keeps it. This asserts the
+            # intentional over-exclusion so a future change cannot silently flip it (and the kept business DE stays).
+            $pkg = [ordered]@{
+                dataElements = @(
+                    [ordered]@{ id = 'deBsiSrc001'; code = 'NEOIPC_BSI_PATHOGEN_1_SOURCE'; name = 'src'; valueType = 'INTEGER_POSITIVE' }          # generated
+                    [ordered]@{ id = 'deNoPosCul1'; code = 'NEOIPC_BSI_NO_POS_CULTURE'; name = 'no positive culture'; valueType = 'TRUE_ONLY' }       # business, kept
+                )
+                programRules = @(
+                    [ordered]@{ id = 'rlWhenSet01'; name = 'NeoIPC BSI Pathogen 1 - when set'; condition = 'd2:hasValue(#{x})'; programRuleActions = @([ordered]@{ id = 'acSrcMand01' }, [ordered]@{ id = 'acNoPosHid1' }) }
+                )
+                programRuleActions = @(
+                    [ordered]@{ id = 'acSrcMand01'; programRuleActionType = 'SETMANDATORYFIELD'; programRule = [ordered]@{ id = 'rlWhenSet01' }; dataElement = [ordered]@{ id = 'deBsiSrc001' } }
+                    [ordered]@{ id = 'acNoPosHid1'; programRuleActionType = 'HIDEFIELD'; programRule = [ordered]@{ id = 'rlWhenSet01' }; dataElement = [ordered]@{ id = 'deNoPosCul1' } }
+                )
+            }
+            $rows = ConvertFrom-NeoIPCMetadataPackage -Package (ConvertFrom-NeoIPCMetadataJsonText -Json ($pkg | ConvertTo-Json -Depth 40))
+            $rows.Contains('programRules') | Should -BeFalse        # the only rule is generated -> dropped
+            $rows.Contains('programRuleActions') | Should -BeFalse  # BOTH actions drop with their generated owning rule
+            @($rows['dataElements'] | ForEach-Object { [string]$_['code'] }) | Should -Be @('NEOIPC_BSI_NO_POS_CULTURE')   # the generated _SOURCE DE drops, the business DE stays
+        }
+        It 'the comparator treats the generated families as a known non-difference, both directions (round-trip stays green)' {
+            $baseline = ConvertFrom-NeoIPCMetadataJsonText -Json ($script:genPkg | ConvertTo-Json -Depth 40)
+            $work     = ConvertFrom-NeoIPCMetadataJsonText -Json ($script:genPkg | ConvertTo-Json -Depth 40)
+            $rebuilt  = ConvertTo-NeoIPCMetadataPackage -Rows (ConvertFrom-NeoIPCMetadataPackage -Package $work)
+            @(Compare-NeoIPCMetadataCore -Reference $baseline -Difference $rebuilt).Count | Should -Be 0
+            # Reversed sides: the generated rules/actions live only on the Difference here, so this guards the
+            # ExcludedRuleIds .UnionWith (without it the Difference-side actions would surface as spurious Added).
+            @(Compare-NeoIPCMetadataCore -Reference $rebuilt -Difference $baseline).Count | Should -Be 0
+        }
+        It 'still flags a real change in a business rule' {
+            $baseline = ConvertFrom-NeoIPCMetadataJsonText -Json ($script:genPkg | ConvertTo-Json -Depth 40)
+            $mutated  = ConvertFrom-NeoIPCMetadataJsonText -Json ($script:genPkg | ConvertTo-Json -Depth 40)
+            $mutated['programRules'][4]['condition'] = 'CHANGED'   # rlBizInf001 — a kept business rule
+            @(Compare-NeoIPCMetadataCore -Reference $baseline -Difference $mutated | Where-Object { $_.Kind -eq 'Changed' }).Count | Should -Be 1
+        }
+    }
+
     Describe 'CSV file I/O (RFC 4180 + UTF-8/no-BOM/LF)' {
         It 'round-trips cells with comma, quote, embedded newline, and leading whitespace' {
             $cols = @('id', 'name', 'description')

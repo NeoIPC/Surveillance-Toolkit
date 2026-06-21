@@ -13,7 +13,14 @@ function ConvertFrom-NeoIPCMetadataJson {
         into OutputDirectory. The two domain-authored option sets (NEOIPC_PATHOGENS, NEOIPC_ANTIMICROBIAL_SUBSTANCES)
         and their options are excluded — their canonical source is the infectious-agents YAML / the antibiotics CSV,
         and the importable package gets them from the export closure via New-NeoIPCMetadataPackage, not this
-        directory. Idempotent: replaces only the per-type files it owns. No DHIS2 API calls.
+        directory. The ontology- and matrix-GENERATED families are excluded the same way: the per-slot pathogen /
+        substance data elements and the resistance / field-gating / substance program-rule variables, rules and
+        actions (plus the retired HAP aggregate rule) are generated from the YAML + capability matrix by
+        New-NeoIPCMetadataPackage, so the directory carries the hand-authored metadata rather than the generated
+        machinery. (A hand-authored action bundled onto a generated rule — e.g. the BSI no-positive-culture
+        interlock on the regenerated 'when set' rule — drops with that rule; the assembler reinstates it from the
+        export, so the importable package keeps it.) Idempotent: replaces only the per-type files it owns. No DHIS2
+        API calls.
     .PARAMETER Path
         Path to the DHIS2 metadata.json export.
     .PARAMETER OutputDirectory
@@ -58,10 +65,11 @@ function ConvertTo-NeoIPCMetadataJson {
     .DESCRIPTION
         Reads the per-type CSV files, coerces cells back to typed values, re-nests nested-only children
         into their parents, and emits a DHIS2 metadata package as JSON (every id a valid UID — push with
-        idScheme=UID). The output therefore omits the two domain-authored option sets the directory does not carry
-        (NEOIPC_PATHOGENS, NEOIPC_ANTIMICROBIAL_SUBSTANCES); the complete importable package is assembled by
-        New-NeoIPCMetadataPackage (closure + authored content), not by this round-trip cmdlet. Returns the JSON
-        string, or writes it to OutputPath (UTF-8, no BOM) when given.
+        idScheme=UID). The output therefore omits what the directory does not carry — the two domain-authored
+        option sets (NEOIPC_PATHOGENS, NEOIPC_ANTIMICROBIAL_SUBSTANCES) and the ontology- / matrix-generated
+        pathogen / substance / resistance / field-gating families; the complete importable package is assembled by
+        New-NeoIPCMetadataPackage (closure + generation + authored content), not by this round-trip cmdlet. Returns
+        the JSON string, or writes it to OutputPath (UTF-8, no BOM) when given.
     .PARAMETER Path
         Directory containing the per-type CSV files.
     .PARAMETER OutputPath

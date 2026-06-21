@@ -633,6 +633,96 @@ function Test-NeoIPCMetadataDomainExcluded {
     return $false
 }
 
+function Get-NeoIPCMetadataGeneratedKeys {
+    # Build the per-package identification context for the ontology- / matrix-GENERATED metadata families the
+    # directory does NOT materialise (the infectious-agent YAML + capability matrix are their single source — the
+    # same families New-NeoIPCMetadataPackage regenerates via Add-NeoIPCGeneratedMetadata). Mirrors
+    # Get-NeoIPCMetadataDomainOptionSetIds: resolved once, shared by the directory emit and the round-trip
+    # comparator so the two agree on exactly what the directory omits. Identification is taken from the generator
+    # PLANS (not a name regex), so it stays exactly in step with what the generators produce:
+    #   - generated per-slot pathogen + substance data-element CODES;
+    #   - resistance / field-gating / substance program-rule-variable + rule NAMES, each slot-normalised via
+    #     ConvertTo-NeoIPCSubstanceUnpaddedName so a deployed unpadded `substance 1` matches the padded plan
+    #     `substance 01` (the same padding trap the assembler seam handles), plus the retired rule names;
+    #   - ExcludedRuleIds: resolved WITHIN $Package — the UID of every programRule whose (normalised) name is a
+    #     generated/retired rule name — so a program-rule action (which carries no name) can be excluded by its
+    #     owning-rule id, the same id-membership idiom options use against their optionSet.
+    # Counts default to the module-wide slot counts, which match the deployed export the directory is built from.
+    #
+    # CONSEQUENCE — actions are keyed purely by owning rule, so a HAND-AUTHORED action bundled onto a generated rule
+    # drops with that rule too: the BSI no-positive-culture interlock (a HIDEFIELD on NEOIPC_BSI_NO_POS_CULTURE,
+    # carried on the regenerated 'when set' rule) is reproduced by no generator yet still leaves the directory here.
+    # This is intentional — Add-NeoIPCGeneratedMetadata reinstates it onto the generated rule from the EXPORT (the
+    # assembler builds the package from the export, never the directory), so the importable package keeps it;
+    # promoting such an interlock to a stand-alone directory business rule belongs to the reconcile path, not this
+    # exclusion. The gettext-PO path (MetadataTranslation.ps1) deliberately does NOT apply this predicate — that PO
+    # is the sole translation source for the regenerated objects, so excluding them there would drop their translations.
+    [CmdletBinding()]
+    [OutputType([pscustomobject])]
+    param(
+        [Parameter(Mandatory)]$Package,
+        [ValidateRange(1, 9)][int]$PathogenCount = $script:NeoIPCPathogenSlotCount,
+        [ValidateRange(1, 99)][int]$SubstanceCount = $script:NeoIPCSubstanceSlotCount
+    )
+    $ordinal = [System.StringComparer]::Ordinal
+
+    $deCodes = [System.Collections.Generic.HashSet[string]]::new($ordinal)
+    foreach ($p in @(Get-NeoIPCPathogenDataElementPlan -PathogenCount $PathogenCount)) { [void]$deCodes.Add([string]$p['Code']) }
+    foreach ($p in @(Get-NeoIPCSubstanceDataElementPlan -SubstanceCount $SubstanceCount)) { [void]$deCodes.Add([string]$p['Code']) }
+
+    $varNames = [System.Collections.Generic.HashSet[string]]::new($ordinal)
+    foreach ($p in @(Get-NeoIPCPathogenVariablePlan -PathogenCount $PathogenCount)) { [void]$varNames.Add((ConvertTo-NeoIPCSubstanceUnpaddedName ([string]$p['Name']))) }
+    foreach ($p in @(Get-NeoIPCPathogenFieldGatingVariablePlan -PathogenCount $PathogenCount)) { [void]$varNames.Add((ConvertTo-NeoIPCSubstanceUnpaddedName ([string]$p['Name']))) }
+    foreach ($p in @(Get-NeoIPCSubstanceVariablePlan -SubstanceCount $SubstanceCount)) { [void]$varNames.Add((ConvertTo-NeoIPCSubstanceUnpaddedName ([string]$p['Name']))) }
+
+    $ruleNames = [System.Collections.Generic.HashSet[string]]::new($ordinal)
+    foreach ($p in @(Get-NeoIPCPathogenRulePlan -PathogenCount $PathogenCount)) { [void]$ruleNames.Add((ConvertTo-NeoIPCSubstanceUnpaddedName ([string]$p['Name']))) }
+    foreach ($p in @(Get-NeoIPCPathogenFieldGatingRulePlan -PathogenCount $PathogenCount)) { [void]$ruleNames.Add((ConvertTo-NeoIPCSubstanceUnpaddedName ([string]$p['Name']))) }
+    foreach ($p in @(Get-NeoIPCSubstanceRulePlan -SubstanceCount $SubstanceCount)) { [void]$ruleNames.Add((ConvertTo-NeoIPCSubstanceUnpaddedName ([string]$p['Name']))) }
+    foreach ($n in $script:NeoIPCMetadataRetiredRuleNames) { [void]$ruleNames.Add($n) }
+
+    $excludedRuleIds = [System.Collections.Generic.HashSet[string]]::new($ordinal)
+    foreach ($r in @($Package['programRules'])) {
+        if ($r -isnot [System.Collections.IDictionary]) { continue }
+        if ($ruleNames.Contains((ConvertTo-NeoIPCSubstanceUnpaddedName ([string]$r['name'])))) { [void]$excludedRuleIds.Add([string]$r['id']) }
+    }
+
+    [pscustomobject]@{
+        DataElementCodes = $deCodes
+        VariableNames    = $varNames
+        RuleNames        = $ruleNames
+        ExcludedRuleIds  = $excludedRuleIds
+    }
+}
+
+function Test-NeoIPCMetadataGeneratedExcluded {
+    # True when an object belongs to an ontology- / matrix-GENERATED family the directory does not materialise, so
+    # it is skipped by BOTH the directory emit and the round-trip comparator — exactly as the domain option content
+    # is (Test-NeoIPCMetadataDomainExcluded): a generated per-slot pathogen / substance data element (code in
+    # DataElementCodes), a resistance / field-gating / substance program-rule variable or rule (slot-normalised
+    # name in VariableNames / RuleNames, the latter incl. the retired rules), or a program-rule action whose owning
+    # rule is excluded (programRule id in ExcludedRuleIds). The single predicate shared by emit and comparator so
+    # they agree on what the directory omits; $GeneratedKeys is one Get-NeoIPCMetadataGeneratedKeys context.
+    [CmdletBinding()]
+    [OutputType([bool])]
+    param(
+        [Parameter(Mandatory)][string]$Type,
+        [Parameter(Mandatory)]$Object,
+        [Parameter(Mandatory)]$GeneratedKeys
+    )
+    switch ($Type) {
+        'dataElements'         { return $GeneratedKeys.DataElementCodes.Contains([string]$Object['code']) }
+        'programRuleVariables' { return $GeneratedKeys.VariableNames.Contains((ConvertTo-NeoIPCSubstanceUnpaddedName ([string]$Object['name']))) }
+        'programRules'         { return $GeneratedKeys.RuleNames.Contains((ConvertTo-NeoIPCSubstanceUnpaddedName ([string]$Object['name']))) }
+        'programRuleActions' {
+            $pr = $Object['programRule']
+            $rid = if ($pr -is [System.Collections.IDictionary]) { [string]$pr['id'] } else { [string]$pr }
+            return $GeneratedKeys.ExcludedRuleIds.Contains($rid)
+        }
+    }
+    return $false
+}
+
 function Get-NeoIPCMetadataRowSortKey {
     # Deterministic, human-reviewable row-sort key for a per-type CSV. Row order never affects the
     # round-trip (objects match by id; nested collections are sorted/positional by the normalizer), so the
@@ -686,7 +776,8 @@ function ConvertFrom-NeoIPCMetadataPackage {
     # ([ordered] type -> List[row]), each type's rows ordinally sorted by Get-NeoIPCMetadataRowSortKey for
     # stable, human-reviewable diffs. Extracts NestedOnly children out of their parents first
     # (mutating the parents to drop the nested array), then converts every object to a row.
-    # System-default objects and excluded/deferred types are skipped. MUTATES the input package.
+    # System-default objects, excluded/deferred types, and the domain-authored + ontology-generated families
+    # (Test-NeoIPCMetadataDomain/GeneratedExcluded) are skipped. MUTATES the input package.
     [CmdletBinding()]
     [OutputType([System.Collections.Specialized.OrderedDictionary])]
     param([Parameter(Mandatory)]$Package)
@@ -711,6 +802,7 @@ function ConvertFrom-NeoIPCMetadataPackage {
     }
 
     $domainSetIds = Get-NeoIPCMetadataDomainOptionSetIds -Package $Package
+    $generatedKeys = Get-NeoIPCMetadataGeneratedKeys -Package $Package
     $result = [ordered]@{}
     foreach ($type in $script:NeoIPCMetadataTypeMaps.Keys) {
         $map = $script:NeoIPCMetadataTypeMaps[$type]
@@ -721,6 +813,7 @@ function ConvertFrom-NeoIPCMetadataPackage {
             if ($obj -isnot [System.Collections.IDictionary]) { continue }
             if ($script:NeoIPCMetadataDefaultUids -contains [string]$obj['id']) { continue }
             if (Test-NeoIPCMetadataDomainExcluded -Type $type -Object $obj -DomainSetIds $domainSetIds) { continue }
+            if (Test-NeoIPCMetadataGeneratedExcluded -Type $type -Object $obj -GeneratedKeys $generatedKeys) { continue }
             $row = ConvertTo-NeoIPCMetadataRow -Type $type -Object $obj
             if ($map.Nesting -eq 'NestedOnly') { $row['__fk'] = [string]$obj['__fk'] }
             $rows.Add($row)
@@ -858,6 +951,12 @@ function Compare-NeoIPCMetadataCore {
     # types — their absence is a known, intentional non-difference, not a Removed/Added/Changed.
     $domainSetIds = Get-NeoIPCMetadataDomainOptionSetIds -Package $Reference
     $domainSetIds.UnionWith((Get-NeoIPCMetadataDomainOptionSetIds -Package $Difference))
+    # Generated families (pathogen / substance / resistance / field-gating) are likewise directory-omitted: skip
+    # them on both sides so their absence on a directory-derived side is not a false Removed/Added. The plan-derived
+    # codes/names are package-independent; ExcludedRuleIds (action owning-rule ids) is resolved per side, so union it
+    # — the export side carries the generated rules+actions, a directory side does not.
+    $generatedKeys = Get-NeoIPCMetadataGeneratedKeys -Package $Reference
+    $generatedKeys.ExcludedRuleIds.UnionWith((Get-NeoIPCMetadataGeneratedKeys -Package $Difference).ExcludedRuleIds)
     foreach ($type in $types) {
         if (-not $script:NeoIPCMetadataTypeMaps.Contains($type)) { continue }                  # out-of-scope top-level key
         if ($script:NeoIPCMetadataTypeMaps[$type].Nesting -eq 'NestedOnly') { continue }        # compared via its parent
@@ -866,12 +965,14 @@ function Compare-NeoIPCMetadataCore {
         foreach ($o in @($Reference[$type])) {
             if ($o -isnot [System.Collections.IDictionary] -or $script:NeoIPCMetadataDefaultUids -contains [string]$o['id']) { continue }
             if (Test-NeoIPCMetadataDomainExcluded -Type $type -Object $o -DomainSetIds $domainSetIds) { continue }
+            if (Test-NeoIPCMetadataGeneratedExcluded -Type $type -Object $o -GeneratedKeys $generatedKeys) { continue }
             $refById[[string]$o['id']] = (Remove-NeoIPCMetadataNoise -Object $o)
         }
         $difById = @{}
         foreach ($o in @($Difference[$type])) {
             if ($o -isnot [System.Collections.IDictionary] -or $script:NeoIPCMetadataDefaultUids -contains [string]$o['id']) { continue }
             if (Test-NeoIPCMetadataDomainExcluded -Type $type -Object $o -DomainSetIds $domainSetIds) { continue }
+            if (Test-NeoIPCMetadataGeneratedExcluded -Type $type -Object $o -GeneratedKeys $generatedKeys) { continue }
             $difById[[string]$o['id']] = (Remove-NeoIPCMetadataNoise -Object $o)
         }
         foreach ($id in $refById.Keys) { if (-not $difById.ContainsKey($id)) { $diffs.Add([pscustomobject]@{ Type = $type; Id = $id; Kind = 'Removed' }) } }

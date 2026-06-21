@@ -54,6 +54,17 @@ $script:NeoIPCMetadataExcludedTypes = @(
 $script:NeoIPCMetadataDomainOptionSetCodes = [System.Collections.Generic.HashSet[string]]::new(
     [string[]]@('NEOIPC_PATHOGENS', 'NEOIPC_ANTIMICROBIAL_SUBSTANCES'), [System.StringComparer]::Ordinal)
 
+# Program rules that are GENERATED elsewhere — the pathogen / substance / resistance / field-gating machinery the
+# ontology + capability matrix produce (Add-NeoIPCGeneratedMetadata). Identified by the generator PLANS, not a
+# regex (see Get-NeoIPCMetadataGeneratedKeys), and dropped from the materialised directory and the comparator the
+# same way the domain option sets are — the YAML / matrix are their single source. This list holds only the
+# DEPLOYED rules a generator family does NOT reproduce by name yet still supersedes, so the family predicate alone
+# would miss them: the stale HAP aggregate 'NeoIPC HAP - set pathogen attribute variables' (15 dead ASSIGNs the
+# per-slot resistance rules replace — the colistin #22/#23 residue), which the directory, like the assembled
+# package, sheds as superseded cruft.
+$script:NeoIPCMetadataRetiredRuleNames = [System.Collections.Generic.HashSet[string]]::new(
+    [string[]]@('NeoIPC HAP - set pathogen attribute variables'), [System.StringComparer]::Ordinal)
+
 # NON-CLOSURE types — first-class NeoIPC metadata the dependency closure cannot reach STRUCTURALLY, packaged
 # as deployment config with their real UIDs. They are converted, compared, and round-tripped like any other
 # type, but the closure (index + prune) and the owned-id / UID-regeneration scan skip them. Distinct from

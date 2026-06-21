@@ -115,6 +115,12 @@ function Get-NeoIPCMetadataTranslationUnit {
             # translated here — excluded from BOTH extraction and injection so the two stay symmetric (a raw export
             # carrying their translations[] must not be wiped on Import).
             if (Test-NeoIPCMetadataDomainExcluded -Type $type -Object $obj -DomainSetIds $domainSetIds) { continue }
+            # NOTE — the ontology/matrix-GENERATED families (Test-NeoIPCMetadataGeneratedExcluded: per-slot pathogen /
+            # substance DEs, resistance / field-gating / substance PRVs+rules+actions) are deliberately NOT excluded
+            # here, unlike the directory emit + comparator. The generators do not copy translations[] and
+            # New-NeoIPCMetadataPackage drops translations, so this PO is their SOLE translation source on the
+            # importable package — mirroring the directory exclusion here would permanently drop every generated-family
+            # translation. Do NOT add the generated predicate to the PO path.
             # Index this object's existing translations by token: token -> { locale -> value }.
             $existing = @{}
             foreach ($t in @($obj['translations'])) {
@@ -404,6 +410,9 @@ function Add-NeoIPCMetadataTranslationToPackage {
             # the ATC antibiotic groups and the domain pathogen/substance option sets. Leave their translations[] intact.
             if ($type -eq 'optionGroups' -and (Test-NeoIPCAtcCode -Code ([string]$obj['code']))) { continue }
             if (Test-NeoIPCMetadataDomainExcluded -Type $type -Object $obj -DomainSetIds $domainSetIds) { continue }
+            # As in extraction, the ontology/matrix-GENERATED families are deliberately NOT excluded here — the PO is
+            # their sole translation source on the import, so excluding them would drop those translations
+            # (see Get-NeoIPCMetadataGeneratedKeys / Test-NeoIPCMetadataGeneratedExcluded).
             $rebuilt = [System.Collections.Generic.List[object]]::new()
             foreach ($locale in $locales) {
                 foreach ($field in $orderedFields) {
