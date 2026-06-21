@@ -416,6 +416,11 @@ function New-NeoIPCMetadataPackage {
              references them only by code).
           3. Noise-strips the whole config: audit fields, user / sharing references, the anonymised
              per-deployment membership, and (for now) translations — leaving a clean, user-ref-free package.
+          3b. Replaces the deployed generated classes (the NEOIPC_PATHOGENS option set + options, the per-slot
+             pathogen / substance data elements, and the resistance / field-gating / substance program-rule
+             variables + rules + actions) with the ontology- and matrix-generated ones (Add-NeoIPCGeneratedMetadata),
+             so the package carries the corrected taxonomy and the rule-quality fixes — not the stale export
+             snapshot. -SkipGeneration omits this step.
           4. Reads the org units, users, and group memberships from the UID-keyed directory — the `common`
              base plus the selected variant overlay — preserving the committed UIDs (real production UIDs for
              the live org units), and stitches them in group-side, collision-checking every authored UID
@@ -441,6 +446,14 @@ function New-NeoIPCMetadataPackage {
         Top-level type of the closure seed (default: programs).
     .PARAMETER SeedCode
         Code of the closure seed (default: NEOIPC_CORE).
+    .PARAMETER PathogenCount
+        Pathogen slots per applicable stage (1-9) for generation. Default: the module-wide count.
+    .PARAMETER SubstanceCount
+        Antimicrobial-substance slots (1-99) for generation. Default: the module-wide count.
+    .PARAMETER SkipGeneration
+        Skip the ontology / matrix generation step, emitting the config exactly as the export carries it — for
+        tests and partial exports that lack the pathogen machinery the generators require. The canonical build
+        leaves this off so the package is generated from the corrected ontology.
     .PARAMETER OutputPath
         Optional file to write the package JSON to (UTF-8, no BOM); if omitted the JSON string is returned
         (unless -PassThru).
@@ -461,6 +474,9 @@ function New-NeoIPCMetadataPackage {
         [string]$Password = 'NeoIPC-Play1',
         [string]$SeedType = 'programs',
         [string]$SeedCode = 'NEOIPC_CORE',
+        [ValidateRange(1, 9)][int]$PathogenCount = $script:NeoIPCPathogenSlotCount,
+        [ValidateRange(1, 99)][int]$SubstanceCount = $script:NeoIPCSubstanceSlotCount,
+        [switch]$SkipGeneration,
         [string]$OutputPath,
         [switch]$Compress,
         [switch]$PassThru
@@ -493,6 +509,14 @@ function New-NeoIPCMetadataPackage {
         if ($export.Contains($t)) { $config[$t] = $export[$t] }
     }
     $config = Remove-NeoIPCMetadataNoise -Object $config
+
+    # Replace the deployed generated classes (pathogen option set + per-slot DEs, resistance / field-gating /
+    # substance PRVs + rules + actions) with the ontology- and matrix-generated ones, so the package carries the
+    # corrected taxonomy and the rule-quality fixes rather than the stale export snapshot. -SkipGeneration leaves
+    # the config as-is — for tests / partial exports that lack the pathogen machinery the generators require.
+    if (-not $SkipGeneration) {
+        $config = Add-NeoIPCGeneratedMetadata -Config $config -Export $export -PathogenCount $PathogenCount -SubstanceCount $SubstanceCount
+    }
 
     # Authored content from the UID-keyed directory: common base + variant overlay. Committed UIDs preserved.
     $orgUnits = Read-NeoIPCAuthoredOrgUnit -Path @((Join-Path $commonDir 'organisationUnits.csv'), (Join-Path $variantDir 'organisationUnits.csv'))

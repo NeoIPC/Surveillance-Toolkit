@@ -1597,7 +1597,7 @@ InModuleScope 'NeoIPC-Tools' {
             @('username,organisationUnit', 'play.at.user1,AT_TEST_TEST') | Set-Content -LiteralPath (Join-Path $playDir 'userOrgUnitAssignments.csv') -Encoding utf8
         }
         It 'assembles the play variant from common + play, preserving committed UIDs and resolving role names' {
-            $res = New-NeoIPCMetadataPackage -ExportPath $script:asmExportPath -MetadataDirectory $script:asmDir -PassThru -WarningAction SilentlyContinue
+            $res = New-NeoIPCMetadataPackage -ExportPath $script:asmExportPath -MetadataDirectory $script:asmDir -SkipGeneration -PassThru -WarningAction SilentlyContinue
             $res.OrgUnitCount | Should -Be 4          # 2 common + 2 play
             $res.UserCount | Should -Be 1
             $pkg = $res.Package
@@ -1610,7 +1610,7 @@ InModuleScope 'NeoIPC-Tools' {
             ($pkg['organisationUnitGroups'] | Where-Object { $_.code -eq 'NEO_DEPARTMENT' }).organisationUnits[0].id | Should -BeExactly 'ouATTESTT01'
         }
         It 'emits JSON (no -PassThru) carrying the assembled org units' {
-            $json = New-NeoIPCMetadataPackage -ExportPath $script:asmExportPath -MetadataDirectory $script:asmDir -WarningAction SilentlyContinue
+            $json = New-NeoIPCMetadataPackage -ExportPath $script:asmExportPath -MetadataDirectory $script:asmDir -SkipGeneration -WarningAction SilentlyContinue
             $json | Should -Match '"organisationUnits"'
         }
         It '-Variant production requires -OverlayPath' {
@@ -1627,13 +1627,13 @@ InModuleScope 'NeoIPC-Tools' {
             @('id,username,firstName,surname', 'usrProdX0001,prod.x.1,Prod,X One', 'usrProdX0002,prod.x.2,Prod,X Two') | Set-Content -LiteralPath (Join-Path $overlay 'users.csv') -Encoding utf8
             @('username,role', 'prod.x.1,Base', 'prod.x.2,Base') | Set-Content -LiteralPath (Join-Path $overlay 'userRoleAssignments.csv') -Encoding utf8
             @('username,organisationUnit', 'prod.x.1,AT_TEST_TEST', 'prod.x.2,AT_TEST_TEST') | Set-Content -LiteralPath (Join-Path $overlay 'userOrgUnitAssignments.csv') -Encoding utf8
-            $res = New-NeoIPCMetadataPackage -ExportPath $script:asmExportPath -MetadataDirectory $script:asmDir -Variant production -OverlayPath $overlay -PassThru -WarningAction SilentlyContinue
+            $res = New-NeoIPCMetadataPackage -ExportPath $script:asmExportPath -MetadataDirectory $script:asmDir -Variant production -OverlayPath $overlay -SkipGeneration -PassThru -WarningAction SilentlyContinue
             $res.UserCount | Should -Be 2                                                                  # the overlay's users, not play's single user
             @($res.Package['users'] | ForEach-Object { [string]$_['username'] } | Sort-Object) | Should -Be @('prod.x.1', 'prod.x.2')
         }
         It '-Variant play ignores a supplied -OverlayPath (reads play/)' {
             # A nonexistent overlay path proves play never touches OverlayPath (no existence check, content unused).
-            $res = New-NeoIPCMetadataPackage -ExportPath $script:asmExportPath -MetadataDirectory $script:asmDir -Variant play -OverlayPath (Join-Path $TestDrive 'nonexistent-overlay-ignored') -PassThru -WarningAction SilentlyContinue
+            $res = New-NeoIPCMetadataPackage -ExportPath $script:asmExportPath -MetadataDirectory $script:asmDir -Variant play -OverlayPath (Join-Path $TestDrive 'nonexistent-overlay-ignored') -SkipGeneration -PassThru -WarningAction SilentlyContinue
             $res.UserCount | Should -Be 1                                                                  # play's single user; overlay ignored
         }
         It 'throws when the metadata directory is missing' {
@@ -3329,6 +3329,90 @@ Hierarchies:
                 { New-NeoIPCPathogenFieldGatingRule -Path $emptyYaml -ExistingPackage $script:FgPkg } | Should -Throw '*common-commensal code set is empty*'
             }
             finally { Remove-Item -LiteralPath $emptyYaml -Force }
+        }
+    }
+
+    Describe 'Add-NeoIPCGeneratedMetadata (generated-class splice)' {
+        # The nine generators are tested in their own Describes; here they are MOCKED to return small controlled
+        # fragments so this exercises only the splice — replacement by id/code/name, the stale-aggregate drop, the
+        # non-family-action salvage, and the duplicate-id guard — without a full pathogen-machinery fixture.
+        # Reproduced objects carry the deployed id (preserve-by-key); optNEW + prvFG1 are mint-only additions.
+        BeforeAll {
+            function New-SpliceConfig {
+                [ordered]@{
+                    optionSets           = @([ordered]@{ id = 'osOther'; code = 'OTHER_SET' }, [ordered]@{ id = 'osP'; code = 'NEOIPC_PATHOGENS' })
+                    options              = @([ordered]@{ id = 'optOther'; code = 'x'; optionSet = [ordered]@{ id = 'osOther' } }, [ordered]@{ id = 'optA'; code = '0'; optionSet = [ordered]@{ id = 'osP' } })
+                    dataElements         = @([ordered]@{ id = 'deOther'; code = 'NEOIPC_ADM_X' }, [ordered]@{ id = 'deP1'; code = 'NEOIPC_BSI_PATHOGEN_1' })
+                    programRuleVariables = @([ordered]@{ id = 'prvOther'; name = 'Some other var' }, [ordered]@{ id = 'prvR1'; name = 'NeoIPC BSI Pathogen 1 value' })
+                    programRules         = @(
+                        [ordered]@{ id = 'ruleDef'; name = 'Some definition rule' },
+                        [ordered]@{ id = 'ruleAgg'; name = 'NeoIPC HAP - set pathogen attribute variables' },
+                        [ordered]@{ id = 'ruleWS'; name = 'NeoIPC BSI Pathogen 1 - when set' },
+                        [ordered]@{ id = 'ruleSV'; name = 'NeoIPC Surveillance end Antibiotic substance days - validate' }
+                    )
+                    programRuleActions   = @(
+                        [ordered]@{ id = 'actDef'; programRule = [ordered]@{ id = 'ruleDef' }; programRuleActionType = 'HIDEFIELD'; dataElement = [ordered]@{ id = 'deOther' } },
+                        [ordered]@{ id = 'actAgg'; programRule = [ordered]@{ id = 'ruleAgg' }; programRuleActionType = 'ASSIGN' },
+                        [ordered]@{ id = 'actWSsrc'; programRule = [ordered]@{ id = 'ruleWS' }; programRuleActionType = 'SETMANDATORYFIELD'; dataElement = [ordered]@{ id = 'deSrc' } },
+                        [ordered]@{ id = 'actNoPos'; programRule = [ordered]@{ id = 'ruleWS' }; programRuleActionType = 'HIDEFIELD'; dataElement = [ordered]@{ id = 'deNoPos' } },
+                        [ordered]@{ id = 'actSV'; programRule = [ordered]@{ id = 'ruleSV' }; programRuleActionType = 'SHOWERROR'; dataElement = [ordered]@{ id = 'deABdays' } }
+                    )
+                }
+            }
+        }
+        BeforeEach {
+            Mock New-NeoIPCPathogenOptionSet { [ordered]@{ optionSets = @([ordered]@{ id = 'osP'; code = 'NEOIPC_PATHOGENS' }); options = @([ordered]@{ id = 'optA'; code = '0'; optionSet = [ordered]@{ id = 'osP' } }, [ordered]@{ id = 'optNEW'; code = '999'; optionSet = [ordered]@{ id = 'osP' } }) } }
+            Mock New-NeoIPCPathogenDataElement { [ordered]@{ dataElements = @([ordered]@{ id = 'deP1'; code = 'NEOIPC_BSI_PATHOGEN_1' }, [ordered]@{ id = 'deSrc'; code = 'NEOIPC_BSI_PATHOGEN_1_SOURCE' }) } }
+            Mock New-NeoIPCSubstanceDataElement { [ordered]@{ dataElements = @([ordered]@{ id = 'deS1'; code = 'NEOIPC_SURVEILLANCE_END_AB_SUBST_01' }) } }
+            Mock New-NeoIPCPathogenVariable { [ordered]@{ programRuleVariables = @([ordered]@{ id = 'prvR1'; name = 'NeoIPC BSI Pathogen 1 value' }) } }
+            Mock New-NeoIPCPathogenFieldGatingVariable { [ordered]@{ programRuleVariables = @([ordered]@{ id = 'prvFG1'; name = 'NeoIPC BSI Pathogen 1 is recognized pathogen' }) } }
+            Mock New-NeoIPCSubstanceVariable { [ordered]@{ programRuleVariables = @([ordered]@{ id = 'prvS1'; name = 'NeoIPC Surveillance end Antibiotic substance 01 - current event value' }) } }
+            Mock New-NeoIPCPathogenRule { [ordered]@{ programRules = @([ordered]@{ id = 'ruleR1'; name = 'NeoIPC BSI Pathogen 1 - set 3GCR'; programRuleActions = @([ordered]@{ id = 'actR1' }) }); programRuleActions = @([ordered]@{ id = 'actR1'; programRule = [ordered]@{ id = 'ruleR1' }; programRuleActionType = 'ASSIGN' }) } }
+            Mock New-NeoIPCPathogenFieldGatingRule { [ordered]@{ programRules = @([ordered]@{ id = 'ruleWS'; name = 'NeoIPC BSI Pathogen 1 - when set'; programRuleActions = @([ordered]@{ id = 'actWSsrc' }) }); programRuleActions = @([ordered]@{ id = 'actWSsrc'; programRule = [ordered]@{ id = 'ruleWS' }; programRuleActionType = 'SETMANDATORYFIELD'; dataElement = [ordered]@{ id = 'deSrc' } }) } }
+            Mock New-NeoIPCSubstanceRule { [ordered]@{ programRules = @([ordered]@{ id = 'ruleSV'; name = 'NeoIPC Surveillance end Antibiotic substance days - validate'; programRuleActions = @([ordered]@{ id = 'actSV' }) }); programRuleActions = @([ordered]@{ id = 'actSV'; programRule = [ordered]@{ id = 'ruleSV' }; programRuleActionType = 'SHOWERROR'; dataElement = [ordered]@{ id = 'deABdays' }; content = 'x' }) } }
+        }
+
+        It 'replaces the generated classes (by id/code/name) and keeps non-generated objects' {
+            $out = Add-NeoIPCGeneratedMetadata -Config (New-SpliceConfig) -Export ([ordered]@{})
+            @($out['optionSets'] | ForEach-Object { [string]$_['id'] } | Sort-Object) | Should -Be @('osOther', 'osP')           # other kept, pathogen replaced, no dup
+            @($out['options'] | ForEach-Object { [string]$_['id'] } | Sort-Object) | Should -Be @('optA', 'optNEW', 'optOther')  # optA replaced, optNEW added, other kept
+            @($out['dataElements'] | ForEach-Object { [string]$_['id'] } | Sort-Object) | Should -Be @('deOther', 'deP1', 'deS1', 'deSrc')
+            @($out['programRuleVariables'] | ForEach-Object { [string]$_['id'] } | Sort-Object) | Should -Be @('prvFG1', 'prvOther', 'prvR1', 'prvS1')
+        }
+        It 'drops the stale HAP aggregate rule and its actions; keeps the definition rule' {
+            $out = Add-NeoIPCGeneratedMetadata -Config (New-SpliceConfig) -Export ([ordered]@{})
+            @($out['programRules'] | Where-Object { [string]$_['id'] -eq 'ruleAgg' }).Count | Should -Be 0
+            @($out['programRuleActions'] | Where-Object { [string]$_['id'] -eq 'actAgg' }).Count | Should -Be 0
+            @($out['programRules'] | Where-Object { [string]$_['id'] -eq 'ruleDef' }).Count | Should -Be 1
+            @($out['programRuleActions'] | Where-Object { [string]$_['id'] -eq 'actDef' }).Count | Should -Be 1
+        }
+        It 'salvages a non-family-target interlock action onto the regenerated rule' {
+            $out = Add-NeoIPCGeneratedMetadata -Config (New-SpliceConfig) -Export ([ordered]@{})
+            $ws = @($out['programRules'] | Where-Object { [string]$_['id'] -eq 'ruleWS' })[0]
+            @($ws['programRuleActions'] | ForEach-Object { [string]$_['id'] } | Sort-Object) | Should -Be @('actNoPos', 'actWSsrc')
+            $salv = @($out['programRuleActions'] | Where-Object { [string]$_['id'] -eq 'actNoPos' })
+            $salv.Count | Should -Be 1
+            $salv[0]['programRule']['id'] | Should -BeExactly 'ruleWS'
+        }
+        It 'does NOT salvage an action the generator already reproduces (the validate SHOWERROR)' {
+            $out = Add-NeoIPCGeneratedMetadata -Config (New-SpliceConfig) -Export ([ordered]@{})
+            @($out['programRuleActions'] | Where-Object { [string]$_['id'] -eq 'actSV' }).Count | Should -Be 1
+        }
+        It 'produces no duplicate ids across the spliced types' {
+            $out = Add-NeoIPCGeneratedMetadata -Config (New-SpliceConfig) -Export ([ordered]@{})
+            foreach ($t in 'optionSets', 'options', 'dataElements', 'programRuleVariables', 'programRules', 'programRuleActions') {
+                $ids = @($out[$t] | ForEach-Object { [string]$_['id'] })
+                ($ids | Sort-Object -Unique).Count | Should -Be $ids.Count
+            }
+        }
+        It 'fails loud on a duplicate id introduced by the splice' {
+            Mock New-NeoIPCPathogenDataElement { [ordered]@{ dataElements = @([ordered]@{ id = 'dup'; code = 'A' }, [ordered]@{ id = 'dup'; code = 'B' }) } }
+            { Add-NeoIPCGeneratedMetadata -Config (New-SpliceConfig) -Export ([ordered]@{}) } | Should -Throw '*duplicate id*'
+        }
+        It 'forwards the slot counts to the generators' {
+            $null = Add-NeoIPCGeneratedMetadata -Config (New-SpliceConfig) -Export ([ordered]@{}) -PathogenCount 5 -SubstanceCount 7
+            Should -Invoke New-NeoIPCPathogenRule -ParameterFilter { $PathogenCount -eq 5 } -Times 1 -Exactly
+            Should -Invoke New-NeoIPCSubstanceRule -ParameterFilter { $SubstanceCount -eq 7 } -Times 1 -Exactly
         }
     }
 }

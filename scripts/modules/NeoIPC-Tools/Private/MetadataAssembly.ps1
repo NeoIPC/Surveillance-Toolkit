@@ -102,3 +102,184 @@ function Join-NeoIPCMetadataPackage {
     }
     $Config
 }
+
+function Add-NeoIPCGeneratedMetadata {
+    <#
+    .SYNOPSIS
+        Splice the ontology / capability-matrix generated objects into a closure config, replacing the deployed
+        generated-class objects with the freshly generated ones.
+    .DESCRIPTION
+        Runs the nine ontology- and matrix-driven generators against the export and replaces the deployed
+        generated-class objects in the config with the generated ones:
+          - the NEOIPC_PATHOGENS option set + its options (from the infectious-agent ontology),
+          - the per-slot pathogen + antimicrobial-substance data elements,
+          - the resistance, field-gating and substance program-rule variables,
+          - the resistance, field-gating and substance program rules + actions.
+        Replacement is by NATURAL KEY, read from the generator outputs themselves (no pattern matching): a deployed
+        object is dropped iff a generated object shares its key — option-set / data-element CODE, program-rule /
+        variable NAME, or (for options) membership in the generated NEOIPC_PATHOGENS set — then the generated
+        objects are appended. Because each generator preserves the deployed UID where the key matches, a regenerated
+        object replaces its deployed counterpart in place (same id); newly minted objects (new option codes, grown
+        slots, the SSI-secondary-slot-2 reveal the deployed program omits) are simply added.
+        Two deliberate exceptions keep the assembled package import-complete:
+          - the stale aggregate rule 'NeoIPC HAP - set pathogen attribute variables' (+ its actions), which the
+            per-slot resistance rules supersede, is dropped WITHOUT a generated replacement (the other five HAP
+            aggregates feed the pneumonia definition and are kept, because the generators do not reproduce them);
+          - a deployed action on a reproduced rule whose target data element is OUTSIDE the generated families
+            (e.g. the BSI 'when set' rule's HIDEFIELD on NEOIPC_BSI_NO_POS_CULTURE) is a business-rule interlock,
+            not part of the per-slot cluster, so it is SALVAGED onto the generated rule rather than dropped.
+        Everything else — the infection-definition business rules, the live HAP virus / criterion aggregates, the
+        non-pathogen data elements, every other option set — is left exactly as the config has it. Fails loud on a
+        duplicate id across the spliced result. Mutates and returns Config. No DHIS2 API calls.
+    .PARAMETER Config
+        The captured config package (ordered dict: type -> object array), noise-stripped — spliced in place.
+    .PARAMETER Export
+        The full parsed export — the UID-preservation source the generators reconcile against.
+    .PARAMETER OntologyPath
+        Path to the infectious-agent YAML (drives the pathogen option set + resistance / common-commensal flags).
+        Defaults (in each generator) to the canonical file in the repository.
+    .PARAMETER PathogenCount
+        Pathogen slots per applicable stage (1-9). Default: the module-wide count.
+    .PARAMETER SubstanceCount
+        Antimicrobial-substance slots (1-99). Default: the module-wide count.
+    #>
+    [CmdletBinding()]
+    [OutputType([System.Collections.IDictionary])]
+    param(
+        [Parameter(Mandatory)][System.Collections.IDictionary]$Config,
+        [Parameter(Mandatory)][System.Collections.IDictionary]$Export,
+        [string]$OntologyPath,
+        [ValidateRange(1, 9)][int]$PathogenCount = $script:NeoIPCPathogenSlotCount,
+        [ValidateRange(1, 99)][int]$SubstanceCount = $script:NeoIPCSubstanceSlotCount
+    )
+
+    $ontologyArgs = @{}
+    if ($OntologyPath) { $ontologyArgs['Path'] = $OntologyPath }
+
+    # Generate against the export so every reproduced object keeps its deployed UID (preserve-by-key).
+    $optionFrag  = New-NeoIPCPathogenOptionSet @ontologyArgs -ExistingPackage $Export
+    $patDeFrag   = New-NeoIPCPathogenDataElement -ExistingPackage $Export -PathogenCount $PathogenCount
+    $subDeFrag   = New-NeoIPCSubstanceDataElement -ExistingPackage $Export -SubstanceCount $SubstanceCount
+    $patVarFrag  = New-NeoIPCPathogenVariable -ExistingPackage $Export -PathogenCount $PathogenCount
+    $fgVarFrag   = New-NeoIPCPathogenFieldGatingVariable -ExistingPackage $Export -PathogenCount $PathogenCount
+    $subVarFrag  = New-NeoIPCSubstanceVariable -ExistingPackage $Export -SubstanceCount $SubstanceCount
+    $patRuleFrag = New-NeoIPCPathogenRule @ontologyArgs -ExistingPackage $Export -PathogenCount $PathogenCount
+    $fgRuleFrag  = New-NeoIPCPathogenFieldGatingRule @ontologyArgs -ExistingPackage $Export -PathogenCount $PathogenCount
+    $subRuleFrag = New-NeoIPCSubstanceRule -ExistingPackage $Export -SubstanceCount $SubstanceCount
+
+    $genOptionSets   = @($optionFrag['optionSets'])
+    $genOptions      = @($optionFrag['options'])
+    $genDataElements = @($patDeFrag['dataElements']) + @($subDeFrag['dataElements'])
+    $genVariables    = @($patVarFrag['programRuleVariables']) + @($fgVarFrag['programRuleVariables']) + @($subVarFrag['programRuleVariables'])
+    $genRules        = @($patRuleFrag['programRules']) + @($fgRuleFrag['programRules']) + @($subRuleFrag['programRules'])
+    $genActions      = @($patRuleFrag['programRuleActions']) + @($fgRuleFrag['programRuleActions']) + @($subRuleFrag['programRuleActions'])
+
+    $ordinal = [System.StringComparer]::Ordinal
+    function New-NeoIPCKeySet([string[]]$Keys) {
+        $s = [System.Collections.Generic.HashSet[string]]::new($ordinal)
+        foreach ($k in $Keys) { [void]$s.Add($k) }
+        $s
+    }
+
+    # ---- optionSets / options ------------------------------------------------------------------------------------
+    $genOsCodes = New-NeoIPCKeySet @($genOptionSets | ForEach-Object { [string]$_['code'] })
+    $genOsIds   = New-NeoIPCKeySet @($genOptionSets | ForEach-Object { [string]$_['id'] })
+    $keptOptionSets = @(@($Config['optionSets']) | Where-Object { $_ -is [System.Collections.IDictionary] -and -not $genOsCodes.Contains([string]$_['code']) })
+    # Owned options = those whose optionSet ref is a generated set (membership identity; the deployed set id is
+    # preserved, so this catches every deployed pathogen option even if its code changed).
+    $keptOptions = @(@($Config['options']) | Where-Object {
+            if ($_ -isnot [System.Collections.IDictionary]) { return $false }
+            $osRef = $_['optionSet']
+            -not ($osRef -is [System.Collections.IDictionary] -and $genOsIds.Contains([string]$osRef['id']))
+        })
+    $Config['optionSets'] = @($keptOptionSets + $genOptionSets)
+    $Config['options'] = @($keptOptions + $genOptions)
+
+    # ---- dataElements (by code or id) ----------------------------------------------------------------------------
+    $genDeCodes = New-NeoIPCKeySet @($genDataElements | ForEach-Object { [string]$_['code'] })
+    $genDeIds   = New-NeoIPCKeySet @($genDataElements | ForEach-Object { [string]$_['id'] })
+    $keptDes = @(@($Config['dataElements']) | Where-Object { $_ -is [System.Collections.IDictionary] -and -not ($genDeCodes.Contains([string]$_['code']) -or $genDeIds.Contains([string]$_['id'])) })
+    $Config['dataElements'] = @($keptDes + $genDataElements)
+
+    # ---- programRuleVariables (by name or id) --------------------------------------------------------------------
+    # The id check is load-bearing: the substance generators preserve UIDs by a padding-insensitive name
+    # (deployed `… 1 …` -> generated `… 01 …`, same id), so exact-name matching alone would keep the deployed
+    # object and duplicate its id onto the generated one.
+    $genVarNames = New-NeoIPCKeySet @($genVariables | ForEach-Object { [string]$_['name'] })
+    $genVarIds   = New-NeoIPCKeySet @($genVariables | ForEach-Object { [string]$_['id'] })
+    $keptVars = @(@($Config['programRuleVariables']) | Where-Object { $_ -is [System.Collections.IDictionary] -and -not ($genVarNames.Contains([string]$_['name']) -or $genVarIds.Contains([string]$_['id'])) })
+    $Config['programRuleVariables'] = @($keptVars + $genVariables)
+
+    # ---- programRules + programRuleActions (by name or id; stale aggregate dropped; non-family actions salvaged) --
+    $staleAggregateRuleNames = New-NeoIPCKeySet @('NeoIPC HAP - set pathogen attribute variables')
+    $genRuleNames  = New-NeoIPCKeySet @($genRules | ForEach-Object { [string]$_['name'] })
+    $genRuleIds    = New-NeoIPCKeySet @($genRules | ForEach-Object { [string]$_['id'] })
+    $genActionIds  = New-NeoIPCKeySet @($genActions | ForEach-Object { [string]$_['id'] })
+    $genRuleById = @{}
+    foreach ($r in $genRules) { $genRuleById[[string]$r['id']] = $r }
+
+    $deployedActionsByRuleId = @{}
+    foreach ($a in @($Config['programRuleActions'])) {
+        if ($a -isnot [System.Collections.IDictionary]) { continue }
+        $pr = $a['programRule']
+        $rid = if ($pr -is [System.Collections.IDictionary]) { [string]$pr['id'] } else { $null }
+        if ($rid) {
+            if (-not $deployedActionsByRuleId.ContainsKey($rid)) { $deployedActionsByRuleId[$rid] = [System.Collections.Generic.List[object]]::new() }
+            $deployedActionsByRuleId[$rid].Add($a)
+        }
+    }
+
+    $keptRules = @(@($Config['programRules']) | Where-Object {
+            $_ -is [System.Collections.IDictionary] -and
+            -not ($genRuleNames.Contains([string]$_['name']) -or $genRuleIds.Contains([string]$_['id'])) -and
+            -not $staleAggregateRuleNames.Contains([string]$_['name'])
+        })
+    $keptRuleIds = New-NeoIPCKeySet @($keptRules | ForEach-Object { [string]$_['id'] })
+
+    # Salvage business-rule-interlock actions (target DE outside the generated families) from each replaced rule
+    # onto the generated rule of the same id (which carries the deployed id where reproduced).
+    $salvagedActions = [System.Collections.Generic.List[object]]::new()
+    foreach ($r in @($Config['programRules'])) {
+        if ($r -isnot [System.Collections.IDictionary]) { continue }
+        $rid = [string]$r['id']
+        if (-not ($genRuleIds.Contains($rid) -or $genRuleNames.Contains([string]$r['name']))) { continue }
+        $genRule = $genRuleById[$rid]
+        if (-not $genRule) { continue }   # replaced by name but its id was re-minted: no same-id gen rule to attach to
+        foreach ($a in @($deployedActionsByRuleId[$rid])) {
+            if ($genActionIds.Contains([string]$a['id'])) { continue }         # the generator already reproduced this action (same id) -> not an omitted interlock
+            $tgt = $a['dataElement']
+            if ($tgt -isnot [System.Collections.IDictionary]) { continue }     # no DE target -> generator owns it
+            if ($genDeIds.Contains([string]$tgt['id'])) { continue }           # generated-family DE -> generator owns it
+            $salvaged = [ordered]@{}
+            foreach ($k in $a.Keys) { $salvaged[$k] = $a[$k] }
+            $salvaged['programRule'] = [ordered]@{ id = [string]$genRule['id'] }
+            $salvagedActions.Add($salvaged)
+            $refs = [System.Collections.Generic.List[object]]::new()
+            foreach ($ref in @($genRule['programRuleActions'])) { $refs.Add($ref) }
+            $refs.Add([ordered]@{ id = [string]$salvaged['id'] })
+            $genRule['programRuleActions'] = $refs.ToArray()
+        }
+    }
+
+    $keptActions = @(@($Config['programRuleActions']) | Where-Object {
+            if ($_ -isnot [System.Collections.IDictionary]) { return $false }
+            $pr = $_['programRule']
+            $rid = if ($pr -is [System.Collections.IDictionary]) { [string]$pr['id'] } else { $null }
+            $rid -and $keptRuleIds.Contains($rid)
+        })
+
+    $Config['programRules'] = @($keptRules + $genRules)
+    $Config['programRuleActions'] = @($keptActions + $genActions + $salvagedActions.ToArray())
+
+    # Fail loud on any duplicate id introduced by the splice (a generated mint colliding with a kept object).
+    foreach ($type in 'optionSets', 'options', 'dataElements', 'programRuleVariables', 'programRules', 'programRuleActions') {
+        $seen = [System.Collections.Generic.HashSet[string]]::new($ordinal)
+        foreach ($o in @($Config[$type])) {
+            if ($o -isnot [System.Collections.IDictionary]) { continue }
+            $id = [string]$o['id']
+            if ($id -and -not $seen.Add($id)) { throw "Generated-metadata splice produced a duplicate id '$id' in '$type'." }
+        }
+    }
+
+    $Config
+}
