@@ -2104,21 +2104,21 @@ Hierarchies:
         }
         It 'preserves the option-set and option UIDs (and sharing) from an existing export, by code' {
             $existing = @{
-                optionSets = @([ordered]@{ id = 'KHMPRkX5a4r'; code = 'NEOIPC_PATHOGENS'; name = 'old'; sharing = @{ public = 'rw------' } })
-                options    = @([ordered]@{ id = 'optExist001'; code = '11'; name = 'old'; optionSet = [ordered]@{ id = 'KHMPRkX5a4r' } })
+                optionSets = @([ordered]@{ id = 'osPathogn01'; code = 'NEOIPC_PATHOGENS'; name = 'old'; sharing = @{ public = 'rw------' } })
+                options    = @([ordered]@{ id = 'optExist001'; code = '11'; name = 'old'; optionSet = [ordered]@{ id = 'osPathogn01' } })
             }
             $frag = New-NeoIPCPathogenOptionSet -Path $script:GenYaml -ExistingPackage $existing
-            (@($frag['optionSets'])[0]['id']) | Should -BeExactly 'KHMPRkX5a4r'
+            (@($frag['optionSets'])[0]['id']) | Should -BeExactly 'osPathogn01'
             (@($frag['optionSets'])[0]['sharing']) | Should -Not -BeNullOrEmpty
             (@($frag['options'] | Where-Object { $_['code'] -eq '11' })[0]['id']) | Should -BeExactly 'optExist001'
             # A code absent from the export still mints deterministically off the preserved set UID.
             (@($frag['options'] | Where-Object { $_['code'] -eq '12' })[0]['id']) |
-                Should -BeExactly (New-NeoIPCMetadataUid -Type 'options' -NaturalKey 'KHMPRkX5a4r|12')
+                Should -BeExactly (New-NeoIPCMetadataUid -Type 'options' -NaturalKey 'osPathogn01|12')
         }
         It 'fails loud when the export carries a deployed code absent from the ontology (no silent drop)' {
             $existing = @{
-                optionSets = @([ordered]@{ id = 'KHMPRkX5a4r'; code = 'NEOIPC_PATHOGENS'; name = 'old' })
-                options    = @([ordered]@{ id = 'optGhost001'; code = '9999'; name = 'ghost'; optionSet = [ordered]@{ id = 'KHMPRkX5a4r' } })
+                optionSets = @([ordered]@{ id = 'osPathogn01'; code = 'NEOIPC_PATHOGENS'; name = 'old' })
+                options    = @([ordered]@{ id = 'optGhost001'; code = '9999'; name = 'ghost'; optionSet = [ordered]@{ id = 'osPathogn01' } })
             }
             { New-NeoIPCPathogenOptionSet -Path $script:GenYaml -ExistingPackage $existing } | Should -Throw '*9999*'
         }
@@ -2149,10 +2149,10 @@ Hierarchies:
         }
         It 'fails loud when two option codes in the export share a UID' {
             $existing = @{
-                optionSets = @([ordered]@{ id = 'KHMPRkX5a4r'; code = 'NEOIPC_PATHOGENS'; name = 'old' })
+                optionSets = @([ordered]@{ id = 'osPathogn01'; code = 'NEOIPC_PATHOGENS'; name = 'old' })
                 options    = @(
-                    [ordered]@{ id = 'dupSharedAA'; code = '11'; name = 'a'; optionSet = [ordered]@{ id = 'KHMPRkX5a4r' } },
-                    [ordered]@{ id = 'dupSharedAA'; code = '12'; name = 'b'; optionSet = [ordered]@{ id = 'KHMPRkX5a4r' } })
+                    [ordered]@{ id = 'dupSharedAA'; code = '11'; name = 'a'; optionSet = [ordered]@{ id = 'osPathogn01' } },
+                    [ordered]@{ id = 'dupSharedAA'; code = '12'; name = 'b'; optionSet = [ordered]@{ id = 'osPathogn01' } })
             }
             { New-NeoIPCPathogenOptionSet -Path $script:GenYaml -ExistingPackage $existing } | Should -Throw '*UID collision*'
         }
@@ -2170,13 +2170,13 @@ Hierarchies:
             finally { Remove-Item -LiteralPath $emptyYaml -Force }
         }
         It 'fails loud when -ExistingPackage is supplied but lacks the target option set' {
-            $existing = @{ optionSets = @([ordered]@{ id = 'KHMPRkX5a4r'; code = 'SOME_OTHER_SET' }); options = @() }
+            $existing = @{ optionSets = @([ordered]@{ id = 'osPathogn01'; code = 'SOME_OTHER_SET' }); options = @() }
             { New-NeoIPCPathogenOptionSet -Path $script:GenYaml -ExistingPackage $existing } | Should -Throw '*not found in the supplied*'
         }
         It 'regenerates the option and set names from the ontology, not a preserved drifted name' {
             $existing = @{
-                optionSets = @([ordered]@{ id = 'KHMPRkX5a4r'; code = 'NEOIPC_PATHOGENS'; name = 'DRIFTED SET NAME' })
-                options    = @([ordered]@{ id = 'optExist001'; code = '11'; name = 'DRIFTED OPTION'; optionSet = [ordered]@{ id = 'KHMPRkX5a4r' } })
+                optionSets = @([ordered]@{ id = 'osPathogn01'; code = 'NEOIPC_PATHOGENS'; name = 'DRIFTED SET NAME' })
+                options    = @([ordered]@{ id = 'optExist001'; code = '11'; name = 'DRIFTED OPTION'; optionSet = [ordered]@{ id = 'osPathogn01' } })
             }
             $frag = New-NeoIPCPathogenOptionSet -Path $script:GenYaml -ExistingPackage $existing
             (@($frag['optionSets'])[0]['name']) | Should -BeExactly 'NeoIPC Pathogen options'
@@ -2197,6 +2197,98 @@ Hierarchies:
         }
     }
 
+    Describe 'Resistance effective-flag computation (own-or-inherited, false overrides)' {
+        BeforeAll {
+            Import-Module powershell-yaml -ErrorAction Stop
+            # A genus carries Carbapenems; its species inherits it; a synonym under the species inherits it too.
+            # A sibling genus carries nothing (all categories false). Verifies inheritance down Children + Synonyms
+            # and the YAML-key -> category-key mapping (Carbapenems -> carbapenem-resistant).
+            $yaml = @'
+Hierarchies:
+- Name: Not listed
+  Id: 0
+  MRSA: true
+  VRE: true
+  3GCR: true
+  Carbapenems: true
+  Colistin: true
+- Name: Bacteria
+  Children:
+  - Name: Klebsiella
+    Id: 100
+    Carbapenems: true
+    Children:
+    - Name: Klebsiella pneumoniae
+      Id: 101
+      Synonyms:
+      - Name: Old klebsiella
+        Id: 102
+  - Name: Lactobacillus
+    Id: 200
+    Children:
+    - Name: Lactobacillus acidophilus
+      Id: 201
+'@
+            $script:FlagTree = ($yaml | ConvertFrom-Yaml)
+        }
+
+        It 'inherits a flag down Children and Synonyms (genus -> species -> synonym)' {
+            $flags = @(Get-NeoIPCResistanceFlag -Node $script:FlagTree)
+            ($flags | Where-Object { $_.Id -eq 100 })['carbapenem-resistant'] | Should -BeTrue
+            ($flags | Where-Object { $_.Id -eq 101 })['carbapenem-resistant'] | Should -BeTrue
+            ($flags | Where-Object { $_.Id -eq 102 })['carbapenem-resistant'] | Should -BeTrue
+        }
+        It 'defaults to false where no flag is set on the node or any ancestor' {
+            $flags = @(Get-NeoIPCResistanceFlag -Node $script:FlagTree)
+            ($flags | Where-Object { $_.Id -eq 201 })['carbapenem-resistant'] | Should -BeFalse
+            ($flags | Where-Object { $_.Id -eq 101 })['MRSA'] | Should -BeFalse
+        }
+        It 'maps the YAML flag keys to the DHIS2 category keys' {
+            $flags = @(Get-NeoIPCResistanceFlag -Node $script:FlagTree)
+            $notListed = $flags | Where-Object { $_.Id -eq 0 }
+            @($notListed.Keys) | Should -Be @('Id', '3GCR', 'carbapenem-resistant', 'colistin-resistant', 'MRSA', 'VRE')
+            $notListed['colistin-resistant'] | Should -BeTrue
+        }
+        It 'honours an explicit false that overrides an inherited true (and re-inherits below)' {
+            $tree = [ordered]@{ Hierarchies = @(
+                    [ordered]@{ Name = 'Genus'; Id = 1; Carbapenems = $true; Children = @(
+                            [ordered]@{ Name = 'Exception species'; Id = 2; Carbapenems = $false; Children = @(
+                                    [ordered]@{ Name = 'Sub'; Id = 3 }
+                                ) }
+                            [ordered]@{ Name = 'Normal species'; Id = 4 }
+                        ) }
+                ) }
+            $flags = @(Get-NeoIPCResistanceFlag -Node $tree)
+            ($flags | Where-Object { $_.Id -eq 1 })['carbapenem-resistant'] | Should -BeTrue
+            ($flags | Where-Object { $_.Id -eq 2 })['carbapenem-resistant'] | Should -BeFalse
+            ($flags | Where-Object { $_.Id -eq 3 })['carbapenem-resistant'] | Should -BeFalse
+            ($flags | Where-Object { $_.Id -eq 4 })['carbapenem-resistant'] | Should -BeTrue
+        }
+        It 'fails loud on a non-boolean flag value' {
+            $tree = [ordered]@{ Hierarchies = @([ordered]@{ Name = 'X'; Id = 9; Carbapenems = 'maybe' }) }
+            { Get-NeoIPCResistanceFlag -Node $tree } | Should -Throw '*non-boolean*'
+        }
+
+        It 'aggregates code sets per category, ascending and category-keyed' {
+            $sets = Get-NeoIPCResistanceCodeSet -Node $script:FlagTree
+            @($sets.Keys) | Should -Be @('3GCR', 'carbapenem-resistant', 'colistin-resistant', 'MRSA', 'VRE')
+            # Id 0 (all flags) + the carbapenem-flagged Klebsiella clade (100/101/102); Lactobacillus excluded.
+            @($sets['carbapenem-resistant']) | Should -Be @(0, 100, 101, 102)
+            # Only Id 0 carries 3GCR/MRSA/VRE/colistin in this fixture.
+            @($sets['3GCR']) | Should -Be @(0)
+            @($sets['MRSA']) | Should -Be @(0)
+            @($sets['colistin-resistant']) | Should -Be @(0)
+        }
+        It 'sorts numerically, not lexically' {
+            $tree = [ordered]@{ Hierarchies = @(
+                    [ordered]@{ Name = 'A'; Id = 100; MRSA = $true }
+                    [ordered]@{ Name = 'B'; Id = 9; MRSA = $true }
+                    [ordered]@{ Name = 'C'; Id = 21; MRSA = $true }
+                ) }
+            @((Get-NeoIPCResistanceCodeSet -Node $tree)['MRSA']) | Should -Be @(9, 21, 100)
+        }
+    }
+
     Describe 'Pathogen data-element generation' {
         BeforeAll {
             $script:DePlan = @(Get-NeoIPCPathogenDataElementPlan)
@@ -2213,7 +2305,7 @@ Hierarchies:
             $script:DePackage = @{
                 dataElements = @($des)
                 optionSets   = @(
-                    [ordered]@{ id = 'KHMPRkX5a4r'; code = 'NEOIPC_PATHOGENS' },
+                    [ordered]@{ id = 'osPathogn01'; code = 'NEOIPC_PATHOGENS' },
                     [ordered]@{ id = 'TnE2yuSrqEP'; code = 'NEOIPC_YES_NO_NOT_TESTED' },
                     [ordered]@{ id = 'B3oP3uOI5Ef'; code = 'NEOIPC_BSI_PATHOGEN_RECOVERED_FROM' },
                     [ordered]@{ id = 'Y64Emj9405U'; code = 'NEOIPC_HAP_RESPIRATORY_TRACT_SAMPLE_SOURCES' }
@@ -2264,7 +2356,7 @@ Hierarchies:
             @($frag['dataElements']).Count | Should -Be 135
             $byCode = @{}; foreach ($de in @($frag['dataElements'])) { $byCode[[string]$de['code']] = $de }
             $base = $byCode['NEOIPC_BSI_PATHOGEN_1']
-            $base['optionSet']['id'] | Should -BeExactly 'KHMPRkX5a4r'
+            $base['optionSet']['id'] | Should -BeExactly 'osPathogn01'
             $base['valueType'] | Should -BeExactly 'INTEGER_ZERO_OR_POSITIVE'
             $base['name'] | Should -BeExactly 'NeoIPC BSI Organism 1'
             $base['description'] | Should -BeExactly 'desc for NEOIPC_BSI_PATHOGEN_1'
@@ -2341,10 +2433,10 @@ Hierarchies:
             $baseCodes = @($script:PrvPlan | Where-Object { $_.Kind -eq 'value' } | ForEach-Object { $_.DataElementCode })
             $des = foreach ($c in $baseCodes) { [ordered]@{ code = $c; id = (New-NeoIPCMetadataUid -Type 'dataElements' -NaturalKey $c) } }
             $script:PrvPackage = @{
-                programs             = @([ordered]@{ code = 'NEOIPC_CORE'; id = 'D8mSSpOpsKj' })
+                programs             = @([ordered]@{ code = 'NEOIPC_CORE'; id = 'progCore001' })
                 dataElements         = @($des)
                 # one pre-existing PRV, to prove UID preservation by name
-                programRuleVariables = @([ordered]@{ name = 'NeoIPC BSI Pathogen 1 value'; id = 'FFHTEhKxqZB' })
+                programRuleVariables = @([ordered]@{ name = 'NeoIPC BSI Pathogen 1 value'; id = 'prvBsiP1Val' })
             }
         }
 
@@ -2381,10 +2473,10 @@ Hierarchies:
             @($frag['programRuleVariables']).Count | Should -Be 108
             $byName = @{}; foreach ($v in @($frag['programRuleVariables'])) { $byName[[string]$v['name']] = $v }
             $val = $byName['NeoIPC BSI Pathogen 1 value']
-            $val['id'] | Should -BeExactly 'FFHTEhKxqZB'   # preserved from the package
+            $val['id'] | Should -BeExactly 'prvBsiP1Val'   # preserved from the package
             $val['programRuleVariableSourceType'] | Should -BeExactly 'DATAELEMENT_CURRENT_EVENT'
             $val['useCodeForOptionSet'] | Should -BeTrue
-            $val['program']['id'] | Should -BeExactly 'D8mSSpOpsKj'
+            $val['program']['id'] | Should -BeExactly 'progCore001'
             $val['dataElement']['id'] | Should -BeExactly (New-NeoIPCMetadataUid -Type 'dataElements' -NaturalKey 'NEOIPC_BSI_PATHOGEN_1')
             $mb = $byName['NeoIPC BSI Pathogen 1 may be 3GCR']
             $mb['programRuleVariableSourceType'] | Should -BeExactly 'CALCULATED_VALUE'
@@ -2443,6 +2535,430 @@ Hierarchies:
             }
             (@((New-NeoIPCPathogenVariable -ExistingPackage $pkg -ProgramCode 'MY_PROGRAM')['programRuleVariables'])[0]['program']['id']) | Should -BeExactly 'MyProgram01'
             { New-NeoIPCPathogenVariable -ExistingPackage $pkg } | Should -Throw '*NEOIPC_CORE*'
+        }
+    }
+
+    Describe 'Pathogen resistance-rule generation' {
+        BeforeAll {
+            Import-Module powershell-yaml -ErrorAction Stop
+            $script:RulePlan = @(Get-NeoIPCPathogenRulePlan)
+
+            # Tiny ontology: Id 0 carries every flag; Klebsiella (100) carbapenem only. So the effective code sets
+            # are carbapenem-resistant = {0,100} and every other category = {0} — small enough to assert exactly.
+            $script:RuleYaml = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-rule-{0}.yaml' -f ([guid]::NewGuid().ToString('N')))
+            Set-Content -LiteralPath $script:RuleYaml -Encoding utf8 -Value @'
+Hierarchies:
+- Name: Not listed
+  Id: 0
+  3GCR: true
+  Carbapenems: true
+  Colistin: true
+  MRSA: true
+  VRE: true
+- Name: Bacteria
+  Children:
+  - Name: Klebsiella
+    Id: 100
+    Carbapenems: true
+'@
+            # A package covering the four program stages (by code), every `_<CAT>` resistance DE (by code) and the
+            # program — the minimum the generator resolves against. Built from the DE plan so it stays in lockstep.
+            # Stages carry no code; the generator resolves each via a slot-1 _3GCR anchor DE listed in
+            # programStageDataElements (the same DE→stage link the real export carries).
+            $repDe = @{ BSI = 'NEOIPC_BSI_PATHOGEN_1_3GCR'; HAP = 'NEOIPC_HAP_PATHOGEN_1_3GCR'; SSI = 'NEOIPC_SSI_PATHOGEN_1_3GCR'; NEC = 'NEOIPC_NEC_SEC_BSI_PATHOGEN_1_3GCR' }
+            $stages = foreach ($s in 'BSI', 'HAP', 'SSI', 'NEC') {
+                [ordered]@{
+                    code                     = "NEOIPC_$s"
+                    id                       = (New-NeoIPCMetadataUid -Type 'programStages' -NaturalKey "NEOIPC_$s")
+                    programStageDataElements = @([ordered]@{ dataElement = [ordered]@{ id = (New-NeoIPCMetadataUid -Type 'dataElements' -NaturalKey $repDe[$s]) } })
+                }
+            }
+            $resCats = @('3GCR', 'CAR', 'COR', 'MRSA', 'VRE')
+            $resDe = foreach ($d in (Get-NeoIPCPathogenDataElementPlan)) {
+                if ($d.Suffix -in $resCats) { [ordered]@{ code = $d.Code; id = (New-NeoIPCMetadataUid -Type 'dataElements' -NaturalKey $d.Code) } }
+            }
+            $script:RulePkg = @{
+                programs           = @([ordered]@{ code = 'NEOIPC_CORE'; id = 'progCore001' })
+                programStages      = @($stages)
+                dataElements       = @($resDe)
+                programRules       = @()
+                programRuleActions = @()
+            }
+        }
+        AfterAll {
+            if ($script:RuleYaml -and (Test-Path -LiteralPath $script:RuleYaml)) { Remove-Item -LiteralPath $script:RuleYaml -Force }
+        }
+
+        It 'expands to 270 rules (90 set + 90 may-be + 90 not)' {
+            $script:RulePlan.Count | Should -Be 270
+            (@($script:RulePlan | Where-Object { $_.Kind -eq 'set' }).Count) | Should -Be 90
+            (@($script:RulePlan | Where-Object { $_.Kind -eq 'mayBe' }).Count) | Should -Be 90
+            (@($script:RulePlan | Where-Object { $_.Kind -eq 'not' }).Count) | Should -Be 90
+        }
+        It 'the PathogenCount parameter drives slot expansion (1 -> 90, 3 -> 270)' {
+            (@(Get-NeoIPCPathogenRulePlan -PathogenCount 1)).Count | Should -Be 90
+            (@(Get-NeoIPCPathogenRulePlan -PathogenCount 3)).Count | Should -Be 270
+        }
+        It 'produces well-formed single-digit slot codes and names up to the max slot 9' {
+            $plan = @(Get-NeoIPCPathogenRulePlan -PathogenCount 9)
+            (@($plan | Where-Object { $_.Name -eq 'NeoIPC BSI Pathogen 9 - set carbapenem-resistant' }).Count) | Should -Be 1
+            $mb = @($plan | Where-Object { $_.Name -eq 'NeoIPC BSI Pathogen 9 - may be carbapenem-resistant' })[0]
+            $mb.CategoryDeCode | Should -BeExactly 'NEOIPC_BSI_PATHOGEN_9_CAR'
+            $mb.ValueVariable | Should -BeExactly 'NeoIPC BSI Pathogen 9 value'
+        }
+        It 'caps the pathogen count at 1..9 (single digit)' {
+            { Get-NeoIPCPathogenRulePlan -PathogenCount 0 } | Should -Throw
+            { Get-NeoIPCPathogenRulePlan -PathogenCount 10 } | Should -Throw
+            # 6 stage-instances (3 primary + 3 secondary) x slots x 5 categories x 3 kinds.
+            (@(Get-NeoIPCPathogenRulePlan -PathogenCount 9)).Count | Should -Be (6 * 9 * 5 * 3)
+        }
+        It 'gives set priority 0 and may-be / not priority 1 (the load-bearing ASSIGN-before-consumer order)' {
+            (@($script:RulePlan | Where-Object { $_.Kind -eq 'set' -and $_.Priority -ne 0 }).Count) | Should -Be 0
+            (@($script:RulePlan | Where-Object { $_.Kind -in 'mayBe', 'not' -and $_.Priority -ne 1 }).Count) | Should -Be 0
+        }
+        It 'makes the not condition the exact complement of the may-be condition (mandatory implies shown)' {
+            $byKey = @{}
+            foreach ($d in $script:RulePlan) { $byKey["$($d.Stage)|$($d.SlotKind)|$($d.Index)|$($d.Category)|$($d.Kind)"] = $d }
+            foreach ($d in @($script:RulePlan | Where-Object { $_.Kind -eq 'mayBe' })) {
+                $not = $byKey["$($d.Stage)|$($d.SlotKind)|$($d.Index)|$($d.Category)|not"]
+                $not.Condition | Should -BeExactly ('!' + $d.Condition)
+            }
+        }
+
+        It 'generates 270 rules and 270 actions' {
+            $frag = New-NeoIPCPathogenRule -Path $script:RuleYaml -ExistingPackage $script:RulePkg
+            @($frag['programRules']).Count | Should -Be 270
+            @($frag['programRuleActions']).Count | Should -Be 270
+        }
+        It 'forwards PathogenCount to expansion (1 -> 90 rules + 90 actions)' {
+            $frag = New-NeoIPCPathogenRule -Path $script:RuleYaml -ExistingPackage $script:RulePkg -PathogenCount 1
+            @($frag['programRules']).Count | Should -Be 90
+            @($frag['programRuleActions']).Count | Should -Be 90
+        }
+        It 'builds the set rule: condition true, priority 0, ASSIGN content=may-be var, data=hasValue + ascending enumeration' {
+            $frag = New-NeoIPCPathogenRule -Path $script:RuleYaml -ExistingPackage $script:RulePkg
+            $rules = @{}; foreach ($r in @($frag['programRules'])) { $rules[[string]$r['name']] = $r }
+            $acts = @{}; foreach ($a in @($frag['programRuleActions'])) { $acts[[string]$a['id']] = $a }
+
+            $car = $rules['NeoIPC BSI Pathogen 1 - set carbapenem-resistant']
+            $car['condition'] | Should -BeExactly 'true'
+            $car['priority'] | Should -Be 0
+            $carAct = $acts[[string]@($car['programRuleActions'])[0]['id']]
+            $carAct['programRuleActionType'] | Should -BeExactly 'ASSIGN'
+            $carAct['content'] | Should -BeExactly '#{NeoIPC BSI Pathogen 1 may be carbapenem-resistant}'
+            $carAct['data'] | Should -BeExactly 'd2:hasValue(#{NeoIPC BSI Pathogen 1 value})&&(#{NeoIPC BSI Pathogen 1 value}==0||#{NeoIPC BSI Pathogen 1 value}==100)'
+            # A single-code category emits a bare term with no `||`.
+            $g = $rules['NeoIPC BSI Pathogen 1 - set 3GCR']
+            $acts[[string]@($g['programRuleActions'])[0]['id']]['data'] | Should -BeExactly 'd2:hasValue(#{NeoIPC BSI Pathogen 1 value})&&(#{NeoIPC BSI Pathogen 1 value}==0)'
+        }
+        It 'builds the may-be rule: priority 1, condition #{var}, SETMANDATORYFIELD on the _<CAT> data element' {
+            $frag = New-NeoIPCPathogenRule -Path $script:RuleYaml -ExistingPackage $script:RulePkg
+            $rules = @{}; foreach ($r in @($frag['programRules'])) { $rules[[string]$r['name']] = $r }
+            $acts = @{}; foreach ($a in @($frag['programRuleActions'])) { $acts[[string]$a['id']] = $a }
+            $mb = $rules['NeoIPC BSI Pathogen 1 - may be carbapenem-resistant']
+            $mb['priority'] | Should -Be 1
+            $mb['condition'] | Should -BeExactly '#{NeoIPC BSI Pathogen 1 may be carbapenem-resistant}'
+            $act = $acts[[string]@($mb['programRuleActions'])[0]['id']]
+            $act['programRuleActionType'] | Should -BeExactly 'SETMANDATORYFIELD'
+            $act['dataElement']['id'] | Should -BeExactly (New-NeoIPCMetadataUid -Type 'dataElements' -NaturalKey 'NEOIPC_BSI_PATHOGEN_1_CAR')
+        }
+        It 'builds the not rule: priority 1, condition !#{var}, HIDEFIELD on the same _<CAT> data element' {
+            $frag = New-NeoIPCPathogenRule -Path $script:RuleYaml -ExistingPackage $script:RulePkg
+            $rules = @{}; foreach ($r in @($frag['programRules'])) { $rules[[string]$r['name']] = $r }
+            $acts = @{}; foreach ($a in @($frag['programRuleActions'])) { $acts[[string]$a['id']] = $a }
+            $not = $rules['NeoIPC BSI Pathogen 1 - not carbapenem-resistant']
+            $not['priority'] | Should -Be 1
+            $not['condition'] | Should -BeExactly '!#{NeoIPC BSI Pathogen 1 may be carbapenem-resistant}'
+            $act = $acts[[string]@($not['programRuleActions'])[0]['id']]
+            $act['programRuleActionType'] | Should -BeExactly 'HIDEFIELD'
+            $act['dataElement']['id'] | Should -BeExactly (New-NeoIPCMetadataUid -Type 'dataElements' -NaturalKey 'NEOIPC_BSI_PATHOGEN_1_CAR')
+        }
+        It 'resolves each rule programStage via DE->stage membership (stages carry no code)' {
+            $frag = New-NeoIPCPathogenRule -Path $script:RuleYaml -ExistingPackage $script:RulePkg
+            $rules = @{}; foreach ($r in @($frag['programRules'])) { $rules[[string]$r['name']] = $r }
+            $rules['NeoIPC BSI Pathogen 1 - set 3GCR']['programStage']['id'] |
+                Should -BeExactly (New-NeoIPCMetadataUid -Type 'programStages' -NaturalKey 'NEOIPC_BSI')
+            $rules['NeoIPC NEC Secondary BSI pathogen 1 - set 3GCR']['programStage']['id'] |
+                Should -BeExactly (New-NeoIPCMetadataUid -Type 'programStages' -NaturalKey 'NEOIPC_NEC')
+        }
+        It 'preserves rule UID + description and the action UID from the export by name; mints otherwise' {
+            $pkg = @{
+                programs           = $script:RulePkg['programs']
+                programStages      = $script:RulePkg['programStages']
+                dataElements       = $script:RulePkg['dataElements']
+                programRules       = @([ordered]@{ name = 'NeoIPC BSI Pathogen 1 - set 3GCR'; id = 'RULEseed001'; description = 'Seeded description.' })
+                programRuleActions = @([ordered]@{ id = 'ACTseed0001'; programRule = [ordered]@{ id = 'RULEseed001' }; programRuleActionType = 'ASSIGN' })
+            }
+            $frag = New-NeoIPCPathogenRule -Path $script:RuleYaml -ExistingPackage $pkg
+            $rules = @{}; foreach ($r in @($frag['programRules'])) { $rules[[string]$r['name']] = $r }
+            $seeded = $rules['NeoIPC BSI Pathogen 1 - set 3GCR']
+            $seeded['id'] | Should -BeExactly 'RULEseed001'
+            $seeded['description'] | Should -BeExactly 'Seeded description.'
+            @($seeded['programRuleActions'])[0]['id'] | Should -BeExactly 'ACTseed0001'
+            # A rule not in the export mints rule + action deterministically.
+            $minted = $rules['NeoIPC BSI Pathogen 1 - not 3GCR']
+            $minted['id'] | Should -BeExactly (New-NeoIPCMetadataUid -Type 'programRules' -NaturalKey 'NeoIPC BSI Pathogen 1 - not 3GCR')
+            @($minted['programRuleActions'])[0]['id'] | Should -BeExactly (New-NeoIPCMetadataUid -Type 'programRuleActions' -NaturalKey 'NeoIPC BSI Pathogen 1 - not 3GCR|HIDEFIELD')
+        }
+        It 'mints deterministically across runs' {
+            $a = New-NeoIPCPathogenRule -Path $script:RuleYaml -ExistingPackage $script:RulePkg
+            $b = New-NeoIPCPathogenRule -Path $script:RuleYaml -ExistingPackage $script:RulePkg
+            @($a['programRules'] | ForEach-Object { $_['id'] }) | Should -Be @($b['programRules'] | ForEach-Object { $_['id'] })
+            @($a['programRuleActions'] | ForEach-Object { $_['id'] }) | Should -Be @($b['programRuleActions'] | ForEach-Object { $_['id'] })
+        }
+        It 'fails loud when a program stage is missing from the package' {
+            $pkg = @{
+                programs           = $script:RulePkg['programs']
+                programStages      = @($script:RulePkg['programStages'] | Where-Object { [string]$_['code'] -ne 'NEOIPC_NEC' })
+                dataElements       = $script:RulePkg['dataElements']
+                programRules       = @()
+                programRuleActions = @()
+            }
+            { New-NeoIPCPathogenRule -Path $script:RuleYaml -ExistingPackage $pkg } | Should -Throw '*NEOIPC_NEC*'
+        }
+        It 'fails loud when a resistance data element is missing from the package' {
+            $pkg = @{
+                programs           = $script:RulePkg['programs']
+                programStages      = $script:RulePkg['programStages']
+                dataElements       = @($script:RulePkg['dataElements'] | Where-Object { [string]$_['code'] -ne 'NEOIPC_BSI_PATHOGEN_1_CAR' })
+                programRules       = @()
+                programRuleActions = @()
+            }
+            { New-NeoIPCPathogenRule -Path $script:RuleYaml -ExistingPackage $pkg } | Should -Throw '*NEOIPC_BSI_PATHOGEN_1_CAR*'
+        }
+        It 'fails loud when the program is absent' {
+            $pkg = @{ programs = @(); programStages = $script:RulePkg['programStages']; dataElements = $script:RulePkg['dataElements']; programRules = @(); programRuleActions = @() }
+            { New-NeoIPCPathogenRule -Path $script:RuleYaml -ExistingPackage $pkg } | Should -Throw '*NEOIPC_CORE*'
+        }
+    }
+
+    Describe 'Substance cluster generation (surveillance-end)' {
+        BeforeAll {
+            $script:SubDePlan = @(Get-NeoIPCSubstanceDataElementPlan)
+            $script:SubPrvPlan = @(Get-NeoIPCSubstanceVariablePlan)
+            $script:SubRulePlan = @(Get-NeoIPCSubstanceRulePlan)
+            $script:SubCcId = New-NeoIPCMetadataUid -Type 'categoryCombos' -NaturalKey 'default'
+            $script:SubDeId = { param($code) New-NeoIPCMetadataUid -Type 'dataElements' -NaturalKey $code }
+
+            # Package with the deployed substance + days DEs (slots 1-9), the total AB-days DE, the option set, the
+            # program and the surveillance-end stage. DEs carry a categoryCombo + description so reuse-by-code is exercised.
+            $subDes = foreach ($d in $script:SubDePlan) {
+                [ordered]@{ code = $d.Code; id = (& $script:SubDeId $d.Code); description = "deployed $($d.Code) desc"; categoryCombo = [ordered]@{ id = $script:SubCcId } }
+            }
+            $abDays = [ordered]@{ code = 'NEOIPC_SURVEILLANCE_END_AB_DAYS'; id = (& $script:SubDeId 'NEOIPC_SURVEILLANCE_END_AB_DAYS'); categoryCombo = [ordered]@{ id = $script:SubCcId } }
+            $script:SubPkg = @{
+                programs             = @([ordered]@{ code = 'NEOIPC_CORE'; id = 'progCore001' })
+                programStages        = @([ordered]@{ id = 'psSurvEnd01'; programStageDataElements = @([ordered]@{ dataElement = [ordered]@{ id = (& $script:SubDeId 'NEOIPC_SURVEILLANCE_END_AB_DAYS') } }) })
+                optionSets           = @([ordered]@{ code = 'NEOIPC_ANTIMICROBIAL_SUBSTANCES'; id = 'osSubstan01' })
+                dataElements         = @($subDes) + @($abDays)
+                programRuleVariables = @()
+                programRules         = @()
+                programRuleActions   = @()
+            }
+        }
+
+        It 'normalises the slot number for padding-insensitive matching' {
+            ConvertTo-NeoIPCSubstanceUnpaddedName -Name 'NeoIPC Surveillance end Antibiotic substance 02 days - current event value' |
+                Should -BeExactly 'NeoIPC Surveillance end Antibiotic substance 2 days - current event value'
+            ConvertTo-NeoIPCSubstanceUnpaddedName -Name 'NeoIPC Surveillance end Antibiotic substance days - validate' |
+                Should -BeExactly 'NeoIPC Surveillance end Antibiotic substance days - validate'
+            ConvertTo-NeoIPCSubstanceUnpaddedName -Name 'NeoIPC Surveillance end Antibiotic substance 10 - hide' |
+                Should -BeExactly 'NeoIPC Surveillance end Antibiotic substance 10 - hide'
+        }
+
+        It 'DE plan: 2 per slot; code/name/shortName padded, formName unpadded' {
+            $script:SubDePlan.Count | Should -Be 18
+            $sub = @($script:SubDePlan | Where-Object { $_.Code -eq 'NEOIPC_SURVEILLANCE_END_AB_SUBST_01' })[0]
+            $sub.Name | Should -BeExactly 'NeoIPC Surveillance end Antibiotic substance 01'
+            $sub.ShortName | Should -BeExactly 'NeoIPC Surv. end AB 01'
+            $sub.FormName | Should -BeExactly 'Antibiotic substance 1'
+            $sub.ValueType | Should -BeExactly 'TEXT'
+            $sub.OptionSetCode | Should -BeExactly 'NEOIPC_ANTIMICROBIAL_SUBSTANCES'
+            $sub.CommentOptionSetCode | Should -BeExactly 'NEOIPC_ANTIMICROBIAL_SUBSTANCES'
+            $days = @($script:SubDePlan | Where-Object { $_.Code -eq 'NEOIPC_SURVEILLANCE_END_AB_SUBST_01_DAYS' })[0]
+            $days.ValueType | Should -BeExactly 'INTEGER_POSITIVE'
+            $days.ZeroIsSignificant | Should -BeTrue
+            $days.FormName | Should -BeExactly 'Antibiotic substance 1 days'
+        }
+
+        It 'PRV plan: substance value TEXT/useCode true, days value INTEGER_POSITIVE/useCode false (padded names)' {
+            $script:SubPrvPlan.Count | Should -Be 18
+            $sv = @($script:SubPrvPlan | Where-Object { $_.Name -eq 'NeoIPC Surveillance end Antibiotic substance 01 - current event value' })[0]
+            $sv.SourceType | Should -BeExactly 'DATAELEMENT_CURRENT_EVENT'
+            $sv.ValueType | Should -BeExactly 'TEXT'
+            $sv.UseCodeForOptionSet | Should -BeTrue
+            $sv.DataElementCode | Should -BeExactly 'NEOIPC_SURVEILLANCE_END_AB_SUBST_01'
+            $dv = @($script:SubPrvPlan | Where-Object { $_.Name -eq 'NeoIPC Surveillance end Antibiotic substance 01 days - current event value' })[0]
+            $dv.UseCodeForOptionSet | Should -BeFalse
+            $dv.ValueType | Should -BeExactly 'INTEGER_POSITIVE'
+        }
+
+        It 'rule plan: 2*N+2 rules with cascading-reveal / require / validate shapes' {
+            $script:SubRulePlan.Count | Should -Be (2 * 9 + 2)
+            $hide1 = @($script:SubRulePlan | Where-Object { $_.Name -eq 'NeoIPC Surveillance end Antibiotic substance 01 - hide' })[0]
+            $hide1.Condition | Should -BeExactly '#{NeoIPC Surveillance end AB days - current event value} <= 0'
+            @($hide1.Actions).Count | Should -Be 2
+            @($hide1.Actions | ForEach-Object { $_.Type }) | Should -Be @('HIDEFIELD', 'HIDEFIELD')
+            @($hide1.Actions | ForEach-Object { $_.DataElementCode }) | Should -Be @('NEOIPC_SURVEILLANCE_END_AB_SUBST_01', 'NEOIPC_SURVEILLANCE_END_AB_SUBST_01_DAYS')
+            $hide2 = @($script:SubRulePlan | Where-Object { $_.Name -eq 'NeoIPC Surveillance end Antibiotic substance 02 - hide' })[0]
+            $hide2.Condition | Should -BeExactly '!d2:hasValue(#{NeoIPC Surveillance end Antibiotic substance 01 - current event value})'
+            $req = @($script:SubRulePlan | Where-Object { $_.Kind -eq 'substanceRequire' })
+            $req.Count | Should -Be 1
+            $req[0].Name | Should -BeExactly 'NeoIPC Surveillance end Antibiotic substance 01 - require'
+            $req[0].Condition | Should -BeExactly '#{NeoIPC Surveillance end AB days - current event value} >= 1'
+            $daysReq = @($script:SubRulePlan | Where-Object { $_.Kind -eq 'daysRequire' })
+            $daysReq.Count | Should -Be 9
+            $dr1 = @($daysReq | Where-Object { $_.Name -eq 'NeoIPC Surveillance end Antibiotic substance 01 days - require' })[0]
+            $dr1.Condition | Should -BeExactly 'd2:hasValue(#{NeoIPC Surveillance end Antibiotic substance 01 - current event value})'
+            @($dr1.Actions).Count | Should -Be 1
+            @($dr1.Actions)[0].Type | Should -BeExactly 'SETMANDATORYFIELD'
+            @($dr1.Actions)[0].DataElementCode | Should -BeExactly 'NEOIPC_SURVEILLANCE_END_AB_SUBST_01_DAYS'
+            $val = @($script:SubRulePlan | Where-Object { $_.Kind -eq 'validate' })[0]
+            $val.Priority | Should -Be 1
+            $val.Condition | Should -BeLike '(#{NeoIPC Surveillance end Antibiotic substance 01 days - current event value} + *#{NeoIPC Surveillance end Antibiotic substance 09 days - current event value}) < #{NeoIPC Surveillance end AB days - current event value}'
+            @($val.Actions)[0].Type | Should -BeExactly 'SHOWERROR'
+            @($val.Actions)[0].Content | Should -BeExactly 'The sum of all antibiotic substance days must be greater than or equal to antibiotic days'
+            # The default-count assertion above wildcards the middle terms; pin the full enumeration at a small count.
+            $val3 = @(Get-NeoIPCSubstanceRulePlan -SubstanceCount 3 | Where-Object { $_.Kind -eq 'validate' })[0]
+            $val3.Condition | Should -BeExactly ('(#{NeoIPC Surveillance end Antibiotic substance 01 days - current event value}' +
+                ' + #{NeoIPC Surveillance end Antibiotic substance 02 days - current event value}' +
+                ' + #{NeoIPC Surveillance end Antibiotic substance 03 days - current event value})' +
+                ' < #{NeoIPC Surveillance end AB days - current event value}')
+        }
+
+        It 'count parameter aligns the three plans and caps at 1..99' {
+            (@(Get-NeoIPCSubstanceDataElementPlan -SubstanceCount 4)).Count | Should -Be 8
+            (@(Get-NeoIPCSubstanceVariablePlan -SubstanceCount 4)).Count | Should -Be 8
+            (@(Get-NeoIPCSubstanceRulePlan -SubstanceCount 4)).Count | Should -Be (2 * 4 + 2)
+            { Get-NeoIPCSubstanceDataElementPlan -SubstanceCount 0 } | Should -Throw
+            { Get-NeoIPCSubstanceDataElementPlan -SubstanceCount 100 } | Should -Throw
+        }
+
+        It 'DE generator: 18 DEs, reusing UID/categoryCombo/description by code, resolving option + comment option set' {
+            $frag = New-NeoIPCSubstanceDataElement -ExistingPackage $script:SubPkg
+            @($frag['dataElements']).Count | Should -Be 18
+            $byCode = @{}; foreach ($de in @($frag['dataElements'])) { $byCode[[string]$de['code']] = $de }
+            $sub = $byCode['NEOIPC_SURVEILLANCE_END_AB_SUBST_01']
+            $sub['id'] | Should -BeExactly (& $script:SubDeId 'NEOIPC_SURVEILLANCE_END_AB_SUBST_01')
+            $sub['name'] | Should -BeExactly 'NeoIPC Surveillance end Antibiotic substance 01'
+            $sub['formName'] | Should -BeExactly 'Antibiotic substance 1'
+            $sub['description'] | Should -BeExactly 'deployed NEOIPC_SURVEILLANCE_END_AB_SUBST_01 desc'
+            $sub['categoryCombo']['id'] | Should -BeExactly $script:SubCcId
+            $sub['optionSet']['id'] | Should -BeExactly 'osSubstan01'
+            $sub['commentOptionSet']['id'] | Should -BeExactly 'osSubstan01'
+            $byCode['NEOIPC_SURVEILLANCE_END_AB_SUBST_01_DAYS'].Contains('optionSet') | Should -BeFalse
+        }
+
+        It 'DE generator: grows beyond the deployed slots (mint UID + sibling categoryCombo + templated description)' {
+            # Package with only slots 1-3; ask for 5 -> slots 4-5 are minted.
+            $smallDes = foreach ($d in (Get-NeoIPCSubstanceDataElementPlan -SubstanceCount 3)) {
+                [ordered]@{ code = $d.Code; id = (& $script:SubDeId $d.Code); categoryCombo = [ordered]@{ id = $script:SubCcId } }
+            }
+            $pkg = @{
+                programs     = $script:SubPkg['programs']
+                optionSets   = $script:SubPkg['optionSets']
+                dataElements = @($smallDes)
+            }
+            $frag = New-NeoIPCSubstanceDataElement -ExistingPackage $pkg -SubstanceCount 5
+            @($frag['dataElements']).Count | Should -Be 10
+            $byCode = @{}; foreach ($de in @($frag['dataElements'])) { $byCode[[string]$de['code']] = $de }
+            $new = $byCode['NEOIPC_SURVEILLANCE_END_AB_SUBST_04']
+            $new['id'] | Should -BeExactly (& $script:SubDeId 'NEOIPC_SURVEILLANCE_END_AB_SUBST_04')
+            $new['categoryCombo']['id'] | Should -BeExactly $script:SubCcId
+            $new['description'] | Should -BeExactly 'Systemic antibiotic substance number 4 the infant received.'
+            $byCode['NEOIPC_SURVEILLANCE_END_AB_SUBST_04_DAYS']['description'] | Should -BeExactly 'The cumulative number of days the infant received antibiotic substance number 4.'
+        }
+
+        It 'DE generator: fails loud when the option set is absent' {
+            $pkg = @{ programs = $script:SubPkg['programs']; optionSets = @(); dataElements = $script:SubPkg['dataElements'] }
+            { New-NeoIPCSubstanceDataElement -ExistingPackage $pkg } | Should -Throw '*NEOIPC_ANTIMICROBIAL_SUBSTANCES*'
+        }
+
+        It 'PRV generator: 18 PRVs, preserving UID by slot-normalised name, resolving the base DE' {
+            $pkg = $script:SubPkg.Clone()
+            $pkg['programRuleVariables'] = @([ordered]@{ name = 'NeoIPC Surveillance end Antibiotic substance 2 - current event value'; id = 'SUBprv00002' })
+            $frag = New-NeoIPCSubstanceVariable -ExistingPackage $pkg
+            @($frag['programRuleVariables']).Count | Should -Be 18
+            $byName = @{}; foreach ($v in @($frag['programRuleVariables'])) { $byName[[string]$v['name']] = $v }
+            $v2 = $byName['NeoIPC Surveillance end Antibiotic substance 02 - current event value']
+            $v2['id'] | Should -BeExactly 'SUBprv00002'   # preserved across the padding rename
+            $v2['useCodeForOptionSet'] | Should -BeTrue
+            $v2['dataElement']['id'] | Should -BeExactly (& $script:SubDeId 'NEOIPC_SURVEILLANCE_END_AB_SUBST_02')
+            $byName['NeoIPC Surveillance end Antibiotic substance 03 - current event value']['id'] |
+                Should -BeExactly (New-NeoIPCMetadataUid -Type 'programRuleVariables' -NaturalKey 'NeoIPC Surveillance end Antibiotic substance 03 - current event value')
+        }
+
+        It 'rule generator: hide (2 HIDEFIELD), validate (SHOWERROR), stage by DE membership, padding-insensitive UID preserve' {
+            $hideSubId = & $script:SubDeId 'NEOIPC_SURVEILLANCE_END_AB_SUBST_01'
+            $hideDaysId = & $script:SubDeId 'NEOIPC_SURVEILLANCE_END_AB_SUBST_01_DAYS'
+            $pkg = $script:SubPkg.Clone()
+            $pkg['programRules'] = @([ordered]@{ name = 'NeoIPC Surveillance end Antibiotic substance 1 - hide'; id = 'SUBrule0001' })
+            $pkg['programRuleActions'] = @(
+                [ordered]@{ id = 'SUBact00001'; programRule = [ordered]@{ id = 'SUBrule0001' }; programRuleActionType = 'HIDEFIELD'; dataElement = [ordered]@{ id = $hideSubId } },
+                [ordered]@{ id = 'SUBact00002'; programRule = [ordered]@{ id = 'SUBrule0001' }; programRuleActionType = 'HIDEFIELD'; dataElement = [ordered]@{ id = $hideDaysId } })
+            $frag = New-NeoIPCSubstanceRule -ExistingPackage $pkg
+            @($frag['programRules']).Count | Should -Be (2 * 9 + 2)
+            $rules = @{}; foreach ($r in @($frag['programRules'])) { $rules[[string]$r['name']] = $r }
+            $acts = @{}; foreach ($a in @($frag['programRuleActions'])) { $acts[[string]$a['id']] = $a }
+
+            $hide = $rules['NeoIPC Surveillance end Antibiotic substance 01 - hide']
+            $hide['id'] | Should -BeExactly 'SUBrule0001'                  # preserved across the padding rename
+            $hide['programStage']['id'] | Should -BeExactly 'psSurvEnd01'  # resolved via DE->stage membership
+            @($hide['programRuleActions']).Count | Should -Be 2
+            $hideActIds = @($hide['programRuleActions'] | ForEach-Object { [string]$_['id'] })
+            $hideActIds | Should -Contain 'SUBact00001'                    # action UID preserved by (type + target DE)
+            $hideActIds | Should -Contain 'SUBact00002'
+            ($acts['SUBact00001']['dataElement']['id']) | Should -BeExactly $hideSubId
+            $hide.Contains('priority') | Should -BeFalse                   # null priority -> omitted
+
+            $val = $rules['NeoIPC Surveillance end Antibiotic substance days - validate']
+            $val['priority'] | Should -Be 1
+            $valAct = $acts[[string]@($val['programRuleActions'])[0]['id']]
+            $valAct['programRuleActionType'] | Should -BeExactly 'SHOWERROR'
+            $valAct['content'] | Should -BeExactly 'The sum of all antibiotic substance days must be greater than or equal to antibiotic days'
+            $valAct['dataElement']['id'] | Should -BeExactly (& $script:SubDeId 'NEOIPC_SURVEILLANCE_END_AB_DAYS')
+        }
+
+        It 'rule generator: fails loud when the surveillance-end stage is absent' {
+            $pkg = $script:SubPkg.Clone()
+            $pkg['programStages'] = @()
+            { New-NeoIPCSubstanceRule -ExistingPackage $pkg } | Should -Throw '*surveillance-end*'
+        }
+        It 'rule generator: emits the per-slot days-require rule (SETMANDATORYFIELD on the _DAYS DE)' {
+            $frag = New-NeoIPCSubstanceRule -ExistingPackage $script:SubPkg
+            $rules = @{}; foreach ($r in @($frag['programRules'])) { $rules[[string]$r['name']] = $r }
+            $acts = @{}; foreach ($a in @($frag['programRuleActions'])) { $acts[[string]$a['id']] = $a }
+            $dr = $rules['NeoIPC Surveillance end Antibiotic substance 01 days - require']
+            $dr['condition'] | Should -BeExactly 'd2:hasValue(#{NeoIPC Surveillance end Antibiotic substance 01 - current event value})'
+            $act = $acts[[string]@($dr['programRuleActions'])[0]['id']]
+            $act['programRuleActionType'] | Should -BeExactly 'SETMANDATORYFIELD'
+            $act['dataElement']['id'] | Should -BeExactly (& $script:SubDeId 'NEOIPC_SURVEILLANCE_END_AB_SUBST_01_DAYS')
+        }
+        It 'PRV generator: fail-loud paths (program / base DE absent; invalid id re-mints)' {
+            $noProg = @{ programs = @(); dataElements = $script:SubPkg['dataElements']; programRuleVariables = @() }
+            { New-NeoIPCSubstanceVariable -ExistingPackage $noProg } | Should -Throw '*NEOIPC_CORE*'
+            $noDe = @{
+                programs             = $script:SubPkg['programs']
+                dataElements         = @($script:SubPkg['dataElements'] | Where-Object { [string]$_['code'] -ne 'NEOIPC_SURVEILLANCE_END_AB_SUBST_01' })
+                programRuleVariables = @()
+            }
+            { New-NeoIPCSubstanceVariable -ExistingPackage $noDe } | Should -Throw '*NEOIPC_SURVEILLANCE_END_AB_SUBST_01*'
+            # A deployed PRV with an invalid id, matched across the padding rename, re-mints by the padded name.
+            $badId = @{
+                programs             = $script:SubPkg['programs']
+                dataElements         = $script:SubPkg['dataElements']
+                programRuleVariables = @([ordered]@{ name = 'NeoIPC Surveillance end Antibiotic substance 1 - current event value'; id = 'BAD!' })
+            }
+            $v = @((New-NeoIPCSubstanceVariable -ExistingPackage $badId)['programRuleVariables'] | Where-Object { $_['name'] -eq 'NeoIPC Surveillance end Antibiotic substance 01 - current event value' })[0]
+            (Test-NeoIPCMetadataUid -Id $v['id']) | Should -BeTrue
+            $v['id'] | Should -BeExactly (New-NeoIPCMetadataUid -Type 'programRuleVariables' -NaturalKey 'NeoIPC Surveillance end Antibiotic substance 01 - current event value')
+        }
+        It 'DE generator: fails loud when a slot has no categoryCombo and no sibling to copy one from' {
+            $noCcDes = foreach ($d in (Get-NeoIPCSubstanceDataElementPlan -SubstanceCount 2)) {
+                [ordered]@{ code = $d.Code; id = (& $script:SubDeId $d.Code) }   # deliberately NO categoryCombo
+            }
+            $pkg = @{ programs = $script:SubPkg['programs']; optionSets = $script:SubPkg['optionSets']; dataElements = @($noCcDes) }
+            { New-NeoIPCSubstanceDataElement -ExistingPackage $pkg -SubstanceCount 3 } | Should -Throw '*categoryCombo*'
         }
     }
 }

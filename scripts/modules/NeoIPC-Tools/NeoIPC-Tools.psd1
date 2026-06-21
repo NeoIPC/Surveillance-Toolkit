@@ -77,6 +77,10 @@
         'New-NeoIPCPathogenOptionSet'
         'New-NeoIPCPathogenDataElement'
         'New-NeoIPCPathogenVariable'
+        'New-NeoIPCPathogenRule'
+        'New-NeoIPCSubstanceDataElement'
+        'New-NeoIPCSubstanceVariable'
+        'New-NeoIPCSubstanceRule'
     )
 
     # Cmdlets to export from this module
