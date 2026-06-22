@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NeoIPC Surveillance Infectious Agents List 0.9\n"
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-04-07 06:38+0200\n"
+"POT-Creation-Date: 2026-06-22 09:58+0200\n"
 "PO-Revision-Date: 2026-04-11 11:09+0200\n"
 "Last-Translator: Brar Piening <brar.piening@charite.de>\n"
 "Language-Team: German <https://hosted.weblate.org/projects/neoipc/neoipc-infectious-agents/de/>\n"
@@ -29,6 +29,12 @@ msgstr "Unbekannt"
 #, no-wrap
 msgid "Not listed"
 msgstr "Nicht aufgeführt"
+
+#. type: Hash Value: Hierarchies Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, no-wrap
+msgid "Unidentifiable"
+msgstr ""
 
 #. type: Hash Value: Hierarchies Children Children Children Children ConceptType
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
@@ -491,6 +497,13 @@ msgstr "Erythrovirus B19"
 #, no-wrap
 msgid "Primate erythroparvovirus 1"
 msgstr "Primate erythroparvovirus 1"
+
+#. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Synonyms Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, fuzzy, no-wrap
+#| msgid "Human respirovirus 1"
+msgid "Human parvovirus B19"
+msgstr "Human respirovirus 1"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Name
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
@@ -22940,6 +22953,27 @@ msgstr "Debaryomycetaceae"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Name
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, fuzzy, no-wrap
+#| msgid "Metschnikowiaceae"
+msgid "Metschnikowia pulcherrima"
+msgstr "Metschnikowiaceae"
+
+#. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Synonyms Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, fuzzy, no-wrap
+#| msgid "Candida ciferrii"
+msgid "Candida pulcherrima"
+msgstr "Candida ciferrii"
+
+#. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, fuzzy, no-wrap
+#| msgid "Metschnikowiaceae"
+msgid "Metschnikowia"
+msgstr "Metschnikowiaceae"
+
+#. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
 msgid "Candidozyma auris"
 msgstr "Candidozyma auris"
@@ -23063,6 +23097,265 @@ msgstr "Serinales"
 #, no-wrap
 msgid "Pichiomycetes"
 msgstr "Pichiomycetes"
+
+#. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, fuzzy, no-wrap
+#| msgid "Hansenula polymorpha"
+msgid "Hanseniaspora"
+msgstr "Hansenula polymorpha"
+
+#. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Synonyms Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, no-wrap
+msgid "Kloeckera"
+msgstr ""
+
+#. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, fuzzy, no-wrap
+#| msgid "Saccharomycetales"
+msgid "Saccharomycodaceae"
+msgstr "Saccharomycetales"
+
+#. type: Hash Value: Hierarchies Children Children Children Children Children Children Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, fuzzy, no-wrap
+#| msgid "Saccharomycetales"
+msgid "Saccharomycodales"
+msgstr "Saccharomycetales"
+
+#. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, no-wrap
+msgid "Cyberlindnera fabianii"
+msgstr ""
+
+#. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Synonyms Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, fuzzy, no-wrap
+#| msgid "Candida albicans"
+msgid "Candida fabianii"
+msgstr "Candida albicans"
+
+#. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Synonyms Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, fuzzy, no-wrap
+#| msgid "Pichia farinosa"
+msgid "Pichia fabianii"
+msgstr "Pichia farinosa"
+
+#. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Synonyms Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, no-wrap
+msgid "Hansenula fabianii"
+msgstr ""
+
+#. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, no-wrap
+msgid "Cyberlindnera jadinii"
+msgstr ""
+
+#. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Synonyms Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, fuzzy, no-wrap
+#| msgid "Candida auris"
+msgid "Candida utilis"
+msgstr "Candida auris"
+
+#. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Synonyms Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, fuzzy, no-wrap
+#| msgid "Torula lipolytica"
+msgid "Torula utilis"
+msgstr "Torula lipolytica"
+
+#. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Synonyms Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, fuzzy, no-wrap
+#| msgid "Torulopsis haemulonii"
+msgid "Torulopsis utilis"
+msgstr "Torulopsis haemulonii"
+
+#. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Synonyms Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, fuzzy, no-wrap
+#| msgid "Streptococcus urinalis"
+msgid "Cryptococcus utilis"
+msgstr "Streptococcus urinalis"
+
+#. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, no-wrap
+msgid "Cyberlindnera"
+msgstr ""
+
+#. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, no-wrap
+msgid "Starmera stellimalicola"
+msgstr ""
+
+#. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Synonyms Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, fuzzy, no-wrap
+#| msgid "Candida stellatoidea"
+msgid "Candida stellimalicola"
+msgstr "Candida stellatoidea"
+
+#. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, no-wrap
+msgid "Starmera"
+msgstr ""
+
+#. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, fuzzy, no-wrap
+#| msgid "Phaeococcomycetaceae"
+msgid "Phaffomycetaceae"
+msgstr "Phaeococcomycetaceae"
+
+#. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, fuzzy, no-wrap
+#| msgid "Wickerhamiella pararugosa"
+msgid "Wickerhamomyces anomalus"
+msgstr "Wickerhamiella pararugosa"
+
+#. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Synonyms Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, fuzzy, no-wrap
+#| msgid "Pichia farinosa"
+msgid "Pichia anomala"
+msgstr "Pichia farinosa"
+
+#. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Synonyms Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, fuzzy, no-wrap
+#| msgid "Hansenula polymorpha"
+msgid "Hansenula anomala"
+msgstr "Hansenula polymorpha"
+
+#. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Synonyms Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, fuzzy, no-wrap
+#| msgid "Candida rugosa"
+msgid "Candida pelliculosa"
+msgstr "Candida rugosa"
+
+#. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, fuzzy, no-wrap
+#| msgid "Cokeromyces"
+msgid "Wickerhamomyces"
+msgstr "Cokeromyces"
+
+#. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, fuzzy, no-wrap
+#| msgid "Eremomycetaceae"
+msgid "Wickerhamomycetaceae"
+msgstr "Eremomycetaceae"
+
+#. type: Hash Value: Hierarchies Children Children Children Children Children Children Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, fuzzy, no-wrap
+#| msgid "Saccharomycetales"
+msgid "Phaffomycetales"
+msgstr "Saccharomycetales"
+
+#. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Children Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, fuzzy, no-wrap
+#| msgid "Cokeromyces recurvatus"
+msgid "Nakaseomyces glabratus"
+msgstr "Cokeromyces recurvatus"
+
+#. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Children Synonyms Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, fuzzy, no-wrap
+#| msgid "Candida lambica"
+msgid "Candida glabrata"
+msgstr "Candida lambica"
+
+#. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Children Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, fuzzy, no-wrap
+#| msgid "Streptomyces bikiniensis"
+msgid "Nakaseomyces nivariensis"
+msgstr "Streptomyces bikiniensis"
+
+#. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Children Synonyms Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, fuzzy, no-wrap
+#| msgid "Candida vini"
+msgid "Candida nivariensis"
+msgstr "Candida vini"
+
+#. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Children Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, fuzzy, no-wrap
+#| msgid "Actinomyces cardiffensis"
+msgid "Nakaseomyces bracarensis"
+msgstr "Actinomyces cardiffensis"
+
+#. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Children Synonyms Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, fuzzy, no-wrap
+#| msgid "Candida auris"
+msgid "Candida bracarensis"
+msgstr "Candida auris"
+
+#. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, fuzzy, no-wrap
+#| msgid "Talaromyces"
+msgid "Nakaseomyces"
+msgstr "Talaromyces"
+
+#. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Children Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, fuzzy, no-wrap
+#| msgid "Saccharomycetidae"
+msgid "Saccharomyces cerevisiae"
+msgstr "Saccharomycetidae"
+
+#. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, fuzzy, no-wrap
+#| msgid "Saccharomycetes"
+msgid "Saccharomyces"
+msgstr "Saccharomycetes"
+
+#. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, fuzzy, no-wrap
+#| msgid "Cokeromyces"
+msgid "Kluyveromyces"
+msgstr "Cokeromyces"
+
+#. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Children Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, fuzzy, no-wrap
+#| msgid "Pichia fermentans"
+msgid "Lachancea fermentati"
+msgstr "Pichia fermentans"
+
+#. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, fuzzy, no-wrap
+#| msgid "Lachnospiraceae"
+msgid "Lachancea"
+msgstr "Lachnospiraceae"
+
+#. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, fuzzy, no-wrap
+#| msgid "Saccharomycetales"
+msgid "Saccharomycetaceae"
+msgstr "Saccharomycetales"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Name
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
@@ -23786,6 +24079,54 @@ msgstr "Mortierellomycota"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Name
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, fuzzy, no-wrap
+#| msgid "Rhizomucor pusillus"
+msgid "Rhizopus arrhizus"
+msgstr "Rhizomucor pusillus"
+
+#. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Synonyms Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, fuzzy, no-wrap
+#| msgid "Rhizomucor"
+msgid "Rhizopus oryzae"
+msgstr "Rhizomucor"
+
+#. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, fuzzy, no-wrap
+#| msgid "Bacillus centrosporus"
+msgid "Rhizopus microsporus"
+msgstr "Bacillus centrosporus"
+
+#. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, no-wrap
+msgid "Rhizopus stolonifer"
+msgstr ""
+
+#. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Synonyms Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, fuzzy, no-wrap
+#| msgid "Rhizobium vitis"
+msgid "Rhizopus nigricans"
+msgstr "Rhizobium vitis"
+
+#. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, fuzzy, no-wrap
+#| msgid "Rhizobium"
+msgid "Rhizopus"
+msgstr "Rhizobium"
+
+#. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, fuzzy, no-wrap
+#| msgid "Rhizobiaceae"
+msgid "Rhizopodaceae"
+msgstr "Rhizobiaceae"
+
+#. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
 msgid "Cunninghamella bertholletiae"
 msgstr "Cunninghamella bertholletiae"
@@ -24179,6 +24520,13 @@ msgstr "Protozoon"
 #, no-wrap
 msgid "Recorded Resistances"
 msgstr "Erfasste Resistenzen"
+
+#. type: Hash Value: Metadata ListTerms Synonym Value
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, fuzzy, no-wrap
+#| msgid "synonym for {0}"
+msgid "synonym"
+msgstr "Synonym für {0}"
 
 #. type: Hash Value: Metadata ListTerms SynonymFor Value
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
