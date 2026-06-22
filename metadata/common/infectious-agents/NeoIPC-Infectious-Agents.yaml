@@ -41,6 +41,8 @@ Metadata:
       Value:  URL
     SynonymFor:
       Value:  synonym for {0}
+    Synonym:
+      Value:  synonym
 Hierarchies:
 - Name: Not listed
   ConceptType: Unknown

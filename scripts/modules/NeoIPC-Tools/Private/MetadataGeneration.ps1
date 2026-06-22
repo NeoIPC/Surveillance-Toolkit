@@ -66,18 +66,82 @@ function Get-NeoIPCPathogenOptionLabel {
     # a synonym-list member is tagged "<Name> [synonym]"; any other node is tagged with its lowercased taxonomic
     # rank ("<Name> [species]", "<Name> [genus]", …); a node whose rank is Unknown or absent (the "Not listed" /
     # "Unidentifiable" specials) carries no tag. Lowercasing matches the deployed English labels (the YAML rank is
-    # title-case). This is the English label, assembled from the canonical ontology.
+    # title-case).
+    #
+    # Without -Translation this is the English label, assembled from the canonical ontology. With -Translation (a
+    # case-sensitive english->localized map from a locale's .po, via Get-NeoIPCPoTranslationMap) it is the localized
+    # label: the Name and the rank word are each replaced by their translation where one exists, and the synonym
+    # word by the translated "synonym" ListTerm. The translated rank/synonym word is used VERBATIM (German ranks are
+    # capitalised nouns — "Art", "Gattung"); only the English fallback is lowercased. A string absent from the map
+    # falls back to its English form, so an untranslated locale yields the English label unchanged.
     [CmdletBinding()]
     [OutputType([string])]
     param(
         [Parameter(Mandatory)][string]$Name,
         [AllowNull()][string]$ConceptType,
-        [bool]$IsSynonym
+        [bool]$IsSynonym,
+        [System.Collections.IDictionary]$Translation
     )
-    $tag = if ($IsSynonym) { 'synonym' }
-    elseif (-not [string]::IsNullOrWhiteSpace($ConceptType) -and $ConceptType -ne 'Unknown') { $ConceptType.ToLowerInvariant() }
+    $name = if ($Translation -and $Translation.Contains($Name)) { [string]$Translation[$Name] } else { $Name }
+    $tag = if ($IsSynonym) {
+        if ($Translation -and $Translation.Contains('synonym')) { [string]$Translation['synonym'] } else { 'synonym' }
+    }
+    elseif (-not [string]::IsNullOrWhiteSpace($ConceptType) -and $ConceptType -ne 'Unknown') {
+        if ($Translation -and $Translation.Contains($ConceptType)) { [string]$Translation[$ConceptType] } else { $ConceptType.ToLowerInvariant() }
+    }
     else { $null }
-    if ($tag) { '{0} [{1}]' -f $Name, $tag } else { $Name }
+    if ($tag) { '{0} [{1}]' -f $name, $tag } else { $name }
+}
+
+function Get-NeoIPCPoTranslationMap {
+    # Build a flat english(msgid) -> localized(msgstr) map from a po4a-generated YAML .po (bare msgid/msgstr, no
+    # msgctxt — so Read-NeoIPCMetadataPoText, which requires a msgctxt, does not apply). Skips the header (empty
+    # msgid), obsolete "#~" entries, FUZZY entries (an unconfirmed msgmerge guess — gettext/po4a ignore them too;
+    # e.g. a new "synonym" msgid fuzzy-matched onto the "synonym for {0}" translation), and any msgstr that is empty
+    # or identical to its msgid (no real translation). The map is case-sensitive (Ordinal) — rank words and organism
+    # names are case-significant. Returns an empty map if the file is absent. Identical msgids are merged by gettext,
+    # so a flat map is unambiguous.
+    [CmdletBinding()]
+    [OutputType([System.Collections.IDictionary])]
+    param([Parameter(Mandatory)][string]$Path)
+
+    $map = [System.Collections.Hashtable]::new([System.StringComparer]::Ordinal)
+    if (-not (Test-Path -LiteralPath $Path)) { return $map }
+
+    # Peel exactly one surrounding quote per side (NOT Trim('"'), which would over-strip a value ending in an
+    # escaped quote) and unescape via the module's PO unescaper.
+    $unq = {
+        param($s)
+        if ($s.StartsWith('"') -and $s.EndsWith('"') -and $s.Length -ge 2) { ConvertFrom-NeoIPCPoString $s.Substring(1, $s.Length - 2) } else { '' }
+    }
+    $id = $null; $str = $null; $field = $null; $obsolete = $false; $fuzzy = $false
+    $entries = [System.Collections.Generic.List[object]]::new()
+    foreach ($raw in ((Get-Content -LiteralPath $Path -Raw) -split "`n")) {
+        $line = $raw.TrimEnd("`r"); $trim = $line.Trim()
+        if ($trim -eq '') {
+            if ($null -ne $id -and -not $obsolete -and -not $fuzzy) { $entries.Add([pscustomobject]@{ Id = $id; Str = [string]$str }) }
+            $id = $null; $str = $null; $field = $null; $obsolete = $false; $fuzzy = $false; continue
+        }
+        if ($trim.StartsWith('#~')) { $obsolete = $true; $field = $null; continue }
+        if ($trim.StartsWith('#')) {
+            if ($trim.StartsWith('#,') -and $trim -match '\bfuzzy\b') { $fuzzy = $true }
+            $field = $null; continue
+        }
+        if ($trim.StartsWith('msgid ')) { $id = & $unq ($trim.Substring(6).Trim()); $field = 'id'; continue }
+        if ($trim.StartsWith('msgstr ')) { $str = & $unq ($trim.Substring(7).Trim()); $field = 'str'; continue }
+        if ($trim.StartsWith('"') -and $trim.EndsWith('"') -and $field) {
+            $piece = & $unq $trim
+            if ($field -eq 'id') { $id = [string]$id + $piece } else { $str = [string]$str + $piece }
+        }
+    }
+    if ($null -ne $id -and -not $obsolete -and -not $fuzzy) { $entries.Add([pscustomobject]@{ Id = $id; Str = [string]$str }) }
+
+    foreach ($e in $entries) {
+        if ([string]::IsNullOrEmpty($e.Id)) { continue }                 # header
+        if ([string]::IsNullOrEmpty($e.Str) -or $e.Str -ceq $e.Id) { continue }  # untranslated / unchanged
+        if (-not $map.Contains($e.Id)) { $map[$e.Id] = $e.Str }
+    }
+    $map
 }
 
 function Get-NeoIPCPathogenDataElementPlan {

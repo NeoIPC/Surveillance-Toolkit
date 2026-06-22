@@ -142,6 +142,10 @@ function Add-NeoIPCGeneratedMetadata {
         Pathogen slots per applicable stage (1-9). Default: the module-wide count.
     .PARAMETER SubstanceCount
         Antimicrobial-substance slots (1-99). Default: the module-wide count.
+    .PARAMETER PoDirectory
+        Directory of the po4a-generated locale catalogues (infectious_agents.<locale>.po) the pathogen option
+        labels are localized from. Defaults to the repository's po/ directory; a non-existent path yields
+        English-only options (graceful).
     #>
     [CmdletBinding()]
     [OutputType([System.Collections.IDictionary])]
@@ -150,14 +154,16 @@ function Add-NeoIPCGeneratedMetadata {
         [Parameter(Mandatory)][System.Collections.IDictionary]$Export,
         [string]$OntologyPath,
         [ValidateRange(1, 9)][int]$PathogenCount = $script:NeoIPCPathogenSlotCount,
-        [ValidateRange(1, 99)][int]$SubstanceCount = $script:NeoIPCSubstanceSlotCount
+        [ValidateRange(1, 99)][int]$SubstanceCount = $script:NeoIPCSubstanceSlotCount,
+        [string]$PoDirectory = (Join-Path $PSScriptRoot '..' '..' '..' '..' 'po')
     )
 
     $ontologyArgs = @{}
     if ($OntologyPath) { $ontologyArgs['Path'] = $OntologyPath }
 
-    # Generate against the export so every reproduced object keeps its deployed UID (preserve-by-key).
-    $optionFrag  = New-NeoIPCPathogenOptionSet @ontologyArgs -ExistingPackage $Export
+    # Generate against the export so every reproduced object keeps its deployed UID (preserve-by-key). The pathogen
+    # option set is localized from the po4a catalogues (PoDirectory); the other generators carry no translations.
+    $optionFrag  = New-NeoIPCPathogenOptionSet @ontologyArgs -ExistingPackage $Export -PoDirectory $PoDirectory
     $patDeFrag   = New-NeoIPCPathogenDataElement -ExistingPackage $Export -PathogenCount $PathogenCount
     $subDeFrag   = New-NeoIPCSubstanceDataElement -ExistingPackage $Export -SubstanceCount $SubstanceCount
     $patVarFrag  = New-NeoIPCPathogenVariable -ExistingPackage $Export -PathogenCount $PathogenCount

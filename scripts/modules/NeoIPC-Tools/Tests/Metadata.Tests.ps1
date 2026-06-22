@@ -2349,6 +2349,146 @@ Hierarchies:
             $os['valueType'] | Should -BeExactly 'TEXT'
             $os['id'] | Should -BeExactly (New-NeoIPCMetadataUid -Type 'optionSets' -NaturalKey 'MY_SET')
         }
+        It 'Get-NeoIPCPoTranslationMap reads a po4a YAML .po: skips header/untranslated/identical/obsolete, joins wrapped' {
+            $po = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-po-{0}.po' -f ([guid]::NewGuid().ToString('N')))
+            Set-Content -LiteralPath $po -Encoding utf8 -Value @'
+msgid ""
+msgstr ""
+"Language: de\n"
+
+#. type: Hash Value: Hierarchies ConceptType
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, no-wrap
+msgid "Species"
+msgstr "Art"
+
+msgid "Untranslated"
+msgstr ""
+
+msgid "Identical"
+msgstr "Identical"
+
+#~ msgid "obsolete-key"
+#~ msgstr "obsolete-value"
+
+#, fuzzy, no-wrap
+#| msgid "synonym for {0}"
+msgid "synonym"
+msgstr "Synonym für {0}"
+
+msgid "Wrapped"
+msgstr ""
+"Wra"
+"pped-DE"
+'@
+            try {
+                $map = Get-NeoIPCPoTranslationMap -Path $po
+                $map['Species'] | Should -BeExactly 'Art'
+                $map['Wrapped'] | Should -BeExactly 'Wrapped-DE'
+                $map.Contains('Untranslated') | Should -BeFalse
+                $map.Contains('Identical') | Should -BeFalse
+                $map.Contains('obsolete-key') | Should -BeFalse
+                $map.Contains('synonym') | Should -BeFalse    # fuzzy msgmerge guess — skipped, like gettext
+                $map.Count | Should -Be 2
+            }
+            finally { Remove-Item -LiteralPath $po -Force }
+        }
+        It 'Get-NeoIPCPoTranslationMap returns an empty map for an absent catalogue' {
+            $map = Get-NeoIPCPoTranslationMap -Path (Join-Path ([System.IO.Path]::GetTempPath()) ('no-such-{0}.po' -f ([guid]::NewGuid().ToString('N'))))
+            $map.Count | Should -Be 0
+        }
+        It 'composes per-locale option labels from a .po: localized name + rank/synonym word, English fallback, no tag for Unknown' {
+            $dir = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-podir-{0}' -f ([guid]::NewGuid().ToString('N')))
+            New-Item -ItemType Directory -Path $dir | Out-Null
+            Set-Content -LiteralPath (Join-Path $dir 'infectious_agents.de.po') -Encoding utf8 -Value @'
+msgid ""
+msgstr ""
+"Language: de\n"
+
+msgid "Genus"
+msgstr "Gattung"
+
+msgid "Species"
+msgstr "Art"
+
+msgid "synonym"
+msgstr "Synonym"
+
+msgid "Not listed"
+msgstr "Nicht aufgeführt"
+
+msgid "Escherichia coli"
+msgstr "Escherichia coli"
+'@
+            try {
+                $frag = New-NeoIPCPathogenOptionSet -Path $script:GenYaml -PoDirectory $dir
+                $byCode = @{}; foreach ($o in @($frag['options'])) { $byCode[[string]$o['code']] = $o }
+                # English source names are unchanged.
+                $byCode['10']['name'] | Should -BeExactly 'Escherichia [genus]'
+                $byCode['11']['name'] | Should -BeExactly 'Escherichia coli [species]'
+                # Each option carries exactly the composed German label: localized rank (verbatim casing), the
+                # synonym word, the localized name where translated, English fallback otherwise, no tag for Unknown.
+                (@($byCode['0']['translations']) | Where-Object { $_.locale -eq 'de' }).value  | Should -BeExactly 'Nicht aufgeführt'
+                (@($byCode['10']['translations']) | Where-Object { $_.locale -eq 'de' }).value | Should -BeExactly 'Escherichia [Gattung]'
+                (@($byCode['11']['translations']) | Where-Object { $_.locale -eq 'de' }).value | Should -BeExactly 'Escherichia coli [Art]'
+                (@($byCode['12']['translations']) | Where-Object { $_.locale -eq 'de' }).value | Should -BeExactly 'Bacillus coli [Synonym]'
+                @($byCode['11']['translations'])[0].property | Should -BeExactly 'NAME'   # DHIS2 ObjectTranslation token (uppercase, case-sensitive)
+            }
+            finally { Remove-Item -LiteralPath $dir -Recurse -Force }
+        }
+        It 'omits a translations[] entry where the locale leaves the label identical to the English source' {
+            $dir = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-podir-{0}' -f ([guid]::NewGuid().ToString('N')))
+            New-Item -ItemType Directory -Path $dir | Out-Null
+            # Only the genus rank is translated, so only the genus option's label differs; the rest stay English.
+            Set-Content -LiteralPath (Join-Path $dir 'infectious_agents.it.po') -Encoding utf8 -Value @'
+msgid ""
+msgstr ""
+"Language: it\n"
+
+msgid "Genus"
+msgstr "Genere"
+'@
+            try {
+                $frag = New-NeoIPCPathogenOptionSet -Path $script:GenYaml -PoDirectory $dir
+                $byCode = @{}; foreach ($o in @($frag['options'])) { $byCode[[string]$o['code']] = $o }
+                (@($byCode['10']['translations']) | Where-Object { $_.locale -eq 'it' }).value | Should -BeExactly 'Escherichia [Genere]'
+                $byCode['0']['translations']  | Should -BeNullOrEmpty
+                $byCode['11']['translations'] | Should -BeNullOrEmpty
+                $byCode['12']['translations'] | Should -BeNullOrEmpty
+            }
+            finally { Remove-Item -LiteralPath $dir -Recurse -Force }
+        }
+        It 'emits one translations[] entry per translated locale, in deterministic (filename-sorted) locale order' {
+            $dir = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-podir-{0}' -f ([guid]::NewGuid().ToString('N')))
+            New-Item -ItemType Directory -Path $dir | Out-Null
+            Set-Content -LiteralPath (Join-Path $dir 'infectious_agents.de.po') -Encoding utf8 -Value @'
+msgid ""
+msgstr ""
+"Language: de\n"
+
+msgid "Genus"
+msgstr "Gattung"
+'@
+            Set-Content -LiteralPath (Join-Path $dir 'infectious_agents.es.po') -Encoding utf8 -Value @'
+msgid ""
+msgstr ""
+"Language: es\n"
+
+msgid "Genus"
+msgstr "Género"
+'@
+            try {
+                $frag = New-NeoIPCPathogenOptionSet -Path $script:GenYaml -PoDirectory $dir
+                $genus = @($frag['options'] | Where-Object { [string]$_['code'] -eq '10' })[0]
+                $t = @($genus['translations'])
+                $t.Count | Should -Be 2
+                @($t | ForEach-Object { $_.locale }) | Should -Be @('de', 'es')   # filename-sorted, deterministic
+                @($t | ForEach-Object { $_.property }) | Should -Be @('NAME', 'NAME')
+                ($t | Where-Object { $_.locale -eq 'de' }).value | Should -BeExactly 'Escherichia [Gattung]'
+                ($t | Where-Object { $_.locale -eq 'es' }).value | Should -BeExactly 'Escherichia [Género]'
+            }
+            finally { Remove-Item -LiteralPath $dir -Recurse -Force }
+        }
     }
 
     Describe 'Resistance effective-flag computation (own-or-inherited, false overrides)' {

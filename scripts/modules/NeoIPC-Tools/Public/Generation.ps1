@@ -30,6 +30,11 @@ function New-NeoIPCPathogenOptionSet {
         synonym keeping its original Id rather than dropping it). New ontology nodes not yet in the export are
         added (reported via -Verbose).
 
+        With -PoDirectory, each option also gets a translations[] entry per locale whose label differs from the
+        English source: the localized label is composed from the po4a-translated Name + rank/synonym word (same
+        translation that drives the PDF list), since the pathogen options are excluded from the metadata gettext-PO
+        path. Without -PoDirectory the options are English-only.
+
         Pure file/object processing — no DHIS2 API calls. Returns a package fragment { optionSets; options }
         ready to splice into an assembly (see New-NeoIPCMetadataPackage).
     .PARAMETER Path
@@ -45,6 +50,12 @@ function New-NeoIPCPathogenOptionSet {
     .PARAMETER ValueType
         The option set's value type. Default: INTEGER_ZERO_OR_POSITIVE (matches the deployed set; option codes
         are non-negative integers, Id 0 = "Not listed").
+    .PARAMETER PoDirectory
+        Optional directory holding the po4a-generated locale catalogues ($PoBaseName.<locale>.po). When supplied,
+        per-locale option-name translations[] are composed from those catalogues. Omit for English-only output.
+    .PARAMETER PoBaseName
+        Base name of the locale catalogues under -PoDirectory. Default: infectious_agents (so the files are
+        infectious_agents.de.po, infectious_agents.es.po, …).
     .OUTPUTS
         [ordered] hashtable with keys 'optionSets' (one object) and 'options' (one per Id-bearing node).
     #>
@@ -56,7 +67,9 @@ function New-NeoIPCPathogenOptionSet {
         [System.Collections.IDictionary]$ExistingPackage,
         [string]$OptionSetCode = 'NEOIPC_PATHOGENS',
         [string]$OptionSetName = 'NeoIPC Pathogen options',
-        [string]$ValueType = 'INTEGER_ZERO_OR_POSITIVE'
+        [string]$ValueType = 'INTEGER_ZERO_OR_POSITIVE',
+        [string]$PoDirectory,
+        [string]$PoBaseName = 'infectious_agents'
     )
 
     Import-Module powershell-yaml -ErrorAction Stop
@@ -122,6 +135,25 @@ function New-NeoIPCPathogenOptionSet {
     $osUid = if ($existingOsUid -and (Test-NeoIPCMetadataUid -Id $existingOsUid)) { $existingOsUid }
     else { New-NeoIPCMetadataUid -Type 'optionSets' -NaturalKey $OptionSetCode }
 
+    # Optional localization: load each locale's english->localized map from the po4a-generated catalogues
+    # ($PoBaseName.<locale>.po under $PoDirectory). The pathogen options are excluded from the metadata gettext-PO
+    # path (authored from this ontology, not translated there), so the per-locale label is composed here instead —
+    # localized Name + localized rank/synonym word — from the same po4a translation that drives the PDF list. Skip
+    # locales whose catalogue carries no real translation (the map is empty) so they add no translations[].
+    $localeMaps = [System.Collections.Generic.List[object]]::new()
+    if ($PoDirectory) {
+        $resolvedPo = Resolve-Path -LiteralPath $PoDirectory -ErrorAction SilentlyContinue
+        if ($resolvedPo) {
+            $localeRe = [regex]('^' + [regex]::Escape($PoBaseName) + '\.(?<loc>[^.]+)\.po$')
+            foreach ($f in @(Get-ChildItem -LiteralPath $resolvedPo.Path -Filter "$PoBaseName.*.po" -File -ErrorAction SilentlyContinue | Sort-Object Name)) {
+                $m = $localeRe.Match($f.Name)
+                if (-not $m.Success) { continue }
+                $map = Get-NeoIPCPoTranslationMap -Path $f.FullName
+                if ($map.Count -gt 0) { $localeMaps.Add([pscustomobject]@{ Locale = $m.Groups['loc'].Value; Map = $map }) }
+            }
+        }
+    }
+
     # Build the options + the option-set's ordered option-ref list. Deterministic 1-based sortOrder in doc order.
     $seen = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::Ordinal)
     [void]$seen.Add($osUid)
@@ -137,13 +169,26 @@ function New-NeoIPCPathogenOptionSet {
             New-NeoIPCMetadataUid -Type 'options' -NaturalKey ('{0}|{1}' -f $osUid, $code)
         }
         if (-not $seen.Add($uid)) { throw "UID collision minting option code '$code' (uid '$uid')." }
-        $options.Add([ordered]@{
-                id        = $uid
-                code      = $code
-                name      = Get-NeoIPCPathogenOptionLabel -Name ([string]$c['Name']) -ConceptType ([string]$c['ConceptType']) -IsSynonym ([bool]$c['IsSynonym'])
-                sortOrder = $sortOrder
-                optionSet = [ordered]@{ id = $osUid }
-            })
+        $cName = [string]$c['Name']; $cType = [string]$c['ConceptType']; $cSyn = [bool]$c['IsSynonym']
+        $enLabel = Get-NeoIPCPathogenOptionLabel -Name $cName -ConceptType $cType -IsSynonym $cSyn
+        $opt = [ordered]@{
+            id        = $uid
+            code      = $code
+            name      = $enLabel
+            sortOrder = $sortOrder
+            optionSet = [ordered]@{ id = $osUid }
+        }
+        if ($localeMaps.Count -gt 0) {
+            $trans = [System.Collections.Generic.List[object]]::new()
+            foreach ($lm in $localeMaps) {
+                $locLabel = Get-NeoIPCPathogenOptionLabel -Name $cName -ConceptType $cType -IsSynonym $cSyn -Translation $lm.Map
+                # property is the UPPERCASE DHIS2 ObjectTranslation token (case-sensitive match against 'NAME' in
+                # BaseIdentifiableObject.getDisplayName); single-sourced from the same map the gettext-PO injector uses.
+                if ($locLabel -cne $enLabel) { $trans.Add([ordered]@{ property = $script:NeoIPCMetadataTranslatableProperties['name']; locale = $lm.Locale; value = $locLabel }) }
+            }
+            if ($trans.Count -gt 0) { $opt['translations'] = $trans.ToArray() }
+        }
+        $options.Add($opt)
         $optionRefs.Add([ordered]@{ id = $uid })
         $sortOrder++
     }
