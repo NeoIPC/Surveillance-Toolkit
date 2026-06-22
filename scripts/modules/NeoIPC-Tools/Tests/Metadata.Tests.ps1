@@ -1846,17 +1846,27 @@ InModuleScope 'NeoIPC-Tools' {
             (Test-NeoIPCAtcCode -Code 'WHO_AWARE_ACCESS') | Should -BeFalse
             (Test-NeoIPCAtcCode -Code 'NEOIPC_ASA_SCORE') | Should -BeFalse
         }
-        It 'excludes ATC-coded antibiotic option groups from the metadata PO, keeping AWaRe and other groups' {
-            $pkg = [ordered]@{ optionGroups = @(
+        It 'excludes the whole antibiotic domain (ATC + AWaRe groups, ATC5/WHO_AWARE group-sets) from the metadata PO, keeping non-antibiotic groups' {
+            $pkg = [ordered]@{
+                optionGroups    = @(
                     [ordered]@{ id = 'OGaaaaaaaa1'; code = 'J01CG'; name = 'Beta-lactamase inhibitors' }
-                    [ordered]@{ id = 'OGaaaaaaaa2'; code = 'WHO_AWARE_ACCESS'; name = 'Access' }
+                    [ordered]@{ id = 'OGaaaaaaaa2'; code = 'WHO_AWARE_ACCESS'; name = 'AWaRe Access' }
                     [ordered]@{ id = 'OGaaaaaaaa3'; code = 'NEOIPC_PATHOGEN_LIST'; name = 'Pathogen list' }
-                ) }
+                )
+                optionGroupSets = @(
+                    [ordered]@{ id = 'OGSaaaaaaa1'; code = 'ATC5'; name = 'ATC-5 Groups' }
+                    [ordered]@{ id = 'OGSaaaaaaa2'; code = 'WHO_AWARE'; name = 'AWaRe Groups' }
+                    [ordered]@{ id = 'OGSaaaaaaa3'; code = 'NEO_ORG_GROUP_SET'; name = 'Organism group set' }
+                )
+            }
             $units = Get-NeoIPCMetadataTranslationUnit -Package $pkg
             $keys = @($units | ForEach-Object { $_.Key })
-            $keys | Should -Not -Contain 'J01CG'           # ATC-coded group excluded (separate antibiotic component)
-            $keys | Should -Contain 'WHO_AWARE_ACCESS'     # AWaRe group stays in the metadata PO
-            $keys | Should -Contain 'NEOIPC_PATHOGEN_LIST' # non-ATC group stays
+            $keys | Should -Not -Contain 'J01CG'            # ATC group -> the dedicated antibiotic component
+            $keys | Should -Not -Contain 'WHO_AWARE_ACCESS' # AWaRe group -> the dedicated antibiotic component
+            $keys | Should -Not -Contain 'ATC5'             # ATC5 group-set -> the dedicated antibiotic component
+            $keys | Should -Not -Contain 'WHO_AWARE'        # WHO_AWARE group-set -> the dedicated antibiotic component
+            $keys | Should -Contain 'NEOIPC_PATHOGEN_LIST'  # non-antibiotic group stays in the metadata PO
+            $keys | Should -Contain 'NEO_ORG_GROUP_SET'     # non-antibiotic group-set stays in the metadata PO
         }
         It 'sources msgid from the English base value and gathers existing translations by locale' {
             $units = Get-NeoIPCMetadataTranslationUnit -Package (New-TranslationFixture)
@@ -2089,17 +2099,29 @@ InModuleScope 'NeoIPC-Tools' {
             $back = Add-NeoIPCMetadataTranslationToPackage -Package $pkg -PoByLocale @{ de = (New-EntryList) }
             @(@($back['programStages'])[0]['translations'] | Where-Object { $_.property -eq 'FORM_NAME' }).Count | Should -Be 0
         }
-        It 'Import preserves translations[] on excluded objects (ATC group + domain option) it does not own' {
+        It 'Import preserves translations[] on every excluded antibiotic-domain object (ATC + AWaRe groups, ATC5/WHO_AWARE group-sets, domain option) it does not own' {
+            # An EMPTY PO would REBUILD (and so wipe) translations[] on any object the injection does not skip. So if
+            # the broadened Test-NeoIPCAntibioticTranslationExcluded failed to exclude the AWaRe groups or the
+            # group-sets on the injection side, their translations[] would be dropped — this guards exactly that.
             $pkg = [ordered]@{
-                optionSets   = @( [ordered]@{ id = 'OSdomain001'; code = 'NEOIPC_ANTIMICROBIAL_SUBSTANCES'; name = 'Substances' } )
-                options      = @( [ordered]@{ id = 'OPdomain001'; code = 'J01AA01'; name = 'Demeclocycline'; optionSet = [ordered]@{ id = 'OSdomain001' }
+                optionSets      = @( [ordered]@{ id = 'OSdomain001'; code = 'NEOIPC_ANTIMICROBIAL_SUBSTANCES'; name = 'Substances' } )
+                options         = @( [ordered]@{ id = 'OPdomain001'; code = 'J01AA01'; name = 'Demeclocycline'; optionSet = [ordered]@{ id = 'OSdomain001' }
                         translations = @( [ordered]@{ property = 'NAME'; locale = 'de'; value = 'Demeclocyclin' } ) } )
-                optionGroups = @( [ordered]@{ id = 'OGatc000001'; code = 'J01CG'; name = 'Beta-lactamase inhibitors'
-                        translations = @( [ordered]@{ property = 'NAME'; locale = 'de'; value = 'Beta-Laktamase-Inhibitoren' } ) } )
+                optionGroups    = @(
+                    [ordered]@{ id = 'OGatc000001'; code = 'J01CG'; name = 'Beta-lactamase inhibitors'
+                        translations = @( [ordered]@{ property = 'NAME'; locale = 'de'; value = 'Beta-Laktamase-Inhibitoren' } ) }
+                    [ordered]@{ id = 'OGaware0001'; code = 'WHO_AWARE_ACCESS'; name = 'AWaRe Access'
+                        translations = @( [ordered]@{ property = 'NAME'; locale = 'de'; value = 'AWaRe Zugang' } ) } )
+                optionGroupSets = @(
+                    [ordered]@{ id = 'OGSatc00001'; code = 'ATC5'; name = 'ATC-5 Groups'
+                        translations = @( [ordered]@{ property = 'NAME'; locale = 'de'; value = 'ATC-5-Gruppen' } ) }
+                    [ordered]@{ id = 'OGSaware001'; code = 'WHO_AWARE'; name = 'AWaRe Groups'
+                        translations = @( [ordered]@{ property = 'NAME'; locale = 'de'; value = 'AWaRe-Gruppen' } ) } )
             }
             $inj = Add-NeoIPCMetadataTranslationToPackage -Package $pkg -PoByLocale @{ de = (New-EntryList) }
             @($inj['options'])[0]['translations'] | Should -Not -BeNullOrEmpty
-            @($inj['optionGroups'])[0]['translations'] | Should -Not -BeNullOrEmpty
+            foreach ($g in @($inj['optionGroups'])) { $g['translations'] | Should -Not -BeNullOrEmpty }        # ATC + AWaRe groups kept
+            foreach ($s in @($inj['optionGroupSets'])) { $s['translations'] | Should -Not -BeNullOrEmpty }     # ATC5 + WHO_AWARE group-sets kept
         }
         It 'Merge takes the priority from the source (New) side' {
             $new = New-EntryList (New-Entry 'a/b/NAME' 'Hello'); $new[0].Priority = 200
@@ -3823,6 +3845,17 @@ Hierarchies:
             @($atc5['optionGroups']).Count | Should -Be 2
             @(@($ogs['optionGroupSets'] | Where-Object { $_['code'] -eq 'WHO_AWARE' })[0]['optionGroups']).Count | Should -Be 3
         }
+        It 'option group-sets: name comes from the canonical constant and is localized from the catalogue (-PoDirectory)' {
+            $poDir = Join-Path $TestDrive 'abxgspo'; New-Item -ItemType Directory -Path $poDir -Force | Out-Null
+            @('msgid ""', 'msgstr ""', '', 'msgid "ATC-5 Groups"', 'msgstr "ATC-5-Gruppen"', '', 'msgid "AWaRe Groups"', 'msgstr "AWaRe-Gruppen"') | Set-Content -LiteralPath (Join-Path $poDir 'antibiotics.de.po') -Encoding utf8NoBOM
+            $os = New-NeoIPCAntimicrobialOptionSet -Path $script:abxCsv -ExistingPackage (New-AbxExport)
+            $og = New-NeoIPCAntibioticOptionGroup -OptionSet $os -SubstancePath $script:abxCsv -GroupPath $script:abxGrpCsv -ExistingPackage (New-AbxExport)
+            $ogs = New-NeoIPCAntibioticOptionGroupSet -OptionGroup $og -ExistingPackage (New-AbxExport) -PoDirectory $poDir
+            $atc5 = @($ogs['optionGroupSets'] | Where-Object { $_['code'] -eq 'ATC5' })[0]
+            $atc5['name'] | Should -BeExactly 'ATC-5 Groups'   # canonical English name from $script:NeoIPCAntibioticGroupSet
+            @($atc5['translations'] | Where-Object { $_['locale'] -eq 'de' -and $_['property'] -eq 'NAME' })[0]['value'] | Should -BeExactly 'ATC-5-Gruppen'
+            @(@($ogs['optionGroupSets'] | Where-Object { $_['code'] -eq 'WHO_AWARE' })[0]['translations'] | Where-Object { $_['locale'] -eq 'de' -and $_['property'] -eq 'NAME' })[0]['value'] | Should -BeExactly 'AWaRe-Gruppen'
+        }
         It 'ConvertTo-NeoIPCAntibioticCanonicalCode maps the migrated codes and passes others through' {
             ConvertTo-NeoIPCAntibioticCanonicalCode -Code 'J01AA08' | Should -BeExactly 'J01AA08_P'
             ConvertTo-NeoIPCAntibioticCanonicalCode -Code 'Cefoselis' | Should -BeExactly 'tmp_002'
@@ -3855,6 +3888,16 @@ Hierarchies:
             $og = New-NeoIPCAntibioticOptionGroup -OptionSet $os -SubstancePath $script:abxCsv -GroupPath $script:abxGrpCsv -ExistingPackage (New-AbxExport) -PoDirectory $poDir
             @(@($og['optionGroups'] | Where-Object { $_['code'] -eq 'J01AA' })[0]['translations'] | Where-Object { $_['locale'] -eq 'de' })[0]['value'] | Should -BeExactly 'Tetrazykline'
             @(@($og['optionGroups'] | Where-Object { $_['code'] -eq 'WHO_AWARE_WATCH' })[0]['translations'] | Where-Object { $_['locale'] -eq 'de' })[0]['value'] | Should -BeExactly 'AWaRe Watch DE'
+        }
+        It 'option groups: localizes the full surface (shortName + description), not just the name' {
+            $poDir = Join-Path $TestDrive 'abxpofull'; New-Item -ItemType Directory -Path $poDir -Force | Out-Null
+            @('msgid ""', 'msgstr ""', '', 'msgid "Tetracyclines"', 'msgstr "Tetrazykline"', '', 'msgid "Tetracycline antibacterials."', 'msgstr "Tetrazyklin-Mittel."') | Set-Content -LiteralPath (Join-Path $poDir 'antibiotics.de.po') -Encoding utf8NoBOM
+            $os = New-NeoIPCAntimicrobialOptionSet -Path $script:abxCsv -ExistingPackage (New-AbxExport)
+            $og = New-NeoIPCAntibioticOptionGroup -OptionSet $os -SubstancePath $script:abxCsv -GroupPath $script:abxGrpCsv -ExistingPackage (New-AbxExport) -PoDirectory $poDir
+            $de = @(@($og['optionGroups'] | Where-Object { $_['code'] -eq 'J01AA' })[0]['translations'] | Where-Object { $_['locale'] -eq 'de' })
+            @($de | Where-Object { $_['property'] -eq 'NAME' })[0]['value'] | Should -BeExactly 'Tetrazykline'
+            @($de | Where-Object { $_['property'] -eq 'SHORT_NAME' })[0]['value'] | Should -BeExactly 'Tetrazykline'
+            @($de | Where-Object { $_['property'] -eq 'DESCRIPTION' })[0]['value'] | Should -BeExactly 'Tetrazyklin-Mittel.'
         }
         It 'reuses the deployed sharing onto the generated option set, group, and group-set' {
             $pkg = New-AbxExport
@@ -3997,6 +4040,134 @@ Hierarchies:
             Mock New-NeoIPCPathogenFieldGatingRule { [ordered]@{ programRules = @(); programRuleActions = @() } }   # ruleWS no longer reproduced
             $r = @(Compare-NeoIPCGeneratedMetadata -ExistingPackage (New-DiffDeployed))
             @($r | Where-Object { $_.Id -eq 'ruleWS' -and $_.Kind -eq 'Removed' -and $_.Class -eq 'Unclassified' }).Count | Should -Be 1
+        }
+    }
+
+    Describe 'Antibiotic translation catalogue (po/antibiotics.*)' {
+        BeforeAll {
+            $script:tcDir = Join-Path $TestDrive 'abxtrans'
+            New-Item -ItemType Directory -Path $script:tcDir -Force | Out-Null
+            # Substances WITH the optional short_name/description columns (one populated, one not).
+            $script:tcSub = Join-Path $script:tcDir 'NeoIPC-Antibiotics.csv'
+            @('id,atc_code,name,atc_group,aware_category,short_name,description',
+                'J01AA01,J01AA01,Demeclocycline,J01AA,Watch,,',
+                'tmp_001,,Micronomicin,J01GB,Watch,Micron,A demo description.') | Set-Content -LiteralPath $script:tcSub -Encoding utf8NoBOM
+            $script:tcGrp = Join-Path $script:tcDir 'NeoIPC-Antibiotic-Groups.csv'
+            @('code,name,shortName,description',
+                'J01AA,Tetracyclines,Tetracyclines,Tetracycline antibacterials.',
+                'J01GB,Other aminoglycosides,Aminoglycosides,') | Set-Content -LiteralPath $script:tcGrp -Encoding utf8NoBOM
+            $script:tcAware = Join-Path $script:tcDir 'NeoIPC-Antibiotic-AWaRe-Groups.csv'
+            @('code,category,name,shortName,description',
+                'WHO_AWARE_ACCESS,Access,AWaRe Access,AWaRe A,Access desc.',
+                'WHO_AWARE_WATCH,Watch,AWaRe Watch,AWaRe W,Watch desc.',
+                'WHO_AWARE_RESERVE,Reserve,AWaRe Reserve,AWaRe R,Reserve desc.') | Set-Content -LiteralPath $script:tcAware -Encoding utf8NoBOM
+            $script:tcList = Join-Path $script:tcDir 'ListElements.csv'
+            @('id,value', 'substance,Substance', 'atc_code,ATC-Code') | Set-Content -LiteralPath $script:tcList -Encoding utf8NoBOM
+        }
+
+        It 'Get-NeoIPCAntibioticSubstance carries optional short_name/description when present' {
+            $s = @(Get-NeoIPCAntibioticSubstance -Path $script:tcSub)
+            $m = @($s | Where-Object { $_.Id -eq 'tmp_001' })[0]
+            $m.ShortName | Should -BeExactly 'Micron'
+            $m.Description | Should -BeExactly 'A demo description.'
+            @($s | Where-Object { $_.Id -eq 'J01AA01' })[0].Description | Should -BeExactly ''
+        }
+        It 'Get-NeoIPCAntibioticSubstance defaults optional fields to empty when the columns are absent' {
+            $p = Join-Path $TestDrive 'nocols.csv'
+            @('id,atc_code,name,atc_group,aware_category', 'J01AA01,J01AA01,Demeclocycline,J01AA,Watch') | Set-Content -LiteralPath $p -Encoding utf8NoBOM
+            $s = @(Get-NeoIPCAntibioticSubstance -Path $p)[0]
+            $s.ShortName | Should -BeExactly ''
+            $s.FormName | Should -BeExactly ''
+            $s.Description | Should -BeExactly ''
+        }
+        It 'Get-NeoIPCAntibioticTranslatableValues keeps name always + only non-empty optionals, in field order' {
+            (Get-NeoIPCAntibioticTranslatableValues -Name 'N' -ShortName '' -FormName $null -Description 'D').Keys | Should -Be @('name', 'description')
+            (Get-NeoIPCAntibioticTranslatableValues -Name 'N' -ShortName 'S' -FormName 'F' -Description 'D').Keys | Should -Be @('name', 'shortName', 'formName', 'description')
+        }
+        It 'Get-NeoIPCAntibioticAwareGroup reads the groups with category + content, fails loud on a bad category' {
+            $a = @(Get-NeoIPCAntibioticAwareGroup -Path $script:tcAware)
+            $a.Count | Should -Be 3
+            @($a | Where-Object { $_.Code -eq 'WHO_AWARE_WATCH' })[0].Category | Should -BeExactly 'Watch'
+            $bad = Join-Path $TestDrive 'badaware.csv'
+            @('code,category,name,shortName,description', 'WHO_AWARE_X,Nonsense,X,X,X') | Set-Content -LiteralPath $bad -Encoding utf8NoBOM
+            { Get-NeoIPCAntibioticAwareGroup -Path $bad } | Should -Throw '*category*'
+        }
+        It 'Add-NeoIPCAntibioticTranslations emits one entry per locale per non-empty differing field' {
+            $de = [System.Collections.Hashtable]::new([System.StringComparer]::Ordinal)
+            $de['Carbapenems'] = 'Carbapeneme'; $de['A group desc'] = 'Gruppenbeschreibung'
+            $maps = [System.Collections.Generic.List[object]]::new()
+            $maps.Add([pscustomobject]@{ Locale = 'de'; Map = $de })
+            $fields = [ordered]@{ name = 'Carbapenems'; shortName = 'Carbapenems'; description = 'A group desc' }
+            $obj = Add-NeoIPCAntibioticTranslations -Object ([ordered]@{ id = 'g1' }) -EnglishValue $fields -LocaleMaps $maps
+            $t = @($obj['translations'])
+            @($t | Where-Object { $_.property -eq 'NAME' })[0].value | Should -BeExactly 'Carbapeneme'
+            @($t | Where-Object { $_.property -eq 'SHORT_NAME' })[0].value | Should -BeExactly 'Carbapeneme'
+            @($t | Where-Object { $_.property -eq 'DESCRIPTION' })[0].value | Should -BeExactly 'Gruppenbeschreibung'
+        }
+        It 'Add-NeoIPCAntibioticTranslations skips empty/identical fields and is a no-op without locale maps' {
+            $m = [System.Collections.Hashtable]::new([System.StringComparer]::Ordinal); $m['Name'] = 'Name'   # identical -> no translation
+            $maps = [System.Collections.Generic.List[object]]::new(); $maps.Add([pscustomobject]@{ Locale = 'de'; Map = $m })
+            (Add-NeoIPCAntibioticTranslations -Object ([ordered]@{ id = 'x' }) -EnglishValue ([ordered]@{ name = 'Name'; description = '' }) -LocaleMaps $maps).Contains('translations') | Should -BeFalse
+            (Add-NeoIPCAntibioticTranslations -Object ([ordered]@{ id = 'y' }) -EnglishValue ([ordered]@{ name = 'Z' }) -LocaleMaps ([System.Collections.Generic.List[object]]::new())).Contains('translations') | Should -BeFalse
+        }
+        It 'ConvertTo-NeoIPCAntibioticPoField renders single-line and splits multi-line at newlines' {
+            (ConvertTo-NeoIPCAntibioticPoField -Keyword 'msgid' -Value 'Hello').Trim() | Should -BeExactly 'msgid "Hello"'
+            $ml = ConvertTo-NeoIPCAntibioticPoField -Keyword 'msgid' -Value "a`nb"
+            $ml | Should -Match '(?m)^msgid ""'
+            $ml | Should -Match '(?m)^"a\\n"'
+            $ml | Should -Match '(?m)^"b"'
+        }
+        It 'Write/Read-NeoIPCAntibioticPoText round-trips entries incl. fuzzy + multi-line, skipping the header' {
+            $entries = [System.Collections.Generic.List[object]]::new()
+            $entries.Add([ordered]@{ Msgid = 'Simple'; Msgstr = 'Einfach'; Fuzzy = $false })
+            $entries.Add([ordered]@{ Msgid = "multi`nline"; Msgstr = ''; Fuzzy = $true })
+            $text = Write-NeoIPCAntibioticPoText -Entry $entries -Locale 'de'
+            $text | Should -Match '(?m)^"Language: de\\n"'
+            $parsed = Read-NeoIPCAntibioticPoText -Text $text
+            $parsed.Count | Should -Be 2
+            @($parsed | Where-Object { $_.Msgid -eq 'Simple' })[0].Msgstr | Should -BeExactly 'Einfach'
+            $mlEntry = @($parsed | Where-Object { $_.Msgid -eq "multi`nline" })[0]
+            $mlEntry | Should -Not -BeNullOrEmpty
+            $mlEntry.Fuzzy | Should -BeTrue
+        }
+        It 'Merge-NeoIPCAntibioticPoEntry preserves msgstr by msgid, drops obsolete, adds new empty' {
+            $existing = [System.Collections.Generic.List[object]]::new()
+            $existing.Add([ordered]@{ Msgid = 'Keep'; Msgstr = 'Behalten'; Fuzzy = $false })
+            $existing.Add([ordered]@{ Msgid = 'Gone'; Msgstr = 'Weg'; Fuzzy = $false })
+            $src = [System.Collections.Generic.List[string]]::new(); $src.Add('Keep'); $src.Add('New')
+            $merged = Merge-NeoIPCAntibioticPoEntry -SourceMsgid $src -Existing $existing
+            @($merged | ForEach-Object { $_.Msgid }) | Should -Be @('Keep', 'New')
+            @($merged | Where-Object { $_.Msgid -eq 'Keep' })[0].Msgstr | Should -BeExactly 'Behalten'
+            @($merged | Where-Object { $_.Msgid -eq 'New' })[0].Msgstr | Should -BeExactly ''
+        }
+        It 'Get-NeoIPCAntibioticTranslationString collects the full surface, de-duplicated' {
+            $strings = Get-NeoIPCAntibioticTranslationString -SubstancePath $script:tcSub -GroupPath $script:tcGrp -AwareGroupPath $script:tcAware -ListElementsPath $script:tcList
+            $strings | Should -Contain 'Demeclocycline'                  # substance name
+            $strings | Should -Contain 'A demo description.'             # substance description (optional col)
+            $strings | Should -Contain 'Tetracycline antibacterials.'    # ATC group description
+            $strings | Should -Contain 'AWaRe Watch'                     # AWaRe group name
+            $strings | Should -Contain 'Watch desc.'                     # AWaRe group description
+            $strings | Should -Contain 'Substance'                       # printed-list UI label
+            $strings | Should -Contain 'ATC-5 Groups'                    # group-set name (structural constant)
+            @($strings | Where-Object { $_ -ceq 'Tetracyclines' }).Count | Should -Be 1   # name == shortName -> one entry
+        }
+        It 'Export-NeoIPCAntibioticTranslation writes the .pot and msgmerge-updates an existing .po' {
+            $poDir = Join-Path $TestDrive 'exportpo'; New-Item -ItemType Directory -Path $poDir -Force | Out-Null
+            @('msgid ""', 'msgstr ""', '', 'msgid "Demeclocycline"', 'msgstr "Demeclocyclin"', '', 'msgid "Obsolete term"', 'msgstr "Veraltet"') | Set-Content -LiteralPath (Join-Path $poDir 'antibiotics.de.po') -Encoding utf8NoBOM
+            $r = Export-NeoIPCAntibioticTranslation -SubstancePath $script:tcSub -GroupPath $script:tcGrp -AwareGroupPath $script:tcAware -ListElementsPath $script:tcList -PoDirectory $poDir
+            Test-Path (Join-Path $poDir 'antibiotics.pot') | Should -BeTrue
+            $r.UpdatedLocales | Should -Contain 'de'
+            $de = Read-NeoIPCAntibioticPoText -Text (Get-Content -LiteralPath (Join-Path $poDir 'antibiotics.de.po') -Raw)
+            @($de | Where-Object { $_.Msgid -eq 'Demeclocycline' })[0].Msgstr | Should -BeExactly 'Demeclocyclin'   # preserved
+            @($de | Where-Object { $_.Msgid -eq 'Obsolete term' }).Count | Should -Be 0                              # dropped
+            $pot = Read-NeoIPCAntibioticPoText -Text (Get-Content -LiteralPath (Join-Path $poDir 'antibiotics.pot') -Raw)
+            @($pot | Where-Object { $_.Msgstr -ne '' }).Count | Should -Be 0                                          # template: all empty
+        }
+        It 'Export-NeoIPCAntibioticTranslation creates no new locales (only updates existing .po)' {
+            $poDir = Join-Path $TestDrive 'exportpo2'; New-Item -ItemType Directory -Path $poDir -Force | Out-Null
+            Export-NeoIPCAntibioticTranslation -SubstancePath $script:tcSub -GroupPath $script:tcGrp -AwareGroupPath $script:tcAware -ListElementsPath $script:tcList -PoDirectory $poDir | Out-Null
+            Test-Path (Join-Path $poDir 'antibiotics.pot') | Should -BeTrue
+            @(Get-ChildItem -Path $poDir -Filter 'antibiotics.*.po').Count | Should -Be 0
         }
     }
 }

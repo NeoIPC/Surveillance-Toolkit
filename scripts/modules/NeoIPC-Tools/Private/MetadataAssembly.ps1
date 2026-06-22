@@ -175,12 +175,13 @@ function Add-NeoIPCGeneratedMetadata {
     $fgRuleFrag  = New-NeoIPCPathogenFieldGatingRule @ontologyArgs -ExistingPackage $Export -PathogenCount $PathogenCount
     $subRuleFrag = New-NeoIPCSubstanceRule -ExistingPackage $Export -SubstanceCount $SubstanceCount
     # Antibiotic domain (from the reconciled antibiotic sources): the NEOIPC_ANTIMICROBIAL_SUBSTANCES option set +
-    # options, the 34 ATC-4 + 3 AWaRe option groups, and the ATC5 / WHO_AWARE option-group-sets. The option set and
-    # the group names are localized from the bilingual antibiotic catalogues (po/antibiotics.<locale>.po). The
-    # group generator needs the generated option UIDs; the group-set generator needs the generated group UIDs.
+    # options, the 34 ATC-4 + 3 AWaRe option groups, and the ATC5 / WHO_AWARE option-group-sets. The full
+    # translatable surface (option/group/group-set name + shortName + description, where present) is localized from
+    # the bilingual antibiotic catalogues (po/antibiotics.<locale>.po). The group generator needs the generated
+    # option UIDs; the group-set generator needs the generated group UIDs.
     $abxOptFrag    = New-NeoIPCAntimicrobialOptionSet -ExistingPackage $Export -PoDirectory $PoDirectory
     $abxGrpFrag    = New-NeoIPCAntibioticOptionGroup -OptionSet $abxOptFrag -ExistingPackage $Export -PoDirectory $PoDirectory
-    $abxGrpSetFrag = New-NeoIPCAntibioticOptionGroupSet -OptionGroup $abxGrpFrag -ExistingPackage $Export
+    $abxGrpSetFrag = New-NeoIPCAntibioticOptionGroupSet -OptionGroup $abxGrpFrag -ExistingPackage $Export -PoDirectory $PoDirectory
 
     $genOptionSets      = @($optionFrag['optionSets']) + @($abxOptFrag['optionSets'])
     $genOptions         = @($optionFrag['options']) + @($abxOptFrag['options'])

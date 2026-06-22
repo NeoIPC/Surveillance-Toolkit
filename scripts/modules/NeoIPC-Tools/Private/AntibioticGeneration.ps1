@@ -1,5 +1,5 @@
 # NeoIPC metadata pipeline — antibiotic-domain generation (private helpers, not exported).
-# Canonical sources (see docs/antibiotic-substance-curation.md):
+# Canonical sources (see metadata/common/antibiotics/README.md):
 #   metadata/common/antibiotics/NeoIPC-Antibiotics.csv       (id, atc_code, name, atc_group, aware_category)
 #   metadata/common/antibiotics/NeoIPC-Antibiotic-Groups.csv (code, name, shortName, description)
 # The public generators live in Public/AntibioticGeneration.ps1.
@@ -7,12 +7,34 @@
 # The four one-off code migrations the source reconciliation applied (deployed option code -> canonical code).
 # The canonical code inherits the deployed option's UID (so the option-set ref stays minimal-diff); only the
 # stored data VALUE strings need a one-off rewrite (data-migration follow-up). Transitional: once the deployment
-# is re-exported with the canonical codes this map is a no-op. See docs/antibiotic-substance-curation.md.
+# is re-exported with the canonical codes this map is a no-op. See metadata/common/antibiotics/README.md.
 $script:NeoIPCAntibioticCodeRename = [System.Collections.Hashtable]::new([System.StringComparer]::Ordinal)
 $script:NeoIPCAntibioticCodeRename['J01AA08']      = 'J01AA08_P'
 $script:NeoIPCAntibioticCodeRename['J01XX01']      = 'J01XX01_P'
 $script:NeoIPCAntibioticCodeRename['Cefoselis']    = 'tmp_002'
 $script:NeoIPCAntibioticCodeRename['Micronomicin'] = 'tmp_001'
+
+# The 3 WHO AWaRe optionGroups are an abstract reference list (WHO-defined name/shortName/description + the
+# aware_category they select), so they live in the canonical CSV metadata/common/antibiotics/NeoIPC-Antibiotic-
+# AWaRe-Groups.csv (read by Get-NeoIPCAntibioticAwareGroup), NOT a code constant — mirroring the ATC groups. The
+# deployed UID + sharing are still preserved from the export by code (a UID sidecar replaces that later). The
+# classified-diff gate verifies the generated strings are byte-identical to the deployed groups.
+
+# The 2 antibiotic optionGroupSets — likewise structural. Codes are fixed (neoipcr/the reports filter on ATC5 /
+# WHO_AWARE). Content canonical here; UID + the other structural fields preserved from the export by code. The
+# long WHO_AWARE description is assembled with explicit `\n` joins so it is independent of this file's newline
+# encoding (it must match the deployed value exactly — gate-verified).
+$script:NeoIPCAntibioticGroupSet = [ordered]@{
+    ATC5      = [ordered]@{ Name = 'ATC-5 Groups'; Description = '' }
+    WHO_AWARE = [ordered]@{ Name = 'AWaRe Groups'; Description = (@(
+                'AWaRe is the WHO classification of antibiotics introduced by WHO as part of the 2017 Model List of Essential Medicines.'
+                'In the AWaRe classification, there are three categories of antibiotics:'
+                '• Access antibiotics that have a narrow spectrum of activity and a good safety profile in terms of side-effects.'
+                '• Watch antibiotics that are broader-spectrum antibiotics and are recommended as first-choice options for patients with more severe clinical presentations or for infections where the causative pathogens are more likely to be resistant to Access antibiotics.'
+                '• Reserve antibiotics that are last-choice antibiotics used to treat multidrug-resistant infections.'
+                'This classification can be used to give an indirect indication of the appropriateness of antibiotic use. The World Health Organization (WHO) has defined a target that at least 70% of global antibiotic consumption at the national level should be from the Access group.'
+            ) -join "`n") }
+}
 
 function ConvertTo-NeoIPCAntibioticCanonicalCode {
     # Map a deployed option code to its canonical (post-reconciliation) code, or return it unchanged.
@@ -34,6 +56,14 @@ function Get-NeoIPCAntibioticSubstance {
     $resolved = Resolve-Path -LiteralPath $Path -ErrorAction Stop
     $rows = @(Import-Csv -LiteralPath $resolved -Encoding utf8NoBOM)
     if ($rows.Count -eq 0) { throw "No antibiotic substances found in '$resolved'." }
+    # shortName / formName / description are TRULY OPTIONAL: substances carry only `name` today, but the schema may
+    # later add any of them (e.g. a form name for the modern Capture app). Read each only if its column exists; an
+    # absent column OR an empty cell yields '' and the generators then neither emit the field nor a translation for
+    # it (graceful for both metadata generation and the PO).
+    $cols = $rows[0].PSObject.Properties.Name
+    $hasShortName = $cols -contains 'short_name'
+    $hasFormName = $cols -contains 'form_name'
+    $hasDescription = $cols -contains 'description'
     $seen = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::Ordinal)
     foreach ($r in $rows) {
         $id = [string]$r.id
@@ -47,6 +77,9 @@ function Get-NeoIPCAntibioticSubstance {
             Name          = $nm
             AtcGroup      = [string]$r.atc_group
             AwareCategory = [string]$r.aware_category
+            ShortName     = if ($hasShortName) { [string]$r.short_name } else { '' }
+            FormName      = if ($hasFormName) { [string]$r.form_name } else { '' }
+            Description   = if ($hasDescription) { [string]$r.description } else { '' }
         }
     }
 }
@@ -71,25 +104,56 @@ function Get-NeoIPCAntibioticLocaleMap {
     , $maps
 }
 
-function Add-NeoIPCAntibioticNameTranslations {
-    # Add a translations[] entry per locale whose localized name differs from the English source. property is the
-    # uppercase DHIS2 ObjectTranslation NAME token (case-sensitive, single-sourced). Returns the (mutated) object;
-    # no-op when $LocaleMaps is empty. Antibiotic names/group names are flat (no rank tag), so the localized value
-    # is the catalogue's translation of the English name.
+function Add-NeoIPCAntibioticTranslations {
+    # Add translations[] entries for an antibiotic-domain object's translatable fields. $EnglishValue is an ordered
+    # map of DHIS2 property name -> English source value (e.g. [ordered]@{ name = ...; shortName = ...; description =
+    # ... }); each property's uppercase ObjectTranslation token comes from $NeoIPCMetadataTranslatableProperties
+    # (single source — case-sensitive). For every locale catalogue and every non-empty field, an entry is added where
+    # the catalogue's localized value differs from the English source — a flat english->localized lookup, so ANY
+    # translatable field (name/shortName/formName/description) is supported with no per-field catalogue split. Entries
+    # are emitted locale-major then in field order, for stable diffs. Returns the (mutated) object; no-op when
+    # $LocaleMaps is empty or nothing differs.
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)][System.Collections.IDictionary]$Object,
-        [Parameter(Mandatory)][string]$EnglishName,
+        [Parameter(Mandatory)][System.Collections.IDictionary]$EnglishValue,
         [AllowNull()]$LocaleMaps
     )
     if (-not $LocaleMaps -or $LocaleMaps.Count -eq 0) { return $Object }
     $trans = [System.Collections.Generic.List[object]]::new()
     foreach ($lm in $LocaleMaps) {
-        $loc = if ($lm.Map.Contains($EnglishName)) { [string]$lm.Map[$EnglishName] } else { $EnglishName }
-        if ($loc -cne $EnglishName) { $trans.Add([ordered]@{ property = $script:NeoIPCMetadataTranslatableProperties['name']; locale = $lm.Locale; value = $loc }) }
+        foreach ($prop in $EnglishValue.Keys) {
+            $en = [string]$EnglishValue[$prop]
+            if ([string]::IsNullOrEmpty($en)) { continue }
+            $token = $script:NeoIPCMetadataTranslatableProperties[$prop]
+            if (-not $token) { throw "No DHIS2 translation token is defined for property '$prop'." }
+            $loc = if ($lm.Map.Contains($en)) { [string]$lm.Map[$en] } else { $en }
+            if ($loc -cne $en) { $trans.Add([ordered]@{ property = $token; locale = $lm.Locale; value = $loc }) }
+        }
     }
     if ($trans.Count -gt 0) { $Object['translations'] = $trans.ToArray() }
     $Object
+}
+
+function Get-NeoIPCAntibioticTranslatableValues {
+    # Collect an antibiotic-domain object's non-empty translatable fields into an ordered property->English map, in
+    # DHIS2 field order (name, shortName, formName, description). `name` is always present (the readers reject a
+    # blank one); shortName/formName/description are included ONLY when non-empty. The generators use the returned
+    # map to BOTH set the fields on the emitted object AND drive Add-NeoIPCAntibioticTranslations, so the metadata
+    # fields and their translations stay in lockstep and the three optional fields are gracefully absent together.
+    [CmdletBinding()]
+    [OutputType([System.Collections.Specialized.OrderedDictionary])]
+    param(
+        [Parameter(Mandatory)][string]$Name,
+        [AllowNull()][string]$ShortName,
+        [AllowNull()][string]$FormName,
+        [AllowNull()][string]$Description
+    )
+    $m = [ordered]@{ name = $Name }
+    if (-not [string]::IsNullOrEmpty($ShortName))   { $m['shortName'] = $ShortName }
+    if (-not [string]::IsNullOrEmpty($FormName))    { $m['formName'] = $FormName }
+    if (-not [string]::IsNullOrEmpty($Description)) { $m['description'] = $Description }
+    $m
 }
 
 function Add-NeoIPCAntibioticGroupSharing {
@@ -125,6 +189,37 @@ function Get-NeoIPCAntibioticGroup {
         if (-not $seen.Add($code)) { throw "Duplicate antibiotic-group code '$code' in '$resolved'." }
         [ordered]@{
             Code        = $code
+            Name        = [string]$r.name
+            ShortName   = [string]$r.shortName
+            Description = [string]$r.description
+        }
+    }
+}
+
+function Get-NeoIPCAntibioticAwareGroup {
+    # Read NeoIPC-Antibiotic-AWaRe-Groups.csv into ordered AWaRe-group records:
+    #   [ordered]@{ Code; Category; Name; ShortName; Description }
+    # The 3 WHO AWaRe groups (WHO_AWARE_ACCESS/WATCH/RESERVE). Code is the DHIS2 optionGroup code (a fixed contract —
+    # neoipcr filters on it); Category is the aware_category value (Access/Watch/Reserve) that selects each group's
+    # member options. Fails loud on a blank/duplicate code or an unexpected category. The deployed UID + sharing are
+    # preserved from the export by code by the generator (content here, identity from the export).
+    [CmdletBinding()]
+    [OutputType([System.Collections.Specialized.OrderedDictionary])]
+    param([Parameter(Mandatory)][string]$Path)
+
+    $resolved = Resolve-Path -LiteralPath $Path -ErrorAction Stop
+    $rows = @(Import-Csv -LiteralPath $resolved -Encoding utf8NoBOM)
+    if ($rows.Count -eq 0) { throw "No AWaRe groups found in '$resolved'." }
+    $seen = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::Ordinal)
+    foreach ($r in $rows) {
+        $code = [string]$r.code
+        $cat = [string]$r.category
+        if ([string]::IsNullOrWhiteSpace($code)) { throw "AWaRe-group row (name '$($r.name)') has a blank code." }
+        if ($cat -cnotin @('Access', 'Watch', 'Reserve')) { throw "AWaRe group '$code' has an unexpected category '$cat' (expected Access/Watch/Reserve)." }
+        if (-not $seen.Add($code)) { throw "Duplicate AWaRe-group code '$code' in '$resolved'." }
+        [ordered]@{
+            Code        = $code
+            Category    = $cat
             Name        = [string]$r.name
             ShortName   = [string]$r.shortName
             Description = [string]$r.description

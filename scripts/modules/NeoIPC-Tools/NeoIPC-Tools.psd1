@@ -88,6 +88,8 @@
         'New-NeoIPCAntimicrobialOptionSet'
         'New-NeoIPCAntibioticOptionGroup'
         'New-NeoIPCAntibioticOptionGroupSet'
+        # Antibiotic translation catalogue (po/antibiotics.pot + .po)
+        'Export-NeoIPCAntibioticTranslation'
     )
 
     # Cmdlets to export from this module

@@ -107,10 +107,10 @@ function Get-NeoIPCMetadataTranslationUnit {
             if ($obj -isnot [System.Collections.IDictionary]) { continue }
             $key = Get-NeoIPCMetadataTranslationKey -Type $type -Object $obj -OptionSetCodeById $optionSetCodeById
             if ($null -eq $key) { continue }
-            # ATC-coded antibiotic option groups (J01CG, …): their names are translated in a separate antibiotic
-            # component keyed by the English name (WHO ATC copyright — see Test-NeoIPCAtcCode), so they are excluded
-            # here and in injection. The AWaRe groups (WHO_AWARE_*) stay.
-            if ($type -eq 'optionGroups' -and (Test-NeoIPCAtcCode -Code ([string]$obj['code']))) { continue }
+            # Antibiotic domain (ATC + AWaRe optionGroups, ATC5/WHO_AWARE optionGroupSets): every antibiotic-domain
+            # name/description is translated in the dedicated antibiotic component (po/antibiotics.*), so it is excluded
+            # here and in injection. See Test-NeoIPCAntibioticTranslationExcluded.
+            if (Test-NeoIPCAntibioticTranslationExcluded -Type $type -Code ([string]$obj['code'])) { continue }
             # Domain option sets (pathogens / substances) are authored from the canonical YAML / antibiotics CSV, not
             # translated here — excluded from BOTH extraction and injection so the two stay symmetric (a raw export
             # carrying their translations[] must not be wiped on Import).
@@ -407,8 +407,8 @@ function Add-NeoIPCMetadataTranslationToPackage {
             $key = Get-NeoIPCMetadataTranslationKey -Type $type -Object $obj -OptionSetCodeById $optionSetCodeById
             if ($null -eq $key) { continue }
             # Mirror extraction's exclusions, else this would REBUILD (and so wipe) translations[] the PO never owns —
-            # the ATC antibiotic groups and the domain pathogen/substance option sets. Leave their translations[] intact.
-            if ($type -eq 'optionGroups' -and (Test-NeoIPCAtcCode -Code ([string]$obj['code']))) { continue }
+            # the antibiotic domain (groups + group-sets) and the domain pathogen/substance option sets. Leave them intact.
+            if (Test-NeoIPCAntibioticTranslationExcluded -Type $type -Code ([string]$obj['code'])) { continue }
             if (Test-NeoIPCMetadataDomainExcluded -Type $type -Object $obj -DomainSetIds $domainSetIds) { continue }
             # As in extraction, the ontology/matrix-GENERATED families are deliberately NOT excluded here — the PO is
             # their sole translation source on the import, so excluding them would drop those translations
@@ -467,12 +467,30 @@ function Test-NeoIPCMetadataPoSyntax {
 
 function Test-NeoIPCAtcCode {
     # True when $Code is a WHO ATC code at the antibiotic-relevant levels: ATC level 4 (5 chars, e.g. J01CG — the
-    # antibiotic option GROUPS) or level 5 (7 chars, e.g. J01AA01 — the substance OPTIONS). The metadata PO excludes
-    # ATC-coded optionGroups: their NAMES (common pharmacological terms) are translated in a separate antibiotic
-    # component keyed by the English name, NOT the ATC code — so no WHO ATC classification material is reproduced in
-    # the translation files. The AWaRe groups WHO_AWARE_* are not ATC codes and stay in the metadata PO.
+    # antibiotic option GROUPS) or level 5 (7 chars, e.g. J01AA01 — the substance OPTIONS). A pure code-shape test;
+    # callers decide what to do with the answer.
     [CmdletBinding()]
     [OutputType([bool])]
     param([AllowEmptyString()][AllowNull()][string]$Code)
     return $Code -cmatch '^[A-Z][0-9]{2}[A-Z]{2}([0-9]{2})?$'
+}
+
+function Test-NeoIPCAntibioticTranslationExcluded {
+    # True for an antibiotic-domain object whose translations live in the dedicated antibiotic PO component
+    # (po/antibiotics.*), and so are excluded from the general metadata PO: the antibiotic optionGroups (ATC-coded
+    # J01CG, … AND the AWaRe groups WHO_AWARE_*) and the antibiotic optionGroupSets (ATC5 / WHO_AWARE). The exclusion
+    # is ORGANIZATIONAL — the whole antibiotic domain is translated in one component keyed by the English name, with
+    # WHO attribution in the metadata CSVs — not a copyright bar. The antimicrobial-substance OPTIONS are excluded
+    # separately, as a domain option set (Test-NeoIPCMetadataDomainExcluded). Mirrors the generated-class predicate.
+    [CmdletBinding()]
+    [OutputType([bool])]
+    param(
+        [Parameter(Mandatory)][string]$Type,
+        [AllowEmptyString()][AllowNull()][string]$Code
+    )
+    switch ($Type) {
+        'optionGroups'    { return (Test-NeoIPCAtcCode -Code $Code) -or ($Code -cmatch '^WHO_AWARE_') }
+        'optionGroupSets' { return ($Code -ceq 'ATC5') -or ($Code -ceq 'WHO_AWARE') }
+        default           { return $false }
+    }
 }

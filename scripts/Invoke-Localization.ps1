@@ -30,6 +30,7 @@
     - infectious_agents:  po/infectious_agents.po4a.cfg
     - scripts:            scripts/po4a.cfg
     - glossary:           glossary via update-glossary-po.py
+    - antibiotics:        po/antibiotics.pot + .po via NeoIPC-Tools Export-NeoIPCAntibioticTranslation
     - all:                all of the above
 
 .PARAMETER Force
@@ -83,7 +84,7 @@ param(
     [switch]$Test,
 
     [Parameter(ParameterSetName = 'Update')]
-    [ValidateSet('reports', 'documentation', 'infectious_agents', 'scripts', 'glossary', 'all')]
+    [ValidateSet('reports', 'documentation', 'infectious_agents', 'scripts', 'glossary', 'antibiotics', 'all')]
     [string]$Config = 'all',
 
     [Parameter(ParameterSetName = 'Update')]
@@ -255,6 +256,22 @@ function Invoke-UpdateGlossary {
     }
 }
 
+function Invoke-AntibioticTranslation {
+    # Regenerate po/antibiotics.pot (+ msgmerge the existing po/antibiotics.<locale>.po) from the canonical
+    # antibiotic sources via the NeoIPC-Tools module. Pure PowerShell — no po4a, no Python. The antibiotic domain
+    # is its own bilingual gettext component keyed by the English name (see metadata/common/antibiotics/README.md).
+    $module = Join-Path $repoRoot 'scripts' 'modules' 'NeoIPC-Tools'
+
+    if ($DryRun) {
+        Write-Host "[DryRun] Import-Module $module; Export-NeoIPCAntibioticTranslation"
+    } else {
+        Write-Host "Updating antibiotic translation catalogue (po/antibiotics.pot + .po)"
+        Import-Module -Name $module -Force -Verbose:$false
+        $result = Export-NeoIPCAntibioticTranslation
+        Write-Host ("  antibiotics.pot: {0} strings; updated locales: {1}" -f $result.StringCount, (($result.UpdatedLocales -join ', ')))
+    }
+}
+
 function Invoke-FixStringLayers {
     $script = Join-Path $PSScriptRoot 'Test-StringResourceLayers.ps1'
 
@@ -279,9 +296,10 @@ function Invoke-TestStringLayers {
 # ---------------------------------------------------------------------------
 
 if ($Update) {
-    $runLayers   = $Config -eq 'all' -or $Config -eq 'glossary'
-    $runPo4a     = $Config -eq 'all' -or $po4aConfigs -contains $Config
-    $runGlossary = $Config -eq 'all' -or $Config -eq 'glossary'
+    $runLayers      = $Config -eq 'all' -or $Config -eq 'glossary'
+    $runPo4a        = $Config -eq 'all' -or $po4aConfigs -contains $Config
+    $runGlossary    = $Config -eq 'all' -or $Config -eq 'glossary'
+    $runAntibiotics = $Config -eq 'all' -or $Config -eq 'antibiotics'
 
     # Step 1: Validate/fix string layers (may move keys between YAML files)
     if ($runLayers) {
@@ -309,6 +327,11 @@ if ($Update) {
     # Step 4: Update glossary
     if ($runGlossary) {
         Invoke-UpdateGlossary
+    }
+
+    # Step 5: Update the antibiotic translation catalogue (NeoIPC-Tools, not po4a)
+    if ($runAntibiotics) {
+        Invoke-AntibioticTranslation
     }
 
     Write-Host "`nLocalization update complete."

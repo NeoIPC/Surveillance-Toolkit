@@ -1,0 +1,987 @@
+# Translations for the NeoIPC antibiotic substance and group lists.
+# Copyright (C) Charite - Universitaetsmedizin Berlin
+# This file is distributed under the Creative Commons Attribution 4.0 International license
+# Automatically generated
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: NeoIPC Antibiotics\n"
+"Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Demeclocycline"
+msgstr "Demeclocyclin"
+
+msgid "Doxycycline"
+msgstr "Doxycyclin"
+
+msgid "Chlortetracycline"
+msgstr "Chlortetracyclin"
+
+msgid "Lymecycline"
+msgstr "Lymecyclin"
+
+msgid "Metacycline"
+msgstr "Metacyclin"
+
+msgid "Oxytetracycline"
+msgstr "Oxytetracyclin"
+
+msgid "Tetracycline"
+msgstr "Tetracyclin"
+
+msgid "Minocycline (oral)"
+msgstr "Minocyclin (oral)"
+
+msgid "Minocycline (i. v.)"
+msgstr ""
+
+msgid "Rolitetracycline"
+msgstr "Rolitetracyclin"
+
+msgid "Penimepicycline"
+msgstr "Penimepicyclin"
+
+msgid "Clomocycline"
+msgstr "Clomocyclin"
+
+msgid "Tigecycline"
+msgstr "Tigecyclin"
+
+msgid "Eravacycline"
+msgstr "Eravacyclin"
+
+msgid "Sarecycline"
+msgstr "Sarecyclin"
+
+msgid "Omadacycline"
+msgstr "Omadacyclin"
+
+msgid "Chloramphenicol"
+msgstr ""
+
+msgid "Thiamphenicol"
+msgstr ""
+
+msgid "Ampicillin"
+msgstr ""
+
+msgid "Pivampicillin"
+msgstr ""
+
+msgid "Carbenicillin"
+msgstr ""
+
+msgid "Amoxicillin"
+msgstr ""
+
+msgid "Carindacillin"
+msgstr ""
+
+msgid "Bacampicillin"
+msgstr ""
+
+msgid "Epicillin"
+msgstr ""
+
+msgid "Pivmecillinam"
+msgstr ""
+
+msgid "Azlocillin"
+msgstr ""
+
+msgid "Mezlocillin"
+msgstr ""
+
+msgid "Mecillinam"
+msgstr ""
+
+msgid "Piperacillin"
+msgstr ""
+
+msgid "Ticarcillin"
+msgstr ""
+
+msgid "Metampicillin"
+msgstr ""
+
+msgid "Talampicillin"
+msgstr ""
+
+msgid "Sulbenicillin"
+msgstr ""
+
+msgid "Temocillin"
+msgstr ""
+
+msgid "Hetacillin"
+msgstr ""
+
+msgid "Aspoxicillin"
+msgstr ""
+
+msgid "Benzylpenicillin"
+msgstr ""
+
+msgid "Phenoxymethylpenicillin"
+msgstr ""
+
+msgid "Propicillin"
+msgstr ""
+
+msgid "Azidocillin"
+msgstr ""
+
+msgid "Pheneticillin"
+msgstr ""
+
+msgid "Penamecillin"
+msgstr ""
+
+msgid "Clometocillin"
+msgstr ""
+
+msgid "Benzathine-benzylpenicillin"
+msgstr ""
+
+msgid "Procaine-benzylpenicillin"
+msgstr ""
+
+msgid "Dicloxacillin"
+msgstr ""
+
+msgid "Cloxacillin"
+msgstr ""
+
+msgid "Meticillin"
+msgstr ""
+
+msgid "Oxacillin"
+msgstr ""
+
+msgid "Flucloxacillin"
+msgstr ""
+
+msgid "Nafcillin"
+msgstr ""
+
+msgid "Sulbactam"
+msgstr ""
+
+msgid "Tazobactam"
+msgstr ""
+
+msgid "Ampicillin/Sulbactam"
+msgstr ""
+
+msgid "Amoxicillin/Clavulanic-acid"
+msgstr ""
+
+msgid "Ticarcillin/clavulanic acid"
+msgstr ""
+
+msgid "Sultamicillin"
+msgstr ""
+
+msgid "Piperacillin/Tazobactam"
+msgstr ""
+
+msgid "Cefalexin"
+msgstr ""
+
+msgid "Cefaloridine"
+msgstr "Cefaloridin"
+
+msgid "Cefalotin"
+msgstr ""
+
+msgid "Cefazolin"
+msgstr ""
+
+msgid "Cefadroxil"
+msgstr ""
+
+msgid "Cefazedone"
+msgstr "Cefazedon"
+
+msgid "Cefatrizine"
+msgstr "Cefatrizin"
+
+msgid "Cefapirin"
+msgstr ""
+
+msgid "Cefradine"
+msgstr "Cefradin"
+
+msgid "Cefacetrile"
+msgstr "Cefacetril"
+
+msgid "Cefroxadine"
+msgstr "Cefroxadin"
+
+msgid "Ceftezole"
+msgstr "Ceftezol"
+
+msgid "Cefoxitin"
+msgstr ""
+
+msgid "Cefuroxime"
+msgstr "Cefuroxim"
+
+msgid "Cefamandole"
+msgstr "Cefamandol"
+
+msgid "Cefaclor"
+msgstr ""
+
+msgid "Cefotetan"
+msgstr ""
+
+msgid "Cefonicid"
+msgstr ""
+
+msgid "Cefotiam"
+msgstr ""
+
+msgid "Loracarbef"
+msgstr ""
+
+msgid "Cefmetazole"
+msgstr "Cefmetazol"
+
+msgid "Cefprozil"
+msgstr ""
+
+msgid "Ceforanide"
+msgstr "Ceforanid"
+
+msgid "Cefminox"
+msgstr ""
+
+msgid "Cefbuperazone"
+msgstr "Cefbuperazon"
+
+msgid "Flomoxef"
+msgstr ""
+
+msgid "Cefotaxime"
+msgstr "Cefotaxim"
+
+msgid "Ceftazidime"
+msgstr "Ceftazidim"
+
+msgid "Cefsulodin"
+msgstr ""
+
+msgid "Ceftriaxone"
+msgstr "Ceftriaxon"
+
+msgid "Cefmenoxime"
+msgstr "Cefmenoxim"
+
+msgid "Latamoxef"
+msgstr ""
+
+msgid "Ceftizoxime"
+msgstr "Ceftizoxim"
+
+msgid "Cefixime"
+msgstr "Cefixim"
+
+msgid "Cefodizime"
+msgstr "Cefodizim"
+
+msgid "Cefetamet-pivoxil"
+msgstr ""
+
+msgid "Cefpiramide"
+msgstr "Cefpiramid"
+
+msgid "Cefoperazone"
+msgstr "Cefoperazon"
+
+msgid "Cefpodoxime-proxetil"
+msgstr ""
+
+msgid "Ceftibuten"
+msgstr ""
+
+msgid "Cefdinir"
+msgstr ""
+
+msgid "Cefditoren-pivoxil"
+msgstr ""
+
+msgid "Cefcapene-pivoxil"
+msgstr ""
+
+msgid "Cefteram-pivoxil"
+msgstr ""
+
+msgid "Ceftazidime/Avibactam"
+msgstr ""
+
+msgid "Cefepime"
+msgstr "Cefepim"
+
+msgid "Cefpirome"
+msgstr "Cefpirom"
+
+msgid "Cefozopran"
+msgstr ""
+
+msgid "Aztreonam"
+msgstr ""
+
+msgid "Carumonam"
+msgstr ""
+
+msgid "Meropenem"
+msgstr ""
+
+msgid "Ertapenem"
+msgstr ""
+
+msgid "Doripenem"
+msgstr ""
+
+msgid "Biapenem"
+msgstr ""
+
+msgid "Tebipenem"
+msgstr ""
+
+msgid "Imipenem/Cilastatin"
+msgstr ""
+
+msgid "Meropenem/Vaborbactam"
+msgstr ""
+
+msgid "Panipenem"
+msgstr ""
+
+msgid "Imipenem/Cilastatin/Relebactam"
+msgstr ""
+
+msgid "Ceftobiprole-medocaril"
+msgstr ""
+
+msgid "Ceftaroline-fosamil"
+msgstr ""
+
+msgid "Faropenem"
+msgstr ""
+
+msgid "Cefiderocol"
+msgstr ""
+
+msgid "Ceftolozane/Tazobactam"
+msgstr ""
+
+msgid "Trimethoprim"
+msgstr ""
+
+msgid "Brodimoprim"
+msgstr ""
+
+msgid "Iclaprim"
+msgstr ""
+
+msgid "Sulfaisodimidine"
+msgstr "Sulfaisodimidin"
+
+msgid "Sulfamethizole"
+msgstr "Sulfamethizol"
+
+msgid "Sulfadimidine"
+msgstr "Sulfadimidin"
+
+msgid "Sulfapyridine"
+msgstr "Sulfapyridin"
+
+msgid "Sulfafurazole"
+msgstr "Sulfafurazol"
+
+msgid "Sulfanilamide"
+msgstr "Sulfanilamid"
+
+msgid "Sulfathiazole"
+msgstr "Sulfathiazol"
+
+msgid "Sulfathiourea"
+msgstr ""
+
+msgid "Sulfamethoxazole"
+msgstr "Sulfamethoxazol"
+
+msgid "Sulfadiazine"
+msgstr "Sulfadiazin"
+
+msgid "Sulfamoxole"
+msgstr "Sulfamoxol"
+
+msgid "Sulfadimethoxine"
+msgstr "Sulfadimethoxin"
+
+msgid "Sulfalene"
+msgstr "Sulfalen"
+
+msgid "Sulfametomidine"
+msgstr "Sulfametomidin"
+
+msgid "Sulfametoxydiazine"
+msgstr "Sulfametoxydiazin"
+
+msgid "Sulfamethoxypyridazine"
+msgstr "Sulfamethoxypyridazin"
+
+msgid "Sulfaperin"
+msgstr ""
+
+msgid "Sulfamerazine"
+msgstr "Sulfamerazin"
+
+msgid "Sulfaphenazole"
+msgstr "Sulfaphenazol"
+
+msgid "Sulfamazone"
+msgstr "Sulfamazon"
+
+msgid "Sulfamethoxazole/Trimethoprim"
+msgstr ""
+
+msgid "Sulfadiazine/Trimethoprim"
+msgstr ""
+
+msgid "Sulfametrole/Trimethoprim"
+msgstr ""
+
+msgid "Sulfamoxole/Trimethoprim"
+msgstr ""
+
+msgid "Sulfadimidine/Trimethoprim"
+msgstr ""
+
+msgid "Sulfadiazine/Tetroxoprim"
+msgstr ""
+
+msgid "Sulfamerazine/Trimethoprim"
+msgstr ""
+
+msgid "Erythromycin"
+msgstr ""
+
+msgid "Spiramycin"
+msgstr ""
+
+msgid "Midecamycin"
+msgstr ""
+
+msgid "Oleandomycin"
+msgstr ""
+
+msgid "Roxithromycin"
+msgstr ""
+
+msgid "Josamycin"
+msgstr ""
+
+msgid "Troleandomycin"
+msgstr ""
+
+msgid "Clarithromycin"
+msgstr ""
+
+msgid "Azithromycin"
+msgstr ""
+
+msgid "Miocamycin"
+msgstr ""
+
+msgid "Rokitamycin"
+msgstr ""
+
+msgid "Dirithromycin"
+msgstr ""
+
+msgid "Flurithromycin"
+msgstr ""
+
+msgid "Telithromycin"
+msgstr ""
+
+msgid "Solithromycin"
+msgstr ""
+
+msgid "Clindamycin"
+msgstr ""
+
+msgid "Lincomycin"
+msgstr ""
+
+msgid "Pristinamycin"
+msgstr ""
+
+msgid "Dalfopristin/Quinupristin"
+msgstr ""
+
+msgid "Streptomycin (i. v.)"
+msgstr ""
+
+msgid "Streptoduocin"
+msgstr ""
+
+msgid "Tobramycin"
+msgstr ""
+
+msgid "Gentamicin"
+msgstr ""
+
+msgid "Kanamycin (i. v.)"
+msgstr ""
+
+msgid "Neomycin (i. v.)"
+msgstr ""
+
+msgid "Amikacin"
+msgstr ""
+
+msgid "Netilmicin"
+msgstr ""
+
+msgid "Sisomicin"
+msgstr ""
+
+msgid "Dibekacin"
+msgstr ""
+
+msgid "Ribostamycin"
+msgstr ""
+
+msgid "Isepamicin"
+msgstr ""
+
+msgid "Arbekacin"
+msgstr ""
+
+msgid "Bekanamycin"
+msgstr ""
+
+msgid "Plazomicin"
+msgstr ""
+
+msgid "Ofloxacin"
+msgstr ""
+
+msgid "Ciprofloxacin"
+msgstr ""
+
+msgid "Pefloxacin"
+msgstr ""
+
+msgid "Enoxacin"
+msgstr ""
+
+msgid "Temafloxacin"
+msgstr ""
+
+msgid "Norfloxacin"
+msgstr ""
+
+msgid "Lomefloxacin"
+msgstr ""
+
+msgid "Fleroxacin"
+msgstr ""
+
+msgid "Sparfloxacin"
+msgstr ""
+
+msgid "Rufloxacin"
+msgstr ""
+
+msgid "Grepafloxacin"
+msgstr ""
+
+msgid "Levofloxacin"
+msgstr ""
+
+msgid "Trovafloxacin"
+msgstr ""
+
+msgid "Moxifloxacin"
+msgstr ""
+
+msgid "Gemifloxacin"
+msgstr ""
+
+msgid "Gatifloxacin"
+msgstr ""
+
+msgid "Prulifloxacin"
+msgstr ""
+
+msgid "Pazufloxacin"
+msgstr ""
+
+msgid "Garenoxacin"
+msgstr ""
+
+msgid "Sitafloxacin"
+msgstr ""
+
+msgid "Tosufloxacin"
+msgstr ""
+
+msgid "Delafloxacin"
+msgstr ""
+
+msgid "Levonadifloxacin"
+msgstr ""
+
+msgid "Lascufloxacin"
+msgstr ""
+
+msgid "Rosoxacin"
+msgstr ""
+
+msgid "Piromidic-acid"
+msgstr ""
+
+msgid "Pipemidic-acid"
+msgstr ""
+
+msgid "Oxolinic-acid"
+msgstr ""
+
+msgid "Cinoxacin"
+msgstr ""
+
+msgid "Flumequine"
+msgstr "Flumequin"
+
+msgid "Nemonoxacin"
+msgstr ""
+
+msgid "Vancomycin (i. v.)"
+msgstr ""
+
+msgid "Teicoplanin"
+msgstr ""
+
+msgid "Telavancin"
+msgstr ""
+
+msgid "Dalbavancin"
+msgstr ""
+
+msgid "Oritavancin"
+msgstr ""
+
+msgid "Colistin (i. v.)"
+msgstr ""
+
+msgid "Polymyxin-B (i. v.)"
+msgstr ""
+
+msgid "Fusidic-acid"
+msgstr ""
+
+msgid "Metronidazole"
+msgstr "Metronidazol"
+
+msgid "Tinidazole"
+msgstr "Tinidazol"
+
+msgid "Ornidazole"
+msgstr "Ornidazol"
+
+msgid "Nitrofurantoin"
+msgstr ""
+
+msgid "Nifurtoinol"
+msgstr ""
+
+msgid "Furazidin"
+msgstr ""
+
+msgid "Fosfomycin (oral)"
+msgstr ""
+
+msgid "Fosfomycin (i. v.)"
+msgstr ""
+
+msgid "Clofoctol"
+msgstr ""
+
+msgid "Spectinomycin"
+msgstr ""
+
+msgid "Linezolid"
+msgstr ""
+
+msgid "Daptomycin"
+msgstr ""
+
+msgid "Tedizolid"
+msgstr ""
+
+msgid "Lefamulin"
+msgstr ""
+
+msgid "Rifampicin"
+msgstr ""
+
+msgid "Secnidazole"
+msgstr ""
+
+msgid "Micronomicin"
+msgstr ""
+
+msgid "Cefoselis"
+msgstr ""
+
+msgid "Tetracyclines"
+msgstr ""
+
+msgid "This group comprises tetracycline antibacterials inhibiting the bacterial protein synthesis through binding to the 30-S part of ribosomes."
+msgstr ""
+
+msgid "Amphenicols"
+msgstr ""
+
+msgid "This group comprises amphenicol antibacterials inhibiting the bacterial protein synthesis."
+msgstr ""
+
+msgid "Penicillins with extended spectrum"
+msgstr ""
+
+msgid "Extended spectrum Penicillins "
+msgstr ""
+
+msgid "This group comprises penicillins with enhanced activity against gram negative rods, e.g. ampicillin and similar antibiotics."
+msgstr ""
+
+msgid "Beta-lactamase sensitive penicillins"
+msgstr ""
+
+msgid "This group comprises penicillin beta-lactam antibacterials, inhibiting the bacterial cell wall synthesis."
+msgstr ""
+
+msgid "Beta-lactamase resistant penicillins"
+msgstr ""
+
+msgid "Beta-lactamase inhibitors"
+msgstr ""
+
+msgid "Combinations of penicillins, incl. beta-lactamase inhibitors"
+msgstr ""
+
+msgid "Penicillins + beta-lactamase inhibitors"
+msgstr ""
+
+msgid "This group comprises combinations of penicillins and/or beta-lactamase inhibitors. Combinations containing one penicillin and enzyme inhibitor are classified at different 5th levels according to the penicillin."
+msgstr ""
+
+msgid "First-generation cephalosporins"
+msgstr ""
+
+msgid "1st gen. cephalosporins"
+msgstr ""
+
+msgid "The first generation compounds have relatively narrow spectrum of activity focused primarily on the gram-positive cocci."
+msgstr ""
+
+msgid "Second-generation cephalosporins"
+msgstr ""
+
+msgid "2nd gen. cephalosporins"
+msgstr ""
+
+msgid "The second generation cephalosporins have a variable activity against gram-positive cocci but have increased activity against gram-negative bacteria. The cephamycin group is included in the second-generation cephalosporins."
+msgstr ""
+
+msgid "Third-generation cephalosporins"
+msgstr ""
+
+msgid "3rd gen. cephalosporins"
+msgstr ""
+
+msgid "The third generation cephalosporins have a marked activity against gram-negative bacteria. Limited activity against gram-positive cocci, particularly methicillin susceptible S. aureus, might occur."
+msgstr ""
+
+msgid "Fourth-generation cephalosporins"
+msgstr ""
+
+msgid "4th gen. cephalosporins"
+msgstr ""
+
+msgid "The fourth generation cephalosporins have activity against gram-positive cocci and a broad array of gram-negative bacteria, including P. aeruginosa and many of the Enterobacteriaceae with inducible chromosomal b-lactamases."
+msgstr ""
+
+msgid "Monobactams"
+msgstr ""
+
+msgid "Carbapenems"
+msgstr ""
+
+msgid "Other cephalosporins and penems"
+msgstr ""
+
+msgid "Trimethoprim and derivatives"
+msgstr ""
+
+msgid "Short-acting sulfonamides"
+msgstr ""
+
+msgid "This group comprises sulfonamides with a biological half-life not exceeding approx. 7 hours."
+msgstr ""
+
+msgid "Intermediate-acting sulfonamides"
+msgstr ""
+
+msgid "This group comprises sulfonamides with a biological half-life of approx. 11-12 hours."
+msgstr ""
+
+msgid "Long-acting sulfonamides"
+msgstr ""
+
+msgid "This group comprises sulfonamides with a biological half-life of approx. 35 hours or more."
+msgstr ""
+
+msgid "Combinations of sulfonamides and trimethoprim, incl. derivatives"
+msgstr ""
+
+msgid "Combinations of sulfonamides and trimethoprim"
+msgstr ""
+
+msgid "Macrolides"
+msgstr ""
+
+msgid "Lincosamides"
+msgstr ""
+
+msgid "Streptogramins"
+msgstr ""
+
+msgid "Streptomycins"
+msgstr ""
+
+msgid "Other aminoglycosides"
+msgstr ""
+
+msgid "Aminoglycosides"
+msgstr ""
+
+msgid "Fluoroquinolones"
+msgstr ""
+
+msgid "Other quinolones"
+msgstr ""
+
+msgid "Glycopeptide antibacterials"
+msgstr ""
+
+msgid "Glycopeptides"
+msgstr ""
+
+msgid "This group comprises glycopeptide antibacterials, inhibiting the cell wall synthesis of gram positive bacteria. Lipoglycopeptide antibacterials are also included in this group. Teicoplanin and intravenous preparations of vancomycin are classified in this group. Oral formulations containing vancomycin are classified in A07A."
+msgstr ""
+
+msgid "Polymyxins"
+msgstr ""
+
+msgid "This group comprises polymyxin antibacterials acting on the bacterial cytoplasm membrane."
+msgstr ""
+
+msgid "Steroid antibacterials"
+msgstr ""
+
+msgid "This group comprises steroid antibacterials, inhibiting the binding of bacterial transfer-RNA and the 50-S part of the ribosomes."
+msgstr ""
+
+msgid "Imidazole derivatives"
+msgstr ""
+
+msgid "Imidazoles"
+msgstr ""
+
+msgid ""
+"This group comprises imidazole antibacterials acting through active metabolites in anaerobic bacteria. Only formulations for parenteral use of e.g. metronidazole are classified in this group. Oral formulations and suppositories of imidazole derivatives are classified in P01 - Antiprotozoals. Pessaries are classified in G01 - Gynecological antiinfectives and antiseptics.\n"
+"The DDDs for the parenteral imidazole formulations are based on the treatment of anaerobic bacteria infections."
+msgstr ""
+
+msgid "Nitrofuran derivatives"
+msgstr ""
+
+msgid "Other antibacterials"
+msgstr ""
+
+msgid "Other"
+msgstr ""
+
+msgid "Antimycobacterial Antibiotics"
+msgstr ""
+
+msgid "This group comprises antibiotics specifically used in tuberculosis, except streptomycin - see comment under J04AM. Other antibiotics, see J01 -Antibacterials for systemic use."
+msgstr ""
+
+msgid "Antiprotozoal Nitroimidazole derivatives"
+msgstr ""
+
+msgid "AWaRe Access"
+msgstr ""
+
+msgid "AWaRe A"
+msgstr ""
+
+msgid "Access antibiotics that have a narrow spectrum of activity and a good safety profile in terms of side-effects."
+msgstr ""
+
+msgid "AWaRe Watch"
+msgstr ""
+
+msgid "AWaRe W"
+msgstr ""
+
+msgid "Watch antibiotics that are broader-spectrum antibiotics and are recommended as first-choice options for patients with more severe clinical presentations or for infections where the causative pathogens are more likely to be resistant to Access antibiotics."
+msgstr ""
+
+msgid "AWaRe Reserve"
+msgstr ""
+
+msgid "AWaRe R"
+msgstr ""
+
+msgid "Reserve antibiotics that are last-choice antibiotics used to treat multidrug-resistant infections."
+msgstr ""
+
+msgid "ATC-5 Groups"
+msgstr ""
+
+msgid "AWaRe Groups"
+msgstr ""
+
+msgid ""
+"AWaRe is the WHO classification of antibiotics introduced by WHO as part of the 2017 Model List of Essential Medicines.\n"
+"In the AWaRe classification, there are three categories of antibiotics:\n"
+"• Access antibiotics that have a narrow spectrum of activity and a good safety profile in terms of side-effects.\n"
+"• Watch antibiotics that are broader-spectrum antibiotics and are recommended as first-choice options for patients with more severe clinical presentations or for infections where the causative pathogens are more likely to be resistant to Access antibiotics.\n"
+"• Reserve antibiotics that are last-choice antibiotics used to treat multidrug-resistant infections.\n"
+"This classification can be used to give an indirect indication of the appropriateness of antibiotic use. The World Health Organization (WHO) has defined a target that at least 70% of global antibiotic consumption at the national level should be from the Access group."
+msgstr ""
+
+msgid "ATC-Code"
+msgstr ""
+
+msgid "AWaRe Category"
+msgstr "AWaRe-Kategorie"
+
+msgid "Substance"
+msgstr "Substanz"
