@@ -3634,8 +3634,10 @@ Hierarchies:
         BeforeAll {
             function New-SpliceConfig {
                 [ordered]@{
-                    optionSets           = @([ordered]@{ id = 'osOther'; code = 'OTHER_SET' }, [ordered]@{ id = 'osP'; code = 'NEOIPC_PATHOGENS' })
-                    options              = @([ordered]@{ id = 'optOther'; code = 'x'; optionSet = [ordered]@{ id = 'osOther' } }, [ordered]@{ id = 'optA'; code = '0'; optionSet = [ordered]@{ id = 'osP' } })
+                    optionSets           = @([ordered]@{ id = 'osOther'; code = 'OTHER_SET' }, [ordered]@{ id = 'osP'; code = 'NEOIPC_PATHOGENS' }, [ordered]@{ id = 'osAbx'; code = 'NEOIPC_ANTIMICROBIAL_SUBSTANCES' })
+                    options              = @([ordered]@{ id = 'optOther'; code = 'x'; optionSet = [ordered]@{ id = 'osOther' } }, [ordered]@{ id = 'optA'; code = '0'; optionSet = [ordered]@{ id = 'osP' } }, [ordered]@{ id = 'optAbxOld'; code = 'J01AA01'; optionSet = [ordered]@{ id = 'osAbx' } })
+                    optionGroups         = @([ordered]@{ id = 'ogAtc'; code = 'J01AA' }, [ordered]@{ id = 'ogAw'; code = 'WHO_AWARE_WATCH' })
+                    optionGroupSets      = @([ordered]@{ id = 'ogsAtc'; code = 'ATC5' }, [ordered]@{ id = 'ogsAw'; code = 'WHO_AWARE' })
                     dataElements         = @([ordered]@{ id = 'deOther'; code = 'NEOIPC_ADM_X' }, [ordered]@{ id = 'deP1'; code = 'NEOIPC_BSI_PATHOGEN_1' })
                     programRuleVariables = @([ordered]@{ id = 'prvOther'; name = 'Some other var' }, [ordered]@{ id = 'prvR1'; name = 'NeoIPC BSI Pathogen 1 value' })
                     programRules         = @(
@@ -3664,14 +3666,21 @@ Hierarchies:
             Mock New-NeoIPCPathogenRule { [ordered]@{ programRules = @([ordered]@{ id = 'ruleR1'; name = 'NeoIPC BSI Pathogen 1 - set 3GCR'; programRuleActions = @([ordered]@{ id = 'actR1' }) }); programRuleActions = @([ordered]@{ id = 'actR1'; programRule = [ordered]@{ id = 'ruleR1' }; programRuleActionType = 'ASSIGN' }) } }
             Mock New-NeoIPCPathogenFieldGatingRule { [ordered]@{ programRules = @([ordered]@{ id = 'ruleWS'; name = 'NeoIPC BSI Pathogen 1 - when set'; programRuleActions = @([ordered]@{ id = 'actWSsrc' }) }); programRuleActions = @([ordered]@{ id = 'actWSsrc'; programRule = [ordered]@{ id = 'ruleWS' }; programRuleActionType = 'SETMANDATORYFIELD'; dataElement = [ordered]@{ id = 'deSrc' } }) } }
             Mock New-NeoIPCSubstanceRule { [ordered]@{ programRules = @([ordered]@{ id = 'ruleSV'; name = 'NeoIPC Surveillance end Antibiotic substance days - validate'; programRuleActions = @([ordered]@{ id = 'actSV' }) }); programRuleActions = @([ordered]@{ id = 'actSV'; programRule = [ordered]@{ id = 'ruleSV' }; programRuleActionType = 'SHOWERROR'; dataElement = [ordered]@{ id = 'deABdays' }; content = 'x' }) } }
+            # Antibiotic generators: reproduce the deployed option set + groups + group-sets in place (same ids),
+            # plus one new option (optAbx1 replacing the deployed optAbxOld by membership).
+            Mock New-NeoIPCAntimicrobialOptionSet { [ordered]@{ optionSets = @([ordered]@{ id = 'osAbx'; code = 'NEOIPC_ANTIMICROBIAL_SUBSTANCES' }); options = @([ordered]@{ id = 'optAbx1'; code = 'J01AA01'; optionSet = [ordered]@{ id = 'osAbx' } }) } }
+            Mock New-NeoIPCAntibioticOptionGroup { [ordered]@{ optionGroups = @([ordered]@{ id = 'ogAtc'; code = 'J01AA' }, [ordered]@{ id = 'ogAw'; code = 'WHO_AWARE_WATCH' }) } }
+            Mock New-NeoIPCAntibioticOptionGroupSet { [ordered]@{ optionGroupSets = @([ordered]@{ id = 'ogsAtc'; code = 'ATC5' }, [ordered]@{ id = 'ogsAw'; code = 'WHO_AWARE' }) } }
         }
 
         It 'replaces the generated classes (by id/code/name) and keeps non-generated objects' {
             $out = Add-NeoIPCGeneratedMetadata -Config (New-SpliceConfig) -Export ([ordered]@{})
-            @($out['optionSets'] | ForEach-Object { [string]$_['id'] } | Sort-Object) | Should -Be @('osOther', 'osP')           # other kept, pathogen replaced, no dup
-            @($out['options'] | ForEach-Object { [string]$_['id'] } | Sort-Object) | Should -Be @('optA', 'optNEW', 'optOther')  # optA replaced, optNEW added, other kept
+            @($out['optionSets'] | ForEach-Object { [string]$_['id'] } | Sort-Object) | Should -Be @('osAbx', 'osOther', 'osP')              # other kept, pathogen + antimicrobial replaced, no dup
+            @($out['options'] | ForEach-Object { [string]$_['id'] } | Sort-Object) | Should -Be @('optA', 'optAbx1', 'optNEW', 'optOther')  # optA + optAbxOld replaced, optNEW added, other kept
             @($out['dataElements'] | ForEach-Object { [string]$_['id'] } | Sort-Object) | Should -Be @('deOther', 'deP1', 'deS1', 'deSrc')
             @($out['programRuleVariables'] | ForEach-Object { [string]$_['id'] } | Sort-Object) | Should -Be @('prvFG1', 'prvOther', 'prvR1', 'prvS1')
+            @($out['optionGroups'] | ForEach-Object { [string]$_['id'] } | Sort-Object) | Should -Be @('ogAtc', 'ogAw')                     # antibiotic ATC + AWaRe groups, replaced in place
+            @($out['optionGroupSets'] | ForEach-Object { [string]$_['id'] } | Sort-Object) | Should -Be @('ogsAtc', 'ogsAw')
         }
         It 'drops the stale HAP aggregate rule and its actions; keeps the definition rule' {
             $out = Add-NeoIPCGeneratedMetadata -Config (New-SpliceConfig) -Export ([ordered]@{})
@@ -3694,7 +3703,7 @@ Hierarchies:
         }
         It 'produces no duplicate ids across the spliced types' {
             $out = Add-NeoIPCGeneratedMetadata -Config (New-SpliceConfig) -Export ([ordered]@{})
-            foreach ($t in 'optionSets', 'options', 'dataElements', 'programRuleVariables', 'programRules', 'programRuleActions') {
+            foreach ($t in 'optionSets', 'options', 'optionGroups', 'optionGroupSets', 'dataElements', 'programRuleVariables', 'programRules', 'programRuleActions') {
                 $ids = @($out[$t] | ForEach-Object { [string]$_['id'] })
                 ($ids | Sort-Object -Unique).Count | Should -Be $ids.Count
             }
@@ -3707,6 +3716,216 @@ Hierarchies:
             $null = Add-NeoIPCGeneratedMetadata -Config (New-SpliceConfig) -Export ([ordered]@{}) -PathogenCount 5 -SubstanceCount 7
             Should -Invoke New-NeoIPCPathogenRule -ParameterFilter { $PathogenCount -eq 5 } -Times 1 -Exactly
             Should -Invoke New-NeoIPCSubstanceRule -ParameterFilter { $SubstanceCount -eq 7 } -Times 1 -Exactly
+        }
+    }
+
+    Describe 'Antibiotic-domain generation (option set + ATC/AWaRe groups + group-sets)' {
+        # Synthetic fixtures: a 5-substance source (incl. the Minocycline route-split + the Micronomicin tmp code)
+        # and a 2-group source, with a mock export carrying the deployed option set + group/group-set shells whose
+        # UIDs the generators preserve. Sharing omitted (not under test) to avoid the sharing-shape contract here.
+        BeforeAll {
+            $script:abxCsv = Join-Path $TestDrive 'NeoIPC-Antibiotics.csv'
+            @('id,atc_code,name,atc_group,aware_category',
+                'J01AA01,J01AA01,Demeclocycline,J01AA,Watch',
+                'J01AA08_O,J01AA08,Minocycline (oral),J01AA,Watch',
+                'J01AA08_P,J01AA08,Minocycline (i. v.),J01AA,Reserve',
+                'tmp_001,,Micronomicin,J01GB,Watch',
+                'J01GB06,J01GB06,Amikacin,J01GB,Access') | Set-Content -LiteralPath $script:abxCsv -Encoding utf8NoBOM
+            $script:abxGrpCsv = Join-Path $TestDrive 'NeoIPC-Antibiotic-Groups.csv'
+            @('code,name,shortName,description',
+                'J01AA,Tetracyclines,Tetracyclines,Tetracycline antibacterials.',
+                'J01GB,Other aminoglycosides,Aminoglycosides,Aminoglycoside antibacterials.') | Set-Content -LiteralPath $script:abxGrpCsv -Encoding utf8NoBOM
+            function New-AbxExport {
+                [ordered]@{
+                    optionSets      = @([ordered]@{ id = 'OptSetAbx01'; code = 'NEOIPC_ANTIMICROBIAL_SUBSTANCES'; name = 'NeoIPC Antimicrobial Substances'; valueType = 'TEXT' })
+                    options         = @(
+                        [ordered]@{ id = 'OptAbxAA011'; code = 'J01AA01'; optionSet = [ordered]@{ id = 'OptSetAbx01' } },
+                        [ordered]@{ id = 'OptAbxAA081'; code = 'J01AA08'; optionSet = [ordered]@{ id = 'OptSetAbx01' } },        # -> J01AA08_P
+                        [ordered]@{ id = 'OptAbxMicr1'; code = 'Micronomicin'; optionSet = [ordered]@{ id = 'OptSetAbx01' } }, # -> tmp_001
+                        [ordered]@{ id = 'OptAbxGB061'; code = 'J01GB06'; optionSet = [ordered]@{ id = 'OptSetAbx01' } })
+                    optionGroups    = @(
+                        [ordered]@{ id = 'GrpAtcAA001'; code = 'J01AA'; name = 'Tetracyclines'; shortName = 'Tetracyclines' },
+                        [ordered]@{ id = 'GrpAtcGB001'; code = 'J01GB'; name = 'Other aminoglycosides'; shortName = 'Aminoglycosides' },
+                        [ordered]@{ id = 'GrpAwAcce01'; code = 'WHO_AWARE_ACCESS'; name = 'AWaRe Access'; shortName = 'AWaRe A'; description = 'Access antibiotics.' },
+                        [ordered]@{ id = 'GrpAwWatc01'; code = 'WHO_AWARE_WATCH'; name = 'AWaRe Watch'; shortName = 'AWaRe W' },
+                        [ordered]@{ id = 'GrpAwRese01'; code = 'WHO_AWARE_RESERVE'; name = 'AWaRe Reserve'; shortName = 'AWaRe R' })
+                    optionGroupSets = @(
+                        [ordered]@{ id = 'GrpSetAtc01'; code = 'ATC5'; name = 'ATC-5 Groups'; dataDimension = $true; optionSet = [ordered]@{ id = 'OptSetAbx01' } },
+                        [ordered]@{ id = 'GrpSetAware'; code = 'WHO_AWARE'; name = 'AWaRe Groups'; description = 'AWaRe classification.'; dataDimension = $true; optionSet = [ordered]@{ id = 'OptSetAbx01' } })
+                }
+            }
+        }
+
+        It 'option set: one option per substance; preserves UID by code; mints the new oral split' {
+            $f = New-NeoIPCAntimicrobialOptionSet -Path $script:abxCsv -ExistingPackage (New-AbxExport)
+            @($f['options']).Count | Should -Be 5
+            $f['optionSets'][0]['id'] | Should -BeExactly 'OptSetAbx01'
+            $f['optionSets'][0]['valueType'] | Should -BeExactly 'TEXT'
+            @($f['options'] | Where-Object { $_['code'] -eq 'J01AA01' })[0]['id'] | Should -BeExactly 'OptAbxAA011'
+            @($f['options'] | Where-Object { $_['code'] -eq 'J01AA08_O' })[0]['id'] | Should -Not -BeNullOrEmpty
+        }
+        It 'option set: the documented code renames inherit the deployed UID' {
+            $f = New-NeoIPCAntimicrobialOptionSet -Path $script:abxCsv -ExistingPackage (New-AbxExport)
+            @($f['options'] | Where-Object { $_['code'] -eq 'J01AA08_P' })[0]['id'] | Should -BeExactly 'OptAbxAA081'
+            @($f['options'] | Where-Object { $_['code'] -eq 'tmp_001' })[0]['id'] | Should -BeExactly 'OptAbxMicr1'
+        }
+        It 'option set: sortOrder is 1-based alphabetical by name' {
+            $f = New-NeoIPCAntimicrobialOptionSet -Path $script:abxCsv -ExistingPackage (New-AbxExport)
+            @($f['options'] | Sort-Object { $_['sortOrder'] } | ForEach-Object { $_['name'] })[0] | Should -BeExactly 'Amikacin'
+        }
+        It 'option set: fails loud when a deployed code is absent from the source' {
+            $pkg = New-AbxExport
+            $pkg['options'] = @($pkg['options']) + @([ordered]@{ id = 'GhostOpt001'; code = 'J01ZZ99'; optionSet = [ordered]@{ id = 'OptSetAbx01' } })
+            { New-NeoIPCAntimicrobialOptionSet -Path $script:abxCsv -ExistingPackage $pkg } | Should -Throw '*J01ZZ99*'
+        }
+        It 'option set: fails loud when the set is absent from the package' {
+            { New-NeoIPCAntimicrobialOptionSet -Path $script:abxCsv -ExistingPackage ([ordered]@{ optionSets = @(); options = @() }) } | Should -Throw '*was not found*'
+        }
+        It 'option set: localizes option names from the antibiotic catalogue (property NAME)' {
+            $poDir = Join-Path $TestDrive 'abxpo'; New-Item -ItemType Directory -Path $poDir -Force | Out-Null
+            @('msgid ""', 'msgstr ""', '', 'msgid "Amikacin"', 'msgstr "Amikacin DE"') | Set-Content -LiteralPath (Join-Path $poDir 'antibiotics.de.po') -Encoding utf8NoBOM
+            $f = New-NeoIPCAntimicrobialOptionSet -Path $script:abxCsv -ExistingPackage (New-AbxExport) -PoDirectory $poDir
+            $t = @(@($f['options'] | Where-Object { $_['code'] -eq 'J01GB06' })[0]['translations'] | Where-Object { $_['locale'] -eq 'de' })[0]
+            $t['property'] | Should -BeExactly 'NAME'
+            $t['value'] | Should -BeExactly 'Amikacin DE'
+        }
+        It 'option groups: ATC + AWaRe groups with derived membership; tmp assigned to its clinical ATC group' {
+            $os = New-NeoIPCAntimicrobialOptionSet -Path $script:abxCsv -ExistingPackage (New-AbxExport)
+            $og = New-NeoIPCAntibioticOptionGroup -OptionSet $os -SubstancePath $script:abxCsv -GroupPath $script:abxGrpCsv -ExistingPackage (New-AbxExport)
+            @($og['optionGroups']).Count | Should -Be 5
+            $byUid = @{}; $os['options'] | ForEach-Object { $byUid[$_['id']] = $_['code'] }
+            $gb = @($og['optionGroups'] | Where-Object { $_['code'] -eq 'J01GB' })[0]
+            @($gb['options'] | ForEach-Object { $byUid[$_['id']] }) | Should -Contain 'tmp_001'
+            @(@($og['optionGroups'] | Where-Object { $_['code'] -eq 'WHO_AWARE_WATCH' })[0]['options']).Count | Should -Be 3
+        }
+        It 'option groups: each option in <=1 group per group-set (the pivot_wider invariant)' {
+            $os = New-NeoIPCAntimicrobialOptionSet -Path $script:abxCsv -ExistingPackage (New-AbxExport)
+            $og = New-NeoIPCAntibioticOptionGroup -OptionSet $os -SubstancePath $script:abxCsv -GroupPath $script:abxGrpCsv -ExistingPackage (New-AbxExport)
+            foreach ($fam in @('ATC', 'AWaRe')) {
+                $grps = @($og['optionGroups'] | Where-Object { if ($fam -eq 'AWaRe') { $_['code'] -like 'WHO_AWARE_*' } else { $_['code'] -notlike 'WHO_AWARE_*' } })
+                $count = @{}; $grps | ForEach-Object { foreach ($o in @($_['options'])) { $count[[string]$o['id']] = 1 + $count[[string]$o['id']] } }
+                @($count.Values | Where-Object { $_ -gt 1 }).Count | Should -Be 0
+            }
+        }
+        It 'option groups: fails loud when an ATC group has no member options' {
+            $grp2 = Join-Path $TestDrive 'grp2.csv'
+            @('code,name,shortName,description', 'J01AA,Tetracyclines,Tetra,x', 'J01ZZ,Empty group,Empty,y') | Set-Content -LiteralPath $grp2 -Encoding utf8NoBOM
+            $os = New-NeoIPCAntimicrobialOptionSet -Path $script:abxCsv -ExistingPackage (New-AbxExport)
+            { New-NeoIPCAntibioticOptionGroup -OptionSet $os -SubstancePath $script:abxCsv -GroupPath $grp2 -ExistingPackage (New-AbxExport) } | Should -Throw '*J01ZZ*'
+        }
+        It 'option group-sets: ATC5 enrols the ATC groups, WHO_AWARE the AWaRe groups (UIDs preserved)' {
+            $os = New-NeoIPCAntimicrobialOptionSet -Path $script:abxCsv -ExistingPackage (New-AbxExport)
+            $og = New-NeoIPCAntibioticOptionGroup -OptionSet $os -SubstancePath $script:abxCsv -GroupPath $script:abxGrpCsv -ExistingPackage (New-AbxExport)
+            $ogs = New-NeoIPCAntibioticOptionGroupSet -OptionGroup $og -ExistingPackage (New-AbxExport)
+            @($ogs['optionGroupSets']).Count | Should -Be 2
+            $atc5 = @($ogs['optionGroupSets'] | Where-Object { $_['code'] -eq 'ATC5' })[0]
+            $atc5['id'] | Should -BeExactly 'GrpSetAtc01'
+            @($atc5['optionGroups']).Count | Should -Be 2
+            @(@($ogs['optionGroupSets'] | Where-Object { $_['code'] -eq 'WHO_AWARE' })[0]['optionGroups']).Count | Should -Be 3
+        }
+        It 'ConvertTo-NeoIPCAntibioticCanonicalCode maps the migrated codes and passes others through' {
+            ConvertTo-NeoIPCAntibioticCanonicalCode -Code 'J01AA08' | Should -BeExactly 'J01AA08_P'
+            ConvertTo-NeoIPCAntibioticCanonicalCode -Code 'Cefoselis' | Should -BeExactly 'tmp_002'
+            ConvertTo-NeoIPCAntibioticCanonicalCode -Code 'J01GB06' | Should -BeExactly 'J01GB06'
+        }
+        It 'Get-NeoIPCAntibioticSubstance fails loud on a duplicate id' {
+            $dup = Join-Path $TestDrive 'dup.csv'
+            @('id,atc_code,name,atc_group,aware_category', 'J01AA01,J01AA01,A,J01AA,Watch', 'J01AA01,J01AA01,B,J01AA,Watch') | Set-Content -LiteralPath $dup -Encoding utf8NoBOM
+            { Get-NeoIPCAntibioticSubstance -Path $dup } | Should -Throw '*Duplicate*'
+        }
+        It 'Test-NeoIPCMetadataGeneratedExcluded excludes antibiotic option groups + group-sets, spares others' {
+            $gk = Get-NeoIPCMetadataGeneratedKeys -Package (New-AbxExport)
+            (Test-NeoIPCMetadataGeneratedExcluded -Type 'optionGroups' -Object ([ordered]@{ code = 'J01AA' }) -GeneratedKeys $gk) | Should -BeTrue
+            (Test-NeoIPCMetadataGeneratedExcluded -Type 'optionGroups' -Object ([ordered]@{ code = 'WHO_AWARE_WATCH' }) -GeneratedKeys $gk) | Should -BeTrue
+            (Test-NeoIPCMetadataGeneratedExcluded -Type 'optionGroupSets' -Object ([ordered]@{ code = 'ATC5' }) -GeneratedKeys $gk) | Should -BeTrue
+            (Test-NeoIPCMetadataGeneratedExcluded -Type 'optionGroupSets' -Object ([ordered]@{ code = 'WHO_AWARE' }) -GeneratedKeys $gk) | Should -BeTrue
+            (Test-NeoIPCMetadataGeneratedExcluded -Type 'optionGroups' -Object ([ordered]@{ code = 'NEO_ORGANISM_GROUP' }) -GeneratedKeys $gk) | Should -BeFalse
+        }
+        It 'the code-rename map is exactly the four documented migrations (pins the gate''s SubstanceCodeMigration trust)' {
+            $script:NeoIPCAntibioticCodeRename.Count | Should -Be 4
+            $script:NeoIPCAntibioticCodeRename['J01AA08'] | Should -BeExactly 'J01AA08_P'
+            $script:NeoIPCAntibioticCodeRename['J01XX01'] | Should -BeExactly 'J01XX01_P'
+            $script:NeoIPCAntibioticCodeRename['Cefoselis'] | Should -BeExactly 'tmp_002'
+            $script:NeoIPCAntibioticCodeRename['Micronomicin'] | Should -BeExactly 'tmp_001'
+        }
+        It 'option groups: localizes both ATC and AWaRe group names from the antibiotic catalogue' {
+            $poDir = Join-Path $TestDrive 'abxpogrp'; New-Item -ItemType Directory -Path $poDir -Force | Out-Null
+            @('msgid ""', 'msgstr ""', '', 'msgid "Tetracyclines"', 'msgstr "Tetrazykline"', '', 'msgid "AWaRe Watch"', 'msgstr "AWaRe Watch DE"') | Set-Content -LiteralPath (Join-Path $poDir 'antibiotics.de.po') -Encoding utf8NoBOM
+            $os = New-NeoIPCAntimicrobialOptionSet -Path $script:abxCsv -ExistingPackage (New-AbxExport)
+            $og = New-NeoIPCAntibioticOptionGroup -OptionSet $os -SubstancePath $script:abxCsv -GroupPath $script:abxGrpCsv -ExistingPackage (New-AbxExport) -PoDirectory $poDir
+            @(@($og['optionGroups'] | Where-Object { $_['code'] -eq 'J01AA' })[0]['translations'] | Where-Object { $_['locale'] -eq 'de' })[0]['value'] | Should -BeExactly 'Tetrazykline'
+            @(@($og['optionGroups'] | Where-Object { $_['code'] -eq 'WHO_AWARE_WATCH' })[0]['translations'] | Where-Object { $_['locale'] -eq 'de' })[0]['value'] | Should -BeExactly 'AWaRe Watch DE'
+        }
+        It 'reuses the deployed sharing onto the generated option set, group, and group-set' {
+            $pkg = New-AbxExport
+            $sh = [ordered]@{ owner = 'OwnerUser01'; external = $false; users = [ordered]@{}; userGroups = [ordered]@{}; public = 'rw------' }
+            $pkg['optionSets'][0]['sharing'] = $sh
+            @($pkg['optionGroups'] | Where-Object { $_['code'] -eq 'J01AA' })[0]['sharing'] = $sh
+            @($pkg['optionGroupSets'] | Where-Object { $_['code'] -eq 'ATC5' })[0]['sharing'] = $sh
+            $os = New-NeoIPCAntimicrobialOptionSet -Path $script:abxCsv -ExistingPackage $pkg
+            $os['optionSets'][0]['sharing'] | Should -Not -BeNullOrEmpty
+            $og = New-NeoIPCAntibioticOptionGroup -OptionSet $os -SubstancePath $script:abxCsv -GroupPath $script:abxGrpCsv -ExistingPackage $pkg
+            @($og['optionGroups'] | Where-Object { $_['code'] -eq 'J01AA' })[0]['sharing'] | Should -Not -BeNullOrEmpty
+            $ogs = New-NeoIPCAntibioticOptionGroupSet -OptionGroup $og -ExistingPackage $pkg
+            @($ogs['optionGroupSets'] | Where-Object { $_['code'] -eq 'ATC5' })[0]['sharing'] | Should -Not -BeNullOrEmpty
+        }
+    }
+
+    Describe 'Compare-NeoIPCGeneratedMetadata (antibiotic buckets)' {
+        # The pathogen/substance generators are mocked EMPTY and the antibiotic generators mocked to a small
+        # controlled domain, so the diff classifier produces only the antibiotic deltas — exercising each antibiotic
+        # bucket (SubstanceCodeMigration / SubstanceNaming / SubstanceAddition / GroupMembership / GroupSetNormalisation
+        # / OptionSetGrowth) and the Unclassified failure path for an UNDOCUMENTED code change.
+        BeforeAll {
+            function New-AbxDiffDeployed {
+                [ordered]@{
+                    optionSets      = @([ordered]@{ id = 'OptSetAbx01'; code = 'NEOIPC_ANTIMICROBIAL_SUBSTANCES'; valueType = 'TEXT'; options = @([ordered]@{ id = 'AbxOptRen01' }, [ordered]@{ id = 'AbxOptNam01' }) })
+                    options         = @(
+                        [ordered]@{ id = 'AbxOptRen01'; code = 'J01AA08'; name = 'Minocycline (i. v.)'; sortOrder = 1; optionSet = [ordered]@{ id = 'OptSetAbx01' } },
+                        [ordered]@{ id = 'AbxOptNam01'; code = 'J01GB06'; name = 'Amikacin'; sortOrder = 2; optionSet = [ordered]@{ id = 'OptSetAbx01' } })
+                    optionGroups    = @([ordered]@{ id = 'AbxGrpAA01'; code = 'J01AA'; name = 'Tetracyclines'; options = @([ordered]@{ id = 'AbxOptRen01' }) })
+                    optionGroupSets = @([ordered]@{ id = 'AbxSetAtc1'; code = 'ATC5'; optionGroups = @([ordered]@{ id = 'AbxGrpAA01' }, [ordered]@{ id = 'AbxGrpZZ01' }) })
+                }
+            }
+        }
+        BeforeEach {
+            Mock New-NeoIPCPathogenOptionSet { [ordered]@{ optionSets = @(); options = @() } }
+            Mock New-NeoIPCPathogenDataElement { [ordered]@{ dataElements = @() } }
+            Mock New-NeoIPCSubstanceDataElement { [ordered]@{ dataElements = @() } }
+            Mock New-NeoIPCPathogenVariable { [ordered]@{ programRuleVariables = @() } }
+            Mock New-NeoIPCPathogenFieldGatingVariable { [ordered]@{ programRuleVariables = @() } }
+            Mock New-NeoIPCSubstanceVariable { [ordered]@{ programRuleVariables = @() } }
+            Mock New-NeoIPCPathogenRule { [ordered]@{ programRules = @(); programRuleActions = @() } }
+            Mock New-NeoIPCPathogenFieldGatingRule { [ordered]@{ programRules = @(); programRuleActions = @() } }
+            Mock New-NeoIPCSubstanceRule { [ordered]@{ programRules = @(); programRuleActions = @() } }
+            Mock New-NeoIPCAntimicrobialOptionSet { [ordered]@{
+                    optionSets = @([ordered]@{ id = 'OptSetAbx01'; code = 'NEOIPC_ANTIMICROBIAL_SUBSTANCES'; valueType = 'TEXT'; options = @([ordered]@{ id = 'AbxOptRen01' }, [ordered]@{ id = 'AbxOptNam01' }, [ordered]@{ id = 'AbxOptAdd01' }) })
+                    options    = @(
+                        [ordered]@{ id = 'AbxOptRen01'; code = 'J01AA08_P'; name = 'Minocycline (i. v.)'; sortOrder = 1; optionSet = [ordered]@{ id = 'OptSetAbx01' } },
+                        [ordered]@{ id = 'AbxOptNam01'; code = 'J01GB06'; name = 'Amikacin renamed'; sortOrder = 2; optionSet = [ordered]@{ id = 'OptSetAbx01' } },
+                        [ordered]@{ id = 'AbxOptAdd01'; code = 'J01AA08_O'; name = 'Minocycline (oral)'; sortOrder = 3; optionSet = [ordered]@{ id = 'OptSetAbx01' } }) } }
+            Mock New-NeoIPCAntibioticOptionGroup { [ordered]@{ optionGroups = @([ordered]@{ id = 'AbxGrpAA01'; code = 'J01AA'; name = 'Tetracyclines'; options = @([ordered]@{ id = 'AbxOptRen01' }, [ordered]@{ id = 'AbxOptAdd01' }) }) } }
+            Mock New-NeoIPCAntibioticOptionGroupSet { [ordered]@{ optionGroupSets = @([ordered]@{ id = 'AbxSetAtc1'; code = 'ATC5'; optionGroups = @([ordered]@{ id = 'AbxGrpZZ01' }, [ordered]@{ id = 'AbxGrpAA01' }) }) } }
+        }
+        It 'classifies every antibiotic delta into its bucket and reports nothing Unclassified' {
+            $r = @(Compare-NeoIPCGeneratedMetadata -ExistingPackage (New-AbxDiffDeployed))
+            function HasC($type, $kind, $class) { @($r | Where-Object { $_.Type -eq $type -and $_.Kind -eq $kind -and $_.Class -eq $class }).Count }
+            (HasC 'optionSets' 'Changed' 'OptionSetGrowth') | Should -BeGreaterThan 0
+            (HasC 'options' 'Changed' 'SubstanceCodeMigration') | Should -BeGreaterThan 0
+            (HasC 'options' 'Changed' 'SubstanceNaming') | Should -BeGreaterThan 0
+            (HasC 'options' 'Added' 'SubstanceAddition') | Should -BeGreaterThan 0
+            (HasC 'optionGroups' 'Changed' 'GroupMembership') | Should -BeGreaterThan 0
+            (HasC 'optionGroupSets' 'Changed' 'GroupSetNormalisation') | Should -BeGreaterThan 0
+            @($r | Where-Object { $_.Class -eq 'Unclassified' }).Count | Should -Be 0
+        }
+        It 'flags an UNDOCUMENTED antibiotic code change as Unclassified (not a benign SubstanceCodeMigration)' {
+            Mock New-NeoIPCAntimicrobialOptionSet { [ordered]@{
+                    optionSets = @([ordered]@{ id = 'OptSetAbx01'; code = 'NEOIPC_ANTIMICROBIAL_SUBSTANCES'; valueType = 'TEXT'; options = @([ordered]@{ id = 'AbxOptRen01' }, [ordered]@{ id = 'AbxOptNam01' }) })
+                    options    = @(
+                        [ordered]@{ id = 'AbxOptRen01'; code = 'J01ZZ99'; name = 'Minocycline (i. v.)'; sortOrder = 1; optionSet = [ordered]@{ id = 'OptSetAbx01' } },
+                        [ordered]@{ id = 'AbxOptNam01'; code = 'J01GB06'; name = 'Amikacin'; sortOrder = 2; optionSet = [ordered]@{ id = 'OptSetAbx01' } }) } }
+            $r = @(Compare-NeoIPCGeneratedMetadata -ExistingPackage (New-AbxDiffDeployed))
+            @($r | Where-Object { $_.Id -eq 'AbxOptRen01' -and $_.Kind -eq 'Changed' -and $_.Class -eq 'Unclassified' }).Count | Should -Be 1
         }
     }
 
@@ -3750,6 +3969,11 @@ Hierarchies:
             Mock New-NeoIPCPathogenRule { [ordered]@{ programRules = @([ordered]@{ id = 'ruleSet'; name = 'NeoIPC BSI Pathogen 1 - set 3GCR'; programRuleActions = @([ordered]@{ id = 'actSet' }) }); programRuleActions = @([ordered]@{ id = 'actSet'; programRule = [ordered]@{ id = 'ruleSet' }; programRuleActionType = 'ASSIGN'; data = 'enum' }) } }
             Mock New-NeoIPCPathogenFieldGatingRule { [ordered]@{ programRules = @([ordered]@{ id = 'ruleWS'; name = 'NeoIPC BSI Pathogen 1 - when set'; programRuleActions = @([ordered]@{ id = 'actWSsrc' }) }); programRuleActions = @([ordered]@{ id = 'actWSsrc'; programRule = [ordered]@{ id = 'ruleWS' }; programRuleActionType = 'SETMANDATORYFIELD'; dataElement = [ordered]@{ id = 'deSrc' } }) } }
             Mock New-NeoIPCSubstanceRule { [ordered]@{ programRules = @(); programRuleActions = @() } }
+            # Antibiotic generators mocked empty: this Describe exercises the pathogen/substance classification.
+            # The antibiotic buckets are exercised in the 'Compare-NeoIPCGeneratedMetadata (antibiotic buckets)' Describe.
+            Mock New-NeoIPCAntimicrobialOptionSet { [ordered]@{ optionSets = @(); options = @() } }
+            Mock New-NeoIPCAntibioticOptionGroup { [ordered]@{ optionGroups = @() } }
+            Mock New-NeoIPCAntibioticOptionGroupSet { [ordered]@{ optionGroupSets = @() } }
         }
         It 'classifies every delta into its documented bucket and reports nothing Unclassified' {
             $r = @(Compare-NeoIPCGeneratedMetadata -ExistingPackage (New-DiffDeployed))

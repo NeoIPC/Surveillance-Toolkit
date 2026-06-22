@@ -109,9 +109,11 @@ function Add-NeoIPCGeneratedMetadata {
         Splice the ontology / capability-matrix generated objects into a closure config, replacing the deployed
         generated-class objects with the freshly generated ones.
     .DESCRIPTION
-        Runs the nine ontology- and matrix-driven generators against the export and replaces the deployed
-        generated-class objects in the config with the generated ones:
+        Runs the twelve ontology-, matrix- and source-driven generators against the export and replaces the
+        deployed generated-class objects in the config with the generated ones:
           - the NEOIPC_PATHOGENS option set + its options (from the infectious-agent ontology),
+          - the NEOIPC_ANTIMICROBIAL_SUBSTANCES option set + options, the 34 ATC-4 + 3 AWaRe option groups, and the
+            ATC5 / WHO_AWARE option-group-sets (from the reconciled antibiotic sources),
           - the per-slot pathogen + antimicrobial-substance data elements,
           - the resistance, field-gating and substance program-rule variables,
           - the resistance, field-gating and substance program rules + actions.
@@ -172,9 +174,18 @@ function Add-NeoIPCGeneratedMetadata {
     $patRuleFrag = New-NeoIPCPathogenRule @ontologyArgs -ExistingPackage $Export -PathogenCount $PathogenCount
     $fgRuleFrag  = New-NeoIPCPathogenFieldGatingRule @ontologyArgs -ExistingPackage $Export -PathogenCount $PathogenCount
     $subRuleFrag = New-NeoIPCSubstanceRule -ExistingPackage $Export -SubstanceCount $SubstanceCount
+    # Antibiotic domain (from the reconciled antibiotic sources): the NEOIPC_ANTIMICROBIAL_SUBSTANCES option set +
+    # options, the 34 ATC-4 + 3 AWaRe option groups, and the ATC5 / WHO_AWARE option-group-sets. The option set and
+    # the group names are localized from the bilingual antibiotic catalogues (po/antibiotics.<locale>.po). The
+    # group generator needs the generated option UIDs; the group-set generator needs the generated group UIDs.
+    $abxOptFrag    = New-NeoIPCAntimicrobialOptionSet -ExistingPackage $Export -PoDirectory $PoDirectory
+    $abxGrpFrag    = New-NeoIPCAntibioticOptionGroup -OptionSet $abxOptFrag -ExistingPackage $Export -PoDirectory $PoDirectory
+    $abxGrpSetFrag = New-NeoIPCAntibioticOptionGroupSet -OptionGroup $abxGrpFrag -ExistingPackage $Export
 
-    $genOptionSets   = @($optionFrag['optionSets'])
-    $genOptions      = @($optionFrag['options'])
+    $genOptionSets      = @($optionFrag['optionSets']) + @($abxOptFrag['optionSets'])
+    $genOptions         = @($optionFrag['options']) + @($abxOptFrag['options'])
+    $genOptionGroups    = @($abxGrpFrag['optionGroups'])
+    $genOptionGroupSets = @($abxGrpSetFrag['optionGroupSets'])
     $genDataElements = @($patDeFrag['dataElements']) + @($subDeFrag['dataElements'])
     $genVariables    = @($patVarFrag['programRuleVariables']) + @($fgVarFrag['programRuleVariables']) + @($subVarFrag['programRuleVariables'])
     $genRules        = @($patRuleFrag['programRules']) + @($fgRuleFrag['programRules']) + @($subRuleFrag['programRules'])
@@ -200,6 +211,17 @@ function Add-NeoIPCGeneratedMetadata {
         })
     $Config['optionSets'] = @($keptOptionSets + $genOptionSets)
     $Config['options'] = @($keptOptions + $genOptions)
+
+    # ---- optionGroups / optionGroupSets (by code or id; the whole antibiotic domain is generated) ----------------
+    $genOgCodes = New-NeoIPCKeySet @($genOptionGroups | ForEach-Object { [string]$_['code'] })
+    $genOgIds   = New-NeoIPCKeySet @($genOptionGroups | ForEach-Object { [string]$_['id'] })
+    $keptOptionGroups = @(@($Config['optionGroups']) | Where-Object { $_ -is [System.Collections.IDictionary] -and -not ($genOgCodes.Contains([string]$_['code']) -or $genOgIds.Contains([string]$_['id'])) })
+    $Config['optionGroups'] = @($keptOptionGroups + $genOptionGroups)
+
+    $genOgsCodes = New-NeoIPCKeySet @($genOptionGroupSets | ForEach-Object { [string]$_['code'] })
+    $genOgsIds   = New-NeoIPCKeySet @($genOptionGroupSets | ForEach-Object { [string]$_['id'] })
+    $keptOptionGroupSets = @(@($Config['optionGroupSets']) | Where-Object { $_ -is [System.Collections.IDictionary] -and -not ($genOgsCodes.Contains([string]$_['code']) -or $genOgsIds.Contains([string]$_['id'])) })
+    $Config['optionGroupSets'] = @($keptOptionGroupSets + $genOptionGroupSets)
 
     # ---- dataElements (by code or id) ----------------------------------------------------------------------------
     $genDeCodes = New-NeoIPCKeySet @($genDataElements | ForEach-Object { [string]$_['code'] })
@@ -278,7 +300,7 @@ function Add-NeoIPCGeneratedMetadata {
     $Config['programRuleActions'] = @($keptActions + $genActions + $salvagedActions.ToArray())
 
     # Fail loud on any duplicate id introduced by the splice (a generated mint colliding with a kept object).
-    foreach ($type in 'optionSets', 'options', 'dataElements', 'programRuleVariables', 'programRules', 'programRuleActions') {
+    foreach ($type in 'optionSets', 'options', 'optionGroups', 'optionGroupSets', 'dataElements', 'programRuleVariables', 'programRules', 'programRuleActions') {
         $seen = [System.Collections.Generic.HashSet[string]]::new($ordinal)
         foreach ($o in @($Config[$type])) {
             if ($o -isnot [System.Collections.IDictionary]) { continue }

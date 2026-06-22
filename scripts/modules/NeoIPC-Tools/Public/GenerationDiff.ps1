@@ -28,8 +28,14 @@ function Compare-NeoIPCGeneratedMetadata {
         'CoverageAddition' (the SSI-secondary-slot-2 reveal the deployed program omits) or 'FieldGatingChange';
         removed = 'SupersededAggregate' (the stale HAP aggregate), 'BusinessInterlock' (a hand-authored action on a
         reproduced rule whose target is outside the generated families — e.g. the BSI no-positive-culture HIDEFIELD
-        the assembler salvages) or 'FieldGatingChange'. Pure object processing — no DHIS2 API calls. Returns one
-        record per delta: { Type; Kind; Id; Key; Class; DiffFields }.
+        the assembler salvages) or 'FieldGatingChange'.
+
+        The antibiotic domain adds its own families + buckets: the NEOIPC_ANTIMICROBIAL_SUBSTANCES option set
+        (options membership = 'OptionSetGrowth'); its options (added oral route-splits = 'SubstanceAddition'; the
+        four documented code migrations = 'SubstanceCodeMigration'; route-qualifier name + alphabetical re-rank =
+        'SubstanceNaming'); the ATC-4 + AWaRe option GROUPS (membership = 'GroupMembership'); and the ATC5 /
+        WHO_AWARE option-group-SETS (member-order normalisation = 'GroupSetNormalisation'). Pure object processing —
+        no DHIS2 API calls. Returns one record per delta: { Type; Kind; Id; Key; Class; DiffFields }.
     .PARAMETER ExistingPackage
         The parsed DHIS2 export the generators reconcile against and the diff baseline.
     .PARAMETER OntologyPath
@@ -60,15 +66,21 @@ function Compare-NeoIPCGeneratedMetadata {
     $patRuleFrag = New-NeoIPCPathogenRule @ontologyArgs -ExistingPackage $ExistingPackage -PathogenCount $PathogenCount
     $fgRuleFrag  = New-NeoIPCPathogenFieldGatingRule @ontologyArgs -ExistingPackage $ExistingPackage -PathogenCount $PathogenCount
     $subRuleFrag = New-NeoIPCSubstanceRule -ExistingPackage $ExistingPackage -SubstanceCount $SubstanceCount
+    $abxOptFrag    = New-NeoIPCAntimicrobialOptionSet -ExistingPackage $ExistingPackage
+    $abxGrpFrag    = New-NeoIPCAntibioticOptionGroup -OptionSet $abxOptFrag -ExistingPackage $ExistingPackage
+    $abxGrpSetFrag = New-NeoIPCAntibioticOptionGroupSet -OptionGroup $abxGrpFrag -ExistingPackage $ExistingPackage
 
     $gen = [ordered]@{
-        optionSets           = @($optionFrag['optionSets'])
-        options              = @($optionFrag['options'])
+        optionSets           = @($optionFrag['optionSets']) + @($abxOptFrag['optionSets'])
+        options              = @($optionFrag['options']) + @($abxOptFrag['options'])
+        optionGroups         = @($abxGrpFrag['optionGroups'])
+        optionGroupSets      = @($abxGrpSetFrag['optionGroupSets'])
         dataElements         = @($patDeFrag['dataElements']) + @($subDeFrag['dataElements'])
         programRuleVariables = @($patVarFrag['programRuleVariables']) + @($fgVarFrag['programRuleVariables']) + @($subVarFrag['programRuleVariables'])
         programRules         = @($patRuleFrag['programRules']) + @($fgRuleFrag['programRules']) + @($subRuleFrag['programRules'])
         programRuleActions   = @($patRuleFrag['programRuleActions']) + @($fgRuleFrag['programRuleActions']) + @($subRuleFrag['programRuleActions'])
     }
+    $genAbxOsId = if (@($abxOptFrag['optionSets']).Count -gt 0) { [string]$abxOptFrag['optionSets'][0]['id'] } else { $null }   # to split the shared 'options' family pathogen vs antibiotic
 
     $ordinal = [System.StringComparer]::Ordinal
     $gk = Get-NeoIPCMetadataGeneratedKeys -Package $ExistingPackage -PathogenCount $PathogenCount -SubstanceCount $SubstanceCount
@@ -87,8 +99,11 @@ function Compare-NeoIPCGeneratedMetadata {
         if ($type -eq 'programRuleVariables') { $n = [string]$o['name']; return ($n -and $gk.VariableNames.Contains((ConvertTo-NeoIPCSubstanceUnpaddedName $n))) }
         if ($type -eq 'programRules') { $n = [string]$o['name']; return ($n -and $gk.RuleNames.Contains((ConvertTo-NeoIPCSubstanceUnpaddedName $n))) }
         if ($type -eq 'programRuleActions') { $pr = $o['programRule']; $rid = if ($pr -is [System.Collections.IDictionary]) { [string]$pr['id'] } else { [string]$pr }; return ($rid -and $gk.ExcludedRuleIds.Contains($rid)) }
+        if ($type -eq 'optionGroups') { $c = [string]$o['code']; return (($c -like 'WHO_AWARE_*') -or ($c -cmatch '^[A-Z][0-9]{2}[A-Z]{2}$')) }   # antibiotic groups are AWaRe or ATC-4 (5-char) only
+        if ($type -eq 'optionGroupSets') { $c = [string]$o['code']; return (($c -ceq 'ATC5') -or ($c -ceq 'WHO_AWARE')) }
         $false
     }
+    function Test-NeoIPCDiffAbxOption($o) { $os = $o['optionSet']; return ($os -is [System.Collections.IDictionary] -and [string]$os['id'] -eq $genAbxOsId) }
     function Get-NeoIPCDiffStripped($o) {
         $c = Remove-NeoIPCMetadataNoise -Object $o
         if ($c -is [System.Collections.IDictionary] -and $c.Contains('translations')) { $c.Remove('translations') }
@@ -105,7 +120,9 @@ function Compare-NeoIPCGeneratedMetadata {
 
     $changeAllowed = @{
         optionSets           = @('options', 'version')
-        options              = @('name', 'sortOrder')
+        options              = @('name', 'sortOrder')                                  # pathogen; antibiotic options also allow 'code' (see below)
+        optionGroups         = @('options', 'name', 'shortName', 'description')
+        optionGroupSets      = @('optionGroups', 'name', 'description')
         dataElements         = @('name', 'shortName', 'formName', 'zeroIsSignificant')
         programRuleVariables = @('name')
         programRules         = @('condition', 'priority', 'name', 'description', 'programRuleActions')
@@ -113,8 +130,12 @@ function Compare-NeoIPCGeneratedMetadata {
     }
     $changeClass = @{
         optionSets = 'OptionSetGrowth'; options = 'TaxonomicNaming'; dataElements = 'DataElementNormalisation'
+        optionGroups = 'GroupMembership'; optionGroupSets = 'GroupSetNormalisation'
         programRuleVariables = 'VariablePadding'; programRules = 'RuleNormalisation'; programRuleActions = 'ActionNormalisation'
     }
+    # Antibiotic options diverge from pathogen options (the 4 documented code migrations + the route-qualifier name
+    # + alphabetical re-rank), so they carry their own allowed fields + classes, keyed off the generated set id.
+    $abxOptAllowed = New-NeoIPCDiffKeySet @('code', 'name', 'sortOrder')
 
     # The rule add/remove split feeds the action classification (an action on an ADDED rule is coverage; on a
     # reproduced rule it is a field-gating change).
@@ -126,7 +147,7 @@ function Compare-NeoIPCGeneratedMetadata {
         $records.Add([pscustomobject]@{ Type = $Type; Kind = $Kind; Id = $Id; Key = $Key; Class = $Class; DiffFields = ($DiffFields -join ',') })
     }
 
-    foreach ($type in 'optionSets', 'options', 'dataElements', 'programRuleVariables', 'programRules', 'programRuleActions') {
+    foreach ($type in 'optionSets', 'options', 'optionGroups', 'optionGroupSets', 'dataElements', 'programRuleVariables', 'programRules', 'programRuleActions') {
         $depStripped = @{}; $depRaw = @{}
         foreach ($o in @($ExistingPackage[$type])) { if (Test-NeoIPCDiffInFamily $type $o) { $id = [string]$o['id']; $depStripped[$id] = (Get-NeoIPCDiffStripped $o); $depRaw[$id] = $o } }
         $genStripped = @{}; $genRaw = @{}
@@ -138,12 +159,28 @@ function Compare-NeoIPCGeneratedMetadata {
             if ($depStripped.ContainsKey($id)) {
                 $diff = @(Get-NeoIPCDiffFields $depStripped[$id] $genStripped[$id])
                 if ($diff.Count -eq 0) { continue }
-                $class = if (@($diff | Where-Object { -not $allowed.Contains($_) }).Count -eq 0) { $changeClass[$type] } else { 'Unclassified' }
+                if ($type -eq 'options' -and (Test-NeoIPCDiffAbxOption $genRaw[$id])) {
+                    # Antibiotic options: a 'code' change is a benign 'SubstanceCodeMigration' ONLY when the
+                    # (deployed code -> generated code) pair is one of the documented renames
+                    # ($script:NeoIPCAntibioticCodeRename) — any other code change is 'Unclassified' so the gate
+                    # cannot wave through an undocumented rename (the highest-consequence, data-affecting delta). A
+                    # name/sortOrder-only change is 'SubstanceNaming' (route qualifier + alphabetical re-rank). The
+                    # rename map itself is pinned to exactly the documented set by a test.
+                    $class = if (@($diff | Where-Object { -not $abxOptAllowed.Contains($_) }).Count -ne 0) { 'Unclassified' }
+                    elseif ($diff -contains 'code') {
+                        $depCode = [string]$depRaw[$id]['code']; $genCode = [string]$genRaw[$id]['code']
+                        if ($script:NeoIPCAntibioticCodeRename.Contains($depCode) -and $script:NeoIPCAntibioticCodeRename[$depCode] -ceq $genCode) { 'SubstanceCodeMigration' } else { 'Unclassified' }
+                    }
+                    else { 'SubstanceNaming' }
+                }
+                else {
+                    $class = if (@($diff | Where-Object { -not $allowed.Contains($_) }).Count -eq 0) { $changeClass[$type] } else { 'Unclassified' }
+                }
                 Add-NeoIPCDiffRecord $type 'Changed' $id $key $class $diff
                 continue
             }
             $class = switch ($type) {
-                'options' { 'TaxonomicAddition' }
+                'options' { if (Test-NeoIPCDiffAbxOption $genRaw[$id]) { 'SubstanceAddition' } else { 'TaxonomicAddition' } }
                 'programRules' { 'CoverageAddition' }
                 'programRuleActions' {
                     $pr = $genRaw[$id]['programRule']; $rid = if ($pr -is [System.Collections.IDictionary]) { [string]$pr['id'] } else { [string]$pr }

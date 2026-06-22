@@ -719,6 +719,19 @@ function Test-NeoIPCMetadataGeneratedExcluded {
             $rid = if ($pr -is [System.Collections.IDictionary]) { [string]$pr['id'] } else { [string]$pr }
             return $GeneratedKeys.ExcludedRuleIds.Contains($rid)
         }
+        'optionGroups' {
+            # The antibiotic option-group domain is generated from the antibiotic sources: the ATC-4 chemical groups
+            # (5-char ATC code, the group level — NOT the 7-char ATC-5 substance codes) + the three AWaRe groups
+            # (WHO_AWARE_*). This is a code-SHAPE match, not the exact generated set: a future non-antibiotic option
+            # group with a non-ATC-4 / non-AWaRe code stays in the directory, and a stray ATC-4-shaped non-generated
+            # group would surface as Unclassified in the classified-diff gate. See New-NeoIPCAntibioticOptionGroup.
+            $c = [string]$Object['code']
+            return ($c -like 'WHO_AWARE_*') -or ($c -cmatch '^[A-Z][0-9]{2}[A-Z]{2}$')
+        }
+        'optionGroupSets' {
+            $c = [string]$Object['code']
+            return ($c -ceq 'ATC5') -or ($c -ceq 'WHO_AWARE')
+        }
     }
     return $false
 }

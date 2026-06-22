@@ -84,6 +84,10 @@
         'New-NeoIPCSubstanceVariable'
         'New-NeoIPCSubstanceRule'
         'Compare-NeoIPCGeneratedMetadata'
+        # Antibiotic-domain generation (option set + ATC/AWaRe groups + group-sets)
+        'New-NeoIPCAntimicrobialOptionSet'
+        'New-NeoIPCAntibioticOptionGroup'
+        'New-NeoIPCAntibioticOptionGroupSet'
     )
 
     # Cmdlets to export from this module

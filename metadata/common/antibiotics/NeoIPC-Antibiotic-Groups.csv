@@ -1,0 +1,36 @@
+code,name,shortName,description
+J01AA,Tetracyclines,Tetracyclines,This group comprises tetracycline antibacterials inhibiting the bacterial protein synthesis through binding to the 30-S part of ribosomes.
+J01BA,Amphenicols,Amphenicols,This group comprises amphenicol antibacterials inhibiting the bacterial protein synthesis.
+J01CA,Penicillins with extended spectrum,Extended spectrum Penicillins ,"This group comprises penicillins with enhanced activity against gram negative rods, e.g. ampicillin and similar antibiotics."
+J01CE,Beta-lactamase sensitive penicillins,Beta-lactamase sensitive penicillins,"This group comprises penicillin beta-lactam antibacterials, inhibiting the bacterial cell wall synthesis."
+J01CF,Beta-lactamase resistant penicillins,Beta-lactamase resistant penicillins,
+J01CG,Beta-lactamase inhibitors,Beta-lactamase inhibitors,
+J01CR,"Combinations of penicillins, incl. beta-lactamase inhibitors",Penicillins + beta-lactamase inhibitors,This group comprises combinations of penicillins and/or beta-lactamase inhibitors. Combinations containing one penicillin and enzyme inhibitor are classified at different 5th levels according to the penicillin.
+J01DB,First-generation cephalosporins,1st gen. cephalosporins,The first generation compounds have relatively narrow spectrum of activity focused primarily on the gram-positive cocci.
+J01DC,Second-generation cephalosporins,2nd gen. cephalosporins,The second generation cephalosporins have a variable activity against gram-positive cocci but have increased activity against gram-negative bacteria. The cephamycin group is included in the second-generation cephalosporins.
+J01DD,Third-generation cephalosporins,3rd gen. cephalosporins,"The third generation cephalosporins have a marked activity against gram-negative bacteria. Limited activity against gram-positive cocci, particularly methicillin susceptible S. aureus, might occur."
+J01DE,Fourth-generation cephalosporins,4th gen. cephalosporins,"The fourth generation cephalosporins have activity against gram-positive cocci and a broad array of gram-negative bacteria, including P. aeruginosa and many of the Enterobacteriaceae with inducible chromosomal b-lactamases."
+J01DF,Monobactams,Monobactams,
+J01DH,Carbapenems,Carbapenems,
+J01DI,Other cephalosporins and penems,Other cephalosporins and penems,
+J01EA,Trimethoprim and derivatives,Trimethoprim and derivatives,
+J01EB,Short-acting sulfonamides,Short-acting sulfonamides,This group comprises sulfonamides with a biological half-life not exceeding approx. 7 hours.
+J01EC,Intermediate-acting sulfonamides,Intermediate-acting sulfonamides,This group comprises sulfonamides with a biological half-life of approx. 11-12 hours.
+J01ED,Long-acting sulfonamides,Long-acting sulfonamides,This group comprises sulfonamides with a biological half-life of approx. 35 hours or more.
+J01EE,"Combinations of sulfonamides and trimethoprim, incl. derivatives",Combinations of sulfonamides and trimethoprim,
+J01FA,Macrolides,Macrolides,
+J01FF,Lincosamides,Lincosamides,
+J01FG,Streptogramins,Streptogramins,
+J01GA,Streptomycins,Streptomycins,
+J01GB,Other aminoglycosides,Aminoglycosides,
+J01MA,Fluoroquinolones,Fluoroquinolones,
+J01MB,Other quinolones,Other quinolones,
+J01XA,Glycopeptide antibacterials,Glycopeptides,"This group comprises glycopeptide antibacterials, inhibiting the cell wall synthesis of gram positive bacteria. Lipoglycopeptide antibacterials are also included in this group. Teicoplanin and intravenous preparations of vancomycin are classified in this group. Oral formulations containing vancomycin are classified in A07A."
+J01XB,Polymyxins,Polymyxins,This group comprises polymyxin antibacterials acting on the bacterial cytoplasm membrane.
+J01XC,Steroid antibacterials,Steroid antibacterials,"This group comprises steroid antibacterials, inhibiting the binding of bacterial transfer-RNA and the 50-S part of the ribosomes."
+J01XD,Imidazole derivatives,Imidazoles,"This group comprises imidazole antibacterials acting through active metabolites in anaerobic bacteria. Only formulations for parenteral use of e.g. metronidazole are classified in this group. Oral formulations and suppositories of imidazole derivatives are classified in P01 - Antiprotozoals. Pessaries are classified in G01 - Gynecological antiinfectives and antiseptics.
+The DDDs for the parenteral imidazole formulations are based on the treatment of anaerobic bacteria infections."
+J01XE,Nitrofuran derivatives,Nitrofuran derivatives,
+J01XX,Other antibacterials,Other,
+J04AB,Antimycobacterial Antibiotics,Antimycobacterial Antibiotics,"This group comprises antibiotics specifically used in tuberculosis, except streptomycin - see comment under J04AM. Other antibiotics, see J01 -Antibacterials for systemic use."
+P01AB,Antiprotozoal Nitroimidazole derivatives,Antiprotozoal Nitroimidazole derivatives,
