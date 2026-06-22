@@ -2170,6 +2170,52 @@ Hierarchies:
             @($concepts | ForEach-Object { $_.Id }) | Should -Be @(0, 10, 11, 12)
             @($concepts | ForEach-Object { $_.Name }) | Should -Be @('Not listed', 'Escherichia', 'Escherichia coli', 'Bacillus coli')
         }
+        It 'captures each node''s ConceptType (rank) and flags synonym-list members' {
+            $concepts = @(Get-NeoIPCInfectiousAgentConcept -Node $script:GenTree)
+            $concepts[0].ConceptType | Should -BeExactly 'Unknown'   # Not listed
+            $concepts[1].ConceptType | Should -BeExactly 'Genus'     # Escherichia
+            $concepts[2].ConceptType | Should -BeExactly 'Species'   # Escherichia coli
+            $concepts[3].ConceptType | Should -BeNullOrEmpty         # Bacillus coli (synonym, no ConceptType)
+            @($concepts | ForEach-Object { [bool]$_.IsSynonym }) | Should -Be @($false, $false, $false, $true)
+        }
+        It 'does not propagate the synonym flag into a synonym''s own children (they are concepts)' {
+            $tree = [ordered]@{ Hierarchies = @(
+                    [ordered]@{ Name = 'Genus'; ConceptType = 'Genus'; Id = 100; Synonyms = @(
+                            [ordered]@{ Name = 'Old genus'; ConceptType = 'Genus'; Id = 101; Children = @(
+                                    [ordered]@{ Name = 'Child species'; ConceptType = 'Species'; Id = 102 }) }) }
+                ) }
+            $byId = @{}
+            foreach ($c in @(Get-NeoIPCInfectiousAgentConcept -Node $tree)) { $byId[$c.Id] = $c }
+            $byId[101].IsSynonym | Should -BeTrue    # direct Synonyms member
+            $byId[102].IsSynonym | Should -BeFalse   # a synonym's child is a concept
+        }
+        It 'Get-NeoIPCPathogenOptionLabel appends the rank tag, [synonym] for synonyms, and no tag for Unknown/absent/blank' {
+            (Get-NeoIPCPathogenOptionLabel -Name 'Escherichia coli' -ConceptType 'Species' -IsSynonym $false) | Should -BeExactly 'Escherichia coli [species]'
+            (Get-NeoIPCPathogenOptionLabel -Name 'Mycobacterium avium complex' -ConceptType 'Species complex' -IsSynonym $false) | Should -BeExactly 'Mycobacterium avium complex [species complex]'
+            (Get-NeoIPCPathogenOptionLabel -Name 'Bacillus coli' -ConceptType 'Species' -IsSynonym $true) | Should -BeExactly 'Bacillus coli [synonym]'
+            (Get-NeoIPCPathogenOptionLabel -Name 'Not listed' -ConceptType 'Unknown' -IsSynonym $false) | Should -BeExactly 'Not listed'
+            (Get-NeoIPCPathogenOptionLabel -Name 'Unidentifiable' -ConceptType $null -IsSynonym $false) | Should -BeExactly 'Unidentifiable'
+            (Get-NeoIPCPathogenOptionLabel -Name 'Blank rank' -ConceptType '' -IsSynonym $false) | Should -BeExactly 'Blank rank'
+        }
+        It 'a synonym carrying its own ConceptType is still tagged [synonym] (synonym precedence) end-to-end' {
+            $y = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-onto-syn-{0}.yaml' -f ([guid]::NewGuid().ToString('N')))
+            Set-Content -LiteralPath $y -Encoding utf8 -Value @'
+Hierarchies:
+- Name: Escherichia coli
+  ConceptType: Species
+  Id: 11
+  Synonyms:
+  - Name: Bacillus coli
+    ConceptType: Species
+    Id: 12
+'@
+            try {
+                $frag = New-NeoIPCPathogenOptionSet -Path $y
+                (@($frag['options'] | Where-Object { $_['code'] -eq '12' })[0]['name']) | Should -BeExactly 'Bacillus coli [synonym]'
+                (@($frag['options'] | Where-Object { $_['code'] -eq '11' })[0]['name']) | Should -BeExactly 'Escherichia coli [species]'
+            }
+            finally { Remove-Item -LiteralPath $y -Force }
+        }
         It 'emits a node''s synonyms before its children (deterministic visit order, not file order)' {
             # A node carrying BOTH an Id-bearing Synonym and an Id-bearing Child, child listed first in the source.
             $tree = [ordered]@{ Hierarchies = @(
@@ -2187,7 +2233,7 @@ Hierarchies:
         It 'fails loud on an Id-bearing node with a blank Name' {
             { Get-NeoIPCInfectiousAgentConcept -Node ([ordered]@{ Hierarchies = @([ordered]@{ Name = ''; Id = 7 }) }) } | Should -Throw '*blank Name*'
         }
-        It 'emits one option per Id-bearing node (code=Id, name=Name, 1-based sortOrder, document order)' {
+        It 'emits one option per Id-bearing node (code=Id, name=Name+tag, 1-based sortOrder, document order)' {
             $frag = New-NeoIPCPathogenOptionSet -Path $script:GenYaml
             @($frag['optionSets']).Count | Should -Be 1
             @($frag['options']).Count | Should -Be 4
@@ -2197,7 +2243,7 @@ Hierarchies:
             @($os['options']).Count | Should -Be 4
             @($frag['options'] | ForEach-Object { $_['code'] }) | Should -Be @('0', '10', '11', '12')
             @($frag['options'] | ForEach-Object { $_['sortOrder'] }) | Should -Be @(1, 2, 3, 4)
-            (@($frag['options'])[2]['name']) | Should -BeExactly 'Escherichia coli'
+            @($frag['options'] | ForEach-Object { $_['name'] }) | Should -Be @('Not listed', 'Escherichia [genus]', 'Escherichia coli [species]', 'Bacillus coli [synonym]')
             (@($frag['options'])[0]['optionSet']['id']) | Should -BeExactly $os['id']
             (Test-NeoIPCMetadataUid -Id $os['id']) | Should -BeTrue
         }
@@ -2288,7 +2334,7 @@ Hierarchies:
             }
             $frag = New-NeoIPCPathogenOptionSet -Path $script:GenYaml -ExistingPackage $existing
             (@($frag['optionSets'])[0]['name']) | Should -BeExactly 'NeoIPC Pathogen options'
-            (@($frag['options'] | Where-Object { $_['code'] -eq '11' })[0]['name']) | Should -BeExactly 'Escherichia coli'
+            (@($frag['options'] | Where-Object { $_['code'] -eq '11' })[0]['name']) | Should -BeExactly 'Escherichia coli [species]'
         }
         It 'emits optionSet.options in the same order as the options list / sortOrder (the DHIS2 ordering authority)' {
             $frag = New-NeoIPCPathogenOptionSet -Path $script:GenYaml

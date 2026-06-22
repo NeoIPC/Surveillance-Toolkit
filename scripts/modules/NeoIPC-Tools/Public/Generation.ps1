@@ -12,9 +12,12 @@ function New-NeoIPCPathogenOptionSet {
         Walks the canonical NeoIPC-Infectious-Agents.yaml and emits one DHIS2 option per Id-bearing node
         (concepts AND synonyms — a synonym is a selectable option keeping its original Id), plus the option-set
         object that binds them. The option CODE is the node's integer Id (the code already stored in collected
-        surveillance data and compared by the resistance program rules); the option NAME is the node's Name (per
-        the domain-authority naming policy in the repo CLAUDE.md). Output order is a deterministic depth-first walk
-        of the ontology (node, then Hierarchies/Synonyms/Children) with a 1-based sortOrder, so diffs are stable.
+        surveillance data and compared by the resistance program rules); the option NAME is the node's Name plus a
+        bracketed rank/synonym tag — "<Name> [genus]", "<Name> [species]", "<Name> [synonym]" — reproducing the
+        deployed convention (a node whose rank is Unknown carries no tag), assembled by Get-NeoIPCPathogenOptionLabel.
+        The name is the domain-authority name (repo CLAUDE.md); the tag is the lowercased ConceptType (the English
+        label). Output order is a deterministic depth-first walk of the ontology (node, then
+        Hierarchies/Synonyms/Children) with a 1-based sortOrder, so diffs are stable.
 
         UID policy mirrors the rest of the pipeline (preserve-if-present, else deterministic mint from the natural
         key): with -ExistingPackage, the option set's UID and each option's UID are reused from the export where
@@ -137,7 +140,7 @@ function New-NeoIPCPathogenOptionSet {
         $options.Add([ordered]@{
                 id        = $uid
                 code      = $code
-                name      = [string]$c['Name']
+                name      = Get-NeoIPCPathogenOptionLabel -Name ([string]$c['Name']) -ConceptType ([string]$c['ConceptType']) -IsSynonym ([bool]$c['IsSynonym'])
                 sortOrder = $sortOrder
                 optionSet = [ordered]@{ id = $osUid }
             })

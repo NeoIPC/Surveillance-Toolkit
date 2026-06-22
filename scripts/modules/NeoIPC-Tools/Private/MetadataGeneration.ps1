@@ -12,21 +12,29 @@ $script:NeoIPCSubstanceSlotCount = 9
 
 function Get-NeoIPCInfectiousAgentConcept {
     # Depth-first walk of a parsed NeoIPC-Infectious-Agents.yaml tree, yielding every Id-bearing node as
-    # [ordered]@{ Id = <int>; Name = <string> }. At each node it emits the node itself, then recurses Hierarchies,
-    # then Synonyms, then Children — a synonym is an Id-bearing selectable option, grouped immediately after its
-    # concept. powershell-yaml's ConvertFrom-Yaml discards YAML mapping key order, so this fixed visit order (not
-    # the file's) is what makes the output deterministic. Fails loud on a malformed Id-bearing node (blank/
+    # [ordered]@{ Id = <int>; Name = <string>; ConceptType = <string|null>; IsSynonym = <bool> }. At each node it
+    # emits the node itself, then recurses Hierarchies, then Synonyms, then Children — a synonym is an Id-bearing
+    # selectable option, grouped immediately after its concept. ConceptType is the node's taxonomic rank (Species,
+    # Genus, Family, …; null when absent); IsSynonym marks nodes reached through a Synonyms list. Both feed the
+    # DHIS2 option label's bracketed rank/synonym tag (Get-NeoIPCPathogenOptionLabel) — Name itself stays the raw
+    # ontology name. powershell-yaml's ConvertFrom-Yaml discards YAML mapping key order, so this fixed visit order
+    # (not the file's) is what makes the output deterministic. Fails loud on a malformed Id-bearing node (blank/
     # non-integer Id, or blank Name) — every selectable option needs a unique integer code and a non-empty name.
     # Operates on an in-memory tree (not a path) so it is unit-testable without a file; the public cmdlet loads the YAML.
     [CmdletBinding()]
     [OutputType([System.Collections.Specialized.OrderedDictionary])]
-    param([Parameter(Mandatory)][AllowNull()]$Node)
+    param(
+        [Parameter(Mandatory)][AllowNull()]$Node,
+        # True when $Node is reached through a Synonyms list. A synonym's own Children are concepts, not synonyms
+        # (e.g. whole-branch virus moves), so the flag does not propagate — each child key is recursed with its own.
+        [bool]$IsSynonym = $false
+    )
 
     # Emit each concept to the pipeline (a dictionary is passed as a single object, never enumerated) and let
     # recursion's output flow up; the caller collects with @(...). This avoids the array-nesting traps of mixing
     # unary-comma returns with @(foreach …) flattening — same emit-to-pipeline idiom as Find-NextFreeInfectiousAgentId.
     if ($Node -is [System.Collections.IList]) {
-        foreach ($item in $Node) { Get-NeoIPCInfectiousAgentConcept -Node $item }
+        foreach ($item in $Node) { Get-NeoIPCInfectiousAgentConcept -Node $item -IsSynonym $IsSynonym }
         return
     }
     if ($Node -is [System.Collections.IDictionary]) {
@@ -40,12 +48,36 @@ function Get-NeoIPCInfectiousAgentConcept {
             if ([string]::IsNullOrWhiteSpace($name)) {
                 throw "Infectious-agent node with Id $idInt has a blank Name — every Id-bearing node needs a non-empty name (DHIS2 Option.name is not-null)."
             }
-            [ordered]@{ Id = $idInt; Name = $name }
+            [ordered]@{
+                Id          = $idInt
+                Name        = $name
+                ConceptType = if ($Node.Contains('ConceptType')) { [string]$Node['ConceptType'] } else { $null }
+                IsSynonym   = $IsSynonym
+            }
         }
-        foreach ($key in 'Hierarchies', 'Synonyms', 'Children') {
-            if ($Node.Contains($key)) { Get-NeoIPCInfectiousAgentConcept -Node $Node[$key] }
-        }
+        if ($Node.Contains('Hierarchies')) { Get-NeoIPCInfectiousAgentConcept -Node $Node['Hierarchies'] -IsSynonym $false }
+        if ($Node.Contains('Synonyms')) { Get-NeoIPCInfectiousAgentConcept -Node $Node['Synonyms'] -IsSynonym $true }
+        if ($Node.Contains('Children')) { Get-NeoIPCInfectiousAgentConcept -Node $Node['Children'] -IsSynonym $false }
     }
+}
+
+function Get-NeoIPCPathogenOptionLabel {
+    # Assemble a NEOIPC_PATHOGENS option label from an ontology node, reproducing the deployed naming convention:
+    # a synonym-list member is tagged "<Name> [synonym]"; any other node is tagged with its lowercased taxonomic
+    # rank ("<Name> [species]", "<Name> [genus]", …); a node whose rank is Unknown or absent (the "Not listed" /
+    # "Unidentifiable" specials) carries no tag. Lowercasing matches the deployed English labels (the YAML rank is
+    # title-case). This is the English label, assembled from the canonical ontology.
+    [CmdletBinding()]
+    [OutputType([string])]
+    param(
+        [Parameter(Mandatory)][string]$Name,
+        [AllowNull()][string]$ConceptType,
+        [bool]$IsSynonym
+    )
+    $tag = if ($IsSynonym) { 'synonym' }
+    elseif (-not [string]::IsNullOrWhiteSpace($ConceptType) -and $ConceptType -ne 'Unknown') { $ConceptType.ToLowerInvariant() }
+    else { $null }
+    if ($tag) { '{0} [{1}]' -f $Name, $tag } else { $Name }
 }
 
 function Get-NeoIPCPathogenDataElementPlan {

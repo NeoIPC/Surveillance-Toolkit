@@ -17,7 +17,9 @@ function Compare-NeoIPCGeneratedMetadata {
         drift, dead config and bugs), so a large, fully-classified diff is the healthy outcome. The gate FAILURE is
         any object whose delta does not match a known bucket — class 'Unclassified' (a silent / unexpected add,
         drop or change). Buckets: option additions = 'TaxonomicAddition'; option name/sortOrder = 'TaxonomicNaming'
-        (the YAML current names, incl. dropping the deployed bracketed rank/synonym tags, + deterministic order);
+        (the YAML current names — incl. the bracketed rank/synonym tag reproduced from the ontology — and the
+        deterministic order; the residual name diffs are genuine taxonomy deltas: reclassifications, the LPSN
+        subsp. form, typo fixes);
         data-element name/shortName/formName/zeroIsSignificant = 'DataElementNormalisation' (the double-space typo
         + substance padding + the _SOURCE zeroIsSignificant fix); variable name = 'VariablePadding'; rule
         condition/priority/name/description/action-membership = 'RuleNormalisation' (the field-gating guard, uniform
