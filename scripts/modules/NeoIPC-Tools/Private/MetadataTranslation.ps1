@@ -86,10 +86,12 @@ function Get-NeoIPCMetadataTranslationKey {
 
 function Get-NeoIPCMetadataTranslationUnit {
     # Walk a package and extract one translation unit per (object, translatable field) that carries a non-empty
-    # base value. Units are emitted in a deterministic order (type-map order, then key ordinal, then token order)
-    # so the .pot diffs cleanly. Warns about any existing translations[] entry whose (object, token) is not
-    # covered by an emitted unit (a translation on a property the type map does not carry) so such drift is
-    # visible, not silently lost.
+    # base value. Units are emitted in a deterministic order — type-map order, then the object key (ordinal),
+    # then the type's field/token order — so the order is INTRINSIC TO THE DATA and independent of how the source
+    # package happens to order its objects (a directory build and an assembled-package build then produce the
+    # same .pot, and the .pot diffs cleanly even when the closure / generation reorders the package). Warns about
+    # any existing translations[] entry whose (object, token) is not covered by an emitted unit (a translation on
+    # a property the type map does not carry) so such drift is visible, not silently lost.
     [CmdletBinding()]
     [OutputType([System.Collections.Generic.List[object]])]
     param([Parameter(Mandatory)]$Package)
@@ -103,6 +105,9 @@ function Get-NeoIPCMetadataTranslationUnit {
         # Elevated-priority tokens for this type ($null if none); unlisted (type, token) deprioritise to LOW.
         $priorities = $script:NeoIPCMetadataTranslationPriorities[$type]
         $tokens = [System.Collections.Generic.HashSet[string]]::new([string[]]@($fields | ForEach-Object { $_.Token }), [System.StringComparer]::Ordinal)
+        # Decorate each unit with its (key, field-index) so the type's units can be emitted ordinally by key (field
+        # order kept within an object) regardless of the order the package carries its objects — see the sort below.
+        $typeDecorated = [System.Collections.Generic.List[object]]::new()
         foreach ($obj in @($Package[$type])) {
             if ($obj -isnot [System.Collections.IDictionary]) { continue }
             $key = Get-NeoIPCMetadataTranslationKey -Type $type -Object $obj -OptionSetCodeById $optionSetCodeById
@@ -130,22 +135,28 @@ function Get-NeoIPCMetadataTranslationUnit {
                     $existing[$tok][[string]$t['locale']] = [string]$t['value']
                 }
             }
+            $fieldIndex = 0
             foreach ($field in $fields) {
                 $base = $obj[$field.Property]
                 if ($null -eq $base -or [string]$base -eq '') { continue }
                 $translations = if ($existing.ContainsKey($field.Token)) { $existing[$field.Token] } else { [ordered]@{} }
                 $priority = if ($priorities -and $priorities.Contains($field.Token)) { [int]$priorities[$field.Token] } else { $script:NeoIPCMetadataLowTranslationPriority }
-                $units.Add([ordered]@{
-                        Type         = $type
-                        Key          = $key
-                        Property     = $field.Property
-                        Token        = $field.Token
-                        Msgctxt      = "$type/$key/$($field.Token)"
-                        Msgid        = [string]$base
-                        ObjectId     = [string]$obj['id']
-                        Priority     = $priority
-                        Translations = $translations
+                $typeDecorated.Add([pscustomobject]@{
+                        SortKey   = $key
+                        SortField = $fieldIndex
+                        Unit      = [ordered]@{
+                            Type         = $type
+                            Key          = $key
+                            Property     = $field.Property
+                            Token        = $field.Token
+                            Msgctxt      = "$type/$key/$($field.Token)"
+                            Msgid        = [string]$base
+                            ObjectId     = [string]$obj['id']
+                            Priority     = $priority
+                            Translations = $translations
+                        }
                     })
+                $fieldIndex++
             }
             $ignoredTokens = $script:NeoIPCMetadataTranslationIgnoredTokens[$type]
             foreach ($tok in $existing.Keys) {
@@ -154,6 +165,15 @@ function Get-NeoIPCMetadataTranslationUnit {
                 }
             }
         }
+        # Emit this type's units ordinally by key, field order preserved within an object (keys are unique per type
+        # — the msgctxt collision gate below enforces it — so the tiebreak only orders an object's own fields).
+        $typeDecorated.Sort([System.Comparison[object]] {
+                param($x, $y)
+                $c = [System.StringComparer]::Ordinal.Compare([string]$x.SortKey, [string]$y.SortKey)
+                if ($c -ne 0) { return $c }
+                return $x.SortField.CompareTo($y.SortField)
+            })
+        foreach ($d in $typeDecorated) { $units.Add($d.Unit) }
     }
     # Gettext-independent uniqueness gate: a duplicate msgctxt would make the PO invalid (msgfmt rejects it, Weblate
     # mangles it). Fail loud naming the colliding object UIDs rather than ship a broken catalogue. (Group-Object can't

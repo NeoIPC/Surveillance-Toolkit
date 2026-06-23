@@ -1957,6 +1957,19 @@ InModuleScope 'NeoIPC-Tools' {
                 'options/NEOIPC_ASA_SCORE/1/NAME', 'options/NEOIPC_ASA_SCORE/2/NAME',
                 'optionSets/NEOIPC_ASA_SCORE/NAME', 'organisationUnits/AT/NAME', 'organisationUnits/AT/SHORT_NAME')
         }
+        It 'orders units by key intrinsically (ordinal) — independent of the order the package carries its objects' {
+            # The two options are listed in REVERSE key order in the package; the .pot must still come out key-sorted
+            # (an export/assembled build orders objects by closure, not by key — the .pot order must not follow that).
+            $pkg = [ordered]@{
+                optionSets = @( [ordered]@{ id = 'OSaaaaaaaa1'; code = 'NEOIPC_ASA_SCORE'; name = 'ASA score' } )
+                options    = @(
+                    [ordered]@{ id = 'OPaaaaaaaa2'; code = '2'; name = 'ASA II'; optionSet = [ordered]@{ id = 'OSaaaaaaaa1' } }
+                    [ordered]@{ id = 'OPaaaaaaaa1'; code = '1'; name = 'ASA I'; optionSet = [ordered]@{ id = 'OSaaaaaaaa1' } }
+                )
+            }
+            @(Get-NeoIPCMetadataTranslationUnit -Package $pkg | ForEach-Object { $_.Msgctxt }) | Should -Be @(
+                'options/NEOIPC_ASA_SCORE/1/NAME', 'options/NEOIPC_ASA_SCORE/2/NAME', 'optionSets/NEOIPC_ASA_SCORE/NAME')
+        }
         It 'recognises ATC level-4 (5-char) and level-5 (7-char) codes, not other codes' {
             (Test-NeoIPCAtcCode -Code 'J01CG') | Should -BeTrue       # ATC level 4 (drug-class group)
             (Test-NeoIPCAtcCode -Code 'J01AA01') | Should -BeTrue     # ATC level 5 (substance)

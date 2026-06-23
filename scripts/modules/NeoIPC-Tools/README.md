@@ -342,15 +342,37 @@ default) > the internal remainder (program-rule / data-element names, `10`). Ret
 that table as needs change. The committed component lives in
 `po/metadata.pot` + `po/metadata.<lang>.po`.
 
-```powershell
-# Extract: a package's translatable strings to PO (regenerate the .pot,
-# msgmerge-update each existing .po preserving translator msgstr, seed a missing
-# .po from the package's existing translations[]).
-Export-NeoIPCMetadataTranslation -Path ./metadata.json -PoDirectory ./po -Locale de,es
+**Source = the assembled package, not the directory.** `Export-NeoIPCMetadataTranslation`
+takes either `-Package` (a parsed package) or `-Path` (a raw export). The committed
+component must be regenerated from **`New-NeoIPCMetadataPackage`'s output**, because the
+`metadata/` directory is *not* a complete translation source on its own: the
+ontology/matrix-generated families (the per-slot pathogen / substance data elements and
+their rules / variables) and the antibiotic domain are deliberately absent from it (the
+generators and `po/antibiotics.*` own them). The assembler regenerates those families
+with their corrected names, so feeding its package is what carries the fixed strings into
+the `.pot`; a raw `-Path ./metadata.json` extract would instead capture the *stale deployed*
+family names and the deployed antibiotic domain. Build the variant-**independent common
+base** so no synthetic `play` hospital/department names (or real production org units) leak
+into the translator catalogue — an empty `production` overlay yields the country scaffold
+only. (A first-class common-only emit mode is planned; until then the empty overlay is the
+seam.) Units are emitted in a **deterministic, locale-independent order** (type-map order,
+then object key ordinal, then token order — independent of how the package orders its
+objects), so re-running the refresh produces a minimal, reviewable diff.
 
-# Build from the canonical directory instead of a raw export:
-$pkg = ConvertFrom-Json (ConvertTo-NeoIPCMetadataJson -Path ./metadata/common) -AsHashtable
-Export-NeoIPCMetadataTranslation -Package $pkg -PoDirectory ./po
+```powershell
+# Canonical refresh of the committed component, from the assembled common-base package.
+$overlay = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-pot-' + [guid]::NewGuid())
+New-Item -ItemType Directory -Path $overlay | Out-Null
+'id,code,name,shortName,openingDate,closedDate,level,parent,image,sharing' | Set-Content (Join-Path $overlay 'organisationUnits.csv')
+'username,firstName,surname'        | Set-Content (Join-Path $overlay 'users.csv')
+'username,role'                     | Set-Content (Join-Path $overlay 'userRoleAssignments.csv')
+'username,organisationUnit'         | Set-Content (Join-Path $overlay 'userOrgUnitAssignments.csv')
+$pkg = (New-NeoIPCMetadataPackage -ExportPath ./metadata.json -MetadataDirectory ./metadata `
+            -Variant production -OverlayPath $overlay -PassThru).Package
+Export-NeoIPCMetadataTranslation -Package $pkg -PoDirectory ./po -Locale de -Validate   # regenerate .pot + msgmerge .po
+
+# Quick ad-hoc extract from a raw export (NOT for the committed component — stale family names):
+Export-NeoIPCMetadataTranslation -Path ./metadata.json -PoDirectory ./po -Locale de
 
 # Apply: per-language PO back onto a package as translations[] (fuzzy and
 # empty entries skipped), emitting the importable JSON.
