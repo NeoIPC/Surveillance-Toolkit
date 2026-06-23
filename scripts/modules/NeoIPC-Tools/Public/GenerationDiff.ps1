@@ -26,7 +26,7 @@ function Compare-NeoIPCGeneratedMetadata {
         priorities, substance padding, Model-A reveal); action data/content/dataElement = 'ActionNormalisation'
         (incl. the taxonomic resistance / common-commensal code-set enumerations). Added rules/actions =
         'CoverageAddition' (the SSI-secondary-slot-2 reveal the deployed program omits) or 'FieldGatingChange';
-        removed = 'SupersededAggregate' (the stale HAP aggregate), 'BusinessInterlock' (a hand-authored action on a
+        removed = 'SupersededAggregate' (the stale HAP aggregate), 'HandAuthoredAction' (a hand-authored action on a
         reproduced rule whose target is outside the generated families — e.g. the BSI no-positive-culture HIDEFIELD
         the assembler salvages) or 'FieldGatingChange'.
 
@@ -201,7 +201,7 @@ function Compare-NeoIPCGeneratedMetadata {
                     $ownName = if ($rid) { [string]$depRuleNameById[$rid] } else { '' }
                     $tgt = $o['dataElement']; $tgtId = if ($tgt -is [System.Collections.IDictionary]) { [string]$tgt['id'] } else { $null }
                     if ($ownName -and $script:NeoIPCMetadataRetiredRuleNames.Contains($ownName)) { 'SupersededAggregate' }
-                    elseif ($rid -and $genRuleIds.Contains($rid) -and $tgtId -and -not $genDeIds.Contains($tgtId)) { 'BusinessInterlock' }
+                    elseif ($rid -and $genRuleIds.Contains($rid) -and $tgtId -and -not $genDeIds.Contains($tgtId)) { 'HandAuthoredAction' }
                     elseif ($rid -and $genRuleIds.Contains($rid)) { 'FieldGatingChange' }
                     else { 'Unclassified' }
                 }

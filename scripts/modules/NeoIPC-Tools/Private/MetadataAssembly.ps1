@@ -128,7 +128,7 @@ function Add-NeoIPCGeneratedMetadata {
             per-slot resistance rules supersede, is dropped WITHOUT a generated replacement (the other five HAP
             aggregates feed the pneumonia definition and are kept, because the generators do not reproduce them);
           - a deployed action on a reproduced rule whose target data element is OUTSIDE the generated families
-            (e.g. the BSI 'when set' rule's HIDEFIELD on NEOIPC_BSI_NO_POS_CULTURE) is a business-rule interlock,
+            (e.g. the BSI 'when set' rule's HIDEFIELD on NEOIPC_BSI_NO_POS_CULTURE) is a hand-authored action,
             not part of the per-slot cluster, so it is SALVAGED onto the generated rule rather than dropped.
         Everything else — the infection-definition business rules, the live HAP virus / criterion aggregates, the
         non-pathogen data elements, every other option set — is left exactly as the config has it. Fails loud on a
@@ -265,7 +265,7 @@ function Add-NeoIPCGeneratedMetadata {
         })
     $keptRuleIds = New-NeoIPCKeySet @($keptRules | ForEach-Object { [string]$_['id'] })
 
-    # Salvage business-rule-interlock actions (target DE outside the generated families) from each replaced rule
+    # Salvage hand-authored actions (target DE outside the generated families) from each replaced rule
     # onto the generated rule of the same id (which carries the deployed id where reproduced).
     $salvagedActions = [System.Collections.Generic.List[object]]::new()
     foreach ($r in @($Config['programRules'])) {
@@ -275,7 +275,7 @@ function Add-NeoIPCGeneratedMetadata {
         $genRule = $genRuleById[$rid]
         if (-not $genRule) { continue }   # replaced by name but its id was re-minted: no same-id gen rule to attach to
         foreach ($a in @($deployedActionsByRuleId[$rid])) {
-            if ($genActionIds.Contains([string]$a['id'])) { continue }         # the generator already reproduced this action (same id) -> not an omitted interlock
+            if ($genActionIds.Contains([string]$a['id'])) { continue }         # the generator already reproduced this action (same id) -> not an omitted hand-authored action
             $tgt = $a['dataElement']
             if ($tgt -isnot [System.Collections.IDictionary]) { continue }     # no DE target -> generator owns it
             if ($genDeIds.Contains([string]$tgt['id'])) { continue }           # generated-family DE -> generator owns it

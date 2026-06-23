@@ -654,11 +654,11 @@ function Get-NeoIPCMetadataGeneratedKeys {
     # Counts default to the module-wide slot counts, which match the deployed export the directory is built from.
     #
     # CONSEQUENCE — actions are keyed purely by owning rule, so a HAND-AUTHORED action bundled onto a generated rule
-    # drops with that rule too: the BSI no-positive-culture interlock (a HIDEFIELD on NEOIPC_BSI_NO_POS_CULTURE,
+    # drops with that rule too: the BSI no-positive-culture rule (a HIDEFIELD on NEOIPC_BSI_NO_POS_CULTURE,
     # carried on the regenerated 'when set' rule) is reproduced by no generator yet still leaves the directory here.
     # This is intentional — Add-NeoIPCGeneratedMetadata reinstates it onto the generated rule from the EXPORT (the
     # assembler builds the package from the export, never the directory), so the importable package keeps it;
-    # promoting such an interlock to a stand-alone directory business rule belongs to the reconcile path, not this
+    # promoting such a hand-authored action to a stand-alone directory rule belongs to the reconcile path, not this
     # exclusion. The gettext-PO path (MetadataTranslation.ps1) deliberately does NOT apply this predicate — that PO
     # is the sole translation source for the regenerated objects, so excluding them there would drop their translations.
     [CmdletBinding()]

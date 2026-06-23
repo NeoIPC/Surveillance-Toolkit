@@ -566,11 +566,11 @@ InModuleScope 'NeoIPC-Tools' {
             @($rows['programRules'] | ForEach-Object { [string]$_['name'] }) | Should -Be @('NeoIPC BSI infection present')
             @($rows['programRuleActions'] | ForEach-Object { [string]$_['id'] }) | Should -Be @('acBizInf001')
         }
-        It 'drops a business-interlock action bundled onto a generated rule (keyed by owning rule); the assembler reinstates it from the export, not the directory' {
+        It 'drops a hand-authored action bundled onto a generated rule (keyed by owning rule); the assembler reinstates it from the export, not the directory' {
             # The deployed BSI 'when set' rule bundles a hand-authored HIDEFIELD on NEOIPC_BSI_NO_POS_CULTURE (a
-            # business interlock no generator reproduces) alongside the generated SETMANDATORYFIELD on _SOURCE. Both
+            # hand-authored action no generator reproduces) alongside the generated SETMANDATORYFIELD on _SOURCE. Both
             # drop from the directory because their owning rule is generated; Add-NeoIPCGeneratedMetadata salvages the
-            # interlock onto the generated rule from the export, so the importable package keeps it. This asserts the
+            # hand-authored action onto the generated rule from the export, so the importable package keeps it. This asserts the
             # intentional over-exclusion so a future change cannot silently flip it (and the kept business DE stays).
             $pkg = [ordered]@{
                 dataElements = @(
@@ -3964,7 +3964,7 @@ Hierarchies:
             @($out['programRules'] | Where-Object { [string]$_['id'] -eq 'ruleDef' }).Count | Should -Be 1
             @($out['programRuleActions'] | Where-Object { [string]$_['id'] -eq 'actDef' }).Count | Should -Be 1
         }
-        It 'salvages a non-family-target interlock action onto the regenerated rule' {
+        It 'salvages a non-family-target hand-authored action onto the regenerated rule' {
             $out = Add-NeoIPCGeneratedMetadata -Config (New-SpliceConfig) -Export ([ordered]@{})
             $ws = @($out['programRules'] | Where-Object { [string]$_['id'] -eq 'ruleWS' })[0]
             @($ws['programRuleActions'] | ForEach-Object { [string]$_['id'] } | Sort-Object) | Should -Be @('actNoPos', 'actWSsrc')
@@ -4307,7 +4307,7 @@ Hierarchies:
         BeforeEach {
             # Generated side: optA renamed (TaxonomicNaming) + optNEW added; osP version bump; deP1 renamed
             # (DataElementNormalisation), deSrc unchanged; ruleSet added (+ its action); ruleWS reproduced but with
-            # only the SOURCE action (so deployed actNoPos -> BusinessInterlock, the aggregate -> Superseded).
+            # only the SOURCE action (so deployed actNoPos -> HandAuthoredAction, the aggregate -> Superseded).
             Mock New-NeoIPCPathogenOptionSet { [ordered]@{ optionSets = @([ordered]@{ id = 'osP'; code = 'NEOIPC_PATHOGENS'; version = 2 }); options = @([ordered]@{ id = 'optA'; code = '0'; name = 'Acinetobacter'; sortOrder = 1; optionSet = [ordered]@{ id = 'osP' } }, [ordered]@{ id = 'optNEW'; code = '999'; name = 'New organism'; sortOrder = 2; optionSet = [ordered]@{ id = 'osP' } }) } }
             Mock New-NeoIPCPathogenDataElement { [ordered]@{ dataElements = @([ordered]@{ id = 'deP1'; code = 'NEOIPC_BSI_PATHOGEN_1'; name = 'Organism 1 renamed'; valueType = 'INTEGER_ZERO_OR_POSITIVE' }, [ordered]@{ id = 'deSrc'; code = 'NEOIPC_BSI_PATHOGEN_1_SOURCE'; name = 'src'; valueType = 'INTEGER_POSITIVE' }) } }
             Mock New-NeoIPCSubstanceDataElement { [ordered]@{ dataElements = @() } }
@@ -4332,7 +4332,7 @@ Hierarchies:
             (HasDelta 'dataElements' 'Changed' 'DataElementNormalisation') | Should -BeGreaterThan 0
             (HasDelta 'programRules' 'Removed' 'SupersededAggregate') | Should -BeGreaterThan 0
             (HasDelta 'programRules' 'Added' 'CoverageAddition') | Should -BeGreaterThan 0
-            (HasDelta 'programRuleActions' 'Removed' 'BusinessInterlock') | Should -BeGreaterThan 0
+            (HasDelta 'programRuleActions' 'Removed' 'HandAuthoredAction') | Should -BeGreaterThan 0
             (HasDelta 'programRuleActions' 'Added' 'CoverageAddition') | Should -BeGreaterThan 0
             @($r | Where-Object { $_.Class -eq 'Unclassified' }).Count | Should -Be 0
         }
@@ -4473,6 +4473,110 @@ Hierarchies:
             Export-NeoIPCAntibioticTranslation -SubstancePath $script:tcSub -GroupPath $script:tcGrp -AwareGroupPath $script:tcAware -ListElementsPath $script:tcList -PoDirectory $poDir | Out-Null
             Test-Path (Join-Path $poDir 'antibiotics.pot') | Should -BeTrue
             @(Get-ChildItem -Path $poDir -Filter 'antibiotics.*.po').Count | Should -Be 0
+        }
+    }
+
+    Describe 'Reconcile mode (Update-NeoIPCMetadataDirectory)' {
+        BeforeEach {
+            # A directory with committed-style files: authored org units (must never be re-emitted from the export),
+            # a config CSV, and an authored sharing.yaml. The heavy engine is mocked; only the orchestration is tested.
+            $script:rcDir = Join-Path $TestDrive ('rc-dir-' + [System.IO.Path]::GetRandomFileName())
+            New-Item -ItemType Directory -Path $script:rcDir -Force | Out-Null
+            Set-Content -LiteralPath (Join-Path $script:rcDir 'organisationUnits.csv') -Value "id,code,name`nOUaaaaaaaa1,AT,Austria" -NoNewline
+            Set-Content -LiteralPath (Join-Path $script:rcDir 'dataElements.csv') -Value "id,code,name`nDEaaaaaaaa1,OLD_DE,Old" -NoNewline
+            Set-Content -LiteralPath (Join-Path $script:rcDir 'sharing.yaml') -Value "PUBLIC_RW:`n  public: `"rw------`"" -NoNewline
+            # Tiny export the cmdlet parses for the template-presence check; includes a template (present case).
+            $script:rcExport = Join-Path $TestDrive ('rc-exp-' + [System.IO.Path]::GetRandomFileName() + '.json')
+            Set-Content -LiteralPath $script:rcExport -Value '{ "dataElements": [ { "id": "DEaaaaaaaa1", "code": "OLD_DE", "name": "Old" } ], "programNotificationTemplates": [ { "id": "PNTaaaaaaa1", "name": "T" } ] }'
+
+            Mock ConvertTo-NeoIPCMetadataJson { '{}' }                       # the directory's "current" package (core diff is mocked, so content is irrelevant)
+            Mock Compare-NeoIPCMetadataCore {
+                @(
+                    [pscustomobject]@{ Type = 'dataElements'; Id = 'DEnewwwwww1'; Kind = 'Added' }
+                    [pscustomobject]@{ Type = 'indicatorTypes'; Id = 'ITaaaaaaaa1'; Kind = 'Added' }
+                    [pscustomobject]@{ Type = 'organisationUnits'; Id = 'OUbbbbbbbb2'; Kind = 'Added' }   # authored -> report-only
+                )
+            }
+            Mock Compare-NeoIPCGeneratedMetadata {
+                # Returned as ONE protected collection (unary-comma), like the real cmdlet — so this also locks the
+                # @()-enumeration: the report must count these as 3 (2 classified + 1 Unclassified), not 1.
+                $l = [System.Collections.Generic.List[object]]::new()
+                $l.Add([pscustomobject]@{ Type = 'options'; Kind = 'Changed'; Id = 'o1'; Key = '1'; Class = 'TaxonomicNaming' })
+                $l.Add([pscustomobject]@{ Type = 'programRuleActions'; Kind = 'Removed'; Id = 'a1'; Key = ''; Class = 'HandAuthoredAction' })
+                $l.Add([pscustomobject]@{ Type = 'dataElements'; Kind = 'Added'; Id = 'd9'; Key = 'X'; Class = 'Unclassified' })
+                , $l
+            }
+            Mock Export-NeoIPCMetadataTranslation { }
+            Mock ConvertFrom-NeoIPCMetadataJson {
+                # Simulate the re-emit into the temp dir: the affected config CSVs PLUS an anonymised org-units CSV
+                # (which the cmdlet must NOT copy back, because organisationUnits is authored / report-only).
+                Set-Content -LiteralPath (Join-Path $OutputDirectory 'dataElements.csv') -Value "id,code,name`nDEnewwwwww1,NEW_DE,New" -NoNewline
+                Set-Content -LiteralPath (Join-Path $OutputDirectory 'indicatorTypes.csv') -Value "id,name`nITaaaaaaaa1,Number" -NoNewline
+                Set-Content -LiteralPath (Join-Path $OutputDirectory 'organisationUnits.csv') -Value "id,code,name`nOUanon00001,," -NoNewline
+            }
+        }
+
+        It 'report-only by default: classifies the drift and writes nothing' {
+            $r = Update-NeoIPCMetadataDirectory -ExportPath $script:rcExport -MetadataDirectory $script:rcDir -WarningAction SilentlyContinue
+            $r.Applied | Should -BeFalse
+            @($r.AutoWrite | ForEach-Object { $_.Type }) | Should -Contain 'dataElements'
+            @($r.AutoWrite | ForEach-Object { $_.Type }) | Should -Contain 'indicatorTypes'
+            @($r.AutoWrite | ForEach-Object { $_.Type }) | Should -Not -Contain 'organisationUnits'
+            $r.AuthoredReportOnly | Should -Contain 'organisationUnits'
+            (Get-Content -LiteralPath (Join-Path $script:rcDir 'dataElements.csv') -Raw) | Should -Match 'OLD_DE'   # untouched
+            Should -Not -Invoke ConvertFrom-NeoIPCMetadataJson
+            Should -Not -Invoke Export-NeoIPCMetadataTranslation
+        }
+
+        It 'enumerates the generated collection (the protected-list return), not a 1-element wrapper' {
+            $r = Update-NeoIPCMetadataDirectory -ExportPath $script:rcExport -MetadataDirectory $script:rcDir -WarningAction SilentlyContinue
+            (@($r.GeneratedReportOnly) | Measure-Object Count -Sum).Sum | Should -Be 2          # the 2 non-Unclassified deltas
+            @($r.GeneratedReportOnly | Where-Object { $_.Class -eq 'HandAuthoredAction' }).Count | Should -Be 1
+            $r.Unclassified.Count | Should -Be 1
+            $r.Unclassified[0].Id | Should -BeExactly 'd9'
+        }
+
+        It 'surfaces Unclassified deltas as a warning' {
+            Update-NeoIPCMetadataDirectory -ExportPath $script:rcExport -MetadataDirectory $script:rcDir -WarningVariable w -WarningAction SilentlyContinue | Out-Null
+            @($w | Where-Object { $_ -match 'Unclassified' }).Count | Should -BeGreaterThan 0
+        }
+
+        It '-Apply re-emits the affected config CSVs, never organisationUnits, and refreshes the PO' {
+            $poDir = Join-Path $TestDrive ('rc-po-' + [System.IO.Path]::GetRandomFileName())
+            $r = Update-NeoIPCMetadataDirectory -ExportPath $script:rcExport -MetadataDirectory $script:rcDir -PoDirectory $poDir -Apply -WarningAction SilentlyContinue
+            $r.Applied | Should -BeTrue
+            (Get-Content -LiteralPath (Join-Path $script:rcDir 'dataElements.csv') -Raw) | Should -Match 'NEW_DE'          # config re-emitted
+            (Test-Path -LiteralPath (Join-Path $script:rcDir 'indicatorTypes.csv')) | Should -BeTrue                       # new type materialised
+            (Get-Content -LiteralPath (Join-Path $script:rcDir 'organisationUnits.csv') -Raw) | Should -Match 'Austria'    # authored org units untouched
+            (Get-Content -LiteralPath (Join-Path $script:rcDir 'organisationUnits.csv') -Raw) | Should -Not -Match 'OUanon00001'
+            $r.PoUpdated | Should -BeTrue
+            Should -Invoke Export-NeoIPCMetadataTranslation -Times 1 -Exactly
+        }
+
+        It 'treats programNotificationTemplates as report-only when the export lacks them' {
+            $noTpl = Join-Path $TestDrive ('rc-notpl-' + [System.IO.Path]::GetRandomFileName() + '.json')
+            Set-Content -LiteralPath $noTpl -Value '{ "dataElements": [ { "id": "DEaaaaaaaa1", "code": "OLD_DE", "name": "Old" } ] }'
+            Mock Compare-NeoIPCMetadataCore { @([pscustomobject]@{ Type = 'programNotificationTemplates'; Id = 'PNTxxxxxxx9'; Kind = 'Removed' }) }
+            $r = Update-NeoIPCMetadataDirectory -ExportPath $noTpl -MetadataDirectory $script:rcDir -WarningAction SilentlyContinue
+            @($r.AutoWrite | ForEach-Object { $_.Type }) | Should -Not -Contain 'programNotificationTemplates'
+            $r.AuthoredReportOnly | Should -Contain 'programNotificationTemplates'
+        }
+        It '-Apply mirrors a changed program-rule-ACTION expression even when only programRuleActions is affected' {
+            # An action `data` expression lives under expressions/programRules/<rule>/<actionId>.data.dhis2 (co-located
+            # with its owning rule), so a data-only change makes programRuleActions the sole affected type. The mirror
+            # must still re-sync the owning programRules subtree, or the new expression is silently dropped.
+            $exprDir = Join-Path $script:rcDir (Join-Path 'expressions' (Join-Path 'programRules' 'rl_test'))
+            New-Item -ItemType Directory -Path $exprDir -Force | Out-Null
+            Set-Content -LiteralPath (Join-Path $exprDir 'acT1.data.dhis2') -Value '1 + 1' -NoNewline      # OLD content in the directory
+            Mock Compare-NeoIPCMetadataCore { @([pscustomobject]@{ Type = 'programRuleActions'; Id = 'acT1'; Kind = 'Changed' }) }
+            Mock ConvertFrom-NeoIPCMetadataJson {
+                $d = Join-Path $OutputDirectory (Join-Path 'expressions' (Join-Path 'programRules' 'rl_test'))
+                New-Item -ItemType Directory -Path $d -Force | Out-Null
+                Set-Content -LiteralPath (Join-Path $d 'acT1.data.dhis2') -Value '2 + 2' -NoNewline        # NEW content from the export
+                Set-Content -LiteralPath (Join-Path $OutputDirectory 'programRuleActions.csv') -Value "id,programRuleActionType,data`nacT1,ASSIGN,expressions/programRules/rl_test/acT1.data.dhis2" -NoNewline
+            }
+            Update-NeoIPCMetadataDirectory -ExportPath $script:rcExport -MetadataDirectory $script:rcDir -Apply -WarningAction SilentlyContinue | Out-Null
+            (Get-Content -LiteralPath (Join-Path $exprDir 'acT1.data.dhis2') -Raw) | Should -BeExactly '2 + 2'
         }
     }
 }

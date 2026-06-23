@@ -42,6 +42,7 @@ The module spans two broad areas:
 | `Public/ReportHelpers.ps1` | Report-build helpers — scoped auth env vars, Quarto/Rscript invocation, locale resolution, build summaries |
 | `Public/InfectiousAgents.ps1` | Infectious-agent ontology helpers (next free `Id`) |
 | `Public/Metadata.ps1` | The metadata-pipeline public surface — convert, compare, round-trip, closure, lint, update, **assemble** (`New-NeoIPCMetadataPackage`), translation export/import |
+| `Public/MetadataReconcile.ps1` | **Reconcile** the canonical directory against a fresh export (`Update-NeoIPCMetadataDirectory`) — classify drift, auto-write CSV-owned config + PO, report-only for authored / generated / domain |
 | `Public/Generation.ps1` | The nine ontology/matrix-driven object generators (pathogen + substance + field-gating) |
 | `Private/Metadata.ps1` | Pipeline **core** — JSON parse, deterministic UID mint, row↔object cell coercion, sharing-profile registry, noise-strip, canonicalize, CSV I/O, package↔directory, semantic compare |
 | `Private/MetadataTypeMaps.ps1` | Per-type field classification (translatable vs technical vs nested), the normalization strip-list, and the non-closure type list — the data the core consults |
@@ -86,6 +87,12 @@ noise-strips, then overlays the authored org units / users / memberships read fr
 substance / field-gating objects from the ontology + capability matrix, each preserving
 the deployed UIDs where they exist (else minting deterministically) so a regenerated
 object replaces its deployed counterpart cleanly.
+
+`Update-NeoIPCMetadataDirectory` is the reverse path: it ingests a fresh export and brings the
+directory into line with it (report-only unless `-Apply`), auto-writing only the CSV-owned config
+it can faithfully reconcile — and reporting the rest by owner. Authored org units / users (the
+export carries only anonymised instances), the ontology-generated families, and the domain YAML are
+never reverse-written; an unexpected change surfaces as `Unclassified` for investigation.
 
 ## Authentication
 
@@ -401,5 +408,5 @@ runs `msgfmt -c` (via WSL on Windows) when gettext is available.
 | User | `Read-UserInfo` |
 | Quarto | `Invoke-WithNeoIPCAuth`, `Invoke-QuartoRender`, `Invoke-Rscript`, `Build-QmdParamPairs`, `Write-NeoIPCBuildReport`, `Test-QuartoInstallation`, `Split-NeoIPCLocale`, `Resolve-NeoIPCLocaleQmd` |
 | InfectiousAgents | `Find-NextFreeInfectiousAgentId` |
-| Metadata pipeline | `ConvertFrom-NeoIPCMetadataJson`, `ConvertTo-NeoIPCMetadataJson`, `Compare-NeoIPCMetadata`, `Test-NeoIPCMetadataRoundTrip`, `Merge-NeoIPCMetadataJson`, `Select-NeoIPCMetadataClosure`, `Test-NeoIPCMetadataExpression`, `Update-NeoIPCMetadata`, `New-NeoIPCMetadataPackage`, `Export-NeoIPCMetadataTranslation`, `Import-NeoIPCMetadataTranslation` |
+| Metadata pipeline | `ConvertFrom-NeoIPCMetadataJson`, `ConvertTo-NeoIPCMetadataJson`, `Compare-NeoIPCMetadata`, `Test-NeoIPCMetadataRoundTrip`, `Merge-NeoIPCMetadataJson`, `Select-NeoIPCMetadataClosure`, `Test-NeoIPCMetadataExpression`, `Update-NeoIPCMetadata`, `New-NeoIPCMetadataPackage`, `Export-NeoIPCMetadataTranslation`, `Import-NeoIPCMetadataTranslation`, `Update-NeoIPCMetadataDirectory` |
 | Metadata generation | `New-NeoIPCPathogenOptionSet`, `New-NeoIPCPathogenDataElement`, `New-NeoIPCPathogenVariable`, `New-NeoIPCPathogenRule`, `New-NeoIPCPathogenFieldGatingVariable`, `New-NeoIPCPathogenFieldGatingRule`, `New-NeoIPCSubstanceDataElement`, `New-NeoIPCSubstanceVariable`, `New-NeoIPCSubstanceRule` |

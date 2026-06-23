@@ -18,7 +18,7 @@ function ConvertFrom-NeoIPCMetadataJson {
         actions (plus the retired HAP aggregate rule) are generated from the YAML + capability matrix by
         New-NeoIPCMetadataPackage, so the directory carries the hand-authored metadata rather than the generated
         machinery. (A hand-authored action bundled onto a generated rule — e.g. the BSI no-positive-culture
-        interlock on the regenerated 'when set' rule — drops with that rule; the assembler reinstates it from the
+        hand-authored action on the regenerated 'when set' rule — drops with that rule; the assembler reinstates it from the
         export, so the importable package keeps it.) Idempotent: replaces only the per-type files it owns. No DHIS2
         API calls.
     .PARAMETER Path

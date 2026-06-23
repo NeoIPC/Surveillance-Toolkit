@@ -674,7 +674,7 @@ function New-NeoIPCPathogenFieldGatingRule {
           - `<slot> - when empty or listed`: condition `!... || != 0`, a HIDEFIELD on `_NAME`;
           - `<slot> - when not listed`: condition `d2:hasValue && == 0`, a SETMANDATORYFIELD on `_NAME`.
         The recognized-pathogen code set carries the corrected taxonomy (the nearest-explicit effective CommonCommensal
-        flag), not the deployed snapshot. The deployed slot-1 NEOIPC_BSI_NO_POS_CULTURE interlock is a BSI-definition
+        flag), not the deployed snapshot. The deployed slot-1 NEOIPC_BSI_NO_POS_CULTURE rule is a BSI-definition
         business rule and is not emitted here.
 
         Each rule's `programStage` is resolved via a slot-1 `_3GCR` resistance data element on that stage (the deployed
