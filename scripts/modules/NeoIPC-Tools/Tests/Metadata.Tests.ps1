@@ -4529,6 +4529,11 @@ Hierarchies:
                 Set-Content -LiteralPath (Join-Path $OutputDirectory 'indicatorTypes.csv') -Value "id,name`nITaaaaaaaa1,Number" -NoNewline
                 Set-Content -LiteralPath (Join-Path $OutputDirectory 'organisationUnits.csv') -Value "id,code,name`nOUanon00001,," -NoNewline
             }
+            # The SCOPED incoming. The config diff / generated diff are mocked, so the scope content is irrelevant —
+            # an empty package keeps Get-NeoIPCMetadataScopedConfig from running the real closure on the tiny export.
+            Mock Get-NeoIPCMetadataScopedConfig { [ordered]@{} }
+            # The git safety net has its own (real-git) tests below; the orchestration tests skip it.
+            Mock Assert-NeoIPCReconcileGitClean { }
         }
 
         It 'report-only by default: classifies the drift and writes nothing' {
@@ -4541,6 +4546,8 @@ Hierarchies:
             (Get-Content -LiteralPath (Join-Path $script:rcDir 'dataElements.csv') -Raw) | Should -Match 'OLD_DE'   # untouched
             Should -Not -Invoke ConvertFrom-NeoIPCMetadataJson
             Should -Not -Invoke Export-NeoIPCMetadataTranslation
+            Should -Invoke Get-NeoIPCMetadataScopedConfig                  # the diff is against the SCOPED package, never the raw export
+            Should -Not -Invoke Assert-NeoIPCReconcileGitClean             # report-only never touches the git safety net
         }
 
         It 'enumerates the generated collection (the protected-list return), not a 1-element wrapper' {
@@ -4556,16 +4563,19 @@ Hierarchies:
             @($w | Where-Object { $_ -match 'Unclassified' }).Count | Should -BeGreaterThan 0
         }
 
-        It '-Apply re-emits the affected config CSVs, never organisationUnits, and refreshes the PO' {
+        It '-Apply row-merges the affected config CSVs (keeping existing rows), never organisationUnits, and refreshes the PO from the scoped package' {
             $poDir = Join-Path $TestDrive ('rc-po-' + [System.IO.Path]::GetRandomFileName())
             $r = Update-NeoIPCMetadataDirectory -ExportPath $script:rcExport -MetadataDirectory $script:rcDir -PoDirectory $poDir -Apply -WarningAction SilentlyContinue
             $r.Applied | Should -BeTrue
-            (Get-Content -LiteralPath (Join-Path $script:rcDir 'dataElements.csv') -Raw) | Should -Match 'NEW_DE'          # config re-emitted
+            $deCsv = (Get-Content -LiteralPath (Join-Path $script:rcDir 'dataElements.csv') -Raw)
+            $deCsv | Should -Match 'NEW_DE'                                                                                # the Added row is merged in
+            $deCsv | Should -Match 'OLD_DE'                                                                               # the directory's existing row is KEPT (row-merge, not whole-file replace)
             (Test-Path -LiteralPath (Join-Path $script:rcDir 'indicatorTypes.csv')) | Should -BeTrue                       # new type materialised
             (Get-Content -LiteralPath (Join-Path $script:rcDir 'organisationUnits.csv') -Raw) | Should -Match 'Austria'    # authored org units untouched
             (Get-Content -LiteralPath (Join-Path $script:rcDir 'organisationUnits.csv') -Raw) | Should -Not -Match 'OUanon00001'
             $r.PoUpdated | Should -BeTrue
-            Should -Invoke Export-NeoIPCMetadataTranslation -Times 1 -Exactly
+            Should -Invoke Assert-NeoIPCReconcileGitClean -Times 1                                                         # -Apply runs the git safety net
+            Should -Invoke Export-NeoIPCMetadataTranslation -Times 1 -Exactly -ParameterFilter { $Package -and -not $Path }   # PO sourced from the scoped package, not a raw -Path export
         }
 
         It 'treats programNotificationTemplates as report-only when the export lacks them' {
@@ -4592,6 +4602,57 @@ Hierarchies:
             }
             Update-NeoIPCMetadataDirectory -ExportPath $script:rcExport -MetadataDirectory $script:rcDir -Apply -WarningAction SilentlyContinue | Out-Null
             (Get-Content -LiteralPath (Join-Path $exprDir 'acT1.data.dhis2') -Raw) | Should -BeExactly '2 + 2'
+        }
+
+        It 'keeps a Removed config object: reports it, never auto-deletes it from the directory' {
+            Mock Compare-NeoIPCMetadataCore { @([pscustomobject]@{ Type = 'dataElements'; Id = 'DEaaaaaaaa1'; Kind = 'Removed' }) }
+            $r = Update-NeoIPCMetadataDirectory -ExportPath $script:rcExport -MetadataDirectory $script:rcDir -Apply -WarningAction SilentlyContinue
+            @($r.AutoWrite | ForEach-Object { $_.Type }) | Should -Not -Contain 'dataElements'           # a Removed-only type is not auto-written
+            @($r.RemovedReportOnly | ForEach-Object { $_.Type }) | Should -Contain 'dataElements'         # reported, report-only
+            (Get-Content -LiteralPath (Join-Path $script:rcDir 'dataElements.csv') -Raw) | Should -Match 'OLD_DE'   # the row is KEPT, not deleted
+            Should -Not -Invoke ConvertFrom-NeoIPCMetadataJson                                            # no Changed/Added -> nothing to re-emit
+        }
+
+        It 'warns before -Apply when the deployment is not yet migrated (large generated diff)' {
+            Mock Compare-NeoIPCGeneratedMetadata {
+                $l = [System.Collections.Generic.List[object]]::new()
+                1..150 | ForEach-Object { $l.Add([pscustomobject]@{ Type = 'options'; Kind = 'Changed'; Id = "o$_"; Key = "$_"; Class = 'TaxonomicNaming' }) }
+                , $l
+            }
+            Update-NeoIPCMetadataDirectory -ExportPath $script:rcExport -MetadataDirectory $script:rcDir -Apply -WarningVariable w -WarningAction SilentlyContinue | Out-Null
+            @($w | Where-Object { $_ -match 'not yet migrated' }).Count | Should -BeGreaterThan 0
+        }
+
+        It 'does not warn about migration when the generated diff is small (below the threshold)' {
+            Update-NeoIPCMetadataDirectory -ExportPath $script:rcExport -MetadataDirectory $script:rcDir -Apply -WarningVariable w -WarningAction SilentlyContinue | Out-Null
+            @($w | Where-Object { $_ -match 'not yet migrated' }).Count | Should -Be 0     # the BeforeEach mock returns 3 deltas
+        }
+    }
+
+    Describe 'Reconcile -Apply git safety net (Assert-NeoIPCReconcileGitClean)' {
+        It 'passes for a clean git working tree' {
+            $repo = Join-Path $TestDrive ('git-clean-' + [System.IO.Path]::GetRandomFileName())
+            New-Item -ItemType Directory -Path $repo -Force | Out-Null
+            Set-Content -LiteralPath (Join-Path $repo 'a.csv') -Value 'x' -NoNewline
+            & git -C $repo init -q
+            & git -C $repo -c user.email=t@t -c user.name=t add -A
+            & git -C $repo -c user.email=t@t -c user.name=t commit -q -m init
+            { Assert-NeoIPCReconcileGitClean -Path $repo } | Should -Not -Throw
+        }
+        It 'refuses a dirty git working tree' {
+            $repo = Join-Path $TestDrive ('git-dirty-' + [System.IO.Path]::GetRandomFileName())
+            New-Item -ItemType Directory -Path $repo -Force | Out-Null
+            Set-Content -LiteralPath (Join-Path $repo 'a.csv') -Value 'x' -NoNewline
+            & git -C $repo init -q
+            & git -C $repo -c user.email=t@t -c user.name=t add -A
+            & git -C $repo -c user.email=t@t -c user.name=t commit -q -m init
+            Set-Content -LiteralPath (Join-Path $repo 'a.csv') -Value 'y' -NoNewline       # uncommitted change
+            { Assert-NeoIPCReconcileGitClean -Path $repo } | Should -Throw '*CLEAN*'
+        }
+        It 'refuses a directory that is not under git at all' {
+            $bare = Join-Path $TestDrive ('git-none-' + [System.IO.Path]::GetRandomFileName())
+            New-Item -ItemType Directory -Path $bare -Force | Out-Null
+            { Assert-NeoIPCReconcileGitClean -Path $bare } | Should -Throw '*git working tree*'
         }
     }
 }

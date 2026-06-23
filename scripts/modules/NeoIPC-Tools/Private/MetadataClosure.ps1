@@ -305,6 +305,34 @@ function Get-NeoIPCMetadataClosure {
     }
 }
 
+function Get-NeoIPCMetadataScopedConfig {
+    # THE single definition of the NeoIPC SCOPE: the NEOIPC_CORE dependency closure PLUS the non-closure config
+    # DEFINITION types the program references only by code (org-unit groups / group-sets / levels, user roles /
+    # groups), noise-stripped. This is exactly what the materialised directory represents and what
+    # New-NeoIPCMetadataPackage assembles its config from, so the assembler AND the reverse path
+    # (Update-NeoIPCMetadataDirectory) share ONE scope so every comparison is like-against-like and no reconcile
+    # code path ever sees the raw full export (which would diff out-of-closure foreign objects as spurious drift).
+    # Excluded authored content (org-unit INSTANCES, users) and the ontology-/matrix-generated families are NOT
+    # added here — the closure carries the deployed generated families, and the authored content is read from the
+    # directory. Mutates the supplied package in place (the noise strip rewrites its objects), so give each
+    # consumer its OWN fresh parse; the -ExportPath form parses fresh internally for exactly that reason.
+    [CmdletBinding(DefaultParameterSetName = 'Package')]
+    [OutputType([System.Collections.Specialized.OrderedDictionary])]
+    param(
+        [Parameter(Mandatory, ParameterSetName = 'Package')][System.Collections.IDictionary]$Package,
+        [Parameter(Mandatory, ParameterSetName = 'Path')][string]$ExportPath,
+        [string]$SeedType = 'programs',
+        [string]$SeedCode = 'NEOIPC_CORE'
+    )
+    $pkg = if ($PSCmdlet.ParameterSetName -eq 'Path') {
+        ConvertFrom-NeoIPCMetadataJsonText -Json (Get-Content -LiteralPath $ExportPath -Raw)
+    }
+    else { $Package }
+    $config = (Get-NeoIPCMetadataClosure -Package $pkg -SeedType $SeedType -SeedCode $SeedCode).Package
+    foreach ($t in $script:NeoIPCMetadataNonClosureTypes) { if ($pkg.Contains($t)) { $config[$t] = $pkg[$t] } }
+    Remove-NeoIPCMetadataNoise -Object $config
+}
+
 function Merge-NeoIPCMetadataPackage {
     # Build the canonical pipeline input from two exports. The full /api/metadata export is the BASE (most
     # complete: all standard types, the analytics groups/attributes, every data element incl. expression-only

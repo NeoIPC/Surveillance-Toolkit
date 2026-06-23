@@ -515,15 +515,13 @@ function New-NeoIPCMetadataPackage {
         if ($r -is [System.Collections.IDictionary] -and $r['name']) { $roleUid[[string]$r['name']] = [string]$r['id'] }
     }
 
-    # Closure + the non-closure DEFINITION types (org-unit groups / group-sets / levels, user roles / groups).
-    # Org-unit INSTANCES are NOT in this set — they are excluded authored content, read from the directory below
-    # via Read-NeoIPCAuthoredOrgUnit. Then noise-strip the config so the anonymised per-deployment membership is
-    # gone BEFORE the authored membership is applied.
-    $config = (Get-NeoIPCMetadataClosure -Package $export -SeedType $SeedType -SeedCode $SeedCode).Package
-    foreach ($t in $script:NeoIPCMetadataNonClosureTypes) {
-        if ($export.Contains($t)) { $config[$t] = $export[$t] }
-    }
-    $config = Remove-NeoIPCMetadataNoise -Object $config
+    # The NeoIPC scope: closure + the non-closure DEFINITION types (org-unit groups / group-sets / levels, user
+    # roles / groups), noise-stripped — so the anonymised per-deployment membership is gone BEFORE the authored
+    # membership is applied. Org-unit INSTANCES are NOT in this set — they are excluded authored content, read
+    # from the directory below via Read-NeoIPCAuthoredOrgUnit. Shared with the reverse path
+    # (Update-NeoIPCMetadataDirectory) via Get-NeoIPCMetadataScopedConfig so directory, assembler and reconcile
+    # use one scope definition.
+    $config = Get-NeoIPCMetadataScopedConfig -Package $export -SeedType $SeedType -SeedCode $SeedCode
 
     # Replace the deployed generated classes (pathogen option set + per-slot DEs, resistance / field-gating /
     # substance PRVs + rules + actions) with the ontology- and matrix-generated ones, so the package carries the
