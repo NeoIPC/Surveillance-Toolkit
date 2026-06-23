@@ -281,8 +281,12 @@ function ConvertTo-NeoIPCSharingProfileSpec {
 
 function Initialize-NeoIPCSharingProfileFromPackage {
     # Build the sharing-profile registry by collecting every distinct sharing shape in a package and minting
-    # a deterministic key per shape (sorted by canonical value -> SHARING_NNN). Used when no authored
-    # sharing.yaml is present, so emit can still resolve and a self-contained file can be written afterwards.
+    # a deterministic key per shape (ordinal-sorted by canonical value -> SHARING_NNN). Used ONLY when no authored
+    # sharing.yaml is present: it SEEDS a self-contained file that a human then reviews and renames to semantic keys
+    # (PUBLIC_RW, NEOIPC_READ, ...). The sequential SHARING_NNN numbering is a property of this transient seed, not of
+    # a committed directory: the committed sharing.yaml carries authored keys (loaded by Import-NeoIPCSharingProfile),
+    # which are insertion-stable — adding a profile there touches one line and never renumbers the CSV `sharing` cells.
+    # (Emit prefers the authored file; re-seeding a directory that already has one is not a supported workflow.)
     [CmdletBinding()]
     param([Parameter(Mandatory)]$Package)
     $byCanon = [ordered]@{}

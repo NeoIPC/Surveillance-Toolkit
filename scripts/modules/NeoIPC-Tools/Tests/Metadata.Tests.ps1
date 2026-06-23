@@ -1907,6 +1907,76 @@ InModuleScope 'NeoIPC-Tools' {
         }
     }
 
+    Describe 'Generated-family translation keys (stable semantic msgctxt — change-locality)' {
+        It 'derives stable DE-code-scheme keys for every generated PRV / rule family (name- and UID-independent)' {
+            $idx = Get-NeoIPCMetadataGeneratedTranslationKeyIndex -Package ([ordered]@{})
+            # Resistance PRVs (primary + secondary), field-gating PRV, substance PRV (slot-padding-normalised lookup).
+            $idx.VariableKeyByName['NeoIPC BSI Pathogen 1 value'] | Should -BeExactly 'NEOIPC_BSI_PATHOGEN_1_VALUE'
+            $idx.VariableKeyByName['NeoIPC BSI Pathogen 1 may be 3GCR'] | Should -BeExactly 'NEOIPC_BSI_PATHOGEN_1_MAYBE_3GCR'
+            $idx.VariableKeyByName['NeoIPC BSI Pathogen 1 may be carbapenem-resistant'] | Should -BeExactly 'NEOIPC_BSI_PATHOGEN_1_MAYBE_CAR'
+            $idx.VariableKeyByName['NeoIPC HAP Secondary BSI pathogen 1 value'] | Should -BeExactly 'NEOIPC_HAP_SEC_BSI_PATHOGEN_1_VALUE'
+            $idx.VariableKeyByName['NeoIPC BSI Pathogen 1 is recognized pathogen'] | Should -BeExactly 'NEOIPC_BSI_PATHOGEN_1_IS_RECOGNIZED'
+            $idx.VariableKeyByName['NeoIPC Surveillance end Antibiotic substance 1 - current event value'] | Should -BeExactly 'NEOIPC_SURVEILLANCE_END_AB_SUBST_01_VALUE'
+            $idx.VariableKeyByName['NeoIPC Surveillance end Antibiotic substance 1 days - current event value'] | Should -BeExactly 'NEOIPC_SURVEILLANCE_END_AB_SUBST_01_DAYS_VALUE'
+            # Rules: the resistance triple, the field-gating kinds, the substance cluster.
+            $idx.RuleKeyByName['NeoIPC BSI Pathogen 1 - set 3GCR'] | Should -BeExactly 'NEOIPC_BSI_PATHOGEN_1_SET_3GCR'
+            $idx.RuleKeyByName['NeoIPC BSI Pathogen 1 - not VRE'] | Should -BeExactly 'NEOIPC_BSI_PATHOGEN_1_NOT_VRE'
+            $idx.RuleKeyByName['NeoIPC BSI Pathogen 1 - when empty'] | Should -BeExactly 'NEOIPC_BSI_PATHOGEN_1_WHEN_EMPTY'
+            $idx.RuleKeyByName['NeoIPC BSI Pathogen 1 - set recognized pathogen'] | Should -BeExactly 'NEOIPC_BSI_PATHOGEN_1_SET_RECOGNIZED'
+            $idx.RuleKeyByName['NeoIPC Surveillance end Antibiotic substance 1 - hide'] | Should -BeExactly 'NEOIPC_SURVEILLANCE_END_AB_SUBST_01_HIDE'
+            $idx.RuleKeyByName['NeoIPC Surveillance end Antibiotic substance days - validate'] | Should -BeExactly 'NEOIPC_SURVEILLANCE_END_AB_SUBST_DAYS_VALIDATE'
+        }
+        It 'resolves a generated rule / variable to its semantic key and a hand-authored code-less object to null' {
+            $idx = Get-NeoIPCMetadataGeneratedTranslationKeyIndex -Package ([ordered]@{})
+            Get-NeoIPCMetadataGeneratedTranslationKey -Type 'programRules' -Object ([ordered]@{ id = 'rl1'; name = 'NeoIPC BSI Pathogen 1 - set 3GCR' }) -Index $idx | Should -BeExactly 'NEOIPC_BSI_PATHOGEN_1_SET_3GCR'
+            Get-NeoIPCMetadataGeneratedTranslationKey -Type 'programRuleVariables' -Object ([ordered]@{ id = 'pv1'; name = 'NeoIPC BSI Pathogen 1 value' }) -Index $idx | Should -BeExactly 'NEOIPC_BSI_PATHOGEN_1_VALUE'
+            Get-NeoIPCMetadataGeneratedTranslationKey -Type 'programRules' -Object ([ordered]@{ id = 'rlx'; name = 'NeoIPC BSI infection present' }) -Index $idx | Should -BeNullOrEmpty
+        }
+        It 'keys a generated action by owning-rule key + action type (+ target DE code), unique across a multi-action rule' {
+            $pkg = [ordered]@{
+                dataElements = @(
+                    [ordered]@{ id = 'deNam2'; code = 'NEOIPC_BSI_PATHOGEN_2_NAME' }
+                )
+                programRules = @(
+                    [ordered]@{ id = 'rlWE1'; name = 'NeoIPC BSI Pathogen 1 - when empty' }
+                    [ordered]@{ id = 'rlSet1'; name = 'NeoIPC BSI Pathogen 1 - set 3GCR' }
+                )
+            }
+            $idx = Get-NeoIPCMetadataGeneratedTranslationKeyIndex -Package (ConvertFrom-NeoIPCMetadataJsonText -Json ($pkg | ConvertTo-Json -Depth 40))
+            # ASSIGN with no DE target -> <ruleKey>/ASSIGN
+            Get-NeoIPCMetadataGeneratedTranslationKey -Type 'programRuleActions' -Object ([ordered]@{ programRuleActionType = 'ASSIGN'; programRule = [ordered]@{ id = 'rlSet1' } }) -Index $idx | Should -BeExactly 'NEOIPC_BSI_PATHOGEN_1_SET_3GCR/ASSIGN'
+            # HIDEFIELD with a DE target -> <ruleKey>/HIDEFIELD/<deCode>
+            Get-NeoIPCMetadataGeneratedTranslationKey -Type 'programRuleActions' -Object ([ordered]@{ programRuleActionType = 'HIDEFIELD'; programRule = [ordered]@{ id = 'rlWE1' }; dataElement = [ordered]@{ id = 'deNam2' } }) -Index $idx | Should -BeExactly 'NEOIPC_BSI_PATHOGEN_1_WHEN_EMPTY/HIDEFIELD/NEOIPC_BSI_PATHOGEN_2_NAME'
+            # an action on a non-generated rule -> null (it keeps its UID key)
+            Get-NeoIPCMetadataGeneratedTranslationKey -Type 'programRuleActions' -Object ([ordered]@{ programRuleActionType = 'HIDEFIELD'; programRule = [ordered]@{ id = 'rlUnknown' } }) -Index $idx | Should -BeNullOrEmpty
+        }
+        It 'extract: a generated code-less object keys by the semantic key; a hand-authored one keeps its UID' {
+            $pkg = [ordered]@{
+                programRuleVariables = @(
+                    [ordered]@{ id = 'pvGen00001'; name = 'NeoIPC BSI Pathogen 1 may be MRSA' }    # generated
+                    [ordered]@{ id = 'pvHand0001'; name = 'NeoIPC custom hand-authored variable' }  # hand-authored
+                )
+            }
+            $msgctxts = @(Get-NeoIPCMetadataTranslationUnit -Package $pkg | ForEach-Object { $_.Msgctxt })
+            $msgctxts | Should -Contain 'programRuleVariables/NEOIPC_BSI_PATHOGEN_1_MAYBE_MRSA/NAME'
+            $msgctxts | Should -Contain 'programRuleVariables/pvHand0001/NAME'
+        }
+        It 'the generated key is independent of the object UID (no churn when a deployed UID is reused vs minted)' {
+            $idx = Get-NeoIPCMetadataGeneratedTranslationKeyIndex -Package ([ordered]@{})
+            $a = Get-NeoIPCMetadataGeneratedTranslationKey -Type 'programRules' -Object ([ordered]@{ id = 'realUID0001'; name = 'NeoIPC BSI Pathogen 1 - set 3GCR' }) -Index $idx
+            $b = Get-NeoIPCMetadataGeneratedTranslationKey -Type 'programRules' -Object ([ordered]@{ id = 'mintedXYZ99'; name = 'NeoIPC BSI Pathogen 1 - set 3GCR' }) -Index $idx
+            $a | Should -BeExactly $b
+            $a | Should -BeExactly 'NEOIPC_BSI_PATHOGEN_1_SET_3GCR'
+        }
+        It 'adding a slot is additive: every key from a smaller slot count survives unchanged (bounded diff)' {
+            $idx3 = Get-NeoIPCMetadataGeneratedTranslationKeyIndex -Package ([ordered]@{}) -PathogenCount 3 -SubstanceCount 9
+            $idx4 = Get-NeoIPCMetadataGeneratedTranslationKeyIndex -Package ([ordered]@{}) -PathogenCount 4 -SubstanceCount 9
+            foreach ($n in $idx3.VariableKeyByName.Keys) { $idx4.VariableKeyByName[$n] | Should -BeExactly $idx3.VariableKeyByName[$n] }
+            foreach ($n in $idx3.RuleKeyByName.Keys) { $idx4.RuleKeyByName[$n] | Should -BeExactly $idx3.RuleKeyByName[$n] }
+            $idx4.RuleKeyByName.Count | Should -BeGreaterThan $idx3.RuleKeyByName.Count   # slot 4 only ADDS entries
+        }
+    }
+
     Describe 'PO string escaping' {
         It 'escapes and unescapes quote / backslash / newline / tab losslessly' {
             $raw = "a `"quoted`" b\c`nline2`ttab"

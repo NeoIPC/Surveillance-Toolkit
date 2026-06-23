@@ -55,11 +55,141 @@ function Get-NeoIPCMetadataOptionSetCodeIndex {
     $index
 }
 
+function Get-NeoIPCMetadataGeneratedTranslationKeyIndex {
+    # Build the lookup that gives every ontology/matrix-GENERATED code-less object (resistance / field-gating /
+    # substance program-rule VARIABLES, RULES and their ACTIONS) a stable, name-independent translation key, so the
+    # gettext msgctxt of those entries is a semantic key mirroring the DE code scheme (NEOIPC_BSI_PATHOGEN_1_SET_3GCR)
+    # instead of the volatile minted UID. The key is derived from the generator PLANS — the same plans
+    # Get-NeoIPCMetadataGeneratedKeys identifies the families from — so it stays in step with what the generators
+    # produce and is independent of the display NAME: a reworded rule keeps its msgctxt (only the msgid changes, which
+    # fuzzes the translation for re-review) and an added slot inserts a LOCAL block instead of reshuffling the whole
+    # catalogue. Generated DATA ELEMENTS are NOT in this index — they already carry a stable code, so they key by code.
+    # The lookup is by the object's slot-normalised name (variables / rules) or, for actions (which carry no name),
+    # by the owning-rule id resolved within the package. Slot counts default to the module-wide counts, matching the
+    # deployed export the package is built from.
+    [CmdletBinding()]
+    [OutputType([pscustomobject])]
+    param(
+        [Parameter(Mandatory)]$Package,
+        [ValidateRange(1, 9)][int]$PathogenCount = $script:NeoIPCPathogenSlotCount,
+        [ValidateRange(1, 99)][int]$SubstanceCount = $script:NeoIPCSubstanceSlotCount
+    )
+    $ordinal = [System.StringComparer]::Ordinal
+    $varKeyByName = [System.Collections.Generic.Dictionary[string, string]]::new($ordinal)
+    $ruleKeyByName = [System.Collections.Generic.Dictionary[string, string]]::new($ordinal)
+
+    foreach ($p in @(Get-NeoIPCPathogenVariablePlan -PathogenCount $PathogenCount)) {
+        $base = Get-NeoIPCPathogenSlotBaseCode -Stage $p['Stage'] -SlotKind $p['SlotKind'] -Index $p['Index']
+        $key = if ($p['Kind'] -eq 'value') { "${base}_VALUE" } else { "${base}_MAYBE_$($script:NeoIPCResistanceDeSuffixByCategory[$p['Category']])" }
+        $varKeyByName[(ConvertTo-NeoIPCSubstanceUnpaddedName ([string]$p['Name']))] = $key
+    }
+    foreach ($p in @(Get-NeoIPCPathogenFieldGatingVariablePlan -PathogenCount $PathogenCount)) {
+        $base = Get-NeoIPCPathogenSlotBaseCode -Stage $p['Stage'] -SlotKind $p['SlotKind'] -Index $p['Index']
+        $varKeyByName[(ConvertTo-NeoIPCSubstanceUnpaddedName ([string]$p['Name']))] = "${base}_IS_RECOGNIZED"
+    }
+    foreach ($p in @(Get-NeoIPCSubstanceVariablePlan -SubstanceCount $SubstanceCount)) {
+        # The substance/days DE code IS the slot base for these PRVs (each reads its DE on the current event).
+        $varKeyByName[(ConvertTo-NeoIPCSubstanceUnpaddedName ([string]$p['Name']))] = "$([string]$p['DataElementCode'])_VALUE"
+    }
+
+    foreach ($p in @(Get-NeoIPCPathogenRulePlan -PathogenCount $PathogenCount)) {
+        $base = Get-NeoIPCPathogenSlotBaseCode -Stage $p['Stage'] -SlotKind $p['SlotKind'] -Index $p['Index']
+        $cat = $script:NeoIPCResistanceDeSuffixByCategory[$p['Category']]
+        $role = switch ($p['Kind']) { 'set' { "SET_$cat" } 'mayBe' { "MAYBE_$cat" } 'not' { "NOT_$cat" } }
+        $ruleKeyByName[(ConvertTo-NeoIPCSubstanceUnpaddedName ([string]$p['Name']))] = "${base}_$role"
+    }
+    foreach ($p in @(Get-NeoIPCPathogenFieldGatingRulePlan -PathogenCount $PathogenCount)) {
+        $base = Get-NeoIPCPathogenSlotBaseCode -Stage $p['Stage'] -SlotKind $p['SlotKind'] -Index $p['Index']
+        $role = switch ($p['Kind']) {
+            'recognizedPathogen' { 'SET_RECOGNIZED' }
+            'whenSet' { 'WHEN_SET' }
+            'whenEmpty' { 'WHEN_EMPTY' }
+            'whenEmptyOrListed' { 'WHEN_EMPTY_OR_LISTED' }
+            'whenNotListed' { 'WHEN_NOT_LISTED' }
+        }
+        $ruleKeyByName[(ConvertTo-NeoIPCSubstanceUnpaddedName ([string]$p['Name']))] = "${base}_$role"
+    }
+    foreach ($p in @(Get-NeoIPCSubstanceRulePlan -SubstanceCount $SubstanceCount)) {
+        $nn = '{0:D2}' -f [int]$p['Index']
+        $sBase = "NEOIPC_SURVEILLANCE_END_AB_SUBST_$nn"
+        $key = switch ($p['Kind']) {
+            'hide' { "${sBase}_HIDE" }
+            'daysRequire' { "${sBase}_DAYS_REQUIRE" }
+            'substanceRequire' { "${sBase}_REQUIRE" }
+            'validate' { 'NEOIPC_SURVEILLANCE_END_AB_SUBST_DAYS_VALIDATE' }
+        }
+        $ruleKeyByName[(ConvertTo-NeoIPCSubstanceUnpaddedName ([string]$p['Name']))] = $key
+    }
+
+    # Resolve within the package: owning-rule id -> rule struct key (actions carry no name), and DE id -> code, so a
+    # generated action keys by its owning rule's struct key + action type (+ target DE code where it has one), which
+    # keeps the multi-action hide / when-empty rules unique.
+    $ruleStructKeyById = [System.Collections.Generic.Dictionary[string, string]]::new($ordinal)
+    foreach ($r in @($Package['programRules'])) {
+        if ($r -isnot [System.Collections.IDictionary]) { continue }
+        $nn = ConvertTo-NeoIPCSubstanceUnpaddedName ([string]$r['name'])
+        if ($ruleKeyByName.ContainsKey($nn)) { $ruleStructKeyById[[string]$r['id']] = $ruleKeyByName[$nn] }
+    }
+    $deCodeById = [System.Collections.Generic.Dictionary[string, string]]::new($ordinal)
+    foreach ($de in @($Package['dataElements'])) {
+        if ($de -is [System.Collections.IDictionary] -and $de['id'] -and $de['code']) { $deCodeById[[string]$de['id']] = [string]$de['code'] }
+    }
+
+    [pscustomobject]@{
+        VariableKeyByName   = $varKeyByName
+        RuleKeyByName       = $ruleKeyByName
+        RuleStructKeyById   = $ruleStructKeyById
+        DataElementCodeById = $deCodeById
+    }
+}
+
+function Get-NeoIPCMetadataGeneratedTranslationKey {
+    # The stable semantic translation key for a GENERATED code-less object, or $null when the object is not a
+    # generated variable / rule / action (it then falls back to the UID). Variables and rules look up by slot-
+    # normalised name; an action keys by its owning rule's struct key + action type (+ target DE code where it has
+    # one, so the multi-action hide / when-empty rules stay unique). Symmetric across extraction and injection — both
+    # reach it through Get-NeoIPCMetadataTranslationKey with the same index, so the keys always match.
+    [CmdletBinding()]
+    [OutputType([string])]
+    param(
+        [Parameter(Mandatory)][string]$Type,
+        [Parameter(Mandatory)]$Object,
+        [Parameter(Mandatory)]$Index
+    )
+    switch ($Type) {
+        'programRuleVariables' {
+            $nn = ConvertTo-NeoIPCSubstanceUnpaddedName ([string]$Object['name'])
+            if ($Index.VariableKeyByName.ContainsKey($nn)) { return $Index.VariableKeyByName[$nn] }
+            return $null
+        }
+        'programRules' {
+            $nn = ConvertTo-NeoIPCSubstanceUnpaddedName ([string]$Object['name'])
+            if ($Index.RuleKeyByName.ContainsKey($nn)) { return $Index.RuleKeyByName[$nn] }
+            return $null
+        }
+        'programRuleActions' {
+            $pr = $Object['programRule']
+            $rid = if ($pr -is [System.Collections.IDictionary]) { [string]$pr['id'] } else { [string]$pr }
+            if ([string]::IsNullOrEmpty($rid) -or -not $Index.RuleStructKeyById.ContainsKey($rid)) { return $null }
+            $ruleKey = $Index.RuleStructKeyById[$rid]
+            $atype = [string]$Object['programRuleActionType']
+            $de = $Object['dataElement']
+            $deId = if ($de -is [System.Collections.IDictionary]) { [string]$de['id'] } else { [string]$de }
+            $deCode = if (-not [string]::IsNullOrEmpty($deId) -and $Index.DataElementCodeById.ContainsKey($deId)) { $Index.DataElementCodeById[$deId] } else { $null }
+            if (-not [string]::IsNullOrEmpty($deCode)) { return "$ruleKey/$atype/$deCode" }
+            return "$ruleKey/$atype"
+        }
+    }
+    return $null
+}
+
 function Get-NeoIPCMetadataTranslationKey {
     # The key segment of an object's translation msgctxt, guaranteeing a UNIQUE msgctxt per (object, token). Code-keyed
     # where a code exists (survives UID regeneration, matches the legacy .<locale>.csv sidecars; options have no unique
-    # code on their own — Option.code repeats across sets — so they key by <optionSetCode>/<optionCode>). Code-less
-    # types (program rules / stages / sections, validation rules, ...) key by the object UID, NOT the name: DHIS2 does
+    # code on their own — Option.code repeats across sets — so they key by <optionSetCode>/<optionCode>). A code-less
+    # GENERATED rule / variable / action keys by a stable SEMANTIC key from Get-NeoIPCMetadataGeneratedTranslationKey
+    # (the DE-code-scheme key, name-independent — passed via $GeneratedKeyIndex). Any other code-less type (program
+    # stages / sections, validation rules, hand-authored rules, ...) keys by the object UID, NOT the name: DHIS2 does
     # not constrain those names to be unique (e.g. two programStageSections can share a name), so a name key would
     # collide into a gettext-invalid duplicate msgctxt — the readable meaning is the English msgid. Returns $null when
     # no usable key exists (the object is then skipped).
@@ -68,7 +198,8 @@ function Get-NeoIPCMetadataTranslationKey {
     param(
         [Parameter(Mandatory)][string]$Type,
         [Parameter(Mandatory)]$Object,
-        [hashtable]$OptionSetCodeById = @{}
+        [hashtable]$OptionSetCodeById = @{},
+        $GeneratedKeyIndex = $null
     )
     if ($Type -eq 'options') {
         $code = [string]$Object['code']
@@ -79,7 +210,11 @@ function Get-NeoIPCMetadataTranslationKey {
     }
     $code = [string]$Object['code']
     if (-not [string]::IsNullOrEmpty($code)) { return $code }
-    $id = [string]$Object['id']                                   # code-less: UID, not name (names are not unique)
+    if ($null -ne $GeneratedKeyIndex) {
+        $gen = Get-NeoIPCMetadataGeneratedTranslationKey -Type $Type -Object $Object -Index $GeneratedKeyIndex
+        if (-not [string]::IsNullOrEmpty($gen)) { return $gen }
+    }
+    $id = [string]$Object['id']                                   # code-less, non-generated: UID, not name (names are not unique)
     if (-not [string]::IsNullOrEmpty($id)) { return $id }
     return $null
 }
@@ -97,6 +232,7 @@ function Get-NeoIPCMetadataTranslationUnit {
     param([Parameter(Mandatory)]$Package)
     $optionSetCodeById = Get-NeoIPCMetadataOptionSetCodeIndex -Package $Package
     $domainSetIds = Get-NeoIPCMetadataDomainOptionSetIds -Package $Package   # NEOIPC_PATHOGENS / _SUBSTANCES — excluded
+    $generatedKeyIndex = Get-NeoIPCMetadataGeneratedTranslationKeyIndex -Package $Package   # stable semantic keys for the generated code-less families
     $units = [System.Collections.Generic.List[object]]::new()
     foreach ($type in $script:NeoIPCMetadataTypeMaps.Keys) {
         $fields = Get-NeoIPCMetadataTranslatableField -Type $type
@@ -110,7 +246,7 @@ function Get-NeoIPCMetadataTranslationUnit {
         $typeDecorated = [System.Collections.Generic.List[object]]::new()
         foreach ($obj in @($Package[$type])) {
             if ($obj -isnot [System.Collections.IDictionary]) { continue }
-            $key = Get-NeoIPCMetadataTranslationKey -Type $type -Object $obj -OptionSetCodeById $optionSetCodeById
+            $key = Get-NeoIPCMetadataTranslationKey -Type $type -Object $obj -OptionSetCodeById $optionSetCodeById -GeneratedKeyIndex $generatedKeyIndex
             if ($null -eq $key) { continue }
             # Antibiotic domain (ATC + AWaRe optionGroups, ATC5/WHO_AWARE optionGroupSets): every antibiotic-domain
             # name/description is translated in the dedicated antibiotic component (po/antibiotics.*), so it is excluded
@@ -177,8 +313,9 @@ function Get-NeoIPCMetadataTranslationUnit {
     }
     # Gettext-independent uniqueness gate: a duplicate msgctxt would make the PO invalid (msgfmt rejects it, Weblate
     # mangles it). Fail loud naming the colliding object UIDs rather than ship a broken catalogue. (Group-Object can't
-    # read a hashtable key as a property, so collisions are tallied by hand.)
-    $byCtx = @{}
+    # read a dictionary key as a property, so collisions are tallied by hand.) Keyed ORDINALLY (case-sensitively),
+    # matching the injection lookup, so two msgctxts that differ only in case stay distinct rather than conflated.
+    $byCtx = [System.Collections.Generic.Dictionary[string, System.Collections.Generic.List[string]]]::new([System.StringComparer]::Ordinal)
     foreach ($u in $units) {
         $ctx = [string]$u.Msgctxt
         if (-not $byCtx.ContainsKey($ctx)) { $byCtx[$ctx] = [System.Collections.Generic.List[string]]::new() }
@@ -404,7 +541,7 @@ function Add-NeoIPCMetadataTranslationToPackage {
     # locale -> { msgctxt -> msgstr } over the kept (non-fuzzy, non-empty) translations only.
     $byLocale = @{}
     foreach ($locale in $PoByLocale.Keys) {
-        $map = @{}
+        $map = [System.Collections.Generic.Dictionary[string, string]]::new([System.StringComparer]::Ordinal)
         foreach ($e in $PoByLocale[$locale]) {
             if ($e.Msgctxt -and -not $e.Fuzzy -and -not [string]::IsNullOrEmpty([string]$e.Msgstr)) { $map[[string]$e.Msgctxt] = [string]$e.Msgstr }
         }
@@ -416,6 +553,7 @@ function Add-NeoIPCMetadataTranslationToPackage {
 
     $optionSetCodeById = Get-NeoIPCMetadataOptionSetCodeIndex -Package $Package
     $domainSetIds = Get-NeoIPCMetadataDomainOptionSetIds -Package $Package
+    $generatedKeyIndex = Get-NeoIPCMetadataGeneratedTranslationKeyIndex -Package $Package
     $locales = @($PoByLocale.Keys | Sort-Object)
     foreach ($type in $script:NeoIPCMetadataTypeMaps.Keys) {
         $fields = Get-NeoIPCMetadataTranslatableField -Type $type
@@ -424,7 +562,7 @@ function Add-NeoIPCMetadataTranslationToPackage {
         $orderedFields = @($fields | Sort-Object { $tokenOrder[$_.Token] })
         foreach ($obj in @($Package[$type])) {
             if ($obj -isnot [System.Collections.IDictionary]) { continue }
-            $key = Get-NeoIPCMetadataTranslationKey -Type $type -Object $obj -OptionSetCodeById $optionSetCodeById
+            $key = Get-NeoIPCMetadataTranslationKey -Type $type -Object $obj -OptionSetCodeById $optionSetCodeById -GeneratedKeyIndex $generatedKeyIndex
             if ($null -eq $key) { continue }
             # Mirror extraction's exclusions, else this would REBUILD (and so wipe) translations[] the PO never owns —
             # the antibiotic domain (groups + group-sets) and the domain pathogen/substance option sets. Leave them intact.
@@ -435,8 +573,10 @@ function Add-NeoIPCMetadataTranslationToPackage {
             # (see Get-NeoIPCMetadataGeneratedKeys / Test-NeoIPCMetadataGeneratedExcluded).
             $rebuilt = [System.Collections.Generic.List[object]]::new()
             foreach ($locale in $locales) {
+                $localeMap = $byLocale[$locale]
                 foreach ($field in $orderedFields) {
-                    $val = $byLocale[$locale]["$type/$key/$($field.Token)"]
+                    $ctx = "$type/$key/$($field.Token)"
+                    $val = if ($localeMap.ContainsKey($ctx)) { $localeMap[$ctx] } else { $null }
                     if (-not [string]::IsNullOrEmpty($val)) {
                         $rebuilt.Add([ordered]@{ property = $field.Token; locale = $locale; value = $val })
                     }

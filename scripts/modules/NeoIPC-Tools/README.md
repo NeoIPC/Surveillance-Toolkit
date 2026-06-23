@@ -319,15 +319,21 @@ ObjectTranslation token — `NAME`, `SHORT_NAME`, `DESCRIPTION`, `FORM_NAME`,
 `SUBJECT_TEMPLATE`, …) maps to a PO entry keyed by a stable msgctxt:
 
 ```
-msgctxt = "<type>/<key>/<TOKEN>"   # key = optionSetCode/optionCode for options, else code, else object UID
+msgctxt = "<type>/<key>/<TOKEN>"   # key = optionSetCode/optionCode for options; else code; else a stable semantic key for the generated families; else the object UID
 msgid   = the English/default base value (e.g. the object's name)
 msgstr  = the translated value (empty in the .pot)
 ```
 
 The msgctxt is code-based where a code exists (so it survives UID regeneration and
-never orphans a translation in Weblate); code-less types (program rules / stages /
-sections, …) fall back to the object UID — names are not unique — so their msgctxt is
-not regeneration-stable, and the English msgid carries the readable meaning. The two
+never orphans a translation in Weblate). The ontology/matrix-**generated** code-less
+families (resistance / field-gating / substance program-rule variables, rules and their
+actions) key on a **stable semantic key** mirroring the DE code scheme
+(`NEOIPC_BSI_PATHOGEN_1_SET_3GCR`, …; actions `<ruleKey>/<TYPE>[/<targetDEcode>]`), derived
+from the generator plans and independent of both the UID and the display name — so a
+generator reword or slot-add yields a *local* `.pot` diff. Any **other** code-less object
+(program stages / sections, validation rules, hand-authored rules — whose names are not
+unique) falls back to the object UID, so its msgctxt is not regeneration-stable and the
+English msgid carries the readable meaning. The two
 domain-authored option sets
 (`NEOIPC_PATHOGENS`, `NEOIPC_ANTIMICROBIAL_SUBSTANCES`) are excluded — their
 translations belong with the option generation from the canonical YAML /

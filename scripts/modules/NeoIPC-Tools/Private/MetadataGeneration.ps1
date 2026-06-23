@@ -232,6 +232,20 @@ function Get-NeoIPCPathogenDataElementPlan {
     }
 }
 
+function Get-NeoIPCPathogenSlotBaseCode {
+    # The data-element code prefix shared by a pathogen slot's fields: NEOIPC_<STAGE>_PATHOGEN_<N> for a primary
+    # slot, NEOIPC_<STAGE>_SEC_BSI_PATHOGEN_<N> for a secondary-BSI slot. The slot plans inline this prefix literally;
+    # this names it once for the translation-key index to reuse, rather than re-inlining the same expression there.
+    [CmdletBinding()]
+    [OutputType([string])]
+    param(
+        [Parameter(Mandatory)][string]$Stage,
+        [Parameter(Mandatory)][string]$SlotKind,
+        [Parameter(Mandatory)][int]$Index
+    )
+    if ($SlotKind -eq 'primary') { "NEOIPC_${Stage}_PATHOGEN_${Index}" } else { "NEOIPC_${Stage}_SEC_BSI_PATHOGEN_${Index}" }
+}
+
 function Get-NeoIPCPathogenVariablePlan {
     # The capability-matrix expansion of the resistance-gating PROGRAM-RULE VARIABLES: for each of the 18
     # pathogen slots, one `value` variable (DATAELEMENT_CURRENT_EVENT over the base organism DE, reading the option
