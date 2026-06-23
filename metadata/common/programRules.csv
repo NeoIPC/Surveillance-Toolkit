@@ -1,279 +1,152 @@
 id,name,description,condition,priority,program,programStage,programRuleActions,sharing
-kuQVuXXgPk0,NeoIPC Admission Date must match enrollment admission date,Validates that the admission date in the enrollment and the admission date in the admission event are the same.,V{event_date} != V{enrollment_date},,D8mSSpOpsKj,YGowWPumDia,FZ3kcGyokUb,
-AxnwOtNl5bH,NeoIPC Admission Day of life 1,Causes an error on attempts to enter 1 as value for the admission day of life,d2:hasValue( #{NeoIPC Admission type - current event value} ) && #{NeoIPC Admission type - current event value}  == 3 && #{NeoIPC Admission on day of life value} < 2,1,D8mSSpOpsKj,YGowWPumDia,AtoLBnKzp6x,
-Ifj6xINnDDE,NeoIPC Admission Day of life value 150+,Issues a warning if the day of life at the time of admission is 150 ore more,#{NeoIPC Admission on day of life value} >= 150,1,D8mSSpOpsKj,YGowWPumDia,NFQYubrrXgs,
-GShb8cTSeZL,NeoIPC Admission Set Length of Stay,Automatically sets the Length of Stay for the current event,true,0,D8mSSpOpsKj,YGowWPumDia,ZqyfZpCn2Go,
-w2qtd49SXSi,NeoIPC Admission Set completed,,V{event_status} == 'COMPLETED',0,D8mSSpOpsKj,YGowWPumDia,SbaonIMfU5K,
-Wr1qtCLDDf2,NeoIPC Admission Type 1,Adjust the NeoIPC admission data entry form when the patient was delivered in the respective hospital or admitted on the day of birth,!d2:hasValue( #{NeoIPC Admission type - current event value} ) || #{NeoIPC Admission type - current event value}  <= 2,0,D8mSSpOpsKj,YGowWPumDia,XXSAf7Nkxps,
-soKejoHmhsN,NeoIPC Admission Type 2+,Adjust the NeoIPC admission data entry form when the patient was admitted on the day after birth or later,d2:hasValue( #{NeoIPC Admission type - current event value} ) && #{NeoIPC Admission type - current event value}  == 3,,D8mSSpOpsKj,YGowWPumDia,tJaNWTcaj2O,
-veOW1SyAYX0,NeoIPC BSI - unless no positive culture,"Adjusts the dialog when ""No positive culture"" is disabled.",!#{NeoIPC BSI - no positive culture},,D8mSSpOpsKj,wDQxhhyAkEU,JJq9QisjHQP,
-VOrixcs1pS7,NeoIPC BSI - when no positive culture,"Adjusts the dialog when ""No positive culture"" is enabled",#{NeoIPC BSI - no positive culture},,D8mSSpOpsKj,wDQxhhyAkEU,h3ISEpfpFMh kUu5iHyWqJP,
-sMHTL9hGVxZ,NeoIPC BSI Acidosis set count,Sets NeoIPC BSI Acidosis count to 1 if it is set to true.,d2:hasValue( #{NeoIPC BSI Acidosis value} ) && #{NeoIPC BSI Acidosis value},0,D8mSSpOpsKj,wDQxhhyAkEU,th3HQuOvf3S,
-J3XyS3QFeQ1,NeoIPC BSI Apnoea set count,Sets NeoIPC BSI Apnoea count to 1 if it is set to true.,d2:hasValue( #{NeoIPC BSI Apnoea value} ) && #{NeoIPC BSI Apnoea value},0,D8mSSpOpsKj,wDQxhhyAkEU,vLKxmwjyxXb,
-vsmxvp7bBHY,NeoIPC BSI Assign common laboratory findings count,Sets the variable for the common laboratory findings to 1 if any are set as present in the NeoIPC Core BSI dialog.,"(#{NeoIPC BSI White blood cell count count} > 0)
-||
-(#{NeoIPC BSI Platelet count count} > 0)
-||
-(#{NeoIPC BSI CRP count} > 0)
-||
-(#{NeoIPC BSI Procalcitonin count} > 0)
-||
-(#{NeoIPC BSI IT ratio count} > 0)
-||
-(#{NeoIPC BSI Interleukin count} > 0)",1,D8mSSpOpsKj,wDQxhhyAkEU,c4NjG2uyMNg,
-qcMm39rdO3M,NeoIPC BSI Assign first finding counts,Counts the findings (except for the common laboratory findings that count as 1) that are set as present in the NeoIPC Core BSI dialog and assigns the result to the variables relevant for the validation rule.,true,1,D8mSSpOpsKj,wDQxhhyAkEU,UvmZEbRhjqM Y1EJX8Pxx5i gi0dmsVCQK9,
-B8PvnPoxbZX,NeoIPC BSI Assign total common finding counts,Assigns the total value for the clinical finding counts.,true,2,D8mSSpOpsKj,wDQxhhyAkEU,L7fYDcRuvOS,
-IUEm8aeu991,NeoIPC BSI Bradycardia set count,Sets NeoIPC BSI Bradycardia count to 1 if it is set to true.,d2:hasValue( #{NeoIPC BSI Bradycardia value} ) && #{NeoIPC BSI Bradycardia value},0,D8mSSpOpsKj,wDQxhhyAkEU,maMCK23v1M9,
-lNm2IjXgA38,NeoIPC BSI CRP set count,Sets NeoIPC BSI CRP count to 1 if it is set to true.,d2:hasValue( #{NeoIPC BSI CRP value} ) && #{NeoIPC BSI CRP value},0,D8mSSpOpsKj,wDQxhhyAkEU,NnNVXY70LiR,
-g5S6YG3r5c7,NeoIPC BSI Clinical sepsis validation rule,Validates the findings in the NeoIPC Core BSI dialog against the clinical sepsis definition in the protocol,"(
-  (d2:hasValue(#{NeoIPC BSI - no positive culture}) && (#{NeoIPC BSI - no positive culture} == true))
-  &&
-  (!d2:hasValue(#{NeoIPC BSI Pathogen 1 value}))
-  &&
-  (!d2:hasValue(#{NeoIPC BSI Pathogen 2 value}))
-  &&
-  (!d2:hasValue(#{NeoIPC BSI Pathogen 3 value}))
-)
-&&
-(
-  (#{NeoIPC BSI - Antibiotic treatment} == false)
-  ||
-  (#{NeoIPC BSI Common sepsis total findings count} < 2)
-)",100,D8mSSpOpsKj,wDQxhhyAkEU,JbaukVydfAi,
-h1CFvJtOkdN,NeoIPC BSI Day of life value less than 4,Issues a warning if the day of life at the time of a BSI event is 3 or less,#{NeoIPC BSI on day of life current value} < 4,1,D8mSSpOpsKj,wDQxhhyAkEU,N42AaeNIvif,
-sKUcwpq4TBC,NeoIPC BSI Debug rule,A rule that shows several key/value pairs for debugging purposes,false,,D8mSSpOpsKj,wDQxhhyAkEU,BYjWfQOGAd3 EgzEnVR3Bw9 Eu0eUuZW0ct GeTPBhZtOL0 H5k55ijqtt4 KgxH0YY8Tli MMBcoRprCft SRl0Sww6BOA TULPXMExhs0 VdxSoplZgWB ZzuWFvH6c4o giL8IkTqs1J h8xs89kMVAH hrmeMF6miFB j19SWnLFzry jkyMli18aRl l6FEIsHlp6c lSLrT7auxYc nEG5GsYT2Z1 o43kYUtH9H6 tY6YEF8HrwM xkFeVyFHbG5,
-uZ76n1VW5ew,NeoIPC BSI Feeding intolerance set count,Sets NeoIPC BSI Feeding intolerance count to 1 if it is set to true.,d2:hasValue( #{NeoIPC BSI Feeding intolerance value} ) && #{NeoIPC BSI Feeding intolerance value},0,D8mSSpOpsKj,wDQxhhyAkEU,prr5HUikjWC,
-CQhxRCFd4yL,NeoIPC BSI Hyperglycaemia  set count,Sets NeoIPC BSI Hyperglycaemia  count to 1 if it is set to true.,d2:hasValue( #{NeoIPC BSI Hyperglycaemia  value} ) && #{NeoIPC BSI Hyperglycaemia  value},0,D8mSSpOpsKj,wDQxhhyAkEU,QG7g6QBkdHG,
-QWVCLlCyWO4,NeoIPC BSI IT ratio set count,Sets NeoIPC BSI I/T ratio count to 1 if it is set to true.,d2:hasValue( #{NeoIPC BSI IT ratio value} ) && #{NeoIPC BSI IT ratio value},0,D8mSSpOpsKj,wDQxhhyAkEU,AU7KfzR1meq,
-JkaN4BaXIpW,NeoIPC BSI Interleukin set count,Sets NeoIPC BSI Interleukin count to 1 if it is set to true.,d2:hasValue( #{NeoIPC BSI Interleukin value} ) && #{NeoIPC BSI Interleukin value},0,D8mSSpOpsKj,wDQxhhyAkEU,EA2FETf6og6,
-GGzawr3JNjG,NeoIPC BSI Irritability set count,Sets NeoIPC BSI Irritability count to 1 if it is set to true.,d2:hasValue( #{NeoIPC BSI Irritability value} ) && #{NeoIPC BSI Irritability value},0,D8mSSpOpsKj,wDQxhhyAkEU,qMDfL313ff4,
-sumEmGo0q2x,NeoIPC BSI LCBSI with common commensal detected multiple times or with AB-treatment >= 5 days validation rule,Validates the findings in the NeoIPC Core BSI dialog against the LCBSI definition in the protocol where a common commensal was detected multiple times or where systemic antibiotic treatment for 5 days or more was initiated.,"(
-  !#{NeoIPC BSI - no positive culture}
-  &&
-  (
-    d2:hasValue(#{NeoIPC BSI Pathogen 1 value})
-    ||
-    d2:hasValue(#{NeoIPC BSI Pathogen 2 value})
-    ||
-    d2:hasValue(#{NeoIPC BSI Pathogen 3 value})
-  )
-  &&
-  (
-    !#{NeoIPC BSI Pathogen 1 is recognized pathogen}
-    &&
-    !#{NeoIPC BSI Pathogen 2 is recognized pathogen}
-    &&
-    !#{NeoIPC BSI Pathogen 3 is recognized pathogen}
-  )
-)
-&&
-(
-  (
-    (d2:hasValue(#{NeoIPC BSI Pathogen 1 recovered multiple times value}) && (#{NeoIPC BSI Pathogen 1 recovered multiple times value} == true))
-    ||
-    (d2:hasValue(#{NeoIPC BSI Pathogen 2 recovered multiple times value}) && (#{NeoIPC BSI Pathogen 2 recovered multiple times value} == true))
-    ||
-    (d2:hasValue(#{NeoIPC BSI Pathogen 3 recovered multiple times value}) && (#{NeoIPC BSI Pathogen 3 recovered multiple times value} == true))
-    ||
-    (d2:hasValue(#{NeoIPC BSI - Antibiotic treatment}) && (#{NeoIPC BSI - Antibiotic treatment} == true))
-  )
-  &&
-  (
-    #{NeoIPC BSI Common sepsis total findings count} < 2
-  )
-)",100,D8mSSpOpsKj,wDQxhhyAkEU,xIxsIs9vFvk,
-auj12Ai26xP,NeoIPC BSI LCBSI with common commensal detected only once and no antibiotic treatment validation rule,Validates the findings in the NeoIPC Core BSI dialog against the LCBSI definition in the protocol where a common commensal was detected only once and no antibiotic treatment was initiated.,"(
-  !#{NeoIPC BSI - no positive culture}
-  &&
-  (
-    d2:hasValue(#{NeoIPC BSI Pathogen 1 value})
-    ||
-    d2:hasValue(#{NeoIPC BSI Pathogen 2 value})
-    ||
-    d2:hasValue(#{NeoIPC BSI Pathogen 3 value})
-  )
-  &&
-  (
-    !#{NeoIPC BSI Pathogen 1 is recognized pathogen}
-    &&
-    !#{NeoIPC BSI Pathogen 2 is recognized pathogen}
-    &&
-    !#{NeoIPC BSI Pathogen 3 is recognized pathogen}
-  )
-)
-&&
-(
-  (
-    !#{NeoIPC BSI Pathogen 1 recovered multiple times value}
-    &&
-    !#{NeoIPC BSI Pathogen 2 recovered multiple times value}
-    &&
-    !#{NeoIPC BSI Pathogen 3 recovered multiple times value}
-    &&
-    !#{NeoIPC BSI - Antibiotic treatment}
-  )
-  &&
-  (
-    (#{NeoIPC BSI Common commensal once clinical findings count} < 2)
-    ||
-    (#{NeoIPC BSI Common commensal once laboratory findings count} < 1)
-  )
-)",100,D8mSSpOpsKj,wDQxhhyAkEU,BXpXjk9mKRe,
-hGpXJ1WuHVJ,NeoIPC BSI Length of Stay less than 2,Issues a warning if the length of stay at the time of a BSI event is 1 or less,#{NeoIPC Admission type - value} == 3 && #{NeoIPC BSI Length of Stay current value} < 2,1,D8mSSpOpsKj,wDQxhhyAkEU,ALLSyDKLxIm,
-wavenklWWWL,NeoIPC BSI Organism 1 - name has value,Sends a message when a custom name is entered as Organism 1 in the NeoIPC Core BSI dialog,0 < d2:length(#{NeoIPC BSI Pathogen 1 name value}),9999,D8mSSpOpsKj,wDQxhhyAkEU,MoPAR39Dtto,
-NcsonLkQwsd,NeoIPC BSI Organism 2 - name has value,Sends a message when a custom name is entered as Organism 2 in the NeoIPC Core BSI dialog,0 < d2:length(#{NeoIPC BSI Pathogen 2 name value}),9999,D8mSSpOpsKj,wDQxhhyAkEU,K8mjcGj1oqH,
-DmK7JLV94nY,NeoIPC BSI Organism 3 - name has value,Sends a message when a custom name is entered as Organism 3 in the NeoIPC Core BSI dialog,0 < d2:length(#{NeoIPC BSI Pathogen 3 name value}),9999,D8mSSpOpsKj,wDQxhhyAkEU,kHGvWBogR4L,
-kkDGNkYQe9t,NeoIPC BSI Pathogen - when recognized pathogen,,#{NeoIPC BSI Pathogen 1 is recognized pathogen} || #{NeoIPC BSI Pathogen 2 is recognized pathogen} || #{NeoIPC BSI Pathogen 3 is recognized pathogen},1,D8mSSpOpsKj,wDQxhhyAkEU,HEm8QLFxBPT tvAshRduwIf,
-hwszsk44hZ3,NeoIPC BSI Pathogen - when recognized pathogen or antibiotic treatment,Hides the detected multiple times checkbox when a recognized pathogen was detected or an antibiotic treatment for the common commensal was initiated.,#{NeoIPC BSI Pathogen 1 is recognized pathogen} || #{NeoIPC BSI Pathogen 2 is recognized pathogen} || #{NeoIPC BSI Pathogen 3 is recognized pathogen} || #{NeoIPC BSI - Antibiotic treatment},1,D8mSSpOpsKj,wDQxhhyAkEU,SkizmAHatQu vzwZ8JFHnLd xqwFwesUADw,
-V3SxTcR7aP1,NeoIPC BSI Pathogen - when recognized pathogen or recovered multiple times,Hides the antibiotic treatment checkbox when a recognized pathogen was detected or the common commensal was detected multiple times,#{NeoIPC BSI Pathogen 1 is recognized pathogen} || #{NeoIPC BSI Pathogen 2 is recognized pathogen} || #{NeoIPC BSI Pathogen 3 is recognized pathogen} || #{NeoIPC BSI Pathogen 1 recovered multiple times value} || #{NeoIPC BSI Pathogen 2 recovered multiple times value} || #{NeoIPC BSI Pathogen 3 recovered multiple times value},1,D8mSSpOpsKj,wDQxhhyAkEU,iqCfIRnj0Yi,
-Gi7SH9RVlKg,NeoIPC BSI Perfusion set count,Sets NeoIPC BSI Perfusion count to 1 if it is set to true.,d2:hasValue( #{NeoIPC BSI Perfusion value} ) && #{NeoIPC BSI Perfusion value},0,D8mSSpOpsKj,wDQxhhyAkEU,hhKcnI0yVCr,
-yJvQVT3rIX1,NeoIPC BSI Platelet count set count,Sets NeoIPC BSI Platelet count count to 1 if it is set to true.,d2:hasValue( #{NeoIPC BSI Platelet count value} ) && #{NeoIPC BSI Platelet count value},0,D8mSSpOpsKj,wDQxhhyAkEU,lfZfbt37OQp,
-EBZOuGuaulx,NeoIPC BSI Procalcitonin set count,Sets NeoIPC BSI Procalcitonin count to 1 if it is set to true.,d2:hasValue( #{NeoIPC BSI Procalcitonin value} ) && #{NeoIPC BSI Procalcitonin value},0,D8mSSpOpsKj,wDQxhhyAkEU,GxuG7K4Pmc9,
-SdLm0Qp8IDS,NeoIPC BSI Set Day of life,Automatically sets the day of life for the current BSI event,true,0,D8mSSpOpsKj,wDQxhhyAkEU,FVHNMY64Lmk,
-YL8YY0dj2AO,NeoIPC BSI Set Length of Stay,Automatically sets the Length of Stay for the current event,true,0,D8mSSpOpsKj,wDQxhhyAkEU,JKSnC6C8tn0,
-uz9nfbom5PM,NeoIPC BSI Temperature set count,Sets NeoIPC BSI Temperature count to 1 if it is set to true.,d2:hasValue( #{NeoIPC BSI Temperature value} ) && #{NeoIPC BSI Temperature value},0,D8mSSpOpsKj,wDQxhhyAkEU,H1W4h5BKCm9,
-DFTJ8MRSqWH,NeoIPC BSI White blood cell count set count,Sets NeoIPC BSI White blood cell count count to 1 if it is set to true.,d2:hasValue( #{NeoIPC BSI White blood cell count value} ) && #{NeoIPC BSI White blood cell count value},0,D8mSSpOpsKj,wDQxhhyAkEU,daNfJVJx9Gm,
-rb0tjhQtZF2,NeoIPC HAP - display feedback,,true,100,D8mSSpOpsKj,gS3zQzPpsgV,BVLjKsKxgmA RiruEMstGWw XjfkynbsLHl pv5FaamSoG4 yNrTNPzvyhZ,
-LZQHeUvyjfJ,NeoIPC HAP - set virus,Sets the virus variables,true,0,D8mSSpOpsKj,gS3zQzPpsgV,MoO5KxaM646 aZrOkpaICko ocEhZAtP6by,
-fGBzfFalTNS,NeoIPC HAP - validate definition,Validates whether the information entered for a pneumonia fulfills the criteria of the NeoIPC pneumonia definition,!(#{NeoIPC HAP Imaging criterion fulfilled} && #{NeoIPC HAP Respiratory support criterion fulfilled} && #{NeoIPC HAP Clinical criteria fulfilled}),100,D8mSSpOpsKj,gS3zQzPpsgV,EK1zr5wNvR4,
-jNcz3fBOGOl,NeoIPC HAP Bradycardia value - true,"Adjusts the dialog and assigns variables when ""NeoIPC HAP Bradycardia value"" is true",d2:hasValue( #{NeoIPC HAP Bradycardia value} ) && #{NeoIPC HAP Bradycardia value},0,D8mSSpOpsKj,gS3zQzPpsgV,gxajYcmXPqX,
-Vq5RQpOCc5S,NeoIPC HAP Clinical criteria fulfilled - assign false,,#{NeoIPC HAP Clinical criteria total count} <= 3,5,D8mSSpOpsKj,gS3zQzPpsgV,lsLr3O3AZuk,
-UcZUM0TOJ8r,NeoIPC HAP Clinical criteria fulfilled - assign true,,#{NeoIPC HAP Clinical criteria total count} > 3,5,D8mSSpOpsKj,gS3zQzPpsgV,xIahBaeARNO,
-JCR4IJWeFPy,NeoIPC HAP Clinical criteria total count - assign calculated value,,true,4,D8mSSpOpsKj,gS3zQzPpsgV,NCIDqY9eBWK,
-TAB3BsCr9gs,NeoIPC HAP Day of life value less than 4,Issues a warning if the day of life at the time of a HAP event is 3 or less,#{NeoIPC HAP on day of life current value} < 4,1,D8mSSpOpsKj,gS3zQzPpsgV,qZU8QJQdiMp,
-uMbvNBL9p73,NeoIPC HAP Fever value - true,"Adjusts the dialog and assigns variables when ""NeoIPC HAP Fever value"" is true",d2:hasValue( #{NeoIPC HAP Fever value} ) && #{NeoIPC HAP Fever value},0,D8mSSpOpsKj,gS3zQzPpsgV,TxnBYLBAVsK,
-gaMKXAX1EtC,NeoIPC HAP Imaging findings criterion fulfilled - assign false,,!d2:hasValue( #{NeoIPC HAP Imaging findings value} ) || !#{NeoIPC HAP Imaging findings value},2,D8mSSpOpsKj,gS3zQzPpsgV,Vhm2WhgO9y9,
-yzZoVDcOape,NeoIPC HAP Imaging findings criterion fulfilled - assign true,,d2:hasValue( #{NeoIPC HAP Imaging findings value} ) && #{NeoIPC HAP Imaging findings value},2,D8mSSpOpsKj,gS3zQzPpsgV,z1LSlhvgXbt,
-CynFTUls1wk,NeoIPC HAP Increased respiratory secretion value - true,"Adjusts the dialog and assigns variables when ""NeoIPC HAP Increased respiratory secretion value"" is true",d2:hasValue( #{NeoIPC HAP Increased respiratory secretion value} ) && #{NeoIPC HAP Increased respiratory secretion value},0,D8mSSpOpsKj,gS3zQzPpsgV,yMUkmWRLhz2,
-aCZ3BVUt88I,NeoIPC HAP Laboratory findings value - true,"Adjusts the dialog and assigns variables when ""NeoIPC HAP Laboratory findings value"" is true",d2:hasValue( #{NeoIPC HAP Laboratory findings value} ) && #{NeoIPC HAP Laboratory findings value},0,D8mSSpOpsKj,gS3zQzPpsgV,GjNS5mEeGT0,
-zCTvQxtGvUp,NeoIPC HAP Length of Stay less than 2,Issues a warning if the length of stay at the time of a HAP event is 1 or less,#{NeoIPC Admission type - value} == 3 && #{NeoIPC HAP Length of Stay current value} < 2,1,D8mSSpOpsKj,gS3zQzPpsgV,pCAJNJGHs5z,
-rMrwsAXqIKc,NeoIPC HAP Lower respiratory tract sample positive - infer false,"Sets the program rule variable ""NeoIPC HAP Lower respiratory tract sample positive"" to false if none of the 3 detected pathogens was detected from the lower respiratory tract.",!(#{NeoIPC HAP Pathogen 1 source value} > 1) && !(#{NeoIPC HAP Pathogen 2 source value} > 1) && !(#{NeoIPC HAP Pathogen 3 source value} > 1),2,D8mSSpOpsKj,gS3zQzPpsgV,pzsArssyjf7,
-EQ640JFGSCE,NeoIPC HAP Lower respiratory tract sample positive - infer true,"Sets the program rule variable ""NeoIPC HAP Lower respiratory tract sample positive"" to true if any of the 3 detected pathogens was detected from the lower respiratory tract.",(#{NeoIPC HAP Pathogen 1 source value} > 1) || (#{NeoIPC HAP Pathogen 2 source value} > 1) || (#{NeoIPC HAP Pathogen 3 source value} > 1),2,D8mSSpOpsKj,gS3zQzPpsgV,N8uZLG5Xa44,
-vZB3p7NXfKx,NeoIPC HAP Microbiological test result value - 1+,"Adjusts the dialog and assigns variables when ""Microbiological test result value"" is greater than 0",#{NeoIPC HAP Microbiological test result value} > 0,,D8mSSpOpsKj,gS3zQzPpsgV,XmKZrpDq0OG ifQ68rsMHB7,
-jewkCRzEWoA,NeoIPC HAP Microbiological test result value - no value or 0-,"Adjusts the dialog and assigns variables when ""Microbiological test result value"" does not have a value or when the value is less than 1",!(#{NeoIPC HAP Microbiological test result value} > 0),,D8mSSpOpsKj,gS3zQzPpsgV,XockUiO4AcV dWiBLolUv7r,
-c0SJorJb5mJ,NeoIPC HAP Organism 1 - name has value,Sends a message when a custom name is entered as Organism 1 in the NeoIPC Core HAP dialog,0 < d2:length(#{NeoIPC HAP Pathogen 1 name value}),9999,D8mSSpOpsKj,gS3zQzPpsgV,kzoXqjNgYYY,
-LpLUO0ByiIO,NeoIPC HAP Organism 2 - name has value,Sends a message when a custom name is entered as Organism 2 in the NeoIPC Core HAP dialog,0 < d2:length(#{NeoIPC HAP Pathogen 2 name value}),9999,D8mSSpOpsKj,gS3zQzPpsgV,Hl1iYPpUAj9,
-BYoTioivN0t,NeoIPC HAP Organism 3 - name has value,Sends a message when a custom name is entered as Organism 3 in the NeoIPC Core HAP dialog,0 < d2:length(#{NeoIPC HAP Pathogen 3 name value}),9999,D8mSSpOpsKj,gS3zQzPpsgV,Cla3O8Aj07N,
-zCoyxqNEOVx,NeoIPC HAP Purulent tracheal aspirate value - true,"Adjusts the dialog and assigns variables when ""NeoIPC HAP Purulent tracheal aspirate value"" is true",d2:hasValue( #{NeoIPC HAP Purulent tracheal aspirate value} ) && #{NeoIPC HAP Purulent tracheal aspirate value},0,D8mSSpOpsKj,gS3zQzPpsgV,Wm8t1QwPEqi,
-FG7FJmg1H0g,NeoIPC HAP Respiratory distress value - true,"Adjusts the dialog and assigns variables when ""NeoIPC HAP Respiratory distress value"" is true",d2:hasValue( #{NeoIPC HAP Respiratory distress value} ) && #{NeoIPC HAP Respiratory distress value},0,D8mSSpOpsKj,gS3zQzPpsgV,K3P7pkqFe0b,
-h0dQA0XH9E5,NeoIPC HAP Respiratory support criterion fulfilled - assign false,,!d2:hasValue( #{NeoIPC HAP Respiratory support value} ) || !#{NeoIPC HAP Respiratory support value},2,D8mSSpOpsKj,gS3zQzPpsgV,mpiwVbg7cLd,
-aHKyMUBufZd,NeoIPC HAP Respiratory support criterion fulfilled - assign true,,d2:hasValue( #{NeoIPC HAP Respiratory support value} ) && #{NeoIPC HAP Respiratory support value},2,D8mSSpOpsKj,gS3zQzPpsgV,M77VfLzMVP6,
-mzWTkqqUcri,NeoIPC HAP Secondary BSI Organism 1 - name has value,Sends a message when a custom name is entered as Organism 1 in the secondary BSI section of the NeoIPC Core HAP dialog,0 < d2:length(#{NeoIPC HAP Secondary BSI pathogen 1 name value}),9999,D8mSSpOpsKj,gS3zQzPpsgV,EaNiPgX7X4X,
-wkyknn44Pla,NeoIPC HAP Secondary BSI Organism 2 - name has value,Sends a message when a custom name is entered as Organism 2 in the secondary BSI section of the NeoIPC Core HAP dialog,0 < d2:length(#{NeoIPC HAP Secondary BSI pathogen 2 name value}),9999,D8mSSpOpsKj,gS3zQzPpsgV,tbSA0hG0XFE,
-RSsNtCsCnwX,NeoIPC HAP Secondary BSI Organism 3 - name has value,Sends a message when a custom name is entered as Organism 3 in the secondary BSI section of the NeoIPC Core HAP dialog,0 < d2:length(#{NeoIPC HAP Secondary BSI pathogen 3 name value}),9999,D8mSSpOpsKj,gS3zQzPpsgV,FjG1PEzwLfV,
-zS1QzifzZJO,NeoIPC HAP Secondary bloodstream infection value - 1+,"Adjusts the dialog and assigns variables when ""NeoIPC HAP Secondary bloodstream infection value"" is greater than 0",#{NeoIPC HAP Secondary bloodstream infection value} > 0,0,D8mSSpOpsKj,gS3zQzPpsgV,ICJnLII2NRd,
-jhW8xHnD8YD,NeoIPC HAP Secondary bloodstream infection value - no value or 0-,"Adjusts the dialog and assigns variables when ""NeoIPC HAP Secondary bloodstream infection value"" does not have a value or when the value is less than 1",!(#{NeoIPC HAP Secondary bloodstream infection value} > 0),0,D8mSSpOpsKj,gS3zQzPpsgV,BfkYxBp7fJP FX4IT62CA1T GuxMVH4PYb7 JEubUEqnobg Kl5TtQ70kjW N7PJnOpg1sr Phyq5BMpvSY RfIu8hP2iT5 RzoPXAebCXe WuEVo0QdZPC ZCFzyr6Uw7G bdNPKVZZLB5 bvDkHGXwu19 cHIbE45Stab cb4iOsz4Hlq faTvRQjFlsY iIFIOdEmbeR oDejX7JqPrQ rjSV9rT8m8r uyVUyl7GGgX w1apQG9YKhG,
-S2v2jluLwkf,NeoIPC HAP Set Day of life,Automatically sets the day of life for the current HAP event,true,0,D8mSSpOpsKj,gS3zQzPpsgV,IhrbU4oVOUo,
-o9o46FMkloW,NeoIPC HAP Set Length of Stay,Automatically sets the Length of Stay for the current event,true,0,D8mSSpOpsKj,gS3zQzPpsgV,q6HKg9AWaM7,
-G9jyHDcj7aX,NeoIPC HAP Tachypnoea value - true,"Adjusts the dialog and assigns variables when ""NeoIPC HAP Tachypnoea value"" is true",d2:hasValue( #{NeoIPC HAP Tachypnoea value} ) && #{NeoIPC HAP Tachypnoea value},0,D8mSSpOpsKj,gS3zQzPpsgV,x8Zjy1rBA65,
-SW9WglzhsId,NeoIPC HAP Virus detected - infer false,"Sets the program rule variable ""NeoIPC HAP Virus detected"" to false if none of the 3 detected pathogens is a virus.",!#{NeoIPC HAP Pathogen 1 is virus} && !#{NeoIPC HAP Pathogen 2 is virus} && !#{NeoIPC HAP Pathogen 3 is virus},2,D8mSSpOpsKj,gS3zQzPpsgV,EBquGZbiuik,
-BMY3P0lQncK,NeoIPC HAP Virus detected - infer true,"Sets the program rule variable ""NeoIPC HAP Virus detected"" to true if any of the 3 detected pathogens is a virus.",#{NeoIPC HAP Pathogen 1 is virus} || #{NeoIPC HAP Pathogen 2 is virus} || #{NeoIPC HAP Pathogen 3 is virus},2,D8mSSpOpsKj,gS3zQzPpsgV,T7zcLkQmV34,
-LjBpqQJlAwH,NeoIPC HAP Virus detected or NeoIPC HAP Lower respiratory tract sample positive,"Adjusts the dialog and assigns variables when ""NeoIPC HAP Virus detected"" or ""NeoIPC HAP Lower respiratory tract sample positive"" is true.",#{NeoIPC HAP Microbiological test result value} > 0 && (#{NeoIPC HAP Virus detected} || #{NeoIPC HAP Lower respiratory tract sample positive}),3,D8mSSpOpsKj,gS3zQzPpsgV,m0l4Urbiw8c,
-D47EyNbJ8pQ,NeoIPC NEC - assign finding counts,,true,4,D8mSSpOpsKj,Cp8UiWONR1B,PYnrU5fFlBt fQcuGNlsW1u vcn5NXLRuZQ,
-KSOwPDUcO26,NeoIPC NEC - display feedback,,true,100,D8mSSpOpsKj,Cp8UiWONR1B,CH7nvJWv0ar N7jev5Tv972 OGH3nhG8st0 gb4iMKWD7wv twdpMdvN3I3 yMTehPQzjJZ,
-jxuyugcOILj,NeoIPC NEC Abdominal discoloration value - true,"Adjusts the dialog and assigns variables when ""NeoIPC NEC Abdominal discoloration value"" is true",d2:hasValue( #{NeoIPC NEC Abdominal discoloration value} ) && #{NeoIPC NEC Abdominal discoloration value},0,D8mSSpOpsKj,Cp8UiWONR1B,d5zVNae6Sqn,
-aMc3Xe08gpD,NeoIPC NEC Abdominal distension value - true,"Adjusts the dialog and assigns variables when ""NeoIPC NEC Abdominal distension value"" is true",d2:hasValue( #{NeoIPC NEC Abdominal distension value} ) && #{NeoIPC NEC Abdominal distension value},0,D8mSSpOpsKj,Cp8UiWONR1B,COO17odEi9Z,
-xdOsdJ0vWkH,NeoIPC NEC Bilious gastric aspirate value - true,"Adjusts the dialog and assigns variables when ""NeoIPC NEC Bilious gastric aspirate value"" is true",d2:hasValue( #{NeoIPC NEC Bilious gastric aspirate value} ) && #{NeoIPC NEC Bilious gastric aspirate value},0,D8mSSpOpsKj,Cp8UiWONR1B,Gl0z95P3NaI,
-PVk6NdQ3cc0,NeoIPC NEC Blood in stool value - true,"Adjusts the dialog and assigns variables when ""NeoIPC NEC Blood in stool value"" is true",d2:hasValue( #{NeoIPC NEC Blood in stool value} ) && #{NeoIPC NEC Blood in stool value},0,D8mSSpOpsKj,Cp8UiWONR1B,z244JJN0afF,
-e90HTaEpv0g,NeoIPC NEC Day of life value less than 4,Issues a warning if the day of life at the time of a NEC event is 3 or less,#{NeoIPC NEC on day of life current value} < 4,1,D8mSSpOpsKj,Cp8UiWONR1B,tYStPZ2uBsa,
-Z7gxtGRNBwJ,NeoIPC NEC Extensive bowel necrosis value - true,"Adjusts the dialog and assigns variables when ""NeoIPC NEC Extensive bowel necrosis value"" is true",d2:hasValue( #{NeoIPC NEC Extensive bowel necrosis value} ) && #{NeoIPC NEC Extensive bowel necrosis value},0,D8mSSpOpsKj,Cp8UiWONR1B,zH8RGpBF1lp,
-vOiD4m07V8h,NeoIPC NEC Fixed bowel loop value - true,"Adjusts the dialog and assigns variables when ""NeoIPC NEC Fixed bowel loop value"" is true",d2:hasValue( #{NeoIPC NEC Fixed bowel loop value} ) && #{NeoIPC NEC Fixed bowel loop value},0,D8mSSpOpsKj,Cp8UiWONR1B,JmBnUWvszBi,
-Gpl5WOc3KR6,NeoIPC NEC Imaging Clinical findings criterion fulfilled - assign false,,#{NeoIPC NEC Imaging findings total count} < 1 || #{NeoIPC NEC Clinical findings total count} < 1,5,D8mSSpOpsKj,Cp8UiWONR1B,GmnZh9TgY5d,
-fEFavPgMtEQ,NeoIPC NEC Imaging Clinical findings criterion fulfilled - assign true,,#{NeoIPC NEC Imaging findings total count} >= 1 && #{NeoIPC NEC Clinical findings total count} >= 1,5,D8mSSpOpsKj,Cp8UiWONR1B,AhmDEsFbA7B,
-FFZw4Nvznpv,NeoIPC NEC Increased gastric residuals value - true,"Adjusts the dialog and assigns variables when ""NeoIPC NEC Increased gastric residuals value"" is true",d2:hasValue( #{NeoIPC NEC Increased gastric residuals value} ) && #{NeoIPC NEC Increased gastric residuals value},0,D8mSSpOpsKj,Cp8UiWONR1B,ZdNvbprB5gs,
-PRHZlRPuVZs,NeoIPC NEC Length of Stay less than 2,Issues a warning if the length of stay at the time of a NEC event is 1 or less,#{NeoIPC Admission type - value} == 3 && #{NeoIPC NEC Length of Stay current value} < 2,1,D8mSSpOpsKj,Cp8UiWONR1B,aZwGywScUt5,
-n1Hc37OvhSa,NeoIPC NEC Pneumatosis intestinalis imaging value - true,"Adjusts the dialog and assigns variables when ""NeoIPC NEC Pneumatosis intestinalis imaging value"" is true",d2:hasValue( #{NeoIPC NEC Pneumatosis intestinalis imaging value} ) && #{NeoIPC NEC Pneumatosis intestinalis imaging value},0,D8mSSpOpsKj,Cp8UiWONR1B,bcKnSS5FcS8,
-pYoHnqNbA3l,NeoIPC NEC Pneumatosis intestinalis surgical value - true,"Adjusts the dialog and assigns variables when ""NeoIPC NEC Pneumatosis intestinalis surgical value"" is true",d2:hasValue( #{NeoIPC NEC Pneumatosis intestinalis surgical value} ) && #{NeoIPC NEC Pneumatosis intestinalis surgical value},0,D8mSSpOpsKj,Cp8UiWONR1B,OIMy7UOmUK9,
-gtxIgGD5Y3R,NeoIPC NEC Pneumoperitoneum value - true,"Adjusts the dialog and assigns variables when ""NeoIPC NEC Pneumoperitoneum value"" is true",d2:hasValue( #{NeoIPC NEC Pneumoperitoneum value} ) && #{NeoIPC NEC Pneumoperitoneum value},0,D8mSSpOpsKj,Cp8UiWONR1B,nkB4VlEfpCv,
-g9afRtOSERN,NeoIPC NEC Portal venous gas value - true,"Adjusts the dialog and assigns variables when ""NeoIPC NEC Portal venous gas value"" is true",d2:hasValue( #{NeoIPC NEC Portal venous gas value} ) && #{NeoIPC NEC Portal venous gas value},0,D8mSSpOpsKj,Cp8UiWONR1B,LFLf3RbOVqN,
-cOrBBDnVH3z,NeoIPC NEC Secondary BSI Organism 1 - name has value,Sends a message when a custom name is entered as Organism 1 in the secondary BSI section of the NeoIPC Core NEC dialog,0 < d2:length(#{NeoIPC NEC Secondary BSI pathogen 1 name value}),9999,D8mSSpOpsKj,Cp8UiWONR1B,DaO14e1QbfG,
-kmpDHu9KTlL,NeoIPC NEC Secondary BSI Organism 2 - name has value,Sends a message when a custom name is entered as Organism 2 in the secondary BSI section of the NeoIPC Core NEC dialog,0 < d2:length(#{NeoIPC NEC Secondary BSI pathogen 2 name value}),9999,D8mSSpOpsKj,Cp8UiWONR1B,TG09ij4rCP7,
-Yf4TstJjxq7,NeoIPC NEC Secondary BSI Organism 3 - name has value,Sends a message when a custom name is entered as Organism 3 in the secondary BSI section of the NeoIPC Core NEC dialog,0 < d2:length(#{NeoIPC NEC Secondary BSI pathogen 3 name value}),9999,D8mSSpOpsKj,Cp8UiWONR1B,hs7ldgDtJa1,
-JkpbIBpvrfh,NeoIPC NEC Secondary bloodstream infection value - 1+,"Adjusts the dialog and assigns variables when ""NeoIPC NEC Secondary bloodstream infection value"" is greater than 0",#{NeoIPC NEC Secondary bloodstream infection value} > 0,0,D8mSSpOpsKj,Cp8UiWONR1B,kV6T5wgFKb4,
-ehrBTKxrBMo,NeoIPC NEC Secondary bloodstream infection value - no value or 0-,"Adjusts the dialog and assigns variables when ""NeoIPC NEC Secondary bloodstream infection value"" does not have a value or when the value is less than 1",!(#{NeoIPC NEC Secondary bloodstream infection value} > 0),0,D8mSSpOpsKj,Cp8UiWONR1B,AHZfr5wVGIK D8RA8PvO47R DbpJzwRsvr6 IFm9cCYyLen L1prOMHUg0c QmL8W4kNsW7 S7J0spdiDd9 aYu9OVyfrGa c1nvWF3ju1U dGJZdYFQDu0 dagWswlR7LB gzDgCi7pvkf hj9D3TiJkC0 hmiG2usoXuU iSQvwFNntZQ j5DIP0YYUAC kRW5Q0ZiYHH pcLASMzDgRQ tC8AXMOqAAM wBLofgMgBg0 wfgUValIVtL,
-pMzKRM5OdcT,NeoIPC NEC Set Day of life,Automatically sets the day of life for the current NEC event,true,0,D8mSSpOpsKj,Cp8UiWONR1B,hvBrOiCk8n5,
-SXv5r0P3cej,NeoIPC NEC Set Length of Stay,Automatically sets the Length of Stay for the current event,true,0,D8mSSpOpsKj,Cp8UiWONR1B,dkNqideENyy,
-EP5qVa9lEpP,NeoIPC NEC Surgical findings criterion fulfilled - assign false,,#{NeoIPC NEC Surgical findings total count} < 1,5,D8mSSpOpsKj,Cp8UiWONR1B,d9mnGdkECl4,
-B4jHFueC2Cn,NeoIPC NEC Surgical findings criterion fulfilled - assign true,,#{NeoIPC NEC Surgical findings total count} >= 1,5,D8mSSpOpsKj,Cp8UiWONR1B,nXkfwkkiZWH,
-FUJje59tZDB,NeoIPC NEC Validation rule,Validates the findings in the NeoIPC Core NEC dialog against the definition in the protocol,!#{NeoIPC NEC Surgical findings criterion fulfilled} && !#{NeoIPC NEC Imaging Clinical findings criterion fulfilled},100,D8mSSpOpsKj,Cp8UiWONR1B,dYmNC8SeeSx,
-erHsTIz7fkO,NeoIPC NEC Vomiting value - true,"Adjusts the dialog and assigns variables when ""NeoIPC NEC Vomiting value"" is true",d2:hasValue( #{NeoIPC NEC Vomiting value} ) && #{NeoIPC NEC Vomiting value},0,D8mSSpOpsKj,Cp8UiWONR1B,ollB07QBNqE,
-DiT08PWJdBc,NeoIPC Patient Assign gestation days and weeks,Assigns the number of gestation days and weeks from the gestational age input format to program rule variables,"d2:hasValue( A{NeoIPC Patient Gestational age value} ) && d2:validatePattern( A{NeoIPC Patient Gestational age value}, '^[2-4]\\d\\+[0-6]$' )",2,D8mSSpOpsKj,,HxBXUZ2LmOF gADByFHDQIv,
-kpQAPAm1z1n,NeoIPC Patient Assign total gestation days,Calculates the total number of gestation days and weeks from the two program rule variables that contain the weeks and days.,true,3,D8mSSpOpsKj,,vkpzQvSDjig wlprf2ToE0R,
-H90Xs7KvX2P,NeoIPC Patient Birth weight 1500+ grams and gestational age 32+ weeks,Raises an error if the entered birth weight is 1500 grams or more and the gestational age is 32 weeks or more.,(( A{NeoIPC Patient Birth weight value} >= 1500 &&  #{NeoIPC Patient Total gestation days} >= 224 ) || ( A{NeoIPC Patient Birth weight value} >= 1500 && #{NeoIPC Patient Total gestation days} == 0 ) || ( #{NeoIPC Patient Total gestation days} >= 224 &&  A{NeoIPC Patient Birth weight value} == 0 )) && ( ! d2:inOrgUnitGroup( 'NEOIPC_ALL_PATIENTS_ELIGIBLE' ) ),4,D8mSSpOpsKj,,IZA8MT8DgTo Qmt363UtrQ4,
-R66wKJMO2KV,NeoIPC Patient Birth weight and gestational age mandatory (NeoDeco),Makes both birth weight and gestational age mandatory if the site is a NeoDeco trial site.,d2:inOrgUnitGroup( 'NEOIPC_NEODECO_TRIAL_SITES' ),4,D8mSSpOpsKj,,VIOoOpB1QFL wJU8SbJsuyu,
-pFN6IkiamMF,NeoIPC Patient Birth weight mandatory if gestational age missing (regular),Makes birth weight mandatory if gestational age is missing and the site is not a NeoDeco trial site.,!d2:inOrgUnitGroup( 'NEOIPC_NEODECO_TRIAL_SITES' ) && !d2:hasValue( A{NeoIPC Patient Gestational age value} ),4,D8mSSpOpsKj,,swSgyFAtXUT,
-jBQc1oNlhHZ,NeoIPC Patient Gestational age mandatory if birth weight missing (regular),Makes gestational age mandatory if birth weight is missing and the site is not a NeoDeco trial site.,!d2:inOrgUnitGroup( 'NEOIPC_NEODECO_TRIAL_SITES' ) && !d2:hasValue( A{NeoIPC Patient Birth weight value} ),4,D8mSSpOpsKj,,sQvTuBrveqZ,
-tKAFqdYOCgG,NeoIPC Patient Multiple birth is not set,Adjusts the dialog when the multiple birth checkbox is not checked.,!A{NeoIPC Patient Multiple birth value},,D8mSSpOpsKj,,yECZMZvJzKm,
-g0UvhlAN4r6,NeoIPC Patient Multiple birth is set,Adjusts the dialog when the multiple birth checkbox is checked.,A{NeoIPC Patient Multiple birth value},,D8mSSpOpsKj,,kGd7F503CGl,
-AOJtrTQg1ZP,"NeoIPC Patient Show feedback for ""Admission Completed""",,true,1,D8mSSpOpsKj,,kGRrYYxGAzx,
-WEHHU9Qug9F,NeoIPC Patient Validate gestational age format,Checks the format of the value entered into the gestational age input field,"d2:hasValue( A{NeoIPC Patient Gestational age value} ) && !d2:validatePattern( A{NeoIPC Patient Gestational age value}, '^[2-4]\\d\\+[0-6]$' )",1,D8mSSpOpsKj,,Brz79iM3TLB,
-KqNiD014l94,NeoIPC Patient Warn birth weight 1-299 or 5000+,Issues a warning when the birth weight is less than 300 grams or more than 5000 grams.,A{NeoIPC Patient Birth weight value} != 0 && (A{NeoIPC Patient Birth weight value} < 300 || A{NeoIPC Patient Birth weight value} >= 5000 ),,D8mSSpOpsKj,,BThYpmhoaky,
-tm7biA83rNu,NeoIPC Patient Warn birth weight empty (regular),Issues a warning if the birth weight is empty.,!d2:hasValue( A{NeoIPC Patient Birth weight value} ),4,D8mSSpOpsKj,YGowWPumDia,SCrOe0ZHWh0,
-b3CR62JDGHW,NeoIPC Patient Warn gestation days 0-160 or 310+,Displays a warning if the calculated number of gestation days is less than 161 or greater than 310,#{NeoIPC Patient Total gestation days} != 0 && (#{NeoIPC Patient Total gestation days} < 161) || (#{NeoIPC Patient Total gestation days} >= 310),4,D8mSSpOpsKj,,ZIqrCJ67NRA,
-m6E8WHjIJsK,NeoIPC Patient Warn siblings in birth 7+,Issues a warning when the number of siblings in one birth is 7 or more.,A{NeoIPC Patient Siblings in birth value} >= 7,,D8mSSpOpsKj,,dXvYPH45tae,
-BwaDt04UeHD,NeoIPC SSI - has microbiology results,Makes pathogen-related data elements mandatory if the user specifies that microbiology result are available,d2:hasValue(#{NeoIPC SSI Organisms identified from any site}) && #{NeoIPC SSI Organisms identified from any site},1,D8mSSpOpsKj,cZhr3Wm2fc8,byGXZQBnsfV,
-oU67Orv3grn,NeoIPC SSI - has secondary BSI,Makes data elements related to secondary BSI mandatory if the user specifies that a secondary BSI has occurred.,d2:hasValue(#{NeoIPC SSI Secondary bloodstream infection value}) && #{NeoIPC SSI Secondary bloodstream infection value} > 0,,D8mSSpOpsKj,cZhr3Wm2fc8,mGBpog8R7JV,
-spEjGdHfvrV,NeoIPC SSI - infection type deep,Hides data elements for superficial and organ/space infections if the infection type is deep,#{NeoIPC SSI Infection type value} == 2,,D8mSSpOpsKj,cZhr3Wm2fc8,NPLdNePJirD ReZdz8k2P9p jddhCiSsOeM,
-PLYGlpyFglh,NeoIPC SSI - infection type organ/space,Hides data elements for superficial and superficial infections if the infection type is organ/space,#{NeoIPC SSI Infection type value} == 3,,D8mSSpOpsKj,cZhr3Wm2fc8,YLoiCtsDgaA q6zrN8QVfNG zjRbpmI3kP6,
-LLKgG1MzPPx,NeoIPC SSI - infection type superficial,Hides data elements for deep and organ/space infections if the infection type is superficial,#{NeoIPC SSI Infection type value} == 1,,D8mSSpOpsKj,cZhr3Wm2fc8,fVzipb7u7JB ufF1oEkaAVV xIrTJaOVNEl,
-bBy2KAwRXCW,NeoIPC SSI - no infection type,Hides clinical signs and symptoms data elements until the user selects an infection type,!d2:hasValue(#{NeoIPC SSI Infection type value}) || #{NeoIPC SSI Infection type value} < 1,,D8mSSpOpsKj,cZhr3Wm2fc8,EkaiavA2iLK Xr6y6BvahHt ZGHD2MFuXSx hkjtnc9E5N1 nmaWTh7wUXA s9MWNUVZTT5,
-cnyYkKWdFSV,NeoIPC SSI - no microbiology result available,Hides pathogen-related data elements unless the user specifies that microbiologic result are available,!d2:hasValue(#{NeoIPC SSI Organisms identified from any site}) || !#{NeoIPC SSI Organisms identified from any site},1,D8mSSpOpsKj,cZhr3Wm2fc8,C24AaRjtqB0 DT7sZJJGU6R KsygiciFSXM LpAedkkFnJK Rf5CWdxMG9I SSBT2ZOBDTM XdXlqqgcp5b XxWQ5RRgXz4 YGJBkSY9BRG ZNebHU6Ve9V cs3eMawm5mP eD5X7l2Z16n fYDGBWxfaYk i2nP3llrGmL mU8PpZOXyNx nUSeExvLsb3 odKR6nYRF6x vLEhaFwxCqA vQ3weS2Oj5T wHi0Eb7k9Rm xALTxL5TX7d z1hSeMmEZm6,
-uitFTLJmYup,NeoIPC SSI - no secondary BSI,Hides data elements related to secondary BSI unless the user specifies that a secondary BSI has occurred.,!d2:hasValue(#{NeoIPC SSI Secondary bloodstream infection value}) || #{NeoIPC SSI Secondary bloodstream infection value} < 1,,D8mSSpOpsKj,cZhr3Wm2fc8,Asfbt9in5MF BGS7WqIrkhg CZV4H02SxDT D5ADpomLswl Dw5vsR9wq9c FqepHLG9rVE Hcke6Yp6sWK IQMVixKHIp8 Inbw2UwKdpo SDd6PPHGXxy SegNT3LTXT6 UAc2iOrETsQ XSwYAItKZuY XvrSQ5Xu2s3 YOMSpHMwrwa gmbDl7TNNGh kitTSOXAMz3 lS1EfjpNob7 lueG3PXCahd veaBzbEaShf x06e8uF9bvm yv2dtzKM44V,
-RsU18e1lWxE,NeoIPC SSI - set organisms identified from any site,,true,0,D8mSSpOpsKj,cZhr3Wm2fc8,gyTtkdEqXXv,
-eqc0S2TZvkm,NeoIPC SSI - superficial infection,Adjusts the dialog when only the skin is involved,"#{NeoIPC SSI Infection involves skin value} && !#{NeoIPC SSI Infection involves deep soft tissues value} && !#{NeoIPC SSI Infection involves parts deeper than fascial muscular layers value}
-",,D8mSSpOpsKj,cZhr3Wm2fc8,XXncoxaoIek iHMgORcoNkp,
-kh6vV560ykk,NeoIPC SSI Deep incisional SSI validation rule,Validates the findings in the NeoIPC Core SSI dialog against the deep incisional SSI definition in the protocol,"#{NeoIPC SSI Infection type value} == 2
-&& !#{NeoIPC SSI Purulent drainage deep incision value}
-&& !#{NeoIPC SSI Abscess deep incision value}
-&& !(
-  #{NeoIPC SSI Deep incision dehisces value}
-  &&
-  #{NeoIPC SSI Organisms identified from deep tissue of incision value} != 0
-  && (
-    #{NeoIPC SSI Fever value}
-    ||
-    #{NeoIPC SSI Localized pain deep value}
-  )
-)",100,D8mSSpOpsKj,cZhr3Wm2fc8,JsOCNg1xiuf,
-BXVz490aRpj,NeoIPC SSI Organ/space SSI validation rule,Validates the findings in the NeoIPC Core SSI dialog against the organ/space SSI definition in the protocol,"#{NeoIPC SSI Infection type value} == 3
-&& !#{NeoIPC SSI Purulent drainage drain value}
-&& #{NeoIPC SSI Organisms identified from organ space fluid tissue value} < 1
-&& !#{NeoIPC SSI Abscess organ space value}",100,D8mSSpOpsKj,cZhr3Wm2fc8,dpFcrLhZ0kN,
-BVXHtD6b14r,NeoIPC SSI Organism 1 - name has value,Sends a message when a custom name is entered as Organism 1 in the NeoIPC Core SSI dialog,0 < d2:length(#{NeoIPC SSI Pathogen 1 name value}),9999,D8mSSpOpsKj,wDQxhhyAkEU,eLqdP1rLcKb,
-wi0btXvKwbF,NeoIPC SSI Organism 2 - name has value,Sends a message when a custom name is entered as Organism 2 in the NeoIPC Core SSI dialog,0 < d2:length(#{NeoIPC SSI Pathogen 2 name value}),9999,D8mSSpOpsKj,wDQxhhyAkEU,MmWM3i0Cxeh,
-PBst4DkKze8,NeoIPC SSI Organism 3 - name has value,Sends a message when a custom name is entered as Organism 3 in the NeoIPC Core SSI dialog,0 < d2:length(#{NeoIPC SSI Pathogen 3 name value}),9999,D8mSSpOpsKj,wDQxhhyAkEU,CD8gvLGu8bX,
-olawHScR3Vu,NeoIPC SSI Secondary BSI Organism 1 - name has value,Sends a message when a custom name is entered as Organism 1 in the secondary BSI section of the NeoIPC Core SSI dialog,0 < d2:length(#{NeoIPC SSI Secondary BSI pathogen 1 name value}),9999,D8mSSpOpsKj,wDQxhhyAkEU,ybQVjyvShwC,
-DSpI9KsaGfg,NeoIPC SSI Secondary BSI Organism 2 - name has value,Sends a message when a custom name is entered as Organism 2 in the secondary BSI section of the NeoIPC Core SSI dialog,0 < d2:length(#{NeoIPC SSI Secondary BSI pathogen 2 name value}),9999,D8mSSpOpsKj,wDQxhhyAkEU,kFbylFQ0HpU,
-xRZwaKSxJ1r,NeoIPC SSI Secondary BSI Organism 3 - name has value,Sends a message when a custom name is entered as Organism 3 in the secondary BSI section of the NeoIPC Core SSI dialog,0 < d2:length(#{NeoIPC SSI Secondary BSI pathogen 3 name value}),9999,D8mSSpOpsKj,wDQxhhyAkEU,ieKkI1rLpMT,
-iTooSG0KaEV,NeoIPC SSI Set Day of life,Automatically sets the day of life for the current SSI event,true,0,D8mSSpOpsKj,cZhr3Wm2fc8,R2Taj2PE634,
-m2CoPEtzZpU,NeoIPC SSI Set Length of Stay,Automatically sets the Length of Stay for the current event,true,0,D8mSSpOpsKj,cZhr3Wm2fc8,BDncuOltyEP,
-sc6VLWeyY4U,NeoIPC SSI Superficial incisional SSI validation rule,Validates the findings in the NeoIPC Core SSI dialog against the superficial incisional SSI definition in the protocol,"#{NeoIPC SSI Infection type value} == 1
-&& !#{NeoIPC SSI Purulent drainage superficial incision value}
-&& #{NeoIPC SSI Organisms identified from superficial incision value}  != 1
-&& !#{NeoIPC SSI Diagnosis superficial by physician value}
-&& !(
-  #{NeoIPC SSI Superficial incision opened value}
-  &&
-  #{NeoIPC SSI Organisms identified from superficial incision value}  == -1
-  && (
-    #{NeoIPC SSI Localized pain superficial value}
-    ||
-    #{NeoIPC SSI Localized swelling value}
-    ||
-    #{NeoIPC SSI Localized erythema value}
-    ||
-    #{NeoIPC SSI Localized heat value}
-  )
-)",100,D8mSSpOpsKj,cZhr3Wm2fc8,TZTH0rlPDRR,
-D2RPS1cedtu,NeoIPC SURGERY Set Length of Stay,Automatically sets the Length of Stay for the current event,true,0,D8mSSpOpsKj,BHWwaviIFvy,cFwDRaTty3N,
-sar1ZEH47wx,NeoIPC Surgical Procedure Set Day of life,Automatically sets the day of life for the current Surgical Procedure event,true,0,D8mSSpOpsKj,BHWwaviIFvy,W3clTqhECkI,
-NGhr5Yt9Dk4,NeoIPC Surveillance end AB days - validate,,#{NeoIPC Surveillance end AB days - current event value} > #{NeoIPC Surveillance end Patient days - current event value},1,D8mSSpOpsKj,DDLi3OGC5Yh,bFBGJuvlCYW,
-mJk6fwzG4WI,NeoIPC Surveillance end CVC days - validate,,#{NeoIPC Surveillance end CVC days - current event value} > #{NeoIPC Surveillance end Patient days - current event value},1,D8mSSpOpsKj,DDLi3OGC5Yh,PzzI3anNhYe,
-cqCLw4GQP4L,NeoIPC Surveillance end Human milk days - validate,,#{NeoIPC Surveillance end Human milk days - current event value} > #{NeoIPC Surveillance end Patient days - current event value},1,D8mSSpOpsKj,DDLi3OGC5Yh,JI9qa1HYm0F,
-R9okkvIpFMj,NeoIPC Surveillance end INV days - validate,,#{NeoIPC Surveillance end INV days - current event value} > #{NeoIPC Surveillance end Patient days - current event value},1,D8mSSpOpsKj,DDLi3OGC5Yh,rJ8kpWRSZ4n,
-komIcllqdzO,NeoIPC Surveillance end Kangaroo care days - validate,,#{NeoIPC Surveillance end Kangaroo care days - current event value} > #{NeoIPC Surveillance end Patient days - current event value},1,D8mSSpOpsKj,DDLi3OGC5Yh,fByTL1GpSPg,
-SvfLyQgSSrC,NeoIPC Surveillance end NIV + INV days - validate,,(#{NeoIPC Surveillance end NIV days - current event value} + #{NeoIPC Surveillance end INV days - current event value})> #{NeoIPC Surveillance end Patient days - current event value},1,D8mSSpOpsKj,DDLi3OGC5Yh,Jn6lZgdzVok,
-OleZ8ZztQBQ,NeoIPC Surveillance end NIV days - validate,,#{NeoIPC Surveillance end NIV days - current event value} > #{NeoIPC Surveillance end Patient days - current event value},1,D8mSSpOpsKj,DDLi3OGC5Yh,wJIDyQITVrk,
-GYKv7YBS4WS,NeoIPC Surveillance end PVC days - validate,,#{NeoIPC Surveillance end PVC days - current event value} > #{NeoIPC Surveillance end Patient days - current event value},1,D8mSSpOpsKj,DDLi3OGC5Yh,gY4SFKCv9Ss,
-ECeGbWVvXFf,NeoIPC Surveillance end Patient days - set,Automatically calculate the patient days.,true,0,D8mSSpOpsKj,DDLi3OGC5Yh,keCrtq3RtkZ,
-e7OKeQN5jpg,NeoIPC Surveillance end Probiotic days - validate,,#{NeoIPC Surveillance end Probiotic days - current event value} > #{NeoIPC Surveillance end Patient days - current event value},1,D8mSSpOpsKj,DDLi3OGC5Yh,TMcdpdR5yBs,
+kuQVuXXgPk0,NeoIPC Admission Date must match enrollment admission date,Validates that the admission date in the enrollment and the admission date in the admission event are the same.,expressions/programRules/NeoIPC Admission Date must match enrollment admission date/condition.dhis2,,D8mSSpOpsKj,YGowWPumDia,FZ3kcGyokUb,
+AxnwOtNl5bH,NeoIPC Admission Day of life 1,Causes an error on attempts to enter 1 as value for the admission day of life,expressions/programRules/NeoIPC Admission Day of life 1/condition.dhis2,1,D8mSSpOpsKj,YGowWPumDia,AtoLBnKzp6x,
+Ifj6xINnDDE,NeoIPC Admission Day of life value 150+,Issues a warning if the day of life at the time of admission is 150 ore more,expressions/programRules/NeoIPC Admission Day of life value 150+/condition.dhis2,1,D8mSSpOpsKj,YGowWPumDia,NFQYubrrXgs,
+GShb8cTSeZL,NeoIPC Admission Set Length of Stay,Automatically sets the Length of Stay for the current event,expressions/programRules/NeoIPC Admission Set Length of Stay/condition.dhis2,0,D8mSSpOpsKj,YGowWPumDia,ZqyfZpCn2Go,
+w2qtd49SXSi,NeoIPC Admission Set completed,,expressions/programRules/NeoIPC Admission Set completed/condition.dhis2,0,D8mSSpOpsKj,YGowWPumDia,SbaonIMfU5K,
+Wr1qtCLDDf2,NeoIPC Admission Type 1,Adjust the NeoIPC admission data entry form when the patient was delivered in the respective hospital or admitted on the day of birth,expressions/programRules/NeoIPC Admission Type 1/condition.dhis2,0,D8mSSpOpsKj,YGowWPumDia,XXSAf7Nkxps,
+soKejoHmhsN,NeoIPC Admission Type 2+,Adjust the NeoIPC admission data entry form when the patient was admitted on the day after birth or later,expressions/programRules/NeoIPC Admission Type 2+/condition.dhis2,,D8mSSpOpsKj,YGowWPumDia,tJaNWTcaj2O,
+veOW1SyAYX0,NeoIPC BSI - unless no positive culture,"Adjusts the dialog when ""No positive culture"" is disabled.",expressions/programRules/NeoIPC BSI - unless no positive culture/condition.dhis2,,D8mSSpOpsKj,wDQxhhyAkEU,JJq9QisjHQP,
+VOrixcs1pS7,NeoIPC BSI - when no positive culture,"Adjusts the dialog when ""No positive culture"" is enabled",expressions/programRules/NeoIPC BSI - when no positive culture/condition.dhis2,,D8mSSpOpsKj,wDQxhhyAkEU,h3ISEpfpFMh kUu5iHyWqJP,
+sMHTL9hGVxZ,NeoIPC BSI Acidosis set count,Sets NeoIPC BSI Acidosis count to 1 if it is set to true.,expressions/programRules/NeoIPC BSI Acidosis set count/condition.dhis2,0,D8mSSpOpsKj,wDQxhhyAkEU,th3HQuOvf3S,
+J3XyS3QFeQ1,NeoIPC BSI Apnoea set count,Sets NeoIPC BSI Apnoea count to 1 if it is set to true.,expressions/programRules/NeoIPC BSI Apnoea set count/condition.dhis2,0,D8mSSpOpsKj,wDQxhhyAkEU,vLKxmwjyxXb,
+vsmxvp7bBHY,NeoIPC BSI Assign common laboratory findings count,Sets the variable for the common laboratory findings to 1 if any are set as present in the NeoIPC Core BSI dialog.,expressions/programRules/NeoIPC BSI Assign common laboratory findings count/condition.dhis2,1,D8mSSpOpsKj,wDQxhhyAkEU,c4NjG2uyMNg,
+qcMm39rdO3M,NeoIPC BSI Assign first finding counts,Counts the findings (except for the common laboratory findings that count as 1) that are set as present in the NeoIPC Core BSI dialog and assigns the result to the variables relevant for the validation rule.,expressions/programRules/NeoIPC BSI Assign first finding counts/condition.dhis2,1,D8mSSpOpsKj,wDQxhhyAkEU,UvmZEbRhjqM Y1EJX8Pxx5i gi0dmsVCQK9,
+B8PvnPoxbZX,NeoIPC BSI Assign total common finding counts,Assigns the total value for the clinical finding counts.,expressions/programRules/NeoIPC BSI Assign total common finding counts/condition.dhis2,2,D8mSSpOpsKj,wDQxhhyAkEU,L7fYDcRuvOS,
+IUEm8aeu991,NeoIPC BSI Bradycardia set count,Sets NeoIPC BSI Bradycardia count to 1 if it is set to true.,expressions/programRules/NeoIPC BSI Bradycardia set count/condition.dhis2,0,D8mSSpOpsKj,wDQxhhyAkEU,maMCK23v1M9,
+lNm2IjXgA38,NeoIPC BSI CRP set count,Sets NeoIPC BSI CRP count to 1 if it is set to true.,expressions/programRules/NeoIPC BSI CRP set count/condition.dhis2,0,D8mSSpOpsKj,wDQxhhyAkEU,NnNVXY70LiR,
+g5S6YG3r5c7,NeoIPC BSI Clinical sepsis validation rule,Validates the findings in the NeoIPC Core BSI dialog against the clinical sepsis definition in the protocol,expressions/programRules/NeoIPC BSI Clinical sepsis validation rule/condition.dhis2,100,D8mSSpOpsKj,wDQxhhyAkEU,JbaukVydfAi,
+h1CFvJtOkdN,NeoIPC BSI Day of life value less than 4,Issues a warning if the day of life at the time of a BSI event is 3 or less,expressions/programRules/NeoIPC BSI Day of life value less than 4/condition.dhis2,1,D8mSSpOpsKj,wDQxhhyAkEU,N42AaeNIvif,
+sKUcwpq4TBC,NeoIPC BSI Debug rule,A rule that shows several key/value pairs for debugging purposes,expressions/programRules/NeoIPC BSI Debug rule/condition.dhis2,,D8mSSpOpsKj,wDQxhhyAkEU,BYjWfQOGAd3 EgzEnVR3Bw9 Eu0eUuZW0ct GeTPBhZtOL0 H5k55ijqtt4 KgxH0YY8Tli MMBcoRprCft SRl0Sww6BOA TULPXMExhs0 VdxSoplZgWB ZzuWFvH6c4o giL8IkTqs1J h8xs89kMVAH hrmeMF6miFB j19SWnLFzry jkyMli18aRl l6FEIsHlp6c lSLrT7auxYc nEG5GsYT2Z1 o43kYUtH9H6 tY6YEF8HrwM xkFeVyFHbG5,
+uZ76n1VW5ew,NeoIPC BSI Feeding intolerance set count,Sets NeoIPC BSI Feeding intolerance count to 1 if it is set to true.,expressions/programRules/NeoIPC BSI Feeding intolerance set count/condition.dhis2,0,D8mSSpOpsKj,wDQxhhyAkEU,prr5HUikjWC,
+CQhxRCFd4yL,NeoIPC BSI Hyperglycaemia  set count,Sets NeoIPC BSI Hyperglycaemia  count to 1 if it is set to true.,expressions/programRules/NeoIPC BSI Hyperglycaemia  set count/condition.dhis2,0,D8mSSpOpsKj,wDQxhhyAkEU,QG7g6QBkdHG,
+QWVCLlCyWO4,NeoIPC BSI IT ratio set count,Sets NeoIPC BSI I/T ratio count to 1 if it is set to true.,expressions/programRules/NeoIPC BSI IT ratio set count/condition.dhis2,0,D8mSSpOpsKj,wDQxhhyAkEU,AU7KfzR1meq,
+JkaN4BaXIpW,NeoIPC BSI Interleukin set count,Sets NeoIPC BSI Interleukin count to 1 if it is set to true.,expressions/programRules/NeoIPC BSI Interleukin set count/condition.dhis2,0,D8mSSpOpsKj,wDQxhhyAkEU,EA2FETf6og6,
+GGzawr3JNjG,NeoIPC BSI Irritability set count,Sets NeoIPC BSI Irritability count to 1 if it is set to true.,expressions/programRules/NeoIPC BSI Irritability set count/condition.dhis2,0,D8mSSpOpsKj,wDQxhhyAkEU,qMDfL313ff4,
+sumEmGo0q2x,NeoIPC BSI LCBSI with common commensal detected multiple times or with AB-treatment >= 5 days validation rule,Validates the findings in the NeoIPC Core BSI dialog against the LCBSI definition in the protocol where a common commensal was detected multiple times or where systemic antibiotic treatment for 5 days or more was initiated.,expressions/programRules/NeoIPC BSI LCBSI with common commensal detected multiple times or with AB-treatment _= 5 days validation rule/condition.dhis2,100,D8mSSpOpsKj,wDQxhhyAkEU,xIxsIs9vFvk,
+auj12Ai26xP,NeoIPC BSI LCBSI with common commensal detected only once and no antibiotic treatment validation rule,Validates the findings in the NeoIPC Core BSI dialog against the LCBSI definition in the protocol where a common commensal was detected only once and no antibiotic treatment was initiated.,expressions/programRules/NeoIPC BSI LCBSI with common commensal detected only once and no antibiotic treatment validation rule/condition.dhis2,100,D8mSSpOpsKj,wDQxhhyAkEU,BXpXjk9mKRe,
+hGpXJ1WuHVJ,NeoIPC BSI Length of Stay less than 2,Issues a warning if the length of stay at the time of a BSI event is 1 or less,expressions/programRules/NeoIPC BSI Length of Stay less than 2/condition.dhis2,1,D8mSSpOpsKj,wDQxhhyAkEU,ALLSyDKLxIm,
+wavenklWWWL,NeoIPC BSI Organism 1 - name has value,Sends a message when a custom name is entered as Organism 1 in the NeoIPC Core BSI dialog,expressions/programRules/NeoIPC BSI Organism 1 - name has value/condition.dhis2,9999,D8mSSpOpsKj,wDQxhhyAkEU,MoPAR39Dtto,
+NcsonLkQwsd,NeoIPC BSI Organism 2 - name has value,Sends a message when a custom name is entered as Organism 2 in the NeoIPC Core BSI dialog,expressions/programRules/NeoIPC BSI Organism 2 - name has value/condition.dhis2,9999,D8mSSpOpsKj,wDQxhhyAkEU,K8mjcGj1oqH,
+DmK7JLV94nY,NeoIPC BSI Organism 3 - name has value,Sends a message when a custom name is entered as Organism 3 in the NeoIPC Core BSI dialog,expressions/programRules/NeoIPC BSI Organism 3 - name has value/condition.dhis2,9999,D8mSSpOpsKj,wDQxhhyAkEU,kHGvWBogR4L,
+kkDGNkYQe9t,NeoIPC BSI Pathogen - when recognized pathogen,,expressions/programRules/NeoIPC BSI Pathogen - when recognized pathogen/condition.dhis2,1,D8mSSpOpsKj,wDQxhhyAkEU,HEm8QLFxBPT tvAshRduwIf,
+hwszsk44hZ3,NeoIPC BSI Pathogen - when recognized pathogen or antibiotic treatment,Hides the detected multiple times checkbox when a recognized pathogen was detected or an antibiotic treatment for the common commensal was initiated.,expressions/programRules/NeoIPC BSI Pathogen - when recognized pathogen or antibiotic treatment/condition.dhis2,1,D8mSSpOpsKj,wDQxhhyAkEU,SkizmAHatQu vzwZ8JFHnLd xqwFwesUADw,
+V3SxTcR7aP1,NeoIPC BSI Pathogen - when recognized pathogen or recovered multiple times,Hides the antibiotic treatment checkbox when a recognized pathogen was detected or the common commensal was detected multiple times,expressions/programRules/NeoIPC BSI Pathogen - when recognized pathogen or recovered multiple times/condition.dhis2,1,D8mSSpOpsKj,wDQxhhyAkEU,iqCfIRnj0Yi,
+Gi7SH9RVlKg,NeoIPC BSI Perfusion set count,Sets NeoIPC BSI Perfusion count to 1 if it is set to true.,expressions/programRules/NeoIPC BSI Perfusion set count/condition.dhis2,0,D8mSSpOpsKj,wDQxhhyAkEU,hhKcnI0yVCr,
+yJvQVT3rIX1,NeoIPC BSI Platelet count set count,Sets NeoIPC BSI Platelet count count to 1 if it is set to true.,expressions/programRules/NeoIPC BSI Platelet count set count/condition.dhis2,0,D8mSSpOpsKj,wDQxhhyAkEU,lfZfbt37OQp,
+EBZOuGuaulx,NeoIPC BSI Procalcitonin set count,Sets NeoIPC BSI Procalcitonin count to 1 if it is set to true.,expressions/programRules/NeoIPC BSI Procalcitonin set count/condition.dhis2,0,D8mSSpOpsKj,wDQxhhyAkEU,GxuG7K4Pmc9,
+SdLm0Qp8IDS,NeoIPC BSI Set Day of life,Automatically sets the day of life for the current BSI event,expressions/programRules/NeoIPC BSI Set Day of life/condition.dhis2,0,D8mSSpOpsKj,wDQxhhyAkEU,FVHNMY64Lmk,
+YL8YY0dj2AO,NeoIPC BSI Set Length of Stay,Automatically sets the Length of Stay for the current event,expressions/programRules/NeoIPC BSI Set Length of Stay/condition.dhis2,0,D8mSSpOpsKj,wDQxhhyAkEU,JKSnC6C8tn0,
+uz9nfbom5PM,NeoIPC BSI Temperature set count,Sets NeoIPC BSI Temperature count to 1 if it is set to true.,expressions/programRules/NeoIPC BSI Temperature set count/condition.dhis2,0,D8mSSpOpsKj,wDQxhhyAkEU,H1W4h5BKCm9,
+DFTJ8MRSqWH,NeoIPC BSI White blood cell count set count,Sets NeoIPC BSI White blood cell count count to 1 if it is set to true.,expressions/programRules/NeoIPC BSI White blood cell count set count/condition.dhis2,0,D8mSSpOpsKj,wDQxhhyAkEU,daNfJVJx9Gm,
+rb0tjhQtZF2,NeoIPC HAP - display feedback,,expressions/programRules/NeoIPC HAP - display feedback/condition.dhis2,100,D8mSSpOpsKj,gS3zQzPpsgV,BVLjKsKxgmA RiruEMstGWw XjfkynbsLHl pv5FaamSoG4 yNrTNPzvyhZ,
+LZQHeUvyjfJ,NeoIPC HAP - set virus,Sets the virus variables,expressions/programRules/NeoIPC HAP - set virus/condition.dhis2,0,D8mSSpOpsKj,gS3zQzPpsgV,MoO5KxaM646 aZrOkpaICko ocEhZAtP6by,
+fGBzfFalTNS,NeoIPC HAP - validate definition,Validates whether the information entered for a pneumonia fulfills the criteria of the NeoIPC pneumonia definition,expressions/programRules/NeoIPC HAP - validate definition/condition.dhis2,100,D8mSSpOpsKj,gS3zQzPpsgV,EK1zr5wNvR4,
+jNcz3fBOGOl,NeoIPC HAP Bradycardia value - true,"Adjusts the dialog and assigns variables when ""NeoIPC HAP Bradycardia value"" is true",expressions/programRules/NeoIPC HAP Bradycardia value - true/condition.dhis2,0,D8mSSpOpsKj,gS3zQzPpsgV,gxajYcmXPqX,
+Vq5RQpOCc5S,NeoIPC HAP Clinical criteria fulfilled - assign false,,expressions/programRules/NeoIPC HAP Clinical criteria fulfilled - assign false/condition.dhis2,5,D8mSSpOpsKj,gS3zQzPpsgV,lsLr3O3AZuk,
+UcZUM0TOJ8r,NeoIPC HAP Clinical criteria fulfilled - assign true,,expressions/programRules/NeoIPC HAP Clinical criteria fulfilled - assign true/condition.dhis2,5,D8mSSpOpsKj,gS3zQzPpsgV,xIahBaeARNO,
+JCR4IJWeFPy,NeoIPC HAP Clinical criteria total count - assign calculated value,,expressions/programRules/NeoIPC HAP Clinical criteria total count - assign calculated value/condition.dhis2,4,D8mSSpOpsKj,gS3zQzPpsgV,NCIDqY9eBWK,
+TAB3BsCr9gs,NeoIPC HAP Day of life value less than 4,Issues a warning if the day of life at the time of a HAP event is 3 or less,expressions/programRules/NeoIPC HAP Day of life value less than 4/condition.dhis2,1,D8mSSpOpsKj,gS3zQzPpsgV,qZU8QJQdiMp,
+uMbvNBL9p73,NeoIPC HAP Fever value - true,"Adjusts the dialog and assigns variables when ""NeoIPC HAP Fever value"" is true",expressions/programRules/NeoIPC HAP Fever value - true/condition.dhis2,0,D8mSSpOpsKj,gS3zQzPpsgV,TxnBYLBAVsK,
+gaMKXAX1EtC,NeoIPC HAP Imaging findings criterion fulfilled - assign false,,expressions/programRules/NeoIPC HAP Imaging findings criterion fulfilled - assign false/condition.dhis2,2,D8mSSpOpsKj,gS3zQzPpsgV,Vhm2WhgO9y9,
+yzZoVDcOape,NeoIPC HAP Imaging findings criterion fulfilled - assign true,,expressions/programRules/NeoIPC HAP Imaging findings criterion fulfilled - assign true/condition.dhis2,2,D8mSSpOpsKj,gS3zQzPpsgV,z1LSlhvgXbt,
+CynFTUls1wk,NeoIPC HAP Increased respiratory secretion value - true,"Adjusts the dialog and assigns variables when ""NeoIPC HAP Increased respiratory secretion value"" is true",expressions/programRules/NeoIPC HAP Increased respiratory secretion value - true/condition.dhis2,0,D8mSSpOpsKj,gS3zQzPpsgV,yMUkmWRLhz2,
+aCZ3BVUt88I,NeoIPC HAP Laboratory findings value - true,"Adjusts the dialog and assigns variables when ""NeoIPC HAP Laboratory findings value"" is true",expressions/programRules/NeoIPC HAP Laboratory findings value - true/condition.dhis2,0,D8mSSpOpsKj,gS3zQzPpsgV,GjNS5mEeGT0,
+zCTvQxtGvUp,NeoIPC HAP Length of Stay less than 2,Issues a warning if the length of stay at the time of a HAP event is 1 or less,expressions/programRules/NeoIPC HAP Length of Stay less than 2/condition.dhis2,1,D8mSSpOpsKj,gS3zQzPpsgV,pCAJNJGHs5z,
+rMrwsAXqIKc,NeoIPC HAP Lower respiratory tract sample positive - infer false,"Sets the program rule variable ""NeoIPC HAP Lower respiratory tract sample positive"" to false if none of the 3 detected pathogens was detected from the lower respiratory tract.",expressions/programRules/NeoIPC HAP Lower respiratory tract sample positive - infer false/condition.dhis2,2,D8mSSpOpsKj,gS3zQzPpsgV,pzsArssyjf7,
+EQ640JFGSCE,NeoIPC HAP Lower respiratory tract sample positive - infer true,"Sets the program rule variable ""NeoIPC HAP Lower respiratory tract sample positive"" to true if any of the 3 detected pathogens was detected from the lower respiratory tract.",expressions/programRules/NeoIPC HAP Lower respiratory tract sample positive - infer true/condition.dhis2,2,D8mSSpOpsKj,gS3zQzPpsgV,N8uZLG5Xa44,
+vZB3p7NXfKx,NeoIPC HAP Microbiological test result value - 1+,"Adjusts the dialog and assigns variables when ""Microbiological test result value"" is greater than 0",expressions/programRules/NeoIPC HAP Microbiological test result value - 1+/condition.dhis2,,D8mSSpOpsKj,gS3zQzPpsgV,XmKZrpDq0OG ifQ68rsMHB7,
+jewkCRzEWoA,NeoIPC HAP Microbiological test result value - no value or 0-,"Adjusts the dialog and assigns variables when ""Microbiological test result value"" does not have a value or when the value is less than 1",expressions/programRules/NeoIPC HAP Microbiological test result value - no value or 0-/condition.dhis2,,D8mSSpOpsKj,gS3zQzPpsgV,XockUiO4AcV dWiBLolUv7r,
+c0SJorJb5mJ,NeoIPC HAP Organism 1 - name has value,Sends a message when a custom name is entered as Organism 1 in the NeoIPC Core HAP dialog,expressions/programRules/NeoIPC HAP Organism 1 - name has value/condition.dhis2,9999,D8mSSpOpsKj,gS3zQzPpsgV,kzoXqjNgYYY,
+LpLUO0ByiIO,NeoIPC HAP Organism 2 - name has value,Sends a message when a custom name is entered as Organism 2 in the NeoIPC Core HAP dialog,expressions/programRules/NeoIPC HAP Organism 2 - name has value/condition.dhis2,9999,D8mSSpOpsKj,gS3zQzPpsgV,Hl1iYPpUAj9,
+BYoTioivN0t,NeoIPC HAP Organism 3 - name has value,Sends a message when a custom name is entered as Organism 3 in the NeoIPC Core HAP dialog,expressions/programRules/NeoIPC HAP Organism 3 - name has value/condition.dhis2,9999,D8mSSpOpsKj,gS3zQzPpsgV,Cla3O8Aj07N,
+zCoyxqNEOVx,NeoIPC HAP Purulent tracheal aspirate value - true,"Adjusts the dialog and assigns variables when ""NeoIPC HAP Purulent tracheal aspirate value"" is true",expressions/programRules/NeoIPC HAP Purulent tracheal aspirate value - true/condition.dhis2,0,D8mSSpOpsKj,gS3zQzPpsgV,Wm8t1QwPEqi,
+FG7FJmg1H0g,NeoIPC HAP Respiratory distress value - true,"Adjusts the dialog and assigns variables when ""NeoIPC HAP Respiratory distress value"" is true",expressions/programRules/NeoIPC HAP Respiratory distress value - true/condition.dhis2,0,D8mSSpOpsKj,gS3zQzPpsgV,K3P7pkqFe0b,
+h0dQA0XH9E5,NeoIPC HAP Respiratory support criterion fulfilled - assign false,,expressions/programRules/NeoIPC HAP Respiratory support criterion fulfilled - assign false/condition.dhis2,2,D8mSSpOpsKj,gS3zQzPpsgV,mpiwVbg7cLd,
+aHKyMUBufZd,NeoIPC HAP Respiratory support criterion fulfilled - assign true,,expressions/programRules/NeoIPC HAP Respiratory support criterion fulfilled - assign true/condition.dhis2,2,D8mSSpOpsKj,gS3zQzPpsgV,M77VfLzMVP6,
+mzWTkqqUcri,NeoIPC HAP Secondary BSI Organism 1 - name has value,Sends a message when a custom name is entered as Organism 1 in the secondary BSI section of the NeoIPC Core HAP dialog,expressions/programRules/NeoIPC HAP Secondary BSI Organism 1 - name has value/condition.dhis2,9999,D8mSSpOpsKj,gS3zQzPpsgV,EaNiPgX7X4X,
+wkyknn44Pla,NeoIPC HAP Secondary BSI Organism 2 - name has value,Sends a message when a custom name is entered as Organism 2 in the secondary BSI section of the NeoIPC Core HAP dialog,expressions/programRules/NeoIPC HAP Secondary BSI Organism 2 - name has value/condition.dhis2,9999,D8mSSpOpsKj,gS3zQzPpsgV,tbSA0hG0XFE,
+RSsNtCsCnwX,NeoIPC HAP Secondary BSI Organism 3 - name has value,Sends a message when a custom name is entered as Organism 3 in the secondary BSI section of the NeoIPC Core HAP dialog,expressions/programRules/NeoIPC HAP Secondary BSI Organism 3 - name has value/condition.dhis2,9999,D8mSSpOpsKj,gS3zQzPpsgV,FjG1PEzwLfV,
+zS1QzifzZJO,NeoIPC HAP Secondary bloodstream infection value - 1+,"Adjusts the dialog and assigns variables when ""NeoIPC HAP Secondary bloodstream infection value"" is greater than 0",expressions/programRules/NeoIPC HAP Secondary bloodstream infection value - 1+/condition.dhis2,0,D8mSSpOpsKj,gS3zQzPpsgV,ICJnLII2NRd,
+jhW8xHnD8YD,NeoIPC HAP Secondary bloodstream infection value - no value or 0-,"Adjusts the dialog and assigns variables when ""NeoIPC HAP Secondary bloodstream infection value"" does not have a value or when the value is less than 1",expressions/programRules/NeoIPC HAP Secondary bloodstream infection value - no value or 0-/condition.dhis2,0,D8mSSpOpsKj,gS3zQzPpsgV,BfkYxBp7fJP FX4IT62CA1T GuxMVH4PYb7 JEubUEqnobg Kl5TtQ70kjW N7PJnOpg1sr Phyq5BMpvSY RfIu8hP2iT5 RzoPXAebCXe WuEVo0QdZPC ZCFzyr6Uw7G bdNPKVZZLB5 bvDkHGXwu19 cHIbE45Stab cb4iOsz4Hlq faTvRQjFlsY iIFIOdEmbeR oDejX7JqPrQ rjSV9rT8m8r uyVUyl7GGgX w1apQG9YKhG,
+S2v2jluLwkf,NeoIPC HAP Set Day of life,Automatically sets the day of life for the current HAP event,expressions/programRules/NeoIPC HAP Set Day of life/condition.dhis2,0,D8mSSpOpsKj,gS3zQzPpsgV,IhrbU4oVOUo,
+o9o46FMkloW,NeoIPC HAP Set Length of Stay,Automatically sets the Length of Stay for the current event,expressions/programRules/NeoIPC HAP Set Length of Stay/condition.dhis2,0,D8mSSpOpsKj,gS3zQzPpsgV,q6HKg9AWaM7,
+G9jyHDcj7aX,NeoIPC HAP Tachypnoea value - true,"Adjusts the dialog and assigns variables when ""NeoIPC HAP Tachypnoea value"" is true",expressions/programRules/NeoIPC HAP Tachypnoea value - true/condition.dhis2,0,D8mSSpOpsKj,gS3zQzPpsgV,x8Zjy1rBA65,
+SW9WglzhsId,NeoIPC HAP Virus detected - infer false,"Sets the program rule variable ""NeoIPC HAP Virus detected"" to false if none of the 3 detected pathogens is a virus.",expressions/programRules/NeoIPC HAP Virus detected - infer false/condition.dhis2,2,D8mSSpOpsKj,gS3zQzPpsgV,EBquGZbiuik,
+BMY3P0lQncK,NeoIPC HAP Virus detected - infer true,"Sets the program rule variable ""NeoIPC HAP Virus detected"" to true if any of the 3 detected pathogens is a virus.",expressions/programRules/NeoIPC HAP Virus detected - infer true/condition.dhis2,2,D8mSSpOpsKj,gS3zQzPpsgV,T7zcLkQmV34,
+LjBpqQJlAwH,NeoIPC HAP Virus detected or NeoIPC HAP Lower respiratory tract sample positive,"Adjusts the dialog and assigns variables when ""NeoIPC HAP Virus detected"" or ""NeoIPC HAP Lower respiratory tract sample positive"" is true.",expressions/programRules/NeoIPC HAP Virus detected or NeoIPC HAP Lower respiratory tract sample positive/condition.dhis2,3,D8mSSpOpsKj,gS3zQzPpsgV,m0l4Urbiw8c,
+D47EyNbJ8pQ,NeoIPC NEC - assign finding counts,,expressions/programRules/NeoIPC NEC - assign finding counts/condition.dhis2,4,D8mSSpOpsKj,Cp8UiWONR1B,PYnrU5fFlBt fQcuGNlsW1u vcn5NXLRuZQ,
+KSOwPDUcO26,NeoIPC NEC - display feedback,,expressions/programRules/NeoIPC NEC - display feedback/condition.dhis2,100,D8mSSpOpsKj,Cp8UiWONR1B,CH7nvJWv0ar N7jev5Tv972 OGH3nhG8st0 gb4iMKWD7wv twdpMdvN3I3 yMTehPQzjJZ,
+jxuyugcOILj,NeoIPC NEC Abdominal discoloration value - true,"Adjusts the dialog and assigns variables when ""NeoIPC NEC Abdominal discoloration value"" is true",expressions/programRules/NeoIPC NEC Abdominal discoloration value - true/condition.dhis2,0,D8mSSpOpsKj,Cp8UiWONR1B,d5zVNae6Sqn,
+aMc3Xe08gpD,NeoIPC NEC Abdominal distension value - true,"Adjusts the dialog and assigns variables when ""NeoIPC NEC Abdominal distension value"" is true",expressions/programRules/NeoIPC NEC Abdominal distension value - true/condition.dhis2,0,D8mSSpOpsKj,Cp8UiWONR1B,COO17odEi9Z,
+xdOsdJ0vWkH,NeoIPC NEC Bilious gastric aspirate value - true,"Adjusts the dialog and assigns variables when ""NeoIPC NEC Bilious gastric aspirate value"" is true",expressions/programRules/NeoIPC NEC Bilious gastric aspirate value - true/condition.dhis2,0,D8mSSpOpsKj,Cp8UiWONR1B,Gl0z95P3NaI,
+PVk6NdQ3cc0,NeoIPC NEC Blood in stool value - true,"Adjusts the dialog and assigns variables when ""NeoIPC NEC Blood in stool value"" is true",expressions/programRules/NeoIPC NEC Blood in stool value - true/condition.dhis2,0,D8mSSpOpsKj,Cp8UiWONR1B,z244JJN0afF,
+e90HTaEpv0g,NeoIPC NEC Day of life value less than 4,Issues a warning if the day of life at the time of a NEC event is 3 or less,expressions/programRules/NeoIPC NEC Day of life value less than 4/condition.dhis2,1,D8mSSpOpsKj,Cp8UiWONR1B,tYStPZ2uBsa,
+Z7gxtGRNBwJ,NeoIPC NEC Extensive bowel necrosis value - true,"Adjusts the dialog and assigns variables when ""NeoIPC NEC Extensive bowel necrosis value"" is true",expressions/programRules/NeoIPC NEC Extensive bowel necrosis value - true/condition.dhis2,0,D8mSSpOpsKj,Cp8UiWONR1B,zH8RGpBF1lp,
+vOiD4m07V8h,NeoIPC NEC Fixed bowel loop value - true,"Adjusts the dialog and assigns variables when ""NeoIPC NEC Fixed bowel loop value"" is true",expressions/programRules/NeoIPC NEC Fixed bowel loop value - true/condition.dhis2,0,D8mSSpOpsKj,Cp8UiWONR1B,JmBnUWvszBi,
+Gpl5WOc3KR6,NeoIPC NEC Imaging Clinical findings criterion fulfilled - assign false,,expressions/programRules/NeoIPC NEC Imaging Clinical findings criterion fulfilled - assign false/condition.dhis2,5,D8mSSpOpsKj,Cp8UiWONR1B,GmnZh9TgY5d,
+fEFavPgMtEQ,NeoIPC NEC Imaging Clinical findings criterion fulfilled - assign true,,expressions/programRules/NeoIPC NEC Imaging Clinical findings criterion fulfilled - assign true/condition.dhis2,5,D8mSSpOpsKj,Cp8UiWONR1B,AhmDEsFbA7B,
+FFZw4Nvznpv,NeoIPC NEC Increased gastric residuals value - true,"Adjusts the dialog and assigns variables when ""NeoIPC NEC Increased gastric residuals value"" is true",expressions/programRules/NeoIPC NEC Increased gastric residuals value - true/condition.dhis2,0,D8mSSpOpsKj,Cp8UiWONR1B,ZdNvbprB5gs,
+PRHZlRPuVZs,NeoIPC NEC Length of Stay less than 2,Issues a warning if the length of stay at the time of a NEC event is 1 or less,expressions/programRules/NeoIPC NEC Length of Stay less than 2/condition.dhis2,1,D8mSSpOpsKj,Cp8UiWONR1B,aZwGywScUt5,
+n1Hc37OvhSa,NeoIPC NEC Pneumatosis intestinalis imaging value - true,"Adjusts the dialog and assigns variables when ""NeoIPC NEC Pneumatosis intestinalis imaging value"" is true",expressions/programRules/NeoIPC NEC Pneumatosis intestinalis imaging value - true/condition.dhis2,0,D8mSSpOpsKj,Cp8UiWONR1B,bcKnSS5FcS8,
+pYoHnqNbA3l,NeoIPC NEC Pneumatosis intestinalis surgical value - true,"Adjusts the dialog and assigns variables when ""NeoIPC NEC Pneumatosis intestinalis surgical value"" is true",expressions/programRules/NeoIPC NEC Pneumatosis intestinalis surgical value - true/condition.dhis2,0,D8mSSpOpsKj,Cp8UiWONR1B,OIMy7UOmUK9,
+gtxIgGD5Y3R,NeoIPC NEC Pneumoperitoneum value - true,"Adjusts the dialog and assigns variables when ""NeoIPC NEC Pneumoperitoneum value"" is true",expressions/programRules/NeoIPC NEC Pneumoperitoneum value - true/condition.dhis2,0,D8mSSpOpsKj,Cp8UiWONR1B,nkB4VlEfpCv,
+g9afRtOSERN,NeoIPC NEC Portal venous gas value - true,"Adjusts the dialog and assigns variables when ""NeoIPC NEC Portal venous gas value"" is true",expressions/programRules/NeoIPC NEC Portal venous gas value - true/condition.dhis2,0,D8mSSpOpsKj,Cp8UiWONR1B,LFLf3RbOVqN,
+cOrBBDnVH3z,NeoIPC NEC Secondary BSI Organism 1 - name has value,Sends a message when a custom name is entered as Organism 1 in the secondary BSI section of the NeoIPC Core NEC dialog,expressions/programRules/NeoIPC NEC Secondary BSI Organism 1 - name has value/condition.dhis2,9999,D8mSSpOpsKj,Cp8UiWONR1B,DaO14e1QbfG,
+kmpDHu9KTlL,NeoIPC NEC Secondary BSI Organism 2 - name has value,Sends a message when a custom name is entered as Organism 2 in the secondary BSI section of the NeoIPC Core NEC dialog,expressions/programRules/NeoIPC NEC Secondary BSI Organism 2 - name has value/condition.dhis2,9999,D8mSSpOpsKj,Cp8UiWONR1B,TG09ij4rCP7,
+Yf4TstJjxq7,NeoIPC NEC Secondary BSI Organism 3 - name has value,Sends a message when a custom name is entered as Organism 3 in the secondary BSI section of the NeoIPC Core NEC dialog,expressions/programRules/NeoIPC NEC Secondary BSI Organism 3 - name has value/condition.dhis2,9999,D8mSSpOpsKj,Cp8UiWONR1B,hs7ldgDtJa1,
+JkpbIBpvrfh,NeoIPC NEC Secondary bloodstream infection value - 1+,"Adjusts the dialog and assigns variables when ""NeoIPC NEC Secondary bloodstream infection value"" is greater than 0",expressions/programRules/NeoIPC NEC Secondary bloodstream infection value - 1+/condition.dhis2,0,D8mSSpOpsKj,Cp8UiWONR1B,kV6T5wgFKb4,
+ehrBTKxrBMo,NeoIPC NEC Secondary bloodstream infection value - no value or 0-,"Adjusts the dialog and assigns variables when ""NeoIPC NEC Secondary bloodstream infection value"" does not have a value or when the value is less than 1",expressions/programRules/NeoIPC NEC Secondary bloodstream infection value - no value or 0-/condition.dhis2,0,D8mSSpOpsKj,Cp8UiWONR1B,AHZfr5wVGIK D8RA8PvO47R DbpJzwRsvr6 IFm9cCYyLen L1prOMHUg0c QmL8W4kNsW7 S7J0spdiDd9 aYu9OVyfrGa c1nvWF3ju1U dGJZdYFQDu0 dagWswlR7LB gzDgCi7pvkf hj9D3TiJkC0 hmiG2usoXuU iSQvwFNntZQ j5DIP0YYUAC kRW5Q0ZiYHH pcLASMzDgRQ tC8AXMOqAAM wBLofgMgBg0 wfgUValIVtL,
+pMzKRM5OdcT,NeoIPC NEC Set Day of life,Automatically sets the day of life for the current NEC event,expressions/programRules/NeoIPC NEC Set Day of life/condition.dhis2,0,D8mSSpOpsKj,Cp8UiWONR1B,hvBrOiCk8n5,
+SXv5r0P3cej,NeoIPC NEC Set Length of Stay,Automatically sets the Length of Stay for the current event,expressions/programRules/NeoIPC NEC Set Length of Stay/condition.dhis2,0,D8mSSpOpsKj,Cp8UiWONR1B,dkNqideENyy,
+EP5qVa9lEpP,NeoIPC NEC Surgical findings criterion fulfilled - assign false,,expressions/programRules/NeoIPC NEC Surgical findings criterion fulfilled - assign false/condition.dhis2,5,D8mSSpOpsKj,Cp8UiWONR1B,d9mnGdkECl4,
+B4jHFueC2Cn,NeoIPC NEC Surgical findings criterion fulfilled - assign true,,expressions/programRules/NeoIPC NEC Surgical findings criterion fulfilled - assign true/condition.dhis2,5,D8mSSpOpsKj,Cp8UiWONR1B,nXkfwkkiZWH,
+FUJje59tZDB,NeoIPC NEC Validation rule,Validates the findings in the NeoIPC Core NEC dialog against the definition in the protocol,expressions/programRules/NeoIPC NEC Validation rule/condition.dhis2,100,D8mSSpOpsKj,Cp8UiWONR1B,dYmNC8SeeSx,
+erHsTIz7fkO,NeoIPC NEC Vomiting value - true,"Adjusts the dialog and assigns variables when ""NeoIPC NEC Vomiting value"" is true",expressions/programRules/NeoIPC NEC Vomiting value - true/condition.dhis2,0,D8mSSpOpsKj,Cp8UiWONR1B,ollB07QBNqE,
+DiT08PWJdBc,NeoIPC Patient Assign gestation days and weeks,Assigns the number of gestation days and weeks from the gestational age input format to program rule variables,expressions/programRules/NeoIPC Patient Assign gestation days and weeks/condition.dhis2,2,D8mSSpOpsKj,,HxBXUZ2LmOF gADByFHDQIv,
+kpQAPAm1z1n,NeoIPC Patient Assign total gestation days,Calculates the total number of gestation days and weeks from the two program rule variables that contain the weeks and days.,expressions/programRules/NeoIPC Patient Assign total gestation days/condition.dhis2,3,D8mSSpOpsKj,,vkpzQvSDjig wlprf2ToE0R,
+H90Xs7KvX2P,NeoIPC Patient Birth weight 1500+ grams and gestational age 32+ weeks,Raises an error if the entered birth weight is 1500 grams or more and the gestational age is 32 weeks or more.,expressions/programRules/NeoIPC Patient Birth weight 1500+ grams and gestational age 32+ weeks/condition.dhis2,4,D8mSSpOpsKj,,IZA8MT8DgTo Qmt363UtrQ4,
+R66wKJMO2KV,NeoIPC Patient Birth weight and gestational age mandatory (NeoDeco),Makes both birth weight and gestational age mandatory if the site is a NeoDeco trial site.,expressions/programRules/NeoIPC Patient Birth weight and gestational age mandatory (NeoDeco)/condition.dhis2,4,D8mSSpOpsKj,,VIOoOpB1QFL wJU8SbJsuyu,
+pFN6IkiamMF,NeoIPC Patient Birth weight mandatory if gestational age missing (regular),Makes birth weight mandatory if gestational age is missing and the site is not a NeoDeco trial site.,expressions/programRules/NeoIPC Patient Birth weight mandatory if gestational age missing (regular)/condition.dhis2,4,D8mSSpOpsKj,,swSgyFAtXUT,
+jBQc1oNlhHZ,NeoIPC Patient Gestational age mandatory if birth weight missing (regular),Makes gestational age mandatory if birth weight is missing and the site is not a NeoDeco trial site.,expressions/programRules/NeoIPC Patient Gestational age mandatory if birth weight missing (regular)/condition.dhis2,4,D8mSSpOpsKj,,sQvTuBrveqZ,
+tKAFqdYOCgG,NeoIPC Patient Multiple birth is not set,Adjusts the dialog when the multiple birth checkbox is not checked.,expressions/programRules/NeoIPC Patient Multiple birth is not set/condition.dhis2,,D8mSSpOpsKj,,yECZMZvJzKm,
+g0UvhlAN4r6,NeoIPC Patient Multiple birth is set,Adjusts the dialog when the multiple birth checkbox is checked.,expressions/programRules/NeoIPC Patient Multiple birth is set/condition.dhis2,,D8mSSpOpsKj,,kGd7F503CGl,
+AOJtrTQg1ZP,"NeoIPC Patient Show feedback for ""Admission Completed""",,expressions/programRules/NeoIPC Patient Show feedback for _Admission Completed_/condition.dhis2,1,D8mSSpOpsKj,,kGRrYYxGAzx,
+WEHHU9Qug9F,NeoIPC Patient Validate gestational age format,Checks the format of the value entered into the gestational age input field,expressions/programRules/NeoIPC Patient Validate gestational age format/condition.dhis2,1,D8mSSpOpsKj,,Brz79iM3TLB,
+KqNiD014l94,NeoIPC Patient Warn birth weight 1-299 or 5000+,Issues a warning when the birth weight is less than 300 grams or more than 5000 grams.,expressions/programRules/NeoIPC Patient Warn birth weight 1-299 or 5000+/condition.dhis2,,D8mSSpOpsKj,,BThYpmhoaky,
+tm7biA83rNu,NeoIPC Patient Warn birth weight empty (regular),Issues a warning if the birth weight is empty.,expressions/programRules/NeoIPC Patient Warn birth weight empty (regular)/condition.dhis2,4,D8mSSpOpsKj,YGowWPumDia,SCrOe0ZHWh0,
+b3CR62JDGHW,NeoIPC Patient Warn gestation days 0-160 or 310+,Displays a warning if the calculated number of gestation days is less than 161 or greater than 310,expressions/programRules/NeoIPC Patient Warn gestation days 0-160 or 310+/condition.dhis2,4,D8mSSpOpsKj,,ZIqrCJ67NRA,
+m6E8WHjIJsK,NeoIPC Patient Warn siblings in birth 7+,Issues a warning when the number of siblings in one birth is 7 or more.,expressions/programRules/NeoIPC Patient Warn siblings in birth 7+/condition.dhis2,,D8mSSpOpsKj,,dXvYPH45tae,
+BwaDt04UeHD,NeoIPC SSI - has microbiology results,Makes pathogen-related data elements mandatory if the user specifies that microbiology result are available,expressions/programRules/NeoIPC SSI - has microbiology results/condition.dhis2,1,D8mSSpOpsKj,cZhr3Wm2fc8,byGXZQBnsfV,
+oU67Orv3grn,NeoIPC SSI - has secondary BSI,Makes data elements related to secondary BSI mandatory if the user specifies that a secondary BSI has occurred.,expressions/programRules/NeoIPC SSI - has secondary BSI/condition.dhis2,,D8mSSpOpsKj,cZhr3Wm2fc8,mGBpog8R7JV,
+spEjGdHfvrV,NeoIPC SSI - infection type deep,Hides data elements for superficial and organ/space infections if the infection type is deep,expressions/programRules/NeoIPC SSI - infection type deep/condition.dhis2,,D8mSSpOpsKj,cZhr3Wm2fc8,NPLdNePJirD ReZdz8k2P9p jddhCiSsOeM,
+PLYGlpyFglh,NeoIPC SSI - infection type organ/space,Hides data elements for superficial and superficial infections if the infection type is organ/space,expressions/programRules/NeoIPC SSI - infection type organ_space/condition.dhis2,,D8mSSpOpsKj,cZhr3Wm2fc8,YLoiCtsDgaA q6zrN8QVfNG zjRbpmI3kP6,
+LLKgG1MzPPx,NeoIPC SSI - infection type superficial,Hides data elements for deep and organ/space infections if the infection type is superficial,expressions/programRules/NeoIPC SSI - infection type superficial/condition.dhis2,,D8mSSpOpsKj,cZhr3Wm2fc8,fVzipb7u7JB ufF1oEkaAVV xIrTJaOVNEl,
+bBy2KAwRXCW,NeoIPC SSI - no infection type,Hides clinical signs and symptoms data elements until the user selects an infection type,expressions/programRules/NeoIPC SSI - no infection type/condition.dhis2,,D8mSSpOpsKj,cZhr3Wm2fc8,EkaiavA2iLK Xr6y6BvahHt ZGHD2MFuXSx hkjtnc9E5N1 nmaWTh7wUXA s9MWNUVZTT5,
+cnyYkKWdFSV,NeoIPC SSI - no microbiology result available,Hides pathogen-related data elements unless the user specifies that microbiologic result are available,expressions/programRules/NeoIPC SSI - no microbiology result available/condition.dhis2,1,D8mSSpOpsKj,cZhr3Wm2fc8,C24AaRjtqB0 DT7sZJJGU6R KsygiciFSXM LpAedkkFnJK Rf5CWdxMG9I SSBT2ZOBDTM XdXlqqgcp5b XxWQ5RRgXz4 YGJBkSY9BRG ZNebHU6Ve9V cs3eMawm5mP eD5X7l2Z16n fYDGBWxfaYk i2nP3llrGmL mU8PpZOXyNx nUSeExvLsb3 odKR6nYRF6x vLEhaFwxCqA vQ3weS2Oj5T wHi0Eb7k9Rm xALTxL5TX7d z1hSeMmEZm6,
+uitFTLJmYup,NeoIPC SSI - no secondary BSI,Hides data elements related to secondary BSI unless the user specifies that a secondary BSI has occurred.,expressions/programRules/NeoIPC SSI - no secondary BSI/condition.dhis2,,D8mSSpOpsKj,cZhr3Wm2fc8,Asfbt9in5MF BGS7WqIrkhg CZV4H02SxDT D5ADpomLswl Dw5vsR9wq9c FqepHLG9rVE Hcke6Yp6sWK IQMVixKHIp8 Inbw2UwKdpo SDd6PPHGXxy SegNT3LTXT6 UAc2iOrETsQ XSwYAItKZuY XvrSQ5Xu2s3 YOMSpHMwrwa gmbDl7TNNGh kitTSOXAMz3 lS1EfjpNob7 lueG3PXCahd veaBzbEaShf x06e8uF9bvm yv2dtzKM44V,
+RsU18e1lWxE,NeoIPC SSI - set organisms identified from any site,,expressions/programRules/NeoIPC SSI - set organisms identified from any site/condition.dhis2,0,D8mSSpOpsKj,cZhr3Wm2fc8,gyTtkdEqXXv,
+eqc0S2TZvkm,NeoIPC SSI - superficial infection,Adjusts the dialog when only the skin is involved,expressions/programRules/NeoIPC SSI - superficial infection/condition.dhis2,,D8mSSpOpsKj,cZhr3Wm2fc8,XXncoxaoIek iHMgORcoNkp,
+kh6vV560ykk,NeoIPC SSI Deep incisional SSI validation rule,Validates the findings in the NeoIPC Core SSI dialog against the deep incisional SSI definition in the protocol,expressions/programRules/NeoIPC SSI Deep incisional SSI validation rule/condition.dhis2,100,D8mSSpOpsKj,cZhr3Wm2fc8,JsOCNg1xiuf,
+BXVz490aRpj,NeoIPC SSI Organ/space SSI validation rule,Validates the findings in the NeoIPC Core SSI dialog against the organ/space SSI definition in the protocol,expressions/programRules/NeoIPC SSI Organ_space SSI validation rule/condition.dhis2,100,D8mSSpOpsKj,cZhr3Wm2fc8,dpFcrLhZ0kN,
+BVXHtD6b14r,NeoIPC SSI Organism 1 - name has value,Sends a message when a custom name is entered as Organism 1 in the NeoIPC Core SSI dialog,expressions/programRules/NeoIPC SSI Organism 1 - name has value/condition.dhis2,9999,D8mSSpOpsKj,wDQxhhyAkEU,eLqdP1rLcKb,
+wi0btXvKwbF,NeoIPC SSI Organism 2 - name has value,Sends a message when a custom name is entered as Organism 2 in the NeoIPC Core SSI dialog,expressions/programRules/NeoIPC SSI Organism 2 - name has value/condition.dhis2,9999,D8mSSpOpsKj,wDQxhhyAkEU,MmWM3i0Cxeh,
+PBst4DkKze8,NeoIPC SSI Organism 3 - name has value,Sends a message when a custom name is entered as Organism 3 in the NeoIPC Core SSI dialog,expressions/programRules/NeoIPC SSI Organism 3 - name has value/condition.dhis2,9999,D8mSSpOpsKj,wDQxhhyAkEU,CD8gvLGu8bX,
+olawHScR3Vu,NeoIPC SSI Secondary BSI Organism 1 - name has value,Sends a message when a custom name is entered as Organism 1 in the secondary BSI section of the NeoIPC Core SSI dialog,expressions/programRules/NeoIPC SSI Secondary BSI Organism 1 - name has value/condition.dhis2,9999,D8mSSpOpsKj,wDQxhhyAkEU,ybQVjyvShwC,
+DSpI9KsaGfg,NeoIPC SSI Secondary BSI Organism 2 - name has value,Sends a message when a custom name is entered as Organism 2 in the secondary BSI section of the NeoIPC Core SSI dialog,expressions/programRules/NeoIPC SSI Secondary BSI Organism 2 - name has value/condition.dhis2,9999,D8mSSpOpsKj,wDQxhhyAkEU,kFbylFQ0HpU,
+xRZwaKSxJ1r,NeoIPC SSI Secondary BSI Organism 3 - name has value,Sends a message when a custom name is entered as Organism 3 in the secondary BSI section of the NeoIPC Core SSI dialog,expressions/programRules/NeoIPC SSI Secondary BSI Organism 3 - name has value/condition.dhis2,9999,D8mSSpOpsKj,wDQxhhyAkEU,ieKkI1rLpMT,
+iTooSG0KaEV,NeoIPC SSI Set Day of life,Automatically sets the day of life for the current SSI event,expressions/programRules/NeoIPC SSI Set Day of life/condition.dhis2,0,D8mSSpOpsKj,cZhr3Wm2fc8,R2Taj2PE634,
+m2CoPEtzZpU,NeoIPC SSI Set Length of Stay,Automatically sets the Length of Stay for the current event,expressions/programRules/NeoIPC SSI Set Length of Stay/condition.dhis2,0,D8mSSpOpsKj,cZhr3Wm2fc8,BDncuOltyEP,
+sc6VLWeyY4U,NeoIPC SSI Superficial incisional SSI validation rule,Validates the findings in the NeoIPC Core SSI dialog against the superficial incisional SSI definition in the protocol,expressions/programRules/NeoIPC SSI Superficial incisional SSI validation rule/condition.dhis2,100,D8mSSpOpsKj,cZhr3Wm2fc8,TZTH0rlPDRR,
+D2RPS1cedtu,NeoIPC SURGERY Set Length of Stay,Automatically sets the Length of Stay for the current event,expressions/programRules/NeoIPC SURGERY Set Length of Stay/condition.dhis2,0,D8mSSpOpsKj,BHWwaviIFvy,cFwDRaTty3N,
+sar1ZEH47wx,NeoIPC Surgical Procedure Set Day of life,Automatically sets the day of life for the current Surgical Procedure event,expressions/programRules/NeoIPC Surgical Procedure Set Day of life/condition.dhis2,0,D8mSSpOpsKj,BHWwaviIFvy,W3clTqhECkI,
+NGhr5Yt9Dk4,NeoIPC Surveillance end AB days - validate,,expressions/programRules/NeoIPC Surveillance end AB days - validate/condition.dhis2,1,D8mSSpOpsKj,DDLi3OGC5Yh,bFBGJuvlCYW,
+mJk6fwzG4WI,NeoIPC Surveillance end CVC days - validate,,expressions/programRules/NeoIPC Surveillance end CVC days - validate/condition.dhis2,1,D8mSSpOpsKj,DDLi3OGC5Yh,PzzI3anNhYe,
+cqCLw4GQP4L,NeoIPC Surveillance end Human milk days - validate,,expressions/programRules/NeoIPC Surveillance end Human milk days - validate/condition.dhis2,1,D8mSSpOpsKj,DDLi3OGC5Yh,JI9qa1HYm0F,
+R9okkvIpFMj,NeoIPC Surveillance end INV days - validate,,expressions/programRules/NeoIPC Surveillance end INV days - validate/condition.dhis2,1,D8mSSpOpsKj,DDLi3OGC5Yh,rJ8kpWRSZ4n,
+komIcllqdzO,NeoIPC Surveillance end Kangaroo care days - validate,,expressions/programRules/NeoIPC Surveillance end Kangaroo care days - validate/condition.dhis2,1,D8mSSpOpsKj,DDLi3OGC5Yh,fByTL1GpSPg,
+SvfLyQgSSrC,NeoIPC Surveillance end NIV + INV days - validate,,expressions/programRules/NeoIPC Surveillance end NIV + INV days - validate/condition.dhis2,1,D8mSSpOpsKj,DDLi3OGC5Yh,Jn6lZgdzVok,
+OleZ8ZztQBQ,NeoIPC Surveillance end NIV days - validate,,expressions/programRules/NeoIPC Surveillance end NIV days - validate/condition.dhis2,1,D8mSSpOpsKj,DDLi3OGC5Yh,wJIDyQITVrk,
+GYKv7YBS4WS,NeoIPC Surveillance end PVC days - validate,,expressions/programRules/NeoIPC Surveillance end PVC days - validate/condition.dhis2,1,D8mSSpOpsKj,DDLi3OGC5Yh,gY4SFKCv9Ss,
+ECeGbWVvXFf,NeoIPC Surveillance end Patient days - set,Automatically calculate the patient days.,expressions/programRules/NeoIPC Surveillance end Patient days - set/condition.dhis2,0,D8mSSpOpsKj,DDLi3OGC5Yh,keCrtq3RtkZ,
+e7OKeQN5jpg,NeoIPC Surveillance end Probiotic days - validate,,expressions/programRules/NeoIPC Surveillance end Probiotic days - validate/condition.dhis2,1,D8mSSpOpsKj,DDLi3OGC5Yh,TMcdpdR5yBs,

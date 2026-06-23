@@ -1,0 +1,1 @@
+#{NeoIPC HAP Microbiological test result value} > 0 && (#{NeoIPC HAP Virus detected} || #{NeoIPC HAP Lower respiratory tract sample positive})

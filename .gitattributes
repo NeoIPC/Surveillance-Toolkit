@@ -1,0 +1,4 @@
+# DHIS2 expression files (the metadata directory's externalised program-rule conditions, action data, program-
+# indicator / validation-rule expressions) are LF text — pin the line endings so they round-trip byte-for-byte
+# regardless of a checkout machine's core.autocrlf setting.
+*.dhis2 text eol=lf

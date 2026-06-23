@@ -1,0 +1,1 @@
+!d2:hasValue( #{NeoIPC Admission type - current event value} ) || #{NeoIPC Admission type - current event value}  <= 2

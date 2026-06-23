@@ -1,0 +1,13 @@
+#{NeoIPC SSI Infection type value} == 2
+&& !#{NeoIPC SSI Purulent drainage deep incision value}
+&& !#{NeoIPC SSI Abscess deep incision value}
+&& !(
+  #{NeoIPC SSI Deep incision dehisces value}
+  &&
+  #{NeoIPC SSI Organisms identified from deep tissue of incision value} != 0
+  && (
+    #{NeoIPC SSI Fever value}
+    ||
+    #{NeoIPC SSI Localized pain deep value}
+  )
+)

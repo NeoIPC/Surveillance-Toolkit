@@ -1,0 +1,18 @@
+#{NeoIPC SSI Infection type value} == 1
+&& !#{NeoIPC SSI Purulent drainage superficial incision value}
+&& #{NeoIPC SSI Organisms identified from superficial incision value}  != 1
+&& !#{NeoIPC SSI Diagnosis superficial by physician value}
+&& !(
+  #{NeoIPC SSI Superficial incision opened value}
+  &&
+  #{NeoIPC SSI Organisms identified from superficial incision value}  == -1
+  && (
+    #{NeoIPC SSI Localized pain superficial value}
+    ||
+    #{NeoIPC SSI Localized swelling value}
+    ||
+    #{NeoIPC SSI Localized erythema value}
+    ||
+    #{NeoIPC SSI Localized heat value}
+  )
+)

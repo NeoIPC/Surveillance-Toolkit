@@ -50,6 +50,11 @@ function ConvertFrom-NeoIPCMetadataJson {
     if ($writeSharing -and $PSCmdlet.ShouldProcess($sharingPath, 'Write sharing profiles')) {
         Export-NeoIPCSharingProfile -Path $sharingPath -IdToKey $ugMap.IdToKey
     }
+    # Externalise the expression-heavy fields to one text file per expression (mutates the rows: the eligible cell
+    # becomes a relative file reference). Must run before the CSV write so the cells carry references, not values.
+    if ($PSCmdlet.ShouldProcess((Join-Path $OutputDirectory 'expressions'), 'Write expression files')) {
+        Write-NeoIPCMetadataExpressionFiles -Rows $rows -Directory $OutputDirectory
+    }
     foreach ($type in $rows.Keys) {
         $target = Join-Path $OutputDirectory "$type.csv"
         if ($PSCmdlet.ShouldProcess($target, 'Write CSV')) {
@@ -93,6 +98,8 @@ function ConvertTo-NeoIPCMetadataJson {
         $csv = Join-Path $Path "$type.csv"
         if (Test-Path -LiteralPath $csv) { $rows[$type] = Read-NeoIPCMetadataCsv -Path $csv }
     }
+    # Re-inline any externalised expression files (a cell that is an expressions/...dhis2 reference) before re-nesting.
+    Read-NeoIPCMetadataExpressionFiles -Rows $rows -Directory $Path
     $package = ConvertTo-NeoIPCMetadataPackage -Rows $rows
     $json = $package | ConvertTo-Json -Depth 100 -Compress:$Compress
     if ($OutputPath) {

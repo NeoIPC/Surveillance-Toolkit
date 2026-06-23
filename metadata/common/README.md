@@ -39,3 +39,21 @@ an unknown code/name fails loud. The grant's `displayName` is deliberately not s
 from the id, and carrying it duplicates a name that drifts — the same reason the rest of the pipeline strips
 the `display*` family). The directory is self-contained: when no `sharing.yaml` is present (a throwaway work
 directory, e.g. the round-trip gate) the converter derives the profiles from the package and writes one out.
+
+## Expressions
+
+The expression-heavy fields are kept as one text file per expression under [`expressions/`](expressions/), not packed
+into a (often multi-line) CSV cell — so they get editor support (multi-line editing, no CSV quoting, syntax
+highlighting). The externalised fields are the program-rule `condition`, the program-rule-action `data` (only for the
+action types that evaluate it as an authored expression — `ASSIGN` / `DISPLAYTEXT` / `DISPLAYKEYVALUEPAIR` /
+`SHOWERROR` / `SHOWWARNING` / `ERRORONCOMPLETE` / `WARNINGONCOMPLETE`; the field/section/option togglers and the
+template-driven notification types keep their rare/short data inline), the program-indicator `expression` / `filter`,
+and the validation-rule left/right-side expressions.
+
+A program rule and its actions are one unit, so they co-locate in a **per-rule folder named by the rule** —
+`expressions/programRules/<rule name>/condition.dhis2` and `…/<actionId>.data.dhis2`; program indicators and
+validation rules (few) stay flat per type — `expressions/<type>/<id>.<column>.dhis2`. The CSV cell carries the
+relative file path; the converter writes the file + reference on emit and re-inlines it on read (an inline,
+non-reference value is left untouched, so a hand-authored inline expression still reads, and a referenced-but-missing
+file fails loud). Folder names are the sanitised rule name (a name collision fails loud); the `.dhis2` files are LF
+(see `.gitattributes`).

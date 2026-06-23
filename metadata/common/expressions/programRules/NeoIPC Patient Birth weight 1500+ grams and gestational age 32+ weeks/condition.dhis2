@@ -1,0 +1,1 @@
+(( A{NeoIPC Patient Birth weight value} >= 1500 &&  #{NeoIPC Patient Total gestation days} >= 224 ) || ( A{NeoIPC Patient Birth weight value} >= 1500 && #{NeoIPC Patient Total gestation days} == 0 ) || ( #{NeoIPC Patient Total gestation days} >= 224 &&  A{NeoIPC Patient Birth weight value} == 0 )) && ( ! d2:inOrgUnitGroup( 'NEOIPC_ALL_PATIENTS_ELIGIBLE' ) )

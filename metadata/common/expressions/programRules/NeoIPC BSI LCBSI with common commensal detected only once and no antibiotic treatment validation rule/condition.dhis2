@@ -1,0 +1,37 @@
+(
+  !#{NeoIPC BSI - no positive culture}
+  &&
+  (
+    d2:hasValue(#{NeoIPC BSI Pathogen 1 value})
+    ||
+    d2:hasValue(#{NeoIPC BSI Pathogen 2 value})
+    ||
+    d2:hasValue(#{NeoIPC BSI Pathogen 3 value})
+  )
+  &&
+  (
+    !#{NeoIPC BSI Pathogen 1 is recognized pathogen}
+    &&
+    !#{NeoIPC BSI Pathogen 2 is recognized pathogen}
+    &&
+    !#{NeoIPC BSI Pathogen 3 is recognized pathogen}
+  )
+)
+&&
+(
+  (
+    !#{NeoIPC BSI Pathogen 1 recovered multiple times value}
+    &&
+    !#{NeoIPC BSI Pathogen 2 recovered multiple times value}
+    &&
+    !#{NeoIPC BSI Pathogen 3 recovered multiple times value}
+    &&
+    !#{NeoIPC BSI - Antibiotic treatment}
+  )
+  &&
+  (
+    (#{NeoIPC BSI Common commensal once clinical findings count} < 2)
+    ||
+    (#{NeoIPC BSI Common commensal once laboratory findings count} < 1)
+  )
+)

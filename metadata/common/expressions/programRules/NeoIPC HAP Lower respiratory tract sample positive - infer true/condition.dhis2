@@ -1,0 +1,1 @@
+(#{NeoIPC HAP Pathogen 1 source value} > 1) || (#{NeoIPC HAP Pathogen 2 source value} > 1) || (#{NeoIPC HAP Pathogen 3 source value} > 1)

@@ -1,2 +1,2 @@
 id,name,operator,periodType,importance,skipFormValidation,organisationUnitLevels,leftSide_expression,leftSide_missingValueStrategy,leftSide_slidingWindow,rightSide_expression,rightSide_missingValueStrategy,rightSide_slidingWindow,sharing
-YpHmukcHvSr,Test,greater_than,Monthly,MEDIUM,False,4,I{bpsntltaU4y},NEVER_SKIP,False,,NEVER_SKIP,False,PATHOGEN_LIST_ADMIN_RW
+YpHmukcHvSr,Test,greater_than,Monthly,MEDIUM,False,4,expressions/validationRules/YpHmukcHvSr.leftSide_expression.dhis2,NEVER_SKIP,False,,NEVER_SKIP,False,PATHOGEN_LIST_ADMIN_RW

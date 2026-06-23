@@ -635,6 +635,123 @@ InModuleScope 'NeoIPC-Tools' {
         }
     }
 
+    Describe 'Per-expression text-file externalisation (directory layout)' {
+        BeforeAll {
+            function New-ExprRows {
+                [ordered]@{
+                    programRules       = @(
+                        [ordered]@{ id = 'Rule1111111'; name = 'NeoIPC BSI - set 3GCR'; condition = 'd2:hasValue(#{x})' },
+                        [ordered]@{ id = 'Rule2222222'; name = 'A/B rule'; condition = "#{a}`n&& #{b}" }   # multi-line + slash in name
+                    )
+                    programRuleActions = @(
+                        [ordered]@{ id = 'Act11111111'; programRuleActionType = 'ASSIGN'; programRule = 'Rule1111111'; data = "d2:concatenate(#{x},`n'y')" },
+                        [ordered]@{ id = 'Act22222222'; programRuleActionType = 'HIDEFIELD'; programRule = 'Rule1111111'; data = '' },
+                        [ordered]@{ id = 'Act33333333'; programRuleActionType = 'SHOWERROR'; programRule = 'Rule2222222'; data = '1 > 0'; content = 'msg' }
+                    )
+                    programIndicators  = @([ordered]@{ id = 'PI111111111'; expression = '#{a.b}'; filter = '#{c} > 0' })
+                    validationRules    = @([ordered]@{ id = 'VR111111111'; leftSide_expression = 'I{x}'; rightSide_expression = '' })
+                }
+            }
+        }
+        BeforeEach {
+            $script:exprDir = Join-Path $TestDrive ('expr-' + [System.IO.Path]::GetRandomFileName())
+            New-Item -ItemType Directory -Path $script:exprDir -Force | Out-Null
+        }
+
+        It 'eligibility: condition always; data only for the expression-bearing action types' {
+            (Test-NeoIPCMetadataExpressionColumn -Type 'programRules' -Column 'condition' -ActionType $null) | Should -BeTrue
+            (Test-NeoIPCMetadataExpressionColumn -Type 'programRuleActions' -Column 'data' -ActionType 'ASSIGN') | Should -BeTrue
+            (Test-NeoIPCMetadataExpressionColumn -Type 'programRuleActions' -Column 'data' -ActionType 'SHOWERROR') | Should -BeTrue
+            (Test-NeoIPCMetadataExpressionColumn -Type 'programRuleActions' -Column 'data' -ActionType 'HIDEFIELD') | Should -BeFalse
+            (Test-NeoIPCMetadataExpressionColumn -Type 'programRuleActions' -Column 'data' -ActionType 'SENDMESSAGE') | Should -BeFalse
+            (Test-NeoIPCMetadataExpressionColumn -Type 'programRules' -Column 'name' -ActionType $null) | Should -BeFalse
+        }
+        It 'segment sanitiser: reserved chars -> _, trailing dot/space trimmed, empty -> _' {
+            (ConvertTo-NeoIPCExpressionPathSegment -Name 'A/B:c*?') | Should -BeExactly 'A_B_c__'
+            (ConvertTo-NeoIPCExpressionPathSegment -Name 'trailing. ') | Should -BeExactly 'trailing'
+            (ConvertTo-NeoIPCExpressionPathSegment -Name '') | Should -BeExactly '_'
+        }
+        It 'rule-segment map fails loud on a post-sanitisation name collision' {
+            $rows = @([ordered]@{ id = 'R1'; name = 'A/B' }, [ordered]@{ id = 'R2'; name = 'A:B' })   # both -> 'A_B'
+            { Get-NeoIPCMetadataExpressionRuleSegmentMap -RuleRows $rows } | Should -Throw '*collision*'
+        }
+        It 'writes per-rule co-located files (condition + the rule''s action data) and references in the cells' {
+            $rows = New-ExprRows
+            Write-NeoIPCMetadataExpressionFiles -Rows $rows -Directory $script:exprDir
+            @($rows['programRules'])[0]['condition'] | Should -BeExactly 'expressions/programRules/NeoIPC BSI - set 3GCR/condition.dhis2'
+            (Test-Path -LiteralPath (Join-Path $script:exprDir 'expressions/programRules/NeoIPC BSI - set 3GCR/condition.dhis2')) | Should -BeTrue
+            # the rule's ASSIGN action data co-locates under the SAME rule folder
+            @($rows['programRuleActions'])[0]['data'] | Should -BeExactly 'expressions/programRules/NeoIPC BSI - set 3GCR/Act11111111.data.dhis2'
+            # the slash in rule 2's name is sanitised to the folder segment
+            @($rows['programRules'])[1]['condition'] | Should -BeExactly 'expressions/programRules/A_B rule/condition.dhis2'
+            # program indicators / validation rules stay flat per-type
+            @($rows['programIndicators'])[0]['expression'] | Should -BeExactly 'expressions/programIndicators/PI111111111.expression.dhis2'
+            @($rows['programIndicators'])[0]['filter'] | Should -BeExactly 'expressions/programIndicators/PI111111111.filter.dhis2'
+            @($rows['validationRules'])[0]['leftSide_expression'] | Should -BeExactly 'expressions/validationRules/VR111111111.leftSide_expression.dhis2'
+        }
+        It 'leaves a non-eligible action''s data inline (HIDEFIELD), and an empty value untouched' {
+            $rows = New-ExprRows
+            @($rows['programRuleActions'])[1]['data'] = '#{cond}'   # a (hypothetical) inline condition on a HIDEFIELD
+            Write-NeoIPCMetadataExpressionFiles -Rows $rows -Directory $script:exprDir
+            @($rows['programRuleActions'])[1]['data'] | Should -BeExactly '#{cond}'                   # NOT externalised
+            @($rows['validationRules'])[0]['rightSide_expression'] | Should -BeExactly ''             # empty -> no file
+        }
+        It 'round-trips verbatim through write+read (multi-line preserved)' {
+            $rows = New-ExprRows
+            $origCond = @($rows['programRules'])[1]['condition']
+            $origData = @($rows['programRuleActions'])[0]['data']
+            Write-NeoIPCMetadataExpressionFiles -Rows $rows -Directory $script:exprDir
+            Read-NeoIPCMetadataExpressionFiles -Rows $rows -Directory $script:exprDir
+            @($rows['programRules'])[1]['condition'] | Should -BeExactly $origCond
+            @($rows['programRuleActions'])[0]['data'] | Should -BeExactly $origData
+        }
+        It 'read fails loud on a referenced-but-missing expression file' {
+            $rows = [ordered]@{ programRules = @([ordered]@{ id = 'Rx'; condition = 'expressions/programRules/ghost/condition.dhis2' }) }
+            { Read-NeoIPCMetadataExpressionFiles -Rows $rows -Directory $script:exprDir } | Should -Throw '*not found*'
+        }
+        It 'read leaves an inline (non-reference) expression untouched' {
+            $rows = [ordered]@{ programRules = @([ordered]@{ id = 'Rx'; condition = 'd2:hasValue(#{x})' }) }
+            Read-NeoIPCMetadataExpressionFiles -Rows $rows -Directory $script:exprDir
+            @($rows['programRules'])[0]['condition'] | Should -BeExactly 'd2:hasValue(#{x})'
+        }
+        It 'rule-segment map skips a null/absent programRules collection (no crash) and returns an empty map' {
+            (Get-NeoIPCMetadataExpressionRuleSegmentMap -RuleRows $null).Count | Should -Be 0
+            # the production trigger: a $rows that omits programRules but carries another externalised type must not crash
+            $rows = [ordered]@{ programIndicators = @([ordered]@{ id = 'PIonly00001'; expression = '#{a.b}' }) }
+            { Write-NeoIPCMetadataExpressionFiles -Rows $rows -Directory $script:exprDir } | Should -Not -Throw
+            @($rows['programIndicators'])[0]['expression'] | Should -BeExactly 'expressions/programIndicators/PIonly00001.expression.dhis2'
+        }
+        It 'wiring: ConvertFrom-/ConvertTo-NeoIPCMetadataJson externalise on emit and re-inline on read (end-to-end)' {
+            $pkg = [ordered]@{
+                userGroups         = @()
+                programRules       = @(
+                    [ordered]@{ id = 'IntgRule001'; name = 'Intg rule one'; program = [ordered]@{ id = 'ProgIntg001' }; condition = "d2:hasValue(#{v})`n&& true" }
+                )
+                programRuleActions = @(
+                    [ordered]@{ id = 'IntgActA001'; programRuleActionType = 'ASSIGN'; programRule = [ordered]@{ id = 'IntgRule001' }; data = "d2:concatenate('a',`n'b')" }
+                )
+            }
+            $jsonPath = Join-Path $script:exprDir 'intg.metadata.json'
+            [System.IO.File]::WriteAllText($jsonPath, ($pkg | ConvertTo-Json -Depth 40), [System.Text.UTF8Encoding]::new($false))
+            $outDir = Join-Path $script:exprDir 'intg-dir'
+            # ConvertFrom-/ConvertTo-NeoIPCMetadataJson (re)initialise the module-global sharing-profile registry;
+            # save + restore it so this integration test does not pollute the sharing state other Describes rely on.
+            $savedSharing = $script:NeoIPCSharingProfiles
+            try {
+                ConvertFrom-NeoIPCMetadataJson -Path $jsonPath -OutputDirectory $outDir
+                # emit hook: per-rule co-located files written; the CSV cell holds the reference, not the value
+                (Test-Path -LiteralPath (Join-Path $outDir 'expressions/programRules/Intg rule one/condition.dhis2')) | Should -BeTrue
+                (Test-Path -LiteralPath (Join-Path $outDir 'expressions/programRules/Intg rule one/IntgActA001.data.dhis2')) | Should -BeTrue
+                @(Import-Csv -LiteralPath (Join-Path $outDir 'programRules.csv'))[0].condition | Should -Match '^expressions/programRules/'
+                # read hook: the multi-line expression is re-inlined verbatim
+                $back = (ConvertTo-NeoIPCMetadataJson -Path $outDir) | ConvertFrom-Json -AsHashtable
+                (@($back['programRules'] | Where-Object { $_['id'] -eq 'IntgRule001' })[0]['condition']) | Should -BeExactly "d2:hasValue(#{v})`n&& true"
+                (@($back['programRuleActions'] | Where-Object { $_['id'] -eq 'IntgActA001' })[0]['data']) | Should -BeExactly "d2:concatenate('a',`n'b')"
+            }
+            finally { $script:NeoIPCSharingProfiles = $savedSharing }
+        }
+    }
+
     Describe 'Expression UID extraction (grammar-complete safety-net scanner)' {
         It 'extracts both UIDs from a 2-part data-element ref #{ps.de}' {
             $r = Get-NeoIPCMetadataExpressionRef -Text '#{stageADM001.deUsed00001}'
