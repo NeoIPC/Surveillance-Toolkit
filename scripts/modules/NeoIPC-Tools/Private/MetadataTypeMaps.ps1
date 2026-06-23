@@ -35,11 +35,13 @@ $script:NeoIPCMetadataDisplayProjections = @(
 $script:NeoIPCMetadataDeferredFields = @('translations')
 
 # Whole object TYPES excluded from the package entirely (not field-stripping): account/PII-shaped
-# objects, and server-generated collections. Excluded from both emit and the comparator, so their
-# presence in a source export is not reported as a round-trip difference.
+# objects, server-generated collections, and authored-instance content the export carries only in
+# anonymised form. Excluded from emit, the comparator, AND the PO, so their presence in a source
+# export is not reported as a round-trip difference.
 $script:NeoIPCMetadataExcludedTypes = @(
     'users', 'apiToken',           # account/PII tier (users are fully anonymised in the export; the play variant gets synthetic authored accounts)
-    'categoryOptionCombos'         # server-generated (regenerate-on-import)
+    'categoryOptionCombos',        # server-generated (regenerate-on-import)
+    'organisationUnits'            # authored content (real production UIDs / ISO codes / English names) the export carries only as anonymised instances (code:null, dummy O… ids, name:"Anonymized Org Unit"); assembled from the directory via Read-NeoIPCAuthoredOrgUnit, never the converter type-map. The org-unit GROUPS / GROUP-SETS / LEVELS stay non-closure (translatable classification config).
 )
 
 # Option SETS whose member options are domain-authored elsewhere — generated from a richer canonical source, not
@@ -70,11 +72,12 @@ $script:NeoIPCMetadataRetiredRuleNames = [System.Collections.Generic.HashSet[str
 # type, but the closure (index + prune) and the owned-id / UID-regeneration scan skip them. Distinct from
 # excluded types (not handled at all) and deferred types (not yet handled). Two families:
 #
-#   Org-unit hierarchy, its groups / group-sets, and the level definitions — real deployment config that
-#   production (not just play) needs: neoipcr reads org-unit group memberships for org-unit roles, World-Bank
-#   income classes, and reference-centre / test-unit / trial-site identification. The NEOIPC_CORE program
-#   references the groups only by CODE inside expression strings (d2:inOrgUnitGroup('NEO_DEPARTMENT')), never
-#   by structured {id}, so the {id}-walk closure cannot pull them in.
+#   Org-unit GROUPS, GROUP-SETS, and LEVEL definitions — real deployment config that production (not just
+#   play) needs: neoipcr reads org-unit group memberships for org-unit roles, World-Bank income classes, and
+#   reference-centre / test-unit / trial-site identification. The NEOIPC_CORE program references the groups
+#   only by CODE inside expression strings (d2:inOrgUnitGroup('NEO_DEPARTMENT')), never by structured {id}, so
+#   the {id}-walk closure cannot pull them in. (The org-unit INSTANCES themselves are NOT here — they are
+#   excluded authored content the export anonymises; see $NeoIPCMetadataExcludedTypes.)
 #
 #   userRoles and userGroups — the access-control config. userRoles (authorities + restrictions) are
 #   deployment-agnostic and referenced only by user accounts (which are excluded/synthetic), so nothing in
@@ -85,7 +88,7 @@ $script:NeoIPCMetadataRetiredRuleNames = [System.Collections.Generic.HashSet[str
 #   types are treated as import-time overlays). Their per-deployment membership (the anonymised users[]) is
 #   stripped on capture, so common groups carry no members.
 $script:NeoIPCMetadataNonClosureTypes = @(
-    'organisationUnits', 'organisationUnitGroups', 'organisationUnitGroupSets', 'organisationUnitLevels',
+    'organisationUnitGroups', 'organisationUnitGroupSets', 'organisationUnitLevels',
     'userRoles', 'userGroups'
 )
 

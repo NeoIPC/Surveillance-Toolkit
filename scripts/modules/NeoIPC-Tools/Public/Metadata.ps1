@@ -515,12 +515,12 @@ function New-NeoIPCMetadataPackage {
         if ($r -is [System.Collections.IDictionary] -and $r['name']) { $roleUid[[string]$r['name']] = [string]$r['id'] }
     }
 
-    # Closure + the non-closure DEFINITION types (the whole non-closure family except org-unit instances,
-    # which are read from the directory). Then noise-strip the config so the anonymised per-deployment
-    # membership is gone BEFORE the authored membership is applied.
+    # Closure + the non-closure DEFINITION types (org-unit groups / group-sets / levels, user roles / groups).
+    # Org-unit INSTANCES are NOT in this set — they are excluded authored content, read from the directory below
+    # via Read-NeoIPCAuthoredOrgUnit. Then noise-strip the config so the anonymised per-deployment membership is
+    # gone BEFORE the authored membership is applied.
     $config = (Get-NeoIPCMetadataClosure -Package $export -SeedType $SeedType -SeedCode $SeedCode).Package
     foreach ($t in $script:NeoIPCMetadataNonClosureTypes) {
-        if ($t -eq 'organisationUnits') { continue }
         if ($export.Contains($t)) { $config[$t] = $export[$t] }
     }
     $config = Remove-NeoIPCMetadataNoise -Object $config

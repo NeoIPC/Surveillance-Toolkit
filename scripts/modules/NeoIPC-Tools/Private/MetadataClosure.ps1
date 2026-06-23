@@ -103,10 +103,11 @@ function Get-NeoIPCMetadataStringValue {
 function Get-NeoIPCMetadataClosure {
     # Compute the dependency closure of a parsed DHIS2 metadata package, seeded at a program (default
     # NEOIPC_CORE). Returns the pruned package + diagnostics. Two classes are never indexed (refs into them
-    # resolve to nothing): the EXCLUDED types ($NeoIPCMetadataExcludedTypes: users / category option combos / …,
-    # PII or server-generated) and the NON-CLOSURE types ($NeoIPCMetadataNonClosureTypes: the org-unit family,
-    # deployment config the program references only by code) — the latter are still converted/round-tripped
-    # elsewhere, just not pulled into the program closure.
+    # resolve to nothing): the EXCLUDED types ($NeoIPCMetadataExcludedTypes: users / org-unit instances /
+    # category option combos / …, PII, authored, or server-generated) and the NON-CLOSURE types
+    # ($NeoIPCMetadataNonClosureTypes: org-unit groups / group-sets / levels + user roles / groups, deployment
+    # config the program references only by code) — the latter are still converted/round-tripped elsewhere,
+    # just not pulled into the program closure.
     [CmdletBinding()]
     [OutputType([hashtable])]
     param(

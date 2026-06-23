@@ -1291,14 +1291,15 @@ InModuleScope 'NeoIPC-Tools' {
                 foreach ($k in $a.Keys) { $a[$k] | Should -BeExactly $b[$k] }
             }
             It 'never re-mints excluded / non-closure / unmapped ids or the system default UIDs' {
-                # When a full export carries the non-closure (org-unit) / PII / server-generated collections
-                # top-level plus the system default categoryCombo (referenced by every dataElement), those must
-                # keep their UIDs so the package still binds on import. bjDvmb4bfuf is a default-UID member.
+                # When a full export carries the excluded (org-unit instances / PII / server-generated) and the
+                # non-closure (org-unit groups / user roles) collections top-level plus the system default
+                # categoryCombo (referenced by every dataElement), those must keep their UIDs so the package still
+                # binds on import. bjDvmb4bfuf is a default-UID member.
                 $pkg = [ordered]@{
                     programs = @([ordered]@{ id = 'progAAAA001'; code = 'NEOIPC_CORE'; name = 'C'; programType = 'WITH_REGISTRATION' })
                     dataElements = @([ordered]@{ id = 'deAAAA00001'; code = 'NEOIPC_X'; name = 'X'; valueType = 'TEXT'; categoryCombo = [ordered]@{ id = 'bjDvmb4bfuf' } })
                     categoryCombos = @([ordered]@{ id = 'bjDvmb4bfuf'; code = 'default'; name = 'default'; dataDimensionType = 'DISAGGREGATION' })
-                    organisationUnits = @([ordered]@{ id = 'ouRealOrg01'; name = 'Real OU' })          # non-closure (org-unit family)
+                    organisationUnits = @([ordered]@{ id = 'ouRealOrg01'; name = 'Real OU' })          # excluded (authored org-unit instances) -> keeps its UID
                     users = @([ordered]@{ id = 'userReal001'; name = 'Acct' })                          # excluded PII
                     categoryOptionCombos = @([ordered]@{ id = 'cocReal0001'; name = 'COC' })            # excluded server-generated
                     legendSets = @([ordered]@{ id = 'lgndSet0001'; name = 'L' }) }                      # unmapped top-level
@@ -1897,7 +1898,7 @@ InModuleScope 'NeoIPC-Tools' {
             Get-NeoIPCMetadataTranslationKey -Type 'options' -Object $opt -OptionSetCodeById @{ 'OSaaaaaaaa1' = 'NEOIPC_ASA_SCORE' } | Should -BeExactly 'NEOIPC_ASA_SCORE/1'
         }
         It 'keys a coded object by its code' {
-            Get-NeoIPCMetadataTranslationKey -Type 'organisationUnits' -Object ([ordered]@{ code = 'AT'; name = 'Austria' }) | Should -BeExactly 'AT'
+            Get-NeoIPCMetadataTranslationKey -Type 'organisationUnitGroups' -Object ([ordered]@{ code = 'NEO_DEPARTMENT'; name = 'Departments' }) | Should -BeExactly 'NEO_DEPARTMENT'
         }
         It 'keys a code-less object by its UID, not the name (DHIS2 names are not unique)' {
             Get-NeoIPCMetadataTranslationKey -Type 'programRules' -Object ([ordered]@{ id = 'PRabc123XYZ'; name = 'Rule X' }) | Should -BeExactly 'PRabc123XYZ'
@@ -2001,9 +2002,9 @@ InModuleScope 'NeoIPC-Tools' {
                         }
                         [ordered]@{ id = 'OPaaaaaaaa2'; code = '2'; name = 'ASA II'; optionSet = [ordered]@{ id = 'OSaaaaaaaa1' } }
                     )
-                    organisationUnits = @(
-                        [ordered]@{ id = 'OUaaaaaaaa1'; code = 'AT'; name = 'Austria'; shortName = 'Austria'
-                            translations = @( [ordered]@{ property = 'NAME'; locale = 'de'; value = 'Oesterreich' } )
+                    organisationUnitGroups = @(
+                        [ordered]@{ id = 'OGaaaaaaaa1'; code = 'NEO_DEPARTMENT'; name = 'Departments'; shortName = 'Depts'
+                            translations = @( [ordered]@{ property = 'NAME'; locale = 'de'; value = 'Abteilungen' } )
                         }
                     )
                 }
@@ -2017,7 +2018,7 @@ InModuleScope 'NeoIPC-Tools' {
                     $po[$loc] = Read-NeoIPCMetadataPoText -Text (Write-NeoIPCMetadataPoText -Entry (ConvertTo-NeoIPCMetadataPoEntry -Unit $units -Locale $loc) -Locale $loc)
                 }
                 $clean = ConvertFrom-NeoIPCMetadataJsonText -Json (New-TranslationFixture | ConvertTo-Json -Depth 40)
-                foreach ($t in 'options', 'organisationUnits') { foreach ($o in @($clean[$t])) { $o.Remove('translations') | Out-Null } }
+                foreach ($t in 'options', 'organisationUnitGroups') { foreach ($o in @($clean[$t])) { $o.Remove('translations') | Out-Null } }
                 Add-NeoIPCMetadataTranslationToPackage -Package $clean -PoByLocale $po
             }
         }
@@ -2025,7 +2026,7 @@ InModuleScope 'NeoIPC-Tools' {
             $units = Get-NeoIPCMetadataTranslationUnit -Package (New-TranslationFixture)
             @($units | ForEach-Object { $_.Msgctxt }) | Should -Be @(
                 'options/NEOIPC_ASA_SCORE/1/NAME', 'options/NEOIPC_ASA_SCORE/2/NAME',
-                'optionSets/NEOIPC_ASA_SCORE/NAME', 'organisationUnits/AT/NAME', 'organisationUnits/AT/SHORT_NAME')
+                'optionSets/NEOIPC_ASA_SCORE/NAME', 'organisationUnitGroups/NEO_DEPARTMENT/NAME', 'organisationUnitGroups/NEO_DEPARTMENT/SHORT_NAME')
         }
         It 'orders units by key intrinsically (ordinal) — independent of the order the package carries its objects' {
             # The two options are listed in REVERSE key order in the package; the .pot must still come out key-sorted
@@ -2068,6 +2069,20 @@ InModuleScope 'NeoIPC-Tools' {
             $keys | Should -Contain 'NEOIPC_PATHOGEN_LIST'  # non-antibiotic group stays in the metadata PO
             $keys | Should -Contain 'NEO_ORG_GROUP_SET'     # non-antibiotic group-set stays in the metadata PO
         }
+        It 'excludes organisationUnit INSTANCES from extraction (authored content) but keeps the group classification labels' {
+            # Org-unit instances are authored content (real UIDs / ISO codes / country names) the export anonymises,
+            # so they are an excluded type — never extracted to the metadata PO. The org-unit GROUPS / GROUP-SETS,
+            # however, are translatable classification config and stay (e.g. NEO_DEPARTMENT, World-Bank classes).
+            $pkg = [ordered]@{
+                organisationUnits      = @( [ordered]@{ id = 'OUaaaaaaaa1'; code = 'AT'; name = 'Austria'; shortName = 'Austria'
+                        translations = @( [ordered]@{ property = 'NAME'; locale = 'de'; value = 'Oesterreich' } ) } )
+                organisationUnitGroups = @( [ordered]@{ id = 'OGaaaaaaaa1'; code = 'NEO_DEPARTMENT'; name = 'Departments' } )
+            }
+            $keys = @(Get-NeoIPCMetadataTranslationUnit -Package $pkg | ForEach-Object { $_.Msgctxt })
+            $keys | Should -Not -Contain 'organisationUnits/AT/NAME'                  # instance excluded (authored)
+            $keys | Should -Not -Contain 'organisationUnits/AT/SHORT_NAME'
+            $keys | Should -Contain 'organisationUnitGroups/NEO_DEPARTMENT/NAME'      # group label kept
+        }
         It 'sources msgid from the English base value and gathers existing translations by locale' {
             $units = Get-NeoIPCMetadataTranslationUnit -Package (New-TranslationFixture)
             $u = $units | Where-Object { $_.Msgctxt -eq 'options/NEOIPC_ASA_SCORE/1/NAME' }
@@ -2078,17 +2093,17 @@ InModuleScope 'NeoIPC-Tools' {
         It 'emits a .pot with empty msgstr and a .<lang>.po with the language msgstr' {
             $units = Get-NeoIPCMetadataTranslationUnit -Package (New-TranslationFixture)
             $pot = Write-NeoIPCMetadataPoText -Entry (ConvertTo-NeoIPCMetadataPoEntry -Unit $units)
-            $pot | Should -Match '(?m)^msgctxt "organisationUnits/AT/NAME"'
+            $pot | Should -Match '(?m)^msgctxt "organisationUnitGroups/NEO_DEPARTMENT/NAME"'
             $pot | Should -Match '(?m)^"Language: en\\n"'
             $poDe = Write-NeoIPCMetadataPoText -Entry (ConvertTo-NeoIPCMetadataPoEntry -Unit $units -Locale 'de') -Locale 'de'
             $poDe | Should -Match '(?m)^"Language: de\\n"'
-            $poDe | Should -Match 'Oesterreich'
+            $poDe | Should -Match 'Abteilungen'
         }
         It 'parses a .po back, skipping the header entry' {
             $units = Get-NeoIPCMetadataTranslationUnit -Package (New-TranslationFixture)
             $entries = Read-NeoIPCMetadataPoText -Text (Write-NeoIPCMetadataPoText -Entry (ConvertTo-NeoIPCMetadataPoEntry -Unit $units -Locale 'de') -Locale 'de')
             @($entries | Where-Object { -not $_.Msgctxt }).Count | Should -Be 0          # no empty-context header entry
-            ($entries | Where-Object { $_.Msgctxt -eq 'organisationUnits/AT/NAME' }).Msgstr | Should -BeExactly 'Oesterreich'
+            ($entries | Where-Object { $_.Msgctxt -eq 'organisationUnitGroups/NEO_DEPARTMENT/NAME' }).Msgstr | Should -BeExactly 'Abteilungen'
         }
         It 'parses gettext multi-line continuation (msgmerge-style wrapped value)' {
             $wrapped = "msgctxt `"x/y/NAME`"`nmsgid `"`"`n`"part one `"`n`"part two`"`nmsgstr `"`"`n`"trans one `"`n`"trans two`"`n"
@@ -2102,13 +2117,13 @@ InModuleScope 'NeoIPC-Tools' {
             $opt1 = @($inj['options']) | Where-Object { $_['code'] -eq '1' }
             @($opt1['translations'] | ForEach-Object { '{0}:{1}={2}' -f $_['property'], $_['locale'], $_['value'] }) |
                 Should -Be @('NAME:de=ASA I (de)', 'NAME:es=ASA I (es)')
-            $au = @($inj['organisationUnits']) | Where-Object { $_['code'] -eq 'AT' }
-            @($au['translations'] | ForEach-Object { '{0}:{1}={2}' -f $_['property'], $_['locale'], $_['value'] }) | Should -Be @('NAME:de=Oesterreich')
+            $grp = @($inj['organisationUnitGroups']) | Where-Object { $_['code'] -eq 'NEO_DEPARTMENT' }
+            @($grp['translations'] | ForEach-Object { '{0}:{1}={2}' -f $_['property'], $_['locale'], $_['value'] }) | Should -Be @('NAME:de=Abteilungen')
         }
         It 'keeps a single-element translations[] an array (serializes as JSON [...] for import)' {
             $inj = Get-InjectedFixture
-            $au = @($inj['organisationUnits']) | Where-Object { $_['code'] -eq 'AT' }
-            $au['translations'] -is [System.Collections.IEnumerable] -and $au['translations'] -isnot [System.Collections.IDictionary] | Should -BeTrue
+            $grp = @($inj['organisationUnitGroups']) | Where-Object { $_['code'] -eq 'NEO_DEPARTMENT' }
+            $grp['translations'] -is [System.Collections.IEnumerable] -and $grp['translations'] -isnot [System.Collections.IDictionary] | Should -BeTrue
             ($inj | ConvertTo-Json -Depth 100) | Should -Match '"translations": \['
         }
         It 'leaves an untranslated object without a translations property' {
@@ -2167,10 +2182,10 @@ InModuleScope 'NeoIPC-Tools' {
             $back[0].Fuzzy | Should -BeTrue
         }
         It 'injection skips a fuzzy entry (unreviewed translation is not applied)' {
-            $pkg = [ordered]@{ organisationUnits = @( [ordered]@{ id = 'OUaaaaaaaa1'; code = 'AT'; name = 'Austria' } ) }
-            $po = @{ de = (New-EntryList (New-Entry 'organisationUnits/AT/NAME' 'Austria' 'Oesterreich' $true)) }
+            $pkg = [ordered]@{ organisationUnitGroups = @( [ordered]@{ id = 'OGaaaaaaaa1'; code = 'NEO_DEPARTMENT'; name = 'Departments' } ) }
+            $po = @{ de = (New-EntryList (New-Entry 'organisationUnitGroups/NEO_DEPARTMENT/NAME' 'Departments' 'Abteilungen' $true)) }
             $inj = Add-NeoIPCMetadataTranslationToPackage -Package $pkg -PoByLocale $po
-            @($inj['organisationUnits'])[0].Contains('translations') | Should -BeFalse
+            @($inj['organisationUnitGroups'])[0].Contains('translations') | Should -BeFalse
         }
     }
 
@@ -2182,7 +2197,7 @@ InModuleScope 'NeoIPC-Tools' {
                 optionSets        = @( [ordered]@{ id = 'OSaaaaaaaa1'; code = 'NEOIPC_ASA_SCORE'; name = 'ASA score' } )
                 options           = @( [ordered]@{ id = 'OPaaaaaaaa1'; code = '1'; name = 'ASA I'; optionSet = [ordered]@{ id = 'OSaaaaaaaa1' }
                         translations = @( [ordered]@{ property = 'NAME'; locale = 'de'; value = 'ASA I (de)' } ) } )
-                organisationUnits = @( [ordered]@{ id = 'OUaaaaaaaa1'; code = 'AT'; name = 'Austria'; shortName = 'Austria' } )
+                organisationUnitGroups = @( [ordered]@{ id = 'OGaaaaaaaa1'; code = 'NEO_DEPARTMENT'; name = 'Departments'; shortName = 'Depts' } )
             }
             [System.IO.File]::WriteAllText($script:trExport, ($pkg | ConvertTo-Json -Depth 40), [System.Text.UTF8Encoding]::new($false))
         }
@@ -2213,10 +2228,10 @@ InModuleScope 'NeoIPC-Tools' {
             Export-NeoIPCMetadataTranslation -Path $script:trExport -PoDirectory $script:trPoDir -Locale es
             $esPath = Join-Path $script:trPoDir 'metadata.es.po'
             $entries = Read-NeoIPCMetadataPoText -Text (Get-Content $esPath -Raw)
-            ($entries | Where-Object { $_.Msgctxt -eq 'organisationUnits/AT/NAME' }).Msgstr = 'Austria (es)'
+            ($entries | Where-Object { $_.Msgctxt -eq 'organisationUnitGroups/NEO_DEPARTMENT/NAME' }).Msgstr = 'Departments (es)'
             [System.IO.File]::WriteAllText($esPath, (Write-NeoIPCMetadataPoText -Entry $entries -Locale 'es'), [System.Text.UTF8Encoding]::new($false))
             Export-NeoIPCMetadataTranslation -Path $script:trExport -PoDirectory $script:trPoDir -Locale es
-            (Get-Content $esPath -Raw) | Should -Match 'Austria \(es\)'
+            (Get-Content $esPath -Raw) | Should -Match 'Departments \(es\)'
         }
         It 'throws on a missing export file / PO directory' {
             { Export-NeoIPCMetadataTranslation -Path (Join-Path $TestDrive 'no.json') -PoDirectory $script:trPoDir } | Should -Throw '*not found*'
@@ -2272,9 +2287,9 @@ InModuleScope 'NeoIPC-Tools' {
             @($units | ForEach-Object { $_.Msgctxt }) | Should -Be @('programStageSections/PSSaaaaaaa1/NAME', 'programStageSections/PSSaaaaaaa2/NAME')
         }
         It 'THROWS on a genuine duplicate msgctxt (two objects mapping to the same key)' {
-            $pkg = [ordered]@{ organisationUnits = @(
-                    [ordered]@{ id = 'OUaaaaaaaa1'; code = 'DUP'; name = 'A' }
-                    [ordered]@{ id = 'OUaaaaaaaa2'; code = 'DUP'; name = 'B' } ) }
+            $pkg = [ordered]@{ organisationUnitGroups = @(
+                    [ordered]@{ id = 'OGaaaaaaaa1'; code = 'DUP'; name = 'A' }
+                    [ordered]@{ id = 'OGaaaaaaaa2'; code = 'DUP'; name = 'B' } ) }
             { Get-NeoIPCMetadataTranslationUnit -Package $pkg } | Should -Throw '*Duplicate translation msgctxt*'
         }
         It 'excludes the domain option sets (pathogens / substances) from extraction' {
@@ -2331,12 +2346,12 @@ InModuleScope 'NeoIPC-Tools' {
             $m[0].Msgstr | Should -BeExactly 'Hallo'
         }
         It 'injects translations[] in deterministic (locale asc, then token) order regardless of PoByLocale key order' {
-            $pkg = [ordered]@{ organisationUnits = @( [ordered]@{ id = 'OUaaaaaaaa1'; code = 'AT'; name = 'Austria'; shortName = 'AT' } ) }
+            $pkg = [ordered]@{ organisationUnitGroups = @( [ordered]@{ id = 'OGaaaaaaaa1'; code = 'NEO_DEPARTMENT'; name = 'Departments'; shortName = 'Depts' } ) }
             $po = [ordered]@{}
-            $po['es'] = (New-EntryList (New-Entry 'organisationUnits/AT/NAME' 'Austria' 'Austria-es') (New-Entry 'organisationUnits/AT/SHORT_NAME' 'AT' 'AT-es'))
-            $po['de'] = (New-EntryList (New-Entry 'organisationUnits/AT/NAME' 'Austria' 'Oesterreich') (New-Entry 'organisationUnits/AT/SHORT_NAME' 'AT' 'OE'))
+            $po['es'] = (New-EntryList (New-Entry 'organisationUnitGroups/NEO_DEPARTMENT/NAME' 'Departments' 'Departments-es') (New-Entry 'organisationUnitGroups/NEO_DEPARTMENT/SHORT_NAME' 'Depts' 'Depts-es'))
+            $po['de'] = (New-EntryList (New-Entry 'organisationUnitGroups/NEO_DEPARTMENT/NAME' 'Departments' 'Abteilungen') (New-Entry 'organisationUnitGroups/NEO_DEPARTMENT/SHORT_NAME' 'Depts' 'Abk'))
             $inj = Add-NeoIPCMetadataTranslationToPackage -Package $pkg -PoByLocale $po
-            @(@($inj['organisationUnits'])[0]['translations'] | ForEach-Object { '{0}/{1}' -f $_.locale, $_.property }) |
+            @(@($inj['organisationUnitGroups'])[0]['translations'] | ForEach-Object { '{0}/{1}' -f $_.locale, $_.property }) |
                 Should -Be @('de/NAME', 'de/SHORT_NAME', 'es/NAME', 'es/SHORT_NAME')
         }
         It 'Test-NeoIPCAtcCode is case-sensitive (a lowercased code is not treated as ATC)' {

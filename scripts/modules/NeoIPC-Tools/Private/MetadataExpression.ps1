@@ -220,7 +220,7 @@ function Get-NeoIPCMetadataOwnedId {
     foreach ($type in $script:NeoIPCMetadataTypeMaps.Keys) {
         if ($script:NeoIPCMetadataTypeMaps[$type].Nesting -eq 'NestedOnly') { continue }   # reached via its parent's child array
         if ($script:NeoIPCMetadataExcludedTypes -contains $type) { continue }              # PII / server-generated, never in the package's owned set
-        if ($script:NeoIPCMetadataNonClosureTypes -contains $type) { continue }            # org-unit family: deployment config, code-referenced — keep their UIDs
+        if ($script:NeoIPCMetadataNonClosureTypes -contains $type) { continue }            # org-unit groups/levels + user roles/groups: deployment config, code-referenced — keep their UIDs
         foreach ($o in @($Package[$type])) {
             if ($o -isnot [System.Collections.IDictionary]) { continue }
             & $add ([string]$o['id'])
