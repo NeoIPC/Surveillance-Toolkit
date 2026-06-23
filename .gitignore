@@ -29,3 +29,5 @@ reports/**/*_files/**
 reports/**/_output
 reports/ICHE-Health-Intervention-Codes.csv
 data/
+# Scratch / throwaway artifacts, never committed (the durable procedures live in the relevant READMEs).
+/tmp/

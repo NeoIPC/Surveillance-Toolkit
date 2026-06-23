@@ -21,14 +21,21 @@ combination and topical agents are excluded.
 
 | File | Contents |
 |------|----------|
-| `NeoIPC-Antibiotics.csv` | The substance/option table — `id, atc_code, name, atc_group, aware_category`. One row per DHIS2 option (the **systemic** antibiotics — the WHO ATC `J01` branch plus a few deliberately-added systemic non-J01 substances). The WHO **AWaRe** classification is folded in as the `aware_category` column. |
-| `NeoIPC-Antibiotic-Groups.csv` | The 34 WHO ATC **level-4** chemical subgroups — `code, name, shortName, description`. A substance joins a group by its `atc_group` column; the `ATC5` option-group-set is built from these. |
-| `NeoIPC-Antibiotic-AWaRe-Groups.csv` | The 3 WHO **AWaRe** groups — `code, category, name, shortName, description`. A substance joins by its `aware_category`; the `WHO_AWARE` option-group-set is built from these. |
+| `NeoIPC-Antibiotics.csv` | The substance/option table — `id, atc_code, name, atc_group, aware_category, uid`. One row per DHIS2 option (the **systemic** antibiotics — the WHO ATC `J01` branch plus a few deliberately-added systemic non-J01 substances). The WHO **AWaRe** classification is folded in as the `aware_category` column. |
+| `NeoIPC-Antibiotic-Groups.csv` | The 34 WHO ATC **level-4** chemical subgroups — `code, name, shortName, description, uid`. A substance joins a group by its `atc_group` column; the `ATC5` option-group-set is built from these. |
+| `NeoIPC-Antibiotic-AWaRe-Groups.csv` | The 3 WHO **AWaRe** groups — `code, category, name, shortName, description, uid`. A substance joins by its `aware_category`; the `WHO_AWARE` option-group-set is built from these. |
 | `ListElements.csv` | The printed-list UI labels (the `New-AntibioticsList` table headers). |
 
 The DHIS2 metadata (option set + option groups + group-sets, with localized `translations[]`) is **generated** from
-these sources by the NeoIPC-Tools pipeline — they are not hand-maintained DHIS2 objects. The DHIS2 UIDs are
-preserved from the deployment.
+these sources by the NeoIPC-Tools pipeline — they are not hand-maintained DHIS2 objects.
+
+**DHIS2 identity comes from source.** Each option's / group's `uid` column is its DHIS2 UID; a **blank** `uid` (e.g. a
+not-yet-deployed substance such as an oral route-split) is minted deterministically on generation. The option set's
+and the two option-group-sets' UIDs are fixed-code singletons and live in the NeoIPC-Tools module constants (a `uid`
+column would be a one-row file). These `uid` values are the UIDs the deployment already assigned, so the generated
+package keeps the deployed ids. When adding an object that already exists in DHIS2, set its `uid` to the deployed UID;
+for a genuinely new one, leave `uid` blank (it mints). The deployment export is otherwise read only for sharing,
+never for identity.
 
 ## Translations
 

@@ -14,19 +14,29 @@ $script:NeoIPCAntibioticCodeRename['J01XX01']      = 'J01XX01_P'
 $script:NeoIPCAntibioticCodeRename['Cefoselis']    = 'tmp_002'
 $script:NeoIPCAntibioticCodeRename['Micronomicin'] = 'tmp_001'
 
+# DHIS2 identity comes from SOURCE, never the export: per-option / per-group UIDs are the `uid` column of the three
+# antibiotic CSVs (collections -> data files), while the fixed-code SINGLETONS (the option set + the two
+# optionGroupSets) carry their UID in the constants below (singletons -> code). All were captured once from the
+# deployment (see the antibiotics README for how to re-capture); the classified-diff gate verifies the regenerated
+# objects stay byte-identical to the deployed ones. The export, when supplied, is consulted ONLY for sharing and for
+# the no-silent-drop validation — not for identity.
+
 # The 3 WHO AWaRe optionGroups are an abstract reference list (WHO-defined name/shortName/description + the
 # aware_category they select), so they live in the canonical CSV metadata/common/antibiotics/NeoIPC-Antibiotic-
-# AWaRe-Groups.csv (read by Get-NeoIPCAntibioticAwareGroup), NOT a code constant — mirroring the ATC groups. The
-# deployed UID + sharing are still preserved from the export by code (a UID sidecar replaces that later). The
-# classified-diff gate verifies the generated strings are byte-identical to the deployed groups.
+# AWaRe-Groups.csv (read by Get-NeoIPCAntibioticAwareGroup), NOT a code constant — mirroring the ATC groups. Their
+# DHIS2 UID is that CSV's `uid` column; sharing is still enriched from the export by code when one is supplied.
 
-# The 2 antibiotic optionGroupSets — likewise structural. Codes are fixed (neoipcr/the reports filter on ATC5 /
-# WHO_AWARE). Content canonical here; UID + the other structural fields preserved from the export by code. The
-# long WHO_AWARE description is assembled with explicit `\n` joins so it is independent of this file's newline
-# encoding (it must match the deployed value exactly — gate-verified).
+# The NEOIPC_ANTIMICROBIAL_SUBSTANCES option set's own UID — a fixed-code singleton (the code is a contract).
+$script:NeoIPCAntimicrobialOptionSetUid = 'JE7ECBWKhWD'
+
+# The 2 antibiotic optionGroupSets — likewise structural singletons. Codes are fixed (neoipcr/the reports filter on
+# ATC5 / WHO_AWARE). Content (name/description) AND the DHIS2 UID (the Uid field) are canonical here; the option-set
+# reference, dataDimension and sharing are taken from the export when one is supplied. The long WHO_AWARE description
+# is assembled with explicit `\n` joins so it is independent of this file's newline encoding (it must match the
+# deployed value exactly — gate-verified).
 $script:NeoIPCAntibioticGroupSet = [ordered]@{
-    ATC5      = [ordered]@{ Name = 'ATC-5 Groups'; Description = '' }
-    WHO_AWARE = [ordered]@{ Name = 'AWaRe Groups'; Description = (@(
+    ATC5      = [ordered]@{ Uid = 'D1N8iz0Grqv'; Name = 'ATC-5 Groups'; Description = '' }
+    WHO_AWARE = [ordered]@{ Uid = 'pvQ5WMrK25p'; Name = 'AWaRe Groups'; Description = (@(
                 'AWaRe is the WHO classification of antibiotics introduced by WHO as part of the 2017 Model List of Essential Medicines.'
                 'In the AWaRe classification, there are three categories of antibiotics:'
                 '• Access antibiotics that have a narrow spectrum of activity and a good safety profile in terms of side-effects.'
@@ -64,6 +74,10 @@ function Get-NeoIPCAntibioticSubstance {
     $hasShortName = $cols -contains 'short_name'
     $hasFormName = $cols -contains 'form_name'
     $hasDescription = $cols -contains 'description'
+    # `uid` is the DHIS2 option UID (source identity). Optional like the other extra columns: an absent column or a
+    # blank cell yields '' and the generator mints a deterministic UID (a not-yet-deployed substance, e.g. an oral
+    # route-split). Note `id` here is the option CODE, not the UID — these CSVs predate the UID-keyed convention.
+    $hasUid = $cols -contains 'uid'
     $seen = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::Ordinal)
     foreach ($r in $rows) {
         $id = [string]$r.id
@@ -80,6 +94,7 @@ function Get-NeoIPCAntibioticSubstance {
             ShortName     = if ($hasShortName) { [string]$r.short_name } else { '' }
             FormName      = if ($hasFormName) { [string]$r.form_name } else { '' }
             Description   = if ($hasDescription) { [string]$r.description } else { '' }
+            Uid           = if ($hasUid) { [string]$r.uid } else { '' }
         }
     }
 }
@@ -182,6 +197,7 @@ function Get-NeoIPCAntibioticGroup {
     $resolved = Resolve-Path -LiteralPath $Path -ErrorAction Stop
     $rows = @(Import-Csv -LiteralPath $resolved -Encoding utf8NoBOM)
     if ($rows.Count -eq 0) { throw "No antibiotic groups found in '$resolved'." }
+    $hasUid = $rows[0].PSObject.Properties.Name -contains 'uid'   # source identity; blank/absent -> generator mints
     $seen = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::Ordinal)
     foreach ($r in $rows) {
         $code = [string]$r.code
@@ -192,6 +208,7 @@ function Get-NeoIPCAntibioticGroup {
             Name        = [string]$r.name
             ShortName   = [string]$r.shortName
             Description = [string]$r.description
+            Uid         = if ($hasUid) { [string]$r.uid } else { '' }
         }
     }
 }
@@ -210,6 +227,7 @@ function Get-NeoIPCAntibioticAwareGroup {
     $resolved = Resolve-Path -LiteralPath $Path -ErrorAction Stop
     $rows = @(Import-Csv -LiteralPath $resolved -Encoding utf8NoBOM)
     if ($rows.Count -eq 0) { throw "No AWaRe groups found in '$resolved'." }
+    $hasUid = $rows[0].PSObject.Properties.Name -contains 'uid'   # source identity; blank/absent -> generator mints
     $seen = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::Ordinal)
     foreach ($r in $rows) {
         $code = [string]$r.code
@@ -223,6 +241,7 @@ function Get-NeoIPCAntibioticAwareGroup {
             Name        = [string]$r.name
             ShortName   = [string]$r.shortName
             Description = [string]$r.description
+            Uid         = if ($hasUid) { [string]$r.uid } else { '' }
         }
     }
 }

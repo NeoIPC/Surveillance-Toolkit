@@ -10,6 +10,30 @@
 $script:NeoIPCPathogenSlotCount = 3
 $script:NeoIPCSubstanceSlotCount = 9
 
+# The NEOIPC_PATHOGENS option set's own UID — a fixed-code singleton (the code is a contract), captured once from the
+# deployment. The per-option UIDs live in the Id->uid sidecar beside the ontology YAML (Get-NeoIPCPathogenUidMap),
+# so pathogen option identity comes from SOURCE, not the export. See the infectious-agents README for re-capture.
+$script:NeoIPCPathogenOptionSetUid = 'KHMPRkX5a4r'
+
+function Get-NeoIPCPathogenUidMap {
+    # Read the pathogen Id->uid sidecar (NeoIPC-Infectious-Agents.uids.csv: columns id,uid) into a case-sensitive
+    # code(string)->uid map. The sidecar records the DEPLOYED option UIDs; a not-yet-deployed ontology Id is simply
+    # absent, and New-NeoIPCPathogenOptionSet then mints it deterministically. Returns an empty map when the file is
+    # absent (every option mints). Fails loud on a blank or duplicate id (the map key must be a unique option code).
+    [CmdletBinding()]
+    [OutputType([System.Collections.IDictionary])]
+    param([Parameter(Mandatory)][string]$Path)
+    $map = [System.Collections.Hashtable]::new([System.StringComparer]::Ordinal)
+    if (-not (Test-Path -LiteralPath $Path)) { return $map }
+    foreach ($r in @(Import-Csv -LiteralPath $Path -Encoding utf8NoBOM)) {
+        $id = [string]$r.id
+        if ([string]::IsNullOrWhiteSpace($id)) { throw "Pathogen UID sidecar '$Path' has a row with a blank id." }
+        if ($map.ContainsKey($id)) { throw "Duplicate id '$id' in the pathogen UID sidecar '$Path' — option codes must be unique." }
+        $map[$id] = [string]$r.uid
+    }
+    $map
+}
+
 function Get-NeoIPCInfectiousAgentConcept {
     # Depth-first walk of a parsed NeoIPC-Infectious-Agents.yaml tree, yielding every Id-bearing node as
     # [ordered]@{ Id = <int>; Name = <string>; ConceptType = <string|null>; IsSynonym = <bool> }. At each node it

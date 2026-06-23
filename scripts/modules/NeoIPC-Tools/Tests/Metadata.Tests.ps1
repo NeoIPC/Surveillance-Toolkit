@@ -2278,18 +2278,47 @@ Hierarchies:
             $expected = New-NeoIPCMetadataUid -Type 'options' -NaturalKey ('{0}|{1}' -f $osUid, '11')
             (@($a['options'] | Where-Object { $_['code'] -eq '11' })[0]['id']) | Should -BeExactly $expected
         }
-        It 'preserves the option-set and option UIDs (and sharing) from an existing export, by code' {
+        It 'takes the option-set + option UIDs from source (-OptionSetUid + the sidecar) and sharing from the export' {
+            $sidecar = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-uids-{0}.csv' -f ([guid]::NewGuid().ToString('N')))
+            Set-Content -LiteralPath $sidecar -Encoding utf8 -Value "id,uid`n11,optExist001"
             $existing = @{
                 optionSets = @([ordered]@{ id = 'osPathogn01'; code = 'NEOIPC_PATHOGENS'; name = 'old'; sharing = @{ public = 'rw------' } })
                 options    = @([ordered]@{ id = 'optExist001'; code = '11'; name = 'old'; optionSet = [ordered]@{ id = 'osPathogn01' } })
             }
-            $frag = New-NeoIPCPathogenOptionSet -Path $script:GenYaml -ExistingPackage $existing
-            (@($frag['optionSets'])[0]['id']) | Should -BeExactly 'osPathogn01'
-            (@($frag['optionSets'])[0]['sharing']) | Should -Not -BeNullOrEmpty
-            (@($frag['options'] | Where-Object { $_['code'] -eq '11' })[0]['id']) | Should -BeExactly 'optExist001'
-            # A code absent from the export still mints deterministically off the preserved set UID.
-            (@($frag['options'] | Where-Object { $_['code'] -eq '12' })[0]['id']) |
-                Should -BeExactly (New-NeoIPCMetadataUid -Type 'options' -NaturalKey 'osPathogn01|12')
+            try {
+                $frag = New-NeoIPCPathogenOptionSet -Path $script:GenYaml -OptionSetUid 'osPathogn01' -UidSidecarPath $sidecar -ExistingPackage $existing
+                (@($frag['optionSets'])[0]['id']) | Should -BeExactly 'osPathogn01'   # from -OptionSetUid (source)
+                (@($frag['optionSets'])[0]['sharing']) | Should -Not -BeNullOrEmpty    # from the export
+                (@($frag['options'] | Where-Object { $_['code'] -eq '11' })[0]['id']) | Should -BeExactly 'optExist001'   # from the sidecar
+                # A code absent from the sidecar still mints deterministically off the source set UID.
+                (@($frag['options'] | Where-Object { $_['code'] -eq '12' })[0]['id']) |
+                    Should -BeExactly (New-NeoIPCMetadataUid -Type 'options' -NaturalKey 'osPathogn01|12')
+            }
+            finally { Remove-Item -LiteralPath $sidecar -Force }
+        }
+        It 'identity is SOURCE, not the export: when the sidecar/-OptionSetUid disagree with the export, source wins' {
+            # The export carries DIFFERENT well-formed UIDs for the same deployed code 11 — they must be ignored for
+            # identity (the export is read only for sharing + the no-silent-drop validation). Pins the commit's guarantee
+            # against a future export-by-code identity fallback (which would otherwise pass every other test).
+            $sidecar = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-uids-{0}.csv' -f ([guid]::NewGuid().ToString('N')))
+            Set-Content -LiteralPath $sidecar -Encoding utf8 -Value "id,uid`n11,srcUID00011"
+            $existing = @{
+                optionSets = @([ordered]@{ id = 'osExport001'; code = 'NEOIPC_PATHOGENS'; name = 'old' })
+                options    = @([ordered]@{ id = 'expUID00011'; code = '11'; name = 'old'; optionSet = [ordered]@{ id = 'osExport001' } })
+            }
+            try {
+                $frag = New-NeoIPCPathogenOptionSet -Path $script:GenYaml -OptionSetUid 'osSource001' -UidSidecarPath $sidecar -ExistingPackage $existing
+                $os = @($frag['optionSets'])[0]
+                $os['id'] | Should -BeExactly 'osSource001'      # from -OptionSetUid (source)
+                $os['id'] | Should -Not -Be 'osExport001'        # NOT the export's option-set id
+                $o11 = @($frag['options'] | Where-Object { $_['code'] -eq '11' })[0]
+                $o11['id'] | Should -BeExactly 'srcUID00011'     # from the sidecar (source)
+                $o11['id'] | Should -Not -Be 'expUID00011'       # NOT the export's option id, even though code 11 matches
+                # A code with no sidecar entry mints off the SOURCE set UID — never the export.
+                $o12 = @($frag['options'] | Where-Object { $_['code'] -eq '12' })[0]
+                $o12['id'] | Should -BeExactly (New-NeoIPCMetadataUid -Type 'options' -NaturalKey 'osSource001|12')
+            }
+            finally { Remove-Item -LiteralPath $sidecar -Force }
         }
         It 'fails loud when the export carries a deployed code absent from the ontology (no silent drop)' {
             $existing = @{
@@ -2310,27 +2339,25 @@ Hierarchies:
             try { { New-NeoIPCPathogenOptionSet -Path $dupYaml } | Should -Throw '*Duplicate option code 5*' }
             finally { Remove-Item -LiteralPath $dupYaml -Force }
         }
-        It 're-mints deterministically when the export carries a structurally invalid option-set or option id' {
-            $existing = @{
-                optionSets = @([ordered]@{ id = 'BAD!'; code = 'NEOIPC_PATHOGENS'; name = 'old' })
-                options    = @([ordered]@{ id = 'short'; code = '11'; name = 'old'; optionSet = [ordered]@{ id = 'BAD!' } })
+        It 're-mints deterministically when the source option-set / option UID is structurally invalid' {
+            $sidecar = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-uids-{0}.csv' -f ([guid]::NewGuid().ToString('N')))
+            Set-Content -LiteralPath $sidecar -Encoding utf8 -Value "id,uid`n11,short"   # 'short' is not a valid UID -> mint
+            try {
+                $frag = New-NeoIPCPathogenOptionSet -Path $script:GenYaml -OptionSetUid 'BAD!' -UidSidecarPath $sidecar
+                $osUid = @($frag['optionSets'])[0]['id']
+                (Test-NeoIPCMetadataUid -Id $osUid) | Should -BeTrue
+                $osUid | Should -BeExactly (New-NeoIPCMetadataUid -Type 'optionSets' -NaturalKey 'NEOIPC_PATHOGENS')
+                $opt = @($frag['options'] | Where-Object { $_['code'] -eq '11' })[0]['id']
+                (Test-NeoIPCMetadataUid -Id $opt) | Should -BeTrue
+                $opt | Should -BeExactly (New-NeoIPCMetadataUid -Type 'options' -NaturalKey ('{0}|{1}' -f $osUid, '11'))
             }
-            $frag = New-NeoIPCPathogenOptionSet -Path $script:GenYaml -ExistingPackage $existing
-            $osUid = @($frag['optionSets'])[0]['id']
-            (Test-NeoIPCMetadataUid -Id $osUid) | Should -BeTrue
-            $osUid | Should -BeExactly (New-NeoIPCMetadataUid -Type 'optionSets' -NaturalKey 'NEOIPC_PATHOGENS')
-            $opt = @($frag['options'] | Where-Object { $_['code'] -eq '11' })[0]['id']
-            (Test-NeoIPCMetadataUid -Id $opt) | Should -BeTrue
-            $opt | Should -BeExactly (New-NeoIPCMetadataUid -Type 'options' -NaturalKey ('{0}|{1}' -f $osUid, '11'))
+            finally { Remove-Item -LiteralPath $sidecar -Force }
         }
-        It 'fails loud when two option codes in the export share a UID' {
-            $existing = @{
-                optionSets = @([ordered]@{ id = 'osPathogn01'; code = 'NEOIPC_PATHOGENS'; name = 'old' })
-                options    = @(
-                    [ordered]@{ id = 'dupSharedAA'; code = '11'; name = 'a'; optionSet = [ordered]@{ id = 'osPathogn01' } },
-                    [ordered]@{ id = 'dupSharedAA'; code = '12'; name = 'b'; optionSet = [ordered]@{ id = 'osPathogn01' } })
-            }
-            { New-NeoIPCPathogenOptionSet -Path $script:GenYaml -ExistingPackage $existing } | Should -Throw '*UID collision*'
+        It 'fails loud when two option codes in the sidecar share a UID' {
+            $sidecar = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-uids-{0}.csv' -f ([guid]::NewGuid().ToString('N')))
+            Set-Content -LiteralPath $sidecar -Encoding utf8 -Value "id,uid`n11,dupSharedAA`n12,dupSharedAA"   # valid UID shape, shared
+            try { { New-NeoIPCPathogenOptionSet -Path $script:GenYaml -UidSidecarPath $sidecar } | Should -Throw '*UID collision*' }
+            finally { Remove-Item -LiteralPath $sidecar -Force }
         }
         It 'fails loud when the ontology has no Id-bearing concepts (would orphan the bindings)' {
             $emptyYaml = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-onto-empty-{0}.yaml' -f ([guid]::NewGuid().ToString('N')))
@@ -2369,7 +2396,33 @@ Hierarchies:
             $os['code'] | Should -BeExactly 'MY_SET'
             $os['name'] | Should -BeExactly 'Custom name'
             $os['valueType'] | Should -BeExactly 'TEXT'
-            $os['id'] | Should -BeExactly (New-NeoIPCMetadataUid -Type 'optionSets' -NaturalKey 'MY_SET')
+            $os['id'] | Should -BeExactly $script:NeoIPCPathogenOptionSetUid   # the default -OptionSetUid (source), not derived from the code
+        }
+        It 'Get-NeoIPCPathogenUidMap reads id->uid, is empty when absent, and fails loud on a blank/duplicate id' {
+            (Get-NeoIPCPathogenUidMap -Path (Join-Path $TestDrive 'no-such-sidecar.csv')).Count | Should -Be 0
+            $ok = Join-Path $TestDrive 'uids-ok.csv'
+            Set-Content -LiteralPath $ok -Encoding utf8 -Value "id,uid`n11,optExist001`n12,optExist002"
+            $m = Get-NeoIPCPathogenUidMap -Path $ok
+            $m['11'] | Should -BeExactly 'optExist001'
+            $m.ContainsKey('99') | Should -BeFalse
+            $dup = Join-Path $TestDrive 'uids-dup.csv'
+            Set-Content -LiteralPath $dup -Encoding utf8 -Value "id,uid`n11,a`n11,b"
+            { Get-NeoIPCPathogenUidMap -Path $dup } | Should -Throw '*Duplicate*'
+            $blank = Join-Path $TestDrive 'uids-blank.csv'
+            Set-Content -LiteralPath $blank -Encoding utf8 -Value "id,uid`n,xUID00abcde"
+            { Get-NeoIPCPathogenUidMap -Path $blank } | Should -Throw '*blank id*'
+        }
+        It 'generates from source alone (no -ExistingPackage): set UID from -OptionSetUid, options from the sidecar else minted' {
+            $sidecar = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-uids-{0}.csv' -f ([guid]::NewGuid().ToString('N')))
+            Set-Content -LiteralPath $sidecar -Encoding utf8 -Value "id,uid`n11,optSrc00011"
+            try {
+                $frag = New-NeoIPCPathogenOptionSet -Path $script:GenYaml -OptionSetUid 'osSrcOnly01' -UidSidecarPath $sidecar
+                @($frag['optionSets'])[0]['id'] | Should -BeExactly 'osSrcOnly01'
+                @($frag['optionSets'])[0].Contains('sharing') | Should -BeFalse
+                @($frag['options'] | Where-Object { $_['code'] -eq '11' })[0]['id'] | Should -BeExactly 'optSrc00011'
+                @($frag['options'] | Where-Object { $_['code'] -eq '12' })[0]['id'] | Should -BeExactly (New-NeoIPCMetadataUid -Type 'options' -NaturalKey 'osSrcOnly01|12')
+            }
+            finally { Remove-Item -LiteralPath $sidecar -Force }
         }
         It 'Get-NeoIPCPoTranslationMap reads a po4a YAML .po: skips header/untranslated/identical/obsolete, joins wrapped' {
             $po = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-po-{0}.po' -f ([guid]::NewGuid().ToString('N')))
@@ -3743,20 +3796,20 @@ Hierarchies:
 
     Describe 'Antibiotic-domain generation (option set + ATC/AWaRe groups + group-sets)' {
         # Synthetic fixtures: a 5-substance source (incl. the Minocycline route-split + the Micronomicin tmp code)
-        # and a 2-group source, with a mock export carrying the deployed option set + group/group-set shells whose
-        # UIDs the generators preserve. Sharing omitted (not under test) to avoid the sharing-shape contract here.
+        # and a 2-group source. UIDs are SOURCE identity (the `uid` column); the oral split J01AA08_O carries no uid
+        # (not yet deployed -> minted). The mock export supplies only sharing + the validation/deployed code set.
         BeforeAll {
             $script:abxCsv = Join-Path $TestDrive 'NeoIPC-Antibiotics.csv'
-            @('id,atc_code,name,atc_group,aware_category',
-                'J01AA01,J01AA01,Demeclocycline,J01AA,Watch',
-                'J01AA08_O,J01AA08,Minocycline (oral),J01AA,Watch',
-                'J01AA08_P,J01AA08,Minocycline (i. v.),J01AA,Reserve',
-                'tmp_001,,Micronomicin,J01GB,Watch',
-                'J01GB06,J01GB06,Amikacin,J01GB,Access') | Set-Content -LiteralPath $script:abxCsv -Encoding utf8NoBOM
+            @('id,atc_code,name,atc_group,aware_category,uid',
+                'J01AA01,J01AA01,Demeclocycline,J01AA,Watch,OptAbxAA011',
+                'J01AA08_O,J01AA08,Minocycline (oral),J01AA,Watch,',
+                'J01AA08_P,J01AA08,Minocycline (i. v.),J01AA,Reserve,OptAbxAA081',
+                'tmp_001,,Micronomicin,J01GB,Watch,OptAbxMicr1',
+                'J01GB06,J01GB06,Amikacin,J01GB,Access,OptAbxGB061') | Set-Content -LiteralPath $script:abxCsv -Encoding utf8NoBOM
             $script:abxGrpCsv = Join-Path $TestDrive 'NeoIPC-Antibiotic-Groups.csv'
-            @('code,name,shortName,description',
-                'J01AA,Tetracyclines,Tetracyclines,Tetracycline antibacterials.',
-                'J01GB,Other aminoglycosides,Aminoglycosides,Aminoglycoside antibacterials.') | Set-Content -LiteralPath $script:abxGrpCsv -Encoding utf8NoBOM
+            @('code,name,shortName,description,uid',
+                'J01AA,Tetracyclines,Tetracyclines,Tetracycline antibacterials.,GrpAtcAA001',
+                'J01GB,Other aminoglycosides,Aminoglycosides,Aminoglycoside antibacterials.,GrpAtcGB001') | Set-Content -LiteralPath $script:abxGrpCsv -Encoding utf8NoBOM
             function New-AbxExport {
                 [ordered]@{
                     optionSets      = @([ordered]@{ id = 'OptSetAbx01'; code = 'NEOIPC_ANTIMICROBIAL_SUBSTANCES'; name = 'NeoIPC Antimicrobial Substances'; valueType = 'TEXT' })
@@ -3778,15 +3831,15 @@ Hierarchies:
             }
         }
 
-        It 'option set: one option per substance; preserves UID by code; mints the new oral split' {
-            $f = New-NeoIPCAntimicrobialOptionSet -Path $script:abxCsv -ExistingPackage (New-AbxExport)
+        It 'option set: one option per substance; UID from the source column; mints the new oral split (blank uid)' {
+            $f = New-NeoIPCAntimicrobialOptionSet -Path $script:abxCsv -OptionSetUid 'OptSetAbx01' -ExistingPackage (New-AbxExport)
             @($f['options']).Count | Should -Be 5
-            $f['optionSets'][0]['id'] | Should -BeExactly 'OptSetAbx01'
+            $f['optionSets'][0]['id'] | Should -BeExactly 'OptSetAbx01'   # from -OptionSetUid (source)
             $f['optionSets'][0]['valueType'] | Should -BeExactly 'TEXT'
             @($f['options'] | Where-Object { $_['code'] -eq 'J01AA01' })[0]['id'] | Should -BeExactly 'OptAbxAA011'
-            @($f['options'] | Where-Object { $_['code'] -eq 'J01AA08_O' })[0]['id'] | Should -Not -BeNullOrEmpty
+            @($f['options'] | Where-Object { $_['code'] -eq 'J01AA08_O' })[0]['id'] | Should -Not -BeNullOrEmpty   # blank uid -> minted
         }
-        It 'option set: the documented code renames inherit the deployed UID' {
+        It 'option set: the documented code renames carry the inherited deployed UID in the source column' {
             $f = New-NeoIPCAntimicrobialOptionSet -Path $script:abxCsv -ExistingPackage (New-AbxExport)
             @($f['options'] | Where-Object { $_['code'] -eq 'J01AA08_P' })[0]['id'] | Should -BeExactly 'OptAbxAA081'
             @($f['options'] | Where-Object { $_['code'] -eq 'tmp_001' })[0]['id'] | Should -BeExactly 'OptAbxMicr1'
@@ -3835,13 +3888,14 @@ Hierarchies:
             $os = New-NeoIPCAntimicrobialOptionSet -Path $script:abxCsv -ExistingPackage (New-AbxExport)
             { New-NeoIPCAntibioticOptionGroup -OptionSet $os -SubstancePath $script:abxCsv -GroupPath $grp2 -ExistingPackage (New-AbxExport) } | Should -Throw '*J01ZZ*'
         }
-        It 'option group-sets: ATC5 enrols the ATC groups, WHO_AWARE the AWaRe groups (UIDs preserved)' {
-            $os = New-NeoIPCAntimicrobialOptionSet -Path $script:abxCsv -ExistingPackage (New-AbxExport)
+        It 'option group-sets: ATC5 enrols the ATC groups, WHO_AWARE the AWaRe groups (UID from the source constant)' {
+            $os = New-NeoIPCAntimicrobialOptionSet -Path $script:abxCsv -OptionSetUid 'OptSetAbx01' -ExistingPackage (New-AbxExport)
             $og = New-NeoIPCAntibioticOptionGroup -OptionSet $os -SubstancePath $script:abxCsv -GroupPath $script:abxGrpCsv -ExistingPackage (New-AbxExport)
             $ogs = New-NeoIPCAntibioticOptionGroupSet -OptionGroup $og -ExistingPackage (New-AbxExport)
             @($ogs['optionGroupSets']).Count | Should -Be 2
             $atc5 = @($ogs['optionGroupSets'] | Where-Object { $_['code'] -eq 'ATC5' })[0]
-            $atc5['id'] | Should -BeExactly 'GrpSetAtc01'
+            $atc5['id'] | Should -BeExactly $script:NeoIPCAntibioticGroupSet['ATC5'].Uid   # source identity (the module constant)
+            $atc5['optionSet']['id'] | Should -BeExactly 'OptSetAbx01'                      # ref threaded from the option set, not the export
             @($atc5['optionGroups']).Count | Should -Be 2
             @(@($ogs['optionGroupSets'] | Where-Object { $_['code'] -eq 'WHO_AWARE' })[0]['optionGroups']).Count | Should -Be 3
         }
@@ -3911,6 +3965,57 @@ Hierarchies:
             @($og['optionGroups'] | Where-Object { $_['code'] -eq 'J01AA' })[0]['sharing'] | Should -Not -BeNullOrEmpty
             $ogs = New-NeoIPCAntibioticOptionGroupSet -OptionGroup $og -ExistingPackage $pkg
             @($ogs['optionGroupSets'] | Where-Object { $_['code'] -eq 'ATC5' })[0]['sharing'] | Should -Not -BeNullOrEmpty
+        }
+        It 'readers expose the optional uid column (present -> value; absent column -> empty)' {
+            (@(Get-NeoIPCAntibioticSubstance -Path $script:abxCsv) | Where-Object { $_.Id -eq 'J01AA01' }).Uid | Should -BeExactly 'OptAbxAA011'
+            (@(Get-NeoIPCAntibioticSubstance -Path $script:abxCsv) | Where-Object { $_.Id -eq 'J01AA08_O' }).Uid | Should -BeExactly ''
+            (@(Get-NeoIPCAntibioticGroup -Path $script:abxGrpCsv) | Where-Object { $_.Code -eq 'J01AA' }).Uid | Should -BeExactly 'GrpAtcAA001'
+            $noUid = Join-Path $TestDrive 'no-uid.csv'
+            @('id,atc_code,name,atc_group,aware_category', 'J01AA01,J01AA01,A,J01AA,Watch') | Set-Content -LiteralPath $noUid -Encoding utf8NoBOM
+            (@(Get-NeoIPCAntibioticSubstance -Path $noUid)[0]).Uid | Should -BeExactly ''
+        }
+        It 'generates the whole antibiotic domain from source alone (no -ExistingPackage; identity preserved, no sharing)' {
+            $os = New-NeoIPCAntimicrobialOptionSet -Path $script:abxCsv -OptionSetUid 'OptSetAbx01'
+            $os['optionSets'][0]['id'] | Should -BeExactly 'OptSetAbx01'
+            $os['optionSets'][0].Contains('sharing') | Should -BeFalse
+            @($os['options'] | Where-Object { $_['code'] -eq 'J01AA01' })[0]['id'] | Should -BeExactly 'OptAbxAA011'
+            $og = New-NeoIPCAntibioticOptionGroup -OptionSet $os -SubstancePath $script:abxCsv -GroupPath $script:abxGrpCsv
+            $j01aa = @($og['optionGroups'] | Where-Object { $_['code'] -eq 'J01AA' })[0]
+            $j01aa['id'] | Should -BeExactly 'GrpAtcAA001'
+            $j01aa.Contains('sharing') | Should -BeFalse
+            $ogs = New-NeoIPCAntibioticOptionGroupSet -OptionGroup $og
+            $atc5 = @($ogs['optionGroupSets'] | Where-Object { $_['code'] -eq 'ATC5' })[0]
+            $atc5['id'] | Should -BeExactly $script:NeoIPCAntibioticGroupSet['ATC5'].Uid
+            $atc5['optionSet']['id'] | Should -BeExactly 'OptSetAbx01'
+        }
+        It 'identity is SOURCE, not the export: a source uid that differs from the export option id wins' {
+            # The export carries DIFFERENT well-formed UIDs for the option set + the deployed code J01AA01 — they must
+            # be ignored for identity. Pins the guarantee against a future export-by-code identity fallback.
+            $csv = Join-Path $TestDrive 'abx-divergent.csv'
+            @('id,atc_code,name,atc_group,aware_category,uid', 'J01AA01,J01AA01,Demeclocycline,J01AA,Watch,srcAbxUID01') | Set-Content -LiteralPath $csv -Encoding utf8NoBOM
+            $export = [ordered]@{
+                optionSets = @([ordered]@{ id = 'osExpAbx011'; code = 'NEOIPC_ANTIMICROBIAL_SUBSTANCES'; valueType = 'TEXT' })
+                options    = @([ordered]@{ id = 'expAbxUID01'; code = 'J01AA01'; optionSet = [ordered]@{ id = 'osExpAbx011' } })
+            }
+            $f = New-NeoIPCAntimicrobialOptionSet -Path $csv -OptionSetUid 'osSrcAbx011' -ExistingPackage $export
+            $f['optionSets'][0]['id'] | Should -BeExactly 'osSrcAbx011'   # from -OptionSetUid (source)
+            $f['optionSets'][0]['id'] | Should -Not -Be 'osExpAbx011'
+            $opt = @($f['options'] | Where-Object { $_['code'] -eq 'J01AA01' })[0]
+            $opt['id'] | Should -BeExactly 'srcAbxUID01'                   # from the source uid column
+            $opt['id'] | Should -Not -Be 'expAbxUID01'                     # NOT the export option id, even though the code matches
+        }
+        It 'mints a group UID deterministically when the source uid is blank' {
+            $grpBlank = Join-Path $TestDrive 'grp-blank-uid.csv'
+            @('code,name,shortName,description,uid', 'J01AA,Tetracyclines,Tetra,x,', 'J01GB,Other aminoglycosides,Aminoglycosides,y,') | Set-Content -LiteralPath $grpBlank -Encoding utf8NoBOM
+            $os = New-NeoIPCAntimicrobialOptionSet -Path $script:abxCsv -OptionSetUid 'OptSetAbx01'
+            $og = New-NeoIPCAntibioticOptionGroup -OptionSet $os -SubstancePath $script:abxCsv -GroupPath $grpBlank
+            @($og['optionGroups'] | Where-Object { $_['code'] -eq 'J01AA' })[0]['id'] | Should -BeExactly (New-NeoIPCMetadataUid -Type 'optionGroups' -NaturalKey 'J01AA')
+        }
+        It 'fails loud on a group UID collision across the generated groups' {
+            $grpDup = Join-Path $TestDrive 'grp-dup-uid.csv'
+            @('code,name,shortName,description,uid', 'J01AA,Tetracyclines,Tetra,x,SharedGrp01', 'J01GB,Other aminoglycosides,Amino,y,SharedGrp01') | Set-Content -LiteralPath $grpDup -Encoding utf8NoBOM
+            $os = New-NeoIPCAntimicrobialOptionSet -Path $script:abxCsv -OptionSetUid 'OptSetAbx01'
+            { New-NeoIPCAntibioticOptionGroup -OptionSet $os -SubstancePath $script:abxCsv -GroupPath $grpDup } | Should -Throw '*collision*'
         }
     }
 

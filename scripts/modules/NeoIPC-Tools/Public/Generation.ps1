@@ -19,16 +19,17 @@ function New-NeoIPCPathogenOptionSet {
         label). Output order is a deterministic depth-first walk of the ontology (node, then
         Hierarchies/Synonyms/Children) with a 1-based sortOrder, so diffs are stable.
 
-        UID policy mirrors the rest of the pipeline (preserve-if-present, else deterministic mint from the natural
-        key): with -ExistingPackage, the option set's UID and each option's UID are reused from the export where
-        the code matches (so binding data elements and already-imported options keep their ids and the diff stays
-        minimal); otherwise the option set mints from its code and each option from "<optionSetUid>|<code>" — the
-        same seed the converter uses, so a generated directory round-trips with zero id churn.
+        UID = SOURCE identity (no longer the export): the option set's UID is -OptionSetUid (the captured constant)
+        and each option's UID is the Id->uid sidecar beside the YAML (-UidSidecarPath, default
+        NeoIPC-Infectious-Agents.uids.csv); a code absent from the sidecar (a not-yet-deployed ontology Id) is minted
+        deterministically from "<optionSetUid>|<code>" — the same seed the converter uses, so a generated directory
+        round-trips with zero id churn.
 
         Fail-loud guarantee (no silent drop): when -ExistingPackage is supplied, every deployed option code MUST
         resolve to an ontology node; any deployed code absent from the YAML throws (restore it to the YAML as a
-        synonym keeping its original Id rather than dropping it). New ontology nodes not yet in the export are
-        added (reported via -Verbose).
+        synonym keeping its original Id rather than dropping it). New ontology nodes not yet in the export are added
+        (reported via -Verbose). The export is consulted ONLY for this validation and the deployed sharing — never
+        for identity; omit it to generate from source alone.
 
         With -PoDirectory, each option also gets a translations[] entry per locale whose label differs from the
         English source: the localized label is composed from the po4a-translated Name + rank/synonym word (same
@@ -45,6 +46,11 @@ function New-NeoIPCPathogenOptionSet {
         set to validate against. Omit to mint all UIDs deterministically and skip the deployed cross-check.
     .PARAMETER OptionSetCode
         The option set's code. Default: NEOIPC_PATHOGENS.
+    .PARAMETER OptionSetUid
+        The option set's DHIS2 UID (source identity). Default: the captured constant. Minted from the code if invalid.
+    .PARAMETER UidSidecarPath
+        Path to the Id->uid sidecar (default: NeoIPC-Infectious-Agents.uids.csv beside the YAML). Supplies each
+        option's deployed UID by code; a code absent from it is minted. An absent file means every option mints.
     .PARAMETER OptionSetName
         The option set's name. Default: 'NeoIPC Pathogen options'.
     .PARAMETER ValueType
@@ -66,6 +72,8 @@ function New-NeoIPCPathogenOptionSet {
         [string]$Path = (Join-Path $PSScriptRoot '..' '..' '..' '..' 'metadata' 'common' 'infectious-agents' 'NeoIPC-Infectious-Agents.yaml'),
         [System.Collections.IDictionary]$ExistingPackage,
         [string]$OptionSetCode = 'NEOIPC_PATHOGENS',
+        [string]$OptionSetUid = $script:NeoIPCPathogenOptionSetUid,
+        [string]$UidSidecarPath,
         [string]$OptionSetName = 'NeoIPC Pathogen options',
         [string]$ValueType = 'INTEGER_ZERO_OR_POSITIVE',
         [string]$PoDirectory,
@@ -78,6 +86,10 @@ function New-NeoIPCPathogenOptionSet {
     $concepts = @(Get-NeoIPCInfectiousAgentConcept -Node $tree)
     if ($concepts.Count -eq 0) { throw "No Id-bearing concepts found in '$resolved'." }
 
+    # Per-option identity from the Id->uid sidecar beside the YAML (source, not the export). An absent file -> all mint.
+    if (-not $UidSidecarPath) { $UidSidecarPath = Join-Path (Split-Path -Parent $resolved) 'NeoIPC-Infectious-Agents.uids.csv' }
+    $uidByCode = Get-NeoIPCPathogenUidMap -Path $UidSidecarPath
+
     # Index by code (= Id, as a string) and fail loud on a duplicate Id — option codes must be unique.
     $byCode = [ordered]@{}
     foreach ($c in $concepts) {
@@ -88,12 +100,12 @@ function New-NeoIPCPathogenOptionSet {
         $byCode[$code] = $c
     }
 
-    # Preserve UIDs from the export where the option set already exists, and collect the deployed code set.
-    $existingOsUid = $null
-    $existingOptUid = @{}
+    # The export, when supplied, is consulted ONLY for the deployed sharing and the no-silent-drop validation (its
+    # option-set id scopes the deployed code set) — never for identity, which is $OptionSetUid + the sidecar.
     $existingCodes = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::Ordinal)
     $existingSharing = $null
     if ($ExistingPackage) {
+        $existingOsUid = $null
         foreach ($os in @($ExistingPackage['optionSets'])) {
             if ($os -is [System.Collections.IDictionary] -and [string]$os['code'] -eq $OptionSetCode) {
                 $existingOsUid = [string]$os['id']
@@ -104,18 +116,15 @@ function New-NeoIPCPathogenOptionSet {
             }
         }
         # A package was supplied but does not carry the target set: this is a malformed/partial/wrong-code export,
-        # not the "omit to mint fresh" mode. Fail loud rather than silently re-minting every UID (which would
-        # orphan the data-element bindings on import) — mirrors the strict anchor checks in the sibling generators.
+        # not the "omit to skip validation" mode. Fail loud rather than silently skipping the no-silent-drop check.
         if (-not $existingOsUid) {
-            throw "Option set '$OptionSetCode' was not found in the supplied -ExistingPackage. Pass an export that contains the deployed option set to reconcile against, or omit -ExistingPackage to mint all UIDs fresh."
+            throw "Option set '$OptionSetCode' was not found in the supplied -ExistingPackage. Pass an export that contains the deployed option set to reconcile against, or omit -ExistingPackage to skip the validation."
         }
         foreach ($opt in @($ExistingPackage['options'])) {
             if ($opt -isnot [System.Collections.IDictionary]) { continue }
             $osRef = $opt['optionSet']
             if ($osRef -is [System.Collections.IDictionary] -and [string]$osRef['id'] -eq $existingOsUid) {
-                $oc = [string]$opt['code']
-                $existingOptUid[$oc] = [string]$opt['id']
-                [void]$existingCodes.Add($oc)
+                [void]$existingCodes.Add([string]$opt['code'])
             }
         }
     }
@@ -132,7 +141,7 @@ function New-NeoIPCPathogenOptionSet {
                 $OptionSetCode, $concepts.Count, $existingCodes.Count, $added.Count)
     }
 
-    $osUid = if ($existingOsUid -and (Test-NeoIPCMetadataUid -Id $existingOsUid)) { $existingOsUid }
+    $osUid = if (Test-NeoIPCMetadataUid -Id $OptionSetUid) { $OptionSetUid }
     else { New-NeoIPCMetadataUid -Type 'optionSets' -NaturalKey $OptionSetCode }
 
     # Optional localization: load each locale's english->localized map from the po4a-generated catalogues
@@ -162,13 +171,13 @@ function New-NeoIPCPathogenOptionSet {
     $sortOrder = 1
     foreach ($c in $concepts) {
         $code = [string]$c['Id']
-        $uid = if ($existingOptUid.ContainsKey($code) -and (Test-NeoIPCMetadataUid -Id $existingOptUid[$code])) {
-            $existingOptUid[$code]
+        $uid = if ($uidByCode.ContainsKey($code) -and (Test-NeoIPCMetadataUid -Id $uidByCode[$code])) {
+            $uidByCode[$code]
         }
         else {
             New-NeoIPCMetadataUid -Type 'options' -NaturalKey ('{0}|{1}' -f $osUid, $code)
         }
-        if (-not $seen.Add($uid)) { throw "UID collision minting option code '$code' (uid '$uid')." }
+        if (-not $seen.Add($uid)) { throw "UID collision for option code '$code' (uid '$uid')." }
         $cName = [string]$c['Name']; $cType = [string]$c['ConceptType']; $cSyn = [bool]$c['IsSynonym']
         $enLabel = Get-NeoIPCPathogenOptionLabel -Name $cName -ConceptType $cType -IsSynonym $cSyn
         $opt = [ordered]@{

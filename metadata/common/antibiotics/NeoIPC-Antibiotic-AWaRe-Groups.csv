@@ -1,4 +1,4 @@
-code,category,name,shortName,description
-WHO_AWARE_ACCESS,Access,AWaRe Access,AWaRe A,Access antibiotics that have a narrow spectrum of activity and a good safety profile in terms of side-effects.
-WHO_AWARE_WATCH,Watch,AWaRe Watch,AWaRe W,Watch antibiotics that are broader-spectrum antibiotics and are recommended as first-choice options for patients with more severe clinical presentations or for infections where the causative pathogens are more likely to be resistant to Access antibiotics.
-WHO_AWARE_RESERVE,Reserve,AWaRe Reserve,AWaRe R,Reserve antibiotics that are last-choice antibiotics used to treat multidrug-resistant infections.
+code,category,name,shortName,description,uid
+WHO_AWARE_ACCESS,Access,AWaRe Access,AWaRe A,Access antibiotics that have a narrow spectrum of activity and a good safety profile in terms of side-effects.,DwIHnRhQn2Z
+WHO_AWARE_WATCH,Watch,AWaRe Watch,AWaRe W,Watch antibiotics that are broader-spectrum antibiotics and are recommended as first-choice options for patients with more severe clinical presentations or for infections where the causative pathogens are more likely to be resistant to Access antibiotics.,O8M678OescV
+WHO_AWARE_RESERVE,Reserve,AWaRe Reserve,AWaRe R,Reserve antibiotics that are last-choice antibiotics used to treat multidrug-resistant infections.,v2GD6NFtYce
