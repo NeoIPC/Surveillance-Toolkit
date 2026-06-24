@@ -16,16 +16,6 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 #, priority:10
-msgctxt "dataElements/AAA_OLD_DELETE_NEOIPC_ADMISSION_BIRTH_WEIGTH/NAME"
-msgid "AAA Old Delete - NeoIPC Admission birth weight"
-msgstr ""
-
-#, priority:10
-msgctxt "dataElements/AAA_OLD_DELETE_NEOIPC_ADMISSION_BIRTH_WEIGTH/SHORT_NAME"
-msgid "AAA Old Delete - NeoIPC Adm. BW"
-msgstr ""
-
-#, priority:10
 msgctxt "dataElements/NEOIPC_ADMISSION_DOL/NAME"
 msgid "NeoIPC Admission on day of life"
 msgstr ""
@@ -422,7 +412,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "dataElements/NEOIPC_BSI_PATHOGEN_1_CAR/DESCRIPTION"
-msgid "The organism is a carbapenem-resistant gram-negative organism. Select \"\"Yes\"\" if the isolate was tested for carbapenem-resistance and the result was positive. Select \"\"No\"\" if it was tested for at least one of Imipenem, Meropenem, or Ertapenem, and the result was negative in all cases. Select \"\"Not tested\"\" if no test for carbapenem-resistance (for at least one of Imipenem, Meropenem, or Ertapenem) was performed. Carbapenemase-producing organisms are considered as carbapenem-resistant irrespective of the actual phenotypical resistance to individual carbapenems."
+msgid "The organism is a carbapenem-resistant gram-negative organism. Select \"Yes\" if the isolate was tested for carbapenem-resistance and the result was positive. Select \"No\" if it was tested for at least one of Imipenem, Meropenem, or Ertapenem, and the result was negative in all cases. Select \"Not tested\" if no test for carbapenem-resistance (for at least one of Imipenem, Meropenem, or Ertapenem) was performed. Carbapenemase-producing organisms are considered as carbapenem-resistant irrespective of the actual phenotypical resistance to individual carbapenems."
 msgstr ""
 
 #, priority:10
@@ -602,7 +592,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "dataElements/NEOIPC_BSI_PATHOGEN_2_CAR/DESCRIPTION"
-msgid "The organism is a carbapenem-resistant gram-negative organism. Select \"\"Yes\"\" if the isolate was tested for carbapenem-resistance and the result was positive. Select \"\"No\"\" if it was tested for at least one of Imipenem, Meropenem, or Ertapenem, and the result was negative in all cases. Select \"\"Not tested\"\" if no test for carbapenem-resistance (for at least one of Imipenem, Meropenem, or Ertapenem) was performed. Carbapenemase-producing organisms are considered as carbapenem-resistant irrespective of the actual phenotypical resistance to individual carbapenems."
+msgid "The organism is a carbapenem-resistant gram-negative organism. Select \"Yes\" if the isolate was tested for carbapenem-resistance and the result was positive. Select \"No\" if it was tested for at least one of Imipenem, Meropenem, or Ertapenem, and the result was negative in all cases. Select \"Not tested\" if no test for carbapenem-resistance (for at least one of Imipenem, Meropenem, or Ertapenem) was performed. Carbapenemase-producing organisms are considered as carbapenem-resistant irrespective of the actual phenotypical resistance to individual carbapenems."
 msgstr ""
 
 #, priority:10
@@ -782,7 +772,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "dataElements/NEOIPC_BSI_PATHOGEN_3_CAR/DESCRIPTION"
-msgid "The organism is a carbapenem-resistant gram-negative organism. Select \"\"Yes\"\" if the isolate was tested for carbapenem-resistance and the result was positive. Select \"\"No\"\" if it was tested for at least one of Imipenem, Meropenem, or Ertapenem, and the result was negative in all cases. Select \"\"Not tested\"\" if no test for carbapenem-resistance (for at least one of Imipenem, Meropenem, or Ertapenem) was performed. Carbapenemase-producing organisms are considered as carbapenem-resistant irrespective of the actual phenotypical resistance to individual carbapenems."
+msgid "The organism is a carbapenem-resistant gram-negative organism. Select \"Yes\" if the isolate was tested for carbapenem-resistance and the result was positive. Select \"No\" if it was tested for at least one of Imipenem, Meropenem, or Ertapenem, and the result was negative in all cases. Select \"Not tested\" if no test for carbapenem-resistance (for at least one of Imipenem, Meropenem, or Ertapenem) was performed. Carbapenemase-producing organisms are considered as carbapenem-resistant irrespective of the actual phenotypical resistance to individual carbapenems."
 msgstr ""
 
 #, priority:10
@@ -1242,7 +1232,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "dataElements/NEOIPC_HAP_PATHOGEN_1_CAR/DESCRIPTION"
-msgid "The organism is a carbapenem-resistant gram-negative organism. Select \"\"Yes\"\" if the isolate was tested for carbapenem-resistance and the result was positive. Select \"\"No\"\" if it was tested for at least one of Imipenem, Meropenem, or Ertapenem, and the result was negative in all cases. Select \"\"Not tested\"\" if no test for carbapenem-resistance (for at least one of Imipenem, Meropenem, or Ertapenem) was performed. Carbapenemase-producing organisms are considered as carbapenem-resistant irrespective of the actual phenotypical resistance to individual carbapenems."
+msgid "The organism is a carbapenem-resistant gram-negative organism. Select \"Yes\" if the isolate was tested for carbapenem-resistance and the result was positive. Select \"No\" if it was tested for at least one of Imipenem, Meropenem, or Ertapenem, and the result was negative in all cases. Select \"Not tested\" if no test for carbapenem-resistance (for at least one of Imipenem, Meropenem, or Ertapenem) was performed. Carbapenemase-producing organisms are considered as carbapenem-resistant irrespective of the actual phenotypical resistance to individual carbapenems."
 msgstr ""
 
 #, priority:10
@@ -1402,7 +1392,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "dataElements/NEOIPC_HAP_PATHOGEN_2_CAR/DESCRIPTION"
-msgid "The organism is a carbapenem-resistant gram-negative organism. Select \"\"Yes\"\" if the isolate was tested for carbapenem-resistance and the result was positive. Select \"\"No\"\" if it was tested for at least one of Imipenem, Meropenem, or Ertapenem, and the result was negative in all cases. Select \"\"Not tested\"\" if no test for carbapenem-resistance (for at least one of Imipenem, Meropenem, or Ertapenem) was performed. Carbapenemase-producing organisms are considered as carbapenem-resistant irrespective of the actual phenotypical resistance to individual carbapenems."
+msgid "The organism is a carbapenem-resistant gram-negative organism. Select \"Yes\" if the isolate was tested for carbapenem-resistance and the result was positive. Select \"No\" if it was tested for at least one of Imipenem, Meropenem, or Ertapenem, and the result was negative in all cases. Select \"Not tested\" if no test for carbapenem-resistance (for at least one of Imipenem, Meropenem, or Ertapenem) was performed. Carbapenemase-producing organisms are considered as carbapenem-resistant irrespective of the actual phenotypical resistance to individual carbapenems."
 msgstr ""
 
 #, priority:10
@@ -1562,7 +1552,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "dataElements/NEOIPC_HAP_PATHOGEN_3_CAR/DESCRIPTION"
-msgid "The organism is a carbapenem-resistant gram-negative organism. Select \"\"Yes\"\" if the isolate was tested for carbapenem-resistance and the result was positive. Select \"\"No\"\" if it was tested for at least one of Imipenem, Meropenem, or Ertapenem, and the result was negative in all cases. Select \"\"Not tested\"\" if no test for carbapenem-resistance (for at least one of Imipenem, Meropenem, or Ertapenem) was performed. Carbapenemase-producing organisms are considered as carbapenem-resistant irrespective of the actual phenotypical resistance to individual carbapenems."
+msgid "The organism is a carbapenem-resistant gram-negative organism. Select \"Yes\" if the isolate was tested for carbapenem-resistance and the result was positive. Select \"No\" if it was tested for at least one of Imipenem, Meropenem, or Ertapenem, and the result was negative in all cases. Select \"Not tested\" if no test for carbapenem-resistance (for at least one of Imipenem, Meropenem, or Ertapenem) was performed. Carbapenemase-producing organisms are considered as carbapenem-resistant irrespective of the actual phenotypical resistance to individual carbapenems."
 msgstr ""
 
 #, priority:10
@@ -1802,7 +1792,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "dataElements/NEOIPC_HAP_SEC_BSI_PATHOGEN_1_CAR/DESCRIPTION"
-msgid "The organism is a carbapenem-resistant gram-negative organism. Select \"\"Yes\"\" if the isolate was tested for carbapenem-resistance and the result was positive. Select \"\"No\"\" if it was tested for at least one of Imipenem, Meropenem, or Ertapenem, and the result was negative in all cases. Select \"\"Not tested\"\" if no test for carbapenem-resistance (for at least one of Imipenem, Meropenem, or Ertapenem) was performed. Carbapenemase-producing organisms are considered as carbapenem-resistant irrespective of the actual phenotypical resistance to individual carbapenems."
+msgid "The organism is a carbapenem-resistant gram-negative organism. Select \"Yes\" if the isolate was tested for carbapenem-resistance and the result was positive. Select \"No\" if it was tested for at least one of Imipenem, Meropenem, or Ertapenem, and the result was negative in all cases. Select \"Not tested\" if no test for carbapenem-resistance (for at least one of Imipenem, Meropenem, or Ertapenem) was performed. Carbapenemase-producing organisms are considered as carbapenem-resistant irrespective of the actual phenotypical resistance to individual carbapenems."
 msgstr ""
 
 #, priority:10
@@ -1942,7 +1932,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "dataElements/NEOIPC_HAP_SEC_BSI_PATHOGEN_2_CAR/DESCRIPTION"
-msgid "The organism is a carbapenem-resistant gram-negative organism. Select \"\"Yes\"\" if the isolate was tested for carbapenem-resistance and the result was positive. Select \"\"No\"\" if it was tested for at least one of Imipenem, Meropenem, or Ertapenem, and the result was negative in all cases. Select \"\"Not tested\"\" if no test for carbapenem-resistance (for at least one of Imipenem, Meropenem, or Ertapenem) was performed. Carbapenemase-producing organisms are considered as carbapenem-resistant irrespective of the actual phenotypical resistance to individual carbapenems."
+msgid "The organism is a carbapenem-resistant gram-negative organism. Select \"Yes\" if the isolate was tested for carbapenem-resistance and the result was positive. Select \"No\" if it was tested for at least one of Imipenem, Meropenem, or Ertapenem, and the result was negative in all cases. Select \"Not tested\" if no test for carbapenem-resistance (for at least one of Imipenem, Meropenem, or Ertapenem) was performed. Carbapenemase-producing organisms are considered as carbapenem-resistant irrespective of the actual phenotypical resistance to individual carbapenems."
 msgstr ""
 
 #, priority:10
@@ -2082,7 +2072,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "dataElements/NEOIPC_HAP_SEC_BSI_PATHOGEN_3_CAR/DESCRIPTION"
-msgid "The organism is a carbapenem-resistant gram-negative organism. Select \"\"Yes\"\" if the isolate was tested for carbapenem-resistance and the result was positive. Select \"\"No\"\" if it was tested for at least one of Imipenem, Meropenem, or Ertapenem, and the result was negative in all cases. Select \"\"Not tested\"\" if no test for carbapenem-resistance (for at least one of Imipenem, Meropenem, or Ertapenem) was performed. Carbapenemase-producing organisms are considered as carbapenem-resistant irrespective of the actual phenotypical resistance to individual carbapenems."
+msgid "The organism is a carbapenem-resistant gram-negative organism. Select \"Yes\" if the isolate was tested for carbapenem-resistance and the result was positive. Select \"No\" if it was tested for at least one of Imipenem, Meropenem, or Ertapenem, and the result was negative in all cases. Select \"Not tested\" if no test for carbapenem-resistance (for at least one of Imipenem, Meropenem, or Ertapenem) was performed. Carbapenemase-producing organisms are considered as carbapenem-resistant irrespective of the actual phenotypical resistance to individual carbapenems."
 msgstr ""
 
 #, priority:10
@@ -2522,7 +2512,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "dataElements/NEOIPC_NEC_SEC_BSI_PATHOGEN_1_CAR/DESCRIPTION"
-msgid "The organism is a carbapenem-resistant gram-negative organism. Select \"\"Yes\"\" if the isolate was tested for carbapenem-resistance and the result was positive. Select \"\"No\"\" if it was tested for at least one of Imipenem, Meropenem, or Ertapenem, and the result was negative in all cases. Select \"\"Not tested\"\" if no test for carbapenem-resistance (for at least one of Imipenem, Meropenem, or Ertapenem) was performed. Carbapenemase-producing organisms are considered as carbapenem-resistant irrespective of the actual phenotypical resistance to individual carbapenems."
+msgid "The organism is a carbapenem-resistant gram-negative organism. Select \"Yes\" if the isolate was tested for carbapenem-resistance and the result was positive. Select \"No\" if it was tested for at least one of Imipenem, Meropenem, or Ertapenem, and the result was negative in all cases. Select \"Not tested\" if no test for carbapenem-resistance (for at least one of Imipenem, Meropenem, or Ertapenem) was performed. Carbapenemase-producing organisms are considered as carbapenem-resistant irrespective of the actual phenotypical resistance to individual carbapenems."
 msgstr ""
 
 #, priority:10
@@ -2662,7 +2652,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "dataElements/NEOIPC_NEC_SEC_BSI_PATHOGEN_2_CAR/DESCRIPTION"
-msgid "The organism is a carbapenem-resistant gram-negative organism. Select \"\"Yes\"\" if the isolate was tested for carbapenem-resistance and the result was positive. Select \"\"No\"\" if it was tested for at least one of Imipenem, Meropenem, or Ertapenem, and the result was negative in all cases. Select \"\"Not tested\"\" if no test for carbapenem-resistance (for at least one of Imipenem, Meropenem, or Ertapenem) was performed. Carbapenemase-producing organisms are considered as carbapenem-resistant irrespective of the actual phenotypical resistance to individual carbapenems."
+msgid "The organism is a carbapenem-resistant gram-negative organism. Select \"Yes\" if the isolate was tested for carbapenem-resistance and the result was positive. Select \"No\" if it was tested for at least one of Imipenem, Meropenem, or Ertapenem, and the result was negative in all cases. Select \"Not tested\" if no test for carbapenem-resistance (for at least one of Imipenem, Meropenem, or Ertapenem) was performed. Carbapenemase-producing organisms are considered as carbapenem-resistant irrespective of the actual phenotypical resistance to individual carbapenems."
 msgstr ""
 
 #, priority:10
@@ -2802,7 +2792,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "dataElements/NEOIPC_NEC_SEC_BSI_PATHOGEN_3_CAR/DESCRIPTION"
-msgid "The organism is a carbapenem-resistant gram-negative organism. Select \"\"Yes\"\" if the isolate was tested for carbapenem-resistance and the result was positive. Select \"\"No\"\" if it was tested for at least one of Imipenem, Meropenem, or Ertapenem, and the result was negative in all cases. Select \"\"Not tested\"\" if no test for carbapenem-resistance (for at least one of Imipenem, Meropenem, or Ertapenem) was performed. Carbapenemase-producing organisms are considered as carbapenem-resistant irrespective of the actual phenotypical resistance to individual carbapenems."
+msgid "The organism is a carbapenem-resistant gram-negative organism. Select \"Yes\" if the isolate was tested for carbapenem-resistance and the result was positive. Select \"No\" if it was tested for at least one of Imipenem, Meropenem, or Ertapenem, and the result was negative in all cases. Select \"Not tested\" if no test for carbapenem-resistance (for at least one of Imipenem, Meropenem, or Ertapenem) was performed. Carbapenemase-producing organisms are considered as carbapenem-resistant irrespective of the actual phenotypical resistance to individual carbapenems."
 msgstr ""
 
 #, priority:10
@@ -3302,7 +3292,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "dataElements/NEOIPC_SSI_PATHOGEN_1_CAR/DESCRIPTION"
-msgid "The organism is a carbapenem-resistant gram-negative organism. Select \"\"Yes\"\" if the isolate was tested for carbapenem-resistance and the result was positive. Select \"\"No\"\" if it was tested for at least one of Imipenem, Meropenem, or Ertapenem, and the result was negative in all cases. Select \"\"Not tested\"\" if no test for carbapenem-resistance (for at least one of Imipenem, Meropenem, or Ertapenem) was performed. Carbapenemase-producing organisms are considered as carbapenem-resistant irrespective of the actual phenotypical resistance to individual carbapenems."
+msgid "The organism is a carbapenem-resistant gram-negative organism. Select \"Yes\" if the isolate was tested for carbapenem-resistance and the result was positive. Select \"No\" if it was tested for at least one of Imipenem, Meropenem, or Ertapenem, and the result was negative in all cases. Select \"Not tested\" if no test for carbapenem-resistance (for at least one of Imipenem, Meropenem, or Ertapenem) was performed. Carbapenemase-producing organisms are considered as carbapenem-resistant irrespective of the actual phenotypical resistance to individual carbapenems."
 msgstr ""
 
 #, priority:10
@@ -3442,7 +3432,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "dataElements/NEOIPC_SSI_PATHOGEN_2_CAR/DESCRIPTION"
-msgid "The organism is a carbapenem-resistant gram-negative organism. Select \"\"Yes\"\" if the isolate was tested for carbapenem-resistance and the result was positive. Select \"\"No\"\" if it was tested for at least one of Imipenem, Meropenem, or Ertapenem, and the result was negative in all cases. Select \"\"Not tested\"\" if no test for carbapenem-resistance (for at least one of Imipenem, Meropenem, or Ertapenem) was performed. Carbapenemase-producing organisms are considered as carbapenem-resistant irrespective of the actual phenotypical resistance to individual carbapenems."
+msgid "The organism is a carbapenem-resistant gram-negative organism. Select \"Yes\" if the isolate was tested for carbapenem-resistance and the result was positive. Select \"No\" if it was tested for at least one of Imipenem, Meropenem, or Ertapenem, and the result was negative in all cases. Select \"Not tested\" if no test for carbapenem-resistance (for at least one of Imipenem, Meropenem, or Ertapenem) was performed. Carbapenemase-producing organisms are considered as carbapenem-resistant irrespective of the actual phenotypical resistance to individual carbapenems."
 msgstr ""
 
 #, priority:10
@@ -3582,7 +3572,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "dataElements/NEOIPC_SSI_PATHOGEN_3_CAR/DESCRIPTION"
-msgid "The organism is a carbapenem-resistant gram-negative organism. Select \"\"Yes\"\" if the isolate was tested for carbapenem-resistance and the result was positive. Select \"\"No\"\" if it was tested for at least one of Imipenem, Meropenem, or Ertapenem, and the result was negative in all cases. Select \"\"Not tested\"\" if no test for carbapenem-resistance (for at least one of Imipenem, Meropenem, or Ertapenem) was performed. Carbapenemase-producing organisms are considered as carbapenem-resistant irrespective of the actual phenotypical resistance to individual carbapenems."
+msgid "The organism is a carbapenem-resistant gram-negative organism. Select \"Yes\" if the isolate was tested for carbapenem-resistance and the result was positive. Select \"No\" if it was tested for at least one of Imipenem, Meropenem, or Ertapenem, and the result was negative in all cases. Select \"Not tested\" if no test for carbapenem-resistance (for at least one of Imipenem, Meropenem, or Ertapenem) was performed. Carbapenemase-producing organisms are considered as carbapenem-resistant irrespective of the actual phenotypical resistance to individual carbapenems."
 msgstr ""
 
 #, priority:10
@@ -3822,7 +3812,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "dataElements/NEOIPC_SSI_SEC_BSI_PATHOGEN_1_CAR/DESCRIPTION"
-msgid "The organism is a carbapenem-resistant gram-negative organism. Select \"\"Yes\"\" if the isolate was tested for carbapenem-resistance and the result was positive. Select \"\"No\"\" if it was tested for at least one of Imipenem, Meropenem, or Ertapenem, and the result was negative in all cases. Select \"\"Not tested\"\" if no test for carbapenem-resistance (for at least one of Imipenem, Meropenem, or Ertapenem) was performed. Carbapenemase-producing organisms are considered as carbapenem-resistant irrespective of the actual phenotypical resistance to individual carbapenems."
+msgid "The organism is a carbapenem-resistant gram-negative organism. Select \"Yes\" if the isolate was tested for carbapenem-resistance and the result was positive. Select \"No\" if it was tested for at least one of Imipenem, Meropenem, or Ertapenem, and the result was negative in all cases. Select \"Not tested\" if no test for carbapenem-resistance (for at least one of Imipenem, Meropenem, or Ertapenem) was performed. Carbapenemase-producing organisms are considered as carbapenem-resistant irrespective of the actual phenotypical resistance to individual carbapenems."
 msgstr ""
 
 #, priority:10
@@ -3962,7 +3952,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "dataElements/NEOIPC_SSI_SEC_BSI_PATHOGEN_2_CAR/DESCRIPTION"
-msgid "The organism is a carbapenem-resistant gram-negative organism. Select \"\"Yes\"\" if the isolate was tested for carbapenem-resistance and the result was positive. Select \"\"No\"\" if it was tested for at least one of Imipenem, Meropenem, or Ertapenem, and the result was negative in all cases. Select \"\"Not tested\"\" if no test for carbapenem-resistance (for at least one of Imipenem, Meropenem, or Ertapenem) was performed. Carbapenemase-producing organisms are considered as carbapenem-resistant irrespective of the actual phenotypical resistance to individual carbapenems."
+msgid "The organism is a carbapenem-resistant gram-negative organism. Select \"Yes\" if the isolate was tested for carbapenem-resistance and the result was positive. Select \"No\" if it was tested for at least one of Imipenem, Meropenem, or Ertapenem, and the result was negative in all cases. Select \"Not tested\" if no test for carbapenem-resistance (for at least one of Imipenem, Meropenem, or Ertapenem) was performed. Carbapenemase-producing organisms are considered as carbapenem-resistant irrespective of the actual phenotypical resistance to individual carbapenems."
 msgstr ""
 
 #, priority:10
@@ -4102,7 +4092,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "dataElements/NEOIPC_SSI_SEC_BSI_PATHOGEN_3_CAR/DESCRIPTION"
-msgid "The organism is a carbapenem-resistant gram-negative organism. Select \"\"Yes\"\" if the isolate was tested for carbapenem-resistance and the result was positive. Select \"\"No\"\" if it was tested for at least one of Imipenem, Meropenem, or Ertapenem, and the result was negative in all cases. Select \"\"Not tested\"\" if no test for carbapenem-resistance (for at least one of Imipenem, Meropenem, or Ertapenem) was performed. Carbapenemase-producing organisms are considered as carbapenem-resistant irrespective of the actual phenotypical resistance to individual carbapenems."
+msgid "The organism is a carbapenem-resistant gram-negative organism. Select \"Yes\" if the isolate was tested for carbapenem-resistance and the result was positive. Select \"No\" if it was tested for at least one of Imipenem, Meropenem, or Ertapenem, and the result was negative in all cases. Select \"Not tested\" if no test for carbapenem-resistance (for at least one of Imipenem, Meropenem, or Ertapenem) was performed. Carbapenemase-producing organisms are considered as carbapenem-resistant irrespective of the actual phenotypical resistance to individual carbapenems."
 msgstr ""
 
 #, priority:10
@@ -5370,31 +5360,6 @@ msgstr ""
 #, priority:10
 msgctxt "dataElementGroups/NEOIPC_SURVEILLANCE_END_INFO/SHORT_NAME"
 msgid "NeoIPC Surveillance end info"
-msgstr ""
-
-#, priority:10
-msgctxt "categories/default/NAME"
-msgid "default"
-msgstr ""
-
-#, priority:10
-msgctxt "categories/default/SHORT_NAME"
-msgid "default"
-msgstr ""
-
-#, priority:10
-msgctxt "categoryCombos/default/NAME"
-msgid "default"
-msgstr ""
-
-#, priority:10
-msgctxt "categoryOptions/default/NAME"
-msgid "default"
-msgstr ""
-
-#, priority:10
-msgctxt "categoryOptions/default/SHORT_NAME"
-msgid "default"
 msgstr ""
 
 #, priority:150
@@ -7654,7 +7619,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_BSI_PATHOGEN_1_SET_MRSA/DESCRIPTION"
-msgid "Sets the \"may be MRSA\" variable for pathogens that could be an MRSA."
+msgid "Sets the \"may be MRSA\" variable for pathogens that could be MRSA."
 msgstr ""
 
 #, priority:10
@@ -7674,7 +7639,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_BSI_PATHOGEN_1_SET_VRE/DESCRIPTION"
-msgid "Sets the \"may be VRE\" variable for pathogens that could be a VRE."
+msgid "Sets the \"may be VRE\" variable for pathogens that could be VRE."
 msgstr ""
 
 #, priority:10
@@ -7694,7 +7659,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_BSI_PATHOGEN_1_WHEN_EMPTY_OR_LISTED/DESCRIPTION"
-msgid "Hides the pathogen name for pathogen 1 unless \"Not listed\" is selected."
+msgid "Hides the pathogen name for Pathogen 1 unless \"Not listed\" is selected."
 msgstr ""
 
 #, priority:10
@@ -7704,7 +7669,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_BSI_PATHOGEN_1_WHEN_NOT_LISTED/DESCRIPTION"
-msgid "Makes the pathogen name for pathogen 1 mandatory if \"Not listed\" is selected."
+msgid "Makes the pathogen name mandatory for Pathogen 1 when \"Not listed\" is selected."
 msgstr ""
 
 #, priority:10
@@ -7714,7 +7679,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_BSI_PATHOGEN_1_WHEN_SET/DESCRIPTION"
-msgid "Make dependent fields mandatory when Pathogen 1 is set."
+msgid "Makes the source field mandatory when Pathogen 1 is set."
 msgstr ""
 
 #, priority:10
@@ -7854,7 +7819,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_BSI_PATHOGEN_2_SET_MRSA/DESCRIPTION"
-msgid "Sets the \"may be MRSA\" variable for pathogens that could be an MRSA."
+msgid "Sets the \"may be MRSA\" variable for pathogens that could be MRSA."
 msgstr ""
 
 #, priority:10
@@ -7874,7 +7839,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_BSI_PATHOGEN_2_SET_VRE/DESCRIPTION"
-msgid "Sets the \"may be VRE\" variable for pathogens that could be a VRE."
+msgid "Sets the \"may be VRE\" variable for pathogens that could be VRE."
 msgstr ""
 
 #, priority:10
@@ -7894,7 +7859,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_BSI_PATHOGEN_2_WHEN_EMPTY_OR_LISTED/DESCRIPTION"
-msgid "Hides the pathogen name for pathogen 2 unless \"Not listed\" is selected."
+msgid "Hides the pathogen name for Pathogen 2 unless \"Not listed\" is selected."
 msgstr ""
 
 #, priority:10
@@ -7904,7 +7869,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_BSI_PATHOGEN_2_WHEN_NOT_LISTED/DESCRIPTION"
-msgid "Makes the pathogen name for pathogen 2 mandatory if \"Not listed\" is selected."
+msgid "Makes the pathogen name mandatory for Pathogen 2 when \"Not listed\" is selected."
 msgstr ""
 
 #, priority:10
@@ -7914,7 +7879,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_BSI_PATHOGEN_2_WHEN_SET/DESCRIPTION"
-msgid "Make dependent fields mandatory when Pathogen 2 is set."
+msgid "Makes the source field mandatory when Pathogen 2 is set."
 msgstr ""
 
 #, priority:10
@@ -8054,7 +8019,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_BSI_PATHOGEN_3_SET_MRSA/DESCRIPTION"
-msgid "Sets the \"may be MRSA\" variable for pathogens that could be an MRSA."
+msgid "Sets the \"may be MRSA\" variable for pathogens that could be MRSA."
 msgstr ""
 
 #, priority:10
@@ -8074,7 +8039,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_BSI_PATHOGEN_3_SET_VRE/DESCRIPTION"
-msgid "Sets the \"may be VRE\" variable for pathogens that could be a VRE."
+msgid "Sets the \"may be VRE\" variable for pathogens that could be VRE."
 msgstr ""
 
 #, priority:10
@@ -8094,7 +8059,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_BSI_PATHOGEN_3_WHEN_EMPTY_OR_LISTED/DESCRIPTION"
-msgid "Hides the pathogen name for pathogen 3 unless \"Not listed\" is selected."
+msgid "Hides the pathogen name for Pathogen 3 unless \"Not listed\" is selected."
 msgstr ""
 
 #, priority:10
@@ -8104,7 +8069,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_BSI_PATHOGEN_3_WHEN_NOT_LISTED/DESCRIPTION"
-msgid "Makes the pathogen name for pathogen 3 mandatory if \"Not listed\" is selected."
+msgid "Makes the pathogen name mandatory for Pathogen 3 when \"Not listed\" is selected."
 msgstr ""
 
 #, priority:10
@@ -8114,7 +8079,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_BSI_PATHOGEN_3_WHEN_SET/DESCRIPTION"
-msgid "Make dependent fields mandatory when Pathogen 3 is set."
+msgid "Makes the source field mandatory when Pathogen 3 is set."
 msgstr ""
 
 #, priority:10
@@ -8124,7 +8089,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_PATHOGEN_1_MAYBE_3GCR/DESCRIPTION"
-msgid "Makes the 3GCR field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the 3GCR field for pathogen 1 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -8134,7 +8099,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_PATHOGEN_1_MAYBE_CAR/DESCRIPTION"
-msgid "Makes the carbapenem-resistant field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the carbapenem-resistant field for pathogen 1 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -8144,7 +8109,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_PATHOGEN_1_MAYBE_COR/DESCRIPTION"
-msgid "Makes the colistin-resistant field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the colistin-resistant field for pathogen 1 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -8154,7 +8119,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_PATHOGEN_1_MAYBE_MRSA/DESCRIPTION"
-msgid "Makes the MRSA field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the MRSA field for pathogen 1 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -8164,7 +8129,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_PATHOGEN_1_MAYBE_VRE/DESCRIPTION"
-msgid "Makes the VRE field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the VRE field for pathogen 1 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -8174,7 +8139,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_PATHOGEN_1_NOT_3GCR/DESCRIPTION"
-msgid "Hides the 3GCR field if it is not relevant for the selected pathogen."
+msgid "Hides the 3GCR field for pathogen 1 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -8184,7 +8149,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_PATHOGEN_1_NOT_CAR/DESCRIPTION"
-msgid "Hides the carbapenem-resistant field if it is not relevant for the selected pathogen."
+msgid "Hides the carbapenem-resistant field for pathogen 1 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -8194,7 +8159,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_PATHOGEN_1_NOT_COR/DESCRIPTION"
-msgid "Hides the colistin-resistant field if it is not relevant for the selected pathogen."
+msgid "Hides the colistin-resistant field for pathogen 1 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -8204,7 +8169,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_PATHOGEN_1_NOT_MRSA/DESCRIPTION"
-msgid "Hides the MRSA field if it is not relevant for the selected pathogen."
+msgid "Hides the MRSA field for pathogen 1 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -8214,7 +8179,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_PATHOGEN_1_NOT_VRE/DESCRIPTION"
-msgid "Hides the VRE field if it is not relevant for the selected pathogen."
+msgid "Hides the VRE field for pathogen 1 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -8284,7 +8249,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_PATHOGEN_1_WHEN_EMPTY_OR_LISTED/DESCRIPTION"
-msgid "Hides the pathogen name for pathogen 1 unless \"Not listed\" is selected."
+msgid "Hides the pathogen name for Pathogen 1 unless \"Not listed\" is selected."
 msgstr ""
 
 #, priority:10
@@ -8294,7 +8259,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_PATHOGEN_1_WHEN_NOT_LISTED/DESCRIPTION"
-msgid "Makes the pathogen name for pathogen 1 mandatory if \"Not listed\" is selected."
+msgid "Makes the pathogen name mandatory for Pathogen 1 when \"Not listed\" is selected."
 msgstr ""
 
 #, priority:10
@@ -8304,7 +8269,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_PATHOGEN_2_MAYBE_3GCR/DESCRIPTION"
-msgid "Makes the 3GCR field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the 3GCR field for pathogen 2 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -8314,7 +8279,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_PATHOGEN_2_MAYBE_CAR/DESCRIPTION"
-msgid "Makes the carbapenem-resistant field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the carbapenem-resistant field for pathogen 2 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -8324,7 +8289,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_PATHOGEN_2_MAYBE_COR/DESCRIPTION"
-msgid "Makes the colistin-resistant field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the colistin-resistant field for pathogen 2 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -8334,7 +8299,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_PATHOGEN_2_MAYBE_MRSA/DESCRIPTION"
-msgid "Makes the MRSA field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the MRSA field for pathogen 2 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -8344,7 +8309,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_PATHOGEN_2_MAYBE_VRE/DESCRIPTION"
-msgid "Makes the VRE field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the VRE field for pathogen 2 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -8354,7 +8319,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_PATHOGEN_2_NOT_3GCR/DESCRIPTION"
-msgid "Hides the 3GCR field if it is not relevant for the selected pathogen."
+msgid "Hides the 3GCR field for pathogen 2 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -8364,7 +8329,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_PATHOGEN_2_NOT_CAR/DESCRIPTION"
-msgid "Hides the carbapenem-resistant field if it is not relevant for the selected pathogen."
+msgid "Hides the carbapenem-resistant field for pathogen 2 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -8374,7 +8339,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_PATHOGEN_2_NOT_COR/DESCRIPTION"
-msgid "Hides the colistin-resistant field if it is not relevant for the selected pathogen."
+msgid "Hides the colistin-resistant field for pathogen 2 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -8384,7 +8349,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_PATHOGEN_2_NOT_MRSA/DESCRIPTION"
-msgid "Hides the MRSA field if it is not relevant for the selected pathogen."
+msgid "Hides the MRSA field for pathogen 2 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -8394,7 +8359,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_PATHOGEN_2_NOT_VRE/DESCRIPTION"
-msgid "Hides the VRE field if it is not relevant for the selected pathogen."
+msgid "Hides the VRE field for pathogen 2 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -8464,7 +8429,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_PATHOGEN_2_WHEN_EMPTY_OR_LISTED/DESCRIPTION"
-msgid "Hides the pathogen name for pathogen 2 unless \"Not listed\" is selected."
+msgid "Hides the pathogen name for Pathogen 2 unless \"Not listed\" is selected."
 msgstr ""
 
 #, priority:10
@@ -8474,7 +8439,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_PATHOGEN_2_WHEN_NOT_LISTED/DESCRIPTION"
-msgid "Makes the pathogen name for pathogen 2 mandatory if \"Not listed\" is selected."
+msgid "Makes the pathogen name mandatory for Pathogen 2 when \"Not listed\" is selected."
 msgstr ""
 
 #, priority:10
@@ -8484,7 +8449,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_PATHOGEN_3_MAYBE_3GCR/DESCRIPTION"
-msgid "Makes the 3GCR field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the 3GCR field for pathogen 3 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -8494,7 +8459,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_PATHOGEN_3_MAYBE_CAR/DESCRIPTION"
-msgid "Makes the carbapenem-resistant field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the carbapenem-resistant field for pathogen 3 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -8504,7 +8469,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_PATHOGEN_3_MAYBE_COR/DESCRIPTION"
-msgid "Makes the colistin-resistant field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the colistin-resistant field for pathogen 3 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -8514,7 +8479,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_PATHOGEN_3_MAYBE_MRSA/DESCRIPTION"
-msgid "Makes the MRSA field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the MRSA field for pathogen 3 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -8524,7 +8489,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_PATHOGEN_3_MAYBE_VRE/DESCRIPTION"
-msgid "Makes the VRE field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the VRE field for pathogen 3 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -8534,7 +8499,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_PATHOGEN_3_NOT_3GCR/DESCRIPTION"
-msgid "Hides the 3GCR field if it is not relevant for the selected pathogen."
+msgid "Hides the 3GCR field for pathogen 3 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -8544,7 +8509,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_PATHOGEN_3_NOT_CAR/DESCRIPTION"
-msgid "Hides the carbapenem-resistant field if it is not relevant for the selected pathogen."
+msgid "Hides the carbapenem-resistant field for pathogen 3 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -8554,7 +8519,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_PATHOGEN_3_NOT_COR/DESCRIPTION"
-msgid "Hides the colistin-resistant field if it is not relevant for the selected pathogen."
+msgid "Hides the colistin-resistant field for pathogen 3 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -8564,7 +8529,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_PATHOGEN_3_NOT_MRSA/DESCRIPTION"
-msgid "Hides the MRSA field if it is not relevant for the selected pathogen."
+msgid "Hides the MRSA field for pathogen 3 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -8574,7 +8539,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_PATHOGEN_3_NOT_VRE/DESCRIPTION"
-msgid "Hides the VRE field if it is not relevant for the selected pathogen."
+msgid "Hides the VRE field for pathogen 3 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -8644,7 +8609,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_PATHOGEN_3_WHEN_EMPTY_OR_LISTED/DESCRIPTION"
-msgid "Hides the pathogen name for pathogen 3 unless \"Not listed\" is selected."
+msgid "Hides the pathogen name for Pathogen 3 unless \"Not listed\" is selected."
 msgstr ""
 
 #, priority:10
@@ -8654,7 +8619,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_PATHOGEN_3_WHEN_NOT_LISTED/DESCRIPTION"
-msgid "Makes the pathogen name for pathogen 3 mandatory if \"Not listed\" is selected."
+msgid "Makes the pathogen name mandatory for Pathogen 3 when \"Not listed\" is selected."
 msgstr ""
 
 #, priority:10
@@ -8664,7 +8629,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_SEC_BSI_PATHOGEN_1_MAYBE_3GCR/DESCRIPTION"
-msgid "Makes the 3GCR field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the 3GCR field for secondary BSI pathogen 1 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -8674,7 +8639,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_SEC_BSI_PATHOGEN_1_MAYBE_CAR/DESCRIPTION"
-msgid "Makes the carbapenem-resistant field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the carbapenem-resistant field for secondary BSI pathogen 1 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -8684,7 +8649,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_SEC_BSI_PATHOGEN_1_MAYBE_COR/DESCRIPTION"
-msgid "Makes the colistin-resistant field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the colistin-resistant field for secondary BSI pathogen 1 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -8694,7 +8659,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_SEC_BSI_PATHOGEN_1_MAYBE_MRSA/DESCRIPTION"
-msgid "Makes the MRSA field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the MRSA field for secondary BSI pathogen 1 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -8704,7 +8669,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_SEC_BSI_PATHOGEN_1_MAYBE_VRE/DESCRIPTION"
-msgid "Makes the VRE field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the VRE field for secondary BSI pathogen 1 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -8714,7 +8679,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_SEC_BSI_PATHOGEN_1_NOT_3GCR/DESCRIPTION"
-msgid "Hides the 3GCR field if it is not relevant for the selected pathogen."
+msgid "Hides the 3GCR field for secondary BSI pathogen 1 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -8724,7 +8689,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_SEC_BSI_PATHOGEN_1_NOT_CAR/DESCRIPTION"
-msgid "Hides the carbapenem-resistant field if it is not relevant for the selected pathogen."
+msgid "Hides the carbapenem-resistant field for secondary BSI pathogen 1 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -8734,7 +8699,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_SEC_BSI_PATHOGEN_1_NOT_COR/DESCRIPTION"
-msgid "Hides the colistin-resistant field if it is not relevant for the selected pathogen."
+msgid "Hides the colistin-resistant field for secondary BSI pathogen 1 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -8744,7 +8709,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_SEC_BSI_PATHOGEN_1_NOT_MRSA/DESCRIPTION"
-msgid "Hides the MRSA field if it is not relevant for the selected pathogen."
+msgid "Hides the MRSA field for secondary BSI pathogen 1 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -8754,7 +8719,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_SEC_BSI_PATHOGEN_1_NOT_VRE/DESCRIPTION"
-msgid "Hides the VRE field if it is not relevant for the selected pathogen."
+msgid "Hides the VRE field for secondary BSI pathogen 1 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -8834,7 +8799,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_SEC_BSI_PATHOGEN_1_WHEN_NOT_LISTED/DESCRIPTION"
-msgid "Makes the pathogen name for Secondary BSI pathogen 1 mandatory if \"Not listed\" is selected."
+msgid "Makes the pathogen name mandatory for Secondary BSI pathogen 1 when \"Not listed\" is selected."
 msgstr ""
 
 #, priority:10
@@ -8844,7 +8809,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_SEC_BSI_PATHOGEN_2_MAYBE_3GCR/DESCRIPTION"
-msgid "Makes the 3GCR field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the 3GCR field for secondary BSI pathogen 2 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -8854,7 +8819,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_SEC_BSI_PATHOGEN_2_MAYBE_CAR/DESCRIPTION"
-msgid "Makes the carbapenem-resistant field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the carbapenem-resistant field for secondary BSI pathogen 2 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -8864,7 +8829,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_SEC_BSI_PATHOGEN_2_MAYBE_COR/DESCRIPTION"
-msgid "Makes the colistin-resistant field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the colistin-resistant field for secondary BSI pathogen 2 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -8874,7 +8839,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_SEC_BSI_PATHOGEN_2_MAYBE_MRSA/DESCRIPTION"
-msgid "Makes the MRSA field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the MRSA field for secondary BSI pathogen 2 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -8884,7 +8849,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_SEC_BSI_PATHOGEN_2_MAYBE_VRE/DESCRIPTION"
-msgid "Makes the VRE field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the VRE field for secondary BSI pathogen 2 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -8894,7 +8859,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_SEC_BSI_PATHOGEN_2_NOT_3GCR/DESCRIPTION"
-msgid "Hides the 3GCR field if it is not relevant for the selected pathogen."
+msgid "Hides the 3GCR field for secondary BSI pathogen 2 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -8904,7 +8869,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_SEC_BSI_PATHOGEN_2_NOT_CAR/DESCRIPTION"
-msgid "Hides the carbapenem-resistant field if it is not relevant for the selected pathogen."
+msgid "Hides the carbapenem-resistant field for secondary BSI pathogen 2 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -8914,7 +8879,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_SEC_BSI_PATHOGEN_2_NOT_COR/DESCRIPTION"
-msgid "Hides the colistin-resistant field if it is not relevant for the selected pathogen."
+msgid "Hides the colistin-resistant field for secondary BSI pathogen 2 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -8924,7 +8889,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_SEC_BSI_PATHOGEN_2_NOT_MRSA/DESCRIPTION"
-msgid "Hides the MRSA field if it is not relevant for the selected pathogen."
+msgid "Hides the MRSA field for secondary BSI pathogen 2 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -8934,7 +8899,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_SEC_BSI_PATHOGEN_2_NOT_VRE/DESCRIPTION"
-msgid "Hides the VRE field if it is not relevant for the selected pathogen."
+msgid "Hides the VRE field for secondary BSI pathogen 2 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9014,7 +8979,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_SEC_BSI_PATHOGEN_2_WHEN_NOT_LISTED/DESCRIPTION"
-msgid "Makes the pathogen name for Secondary BSI pathogen 2 mandatory if \"Not listed\" is selected."
+msgid "Makes the pathogen name mandatory for Secondary BSI pathogen 2 when \"Not listed\" is selected."
 msgstr ""
 
 #, priority:10
@@ -9024,7 +8989,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_SEC_BSI_PATHOGEN_3_MAYBE_3GCR/DESCRIPTION"
-msgid "Makes the 3GCR field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the 3GCR field for secondary BSI pathogen 3 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9034,7 +8999,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_SEC_BSI_PATHOGEN_3_MAYBE_CAR/DESCRIPTION"
-msgid "Makes the carbapenem-resistant field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the carbapenem-resistant field for secondary BSI pathogen 3 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9044,7 +9009,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_SEC_BSI_PATHOGEN_3_MAYBE_COR/DESCRIPTION"
-msgid "Makes the colistin-resistant field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the colistin-resistant field for secondary BSI pathogen 3 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9054,7 +9019,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_SEC_BSI_PATHOGEN_3_MAYBE_MRSA/DESCRIPTION"
-msgid "Makes the MRSA field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the MRSA field for secondary BSI pathogen 3 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9064,7 +9029,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_SEC_BSI_PATHOGEN_3_MAYBE_VRE/DESCRIPTION"
-msgid "Makes the VRE field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the VRE field for secondary BSI pathogen 3 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9074,7 +9039,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_SEC_BSI_PATHOGEN_3_NOT_3GCR/DESCRIPTION"
-msgid "Hides the 3GCR field if it is not relevant for the selected pathogen."
+msgid "Hides the 3GCR field for secondary BSI pathogen 3 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9084,7 +9049,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_SEC_BSI_PATHOGEN_3_NOT_CAR/DESCRIPTION"
-msgid "Hides the carbapenem-resistant field if it is not relevant for the selected pathogen."
+msgid "Hides the carbapenem-resistant field for secondary BSI pathogen 3 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9094,7 +9059,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_SEC_BSI_PATHOGEN_3_NOT_COR/DESCRIPTION"
-msgid "Hides the colistin-resistant field if it is not relevant for the selected pathogen."
+msgid "Hides the colistin-resistant field for secondary BSI pathogen 3 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9104,7 +9069,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_SEC_BSI_PATHOGEN_3_NOT_MRSA/DESCRIPTION"
-msgid "Hides the MRSA field if it is not relevant for the selected pathogen."
+msgid "Hides the MRSA field for secondary BSI pathogen 3 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9114,7 +9079,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_SEC_BSI_PATHOGEN_3_NOT_VRE/DESCRIPTION"
-msgid "Hides the VRE field if it is not relevant for the selected pathogen."
+msgid "Hides the VRE field for secondary BSI pathogen 3 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9184,7 +9149,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_HAP_SEC_BSI_PATHOGEN_3_WHEN_NOT_LISTED/DESCRIPTION"
-msgid "Makes the pathogen name for Secondary BSI pathogen 3 mandatory if \"Not listed\" is selected."
+msgid "Makes the pathogen name mandatory for Secondary BSI pathogen 3 when \"Not listed\" is selected."
 msgstr ""
 
 #, priority:10
@@ -9194,7 +9159,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_NEC_SEC_BSI_PATHOGEN_1_MAYBE_3GCR/DESCRIPTION"
-msgid "Makes the 3GCR field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the 3GCR field for secondary BSI pathogen 1 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9204,7 +9169,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_NEC_SEC_BSI_PATHOGEN_1_MAYBE_CAR/DESCRIPTION"
-msgid "Makes the carbapenem-resistant field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the carbapenem-resistant field for secondary BSI pathogen 1 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9214,7 +9179,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_NEC_SEC_BSI_PATHOGEN_1_MAYBE_COR/DESCRIPTION"
-msgid "Makes the colistin-resistant field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the colistin-resistant field for secondary BSI pathogen 1 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9224,7 +9189,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_NEC_SEC_BSI_PATHOGEN_1_MAYBE_MRSA/DESCRIPTION"
-msgid "Makes the MRSA field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the MRSA field for secondary BSI pathogen 1 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9234,7 +9199,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_NEC_SEC_BSI_PATHOGEN_1_MAYBE_VRE/DESCRIPTION"
-msgid "Makes the VRE field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the VRE field for secondary BSI pathogen 1 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9244,7 +9209,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_NEC_SEC_BSI_PATHOGEN_1_NOT_3GCR/DESCRIPTION"
-msgid "Hides the 3GCR field if it is not relevant for the selected pathogen."
+msgid "Hides the 3GCR field for secondary BSI pathogen 1 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9254,7 +9219,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_NEC_SEC_BSI_PATHOGEN_1_NOT_CAR/DESCRIPTION"
-msgid "Hides the carbapenem-resistant field if it is not relevant for the selected pathogen."
+msgid "Hides the carbapenem-resistant field for secondary BSI pathogen 1 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9264,7 +9229,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_NEC_SEC_BSI_PATHOGEN_1_NOT_COR/DESCRIPTION"
-msgid "Hides the colistin-resistant field if it is not relevant for the selected pathogen."
+msgid "Hides the colistin-resistant field for secondary BSI pathogen 1 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9274,7 +9239,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_NEC_SEC_BSI_PATHOGEN_1_NOT_MRSA/DESCRIPTION"
-msgid "Hides the MRSA field if it is not relevant for the selected pathogen."
+msgid "Hides the MRSA field for secondary BSI pathogen 1 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9284,7 +9249,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_NEC_SEC_BSI_PATHOGEN_1_NOT_VRE/DESCRIPTION"
-msgid "Hides the VRE field if it is not relevant for the selected pathogen."
+msgid "Hides the VRE field for secondary BSI pathogen 1 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9354,7 +9319,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_NEC_SEC_BSI_PATHOGEN_1_WHEN_EMPTY_OR_LISTED/DESCRIPTION"
-msgid "Hides the pathogen name for NeoIPC NEC Secondary BSI pathogen 1 unless \"Not listed\" is selected."
+msgid "Hides the pathogen name for Secondary BSI pathogen 1 unless \"Not listed\" is selected."
 msgstr ""
 
 #, priority:10
@@ -9364,7 +9329,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_NEC_SEC_BSI_PATHOGEN_1_WHEN_NOT_LISTED/DESCRIPTION"
-msgid "Makes the pathogen name for NeoIPC NEC Secondary BSI pathogen 1 mandatory if \"Not listed\" is selected."
+msgid "Makes the pathogen name mandatory for Secondary BSI pathogen 1 when \"Not listed\" is selected."
 msgstr ""
 
 #, priority:10
@@ -9374,7 +9339,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_NEC_SEC_BSI_PATHOGEN_2_MAYBE_3GCR/DESCRIPTION"
-msgid "Makes the 3GCR field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the 3GCR field for secondary BSI pathogen 2 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9384,7 +9349,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_NEC_SEC_BSI_PATHOGEN_2_MAYBE_CAR/DESCRIPTION"
-msgid "Makes the carbapenem-resistant field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the carbapenem-resistant field for secondary BSI pathogen 2 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9394,7 +9359,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_NEC_SEC_BSI_PATHOGEN_2_MAYBE_COR/DESCRIPTION"
-msgid "Makes the colistin-resistant field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the colistin-resistant field for secondary BSI pathogen 2 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9404,7 +9369,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_NEC_SEC_BSI_PATHOGEN_2_MAYBE_MRSA/DESCRIPTION"
-msgid "Makes the MRSA field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the MRSA field for secondary BSI pathogen 2 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9414,7 +9379,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_NEC_SEC_BSI_PATHOGEN_2_MAYBE_VRE/DESCRIPTION"
-msgid "Makes the VRE field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the VRE field for secondary BSI pathogen 2 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9424,7 +9389,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_NEC_SEC_BSI_PATHOGEN_2_NOT_3GCR/DESCRIPTION"
-msgid "Hides the 3GCR field if it is not relevant for the selected pathogen."
+msgid "Hides the 3GCR field for secondary BSI pathogen 2 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9434,7 +9399,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_NEC_SEC_BSI_PATHOGEN_2_NOT_CAR/DESCRIPTION"
-msgid "Hides the carbapenem-resistant field if it is not relevant for the selected pathogen."
+msgid "Hides the carbapenem-resistant field for secondary BSI pathogen 2 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9444,7 +9409,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_NEC_SEC_BSI_PATHOGEN_2_NOT_COR/DESCRIPTION"
-msgid "Hides the colistin-resistant field if it is not relevant for the selected pathogen."
+msgid "Hides the colistin-resistant field for secondary BSI pathogen 2 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9454,7 +9419,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_NEC_SEC_BSI_PATHOGEN_2_NOT_MRSA/DESCRIPTION"
-msgid "Hides the MRSA field if it is not relevant for the selected pathogen."
+msgid "Hides the MRSA field for secondary BSI pathogen 2 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9464,7 +9429,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_NEC_SEC_BSI_PATHOGEN_2_NOT_VRE/DESCRIPTION"
-msgid "Hides the VRE field if it is not relevant for the selected pathogen."
+msgid "Hides the VRE field for secondary BSI pathogen 2 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9534,7 +9499,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_NEC_SEC_BSI_PATHOGEN_2_WHEN_EMPTY_OR_LISTED/DESCRIPTION"
-msgid "Hides the pathogen name for NeoIPC NEC Secondary BSI pathogen 2 unless \"Not listed\" is selected."
+msgid "Hides the pathogen name for Secondary BSI pathogen 2 unless \"Not listed\" is selected."
 msgstr ""
 
 #, priority:10
@@ -9544,7 +9509,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_NEC_SEC_BSI_PATHOGEN_2_WHEN_NOT_LISTED/DESCRIPTION"
-msgid "Makes the pathogen name for NeoIPC NEC Secondary BSI pathogen 2 mandatory if \"Not listed\" is selected."
+msgid "Makes the pathogen name mandatory for Secondary BSI pathogen 2 when \"Not listed\" is selected."
 msgstr ""
 
 #, priority:10
@@ -9554,7 +9519,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_NEC_SEC_BSI_PATHOGEN_3_MAYBE_3GCR/DESCRIPTION"
-msgid "Makes the 3GCR field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the 3GCR field for secondary BSI pathogen 3 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9564,7 +9529,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_NEC_SEC_BSI_PATHOGEN_3_MAYBE_CAR/DESCRIPTION"
-msgid "Makes the carbapenem-resistant field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the carbapenem-resistant field for secondary BSI pathogen 3 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9574,7 +9539,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_NEC_SEC_BSI_PATHOGEN_3_MAYBE_COR/DESCRIPTION"
-msgid "Makes the colistin-resistant field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the colistin-resistant field for secondary BSI pathogen 3 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9584,7 +9549,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_NEC_SEC_BSI_PATHOGEN_3_MAYBE_MRSA/DESCRIPTION"
-msgid "Makes the MRSA field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the MRSA field for secondary BSI pathogen 3 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9594,7 +9559,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_NEC_SEC_BSI_PATHOGEN_3_MAYBE_VRE/DESCRIPTION"
-msgid "Makes the VRE field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the VRE field for secondary BSI pathogen 3 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9604,7 +9569,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_NEC_SEC_BSI_PATHOGEN_3_NOT_3GCR/DESCRIPTION"
-msgid "Hides the 3GCR field if it is not relevant for the selected pathogen."
+msgid "Hides the 3GCR field for secondary BSI pathogen 3 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9614,7 +9579,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_NEC_SEC_BSI_PATHOGEN_3_NOT_CAR/DESCRIPTION"
-msgid "Hides the carbapenem-resistant field if it is not relevant for the selected pathogen."
+msgid "Hides the carbapenem-resistant field for secondary BSI pathogen 3 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9624,7 +9589,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_NEC_SEC_BSI_PATHOGEN_3_NOT_COR/DESCRIPTION"
-msgid "Hides the colistin-resistant field if it is not relevant for the selected pathogen."
+msgid "Hides the colistin-resistant field for secondary BSI pathogen 3 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9634,7 +9599,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_NEC_SEC_BSI_PATHOGEN_3_NOT_MRSA/DESCRIPTION"
-msgid "Hides the MRSA field if it is not relevant for the selected pathogen."
+msgid "Hides the MRSA field for secondary BSI pathogen 3 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9644,7 +9609,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_NEC_SEC_BSI_PATHOGEN_3_NOT_VRE/DESCRIPTION"
-msgid "Hides the VRE field if it is not relevant for the selected pathogen."
+msgid "Hides the VRE field for secondary BSI pathogen 3 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9704,7 +9669,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_NEC_SEC_BSI_PATHOGEN_3_WHEN_EMPTY_OR_LISTED/DESCRIPTION"
-msgid "Hides the pathogen name for NeoIPC NEC Secondary BSI pathogen 3 unless \"Not listed\" is selected."
+msgid "Hides the pathogen name for Secondary BSI pathogen 3 unless \"Not listed\" is selected."
 msgstr ""
 
 #, priority:10
@@ -9714,7 +9679,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_NEC_SEC_BSI_PATHOGEN_3_WHEN_NOT_LISTED/DESCRIPTION"
-msgid "Makes the pathogen name for NeoIPC NEC Secondary BSI pathogen 3 mandatory if \"Not listed\" is selected."
+msgid "Makes the pathogen name mandatory for Secondary BSI pathogen 3 when \"Not listed\" is selected."
 msgstr ""
 
 #, priority:10
@@ -9724,7 +9689,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_PATHOGEN_1_MAYBE_3GCR/DESCRIPTION"
-msgid "Makes the 3GCR field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the 3GCR field for pathogen 1 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9734,7 +9699,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_PATHOGEN_1_MAYBE_CAR/DESCRIPTION"
-msgid "Makes the carbapenem-resistant field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the carbapenem-resistant field for pathogen 1 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9744,7 +9709,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_PATHOGEN_1_MAYBE_COR/DESCRIPTION"
-msgid "Makes the colistin-resistant field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the colistin-resistant field for pathogen 1 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9754,7 +9719,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_PATHOGEN_1_MAYBE_MRSA/DESCRIPTION"
-msgid "Makes the MRSA field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the MRSA field for pathogen 1 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9764,7 +9729,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_PATHOGEN_1_MAYBE_VRE/DESCRIPTION"
-msgid "Makes the VRE field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the VRE field for pathogen 1 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9774,7 +9739,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_PATHOGEN_1_NOT_3GCR/DESCRIPTION"
-msgid "Hides the 3GCR field if it is not relevant for the selected pathogen."
+msgid "Hides the 3GCR field for pathogen 1 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9784,7 +9749,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_PATHOGEN_1_NOT_CAR/DESCRIPTION"
-msgid "Hides the carbapenem-resistant field if it is not relevant for the selected pathogen."
+msgid "Hides the carbapenem-resistant field for pathogen 1 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9794,7 +9759,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_PATHOGEN_1_NOT_COR/DESCRIPTION"
-msgid "Hides the colistin-resistant field if it is not relevant for the selected pathogen."
+msgid "Hides the colistin-resistant field for pathogen 1 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9804,7 +9769,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_PATHOGEN_1_NOT_MRSA/DESCRIPTION"
-msgid "Hides the MRSA field if it is not relevant for the selected pathogen."
+msgid "Hides the MRSA field for pathogen 1 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9814,7 +9779,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_PATHOGEN_1_NOT_VRE/DESCRIPTION"
-msgid "Hides the VRE field if it is not relevant for the selected pathogen."
+msgid "Hides the VRE field for pathogen 1 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9884,7 +9849,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_PATHOGEN_1_WHEN_EMPTY_OR_LISTED/DESCRIPTION"
-msgid "Hides the pathogen name for pathogen 1 unless \"Not listed\" is selected."
+msgid "Hides the pathogen name for Pathogen 1 unless \"Not listed\" is selected."
 msgstr ""
 
 #, priority:10
@@ -9894,7 +9859,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_PATHOGEN_1_WHEN_NOT_LISTED/DESCRIPTION"
-msgid "Makes the pathogen name for pathogen 1 mandatory if \"Not listed\" is selected."
+msgid "Makes the pathogen name mandatory for Pathogen 1 when \"Not listed\" is selected."
 msgstr ""
 
 #, priority:10
@@ -9904,7 +9869,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_PATHOGEN_2_MAYBE_3GCR/DESCRIPTION"
-msgid "Makes the 3GCR field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the 3GCR field for pathogen 2 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9914,7 +9879,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_PATHOGEN_2_MAYBE_CAR/DESCRIPTION"
-msgid "Makes the carbapenem-resistant field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the carbapenem-resistant field for pathogen 2 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9924,7 +9889,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_PATHOGEN_2_MAYBE_COR/DESCRIPTION"
-msgid "Makes the colistin-resistant field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the colistin-resistant field for pathogen 2 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9934,7 +9899,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_PATHOGEN_2_MAYBE_MRSA/DESCRIPTION"
-msgid "Makes the MRSA field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the MRSA field for pathogen 2 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9944,7 +9909,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_PATHOGEN_2_MAYBE_VRE/DESCRIPTION"
-msgid "Makes the VRE field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the VRE field for pathogen 2 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9954,7 +9919,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_PATHOGEN_2_NOT_3GCR/DESCRIPTION"
-msgid "Hides the 3GCR field if it is not relevant for the selected pathogen."
+msgid "Hides the 3GCR field for pathogen 2 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9964,7 +9929,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_PATHOGEN_2_NOT_CAR/DESCRIPTION"
-msgid "Hides the carbapenem-resistant field if it is not relevant for the selected pathogen."
+msgid "Hides the carbapenem-resistant field for pathogen 2 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9974,7 +9939,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_PATHOGEN_2_NOT_COR/DESCRIPTION"
-msgid "Hides the colistin-resistant field if it is not relevant for the selected pathogen."
+msgid "Hides the colistin-resistant field for pathogen 2 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9984,7 +9949,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_PATHOGEN_2_NOT_MRSA/DESCRIPTION"
-msgid "Hides the MRSA field if it is not relevant for the selected pathogen."
+msgid "Hides the MRSA field for pathogen 2 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -9994,7 +9959,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_PATHOGEN_2_NOT_VRE/DESCRIPTION"
-msgid "Hides the VRE field if it is not relevant for the selected pathogen."
+msgid "Hides the VRE field for pathogen 2 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -10064,7 +10029,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_PATHOGEN_2_WHEN_EMPTY_OR_LISTED/DESCRIPTION"
-msgid "Hides the pathogen name for pathogen 2 unless \"Not listed\" is selected."
+msgid "Hides the pathogen name for Pathogen 2 unless \"Not listed\" is selected."
 msgstr ""
 
 #, priority:10
@@ -10074,7 +10039,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_PATHOGEN_2_WHEN_NOT_LISTED/DESCRIPTION"
-msgid "Makes the pathogen name for pathogen 2 mandatory if \"Not listed\" is selected."
+msgid "Makes the pathogen name mandatory for Pathogen 2 when \"Not listed\" is selected."
 msgstr ""
 
 #, priority:10
@@ -10084,7 +10049,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_PATHOGEN_3_MAYBE_3GCR/DESCRIPTION"
-msgid "Makes the 3GCR field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the 3GCR field for pathogen 3 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -10094,7 +10059,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_PATHOGEN_3_MAYBE_CAR/DESCRIPTION"
-msgid "Makes the carbapenem-resistant field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the carbapenem-resistant field for pathogen 3 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -10104,7 +10069,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_PATHOGEN_3_MAYBE_COR/DESCRIPTION"
-msgid "Makes the colistin-resistant field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the colistin-resistant field for pathogen 3 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -10114,7 +10079,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_PATHOGEN_3_MAYBE_MRSA/DESCRIPTION"
-msgid "Makes the MRSA field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the MRSA field for pathogen 3 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -10124,7 +10089,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_PATHOGEN_3_MAYBE_VRE/DESCRIPTION"
-msgid "Makes the VRE field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the VRE field for pathogen 3 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -10134,7 +10099,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_PATHOGEN_3_NOT_3GCR/DESCRIPTION"
-msgid "Hides the 3GCR field if it is not relevant for the selected pathogen."
+msgid "Hides the 3GCR field for pathogen 3 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -10144,7 +10109,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_PATHOGEN_3_NOT_CAR/DESCRIPTION"
-msgid "Hides the carbapenem-resistant field if it is not relevant for the selected pathogen."
+msgid "Hides the carbapenem-resistant field for pathogen 3 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -10154,7 +10119,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_PATHOGEN_3_NOT_COR/DESCRIPTION"
-msgid "Hides the colistin-resistant field if it is not relevant for the selected pathogen."
+msgid "Hides the colistin-resistant field for pathogen 3 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -10164,7 +10129,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_PATHOGEN_3_NOT_MRSA/DESCRIPTION"
-msgid "Hides the MRSA field if it is not relevant for the selected pathogen."
+msgid "Hides the MRSA field for pathogen 3 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -10174,7 +10139,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_PATHOGEN_3_NOT_VRE/DESCRIPTION"
-msgid "Hides the VRE field if it is not relevant for the selected pathogen."
+msgid "Hides the VRE field for pathogen 3 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -10234,7 +10199,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_PATHOGEN_3_WHEN_EMPTY_OR_LISTED/DESCRIPTION"
-msgid "Hides the pathogen name for pathogen 3 unless \"Not listed\" is selected."
+msgid "Hides the pathogen name for Pathogen 3 unless \"Not listed\" is selected."
 msgstr ""
 
 #, priority:10
@@ -10244,7 +10209,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_PATHOGEN_3_WHEN_NOT_LISTED/DESCRIPTION"
-msgid "Makes the pathogen name for pathogen 3 mandatory if \"Not listed\" is selected."
+msgid "Makes the pathogen name mandatory for Pathogen 3 when \"Not listed\" is selected."
 msgstr ""
 
 #, priority:10
@@ -10254,7 +10219,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_SEC_BSI_PATHOGEN_1_MAYBE_3GCR/DESCRIPTION"
-msgid "Makes the 3GCR field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the 3GCR field for secondary BSI pathogen 1 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -10264,7 +10229,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_SEC_BSI_PATHOGEN_1_MAYBE_CAR/DESCRIPTION"
-msgid "Makes the carbapenem-resistant field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the carbapenem-resistant field for secondary BSI pathogen 1 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -10274,7 +10239,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_SEC_BSI_PATHOGEN_1_MAYBE_COR/DESCRIPTION"
-msgid "Makes the colistin-resistant field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the colistin-resistant field for secondary BSI pathogen 1 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -10284,7 +10249,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_SEC_BSI_PATHOGEN_1_MAYBE_MRSA/DESCRIPTION"
-msgid "Makes the MRSA field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the MRSA field for secondary BSI pathogen 1 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -10294,7 +10259,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_SEC_BSI_PATHOGEN_1_MAYBE_VRE/DESCRIPTION"
-msgid "Makes the VRE field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the VRE field for secondary BSI pathogen 1 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -10304,7 +10269,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_SEC_BSI_PATHOGEN_1_NOT_3GCR/DESCRIPTION"
-msgid "Hides the 3GCR field if it is not relevant for the selected pathogen."
+msgid "Hides the 3GCR field for secondary BSI pathogen 1 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -10314,7 +10279,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_SEC_BSI_PATHOGEN_1_NOT_CAR/DESCRIPTION"
-msgid "Hides the carbapenem-resistant field if it is not relevant for the selected pathogen."
+msgid "Hides the carbapenem-resistant field for secondary BSI pathogen 1 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -10324,7 +10289,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_SEC_BSI_PATHOGEN_1_NOT_COR/DESCRIPTION"
-msgid "Hides the colistin-resistant field if it is not relevant for the selected pathogen."
+msgid "Hides the colistin-resistant field for secondary BSI pathogen 1 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -10334,7 +10299,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_SEC_BSI_PATHOGEN_1_NOT_MRSA/DESCRIPTION"
-msgid "Hides the MRSA field if it is not relevant for the selected pathogen."
+msgid "Hides the MRSA field for secondary BSI pathogen 1 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -10344,7 +10309,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_SEC_BSI_PATHOGEN_1_NOT_VRE/DESCRIPTION"
-msgid "Hides the VRE field if it is not relevant for the selected pathogen."
+msgid "Hides the VRE field for secondary BSI pathogen 1 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -10404,7 +10369,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_SEC_BSI_PATHOGEN_1_WHEN_EMPTY/DESCRIPTION"
-msgid "Hides dependent fields when secondary BSI pathogen 1 is empty."
+msgid "Hides dependent fields when Secondary BSI pathogen 1 is empty."
 msgstr ""
 
 #, priority:10
@@ -10414,7 +10379,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_SEC_BSI_PATHOGEN_1_WHEN_EMPTY_OR_LISTED/DESCRIPTION"
-msgid "Hides the pathogen name for secondary BSI pathogen 1 unless \"Not listed\" is selected."
+msgid "Hides the pathogen name for Secondary BSI pathogen 1 unless \"Not listed\" is selected."
 msgstr ""
 
 #, priority:10
@@ -10424,7 +10389,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_SEC_BSI_PATHOGEN_1_WHEN_NOT_LISTED/DESCRIPTION"
-msgid "Makes the pathogen name for secondary BSI pathogen 1 mandatory if \"Not listed\" is selected."
+msgid "Makes the pathogen name mandatory for Secondary BSI pathogen 1 when \"Not listed\" is selected."
 msgstr ""
 
 #, priority:10
@@ -10434,7 +10399,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_SEC_BSI_PATHOGEN_2_MAYBE_3GCR/DESCRIPTION"
-msgid "Makes the 3GCR field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the 3GCR field for secondary BSI pathogen 2 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -10444,7 +10409,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_SEC_BSI_PATHOGEN_2_MAYBE_CAR/DESCRIPTION"
-msgid "Makes the carbapenem-resistant field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the carbapenem-resistant field for secondary BSI pathogen 2 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -10454,7 +10419,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_SEC_BSI_PATHOGEN_2_MAYBE_COR/DESCRIPTION"
-msgid "Makes the colistin-resistant field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the colistin-resistant field for secondary BSI pathogen 2 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -10464,7 +10429,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_SEC_BSI_PATHOGEN_2_MAYBE_MRSA/DESCRIPTION"
-msgid "Makes the MRSA field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the MRSA field for secondary BSI pathogen 2 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -10474,7 +10439,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_SEC_BSI_PATHOGEN_2_MAYBE_VRE/DESCRIPTION"
-msgid "Makes the VRE field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the VRE field for secondary BSI pathogen 2 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -10484,7 +10449,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_SEC_BSI_PATHOGEN_2_NOT_3GCR/DESCRIPTION"
-msgid "Hides the 3GCR field if it is not relevant for the selected pathogen."
+msgid "Hides the 3GCR field for secondary BSI pathogen 2 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -10494,7 +10459,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_SEC_BSI_PATHOGEN_2_NOT_CAR/DESCRIPTION"
-msgid "Hides the carbapenem-resistant field if it is not relevant for the selected pathogen."
+msgid "Hides the carbapenem-resistant field for secondary BSI pathogen 2 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -10504,7 +10469,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_SEC_BSI_PATHOGEN_2_NOT_COR/DESCRIPTION"
-msgid "Hides the colistin-resistant field if it is not relevant for the selected pathogen."
+msgid "Hides the colistin-resistant field for secondary BSI pathogen 2 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -10514,7 +10479,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_SEC_BSI_PATHOGEN_2_NOT_MRSA/DESCRIPTION"
-msgid "Hides the MRSA field if it is not relevant for the selected pathogen."
+msgid "Hides the MRSA field for secondary BSI pathogen 2 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -10524,7 +10489,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_SEC_BSI_PATHOGEN_2_NOT_VRE/DESCRIPTION"
-msgid "Hides the VRE field if it is not relevant for the selected pathogen."
+msgid "Hides the VRE field for secondary BSI pathogen 2 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -10594,7 +10559,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_SEC_BSI_PATHOGEN_2_WHEN_EMPTY_OR_LISTED/DESCRIPTION"
-msgid "Hides the pathogen name for secondary BSI pathogen 2 unless \"Not listed\" is selected."
+msgid "Hides the pathogen name for Secondary BSI pathogen 2 unless \"Not listed\" is selected."
 msgstr ""
 
 #, priority:10
@@ -10604,7 +10569,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_SEC_BSI_PATHOGEN_2_WHEN_NOT_LISTED/DESCRIPTION"
-msgid "Makes the pathogen name for secondary BSI pathogen 2 mandatory if \"Not listed\" is selected."
+msgid "Makes the pathogen name mandatory for Secondary BSI pathogen 2 when \"Not listed\" is selected."
 msgstr ""
 
 #, priority:10
@@ -10614,7 +10579,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_SEC_BSI_PATHOGEN_3_MAYBE_3GCR/DESCRIPTION"
-msgid "Makes the 3GCR field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the 3GCR field for secondary BSI pathogen 3 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -10624,7 +10589,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_SEC_BSI_PATHOGEN_3_MAYBE_CAR/DESCRIPTION"
-msgid "Makes the carbapenem-resistant field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the carbapenem-resistant field for secondary BSI pathogen 3 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -10634,7 +10599,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_SEC_BSI_PATHOGEN_3_MAYBE_COR/DESCRIPTION"
-msgid "Makes the colistin-resistant field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the colistin-resistant field for secondary BSI pathogen 3 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -10644,7 +10609,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_SEC_BSI_PATHOGEN_3_MAYBE_MRSA/DESCRIPTION"
-msgid "Makes the MRSA field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the MRSA field for secondary BSI pathogen 3 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -10654,7 +10619,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_SEC_BSI_PATHOGEN_3_MAYBE_VRE/DESCRIPTION"
-msgid "Makes the VRE field mandatory if it is relevant for the selected pathogen."
+msgid "Makes the VRE field for secondary BSI pathogen 3 mandatory if it is relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -10664,7 +10629,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_SEC_BSI_PATHOGEN_3_NOT_3GCR/DESCRIPTION"
-msgid "Hides the 3GCR field if it is not relevant for the selected pathogen."
+msgid "Hides the 3GCR field for secondary BSI pathogen 3 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -10674,7 +10639,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_SEC_BSI_PATHOGEN_3_NOT_CAR/DESCRIPTION"
-msgid "Hides the carbapenem-resistant field if it is not relevant for the selected pathogen."
+msgid "Hides the carbapenem-resistant field for secondary BSI pathogen 3 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -10684,7 +10649,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_SEC_BSI_PATHOGEN_3_NOT_COR/DESCRIPTION"
-msgid "Hides the colistin-resistant field if it is not relevant for the selected pathogen."
+msgid "Hides the colistin-resistant field for secondary BSI pathogen 3 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -10694,7 +10659,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_SEC_BSI_PATHOGEN_3_NOT_MRSA/DESCRIPTION"
-msgid "Hides the MRSA field if it is not relevant for the selected pathogen."
+msgid "Hides the MRSA field for secondary BSI pathogen 3 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -10704,7 +10669,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_SEC_BSI_PATHOGEN_3_NOT_VRE/DESCRIPTION"
-msgid "Hides the VRE field if it is not relevant for the selected pathogen."
+msgid "Hides the VRE field for secondary BSI pathogen 3 if it is not relevant for the selected pathogen."
 msgstr ""
 
 #, priority:10
@@ -10764,7 +10729,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_SEC_BSI_PATHOGEN_3_WHEN_EMPTY_OR_LISTED/DESCRIPTION"
-msgid "Hides the pathogen name for secondary BSI pathogen 3 unless \"Not listed\" is selected."
+msgid "Hides the pathogen name for Secondary BSI pathogen 3 unless \"Not listed\" is selected."
 msgstr ""
 
 #, priority:10
@@ -10774,7 +10739,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "programRules/NEOIPC_SSI_SEC_BSI_PATHOGEN_3_WHEN_NOT_LISTED/DESCRIPTION"
-msgid "Makes the pathogen name for secondary BSI pathogen 3 mandatory if \"Not listed\" is selected."
+msgid "Makes the pathogen name mandatory for Secondary BSI pathogen 3 when \"Not listed\" is selected."
 msgstr ""
 
 #, priority:10
@@ -11650,6 +11615,16 @@ msgstr ""
 #, priority:10
 msgctxt "programRules/spEjGdHfvrV/DESCRIPTION"
 msgid "Hides data elements for superficial and organ/space infections if the infection type is deep"
+msgstr ""
+
+#, priority:10
+msgctxt "programRules/srGZpDr3rnG/NAME"
+msgid "NeoIPC BSI no positive culture - hide when an organism is recorded"
+msgstr ""
+
+#, priority:10
+msgctxt "programRules/srGZpDr3rnG/DESCRIPTION"
+msgid "Hides the 'no positive culture' field once an organism has been recorded in the first BSI pathogen slot (a recovered organism implies a positive culture)."
 msgstr ""
 
 #, priority:10
@@ -13301,14 +13276,6 @@ msgstr ""
 
 msgctxt "programIndicators/ApYgClc8SVA/SHORT_NAME"
 msgid "No. enrollments (tot.)"
-msgstr ""
-
-msgctxt "programIndicators/BirthWeight_Indicator/NAME"
-msgid "BirthWeight_Indicator"
-msgstr ""
-
-msgctxt "programIndicators/BirthWeight_Indicator/SHORT_NAME"
-msgid "BirthWeight_Indicator"
 msgstr ""
 
 msgctxt "programIndicators/J4nrp0CYvO8/NAME"
