@@ -1896,6 +1896,32 @@ InModuleScope 'NeoIPC-Tools' {
             New-Item -ItemType Directory -Path (Join-Path $bare 'play') -Force | Out-Null
             { New-NeoIPCMetadataPackage -MetadataDirectory $bare -Play -WarningAction SilentlyContinue } | Should -Throw '*Common metadata directory not found*'
         }
+        Context '-Manifest (top-level package manifest)' {
+            It 'prepends the manifest as the FIRST top-level key, leaving the assembled package intact' {
+                $manifest = [ordered]@{ name = 'NEOIPC_CORE_TRK_test'; code = 'NEOIPC_CORE'; type = 'TRK'; version = '9.9.9'; DHIS2Version = '2.40.3.2' }
+                $res = New-NeoIPCMetadataPackage -MetadataDirectory $script:asmDir -SkipGeneration -Manifest $manifest -PassThru -WarningAction SilentlyContinue
+                @($res.Package.Keys)[0] | Should -BeExactly 'package'                 # emitted first (local readability choice; field names follow WHO)
+                $res.Package['package']['code'] | Should -BeExactly 'NEOIPC_CORE'
+                $res.Package['package']['DHIS2Version'] | Should -BeExactly '2.40.3.2'
+                @($res.Package['userRoles']).Count | Should -Be 3                      # the rest of the package is untouched
+            }
+            It 'omits the package key entirely when -Manifest is not supplied' {
+                $res = New-NeoIPCMetadataPackage -MetadataDirectory $script:asmDir -SkipGeneration -PassThru -WarningAction SilentlyContinue
+                $res.Package.Contains('package') | Should -BeFalse
+            }
+            It 'emits the manifest first in the JSON output (no -PassThru)' {
+                $manifest = [ordered]@{ name = 'NEOIPC_CORE_TRK_test'; code = 'NEOIPC_CORE'; type = 'TRK' }
+                $json = New-NeoIPCMetadataPackage -MetadataDirectory $script:asmDir -SkipGeneration -Manifest $manifest -Compress -WarningAction SilentlyContinue
+                $json | Should -Match '^\{"package":'
+            }
+            It 'preserves the existing top-level key order after the prepend (determinism invariant)' {
+                $base = New-NeoIPCMetadataPackage -MetadataDirectory $script:asmDir -SkipGeneration -PassThru -WarningAction SilentlyContinue
+                $originalKeys = @($base.Package.Keys)
+                $manifest = [ordered]@{ name = 'NEOIPC_CORE_TRK_test'; code = 'NEOIPC_CORE' }
+                $res = New-NeoIPCMetadataPackage -MetadataDirectory $script:asmDir -SkipGeneration -Manifest $manifest -PassThru -WarningAction SilentlyContinue
+                @($res.Package.Keys) | Should -Be (@('package') + $originalKeys)      # package prepended, the rest in their original order
+            }
+        }
     }
 
     Describe 'Translation property/token model (intersection with the type maps)' {

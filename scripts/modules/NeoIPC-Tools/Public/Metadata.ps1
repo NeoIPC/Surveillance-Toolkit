@@ -481,6 +481,14 @@ function New-NeoIPCMetadataPackage {
         Emit compact JSON instead of indented.
     .PARAMETER PassThru
         Return the result object (Package + OrgUnitCount + UserCount) instead of JSON.
+    .PARAMETER Manifest
+        Optional package manifest (a dictionary), emitted as a top-level `package` key — placed first for readability
+        (the WHO dhis2-package-exporter key-sorts its output, so first-position is a local choice; the manifest's
+        FIELD names follow the WHO convention). Import-safe: DHIS2's JSON metadata import tree-walks the top-level
+        keys and skips any whose plural name matches no metadata schema (DefaultRenderService.fromMetadata), so an
+        unrecognised `package` key is dropped, not rejected (the disabled FAIL_ON_UNKNOWN_PROPERTIES on the shared
+        jsonMapper additionally tolerates unknown per-object fields). The Metadata Package Installer reads it.
+        The manifest's contents (code / type / version / DHIS2Version / ...) are the caller's policy, not built here.
     #>
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', 'Password',
         Justification = 'Forwards the synthetic play accounts'' known, clearly-test password to the authoring compiler — not a real secret.')]
@@ -492,6 +500,7 @@ function New-NeoIPCMetadataPackage {
         [Parameter(Mandatory, ParameterSetName = 'Play')][switch]$Play,
         [string]$Password = 'NeoIPC-Play1',
         [switch]$SkipGeneration,
+        [System.Collections.IDictionary]$Manifest,
         [string]$OutputPath,
         [switch]$Compress,
         [switch]$PassThru
@@ -548,6 +557,15 @@ function New-NeoIPCMetadataPackage {
     }
 
     $package = Join-NeoIPCMetadataPackage -Config $config -OrgUnit $orgUnits -User $users -OrgUnitGroupMembership $ougMembership -UserGroupMembership $ugMembership
+    if ($Manifest) {
+        # Emit the manifest as the top-level `package` key, placed first for readability (the WHO exporter key-sorts,
+        # so first-position is a local choice; the field NAMES follow WHO). Import-safe: DHIS2's JSON metadata import
+        # skips any top-level key whose plural name matches no schema (DefaultRenderService.fromMetadata), so `package`
+        # is dropped, not rejected. The manifest's contents are the caller's policy.
+        $withManifest = [ordered]@{ package = $Manifest }
+        foreach ($k in @($package.Keys)) { $withManifest[$k] = $package[$k] }
+        $package = $withManifest
+    }
     $variantLabel = if ($Play) { 'play' } elseif ($OverlayPath) { 'production+overlay' } else { 'production' }
     Write-Verbose ("Assembled '{0}' package: {1} org units, {2} users, {3} top-level types." -f $variantLabel, @($orgUnits).Count, @($users).Count, @($package.Keys).Count)
 
