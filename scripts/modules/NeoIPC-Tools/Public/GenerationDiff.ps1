@@ -99,7 +99,7 @@ function Compare-NeoIPCGeneratedMetadata {
         if ($type -eq 'programRuleVariables') { $n = [string]$o['name']; return ($n -and $gk.VariableNames.Contains((ConvertTo-NeoIPCSubstanceUnpaddedName $n))) }
         if ($type -eq 'programRules') { $n = ConvertTo-NeoIPCSubstanceUnpaddedName ([string]$o['name']); return ($n -and ($gk.RuleNames.Contains($n) -or $gk.RetiredRuleNames.Contains($n))) }
         if ($type -eq 'programRuleActions') { $pr = $o['programRule']; $rid = if ($pr -is [System.Collections.IDictionary]) { [string]$pr['id'] } else { [string]$pr }; return ($rid -and $gk.GeneratedRuleIds.Contains($rid)) }
-        if ($type -eq 'optionGroups') { $c = [string]$o['code']; return (($c -like 'WHO_AWARE_*') -or ($c -cmatch '^[A-Z][0-9]{2}[A-Z]{2}$')) }   # antibiotic groups are AWaRe or ATC-4 (5-char) only
+        if ($type -eq 'optionGroups') { $c = [string]$o['code']; return (($c -like 'WHO_AWARE_*') -or (Test-NeoIPCAtcGroupCode $c)) }   # antibiotic groups are AWaRe or ATC-4 (5-char) only
         if ($type -eq 'optionGroupSets') { $c = [string]$o['code']; return (($c -ceq 'ATC5') -or ($c -ceq 'WHO_AWARE')) }
         $false
     }

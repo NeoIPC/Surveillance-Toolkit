@@ -628,11 +628,24 @@ function Test-NeoIPCMetadataPoSyntax {
 function Test-NeoIPCAtcCode {
     # True when $Code is a WHO ATC code at the antibiotic-relevant levels: ATC level 4 (5 chars, e.g. J01CG — the
     # antibiotic option GROUPS) or level 5 (7 chars, e.g. J01AA01 — the substance OPTIONS). A pure code-shape test;
-    # callers decide what to do with the answer.
+    # callers decide what to do with the answer. The optional trailing 2 digits (ATC-5) are INTENTIONAL — this
+    # predicate spans both groups and substance options; do NOT narrow it to ATC-4 (use Test-NeoIPCAtcGroupCode for
+    # the group-only shape).
     [CmdletBinding()]
     [OutputType([bool])]
     param([AllowEmptyString()][AllowNull()][string]$Code)
     return $Code -cmatch '^[A-Z][0-9]{2}[A-Z]{2}([0-9]{2})?$'
+}
+
+function Test-NeoIPCAtcGroupCode {
+    # True when $Code is a WHO ATC level-4 (chemical-subgroup) code (5 chars, e.g. J01CG) — the antibiotic option
+    # GROUP level, NOT the 7-char ATC-5 substance codes. The single source for this shape, called by the emit
+    # (Test-NeoIPCMetadataGeneratedExcluded), the antibiotic group-set generator, and the classified-diff gate, so
+    # the four antibiotic-domain decision sites cannot drift on what counts as an ATC-4 group code.
+    [CmdletBinding()]
+    [OutputType([bool])]
+    param([AllowEmptyString()][AllowNull()][string]$Code)
+    return $Code -cmatch '^[A-Z][0-9]{2}[A-Z]{2}$'
 }
 
 function Test-NeoIPCAntibioticTranslationExcluded {

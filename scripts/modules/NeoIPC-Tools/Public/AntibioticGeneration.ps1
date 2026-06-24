@@ -328,7 +328,7 @@ function New-NeoIPCAntibioticOptionGroupSet {
         $code = [string]$g['code']
         if (-not $abxOsUid -and $g['optionSet'] -is [System.Collections.IDictionary]) { $abxOsUid = [string]$g['optionSet']['id'] }
         if ($code -like 'WHO_AWARE_*') { $awGroupIds.Add([string]$g['id']) }
-        elseif ($code -cmatch '^[A-Z][0-9]{2}[A-Z]{2}$') { $atcGroupIds.Add([string]$g['id']) }   # ATC-4 (5-char) group level
+        elseif (Test-NeoIPCAtcGroupCode $code) { $atcGroupIds.Add([string]$g['id']) }   # ATC-4 (5-char) group level
         else { throw "Option group '$code' is neither an ATC-4 nor an AWaRe group — cannot assign to a group-set." }
     }
 

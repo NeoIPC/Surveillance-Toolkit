@@ -356,6 +356,7 @@ function Add-NeoIPCGeneratedMetadata {
         $genRule = $genRuleById[$rid]
         if (-not $genRule) { continue }   # replaced by name but its id was re-minted: no same-id gen rule to attach to
         foreach ($a in @($deployedActionsByRuleId[$rid])) {
+            if ($a -isnot [System.Collections.IDictionary]) { continue }       # rule with no deployed actions: @($null) is a 1-element [$null] array (not empty) -> skip, do not index $null
             if ($genActionIds.Contains([string]$a['id'])) { continue }         # the generator already reproduced this action (same id) -> not an omitted hand-authored action
             $tgt = $a['dataElement']
             if ($tgt -isnot [System.Collections.IDictionary]) { continue }     # no DE target -> generator owns it

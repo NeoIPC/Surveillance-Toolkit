@@ -302,6 +302,10 @@ function Update-NeoIPCMetadataPackage {
         [switch]$Canonicalize,
         [switch]$RegenerateUids
     )
+    if (-not $Canonicalize -and -not $RegenerateUids) {
+        # No transform requested: skip the multi-megabyte clone and return the input unchanged.
+        return @{ Package = $Package; CanonicalizedSlots = 0; RegeneratedUids = 0; UidMap = @{} }
+    }
     # Deep clone via JSON round-trip (the package is JSON-origin; PS 7.5 -AsHashtable preserves key order).
     $clone = ConvertFrom-NeoIPCMetadataJsonText -Json ($Package | ConvertTo-Json -Depth 100)
     $canonCount = 0

@@ -352,7 +352,7 @@ function Merge-NeoIPCMetadataPackage {
     $merged = [ordered]@{}
     foreach ($k in $Base.Keys) { $merged[$k] = $Base[$k] }
     foreach ($t in $Types) {
-        if ($Supplement -is [System.Collections.IDictionary] -and $Supplement.Contains($t) -and @($Supplement[$t]).Count -gt 0) {
+        if ($Supplement -is [System.Collections.IDictionary] -and $Supplement.Contains($t) -and $Supplement[$t] -and @($Supplement[$t]).Count -gt 0) {
             $merged[$t] = $Supplement[$t]
         }
         else { Write-Warning "Supplement export has no '$t' to merge in." }

@@ -34,8 +34,11 @@ function Read-NeoIPCAuthoredOrgUnit {
     # a repeated id collides at idScheme=UID import. A malformed/blank id would fail only at import — and a
     # blank id slips past the assembly collision guard on first sight — so reject ids up front, here, against
     # the offending code (symmetric with the user path's Test-NeoIPCMetadataUid).
-    $seenCode = @{}
-    $seenId = @{}
+    # Ordinal sets: DHIS2 UIDs and codes are case-sensitive, and the downstream assembly collision guard
+    # (Join-NeoIPCMetadataPackage) is Ordinal — so dedup here must match, else two case-only-distinct ids/codes
+    # would be wrongly rejected here yet accepted at assembly.
+    $seenCode = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::Ordinal)
+    $seenId = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::Ordinal)
     foreach ($p in $Path) {
         if (-not (Test-Path -LiteralPath $p)) { throw "Org-unit CSV not found: '$p'." }
         foreach ($row in (Read-NeoIPCMetadataCsv -Path $p)) {
@@ -54,11 +57,9 @@ function Read-NeoIPCAuthoredOrgUnit {
                 if (-not $obj.Contains($req)) { throw "Org unit '$code' needs a non-empty $req (DHIS2 requirement)." }
             }
             if (-not [string]::IsNullOrEmpty($code)) {
-                if ($seenCode.ContainsKey($code)) { throw "Duplicate authored org-unit code '$code'." }
-                $seenCode[$code] = $true
+                if (-not $seenCode.Add($code)) { throw "Duplicate authored org-unit code '$code'." }
             }
-            if ($seenId.ContainsKey($id)) { throw "Duplicate authored org-unit UID '$id' (code '$code')." }
-            $seenId[$id] = $true
+            if (-not $seenId.Add($id)) { throw "Duplicate authored org-unit UID '$id' (code '$code')." }
             $objects.Add($obj)
         }
     }
@@ -68,7 +69,7 @@ function Read-NeoIPCAuthoredOrgUnit {
     foreach ($o in $objects) {
         if ($o.Contains('parent')) {
             $parentId = [string]$o['parent']['id']
-            if (-not $seenId.ContainsKey($parentId)) { throw "Org unit '$([string]$o['code'])' references unknown parent UID '$parentId' (not in the authored hierarchy)." }
+            if (-not $seenId.Contains($parentId)) { throw "Org unit '$([string]$o['code'])' references unknown parent UID '$parentId' (not in the authored hierarchy)." }
         }
     }
     , $objects.ToArray()

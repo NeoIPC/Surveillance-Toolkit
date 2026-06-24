@@ -744,7 +744,7 @@ function Test-NeoIPCMetadataGeneratedExcluded {
             # group with a non-ATC-4 / non-AWaRe code stays in the directory, and a stray ATC-4-shaped non-generated
             # group would surface as Unclassified in the classified-diff gate. See New-NeoIPCAntibioticOptionGroup.
             $c = [string]$Object['code']
-            return ($c -like 'WHO_AWARE_*') -or ($c -cmatch '^[A-Z][0-9]{2}[A-Z]{2}$')
+            return ($c -like 'WHO_AWARE_*') -or (Test-NeoIPCAtcGroupCode $c)
         }
         'optionGroupSets' {
             $c = [string]$Object['code']

@@ -232,7 +232,7 @@ $script:NeoIPCMetadataTypeMaps = [ordered]@{
         code = 'string'; name = 'string'; shortName = 'string'; description = 'string'; symbol = 'string'; color = 'string' } }   # organisationUnits (membership) is per-deployment — stripped on capture; re-authored as common + play overlays
     'organisationUnitGroupSets' = @{ NaturalKey = 'code'; Nesting = 'TopLevel'; Properties = [ordered]@{
         code = 'string'; name = 'string'; shortName = 'string'; description = 'string'
-        compulsory = 'bool'; dataDimension = 'bool'; includeSubhierarchyInAnalytics = 'bool'; organisationUnitGroups = 'idArray' } }
+        compulsory = 'bool'; dataDimension = 'bool'; includeSubhierarchyInAnalytics = 'bool'; organisationUnitGroups = 'idArray' } }   # idArray (NOT idArrayOrdered): OrganisationUnitGroupSet.hbm.xml maps organisationUnitGroups as an unordered <set> (no list-index) -> member order is not significant, ordinal-sort for determinism. Contrast optionGroupSets.optionGroups, an ordered <list> with a sort_order column -> idArrayOrdered.
     'organisationUnitLevels' = @{ NaturalKey = 'level'; Nesting = 'TopLevel'; Properties = [ordered]@{
         name = 'string'; level = 'int'; offlineLevels = 'int' } }
     'userRoles'             = @{ NaturalKey = 'name'; Nesting = 'TopLevel'; Properties = [ordered]@{
