@@ -1,0 +1,35 @@
+(
+  !#{NeoIPC BSI - no positive culture}
+  &&
+  (
+    d2:hasValue(#{NeoIPC BSI Pathogen 1 value})
+    ||
+    d2:hasValue(#{NeoIPC BSI Pathogen 2 value})
+    ||
+    d2:hasValue(#{NeoIPC BSI Pathogen 3 value})
+  )
+  &&
+  (
+    !#{NeoIPC BSI Pathogen 1 is recognized pathogen}
+    &&
+    !#{NeoIPC BSI Pathogen 2 is recognized pathogen}
+    &&
+    !#{NeoIPC BSI Pathogen 3 is recognized pathogen}
+  )
+)
+&&
+(
+  (
+    (d2:hasValue(#{NeoIPC BSI Pathogen 1 recovered multiple times value}) && (#{NeoIPC BSI Pathogen 1 recovered multiple times value} == true))
+    ||
+    (d2:hasValue(#{NeoIPC BSI Pathogen 2 recovered multiple times value}) && (#{NeoIPC BSI Pathogen 2 recovered multiple times value} == true))
+    ||
+    (d2:hasValue(#{NeoIPC BSI Pathogen 3 recovered multiple times value}) && (#{NeoIPC BSI Pathogen 3 recovered multiple times value} == true))
+    ||
+    (d2:hasValue(#{NeoIPC BSI - Antibiotic treatment}) && (#{NeoIPC BSI - Antibiotic treatment} == true))
+  )
+  &&
+  (
+    #{NeoIPC BSI Common sepsis total findings count} < 2
+  )
+)

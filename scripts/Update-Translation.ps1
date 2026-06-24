@@ -53,24 +53,6 @@ $inputFileInfos = @(
         type = 'adoc'
     }
     @{
-        path = Join-Path -Path $workspaceFolder -ChildPath 'metadata' -AdditionalChildPath 'common','antibiotics','ListElements.csv' -Resolve
-        type = 'csv'
-        key = 'id'
-        translatedProperties = @('value')
-    }
-    @{
-        path = Join-Path -Path $workspaceFolder -ChildPath 'metadata' -AdditionalChildPath 'common','antibiotics','NeoIPC-Antibiotics.csv' -Resolve
-        type = 'csv'
-        key = 'atc_code'
-        translatedProperties = @('name')
-    }
-    @{
-        path = Join-Path -Path $workspaceFolder -ChildPath 'metadata' -AdditionalChildPath 'common','organisation_units','organisationUnits.csv' -Resolve
-        type = 'csv'
-        key = 'code'
-        translatedProperties = @('name','shortName')
-    }
-    @{
         path = Join-Path -Path $workspaceFolder -ChildPath 'metadata' -AdditionalChildPath 'common','infectious-agents','ListElements.csv' -Resolve
         type = 'csv'
         key = 'id'
@@ -87,12 +69,6 @@ $inputFileInfos = @(
         type = 'csv'
         key = 'id'
         translatedProperties = @('synonym')
-    }
-    @{
-        path = Join-Path -Path $workspaceFolder -ChildPath 'metadata' -AdditionalChildPath 'play','organisationUnits.csv' -Resolve
-        type = 'csv'
-        key = 'code'
-        translatedProperties = @('name','shortName')
     }
 )
 

@@ -6,7 +6,7 @@ param(
     [ArgumentCompleter({
         param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
         Import-Module (Join-Path $PSScriptRoot 'modules' 'NeoIPC-Tools') -Force -Verbose:$false
-        $serverKey = Get-NeoipcServerKey `
+        $serverKey = Get-NeoIPCServerKey `
             -Scheme $fakeBoundParameters['Dhis2Scheme'] `
             -Hostname $fakeBoundParameters['Dhis2Hostname'] `
             -Port $fakeBoundParameters['Dhis2Port'] `
@@ -66,7 +66,7 @@ param(
 )
 
 Import-Module (Join-Path $PSScriptRoot 'modules' 'NeoIPC-Tools') -Force -Verbose:$false
-$auth = Resolve-NeoipcAuth -Token $Token
+$auth = Resolve-NeoIPCAuth -Token $Token
 
 $currentDir = Get-Location
 $reportDirPath = Resolve-Path -LiteralPath "$PSScriptRoot/../reports/Patient-Data-Report/"
@@ -88,7 +88,7 @@ if ($OutputDir) {
     $outputDirExplicit = $false
 }
 
-Invoke-WithNeoipcAuth -Auth $auth -ExtraEnvVars @{ 'LC_ALL' = $null } -ScriptBlock {
+Invoke-WithNeoIPCAuth -Auth $auth -ExtraEnvVars @{ 'LC_ALL' = $null } -ScriptBlock {
 
 $errors = @()
 $outputFiles = @()
@@ -101,7 +101,7 @@ try {
 
     Write-Progress -Activity 'Patient Data Report Build' -Status "Generating $OutputFormat for $PatientId" -PercentComplete 50
 
-    $localeParts = Split-NeoipcLocale -Locale $OutputLocale
+    $localeParts = Split-NeoIPCLocale -Locale $OutputLocale
 
     if ($localeParts.Territory) {
         $env:LC_ALL = "${OutputLocale}.UTF-8"
@@ -131,7 +131,7 @@ try {
             }
         }
     } else {
-        $quartoFile = Resolve-NeoipcLocaleQmd -ReportDir $reportDirPath -BaseName 'Patient-Data-Report' -Locale $OutputLocale
+        $quartoFile = Resolve-NeoIPCLocaleQmd -ReportDir $reportDirPath -BaseName 'Patient-Data-Report' -Locale $OutputLocale
         $outFile = "${scriptTimestamp}_NeoIPC-Surveillance-Patient-Data-Report_${PatientId}.${OutputLocale}.${OutputFormat}"
 
         if ($PSCmdlet.ShouldProcess($outFile, "Render patient data report for $PatientId")) {
@@ -176,7 +176,7 @@ finally {
         outputLocale = $OutputLocale
     }
     $reportPath = if ($JsonReport) { $buildReportFilePath } else { $null }
-    $status = Write-NeoipcBuildReport -Name 'Patient Data Report Build' `
+    $status = Write-NeoIPCBuildReport -Name 'Patient Data Report Build' `
         -Errors $errors -OutputFiles $outputFiles -BuildCompleted $buildCompleted `
         -StartedAt $startedAt -BuildReportPath $reportPath -ExtraFields $extraFields
 
@@ -185,4 +185,4 @@ finally {
     }
 }
 
-} # end Invoke-WithNeoipcAuth
+} # end Invoke-WithNeoIPCAuth

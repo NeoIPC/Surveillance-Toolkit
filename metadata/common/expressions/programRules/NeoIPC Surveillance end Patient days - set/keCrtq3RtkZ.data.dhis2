@@ -1,0 +1,1 @@
+d2:daysBetween( V{enrollment_date}, V{event_date} ) +1

@@ -1,0 +1,1 @@
+ if( isNotNull(#{YGowWPumDia.rvq4L9wWbwW}), #{YGowWPumDia.rvq4L9wWbwW}+d2:daysBetween(V{enrollment_date},V{event_date}),d2:daysBetween(V{enrollment_date},V{event_date}))

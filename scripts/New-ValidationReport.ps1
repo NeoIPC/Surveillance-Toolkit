@@ -20,7 +20,7 @@ param(
     [ArgumentCompleter({
         param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
         Import-Module (Join-Path $PSScriptRoot 'modules' 'NeoIPC-Tools') -Force -Verbose:$false
-        $serverKey = Get-NeoipcServerKey `
+        $serverKey = Get-NeoIPCServerKey `
             -Scheme $fakeBoundParameters['Dhis2Scheme'] `
             -Hostname $fakeBoundParameters['Dhis2Hostname'] `
             -Port $fakeBoundParameters['Dhis2Port'] `
@@ -85,7 +85,7 @@ param(
 
 Import-Module (Join-Path $PSScriptRoot 'modules' 'NeoIPC-Tools') -Force -Verbose:$false
 
-$auth = Resolve-NeoipcAuth -Token $Token
+$auth = Resolve-NeoIPCAuth -Token $Token
 
 $reportDirPath = Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..' 'reports' 'Validation-Report')
 
@@ -126,7 +126,7 @@ if (-not $isCombined) {
     if ($Dhis2Hostname) { $deptArgs.Hostname = $Dhis2Hostname }
     if ($Dhis2Port) { $deptArgs.Port = $Dhis2Port }
     if ($Dhis2Path) { $deptArgs.Path = $Dhis2Path }
-    $siteCodes = Get-NeoipcDepartments @deptArgs
+    $siteCodes = Get-NeoIPCDepartments @deptArgs
 
     if (-not $siteCodes -or $siteCodes.Count -eq 0) {
         Write-Warning "No sites matched filter '$SiteCodeFilter'. Nothing to do."
@@ -136,7 +136,7 @@ if (-not $isCombined) {
 
 $wd = Get-Location
 
-Invoke-WithNeoipcAuth -Auth $auth -ExtraEnvVars @{ 'LC_ALL' = $null } -ScriptBlock {
+Invoke-WithNeoIPCAuth -Auth $auth -ExtraEnvVars @{ 'LC_ALL' = $null } -ScriptBlock {
 
 $errors = @()
 $outputFiles = @()
@@ -149,9 +149,9 @@ $completedSteps = 0
 try {
     Set-Location -LiteralPath $reportDirPath
 
-    $localeParts = Split-NeoipcLocale -Locale $OutputLocale
+    $localeParts = Split-NeoIPCLocale -Locale $OutputLocale
     $language = $localeParts.Language
-    $qmdPath = Resolve-NeoipcLocaleQmd -ReportDir $reportDirPath -BaseName 'Validation-Report' -Locale $OutputLocale
+    $qmdPath = Resolve-NeoIPCLocaleQmd -ReportDir $reportDirPath -BaseName 'Validation-Report' -Locale $OutputLocale
     $qmdFile = [System.IO.Path]::GetFileName($qmdPath)
 
     if ($localeParts.Territory) {
@@ -241,7 +241,7 @@ finally {
         outputLocale = $OutputLocale
     }
     $reportPath = if ($JsonReport) { $buildReportFilePath } else { $null }
-    $status = Write-NeoipcBuildReport -Name 'Validation Report Build' `
+    $status = Write-NeoIPCBuildReport -Name 'Validation Report Build' `
         -Errors $errors -OutputFiles $outputFiles -BuildCompleted $buildCompleted `
         -StartedAt $startedAt -BuildReportPath $reportPath -ExtraFields $extraFields
 
@@ -250,4 +250,4 @@ finally {
     }
 }
 
-} # end Invoke-WithNeoipcAuth
+} # end Invoke-WithNeoIPCAuth

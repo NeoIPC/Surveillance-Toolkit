@@ -57,7 +57,7 @@ When a token is resolved, it is validated against Test-DHIS2PersonalAccessToken.
 .PARAMETER Token
 Optional token string or path to a file containing the token.
 #>
-function Resolve-NeoipcToken {
+function Resolve-NeoIPCToken {
     [CmdletBinding()]
     [OutputType([string])]
     param(
@@ -118,7 +118,7 @@ Optional token string or path to a file containing the token.
 Optional username for Basic auth. When provided (and no token is available),
 the password prompt is shown without asking for the username first.
 #>
-function Resolve-NeoipcAuth {
+function Resolve-NeoIPCAuth {
     [CmdletBinding()]
     param(
         [Parameter(Position = 0)]
@@ -181,13 +181,13 @@ function Resolve-NeoipcAuth {
 
 <#
 .SYNOPSIS
-Get the plaintext password from a Resolve-NeoipcAuth result.
+Get the plaintext password from a Resolve-NeoIPCAuth result.
 
 .DESCRIPTION
 Converts the SecureString password in a Basic auth result to plaintext.
 Returns $null for Token auth.
 #>
-function Get-NeoipcAuthPassword {
+function Get-NeoIPCAuthPassword {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)]

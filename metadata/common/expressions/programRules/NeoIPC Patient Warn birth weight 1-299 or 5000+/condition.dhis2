@@ -1,0 +1,1 @@
+A{NeoIPC Patient Birth weight value} != 0 && (A{NeoIPC Patient Birth weight value} < 300 || A{NeoIPC Patient Birth weight value} >= 5000 )

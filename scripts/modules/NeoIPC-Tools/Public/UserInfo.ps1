@@ -15,8 +15,8 @@ function Read-UserInfo {
         [Parameter(Position = 0, ValueFromPipelineByPropertyName)]
         [ArgumentCompleter({
             param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
-            $serverKey = Get-NeoipcServerKey -Scheme $fakeBoundParameters['Scheme'] -Hostname $fakeBoundParameters['Hostname'] -Port $fakeBoundParameters['Port']
-            $cacheDir = Join-Path $script:NeoipcRepoRoot 'data' $serverKey
+            $serverKey = Get-NeoIPCServerKey -Scheme $fakeBoundParameters['Scheme'] -Hostname $fakeBoundParameters['Hostname'] -Port $fakeBoundParameters['Port']
+            $cacheDir = Join-Path $script:NeoIPCRepoRoot 'data' $serverKey
             $cacheFile = Join-Path $cacheDir 'site-codes.txt'
             if (Test-Path $cacheFile) {
                 Get-Content $cacheFile | Where-Object { $_ -like "$wordToComplete*" }
@@ -36,7 +36,7 @@ function Read-UserInfo {
     )
 
     begin {
-        $script:auth = Resolve-NeoipcAuth -Token $Token -UserName $UserName
+        $script:auth = Resolve-NeoIPCAuth -Token $Token -UserName $UserName
         $script:collectedOrgUnitCodes = [System.Collections.Generic.List[string]]::new()
     }
 
@@ -72,7 +72,7 @@ function Read-UserInfo {
         if ($Hostname) { $getParams.Hostname = $Hostname }
         if ($Port)     { $getParams.Port     = $Port }
 
-        $obj = Invoke-NeoipcDhis2Get @getParams
+        $obj = Invoke-NeoIPCDhis2Get @getParams
 
         $effectiveScheme = if ($Scheme) { $Scheme } else { 'https' }
         $effectiveHost = if ($Hostname) { $Hostname } else { 'neoipc.charite.de' }

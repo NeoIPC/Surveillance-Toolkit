@@ -1,0 +1,43 @@
+# DHIS2 sharing profiles for the metadata pipeline.
+#
+# DHIS2 attaches a `sharing` object to most metadata objects: a `public` access string plus optional
+# per-user / per-user-group access grants. Across the package only a handful of distinct sharing shapes
+# actually occur, so they are named here ONCE and every per-type CSV's `sharing` column carries just the
+# profile key (e.g. PUBLIC_RW) instead of a JSON blob repeated on hundreds of rows. The converter expands
+# the key back into the DHIS2 sharing object on assembly and maps a captured sharing object back to its
+# key on round-trip (an unrecognized shape fails loud so a human names it here rather than silently
+# absorbing it).
+#
+# `public` and the per-group access values are 8-char DHIS2 access strings (metadata-r/w, data-r/w, ...).
+# Grants are keyed by the user-GROUP CODE (falling back to its unique name for a codeless group) so this
+# file stays human-editable; the converter resolves the code to the group UID against userGroups, and an
+# unknown code/name fails loud. The group's display name is intentionally not stored (it is server-derived
+# from the id, and carrying it duplicates a name that drifts — the same reason the rest of the pipeline
+# strips the display* family). User grants (rare) would use a parallel `users:` map keyed by user id.
+
+PUBLIC_RW:
+  public: "rw------"
+
+PRIVATE:
+  public: "--------"
+
+NEOIPC_READ:
+  public: "--------"
+  userGroups:
+    NEOIPC: "r-------"
+
+NEOIPC_DATA_EDIT:
+  public: "--------"
+  userGroups:
+    NEOIPC: "r-r-----"
+    NEOIPC_DATA_EDITORS: "r-rw----"
+
+PATHOGEN_LIST_ADMIN_RW:
+  public: "--------"
+  userGroups:
+    NEOIPC_PATHOGEN_LIST_ADMINS: "rw------"
+
+TESTERS_READ:
+  public: "--------"
+  userGroups:
+    NEOIPC_TESTERS: "r-------"

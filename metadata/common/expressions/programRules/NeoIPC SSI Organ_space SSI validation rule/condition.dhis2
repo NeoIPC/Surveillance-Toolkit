@@ -1,0 +1,4 @@
+#{NeoIPC SSI Infection type value} == 3
+&& !#{NeoIPC SSI Purulent drainage drain value}
+&& #{NeoIPC SSI Organisms identified from organ space fluid tissue value} < 1
+&& !#{NeoIPC SSI Abscess organ space value}

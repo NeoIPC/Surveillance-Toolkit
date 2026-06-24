@@ -1,0 +1,1 @@
+#{NeoIPC Patient Total gestation days} != 0 && (#{NeoIPC Patient Total gestation days} < 161) || (#{NeoIPC Patient Total gestation days} >= 310)

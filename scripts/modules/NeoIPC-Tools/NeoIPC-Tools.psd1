@@ -30,25 +30,25 @@
     # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
     FunctionsToExport = @(
         # Auth
-        'Resolve-NeoipcToken'
-        'Resolve-NeoipcAuth'
-        'Get-NeoipcAuthPassword'
+        'Resolve-NeoIPCToken'
+        'Resolve-NeoIPCAuth'
+        'Get-NeoIPCAuthPassword'
         'Test-DHIS2PersonalAccessToken'
         # OrgUnits
-        'Get-NeoipcDepartments'
-        'Get-NeoipcServerKey'
+        'Get-NeoIPCDepartments'
+        'Get-NeoIPCServerKey'
         'Read-OrgUnitInfo'
         # DataElements
-        'Get-NeoipcDataElementCodes'
+        'Get-NeoIPCDataElementCodes'
         # QuartoHelpers
-        'Invoke-WithNeoipcAuth'
+        'Invoke-WithNeoIPCAuth'
         'Invoke-QuartoRender'
         'Invoke-Rscript'
         'Build-QmdParamPairs'
-        'Write-NeoipcBuildReport'
+        'Write-NeoIPCBuildReport'
         'Test-QuartoInstallation'
-        'Split-NeoipcLocale'
-        'Resolve-NeoipcLocaleQmd'
+        'Split-NeoIPCLocale'
+        'Resolve-NeoIPCLocaleQmd'
         # PAT
         'Read-DHIS2PersonalAccessToken'
         'Remove-DHIS2PersonalAccessToken'
@@ -61,6 +61,36 @@
         'Read-EventInfo'
         # InfectiousAgents
         'Find-NextFreeInfectiousAgentId'
+        # Metadata pipeline
+        'ConvertFrom-NeoIPCMetadataJson'
+        'ConvertTo-NeoIPCMetadataJson'
+        'Compare-NeoIPCMetadata'
+        'Test-NeoIPCMetadataRoundTrip'
+        'Merge-NeoIPCMetadataJson'
+        'Select-NeoIPCMetadataClosure'
+        'Test-NeoIPCMetadataExpression'
+        'Update-NeoIPCMetadata'
+        'New-NeoIPCMetadataPackage'
+        'Export-NeoIPCMetadataTranslation'
+        'Import-NeoIPCMetadataTranslation'
+        'Update-NeoIPCMetadataDirectory'
+        # Metadata generation (ontology / matrix-driven)
+        'New-NeoIPCPathogenOptionSet'
+        'New-NeoIPCPathogenDataElement'
+        'New-NeoIPCPathogenVariable'
+        'New-NeoIPCPathogenRule'
+        'New-NeoIPCPathogenFieldGatingVariable'
+        'New-NeoIPCPathogenFieldGatingRule'
+        'New-NeoIPCSubstanceDataElement'
+        'New-NeoIPCSubstanceVariable'
+        'New-NeoIPCSubstanceRule'
+        'Compare-NeoIPCGeneratedMetadata'
+        # Antibiotic-domain generation (option set + ATC/AWaRe groups + group-sets)
+        'New-NeoIPCAntimicrobialOptionSet'
+        'New-NeoIPCAntibioticOptionGroup'
+        'New-NeoIPCAntibioticOptionGroupSet'
+        # Antibiotic translation catalogue (po/antibiotics.pot + .po)
+        'Export-NeoIPCAntibioticTranslation'
     )
 
     # Cmdlets to export from this module

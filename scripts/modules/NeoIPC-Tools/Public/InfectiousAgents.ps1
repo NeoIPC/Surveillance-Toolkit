@@ -37,7 +37,9 @@ function Find-NextFreeInfectiousAgentId {
         }
         if ($Node -is [System.Collections.IDictionary]) {
             if ($Node.Contains('Id')) { [int]$Node['Id'] }
-            foreach ($key in 'Hierarchies', 'Children', 'Synonyms') {
+            # Same key order as Get-NeoIPCInfectiousAgentConcept (Hierarchies, Synonyms, Children) so the two
+            # ontology walkers agree on traversal; order is irrelevant here (max-Id), load-bearing there (sortOrder).
+            foreach ($key in 'Hierarchies', 'Synonyms', 'Children') {
                 if ($Node.Contains($key)) { Get-IdsFromNode $Node[$key] }
             }
         }

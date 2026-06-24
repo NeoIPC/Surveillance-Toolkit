@@ -1,0 +1,11 @@
+(#{NeoIPC BSI White blood cell count count} > 0)
+||
+(#{NeoIPC BSI Platelet count count} > 0)
+||
+(#{NeoIPC BSI CRP count} > 0)
+||
+(#{NeoIPC BSI Procalcitonin count} > 0)
+||
+(#{NeoIPC BSI IT ratio count} > 0)
+||
+(#{NeoIPC BSI Interleukin count} > 0)

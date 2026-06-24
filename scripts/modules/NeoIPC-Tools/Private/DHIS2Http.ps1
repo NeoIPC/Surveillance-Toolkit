@@ -1,7 +1,7 @@
 # Private DHIS2 HTTP layer — not exported from the module.
 # All public functions that call the DHIS2 API should go through these two functions.
 
-function Invoke-NeoipcDhis2Get {
+function Invoke-NeoIPCDhis2Get {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]
     param(
         [Parameter(Mandatory)]
@@ -78,7 +78,7 @@ function Invoke-NeoipcDhis2Get {
     }
 }
 
-function Invoke-NeoipcDhis2Delete {
+function Invoke-NeoIPCDhis2Delete {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
     param(
         [Parameter(Mandatory)]

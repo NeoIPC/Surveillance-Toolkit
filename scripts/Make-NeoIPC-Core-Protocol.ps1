@@ -26,6 +26,7 @@ $workspaceFolder = Join-Path -Resolve -Path $PSScriptRoot -ChildPath '..'
 $metadataFolder =  Join-Path -Resolve -Path $workspaceFolder -ChildPath 'metadata'
 $artifactsFolder = Join-Path -Resolve -Path $workspaceFolder -ChildPath 'artifacts' -ErrorAction SilentlyContinue
 $antibioticsDir = Join-Path -Resolve -Path $metadataFolder -ChildPath 'common' -AdditionalChildPath 'antibiotics'
+$poDir = Join-Path -Resolve -Path $workspaceFolder -ChildPath 'po'
 $infectiousAgentsDir = Join-Path -Resolve -Path $metadataFolder -ChildPath 'common' -AdditionalChildPath 'infectious-agents'
 $docDir = Join-Path -Resolve -Path $workspaceFolder -ChildPath 'doc'
 $protocolDir = Join-Path -Resolve -Path $docDir -ChildPath 'protocol'
@@ -131,7 +132,14 @@ foreach ($targetCulture in $targetCultures)
     }
 
     $antibioticsListFile = Get-LocalisedPath $protocolDir $antibioticsFileName $targetCulture
-    Build-Target $antibioticsListFile (Get-LocalisedPath $antibioticsDir 'NeoIPC-Antibiotics.csv' $targetCulture -All -Existing) {
+    # New-AntibioticsList reads the base antibiotic + UI-label CSVs plus the per-locale gettext catalogue
+    # po/antibiotics.<lang>.po (the translation source that replaced the retired .<lang>.csv sidecars), so the
+    # incremental-build dependency set must track all three (the two base CSVs always exist; the .po is per-locale).
+    $antibioticsListInputs = @(
+        (Join-Path $antibioticsDir 'NeoIPC-Antibiotics.csv')
+        (Join-Path $antibioticsDir 'ListElements.csv')
+    ) + @(Get-LocalisedPath $poDir 'antibiotics.po' $targetCulture -All -Existing)
+    Build-Target $antibioticsListFile $antibioticsListInputs {
         Write-Verbose "Generating list of antibiotics"
         New-AntibioticsList -TargetCulture $targetCulture -MetadataPath $metadataFolder -AsciiDoc | Out-File $antibioticsListFile -Encoding utf8NoBOM
     }

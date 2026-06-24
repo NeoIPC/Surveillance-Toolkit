@@ -1,0 +1,41 @@
+(
+  (
+    !d2:hasValue(#{NeoIPC BSI - no positive culture})
+    ||
+    (#{NeoIPC BSI - no positive culture} != true)
+  )
+  &&
+  (
+    d2:hasValue(#{NeoIPC BSI Pathogen 1 value})
+    ||
+    d2:hasValue(#{NeoIPC BSI Pathogen 2 value})
+    ||
+    d2:hasValue(#{NeoIPC BSI Pathogen 3 value})
+  )
+  &&
+  (
+    (#{NeoIPC BSI Pathogen 1 is recognized pathogen} == false)
+    &&
+    (#{NeoIPC BSI Pathogen 2 is recognized pathogen} == false)
+    &&
+    (#{NeoIPC BSI Pathogen 3 is recognized pathogen} == false)
+  )
+)
+&&
+(
+  (
+    (!d2:hasValue(#{NeoIPC BSI Pathogen 1 recovered multiple times value}) || (#{NeoIPC BSI Pathogen 1 recovered multiple times value} != true))
+    &&
+    (!d2:hasValue(#{NeoIPC BSI Pathogen 2 recovered multiple times value}) || (#{NeoIPC BSI Pathogen 2 recovered multiple times value} != true))
+    &&
+    (!d2:hasValue(#{NeoIPC BSI Pathogen 3 recovered multiple times value}) || (#{NeoIPC BSI Pathogen 3 recovered multiple times value} != true))
+    &&
+    (!d2:hasValue(#{NeoIPC BSI - Antibiotic treatment}) || (#{NeoIPC BSI - Antibiotic treatment} != true))
+  )
+  &&
+  (
+    (#{NeoIPC BSI Common commensal once clinical findings count} < 2)
+    ||
+    (#{NeoIPC BSI Common commensal once laboratory findings count} < 1)
+  )
+)

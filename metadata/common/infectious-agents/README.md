@@ -8,6 +8,7 @@ This directory contains the NeoIPC infectious-agent ontology used to populate ca
 |------|---------|
 | `NeoIPC-Infectious-Agents.yaml` | **Canonical** hierarchical ontology of infectious agents, their synonyms, and metadata. Single source of truth. |
 | `NeoIPC-Infectious-Agents.<lang>.yaml` | Per-locale translation overlay generated from the po4a pipeline (do not edit by hand — see [the repo `CLAUDE.md` po4a section](../../../CLAUDE.md)). |
+| `NeoIPC-Infectious-Agents.uids.csv` | The `id,uid` sidecar mapping each option code (the YAML `Id`) to its DHIS2 option **UID** (source identity for the generated `NEOIPC_PATHOGENS` option set, so generation no longer reads UIDs from the export). Holds only the **deployed** codes; an `Id` absent from it (a not-yet-deployed organism) is minted deterministically on generation. The option **set**'s own UID is a NeoIPC-Tools module constant. These are the UIDs the deployment already assigned. |
 | `NeoIPC-Owned-Pathogen-Concepts.csv` | Classification of NeoIPC-owned concepts (`pathogen_type`, `concept_type`). Consumed by `Make-NeoIPC-Core-Protocol.ps1`. |
 | `ListElements.csv` / `ListElements.<lang>.csv` | UI/report list-element labels used by `Convert-InfectiousAgentList.ps1` when rendering the pathogen reference document. |
 | `AsciiDoc-PDF.yml` | Asciidoctor-PDF theme for the rendered pathogen reference document. |
@@ -41,7 +42,7 @@ Reference to specific commercial products, manufacturers, companies, or trademar
 
 Not subject to copyright but some [requirements](https://www.cdc.gov/other/agencymaterials.html) must be followed.
 
-The classification of pathogens as common commensals follows the classification in the NHSN Organism List.
+The `CommonCommensal` flag follows the classification in the NHSN Organism List. Conceptually it is **not about (human) commensalism per se but about blood-culture contamination**: it marks organisms for which a positive blood culture is *most likely the result of sample contamination from the immediate sampling environment* — where the patient's own skin flora plays the dominant role — rather than the genuine presence of the organism in the patient's blood. This framing is what should guide judgement whenever an organism is **not** enumerated by NHSN, or when researching a specific organism: ask *"is a positive blood culture for this organism more plausibly skin/environmental contamination at sampling than true bacteraemia?"* Human skin/mucosal flora (e.g. coagulase-negative staphylococci, viridans streptococci) answer **yes** → common commensal; animal-associated, environmental, or frankly pathogenic organisms answer **no** → not a common commensal. (NHSN's own list is the same idea applied to human flora, which is why animal/environmental species and recognised pathogens are excluded from it.)
 
 ### List of Prokaryotic names with Standing in Nomenclature (LPSN)
 

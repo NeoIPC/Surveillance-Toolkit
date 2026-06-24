@@ -1,0 +1,15 @@
+(
+  (d2:hasValue(#{NeoIPC BSI - no positive culture}) && (#{NeoIPC BSI - no positive culture} == true))
+  &&
+  (!d2:hasValue(#{NeoIPC BSI Pathogen 1 value}))
+  &&
+  (!d2:hasValue(#{NeoIPC BSI Pathogen 2 value}))
+  &&
+  (!d2:hasValue(#{NeoIPC BSI Pathogen 3 value}))
+)
+&&
+(
+  (#{NeoIPC BSI - Antibiotic treatment} == false)
+  ||
+  (#{NeoIPC BSI Common sepsis total findings count} < 2)
+)

@@ -6,7 +6,7 @@
 # Computed once at module load so completer scriptblocks (parsed in
 # Public/*.ps1 where $PSScriptRoot is one level deeper) don't have to
 # stack Split-Path calls to undo their nesting.
-$script:NeoipcRepoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..' '..' '..')).Path
+$script:NeoIPCRepoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..' '..' '..')).Path
 
 $privatePath = Join-Path $PSScriptRoot 'Private'
 $publicPath  = Join-Path $PSScriptRoot 'Public'

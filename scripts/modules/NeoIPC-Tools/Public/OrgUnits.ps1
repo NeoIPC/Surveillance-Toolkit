@@ -7,7 +7,7 @@ Returns a string like "https_neoipc.charite.de_api" derived from scheme,
 hostname, port, and path. Used to partition per-server cache files.
 Falls back to neoipcr defaults for any null parameter.
 #>
-function Get-NeoipcServerKey {
+function Get-NeoIPCServerKey {
     [CmdletBinding()]
     param(
         [Parameter()] [string]$Scheme = $null,
@@ -36,7 +36,7 @@ the NEO_DEPARTMENT group. This avoids the DHIS2 metadata endpoint which
 exposes all org units regardless of user assignment.
 
 .PARAMETER Auth
-Authentication hashtable from Resolve-NeoipcAuth.
+Authentication hashtable from Resolve-NeoIPCAuth.
 
 .PARAMETER SiteCodeFilter
 Regex pattern to filter department codes. Default: '.+' (all).
@@ -44,7 +44,7 @@ Regex pattern to filter department codes. Default: '.+' (all).
 .OUTPUTS
 Sorted array of department code strings.
 #>
-function Get-NeoipcDepartments {
+function Get-NeoIPCDepartments {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)]
@@ -78,7 +78,7 @@ function Get-NeoipcDepartments {
     if ($Port)     { $getParams.Port     = $Port }
 
     try {
-        $resp = Invoke-NeoipcDhis2Get @getParams
+        $resp = Invoke-NeoIPCDhis2Get @getParams
         $units = if ($resp.organisationUnits) {
             $resp.organisationUnits
         } else { @() }
@@ -114,7 +114,7 @@ Uses /api/organisationUnits with withinUserHierarchy=true so results are
 scoped to the authenticated user's assigned hierarchy.
 
 .PARAMETER Auth
-Authentication hashtable from Resolve-NeoipcAuth.
+Authentication hashtable from Resolve-NeoIPCAuth.
 
 .PARAMETER OrgUnitCode
 Filter to specific OU codes. Pipeline-bound from upstream cmdlets that emit
@@ -142,8 +142,8 @@ function Read-OrgUnitInfo {
         [Parameter(ValueFromPipelineByPropertyName)]
         [ArgumentCompleter({
             param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
-            $serverKey = Get-NeoipcServerKey -Scheme $fakeBoundParameters['Scheme'] -Hostname $fakeBoundParameters['Hostname'] -Port $fakeBoundParameters['Port']
-            $cacheDir = Join-Path $script:NeoipcRepoRoot 'data' $serverKey
+            $serverKey = Get-NeoIPCServerKey -Scheme $fakeBoundParameters['Scheme'] -Hostname $fakeBoundParameters['Hostname'] -Port $fakeBoundParameters['Port']
+            $cacheDir = Join-Path $script:NeoIPCRepoRoot 'data' $serverKey
             $cacheFile = Join-Path $cacheDir 'site-codes.txt'
             if (Test-Path $cacheFile) {
                 Get-Content $cacheFile | Where-Object { $_ -like "$wordToComplete*" }
@@ -164,7 +164,7 @@ function Read-OrgUnitInfo {
 
     begin {
         if (-not $Auth) {
-            $Auth = Resolve-NeoipcAuth -Token $Token
+            $Auth = Resolve-NeoIPCAuth -Token $Token
         }
         $script:collectedOrgUnitCodes = [System.Collections.Generic.List[string]]::new()
         $script:collectedOrgUnitIds = [System.Collections.Generic.List[string]]::new()
@@ -203,7 +203,7 @@ function Read-OrgUnitInfo {
         if ($Hostname) { $getParams.Hostname = $Hostname }
         if ($Port)     { $getParams.Port     = $Port }
 
-        $resp = Invoke-NeoipcDhis2Get @getParams
+        $resp = Invoke-NeoIPCDhis2Get @getParams
 
         foreach ($ou in $resp.organisationUnits) {
             $groupCodes = @($ou.organisationUnitGroups | ForEach-Object { $_.code })

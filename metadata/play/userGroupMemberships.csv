@@ -1,0 +1,15 @@
+userGroup,username
+NEOIPC,play.admin
+NEOIPC_PATHOGEN_LIST_ADMINS,play.admin
+NEOIPC_TESTERS,play.admin
+NEOIPC_USER_MANAGERS,play.admin
+NEOIPC,play.at.data1
+NEOIPC_DATA_EDITORS,play.at.data1
+NEOIPC,play.at.data2
+NEOIPC_DATA_EDITORS,play.at.data2
+NEOIPC,play.at.data3
+NEOIPC_DATA_EDITORS,play.at.data3
+NEOIPC,play.ch.data1
+NEOIPC_DATA_EDITORS,play.ch.data1
+NEOIPC,play.ch.data2
+NEOIPC_DATA_EDITORS,play.ch.data2

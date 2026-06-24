@@ -313,6 +313,88 @@ function Import-Translations {
     return $translations.ToArray()
 }
 
+function Import-AntibioticPoTranslation {
+    <#
+    .SYNOPSIS
+        Build an english(msgid) -> localized(msgstr) map from the antibiotic gettext catalogue po/antibiotics.<lang>.po.
+    .DESCRIPTION
+        The antibiotic domain is translated in a bilingual gettext component keyed by the English STRING (bare msgid,
+        no msgctxt). Resolves the catalogue for $TargetCulture by walking its parent chain (e.g. de-DE -> de) and
+        returns english -> localized for the entries with a real translation: the header (empty msgid), obsolete
+        "#~" and FUZZY entries, and any empty or msgid-identical msgstr are skipped. Case-sensitive (Ordinal —
+        substance names are case-significant). Empty map when no catalogue exists for the culture. Self-contained:
+        NeoIPC-BuildTools does not depend on NeoIPC-Tools, so this mirrors NeoIPC-Tools' Get-NeoIPCPoTranslationMap.
+    #>
+    [CmdletBinding()]
+    [OutputType([System.Collections.Hashtable])]
+    param(
+        [Parameter(Mandatory)]
+        [string]$PoDirectory,
+        [Parameter(Mandatory)]
+        [CultureInfo]$TargetCulture,
+        [string]$BaseName = 'antibiotics'
+    )
+    $map = [System.Collections.Hashtable]::new([System.StringComparer]::Ordinal)
+    $poPath = $null
+    for ($culture = $TargetCulture; $culture -and $culture.Name.Length -gt 0; $culture = $culture.Parent) {
+        $candidate = Join-Path -Path $PoDirectory -ChildPath "$BaseName.$($culture.Name).po"
+        if (Test-Path -LiteralPath $candidate -PathType Leaf) { $poPath = $candidate; break }
+    }
+    if (-not $poPath) { return $map }
+
+    $unescape = {
+        param([string]$value)
+        $sb = [System.Text.StringBuilder]::new($value.Length)
+        for ($i = 0; $i -lt $value.Length; $i++) {
+            $ch = $value[$i]
+            if ($ch -ne '\' -or $i -eq $value.Length - 1) { [void]$sb.Append($ch); continue }
+            $next = $value[++$i]
+            switch ($next) {
+                'n' { [void]$sb.Append("`n") }
+                'r' { [void]$sb.Append("`r") }
+                't' { [void]$sb.Append("`t") }
+                '"' { [void]$sb.Append('"') }
+                '\' { [void]$sb.Append('\') }
+                default { [void]$sb.Append($next) }
+            }
+        }
+        $sb.ToString()
+    }
+    $peel = {
+        param([string]$s)
+        if ($s.StartsWith('"') -and $s.EndsWith('"') -and $s.Length -ge 2) { & $unescape $s.Substring(1, $s.Length - 2) } else { '' }
+    }
+
+    $id = $null; $str = $null; $field = $null; $fuzzy = $false; $obsolete = $false
+    $entries = [System.Collections.Generic.List[object]]::new()
+    foreach ($raw in ((Get-Content -LiteralPath $poPath -Raw) -split "`n")) {
+        $trim = $raw.TrimEnd("`r").Trim()
+        if ($trim -eq '') {
+            if ($null -ne $id -and -not $obsolete -and -not $fuzzy) { $entries.Add([PSCustomObject]@{ Id = $id; Str = [string]$str }) }
+            $id = $null; $str = $null; $field = $null; $fuzzy = $false; $obsolete = $false; continue
+        }
+        if ($trim.StartsWith('#~')) { $obsolete = $true; $field = $null; continue }
+        if ($trim.StartsWith('#')) {
+            if ($trim.StartsWith('#,') -and $trim -match '\bfuzzy\b') { $fuzzy = $true }
+            $field = $null; continue
+        }
+        if ($trim.StartsWith('msgid ')) { $id = & $peel ($trim.Substring(6).Trim()); $field = 'id'; continue }
+        if ($trim.StartsWith('msgstr ')) { $str = & $peel ($trim.Substring(7).Trim()); $field = 'str'; continue }
+        if ($trim.StartsWith('"') -and $trim.EndsWith('"') -and $field) {
+            $piece = & $peel $trim
+            if ($field -eq 'id') { $id = [string]$id + $piece } else { $str = [string]$str + $piece }
+        }
+    }
+    if ($null -ne $id -and -not $obsolete -and -not $fuzzy) { $entries.Add([PSCustomObject]@{ Id = $id; Str = [string]$str }) }
+
+    foreach ($e in $entries) {
+        if ([string]::IsNullOrEmpty($e.Id)) { continue }                          # header
+        if ([string]::IsNullOrEmpty($e.Str) -or $e.Str -ceq $e.Id) { continue }   # untranslated / unchanged
+        if (-not $map.ContainsKey($e.Id)) { $map[$e.Id] = $e.Str }
+    }
+    $map
+}
+
 function New-AntibioticsList {
     param (
         [Parameter(Mandatory)]
@@ -323,90 +405,47 @@ function New-AntibioticsList {
     )
     $antibioticsFolderPath = Join-Path -Resolve -Path $MetadataPath -ChildPath 'common' -AdditionalChildPath 'antibiotics'
     $antibioticsFile = Join-Path -Resolve -Path $antibioticsFolderPath -ChildPath 'NeoIPC-Antibiotics.csv'
-    $awareFile = Join-Path -Resolve -Path $antibioticsFolderPath -ChildPath 'WHO-AWaRe-Classification-2021.csv'
     $listElementsFile = Join-Path -Resolve -Path $antibioticsFolderPath -ChildPath 'ListElements.csv'
+    # Substance names + printed-list UI labels are translated in po/antibiotics.<lang>.po, keyed by the English
+    # string. po/ sits at the repository root (the parent of the metadata directory).
+    $poDirectory = Join-Path -Path (Split-Path -Parent $MetadataPath) -ChildPath 'po'
 
-    $awareClasses = [System.Collections.Generic.Dictionary[string, PSCustomObject]]::new()
-    $lineNo = 1
-    Import-Csv -LiteralPath $awareFile -Encoding utf8NoBOM | ForEach-Object {
-        $lineNo++
-        $category = $_.category
-        switch ($category) {
-            'Access' { $c = 'A' }
-            'Watch' { $c = 'W' }
-            'Reserve' { $c = 'R' }
-            Default {
-                Write-Warning "Unexpected AWaRe category '$($category)' in '$awareFile' line $lineNo."
-                return
-            }
-        }
-        if ($_.atc_code -eq 'to be assigned') { return }
-        $awareClasses.Add($_.id,[PSCustomObject]@{
-            Category = $c
-            Url = $AWaReUrlTemplate -f [System.Web.HttpUtility]::UrlEncode($_.antibiotic)
-        })
-    }
-
-    if ($TargetCulture.Name) {
-        $listElementsTranslations = Import-Translations -LiteralPath $listElementsFile -TargetCulture $TargetCulture -ExpectedProperties 'VALUE'
-        $translations = Import-Translations -LiteralPath $antibioticsFile -TargetCulture $TargetCulture -ExpectedProperties 'NAME'
+    $translations = if ($TargetCulture.Name) {
+        Import-AntibioticPoTranslation -PoDirectory $poDirectory -TargetCulture $TargetCulture
     } else {
-        $listElementsTranslations = @()
-        $translations = @()
+        [System.Collections.Hashtable]::new([System.StringComparer]::Ordinal)
+    }
+    if ($TargetCulture.Name -and $translations.Count -eq 0) {
+        Write-Warning "No antibiotic translations found for locale '$($TargetCulture.Name)' (or its parent locales) in '$poDirectory'. The antibiotic list will use the English names."
     }
 
+    # Localize the printed-table UI labels (ListElements.csv `value`) by English string.
     $listElements = [System.Collections.Generic.Dictionary[string, string]]::new()
     Import-Csv -LiteralPath $listElementsFile -Encoding utf8NoBOM | ForEach-Object {
-        foreach ($translation in $listElementsTranslations) {
-            $translationInfo = $null
-            if ($translation.VALUE.TryGetValue($_.id, [ref]$translationInfo)) {
-                if ($_.value -cne $translationInfo.DefaultValue) {
-                    Write-Warning "The default value '$($translationInfo.DefaultValue)' for id '$($_.id)' in translation file '$($translation.TranslationFile)' does not match the value '$($_.value)' in '$listElementsFile'."
-                }
-                if ($translationInfo.NeedsTranslation) {
-                    $listElements.add($_.id, $translationInfo.TranslatedValue)
-                }
-                break
-            }
-        }
-        if (-not $listElements.ContainsKey($_.id)) {
-            $listElements.add($_.id, $_.value)
-        }
+        $localized = if ($translations.ContainsKey($_.value)) { $translations[$_.value] } else { $_.value }
+        $listElements[$_.id] = $localized
     }
-
     $atcCodeString = $listElements['atc_code']
     $awareCategoryString = $listElements['aware_category']
     $substanceString = $listElements['substance']
 
-    # Iterate the list of antibiotics and try to find and return the translated row in the requested format.
+    # AWaRe category (folded into NeoIPC-Antibiotics.csv) -> the single-letter code used for the AWaRe-<X>.svg badge.
+    $awareCode = @{ Access = 'A'; Watch = 'W'; Reserve = 'R' }
+
+    # Iterate the substances and emit each translated row in the requested format.
     Import-Csv -LiteralPath $antibioticsFile -Encoding utf8NoBOM |
-    Foreach-Object {
-        $substance = $_.name
-        $atcUrl = $AtcUrlTemplate -f $_.atc_code
-        $awareInfo = $null
-        if ($awareClasses.TryGetValue($_.id, [ref]$awareInfo)) {
-            $awareCategory = $awareInfo.Category
-            $awareUrl = $awareInfo.Url
-        } else {
-            $awareCategory = $null
-            $awareUrl = $null
+    ForEach-Object {
+        $substance = if ($translations.ContainsKey($_.name)) { $translations[$_.name] } else { $_.name }
+        # ATC link only where the substance has an ATC code (the tmp_* AWaRe-list ids have none).
+        $atcUrl = if ($_.atc_code) { $AtcUrlTemplate -f $_.atc_code } else { $null }
+        # AWaRe badge + search link, only where WHO has classified the substance; the search term is the English name.
+        $awareCategory = $null
+        $awareUrl = $null
+        if ($_.aware_category -and $awareCode.ContainsKey($_.aware_category)) {
+            $awareCategory = $awareCode[$_.aware_category]
+            $awareUrl = $AWaReUrlTemplate -f [System.Web.HttpUtility]::UrlEncode($_.name)
         }
-        foreach ($translation in $translations) {
-            $translationInfo = $null
-            if ($translation.NAME.TryGetValue($_.id, [ref]$translationInfo)) {
-                if ($_.name -cne $translationInfo.DefaultValue) {
-                    Write-Warning "The default value '$($translationInfo.DefaultValue)' for id '$($_.id)' in translation file '$($translation.TranslationFile)' does not match the value '$($_.name)' in '$antibioticsFile'."
-                }
-                if ($translationInfo.NeedsTranslation) {
-                    $substance = $translationInfo.TranslatedValue
-                }
-                return [PSCustomObject][ordered]@{ Id = $_.id; Substance = $substance; AtcCode = $_.atc_code; AtcUrl = $atcUrl; AWaReCategory = $awareCategory; AWaReUrl = $awareUrl }
-            }
-        }
-        if ($TargetCulture.Name -and $translations.Count -gt 0) {
-            Write-Warning "Cannot find a translation for id '$($_.id)' in any of the translation files for locale '$($TargetCulture.Name)' or any of its parent locales in directory '$antibioticsFolderPath'. The antibiotic will have its untranslated default name '$($_.name)'."
-        }
-        return [PSCustomObject][ordered]@{ Id = $_.id; Substance = $substance; AtcCode = $_.atc_code; AtcUrl = $atcUrl; AWaReCategory = $awareCategory; AWaReUrl = $awareUrl }
+        [PSCustomObject][ordered]@{ Id = $_.id; Substance = $substance; AtcCode = $_.atc_code; AtcUrl = $atcUrl; AWaReCategory = $awareCategory; AWaReUrl = $awareUrl }
     } |
     Sort-Object -Culture $TargetCulture -Property 'Substance' |
     ForEach-Object -Begin {
@@ -418,8 +457,9 @@ function New-AntibioticsList {
         }
     } -Process {
         if ($AsciiDoc) {
-            $a = if ($_.AWaReCategory) { "$($_.AWaReUrl)[image:AWaRe-$($_.AWaReCategory).svg[$($_.AWaReCategory),20],window=_blank]" } else { '' }
-            Write-Output "|$($_.Substance) |$($_.AtcUrl)[$($_.AtcCode),window=_blank] |$a"
+            $awareCell = if ($_.AWaReCategory) { "$($_.AWaReUrl)[image:AWaRe-$($_.AWaReCategory).svg[$($_.AWaReCategory),20],window=_blank]" } else { '' }
+            $atcCell = if ($_.AtcCode) { "$($_.AtcUrl)[$($_.AtcCode),window=_blank]" } else { '' }
+            Write-Output "|$($_.Substance) |$atcCell |$awareCell"
         } else {
             $_
         }

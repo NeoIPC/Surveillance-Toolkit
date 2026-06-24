@@ -25,7 +25,7 @@ param(
     [ArgumentCompleter({
         param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
         Import-Module (Join-Path $PSScriptRoot 'modules' 'NeoIPC-Tools') -Force -Verbose:$false
-        $serverKey = Get-NeoipcServerKey `
+        $serverKey = Get-NeoIPCServerKey `
             -Scheme $fakeBoundParameters['Dhis2Scheme'] `
             -Hostname $fakeBoundParameters['Dhis2Hostname'] `
             -Port $fakeBoundParameters['Dhis2Port'] `
@@ -299,9 +299,9 @@ if ($ValidationExceptionFile) {
 
 # In DataFile mode no DHIS2 auth is needed, but we still scope LC_ALL.
 # Pass a dummy auth hashtable that clears env vars without setting new ones.
-$authForEnv = if ($isDataFileMode) { @{ AuthType = 'None' } } else { Resolve-NeoipcAuth -Token $Token }
+$authForEnv = if ($isDataFileMode) { @{ AuthType = 'None' } } else { Resolve-NeoIPCAuth -Token $Token }
 
-Invoke-WithNeoipcAuth -Auth $authForEnv -ExtraEnvVars @{ 'LC_ALL' = $null } -ScriptBlock {
+Invoke-WithNeoIPCAuth -Auth $authForEnv -ExtraEnvVars @{ 'LC_ALL' = $null } -ScriptBlock {
 
 # Prepare build tracking before try block so variables are always initialized,
 # even if an early exception (e.g. auth failure) skips the rest of the try body
@@ -352,7 +352,7 @@ if (inherits(x, 'neoipcr_bnch_ds')) {
         if ($Dhis2Hostname) { $deptArgs.Hostname = $Dhis2Hostname }
         if ($Dhis2Port) { $deptArgs.Port = $Dhis2Port }
         if ($Dhis2Path) { $deptArgs.Path = $Dhis2Path }
-        $siteCodes = Get-NeoipcDepartments @deptArgs
+        $siteCodes = Get-NeoIPCDepartments @deptArgs
 
         if (-not $siteCodes -or $siteCodes.Count -eq 0) {
             Write-Warning "No sites matched filter '$SiteCodeFilter'. Nothing to do.";
@@ -460,9 +460,9 @@ if (inherits(x, 'neoipcr_bnch_ds')) {
 
         # Loop by locale and site
         foreach ($locale in $OutputLocales) {
-            $localeParts = Split-NeoipcLocale -Locale $locale
+            $localeParts = Split-NeoIPCLocale -Locale $locale
             $lang = $localeParts.Language
-            $qmdToUse = Resolve-NeoipcLocaleQmd -ReportDir $reportDirPath -BaseName 'Partner-Report' -Locale $locale
+            $qmdToUse = Resolve-NeoIPCLocaleQmd -ReportDir $reportDirPath -BaseName 'Partner-Report' -Locale $locale
 
             # Set LC_ALL so R picks up the full locale (territory-specific resources)
             if ($localeParts.Territory) {
@@ -658,7 +658,7 @@ finally {
         buildSteps = $buildLog
     }
     $reportPath = if ($JsonReport) { $buildReportFilePath } else { $null }
-    $status = Write-NeoipcBuildReport -Name 'Partner Report Build' `
+    $status = Write-NeoIPCBuildReport -Name 'Partner Report Build' `
         -Errors $errors -OutputFiles $outputFiles -BuildCompleted $buildCompleted `
         -StartedAt $startedAt -BuildReportPath $reportPath -ExtraFields $extraFields
 
@@ -667,4 +667,4 @@ finally {
     }
 }
 
-} # end Invoke-WithNeoipcAuth
+} # end Invoke-WithNeoIPCAuth

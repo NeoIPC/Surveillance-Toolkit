@@ -1,0 +1,9 @@
+# DHIS2 expression files (the metadata directory's externalised program-rule conditions, action data, program-
+# indicator / validation-rule expressions) are LF text — pin the line endings so they round-trip byte-for-byte
+# regardless of a checkout machine's core.autocrlf setting.
+*.dhis2 text eol=lf
+
+# Rendered metadata distribution packages (scripts/New-NeoIPCMetadataDistribution.ps1) are generated build
+# artifacts, committed compressed (single line). Collapse them in diffs and exclude them from language stats —
+# review the source metadata directory and the generator, not the rendered blob.
+metadata/dist/*.json linguist-generated=true

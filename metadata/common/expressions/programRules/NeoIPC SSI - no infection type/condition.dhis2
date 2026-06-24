@@ -1,0 +1,1 @@
+!d2:hasValue(#{NeoIPC SSI Infection type value}) || #{NeoIPC SSI Infection type value} < 1

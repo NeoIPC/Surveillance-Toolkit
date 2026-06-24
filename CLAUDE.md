@@ -16,6 +16,8 @@ The rules below without a *(repo-specific)* tag are the NeoIPC **universal** gua
 - Treat infection definitions in this repository as normative. When a conflict exists between code and definitions, **fix the code**, not the definitions.
 - **Never** invent or paraphrase clinical definitions, thresholds, or measurement criteria. Always look up the normative text in `doc/protocol/` (or the relevant definition file) before writing or modifying footnotes, tooltips, or explanatory text that describes how a metric is defined or measured. If no protocol definition exists for the concept, flag it rather than guessing. *(repo-specific)*
 - **Never** use `metadata/common/infectious-agents/NeoIPC-Pathogen-Concepts.csv` or `metadata/common/infectious-agents/NeoIPC-Pathogen-Synonyms.csv` as a reference when investigating infectious-agent taxonomy, synonyms, resistance categories, or any pathogen definition. These CSVs are legacy and unmaintained. The canonical source is `metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml`. *(repo-specific)*
+- **Always** name infectious-agent concepts in `NeoIPC-Infectious-Agents.yaml` from the appropriate **domain authority**: **LPSN** (<https://lpsn.dsmz.de>) for bacteria/prokaryotes, **MycoBank** (<https://www.mycobank.org>) for fungi, and **ICTV** (<https://ictv.global/taxonomy/>) for viruses; the **common-commensal** status follows the **NHSN Organism List** (<https://www.cdc.gov/nhsn/index.html>). For bacteria, prefer the **LoRN** name ("Recommended Names for bacteria of medical importance" — the LPSN entry whose `status` is "correct name, recommended for medical use"; its `record_lnk` joins a synonym to its correct-name record) as the primary name wherever one exists, keeping other valid names as synonyms. Each upstream source carries its own copyright — the directory's effective license is **CC BY-NC-ND 4.0** (plus CDC terms for NHSN-derived content); cite and attribute per this directory's `README.md` + `LICENSE.md`, and obtain upstream data only via each source's official download page / API (never scrape). *(repo-specific)*
+- **Never** drop a pathogen name from `NeoIPC-Infectious-Agents.yaml` when it is renamed or reclassified — retain the prior name as a **synonym** of the current concept, **keeping its original `Id`** so values already entered against it still resolve, **and give the current/accepted name its own `Id` so it is selectable in DHIS2 too.** A reclassification therefore *adds* the new name as an option alongside the retained synonym — it never merely relabels the old one. A synonym's `Id` is the DHIS2 option-code already stored in collected surveillance data, so it must follow the name as it becomes a synonym — do **not** mint a new `Id` for the demoted name or retire the old one; the current name takes the next free `Id` (= `max+1`, gaps not refilled; a genuinely retired `Id` is never reassigned to a *different* organism). Whole-branch moves (mostly in viruses) can complicate this, but bacterial renames are normally clean per-name retentions. *(repo-specific)*
 - **Never** introduce non-permissive dependencies (fonts, libraries, templates). All fonts must be SIL OFL or equivalent.
 - **Always** keep `CLAUDE.md` and `.github/copilot-instructions.md` in sync within this repository. When you modify one, apply the same change to the other.
 - **Always** push back when evidence contradicts the user's suggestion or implied assumption. Do not defer to the user's position when authoritative sources (AMA Manual of Style, protocol definitions, language specifications, etc.) say otherwise. Present the evidence clearly and let the user decide.
@@ -261,7 +263,7 @@ No `sprintf` `%s`, markdown, or LaTeX syntax in translatable strings. Use `glue`
 
 ### PowerShell Scripts
 
-Approved PS verbs + PascalCase noun (e.g., `New-PartnerReports.ps1`). All wrappers in `scripts/`. Shared helpers in `scripts/NeoipcReportHelpers.ps1` (dot-sourced).
+Approved PS verbs + PascalCase noun (e.g., `New-PartnerReports.ps1`). All wrappers in `scripts/`. Shared helpers in `scripts/NeoIPCReportHelpers.ps1` (dot-sourced).
 
 ### Argument Handling
 
@@ -272,7 +274,7 @@ Approved PS verbs + PascalCase noun (e.g., `New-PartnerReports.ps1`). All wrappe
 
 ### Auth Flow
 
-neoipcr is the single auth authority. PS scripts resolve credentials via `Resolve-NeoipcAuth` (token or username/password), then set scoped environment variables (`NEOIPC_DHIS2_TOKEN`, `NEOIPC_DHIS2_USER`, `NEOIPC_DHIS2_PASSWORD`) so neoipcr in child R/Quarto processes finds them automatically. No `-P "token:..."` in QMD renders.
+neoipcr is the single auth authority. PS scripts resolve credentials via `Resolve-NeoIPCAuth` (token or username/password), then set scoped environment variables (`NEOIPC_DHIS2_TOKEN`, `NEOIPC_DHIS2_USER`, `NEOIPC_DHIS2_PASSWORD`) so neoipcr in child R/Quarto processes finds them automatically. No `-P "token:..."` in QMD renders.
 
 Env var fallback chain in `neoipcr::get_auth_data()`:
 1. `NEOIPC_DHIS2_SESSION_ID` → session_id (Docker only)

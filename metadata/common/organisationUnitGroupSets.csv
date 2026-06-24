@@ -1,0 +1,4 @@
+id,code,name,shortName,description,compulsory,dataDimension,includeSubhierarchyInAnalytics,organisationUnitGroups,sharing
+vH6VC8oZ8DM,NEOIPC_CATEGORY,NeoIPC Category,NeoIPC Category,,True,False,False,H1frxxJMCb4 OuU4pHxMRe1 V9axyIuqqs6 XPP6LOaflkG aYhPCaHuOnT e98fvj9eyyT rmCE1osCb4M,PUBLIC_RW
+a4027Fi160b,NEOIPC_TRIALS,NeoIPC Trials,NeoIPC Trials,,False,False,False,e98fvj9eyyT,PUBLIC_RW
+XjOQeVQSIhL,WORLD_BANK_CLASSES,World Bank Country classification,World Bank CC,World Bank country classification,False,False,False,FGXhcDCM8iI UK9bpnhSABF UuBqewaL0cA avrlCvo8wGg fs3kOGAgBwd iElwDtfOCEx ubtWo66ecVA wgowwnF8f4I,PUBLIC_RW

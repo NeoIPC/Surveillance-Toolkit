@@ -1,0 +1,2 @@
+id,name,description,featureType,allowAuditLog,maxTeiCountToReturn,minAttributesRequiredToSearch,style_icon,sharing
+DAv3TK40X4R,NeoIPC Patient,A patient in the NeoIPC core module,NONE,False,10,0,baby_female_0203m_outline,NEOIPC_DATA_EDIT

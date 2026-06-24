@@ -1,0 +1,9 @@
+id,name,valueType,mandatory,searchable,displayInList,trackedEntityType,trackedEntityAttribute,sharing,__fk
+RYmda5D4dPy,NeoIPC Patient NeoIPC Patient Birth weight,INTEGER_POSITIVE,False,True,True,DAv3TK40X4R,ZbL9VmLRB6D,,DAv3TK40X4R
+qRMZK5YnWGV,NeoIPC Patient NeoIPC Patient Delivery mode,INTEGER_POSITIVE,True,True,True,DAv3TK40X4R,r0fqpUF1IF4,,DAv3TK40X4R
+l1NQBbu1Wcx,NeoIPC Patient NeoIPC Patient Gestational age,TEXT,,True,True,DAv3TK40X4R,qLGOhTzMVyY,,DAv3TK40X4R
+e1xyqDLvOal,NeoIPC Patient NeoIPC Patient Identifier,TEXT,True,True,True,DAv3TK40X4R,yQwpowV0o08,,DAv3TK40X4R
+eXDg0Ynpjiw,NeoIPC Patient NeoIPC Patient Infants in birth,INTEGER_POSITIVE,False,True,True,DAv3TK40X4R,RWgBBhSiu5U,,DAv3TK40X4R
+OuZSodFkE4c,NeoIPC Patient NeoIPC Patient Multiple birth,TRUE_ONLY,,True,True,DAv3TK40X4R,q2ijTWehrUh,,DAv3TK40X4R
+bIfhAOLjVIN,NeoIPC Patient NeoIPC Patient Sex,LETTER,True,True,True,DAv3TK40X4R,E5OMg8BC8be,,DAv3TK40X4R
+KPrIDEaZCGF,NeoIPC Patient NeoIPC Patient Total gestation days,INTEGER_ZERO_OR_POSITIVE,True,True,True,DAv3TK40X4R,Qyu9KOWyazL,,DAv3TK40X4R

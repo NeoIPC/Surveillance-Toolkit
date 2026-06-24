@@ -1,0 +1,1 @@
+!d2:hasValue(#{NeoIPC HAP Secondary BSI pathogen 2 value}) || #{NeoIPC HAP Secondary BSI pathogen 2 value} != 0
