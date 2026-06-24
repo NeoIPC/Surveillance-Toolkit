@@ -499,11 +499,12 @@ InModuleScope 'NeoIPC-Tools' {
         }
     }
 
-    Describe 'Generated-family exclusion (pathogen / substance / resistance / field-gating sourced from the ontology, not the directory)' {
+    Describe 'Directory materialisation + retired/option-domain exclusion' {
         BeforeAll {
-            # A package mixing the GENERATED families (excluded from the directory) with hand-authored business
-            # metadata (kept). The substance PRV / rule names are the DEPLOYED *unpadded* form ("substance 1"),
-            # exercising the slot-normalisation that matches them to the padded plan ("substance 01").
+            # A package mixing the matrix-generated families (now MATERIALISED into the directory) with hand-authored
+            # business metadata (kept) and a RETIRED aggregate rule (omitted — superseded, not in the to-be). The
+            # substance PRV / rule names are the DEPLOYED *unpadded* form ("substance 1"), exercising the
+            # slot-normalisation that matches them to the padded plan ("substance 01").
             $script:genPkg = [ordered]@{
                 dataElements = @(
                     [ordered]@{ id = 'deBsiPat001'; code = 'NEOIPC_BSI_PATHOGEN_1'; name = 'NeoIPC BSI Organism 1'; valueType = 'INTEGER_ZERO_OR_POSITIVE' }                          # generated
@@ -534,48 +535,65 @@ InModuleScope 'NeoIPC-Tools' {
                 )
             }
         }
-        It 'Get-NeoIPCMetadataGeneratedKeys resolves plan codes/names + the retired rule + in-package excluded rule ids' {
+        It 'Get-NeoIPCMetadataGeneratedKeys resolves the matrix refresh-identity + the retired rule ids' {
             $gk = Get-NeoIPCMetadataGeneratedKeys -Package (ConvertFrom-NeoIPCMetadataJsonText -Json ($script:genPkg | ConvertTo-Json -Depth 40))
+            # Refresh identity (which materialised rows are generated): matrix DE codes + variable + rule names.
             $gk.DataElementCodes.Contains('NEOIPC_BSI_PATHOGEN_1') | Should -BeTrue
             $gk.DataElementCodes.Contains('NEOIPC_SURVEILLANCE_END_AB_SUBST_01') | Should -BeTrue
             $gk.DataElementCodes.Contains('NEOIPC_BSI_NO_POS_CULTURE') | Should -BeFalse
             $gk.VariableNames.Contains('NeoIPC BSI Pathogen 1 value') | Should -BeTrue
-            # The deployed unpadded substance name is normalised into the (padded) generated set.
+            # The deployed unpadded substance name is normalised into the (padded) matrix set.
             $gk.VariableNames.Contains('NeoIPC Surveillance end Antibiotic substance 1 - current event value') | Should -BeTrue
             $gk.RuleNames.Contains('NeoIPC BSI Pathogen 1 - set 3GCR') | Should -BeTrue
-            $gk.RuleNames.Contains('NeoIPC HAP - set pathogen attribute variables') | Should -BeTrue
             $gk.RuleNames.Contains('NeoIPC BSI infection present') | Should -BeFalse
-            @($gk.ExcludedRuleIds | Sort-Object) | Should -Be @('rlHapAggr01', 'rlSet3gcr01', 'rlSubHide01', 'rlWhenEmp01')
+            # The retired aggregate is NOT a materialised matrix rule — it is tracked separately for exclusion.
+            $gk.RuleNames.Contains('NeoIPC HAP - set pathogen attribute variables') | Should -BeFalse
+            $gk.RetiredRuleNames.Contains('NeoIPC HAP - set pathogen attribute variables') | Should -BeTrue
+            # RetiredRuleIds = in-package ids of RETIRED rules (their name-less actions drop by owning id);
+            # GeneratedRuleIds = ALL generated rule ids (matrix + retired) for the classified-diff gate's selection.
+            @($gk.RetiredRuleIds | Sort-Object) | Should -Be @('rlHapAggr01')
+            @($gk.GeneratedRuleIds | Sort-Object) | Should -Be @('rlHapAggr01', 'rlSet3gcr01', 'rlSubHide01', 'rlWhenEmp01')
         }
-        It 'Test-NeoIPCMetadataGeneratedExcluded keys DEs by code, PRVs/rules by normalised name, actions by owning rule' {
+        It 'Test-NeoIPCMetadataGeneratedExcluded excludes only retired rules + the antibiotic option-domain; matrix families are materialised' {
             $gk = Get-NeoIPCMetadataGeneratedKeys -Package (ConvertFrom-NeoIPCMetadataJsonText -Json ($script:genPkg | ConvertTo-Json -Depth 40))
-            Test-NeoIPCMetadataGeneratedExcluded -Type 'dataElements' -Object ([ordered]@{ code = 'NEOIPC_BSI_PATHOGEN_1' }) -GeneratedKeys $gk | Should -BeTrue
-            Test-NeoIPCMetadataGeneratedExcluded -Type 'dataElements' -Object ([ordered]@{ code = 'NEOIPC_BSI_NO_POS_CULTURE' }) -GeneratedKeys $gk | Should -BeFalse
-            Test-NeoIPCMetadataGeneratedExcluded -Type 'programRuleVariables' -Object ([ordered]@{ name = 'NeoIPC Surveillance end Antibiotic substance 1 - current event value' }) -GeneratedKeys $gk | Should -BeTrue
-            Test-NeoIPCMetadataGeneratedExcluded -Type 'programRuleVariables' -Object ([ordered]@{ name = 'NeoIPC BSI antibiotic treatment value' }) -GeneratedKeys $gk | Should -BeFalse
-            Test-NeoIPCMetadataGeneratedExcluded -Type 'programRules' -Object ([ordered]@{ name = 'NeoIPC BSI Pathogen 1 - when empty' }) -GeneratedKeys $gk | Should -BeTrue
-            Test-NeoIPCMetadataGeneratedExcluded -Type 'programRules' -Object ([ordered]@{ name = 'NeoIPC BSI infection present' }) -GeneratedKeys $gk | Should -BeFalse
-            Test-NeoIPCMetadataGeneratedExcluded -Type 'programRuleActions' -Object ([ordered]@{ programRule = [ordered]@{ id = 'rlSet3gcr01' } }) -GeneratedKeys $gk | Should -BeTrue
+            # Matrix DEs / PRVs / rules / actions are MATERIALISED -> NOT excluded.
+            Test-NeoIPCMetadataGeneratedExcluded -Type 'dataElements' -Object ([ordered]@{ code = 'NEOIPC_BSI_PATHOGEN_1' }) -GeneratedKeys $gk | Should -BeFalse
+            Test-NeoIPCMetadataGeneratedExcluded -Type 'programRuleVariables' -Object ([ordered]@{ name = 'NeoIPC Surveillance end Antibiotic substance 1 - current event value' }) -GeneratedKeys $gk | Should -BeFalse
+            Test-NeoIPCMetadataGeneratedExcluded -Type 'programRules' -Object ([ordered]@{ name = 'NeoIPC BSI Pathogen 1 - when empty' }) -GeneratedKeys $gk | Should -BeFalse
+            Test-NeoIPCMetadataGeneratedExcluded -Type 'programRuleActions' -Object ([ordered]@{ programRule = [ordered]@{ id = 'rlSet3gcr01' } }) -GeneratedKeys $gk | Should -BeFalse
+            # The retired aggregate rule + its actions ARE excluded (superseded; not in the to-be directory).
+            Test-NeoIPCMetadataGeneratedExcluded -Type 'programRules' -Object ([ordered]@{ name = 'NeoIPC HAP - set pathogen attribute variables' }) -GeneratedKeys $gk | Should -BeTrue
+            Test-NeoIPCMetadataGeneratedExcluded -Type 'programRuleActions' -Object ([ordered]@{ programRule = [ordered]@{ id = 'rlHapAggr01' } }) -GeneratedKeys $gk | Should -BeTrue
             Test-NeoIPCMetadataGeneratedExcluded -Type 'programRuleActions' -Object ([ordered]@{ programRule = [ordered]@{ id = 'rlBizInf001' } }) -GeneratedKeys $gk | Should -BeFalse
+            # The antibiotic option-domain stays generated from the curation CSVs -> excluded by code shape.
+            Test-NeoIPCMetadataGeneratedExcluded -Type 'optionGroups' -Object ([ordered]@{ code = 'J01AA' }) -GeneratedKeys $gk | Should -BeTrue
+            Test-NeoIPCMetadataGeneratedExcluded -Type 'optionGroups' -Object ([ordered]@{ code = 'WHO_AWARE_WATCH' }) -GeneratedKeys $gk | Should -BeTrue
+            Test-NeoIPCMetadataGeneratedExcluded -Type 'optionGroups' -Object ([ordered]@{ code = 'NEOIPC_OTHER_GROUP' }) -GeneratedKeys $gk | Should -BeFalse
+            Test-NeoIPCMetadataGeneratedExcluded -Type 'optionGroupSets' -Object ([ordered]@{ code = 'ATC5' }) -GeneratedKeys $gk | Should -BeTrue
+            Test-NeoIPCMetadataGeneratedExcluded -Type 'optionGroupSets' -Object ([ordered]@{ code = 'WHO_AWARE' }) -GeneratedKeys $gk | Should -BeTrue
         }
-        It 'the emit drops the generated families (incl. the retired aggregate) and keeps the business metadata' {
+        It 'the emit materialises the matrix families + business and drops only the retired aggregate' {
             $work = ConvertFrom-NeoIPCMetadataJsonText -Json ($script:genPkg | ConvertTo-Json -Depth 40)
             $rows = ConvertFrom-NeoIPCMetadataPackage -Package $work
-            @($rows['dataElements'] | ForEach-Object { [string]$_['code'] } | Sort-Object) | Should -Be @('NEOIPC_ADM_DATE', 'NEOIPC_BSI_NO_POS_CULTURE')
-            @($rows['programRuleVariables'] | ForEach-Object { [string]$_['name'] }) | Should -Be @('NeoIPC BSI antibiotic treatment value')
-            @($rows['programRules'] | ForEach-Object { [string]$_['name'] }) | Should -Be @('NeoIPC BSI infection present')
-            @($rows['programRuleActions'] | ForEach-Object { [string]$_['id'] }) | Should -Be @('acBizInf001')
+            # All five DEs are kept (3 matrix + 2 business) — the matrix families are materialised, not dropped.
+            # (Compare-Object asserts set equality, order-independent — Sort-Object is culture-aware.)
+            (Compare-Object @($rows['dataElements'] | ForEach-Object { [string]$_['code'] }) @('NEOIPC_ADM_DATE', 'NEOIPC_BSI_NO_POS_CULTURE', 'NEOIPC_BSI_PATHOGEN_1', 'NEOIPC_BSI_PATHOGEN_1_3GCR', 'NEOIPC_SURVEILLANCE_END_AB_SUBST_01')) | Should -BeNullOrEmpty
+            (Compare-Object @($rows['programRuleVariables'] | ForEach-Object { [string]$_['name'] }) @('NeoIPC BSI Pathogen 1 value', 'NeoIPC BSI Pathogen 1 may be 3GCR', 'NeoIPC Surveillance end Antibiotic substance 1 - current event value', 'NeoIPC BSI antibiotic treatment value')) | Should -BeNullOrEmpty
+            # The retired aggregate is the only rule dropped (superseded); the three matrix rules + business stay.
+            (Compare-Object @($rows['programRules'] | ForEach-Object { [string]$_['name'] }) @('NeoIPC BSI Pathogen 1 - set 3GCR', 'NeoIPC BSI Pathogen 1 - when empty', 'NeoIPC Surveillance end Antibiotic substance 1 - hide', 'NeoIPC BSI infection present')) | Should -BeNullOrEmpty
+            # Its action drops with it; the four kept rules' actions remain.
+            @($rows['programRuleActions'] | ForEach-Object { [string]$_['id'] }) | Should -Not -Contain 'acHapAggr01'
+            (Compare-Object @($rows['programRuleActions'] | ForEach-Object { [string]$_['id'] }) @('acSet3gcr01', 'acWhenEmp01', 'acSubHide01', 'acBizInf001')) | Should -BeNullOrEmpty
         }
-        It 'drops a hand-authored action bundled onto a generated rule (keyed by owning rule); the assembler reinstates it from the export, not the directory' {
-            # The deployed BSI 'when set' rule bundles a hand-authored HIDEFIELD on NEOIPC_BSI_NO_POS_CULTURE (a
-            # hand-authored action no generator reproduces) alongside the generated SETMANDATORYFIELD on _SOURCE. Both
-            # drop from the directory because their owning rule is generated; Add-NeoIPCGeneratedMetadata salvages the
-            # hand-authored action onto the generated rule from the export, so the importable package keeps it. This asserts the
-            # intentional over-exclusion so a future change cannot silently flip it (and the kept business DE stays).
+        It 'materialises a now-directory rule together with its hand-authored action' {
+            # The BSI 'when set' rule bundles a hand-authored HIDEFIELD on NEOIPC_BSI_NO_POS_CULTURE alongside the
+            # generated SETMANDATORYFIELD on _SOURCE. The rule is now a MATERIALISED directory row, so BOTH actions
+            # (and both DEs) are emitted with it — including the hand-authored one. (The export-independence / BSI
+            # step later promotes that hand-authored action to its own stand-alone directory rule.)
             $pkg = [ordered]@{
                 dataElements = @(
-                    [ordered]@{ id = 'deBsiSrc001'; code = 'NEOIPC_BSI_PATHOGEN_1_SOURCE'; name = 'src'; valueType = 'INTEGER_POSITIVE' }          # generated
-                    [ordered]@{ id = 'deNoPosCul1'; code = 'NEOIPC_BSI_NO_POS_CULTURE'; name = 'no positive culture'; valueType = 'TRUE_ONLY' }       # business, kept
+                    [ordered]@{ id = 'deBsiSrc001'; code = 'NEOIPC_BSI_PATHOGEN_1_SOURCE'; name = 'src'; valueType = 'INTEGER_POSITIVE' }          # matrix
+                    [ordered]@{ id = 'deNoPosCul1'; code = 'NEOIPC_BSI_NO_POS_CULTURE'; name = 'no positive culture'; valueType = 'TRUE_ONLY' }       # business
                 )
                 programRules = @(
                     [ordered]@{ id = 'rlWhenSet01'; name = 'NeoIPC BSI Pathogen 1 - when set'; condition = 'd2:hasValue(#{x})'; programRuleActions = @([ordered]@{ id = 'acSrcMand01' }, [ordered]@{ id = 'acNoPosHid1' }) }
@@ -586,17 +604,19 @@ InModuleScope 'NeoIPC-Tools' {
                 )
             }
             $rows = ConvertFrom-NeoIPCMetadataPackage -Package (ConvertFrom-NeoIPCMetadataJsonText -Json ($pkg | ConvertTo-Json -Depth 40))
-            $rows.Contains('programRules') | Should -BeFalse        # the only rule is generated -> dropped
-            $rows.Contains('programRuleActions') | Should -BeFalse  # BOTH actions drop with their generated owning rule
-            @($rows['dataElements'] | ForEach-Object { [string]$_['code'] }) | Should -Be @('NEOIPC_BSI_NO_POS_CULTURE')   # the generated _SOURCE DE drops, the business DE stays
+            @($rows['programRules'] | ForEach-Object { [string]$_['name'] }) | Should -Be @('NeoIPC BSI Pathogen 1 - when set')
+            @($rows['programRuleActions'] | ForEach-Object { [string]$_['id'] } | Sort-Object) | Should -Be @('acNoPosHid1', 'acSrcMand01')
+            @($rows['dataElements'] | ForEach-Object { [string]$_['code'] } | Sort-Object) | Should -Be @('NEOIPC_BSI_NO_POS_CULTURE', 'NEOIPC_BSI_PATHOGEN_1_SOURCE')
         }
-        It 'the comparator treats the generated families as a known non-difference, both directions (round-trip stays green)' {
+        It 'the comparator round-trips the materialised matrix families and skips the retired aggregate (both directions)' {
             $baseline = ConvertFrom-NeoIPCMetadataJsonText -Json ($script:genPkg | ConvertTo-Json -Depth 40)
             $work     = ConvertFrom-NeoIPCMetadataJsonText -Json ($script:genPkg | ConvertTo-Json -Depth 40)
             $rebuilt  = ConvertTo-NeoIPCMetadataPackage -Rows (ConvertFrom-NeoIPCMetadataPackage -Package $work)
+            # The matrix families are materialised, so they survive emit->rebuild and compare equal; the retired
+            # aggregate is dropped from $rebuilt, and the comparator skips it via ExcludedRuleIds on BOTH sides.
             @(Compare-NeoIPCMetadataCore -Reference $baseline -Difference $rebuilt).Count | Should -Be 0
-            # Reversed sides: the generated rules/actions live only on the Difference here, so this guards the
-            # ExcludedRuleIds .UnionWith (without it the Difference-side actions would surface as spurious Added).
+            # Reversed sides: the retired rule + its action live only on the Reference here, guarding the
+            # ExcludedRuleIds .UnionWith (without it they would surface as spurious Removed).
             @(Compare-NeoIPCMetadataCore -Reference $rebuilt -Difference $baseline).Count | Should -Be 0
         }
         It 'still flags a real change in a business rule' {
@@ -1784,28 +1804,13 @@ InModuleScope 'NeoIPC-Tools' {
         }
     }
 
-    Describe 'New-NeoIPCMetadataPackage (public assembler: variant switch + directory read)' {
+    Describe 'New-NeoIPCMetadataPackage (public assembler: export-free directory read; production / -Play)' {
         BeforeAll {
-            # Minimal export: the closure seed (NEOIPC_CORE program) + the non-closure DEFINITIONS the assembler
-            # pulls — userRoles (for the role-name -> UID map) and the three structural org-unit groups that the
-            # derived membership lands on.
-            $export = [ordered]@{
-                programs               = @([ordered]@{ id = 'progNEOIPC1'; code = 'NEOIPC_CORE'; name = 'Core' })
-                userRoles              = @(
-                    [ordered]@{ id = 'roleBase001'; name = 'Base' }
-                    [ordered]@{ id = 'roleData001'; name = 'Data entry' }
-                    [ordered]@{ id = 'roleSuper01'; name = 'Superuser' })
-                organisationUnitGroups = @(
-                    [ordered]@{ id = 'oug0000001'; code = 'HOSPITAL'; name = 'Hospital' }
-                    [ordered]@{ id = 'oug0000002'; code = 'COUNTRY'; name = 'Country' }
-                    [ordered]@{ id = 'oug0000003'; code = 'NEO_DEPARTMENT'; name = 'Neonatology Department' })
-            }
-            $script:asmExportPath = Join-Path $TestDrive 'asm-export.json'
-            [System.IO.File]::WriteAllText($script:asmExportPath, ($export | ConvertTo-Json -Depth 40), [System.Text.UTF8Encoding]::new($false))
-
-            # A minimal canonical directory: common (root + AT country) + play (AT_TEST hospital + AT_TEST_TEST
-            # dept, one user). No org-unit-group / user-group membership files -> exercises the optional-file
-            # (Where-Object Test-Path) guards; the only memberships are the structural COUNTRY/HOSPITAL/NEO_DEPARTMENT
+            # A minimal canonical directory — the build reads it ALONE (no export). common/ carries the config the
+            # assembler needs: the org-unit scaffold (root + AT country), the userRoles (role-name -> UID map), and
+            # the three structural org-unit groups the derived membership lands on. play/ carries the synthetic test
+            # hierarchy (AT_TEST hospital + AT_TEST_TEST dept, one user). No membership files -> exercises the
+            # optional-file guards; the only memberships are the structural COUNTRY/HOSPITAL/NEO_DEPARTMENT
             # derivation off the codes.
             $script:asmDir = Join-Path $TestDrive 'asm-mdir'
             $commonDir = Join-Path $script:asmDir 'common'
@@ -1815,6 +1820,14 @@ InModuleScope 'NeoIPC-Tools' {
             @('id,code,name,shortName,openingDate,closedDate,level,parent,image,sharing',
               'ouNEOIPC001,NEOIPC,NeoIPC,NeoIPC,2023-01-01,,1,,,',
               'ouAT0000001,AT,Austria,Austria,2023-01-01,,2,ouNEOIPC001,,') | Set-Content -LiteralPath (Join-Path $commonDir 'organisationUnits.csv') -Encoding utf8
+            @('id,name,sharing',
+              'roleBase001,Base,',
+              'roleData001,Data entry,',
+              'roleSuper01,Superuser,') | Set-Content -LiteralPath (Join-Path $commonDir 'userRoles.csv') -Encoding utf8
+            @('id,code,name,sharing',
+              'oug0000001,HOSPITAL,Hospital,',
+              'oug0000002,COUNTRY,Country,',
+              'oug0000003,NEO_DEPARTMENT,Neonatology Department,') | Set-Content -LiteralPath (Join-Path $commonDir 'organisationUnitGroups.csv') -Encoding utf8
             @('id,code,name,shortName,openingDate,closedDate,level,parent,image,sharing',
               'ouATTEST001,AT_TEST,Hospital,Hospital,2023-01-01,,3,ouAT0000001,,',
               'ouATTESTT01,AT_TEST_TEST,Dept,Dept,2023-01-01,,4,ouATTEST001,,') | Set-Content -LiteralPath (Join-Path $playDir 'organisationUnits.csv') -Encoding utf8
@@ -1823,29 +1836,44 @@ InModuleScope 'NeoIPC-Tools' {
             @('username,organisationUnit', 'play.at.user1,AT_TEST_TEST') | Set-Content -LiteralPath (Join-Path $playDir 'userOrgUnitAssignments.csv') -Encoding utf8
         }
         It 'assembles the play variant from common + play, preserving committed UIDs and resolving role names' {
-            $res = New-NeoIPCMetadataPackage -ExportPath $script:asmExportPath -MetadataDirectory $script:asmDir -SkipGeneration -PassThru -WarningAction SilentlyContinue
+            $res = New-NeoIPCMetadataPackage -MetadataDirectory $script:asmDir -Play -SkipGeneration -PassThru -WarningAction SilentlyContinue
             $res.OrgUnitCount | Should -Be 4          # 2 common + 2 play
             $res.UserCount | Should -Be 1
             $pkg = $res.Package
             @($pkg['organisationUnits']).Count | Should -Be 4
             @($pkg['users']).Count | Should -Be 1
             $pkg['users'][0]['id'] | Should -BeExactly 'usrPlayAT01'                                       # committed UID preserved
-            @($pkg['users'][0]['userRoles'] | ForEach-Object { [string]$_['id'] } | Sort-Object) | Should -Be @('roleBase001', 'roleData001')   # role NAME -> export UID
+            @($pkg['users'][0]['userRoles'] | ForEach-Object { [string]$_['id'] } | Sort-Object) | Should -Be @('roleBase001', 'roleData001')   # role NAME -> directory UID
             ($pkg['organisationUnitGroups'] | Where-Object { $_.code -eq 'COUNTRY' }).organisationUnits[0].id | Should -BeExactly 'ouAT0000001'
             ($pkg['organisationUnitGroups'] | Where-Object { $_.code -eq 'HOSPITAL' }).organisationUnits[0].id | Should -BeExactly 'ouATTEST001'
             ($pkg['organisationUnitGroups'] | Where-Object { $_.code -eq 'NEO_DEPARTMENT' }).organisationUnits[0].id | Should -BeExactly 'ouATTESTT01'
         }
         It 'emits JSON (no -PassThru) carrying the assembled org units' {
-            $json = New-NeoIPCMetadataPackage -ExportPath $script:asmExportPath -MetadataDirectory $script:asmDir -SkipGeneration -WarningAction SilentlyContinue
+            $json = New-NeoIPCMetadataPackage -MetadataDirectory $script:asmDir -Play -SkipGeneration -WarningAction SilentlyContinue
             $json | Should -Match '"organisationUnits"'
         }
-        It '-Variant production requires -OverlayPath' {
-            { New-NeoIPCMetadataPackage -ExportPath $script:asmExportPath -MetadataDirectory $script:asmDir -Variant production -WarningAction SilentlyContinue } | Should -Throw '*requires -OverlayPath*'
+        It 'without -SkipGeneration, splices the generated option-domain into the package (exercises the generation branch)' {
+            # The four option-domain generators are mocked so the branch runs without the YAML / antibiotics sources.
+            Mock New-NeoIPCPathogenOptionSet { [ordered]@{ optionSets = @([ordered]@{ id = 'osPbuild'; code = 'NEOIPC_PATHOGENS' }); options = @([ordered]@{ id = 'optP0build'; code = '0'; optionSet = [ordered]@{ id = 'osPbuild' } }) } }
+            Mock New-NeoIPCAntimicrobialOptionSet { [ordered]@{ optionSets = @([ordered]@{ id = 'osAbxbuild'; code = 'NEOIPC_ANTIMICROBIAL_SUBSTANCES' }); options = @() } }
+            Mock New-NeoIPCAntibioticOptionGroup { [ordered]@{ optionGroups = @([ordered]@{ id = 'ogAtcbuild'; code = 'J01AA' }) } }
+            Mock New-NeoIPCAntibioticOptionGroupSet { [ordered]@{ optionGroupSets = @([ordered]@{ id = 'ogsAtcbuild'; code = 'ATC5' }) } }
+            $res = New-NeoIPCMetadataPackage -MetadataDirectory $script:asmDir -Play -PassThru -WarningAction SilentlyContinue
+            @($res.Package['optionSets'] | Where-Object { [string]$_['code'] -eq 'NEOIPC_PATHOGENS' }).Count | Should -Be 1
+            @($res.Package['optionGroups'] | Where-Object { [string]$_['id'] -eq 'ogAtcbuild' }).Count | Should -Be 1
+            Should -Invoke New-NeoIPCAntibioticOptionGroupSet -Times 1
         }
-        It '-Variant production throws when the OverlayPath does not exist' {
-            { New-NeoIPCMetadataPackage -ExportPath $script:asmExportPath -MetadataDirectory $script:asmDir -Variant production -OverlayPath (Join-Path $TestDrive 'no-such-overlay') -WarningAction SilentlyContinue } | Should -Throw '*Variant overlay directory not found*'
+        It 'production (no overlay) is the install base — config + groups/roles, no org units or users' {
+            $res = New-NeoIPCMetadataPackage -MetadataDirectory $script:asmDir -SkipGeneration -PassThru -WarningAction SilentlyContinue
+            $res.OrgUnitCount | Should -Be 0
+            $res.UserCount | Should -Be 0
+            @($res.Package['organisationUnitGroups']).Count | Should -Be 3      # the group DEFINITIONS are still carried
+            @($res.Package['userRoles']).Count | Should -Be 3
         }
-        It '-Variant production reads the supplied overlay directory instead of play/' {
+        It 'production throws when the -OverlayPath does not exist' {
+            { New-NeoIPCMetadataPackage -MetadataDirectory $script:asmDir -OverlayPath (Join-Path $TestDrive 'no-such-overlay') -WarningAction SilentlyContinue } | Should -Throw '*Overlay directory not found*'
+        }
+        It 'production reads the supplied -OverlayPath instead of play/' {
             # An overlay with a DIFFERENT user set proves the overlay (not play/) is the variant source.
             $overlay = Join-Path $TestDrive 'asm-prod-overlay'
             New-Item -ItemType Directory -Path $overlay -Force | Out-Null
@@ -1853,22 +1881,20 @@ InModuleScope 'NeoIPC-Tools' {
             @('id,username,firstName,surname', 'usrProdX0001,prod.x.1,Prod,X One', 'usrProdX0002,prod.x.2,Prod,X Two') | Set-Content -LiteralPath (Join-Path $overlay 'users.csv') -Encoding utf8
             @('username,role', 'prod.x.1,Base', 'prod.x.2,Base') | Set-Content -LiteralPath (Join-Path $overlay 'userRoleAssignments.csv') -Encoding utf8
             @('username,organisationUnit', 'prod.x.1,AT_TEST_TEST', 'prod.x.2,AT_TEST_TEST') | Set-Content -LiteralPath (Join-Path $overlay 'userOrgUnitAssignments.csv') -Encoding utf8
-            $res = New-NeoIPCMetadataPackage -ExportPath $script:asmExportPath -MetadataDirectory $script:asmDir -Variant production -OverlayPath $overlay -SkipGeneration -PassThru -WarningAction SilentlyContinue
-            $res.UserCount | Should -Be 2                                                                  # the overlay's users, not play's single user
+            $res = New-NeoIPCMetadataPackage -MetadataDirectory $script:asmDir -OverlayPath $overlay -SkipGeneration -PassThru -WarningAction SilentlyContinue
+            $res.UserCount | Should -Be 2                                                                  # the overlay's users
             @($res.Package['users'] | ForEach-Object { [string]$_['username'] } | Sort-Object) | Should -Be @('prod.x.1', 'prod.x.2')
         }
-        It '-Variant play ignores a supplied -OverlayPath (reads play/)' {
-            # A nonexistent overlay path proves play never touches OverlayPath (no existence check, content unused).
-            $res = New-NeoIPCMetadataPackage -ExportPath $script:asmExportPath -MetadataDirectory $script:asmDir -Variant play -OverlayPath (Join-Path $TestDrive 'nonexistent-overlay-ignored') -SkipGeneration -PassThru -WarningAction SilentlyContinue
-            $res.UserCount | Should -Be 1                                                                  # play's single user; overlay ignored
+        It '-Play and -OverlayPath are mutually exclusive (parameter sets)' {
+            { New-NeoIPCMetadataPackage -MetadataDirectory $script:asmDir -Play -OverlayPath $TestDrive -SkipGeneration -WarningAction SilentlyContinue } | Should -Throw
         }
         It 'throws when the metadata directory is missing' {
-            { New-NeoIPCMetadataPackage -ExportPath $script:asmExportPath -MetadataDirectory (Join-Path $TestDrive 'no-such-dir') -WarningAction SilentlyContinue } | Should -Throw '*Metadata directory not found*'
+            { New-NeoIPCMetadataPackage -MetadataDirectory (Join-Path $TestDrive 'no-such-dir') -WarningAction SilentlyContinue } | Should -Throw '*Metadata directory not found*'
         }
         It 'throws when the common/ subdirectory is missing' {
             $bare = Join-Path $TestDrive 'asm-bare'
             New-Item -ItemType Directory -Path (Join-Path $bare 'play') -Force | Out-Null
-            { New-NeoIPCMetadataPackage -ExportPath $script:asmExportPath -MetadataDirectory $bare -WarningAction SilentlyContinue } | Should -Throw '*Common metadata directory not found*'
+            { New-NeoIPCMetadataPackage -MetadataDirectory $bare -Play -WarningAction SilentlyContinue } | Should -Throw '*Common metadata directory not found*'
         }
     }
 
@@ -3265,7 +3291,7 @@ Hierarchies:
             $rules['NeoIPC NEC Secondary BSI pathogen 1 - set 3GCR']['programStage']['id'] |
                 Should -BeExactly (New-NeoIPCMetadataUid -Type 'programStages' -NaturalKey 'NEOIPC_NEC')
         }
-        It 'preserves rule UID + description and the action UID from the export by name; mints otherwise' {
+        It 'preserves rule UID + action UID from the export by name; uses the plan description; mints otherwise' {
             $pkg = @{
                 programs           = $script:RulePkg['programs']
                 programStages      = $script:RulePkg['programStages']
@@ -3277,7 +3303,11 @@ Hierarchies:
             $rules = @{}; foreach ($r in @($frag['programRules'])) { $rules[[string]$r['name']] = $r }
             $seeded = $rules['NeoIPC BSI Pathogen 1 - set 3GCR']
             $seeded['id'] | Should -BeExactly 'RULEseed001'
-            $seeded['description'] | Should -BeExactly 'Seeded description.'
+            # Description is the canonical plan wording — it OVERWRITES the deployed/seeded text (rule descriptions
+            # are not load-bearing; the deployed copy carried drift). UID + action UID are still preserved.
+            $expectedDesc = [string](@(Get-NeoIPCPathogenRulePlan | Where-Object { [string]$_['Name'] -eq 'NeoIPC BSI Pathogen 1 - set 3GCR' })[0]['Description'])
+            $expectedDesc | Should -Not -BeNullOrEmpty
+            $seeded['description'] | Should -BeExactly $expectedDesc
             @($seeded['programRuleActions'])[0]['id'] | Should -BeExactly 'ACTseed0001'
             # A rule not in the export mints rule + action deterministically.
             $minted = $rules['NeoIPC BSI Pathogen 1 - not 3GCR']
@@ -3869,7 +3899,7 @@ Hierarchies:
             $rules['NeoIPC NEC Secondary BSI pathogen 1 - when not listed']['programStage']['id'] |
                 Should -BeExactly (New-NeoIPCMetadataUid -Type 'programStages' -NaturalKey 'NEOIPC_NEC')
         }
-        It 'rule generator: preserves rule UID + description and the action UID from the export by name; mints otherwise' {
+        It 'rule generator: preserves rule UID + action UID from the export by name; uses the plan description; mints otherwise' {
             $pkg = $script:FgPkg.Clone()
             $bsiStageId = New-NeoIPCMetadataUid -Type 'programStages' -NaturalKey 'NEOIPC_BSI'
             $pkg['programRules'] = @([ordered]@{ name = 'NeoIPC BSI Pathogen 1 - when set'; id = 'RULEseed001'; description = 'Seeded description.' })
@@ -3878,7 +3908,10 @@ Hierarchies:
             $rules = @{}; foreach ($r in @($frag['programRules'])) { $rules[[string]$r['name']] = $r }
             $seeded = $rules['NeoIPC BSI Pathogen 1 - when set']
             $seeded['id'] | Should -BeExactly 'RULEseed001'
-            $seeded['description'] | Should -BeExactly 'Seeded description.'
+            # Description is the canonical plan wording — it OVERWRITES the deployed/seeded text; UID + action UID kept.
+            $expectedDesc = [string](@(Get-NeoIPCPathogenFieldGatingRulePlan | Where-Object { [string]$_['Name'] -eq 'NeoIPC BSI Pathogen 1 - when set' })[0]['Description'])
+            $expectedDesc | Should -Not -BeNullOrEmpty
+            $seeded['description'] | Should -BeExactly $expectedDesc
             @($seeded['programRuleActions'])[0]['id'] | Should -BeExactly 'ACTseed0001'
             # A rule absent from the export mints rule + action deterministically.
             $minted = $rules['NeoIPC BSI Pathogen 1 - when not listed']
@@ -4006,6 +4039,54 @@ Hierarchies:
             $null = Add-NeoIPCGeneratedMetadata -Config (New-SpliceConfig) -Export ([ordered]@{}) -PathogenCount 5 -SubstanceCount 7
             Should -Invoke New-NeoIPCPathogenRule -ParameterFilter { $PathogenCount -eq 5 } -Times 1 -Exactly
             Should -Invoke New-NeoIPCSubstanceRule -ParameterFilter { $SubstanceCount -eq 7 } -Times 1 -Exactly
+        }
+    }
+
+    Describe 'Add-NeoIPCGeneratedOptionMetadata (export-free option-domain splice)' {
+        # The export-independent build path. The four option-domain generators are MOCKED to small fragments that
+        # carry NO sharing / dataDimension, so this exercises only the splice: the pure ADD into the directory
+        # config, the PUBLIC_RW sharing default + dataDimension=true default the export used to supply, the
+        # no-override of a generator-supplied value, and the duplicate-id guard. No -Export, no seed.
+        BeforeEach {
+            Mock New-NeoIPCPathogenOptionSet { [ordered]@{ optionSets = @([ordered]@{ id = 'osP'; code = 'NEOIPC_PATHOGENS' }); options = @([ordered]@{ id = 'optP0'; code = '0'; optionSet = [ordered]@{ id = 'osP' } }) } }
+            Mock New-NeoIPCAntimicrobialOptionSet { [ordered]@{ optionSets = @([ordered]@{ id = 'osAbx'; code = 'NEOIPC_ANTIMICROBIAL_SUBSTANCES' }); options = @([ordered]@{ id = 'optAbx1'; code = 'J01AA01'; optionSet = [ordered]@{ id = 'osAbx' } }) } }
+            Mock New-NeoIPCAntibioticOptionGroup { [ordered]@{ optionGroups = @([ordered]@{ id = 'ogAtc'; code = 'J01AA' }) } }
+            Mock New-NeoIPCAntibioticOptionGroupSet { [ordered]@{ optionGroupSets = @([ordered]@{ id = 'ogsAtc'; code = 'ATC5' }) } }
+        }
+        It 'adds the generated option-domain to the directory config (pure ADD; keeps the materialised matrix + config)' {
+            $config = [ordered]@{
+                dataElements = @([ordered]@{ id = 'deDir'; code = 'NEOIPC_BSI_PATHOGEN_1' })       # materialised matrix DE — untouched
+                optionSets   = @([ordered]@{ id = 'osYn'; code = 'NEOIPC_YES_NO_NOT_TESTED' })       # config option set — kept
+            }
+            $out = Add-NeoIPCGeneratedOptionMetadata -Config $config
+            @($out['dataElements'] | ForEach-Object { [string]$_['id'] }) | Should -Be @('deDir')
+            @($out['optionSets'] | ForEach-Object { [string]$_['id'] } | Sort-Object) | Should -Be @('osAbx', 'osP', 'osYn')
+            @($out['options'] | ForEach-Object { [string]$_['id'] } | Sort-Object) | Should -Be @('optAbx1', 'optP0')
+            @($out['optionGroups'] | ForEach-Object { [string]$_['id'] }) | Should -Be @('ogAtc')
+            @($out['optionGroupSets'] | ForEach-Object { [string]$_['id'] }) | Should -Be @('ogsAtc')
+        }
+        It 'applies the PUBLIC_RW sharing default to the generated option sets + groups (the export used to supply it)' {
+            $out = Add-NeoIPCGeneratedOptionMetadata -Config ([ordered]@{})
+            foreach ($o in @($out['optionSets']) + @($out['optionGroups'])) {
+                [string]$o['sharing']['public'] | Should -BeExactly 'rw------'
+            }
+        }
+        It 'defaults dataDimension=true and PUBLIC_RW on the option-group-set' {
+            $out = Add-NeoIPCGeneratedOptionMetadata -Config ([ordered]@{})
+            $gs = @($out['optionGroupSets'])[0]
+            $gs['dataDimension'] | Should -BeTrue
+            [string]$gs['sharing']['public'] | Should -BeExactly 'rw------'
+        }
+        It 'does not override a sharing / dataDimension value a generator already supplied' {
+            Mock New-NeoIPCAntibioticOptionGroupSet { [ordered]@{ optionGroupSets = @([ordered]@{ id = 'ogsAtc'; code = 'ATC5'; dataDimension = $false; sharing = [ordered]@{ public = 'r-------' } }) } }
+            $out = Add-NeoIPCGeneratedOptionMetadata -Config ([ordered]@{})
+            $gs = @($out['optionGroupSets'])[0]
+            $gs['dataDimension'] | Should -BeFalse
+            [string]$gs['sharing']['public'] | Should -BeExactly 'r-------'
+        }
+        It 'fails loud on a duplicate id introduced by the splice' {
+            $config = [ordered]@{ optionSets = @([ordered]@{ id = 'osP'; code = 'SOME_CONFIG_SET' }) }   # collides with the generated pathogen-set id
+            { Add-NeoIPCGeneratedOptionMetadata -Config $config } | Should -Throw '*duplicate id*'
         }
     }
 

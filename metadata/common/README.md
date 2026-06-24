@@ -57,3 +57,26 @@ relative file path; the converter writes the file + reference on emit and re-inl
 non-reference value is left untouched, so a hand-authored inline expression still reads, and a referenced-but-missing
 file fails loud). Folder names are the sanitised rule name (a name collision fails loud); the `.dhis2` files are LF
 (see `.gitattributes`).
+
+## Generated families — do not hand-edit; edit the source and regenerate
+
+Most rows here are hand-authored, but several **families are GENERATED** and materialised into the per-type CSVs
+(+ `expressions/`) for review, reconciliation and comprehension — **not** as the place to change them:
+
+- **per-slot pathogen / substance data elements** — codes `NEOIPC_<STAGE>_PATHOGEN_<N>[_…]`,
+  `NEOIPC_<STAGE>_SEC_BSI_PATHOGEN_<N>[_…]`, `NEOIPC_SURVEILLANCE_END_AB_SUBST_<NN>[_DAYS]`;
+- **resistance / field-gating / substance program-rule variables, rules and their actions** — names beginning
+  `NeoIPC <STAGE> Pathogen <N> …`, `NeoIPC <STAGE> Secondary BSI pathogen <N> …`,
+  `NeoIPC Antimicrobial substance <NN> …` (the same identity `Get-NeoIPCMetadataGeneratedKeys` derives from the
+  generator plans — there is no marker column; the family is identified by the naming convention, not stored).
+
+These are produced from their **source**: the capability matrix in `scripts/modules/NeoIPC-Tools/Private/MetadataGeneration.ps1`
+and the infectious-agent ontology `infectious-agents/NeoIPC-Infectious-Agents.yaml` (resistance code-sets). A direct
+edit to a generated row or its `expressions/` file is **silently overwritten the next time the family is refreshed**.
+To change a generated object, edit the source (the matrix / the YAML) and regenerate.
+
+The **option-domain** stays generated and is therefore **not** materialised here at all — the `NEOIPC_PATHOGENS`
+options (from the YAML + `infectious-agents/NeoIPC-Infectious-Agents.uids.csv`) and the
+`NEOIPC_ANTIMICROBIAL_SUBSTANCES` option set / options / ATC + AWaRe option groups / group-sets (from
+`antibiotics/`). Those are emitted into the importable package at build time; edit their source files, never expect
+them as rows here.

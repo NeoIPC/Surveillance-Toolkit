@@ -7,20 +7,17 @@ function ConvertFrom-NeoIPCMetadataJson {
     .SYNOPSIS
         Convert a DHIS2 metadata.json export into the reviewable per-type CSV directory.
     .DESCRIPTION
-        Reads a (PII-cleaned) DHIS2 metadata JSON file, prunes per-instance noise, extracts nested-only
-        child objects (programStageDataElements, programTrackedEntityAttributes, trackedEntityTypeAttributes,
-        analyticsPeriodBoundaries) into their own tables, and writes one UTF-8/no-BOM/LF CSV per object type
-        into OutputDirectory. The two domain-authored option sets (NEOIPC_PATHOGENS, NEOIPC_ANTIMICROBIAL_SUBSTANCES)
-        and their options are excluded — their canonical source is the infectious-agents YAML / the antibiotics CSV,
-        and the importable package gets them from the export closure via New-NeoIPCMetadataPackage, not this
-        directory. The ontology- and matrix-GENERATED families are excluded the same way: the per-slot pathogen /
-        substance data elements and the resistance / field-gating / substance program-rule variables, rules and
-        actions (plus the retired HAP aggregate rule) are generated from the YAML + capability matrix by
-        New-NeoIPCMetadataPackage, so the directory carries the hand-authored metadata rather than the generated
-        machinery. (A hand-authored action bundled onto a generated rule — e.g. the BSI no-positive-culture
-        hand-authored action on the regenerated 'when set' rule — drops with that rule; the assembler reinstates it from the
-        export, so the importable package keeps it.) Idempotent: replaces only the per-type files it owns. No DHIS2
-        API calls.
+        Initialises a per-type CSV directory from an export. Reads a (PII-cleaned) DHIS2 metadata JSON file, prunes
+        per-instance noise, extracts nested-only child objects (programStageDataElements,
+        programTrackedEntityAttributes, trackedEntityTypeAttributes, analyticsPeriodBoundaries) into their own
+        tables, and writes one UTF-8/no-BOM/LF CSV per object type into OutputDirectory. The matrix-generated
+        families — the per-slot pathogen / substance data elements and the resistance / field-gating / substance
+        program-rule variables, rules and actions — ARE materialised as ordinary rows (their opaque UID in the `id`
+        column, expressions externalised under expressions/). What stays excluded — because a richer file is its
+        canonical source and it is generated at build instead — is: the two domain option sets (NEOIPC_PATHOGENS,
+        NEOIPC_ANTIMICROBIAL_SUBSTANCES) + their options (from the infectious-agents YAML / antibiotics CSVs), the
+        antibiotic option groups / group-sets, and the superseded (retired) HAP aggregate rule + its actions.
+        Idempotent: replaces only the per-type files it owns. No DHIS2 API calls.
     .PARAMETER Path
         Path to the DHIS2 metadata.json export.
     .PARAMETER OutputDirectory
@@ -70,11 +67,12 @@ function ConvertTo-NeoIPCMetadataJson {
     .DESCRIPTION
         Reads the per-type CSV files, coerces cells back to typed values, re-nests nested-only children
         into their parents, and emits a DHIS2 metadata package as JSON (every id a valid UID — push with
-        idScheme=UID). The output therefore omits what the directory does not carry — the two domain-authored
-        option sets (NEOIPC_PATHOGENS, NEOIPC_ANTIMICROBIAL_SUBSTANCES) and the ontology- / matrix-generated
-        pathogen / substance / resistance / field-gating families; the complete importable package is assembled by
-        New-NeoIPCMetadataPackage (closure + generation + authored content), not by this round-trip cmdlet. Returns
-        the JSON string, or writes it to OutputPath (UTF-8, no BOM) when given.
+        idScheme=UID). The output carries the config + the materialised matrix families but omits what the directory
+        does not hold — the two domain option sets (NEOIPC_PATHOGENS, NEOIPC_ANTIMICROBIAL_SUBSTANCES) + their
+        options and the antibiotic option groups / group-sets, which stay generated from the YAML / antibiotics CSVs.
+        The complete importable package is assembled by New-NeoIPCMetadataPackage (directory read + option-domain
+        generation + authored org-unit/user overlay), export-free, not by this round-trip cmdlet. Returns the JSON
+        string, or writes it to OutputPath (UTF-8, no BOM) when given.
     .PARAMETER Path
         Directory containing the per-type CSV files.
     .PARAMETER OutputPath
@@ -90,6 +88,36 @@ function ConvertTo-NeoIPCMetadataJson {
         [switch]$Compress
     )
     if (-not (Test-Path -LiteralPath $Path)) { throw "Metadata directory not found: '$Path'." }
+    $package = Read-NeoIPCMetadataDirectoryPackage -Path $Path
+    $json = $package | ConvertTo-Json -Depth 100 -Compress:$Compress
+    if ($OutputPath) {
+        [System.IO.File]::WriteAllText($OutputPath, $json, [System.Text.UTF8Encoding]::new($false))
+        return
+    }
+    $json
+}
+
+function Read-NeoIPCMetadataDirectoryPackage {
+    <#
+    .SYNOPSIS
+        Read a per-type CSV metadata directory into a parsed DHIS2 package (hashtable).
+    .DESCRIPTION
+        The directory-read half of ConvertTo-NeoIPCMetadataJson, factored out so the package assembler
+        (New-NeoIPCMetadataPackage) can source its config + materialised matrix families from the directory the
+        same way the round-trip does — instead of from the seed export. Reads each per-type CSV, resolves the
+        sharing profiles (sharing.yaml), re-inlines the externalised expression files, and re-nests the
+        nested-only children. Excluded types (org units, users — authored separately) and the still-generated
+        families (the domain option sets, the antibiotic option groups) are simply absent from the directory and
+        therefore from the result. No DHIS2 API calls.
+    .PARAMETER Path
+        Directory containing the per-type CSV files (+ sharing.yaml + expressions/).
+    .OUTPUTS
+        An [ordered] hashtable: type -> object[].
+    #>
+    [CmdletBinding()]
+    [OutputType([System.Collections.IDictionary])]
+    param([Parameter(Mandatory)][string]$Path)
+    if (-not (Test-Path -LiteralPath $Path)) { throw "Metadata directory not found: '$Path'." }
     $ugCsv = Join-Path $Path 'userGroups.csv'
     $ugObjs = if (Test-Path -LiteralPath $ugCsv) { @(Read-NeoIPCMetadataCsv -Path $ugCsv) } else { @() }
     Import-NeoIPCSharingProfile -Path (Join-Path $Path 'sharing.yaml') -KeyToId (Get-NeoIPCUserGroupKeyMap -UserGroups $ugObjs).KeyToId
@@ -100,13 +128,7 @@ function ConvertTo-NeoIPCMetadataJson {
     }
     # Re-inline any externalised expression files (a cell that is an expressions/...dhis2 reference) before re-nesting.
     Read-NeoIPCMetadataExpressionFiles -Rows $rows -Directory $Path
-    $package = ConvertTo-NeoIPCMetadataPackage -Rows $rows
-    $json = $package | ConvertTo-Json -Depth 100 -Compress:$Compress
-    if ($OutputPath) {
-        [System.IO.File]::WriteAllText($OutputPath, $json, [System.Text.UTF8Encoding]::new($false))
-        return
-    }
-    $json
+    ConvertTo-NeoIPCMetadataPackage -Rows $rows
 }
 
 function Compare-NeoIPCMetadata {
@@ -420,55 +442,38 @@ function Select-NeoIPCMetadataClosure {
 function New-NeoIPCMetadataPackage {
     <#
     .SYNOPSIS
-        Assemble an importable DHIS2 metadata package from an export plus the UID-keyed metadata directory.
+        Assemble an importable DHIS2 metadata package from the canonical metadata directory — export-free.
     .DESCRIPTION
-        The play / production package build. Starts from a (PII-cleaned, merged) DHIS2 export for the
-        dependency-closure config, then overlays the authored content read from the canonical UID-keyed
-        directory (push with idScheme=UID):
-          1. Prunes the export to the seed program's dependency closure (the Select-NeoIPCMetadataClosure engine).
-          2. Adds the non-closure config DEFINITIONS from the export — org-unit groups / group-sets / levels,
-             userRoles, userGroups — with their real UIDs (the closure cannot reach these: the program
-             references them only by code).
-          3. Noise-strips the whole config: audit fields, user / sharing references, the anonymised
-             per-deployment membership, and (for now) translations — leaving a clean, user-ref-free package.
-          3b. Replaces the deployed generated classes (the NEOIPC_PATHOGENS option set + options, the per-slot
-             pathogen / substance data elements, and the resistance / field-gating / substance program-rule
-             variables + rules + actions) with the ontology- and matrix-generated ones (Add-NeoIPCGeneratedMetadata),
-             so the package carries the corrected taxonomy and the rule-quality fixes — not the stale export
-             snapshot. -SkipGeneration omits this step.
-          4. Reads the org units, users, and group memberships from the UID-keyed directory — the `common`
-             base plus the selected variant overlay — preserving the committed UIDs (real production UIDs for
-             the live org units), and stitches them in group-side, collision-checking every authored UID
-             against the captured identities (Join-NeoIPCMetadataPackage).
-        The export's anonymised org-unit instances and user accounts are excluded; the directory content
-        replaces them. By default the assembled package is emitted as JSON (returned, or written to
-        OutputPath). Translations are dropped pending the gettext-PO pipeline. No DHIS2 API calls.
-    .PARAMETER ExportPath
-        Path to the merged, PII-cleaned DHIS2 export JSON (the closure seed + the non-closure definitions).
+        The production / play package build, sourced from the `metadata/` directory ALONE (no seed export; push
+        with idScheme=UID):
+          1. Reads the config + the materialised matrix families (per-slot DEs / PRVs / rules / actions) from
+             `common/` (Read-NeoIPCMetadataDirectoryPackage), and drops the excluded authored types (the org-unit
+             scaffold, users) — those are read separately from the overlay.
+          2. Splices in the still-generated OPTION-DOMAIN families — the NEOIPC_PATHOGENS option set + options
+             (from the infectious-agent YAML + the UID sidecar) and the NEOIPC_ANTIMICROBIAL_SUBSTANCES option
+             set / options / option groups / group-sets (from the antibiotics curation CSVs) — via
+             Add-NeoIPCGeneratedOptionMetadata. -SkipGeneration omits this (config + matrix only).
+          3. Reads the org units, users, and group memberships from the selected overlay — `common` scaffold +
+             the variant (play, or a production OverlayPath) — preserving the committed UIDs, and stitches them
+             in group-side, collision-checking every authored UID (Join-NeoIPCMetadataPackage). production with
+             no overlay carries none (the WHO install-base convention: config + groups/roles, no org units/users).
+        By default the assembled package is emitted as JSON (returned, or written to OutputPath). Translations are
+        dropped pending the gettext-PO pipeline. No DHIS2 API calls, and no dependency on the seed metadata.json.
     .PARAMETER MetadataDirectory
-        The canonical metadata directory root (contains common/ and play/). The base config is read from
-        common/; the overlay from common/ + (play/ or the production OverlayPath).
-    .PARAMETER Variant
-        play (the committed synthetic overlay under MetadataDirectory/play) or production (an uncommittable
-        real-data overlay supplied via OverlayPath). Both share the common base. Default: play.
+        The canonical metadata directory root (contains common/ and play/). Config + matrix families are read from
+        common/; the org-unit / user overlay from common/ + (play/ under -Play, or the production -OverlayPath).
     .PARAMETER OverlayPath
-        For -Variant production: the uncommittable private directory of real org units / users / memberships
-        (same file layout as play/). Ignored for -Variant play.
+        production only: an out-of-band directory of real org units / users / memberships (same layout as play/).
+        Omit for the install base (no org units / users). Not valid with -Play.
+    .PARAMETER Play
+        Build the play variant: the production base plus the committed synthetic test org units / users under
+        play/. Mutually exclusive with -OverlayPath; production (no -Play) is the default.
     .PARAMETER Password
         Login password for every authored user. Defaults to a clearly-test value that passes DHIS2's import
         password policy (the bare demo password 'district' is rejected — E4005 — for imported users).
-    .PARAMETER SeedType
-        Top-level type of the closure seed (default: programs).
-    .PARAMETER SeedCode
-        Code of the closure seed (default: NEOIPC_CORE).
-    .PARAMETER PathogenCount
-        Pathogen slots per applicable stage (1-9) for generation. Default: the module-wide count.
-    .PARAMETER SubstanceCount
-        Antimicrobial-substance slots (1-99) for generation. Default: the module-wide count.
     .PARAMETER SkipGeneration
-        Skip the ontology / matrix generation step, emitting the config exactly as the export carries it — for
-        tests and partial exports that lack the pathogen machinery the generators require. The canonical build
-        leaves this off so the package is generated from the corrected ontology.
+        Skip the option-domain generation step, emitting config + the materialised matrix families exactly as the
+        directory carries them — for tests / partial directories. The canonical build leaves this off.
     .PARAMETER OutputPath
         Optional file to write the package JSON to (UTF-8, no BOM); if omitted the JSON string is returned
         (unless -PassThru).
@@ -479,83 +484,72 @@ function New-NeoIPCMetadataPackage {
     #>
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', 'Password',
         Justification = 'Forwards the synthetic play accounts'' known, clearly-test password to the authoring compiler — not a real secret.')]
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName = 'Production')]
     [OutputType([string], [hashtable])]
     param(
-        [Parameter(Mandatory)][string]$ExportPath,
         [Parameter(Mandatory)][string]$MetadataDirectory,
-        [ValidateSet('play', 'production')][string]$Variant = 'play',
-        [string]$OverlayPath,
+        [Parameter(ParameterSetName = 'Production')][string]$OverlayPath,
+        [Parameter(Mandatory, ParameterSetName = 'Play')][switch]$Play,
         [string]$Password = 'NeoIPC-Play1',
-        [string]$SeedType = 'programs',
-        [string]$SeedCode = 'NEOIPC_CORE',
-        [ValidateRange(1, 9)][int]$PathogenCount = $script:NeoIPCPathogenSlotCount,
-        [ValidateRange(1, 99)][int]$SubstanceCount = $script:NeoIPCSubstanceSlotCount,
         [switch]$SkipGeneration,
         [string]$OutputPath,
         [switch]$Compress,
         [switch]$PassThru
     )
-    if (-not (Test-Path -LiteralPath $ExportPath)) { throw "Export metadata file not found: '$ExportPath'." }
     if (-not (Test-Path -LiteralPath $MetadataDirectory)) { throw "Metadata directory not found: '$MetadataDirectory'." }
     $commonDir = Join-Path $MetadataDirectory 'common'
     if (-not (Test-Path -LiteralPath $commonDir)) { throw "Common metadata directory not found: '$commonDir'." }
-    $variantDir = if ($Variant -eq 'production') {
-        if ([string]::IsNullOrEmpty($OverlayPath)) { throw '-Variant production requires -OverlayPath (the uncommittable real-data overlay).' }
-        $OverlayPath
-    }
-    else { Join-Path $MetadataDirectory 'play' }
-    if (-not (Test-Path -LiteralPath $variantDir)) { throw "Variant overlay directory not found: '$variantDir'." }
+    # The org-unit / user overlay: -Play -> the committed synthetic test hierarchy under play/; production with
+    # -OverlayPath -> an out-of-band real-data overlay; production with no overlay -> none (the install base is
+    # config + groups/roles + generated families, no org-unit instances and no users — the WHO package convention).
+    $variantDir = if ($Play) { Join-Path $MetadataDirectory 'play' }
+    elseif ($OverlayPath) { $OverlayPath }
+    else { $null }
+    if ($variantDir -and -not (Test-Path -LiteralPath $variantDir)) { throw "Overlay directory not found: '$variantDir'." }
 
-    $export = ConvertFrom-NeoIPCMetadataJsonText -Json (Get-Content -LiteralPath $ExportPath -Raw)
+    # Config + the materialised matrix families come from the directory ALONE — no export. Drop the excluded
+    # authored types (the org-unit scaffold, users): they are read separately below from the selected overlay.
+    $config = Read-NeoIPCMetadataDirectoryPackage -Path $commonDir
+    foreach ($t in $script:NeoIPCMetadataExcludedTypes) { if ($config.Contains($t)) { $config.Remove($t) } }
 
-    # userRole NAME -> real UID, resolved before stripping (name and id both survive normalization anyway).
+    # userRole NAME -> real UID, from the directory config (for the authored user role assignments).
     $roleUid = @{}
-    foreach ($r in @($export['userRoles'])) {
+    foreach ($r in @($config['userRoles'])) {
         if ($r -is [System.Collections.IDictionary] -and $r['name']) { $roleUid[[string]$r['name']] = [string]$r['id'] }
     }
 
-    # The NeoIPC scope: closure + the non-closure DEFINITION types (org-unit groups / group-sets / levels, user
-    # roles / groups), noise-stripped — so the anonymised per-deployment membership is gone BEFORE the authored
-    # membership is applied. Org-unit INSTANCES are NOT in this set — they are excluded authored content, read
-    # from the directory below via Read-NeoIPCAuthoredOrgUnit. Shared with the reverse path
-    # (Update-NeoIPCMetadataDirectory) via Get-NeoIPCMetadataScopedConfig so directory, assembler and reconcile
-    # use one scope definition.
-    $config = Get-NeoIPCMetadataScopedConfig -Package $export -SeedType $SeedType -SeedCode $SeedCode
+    # Splice in the still-generated OPTION-DOMAIN (pathogen options from the YAML + UID sidecar; antibiotic option
+    # set / options / groups / group-sets from the curation CSVs) — export-free. The matrix families are already
+    # materialised in the directory config. -SkipGeneration emits config + matrix only (tests / partial directories).
+    if (-not $SkipGeneration) { $config = Add-NeoIPCGeneratedOptionMetadata -Config $config }
 
-    # Replace the deployed generated classes (pathogen option set + per-slot DEs, resistance / field-gating /
-    # substance PRVs + rules + actions) with the ontology- and matrix-generated ones, so the package carries the
-    # corrected taxonomy and the rule-quality fixes rather than the stale export snapshot. -SkipGeneration leaves
-    # the config as-is — for tests / partial exports that lack the pathogen machinery the generators require.
-    if (-not $SkipGeneration) {
-        $config = Add-NeoIPCGeneratedMetadata -Config $config -Export $export -PathogenCount $PathogenCount -SubstanceCount $SubstanceCount
+    # Authored org units / users + memberships from the selected overlay (common scaffold + variant). With no
+    # overlay (the production install base) there are none.
+    if ($variantDir) {
+        $orgUnits = Read-NeoIPCAuthoredOrgUnit -Path @((Join-Path $commonDir 'organisationUnits.csv'), (Join-Path $variantDir 'organisationUnits.csv'))
+        $ouUid = @{}
+        foreach ($o in $orgUnits) { $ouUid[[string]$o['code']] = [string]$o['id'] }
+        $userArgs = @{
+            UserPath              = (Join-Path $variantDir 'users.csv')
+            RoleAssignmentPath    = (Join-Path $variantDir 'userRoleAssignments.csv')
+            OrgUnitAssignmentPath = (Join-Path $variantDir 'userOrgUnitAssignments.csv')
+            RoleUid               = $roleUid
+            OrgUnitUid            = $ouUid
+            Password              = $Password
+        }
+        $users = ConvertFrom-NeoIPCAuthoredUserCsv @userArgs
+        $ougPaths = @(@((Join-Path $commonDir 'organisationUnitGroupMemberships.csv'), (Join-Path $variantDir 'organisationUnitGroupMemberships.csv')) | Where-Object { Test-Path -LiteralPath $_ })
+        $ougMembership = ConvertFrom-NeoIPCAuthoredOrgUnitGroupMembership -OrgUnit $orgUnits -MembershipPath $ougPaths
+        $ugPath = Join-Path $variantDir 'userGroupMemberships.csv'
+        $ugMembership = if (Test-Path -LiteralPath $ugPath) { ConvertFrom-NeoIPCAuthoredUserGroupMembership -MembershipPath $ugPath -User $users } else { [ordered]@{} }
     }
-
-    # Authored content from the UID-keyed directory: common base + variant overlay. Committed UIDs preserved.
-    $orgUnits = Read-NeoIPCAuthoredOrgUnit -Path @((Join-Path $commonDir 'organisationUnits.csv'), (Join-Path $variantDir 'organisationUnits.csv'))
-    $ouUid = @{}
-    foreach ($o in $orgUnits) { $ouUid[[string]$o['code']] = [string]$o['id'] }
-
-    $userArgs = @{
-        UserPath              = (Join-Path $variantDir 'users.csv')
-        RoleAssignmentPath    = (Join-Path $variantDir 'userRoleAssignments.csv')
-        OrgUnitAssignmentPath = (Join-Path $variantDir 'userOrgUnitAssignments.csv')
-        RoleUid               = $roleUid
-        OrgUnitUid            = $ouUid
-        Password              = $Password
+    else {
+        $orgUnits = @(); $users = @(); $ougMembership = [ordered]@{}; $ugMembership = [ordered]@{}
     }
-    $users = ConvertFrom-NeoIPCAuthoredUserCsv @userArgs
-
-    # Org-unit-group membership: the common overlay (World-Bank class, reference centre) + the variant overlay
-    # (test units / trial sites / all-eligible). Structural identity groups are derived from the org units.
-    $ougPaths = @(@((Join-Path $commonDir 'organisationUnitGroupMemberships.csv'), (Join-Path $variantDir 'organisationUnitGroupMemberships.csv')) | Where-Object { Test-Path -LiteralPath $_ })
-    $ougMembership = ConvertFrom-NeoIPCAuthoredOrgUnitGroupMembership -OrgUnit $orgUnits -MembershipPath $ougPaths
-
-    $ugPath = Join-Path $variantDir 'userGroupMemberships.csv'
-    $ugMembership = if (Test-Path -LiteralPath $ugPath) { ConvertFrom-NeoIPCAuthoredUserGroupMembership -MembershipPath $ugPath -User $users } else { [ordered]@{} }
 
     $package = Join-NeoIPCMetadataPackage -Config $config -OrgUnit $orgUnits -User $users -OrgUnitGroupMembership $ougMembership -UserGroupMembership $ugMembership
-    Write-Verbose ("Assembled '{0}' package: {1} org units, {2} users, {3} top-level types." -f $Variant, @($orgUnits).Count, @($users).Count, @($package.Keys).Count)
+    $variantLabel = if ($Play) { 'play' } elseif ($OverlayPath) { 'production+overlay' } else { 'production' }
+    Write-Verbose ("Assembled '{0}' package: {1} org units, {2} users, {3} top-level types." -f $variantLabel, @($orgUnits).Count, @($users).Count, @($package.Keys).Count)
 
     if ($PassThru) { return @{ Package = $package; OrgUnitCount = @($orgUnits).Count; UserCount = @($users).Count } }
     $json = $package | ConvertTo-Json -Depth 100 -Compress:$Compress

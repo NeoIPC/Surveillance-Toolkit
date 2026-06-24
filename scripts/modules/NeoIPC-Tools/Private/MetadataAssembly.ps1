@@ -68,8 +68,8 @@ function Join-NeoIPCMetadataPackage {
     [OutputType([System.Collections.IDictionary])]
     param(
         [Parameter(Mandatory)][System.Collections.IDictionary]$Config,
-        [Parameter(Mandatory)][System.Collections.IEnumerable]$OrgUnit,
-        [Parameter(Mandatory)][System.Collections.IEnumerable]$User,
+        [Parameter(Mandatory)][AllowEmptyCollection()][System.Collections.IEnumerable]$OrgUnit,
+        [Parameter(Mandatory)][AllowEmptyCollection()][System.Collections.IEnumerable]$User,
         [System.Collections.IDictionary]$OrgUnitGroupMembership,
         [System.Collections.IDictionary]$UserGroupMembership
     )
@@ -99,6 +99,87 @@ function Join-NeoIPCMetadataPackage {
     }
     if ($UserGroupMembership -and @($UserGroupMembership.Keys).Count) {
         [void](Set-NeoIPCGroupMembership -Group @($Config['userGroups']) -Membership $UserGroupMembership -MemberProperty 'users')
+    }
+    $Config
+}
+
+function Add-NeoIPCGeneratedOptionMetadata {
+    <#
+    .SYNOPSIS
+        Splice the still-generated OPTION-DOMAIN families into a directory-sourced config — export-free.
+    .DESCRIPTION
+        The export-independent build path. The matrix families (per-slot DEs / PRVs / rules / actions) are now
+        MATERIALISED in the directory config, so only the option-domain stays generated from its richer directory
+        source: the NEOIPC_PATHOGENS option set + options (from the infectious-agent YAML + the UID sidecar), the
+        NEOIPC_ANTIMICROBIAL_SUBSTANCES option set + options, the 34 ATC-4 + 3 AWaRe option groups, and the
+        ATC5 / WHO_AWARE option-group-sets (from the antibiotics curation CSVs, whose `uid` columns carry the
+        opaque UIDs). None of these are in the directory config (they are directory-excluded), so this is a pure
+        ADD — no replace-by-key, no salvage. The generators run WITHOUT -ExistingPackage (no seed); the deployed
+        sharing they used to copy is reproduced from the PUBLIC_RW profile, and the group-sets' dataDimension
+        defaults to true (both verified against the deployed export). Fails loud on a duplicate id across the
+        spliced result. Mutates and returns Config. No DHIS2 API calls.
+    .PARAMETER Config
+        The directory-sourced config package (ordered dict: type -> object array) — spliced in place.
+    .PARAMETER OntologyPath
+        Path to the infectious-agent YAML (drives the pathogen option set). Defaults in the generator.
+    .PARAMETER PoDirectory
+        Directory of the po4a locale catalogues for option-label localization. Defaults to the repo po/ directory.
+    #>
+    [CmdletBinding()]
+    [OutputType([System.Collections.IDictionary])]
+    param(
+        [Parameter(Mandatory)][System.Collections.IDictionary]$Config,
+        [string]$OntologyPath,
+        [string]$PoDirectory = (Join-Path $PSScriptRoot '..' '..' '..' '..' 'po')
+    )
+    $ontologyArgs = @{}
+    if ($OntologyPath) { $ontologyArgs['Path'] = $OntologyPath }
+
+    # Generate the option-domain from its directory sources — no -ExistingPackage (export-free).
+    $optionFrag    = New-NeoIPCPathogenOptionSet @ontologyArgs -PoDirectory $PoDirectory
+    $abxOptFrag    = New-NeoIPCAntimicrobialOptionSet -PoDirectory $PoDirectory
+    $abxGrpFrag    = New-NeoIPCAntibioticOptionGroup -OptionSet $abxOptFrag -PoDirectory $PoDirectory
+    $abxGrpSetFrag = New-NeoIPCAntibioticOptionGroupSet -OptionGroup $abxGrpFrag -PoDirectory $PoDirectory
+
+    # Reproduce the deployed sharing the export used to supply: PUBLIC_RW on the option sets / groups / group-sets,
+    # and dataDimension=true on the group-sets (options carry no sharing of their own). A fresh sharing literal per
+    # object — never a shared reference — so the objects stay independent.
+    $genOptionSets      = @($optionFrag['optionSets']) + @($abxOptFrag['optionSets'])
+    $genOptionGroups    = @($abxGrpFrag['optionGroups'])
+    $genOptionGroupSets = @($abxGrpSetFrag['optionGroupSets'])
+    foreach ($o in ($genOptionSets + $genOptionGroups)) { if (-not $o.Contains('sharing')) { $o['sharing'] = [ordered]@{ public = 'rw------' } } }
+    foreach ($gs in $genOptionGroupSets) {
+        if (-not $gs.Contains('dataDimension')) { $gs['dataDimension'] = $true }
+        if (-not $gs.Contains('sharing')) { $gs['sharing'] = [ordered]@{ public = 'rw------' } }
+    }
+
+    $genOptions = @($optionFrag['options']) + @($abxOptFrag['options'])
+
+    # Pure ADD: append the generated option-domain to the directory config (these types are directory-excluded, so
+    # there is nothing to replace). Initialise a target collection when the directory carried none. A List append
+    # (not the + operator) keeps it unambiguous when an existing collection is present.
+    $splices = [ordered]@{
+        optionSets      = $genOptionSets
+        options         = $genOptions
+        optionGroups    = $genOptionGroups
+        optionGroupSets = $genOptionGroupSets
+    }
+    foreach ($type in @($splices.Keys)) {
+        $merged = [System.Collections.Generic.List[object]]::new()
+        if ($Config.Contains($type)) { foreach ($x in @($Config[$type])) { $merged.Add($x) } }
+        foreach ($x in @($splices[$type])) { $merged.Add($x) }
+        $Config[$type] = $merged.ToArray()
+    }
+
+    # Fail loud on any duplicate id introduced by the splice.
+    $ordinal = [System.StringComparer]::Ordinal
+    foreach ($type in 'optionSets', 'options', 'optionGroups', 'optionGroupSets') {
+        $seen = [System.Collections.Generic.HashSet[string]]::new($ordinal)
+        foreach ($o in @($Config[$type])) {
+            if ($o -isnot [System.Collections.IDictionary]) { continue }
+            $id = [string]$o['id']
+            if ($id -and -not $seen.Add($id)) { throw "Generated option-domain splice produced a duplicate id '$id' in '$type'." }
+        }
     }
     $Config
 }

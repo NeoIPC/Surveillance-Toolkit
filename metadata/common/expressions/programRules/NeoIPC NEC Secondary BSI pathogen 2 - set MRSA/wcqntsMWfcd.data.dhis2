@@ -1,0 +1,1 @@
+d2:hasValue(#{NeoIPC NEC Secondary BSI pathogen 2 value})&&(#{NeoIPC NEC Secondary BSI pathogen 2 value}==0||#{NeoIPC NEC Secondary BSI pathogen 2 value}==934||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2778)

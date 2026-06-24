@@ -557,7 +557,13 @@ function New-NeoIPCPathogenRule {
         if (-not $actionsSeen.Add($actionId)) { throw "UID collision for the action of program rule '$name' (uid '$actionId')." }
 
         $rule = [ordered]@{ id = $ruleId; name = $name }
-        $desc = if ($deployedRule -and $deployedRule.Contains('description') -and "$($deployedRule['description'])") { [string]$deployedRule['description'] } else { [string]$d['Description'] }
+        # The plan description is the canonical (normalised) wording and overwrites the deployed one — rule
+        # descriptions are not load-bearing, and the deployed text carries human-entry drift (inconsistent casing,
+        # "for pathogen N" present-or-absent). The deployed/existing description is only a fallback for a family with
+        # no plan description (e.g. the substance rules). Source-only: no field is copied from the package's text.
+        $desc = if ("$([string]$d['Description'])") { [string]$d['Description'] }
+        elseif ($deployedRule -and $deployedRule.Contains('description')) { [string]$deployedRule['description'] }
+        else { '' }
         if ($desc) { $rule['description'] = $desc }
         $rule['program'] = [ordered]@{ id = $programId }
         $rule['programStage'] = [ordered]@{ id = $psId }
@@ -786,7 +792,13 @@ function New-NeoIPCPathogenFieldGatingRule {
         if (-not $rulesSeen.Add($ruleId)) { throw "UID collision for program rule '$name' (uid '$ruleId')." }
 
         $rule = [ordered]@{ id = $ruleId; name = $name }
-        $desc = if ($deployedRule -and $deployedRule.Contains('description') -and "$($deployedRule['description'])") { [string]$deployedRule['description'] } else { [string]$d['Description'] }
+        # The plan description is the canonical (normalised) wording and overwrites the deployed one — rule
+        # descriptions are not load-bearing, and the deployed text carries human-entry drift (inconsistent casing,
+        # "for pathogen N" present-or-absent). The deployed/existing description is only a fallback for a family with
+        # no plan description (e.g. the substance rules). Source-only: no field is copied from the package's text.
+        $desc = if ("$([string]$d['Description'])") { [string]$d['Description'] }
+        elseif ($deployedRule -and $deployedRule.Contains('description')) { [string]$deployedRule['description'] }
+        else { '' }
         if ($desc) { $rule['description'] = $desc }
         $rule['program'] = [ordered]@{ id = $programId }
         $rule['programStage'] = [ordered]@{ id = $psId }
@@ -1144,9 +1156,12 @@ function New-NeoIPCSubstanceRule {
         if (-not $rulesSeen.Add($ruleId)) { throw "UID collision for program rule '$name' (uid '$ruleId')." }
 
         $rule = [ordered]@{ id = $ruleId; name = $name }
-        if ($deployedRule -and $deployedRule.Contains('description') -and "$($deployedRule['description'])") {
-            $rule['description'] = [string]$deployedRule['description']
-        }
+        # Plan description wins (the substance rule plan carries none today, so this falls through to the deployed/
+        # existing text); mirrors the pathogen/field-gating generators. Source-only: nothing else copied from text.
+        $subDesc = if ("$([string]$d['Description'])") { [string]$d['Description'] }
+        elseif ($deployedRule -and $deployedRule.Contains('description') -and "$($deployedRule['description'])") { [string]$deployedRule['description'] }
+        else { '' }
+        if ($subDesc) { $rule['description'] = $subDesc }
         $rule['program'] = [ordered]@{ id = $programId }
         $rule['programStage'] = [ordered]@{ id = $psId }
         $rule['condition'] = [string]$d['Condition']
