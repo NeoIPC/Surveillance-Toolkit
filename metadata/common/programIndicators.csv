@@ -1,5 +1,4 @@
 id,code,name,shortName,description,expression,filter,aggregationType,analyticsType,decimals,displayInForm,program,sharing
-M3kiULyBxKz,BirthWeight_Indicator,BirthWeight_Indicator,BirthWeight_Indicator,,expressions/programIndicators/M3kiULyBxKz.expression.dhis2,expressions/programIndicators/M3kiULyBxKz.filter.dhis2,MAX,EVENT,0,False,D8mSSpOpsKj,PUBLIC_RW
 A2nURqk9LMx,NEOIPC_ADMISSION_COMPLETED,NeoIPC Admission Completed,NeoIPC Adm. Compl.,"1 if the admission is completed, otherwise 0.",expressions/programIndicators/A2nURqk9LMx.expression.dhis2,expressions/programIndicators/A2nURqk9LMx.filter.dhis2,,EVENT,0,False,D8mSSpOpsKj,PUBLIC_RW
 AsKrlGNQ2Iy,NEOIPC_DAY_OF_LIFE,NeoIPC Day of life,NeoIPC DOL,The day of life when an event occurs,expressions/programIndicators/AsKrlGNQ2Iy.expression.dhis2,expressions/programIndicators/AsKrlGNQ2Iy.filter.dhis2,,EVENT,0,False,D8mSSpOpsKj,PUBLIC_RW
 dI2A1nsgZgR,NEOIPC_ENROLLMENT_COMPLETED,NeoIPC Enrollment Completed,NeoIPC Enr. Compl.,"1 if the enrollment is completed, otherwise 0.",expressions/programIndicators/dI2A1nsgZgR.expression.dhis2,expressions/programIndicators/dI2A1nsgZgR.filter.dhis2,,EVENT,0,False,D8mSSpOpsKj,PUBLIC_RW
