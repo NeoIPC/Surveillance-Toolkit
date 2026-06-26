@@ -15,12 +15,12 @@ jobs:
         # runtime the NeoIPC-Tools module and data-dictionary generator require.
         runs-on: ubuntu-26.04
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v7
               with:
                 submodules: true
 
             - name: Set up .NET 10 (for the data-dictionary .xlsx writer)
-              uses: actions/setup-dotnet@v4
+              uses: actions/setup-dotnet@v5
               with:
                 dotnet-version: '10.0.x'
 
@@ -58,7 +58,7 @@ jobs:
                 Install-Module -Name Pester -MinimumVersion 5.5 -Force -Scope CurrentUser -SkipPublisherCheck
                 # powershell-yaml: the metadata assembler reads the infectious-agents / sharing YAML when
                 # building the package the data dictionary flattens.
-                Install-Module -Name powershell-yaml -Force -Scope CurrentUser -SkipPublisherCheck
+                Install-Module -Name powershell-yaml -MinimumVersion 0.4.2 -Force -Scope CurrentUser -SkipPublisherCheck
                 Invoke-Pester -Path scripts/modules/NeoIPC-Tools/Tests/DataDictionary.Tests.ps1 -CI
 
             - name: Generate data dictionary
@@ -69,7 +69,7 @@ jobs:
                 ./scripts/New-NeoIPCDataDictionary.ps1 -OutputDirectory ./artifacts/data-dictionary
 
             - name: Upload artifacts
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v7
               with:
                 name: NeoIPC-Docs-Preview
                 path: ./artifacts/

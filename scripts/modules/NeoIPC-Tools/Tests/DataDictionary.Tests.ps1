@@ -201,6 +201,27 @@ InModuleScope 'NeoIPC-Tools' {
         }
     }
 
+    Describe 'Guards' {
+        It 'throws on a multi-program package' {
+            $mkProg = { param($c) [ordered]@{ id = $c; code = $c; name = $c; version = 1; programStages = @(); programTrackedEntityAttributes = @() } }
+            $pkg = [ordered]@{
+                programs = @((& $mkProg 'P1'), (& $mkProg 'P2'))
+                programStages = @(); trackedEntityAttributes = @(); dataElements = @(); optionSets = @(); options = @(); programStageSections = @()
+            }
+            { Get-NeoIPCDataDictionaryRow -Package $pkg } | Should -Throw -ExpectedMessage '*single program*'
+        }
+
+        It 'throws on a duplicate variable code (e.g. stage names that slugify the same)' {
+            $mkStage = { param($id, $name, $order) [ordered]@{ id = $id; name = $name; executionDateLabel = 'D'; reportDateToUse = ''; sortOrder = $order; repeatable = $false; program = (Ref 'p'); programStageSections = @(); programStageDataElements = @() } }
+            $pkg = [ordered]@{
+                programs = @([ordered]@{ id = 'p'; code = 'P'; name = 'P'; version = 1; programStages = @((Ref 's1'), (Ref 's2')); programTrackedEntityAttributes = @() })
+                programStages = @((& $mkStage 's1' 'Visit A' 1), (& $mkStage 's2' 'Visit/A' 2))
+                trackedEntityAttributes = @(); dataElements = @(); optionSets = @(); options = @(); programStageSections = @()
+            }
+            { Get-NeoIPCDataDictionaryRow -Package $pkg } | Should -Throw -ExpectedMessage '*Duplicate variable code*'
+        }
+    }
+
     Describe 'value-type mapping' {
         It 'maps known value types' {
             Get-NeoIPCFriendlyValueType 'TRUE_ONLY' | Should -BeExactly 'Checkbox (yes / blank)'

@@ -417,21 +417,36 @@ function Get-NeoIPCDataDictionaryRow {
 
     $programs = Get-NeoIPCDataDictionarySorted -Item @($Package['programs']) -KeyOf { param($p) [string]$p['code'] }
     if ($programs.Count -eq 0) { throw 'The metadata package contains no programs to document.' }
+    # The dictionary documents ONE program (NEOIPC_CORE; the closure is single-program). The cover sheet and the
+    # row sheets must describe the same one — fail loud rather than silently cover only the first of several.
+    if ($programs.Count -gt 1) {
+        throw ("The data dictionary documents a single program, but the package has $($programs.Count): " +
+            ((@($programs | ForEach-Object { [string]$_['code'] })) -join ', ') + '.')
+    }
+    $program = $programs[0]
     $index = ConvertFrom-NeoIPCPackageIndex -Package $Package
 
     $variableRows = [System.Collections.Generic.List[object]]::new()
-    $formRows = [System.Collections.Generic.List[object]]::new()
-    foreach ($program in $programs) {
-        foreach ($r in (Get-NeoIPCPatientAttributeRow -Program $program -Index $index)) { $variableRows.Add($r) }
-        $stages = Get-NeoIPCDataDictionaryProgramStage -Program $program -Index $index
-        foreach ($stage in $stages) {
-            foreach ($r in (Get-NeoIPCEventVariableRow -Stage $stage -Program $program -Index $index)) { $variableRows.Add($r) }
-        }
-        foreach ($r in (Get-NeoIPCFormsAndDatesRow -Stage $stages -Program $program)) { $formRows.Add($r) }
+    foreach ($r in (Get-NeoIPCPatientAttributeRow -Program $program -Index $index)) { $variableRows.Add($r) }
+    $stages = Get-NeoIPCDataDictionaryProgramStage -Program $program -Index $index
+    foreach ($stage in $stages) {
+        foreach ($r in (Get-NeoIPCEventVariableRow -Stage $stage -Program $program -Index $index)) { $variableRows.Add($r) }
     }
+    $formRows = [System.Collections.Generic.List[object]]::new()
+    foreach ($r in (Get-NeoIPCFormsAndDatesRow -Stage $stages -Program $program)) { $formRows.Add($r) }
+
+    # The Code column is the dictionary's stable identifier — fail loud if a synthesized event-date code ever
+    # collides with another variable's code (e.g. two stage names that slugify the same), rather than emit two
+    # rows sharing a supposedly-unique Code.
+    $seenCode = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::Ordinal)
+    foreach ($r in $variableRows) {
+        $code = [string]$r['Code']
+        if ($code -and -not $seenCode.Add($code)) { throw "Duplicate variable code '$code' in the data dictionary." }
+    }
+
     $codeListRows = Get-NeoIPCCodeListRow -Package $Package -Index $index
     $codeListCount = @($codeListRows | ForEach-Object { $_['Code list code'] } | Select-Object -Unique).Count
-    $aboutRows = Get-NeoIPCDataDictionaryAboutRow -Program $programs[0] `
+    $aboutRows = Get-NeoIPCDataDictionaryAboutRow -Program $program `
         -VariableCount $variableRows.Count -CodeListCount $codeListCount `
         -CodeListValueCount @($codeListRows).Count -FormCount $formRows.Count
 
