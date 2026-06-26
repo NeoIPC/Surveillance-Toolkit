@@ -11,18 +11,27 @@ on:
 
 jobs:
     build-docs:
-        runs-on: ubuntu-latest
+        # Pinned to an explicit image for reproducibility; 26.04 provides the .NET 10 / PowerShell 7.6
+        # runtime the NeoIPC-Tools module and data-dictionary generator require.
+        runs-on: ubuntu-26.04
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v7
               with:
                 submodules: true
+
+            - name: Set up .NET 10 (for the data-dictionary .xlsx writer)
+              uses: actions/setup-dotnet@v5
+              with:
+                dotnet-version: '10.0.x'
 
             - name: Prepare environment
               shell: bash
               run: |
                 sudo apt-get update -qq
-                sudo apt-get install -qq pandoc librsvg2-bin bison flex libffi-dev libxml2-dev libgdk-pixbuf2.0-dev libcairo2-dev libpango1.0-dev libwebp-dev fonts-lyx fonts-noto-core gettext liblocale-gettext-perl libtext-wrapi18n-perl libsyntax-keyword-try-perl libtimedate-perl libyaml-tiny-perl libpod-parser-perl libmodule-build-perl
-                sudo gem install mathematical:1.6.18 asciidoctor-pdf asciidoctor-bibtex asciidoctor-diagram asciimath asciidoctor-mathematical
+                sudo apt-get install -qq pandoc librsvg2-bin bison flex libffi-dev libxml2-dev libgdk-pixbuf-2.0-dev libcairo2-dev libpango1.0-dev libwebp-dev fonts-lyx fonts-noto-core gettext liblocale-gettext-perl libtext-wrapi18n-perl libsyntax-keyword-try-perl libtimedate-perl libyaml-tiny-perl libpod-parser-perl libmodule-build-perl
+                # CMAKE_POLICY_VERSION_MINIMUM lets the gems' bundled mtex2MML (an old cmake_minimum_required)
+                # configure under the CMake 4 on Ubuntu 26.04; passed through sudo, which otherwise resets env.
+                sudo env CMAKE_POLICY_VERSION_MINIMUM=3.5 gem install mathematical:1.7.0 asciidoctor-pdf asciidoctor-bibtex asciidoctor-diagram asciimath asciidoctor-mathematical
                 sudo npm install -g @linthtml/linthtml
 
             - name: Run po4a
@@ -39,8 +48,28 @@ jobs:
               shell: pwsh
               run: ./scripts/Make-NeoIPC-Core-Protocol.ps1 -InformationAction Continue -WarningAction:Stop
 
+            - name: Provision and test NeoIPC-Tools
+              shell: pwsh
+              run: |
+                # Provision the DocumentFormat.OpenXml assembly the .xlsx writer loads, then run the module
+                # tests so the OpenXmlValidator-backed XLSX schema-validity gate runs in CI (it is skipped only
+                # when the assembly is absent).
+                dotnet publish scripts/modules/NeoIPC-Tools/lib -o scripts/modules/NeoIPC-Tools/lib/bin -c Release --nologo
+                Install-Module -Name Pester -MinimumVersion 5.5 -Force -Scope CurrentUser -SkipPublisherCheck
+                # powershell-yaml: the metadata assembler reads the infectious-agents / sharing YAML when
+                # building the package the data dictionary flattens.
+                Install-Module -Name powershell-yaml -MinimumVersion 0.4.2 -Force -Scope CurrentUser -SkipPublisherCheck
+                Invoke-Pester -Path scripts/modules/NeoIPC-Tools/Tests/DataDictionary.Tests.ps1 -CI
+
+            - name: Generate data dictionary
+              shell: pwsh
+              run: |
+                # Generate the CSV + .xlsx data dictionary into the uploaded artifacts. Assembled from the
+                # metadata/ directory alone — no DHIS2 API.
+                ./scripts/New-NeoIPCDataDictionary.ps1 -OutputDirectory ./artifacts/data-dictionary
+
             - name: Upload artifacts
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v7
               with:
                 name: NeoIPC-Docs-Preview
                 path: ./artifacts/

@@ -52,6 +52,7 @@ The module spans two broad areas:
 | `Private/MetadataAssembly.ps1` | Stitch closure config + authored content into the final package (`Join-NeoIPCMetadataPackage`) |
 | `Private/MetadataTranslation.ps1` | The gettext-PO subsystem — translation-unit extraction, PO emit/parse/merge, inject `translations[]` |
 | `Private/MetadataGeneration.ps1` | The generation **plans** — pathogen/substance/field-gating DE+PRV+rule plans, resistance + common-commensal effective-flag/code-set computation, the per-slot capability matrix |
+| `Public/DataDictionary.ps1` + `Private/DataDictionary.ps1` | The **data-dictionary** generator (`Export-NeoIPCDataDictionary`) — flattens the assembled package into a technology-agnostic spreadsheet (patient attributes, per-stage data elements, the event dates, and every code list in full) as CSV + a multi-tab `.xlsx` (via `DocumentFormat.OpenXml`, provisioned under `lib/`) |
 
 ### Metadata pipeline — data flow
 
@@ -410,3 +411,4 @@ runs `msgfmt -c` (via WSL on Windows) when gettext is available.
 | InfectiousAgents | `Find-NextFreeInfectiousAgentId` |
 | Metadata pipeline | `ConvertFrom-NeoIPCMetadataJson`, `ConvertTo-NeoIPCMetadataJson`, `Compare-NeoIPCMetadata`, `Test-NeoIPCMetadataRoundTrip`, `Merge-NeoIPCMetadataJson`, `Select-NeoIPCMetadataClosure`, `Test-NeoIPCMetadataExpression`, `Update-NeoIPCMetadata`, `New-NeoIPCMetadataPackage`, `Export-NeoIPCMetadataTranslation`, `Import-NeoIPCMetadataTranslation`, `Update-NeoIPCMetadataDirectory` |
 | Metadata generation | `New-NeoIPCPathogenOptionSet`, `New-NeoIPCPathogenDataElement`, `New-NeoIPCPathogenVariable`, `New-NeoIPCPathogenRule`, `New-NeoIPCPathogenFieldGatingVariable`, `New-NeoIPCPathogenFieldGatingRule`, `New-NeoIPCSubstanceDataElement`, `New-NeoIPCSubstanceVariable`, `New-NeoIPCSubstanceRule` |
+| Data dictionary | `Export-NeoIPCDataDictionary` |

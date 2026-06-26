@@ -25,7 +25,7 @@
     Description = 'PowerShell tools for NeoIPC Surveillance: DHIS2 admin, report generation helpers, and pipeline-composable data inspection.'
 
     # Minimum version of the PowerShell engine required by this module
-    PowerShellVersion = '7.5'
+    PowerShellVersion = '7.6'
 
     # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
     FunctionsToExport = @(
@@ -91,6 +91,8 @@
         'New-NeoIPCAntibioticOptionGroupSet'
         # Antibiotic translation catalogue (po/antibiotics.pot + .po)
         'Export-NeoIPCAntibioticTranslation'
+        # Data dictionary
+        'Export-NeoIPCDataDictionary'
     )
 
     # Cmdlets to export from this module
