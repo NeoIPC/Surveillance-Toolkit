@@ -39,6 +39,20 @@ jobs:
               with:
                 submodules: true
 
+            - name: Verify the release tag matches the VERSION file
+              # On a published Release the tag (minus the leading v) must equal the committed VERSION, so a
+              # release is always cut from a commit whose VERSION declares exactly that version — no tag/file drift.
+              if: github.event_name == 'release'
+              shell: bash
+              run: |
+                tag="${{ github.event.release.tag_name }}"
+                file="$(tr -d '[:space:]' < ./VERSION)"
+                if [[ "${tag#v}" != "$file" ]]; then
+                  echo "::error::Release tag '$tag' (version ${tag#v}) does not match the VERSION file ('$file'). Bump VERSION to match before releasing."
+                  exit 1
+                fi
+                echo "Release tag matches VERSION ($file)."
+
             - name: Set up .NET 10 (for the data-dictionary .xlsx writer)
               uses: actions/setup-dotnet@v5
               with:
@@ -117,3 +131,40 @@ jobs:
               env:
                 GH_TOKEN: ${{ github.token }}
               run: gh release upload "${{ github.event.release.tag_name }}" ./artifacts/metadata-package/*.json --clobber
+
+    bump-version:
+        # After a Release is published, advance VERSION to the next patch (keeping any pre-release suffix) so the
+        # repository's working version is always one ahead of the last release. The next version is computed from
+        # the released tag — the authoritative version just shipped — not from the current file. The patch bump is
+        # the *probable* next version: edit VERSION by hand before the next release to take a minor/major instead.
+        # Requires main to allow this workflow's GITHUB_TOKEN to push (grant the Actions bot a branch-protection
+        # bypass if main is protected); build-docs' tag-format + tag-vs-VERSION checks gate this first.
+        if: github.event_name == 'release'
+        needs: build-docs
+        runs-on: ubuntu-26.04
+        permissions:
+          contents: write
+        steps:
+            - uses: actions/checkout@v7
+              with:
+                ref: main
+            - name: Advance VERSION to the next patch
+              shell: bash
+              run: |
+                released="${{ github.event.release.tag_name }}"
+                released="${released#v}"
+                if [[ ! "$released" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)(-.+)?$ ]]; then
+                  echo "::error::Release '$released' is not MAJOR.MINOR.PATCH[-pre]; cannot compute the next version."
+                  exit 1
+                fi
+                next="${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.$((BASH_REMATCH[3] + 1))${BASH_REMATCH[4]}"
+                if [[ "$(tr -d '[:space:]' < ./VERSION)" == "$next" ]]; then
+                  echo "VERSION is already $next; nothing to do."
+                  exit 0
+                fi
+                printf '%s\n' "$next" > VERSION
+                git config user.name "github-actions[bot]"
+                git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+                git add VERSION
+                git commit -m "Bump VERSION to $next after release $released"
+                git push origin main
