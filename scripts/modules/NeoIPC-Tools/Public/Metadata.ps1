@@ -595,8 +595,9 @@ function Import-NeoIPCMetadata {
         8080 and a Basic-auth hashtable.
 
         The summary object carries DryRun, HttpStatusCode (transport), Status (OK / WARNING / ERROR), the create/
-        update/delete/ignore/total counts, the per-type reports, and Raw (the full parsed response) for callers
-        that need the conflict detail. A non-OK status is reported, not thrown — the caller decides how to react
+        update/delete/ignore/total counts, the per-type reports, ErrorMessage (the top-level WebMessage
+        message when the body carries no structured report — e.g. a Hibernate persistence error), and Raw (the
+        full parsed response) for callers that need the conflict detail. A non-OK status is reported, not thrown — the caller decides how to react
         (a seed continues on WARNING; a strict gate fails). The body is read whatever the transport code, because
         DHIS2 answers an import with conflicts HTTP 409 while still returning the full report.
     .PARAMETER Path
@@ -667,9 +668,21 @@ function Import-NeoIPCMetadata {
     $status = if ($report -and ($report.PSObject.Properties.Name -contains 'status')) { $report.status }
     elseif ($body -and ($body.PSObject.Properties.Name -contains 'status')) { $body.status } else { $null }
 
-    Write-Verbose ("metadata import ({0}): HTTP {1}, status {2}{3}." -f `
+    # When the import fails at the persistence layer (e.g. a Hibernate not-null/transient flush error),
+    # DHIS2 returns a bare WebMessage with a top-level `message` and NO `.response`/typeReports node — so
+    # the structured-report fields above are all null and the real cause hides in `message`. Surface it so
+    # callers and logs name the actual fault instead of an opaque "status ERROR (HTTP 409)".
+    $errorMessage = if (-not $hasResponse -and $body) {
+        $m = if ($body.PSObject.Properties.Name -contains 'message') { $body.message } else { $null }
+        $dm = if ($body.PSObject.Properties.Name -contains 'devMessage') { $body.devMessage } else { $null }
+        (@($m, $dm) | Where-Object { $_ }) -join ' / '
+    }
+    else { $null }
+
+    Write-Verbose ("metadata import ({0}): HTTP {1}, status {2}{3}{4}." -f `
         ($(if ($DryRun) { 'dry-run' } else { 'commit' })), $response.StatusCode, $status,
-        $(if ($stats) { ", created=$($stats.created) updated=$($stats.updated) ignored=$($stats.ignored) total=$($stats.total)" } else { '' }))
+        $(if ($stats) { ", created=$($stats.created) updated=$($stats.updated) ignored=$($stats.ignored) total=$($stats.total)" } else { '' }),
+        $(if ($errorMessage) { " — $errorMessage" } else { '' }))
 
     [pscustomobject]@{
         DryRun         = [bool]$DryRun
@@ -681,6 +694,7 @@ function Import-NeoIPCMetadata {
         Ignored        = if ($stats) { $stats.ignored } else { $null }
         Total          = if ($stats) { $stats.total } else { $null }
         TypeReports    = if ($report -and ($report.PSObject.Properties.Name -contains 'typeReports')) { $report.typeReports } else { $null }
+        ErrorMessage   = $errorMessage
         Raw            = $body
     }
 }
