@@ -136,7 +136,10 @@ objects are report-only on reconcile. The matrix that drives expansion:
 
 The generation **plans** (DE + PRV + rule plans, resistance / common-commensal effective-flag
 computation, the per-slot matrix) live in `Private/MetadataGeneration.ps1`; the nine generator
-cmdlets are in `Public/Generation.ps1`.
+cmdlets are in `Public/Generation.ps1`. The deployed structure the generators reproduce, the
+program-rule execution model that constrains their shape, the effective-flag model behind the code
+sets, and the correctness gate are documented in
+[`metadata-generation-design.md`](metadata-generation-design.md).
 
 ## 7. Translations — gettext PO, managed in Weblate
 
