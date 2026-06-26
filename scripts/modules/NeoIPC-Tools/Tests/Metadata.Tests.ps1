@@ -4809,7 +4809,7 @@ Hierarchies:
 
         It 'sends importMode=COMMIT with the default strategy / atomic mode on a real import' {
             Mock Invoke-NeoIPCDhis2Post { [pscustomobject]@{ StatusCode = 200; Body = $script:wrappedReport } }
-            Import-NeoIPCMetadata -Json '{"programs":[]}' -Auth $script:testAuth | Out-Null
+            Import-NeoIPCMetadata -Json '{"programs":[]}' -Auth $script:testAuth -Confirm:$false | Out-Null
             Should -Invoke Invoke-NeoIPCDhis2Post -Times 1 -Exactly -ParameterFilter {
                 $QueryParameters['importMode'] -eq 'COMMIT' -and
                 $QueryParameters['importStrategy'] -eq 'CREATE_AND_UPDATE' -and
@@ -4819,7 +4819,7 @@ Hierarchies:
 
         It 'forwards -ImportStrategy and -AtomicMode to the query' {
             Mock Invoke-NeoIPCDhis2Post { [pscustomobject]@{ StatusCode = 200; Body = $script:wrappedReport } }
-            Import-NeoIPCMetadata -Json '{}' -Auth $script:testAuth -ImportStrategy 'CREATE' -AtomicMode 'NONE' | Out-Null
+            Import-NeoIPCMetadata -Json '{}' -Auth $script:testAuth -ImportStrategy 'CREATE' -AtomicMode 'NONE' -Confirm:$false | Out-Null
             Should -Invoke Invoke-NeoIPCDhis2Post -Times 1 -Exactly -ParameterFilter {
                 $QueryParameters['importStrategy'] -eq 'CREATE' -and $QueryParameters['atomicMode'] -eq 'NONE'
             }
@@ -4829,7 +4829,7 @@ Hierarchies:
             $pkg = Join-Path $TestDrive ('pkg-' + [System.IO.Path]::GetRandomFileName() + '.json')
             Set-Content -LiteralPath $pkg -Value '{"dataElements":[{"id":"abc"}]}' -NoNewline
             Mock Invoke-NeoIPCDhis2Post { [pscustomobject]@{ StatusCode = 200; Body = $script:wrappedReport } }
-            Import-NeoIPCMetadata -Path $pkg -Auth $script:testAuth | Out-Null
+            Import-NeoIPCMetadata -Path $pkg -Auth $script:testAuth -Confirm:$false | Out-Null
             Should -Invoke Invoke-NeoIPCDhis2Post -Times 1 -Exactly -ParameterFilter {
                 $Body -eq '{"dataElements":[{"id":"abc"}]}'
             }
@@ -4854,7 +4854,7 @@ Hierarchies:
 
         It 'normalizes a plain (un-wrapped) ImportReport (stats at top level)' {
             Mock Invoke-NeoIPCDhis2Post { [pscustomobject]@{ StatusCode = 200; Body = $script:plainReport } }
-            $r = Import-NeoIPCMetadata -Json '{}' -Auth $script:testAuth
+            $r = Import-NeoIPCMetadata -Json '{}' -Auth $script:testAuth -Confirm:$false
             $r.Status | Should -Be 'WARNING'
             $r.Updated | Should -Be 3
             $r.Ignored | Should -Be 2
@@ -4863,7 +4863,7 @@ Hierarchies:
 
         It 'reports an ERROR import (HTTP 409) without throwing' {
             Mock Invoke-NeoIPCDhis2Post { [pscustomobject]@{ StatusCode = 409; Body = $script:errorReport } }
-            $r = Import-NeoIPCMetadata -Json '{}' -Auth $script:testAuth
+            $r = Import-NeoIPCMetadata -Json '{}' -Auth $script:testAuth -Confirm:$false
             $r.HttpStatusCode | Should -Be 409
             $r.Status | Should -Be 'ERROR'
         }

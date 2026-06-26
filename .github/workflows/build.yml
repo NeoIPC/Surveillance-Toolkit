@@ -11,20 +11,23 @@ on:
   release:
     types: [published]
 
+# Least-privilege default: every job is read-only unless it explicitly opts into more. Only the release-gated
+# jobs that write to the repo (the VERSION bump, the Release-asset upload) request contents: write.
+permissions:
+  contents: read
+
 jobs:
     build-docs:
         # Pinned to an explicit image for reproducibility; 26.04 provides the .NET 10 / PowerShell 7.6
         # runtime the NeoIPC-Tools module and data-dictionary generator require.
         runs-on: ubuntu-26.04
-        # contents: write lets a manually-published Release receive the rendered metadata package as an asset.
-        permissions:
-          contents: write
         steps:
             - name: Validate version tag format
-              # On a tag push or a published Release, the tag must match vMAJOR.MINOR.PATCH[-(alpha|beta|rc)[.N]] so
-              # the release/versioning scheme stays consistent (the tag is otherwise an unconstrained text field — easy
-              # to fat-finger as v0.1.0-aplha, 0.1, etc.). Fails fast before the heavy build.
-              if: github.event_name == 'release' || startsWith(github.ref, 'refs/tags/')
+              # On a published Release or a v* tag push, the tag must match vMAJOR.MINOR.PATCH[-(alpha|beta|rc)[.N]]
+              # so the release/versioning scheme stays consistent (the tag is otherwise an unconstrained text field —
+              # easy to fat-finger as v0.1.0-aplha, 0.1, etc.). Non-version tags (a deploy/marker tag) are not gated,
+              # so they build as before. Fails fast before the heavy build.
+              if: github.event_name == 'release' || startsWith(github.ref, 'refs/tags/v')
               shell: bash
               run: |
                 tag="${{ github.ref_name }}"
@@ -46,7 +49,7 @@ jobs:
               shell: bash
               run: |
                 tag="${{ github.event.release.tag_name }}"
-                file="$(tr -d '[:space:]' < ./VERSION)"
+                file="$(sed '1s/^\xef\xbb\xbf//' ./VERSION | tr -d '[:space:]')"
                 if [[ "${tag#v}" != "$file" ]]; then
                   echo "::error::Release tag '$tag' (version ${tag#v}) does not match the VERSION file ('$file'). Bump VERSION to match before releasing."
                   exit 1
@@ -122,16 +125,6 @@ jobs:
                 name: NeoIPC-Surveillance-Toolkit
                 path: ./artifacts/
 
-            - name: Attach metadata package to the published Release
-              # Releasing is a deliberate human step: a maintainer publishes a GitHub Release (choosing the version
-              # and marking it pre-release/alpha). This only ATTACHES the rendered packages to that release — it
-              # never creates or labels one.
-              if: github.event_name == 'release'
-              shell: bash
-              env:
-                GH_TOKEN: ${{ github.token }}
-              run: gh release upload "${{ github.event.release.tag_name }}" ./artifacts/metadata-package/*.json --clobber
-
     bump-version:
         # After a Release is published, advance VERSION to the next patch (keeping any pre-release suffix) so the
         # repository's working version is always one ahead of the last release. The next version is computed from
@@ -158,13 +151,50 @@ jobs:
                   exit 1
                 fi
                 next="${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.$((BASH_REMATCH[3] + 1))${BASH_REMATCH[4]}"
-                if [[ "$(tr -d '[:space:]' < ./VERSION)" == "$next" ]]; then
-                  echo "VERSION is already $next; nothing to do."
-                  exit 0
-                fi
-                printf '%s\n' "$next" > VERSION
                 git config user.name "github-actions[bot]"
                 git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-                git add VERSION
-                git commit -m "Bump VERSION to $next after release $released"
-                git push origin main
+                # Re-sync to the tip of main each attempt, only ever ADVANCE VERSION (never roll it back below a
+                # hand-bumped minor/major in progress, or a patch released from an older commit), and retry on a
+                # non-fast-forward push so a commit landing on main between checkout and push doesn't drop the bump.
+                for attempt in 1 2 3; do
+                  git fetch --quiet origin main
+                  git reset --quiet --hard origin/main
+                  current="$(sed '1s/^\xef\xbb\xbf//' ./VERSION | tr -d '[:space:]')"
+                  highest="$(printf '%s\n%s\n' "$current" "$next" | sort -V | tail -1)"
+                  if [[ "$current" == "$next" || "$next" != "$highest" ]]; then
+                    echo "VERSION ($current) is already at or ahead of $next; nothing to bump."
+                    exit 0
+                  fi
+                  printf '%s\n' "$next" > VERSION
+                  git commit --quiet -am "Bump VERSION to $next after release $released"
+                  if git push origin HEAD:main; then
+                    echo "Bumped VERSION to $next."
+                    exit 0
+                  fi
+                  echo "push rejected (main advanced); retrying ($attempt/3)…"
+                done
+                echo "::error::Could not push the VERSION bump after 3 attempts."
+                exit 1
+
+    release-assets:
+        # Attach the rendered metadata packages to the published Release. Split out from build-docs so that job
+        # runs with a read-only token; only this release-gated job needs contents: write. Releasing is a deliberate
+        # human step (a maintainer publishes the Release, choosing the version + pre-release flag); this only
+        # ATTACHES the packages build-docs rendered — it never creates or labels a release.
+        if: github.event_name == 'release'
+        needs: build-docs
+        runs-on: ubuntu-26.04
+        permissions:
+          contents: write
+        steps:
+            - name: Download the rendered packages
+              uses: actions/download-artifact@v7
+              with:
+                name: NeoIPC-Surveillance-Toolkit
+                path: ./artifacts
+            - name: Attach metadata packages to the Release
+              shell: bash
+              env:
+                GH_TOKEN: ${{ github.token }}
+                GH_REPO: ${{ github.repository }}
+              run: gh release upload "${{ github.event.release.tag_name }}" ./artifacts/metadata-package/*.json --clobber

@@ -589,8 +589,10 @@ function Import-NeoIPCMetadata {
         fresh instance. References resolve by UID (the package is UID-keyed), so no idScheme override is needed.
 
         This DRIVES a DHIS2 instance, so it is intended for the LOCAL / test stack only (synthetic data); it must
-        not be pointed at the production or deployed-test API. Auth comes from a Resolve-NeoIPCAuth hashtable; for
-        the local http stack pass -Scheme http -Hostname localhost -Port 8080 and a Basic-auth hashtable.
+        not be pointed at the production or deployed-test API. A real (non-DryRun) import is high-impact and prompts
+        for confirmation by default; pass -Confirm:$false to run unattended (a dry-run does not prompt). Auth comes
+        from a Resolve-NeoIPCAuth hashtable; for the local http stack pass -Scheme http -Hostname localhost -Port
+        8080 and a Basic-auth hashtable.
 
         The summary object carries DryRun, HttpStatusCode (transport), Status (OK / WARNING / ERROR), the create/
         update/delete/ignore/total counts, the per-type reports, and Raw (the full parsed response) for callers
@@ -610,7 +612,7 @@ function Import-NeoIPCMetadata {
     .PARAMETER DryRun
         Validate only (importMode=VALIDATE); the server commits nothing.
     #>
-    [CmdletBinding(SupportsShouldProcess, DefaultParameterSetName = 'Path')]
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High', DefaultParameterSetName = 'Path')]
     [OutputType([pscustomobject])]
     param(
         [Parameter(Mandatory, ParameterSetName = 'Path')][string]$Path,
@@ -648,6 +650,10 @@ function Import-NeoIPCMetadata {
     $portSuffix = if ($null -ne $Port) { ":$Port" } else { '' }
     $target = "${Scheme}://${Hostname}${portSuffix}/api/metadata"
     $action = if ($DryRun) { 'Validate metadata import (dry-run)' } else { "Import metadata ($ImportStrategy)" }
+    # A real COMMIT can create/update/delete metadata on a live instance, so it confirms by default
+    # (ConfirmImpact=High). A -DryRun only validates (importMode=VALIDATE) and changes nothing server-side, so it
+    # shouldn't nag — drop its confirmation unless the caller asked for one explicitly. -WhatIf still applies.
+    if ($DryRun -and -not $PSBoundParameters.ContainsKey('Confirm')) { $ConfirmPreference = 'None' }
     if (-not $PSCmdlet.ShouldProcess($target, $action)) { return }
 
     # Own confirmation done above; suppress the inner helper's ShouldProcess.
