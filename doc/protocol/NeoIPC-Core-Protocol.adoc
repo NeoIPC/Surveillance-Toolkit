@@ -516,6 +516,8 @@ include::definitions/NeoIPC-Core-Organ-Space-SSI-Definition.adoc[]
 The following data items appear in the NeoIPC documentation sheets or in the reporting platform.
 Some of them (e.g., patient id and patient name) are used for your local documentation only and not used in the central NeoIPC software tools.
 
+NOTE: A companion machine-readable *data dictionary* — a spreadsheet listing every collected variable with its data type and whether it is required or repeatable, together with the full code lists (including the complete pathogen and antimicrobial-substance lists) — is generated automatically from the same NeoIPC metadata and is available as a companion to this protocol.
+
 [#data-dictionary-patient-master-data]
 === Patient Master Data
 [#data-dictionary-patient-master-data-enrolment]

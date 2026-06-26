@@ -29,5 +29,9 @@ reports/**/*_files/**
 reports/**/_output
 reports/ICHE-Health-Intervention-Codes.csv
 data/
+# Provisioned (not committed) DocumentFormat.OpenXml assemblies for the data-dictionary .xlsx writer
+# (restored by `dotnet publish` of lib/NeoIPC-Tools.Dependencies.csproj; see that file + the data-dictionary README).
+scripts/modules/NeoIPC-Tools/lib/bin/
+scripts/modules/NeoIPC-Tools/lib/obj/
 # Scratch / throwaway artifacts, never committed (the durable procedures live in the relevant READMEs).
 /tmp/
