@@ -8,6 +8,13 @@ on:
       - '*'
   pull_request:
   workflow_dispatch:
+  release:
+    types: [published]
+
+# Least-privilege default: every job is read-only unless it explicitly opts into more. Only the release-gated
+# jobs that write to the repo (the VERSION bump, the Release-asset upload) request contents: write.
+permissions:
+  contents: read
 
 jobs:
     build-docs:
@@ -15,9 +22,39 @@ jobs:
         # runtime the NeoIPC-Tools module and data-dictionary generator require.
         runs-on: ubuntu-26.04
         steps:
+            - name: Validate version tag format
+              # On a published Release or a v* tag push, the tag must match vMAJOR.MINOR.PATCH[-(alpha|beta|rc)[.N]]
+              # so the release/versioning scheme stays consistent (the tag is otherwise an unconstrained text field —
+              # easy to fat-finger as v0.1.0-aplha, 0.1, etc.). Non-version tags (a deploy/marker tag) are not gated,
+              # so they build as before. Fails fast before the heavy build.
+              if: github.event_name == 'release' || startsWith(github.ref, 'refs/tags/v')
+              shell: bash
+              run: |
+                tag="${{ github.ref_name }}"
+                pattern='^v[0-9]+\.[0-9]+\.[0-9]+(-(alpha|beta|rc)(\.[0-9]+)?)?$'
+                if [[ ! "$tag" =~ $pattern ]]; then
+                  echo "::error::Version tag '$tag' must match $pattern (e.g. v0.1.0-alpha, v1.2.0, v1.2.0-rc.1)."
+                  exit 1
+                fi
+                echo "Version tag '$tag' OK."
+
             - uses: actions/checkout@v7
               with:
                 submodules: true
+
+            - name: Verify the release tag matches the VERSION file
+              # On a published Release the tag (minus the leading v) must equal the committed VERSION, so a
+              # release is always cut from a commit whose VERSION declares exactly that version — no tag/file drift.
+              if: github.event_name == 'release'
+              shell: bash
+              run: |
+                tag="${{ github.event.release.tag_name }}"
+                file="$(sed '1s/^\xef\xbb\xbf//' ./VERSION | tr -d '[:space:]')"
+                if [[ "${tag#v}" != "$file" ]]; then
+                  echo "::error::Release tag '$tag' (version ${tag#v}) does not match the VERSION file ('$file'). Bump VERSION to match before releasing."
+                  exit 1
+                fi
+                echo "Release tag matches VERSION ($file)."
 
             - name: Set up .NET 10 (for the data-dictionary .xlsx writer)
               uses: actions/setup-dotnet@v5
@@ -68,8 +105,96 @@ jobs:
                 # metadata/ directory alone — no DHIS2 API.
                 ./scripts/New-NeoIPCDataDictionary.ps1 -OutputDirectory ./artifacts/data-dictionary
 
+            - name: Render metadata distribution packages
+              shell: pwsh
+              env:
+                RELEASE_TAG: ${{ github.event.release.tag_name }}
+              run: |
+                # Render the importable DHIS2 metadata packages (install base + play) into the uploaded artifacts.
+                # Generated from the metadata/ directory alone — no DHIS2 API. NOT committed (undiffable compressed
+                # blobs): they ship as this build artifact, and as a Release asset on a manually-published release.
+                # The version is always explicit (the generator has no default): the published Release tag on a
+                # release build (the released version), else the repository VERSION file (the prominent source of
+                # truth) for the preview artifact.
+                $version = if ($env:RELEASE_TAG) { $env:RELEASE_TAG -replace '^v', '' } else { (Get-Content -LiteralPath ./VERSION -Raw).Trim() }
+                ./scripts/New-NeoIPCMetadataDistribution.ps1 -OutputDirectory ./artifacts/metadata-package -Version $version
+
             - name: Upload artifacts
               uses: actions/upload-artifact@v7
               with:
-                name: NeoIPC-Docs-Preview
+                name: NeoIPC-Surveillance-Toolkit
                 path: ./artifacts/
+
+    bump-version:
+        # After a Release is published, advance VERSION to the next patch (keeping any pre-release suffix) so the
+        # repository's working version is always one ahead of the last release. The next version is computed from
+        # the released tag — the authoritative version just shipped — not from the current file. The patch bump is
+        # the *probable* next version: edit VERSION by hand before the next release to take a minor/major instead.
+        # Requires main to allow this workflow's GITHUB_TOKEN to push (grant the Actions bot a branch-protection
+        # bypass if main is protected); build-docs' tag-format + tag-vs-VERSION checks gate this first.
+        if: github.event_name == 'release'
+        needs: build-docs
+        runs-on: ubuntu-26.04
+        permissions:
+          contents: write
+        steps:
+            - uses: actions/checkout@v7
+              with:
+                ref: main
+            - name: Advance VERSION to the next patch
+              shell: bash
+              run: |
+                released="${{ github.event.release.tag_name }}"
+                released="${released#v}"
+                if [[ ! "$released" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)(-.+)?$ ]]; then
+                  echo "::error::Release '$released' is not MAJOR.MINOR.PATCH[-pre]; cannot compute the next version."
+                  exit 1
+                fi
+                next="${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.$((BASH_REMATCH[3] + 1))${BASH_REMATCH[4]}"
+                git config user.name "github-actions[bot]"
+                git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+                # Re-sync to the tip of main each attempt, only ever ADVANCE VERSION (never roll it back below a
+                # hand-bumped minor/major in progress, or a patch released from an older commit), and retry on a
+                # non-fast-forward push so a commit landing on main between checkout and push doesn't drop the bump.
+                for attempt in 1 2 3; do
+                  git fetch --quiet origin main
+                  git reset --quiet --hard origin/main
+                  current="$(sed '1s/^\xef\xbb\xbf//' ./VERSION | tr -d '[:space:]')"
+                  highest="$(printf '%s\n%s\n' "$current" "$next" | sort -V | tail -1)"
+                  if [[ "$current" == "$next" || "$next" != "$highest" ]]; then
+                    echo "VERSION ($current) is already at or ahead of $next; nothing to bump."
+                    exit 0
+                  fi
+                  printf '%s\n' "$next" > VERSION
+                  git commit --quiet -am "Bump VERSION to $next after release $released"
+                  if git push origin HEAD:main; then
+                    echo "Bumped VERSION to $next."
+                    exit 0
+                  fi
+                  echo "push rejected (main advanced); retrying ($attempt/3)…"
+                done
+                echo "::error::Could not push the VERSION bump after 3 attempts."
+                exit 1
+
+    release-assets:
+        # Attach the rendered metadata packages to the published Release. Split out from build-docs so that job
+        # runs with a read-only token; only this release-gated job needs contents: write. Releasing is a deliberate
+        # human step (a maintainer publishes the Release, choosing the version + pre-release flag); this only
+        # ATTACHES the packages build-docs rendered — it never creates or labels a release.
+        if: github.event_name == 'release'
+        needs: build-docs
+        runs-on: ubuntu-26.04
+        permissions:
+          contents: write
+        steps:
+            - name: Download the rendered packages
+              uses: actions/download-artifact@v7
+              with:
+                name: NeoIPC-Surveillance-Toolkit
+                path: ./artifacts
+            - name: Attach metadata packages to the Release
+              shell: bash
+              env:
+                GH_TOKEN: ${{ github.token }}
+                GH_REPO: ${{ github.repository }}
+              run: gh release upload "${{ github.event.release.tag_name }}" ./artifacts/metadata-package/*.json --clobber

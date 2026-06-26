@@ -22,6 +22,8 @@ glossary.*.yaml
 metadata/common/infectious-agents/NeoIPC-Infectious-Agents.*.yaml
 metadata/common/infectious-agents/Output-Footer.*.adoc
 metadata/common/infectious-agents/Output-Header.*.adoc
+# Rendered metadata distribution packages — generated build artifacts (CI artifact + Release asset), never committed.
+metadata/dist/*.json
 output/
 reports/**/*.html
 reports/**/*.md
@@ -33,5 +35,7 @@ data/
 # (restored by `dotnet publish` of lib/NeoIPC-Tools.Dependencies.csproj; see that file + the data-dictionary README).
 scripts/modules/NeoIPC-Tools/lib/bin/
 scripts/modules/NeoIPC-Tools/lib/obj/
+# Pester -CI test report (NUnit XML) — a transient run artifact, never committed.
+testResults.xml
 # Scratch / throwaway artifacts, never committed (the durable procedures live in the relevant READMEs).
 /tmp/

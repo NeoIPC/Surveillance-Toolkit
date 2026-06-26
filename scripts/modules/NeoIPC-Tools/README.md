@@ -30,6 +30,12 @@ The module spans two broad areas:
    assembled play / production package, and generates the pathogen / substance /
    field-gating objects from the infectious-agent ontology + a capability matrix.
 
+This section is the architecture map for area 2. The **design rationale** behind it —
+the locked decisions (canonical directory, opaque UIDs, the two variants, the
+export→prune→normalize→reconcile reverse path, Node-free expressions), the diffability
+principles, the capability matrix, and the verification gates — lives in
+[`docs/metadata-pipeline-design.md`](../../../docs/metadata-pipeline-design.md).
+
 ### Files at a glance
 
 `Public/` holds the exported surface; `Private/` the implementation. Each

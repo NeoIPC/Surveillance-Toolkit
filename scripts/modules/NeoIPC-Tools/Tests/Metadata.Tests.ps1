@@ -4195,6 +4195,31 @@ Hierarchies:
             @($gb['options'] | ForEach-Object { $byUid[$_['id']] }) | Should -Contain 'tmp_001'
             @(@($og['optionGroups'] | Where-Object { $_['code'] -eq 'WHO_AWARE_WATCH' })[0]['options']).Count | Should -Be 3
         }
+        It 'option groups: a single-member group keeps array options (regression: scalar-collapse import 500)' {
+            # A group with exactly ONE member must still serialize `options` as a one-element JSON ARRAY. The
+            # member-resolver scriptblock returns an array that PowerShell unrolls on return, so a single member
+            # collapsed to a scalar object on assignment — which DHIS2 rejects on import ("Cannot deserialize value
+            # of type HashSet<Option> from Object value"). This fixture makes every group single-member.
+            $csv = Join-Path $TestDrive 'abx-single.csv'
+            @('id,atc_code,name,atc_group,aware_category,uid',
+                'J01XA01,J01XA01,Vancomycin,J01XA,Access,OptAbxSng01',
+                'J01XB01,J01XB01,Colistin,J01XB,Watch,OptAbxSng02',
+                'J01XX08,J01XX08,Linezolid,J01XX,Reserve,OptAbxSng03') | Set-Content -LiteralPath $csv -Encoding utf8NoBOM
+            $grpCsv = Join-Path $TestDrive 'abx-single-groups.csv'
+            @('code,name,shortName,description,uid',
+                'J01XA,Glycopeptide antibacterials,Glycopeptides,Glycopeptide antibacterials.,GrpSng0001',
+                'J01XB,Polymyxins,Polymyxins,Polymyxin antibacterials.,GrpSng0002',
+                'J01XX,Other antibacterials,Other,Other antibacterials.,GrpSng0003') | Set-Content -LiteralPath $grpCsv -Encoding utf8NoBOM
+            $os = New-NeoIPCAntimicrobialOptionSet -Path $csv
+            $og = New-NeoIPCAntibioticOptionGroup -OptionSet $os -SubstancePath $csv -GroupPath $grpCsv
+            $singles = @($og['optionGroups'] | Where-Object { @($_['options']).Count -eq 1 })
+            $singles.Count | Should -BeGreaterThan 0   # the fixture builds every group with exactly one member
+            foreach ($g in $og['optionGroups']) {
+                ($g['options'] -is [System.Array]) | Should -BeTrue -Because "group '$($g['code'])' options must be a JSON array, not a scalar object"
+            }
+            # the real failure mode: a single-member group must serialize as "options":[ ... ], not "options":{ ... }
+            (@($singles)[0] | ConvertTo-Json -Depth 6) | Should -Match '"options":\s*\['
+        }
         It 'option groups: each option in <=1 group per group-set (the pivot_wider invariant)' {
             $os = New-NeoIPCAntimicrobialOptionSet -Path $script:abxCsv -ExistingPackage (New-AbxExport)
             $og = New-NeoIPCAntibioticOptionGroup -OptionSet $os -SubstancePath $script:abxCsv -GroupPath $script:abxGrpCsv -ExistingPackage (New-AbxExport)
@@ -4760,6 +4785,110 @@ Hierarchies:
             $bare = Join-Path $TestDrive ('git-none-' + [System.IO.Path]::GetRandomFileName())
             New-Item -ItemType Directory -Path $bare -Force | Out-Null
             { Assert-NeoIPCReconcileGitClean -Path $bare } | Should -Throw '*git working tree*'
+        }
+    }
+
+    Describe 'Import-NeoIPCMetadata' {
+        BeforeAll {
+            $script:wrappedReport = '{"httpStatus":"OK","httpStatusCode":200,"status":"OK","response":{"responseType":"ImportReport","status":"OK","stats":{"created":5,"updated":2,"deleted":0,"ignored":1,"total":8},"typeReports":[]}}' | ConvertFrom-Json
+            $script:plainReport = '{"responseType":"ImportReport","status":"WARNING","stats":{"created":0,"updated":3,"deleted":0,"ignored":2,"total":5}}' | ConvertFrom-Json
+            # A real DHIS2 409 puts WARNING at the WebMessage top level and the ERROR under .response.status
+            # (WebMessageUtils.importReport builds `new WebMessage(Status.WARNING, CONFLICT)`); the cmdlet reads
+            # .response.status first, so it still surfaces ERROR. The fixture mirrors that real shape.
+            $script:errorReport = '{"httpStatus":"Conflict","httpStatusCode":409,"status":"WARNING","response":{"responseType":"ImportReport","status":"ERROR","stats":{"created":0,"updated":0,"deleted":0,"ignored":4,"total":4}}}' | ConvertFrom-Json
+            $script:testAuth = @{ AuthType = 'Token'; Token = 'd2pat_xTESTtoken' }
+        }
+
+        It 'sends importMode=VALIDATE on a dry-run' {
+            Mock Invoke-NeoIPCDhis2Post { [pscustomobject]@{ StatusCode = 200; Body = $script:wrappedReport } }
+            Import-NeoIPCMetadata -Json '{"programs":[]}' -Auth $script:testAuth -DryRun | Out-Null
+            Should -Invoke Invoke-NeoIPCDhis2Post -Times 1 -Exactly -ParameterFilter {
+                $QueryParameters['importMode'] -eq 'VALIDATE' -and $Path -eq 'api/metadata'
+            }
+        }
+
+        It 'sends importMode=COMMIT with the default strategy / atomic mode on a real import' {
+            Mock Invoke-NeoIPCDhis2Post { [pscustomobject]@{ StatusCode = 200; Body = $script:wrappedReport } }
+            Import-NeoIPCMetadata -Json '{"programs":[]}' -Auth $script:testAuth -Confirm:$false | Out-Null
+            Should -Invoke Invoke-NeoIPCDhis2Post -Times 1 -Exactly -ParameterFilter {
+                $QueryParameters['importMode'] -eq 'COMMIT' -and
+                $QueryParameters['importStrategy'] -eq 'CREATE_AND_UPDATE' -and
+                $QueryParameters['atomicMode'] -eq 'ALL'
+            }
+        }
+
+        It 'forwards -ImportStrategy and -AtomicMode to the query' {
+            Mock Invoke-NeoIPCDhis2Post { [pscustomobject]@{ StatusCode = 200; Body = $script:wrappedReport } }
+            Import-NeoIPCMetadata -Json '{}' -Auth $script:testAuth -ImportStrategy 'CREATE' -AtomicMode 'NONE' -Confirm:$false | Out-Null
+            Should -Invoke Invoke-NeoIPCDhis2Post -Times 1 -Exactly -ParameterFilter {
+                $QueryParameters['importStrategy'] -eq 'CREATE' -and $QueryParameters['atomicMode'] -eq 'NONE'
+            }
+        }
+
+        It 'reads the package file for -Path and posts its content as the body' {
+            $pkg = Join-Path $TestDrive ('pkg-' + [System.IO.Path]::GetRandomFileName() + '.json')
+            Set-Content -LiteralPath $pkg -Value '{"dataElements":[{"id":"abc"}]}' -NoNewline
+            Mock Invoke-NeoIPCDhis2Post { [pscustomobject]@{ StatusCode = 200; Body = $script:wrappedReport } }
+            Import-NeoIPCMetadata -Path $pkg -Auth $script:testAuth -Confirm:$false | Out-Null
+            Should -Invoke Invoke-NeoIPCDhis2Post -Times 1 -Exactly -ParameterFilter {
+                $Body -eq '{"dataElements":[{"id":"abc"}]}'
+            }
+        }
+
+        It 'throws for a missing -Path' {
+            { Import-NeoIPCMetadata -Path (Join-Path $TestDrive 'nope.json') -Auth $script:testAuth } |
+                Should -Throw '*not found*'
+        }
+
+        It 'normalizes a WebMessage-wrapped ImportReport (stats under .response)' {
+            Mock Invoke-NeoIPCDhis2Post { [pscustomobject]@{ StatusCode = 200; Body = $script:wrappedReport } }
+            $r = Import-NeoIPCMetadata -Json '{}' -Auth $script:testAuth -DryRun
+            $r.DryRun | Should -BeTrue
+            $r.HttpStatusCode | Should -Be 200
+            $r.Status | Should -Be 'OK'
+            $r.Created | Should -Be 5
+            $r.Updated | Should -Be 2
+            $r.Ignored | Should -Be 1
+            $r.Total | Should -Be 8
+        }
+
+        It 'normalizes a plain (un-wrapped) ImportReport (stats at top level)' {
+            Mock Invoke-NeoIPCDhis2Post { [pscustomobject]@{ StatusCode = 200; Body = $script:plainReport } }
+            $r = Import-NeoIPCMetadata -Json '{}' -Auth $script:testAuth -Confirm:$false
+            $r.Status | Should -Be 'WARNING'
+            $r.Updated | Should -Be 3
+            $r.Ignored | Should -Be 2
+            $r.Total | Should -Be 5
+        }
+
+        It 'reports an ERROR import (HTTP 409) without throwing' {
+            Mock Invoke-NeoIPCDhis2Post { [pscustomobject]@{ StatusCode = 409; Body = $script:errorReport } }
+            $r = Import-NeoIPCMetadata -Json '{}' -Auth $script:testAuth -Confirm:$false
+            $r.HttpStatusCode | Should -Be 409
+            $r.Status | Should -Be 'ERROR'
+        }
+
+        It 'does not POST under -WhatIf' {
+            Mock Invoke-NeoIPCDhis2Post { [pscustomobject]@{ StatusCode = 200; Body = $script:wrappedReport } }
+            Import-NeoIPCMetadata -Json '{}' -Auth $script:testAuth -WhatIf | Out-Null
+            Should -Invoke Invoke-NeoIPCDhis2Post -Times 0 -Exactly
+        }
+    }
+
+    Describe 'Invoke-NeoIPCDhis2Post' {
+        It 'builds the URI with scheme/host/port/path, encodes the query, and returns the parsed body' {
+            Mock Invoke-RestMethod { [pscustomobject]@{ ok = $true } }
+            $auth = @{ AuthType = 'Basic'; Username = 'admin'; Password = (ConvertTo-SecureString 'district' -AsPlainText -Force) }
+            $res = Invoke-NeoIPCDhis2Post -Auth $auth -Path 'api/metadata' -Scheme 'http' -Hostname 'localhost' -Port 8080 `
+                -Body '{}' -QueryParameters @{ importMode = 'VALIDATE'; atomicMode = 'NONE' } -Confirm:$false
+            $res.Body.ok | Should -BeTrue
+            Should -Invoke Invoke-RestMethod -Times 1 -Exactly -ParameterFilter {
+                $Method -eq 'Post' -and
+                $Uri.AbsoluteUri -like 'http://localhost:8080/api/metadata*' -and
+                $Uri.Query -like '*importMode=VALIDATE*' -and
+                $Authentication -eq 'Basic' -and
+                $AllowUnencryptedAuthentication -eq $true
+            }
         }
     }
 }
