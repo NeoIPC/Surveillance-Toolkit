@@ -8,13 +8,33 @@ on:
       - '*'
   pull_request:
   workflow_dispatch:
+  release:
+    types: [published]
 
 jobs:
     build-docs:
         # Pinned to an explicit image for reproducibility; 26.04 provides the .NET 10 / PowerShell 7.6
         # runtime the NeoIPC-Tools module and data-dictionary generator require.
         runs-on: ubuntu-26.04
+        # contents: write lets a manually-published Release receive the rendered metadata package as an asset.
+        permissions:
+          contents: write
         steps:
+            - name: Validate version tag format
+              # On a tag push or a published Release, the tag must match vMAJOR.MINOR.PATCH[-(alpha|beta|rc)[.N]] so
+              # the release/versioning scheme stays consistent (the tag is otherwise an unconstrained text field — easy
+              # to fat-finger as v0.1.0-aplha, 0.1, etc.). Fails fast before the heavy build.
+              if: github.event_name == 'release' || startsWith(github.ref, 'refs/tags/')
+              shell: bash
+              run: |
+                tag="${{ github.ref_name }}"
+                pattern='^v[0-9]+\.[0-9]+\.[0-9]+(-(alpha|beta|rc)(\.[0-9]+)?)?$'
+                if [[ ! "$tag" =~ $pattern ]]; then
+                  echo "::error::Version tag '$tag' must match $pattern (e.g. v0.1.0-alpha, v1.2.0, v1.2.0-rc.1)."
+                  exit 1
+                fi
+                echo "Version tag '$tag' OK."
+
             - uses: actions/checkout@v7
               with:
                 submodules: true
@@ -68,8 +88,32 @@ jobs:
                 # metadata/ directory alone — no DHIS2 API.
                 ./scripts/New-NeoIPCDataDictionary.ps1 -OutputDirectory ./artifacts/data-dictionary
 
+            - name: Render metadata distribution packages
+              shell: pwsh
+              env:
+                RELEASE_TAG: ${{ github.event.release.tag_name }}
+              run: |
+                # Render the importable DHIS2 metadata packages (install base + play) into the uploaded artifacts.
+                # Generated from the metadata/ directory alone — no DHIS2 API. NOT committed (undiffable compressed
+                # blobs): they ship as this build artifact, and as a Release asset on a manually-published release.
+                # The version is always explicit (the generator has no default): the published Release tag on a
+                # release build (the released version), else the repository VERSION file (the prominent source of
+                # truth) for the preview artifact.
+                $version = if ($env:RELEASE_TAG) { $env:RELEASE_TAG -replace '^v', '' } else { (Get-Content -LiteralPath ./VERSION -Raw).Trim() }
+                ./scripts/New-NeoIPCMetadataDistribution.ps1 -OutputDirectory ./artifacts/metadata-package -Version $version
+
             - name: Upload artifacts
               uses: actions/upload-artifact@v7
               with:
-                name: NeoIPC-Docs-Preview
+                name: NeoIPC-Surveillance-Toolkit
                 path: ./artifacts/
+
+            - name: Attach metadata package to the published Release
+              # Releasing is a deliberate human step: a maintainer publishes a GitHub Release (choosing the version
+              # and marking it pre-release/alpha). This only ATTACHES the rendered packages to that release — it
+              # never creates or labels one.
+              if: github.event_name == 'release'
+              shell: bash
+              env:
+                GH_TOKEN: ${{ github.token }}
+              run: gh release upload "${{ github.event.release.tag_name }}" ./artifacts/metadata-package/*.json --clobber

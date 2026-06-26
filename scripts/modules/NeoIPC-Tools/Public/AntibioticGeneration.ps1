@@ -248,7 +248,10 @@ function New-NeoIPCAntibioticOptionGroup {
 
     $resolveMembers = {
         param($codes)
-        @($codes | Sort-Object | ForEach-Object { [ordered]@{ id = $optUidByCode[$_] } })
+        # This pipeline output unrolls on return, so callers MUST @()-wrap the result: a single-member group's
+        # `options` would otherwise collapse to a scalar object (not a one-element array), which DHIS2 rejects on
+        # import ("Cannot deserialize value of type HashSet<Option> from Object value").
+        $codes | Sort-Object | ForEach-Object { [ordered]@{ id = $optUidByCode[$_] } }
     }
     $groups = [System.Collections.Generic.List[object]]::new()
 
@@ -261,7 +264,7 @@ function New-NeoIPCAntibioticOptionGroup {
         $obj = [ordered]@{ id = (& $groupUid $g.Code $g.Uid); code = $g.Code }
         foreach ($p in $fields.Keys) { $obj[$p] = $fields[$p] }
         $obj['optionSet'] = [ordered]@{ id = $osUid }
-        $obj['options'] = & $resolveMembers $members
+        $obj['options'] = @(& $resolveMembers $members)
         if ($dep) { $obj = Add-NeoIPCAntibioticGroupSharing -Group $obj -Deployed $dep }
         $obj = Add-NeoIPCAntibioticTranslations -Object $obj -EnglishValue $fields -LocaleMaps $localeMaps
         $groups.Add($obj)
@@ -278,7 +281,7 @@ function New-NeoIPCAntibioticOptionGroup {
         $obj = [ordered]@{ id = (& $groupUid $code $aw.Uid); code = $code }
         foreach ($p in $fields.Keys) { $obj[$p] = $fields[$p] }
         $obj['optionSet'] = [ordered]@{ id = $osUid }
-        $obj['options'] = & $resolveMembers $members
+        $obj['options'] = @(& $resolveMembers $members)
         if ($dep) { $obj = Add-NeoIPCAntibioticGroupSharing -Group $obj -Deployed $dep }
         $obj = Add-NeoIPCAntibioticTranslations -Object $obj -EnglishValue $fields -LocaleMaps $localeMaps
         $groups.Add($obj)

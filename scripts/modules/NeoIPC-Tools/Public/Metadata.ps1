@@ -578,6 +578,107 @@ function New-NeoIPCMetadataPackage {
     $json
 }
 
+function Import-NeoIPCMetadata {
+    <#
+    .SYNOPSIS
+        POST a metadata package to a DHIS2 instance's /api/metadata, returning the import summary.
+    .DESCRIPTION
+        The import half of the pipeline: sends a package produced by New-NeoIPCMetadataPackage (or any DHIS2
+        metadata JSON) to /api/metadata and returns a normalized summary of the import report. With -DryRun the
+        server only validates (importMode=VALIDATE) and commits nothing — the recommended first pass against a
+        fresh instance. References resolve by UID (the package is UID-keyed), so no idScheme override is needed.
+
+        This DRIVES a DHIS2 instance, so it is intended for the LOCAL / test stack only (synthetic data); it must
+        not be pointed at the production or deployed-test API. Auth comes from a Resolve-NeoIPCAuth hashtable; for
+        the local http stack pass -Scheme http -Hostname localhost -Port 8080 and a Basic-auth hashtable.
+
+        The summary object carries DryRun, HttpStatusCode (transport), Status (OK / WARNING / ERROR), the create/
+        update/delete/ignore/total counts, the per-type reports, and Raw (the full parsed response) for callers
+        that need the conflict detail. A non-OK status is reported, not thrown — the caller decides how to react
+        (a seed continues on WARNING; a strict gate fails). The body is read whatever the transport code, because
+        DHIS2 answers an import with conflicts HTTP 409 while still returning the full report.
+    .PARAMETER Path
+        Path to a metadata package JSON file to import.
+    .PARAMETER Json
+        A metadata package JSON string to import, instead of -Path (e.g. the New-NeoIPCMetadataPackage return).
+    .PARAMETER Auth
+        Auth hashtable from Resolve-NeoIPCAuth (Token or Basic).
+    .PARAMETER ImportStrategy
+        DHIS2 importStrategy: CREATE_AND_UPDATE (default), CREATE, UPDATE, or DELETE.
+    .PARAMETER AtomicMode
+        DHIS2 atomicMode: ALL (default — all-or-nothing) or NONE (import what is valid, report the rest).
+    .PARAMETER DryRun
+        Validate only (importMode=VALIDATE); the server commits nothing.
+    #>
+    [CmdletBinding(SupportsShouldProcess, DefaultParameterSetName = 'Path')]
+    [OutputType([pscustomobject])]
+    param(
+        [Parameter(Mandatory, ParameterSetName = 'Path')][string]$Path,
+        [Parameter(Mandatory, ParameterSetName = 'Json')][string]$Json,
+        [Parameter(Mandatory)][hashtable]$Auth,
+        [string]$Scheme = 'https',
+        [string]$Hostname = 'neoipc.charite.de',
+        [Nullable[int]]$Port = $null,
+        [ValidateSet('CREATE_AND_UPDATE', 'CREATE', 'UPDATE', 'DELETE')][string]$ImportStrategy = 'CREATE_AND_UPDATE',
+        [ValidateSet('ALL', 'NONE')][string]$AtomicMode = 'ALL',
+        [switch]$DryRun
+    )
+    if ($PSCmdlet.ParameterSetName -eq 'Path') {
+        if (-not (Test-Path -LiteralPath $Path)) { throw "Metadata package not found: '$Path'." }
+        $payload = [System.IO.File]::ReadAllText($Path)
+    }
+    else { $payload = $Json }
+
+    $query = [ordered]@{
+        importStrategy = $ImportStrategy
+        atomicMode     = $AtomicMode
+        importMode     = if ($DryRun) { 'VALIDATE' } else { 'COMMIT' }
+    }
+
+    $postArgs = @{
+        Auth            = $Auth
+        Path            = 'api/metadata'
+        Body            = $payload
+        QueryParameters = $query
+    }
+    if ($Scheme) { $postArgs.Scheme = $Scheme }
+    if ($Hostname) { $postArgs.Hostname = $Hostname }
+    if ($null -ne $Port) { $postArgs.Port = $Port }
+
+    $portSuffix = if ($null -ne $Port) { ":$Port" } else { '' }
+    $target = "${Scheme}://${Hostname}${portSuffix}/api/metadata"
+    $action = if ($DryRun) { 'Validate metadata import (dry-run)' } else { "Import metadata ($ImportStrategy)" }
+    if (-not $PSCmdlet.ShouldProcess($target, $action)) { return }
+
+    # Own confirmation done above; suppress the inner helper's ShouldProcess.
+    $response = Invoke-NeoIPCDhis2Post @postArgs -Confirm:$false
+
+    # DHIS2 returns the ImportReport either wrapped in a WebMessage (.response) or plain, depending on API version.
+    $body = $response.Body
+    $hasResponse = $body -and ($body.PSObject.Properties.Name -contains 'response') -and $body.response
+    $report = if ($hasResponse) { $body.response } else { $body }
+    $stats = if ($report -and ($report.PSObject.Properties.Name -contains 'stats')) { $report.stats } else { $null }
+    $status = if ($report -and ($report.PSObject.Properties.Name -contains 'status')) { $report.status }
+    elseif ($body -and ($body.PSObject.Properties.Name -contains 'status')) { $body.status } else { $null }
+
+    Write-Verbose ("metadata import ({0}): HTTP {1}, status {2}{3}." -f `
+        ($(if ($DryRun) { 'dry-run' } else { 'commit' })), $response.StatusCode, $status,
+        $(if ($stats) { ", created=$($stats.created) updated=$($stats.updated) ignored=$($stats.ignored) total=$($stats.total)" } else { '' }))
+
+    [pscustomobject]@{
+        DryRun         = [bool]$DryRun
+        HttpStatusCode = $response.StatusCode
+        Status         = $status
+        Created        = if ($stats) { $stats.created } else { $null }
+        Updated        = if ($stats) { $stats.updated } else { $null }
+        Deleted        = if ($stats) { $stats.deleted } else { $null }
+        Ignored        = if ($stats) { $stats.ignored } else { $null }
+        Total          = if ($stats) { $stats.total } else { $null }
+        TypeReports    = if ($report -and ($report.PSObject.Properties.Name -contains 'typeReports')) { $report.typeReports } else { $null }
+        Raw            = $body
+    }
+}
+
 function Export-NeoIPCMetadataTranslation {
     <#
     .SYNOPSIS
