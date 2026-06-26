@@ -29,7 +29,9 @@ jobs:
               run: |
                 sudo apt-get update -qq
                 sudo apt-get install -qq pandoc librsvg2-bin bison flex libffi-dev libxml2-dev libgdk-pixbuf-2.0-dev libcairo2-dev libpango1.0-dev libwebp-dev fonts-lyx fonts-noto-core gettext liblocale-gettext-perl libtext-wrapi18n-perl libsyntax-keyword-try-perl libtimedate-perl libyaml-tiny-perl libpod-parser-perl libmodule-build-perl
-                sudo gem install mathematical:1.7.0 asciidoctor-pdf asciidoctor-bibtex asciidoctor-diagram asciimath asciidoctor-mathematical
+                # CMAKE_POLICY_VERSION_MINIMUM lets the gems' bundled mtex2MML (an old cmake_minimum_required)
+                # configure under the CMake 4 on Ubuntu 26.04; passed through sudo, which otherwise resets env.
+                sudo env CMAKE_POLICY_VERSION_MINIMUM=3.5 gem install mathematical:1.7.0 asciidoctor-pdf asciidoctor-bibtex asciidoctor-diagram asciimath asciidoctor-mathematical
                 sudo npm install -g @linthtml/linthtml
 
             - name: Run po4a
