@@ -72,6 +72,7 @@
         'Update-NeoIPCMetadata'
         'New-NeoIPCMetadataPackage'
         'Import-NeoIPCMetadata'
+        'Test-NeoIPCMetadataImport'
         'Export-NeoIPCMetadataTranslation'
         'Import-NeoIPCMetadataTranslation'
         'Update-NeoIPCMetadataDirectory'

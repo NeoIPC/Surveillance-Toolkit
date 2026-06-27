@@ -82,7 +82,9 @@ function Invoke-NeoIPCDhis2Get {
         Uri         = $uri
         ErrorAction = 'Stop'
     }
-    Set-NeoIPCDhis2Auth -InvokeParams $invokeParams -Auth $Auth
+    # -AllowUnencrypted so Basic auth works over the local http dev/test stack, matching the POST helper
+    # (harmless over https — it only permits, never forces, unencrypted Basic auth).
+    Set-NeoIPCDhis2Auth -InvokeParams $invokeParams -Auth $Auth -AllowUnencrypted
 
     if ($PSCmdlet.ShouldProcess(
             "GET $uri",
