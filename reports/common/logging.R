@@ -77,8 +77,11 @@ configure_logging <- function(report = NULL, verbosity = NULL) {
   }
 
   # Capture stray base-R conditions (warnings, messages) into the unified log
-  # while leaving them catchable (log_warnings() defaults to muffle = FALSE).
-  logger::log_warnings()
+  # while leaving them catchable. muffle = FALSE keeps each warning propagating
+  # (logged AND still reachable by a surrounding handler), independent of the
+  # global logger_muffle_warnings option. log_messages() takes no muffle
+  # argument and never muffles.
+  logger::log_warnings(muffle = FALSE)
   logger::log_messages()
 
   invisible(threshold)
@@ -88,22 +91,28 @@ configure_logging <- function(report = NULL, verbosity = NULL) {
 # emit under the active report namespace by default; the shared `common/` code
 # passes `namespace = "report-common"` so its lines are attributed to the
 # shared layer rather than to whichever report invoked it.
+#
+# Each helper forwards `.topenv = parent.frame()` so logger's glue formatter
+# resolves `{placeholder}` tokens in the *caller's* frame. Without it the
+# formatter evaluates in this wrapper's frame (whose enclosing environment is
+# globalenv, since this file is sourced at top level), and a message that
+# references a caller-local variable would error at runtime.
 logInfo <- function(..., namespace = .report_log$namespace) {
-  logger::log_info(..., namespace = namespace)
+  logger::log_info(..., namespace = namespace, .topenv = parent.frame())
 }
 
 logVerbose <- function(..., namespace = .report_log$namespace) {
-  logger::log_debug(..., namespace = namespace)
+  logger::log_debug(..., namespace = namespace, .topenv = parent.frame())
 }
 
 logDebug <- function(..., namespace = .report_log$namespace) {
-  logger::log_trace(..., namespace = namespace)
+  logger::log_trace(..., namespace = namespace, .topenv = parent.frame())
 }
 
 logWarn <- function(..., namespace = .report_log$namespace) {
-  logger::log_warn(..., namespace = namespace)
+  logger::log_warn(..., namespace = namespace, .topenv = parent.frame())
 }
 
 logError <- function(..., namespace = .report_log$namespace) {
-  logger::log_error(..., namespace = namespace)
+  logger::log_error(..., namespace = namespace, .topenv = parent.frame())
 }
