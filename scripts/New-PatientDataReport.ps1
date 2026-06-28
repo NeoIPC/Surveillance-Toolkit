@@ -89,13 +89,43 @@ if ($OutputDir) {
     $outputDirExplicit = $false
 }
 
-# Resolve the unified log verbosity from -Quiet / -Verbose / -Debug; the R and
-# Quarto children read it via NEOIPC_LOG_LEVEL (see reports/common/logging.R).
+# Resolve the unified log verbosity from -Quiet / -Verbose / -Debug. It reaches
+# the child processes two ways: the NEOIPC_LOG_LEVEL environment variable (read
+# by the QMDs / neoipcr) and native --quiet/--verbose/--debug flags on the child
+# commands. Snapshot the common-parameter flags and resolve the level (and the
+# per-child flag arrays) here in the script scope; inside the
+# Invoke-WithNeoIPCAuth scriptblock $PSBoundParameters is the scriptblock's own
+# (empty) dictionary, so the scriptblock reads the resolved arrays via closure.
+$debugRequested   = $PSBoundParameters.ContainsKey('Debug')
+$verboseRequested = $PSBoundParameters.ContainsKey('Verbose')
 $logLevel =
     if ($Quiet) { 'quiet' }
-    elseif ($PSBoundParameters.ContainsKey('Debug')) { 'debug' }
-    elseif ($PSBoundParameters.ContainsKey('Verbose')) { 'verbose' }
+    elseif ($debugRequested) { 'debug' }
+    elseif ($verboseRequested) { 'verbose' }
     else { 'normal' }
+
+# -Quiet also silences the wrapper's own progress/verbose/info streams so the
+# whole pipeline is quiet, not just the logger channel.
+if ($Quiet) {
+    $VerbosePreference     = 'SilentlyContinue'
+    $DebugPreference       = 'SilentlyContinue'
+    $InformationPreference = 'SilentlyContinue'
+    $ProgressPreference    = 'SilentlyContinue'
+}
+
+# Native verbosity flags for the child processes, derived from the same level.
+$rscriptVerbosityArgs = switch ($logLevel) {
+    'quiet'   { @('--quiet') }
+    'verbose' { @('--verbose') }
+    'debug'   { @('--debug') }
+    default   { @() }
+}
+$quartoVerbosityArgs = switch ($logLevel) {
+    'quiet'   { @('--quiet') }
+    'verbose' { @('--log-level', 'info') }
+    'debug'   { @('--log-level', 'debug') }
+    default   { @() }
+}
 
 Invoke-WithNeoIPCAuth -Auth $auth -ExtraEnvVars @{ 'LC_ALL' = $null; 'NEOIPC_LOG_LEVEL' = $logLevel } -ScriptBlock {
 
@@ -132,6 +162,7 @@ try {
             if ($Dhis2Hostname) { $rArgs += @('--host', $Dhis2Hostname) }
             if ($Dhis2Port) { $rArgs += @('--port', $Dhis2Port) }
             if ($Dhis2Path) { $rArgs += @('--path', $Dhis2Path) }
+            $rArgs += $rscriptVerbosityArgs
             $rResult = Invoke-Rscript -Arguments $rArgs -Description "Generate-PatientData.R"
             if ($rResult.Status -eq 'Error') {
                 $errors += "Generate-PatientData.R failed (exit code $($rResult.ExitCode))."
@@ -156,6 +187,7 @@ try {
             if ($Dhis2Hostname) { $quartoArgs += @('-P', "dhis2Hostname:$Dhis2Hostname") }
             if ($Dhis2Port) { $quartoArgs += @('-P', "dhis2Port:$Dhis2Port") }
             if ($Dhis2Path) { $quartoArgs += @('-P', "dhis2Path:$Dhis2Path") }
+            $quartoArgs += $quartoVerbosityArgs
             $result = Invoke-QuartoRender -Arguments $quartoArgs -Description "patient data report for $PatientId"
             if ($result.Status -eq 'Error') {
                 $errors += "Quarto render failed for $PatientId (exit code $($result.ExitCode))."

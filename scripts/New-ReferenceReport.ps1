@@ -139,13 +139,6 @@ if ($isDataFileMode -and ($OutputFormats -contains 'json')) {
     throw "The 'json' format is not supported with -DataFile. The data file is already JSON."
 }
 
-if ($Quiet) {
-    $VerbosePreference = 'SilentlyContinue'
-    $DebugPreference = 'SilentlyContinue'
-    $InformationPreference = 'SilentlyContinue'
-    $ProgressPreference = 'SilentlyContinue'
-}
-
 $scriptTimestamp = (Get-Date -AsUTC).ToString("yyyy-MM-dd_HHmmss'Z'")
 $repoRoot = Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..')
 $reportDirPath = Resolve-Path -LiteralPath (Join-Path $repoRoot 'reports/Reference-Report')
@@ -247,20 +240,43 @@ if ($isDataFileMode) {
 
 $authForEnv = if (-not $isDataFileMode) { Resolve-NeoIPCAuth -Token $Token } else { @{ AuthType = 'None' } }
 
-# $PSBoundParameters is per-invocation; inside the Invoke-WithNeoIPCAuth
-# scriptblock it refers to the scriptblock's own (empty) parameter dictionary,
-# not this script's. Snapshot common-parameter flags here so the scriptblock
-# can read them via lexical closure.
+# Resolve the unified log verbosity from -Quiet / -Verbose / -Debug. It reaches
+# the child processes two ways: the NEOIPC_LOG_LEVEL environment variable (read
+# by the QMDs / neoipcr) and native --quiet/--verbose/--debug flags on the child
+# commands. Snapshot the common-parameter flags and resolve the level (and the
+# per-child flag arrays) here in the script scope; inside the
+# Invoke-WithNeoIPCAuth scriptblock $PSBoundParameters is the scriptblock's own
+# (empty) dictionary, so the scriptblock reads the resolved arrays via closure.
 $debugRequested   = $PSBoundParameters.ContainsKey('Debug')
 $verboseRequested = $PSBoundParameters.ContainsKey('Verbose')
-
-# Resolve the unified log verbosity; the R and Quarto children read it via
-# NEOIPC_LOG_LEVEL (see reports/common/logging.R).
 $logLevel =
     if ($Quiet) { 'quiet' }
     elseif ($debugRequested) { 'debug' }
     elseif ($verboseRequested) { 'verbose' }
     else { 'normal' }
+
+# -Quiet also silences the wrapper's own progress/verbose/info streams so the
+# whole pipeline is quiet, not just the logger channel.
+if ($Quiet) {
+    $VerbosePreference     = 'SilentlyContinue'
+    $DebugPreference       = 'SilentlyContinue'
+    $InformationPreference = 'SilentlyContinue'
+    $ProgressPreference    = 'SilentlyContinue'
+}
+
+# Native verbosity flags for the child processes, derived from the same level.
+$rscriptVerbosityArgs = switch ($logLevel) {
+    'quiet'   { @('--quiet') }
+    'verbose' { @('--verbose') }
+    'debug'   { @('--debug') }
+    default   { @() }
+}
+$quartoVerbosityArgs = switch ($logLevel) {
+    'quiet'   { @('--quiet') }
+    'verbose' { @('--log-level', 'info') }
+    'debug'   { @('--log-level', 'debug') }
+    default   { @() }
+}
 
 Invoke-WithNeoIPCAuth -Auth $authForEnv -ExtraEnvVars @{ 'LC_ALL' = $null; 'NEOIPC_BACKUP_PASSWORD' = $null; 'NEOIPC_LOG_LEVEL' = $logLevel } -ScriptBlock {
 
@@ -349,9 +365,7 @@ try {
         if ($PSCmdlet.ShouldProcess($jsonPath, 'Generate reference data JSON')) {
             Write-Verbose "Generating reference data JSON: $jsonPath"
             $rArgs = @('--vanilla', (Join-Path $reportDirPath 'Generate-ReferenceData.R'), '--file', $jsonPath)
-            if ($Quiet) { $rArgs += @('--quiet') }
-            if ($debugRequested) { $rArgs += @('--debug') }
-            if ($verboseRequested) { $rArgs += @('--verbose') }
+            $rArgs += $rscriptVerbosityArgs
             foreach ($kvp in $qmdParams.GetEnumerator()) {
                 if ($null -ne $kvp.Value -and '' -ne $kvp.Value) {
                     $rArgs += @("--$($kvp.Key)", "$($kvp.Value)")
@@ -380,18 +394,7 @@ try {
     }
 
     $quartoArgsCommon = @()
-    if ($Quiet) {$quartoArgsCommon += '--quiet' }
-    if ($debugRequested) {
-        $quartoArgsCommon += '--debug'
-        $quartoArgsCommon += @('--log-level', 'debug')
-    } elseif ($verboseRequested) {
-        $quartoArgsCommon += '--verbose'
-        $quartoArgsCommon += @('--log-level', 'info')
-    } else {
-        if ($Quiet) {
-            $quartoArgsCommon += @('--log-level', 'error')
-        }
-    }
+    $quartoArgsCommon += $quartoVerbosityArgs
     $outputDirRelative = [System.IO.Path]::GetRelativePath($reportDirPath, $outputDirPath)
     $quartoArgsCommon += @('--output-dir', $outputDirRelative)
 

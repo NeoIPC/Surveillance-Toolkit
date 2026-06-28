@@ -22,7 +22,10 @@ print_usage <- function() {
     "  --patient-id, -p <id>           NeoIPC patient ID\n",
     "  --department, -d <code>         Department code\n\n",
     "Options:\n",
-    "  --output, -o <path>             Output file path (stdout if omitted)\n\n",
+    "  --output, -o <path>             Output file path (stdout if omitted)\n",
+    "  --quiet, -q                     Suppress non-critical output\n",
+    "  --verbose, -V                   Verbose output\n",
+    "  --debug, -D                     Debug output\n\n",
     "Connection settings:\n",
     "  --scheme <scheme>               URL scheme (default: https)\n",
     "  --host <hostname>               DHIS2 hostname\n",
@@ -42,6 +45,9 @@ short_map <- list(
   p = "patientId",
   d = "department",
   o = "output",
+  q = "quiet",
+  V = "verbose",
+  D = "debug",
   h = "help"
 )
 
@@ -53,7 +59,22 @@ if (isTRUE(args$help)) {
   quit(status = 0)
 }
 
-configure_logging(report = "patient-data-report")
+# Verbosity precedence: an explicit CLI flag wins; otherwise inherit
+# NEOIPC_LOG_LEVEL (set by the PowerShell wrapper or the .NET service);
+# otherwise default to normal. Republish the resolved level so neoipcr and any
+# child processes share it.
+verbosity <- if (isTRUE(args$quiet)) {
+  "quiet"
+} else if (isTRUE(args$debug)) {
+  "debug"
+} else if (isTRUE(args$verbose)) {
+  "verbose"
+} else {
+  Sys.getenv("NEOIPC_LOG_LEVEL", unset = "normal")
+}
+Sys.setenv(NEOIPC_LOG_LEVEL = verbosity)
+
+configure_logging(report = "patient-data-report", verbosity = verbosity)
 
 patient_id <- as_null(args$patientId)
 department_code <- as_null(args$department)

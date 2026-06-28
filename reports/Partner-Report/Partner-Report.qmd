@@ -156,10 +156,6 @@ params:
   # @type integer
   # @range 1..
   sparseDataThreshold: 16
-
-  # Render in debug mode (extra diagnostics).
-  # @type logical
-  debug: false
 subtitle: '`r paste0(params$unitCodes, collapse = ", ")`'
 ---
 

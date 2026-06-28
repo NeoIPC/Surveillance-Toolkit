@@ -269,12 +269,14 @@ Approved PS verbs + PascalCase noun (e.g., `New-PartnerReports.ps1`). All wrappe
 
 All report R code and neoipcr log through the `logger` package (`reports/common/logging.R`). Three R namespaces —
 the report's slug (e.g. `partner-report`), `report-common` (the shared `common/` layer), and `neoipcr` — let every
-line self-identify its source. Verbosity is **one** setting (`quiet`/`normal`/`verbose`/`debug`), propagated to the
-R / Quarto child processes via the **`NEOIPC_LOG_LEVEL`** environment variable: the default `normal` shows lifecycle
-progress; `verbose`/`debug` reveal the DHIS2 query trace (URL + HTTP status + row count — **never** response bodies,
-a data-protection boundary). The `New-*.ps1` wrappers map the standard `-Quiet`/`-Verbose`/`-Debug` switches to it
-(via `Invoke-WithNeoIPCAuth -ExtraEnvVars`); the `Generate-*Data.R` wrappers' `--quiet`/`--verbose`/`--debug` flags
-and Partner-Report's `-P debug:true` override it. When `NEOIPC_LOG_FILE` is set (by the NeoIPC-Reporting .NET
+line self-identify its source. Verbosity is **one** setting (`quiet`/`normal`/`verbose`/`debug`): the default `normal` shows lifecycle progress;
+`verbose`/`debug` reveal the DHIS2 query trace (URL + HTTP status + row count — **never** response bodies, a
+data-protection boundary). The `New-*.ps1` wrappers map the standard `-Quiet`/`-Verbose`/`-Debug` switches to it and
+pass it to the children **two** ways: the **`NEOIPC_LOG_LEVEL`** environment variable (read by the QMDs and neoipcr)
+and the native `--quiet`/`--verbose`/`--debug` CLI flags on the `Generate-*Data.R` / `quarto render` calls; `-Quiet`
+additionally silences the wrapper's own progress/verbose streams. Each `Generate-*Data.R` resolves a native CLI flag
+first, falls back to `NEOIPC_LOG_LEVEL` (so the .NET service can drive it environment-only), and republishes the
+resolved level for neoipcr and any child processes. When `NEOIPC_LOG_FILE` is set (by the NeoIPC-Reporting .NET
 service), the R side writes structured JSON to that file instead of the console.
 
 ### Argument Handling

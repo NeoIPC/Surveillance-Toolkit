@@ -15,8 +15,6 @@ suppressPackageStartupMessages({
   library(jsonlite)
 })
 
-verbosity <- "normal"
-
 printUsage <- function() {
   cat(
     "Usage: Rscript --vanilla ",
@@ -264,13 +262,20 @@ if (isTRUE(args$help)) {
   quit(status = 0)
 }
 
-if (isTRUE(args$quiet)) {
-  verbosity <- "quiet"
+# Verbosity precedence: an explicit CLI flag wins; otherwise inherit
+# NEOIPC_LOG_LEVEL (set by the PowerShell wrapper or the .NET service);
+# otherwise default to normal. Republish the resolved level so neoipcr and any
+# child processes share it.
+verbosity <- if (isTRUE(args$quiet)) {
+  "quiet"
 } else if (isTRUE(args$debug)) {
-  verbosity <- "debug"
+  "debug"
 } else if (isTRUE(args$verbose)) {
-  verbosity <- "verbose"
+  "verbose"
+} else {
+  Sys.getenv("NEOIPC_LOG_LEVEL", unset = "normal")
 }
+Sys.setenv(NEOIPC_LOG_LEVEL = verbosity)
 
 configure_logging(report = "reference-report", verbosity = verbosity)
 

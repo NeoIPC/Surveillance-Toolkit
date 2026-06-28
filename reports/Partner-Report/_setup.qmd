@@ -15,16 +15,13 @@ library(gt, warn.conflicts = FALSE, quietly = TRUE)
 ```{r Set up functions}
 #| include: false
 
-# Debug mode: when false (default), suppress warnings from rendered output.
-# Warnings still appear in the build log. Pass -P debug:true to enable.
-debug_mode <- isTRUE(as.logical(params$debug))
-knitr::opts_chunk$set(warning = debug_mode)
+# R warnings are captured into the unified log channel by configure_logging()'s
+# warning hook; keep them out of the rendered report body.
+knitr::opts_chunk$set(warning = FALSE)
 
 source("../common/helpers.R")
 source("../common/logging.R")
-configure_logging(
-  report = "partner-report",
-  verbosity = if (debug_mode) "debug" else NULL)
+configure_logging(report = "partner-report")
 
 # Cross-reference table IDs for metric pairings. These are Quarto
 # cross-references (invariant across languages), not translatable strings,
@@ -1169,14 +1166,11 @@ localize_metric_name <- function(metric_id, sR, table_name = NULL) {
     }
   }
 
-  # Fall back to the raw identifier. Warn in debug mode so it renders into
-  # the document for diagnosis; silently fall back otherwise.
-  if (isTRUE(debug_mode)) {
-    rlang::warn(paste0(
-      "localize_metric_name: no display label found for metric identifier '",
-      metric_id, "'. Using raw identifier as fallback."
-    ))
-  }
+  # Fall back to the raw identifier; record the gap in the log channel only (it
+  # never surfaces in the rendered report body).
+  logDebug(paste0(
+    "localize_metric_name: no display label found for metric ",
+    "identifier '{metric_id}'. Using raw identifier as fallback."))
   return(metric_id)
 }
 
