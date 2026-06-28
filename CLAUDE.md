@@ -67,7 +67,7 @@ Reports live under `reports/`:
 
 ### Shared Infrastructure
 
-- **Shared R code**: `reports/common/` — `helpers.R` (locale parsing, string resource loading, DHIS2 connection helpers), `load-neoipcr.R`, `parse-args.R` (CLI arg parsing), `getDataset.R` (dataset export), `reference.docx` (Word template)
+- **Shared R code**: `reports/common/` — `helpers.R` (locale parsing, string resource loading, DHIS2 connection helpers), `load-neoipcr.R`, `parse-args.R` (CLI arg parsing), `getDataset.R` (dataset export), `logging.R` (unified `logger`-based logging: `configure_logging()` + `logInfo`/`logVerbose`/`logDebug`/`logWarn`/`logError`), `reference.docx` (Word template)
 - **Base string resources**: `reports/common.yaml` (English domain terms, table headers, footnotes)
 - **Pandoc filters**: `reports/filters/pandoc-quotes.lua` (language-aware typographic quotes), `remove-empty-sections.lua`
 
@@ -264,6 +264,18 @@ No `sprintf` `%s`, markdown, or LaTeX syntax in translatable strings. Use `glue`
 ### PowerShell Scripts
 
 Approved PS verbs + PascalCase noun (e.g., `New-PartnerReports.ps1`). All wrappers in `scripts/`. Shared helpers in `scripts/NeoIPCReportHelpers.ps1` (dot-sourced).
+
+### Logging
+
+All report R code and neoipcr log through the `logger` package (`reports/common/logging.R`). Three R namespaces —
+the report's slug (e.g. `partner-report`), `report-common` (the shared `common/` layer), and `neoipcr` — let every
+line self-identify its source. Verbosity is **one** setting (`quiet`/`normal`/`verbose`/`debug`), propagated to the
+R / Quarto child processes via the **`NEOIPC_LOG_LEVEL`** environment variable: the default `normal` shows lifecycle
+progress; `verbose`/`debug` reveal the DHIS2 query trace (URL + HTTP status + row count — **never** response bodies,
+a data-protection boundary). The `New-*.ps1` wrappers map the standard `-Quiet`/`-Verbose`/`-Debug` switches to it
+(via `Invoke-WithNeoIPCAuth -ExtraEnvVars`); the `Generate-*Data.R` wrappers' `--quiet`/`--verbose`/`--debug` flags
+and Partner-Report's `-P debug:true` override it. When `NEOIPC_LOG_FILE` is set (by the NeoIPC-Reporting .NET
+service), the R side writes structured JSON to that file instead of the console.
 
 ### Argument Handling
 

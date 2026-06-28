@@ -2,7 +2,9 @@
 source("../common/load-neoipcr.R")
 load_neoipcr(dev_pkg_path = "../../../neoipcr")
 source("../common/helpers.R")
+source("../common/logging.R")
 suppressMessages(library(tidyverse, warn.conflicts = FALSE, quietly = TRUE))
+configure_logging(report = "validation-report")
 ```
 
 ```{r Initialise locale dependent information}

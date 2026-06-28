@@ -153,7 +153,8 @@ get_validation_exceptions <- function(x) {
   if (file.exists(validationExceptionFile)) {
     return(read_csv(validationExceptionFile, show_col_types = FALSE))
   } else {
-    warning(sprintf("Validation ecxeption file not found: '%s'", validationExceptionFile))
+    logWarn("Validation exception file not found: '{validationExceptionFile}'",
+            namespace = "report-common")
     return(FALSE)
   }
 }

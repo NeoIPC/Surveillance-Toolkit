@@ -11,26 +11,11 @@ suppressPackageStartupMessages({
   source(file.path(script_dir, "../common/load-neoipcr.R"))
   load_neoipcr(dev_pkg_path = file.path(script_dir, "../../../neoipcr"))
   source(file.path(script_dir, "../common/parse-args.R"))
+  source(file.path(script_dir, "../common/logging.R"))
   library(jsonlite)
 })
 
 verbosity <- "normal"
-
-logInfo <- function(...) {
-  if (verbosity != "quiet") message(...)
-}
-
-logVerbose <- function(...) {
-  if (verbosity %in% c("verbose", "debug")) message(...)
-}
-
-logDebug <- function(...) {
-  if (verbosity == "debug") message(...)
-}
-
-logWarn <- function(...) {
-  if (verbosity != "quiet") warning(..., call. = FALSE)
-}
 
 printUsage <- function() {
   cat(
@@ -115,12 +100,7 @@ getValidationExceptions <- function(x) {
       colClasses = colClasses
     ))
   }
-  logWarn(
-    sprintf(
-      "Validation exception file not found: '%s'",
-      validationExceptionFile
-    )
-  )
+  logWarn("Validation exception file not found: '{validationExceptionFile}'")
   NULL
 }
 
@@ -292,6 +272,8 @@ if (isTRUE(args$quiet)) {
   verbosity <- "verbose"
 }
 
+configure_logging(report = "reference-report", verbosity = verbosity)
+
 referenceDataFile <- as_null(args$file)
 reportingPeriodFrom <- as_date_or_null(args$reportingPeriodFrom)
 reportingPeriodTo <- as_date_or_null(args$reportingPeriodTo)
@@ -328,18 +310,16 @@ datasetOptions <- getDatasetOptions(
 )
 
 logVerbose("Importing DHIS2 data...")
-rawData <- suppressWarnings(
-  neoipcr::import_dhis2(
-    connection_options = connectionOptions,
-    dataset_options = datasetOptions
-  )
+rawData <- neoipcr::import_dhis2(
+  connection_options = connectionOptions,
+  dataset_options = datasetOptions
 )
 if (!is.null(backupDataset)) {
   backupPath <- backupDataset
   if (is.na(backupPath) || backupPath == "") {
     stop("--backup-dataset requires a file path.")
   }
-  logVerbose("Creating encrypted backup: ", backupPath)
+  logVerbose("Creating encrypted backup: {backupPath}")
   backupReferenceDataset(rawData, backupPath)
 }
 referenceData <- neoipcr::calculate_reference_data(rawData)
@@ -358,5 +338,5 @@ if (is.null(referenceDataFile)) {
     dir.create(outputDir, recursive = TRUE, showWarnings = FALSE)
   }
   writeLines(json, referenceDataFile, useBytes = TRUE)
-  logInfo("Reference data written to: ", referenceDataFile)
+  logInfo("Reference data written to: {referenceDataFile}")
 }

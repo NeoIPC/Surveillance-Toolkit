@@ -209,7 +209,9 @@ param(
         'SurgicalProcedureRates',
         'SecondaryBloodstreamInfectionRates'
     )]
-    [string[]]$DisableElements = @()
+    [string[]]$DisableElements = @(),
+
+    [switch]$Quiet
 )
 
 Import-Module (Join-Path $PSScriptRoot 'modules' 'NeoIPC-Tools') -Force -Verbose:$false
@@ -301,7 +303,15 @@ if ($ValidationExceptionFile) {
 # Pass a dummy auth hashtable that clears env vars without setting new ones.
 $authForEnv = if ($isDataFileMode) { @{ AuthType = 'None' } } else { Resolve-NeoIPCAuth -Token $Token }
 
-Invoke-WithNeoIPCAuth -Auth $authForEnv -ExtraEnvVars @{ 'LC_ALL' = $null } -ScriptBlock {
+# Resolve the unified log verbosity from -Quiet / -Verbose / -Debug; the R and
+# Quarto children read it via NEOIPC_LOG_LEVEL (see reports/common/logging.R).
+$logLevel =
+    if ($Quiet) { 'quiet' }
+    elseif ($PSBoundParameters.ContainsKey('Debug')) { 'debug' }
+    elseif ($PSBoundParameters.ContainsKey('Verbose')) { 'verbose' }
+    else { 'normal' }
+
+Invoke-WithNeoIPCAuth -Auth $authForEnv -ExtraEnvVars @{ 'LC_ALL' = $null; 'NEOIPC_LOG_LEVEL' = $logLevel } -ScriptBlock {
 
 # Prepare build tracking before try block so variables are always initialized,
 # even if an early exception (e.g. auth failure) skips the rest of the try body

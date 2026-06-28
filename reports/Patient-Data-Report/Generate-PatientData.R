@@ -6,6 +6,7 @@ suppressPackageStartupMessages({
   source(file.path(script_dir, "../common/load-neoipcr.R"))
   load_neoipcr(dev_pkg_path = file.path(script_dir, "../../neoipcr"))
   source(file.path(script_dir, "../common/parse-args.R"))
+  source(file.path(script_dir, "../common/logging.R"))
   library(jsonlite)
   library(dplyr, warn.conflicts = FALSE)
 })
@@ -52,15 +53,17 @@ if (isTRUE(args$help)) {
   quit(status = 0)
 }
 
+configure_logging(report = "patient-data-report")
+
 patient_id <- as_null(args$patientId)
 department_code <- as_null(args$department)
 
 if (is.null(patient_id)) {
-  cat("Error: --patient-id is required.\n", file = stderr())
+  logError("--patient-id is required.")
   quit(status = 1)
 }
 if (is.null(department_code)) {
-  cat("Error: --department is required.\n", file = stderr())
+  logError("--department is required.")
   quit(status = 1)
 }
 
@@ -98,8 +101,7 @@ ds <- neoipcr::import_dhis2(connection_options = conn_opt, dataset_options = ds_
 patient <- ds$patients |> dplyr::filter(patient_id == !!patient_id)
 
 if (nrow(patient) == 0) {
-  cat(sprintf("Error: No patient with ID '%s' found in department '%s'.\n",
-    patient_id, department_code), file = stderr())
+  logError("No patient with ID '{patient_id}' found in department '{department_code}'.")
   quit(status = 1)
 }
 
@@ -150,5 +152,5 @@ if (is.null(output_path)) {
   cat(out)
 } else {
   writeLines(out, output_path, useBytes = TRUE)
-  cat(sprintf("Patient data written to '%s'.\n", output_path), file = stderr())
+  logInfo("Patient data written to '{output_path}'.")
 }

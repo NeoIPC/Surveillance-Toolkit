@@ -47,6 +47,7 @@ param(
     [string]$Token,
 
     [Parameter()]
+    [switch]$Quiet,
     [switch]$JsonReport,
 
     [Parameter()]
@@ -88,7 +89,15 @@ if ($OutputDir) {
     $outputDirExplicit = $false
 }
 
-Invoke-WithNeoIPCAuth -Auth $auth -ExtraEnvVars @{ 'LC_ALL' = $null } -ScriptBlock {
+# Resolve the unified log verbosity from -Quiet / -Verbose / -Debug; the R and
+# Quarto children read it via NEOIPC_LOG_LEVEL (see reports/common/logging.R).
+$logLevel =
+    if ($Quiet) { 'quiet' }
+    elseif ($PSBoundParameters.ContainsKey('Debug')) { 'debug' }
+    elseif ($PSBoundParameters.ContainsKey('Verbose')) { 'verbose' }
+    else { 'normal' }
+
+Invoke-WithNeoIPCAuth -Auth $auth -ExtraEnvVars @{ 'LC_ALL' = $null; 'NEOIPC_LOG_LEVEL' = $logLevel } -ScriptBlock {
 
 $errors = @()
 $outputFiles = @()

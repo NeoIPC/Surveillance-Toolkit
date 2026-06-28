@@ -15,6 +15,8 @@ library(gt, warn.conflicts = FALSE, quietly = TRUE)
 #| include: false
 
 source("../common/helpers.R")
+source("../common/logging.R")
+configure_logging(report = "reference-report")
 
 labels_bw <- function(x) {
   paste(
@@ -199,7 +201,7 @@ if (!is.null(params$referenceDataFile)) {
         params$referenceDataFile,
         file.info(params$referenceDataFile)$size))
 } else {
-  reference_data <- suppressWarnings(import_dhis2(
+  reference_data <- import_dhis2(
     connection_options = get_connection_options(
       scheme = params$dhis2Scheme, hostname = params$dhis2Hostname,
       port = params$dhis2Port, path = params$dhis2Path),
@@ -213,7 +215,7 @@ if (!is.null(params$referenceDataFile)) {
       reportingCountries = params$reportingCountries,
       testUnitFilter = params$testUnitFilter,
       defaultPatientFilter = params$defaultPatientFilter,
-      validationExceptionFile = params$validationExceptionFile))) |>
+      validationExceptionFile = params$validationExceptionFile)) |>
     neoipcr::calculate_reference_data()
 }
 

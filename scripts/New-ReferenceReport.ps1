@@ -254,7 +254,15 @@ $authForEnv = if (-not $isDataFileMode) { Resolve-NeoIPCAuth -Token $Token } els
 $debugRequested   = $PSBoundParameters.ContainsKey('Debug')
 $verboseRequested = $PSBoundParameters.ContainsKey('Verbose')
 
-Invoke-WithNeoIPCAuth -Auth $authForEnv -ExtraEnvVars @{ 'LC_ALL' = $null; 'NEOIPC_BACKUP_PASSWORD' = $null } -ScriptBlock {
+# Resolve the unified log verbosity; the R and Quarto children read it via
+# NEOIPC_LOG_LEVEL (see reports/common/logging.R).
+$logLevel =
+    if ($Quiet) { 'quiet' }
+    elseif ($debugRequested) { 'debug' }
+    elseif ($verboseRequested) { 'verbose' }
+    else { 'normal' }
+
+Invoke-WithNeoIPCAuth -Auth $authForEnv -ExtraEnvVars @{ 'LC_ALL' = $null; 'NEOIPC_BACKUP_PASSWORD' = $null; 'NEOIPC_LOG_LEVEL' = $logLevel } -ScriptBlock {
 
 if (-not $isDataFileMode -and $BackupDataset -and [string]::IsNullOrWhiteSpace($env:NEOIPC_BACKUP_PASSWORD)) {
     $secureBackupPassword = Read-Host -Prompt 'Backup password' -AsSecureString
