@@ -217,5 +217,35 @@ InModuleScope 'NeoIPC-Tools' {
             }
             (Get-VDisc $pkg).Count | Should -Be 0
         }
+
+        It 'does NOT flag a nested object whose keys round-trip in a different order (renderType)' {
+            # renderType is a multi-key nested object on programStageDataElements with no reference / *Array class,
+            # so it reaches the FieldMismatch branch. DHIS2 can return its keys (DESKTOP/MOBILE) in a different
+            # order than the package emitted; order-insensitive canonicalization must NOT flag identical data.
+            $script:VState = @{ programStages = @([pscustomobject]@{ id = 'ps1'; name = 'S'
+                        programStageDataElements = @([pscustomobject]@{ id = 'psde1'; compulsory = $true
+                                renderType  = [pscustomobject]@{ MOBILE = [pscustomobject]@{ type = 'DEFAULT' }; DESKTOP = [pscustomobject]@{ type = 'DEFAULT' } }
+                                dataElement = [pscustomobject]@{ id = 'de1' }; programStage = [pscustomobject]@{ id = 'ps1' } }) }) }
+            $pkg = @{ programStages = @([ordered]@{ id = 'ps1'; name = 'S'
+                        programStageDataElements = @([ordered]@{ id = 'psde1'; compulsory = $true
+                                renderType  = [ordered]@{ DESKTOP = [ordered]@{ type = 'DEFAULT' }; MOBILE = [ordered]@{ type = 'DEFAULT' } }
+                                dataElement = [ordered]@{ id = 'de1' }; programStage = [ordered]@{ id = 'ps1' } }) }) }
+            @((Get-VDisc $pkg) | Where-Object { $_.Kind -eq 'FieldMismatch' }).Count | Should -Be 0
+        }
+
+        It 'still flags a nested object whose value genuinely differs (canonicalization does not mask real drift)' {
+            # Same shape as above but DESKTOP.type genuinely differs — canonicalization sorts keys, it does not
+            # collapse values, so a real value drift must still surface as a FieldMismatch on renderType.
+            $script:VState = @{ programStages = @([pscustomobject]@{ id = 'ps1'; name = 'S'
+                        programStageDataElements = @([pscustomobject]@{ id = 'psde1'; compulsory = $true
+                                renderType  = [pscustomobject]@{ DESKTOP = [pscustomobject]@{ type = 'VERTICAL_RADIOBUTTONS' }; MOBILE = [pscustomobject]@{ type = 'DEFAULT' } }
+                                dataElement = [pscustomobject]@{ id = 'de1' }; programStage = [pscustomobject]@{ id = 'ps1' } }) }) }
+            $pkg = @{ programStages = @([ordered]@{ id = 'ps1'; name = 'S'
+                        programStageDataElements = @([ordered]@{ id = 'psde1'; compulsory = $true
+                                renderType  = [ordered]@{ DESKTOP = [ordered]@{ type = 'DEFAULT' }; MOBILE = [ordered]@{ type = 'DEFAULT' } }
+                                dataElement = [ordered]@{ id = 'de1' }; programStage = [ordered]@{ id = 'ps1' } }) }) }
+            $fm = @((Get-VDisc $pkg) | Where-Object { $_.Kind -eq 'FieldMismatch' -and $_.Field -eq 'renderType' })
+            $fm.Count | Should -Be 1
+        }
     }
 }

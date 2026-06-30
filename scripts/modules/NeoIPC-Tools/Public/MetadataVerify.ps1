@@ -154,6 +154,30 @@ function Test-NeoIPCMetadataImport {
         return $null
     }
 
+    # Canonicalize a value for order-insensitive comparison: recursively sort the keys of every nested object
+    # (the package emits an [ordered] hashtable, DHIS2 reads back a PSCustomObject, and the two can hold the SAME
+    # nested data in a DIFFERENT key order — renderType { DESKTOP, MOBILE }, style { icon, color } — which a raw
+    # ConvertTo-Json string compare would wrongly flag as a FieldMismatch and block a good seed). Array order is
+    # preserved (it is semantically meaningful and checked in the reference / *Array branches above); only object
+    # keys are reordered. Scalars pass through unchanged, so genuine value differences still surface.
+    function ConvertTo-NeoIPCCanonical($Value) {
+        if ($null -eq $Value) { return $null }
+        if ($Value -is [System.Collections.IDictionary]) {
+            $out = [ordered]@{}
+            foreach ($k in (@($Value.Keys) | Sort-Object)) { $out[[string]$k] = ConvertTo-NeoIPCCanonical $Value[$k] }
+            return $out
+        }
+        if ($Value -is [System.Management.Automation.PSCustomObject]) {
+            $out = [ordered]@{}
+            foreach ($p in (@($Value.PSObject.Properties) | Sort-Object Name)) { $out[$p.Name] = ConvertTo-NeoIPCCanonical $p.Value }
+            return $out
+        }
+        if ($Value -is [System.Collections.IEnumerable] -and $Value -isnot [string]) {
+            return @(foreach ($item in $Value) { ConvertTo-NeoIPCCanonical $item })
+        }
+        return $Value
+    }
+
     # Diff one package object's specified fields against its DHIS2 read-back, appending discrepancy records.
     # $SkipFields holds property names to bypass (the NestedOnly child collections on a parent, which are diffed
     # element-wise in their own pass — so the parent does not also membership-flag them).
@@ -210,8 +234,8 @@ function Test-NeoIPCMetadataImport {
                 }
                 continue
             }
-            $e = $expected | ConvertTo-Json -Compress -Depth 20
-            $a = $actual | ConvertTo-Json -Compress -Depth 20
+            $e = ConvertTo-Json -InputObject (ConvertTo-NeoIPCCanonical $expected) -Compress -Depth 20
+            $a = ConvertTo-Json -InputObject (ConvertTo-NeoIPCCanonical $actual) -Compress -Depth 20
             if ($e -cne $a) {
                 $records.Add([pscustomobject]@{ Type = $Type; Id = $id; Code = $code; Kind = 'FieldMismatch'; Field = $fname
                         Detail = "package=$e DHIS2=$a" })
