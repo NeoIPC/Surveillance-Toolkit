@@ -272,6 +272,32 @@ $script:NeoIPCMetadataOrderedRefProps = [System.Collections.Generic.HashSet[stri
     }),
     [System.StringComparer]::Ordinal)
 
+# The ref-collections DHIS2 actually persists as ORDERED <list>s (a sort_order list-index column), keyed by
+# "<type>|<property>". This is the round-trip VERIFIER's source of truth for an order check (Test-NeoIPCMetadataImport
+# OrderDrift): only these collections are guaranteed to read back in the imported order, so only these may be compared
+# positionally against DHIS2. It is deliberately NARROWER than $NeoIPCMetadataOrderedRefProps above, for two reasons:
+# (1) that set is keyed by property NAME and serves the NORMALIZER's cell determinism (preserve-in-cell, NOT
+#     server-order), so it cannot distinguish two types that share a property name; and
+# (2) `dataElementGroups.dataElements` is classed idArrayOrdered there only so its CSV cell stays stable, but DHIS2
+#     maps DataElementGroup.members as an unordered <set> (no list-index — DataElementGroup.hbm.xml), so it is
+#     EXCLUDED here: ordering it positionally would false-positive (the server returns members in hash order).
+# Each entry verified against refs/dhis2-core *.hbm.xml as a <list> with <list-index column="sort_order" base="1">.
+$script:NeoIPCMetadataServerOrderedRefs = [System.Collections.Generic.HashSet[string]]::new(
+    [string[]]@(
+        'optionGroupSets|optionGroups'                  # OptionGroupSet.hbm.xml <list>
+        'categories|categoryOptions'                    # Category.hbm.xml <list>
+        'categoryCombos|categories'                     # CategoryCombo.hbm.xml <list>
+        'programStageSections|dataElements'             # ProgramStageSection.hbm.xml <list> (form layout)
+        'programStageSections|programIndicators'        # ProgramStageSection.hbm.xml <list>
+        'programSections|trackedEntityAttributes'       # ProgramSection.hbm.xml <list>
+        # NestedOnly attribute lists — genuine <list> with sort_order, but their order lives on the PARENT
+        # collection (TrackedEntityTypeAttribute has no element sortOrder at all), so the verifier checks it
+        # positionally on the parent's child-id sequence (the NestedOnly pass), not via a parent field compare.
+        'programs|programTrackedEntityAttributes'       # Program.hbm.xml <list name="programAttributes">
+        'trackedEntityTypes|trackedEntityTypeAttributes' # TrackedEntityType.hbm.xml <list>
+    ),
+    [System.StringComparer]::Ordinal)
+
 # Translatable base property -> DHIS2 ObjectTranslation TOKEN. A translations[] entry serializes as
 # { property = <TOKEN>, locale = <java-locale string, e.g. "de">, value = <translated string> }
 # (refs/dhis2-core dhis-api .../translation/Translation.java). The TOKEN is the literal @Translatable.key()

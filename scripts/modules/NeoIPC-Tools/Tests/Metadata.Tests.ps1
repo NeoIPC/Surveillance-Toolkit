@@ -4796,6 +4796,10 @@ Hierarchies:
             # (WebMessageUtils.importReport builds `new WebMessage(Status.WARNING, CONFLICT)`); the cmdlet reads
             # .response.status first, so it still surfaces ERROR. The fixture mirrors that real shape.
             $script:errorReport = '{"httpStatus":"Conflict","httpStatusCode":409,"status":"WARNING","response":{"responseType":"ImportReport","status":"ERROR","stats":{"created":0,"updated":0,"deleted":0,"ignored":4,"total":4}}}' | ConvertFrom-Json
+            # A persistence-layer failure (e.g. a Hibernate not-null/transient flush) comes back as a BARE WebMessage:
+            # top-level status/message/devMessage and NO .response/typeReports node, so the structured stats are all
+            # null and the real cause lives only in `message` — the case the ErrorMessage surfacing exists for.
+            $script:bareWebMessage = '{"httpStatus":"Conflict","httpStatusCode":409,"status":"ERROR","message":"Could not commit transaction.","devMessage":"PersistenceException: not-null property references a null or transient value"}' | ConvertFrom-Json
             $script:testAuth = @{ AuthType = 'Token'; Token = 'd2pat_xTESTtoken' }
         }
 
@@ -4872,6 +4876,48 @@ Hierarchies:
             Mock Invoke-NeoIPCDhis2Post { [pscustomobject]@{ StatusCode = 200; Body = $script:wrappedReport } }
             Import-NeoIPCMetadata -Json '{}' -Auth $script:testAuth -WhatIf | Out-Null
             Should -Invoke Invoke-NeoIPCDhis2Post -Times 0 -Exactly
+        }
+
+        It 'surfaces the joined message / devMessage when DHIS2 returns a bare WebMessage (no .response)' {
+            Mock Invoke-NeoIPCDhis2Post { [pscustomobject]@{ StatusCode = 409; Body = $script:bareWebMessage } }
+            $r = Import-NeoIPCMetadata -Json '{}' -Auth $script:testAuth -Confirm:$false
+            $r.HttpStatusCode | Should -Be 409
+            $r.Status | Should -Be 'ERROR'
+            $r.ErrorMessage | Should -Be 'Could not commit transaction. / PersistenceException: not-null property references a null or transient value'
+        }
+
+        It 'leaves ErrorMessage null on a happy-path (WebMessage-wrapped) import' {
+            Mock Invoke-NeoIPCDhis2Post { [pscustomobject]@{ StatusCode = 200; Body = $script:wrappedReport } }
+            $r = Import-NeoIPCMetadata -Json '{}' -Auth $script:testAuth -DryRun
+            $r.ErrorMessage | Should -BeNullOrEmpty
+        }
+
+        It 'does not run a connect pass by default (no -ConnectReferences)' {
+            Mock Invoke-NeoIPCDhis2Post { [pscustomobject]@{ StatusCode = 200; Body = $script:wrappedReport } }
+            $r = Import-NeoIPCMetadata -Json '{}' -Auth $script:testAuth -Confirm:$false
+            Should -Invoke Invoke-NeoIPCDhis2Post -Times 1 -Exactly
+            $r.ConnectPassStatus | Should -BeNullOrEmpty
+        }
+
+        It 'runs a second connect-pass POST when -ConnectReferences and the import status is OK/WARNING' {
+            Mock Invoke-NeoIPCDhis2Post { [pscustomobject]@{ StatusCode = 200; Body = $script:wrappedReport } }
+            $r = Import-NeoIPCMetadata -Json '{}' -Auth $script:testAuth -ConnectReferences -Confirm:$false
+            Should -Invoke Invoke-NeoIPCDhis2Post -Times 2 -Exactly
+            $r.ConnectPassStatus | Should -Be 'OK'
+        }
+
+        It 'skips the connect pass when the import status is ERROR, even with -ConnectReferences' {
+            Mock Invoke-NeoIPCDhis2Post { [pscustomobject]@{ StatusCode = 409; Body = $script:errorReport } }
+            $r = Import-NeoIPCMetadata -Json '{}' -Auth $script:testAuth -ConnectReferences -Confirm:$false
+            Should -Invoke Invoke-NeoIPCDhis2Post -Times 1 -Exactly
+            $r.ConnectPassStatus | Should -BeNullOrEmpty
+        }
+
+        It 'does not run the connect pass on a dry-run even with -ConnectReferences' {
+            Mock Invoke-NeoIPCDhis2Post { [pscustomobject]@{ StatusCode = 200; Body = $script:wrappedReport } }
+            $r = Import-NeoIPCMetadata -Json '{}' -Auth $script:testAuth -ConnectReferences -DryRun
+            Should -Invoke Invoke-NeoIPCDhis2Post -Times 1 -Exactly
+            $r.ConnectPassStatus | Should -BeNullOrEmpty
         }
     }
 

@@ -595,8 +595,9 @@ function Import-NeoIPCMetadata {
         8080 and a Basic-auth hashtable.
 
         The summary object carries DryRun, HttpStatusCode (transport), Status (OK / WARNING / ERROR), the create/
-        update/delete/ignore/total counts, the per-type reports, and Raw (the full parsed response) for callers
-        that need the conflict detail. A non-OK status is reported, not thrown — the caller decides how to react
+        update/delete/ignore/total counts, the per-type reports, ErrorMessage (the top-level WebMessage
+        message when the body carries no structured report — e.g. a Hibernate persistence error), and Raw (the
+        full parsed response) for callers that need the conflict detail. A non-OK status is reported, not thrown — the caller decides how to react
         (a seed continues on WARNING; a strict gate fails). The body is read whatever the transport code, because
         DHIS2 answers an import with conflicts HTTP 409 while still returning the full report.
     .PARAMETER Path
@@ -611,6 +612,14 @@ function Import-NeoIPCMetadata {
         DHIS2 atomicMode: ALL (default — all-or-nothing) or NONE (import what is valid, report the rest).
     .PARAMETER DryRun
         Validate only (importMode=VALIDATE); the server commits nothing.
+    .PARAMETER ConnectReferences
+        After a committing import, re-apply the package a SECOND time to connect OWNED reference collections that
+        DHIS2 does not link to objects created in the SAME payload. Verified empirically: a single combined import
+        leaves optionGroupSet.optionGroups, programRule.programRuleActions and userGroup.managedGroups members-less
+        even though it reports status=OK — the analogous optionGroup.options links fine, so it is specific to those
+        group-set / rule-action / managed-group collections. The second pass, where every referenced object now
+        exists, connects them. No effect with -DryRun. The returned object's ConnectPassStatus carries the second
+        pass's status; the round-trip Test-NeoIPCMetadataImport is the authoritative gate that it worked.
     #>
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High', DefaultParameterSetName = 'Path')]
     [OutputType([pscustomobject])]
@@ -623,7 +632,8 @@ function Import-NeoIPCMetadata {
         [Nullable[int]]$Port = $null,
         [ValidateSet('CREATE_AND_UPDATE', 'CREATE', 'UPDATE', 'DELETE')][string]$ImportStrategy = 'CREATE_AND_UPDATE',
         [ValidateSet('ALL', 'NONE')][string]$AtomicMode = 'ALL',
-        [switch]$DryRun
+        [switch]$DryRun,
+        [switch]$ConnectReferences
     )
     if ($PSCmdlet.ParameterSetName -eq 'Path') {
         if (-not (Test-Path -LiteralPath $Path)) { throw "Metadata package not found: '$Path'." }
@@ -667,9 +677,36 @@ function Import-NeoIPCMetadata {
     $status = if ($report -and ($report.PSObject.Properties.Name -contains 'status')) { $report.status }
     elseif ($body -and ($body.PSObject.Properties.Name -contains 'status')) { $body.status } else { $null }
 
-    Write-Verbose ("metadata import ({0}): HTTP {1}, status {2}{3}." -f `
+    # When the import fails at the persistence layer (e.g. a Hibernate not-null/transient flush error),
+    # DHIS2 returns a bare WebMessage with a top-level `message` and NO `.response`/typeReports node — so
+    # the structured-report fields above are all null and the real cause hides in `message`. Surface it so
+    # callers and logs name the actual fault instead of an opaque "status ERROR (HTTP 409)".
+    $errorMessage = if (-not $hasResponse -and $body) {
+        $m = if ($body.PSObject.Properties.Name -contains 'message') { $body.message } else { $null }
+        $dm = if ($body.PSObject.Properties.Name -contains 'devMessage') { $body.devMessage } else { $null }
+        (@($m, $dm) | Where-Object { $_ }) -join ' / '
+    }
+    else { $null }
+
+    Write-Verbose ("metadata import ({0}): HTTP {1}, status {2}{3}{4}." -f `
         ($(if ($DryRun) { 'dry-run' } else { 'commit' })), $response.StatusCode, $status,
-        $(if ($stats) { ", created=$($stats.created) updated=$($stats.updated) ignored=$($stats.ignored) total=$($stats.total)" } else { '' }))
+        $(if ($stats) { ", created=$($stats.created) updated=$($stats.updated) ignored=$($stats.ignored) total=$($stats.total)" } else { '' }),
+        $(if ($errorMessage) { " — $errorMessage" } else { '' }))
+
+    # Connect pass: DHIS2's metadata import does not link an object's OWNED reference collections to objects
+    # created in the SAME payload (optionGroupSet.optionGroups, programRule.programRuleActions,
+    # userGroup.managedGroups — verified: they import members-less even though status=OK, while the analogous
+    # optionGroup.options links fine). Re-applying the package once every referenced object exists connects them.
+    # Only after a committing pass that did not hard-fail; Test-NeoIPCMetadataImport is the authoritative gate.
+    $connectPassStatus = $null
+    if ($ConnectReferences -and -not $DryRun -and $status -in 'OK', 'WARNING') {
+        Write-Verbose 'Connect pass: re-applying the package to connect same-payload owned-collection memberships...'
+        $connectBody = (Invoke-NeoIPCDhis2Post @postArgs -Confirm:$false).Body
+        $connectReport = if ($connectBody -and ($connectBody.PSObject.Properties.Name -contains 'response') -and $connectBody.response) { $connectBody.response } else { $connectBody }
+        $connectPassStatus = if ($connectReport -and ($connectReport.PSObject.Properties.Name -contains 'status')) { $connectReport.status }
+        elseif ($connectBody -and ($connectBody.PSObject.Properties.Name -contains 'status')) { $connectBody.status } else { $null }
+        Write-Verbose "Connect pass: status $connectPassStatus."
+    }
 
     [pscustomobject]@{
         DryRun         = [bool]$DryRun
@@ -681,7 +718,9 @@ function Import-NeoIPCMetadata {
         Ignored        = if ($stats) { $stats.ignored } else { $null }
         Total          = if ($stats) { $stats.total } else { $null }
         TypeReports    = if ($report -and ($report.PSObject.Properties.Name -contains 'typeReports')) { $report.typeReports } else { $null }
-        Raw            = $body
+        ErrorMessage      = $errorMessage
+        ConnectPassStatus = $connectPassStatus
+        Raw               = $body
     }
 }
 

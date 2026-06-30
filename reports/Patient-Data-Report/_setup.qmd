@@ -3,7 +3,15 @@
 source("../common/load-neoipcr.R")
 suppressMessages(load_neoipcr(dev_pkg_path = "../../../neoipcr"))
 source("../common/helpers.R")
+source("../common/logging.R")
 suppressMessages(library(tidyverse, warn.conflicts = FALSE, quietly = TRUE))
+configure_logging(report = "patient-data-report")
+
+# R warnings (e.g. from import_dhis2) are captured into the unified log channel
+# by configure_logging()'s warning hook; keep them out of the rendered report
+# body. Set here in the setup chunk so it applies to the later import/filter
+# chunks (mirrors Partner-Report).
+knitr::opts_chunk$set(warning = FALSE)
 
 locale <- Sys.getenv("LC_ALL")
 invisible(Sys.setlocale(category = "LC_ALL", locale = locale))
@@ -21,7 +29,7 @@ connection_options <- get_connection_options(
   scheme = params$dhis2Scheme, hostname = params$dhis2Hostname,
   port = params$dhis2Port, path = params$dhis2Path)
 
-ds <- suppressWarnings(neoipcr::import_dhis2(
+ds <- neoipcr::import_dhis2(
   connection_options = connection_options,
   dataset_options = neoipcr::dhis2_dataset_options(
     department_filter = department_code,
@@ -42,7 +50,7 @@ ds <- suppressWarnings(neoipcr::import_dhis2(
     include_incomplete = c("enrollments", "events"),
     translate = TRUE,
     locale = locale
-  )))
+  ))
 ```
 
 ```{r}

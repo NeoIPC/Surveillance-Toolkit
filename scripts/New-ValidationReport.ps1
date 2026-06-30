@@ -68,6 +68,7 @@ param(
     [string]$OutputDir = $null,
 
     [Parameter()]
+    [switch]$Quiet,
     [switch]$JsonReport,
 
     [Parameter()]
@@ -136,7 +137,39 @@ if (-not $isCombined) {
 
 $wd = Get-Location
 
-Invoke-WithNeoIPCAuth -Auth $auth -ExtraEnvVars @{ 'LC_ALL' = $null } -ScriptBlock {
+# Resolve the unified log verbosity from -Quiet / -Verbose / -Debug. It reaches
+# the Quarto child two ways: the NEOIPC_LOG_LEVEL environment variable (read by
+# the QMD / neoipcr) and native --quiet/--log-level flags on the render command.
+# Snapshot the common-parameter flags and resolve the level (and the Quarto flag
+# array) here in the script scope; inside the Invoke-WithNeoIPCAuth scriptblock
+# $PSBoundParameters is the scriptblock's own (empty) dictionary, so the
+# scriptblock reads the resolved array via closure.
+$debugRequested   = $PSBoundParameters.ContainsKey('Debug')
+$verboseRequested = $PSBoundParameters.ContainsKey('Verbose')
+$logLevel =
+    if ($Quiet) { 'quiet' }
+    elseif ($debugRequested) { 'debug' }
+    elseif ($verboseRequested) { 'verbose' }
+    else { 'normal' }
+
+# -Quiet also silences the wrapper's own progress/verbose/info streams so the
+# whole pipeline is quiet, not just the logger channel.
+if ($Quiet) {
+    $VerbosePreference     = 'SilentlyContinue'
+    $DebugPreference       = 'SilentlyContinue'
+    $InformationPreference = 'SilentlyContinue'
+    $ProgressPreference    = 'SilentlyContinue'
+}
+
+# Native verbosity flags for the Quarto child, derived from the same level.
+$quartoVerbosityArgs = switch ($logLevel) {
+    'quiet'   { @('--quiet') }
+    'verbose' { @('--log-level', 'info') }
+    'debug'   { @('--log-level', 'debug') }
+    default   { @() }
+}
+
+Invoke-WithNeoIPCAuth -Auth $auth -ExtraEnvVars @{ 'LC_ALL' = $null; 'NEOIPC_LOG_LEVEL' = $logLevel } -ScriptBlock {
 
 $errors = @()
 $outputFiles = @()
@@ -179,6 +212,7 @@ try {
         if ($Dhis2Hostname) { $quartoArgs += @('-P', "dhis2Hostname:$Dhis2Hostname") }
         if ($Dhis2Port) { $quartoArgs += @('-P', "dhis2Port:$Dhis2Port") }
         if ($Dhis2Path) { $quartoArgs += @('-P', "dhis2Path:$Dhis2Path") }
+        $quartoArgs += $quartoVerbosityArgs
 
         if ($PSCmdlet.ShouldProcess($outFile, 'Render combined validation report')) {
             Write-Host "Generating combined validation report..."
@@ -209,6 +243,7 @@ try {
             if ($Dhis2Hostname) { $quartoArgs += @('-P', "dhis2Hostname:$Dhis2Hostname") }
             if ($Dhis2Port) { $quartoArgs += @('-P', "dhis2Port:$Dhis2Port") }
             if ($Dhis2Path) { $quartoArgs += @('-P', "dhis2Path:$Dhis2Path") }
+            $quartoArgs += $quartoVerbosityArgs
 
             if ($PSCmdlet.ShouldProcess($outFile, "Render validation report for $siteCode")) {
                 Write-Host "Generating validation report for $siteCode..."

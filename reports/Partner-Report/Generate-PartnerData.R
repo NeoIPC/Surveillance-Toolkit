@@ -11,26 +11,9 @@ suppressPackageStartupMessages({
   source(file.path(script_dir, "../common/load-neoipcr.R"))
   load_neoipcr(dev_pkg_path = file.path(script_dir, "../../../neoipcr"))
   source(file.path(script_dir, "../common/parse-args.R"))
+  source(file.path(script_dir, "../common/logging.R"))
   library(jsonlite)
 })
-
-verbosity <- "normal"
-
-logInfo <- function(...) {
-  if (verbosity != "quiet") message(...)
-}
-
-logVerbose <- function(...) {
-  if (verbosity %in% c("verbose", "debug")) message(...)
-}
-
-logDebug <- function(...) {
-  if (verbosity == "debug") message(...)
-}
-
-logWarn <- function(...) {
-  if (verbosity != "quiet") warning(..., call. = FALSE)
-}
 
 printUsage <- function() {
   cat(
@@ -110,7 +93,7 @@ getValidationExceptions <- function(x) {
     }
     return(utils::read.csv(x, stringsAsFactors = FALSE, colClasses = colClasses))
   }
-  logWarn(sprintf("Validation exception file not found: '%s'", x))
+  logWarn("Validation exception file not found: '{x}'")
   FALSE
 }
 
@@ -122,13 +105,22 @@ if (isTRUE(args$help)) {
   quit(status = 0)
 }
 
-if (isTRUE(args$quiet)) {
-  verbosity <- "quiet"
+# Verbosity precedence: an explicit CLI flag wins; otherwise inherit
+# NEOIPC_LOG_LEVEL (set by the PowerShell wrapper or the .NET service);
+# otherwise default to normal. Republish the resolved level so neoipcr and any
+# child processes share it.
+verbosity <- if (isTRUE(args$quiet)) {
+  "quiet"
 } else if (isTRUE(args$debug)) {
-  verbosity <- "debug"
+  "debug"
 } else if (isTRUE(args$verbose)) {
-  verbosity <- "verbose"
+  "verbose"
+} else {
+  Sys.getenv("NEOIPC_LOG_LEVEL", unset = "normal")
 }
+Sys.setenv(NEOIPC_LOG_LEVEL = verbosity)
+
+configure_logging(report = "partner-report", verbosity = verbosity)
 
 outputFile <- as_null(args$file)
 unitCodes <- as_vector_or_null(args$unitCodes)
@@ -144,7 +136,7 @@ includeTestData <- as_bool(args$includeTestData, default = FALSE)
 validationExceptionFile <- as_null(args$validationExceptionFile)
 
 if (is.null(unitCodes)) {
-  cat("Error: --unitCodes is required.\n", file = stderr())
+  logError("--unitCodes is required.")
   quit(status = 1)
 }
 
@@ -180,11 +172,9 @@ datasetOptions <- neoipcr::dhis2_dataset_options(
 )
 
 logVerbose("Importing DHIS2 data...")
-unit_data <- suppressWarnings(
-  neoipcr::import_dhis2(
-    connection_options = connectionOptions,
-    dataset_options = datasetOptions
-  )
+unit_data <- neoipcr::import_dhis2(
+  connection_options = connectionOptions,
+  dataset_options = datasetOptions
 ) |> neoipcr::calculate_department_data()
 
 # Load reference data if provided
@@ -193,7 +183,7 @@ if (!is.null(referenceDataFile)) {
   if (!file.exists(referenceDataFile)) {
     stop(sprintf("Reference data file not found: '%s'", referenceDataFile))
   }
-  logVerbose("Loading reference data: ", referenceDataFile)
+  logVerbose("Loading reference data: {referenceDataFile}")
   reference_data <- jsonlite::unserializeJSON(
     readChar(referenceDataFile, file.info(referenceDataFile)$size))
 }
@@ -218,5 +208,5 @@ if (is.null(outputFile)) {
     dir.create(outputDir, recursive = TRUE, showWarnings = FALSE)
   }
   writeLines(json, outputFile, useBytes = TRUE)
-  logInfo("Partner data written to: ", outputFile)
+  logInfo("Partner data written to: {outputFile}")
 }
