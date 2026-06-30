@@ -273,8 +273,8 @@ line self-identify its source. Verbosity is **one** setting (`quiet`/`normal`/`v
 `verbose`/`debug` reveal the DHIS2 query trace (URL + HTTP status + row count — **never** response bodies, a
 data-protection boundary). The `New-*.ps1` wrappers map the standard `-Quiet`/`-Verbose`/`-Debug` switches to it and
 pass it to the children **two** ways: the **`NEOIPC_LOG_LEVEL`** environment variable (read by the QMDs and neoipcr)
-and the native `--quiet`/`--verbose`/`--debug` CLI flags on the `Generate-*Data.R` / `quarto render` calls; `-Quiet`
-additionally silences the wrapper's own progress/verbose streams. Each `Generate-*Data.R` resolves a native CLI flag
+and native CLI flags — `--quiet`/`--verbose`/`--debug` on the `Generate-*Data.R` calls and `--quiet`/`--log-level`
+on `quarto render`; `-Quiet` additionally silences the wrapper's own progress/verbose streams. Each `Generate-*Data.R` resolves a native CLI flag
 first, falls back to `NEOIPC_LOG_LEVEL` (so the .NET service can drive it environment-only), and republishes the
 resolved level for neoipcr and any child processes. When `NEOIPC_LOG_FILE` is set (by the NeoIPC-Reporting .NET
 service), the R side writes structured JSON to that file instead of the console.

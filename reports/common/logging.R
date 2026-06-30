@@ -36,7 +36,7 @@
 #
 # `report` is the report slug used as this report's logger namespace (e.g.
 # "partner-report"); NULL (the default) uses "report-common", for standalone
-# common entry points such as getDataset.R. `verbosity` is one of
+# entry points in the shared `common/` layer. `verbosity` is one of
 # quiet|normal|verbose|debug; NULL reads NEOIPC_LOG_LEVEL (default "normal").
 configure_logging <- function(report = NULL, verbosity = NULL) {
   namespace <- if (is.null(report) || !nzchar(report)) "report-common" else report

@@ -7,6 +7,12 @@ source("../common/logging.R")
 suppressMessages(library(tidyverse, warn.conflicts = FALSE, quietly = TRUE))
 configure_logging(report = "patient-data-report")
 
+# R warnings (e.g. from import_dhis2) are captured into the unified log channel
+# by configure_logging()'s warning hook; keep them out of the rendered report
+# body. Set here in the setup chunk so it applies to the later import/filter
+# chunks (mirrors Partner-Report).
+knitr::opts_chunk$set(warning = FALSE)
+
 locale <- Sys.getenv("LC_ALL")
 invisible(Sys.setlocale(category = "LC_ALL", locale = locale))
 localeObj <- parse_locales(locale)[[1]]

@@ -1,8 +1,14 @@
 ```{r}
 #| label: Setup
+#| warning: false
 source("../common/helpers.R")
 source("../common/logging.R")
 configure_logging(report = "partner-certificate")
+# R warnings (e.g. from the import_dhis2 fallback below) are captured into the
+# unified log channel by configure_logging()'s warning hook; the chunk's
+# `warning: false` keeps them out of the rendered certificate body. (The import
+# runs inside this chunk, so a chunk option is needed rather than
+# opts_chunk$set, which only affects subsequent chunks.)
 
 locale <- Sys.getenv("LC_ALL")
 localeObj <- parse_locales(locale)[[1]]
