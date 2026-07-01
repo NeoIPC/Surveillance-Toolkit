@@ -96,17 +96,10 @@ jobs:
                 # powershell-yaml: the metadata assembler reads the infectious-agents / sharing YAML when
                 # building the package the data dictionary flattens.
                 Install-Module -Name powershell-yaml -MinimumVersion 0.4.2 -Force -Scope CurrentUser -SkipPublisherCheck
-                Invoke-Pester -Path scripts/modules/NeoIPC-Tools/Tests/DataDictionary.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/BuildReport.Tests.ps1 -CI
-
-            - name: Check PowerShell verb hygiene
-              shell: pwsh
-              run: |
-                # Approved-verb gate: fail the build on any scripts/*.ps1 whose file name uses an unapproved
-                # verb, and (via PSScriptAnalyzer's PSUseApprovedVerbs) any function that does. PSUseApprovedVerbs
-                # lints function definitions only — the file-name half is a custom check in the Pester test.
-                Install-Module -Name Pester -MinimumVersion 5.5 -Force -Scope CurrentUser -SkipPublisherCheck
+                # PSScriptAnalyzer backs the approved-verb *function* check (PSUseApprovedVerbs) in
+                # ScriptVerbHygiene.Tests.ps1; the file-name half of that gate is a custom Pester check.
                 Install-Module -Name PSScriptAnalyzer -Force -Scope CurrentUser -SkipPublisherCheck
-                Invoke-Pester -Path scripts/modules/NeoIPC-BuildTools/Tests/ScriptVerbHygiene.Tests.ps1 -CI
+                Invoke-Pester -Path scripts/modules/NeoIPC-Tools/Tests/DataDictionary.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/BuildReport.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/ScriptVerbHygiene.Tests.ps1 -CI
 
             - name: Generate data dictionary
               shell: pwsh

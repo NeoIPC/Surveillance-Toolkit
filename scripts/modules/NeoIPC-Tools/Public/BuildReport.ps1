@@ -69,6 +69,10 @@ function Write-NeoIPCBuildReport {
     }
     if ($PSBoundParameters.ContainsKey('ScriptTimestamp'))   { $buildReport['scriptTimestamp']   = $ScriptTimestamp }
     if ($PSBoundParameters.ContainsKey('OutputDirPath'))     { $buildReport['outputDirPath']     = $OutputDirPath }
+    # siteCodes is intentionally NOT wrapped in @(): it is nullable (combined / single-render builds
+    # pass $null, which must serialise as JSON null — @($null) would emit [null]) and, being [string[]],
+    # already serialises as an array when set. outputLocales/outputFormats are always-present arrays,
+    # wrapped defensively. Do not "normalise" siteCodes to @() — that reintroduces the [null] bug.
     if ($PSBoundParameters.ContainsKey('SiteCodes'))         { $buildReport['siteCodes']         = $SiteCodes }
     if ($PSBoundParameters.ContainsKey('OutputLocales'))     { $buildReport['outputLocales']     = @($OutputLocales) }
     if ($PSBoundParameters.ContainsKey('OutputFormats'))     { $buildReport['outputFormats']     = @($OutputFormats) }

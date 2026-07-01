@@ -3,7 +3,7 @@ param(
     [Parameter(Mandatory, Position = 0)]
     [string]$Signatory,
     [Parameter(Mandatory, Position = 1)]
-    [System.IO.DirectoryInfo]$SignatureImagePath,
+    [string]$SignatureImagePath,
     [ArgumentCompleter({
         param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
         Import-Module (Join-Path $PSScriptRoot 'modules' 'NeoIPC-Tools') -Force -Verbose:$false
@@ -96,7 +96,7 @@ if ($OutputDir) {
 
 $localeParts = Split-NeoIPCLocale -Locale $OutputLocale
 $quartoFile = Resolve-NeoIPCLocaleQmd -ReportDirPath $reportDirPath -BaseName 'Partner-Certificate' -Locale $OutputLocale
-$SignatureImagePath = Resolve-Path -LiteralPath $SignatureImagePath.FullName -Relative -RelativeBasePath $reportDirPath
+$SignatureImagePath = Resolve-Path -LiteralPath $SignatureImagePath -Relative -RelativeBasePath $reportDirPath
 
 # Resolve the unified log verbosity from -Quiet / -Verbose / -Debug. It reaches
 # the Quarto child two ways: the NEOIPC_LOG_LEVEL environment variable (read by
@@ -140,6 +140,7 @@ Invoke-WithNeoIPCAuth -Auth $auth -ExtraEnvVars @{ 'LC_ALL' = $null; 'NEOIPC_LOG
 $errors = @()
 $outputFiles = @()
 $buildLog = @()
+$siteCodes = $null   # set in Acquire (DepartmentCode) mode; stays $null in Pass (HospitalName) mode
 $buildCompleted = $false
 $startedAt = (Get-Date -AsUTC).ToString('o')
 $scriptTimestamp = [datetime]::UtcNow.ToString("yyyy-MM-dd_HHmmss'Z'")
@@ -242,6 +243,7 @@ finally {
         -BuildReportFilePath $reportFilePath `
         -ScriptTimestamp $scriptTimestamp -OutputDirPath $outputDirPath `
         -OutputLocales @($OutputLocale) `
+        -SiteCodes $siteCodes `
         -BuildSteps $buildLog `
         -ParameterHash $paramSnapshot.hash -Parameters $paramSnapshot.source
 
