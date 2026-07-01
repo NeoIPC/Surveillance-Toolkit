@@ -1,7 +1,7 @@
 # NeoIPC metadata distribution packages
 
 Importable DHIS2 metadata packages for the NeoIPC Core surveillance program, rendered from the canonical `metadata/`
-directory by [`scripts/New-NeoIPCMetadataDistribution.ps1`](../../scripts/New-NeoIPCMetadataDistribution.ps1). They
+directory by [`scripts/Build-NeoIPCMetadataDistribution.ps1`](../../scripts/Build-NeoIPCMetadataDistribution.ps1). They
 let you install NeoIPC into a DHIS2 instance without running the conversion pipeline.
 
 | Package | Contents |
@@ -25,7 +25,7 @@ To render them locally (to inspect or import), pass an explicit version — the 
 current one (the generator has no default version):
 
 ```pwsh
-pwsh ./scripts/New-NeoIPCMetadataDistribution.ps1 -Version (Get-Content ./VERSION -Raw).Trim()
+pwsh ./scripts/Build-NeoIPCMetadataDistribution.ps1 -Version (Get-Content ./VERSION -Raw).Trim()
 ```
 
 This writes them into this directory (git-ignored). Regeneration is deterministic (byte-identical for unchanged

@@ -24,10 +24,10 @@
 .PARAMETER Format
     Csv, Xlsx, or Both (default). Xlsx/Both require the provisioned DocumentFormat.OpenXml assembly.
 .EXAMPLE
-    ./scripts/New-NeoIPCDataDictionary.ps1
+    ./scripts/Build-NeoIPCDataDictionary.ps1
     Generate the CSV + .xlsx data dictionary into artifacts/data-dictionary/.
 .EXAMPLE
-    ./scripts/New-NeoIPCDataDictionary.ps1 -Format Csv
+    ./scripts/Build-NeoIPCDataDictionary.ps1 -Format Csv
     Generate only the dependency-free CSV sheets.
 #>
 [CmdletBinding()]

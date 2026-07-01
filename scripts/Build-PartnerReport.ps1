@@ -14,11 +14,11 @@ In DataFile mode (-DataFile), the script renders a formatted report from a pre-c
 
 .EXAMPLE
 .
-    .\New-PartnerReports.ps1 -SiteCodeFilter 'NEO_.*' -OutputLocales @('en','de') -OutputDir 'C:\tmp\partner-reports' -ReferenceDataFile '2026-01-28_124237Z.Reference-Report.json' -IncludeNonCorePatients -Verbose
+    .\Build-PartnerReport.ps1 -SiteCodeFilter 'NEO_.*' -OutputLocales @('en','de') -OutputDir 'C:\tmp\partner-reports' -ReferenceDataFile '2026-01-28_124237Z.Reference-Report.json' -IncludeNonCorePatients -Verbose
 
 .EXAMPLE
 .
-    .\New-PartnerReports.ps1 -DataFile 'partner-data.json' -OutputLocales @('en','de') -OutputFormats pdf -OutputDir 'C:\tmp\partner-reports' -Verbose
+    .\Build-PartnerReport.ps1 -DataFile 'partner-data.json' -OutputLocales @('en','de') -OutputFormats pdf -OutputDir 'C:\tmp\partner-reports' -Verbose
 #>
 [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Low', DefaultParameterSetName='Online')]
 param(

@@ -25,10 +25,10 @@ the *Code lists* sheet in the same workbook — nothing is omitted.
 
 ```sh
 # CSV + .xlsx (default), written to artifacts/data-dictionary/. The .xlsx needs DocumentFormat.OpenXml (below).
-./scripts/New-NeoIPCDataDictionary.ps1
+./scripts/Build-NeoIPCDataDictionary.ps1
 
 # CSV only (no extra dependency):
-./scripts/New-NeoIPCDataDictionary.ps1 -Format Csv
+./scripts/Build-NeoIPCDataDictionary.ps1 -Format Csv
 ```
 
 The `.xlsx` writer uses the MIT-licensed [DocumentFormat.OpenXml](https://github.com/dotnet/Open-XML-SDK) SDK,

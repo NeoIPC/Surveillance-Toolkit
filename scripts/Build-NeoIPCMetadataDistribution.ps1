@@ -30,7 +30,7 @@
     Login password set on every synthetic play user (forwarded to New-NeoIPCMetadataPackage for the play variant).
     Defaults to the module's clearly-test value; never a real secret.
 .EXAMPLE
-    ./scripts/New-NeoIPCMetadataDistribution.ps1 -Version (Get-Content ./VERSION -Raw).Trim()
+    ./scripts/Build-NeoIPCMetadataDistribution.ps1 -Version (Get-Content ./VERSION -Raw).Trim()
     Render both package artifacts into metadata/dist/ at the repository's current version.
 #>
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', 'Password',

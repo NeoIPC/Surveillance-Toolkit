@@ -14,7 +14,7 @@ repository:
 Import-Module ./scripts/modules/NeoIPC-Tools
 ```
 
-Report-generation scripts (`New-PartnerReports.ps1`, etc.) import the module
+Report-generation scripts (`Build-PartnerReport.ps1`, etc.) import the module
 automatically.
 
 ## Architecture & subsystems
@@ -247,8 +247,8 @@ Clear-PATs -All
 
 ## Report generation helpers
 
-These functions are used by the report scripts (`New-PartnerReports.ps1`,
-`New-ReferenceReport.ps1`, etc.) but can also be called directly.
+These functions are used by the report scripts (`Build-PartnerReport.ps1`,
+`Build-ReferenceReport.ps1`, etc.) but can also be called directly.
 
 ### Scoped auth environment variables
 
