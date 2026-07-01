@@ -337,6 +337,11 @@ $quartoVerbosityArgs = switch ($logLevel) {
     default   { @() }
 }
 
+# Snapshot the bound parameters in script scope — inside the Invoke-WithNeoIPCAuth
+# scriptblock $PSBoundParameters is the scriptblock's own (empty) dictionary. Feeds the
+# build report's reproducibility fields.
+$paramSnapshot = Get-NeoIPCParameterSnapshot -BoundParameters $PSBoundParameters
+
 Invoke-WithNeoIPCAuth -Auth $authForEnv -ExtraEnvVars @{ 'LC_ALL' = $null; 'NEOIPC_LOG_LEVEL' = $logLevel } -ScriptBlock {
 
 # Prepare build tracking before try block so variables are always initialized,
@@ -418,18 +423,7 @@ if (inherits(x, 'neoipcr_bnch_ds')) {
                 Join-Path $reportDirPath '_output' $jsonFileName
             }
 
-            $currentEntry = [ordered]@{
-                Site = $siteCode
-                Language = $null
-                Format = 'json'
-                Timestamp = (Get-Date).ToString('o')
-                FileName = $jsonFileName
-                Qmd = $null
-                Params = @{}
-                Messages = @()
-                Status = 'Planned'
-                ExitCode = $null
-            }
+            $currentEntry = New-NeoIPCBuildStep -SiteCode $siteCode -OutputFormat 'json' -OutputFileName $jsonFileName
 
             $completedSteps++
             $pct = if ($totalSteps -gt 0) { [int](100 * $completedSteps / $totalSteps) } else { 0 }
@@ -464,24 +458,20 @@ if (inherits(x, 'neoipcr_bnch_ds')) {
 
                 $rResult = Invoke-Rscript -Arguments $rArgs -Command $rscriptCmd -Description "Generate-PartnerData.R ($siteCode)"
 
-                $currentEntry.ExitCode = $rResult.ExitCode
-                $currentEntry.Messages = $rResult.Messages
+                $currentEntry = $currentEntry | Complete-NeoIPCBuildStep -Result $rResult
                 if ($rResult.Status -eq 'Success') {
                     Write-Host "done." -ForegroundColor Green
-                    $currentEntry.Status = 'Success'
                     $outputFiles += $jsonOutPath
                 } else {
                     $errMsg = "Generate-PartnerData.R failed (exit code $($rResult.ExitCode)) for site $siteCode."
                     Write-Error $errMsg
                     $errors += $errMsg
-                    $currentEntry.Status = 'Error'
                 }
             } else {
-                $currentEntry.Status = 'Planned'
-                $currentEntry.Messages += "WhatIf: would generate partner data JSON for $siteCode"
+                $currentEntry = $currentEntry | Complete-NeoIPCBuildStep -Messages @("WhatIf: would generate partner data JSON for $siteCode")
             }
 
-            $buildLog += (New-Object PSObject -Property $currentEntry)
+            $buildLog += $currentEntry
         }
     }
 
@@ -567,18 +557,7 @@ if (inherits(x, 'neoipcr_bnch_ds')) {
                     $outFileForQuarto = [System.IO.Path]::GetFileName($fileName)
 
                     # Prepare log entry for this run/format
-                    $currentEntry = [ordered]@{
-                        Site = $siteCode
-                        Language = $lang
-                        Format = $format
-                        Timestamp = (Get-Date).ToString('o')
-                        FileName = $fileName
-                        Qmd = $qmdToUse
-                        Params = $qmdParams
-                        Messages = @()
-                        Status = 'Planned'
-                        ExitCode = $null
-                    }
+                    $currentEntry = New-NeoIPCBuildStep -SiteCode $siteCode -OutputLocale $lang -OutputFormat $format -OutputFileName $fileName -QmdFilePath $qmdToUse -QmdParams $qmdParams
 
                     # Build Quarto argument list for this format
                     $quartoArgs = @('render', '--profile', $lang, $qmdToUse, '--to', $format, '-o', $outFileForQuarto)
@@ -641,33 +620,33 @@ if (inherits(x, 'neoipcr_bnch_ds')) {
                         }
 
                         # Record exit status
-                        $currentEntry.ExitCode = $LASTEXITCODE
-                        $currentEntry.Messages += $currentMessages
+                        $currentEntry.exitCode = $LASTEXITCODE
+                        $currentEntry.messages += $currentMessages
 
                         if (-not $skipRest -and -not $isError -and $LASTEXITCODE -eq 0) {
                             Write-Host "done." -ForegroundColor Green
-                            $currentEntry.Status = 'Success'
-                            $outPath = if ($outputDirPath) { Join-Path $outputDirPath $fileName } else { Join-Path $reportDirPath '_output' $fileName }
-                            $outputFiles += $outPath
+                            $currentEntry.status = 'success'
+                            $outFilePath = if ($outputDirPath) { Join-Path $outputDirPath $fileName } else { Join-Path $reportDirPath '_output' $fileName }
+                            $outputFiles += $outFilePath
                         }
                         elseif ($LASTEXITCODE -ne 0 -or $isError) {
                             $errMsg = "Quarto returned exit code $LASTEXITCODE for site $siteCode (lang: $lang, format: $format)."
                             Write-Error $errMsg
                             $errors += $errMsg
-                            $currentEntry.Status = 'Error'
-                            if ($LASTEXITCODE -ne 0) { $currentEntry.Messages += "Quarto exit code $LASTEXITCODE" }
+                            $currentEntry.status = 'error'
+                            if ($LASTEXITCODE -ne 0) { $currentEntry.messages += "Quarto exit code $LASTEXITCODE" }
                         }
                     }
                     else {
                         # WhatIf / dry-run: report planned action
                         Write-Host "WhatIf: would render $target" -ForegroundColor DarkYellow
-                        $currentEntry.Status = 'Planned'
-                        $currentEntry.Messages += "WhatIf: would render $target"
-                        $currentEntry.Messages += "Params: $(ConvertTo-Json -Depth 3 $qmdParams | Out-String)"
+                        $currentEntry.status = 'planned'
+                        $currentEntry.messages += "WhatIf: would render $target"
+                        $currentEntry.messages += "Params: $(ConvertTo-Json -Depth 3 $qmdParams | Out-String)"
                     }
 
                     # Add current entry to aggregated log
-                    $buildLog += (New-Object PSObject -Property $currentEntry)
+                    $buildLog += $currentEntry
                 }
             }
         }
@@ -686,18 +665,14 @@ finally {
 
     $buildReportDirPath = if ($outputDirPath) { $outputDirPath } else { Join-Path $reportDirPath '_output' }
     $buildReportFilePath = Join-Path $buildReportDirPath "${scriptTimestamp}_NeoIPC-Surveillance-Partner-Report-Build.json"
-    $extraFields = [ordered]@{
-        scriptTimestamp = $scriptTimestamp
-        outputDirPath = $buildReportDirPath
-        siteCodes = $siteCodes
-        outputLocales = $OutputLocales
-        outputFormats = $OutputFormats
-        buildSteps = $buildLog
-    }
-    $reportPath = if ($JsonReport) { $buildReportFilePath } else { $null }
-    $status = Write-NeoIPCBuildReport -Name 'Partner Report Build' `
-        -Errors $errors -OutputFiles $outputFiles -BuildCompleted $buildCompleted `
-        -StartedAt $startedAt -BuildReportPath $reportPath -ExtraFields $extraFields
+    $reportFilePath = if ($JsonReport) { $buildReportFilePath } else { $null }
+    $status = Write-NeoIPCBuildReport -Name 'Partner Report Build' -StartedAt $startedAt `
+        -Errors $errors -OutputFilePaths $outputFiles -BuildCompleted $buildCompleted `
+        -BuildReportFilePath $reportFilePath `
+        -ScriptTimestamp $scriptTimestamp -OutputDirPath $buildReportDirPath `
+        -SiteCodes $siteCodes -OutputLocales $OutputLocales -OutputFormats $OutputFormats `
+        -ParameterHash $paramSnapshot.hash -Parameters $paramSnapshot.source `
+        -BuildSteps $buildLog
 
     if ($status -ne 'success') {
         exit 1

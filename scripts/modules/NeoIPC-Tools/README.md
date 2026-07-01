@@ -290,10 +290,19 @@ Resolve-NeoIPCLocaleQmd -ReportDir ./reports/Partner-Report -BaseName 'Partner-R
 ### Build reports
 
 ```powershell
-# Write a build summary to console and optionally to JSON
-$status = Write-NeoIPCBuildReport -Name 'Partner Report Build' `
-    -Errors $errors -OutputFiles $outputFiles -BuildCompleted $true `
-    -StartedAt $startedAt -BuildReportPath './build-report.json'
+# Write a build summary to console and optionally to JSON. Common fields (site codes,
+# locales/formats, per-step log, parameter snapshot, ...) are first-class parameters;
+# the module owns the JSON schema so every report wrapper stays consistent by construction.
+$status = Write-NeoIPCBuildReport -Name 'Partner Report Build' -StartedAt $startedAt `
+    -Errors $errors -OutputFilePaths $outputFiles -BuildCompleted $true `
+    -BuildReportFilePath './build-report.json' `
+    -SiteCodes $siteCodes -OutputLocales @('en', 'de') -OutputFormats @('pdf')
+
+# Per-step logging: build a step, then record its outcome from an
+# Invoke-Rscript / Invoke-QuartoRender result ('Success' -> success, 'Error' -> error,
+# 'NoData' -> nodata).
+$step = New-NeoIPCBuildStep -SiteCode 'NEO_DE_01' -OutputLocale 'de' -OutputFormat 'pdf'
+$step = $step | Complete-NeoIPCBuildStep -Result $renderResult
 ```
 
 ### Quarto parameter pairs

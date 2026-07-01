@@ -199,13 +199,6 @@ if ($isDataFileMode) {
     $needsJson = $false
     $jsonIntermediate = $false
     $backupPath = $null
-    $paramHashSource = [ordered]@{ dataFile = $resolvedDataFile }
-    $paramHashJson = ($paramHashSource | ConvertTo-Json -Depth 100 -Compress)
-    $paramHash = [System.BitConverter]::ToString(
-        [System.Security.Cryptography.SHA256]::Create().ComputeHash(
-            [System.Text.Encoding]::UTF8.GetBytes($paramHashJson)
-        )
-    ).Replace('-', '').ToLowerInvariant()
     Write-Verbose "DataFile mode: rendering from $resolvedDataFile"
 } else {
     $needsJson = $false
@@ -216,27 +209,12 @@ if ($isDataFileMode) {
     $jsonPath = Join-Path $outputDirPath "${scriptTimestamp}_NeoIPC-Surveillance-Reference-Report.json"
     $jsonIntermediate = $needsJson -and (-not $wantsJson)
     $backupPath = Join-Path $outputDirPath "${scriptTimestamp}_NeoIPC-Surveillance-Reference-Report.dataset.json.7z"
-
-    $paramHashSource = [ordered]@{
-        reportingPeriodFrom = $ReportingPeriodFrom
-        reportingPeriodTo = $ReportingPeriodTo
-        birthWeightFrom = $BirthWeightFrom
-        birthWeightTo = $BirthWeightTo
-        gestationWeeksFrom = $GestationWeeksFrom
-        gestationWeeksTo = $GestationWeeksTo
-        reportingCountries = $ReportingCountries
-        includeTestUnits = [bool]$IncludeTestUnits
-        includeNonCorePatients = [bool]$IncludeNonCorePatients
-        backupDataset = [bool]$BackupDataset
-        validationExceptionFile = $ValidationExceptionFile
-    }
-    $paramHashJson = ($paramHashSource | ConvertTo-Json -Depth 100 -Compress)
-    $paramHash = [System.BitConverter]::ToString(
-        [System.Security.Cryptography.SHA256]::Create().ComputeHash(
-            [System.Text.Encoding]::UTF8.GetBytes($paramHashJson)
-        )
-    ).Replace('-', '').ToLowerInvariant()
 }
+
+# Snapshot the bound parameters in script scope — inside the Invoke-WithNeoIPCAuth
+# scriptblock $PSBoundParameters is the scriptblock's own (empty) dictionary. Feeds the
+# build report's reproducibility fields.
+$paramSnapshot = Get-NeoIPCParameterSnapshot -BoundParameters $PSBoundParameters
 
 $authForEnv = if (-not $isDataFileMode) { Resolve-NeoIPCAuth -Token $Token } else { @{ AuthType = 'None' } }
 
@@ -470,27 +448,23 @@ finally {
 
     Write-Progress -Activity 'Reference Report Build' -Completed
 
-    $extraFields = [ordered]@{
-        scriptTimestamp = $scriptTimestamp
-        outputDirPath = $outputDirPath
-        json = [ordered]@{
-            filePath = if ($needsJson) { $jsonPath } else { $null }
-            requested = $wantsJson
-            intermediate = $jsonIntermediate
-        }
-        backup = [ordered]@{
-            enabled = [bool]$BackupDataset
-            filePath = if ($BackupDataset) { $backupPath } else { $null }
-        }
-        outputLocales = $OutputLocales
-        outputFormats = $OutputFormats
-        parameterHash = $paramHash
-        parameters = $paramHashSource
+    $json = [ordered]@{
+        filePath = if ($needsJson) { $jsonPath } else { $null }
+        requested = $wantsJson
+        intermediate = $jsonIntermediate
     }
-    $reportPath = if ($JsonReport) { $buildReportFilePath } else { $null }
-    $status = Write-NeoIPCBuildReport -Name 'Reference Report Build' `
-        -Errors $errors -OutputFiles $outputFiles -BuildCompleted $buildCompleted `
-        -StartedAt $startedAt -BuildReportPath $reportPath -ExtraFields $extraFields
+    $backup = [ordered]@{
+        enabled = [bool]$BackupDataset
+        filePath = if ($BackupDataset) { $backupPath } else { $null }
+    }
+    $reportFilePath = if ($JsonReport) { $buildReportFilePath } else { $null }
+    $status = Write-NeoIPCBuildReport -Name 'Reference Report Build' -StartedAt $startedAt `
+        -Errors $errors -OutputFilePaths $outputFiles -BuildCompleted $buildCompleted `
+        -BuildReportFilePath $reportFilePath `
+        -ScriptTimestamp $scriptTimestamp -OutputDirPath $outputDirPath `
+        -OutputLocales $OutputLocales -OutputFormats $OutputFormats `
+        -GeneratedDataFile $json -Backup $backup `
+        -ParameterHash $paramSnapshot.hash -Parameters $paramSnapshot.source
 
     if ($status -ne 'success') {
         exit 1

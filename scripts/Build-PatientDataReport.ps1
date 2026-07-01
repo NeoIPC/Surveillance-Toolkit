@@ -127,6 +127,11 @@ $quartoVerbosityArgs = switch ($logLevel) {
     default   { @() }
 }
 
+# Snapshot the bound parameters in script scope — inside the Invoke-WithNeoIPCAuth
+# scriptblock $PSBoundParameters is the scriptblock's own (empty) dictionary. Feeds the
+# build report's reproducibility fields.
+$paramSnapshot = Get-NeoIPCParameterSnapshot -BoundParameters $PSBoundParameters
+
 Invoke-WithNeoIPCAuth -Auth $auth -ExtraEnvVars @{ 'LC_ALL' = $null; 'NEOIPC_LOG_LEVEL' = $logLevel } -ScriptBlock {
 
 $errors = @()
@@ -208,18 +213,14 @@ finally {
     Write-Progress -Activity 'Patient Data Report Build' -Completed
 
     $buildReportFilePath = Join-Path $outputDirPath "${scriptTimestamp}_NeoIPC-Surveillance-Patient-Data-Report-Build.json"
-    $extraFields = [ordered]@{
-        scriptTimestamp = $scriptTimestamp
-        outputDirPath = $outputDirPath
-        patientId = $PatientId
-        departmentCode = $DepartmentCode
-        outputFormat = $OutputFormat
-        outputLocale = $OutputLocale
-    }
-    $reportPath = if ($JsonReport) { $buildReportFilePath } else { $null }
-    $status = Write-NeoIPCBuildReport -Name 'Patient Data Report Build' `
-        -Errors $errors -OutputFiles $outputFiles -BuildCompleted $buildCompleted `
-        -StartedAt $startedAt -BuildReportPath $reportPath -ExtraFields $extraFields
+    $reportFilePath = if ($JsonReport) { $buildReportFilePath } else { $null }
+    $status = Write-NeoIPCBuildReport -Name 'Patient Data Report Build' -StartedAt $startedAt `
+        -Errors $errors -OutputFilePaths $outputFiles -BuildCompleted $buildCompleted `
+        -BuildReportFilePath $reportFilePath `
+        -ScriptTimestamp $scriptTimestamp -OutputDirPath $outputDirPath `
+        -OutputLocales @($OutputLocale) -OutputFormats @($OutputFormat) `
+        -ParameterHash $paramSnapshot.hash -Parameters $paramSnapshot.source `
+        -ExtraFields ([ordered]@{ patientId = $PatientId; departmentCode = $DepartmentCode })
 
     if ($status -ne 'success') {
         exit 1
