@@ -9,7 +9,7 @@ This directory contains the NeoIPC infectious-agent ontology used to populate ca
 | `NeoIPC-Infectious-Agents.yaml` | **Canonical** hierarchical ontology of infectious agents, their synonyms, and metadata. Single source of truth. |
 | `NeoIPC-Infectious-Agents.<lang>.yaml` | Per-locale translation overlay generated from the po4a pipeline (do not edit by hand — see [the repo `CLAUDE.md` po4a section](../../../CLAUDE.md)). |
 | `NeoIPC-Infectious-Agents.uids.csv` | The `id,uid` sidecar mapping each option code (the YAML `Id`) to its DHIS2 option **UID** (source identity for the generated `NEOIPC_PATHOGENS` option set, so generation no longer reads UIDs from the export). Holds only the **deployed** codes; an `Id` absent from it (a not-yet-deployed organism) is minted deterministically on generation. The option **set**'s own UID is a NeoIPC-Tools module constant. These are the UIDs the deployment already assigned. |
-| `NeoIPC-Owned-Pathogen-Concepts.csv` | Classification of NeoIPC-owned concepts (`pathogen_type`, `concept_type`). Consumed by `Make-NeoIPC-Core-Protocol.ps1`. |
+| `NeoIPC-Owned-Pathogen-Concepts.csv` | Classification of NeoIPC-owned concepts (`pathogen_type`, `concept_type`). Consumed by `Build-NeoIPCCoreProtocol.ps1`. |
 | `ListElements.csv` / `ListElements.<lang>.csv` | UI/report list-element labels used by `Convert-InfectiousAgentList.ps1` when rendering the pathogen reference document. |
 | `AsciiDoc-PDF.yml` | Asciidoctor-PDF theme for the rendered pathogen reference document. |
 | `Output-Header.adoc` / `Output-Footer.adoc` (+ per-locale variants) | AsciiDoc preamble/postamble for the rendered pathogen reference document. |

@@ -7,13 +7,13 @@ This script fetches the department/site list from DHIS2, filters by a regex, and
 With -Combined, it renders a single report covering all departments (no departmentFilter).
 
 .EXAMPLE
-    .\New-ValidationReport.ps1 -SiteCodeFilter 'NEO_AT.*' -OutputLocale 'de' -Token $myToken -Verbose
+    .\Build-ValidationReport.ps1 -SiteCodeFilter 'NEO_AT.*' -OutputLocale 'de' -Token $myToken -Verbose
 
 .EXAMPLE
-    .\New-ValidationReport.ps1 -Combined -OutputLocale 'en' -Token $myToken -JsonReport
+    .\Build-ValidationReport.ps1 -Combined -OutputLocale 'en' -Token $myToken -JsonReport
 
 .EXAMPLE
-    .\New-ValidationReport.ps1 -Combined -OutputDir ./data -ValidationExceptionFile ../NeoIPC/validation-exceptions_ref.csv -JsonReport
+    .\Build-ValidationReport.ps1 -Combined -OutputDir ./data -ValidationExceptionFile ../NeoIPC/validation-exceptions_ref.csv -JsonReport
 #>
 [CmdletBinding(SupportsShouldProcess = $true, DefaultParameterSetName = 'PerSite')]
 param(
@@ -169,10 +169,16 @@ $quartoVerbosityArgs = switch ($logLevel) {
     default   { @() }
 }
 
+# Snapshot the bound parameters in script scope — inside the Invoke-WithNeoIPCAuth
+# scriptblock $PSBoundParameters is the scriptblock's own (empty) dictionary. Feeds the
+# build report's reproducibility fields.
+$paramSnapshot = Get-NeoIPCParameterSnapshot -BoundParameters $PSBoundParameters
+
 Invoke-WithNeoIPCAuth -Auth $auth -ExtraEnvVars @{ 'LC_ALL' = $null; 'NEOIPC_LOG_LEVEL' = $logLevel } -ScriptBlock {
 
 $errors = @()
 $outputFiles = @()
+$buildLog = @()
 $buildCompleted = $false
 $startedAt = (Get-Date -AsUTC).ToString('o')
 $scriptTimestamp = [datetime]::UtcNow.ToString("yyyy-MM-dd_HHmmss'Z'")
@@ -184,8 +190,8 @@ try {
 
     $localeParts = Split-NeoIPCLocale -Locale $OutputLocale
     $language = $localeParts.Language
-    $qmdPath = Resolve-NeoIPCLocaleQmd -ReportDir $reportDirPath -BaseName 'Validation-Report' -Locale $OutputLocale
-    $qmdFile = [System.IO.Path]::GetFileName($qmdPath)
+    $qmdFilePath = Resolve-NeoIPCLocaleQmd -ReportDirPath $reportDirPath -BaseName 'Validation-Report' -Locale $OutputLocale
+    $qmdFileName = [System.IO.Path]::GetFileName($qmdFilePath)
 
     if ($localeParts.Territory) {
         $env:LC_ALL = "${OutputLocale}.UTF-8"
@@ -199,8 +205,9 @@ try {
         $pct = [int](100 * $completedSteps / $totalSteps)
         Write-Progress -Activity 'Validation Report Build' -Status 'Rendering combined report' -PercentComplete $pct
 
-        $outFile = "${scriptTimestamp}_NeoIPC-Surveillance-Validation-Report.${OutputLocale}.pdf"
-        $quartoArgs = @('render', $qmdFile, '--profile', $language, '--to', 'pdf', '-o', $outFile)
+        $outFileName = "${scriptTimestamp}_NeoIPC-Surveillance-Validation-Report.${OutputLocale}.pdf"
+        $currentEntry = New-NeoIPCBuildStep -OutputLocale $OutputLocale -OutputFormat 'pdf' -OutputFileName $outFileName -QmdFilePath $qmdFileName
+        $quartoArgs = @('render', $qmdFileName, '--profile', $language, '--to', 'pdf', '-o', $outFileName)
         if ($outputDirExplicit) { $quartoArgs += @('--output-dir', $outputDirPath) }
         if ($IncludeTestData) {
             $quartoArgs += @('-P', 'includeTestData:true')
@@ -214,15 +221,19 @@ try {
         if ($Dhis2Path) { $quartoArgs += @('-P', "dhis2Path:$Dhis2Path") }
         $quartoArgs += $quartoVerbosityArgs
 
-        if ($PSCmdlet.ShouldProcess($outFile, 'Render combined validation report')) {
+        if ($PSCmdlet.ShouldProcess($outFileName, 'Render combined validation report')) {
             Write-Host "Generating combined validation report..."
             $result = Invoke-QuartoRender -Arguments $quartoArgs -Description 'combined validation report'
+            $currentEntry = $currentEntry | Complete-NeoIPCBuildStep -Result $result
             if ($result.Status -eq 'Error') {
                 $errors += "Quarto render failed for combined report."
             } elseif ($result.Status -ne 'NoData') {
-                $outputFiles += (Join-Path $outputDirPath $outFile)
+                $outputFiles += (Join-Path $outputDirPath $outFileName)
             }
+        } else {
+            $currentEntry = $currentEntry | Complete-NeoIPCBuildStep -Messages @('WhatIf: would render combined validation report')
         }
+        $buildLog += $currentEntry
     } else {
         # PerSite mode: one report per site
         foreach ($siteCode in $siteCodes) {
@@ -230,8 +241,9 @@ try {
             $pct = [int](100 * $completedSteps / $totalSteps)
             Write-Progress -Activity 'Validation Report Build' -Status "Rendering report for $siteCode" -PercentComplete $pct
 
-            $outFile = "$([datetime]::Now.ToString('yyyy-MM-dd_HHmmss'))_NeoIPC-Surveillance-Validation-Report_${siteCode}.${OutputLocale}.pdf"
-            $quartoArgs = @('render', $qmdFile, '--profile', $language, '--to', 'pdf', '-P', "departmentFilter:$($siteCode)", '-o', $outFile)
+            $outFileName = "$([datetime]::Now.ToString('yyyy-MM-dd_HHmmss'))_NeoIPC-Surveillance-Validation-Report_${siteCode}.${OutputLocale}.pdf"
+            $currentEntry = New-NeoIPCBuildStep -SiteCode $siteCode -OutputLocale $OutputLocale -OutputFormat 'pdf' -OutputFileName $outFileName -QmdFilePath $qmdFileName
+            $quartoArgs = @('render', $qmdFileName, '--profile', $language, '--to', 'pdf', '-P', "departmentFilter:$($siteCode)", '-o', $outFileName)
             if ($outputDirExplicit) { $quartoArgs += @('--output-dir', $outputDirPath) }
             if ($IncludeTestData) {
                 $quartoArgs += @('-P', 'includeTestData:true')
@@ -245,15 +257,19 @@ try {
             if ($Dhis2Path) { $quartoArgs += @('-P', "dhis2Path:$Dhis2Path") }
             $quartoArgs += $quartoVerbosityArgs
 
-            if ($PSCmdlet.ShouldProcess($outFile, "Render validation report for $siteCode")) {
+            if ($PSCmdlet.ShouldProcess($outFileName, "Render validation report for $siteCode")) {
                 Write-Host "Generating validation report for $siteCode..."
                 $result = Invoke-QuartoRender -Arguments $quartoArgs -Description "validation report for $siteCode"
+                $currentEntry = $currentEntry | Complete-NeoIPCBuildStep -Result $result
                 if ($result.Status -eq 'Error') {
                     $errors += "Quarto render failed for $siteCode."
                 } elseif ($result.Status -ne 'NoData') {
-                    $outputFiles += (Join-Path $outputDirPath $outFile)
+                    $outputFiles += (Join-Path $outputDirPath $outFileName)
                 }
+            } else {
+                $currentEntry = $currentEntry | Complete-NeoIPCBuildStep -Messages @("WhatIf: would render validation report for $siteCode")
             }
+            $buildLog += $currentEntry
         }
     }
 
@@ -268,17 +284,16 @@ finally {
     Write-Progress -Activity 'Validation Report Build' -Completed
 
     $buildReportFilePath = Join-Path $outputDirPath "${scriptTimestamp}_NeoIPC-Surveillance-Validation-Report-Build.json"
-    $extraFields = [ordered]@{
-        scriptTimestamp = $scriptTimestamp
-        outputDirPath = $outputDirPath
-        outputLayout = if ($isCombined) { 'combined' } else { 'per-site' }
-        siteCodes = if ($isCombined) { $null } else { $siteCodes }
-        outputLocale = $OutputLocale
-    }
-    $reportPath = if ($JsonReport) { $buildReportFilePath } else { $null }
-    $status = Write-NeoIPCBuildReport -Name 'Validation Report Build' `
-        -Errors $errors -OutputFiles $outputFiles -BuildCompleted $buildCompleted `
-        -StartedAt $startedAt -BuildReportPath $reportPath -ExtraFields $extraFields
+    $siteCodes = if ($isCombined) { $null } else { $siteCodes }
+    $reportFilePath = if ($JsonReport) { $buildReportFilePath } else { $null }
+    $status = Write-NeoIPCBuildReport -Name 'Validation Report Build' -StartedAt $startedAt `
+        -Errors $errors -OutputFilePaths $outputFiles -BuildCompleted $buildCompleted `
+        -BuildReportFilePath $reportFilePath `
+        -ScriptTimestamp $scriptTimestamp -OutputDirPath $outputDirPath `
+        -SiteCodes $siteCodes -OutputLocales @($OutputLocale) `
+        -BuildSteps $buildLog `
+        -ParameterHash $paramSnapshot.hash -Parameters $paramSnapshot.source `
+        -ExtraFields ([ordered]@{ outputLayout = if ($isCombined) { 'combined' } else { 'per-site' } })
 
     if ($status -ne 'success') {
         exit 1

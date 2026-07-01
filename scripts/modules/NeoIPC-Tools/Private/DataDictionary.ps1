@@ -395,7 +395,7 @@ function Get-NeoIPCDataDictionaryAboutRow {
         'Data dictionary'      = 'NeoIPC Core surveillance — collected variables and code lists'
         'Program'              = ('{0} ({1})' -f [string]$Program['name'], [string]$Program['code'])
         'Program version'      = [string]$Program['version']
-        'Generated'            = 'Generated from the canonical NeoIPC metadata directory — do not hand-edit; regenerate with scripts/New-NeoIPCDataDictionary.ps1.'
+        'Generated'            = 'Generated from the canonical NeoIPC metadata directory — do not hand-edit; regenerate with scripts/Build-NeoIPCDataDictionary.ps1.'
         'Variables'            = [string]$VariableCount
         'Code lists'           = [string]$CodeListCount
         'Code list values'     = [string]$CodeListValueCount

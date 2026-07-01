@@ -209,6 +209,6 @@ manifest and are marked **alpha**: they import as-is (DHIS2's importer tree-walk
 and skips the unrecognised `package` key, verified in source), but they do **not** yet follow the
 WHO `dhis2-package-exporter` sharing/manifest conventions. A standards-compliant package — and
 the user-group / role / permission model it depends on — is a planned successor. The packages are
-not committed: they are rendered on demand by `scripts/New-NeoIPCMetadataDistribution.ps1` (which
+not committed: they are rendered on demand by `scripts/Build-NeoIPCMetadataDistribution.ps1` (which
 holds the manifest policy and takes the version explicitly) and published as a CI build artifact
 and a manually-published Release asset.

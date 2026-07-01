@@ -3,7 +3,7 @@ param(
     [Parameter(Mandatory, Position = 0)]
     [string]$Signatory,
     [Parameter(Mandatory, Position = 1)]
-    [System.IO.DirectoryInfo]$SignatureImagePath,
+    [string]$SignatureImagePath,
     [ArgumentCompleter({
         param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
         Import-Module (Join-Path $PSScriptRoot 'modules' 'NeoIPC-Tools') -Force -Verbose:$false
@@ -12,14 +12,14 @@ param(
             -Hostname $fakeBoundParameters['Dhis2Hostname'] `
             -Port $fakeBoundParameters['Dhis2Port'] `
             -Path $fakeBoundParameters['Dhis2Path']
-        $cacheFile = Join-Path $PSScriptRoot '..' 'data' $serverKey 'site-codes.txt'
-        if (Test-Path -LiteralPath $cacheFile) {
-            Get-Content -LiteralPath $cacheFile |
+        $cacheFilePath = Join-Path $PSScriptRoot '..' 'data' $serverKey 'site-codes.txt'
+        if (Test-Path -LiteralPath $cacheFilePath) {
+            Get-Content -LiteralPath $cacheFilePath |
                 Where-Object { $_ -like "$wordToComplete*" } |
                 Sort-Object
         } else {
-            $cacheBase = Join-Path $PSScriptRoot '..' 'data'
-            Get-ChildItem -LiteralPath $cacheBase -Recurse -Filter 'site-codes.txt' -ErrorAction SilentlyContinue |
+            $cacheBaseDirPath = Join-Path $PSScriptRoot '..' 'data'
+            Get-ChildItem -LiteralPath $cacheBaseDirPath -Recurse -Filter 'site-codes.txt' -ErrorAction SilentlyContinue |
                 Get-Content |
                 Sort-Object -Unique |
                 Where-Object { $_ -like "$wordToComplete*" }
@@ -95,8 +95,8 @@ if ($OutputDir) {
 }
 
 $localeParts = Split-NeoIPCLocale -Locale $OutputLocale
-$quartoFile = Resolve-NeoIPCLocaleQmd -ReportDir $reportDirPath -BaseName 'Partner-Certificate' -Locale $OutputLocale
-$SignatureImagePath = Resolve-Path -LiteralPath $SignatureImagePath.FullName -Relative -RelativeBasePath $reportDirPath
+$quartoFile = Resolve-NeoIPCLocaleQmd -ReportDirPath $reportDirPath -BaseName 'Partner-Certificate' -Locale $OutputLocale
+$SignatureImagePath = Resolve-Path -LiteralPath $SignatureImagePath -Relative -RelativeBasePath $reportDirPath
 
 # Resolve the unified log verbosity from -Quiet / -Verbose / -Debug. It reaches
 # the Quarto child two ways: the NEOIPC_LOG_LEVEL environment variable (read by
@@ -130,10 +130,17 @@ $quartoVerbosityArgs = switch ($logLevel) {
     default   { @() }
 }
 
+# Snapshot the bound parameters in script scope — inside the Invoke-WithNeoIPCAuth
+# scriptblock $PSBoundParameters is the scriptblock's own (empty) dictionary. Feeds the
+# build report's reproducibility fields.
+$paramSnapshot = Get-NeoIPCParameterSnapshot -BoundParameters $PSBoundParameters
+
 Invoke-WithNeoIPCAuth -Auth $auth -ExtraEnvVars @{ 'LC_ALL' = $null; 'NEOIPC_LOG_LEVEL' = $logLevel } -ScriptBlock {
 
 $errors = @()
 $outputFiles = @()
+$buildLog = @()
+$siteCodes = $null   # set in Acquire (DepartmentCode) mode; stays $null in Pass (HospitalName) mode
 $buildCompleted = $false
 $startedAt = (Get-Date -AsUTC).ToString('o')
 $scriptTimestamp = [datetime]::UtcNow.ToString("yyyy-MM-dd_HHmmss'Z'")
@@ -165,8 +172,9 @@ try {
             $pct = if ($totalSteps -gt 0) { [int](100 * $completedSteps / $totalSteps) } else { 0 }
             Write-Progress -Activity 'Partner-Certificate Build' -Status "Rendering certificate for $siteCode" -PercentComplete $pct
 
-            $outFile = "$([datetime]::Now.ToString('yyyy-MM-dd_HHmmss'))_NeoIPC-Surveillance-Partner-Certificate_${siteCode}.${OutputLocale}.pdf"
-            $quartoArgs = @('render', $quartoFile, '-P', "signatory:$Signatory", '-P', "signatureImagePath:$SignatureImagePath", '-P', "departmentCode:$siteCode", '-o', $outFile)
+            $outFileName = "$([datetime]::Now.ToString('yyyy-MM-dd_HHmmss'))_NeoIPC-Surveillance-Partner-Certificate_${siteCode}.${OutputLocale}.pdf"
+            $currentEntry = New-NeoIPCBuildStep -SiteCode $siteCode -OutputLocale $OutputLocale -OutputFormat 'pdf' -OutputFileName $outFileName -QmdFilePath $quartoFile
+            $quartoArgs = @('render', $quartoFile, '-P', "signatory:$Signatory", '-P', "signatureImagePath:$SignatureImagePath", '-P', "departmentCode:$siteCode", '-o', $outFileName)
             if ($outputDirExplicit) { $quartoArgs += @('--output-dir', $outputDirPath) }
             if ($Dhis2Scheme) { $quartoArgs += @('-P', "dhis2Scheme:$Dhis2Scheme") }
             if ($Dhis2Hostname) { $quartoArgs += @('-P', "dhis2Hostname:$Dhis2Hostname") }
@@ -174,23 +182,28 @@ try {
             if ($Dhis2Path) { $quartoArgs += @('-P', "dhis2Path:$Dhis2Path") }
             $quartoArgs += $quartoVerbosityArgs
 
-            if ($PSCmdlet.ShouldProcess($outFile, "Render partner certificate for $siteCode")) {
+            if ($PSCmdlet.ShouldProcess($outFileName, "Render partner certificate for $siteCode")) {
                 Write-Host "Generating partner certificate for $siteCode..."
                 $result = Invoke-QuartoRender -Arguments $quartoArgs -Description "partner certificate for $siteCode"
+                $currentEntry = $currentEntry | Complete-NeoIPCBuildStep -Result $result
                 if ($result.Status -eq 'Error') {
                     $errors += "Quarto render failed for $siteCode (exit code $($result.ExitCode))."
                 } else {
-                    $outputFiles += (Join-Path $outputDirPath $outFile)
+                    $outputFiles += (Join-Path $outputDirPath $outFileName)
                 }
+            } else {
+                $currentEntry = $currentEntry | Complete-NeoIPCBuildStep -Messages @("WhatIf: would render partner certificate for $siteCode")
             }
+            $buildLog += $currentEntry
         }
     } else {
         $totalSteps = 1
         $completedSteps = 1
         Write-Progress -Activity 'Partner-Certificate Build' -Status "Rendering certificate for $HospitalName" -PercentComplete 100
 
-        $outFile = "$([datetime]::Now.ToString('yyyy-MM-dd_HHmmss'))_NeoIPC-Surveillance-Partner-Certificate_${HospitalName}.${OutputLocale}.pdf"
-        $quartoArgs = @('render', $quartoFile, '-P', "signatory:$Signatory", '-P', "signatureImagePath:$SignatureImagePath", '-P', "startYear:$StartYear", '-P', "endYear:$EndYear", '-P', "nPatients:$NumberOfPatients", '-P', "hospitalName:$HospitalName", '-o', $outFile)
+        $outFileName = "$([datetime]::Now.ToString('yyyy-MM-dd_HHmmss'))_NeoIPC-Surveillance-Partner-Certificate_${HospitalName}.${OutputLocale}.pdf"
+        $currentEntry = New-NeoIPCBuildStep -OutputLocale $OutputLocale -OutputFormat 'pdf' -OutputFileName $outFileName -QmdFilePath $quartoFile
+        $quartoArgs = @('render', $quartoFile, '-P', "signatory:$Signatory", '-P', "signatureImagePath:$SignatureImagePath", '-P', "startYear:$StartYear", '-P', "endYear:$EndYear", '-P', "nPatients:$NumberOfPatients", '-P', "hospitalName:$HospitalName", '-o', $outFileName)
         if ($outputDirExplicit) { $quartoArgs += @('--output-dir', $outputDirPath) }
         if ($Dhis2Scheme) { $quartoArgs += @('-P', "dhis2Scheme:$Dhis2Scheme") }
         if ($Dhis2Hostname) { $quartoArgs += @('-P', "dhis2Hostname:$Dhis2Hostname") }
@@ -198,15 +211,19 @@ try {
         if ($Dhis2Path) { $quartoArgs += @('-P', "dhis2Path:$Dhis2Path") }
         $quartoArgs += $quartoVerbosityArgs
 
-        if ($PSCmdlet.ShouldProcess($outFile, "Render partner certificate for $HospitalName")) {
+        if ($PSCmdlet.ShouldProcess($outFileName, "Render partner certificate for $HospitalName")) {
             Write-Host "Generating partner certificate for $HospitalName..."
             $result = Invoke-QuartoRender -Arguments $quartoArgs -Description "partner certificate for $HospitalName"
+            $currentEntry = $currentEntry | Complete-NeoIPCBuildStep -Result $result
             if ($result.Status -eq 'Error') {
                 $errors += "Quarto render failed for $HospitalName (exit code $($result.ExitCode))."
             } else {
-                $outputFiles += (Join-Path $outputDirPath $outFile)
+                $outputFiles += (Join-Path $outputDirPath $outFileName)
             }
+        } else {
+            $currentEntry = $currentEntry | Complete-NeoIPCBuildStep -Messages @("WhatIf: would render partner certificate for $HospitalName")
         }
+        $buildLog += $currentEntry
     }
 
     $buildCompleted = $true
@@ -220,15 +237,15 @@ finally {
     Write-Progress -Activity 'Partner-Certificate Build' -Completed
 
     $buildReportFilePath = Join-Path $outputDirPath "${scriptTimestamp}_NeoIPC-Surveillance-Partner-Certificate-Build.json"
-    $extraFields = [ordered]@{
-        scriptTimestamp = $scriptTimestamp
-        outputDirPath = $outputDirPath
-        outputLocale = $OutputLocale
-    }
-    $reportPath = if ($JsonReport) { $buildReportFilePath } else { $null }
-    $status = Write-NeoIPCBuildReport -Name 'Partner-Certificate Build' `
-        -Errors $errors -OutputFiles $outputFiles -BuildCompleted $buildCompleted `
-        -StartedAt $startedAt -BuildReportPath $reportPath -ExtraFields $extraFields
+    $reportFilePath = if ($JsonReport) { $buildReportFilePath } else { $null }
+    $status = Write-NeoIPCBuildReport -Name 'Partner-Certificate Build' -StartedAt $startedAt `
+        -Errors $errors -OutputFilePaths $outputFiles -BuildCompleted $buildCompleted `
+        -BuildReportFilePath $reportFilePath `
+        -ScriptTimestamp $scriptTimestamp -OutputDirPath $outputDirPath `
+        -OutputLocales @($OutputLocale) `
+        -SiteCodes $siteCodes `
+        -BuildSteps $buildLog `
+        -ParameterHash $paramSnapshot.hash -Parameters $paramSnapshot.source
 
     if ($status -ne 'success') {
         exit 1

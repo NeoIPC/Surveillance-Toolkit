@@ -14,7 +14,7 @@ repository:
 Import-Module ./scripts/modules/NeoIPC-Tools
 ```
 
-Report-generation scripts (`New-PartnerReports.ps1`, etc.) import the module
+Report-generation scripts (`Build-PartnerReport.ps1`, etc.) import the module
 automatically.
 
 ## Architecture & subsystems
@@ -247,8 +247,8 @@ Clear-PATs -All
 
 ## Report generation helpers
 
-These functions are used by the report scripts (`New-PartnerReports.ps1`,
-`New-ReferenceReport.ps1`, etc.) but can also be called directly.
+These functions are used by the report scripts (`Build-PartnerReport.ps1`,
+`Build-ReferenceReport.ps1`, etc.) but can also be called directly.
 
 ### Scoped auth environment variables
 
@@ -283,17 +283,26 @@ Split-NeoIPCLocale -Locale 'de_AT'
 # @{ Language = 'de'; Territory = 'AT'; Code = 'de_AT' }
 
 # Resolve localized QMD file (with fallback)
-Resolve-NeoIPCLocaleQmd -ReportDir ./reports/Partner-Report -BaseName 'Partner-Report' -Locale 'de'
+Resolve-NeoIPCLocaleQmd -ReportDirPath ./reports/Partner-Report -BaseName 'Partner-Report' -Locale 'de'
 # Returns Partner-Report.de.qmd if it exists, otherwise Partner-Report.qmd
 ```
 
 ### Build reports
 
 ```powershell
-# Write a build summary to console and optionally to JSON
-$status = Write-NeoIPCBuildReport -Name 'Partner Report Build' `
-    -Errors $errors -OutputFiles $outputFiles -BuildCompleted $true `
-    -StartedAt $startedAt -BuildReportPath './build-report.json'
+# Write a build summary to console and optionally to JSON. Common fields (site codes,
+# locales/formats, per-step log, parameter snapshot, ...) are first-class parameters;
+# the module owns the JSON schema so every report wrapper stays consistent by construction.
+$status = Write-NeoIPCBuildReport -Name 'Partner Report Build' -StartedAt $startedAt `
+    -Errors $errors -OutputFilePaths $outputFiles -BuildCompleted $true `
+    -BuildReportFilePath './build-report.json' `
+    -SiteCodes $siteCodes -OutputLocales @('en', 'de') -OutputFormats @('pdf')
+
+# Per-step logging: build a step, then record its outcome from an
+# Invoke-Rscript / Invoke-QuartoRender result ('Success' -> success, 'Error' -> error,
+# 'NoData' -> nodata).
+$step = New-NeoIPCBuildStep -SiteCode 'NEO_DE_01' -OutputLocale 'de' -OutputFormat 'pdf'
+$step = $step | Complete-NeoIPCBuildStep -Result $renderResult
 ```
 
 ### Quarto parameter pairs

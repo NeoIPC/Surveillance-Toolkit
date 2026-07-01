@@ -351,7 +351,7 @@ Resolve the localized QMD file for a report.
 Looks for BaseName.Language.qmd first, falls back to BaseName.qmd.
 Throws if neither exists.
 
-.PARAMETER ReportDir
+.PARAMETER ReportDirPath
 Directory containing the QMD files.
 
 .PARAMETER BaseName
@@ -364,7 +364,7 @@ function Resolve-NeoIPCLocaleQmd {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)]
-        [string]$ReportDir,
+        [string]$ReportDirPath,
 
         [Parameter(Mandatory)]
         [string]$BaseName,
@@ -376,23 +376,23 @@ function Resolve-NeoIPCLocaleQmd {
     $language = (Split-NeoIPCLocale -Locale $Locale).Language
 
     if ($language -eq 'en') {
-        $qmdPath = Join-Path $ReportDir "$BaseName.qmd"
+        $qmdFilePath = Join-Path $ReportDirPath "$BaseName.qmd"
     }
     else {
-        $qmdPath = Join-Path $ReportDir "$BaseName.$language.qmd"
+        $qmdFilePath = Join-Path $ReportDirPath "$BaseName.$language.qmd"
     }
 
-    if (Test-Path -LiteralPath $qmdPath) {
-        return $qmdPath
+    if (Test-Path -LiteralPath $qmdFilePath) {
+        return $qmdFilePath
     }
 
     # Fallback to default (no language suffix)
-    $defaultPath = Join-Path $ReportDir "$BaseName.qmd"
-    if (Test-Path -LiteralPath $defaultPath) {
-        return $defaultPath
+    $defaultQmdFilePath = Join-Path $ReportDirPath "$BaseName.qmd"
+    if (Test-Path -LiteralPath $defaultQmdFilePath) {
+        return $defaultQmdFilePath
     }
 
-    throw "No QMD found for '$BaseName' in locale '$Locale'. Expected '$qmdPath' or '$defaultPath'."
+    throw "No QMD found for '$BaseName' in locale '$Locale'. Expected '$qmdFilePath' or '$defaultQmdFilePath'."
 }
 
 <#
@@ -474,90 +474,4 @@ function Build-QmdParamPairs {
         }
     }
     return $pairs
-}
-
-<#
-.SYNOPSIS
-Write a standardised build report to the console and optionally to a JSON file.
-
-.DESCRIPTION
-Computes the build status from the error list and the $BuildCompleted flag,
-writes a coloured console summary, and optionally persists a JSON build report.
-
-CTRL+C (PipelineStoppedException) bypasses catch blocks, so $BuildCompleted
-distinguishes a clean finish (true) from an interrupted one (false with no errors).
-
-.OUTPUTS
-The status string: 'success', 'failed', or 'cancelled'.
-#>
-function Write-NeoIPCBuildReport {
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory)]
-        [string]$Name,
-
-        [string[]]$Errors = @(),
-
-        [string[]]$OutputFiles = @(),
-
-        [bool]$BuildCompleted = $false,
-
-        [Parameter(Mandatory)]
-        [string]$StartedAt,
-
-        [string]$BuildReportPath,
-
-        [System.Collections.Specialized.OrderedDictionary]$ExtraFields
-    )
-
-    $completedAt = (Get-Date -AsUTC).ToString('o')
-    $status = if ($Errors.Count -gt 0) { 'failed' }
-              elseif (-not $BuildCompleted) { 'cancelled' }
-              else { 'success' }
-
-    $sortedOutputs = @($OutputFiles | Sort-Object -Unique)
-
-    # Build the report object with core fields first, then extra fields, then errors last
-    $buildReport = [ordered]@{
-        name        = $Name
-        status      = $status
-        startedAt   = $StartedAt
-        completedAt = $completedAt
-        outputs     = $sortedOutputs
-    }
-    if ($ExtraFields) {
-        foreach ($key in $ExtraFields.Keys) {
-            $buildReport[$key] = $ExtraFields[$key]
-        }
-    }
-    $buildReport['errors'] = $Errors
-
-    # Write JSON report if requested
-    if (-not [string]::IsNullOrWhiteSpace($BuildReportPath)) {
-        try {
-            $buildReport | ConvertTo-Json -Depth 100 | Set-Content -LiteralPath $BuildReportPath
-            Write-Verbose "Generated build report: $BuildReportPath"
-        }
-        catch {
-            Write-Warning "Failed to write build report: $($_.Exception.Message)"
-        }
-    }
-
-    # Console summary
-    if ($status -eq 'success') {
-        Write-Host "Build status: $status" -ForegroundColor Green
-    } elseif ($status -eq 'cancelled') {
-        Write-Host "Build status: $status" -ForegroundColor Yellow
-    } else {
-        Write-Host "Build status: $status" -ForegroundColor Red
-    }
-
-    Write-Host "Outputs:"
-    $sortedOutputs | ForEach-Object { Write-Host "  $_" }
-
-    if (-not [string]::IsNullOrWhiteSpace($BuildReportPath)) {
-        Write-Host "Build report: $BuildReportPath"
-    }
-
-    return $status
 }

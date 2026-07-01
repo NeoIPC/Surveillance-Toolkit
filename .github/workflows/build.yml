@@ -83,7 +83,7 @@ jobs:
 
             - name: Build
               shell: pwsh
-              run: ./scripts/Make-NeoIPC-Core-Protocol.ps1 -InformationAction Continue -WarningAction:Stop
+              run: ./scripts/Build-NeoIPCCoreProtocol.ps1 -InformationAction Continue -WarningAction:Stop
 
             - name: Provision and test NeoIPC-Tools
               shell: pwsh
@@ -96,14 +96,17 @@ jobs:
                 # powershell-yaml: the metadata assembler reads the infectious-agents / sharing YAML when
                 # building the package the data dictionary flattens.
                 Install-Module -Name powershell-yaml -MinimumVersion 0.4.2 -Force -Scope CurrentUser -SkipPublisherCheck
-                Invoke-Pester -Path scripts/modules/NeoIPC-Tools/Tests/DataDictionary.Tests.ps1 -CI
+                # PSScriptAnalyzer backs the approved-verb *function* check (PSUseApprovedVerbs) in
+                # ScriptVerbHygiene.Tests.ps1; the file-name half of that gate is a custom Pester check.
+                Install-Module -Name PSScriptAnalyzer -Force -Scope CurrentUser -SkipPublisherCheck
+                Invoke-Pester -Path scripts/modules/NeoIPC-Tools/Tests/DataDictionary.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/BuildReport.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/ScriptVerbHygiene.Tests.ps1 -CI
 
             - name: Generate data dictionary
               shell: pwsh
               run: |
                 # Generate the CSV + .xlsx data dictionary into the uploaded artifacts. Assembled from the
                 # metadata/ directory alone — no DHIS2 API.
-                ./scripts/New-NeoIPCDataDictionary.ps1 -OutputDirectory ./artifacts/data-dictionary
+                ./scripts/Build-NeoIPCDataDictionary.ps1 -OutputDirectory ./artifacts/data-dictionary
 
             - name: Render metadata distribution packages
               shell: pwsh
@@ -117,7 +120,7 @@ jobs:
                 # release build (the released version), else the repository VERSION file (the prominent source of
                 # truth) for the preview artifact.
                 $version = if ($env:RELEASE_TAG) { $env:RELEASE_TAG -replace '^v', '' } else { (Get-Content -LiteralPath ./VERSION -Raw).Trim() }
-                ./scripts/New-NeoIPCMetadataDistribution.ps1 -OutputDirectory ./artifacts/metadata-package -Version $version
+                ./scripts/Build-NeoIPCMetadataDistribution.ps1 -OutputDirectory ./artifacts/metadata-package -Version $version
 
             - name: Upload artifacts
               uses: actions/upload-artifact@v7

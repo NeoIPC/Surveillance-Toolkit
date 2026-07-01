@@ -64,7 +64,7 @@ $LcAllByLanguage = @{
 }
 
 # Reports whose wrappers are generated. These are the two reports whose params
-# are also snapshotted for the backend (Generate-ReportSchemas.ps1).
+# are also snapshotted for the .NET reporting backend.
 $reports = @('Partner-Report', 'Reference-Report')
 
 # Reads the locale group — the first `- [..]` flow sequence under
