@@ -11,14 +11,14 @@ param(
             -Hostname $fakeBoundParameters['Dhis2Hostname'] `
             -Port $fakeBoundParameters['Dhis2Port'] `
             -Path $fakeBoundParameters['Dhis2Path']
-        $cacheFile = Join-Path $PSScriptRoot '..' 'data' $serverKey 'site-codes.txt'
-        if (Test-Path -LiteralPath $cacheFile) {
-            Get-Content -LiteralPath $cacheFile |
+        $cacheFilePath = Join-Path $PSScriptRoot '..' 'data' $serverKey 'site-codes.txt'
+        if (Test-Path -LiteralPath $cacheFilePath) {
+            Get-Content -LiteralPath $cacheFilePath |
                 Where-Object { $_ -like "$wordToComplete*" } |
                 Sort-Object
         } else {
-            $cacheBase = Join-Path $PSScriptRoot '..' 'data'
-            Get-ChildItem -LiteralPath $cacheBase -Recurse -Filter 'site-codes.txt' -ErrorAction SilentlyContinue |
+            $cacheBaseDirPath = Join-Path $PSScriptRoot '..' 'data'
+            Get-ChildItem -LiteralPath $cacheBaseDirPath -Recurse -Filter 'site-codes.txt' -ErrorAction SilentlyContinue |
                 Get-Content |
                 Sort-Object -Unique |
                 Where-Object { $_ -like "$wordToComplete*" }
@@ -139,6 +139,7 @@ $outputFiles = @()
 $buildCompleted = $false
 $startedAt = (Get-Date -AsUTC).ToString('o')
 $scriptTimestamp = [datetime]::UtcNow.ToString("yyyy-MM-dd_HHmmss'Z'")
+$generatedDataFilePath = $null
 
 try {
     Set-Location -LiteralPath $reportDirPath
@@ -154,10 +155,11 @@ try {
     }
 
     if ($OutputFormat -eq 'json') {
-        $outFile = "${scriptTimestamp}_NeoIPC-Surveillance-Patient-Data-Report_${PatientId}.json"
-        $outFilePath = Join-Path $outputDirPath $outFile
+        $outFileName = "${scriptTimestamp}_NeoIPC-Surveillance-Patient-Data-Report_${PatientId}.json"
+        $outFilePath = Join-Path $outputDirPath $outFileName
+        $generatedDataFilePath = $outFilePath
 
-        if ($PSCmdlet.ShouldProcess($outFile, "Generate patient data JSON for $PatientId")) {
+        if ($PSCmdlet.ShouldProcess($outFileName, "Generate patient data JSON for $PatientId")) {
             Write-Host "Generating patient data JSON for $PatientId..."
             $rArgs = @('--vanilla', 'Generate-PatientData.R',
                 '--patient-id', $PatientId,
@@ -176,17 +178,17 @@ try {
             }
         }
     } else {
-        $quartoFile = Resolve-NeoIPCLocaleQmd -ReportDir $reportDirPath -BaseName 'Patient-Data-Report' -Locale $OutputLocale
-        $outFile = "${scriptTimestamp}_NeoIPC-Surveillance-Patient-Data-Report_${PatientId}.${OutputLocale}.${OutputFormat}"
+        $quartoFile = Resolve-NeoIPCLocaleQmd -ReportDirPath $reportDirPath -BaseName 'Patient-Data-Report' -Locale $OutputLocale
+        $outFileName = "${scriptTimestamp}_NeoIPC-Surveillance-Patient-Data-Report_${PatientId}.${OutputLocale}.${OutputFormat}"
 
-        if ($PSCmdlet.ShouldProcess($outFile, "Render patient data report for $PatientId")) {
+        if ($PSCmdlet.ShouldProcess($outFileName, "Render patient data report for $PatientId")) {
             Write-Host "Generating patient data report ($OutputFormat) for $PatientId..."
             $quartoArgs = @('render', $quartoFile,
                 '--profile', $localeParts.Language,
                 '--to', $OutputFormat,
                 '-P', "patientId:$PatientId",
                 '-P', "departmentCode:$DepartmentCode",
-                '-o', $outFile)
+                '-o', $outFileName)
             if ($outputDirExplicit) { $quartoArgs += @('--output-dir', $outputDirPath) }
             if ($Dhis2Scheme) { $quartoArgs += @('-P', "dhis2Scheme:$Dhis2Scheme") }
             if ($Dhis2Hostname) { $quartoArgs += @('-P', "dhis2Hostname:$Dhis2Hostname") }
@@ -197,7 +199,7 @@ try {
             if ($result.Status -eq 'Error') {
                 $errors += "Quarto render failed for $PatientId (exit code $($result.ExitCode))."
             } else {
-                $outputFiles += (Join-Path $outputDirPath $outFile)
+                $outputFiles += (Join-Path $outputDirPath $outFileName)
             }
         }
     }
@@ -214,11 +216,17 @@ finally {
 
     $buildReportFilePath = Join-Path $outputDirPath "${scriptTimestamp}_NeoIPC-Surveillance-Patient-Data-Report-Build.json"
     $reportFilePath = if ($JsonReport) { $buildReportFilePath } else { $null }
+    $generatedDataFile = [ordered]@{
+        filePath = $generatedDataFilePath
+        requested = ($OutputFormat -eq 'json')
+        intermediate = $false
+    }
     $status = Write-NeoIPCBuildReport -Name 'Patient Data Report Build' -StartedAt $startedAt `
         -Errors $errors -OutputFilePaths $outputFiles -BuildCompleted $buildCompleted `
         -BuildReportFilePath $reportFilePath `
         -ScriptTimestamp $scriptTimestamp -OutputDirPath $outputDirPath `
         -OutputLocales @($OutputLocale) -OutputFormats @($OutputFormat) `
+        -GeneratedDataFile $generatedDataFile `
         -ParameterHash $paramSnapshot.hash -Parameters $paramSnapshot.source `
         -ExtraFields ([ordered]@{ patientId = $PatientId; departmentCode = $DepartmentCode })
 

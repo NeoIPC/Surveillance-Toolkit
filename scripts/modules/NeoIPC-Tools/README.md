@@ -283,7 +283,7 @@ Split-NeoIPCLocale -Locale 'de_AT'
 # @{ Language = 'de'; Territory = 'AT'; Code = 'de_AT' }
 
 # Resolve localized QMD file (with fallback)
-Resolve-NeoIPCLocaleQmd -ReportDir ./reports/Partner-Report -BaseName 'Partner-Report' -Locale 'de'
+Resolve-NeoIPCLocaleQmd -ReportDirPath ./reports/Partner-Report -BaseName 'Partner-Report' -Locale 'de'
 # Returns Partner-Report.de.qmd if it exists, otherwise Partner-Report.qmd
 ```
 

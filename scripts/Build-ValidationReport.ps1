@@ -190,8 +190,8 @@ try {
 
     $localeParts = Split-NeoIPCLocale -Locale $OutputLocale
     $language = $localeParts.Language
-    $qmdPath = Resolve-NeoIPCLocaleQmd -ReportDir $reportDirPath -BaseName 'Validation-Report' -Locale $OutputLocale
-    $qmdFile = [System.IO.Path]::GetFileName($qmdPath)
+    $qmdFilePath = Resolve-NeoIPCLocaleQmd -ReportDirPath $reportDirPath -BaseName 'Validation-Report' -Locale $OutputLocale
+    $qmdFileName = [System.IO.Path]::GetFileName($qmdFilePath)
 
     if ($localeParts.Territory) {
         $env:LC_ALL = "${OutputLocale}.UTF-8"
@@ -205,9 +205,9 @@ try {
         $pct = [int](100 * $completedSteps / $totalSteps)
         Write-Progress -Activity 'Validation Report Build' -Status 'Rendering combined report' -PercentComplete $pct
 
-        $outFile = "${scriptTimestamp}_NeoIPC-Surveillance-Validation-Report.${OutputLocale}.pdf"
-        $currentEntry = New-NeoIPCBuildStep -OutputLocale $OutputLocale -OutputFormat 'pdf' -OutputFileName $outFile -QmdFilePath $qmdFile
-        $quartoArgs = @('render', $qmdFile, '--profile', $language, '--to', 'pdf', '-o', $outFile)
+        $outFileName = "${scriptTimestamp}_NeoIPC-Surveillance-Validation-Report.${OutputLocale}.pdf"
+        $currentEntry = New-NeoIPCBuildStep -OutputLocale $OutputLocale -OutputFormat 'pdf' -OutputFileName $outFileName -QmdFilePath $qmdFileName
+        $quartoArgs = @('render', $qmdFileName, '--profile', $language, '--to', 'pdf', '-o', $outFileName)
         if ($outputDirExplicit) { $quartoArgs += @('--output-dir', $outputDirPath) }
         if ($IncludeTestData) {
             $quartoArgs += @('-P', 'includeTestData:true')
@@ -221,14 +221,14 @@ try {
         if ($Dhis2Path) { $quartoArgs += @('-P', "dhis2Path:$Dhis2Path") }
         $quartoArgs += $quartoVerbosityArgs
 
-        if ($PSCmdlet.ShouldProcess($outFile, 'Render combined validation report')) {
+        if ($PSCmdlet.ShouldProcess($outFileName, 'Render combined validation report')) {
             Write-Host "Generating combined validation report..."
             $result = Invoke-QuartoRender -Arguments $quartoArgs -Description 'combined validation report'
             $currentEntry = $currentEntry | Complete-NeoIPCBuildStep -Result $result
             if ($result.Status -eq 'Error') {
                 $errors += "Quarto render failed for combined report."
             } elseif ($result.Status -ne 'NoData') {
-                $outputFiles += (Join-Path $outputDirPath $outFile)
+                $outputFiles += (Join-Path $outputDirPath $outFileName)
             }
         } else {
             $currentEntry = $currentEntry | Complete-NeoIPCBuildStep -Messages @('WhatIf: would render combined validation report')
@@ -241,9 +241,9 @@ try {
             $pct = [int](100 * $completedSteps / $totalSteps)
             Write-Progress -Activity 'Validation Report Build' -Status "Rendering report for $siteCode" -PercentComplete $pct
 
-            $outFile = "$([datetime]::Now.ToString('yyyy-MM-dd_HHmmss'))_NeoIPC-Surveillance-Validation-Report_${siteCode}.${OutputLocale}.pdf"
-            $currentEntry = New-NeoIPCBuildStep -SiteCode $siteCode -OutputLocale $OutputLocale -OutputFormat 'pdf' -OutputFileName $outFile -QmdFilePath $qmdFile
-            $quartoArgs = @('render', $qmdFile, '--profile', $language, '--to', 'pdf', '-P', "departmentFilter:$($siteCode)", '-o', $outFile)
+            $outFileName = "$([datetime]::Now.ToString('yyyy-MM-dd_HHmmss'))_NeoIPC-Surveillance-Validation-Report_${siteCode}.${OutputLocale}.pdf"
+            $currentEntry = New-NeoIPCBuildStep -SiteCode $siteCode -OutputLocale $OutputLocale -OutputFormat 'pdf' -OutputFileName $outFileName -QmdFilePath $qmdFileName
+            $quartoArgs = @('render', $qmdFileName, '--profile', $language, '--to', 'pdf', '-P', "departmentFilter:$($siteCode)", '-o', $outFileName)
             if ($outputDirExplicit) { $quartoArgs += @('--output-dir', $outputDirPath) }
             if ($IncludeTestData) {
                 $quartoArgs += @('-P', 'includeTestData:true')
@@ -257,14 +257,14 @@ try {
             if ($Dhis2Path) { $quartoArgs += @('-P', "dhis2Path:$Dhis2Path") }
             $quartoArgs += $quartoVerbosityArgs
 
-            if ($PSCmdlet.ShouldProcess($outFile, "Render validation report for $siteCode")) {
+            if ($PSCmdlet.ShouldProcess($outFileName, "Render validation report for $siteCode")) {
                 Write-Host "Generating validation report for $siteCode..."
                 $result = Invoke-QuartoRender -Arguments $quartoArgs -Description "validation report for $siteCode"
                 $currentEntry = $currentEntry | Complete-NeoIPCBuildStep -Result $result
                 if ($result.Status -eq 'Error') {
                     $errors += "Quarto render failed for $siteCode."
                 } elseif ($result.Status -ne 'NoData') {
-                    $outputFiles += (Join-Path $outputDirPath $outFile)
+                    $outputFiles += (Join-Path $outputDirPath $outFileName)
                 }
             } else {
                 $currentEntry = $currentEntry | Complete-NeoIPCBuildStep -Messages @("WhatIf: would render validation report for $siteCode")

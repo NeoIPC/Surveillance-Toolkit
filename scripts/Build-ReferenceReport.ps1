@@ -140,8 +140,8 @@ if ($isDataFileMode -and ($OutputFormats -contains 'json')) {
 }
 
 $scriptTimestamp = (Get-Date -AsUTC).ToString("yyyy-MM-dd_HHmmss'Z'")
-$repoRoot = Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..')
-$reportDirPath = Resolve-Path -LiteralPath (Join-Path $repoRoot 'reports/Reference-Report')
+$repoRootDirPath = Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..')
+$reportDirPath = Resolve-Path -LiteralPath (Join-Path $repoRootDirPath 'reports/Reference-Report')
 
 # Resolve OutputDir relative to the caller's location ($PWD); fall back to the report's _output.
 if ($OutputDir) {
@@ -185,7 +185,7 @@ $OutputLocales = $OutputLocales | ForEach-Object { $_ -split ',' } |
 
 # Validate locale inputs and resolve QMD files
 foreach ($locale in $OutputLocales) {
-    $null = Resolve-NeoIPCLocaleQmd -ReportDir $reportDirPath -BaseName 'Reference-Report' -Locale $locale
+    $null = Resolve-NeoIPCLocaleQmd -ReportDirPath $reportDirPath -BaseName 'Reference-Report' -Locale $locale
 }
 
 $wantsJson = $OutputFormats -contains 'json'
@@ -194,21 +194,21 @@ $renderCount = $renderFormats.Count * $OutputLocales.Count
 
 if ($isDataFileMode) {
     # DataFile mode: data already exists, resolve its path
-    $resolvedDataFile = (Resolve-Path -LiteralPath $DataFile).Path
-    $jsonPath = $resolvedDataFile
+    $resolvedDataFilePath = (Resolve-Path -LiteralPath $DataFile).Path
+    $jsonFilePath = $resolvedDataFilePath
     $needsJson = $false
     $jsonIntermediate = $false
-    $backupPath = $null
-    Write-Verbose "DataFile mode: rendering from $resolvedDataFile"
+    $backupFilePath = $null
+    Write-Verbose "DataFile mode: rendering from $resolvedDataFilePath"
 } else {
     $needsJson = $false
     if ($wantsJson -or $renderCount -gt 1 -or $BackupDataset) {
         $needsJson = $true
     }
 
-    $jsonPath = Join-Path $outputDirPath "${scriptTimestamp}_NeoIPC-Surveillance-Reference-Report.json"
+    $jsonFilePath = Join-Path $outputDirPath "${scriptTimestamp}_NeoIPC-Surveillance-Reference-Report.json"
     $jsonIntermediate = $needsJson -and (-not $wantsJson)
-    $backupPath = Join-Path $outputDirPath "${scriptTimestamp}_NeoIPC-Surveillance-Reference-Report.dataset.json.7z"
+    $backupFilePath = Join-Path $outputDirPath "${scriptTimestamp}_NeoIPC-Surveillance-Reference-Report.dataset.json.7z"
 }
 
 # Snapshot the bound parameters in script scope — inside the Invoke-WithNeoIPCAuth
@@ -340,9 +340,9 @@ try {
         $completedSteps++
         $percentComplete = if ($totalSteps -gt 0) { [int](100 * $completedSteps / $totalSteps) } else { 0 }
         Write-Progress -Activity 'Reference Report Build' -Status 'Generating JSON' -PercentComplete $percentComplete
-        if ($PSCmdlet.ShouldProcess($jsonPath, 'Generate reference data JSON')) {
-            Write-Verbose "Generating reference data JSON: $jsonPath"
-            $rArgs = @('--vanilla', (Join-Path $reportDirPath 'Generate-ReferenceData.R'), '--file', $jsonPath)
+        if ($PSCmdlet.ShouldProcess($jsonFilePath, 'Generate reference data JSON')) {
+            Write-Verbose "Generating reference data JSON: $jsonFilePath"
+            $rArgs = @('--vanilla', (Join-Path $reportDirPath 'Generate-ReferenceData.R'), '--file', $jsonFilePath)
             $rArgs += $rscriptVerbosityArgs
             foreach ($kvp in $qmdParams.GetEnumerator()) {
                 if ($null -ne $kvp.Value -and '' -ne $kvp.Value) {
@@ -351,7 +351,7 @@ try {
             }
             if ($IncludeTestUnits) { $rArgs += '--includeTestUnits' }
             if ($IncludeNonCorePatients) { $rArgs += '--includeNonCorePatients' }
-            if ($BackupDataset) { $rArgs += @('--backup-dataset', $backupPath) }
+            if ($BackupDataset) { $rArgs += @('--backup-dataset', $backupFilePath) }
             if ($Dhis2Scheme) { $rArgs += @('--scheme', $Dhis2Scheme) }
             if ($Dhis2Hostname) { $rArgs += @('--host', $Dhis2Hostname) }
             if ($Dhis2Port) { $rArgs += @('--port', $Dhis2Port) }
@@ -361,12 +361,12 @@ try {
                 throw "Generate-ReferenceData.R failed (exit code $($rResult.ExitCode))."
             }
             if (-not $jsonIntermediate) {
-                $outputFiles += $jsonPath
+                $outputFiles += $jsonFilePath
             }
-            Write-Verbose "Generated output: $jsonPath"
+            Write-Verbose "Generated output: $jsonFilePath"
             if ($BackupDataset) {
-                $outputFiles += $backupPath
-                Write-Verbose "Generated output: $backupPath"
+                $outputFiles += $backupFilePath
+                Write-Verbose "Generated output: $backupFilePath"
             }
         }
     }
@@ -380,8 +380,8 @@ try {
     try {
         foreach ($locale in $OutputLocales) {
             $localeParts = Split-NeoIPCLocale -Locale $locale
-            $qmdPath = Resolve-NeoIPCLocaleQmd -ReportDir $reportDirPath -BaseName 'Reference-Report' -Locale $locale
-            $qmd = [System.IO.Path]::GetFileName($qmdPath)
+            $qmdFilePath = Resolve-NeoIPCLocaleQmd -ReportDirPath $reportDirPath -BaseName 'Reference-Report' -Locale $locale
+            $qmdFileName = [System.IO.Path]::GetFileName($qmdFilePath)
             $profileName = $localeParts.Language
 
             # Set LC_ALL so R picks up the full locale (territory-specific resources)
@@ -398,8 +398,8 @@ try {
                 Write-Progress -Activity 'Reference Report Build' `
                     -Status "Rendering $format for $locale" -PercentComplete $percentComplete
                 $outFileName = "${scriptTimestamp}_NeoIPC-Surveillance-Reference-Report.${locale}.${format}"
-                $outFile = Join-Path $outputDirPath $outFileName
-                $quartoArgs = @('render', $qmd, '--profile', $profileName, '--to', $format, '-o', $outFileName)
+                $outFilePath = Join-Path $outputDirPath $outFileName
+                $quartoArgs = @('render', $qmdFileName, '--profile', $profileName, '--to', $format, '-o', $outFileName)
                 # All parameters via -P (R reads params$, conditional
                 # blocks use cat() + when-meta="alwaysTrue" wrappers)
                 foreach ($kvp in $qmdParams.GetEnumerator()) {
@@ -408,7 +408,7 @@ try {
                     }
                 }
                 if ($needsJson -or $isDataFileMode) {
-                    $quartoArgs += @('-P', "referenceDataFile:$jsonPath")
+                    $quartoArgs += @('-P', "referenceDataFile:$jsonFilePath")
                 }
                 if (-not $isDataFileMode) {
                     if ($Dhis2Scheme) { $quartoArgs += @('-P', "dhis2Scheme:$Dhis2Scheme") }
@@ -417,15 +417,15 @@ try {
                     if ($Dhis2Path) { $quartoArgs += @('-P', "dhis2Path:$Dhis2Path") }
                 }
                 $quartoArgs += $quartoArgsCommon
-                if ($PSCmdlet.ShouldProcess($outFile, "Render $format for $locale")) {
+                if ($PSCmdlet.ShouldProcess($outFilePath, "Render $format for $locale")) {
                     Write-Verbose "Rendering $format for $locale"
                     $renderResult = Invoke-QuartoRender -Arguments $quartoArgs -Description "$format for $locale"
                     if ($renderResult.Status -eq 'Error') {
                         $errors += $renderResult.Messages
                         throw "Quarto render failed for $locale/$format."
                     }
-                    $outputFiles += $outFile
-                    Write-Verbose "Generated output: $outFile"
+                    $outputFiles += $outFilePath
+                    Write-Verbose "Generated output: $outFilePath"
                 }
             }
         }
@@ -440,22 +440,22 @@ catch {
     $errors += $_.Exception.Message
 }
 finally {
-    if ($jsonIntermediate -and $errors.Count -eq 0 -and (Test-Path -LiteralPath $jsonPath)) {
-        if ($PSCmdlet.ShouldProcess($jsonPath, 'Remove intermediate JSON')) {
-            Remove-Item -LiteralPath $jsonPath -Force
+    if ($jsonIntermediate -and $errors.Count -eq 0 -and (Test-Path -LiteralPath $jsonFilePath)) {
+        if ($PSCmdlet.ShouldProcess($jsonFilePath, 'Remove intermediate JSON')) {
+            Remove-Item -LiteralPath $jsonFilePath -Force
         }
     }
 
     Write-Progress -Activity 'Reference Report Build' -Completed
 
     $json = [ordered]@{
-        filePath = if ($needsJson) { $jsonPath } else { $null }
+        filePath = if ($needsJson) { $jsonFilePath } else { $null }
         requested = $wantsJson
         intermediate = $jsonIntermediate
     }
     $backup = [ordered]@{
         enabled = [bool]$BackupDataset
-        filePath = if ($BackupDataset) { $backupPath } else { $null }
+        filePath = if ($BackupDataset) { $backupFilePath } else { $null }
     }
     $reportFilePath = if ($JsonReport) { $buildReportFilePath } else { $null }
     $status = Write-NeoIPCBuildReport -Name 'Reference Report Build' -StartedAt $startedAt `
