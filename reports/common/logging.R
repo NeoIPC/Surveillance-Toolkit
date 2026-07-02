@@ -81,8 +81,18 @@ configure_logging <- function(report = NULL, verbosity = NULL) {
   # (logged AND still reachable by a surrounding handler), independent of the
   # global logger_muffle_warnings option. log_messages() takes no muffle
   # argument and never muffles.
-  logger::log_warnings(muffle = FALSE)
-  logger::log_messages()
+  #
+  # These install *global* calling handlers, which R permits only at top level
+  # (no handlers already on the stack). Under knitr/Quarto every chunk runs
+  # inside knitr's own calling handlers, so installing them there errors
+  # ("should not be called with handlers on the stack") and aborts the render —
+  # and knitr already surfaces warnings/messages into the rendered output. So
+  # install the global capture only outside knitr: the standalone Generate-*.R
+  # entry points run via Rscript at top level, where it works and is wanted.
+  if (!isTRUE(getOption("knitr.in.progress"))) {
+    logger::log_warnings(muffle = FALSE)
+    logger::log_messages()
+  }
 
   invisible(threshold)
 }
