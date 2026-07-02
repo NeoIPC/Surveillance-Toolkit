@@ -15,13 +15,13 @@ library(gt, warn.conflicts = FALSE, quietly = TRUE)
 ```{r Set up functions}
 #| include: false
 
-# R warnings are captured into the unified log channel by configure_logging()'s
-# warning hook; keep them out of the rendered report body.
-knitr::opts_chunk$set(warning = FALSE)
-
 source("../common/helpers.R")
 source("../common/logging.R")
 configure_logging(report = "partner-report")
+# Under Quarto/knitr, configure_logging() installs an output hook that routes R
+# warnings and messages into the unified log channel and keeps them out of the
+# rendered report body; report chunks therefore need no `warning: false` of
+# their own (adding it back would drop the condition before the hook can log it).
 
 # Cross-reference table IDs for metric pairings. These are Quarto
 # cross-references (invariant across languages), not translatable strings,
@@ -1576,8 +1576,6 @@ compute_col_widths <- function(tbl_data, stub_min, has_reference = TRUE,
 ```
 
 ```{r General setup and parameter preparation}
-#| message: false
-#| warning: false
 #| include: false
 
 if(!exists("params")) params <- list()

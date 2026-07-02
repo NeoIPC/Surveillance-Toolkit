@@ -7,11 +7,11 @@ source("../common/logging.R")
 suppressMessages(library(tidyverse, warn.conflicts = FALSE, quietly = TRUE))
 configure_logging(report = "patient-data-report")
 
-# R warnings (e.g. from import_dhis2) are captured into the unified log channel
-# by configure_logging()'s warning hook; keep them out of the rendered report
-# body. Set here in the setup chunk so it applies to the later import/filter
-# chunks (mirrors Partner-Report).
-knitr::opts_chunk$set(warning = FALSE)
+# Under Quarto/knitr, configure_logging() (above) installs an output hook that
+# routes R warnings and messages — e.g. from the import_dhis2 fallback in the
+# later import/filter chunks — into the unified log channel and keeps them out
+# of the rendered report body; those chunks therefore need no `warning: false`
+# of their own (adding it back would drop the condition before the hook logs it).
 
 locale <- Sys.getenv("LC_ALL")
 invisible(Sys.setlocale(category = "LC_ALL", locale = locale))

@@ -24,7 +24,11 @@ NeoIPC_ProgramId <- "D8mSSpOpsKj"
 support_email_address <- "NeoIPC-Support@charite.de"
 ```
 
-```{r Data Import, message=FALSE, warning=FALSE}
+```{r Data Import}
+# No warning/message suppression here: configure_logging() (in the first chunk)
+# installs a knitr output hook that routes import_dhis2()'s warnings and messages
+# into the unified log channel and keeps them out of the rendered body; a
+# `warning=FALSE` here would drop them before the hook can log them.
 connection_options <- get_connection_options(
   scheme = params$dhis2Scheme,
   hostname = params$dhis2Hostname,
