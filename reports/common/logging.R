@@ -32,6 +32,27 @@
     logger::INFO)
 }
 
+# Strip knitr's per-line comment marker (the chunk `comment` option, default
+# "##") from the text a knitr warning/message output hook receives, so the log
+# carries the condition text without the rendered comment decoration. `options`
+# is the merged chunk option list knitr passes to the hook (`options$comment` is
+# the active marker). knitr's own "Warning[ in <call>]:" label on warnings is
+# left in place — the call context it carries is useful in the log.
+.knit_condition_text <- function(x, options) {
+  comment <- options$comment
+  # knitr passes a length-1 string today (one hook call per condition), but
+  # flatten defensively so a multi-element character vector, if one is ever
+  # handed over, has all its lines processed rather than only the first.
+  lines <- unlist(strsplit(x, "\n", fixed = TRUE))
+  if (!is.null(comment) && !is.na(comment) && nzchar(comment)) {
+    lines <- vapply(lines, function(line) {
+      if (startsWith(line, comment)) line <- substring(line, nchar(comment) + 1L)
+      sub("^ ", "", line)
+    }, character(1), USE.NAMES = FALSE)
+  }
+  trimws(paste(lines, collapse = "\n"))
+}
+
 # Configure logging for a report run.
 #
 # `report` is the report slug used as this report's logger namespace (e.g.
@@ -76,13 +97,39 @@ configure_logging <- function(report = NULL, verbosity = NULL) {
     logger::log_layout(layout, namespace = ns)
   }
 
-  # Capture stray base-R conditions (warnings, messages) into the unified log
-  # while leaving them catchable. muffle = FALSE keeps each warning propagating
-  # (logged AND still reachable by a surrounding handler), independent of the
-  # global logger_muffle_warnings option. log_messages() takes no muffle
-  # argument and never muffles.
-  logger::log_warnings(muffle = FALSE)
-  logger::log_messages()
+  # Capture stray base-R conditions (warnings, messages) into the unified log.
+  #
+  # Outside knitr — the standalone Generate-*.R entry points run via Rscript at
+  # top level — install *global* calling handlers. muffle = FALSE keeps each
+  # warning propagating (logged AND still reachable by a surrounding handler),
+  # independent of the global logger_muffle_warnings option; log_messages()
+  # takes no muffle argument and never muffles. R permits global handlers only
+  # at top level (no handlers already on the stack).
+  #
+  # Under knitr/Quarto that path is unavailable: every chunk runs inside knitr's
+  # own calling handlers, so log_warnings()/log_messages() would error ("should
+  # not be called with handlers on the stack") and abort the render. Register
+  # knitr output hooks instead: each captured warning/message is routed into the
+  # log channel and the hook returns "" so the condition stays out of the
+  # rendered report body. This only fires for conditions knitr actually surfaces
+  # to a hook — a chunk that sets warning=FALSE / message=FALSE drops the
+  # condition first, so the report _setup.qmd chunks leave those unset where the
+  # log capture is wanted. skip_formatter keeps logger's glue formatter from
+  # trying to interpolate braces in arbitrary condition text.
+  if (!isTRUE(getOption("knitr.in.progress"))) {
+    logger::log_warnings(muffle = FALSE)
+    logger::log_messages()
+  } else if (requireNamespace("knitr", quietly = TRUE)) {
+    knitr::knit_hooks$set(
+      warning = function(x, options) {
+        logWarn(logger::skip_formatter(.knit_condition_text(x, options)))
+        ""
+      },
+      message = function(x, options) {
+        logInfo(logger::skip_formatter(.knit_condition_text(x, options)))
+        ""
+      })
+  }
 
   invisible(threshold)
 }
