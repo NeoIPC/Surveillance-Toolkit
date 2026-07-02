@@ -40,7 +40,10 @@
 # left in place — the call context it carries is useful in the log.
 .knit_condition_text <- function(x, options) {
   comment <- options$comment
-  lines <- strsplit(x, "\n", fixed = TRUE)[[1]]
+  # knitr passes a length-1 string today (one hook call per condition), but
+  # flatten defensively so a multi-element character vector, if one is ever
+  # handed over, has all its lines processed rather than only the first.
+  lines <- unlist(strsplit(x, "\n", fixed = TRUE))
   if (!is.null(comment) && !is.na(comment) && nzchar(comment)) {
     lines <- vapply(lines, function(line) {
       if (startsWith(line, comment)) line <- substring(line, nchar(comment) + 1L)

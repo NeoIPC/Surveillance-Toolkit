@@ -280,6 +280,8 @@ first, falls back to `NEOIPC_LOG_LEVEL` (so the .NET service can drive it enviro
 resolved level for neoipcr and any child processes. When `NEOIPC_LOG_FILE` is set (by the NeoIPC-Reporting .NET
 service), the R side writes structured JSON to that file instead of the console.
 
+Under Quarto/knitr, `configure_logging()` cannot install `logger`'s global warning/message handlers (knitr's own are already on the stack), so it registers knitr output hooks that route each render-time `warning()`/`message()` into the log channel and return `""` to keep it out of the report body. Two invariants follow. **(1)** That hook is the *only* thing keeping raw conditions out of the rendered PDF/HTML — a chunk-level `warning=FALSE`/`message=FALSE` drops the condition before the hook can log it — so `configure_logging()` must run before any condition-raising code (every report `_setup.qmd` installs it before, or at the top of, its first import chunk). **(2)** Render-time condition text is a **logged surface**: keep `warning()`/`message()` messages to aggregates and structural text, never record-level identifiers. The DHIS2 query-trace boundary in `log_dhis2_request` (URL + status + row count, never bodies) is separate and unaffected.
+
 ### Argument Handling
 
 - PS passes parameters to Quarto via `-P key:value` flags
