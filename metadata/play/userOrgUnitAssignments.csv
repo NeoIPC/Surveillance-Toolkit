@@ -1,9 +1,14 @@
 username,organisationUnit
 play.admin,NEOIPC
 play.at.data1,AT_TEST_TEST
+play.at.data1,AT_TEST_TEST2
 play.at.data2,AT_TEST_TEST
 play.at.data3,AT_TEST_TEST
 play.ch.data1,CH_TEST_TEST
 play.ch.data2,CH_TEST_TEST
 play.at.report1,AT_TEST_TEST
 play.ch.report1,CH_TEST_TEST
+play.at.admin1,AT_TEST_TEST
+play.at.admin1,AT_TEST_TEST2
+play.at.adminonly1,AT_TEST_TEST
+play.at.adminonly1,AT_TEST_TEST2

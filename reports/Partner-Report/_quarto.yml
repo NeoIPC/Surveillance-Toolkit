@@ -13,7 +13,6 @@ execute:
   error: true
 filters:
   - "../filters/pandoc-quotes.lua"
-  - "../filters/remove-empty-sections.lua"
 format:
   html:
     link-external-icon: true

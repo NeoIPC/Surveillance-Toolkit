@@ -70,11 +70,11 @@ Reports live under `reports/`:
 
 - **Shared R code**: `reports/common/` — `helpers.R` (locale parsing, string resource loading, DHIS2 connection helpers), `load-neoipcr.R`, `parse-args.R` (CLI arg parsing), `getDataset.R` (dataset export), `logging.R` (unified `logger`-based logging: `configure_logging()` + `logInfo`/`logVerbose`/`logDebug`/`logWarn`/`logError`), `reference.docx` (Word template)
 - **Base string resources**: `reports/common.yaml` (English domain terms, table headers, footnotes)
-- **Pandoc filters**: `reports/filters/pandoc-quotes.lua` (language-aware typographic quotes), `remove-empty-sections.lua`
+- **Pandoc filters**: `reports/filters/pandoc-quotes.lua` (language-aware typographic quotes)
 
 ### Lua Filters
 
-`pandoc-quotes.lua` on all four reports. `remove-empty-sections.lua` only on Partner-Report and Reference-Report.
+`pandoc-quotes.lua` on all four reports. Empty section headers are suppressed in R (conditional cat-emit gated on the section's `show_section_*` flag), not by a Lua filter.
 
 ### R Data Scripts & Docker Deployment
 
