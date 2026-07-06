@@ -12,5 +12,5 @@
 # not part of this check — see RELEASING.md.)
 
 incorporates:
-  infectious-agents: 0.1.0-alpha
-  antibiotics: 0.1.0-alpha
+  infectious-agents: 0.0.1-alpha
+  antibiotics: 0.0.1-alpha

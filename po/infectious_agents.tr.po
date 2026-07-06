@@ -1,6 +1,6 @@
-# Turkish translations for NeoIPC Surveillance Infectious Agent List package
-# Copyright (C) 2026 CharitÃ© â UniversitÃ¤tsmedizin Berlin
-# This file is distributed under the same license as the NeoIPC Surveillance Infectious Agent List package.
+# Turkish translations for the NeoIPC Surveillance Infectious Agent List
+# Copyright (C) Charité – Universitätsmedizin Berlin
+# This file is distributed under the Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International license
 # Automatically generated, 2026.
 #
 msgid ""

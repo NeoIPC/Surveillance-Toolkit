@@ -7,8 +7,6 @@ param(
     })]
     [CultureInfo[]]$TargetCultures,
     [Parameter(ParameterSetName = 'Build')]
-    [switch]$Release,
-    [Parameter(ParameterSetName = 'Build')]
     [switch]$Html,
     [Parameter(ParameterSetName = 'Build')]
     [switch]$Pdf,
@@ -75,8 +73,19 @@ if (-not $artifactsImgFolder) {
     $artifactsImgFolder = (New-Item -Path $artifactsFolder -Name 'img' -ItemType Directory).FullName
 }
 
-if ($Release) { $revRemark = 'revremark!' }
-else { $revRemark = 'revremark=Preview' }
+# Document version metadata, derived from doc/protocol/VERSION (the release source of truth) so it stays in
+# sync with the released version instead of being hardcoded. revnumber is the protocol's MAJOR.MINOR
+# document revision — its human-facing revision line (e.g. 1.3, continuing the historical 1.2 -> 1.3
+# progression), deliberately two-component, not the full semver. A semver pre-release suffix (e.g.
+# 1.3.0-preview1) marks a PREVIEW build: revremark carries the identifier and the preview watermark is
+# applied; a plain X.Y.Z is a final release (no remark, no watermark). $revNumber and $preRelease hold the
+# BARE values (what Export-AsciiDocReferences substitutes into {revnumber}/{revremark} include/image paths);
+# the key=value forms are assembled only for asciidoctor's -a CLI flags.
+$version = (Get-Content -LiteralPath (Join-Path $protocolDir 'VERSION') -Raw).Trim()
+$preRelease = if ($version -match '-(.+)$') { $Matches[1] } else { $null }
+$revNumber = ((($version -split '-', 2)[0] -split '\.')[0..1] -join '.')
+$revNumberArg = "revnumber=$revNumber"
+if ($preRelease) { $revRemark = "revremark=$preRelease" } else { $revRemark = 'revremark!' }
 
 [AppContext]::SetSwitch("Switch.System.Xml.AllowDefaultResolver", $true);
 $resolver = New-Object System.Xml.XmlUrlResolver
@@ -113,7 +122,8 @@ Build-Target $AWaReRDest $AWaReRSrc {
 }
 
 $attributes = @{}
-if (-not $Release) { $attributes.revremark = $revRemark }
+$attributes.revnumber = $revNumber
+if ($preRelease) { $attributes.revremark = $preRelease }
 foreach ($targetCulture in $targetCultures)
 {
     if ($targetCulture.Name) { $attributes.lang = $targetCulture.TwoLetterISOLanguageName } else { $attributes.Remove('lang') }
@@ -152,7 +162,7 @@ foreach ($targetCulture in $targetCultures)
         Write-Verbose "Generating title page background SVG"
         $titlePage.Transform("$resDir/NeoIPC-Core-Title-Page$localeSuffix.resx", "$imgDir/NeoIPC-Core-Title-Page$localeSuffix.svg")
     }
-    if (-not $Release) {
+    if ($preRelease) {
         Build-Target (Get-LocalisedPath $imgDir 'Preview-Watermark.svg' $targetCulture) (Get-LocalisedPath $resDir 'Preview-Watermark.resx' $targetCulture -All -Existing),(Join-Path $transDir 'Preview-Watermark.xslt') {
             Write-Verbose "Generating preview watermark SVG"
             $previewWatermark.Transform("$resDir/Preview-Watermark$localeSuffix.resx", "$imgDir/Preview-Watermark$localeSuffix.svg")
@@ -177,7 +187,7 @@ foreach ($targetCulture in $targetCultures)
         $outputFile = Get-LocalisedPath $artifactsFolder 'index.html' $targetCulture
         Build-Target $outputFile (@($protocolFile)+@(Export-AsciiDocReferences $protocolFile $att)) {
             Write-Information "Generating HTML"
-            asciidoctor -a $revRemark -a $revDate -b html5 -w --failure-level=WARN -D $(Resolve-Path $artifactsFolder -Relative) -o $([System.IO.Path]::GetFileName($outputFile)) $(Resolve-Path $protocolFile -Relative)
+            asciidoctor -a $revNumberArg -a $revRemark -a $revDate -b html5 -w --failure-level=WARN -D $(Resolve-Path $artifactsFolder -Relative) -o $([System.IO.Path]::GetFileName($outputFile)) $(Resolve-Path $protocolFile -Relative)
             if (-not $?) { exit 1 }
             Write-Verbose "Linting HTML"
 
@@ -217,7 +227,7 @@ foreach ($targetCulture in $targetCultures)
         $docbookFile = Get-LocalisedPath $protocolDir $docBookFileName $targetCulture
         Build-Target $docbookFile (@($protocolFile)+@(Export-AsciiDocReferences $protocolFile $att)) {
             Write-Verbose "Generating DocBook xml"
-            asciidoctor -a $revRemark -a $revDate -b docbook -w --failure-level=WARN -D $(Resolve-Path $protocolDir -Relative) -o $([System.IO.Path]::GetFileName($docbookFile)) $(Resolve-Path $protocolFile -Relative)
+            asciidoctor -a $revNumberArg -a $revRemark -a $revDate -b docbook -w --failure-level=WARN -D $(Resolve-Path $protocolDir -Relative) -o $([System.IO.Path]::GetFileName($docbookFile)) $(Resolve-Path $protocolFile -Relative)
             if (-not $?) { exit 1 }
         }
     }
@@ -232,9 +242,9 @@ foreach ($targetCulture in $targetCultures)
                 Write-Information "Generating PDF"
                 if ($IsWindows) {
                     Write-Warning "Asciidoctor Mathematical is not supported on Windows. The STEM expressions will not be converted in your pdf output."
-                    asciidoctor-pdf -a compress -a $revRemark -a $revDate -w --failure-level=WARN -D $(Resolve-Path $artifactsFolder -Relative) -o $([System.IO.Path]::GetFileName($outputFile)) $(Resolve-Path $protocolFile -Relative)
+                    asciidoctor-pdf -a compress -a $revNumberArg -a $revRemark -a $revDate -w --failure-level=WARN -D $(Resolve-Path $artifactsFolder -Relative) -o $([System.IO.Path]::GetFileName($outputFile)) $(Resolve-Path $protocolFile -Relative)
                 } else {
-                    asciidoctor-pdf -a compress -a $revRemark -a $revDate -a mathematical-format=svg -r asciidoctor-mathematical -w --failure-level=WARN -D $(Resolve-Path $artifactsFolder -Relative) -o $([System.IO.Path]::GetFileName($outputFile)) $(Resolve-Path $protocolFile -Relative)
+                    asciidoctor-pdf -a compress -a $revNumberArg -a $revRemark -a $revDate -a mathematical-format=svg -r asciidoctor-mathematical -w --failure-level=WARN -D $(Resolve-Path $artifactsFolder -Relative) -o $([System.IO.Path]::GetFileName($outputFile)) $(Resolve-Path $protocolFile -Relative)
                 }
                 if (-not $?) { exit 1 }
             }

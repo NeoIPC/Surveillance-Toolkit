@@ -11,7 +11,8 @@ has its own version file, its own tag stream, and its own GitHub Release stream:
 | NeoIPC Infectious Agent List | `infectious-agents-v*` | `metadata/common/infectious-agents/VERSION` | `NeoIPC-Infectious-Agents-<ver>.tar.gz` (canonical YAML + po4a-localized YAMLs + UID map) |
 | NeoIPC Antibiotics List | `antibiotics-v*` | `metadata/common/antibiotics/VERSION` | `NeoIPC-Antibiotics-<ver>.tar.gz` (substance/group/AWaRe/list-element CSVs + gettext translation catalogue) |
 
-A release tag is `<product>-vMAJOR.MINOR.PATCH[-(alpha|beta|rc)[.N]]`, e.g. `reports-v0.1.0-alpha`,
+A release tag is `<product>-vMAJOR.MINOR.PATCH[-prerelease]`, where `-prerelease` is a standard semver
+pre-release identifier (dot-separated alphanumerics), e.g. `reports-v0.0.1-alpha`, `protocol-v1.3.0-preview1`,
 `metadata-v1.2.0`, `infectious-agents-v1.0.0-rc.1`. Because the products are independent you can cut a
 release for any one without touching the others — subject to the incorporation rule below.
 
@@ -41,7 +42,7 @@ Weblate, and requiring a list re-release for every translation update before any
 release would be too strict.
 
 **Consequence — release order.** The very first protocol/metadata release requires the two lists to be
-released first (there is no `<list>-v0.1.0-alpha` tag until you cut it). Order: **release the lists →
+released first (there is no `<list>-v0.0.1-alpha` tag until you cut it). Order: **release the lists →
 then protocol/metadata**.
 
 ## Reports compatibility (neoipcr / neoipc-app)
@@ -52,7 +53,7 @@ forms, so a reports release records the neoipcr + neoipc-app versions it was val
 diff (unlike the lists above) — instead, at every `reports-v*` release CI verifies that each
 `tested` version resolves to a **real tag** on its repo (`git ls-remote` against
 `github.com/NeoIPC/neoipcr`, `github.com/NeoIPC/neoipc-app`): a published GitHub Release **or** an
-immutable dev-snapshot tag (e.g. neoipcr's `v0.1.0.9000`, which is a pushed tag, not a formal Release).
+immutable dev-snapshot tag (e.g. neoipcr's `v0.0.0.9000`, which is a pushed tag, not a formal Release).
 The check is tag-existence. So a reports release can never claim compatibility with an unreleased
 neoipcr/neoipc-app. Order: **release neoipcr + neoipc-app → then the reports** (and update
 `reports/compatibility.yml` to the versions you validated against).
@@ -63,28 +64,29 @@ neoipcr/neoipc-app. Order: **release neoipcr + neoipc-app → then the reports**
    version you intend to release. For a reports release, also update `reports/compatibility.yml` (the
    neoipcr / neoipc-app versions the reports were validated against). For a protocol/metadata release,
    make sure `compatibility.yml`'s incorporated list versions point at current list releases.
-2. **Publish a GitHub Release** whose tag is `<product>-v<that-version>`. Mark it **pre-release** while
-   the products are alpha. Creating the Release is a deliberate human step — CI never creates one.
-3. CI (`.github/workflows/build.yml`) then, on the published Release:
+2. **Push the release tag** `<product>-v<that-version>`. That single push triggers the release — there
+   is no separate "publish a Release" step; CI creates the GitHub Release itself.
+3. CI (`.github/workflows/build.yml`) then, on the `<product>-v*` tag push:
    - validates the tag shape and that its version equals the released product's `VERSION` file;
+   - rejects a moved / retagged tag and enforces the monotonic-version guard;
    - for a protocol/metadata release, runs the incorporation check above;
-   - builds **only** that product and attaches its assets to the Release;
-   - advances that product's `VERSION` file to the next patch on `main` (the *probable* next version —
-     edit it by hand before the next release to take a minor/major instead).
+   - builds **only** that product;
+   - creates the GitHub Release (generated notes; flagged **pre-release** automatically when the version
+     carries a semver pre-release suffix) and attaches that product's assets.
 
-Continuous CI (push / PR / manual dispatch) builds the protocol and metadata products for validation
-but publishes nothing.
+The next version is **not** bumped automatically — bump the product's `VERSION` deliberately in the PR
+that prepares the next release (step 1). Continuous CI (push / PR / manual dispatch) builds the protocol
+and metadata products for validation but publishes nothing.
 
 ## Notes
 
 - The **"Latest release"** badge on the repository tracks whichever tag is newest by date across all
   streams; the tag prefix identifies the product. Pass `--latest=false` when publishing an off-stream
   release if you do not want it to claim the badge.
-- Each product's version is independent; they do **not** have to move together. The three
-  `po/*.po4a.cfg` `--package-version` values track their product's version (documentation → protocol,
-  reports → reports, infectious_agents → infectious-agents) and are refreshed into the `.pot`/`.po`
-  headers on the next localization run. They are **hardcoded** and **not** advanced by the
-  `bump-version` job — update them by hand when a product's version changes (they will otherwise drift).
+- Each product's version is independent; they do **not** have to move together. The `--package-version`
+  stamped into each localized `.pot`/`.po` header is derived from that product's `VERSION` file at
+  localization time (documentation → protocol, reports → reports, infectious_agents → infectious-agents),
+  so it tracks the version automatically and cannot drift — there is nothing to hand-edit.
 - The **metadata** packages are **generated build artifacts**, never committed (see
   `metadata/dist/README.md`); they exist only as Release assets and CI build artifacts. The **reports**
   product has **no** generated package: its render-ready sources ship in the tag's auto source archive

@@ -57,3 +57,7 @@ sidecars and the standalone `WHO-AWaRe-Classification-2021.csv` are **retired** 
   Organization; 2021 (WHO/MHP/HPS/EML/2021.04).
   <https://www.who.int/publications/i/item/2021-aware-classification>. Licence:
   [CC BY-NC-SA 3.0 IGO](https://creativecommons.org/licenses/by-nc-sa/3.0/igo/).
+
+## Licensing
+
+The repository as a whole is MIT-licensed, but the WHO upstream terms above impose stricter conditions on this directory's contents. The effective license is **CC BY-NC-ND 4.0** — the ATC/DDD no-derivatives terms dominate the more permissive AWaRe share-alike license, so the strictest upstream term governs. See [`LICENSE.md`](LICENSE.md) for the full reasoning.

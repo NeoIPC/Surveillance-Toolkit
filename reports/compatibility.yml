@@ -14,8 +14,8 @@
 #             actually established by testing.
 
 neoipcr:
-  tested: v0.1.0.9000
-  minimum: v0.1.0.9000
+  tested: v0.0.0.9000
+  minimum: v0.0.0.9000
 
 neoipc-app:
   tested: v0.0.1-alpha

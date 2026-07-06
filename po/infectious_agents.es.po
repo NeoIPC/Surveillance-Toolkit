@@ -1,6 +1,6 @@
-# Spanish translations for the NeoIPC Surveillance Infectious Agents List
-# Copyright (C) 2025 Charité – Universitätsmedizin Berlin
-# This file is distributed under the Creative Commons Attribution 4.0 International license
+# Spanish translations for the NeoIPC Surveillance Infectious Agent List
+# Copyright (C) Charité – Universitätsmedizin Berlin
+# This file is distributed under the Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International license
 # Brar Piening <brar.piening@charite.de>, 2025.
 # Prefill add-on <noreply-addon-prefill@weblate.org>, 2025.
 msgid ""

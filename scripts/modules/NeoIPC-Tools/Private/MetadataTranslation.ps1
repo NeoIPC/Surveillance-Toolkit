@@ -391,7 +391,7 @@ function Write-NeoIPCMetadataPoText {
     # Render PO entries to PO text. -Locale '' (default) writes a .pot header (Language: en, blank msgstr expected);
     # a non-empty -Locale writes that language's header. Each entry's Weblate flags line carries fuzzy + priority:NNN
     # (priority 100 = default, no flag). The header is the standard empty-msgid entry; metadata mirrors the reports'
-    # glossary PO (Charite copyright, CC-BY-4.0). Output is LF-terminated (StringBuilder.AppendLine would emit the
+    # glossary PO (NeoIPC copyright, CC BY 4.0). Output is LF-terminated (StringBuilder.AppendLine would emit the
     # platform newline) to match every other catalogue under po/.
     [CmdletBinding()]
     [OutputType([string])]
@@ -402,7 +402,7 @@ function Write-NeoIPCMetadataPoText {
     $lang = if ($Locale) { $Locale } else { 'en' }
     $sb = [System.Text.StringBuilder]::new()
     [void]$sb.AppendLine('# Translations for the NeoIPC DHIS2 metadata.')
-    [void]$sb.AppendLine('# Copyright (C) Charite - Universitaetsmedizin Berlin')
+    [void]$sb.AppendLine('# Copyright (C) Charité – Universitätsmedizin Berlin')
     [void]$sb.AppendLine('# This file is distributed under the Creative Commons Attribution 4.0 International license')
     [void]$sb.AppendLine('# Automatically generated')
     [void]$sb.AppendLine('#')
