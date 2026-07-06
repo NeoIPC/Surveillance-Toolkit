@@ -1,7 +1,6 @@
 = Infection Surveillance for Neonatology: Core Module for Very Low Birth Weight (VLBW) and Very Preterm (VPT) Infants
 //:lang: en
 include::NeoIPC-Core-Protocol-Header.adoc[]
-:revnumber: 2.0
 
 [#introduction]
 == Introduction

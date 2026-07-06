@@ -1,6 +1,6 @@
-# Nepali translations for NeoIPC Surveillance Reports package
-# Copyright (C) 2026 CharitÃ© â UniversitÃ¤tsmedizin Berlin
-# This file is distributed under the same license as the NeoIPC Surveillance Reports package.
+# Nepali translations for the NeoIPC Surveillance Reports
+# Copyright (C) Charité – Universitätsmedizin Berlin
+# This file is distributed under the MIT license
 # Automatically generated, 2026.
 #
 msgid ""

@@ -1,5 +1,5 @@
 # Translations for the NeoIPC DHIS2 metadata.
-# Copyright (C) Charite - Universitaetsmedizin Berlin
+# Copyright (C) Charité – Universitätsmedizin Berlin
 # This file is distributed under the Creative Commons Attribution 4.0 International license
 # Automatically generated
 #

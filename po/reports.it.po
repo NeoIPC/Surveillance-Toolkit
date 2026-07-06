@@ -1,6 +1,6 @@
 # Italian translations for the NeoIPC Surveillance Reports
-# Copyright (C) 2025 Charité - Universitätsmedizin Berlin
-# This file is distributed under the Creative Commons Attribution 4.0 International license
+# Copyright (C) Charité – Universitätsmedizin Berlin
+# This file is distributed under the MIT license
 # Brar Piening <brar.piening@charite.de>, 2025.
 # Prefill add-on <noreply-addon-prefill@weblate.org>, 2025.
 #

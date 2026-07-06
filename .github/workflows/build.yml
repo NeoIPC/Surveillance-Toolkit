@@ -4,15 +4,15 @@ on:
   push:
     branches:
       - main
+    # Release path: a `<product>-v*` tag push (parsed + validated in the build-docs job). Continuous CI runs
+    # on branch pushes + PRs; only product-tag pushes take the release path.
     tags:
-      - '*'
+      - '*-v*'
   pull_request:
   workflow_dispatch:
-  release:
-    types: [published]
 
 # Least-privilege default: every job is read-only unless it explicitly opts into more. Only the release-gated
-# jobs that write to the repo (the VERSION bump, the Release-asset upload) request contents: write.
+# job that creates + populates the GitHub Release requests contents: write.
 permissions:
   contents: read
 
@@ -34,13 +34,15 @@ jobs:
               # a malformed tag before the heavy build. The parsed product gates which product is built + attached
               # below; its version is matched against the product's VERSION file after checkout.
               id: rel
-              if: github.event_name == 'release'
+              if: github.ref_type == 'tag'
               shell: bash
               run: |
-                tag="${{ github.event.release.tag_name }}"
-                pattern='^(protocol|metadata|reports|infectious-agents|antibiotics)-v([0-9]+\.[0-9]+\.[0-9]+(-(alpha|beta|rc)(\.[0-9]+)?)?)$'
+                tag="$GITHUB_REF_NAME"
+                # <product>-vMAJOR.MINOR.PATCH with an optional standard semver pre-release suffix
+                # (dot-separated alphanumeric identifiers), e.g. -alpha, -rc.1, -preview1.
+                pattern='^(protocol|metadata|reports|infectious-agents|antibiotics)-v([0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?)$'
                 if [[ ! "$tag" =~ $pattern ]]; then
-                  echo "::error::Release tag '$tag' must be <product>-vX.Y.Z[-(alpha|beta|rc)[.N]] with product one of protocol|metadata|reports|infectious-agents|antibiotics (e.g. reports-v0.1.0-alpha, infectious-agents-v1.2.0)."
+                  echo "::error::Release tag '$tag' must be <product>-vMAJOR.MINOR.PATCH[-prerelease] (product one of protocol|metadata|reports|infectious-agents|antibiotics; e.g. reports-v0.0.1-alpha, protocol-v1.3.0-preview1, infectious-agents-v1.2.0)."
                   exit 1
                 fi
                 product="${BASH_REMATCH[1]}"
@@ -69,7 +71,7 @@ jobs:
               # On a published Release the parsed version must equal the released product's committed VERSION, so a
               # release is always cut from a commit whose per-product VERSION declares exactly that version — no
               # tag/file drift.
-              if: github.event_name == 'release'
+              if: github.ref_type == 'tag'
               shell: bash
               run: |
                 vfile="${{ steps.rel.outputs.vfile }}"
@@ -81,6 +83,40 @@ jobs:
                 fi
                 echo "Release version matches $vfile ($file)."
 
+            - name: Reject a moved / retagged release tag
+              # A tag push with created=false means an existing tag was force-moved. Releases are immutable --
+              # cut a new version rather than re-pointing a tag.
+              if: github.ref_type == 'tag' && github.event.created != true
+              shell: bash
+              run: |
+                echo "::error::Tag '$GITHUB_REF_NAME' already existed and was moved; releases are immutable. Cut a new version instead."
+                exit 1
+
+            - name: Enforce monotonic version (per-line, semver-correct)
+              # The tag must be strictly greater than the highest already-released version of THIS product on
+              # its major.minor line; a new line (and backports on older lines) are allowed. The triggering tag
+              # is excluded from the history (checkout fetch-depth: 0 includes it). Map a pre-release '-' -> '~'
+              # before `sort -V` so its tilde rule orders e.g. 1.3.0-preview1 before 1.3.0 (correct precedence).
+              if: github.ref_type == 'tag'
+              shell: bash
+              run: |
+                product="${{ steps.rel.outputs.product }}"
+                ver="${{ steps.rel.outputs.version }}"
+                pfx="${product}-v"
+                line="$(cut -d. -f1-2 <<<"$ver")."
+                mapfile -t vers < <(git tag -l "${pfx}*" | sed "s/^${pfx}//" | grep -vxF "$ver" || true)
+                same="$(printf '%s\n' "${vers[@]}" | grep -E "^${line//./\\.}" | sed 's/-/~/' | sort -V | sed 's/~/-/' | tail -1 || true)"
+                if [ -n "$same" ]; then
+                  hi="$(printf '%s\n%s\n' "$same" "$ver" | sed 's/-/~/' | sort -V | sed 's/~/-/' | tail -1)"
+                  if [ "$hi" != "$ver" ]; then
+                    echo "::error::Release '$product $ver' is not greater than the last released '$same' on the ${line%.} line."
+                    exit 1
+                  fi
+                  echo "Monotonic OK: $product $ver > $same (line ${line%.})."
+                else
+                  echo "Monotonic OK: new $product ${line%.} line."
+                fi
+
             - name: Enforce incorporated shared-list versions
               # The protocol and metadata products COMPILE the infectious agent list and the antibiotics list into
               # their artifacts, but those lists are their own products. Each product declares in its
@@ -89,7 +125,7 @@ jobs:
               #   (2) the list's committed source at this commit is byte-identical to what that release shipped.
               # So a protocol/metadata release can never incorporate list content that was not itself released.
               # Translations are intentionally out of scope for the content check (see RELEASING.md).
-              if: github.event_name == 'release' && (steps.rel.outputs.product == 'protocol' || steps.rel.outputs.product == 'metadata')
+              if: github.ref_type == 'tag' && (steps.rel.outputs.product == 'protocol' || steps.rel.outputs.product == 'metadata')
               shell: bash
               run: |
                 case "${{ steps.rel.outputs.product }}" in
@@ -138,7 +174,7 @@ jobs:
               # tree to diff — instead require each referenced version to be a real published release on its repo, so
               # a reports release can never claim compatibility with an unreleased neoipcr/neoipc-app. Public repos,
               # no auth (git ls-remote — not the DHIS2 API).
-              if: github.event_name == 'release' && steps.rel.outputs.product == 'reports'
+              if: github.ref_type == 'tag' && steps.rel.outputs.product == 'reports'
               shell: bash
               run: |
                 get_tested() {  # $1 = top-level section key in reports/compatibility.yml
@@ -165,7 +201,7 @@ jobs:
             # ── Metadata product group ─────────────────────────────────────────────────────────────────────────
             # Runs on every non-release trigger (continuous CI builds all products), and on a metadata-v* release.
             - name: Set up .NET 10 (for the data-dictionary .xlsx writer)
-              if: github.event_name != 'release' || steps.rel.outputs.product == 'metadata'
+              if: github.ref_type != 'tag' || steps.rel.outputs.product == 'metadata'
               uses: actions/setup-dotnet@v5
               with:
                 dotnet-version: '10.0.x'
@@ -173,7 +209,7 @@ jobs:
             # ── po4a toolchain (Perl) ──────────────────────────────────────────────────────────────────────────
             # Needed by the protocol AND the infectious agent list (both localize via po4a).
             - name: Install po4a dependencies
-              if: github.event_name != 'release' || steps.rel.outputs.product == 'protocol' || steps.rel.outputs.product == 'infectious-agents'
+              if: github.ref_type != 'tag' || steps.rel.outputs.product == 'protocol' || steps.rel.outputs.product == 'infectious-agents'
               shell: bash
               run: |
                 sudo apt-get update -qq
@@ -181,7 +217,7 @@ jobs:
 
             # ── Protocol rendering toolchain (Pandoc/AsciiDoctor) — protocol only. ──────────────────────────────
             - name: Install protocol build dependencies
-              if: github.event_name != 'release' || steps.rel.outputs.product == 'protocol'
+              if: github.ref_type != 'tag' || steps.rel.outputs.product == 'protocol'
               shell: bash
               run: |
                 sudo apt-get update -qq
@@ -196,23 +232,23 @@ jobs:
             - name: Run po4a (infectious agents)
               # Generates the localized NeoIPC-Infectious-Agents.<lang>.yaml — consumed by the protocol build (pathogen
               # list) and bundled into the infectious agent list release.
-              if: github.event_name != 'release' || steps.rel.outputs.product == 'protocol' || steps.rel.outputs.product == 'infectious-agents'
+              if: github.ref_type != 'tag' || steps.rel.outputs.product == 'protocol' || steps.rel.outputs.product == 'infectious-agents'
               shell: bash
               run: PERLLIB=tools/po4a/lib tools/po4a/po4a --verbose po/infectious_agents.po4a.cfg
 
             - name: Run po4a (documentation)
-              if: github.event_name != 'release' || steps.rel.outputs.product == 'protocol'
+              if: github.ref_type != 'tag' || steps.rel.outputs.product == 'protocol'
               shell: bash
               run: PERLLIB=tools/po4a/lib tools/po4a/po4a --verbose po/documentation.po4a.cfg
 
             - name: Build
-              if: github.event_name != 'release' || steps.rel.outputs.product == 'protocol'
+              if: github.ref_type != 'tag' || steps.rel.outputs.product == 'protocol'
               shell: pwsh
               run: ./scripts/Build-NeoIPCCoreProtocol.ps1 -InformationAction Continue -WarningAction:Stop
 
             # ── Metadata product group (continued) ─────────────────────────────────────────────────────────────
             - name: Provision and test NeoIPC-Tools
-              if: github.event_name != 'release' || steps.rel.outputs.product == 'metadata'
+              if: github.ref_type != 'tag' || steps.rel.outputs.product == 'metadata'
               shell: pwsh
               run: |
                 # Provision the DocumentFormat.OpenXml assembly the .xlsx writer loads, then run the module
@@ -229,7 +265,7 @@ jobs:
                 Invoke-Pester -Path scripts/modules/NeoIPC-Tools/Tests/DataDictionary.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/BuildReport.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/ScriptVerbHygiene.Tests.ps1 -CI
 
             - name: Generate data dictionary
-              if: github.event_name != 'release' || steps.rel.outputs.product == 'metadata'
+              if: github.ref_type != 'tag' || steps.rel.outputs.product == 'metadata'
               shell: pwsh
               run: |
                 # Generate the CSV + .xlsx data dictionary into the uploaded artifacts. Assembled from the
@@ -237,7 +273,7 @@ jobs:
                 ./scripts/Build-NeoIPCDataDictionary.ps1 -OutputDirectory ./artifacts/data-dictionary
 
             - name: Render metadata distribution packages
-              if: github.event_name != 'release' || steps.rel.outputs.product == 'metadata'
+              if: github.ref_type != 'tag' || steps.rel.outputs.product == 'metadata'
               shell: pwsh
               run: |
                 # Render the importable DHIS2 metadata packages (install base + play) into the uploaded artifacts.
@@ -252,7 +288,7 @@ jobs:
             # Only one product releases at a time, so ./artifacts/release-assets holds just that product's files.
             # protocol/metadata add their compatibility record alongside their built assets.
             - name: Stage the compatibility record
-              if: github.event_name == 'release' && (steps.rel.outputs.product == 'protocol' || steps.rel.outputs.product == 'metadata' || steps.rel.outputs.product == 'reports')
+              if: github.ref_type == 'tag' && (steps.rel.outputs.product == 'protocol' || steps.rel.outputs.product == 'metadata' || steps.rel.outputs.product == 'reports')
               shell: bash
               run: |
                 mkdir -p ./artifacts/release-assets
@@ -265,13 +301,14 @@ jobs:
 
             - name: Bundle the infectious agent list (source + translations)
               # Canonical YAML + the po4a-generated localized NeoIPC-Infectious-Agents.<lang>.yaml + the UID map.
-              if: github.event_name == 'release' && steps.rel.outputs.product == 'infectious-agents'
+              if: github.ref_type == 'tag' && steps.rel.outputs.product == 'infectious-agents'
               shell: bash
               run: |
                 mkdir -p ./artifacts/release-assets
                 out="$PWD/artifacts/release-assets/NeoIPC-Infectious-Agents-${{ steps.rel.outputs.version }}.tar.gz"
                 cd metadata/common/infectious-agents
-                files=(NeoIPC-Infectious-Agents.yaml NeoIPC-Infectious-Agents.uids.csv)
+                # LICENSE.md + README.md travel with the list so the bundle carries its own attribution + effective license.
+                files=(NeoIPC-Infectious-Agents.yaml NeoIPC-Infectious-Agents.uids.csv LICENSE.md README.md)
                 for f in NeoIPC-Infectious-Agents.*.yaml; do [ -e "$f" ] && files+=("$f"); done
                 tar czf "$out" "${files[@]}"
                 echo "Bundled: ${files[*]}"
@@ -280,7 +317,7 @@ jobs:
               # The substance/group CSVs + the gettext translation catalogue. Antibiotic-name translations are applied
               # to the DHIS2 option sets at metadata-build time from these catalogues — there is no standalone
               # localized list file, so the catalogue is the translation deliverable.
-              if: github.event_name == 'release' && steps.rel.outputs.product == 'antibiotics'
+              if: github.ref_type == 'tag' && steps.rel.outputs.product == 'antibiotics'
               shell: bash
               run: |
                 mkdir -p ./artifacts/release-assets
@@ -290,6 +327,9 @@ jobs:
                   metadata/common/antibiotics/NeoIPC-Antibiotic-Groups.csv
                   metadata/common/antibiotics/NeoIPC-Antibiotic-AWaRe-Groups.csv
                   metadata/common/antibiotics/ListElements.csv
+                  # LICENSE.md + README.md travel with the list so the bundle carries its own attribution + effective license.
+                  metadata/common/antibiotics/LICENSE.md
+                  metadata/common/antibiotics/README.md
                   po/antibiotics.pot
                 )
                 for f in po/antibiotics.*.po; do [ -e "$f" ] && files+=("$f"); done
@@ -302,68 +342,13 @@ jobs:
                 name: NeoIPC-Surveillance-Toolkit
                 path: ./artifacts/
 
-    bump-version:
-        # After a Release is published, advance the RELEASED product's VERSION to the next patch (keeping any
-        # pre-release suffix) so that product's working version is always one ahead of its last release. The next
-        # version is computed from the released version — the authoritative version just shipped — not from the
-        # current file. The patch bump is the *probable* next version: edit the product VERSION by hand before the
-        # next release to take a minor/major instead. Requires main to allow this workflow's GITHUB_TOKEN to push
-        # (grant the Actions bot a branch-protection bypass if main is protected); build-docs' tag-format +
-        # tag-vs-VERSION checks gate this first.
-        if: github.event_name == 'release'
-        needs: build-docs
-        runs-on: ubuntu-26.04
-        permissions:
-          contents: write
-        steps:
-            - uses: actions/checkout@v7
-              with:
-                ref: main
-            - name: Advance the product VERSION to the next patch
-              shell: bash
-              env:
-                VFILE: ${{ needs.build-docs.outputs.vfile }}
-                RELEASED: ${{ needs.build-docs.outputs.version }}
-                TAG: ${{ github.event.release.tag_name }}
-              run: |
-                if [[ ! "$RELEASED" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)(-.+)?$ ]]; then
-                  echo "::error::Released version '$RELEASED' is not MAJOR.MINOR.PATCH[-pre]; cannot compute the next version."
-                  exit 1
-                fi
-                next="${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.$((BASH_REMATCH[3] + 1))${BASH_REMATCH[4]}"
-                git config user.name "github-actions[bot]"
-                git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-                # Re-sync to the tip of main each attempt, only ever ADVANCE the product VERSION (never roll it back
-                # below a hand-bumped minor/major in progress, or a patch released from an older commit), and retry
-                # on a non-fast-forward push so a commit landing on main between checkout and push doesn't drop the
-                # bump.
-                for attempt in 1 2 3; do
-                  git fetch --quiet origin main
-                  git reset --quiet --hard origin/main
-                  current="$(sed '1s/^\xef\xbb\xbf//' "$VFILE" | tr -d '[:space:]')"
-                  highest="$(printf '%s\n%s\n' "$current" "$next" | sort -V | tail -1)"
-                  if [[ "$current" == "$next" || "$next" != "$highest" ]]; then
-                    echo "$VFILE ($current) is already at or ahead of $next; nothing to bump."
-                    exit 0
-                  fi
-                  printf '%s\n' "$next" > "$VFILE"
-                  git commit --quiet -am "Bump $VFILE to $next after release $TAG"
-                  if git push origin HEAD:main; then
-                    echo "Bumped $VFILE to $next."
-                    exit 0
-                  fi
-                  echo "push rejected (main advanced); retrying ($attempt/3)…"
-                done
-                echo "::error::Could not push the VERSION bump after 3 attempts."
-                exit 1
-
     release-assets:
-        # Attach the released product's assets to the published Release. Split out from build-docs so that job runs
-        # with a read-only token; only this release-gated job needs contents: write. Releasing is a deliberate human
-        # step (a maintainer publishes the Release, choosing the product + version + pre-release flag); this only
-        # ATTACHES what build-docs rendered/staged — it never creates or labels a release. Exactly one product
-        # branch fires per release, keyed off the product build-docs parsed from the tag.
-        if: github.event_name == 'release'
+        # Create the product's GitHub Release and attach its rendered assets. Split out from build-docs so that
+        # job runs with a read-only token; only this release-gated job needs contents: write. Triggered by a
+        # `<product>-v*` tag push: create the Release (generated notes; pre-release when the tag carries a
+        # pre-release suffix), then attach what build-docs rendered/staged. Exactly one product's attach step
+        # fires, keyed off the product build-docs parsed from the tag.
+        if: github.ref_type == 'tag'
         needs: build-docs
         runs-on: ubuntu-26.04
         permissions:
@@ -371,13 +356,25 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-          TAG: ${{ github.event.release.tag_name }}
+          TAG: ${{ github.ref_name }}
         steps:
             - name: Download the rendered artifacts
               uses: actions/download-artifact@v7
               with:
                 name: NeoIPC-Surveillance-Toolkit
                 path: ./artifacts
+            - name: Create the Release
+              # Tag-driven: create the GitHub Release (generated notes) before attaching assets. Pre-release
+              # only when the VERSION itself carries a semver pre-release suffix (e.g. -alpha, -preview1); a
+              # plain X.Y.Z is final. Test the parsed version, NOT $TAG — every tag's <product>-v prefix
+              # contains a hyphen, so matching $TAG would flag every release as a pre-release.
+              shell: bash
+              run: |
+                ver='${{ needs.build-docs.outputs.version }}'
+                pre=""; case "$ver" in *-*) pre="--prerelease";; esac
+                # Idempotent: a re-run of this job re-executes create; skip if the Release already exists (a
+                # partial earlier run may have created it) so the attach steps below still run.
+                gh release view "$TAG" >/dev/null 2>&1 || gh release create "$TAG" --generate-notes $pre
             - name: Attach protocol documents
               # PDF + DOCX are self-contained; the HTML references artifacts/img/ so it is not attached as a bare
               # asset (an HTML bundle with its images is a possible future asset). compatibility.yml records the
