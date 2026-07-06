@@ -61,21 +61,6 @@
                     <xsl:with-param name="further_dy" select="420"/>
                 </xsl:call-template>
             </text>
-            <text x="17300" y="28600" font-size="370px" text-anchor="end">
-                <tspan><xsl:value-of select="root/data[@name='licensed_under']/value"/> CC BY 4.0</tspan>
-                <tspan x="17300" dy="390">)</tspan>
-                <tspan dx="195" fill="#0083C1">
-                    <xsl:choose>
-                        <xsl:when test="root/data[@name='license_url']/value">
-                            <xsl:value-of select="root/data[@name='license_url']/value"/>
-                        </xsl:when>
-                        <xsl:otherwise>https://creativecommons.org/licenses/by/4.0/</xsl:otherwise>
-                    </xsl:choose>
-                </tspan>
-                <tspan dx="190">(</tspan>
-            </text>
-            <image xlink:href="cc.xlarge.png" x="17500" y="28250" width="800" height="800" />
-            <image xlink:href="by.xlarge.png" x="18500" y="28250" width="800" height="800" />
         </svg>
     </xsl:template>
 </xsl:stylesheet>

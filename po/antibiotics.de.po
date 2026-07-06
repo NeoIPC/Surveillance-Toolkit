@@ -1,6 +1,6 @@
 # Translations for the NeoIPC antibiotic substance and group lists.
 # Copyright (C) Charité – Universitätsmedizin Berlin
-# This file is distributed under the Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International license
+# This file is distributed under the Creative Commons Attribution-NonCommercial-ShareAlike 3.0 IGO license
 # Automatically generated
 #
 msgid ""

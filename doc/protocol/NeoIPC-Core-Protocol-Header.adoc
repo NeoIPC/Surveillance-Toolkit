@@ -1,5 +1,8 @@
 Gizem Karadağ; Adrie Bekker; Angela Dramowski; Paul Heath; Begoña Loureiro_Gonzalez; Jose_Ignacio Pijoan_Zubizarreta; Brar Piening
 :doctype: book
+// PDF/HTML document metadata. asciidoctor-pdf has no native dc:rights field, so the licence is recorded
+// in Keywords (and stated in full on the "Licensing and attribution" colophon page).
+:keywords: NeoIPC, neonatal infection surveillance, VLBW, VPT, healthcare-associated infection; licence: protocol text and List of Infectious Agents CC BY 4.0, List of Antibiotics CC BY-NC-SA 3.0 IGO
 :imagesdir: ./img
 ifdef::lang[:title-page-background-image: image:NeoIPC-Core-Title-Page.{lang}.svg[]]
 ifndef::lang[:title-page-background-image: image:NeoIPC-Core-Title-Page.svg[]]

@@ -24616,7 +24616,7 @@ msgstr "Lefkowitz EJ, Dempsey DM, Hendrickson RC, Orton RJ, Siddell SG, Smith DB
 #. type: bibliography
 #: metadata/common/infectious-agents/Output-Footer.adoc:57
 msgid "Licensed under the Creative Commons http://creativecommons.org/licenses/by-sa/4.0/[Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)] license."
-msgstr "Licenciado bajo la licencia Creative Commons https://creativecommons.org/licenses/by-nc-nd/4.0/deed.es[AAtribución/Reconocimiento-CompartirIgual 4.0 Internacional (CC BY-SA 4.0)]."
+msgstr "Licenciado bajo la licencia Creative Commons https://creativecommons.org/licenses/by-sa/4.0/deed.es[Atribución/Reconocimiento-CompartirIgual 4.0 Internacional (CC BY-SA 4.0)]."
 
 #. type: Title =
 #: metadata/common/infectious-agents/Output-Header.adoc:1
