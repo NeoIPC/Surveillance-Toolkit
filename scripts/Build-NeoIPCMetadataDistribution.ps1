@@ -23,15 +23,15 @@
     Where to write the package files. Defaults to the repository's metadata/dist directory.
 .PARAMETER Version
     Package version written into the manifest + filename. REQUIRED — no default, so the version is always an explicit
-    caller decision (the script never silently picks one). CI passes the published GitHub Release tag on a release
-    build (the tag is the released version), else the repository `VERSION` file — the prominent single source of truth
-    for the current version.
+    caller decision (the script never silently picks one). CI passes the metadata release version on a metadata-v*
+    release build (the tag is the released version), else the `metadata/VERSION` file — the source of truth for the
+    metadata product version.
 .PARAMETER Password
     Login password set on every synthetic play user (forwarded to New-NeoIPCMetadataPackage for the play variant).
     Defaults to the module's clearly-test value; never a real secret.
 .EXAMPLE
-    ./scripts/Build-NeoIPCMetadataDistribution.ps1 -Version (Get-Content ./VERSION -Raw).Trim()
-    Render both package artifacts into metadata/dist/ at the repository's current version.
+    ./scripts/Build-NeoIPCMetadataDistribution.ps1 -Version (Get-Content ./metadata/VERSION -Raw).Trim()
+    Render both package artifacts into metadata/dist/ at the metadata product's current version.
 #>
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', 'Password',
     Justification = 'Forwards the synthetic play accounts'' known, clearly-test password — not a real secret.')]
@@ -53,7 +53,8 @@ if (-not (Test-Path -LiteralPath $OutputDirectory)) { New-Item -ItemType Directo
 # --- Alpha manifest policy (the values; the module only provides the mechanism) -------------------------------------
 # DHIS2Version is pinned to the NeoIPC DHIS2 deployment version (the dhis2/core image tag in the deployment's
 # compose file). The version is the required -Version param (no default — the caller always decides): CI passes the
-# published Release tag on a release build, else the repository VERSION file (the prominent single source of truth).
+# metadata release version on a metadata-v* release build, else the metadata/VERSION file (the metadata product's
+# source of truth).
 # healthArea tagging, DHIS2Build and the WHO sharing/group conventions are deferred to the standards-package design
 # task — kept minimal here on purpose.
 $packageCode = 'NEOIPC_CORE'

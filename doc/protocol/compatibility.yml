@@ -1,0 +1,16 @@
+# Shared-input versions this NeoIPC Core Surveillance Protocol release incorporates.
+#
+# The protocol compiles the infectious agent list and the antibiotics list into its artifacts, but
+# those lists are their own independently-versioned products. This file records which released
+# version of each the protocol incorporates.
+#
+# CI enforces at every protocol-v* release that, for each list here:
+#   1. the <list>-v<version> release tag exists, and
+#   2. the list's committed source at this commit is byte-identical to what that release shipped.
+# If a list changed since its release, bump metadata/common/<list>/VERSION, publish an <list>-v<new>
+# release, then set the value here to <new> before releasing the protocol. (Translations are not part
+# of this check — see RELEASING.md.)
+
+incorporates:
+  infectious-agents: 0.1.0-alpha
+  antibiotics: 0.1.0-alpha

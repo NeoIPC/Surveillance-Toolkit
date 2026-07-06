@@ -1,0 +1,22 @@
+# Compatibility record for the NeoIPC Surveillance Reports product.
+#
+# Declares the neoipcr (R analysis package) and neoipc-app (reporting frontend) versions this
+# reports release was validated against, plus the minimum version each report source is known to
+# require. The reports (Quarto + R) depend on neoipcr's data contract, and the report parameter
+# schema is consumed by neoipc-app — so both are genuine compatibility axes.
+#
+# Bump these together with reports/VERSION when cutting a `reports-vX.Y.Z` release. The
+# NeoIPC-Reporting container mirrors the concrete pins it bakes in its own pinned-sources.yml and
+# should keep them within the ranges declared here.
+#
+# `tested`  — the exact version this reports release was rendered and checked against.
+# `minimum` — the earliest version known to work; leave equal to `tested` until an older floor is
+#             actually established by testing.
+
+neoipcr:
+  tested: v0.1.0.9000
+  minimum: v0.1.0.9000
+
+neoipc-app:
+  tested: v0.0.1-alpha
+  minimum: v0.0.1-alpha
