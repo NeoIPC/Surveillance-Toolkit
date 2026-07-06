@@ -6,10 +6,4 @@
     <data name="neoipc_project" xml:space="preserve">
         <value>Proyecto NeoIPC</value>
     </data>
-    <data name="licensed_under" xml:space="preserve">
-        <value>bajo licencia</value>
-    </data>
-    <data name="license_url" xml:space="preserve">
-        <value>https://creativecommons.org/licenses/by/4.0/deed.es</value>
-    </data>
 </root>

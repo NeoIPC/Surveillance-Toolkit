@@ -77,7 +77,8 @@ function Write-NeoIPCAntibioticPoText {
     # (Language: en); a real locale writes that language's header. The header is the standard empty-msgid entry with
     # the NeoIPC copyright + CC BY-NC-SA 3.0 IGO attribution: the list is a derivative of the WHO AWaRe
     # classification (CC BY-NC-SA 3.0 IGO), whose ShareAlike term requires the derivative to keep the same
-    # licence; the ATC codes and substance names it also carries are factual identifiers. Output is LF-terminated.
+    # licence; the substance names it carries are International Nonproprietary Names (factual), and the ATC
+    # codes and group names are the WHOCC's classification reproduced verbatim. Output is LF-terminated.
     [CmdletBinding()]
     [OutputType([string])]
     param(
