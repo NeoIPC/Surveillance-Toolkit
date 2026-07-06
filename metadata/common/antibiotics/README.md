@@ -60,4 +60,4 @@ sidecars and the standalone `WHO-AWaRe-Classification-2021.csv` are **retired** 
 
 ## Licensing
 
-The repository as a whole is MIT-licensed, but the WHO upstream terms above impose stricter conditions on this directory's contents. The effective license is **CC BY-NC-ND 4.0** — the ATC/DDD no-derivatives terms dominate the more permissive AWaRe share-alike license, so the strictest upstream term governs. See [`LICENSE.md`](LICENSE.md) for the full reasoning.
+The repository as a whole is MIT-licensed, but this directory is a **derivative** of the WHO AWaRe classification (CC BY-NC-SA 3.0 IGO). ShareAlike requires the derivative to keep the same licence, so the effective license is **CC BY-NC-SA 3.0 IGO**; the ATC codes, substance names and group descriptions it also carries are reproduced unchanged from the WHOCC ATC/DDD index, not adapted. See [`LICENSE.md`](LICENSE.md) for the full reasoning.

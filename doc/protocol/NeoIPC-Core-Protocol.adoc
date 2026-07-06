@@ -2,6 +2,18 @@
 //:lang: en
 include::NeoIPC-Core-Protocol-Header.adoc[]
 
+[colophon]
+[#licensing-and-attribution]
+== Licensing and attribution
+
+The text of this protocol is © The NeoIPC Project Consortium and is licensed under the Creative Commons https://creativecommons.org/licenses/by/4.0/[Attribution 4.0 International (CC BY 4.0)] licence. Its two reference-list appendices are as follows:
+
+* The *<<appendix-list-of-antibiotics>>* is a NeoIPC compilation derived from the WHO https://www.who.int/publications/i/item/2021-aware-classification[AWaRe classification of antibiotics, 2021] (WHO/MHP/HPS/EML/2021.04), extended with systemic substances not in the AWaRe list. As an adaptation of the ShareAlike-licensed AWaRe classification it is licensed under the Creative Commons https://creativecommons.org/licenses/by-nc-sa/3.0/igo/[Attribution-NonCommercial-ShareAlike 3.0 IGO (CC BY-NC-SA 3.0 IGO)] licence. The ATC codes and group names it carries are reproduced verbatim from the WHO Collaborating Centre for Drug Statistics Methodology https://www.whocc.no/[ATC/DDD index] (© World Health Organization); the substance names are International Nonproprietary Names.
+
+* The *<<appendix-list-of-list-of-infectious-agents>>* lists organism names and their taxonomic classification, compiled from the CDC https://www.cdc.gov/nhsn/index.html[NHSN Organism List], the https://lpsn.dsmz.de/[List of Prokaryotic names with Standing in Nomenclature (LPSN)], https://www.mycobank.org/[MycoBank] and the https://ictv.global/taxonomy/[International Committee on Taxonomy of Viruses (ICTV)]. It reproduces only taxonomic facts, which are not subject to copyright, and is provided under this protocol's CC BY 4.0 licence with attribution to those sources. (The full infectious-agent ontology in the source repository, which incorporates more than nomenclature, is separately licensed CC BY-NC-ND 4.0.)
+
+Because the List of Antibiotics is CC BY-NC-SA 3.0 IGO, the compiled PDF **as a whole** may be used and shared for **non-commercial purposes only**, and any adaptation of that list must be shared under the same terms (ShareAlike).
+
 [#introduction]
 == Introduction
 [#introduction-what-are-you-reading-here]
@@ -1008,10 +1020,14 @@ neoipc-support@charite.de
 [#appendix-list-of-antibiotics]
 == List of Antibiotics
 
+_Derived from the WHO AWaRe classification and the WHOCC ATC/DDD index. Licensed under CC BY-NC-SA 3.0 IGO — see <<licensing-and-attribution>>._
+
 include::NeoIPC-Antibiotics.adoc[]
 
 [appendix]
 [#appendix-list-of-list-of-infectious-agents]
 == List of Infectious Agents
+
+_Organism names and taxonomy compiled from NHSN, LPSN, MycoBank and ICTV (taxonomic facts) — see <<licensing-and-attribution>>._
 
 include::NeoIPC-Infectious-Agents.adoc[]

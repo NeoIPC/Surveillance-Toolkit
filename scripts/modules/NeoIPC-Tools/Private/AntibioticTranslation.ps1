@@ -75,9 +75,9 @@ function ConvertTo-NeoIPCAntibioticPoField {
 function Write-NeoIPCAntibioticPoText {
     # Render bare-msgid PO entries [{ Msgid; Msgstr; Fuzzy }] to PO text. -Locale '' (default) writes the .pot header
     # (Language: en); a real locale writes that language's header. The header is the standard empty-msgid entry with
-    # the NeoIPC copyright + CC BY-NC-ND 4.0 attribution: the directory's effective license is no-derivatives
-    # because the WHO ATC/DDD index (which the substance/group names derive from) forbids modification,
-    # dominating the more permissive CC BY-NC-SA 3.0 IGO of the WHO AWaRe classification. Output is LF-terminated.
+    # the NeoIPC copyright + CC BY-NC-SA 3.0 IGO attribution: the list is a derivative of the WHO AWaRe
+    # classification (CC BY-NC-SA 3.0 IGO), whose ShareAlike term requires the derivative to keep the same
+    # licence; the ATC codes and substance names it also carries are factual identifiers. Output is LF-terminated.
     [CmdletBinding()]
     [OutputType([string])]
     param(
@@ -88,7 +88,7 @@ function Write-NeoIPCAntibioticPoText {
     $sb = [System.Text.StringBuilder]::new()
     [void]$sb.AppendLine('# Translations for the NeoIPC antibiotic substance and group lists.')
     [void]$sb.AppendLine('# Copyright (C) Charité – Universitätsmedizin Berlin')
-    [void]$sb.AppendLine('# This file is distributed under the Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International license')
+    [void]$sb.AppendLine('# This file is distributed under the Creative Commons Attribution-NonCommercial-ShareAlike 3.0 IGO license')
     [void]$sb.AppendLine('# Automatically generated')
     [void]$sb.AppendLine('#')
     [void]$sb.AppendLine('msgid ""')
