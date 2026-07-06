@@ -73,13 +73,18 @@ if (-not $artifactsImgFolder) {
     $artifactsImgFolder = (New-Item -Path $artifactsFolder -Name 'img' -ItemType Directory).FullName
 }
 
-# Document version metadata, derived from doc/protocol/VERSION (the release source of truth) so the
-# revnumber/revremark can never drift from the released version. A semver pre-release suffix (e.g.
+# Document version metadata, derived from doc/protocol/VERSION (the release source of truth) so it stays in
+# sync with the released version instead of being hardcoded. revnumber is the protocol's MAJOR.MINOR
+# document revision — its human-facing revision line (e.g. 1.3, continuing the historical 1.2 -> 1.3
+# progression), deliberately two-component, not the full semver. A semver pre-release suffix (e.g.
 # 1.3.0-preview1) marks a PREVIEW build: revremark carries the identifier and the preview watermark is
-# applied; a plain X.Y.Z is a final release (no remark, no watermark).
+# applied; a plain X.Y.Z is a final release (no remark, no watermark). $revNumber and $preRelease hold the
+# BARE values (what Export-AsciiDocReferences substitutes into {revnumber}/{revremark} include/image paths);
+# the key=value forms are assembled only for asciidoctor's -a CLI flags.
 $version = (Get-Content -LiteralPath (Join-Path $protocolDir 'VERSION') -Raw).Trim()
 $preRelease = if ($version -match '-(.+)$') { $Matches[1] } else { $null }
-$revNumberArg = 'revnumber=' + ((($version -split '-', 2)[0] -split '\.')[0..1] -join '.')
+$revNumber = ((($version -split '-', 2)[0] -split '\.')[0..1] -join '.')
+$revNumberArg = "revnumber=$revNumber"
 if ($preRelease) { $revRemark = "revremark=$preRelease" } else { $revRemark = 'revremark!' }
 
 [AppContext]::SetSwitch("Switch.System.Xml.AllowDefaultResolver", $true);
@@ -117,8 +122,8 @@ Build-Target $AWaReRDest $AWaReRSrc {
 }
 
 $attributes = @{}
-$attributes.revnumber = $revNumberArg
-if ($preRelease) { $attributes.revremark = $revRemark }
+$attributes.revnumber = $revNumber
+if ($preRelease) { $attributes.revremark = $preRelease }
 foreach ($targetCulture in $targetCultures)
 {
     if ($targetCulture.Name) { $attributes.lang = $targetCulture.TwoLetterISOLanguageName } else { $attributes.Remove('lang') }

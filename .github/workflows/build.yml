@@ -234,12 +234,16 @@ jobs:
               # list) and bundled into the infectious agent list release.
               if: github.ref_type != 'tag' || steps.rel.outputs.product == 'protocol' || steps.rel.outputs.product == 'infectious-agents'
               shell: bash
-              run: PERLLIB=tools/po4a/lib tools/po4a/po4a --verbose po/infectious_agents.po4a.cfg
+              # PERL_UNICODE=SDA must match scripts/Invoke-Localization.ps1: it decodes @ARGV/open() as UTF-8 so
+              # po4a reads the .cfg's non-ASCII --copyright-holder correctly instead of double-encoding it into
+              # the regenerated .pot/.po headers. Keep the two po4a invocation sites in sync.
+              run: PERL_UNICODE=SDA PERLLIB=tools/po4a/lib tools/po4a/po4a --verbose po/infectious_agents.po4a.cfg
 
             - name: Run po4a (documentation)
               if: github.ref_type != 'tag' || steps.rel.outputs.product == 'protocol'
               shell: bash
-              run: PERLLIB=tools/po4a/lib tools/po4a/po4a --verbose po/documentation.po4a.cfg
+              # PERL_UNICODE=SDA: see the infectious-agents po4a step above (keep the two sites in sync).
+              run: PERL_UNICODE=SDA PERLLIB=tools/po4a/lib tools/po4a/po4a --verbose po/documentation.po4a.cfg
 
             - name: Build
               if: github.ref_type != 'tag' || steps.rel.outputs.product == 'protocol'
