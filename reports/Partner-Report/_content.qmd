@@ -75,7 +75,12 @@ include_localised("_methods.Rmd")
 \FloatBarrier
 :::
 
-## `{r} sR$headings$patient_population`
+```{r}
+#| output: asis
+if (show_section_patient_population)
+  cat('::: {.content-visible when-meta="alwaysTrue"}\n\n##',
+      sR$headings$patient_population, '\n\n:::\n')
+```
 
 ```{r}
 #| output: asis

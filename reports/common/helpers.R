@@ -236,7 +236,15 @@ format_countries <- function(countries) {
       ) |>
       dplyr::group_by(.data$wb_class_label) |>
       dplyr::summarise(
-        country_list = paste((sR$countryNames |> unlist())[gsub("\\s+", "", .data$name)], collapse = "*, *"),
+        # Fall back to the raw org-unit name when a country has no
+        # `countryNames` entry, so an unlisted country shows its own name
+        # rather than "NA". Curated/localised names can still be added to
+        # `common.yaml` `countryNames`; this only guards the gaps.
+        country_list = paste(
+          dplyr::coalesce(
+            unname((sR$countryNames |> unlist())[gsub("\\s+", "", .data$name)]),
+            .data$name),
+          collapse = "*, *"),
         .groups = "drop")|>
       dplyr::mutate(
         formatted = paste0(.data$wb_class_label, ": *", .data$country_list, "*")

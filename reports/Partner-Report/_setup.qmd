@@ -1467,6 +1467,10 @@ show_section_nosocomial  <- params$includeIncidenceDensityTable ||
 show_section_risk        <- params$includeRiskDensityRateTable ||
   params$includeAntibioticUtilisationTable ||
   show_section_surgical
+show_section_patient_population <- params$includeIntroductionTexts ||
+  params$includeMethodsTexts ||
+  params$includeBirthWeightFigure ||
+  params$includeGestationalAgeFigure
 
 # ── Conditional block helpers ────────────────────────────────────
 # Emit fenced div markers for R-controlled conditional content.

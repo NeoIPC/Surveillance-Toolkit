@@ -1,3 +1,10 @@
 format:
   html:
     minimal: true
+    # The app (repos/neoipc-app) renders this output's math with bundled KaTeX
+    # after mounting the body fragment. Quarto's default would otherwise inject
+    # a MathJax loader into the <head> — stripped by the fragment transformer,
+    # so dead for the app, and a CDN dependency for a standalone HTML download.
+    # `plain` emits no math renderer; the gt-footnote `$$` stays literal for
+    # KaTeX to typeset. PDF is unaffected (this profile is HTML-only).
+    html-math-method: plain

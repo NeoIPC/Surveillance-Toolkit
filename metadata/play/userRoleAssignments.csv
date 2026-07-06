@@ -10,5 +10,12 @@ play.ch.data1,Base
 play.ch.data1,Data entry
 play.ch.data2,Base
 play.ch.data2,Data entry
+play.at.report1,Base
 play.at.report1,ReportViewer
+play.ch.report1,Base
 play.ch.report1,ReportViewer
+play.at.admin1,Base
+play.at.admin1,ReportViewer
+play.at.admin1,NeoIPC Admin
+play.at.adminonly1,Base
+play.at.adminonly1,NeoIPC Admin

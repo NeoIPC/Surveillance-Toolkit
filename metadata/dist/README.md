@@ -21,11 +21,11 @@ are produced from source on every CI build and published two ways:
   product and choosing its version is a deliberate human step, and the release is marked **pre-release (alpha)**; CI
   only attaches the rendered packages to it.
 
-To render them locally (to inspect or import), pass an explicit version — the repository `VERSION` file holds the
+To render them locally (to inspect or import), pass an explicit version — the `metadata/VERSION` file holds the
 current one (the generator has no default version):
 
 ```pwsh
-pwsh ./scripts/Build-NeoIPCMetadataDistribution.ps1 -Version (Get-Content ./VERSION -Raw).Trim()
+pwsh ./scripts/Build-NeoIPCMetadataDistribution.ps1 -Version (Get-Content ./metadata/VERSION -Raw).Trim()
 ```
 
 This writes them into this directory (git-ignored). Regeneration is deterministic (byte-identical for unchanged

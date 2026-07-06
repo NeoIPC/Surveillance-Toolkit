@@ -119,13 +119,17 @@ if (!is.null(benchmark_data$antibiotic_utilisation_table) &&
       min_sep_threshold = 2) |>
     gt::fmt_markdown(columns = "aware")
 
-  # Move AWaRe column right after stub and set column widths
+  # Move AWaRe column right after stub and set column widths. The column
+  # holds only a narrow badge/letter, so 3% suits the PDF; the "AWaRe" header
+  # needs more room in HTML or it clips, so widen it there — taken from the
+  # stub, keeping the row total unchanged. PDF layout is untouched.
+  aware_w <- if (knitr::is_html_output()) 5 else 3
   gt_tbl <- gt_tbl |>
     gt::cols_move(columns = "aware", after = 1) |>
     gt::cols_label(aware = sR$aware) |>
     cols_width(
-      stub() ~ pct(cw$stub - 3),
-      "aware" ~ pct(3),
+      stub() ~ pct(cw$stub - aware_w),
+      "aware" ~ pct(aware_w),
       sR$table_headers$n ~ pct(cw$n),
       sR$table_headers$rate ~ pct(cw$rate %||% cw$pooled),
       tidyselect::any_of(sR$table_headers$pooled) ~ pct(cw$pooled),
