@@ -50,8 +50,10 @@ The reports are rendered by the `neoipcr` R package and drive the `neoipc-app` f
 forms, so a reports release records the neoipcr + neoipc-app versions it was validated against in
 `reports/compatibility.yml`. Those are **separate repositories**, so there is no in-repo content to
 diff (unlike the lists above) — instead, at every `reports-v*` release CI verifies that each
-`tested` version is a **real published release** on its repo (`github.com/NeoIPC/neoipcr`,
-`github.com/NeoIPC/neoipc-app`). So a reports release can never claim compatibility with an unreleased
+`tested` version resolves to a **real tag** on its repo (`git ls-remote` against
+`github.com/NeoIPC/neoipcr`, `github.com/NeoIPC/neoipc-app`): a published GitHub Release **or** an
+immutable dev-snapshot tag (e.g. neoipcr's `v0.1.0.9000`, which is a pushed tag, not a formal Release).
+The check is tag-existence. So a reports release can never claim compatibility with an unreleased
 neoipcr/neoipc-app. Order: **release neoipcr + neoipc-app → then the reports** (and update
 `reports/compatibility.yml` to the versions you validated against).
 
@@ -81,7 +83,8 @@ but publishes nothing.
 - Each product's version is independent; they do **not** have to move together. The three
   `po/*.po4a.cfg` `--package-version` values track their product's version (documentation → protocol,
   reports → reports, infectious_agents → infectious-agents) and are refreshed into the `.pot`/`.po`
-  headers on the next localization run.
+  headers on the next localization run. They are **hardcoded** and **not** advanced by the
+  `bump-version` job — update them by hand when a product's version changes (they will otherwise drift).
 - The **metadata** packages are **generated build artifacts**, never committed (see
   `metadata/dist/README.md`); they exist only as Release assets and CI build artifacts. The **reports**
   product has **no** generated package: its render-ready sources ship in the tag's auto source archive
