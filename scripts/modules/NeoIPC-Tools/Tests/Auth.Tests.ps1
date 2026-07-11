@@ -46,6 +46,21 @@ Describe 'Test-DHIS2PersonalAccessToken' {
             Should -BeFalse
     }
 
+    It 'rejects a non-ASCII (Unicode) digit in the checksum tail' {
+        # .NET/PowerShell `\d` matches Unicode decimal digits, so [0-9] is used
+        # for the checksum tail; a U+0665 (Arabic-Indic 5) tail must be rejected.
+        $unicodeTail = 'd2pat_' + ('a' * 32) + ((0..9 | ForEach-Object { [char]0x0665 }) -join '')
+        $unicodeTail.Length | Should -Be 48
+        Test-DHIS2PersonalAccessToken $unicodeTail | Should -BeFalse
+    }
+
+    It 'accepts only the whole token (the prefix must be at the start)' {
+        # The pattern is anchored, so a valid 48-char token surrounded by any
+        # other characters is not accepted as a substring.
+        Test-DHIS2PersonalAccessToken ('x' + $letterFirst) | Should -BeFalse
+        Test-DHIS2PersonalAccessToken ($letterFirst + 'x') | Should -BeFalse
+    }
+
     It '-Invert inverts the result' {
         Test-DHIS2PersonalAccessToken $digitFirst -Invert | Should -BeFalse
         Test-DHIS2PersonalAccessToken 'nope' -Invert | Should -BeTrue

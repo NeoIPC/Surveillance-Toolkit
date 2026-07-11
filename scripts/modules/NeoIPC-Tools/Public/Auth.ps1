@@ -28,9 +28,13 @@ function Test-DHIS2PersonalAccessToken {
         [switch]$Throw
     )
 
-    # First char is intentionally unconstrained (see the token-format note
-    # above): a valid PAT random part may start with a digit.
-    $result = $Token.Length -eq 48 -and $Token -cmatch 'd2pat_[a-zA-Z0-9]{32}\d{10}'
+    # First char of the random part is intentionally unconstrained (see the
+    # token-format note above): a valid PAT random part may start with a digit.
+    # The pattern is anchored (^...$) so a match can never be a substring of a
+    # longer string, and the checksum tail uses [0-9], not \d: in .NET/PowerShell
+    # \d matches Unicode decimal digits, so [0-9] is the ASCII-exact class (the
+    # same \d -> [0-9] reasoning as the gestational-age regexes in this package).
+    $result = $Token.Length -eq 48 -and $Token -cmatch '^d2pat_[a-zA-Z0-9]{32}[0-9]{10}$'
 
     if ($Invert) {
         $result = -not $result

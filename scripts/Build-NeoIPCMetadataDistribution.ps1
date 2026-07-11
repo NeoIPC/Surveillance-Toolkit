@@ -101,9 +101,8 @@ $playPath = Join-Path $OutputDirectory "${packageCode}_${packageType}_${packageV
 # delete the externalised expression files (or prune the CSV rows) of a generated object that regeneration DROPS or
 # RENAMES (e.g. lowering the slot count, or an ontology change that removes/renames a rule). Such a removal surfaces
 # only as the CSV-row change; its now-orphaned expressions/<rule>/*.dhis2 files linger as unchanged tracked files that
-# git status does not flag, so they must be deleted by hand (as was done for the removed "NeoIPC BSI Debug rule"). So
-# the automatic drift-as-git-diff guarantee covers ADDITIONS and CONTENT changes, not REMOVALS/RENAMES. See
-# Update-NeoIPCGeneratedMetadataDirectory.
+# git status does not flag, so they must be deleted by hand. So the automatic drift-as-git-diff guarantee covers
+# ADDITIONS and CONTENT changes, not REMOVALS/RENAMES. See Update-NeoIPCGeneratedMetadataDirectory.
 Write-Host 'Regenerating the ontology / capability-matrix families into metadata/common/ (drift check)...'
 Update-NeoIPCGeneratedMetadataDirectory -MetadataDirectory $metadataDir -Confirm:$false
 

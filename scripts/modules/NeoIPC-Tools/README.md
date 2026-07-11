@@ -138,8 +138,7 @@ drift without writing.
 > regeneration **drops or renames** (lowering the slot count, or an ontology change that removes/renames a
 > rule). Those orphaned `expressions/<rule>/*.dhis2` files linger as unchanged tracked files that
 > `git status` does not flag, so the automatic drift-as-git-diff guarantee covers **additions and content
-> changes but not removals/renames** — the orphaned files must be deleted by hand (as was done for the
-> removed *NeoIPC BSI Debug rule*) until an orphan-sweep is added to the writer.
+> changes but not removals/renames** — the orphaned files must currently be deleted by hand.
 
 **The rule this enforces: a program-rule expression that _enumerates an externally-sourced set_ is
 GENERATED from that source, never hand-authored.** The membership sets — the ontology's virus kingdom

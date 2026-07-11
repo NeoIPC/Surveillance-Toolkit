@@ -22,7 +22,7 @@ function Update-NeoIPCGeneratedMetadataDirectory {
         or RENAMES — lowering the slot count, or an ontology change that removes/renames a rule, leaves the old
         expressions/<rule>/*.dhis2 files behind as unchanged tracked files that git status does not flag. So the
         drift-as-git-diff guarantee is complete for ADDITIONS and CONTENT changes but NOT for removals/renames, whose
-        orphaned files must be deleted by hand until an orphan-sweep is added.
+        orphaned files must currently be deleted by hand.
 
         Why an assembled install base is the UID source, not common/ alone: the option-domain families
         (NEOIPC_PATHOGENS / NEOIPC_ANTIMICROBIAL_SUBSTANCES option sets + options + groups) are NOT materialised into

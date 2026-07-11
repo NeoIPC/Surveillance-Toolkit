@@ -12,6 +12,7 @@ suppressPackageStartupMessages({
   load_neoipcr(dev_pkg_path = file.path(script_dir, "../../../neoipcr"))
   source(file.path(script_dir, "../common/parse-args.R"))
   source(file.path(script_dir, "../common/logging.R"))
+  source(file.path(script_dir, "../common/helpers.R"))
   library(jsonlite)
 })
 
@@ -141,12 +142,11 @@ if (is.null(unitCodes)) {
 }
 
 # Connection options
-conn_args <- list()
-if (!is.null(args$scheme)) conn_args$scheme <- args$scheme
-if (!is.null(args$hostname)) conn_args$hostname <- args$hostname
-if (!is.null(args$port)) conn_args$port <- args$port
-if (!is.null(args$path)) conn_args$path <- args$path
-connectionOptions <- do.call(neoipcr::dhis2_connection_options, conn_args)
+# get_connection_options() supplies the production host default when --host is
+# omitted (neoipcr itself no longer defaults to any deployment).
+connectionOptions <- get_connection_options(
+  scheme = args$scheme, hostname = args$hostname,
+  port = args$port, path = args$path)
 
 # Dataset options (mirrors _setup.qmd)
 datasetOptions <- neoipcr::dhis2_dataset_options(
