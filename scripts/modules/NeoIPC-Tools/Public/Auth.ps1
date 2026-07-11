@@ -1,18 +1,20 @@
 # DHIS2 version-1 personal access tokens consist of three parts:
 # 1. The prefix: (d2pat_)
-# 2. 32 Random bytes: where the docs claim that they are Base-64-encoded but
-#    the code shows that they are actually alphanumeric with the first byte
-#    being non numeric
-# 3. The CRC32 checksum: (1151814092) the checksum part is padded with 0 so
-#    that it always stays ten characters long.
+# 2. A 32-character alphanumeric [A-Za-z0-9] random part. There is no
+#    letter-first constraint, so the first character may be a digit (e.g.
+#    DHIS2's own `d2pat_5xVA...`). The deployed 2.40 line builds it with the
+#    Base64 `getRandomSecureToken(24)` ('-'/'_' replaced by 'x'); a newer
+#    dhis2-core (the 2025 `ApiKeyTokenGenerator`) builds it letter-first —
+#    either way it is alphanumeric, hence the `[a-zA-Z0-9]` first character.
+# 3. The CRC32 checksum: 10 digits, zero-padded (a CRC32 value is at most
+#    4294967295, so `%010d` is always exactly ten digits).
 #
 # The DHIS2 codebase shows that there are also version-2 personal access
 # tokens but since we haven't seen them in the wild yet, we don't support
 # them.
 #
-# See:
-# * https://github.com/dhis2/dhis2-core/blob/81599c24711d4718c43f4917ada29ee4af895511/dhis-2/dhis-api/src/main/java/org/hisp/dhis/security/apikey/ApiTokenType.java
-# * https://github.com/dhis2/dhis2-core/blob/81599c24711d4718c43f4917ada29ee4af895511/dhis-2/dhis-api/src/main/java/org/hisp/dhis/common/CodeGenerator.java#L95
+# See `ApiTokenServiceImpl.initToken` (generation) + `CodeGenerator
+# .getRandomSecureToken` in dhis2-core, and:
 # * https://docs.dhis2.org/en/develop/using-the-api/dhis-core-version-242/introduction.html#b-creating-a-token-via-the-api
 
 function Test-DHIS2PersonalAccessToken {
@@ -26,7 +28,13 @@ function Test-DHIS2PersonalAccessToken {
         [switch]$Throw
     )
 
-    $result = $Token.Length -eq 48 -and $Token -cmatch 'd2pat_[a-zA-Z][a-zA-Z0-9]{31}\d{10}'
+    # First char of the random part is intentionally unconstrained (see the
+    # token-format note above): a valid PAT random part may start with a digit.
+    # The pattern is anchored (^...$) so a match can never be a substring of a
+    # longer string, and the checksum tail uses [0-9], not \d: in .NET/PowerShell
+    # \d matches Unicode decimal digits, so [0-9] is the ASCII-exact class (the
+    # same \d -> [0-9] reasoning as the gestational-age regexes in this package).
+    $result = $Token.Length -eq 48 -and $Token -cmatch '^d2pat_[a-zA-Z0-9]{32}[0-9]{10}$'
 
     if ($Invert) {
         $result = -not $result

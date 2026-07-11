@@ -190,14 +190,15 @@ function Add-NeoIPCGeneratedMetadata {
         Splice the ontology / capability-matrix generated objects into a closure config, replacing the deployed
         generated-class objects with the freshly generated ones.
     .DESCRIPTION
-        Runs the twelve ontology-, matrix- and source-driven generators against the export and replaces the
+        Runs the ontology-, matrix- and source-driven generators against the export and replaces the
         deployed generated-class objects in the config with the generated ones:
           - the NEOIPC_PATHOGENS option set + its options (from the infectious-agent ontology),
           - the NEOIPC_ANTIMICROBIAL_SUBSTANCES option set + options, the 34 ATC-4 + 3 AWaRe option groups, and the
             ATC5 / WHO_AWARE option-group-sets (from the reconciled antibiotic sources),
           - the per-slot pathogen + antimicrobial-substance data elements,
-          - the resistance, field-gating and substance program-rule variables,
-          - the resistance, field-gating and substance program rules + actions.
+          - the resistance, field-gating, virus and substance program-rule variables,
+          - the resistance, field-gating, virus and substance program rules + actions (the HAP `set virus` rule
+            classifies each slot's organism against the ontology's `Viruses` realm — see New-NeoIPCPathogenVirusRule).
         Replacement is by NATURAL KEY, read from the generator outputs themselves (no pattern matching): a deployed
         object is dropped iff a generated object shares its key — option-set / data-element CODE, program-rule /
         variable NAME, or (for options) membership in the generated NEOIPC_PATHOGENS set — then the generated
@@ -211,7 +212,7 @@ function Add-NeoIPCGeneratedMetadata {
           - a deployed action on a reproduced rule whose target data element is OUTSIDE the generated families
             (e.g. the BSI 'when set' rule's HIDEFIELD on NEOIPC_BSI_NO_POS_CULTURE) is a hand-authored action,
             not part of the per-slot cluster, so it is SALVAGED onto the generated rule rather than dropped.
-        Everything else — the infection-definition business rules, the live HAP virus / criterion aggregates, the
+        Everything else — the infection-definition business rules, the live HAP criterion aggregates, the
         non-pathogen data elements, every other option set — is left exactly as the config has it. Fails loud on a
         duplicate id across the spliced result. Mutates and returns Config. No DHIS2 API calls.
     .PARAMETER Config
@@ -254,6 +255,8 @@ function Add-NeoIPCGeneratedMetadata {
     $subVarFrag  = New-NeoIPCSubstanceVariable -ExistingPackage $Export -SubstanceCount $SubstanceCount
     $patRuleFrag = New-NeoIPCPathogenRule @ontologyArgs -ExistingPackage $Export -PathogenCount $PathogenCount
     $fgRuleFrag  = New-NeoIPCPathogenFieldGatingRule @ontologyArgs -ExistingPackage $Export -PathogenCount $PathogenCount
+    $virusVarFrag  = New-NeoIPCPathogenVirusVariable -ExistingPackage $Export -PathogenCount $PathogenCount
+    $virusRuleFrag = New-NeoIPCPathogenVirusRule @ontologyArgs -ExistingPackage $Export -PathogenCount $PathogenCount
     $subRuleFrag = New-NeoIPCSubstanceRule -ExistingPackage $Export -SubstanceCount $SubstanceCount
     # Antibiotic domain (from the reconciled antibiotic sources): the NEOIPC_ANTIMICROBIAL_SUBSTANCES option set +
     # options, the 34 ATC-4 + 3 AWaRe option groups, and the ATC5 / WHO_AWARE option-group-sets. The full
@@ -269,9 +272,9 @@ function Add-NeoIPCGeneratedMetadata {
     $genOptionGroups    = @($abxGrpFrag['optionGroups'])
     $genOptionGroupSets = @($abxGrpSetFrag['optionGroupSets'])
     $genDataElements = @($patDeFrag['dataElements']) + @($subDeFrag['dataElements'])
-    $genVariables    = @($patVarFrag['programRuleVariables']) + @($fgVarFrag['programRuleVariables']) + @($subVarFrag['programRuleVariables'])
-    $genRules        = @($patRuleFrag['programRules']) + @($fgRuleFrag['programRules']) + @($subRuleFrag['programRules'])
-    $genActions      = @($patRuleFrag['programRuleActions']) + @($fgRuleFrag['programRuleActions']) + @($subRuleFrag['programRuleActions'])
+    $genVariables    = @($patVarFrag['programRuleVariables']) + @($fgVarFrag['programRuleVariables']) + @($virusVarFrag['programRuleVariables']) + @($subVarFrag['programRuleVariables'])
+    $genRules        = @($patRuleFrag['programRules']) + @($fgRuleFrag['programRules']) + @($virusRuleFrag['programRules']) + @($subRuleFrag['programRules'])
+    $genActions      = @($patRuleFrag['programRuleActions']) + @($fgRuleFrag['programRuleActions']) + @($virusRuleFrag['programRuleActions']) + @($subRuleFrag['programRuleActions'])
 
     $ordinal = [System.StringComparer]::Ordinal
     function New-NeoIPCKeySet([string[]]$Keys) {

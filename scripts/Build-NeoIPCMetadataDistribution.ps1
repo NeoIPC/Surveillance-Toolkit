@@ -90,6 +90,22 @@ $playDescription = 'NeoIPC Core surveillance package plus a synthetic play / dem
 $installPath = Join-Path $OutputDirectory "${packageCode}_${packageType}_${packageVersion}_DHIS${dhis2Version}-${locale}.json"
 $playPath = Join-Path $OutputDirectory "${packageCode}_${packageType}_${packageVersion}_DHIS${dhis2Version}-${locale}.play.json"
 
+# Regenerate the ontology- / capability-matrix-driven families (per-slot pathogen + substance data elements, the
+# resistance / field-gating / virus / substance program-rule variables, rules and actions) into metadata/common/
+# BEFORE rendering, so every build ships the current generators and drift between the generators and the committed
+# metadata/common/ tree surfaces as a reviewable git diff. The writer overwrites only files whose content changed, so a
+# drift-free tree stays clean (regeneration is idempotent); a dirty tree after a build means the committed metadata is
+# stale and must be committed.
+#
+# LIMIT: the directory writer is ADDITIVE — it writes/overwrites files for the objects currently generated but does NOT
+# delete the externalised expression files (or prune the CSV rows) of a generated object that regeneration DROPS or
+# RENAMES (e.g. lowering the slot count, or an ontology change that removes/renames a rule). Such a removal surfaces
+# only as the CSV-row change; its now-orphaned expressions/<rule>/*.dhis2 files linger as unchanged tracked files that
+# git status does not flag, so they must be deleted by hand. So the automatic drift-as-git-diff guarantee covers
+# ADDITIONS and CONTENT changes, not REMOVALS/RENAMES. See Update-NeoIPCGeneratedMetadataDirectory.
+Write-Host 'Regenerating the ontology / capability-matrix families into metadata/common/ (drift check)...'
+Update-NeoIPCGeneratedMetadataDirectory -MetadataDirectory $metadataDir -Confirm:$false
+
 Write-Host 'Rendering the install-base package (no org units / users)...'
 New-NeoIPCMetadataPackage -MetadataDirectory $metadataDir -Manifest (New-AlphaManifest '' $installDescription) `
     -Compress -OutputPath $installPath

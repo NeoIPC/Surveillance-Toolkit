@@ -1,1 +1,377 @@
-d2:hasValue(#{NeoIPC NEC Secondary BSI pathogen 2 value})&&(#{NeoIPC NEC Secondary BSI pathogen 2 value}==0||#{NeoIPC NEC Secondary BSI pathogen 2 value}==9||#{NeoIPC NEC Secondary BSI pathogen 2 value}==12||#{NeoIPC NEC Secondary BSI pathogen 2 value}==15||#{NeoIPC NEC Secondary BSI pathogen 2 value}==32||#{NeoIPC NEC Secondary BSI pathogen 2 value}==40||#{NeoIPC NEC Secondary BSI pathogen 2 value}==86||#{NeoIPC NEC Secondary BSI pathogen 2 value}==107||#{NeoIPC NEC Secondary BSI pathogen 2 value}==117||#{NeoIPC NEC Secondary BSI pathogen 2 value}==131||#{NeoIPC NEC Secondary BSI pathogen 2 value}==170||#{NeoIPC NEC Secondary BSI pathogen 2 value}==183||#{NeoIPC NEC Secondary BSI pathogen 2 value}==207||#{NeoIPC NEC Secondary BSI pathogen 2 value}==209||#{NeoIPC NEC Secondary BSI pathogen 2 value}==222||#{NeoIPC NEC Secondary BSI pathogen 2 value}==232||#{NeoIPC NEC Secondary BSI pathogen 2 value}==245||#{NeoIPC NEC Secondary BSI pathogen 2 value}==254||#{NeoIPC NEC Secondary BSI pathogen 2 value}==265||#{NeoIPC NEC Secondary BSI pathogen 2 value}==287||#{NeoIPC NEC Secondary BSI pathogen 2 value}==292||#{NeoIPC NEC Secondary BSI pathogen 2 value}==296||#{NeoIPC NEC Secondary BSI pathogen 2 value}==309||#{NeoIPC NEC Secondary BSI pathogen 2 value}==318||#{NeoIPC NEC Secondary BSI pathogen 2 value}==323||#{NeoIPC NEC Secondary BSI pathogen 2 value}==333||#{NeoIPC NEC Secondary BSI pathogen 2 value}==347||#{NeoIPC NEC Secondary BSI pathogen 2 value}==360||#{NeoIPC NEC Secondary BSI pathogen 2 value}==377||#{NeoIPC NEC Secondary BSI pathogen 2 value}==390||#{NeoIPC NEC Secondary BSI pathogen 2 value}==409||#{NeoIPC NEC Secondary BSI pathogen 2 value}==417||#{NeoIPC NEC Secondary BSI pathogen 2 value}==431||#{NeoIPC NEC Secondary BSI pathogen 2 value}==440||#{NeoIPC NEC Secondary BSI pathogen 2 value}==459||#{NeoIPC NEC Secondary BSI pathogen 2 value}==461||#{NeoIPC NEC Secondary BSI pathogen 2 value}==464||#{NeoIPC NEC Secondary BSI pathogen 2 value}==472||#{NeoIPC NEC Secondary BSI pathogen 2 value}==476||#{NeoIPC NEC Secondary BSI pathogen 2 value}==491||#{NeoIPC NEC Secondary BSI pathogen 2 value}==497||#{NeoIPC NEC Secondary BSI pathogen 2 value}==526||#{NeoIPC NEC Secondary BSI pathogen 2 value}==527||#{NeoIPC NEC Secondary BSI pathogen 2 value}==533||#{NeoIPC NEC Secondary BSI pathogen 2 value}==554||#{NeoIPC NEC Secondary BSI pathogen 2 value}==564||#{NeoIPC NEC Secondary BSI pathogen 2 value}==590||#{NeoIPC NEC Secondary BSI pathogen 2 value}==592||#{NeoIPC NEC Secondary BSI pathogen 2 value}==609||#{NeoIPC NEC Secondary BSI pathogen 2 value}==611||#{NeoIPC NEC Secondary BSI pathogen 2 value}==646||#{NeoIPC NEC Secondary BSI pathogen 2 value}==652||#{NeoIPC NEC Secondary BSI pathogen 2 value}==658||#{NeoIPC NEC Secondary BSI pathogen 2 value}==675||#{NeoIPC NEC Secondary BSI pathogen 2 value}==696||#{NeoIPC NEC Secondary BSI pathogen 2 value}==733||#{NeoIPC NEC Secondary BSI pathogen 2 value}==760||#{NeoIPC NEC Secondary BSI pathogen 2 value}==761||#{NeoIPC NEC Secondary BSI pathogen 2 value}==763||#{NeoIPC NEC Secondary BSI pathogen 2 value}==781||#{NeoIPC NEC Secondary BSI pathogen 2 value}==820||#{NeoIPC NEC Secondary BSI pathogen 2 value}==828||#{NeoIPC NEC Secondary BSI pathogen 2 value}==831||#{NeoIPC NEC Secondary BSI pathogen 2 value}==841||#{NeoIPC NEC Secondary BSI pathogen 2 value}==852||#{NeoIPC NEC Secondary BSI pathogen 2 value}==896||#{NeoIPC NEC Secondary BSI pathogen 2 value}==904||#{NeoIPC NEC Secondary BSI pathogen 2 value}==913||#{NeoIPC NEC Secondary BSI pathogen 2 value}==926||#{NeoIPC NEC Secondary BSI pathogen 2 value}==943||#{NeoIPC NEC Secondary BSI pathogen 2 value}==944||#{NeoIPC NEC Secondary BSI pathogen 2 value}==963||#{NeoIPC NEC Secondary BSI pathogen 2 value}==967||#{NeoIPC NEC Secondary BSI pathogen 2 value}==974||#{NeoIPC NEC Secondary BSI pathogen 2 value}==983||#{NeoIPC NEC Secondary BSI pathogen 2 value}==987||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1014||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1063||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1079||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1088||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1121||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1122||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1130||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1141||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1146||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1172||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1204||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1208||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1212||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1218||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1223||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1239||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1248||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1254||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1255||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1257||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1274||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1281||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1286||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1288||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1294||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1295||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1302||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1303||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1304||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1324||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1402||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1417||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1430||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1431||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1432||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1438||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1443||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1445||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1448||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1450||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1451||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1471||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1495||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1501||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1523||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1530||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1541||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1556||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1561||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1571||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1575||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1591||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1607||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1625||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1660||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1690||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1691||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1698||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1704||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1705||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1727||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1731||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1736||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1747||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1760||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1765||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1775||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1782||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1788||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1799||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1801||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1802||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1807||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1809||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1810||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1826||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1832||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1849||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1854||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1861||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1873||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1877||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1907||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1914||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1922||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1940||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1944||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1948||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1958||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1975||#{NeoIPC NEC Secondary BSI pathogen 2 value}==1985||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2041||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2053||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2063||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2065||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2066||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2074||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2079||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2083||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2098||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2099||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2107||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2114||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2115||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2119||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2149||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2159||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2181||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2202||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2225||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2227||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2248||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2264||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2266||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2281||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2286||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2293||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2316||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2318||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2328||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2340||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2353||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2371||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2379||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2380||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2390||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2394||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2400||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2406||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2409||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2420||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2467||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2483||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2494||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2504||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2549||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2559||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2563||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2573||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2578||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2587||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2704||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2705||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2706||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2707||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2711||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2712||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2713||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2714||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2715||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2716||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2717||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2718||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2720||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2721||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2722||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2723||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2724||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2725||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2726||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2727||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2728||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2729||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2730||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2732||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2733||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2734||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2735||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2736||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2737||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2738||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2739||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2740||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2741||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2742||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2743||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2744||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2745||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2746||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2747||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2748||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2749||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2750||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2751||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2752||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2753||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2754||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2755||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2756||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2757||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2758||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2759||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2760||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2761||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2762||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2763||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2764||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2765||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2766||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2767||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2768||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2769||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2770||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2771||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2772||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2773||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2774||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2808||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2809||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2810||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2811||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2812||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2813||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2814||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2815||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2816||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2831||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2832||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2833||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2834||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2835||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2836||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2837||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2838||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2839||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2840||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2849||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2850||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2851||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2931||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2932||#{NeoIPC NEC Secondary BSI pathogen 2 value}==2988||#{NeoIPC NEC Secondary BSI pathogen 2 value}==3086||#{NeoIPC NEC Secondary BSI pathogen 2 value}==3107||#{NeoIPC NEC Secondary BSI pathogen 2 value}==3135||#{NeoIPC NEC Secondary BSI pathogen 2 value}==3175||#{NeoIPC NEC Secondary BSI pathogen 2 value}==3223||#{NeoIPC NEC Secondary BSI pathogen 2 value}==3325||#{NeoIPC NEC Secondary BSI pathogen 2 value}==3543)
+d2:hasValue(#{NeoIPC NEC Secondary BSI pathogen 2 value})&&(
+  (
+    (
+      (
+        (
+          #{NeoIPC NEC Secondary BSI pathogen 2 value}==0
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==9
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==12
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==15
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==32
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==40
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==86
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==107
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==117
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==131
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==170
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==183
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==207
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==209
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==222
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==232
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==245
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==254
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==265
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==287
+        )
+        || (
+          #{NeoIPC NEC Secondary BSI pathogen 2 value}==292
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==296
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==309
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==318
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==323
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==333
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==347
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==360
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==377
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==390
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==409
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==417
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==431
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==440
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==459
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==461
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==464
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==472
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==476
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==491
+        )
+      )
+      || (
+        (
+          #{NeoIPC NEC Secondary BSI pathogen 2 value}==497
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==526
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==527
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==533
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==554
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==564
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==590
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==592
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==609
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==611
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==646
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==652
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==658
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==675
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==696
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==733
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==760
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==761
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==763
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==781
+        )
+        || (
+          #{NeoIPC NEC Secondary BSI pathogen 2 value}==820
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==828
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==831
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==841
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==852
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==896
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==904
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==913
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==926
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==943
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==944
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==963
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==967
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==974
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==983
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==987
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1014
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1063
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1079
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1088
+        )
+      )
+    )
+    || (
+      (
+        (
+          #{NeoIPC NEC Secondary BSI pathogen 2 value}==1121
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1122
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1130
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1141
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1146
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1172
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1204
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1208
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1212
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1218
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1223
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1239
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1248
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1254
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1255
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1257
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1274
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1281
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1286
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1288
+        )
+        || (
+          #{NeoIPC NEC Secondary BSI pathogen 2 value}==1294
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1295
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1302
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1303
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1304
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1324
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1402
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1417
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1430
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1431
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1432
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1438
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1443
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1445
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1448
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1450
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1451
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1471
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1495
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1501
+        )
+      )
+      || (
+        (
+          #{NeoIPC NEC Secondary BSI pathogen 2 value}==1523
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1530
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1541
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1556
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1561
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1571
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1575
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1591
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1607
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1625
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1660
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1690
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1691
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1698
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1704
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1705
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1727
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1731
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1736
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1747
+        )
+        || (
+          #{NeoIPC NEC Secondary BSI pathogen 2 value}==1760
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1765
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1775
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1782
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1788
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1799
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1801
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1802
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1807
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1809
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1810
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1826
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1832
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1849
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1854
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1861
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1873
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1877
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1907
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1914
+        )
+      )
+    )
+  )
+  || (
+    (
+      (
+        (
+          #{NeoIPC NEC Secondary BSI pathogen 2 value}==1922
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1940
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1944
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1948
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1958
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1975
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==1985
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2041
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2053
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2063
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2065
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2066
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2074
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2079
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2083
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2098
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2099
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2107
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2114
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2115
+        )
+        || (
+          #{NeoIPC NEC Secondary BSI pathogen 2 value}==2119
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2149
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2159
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2181
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2202
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2225
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2227
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2248
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2264
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2266
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2281
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2286
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2293
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2316
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2318
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2328
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2340
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2353
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2371
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2379
+        )
+      )
+      || (
+        (
+          #{NeoIPC NEC Secondary BSI pathogen 2 value}==2380
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2390
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2394
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2400
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2406
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2409
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2420
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2467
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2483
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2494
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2504
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2549
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2559
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2563
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2573
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2578
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2587
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2704
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2705
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2706
+        )
+        || (
+          #{NeoIPC NEC Secondary BSI pathogen 2 value}==2707
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2711
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2712
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2713
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2714
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2715
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2716
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2717
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2718
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2720
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2721
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2722
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2723
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2724
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2725
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2726
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2727
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2728
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2729
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2730
+        )
+      )
+    )
+    || (
+      (
+        (
+          #{NeoIPC NEC Secondary BSI pathogen 2 value}==2732
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2733
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2734
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2735
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2736
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2737
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2738
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2739
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2740
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2741
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2742
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2743
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2744
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2745
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2746
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2747
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2748
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2749
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2750
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2751
+        )
+        || (
+          #{NeoIPC NEC Secondary BSI pathogen 2 value}==2752
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2753
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2754
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2755
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2756
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2757
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2758
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2759
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2760
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2761
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2762
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2763
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2764
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2765
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2766
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2767
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2768
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2769
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2770
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2771
+        )
+      )
+      || (
+        (
+          #{NeoIPC NEC Secondary BSI pathogen 2 value}==2772
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2773
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2774
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2808
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2809
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2810
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2811
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2812
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2813
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2814
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2815
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2816
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2831
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2832
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2833
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2834
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2835
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2836
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2837
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2838
+        )
+        || (
+          #{NeoIPC NEC Secondary BSI pathogen 2 value}==2839
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2840
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2849
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2850
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2851
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2931
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2932
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==2988
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==3086
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==3107
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==3135
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==3175
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==3223
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==3325
+          || #{NeoIPC NEC Secondary BSI pathogen 2 value}==3543
+        )
+      )
+    )
+  )
+)

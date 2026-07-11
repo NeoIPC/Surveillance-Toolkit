@@ -99,6 +99,109 @@ function Test-NeoIPCMetadataPrecedenceAmbiguity {
     return $false
 }
 
+function Join-NeoIPCBalancedBooleanChain {
+    # Join boolean term strings with a binary operator ('||' or '&&') into a BALANCED,
+    # explicitly-parenthesised tree, so the resulting expression's parse-tree depth is
+    # O(log n) rather than O(n). DHIS2 2.41's expression-parser
+    # (org.hisp.dhis.lib.expression.eval.Calculator) evaluates every &&/|| operator by
+    # recursion (~13 JVM stack frames per operator), so a flat left-nested chain of a few
+    # hundred terms overflows the request-thread stack (StackOverflowError) during tracker
+    # import — the pathogen-resistance and recognized-pathogen membership chains run to
+    # hundreds of `#{var}==code` terms. The operator is associative and the terms are
+    # side-effect-free comparisons, so rebalancing changes only the parse tree, never the
+    # boolean result or the set-membership short-circuit semantics. The result is always a
+    # single parenthesised group (so a caller can embed it directly, e.g. `... && $group`
+    # or `... && !$group`).
+    #
+    # Layout depends on size, because these chains are committed under metadata/common/ and
+    # reviewed as git diffs:
+    #   * <= BlockSize terms  -> COMPACT single line via bottom-up pairing (tree height
+    #     ceil(log2 n)). At this size the one-liner is already readable and diffable, so no
+    #     newlines are added; the output is byte-identical to a plain
+    #     `'(' + ($Term -join $Operator) + ')'` for one/two terms, diverging only from three
+    #     terms up. This keeps the small resistance/recognized rules (1-2 codes) unchanged.
+    #   * >  BlockSize terms  -> PRETTY multi-line: the terms are grouped into fixed-size FLAT
+    #     blocks (one term per line, leading-operator) and the blocks are joined as a BALANCED
+    #     binary tree. Parse-tree depth = (BlockSize-1) within a block + ceil(log2 blockCount)
+    #     across blocks: bounded, and grows only logarithmically as the term list grows, so it
+    #     never re-approaches the overflow. Whitespace is irrelevant to the DHIS2 expression
+    #     parser (it tokenizes and skips it), so the newlines/indent are purely for human review
+    #     and line-level git diffs and never change evaluation.
+    [CmdletBinding()]
+    [OutputType([string])]
+    param(
+        [Parameter(Mandatory)][AllowEmptyCollection()][string[]]$Term,
+        [Parameter(Mandatory)][ValidateSet('||', '&&')][string]$Operator,
+        [ValidateRange(2, 4096)][int]$BlockSize = 20,
+        [string]$IndentUnit = '  '
+    )
+    if ($Term.Count -eq 0) { throw 'Join-NeoIPCBalancedBooleanChain: no terms to join.' }
+    if ($Term.Count -eq 1) { return "($($Term[0]))" }
+
+    if ($Term.Count -le $BlockSize) {
+        $level = [string[]]$Term
+        while ($level.Count -gt 1) {
+            $next = [System.Collections.Generic.List[string]]::new()
+            for ($i = 0; $i -lt $level.Count; $i += 2) {
+                if ($i + 1 -lt $level.Count) {
+                    $next.Add("($($level[$i])$Operator$($level[$i + 1]))")
+                }
+                else {
+                    $next.Add($level[$i])
+                }
+            }
+            $level = $next.ToArray()
+        }
+        return $level[0]
+    }
+
+    $blocks = [System.Collections.Generic.List[string[]]]::new()
+    for ($i = 0; $i -lt $Term.Count; $i += $BlockSize) {
+        $end = [Math]::Min($i + $BlockSize, $Term.Count) - 1
+        $blocks.Add([string[]]($Term[$i..$end]))
+    }
+    $lines = @(Format-NeoIPCBalancedBlockGroup -Block $blocks -Lo 0 -Hi ($blocks.Count - 1) -Operator $Operator -IndentUnit $IndentUnit -Pad '' -LeadOp '')
+    return ($lines -join "`n")
+}
+
+function Format-NeoIPCBalancedBlockGroup {
+    # Recursively render $Block[$Lo..$Hi] as a parenthesised, indented group joined by $Operator,
+    # balanced by midpoint split (tree height = ceil(log2(Hi-Lo+1))). A single block is a flat,
+    # leading-operator, one-term-per-line list; an internal node wraps its two half-ranges. $LeadOp,
+    # when non-empty, is the operator connecting this group to its left sibling and is emitted before
+    # the opening parenthesis. Emits the group's lines to the output stream (the caller collects with
+    # @(...)). Private helper for Join-NeoIPCBalancedBooleanChain's pretty branch.
+    [CmdletBinding()]
+    [OutputType([string])]
+    param(
+        [Parameter(Mandatory)][System.Collections.Generic.List[string[]]]$Block,
+        [Parameter(Mandatory)][int]$Lo,
+        [Parameter(Mandatory)][int]$Hi,
+        [Parameter(Mandatory)][ValidateSet('||', '&&')][string]$Operator,
+        [Parameter(Mandatory)][AllowEmptyString()][string]$IndentUnit,
+        [Parameter(Mandatory)][AllowEmptyString()][string]$Pad,
+        [Parameter(Mandatory)][AllowEmptyString()][string]$LeadOp
+    )
+    $open = if ($LeadOp) { "$Pad$LeadOp (" } else { "$Pad(" }
+    if ($Lo -eq $Hi) {
+        $terms = $Block[$Lo]
+        $inner = "$Pad$IndentUnit"
+        $open
+        for ($k = 0; $k -lt $terms.Count; $k++) {
+            if ($k -eq 0) { "$inner$($terms[$k])" }
+            else { "$inner$Operator $($terms[$k])" }
+        }
+        "$Pad)"
+        return
+    }
+    $mid = [int][Math]::Floor(($Lo + $Hi) / 2)
+    $childPad = "$Pad$IndentUnit"
+    $open
+    Format-NeoIPCBalancedBlockGroup -Block $Block -Lo $Lo -Hi $mid -Operator $Operator -IndentUnit $IndentUnit -Pad $childPad -LeadOp ''
+    Format-NeoIPCBalancedBlockGroup -Block $Block -Lo ($mid + 1) -Hi $Hi -Operator $Operator -IndentUnit $IndentUnit -Pad $childPad -LeadOp $Operator
+    "$Pad)"
+}
+
 function Get-NeoIPCMetadataExpressionFinding {
     # Run the three NeoIPC-specific lint rules on a single expression string; return finding objects.
     # Severities: precedence + negative-sentinel are Warning (likely bug); legacy-arg-form is Info (style /

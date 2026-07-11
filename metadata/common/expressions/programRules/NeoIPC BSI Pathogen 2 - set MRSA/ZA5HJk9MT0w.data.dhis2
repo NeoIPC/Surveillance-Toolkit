@@ -1,1 +1,1 @@
-d2:hasValue(#{NeoIPC BSI Pathogen 2 value})&&(#{NeoIPC BSI Pathogen 2 value}==0||#{NeoIPC BSI Pathogen 2 value}==934||#{NeoIPC BSI Pathogen 2 value}==2778)
+d2:hasValue(#{NeoIPC BSI Pathogen 2 value})&&((#{NeoIPC BSI Pathogen 2 value}==0||#{NeoIPC BSI Pathogen 2 value}==934)||#{NeoIPC BSI Pathogen 2 value}==2778)

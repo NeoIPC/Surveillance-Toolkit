@@ -288,11 +288,11 @@ Under Quarto/knitr, `configure_logging()` cannot install `logger`'s global warni
 - PS passes parameters to Quarto via `-P key:value` flags
 - `dhis2_connection_options()` / `dhis2_dataset_options()` in neoipcr coerce string inputs internally — single source of truth for types and defaults
 - Casing per layer: PS `PascalCase` → QMD `camelCase` → R `snake_case`, mapped once at each boundary
-- Defaults defined only in neoipcr functions, not duplicated in PS scripts or QMD YAML
+- Defaults defined only in neoipcr functions, not duplicated in PS scripts or QMD YAML — **except the DHIS2 host**: neoipcr (a public library) no longer defaults to any deployment's host, so the production host default lives in `reports/common/helpers.R::get_connection_options()` (used by every report R entry point). Pass `--host` / `-P dhis2Hostname` to override it.
 
 ### Auth Flow
 
-neoipcr is the single auth authority. PS scripts resolve credentials via `Resolve-NeoIPCAuth` (token or username/password), then set scoped environment variables (`NEOIPC_DHIS2_TOKEN`, `NEOIPC_DHIS2_USER`, `NEOIPC_DHIS2_PASSWORD`) so neoipcr in child R/Quarto processes finds them automatically. No `-P "token:..."` in QMD renders.
+neoipcr is the single auth authority. PS scripts resolve credentials via `Resolve-NeoIPCAuth` (token or username/password), then set scoped environment variables (`NEOIPC_DHIS2_TOKEN`, `NEOIPC_DHIS2_USER`, `NEOIPC_DHIS2_PASSWORD`) so neoipcr in child R/Quarto processes finds them automatically. No `-P "token:..."` in QMD renders. The **host** resolves separately from auth — an explicit `hostname` argument, else the `NEOIPC_DHIS2_HOST` env var (the report tooling supplies the production default when neither is set).
 
 Env var fallback chain in `neoipcr::get_auth_data()`:
 1. `NEOIPC_DHIS2_SESSION_ID` → session_id (Docker only)

@@ -1162,6 +1162,62 @@ InModuleScope 'NeoIPC-Tools' {
         }
     }
 
+    Describe 'Join-NeoIPCBalancedBooleanChain (balanced boolean-chain builder)' {
+        It 'wraps a single term in one parenthesised group' {
+            Join-NeoIPCBalancedBooleanChain -Term 'a' -Operator '||' | Should -BeExactly '(a)'
+        }
+        It 'joins two terms identically to a plain parenthesised join (small chains unchanged)' {
+            Join-NeoIPCBalancedBooleanChain -Term 'a', 'b' -Operator '||' | Should -BeExactly '(a||b)'
+            Join-NeoIPCBalancedBooleanChain -Term 'a', 'b' -Operator '&&' | Should -BeExactly '(a&&b)'
+        }
+        It 'balances (does not left-nest) from three terms up' {
+            Join-NeoIPCBalancedBooleanChain -Term 'a', 'b', 'c' -Operator '||' | Should -BeExactly '((a||b)||c)'
+            Join-NeoIPCBalancedBooleanChain -Term 'a', 'b', 'c', 'd' -Operator '||' | Should -BeExactly '((a||b)||(c||d))'
+        }
+        It 'keeps a chain of BlockSize or fewer terms on one compact line' {
+            $expr = Join-NeoIPCBalancedBooleanChain -Term @(1..20 | ForEach-Object { "v==$_" }) -Operator '||' -BlockSize 20
+            $expr | Should -Not -Match "`n"
+            @([regex]::Matches($expr, 'v==\d+')).Count | Should -Be 20
+        }
+        It 'pretty-prints a large chain as balanced flat blocks with bounded, log-scale depth (the SOE fix)' {
+            $expr = Join-NeoIPCBalancedBooleanChain -Term @(1..730 | ForEach-Object { "v==$_" }) -Operator '||' -BlockSize 20
+            $expr | Should -Match "`n"                         # multi-line (pretty) above the threshold
+            # Parentheses balanced, and nesting is O(log blockCount) -- 7 for 37 blocks -- not O(n).
+            $depth = 0; $max = 0
+            foreach ($ch in $expr.ToCharArray()) {
+                if ($ch -eq '(') { $depth++; if ($depth -gt $max) { $max = $depth } }
+                elseif ($ch -eq ')') { $depth-- }
+            }
+            $depth | Should -Be 0
+            $max | Should -BeLessOrEqual 10
+            # No flat operator run longer than a block bounds the within-block recursion depth. A
+            # block is the only place terms share one parenthesis level, so splitting on parentheses
+            # isolates each flat run; none may exceed BlockSize.
+            $maxRun = ($expr -split '[()]' | ForEach-Object { ([regex]::Matches($_, 'v==\d+')).Count } | Measure-Object -Maximum).Maximum
+            $maxRun | Should -BeLessOrEqual 20
+        }
+        It 'pretty branch: stripping parentheses and whitespace yields exactly the flat operator chain (a dropped or doubled operator fails)' {
+            # The structural checks above (depth, balance, flat-run, term count) are all blind to the JOINING operator
+            # between blocks/terms — a regression that dropped a '||' would pass them while emitting an invalid
+            # expression. Removing every '(' ')' and whitespace must collapse the pretty layout back to the exact flat
+            # chain: any missing operator leaves 'v==Nv==M' adjacency, any doubled/extra operator adds a stray '||'.
+            foreach ($op in '||', '&&') {
+                $terms = @(1..25 | ForEach-Object { "v==$_" })
+                $expr = Join-NeoIPCBalancedBooleanChain -Term $terms -Operator $op -BlockSize 4
+                $expr | Should -Match "`n"                              # pretty (multi-block) path is exercised
+                ($expr -replace '[()\s]', '') | Should -BeExactly ($terms -join $op)
+            }
+        }
+        It 'preserves every term exactly once (rebalancing neither drops nor duplicates)' {
+            $expr = Join-NeoIPCBalancedBooleanChain -Term @(1..37 | ForEach-Object { "v==$_" }) -Operator '||'
+            @([regex]::Matches($expr, 'v==\d+')).Count | Should -Be 37
+            @([regex]::Matches($expr, 'v==\d+') | ForEach-Object { $_.Value } | Sort-Object -Unique).Count | Should -Be 37
+        }
+        It 'throws on an empty term list' {
+            { Join-NeoIPCBalancedBooleanChain -Term @() -Operator '||' } | Should -Throw '*no terms*'
+        }
+    }
+
     Describe 'Expression linting (the three NeoIPC issue classes)' {
         It 'flags MixedBooleanPrecedence (Warning)' {
             $f = @(Get-NeoIPCMetadataExpressionFinding -Expression 'a && b || c' -ObjectType 'programRules' -ObjectId 'prX' -Field 'condition')
@@ -3685,6 +3741,135 @@ Hierarchies:
         }
     }
 
+    Describe 'Virus classification generation (ontology-driven set-virus rule)' {
+        BeforeAll {
+            Import-Module powershell-yaml -ErrorAction Stop
+            # Ontology with a Viruses realm (a genus + a species + a synonym under it = 3 virus Ids: 10, 11, 12) and a
+            # non-virus Bacteria branch (200) that must be excluded. Small virus set so the ASSIGN chain stays compact
+            # (<= BlockSize) and is exactly assertable.
+            $script:VirusYaml = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-virus-{0}.yaml' -f ([guid]::NewGuid().ToString('N')))
+            Set-Content -LiteralPath $script:VirusYaml -Encoding utf8 -Value @'
+Hierarchies:
+- Name: Viruses
+  ConceptType: Realm
+  Children:
+  - Name: Simplexvirus
+    Id: 12
+    Children:
+    - Name: Herpes simplex virus type 1
+      Id: 10
+      Synonyms:
+      - Name: HSV-1 old name
+        Id: 11
+- Name: Bacteria
+  Children:
+  - Name: Escherichia coli
+    Id: 200
+'@
+            $script:VirusTree = (Get-Content -LiteralPath $script:VirusYaml -Raw | ConvertFrom-Yaml)
+
+            # Fixture package: NEOIPC_CORE program, the HAP stage resolved via its slot-1 _3GCR anchor DE (stages carry
+            # no code), every pathogen DE (so the anchor resolves), and empty rule/action/variable collections.
+            $hapAnchor = 'NEOIPC_HAP_PATHOGEN_1_3GCR'
+            $hapStage = [ordered]@{
+                id                       = 'hapStage001'
+                programStageDataElements = @([ordered]@{ dataElement = [ordered]@{ id = (New-NeoIPCMetadataUid -Type 'dataElements' -NaturalKey $hapAnchor) } })
+            }
+            $des = foreach ($d in (Get-NeoIPCPathogenDataElementPlan)) {
+                [ordered]@{ code = $d.Code; id = (New-NeoIPCMetadataUid -Type 'dataElements' -NaturalKey $d.Code) }
+            }
+            $script:VirusPkg = @{
+                programs             = @([ordered]@{ code = 'NEOIPC_CORE'; id = 'progCore001' })
+                programStages        = @($hapStage)
+                dataElements         = @($des)
+                programRuleVariables = @()
+                programRules         = @()
+                programRuleActions   = @()
+            }
+        }
+        AfterAll {
+            if ($script:VirusYaml -and (Test-Path -LiteralPath $script:VirusYaml)) { Remove-Item -LiteralPath $script:VirusYaml -Force }
+        }
+
+        # ---- code-set walker ---------------------------------------------------------------------------------------
+        It 'code set: the ascending Ids under the Viruses realm (concepts + synonyms), excluding non-viruses' {
+            @(Get-NeoIPCVirusCodeSet -Node $script:VirusTree) | Should -Be @(10, 11, 12)
+        }
+        It 'code set: accepts a subtree root directly and sorts numerically, not lexically' {
+            $tree = [ordered]@{ Hierarchies = @(
+                    [ordered]@{ Name = 'Viruses'; Children = @(
+                            [ordered]@{ Name = 'A'; Id = 100 }, [ordered]@{ Name = 'B'; Id = 9 }, [ordered]@{ Name = 'C'; Id = 21 }
+                        ) }
+                ) }
+            @(Get-NeoIPCVirusCodeSet -Node $tree) | Should -Be @(9, 21, 100)
+        }
+        It 'code set: fails loud when the ontology carries no Viruses realm' {
+            $tree = [ordered]@{ Hierarchies = @([ordered]@{ Name = 'Bacteria'; Children = @([ordered]@{ Name = 'E. coli'; Id = 1 }) }) }
+            { Get-NeoIPCVirusCodeSet -Node $tree } | Should -Throw '*Viruses*'
+        }
+
+        # ---- variable generator ------------------------------------------------------------------------------------
+        It 'variable generator: one is-virus BOOLEAN CALCULATED_VALUE per HAP slot; preserves UID by name, mints otherwise' {
+            $pkg = $script:VirusPkg.Clone()
+            $pkg['programRuleVariables'] = @([ordered]@{ name = 'NeoIPC HAP Pathogen 1 is virus'; id = 'virHapP1AAA' })
+            $frag = New-NeoIPCPathogenVirusVariable -ExistingPackage $pkg
+            @($frag['programRuleVariables']).Count | Should -Be 3
+            $byName = @{}; foreach ($v in @($frag['programRuleVariables'])) { $byName[[string]$v['name']] = $v }
+            $p1 = $byName['NeoIPC HAP Pathogen 1 is virus']
+            $p1['id'] | Should -BeExactly 'virHapP1AAA'   # preserved
+            $p1['programRuleVariableSourceType'] | Should -BeExactly 'CALCULATED_VALUE'
+            $p1['valueType'] | Should -BeExactly 'BOOLEAN'
+            $p1['program']['id'] | Should -BeExactly 'progCore001'
+            $byName['NeoIPC HAP Pathogen 2 is virus']['id'] |
+                Should -BeExactly (New-NeoIPCMetadataUid -Type 'programRuleVariables' -NaturalKey 'NeoIPC HAP Pathogen 2 is virus')
+        }
+        It 'variable generator: fails loud when the program is absent' {
+            { New-NeoIPCPathogenVirusVariable -ExistingPackage @{ programs = @(); programRuleVariables = @() } } | Should -Throw '*NEOIPC_CORE*'
+        }
+
+        # ---- rule generator ----------------------------------------------------------------------------------------
+        It 'rule generator: one HAP rule (condition true, priority 0) with one positive-membership ASSIGN per slot' {
+            $frag = New-NeoIPCPathogenVirusRule -Path $script:VirusYaml -ExistingPackage $script:VirusPkg
+            @($frag['programRules']).Count | Should -Be 1
+            $rule = @($frag['programRules'])[0]
+            $rule['name'] | Should -BeExactly 'NeoIPC HAP - set virus'
+            $rule['condition'] | Should -BeExactly 'true'
+            $rule['priority'] | Should -Be 0
+            $rule['programStage']['id'] | Should -BeExactly 'hapStage001'
+            $acts = @($frag['programRuleActions'])
+            $acts.Count | Should -Be 3
+            $a1 = @($acts | Where-Object { $_['content'] -eq '#{NeoIPC HAP Pathogen 1 is virus}' })[0]
+            $a1['programRuleActionType'] | Should -BeExactly 'ASSIGN'
+            # Positive membership (a virus), balanced compact form for the 3-code set, ascending.
+            $a1['data'] | Should -BeExactly 'd2:hasValue(#{NeoIPC HAP Pathogen 1 value})&&((#{NeoIPC HAP Pathogen 1 value}==10||#{NeoIPC HAP Pathogen 1 value}==11)||#{NeoIPC HAP Pathogen 1 value}==12)'
+            $a1.Contains('dataElement') | Should -BeFalse
+        }
+        It 'rule generator: preserves the deployed rule + action UIDs (rule by name, action by assigned variable)' {
+            $pkg = $script:VirusPkg.Clone()
+            # Seed a description DISTINCT from the generator's fallback ('Sets the virus variables') so the assertion
+            # actually proves the deployed description is preserved, not merely that the fallback was re-emitted.
+            $pkg['programRules'] = @([ordered]@{ name = 'NeoIPC HAP - set virus'; id = 'virRuleAAAA'; description = 'Deployed virus rule description (preserved verbatim).' })
+            $pkg['programRuleActions'] = @([ordered]@{ id = 'virActP2AAA'; programRuleActionType = 'ASSIGN'; content = '#{NeoIPC HAP Pathogen 2 is virus}'; programRule = [ordered]@{ id = 'virRuleAAAA' } })
+            $frag = New-NeoIPCPathogenVirusRule -Path $script:VirusYaml -ExistingPackage $pkg
+            @($frag['programRules'])[0]['id'] | Should -BeExactly 'virRuleAAAA'
+            @($frag['programRules'])[0]['description'] | Should -BeExactly 'Deployed virus rule description (preserved verbatim).'
+            (@($frag['programRuleActions'] | Where-Object { $_['content'] -eq '#{NeoIPC HAP Pathogen 2 is virus}' })[0])['id'] | Should -BeExactly 'virActP2AAA'
+        }
+        It 'rule generator: PathogenCount drives slot expansion (1 -> a single ASSIGN)' {
+            @((New-NeoIPCPathogenVirusRule -Path $script:VirusYaml -ExistingPackage $script:VirusPkg -PathogenCount 1)['programRuleActions']).Count | Should -Be 1
+        }
+        It 'rule generator: fails loud when the HAP stage anchor is unresolvable' {
+            $noStage = $script:VirusPkg.Clone(); $noStage['programStages'] = @()
+            { New-NeoIPCPathogenVirusRule -Path $script:VirusYaml -ExistingPackage $noStage } | Should -Throw '*HAP program stage*'
+        }
+        It 'rule generator: fails loud on an empty virus set' {
+            $emptyYaml = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-virus-empty-{0}.yaml' -f ([guid]::NewGuid().ToString('N')))
+            Set-Content -LiteralPath $emptyYaml -Encoding utf8 -Value "Hierarchies:`n- Name: Viruses`n  ConceptType: Realm`n"
+            try { { New-NeoIPCPathogenVirusRule -Path $emptyYaml -ExistingPackage $script:VirusPkg } | Should -Throw '*virus code set is empty*' }
+            finally { Remove-Item -LiteralPath $emptyYaml -Force }
+        }
+    }
+
     Describe 'Pathogen slot-suffix matrix' {
         It 'gives a BSI primary slot the full suffix set (base + NAME + 5 resistance + SOURCE + MULTIPLE), in order' {
             @(Get-NeoIPCPathogenSlotSuffix -Stage 'BSI' -IsPrimary $true) |
@@ -3976,7 +4161,7 @@ Hierarchies:
     }
 
     Describe 'Add-NeoIPCGeneratedMetadata (generated-class splice)' {
-        # The nine generators are tested in their own Describes; here they are MOCKED to return small controlled
+        # The generators are tested in their own Describes; here they are MOCKED to return small controlled
         # fragments so this exercises only the splice — replacement by id/code/name, the stale-aggregate drop, the
         # non-family-action salvage, and the duplicate-id guard — without a full pathogen-machinery fixture.
         # Reproduced objects carry the deployed id (preserve-by-key); optNEW + prvFG1 are mint-only additions.
@@ -4015,6 +4200,8 @@ Hierarchies:
             Mock New-NeoIPCPathogenRule { [ordered]@{ programRules = @([ordered]@{ id = 'ruleR1'; name = 'NeoIPC BSI Pathogen 1 - set 3GCR'; programRuleActions = @([ordered]@{ id = 'actR1' }) }); programRuleActions = @([ordered]@{ id = 'actR1'; programRule = [ordered]@{ id = 'ruleR1' }; programRuleActionType = 'ASSIGN' }) } }
             Mock New-NeoIPCPathogenFieldGatingRule { [ordered]@{ programRules = @([ordered]@{ id = 'ruleWS'; name = 'NeoIPC BSI Pathogen 1 - when set'; programRuleActions = @([ordered]@{ id = 'actWSsrc' }) }); programRuleActions = @([ordered]@{ id = 'actWSsrc'; programRule = [ordered]@{ id = 'ruleWS' }; programRuleActionType = 'SETMANDATORYFIELD'; dataElement = [ordered]@{ id = 'deSrc' } }) } }
             Mock New-NeoIPCSubstanceRule { [ordered]@{ programRules = @([ordered]@{ id = 'ruleSV'; name = 'NeoIPC Surveillance end Antibiotic substance days - validate'; programRuleActions = @([ordered]@{ id = 'actSV' }) }); programRuleActions = @([ordered]@{ id = 'actSV'; programRule = [ordered]@{ id = 'ruleSV' }; programRuleActionType = 'SHOWERROR'; dataElement = [ordered]@{ id = 'deABdays' }; content = 'x' }) } }
+            Mock New-NeoIPCPathogenVirusVariable { [ordered]@{ programRuleVariables = @([ordered]@{ id = 'prvVirus1'; name = 'NeoIPC HAP Pathogen 1 is virus' }) } }
+            Mock New-NeoIPCPathogenVirusRule { [ordered]@{ programRules = @([ordered]@{ id = 'ruleVirus'; name = 'NeoIPC HAP - set virus'; programRuleActions = @([ordered]@{ id = 'actVirus' }) }); programRuleActions = @([ordered]@{ id = 'actVirus'; programRule = [ordered]@{ id = 'ruleVirus' }; programRuleActionType = 'ASSIGN'; content = '#{NeoIPC HAP Pathogen 1 is virus}' }) } }
             # Antibiotic generators: reproduce the deployed option set + groups + group-sets in place (same ids),
             # plus one new option (optAbx1 replacing the deployed optAbxOld by membership).
             Mock New-NeoIPCAntimicrobialOptionSet { [ordered]@{ optionSets = @([ordered]@{ id = 'osAbx'; code = 'NEOIPC_ANTIMICROBIAL_SUBSTANCES' }); options = @([ordered]@{ id = 'optAbx1'; code = 'J01AA01'; optionSet = [ordered]@{ id = 'osAbx' } }) } }
@@ -4027,9 +4214,18 @@ Hierarchies:
             @($out['optionSets'] | ForEach-Object { [string]$_['id'] } | Sort-Object) | Should -Be @('osAbx', 'osOther', 'osP')              # other kept, pathogen + antimicrobial replaced, no dup
             @($out['options'] | ForEach-Object { [string]$_['id'] } | Sort-Object) | Should -Be @('optA', 'optAbx1', 'optNEW', 'optOther')  # optA + optAbxOld replaced, optNEW added, other kept
             @($out['dataElements'] | ForEach-Object { [string]$_['id'] } | Sort-Object) | Should -Be @('deOther', 'deP1', 'deS1', 'deSrc')
-            @($out['programRuleVariables'] | ForEach-Object { [string]$_['id'] } | Sort-Object) | Should -Be @('prvFG1', 'prvOther', 'prvR1', 'prvS1')
+            @($out['programRuleVariables'] | ForEach-Object { [string]$_['id'] } | Sort-Object) | Should -Be @('prvFG1', 'prvOther', 'prvR1', 'prvS1', 'prvVirus1')
             @($out['optionGroups'] | ForEach-Object { [string]$_['id'] } | Sort-Object) | Should -Be @('ogAtc', 'ogAw')                     # antibiotic ATC + AWaRe groups, replaced in place
             @($out['optionGroupSets'] | ForEach-Object { [string]$_['id'] } | Sort-Object) | Should -Be @('ogsAtc', 'ogsAw')
+        }
+        It 'incorporates the generated virus family (rule + action + variable) into the spliced collections' {
+            # Guards the New-NeoIPCPathogenVirusVariable/Rule wiring in Add-NeoIPCGeneratedMetadata: if either virus
+            # fragment were dropped from $genVariables/$genRules/$genActions, the whole 'set virus' feature would be
+            # silently absent from the regenerated package with every other splice assertion still green.
+            $out = Add-NeoIPCGeneratedMetadata -Config (New-SpliceConfig) -Export ([ordered]@{})
+            @($out['programRules'] | Where-Object { [string]$_['id'] -eq 'ruleVirus' }).Count | Should -Be 1
+            @($out['programRuleActions'] | Where-Object { [string]$_['id'] -eq 'actVirus' }).Count | Should -Be 1
+            @($out['programRuleVariables'] | Where-Object { [string]$_['id'] -eq 'prvVirus1' }).Count | Should -Be 1
         }
         It 'drops the stale HAP aggregate rule and its actions; keeps the definition rule' {
             $out = Add-NeoIPCGeneratedMetadata -Config (New-SpliceConfig) -Export ([ordered]@{})
@@ -4065,6 +4261,55 @@ Hierarchies:
             $null = Add-NeoIPCGeneratedMetadata -Config (New-SpliceConfig) -Export ([ordered]@{}) -PathogenCount 5 -SubstanceCount 7
             Should -Invoke New-NeoIPCPathogenRule -ParameterFilter { $PathogenCount -eq 5 } -Times 1 -Exactly
             Should -Invoke New-NeoIPCSubstanceRule -ParameterFilter { $SubstanceCount -eq 7 } -Times 1 -Exactly
+        }
+    }
+
+    Describe 'Update-NeoIPCGeneratedMetadataDirectory (re-materialise orchestration)' {
+        # The generation + splice + directory-writer pieces are tested in their own Describes; here the internals are
+        # MOCKED so this exercises only the ORCHESTRATION — the load-bearing decision that the UID-preservation Export
+        # is the assembled install base (which carries the option-set UIDs common/ omits) while the Config is the
+        # committed common/ tree, and that the regenerated package is written back INTO common/.
+        It 'fails loud when the metadata directory is absent' {
+            { Update-NeoIPCGeneratedMetadataDirectory -MetadataDirectory (Join-Path $TestDrive 'no-such-dir') -Confirm:$false } |
+                Should -Throw '*Metadata directory not found*'
+        }
+        It 'fails loud when common/ is absent' {
+            $bare = Join-Path $TestDrive ('bare-{0}' -f ([guid]::NewGuid().ToString('N')))
+            New-Item -ItemType Directory -Path $bare -Force | Out-Null
+            { Update-NeoIPCGeneratedMetadataDirectory -MetadataDirectory $bare -Confirm:$false } |
+                Should -Throw '*Common metadata directory not found*'
+        }
+        It 'wires the assembled install base as the Export and common/ as the Config, and writes the regen back to common/' {
+            $md = Join-Path $TestDrive ('md-{0}' -f ([guid]::NewGuid().ToString('N')))
+            $common = Join-Path $md 'common'
+            New-Item -ItemType Directory -Path $common -Force | Out-Null
+            Mock New-NeoIPCMetadataPackage { 'EXPORT_JSON' }
+            Mock ConvertTo-NeoIPCMetadataJson { 'CONFIG_JSON' }
+            Mock ConvertFrom-NeoIPCMetadataJsonText { [ordered]@{ marker = $Json } }
+            Mock Add-NeoIPCGeneratedMetadata { [ordered]@{ regenerated = $true } }
+            Mock ConvertFrom-NeoIPCMetadataJson { }
+
+            Update-NeoIPCGeneratedMetadataDirectory -MetadataDirectory $md -Confirm:$false
+
+            Should -Invoke New-NeoIPCMetadataPackage -Times 1 -Exactly -ParameterFilter { $MetadataDirectory -eq $md }
+            Should -Invoke ConvertTo-NeoIPCMetadataJson -Times 1 -Exactly -ParameterFilter { $Path -eq $common }
+            # Export is the assembled install base; Config is the committed common/ tree (not the other way round).
+            Should -Invoke Add-NeoIPCGeneratedMetadata -Times 1 -Exactly -ParameterFilter {
+                $Export['marker'] -eq 'EXPORT_JSON' -and $Config['marker'] -eq 'CONFIG_JSON'
+            }
+            # The regenerated package is written back into common/.
+            Should -Invoke ConvertFrom-NeoIPCMetadataJson -Times 1 -Exactly -ParameterFilter { $OutputDirectory -eq $common }
+        }
+        It 'forwards PathogenCount and SubstanceCount to the generators' {
+            $md = Join-Path $TestDrive ('md2-{0}' -f ([guid]::NewGuid().ToString('N')))
+            New-Item -ItemType Directory -Path (Join-Path $md 'common') -Force | Out-Null
+            Mock New-NeoIPCMetadataPackage { 'E' }
+            Mock ConvertTo-NeoIPCMetadataJson { 'C' }
+            Mock ConvertFrom-NeoIPCMetadataJsonText { [ordered]@{} }
+            Mock Add-NeoIPCGeneratedMetadata { [ordered]@{} }
+            Mock ConvertFrom-NeoIPCMetadataJson { }
+            Update-NeoIPCGeneratedMetadataDirectory -MetadataDirectory $md -PathogenCount 5 -SubstanceCount 7 -Confirm:$false
+            Should -Invoke Add-NeoIPCGeneratedMetadata -Times 1 -Exactly -ParameterFilter { $PathogenCount -eq 5 -and $SubstanceCount -eq 7 }
         }
     }
 
