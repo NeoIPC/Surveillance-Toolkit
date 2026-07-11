@@ -159,11 +159,18 @@ get_validation_exceptions <- function(x) {
   }
 }
 
+# The production NeoIPC DHIS2 host. neoipcr (the library) no longer defaults to
+# any deployment's host — it is a public library for any NeoIPC instance — so
+# the deployment default lives here in the report tooling: a render without an
+# explicit host keeps targeting production, exactly as before.
+NEOIPC_PRODUCTION_DHIS2_HOST <- "neoipc.charite.de"
+
 get_connection_options <- function(scheme = NULL, hostname = NULL,
                                     port = NULL, path = NULL) {
   args <- list()
   if (!is.null(scheme)) args$scheme <- scheme
-  if (!is.null(hostname)) args$hostname <- hostname
+  args$hostname <- if (is.null(hostname)) NEOIPC_PRODUCTION_DHIS2_HOST
+                   else hostname
   if (!is.null(port)) args$port <- port
   if (!is.null(path)) args$path <- path
   do.call(neoipcr::dhis2_connection_options, args)

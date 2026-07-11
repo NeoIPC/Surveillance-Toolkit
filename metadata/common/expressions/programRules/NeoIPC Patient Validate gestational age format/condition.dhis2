@@ -1,1 +1,1 @@
-d2:hasValue( A{NeoIPC Patient Gestational age value} ) && !d2:validatePattern( A{NeoIPC Patient Gestational age value}, '^[2-4]\\d\\+[0-6]$' )
+d2:hasValue( A{NeoIPC Patient Gestational age value} ) && !d2:validatePattern( A{NeoIPC Patient Gestational age value}, '^[2-4][0-9][+][0-6]$' )

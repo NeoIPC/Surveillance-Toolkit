@@ -1,1 +1,42 @@
-d2:hasValue(#{NeoIPC HAP Secondary BSI pathogen 1 value})&&(#{NeoIPC HAP Secondary BSI pathogen 1 value}==0||#{NeoIPC HAP Secondary BSI pathogen 1 value}==77||#{NeoIPC HAP Secondary BSI pathogen 1 value}==196||#{NeoIPC HAP Secondary BSI pathogen 1 value}==243||#{NeoIPC HAP Secondary BSI pathogen 1 value}==297||#{NeoIPC HAP Secondary BSI pathogen 1 value}==303||#{NeoIPC HAP Secondary BSI pathogen 1 value}==369||#{NeoIPC HAP Secondary BSI pathogen 1 value}==503||#{NeoIPC HAP Secondary BSI pathogen 1 value}==522||#{NeoIPC HAP Secondary BSI pathogen 1 value}==626||#{NeoIPC HAP Secondary BSI pathogen 1 value}==849||#{NeoIPC HAP Secondary BSI pathogen 1 value}==850||#{NeoIPC HAP Secondary BSI pathogen 1 value}==865||#{NeoIPC HAP Secondary BSI pathogen 1 value}==871||#{NeoIPC HAP Secondary BSI pathogen 1 value}==878||#{NeoIPC HAP Secondary BSI pathogen 1 value}==908||#{NeoIPC HAP Secondary BSI pathogen 1 value}==1108||#{NeoIPC HAP Secondary BSI pathogen 1 value}==1205||#{NeoIPC HAP Secondary BSI pathogen 1 value}==1236||#{NeoIPC HAP Secondary BSI pathogen 1 value}==1320||#{NeoIPC HAP Secondary BSI pathogen 1 value}==1339||#{NeoIPC HAP Secondary BSI pathogen 1 value}==1401||#{NeoIPC HAP Secondary BSI pathogen 1 value}==1453||#{NeoIPC HAP Secondary BSI pathogen 1 value}==1505||#{NeoIPC HAP Secondary BSI pathogen 1 value}==1720||#{NeoIPC HAP Secondary BSI pathogen 1 value}==1780||#{NeoIPC HAP Secondary BSI pathogen 1 value}==1865||#{NeoIPC HAP Secondary BSI pathogen 1 value}==1908||#{NeoIPC HAP Secondary BSI pathogen 1 value}==2001||#{NeoIPC HAP Secondary BSI pathogen 1 value}==2027||#{NeoIPC HAP Secondary BSI pathogen 1 value}==2057||#{NeoIPC HAP Secondary BSI pathogen 1 value}==2213||#{NeoIPC HAP Secondary BSI pathogen 1 value}==2345||#{NeoIPC HAP Secondary BSI pathogen 1 value}==2362||#{NeoIPC HAP Secondary BSI pathogen 1 value}==2410||#{NeoIPC HAP Secondary BSI pathogen 1 value}==2453)
+d2:hasValue(#{NeoIPC HAP Secondary BSI pathogen 1 value})&&(
+  (
+    #{NeoIPC HAP Secondary BSI pathogen 1 value}==0
+    || #{NeoIPC HAP Secondary BSI pathogen 1 value}==77
+    || #{NeoIPC HAP Secondary BSI pathogen 1 value}==196
+    || #{NeoIPC HAP Secondary BSI pathogen 1 value}==243
+    || #{NeoIPC HAP Secondary BSI pathogen 1 value}==297
+    || #{NeoIPC HAP Secondary BSI pathogen 1 value}==303
+    || #{NeoIPC HAP Secondary BSI pathogen 1 value}==369
+    || #{NeoIPC HAP Secondary BSI pathogen 1 value}==503
+    || #{NeoIPC HAP Secondary BSI pathogen 1 value}==522
+    || #{NeoIPC HAP Secondary BSI pathogen 1 value}==626
+    || #{NeoIPC HAP Secondary BSI pathogen 1 value}==849
+    || #{NeoIPC HAP Secondary BSI pathogen 1 value}==850
+    || #{NeoIPC HAP Secondary BSI pathogen 1 value}==865
+    || #{NeoIPC HAP Secondary BSI pathogen 1 value}==871
+    || #{NeoIPC HAP Secondary BSI pathogen 1 value}==878
+    || #{NeoIPC HAP Secondary BSI pathogen 1 value}==908
+    || #{NeoIPC HAP Secondary BSI pathogen 1 value}==1108
+    || #{NeoIPC HAP Secondary BSI pathogen 1 value}==1205
+    || #{NeoIPC HAP Secondary BSI pathogen 1 value}==1236
+    || #{NeoIPC HAP Secondary BSI pathogen 1 value}==1320
+  )
+  || (
+    #{NeoIPC HAP Secondary BSI pathogen 1 value}==1339
+    || #{NeoIPC HAP Secondary BSI pathogen 1 value}==1401
+    || #{NeoIPC HAP Secondary BSI pathogen 1 value}==1453
+    || #{NeoIPC HAP Secondary BSI pathogen 1 value}==1505
+    || #{NeoIPC HAP Secondary BSI pathogen 1 value}==1720
+    || #{NeoIPC HAP Secondary BSI pathogen 1 value}==1780
+    || #{NeoIPC HAP Secondary BSI pathogen 1 value}==1865
+    || #{NeoIPC HAP Secondary BSI pathogen 1 value}==1908
+    || #{NeoIPC HAP Secondary BSI pathogen 1 value}==2001
+    || #{NeoIPC HAP Secondary BSI pathogen 1 value}==2027
+    || #{NeoIPC HAP Secondary BSI pathogen 1 value}==2057
+    || #{NeoIPC HAP Secondary BSI pathogen 1 value}==2213
+    || #{NeoIPC HAP Secondary BSI pathogen 1 value}==2345
+    || #{NeoIPC HAP Secondary BSI pathogen 1 value}==2362
+    || #{NeoIPC HAP Secondary BSI pathogen 1 value}==2410
+    || #{NeoIPC HAP Secondary BSI pathogen 1 value}==2453
+  )
+)

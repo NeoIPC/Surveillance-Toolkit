@@ -86,10 +86,13 @@
         'New-NeoIPCPathogenRule'
         'New-NeoIPCPathogenFieldGatingVariable'
         'New-NeoIPCPathogenFieldGatingRule'
+        'New-NeoIPCPathogenVirusVariable'
+        'New-NeoIPCPathogenVirusRule'
         'New-NeoIPCSubstanceDataElement'
         'New-NeoIPCSubstanceVariable'
         'New-NeoIPCSubstanceRule'
         'Compare-NeoIPCGeneratedMetadata'
+        'Update-NeoIPCGeneratedMetadataDirectory'
         # Antibiotic-domain generation (option set + ATC/AWaRe groups + group-sets)
         'New-NeoIPCAntimicrobialOptionSet'
         'New-NeoIPCAntibioticOptionGroup'

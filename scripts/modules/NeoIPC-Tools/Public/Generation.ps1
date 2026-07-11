@@ -582,9 +582,14 @@ function New-NeoIPCPathogenRule {
             $codes = @($codeSets[$cat])
             if ($codes.Count -eq 0) { throw "Resistance category '$cat' has an empty code set — cannot build the ASSIGN expression for '$name'." }
             $valueVar = [string]$d['ValueVariable']
-            $terms = ($codes | ForEach-Object { "#{$valueVar}==$_" }) -join '||'
+            # Balanced-tree join (not a flat `-join '||'`): the 2.41 expression-parser
+            # evaluates &&/|| by recursion, so a flat chain of hundreds of pathogen-code
+            # terms overflows the request-thread stack at tracker import. See
+            # Join-NeoIPCBalancedBooleanChain.
+            $terms = Join-NeoIPCBalancedBooleanChain -Operator '||' -Term @(
+                $codes | ForEach-Object { "#{$valueVar}==$_" })
             $action['content'] = "#{$([string]$d['MayBeVariable'])}"
-            $action['data'] = "d2:hasValue(#{$valueVar})&&($terms)"
+            $action['data'] = "d2:hasValue(#{$valueVar})&&$terms"
         }
         else {
             $catDeCode = [string]$d['CategoryDeCode']
@@ -841,9 +846,13 @@ function New-NeoIPCPathogenFieldGatingRule {
             if ($a['UsesCommonCommensalSet']) {
                 if ($commonCommensal.Count -eq 0) { throw "The common-commensal code set is empty — cannot build the recognized-pathogen ASSIGN expression for '$name'." }
                 $valueVar = [string]$d['ValueVariable']
-                $terms = ($commonCommensal | ForEach-Object { "#{$valueVar}==$_" }) -join '||'
+                # Balanced-tree join (see Join-NeoIPCBalancedBooleanChain): a flat `||`
+                # chain of hundreds of common-commensal codes overflows the 2.41
+                # expression-parser's recursive evaluator at tracker import.
+                $terms = Join-NeoIPCBalancedBooleanChain -Operator '||' -Term @(
+                    $commonCommensal | ForEach-Object { "#{$valueVar}==$_" })
                 $action['content'] = [string]$a['Content']
-                $action['data'] = "d2:hasValue(#{$valueVar}) && !($terms)"
+                $action['data'] = "d2:hasValue(#{$valueVar}) && !$terms"
             }
             elseif ($a['Content']) { $action['content'] = [string]$a['Content'] }
             $actions.Add($action)
@@ -854,6 +863,209 @@ function New-NeoIPCPathogenFieldGatingRule {
     }
 
     [ordered]@{ programRules = $rules.ToArray(); programRuleActions = $actions.ToArray() }
+}
+
+function New-NeoIPCPathogenVirusVariable {
+    <#
+    .SYNOPSIS
+        Generate the per-slot `is virus` PROGRAM-RULE VARIABLES of NEOIPC_CORE (HAP primary organism slots).
+    .DESCRIPTION
+        For each HAP primary pathogen slot, a `NeoIPC HAP Pathogen N is virus` CALCULATED_VALUE BOOLEAN variable — the
+        boolean the HAP `set virus` ASSIGN writes (and the pneumonia-definition rules read). Generated alongside its rule
+        (New-NeoIPCPathogenVirusRule); the twin of the recognized-pathogen field-gating variable, but virus-sourced. The
+        UID is preserved from the export by name where present, else minted deterministically (programRuleVariables
+        natural key = name); the program is resolved by code. Fail-loud if the program is absent. Pure object processing —
+        no DHIS2 API calls. Returns a package fragment { programRuleVariables }.
+    .PARAMETER ExistingPackage
+        An already-parsed DHIS2 package/export (hashtable) supplying UIDs to preserve and the NEOIPC_CORE program.
+    .PARAMETER ProgramCode
+        Code of the program the variables belong to. Default: NEOIPC_CORE.
+    .PARAMETER PathogenCount
+        Number of HAP primary organism slots (1-9). Defaults to the module-wide count (3). Pass the same value to
+        New-NeoIPCPathogenVirusRule so the variables and rule stay aligned.
+    .OUTPUTS
+        [ordered] hashtable with key 'programRuleVariables'.
+    #>
+    [CmdletBinding()]
+    [OutputType([System.Collections.Specialized.OrderedDictionary])]
+    param(
+        [Parameter(Mandatory)][System.Collections.IDictionary]$ExistingPackage,
+        [string]$ProgramCode = 'NEOIPC_CORE',
+        [ValidateRange(1, 9)][int]$PathogenCount = $script:NeoIPCPathogenSlotCount
+    )
+
+    $programId = $null
+    foreach ($p in @($ExistingPackage['programs'])) {
+        if ($p -is [System.Collections.IDictionary] -and [string]$p['code'] -eq $ProgramCode) { $programId = [string]$p['id']; break }
+    }
+    if (-not $programId) { throw "Program '$ProgramCode' not found in the package." }
+
+    $prvByName = [System.Collections.Generic.Dictionary[string, string]]::new([System.StringComparer]::Ordinal)
+    foreach ($v in @($ExistingPackage['programRuleVariables'])) {
+        if ($v -is [System.Collections.IDictionary] -and $v['name']) {
+            $nm = [string]$v['name']
+            if ($prvByName.ContainsKey($nm)) { throw "Duplicate program-rule-variable name '$nm' in the package." }
+            $prvByName[$nm] = [string]$v['id']
+        }
+    }
+
+    $seen = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::Ordinal)
+    $out = [System.Collections.Generic.List[object]]::new()
+    foreach ($n in 1..$PathogenCount) {
+        $name = "NeoIPC HAP Pathogen $n is virus"
+        $existingId = if ($prvByName.ContainsKey($name)) { $prvByName[$name] } else { $null }
+        $id = if ($existingId -and (Test-NeoIPCMetadataUid -Id $existingId)) { $existingId }
+        else { New-NeoIPCMetadataUid -Type 'programRuleVariables' -NaturalKey $name }
+        if (-not $seen.Add($id)) { throw "UID collision for program-rule variable '$name' (uid '$id')." }
+
+        $out.Add([ordered]@{
+                id                            = $id
+                name                          = $name
+                programRuleVariableSourceType = 'CALCULATED_VALUE'
+                valueType                     = 'BOOLEAN'
+                useCodeForOptionSet           = $false
+                program                       = [ordered]@{ id = $programId }
+            })
+    }
+    [ordered]@{ programRuleVariables = $out.ToArray() }
+}
+
+function New-NeoIPCPathogenVirusRule {
+    <#
+    .SYNOPSIS
+        Generate the HAP `set virus` PROGRAM RULE + ACTIONS of NEOIPC_CORE from the infectious-agent ontology.
+    .DESCRIPTION
+        The single HAP rule `NeoIPC HAP - set virus` (condition `true`, priority 0) with one ASSIGN action per HAP primary
+        pathogen slot that sets the slot's `is virus` boolean to "the slot has a value and that value is a virus" —
+        `d2:hasValue(#{<slot> value}) && (#{<slot> value}==c1 || …)`, the virus code set from Get-NeoIPCVirusCodeSet over
+        the canonical ontology (organism Ids under the `Viruses` realm). It is the twin of the recognized-pathogen
+        field-gating ASSIGN, but POSITIVE membership (a virus) rather than the NEGATED common-commensal set, and a single
+        multi-action rule (the deployed shape) rather than one rule per slot. The membership chain is built by
+        Join-NeoIPCBalancedBooleanChain, so it is balanced + pretty-printed — the DHIS2 2.41 expression-parser evaluates
+        &&/|| by recursion and overflows on a long flat chain.
+
+        Generating it from the ontology REPLACES the previously hand-authored rule, which had silently drifted from the
+        ontology as viruses were added to the YAML (a virus not enumerated in the stale rule was never flagged); the
+        generator keeps the rule in lockstep with the ontology by construction — which corrects that drift, so the rule
+        now flags every ontology virus. UID policy mirrors the rest of the pipeline: the rule preserves its UID +
+        description from the export by name where present, else mints deterministically; each ASSIGN action preserves the
+        UID of the deployed rule's action with the same assigned variable (content), else mints from
+        `<rule name>|ASSIGN|<content>`; the `is virus` variables are generated by New-NeoIPCPathogenVirusVariable. The HAP
+        program stage is resolved via a slot-1 resistance data element on that stage (deployed stages carry no code).
+        Fail-loud (no silent divergence): a missing program / HAP program stage, an empty virus code set, or a duplicate
+        minted UID throws. Pure file/object processing — no DHIS2 API calls. Returns a package fragment
+        { programRules; programRuleActions }.
+    .PARAMETER ExistingPackage
+        An already-parsed DHIS2 package/export (hashtable) supplying the NEOIPC_CORE program, the HAP program stage
+        (resolved through programStageDataElements), and the deployed rule/actions whose UIDs + description are preserved.
+    .PARAMETER Path
+        Path to the ontology YAML (drives the virus code set). Defaults to the canonical file in the repository.
+    .PARAMETER ProgramCode
+        Code of the program the rule belongs to. Default: NEOIPC_CORE.
+    .PARAMETER PathogenCount
+        Number of HAP primary organism slots (1-9). Defaults to the module-wide count (3). Pass the same value to
+        New-NeoIPCPathogenVirusVariable so the rule and its variables stay aligned.
+    .OUTPUTS
+        [ordered] hashtable with keys 'programRules' and 'programRuleActions'.
+    #>
+    [CmdletBinding()]
+    [OutputType([System.Collections.Specialized.OrderedDictionary])]
+    param(
+        [Parameter(Mandatory)][System.Collections.IDictionary]$ExistingPackage,
+        [Parameter(Position = 0)]
+        [string]$Path = (Join-Path $PSScriptRoot '..' '..' '..' '..' 'metadata' 'common' 'infectious-agents' 'NeoIPC-Infectious-Agents.yaml'),
+        [string]$ProgramCode = 'NEOIPC_CORE',
+        [ValidateRange(1, 9)][int]$PathogenCount = $script:NeoIPCPathogenSlotCount
+    )
+
+    Import-Module powershell-yaml -ErrorAction Stop
+
+    $programId = $null
+    foreach ($p in @($ExistingPackage['programs'])) {
+        if ($p -is [System.Collections.IDictionary] -and [string]$p['code'] -eq $ProgramCode) { $programId = [string]$p['id']; break }
+    }
+    if (-not $programId) { throw "Program '$ProgramCode' not found in the package." }
+
+    $deByCode = [System.Collections.Generic.Dictionary[string, string]]::new([System.StringComparer]::Ordinal)
+    foreach ($de in @($ExistingPackage['dataElements'])) {
+        if ($de -is [System.Collections.IDictionary] -and $de['code']) {
+            $c = [string]$de['code']
+            if ($deByCode.ContainsKey($c)) { throw "Duplicate data-element code '$c' in the package." }
+            $deByCode[$c] = [string]$de['id']
+        }
+    }
+
+    # The deployed program stages carry no code, so resolve the HAP stage by a slot-1 resistance DE that always exists on
+    # it (so the rule resolves even when slots are grown).
+    $stageByDeId = Get-NeoIPCStageByDataElementId -Package $ExistingPackage
+    $anchor = 'NEOIPC_HAP_PATHOGEN_1_3GCR'
+    if (-not ($deByCode.ContainsKey($anchor) -and $stageByDeId.ContainsKey($deByCode[$anchor]))) {
+        throw "Cannot resolve the HAP program stage for 'NeoIPC HAP - set virus' — the anchor data element '$anchor' is absent from the package or not assigned to a stage."
+    }
+    $psId = $stageByDeId[$deByCode[$anchor]]
+
+    $resolvedYaml = Resolve-Path -LiteralPath $Path -ErrorAction Stop
+    $tree = Get-Content -LiteralPath $resolvedYaml -Raw | ConvertFrom-Yaml
+    $virusCodes = @(Get-NeoIPCVirusCodeSet -Node $tree)
+    if ($virusCodes.Count -eq 0) { throw "The virus code set is empty — cannot build the 'set virus' ASSIGN expressions." }
+
+    $ruleName = 'NeoIPC HAP - set virus'
+    $deployedRule = $null
+    foreach ($r in @($ExistingPackage['programRules'])) {
+        if ($r -is [System.Collections.IDictionary] -and [string]$r['name'] -eq $ruleName) { $deployedRule = $r; break }
+    }
+    $deployedRuleId = if ($deployedRule) { [string]$deployedRule['id'] } else { $null }
+    $ruleId = if ($deployedRuleId -and (Test-NeoIPCMetadataUid -Id $deployedRuleId)) { $deployedRuleId }
+    else { New-NeoIPCMetadataUid -Type 'programRules' -NaturalKey $ruleName }
+
+    # Deployed actions of this rule, for UID preservation keyed by the assigned variable (content).
+    $deployedActions = [System.Collections.Generic.List[object]]::new()
+    if ($deployedRuleId) {
+        foreach ($a in @($ExistingPackage['programRuleActions'])) {
+            if ($a -isnot [System.Collections.IDictionary]) { continue }
+            $pr = $a['programRule']
+            if ($pr -is [System.Collections.IDictionary] -and [string]$pr['id'] -eq $deployedRuleId) { $deployedActions.Add($a) }
+        }
+    }
+
+    $actionsSeen = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::Ordinal)
+    $actionRefs = [System.Collections.Generic.List[object]]::new()
+    $actions = [System.Collections.Generic.List[object]]::new()
+    foreach ($n in 1..$PathogenCount) {
+        $valueVar = "NeoIPC HAP Pathogen $n value"
+        $content = "#{NeoIPC HAP Pathogen $n is virus}"
+        $actionId = $null
+        foreach ($da in $deployedActions) {
+            if ([string]$da['programRuleActionType'] -eq 'ASSIGN' -and [string]$da['content'] -eq $content -and (Test-NeoIPCMetadataUid -Id ([string]$da['id']))) {
+                $actionId = [string]$da['id']; break
+            }
+        }
+        if (-not $actionId) { $actionId = New-NeoIPCMetadataUid -Type 'programRuleActions' -NaturalKey ('{0}|ASSIGN|{1}' -f $ruleName, $content) }
+        if (-not $actionsSeen.Add($actionId)) { throw "UID collision for an action of program rule '$ruleName' (uid '$actionId')." }
+
+        $terms = Join-NeoIPCBalancedBooleanChain -Operator '||' -Term @($virusCodes | ForEach-Object { "#{$valueVar}==$_" })
+        $actions.Add([ordered]@{
+                id                    = $actionId
+                programRule           = [ordered]@{ id = $ruleId }
+                programRuleActionType = 'ASSIGN'
+                content               = $content
+                data                  = "d2:hasValue(#{$valueVar})&&$terms"
+            })
+        $actionRefs.Add([ordered]@{ id = $actionId })
+    }
+
+    $rule = [ordered]@{ id = $ruleId; name = $ruleName }
+    # Preserve the deployed description verbatim (not load-bearing, and preserving it avoids a spurious diff); fall back
+    # to the canonical wording only when the export carries none.
+    $desc = if ($deployedRule -and $deployedRule.Contains('description') -and "$([string]$deployedRule['description'])") { [string]$deployedRule['description'] } else { 'Sets the virus variables' }
+    $rule['description'] = $desc
+    $rule['program'] = [ordered]@{ id = $programId }
+    $rule['programStage'] = [ordered]@{ id = $psId }
+    $rule['condition'] = 'true'
+    $rule['priority'] = 0
+    $rule['programRuleActions'] = $actionRefs.ToArray()
+
+    [ordered]@{ programRules = @($rule); programRuleActions = $actions.ToArray() }
 }
 
 function New-NeoIPCSubstanceDataElement {

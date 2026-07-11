@@ -6,6 +6,7 @@ suppressPackageStartupMessages({
   source(file.path(script_dir, "load-neoipcr.R"))
   load_neoipcr(dev_pkg_path = file.path(script_dir, "../../neoipcr"))
   source(file.path(script_dir, "parse-args.R"))
+  source(file.path(script_dir, "helpers.R"))
   library(jsonlite)
 })
 
@@ -65,13 +66,12 @@ if (isTRUE(args$help)) {
   quit(status = 0)
 }
 
-# Connection options — auth handled by neoipcr via env vars or interactive prompt
-conn_args <- list()
-if (!is.null(args$scheme)) conn_args$scheme <- args$scheme
-if (!is.null(args$host)) conn_args$hostname <- args$host
-if (!is.null(args$port)) conn_args$port <- args$port
-if (!is.null(args$path)) conn_args$path <- args$path
-conn_opt <- do.call(neoipcr::dhis2_connection_options, conn_args)
+# Connection options — auth handled by neoipcr via env vars or interactive
+# prompt. get_connection_options() supplies the production host default when
+# --host is omitted (neoipcr itself no longer defaults to any deployment).
+conn_opt <- get_connection_options(
+  scheme = args$scheme, hostname = args$host,
+  port = args$port, path = args$path)
 
 # Dataset options
 surveillance_end_from <- as_date_or_null(args$dateFrom)

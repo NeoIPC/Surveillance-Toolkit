@@ -737,6 +737,34 @@ function Get-NeoIPCCommonCommensalCodeSet {
     @($ids | Sort-Object)
 }
 
+function Get-NeoIPCVirusCodeSet {
+    # The ascending set of organism Ids classified as VIRUSES in the ontology — every Id-bearing node (concept AND
+    # synonym) under the top-level `Viruses` realm of NeoIPC-Infectious-Agents.yaml. This is the set the HAP `set virus`
+    # rule tests each pathogen slot against (a HAP pathogen `is virus` iff its slot holds a value in this set).
+    # "Virus" is STRUCTURAL, not a per-concept flag: the ontology carries no kingdom attribute on a concept, so a
+    # concept is a virus iff it descends from the Viruses realm (the ICTV branch — mirrors how bacteria live under
+    # `Bacteria` and eukaryotes under `Eukaryota`). Synonyms are Id-bearing selectable options too, so a value entered
+    # against a virus synonym must also classify as a virus — hence the full-subtree walk (Get-NeoIPCInfectiousAgentConcept
+    # descends Hierarchies/Synonyms/Children). Ids ascending so the generated ASSIGN expression — and its git diff — is
+    # stable. Pure (no package); the single source the `set virus` rule generator and its tests both expand from. Fails
+    # loud if the Viruses realm is absent, so a malformed ontology can never silently yield an empty (always-false) rule.
+    [CmdletBinding()]
+    [OutputType([int[]])]
+    param([Parameter(Mandatory)][AllowNull()]$Node)
+
+    # The ontology root is a mapping { Metadata; Hierarchies }; a subtree may be passed directly. Accept either.
+    $tops = if ($Node -is [System.Collections.IDictionary] -and $Node.Contains('Hierarchies')) { $Node['Hierarchies'] } else { $Node }
+    $virusRealm = $null
+    foreach ($top in @($tops)) {
+        if ($top -is [System.Collections.IDictionary] -and [string]$top['Name'] -eq 'Viruses') { $virusRealm = $top; break }
+    }
+    if (-not $virusRealm) { throw "The infectious-agent ontology has no top-level 'Viruses' realm — cannot derive the virus code set." }
+
+    $ids = [System.Collections.Generic.List[int]]::new()
+    foreach ($c in @(Get-NeoIPCInfectiousAgentConcept -Node $virusRealm)) { $ids.Add([int]$c['Id']) }
+    @($ids | Sort-Object -Unique)
+}
+
 function Get-NeoIPCPathogenSlotSuffix {
     # The ordered dependent-field suffixes of a pathogen slot on a given stage/kind, per the capability matrix: ''
     # (the organism-selector value DE), then 'NAME', the five resistance suffixes, and — primary slots only — the
