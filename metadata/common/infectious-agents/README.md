@@ -26,6 +26,17 @@ Find-NextFreeInfectiousAgentId
 
 The cmdlet returns `max(existing Id:) + 1`. Gaps left by retired entries are not refilled — IDs are append-only, so a retired ID stays retired and out-of-band downstream consumers don't have to worry about it being silently reused.
 
+## Ontology structure: flag inheritance and virus classification
+
+The ontology is a tree: every node may carry child nodes under `Hierarchies`, `Synonyms`, and `Children`. **A synonym is a first-class, Id-bearing, selectable option**, not just a display alias — a value collected in DHIS2 may be a synonym's `Id`, so downstream classification must treat synonyms exactly like the concepts they belong to.
+
+Two classification mechanisms follow from this, and both are relied upon by the generated DHIS2 program rules (the `set recognized pathogen` / `set virus` ASSIGN rules) **and** by the synthetic-data generator that must produce rule-valid data:
+
+- **`CommonCommensal` (and resistance) flags are inherited.** A node's **effective** flag is the nearest explicit value on its path to the root: its own value if it carries one, otherwise the closest ancestor that does; absent everywhere it defaults to `false`. The flag **flows down** through `Hierarchies`/`Synonyms`/`Children`, so setting `CommonCommensal: true` on a genus marks every species and synonym beneath it without repetition — and an **explicit `false` on a descendant overrides an inherited `true`** (and vice versa). This is why you cannot read a node's flag in isolation: e.g. the *Coagulase-negative staphylococci* group node and the *Staphylococcus epidermidis* species node beneath it can carry different effective flags depending on where the explicit value sits. Resistance flags (`MRSA`, `VRE`, `3GCR`, carbapenem, colistin) use the identical own-or-inherited model.
+- **Virus classification is structural, not a flag.** There is no per-concept "kingdom" attribute. A concept **is a virus iff it descends from the top-level `Viruses` realm** (the ICTV branch) — mirroring how bacteria live under `Bacteria` and eukaryotes under `Eukaryota`. Because synonyms are Id-bearing options too, the virus set is the **full subtree** under `Viruses` (every concept *and* synonym Id), so a value entered against a virus synonym still classifies as a virus.
+
+The canonical implementations are `Get-NeoIPCCommonCommensalFlag` / `Get-NeoIPCCommonCommensalCodeSet` and `Get-NeoIPCVirusCodeSet` in the `NeoIPC-Tools` module — the single source both the rule generator and its tests expand from. Compute effective flags/sets through those functions rather than reading a node's literal `CommonCommensal` value or guessing at kingdom membership.
+
 ## Data sources
 
 The ontology is compiled from the following sources. All citations and source URLs live here; the licensing implications are documented in [`LICENSE.md`](LICENSE.md).

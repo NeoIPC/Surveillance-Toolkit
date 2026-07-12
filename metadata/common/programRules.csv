@@ -496,3 +496,4 @@ OleZ8ZztQBQ,NeoIPC Surveillance end NIV days - validate,,expressions/programRule
 GYKv7YBS4WS,NeoIPC Surveillance end PVC days - validate,,expressions/programRules/NeoIPC Surveillance end PVC days - validate/condition.dhis2,1,D8mSSpOpsKj,DDLi3OGC5Yh,gY4SFKCv9Ss,
 ECeGbWVvXFf,NeoIPC Surveillance end Patient days - set,Automatically calculate the patient days.,expressions/programRules/NeoIPC Surveillance end Patient days - set/condition.dhis2,0,D8mSSpOpsKj,DDLi3OGC5Yh,keCrtq3RtkZ,
 e7OKeQN5jpg,NeoIPC Surveillance end Probiotic days - validate,,expressions/programRules/NeoIPC Surveillance end Probiotic days - validate/condition.dhis2,1,D8mSSpOpsKj,DDLi3OGC5Yh,TMcdpdR5yBs,
+KaUyBtMlag2,NeoIPC HAP IT ratio value - true,"Adjusts the dialog and assigns variables when ""NeoIPC HAP IT ratio value"" is true",expressions/programRules/NeoIPC HAP IT ratio value - true/condition.dhis2,0,D8mSSpOpsKj,gS3zQzPpsgV,cN9UvYEbpdy,
