@@ -313,3 +313,5 @@ PIY50IRnybz,NeoIPC Surveillance end Probiotic days - current event value,DATAELE
 nLl9aH1VyU8,Pneumatosis intestinalis imaging - count,CALCULATED_VALUE,INTEGER,False,D8mSSpOpsKj,,,,
 mAW7JgTrlDE,Pneumoperitoneum - count,CALCULATED_VALUE,INTEGER,False,D8mSSpOpsKj,,,,
 xRaEnfQER4n,Portal venous gas - count,CALCULATED_VALUE,INTEGER,False,D8mSSpOpsKj,,,,
+i7uelgbdYta,NeoIPC HAP IT ratio value,DATAELEMENT_CURRENT_EVENT,BOOLEAN,False,D8mSSpOpsKj,iriHpzXRO5e,,,
+LZBFFRw1esz,NeoIPC HAP IT ratio uint value,CALCULATED_VALUE,INTEGER_ZERO_OR_POSITIVE,False,D8mSSpOpsKj,,,,
