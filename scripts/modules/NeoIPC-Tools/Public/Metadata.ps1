@@ -619,7 +619,10 @@ function Import-NeoIPCMetadata {
         even though it reports status=OK — the analogous optionGroup.options links fine, so it is specific to those
         group-set / rule-action / managed-group collections. The second pass, where every referenced object now
         exists, connects them. No effect with -DryRun. The returned object's ConnectPassStatus carries the second
-        pass's status; the round-trip Test-NeoIPCMetadataImport is the authoritative gate that it worked.
+        pass's status; the round-trip Test-NeoIPCMetadataImport is the authoritative gate that it worked. NOTE: on
+        DHIS2 2.42+ the re-apply drops owned ordered-<list> collections NON-DETERMINISTICALLY (root cause open,
+        ruled out as an L2-cache issue; see tasks/dhis2-242-optiongroups-connect-nondeterministic.md), so the
+        round-trip gate can fail on 2.42+ even though this call reports OK.
     #>
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High', DefaultParameterSetName = 'Path')]
     [OutputType([pscustomobject])]
@@ -700,6 +703,11 @@ function Import-NeoIPCMetadata {
     # Only after a committing pass that did not hard-fail; Test-NeoIPCMetadataImport is the authoritative gate.
     $connectPassStatus = $null
     if ($ConnectReferences -and -not $DryRun -and $status -in 'OK', 'WARNING') {
+        # KNOWN DHIS2 2.42+ issue: this connect re-apply drops the owned ordered-<list> collections it is meant to
+        # link (optionGroupSet.optionGroups et al.) NON-DETERMINISTICALLY and per-instance-stickily; root cause
+        # unresolved (ruled out as an L2-cache issue). ConnectPassStatus below is only the second POST's status,
+        # NOT proof the collections linked — Test-NeoIPCMetadataImport is the authoritative gate. 2.40/2.41 connect
+        # on the first pass. See tasks/dhis2-242-optiongroups-connect-nondeterministic.md.
         Write-Verbose 'Connect pass: re-applying the package to connect same-payload owned-collection memberships...'
         $connectBody = (Invoke-NeoIPCDhis2Post @postArgs -Confirm:$false).Body
         $connectReport = if ($connectBody -and ($connectBody.PSObject.Properties.Name -contains 'response') -and $connectBody.response) { $connectBody.response } else { $connectBody }
