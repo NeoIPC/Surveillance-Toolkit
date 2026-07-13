@@ -184,7 +184,7 @@ $script:NeoIPCMetadataTypeMaps = [ordered]@{
             leftSide  = @{ Wrap = $false; Fields = [ordered]@{ expression = 'string'; missingValueStrategy = 'string'; slidingWindow = 'bool' } }
             rightSide = @{ Wrap = $false; Fields = [ordered]@{ expression = 'string'; missingValueStrategy = 'string'; slidingWindow = 'bool' } } } }
     'trackedEntityTypes'    = @{ NaturalKey = 'name'; Nesting = 'TopLevel'
-        Properties = [ordered]@{ name = 'string'; description = 'string'; featureType = 'string'; allowAuditLog = 'bool'
+        Properties = [ordered]@{ name = 'string'; shortName = 'string'; description = 'string'; featureType = 'string'; allowAuditLog = 'bool'
             maxTeiCountToReturn = 'int'; minAttributesRequiredToSearch = 'int' }
         Nested = [ordered]@{ style = @{ Wrap = $false; Fields = [ordered]@{ icon = 'string' } } } }
     'programs'              = @{ NaturalKey = 'code'; Nesting = 'TopLevel'; Properties = [ordered]@{
