@@ -79,6 +79,10 @@
         'Export-NeoIPCMetadataTranslation'
         'Import-NeoIPCMetadataTranslation'
         'Update-NeoIPCMetadataDirectory'
+        # Play demo-data pipeline (committed synthetic tracker data)
+        'New-NeoIPCPlayDataPackage'
+        'Import-NeoIPCPlayData'
+        'Export-NeoIPCPlayDataCsv'
         # Metadata generation (ontology / matrix-driven)
         'New-NeoIPCPathogenOptionSet'
         'New-NeoIPCPathogenDataElement'
