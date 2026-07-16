@@ -3,19 +3,21 @@
 # This file is distributed under the MIT license
 # Automatically generated, 2025.
 #
+# Libre <6n0n1m0s@proton.me>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: NeoIPC Surveillance Reports 0.9\n"
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
 "POT-Creation-Date: 2026-06-03 22:11+0200\n"
-"PO-Revision-Date: 2026-01-26 22:18+0100\n"
-"Last-Translator: Brar Piening <brar.piening@charite.de>\n"
-"Language-Team: none\n"
+"PO-Revision-Date: 2026-07-16 15:01+0000\n"
+"Last-Translator: Libre <6n0n1m0s@proton.me>\n"
+"Language-Team: Spanish <https://hosted.weblate.org/projects/neoipc/neoipc-reports/es/>\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2026.8.dev0\n"
 
 #. type: Hash Value: 3gcr
 #: reports/common.yaml:1
@@ -133,10 +135,9 @@ msgstr "Las líneas verticales del diagrama de caja representan los cuantiles %s
 
 #. type: Hash Value: fig_sample_size
 #: reports/common.yaml:1
-#, fuzzy, no-wrap
-#| msgid "No of Patients"
+#, no-wrap
 msgid "(N = %s patients)"
-msgstr "Número de pacientes"
+msgstr "(N = %s pacientes)"
 
 #. type: Hash Value: gramm_abbreviation
 #: reports/common.yaml:1
@@ -148,13 +149,13 @@ msgstr "g"
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Department"
-msgstr ""
+msgstr "Departamento"
 
 #. type: Hash Value: headerList admissionsExceedRecordsNote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Admissions may exceed records when a patient had more than one admission episode during the surveillance period"
-msgstr ""
+msgstr "Las admisiones pueden superar los registros cuando un paciente tuvo más de un episodio de admisión durante el periodo de vigilancia"
 
 #. type: Hash Value: headerList allBirthweights
 #: reports/common.yaml:1
@@ -176,10 +177,9 @@ msgstr " y "
 
 #. type: Hash Value: headerList averageSurveillancePeriod
 #: reports/common.yaml:1
-#, fuzzy, no-wrap
-#| msgid "Average surveillance period per patient:\n"
+#, no-wrap
 msgid "Average surveillance period per patient"
-msgstr "Periodo medio de seguimiento por paciente:\n"
+msgstr "Periodo medio de seguimiento por paciente"
 
 #. type: Hash Value: headerList birthweightFilter
 #: reports/common.yaml:1
@@ -213,10 +213,9 @@ msgstr "Datos hasta"
 
 #. type: Hash Value: headerList effectiveAnalysisPeriod
 #: reports/common.yaml:1
-#, fuzzy, no-wrap
-#| msgid "Analysis period"
+#, no-wrap
 msgid "Effective analysis period"
-msgstr "Período de análisis"
+msgstr "Período de análisis efectivo"
 
 #. type: Hash Value: headerList gestationalAgeFilter
 #: reports/common.yaml:1
@@ -238,24 +237,21 @@ msgstr "incluye departamentos de prueba"
 
 #. type: Hash Value: headerList numberOfAdmissions
 #: reports/common.yaml:1
-#, fuzzy, no-wrap
-#| msgid "Number of patient admissions:\n"
+#, no-wrap
 msgid "Number of patient admissions"
-msgstr "Número de ingresos de pacientes:\n"
+msgstr "Número de ingresos del paciente"
 
 #. type: Hash Value: headerList numberOfDepartments
 #: reports/common.yaml:1
-#, fuzzy, no-wrap
-#| msgid "Number of departments contributing at least one patient record:\n"
+#, no-wrap
 msgid "Number of departments contributing at least one patient record"
-msgstr "Número de departamentos que aportan al menos un registro de paciente:\n"
+msgstr "Número de departamentos que aportan al menos un registro de paciente"
 
 #. type: Hash Value: headerList numberOfPatients
 #: reports/common.yaml:1
-#, fuzzy, no-wrap
-#| msgid "Number of patient records:\n"
+#, no-wrap
 msgid "Number of patient records"
-msgstr "Número de registros de pacientes:\n"
+msgstr "Número de registros del paciente"
 
 #. type: Hash Value: headerList specialAnalysisHint
 #: reports/common.yaml:1
@@ -265,43 +261,39 @@ msgstr "Este es un análisis especial que"
 
 #. type: Hash Value: headerList sumOfPatientDays
 #: reports/common.yaml:1
-#, fuzzy, no-wrap
-#| msgid "Sum of patient days:\n"
+#, no-wrap
 msgid "Sum of patient days"
-msgstr "Suma de días de hospitalización:\n"
+msgstr "Suma de días de hospitalización"
 
 #. type: Hash Value: headings antibiotic_utilisation
 #: reports/common.yaml:1
-#, fuzzy, no-wrap
-#| msgid "Antibiotics"
+#, no-wrap
 msgid "Antibiotic Utilisation"
-msgstr "Antibióticos"
+msgstr "Utilización de antibióticos"
 
 #. type: Hash Value: headings antimicrobial_susceptibility_testing
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Antimicrobial Susceptibility Testing"
-msgstr ""
+msgstr "Prueba de susceptibilidad anti‐microbiana"
 
 #. type: Hash Value: headings detection_of_infectious_agents
 #: reports/common.yaml:1
-#, fuzzy, no-wrap
-#| msgid "Infectious Agents"
+#, no-wrap
 msgid "Detection of Infectious Agents"
-msgstr "Agentes infecciosos"
+msgstr "Detección de agentes infecciosos"
 
 #. type: Hash Value: headings device_associated_infections
 #: reports/common.yaml:1
-#, fuzzy, no-wrap
-#| msgid "Number of device-associated infections"
+#, no-wrap
 msgid "Device-Associated Infections"
-msgstr "Número de infecciones asociadas al dispositivo"
+msgstr "Infecciones asociadas al dispositivo"
 
 #. type: Hash Value: headings diagnostics
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Diagnostics"
-msgstr ""
+msgstr "Diagnósticos"
 
 #. type: Hash Value: headings infectious_agents
 #: reports/common.yaml:1
@@ -311,10 +303,9 @@ msgstr "Agentes infecciosos"
 
 #. type: Hash Value: headings infectious_agents_in_nosocomial_infections
 #: reports/common.yaml:1
-#, fuzzy, no-wrap
-#| msgid "Infectious agents detected in nosocomial infections"
+#, no-wrap
 msgid "Infectious Agents Detected in Nosocomial Infections\n"
-msgstr "Agentes infecciosos detectados en infecciones nosocomiales"
+msgstr "Agentes infecciosos detectados en infecciones nosocomiales\n"
 
 #. type: Hash Value: headings introduction
 #: reports/common.yaml:1
@@ -332,7 +323,7 @@ msgstr "Infecciones nosocomiales"
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Organism-Specific Resistance Rates"
-msgstr ""
+msgstr "Índices de resistencia específicos por organismo"
 
 #. type: Hash Value: headings patient_population
 #: reports/common.yaml:1
@@ -342,10 +333,9 @@ msgstr "Población de pacientes"
 
 #. type: Hash Value: headings resistant_pathogens
 #: reports/common.yaml:1
-#, fuzzy, no-wrap
-#| msgid "Resistant pathogen infection rate"
+#, no-wrap
 msgid "Resistant Pathogens"
-msgstr "Tasa de infección por patógenos resistentes"
+msgstr "Patógenos resistentes"
 
 #. type: Hash Value: headings risk_and_protective_factors
 #: reports/common.yaml:1
@@ -355,143 +345,141 @@ msgstr "Factores de riesgo y de protección"
 
 #. type: Hash Value: headings secondary_bsi
 #: reports/common.yaml:1
-#, fuzzy, no-wrap
-#| msgid "Surgical site infection"
+#, no-wrap
 msgid "Secondary Bloodstream Infections"
-msgstr "Infección del sitio quirúrgico"
+msgstr "Infección torrente sanguíneo secundario"
 
 #. type: Hash Value: headings severe_infections_and_nec
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Severe Neonatal Infections and Necrotizing Enterocolitis\n"
-msgstr ""
+msgstr "Infecciones neonatales graves y enterocolitis necrotizante\n"
 
 #. type: Hash Value: headings surgical_procedures_by_category
 #: reports/common.yaml:1
-#, fuzzy, no-wrap
-#| msgid "Surgical procedures by category"
+#, no-wrap
 msgid "Surgical Procedures by Category"
 msgstr "Procedimientos quirúrgicos por categoría"
 
 #. type: Hash Value: methods agent_per_infection
 #: reports/common.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "The agent-per-infection rate measures how frequently specific pathogens are detected relative to the number of infections in which any infectious agent was identified. Values above 100% are expected and indicate polymicrobial infections. Diagnostic challenges specific to neonates — including low blood volume reducing culture sensitivity and elevated contamination risk — may influence detection patterns."
-msgstr ""
+msgstr "La tasa de agentes por infección mide la frecuencia con la que se detectan patógenos específicos en relación con el número de infecciones en las que se identificó algún agente infeccioso. Es normal que los valores superen el 100 % e indican infecciones polimicrobianas. Las dificultades diagnósticas específicas de los recién nacidos —entre ellas, el bajo volumen sanguíneo, que reduce la sensibilidad de los cultivos, y el elevado riesgo de contaminación— pueden influir en los patrones de detección."
 
 #. type: Hash Value: methods antibiotic_utilisation
 #: reports/common.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Antibiotic utilisation is reported per individual substance, grouped by ATC pharmacological subgroup. The exposure density rate measures substance-days per 100 patient-days. Antibiotic days are counted from the first dose to the last dose of a therapy inclusive. Each substance is counted separately; a patient receiving two antibiotics on the same day contributes one day to each substance's tally. Because of combination therapy, the sum of individual substance rates can exceed the total antibiotic exposure rate shown in the risk and protective factors table."
-msgstr ""
+msgstr "El uso de antibióticos se registra por sustancia individual, agrupadas por subgrupo farmacológico de la clasificación ATC. La tasa de densidad de exposición mide los días-sustancia por cada 100 días-paciente. Los días de tratamiento con antibióticos se cuentan desde la primera dosis hasta la última dosis de un tratamiento, ambas incluidas. Cada sustancia se cuenta por separado; un paciente que reciba dos antibióticos el mismo día contribuye con un día al recuento de cada sustancia. Debido a los tratamientos combinados, la suma de las tasas de cada sustancia puede superar la tasa total de exposición a antibióticos que figura en la tabla de factores de riesgo y de protección."
 
 #. type: Hash Value: methods ci_quartile_auto_note
 #: reports/common.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Bootstrap confidence intervals for reference quartiles are displayed only for metrics where quartile values are not suppressed."
-msgstr ""
+msgstr "Los intervalos de confianza de Bootstrap para los cuartiles de referencia solo se muestran para aquellas métricas en las que no se han ocultado los valores de los cuartiles."
 
 #. type: Hash Value: methods ci_quartile_bootstrap
 #: reports/common.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Confidence intervals for reference quartiles are computed using a parametric bootstrap that propagates both within-department sampling uncertainty and cross-department distributional uncertainty. Department-level rates are resampled 2,000 times using non-informative prior distributions, and quartiles are recalculated for each iteration. The reported bounds represent the 2.5th and 97.5th percentiles of the bootstrap distribution."
-msgstr ""
+msgstr "Los intervalos de confianza para los cuartiles de referencia se calculan mediante un bootstrap paramétrico que propaga tanto la incertidumbre muestral intradepartamental como la incertidumbre distributiva interdepartamental. Las tasas a nivel de departamento se remuestrean 2.000 veces utilizando distribuciones a priori no informativas, y los cuartiles se recalculan en cada iteración. Los límites indicados representan los percentiles 2,5 y 97,5 de la distribución del bootstrap."
 
 #. type: Hash Value: methods ci_rates
 #: reports/common.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Confidence intervals for rates use exact Poisson methods when the denominator is an exposure measure (such as patient-days or device-days) and Wilson score intervals when the denominator is a count of discrete entities (such as the number of infections or pathogens tested). Both methods provide reliable coverage for small counts including zero."
-msgstr ""
+msgstr "Los intervalos de confianza para las tasas utilizan métodos exactos de Poisson cuando el denominador es una medida de exposición (como los días-paciente o los días-dispositivo) e intervalos de Wilson cuando el denominador es un recuento de entidades discretas (como el número de infecciones o de patógenos analizados). Ambos métodos ofrecen una cobertura fiable para recuentos pequeños, incluido el cero."
 
 #. type: Hash Value: methods device_associated
 #: reports/common.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Device-associated infections are defined by a time-based association according to the NeoIPC Core Protocol: a vascular catheter must have been in place for at least three consecutive days, and ventilatory support for at least four calendar days, before an infection on that day or the day before qualifies as device-associated. This represents a temporal rather than a proven causal relationship. The denominator is device-days — only days on which the device was present."
-msgstr ""
+msgstr "Las infecciones asociadas a dispositivos se definen en función de una relación temporal, según el Protocolo Básico NeoIPC: un catéter vascular debe haber permanecido colocado durante al menos tres días consecutivos, y el soporte respiratorio durante al menos cuatro días naturales, para que una infección que se produzca ese mismo día o el día anterior se considere asociada al dispositivo. Esto representa una relación temporal, más que una relación causal demostrada. El denominador son los «días de dispositivo», es decir, únicamente los días en los que el dispositivo estuvo presente."
 
 #. type: Hash Value: methods heading
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Methodology"
-msgstr ""
+msgstr "Metodología"
 
 #. type: Hash Value: methods incidence_density
 #: reports/common.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Incidence density rates are calculated per 1,000 patient-days, allowing comparison between departments with different patient volumes and lengths of stay. The primary sepsis/BSI category includes both clinical sepsis and laboratory-confirmed bloodstream infections."
-msgstr ""
+msgstr "Las tasas de densidad de incidencia se calculan por cada 1.000 días-paciente, lo que permite comparar entre servicios con diferentes volúmenes de pacientes y duraciones de la estancia. La categoría de sepsis primaria/infección del torrente sanguíneo (BSI) incluye tanto la sepsis clínica como las infecciones del torrente sanguíneo confirmadas mediante análisis de laboratorio."
 
 #. type: Hash Value: methods infectious_agent_detection
 #: reports/common.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "The infectious agent detection rate measures the proportion of infections in which at least one infectious agent was identified. Higher detection rates for sepsis/BSI may reflect thorough microbiological workup practices. Lower detection rates for NEC are expected because the NEC surveillance definition is based on radiological and clinical criteria, and pathogens are only recorded when a secondary bloodstream infection occurs."
-msgstr ""
+msgstr "La tasa de detección de agentes infecciosos mide la proporción de infecciones en las que se identificó al menos un agente infeccioso. Las tasas de detección más elevadas en el caso de la sepsis y la infección del torrente sanguíneo pueden reflejar unas prácticas exhaustivas de análisis microbiológico. Es de esperar que las tasas de detección sean más bajas en el caso de la NEC, ya que la definición de vigilancia de esta enfermedad se basa en criterios radiológicos y clínicos, y los patógenos solo se registran cuando se produce una infección secundaria del torrente sanguíneo."
 
 #. type: Hash Value: methods organism_resistance
 #: reports/common.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "This section reports organism-specific resistance rates — the proportion of each detected organism that carries a given resistance marker. Unlike the resistant pathogen infection rate, which uses infections as the denominator, this metric uses organism-level detections: for example, the proportion of all tested Klebsiella pneumoniae detections that are carbapenem-resistant."
-msgstr ""
+msgstr "En esta sección se recogen las tasas de resistencia específicas de cada organismo, es decir, la proporción de cada organismo detectado que presenta un marcador de resistencia determinado. A diferencia de la tasa de infección por patógenos resistentes, que utiliza las infecciones como denominador, este indicador se basa en las detecciones a nivel de organismo: por ejemplo, la proporción de todas las detecciones de Klebsiella pneumoniae analizadas que son resistentes a los carbapenémicos."
 
 #. type: Hash Value: methods patient_population
 #: reports/common.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Birth weight and gestational age are the primary case-mix descriptors in neonatal surveillance. Lower birth weight and earlier gestational age are associated with increased vulnerability to healthcare-associated infections. The figures show both the frequency distribution (histogram with density curve) and summary statistics (boxplot with quartiles and pooled arithmetic mean)."
-msgstr ""
+msgstr "El peso al nacer y la edad gestacional son los principales descriptores de la heterogeneidad de los casos en la vigilancia neonatal. Un peso al nacer más bajo y una edad gestacional más temprana se asocian con una mayor vulnerabilidad a las infecciones asociadas a la asistencia sanitaria. Las figuras muestran tanto la distribución de frecuencias (histograma con curva de densidad) como las estadísticas resumidas (diagrama de caja con cuartiles y media aritmética combinada)."
 
 #. type: Hash Value: methods pooled_rate
 #: reports/common.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "The pooled rate is the arithmetic mean across all individual records in the reference population. Because it is calculated at the patient level rather than as an average of department-level rates, the pooled rate can fall outside the interquartile range, which is derived from department-level rates."
-msgstr ""
+msgstr "La tasa combinada es la media aritmética de todos los registros individuales de la población de referencia. Dado que se calcula a nivel de paciente y no como una media de las tasas a nivel de servicio, la tasa combinada puede situarse fuera del rango intercuartílico, que se obtiene a partir de las tasas a nivel de servicio."
 
 #. type: Hash Value: methods quartiles
 #: reports/common.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Reference data quartiles represent the 25th percentile (Q₁), median (Q₂) and 75th percentile (Q₃) of department-level rates. Quartiles are displayed only when at least five departments contribute to the denominator and the metric is frequent enough that a typical department would be expected to observe at least one event based on the pooled rate. When these conditions are not met, quartiles are suppressed to avoid presenting unreliable distributional estimates."
-msgstr ""
+msgstr "Los cuartiles de los datos de referencia representan el percentil 25 (Q₁), la mediana (Q₂) y el percentil 75 (Q₃) de las tasas a nivel de departamento. Los cuartiles solo se muestran cuando al menos cinco departamentos contribuyen al denominador y el indicador es lo suficientemente frecuente como para que, según la tasa combinada, se espere que un departamento típico registre al menos un caso. Cuando no se cumplen estas condiciones, se omiten los cuartiles para evitar presentar estimaciones de distribución poco fiables."
 
 #. type: Hash Value: methods resistance_test
 #: reports/common.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "The antimicrobial susceptibility testing (AST) rate measures the proportion of eligible pathogens for which a resistance test result was recorded. Low AST rates may indicate gaps in microbiological diagnostic capacity and can limit the ability to detect resistant organisms."
-msgstr ""
+msgstr "La tasa de pruebas de sensibilidad a los antimicrobianos (AST) mide la proporción de patógenos elegibles para los que se ha registrado un resultado de la prueba de resistencia. Unas tasas bajas de AST pueden indicar deficiencias en la capacidad de diagnóstico microbiológico y pueden limitar la capacidad para detectar organismos resistentes."
 
 #. type: Hash Value: methods resistant_pathogens
 #: reports/common.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "This section reports the rate at which detected pathogens carry specific resistance markers. An empty table indicates that no resistant organisms were detected among tested pathogens — it does not indicate that testing was not performed."
-msgstr ""
+msgstr "En esta sección se indica la proporción de patógenos detectados que presentan marcadores de resistencia específicos. Una tabla vacía indica que no se han detectado organismos resistentes entre los patógenos analizados; no significa que no se hayan realizado las pruebas."
 
 #. type: Hash Value: methods resistant_pathogens_ast_ref
 #: reports/common.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Resistance testing completeness is reported separately in the antimicrobial susceptibility testing section."
-msgstr ""
+msgstr "La exhaustividad de las pruebas de resistencia se describe por separado en la sección dedicada a las pruebas de sensibilidad a los antimicrobianos."
 
 #. type: Hash Value: methods risk_density
 #: reports/common.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Exposure density rates measure the number of days a risk or protective factor was present per 100 patient-days. Device and ventilation days require the device or support to be in place for at least 12 hours on that calendar day. A human milk day requires that the patient's enteral feeding exclusively consists of human milk (including donor milk and fortified breast milk). Probiotic days require an oral probiotic containing Lactobacillus spp. or Bifidobacterium spp. A kangaroo care day is recorded when the patient received intensive skin-to-skin contact for at least 2 hours on a given calendar day. Antibiotic days are counted from the first dose to the last dose of a therapy inclusive, including days where doses were skipped, but not days after the last dose. Antibiotic exposure is recorded per individual substance. For reporting, substance-days are aggregated into WHO AWaRe categories (Access, Watch, Reserve); combination therapy means a single patient-day may contribute substance-days to multiple categories."
-msgstr ""
+msgstr "Las tasas de densidad de exposición miden el número de días en los que un factor de riesgo o de protección estuvo presente por cada 100 días-paciente. Los días de uso de dispositivos y de ventilación requieren que el dispositivo o el soporte estén en uso durante al menos 12 horas en ese día natural. Un día de leche materna requiere que la alimentación enteral del paciente consista exclusivamente en leche materna (incluida la leche de donante y la leche materna enriquecida). Los días de probióticos requieren la administración de un probiótico oral que contenga Lactobacillus spp. o Bifidobacterium spp. Se registra un día de «cuidado canguro» cuando el paciente ha recibido contacto piel con piel intensivo durante al menos 2 horas en un día natural determinado. Los días de tratamiento con antibióticos se cuentan desde la primera dosis hasta la última dosis de un tratamiento, ambas incluidas, incluyendo los días en los que se omitieron dosis, pero no los días posteriores a la última dosis. La exposición a los antibióticos se registra por sustancia individual. A efectos de la presentación de informes, los días-sustancia se agrupan en las categorías AWaRe de la OMS (Acceso, Vigilancia, Reserva); el tratamiento combinado significa que un único día-paciente puede aportar días-sustancia a varias categorías."
 
 #. type: Hash Value: methods secondary_bsi
 #: reports/common.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "A secondary bloodstream infection is a BSI attributed to a site-specific infection (pneumonia, NEC, or SSI) when the same organism is identified within a 17-day window around the primary infection (3 days before through 13 days after). Catheter-associated infections are excluded. Secondary BSI rates tend to have small event counts, which frequently leads to quartile suppression."
-msgstr ""
+msgstr "Una infección secundaria del torrente sanguíneo es aquella atribuida a una infección específica de un sitio (neumonía, colitis necrotizante o infección del sitio quirúrgico) cuando se identifica el mismo microorganismo en un intervalo de 17 días en torno a la infección primaria (desde 3 días antes hasta 13 días después). Se excluyen las infecciones asociadas a catéteres. Las tasas de infección secundaria del torrente sanguíneo suelen presentar un número reducido de casos, lo que con frecuencia da lugar a la supresión de cuartiles."
 
 #. type: Hash Value: methods sparse_data
 #: reports/common.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Rates based on small numbers of events are inherently unstable and may not reflect systematic patterns. Where this applies, individual table rows are flagged accordingly."
-msgstr ""
+msgstr "Las tasas basadas en un número reducido de casos son intrínsecamente inestables y pueden no reflejar patrones sistemáticos. Cuando esto ocurre, las filas correspondientes de la tabla se señalan como tales."
 
 #. type: Hash Value: methods surgical_procedures
 #: reports/common.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Surgical procedure rates are calculated per 100 patients, not per 1,000 patient-days. One patient may contribute multiple procedures."
-msgstr ""
+msgstr "Las tasas de intervenciones quirúrgicas se calculan por cada 100 pacientes, no por cada 1.000 días de hospitalización. Un mismo paciente puede ser objeto de varias intervenciones."
 
 #. type: Hash Value: mrsa
 #: reports/common.yaml:1
@@ -503,19 +491,19 @@ msgstr "Staphylococcus aureus resistente a la meticilina (SARM)"
 #: reports/common.yaml:1
 #, no-wrap
 msgid "No data."
-msgstr ""
+msgstr "Sin datos."
 
 #. type: Hash Value: nos_footnote
 #: reports/common.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "n.o.s. = not otherwise specified; isolates identified to genus but not species level."
-msgstr ""
+msgstr "n.e. = no especificado; cepas identificadas a nivel de género, pero no de especie."
 
 #. type: Hash Value: not_available
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Not available."
-msgstr ""
+msgstr "No disponible."
 
 #. type: Hash Value: other
 #: reports/common.yaml:1
@@ -545,20 +533,19 @@ msgstr "Infección grave"
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Fewer than {threshold} events; interpret rate and confidence interval with caution."
-msgstr ""
+msgstr "Menos de {threshold} eventos; se recomienda interpretar la tasa y el intervalo de confianza con precaución."
 
 #. type: Hash Value: sparse_data_footnote_no_ci
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Fewer than {threshold} events; interpret rate with caution."
-msgstr ""
+msgstr "Menos de {threshold} eventos; interpretar la tasa con precaución."
 
 #. type: Hash Value: surgical_procedures
 #: reports/common.yaml:1
-#, fuzzy, no-wrap
-#| msgid "Surgical Procedure Rate"
+#, no-wrap
 msgid "Surgical Procedures"
-msgstr "Tasa de procedimientos quirúrgicos"
+msgstr "Intervenciones quirúrgicas"
 
 #. type: Hash Value: table_headers n
 #: reports/common.yaml:1
@@ -607,7 +594,7 @@ msgstr "%s: Número total de patógenos resistentes a los antibióticos en todas
 #, fuzzy, no-wrap
 #| msgid "%s: The resistant pathogen infection rate calculated across all infants from all departments."
 msgid "No resistant pathogen infection data available for this report settings."
-msgstr "%s: Tasa de infección por patógenos resistentes calculada entre todos los bebés de todos los departamentos."
+msgstr "No hay datos disponibles sobre infecciones por patógenos resistentes en los entornos objeto de este informe."
 
 #. type: Hash Value: tbl-abr-infection-rate pooled_footnote
 #: reports/common.yaml:1
@@ -644,7 +631,7 @@ msgstr "Número de patógenos resistentes a los antibióticos en infecciones"
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Resistance categories are not mutually exclusive. An organism may meet the criteria for more than one category and will appear under each applicable one."
-msgstr ""
+msgstr "Las categorías de resistencia no son mutuamente excluyentes. Un organismo puede cumplir los criterios de más de una categoría y aparecerá en cada una de las que le sean aplicables."
 
 #. type: Hash Value: tbl-abr-infection-rate tbl-cap
 #: reports/common.yaml:1
@@ -656,7 +643,7 @@ msgstr "Infecciones nosocomiales por patógenos resistentes"
 #: reports/common.yaml:1
 #, no-wrap
 msgid "The Total row counts infections in which at least one resistant pathogen of this resistance category was detected. Because a single infection may involve resistant organisms from more than one organism group, the organism-level subtotals may sum to more than the Total."
-msgstr ""
+msgstr "La fila «Total» recoge los casos de infección en los que se ha detectado al menos un patógeno resistente de esta categoría de resistencia. Dado que una misma infección puede implicar organismos resistentes pertenecientes a más de un grupo de organismos, es posible que la suma de los subtotales a nivel de organismo sea superior al «Total»."
 
 #. type: Hash Value: tbl-agent-per-infection-rate n_footnote
 #: reports/common.yaml:1
@@ -666,10 +653,9 @@ msgstr "%s: Número total de agentes infecciosos en todas las infecciones."
 
 #. type: Hash Value: tbl-agent-per-infection-rate no_data
 #: reports/common.yaml:1
-#, fuzzy, no-wrap
-#| msgid "No of infections with agent"
+#, no-wrap
 msgid "No infectious agent data available for this report settings."
-msgstr "Número de infecciones con el agente"
+msgstr "No hay datos disponibles sobre agentes infecciosos para los ajustes de este informe."
 
 #. type: Hash Value: tbl-agent-per-infection-rate pooled_footnote
 #: reports/common.yaml:1
@@ -710,15 +696,15 @@ msgstr "Agentes infecciosos detectados en infecciones nosocomiales"
 
 #. type: Hash Value: tbl-antibiotic-utilisation atc_footnote
 #: reports/common.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "ATC: Anatomical Therapeutic Chemical classification (WHO). Substances are grouped by pharmacological subgroup (ATC 5th level). See %s for details."
-msgstr ""
+msgstr "ATC: Clasificación Anatómica, Terapéutica y Química (OMS). Las sustancias se agrupan por subgrupos farmacológicos (5.º nivel ATC). Para más detalles, véase %s."
 
 #. type: Hash Value: tbl-antibiotic-utilisation aware_column_footnote
 #: reports/common.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "WHO AWaRe classification (Access, Watch, Reserve). See %s."
-msgstr ""
+msgstr "Clasificación AWaRe de la OMS (Acceso, Vigilancia, Reserva). Véase %s."
 
 #. type: Hash Value: tbl-antibiotic-utilisation exposure_density_rate
 #: reports/common.yaml:1
@@ -739,7 +725,7 @@ msgstr "%s: Número agregado de infecciones asociadas a dispositivos en todos lo
 #, fuzzy, no-wrap
 #| msgid "No of infections with agent"
 msgid "No antibiotic utilisation data available for this report settings."
-msgstr "Número de infecciones con el agente"
+msgstr "No se dispone de datos sobre el uso de antibióticos para los entornos objeto de este informe."
 
 #. type: Hash Value: tbl-antibiotic-utilisation pooled_footnote
 #: reports/common.yaml:1
@@ -757,15 +743,15 @@ msgstr "%s, %s, %s: Los cuartiles (%s, %s y %s cuantiles) de las tasas de densid
 
 #. type: Hash Value: tbl-antibiotic-utilisation substance_days
 #: reports/common.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Substance-days"
-msgstr ""
+msgstr "Días de substancia"
 
 #. type: Hash Value: tbl-antibiotic-utilisation tbl-cap
 #: reports/common.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Antibiotic utilisation by pharmacological subgroup and substance"
-msgstr ""
+msgstr "Uso de antibióticos por subgrupo farmacológico y sustancia"
 
 #. type: Hash Value: tbl-device-associated-incidence-density-rates cvc
 #: reports/common.yaml:1
@@ -826,9 +812,9 @@ msgstr "Neumonía asociada al soporte ventilatorio"
 
 #. type: Hash Value: tbl-device-associated-incidence-density-rates no_data
 #: reports/common.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "No device-associated infection data available for this report settings."
-msgstr ""
+msgstr "No hay datos disponibles sobre infecciones asociadas a dispositivos para los parámetros de este informe."
 
 #. type: Hash Value: tbl-device-associated-incidence-density-rates pooled_footnote
 #: reports/common.yaml:1
@@ -892,7 +878,7 @@ msgstr "Número de infecciones"
 #, fuzzy, no-wrap
 #| msgid "No of infections with agent"
 msgid "No infection data available for this report settings."
-msgstr "Número de infecciones con el agente"
+msgstr "No hay datos sobre infecciones disponibles para los parámetros de este informe."
 
 #. type: Hash Value: tbl-incidence-density-rates pooled_footnote
 #: reports/common.yaml:1
@@ -912,7 +898,7 @@ msgstr "%s, %s, %s: Los cuartiles (cuartiles del %s, %s y %s) de las tasas de de
 #, fuzzy, no-wrap
 #| msgid "%s: Combines the outcomes primary sepsis/BSI and pneumonia"
 msgid "%s is a composite endpoint combining primary sepsis/BSI and pneumonia."
-msgstr "%s: combina los resultados de sepsis primaria/BSI y neumonía"
+msgstr "%s es un criterio de valoración compuesto que combina la sepsis/infección de la sangre (BSI) primaria y la neumonía."
 
 #. type: Hash Value: tbl-incidence-density-rates tbl-cap
 #: reports/common.yaml:1
@@ -931,7 +917,7 @@ msgstr "%s: Número agregado de infecciones en las que se registró al menos un 
 #, fuzzy, no-wrap
 #| msgid "No of infections with agent"
 msgid "No infectious agent detection data available for this report settings."
-msgstr "Número de infecciones con el agente"
+msgstr "No hay datos disponibles sobre la detección de agentes infecciosos para los entornos de este informe."
 
 #. type: Hash Value: tbl-infectious-agent-detection-rate pooled_footnote
 #: reports/common.yaml:1
@@ -982,7 +968,7 @@ msgstr "%s: Número total de infecciones en todos los bebés."
 #, fuzzy, no-wrap
 #| msgid "No of infections with agent"
 msgid "No organism-specific resistance data available for this report settings."
-msgstr "Número de infecciones con el agente"
+msgstr "No se dispone de datos sobre la resistencia específica de ningún organismo para los parámetros de este informe."
 
 #. type: Hash Value: tbl-organism-resistance-rate pooled_footnote
 #: reports/common.yaml:1
@@ -1000,9 +986,9 @@ msgstr "%s, %s, %s: Los cuartiles (cuartiles del %s, %s y %s) de las tasas de de
 
 #. type: Hash Value: tbl-organism-resistance-rate rate_denominator
 #: reports/common.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Number of tested detections of the organism"
-msgstr ""
+msgstr "Número de detecciones del organismo analizadas"
 
 #. type: Hash Value: tbl-organism-resistance-rate rate_name
 #: reports/common.yaml:1
@@ -1045,9 +1031,9 @@ msgstr "%s: El número agregado de patógenos resistentes a los antibióticos qu
 
 #. type: Hash Value: tbl-resistance-test-rate no_data
 #: reports/common.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "No antibiotic resistance diagnostics data available for this report settings."
-msgstr ""
+msgstr "No hay datos de diagnóstico sobre la resistencia a los antibióticos disponibles para los parámetros de este informe."
 
 #. type: Hash Value: tbl-resistance-test-rate pooled_footnote
 #: reports/common.yaml:1
@@ -1106,9 +1092,9 @@ msgstr "Cualquier antibiótico"
 
 #. type: Hash Value: tbl-risk-density-rates aware_footnote
 #: reports/common.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "WHO AWaRe group (see %s). Each antibiotic substance is counted separately. A patient receiving two antibiotics on the same day contributes one day to each substance's tally — so one patient-day may be counted in both the Access and Watch group totals simultaneously."
-msgstr ""
+msgstr "Grupo AWaRe de la OMS (consulte %s). Cada sustancia antibiótica se contabiliza por separado. Un paciente que reciba dos antibióticos el mismo día cuenta como un día en el recuento de cada sustancia; por lo tanto, un día-paciente puede contabilizarse simultáneamente en los totales de los grupos «Access» y «Watch»."
 
 #. type: Hash Value: tbl-risk-density-rates days_with_risk_factor
 #: reports/common.yaml:1
@@ -1125,15 +1111,15 @@ msgstr "Tasa de densidad de riesgo"
 
 #. type: Hash Value: tbl-risk-density-rates kmc_day_footnote
 #: reports/common.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "A kangaroo care day is recorded when the patient received intensive skin-to-skin contact for at least 2 hours on a given calendar day."
-msgstr ""
+msgstr "Se registra un día de «cuidado canguro» cuando el paciente ha recibido contacto piel con piel intensivo durante al menos 2 horas en un día natural determinado."
 
 #. type: Hash Value: tbl-risk-density-rates no_data
 #: reports/common.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "No risk/protective factor data available for this report settings."
-msgstr ""
+msgstr "No hay datos disponibles sobre factores de riesgo o de protección para los entornos objeto de este informe."
 
 #. type: Hash Value: tbl-risk-density-rates pooled_footnote
 #: reports/common.yaml:1
@@ -1189,9 +1175,9 @@ msgstr "%s: Número agregado de infecciones en las que se registró al menos un 
 
 #. type: Hash Value: tbl-secondary-bsi-rates no_data
 #: reports/common.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "No secondary BSI data available for this report settings."
-msgstr ""
+msgstr "No hay datos secundarios de BSI disponibles para los parámetros de este informe."
 
 #. type: Hash Value: tbl-secondary-bsi-rates pooled_footnote
 #: reports/common.yaml:1
@@ -1216,15 +1202,15 @@ msgstr "Número de infecciones en las que se detectó un patógeno"
 
 #. type: Hash Value: tbl-secondary-bsi-rates rate_footnote
 #: reports/common.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "%s: The secondary BSI rate for the department calculated as infections with secondary BSI per 100 infections with follow-up for secondary BSI."
-msgstr ""
+msgstr "%s: La tasa de infecciones sanguíneas secundarias (BSI) del departamento, calculada como el número de infecciones sanguíneas secundarias por cada 100 infecciones con seguimiento para detectar infecciones sanguíneas secundarias."
 
 #. type: Hash Value: tbl-secondary-bsi-rates rate_name
 #: reports/common.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Secondary BSI rate"
-msgstr ""
+msgstr "Tasa de BSI secundaria"
 
 #. type: Hash Value: tbl-secondary-bsi-rates rate_numerator
 #: reports/common.yaml:1
@@ -1278,9 +1264,9 @@ msgstr "Neurocirugía"
 
 #. type: Hash Value: tbl-surgical-procedure-rates no_data
 #: reports/common.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "No surgical procedure data available for this report."
-msgstr ""
+msgstr "No hay datos disponibles sobre intervenciones quirúrgicas para este informe."
 
 #. type: Hash Value: tbl-surgical-procedure-rates not_surgery
 #: reports/common.yaml:1
@@ -1369,27 +1355,27 @@ msgstr "w"
 
 #. type: Hash Value: worldBankClassNames H
 #: reports/common.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "High income"
-msgstr ""
+msgstr "Ingresos altos"
 
 #. type: Hash Value: worldBankClassNames L
 #: reports/common.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Low income"
-msgstr ""
+msgstr "Ingresos bajos"
 
 #. type: Hash Value: worldBankClassNames LM
 #: reports/common.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Lower middle income"
-msgstr ""
+msgstr "Ingresos medios más bajos"
 
 #. type: Hash Value: worldBankClassNames UM
 #: reports/common.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Upper middle income"
-msgstr ""
+msgstr "Ingresos medios superiores"
 
 #. type: Hash Value: format pdf author-meta
 #: reports/Partner-Report/_quarto-en.yml:1
@@ -1430,93 +1416,93 @@ msgstr "Informe del socio de vigilancia NeoIPC"
 
 #. type: Hash Value: figure_interpretation birth_weight_higher_median
 #: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Your department's median birth weight is higher than the reference population, indicating a shift toward higher birth weights in your population. This should be considered when interpreting infection rates and other clinical outcomes.\n"
-msgstr ""
+msgstr "El peso medio al nacer de su departamento es superior al de la población de referencia, lo que indica una tendencia hacia pesos al nacer más elevados en su población. Esto debe tenerse en cuenta a la hora de interpretar las tasas de infección y otros resultados clínicos.\n"
 
 #. type: Hash Value: figure_interpretation birth_weight_lower_median
 #: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Your department’s median birth weight is lower than the reference population, indicating a shift toward lower birth weights in your population. This should be considered when interpreting infection rates and other clinical outcomes.\n"
-msgstr ""
+msgstr "El peso medio al nacer de su departamento es inferior al de la población de referencia, lo que indica una tendencia hacia pesos al nacer más bajos en su población. Esto debe tenerse en cuenta a la hora de interpretar las tasas de infección y otros resultados clínicos.\n"
 
 #. type: Hash Value: figure_interpretation birth_weight_similar_median
 #: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Your department's median birth weight is similar to the reference population, suggesting comparable case mix in terms of birth weight distribution. This facilitates direct comparison of infection rates and clinical outcomes.\n"
-msgstr ""
+msgstr "El peso medio al nacer de su departamento es similar al de la población de referencia, lo que sugiere una composición de casos comparable en cuanto a la distribución del peso al nacer. Esto facilita la comparación directa de las tasas de infección y los resultados clínicos.\n"
 
 #. type: Hash Value: figure_interpretation gestational_age_higher_median
 #: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Your department's median gestational age is higher than the reference population, indicating a shift toward higher gestational ages in your population. This should be considered when interpreting infection rates and other clinical outcomes.\n"
-msgstr ""
+msgstr "La edad gestacional mediana de su departamento es superior a la de la población de referencia, lo que indica una tendencia hacia edades gestacionales más avanzadas en su población. Esto debe tenerse en cuenta a la hora de interpretar las tasas de infección y otros resultados clínicos.\n"
 
 #. type: Hash Value: figure_interpretation gestational_age_lower_median
 #: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Your department's median gestational age is lower than the reference population, indicating a shift toward lower gestational ages in your population. This should be considered when interpreting infection rates and other clinical outcomes.\n"
-msgstr ""
+msgstr "La edad gestacional mediana de su departamento es inferior a la de la población de referencia, lo que indica una tendencia hacia edades gestacionales más bajas en su población. Esto debe tenerse en cuenta a la hora de interpretar las tasas de infección y otros resultados clínicos.\n"
 
 #. type: Hash Value: figure_interpretation gestational_age_similar_median
 #: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Your department's median gestational age is similar to the reference population, indicating comparable patient maturity profiles. This similarity in case mix facilitates meaningful comparison of infection prevention outcomes.\n"
-msgstr ""
+msgstr "La edad gestacional mediana de su departamento es similar a la de la población de referencia, lo que indica que los perfiles de madurez de los pacientes son comparables. Esta similitud en la composición de los casos facilita una comparación significativa de los resultados en materia de prevención de infecciones.\n"
 
 #. type: Hash Value: figure_interpretation narrower_distribution
 #: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Your department shows a narrower distribution (smaller interquartile range), suggesting more homogeneous patient characteristics compared to the reference population.\n"
-msgstr ""
+msgstr "Su departamento presenta una distribución más estrecha (un rango intercuartílico menor), lo que sugiere que las características de los pacientes son más homogéneas en comparación con la población de referencia.\n"
 
 #. type: Hash Value: figure_interpretation no_outliers
 #: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "All metrics fall within the interquartile range (25th-75th percentile) of the reference population, suggesting similiar patient characteristics.\n"
-msgstr ""
+msgstr "Todos los parámetros se sitúan dentro del rango intercuartílico (percentiles 25 y 75) de la población de referencia, lo que sugiere que las características de los pacientes son similares.\n"
 
 #. type: Hash Value: figure_interpretation wider_distribution
 #: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Your department shows a wider distribution (larger interquartile range), indicating more heterogeneous patient characteristics compared to the reference population.\n"
-msgstr ""
+msgstr "Su departamento presenta una distribución más amplia (un rango intercuartílico mayor), lo que indica que las características de los pacientes son más heterogéneas en comparación con la población de referencia.\n"
 
 #. type: Hash Value: headerList benchmarkComparabilityHeader
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Benchmark composition"
-msgstr ""
+msgstr "Composición del índice de referencia"
 
 #. type: Hash Value: headerList effectiveAnalysisPeriodFootnote
 #: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "The effective analysis period is the time span between the surveillance end date of the earliest included patient and the surveillance end date of the latest included patient in the dataset.\n"
-msgstr ""
+msgstr "El periodo de análisis efectivo es el intervalo de tiempo comprendido entre la fecha de finalización del seguimiento del primer paciente incluido y la fecha de finalización del seguimiento del último paciente incluido en el conjunto de datos.\n"
 
 #. type: Hash Value: headerList filterDiffersFootnote
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Note: This filter differs from the reference dataset.\n"
-msgstr ""
+msgstr "Nota: Este filtro difiere del conjunto de datos de referencia.\n"
 
 #. type: Hash Value: headerList multiCountryBenchmarkHint
 #: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "The reference data aggregates information from neonatal departments in several countries. While ideally a single-country benchmark would be preferable, aggregating data across multiple countries is pragmatically necessary when sufficient data from a single country is not available. This means that comparability may be limited due to different healthcare systems and resources available in different countries.\n"
-msgstr ""
+msgstr "Los datos de referencia recogen información de los servicios de neonatología de varios países. Aunque lo ideal sería disponer de un punto de referencia de un solo país, la agregación de datos de varios países resulta necesaria desde un punto de vista práctico cuando no se dispone de datos suficientes de un solo país. Esto significa que la comparabilidad puede verse limitada debido a las diferencias entre los sistemas sanitarios y los recursos disponibles en los distintos países.\n"
 
 #. type: Hash Value: headerList singleCountryBenchmarkHint
 #: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "The reference data presents information from neonatal departments in a single country. While this provides a more relevant benchmark due to the relative homogeneity of the healthcare system, your department's country differs from the reference country, which may affect comparability.\n"
-msgstr ""
+msgstr "Los datos de referencia recogen información de los servicios de neonatología de un único país. Aunque esto ofrece un punto de referencia más pertinente debido a la relativa homogeneidad del sistema sanitario, el país de su servicio difiere del país de referencia, lo que puede afectar a la comparabilidad.\n"
 
 #. type: Hash Value: headerList wbClassMismatchAddendum
 #: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Additionally, the World Bank income classifications differ between your data and the reference data (%s: %s; %s: %s), which may indicate even more substantial differences in healthcare system resources and infrastructure, further affecting comparability of certain indicators.\n"
-msgstr ""
+msgstr "Además, las clasificaciones de ingresos del Banco Mundial difieren entre sus datos y los datos de referencia (%s: %s; %s: %s), lo que podría indicar diferencias aún más sustanciales en los recursos y la infraestructura del sistema sanitario, lo que afectaría aún más a la comparabilidad de determinados indicadores.\n"
 
 #. type: Hash Value: headings birth_weight_distribution
 #: reports/Partner-Report/content/_sR.yaml:1
@@ -1543,187 +1529,187 @@ msgstr "Factores de riesgo y de protección"
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Both third-generation cephalosporin resistance (3GCR) and carbapenem resistance (CARBR) are elevated, indicating broad Gram-negative resistance. This significantly limits treatment options and may warrant enhanced infection control measures and antimicrobial stewardship review."
-msgstr ""
+msgstr "Tanto la resistencia a las cefalosporinas de tercera generación (3GCR) como la resistencia a los carbapenémicos (CARBR) presentan niveles elevados, lo que indica una amplia resistencia de las bacterias Gram‐negativas. Esto limita significativamente las opciones terapéuticas y puede justificar la adopción de medidas reforzadas de control de infecciones y una revisión de la gestión de los anti‐microbianos."
 
 #. type: Hash Value: outlier abr_gram_negative_3gcr_high_only
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Elevated third-generation cephalosporin resistance (3GCR) without corresponding carbapenem resistance elevation may indicate extended-spectrum beta-lactamase (ESBL) production. Carbapenems may remain effective for these organisms."
-msgstr ""
+msgstr "Una resistencia elevada a las cefalosporinas de tercera generación (3GCR) sin el correspondiente aumento de la resistencia a los carbapenémicos puede indicar la producción de beta‐lactamasas de espectro ampliado (BLEA). Los carbapenémicos pueden seguir siendo eficaces frente a estos microorganismos."
 
 #. type: Hash Value: outlier abr_gram_negative_cor_high
 #: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Elevated colistin resistance (COLR) is a critical concern as colistin is often a last-resort agent for multidrug-resistant Gram-negative infections."
-msgstr ""
+msgstr "La resistencia elevada a la colistina (COLR) constituye un motivo de gran preocupación, ya que la colistina suele ser el fármaco de último recurso para tratar las infecciones por bacterias gramnegativas multirresistentes."
 
 #. type: Hash Value: outlier abr_gram_positive_mrsa_high
 #: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Elevated methicillin-resistant Staphylococcus aureus (MRSA) rates may warrant review of screening, decolonisation, and contact isolation practices."
-msgstr ""
+msgstr "Las tasas elevadas de Staphylococcus aureus resistente a la meticilina (SARM) podrían justificar una revisión de las prácticas de cribado, descolonización y aislamiento de contactos."
 
 #. type: Hash Value: outlier abr_gram_positive_vre_high
 #: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Elevated vancomycin-resistant Enterococcus (VRE) rates may warrant review of antibiotic stewardship and environmental cleaning practices."
-msgstr ""
+msgstr "Las tasas elevadas de Enterococcus resistente a la vancomicina (VRE) pueden justificar una revisión de las prácticas de gestión de antibióticos y de limpieza ambiental."
 
 #. type: Hash Value: outlier agent_detection_per_inf_type_all_zero
 #: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "No pathogens were detected across any infection type during the surveillance period."
-msgstr ""
+msgstr "No se detectaron agentes patógenos en ningún tipo de infección durante el periodo de vigilancia."
 
 #. type: Hash Value: outlier agent_detection_per_inf_type_interpretation_all_above
 #: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Pathogen detection rates are above the reference range across infection types. Higher detection rates may reflect thorough microbiological workup practices."
-msgstr ""
+msgstr "Las tasas de detección de patógenos se sitúan por encima del rango de referencia en todos los tipos de infección. Estas tasas de detección más elevadas podrían deberse a unas prácticas exhaustivas de análisis microbiológico."
 
 #. type: Hash Value: outlier agent_detection_per_inf_type_interpretation_all_below
 #: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Pathogen detection rates are below the reference range across infection types. Lower detection rates may reflect differences in microbiological sampling practices or laboratory capacity."
-msgstr ""
+msgstr "Las tasas de detección de patógenos se sitúan por debajo del rango de referencia en todos los tipos de infección. Las tasas de detección más bajas pueden deberse a diferencias en las prácticas de toma de muestras microbiológicas o en la capacidad de los laboratorios."
 
 #. type: Hash Value: outlier agent_detection_per_inf_type_interpretation_some_above
 #: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Higher pathogen detection rates may reflect thorough microbiological workup practices for these infection types."
-msgstr ""
+msgstr "Las tasas más elevadas de detección de patógenos podrían deberse a unas prácticas exhaustivas de análisis microbiológico para este tipo de infecciones."
 
 #. type: Hash Value: outlier agent_detection_per_inf_type_interpretation_some_below
 #: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Lower pathogen detection rates may reflect differences in microbiological sampling practices or laboratory capacity for these infection types."
-msgstr ""
+msgstr "Las tasas más bajas de detección de patógenos podrían deberse a diferencias en las prácticas de muestreo microbiológico o en la capacidad de los laboratorios para analizar estos tipos de infecciones."
 
 #. type: Hash Value: outlier agent_enterobacterales_high
 #: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Elevated Enterobacterales detection rates may suggest environmental or hygiene-related transmission patterns. Collective elevation across Gram-negative organisms may warrant environmental surveillance and review of hand hygiene and surface disinfection practices."
-msgstr ""
+msgstr "Las tasas elevadas de detección de Enterobacterales podrían indicar patrones de transmisión de origen ambiental o relacionados con la higiene. Un aumento generalizado en todos los organismos gramnegativos podría justificar la vigilancia ambiental y la revisión de las prácticas de higiene de manos y desinfección de superficies."
 
 #. type: Hash Value: outlier agent_enterobacterales_low
 #: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Low Enterobacterales detection rates relative to the reference may reflect differences in patient population, antibiotic exposure patterns, or microbiological sampling practices."
-msgstr ""
+msgstr "Las bajas tasas de detección de Enterobacterales en comparación con la referencia pueden deberse a diferencias en la población de pacientes, en los patrones de exposición a los antibióticos o en las prácticas de toma de muestras microbiológicas."
 
 #. type: Hash Value: outlier agent_staphylococci_cns_high
 #: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Elevated coagulase-negative staphylococci detection rates may reflect higher contamination rates, more liberal blood culture criteria, or a genuine increase in coagulase-negative staphylococcal infections. These organisms are common skin commensals and elevated rates may warrant review of blood culture collection practices."
-msgstr ""
+msgstr "Las tasas elevadas de detección de estafilococos coagulasa‐negativos pueden deberse a mayores índices de contaminación, a criterios más flexibles para la realización de hemocultivos o a un aumento real de las infecciones por estafilococos coagulasa‐negativos. Estos organismos son comensales habituales de la piel, por lo que unas tasas elevadas podrían justificar una revisión de las prácticas de recogida de hemocultivos."
 
 #. type: Hash Value: outlier agent_staphylococci_cns_low
 #: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Low coagulase-negative staphylococci detection rates may reflect strict blood culture criteria or effective contamination prevention practices. Coagulase-negative staphylococci are common skin commensals, and detection rates are influenced by both true infection and contamination."
-msgstr ""
+msgstr "Las bajas tasas de detección de estafilococos coagulasa‐negativos pueden deberse a criterios estrictos para la realización de hemocultivos o a prácticas eficaces de prevención de la contaminación. Los estafilococos coagulasa‐negativos son microorganismos comensales habituales de la piel, y las tasas de detección se ven influidas tanto por infecciones reales como por la contaminación."
 
 #. type: Hash Value: outlier agent_staphylococci_cops_high
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Elevated coagulase-positive staphylococci detection rates may indicate increased Staphylococcus aureus burden. This may warrant review of skin care protocols and vascular catheter management practices."
-msgstr ""
+msgstr "Las tasas elevadas de detección de estafilococos coagulasa‐positivos pueden indicar un aumento de la carga de Staphylococcus aureus. Esto podría justificar una revisión de los protocolos de cuidados de la piel y de las prácticas de manejo de los catéteres vasculares."
 
 #. type: Hash Value: outlier antibiotic_rate_ab_zero
 #: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "No antibiotic exposure was recorded during the surveillance period despite available patient day data. This is unusual in a neonatal setting and may indicate incomplete data capture, a very small population resulting from narrow filter criteria, or generation of the report very early after starting surveillance."
-msgstr ""
+msgstr "No se registró ninguna exposición a antibióticos durante el periodo de vigilancia, a pesar de que se disponía de datos sobre los días de estancia de los pacientes. Esto resulta inusual en un entorno neonatal y podría indicar que la recopilación de datos fue incompleta, que la población era muy reducida debido a criterios de filtrado muy restrictivos, o que el informe se elaboró muy poco tiempo después de iniciar la vigilancia."
 
 #. type: Hash Value: outlier antibiotic_rate_interpretation_all_above
 #: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "All AWaRe components are above the reference range, suggesting broad prescribing intensity rather than a single-category signal. This may be considered together with resistance and pathogen detection results."
-msgstr ""
+msgstr "Todos los componentes de AWaRe se sitúan por encima del rango de referencia, lo que sugiere una intensidad de prescripción generalizada más que una señal específica de una sola categoría. Esto debe tenerse en cuenta junto con los resultados de resistencia y de detección de patógenos."
 
 #. type: Hash Value: outlier antibiotic_rate_interpretation_all_below
 #: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "All AWaRe components are below the reference range. This may reflect lower treatment burden or narrower indications."
-msgstr ""
+msgstr "Todos los componentes de AWaRe se sitúan por debajo del intervalo de referencia. Esto podría deberse a una menor carga terapéutica o a unas indicaciones más restringidas."
 
 #. type: Hash Value: outlier antibiotic_rate_interpretation_gradient_ascending
 #: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "The AWaRe profile shows increasing exposure from Access towards Watch and Reserve groups, suggesting broader-spectrum prescribing. De-escalation practices and indication quality may warrant attention."
-msgstr ""
+msgstr "El perfil AWaRe muestra una exposición creciente de los grupos «Access» hacia los grupos «Watch» y «Reserve», lo que sugiere una prescripción de espectro más amplio. Las prácticas de reducción gradual del tratamiento y la calidad de las indicaciones podrían merecer una mayor atención."
 
 #. type: Hash Value: outlier antibiotic_rate_interpretation_gradient_descending
 #: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "The AWaRe profile follows a de-escalation gradient from Access towards lower Watch and Reserve exposure, consistent with more conservative spectrum use."
-msgstr ""
+msgstr "El perfil AWaRe sigue un gradiente de reducción progresiva desde el nivel «Access» hacia niveles más bajos de exposición («Watch» y «Reserve»), en consonancia con un uso más conservador del espectro."
 
 #. type: Hash Value: outlier antibiotic_rate_interpretation_reserve_isolated_high
 #: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "AWaRe Reserve-group exposure is elevated while other components are not, suggesting selective use of last-resort agents. This pattern is typically associated with documented resistant pathogens rather than empirical prescribing."
-msgstr ""
+msgstr "La exposición al grupo de reserva de AWaRe es elevada, mientras que la de otros componentes no lo es, lo que sugiere un uso selectivo de agentes de último recurso. Este patrón suele estar asociado a patógenos resistentes documentados, más que a la prescripción empírica."
 
 #. type: Hash Value: outlier antibiotic_rate_interpretation_review_resistance
 #: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "This may be considered together with resistance and pathogen detection results, as Watch- and Reserve-group use may be expected to increase where resistant or multidrug-resistant pathogens are common."
-msgstr ""
+msgstr "Esto puede tenerse en cuenta junto con los resultados de resistencia y detección de patógenos, ya que cabe esperar que el uso de los grupos «Watch» y «Reserve» aumente en aquellos lugares donde sean habituales los patógenos resistentes o multirresistentes."
 
 #. type: Hash Value: outlier antibiotic_rate_interpretation_watch_high
 #: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Elevated Watch-group exposure may reflect broader-spectrum empirical prescribing. De-escalation practices and indication quality may be relevant considerations."
-msgstr ""
+msgstr "Una mayor exposición al grupo de vigilancia podría reflejar una prescripción empírica de espectro más amplio. Las prácticas de reducción gradual del tratamiento y la calidad de las indicaciones podrían ser factores relevantes a tener en cuenta."
 
 #. type: Hash Value: outlier antibiotic_rate_interpretation_watch_low
 #: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Low Watch-group exposure may reflect conservative prescribing that favours Access-group agents. This may be consistent with appropriate antibiotic stewardship practices."
-msgstr ""
+msgstr "Una baja exposición al grupo «Watch» podría reflejar una prescripción conservadora que favorece los agentes del grupo «Access». Esto podría ser coherente con unas prácticas adecuadas de gestión de antibióticos."
 
 #. type: Hash Value: outlier caution_limited_data
 #: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "The reference data is based on fewer than 5 contributing departments. Comparisons should be interpreted with caution due to limited sample size."
-msgstr ""
+msgstr "Los datos de referencia se basan en menos de cinco departamentos participantes. Las comparaciones deben interpretarse con precaución debido al tamaño limitado de la muestra."
 
 #. type: Hash Value: outlier composed clause_concordant_high
 #: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid ", consistent with elevated {paired_label}{paired_ref}"
-msgstr ""
+msgstr ", en consonancia con los niveles elevados de {paired_label}{paired_ref}"
 
 #. type: Hash Value: outlier composed clause_concordant_high_pooled
 #: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid ", consistent with elevated {paired_label}{paired_ref}, noting that reference quartiles for this metric are not yet available"
-msgstr ""
+msgstr ", en consonancia con los valores elevados de {paired_label}{paired_ref}, teniendo en cuenta que aún no se dispone de los cuartiles de referencia para esta métrica"
 
 #. type: Hash Value: outlier composed clause_concordant_low
 #: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid ", consistent with low {paired_label}{paired_ref}"
-msgstr ""
+msgstr ", en consonancia con los bajos valores de {paired_label}{paired_ref}"
 
 #. type: Hash Value: outlier composed clause_concordant_low_pooled
 #: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid ", consistent with low {paired_label}{paired_ref}, noting that reference quartiles for this metric are not yet available"
-msgstr ""
+msgstr ", en consonancia con un valor bajo de {paired_label}{paired_ref}, teniendo en cuenta que aún no se dispone de los cuartiles de referencia para esta métrica"
 
 #. type: Hash Value: outlier composed clause_discordant_high
 #: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid " despite elevated {paired_label}{paired_ref}"
-msgstr ""
+msgstr " a pesar de los elevados valores de {paired_label}{paired_ref}"
 
 #. type: Hash Value: outlier composed clause_discordant_high_pooled
 #: reports/Partner-Report/content/_sR.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "despite elevated {paired_label}{paired_ref}, noting that reference quartiles for this metric are not yet available"
-msgstr ""
+msgstr "a pesar de los valores elevados de {paired_label}{paired_ref}, teniendo en cuenta que aún no se dispone de los cuartiles de referencia para esta métrica"
 
 #. type: Hash Value: outlier composed clause_discordant_low
 #: reports/Partner-Report/content/_sR.yaml:1
@@ -2423,7 +2409,7 @@ msgstr ""
 #, fuzzy, no-wrap
 #| msgid "No of infections with agent"
 msgid "No surgical procedures were recorded during the surveillance period despite available patient data."
-msgstr "Número de infecciones con el agente"
+msgstr "No se registró ninguna intervención quirúrgica durante el periodo de seguimiento, a pesar de que se disponía de datos de los pacientes."
 
 #. type: Hash Value: outlier vascular_catheter_interpretation_both_above
 #: reports/Partner-Report/content/_sR.yaml:1
@@ -2547,7 +2533,7 @@ msgstr "%s: El número total de días en que el factor de riesgo/protección est
 #, fuzzy, no-wrap
 #| msgid "No of infections where an infectious agent was detected"
 msgid "%s: The percentage of infections in your department where this infectious agent was detected."
-msgstr "Número de infecciones en las que se detectó un agente infeccioso"
+msgstr "%s: El porcentaje de infecciones en tu departamento en las que se detectó este agente infeccioso."
 
 #. type: Hash Value: tbl-antibiotic-utilisation n_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
@@ -2636,14 +2622,14 @@ msgstr ""
 #, fuzzy, no-wrap
 #| msgid "%s: The aggregated number of days the risk/protective factor was present in your unit's infants."
 msgid "%s: The aggregated number of days the risk/protective factor was present in your department's infants.\n"
-msgstr "%s: El número total de días en que el factor de riesgo/protección estuvo presente en los bebés de su unidad."
+msgstr "%s: El número total de días en los que el factor de riesgo o de protección estuvo presente en los bebés de tu departamento.\n"
 
 #. type: Hash Value: tbl-risk-density-rates rate_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
 #, fuzzy, no-wrap
 #| msgid "%s: The Risk Density Rate calculated for your unit's infants."
 msgid "%s: The Exposure Density Rate calculated for your department's infants.\n"
-msgstr "%s: La tasa de densidad de riesgo calculada para los bebés de su unidad."
+msgstr "%s: La tasa de densidad de exposición calculada para los bebés de tu departamento.\n"
 
 #. type: Hash Value: tbl-secondary-bsi-rates n_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
@@ -2860,13 +2846,13 @@ msgstr ""
 #: reports/Patient-Data-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Invasive Ventilation"
-msgstr ""
+msgstr "Ventilación invasiva"
 
 #. type: Hash Value: device niv
 #: reports/Patient-Data-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Non-invasive Ventilation"
-msgstr ""
+msgstr "Ventilación no invasiva"
 
 #. type: Hash Value: device pvc
 #: reports/Patient-Data-Report/content/_sR.yaml:1
@@ -2933,10 +2919,9 @@ msgstr ""
 
 #. type: Hash Value: field gestational_age
 #: reports/Patient-Data-Report/content/_sR.yaml:1
-#, fuzzy, no-wrap
-#| msgid "Gestational age filter"
+#, no-wrap
 msgid "Gestational Age"
-msgstr "Filtro de edad gestacional"
+msgstr "Edad gestacional"
 
 #. type: Hash Value: field hospital
 #: reports/Patient-Data-Report/content/_sR.yaml:1
@@ -3064,14 +3049,14 @@ msgstr ""
 #, fuzzy, no-wrap
 #| msgid "No of infections with agent"
 msgid "No infections recorded for this patient."
-msgstr "Número de infecciones con el agente"
+msgstr "No se han registrado infecciones en este paciente."
 
 #. type: Hash Value: no_procedures
 #: reports/Patient-Data-Report/content/_sR.yaml:1
 #, fuzzy, no-wrap
 #| msgid "No of infections with agent"
 msgid "No surgical procedures recorded for this patient."
-msgstr "Número de infecciones con el agente"
+msgstr "No se ha registrado ninguna intervención quirúrgica para este paciente."
 
 #. type: Hash Value: not_available
 #: reports/Patient-Data-Report/content/_sR.yaml:1
@@ -3136,10 +3121,9 @@ msgstr "Días de hospitalización"
 
 #. type: Hash Value: section infections
 #: reports/Patient-Data-Report/content/_sR.yaml:1
-#, fuzzy, no-wrap
-#| msgid "Infectious Agents"
+#, no-wrap
 msgid "Infections"
-msgstr "Agentes infecciosos"
+msgstr "Infecciones"
 
 #. type: Hash Value: section pathogens
 #: reports/Patient-Data-Report/content/_sR.yaml:1
@@ -3158,19 +3142,19 @@ msgstr ""
 #: reports/Patient-Data-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Female"
-msgstr ""
+msgstr "Femenina"
 
 #. type: Hash Value: sex male
 #: reports/Patient-Data-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Male"
-msgstr ""
+msgstr "Masculino"
 
 #. type: Hash Value: sex undetermined
 #: reports/Patient-Data-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Undetermined"
-msgstr ""
+msgstr "Indeterminado"
 
 #. type: Hash Value: subtitle
 #: reports/Patient-Data-Report/content/_sR.yaml:1
@@ -4194,7 +4178,7 @@ msgstr ""
 #, fuzzy, no-wrap
 #| msgid "Surgical site infection"
 msgid "Superficial incisional infection: 30 days\n"
-msgstr "Infección del sitio quirúrgico"
+msgstr "Infección superficial de la incisión: 30 días\n"
 
 #. type: Bullet: '* '
 #: reports/Validation-Report/en/_problem_detail_0011.Rmd:9
@@ -4241,7 +4225,7 @@ msgstr ""
 #, fuzzy, no-wrap
 #| msgid "Not a surgical procedure"
 msgid "No form has been created for the surgical procedure\n"
-msgstr "No es un procedimiento quirúrgico"
+msgstr "No se ha creado ningún formulario para la intervención quirúrgica.\n"
 
 #. type: Plain text
 #: reports/Validation-Report/en/_problem_detail_0011.Rmd:24
