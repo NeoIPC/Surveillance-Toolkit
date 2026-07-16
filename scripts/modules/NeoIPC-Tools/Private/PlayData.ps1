@@ -191,6 +191,12 @@ function Read-NeoIPCPlayDataDirectory {
         if (-not $teIds.Contains($te)) { throw "Enrollment '$id' references unknown tracked entity '$te'." }
         $status = [string]$enr['status']
         if ($status -notin $script:NeoIPCPlayDataEnrollmentStatus) { throw "Enrollment '$id' has invalid status '$status' (expected one of $($script:NeoIPCPlayDataEnrollmentStatus -join ', '))." }
+        # completedAt is only meaningful once completed. DHIS2 fills it server-side on completion, so a blank
+        # COMPLETED row is still a valid payload — reject only the inverse (a date on a non-completed row), an
+        # authoring slip that would otherwise surface as confusing state at import rather than here.
+        if (-not [string]::IsNullOrEmpty([string]$enr['completedAt']) -and $status -ne 'COMPLETED') {
+            throw "Enrollment '$id' has completedAt set but status '$status' (completedAt is only valid on a COMPLETED enrollment)."
+        }
     }
     $evIds = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::Ordinal)
     foreach ($ev in $evs) {
@@ -203,6 +209,11 @@ function Read-NeoIPCPlayDataDirectory {
         if ($stage -notin $script:NeoIPCPlayDataStageKeyByName.Values) { throw "Event '$id' has unknown programStage key '$stage' (expected one of $($script:NeoIPCPlayDataStageKeyByName.Values -join ', '))." }
         $status = [string]$ev['status']
         if ($status -notin $script:NeoIPCPlayDataEventStatus) { throw "Event '$id' has invalid status '$status' (expected one of $($script:NeoIPCPlayDataEventStatus -join ', '))." }
+        # Same one-directional invariant as enrollments: a completedAt on a non-COMPLETED event is an
+        # authoring mistake (the server fills it on completion, so the COMPLETED-with-blank case stays valid).
+        if (-not [string]::IsNullOrEmpty([string]$ev['completedAt']) -and $status -ne 'COMPLETED') {
+            throw "Event '$id' has completedAt set but status '$status' (completedAt is only valid on a COMPLETED event)."
+        }
     }
     foreach ($edv in $edvs) {
         $ev = [string]$edv['event']

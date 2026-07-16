@@ -166,6 +166,18 @@ InModuleScope 'NeoIPC-Tools' {
             Set-Content -LiteralPath (Join-Path $script:Dir 'bulk/trackedEntities.csv') -Value "id,orgUnit,NEOIPC_PATIENT_ID`ntrkDupAAAA1,DE_TEST_TEST,E2E-TC-FIXTURE"
             (Read-NeoIPCPlayDataDirectory -Path $script:Dir).TrackedEntities.Count | Should -Be 2
         }
+        It 'rejects an enrollment that sets completedAt on a non-COMPLETED status' {
+            Set-Content -LiteralPath (Join-Path $script:Dir 'curated/enrollments.csv') -Value "id,trackedEntity,orgUnit,enrolledAt,occurredAt,status,completedAt`nenrActAAAA1,trkFixAAAA1,AT_TEST_TEST,2025-03-01,2025-03-01,ACTIVE,2025-04-01"
+            { Read-NeoIPCPlayDataDirectory -Path $script:Dir } | Should -Throw '*completedAt*'
+        }
+        It 'allows a COMPLETED enrollment with a blank completedAt (the server fills it on completion)' {
+            Set-Content -LiteralPath (Join-Path $script:Dir 'curated/enrollments.csv') -Value "id,trackedEntity,orgUnit,enrolledAt,occurredAt,status,completedAt`nenrActAAAA1,trkFixAAAA1,AT_TEST_TEST,2025-03-01,2025-03-01,COMPLETED,"
+            (Read-NeoIPCPlayDataDirectory -Path $script:Dir).Enrollments.Count | Should -Be 1
+        }
+        It 'rejects an event that sets completedAt on a non-COMPLETED status' {
+            Set-Content -LiteralPath (Join-Path $script:Dir 'curated/events.csv') -Value "id,enrollment,programStage,orgUnit,occurredAt,status,completedAt`nevtAdmAAAA1,enrActAAAA1,adm,AT_TEST_TEST,2025-03-01,ACTIVE,2025-03-02"
+            { Read-NeoIPCPlayDataDirectory -Path $script:Dir } | Should -Throw '*completedAt*'
+        }
     }
 
     Describe 'ConvertTo-NeoIPCPlayDataRow (bulk re-freeze serializer)' {
@@ -227,6 +239,85 @@ InModuleScope 'NeoIPC-Tools' {
             $path = Join-Path $TestDrive 'empty.csv'
             Write-NeoIPCPlayDataCsv -Path $path -Column @('a', 'b') -Row @()
             [System.IO.File]::ReadAllText($path) | Should -Be "a,b`n"
+        }
+    }
+
+    Describe 'Import-NeoIPCPlayData (offline, mocked POST)' {
+        # The live POST is mocked, so this exercises the load-bearing pure logic offline: the per-org-unit
+        # split (one POST per tracked-entity org unit — the E1064 within-payload-uniqueness workaround), the
+        # cross-POST stats/report aggregation, the OK/WARNING/ERROR derivation, the transport-error fold, and
+        # the representative Raw. -SkipRuleEngine:$false pins the rule-engine gate off without the version GET.
+        BeforeAll {
+            # One tracked entity per listed org unit; the importer groups by orgUnit, so the codes drive the split.
+            function New-PlayImportJson([string[]]$OrgUnit) {
+                $i = 0
+                $tes = @($OrgUnit | ForEach-Object { $i++; [ordered]@{ trackedEntity = ('trkImp{0:D5}' -f $i); orgUnit = $_; attributes = @(); enrollments = @() } })
+                @{ trackedEntities = $tes } | ConvertTo-Json -Depth 100
+            }
+            # DHIS2 tracker import reports as the server returns them (WebMessage-wrapped in .response).
+            function New-OkBody([int]$Created = 1) {
+                [pscustomobject]@{ status = 'OK'; response = [pscustomobject]@{ status = 'OK'; stats = [pscustomobject]@{ created = $Created; updated = 0; deleted = 0; ignored = 0; total = $Created }; validationReport = [pscustomobject]@{ errorReports = @(); warningReports = @() } } }
+            }
+            function New-ErrorBody {
+                [pscustomobject]@{ status = 'ERROR'; response = [pscustomobject]@{ status = 'ERROR'; stats = [pscustomobject]@{ created = 0; updated = 0; deleted = 0; ignored = 1; total = 1 }; validationReport = [pscustomobject]@{ errorReports = @([pscustomobject]@{ errorCode = 'E9999'; message = 'boom' }); warningReports = @() } } }
+            }
+            function New-WarningBody {
+                [pscustomobject]@{ status = 'WARNING'; response = [pscustomobject]@{ status = 'WARNING'; stats = [pscustomobject]@{ created = 1; updated = 0; deleted = 0; ignored = 0; total = 1 }; validationReport = [pscustomobject]@{ errorReports = @(); warningReports = @([pscustomobject]@{ warningCode = 'W1000'; message = 'heads up' }) } } }
+            }
+        }
+        It 'POSTs once per org unit and sums the stats across the groups' {
+            Mock Invoke-NeoIPCDhis2Post { [pscustomobject]@{ StatusCode = 200; Body = (New-OkBody 1) } }
+            $r = Import-NeoIPCPlayData -Json (New-PlayImportJson @('ouAAAAAAAA1', 'ouBBBBBBBB1', 'ouCCCCCCCC1')) -Auth @{} -SkipRuleEngine:$false -Confirm:$false
+            Should -Invoke Invoke-NeoIPCDhis2Post -Times 3 -Exactly
+            $r.OrgUnitGroups | Should -Be 3
+            $r.Created | Should -Be 3
+            $r.Status | Should -Be 'OK'
+        }
+        It 'reports ERROR and aggregates errorReports when any group fails' {
+            Mock Invoke-NeoIPCDhis2Post -ParameterFilter { $Body -match 'ouZZZ' } { [pscustomobject]@{ StatusCode = 409; Body = (New-ErrorBody) } }
+            Mock Invoke-NeoIPCDhis2Post -ParameterFilter { $Body -notmatch 'ouZZZ' } { [pscustomobject]@{ StatusCode = 200; Body = (New-OkBody 1) } }
+            $r = Import-NeoIPCPlayData -Json (New-PlayImportJson @('ouAAAAAAAA1', 'ouZZZAAAAA1')) -Auth @{} -SkipRuleEngine:$false -Confirm:$false
+            $r.Status | Should -Be 'ERROR'
+            $r.ErrorReports.Count | Should -BeGreaterThan 0
+            $r.HttpStatusCode | Should -Be 409
+        }
+        It 'sets Raw to an earlier failing group''s body, not a later success' {
+            # Group-Object orders groups by orgUnit ascending, so the FAILING ouAAA group posts BEFORE the
+            # ouZZZ success. Raw must be the ERROR body — proving the earlier failure survives the later
+            # success. (The old "keep the last body" behaviour would wrongly yield the ouZZZ success here, so
+            # this ordering — failure first — is what makes the assertion distinguish new code from old.)
+            Mock Invoke-NeoIPCDhis2Post -ParameterFilter { $Body -match 'ouAAA' } { [pscustomobject]@{ StatusCode = 409; Body = (New-ErrorBody) } }
+            Mock Invoke-NeoIPCDhis2Post -ParameterFilter { $Body -notmatch 'ouAAA' } { [pscustomobject]@{ StatusCode = 200; Body = (New-OkBody 1) } }
+            $r = Import-NeoIPCPlayData -Json (New-PlayImportJson @('ouAAAAAAAA1', 'ouZZZAAAAA1')) -Auth @{} -SkipRuleEngine:$false -Confirm:$false
+            $r.Raw.status | Should -Be 'ERROR'
+        }
+        It 'does not surface a later success in Raw when an earlier group failed with no body' {
+            # A bare transport failure (HTTP 502, null body) posts first (ouAAA sorts first); a later group
+            # succeeds with a body. Once a failure is seen, Raw must NOT fall back to that success — the
+            # aggregate Status carries the failure, so Raw stays null rather than masking it with an OK body.
+            Mock Invoke-NeoIPCDhis2Post -ParameterFilter { $Body -match 'ouAAA' } { [pscustomobject]@{ StatusCode = 502; Body = $null } }
+            Mock Invoke-NeoIPCDhis2Post -ParameterFilter { $Body -notmatch 'ouAAA' } { [pscustomobject]@{ StatusCode = 200; Body = (New-OkBody 1) } }
+            $r = Import-NeoIPCPlayData -Json (New-PlayImportJson @('ouAAAAAAAA1', 'ouZZZAAAAA1')) -Auth @{} -SkipRuleEngine:$false -Confirm:$false
+            $r.Status | Should -Be 'ERROR'
+            $r.Raw | Should -BeNullOrEmpty
+        }
+        It 'folds a non-2xx transport failure with no parseable report into ERROR' {
+            Mock Invoke-NeoIPCDhis2Post { [pscustomobject]@{ StatusCode = 502; Body = $null } }
+            $r = Import-NeoIPCPlayData -Json (New-PlayImportJson @('ouAAAAAAAA1')) -Auth @{} -SkipRuleEngine:$false -Confirm:$false
+            $r.Status | Should -Be 'ERROR'
+            $r.HttpStatusCode | Should -Be 502
+            $r.ErrorMessage | Should -Match 'no parseable import report'
+        }
+        It 'reports WARNING (not ERROR) when a group warns and none error' {
+            Mock Invoke-NeoIPCDhis2Post { [pscustomobject]@{ StatusCode = 200; Body = (New-WarningBody) } }
+            $r = Import-NeoIPCPlayData -Json (New-PlayImportJson @('ouAAAAAAAA1')) -Auth @{} -SkipRuleEngine:$false -Confirm:$false
+            $r.Status | Should -Be 'WARNING'
+            $r.WarningReports.Count | Should -BeGreaterThan 0
+        }
+        It 'validates only (importMode=VALIDATE) under -DryRun' {
+            Mock Invoke-NeoIPCDhis2Post { [pscustomobject]@{ StatusCode = 200; Body = (New-OkBody 0) } }
+            $null = Import-NeoIPCPlayData -Json (New-PlayImportJson @('ouAAAAAAAA1')) -Auth @{} -SkipRuleEngine:$false -DryRun
+            Should -Invoke Invoke-NeoIPCDhis2Post -Times 1 -Exactly -ParameterFilter { $QueryParameters.importMode -eq 'VALIDATE' }
         }
     }
 }

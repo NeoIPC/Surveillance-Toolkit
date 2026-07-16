@@ -34,6 +34,11 @@ upsert idempotently (`CREATE_AND_UPDATE`) instead of duplicating.
 | `events.csv` | `id`, `enrollment`, `programStage` (stage key: `adm`, `pro`, `bsi`, `nec`, `ssi`, `hap`, `end`), `orgUnit`, `occurredAt`, `status`, `completedAt` |
 | `eventDataValues.csv` | `event`, `dataElement` (code), `value` |
 
+`Read-NeoIPCPlayDataDirectory` validates each row up front and fails loud on the offending id: every `id` a
+valid unique UID, `NEOIPC_PATIENT_ID` present and unique per org unit, every parent reference resolvable,
+`status` in the allowed set, and `completedAt` blank unless `status = COMPLETED` (the inverse — a blank
+`completedAt` on a completed row — stays valid, since DHIS2 fills it server-side on completion).
+
 **Why `eventDataValues.csv` is normalized (long form), not per-event-type wide files:** each of the seven
 event types sets a different, sparse subset of data elements (a BSI event's pathogen slots 1-3 × resistance
 flags + clinical findings vs. a surveillance-end's substance slots 01-09 × days), so per-type wide files

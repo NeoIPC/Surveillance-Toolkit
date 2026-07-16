@@ -182,13 +182,16 @@ function Import-NeoIPCPlayData {
     $errorMessages = [System.Collections.Generic.List[string]]::new()
     $statuses = [System.Collections.Generic.List[string]]::new()
     $httpCodes = [System.Collections.Generic.List[int]]::new()
-    $lastBody = $null
+    # Raw retains a representative response body — the first group's, unless a later group fails, in which
+    # case the first FAILING body takes over (see the loop) so a post-mortem reads the failure, not a
+    # subsequent group's success.
+    $rawBody = $null
+    $rawIsFailure = $false
 
     foreach ($grp in $groups) {
         $groupBody = @{ trackedEntities = @($grp.Group) } | ConvertTo-Json -Depth 100
         $response = Invoke-NeoIPCDhis2Post @endpoint -Path 'api/tracker' -Body $groupBody -QueryParameters $query -Confirm:$false
         $body = $response.Body
-        $lastBody = $body
         $httpCodes.Add([int]$response.StatusCode)
 
         # The tracker import report is either plain or wrapped in a WebMessage (.response), depending on version.
@@ -197,6 +200,20 @@ function Import-NeoIPCPlayData {
         $status = if ($report -and ($report.PSObject.Properties.Name -contains 'status')) { [string]$report.status }
         elseif ($body -and ($body.PSObject.Properties.Name -contains 'status')) { [string]$body.status } else { $null }
         if ($status) { $statuses.Add($status) }
+
+        # Keep Raw representative of a failure rather than merely "the last group posted". Prefer the first
+        # FAILING group's body (non-2xx transport or status=ERROR); fall back to the first group's body only
+        # while no failure has been seen. A failure claims the slot even with a null body (a bare transport
+        # error carries none), so a later group's success can never mask it — the failure detail then lives
+        # in the aggregate Status / HttpStatusCode / ErrorMessage.
+        $isFailureBody = ([int]$response.StatusCode -ge 400) -or ($status -eq 'ERROR')
+        if ($isFailureBody) {
+            if (-not $rawIsFailure) { $rawBody = $body; $rawIsFailure = $true }
+        }
+        elseif ((-not $rawIsFailure) -and ($null -eq $rawBody)) {
+            $rawBody = $body
+        }
+
         $stats = if ($report -and ($report.PSObject.Properties.Name -contains 'stats')) { $report.stats } else { $null }
         if ($stats) {
             if ($stats.PSObject.Properties.Name -contains 'created') { $created += [int]$stats.created }
@@ -249,7 +266,7 @@ function Import-NeoIPCPlayData {
         ErrorReports   = $errorReports.ToArray()
         WarningReports = $warningReports.ToArray()
         ErrorMessage   = $errorMessage
-        Raw            = $lastBody
+        Raw            = $rawBody
     }
 }
 
