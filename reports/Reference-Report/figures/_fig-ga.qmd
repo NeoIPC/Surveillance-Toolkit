@@ -1,6 +1,6 @@
 ```{r}
 #| label: fig-ga
-#| fig-cap: !expr 'paste(sR$`fig-cap`[[1]]$`fig-ga`, sprintf(sR$fig_sample_size, format_integer(ref_counts$n_patients)), sprintf(sR$`fig-cap`[[2]]$`no-bnch`, sprintf("%i%s%s", 7L, sR$unit_separator, sR$day)), sprintf(sR$`fig-cap`[[3]]$`no-bnch`, sprintf("%i%s", 25L, sR$percent_symbol), sprintf("%i%s", 50L, sR$percent_symbol), sprintf("%i%s", 75L, sR$percent_symbol)))'
+#| fig-cap: !expr 'paste(sR$`fig-cap`[[1]]$`fig-ga`, sprintf(sR$fig_sample_size, format_integer(sum(reference_data$gestational_age_figure$frequency$n))), sprintf(sR$`fig-cap`[[2]]$`no-bnch`, sprintf("%i%s%s", 7L, sR$unit_separator, sR$day)), sprintf(sR$`fig-cap`[[3]]$`no-bnch`, sprintf("%i%s", 25L, sR$percent_symbol), sprintf("%i%s", 50L, sR$percent_symbol), sprintf("%i%s", 75L, sR$percent_symbol)))'
 
 ga_scale_min <- reference_data$gestational_age_figure$scale$min
 ga_scale_max <- reference_data$gestational_age_figure$scale$max

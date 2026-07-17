@@ -1638,7 +1638,7 @@ if (!is.null(params$partnerDataFile)) {
     typedParams$unitCodes <- data_unit_codes
   }
 } else {
-  get_unit_data <- function() import_dhis2(
+  get_unit_data <- function() with_error_trace(import_dhis2(
       connection_options = get_connection_options(
         scheme = params$dhis2Scheme, hostname = params$dhis2Hostname,
         port = params$dhis2Port, path = params$dhis2Path),
@@ -1663,7 +1663,7 @@ if (!is.null(params$partnerDataFile)) {
         include_event = "full",
         include_test_data = isTRUE(params$includeTestData)
         )) |>
-    neoipcr::calculate_department_data()
+    neoipcr::calculate_department_data())
 
   benchmark_data <- if (is.null(reference_data)) {
     neoipcr::get_benchmark_data(

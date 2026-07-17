@@ -54,9 +54,9 @@ dataset_options <- neoipcr::dhis2_dataset_options(
   include_invalid_patients = TRUE,
   locale = locale)
 
-data <- neoipcr::import_dhis2(
+data <- with_error_trace(neoipcr::import_dhis2(
   connection_options = connection_options,
-  dataset_options = dataset_options)
+  dataset_options = dataset_options))
 ```
 
 ```{r Filter metadata to in-scope departments}

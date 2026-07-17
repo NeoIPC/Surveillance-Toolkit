@@ -68,7 +68,7 @@ Reports live under `reports/`:
 
 ### Shared Infrastructure
 
-- **Shared R code**: `reports/common/` — `helpers.R` (locale parsing, string resource loading, DHIS2 connection helpers), `load-neoipcr.R`, `parse-args.R` (CLI arg parsing), `getDataset.R` (dataset export), `logging.R` (unified `logger`-based logging: `configure_logging()` + `logInfo`/`logVerbose`/`logDebug`/`logWarn`/`logError`), `reference.docx` (Word template)
+- **Shared R code**: `reports/common/` — `helpers.R` (locale parsing, string resource loading, DHIS2 connection helpers), `load-neoipcr.R`, `parse-args.R` (CLI arg parsing), `getDataset.R` (dataset export), `logging.R` (unified `logger`-based logging: `configure_logging()` + `logInfo`/`logVerbose`/`logDebug`/`logWarn`/`logError`, plus `with_error_trace()` to log a full backtrace when a render-time computation fails), `reference.docx` (Word template)
 - **Base string resources**: `reports/common.yaml` (English domain terms, table headers, footnotes)
 - **Pandoc filters**: `reports/filters/pandoc-quotes.lua` (language-aware typographic quotes)
 
