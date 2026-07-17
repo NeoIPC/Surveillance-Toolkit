@@ -201,22 +201,23 @@ if (!is.null(params$referenceDataFile)) {
         params$referenceDataFile,
         file.info(params$referenceDataFile)$size))
 } else {
-  reference_data <- import_dhis2(
-    connection_options = get_connection_options(
-      scheme = params$dhis2Scheme, hostname = params$dhis2Hostname,
-      port = params$dhis2Port, path = params$dhis2Path),
-    dataset_options = get_dataset_options(
-      reportingPeriodFrom = params$reportingPeriodFrom,
-      reportingPeriodTo = params$reportingPeriodTo,
-      birthWeightFrom = params$birthWeightFrom,
-      birthWeightTo = params$birthWeightTo,
-      gestationWeeksFrom = params$gestationWeeksFrom,
-      gestationWeeksTo = params$gestationWeeksTo,
-      reportingCountries = params$reportingCountries,
-      testUnitFilter = params$testUnitFilter,
-      defaultPatientFilter = params$defaultPatientFilter,
-      validationExceptionFile = params$validationExceptionFile)) |>
-    neoipcr::calculate_reference_data()
+  reference_data <- with_error_trace(
+    import_dhis2(
+      connection_options = get_connection_options(
+        scheme = params$dhis2Scheme, hostname = params$dhis2Hostname,
+        port = params$dhis2Port, path = params$dhis2Path),
+      dataset_options = get_dataset_options(
+        reportingPeriodFrom = params$reportingPeriodFrom,
+        reportingPeriodTo = params$reportingPeriodTo,
+        birthWeightFrom = params$birthWeightFrom,
+        birthWeightTo = params$birthWeightTo,
+        gestationWeeksFrom = params$gestationWeeksFrom,
+        gestationWeeksTo = params$gestationWeeksTo,
+        reportingCountries = params$reportingCountries,
+        testUnitFilter = params$testUnitFilter,
+        defaultPatientFilter = params$defaultPatientFilter,
+        validationExceptionFile = params$validationExceptionFile)) |>
+      neoipcr::calculate_reference_data())
 }
 
 ```

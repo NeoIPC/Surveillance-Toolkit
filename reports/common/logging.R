@@ -163,3 +163,26 @@ logWarn <- function(..., namespace = .report_log$namespace) {
 logError <- function(..., namespace = .report_log$namespace) {
   logger::log_error(..., namespace = namespace, .topenv = parent.frame())
 }
+
+# Run `expr`, logging a full R backtrace if it raises, then let the error
+# propagate. A failure deep in neoipcr (e.g. a quantile() on an unexpected NA)
+# otherwise surfaces only as an opaque one-line error with no call site. The
+# calling handler runs before the stack unwinds, so rlang::trace_back() captures
+# the frame that raised. Emitting through the logger keeps the trace on the
+# report's namespaced channel — reliably captured by the .NET service's JSON log
+# when NEOIPC_LOG_FILE is set, and written to stderr on a console render.
+# skip_formatter stops logger glue-interpolating braces in the trace text; the
+# try() guard ensures a failure in the logging channel itself (e.g. an
+# unwritable NEOIPC_LOG_FILE) can never replace the original error this helper
+# exists to surface.
+with_error_trace <- function(expr) {
+  withCallingHandlers(
+    expr,
+    error = function(e) {
+      try(
+        logError(logger::skip_formatter(paste0(
+          conditionMessage(e), "\n",
+          paste(format(rlang::trace_back()), collapse = "\n")))),
+        silent = TRUE)
+    })
+}

@@ -29,7 +29,7 @@ connection_options <- get_connection_options(
   scheme = params$dhis2Scheme, hostname = params$dhis2Hostname,
   port = params$dhis2Port, path = params$dhis2Path)
 
-ds <- neoipcr::import_dhis2(
+ds <- with_error_trace(neoipcr::import_dhis2(
   connection_options = connection_options,
   dataset_options = neoipcr::dhis2_dataset_options(
     department_filter = department_code,
@@ -50,7 +50,7 @@ ds <- neoipcr::import_dhis2(
     include_incomplete = c("enrollments", "events"),
     translate = TRUE,
     locale = locale
-  ))
+  )))
 ```
 
 ```{r}

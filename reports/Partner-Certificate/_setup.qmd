@@ -58,7 +58,7 @@ if (is.null(data$startYear) || is.null(data$endYear) || is.null(data$hospitalNam
     port = params$dhis2Port, path = params$dhis2Path)
 
   # Import date from our DHIS2 server
-  ds <- neoipcr::import_dhis2(
+  ds <- with_error_trace(neoipcr::import_dhis2(
     connection_options = connection_options,
     dataset_options = neoipcr::dhis2_dataset_options(
       surveillance_end_from = startFrom,
@@ -70,7 +70,7 @@ if (is.null(data$startYear) || is.null(data$endYear) || is.null(data$hospitalNam
                            "delivery_mode", "siblings"),
       include_enrollment = "full",
       include_event = "full"
-      ))
+      )))
 
   department <- ds$metadata$departments |>
     dplyr::filter(code == data$departmentCode) |>

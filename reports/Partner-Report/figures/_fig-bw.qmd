@@ -18,7 +18,7 @@ include_localised("_fig-intro-birth-weight.Rmd")
 ```{r}
 #| label: fig-bw
 #| results: asis
-#| fig-cap: !expr 'paste(sR$`fig-cap`[[1]]$`fig-bw`, sprintf(sR$fig_sample_size, dR$own$numberOfPatients), sprintf(if("ref" %in% benchmark_data$dataset_names) sR$`fig-cap`[[2]]$bnch else sR$`fig-cap`[[2]]$`no-bnch`, sprintf("%i%s%s", 50L, sR$unit_separator, sR$gramm_abbreviation)), sprintf(if("ref" %in% benchmark_data$dataset_names) sR$`fig-cap`[[3]]$bnch else sR$`fig-cap`[[3]]$`no-bnch`, sprintf("%i%s", 25L, sR$percent_symbol), sprintf("%i%s", 50L, sR$percent_symbol), sprintf("%i%s", 75L, sR$percent_symbol)))'
+#| fig-cap: !expr 'paste(sR$`fig-cap`[[1]]$`fig-bw`, sprintf(sR$fig_sample_size, format_integer(if (is.null(benchmark_data$birth_weight_figure)) 0L else sum(dplyr::filter(benchmark_data$birth_weight_figure$frequency, dataset == "own")$n))), sprintf(if("ref" %in% benchmark_data$dataset_names) sR$`fig-cap`[[2]]$bnch else sR$`fig-cap`[[2]]$`no-bnch`, sprintf("%i%s%s", 50L, sR$unit_separator, sR$gramm_abbreviation)), sprintf(if("ref" %in% benchmark_data$dataset_names) sR$`fig-cap`[[3]]$bnch else sR$`fig-cap`[[3]]$`no-bnch`, sprintf("%i%s", 25L, sR$percent_symbol), sprintf("%i%s", 50L, sR$percent_symbol), sprintf("%i%s", 75L, sR$percent_symbol)))'
 
 has_bw <- FALSE
 if (!is.null(benchmark_data) && !is.null(benchmark_data$birth_weight_figure)) {
