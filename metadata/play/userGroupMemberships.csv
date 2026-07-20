@@ -17,3 +17,5 @@ NEOIPC,play.at.report1
 NEOIPC,play.ch.report1
 NEOIPC,play.at.admin1
 NEOIPC,play.at.adminonly1
+NEOIPC,play.e2e.data1
+NEOIPC_DATA_EDITORS,play.e2e.data1

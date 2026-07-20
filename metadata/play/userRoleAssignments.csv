@@ -19,3 +19,6 @@ play.at.admin1,ReportViewer
 play.at.admin1,NeoIPC Admin
 play.at.adminonly1,Base
 play.at.adminonly1,NeoIPC Admin
+play.e2e.data1,Base
+play.e2e.data1,Data entry
+play.e2e.data1,Update Delete User
