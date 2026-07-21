@@ -13,11 +13,26 @@ a known, clearly-test password.
 |------|----------|
 | `organisationUnits.csv` | Synthetic **test hospital + department per country** (`<CC>_TEST` / `<CC>_TEST_TEST`), plus four **`*_TEST_TEST2`** scratch departments (`AT` / `BE` / `CZ` / `EE`) for the Tracker Capture e2e coverage suite. The production base carries no test hierarchy of its own. |
 | `organisationUnitGroupMemberships.csv` | Authored group memberships for the synthetic units — `TEST_UNITS`, `NEO_DEPARTMENT`, and the eligibility / trial-site groups (`NEOIPC_ALL_PATIENTS_ELIGIBLE`, `NEOIPC_NEODECO_TRIAL_SITES`). |
-| `users.csv` | Synthetic accounts — a superuser admin, data-entry users, the report-only personas (`play.at.report1` / `play.ch.report1`), and report-admin / admin-only variants. |
+| `users.csv` | Synthetic accounts — a superuser admin, data-entry users (including the Tracker Capture e2e account `play.e2e.data1`, see below), the report-only personas (`play.at.report1` / `play.ch.report1`), and report-admin / admin-only variants. |
 | `userRoleAssignments.csv`, `userGroupMemberships.csv`, `userOrgUnitAssignments.csv` | Each play user's roles, group membership, and org-unit scope. |
 
 Row order is deterministic (see [`../common/README.md`](../common/README.md)); this
 overlay mirrors the layout production supplies out-of-band via `-OverlayPath`.
+
+## The `play.e2e.data1` account's role set is deliberate — both what it has and what it lacks
+
+`play.e2e.data1` is the account the Tracker Capture e2e coverage suite runs as. Its role assignment
+(`userRoleAssignments.csv`) is chosen precisely, in **both** directions:
+
+- **Base + Data entry** for the data entry the suite drives, **plus `Update Delete User`** — the last one
+  deliberately, because every spec **tears down the patient it provisions**. The bottom-up delete
+  (events → enrollment → tracked entity) needs the cascade-delete authorities that role bundles
+  (`F_ENROLLMENT_CASCADE_DELETE` / `F_TEI_CASCADE_DELETE` / `F_UNCOMPLETE_EVENT`); without them a spec
+  cannot remove what it created and the target accumulates orphaned records run after run. It is a
+  materially higher privilege than plain data entry, and it is present on purpose.
+- **Not a superuser** (no `ALL`), equally on purpose: `ALL` makes the registration form's rule-driven
+  `required` indicator return false outright, so a superuser account could not observe the
+  mandatory-field program rules at all — the suite would silently pass without testing them.
 
 ## `TEST_UNITS` membership is deliberately asymmetric — do not normalise it back
 
