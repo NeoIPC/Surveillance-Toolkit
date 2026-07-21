@@ -1980,6 +1980,46 @@ InModuleScope 'NeoIPC-Tools' {
         }
     }
 
+    Describe 'Type-map bases (DHIS2 Identifiable/Nameable factoring)' {
+        # Guards the factoring that mirrors DHIS2 BaseIdentifiableObject -> BaseNameableObject. The failure it
+        # prevents is the trackedEntityTypes-shortName drop (DHIS2 2.42 E4000): a type re-spelling the name-family
+        # instead of sourcing it from the shared base can silently omit a member.
+        It 'IdentifiableBase is exactly code, name in order' {
+            @($script:NeoIPCMetadataIdentifiableBase.Keys) | Should -Be @('code', 'name')
+        }
+        It 'NameableBase extends IdentifiableBase with shortName + description, in order' {
+            @($script:NeoIPCMetadataNameableBase.Keys) | Should -Be @('code', 'name', 'shortName', 'description')
+            foreach ($k in $script:NeoIPCMetadataIdentifiableBase.Keys) {
+                $script:NeoIPCMetadataNameableBase.Contains($k) | Should -BeTrue -Because "NameableBase must be a superset of IdentifiableBase"
+            }
+        }
+        It 'each type gets an independent copy of the base (a per-type edit cannot corrupt the shared base)' {
+            [object]::ReferenceEquals($script:NeoIPCMetadataTypeMaps['optionGroups'].Properties, $script:NeoIPCMetadataNameableBase) | Should -BeFalse
+            $script:NeoIPCMetadataNameableBase.Count | Should -Be 4
+        }
+        It 'full-nameable types source the name-family from the base (code,name,shortName,description prefix)' {
+            # The currently-coded nameable types; trackedEntityTypes joins this list once it authors a code.
+            $fullNameable = @('optionGroups', 'programs', 'programIndicators', 'attributes',
+                'organisationUnitGroups', 'organisationUnitGroupSets')
+            foreach ($t in $fullNameable) {
+                @(@($script:NeoIPCMetadataTypeMaps[$t].Properties.Keys)[0..3]) |
+                    Should -Be @('code', 'name', 'shortName', 'description') -Because "$t should open with the nameable base"
+            }
+        }
+        It 'the formName exception (dataElements / trackedEntityAttributes) keeps the name-family explicit with formName interleaved' {
+            foreach ($t in 'dataElements', 'trackedEntityAttributes') {
+                @(@($script:NeoIPCMetadataTypeMaps[$t].Properties.Keys)[0..4]) |
+                    Should -Be @('code', 'name', 'shortName', 'formName', 'description') -Because "$t interleaves formName, so it cannot use the nameable base"
+            }
+        }
+        It 'EmbeddedObject nested types carry no code (DHIS2 never resolves them by code)' {
+            foreach ($t in 'programStageDataElements', 'programTrackedEntityAttributes',
+                'trackedEntityTypeAttributes', 'analyticsPeriodBoundaries') {
+                $script:NeoIPCMetadataTypeMaps[$t].Properties.Contains('code') | Should -BeFalse -Because "$t is an EmbeddedObject"
+            }
+        }
+    }
+
     Describe 'Translation property/token model (intersection with the type maps)' {
         It 'derives translatable fields as type-map Properties intersect the translatable-property table' {
             $f = Get-NeoIPCMetadataTranslatableField -Type 'organisationUnitGroups'
