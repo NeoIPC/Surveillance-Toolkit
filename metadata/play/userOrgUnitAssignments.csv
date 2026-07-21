@@ -12,3 +12,7 @@ play.at.admin1,AT_TEST_TEST
 play.at.admin1,AT_TEST_TEST2
 play.at.adminonly1,AT_TEST_TEST
 play.at.adminonly1,AT_TEST_TEST2
+play.e2e.data1,AT_TEST_TEST2
+play.e2e.data1,BE_TEST_TEST2
+play.e2e.data1,CZ_TEST_TEST2
+play.e2e.data1,EE_TEST_TEST2
