@@ -660,16 +660,16 @@ InModuleScope 'NeoIPC-Tools' {
             function New-ExprRows {
                 [ordered]@{
                     programRules       = @(
-                        [ordered]@{ id = 'Rule1111111'; name = 'NeoIPC BSI - set 3GCR'; condition = 'd2:hasValue(#{x})' },
-                        [ordered]@{ id = 'Rule2222222'; name = 'A/B rule'; condition = "#{a}`n&& #{b}" }   # multi-line + slash in name
+                        [ordered]@{ id = 'Rule1111111'; code = 'NEOIPC_BSI_AGENT_1_SET_3GCR'; name = 'NeoIPC BSI - set 3GCR'; condition = 'd2:hasValue(#{x})' },
+                        [ordered]@{ id = 'Rule2222222'; code = 'NEOIPC_TEST_RULE_2'; name = 'A/B rule'; condition = "#{a}`n&& #{b}" }   # multi-line; the slash in the NAME no longer matters (folder is the code)
                     )
                     programRuleActions = @(
                         [ordered]@{ id = 'Act11111111'; programRuleActionType = 'ASSIGN'; programRule = 'Rule1111111'; data = "d2:concatenate(#{x},`n'y')" },
                         [ordered]@{ id = 'Act22222222'; programRuleActionType = 'HIDEFIELD'; programRule = 'Rule1111111'; data = '' },
                         [ordered]@{ id = 'Act33333333'; programRuleActionType = 'SHOWERROR'; programRule = 'Rule2222222'; data = '1 > 0'; content = 'msg' }
                     )
-                    programIndicators  = @([ordered]@{ id = 'PI111111111'; expression = '#{a.b}'; filter = '#{c} > 0' })
-                    validationRules    = @([ordered]@{ id = 'VR111111111'; leftSide_expression = 'I{x}'; rightSide_expression = '' })
+                    programIndicators  = @([ordered]@{ id = 'PI111111111'; code = 'NEOIPC_TEST_PI'; expression = '#{a.b}'; filter = '#{c} > 0' })
+                    validationRules    = @([ordered]@{ id = 'VR111111111'; leftSide_expression = 'I{x}'; rightSide_expression = '' })   # code-less -> keyed by UID (the placeholder-VR fallback)
                 }
             }
         }
@@ -686,27 +686,29 @@ InModuleScope 'NeoIPC-Tools' {
             (Test-NeoIPCMetadataExpressionColumn -Type 'programRuleActions' -Column 'data' -ActionType 'SENDMESSAGE') | Should -BeFalse
             (Test-NeoIPCMetadataExpressionColumn -Type 'programRules' -Column 'name' -ActionType $null) | Should -BeFalse
         }
-        It 'segment sanitiser: reserved chars -> _, trailing dot/space trimmed, empty -> _' {
-            (ConvertTo-NeoIPCExpressionPathSegment -Name 'A/B:c*?') | Should -BeExactly 'A_B_c__'
-            (ConvertTo-NeoIPCExpressionPathSegment -Name 'trailing. ') | Should -BeExactly 'trailing'
-            (ConvertTo-NeoIPCExpressionPathSegment -Name '') | Should -BeExactly '_'
+        It 'rule-segment map keys by code, falling back to the id for a code-less rule' {
+            $map = Get-NeoIPCMetadataExpressionRuleSegmentMap -RuleRows @(
+                [ordered]@{ id = 'R1'; code = 'NEOIPC_BSI_AGENT_1_SET_3GCR'; name = 'ignored name/with slash' },
+                [ordered]@{ id = 'R2coded001'; name = 'no code here' })
+            $map['R1'] | Should -BeExactly 'NEOIPC_BSI_AGENT_1_SET_3GCR'   # code, not the sanitised name
+            $map['R2coded001'] | Should -BeExactly 'R2coded001'            # code-less -> the id
         }
-        It 'rule-segment map fails loud on a post-sanitisation name collision' {
-            $rows = @([ordered]@{ id = 'R1'; name = 'A/B' }, [ordered]@{ id = 'R2'; name = 'A:B' })   # both -> 'A_B'
-            { Get-NeoIPCMetadataExpressionRuleSegmentMap -RuleRows $rows } | Should -Throw '*collision*'
+        It 'rule-segment map fails loud on a path-unsafe segment' {
+            $rows = @([ordered]@{ id = 'R1'; code = 'NEOIPC_BAD CODE' })   # space -> not path-safe
+            { Get-NeoIPCMetadataExpressionRuleSegmentMap -RuleRows $rows } | Should -Throw '*path-unsafe*'
         }
         It 'writes per-rule co-located files (condition + the rule''s action data) and references in the cells' {
             $rows = New-ExprRows
             Write-NeoIPCMetadataExpressionFiles -Rows $rows -Directory $script:exprDir
-            @($rows['programRules'])[0]['condition'] | Should -BeExactly 'expressions/programRules/NeoIPC BSI - set 3GCR/condition.dhis2'
-            (Test-Path -LiteralPath (Join-Path $script:exprDir 'expressions/programRules/NeoIPC BSI - set 3GCR/condition.dhis2')) | Should -BeTrue
-            # the rule's ASSIGN action data co-locates under the SAME rule folder
-            @($rows['programRuleActions'])[0]['data'] | Should -BeExactly 'expressions/programRules/NeoIPC BSI - set 3GCR/Act11111111.data.dhis2'
-            # the slash in rule 2's name is sanitised to the folder segment
-            @($rows['programRules'])[1]['condition'] | Should -BeExactly 'expressions/programRules/A_B rule/condition.dhis2'
-            # program indicators / validation rules stay flat per-type
-            @($rows['programIndicators'])[0]['expression'] | Should -BeExactly 'expressions/programIndicators/PI111111111.expression.dhis2'
-            @($rows['programIndicators'])[0]['filter'] | Should -BeExactly 'expressions/programIndicators/PI111111111.filter.dhis2'
+            @($rows['programRules'])[0]['condition'] | Should -BeExactly 'expressions/programRules/NEOIPC_BSI_AGENT_1_SET_3GCR/condition.dhis2'
+            (Test-Path -LiteralPath (Join-Path $script:exprDir 'expressions/programRules/NEOIPC_BSI_AGENT_1_SET_3GCR/condition.dhis2')) | Should -BeTrue
+            # the rule's ASSIGN action data co-locates under the SAME (code-named) rule folder, keyed by its own UID
+            @($rows['programRuleActions'])[0]['data'] | Should -BeExactly 'expressions/programRules/NEOIPC_BSI_AGENT_1_SET_3GCR/Act11111111.data.dhis2'
+            # rule 2's folder is its CODE; the slash in its name is irrelevant
+            @($rows['programRules'])[1]['condition'] | Should -BeExactly 'expressions/programRules/NEOIPC_TEST_RULE_2/condition.dhis2'
+            # program indicators key by code; validation rules stay flat per-type (the code-less placeholder keys by UID)
+            @($rows['programIndicators'])[0]['expression'] | Should -BeExactly 'expressions/programIndicators/NEOIPC_TEST_PI.expression.dhis2'
+            @($rows['programIndicators'])[0]['filter'] | Should -BeExactly 'expressions/programIndicators/NEOIPC_TEST_PI.filter.dhis2'
             @($rows['validationRules'])[0]['leftSide_expression'] | Should -BeExactly 'expressions/validationRules/VR111111111.leftSide_expression.dhis2'
         }
         It 'leaves a non-eligible action''s data inline (HIDEFIELD), and an empty value untouched' {
@@ -745,7 +747,7 @@ InModuleScope 'NeoIPC-Tools' {
             $pkg = [ordered]@{
                 userGroups         = @()
                 programRules       = @(
-                    [ordered]@{ id = 'IntgRule001'; name = 'Intg rule one'; program = [ordered]@{ id = 'ProgIntg001' }; condition = "d2:hasValue(#{v})`n&& true" }
+                    [ordered]@{ id = 'IntgRule001'; code = 'NEOIPC_INTG_RULE_1'; name = 'Intg rule one'; program = [ordered]@{ id = 'ProgIntg001' }; condition = "d2:hasValue(#{v})`n&& true" }
                 )
                 programRuleActions = @(
                     [ordered]@{ id = 'IntgActA001'; programRuleActionType = 'ASSIGN'; programRule = [ordered]@{ id = 'IntgRule001' }; data = "d2:concatenate('a',`n'b')" }
@@ -760,8 +762,8 @@ InModuleScope 'NeoIPC-Tools' {
             try {
                 ConvertFrom-NeoIPCMetadataJson -Path $jsonPath -OutputDirectory $outDir
                 # emit hook: per-rule co-located files written; the CSV cell holds the reference, not the value
-                (Test-Path -LiteralPath (Join-Path $outDir 'expressions/programRules/Intg rule one/condition.dhis2')) | Should -BeTrue
-                (Test-Path -LiteralPath (Join-Path $outDir 'expressions/programRules/Intg rule one/IntgActA001.data.dhis2')) | Should -BeTrue
+                (Test-Path -LiteralPath (Join-Path $outDir 'expressions/programRules/NEOIPC_INTG_RULE_1/condition.dhis2')) | Should -BeTrue
+                (Test-Path -LiteralPath (Join-Path $outDir 'expressions/programRules/NEOIPC_INTG_RULE_1/IntgActA001.data.dhis2')) | Should -BeTrue
                 @(Import-Csv -LiteralPath (Join-Path $outDir 'programRules.csv'))[0].condition | Should -Match '^expressions/programRules/'
                 # read hook: the multi-line expression is re-inlined verbatim
                 $back = (ConvertTo-NeoIPCMetadataJson -Path $outDir) | ConvertFrom-Json -AsHashtable
