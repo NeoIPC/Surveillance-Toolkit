@@ -43,9 +43,15 @@ Every deployed object's production UID lives verbatim in its directory row's `id
 and the package imports with `idScheme=UID`. This is forced by verified DHIS2 behaviour
 (confirmed against DHIS2's server source, not its docs): the importer has **no UID fallback
 for an empty `code`** and **no per-class `idScheme` mixing** (one global scheme per import).
-Because NeoIPC's rules, variables and actions have empty codes, `idScheme=CODE` is unsafe —
-so UID is the portable identity at import time, and the code is the portable identity for
-*matching* (translations, reconcile).
+Not every object carries a code — program-rule **actions** deliberately have none (a code folds
+into their `hashCode` over an `order-by`-less collection, which can perturb execution order; see
+the workspace `docs/dhis2-code-on-first-class-types.md`), the placeholder validation rule has none,
+and most DHIS2 built-ins have none. Under `idScheme=CODE` a code-less object is skipped and
+re-created with a fresh UID, so `idScheme=CODE` is unsafe regardless of how many objects carry
+codes — UID stays the portable identity at import time, and the code is the portable identity for
+*matching* (translations, reconcile). Program rules and variables now **do** carry codes (they
+moved onto the shared identifiable base), which is what makes the code their stable msgctxt key,
+but that does not change the import scheme.
 
 A fresh UID is minted (deterministically, `f(natural key)`) **only** for a genuinely new
 authored object that has no production UID yet — the synthetic play accounts and the

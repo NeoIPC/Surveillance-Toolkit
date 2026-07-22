@@ -302,6 +302,36 @@ pass/fail equality but **correctness-by-construction plus a two-directional clas
   **unclassified** delta in either direction is the failure. A large, fully-classified diff is the
   healthy outcome.
 
+## Authored codes on the generated families
+
+Every generated program rule and variable carries an authored `code` (program-rule *actions* stay
+code-less by decision — see the workspace `docs/dhis2-code-on-first-class-types.md`). One function mints
+it, so the generator and the translation-key index cannot drift: `Get-NeoIPCGeneratedCode` maps a
+data-element-scheme semantic key (`NEOIPC_BSI_PATHOGEN_1_SET_3GCR`) to the code by applying the NeoIPC
+rule/variable vocabulary, and `Get-NeoIPCGeneratedObjectCode` derives that key from a plan descriptor +
+family. Because `code` outranks the UID in the msgctxt (`Get-NeoIPCMetadataTranslationKey`), **an object's
+code and its gettext msgctxt are the same string** by construction.
+
+The vocabulary — data elements keep their deployed tokens, while rule/variable/config codes lead with the
+target vocabulary (the two converge when the planned name/data-element migration lands):
+
+| Token | → | Rationale |
+|---|---|---|
+| `PATHOGEN`, `ORGANISM(S)` | `AGENT(S)` | infectious agent — a recovered common commensal is not a pathogen, a virus is not an organism |
+| `RECOGNIZED` (recognized pathogen) | `NCC` | non-common commensal |
+| `SURVEILLANCE_END` → `SURV_END`; `ADMISSION` → `ADM` | stage tokens (stage codes `NEOIPC_STG_SURV_END`, `NEOIPC_STG_ADM`) | |
+| `WHEN_EMPTY_OR_LISTED` / `WHEN_NOT_LISTED` / `WHEN_EMPTY` / `WHEN_SET` | `IF_EMPTY_LISTED` / `IF_NOT_LISTED` / `IF_EMPTY` / `IF_SET` | field-gating role compaction |
+| `VALUE` (value-accessor role) | `VAL` | covers `_VALUE` and `_DAYS_VALUE` |
+| `DAYS_VALIDATE` | `DAYS_VR` | the substance-days validation rule takes the `_VR` marker |
+
+The generated codes stay ≤50 characters at the maximum slot counts (9 pathogen, 99 substance); the
+`Get-NeoIPCGeneratedObjectCode` whole-surface test guards the DHIS2 50-char cap and per-type uniqueness
+across the entire minted surface.
+
+Program stages carry a `NEOIPC_STG_<token>` code, so each rule generator resolves its stage directly by
+code (`Get-NeoIPCStageIdByToken`) rather than by which stage owns a slot-1 resistance / AB-days data
+element.
+
 ## Defect catalog (what generation drops or fixes)
 
 Generated-class defects fixed **by construction**:
