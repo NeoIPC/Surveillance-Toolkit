@@ -936,3 +936,60 @@ function Get-NeoIPCPathogenFieldGatingRulePlan {
         }
     }
 }
+
+function Get-NeoIPCPathogenVirusVariablePlan {
+    # The per-slot `is virus` field-gating PROGRAM-RULE VARIABLES — the HAP primary-slot CALCULATED_VALUE boolean the
+    # HAP `set virus` ASSIGN writes (and the pneumonia-definition rules read). The virus-sourced twin of the
+    # recognized-pathogen field-gating variable (Get-NeoIPCPathogenFieldGatingVariablePlan); HAP primary slots only.
+    # Pure (no package): PathogenCount descriptors.
+    [CmdletBinding()]
+    [OutputType([System.Collections.Specialized.OrderedDictionary])]
+    param([ValidateRange(1, 9)][int]$PathogenCount = $script:NeoIPCPathogenSlotCount)
+
+    foreach ($n in 1..$PathogenCount) {
+        [ordered]@{
+            Name                = "NeoIPC HAP Pathogen $n is virus"
+            Kind                = 'isVirus'
+            Stage               = 'HAP'
+            SlotKind            = 'primary'
+            Index               = $n
+            SourceType          = 'CALCULATED_VALUE'
+            ValueType           = 'BOOLEAN'
+            UseCodeForOptionSet = $false
+            DataElementCode     = $null
+        }
+    }
+}
+
+function Get-NeoIPCPathogenVirusRulePlan {
+    # The single HAP `set virus` PROGRAM RULE — condition `true`, priority 0, one ASSIGN per HAP primary slot that sets
+    # the slot's `is virus` boolean to "the slot has a value and that value is a virus". The positive-membership twin of
+    # the recognized-pathogen field-gating rule (Get-NeoIPCPathogenFieldGatingRulePlan): a virus code set (resolved by
+    # the generator from Get-NeoIPCVirusCodeSet) rather than the NEGATED common-commensal set, and a SINGLE multi-action
+    # rule (the deployed shape) rather than one rule per slot — so each ASSIGN carries its OWN slot ValueVariable, not a
+    # rule-level one. Pure (no package/YAML): the virus set is resolved later by the generator; this plan carries only
+    # the structure. Emits ONE rule descriptor (an Actions array of PathogenCount ASSIGNs).
+    [CmdletBinding()]
+    [OutputType([System.Collections.Specialized.OrderedDictionary])]
+    param([ValidateRange(1, 9)][int]$PathogenCount = $script:NeoIPCPathogenSlotCount)
+
+    $actions = @(foreach ($n in 1..$PathogenCount) {
+            [ordered]@{
+                Type          = 'ASSIGN'
+                Content       = "#{NeoIPC HAP Pathogen $n is virus}"
+                ValueVariable = "NeoIPC HAP Pathogen $n value"
+                UsesVirusSet  = $true
+            }
+        })
+    [ordered]@{
+        Kind        = 'setVirus'
+        Stage       = 'HAP'
+        SlotKind    = 'primary'
+        Index       = $null
+        Name        = 'NeoIPC HAP - set virus'
+        Description = 'Sets the virus variables'
+        Condition   = 'true'
+        Priority    = 0
+        Actions     = $actions
+    }
+}

@@ -4678,6 +4678,8 @@ Hierarchies:
             Mock New-NeoIPCPathogenRule { [ordered]@{ programRules = @(); programRuleActions = @() } }
             Mock New-NeoIPCPathogenFieldGatingRule { [ordered]@{ programRules = @(); programRuleActions = @() } }
             Mock New-NeoIPCSubstanceRule { [ordered]@{ programRules = @(); programRuleActions = @() } }
+            Mock New-NeoIPCPathogenVirusVariable { [ordered]@{ programRuleVariables = @() } }
+            Mock New-NeoIPCPathogenVirusRule { [ordered]@{ programRules = @(); programRuleActions = @() } }
             Mock New-NeoIPCAntimicrobialOptionSet { [ordered]@{
                     optionSets = @([ordered]@{ id = 'OptSetAbx01'; code = 'NEOIPC_ANTIMICROBIAL_SUBSTANCES'; valueType = 'TEXT'; options = @([ordered]@{ id = 'AbxOptRen01' }, [ordered]@{ id = 'AbxOptNam01' }, [ordered]@{ id = 'AbxOptAdd01' }) })
                     options    = @(
@@ -4749,6 +4751,8 @@ Hierarchies:
             Mock New-NeoIPCPathogenRule { [ordered]@{ programRules = @([ordered]@{ id = 'ruleSet'; name = 'NeoIPC BSI Pathogen 1 - set 3GCR'; programRuleActions = @([ordered]@{ id = 'actSet' }) }); programRuleActions = @([ordered]@{ id = 'actSet'; programRule = [ordered]@{ id = 'ruleSet' }; programRuleActionType = 'ASSIGN'; data = 'enum' }) } }
             Mock New-NeoIPCPathogenFieldGatingRule { [ordered]@{ programRules = @([ordered]@{ id = 'ruleWS'; name = 'NeoIPC BSI Pathogen 1 - when set'; programRuleActions = @([ordered]@{ id = 'actWSsrc' }) }); programRuleActions = @([ordered]@{ id = 'actWSsrc'; programRule = [ordered]@{ id = 'ruleWS' }; programRuleActionType = 'SETMANDATORYFIELD'; dataElement = [ordered]@{ id = 'deSrc' } }) } }
             Mock New-NeoIPCSubstanceRule { [ordered]@{ programRules = @(); programRuleActions = @() } }
+            Mock New-NeoIPCPathogenVirusVariable { [ordered]@{ programRuleVariables = @() } }
+            Mock New-NeoIPCPathogenVirusRule { [ordered]@{ programRules = @(); programRuleActions = @() } }
             # Antibiotic generators mocked empty: this Describe exercises the pathogen/substance classification.
             # The antibiotic buckets are exercised in the 'Compare-NeoIPCGeneratedMetadata (antibiotic buckets)' Describe.
             Mock New-NeoIPCAntimicrobialOptionSet { [ordered]@{ optionSets = @(); options = @() } }

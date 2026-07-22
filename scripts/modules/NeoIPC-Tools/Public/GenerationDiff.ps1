@@ -66,6 +66,8 @@ function Compare-NeoIPCGeneratedMetadata {
     $patRuleFrag = New-NeoIPCPathogenRule @ontologyArgs -ExistingPackage $ExistingPackage -PathogenCount $PathogenCount
     $fgRuleFrag  = New-NeoIPCPathogenFieldGatingRule @ontologyArgs -ExistingPackage $ExistingPackage -PathogenCount $PathogenCount
     $subRuleFrag = New-NeoIPCSubstanceRule -ExistingPackage $ExistingPackage -SubstanceCount $SubstanceCount
+    $virusVarFrag  = New-NeoIPCPathogenVirusVariable -ExistingPackage $ExistingPackage -PathogenCount $PathogenCount
+    $virusRuleFrag = New-NeoIPCPathogenVirusRule @ontologyArgs -ExistingPackage $ExistingPackage -PathogenCount $PathogenCount
     $abxOptFrag    = New-NeoIPCAntimicrobialOptionSet -ExistingPackage $ExistingPackage
     $abxGrpFrag    = New-NeoIPCAntibioticOptionGroup -OptionSet $abxOptFrag -ExistingPackage $ExistingPackage
     $abxGrpSetFrag = New-NeoIPCAntibioticOptionGroupSet -OptionGroup $abxGrpFrag -ExistingPackage $ExistingPackage
@@ -76,9 +78,9 @@ function Compare-NeoIPCGeneratedMetadata {
         optionGroups         = @($abxGrpFrag['optionGroups'])
         optionGroupSets      = @($abxGrpSetFrag['optionGroupSets'])
         dataElements         = @($patDeFrag['dataElements']) + @($subDeFrag['dataElements'])
-        programRuleVariables = @($patVarFrag['programRuleVariables']) + @($fgVarFrag['programRuleVariables']) + @($subVarFrag['programRuleVariables'])
-        programRules         = @($patRuleFrag['programRules']) + @($fgRuleFrag['programRules']) + @($subRuleFrag['programRules'])
-        programRuleActions   = @($patRuleFrag['programRuleActions']) + @($fgRuleFrag['programRuleActions']) + @($subRuleFrag['programRuleActions'])
+        programRuleVariables = @($patVarFrag['programRuleVariables']) + @($fgVarFrag['programRuleVariables']) + @($subVarFrag['programRuleVariables']) + @($virusVarFrag['programRuleVariables'])
+        programRules         = @($patRuleFrag['programRules']) + @($fgRuleFrag['programRules']) + @($subRuleFrag['programRules']) + @($virusRuleFrag['programRules'])
+        programRuleActions   = @($patRuleFrag['programRuleActions']) + @($fgRuleFrag['programRuleActions']) + @($subRuleFrag['programRuleActions']) + @($virusRuleFrag['programRuleActions'])
     }
     $genAbxOsId = if (@($abxOptFrag['optionSets']).Count -gt 0) { [string]$abxOptFrag['optionSets'][0]['id'] } else { $null }   # to split the shared 'options' family pathogen vs antibiotic
 

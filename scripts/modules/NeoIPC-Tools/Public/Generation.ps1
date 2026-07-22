@@ -909,10 +909,11 @@ function New-NeoIPCPathogenVirusVariable {
         }
     }
 
+    $plan = @(Get-NeoIPCPathogenVirusVariablePlan -PathogenCount $PathogenCount)
     $seen = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::Ordinal)
     $out = [System.Collections.Generic.List[object]]::new()
-    foreach ($n in 1..$PathogenCount) {
-        $name = "NeoIPC HAP Pathogen $n is virus"
+    foreach ($d in $plan) {
+        $name = [string]$d['Name']
         $existingId = if ($prvByName.ContainsKey($name)) { $prvByName[$name] } else { $null }
         $id = if ($existingId -and (Test-NeoIPCMetadataUid -Id $existingId)) { $existingId }
         else { New-NeoIPCMetadataUid -Type 'programRuleVariables' -NaturalKey $name }
@@ -921,9 +922,9 @@ function New-NeoIPCPathogenVirusVariable {
         $out.Add([ordered]@{
                 id                            = $id
                 name                          = $name
-                programRuleVariableSourceType = 'CALCULATED_VALUE'
-                valueType                     = 'BOOLEAN'
-                useCodeForOptionSet           = $false
+                programRuleVariableSourceType = [string]$d['SourceType']
+                valueType                     = [string]$d['ValueType']
+                useCodeForOptionSet           = [bool]$d['UseCodeForOptionSet']
                 program                       = [ordered]@{ id = $programId }
             })
     }
@@ -1009,63 +1010,72 @@ function New-NeoIPCPathogenVirusRule {
     $virusCodes = @(Get-NeoIPCVirusCodeSet -Node $tree)
     if ($virusCodes.Count -eq 0) { throw "The virus code set is empty — cannot build the 'set virus' ASSIGN expressions." }
 
-    $ruleName = 'NeoIPC HAP - set virus'
-    $deployedRule = $null
-    foreach ($r in @($ExistingPackage['programRules'])) {
-        if ($r -is [System.Collections.IDictionary] -and [string]$r['name'] -eq $ruleName) { $deployedRule = $r; break }
-    }
-    $deployedRuleId = if ($deployedRule) { [string]$deployedRule['id'] } else { $null }
-    $ruleId = if ($deployedRuleId -and (Test-NeoIPCMetadataUid -Id $deployedRuleId)) { $deployedRuleId }
-    else { New-NeoIPCMetadataUid -Type 'programRules' -NaturalKey $ruleName }
-
-    # Deployed actions of this rule, for UID preservation keyed by the assigned variable (content).
-    $deployedActions = [System.Collections.Generic.List[object]]::new()
-    if ($deployedRuleId) {
-        foreach ($a in @($ExistingPackage['programRuleActions'])) {
-            if ($a -isnot [System.Collections.IDictionary]) { continue }
-            $pr = $a['programRule']
-            if ($pr -is [System.Collections.IDictionary] -and [string]$pr['id'] -eq $deployedRuleId) { $deployedActions.Add($a) }
-        }
-    }
-
+    $plan = @(Get-NeoIPCPathogenVirusRulePlan -PathogenCount $PathogenCount)
+    $rulesSeen = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::Ordinal)
     $actionsSeen = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::Ordinal)
-    $actionRefs = [System.Collections.Generic.List[object]]::new()
+    $rules = [System.Collections.Generic.List[object]]::new()
     $actions = [System.Collections.Generic.List[object]]::new()
-    foreach ($n in 1..$PathogenCount) {
-        $valueVar = "NeoIPC HAP Pathogen $n value"
-        $content = "#{NeoIPC HAP Pathogen $n is virus}"
-        $actionId = $null
-        foreach ($da in $deployedActions) {
-            if ([string]$da['programRuleActionType'] -eq 'ASSIGN' -and [string]$da['content'] -eq $content -and (Test-NeoIPCMetadataUid -Id ([string]$da['id']))) {
-                $actionId = [string]$da['id']; break
+
+    foreach ($d in $plan) {
+        $ruleName = [string]$d['Name']
+        $deployedRule = $null
+        foreach ($r in @($ExistingPackage['programRules'])) {
+            if ($r -is [System.Collections.IDictionary] -and [string]$r['name'] -eq $ruleName) { $deployedRule = $r; break }
+        }
+        $deployedRuleId = if ($deployedRule) { [string]$deployedRule['id'] } else { $null }
+        $ruleId = if ($deployedRuleId -and (Test-NeoIPCMetadataUid -Id $deployedRuleId)) { $deployedRuleId }
+        else { New-NeoIPCMetadataUid -Type 'programRules' -NaturalKey $ruleName }
+        if (-not $rulesSeen.Add($ruleId)) { throw "UID collision for program rule '$ruleName' (uid '$ruleId')." }
+
+        # Deployed actions of this rule, for UID preservation keyed by the assigned variable (content).
+        $deployedActions = [System.Collections.Generic.List[object]]::new()
+        if ($deployedRuleId) {
+            foreach ($a in @($ExistingPackage['programRuleActions'])) {
+                if ($a -isnot [System.Collections.IDictionary]) { continue }
+                $pr = $a['programRule']
+                if ($pr -is [System.Collections.IDictionary] -and [string]$pr['id'] -eq $deployedRuleId) { $deployedActions.Add($a) }
             }
         }
-        if (-not $actionId) { $actionId = New-NeoIPCMetadataUid -Type 'programRuleActions' -NaturalKey ('{0}|ASSIGN|{1}' -f $ruleName, $content) }
-        if (-not $actionsSeen.Add($actionId)) { throw "UID collision for an action of program rule '$ruleName' (uid '$actionId')." }
 
-        $terms = Join-NeoIPCBalancedBooleanChain -Operator '||' -Term @($virusCodes | ForEach-Object { "#{$valueVar}==$_" })
-        $actions.Add([ordered]@{
-                id                    = $actionId
-                programRule           = [ordered]@{ id = $ruleId }
-                programRuleActionType = 'ASSIGN'
-                content               = $content
-                data                  = "d2:hasValue(#{$valueVar})&&$terms"
-            })
-        $actionRefs.Add([ordered]@{ id = $actionId })
+        $actionRefs = [System.Collections.Generic.List[object]]::new()
+        foreach ($a in @($d['Actions'])) {
+            $valueVar = [string]$a['ValueVariable']
+            $content = [string]$a['Content']
+            $actionId = $null
+            foreach ($da in $deployedActions) {
+                if ([string]$da['programRuleActionType'] -eq 'ASSIGN' -and [string]$da['content'] -eq $content -and (Test-NeoIPCMetadataUid -Id ([string]$da['id']))) {
+                    $actionId = [string]$da['id']; break
+                }
+            }
+            if (-not $actionId) { $actionId = New-NeoIPCMetadataUid -Type 'programRuleActions' -NaturalKey ('{0}|ASSIGN|{1}' -f $ruleName, $content) }
+            if (-not $actionsSeen.Add($actionId)) { throw "UID collision for an action of program rule '$ruleName' (uid '$actionId')." }
+
+            if (-not $a['UsesVirusSet']) { throw "The 'set virus' action assigning '$content' does not request the virus code set." }
+            $terms = Join-NeoIPCBalancedBooleanChain -Operator '||' -Term @($virusCodes | ForEach-Object { "#{$valueVar}==$_" })
+            $actions.Add([ordered]@{
+                    id                    = $actionId
+                    programRule           = [ordered]@{ id = $ruleId }
+                    programRuleActionType = 'ASSIGN'
+                    content               = $content
+                    data                  = "d2:hasValue(#{$valueVar})&&$terms"
+                })
+            $actionRefs.Add([ordered]@{ id = $actionId })
+        }
+
+        $rule = [ordered]@{ id = $ruleId; name = $ruleName }
+        # Preserve the deployed description verbatim (not load-bearing, and preserving it avoids a spurious diff); fall
+        # back to the plan's canonical wording only when the export carries none.
+        $desc = if ($deployedRule -and $deployedRule.Contains('description') -and "$([string]$deployedRule['description'])") { [string]$deployedRule['description'] } else { [string]$d['Description'] }
+        $rule['description'] = $desc
+        $rule['program'] = [ordered]@{ id = $programId }
+        $rule['programStage'] = [ordered]@{ id = $psId }
+        $rule['condition'] = [string]$d['Condition']
+        $rule['priority'] = [int]$d['Priority']
+        $rule['programRuleActions'] = $actionRefs.ToArray()
+        $rules.Add($rule)
     }
 
-    $rule = [ordered]@{ id = $ruleId; name = $ruleName }
-    # Preserve the deployed description verbatim (not load-bearing, and preserving it avoids a spurious diff); fall back
-    # to the canonical wording only when the export carries none.
-    $desc = if ($deployedRule -and $deployedRule.Contains('description') -and "$([string]$deployedRule['description'])") { [string]$deployedRule['description'] } else { 'Sets the virus variables' }
-    $rule['description'] = $desc
-    $rule['program'] = [ordered]@{ id = $programId }
-    $rule['programStage'] = [ordered]@{ id = $psId }
-    $rule['condition'] = 'true'
-    $rule['priority'] = 0
-    $rule['programRuleActions'] = $actionRefs.ToArray()
-
-    [ordered]@{ programRules = @($rule); programRuleActions = $actions.ToArray() }
+    [ordered]@{ programRules = $rules.ToArray(); programRuleActions = $actions.ToArray() }
 }
 
 function New-NeoIPCSubstanceDataElement {
