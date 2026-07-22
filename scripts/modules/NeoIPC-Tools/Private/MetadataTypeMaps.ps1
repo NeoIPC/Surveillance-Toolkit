@@ -166,8 +166,8 @@ $script:NeoIPCMetadataTypeMaps = [ordered]@{
         description = 'string'; dataDimension = 'bool'; optionSet = 'id'; optionGroups = 'idArrayOrdered' } }
     'dataElementGroups'     = @{ NaturalKey = 'code'; Nesting = 'TopLevel'; Properties = $IdentifiableBase + [ordered]@{
         shortName = 'string'; dataElements = 'idArrayOrdered' } }
-    'indicatorTypes'        = @{ NaturalKey = 'name'; Nesting = 'TopLevel'; Properties = [ordered]@{
-        name = 'string'; factor = 'int'; number = 'bool' } }
+    'indicatorTypes'        = @{ NaturalKey = 'name'; Nesting = 'TopLevel'; Properties = $IdentifiableBase + [ordered]@{
+        factor = 'int'; number = 'bool' } }
     'categories'            = @{ NaturalKey = 'code'; Nesting = 'TopLevel'; Properties = $IdentifiableBase + [ordered]@{
         shortName = 'string'; dataDimensionType = 'string'; dataDimension = 'bool'; categoryOptions = 'idArrayOrdered' } }
     'categoryCombos'        = @{ NaturalKey = 'code'; Nesting = 'TopLevel'; Properties = $IdentifiableBase + [ordered]@{
@@ -180,29 +180,29 @@ $script:NeoIPCMetadataTypeMaps = [ordered]@{
         confidential = 'bool'; displayInListNoProgram = 'bool'; displayOnVisitSchedule = 'bool'; generated = 'bool'; inherit = 'bool'
         orgunitScope = 'bool'; skipSynchronization = 'bool'; unique = 'bool'
         optionSet = 'id'; legendSets = 'idArray' } }
-    'programRuleVariables'  = @{ NaturalKey = 'name'; Nesting = 'TopLevel'; Properties = [ordered]@{
-        name = 'string'; programRuleVariableSourceType = 'string'; valueType = 'string'; useCodeForOptionSet = 'bool'
+    'programRuleVariables'  = @{ NaturalKey = 'name'; Nesting = 'TopLevel'; Properties = $IdentifiableBase + [ordered]@{
+        programRuleVariableSourceType = 'string'; valueType = 'string'; useCodeForOptionSet = 'bool'
         program = 'id'; dataElement = 'id'; trackedEntityAttribute = 'id'; programStage = 'id' } }
-    'programRules'          = @{ NaturalKey = 'name'; Nesting = 'TopLevel'; Properties = [ordered]@{
-        name = 'string'; description = 'string'; condition = 'string'; priority = 'int'
+    'programRules'          = @{ NaturalKey = 'name'; Nesting = 'TopLevel'; Properties = $IdentifiableBase + [ordered]@{
+        description = 'string'; condition = 'string'; priority = 'int'
         program = 'id'; programStage = 'id'; programRuleActions = 'idArray' } }
     'programRuleActions'    = @{ NaturalKey = 'id'; Nesting = 'BothPlaces'; Properties = [ordered]@{
         programRuleActionType = 'string'; content = 'string'; data = 'string'; location = 'string'; templateUid = 'idString'
         programRule = 'id'; dataElement = 'id'; trackedEntityAttribute = 'id'; programStageSection = 'id'
         programStage = 'id'; programIndicator = 'id'; optionGroup = 'id'; option = 'id' } }
     'programStageSections'  = @{ NaturalKey = 'name'; Nesting = 'BothPlaces'
-        Properties = [ordered]@{ name = 'string'; description = 'string'; sortOrder = 'int'; programStage = 'id'; dataElements = 'idArrayOrdered'; programIndicators = 'idArrayOrdered' }
+        Properties = $IdentifiableBase + [ordered]@{ description = 'string'; sortOrder = 'int'; programStage = 'id'; dataElements = 'idArrayOrdered'; programIndicators = 'idArrayOrdered' }
         Nested = [ordered]@{ renderType = @{ Wrap = $true; Fields = [ordered]@{ DESKTOP = 'string'; MOBILE = 'string' } } } }
     'programSections'       = @{ NaturalKey = 'name'; Nesting = 'BothPlaces'
-        Properties = [ordered]@{ name = 'string'; sortOrder = 'int'; program = 'id'; trackedEntityAttributes = 'idArrayOrdered' }
+        Properties = $IdentifiableBase + [ordered]@{ sortOrder = 'int'; program = 'id'; trackedEntityAttributes = 'idArrayOrdered' }
         Nested = [ordered]@{ renderType = @{ Wrap = $true; Fields = [ordered]@{ DESKTOP = 'string'; MOBILE = 'string' } } } }
     'validationRules'       = @{ NaturalKey = 'name'; Nesting = 'TopLevel'
-        Properties = [ordered]@{ name = 'string'; operator = 'string'; periodType = 'string'; importance = 'string'; skipFormValidation = 'bool'; organisationUnitLevels = 'intArray' }
+        Properties = $IdentifiableBase + [ordered]@{ operator = 'string'; periodType = 'string'; importance = 'string'; skipFormValidation = 'bool'; organisationUnitLevels = 'intArray' }
         Nested = [ordered]@{
             leftSide  = @{ Wrap = $false; Fields = [ordered]@{ expression = 'string'; missingValueStrategy = 'string'; slidingWindow = 'bool' } }
             rightSide = @{ Wrap = $false; Fields = [ordered]@{ expression = 'string'; missingValueStrategy = 'string'; slidingWindow = 'bool' } } } }
     'trackedEntityTypes'    = @{ NaturalKey = 'name'; Nesting = 'TopLevel'
-        Properties = [ordered]@{ name = 'string'; shortName = 'string'; description = 'string'; featureType = 'string'; allowAuditLog = 'bool'
+        Properties = $NameableBase + [ordered]@{ featureType = 'string'; allowAuditLog = 'bool'
             maxTeiCountToReturn = 'int'; minAttributesRequiredToSearch = 'int' }
         Nested = [ordered]@{ style = @{ Wrap = $false; Fields = [ordered]@{ icon = 'string' } } } }
     'programs'              = @{ NaturalKey = 'code'; Nesting = 'TopLevel'; Properties = $NameableBase + [ordered]@{
@@ -213,8 +213,8 @@ $script:NeoIPCMetadataTypeMaps = [ordered]@{
         selectEnrollmentDatesInFuture = 'bool'; selectIncidentDatesInFuture = 'bool'; skipOffline = 'bool'; useFirstStageDuringRegistration = 'bool'
         categoryCombo = 'id'; trackedEntityType = 'id'
         programStages = 'idArray'; programSections = 'idArray'; notificationTemplates = 'idArray' } }   # organisationUnits (the program's org-unit assignment) is per-deployment — stripped
-    'programStages'        = @{ NaturalKey = 'name'; Nesting = 'BothPlaces'; Properties = [ordered]@{
-        name = 'string'; description = 'string'; executionDateLabel = 'string'; reportDateToUse = 'string'; validationStrategy = 'string'
+    'programStages'        = @{ NaturalKey = 'name'; Nesting = 'BothPlaces'; Properties = $IdentifiableBase + [ordered]@{
+        description = 'string'; executionDateLabel = 'string'; reportDateToUse = 'string'; validationStrategy = 'string'
         minDaysFromStart = 'int'; sortOrder = 'int'
         allowGenerateNextVisit = 'bool'; autoGenerateEvent = 'bool'; blockEntryForm = 'bool'; displayGenerateEventBox = 'bool'
         enableUserAssignment = 'bool'; generatedByEnrollmentDate = 'bool'; hideDueDate = 'bool'; openAfterEnrollment = 'bool'
@@ -249,8 +249,8 @@ $script:NeoIPCMetadataTypeMaps = [ordered]@{
         symbol = 'string'; color = 'string' } }   # organisationUnits (membership) is per-deployment — stripped on capture; re-authored as common + play overlays
     'organisationUnitGroupSets' = @{ NaturalKey = 'code'; Nesting = 'TopLevel'; Properties = $NameableBase + [ordered]@{
         compulsory = 'bool'; dataDimension = 'bool'; includeSubhierarchyInAnalytics = 'bool'; organisationUnitGroups = 'idArray' } }   # idArray (NOT idArrayOrdered): OrganisationUnitGroupSet.hbm.xml maps organisationUnitGroups as an unordered <set> (no list-index) -> member order is not significant, ordinal-sort for determinism. Contrast optionGroupSets.optionGroups, an ordered <list> with a sort_order column -> idArrayOrdered.
-    'organisationUnitLevels' = @{ NaturalKey = 'level'; Nesting = 'TopLevel'; Properties = [ordered]@{
-        name = 'string'; level = 'int'; offlineLevels = 'int' } }
+    'organisationUnitLevels' = @{ NaturalKey = 'level'; Nesting = 'TopLevel'; Properties = $IdentifiableBase + [ordered]@{
+        level = 'int'; offlineLevels = 'int' } }
     'userRoles'             = @{ NaturalKey = 'name'; Nesting = 'TopLevel'; Properties = $IdentifiableBase + [ordered]@{
         description = 'string'; authorities = 'stringArray'; restrictions = 'stringArray' } }   # description is userRole's OWN field (BaseIdentifiableObject, not nameable) — not the name-family one
     'userGroups'            = @{ NaturalKey = 'code'; Nesting = 'TopLevel'; Properties = $IdentifiableBase + [ordered]@{
