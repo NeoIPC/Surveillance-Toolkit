@@ -260,6 +260,8 @@ function Get-NeoIPCGeneratedCode {
     #   RECOGNIZED -> NCC           recognized pathogen -> non-common commensal (covers SET_RECOGNIZED + IS_RECOGNIZED).
     #   WHEN_* -> IF_*              field-gating role compaction (EMPTY_OR_LISTED also drops the redundant OR).
     #   DAYS_VALIDATE -> DAYS_VR    the substance-days validation rule adopts the _VR validation-rule marker.
+    #   VALUE -> VAL                the value-accessor role suffix (covers _VALUE and _DAYS_VALUE). Applied AFTER
+    #                               DAYS_VALIDATE so it cannot touch VALIDATE (which anyway contains no VALUE).
     [CmdletBinding()]
     [OutputType([string])]
     param([Parameter(Mandatory)][string]$SemanticKey)
@@ -271,7 +273,8 @@ function Get-NeoIPCGeneratedCode {
         @('WHEN_NOT_LISTED', 'IF_NOT_LISTED'),
         @('WHEN_EMPTY', 'IF_EMPTY'),
         @('WHEN_SET', 'IF_SET'),
-        @('DAYS_VALIDATE', 'DAYS_VR')
+        @('DAYS_VALIDATE', 'DAYS_VR'),
+        @('VALUE', 'VAL')
     )
     $s = $SemanticKey
     foreach ($pair in $replacements) { $s = $s.Replace([string]$pair[0], [string]$pair[1]) }

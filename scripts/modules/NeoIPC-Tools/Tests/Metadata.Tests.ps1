@@ -2060,13 +2060,13 @@ InModuleScope 'NeoIPC-Tools' {
         It 'derives stable DE-code-scheme keys for every generated PRV / rule family (name- and UID-independent)' {
             $idx = Get-NeoIPCMetadataGeneratedTranslationKeyIndex -Package ([ordered]@{})
             # Resistance PRVs (primary + secondary), field-gating PRV, substance PRV (slot-padding-normalised lookup).
-            $idx.VariableKeyByName['NeoIPC BSI Pathogen 1 value'] | Should -BeExactly 'NEOIPC_BSI_AGENT_1_VALUE'
+            $idx.VariableKeyByName['NeoIPC BSI Pathogen 1 value'] | Should -BeExactly 'NEOIPC_BSI_AGENT_1_VAL'
             $idx.VariableKeyByName['NeoIPC BSI Pathogen 1 may be 3GCR'] | Should -BeExactly 'NEOIPC_BSI_AGENT_1_MAYBE_3GCR'
             $idx.VariableKeyByName['NeoIPC BSI Pathogen 1 may be carbapenem-resistant'] | Should -BeExactly 'NEOIPC_BSI_AGENT_1_MAYBE_CAR'
-            $idx.VariableKeyByName['NeoIPC HAP Secondary BSI pathogen 1 value'] | Should -BeExactly 'NEOIPC_HAP_SEC_BSI_AGENT_1_VALUE'
+            $idx.VariableKeyByName['NeoIPC HAP Secondary BSI pathogen 1 value'] | Should -BeExactly 'NEOIPC_HAP_SEC_BSI_AGENT_1_VAL'
             $idx.VariableKeyByName['NeoIPC BSI Pathogen 1 is recognized pathogen'] | Should -BeExactly 'NEOIPC_BSI_AGENT_1_IS_NCC'
-            $idx.VariableKeyByName['NeoIPC Surveillance end Antibiotic substance 1 - current event value'] | Should -BeExactly 'NEOIPC_SURV_END_AB_SUBST_01_VALUE'
-            $idx.VariableKeyByName['NeoIPC Surveillance end Antibiotic substance 1 days - current event value'] | Should -BeExactly 'NEOIPC_SURV_END_AB_SUBST_01_DAYS_VALUE'
+            $idx.VariableKeyByName['NeoIPC Surveillance end Antibiotic substance 1 - current event value'] | Should -BeExactly 'NEOIPC_SURV_END_AB_SUBST_01_VAL'
+            $idx.VariableKeyByName['NeoIPC Surveillance end Antibiotic substance 1 days - current event value'] | Should -BeExactly 'NEOIPC_SURV_END_AB_SUBST_01_DAYS_VAL'
             # Rules: the resistance triple, the field-gating kinds, the substance cluster — keyed by their AUTHORED CODE
             # (PATHOGEN->AGENT, SURVEILLANCE_END->SURV_END, WHEN_*->IF_*, RECOGNIZED->NCC, DAYS_VALIDATE->DAYS_VR).
             $idx.RuleKeyByName['NeoIPC BSI Pathogen 1 - set 3GCR'] | Should -BeExactly 'NEOIPC_BSI_AGENT_1_SET_3GCR'
@@ -2079,7 +2079,7 @@ InModuleScope 'NeoIPC-Tools' {
         It 'resolves a generated rule / variable to its semantic key and a hand-authored code-less object to null' {
             $idx = Get-NeoIPCMetadataGeneratedTranslationKeyIndex -Package ([ordered]@{})
             Get-NeoIPCMetadataGeneratedTranslationKey -Type 'programRules' -Object ([ordered]@{ id = 'rl1'; name = 'NeoIPC BSI Pathogen 1 - set 3GCR' }) -Index $idx | Should -BeExactly 'NEOIPC_BSI_AGENT_1_SET_3GCR'
-            Get-NeoIPCMetadataGeneratedTranslationKey -Type 'programRuleVariables' -Object ([ordered]@{ id = 'pv1'; name = 'NeoIPC BSI Pathogen 1 value' }) -Index $idx | Should -BeExactly 'NEOIPC_BSI_AGENT_1_VALUE'
+            Get-NeoIPCMetadataGeneratedTranslationKey -Type 'programRuleVariables' -Object ([ordered]@{ id = 'pv1'; name = 'NeoIPC BSI Pathogen 1 value' }) -Index $idx | Should -BeExactly 'NEOIPC_BSI_AGENT_1_VAL'
             Get-NeoIPCMetadataGeneratedTranslationKey -Type 'programRules' -Object ([ordered]@{ id = 'rlx'; name = 'NeoIPC BSI infection present' }) -Index $idx | Should -BeNullOrEmpty
         }
         It 'keys a generated action by owning-rule key + action type (+ target DE code), unique across a multi-action rule' {
@@ -3917,7 +3917,8 @@ Hierarchies:
         # rule/variable-code vocabulary. Guards each transform, every generated family, and the identity case.
         It 'applies the finalized vocabulary to each generated family' {
             InModuleScope NeoIPC-Tools {
-                Get-NeoIPCGeneratedCode -SemanticKey 'NEOIPC_BSI_PATHOGEN_1_VALUE'                      | Should -BeExactly 'NEOIPC_BSI_AGENT_1_VALUE'
+                Get-NeoIPCGeneratedCode -SemanticKey 'NEOIPC_BSI_PATHOGEN_1_VALUE'                      | Should -BeExactly 'NEOIPC_BSI_AGENT_1_VAL'
+                Get-NeoIPCGeneratedCode -SemanticKey 'NEOIPC_SURVEILLANCE_END_AB_SUBST_01_DAYS_VALUE'   | Should -BeExactly 'NEOIPC_SURV_END_AB_SUBST_01_DAYS_VAL'
                 Get-NeoIPCGeneratedCode -SemanticKey 'NEOIPC_BSI_PATHOGEN_1_SET_3GCR'                   | Should -BeExactly 'NEOIPC_BSI_AGENT_1_SET_3GCR'
                 Get-NeoIPCGeneratedCode -SemanticKey 'NEOIPC_HAP_SEC_BSI_PATHOGEN_2_MAYBE_CAR'          | Should -BeExactly 'NEOIPC_HAP_SEC_BSI_AGENT_2_MAYBE_CAR'
                 Get-NeoIPCGeneratedCode -SemanticKey 'NEOIPC_BSI_PATHOGEN_1_IS_RECOGNIZED'              | Should -BeExactly 'NEOIPC_BSI_AGENT_1_IS_NCC'
