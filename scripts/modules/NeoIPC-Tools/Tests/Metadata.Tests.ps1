@@ -3294,14 +3294,14 @@ Hierarchies:
     Id: 100
     Carbapenems: true
 '@
-            # A package covering the four program stages (by code), every `_<CAT>` resistance DE (by code) and the
-            # program — the minimum the generator resolves against. Built from the DE plan so it stays in lockstep.
-            # Stages carry no code; the generator resolves each via a slot-1 _3GCR anchor DE listed in
-            # programStageDataElements (the same DE→stage link the real export carries).
+            # A package covering the four program stages (each by its NEOIPC_STG_ code — the key the generator now
+            # resolves against), every `_<CAT>` resistance DE (by code) and the program — the minimum the generator
+            # resolves against. Built from the DE plan so it stays in lockstep. The stages also carry the DE→stage
+            # links the real export has (kept for realism; no longer used for stage resolution).
             $repDe = @{ BSI = 'NEOIPC_BSI_PATHOGEN_1_3GCR'; HAP = 'NEOIPC_HAP_PATHOGEN_1_3GCR'; SSI = 'NEOIPC_SSI_PATHOGEN_1_3GCR'; NEC = 'NEOIPC_NEC_SEC_BSI_PATHOGEN_1_3GCR' }
             $stages = foreach ($s in 'BSI', 'HAP', 'SSI', 'NEC') {
                 [ordered]@{
-                    code                     = "NEOIPC_$s"
+                    code                     = "NEOIPC_STG_$s"
                     id                       = (New-NeoIPCMetadataUid -Type 'programStages' -NaturalKey "NEOIPC_$s")
                     programStageDataElements = @([ordered]@{ dataElement = [ordered]@{ id = (New-NeoIPCMetadataUid -Type 'dataElements' -NaturalKey $repDe[$s]) } })
                 }
@@ -3446,12 +3446,12 @@ Hierarchies:
         It 'fails loud when a program stage is missing from the package' {
             $pkg = @{
                 programs           = $script:RulePkg['programs']
-                programStages      = @($script:RulePkg['programStages'] | Where-Object { [string]$_['code'] -ne 'NEOIPC_NEC' })
+                programStages      = @($script:RulePkg['programStages'] | Where-Object { [string]$_['code'] -ne 'NEOIPC_STG_NEC' })
                 dataElements       = $script:RulePkg['dataElements']
                 programRules       = @()
                 programRuleActions = @()
             }
-            { New-NeoIPCPathogenRule -Path $script:RuleYaml -ExistingPackage $pkg } | Should -Throw '*NEOIPC_NEC*'
+            { New-NeoIPCPathogenRule -Path $script:RuleYaml -ExistingPackage $pkg } | Should -Throw '*NEOIPC_STG_NEC*'
         }
         It 'fails loud when a resistance data element is missing from the package' {
             $pkg = @{
@@ -3485,7 +3485,7 @@ Hierarchies:
             $abDays = [ordered]@{ code = 'NEOIPC_SURVEILLANCE_END_AB_DAYS'; id = (& $script:SubDeId 'NEOIPC_SURVEILLANCE_END_AB_DAYS'); categoryCombo = [ordered]@{ id = $script:SubCcId } }
             $script:SubPkg = @{
                 programs             = @([ordered]@{ code = 'NEOIPC_CORE'; id = 'progCore001' })
-                programStages        = @([ordered]@{ id = 'psSurvEnd01'; programStageDataElements = @([ordered]@{ dataElement = [ordered]@{ id = (& $script:SubDeId 'NEOIPC_SURVEILLANCE_END_AB_DAYS') } }) })
+                programStages        = @([ordered]@{ code = 'NEOIPC_STG_SURV_END'; id = 'psSurvEnd01'; programStageDataElements = @([ordered]@{ dataElement = [ordered]@{ id = (& $script:SubDeId 'NEOIPC_SURVEILLANCE_END_AB_DAYS') } }) })
                 optionSets           = @([ordered]@{ code = 'NEOIPC_ANTIMICROBIAL_SUBSTANCES'; id = 'osSubstan01' })
                 dataElements         = @($subDes) + @($abDays)
                 programRuleVariables = @()
@@ -3640,7 +3640,7 @@ Hierarchies:
 
             $hide = $rules['NeoIPC Surveillance end Antibiotic substance 01 - hide']
             $hide['id'] | Should -BeExactly 'SUBrule0001'                  # preserved across the padding rename
-            $hide['programStage']['id'] | Should -BeExactly 'psSurvEnd01'  # resolved via DE->stage membership
+            $hide['programStage']['id'] | Should -BeExactly 'psSurvEnd01'  # resolved via the NEOIPC_STG_SURV_END code
             @($hide['programRuleActions']).Count | Should -Be 2
             $hideActIds = @($hide['programRuleActions'] | ForEach-Object { [string]$_['id'] })
             $hideActIds | Should -Contain 'SUBact00001'                    # action UID preserved by (type + target DE)
@@ -3809,10 +3809,11 @@ Hierarchies:
 '@
             $script:VirusTree = (Get-Content -LiteralPath $script:VirusYaml -Raw | ConvertFrom-Yaml)
 
-            # Fixture package: NEOIPC_CORE program, the HAP stage resolved via its slot-1 _3GCR anchor DE (stages carry
-            # no code), every pathogen DE (so the anchor resolves), and empty rule/action/variable collections.
+            # Fixture package: NEOIPC_CORE program, the HAP stage resolved by its NEOIPC_STG_HAP code, every pathogen DE
+            # (so the gating targets resolve), and empty rule/action/variable collections.
             $hapAnchor = 'NEOIPC_HAP_PATHOGEN_1_3GCR'
             $hapStage = [ordered]@{
+                code                     = 'NEOIPC_STG_HAP'
                 id                       = 'hapStage001'
                 programStageDataElements = @([ordered]@{ dataElement = [ordered]@{ id = (New-NeoIPCMetadataUid -Type 'dataElements' -NaturalKey $hapAnchor) } })
             }
@@ -4017,12 +4018,14 @@ Hierarchies:
   - Name: Escherichia coli
     Id: 200
 '@
-            # The four pathogen stages (BSI/HAP/SSI/NEC), each resolved via a slot-1 _3GCR anchor DE in
-            # programStageDataElements (stages carry no code), plus every pathogen DE (so every gating target resolves),
-            # the program, and empty rule/action collections. Built from the DE plan so it stays in lockstep.
+            # The four pathogen stages (BSI/HAP/SSI/NEC), each resolved by its NEOIPC_STG_ code, plus every pathogen DE
+            # (so every gating target resolves), the program, and empty rule/action collections. Built from the DE plan
+            # so it stays in lockstep. The stages also carry their DE→stage links for realism (no longer used to resolve
+            # the stage).
             $repDe = @{ BSI = 'NEOIPC_BSI_PATHOGEN_1_3GCR'; HAP = 'NEOIPC_HAP_PATHOGEN_1_3GCR'; SSI = 'NEOIPC_SSI_PATHOGEN_1_3GCR'; NEC = 'NEOIPC_NEC_SEC_BSI_PATHOGEN_1_3GCR' }
             $stages = foreach ($s in 'BSI', 'HAP', 'SSI', 'NEC') {
                 [ordered]@{
+                    code                     = "NEOIPC_STG_$s"
                     id                       = (New-NeoIPCMetadataUid -Type 'programStages' -NaturalKey "NEOIPC_$s")
                     programStageDataElements = @([ordered]@{ dataElement = [ordered]@{ id = (New-NeoIPCMetadataUid -Type 'dataElements' -NaturalKey $repDe[$s]) } })
                 }
@@ -4240,9 +4243,9 @@ Hierarchies:
             $pkg = @{ programs = @(); programStages = $script:FgPkg['programStages']; dataElements = $script:FgPkg['dataElements']; programRules = @(); programRuleActions = @() }
             { New-NeoIPCPathogenFieldGatingRule -Path $script:FgYaml -ExistingPackage $pkg } | Should -Throw '*NEOIPC_CORE*'
         }
-        It 'rule generator: fails loud when a stage anchor data element is absent (stage unresolvable)' {
+        It 'rule generator: fails loud when a program stage is absent (stage unresolvable)' {
             $pkg = $script:FgPkg.Clone()
-            $pkg['dataElements'] = @($script:FgPkg['dataElements'] | Where-Object { [string]$_['code'] -ne 'NEOIPC_NEC_SEC_BSI_PATHOGEN_1_3GCR' })
+            $pkg['programStages'] = @($script:FgPkg['programStages'] | Where-Object { [string]$_['code'] -ne 'NEOIPC_STG_NEC' })
             { New-NeoIPCPathogenFieldGatingRule -Path $script:FgYaml -ExistingPackage $pkg } | Should -Throw '*program stage*'
         }
         It 'rule generator: fails loud when a gating target data element is absent' {

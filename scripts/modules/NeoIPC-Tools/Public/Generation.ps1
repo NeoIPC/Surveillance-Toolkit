@@ -509,22 +509,8 @@ function New-NeoIPCPathogenRule {
     $tree = Get-Content -LiteralPath $resolvedYaml -Raw | ConvertFrom-Yaml
     $codeSets = Get-NeoIPCResistanceCodeSet -Node $tree
 
-    # The deployed program stages carry no code, so resolve each pathogen stage by a slot-1 resistance DE that always
-    # exists on it (so rules for grown slots resolve too); map the stage token -> stage id once.
-    $stageByDeId = Get-NeoIPCStageByDataElementId -Package $ExistingPackage
-    $stageAnchorByToken = @{
-        BSI = 'NEOIPC_BSI_PATHOGEN_1_3GCR'
-        HAP = 'NEOIPC_HAP_PATHOGEN_1_3GCR'
-        SSI = 'NEOIPC_SSI_PATHOGEN_1_3GCR'
-        NEC = 'NEOIPC_NEC_SEC_BSI_PATHOGEN_1_3GCR'
-    }
-    $stageIdByToken = @{}
-    foreach ($tok in $stageAnchorByToken.Keys) {
-        $anchor = $stageAnchorByToken[$tok]
-        if ($deByCode.ContainsKey($anchor) -and $stageByDeId.ContainsKey($deByCode[$anchor])) {
-            $stageIdByToken[$tok] = $stageByDeId[$deByCode[$anchor]]
-        }
-    }
+    # Program stages carry an authored code (NEOIPC_STG_<token>), so resolve each stage directly by code.
+    $stageIdByToken = Get-NeoIPCStageIdByToken -Package $ExistingPackage
 
     $plan = @(Get-NeoIPCPathogenRulePlan -PathogenCount $PathogenCount)
     $rulesSeen = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::Ordinal)
@@ -535,7 +521,7 @@ function New-NeoIPCPathogenRule {
     foreach ($d in $plan) {
         $name = [string]$d['Name']
         $stage = [string]$d['Stage']
-        if (-not $stageIdByToken.ContainsKey($stage)) { throw "Cannot resolve the program stage for rule '$name' — the anchor data element '$($stageAnchorByToken[$stage])' is absent from the package or not assigned to a stage." }
+        if (-not $stageIdByToken.ContainsKey($stage)) { throw "Cannot resolve the program stage for rule '$name' — no program stage with code 'NEOIPC_STG_$stage' in the package." }
         $psId = $stageIdByToken[$stage]
 
         $deployedRule = if ($ruleByName.ContainsKey($name)) { $ruleByName[$name] } else { $null }
@@ -763,22 +749,8 @@ function New-NeoIPCPathogenFieldGatingRule {
     $tree = Get-Content -LiteralPath $resolvedYaml -Raw | ConvertFrom-Yaml
     $commonCommensal = @(Get-NeoIPCCommonCommensalCodeSet -Node $tree)
 
-    # The deployed program stages carry no code, so resolve each pathogen stage by a slot-1 resistance DE that always
-    # exists on it (so rules for grown slots resolve too); map the stage token -> stage id once.
-    $stageByDeId = Get-NeoIPCStageByDataElementId -Package $ExistingPackage
-    $stageAnchorByToken = @{
-        BSI = 'NEOIPC_BSI_PATHOGEN_1_3GCR'
-        HAP = 'NEOIPC_HAP_PATHOGEN_1_3GCR'
-        SSI = 'NEOIPC_SSI_PATHOGEN_1_3GCR'
-        NEC = 'NEOIPC_NEC_SEC_BSI_PATHOGEN_1_3GCR'
-    }
-    $stageIdByToken = @{}
-    foreach ($tok in $stageAnchorByToken.Keys) {
-        $anchor = $stageAnchorByToken[$tok]
-        if ($deByCode.ContainsKey($anchor) -and $stageByDeId.ContainsKey($deByCode[$anchor])) {
-            $stageIdByToken[$tok] = $stageByDeId[$deByCode[$anchor]]
-        }
-    }
+    # Program stages carry an authored code (NEOIPC_STG_<token>), so resolve each stage directly by code.
+    $stageIdByToken = Get-NeoIPCStageIdByToken -Package $ExistingPackage
 
     $plan = @(Get-NeoIPCPathogenFieldGatingRulePlan -PathogenCount $PathogenCount)
     $rulesSeen = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::Ordinal)
@@ -789,7 +761,7 @@ function New-NeoIPCPathogenFieldGatingRule {
     foreach ($d in $plan) {
         $name = [string]$d['Name']
         $stage = [string]$d['Stage']
-        if (-not $stageIdByToken.ContainsKey($stage)) { throw "Cannot resolve the program stage for rule '$name' — the anchor data element '$($stageAnchorByToken[$stage])' is absent from the package or not assigned to a stage." }
+        if (-not $stageIdByToken.ContainsKey($stage)) { throw "Cannot resolve the program stage for rule '$name' — no program stage with code 'NEOIPC_STG_$stage' in the package." }
         $psId = $stageIdByToken[$stage]
 
         $deployedRule = if ($ruleByName.ContainsKey($name)) { $ruleByName[$name] } else { $null }
@@ -1001,14 +973,12 @@ function New-NeoIPCPathogenVirusRule {
         }
     }
 
-    # The deployed program stages carry no code, so resolve the HAP stage by a slot-1 resistance DE that always exists on
-    # it (so the rule resolves even when slots are grown).
-    $stageByDeId = Get-NeoIPCStageByDataElementId -Package $ExistingPackage
-    $anchor = 'NEOIPC_HAP_PATHOGEN_1_3GCR'
-    if (-not ($deByCode.ContainsKey($anchor) -and $stageByDeId.ContainsKey($deByCode[$anchor]))) {
-        throw "Cannot resolve the HAP program stage for 'NeoIPC HAP - set virus' — the anchor data element '$anchor' is absent from the package or not assigned to a stage."
+    # The HAP program stage carries an authored code, so resolve it directly by code.
+    $stageIdByToken = Get-NeoIPCStageIdByToken -Package $ExistingPackage
+    if (-not $stageIdByToken.ContainsKey('HAP')) {
+        throw "Cannot resolve the HAP program stage for 'NeoIPC HAP - set virus' — no program stage with code 'NEOIPC_STG_HAP' in the package."
     }
-    $psId = $stageByDeId[$deByCode[$anchor]]
+    $psId = $stageIdByToken['HAP']
 
     $resolvedYaml = Resolve-Path -LiteralPath $Path -ErrorAction Stop
     $tree = Get-Content -LiteralPath $resolvedYaml -Raw | ConvertFrom-Yaml
@@ -1342,13 +1312,12 @@ function New-NeoIPCSubstanceRule {
         }
     }
 
-    # The surveillance-end program stage carries no code, so resolve it as the stage that owns the total AB-days DE.
-    $stageByDeId = Get-NeoIPCStageByDataElementId -Package $ExistingPackage
-    $stageAnchor = 'NEOIPC_SURVEILLANCE_END_AB_DAYS'
-    if (-not ($deByCode.ContainsKey($stageAnchor) -and $stageByDeId.ContainsKey($deByCode[$stageAnchor]))) {
-        throw "Cannot resolve the surveillance-end program stage — the anchor data element '$stageAnchor' is absent from the package or not assigned to a stage."
+    # The surveillance-end program stage carries an authored code, so resolve it directly by code.
+    $stageIdByToken = Get-NeoIPCStageIdByToken -Package $ExistingPackage
+    if (-not $stageIdByToken.ContainsKey('SURV_END')) {
+        throw "Cannot resolve the surveillance-end program stage — no program stage with code 'NEOIPC_STG_SURV_END' in the package."
     }
-    $psId = $stageByDeId[$deByCode[$stageAnchor]]
+    $psId = $stageIdByToken['SURV_END']
     # Deployed rules by slot-number-normalised name (first-wins) + actions grouped by owning rule id.
     $ruleByName = [System.Collections.Generic.Dictionary[string, object]]::new([System.StringComparer]::Ordinal)
     foreach ($r in @($ExistingPackage['programRules'])) {

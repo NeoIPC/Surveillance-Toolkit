@@ -601,24 +601,22 @@ function ConvertTo-NeoIPCSubstanceUnpaddedName {
     $Name -replace 'substance 0*(\d+)', 'substance $1'
 }
 
-function Get-NeoIPCStageByDataElementId {
-    # Build a data-element-id -> program-stage-id map from a package's programStages[].programStageDataElements.
-    # The deployed program stages carry NO `code` (their codes belong to other objects), so a rule's program stage is
-    # resolved by which stage owns a known data element on it (a slot-1 resistance DE, or the AB-days DE) rather than
-    # by a stage code. First-wins per DE id (a DE belongs to one stage).
+function Get-NeoIPCStageIdByToken {
+    # Map a NeoIPC stage TOKEN (BSI, HAP, SSI, NEC, SURV_END, ADM, SURGERY) to its program-stage id via the stage's
+    # authored `code` (NEOIPC_STG_<token>). Program stages now carry codes, so a generated rule resolves its stage
+    # directly by code rather than by which stage owns a slot-1 resistance / AB-days data element. Stages without a
+    # NEOIPC_STG_ code are ignored.
     [CmdletBinding()]
     [OutputType([System.Collections.IDictionary])]
     param([Parameter(Mandatory)][System.Collections.IDictionary]$Package)
 
+    $prefix = 'NEOIPC_STG_'
     $map = [System.Collections.Generic.Dictionary[string, string]]::new([System.StringComparer]::Ordinal)
     foreach ($ps in @($Package['programStages'])) {
         if ($ps -isnot [System.Collections.IDictionary]) { continue }
-        $sid = [string]$ps['id']
-        foreach ($psde in @($ps['programStageDataElements'])) {
-            if ($psde -is [System.Collections.IDictionary] -and $psde['dataElement'] -is [System.Collections.IDictionary]) {
-                $deId = [string]$psde['dataElement']['id']
-                if ($deId -and -not $map.ContainsKey($deId)) { $map[$deId] = $sid }
-            }
+        $code = [string]$ps['code']
+        if ($code.StartsWith($prefix, [System.StringComparison]::Ordinal)) {
+            $map[$code.Substring($prefix.Length)] = [string]$ps['id']
         }
     }
     $map
