@@ -4772,6 +4772,17 @@ Hierarchies:
             (HasDelta 'programRuleActions' 'Added' 'CoverageAddition') | Should -BeGreaterThan 0
             @($r | Where-Object { $_.Class -eq 'Unclassified' }).Count | Should -Be 0
         }
+        It 'classifies a generated rule that authors a code the pre-code export lacks as CodeAuthoring, not Unclassified' {
+            # Guards step 6: once the generators mint codes, a `code` the pre-code deployed export lacks must classify
+            # as its own CodeAuthoring bucket, NOT vanish into RuleNormalisation or trip Unclassified. Reproduce ruleWS
+            # with a code added; the deployed ruleWS carries none.
+            Mock New-NeoIPCPathogenFieldGatingRule { [ordered]@{ programRules = @([ordered]@{ id = 'ruleWS'; code = 'NEOIPC_BSI_AGENT_1_IF_SET'; name = 'NeoIPC BSI Pathogen 1 - when set'; programRuleActions = @([ordered]@{ id = 'actWSsrc' }) }); programRuleActions = @([ordered]@{ id = 'actWSsrc'; programRule = [ordered]@{ id = 'ruleWS' }; programRuleActionType = 'SETMANDATORYFIELD'; dataElement = [ordered]@{ id = 'deSrc' } }) } }
+            $r = @(Compare-NeoIPCGeneratedMetadata -ExistingPackage (New-DiffDeployed))
+            # Exactly one programRules delta is CodeAuthoring, and `code` is the field that drove it (not a
+            # normalisation class, not Unclassified).
+            @($r | Where-Object { $_.Type -eq 'programRules' -and $_.Class -eq 'CodeAuthoring' -and (($_.DiffFields -split ',') -contains 'code') }).Count | Should -Be 1
+            @($r | Where-Object { $_.Class -eq 'Unclassified' }).Count | Should -Be 0
+        }
         It 'flags an unexpected data-element field change (valueType) as Unclassified — the gate failure path' {
             Mock New-NeoIPCPathogenDataElement { [ordered]@{ dataElements = @([ordered]@{ id = 'deP1'; code = 'NEOIPC_BSI_PATHOGEN_1'; name = 'Organism 1'; valueType = 'TEXT' }, [ordered]@{ id = 'deSrc'; code = 'NEOIPC_BSI_PATHOGEN_1_SOURCE'; name = 'src'; valueType = 'INTEGER_POSITIVE' }) } }
             $r = @(Compare-NeoIPCGeneratedMetadata -ExistingPackage (New-DiffDeployed))
