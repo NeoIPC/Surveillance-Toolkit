@@ -2060,25 +2060,26 @@ InModuleScope 'NeoIPC-Tools' {
         It 'derives stable DE-code-scheme keys for every generated PRV / rule family (name- and UID-independent)' {
             $idx = Get-NeoIPCMetadataGeneratedTranslationKeyIndex -Package ([ordered]@{})
             # Resistance PRVs (primary + secondary), field-gating PRV, substance PRV (slot-padding-normalised lookup).
-            $idx.VariableKeyByName['NeoIPC BSI Pathogen 1 value'] | Should -BeExactly 'NEOIPC_BSI_PATHOGEN_1_VALUE'
-            $idx.VariableKeyByName['NeoIPC BSI Pathogen 1 may be 3GCR'] | Should -BeExactly 'NEOIPC_BSI_PATHOGEN_1_MAYBE_3GCR'
-            $idx.VariableKeyByName['NeoIPC BSI Pathogen 1 may be carbapenem-resistant'] | Should -BeExactly 'NEOIPC_BSI_PATHOGEN_1_MAYBE_CAR'
-            $idx.VariableKeyByName['NeoIPC HAP Secondary BSI pathogen 1 value'] | Should -BeExactly 'NEOIPC_HAP_SEC_BSI_PATHOGEN_1_VALUE'
-            $idx.VariableKeyByName['NeoIPC BSI Pathogen 1 is recognized pathogen'] | Should -BeExactly 'NEOIPC_BSI_PATHOGEN_1_IS_RECOGNIZED'
-            $idx.VariableKeyByName['NeoIPC Surveillance end Antibiotic substance 1 - current event value'] | Should -BeExactly 'NEOIPC_SURVEILLANCE_END_AB_SUBST_01_VALUE'
-            $idx.VariableKeyByName['NeoIPC Surveillance end Antibiotic substance 1 days - current event value'] | Should -BeExactly 'NEOIPC_SURVEILLANCE_END_AB_SUBST_01_DAYS_VALUE'
-            # Rules: the resistance triple, the field-gating kinds, the substance cluster.
-            $idx.RuleKeyByName['NeoIPC BSI Pathogen 1 - set 3GCR'] | Should -BeExactly 'NEOIPC_BSI_PATHOGEN_1_SET_3GCR'
-            $idx.RuleKeyByName['NeoIPC BSI Pathogen 1 - not VRE'] | Should -BeExactly 'NEOIPC_BSI_PATHOGEN_1_NOT_VRE'
-            $idx.RuleKeyByName['NeoIPC BSI Pathogen 1 - when empty'] | Should -BeExactly 'NEOIPC_BSI_PATHOGEN_1_WHEN_EMPTY'
-            $idx.RuleKeyByName['NeoIPC BSI Pathogen 1 - set recognized pathogen'] | Should -BeExactly 'NEOIPC_BSI_PATHOGEN_1_SET_RECOGNIZED'
-            $idx.RuleKeyByName['NeoIPC Surveillance end Antibiotic substance 1 - hide'] | Should -BeExactly 'NEOIPC_SURVEILLANCE_END_AB_SUBST_01_HIDE'
-            $idx.RuleKeyByName['NeoIPC Surveillance end Antibiotic substance days - validate'] | Should -BeExactly 'NEOIPC_SURVEILLANCE_END_AB_SUBST_DAYS_VALIDATE'
+            $idx.VariableKeyByName['NeoIPC BSI Pathogen 1 value'] | Should -BeExactly 'NEOIPC_BSI_AGENT_1_VALUE'
+            $idx.VariableKeyByName['NeoIPC BSI Pathogen 1 may be 3GCR'] | Should -BeExactly 'NEOIPC_BSI_AGENT_1_MAYBE_3GCR'
+            $idx.VariableKeyByName['NeoIPC BSI Pathogen 1 may be carbapenem-resistant'] | Should -BeExactly 'NEOIPC_BSI_AGENT_1_MAYBE_CAR'
+            $idx.VariableKeyByName['NeoIPC HAP Secondary BSI pathogen 1 value'] | Should -BeExactly 'NEOIPC_HAP_SEC_BSI_AGENT_1_VALUE'
+            $idx.VariableKeyByName['NeoIPC BSI Pathogen 1 is recognized pathogen'] | Should -BeExactly 'NEOIPC_BSI_AGENT_1_IS_NCC'
+            $idx.VariableKeyByName['NeoIPC Surveillance end Antibiotic substance 1 - current event value'] | Should -BeExactly 'NEOIPC_SURV_END_AB_SUBST_01_VALUE'
+            $idx.VariableKeyByName['NeoIPC Surveillance end Antibiotic substance 1 days - current event value'] | Should -BeExactly 'NEOIPC_SURV_END_AB_SUBST_01_DAYS_VALUE'
+            # Rules: the resistance triple, the field-gating kinds, the substance cluster — keyed by their AUTHORED CODE
+            # (PATHOGEN->AGENT, SURVEILLANCE_END->SURV_END, WHEN_*->IF_*, RECOGNIZED->NCC, DAYS_VALIDATE->DAYS_VR).
+            $idx.RuleKeyByName['NeoIPC BSI Pathogen 1 - set 3GCR'] | Should -BeExactly 'NEOIPC_BSI_AGENT_1_SET_3GCR'
+            $idx.RuleKeyByName['NeoIPC BSI Pathogen 1 - not VRE'] | Should -BeExactly 'NEOIPC_BSI_AGENT_1_NOT_VRE'
+            $idx.RuleKeyByName['NeoIPC BSI Pathogen 1 - when empty'] | Should -BeExactly 'NEOIPC_BSI_AGENT_1_IF_EMPTY'
+            $idx.RuleKeyByName['NeoIPC BSI Pathogen 1 - set recognized pathogen'] | Should -BeExactly 'NEOIPC_BSI_AGENT_1_SET_NCC'
+            $idx.RuleKeyByName['NeoIPC Surveillance end Antibiotic substance 1 - hide'] | Should -BeExactly 'NEOIPC_SURV_END_AB_SUBST_01_HIDE'
+            $idx.RuleKeyByName['NeoIPC Surveillance end Antibiotic substance days - validate'] | Should -BeExactly 'NEOIPC_SURV_END_AB_SUBST_DAYS_VR'
         }
         It 'resolves a generated rule / variable to its semantic key and a hand-authored code-less object to null' {
             $idx = Get-NeoIPCMetadataGeneratedTranslationKeyIndex -Package ([ordered]@{})
-            Get-NeoIPCMetadataGeneratedTranslationKey -Type 'programRules' -Object ([ordered]@{ id = 'rl1'; name = 'NeoIPC BSI Pathogen 1 - set 3GCR' }) -Index $idx | Should -BeExactly 'NEOIPC_BSI_PATHOGEN_1_SET_3GCR'
-            Get-NeoIPCMetadataGeneratedTranslationKey -Type 'programRuleVariables' -Object ([ordered]@{ id = 'pv1'; name = 'NeoIPC BSI Pathogen 1 value' }) -Index $idx | Should -BeExactly 'NEOIPC_BSI_PATHOGEN_1_VALUE'
+            Get-NeoIPCMetadataGeneratedTranslationKey -Type 'programRules' -Object ([ordered]@{ id = 'rl1'; name = 'NeoIPC BSI Pathogen 1 - set 3GCR' }) -Index $idx | Should -BeExactly 'NEOIPC_BSI_AGENT_1_SET_3GCR'
+            Get-NeoIPCMetadataGeneratedTranslationKey -Type 'programRuleVariables' -Object ([ordered]@{ id = 'pv1'; name = 'NeoIPC BSI Pathogen 1 value' }) -Index $idx | Should -BeExactly 'NEOIPC_BSI_AGENT_1_VALUE'
             Get-NeoIPCMetadataGeneratedTranslationKey -Type 'programRules' -Object ([ordered]@{ id = 'rlx'; name = 'NeoIPC BSI infection present' }) -Index $idx | Should -BeNullOrEmpty
         }
         It 'keys a generated action by owning-rule key + action type (+ target DE code), unique across a multi-action rule' {
@@ -2093,9 +2094,9 @@ InModuleScope 'NeoIPC-Tools' {
             }
             $idx = Get-NeoIPCMetadataGeneratedTranslationKeyIndex -Package (ConvertFrom-NeoIPCMetadataJsonText -Json ($pkg | ConvertTo-Json -Depth 40))
             # ASSIGN with no DE target -> <ruleKey>/ASSIGN
-            Get-NeoIPCMetadataGeneratedTranslationKey -Type 'programRuleActions' -Object ([ordered]@{ programRuleActionType = 'ASSIGN'; programRule = [ordered]@{ id = 'rlSet1' } }) -Index $idx | Should -BeExactly 'NEOIPC_BSI_PATHOGEN_1_SET_3GCR/ASSIGN'
+            Get-NeoIPCMetadataGeneratedTranslationKey -Type 'programRuleActions' -Object ([ordered]@{ programRuleActionType = 'ASSIGN'; programRule = [ordered]@{ id = 'rlSet1' } }) -Index $idx | Should -BeExactly 'NEOIPC_BSI_AGENT_1_SET_3GCR/ASSIGN'
             # HIDEFIELD with a DE target -> <ruleKey>/HIDEFIELD/<deCode>
-            Get-NeoIPCMetadataGeneratedTranslationKey -Type 'programRuleActions' -Object ([ordered]@{ programRuleActionType = 'HIDEFIELD'; programRule = [ordered]@{ id = 'rlWE1' }; dataElement = [ordered]@{ id = 'deNam2' } }) -Index $idx | Should -BeExactly 'NEOIPC_BSI_PATHOGEN_1_WHEN_EMPTY/HIDEFIELD/NEOIPC_BSI_PATHOGEN_2_NAME'
+            Get-NeoIPCMetadataGeneratedTranslationKey -Type 'programRuleActions' -Object ([ordered]@{ programRuleActionType = 'HIDEFIELD'; programRule = [ordered]@{ id = 'rlWE1' }; dataElement = [ordered]@{ id = 'deNam2' } }) -Index $idx | Should -BeExactly 'NEOIPC_BSI_AGENT_1_IF_EMPTY/HIDEFIELD/NEOIPC_BSI_PATHOGEN_2_NAME'
             # an action on a non-generated rule -> null (it keeps its UID key)
             Get-NeoIPCMetadataGeneratedTranslationKey -Type 'programRuleActions' -Object ([ordered]@{ programRuleActionType = 'HIDEFIELD'; programRule = [ordered]@{ id = 'rlUnknown' } }) -Index $idx | Should -BeNullOrEmpty
         }
@@ -2107,7 +2108,7 @@ InModuleScope 'NeoIPC-Tools' {
                 )
             }
             $msgctxts = @(Get-NeoIPCMetadataTranslationUnit -Package $pkg | ForEach-Object { $_.Msgctxt })
-            $msgctxts | Should -Contain 'programRuleVariables/NEOIPC_BSI_PATHOGEN_1_MAYBE_MRSA/NAME'
+            $msgctxts | Should -Contain 'programRuleVariables/NEOIPC_BSI_AGENT_1_MAYBE_MRSA/NAME'
             $msgctxts | Should -Contain 'programRuleVariables/pvHand0001/NAME'
         }
         It 'the generated key is independent of the object UID (no churn when a deployed UID is reused vs minted)' {
@@ -2115,7 +2116,7 @@ InModuleScope 'NeoIPC-Tools' {
             $a = Get-NeoIPCMetadataGeneratedTranslationKey -Type 'programRules' -Object ([ordered]@{ id = 'realUID0001'; name = 'NeoIPC BSI Pathogen 1 - set 3GCR' }) -Index $idx
             $b = Get-NeoIPCMetadataGeneratedTranslationKey -Type 'programRules' -Object ([ordered]@{ id = 'mintedXYZ99'; name = 'NeoIPC BSI Pathogen 1 - set 3GCR' }) -Index $idx
             $a | Should -BeExactly $b
-            $a | Should -BeExactly 'NEOIPC_BSI_PATHOGEN_1_SET_3GCR'
+            $a | Should -BeExactly 'NEOIPC_BSI_AGENT_1_SET_3GCR'
         }
         It 'adding a slot is additive: every key from a smaller slot count survives unchanged (bounded diff)' {
             $idx3 = Get-NeoIPCMetadataGeneratedTranslationKeyIndex -Package ([ordered]@{}) -PathogenCount 3 -SubstanceCount 9

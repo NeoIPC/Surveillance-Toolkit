@@ -78,47 +78,27 @@ function Get-NeoIPCMetadataGeneratedTranslationKeyIndex {
     $varKeyByName = [System.Collections.Generic.Dictionary[string, string]]::new($ordinal)
     $ruleKeyByName = [System.Collections.Generic.Dictionary[string, string]]::new($ordinal)
 
+    # Each generated variable/rule keys by its authored CODE (== its msgctxt once minted): Get-NeoIPCGeneratedObjectCode
+    # is the single derivation the generators also mint from, so an object's code and its key are one value. The
+    # virus family is deliberately absent (its rule/vars key by code once minted; its actions stay UID-keyed — step 2).
     foreach ($p in @(Get-NeoIPCPathogenVariablePlan -PathogenCount $PathogenCount)) {
-        $base = Get-NeoIPCPathogenSlotBaseCode -Stage $p['Stage'] -SlotKind $p['SlotKind'] -Index $p['Index']
-        $key = if ($p['Kind'] -eq 'value') { "${base}_VALUE" } else { "${base}_MAYBE_$($script:NeoIPCResistanceDeSuffixByCategory[$p['Category']])" }
-        $varKeyByName[(ConvertTo-NeoIPCSubstanceUnpaddedName ([string]$p['Name']))] = $key
+        $varKeyByName[(ConvertTo-NeoIPCSubstanceUnpaddedName ([string]$p['Name']))] = Get-NeoIPCGeneratedObjectCode -PlanItem $p -Family 'pathogenVar'
     }
     foreach ($p in @(Get-NeoIPCPathogenFieldGatingVariablePlan -PathogenCount $PathogenCount)) {
-        $base = Get-NeoIPCPathogenSlotBaseCode -Stage $p['Stage'] -SlotKind $p['SlotKind'] -Index $p['Index']
-        $varKeyByName[(ConvertTo-NeoIPCSubstanceUnpaddedName ([string]$p['Name']))] = "${base}_IS_RECOGNIZED"
+        $varKeyByName[(ConvertTo-NeoIPCSubstanceUnpaddedName ([string]$p['Name']))] = Get-NeoIPCGeneratedObjectCode -PlanItem $p -Family 'fieldGatingVar'
     }
     foreach ($p in @(Get-NeoIPCSubstanceVariablePlan -SubstanceCount $SubstanceCount)) {
-        # The substance/days DE code IS the slot base for these PRVs (each reads its DE on the current event).
-        $varKeyByName[(ConvertTo-NeoIPCSubstanceUnpaddedName ([string]$p['Name']))] = "$([string]$p['DataElementCode'])_VALUE"
+        $varKeyByName[(ConvertTo-NeoIPCSubstanceUnpaddedName ([string]$p['Name']))] = Get-NeoIPCGeneratedObjectCode -PlanItem $p -Family 'substanceVar'
     }
 
     foreach ($p in @(Get-NeoIPCPathogenRulePlan -PathogenCount $PathogenCount)) {
-        $base = Get-NeoIPCPathogenSlotBaseCode -Stage $p['Stage'] -SlotKind $p['SlotKind'] -Index $p['Index']
-        $cat = $script:NeoIPCResistanceDeSuffixByCategory[$p['Category']]
-        $role = switch ($p['Kind']) { 'set' { "SET_$cat" } 'mayBe' { "MAYBE_$cat" } 'not' { "NOT_$cat" } }
-        $ruleKeyByName[(ConvertTo-NeoIPCSubstanceUnpaddedName ([string]$p['Name']))] = "${base}_$role"
+        $ruleKeyByName[(ConvertTo-NeoIPCSubstanceUnpaddedName ([string]$p['Name']))] = Get-NeoIPCGeneratedObjectCode -PlanItem $p -Family 'pathogenRule'
     }
     foreach ($p in @(Get-NeoIPCPathogenFieldGatingRulePlan -PathogenCount $PathogenCount)) {
-        $base = Get-NeoIPCPathogenSlotBaseCode -Stage $p['Stage'] -SlotKind $p['SlotKind'] -Index $p['Index']
-        $role = switch ($p['Kind']) {
-            'recognizedPathogen' { 'SET_RECOGNIZED' }
-            'whenSet' { 'WHEN_SET' }
-            'whenEmpty' { 'WHEN_EMPTY' }
-            'whenEmptyOrListed' { 'WHEN_EMPTY_OR_LISTED' }
-            'whenNotListed' { 'WHEN_NOT_LISTED' }
-        }
-        $ruleKeyByName[(ConvertTo-NeoIPCSubstanceUnpaddedName ([string]$p['Name']))] = "${base}_$role"
+        $ruleKeyByName[(ConvertTo-NeoIPCSubstanceUnpaddedName ([string]$p['Name']))] = Get-NeoIPCGeneratedObjectCode -PlanItem $p -Family 'fieldGatingRule'
     }
     foreach ($p in @(Get-NeoIPCSubstanceRulePlan -SubstanceCount $SubstanceCount)) {
-        $nn = '{0:D2}' -f [int]$p['Index']
-        $sBase = "NEOIPC_SURVEILLANCE_END_AB_SUBST_$nn"
-        $key = switch ($p['Kind']) {
-            'hide' { "${sBase}_HIDE" }
-            'daysRequire' { "${sBase}_DAYS_REQUIRE" }
-            'substanceRequire' { "${sBase}_REQUIRE" }
-            'validate' { 'NEOIPC_SURVEILLANCE_END_AB_SUBST_DAYS_VALIDATE' }
-        }
-        $ruleKeyByName[(ConvertTo-NeoIPCSubstanceUnpaddedName ([string]$p['Name']))] = $key
+        $ruleKeyByName[(ConvertTo-NeoIPCSubstanceUnpaddedName ([string]$p['Name']))] = Get-NeoIPCGeneratedObjectCode -PlanItem $p -Family 'substanceRule'
     }
 
     # Resolve within the package: owning-rule id -> rule struct key (actions carry no name), and DE id -> code, so a
