@@ -3938,6 +3938,36 @@ Hierarchies:
         }
     }
 
+    Describe 'Get-NeoIPCGeneratedObjectCode (whole generated code surface)' {
+        # Derives every generated variable/rule code from its plan at the MAX slot counts (9 pathogen, 99 substance) —
+        # the full surface the generators will mint and the translation index will key. Guards the two DHIS2 hard
+        # constraints across all of it: code shape + the 50-char cap (E4001), and per-type uniqueness. This is the
+        # load-bearing check that the vocabulary + slot growth never overflow or collide.
+        BeforeAll {
+            $script:GenVarCodes = InModuleScope NeoIPC-Tools {
+                $P = 9; $S = 99
+                @(@(Get-NeoIPCPathogenVariablePlan -PathogenCount $P            | ForEach-Object { Get-NeoIPCGeneratedObjectCode -PlanItem $_ -Family 'pathogenVar' }) +
+                  @(Get-NeoIPCPathogenFieldGatingVariablePlan -PathogenCount $P | ForEach-Object { Get-NeoIPCGeneratedObjectCode -PlanItem $_ -Family 'fieldGatingVar' }) +
+                  @(Get-NeoIPCSubstanceVariablePlan -SubstanceCount $S          | ForEach-Object { Get-NeoIPCGeneratedObjectCode -PlanItem $_ -Family 'substanceVar' }) +
+                  @(Get-NeoIPCPathogenVirusVariablePlan -PathogenCount $P       | ForEach-Object { Get-NeoIPCGeneratedObjectCode -PlanItem $_ -Family 'virusVar' }))
+            }
+            $script:GenRuleCodes = InModuleScope NeoIPC-Tools {
+                $P = 9; $S = 99
+                @(@(Get-NeoIPCPathogenRulePlan -PathogenCount $P            | ForEach-Object { Get-NeoIPCGeneratedObjectCode -PlanItem $_ -Family 'pathogenRule' }) +
+                  @(Get-NeoIPCPathogenFieldGatingRulePlan -PathogenCount $P | ForEach-Object { Get-NeoIPCGeneratedObjectCode -PlanItem $_ -Family 'fieldGatingRule' }) +
+                  @(Get-NeoIPCSubstanceRulePlan -SubstanceCount $S          | ForEach-Object { Get-NeoIPCGeneratedObjectCode -PlanItem $_ -Family 'substanceRule' }) +
+                  @(Get-NeoIPCPathogenVirusRulePlan -PathogenCount $P       | ForEach-Object { Get-NeoIPCGeneratedObjectCode -PlanItem $_ -Family 'virusRule' }))
+            }
+        }
+        It 'every generated code is upper-snake (^[A-Z][A-Z0-9_]*$) and <= 50 characters' {
+            @($script:GenVarCodes + $script:GenRuleCodes | Where-Object { $_ -notmatch '^[A-Z][A-Z0-9_]*$' -or $_.Length -gt 50 }) | Should -BeNullOrEmpty
+        }
+        It 'generated variable codes are unique, and rule codes are unique (per-type constraint)' {
+            @($script:GenVarCodes | Group-Object | Where-Object Count -gt 1).Count | Should -Be 0
+            @($script:GenRuleCodes | Group-Object | Where-Object Count -gt 1).Count | Should -Be 0
+        }
+    }
+
     Describe 'Pathogen slot-suffix matrix' {
         It 'gives a BSI primary slot the full suffix set (base + NAME + 5 resistance + SOURCE + MULTIPLE), in order' {
             @(Get-NeoIPCPathogenSlotSuffix -Stage 'BSI' -IsPrimary $true) |

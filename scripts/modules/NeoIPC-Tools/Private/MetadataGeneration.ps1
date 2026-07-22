@@ -278,6 +278,62 @@ function Get-NeoIPCGeneratedCode {
     $s
 }
 
+function Get-NeoIPCGeneratedObjectCode {
+    # The authored `code` for a GENERATED program-rule VARIABLE or RULE, from its plan descriptor + family. Derives
+    # the DE-code-scheme semantic key (slot base code + role) EXACTLY as Get-NeoIPCMetadataGeneratedTranslationKeyIndex
+    # does, then applies the vocabulary via Get-NeoIPCGeneratedCode. Called by BOTH the generator mint points (setting
+    # `code`) and that index (the msgctxt), so an object's code and its msgctxt key are one value. programRuleActions
+    # carry no code (the documented exception), so there is no action family here.
+    [CmdletBinding()]
+    [OutputType([string])]
+    param(
+        [Parameter(Mandatory)][System.Collections.IDictionary]$PlanItem,
+        [Parameter(Mandatory)]
+        [ValidateSet('pathogenVar', 'fieldGatingVar', 'substanceVar', 'virusVar', 'pathogenRule', 'fieldGatingRule', 'substanceRule', 'virusRule')]
+        [string]$Family
+    )
+    $d = $PlanItem
+    $slotBase = {
+        Get-NeoIPCPathogenSlotBaseCode -Stage ([string]$d['Stage']) -SlotKind ([string]$d['SlotKind']) -Index ([int]$d['Index'])
+    }
+    $key = switch ($Family) {
+        'pathogenVar' {
+            $base = & $slotBase
+            if ([string]$d['Kind'] -eq 'value') { "${base}_VALUE" } else { "${base}_MAYBE_$($script:NeoIPCResistanceDeSuffixByCategory[[string]$d['Category']])" }
+        }
+        'fieldGatingVar' { "$(& $slotBase)_IS_RECOGNIZED" }
+        'virusVar' { "$(& $slotBase)_IS_VIRUS" }
+        'substanceVar' { "$([string]$d['DataElementCode'])_VALUE" }
+        'pathogenRule' {
+            $base = & $slotBase
+            $cat = $script:NeoIPCResistanceDeSuffixByCategory[[string]$d['Category']]
+            switch ([string]$d['Kind']) { 'set' { "${base}_SET_$cat" } 'mayBe' { "${base}_MAYBE_$cat" } 'not' { "${base}_NOT_$cat" } }
+        }
+        'fieldGatingRule' {
+            $base = & $slotBase
+            $role = switch ([string]$d['Kind']) {
+                'recognizedPathogen' { 'SET_RECOGNIZED' }
+                'whenSet' { 'WHEN_SET' }
+                'whenEmpty' { 'WHEN_EMPTY' }
+                'whenEmptyOrListed' { 'WHEN_EMPTY_OR_LISTED' }
+                'whenNotListed' { 'WHEN_NOT_LISTED' }
+            }
+            "${base}_$role"
+        }
+        'substanceRule' {
+            $sBase = "NEOIPC_SURVEILLANCE_END_AB_SUBST_$('{0:D2}' -f [int]$d['Index'])"
+            switch ([string]$d['Kind']) {
+                'hide' { "${sBase}_HIDE" }
+                'daysRequire' { "${sBase}_DAYS_REQUIRE" }
+                'substanceRequire' { "${sBase}_REQUIRE" }
+                'validate' { 'NEOIPC_SURVEILLANCE_END_AB_SUBST_DAYS_VALIDATE' }
+            }
+        }
+        'virusRule' { 'NEOIPC_HAP_SET_VIRUS' }
+    }
+    Get-NeoIPCGeneratedCode -SemanticKey $key
+}
+
 function Get-NeoIPCPathogenVariablePlan {
     # The capability-matrix expansion of the resistance-gating PROGRAM-RULE VARIABLES: for each of the 18
     # pathogen slots, one `value` variable (DATAELEMENT_CURRENT_EVENT over the base organism DE, reading the option
