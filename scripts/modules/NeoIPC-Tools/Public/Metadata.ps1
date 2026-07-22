@@ -742,8 +742,9 @@ function Export-NeoIPCMetadataTranslation {
         documentation / glossary PO:
           - metadata.pot — the English source template. msgctxt = <type>/<key>/<TOKEN> (key = optionSetCode/
             optionCode for options, else code — code-stable across UID regeneration and matching the legacy
-            .<locale>.csv sidecars — else the object UID for code-less types like program rules / stages / sections,
-            which is therefore NOT regeneration-stable), msgid = the English base value, msgstr empty.
+            .<locale>.csv sidecars — else the object UID for the types that carry no code (program rule actions and
+            the placeholder validation rule), whose msgctxt is therefore NOT regeneration-stable), msgid = the
+            English base value, msgstr empty.
           - metadata.<lang>.po — per language. An EXISTING .po is refreshed msgmerge-style (in code): the source
             msgid is updated, the translator's msgstr is preserved, an entry whose source changed is kept but
             marked fuzzy, and entries no longer in the source are dropped. A MISSING .po is created and seeded from

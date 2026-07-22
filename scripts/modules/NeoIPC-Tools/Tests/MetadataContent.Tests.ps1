@@ -62,3 +62,49 @@ Describe 'Program-rule name vs programStage consistency (metadata/common)' {
         $script:Mismatches.Count | Should -Be 0 -Because ('name/stage mismatches: ' + ($script:Mismatches -join ' | '))
     }
 }
+
+Describe 'First-class code constraints (metadata/common)' {
+    # Guards the DHIS2 hard code constraints against the REAL committed directory - hand-authored AND generated codes
+    # together, per type. The generator-only whole-surface check in Metadata.Tests.ps1 cannot see a hand code, a
+    # config/indicator code, or a hand-vs-generated collision; and that file is not run in CI. This lint is, so a
+    # future edit introducing a 51-char, malformed, or duplicate code fails here instead of as an import-blocking
+    # E4001 at deploy. The 50-char cap and per-type uniqueness are universal DHIS2 rules; the ^[A-Z][A-Z0-9_]*$ shape
+    # is the NeoIPC scheme for the first-class types this arc authored (options / antibiotic-domain codes have their
+    # own schemes and are only length/uniqueness-checked).
+    BeforeAll {
+        $common = (Resolve-Path (Join-Path $PSScriptRoot '../../../../metadata/common')).Path
+        $script:CodesByType = [ordered]@{}
+        foreach ($csv in Get-ChildItem -LiteralPath $common -Filter '*.csv') {
+            $rows = @(Import-Csv -LiteralPath $csv.FullName)
+            if ($rows.Count -eq 0 -or -not ($rows[0].PSObject.Properties.Name -contains 'code')) { continue }
+            $codes = @($rows | ForEach-Object { [string]$_.code } | Where-Object { $_ -ne '' })
+            if ($codes.Count) { $script:CodesByType[$csv.BaseName] = $codes }
+        }
+        # The first-class types this arc authored NEOIPC_ codes on; they must match the code scheme.
+        $script:NeoIPCSchemeTypes = @('programRules', 'programRuleVariables', 'programStages', 'programStageSections',
+            'programSections', 'organisationUnitLevels', 'trackedEntityTypes', 'programIndicators')
+    }
+
+    It 'no code exceeds the DHIS2 50-character cap (E4001) in any type' {
+        $over = foreach ($t in $script:CodesByType.Keys) {
+            foreach ($c in $script:CodesByType[$t]) { if ($c.Length -gt 50) { "$t/$c ($($c.Length))" } }
+        }
+        @($over) | Should -BeNullOrEmpty -Because ('over-length codes: ' + (@($over) -join ' | '))
+    }
+
+    It 'codes are unique within each type (DHIS2 per-type unique constraint)' {
+        $dups = foreach ($t in $script:CodesByType.Keys) {
+            if ($t -eq 'options') { continue }   # an option's code is unique per optionSet, not per type
+            foreach ($x in @($script:CodesByType[$t] | Group-Object | Where-Object Count -gt 1)) { "$t/$($x.Name) x$($x.Count)" }
+        }
+        @($dups) | Should -BeNullOrEmpty -Because ('duplicate codes: ' + (@($dups) -join ' | '))
+    }
+
+    It 'first-class NeoIPC codes match ^[A-Z][A-Z0-9_]*$' {
+        $bad = foreach ($t in $script:NeoIPCSchemeTypes) {
+            if (-not $script:CodesByType.Contains($t)) { continue }
+            foreach ($c in $script:CodesByType[$t]) { if ($c -notmatch '^[A-Z][A-Z0-9_]*$') { "$t/$c" } }
+        }
+        @($bad) | Should -BeNullOrEmpty -Because ('malformed codes: ' + (@($bad) -join ' | '))
+    }
+}
