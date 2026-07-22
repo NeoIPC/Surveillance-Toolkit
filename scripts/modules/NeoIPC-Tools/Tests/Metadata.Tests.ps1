@@ -3910,6 +3910,34 @@ Hierarchies:
         }
     }
 
+    Describe 'Get-NeoIPCGeneratedCode (generated-code vocabulary)' {
+        # The single derivation the generators (minting `code`) and the translation-key index (msgctxt) both call, so
+        # generated codes == msgctxt keys by construction. Maps a DE-code-scheme semantic key to the finalized
+        # rule/variable-code vocabulary. Guards each transform, every generated family, and the identity case.
+        It 'applies the finalized vocabulary to each generated family' {
+            InModuleScope NeoIPC-Tools {
+                Get-NeoIPCGeneratedCode -SemanticKey 'NEOIPC_BSI_PATHOGEN_1_VALUE'                      | Should -BeExactly 'NEOIPC_BSI_AGENT_1_VALUE'
+                Get-NeoIPCGeneratedCode -SemanticKey 'NEOIPC_BSI_PATHOGEN_1_SET_3GCR'                   | Should -BeExactly 'NEOIPC_BSI_AGENT_1_SET_3GCR'
+                Get-NeoIPCGeneratedCode -SemanticKey 'NEOIPC_HAP_SEC_BSI_PATHOGEN_2_MAYBE_CAR'          | Should -BeExactly 'NEOIPC_HAP_SEC_BSI_AGENT_2_MAYBE_CAR'
+                Get-NeoIPCGeneratedCode -SemanticKey 'NEOIPC_BSI_PATHOGEN_1_IS_RECOGNIZED'              | Should -BeExactly 'NEOIPC_BSI_AGENT_1_IS_NCC'
+                Get-NeoIPCGeneratedCode -SemanticKey 'NEOIPC_BSI_PATHOGEN_1_SET_RECOGNIZED'             | Should -BeExactly 'NEOIPC_BSI_AGENT_1_SET_NCC'
+                Get-NeoIPCGeneratedCode -SemanticKey 'NEOIPC_BSI_PATHOGEN_1_WHEN_SET'                   | Should -BeExactly 'NEOIPC_BSI_AGENT_1_IF_SET'
+                Get-NeoIPCGeneratedCode -SemanticKey 'NEOIPC_BSI_PATHOGEN_1_WHEN_EMPTY'                 | Should -BeExactly 'NEOIPC_BSI_AGENT_1_IF_EMPTY'
+                Get-NeoIPCGeneratedCode -SemanticKey 'NEOIPC_BSI_PATHOGEN_1_WHEN_EMPTY_OR_LISTED'       | Should -BeExactly 'NEOIPC_BSI_AGENT_1_IF_EMPTY_LISTED'
+                Get-NeoIPCGeneratedCode -SemanticKey 'NEOIPC_BSI_PATHOGEN_1_WHEN_NOT_LISTED'            | Should -BeExactly 'NEOIPC_BSI_AGENT_1_IF_NOT_LISTED'
+                Get-NeoIPCGeneratedCode -SemanticKey 'NEOIPC_HAP_PATHOGEN_1_IS_VIRUS'                   | Should -BeExactly 'NEOIPC_HAP_AGENT_1_IS_VIRUS'
+                Get-NeoIPCGeneratedCode -SemanticKey 'NEOIPC_SURVEILLANCE_END_AB_SUBST_07_HIDE'         | Should -BeExactly 'NEOIPC_SURV_END_AB_SUBST_07_HIDE'
+                Get-NeoIPCGeneratedCode -SemanticKey 'NEOIPC_SURVEILLANCE_END_AB_SUBST_07_DAYS_REQUIRE' | Should -BeExactly 'NEOIPC_SURV_END_AB_SUBST_07_DAYS_REQUIRE'
+                Get-NeoIPCGeneratedCode -SemanticKey 'NEOIPC_SURVEILLANCE_END_AB_SUBST_DAYS_VALIDATE'   | Should -BeExactly 'NEOIPC_SURV_END_AB_SUBST_DAYS_VR'
+            }
+        }
+        It 'leaves a key carrying no vocabulary token unchanged (the single virus rule code)' {
+            InModuleScope NeoIPC-Tools {
+                Get-NeoIPCGeneratedCode -SemanticKey 'NEOIPC_HAP_SET_VIRUS' | Should -BeExactly 'NEOIPC_HAP_SET_VIRUS'
+            }
+        }
+    }
+
     Describe 'Pathogen slot-suffix matrix' {
         It 'gives a BSI primary slot the full suffix set (base + NAME + 5 resistance + SOURCE + MULTIPLE), in order' {
             @(Get-NeoIPCPathogenSlotSuffix -Stage 'BSI' -IsPrimary $true) |

@@ -246,6 +246,38 @@ function Get-NeoIPCPathogenSlotBaseCode {
     if ($SlotKind -eq 'primary') { "NEOIPC_${Stage}_PATHOGEN_${Index}" } else { "NEOIPC_${Stage}_SEC_BSI_PATHOGEN_${Index}" }
 }
 
+function Get-NeoIPCGeneratedCode {
+    # Map a GENERATED object's DE-code-scheme semantic key (the key the translation-key index builds, e.g.
+    # NEOIPC_BSI_PATHOGEN_1_SET_3GCR, NEOIPC_SURVEILLANCE_END_AB_SUBST_07_HIDE) to its authored `code`, applying the
+    # finalized NeoIPC rule/variable-code VOCABULARY. Both halves that must agree call this ONE function — the
+    # generators (minting `code` onto each object) and Get-NeoIPCMetadataGeneratedTranslationKeyIndex (the msgctxt) —
+    # so `code == msgctxt` by construction. Literal replacements, applied in order (longest phrase first, so
+    # WHEN_EMPTY_OR_LISTED wins over WHEN_EMPTY):
+    #   PATHOGEN -> AGENT            infectious agent (a recovered common commensal is not a pathogen, a virus is not
+    #                               an organism). The DATA ELEMENTS keep their deployed PATHOGEN token, so a generated
+    #                               rule/variable code diverges by design from the DE code it targets.
+    #   SURVEILLANCE_END -> SURV_END the rule/variable stage token; the data elements keep SURVEILLANCE_END.
+    #   RECOGNIZED -> NCC           recognized pathogen -> non-common commensal (covers SET_RECOGNIZED + IS_RECOGNIZED).
+    #   WHEN_* -> IF_*              field-gating role compaction (EMPTY_OR_LISTED also drops the redundant OR).
+    #   DAYS_VALIDATE -> DAYS_VR    the substance-days validation rule adopts the _VR validation-rule marker.
+    [CmdletBinding()]
+    [OutputType([string])]
+    param([Parameter(Mandatory)][string]$SemanticKey)
+    $replacements = @(
+        @('SURVEILLANCE_END', 'SURV_END'),
+        @('PATHOGEN', 'AGENT'),
+        @('RECOGNIZED', 'NCC'),
+        @('WHEN_EMPTY_OR_LISTED', 'IF_EMPTY_LISTED'),
+        @('WHEN_NOT_LISTED', 'IF_NOT_LISTED'),
+        @('WHEN_EMPTY', 'IF_EMPTY'),
+        @('WHEN_SET', 'IF_SET'),
+        @('DAYS_VALIDATE', 'DAYS_VR')
+    )
+    $s = $SemanticKey
+    foreach ($pair in $replacements) { $s = $s.Replace([string]$pair[0], [string]$pair[1]) }
+    $s
+}
+
 function Get-NeoIPCPathogenVariablePlan {
     # The capability-matrix expansion of the resistance-gating PROGRAM-RULE VARIABLES: for each of the 18
     # pathogen slots, one `value` variable (DATAELEMENT_CURRENT_EVENT over the base organism DE, reading the option
