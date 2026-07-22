@@ -395,6 +395,7 @@ function New-NeoIPCPathogenVariable {
 
         $prv = [ordered]@{
             id                            = $id
+            code                          = (Get-NeoIPCGeneratedObjectCode -PlanItem $d -Family 'pathogenVar')
             name                          = $name
             programRuleVariableSourceType = [string]$d['SourceType']
             valueType                     = [string]$d['ValueType']
@@ -557,6 +558,7 @@ function New-NeoIPCPathogenRule {
         if (-not $actionsSeen.Add($actionId)) { throw "UID collision for the action of program rule '$name' (uid '$actionId')." }
 
         $rule = [ordered]@{ id = $ruleId; name = $name }
+        $rule['code'] = Get-NeoIPCGeneratedObjectCode -PlanItem $d -Family 'pathogenRule'
         # The plan description is the canonical (normalised) wording and overwrites the deployed one — rule
         # descriptions are not load-bearing, and the deployed text carries human-entry drift (inconsistent casing,
         # "for pathogen N" present-or-absent). The deployed/existing description is only a fallback for a family with
@@ -659,6 +661,7 @@ function New-NeoIPCPathogenFieldGatingVariable {
 
         $out.Add([ordered]@{
                 id                            = $id
+                code                          = (Get-NeoIPCGeneratedObjectCode -PlanItem $d -Family 'fieldGatingVar')
                 name                          = $name
                 programRuleVariableSourceType = [string]$d['SourceType']
                 valueType                     = [string]$d['ValueType']
@@ -797,6 +800,7 @@ function New-NeoIPCPathogenFieldGatingRule {
         if (-not $rulesSeen.Add($ruleId)) { throw "UID collision for program rule '$name' (uid '$ruleId')." }
 
         $rule = [ordered]@{ id = $ruleId; name = $name }
+        $rule['code'] = Get-NeoIPCGeneratedObjectCode -PlanItem $d -Family 'fieldGatingRule'
         # The plan description is the canonical (normalised) wording and overwrites the deployed one — rule
         # descriptions are not load-bearing, and the deployed text carries human-entry drift (inconsistent casing,
         # "for pathogen N" present-or-absent). The deployed/existing description is only a fallback for a family with
@@ -921,6 +925,7 @@ function New-NeoIPCPathogenVirusVariable {
 
         $out.Add([ordered]@{
                 id                            = $id
+                code                          = (Get-NeoIPCGeneratedObjectCode -PlanItem $d -Family 'virusVar')
                 name                          = $name
                 programRuleVariableSourceType = [string]$d['SourceType']
                 valueType                     = [string]$d['ValueType']
@@ -1063,6 +1068,7 @@ function New-NeoIPCPathogenVirusRule {
         }
 
         $rule = [ordered]@{ id = $ruleId; name = $ruleName }
+        $rule['code'] = Get-NeoIPCGeneratedObjectCode -PlanItem $d -Family 'virusRule'
         # Preserve the deployed description verbatim (not load-bearing, and preserving it avoids a spurious diff); fall
         # back to the plan's canonical wording only when the export carries none.
         $desc = if ($deployedRule -and $deployedRule.Contains('description') -and "$([string]$deployedRule['description'])") { [string]$deployedRule['description'] } else { [string]$d['Description'] }
@@ -1273,6 +1279,7 @@ function New-NeoIPCSubstanceVariable {
         if (-not $deByCode.ContainsKey($dec)) { throw "Base data element '$dec' (read by variable '$name') is not present in the package." }
         $out.Add([ordered]@{
                 id                            = $id
+                code                          = (Get-NeoIPCGeneratedObjectCode -PlanItem $d -Family 'substanceVar')
                 name                          = $name
                 programRuleVariableSourceType = [string]$d['SourceType']
                 valueType                     = [string]$d['ValueType']
@@ -1378,6 +1385,7 @@ function New-NeoIPCSubstanceRule {
         if (-not $rulesSeen.Add($ruleId)) { throw "UID collision for program rule '$name' (uid '$ruleId')." }
 
         $rule = [ordered]@{ id = $ruleId; name = $name }
+        $rule['code'] = Get-NeoIPCGeneratedObjectCode -PlanItem $d -Family 'substanceRule'
         # Plan description wins (the substance rule plan carries none today, so this falls through to the deployed/
         # existing text); mirrors the pathogen/field-gating generators. Source-only: nothing else copied from text.
         $subDesc = if ("$([string]$d['Description'])") { [string]$d['Description'] }
