@@ -23,7 +23,8 @@ function Compare-NeoIPCGeneratedMetadata {
         data-element name/shortName/formName/zeroIsSignificant = 'DataElementNormalisation' (the double-space typo
         + substance padding + the _SOURCE zeroIsSignificant fix); variable name = 'VariablePadding'; rule
         condition/priority/name/description/action-membership = 'RuleNormalisation' (the field-gating guard, uniform
-        priorities, substance padding, Model-A reveal); action data/content/dataElement = 'ActionNormalisation'
+        priorities, substance padding, Model-A reveal); a `code` authored on a generated rule/variable that the
+        deployed export lacks = 'CodeAuthoring'; action data/content/dataElement = 'ActionNormalisation'
         (incl. the taxonomic resistance / common-commensal code-set enumerations). Added rules/actions =
         'CoverageAddition' (the SSI-secondary-slot-2 reveal the deployed program omits) or 'FieldGatingChange';
         removed = 'SupersededAggregate' (the stale HAP aggregate), 'HandAuthoredAction' (a hand-authored action on a
@@ -66,6 +67,8 @@ function Compare-NeoIPCGeneratedMetadata {
     $patRuleFrag = New-NeoIPCPathogenRule @ontologyArgs -ExistingPackage $ExistingPackage -PathogenCount $PathogenCount
     $fgRuleFrag  = New-NeoIPCPathogenFieldGatingRule @ontologyArgs -ExistingPackage $ExistingPackage -PathogenCount $PathogenCount
     $subRuleFrag = New-NeoIPCSubstanceRule -ExistingPackage $ExistingPackage -SubstanceCount $SubstanceCount
+    $virusVarFrag  = New-NeoIPCPathogenVirusVariable -ExistingPackage $ExistingPackage -PathogenCount $PathogenCount
+    $virusRuleFrag = New-NeoIPCPathogenVirusRule @ontologyArgs -ExistingPackage $ExistingPackage -PathogenCount $PathogenCount
     $abxOptFrag    = New-NeoIPCAntimicrobialOptionSet -ExistingPackage $ExistingPackage
     $abxGrpFrag    = New-NeoIPCAntibioticOptionGroup -OptionSet $abxOptFrag -ExistingPackage $ExistingPackage
     $abxGrpSetFrag = New-NeoIPCAntibioticOptionGroupSet -OptionGroup $abxGrpFrag -ExistingPackage $ExistingPackage
@@ -76,9 +79,9 @@ function Compare-NeoIPCGeneratedMetadata {
         optionGroups         = @($abxGrpFrag['optionGroups'])
         optionGroupSets      = @($abxGrpSetFrag['optionGroupSets'])
         dataElements         = @($patDeFrag['dataElements']) + @($subDeFrag['dataElements'])
-        programRuleVariables = @($patVarFrag['programRuleVariables']) + @($fgVarFrag['programRuleVariables']) + @($subVarFrag['programRuleVariables'])
-        programRules         = @($patRuleFrag['programRules']) + @($fgRuleFrag['programRules']) + @($subRuleFrag['programRules'])
-        programRuleActions   = @($patRuleFrag['programRuleActions']) + @($fgRuleFrag['programRuleActions']) + @($subRuleFrag['programRuleActions'])
+        programRuleVariables = @($patVarFrag['programRuleVariables']) + @($fgVarFrag['programRuleVariables']) + @($subVarFrag['programRuleVariables']) + @($virusVarFrag['programRuleVariables'])
+        programRules         = @($patRuleFrag['programRules']) + @($fgRuleFrag['programRules']) + @($subRuleFrag['programRules']) + @($virusRuleFrag['programRules'])
+        programRuleActions   = @($patRuleFrag['programRuleActions']) + @($fgRuleFrag['programRuleActions']) + @($subRuleFrag['programRuleActions']) + @($virusRuleFrag['programRuleActions'])
     }
     $genAbxOsId = if (@($abxOptFrag['optionSets']).Count -gt 0) { [string]$abxOptFrag['optionSets'][0]['id'] } else { $null }   # to split the shared 'options' family pathogen vs antibiotic
 
@@ -124,8 +127,8 @@ function Compare-NeoIPCGeneratedMetadata {
         optionGroups         = @('options', 'name', 'shortName', 'description')
         optionGroupSets      = @('optionGroups', 'name', 'description')
         dataElements         = @('name', 'shortName', 'formName', 'zeroIsSignificant')
-        programRuleVariables = @('name')
-        programRules         = @('condition', 'priority', 'name', 'description', 'programRuleActions')
+        programRuleVariables = @('name', 'code')                                       # 'code' = the arc authoring semantic codes the pre-code export lacks
+        programRules         = @('condition', 'priority', 'name', 'description', 'programRuleActions', 'code')
         programRuleActions   = @('data', 'content', 'dataElement', 'location')
     }
     $changeClass = @{
@@ -174,7 +177,13 @@ function Compare-NeoIPCGeneratedMetadata {
                     else { 'SubstanceNaming' }
                 }
                 else {
-                    $class = if (@($diff | Where-Object { -not $allowed.Contains($_) }).Count -eq 0) { $changeClass[$type] } else { 'Unclassified' }
+                    # A `code` in the diff on a rule/variable is this arc authoring a semantic code the pre-code
+                    # deployed export lacks — its own bucket, so the transition is legible rather than hiding inside
+                    # RuleNormalisation/VariablePadding. The unlisted-field guard is unchanged: any field NOT in
+                    # $allowed still forces Unclassified, so the code branch cannot wave through an unexpected change.
+                    $class = if (@($diff | Where-Object { -not $allowed.Contains($_) }).Count -ne 0) { 'Unclassified' }
+                    elseif (($type -eq 'programRules' -or $type -eq 'programRuleVariables') -and ($diff -contains 'code')) { 'CodeAuthoring' }
+                    else { $changeClass[$type] }
                 }
                 Add-NeoIPCDiffRecord $type 'Changed' $id $key $class $diff
                 continue

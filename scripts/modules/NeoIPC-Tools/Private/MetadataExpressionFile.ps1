@@ -53,33 +53,22 @@ function Test-NeoIPCMetadataExpressionColumn {
     $true
 }
 
-function ConvertTo-NeoIPCExpressionPathSegment {
-    # Sanitise a name into one safe, stable path segment for an expressions/ subdirectory: replace any
-    # filesystem-reserved character with '_', trim trailing dots/spaces (Windows-hostile), fall back to '_' if empty.
-    [CmdletBinding()]
-    [OutputType([string])]
-    param([Parameter(Mandatory)][AllowEmptyString()][string]$Name)
-    $s = ([regex]::Replace($Name, '[\\/:*?"<>|]', '_')).TrimEnd(' ', '.')
-    if ($s -eq '') { '_' } else { $s }
-}
-
 function Get-NeoIPCMetadataExpressionRuleSegmentMap {
-    # programRule id -> safe subdirectory segment (the sanitised rule name; the id when unnamed). A program rule
-    # and its actions' expressions share this subdirectory. Fails loud if two rules sanitise to the same segment.
+    # programRule id -> subdirectory segment: the rule CODE (or the id for a rule with no code). A program rule and its
+    # actions' expressions share this subdirectory. Rule codes match ^[A-Z][A-Z0-9_]*$ and UIDs are alphanumeric, so
+    # both are path-safe without sanitisation and unique per type, so no name-sanitiser and no collision check are
+    # needed — a defensive path-safety assertion is the only guard (against a malformed code slipping through).
     [CmdletBinding()]
     [OutputType([hashtable])]
     param([AllowNull()]$RuleRows)
-    $byId = @{}; $owner = @{}
+    $byId = @{}
     foreach ($r in @($RuleRows)) {
         if ($null -eq $r) { continue }   # @($null) is a 1-element null array, so a missing programRules key lands here
         $rid = [string]$r['id']
         if ($rid -eq '') { continue }
-        $name = [string]$r['name']
-        $seg = if ($name -ne '') { ConvertTo-NeoIPCExpressionPathSegment -Name $name } else { $rid }
-        if ($owner.ContainsKey($seg) -and $owner[$seg] -ne $rid) {
-            throw "Program-rule expression-folder name collision: '$seg' maps both rule '$($owner[$seg])' and rule '$rid' — rename one rule."
-        }
-        $owner[$seg] = $rid
+        $code = [string]$r['code']
+        $seg = if ($code -ne '') { $code } else { $rid }
+        if ($seg -notmatch '^[A-Za-z0-9_]+$') { throw "Program rule '$rid' has a path-unsafe expression-folder segment '$seg' — a rule code must match ^[A-Z][A-Z0-9_]*`$." }
         $byId[$rid] = $seg
     }
     $byId
@@ -87,8 +76,10 @@ function Get-NeoIPCMetadataExpressionRuleSegmentMap {
 
 function Get-NeoIPCMetadataExpressionFilePath {
     # The directory-relative path (forward slashes) of a field's expression file. A program rule's condition and its
-    # actions' data co-locate under one per-rule subdirectory (expressions/programRules/<rule>/...); program
-    # indicators and validation rules stay flat per-type (few files). $RuleSegment is the rule id -> segment map.
+    # actions' data co-locate under one per-rule subdirectory named by the rule CODE
+    # (expressions/programRules/<RULE_CODE>/...); the action's file keeps its own UID inside that folder (actions
+    # carry no code). Program indicators and validation rules stay flat per-type, keyed by CODE (or the UID for a
+    # code-less object, e.g. the placeholder validation rule). $RuleSegment is the rule id -> segment map.
     [CmdletBinding()]
     [OutputType([string])]
     param(
@@ -105,7 +96,11 @@ function Get-NeoIPCMetadataExpressionFilePath {
             $seg = if ($RuleSegment.ContainsKey($rid)) { $RuleSegment[$rid] } elseif ($rid -ne '') { $rid } else { $id }
             'expressions/programRules/{0}/{1}.{2}.dhis2' -f $seg, $id, $Column
         }
-        default { 'expressions/{0}/{1}.{2}.dhis2' -f $Type, $id, $Column }
+        default {
+            $code = [string]$Row['code']
+            $key = if ($code -ne '') { $code } else { $id }
+            'expressions/{0}/{1}.{2}.dhis2' -f $Type, $key, $Column
+        }
     }
 }
 

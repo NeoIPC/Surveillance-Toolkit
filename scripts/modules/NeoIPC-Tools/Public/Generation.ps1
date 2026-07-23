@@ -395,6 +395,7 @@ function New-NeoIPCPathogenVariable {
 
         $prv = [ordered]@{
             id                            = $id
+            code                          = (Get-NeoIPCGeneratedObjectCode -PlanItem $d -Family 'pathogenVar')
             name                          = $name
             programRuleVariableSourceType = [string]$d['SourceType']
             valueType                     = [string]$d['ValueType']
@@ -508,22 +509,8 @@ function New-NeoIPCPathogenRule {
     $tree = Get-Content -LiteralPath $resolvedYaml -Raw | ConvertFrom-Yaml
     $codeSets = Get-NeoIPCResistanceCodeSet -Node $tree
 
-    # The deployed program stages carry no code, so resolve each pathogen stage by a slot-1 resistance DE that always
-    # exists on it (so rules for grown slots resolve too); map the stage token -> stage id once.
-    $stageByDeId = Get-NeoIPCStageByDataElementId -Package $ExistingPackage
-    $stageAnchorByToken = @{
-        BSI = 'NEOIPC_BSI_PATHOGEN_1_3GCR'
-        HAP = 'NEOIPC_HAP_PATHOGEN_1_3GCR'
-        SSI = 'NEOIPC_SSI_PATHOGEN_1_3GCR'
-        NEC = 'NEOIPC_NEC_SEC_BSI_PATHOGEN_1_3GCR'
-    }
-    $stageIdByToken = @{}
-    foreach ($tok in $stageAnchorByToken.Keys) {
-        $anchor = $stageAnchorByToken[$tok]
-        if ($deByCode.ContainsKey($anchor) -and $stageByDeId.ContainsKey($deByCode[$anchor])) {
-            $stageIdByToken[$tok] = $stageByDeId[$deByCode[$anchor]]
-        }
-    }
+    # Program stages carry an authored code (NEOIPC_STG_<token>), so resolve each stage directly by code.
+    $stageIdByToken = Get-NeoIPCStageIdByToken -Package $ExistingPackage
 
     $plan = @(Get-NeoIPCPathogenRulePlan -PathogenCount $PathogenCount)
     $rulesSeen = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::Ordinal)
@@ -534,7 +521,7 @@ function New-NeoIPCPathogenRule {
     foreach ($d in $plan) {
         $name = [string]$d['Name']
         $stage = [string]$d['Stage']
-        if (-not $stageIdByToken.ContainsKey($stage)) { throw "Cannot resolve the program stage for rule '$name' — the anchor data element '$($stageAnchorByToken[$stage])' is absent from the package or not assigned to a stage." }
+        if (-not $stageIdByToken.ContainsKey($stage)) { throw "Cannot resolve the program stage for rule '$name' — no program stage with code 'NEOIPC_STG_$stage' in the package." }
         $psId = $stageIdByToken[$stage]
 
         $deployedRule = if ($ruleByName.ContainsKey($name)) { $ruleByName[$name] } else { $null }
@@ -557,6 +544,7 @@ function New-NeoIPCPathogenRule {
         if (-not $actionsSeen.Add($actionId)) { throw "UID collision for the action of program rule '$name' (uid '$actionId')." }
 
         $rule = [ordered]@{ id = $ruleId; name = $name }
+        $rule['code'] = Get-NeoIPCGeneratedObjectCode -PlanItem $d -Family 'pathogenRule'
         # The plan description is the canonical (normalised) wording and overwrites the deployed one — rule
         # descriptions are not load-bearing, and the deployed text carries human-entry drift (inconsistent casing,
         # "for pathogen N" present-or-absent). The deployed/existing description is only a fallback for a family with
@@ -659,6 +647,7 @@ function New-NeoIPCPathogenFieldGatingVariable {
 
         $out.Add([ordered]@{
                 id                            = $id
+                code                          = (Get-NeoIPCGeneratedObjectCode -PlanItem $d -Family 'fieldGatingVar')
                 name                          = $name
                 programRuleVariableSourceType = [string]$d['SourceType']
                 valueType                     = [string]$d['ValueType']
@@ -760,22 +749,8 @@ function New-NeoIPCPathogenFieldGatingRule {
     $tree = Get-Content -LiteralPath $resolvedYaml -Raw | ConvertFrom-Yaml
     $commonCommensal = @(Get-NeoIPCCommonCommensalCodeSet -Node $tree)
 
-    # The deployed program stages carry no code, so resolve each pathogen stage by a slot-1 resistance DE that always
-    # exists on it (so rules for grown slots resolve too); map the stage token -> stage id once.
-    $stageByDeId = Get-NeoIPCStageByDataElementId -Package $ExistingPackage
-    $stageAnchorByToken = @{
-        BSI = 'NEOIPC_BSI_PATHOGEN_1_3GCR'
-        HAP = 'NEOIPC_HAP_PATHOGEN_1_3GCR'
-        SSI = 'NEOIPC_SSI_PATHOGEN_1_3GCR'
-        NEC = 'NEOIPC_NEC_SEC_BSI_PATHOGEN_1_3GCR'
-    }
-    $stageIdByToken = @{}
-    foreach ($tok in $stageAnchorByToken.Keys) {
-        $anchor = $stageAnchorByToken[$tok]
-        if ($deByCode.ContainsKey($anchor) -and $stageByDeId.ContainsKey($deByCode[$anchor])) {
-            $stageIdByToken[$tok] = $stageByDeId[$deByCode[$anchor]]
-        }
-    }
+    # Program stages carry an authored code (NEOIPC_STG_<token>), so resolve each stage directly by code.
+    $stageIdByToken = Get-NeoIPCStageIdByToken -Package $ExistingPackage
 
     $plan = @(Get-NeoIPCPathogenFieldGatingRulePlan -PathogenCount $PathogenCount)
     $rulesSeen = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::Ordinal)
@@ -786,7 +761,7 @@ function New-NeoIPCPathogenFieldGatingRule {
     foreach ($d in $plan) {
         $name = [string]$d['Name']
         $stage = [string]$d['Stage']
-        if (-not $stageIdByToken.ContainsKey($stage)) { throw "Cannot resolve the program stage for rule '$name' — the anchor data element '$($stageAnchorByToken[$stage])' is absent from the package or not assigned to a stage." }
+        if (-not $stageIdByToken.ContainsKey($stage)) { throw "Cannot resolve the program stage for rule '$name' — no program stage with code 'NEOIPC_STG_$stage' in the package." }
         $psId = $stageIdByToken[$stage]
 
         $deployedRule = if ($ruleByName.ContainsKey($name)) { $ruleByName[$name] } else { $null }
@@ -797,6 +772,7 @@ function New-NeoIPCPathogenFieldGatingRule {
         if (-not $rulesSeen.Add($ruleId)) { throw "UID collision for program rule '$name' (uid '$ruleId')." }
 
         $rule = [ordered]@{ id = $ruleId; name = $name }
+        $rule['code'] = Get-NeoIPCGeneratedObjectCode -PlanItem $d -Family 'fieldGatingRule'
         # The plan description is the canonical (normalised) wording and overwrites the deployed one — rule
         # descriptions are not load-bearing, and the deployed text carries human-entry drift (inconsistent casing,
         # "for pathogen N" present-or-absent). The deployed/existing description is only a fallback for a family with
@@ -909,10 +885,11 @@ function New-NeoIPCPathogenVirusVariable {
         }
     }
 
+    $plan = @(Get-NeoIPCPathogenVirusVariablePlan -PathogenCount $PathogenCount)
     $seen = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::Ordinal)
     $out = [System.Collections.Generic.List[object]]::new()
-    foreach ($n in 1..$PathogenCount) {
-        $name = "NeoIPC HAP Pathogen $n is virus"
+    foreach ($d in $plan) {
+        $name = [string]$d['Name']
         $existingId = if ($prvByName.ContainsKey($name)) { $prvByName[$name] } else { $null }
         $id = if ($existingId -and (Test-NeoIPCMetadataUid -Id $existingId)) { $existingId }
         else { New-NeoIPCMetadataUid -Type 'programRuleVariables' -NaturalKey $name }
@@ -920,10 +897,11 @@ function New-NeoIPCPathogenVirusVariable {
 
         $out.Add([ordered]@{
                 id                            = $id
+                code                          = (Get-NeoIPCGeneratedObjectCode -PlanItem $d -Family 'virusVar')
                 name                          = $name
-                programRuleVariableSourceType = 'CALCULATED_VALUE'
-                valueType                     = 'BOOLEAN'
-                useCodeForOptionSet           = $false
+                programRuleVariableSourceType = [string]$d['SourceType']
+                valueType                     = [string]$d['ValueType']
+                useCodeForOptionSet           = [bool]$d['UseCodeForOptionSet']
                 program                       = [ordered]@{ id = $programId }
             })
     }
@@ -995,77 +973,85 @@ function New-NeoIPCPathogenVirusRule {
         }
     }
 
-    # The deployed program stages carry no code, so resolve the HAP stage by a slot-1 resistance DE that always exists on
-    # it (so the rule resolves even when slots are grown).
-    $stageByDeId = Get-NeoIPCStageByDataElementId -Package $ExistingPackage
-    $anchor = 'NEOIPC_HAP_PATHOGEN_1_3GCR'
-    if (-not ($deByCode.ContainsKey($anchor) -and $stageByDeId.ContainsKey($deByCode[$anchor]))) {
-        throw "Cannot resolve the HAP program stage for 'NeoIPC HAP - set virus' — the anchor data element '$anchor' is absent from the package or not assigned to a stage."
+    # The HAP program stage carries an authored code, so resolve it directly by code.
+    $stageIdByToken = Get-NeoIPCStageIdByToken -Package $ExistingPackage
+    if (-not $stageIdByToken.ContainsKey('HAP')) {
+        throw "Cannot resolve the HAP program stage for 'NeoIPC HAP - set virus' — no program stage with code 'NEOIPC_STG_HAP' in the package."
     }
-    $psId = $stageByDeId[$deByCode[$anchor]]
+    $psId = $stageIdByToken['HAP']
 
     $resolvedYaml = Resolve-Path -LiteralPath $Path -ErrorAction Stop
     $tree = Get-Content -LiteralPath $resolvedYaml -Raw | ConvertFrom-Yaml
     $virusCodes = @(Get-NeoIPCVirusCodeSet -Node $tree)
     if ($virusCodes.Count -eq 0) { throw "The virus code set is empty — cannot build the 'set virus' ASSIGN expressions." }
 
-    $ruleName = 'NeoIPC HAP - set virus'
-    $deployedRule = $null
-    foreach ($r in @($ExistingPackage['programRules'])) {
-        if ($r -is [System.Collections.IDictionary] -and [string]$r['name'] -eq $ruleName) { $deployedRule = $r; break }
-    }
-    $deployedRuleId = if ($deployedRule) { [string]$deployedRule['id'] } else { $null }
-    $ruleId = if ($deployedRuleId -and (Test-NeoIPCMetadataUid -Id $deployedRuleId)) { $deployedRuleId }
-    else { New-NeoIPCMetadataUid -Type 'programRules' -NaturalKey $ruleName }
-
-    # Deployed actions of this rule, for UID preservation keyed by the assigned variable (content).
-    $deployedActions = [System.Collections.Generic.List[object]]::new()
-    if ($deployedRuleId) {
-        foreach ($a in @($ExistingPackage['programRuleActions'])) {
-            if ($a -isnot [System.Collections.IDictionary]) { continue }
-            $pr = $a['programRule']
-            if ($pr -is [System.Collections.IDictionary] -and [string]$pr['id'] -eq $deployedRuleId) { $deployedActions.Add($a) }
-        }
-    }
-
+    $plan = @(Get-NeoIPCPathogenVirusRulePlan -PathogenCount $PathogenCount)
+    $rulesSeen = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::Ordinal)
     $actionsSeen = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::Ordinal)
-    $actionRefs = [System.Collections.Generic.List[object]]::new()
+    $rules = [System.Collections.Generic.List[object]]::new()
     $actions = [System.Collections.Generic.List[object]]::new()
-    foreach ($n in 1..$PathogenCount) {
-        $valueVar = "NeoIPC HAP Pathogen $n value"
-        $content = "#{NeoIPC HAP Pathogen $n is virus}"
-        $actionId = $null
-        foreach ($da in $deployedActions) {
-            if ([string]$da['programRuleActionType'] -eq 'ASSIGN' -and [string]$da['content'] -eq $content -and (Test-NeoIPCMetadataUid -Id ([string]$da['id']))) {
-                $actionId = [string]$da['id']; break
+
+    foreach ($d in $plan) {
+        $ruleName = [string]$d['Name']
+        $deployedRule = $null
+        foreach ($r in @($ExistingPackage['programRules'])) {
+            if ($r -is [System.Collections.IDictionary] -and [string]$r['name'] -eq $ruleName) { $deployedRule = $r; break }
+        }
+        $deployedRuleId = if ($deployedRule) { [string]$deployedRule['id'] } else { $null }
+        $ruleId = if ($deployedRuleId -and (Test-NeoIPCMetadataUid -Id $deployedRuleId)) { $deployedRuleId }
+        else { New-NeoIPCMetadataUid -Type 'programRules' -NaturalKey $ruleName }
+        if (-not $rulesSeen.Add($ruleId)) { throw "UID collision for program rule '$ruleName' (uid '$ruleId')." }
+
+        # Deployed actions of this rule, for UID preservation keyed by the assigned variable (content).
+        $deployedActions = [System.Collections.Generic.List[object]]::new()
+        if ($deployedRuleId) {
+            foreach ($a in @($ExistingPackage['programRuleActions'])) {
+                if ($a -isnot [System.Collections.IDictionary]) { continue }
+                $pr = $a['programRule']
+                if ($pr -is [System.Collections.IDictionary] -and [string]$pr['id'] -eq $deployedRuleId) { $deployedActions.Add($a) }
             }
         }
-        if (-not $actionId) { $actionId = New-NeoIPCMetadataUid -Type 'programRuleActions' -NaturalKey ('{0}|ASSIGN|{1}' -f $ruleName, $content) }
-        if (-not $actionsSeen.Add($actionId)) { throw "UID collision for an action of program rule '$ruleName' (uid '$actionId')." }
 
-        $terms = Join-NeoIPCBalancedBooleanChain -Operator '||' -Term @($virusCodes | ForEach-Object { "#{$valueVar}==$_" })
-        $actions.Add([ordered]@{
-                id                    = $actionId
-                programRule           = [ordered]@{ id = $ruleId }
-                programRuleActionType = 'ASSIGN'
-                content               = $content
-                data                  = "d2:hasValue(#{$valueVar})&&$terms"
-            })
-        $actionRefs.Add([ordered]@{ id = $actionId })
+        $actionRefs = [System.Collections.Generic.List[object]]::new()
+        foreach ($a in @($d['Actions'])) {
+            $valueVar = [string]$a['ValueVariable']
+            $content = [string]$a['Content']
+            $actionId = $null
+            foreach ($da in $deployedActions) {
+                if ([string]$da['programRuleActionType'] -eq 'ASSIGN' -and [string]$da['content'] -eq $content -and (Test-NeoIPCMetadataUid -Id ([string]$da['id']))) {
+                    $actionId = [string]$da['id']; break
+                }
+            }
+            if (-not $actionId) { $actionId = New-NeoIPCMetadataUid -Type 'programRuleActions' -NaturalKey ('{0}|ASSIGN|{1}' -f $ruleName, $content) }
+            if (-not $actionsSeen.Add($actionId)) { throw "UID collision for an action of program rule '$ruleName' (uid '$actionId')." }
+
+            if (-not $a['UsesVirusSet']) { throw "The 'set virus' action assigning '$content' does not request the virus code set." }
+            $terms = Join-NeoIPCBalancedBooleanChain -Operator '||' -Term @($virusCodes | ForEach-Object { "#{$valueVar}==$_" })
+            $actions.Add([ordered]@{
+                    id                    = $actionId
+                    programRule           = [ordered]@{ id = $ruleId }
+                    programRuleActionType = 'ASSIGN'
+                    content               = $content
+                    data                  = "d2:hasValue(#{$valueVar})&&$terms"
+                })
+            $actionRefs.Add([ordered]@{ id = $actionId })
+        }
+
+        $rule = [ordered]@{ id = $ruleId; name = $ruleName }
+        $rule['code'] = Get-NeoIPCGeneratedObjectCode -PlanItem $d -Family 'virusRule'
+        # Preserve the deployed description verbatim (not load-bearing, and preserving it avoids a spurious diff); fall
+        # back to the plan's canonical wording only when the export carries none.
+        $desc = if ($deployedRule -and $deployedRule.Contains('description') -and "$([string]$deployedRule['description'])") { [string]$deployedRule['description'] } else { [string]$d['Description'] }
+        $rule['description'] = $desc
+        $rule['program'] = [ordered]@{ id = $programId }
+        $rule['programStage'] = [ordered]@{ id = $psId }
+        $rule['condition'] = [string]$d['Condition']
+        $rule['priority'] = [int]$d['Priority']
+        $rule['programRuleActions'] = $actionRefs.ToArray()
+        $rules.Add($rule)
     }
 
-    $rule = [ordered]@{ id = $ruleId; name = $ruleName }
-    # Preserve the deployed description verbatim (not load-bearing, and preserving it avoids a spurious diff); fall back
-    # to the canonical wording only when the export carries none.
-    $desc = if ($deployedRule -and $deployedRule.Contains('description') -and "$([string]$deployedRule['description'])") { [string]$deployedRule['description'] } else { 'Sets the virus variables' }
-    $rule['description'] = $desc
-    $rule['program'] = [ordered]@{ id = $programId }
-    $rule['programStage'] = [ordered]@{ id = $psId }
-    $rule['condition'] = 'true'
-    $rule['priority'] = 0
-    $rule['programRuleActions'] = $actionRefs.ToArray()
-
-    [ordered]@{ programRules = @($rule); programRuleActions = $actions.ToArray() }
+    [ordered]@{ programRules = $rules.ToArray(); programRuleActions = $actions.ToArray() }
 }
 
 function New-NeoIPCSubstanceDataElement {
@@ -1263,6 +1249,7 @@ function New-NeoIPCSubstanceVariable {
         if (-not $deByCode.ContainsKey($dec)) { throw "Base data element '$dec' (read by variable '$name') is not present in the package." }
         $out.Add([ordered]@{
                 id                            = $id
+                code                          = (Get-NeoIPCGeneratedObjectCode -PlanItem $d -Family 'substanceVar')
                 name                          = $name
                 programRuleVariableSourceType = [string]$d['SourceType']
                 valueType                     = [string]$d['ValueType']
@@ -1325,13 +1312,12 @@ function New-NeoIPCSubstanceRule {
         }
     }
 
-    # The surveillance-end program stage carries no code, so resolve it as the stage that owns the total AB-days DE.
-    $stageByDeId = Get-NeoIPCStageByDataElementId -Package $ExistingPackage
-    $stageAnchor = 'NEOIPC_SURVEILLANCE_END_AB_DAYS'
-    if (-not ($deByCode.ContainsKey($stageAnchor) -and $stageByDeId.ContainsKey($deByCode[$stageAnchor]))) {
-        throw "Cannot resolve the surveillance-end program stage — the anchor data element '$stageAnchor' is absent from the package or not assigned to a stage."
+    # The surveillance-end program stage carries an authored code, so resolve it directly by code.
+    $stageIdByToken = Get-NeoIPCStageIdByToken -Package $ExistingPackage
+    if (-not $stageIdByToken.ContainsKey('SURV_END')) {
+        throw "Cannot resolve the surveillance-end program stage — no program stage with code 'NEOIPC_STG_SURV_END' in the package."
     }
-    $psId = $stageByDeId[$deByCode[$stageAnchor]]
+    $psId = $stageIdByToken['SURV_END']
     # Deployed rules by slot-number-normalised name (first-wins) + actions grouped by owning rule id.
     $ruleByName = [System.Collections.Generic.Dictionary[string, object]]::new([System.StringComparer]::Ordinal)
     foreach ($r in @($ExistingPackage['programRules'])) {
@@ -1368,6 +1354,7 @@ function New-NeoIPCSubstanceRule {
         if (-not $rulesSeen.Add($ruleId)) { throw "UID collision for program rule '$name' (uid '$ruleId')." }
 
         $rule = [ordered]@{ id = $ruleId; name = $name }
+        $rule['code'] = Get-NeoIPCGeneratedObjectCode -PlanItem $d -Family 'substanceRule'
         # Plan description wins (the substance rule plan carries none today, so this falls through to the deployed/
         # existing text); mirrors the pathogen/field-gating generators. Source-only: nothing else copied from text.
         $subDesc = if ("$([string]$d['Description'])") { [string]$d['Description'] }

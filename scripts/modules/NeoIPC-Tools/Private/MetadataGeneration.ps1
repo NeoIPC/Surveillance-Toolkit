@@ -246,6 +246,97 @@ function Get-NeoIPCPathogenSlotBaseCode {
     if ($SlotKind -eq 'primary') { "NEOIPC_${Stage}_PATHOGEN_${Index}" } else { "NEOIPC_${Stage}_SEC_BSI_PATHOGEN_${Index}" }
 }
 
+function Get-NeoIPCGeneratedCode {
+    # Map a GENERATED object's DE-code-scheme semantic key (the key the translation-key index builds, e.g.
+    # NEOIPC_BSI_PATHOGEN_1_SET_3GCR, NEOIPC_SURVEILLANCE_END_AB_SUBST_07_HIDE) to its authored `code`, applying the
+    # finalized NeoIPC rule/variable-code VOCABULARY. Both halves that must agree call this ONE function — the
+    # generators (minting `code` onto each object) and Get-NeoIPCMetadataGeneratedTranslationKeyIndex (the msgctxt) —
+    # so `code == msgctxt` by construction. Literal replacements, applied in order (longest phrase first, so
+    # WHEN_EMPTY_OR_LISTED wins over WHEN_EMPTY):
+    #   PATHOGEN -> AGENT            infectious agent (a recovered common commensal is not a pathogen, a virus is not
+    #                               an organism). The DATA ELEMENTS keep their deployed PATHOGEN token, so a generated
+    #                               rule/variable code diverges by design from the DE code it targets.
+    #   SURVEILLANCE_END -> SURV_END the rule/variable stage token; the data elements keep SURVEILLANCE_END.
+    #   RECOGNIZED -> NCC           recognized pathogen -> non-common commensal (covers SET_RECOGNIZED + IS_RECOGNIZED).
+    #   WHEN_* -> IF_*              field-gating role compaction (EMPTY_OR_LISTED also drops the redundant OR).
+    #   DAYS_VALIDATE -> DAYS_VR    the substance-days validation rule adopts the _VR validation-rule marker.
+    #   VALUE -> VAL                the value-accessor role suffix (covers _VALUE and _DAYS_VALUE). Applied AFTER
+    #                               DAYS_VALIDATE so it cannot touch VALIDATE (which anyway contains no VALUE).
+    [CmdletBinding()]
+    [OutputType([string])]
+    param([Parameter(Mandatory)][string]$SemanticKey)
+    $replacements = @(
+        @('SURVEILLANCE_END', 'SURV_END'),
+        @('PATHOGEN', 'AGENT'),
+        @('RECOGNIZED', 'NCC'),
+        @('WHEN_EMPTY_OR_LISTED', 'IF_EMPTY_LISTED'),
+        @('WHEN_NOT_LISTED', 'IF_NOT_LISTED'),
+        @('WHEN_EMPTY', 'IF_EMPTY'),
+        @('WHEN_SET', 'IF_SET'),
+        @('DAYS_VALIDATE', 'DAYS_VR'),
+        @('VALUE', 'VAL')
+    )
+    $s = $SemanticKey
+    foreach ($pair in $replacements) { $s = $s.Replace([string]$pair[0], [string]$pair[1]) }
+    $s
+}
+
+function Get-NeoIPCGeneratedObjectCode {
+    # The authored `code` for a GENERATED program-rule VARIABLE or RULE, from its plan descriptor + family. Derives
+    # the DE-code-scheme semantic key (slot base code + role) EXACTLY as Get-NeoIPCMetadataGeneratedTranslationKeyIndex
+    # does, then applies the vocabulary via Get-NeoIPCGeneratedCode. Called by BOTH the generator mint points (setting
+    # `code`) and that index (the msgctxt), so an object's code and its msgctxt key are one value. programRuleActions
+    # carry no code (the documented exception), so there is no action family here.
+    [CmdletBinding()]
+    [OutputType([string])]
+    param(
+        [Parameter(Mandatory)][System.Collections.IDictionary]$PlanItem,
+        [Parameter(Mandatory)]
+        [ValidateSet('pathogenVar', 'fieldGatingVar', 'substanceVar', 'virusVar', 'pathogenRule', 'fieldGatingRule', 'substanceRule', 'virusRule')]
+        [string]$Family
+    )
+    $d = $PlanItem
+    $slotBase = {
+        Get-NeoIPCPathogenSlotBaseCode -Stage ([string]$d['Stage']) -SlotKind ([string]$d['SlotKind']) -Index ([int]$d['Index'])
+    }
+    $key = switch ($Family) {
+        'pathogenVar' {
+            $base = & $slotBase
+            if ([string]$d['Kind'] -eq 'value') { "${base}_VALUE" } else { "${base}_MAYBE_$($script:NeoIPCResistanceDeSuffixByCategory[[string]$d['Category']])" }
+        }
+        'fieldGatingVar' { "$(& $slotBase)_IS_RECOGNIZED" }
+        'virusVar' { "$(& $slotBase)_IS_VIRUS" }
+        'substanceVar' { "$([string]$d['DataElementCode'])_VALUE" }
+        'pathogenRule' {
+            $base = & $slotBase
+            $cat = $script:NeoIPCResistanceDeSuffixByCategory[[string]$d['Category']]
+            switch ([string]$d['Kind']) { 'set' { "${base}_SET_$cat" } 'mayBe' { "${base}_MAYBE_$cat" } 'not' { "${base}_NOT_$cat" } }
+        }
+        'fieldGatingRule' {
+            $base = & $slotBase
+            $role = switch ([string]$d['Kind']) {
+                'recognizedPathogen' { 'SET_RECOGNIZED' }
+                'whenSet' { 'WHEN_SET' }
+                'whenEmpty' { 'WHEN_EMPTY' }
+                'whenEmptyOrListed' { 'WHEN_EMPTY_OR_LISTED' }
+                'whenNotListed' { 'WHEN_NOT_LISTED' }
+            }
+            "${base}_$role"
+        }
+        'substanceRule' {
+            $sBase = "NEOIPC_SURVEILLANCE_END_AB_SUBST_$('{0:D2}' -f [int]$d['Index'])"
+            switch ([string]$d['Kind']) {
+                'hide' { "${sBase}_HIDE" }
+                'daysRequire' { "${sBase}_DAYS_REQUIRE" }
+                'substanceRequire' { "${sBase}_REQUIRE" }
+                'validate' { 'NEOIPC_SURVEILLANCE_END_AB_SUBST_DAYS_VALIDATE' }
+            }
+        }
+        'virusRule' { 'NEOIPC_HAP_SET_VIRUS' }
+    }
+    Get-NeoIPCGeneratedCode -SemanticKey $key
+}
+
 function Get-NeoIPCPathogenVariablePlan {
     # The capability-matrix expansion of the resistance-gating PROGRAM-RULE VARIABLES: for each of the 18
     # pathogen slots, one `value` variable (DATAELEMENT_CURRENT_EVENT over the base organism DE, reading the option
@@ -510,24 +601,22 @@ function ConvertTo-NeoIPCSubstanceUnpaddedName {
     $Name -replace 'substance 0*(\d+)', 'substance $1'
 }
 
-function Get-NeoIPCStageByDataElementId {
-    # Build a data-element-id -> program-stage-id map from a package's programStages[].programStageDataElements.
-    # The deployed program stages carry NO `code` (their codes belong to other objects), so a rule's program stage is
-    # resolved by which stage owns a known data element on it (a slot-1 resistance DE, or the AB-days DE) rather than
-    # by a stage code. First-wins per DE id (a DE belongs to one stage).
+function Get-NeoIPCStageIdByToken {
+    # Map a NeoIPC stage TOKEN (BSI, HAP, SSI, NEC, SURV_END, ADM, SURGERY) to its program-stage id via the stage's
+    # authored `code` (NEOIPC_STG_<token>). Program stages now carry codes, so a generated rule resolves its stage
+    # directly by code rather than by which stage owns a slot-1 resistance / AB-days data element. Stages without a
+    # NEOIPC_STG_ code are ignored.
     [CmdletBinding()]
     [OutputType([System.Collections.IDictionary])]
     param([Parameter(Mandatory)][System.Collections.IDictionary]$Package)
 
+    $prefix = 'NEOIPC_STG_'
     $map = [System.Collections.Generic.Dictionary[string, string]]::new([System.StringComparer]::Ordinal)
     foreach ($ps in @($Package['programStages'])) {
         if ($ps -isnot [System.Collections.IDictionary]) { continue }
-        $sid = [string]$ps['id']
-        foreach ($psde in @($ps['programStageDataElements'])) {
-            if ($psde -is [System.Collections.IDictionary] -and $psde['dataElement'] -is [System.Collections.IDictionary]) {
-                $deId = [string]$psde['dataElement']['id']
-                if ($deId -and -not $map.ContainsKey($deId)) { $map[$deId] = $sid }
-            }
+        $code = [string]$ps['code']
+        if ($code.StartsWith($prefix, [System.StringComparison]::Ordinal)) {
+            $map[$code.Substring($prefix.Length)] = [string]$ps['id']
         }
     }
     $map
@@ -934,5 +1023,62 @@ function Get-NeoIPCPathogenFieldGatingRulePlan {
                 }
             }
         }
+    }
+}
+
+function Get-NeoIPCPathogenVirusVariablePlan {
+    # The per-slot `is virus` field-gating PROGRAM-RULE VARIABLES — the HAP primary-slot CALCULATED_VALUE boolean the
+    # HAP `set virus` ASSIGN writes (and the pneumonia-definition rules read). The virus-sourced twin of the
+    # recognized-pathogen field-gating variable (Get-NeoIPCPathogenFieldGatingVariablePlan); HAP primary slots only.
+    # Pure (no package): PathogenCount descriptors.
+    [CmdletBinding()]
+    [OutputType([System.Collections.Specialized.OrderedDictionary])]
+    param([ValidateRange(1, 9)][int]$PathogenCount = $script:NeoIPCPathogenSlotCount)
+
+    foreach ($n in 1..$PathogenCount) {
+        [ordered]@{
+            Name                = "NeoIPC HAP Pathogen $n is virus"
+            Kind                = 'isVirus'
+            Stage               = 'HAP'
+            SlotKind            = 'primary'
+            Index               = $n
+            SourceType          = 'CALCULATED_VALUE'
+            ValueType           = 'BOOLEAN'
+            UseCodeForOptionSet = $false
+            DataElementCode     = $null
+        }
+    }
+}
+
+function Get-NeoIPCPathogenVirusRulePlan {
+    # The single HAP `set virus` PROGRAM RULE — condition `true`, priority 0, one ASSIGN per HAP primary slot that sets
+    # the slot's `is virus` boolean to "the slot has a value and that value is a virus". The positive-membership twin of
+    # the recognized-pathogen field-gating rule (Get-NeoIPCPathogenFieldGatingRulePlan): a virus code set (resolved by
+    # the generator from Get-NeoIPCVirusCodeSet) rather than the NEGATED common-commensal set, and a SINGLE multi-action
+    # rule (the deployed shape) rather than one rule per slot — so each ASSIGN carries its OWN slot ValueVariable, not a
+    # rule-level one. Pure (no package/YAML): the virus set is resolved later by the generator; this plan carries only
+    # the structure. Emits ONE rule descriptor (an Actions array of PathogenCount ASSIGNs).
+    [CmdletBinding()]
+    [OutputType([System.Collections.Specialized.OrderedDictionary])]
+    param([ValidateRange(1, 9)][int]$PathogenCount = $script:NeoIPCPathogenSlotCount)
+
+    $actions = @(foreach ($n in 1..$PathogenCount) {
+            [ordered]@{
+                Type          = 'ASSIGN'
+                Content       = "#{NeoIPC HAP Pathogen $n is virus}"
+                ValueVariable = "NeoIPC HAP Pathogen $n value"
+                UsesVirusSet  = $true
+            }
+        })
+    [ordered]@{
+        Kind        = 'setVirus'
+        Stage       = 'HAP'
+        SlotKind    = 'primary'
+        Index       = $null
+        Name        = 'NeoIPC HAP - set virus'
+        Description = 'Sets the virus variables'
+        Condition   = 'true'
+        Priority    = 0
+        Actions     = $actions
     }
 }

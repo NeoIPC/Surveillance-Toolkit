@@ -50,13 +50,15 @@ action types that evaluate it as an authored expression — `ASSIGN` / `DISPLAYT
 template-driven notification types keep their rare/short data inline), the program-indicator `expression` / `filter`,
 and the validation-rule left/right-side expressions.
 
-A program rule and its actions are one unit, so they co-locate in a **per-rule folder named by the rule** —
-`expressions/programRules/<rule name>/condition.dhis2` and `…/<actionId>.data.dhis2`; program indicators and
-validation rules (few) stay flat per type — `expressions/<type>/<id>.<column>.dhis2`. The CSV cell carries the
-relative file path; the converter writes the file + reference on emit and re-inlines it on read (an inline,
-non-reference value is left untouched, so a hand-authored inline expression still reads, and a referenced-but-missing
-file fails loud). Folder names are the sanitised rule name (a name collision fails loud); the `.dhis2` files are LF
-(see `.gitattributes`).
+A program rule and its actions are one unit, so they co-locate in a **per-rule folder named by the rule `code`** —
+`expressions/programRules/<RULE_CODE>/condition.dhis2` and `…/<actionId>.data.dhis2` (the action file keeps its UID
+inside the code-named folder — program rule actions carry no code); program indicators and validation rules (few)
+stay flat per type, keyed by `code` — `expressions/<type>/<CODE>.<column>.dhis2` (a code-less object, e.g. the
+placeholder validation rule, falls back to its UID). The CSV cell carries the relative file path; the converter
+writes the file + reference on emit and re-inlines it on read (an inline, non-reference value is left untouched, so a
+hand-authored inline expression still reads, and a referenced-but-missing file fails loud). Codes match
+`^[A-Z][A-Z0-9_]*$` and UIDs are alphanumeric, so both are path-safe and unique — a defensive path-safety assertion
+replaces the former name sanitiser + collision check; the `.dhis2` files are LF (see `.gitattributes`).
 
 ## Generated families — do not hand-edit; edit the source and regenerate
 

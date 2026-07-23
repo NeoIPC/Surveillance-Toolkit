@@ -676,12 +676,14 @@ function Get-NeoIPCMetadataGeneratedKeys {
     foreach ($p in @(Get-NeoIPCPathogenVariablePlan -PathogenCount $PathogenCount)) { [void]$varNames.Add((ConvertTo-NeoIPCSubstanceUnpaddedName ([string]$p['Name']))) }
     foreach ($p in @(Get-NeoIPCPathogenFieldGatingVariablePlan -PathogenCount $PathogenCount)) { [void]$varNames.Add((ConvertTo-NeoIPCSubstanceUnpaddedName ([string]$p['Name']))) }
     foreach ($p in @(Get-NeoIPCSubstanceVariablePlan -SubstanceCount $SubstanceCount)) { [void]$varNames.Add((ConvertTo-NeoIPCSubstanceUnpaddedName ([string]$p['Name']))) }
+    foreach ($p in @(Get-NeoIPCPathogenVirusVariablePlan -PathogenCount $PathogenCount)) { [void]$varNames.Add((ConvertTo-NeoIPCSubstanceUnpaddedName ([string]$p['Name']))) }
 
     # Matrix rule names (refresh identity) — the materialised resistance / field-gating / substance rules.
     $ruleNames = [System.Collections.Generic.HashSet[string]]::new($ordinal)
     foreach ($p in @(Get-NeoIPCPathogenRulePlan -PathogenCount $PathogenCount)) { [void]$ruleNames.Add((ConvertTo-NeoIPCSubstanceUnpaddedName ([string]$p['Name']))) }
     foreach ($p in @(Get-NeoIPCPathogenFieldGatingRulePlan -PathogenCount $PathogenCount)) { [void]$ruleNames.Add((ConvertTo-NeoIPCSubstanceUnpaddedName ([string]$p['Name']))) }
     foreach ($p in @(Get-NeoIPCSubstanceRulePlan -SubstanceCount $SubstanceCount)) { [void]$ruleNames.Add((ConvertTo-NeoIPCSubstanceUnpaddedName ([string]$p['Name']))) }
+    foreach ($p in @(Get-NeoIPCPathogenVirusRulePlan -PathogenCount $PathogenCount)) { [void]$ruleNames.Add((ConvertTo-NeoIPCSubstanceUnpaddedName ([string]$p['Name']))) }
 
     # Retired rules are NOT materialised — the per-slot resistance rules supersede them, and the assembler drops
     # them. Resolve, within the package, two id sets the two consumers need separately:

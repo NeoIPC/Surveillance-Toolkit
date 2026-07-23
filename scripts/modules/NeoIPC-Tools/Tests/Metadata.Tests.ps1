@@ -660,16 +660,16 @@ InModuleScope 'NeoIPC-Tools' {
             function New-ExprRows {
                 [ordered]@{
                     programRules       = @(
-                        [ordered]@{ id = 'Rule1111111'; name = 'NeoIPC BSI - set 3GCR'; condition = 'd2:hasValue(#{x})' },
-                        [ordered]@{ id = 'Rule2222222'; name = 'A/B rule'; condition = "#{a}`n&& #{b}" }   # multi-line + slash in name
+                        [ordered]@{ id = 'Rule1111111'; code = 'NEOIPC_BSI_AGENT_1_SET_3GCR'; name = 'NeoIPC BSI - set 3GCR'; condition = 'd2:hasValue(#{x})' },
+                        [ordered]@{ id = 'Rule2222222'; code = 'NEOIPC_TEST_RULE_2'; name = 'A/B rule'; condition = "#{a}`n&& #{b}" }   # multi-line; the slash in the NAME no longer matters (folder is the code)
                     )
                     programRuleActions = @(
                         [ordered]@{ id = 'Act11111111'; programRuleActionType = 'ASSIGN'; programRule = 'Rule1111111'; data = "d2:concatenate(#{x},`n'y')" },
                         [ordered]@{ id = 'Act22222222'; programRuleActionType = 'HIDEFIELD'; programRule = 'Rule1111111'; data = '' },
                         [ordered]@{ id = 'Act33333333'; programRuleActionType = 'SHOWERROR'; programRule = 'Rule2222222'; data = '1 > 0'; content = 'msg' }
                     )
-                    programIndicators  = @([ordered]@{ id = 'PI111111111'; expression = '#{a.b}'; filter = '#{c} > 0' })
-                    validationRules    = @([ordered]@{ id = 'VR111111111'; leftSide_expression = 'I{x}'; rightSide_expression = '' })
+                    programIndicators  = @([ordered]@{ id = 'PI111111111'; code = 'NEOIPC_TEST_PI'; expression = '#{a.b}'; filter = '#{c} > 0' })
+                    validationRules    = @([ordered]@{ id = 'VR111111111'; leftSide_expression = 'I{x}'; rightSide_expression = '' })   # code-less -> keyed by UID (the placeholder-VR fallback)
                 }
             }
         }
@@ -686,27 +686,29 @@ InModuleScope 'NeoIPC-Tools' {
             (Test-NeoIPCMetadataExpressionColumn -Type 'programRuleActions' -Column 'data' -ActionType 'SENDMESSAGE') | Should -BeFalse
             (Test-NeoIPCMetadataExpressionColumn -Type 'programRules' -Column 'name' -ActionType $null) | Should -BeFalse
         }
-        It 'segment sanitiser: reserved chars -> _, trailing dot/space trimmed, empty -> _' {
-            (ConvertTo-NeoIPCExpressionPathSegment -Name 'A/B:c*?') | Should -BeExactly 'A_B_c__'
-            (ConvertTo-NeoIPCExpressionPathSegment -Name 'trailing. ') | Should -BeExactly 'trailing'
-            (ConvertTo-NeoIPCExpressionPathSegment -Name '') | Should -BeExactly '_'
+        It 'rule-segment map keys by code, falling back to the id for a code-less rule' {
+            $map = Get-NeoIPCMetadataExpressionRuleSegmentMap -RuleRows @(
+                [ordered]@{ id = 'R1'; code = 'NEOIPC_BSI_AGENT_1_SET_3GCR'; name = 'ignored name/with slash' },
+                [ordered]@{ id = 'R2coded001'; name = 'no code here' })
+            $map['R1'] | Should -BeExactly 'NEOIPC_BSI_AGENT_1_SET_3GCR'   # code, not the sanitised name
+            $map['R2coded001'] | Should -BeExactly 'R2coded001'            # code-less -> the id
         }
-        It 'rule-segment map fails loud on a post-sanitisation name collision' {
-            $rows = @([ordered]@{ id = 'R1'; name = 'A/B' }, [ordered]@{ id = 'R2'; name = 'A:B' })   # both -> 'A_B'
-            { Get-NeoIPCMetadataExpressionRuleSegmentMap -RuleRows $rows } | Should -Throw '*collision*'
+        It 'rule-segment map fails loud on a path-unsafe segment' {
+            $rows = @([ordered]@{ id = 'R1'; code = 'NEOIPC_BAD CODE' })   # space -> not path-safe
+            { Get-NeoIPCMetadataExpressionRuleSegmentMap -RuleRows $rows } | Should -Throw '*path-unsafe*'
         }
         It 'writes per-rule co-located files (condition + the rule''s action data) and references in the cells' {
             $rows = New-ExprRows
             Write-NeoIPCMetadataExpressionFiles -Rows $rows -Directory $script:exprDir
-            @($rows['programRules'])[0]['condition'] | Should -BeExactly 'expressions/programRules/NeoIPC BSI - set 3GCR/condition.dhis2'
-            (Test-Path -LiteralPath (Join-Path $script:exprDir 'expressions/programRules/NeoIPC BSI - set 3GCR/condition.dhis2')) | Should -BeTrue
-            # the rule's ASSIGN action data co-locates under the SAME rule folder
-            @($rows['programRuleActions'])[0]['data'] | Should -BeExactly 'expressions/programRules/NeoIPC BSI - set 3GCR/Act11111111.data.dhis2'
-            # the slash in rule 2's name is sanitised to the folder segment
-            @($rows['programRules'])[1]['condition'] | Should -BeExactly 'expressions/programRules/A_B rule/condition.dhis2'
-            # program indicators / validation rules stay flat per-type
-            @($rows['programIndicators'])[0]['expression'] | Should -BeExactly 'expressions/programIndicators/PI111111111.expression.dhis2'
-            @($rows['programIndicators'])[0]['filter'] | Should -BeExactly 'expressions/programIndicators/PI111111111.filter.dhis2'
+            @($rows['programRules'])[0]['condition'] | Should -BeExactly 'expressions/programRules/NEOIPC_BSI_AGENT_1_SET_3GCR/condition.dhis2'
+            (Test-Path -LiteralPath (Join-Path $script:exprDir 'expressions/programRules/NEOIPC_BSI_AGENT_1_SET_3GCR/condition.dhis2')) | Should -BeTrue
+            # the rule's ASSIGN action data co-locates under the SAME (code-named) rule folder, keyed by its own UID
+            @($rows['programRuleActions'])[0]['data'] | Should -BeExactly 'expressions/programRules/NEOIPC_BSI_AGENT_1_SET_3GCR/Act11111111.data.dhis2'
+            # rule 2's folder is its CODE; the slash in its name is irrelevant
+            @($rows['programRules'])[1]['condition'] | Should -BeExactly 'expressions/programRules/NEOIPC_TEST_RULE_2/condition.dhis2'
+            # program indicators key by code; validation rules stay flat per-type (the code-less placeholder keys by UID)
+            @($rows['programIndicators'])[0]['expression'] | Should -BeExactly 'expressions/programIndicators/NEOIPC_TEST_PI.expression.dhis2'
+            @($rows['programIndicators'])[0]['filter'] | Should -BeExactly 'expressions/programIndicators/NEOIPC_TEST_PI.filter.dhis2'
             @($rows['validationRules'])[0]['leftSide_expression'] | Should -BeExactly 'expressions/validationRules/VR111111111.leftSide_expression.dhis2'
         }
         It 'leaves a non-eligible action''s data inline (HIDEFIELD), and an empty value untouched' {
@@ -745,7 +747,7 @@ InModuleScope 'NeoIPC-Tools' {
             $pkg = [ordered]@{
                 userGroups         = @()
                 programRules       = @(
-                    [ordered]@{ id = 'IntgRule001'; name = 'Intg rule one'; program = [ordered]@{ id = 'ProgIntg001' }; condition = "d2:hasValue(#{v})`n&& true" }
+                    [ordered]@{ id = 'IntgRule001'; code = 'NEOIPC_INTG_RULE_1'; name = 'Intg rule one'; program = [ordered]@{ id = 'ProgIntg001' }; condition = "d2:hasValue(#{v})`n&& true" }
                 )
                 programRuleActions = @(
                     [ordered]@{ id = 'IntgActA001'; programRuleActionType = 'ASSIGN'; programRule = [ordered]@{ id = 'IntgRule001' }; data = "d2:concatenate('a',`n'b')" }
@@ -760,8 +762,8 @@ InModuleScope 'NeoIPC-Tools' {
             try {
                 ConvertFrom-NeoIPCMetadataJson -Path $jsonPath -OutputDirectory $outDir
                 # emit hook: per-rule co-located files written; the CSV cell holds the reference, not the value
-                (Test-Path -LiteralPath (Join-Path $outDir 'expressions/programRules/Intg rule one/condition.dhis2')) | Should -BeTrue
-                (Test-Path -LiteralPath (Join-Path $outDir 'expressions/programRules/Intg rule one/IntgActA001.data.dhis2')) | Should -BeTrue
+                (Test-Path -LiteralPath (Join-Path $outDir 'expressions/programRules/NEOIPC_INTG_RULE_1/condition.dhis2')) | Should -BeTrue
+                (Test-Path -LiteralPath (Join-Path $outDir 'expressions/programRules/NEOIPC_INTG_RULE_1/IntgActA001.data.dhis2')) | Should -BeTrue
                 @(Import-Csv -LiteralPath (Join-Path $outDir 'programRules.csv'))[0].condition | Should -Match '^expressions/programRules/'
                 # read hook: the multi-line expression is re-inlined verbatim
                 $back = (ConvertTo-NeoIPCMetadataJson -Path $outDir) | ConvertFrom-Json -AsHashtable
@@ -1980,6 +1982,46 @@ InModuleScope 'NeoIPC-Tools' {
         }
     }
 
+    Describe 'Type-map bases (DHIS2 Identifiable/Nameable factoring)' {
+        # Guards the factoring that mirrors DHIS2 BaseIdentifiableObject -> BaseNameableObject. The failure it
+        # prevents is the trackedEntityTypes-shortName drop (DHIS2 2.42 E4000): a type re-spelling the name-family
+        # instead of sourcing it from the shared base can silently omit a member.
+        It 'IdentifiableBase is exactly code, name in order' {
+            @($script:NeoIPCMetadataIdentifiableBase.Keys) | Should -Be @('code', 'name')
+        }
+        It 'NameableBase extends IdentifiableBase with shortName + description, in order' {
+            @($script:NeoIPCMetadataNameableBase.Keys) | Should -Be @('code', 'name', 'shortName', 'description')
+            foreach ($k in $script:NeoIPCMetadataIdentifiableBase.Keys) {
+                $script:NeoIPCMetadataNameableBase.Contains($k) | Should -BeTrue -Because "NameableBase must be a superset of IdentifiableBase"
+            }
+        }
+        It 'each type gets an independent copy of the base (a per-type edit cannot corrupt the shared base)' {
+            [object]::ReferenceEquals($script:NeoIPCMetadataTypeMaps['optionGroups'].Properties, $script:NeoIPCMetadataNameableBase) | Should -BeFalse
+            $script:NeoIPCMetadataNameableBase.Count | Should -Be 4
+        }
+        It 'full-nameable types source the name-family from the base (code,name,shortName,description prefix)' {
+            # The currently-coded nameable types; trackedEntityTypes joins this list once it authors a code.
+            $fullNameable = @('optionGroups', 'programs', 'programIndicators', 'attributes',
+                'organisationUnitGroups', 'organisationUnitGroupSets')
+            foreach ($t in $fullNameable) {
+                @(@($script:NeoIPCMetadataTypeMaps[$t].Properties.Keys)[0..3]) |
+                    Should -Be @('code', 'name', 'shortName', 'description') -Because "$t should open with the nameable base"
+            }
+        }
+        It 'the formName exception (dataElements / trackedEntityAttributes) keeps the name-family explicit with formName interleaved' {
+            foreach ($t in 'dataElements', 'trackedEntityAttributes') {
+                @(@($script:NeoIPCMetadataTypeMaps[$t].Properties.Keys)[0..4]) |
+                    Should -Be @('code', 'name', 'shortName', 'formName', 'description') -Because "$t interleaves formName, so it cannot use the nameable base"
+            }
+        }
+        It 'EmbeddedObject nested types carry no code (DHIS2 never resolves them by code)' {
+            foreach ($t in 'programStageDataElements', 'programTrackedEntityAttributes',
+                'trackedEntityTypeAttributes', 'analyticsPeriodBoundaries') {
+                $script:NeoIPCMetadataTypeMaps[$t].Properties.Contains('code') | Should -BeFalse -Because "$t is an EmbeddedObject"
+            }
+        }
+    }
+
     Describe 'Translation property/token model (intersection with the type maps)' {
         It 'derives translatable fields as type-map Properties intersect the translatable-property table' {
             $f = Get-NeoIPCMetadataTranslatableField -Type 'organisationUnitGroups'
@@ -2020,25 +2062,26 @@ InModuleScope 'NeoIPC-Tools' {
         It 'derives stable DE-code-scheme keys for every generated PRV / rule family (name- and UID-independent)' {
             $idx = Get-NeoIPCMetadataGeneratedTranslationKeyIndex -Package ([ordered]@{})
             # Resistance PRVs (primary + secondary), field-gating PRV, substance PRV (slot-padding-normalised lookup).
-            $idx.VariableKeyByName['NeoIPC BSI Pathogen 1 value'] | Should -BeExactly 'NEOIPC_BSI_PATHOGEN_1_VALUE'
-            $idx.VariableKeyByName['NeoIPC BSI Pathogen 1 may be 3GCR'] | Should -BeExactly 'NEOIPC_BSI_PATHOGEN_1_MAYBE_3GCR'
-            $idx.VariableKeyByName['NeoIPC BSI Pathogen 1 may be carbapenem-resistant'] | Should -BeExactly 'NEOIPC_BSI_PATHOGEN_1_MAYBE_CAR'
-            $idx.VariableKeyByName['NeoIPC HAP Secondary BSI pathogen 1 value'] | Should -BeExactly 'NEOIPC_HAP_SEC_BSI_PATHOGEN_1_VALUE'
-            $idx.VariableKeyByName['NeoIPC BSI Pathogen 1 is recognized pathogen'] | Should -BeExactly 'NEOIPC_BSI_PATHOGEN_1_IS_RECOGNIZED'
-            $idx.VariableKeyByName['NeoIPC Surveillance end Antibiotic substance 1 - current event value'] | Should -BeExactly 'NEOIPC_SURVEILLANCE_END_AB_SUBST_01_VALUE'
-            $idx.VariableKeyByName['NeoIPC Surveillance end Antibiotic substance 1 days - current event value'] | Should -BeExactly 'NEOIPC_SURVEILLANCE_END_AB_SUBST_01_DAYS_VALUE'
-            # Rules: the resistance triple, the field-gating kinds, the substance cluster.
-            $idx.RuleKeyByName['NeoIPC BSI Pathogen 1 - set 3GCR'] | Should -BeExactly 'NEOIPC_BSI_PATHOGEN_1_SET_3GCR'
-            $idx.RuleKeyByName['NeoIPC BSI Pathogen 1 - not VRE'] | Should -BeExactly 'NEOIPC_BSI_PATHOGEN_1_NOT_VRE'
-            $idx.RuleKeyByName['NeoIPC BSI Pathogen 1 - when empty'] | Should -BeExactly 'NEOIPC_BSI_PATHOGEN_1_WHEN_EMPTY'
-            $idx.RuleKeyByName['NeoIPC BSI Pathogen 1 - set recognized pathogen'] | Should -BeExactly 'NEOIPC_BSI_PATHOGEN_1_SET_RECOGNIZED'
-            $idx.RuleKeyByName['NeoIPC Surveillance end Antibiotic substance 1 - hide'] | Should -BeExactly 'NEOIPC_SURVEILLANCE_END_AB_SUBST_01_HIDE'
-            $idx.RuleKeyByName['NeoIPC Surveillance end Antibiotic substance days - validate'] | Should -BeExactly 'NEOIPC_SURVEILLANCE_END_AB_SUBST_DAYS_VALIDATE'
+            $idx.VariableKeyByName['NeoIPC BSI Pathogen 1 value'] | Should -BeExactly 'NEOIPC_BSI_AGENT_1_VAL'
+            $idx.VariableKeyByName['NeoIPC BSI Pathogen 1 may be 3GCR'] | Should -BeExactly 'NEOIPC_BSI_AGENT_1_MAYBE_3GCR'
+            $idx.VariableKeyByName['NeoIPC BSI Pathogen 1 may be carbapenem-resistant'] | Should -BeExactly 'NEOIPC_BSI_AGENT_1_MAYBE_CAR'
+            $idx.VariableKeyByName['NeoIPC HAP Secondary BSI pathogen 1 value'] | Should -BeExactly 'NEOIPC_HAP_SEC_BSI_AGENT_1_VAL'
+            $idx.VariableKeyByName['NeoIPC BSI Pathogen 1 is recognized pathogen'] | Should -BeExactly 'NEOIPC_BSI_AGENT_1_IS_NCC'
+            $idx.VariableKeyByName['NeoIPC Surveillance end Antibiotic substance 1 - current event value'] | Should -BeExactly 'NEOIPC_SURV_END_AB_SUBST_01_VAL'
+            $idx.VariableKeyByName['NeoIPC Surveillance end Antibiotic substance 1 days - current event value'] | Should -BeExactly 'NEOIPC_SURV_END_AB_SUBST_01_DAYS_VAL'
+            # Rules: the resistance triple, the field-gating kinds, the substance cluster — keyed by their AUTHORED CODE
+            # (PATHOGEN->AGENT, SURVEILLANCE_END->SURV_END, WHEN_*->IF_*, RECOGNIZED->NCC, DAYS_VALIDATE->DAYS_VR).
+            $idx.RuleKeyByName['NeoIPC BSI Pathogen 1 - set 3GCR'] | Should -BeExactly 'NEOIPC_BSI_AGENT_1_SET_3GCR'
+            $idx.RuleKeyByName['NeoIPC BSI Pathogen 1 - not VRE'] | Should -BeExactly 'NEOIPC_BSI_AGENT_1_NOT_VRE'
+            $idx.RuleKeyByName['NeoIPC BSI Pathogen 1 - when empty'] | Should -BeExactly 'NEOIPC_BSI_AGENT_1_IF_EMPTY'
+            $idx.RuleKeyByName['NeoIPC BSI Pathogen 1 - set recognized pathogen'] | Should -BeExactly 'NEOIPC_BSI_AGENT_1_SET_NCC'
+            $idx.RuleKeyByName['NeoIPC Surveillance end Antibiotic substance 1 - hide'] | Should -BeExactly 'NEOIPC_SURV_END_AB_SUBST_01_HIDE'
+            $idx.RuleKeyByName['NeoIPC Surveillance end Antibiotic substance days - validate'] | Should -BeExactly 'NEOIPC_SURV_END_AB_SUBST_DAYS_VR'
         }
         It 'resolves a generated rule / variable to its semantic key and a hand-authored code-less object to null' {
             $idx = Get-NeoIPCMetadataGeneratedTranslationKeyIndex -Package ([ordered]@{})
-            Get-NeoIPCMetadataGeneratedTranslationKey -Type 'programRules' -Object ([ordered]@{ id = 'rl1'; name = 'NeoIPC BSI Pathogen 1 - set 3GCR' }) -Index $idx | Should -BeExactly 'NEOIPC_BSI_PATHOGEN_1_SET_3GCR'
-            Get-NeoIPCMetadataGeneratedTranslationKey -Type 'programRuleVariables' -Object ([ordered]@{ id = 'pv1'; name = 'NeoIPC BSI Pathogen 1 value' }) -Index $idx | Should -BeExactly 'NEOIPC_BSI_PATHOGEN_1_VALUE'
+            Get-NeoIPCMetadataGeneratedTranslationKey -Type 'programRules' -Object ([ordered]@{ id = 'rl1'; name = 'NeoIPC BSI Pathogen 1 - set 3GCR' }) -Index $idx | Should -BeExactly 'NEOIPC_BSI_AGENT_1_SET_3GCR'
+            Get-NeoIPCMetadataGeneratedTranslationKey -Type 'programRuleVariables' -Object ([ordered]@{ id = 'pv1'; name = 'NeoIPC BSI Pathogen 1 value' }) -Index $idx | Should -BeExactly 'NEOIPC_BSI_AGENT_1_VAL'
             Get-NeoIPCMetadataGeneratedTranslationKey -Type 'programRules' -Object ([ordered]@{ id = 'rlx'; name = 'NeoIPC BSI infection present' }) -Index $idx | Should -BeNullOrEmpty
         }
         It 'keys a generated action by owning-rule key + action type (+ target DE code), unique across a multi-action rule' {
@@ -2053,9 +2096,9 @@ InModuleScope 'NeoIPC-Tools' {
             }
             $idx = Get-NeoIPCMetadataGeneratedTranslationKeyIndex -Package (ConvertFrom-NeoIPCMetadataJsonText -Json ($pkg | ConvertTo-Json -Depth 40))
             # ASSIGN with no DE target -> <ruleKey>/ASSIGN
-            Get-NeoIPCMetadataGeneratedTranslationKey -Type 'programRuleActions' -Object ([ordered]@{ programRuleActionType = 'ASSIGN'; programRule = [ordered]@{ id = 'rlSet1' } }) -Index $idx | Should -BeExactly 'NEOIPC_BSI_PATHOGEN_1_SET_3GCR/ASSIGN'
+            Get-NeoIPCMetadataGeneratedTranslationKey -Type 'programRuleActions' -Object ([ordered]@{ programRuleActionType = 'ASSIGN'; programRule = [ordered]@{ id = 'rlSet1' } }) -Index $idx | Should -BeExactly 'NEOIPC_BSI_AGENT_1_SET_3GCR/ASSIGN'
             # HIDEFIELD with a DE target -> <ruleKey>/HIDEFIELD/<deCode>
-            Get-NeoIPCMetadataGeneratedTranslationKey -Type 'programRuleActions' -Object ([ordered]@{ programRuleActionType = 'HIDEFIELD'; programRule = [ordered]@{ id = 'rlWE1' }; dataElement = [ordered]@{ id = 'deNam2' } }) -Index $idx | Should -BeExactly 'NEOIPC_BSI_PATHOGEN_1_WHEN_EMPTY/HIDEFIELD/NEOIPC_BSI_PATHOGEN_2_NAME'
+            Get-NeoIPCMetadataGeneratedTranslationKey -Type 'programRuleActions' -Object ([ordered]@{ programRuleActionType = 'HIDEFIELD'; programRule = [ordered]@{ id = 'rlWE1' }; dataElement = [ordered]@{ id = 'deNam2' } }) -Index $idx | Should -BeExactly 'NEOIPC_BSI_AGENT_1_IF_EMPTY/HIDEFIELD/NEOIPC_BSI_PATHOGEN_2_NAME'
             # an action on a non-generated rule -> null (it keeps its UID key)
             Get-NeoIPCMetadataGeneratedTranslationKey -Type 'programRuleActions' -Object ([ordered]@{ programRuleActionType = 'HIDEFIELD'; programRule = [ordered]@{ id = 'rlUnknown' } }) -Index $idx | Should -BeNullOrEmpty
         }
@@ -2067,7 +2110,7 @@ InModuleScope 'NeoIPC-Tools' {
                 )
             }
             $msgctxts = @(Get-NeoIPCMetadataTranslationUnit -Package $pkg | ForEach-Object { $_.Msgctxt })
-            $msgctxts | Should -Contain 'programRuleVariables/NEOIPC_BSI_PATHOGEN_1_MAYBE_MRSA/NAME'
+            $msgctxts | Should -Contain 'programRuleVariables/NEOIPC_BSI_AGENT_1_MAYBE_MRSA/NAME'
             $msgctxts | Should -Contain 'programRuleVariables/pvHand0001/NAME'
         }
         It 'the generated key is independent of the object UID (no churn when a deployed UID is reused vs minted)' {
@@ -2075,7 +2118,7 @@ InModuleScope 'NeoIPC-Tools' {
             $a = Get-NeoIPCMetadataGeneratedTranslationKey -Type 'programRules' -Object ([ordered]@{ id = 'realUID0001'; name = 'NeoIPC BSI Pathogen 1 - set 3GCR' }) -Index $idx
             $b = Get-NeoIPCMetadataGeneratedTranslationKey -Type 'programRules' -Object ([ordered]@{ id = 'mintedXYZ99'; name = 'NeoIPC BSI Pathogen 1 - set 3GCR' }) -Index $idx
             $a | Should -BeExactly $b
-            $a | Should -BeExactly 'NEOIPC_BSI_PATHOGEN_1_SET_3GCR'
+            $a | Should -BeExactly 'NEOIPC_BSI_AGENT_1_SET_3GCR'
         }
         It 'adding a slot is additive: every key from a smaller slot count survives unchanged (bounded diff)' {
             $idx3 = Get-NeoIPCMetadataGeneratedTranslationKeyIndex -Package ([ordered]@{}) -PathogenCount 3 -SubstanceCount 9
@@ -3253,14 +3296,14 @@ Hierarchies:
     Id: 100
     Carbapenems: true
 '@
-            # A package covering the four program stages (by code), every `_<CAT>` resistance DE (by code) and the
-            # program — the minimum the generator resolves against. Built from the DE plan so it stays in lockstep.
-            # Stages carry no code; the generator resolves each via a slot-1 _3GCR anchor DE listed in
-            # programStageDataElements (the same DE→stage link the real export carries).
+            # A package covering the four program stages (each by its NEOIPC_STG_ code — the key the generator now
+            # resolves against), every `_<CAT>` resistance DE (by code) and the program — the minimum the generator
+            # resolves against. Built from the DE plan so it stays in lockstep. The stages also carry the DE→stage
+            # links the real export has (kept for realism; no longer used for stage resolution).
             $repDe = @{ BSI = 'NEOIPC_BSI_PATHOGEN_1_3GCR'; HAP = 'NEOIPC_HAP_PATHOGEN_1_3GCR'; SSI = 'NEOIPC_SSI_PATHOGEN_1_3GCR'; NEC = 'NEOIPC_NEC_SEC_BSI_PATHOGEN_1_3GCR' }
             $stages = foreach ($s in 'BSI', 'HAP', 'SSI', 'NEC') {
                 [ordered]@{
-                    code                     = "NEOIPC_$s"
+                    code                     = "NEOIPC_STG_$s"
                     id                       = (New-NeoIPCMetadataUid -Type 'programStages' -NaturalKey "NEOIPC_$s")
                     programStageDataElements = @([ordered]@{ dataElement = [ordered]@{ id = (New-NeoIPCMetadataUid -Type 'dataElements' -NaturalKey $repDe[$s]) } })
                 }
@@ -3405,12 +3448,12 @@ Hierarchies:
         It 'fails loud when a program stage is missing from the package' {
             $pkg = @{
                 programs           = $script:RulePkg['programs']
-                programStages      = @($script:RulePkg['programStages'] | Where-Object { [string]$_['code'] -ne 'NEOIPC_NEC' })
+                programStages      = @($script:RulePkg['programStages'] | Where-Object { [string]$_['code'] -ne 'NEOIPC_STG_NEC' })
                 dataElements       = $script:RulePkg['dataElements']
                 programRules       = @()
                 programRuleActions = @()
             }
-            { New-NeoIPCPathogenRule -Path $script:RuleYaml -ExistingPackage $pkg } | Should -Throw '*NEOIPC_NEC*'
+            { New-NeoIPCPathogenRule -Path $script:RuleYaml -ExistingPackage $pkg } | Should -Throw '*NEOIPC_STG_NEC*'
         }
         It 'fails loud when a resistance data element is missing from the package' {
             $pkg = @{
@@ -3444,7 +3487,7 @@ Hierarchies:
             $abDays = [ordered]@{ code = 'NEOIPC_SURVEILLANCE_END_AB_DAYS'; id = (& $script:SubDeId 'NEOIPC_SURVEILLANCE_END_AB_DAYS'); categoryCombo = [ordered]@{ id = $script:SubCcId } }
             $script:SubPkg = @{
                 programs             = @([ordered]@{ code = 'NEOIPC_CORE'; id = 'progCore001' })
-                programStages        = @([ordered]@{ id = 'psSurvEnd01'; programStageDataElements = @([ordered]@{ dataElement = [ordered]@{ id = (& $script:SubDeId 'NEOIPC_SURVEILLANCE_END_AB_DAYS') } }) })
+                programStages        = @([ordered]@{ code = 'NEOIPC_STG_SURV_END'; id = 'psSurvEnd01'; programStageDataElements = @([ordered]@{ dataElement = [ordered]@{ id = (& $script:SubDeId 'NEOIPC_SURVEILLANCE_END_AB_DAYS') } }) })
                 optionSets           = @([ordered]@{ code = 'NEOIPC_ANTIMICROBIAL_SUBSTANCES'; id = 'osSubstan01' })
                 dataElements         = @($subDes) + @($abDays)
                 programRuleVariables = @()
@@ -3599,7 +3642,7 @@ Hierarchies:
 
             $hide = $rules['NeoIPC Surveillance end Antibiotic substance 01 - hide']
             $hide['id'] | Should -BeExactly 'SUBrule0001'                  # preserved across the padding rename
-            $hide['programStage']['id'] | Should -BeExactly 'psSurvEnd01'  # resolved via DE->stage membership
+            $hide['programStage']['id'] | Should -BeExactly 'psSurvEnd01'  # resolved via the NEOIPC_STG_SURV_END code
             @($hide['programRuleActions']).Count | Should -Be 2
             $hideActIds = @($hide['programRuleActions'] | ForEach-Object { [string]$_['id'] })
             $hideActIds | Should -Contain 'SUBact00001'                    # action UID preserved by (type + target DE)
@@ -3768,10 +3811,11 @@ Hierarchies:
 '@
             $script:VirusTree = (Get-Content -LiteralPath $script:VirusYaml -Raw | ConvertFrom-Yaml)
 
-            # Fixture package: NEOIPC_CORE program, the HAP stage resolved via its slot-1 _3GCR anchor DE (stages carry
-            # no code), every pathogen DE (so the anchor resolves), and empty rule/action/variable collections.
+            # Fixture package: NEOIPC_CORE program, the HAP stage resolved by its NEOIPC_STG_HAP code, every pathogen DE
+            # (so the gating targets resolve), and empty rule/action/variable collections.
             $hapAnchor = 'NEOIPC_HAP_PATHOGEN_1_3GCR'
             $hapStage = [ordered]@{
+                code                     = 'NEOIPC_STG_HAP'
                 id                       = 'hapStage001'
                 programStageDataElements = @([ordered]@{ dataElement = [ordered]@{ id = (New-NeoIPCMetadataUid -Type 'dataElements' -NaturalKey $hapAnchor) } })
             }
@@ -3870,6 +3914,65 @@ Hierarchies:
         }
     }
 
+    Describe 'Get-NeoIPCGeneratedCode (generated-code vocabulary)' {
+        # The single derivation the generators (minting `code`) and the translation-key index (msgctxt) both call, so
+        # generated codes == msgctxt keys by construction. Maps a DE-code-scheme semantic key to the finalized
+        # rule/variable-code vocabulary. Guards each transform, every generated family, and the identity case.
+        It 'applies the finalized vocabulary to each generated family' {
+            InModuleScope NeoIPC-Tools {
+                Get-NeoIPCGeneratedCode -SemanticKey 'NEOIPC_BSI_PATHOGEN_1_VALUE'                      | Should -BeExactly 'NEOIPC_BSI_AGENT_1_VAL'
+                Get-NeoIPCGeneratedCode -SemanticKey 'NEOIPC_SURVEILLANCE_END_AB_SUBST_01_DAYS_VALUE'   | Should -BeExactly 'NEOIPC_SURV_END_AB_SUBST_01_DAYS_VAL'
+                Get-NeoIPCGeneratedCode -SemanticKey 'NEOIPC_BSI_PATHOGEN_1_SET_3GCR'                   | Should -BeExactly 'NEOIPC_BSI_AGENT_1_SET_3GCR'
+                Get-NeoIPCGeneratedCode -SemanticKey 'NEOIPC_HAP_SEC_BSI_PATHOGEN_2_MAYBE_CAR'          | Should -BeExactly 'NEOIPC_HAP_SEC_BSI_AGENT_2_MAYBE_CAR'
+                Get-NeoIPCGeneratedCode -SemanticKey 'NEOIPC_BSI_PATHOGEN_1_IS_RECOGNIZED'              | Should -BeExactly 'NEOIPC_BSI_AGENT_1_IS_NCC'
+                Get-NeoIPCGeneratedCode -SemanticKey 'NEOIPC_BSI_PATHOGEN_1_SET_RECOGNIZED'             | Should -BeExactly 'NEOIPC_BSI_AGENT_1_SET_NCC'
+                Get-NeoIPCGeneratedCode -SemanticKey 'NEOIPC_BSI_PATHOGEN_1_WHEN_SET'                   | Should -BeExactly 'NEOIPC_BSI_AGENT_1_IF_SET'
+                Get-NeoIPCGeneratedCode -SemanticKey 'NEOIPC_BSI_PATHOGEN_1_WHEN_EMPTY'                 | Should -BeExactly 'NEOIPC_BSI_AGENT_1_IF_EMPTY'
+                Get-NeoIPCGeneratedCode -SemanticKey 'NEOIPC_BSI_PATHOGEN_1_WHEN_EMPTY_OR_LISTED'       | Should -BeExactly 'NEOIPC_BSI_AGENT_1_IF_EMPTY_LISTED'
+                Get-NeoIPCGeneratedCode -SemanticKey 'NEOIPC_BSI_PATHOGEN_1_WHEN_NOT_LISTED'            | Should -BeExactly 'NEOIPC_BSI_AGENT_1_IF_NOT_LISTED'
+                Get-NeoIPCGeneratedCode -SemanticKey 'NEOIPC_HAP_PATHOGEN_1_IS_VIRUS'                   | Should -BeExactly 'NEOIPC_HAP_AGENT_1_IS_VIRUS'
+                Get-NeoIPCGeneratedCode -SemanticKey 'NEOIPC_SURVEILLANCE_END_AB_SUBST_07_HIDE'         | Should -BeExactly 'NEOIPC_SURV_END_AB_SUBST_07_HIDE'
+                Get-NeoIPCGeneratedCode -SemanticKey 'NEOIPC_SURVEILLANCE_END_AB_SUBST_07_DAYS_REQUIRE' | Should -BeExactly 'NEOIPC_SURV_END_AB_SUBST_07_DAYS_REQUIRE'
+                Get-NeoIPCGeneratedCode -SemanticKey 'NEOIPC_SURVEILLANCE_END_AB_SUBST_DAYS_VALIDATE'   | Should -BeExactly 'NEOIPC_SURV_END_AB_SUBST_DAYS_VR'
+            }
+        }
+        It 'leaves a key carrying no vocabulary token unchanged (the single virus rule code)' {
+            InModuleScope NeoIPC-Tools {
+                Get-NeoIPCGeneratedCode -SemanticKey 'NEOIPC_HAP_SET_VIRUS' | Should -BeExactly 'NEOIPC_HAP_SET_VIRUS'
+            }
+        }
+    }
+
+    Describe 'Get-NeoIPCGeneratedObjectCode (whole generated code surface)' {
+        # Derives every generated variable/rule code from its plan at the MAX slot counts (9 pathogen, 99 substance) —
+        # the full surface the generators will mint and the translation index will key. Guards the two DHIS2 hard
+        # constraints across all of it: code shape + the 50-char cap (E4001), and per-type uniqueness. This is the
+        # load-bearing check that the vocabulary + slot growth never overflow or collide.
+        BeforeAll {
+            $script:GenVarCodes = InModuleScope NeoIPC-Tools {
+                $P = 9; $S = 99
+                @(@(Get-NeoIPCPathogenVariablePlan -PathogenCount $P            | ForEach-Object { Get-NeoIPCGeneratedObjectCode -PlanItem $_ -Family 'pathogenVar' }) +
+                  @(Get-NeoIPCPathogenFieldGatingVariablePlan -PathogenCount $P | ForEach-Object { Get-NeoIPCGeneratedObjectCode -PlanItem $_ -Family 'fieldGatingVar' }) +
+                  @(Get-NeoIPCSubstanceVariablePlan -SubstanceCount $S          | ForEach-Object { Get-NeoIPCGeneratedObjectCode -PlanItem $_ -Family 'substanceVar' }) +
+                  @(Get-NeoIPCPathogenVirusVariablePlan -PathogenCount $P       | ForEach-Object { Get-NeoIPCGeneratedObjectCode -PlanItem $_ -Family 'virusVar' }))
+            }
+            $script:GenRuleCodes = InModuleScope NeoIPC-Tools {
+                $P = 9; $S = 99
+                @(@(Get-NeoIPCPathogenRulePlan -PathogenCount $P            | ForEach-Object { Get-NeoIPCGeneratedObjectCode -PlanItem $_ -Family 'pathogenRule' }) +
+                  @(Get-NeoIPCPathogenFieldGatingRulePlan -PathogenCount $P | ForEach-Object { Get-NeoIPCGeneratedObjectCode -PlanItem $_ -Family 'fieldGatingRule' }) +
+                  @(Get-NeoIPCSubstanceRulePlan -SubstanceCount $S          | ForEach-Object { Get-NeoIPCGeneratedObjectCode -PlanItem $_ -Family 'substanceRule' }) +
+                  @(Get-NeoIPCPathogenVirusRulePlan -PathogenCount $P       | ForEach-Object { Get-NeoIPCGeneratedObjectCode -PlanItem $_ -Family 'virusRule' }))
+            }
+        }
+        It 'every generated code is upper-snake (^[A-Z][A-Z0-9_]*$) and <= 50 characters' {
+            @($script:GenVarCodes + $script:GenRuleCodes | Where-Object { $_ -notmatch '^[A-Z][A-Z0-9_]*$' -or $_.Length -gt 50 }) | Should -BeNullOrEmpty
+        }
+        It 'generated variable codes are unique, and rule codes are unique (per-type constraint)' {
+            @($script:GenVarCodes | Group-Object | Where-Object Count -gt 1).Count | Should -Be 0
+            @($script:GenRuleCodes | Group-Object | Where-Object Count -gt 1).Count | Should -Be 0
+        }
+    }
+
     Describe 'Pathogen slot-suffix matrix' {
         It 'gives a BSI primary slot the full suffix set (base + NAME + 5 resistance + SOURCE + MULTIPLE), in order' {
             @(Get-NeoIPCPathogenSlotSuffix -Stage 'BSI' -IsPrimary $true) |
@@ -3917,12 +4020,14 @@ Hierarchies:
   - Name: Escherichia coli
     Id: 200
 '@
-            # The four pathogen stages (BSI/HAP/SSI/NEC), each resolved via a slot-1 _3GCR anchor DE in
-            # programStageDataElements (stages carry no code), plus every pathogen DE (so every gating target resolves),
-            # the program, and empty rule/action collections. Built from the DE plan so it stays in lockstep.
+            # The four pathogen stages (BSI/HAP/SSI/NEC), each resolved by its NEOIPC_STG_ code, plus every pathogen DE
+            # (so every gating target resolves), the program, and empty rule/action collections. Built from the DE plan
+            # so it stays in lockstep. The stages also carry their DE→stage links for realism (no longer used to resolve
+            # the stage).
             $repDe = @{ BSI = 'NEOIPC_BSI_PATHOGEN_1_3GCR'; HAP = 'NEOIPC_HAP_PATHOGEN_1_3GCR'; SSI = 'NEOIPC_SSI_PATHOGEN_1_3GCR'; NEC = 'NEOIPC_NEC_SEC_BSI_PATHOGEN_1_3GCR' }
             $stages = foreach ($s in 'BSI', 'HAP', 'SSI', 'NEC') {
                 [ordered]@{
+                    code                     = "NEOIPC_STG_$s"
                     id                       = (New-NeoIPCMetadataUid -Type 'programStages' -NaturalKey "NEOIPC_$s")
                     programStageDataElements = @([ordered]@{ dataElement = [ordered]@{ id = (New-NeoIPCMetadataUid -Type 'dataElements' -NaturalKey $repDe[$s]) } })
                 }
@@ -4140,9 +4245,9 @@ Hierarchies:
             $pkg = @{ programs = @(); programStages = $script:FgPkg['programStages']; dataElements = $script:FgPkg['dataElements']; programRules = @(); programRuleActions = @() }
             { New-NeoIPCPathogenFieldGatingRule -Path $script:FgYaml -ExistingPackage $pkg } | Should -Throw '*NEOIPC_CORE*'
         }
-        It 'rule generator: fails loud when a stage anchor data element is absent (stage unresolvable)' {
+        It 'rule generator: fails loud when a program stage is absent (stage unresolvable)' {
             $pkg = $script:FgPkg.Clone()
-            $pkg['dataElements'] = @($script:FgPkg['dataElements'] | Where-Object { [string]$_['code'] -ne 'NEOIPC_NEC_SEC_BSI_PATHOGEN_1_3GCR' })
+            $pkg['programStages'] = @($script:FgPkg['programStages'] | Where-Object { [string]$_['code'] -ne 'NEOIPC_STG_NEC' })
             { New-NeoIPCPathogenFieldGatingRule -Path $script:FgYaml -ExistingPackage $pkg } | Should -Throw '*program stage*'
         }
         It 'rule generator: fails loud when a gating target data element is absent' {
@@ -4638,6 +4743,8 @@ Hierarchies:
             Mock New-NeoIPCPathogenRule { [ordered]@{ programRules = @(); programRuleActions = @() } }
             Mock New-NeoIPCPathogenFieldGatingRule { [ordered]@{ programRules = @(); programRuleActions = @() } }
             Mock New-NeoIPCSubstanceRule { [ordered]@{ programRules = @(); programRuleActions = @() } }
+            Mock New-NeoIPCPathogenVirusVariable { [ordered]@{ programRuleVariables = @() } }
+            Mock New-NeoIPCPathogenVirusRule { [ordered]@{ programRules = @(); programRuleActions = @() } }
             Mock New-NeoIPCAntimicrobialOptionSet { [ordered]@{
                     optionSets = @([ordered]@{ id = 'OptSetAbx01'; code = 'NEOIPC_ANTIMICROBIAL_SUBSTANCES'; valueType = 'TEXT'; options = @([ordered]@{ id = 'AbxOptRen01' }, [ordered]@{ id = 'AbxOptNam01' }, [ordered]@{ id = 'AbxOptAdd01' }) })
                     options    = @(
@@ -4709,6 +4816,8 @@ Hierarchies:
             Mock New-NeoIPCPathogenRule { [ordered]@{ programRules = @([ordered]@{ id = 'ruleSet'; name = 'NeoIPC BSI Pathogen 1 - set 3GCR'; programRuleActions = @([ordered]@{ id = 'actSet' }) }); programRuleActions = @([ordered]@{ id = 'actSet'; programRule = [ordered]@{ id = 'ruleSet' }; programRuleActionType = 'ASSIGN'; data = 'enum' }) } }
             Mock New-NeoIPCPathogenFieldGatingRule { [ordered]@{ programRules = @([ordered]@{ id = 'ruleWS'; name = 'NeoIPC BSI Pathogen 1 - when set'; programRuleActions = @([ordered]@{ id = 'actWSsrc' }) }); programRuleActions = @([ordered]@{ id = 'actWSsrc'; programRule = [ordered]@{ id = 'ruleWS' }; programRuleActionType = 'SETMANDATORYFIELD'; dataElement = [ordered]@{ id = 'deSrc' } }) } }
             Mock New-NeoIPCSubstanceRule { [ordered]@{ programRules = @(); programRuleActions = @() } }
+            Mock New-NeoIPCPathogenVirusVariable { [ordered]@{ programRuleVariables = @() } }
+            Mock New-NeoIPCPathogenVirusRule { [ordered]@{ programRules = @(); programRuleActions = @() } }
             # Antibiotic generators mocked empty: this Describe exercises the pathogen/substance classification.
             # The antibiotic buckets are exercised in the 'Compare-NeoIPCGeneratedMetadata (antibiotic buckets)' Describe.
             Mock New-NeoIPCAntimicrobialOptionSet { [ordered]@{ optionSets = @(); options = @() } }
@@ -4726,6 +4835,17 @@ Hierarchies:
             (HasDelta 'programRules' 'Added' 'CoverageAddition') | Should -BeGreaterThan 0
             (HasDelta 'programRuleActions' 'Removed' 'HandAuthoredAction') | Should -BeGreaterThan 0
             (HasDelta 'programRuleActions' 'Added' 'CoverageAddition') | Should -BeGreaterThan 0
+            @($r | Where-Object { $_.Class -eq 'Unclassified' }).Count | Should -Be 0
+        }
+        It 'classifies a generated rule that authors a code the pre-code export lacks as CodeAuthoring, not Unclassified' {
+            # Guards step 6: once the generators mint codes, a `code` the pre-code deployed export lacks must classify
+            # as its own CodeAuthoring bucket, NOT vanish into RuleNormalisation or trip Unclassified. Reproduce ruleWS
+            # with a code added; the deployed ruleWS carries none.
+            Mock New-NeoIPCPathogenFieldGatingRule { [ordered]@{ programRules = @([ordered]@{ id = 'ruleWS'; code = 'NEOIPC_BSI_AGENT_1_IF_SET'; name = 'NeoIPC BSI Pathogen 1 - when set'; programRuleActions = @([ordered]@{ id = 'actWSsrc' }) }); programRuleActions = @([ordered]@{ id = 'actWSsrc'; programRule = [ordered]@{ id = 'ruleWS' }; programRuleActionType = 'SETMANDATORYFIELD'; dataElement = [ordered]@{ id = 'deSrc' } }) } }
+            $r = @(Compare-NeoIPCGeneratedMetadata -ExistingPackage (New-DiffDeployed))
+            # Exactly one programRules delta is CodeAuthoring, and `code` is the field that drove it (not a
+            # normalisation class, not Unclassified).
+            @($r | Where-Object { $_.Type -eq 'programRules' -and $_.Class -eq 'CodeAuthoring' -and (($_.DiffFields -split ',') -contains 'code') }).Count | Should -Be 1
             @($r | Where-Object { $_.Class -eq 'Unclassified' }).Count | Should -Be 0
         }
         It 'flags an unexpected data-element field change (valueType) as Unclassified — the gate failure path' {
