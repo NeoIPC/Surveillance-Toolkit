@@ -13200,22 +13200,6 @@ msgctxt "programStages/NEOIPC_STG_SURV_END/EXECUTION_DATE_LABEL"
 msgid "Surveillance end date"
 msgstr ""
 
-msgctxt "programIndicators/ApYgClc8SVA/NAME"
-msgid "NeoIPC Number of enrollments (total)"
-msgstr ""
-
-msgctxt "programIndicators/ApYgClc8SVA/SHORT_NAME"
-msgid "No. enrollments (tot.)"
-msgstr ""
-
-msgctxt "programIndicators/J4nrp0CYvO8/NAME"
-msgid "NeoIPC Number of enrollments (cancelled)"
-msgstr ""
-
-msgctxt "programIndicators/J4nrp0CYvO8/SHORT_NAME"
-msgid "No. enrollments (canc.)"
-msgstr ""
-
 msgctxt "programIndicators/NEOIPC_ADMISSION_COMPLETED/NAME"
 msgid "NeoIPC Admission Completed"
 msgstr ""
@@ -13240,6 +13224,46 @@ msgctxt "programIndicators/NEOIPC_DAY_OF_LIFE/DESCRIPTION"
 msgid "The day of life when an event occurs"
 msgstr ""
 
+msgctxt "programIndicators/NEOIPC_ENROLLMENTS_ACTIVE/NAME"
+msgid "NeoIPC Number of enrollments (active)"
+msgstr ""
+
+msgctxt "programIndicators/NEOIPC_ENROLLMENTS_ACTIVE/SHORT_NAME"
+msgid "No. enrollments (act.)"
+msgstr ""
+
+msgctxt "programIndicators/NEOIPC_ENROLLMENTS_CANCELLED/NAME"
+msgid "NeoIPC Number of enrollments (cancelled)"
+msgstr ""
+
+msgctxt "programIndicators/NEOIPC_ENROLLMENTS_CANCELLED/SHORT_NAME"
+msgid "No. enrollments (canc.)"
+msgstr ""
+
+msgctxt "programIndicators/NEOIPC_ENROLLMENTS_COMPLETED/NAME"
+msgid "NeoIPC Number of enrollments (completed)"
+msgstr ""
+
+msgctxt "programIndicators/NEOIPC_ENROLLMENTS_COMPLETED/SHORT_NAME"
+msgid "No. enrollments (comp.)"
+msgstr ""
+
+msgctxt "programIndicators/NEOIPC_ENROLLMENTS_SUM/NAME"
+msgid "Enrollments"
+msgstr ""
+
+msgctxt "programIndicators/NEOIPC_ENROLLMENTS_SUM/SHORT_NAME"
+msgid "NEO_SumAllEnrollments_PI"
+msgstr ""
+
+msgctxt "programIndicators/NEOIPC_ENROLLMENTS_TOTAL/NAME"
+msgid "NeoIPC Number of enrollments (total)"
+msgstr ""
+
+msgctxt "programIndicators/NEOIPC_ENROLLMENTS_TOTAL/SHORT_NAME"
+msgid "No. enrollments (tot.)"
+msgstr ""
+
 msgctxt "programIndicators/NEOIPC_ENROLLMENT_COMPLETED/NAME"
 msgid "NeoIPC Enrollment Completed"
 msgstr ""
@@ -13252,51 +13276,27 @@ msgctxt "programIndicators/NEOIPC_ENROLLMENT_COMPLETED/DESCRIPTION"
 msgid "1 if the enrollment is completed, otherwise 0."
 msgstr ""
 
-msgctxt "programIndicators/NEO_SumAllEnrollments_PI/NAME"
-msgid "Enrollments"
-msgstr ""
-
-msgctxt "programIndicators/NEO_SumAllEnrollments_PI/SHORT_NAME"
-msgid "NEO_SumAllEnrollments_PI"
-msgstr ""
-
-msgctxt "programIndicators/NEO_SumAllSurvEnde_PI/NAME"
-msgid "NEO_SumAllSurvEnde_PI"
-msgstr ""
-
-msgctxt "programIndicators/NEO_SumAllSurvEnde_PI/SHORT_NAME"
-msgid "NEO_SumAllSurvEnde_PI"
-msgstr ""
-
-msgctxt "programIndicators/SFT8PJJoPRZ/NAME"
-msgid "NeoIPC Number of enrollments (completed)"
-msgstr ""
-
-msgctxt "programIndicators/SFT8PJJoPRZ/SHORT_NAME"
-msgid "No. enrollments (comp.)"
-msgstr ""
-
-msgctxt "programIndicators/Scio2GndATI/NAME"
-msgid "NeoIPC Number of enrollments (active)"
-msgstr ""
-
-msgctxt "programIndicators/Scio2GndATI/SHORT_NAME"
-msgid "No. enrollments (act.)"
-msgstr ""
-
-msgctxt "programIndicators/bpsntltaU4y/NAME"
+msgctxt "programIndicators/NEOIPC_MISSING_SURVEILLANCE_END/NAME"
 msgid "NeoIPC Missing surveillance end in closed enrollment"
 msgstr ""
 
-msgctxt "programIndicators/bpsntltaU4y/SHORT_NAME"
+msgctxt "programIndicators/NEOIPC_MISSING_SURVEILLANCE_END/SHORT_NAME"
 msgid "NeoIPC Missing sur. end in closed enr."
 msgstr ""
 
-msgctxt "programIndicators/taydZHWlYCt/NAME"
+msgctxt "programIndicators/NEOIPC_SURVEILLANCE_ENDS_SUM/NAME"
+msgid "NEO_SumAllSurvEnde_PI"
+msgstr ""
+
+msgctxt "programIndicators/NEOIPC_SURVEILLANCE_ENDS_SUM/SHORT_NAME"
+msgid "NEO_SumAllSurvEnde_PI"
+msgstr ""
+
+msgctxt "programIndicators/NEOIPC_SURVEILLANCE_END_COMPLETED/NAME"
 msgid "Surveillance-End_Completed"
 msgstr ""
 
-msgctxt "programIndicators/taydZHWlYCt/SHORT_NAME"
+msgctxt "programIndicators/NEOIPC_SURVEILLANCE_END_COMPLETED/SHORT_NAME"
 msgid "Surveillance-End_Completed"
 msgstr ""
 
