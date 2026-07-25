@@ -11,7 +11,9 @@ echo: false
 #keep-tex: true
 execute:
   error: true
-filters: ["../filters/pandoc-quotes.lua"]
+filters:
+  - "../filters/pandoc-quotes.lua"
+  - "../filters/fix-gt-footnote-display-math.lua"
 format:
   html:
     link-external-icon: true
