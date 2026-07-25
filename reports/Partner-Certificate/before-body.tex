@@ -1,6 +1,9 @@
 \maketitle
 \begin{center}
-  % alt= gives this content-flow title-page logo PDF/UA accessible text; the scrlayer-scrpage
-  % header/footer logos need none — they are auto-tagged as artifacts (page furniture).
+  % alt= supplies this content-flow title-page logo's accessible text once tagged PDF is
+  % enabled — it reaches nothing today, since _quarto.yml declares PDF/A-4 only and Quarto
+  % emits tagging=on solely for the standards that require it. The scrlayer-scrpage
+  % header/footer logos need no alt= either way: they are auto-tagged as artifacts (page
+  % furniture) and stay out of the reading order.
   \includegraphics[alt={NeoIPC},width=6cm]{../logos/LOGO_NEOIPC.png}
 \end{center}

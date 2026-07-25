@@ -30,7 +30,7 @@ fig-cap:
     no-bnch: "A is a histogram in %s steps with a density curve and B is a boxplot."
   - bnch: "Vertical lines in the boxplots represent the %s, %s and %s quantiles, the diamonds represent the pooled arithmetic means."
     no-bnch: "Vertical lines in the boxplot represent the %s, %s and %s quantiles, the diamond represents the pooled arithmetic mean."
-# fig-alt: concise screen-reader / PDF-UA + axe descriptions of the two distribution figures. Describes the
+# fig-alt: concise screen-reader / PDF/UA + axe descriptions of the two distribution figures. Describes the
 # chart type/structure only; the fig-cap above carries the own-vs-reference detail (a screen reader reads both).
 fig-alt:
   fig-bw:

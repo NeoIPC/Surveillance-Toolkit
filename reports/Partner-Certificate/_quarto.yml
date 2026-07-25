@@ -14,8 +14,7 @@ format:
       - title.tex
     documentclass: scrartcl
     # LuaLaTeX pinned: `pdf-standard` reaches LaTeX as \DocumentMetadata, which
-    # needs LuaLaTeX. Pinning it here keeps every render path on one engine (the
-    # .NET service injects the same value on its own path).
+    # needs LuaLaTeX. Pinning it here keeps every render path on one engine.
     # (No html format → no axe here.)
     pdf-engine: lualatex
     # Archival only. PDF/UA-2 is deliberately NOT declared: it requires tagged
