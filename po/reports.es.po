@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NeoIPC Surveillance Reports 0.9\n"
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-07-25 18:18+0200\n"
+"POT-Creation-Date: 2026-07-25 21:09+0200\n"
 "PO-Revision-Date: 2026-01-26 22:18+0100\n"
 "Last-Translator: Brar Piening <brar.piening@charite.de>\n"
 "Language-Team: none\n"
@@ -95,13 +95,25 @@ msgstr "día"
 msgid " "
 msgstr " "
 
-#. type: Hash Value: fig-alt fig-bw
+#. type: Hash Value: fig-alt fig-bw bnch
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Distribution of birth weight, shown as two panels: panel A a histogram with two smoothed density curves, one for this department and one for the reference data; panel B two horizontal box plots, one per dataset, each marking the first quartile, median and third quartile, with the mean shown as a diamond."
+msgstr ""
+
+#. type: Hash Value: fig-alt fig-bw no-bnch
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Distribution of birth weight, shown as two panels: panel A a histogram with a smoothed density curve; panel B a horizontal box plot marking the first quartile, median and third quartile, with the mean shown as a diamond."
 msgstr ""
 
-#. type: Hash Value: fig-alt fig-ga
+#. type: Hash Value: fig-alt fig-ga bnch
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Distribution of gestational age, shown as two panels: panel A a histogram with two smoothed density curves, one for this department and one for the reference data; panel B two horizontal box plots, one per dataset, each marking the first quartile, median and third quartile, with the mean shown as a diamond."
+msgstr ""
+
+#. type: Hash Value: fig-alt fig-ga no-bnch
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Distribution of gestational age, shown as two panels: panel A a histogram with a smoothed density curve; panel B a horizontal box plot marking the first quartile, median and third quartile, with the mean shown as a diamond."
@@ -3263,6 +3275,12 @@ msgstr "para el equipo de vigilancia de NeoIPC"
 #, no-wrap
 msgid "Berlin,"
 msgstr "Berlín,"
+
+#. type: Hash Value: signature_alt
+#: reports/Partner-Certificate/content/_sR.yaml:1
+#, no-wrap
+msgid "Handwritten signature"
+msgstr ""
 
 #. type: Hash Value: signature_offset
 #: reports/Partner-Certificate/content/_sR.yaml:1

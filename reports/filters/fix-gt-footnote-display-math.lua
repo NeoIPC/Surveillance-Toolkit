@@ -12,26 +12,39 @@
 -- and the typeset result is unchanged (verified by comparing the extracted
 -- text layout of both forms).
 
--- Only the LaTeX writer is affected; HTML and DOCX take the math as-is.
+-- Only the LaTeX writer reaches this construct. The HTML path is unaffected
+-- because MathJax/KaTeX consumes the delimiters in the rendered DOM; the DOCX
+-- path has its own, separate defect (the same footnotes reach Word as literal
+-- LaTeX because gt's text is never parsed into a Math node) which this filter
+-- does not address.
 if not FORMAT:match("latex") then
   return {}
 end
 
---- Insert `\leavevmode` before every `\\` that directly follows display math.
+--- Insert `\leavevmode` before a `\\` that directly follows display math.
 ---
---- Applied to raw LaTeX only, so document prose written by an author is never
---- touched — the pattern exists in gt's generated footnote blocks.
+--- Scoped to gt's footnote block rather than to raw LaTeX generally: a
+--- ```{=latex} fence written by an author is also a RawBlock, so matching on
+--- the construct alone would rewrite hand-written LaTeX too. gt wraps the
+--- footnote block in a `\begin{minipage}` immediately after the table, which is
+--- the anchor used here.
 ---
 --- @param text string raw LaTeX
 --- @return string, integer the patched LaTeX and the number of substitutions
 local function guard_display_math_breaks(text)
-  -- `%$%$` matches the closing `$$`; `%s*` covers a line break between the
-  -- math and the `\\` that gt may or may not emit.
-  return text:gsub("(%$%$)(%s*)(\\\\)", "%1%2\\leavevmode%3")
+  -- `%$%$` matches the closing `$$`; `[ \t]*` covers optional spacing before
+  -- the `\\`. Deliberately not `%s*`, which would span blank lines and let the
+  -- match jump from a formula into an unrelated later line.
+  return text:gsub("(%$%$)([ \t]*)(\\\\)", "%1%2\\leavevmode%3")
 end
 
 function RawBlock(el)
   if el.format ~= "latex" and el.format ~= "tex" then
+    return nil
+  end
+  -- gt emits its footnotes inside a minipage; without this the filter would
+  -- also rewrite author-written raw-LaTeX blocks.
+  if not el.text:find("\\begin{minipage}", 1, true) then
     return nil
   end
   local patched, count = guard_display_math_breaks(el.text)

@@ -9,6 +9,10 @@
 # Language: en
 
 signature_offset: 3.25
+# Text equivalent for the scanned signature image. Deliberately generic — a
+# signature's accessible name must not spell out the signatory's name.
+signature_alt: Handwritten signature
+
 content:
   - This project has received funding from the European Union’s Horizon 2020 research and%sinnovation programme under grant agreement No 965328.
   - In

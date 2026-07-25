@@ -60,7 +60,9 @@ cat(
   "\\begin{textblock*}{10cm}(2.5cm,26cm)",
   paste(sR$content[7], format(Sys.Date(), format = "%x")),
   "\\end{textblock*}",
-  paste0("![](", data$signatureImagePath, '){fig-align="right"}'),
+  paste0(
+    "![](", data$signatureImagePath,
+    '){fig-align="right" fig-alt="', sR$signature_alt, '"}'),
   sep = "\n"
 )
 ```

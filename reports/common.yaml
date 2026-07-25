@@ -33,8 +33,12 @@ fig-cap:
 # fig-alt: concise screen-reader / PDF-UA + axe descriptions of the two distribution figures. Describes the
 # chart type/structure only; the fig-cap above carries the own-vs-reference detail (a screen reader reads both).
 fig-alt:
-  fig-bw: "Distribution of birth weight, shown as two panels: panel A a histogram with a smoothed density curve; panel B a horizontal box plot marking the first quartile, median and third quartile, with the mean shown as a diamond."
-  fig-ga: "Distribution of gestational age, shown as two panels: panel A a histogram with a smoothed density curve; panel B a horizontal box plot marking the first quartile, median and third quartile, with the mean shown as a diamond."
+  fig-bw:
+    bnch: "Distribution of birth weight, shown as two panels: panel A a histogram with two smoothed density curves, one for this department and one for the reference data; panel B two horizontal box plots, one per dataset, each marking the first quartile, median and third quartile, with the mean shown as a diamond."
+    no-bnch: "Distribution of birth weight, shown as two panels: panel A a histogram with a smoothed density curve; panel B a horizontal box plot marking the first quartile, median and third quartile, with the mean shown as a diamond."
+  fig-ga:
+    bnch: "Distribution of gestational age, shown as two panels: panel A a histogram with two smoothed density curves, one for this department and one for the reference data; panel B two horizontal box plots, one per dataset, each marking the first quartile, median and third quartile, with the mean shown as a diamond."
+    no-bnch: "Distribution of gestational age, shown as two panels: panel A a histogram with a smoothed density curve; panel B a horizontal box plot marking the first quartile, median and third quartile, with the mean shown as a diamond."
 fig_sample_size: "(N = %s patients)"
 gramm_abbreviation: "g"
 header:
