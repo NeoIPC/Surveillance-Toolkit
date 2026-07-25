@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NeoIPC Surveillance Reports 0.9\n"
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-06-03 22:11+0200\n"
+"POT-Creation-Date: 2026-07-25 18:18+0200\n"
 "PO-Revision-Date: 2026-04-12 11:59+0200\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -93,6 +93,18 @@ msgstr ""
 #: reports/common.yaml:1
 #, no-wrap
 msgid " "
+msgstr ""
+
+#. type: Hash Value: fig-alt fig-bw
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Distribution of birth weight, shown as two panels: panel A a histogram with a smoothed density curve; panel B a horizontal box plot marking the first quartile, median and third quartile, with the mean shown as a diamond."
+msgstr ""
+
+#. type: Hash Value: fig-alt fig-ga
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Distribution of gestational age, shown as two panels: panel A a histogram with a smoothed density curve; panel B a horizontal box plot marking the first quartile, median and third quartile, with the mean shown as a diamond."
 msgstr ""
 
 #. type: Hash Value: fig-cap fig-bw
