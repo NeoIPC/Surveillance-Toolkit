@@ -60,7 +60,14 @@ cat(
   "\\begin{textblock*}{10cm}(2.5cm,26cm)",
   paste(sR$content[7], format(Sys.Date(), format = "%x")),
   "\\end{textblock*}",
-  paste0("![](", data$signatureImagePath, '){fig-align="right"}'),
+  # A double quote in the alt text would close `fig-alt="` early and make Pandoc
+  # abandon the whole attribute block — losing fig-align as well as the alt, and
+  # emitting the braces as literal text. Not reachable from the English source,
+  # but a translator writing a quoted term would hit it silently, so drop them.
+  paste0(
+    "![](", data$signatureImagePath,
+    '){fig-align="right" fig-alt="',
+    gsub('"', "", sR$signature_alt, fixed = TRUE), '"}'),
   sep = "\n"
 )
 ```

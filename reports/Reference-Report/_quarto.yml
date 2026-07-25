@@ -11,7 +11,9 @@ echo: false
 #keep-tex: true
 execute:
   error: true
-filters: ["../filters/pandoc-quotes.lua"]
+filters:
+  - "../filters/pandoc-quotes.lua"
+  - "../filters/fix-gt-footnote-display-math.lua"
 format:
   html:
     link-external-icon: true
@@ -20,6 +22,18 @@ format:
     template-partials:
       - before-body.tex
     documentclass: scrartcl
+    # LuaLaTeX pinned: `pdf-standard` reaches LaTeX as \DocumentMetadata, which
+    # needs LuaLaTeX. Pinning it here keeps every render path on one engine (the
+    # .NET service injects the same value on its own path).
+    pdf-engine: lualatex
+    # Archival only. PDF/UA-2 is deliberately NOT declared: it requires tagged
+    # structure, and KOMA-Script does not support LaTeX tagging — under
+    # `documentclass: scrartcl` it warns "Activated tagging detected but not
+    # supported!" and emits headings as ordinary paragraph text (no Sect /
+    # section / subsection structure elements), so declaring ua-2 would assert a
+    # conformance the file does not have. Re-declare it only once the reports
+    # move to a tagging-capable class.
+    pdf-standard: [a-4]
     mainfont: "EB Garamond"
     monofont: "EB Garamond"
     fontsize: 10pt
