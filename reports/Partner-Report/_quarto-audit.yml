@@ -1,0 +1,11 @@
+# Opt-in accessibility-audit profile. Run: `quarto render --profile audit` (composes with the language
+# profile group, e.g. `--profile audit,de` to audit the German render). Overlays axe-core onto the HTML so
+# WCAG 2.1 AA violations are emitted as JSON to the browser console — collectable headless in CI (e.g. a
+# Playwright audit run). Kept OUT of the default render so the ~500 KB axe bundle never ships in
+# partner-facing or service HTML (the NeoIPC-Reporting `minimal` HTML render never activates this profile).
+# Switch `output` to `document` for a visible in-page violation overlay when auditing interactively.
+format:
+  html:
+    axe:
+      standard: wcag21aa
+      output: json

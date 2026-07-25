@@ -13,6 +13,11 @@ format:
       - before-body.tex
       - title.tex
     documentclass: scrartcl
+    # LuaLaTeX pinned: required for PDF/UA tagging and matches the .NET service (which injects it); PDF/A-2b
+    # + PDF/UA-1 make Quarto emit \DocumentMetadata{tagging=on,…} — needs fig-alt on every figure and the
+    # decorative logos marked as artifacts to actually pass PDF/UA. (No html format → no axe; PDF/UA covers it.)
+    pdf-engine: lualatex
+    pdf-standard: [a-2b, ua-1]
     classoption:
       - footsepline=true
       - plainfootsepline=true
