@@ -2,21 +2,21 @@
 # Copyright (C) Charité – Universitätsmedizin Berlin
 # This file is distributed under the Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International license
 # Brar Piening <brar.piening@charite.de>, 2025.
-# Prefill add-on <noreply-addon-prefill@weblate.org>, 2025.
-#
+# Prefill add-on <noreply-addon-prefill@weblate.org>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: NeoIPC Surveillance Infectious Agents List 0.9\n"
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
 "POT-Creation-Date: 2026-06-22 09:58+0200\n"
-"PO-Revision-Date: 2026-04-11 11:09+0200\n"
-"Last-Translator: Brar Piening <brar.piening@charite.de>\n"
+"PO-Revision-Date: 2026-06-24 17:13+0000\n"
+"Last-Translator: Prefill add-on <noreply-addon-prefill@weblate.org>\n"
 "Language-Team: German <https://hosted.weblate.org/projects/neoipc/neoipc-infectious-agents/de/>\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2026.7.dev0\n"
 
 #. type: Hash Value: Hierarchies ConceptType
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
@@ -32,9 +32,9 @@ msgstr "Nicht aufgeführt"
 
 #. type: Hash Value: Hierarchies Name
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Unidentifiable"
-msgstr ""
+msgstr "Unidentifiable"
 
 #. type: Hash Value: Hierarchies Children Children Children Children ConceptType
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
@@ -23107,9 +23107,9 @@ msgstr "Hansenula polymorpha"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Synonyms Name
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Kloeckera"
-msgstr ""
+msgstr "Kloeckera"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Name
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
@@ -23127,9 +23127,9 @@ msgstr "Saccharomycetales"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Name
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Cyberlindnera fabianii"
-msgstr ""
+msgstr "Cyberlindnera fabianii"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Synonyms Name
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
@@ -23147,15 +23147,15 @@ msgstr "Pichia farinosa"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Synonyms Name
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Hansenula fabianii"
-msgstr ""
+msgstr "Hansenula fabianii"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Name
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Cyberlindnera jadinii"
-msgstr ""
+msgstr "Cyberlindnera jadinii"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Synonyms Name
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
@@ -23187,15 +23187,15 @@ msgstr "Streptococcus urinalis"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Name
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Cyberlindnera"
-msgstr ""
+msgstr "Cyberlindnera"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Name
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Starmera stellimalicola"
-msgstr ""
+msgstr "Starmera stellimalicola"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Synonyms Name
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
@@ -23206,9 +23206,9 @@ msgstr "Candida stellatoidea"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Name
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Starmera"
-msgstr ""
+msgstr "Starmera"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Name
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
@@ -24100,9 +24100,9 @@ msgstr "Bacillus centrosporus"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Name
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
-#, no-wrap
+#, fuzzy, no-wrap
 msgid "Rhizopus stolonifer"
-msgstr ""
+msgstr "Rhizopus stolonifer"
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Synonyms Name
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
