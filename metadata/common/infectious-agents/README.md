@@ -76,3 +76,5 @@ Walker PJ, Siddell SG, Lefkowitz EJ, Mushegian AR, Adriaenssens EM, Alfenas-Zerb
 ## Licensing
 
 The repository as a whole is MIT-licensed, but the upstream sources above impose stricter terms on this directory's contents. See [`LICENSE.md`](LICENSE.md) for the full reasoning and the resulting effective license.
+
+Those terms cover **this directory**. They do not extend to the gettext translation catalogue (`po/infectious_agents.*`), which carries only names, rank labels, controlled values and NeoIPC's own header/footer prose, and is published under CC BY 4.0 — see [`LICENSE.md`](LICENSE.md) § *Scope*.

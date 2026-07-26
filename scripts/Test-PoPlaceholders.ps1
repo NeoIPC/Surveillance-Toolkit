@@ -59,7 +59,10 @@
 [CmdletBinding()]
 param(
     [Parameter()]
-    [string]$Path = "po\*.po",
+    # Resolved from the script's own location, not $PWD, so the default works from any working
+    # directory and on any platform. A backslash-globbed default ("po\*.po") matched nothing on Linux,
+    # which combined with the no-match exit below made this silently validate zero files.
+    [string]$Path = (Join-Path (Split-Path -Parent $PSScriptRoot) 'po'),
     
     [Parameter()]
     [string[]]$Include,
@@ -665,7 +668,11 @@ if ($Include) {
 }
 else {
     if (Test-Path $Path -PathType Container) {
-        $filesToValidate = Get-ChildItem -Path $Path -Filter "*.po" -File | Select-Object -ExpandProperty FullName
+        # -Filter "*.po" also matches *.pot on Windows (legacy short-name matching), so check the
+        # extension explicitly — the .pot templates are not translations and have nothing to compare.
+        $filesToValidate = Get-ChildItem -Path $Path -Filter "*.po" -File |
+            Where-Object { $_.Extension -eq '.po' } |
+            Select-Object -ExpandProperty FullName
     }
     elseif (Test-Path $Path) {
         $filesToValidate = @((Get-Item $Path).FullName)
@@ -684,8 +691,10 @@ if ($Category -ne 'all') {
 }
 
 if ($filesToValidate.Count -eq 0) {
-    Write-Warning "No PO files found matching the specified criteria."
-    exit 0
+    # Fail rather than pass. As a CI gate, "validated nothing" reported as success is the worst
+    # outcome available: it looks green while checking no files at all.
+    Write-Error "No PO files found matching the specified criteria (Path: '$Path', Category: '$Category')."
+    exit 1
 }
 
 Write-Host "Validating $($filesToValidate.Count) PO file(s)..." -ForegroundColor Cyan

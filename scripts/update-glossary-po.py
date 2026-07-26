@@ -72,29 +72,41 @@ POT_METADATA = {
 }
 
 
-def _parse_comment_tokens(tokens):
-    """Parse comment tokens into (description_lines, flag_strings).
+def _comment_lines(tokens):
+    """Flatten comment tokens into their raw source lines, blank lines included."""
+    lines = []
+    for token in tokens:
+        lines.extend(token.value.splitlines())
+    return lines
+
+
+def _parse_comment_lines(lines):
+    """Parse raw comment lines into (description_lines, flag_strings).
 
     Lines matching ``# flags: ...`` are split into individual flag strings.
     All other non-empty comment lines become translator descriptions.
     """
     descriptions = []
     flags = []
-    for token in tokens:
-        for raw_line in token.value.splitlines():
-            text = raw_line.strip()
-            if not text or text == "#":
-                continue
-            if text.startswith("#"):
-                text = text[1:].strip()
-            if not text:
-                continue
-            m = FLAGS_LINE.match(text)
-            if m:
-                flags.extend(f.strip() for f in m.group(1).split(",") if f.strip())
-            else:
-                descriptions.append(text)
+    for raw_line in lines:
+        text = raw_line.strip()
+        if not text or text == "#":
+            continue
+        if text.startswith("#"):
+            text = text[1:].strip()
+        if not text:
+            continue
+        m = FLAGS_LINE.match(text)
+        if m:
+            flags.extend(f.strip() for f in m.group(1).split(",") if f.strip())
+        else:
+            descriptions.append(text)
     return descriptions, flags
+
+
+def _parse_comment_tokens(tokens):
+    """Parse comment tokens into (description_lines, flag_strings)."""
+    return _parse_comment_lines(_comment_lines(tokens))
 
 
 def get_key_comments(yaml_data, keys, index):
@@ -106,13 +118,22 @@ def get_key_comments(yaml_data, keys, index):
     (``yaml_data.ca.comment``) is used instead.
     """
     if index == 0:
-        # File-level comment (ca.comment[1]) is the YAML header.  It is NOT
-        # a per-entry description — only parse it for per-entry flags.
+        # The file-level comment block holds the YAML header AND, when present,
+        # the first key's own comment — ruamel does not separate them.  YAML
+        # convention puts a blank line between the two, so the comment group
+        # after the last blank line belongs to the key.  Without any blank line
+        # the block is unambiguously just the header, so only flags are taken.
         top = yaml_data.ca.comment
-        if top and top[1]:
-            _, flags = _parse_comment_tokens(top[1])
+        if not (top and top[1]):
+            return None, []
+        lines = _comment_lines(top[1])
+        if not any(not line.strip() for line in lines):
+            _, flags = _parse_comment_lines(lines)
             return None, flags
-        return None, []
+        group = []
+        for raw in lines:
+            group = [] if not raw.strip() else group + [raw]
+        return _parse_comment_lines(group)
 
     prev_key = keys[index - 1]
     ca = yaml_data.ca.items.get(prev_key)

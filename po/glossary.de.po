@@ -18,38 +18,48 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: glossary.yaml:34
+#. WHO AWaRe antibiotic category. The official WHO translation is normative:
+#. Spanish "Acceso", per the
+#. WHO AWaRe antibiotic book. Do not invent a local rendering.
+#: glossary.yaml:41
+#, terminology
+msgctxt "access"
+msgid "Access"
+msgstr ""
+
+#: glossary.yaml:42
 msgctxt "admission"
 msgid "admission"
 msgstr ""
 
-#: glossary.yaml:35
+#: glossary.yaml:43
 msgctxt "admission_sc"
 msgid "Admission"
 msgstr ""
 
-#: glossary.yaml:36
+#: glossary.yaml:44
 msgctxt "antibiotics"
 msgid "antibiotics"
 msgstr ""
 
-#: glossary.yaml:37
+#: glossary.yaml:45
 msgctxt "antibiotics_sc"
 msgid "Antibiotics"
 msgstr ""
 
 #. AWaRe is a WHO acronym (Access, Watch, Reserve) — not translatable
-#: glossary.yaml:39
+#: glossary.yaml:48
+#, read-only, terminology
 msgctxt "aware"
 msgid "AWaRe"
 msgstr ""
 
-#: glossary.yaml:40
+#: glossary.yaml:49
 msgctxt "cvc"
 msgid "CVC"
 msgstr ""
 
-#: glossary.yaml:41
+#: glossary.yaml:50
 msgctxt "h2020_funding_statement"
 msgid ""
 "This project has received funding from the European Union's Horizon 2020 "
@@ -59,160 +69,180 @@ msgstr ""
 "Horizont 2020 der Europäischen Union unter der Fördervereinbarung Nr. 965328"
 " gefördert."
 
-#: glossary.yaml:44
+#: glossary.yaml:53
 msgctxt "hap"
 msgid "HAP"
 msgstr ""
 
-#: glossary.yaml:45
+#: glossary.yaml:54
 msgctxt "human_milk"
 msgid "human milk"
 msgstr ""
 
-#: glossary.yaml:46
+#: glossary.yaml:55
 msgctxt "human_milk_sc"
 msgid "Human milk"
 msgstr ""
 
-#: glossary.yaml:47
+#: glossary.yaml:56
 msgctxt "inv"
 msgid "INV"
 msgstr ""
 
-#: glossary.yaml:48
+#: glossary.yaml:57
 msgctxt "kangaroo_care"
 msgid "kangaroo care"
 msgstr ""
 
-#: glossary.yaml:49
+#: glossary.yaml:58
 msgctxt "kangaroo_care_sc"
 msgid "Kangaroo care"
 msgstr ""
 
-#: glossary.yaml:50
+#: glossary.yaml:59
 #, ignore-same
 msgctxt "nec"
 msgid "NEC"
 msgstr "NEC"
 
-#: glossary.yaml:51
+#: glossary.yaml:60
 msgctxt "necrotising_enterocolitis"
 msgid "necrotising enterocolitis"
 msgstr ""
 
-#: glossary.yaml:52
+#: glossary.yaml:61
 msgctxt "necrotising_enterocolitis_sc"
 msgid "Necrotising enterocolitis"
 msgstr ""
 
-#: glossary.yaml:53
+#: glossary.yaml:62
 msgctxt "necrotising_enterocolitis_tc"
 msgid "Necrotising Enterocolitis"
 msgstr ""
 
-#: glossary.yaml:55
+#: glossary.yaml:64
 #, ignore-same
 msgctxt "neoipc_surveillance"
 msgid "NeoIPC Surveillance"
 msgstr "NeoIPC Surveillance"
 
-#: glossary.yaml:56
+#: glossary.yaml:65
 msgctxt "niv"
 msgid "NIV"
 msgstr ""
 
-#: glossary.yaml:57
+#: glossary.yaml:66
 msgctxt "pneumonia"
 msgid "pneumonia"
 msgstr ""
 
-#: glossary.yaml:58
+#: glossary.yaml:67
 msgctxt "pneumonia_sc"
 msgid "Pneumonia"
 msgstr ""
 
-#: glossary.yaml:59
+#: glossary.yaml:68
 msgctxt "primary_sepsis_bsi"
 msgid "primary sepsis/BSI"
 msgstr ""
 
-#: glossary.yaml:60
+#: glossary.yaml:69
 msgctxt "primary_sepsis_bsi_sc"
 msgid "Primary sepsis/BSI"
 msgstr ""
 
-#: glossary.yaml:61
+#: glossary.yaml:70
 msgctxt "primary_sepsis_bsi_tc"
 msgid "Primary Sepsis/BSI"
 msgstr ""
 
-#: glossary.yaml:62
+#: glossary.yaml:71
 msgctxt "probiotics"
 msgid "Probiotics"
 msgstr ""
 
-#: glossary.yaml:63
+#: glossary.yaml:72
 msgctxt "pvc"
 msgid "PVC"
 msgstr ""
 
-#: glossary.yaml:64
+#. WHO AWaRe antibiotic category. The official WHO translation is normative:
+#. Spanish "Reserva", per the
+#. WHO AWaRe antibiotic book.
+#: glossary.yaml:76
+#, terminology
+msgctxt "reserve"
+msgid "Reserve"
+msgstr ""
+
+#: glossary.yaml:77
 msgctxt "ssi"
 msgid "SSI"
 msgstr ""
 
-#: glossary.yaml:65
+#: glossary.yaml:78
 msgctxt "surgical_procedure"
 msgid "surgical procedure"
 msgstr ""
 
-#: glossary.yaml:66
+#: glossary.yaml:79
 msgctxt "surgical_procedure_sc"
 msgid "Surgical procedure"
 msgstr ""
 
-#: glossary.yaml:67
+#: glossary.yaml:80
 msgctxt "surgical_procedure_tc"
 msgid "Surgical Procedure"
 msgstr ""
 
-#: glossary.yaml:68
+#: glossary.yaml:81
 msgctxt "surgical_site_infection"
 msgid "surgical site infection"
 msgstr ""
 
-#: glossary.yaml:69
+#: glossary.yaml:82
 msgctxt "surgical_site_infection_sc"
 msgid "Surgical site infection"
 msgstr ""
 
-#: glossary.yaml:70
+#: glossary.yaml:83
 msgctxt "surgical_site_infection_tc"
 msgid "Surgical Site Infection"
 msgstr ""
 
-#: glossary.yaml:71
+#: glossary.yaml:84
 msgctxt "surveillance"
 msgid "surveillance"
 msgstr "Surveillance"
 
-#: glossary.yaml:72
+#: glossary.yaml:85
 #, ignore-same
 msgctxt "surveillance_sc"
 msgid "Surveillance"
 msgstr "Surveillance"
 
-#: glossary.yaml:73
+#: glossary.yaml:86
 msgctxt "surveillance_end"
 msgid "surveillance end"
 msgstr ""
 
-#: glossary.yaml:74
+#: glossary.yaml:87
 msgctxt "surveillance_end_sc"
 msgid "Surveillance end"
 msgstr ""
 
-#: glossary.yaml:75
+#: glossary.yaml:88
 msgctxt "surveillance_end_tc"
 msgid "Surveillance End"
+msgstr ""
+
+#. WHO AWaRe antibiotic category. The official WHO translation is normative:
+#. Spanish "Precaución", per
+#. the WHO AWaRe antibiotic book — NOT "Vigilancia", which this project uses
+#. for "surveillance" and
+#. would therefore collide, and not the bare verb "Ver".
+#: glossary.yaml:93
+#, terminology
+msgctxt "watch"
+msgid "Watch"
 msgstr ""

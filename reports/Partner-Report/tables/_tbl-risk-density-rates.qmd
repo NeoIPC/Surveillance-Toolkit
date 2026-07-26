@@ -88,9 +88,9 @@ if (!is.null(benchmark_data$usage_density_rate_table) &&
       "probiotic" ~ sR$probiotics,
       "kangaroo_care" ~ sR$kangaroo_care_sc,
       "ab" ~ sR$`tbl-risk-density-rates`$any_antibiotic,
-      "a" ~ sR$`tbl-risk-density-rates`$access,
-      "w" ~ sR$`tbl-risk-density-rates`$watch,
-      "r" ~ sR$`tbl-risk-density-rates`$reserve)) |>
+      "a" ~ sR$access,
+      "w" ~ sR$watch,
+      "r" ~ sR$reserve)) |>
     gt(rowname_col = "factor") |>
     sub_missing() |>
     gt::tab_options(
@@ -133,9 +133,9 @@ if (!is.null(benchmark_data$usage_density_rate_table) &&
       label = sR$antibiotics_sc,
       rows = tidyselect::any_of(c(
         sR$`tbl-risk-density-rates`$any_antibiotic,
-        sR$`tbl-risk-density-rates`$access,
-        sR$`tbl-risk-density-rates`$watch,
-        sR$`tbl-risk-density-rates`$reserve)),
+        sR$access,
+        sR$watch,
+        sR$reserve)),
       id = "grp_ab") |>
     row_group_order(groups = c("grp_vc", "grp_vs", "grp_ab", "grp_othr")) |>
     tab_spanner(
@@ -192,9 +192,9 @@ if (!is.null(benchmark_data$usage_density_rate_table) &&
           "[aware.essentialmeds.org](https://aware.essentialmeds.org/)")),
       locations = gt::cells_stub(
         rows = tidyselect::any_of(c(
-          sR$`tbl-risk-density-rates`$access,
-          sR$`tbl-risk-density-rates`$watch,
-          sR$`tbl-risk-density-rates`$reserve))),
+          sR$access,
+          sR$watch,
+          sR$reserve))),
       placement = "right"
     ) |>
     tab_footnote(

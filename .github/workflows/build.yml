@@ -17,6 +17,40 @@ permissions:
   contents: read
 
 jobs:
+    catalogue-ownership:
+        # The repository owns the .pot templates; Weblate owns the .po translations and is their only writer.
+        # Two writers on one .po is what conflicts every language of a catalogue at once — both sides rewrite
+        # adjacent header lines (POT-Creation-Date against PO-Revision-Date / Last-Translator / Language-Team /
+        # X-Generator) inside a single hunk git cannot auto-merge. A prose rule did not hold, so this enforces it.
+        if: github.event_name == 'pull_request'
+        runs-on: ubuntu-26.04
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                # Need the base commit to diff against; a shallow clone has neither side.
+                fetch-depth: 0
+
+            - name: Reject hand-written changes to Weblate-owned catalogues
+              # Weblate's own pull requests are the legitimate exception — it IS the owner.
+              if: github.event.pull_request.user.login != 'weblate'
+              shell: bash
+              run: |
+                base="origin/${{ github.base_ref }}"
+                # Weblate-owned: every catalogue registered as a Weblate component. po/glossary.*.po and
+                # scripts/po/*.po are deliberately absent — they are not on Weblate and remain repository-owned,
+                # so a hand edit there is legitimate. Add a catalogue here when it is registered on Weblate.
+                owned='po/reports\..*\.po|po/documentation\..*\.po|po/infectious_agents\..*\.po|po/antibiotics\..*\.po|po/metadata\..*\.po'
+                offending=$(git diff --name-only "$base"...HEAD | grep -E "^($owned)$" || true)
+                if [ -n "$offending" ]; then
+                  echo "::error::This pull request modifies Weblate-owned .po files. Weblate is their only writer."
+                  echo "$offending" | while read -r f; do echo "::error file=$f::$f is owned by Weblate — make the change there, not here."; done
+                  echo
+                  echo "Translations, corrections and terminology go through https://hosted.weblate.org/projects/neoipc/"
+                  echo "If a local pipeline run produced these, it is a bug: Invoke-Localization.ps1 -Update restores them."
+                  exit 1
+                fi
+                echo "No Weblate-owned catalogue was modified."
+
     build-docs:
         # Pinned to an explicit image for reproducibility; 26.04 provides the .NET 10 / PowerShell 7.6
         # runtime the NeoIPC-Tools module and data-dictionary generator require.
@@ -236,14 +270,17 @@ jobs:
               shell: bash
               # PERL_UNICODE=SDA must match scripts/Invoke-Localization.ps1: it decodes @ARGV/open() as UTF-8 so
               # po4a reads the .cfg's non-ASCII --copyright-holder correctly instead of double-encoding it into
-              # the regenerated .pot/.po headers. Keep the two po4a invocation sites in sync.
-              run: PERL_UNICODE=SDA PERLLIB=tools/po4a/lib tools/po4a/po4a --verbose po/infectious_agents.po4a.cfg
+              # the regenerated .pot header. Keep the two po4a invocation sites in sync.
+              # --no-update renders from the catalogues exactly as committed, writing neither .pot nor .po. Without
+              # it CI msgmerges its checkout and then builds from a merged state that is not what is on main, which
+              # hides drift instead of surfacing it. This is what Invoke-Localization.ps1 -Render does.
+              run: PERL_UNICODE=SDA PERLLIB=tools/po4a/lib tools/po4a/po4a --verbose --no-update po/infectious_agents.po4a.cfg
 
             - name: Run po4a (documentation)
               if: github.ref_type != 'tag' || steps.rel.outputs.product == 'protocol'
               shell: bash
-              # PERL_UNICODE=SDA: see the infectious-agents po4a step above (keep the two sites in sync).
-              run: PERL_UNICODE=SDA PERLLIB=tools/po4a/lib tools/po4a/po4a --verbose po/documentation.po4a.cfg
+              # PERL_UNICODE=SDA and --no-update: see the infectious-agents po4a step above (keep the two sites in sync).
+              run: PERL_UNICODE=SDA PERLLIB=tools/po4a/lib tools/po4a/po4a --verbose --no-update po/documentation.po4a.cfg
 
             - name: Build
               if: github.ref_type != 'tag' || steps.rel.outputs.product == 'protocol'
