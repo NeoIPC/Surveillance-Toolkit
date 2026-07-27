@@ -22,7 +22,7 @@ msgstr ""
 #, terminology
 msgctxt "access"
 msgid "Access"
-msgstr ""
+msgstr "Accesso"
 
 #: glossary.yaml:42
 msgctxt "admission"
@@ -166,7 +166,7 @@ msgstr ""
 #, terminology
 msgctxt "reserve"
 msgid "Reserve"
-msgstr ""
+msgstr "Riserva"
 
 #: glossary.yaml:77
 msgctxt "ssi"

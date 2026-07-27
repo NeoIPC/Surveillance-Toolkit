@@ -31,25 +31,51 @@ jobs:
                 fetch-depth: 0
 
             - name: Reject hand-written changes to Weblate-owned catalogues
-              # Weblate's own pull requests are the legitimate exception — it IS the owner.
-              if: github.event.pull_request.user.login != 'weblate'
               shell: bash
               run: |
                 base="origin/${{ github.base_ref }}"
+                # The pull request's own tip, NOT HEAD. On a pull_request event actions/checkout checks out
+                # refs/pull/N/merge, a synthetic merge commit GitHub creates and commits under its own identity.
+                # That commit touches a .po whenever both sides changed one, so a committer check against HEAD
+                # rejects pull requests whose every real commit is Weblate's.
+                head="${{ github.event.pull_request.head.sha }}"
                 # Weblate-owned: every catalogue registered as a Weblate component. po/glossary.*.po and
                 # scripts/po/*.po are deliberately absent — they are not on Weblate and remain repository-owned,
                 # so a hand edit there is legitimate. Add a catalogue here when it is registered on Weblate.
                 owned='po/reports\..*\.po|po/documentation\..*\.po|po/infectious_agents\..*\.po|po/antibiotics\..*\.po|po/metadata\..*\.po'
-                offending=$(git diff --name-only "$base"...HEAD | grep -E "^($owned)$" || true)
+                # Weblate commits everything it pushes under this one identity, whoever wrote the translation,
+                # so a per-commit committer check recognises Weblate's own output no matter who opened the pull
+                # request. Exempting by pull-request author instead would reject the drain pull requests we open
+                # ourselves from a weblate-* branch, whose commits are Weblate's throughout — and would wave
+                # through a stray hand-written commit riding along in a Weblate-authored one.
+                weblate='hosted@weblate.org'
+
+                # --no-renames matters: with rename detection on, git prints only a rename's DESTINATION, so
+                # `git mv po/reports.de.po elsewhere.po` plus a hand edit shows a path that cannot match the
+                # pattern and the file escapes the gate entirely. Splitting renames into delete+add surfaces
+                # the owned source path. Assigned separately from the grep so that a git failure cannot be
+                # swallowed by the `|| true` and read as "nothing offending".
+                if ! changed=$(git diff --name-only --no-renames "$base...$head"); then
+                  echo "::error::Could not diff $base...$head — the gate cannot vouch for this pull request."
+                  exit 1
+                fi
+
+                offending=""
+                for f in $(printf '%s\n' "$changed" | grep -E "^($owned)$" || true); do
+                  # Not `grep -q`: it exits on the first hit, and SIGPIPE plus `pipefail` would then report
+                  # the pipeline as failed, which reads here as "no offence found" and silently passes.
+                  others=$(git log --format='%ce' "$base".."$head" -- "$f" | grep -vFx "$weblate" || true)
+                  if [ -n "$others" ]; then offending="${offending}${f}"$'\n'; fi
+                done
                 if [ -n "$offending" ]; then
                   echo "::error::This pull request modifies Weblate-owned .po files. Weblate is their only writer."
-                  echo "$offending" | while read -r f; do echo "::error file=$f::$f is owned by Weblate — make the change there, not here."; done
+                  echo "$offending" | while read -r f; do [ -n "$f" ] && echo "::error file=$f::$f is owned by Weblate — make the change there, not here."; done
                   echo
                   echo "Translations, corrections and terminology go through https://hosted.weblate.org/projects/neoipc/"
                   echo "If a local pipeline run produced these, it is a bug: Invoke-Localization.ps1 -Update restores them."
                   exit 1
                 fi
-                echo "No Weblate-owned catalogue was modified."
+                echo "No Weblate-owned catalogue was modified outside Weblate."
 
     build-docs:
         # Pinned to an explicit image for reproducibility; 26.04 provides the .NET 10 / PowerShell 7.6

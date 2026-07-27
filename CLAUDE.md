@@ -163,10 +163,11 @@ Translatable content is managed via [po4a](https://po4a.org/) with Weblate for c
 ### How it works
 
 1. Source files (QMD, Rmd, YAML, LaTeX) → po4a extracts → `.pot` template
-2. Translators work on `.po` files per language (via Weblate or directly)
-3. po4a generates localized files (e.g., `Report.de.qmd`, `content.de/_sR.yaml`)
+2. The `.pot` is merged to `main`; Weblate's *msgmerge* add-on brings each `.po` up to it
+3. Translators work in **Weblate**, which commits the `.po` back
+4. po4a generates localized files (e.g., `Report.de.qmd`, `content.de/_sR.yaml`) from the committed `.po`
 
-**Translations live in `.po` files, not in YAML.** The localized YAML files (`content.de/_sR.yaml`, `common.de.yaml`, etc.) are *generated* by po4a from `.po` files. Do not edit them directly — edit the `.po` files or use Weblate. If you create a localized YAML file manually, you must import its strings into the `.po` file using `po4a-gettextize`, otherwise po4a will silently remove the translations on the next run.
+**Translations live in `.po` files, not in YAML.** The localized YAML files (`content.de/_sR.yaml`, `common.de.yaml`, etc.) are *generated* by po4a from `.po` files — do not edit them directly. To change a translation, change it in Weblate; the catalogue-ownership guardrail above says which `.po` files that applies to, and `po/glossary.*.po` + `scripts/po/*.po` are the two that remain repository-owned and may still be edited by hand.
 
 ### po4a setup
 
@@ -219,7 +220,7 @@ af, de, el, es, et, fr, it, ne, tr (9 languages)
 | `Invoke-Localization.ps1` | Unified localization wrapper with tab completion. `-Update` runs the full pipeline (fix layers → YAML keys → po4a → glossary). `-Test` runs read-only validation. See `-Config`, `-Force`, `-DryRun` switches. |
 | `Update-Po4aYamlKeys.ps1` | Auto-extract YAML keys for po4a config (run after changing YAML structure) |
 | `Test-PoPlaceholders.ps1` | Validate placeholder consistency between source and translations |
-| `update-glossary-po.py` | Convert `glossary.yaml` to/from monolingual gettext PO (replaces po4a for glossary). Requires `ruamel.yaml` and `polib`. Run after editing `glossary.yaml` to regenerate `.pot` and merge `.po` files. Use `--generate-yaml` to produce localized `glossary.<lang>.yaml`. |
+| `update-glossary-po.py` | Convert `glossary.yaml` to/from monolingual gettext PO (replaces po4a for glossary). Requires `ruamel.yaml` and `polib`. Run after editing `glossary.yaml` to regenerate `po/glossary.pot`; it writes nothing else, and reads `po/glossary.<lang>.po` only for `--generate-yaml`, which produces the localized `glossary.<lang>.yaml`. |
 
 ### Importing existing translations
 
@@ -239,11 +240,14 @@ When adding a new file to po4a that already has manual translations:
    ```bash
    sed -i 's/^#, fuzzy, /#, /; s/^#, fuzzy$//' /tmp/<report>_<lang>.po
    ```
-6. **Merge with new translations first** (priority order matters). `msgcat --use-first` keeps the first file's translation for duplicate msgids. Put the new translations first so they override any empty entries in the existing `.po`:
+6. **Merge into a temporary file, never over the committed catalogue.** `msgcat --use-first` keeps the first file's translation for duplicate msgids, so put the imported translations first to override empty entries:
    ```bash
-   msgcat --use-first /tmp/<report>_<lang>.po po/reports.<lang>.po -o po/reports.<lang>.po
+   msgcat --use-first /tmp/<report>_<lang>.po po/reports.<lang>.po -o /tmp/<report>_<lang>_merged.po
    ```
-7. Verify with a round-trip: `PERLLIB=tools/po4a/lib tools/po4a/po4a <config-file>` — check that the generated files match the backup.
+7. **Deliver the result according to who owns the catalogue.**
+   - **Weblate-owned** (`reports`, `documentation`, `infectious_agents`, `antibiotics`, `metadata`): upload it — `wlc upload neoipc/<component>/<lang> --input /tmp/<report>_<lang>_merged.po`. Do **not** commit it; the catalogue-ownership guardrail and the CI gate both reject that, and Weblate would overwrite it anyway. Choose the upload method deliberately: `--method replace` **silently ignores entries whose msgstr is empty**, so it cannot be used to clear a translation, only to add or overwrite non-empty ones.
+   - **Repository-owned** (`po/glossary.*.po`, `scripts/po/*.po`): move the merged file into place and commit it.
+8. Verify with a round-trip: `PERLLIB=tools/po4a/lib tools/po4a/po4a <config-file>` — check that the generated files match the backup.
 
 **Important**: Run steps 4–6 in a **single WSL session** (one `wsl -e bash -c '...'` invocation). Temp files in `/tmp` do not persist across separate WSL invocations on Windows.
 

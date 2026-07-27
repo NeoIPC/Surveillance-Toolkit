@@ -52,7 +52,7 @@
     - infectious_agents:  po/infectious_agents.po4a.cfg
     - scripts:            scripts/po4a.cfg
     - glossary:           glossary via update-glossary-po.py
-    - antibiotics:        po/antibiotics.pot + .po via NeoIPC-Tools Export-NeoIPCAntibioticTranslation
+    - antibiotics:        po/antibiotics.pot via NeoIPC-Tools Export-NeoIPCAntibioticTranslation
     - all:                all of the above
 
 .PARAMETER Force
@@ -147,6 +147,13 @@ $configMap = @{
     scripts            = 'scripts/po4a.cfg'
 }
 $po4aConfigs = @('reports', 'documentation', 'infectious_agents', 'scripts')
+
+# Which of those catalogues Weblate owns. `scripts` is deliberately absent: scripts/po/*.po is not
+# registered as a Weblate component, so it stays repository-owned and this pipeline is the only thing
+# that keeps it current. Guarding it as Weblate's would freeze it at HEAD — po4a's msgmerge of a new
+# message key would be discarded, and no other writer exists to add it — and would abort the run on a
+# legitimate hand edit. po/glossary.*.po is likewise repository-owned, and is not a po4a config.
+$weblateOwnedPo4aConfigs = @('reports', 'documentation', 'infectious_agents')
 
 # Each product po4a config derives its --package-version from that product's VERSION file (the single
 # source of truth), passed to po4a on the command line so the version lives in exactly one place. scripts/
@@ -335,15 +342,32 @@ function Get-Po4aCatalogPath {
     [pscustomobject]@{ Pot = $potRel; Po = $po }
 }
 
+function Get-WeblateOwnedPoPath {
+    # The Weblate-owned catalogues a step is about to overwrite, repo-relative. Two sources, because
+    # the generators that write them are of two kinds: the po4a configs declare theirs in the .cfg,
+    # while the antibiotic catalogue is produced by a NeoIPC-Tools cmdlet with no such declaration.
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory, ParameterSetName = 'Config')][string]$ConfigPath,
+        [Parameter(Mandatory, ParameterSetName = 'Glob')][string]$Glob
+    )
+
+    if ($PSCmdlet.ParameterSetName -eq 'Config') {
+        return @((Get-Po4aCatalogPath -ConfigPath $ConfigPath).Po.Values)
+    }
+    @(Get-ChildItem -Path (Join-Path $repoRoot $Glob) -File -ErrorAction SilentlyContinue |
+        ForEach-Object { [System.IO.Path]::GetRelativePath($repoRoot, $_.FullName) -replace '\\', '/' })
+}
+
 function Assert-CleanWeblatePo {
-    # Weblate owns the .po files, so the pipeline restores them after po4a writes them (see
+    # Weblate owns these .po files, so the pipeline restores them after a generator writes them (see
     # Restore-WeblateOwnedPo). That restore is a `git restore`, which would silently destroy any
     # uncommitted work already in the tree — so refuse to start when there is some. There is
     # deliberately no override switch: -Force already means --keep 0, and losing a translator's
     # in-progress edit is not a thing to make convenient.
-    param([Parameter(Mandatory)][string]$ConfigPath)
+    param([Parameter(Mandatory)][string[]]$RelativePath)
 
-    $paths = (Get-Po4aCatalogPath -ConfigPath $ConfigPath).Po.Values
+    $paths = $RelativePath
     if (-not $paths) { return }
 
     $dirty = @(git -C $repoRoot status --porcelain -- @paths | Where-Object { $_ })
@@ -355,18 +379,37 @@ function Assert-CleanWeblatePo {
 }
 
 function Restore-WeblateOwnedPo {
-    # po4a always msgmerges the .po files (its own docs: "The PO files are always re-generated based
-    # on the POT with msgmerge -U"), and there is no flag that writes the .pot without them. Weblate
-    # is their only writer, so restore them from HEAD once po4a has produced the localized artifacts.
-    # This is what keeps the repo out of the header hunk that Weblate also writes.
-    param([Parameter(Mandatory)][string]$ConfigPath)
+    # Every generator here rewrites the .po files as a side effect of producing its .pot: po4a because
+    # "The PO files are always re-generated based on the POT with msgmerge -U" (its own docs) with no
+    # flag to suppress only that, and Export-NeoIPCAntibioticTranslation because it msgmerges each
+    # existing locale in code. Weblate is their only writer, so restore them from HEAD once the
+    # generator has produced the localized artifacts. This is what keeps the repository out of the
+    # header hunk Weblate also writes.
+    param([Parameter(Mandatory)][string[]]$RelativePath)
 
-    $paths = @((Get-Po4aCatalogPath -ConfigPath $ConfigPath).Po.Values | Where-Object { Test-Path (Join-Path $repoRoot $_) })
-    if (-not $paths) { return }
+    $declared = @($RelativePath)
+    if (-not $declared) { return }
 
-    git -C $repoRoot restore --source=HEAD --worktree -- @paths
-    if ($LASTEXITCODE -ne 0) {
-        throw "Failed to restore Weblate-owned .po files after po4a (git restore exit code $LASTEXITCODE)."
+    # `git restore` is atomic over its pathspec: a single path HEAD does not carry aborts the whole
+    # command, so every other catalogue would be left exactly as po4a's msgmerge rewrote it — the
+    # two-writer state this exists to prevent. Adding a language to [po4a_langs] does precisely that,
+    # because po4a msginits a catalogue for it that HEAD has never seen. So partition first.
+    $inHead = @(git -C $repoRoot ls-tree -r --name-only HEAD -- @declared)
+    $tracked = @($declared | Where-Object { $inHead -contains $_ })
+    $created = @($declared | Where-Object { $inHead -notcontains $_ -and (Test-Path (Join-Path $repoRoot $_)) })
+
+    if ($tracked) {
+        git -C $repoRoot restore --source=HEAD --worktree -- @tracked
+        if ($LASTEXITCODE -ne 0) {
+            throw "Failed to restore Weblate-owned .po files after po4a (git restore exit code $LASTEXITCODE)."
+        }
+    }
+
+    # A catalogue po4a created for a language HEAD does not carry is the repository authoring a .po,
+    # which is Weblate's job — it adds a language from the .pot. Delete it rather than commit it.
+    foreach ($rel in $created) {
+        Remove-Item -LiteralPath (Join-Path $repoRoot $rel) -Force
+        Write-Host "  removed $rel (po4a created it; Weblate adds new languages from the .pot)"
     }
 }
 
@@ -466,7 +509,9 @@ function Invoke-AntibioticTranslation {
         Write-Host "Updating antibiotic translation catalogue (po/antibiotics.pot + .po)"
         Import-Module -Name $module -Force -Verbose:$false
         $result = Export-NeoIPCAntibioticTranslation
-        Write-Host ("  antibiotics.pot: {0} strings; updated locales: {1}" -f $result.StringCount, (($result.UpdatedLocales -join ', ')))
+        # Deliberately not reporting UpdatedLocales: the exporter does rewrite each locale, but the
+        # caller restores them, so naming them here would tell the reader the opposite of what lands.
+        Write-Host ("  antibiotics.pot: {0} strings" -f $result.StringCount)
     }
 }
 
@@ -520,7 +565,10 @@ if ($Update) {
         foreach ($target in $targets) {
             $cfgPath = $configMap[$target]
             $fullCfgPath = Join-Path $repoRoot $cfgPath
-            if (-not $DryRun) { Assert-CleanWeblatePo -ConfigPath $fullCfgPath }
+            $ownedPo = if ($weblateOwnedPo4aConfigs -contains $target) {
+                Get-WeblateOwnedPoPath -ConfigPath $fullCfgPath
+            } else { @() }
+            if ($ownedPo -and -not $DryRun) { Assert-CleanWeblatePo -RelativePath $ownedPo }
             Invoke-UpdateYamlKeys -ConfigPath $cfgPath
             $pkgVer = if ($versionFileMap.ContainsKey($target)) {
                 (Get-Content -LiteralPath (Join-Path $repoRoot $versionFileMap[$target]) -Raw).Trim()
@@ -528,7 +576,7 @@ if ($Update) {
             try {
                 Invoke-Po4a -ConfigPath $cfgPath -PackageVersion $pkgVer
             } finally {
-                if (-not $DryRun) { Restore-WeblateOwnedPo -ConfigPath $fullCfgPath }
+                if ($ownedPo -and -not $DryRun) { Restore-WeblateOwnedPo -RelativePath $ownedPo }
             }
             if (-not $DryRun -and $catalogHeaderMap.ContainsKey($target)) {
                 $hdr = $catalogHeaderMap[$target]
@@ -542,9 +590,19 @@ if ($Update) {
         Invoke-UpdateGlossary
     }
 
-    # Step 5: Update the antibiotic translation catalogue (NeoIPC-Tools, not po4a)
+    # Step 5: Update the antibiotic translation catalogue (NeoIPC-Tools, not po4a). Its exporter
+    # msgmerges every existing po/antibiotics.<locale>.po in code, and those are Weblate-owned, so the
+    # same clean-tree assertion and restore apply here as to po4a. Without them a plain -Update leaves
+    # Weblate's header fields overwritten with the exporter's placeholders, and the developer who then
+    # commits is rejected by the catalogue-ownership gate.
     if ($runAntibiotics) {
-        Invoke-AntibioticTranslation
+        $antibioticPo = if ($DryRun) { @() } else { Get-WeblateOwnedPoPath -Glob 'po/antibiotics.*.po' }
+        if ($antibioticPo) { Assert-CleanWeblatePo -RelativePath $antibioticPo }
+        try {
+            Invoke-AntibioticTranslation
+        } finally {
+            if ($antibioticPo) { Restore-WeblateOwnedPo -RelativePath $antibioticPo }
+        }
     }
 
     Write-Host "`nLocalization update complete."
