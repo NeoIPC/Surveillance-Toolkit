@@ -1,3 +1,6 @@
+#!/usr/bin/env pwsh
+#Requires -Version 7.6
+
 <#
 .SYNOPSIS
     Validates that placeholders in PO file translations haven't been replaced with constant values.
@@ -807,7 +810,10 @@ if (-not $Quiet) {
 
 # Write output file if specified
 if ($OutputFile) {
-    $output.ToString() | Out-File -FilePath $OutputFile -Encoding UTF8
+    # Out-File appends [Environment]::NewLine after the string, producing a mixed file: LF inside the
+    # accumulated report text and a lone CRLF at the end. Write the string verbatim instead.
+    [System.IO.File]::WriteAllText(
+        $OutputFile, ($output.ToString() -replace "`r`n", "`n"), [System.Text.UTF8Encoding]::new($false))
     Write-Host
     Write-Host "Results written to: $OutputFile" -ForegroundColor Cyan
 }

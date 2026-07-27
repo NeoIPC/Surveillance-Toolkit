@@ -1,12 +1,25 @@
-# Pester 5 tests for the NeoIPC metadata pipeline (Private/Metadata.ps1 + Private/MetadataTypeMaps.ps1).
-# Self-contained: every fixture is synthetic, so the suite runs against a standalone Surveillance-Toolkit
-# checkout with no DHIS2 metadata.json present. The full-metadata.json round-trip is a workspace-level
-# gate (Test-NeoIPCMetadataRoundTrip against repos/neoipc-dhis2), intentionally not reproduced here.
-#
-# Run:  Invoke-Pester -Path scripts/modules/NeoIPC-Tools/Tests
-#
-# Internals are exercised via InModuleScope so the private (non-exported) helpers are in scope. The
-# Import-Module at file top runs during Pester's discovery phase, which InModuleScope requires.
+#Requires -Version 7.6
+
+<#
+.SYNOPSIS
+    Pester tests for the NeoIPC metadata pipeline.
+
+.DESCRIPTION
+    Covers Private/Metadata.ps1 and Private/MetadataTypeMaps.ps1 — row/object conversion, sharing
+    profiles, package assembly, dependency closure, expression externalisation and canonicalisation, and
+    the CSV file I/O contract.
+
+    Self-contained: every fixture is synthetic, so the suite runs against a standalone Surveillance-Toolkit
+    checkout with no deployed metadata snapshot present. The round-trip against the full production export
+    is a workspace-level gate instead, and is intentionally not reproduced here.
+
+    Internals are reached through InModuleScope so the private, non-exported helpers are in scope. The
+    Import-Module at file top runs during Pester's discovery phase, which InModuleScope requires — a
+    BeforeAll import would be too late.
+
+.EXAMPLE
+    Invoke-Pester -Path scripts/modules/NeoIPC-Tools/Tests/Metadata.Tests.ps1
+#>
 
 $ErrorActionPreference = 'Stop'
 Import-Module (Join-Path $PSScriptRoot '..') -Force
@@ -14,6 +27,12 @@ Import-Module (Join-Path $PSScriptRoot '..') -Force
 InModuleScope 'NeoIPC-Tools' {
 
     BeforeAll {
+        # Set-TestFileContent — writes fixtures with LF endings on every platform, so a fixture means
+        # the same thing on a Windows developer machine and on the Linux CI runner. Dot-sourced here
+        # rather than defined at script scope or at the top of InModuleScope: neither of those is
+        # visible during Pester's run phase (see the header of TestFileHelpers.ps1).
+        . (Join-Path $PSScriptRoot '..' '..' 'TestFileHelpers.ps1')
+
         # Round-trip one object through row<->object and report semantic equality the way the comparator
         # sees it (normalized + canonical). Returns the row and rebuilt object too, for cell-level asserts.
         function Get-RowRoundTrip {
@@ -251,7 +270,7 @@ InModuleScope 'NeoIPC-Tools' {
             $tmp = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-shc-' + [System.IO.Path]::GetRandomFileName() + '.yaml')
             $saved = $script:NeoIPCSharingProfiles
             try {
-                @('PUBLIC_RW:', '  public: "rw------"', 'ALSO_RW:', '  public: "rw------"') | Set-Content -LiteralPath $tmp -Encoding utf8
+                @('PUBLIC_RW:', '  public: "rw------"', 'ALSO_RW:', '  public: "rw------"') | Set-TestFileContent -LiteralPath $tmp -Encoding utf8
                 { Import-NeoIPCSharingProfile -Path $tmp } | Should -Throw '*resolve to the same sharing object*'
             }
             finally { $script:NeoIPCSharingProfiles = $saved; Remove-Item -LiteralPath $tmp -ErrorAction SilentlyContinue }
@@ -645,6 +664,20 @@ InModuleScope 'NeoIPC-Tools' {
             $back[2]['name'] | Should -BeExactly ' leading space'
             $back[2]['description'] | Should -BeExactly ''
         }
+        It 'normalizes CRLF *inside* a cell, so the file cannot come out mixed' {
+            # Pinning the row terminator is not enough: a multi-line DHIS2 description entered on Windows
+            # arrives as CRLF and lands inside the quoted field, giving LF row endings with CRLF within a
+            # cell — a mixed file, which is the state this project treats as corrupt. The whole-file
+            # assertion below would not catch it, because it only inspects a row with no embedded newline.
+            $csv = Join-Path $TestDrive 'mixed.csv'
+            Write-NeoIPCMetadataCsv -Path $csv -Columns @('id', 'description') -Rows @(
+                [ordered]@{ id = 'm1'; description = "line1`r`nline2`r`nline3" })
+            $bytes = [System.IO.File]::ReadAllBytes($csv)
+            ($bytes -contains 0x0D) | Should -BeFalse   # not one CR anywhere, embedded or terminating
+            # @() is load-bearing: with a single data row the reader returns a bare hashtable, so [0] would
+            # be a KEY lookup for 0 and silently yield $null rather than the first row.
+            @(Read-NeoIPCMetadataCsv -Path $csv)[0]['description'] | Should -BeExactly "line1`nline2`nline3"
+        }
         It 'writes UTF-8 with no BOM and LF line endings' {
             $csv = Join-Path $TestDrive 'enc.csv'
             Write-NeoIPCMetadataCsv -Path $csv -Columns @('id', 'name') -Rows @([ordered]@{ id = 'x'; name = 'y' })
@@ -652,6 +685,48 @@ InModuleScope 'NeoIPC-Tools' {
             ($bytes[0] -eq 0xEF -and $bytes[1] -eq 0xBB -and $bytes[2] -eq 0xBF) | Should -BeFalse
             ($bytes -contains 0x0D) | Should -BeFalse   # no CR
             ($bytes -contains 0x0A) | Should -BeTrue    # has LF
+        }
+
+        # The two cases below cover the READ side against non-conforming input. They exist because the
+        # fixture writers in this suite are pinned to LF: before that, a Windows developer run happened
+        # to feed CRLF fixtures to every reader while CI fed LF, so the CRLF path was covered by
+        # accident and would have vanished silently the first time anyone normalized the fixtures.
+        # These construct the bytes deliberately with WriteAllText rather than via Set-TestFileContent,
+        # which normalizes — writing them through the helper would defeat the point.
+        It 'reads a CRLF-terminated CSV identically to the LF form' {
+            $body = "id,name,note`na1,plain,x`na2,`"has, comma`",y`n"
+            $lfPath   = Join-Path $TestDrive 'read-lf.csv'
+            $crlfPath = Join-Path $TestDrive 'read-crlf.csv'
+            [System.IO.File]::WriteAllText($lfPath, $body, [System.Text.UTF8Encoding]::new($false))
+            [System.IO.File]::WriteAllText($crlfPath, ($body -replace "`n", "`r`n"), [System.Text.UTF8Encoding]::new($false))
+
+            $fromLf   = @(Read-NeoIPCMetadataCsv -Path $lfPath)
+            $fromCrlf = @(Read-NeoIPCMetadataCsv -Path $crlfPath)
+
+            $fromCrlf.Count | Should -Be $fromLf.Count
+            ($fromCrlf | ConvertTo-Json -Depth 5) | Should -BeExactly ($fromLf | ConvertTo-Json -Depth 5)
+            $fromCrlf[1]['name'] | Should -BeExactly 'has, comma'
+        }
+
+        It 'reads a BOM-prefixed CSV identically, leaving the first column name unmangled' {
+            # Read-NeoIPCMetadataCsv's comment claims Import-Csv is BOM-transparent; assert it, because
+            # if it were not, the BOM would land inside the first header cell and every lookup by that
+            # column name would silently return nothing.
+            $body = "id,name`na1,plain`na2,second`n"
+            $plainPath = Join-Path $TestDrive 'read-plain.csv'
+            $bomPath   = Join-Path $TestDrive 'read-bom.csv'
+            [System.IO.File]::WriteAllText($plainPath, $body, [System.Text.UTF8Encoding]::new($false))
+            [System.IO.File]::WriteAllText($bomPath, $body, [System.Text.UTF8Encoding]::new($true))
+
+            # @() because a single-row read unrolls to a bare row object rather than a one-element list,
+            # and indexing that by [0] would look up the key "0" and quietly yield $null.
+            $fromBom   = @(Read-NeoIPCMetadataCsv -Path $bomPath)
+            $fromPlain = @(Read-NeoIPCMetadataCsv -Path $plainPath)
+
+            ($fromBom | ConvertTo-Json -Depth 5) | Should -BeExactly ($fromPlain | ConvertTo-Json -Depth 5)
+            $fromBom[0]['id'] | Should -BeExactly 'a1'   # lookup by the first column name still resolves
+            $firstKey = @($fromBom[0].Keys | Select-Object -First 1)[0]
+            $firstKey | Should -BeExactly 'id'
         }
     }
 
@@ -726,6 +801,34 @@ InModuleScope 'NeoIPC-Tools' {
             Read-NeoIPCMetadataExpressionFiles -Rows $rows -Directory $script:exprDir
             @($rows['programRules'])[1]['condition'] | Should -BeExactly $origCond
             @($rows['programRuleActions'])[0]['data'] | Should -BeExactly $origData
+        }
+        It 'writes conforming text: no trailing whitespace, exactly one closing newline' {
+            # Pins the convention the 707 committed expression files were normalized to. Without this the
+            # generator could quietly revert to writing verbatim bytes, and the only symptom would be an
+            # .editorconfig carve-out reappearing to accommodate it.
+            $rows = New-ExprRows
+            @($rows['programRules'])[0]['condition'] = "d2:hasValue(#{x})   `t "   # trailing space + tab
+            Write-NeoIPCMetadataExpressionFiles -Rows $rows -Directory $script:exprDir
+            $file = Join-Path $script:exprDir 'expressions/programRules/NEOIPC_BSI_AGENT_1_SET_3GCR/condition.dhis2'
+            $bytes = [System.IO.File]::ReadAllText($file)
+            $bytes | Should -BeExactly "d2:hasValue(#{x})`n"
+            $bytes | Should -Not -Match '[ \t]\n'          # no whitespace before the newline
+            $bytes | Should -Not -Match "`n`n$"            # exactly one, not a blank line
+        }
+        It 'round-trip is idempotent: trailing whitespace is normalized away, everything else survives' {
+            # The safety argument for trimming rests on these preservation properties, so they are asserted
+            # rather than asserted-about: leading whitespace and interior newlines must be untouched, and a
+            # second write+read must not drift further.
+            $rows = New-ExprRows
+            @($rows['programRules'])[1]['condition'] = "  #{a}`n&& #{b}  `n"   # leading ws, interior LF, trailing ws
+            Write-NeoIPCMetadataExpressionFiles -Rows $rows -Directory $script:exprDir
+            Read-NeoIPCMetadataExpressionFiles -Rows $rows -Directory $script:exprDir
+            $once = @($rows['programRules'])[1]['condition']
+            $once | Should -BeExactly "  #{a}`n&& #{b}"    # leading kept, interior kept, trailing gone
+
+            Write-NeoIPCMetadataExpressionFiles -Rows $rows -Directory $script:exprDir
+            Read-NeoIPCMetadataExpressionFiles -Rows $rows -Directory $script:exprDir
+            @($rows['programRules'])[1]['condition'] | Should -BeExactly $once   # second pass changes nothing
         }
         It 'read fails loud on a referenced-but-missing expression file' {
             $rows = [ordered]@{ programRules = @([ordered]@{ id = 'Rx'; condition = 'expressions/programRules/ghost/condition.dhis2' }) }
@@ -1549,10 +1652,10 @@ InModuleScope 'NeoIPC-Tools' {
             $script:ouPlay = Join-Path $TestDrive 'play-ou.csv'
             @('id,code,name,shortName,openingDate,closedDate,level,parent,image,sharing',
               'ouROOT00001,ROOT,Root,Root,2023-01-01,,1,,,',
-              'ouCtryA0001,CtryA,Country A,CtryA,2023-01-01,,2,ouROOT00001,,') | Set-Content -LiteralPath $script:ouCommon -Encoding utf8
+              'ouCtryA0001,CtryA,Country A,CtryA,2023-01-01,,2,ouROOT00001,,') | Set-TestFileContent -LiteralPath $script:ouCommon -Encoding utf8
             @('id,code,name,shortName,openingDate,closedDate,level,parent,image,sharing',
               'ouCtryAH001,CtryA_TEST,Hospital A,Hosp A,2023-01-01,,3,ouCtryA0001,,',
-              'ouCtryAHD01,CtryA_TEST_TEST,Dept A,Dept A,2023-01-01,,4,ouCtryAH001,,') | Set-Content -LiteralPath $script:ouPlay -Encoding utf8
+              'ouCtryAHD01,CtryA_TEST_TEST,Dept A,Dept A,2023-01-01,,4,ouCtryAH001,,') | Set-TestFileContent -LiteralPath $script:ouPlay -Encoding utf8
         }
         It 'reads UID-keyed CSVs across files, preserving committed ids, level, and parent refs' {
             $ous = Read-NeoIPCAuthoredOrgUnit -Path $script:ouCommon, $script:ouPlay
@@ -1580,35 +1683,35 @@ InModuleScope 'NeoIPC-Tools' {
         It 'throws on a duplicate org-unit code across files (would clobber membership / assignment resolution)' {
             $a = Join-Path $TestDrive 'dupcode-a.csv'
             $b = Join-Path $TestDrive 'dupcode-b.csv'
-            @('id,code,name,shortName,openingDate,closedDate,level,parent,image,sharing', 'ouDupAAAAA1,DUP,Dup A,Dup A,2023-01-01,,2,,,') | Set-Content -LiteralPath $a -Encoding utf8
-            @('id,code,name,shortName,openingDate,closedDate,level,parent,image,sharing', 'ouDupBBBBB2,DUP,Dup B,Dup B,2023-01-01,,2,,,') | Set-Content -LiteralPath $b -Encoding utf8
+            @('id,code,name,shortName,openingDate,closedDate,level,parent,image,sharing', 'ouDupAAAAA1,DUP,Dup A,Dup A,2023-01-01,,2,,,') | Set-TestFileContent -LiteralPath $a -Encoding utf8
+            @('id,code,name,shortName,openingDate,closedDate,level,parent,image,sharing', 'ouDupBBBBB2,DUP,Dup B,Dup B,2023-01-01,,2,,,') | Set-TestFileContent -LiteralPath $b -Encoding utf8
             { Read-NeoIPCAuthoredOrgUnit -Path $a, $b } | Should -Throw "*Duplicate authored org-unit code 'DUP'*"
         }
         It 'throws on a duplicate org-unit UID across files (would collide at idScheme=UID import)' {
             $a = Join-Path $TestDrive 'dupid-a.csv'
             $b = Join-Path $TestDrive 'dupid-b.csv'
-            @('id,code,name,shortName,openingDate,closedDate,level,parent,image,sharing', 'ouSameIDAA1,CODEA,A,A,2023-01-01,,2,,,') | Set-Content -LiteralPath $a -Encoding utf8
-            @('id,code,name,shortName,openingDate,closedDate,level,parent,image,sharing', 'ouSameIDAA1,CODEB,B,B,2023-01-01,,2,,,') | Set-Content -LiteralPath $b -Encoding utf8
+            @('id,code,name,shortName,openingDate,closedDate,level,parent,image,sharing', 'ouSameIDAA1,CODEA,A,A,2023-01-01,,2,,,') | Set-TestFileContent -LiteralPath $a -Encoding utf8
+            @('id,code,name,shortName,openingDate,closedDate,level,parent,image,sharing', 'ouSameIDAA1,CODEB,B,B,2023-01-01,,2,,,') | Set-TestFileContent -LiteralPath $b -Encoding utf8
             { Read-NeoIPCAuthoredOrgUnit -Path $a, $b } | Should -Throw '*Duplicate authored org-unit UID*'
         }
         It 'throws on a malformed org-unit UID (a blank/invalid id would otherwise slip past the assembly collision guard)' {
             $bad = Join-Path $TestDrive 'badid-ou.csv'
-            @('id,code,name,shortName,openingDate,closedDate,level,parent,image,sharing', 'not-a-uid,CODEX,X,X,2023-01-01,,2,,,') | Set-Content -LiteralPath $bad -Encoding utf8
+            @('id,code,name,shortName,openingDate,closedDate,level,parent,image,sharing', 'not-a-uid,CODEX,X,X,2023-01-01,,2,,,') | Set-TestFileContent -LiteralPath $bad -Encoding utf8
             { Read-NeoIPCAuthoredOrgUnit -Path $bad } | Should -Throw '*invalid UID*'
         }
         It 'throws on a malformed parent UID' {
             $bad = Join-Path $TestDrive 'badparent-ou.csv'
-            @('id,code,name,shortName,openingDate,closedDate,level,parent,image,sharing', 'ouChildAAA1,CHILD,C,C,2023-01-01,,2,badparentX,,') | Set-Content -LiteralPath $bad -Encoding utf8
+            @('id,code,name,shortName,openingDate,closedDate,level,parent,image,sharing', 'ouChildAAA1,CHILD,C,C,2023-01-01,,2,badparentX,,') | Set-TestFileContent -LiteralPath $bad -Encoding utf8
             { Read-NeoIPCAuthoredOrgUnit -Path $bad } | Should -Throw '*invalid parent UID*'
         }
         It 'throws on a parent UID that is well-formed but resolves to no org unit in the set (dangling parent)' {
             $bad = Join-Path $TestDrive 'danglingparent-ou.csv'
-            @('id,code,name,shortName,openingDate,closedDate,level,parent,image,sharing', 'ouChildAAA1,CHILD,Child,Child,2023-01-01,,2,ouNoSuchAA9,,') | Set-Content -LiteralPath $bad -Encoding utf8
+            @('id,code,name,shortName,openingDate,closedDate,level,parent,image,sharing', 'ouChildAAA1,CHILD,Child,Child,2023-01-01,,2,ouNoSuchAA9,,') | Set-TestFileContent -LiteralPath $bad -Encoding utf8
             { Read-NeoIPCAuthoredOrgUnit -Path $bad } | Should -Throw '*unknown parent UID*'
         }
         It 'throws on a blank DHIS2 not-null field (name / shortName / openingDate)' {
             $bad = Join-Path $TestDrive 'noname-ou.csv'
-            @('id,code,name,shortName,openingDate,closedDate,level,parent,image,sharing', 'ouNoNameAA1,NONAME,,Short,2023-01-01,,2,,,') | Set-Content -LiteralPath $bad -Encoding utf8
+            @('id,code,name,shortName,openingDate,closedDate,level,parent,image,sharing', 'ouNoNameAA1,NONAME,,Short,2023-01-01,,2,,,') | Set-TestFileContent -LiteralPath $bad -Encoding utf8
             { Read-NeoIPCAuthoredOrgUnit -Path $bad } | Should -Throw '*non-empty name*'
         }
     }
@@ -1620,14 +1723,14 @@ InModuleScope 'NeoIPC-Tools' {
             $script:uOus   = Join-Path $TestDrive 'userOrgUnitAssignments.csv'
             @('username,firstName,surname',
               'play.a.1,Play,A One',
-              'play.admin,Play,Admin') | Set-Content -LiteralPath $script:uUsers -Encoding utf8
+              'play.admin,Play,Admin') | Set-TestFileContent -LiteralPath $script:uUsers -Encoding utf8
             @('username,role',
               'play.a.1,Base',
               'play.a.1,Data entry',
-              'play.admin,Superuser') | Set-Content -LiteralPath $script:uRoles -Encoding utf8
+              'play.admin,Superuser') | Set-TestFileContent -LiteralPath $script:uRoles -Encoding utf8
             @('username,organisationUnit',
               'play.a.1,DeptA',
-              'play.admin,ROOT') | Set-Content -LiteralPath $script:uOus -Encoding utf8
+              'play.admin,ROOT') | Set-TestFileContent -LiteralPath $script:uOus -Encoding utf8
             $script:roleUid = @{ 'Base' = 'roleBase001'; 'Data entry' = 'roleData001'; 'Superuser' = 'roleSuper01' }
             $script:ouUid = @{ 'DeptA' = 'ouDeptA0001'; 'ROOT' = 'ouRoot00001' }
         }
@@ -1649,59 +1752,59 @@ InModuleScope 'NeoIPC-Tools' {
         }
         It 'preserves a committed UID from a UID-keyed users.csv (instead of minting)' {
             $uidUsers = Join-Path $TestDrive 'users-uid.csv'
-            @('id,username,firstName,surname', 'uPreserved1,play.a.1,Play,A One') | Set-Content -LiteralPath $uidUsers -Encoding utf8
+            @('id,username,firstName,surname', 'uPreserved1,play.a.1,Play,A One') | Set-TestFileContent -LiteralPath $uidUsers -Encoding utf8
             $ur = Join-Path $TestDrive 'ur-uid.csv'
-            @('username,role', 'play.a.1,Base') | Set-Content -LiteralPath $ur -Encoding utf8
+            @('username,role', 'play.a.1,Base') | Set-TestFileContent -LiteralPath $ur -Encoding utf8
             $uo = Join-Path $TestDrive 'uo-uid.csv'
-            @('username,organisationUnit', 'play.a.1,DeptA') | Set-Content -LiteralPath $uo -Encoding utf8
+            @('username,organisationUnit', 'play.a.1,DeptA') | Set-TestFileContent -LiteralPath $uo -Encoding utf8
             $u = ConvertFrom-NeoIPCAuthoredUserCsv -UserPath $uidUsers -RoleAssignmentPath $ur -OrgUnitAssignmentPath $uo -RoleUid $script:roleUid -OrgUnitUid $script:ouUid
             $u[0].id | Should -BeExactly 'uPreserved1'
         }
         It 'falls back to a deterministic mint when the row id is present but not a valid UID' {
             $badId = Join-Path $TestDrive 'users-badid.csv'
-            @('id,username,firstName,surname', 'not-a-uid,play.a.1,Play,A One') | Set-Content -LiteralPath $badId -Encoding utf8
-            $ur = Join-Path $TestDrive 'ur-badid.csv'; @('username,role', 'play.a.1,Base') | Set-Content -LiteralPath $ur -Encoding utf8
-            $uo = Join-Path $TestDrive 'uo-badid.csv'; @('username,organisationUnit', 'play.a.1,DeptA') | Set-Content -LiteralPath $uo -Encoding utf8
+            @('id,username,firstName,surname', 'not-a-uid,play.a.1,Play,A One') | Set-TestFileContent -LiteralPath $badId -Encoding utf8
+            $ur = Join-Path $TestDrive 'ur-badid.csv'; @('username,role', 'play.a.1,Base') | Set-TestFileContent -LiteralPath $ur -Encoding utf8
+            $uo = Join-Path $TestDrive 'uo-badid.csv'; @('username,organisationUnit', 'play.a.1,DeptA') | Set-TestFileContent -LiteralPath $uo -Encoding utf8
             $u = ConvertFrom-NeoIPCAuthoredUserCsv -UserPath $badId -RoleAssignmentPath $ur -OrgUnitAssignmentPath $uo -RoleUid $script:roleUid -OrgUnitUid $script:ouUid
             Test-NeoIPCMetadataUid -Id $u[0].id | Should -BeTrue                                       # not the malformed 'not-a-uid'
             $u[0].id | Should -BeExactly (New-NeoIPCMetadataUid -Type 'users' -NaturalKey 'play.a.1')   # minted from the username
         }
         It 'throws on an unknown role' {
             $bad = Join-Path $TestDrive 'ur-badrole.csv'
-            @('username,role', 'play.a.1,Nope', 'play.admin,Superuser') | Set-Content -LiteralPath $bad -Encoding utf8
+            @('username,role', 'play.a.1,Nope', 'play.admin,Superuser') | Set-TestFileContent -LiteralPath $bad -Encoding utf8
             { ConvertFrom-NeoIPCAuthoredUserCsv -UserPath $script:uUsers -RoleAssignmentPath $bad -OrgUnitAssignmentPath $script:uOus -RoleUid $script:roleUid -OrgUnitUid $script:ouUid } | Should -Throw '*unknown role*'
         }
         It 'throws on an unknown org unit' {
             $bad = Join-Path $TestDrive 'uo-badou.csv'
-            @('username,organisationUnit', 'play.a.1,Nowhere', 'play.admin,ROOT') | Set-Content -LiteralPath $bad -Encoding utf8
+            @('username,organisationUnit', 'play.a.1,Nowhere', 'play.admin,ROOT') | Set-TestFileContent -LiteralPath $bad -Encoding utf8
             { ConvertFrom-NeoIPCAuthoredUserCsv -UserPath $script:uUsers -RoleAssignmentPath $script:uRoles -OrgUnitAssignmentPath $bad -RoleUid $script:roleUid -OrgUnitUid $script:ouUid } | Should -Throw '*unknown org unit*'
         }
         It 'throws on a user with no role assignment (DHIS2 requires at least one)' {
             $noRole = Join-Path $TestDrive 'ur-norole.csv'
-            @('username,role', 'play.admin,Superuser') | Set-Content -LiteralPath $noRole -Encoding utf8   # play.a.1 has no role row
+            @('username,role', 'play.admin,Superuser') | Set-TestFileContent -LiteralPath $noRole -Encoding utf8   # play.a.1 has no role row
             { ConvertFrom-NeoIPCAuthoredUserCsv -UserPath $script:uUsers -RoleAssignmentPath $noRole -OrgUnitAssignmentPath $script:uOus -RoleUid $script:roleUid -OrgUnitUid $script:ouUid } | Should -Throw '*no userRoles*'
         }
         It 'throws on an assignment targeting a user absent from users.csv' {
             $dangling = Join-Path $TestDrive 'ur-dangling.csv'
-            @('username,role', 'play.a.1,Base', 'play.admin,Superuser', 'play.ghost,Base') | Set-Content -LiteralPath $dangling -Encoding utf8
+            @('username,role', 'play.a.1,Base', 'play.admin,Superuser', 'play.ghost,Base') | Set-TestFileContent -LiteralPath $dangling -Encoding utf8
             { ConvertFrom-NeoIPCAuthoredUserCsv -UserPath $script:uUsers -RoleAssignmentPath $dangling -OrgUnitAssignmentPath $script:uOus -RoleUid $script:roleUid -OrgUnitUid $script:ouUid } | Should -Throw '*unknown user*'
         }
         It 'throws on a duplicate username in users.csv' {
             $dup = Join-Path $TestDrive 'users-dup.csv'
-            @('username,firstName,surname', 'd,Xx,Xx', 'd,Yy,Yy') | Set-Content -LiteralPath $dup -Encoding utf8
+            @('username,firstName,surname', 'd,Xx,Xx', 'd,Yy,Yy') | Set-TestFileContent -LiteralPath $dup -Encoding utf8
             $dr = Join-Path $TestDrive 'ur-for-dup.csv'
-            @('username,role', 'd,Base') | Set-Content -LiteralPath $dr -Encoding utf8
+            @('username,role', 'd,Base') | Set-TestFileContent -LiteralPath $dr -Encoding utf8
             $do = Join-Path $TestDrive 'uo-for-dup.csv'
-            @('username,organisationUnit', 'd,DeptA') | Set-Content -LiteralPath $do -Encoding utf8
+            @('username,organisationUnit', 'd,DeptA') | Set-TestFileContent -LiteralPath $do -Encoding utf8
             { ConvertFrom-NeoIPCAuthoredUserCsv -UserPath $dup -RoleAssignmentPath $dr -OrgUnitAssignmentPath $do -RoleUid $script:roleUid -OrgUnitUid $script:ouUid } | Should -Throw '*Duplicate*'
         }
         It 'throws on a firstName/surname shorter than 2 characters (DHIS2 @PropertyRange min)' {
             $shortName = Join-Path $TestDrive 'users-short.csv'
-            @('username,firstName,surname', 'play.x,P,One') | Set-Content -LiteralPath $shortName -Encoding utf8   # firstName 'P' is 1 char
+            @('username,firstName,surname', 'play.x,P,One') | Set-TestFileContent -LiteralPath $shortName -Encoding utf8   # firstName 'P' is 1 char
             $ur = Join-Path $TestDrive 'ur-short.csv'
-            @('username,role', 'play.x,Base') | Set-Content -LiteralPath $ur -Encoding utf8
+            @('username,role', 'play.x,Base') | Set-TestFileContent -LiteralPath $ur -Encoding utf8
             $uo = Join-Path $TestDrive 'uo-short.csv'
-            @('username,organisationUnit', 'play.x,DeptA') | Set-Content -LiteralPath $uo -Encoding utf8
+            @('username,organisationUnit', 'play.x,DeptA') | Set-TestFileContent -LiteralPath $uo -Encoding utf8
             { ConvertFrom-NeoIPCAuthoredUserCsv -UserPath $shortName -RoleAssignmentPath $ur -OrgUnitAssignmentPath $uo -RoleUid $script:roleUid -OrgUnitUid $script:ouUid } | Should -Throw '*at least 2 characters*'
         }
     }
@@ -1715,17 +1818,17 @@ InModuleScope 'NeoIPC-Tools' {
               'ouCtryA0001,CtryA,Country A,CtryA,2023-01-01,,2,ouNEOIPC001,,',
               'ouCtryB0001,CtryB,Country B,CtryB,2023-01-01,,2,ouNEOIPC001,,',
               'ouCtryAH001,CtryA_TEST,Hospital A,Hosp A,2023-01-01,,3,ouCtryA0001,,',
-              'ouCtryAHD01,CtryA_TEST_TEST,Dept A,Dept A,2023-01-01,,4,ouCtryAH001,,') | Set-Content -LiteralPath $script:gmOu -Encoding utf8
+              'ouCtryAHD01,CtryA_TEST_TEST,Dept A,Dept A,2023-01-01,,4,ouCtryAH001,,') | Set-TestFileContent -LiteralPath $script:gmOu -Encoding utf8
             $script:gmOrgUnits = Read-NeoIPCAuthoredOrgUnit -Path $script:gmOu
             $script:gmIdByCode = @{}; $script:gmOrgUnits | ForEach-Object { $script:gmIdByCode[$_.code] = $_.id }
 
             # Synthetic users (via the user compiler) for the user-group membership map.
             $uUsers = Join-Path $TestDrive 'gm-users.csv'
-            @('username,firstName,surname', 'play.a.1,Play,A One', 'play.admin,Play,Admin') | Set-Content -LiteralPath $uUsers -Encoding utf8
+            @('username,firstName,surname', 'play.a.1,Play,A One', 'play.admin,Play,Admin') | Set-TestFileContent -LiteralPath $uUsers -Encoding utf8
             $uRoles = Join-Path $TestDrive 'gm-roles.csv'
-            @('username,role', 'play.a.1,Base', 'play.admin,Superuser') | Set-Content -LiteralPath $uRoles -Encoding utf8
+            @('username,role', 'play.a.1,Base', 'play.admin,Superuser') | Set-TestFileContent -LiteralPath $uRoles -Encoding utf8
             $uOus = Join-Path $TestDrive 'gm-userous.csv'
-            @('username,organisationUnit', 'play.a.1,CtryA_TEST_TEST', 'play.admin,NEOIPC') | Set-Content -LiteralPath $uOus -Encoding utf8
+            @('username,organisationUnit', 'play.a.1,CtryA_TEST_TEST', 'play.admin,NEOIPC') | Set-TestFileContent -LiteralPath $uOus -Encoding utf8
             $script:gmUsers = ConvertFrom-NeoIPCAuthoredUserCsv -UserPath $uUsers -RoleAssignmentPath $uRoles -OrgUnitAssignmentPath $uOus -RoleUid @{ 'Base' = 'roleBase001'; 'Superuser' = 'roleSuper01' } -OrgUnitUid @{ 'CtryA_TEST_TEST' = 'ouDeptA0001'; 'NEOIPC' = 'ouRoot00001' }
             $script:gmIdByUser = @{}; $script:gmUsers | ForEach-Object { $script:gmIdByUser[$_.username] = $_.id }
         }
@@ -1740,7 +1843,7 @@ InModuleScope 'NeoIPC-Tools' {
             $dom = Join-Path $TestDrive 'gm-domain.csv'
             @('organisationUnitGroup,organisationUnit',
               'WORLD_BANK_CLASS_H_FY_2026,CtryA',
-              'REFERENCE_CENTRE,CtryA_TEST_TEST') | Set-Content -LiteralPath $dom -Encoding utf8
+              'REFERENCE_CENTRE,CtryA_TEST_TEST') | Set-TestFileContent -LiteralPath $dom -Encoding utf8
             $m = ConvertFrom-NeoIPCAuthoredOrgUnitGroupMembership -OrgUnit $script:gmOrgUnits -MembershipPath $dom
             @($m['WORLD_BANK_CLASS_H_FY_2026']) | Should -Be @($script:gmIdByCode['CtryA'])
             @($m['REFERENCE_CENTRE']) | Should -Be @($script:gmIdByCode['CtryA_TEST_TEST'])
@@ -1748,22 +1851,22 @@ InModuleScope 'NeoIPC-Tools' {
         }
         It 'merges domain memberships from multiple junction files (common World-Bank + play designations)' {
             $common = Join-Path $TestDrive 'gm-common-mem.csv'
-            @('organisationUnitGroup,organisationUnit', 'WORLD_BANK_CLASS_H_FY_2025,CtryA') | Set-Content -LiteralPath $common -Encoding utf8
+            @('organisationUnitGroup,organisationUnit', 'WORLD_BANK_CLASS_H_FY_2025,CtryA') | Set-TestFileContent -LiteralPath $common -Encoding utf8
             $play = Join-Path $TestDrive 'gm-play-mem.csv'
-            @('organisationUnitGroup,organisationUnit', 'TEST_UNITS,CtryA_TEST_TEST') | Set-Content -LiteralPath $play -Encoding utf8
+            @('organisationUnitGroup,organisationUnit', 'TEST_UNITS,CtryA_TEST_TEST') | Set-TestFileContent -LiteralPath $play -Encoding utf8
             $m = ConvertFrom-NeoIPCAuthoredOrgUnitGroupMembership -OrgUnit $script:gmOrgUnits -MembershipPath $common, $play
             @($m['WORLD_BANK_CLASS_H_FY_2025']) | Should -Be @($script:gmIdByCode['CtryA'])
             @($m['TEST_UNITS']) | Should -Be @($script:gmIdByCode['CtryA_TEST_TEST'])
         }
         It 'de-duplicates a member listed by both the structural rule and a domain row' {
             $dom = Join-Path $TestDrive 'gm-dup.csv'
-            @('organisationUnitGroup,organisationUnit', 'COUNTRY,CtryA') | Set-Content -LiteralPath $dom -Encoding utf8
+            @('organisationUnitGroup,organisationUnit', 'COUNTRY,CtryA') | Set-TestFileContent -LiteralPath $dom -Encoding utf8
             $m = ConvertFrom-NeoIPCAuthoredOrgUnitGroupMembership -OrgUnit $script:gmOrgUnits -MembershipPath $dom
             @($m['COUNTRY']).Count | Should -Be 2                                              # CtryA not listed twice
         }
         It 'throws on a domain membership row naming an org unit not in the hierarchy' {
             $dom = Join-Path $TestDrive 'gm-badou.csv'
-            @('organisationUnitGroup,organisationUnit', 'TEST_UNITS,NOPE') | Set-Content -LiteralPath $dom -Encoding utf8
+            @('organisationUnitGroup,organisationUnit', 'TEST_UNITS,NOPE') | Set-TestFileContent -LiteralPath $dom -Encoding utf8
             { ConvertFrom-NeoIPCAuthoredOrgUnitGroupMembership -OrgUnit $script:gmOrgUnits -MembershipPath $dom } | Should -Throw '*unknown org unit*'
         }
         It 'compiles user-group memberships, resolving username to the authored user UID' {
@@ -1771,14 +1874,14 @@ InModuleScope 'NeoIPC-Tools' {
             @('userGroup,username',
               'NEOIPC,play.a.1',
               'NEOIPC,play.admin',
-              'NEOIPC_USER_MANAGERS,play.admin') | Set-Content -LiteralPath $ug -Encoding utf8
+              'NEOIPC_USER_MANAGERS,play.admin') | Set-TestFileContent -LiteralPath $ug -Encoding utf8
             $m = ConvertFrom-NeoIPCAuthoredUserGroupMembership -MembershipPath $ug -User $script:gmUsers
             @($m['NEOIPC']) | Should -Be @($script:gmIdByUser['play.a.1'], $script:gmIdByUser['play.admin'])
             @($m['NEOIPC_USER_MANAGERS']) | Should -Be @($script:gmIdByUser['play.admin'])
         }
         It 'throws on a user-group membership row naming an unknown user' {
             $ug = Join-Path $TestDrive 'gm-baduser.csv'
-            @('userGroup,username', 'NEOIPC,play.ghost') | Set-Content -LiteralPath $ug -Encoding utf8
+            @('userGroup,username', 'NEOIPC,play.ghost') | Set-TestFileContent -LiteralPath $ug -Encoding utf8
             { ConvertFrom-NeoIPCAuthoredUserGroupMembership -MembershipPath $ug -User $script:gmUsers } | Should -Throw '*unknown user*'
         }
         It 'applies org-unit-group membership group-side as {id} refs, leaving member-less groups untouched' {
@@ -1797,7 +1900,7 @@ InModuleScope 'NeoIPC-Tools' {
         }
         It 'applies user-group membership group-side onto userGroup objects' {
             $ug = Join-Path $TestDrive 'gm-ug-apply.csv'
-            @('userGroup,username', 'NEOIPC,play.a.1', 'NEOIPC,play.admin') | Set-Content -LiteralPath $ug -Encoding utf8
+            @('userGroup,username', 'NEOIPC,play.a.1', 'NEOIPC,play.admin') | Set-TestFileContent -LiteralPath $ug -Encoding utf8
             $m = ConvertFrom-NeoIPCAuthoredUserGroupMembership -MembershipPath $ug -User $script:gmUsers
             $groups = @([ordered]@{ id = 'ug00000001'; code = 'NEOIPC'; name = 'NeoIPC' }, [ordered]@{ id = 'ug00000002'; code = 'NEOIPC_SPAIN'; name = 'NeoIPC Spain' })
             Set-NeoIPCGroupMembership -Group $groups -Membership $m -MemberProperty 'users' | Should -Be 1
@@ -1877,21 +1980,21 @@ InModuleScope 'NeoIPC-Tools' {
             New-Item -ItemType Directory -Path $playDir -Force | Out-Null
             @('id,code,name,shortName,openingDate,closedDate,level,parent,image,sharing',
               'ouNEOIPC001,NEOIPC,NeoIPC,NeoIPC,2023-01-01,,1,,,',
-              'ouAT0000001,AT,Austria,Austria,2023-01-01,,2,ouNEOIPC001,,') | Set-Content -LiteralPath (Join-Path $commonDir 'organisationUnits.csv') -Encoding utf8
+              'ouAT0000001,AT,Austria,Austria,2023-01-01,,2,ouNEOIPC001,,') | Set-TestFileContent -LiteralPath (Join-Path $commonDir 'organisationUnits.csv') -Encoding utf8
             @('id,name,sharing',
               'roleBase001,Base,',
               'roleData001,Data entry,',
-              'roleSuper01,Superuser,') | Set-Content -LiteralPath (Join-Path $commonDir 'userRoles.csv') -Encoding utf8
+              'roleSuper01,Superuser,') | Set-TestFileContent -LiteralPath (Join-Path $commonDir 'userRoles.csv') -Encoding utf8
             @('id,code,name,sharing',
               'oug0000001,HOSPITAL,Hospital,',
               'oug0000002,COUNTRY,Country,',
-              'oug0000003,NEO_DEPARTMENT,Neonatology Department,') | Set-Content -LiteralPath (Join-Path $commonDir 'organisationUnitGroups.csv') -Encoding utf8
+              'oug0000003,NEO_DEPARTMENT,Neonatology Department,') | Set-TestFileContent -LiteralPath (Join-Path $commonDir 'organisationUnitGroups.csv') -Encoding utf8
             @('id,code,name,shortName,openingDate,closedDate,level,parent,image,sharing',
               'ouATTEST001,AT_TEST,Hospital,Hospital,2023-01-01,,3,ouAT0000001,,',
-              'ouATTESTT01,AT_TEST_TEST,Dept,Dept,2023-01-01,,4,ouATTEST001,,') | Set-Content -LiteralPath (Join-Path $playDir 'organisationUnits.csv') -Encoding utf8
-            @('id,username,firstName,surname', 'usrPlayAT01,play.at.user1,Play,AT User 1') | Set-Content -LiteralPath (Join-Path $playDir 'users.csv') -Encoding utf8
-            @('username,role', 'play.at.user1,Base', 'play.at.user1,Data entry') | Set-Content -LiteralPath (Join-Path $playDir 'userRoleAssignments.csv') -Encoding utf8
-            @('username,organisationUnit', 'play.at.user1,AT_TEST_TEST') | Set-Content -LiteralPath (Join-Path $playDir 'userOrgUnitAssignments.csv') -Encoding utf8
+              'ouATTESTT01,AT_TEST_TEST,Dept,Dept,2023-01-01,,4,ouATTEST001,,') | Set-TestFileContent -LiteralPath (Join-Path $playDir 'organisationUnits.csv') -Encoding utf8
+            @('id,username,firstName,surname', 'usrPlayAT01,play.at.user1,Play,AT User 1') | Set-TestFileContent -LiteralPath (Join-Path $playDir 'users.csv') -Encoding utf8
+            @('username,role', 'play.at.user1,Base', 'play.at.user1,Data entry') | Set-TestFileContent -LiteralPath (Join-Path $playDir 'userRoleAssignments.csv') -Encoding utf8
+            @('username,organisationUnit', 'play.at.user1,AT_TEST_TEST') | Set-TestFileContent -LiteralPath (Join-Path $playDir 'userOrgUnitAssignments.csv') -Encoding utf8
         }
         It 'assembles the play variant from common + play, preserving committed UIDs and resolving role names' {
             $res = New-NeoIPCMetadataPackage -MetadataDirectory $script:asmDir -Play -SkipGeneration -PassThru -WarningAction SilentlyContinue
@@ -1936,9 +2039,9 @@ InModuleScope 'NeoIPC-Tools' {
             $overlay = Join-Path $TestDrive 'asm-prod-overlay'
             New-Item -ItemType Directory -Path $overlay -Force | Out-Null
             Copy-Item (Join-Path $playDir 'organisationUnits.csv') (Join-Path $overlay 'organisationUnits.csv')
-            @('id,username,firstName,surname', 'usrProdX0001,prod.x.1,Prod,X One', 'usrProdX0002,prod.x.2,Prod,X Two') | Set-Content -LiteralPath (Join-Path $overlay 'users.csv') -Encoding utf8
-            @('username,role', 'prod.x.1,Base', 'prod.x.2,Base') | Set-Content -LiteralPath (Join-Path $overlay 'userRoleAssignments.csv') -Encoding utf8
-            @('username,organisationUnit', 'prod.x.1,AT_TEST_TEST', 'prod.x.2,AT_TEST_TEST') | Set-Content -LiteralPath (Join-Path $overlay 'userOrgUnitAssignments.csv') -Encoding utf8
+            @('id,username,firstName,surname', 'usrProdX0001,prod.x.1,Prod,X One', 'usrProdX0002,prod.x.2,Prod,X Two') | Set-TestFileContent -LiteralPath (Join-Path $overlay 'users.csv') -Encoding utf8
+            @('username,role', 'prod.x.1,Base', 'prod.x.2,Base') | Set-TestFileContent -LiteralPath (Join-Path $overlay 'userRoleAssignments.csv') -Encoding utf8
+            @('username,organisationUnit', 'prod.x.1,AT_TEST_TEST', 'prod.x.2,AT_TEST_TEST') | Set-TestFileContent -LiteralPath (Join-Path $overlay 'userOrgUnitAssignments.csv') -Encoding utf8
             $res = New-NeoIPCMetadataPackage -MetadataDirectory $script:asmDir -OverlayPath $overlay -SkipGeneration -PassThru -WarningAction SilentlyContinue
             $res.UserCount | Should -Be 2                                                                  # the overlay's users
             @($res.Package['users'] | ForEach-Object { [string]$_['username'] } | Sort-Object) | Should -Be @('prod.x.1', 'prod.x.2')
@@ -2546,7 +2649,7 @@ Hierarchies:
         Id: 12
 '@
             $script:GenYaml = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-onto-{0}.yaml' -f ([guid]::NewGuid().ToString('N')))
-            Set-Content -LiteralPath $script:GenYaml -Value $yaml -Encoding utf8
+            Set-TestFileContent -LiteralPath $script:GenYaml -Value $yaml -Encoding utf8
             $script:GenTree = (Get-Content -LiteralPath $script:GenYaml -Raw | ConvertFrom-Yaml)
         }
         AfterAll {
@@ -2587,7 +2690,7 @@ Hierarchies:
         }
         It 'a synonym carrying its own ConceptType is still tagged [synonym] (synonym precedence) end-to-end' {
             $y = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-onto-syn-{0}.yaml' -f ([guid]::NewGuid().ToString('N')))
-            Set-Content -LiteralPath $y -Encoding utf8 -Value @'
+            Set-TestFileContent -LiteralPath $y -Encoding utf8 -Value @'
 Hierarchies:
 - Name: Escherichia coli
   ConceptType: Species
@@ -2646,7 +2749,7 @@ Hierarchies:
         }
         It 'takes the option-set + option UIDs from source (-OptionSetUid + the sidecar) and sharing from the export' {
             $sidecar = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-uids-{0}.csv' -f ([guid]::NewGuid().ToString('N')))
-            Set-Content -LiteralPath $sidecar -Encoding utf8 -Value "id,uid`n11,optExist001"
+            Set-TestFileContent -LiteralPath $sidecar -Encoding utf8 -Value "id,uid`n11,optExist001"
             $existing = @{
                 optionSets = @([ordered]@{ id = 'osPathogn01'; code = 'NEOIPC_PATHOGENS'; name = 'old'; sharing = @{ public = 'rw------' } })
                 options    = @([ordered]@{ id = 'optExist001'; code = '11'; name = 'old'; optionSet = [ordered]@{ id = 'osPathogn01' } })
@@ -2667,7 +2770,7 @@ Hierarchies:
             # identity (the export is read only for sharing + the no-silent-drop validation). Pins the commit's guarantee
             # against a future export-by-code identity fallback (which would otherwise pass every other test).
             $sidecar = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-uids-{0}.csv' -f ([guid]::NewGuid().ToString('N')))
-            Set-Content -LiteralPath $sidecar -Encoding utf8 -Value "id,uid`n11,srcUID00011"
+            Set-TestFileContent -LiteralPath $sidecar -Encoding utf8 -Value "id,uid`n11,srcUID00011"
             $existing = @{
                 optionSets = @([ordered]@{ id = 'osExport001'; code = 'NEOIPC_PATHOGENS'; name = 'old' })
                 options    = @([ordered]@{ id = 'expUID00011'; code = '11'; name = 'old'; optionSet = [ordered]@{ id = 'osExport001' } })
@@ -2695,7 +2798,7 @@ Hierarchies:
         }
         It 'fails loud on a duplicate Id in the ontology' {
             $dupYaml = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-onto-dup-{0}.yaml' -f ([guid]::NewGuid().ToString('N')))
-            Set-Content -LiteralPath $dupYaml -Encoding utf8 -Value @'
+            Set-TestFileContent -LiteralPath $dupYaml -Encoding utf8 -Value @'
 Hierarchies:
 - Name: A
   Id: 5
@@ -2707,7 +2810,7 @@ Hierarchies:
         }
         It 're-mints deterministically when the source option-set / option UID is structurally invalid' {
             $sidecar = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-uids-{0}.csv' -f ([guid]::NewGuid().ToString('N')))
-            Set-Content -LiteralPath $sidecar -Encoding utf8 -Value "id,uid`n11,short"   # 'short' is not a valid UID -> mint
+            Set-TestFileContent -LiteralPath $sidecar -Encoding utf8 -Value "id,uid`n11,short"   # 'short' is not a valid UID -> mint
             try {
                 $frag = New-NeoIPCPathogenOptionSet -Path $script:GenYaml -OptionSetUid 'BAD!' -UidSidecarPath $sidecar
                 $osUid = @($frag['optionSets'])[0]['id']
@@ -2721,13 +2824,13 @@ Hierarchies:
         }
         It 'fails loud when two option codes in the sidecar share a UID' {
             $sidecar = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-uids-{0}.csv' -f ([guid]::NewGuid().ToString('N')))
-            Set-Content -LiteralPath $sidecar -Encoding utf8 -Value "id,uid`n11,dupSharedAA`n12,dupSharedAA"   # valid UID shape, shared
+            Set-TestFileContent -LiteralPath $sidecar -Encoding utf8 -Value "id,uid`n11,dupSharedAA`n12,dupSharedAA"   # valid UID shape, shared
             try { { New-NeoIPCPathogenOptionSet -Path $script:GenYaml -UidSidecarPath $sidecar } | Should -Throw '*UID collision*' }
             finally { Remove-Item -LiteralPath $sidecar -Force }
         }
         It 'fails loud when the ontology has no Id-bearing concepts (would orphan the bindings)' {
             $emptyYaml = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-onto-empty-{0}.yaml' -f ([guid]::NewGuid().ToString('N')))
-            Set-Content -LiteralPath $emptyYaml -Encoding utf8 -Value @'
+            Set-TestFileContent -LiteralPath $emptyYaml -Encoding utf8 -Value @'
 Hierarchies:
 - Name: Bacteria
   ConceptType: Domain
@@ -2767,20 +2870,20 @@ Hierarchies:
         It 'Get-NeoIPCPathogenUidMap reads id->uid, is empty when absent, and fails loud on a blank/duplicate id' {
             (Get-NeoIPCPathogenUidMap -Path (Join-Path $TestDrive 'no-such-sidecar.csv')).Count | Should -Be 0
             $ok = Join-Path $TestDrive 'uids-ok.csv'
-            Set-Content -LiteralPath $ok -Encoding utf8 -Value "id,uid`n11,optExist001`n12,optExist002"
+            Set-TestFileContent -LiteralPath $ok -Encoding utf8 -Value "id,uid`n11,optExist001`n12,optExist002"
             $m = Get-NeoIPCPathogenUidMap -Path $ok
             $m['11'] | Should -BeExactly 'optExist001'
             $m.ContainsKey('99') | Should -BeFalse
             $dup = Join-Path $TestDrive 'uids-dup.csv'
-            Set-Content -LiteralPath $dup -Encoding utf8 -Value "id,uid`n11,a`n11,b"
+            Set-TestFileContent -LiteralPath $dup -Encoding utf8 -Value "id,uid`n11,a`n11,b"
             { Get-NeoIPCPathogenUidMap -Path $dup } | Should -Throw '*Duplicate*'
             $blank = Join-Path $TestDrive 'uids-blank.csv'
-            Set-Content -LiteralPath $blank -Encoding utf8 -Value "id,uid`n,xUID00abcde"
+            Set-TestFileContent -LiteralPath $blank -Encoding utf8 -Value "id,uid`n,xUID00abcde"
             { Get-NeoIPCPathogenUidMap -Path $blank } | Should -Throw '*blank id*'
         }
         It 'generates from source alone (no -ExistingPackage): set UID from -OptionSetUid, options from the sidecar else minted' {
             $sidecar = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-uids-{0}.csv' -f ([guid]::NewGuid().ToString('N')))
-            Set-Content -LiteralPath $sidecar -Encoding utf8 -Value "id,uid`n11,optSrc00011"
+            Set-TestFileContent -LiteralPath $sidecar -Encoding utf8 -Value "id,uid`n11,optSrc00011"
             try {
                 $frag = New-NeoIPCPathogenOptionSet -Path $script:GenYaml -OptionSetUid 'osSrcOnly01' -UidSidecarPath $sidecar
                 @($frag['optionSets'])[0]['id'] | Should -BeExactly 'osSrcOnly01'
@@ -2792,7 +2895,7 @@ Hierarchies:
         }
         It 'Get-NeoIPCPoTranslationMap reads a po4a YAML .po: skips header/untranslated/identical/obsolete, joins wrapped' {
             $po = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-po-{0}.po' -f ([guid]::NewGuid().ToString('N')))
-            Set-Content -LiteralPath $po -Encoding utf8 -Value @'
+            Set-TestFileContent -LiteralPath $po -Encoding utf8 -Value @'
 msgid ""
 msgstr ""
 "Language: de\n"
@@ -2841,7 +2944,7 @@ msgstr ""
         It 'composes per-locale option labels from a .po: localized name + rank/synonym word, English fallback, no tag for Unknown' {
             $dir = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-podir-{0}' -f ([guid]::NewGuid().ToString('N')))
             New-Item -ItemType Directory -Path $dir | Out-Null
-            Set-Content -LiteralPath (Join-Path $dir 'infectious_agents.de.po') -Encoding utf8 -Value @'
+            Set-TestFileContent -LiteralPath (Join-Path $dir 'infectious_agents.de.po') -Encoding utf8 -Value @'
 msgid ""
 msgstr ""
 "Language: de\n"
@@ -2881,7 +2984,7 @@ msgstr "Escherichia coli"
             $dir = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-podir-{0}' -f ([guid]::NewGuid().ToString('N')))
             New-Item -ItemType Directory -Path $dir | Out-Null
             # Only the genus rank is translated, so only the genus option's label differs; the rest stay English.
-            Set-Content -LiteralPath (Join-Path $dir 'infectious_agents.it.po') -Encoding utf8 -Value @'
+            Set-TestFileContent -LiteralPath (Join-Path $dir 'infectious_agents.it.po') -Encoding utf8 -Value @'
 msgid ""
 msgstr ""
 "Language: it\n"
@@ -2902,7 +3005,7 @@ msgstr "Genere"
         It 'emits one translations[] entry per translated locale, in deterministic (filename-sorted) locale order' {
             $dir = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-podir-{0}' -f ([guid]::NewGuid().ToString('N')))
             New-Item -ItemType Directory -Path $dir | Out-Null
-            Set-Content -LiteralPath (Join-Path $dir 'infectious_agents.de.po') -Encoding utf8 -Value @'
+            Set-TestFileContent -LiteralPath (Join-Path $dir 'infectious_agents.de.po') -Encoding utf8 -Value @'
 msgid ""
 msgstr ""
 "Language: de\n"
@@ -2910,7 +3013,7 @@ msgstr ""
 msgid "Genus"
 msgstr "Gattung"
 '@
-            Set-Content -LiteralPath (Join-Path $dir 'infectious_agents.es.po') -Encoding utf8 -Value @'
+            Set-TestFileContent -LiteralPath (Join-Path $dir 'infectious_agents.es.po') -Encoding utf8 -Value @'
 msgid ""
 msgstr ""
 "Language: es\n"
@@ -3281,7 +3384,7 @@ Hierarchies:
             # Tiny ontology: Id 0 carries every flag; Klebsiella (100) carbapenem only. So the effective code sets
             # are carbapenem-resistant = {0,100} and every other category = {0} — small enough to assert exactly.
             $script:RuleYaml = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-rule-{0}.yaml' -f ([guid]::NewGuid().ToString('N')))
-            Set-Content -LiteralPath $script:RuleYaml -Encoding utf8 -Value @'
+            Set-TestFileContent -LiteralPath $script:RuleYaml -Encoding utf8 -Value @'
 Hierarchies:
 - Name: Not listed
   Id: 0
@@ -3791,7 +3894,7 @@ Hierarchies:
             # non-virus Bacteria branch (200) that must be excluded. Small virus set so the ASSIGN chain stays compact
             # (<= BlockSize) and is exactly assertable.
             $script:VirusYaml = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-virus-{0}.yaml' -f ([guid]::NewGuid().ToString('N')))
-            Set-Content -LiteralPath $script:VirusYaml -Encoding utf8 -Value @'
+            Set-TestFileContent -LiteralPath $script:VirusYaml -Encoding utf8 -Value @'
 Hierarchies:
 - Name: Viruses
   ConceptType: Realm
@@ -3908,7 +4011,7 @@ Hierarchies:
         }
         It 'rule generator: fails loud on an empty virus set' {
             $emptyYaml = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-virus-empty-{0}.yaml' -f ([guid]::NewGuid().ToString('N')))
-            Set-Content -LiteralPath $emptyYaml -Encoding utf8 -Value "Hierarchies:`n- Name: Viruses`n  ConceptType: Realm`n"
+            Set-TestFileContent -LiteralPath $emptyYaml -Encoding utf8 -Value "Hierarchies:`n- Name: Viruses`n  ConceptType: Realm`n"
             try { { New-NeoIPCPathogenVirusRule -Path $emptyYaml -ExistingPackage $script:VirusPkg } | Should -Throw '*virus code set is empty*' }
             finally { Remove-Item -LiteralPath $emptyYaml -Force }
         }
@@ -4003,7 +4106,7 @@ Hierarchies:
             # Tiny ontology: Id 0 and the Staphylococcus genus (100) are common commensals; S. aureus (101) overrides
             # to false. So the effective CC code set is {0,100} — small enough to pin the negated ASSIGN exactly.
             $script:FgYaml = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-fg-{0}.yaml' -f ([guid]::NewGuid().ToString('N')))
-            Set-Content -LiteralPath $script:FgYaml -Encoding utf8 -Value @'
+            Set-TestFileContent -LiteralPath $script:FgYaml -Encoding utf8 -Value @'
 Hierarchies:
 - Name: Not listed
   Id: 0
@@ -4257,7 +4360,7 @@ Hierarchies:
         }
         It 'rule generator: fails loud when the common-commensal set is empty (no recognized-pathogen expression)' {
             $emptyYaml = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-fg-empty-{0}.yaml' -f ([guid]::NewGuid().ToString('N')))
-            Set-Content -LiteralPath $emptyYaml -Encoding utf8 -Value "Hierarchies:`n- Name: Bacteria`n  Id: 1`n"
+            Set-TestFileContent -LiteralPath $emptyYaml -Encoding utf8 -Value "Hierarchies:`n- Name: Bacteria`n  Id: 1`n"
             try {
                 { New-NeoIPCPathogenFieldGatingRule -Path $emptyYaml -ExistingPackage $script:FgPkg } | Should -Throw '*common-commensal code set is empty*'
             }
@@ -4477,11 +4580,11 @@ Hierarchies:
                 'J01AA08_O,J01AA08,Minocycline (oral),J01AA,Watch,',
                 'J01AA08_P,J01AA08,Minocycline (i. v.),J01AA,Reserve,OptAbxAA081',
                 'tmp_001,,Micronomicin,J01GB,Watch,OptAbxMicr1',
-                'J01GB06,J01GB06,Amikacin,J01GB,Access,OptAbxGB061') | Set-Content -LiteralPath $script:abxCsv -Encoding utf8NoBOM
+                'J01GB06,J01GB06,Amikacin,J01GB,Access,OptAbxGB061') | Set-TestFileContent -LiteralPath $script:abxCsv -Encoding utf8NoBOM
             $script:abxGrpCsv = Join-Path $TestDrive 'NeoIPC-Antibiotic-Groups.csv'
             @('code,name,shortName,description,uid',
                 'J01AA,Tetracyclines,Tetracyclines,Tetracycline antibacterials.,GrpAtcAA001',
-                'J01GB,Other aminoglycosides,Aminoglycosides,Aminoglycoside antibacterials.,GrpAtcGB001') | Set-Content -LiteralPath $script:abxGrpCsv -Encoding utf8NoBOM
+                'J01GB,Other aminoglycosides,Aminoglycosides,Aminoglycoside antibacterials.,GrpAtcGB001') | Set-TestFileContent -LiteralPath $script:abxGrpCsv -Encoding utf8NoBOM
             function New-AbxExport {
                 [ordered]@{
                     optionSets      = @([ordered]@{ id = 'OptSetAbx01'; code = 'NEOIPC_ANTIMICROBIAL_SUBSTANCES'; name = 'NeoIPC Antimicrobial Substances'; valueType = 'TEXT' })
@@ -4530,7 +4633,7 @@ Hierarchies:
         }
         It 'option set: localizes option names from the antibiotic catalogue (property NAME)' {
             $poDir = Join-Path $TestDrive 'abxpo'; New-Item -ItemType Directory -Path $poDir -Force | Out-Null
-            @('msgid ""', 'msgstr ""', '', 'msgid "Amikacin"', 'msgstr "Amikacin DE"') | Set-Content -LiteralPath (Join-Path $poDir 'antibiotics.de.po') -Encoding utf8NoBOM
+            @('msgid ""', 'msgstr ""', '', 'msgid "Amikacin"', 'msgstr "Amikacin DE"') | Set-TestFileContent -LiteralPath (Join-Path $poDir 'antibiotics.de.po') -Encoding utf8NoBOM
             $f = New-NeoIPCAntimicrobialOptionSet -Path $script:abxCsv -ExistingPackage (New-AbxExport) -PoDirectory $poDir
             $t = @(@($f['options'] | Where-Object { $_['code'] -eq 'J01GB06' })[0]['translations'] | Where-Object { $_['locale'] -eq 'de' })[0]
             $t['property'] | Should -BeExactly 'NAME'
@@ -4554,12 +4657,12 @@ Hierarchies:
             @('id,atc_code,name,atc_group,aware_category,uid',
                 'J01XA01,J01XA01,Vancomycin,J01XA,Access,OptAbxSng01',
                 'J01XB01,J01XB01,Colistin,J01XB,Watch,OptAbxSng02',
-                'J01XX08,J01XX08,Linezolid,J01XX,Reserve,OptAbxSng03') | Set-Content -LiteralPath $csv -Encoding utf8NoBOM
+                'J01XX08,J01XX08,Linezolid,J01XX,Reserve,OptAbxSng03') | Set-TestFileContent -LiteralPath $csv -Encoding utf8NoBOM
             $grpCsv = Join-Path $TestDrive 'abx-single-groups.csv'
             @('code,name,shortName,description,uid',
                 'J01XA,Glycopeptide antibacterials,Glycopeptides,Glycopeptide antibacterials.,GrpSng0001',
                 'J01XB,Polymyxins,Polymyxins,Polymyxin antibacterials.,GrpSng0002',
-                'J01XX,Other antibacterials,Other,Other antibacterials.,GrpSng0003') | Set-Content -LiteralPath $grpCsv -Encoding utf8NoBOM
+                'J01XX,Other antibacterials,Other,Other antibacterials.,GrpSng0003') | Set-TestFileContent -LiteralPath $grpCsv -Encoding utf8NoBOM
             $os = New-NeoIPCAntimicrobialOptionSet -Path $csv
             $og = New-NeoIPCAntibioticOptionGroup -OptionSet $os -SubstancePath $csv -GroupPath $grpCsv
             $singles = @($og['optionGroups'] | Where-Object { @($_['options']).Count -eq 1 })
@@ -4581,7 +4684,7 @@ Hierarchies:
         }
         It 'option groups: fails loud when an ATC group has no member options' {
             $grp2 = Join-Path $TestDrive 'grp2.csv'
-            @('code,name,shortName,description', 'J01AA,Tetracyclines,Tetra,x', 'J01ZZ,Empty group,Empty,y') | Set-Content -LiteralPath $grp2 -Encoding utf8NoBOM
+            @('code,name,shortName,description', 'J01AA,Tetracyclines,Tetra,x', 'J01ZZ,Empty group,Empty,y') | Set-TestFileContent -LiteralPath $grp2 -Encoding utf8NoBOM
             $os = New-NeoIPCAntimicrobialOptionSet -Path $script:abxCsv -ExistingPackage (New-AbxExport)
             { New-NeoIPCAntibioticOptionGroup -OptionSet $os -SubstancePath $script:abxCsv -GroupPath $grp2 -ExistingPackage (New-AbxExport) } | Should -Throw '*J01ZZ*'
         }
@@ -4598,7 +4701,7 @@ Hierarchies:
         }
         It 'option group-sets: name comes from the canonical constant and is localized from the catalogue (-PoDirectory)' {
             $poDir = Join-Path $TestDrive 'abxgspo'; New-Item -ItemType Directory -Path $poDir -Force | Out-Null
-            @('msgid ""', 'msgstr ""', '', 'msgid "ATC-5 Groups"', 'msgstr "ATC-5-Gruppen"', '', 'msgid "AWaRe Groups"', 'msgstr "AWaRe-Gruppen"') | Set-Content -LiteralPath (Join-Path $poDir 'antibiotics.de.po') -Encoding utf8NoBOM
+            @('msgid ""', 'msgstr ""', '', 'msgid "ATC-5 Groups"', 'msgstr "ATC-5-Gruppen"', '', 'msgid "AWaRe Groups"', 'msgstr "AWaRe-Gruppen"') | Set-TestFileContent -LiteralPath (Join-Path $poDir 'antibiotics.de.po') -Encoding utf8NoBOM
             $os = New-NeoIPCAntimicrobialOptionSet -Path $script:abxCsv -ExistingPackage (New-AbxExport)
             $og = New-NeoIPCAntibioticOptionGroup -OptionSet $os -SubstancePath $script:abxCsv -GroupPath $script:abxGrpCsv -ExistingPackage (New-AbxExport)
             $ogs = New-NeoIPCAntibioticOptionGroupSet -OptionGroup $og -ExistingPackage (New-AbxExport) -PoDirectory $poDir
@@ -4614,7 +4717,7 @@ Hierarchies:
         }
         It 'Get-NeoIPCAntibioticSubstance fails loud on a duplicate id' {
             $dup = Join-Path $TestDrive 'dup.csv'
-            @('id,atc_code,name,atc_group,aware_category', 'J01AA01,J01AA01,A,J01AA,Watch', 'J01AA01,J01AA01,B,J01AA,Watch') | Set-Content -LiteralPath $dup -Encoding utf8NoBOM
+            @('id,atc_code,name,atc_group,aware_category', 'J01AA01,J01AA01,A,J01AA,Watch', 'J01AA01,J01AA01,B,J01AA,Watch') | Set-TestFileContent -LiteralPath $dup -Encoding utf8NoBOM
             { Get-NeoIPCAntibioticSubstance -Path $dup } | Should -Throw '*Duplicate*'
         }
         It 'Test-NeoIPCMetadataGeneratedExcluded excludes antibiotic option groups + group-sets, spares others' {
@@ -4634,7 +4737,7 @@ Hierarchies:
         }
         It 'option groups: localizes both ATC and AWaRe group names from the antibiotic catalogue' {
             $poDir = Join-Path $TestDrive 'abxpogrp'; New-Item -ItemType Directory -Path $poDir -Force | Out-Null
-            @('msgid ""', 'msgstr ""', '', 'msgid "Tetracyclines"', 'msgstr "Tetrazykline"', '', 'msgid "AWaRe Watch"', 'msgstr "AWaRe Watch DE"') | Set-Content -LiteralPath (Join-Path $poDir 'antibiotics.de.po') -Encoding utf8NoBOM
+            @('msgid ""', 'msgstr ""', '', 'msgid "Tetracyclines"', 'msgstr "Tetrazykline"', '', 'msgid "AWaRe Watch"', 'msgstr "AWaRe Watch DE"') | Set-TestFileContent -LiteralPath (Join-Path $poDir 'antibiotics.de.po') -Encoding utf8NoBOM
             $os = New-NeoIPCAntimicrobialOptionSet -Path $script:abxCsv -ExistingPackage (New-AbxExport)
             $og = New-NeoIPCAntibioticOptionGroup -OptionSet $os -SubstancePath $script:abxCsv -GroupPath $script:abxGrpCsv -ExistingPackage (New-AbxExport) -PoDirectory $poDir
             @(@($og['optionGroups'] | Where-Object { $_['code'] -eq 'J01AA' })[0]['translations'] | Where-Object { $_['locale'] -eq 'de' })[0]['value'] | Should -BeExactly 'Tetrazykline'
@@ -4642,7 +4745,7 @@ Hierarchies:
         }
         It 'option groups: localizes the full surface (shortName + description), not just the name' {
             $poDir = Join-Path $TestDrive 'abxpofull'; New-Item -ItemType Directory -Path $poDir -Force | Out-Null
-            @('msgid ""', 'msgstr ""', '', 'msgid "Tetracyclines"', 'msgstr "Tetrazykline"', '', 'msgid "Tetracycline antibacterials."', 'msgstr "Tetrazyklin-Mittel."') | Set-Content -LiteralPath (Join-Path $poDir 'antibiotics.de.po') -Encoding utf8NoBOM
+            @('msgid ""', 'msgstr ""', '', 'msgid "Tetracyclines"', 'msgstr "Tetrazykline"', '', 'msgid "Tetracycline antibacterials."', 'msgstr "Tetrazyklin-Mittel."') | Set-TestFileContent -LiteralPath (Join-Path $poDir 'antibiotics.de.po') -Encoding utf8NoBOM
             $os = New-NeoIPCAntimicrobialOptionSet -Path $script:abxCsv -ExistingPackage (New-AbxExport)
             $og = New-NeoIPCAntibioticOptionGroup -OptionSet $os -SubstancePath $script:abxCsv -GroupPath $script:abxGrpCsv -ExistingPackage (New-AbxExport) -PoDirectory $poDir
             $de = @(@($og['optionGroups'] | Where-Object { $_['code'] -eq 'J01AA' })[0]['translations'] | Where-Object { $_['locale'] -eq 'de' })
@@ -4668,7 +4771,7 @@ Hierarchies:
             (@(Get-NeoIPCAntibioticSubstance -Path $script:abxCsv) | Where-Object { $_.Id -eq 'J01AA08_O' }).Uid | Should -BeExactly ''
             (@(Get-NeoIPCAntibioticGroup -Path $script:abxGrpCsv) | Where-Object { $_.Code -eq 'J01AA' }).Uid | Should -BeExactly 'GrpAtcAA001'
             $noUid = Join-Path $TestDrive 'no-uid.csv'
-            @('id,atc_code,name,atc_group,aware_category', 'J01AA01,J01AA01,A,J01AA,Watch') | Set-Content -LiteralPath $noUid -Encoding utf8NoBOM
+            @('id,atc_code,name,atc_group,aware_category', 'J01AA01,J01AA01,A,J01AA,Watch') | Set-TestFileContent -LiteralPath $noUid -Encoding utf8NoBOM
             (@(Get-NeoIPCAntibioticSubstance -Path $noUid)[0]).Uid | Should -BeExactly ''
         }
         It 'generates the whole antibiotic domain from source alone (no -ExistingPackage; identity preserved, no sharing)' {
@@ -4689,7 +4792,7 @@ Hierarchies:
             # The export carries DIFFERENT well-formed UIDs for the option set + the deployed code J01AA01 — they must
             # be ignored for identity. Pins the guarantee against a future export-by-code identity fallback.
             $csv = Join-Path $TestDrive 'abx-divergent.csv'
-            @('id,atc_code,name,atc_group,aware_category,uid', 'J01AA01,J01AA01,Demeclocycline,J01AA,Watch,srcAbxUID01') | Set-Content -LiteralPath $csv -Encoding utf8NoBOM
+            @('id,atc_code,name,atc_group,aware_category,uid', 'J01AA01,J01AA01,Demeclocycline,J01AA,Watch,srcAbxUID01') | Set-TestFileContent -LiteralPath $csv -Encoding utf8NoBOM
             $export = [ordered]@{
                 optionSets = @([ordered]@{ id = 'osExpAbx011'; code = 'NEOIPC_ANTIMICROBIAL_SUBSTANCES'; valueType = 'TEXT' })
                 options    = @([ordered]@{ id = 'expAbxUID01'; code = 'J01AA01'; optionSet = [ordered]@{ id = 'osExpAbx011' } })
@@ -4703,14 +4806,14 @@ Hierarchies:
         }
         It 'mints a group UID deterministically when the source uid is blank' {
             $grpBlank = Join-Path $TestDrive 'grp-blank-uid.csv'
-            @('code,name,shortName,description,uid', 'J01AA,Tetracyclines,Tetra,x,', 'J01GB,Other aminoglycosides,Aminoglycosides,y,') | Set-Content -LiteralPath $grpBlank -Encoding utf8NoBOM
+            @('code,name,shortName,description,uid', 'J01AA,Tetracyclines,Tetra,x,', 'J01GB,Other aminoglycosides,Aminoglycosides,y,') | Set-TestFileContent -LiteralPath $grpBlank -Encoding utf8NoBOM
             $os = New-NeoIPCAntimicrobialOptionSet -Path $script:abxCsv -OptionSetUid 'OptSetAbx01'
             $og = New-NeoIPCAntibioticOptionGroup -OptionSet $os -SubstancePath $script:abxCsv -GroupPath $grpBlank
             @($og['optionGroups'] | Where-Object { $_['code'] -eq 'J01AA' })[0]['id'] | Should -BeExactly (New-NeoIPCMetadataUid -Type 'optionGroups' -NaturalKey 'J01AA')
         }
         It 'fails loud on a group UID collision across the generated groups' {
             $grpDup = Join-Path $TestDrive 'grp-dup-uid.csv'
-            @('code,name,shortName,description,uid', 'J01AA,Tetracyclines,Tetra,x,SharedGrp01', 'J01GB,Other aminoglycosides,Amino,y,SharedGrp01') | Set-Content -LiteralPath $grpDup -Encoding utf8NoBOM
+            @('code,name,shortName,description,uid', 'J01AA,Tetracyclines,Tetra,x,SharedGrp01', 'J01GB,Other aminoglycosides,Amino,y,SharedGrp01') | Set-TestFileContent -LiteralPath $grpDup -Encoding utf8NoBOM
             $os = New-NeoIPCAntimicrobialOptionSet -Path $script:abxCsv -OptionSetUid 'OptSetAbx01'
             { New-NeoIPCAntibioticOptionGroup -OptionSet $os -SubstancePath $script:abxCsv -GroupPath $grpDup } | Should -Throw '*collision*'
         }
@@ -4868,18 +4971,18 @@ Hierarchies:
             $script:tcSub = Join-Path $script:tcDir 'NeoIPC-Antibiotics.csv'
             @('id,atc_code,name,atc_group,aware_category,short_name,description',
                 'J01AA01,J01AA01,Demeclocycline,J01AA,Watch,,',
-                'tmp_001,,Micronomicin,J01GB,Watch,Micron,A demo description.') | Set-Content -LiteralPath $script:tcSub -Encoding utf8NoBOM
+                'tmp_001,,Micronomicin,J01GB,Watch,Micron,A demo description.') | Set-TestFileContent -LiteralPath $script:tcSub -Encoding utf8NoBOM
             $script:tcGrp = Join-Path $script:tcDir 'NeoIPC-Antibiotic-Groups.csv'
             @('code,name,shortName,description',
                 'J01AA,Tetracyclines,Tetracyclines,Tetracycline antibacterials.',
-                'J01GB,Other aminoglycosides,Aminoglycosides,') | Set-Content -LiteralPath $script:tcGrp -Encoding utf8NoBOM
+                'J01GB,Other aminoglycosides,Aminoglycosides,') | Set-TestFileContent -LiteralPath $script:tcGrp -Encoding utf8NoBOM
             $script:tcAware = Join-Path $script:tcDir 'NeoIPC-Antibiotic-AWaRe-Groups.csv'
             @('code,category,name,shortName,description',
                 'WHO_AWARE_ACCESS,Access,AWaRe Access,AWaRe A,Access desc.',
                 'WHO_AWARE_WATCH,Watch,AWaRe Watch,AWaRe W,Watch desc.',
-                'WHO_AWARE_RESERVE,Reserve,AWaRe Reserve,AWaRe R,Reserve desc.') | Set-Content -LiteralPath $script:tcAware -Encoding utf8NoBOM
+                'WHO_AWARE_RESERVE,Reserve,AWaRe Reserve,AWaRe R,Reserve desc.') | Set-TestFileContent -LiteralPath $script:tcAware -Encoding utf8NoBOM
             $script:tcList = Join-Path $script:tcDir 'ListElements.csv'
-            @('id,value', 'substance,Substance', 'atc_code,ATC-Code') | Set-Content -LiteralPath $script:tcList -Encoding utf8NoBOM
+            @('id,value', 'substance,Substance', 'atc_code,ATC-Code') | Set-TestFileContent -LiteralPath $script:tcList -Encoding utf8NoBOM
         }
 
         It 'Get-NeoIPCAntibioticSubstance carries optional short_name/description when present' {
@@ -4891,7 +4994,7 @@ Hierarchies:
         }
         It 'Get-NeoIPCAntibioticSubstance defaults optional fields to empty when the columns are absent' {
             $p = Join-Path $TestDrive 'nocols.csv'
-            @('id,atc_code,name,atc_group,aware_category', 'J01AA01,J01AA01,Demeclocycline,J01AA,Watch') | Set-Content -LiteralPath $p -Encoding utf8NoBOM
+            @('id,atc_code,name,atc_group,aware_category', 'J01AA01,J01AA01,Demeclocycline,J01AA,Watch') | Set-TestFileContent -LiteralPath $p -Encoding utf8NoBOM
             $s = @(Get-NeoIPCAntibioticSubstance -Path $p)[0]
             $s.ShortName | Should -BeExactly ''
             $s.FormName | Should -BeExactly ''
@@ -4906,7 +5009,7 @@ Hierarchies:
             $a.Count | Should -Be 3
             @($a | Where-Object { $_.Code -eq 'WHO_AWARE_WATCH' })[0].Category | Should -BeExactly 'Watch'
             $bad = Join-Path $TestDrive 'badaware.csv'
-            @('code,category,name,shortName,description', 'WHO_AWARE_X,Nonsense,X,X,X') | Set-Content -LiteralPath $bad -Encoding utf8NoBOM
+            @('code,category,name,shortName,description', 'WHO_AWARE_X,Nonsense,X,X,X') | Set-TestFileContent -LiteralPath $bad -Encoding utf8NoBOM
             { Get-NeoIPCAntibioticAwareGroup -Path $bad } | Should -Throw '*category*'
         }
         It 'Add-NeoIPCAntibioticTranslations emits one entry per locale per non-empty differing field' {
@@ -4970,7 +5073,7 @@ Hierarchies:
         }
         It 'Export-NeoIPCAntibioticTranslation writes the .pot and msgmerge-updates an existing .po' {
             $poDir = Join-Path $TestDrive 'exportpo'; New-Item -ItemType Directory -Path $poDir -Force | Out-Null
-            @('msgid ""', 'msgstr ""', '', 'msgid "Demeclocycline"', 'msgstr "Demeclocyclin"', '', 'msgid "Obsolete term"', 'msgstr "Veraltet"') | Set-Content -LiteralPath (Join-Path $poDir 'antibiotics.de.po') -Encoding utf8NoBOM
+            @('msgid ""', 'msgstr ""', '', 'msgid "Demeclocycline"', 'msgstr "Demeclocyclin"', '', 'msgid "Obsolete term"', 'msgstr "Veraltet"') | Set-TestFileContent -LiteralPath (Join-Path $poDir 'antibiotics.de.po') -Encoding utf8NoBOM
             $r = Export-NeoIPCAntibioticTranslation -SubstancePath $script:tcSub -GroupPath $script:tcGrp -AwareGroupPath $script:tcAware -ListElementsPath $script:tcList -PoDirectory $poDir
             Test-Path (Join-Path $poDir 'antibiotics.pot') | Should -BeTrue
             $r.UpdatedLocales | Should -Contain 'de'
@@ -4994,12 +5097,12 @@ Hierarchies:
             # a config CSV, and an authored sharing.yaml. The heavy engine is mocked; only the orchestration is tested.
             $script:rcDir = Join-Path $TestDrive ('rc-dir-' + [System.IO.Path]::GetRandomFileName())
             New-Item -ItemType Directory -Path $script:rcDir -Force | Out-Null
-            Set-Content -LiteralPath (Join-Path $script:rcDir 'organisationUnits.csv') -Value "id,code,name`nOUaaaaaaaa1,AT,Austria" -NoNewline
-            Set-Content -LiteralPath (Join-Path $script:rcDir 'dataElements.csv') -Value "id,code,name`nDEaaaaaaaa1,OLD_DE,Old" -NoNewline
-            Set-Content -LiteralPath (Join-Path $script:rcDir 'sharing.yaml') -Value "PUBLIC_RW:`n  public: `"rw------`"" -NoNewline
+            Set-TestFileContent -LiteralPath (Join-Path $script:rcDir 'organisationUnits.csv') -Value "id,code,name`nOUaaaaaaaa1,AT,Austria" -NoNewline
+            Set-TestFileContent -LiteralPath (Join-Path $script:rcDir 'dataElements.csv') -Value "id,code,name`nDEaaaaaaaa1,OLD_DE,Old" -NoNewline
+            Set-TestFileContent -LiteralPath (Join-Path $script:rcDir 'sharing.yaml') -Value "PUBLIC_RW:`n  public: `"rw------`"" -NoNewline
             # Tiny export the cmdlet parses for the template-presence check; includes a template (present case).
             $script:rcExport = Join-Path $TestDrive ('rc-exp-' + [System.IO.Path]::GetRandomFileName() + '.json')
-            Set-Content -LiteralPath $script:rcExport -Value '{ "dataElements": [ { "id": "DEaaaaaaaa1", "code": "OLD_DE", "name": "Old" } ], "programNotificationTemplates": [ { "id": "PNTaaaaaaa1", "name": "T" } ] }'
+            Set-TestFileContent -LiteralPath $script:rcExport -Value '{ "dataElements": [ { "id": "DEaaaaaaaa1", "code": "OLD_DE", "name": "Old" } ], "programNotificationTemplates": [ { "id": "PNTaaaaaaa1", "name": "T" } ] }'
 
             Mock ConvertTo-NeoIPCMetadataJson { '{}' }                       # the directory's "current" package (core diff is mocked, so content is irrelevant)
             Mock Compare-NeoIPCMetadataCore {
@@ -5022,9 +5125,9 @@ Hierarchies:
             Mock ConvertFrom-NeoIPCMetadataJson {
                 # Simulate the re-emit into the temp dir: the affected config CSVs PLUS an anonymised org-units CSV
                 # (which the cmdlet must NOT copy back, because organisationUnits is authored / report-only).
-                Set-Content -LiteralPath (Join-Path $OutputDirectory 'dataElements.csv') -Value "id,code,name`nDEnewwwwww1,NEW_DE,New" -NoNewline
-                Set-Content -LiteralPath (Join-Path $OutputDirectory 'indicatorTypes.csv') -Value "id,name`nITaaaaaaaa1,Number" -NoNewline
-                Set-Content -LiteralPath (Join-Path $OutputDirectory 'organisationUnits.csv') -Value "id,code,name`nOUanon00001,," -NoNewline
+                Set-TestFileContent -LiteralPath (Join-Path $OutputDirectory 'dataElements.csv') -Value "id,code,name`nDEnewwwwww1,NEW_DE,New" -NoNewline
+                Set-TestFileContent -LiteralPath (Join-Path $OutputDirectory 'indicatorTypes.csv') -Value "id,name`nITaaaaaaaa1,Number" -NoNewline
+                Set-TestFileContent -LiteralPath (Join-Path $OutputDirectory 'organisationUnits.csv') -Value "id,code,name`nOUanon00001,," -NoNewline
             }
             # The SCOPED incoming. The config diff / generated diff are mocked, so the scope content is irrelevant —
             # an empty package keeps Get-NeoIPCMetadataScopedConfig from running the real closure on the tiny export.
@@ -5077,7 +5180,7 @@ Hierarchies:
 
         It 'treats programNotificationTemplates as report-only when the export lacks them' {
             $noTpl = Join-Path $TestDrive ('rc-notpl-' + [System.IO.Path]::GetRandomFileName() + '.json')
-            Set-Content -LiteralPath $noTpl -Value '{ "dataElements": [ { "id": "DEaaaaaaaa1", "code": "OLD_DE", "name": "Old" } ] }'
+            Set-TestFileContent -LiteralPath $noTpl -Value '{ "dataElements": [ { "id": "DEaaaaaaaa1", "code": "OLD_DE", "name": "Old" } ] }'
             Mock Compare-NeoIPCMetadataCore { @([pscustomobject]@{ Type = 'programNotificationTemplates'; Id = 'PNTxxxxxxx9'; Kind = 'Removed' }) }
             $r = Update-NeoIPCMetadataDirectory -ExportPath $noTpl -MetadataDirectory $script:rcDir -WarningAction SilentlyContinue
             @($r.AutoWrite | ForEach-Object { $_.Type }) | Should -Not -Contain 'programNotificationTemplates'
@@ -5089,16 +5192,20 @@ Hierarchies:
             # must still re-sync the owning programRules subtree, or the new expression is silently dropped.
             $exprDir = Join-Path $script:rcDir (Join-Path 'expressions' (Join-Path 'programRules' 'rl_test'))
             New-Item -ItemType Directory -Path $exprDir -Force | Out-Null
-            Set-Content -LiteralPath (Join-Path $exprDir 'acT1.data.dhis2') -Value '1 + 1' -NoNewline      # OLD content in the directory
+            Set-TestFileContent -LiteralPath (Join-Path $exprDir 'acT1.data.dhis2') -Value '1 + 1' -NoNewline      # OLD content in the directory
             Mock Compare-NeoIPCMetadataCore { @([pscustomobject]@{ Type = 'programRuleActions'; Id = 'acT1'; Kind = 'Changed' }) }
             Mock ConvertFrom-NeoIPCMetadataJson {
                 $d = Join-Path $OutputDirectory (Join-Path 'expressions' (Join-Path 'programRules' 'rl_test'))
                 New-Item -ItemType Directory -Path $d -Force | Out-Null
-                Set-Content -LiteralPath (Join-Path $d 'acT1.data.dhis2') -Value '2 + 2' -NoNewline        # NEW content from the export
-                Set-Content -LiteralPath (Join-Path $OutputDirectory 'programRuleActions.csv') -Value "id,programRuleActionType,data`nacT1,ASSIGN,expressions/programRules/rl_test/acT1.data.dhis2" -NoNewline
+                Set-TestFileContent -LiteralPath (Join-Path $d 'acT1.data.dhis2') -Value '2 + 2' -NoNewline        # NEW content from the export
+                Set-TestFileContent -LiteralPath (Join-Path $OutputDirectory 'programRuleActions.csv') -Value "id,programRuleActionType,data`nacT1,ASSIGN,expressions/programRules/rl_test/acT1.data.dhis2" -NoNewline
             }
             Update-NeoIPCMetadataDirectory -ExportPath $script:rcExport -MetadataDirectory $script:rcDir -Apply -WarningAction SilentlyContinue | Out-Null
-            (Get-Content -LiteralPath (Join-Path $exprDir 'acT1.data.dhis2') -Raw) | Should -BeExactly '2 + 2'
+            # One closing newline: the writer emits conforming text (TrimEnd + a single "`n") so the file
+            # obeys the same insert_final_newline/trim_trailing_whitespace rules as everything else and
+            # needs no .editorconfig carve-out. The reader strips it again, so the expression itself is
+            # unchanged — asserted on the round-trip elsewhere.
+            (Get-Content -LiteralPath (Join-Path $exprDir 'acT1.data.dhis2') -Raw) | Should -BeExactly "2 + 2`n"
         }
 
         It 'keeps a Removed config object: reports it, never auto-deletes it from the directory' {
@@ -5130,7 +5237,7 @@ Hierarchies:
         It 'passes for a clean git working tree' {
             $repo = Join-Path $TestDrive ('git-clean-' + [System.IO.Path]::GetRandomFileName())
             New-Item -ItemType Directory -Path $repo -Force | Out-Null
-            Set-Content -LiteralPath (Join-Path $repo 'a.csv') -Value 'x' -NoNewline
+            Set-TestFileContent -LiteralPath (Join-Path $repo 'a.csv') -Value 'x' -NoNewline
             & git -C $repo init -q
             & git -C $repo -c user.email=t@t -c user.name=t add -A
             & git -C $repo -c user.email=t@t -c user.name=t commit -q -m init
@@ -5139,11 +5246,11 @@ Hierarchies:
         It 'refuses a dirty git working tree' {
             $repo = Join-Path $TestDrive ('git-dirty-' + [System.IO.Path]::GetRandomFileName())
             New-Item -ItemType Directory -Path $repo -Force | Out-Null
-            Set-Content -LiteralPath (Join-Path $repo 'a.csv') -Value 'x' -NoNewline
+            Set-TestFileContent -LiteralPath (Join-Path $repo 'a.csv') -Value 'x' -NoNewline
             & git -C $repo init -q
             & git -C $repo -c user.email=t@t -c user.name=t add -A
             & git -C $repo -c user.email=t@t -c user.name=t commit -q -m init
-            Set-Content -LiteralPath (Join-Path $repo 'a.csv') -Value 'y' -NoNewline       # uncommitted change
+            Set-TestFileContent -LiteralPath (Join-Path $repo 'a.csv') -Value 'y' -NoNewline       # uncommitted change
             { Assert-NeoIPCReconcileGitClean -Path $repo } | Should -Throw '*CLEAN*'
         }
         It 'refuses a directory that is not under git at all' {
@@ -5196,7 +5303,7 @@ Hierarchies:
 
         It 'reads the package file for -Path and posts its content as the body' {
             $pkg = Join-Path $TestDrive ('pkg-' + [System.IO.Path]::GetRandomFileName() + '.json')
-            Set-Content -LiteralPath $pkg -Value '{"dataElements":[{"id":"abc"}]}' -NoNewline
+            Set-TestFileContent -LiteralPath $pkg -Value '{"dataElements":[{"id":"abc"}]}' -NoNewline
             Mock Invoke-NeoIPCDhis2Post { [pscustomobject]@{ StatusCode = 200; Body = $script:wrappedReport } }
             Import-NeoIPCMetadata -Path $pkg -Auth $script:testAuth -Confirm:$false | Out-Null
             Should -Invoke Invoke-NeoIPCDhis2Post -Times 1 -Exactly -ParameterFilter {

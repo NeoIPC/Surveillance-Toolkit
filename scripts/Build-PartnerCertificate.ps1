@@ -1,3 +1,28 @@
+#!/usr/bin/env pwsh
+#Requires -Version 7.6
+
+<#
+.SYNOPSIS
+    Renders the NeoIPC Surveillance Partner Certificate for one or more departments.
+
+.DESCRIPTION
+    Wrapper around the Partner-Certificate Quarto report. It resolves DHIS2 credentials through the
+    shared auth helper, acquires the participation data (or renders from a supplied data file), and drives
+    the render, emitting a build report alongside the certificate.
+
+    The signatory name and signature image are the certificate's two required inputs — they appear on the
+    face of the document, so there is no sensible default for either.
+
+.PARAMETER Signatory
+    Name printed as the certifying signatory.
+
+.PARAMETER SignatureImagePath
+    Path to the signature image reproduced on the certificate.
+
+.EXAMPLE
+    ./scripts/Build-PartnerCertificate.ps1 'A. Signatory' ./signature.png -Department AT_TEST_TEST
+#>
+
 [CmdletBinding(SupportsShouldProcess = $true, DefaultParameterSetName = 'Acquire')]
 param(
     [Parameter(Mandatory, Position = 0)]

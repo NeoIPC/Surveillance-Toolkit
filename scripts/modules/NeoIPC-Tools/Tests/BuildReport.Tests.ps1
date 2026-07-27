@@ -1,7 +1,18 @@
+#Requires -Version 7.6
 #requires -Module Pester
 
-# Tests for the centralized build-report machinery (Public/BuildReport.ps1):
-# Write-NeoIPCBuildReport, New-NeoIPCBuildStep, Complete-NeoIPCBuildStep, Get-NeoIPCParameterSnapshot.
+<#
+.SYNOPSIS
+    Pester tests for the centralized build-report machinery.
+
+.DESCRIPTION
+    Covers Public/BuildReport.ps1: Write-NeoIPCBuildReport, New-NeoIPCBuildStep,
+    Complete-NeoIPCBuildStep and Get-NeoIPCParameterSnapshot — the shared step/timing/parameter record
+    every Build-*.ps1 wrapper emits alongside its rendered artifact.
+
+.EXAMPLE
+    Invoke-Pester -Path scripts/modules/NeoIPC-Tools/Tests/BuildReport.Tests.ps1
+#>
 
 BeforeAll {
     Import-Module -Name (Join-Path $PSScriptRoot '..') -Force

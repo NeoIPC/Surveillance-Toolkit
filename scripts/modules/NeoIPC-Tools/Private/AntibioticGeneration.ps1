@@ -1,3 +1,4 @@
+#Requires -Version 7.6
 # NeoIPC metadata pipeline — antibiotic-domain generation (private helpers, not exported).
 # Canonical sources (see metadata/common/antibiotics/README.md):
 #   metadata/common/antibiotics/NeoIPC-Antibiotics.csv       (id, atc_code, name, atc_group, aware_category)

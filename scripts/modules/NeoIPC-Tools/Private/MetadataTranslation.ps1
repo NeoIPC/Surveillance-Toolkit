@@ -1,3 +1,4 @@
+#Requires -Version 7.6
 # NeoIPC metadata translations <-> gettext PO engine.
 #
 # DHIS2 carries i18n inline on every object as translations[] = [{ property, locale, value }] (the property is

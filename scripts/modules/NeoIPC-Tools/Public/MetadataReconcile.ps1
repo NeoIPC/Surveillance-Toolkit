@@ -1,3 +1,4 @@
+#Requires -Version 7.6
 # Public reconcile cmdlet: ingest a fresh DHIS2 export and bring the canonical metadata/ directory into line with
 # the DELIBERATE, IN-SCOPE changes made in DHIS2 — as reviewable, minimal git diffs — WITHOUT (a) re-importing
 # out-of-scope junk, (b) reverting directory edits not yet deployed, or (c) corrupting content the directory owns
@@ -197,7 +198,7 @@ function Update-NeoIPCMetadataDirectory {
                 # rows keep their AUTHORED sharing keys), then row-merge per affected type. ConvertFrom takes a JSON
                 # FILE, so the scoped package is written to a temp file first.
                 $scopedJson = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-reconcile-scoped-' + [System.IO.Path]::GetRandomFileName() + '.json')
-                [System.IO.File]::WriteAllText($scopedJson, ((Get-NeoIPCMetadataScopedConfig -ExportPath $sourcePath) | ConvertTo-Json -Depth 100), [System.Text.UTF8Encoding]::new($false))
+                Write-NeoIPCTextFile -Path $scopedJson -Text ((Get-NeoIPCMetadataScopedConfig -ExportPath $sourcePath) | ConvertTo-Json -Depth 100)
                 $tmp = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-reconcile-emit-' + [System.IO.Path]::GetRandomFileName())
                 New-Item -ItemType Directory -Path $tmp -Force | Out-Null
                 try {
@@ -242,7 +243,15 @@ function Update-NeoIPCMetadataDirectory {
                                 $dstExpr = Join-Path $MetadataDirectory $ref
                                 $dstParent = Split-Path -Parent $dstExpr
                                 if (-not (Test-Path -LiteralPath $dstParent)) { New-Item -ItemType Directory -Path $dstParent -Force | Out-Null }
-                                Copy-Item -LiteralPath $srcExpr -Destination $dstExpr -Force
+                                # Normalize instead of copying the exported bytes through: this is the
+                                # SECOND writer of these files, and it has to agree with
+                                # Write-NeoIPCMetadataExpressionFiles or the two of them fight over the
+                                # same file — trailing whitespace stripped, exactly one closing newline, so
+                                # the result is conforming text like every other committed file. The reader
+                                # strips the newline again, so the expression is unchanged; whatever the
+                                # export happened to emit is irrelevant here.
+                                $exprText = [System.IO.File]::ReadAllText($srcExpr).TrimEnd() + "`n"
+                                [System.IO.File]::WriteAllText($dstExpr, $exprText, [System.Text.UTF8Encoding]::new($false))
                             }
                         }
                     }

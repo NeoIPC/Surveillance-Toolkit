@@ -1,3 +1,31 @@
+#!/usr/bin/env pwsh
+#Requires -Version 7.6
+
+<#
+.SYNOPSIS
+    Converts a DHIS2 metadata JSON export into the authored CSV metadata directory.
+
+.DESCRIPTION
+    Takes a metadata export and writes it out as the per-type CSVs (plus externalized expression files)
+    that make up the authored metadata directory — the reviewable, diffable form the pipeline builds from,
+    as opposed to a single opaque JSON document.
+
+    Output lands in a timestamped directory by default, so a conversion never overwrites a previous one and
+    two runs can be compared.
+
+.PARAMETER LiteralPath
+    The metadata JSON export to convert.
+
+.PARAMETER OutputDirectory
+    Destination directory. Defaults to a UTC-timestamped directory under the metadata directory.
+
+.PARAMETER TranslationLanguages
+    Languages whose translation columns are emitted.
+
+.EXAMPLE
+    ./scripts/ConvertFrom-JsonMetadata.ps1 ./export.json
+#>
+
 [CmdletBinding(PositionalBinding, SupportsShouldProcess)]
 param(
     [Parameter(Position=0, Mandatory)]
@@ -7,14 +35,27 @@ param(
     [string[]]$TranslationLanguages = @('de', 'el', 'es', 'fr', 'it'),
     [switch]$IncudeIds,
     [switch]$NoSharing,
-    [switch]$ForExcel
+    # A [bool] rather than a [switch] precisely because it defaults ON, which is what this script has
+    # actually done for a long time: the body used to force `$ForExcel = $true` under a "Dev mode" comment,
+    # so the switch was inert and passing it changed nothing. Declaring the default here keeps that
+    # behaviour while making the parameter real again — `-ForExcel $false` now genuinely selects the
+    # utf8NoBOM / invariant-separator output. A switch defaulting to true would be the anti-pattern
+    # PSAvoidDefaultValueSwitchParameter names, and `-ForExcel:$false` reads far worse than `-ForExcel $false`.
+    [bool]$ForExcel = $true
 )
 
 Import-Module -Name (Join-Path -Resolve -Path $PSScriptRoot -ChildPath 'modules' -AdditionalChildPath 'NeoIPC-BuildTools') -Force -Verbose:$false
 
-# Dev mode
-$ForExcel = $true
-
+# In the default (-ForExcel) mode the CSV output is deliberately exempt from the LF/no-BOM text contract,
+# and must stay that way: what this script emits is a **generated Excel deliverable**, not repository
+# content — none of these CSVs is committed. Excel misreads a BOM-less UTF-8 CSV as the local ANSI code
+# page, so the BOM is what makes the file open correctly on a double-click, and -UseCulture matches the list
+# separator the user's Excel expects. `Export-Csv` is therefore kept here (with its [Environment]::NewLine
+# row joins) rather than replaced by the ConvertTo-Csv + WriteAllText pattern used for committed files.
+#
+# Under `-ForExcel $false` the output is utf8NoBOM with an invariant separator, which is the shape a
+# machine consumer wants. That branch is not newline-pinned either; if its output ever becomes an input to
+# something that cares, pin it there rather than weakening the Excel branch.
 if ($ForExcel) {
     $csvOutputEncoding = 'utf8BOM'
     $useCultureInCsvOutput = $true

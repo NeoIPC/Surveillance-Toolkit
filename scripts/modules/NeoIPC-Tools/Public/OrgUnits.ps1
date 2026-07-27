@@ -1,3 +1,5 @@
+#Requires -Version 7.6
+
 <#
 .SYNOPSIS
 Build a filesystem-safe key from DHIS2 connection parameters.

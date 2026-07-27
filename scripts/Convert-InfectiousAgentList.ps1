@@ -1,3 +1,32 @@
+#!/usr/bin/env pwsh
+#Requires -Version 7.6
+
+<#
+.SYNOPSIS
+    Renders the NeoIPC infectious-agent list from its authored YAML into AsciiDoc, CSV and PDF.
+
+.DESCRIPTION
+    Reads the authored infectious-agents YAML — the canonical source for organism concepts, their
+    synonyms, common-commensal status and recorded resistance categories — and emits the requested output
+    formats, one set per requested translation language.
+
+    Localization runs through po4a against the config in the input directory, so translated output is
+    generated from the committed catalogues rather than from any hand-edited copy.
+
+    Each concept row carries a citation link built from the authority that names it: LPSN for bacteria,
+    MycoBank for fungi and protozoa, ICTV for viruses. Synonyms inherit their accepted concept's
+    commensal and resistance attributes, and cross-reference it.
+
+.PARAMETER OutputFormats
+    Any of AsciiDoc, CSV, PDF.
+
+.PARAMETER TranslationLanguages
+    Languages to render in addition to the source language.
+
+.EXAMPLE
+    ./scripts/Convert-InfectiousAgentList.ps1 -OutputFormats AsciiDoc,CSV -TranslationLanguages de,es
+#>
+
 [CmdletBinding(PositionalBinding, SupportsShouldProcess)]
 param(
     [string]$InputDirectory = "$PSScriptRoot/../metadata/common/infectious-agents",
@@ -276,16 +305,20 @@ foreach ($iaList in $translationPaths) {
             $header = Get-Content -LiteralPath $headerFilePath
             $footer = Get-Content -LiteralPath $footerFilePath
             $adocOutputPath = $outputBasePath + 'adoc'
-            @(
+            # Assembled into one array and written once, rather than Out-File plus two -Append
+            # passes: Out-File joins items with [Environment]::NewLine, so the generated AsciiDoc was
+            # CRLF on Windows and LF in CI. These lists are po4a inputs and po4a wraps and re-emits
+            # their text, so the extracted strings must not depend on the build platform.
+            $adocLines = @(
                 $header
                 ''
                 '[.small,cols="3,3,^1,2"]'
                 '|==='
                 "|$($contentStrings.Name) |$($contentStrings.Type) |$($contentStrings.CommonCommensal) |$($contentStrings.RecordedResistances)"
                 ''
-            ) | Out-File -LiteralPath $adocOutputPath -Encoding utf8NoBOM
+            )
 
-            $output |
+            $adocLines += $output |
                 ForEach-Object {
                     @(
                         if ($_."$($contentStrings.URL)") {
@@ -301,20 +334,28 @@ foreach ($iaList in $translationPaths) {
                         "$($_."$($contentStrings.CommonCommensal)")"
                         "$($_."$($contentStrings.RecordedResistances)")"
                     ) | Join-String -Separator ' |' -OutputPrefix '|'
-                } |
-                Out-File -LiteralPath $adocOutputPath -Encoding utf8NoBOM -Append
-                @(
-                    '|==='
-                    ''
-                    $footer
-                ) | Out-File -LiteralPath $adocOutputPath -Encoding utf8NoBOM -Append
+                }
+
+            $adocLines += @(
+                '|==='
+                ''
+                $footer
+            )
+
+            [System.IO.File]::WriteAllText($adocOutputPath, (($adocLines -join "`n") + "`n"), [System.Text.UTF8Encoding]::new($false))
             continue
         }
         'CSV' {
             Write-Information -MessageData ($MessageStrings.FormatInfoMsg -f 'CSV')
             $csvOutputPath = $outputBasePath + 'csv'
-            $output |
-                Export-Csv -LiteralPath $csvOutputPath -Encoding utf8NoBOM -UseQuotes AsNeeded
+            # ConvertTo-Csv rather than Export-Csv: Export-Csv joins its rows with
+            # [Environment]::NewLine, so the same invocation produced CRLF on Windows and LF in CI.
+            # This output is a generated artifact under $OutputDirectory (default ../artifacts), not a
+            # committed file, so nothing in git depends on it — it is pinned anyway because a
+            # platform-dependent artifact is a nuisance to diff or hand off, and because the encoding was
+            # already utf8NoBOM, leaving the newlines as the only thing out of step.
+            $csvText = (($output | ConvertTo-Csv -UseQuotes AsNeeded) -join "`n") + "`n"
+            [System.IO.File]::WriteAllText($csvOutputPath, $csvText, [System.Text.UTF8Encoding]::new($false))
             continue
         }
         'PDF' {

@@ -1,3 +1,4 @@
+#Requires -Version 7.6
 function Update-NeoIPCGeneratedMetadataDirectory {
     <#
     .SYNOPSIS
@@ -65,7 +66,7 @@ function Update-NeoIPCGeneratedMetadataDirectory {
     if ($PSCmdlet.ShouldProcess($common, 'Re-materialise the generated matrix families')) {
         $tmp = [System.IO.Path]::GetTempFileName()
         try {
-            [System.IO.File]::WriteAllText($tmp, ($regen | ConvertTo-Json -Depth 100), [System.Text.UTF8Encoding]::new($false))
+            Write-NeoIPCTextFile -Path $tmp -Text ($regen | ConvertTo-Json -Depth 100)
             ConvertFrom-NeoIPCMetadataJson -Path $tmp -OutputDirectory $common -Confirm:$false
         }
         finally { Remove-Item -LiteralPath $tmp -ErrorAction SilentlyContinue }

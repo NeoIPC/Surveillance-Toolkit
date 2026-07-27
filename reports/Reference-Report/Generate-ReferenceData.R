@@ -342,6 +342,6 @@ if (is.null(referenceDataFile)) {
   if (!dir.exists(outputDir)) {
     dir.create(outputDir, recursive = TRUE, showWarnings = FALSE)
   }
-  writeLines(json, referenceDataFile, useBytes = TRUE)
+  write_lines_lf(json, referenceDataFile)
   logInfo("Reference data written to: {referenceDataFile}")
 }

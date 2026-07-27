@@ -1,3 +1,4 @@
+#Requires -Version 7.6
 # NeoIPC metadata pipeline — static data tables (no logic).
 # Dot-sourced as a private module file; consumed by Private/Metadata.ps1 and the
 # Public/Metadata.ps1 converter cmdlets. Definitions live here ONCE so the normalizer

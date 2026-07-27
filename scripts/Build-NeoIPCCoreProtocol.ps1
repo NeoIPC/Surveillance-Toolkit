@@ -1,3 +1,27 @@
+#!/usr/bin/env pwsh
+#Requires -Version 7.6
+
+<#
+.SYNOPSIS
+    Builds the NeoIPC Core Protocol document for one or more target cultures.
+
+.DESCRIPTION
+    Assembles the protocol from its AsciiDoc sources and the generated reference lists, then renders it.
+    Each generated input is produced only when its own sources are newer than the output, so a rebuild
+    after editing one list does not regenerate everything:
+
+    - the antibiotics list and the infectious-agents list, both localized from their gettext catalogues;
+    - the title-page background SVG, transformed from the localized resource file.
+
+    Localized output paths carry a culture suffix, so building several cultures does not overwrite one
+    another.
+
+.EXAMPLE
+    ./scripts/Build-NeoIPCCoreProtocol.ps1
+
+.EXAMPLE
+    ./scripts/Build-NeoIPCCoreProtocol.ps1 -TargetCultures de,es
+#>
 [CmdletBinding(DefaultParameterSetName = 'Build')]
 param(
     [Parameter(ParameterSetName = 'Build', Position = 0)]
@@ -151,12 +175,17 @@ foreach ($targetCulture in $targetCultures)
     ) + @(Get-LocalisedPath $poDir 'antibiotics.po' $targetCulture -All -Existing)
     Build-Target $antibioticsListFile $antibioticsListInputs {
         Write-Verbose "Generating list of antibiotics"
-        New-AntibioticsList -TargetCulture $targetCulture -MetadataPath $metadataFolder -AsciiDoc | Out-File $antibioticsListFile -Encoding utf8NoBOM
+        # Not Out-File: it joins pipeline items with [Environment]::NewLine, so the generated AsciiDoc
+        # would be CRLF on Windows and LF in CI. These lists are po4a inputs, and po4a wraps and
+        # re-emits their text — the extracted strings must not depend on the platform that built them.
+        $lines = New-AntibioticsList -TargetCulture $targetCulture -MetadataPath $metadataFolder -AsciiDoc
+        [System.IO.File]::WriteAllText($antibioticsListFile, (($lines -join "`n") + "`n"), [System.Text.UTF8Encoding]::new($false))
     }
     $infectiousAgentsListFile = Get-LocalisedPath $protocolDir $infectiousAgentsFileName $targetCulture
     Build-Target $infectiousAgentsListFile (Get-LocalisedPath $infectiousAgentsDir 'NeoIPC-Pathogen-Concepts.csv' $targetCulture -All -Existing),(Get-LocalisedPath $infectiousAgentsDir 'NeoIPC-Pathogen-Synonyms.csv' $targetCulture -All -Existing) {
         Write-Verbose "Generating list of infectious agents"
-        New-PathogenList -TargetCulture $targetCulture -MetadataPath $metadataFolder -AsciiDoc | Out-File $infectiousAgentsListFile -Encoding utf8NoBOM
+        $lines = New-PathogenList -TargetCulture $targetCulture -MetadataPath $metadataFolder -AsciiDoc
+        [System.IO.File]::WriteAllText($infectiousAgentsListFile, (($lines -join "`n") + "`n"), [System.Text.UTF8Encoding]::new($false))
     }
     Build-Target (Get-LocalisedPath $imgDir 'NeoIPC-Core-Title-Page.svg' $targetCulture) (Get-LocalisedPath $resDir 'NeoIPC-Core-Title-Page.resx' $targetCulture -All -Existing),(Join-Path $transDir 'NeoIPC-Core-Title-Page.xslt') {
         Write-Verbose "Generating title page background SVG"

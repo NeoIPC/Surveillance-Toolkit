@@ -1,3 +1,4 @@
+#Requires -Version 7.6
 # NeoIPC metadata pipeline — antibiotic translation catalogue generator (public). Builds po/antibiotics.pot from
 # the canonical antibiotic sources and msgmerge-updates the existing per-locale catalogues. The private machinery
 # (string collection, bare-msgid PO read/write/merge) lives in Private/AntibioticTranslation.ps1.

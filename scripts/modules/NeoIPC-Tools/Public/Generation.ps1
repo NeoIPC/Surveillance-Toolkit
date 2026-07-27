@@ -1,3 +1,4 @@
+#Requires -Version 7.6
 # NeoIPC metadata pipeline — ontology / matrix-driven generators.
 # These produce the importable DHIS2 objects that are NOT hand-authored in the per-type CSV directory but
 # generated from a richer canonical source: the NEOIPC_PATHOGENS option set from the infectious-agent ontology

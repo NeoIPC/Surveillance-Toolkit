@@ -1,3 +1,5 @@
+#Requires -Version 7.6
+
 <#
 .SYNOPSIS
 Run a script block with NeoIPC auth environment variables scoped.

@@ -17,6 +17,26 @@ permissions:
   contents: read
 
 jobs:
+    text-hygiene:
+        # LF line endings, UTF-8 without a BOM, and the canonical PowerShell header. Runs on every trigger,
+        # not just pull requests: the defect this catches is invisible locally — with `* text=auto` declared,
+        # a tool writing CRLF into the working tree still produces an LF blob and a clean `git status`, so
+        # nothing short of an explicit check reports it. Seven CRLF catalogues sat here undetected that way.
+        #
+        # Its own job rather than a step inside build-docs, so a failure names the offending file instead of
+        # being buried in a render log, and so it reports in seconds without waiting on the toolchain setup.
+        runs-on: ubuntu-26.04
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                # The check reads the working tree and the index, so the submodule is not needed — and
+                # tools/po4a is third-party upstream that this contract deliberately does not cover.
+                submodules: false
+
+            - name: Check text-file hygiene
+              shell: pwsh
+              run: ./scripts/Test-TextFileHygiene.ps1
+
     catalogue-ownership:
         # The repository owns the .pot templates; Weblate owns the .po translations and is their only writer.
         # Two writers on one .po is what conflicts every language of a catalogue at once — both sides rewrite

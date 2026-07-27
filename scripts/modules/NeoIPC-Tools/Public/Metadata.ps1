@@ -1,3 +1,4 @@
+#Requires -Version 7.6
 # Public NeoIPC metadata-pipeline cmdlets. The conversion is pure file processing (no DHIS2 API):
 # a DHIS2 metadata.json on disk <-> a reviewable directory of one CSV per object type. The heavy
 # lifting lives in Private/Metadata.ps1 (engine + orchestration) and Private/MetadataTypeMaps.ps1.
@@ -91,7 +92,7 @@ function ConvertTo-NeoIPCMetadataJson {
     $package = Read-NeoIPCMetadataDirectoryPackage -Path $Path
     $json = $package | ConvertTo-Json -Depth 100 -Compress:$Compress
     if ($OutputPath) {
-        [System.IO.File]::WriteAllText($OutputPath, $json, [System.Text.UTF8Encoding]::new($false))
+        Write-NeoIPCTextFile -Path $OutputPath -Text $json
         return
     }
     $json
@@ -217,7 +218,7 @@ function Merge-NeoIPCMetadataJson {
     $merged = Merge-NeoIPCMetadataPackage -Base $base -Supplement $supplement -Types $Types
     $json = $merged | ConvertTo-Json -Depth 100 -Compress:$Compress
     if ($OutputPath) {
-        [System.IO.File]::WriteAllText($OutputPath, $json, [System.Text.UTF8Encoding]::new($false))
+        Write-NeoIPCTextFile -Path $OutputPath -Text $json
         return
     }
     $json
@@ -348,7 +349,7 @@ function Update-NeoIPCMetadata {
 
     if ($OutputPath) {
         $json = $result.Package | ConvertTo-Json -Depth 100 -Compress:$Compress
-        [System.IO.File]::WriteAllText($OutputPath, $json, [System.Text.UTF8Encoding]::new($false))
+        Write-NeoIPCTextFile -Path $OutputPath -Text $json
         if ($PassThru) { return $result }
         return
     }
@@ -431,7 +432,7 @@ function Select-NeoIPCMetadataClosure {
 
     if ($OutputPath) {
         $json = $result.Package | ConvertTo-Json -Depth 100 -Compress:$Compress
-        [System.IO.File]::WriteAllText($OutputPath, $json, [System.Text.UTF8Encoding]::new($false))
+        Write-NeoIPCTextFile -Path $OutputPath -Text $json
         if ($PassThru) { return $result }
         return
     }
@@ -572,7 +573,7 @@ function New-NeoIPCMetadataPackage {
     if ($PassThru) { return @{ Package = $package; OrgUnitCount = @($orgUnits).Count; UserCount = @($users).Count } }
     $json = $package | ConvertTo-Json -Depth 100 -Compress:$Compress
     if ($OutputPath) {
-        [System.IO.File]::WriteAllText($OutputPath, $json, [System.Text.UTF8Encoding]::new($false))
+        Write-NeoIPCTextFile -Path $OutputPath -Text $json
         return
     }
     $json
@@ -871,7 +872,7 @@ function Import-NeoIPCMetadataTranslation {
     if ($PassThru) { return $result }
     $json = $result | ConvertTo-Json -Depth 100 -Compress:$Compress
     if ($OutputPath) {
-        [System.IO.File]::WriteAllText($OutputPath, $json, [System.Text.UTF8Encoding]::new($false))
+        Write-NeoIPCTextFile -Path $OutputPath -Text $json
         return
     }
     $json

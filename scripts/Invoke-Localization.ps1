@@ -1,4 +1,5 @@
 #!/usr/bin/env pwsh
+#Requires -Version 7.6
 
 <#
 .SYNOPSIS
@@ -8,8 +9,8 @@
     Wraps po4a, the glossary script, YAML key extraction, and string layer
     validation into a single entry point with tab-completable parameters.
 
-    Catalogue ownership: the repository owns the .pot templates; Weblate owns the
-    .po translations and is their only writer. po4a msgmerges the .po files as an
+    Catalogue ownership: the repository owns the .pot templates; Weblate owns
+    the .po translations and is their only writer. po4a msgmerges the .po files as an
     unavoidable side effect of every run, so -Update restores them from HEAD once
     the localized artifacts exist. Two writers on one .po is what conflicts every
     language of a catalogue at once: both sides rewrite adjacent header lines

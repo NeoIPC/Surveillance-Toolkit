@@ -1,3 +1,4 @@
+#Requires -Version 7.6
 # NeoIPC metadata pipeline — ontology-derived generation (private, not exported).
 # Helpers that turn the canonical infectious-agent ontology into DHIS2 metadata objects (the generation half
 # of the pipeline). The public generators live in Public/Generation.ps1.

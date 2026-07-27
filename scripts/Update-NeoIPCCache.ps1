@@ -1,3 +1,6 @@
+#!/usr/bin/env pwsh
+#Requires -Version 7.6
+
 <#
 .SYNOPSIS
 Refresh local NeoIPC tab-completion caches.
@@ -78,13 +81,17 @@ if (-not (Test-Path -LiteralPath $cacheDir)) {
 if ($Sites) {
     $siteList = Get-NeoIPCDepartments @connArgs
     $sitePath = Join-Path $cacheDir 'site-codes.txt'
-    $siteList | Set-Content -LiteralPath $sitePath -Encoding UTF8
+    # Set-Content joins with [Environment]::NewLine. These cache files are not committed, but they are
+    # read back by other tooling, so they follow the same LF contract as everything else.
+    [System.IO.File]::WriteAllText(
+        $sitePath, (($siteList -join "`n") + "`n"), [System.Text.UTF8Encoding]::new($false))
     Write-Host "Cached $($siteList.Count) site codes to $sitePath" -ForegroundColor Green
 }
 
 if ($DataElements) {
     $deCodes = Get-NeoIPCDataElementCodes @connArgs
     $dePath = Join-Path $cacheDir 'de-codes.txt'
-    $deCodes | Set-Content -LiteralPath $dePath -Encoding UTF8
+    [System.IO.File]::WriteAllText(
+        $dePath, (($deCodes -join "`n") + "`n"), [System.Text.UTF8Encoding]::new($false))
     Write-Host "Cached $($deCodes.Count) DE codes to $dePath" -ForegroundColor Green
 }

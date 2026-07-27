@@ -225,7 +225,11 @@ def yaml_to_pot(glossary_path, pot_path):
             entry.flags = entry_flags
         pot.append(entry)
 
-    pot.save(str(pot_path))
+    # newline="\n" is not optional. polib.save() forwards it to io.open(), and io.open's default
+    # (newline=None) translates every "\n" to os.linesep -- so on Windows this writes a CRLF .pot
+    # while po4a, msgmerge and Weblate all write LF. A catalogue rewritten in part by a tool that
+    # disagrees is what produces a mixed file no gettext parser accepts.
+    pot.save(str(pot_path), newline="\n")
     print(f"Generated {pot_path} ({len(pot)} entries)")
     return pot
 
@@ -279,8 +283,12 @@ def generate_yaml(po_dir, glossary_path, languages, threshold=80):
         # Sort by key
         sorted_translations = dict(sorted(translations.items()))
 
+        # newline="\n" for the same reason as the .pot above: open()'s default translates "\n" to
+        # os.linesep, so this generated YAML would be CRLF on Windows and LF in CI. It is read by
+        # the reports' R string-resource cascade and committed, so the bytes must not depend on
+        # which machine ran the pipeline.
         out_path = glossary_path.parent / f"glossary.{lang}.yaml"
-        with open(out_path, "w", encoding="utf-8") as f:
+        with open(out_path, "w", encoding="utf-8", newline="\n") as f:
             yaml.dump(sorted_translations, f)
 
         print(f"Generated {out_path} ({len(sorted_translations)} entries)")

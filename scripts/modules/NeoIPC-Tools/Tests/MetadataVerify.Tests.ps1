@@ -1,10 +1,22 @@
-# Pester 5 tests for the round-trip import verifier (Public/MetadataVerify.ps1). Self-contained: the DHIS2
-# read-back (Invoke-NeoIPCDhis2Get) is mocked from a synthetic in-memory "server state", so no live instance
-# is needed. The mock returns, per `api/<type>` request, a { <type> = [...] } envelope built from
-# $script:VState — the shape fields=:owner produces (owned ref-collections as bare { id } objects). NestedOnly
-# children are diffed out of their PARENT's expanded read-back (the verifier requests
-# fields=:owner,<arrayProp>[:owner]), so the parent's VState entry carries the children as FULL objects — there
-# is no separate child-type endpoint (it does not exist in DHIS2 2.40).
+#Requires -Version 7.6
+
+<#
+.SYNOPSIS
+    Pester tests for the round-trip metadata import verifier.
+
+.DESCRIPTION
+    Covers Public/MetadataVerify.ps1. Self-contained: the DHIS2 read-back is mocked from a synthetic
+    in-memory server state, so no live instance is needed and no API call is made.
+
+    The mock returns, for each per-type request, the envelope shape that an owner-field projection produces —
+    owned reference collections as bare id objects. Nested-only children are diffed out of their PARENT's
+    expanded read-back, because the verifier requests the parent with its child array expanded and DHIS2 2.40
+    exposes no separate endpoint for those child types. So a parent's mocked state carries its children as
+    full objects rather than as references.
+
+.EXAMPLE
+    Invoke-Pester -Path scripts/modules/NeoIPC-Tools/Tests/MetadataVerify.Tests.ps1
+#>
 #
 # Discrepancies are read via Get-VDisc, which filters to the records that carry a Kind — matching how the
 # seed gate consumes the result (`$disc | Where-Object { $_.Kind -in ... }`). That also sidesteps the

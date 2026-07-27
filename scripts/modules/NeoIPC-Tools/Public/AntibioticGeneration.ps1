@@ -1,3 +1,4 @@
+#Requires -Version 7.6
 # NeoIPC metadata pipeline — antibiotic-domain generators (the importable DHIS2 objects built from the
 # reconciled antibiotic sources rather than hand-authored in the directory CSVs). See
 # metadata/common/antibiotics/README.md for the curation model these reproduce.

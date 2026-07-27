@@ -1,3 +1,4 @@
+#Requires -Version 7.6
 # NeoIPC metadata pipeline — expression analysis + source transforms (private, not exported).
 # Node-free (PowerShell/regex): no @dhis2/expression-parser dependency — NeoIPC's expressions reference
 # variables by name (resolved structurally), and the issue classes linted below all parse/validate clean,

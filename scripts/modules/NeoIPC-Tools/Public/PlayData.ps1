@@ -1,3 +1,4 @@
+#Requires -Version 7.6
 function New-NeoIPCPlayDataPackage {
     <#
     .SYNOPSIS
@@ -62,7 +63,7 @@ function New-NeoIPCPlayDataPackage {
     if ($PassThru) { return $payload }
     $json = $payload | ConvertTo-Json -Depth 100 -Compress:$Compress
     if ($OutputPath) {
-        [System.IO.File]::WriteAllText($OutputPath, $json, [System.Text.UTF8Encoding]::new($false))
+        Write-NeoIPCTextFile -Path $OutputPath -Text $json
         return
     }
     $json

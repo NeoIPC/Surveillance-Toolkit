@@ -1,0 +1,42 @@
+# Editor-side half of the LF policy declared in .gitattributes. Git normalizes what is committed;
+# this stops an editor writing CRLF into the working tree in the first place, so a diff never shows
+# a whole file changed because someone opened it in a tool with different defaults.
+#
+# Coverage is uneven, which is why this file is not the whole story. Visual Studio and the JetBrains
+# IDEs honour it natively. **VS Code does not** — it needs the EditorConfig.EditorConfig extension —
+# and RStudio does not honour it reliably either. So the same settings are repeated in
+# .vscode/settings.json (files.eol / files.encoding) and in each report's .Rproj
+# (LineEndingConversion / Encoding). Those are not redundant; they are the coverage this file lacks.
+root = true
+
+[*]
+end_of_line = lf
+charset = utf-8
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Markdown uses two trailing spaces as a hard line break, so trailing whitespace is significant.
+[*.md]
+trim_trailing_whitespace = false
+
+# gettext catalogues are machine-written and must round-trip byte-for-byte; leave every byte alone.
+[*.{po,pot}]
+insert_final_newline = false
+trim_trailing_whitespace = false
+
+# Deliberately no `[*.dhis2]` carve-out, and that took a correction to get right.
+#
+# The 708 DHIS2 expression files used to carry no closing newline, because the generator that writes them
+# emitted the expression bytes and nothing else. The tempting fix was to switch `insert_final_newline` off
+# for the format, so an editor would not add what the generator would only strip again. That is the wrong
+# therapy for a correct diagnosis: a carve-out has to be justified by the format being unable to represent
+# the result, and this format represents it fine — a trailing newline lands in a JSON string as `\n`, and
+# the DHIS2 grammar skips whitespace between tokens, so nothing breaks and nothing is misevaluated.
+#
+# So the generator was fixed instead. `Write-NeoIPCMetadataExpressionFiles` now strips trailing whitespace
+# and appends exactly one newline; the reader strips it again, leaving the expression that reaches the API
+# payload unchanged and making write-then-read idempotent. The files are now ordinary conforming text, both
+# settings above apply to them like anything else, and the editor and the generator agree — which is the
+# whole point, since two writers disagreeing about one file is the failure this contract exists to stop.
+# That had already happened, quietly: two expressions were found carrying a stray trailing newline (one of
+# them a duplicate blank line), sitting in the metadata that way.

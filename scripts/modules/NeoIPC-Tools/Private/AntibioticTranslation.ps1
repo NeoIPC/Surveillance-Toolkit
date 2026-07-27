@@ -1,3 +1,4 @@
+#Requires -Version 7.6
 # NeoIPC metadata pipeline — antibiotic translation catalogue (PO) helpers (private, not exported).
 # The antibiotic domain is translated in its OWN bilingual gettext component (po/antibiotics.pot + .po), keyed by
 # the English STRING (bare msgid, no msgctxt — so Get-NeoIPCPoTranslationMap reads it, like po4a's infectious_agents

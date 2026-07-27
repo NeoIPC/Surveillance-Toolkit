@@ -1,4 +1,6 @@
+#!/usr/bin/env pwsh
 #requires -Version 7.6
+
 <#
 .SYNOPSIS
     Render the NeoIPC Core data-dictionary release artifact (CSV + .xlsx) from the canonical metadata.

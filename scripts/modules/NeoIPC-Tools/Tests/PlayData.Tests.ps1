@@ -1,10 +1,20 @@
-# Pester 5 tests for the play demo-data pipeline (Private/PlayData.ps1 + Public/PlayData.ps1).
-# Self-contained: the pure assembler / serializer / reader are exercised with hand-built code maps and
-# temp CSVs, so the suite runs with no DHIS2 instance. The live import (Import-NeoIPCPlayData) and the
-# code-map fetch (Get-NeoIPCPlayDataCodeMap) hit the API, so they are covered by the workspace integration
-# seed, not here.
-#
-# Run:  Invoke-Pester -Path scripts/modules/NeoIPC-Tools/Tests/PlayData.Tests.ps1
+#Requires -Version 7.6
+
+<#
+.SYNOPSIS
+    Pester tests for the play demo-data pipeline.
+
+.DESCRIPTION
+    Covers Private/PlayData.ps1 and Public/PlayData.ps1. Self-contained: the pure assembler, serializer
+    and directory reader are exercised with hand-built code maps and temporary CSVs, so the suite needs no
+    DHIS2 instance.
+
+    Two functions are deliberately out of scope here because they call the API — the live import and the
+    code-map fetch. Those are covered by the workspace integration seed instead.
+
+.EXAMPLE
+    Invoke-Pester -Path scripts/modules/NeoIPC-Tools/Tests/PlayData.Tests.ps1
+#>
 
 $ErrorActionPreference = 'Stop'
 Import-Module (Join-Path $PSScriptRoot '..') -Force
@@ -12,6 +22,11 @@ Import-Module (Join-Path $PSScriptRoot '..') -Force
 InModuleScope 'NeoIPC-Tools' {
 
     BeforeAll {
+        # Set-TestFileContent — writes fixtures with LF endings on every platform. Dot-sourced here
+        # because neither script scope nor the top of InModuleScope is visible during Pester's run
+        # phase (see the header of TestFileHelpers.ps1).
+        . (Join-Path $PSScriptRoot '..' '..' 'TestFileHelpers.ps1')
+
         # A hand-built code map — the offline stand-in for Get-NeoIPCPlayDataCodeMap's fetch. Map values are
         # opaque UIDs the converters copy through; only the play-data row ids must be real 11-char UIDs.
         $script:Map = @{
@@ -109,12 +124,12 @@ InModuleScope 'NeoIPC-Tools' {
             $script:Dir = Join-Path $TestDrive ([System.Guid]::NewGuid().ToString('N'))
             foreach ($tier in 'bulk', 'curated') { New-Item -ItemType Directory -Path (Join-Path $script:Dir $tier) -Force | Out-Null }
             # A minimal valid one-patient set in curated/; bulk/ stays header-only.
-            Set-Content -LiteralPath (Join-Path $script:Dir 'curated/trackedEntities.csv') -Value "id,orgUnit,NEOIPC_PATIENT_ID,NEOIPC_TEA_SEX`ntrkFixAAAA1,AT_TEST_TEST,E2E-TC-FIXTURE,m"
-            Set-Content -LiteralPath (Join-Path $script:Dir 'curated/enrollments.csv') -Value "id,trackedEntity,orgUnit,enrolledAt,occurredAt,status,completedAt`nenrActAAAA1,trkFixAAAA1,AT_TEST_TEST,2025-03-01,2025-03-01,ACTIVE,"
-            Set-Content -LiteralPath (Join-Path $script:Dir 'curated/events.csv') -Value "id,enrollment,programStage,orgUnit,occurredAt,status,completedAt`nevtAdmAAAA1,enrActAAAA1,adm,AT_TEST_TEST,2025-03-01,COMPLETED,2025-03-01"
-            Set-Content -LiteralPath (Join-Path $script:Dir 'curated/eventDataValues.csv') -Value "event,dataElement,value`nevtAdmAAAA1,NEOIPC_ADMISSION_TYPE,1"
+            Set-TestFileContent -LiteralPath (Join-Path $script:Dir 'curated/trackedEntities.csv') -Value "id,orgUnit,NEOIPC_PATIENT_ID,NEOIPC_TEA_SEX`ntrkFixAAAA1,AT_TEST_TEST,E2E-TC-FIXTURE,m"
+            Set-TestFileContent -LiteralPath (Join-Path $script:Dir 'curated/enrollments.csv') -Value "id,trackedEntity,orgUnit,enrolledAt,occurredAt,status,completedAt`nenrActAAAA1,trkFixAAAA1,AT_TEST_TEST,2025-03-01,2025-03-01,ACTIVE,"
+            Set-TestFileContent -LiteralPath (Join-Path $script:Dir 'curated/events.csv') -Value "id,enrollment,programStage,orgUnit,occurredAt,status,completedAt`nevtAdmAAAA1,enrActAAAA1,adm,AT_TEST_TEST,2025-03-01,COMPLETED,2025-03-01"
+            Set-TestFileContent -LiteralPath (Join-Path $script:Dir 'curated/eventDataValues.csv') -Value "event,dataElement,value`nevtAdmAAAA1,NEOIPC_ADMISSION_TYPE,1"
             foreach ($f in 'trackedEntities', 'enrollments', 'events', 'eventDataValues') {
-                Set-Content -LiteralPath (Join-Path $script:Dir "bulk/$f.csv") -Value (Get-Content -LiteralPath (Join-Path $script:Dir "curated/$f.csv") -TotalCount 1)
+                Set-TestFileContent -LiteralPath (Join-Path $script:Dir "bulk/$f.csv") -Value (Get-Content -LiteralPath (Join-Path $script:Dir "curated/$f.csv") -TotalCount 1)
             }
         }
         It 'reads and merges the tiers, exposing the TEA columns as an Attributes map' {
@@ -126,56 +141,56 @@ InModuleScope 'NeoIPC-Tools' {
             $te['Attributes'].Contains('id') | Should -BeFalse
         }
         It 'rejects an invalid tracked-entity UID' {
-            Set-Content -LiteralPath (Join-Path $script:Dir 'curated/trackedEntities.csv') -Value "id,orgUnit,NEOIPC_PATIENT_ID`nnope,AT_TEST_TEST,E2E-TC-FIXTURE"
+            Set-TestFileContent -LiteralPath (Join-Path $script:Dir 'curated/trackedEntities.csv') -Value "id,orgUnit,NEOIPC_PATIENT_ID`nnope,AT_TEST_TEST,E2E-TC-FIXTURE"
             { Read-NeoIPCPlayDataDirectory -Path $script:Dir } | Should -Throw '*invalid UID*'
         }
         It 'rejects a tracked entity with no NEOIPC_PATIENT_ID' {
-            Set-Content -LiteralPath (Join-Path $script:Dir 'curated/trackedEntities.csv') -Value "id,orgUnit,NEOIPC_TEA_SEX`ntrkFixAAAA1,AT_TEST_TEST,m"
+            Set-TestFileContent -LiteralPath (Join-Path $script:Dir 'curated/trackedEntities.csv') -Value "id,orgUnit,NEOIPC_TEA_SEX`ntrkFixAAAA1,AT_TEST_TEST,m"
             { Read-NeoIPCPlayDataDirectory -Path $script:Dir } | Should -Throw '*no NEOIPC_PATIENT_ID*'
         }
         It 'rejects a dangling enrollment.trackedEntity reference' {
-            Set-Content -LiteralPath (Join-Path $script:Dir 'curated/enrollments.csv') -Value "id,trackedEntity,orgUnit,enrolledAt,occurredAt,status,completedAt`nenrActAAAA1,trkOtherAA1,AT_TEST_TEST,2025-03-01,2025-03-01,ACTIVE,"
+            Set-TestFileContent -LiteralPath (Join-Path $script:Dir 'curated/enrollments.csv') -Value "id,trackedEntity,orgUnit,enrolledAt,occurredAt,status,completedAt`nenrActAAAA1,trkOtherAA1,AT_TEST_TEST,2025-03-01,2025-03-01,ACTIVE,"
             { Read-NeoIPCPlayDataDirectory -Path $script:Dir } | Should -Throw '*unknown tracked entity*'
         }
         It 'rejects an invalid enrollment status' {
-            Set-Content -LiteralPath (Join-Path $script:Dir 'curated/enrollments.csv') -Value "id,trackedEntity,orgUnit,enrolledAt,occurredAt,status,completedAt`nenrActAAAA1,trkFixAAAA1,AT_TEST_TEST,2025-03-01,2025-03-01,OPEN,"
+            Set-TestFileContent -LiteralPath (Join-Path $script:Dir 'curated/enrollments.csv') -Value "id,trackedEntity,orgUnit,enrolledAt,occurredAt,status,completedAt`nenrActAAAA1,trkFixAAAA1,AT_TEST_TEST,2025-03-01,2025-03-01,OPEN,"
             { Read-NeoIPCPlayDataDirectory -Path $script:Dir } | Should -Throw '*invalid status*'
         }
         It 'rejects an unknown programStage key' {
-            Set-Content -LiteralPath (Join-Path $script:Dir 'curated/events.csv') -Value "id,enrollment,programStage,orgUnit,occurredAt,status,completedAt`nevtAdmAAAA1,enrActAAAA1,xyz,AT_TEST_TEST,2025-03-01,COMPLETED,2025-03-01"
+            Set-TestFileContent -LiteralPath (Join-Path $script:Dir 'curated/events.csv') -Value "id,enrollment,programStage,orgUnit,occurredAt,status,completedAt`nevtAdmAAAA1,enrActAAAA1,xyz,AT_TEST_TEST,2025-03-01,COMPLETED,2025-03-01"
             { Read-NeoIPCPlayDataDirectory -Path $script:Dir } | Should -Throw '*unknown programStage*'
         }
         It 'rejects a dangling event.enrollment reference' {
-            Set-Content -LiteralPath (Join-Path $script:Dir 'curated/events.csv') -Value "id,enrollment,programStage,orgUnit,occurredAt,status,completedAt`nevtAdmAAAA1,enrOtherAA1,adm,AT_TEST_TEST,2025-03-01,COMPLETED,2025-03-01"
+            Set-TestFileContent -LiteralPath (Join-Path $script:Dir 'curated/events.csv') -Value "id,enrollment,programStage,orgUnit,occurredAt,status,completedAt`nevtAdmAAAA1,enrOtherAA1,adm,AT_TEST_TEST,2025-03-01,COMPLETED,2025-03-01"
             { Read-NeoIPCPlayDataDirectory -Path $script:Dir } | Should -Throw '*unknown enrollment*'
         }
         It 'rejects a dangling eventDataValue.event reference' {
-            Set-Content -LiteralPath (Join-Path $script:Dir 'curated/eventDataValues.csv') -Value "event,dataElement,value`nevtNoSuchE1,NEOIPC_ADMISSION_TYPE,1"
+            Set-TestFileContent -LiteralPath (Join-Path $script:Dir 'curated/eventDataValues.csv') -Value "event,dataElement,value`nevtNoSuchE1,NEOIPC_ADMISSION_TYPE,1"
             { Read-NeoIPCPlayDataDirectory -Path $script:Dir } | Should -Throw '*unknown event*'
         }
         It 'rejects a duplicate tracked-entity UID across tiers' {
-            Set-Content -LiteralPath (Join-Path $script:Dir 'bulk/trackedEntities.csv') -Value "id,orgUnit,NEOIPC_PATIENT_ID`ntrkFixAAAA1,DE_TEST_TEST,DEMO-9999"
+            Set-TestFileContent -LiteralPath (Join-Path $script:Dir 'bulk/trackedEntities.csv') -Value "id,orgUnit,NEOIPC_PATIENT_ID`ntrkFixAAAA1,DE_TEST_TEST,DEMO-9999"
             { Read-NeoIPCPlayDataDirectory -Path $script:Dir } | Should -Throw '*Duplicate tracked-entity UID*'
         }
         It 'rejects a duplicate NEOIPC_PATIENT_ID within the same org unit' {
-            Set-Content -LiteralPath (Join-Path $script:Dir 'bulk/trackedEntities.csv') -Value "id,orgUnit,NEOIPC_PATIENT_ID`ntrkDupAAAA1,AT_TEST_TEST,E2E-TC-FIXTURE"
+            Set-TestFileContent -LiteralPath (Join-Path $script:Dir 'bulk/trackedEntities.csv') -Value "id,orgUnit,NEOIPC_PATIENT_ID`ntrkDupAAAA1,AT_TEST_TEST,E2E-TC-FIXTURE"
             { Read-NeoIPCPlayDataDirectory -Path $script:Dir } | Should -Throw '*Duplicate NEOIPC_PATIENT_ID*'
         }
         It 'allows the same NEOIPC_PATIENT_ID in different org units (the attribute is unique per org unit)' {
             # DEMO-#### legitimately repeats across departments in the generated bulk tier.
-            Set-Content -LiteralPath (Join-Path $script:Dir 'bulk/trackedEntities.csv') -Value "id,orgUnit,NEOIPC_PATIENT_ID`ntrkDupAAAA1,DE_TEST_TEST,E2E-TC-FIXTURE"
+            Set-TestFileContent -LiteralPath (Join-Path $script:Dir 'bulk/trackedEntities.csv') -Value "id,orgUnit,NEOIPC_PATIENT_ID`ntrkDupAAAA1,DE_TEST_TEST,E2E-TC-FIXTURE"
             (Read-NeoIPCPlayDataDirectory -Path $script:Dir).TrackedEntities.Count | Should -Be 2
         }
         It 'rejects an enrollment that sets completedAt on a non-COMPLETED status' {
-            Set-Content -LiteralPath (Join-Path $script:Dir 'curated/enrollments.csv') -Value "id,trackedEntity,orgUnit,enrolledAt,occurredAt,status,completedAt`nenrActAAAA1,trkFixAAAA1,AT_TEST_TEST,2025-03-01,2025-03-01,ACTIVE,2025-04-01"
+            Set-TestFileContent -LiteralPath (Join-Path $script:Dir 'curated/enrollments.csv') -Value "id,trackedEntity,orgUnit,enrolledAt,occurredAt,status,completedAt`nenrActAAAA1,trkFixAAAA1,AT_TEST_TEST,2025-03-01,2025-03-01,ACTIVE,2025-04-01"
             { Read-NeoIPCPlayDataDirectory -Path $script:Dir } | Should -Throw '*completedAt*'
         }
         It 'allows a COMPLETED enrollment with a blank completedAt (the server fills it on completion)' {
-            Set-Content -LiteralPath (Join-Path $script:Dir 'curated/enrollments.csv') -Value "id,trackedEntity,orgUnit,enrolledAt,occurredAt,status,completedAt`nenrActAAAA1,trkFixAAAA1,AT_TEST_TEST,2025-03-01,2025-03-01,COMPLETED,"
+            Set-TestFileContent -LiteralPath (Join-Path $script:Dir 'curated/enrollments.csv') -Value "id,trackedEntity,orgUnit,enrolledAt,occurredAt,status,completedAt`nenrActAAAA1,trkFixAAAA1,AT_TEST_TEST,2025-03-01,2025-03-01,COMPLETED,"
             (Read-NeoIPCPlayDataDirectory -Path $script:Dir).Enrollments.Count | Should -Be 1
         }
         It 'rejects an event that sets completedAt on a non-COMPLETED status' {
-            Set-Content -LiteralPath (Join-Path $script:Dir 'curated/events.csv') -Value "id,enrollment,programStage,orgUnit,occurredAt,status,completedAt`nevtAdmAAAA1,enrActAAAA1,adm,AT_TEST_TEST,2025-03-01,ACTIVE,2025-03-02"
+            Set-TestFileContent -LiteralPath (Join-Path $script:Dir 'curated/events.csv') -Value "id,enrollment,programStage,orgUnit,occurredAt,status,completedAt`nevtAdmAAAA1,enrActAAAA1,adm,AT_TEST_TEST,2025-03-01,ACTIVE,2025-03-02"
             { Read-NeoIPCPlayDataDirectory -Path $script:Dir } | Should -Throw '*completedAt*'
         }
     }

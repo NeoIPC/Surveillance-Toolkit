@@ -1,3 +1,4 @@
+#Requires -Version 7.6
 # DHIS2 version-1 personal access tokens consist of three parts:
 # 1. The prefix: (d2pat_)
 # 2. A 32-character alphanumeric [A-Za-z0-9] random part. There is no

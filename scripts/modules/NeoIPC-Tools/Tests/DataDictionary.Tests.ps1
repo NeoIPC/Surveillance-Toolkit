@@ -1,9 +1,20 @@
-# Pester 5 tests for the NeoIPC data-dictionary generator (Private/DataDictionary.ps1 + Public/DataDictionary.ps1).
-# Self-contained: every fixture is a synthetic in-memory package, so the suite runs against a standalone
-# Surveillance-Toolkit checkout with no DHIS2 metadata.json and no package assembly. The XLSX case is skipped
-# unless the DocumentFormat.OpenXml assembly has been provisioned.
-#
-# Run:  Invoke-Pester -Path scripts/modules/NeoIPC-Tools/Tests/DataDictionary.Tests.ps1
+#Requires -Version 7.6
+
+<#
+.SYNOPSIS
+    Pester tests for the NeoIPC data-dictionary generator.
+
+.DESCRIPTION
+    Covers Private/DataDictionary.ps1 and Public/DataDictionary.ps1. Self-contained: every fixture is a
+    synthetic in-memory package, so the suite runs against a standalone Surveillance-Toolkit checkout with
+    neither a deployed metadata snapshot nor a package assembly step.
+
+    The spreadsheet case is skipped unless the DocumentFormat.OpenXml assembly has been provisioned, so an
+    unprovisioned checkout reports a skip rather than a failure.
+
+.EXAMPLE
+    Invoke-Pester -Path scripts/modules/NeoIPC-Tools/Tests/DataDictionary.Tests.ps1
+#>
 #
 # Private helpers are exercised via InModuleScope. The Import-Module at file top runs during Pester's
 # discovery phase, which InModuleScope requires.

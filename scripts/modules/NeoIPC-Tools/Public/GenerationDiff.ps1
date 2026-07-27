@@ -1,3 +1,4 @@
+#Requires -Version 7.6
 # The validation gate for the ontology / capability-matrix generation: a CLASSIFIED diff of the generated families
 # against the deployed export. The deployed program is a baseline to review against, not a target to match, so a
 # large fully-classified diff is healthy; the gate failure is any delta that does not match a known bucket.
