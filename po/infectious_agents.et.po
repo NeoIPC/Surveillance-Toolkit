@@ -3,6 +3,7 @@
 # This file is distributed under the Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International license
 # Automatically generated, 2026.
 #
+# Brar Piening <brar@gmx.de>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: NeoIPC Surveillance Infectious Agent List 0.9\n"
