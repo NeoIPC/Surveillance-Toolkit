@@ -11,14 +11,17 @@ function Export-NeoIPCAntibioticTranslation {
         The antibiotic domain is translated in its own bilingual gettext component, keyed by the English string
         (bare msgid, no msgctxt — read by Get-NeoIPCPoTranslationMap, like po4a's infectious_agents catalogue). This
         cmdlet collects the full translatable surface — substance names (+ shortName/formName/description where the
-        source carries them), the ATC + AWaRe group name/shortName/description, the ATC5/WHO_AWARE group-set
-        name/description, and the printed-list UI labels (ListElements.csv) — de-duplicates it, and:
+        source carries them), the ATC group name/shortName (that source carries no description), the AWaRe group
+        name/shortName/description, the ATC5/WHO_AWARE group-set name/description, and the printed-list UI labels
+        (ListElements.csv) — de-duplicates it, and:
 
           - writes the template po/<PoBaseName>.pot (all msgstr empty);
           - for every EXISTING po/<PoBaseName>.<locale>.po, msgmerge-updates it (msgid set + order from the sources;
             each existing msgstr + fuzzy flag preserved by msgid; strings dropped from the sources become obsolete;
-            new strings get an empty msgstr). New locales are NOT created here — Weblate creates them from the .pot
-            as translators need them (matching the metadata catalogue's policy).
+            new strings get an empty msgstr). New locales are NOT created here. This catalogue is not hosted on
+            Weblate — its CC BY-NC-SA 3.0 IGO licence is not free, which Hosted Weblate's free plan requires — so
+            nothing adds a language automatically: add the .po by hand (or copy the .pot) and this cmdlet maintains
+            it from then on.
 
         Pure file processing — no DHIS2 API. Both the .pot and each updated .po are msgfmt-validated (best-effort;
         a warning, never a hard failure, when gettext is unavailable). ATC/AWaRe content is reproduced under WHO

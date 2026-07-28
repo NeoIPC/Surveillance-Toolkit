@@ -9,15 +9,22 @@
     Wraps po4a, the glossary script, YAML key extraction, and string layer
     validation into a single entry point with tab-completable parameters.
 
-    Catalogue ownership: the repository owns every .pot template, and also owns the
+    Catalogue ownership: the repository owns every .pot template. It also owns the
     catalogues of the three domains that are NOT hosted on Weblate — glossary,
-    scripts and antibiotics — where this pipeline is their only writer. For the rest
-    (reports, documentation, infectious_agents, metadata) Weblate is the only writer,
-    and po4a msgmerges them as an unavoidable side effect of every run, so -Update
-    restores those from HEAD once the localized artifacts exist. Two writers on one
-    catalogue is what conflicts every language at once: both sides rewrite adjacent
-    header lines (POT-Creation-Date against PO-Revision-Date / Last-Translator /
-    Language-Team / X-Generator) inside a single hunk git cannot auto-merge.
+    scripts and antibiotics — each of which has a writer here that keeps it in step
+    with its template: update-glossary-po.py, po4a, and the NeoIPC-Tools antibiotic
+    exporter respectively. For the rest (reports, documentation, infectious_agents,
+    metadata) Weblate is the only writer, and po4a msgmerges them as an unavoidable
+    side effect of every run, so -Update restores those from HEAD once the localized
+    artifacts exist. Two writers on one catalogue is what conflicts every language at
+    once: both sides rewrite adjacent header lines (POT-Creation-Date against
+    PO-Revision-Date / Last-Translator / Language-Team / X-Generator) inside a single
+    hunk git cannot auto-merge.
+
+    One gap remains and is not covered here: po/metadata.<lang>.po is Weblate-owned,
+    but Export-NeoIPCMetadataTranslation still rewrites it. That cmdlet belongs to the
+    metadata pipeline, which this script never invokes, so a run of -Update cannot
+    trip it — but a metadata refresh can.
 
     Update pipeline (default -Config all):
       1. Fix string layer duplicates (Test-StringResourceLayers.ps1 -Fix)
@@ -366,12 +373,15 @@ function Assert-CleanWeblatePo {
 }
 
 function Restore-WeblateOwnedPo {
-    # Every generator here rewrites the .po files as a side effect of producing its .pot: po4a because
-    # "The PO files are always re-generated based on the POT with msgmerge -U" (its own docs) with no
-    # flag to suppress only that, and Export-NeoIPCAntibioticTranslation because it msgmerges each
-    # existing locale in code. Weblate is their only writer, so restore them from HEAD once the
-    # generator has produced the localized artifacts. This is what keeps the repository out of the
-    # header hunk Weblate also writes.
+    # po4a rewrites the .po files as a side effect of producing its .pot — "The PO files are always
+    # re-generated based on the POT with msgmerge -U" (its own docs) — and offers no flag that
+    # suppresses only that. Weblate is the only writer of the catalogues passed here, so they are
+    # restored from HEAD once po4a has produced the localized artifacts. That is what keeps the
+    # repository out of the header hunk Weblate also writes.
+    #
+    # Only Weblate-owned catalogues are ever passed in. The antibiotic and glossary catalogues are
+    # repository-owned and are written by their own generators, so restoring them would discard the
+    # regeneration and freeze them at HEAD with nothing else to maintain them.
     param([Parameter(Mandatory)][string[]]$RelativePath)
 
     $declared = @($RelativePath)

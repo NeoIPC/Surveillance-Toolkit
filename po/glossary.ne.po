@@ -232,8 +232,12 @@ msgstr ""
 #. Spanish "Precaución", per
 #. the WHO AWaRe antibiotic book — NOT "Vigilancia", which this project uses
 #. for "surveillance" and
-#. would therefore collide, and not the bare verb "Ver".
-#: glossary.yaml:93
+#. would therefore collide, and not the bare verb "Ver". Italian is
+#. deliberately left untranslated
+#. rather than inheriting "Sorveglianza" from the reports catalogue, which has
+#. the same collision; it
+#. needs the WHO Italian edition rather than a guess.
+#: glossary.yaml:95
 #, terminology
 msgctxt "watch"
 msgid "Watch"

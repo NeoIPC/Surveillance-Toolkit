@@ -5,17 +5,22 @@ Replaces po4a for glossary management, providing full PO feature support:
 msgctxt (variant grouping), msgid_plural (plurals), translator comments,
 flags, locations with line numbers, and additional states.
 
-Catalogue ownership: this script writes po/glossary.pot and nothing else. It no
-longer generates the per-language po/glossary.<lang>.po, because a generator that
-rewrites a catalogue somebody else also writes is what conflicts every language at
-once -- both sides rewrite adjacent header lines inside a single hunk git cannot
-auto-merge. Reading them is unaffected, and --generate-yaml does exactly that.
+Catalogue ownership: this script writes BOTH po/glossary.pot and every
+po/glossary.<lang>.po, and it is their only writer.
 
-Who writes them instead depends on registration. The other catalogues here are
-Weblate components, so Weblate's msgmerge add-on brings their .po up to a changed
-.pot. po/glossary.*.po is NOT yet registered, so nothing writes it: it is
-repository-owned, hand-editable, and must be kept in step with this .pot by hand
-until the component exists.
+That is the opposite of the rule for the other catalogues here, and deliberately
+so. The others are Weblate components, so Weblate owns their .po and its msgmerge
+add-on brings them up to a changed .pot; a generator writing them as well would
+put two writers on one file, which is what conflicts every language of a catalogue
+at once -- both sides rewrite adjacent header lines inside a single hunk git
+cannot auto-merge. The glossary is NOT registered as a component, so no second
+writer exists and this script has to keep the catalogues in step with the template
+itself. Nothing else would: a term added to glossary.yaml would otherwise reach
+the .pot alone, be translatable nowhere, and silently never appear in any
+generated glossary.<lang>.yaml.
+
+**Remove the merge the moment the component is registered on Weblate**, or the
+two-writer conflict returns here.
 
 Naming convention in glossary.yaml:
     key             = AMA canonical (lowercase)
@@ -34,7 +39,7 @@ YAML comment conventions:
     See https://docs.weblate.org/en/latest/admin/checks.html for available flags.
 
 Usage:
-    # Extract YAML -> POT
+    # Extract YAML -> POT, and merge the result into every language catalogue
     python scripts/update-glossary-po.py
 
     # Also generate localized YAML from the committed PO files
@@ -234,6 +239,149 @@ def yaml_to_pot(glossary_path, pot_path):
     return pot
 
 
+# Flags that are managed by translators/Weblate, not by the source YAML.
+# These are preserved from existing PO files during merge; all other flags
+# are replaced by whatever the POT specifies.
+TRANSLATOR_FLAGS = {"fuzzy", "ignore-same"}
+
+
+def _merge_flags(pot_flags, po_flags):
+    """Merge source flags (from POT/YAML) with translator flags (from PO).
+
+    POT flags are authoritative — they replace all non-translator flags.
+    Only translator-managed flags (e.g. ``fuzzy``) are preserved from the
+    existing PO.  Returns a deduplicated list.
+    """
+    merged = list(pot_flags or [])
+    for f in (po_flags or []):
+        if f in TRANSLATOR_FLAGS and f not in merged:
+            merged.append(f)
+    return merged
+
+
+LANGUAGE_NAMES = {
+    "af": "Afrikaans", "de": "German", "es": "Spanish", "et": "Estonian",
+    "el": "Greek", "fr": "French", "it": "Italian", "ne": "Nepali",
+    "tr": "Turkish",
+}
+
+
+def _po_header_comment(lang):
+    """Generate the file-level comment block for a new PO file."""
+    lang_name = LANGUAGE_NAMES.get(lang, lang)
+    return (
+        f"{lang_name} translations for the NeoIPC Surveillance Glossary\n"
+        "Copyright (C) Charité – Universitätsmedizin Berlin\n"
+        "This file is distributed under the Creative Commons "
+        "Attribution 4.0 International license\n"
+        "FIRST AUTHOR <EMAIL@ADDRESS>"
+    )
+
+
+def merge_po(pot_path, po_path):
+    """Merge a POT into an existing PO file, preserving translations."""
+    pot = polib.pofile(str(pot_path))
+
+    # Extract language code from filename (glossary.<lang>.po)
+    lang = po_path.stem.split(".")[-1]
+
+    if not po_path.exists():
+        # Create a new PO from the POT
+        po = polib.POFile()
+        po.header = _po_header_comment(lang)
+        po.metadata = {**pot.metadata}
+        po.metadata["Language"] = lang
+        for entry in pot:
+            new_entry = polib.POEntry(
+                msgctxt=entry.msgctxt,
+                msgid=entry.msgid,
+                msgid_plural=entry.msgid_plural,
+                msgstr="" if not entry.msgid_plural else None,
+                msgstr_plural=({i: "" for i in range(2)}
+                               if entry.msgid_plural else None),
+                comment=entry.comment,
+                occurrences=entry.occurrences,
+            )
+            if entry.flags:
+                new_entry.flags = list(entry.flags)
+            po.append(new_entry)
+        po.save(str(po_path), newline="\n")
+        print(f"Created {po_path}")
+        return
+
+    po = polib.pofile(str(po_path))
+
+    # Build lookup of existing translations by (msgctxt, msgid)
+    existing = {}
+    for entry in po:
+        existing[(entry.msgctxt, entry.msgid)] = entry
+
+    # Also try matching by msgid alone (for migration from po4a which had
+    # no msgctxt)
+    existing_by_msgid = {}
+    for entry in po:
+        if not entry.msgctxt and entry.msgid:
+            existing_by_msgid[entry.msgid] = entry
+
+    new_po = polib.POFile()
+    new_po.header = po.header or _po_header_comment(lang)
+    new_po.metadata = {**po.metadata}
+
+    for pot_entry in pot:
+        key = (pot_entry.msgctxt, pot_entry.msgid)
+
+        if key in existing:
+            # Exact match — preserve translation, merge flags
+            old = existing[key]
+            merged_flags = _merge_flags(pot_entry.flags, old.flags)
+            new_entry = polib.POEntry(
+                msgctxt=pot_entry.msgctxt,
+                msgid=pot_entry.msgid,
+                msgid_plural=pot_entry.msgid_plural,
+                msgstr=old.msgstr if not pot_entry.msgid_plural else "",
+                msgstr_plural=(old.msgstr_plural
+                               if pot_entry.msgid_plural else None),
+                comment=pot_entry.comment,
+                occurrences=pot_entry.occurrences,
+            )
+            new_entry.flags = merged_flags
+        elif pot_entry.msgid in existing_by_msgid:
+            # Migration: match by msgid (old po4a entry without msgctxt)
+            old = existing_by_msgid[pot_entry.msgid]
+            new_entry = polib.POEntry(
+                msgctxt=pot_entry.msgctxt,
+                msgid=pot_entry.msgid,
+                msgid_plural=pot_entry.msgid_plural,
+                msgstr=old.msgstr if not pot_entry.msgid_plural else "",
+                msgstr_plural=(old.msgstr_plural
+                               if pot_entry.msgid_plural else None),
+                comment=pot_entry.comment,
+                occurrences=pot_entry.occurrences,
+            )
+            new_entry.flags = _merge_flags(pot_entry.flags, old.flags)
+        else:
+            # New entry — no translation yet
+            new_entry = polib.POEntry(
+                msgctxt=pot_entry.msgctxt,
+                msgid=pot_entry.msgid,
+                msgid_plural=pot_entry.msgid_plural,
+                msgstr="" if not pot_entry.msgid_plural else None,
+                msgstr_plural=({i: "" for i in range(2)}
+                               if pot_entry.msgid_plural else None),
+                comment=pot_entry.comment,
+                occurrences=pot_entry.occurrences,
+            )
+            if pot_entry.flags:
+                new_entry.flags = list(pot_entry.flags)
+
+        new_po.append(new_entry)
+
+    new_po.save(str(po_path), newline="\n")
+    translated = len([e for e in new_po if e.msgstr or
+                      (e.msgstr_plural and any(e.msgstr_plural.values()))])
+    print(f"Updated {po_path} ({translated}/{len(new_po)} translated)")
+
+
 def generate_yaml(po_dir, glossary_path, languages, threshold=80):
     """Generate glossary.<lang>.yaml from translated PO files.
 
@@ -340,6 +488,13 @@ def main():
         sys.exit(f"Error: {args.glossary} not found")
 
     yaml_to_pot(args.glossary, args.pot)
+
+    # The glossary catalogue is repository-owned -- it is not a Weblate component -- so this script
+    # is its writer and must keep every .po in step with the template it just regenerated. Remove
+    # this loop at the moment the component is registered on Weblate, or there will be two writers
+    # on one file again, which is the failure the rest of the pipeline exists to prevent.
+    for lang in args.languages:
+        merge_po(args.pot, args.po_dir / f"glossary.{lang}.po")
 
     if args.generate_yaml:
         generate_yaml(args.po_dir, args.glossary, args.languages,

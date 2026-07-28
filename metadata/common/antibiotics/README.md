@@ -22,7 +22,7 @@ combination and topical agents are excluded.
 | File | Contents |
 |------|----------|
 | `NeoIPC-Antibiotics.csv` | The substance/option table — `id, atc_code, name, atc_group, aware_category, uid`. One row per DHIS2 option (the **systemic** antibiotics — the WHO ATC `J01` branch plus a few deliberately-added systemic non-J01 substances). The WHO **AWaRe** classification is folded in as the `aware_category` column. |
-| `NeoIPC-Antibiotic-Groups.csv` | The 34 WHO ATC **level-4** chemical subgroups — `code, name, shortName, description, uid`. A substance joins a group by its `atc_group` column; the `ATC5` option-group-set is built from these. |
+| `NeoIPC-Antibiotic-Groups.csv` | The 34 WHO ATC **level-4** chemical subgroups — `code, name, shortName, uid`. A substance joins a group by its `atc_group` column; the `ATC5` option-group-set is built from these. Carries **no `description`**: only half the groups ever had one and it restated the group name, so the column was dropped (see [Translations](#translations)). |
 | `NeoIPC-Antibiotic-AWaRe-Groups.csv` | The 3 WHO **AWaRe** groups — `code, category, name, shortName, description, uid`. A substance joins by its `aware_category`; the `WHO_AWARE` option-group-set is built from these. |
 | `ListElements.csv` | The printed-list UI labels (the `New-AntibioticsList` table headers). |
 
@@ -51,8 +51,9 @@ sidecars and the standalone `WHO-AWaRe-Classification-2021.csv` are **retired** 
 
 ### This catalogue is not on Weblate, and cannot be
 
-Every other NeoIPC catalogue is hosted on [Hosted Weblate](https://hosted.weblate.org/projects/neoipc/) for community
-translation. This one is not. Hosted Weblate's free plan requires every component to carry a **free (libre) licence**,
+Four NeoIPC catalogues are hosted on [Hosted Weblate](https://hosted.weblate.org/projects/neoipc/) for community
+translation — reports, protocol documentation, infectious agents and DHIS2 metadata. This one is not, and unlike the
+glossary and the PowerShell message strings, which are simply not registered yet, it cannot be. Hosted Weblate's free plan requires every component to carry a **free (libre) licence**,
 and a **NonCommercial** term is not one — so the component was rejected as *"does not meet the Libre hosting
 conditions"* and has been removed.
 

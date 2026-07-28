@@ -88,6 +88,8 @@ surveillance_end_sc: "Surveillance end"
 surveillance_end_tc: "Surveillance End"
 # WHO AWaRe antibiotic category. The official WHO translation is normative: Spanish "Precaución", per
 # the WHO AWaRe antibiotic book — NOT "Vigilancia", which this project uses for "surveillance" and
-# would therefore collide, and not the bare verb "Ver".
+# would therefore collide, and not the bare verb "Ver". Italian is deliberately left untranslated
+# rather than inheriting "Sorveglianza" from the reports catalogue, which has the same collision; it
+# needs the WHO Italian edition rather than a guess.
 # flags: terminology
 watch: "Watch"

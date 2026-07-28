@@ -95,7 +95,14 @@ jobs:
                   echo "$offending" | while read -r f; do [ -n "$f" ] && echo "::error file=$f::$f is owned by Weblate — make the change there, not here."; done
                   echo
                   echo "Translations, corrections and terminology go through https://hosted.weblate.org/projects/neoipc/"
-                  echo "If a local pipeline run produced these, it is a bug: Invoke-Localization.ps1 -Update restores them."
+                  echo
+                  echo "If a local run produced these, which tool it was decides the remedy:"
+                  echo "  po/reports.* po/documentation.* po/infectious_agents.*"
+                  echo "      Invoke-Localization.ps1 -Update restores them; seeing them here is a bug in that script."
+                  echo "  po/metadata.*"
+                  echo "      Export-NeoIPCMetadataTranslation rewrote them. Invoke-Localization.ps1 does NOT cover"
+                  echo "      that catalogue, so re-running it will not help — restore them with"
+                  echo "      git restore --source=HEAD --worktree -- po/metadata.*.po and commit only po/metadata.pot."
                   exit 1
                 fi
                 echo "No Weblate-owned catalogue was modified outside Weblate."

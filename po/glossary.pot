@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NeoIPC Surveillance Glossary 0.9\n"
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-07-26 21:30+0000\n"
+"POT-Creation-Date: 2026-07-28 09:55+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -232,8 +232,12 @@ msgstr ""
 #. Spanish "Precaución", per
 #. the WHO AWaRe antibiotic book — NOT "Vigilancia", which this project uses
 #. for "surveillance" and
-#. would therefore collide, and not the bare verb "Ver".
-#: glossary.yaml:93
+#. would therefore collide, and not the bare verb "Ver". Italian is
+#. deliberately left untranslated
+#. rather than inheriting "Sorveglianza" from the reports catalogue, which has
+#. the same collision; it
+#. needs the WHO Italian edition rather than a guess.
+#: glossary.yaml:95
 #, terminology
 msgctxt "watch"
 msgid "Watch"
