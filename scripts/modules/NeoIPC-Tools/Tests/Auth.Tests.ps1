@@ -1,10 +1,21 @@
+#Requires -Version 7.6
 #requires -Module Pester
 
-# Tests for the DHIS2 personal-access-token format validator (Public/Auth.ps1):
-# Test-DHIS2PersonalAccessToken. The token is `d2pat_` + a 32-char alphanumeric
-# random part + a 10-digit CRC32 checksum. The random part is Base64-derived,
-# NOT a UID, so its first character may be a digit — the case the earlier
-# `[a-zA-Z]` first-char regex wrongly rejected.
+<#
+.SYNOPSIS
+    Pester tests for the DHIS2 personal-access-token format validator.
+
+.DESCRIPTION
+    Covers Test-DHIS2PersonalAccessToken in Public/Auth.ps1. A token is the prefix `d2pat_` followed by a
+    32-character alphanumeric random part and a 10-digit CRC32 checksum.
+
+    The random part is Base64-derived rather than a DHIS2 UID, so its first character may be a digit. An
+    earlier validator anchored on a letter and therefore rejected a valid token; these tests pin that case
+    so it cannot regress.
+
+.EXAMPLE
+    Invoke-Pester -Path scripts/modules/NeoIPC-Tools/Tests/Auth.Tests.ps1
+#>
 
 BeforeAll {
     Import-Module -Name (Join-Path $PSScriptRoot '..') -Force

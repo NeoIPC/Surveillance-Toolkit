@@ -1,3 +1,4 @@
+#Requires -Version 7.6
 # Play demo-data pipeline — internal helpers (private, not exported).
 #
 # The tracker-data counterpart to the metadata authoring layer: read the committed demo_data/ CSVs (code

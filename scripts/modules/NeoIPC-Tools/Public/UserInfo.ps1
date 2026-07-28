@@ -1,3 +1,5 @@
+#Requires -Version 7.6
+
 <#
 .SYNOPSIS
 Query DHIS2 user accounts with optional filtering by org-unit code.

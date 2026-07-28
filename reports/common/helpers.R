@@ -1,6 +1,29 @@
 # Common helper functions for NeoIPC Surveillance reports
 # This file is sourced by all report types
 
+# Write text to a file as UTF-8 with LF line endings, on every platform.
+#
+# `writeLines(x, "path")` opens the path with file(path, "w") — that is "wt", a TEXT-mode
+# connection — and R translates LF to CRLF in text mode on Windows. R's own writeLines
+# documentation is explicit: "the default separator is converted to the normal separator for
+# that platform (LF on Unix/Linux, CRLF on Windows). For more control, open a binary
+# connection and specify the precise value you want written to the file in sep."
+#
+# `useBytes = TRUE` does NOT prevent this. It only suppresses re-encoding of strings with a
+# marked encoding; it has no line-ending semantics at all. Every one of these report writers
+# passed useBytes = TRUE and still emitted CRLF on Windows.
+#
+# It matters because each artifact written here is read by something else — the
+# NeoIPC.Reporting .NET service, Quarto, git — so the bytes must not depend on which machine
+# produced them. Binary mode writes `sep` literally, which makes sep the single thing deciding
+# the line endings; hence stating it rather than leaning on the default.
+write_lines_lf <- function(x, path) {
+  con <- file(path, open = "wb")
+  on.exit(close(con), add = TRUE)
+  writeLines(x, con, sep = "\n", useBytes = TRUE)
+  invisible(path)
+}
+
 parse_locales <- function(x) {
   locales <- NULL
   # split language and territory

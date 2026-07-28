@@ -1,3 +1,4 @@
+#Requires -Version 7.6
 # Play/test-package assembly: stitch the captured config (the NEOIPC_CORE dependency closure + the
 # non-closure group / role / level DEFINITIONS) together with the authored org units, users, and group
 # memberships into one importable package. The captured org-unit instances and user accounts are anonymised

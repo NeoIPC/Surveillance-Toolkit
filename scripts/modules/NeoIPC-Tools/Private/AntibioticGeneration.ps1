@@ -1,7 +1,8 @@
+#Requires -Version 7.6
 # NeoIPC metadata pipeline — antibiotic-domain generation (private helpers, not exported).
 # Canonical sources (see metadata/common/antibiotics/README.md):
 #   metadata/common/antibiotics/NeoIPC-Antibiotics.csv       (id, atc_code, name, atc_group, aware_category)
-#   metadata/common/antibiotics/NeoIPC-Antibiotic-Groups.csv (code, name, shortName, description)
+#   metadata/common/antibiotics/NeoIPC-Antibiotic-Groups.csv (code, name, shortName)
 # The public generators live in Public/AntibioticGeneration.ps1.
 
 # The four one-off code migrations the source reconciliation applied (deployed option code -> canonical code).

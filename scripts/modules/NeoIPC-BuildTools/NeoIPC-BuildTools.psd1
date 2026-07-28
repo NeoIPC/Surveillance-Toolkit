@@ -27,8 +27,14 @@ Copyright = '2024 NeoIPC Project.'
 # Description of the functionality provided by this module
 Description = 'A set of PowerShell tools for the NeoIPC Surveillance Toolkit'
 
-# Minimum version of the PowerShell engine required by this module
-PowerShellVersion = '7.2'
+# Minimum version of the PowerShell engine required by this module.
+#
+# 7.6 is the workspace-wide floor that every .ps1/.psm1 also declares via #Requires. This module's own
+# code needs nothing past 7.0 — measured, not assumed — but a single number across the toolkit is worth
+# more than a per-module minimum: the wrappers that import this module do need more (Resolve-Path
+# -RelativeBasePath, Get-Date -AsUTC), and a lower figure here would suggest this module is usable on an
+# engine the surrounding scripts cannot run on.
+PowerShellVersion = '7.6'
 
 # Name of the PowerShell host required by this module
 # PowerShellHostName = ''

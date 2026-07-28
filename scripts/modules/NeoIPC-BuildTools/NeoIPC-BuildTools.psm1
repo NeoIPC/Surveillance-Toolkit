@@ -1,3 +1,24 @@
+#Requires -Version 7.6
+
+<#
+.SYNOPSIS
+    Root module for NeoIPC-BuildTools: protocol build helpers for the Surveillance Toolkit.
+
+.DESCRIPTION
+    Single-file module providing the helpers the protocol and list builds use — AsciiDoc id export, the
+    antibiotic and pathogen list builders, and the gettext catalogue import that localizes them.
+
+    The XML default resolver is re-enabled at import because the XSLT transforms these builds run resolve
+    external references (the title-page transform reads its resource file), and .NET disables the default
+    resolver for XmlDocument by default.
+
+    URL templates for the external authorities (WHO ATC/DDD, AWaRe, LPSN, MycoBank, ICTV) are module-scoped
+    here so every list builder formats a citation link the same way.
+
+.EXAMPLE
+    Import-Module ./scripts/modules/NeoIPC-BuildTools -Force
+#>
+
 [AppContext]::SetSwitch("Switch.System.Xml.AllowDefaultResolver", $true);
 
 $AtcUrlTemplate = 'https://www.whocc.no/atc_ddd_index/?code={0}&showdescription=yes'

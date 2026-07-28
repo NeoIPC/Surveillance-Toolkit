@@ -1,3 +1,5 @@
+#Requires -Version 7.6
+
 <#
 .SYNOPSIS
 Write a standardised build report to the console and optionally to a JSON file.
@@ -88,7 +90,7 @@ function Write-NeoIPCBuildReport {
 
     if (-not [string]::IsNullOrWhiteSpace($BuildReportFilePath)) {
         try {
-            $buildReport | ConvertTo-Json -Depth 100 | Set-Content -LiteralPath $BuildReportFilePath
+            Write-NeoIPCTextFile -Path $BuildReportFilePath -Text ($buildReport | ConvertTo-Json -Depth 100)
             Write-Verbose "Generated build report: $BuildReportFilePath"
         }
         catch {

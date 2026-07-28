@@ -11,6 +11,10 @@
 #   Flags         — `# flags: ...` comment line becomes PO #, flags
 #   Needs editing — fuzzy flag in .po, managed by Weblate; preserved across merges
 #
+# Keep a blank line between this header and the first key. ruamel hands both to the generator as
+# one block, which splits them on the last blank line — without it, a note on the first key would
+# be read as part of this header and never reach translators.
+#
 # Naming convention:
 #   base key    = AMA canonical (lowercase)
 #   key_sc      = Sentence case (first word capitalised)
@@ -31,11 +35,16 @@
 # Variant grouping is handled by the Weblate component's variant_regex
 # setting: _(tc|sc|plural|plural_tc|plural_sc)$
 
+# WHO AWaRe antibiotic category. The official WHO translation is normative: Spanish "Acceso", per the
+# WHO AWaRe antibiotic book. Do not invent a local rendering.
+# flags: terminology
+access: "Access"
 admission: admission
 admission_sc: Admission
 antibiotics: antibiotics
 antibiotics_sc: Antibiotics
 # AWaRe is a WHO acronym (Access, Watch, Reserve) — not translatable
+# flags: read-only, terminology
 aware: "AWaRe"
 cvc: CVC
 h2020_funding_statement: >-
@@ -61,6 +70,10 @@ primary_sepsis_bsi_sc: "Primary sepsis/BSI"
 primary_sepsis_bsi_tc: "Primary Sepsis/BSI"
 probiotics: Probiotics
 pvc: PVC
+# WHO AWaRe antibiotic category. The official WHO translation is normative: Spanish "Reserva", per the
+# WHO AWaRe antibiotic book.
+# flags: terminology
+reserve: "Reserve"
 ssi: SSI
 surgical_procedure: "surgical procedure"
 surgical_procedure_sc: "Surgical procedure"
@@ -73,3 +86,10 @@ surveillance_sc: Surveillance
 surveillance_end: "surveillance end"
 surveillance_end_sc: "Surveillance end"
 surveillance_end_tc: "Surveillance End"
+# WHO AWaRe antibiotic category. The official WHO translation is normative: Spanish "Precaución", per
+# the WHO AWaRe antibiotic book — NOT "Vigilancia", which this project uses for "surveillance" and
+# would therefore collide, and not the bare verb "Ver". Italian is deliberately left untranslated
+# rather than inheriting "Sorveglianza" from the reports catalogue, which has the same collision; it
+# needs the WHO Italian edition rather than a guess.
+# flags: terminology
+watch: "Watch"

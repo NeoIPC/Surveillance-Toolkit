@@ -1,3 +1,5 @@
+#Requires -Version 7.6
+
 <#
 .SYNOPSIS
 Return the next unused integer Id in the infectious-agent ontology YAML.

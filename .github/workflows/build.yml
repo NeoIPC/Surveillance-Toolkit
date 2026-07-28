@@ -17,6 +17,99 @@ permissions:
   contents: read
 
 jobs:
+    text-hygiene:
+        # LF line endings, UTF-8 without a BOM, and the canonical PowerShell header. Runs on every trigger,
+        # not just pull requests: the defect this catches is invisible locally — with `* text=auto` declared,
+        # a tool writing CRLF into the working tree still produces an LF blob and a clean `git status`, so
+        # nothing short of an explicit check reports it. Seven CRLF catalogues sat here undetected that way.
+        #
+        # Its own job rather than a step inside build-docs, so a failure names the offending file instead of
+        # being buried in a render log, and so it reports in seconds without waiting on the toolchain setup.
+        runs-on: ubuntu-26.04
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                # The check reads the working tree and the index, so the submodule is not needed — and
+                # tools/po4a is third-party upstream that this contract deliberately does not cover.
+                submodules: false
+
+            - name: Check text-file hygiene
+              shell: pwsh
+              run: ./scripts/Test-TextFileHygiene.ps1
+
+    catalogue-ownership:
+        # The repository owns the .pot templates; Weblate owns the .po translations and is their only writer.
+        # Two writers on one .po is what conflicts every language of a catalogue at once — both sides rewrite
+        # adjacent header lines (POT-Creation-Date against PO-Revision-Date / Last-Translator / Language-Team /
+        # X-Generator) inside a single hunk git cannot auto-merge. A prose rule did not hold, so this enforces it.
+        if: github.event_name == 'pull_request'
+        runs-on: ubuntu-26.04
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                # Need the base commit to diff against; a shallow clone has neither side.
+                fetch-depth: 0
+
+            - name: Reject hand-written changes to Weblate-owned catalogues
+              shell: bash
+              run: |
+                base="origin/${{ github.base_ref }}"
+                # The pull request's own tip, NOT HEAD. On a pull_request event actions/checkout checks out
+                # refs/pull/N/merge, a synthetic merge commit GitHub creates and commits under its own identity.
+                # That commit touches a .po whenever both sides changed one, so a committer check against HEAD
+                # rejects pull requests whose every real commit is Weblate's.
+                head="${{ github.event.pull_request.head.sha }}"
+                # Weblate-owned: every catalogue registered as a Weblate component. po/glossary.*.po,
+                # scripts/po/*.po and po/antibiotics.*.po are deliberately absent — they are not on Weblate and
+                # remain repository-owned, so a hand edit or a generator run there is legitimate. The antibiotic
+                # catalogue cannot be hosted: its content is CC BY-NC-SA 3.0 IGO, and a NonCommercial term is not
+                # a free licence, which Hosted Weblate's free plan requires. Add a catalogue here when it is
+                # registered on Weblate, and remove it here when it is not.
+                owned='po/reports\..*\.po|po/documentation\..*\.po|po/infectious_agents\..*\.po|po/metadata\..*\.po'
+                # Weblate commits everything it pushes under this one identity, whoever wrote the translation,
+                # so a per-commit committer check recognises Weblate's own output no matter who opened the pull
+                # request. Exempting by pull-request author instead would reject the drain pull requests we open
+                # ourselves from a weblate-* branch, whose commits are Weblate's throughout — and would wave
+                # through a stray hand-written commit riding along in a Weblate-authored one.
+                weblate='hosted@weblate.org'
+
+                # --no-renames matters: with rename detection on, git prints only a rename's DESTINATION, so
+                # `git mv po/reports.de.po elsewhere.po` plus a hand edit shows a path that cannot match the
+                # pattern and the file escapes the gate entirely. Splitting renames into delete+add surfaces
+                # the owned source path. Assigned separately from the grep so that a git failure cannot be
+                # swallowed by the `|| true` and read as "nothing offending".
+                if ! changed=$(git diff --name-only --no-renames "$base...$head"); then
+                  echo "::error::Could not diff $base...$head — the gate cannot vouch for this pull request."
+                  exit 1
+                fi
+
+                offending=""
+                for f in $(printf '%s\n' "$changed" | grep -E "^($owned)$" || true); do
+                  # Not `grep -q`: it exits on the first hit, and SIGPIPE plus `pipefail` would then report
+                  # the pipeline as failed, which reads here as "no offence found" and silently passes.
+                  others=$(git log --format='%ce' "$base".."$head" -- "$f" | grep -vFx "$weblate" || true)
+                  if [ -n "$others" ]; then offending="${offending}${f}"$'\n'; fi
+                done
+                if [ -n "$offending" ]; then
+                  echo "::error::This pull request modifies Weblate-owned .po files. Weblate is their only writer."
+                  echo "$offending" | while read -r f; do [ -n "$f" ] && echo "::error file=$f::$f is owned by Weblate — make the change there, not here."; done
+                  echo
+                  echo "Translations, corrections and terminology go through https://hosted.weblate.org/projects/neoipc/"
+                  echo
+                  echo "If a local run produced these, which tool it was decides the remedy:"
+                  echo "  po/reports.* po/documentation.* po/infectious_agents.*"
+                  echo "      Invoke-Localization.ps1 -Update restores them; seeing them here is a bug in that script."
+                  echo "  po/metadata.*"
+                  echo "      Export-NeoIPCMetadataTranslation rewrote them. Invoke-Localization.ps1 does NOT cover"
+                  echo "      that catalogue, so re-running it will not help. Restore them from the BASE branch,"
+                  echo "      not from HEAD — by the time this gate fires the change is already committed, so"
+                  echo "      --source=HEAD would restore the very version being rejected:"
+                  echo "      git restore --source=origin/main --worktree -- po/metadata.*.po"
+                  echo "      then commit only po/metadata.pot."
+                  exit 1
+                fi
+                echo "No Weblate-owned catalogue was modified outside Weblate."
+
     build-docs:
         # Pinned to an explicit image for reproducibility; 26.04 provides the .NET 10 / PowerShell 7.6
         # runtime the NeoIPC-Tools module and data-dictionary generator require.
@@ -236,14 +329,17 @@ jobs:
               shell: bash
               # PERL_UNICODE=SDA must match scripts/Invoke-Localization.ps1: it decodes @ARGV/open() as UTF-8 so
               # po4a reads the .cfg's non-ASCII --copyright-holder correctly instead of double-encoding it into
-              # the regenerated .pot/.po headers. Keep the two po4a invocation sites in sync.
-              run: PERL_UNICODE=SDA PERLLIB=tools/po4a/lib tools/po4a/po4a --verbose po/infectious_agents.po4a.cfg
+              # the regenerated .pot header. Keep the two po4a invocation sites in sync.
+              # --no-update renders from the catalogues exactly as committed, writing neither .pot nor .po. Without
+              # it CI msgmerges its checkout and then builds from a merged state that is not what is on main, which
+              # hides drift instead of surfacing it. This is what Invoke-Localization.ps1 -Render does.
+              run: PERL_UNICODE=SDA PERLLIB=tools/po4a/lib tools/po4a/po4a --verbose --no-update po/infectious_agents.po4a.cfg
 
             - name: Run po4a (documentation)
               if: github.ref_type != 'tag' || steps.rel.outputs.product == 'protocol'
               shell: bash
-              # PERL_UNICODE=SDA: see the infectious-agents po4a step above (keep the two sites in sync).
-              run: PERL_UNICODE=SDA PERLLIB=tools/po4a/lib tools/po4a/po4a --verbose po/documentation.po4a.cfg
+              # PERL_UNICODE=SDA and --no-update: see the infectious-agents po4a step above (keep the two sites in sync).
+              run: PERL_UNICODE=SDA PERLLIB=tools/po4a/lib tools/po4a/po4a --verbose --no-update po/documentation.po4a.cfg
 
             - name: Build
               if: github.ref_type != 'tag' || steps.rel.outputs.product == 'protocol'

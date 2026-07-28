@@ -1,3 +1,4 @@
+#Requires -Version 7.6
 # Authoring-input helpers for the play / production overlay. Org-unit INSTANCES and user accounts are
 # anonymised in the export, so their package content comes from the canonical UID-keyed directory, not the
 # capture: org units are read straight through the converter (preserving the committed ids — real production

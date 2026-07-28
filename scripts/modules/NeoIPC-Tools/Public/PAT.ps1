@@ -1,3 +1,5 @@
+#Requires -Version 7.6
+
 <#
 .SYNOPSIS
 Read DHIS2 personal access tokens for the current user.

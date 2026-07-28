@@ -1,4 +1,6 @@
-#requires -Version 7.5
+#!/usr/bin/env pwsh
+#requires -Version 7.6
+
 <#
 .SYNOPSIS
     Render the importable NeoIPC metadata package artifacts (CI build artifact / Release asset) from the canonical

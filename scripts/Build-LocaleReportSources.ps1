@@ -1,3 +1,6 @@
+#!/usr/bin/env pwsh
+#Requires -Version 7.6
+
 <#
 .SYNOPSIS
     (Re)generates the per-locale report wrappers ({Report}.<locale>.qmd) from

@@ -1,3 +1,5 @@
+#Requires -Version 7.6
+
 <#
 .SYNOPSIS
 Query DHIS2 tracked entity (patient) attributes.

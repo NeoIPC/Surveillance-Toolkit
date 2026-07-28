@@ -1,11 +1,24 @@
-# Content lints over the AUTHORED metadata directory (metadata/common). Distinct from Metadata.Tests.ps1, which
-# tests module logic against synthetic fixtures: these read the real committed CSVs and catch content drift a
-# synthetic test cannot. The motivating defect: six "NeoIPC SSI Organism ..." rules whose programStage was the BSI
-# stage (not SSI) - dead rules that fired never, yet every offline gate and the e2e suite passed, because
-# "attached to a stage where its fields do not exist, so never fires" is indistinguishable from "correctly does
-# nothing" unless a check cross-references the name against the stage. A green suite proves a failure absent, not a
-# safeguard unnecessary; this is the cross-reference that would have caught it.
-# Run:  Invoke-Pester -Path scripts/modules/NeoIPC-Tools/Tests/MetadataContent.Tests.ps1
+#Requires -Version 7.6
+
+<#
+.SYNOPSIS
+    Content lints over the authored metadata directory, as opposed to module logic.
+
+.DESCRIPTION
+    These read the real committed CSVs under the authored metadata directory and catch content drift that a
+    synthetic fixture cannot. That is the distinction from Metadata.Tests.ps1, which exercises module logic
+    against fixtures it constructs itself.
+
+    The motivating defect is worth keeping in view: six SSI organism rules were attached to the BSI program
+    stage rather than the SSI one. They were dead — they could never fire — yet every offline gate and the
+    end-to-end suite passed, because "attached to a stage whose fields do not exist, so never fires" is
+    indistinguishable from "correctly does nothing" unless something cross-references the rule's name
+    against its stage. A green suite proves a failure absent, not a safeguard unnecessary; this is the
+    cross-reference that would have caught it.
+
+.EXAMPLE
+    Invoke-Pester -Path scripts/modules/NeoIPC-Tools/Tests/MetadataContent.Tests.ps1
+#>
 
 Describe 'Program-rule name vs programStage consistency (metadata/common)' {
     BeforeAll {

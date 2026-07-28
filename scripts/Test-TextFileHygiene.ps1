@@ -1,0 +1,332 @@
+#!/usr/bin/env pwsh
+#Requires -Version 7.6
+
+<#
+.SYNOPSIS
+    Fail if any committed text file has the wrong line endings or encoding, or if a PowerShell file's
+    header is malformed.
+
+.DESCRIPTION
+    The mechanical half of the text-file contract: LF line endings, UTF-8 without a BOM, and a canonical
+    PowerShell header. Runs over this repository.
+
+    This repository's only submodule is the pinned po4a tool, which is third-party upstream and not ours
+    to hold to this contract — it is excluded automatically, because SubmodulePrefix defaults to 'repos/'
+    and no submodule here matches. So the file needs no adaptation to run standalone.
+
+    Equivalent copies of this check live in the other NeoIPC repositories. The duplication is deliberate:
+    each repository has to enforce its own contract when cloned on its own, so none of them can reach
+    outside itself for the script. Only the help text differs between copies — keep the logic in step when
+    changing any of it.
+
+    Three checks, each of which caught a real defect in this repository:
+
+    1. LINE ENDINGS, from the WORKING-TREE column of `git ls-files --eol`, not the index column. This
+        distinction is the whole point. With `* text=auto` declared, git normalizes on commit, so a tool
+        that writes CRLF into the working tree still produces an LF blob and a clean `git status` — the
+        index column can therefore never report crlf for a text file, and a gate that reads it passes on
+        exactly the defect it exists to catch. Seven CRLF catalogues sat in this repository undetected
+        that way. The index column is still checked as a cheap fallback — but not, as this help previously
+        claimed, because a declared-binary file bypasses normalization: such a file is exempt before either
+        column is read, so it can never reach the check. It guards against a crlf/mixed blob arriving by a
+        route that skips the clean filter instead.
+
+    2. ENCODING, by reading bytes: no UTF-8 BOM, and the content must decode as strict UTF-8. Files git
+        classifies as binary are skipped — they are not text and the rule does not apply to them.
+
+    3. POWERSHELL HEADERS, by parsing each file: a #Requires -Version at or above the floor, a shebang on
+        line 1 for anything executed directly, and — where the file carries a top-of-file help block —
+        that block actually resolving. That last one is not cosmetic: three separate layout mistakes
+        silently discard comment-based help while `Get-Help` still prints a synthesized syntax line, so
+        the script looks documented when it is not. Sixteen files were in that state.
+
+    Exit code is 0 when clean, 1 when any check fails. Nothing is modified.
+
+.PARAMETER Path
+    Repository root to check. Defaults to this repository's root (this script's parent directory).
+
+.PARAMETER NoSubmodules
+    Check only the given repository, not its submodules. Used when each repository runs the check itself
+    in its own CI, where the submodules are not present.
+
+.PARAMETER SubmodulePrefix
+    Only submodules whose path starts with this are checked. Defaults to 'repos/', which no submodule of
+    this repository matches — so the sweep stays inside this repository unless told otherwise.
+
+    Third-party upstream checkouts are deliberately out of scope wherever they appear: their line endings
+    and encodings are not ours to set, gating on them would report failures nobody here could act on, and
+    they are large enough to turn a seconds-long check into a minutes-long one.
+
+.PARAMETER RequiredPowerShellVersion
+    The #Requires floor every .ps1/.psm1 must declare at least. Defaults to 7.6, which is what this
+    codebase actually needs — Resolve-Path -RelativeBasePath and ConvertFrom-Json -DateKind do not exist
+    below it.
+
+.EXAMPLE
+    ./scripts/Test-TextFileHygiene.ps1
+
+    Check this repository. This is what its CI runs on every push and pull request.
+
+.EXAMPLE
+    ./scripts/Test-TextFileHygiene.ps1 -Path . -NoSubmodules
+
+    Check one repository on its own, as a repository's own CI does.
+#>
+
+[CmdletBinding()]
+param(
+    [string]$Path = (Split-Path -Parent $PSScriptRoot),
+    [switch]$NoSubmodules,
+    [string]$SubmodulePrefix = 'repos/',
+    [string]$RequiredPowerShellVersion = '7.6'
+)
+
+$ErrorActionPreference = 'Stop'
+Set-StrictMode -Version Latest
+
+$floor = [version]$RequiredPowerShellVersion
+$failures = [System.Collections.Generic.List[string]]::new()
+$checkedFiles = 0
+$checkedRepos = 0
+
+function Get-RepoList {
+    param([string]$Root)
+
+    $roots = @($Root)
+    if (-not $NoSubmodules) {
+        # Read the declared submodule paths rather than shelling into each one: `submodule foreach` would
+        # also descend into refs/, and those upstream checkouts are both out of scope and enormous.
+        foreach ($line in @(& git -C $Root config --file .gitmodules --get-regexp 'submodule\..*\.path' 2>$null)) {
+            if (-not $line) { continue }
+            $declared = ($line -split '\s+', 2)[1]
+            if ($declared -and $declared.StartsWith($SubmodulePrefix)) {
+                $roots += (Join-Path $Root $declared)
+            }
+        }
+    }
+    $roots | Where-Object { Test-Path (Join-Path $_ '.git') -PathType Any }
+}
+
+function Get-EolRow {
+    param([string]$Repo)
+
+    # `git ls-files --eol` emits: i/<idx>  w/<worktree>  attr/<attrs><TAB><path>
+    # Split the path off on the TAB first, then the columns on whitespace, so an attr value containing a
+    # space (attr/text=auto eol=lf) cannot shift the column indices — and so "eol=crlf" appearing inside
+    # the attr text can never be mistaken for a finding.
+    foreach ($line in (& git -C $Repo ls-files --eol)) {
+        if (-not $line) { continue }
+        $parts = $line -split "`t", 2
+        if ($parts.Count -lt 2) { continue }
+        $cols = @($parts[0] -split '\s+' | Where-Object { $_ })
+        if ($cols.Count -lt 2) { continue }
+
+        # The third column is the literal string "attr/" with the attributes glued directly on, e.g.
+        # "attr/-text" or "attr/text=auto eol=lf" — so the prefix has to come off before matching, or
+        # "-text" is preceded by "/" rather than whitespace and no word-boundary pattern will find it.
+        $attr = if ($cols.Count -gt 2) { ($cols[2..($cols.Count - 1)] -join ' ') } else { '' }
+        $attr = $attr -replace '^attr/', ''
+
+        # Whether to treat the path as binary, and so exempt from the text rules. The ATTRIBUTE is
+        # authoritative, not the detected content: `*.pdf binary` expands to -text, but git still reports
+        # the i/ and w/ columns from what it DETECTED in the bytes. A PDF whose first 8000 bytes contain
+        # no NUL is detected as "lf" while being declared binary — so keying the skip on the i/ column
+        # alone reports it as invalid UTF-8, which is how the first run of this script failed.
+        # Only the DECLARATION exempts a path. Folding the detected columns into this instead opens a
+        # hole big enough to drive the original defect through: a single NUL byte in the first 8000 bytes
+        # makes git report -text, which would then skip the line-ending check, the BOM check AND the
+        # strict-UTF-8 check at once — so a UTF-16 CRLF catalogue commits silently, which is exactly the
+        # class of corruption this script exists to catch. A genuinely binary file must therefore say so
+        # in .gitattributes; there are only ever a handful, and naming them is the point.
+        $declaredBinary = $attr -match '(^|\s)-text(\s|$)' -or $attr -match '(^|\s)binary(\s|$)'
+        $detectedBinary = $cols[0] -eq 'i/-text' -or $cols[1] -eq 'w/-text'
+
+        [pscustomobject]@{
+            Index       = $cols[0]
+            Worktree    = $cols[1]
+            Attr        = $attr
+            File        = $parts[1]
+            IsBinary    = $declaredBinary
+            LooksBinary = $detectedBinary
+        }
+    }
+}
+
+function Test-LineEnding {
+    param([string]$Repo, [string]$Label)
+
+    foreach ($row in (Get-EolRow -Repo $Repo)) {
+        if ($row.IsBinary) { continue }
+
+        # Declared text, but git found a NUL in the first 8000 bytes and so reports -text. This has to be
+        # its own finding rather than a skip, because it is the one state in which NONE of the other checks
+        # can see anything wrong: git reports -text instead of crlf so the line-ending columns are empty of
+        # evidence, a NUL is perfectly valid UTF-8 so strict decoding passes, and a UTF-16 file carries no
+        # UTF-8 BOM. A CRLF UTF-16 catalogue therefore sailed through every check while being exactly the
+        # corruption this script exists to catch. Either the file is mis-encoded, or it is binary and the
+        # attribute should say so.
+        if ($row.LooksBinary) {
+            $failures.Add("$Label`: $($row.File) is declared text but git detects binary content (a NUL byte). " +
+                "That usually means it is UTF-16 or otherwise mis-encoded — git cannot report its real line " +
+                "endings while it looks binary. If it genuinely is binary, declare it '-text' in .gitattributes.")
+            continue
+        }
+
+        if ($row.Worktree -in @('w/crlf', 'w/mixed')) {
+            $failures.Add("$Label`: $($row.File) has $($row.Worktree.Substring(2)) line endings in the working tree (expected lf)")
+        }
+        elseif ($row.Index -in @('i/crlf', 'i/mixed')) {
+            $failures.Add("$Label`: $($row.File) has $($row.Index.Substring(2)) line endings in the index (expected lf)")
+        }
+    }
+}
+
+function Test-Encoding {
+    param([string]$Repo, [string]$Label)
+
+    # Paths exempt as binary — by declared attribute only. Same determination as the line-ending check,
+    # so the two cannot disagree about what counts as text. `$looksBinary` is kept separately to make the
+    # failure actionable rather than to excuse the file.
+    $binary = [System.Collections.Generic.HashSet[string]]::new()
+    $looksBinary = [System.Collections.Generic.HashSet[string]]::new()
+    foreach ($row in (Get-EolRow -Repo $Repo)) {
+        if ($row.IsBinary) { [void]$binary.Add($row.File) }
+        elseif ($row.LooksBinary) { [void]$looksBinary.Add($row.File) }
+    }
+
+    $strict = [System.Text.UTF8Encoding]::new($false, $true)
+    foreach ($file in (& git -C $Repo ls-files)) {
+        if (-not $file -or $binary.Contains($file)) { continue }
+        $full = Join-Path $Repo $file
+        if (-not (Test-Path -LiteralPath $full -PathType Leaf)) { continue }
+
+        # Absolute path: [System.IO.File] resolves a relative path against the PROCESS working
+        # directory, not PowerShell's location, so a relative one here silently reads the wrong file.
+        $bytes = [System.IO.File]::ReadAllBytes($full)
+        $script:checkedFiles++
+
+        if ($bytes.Length -ge 3 -and $bytes[0] -eq 0xEF -and $bytes[1] -eq 0xBB -and $bytes[2] -eq 0xBF) {
+            $failures.Add("$Label`: $file starts with a UTF-8 BOM")
+            continue
+        }
+
+        # A UTF-16 or UTF-32 BOM means the file is not UTF-8 at all. Strict decoding below rejects it
+        # anyway — 0xFF and 0xFE never appear in valid UTF-8 — but naming the actual encoding is what
+        # makes the failure actionable; "is not valid UTF-8" leaves the reader guessing which of a dozen
+        # things went wrong. Test UTF-32 first: its little-endian BOM (FF FE 00 00) opens with the
+        # UTF-16LE one, so the shorter pattern would otherwise shadow it and misreport the encoding.
+        $wideBom =
+            if ($bytes.Length -ge 4 -and $bytes[0] -eq 0xFF -and $bytes[1] -eq 0xFE -and $bytes[2] -eq 0x00 -and $bytes[3] -eq 0x00) { 'UTF-32LE' }
+            elseif ($bytes.Length -ge 4 -and $bytes[0] -eq 0x00 -and $bytes[1] -eq 0x00 -and $bytes[2] -eq 0xFE -and $bytes[3] -eq 0xFF) { 'UTF-32BE' }
+            elseif ($bytes.Length -ge 2 -and $bytes[0] -eq 0xFF -and $bytes[1] -eq 0xFE) { 'UTF-16LE' }
+            elseif ($bytes.Length -ge 2 -and $bytes[0] -eq 0xFE -and $bytes[1] -eq 0xFF) { 'UTF-16BE' }
+            else { $null }
+        if ($wideBom) {
+            $failures.Add("$Label`: $file starts with a $wideBom BOM — it is not UTF-8. Re-encode it as UTF-8 without a BOM.")
+            continue
+        }
+        try { [void]$strict.GetString($bytes) }
+        catch {
+            $hint = if ($looksBinary.Contains($file)) {
+                " (git detects it as binary — if it genuinely is, declare it '-text' in .gitattributes" +
+                " so it is exempt by declaration rather than by accident)"
+            } else { '' }
+            $failures.Add("$Label`: $file is not valid UTF-8$hint")
+        }
+    }
+}
+
+function Test-PowerShellHeader {
+    param([string]$Repo, [string]$Label)
+
+    foreach ($file in (& git -C $Repo ls-files '*.ps1' '*.psm1')) {
+        if (-not $file) { continue }
+        $full = Join-Path $Repo $file
+        if (-not (Test-Path -LiteralPath $full -PathType Leaf)) { continue }
+
+        # A module source file is dot-sourced by its module root, never executed, and its help belongs to
+        # the functions it defines — so it takes the version floor but neither a shebang nor script help.
+        $isModuleSource = $file -match 'modules/.+/(Private|Public)/'
+
+        # "Executed directly" is decided from a POSITIVE signal — living outside any modules/ tree —
+        # rather than by failing three negative patterns. Anything under modules/ is dot-sourced or
+        # imported by a module root, whether it sits in Private/, Public/, or directly in modules/
+        # (the shared Pester helper does). Inferring this by exclusion let that helper fall through and
+        # be told to carry a shebang, which is precisely what the header rule forbids on a file that is
+        # never executed.
+        $isModuleFile = $file -match '(^|/)modules/'
+        $isDirectlyRun = -not $isModuleFile -and
+                         $file -notmatch '\.psm1$' -and
+                         $file -notmatch '\.Tests\.ps1$'
+
+        $tokens = $null; $errors = $null
+        $ast = [System.Management.Automation.Language.Parser]::ParseFile($full, [ref]$tokens, [ref]$errors)
+        if ($errors.Count) {
+            $failures.Add("$Label`: $file does not parse ($($errors.Count) error(s))")
+            continue
+        }
+
+        $declared = if ($ast.ScriptRequirements) { $ast.ScriptRequirements.RequiredPSVersion } else { $null }
+        if (-not $declared) {
+            $failures.Add("$Label`: $file has no '#Requires -Version' (expected at least $floor)")
+        }
+        elseif ([version]$declared -lt $floor) {
+            $failures.Add("$Label`: $file declares '#Requires -Version $declared', below the $floor floor")
+        }
+
+        $text = [System.IO.File]::ReadAllText($full)
+        $firstLine = ($text -split "`r?`n", 2)[0]
+        if ($isDirectlyRun -and -not $firstLine.TrimStart().StartsWith('#!')) {
+            $failures.Add("$Label`: $file is executed directly but has no '#!' on line 1")
+        }
+
+        # Only assert help RESOLVES where the file plainly means to have script-level help: a <# … #>
+        # block containing .SYNOPSIS before the first statement. Testing the outcome rather than the
+        # layout catches all three ways the block can be silently discarded, without encoding any of them:
+        #   - a comment line (shebang or #Requires) directly above <#, with no blank line between;
+        #   - a function fewer than two blank lines after #>, which takes the help for itself;
+        #   - a line inside the block starting with '.' plus a word that is not a help keyword,
+        #     which discards the entire block. ".po" and ".pot" do this, and this project writes about
+        #     those files constantly.
+        if (-not $isModuleSource) {
+            $firstStatement = if ($ast.EndBlock -and $ast.EndBlock.Statements.Count) {
+                $ast.EndBlock.Statements[0].Extent.StartOffset
+            } elseif ($ast.ParamBlock) {
+                $ast.ParamBlock.Extent.StartOffset
+            } else { [int]::MaxValue }
+
+            $intendsHelp = $tokens | Where-Object {
+                $_.Kind -eq 'Comment' -and $_.Text.StartsWith('<#') -and
+                $_.Text -match '\.SYNOPSIS' -and $_.Extent.StartOffset -lt $firstStatement
+            } | Select-Object -First 1
+
+            if ($intendsHelp) {
+                $help = $ast.GetHelpContent()
+                if (-not ($help -and $help.Synopsis)) {
+                    $failures.Add(("$Label`: $file has a top-of-file help block that PowerShell does not " +
+                        'resolve — check for a missing blank line after the last leading comment, a ' +
+                        'function fewer than two blank lines after #>, or a line starting with a dot-token'))
+                }
+            }
+        }
+    }
+}
+
+foreach ($repo in (Get-RepoList -Root (Resolve-Path -LiteralPath $Path))) {
+    $label = Split-Path $repo -Leaf
+    $checkedRepos++
+    Test-LineEnding      -Repo $repo -Label $label
+    Test-Encoding        -Repo $repo -Label $label
+    Test-PowerShellHeader -Repo $repo -Label $label
+}
+
+if ($failures.Count) {
+    Write-Host ("Text-file hygiene: {0} problem(s) across {1} repository/ies." -f $failures.Count, $checkedRepos) -ForegroundColor Red
+    $failures | Sort-Object | ForEach-Object { Write-Host "  $_" -ForegroundColor Red }
+    Write-Host ''
+    Write-Host 'Expected: LF line endings, UTF-8 without a BOM, and the canonical PowerShell header' -ForegroundColor DarkGray
+    Write-Host "(#!/usr/bin/env pwsh where run directly, #Requires -Version $floor, blank line, help block)." -ForegroundColor DarkGray
+    exit 1
+}
+
+Write-Host ("Text-file hygiene OK: {0} file(s) across {1} repository/ies." -f $checkedFiles, $checkedRepos) -ForegroundColor Green

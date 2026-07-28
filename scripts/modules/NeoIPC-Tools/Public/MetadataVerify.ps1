@@ -1,3 +1,4 @@
+#Requires -Version 7.6
 # Round-trip verification of a metadata import: the companion to Import-NeoIPCMetadata. After a package is
 # imported it proves the import did not SILENTLY drop objects, owned-collection memberships, ordered-list
 # order, or stringArray values. This guards a real DHIS2 import behaviour: a single combined /api/metadata

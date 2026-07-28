@@ -1,3 +1,25 @@
+#!/usr/bin/env pwsh
+#Requires -Version 7.6
+
+<#
+.SYNOPSIS
+    Renders the Patient Data Report for a single patient — the GDPR Article 15(3) subject-access output.
+
+.DESCRIPTION
+    Wrapper around the Patient-Data-Report Quarto report. It resolves DHIS2 credentials through the shared
+    auth helper, exports that one patient's records, and drives the render, emitting a build report
+    alongside the output.
+
+    Scope is deliberately one patient: this exists to answer a data-subject access request, so the report
+    covers exactly the records of the identified patient and nothing else.
+
+.PARAMETER PatientId
+    The NeoIPC patient identifier whose records the report covers.
+
+.EXAMPLE
+    ./scripts/Build-PatientDataReport.ps1 'NEOIPC-000123' -OutputFormats pdf,json
+#>
+
 [CmdletBinding(SupportsShouldProcess = $true, DefaultParameterSetName = 'Render')]
 param(
     [Parameter(Mandatory, Position = 0)]

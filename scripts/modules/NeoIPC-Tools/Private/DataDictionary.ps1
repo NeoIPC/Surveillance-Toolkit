@@ -1,3 +1,4 @@
+#Requires -Version 7.6
 # NeoIPC data dictionary — flatten the assembled DHIS2 metadata package into a technology-agnostic
 # "data dictionary" readable by epidemiologists AND technical implementers: patient attributes, per-stage
 # data elements, the per-event dates, and the full code lists. Pure transforms over the

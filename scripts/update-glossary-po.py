@@ -5,6 +5,23 @@ Replaces po4a for glossary management, providing full PO feature support:
 msgctxt (variant grouping), msgid_plural (plurals), translator comments,
 flags, locations with line numbers, and additional states.
 
+Catalogue ownership: this script writes BOTH po/glossary.pot and every
+po/glossary.<lang>.po, and it is their only writer.
+
+That is the opposite of the rule for the other catalogues here, and deliberately
+so. The others are Weblate components, so Weblate owns their .po and its msgmerge
+add-on brings them up to a changed .pot; a generator writing them as well would
+put two writers on one file, which is what conflicts every language of a catalogue
+at once -- both sides rewrite adjacent header lines inside a single hunk git
+cannot auto-merge. The glossary is NOT registered as a component, so no second
+writer exists and this script has to keep the catalogues in step with the template
+itself. Nothing else would: a term added to glossary.yaml would otherwise reach
+the .pot alone, be translatable nowhere, and silently never appear in any
+generated glossary.<lang>.yaml.
+
+**Remove the merge the moment the component is registered on Weblate**, or the
+two-writer conflict returns here.
+
 Naming convention in glossary.yaml:
     key             = AMA canonical (lowercase)
     key_sc          = Sentence case
@@ -22,10 +39,10 @@ YAML comment conventions:
     See https://docs.weblate.org/en/latest/admin/checks.html for available flags.
 
 Usage:
-    # Extract YAML -> POT and merge with existing PO files
+    # Extract YAML -> POT, and merge the result into every language catalogue
     python scripts/update-glossary-po.py
 
-    # Also generate localized YAML from translated PO files
+    # Also generate localized YAML from the committed PO files
     python scripts/update-glossary-po.py --generate-yaml
 """
 
@@ -72,29 +89,41 @@ POT_METADATA = {
 }
 
 
-def _parse_comment_tokens(tokens):
-    """Parse comment tokens into (description_lines, flag_strings).
+def _comment_lines(tokens):
+    """Flatten comment tokens into their raw source lines, blank lines included."""
+    lines = []
+    for token in tokens:
+        lines.extend(token.value.splitlines())
+    return lines
+
+
+def _parse_comment_lines(lines):
+    """Parse raw comment lines into (description_lines, flag_strings).
 
     Lines matching ``# flags: ...`` are split into individual flag strings.
     All other non-empty comment lines become translator descriptions.
     """
     descriptions = []
     flags = []
-    for token in tokens:
-        for raw_line in token.value.splitlines():
-            text = raw_line.strip()
-            if not text or text == "#":
-                continue
-            if text.startswith("#"):
-                text = text[1:].strip()
-            if not text:
-                continue
-            m = FLAGS_LINE.match(text)
-            if m:
-                flags.extend(f.strip() for f in m.group(1).split(",") if f.strip())
-            else:
-                descriptions.append(text)
+    for raw_line in lines:
+        text = raw_line.strip()
+        if not text or text == "#":
+            continue
+        if text.startswith("#"):
+            text = text[1:].strip()
+        if not text:
+            continue
+        m = FLAGS_LINE.match(text)
+        if m:
+            flags.extend(f.strip() for f in m.group(1).split(",") if f.strip())
+        else:
+            descriptions.append(text)
     return descriptions, flags
+
+
+def _parse_comment_tokens(tokens):
+    """Parse comment tokens into (description_lines, flag_strings)."""
+    return _parse_comment_lines(_comment_lines(tokens))
 
 
 def get_key_comments(yaml_data, keys, index):
@@ -106,13 +135,22 @@ def get_key_comments(yaml_data, keys, index):
     (``yaml_data.ca.comment``) is used instead.
     """
     if index == 0:
-        # File-level comment (ca.comment[1]) is the YAML header.  It is NOT
-        # a per-entry description — only parse it for per-entry flags.
+        # The file-level comment block holds the YAML header AND, when present,
+        # the first key's own comment — ruamel does not separate them.  YAML
+        # convention puts a blank line between the two, so the comment group
+        # after the last blank line belongs to the key.  Without any blank line
+        # the block is unambiguously just the header, so only flags are taken.
         top = yaml_data.ca.comment
-        if top and top[1]:
-            _, flags = _parse_comment_tokens(top[1])
+        if not (top and top[1]):
+            return None, []
+        lines = _comment_lines(top[1])
+        if not any(not line.strip() for line in lines):
+            _, flags = _parse_comment_lines(lines)
             return None, flags
-        return None, []
+        group = []
+        for raw in lines:
+            group = [] if not raw.strip() else group + [raw]
+        return _parse_comment_lines(group)
 
     prev_key = keys[index - 1]
     ca = yaml_data.ca.items.get(prev_key)
@@ -192,7 +230,11 @@ def yaml_to_pot(glossary_path, pot_path):
             entry.flags = entry_flags
         pot.append(entry)
 
-    pot.save(str(pot_path))
+    # newline="\n" is not optional. polib.save() forwards it to io.open(), and io.open's default
+    # (newline=None) translates every "\n" to os.linesep -- so on Windows this writes a CRLF .pot
+    # while po4a, msgmerge and Weblate all write LF. A catalogue rewritten in part by a tool that
+    # disagrees is what produces a mixed file no gettext parser accepts.
+    pot.save(str(pot_path), newline="\n")
     print(f"Generated {pot_path} ({len(pot)} entries)")
     return pot
 
@@ -263,7 +305,7 @@ def merge_po(pot_path, po_path):
             if entry.flags:
                 new_entry.flags = list(entry.flags)
             po.append(new_entry)
-        po.save(str(po_path))
+        po.save(str(po_path), newline="\n")
         print(f"Created {po_path}")
         return
 
@@ -334,7 +376,7 @@ def merge_po(pot_path, po_path):
 
         new_po.append(new_entry)
 
-    new_po.save(str(po_path))
+    new_po.save(str(po_path), newline="\n")
     translated = len([e for e in new_po if e.msgstr or
                       (e.msgstr_plural and any(e.msgstr_plural.values()))])
     print(f"Updated {po_path} ({translated}/{len(new_po)} translated)")
@@ -389,8 +431,12 @@ def generate_yaml(po_dir, glossary_path, languages, threshold=80):
         # Sort by key
         sorted_translations = dict(sorted(translations.items()))
 
+        # newline="\n" for the same reason as the .pot above: open()'s default translates "\n" to
+        # os.linesep, so this generated YAML would be CRLF on Windows and LF in CI. It is read by
+        # the reports' R string-resource cascade and committed, so the bytes must not depend on
+        # which machine ran the pipeline.
         out_path = glossary_path.parent / f"glossary.{lang}.yaml"
-        with open(out_path, "w", encoding="utf-8") as f:
+        with open(out_path, "w", encoding="utf-8", newline="\n") as f:
             yaml.dump(sorted_translations, f)
 
         print(f"Generated {out_path} ({len(sorted_translations)} entries)")
@@ -416,13 +462,13 @@ def main():
         "--po-dir",
         type=Path,
         default=Path("po"),
-        help="Directory containing .po files (default: po/)",
+        help="Directory the .po files are read from (default: po/)",
     )
     parser.add_argument(
         "--languages",
         type=lambda s: s.split(","),
         default=DEFAULT_LANGUAGES,
-        help="Comma-separated language codes",
+        help="Comma-separated language codes to generate localized YAML for",
     )
     parser.add_argument(
         "--generate-yaml",
@@ -441,12 +487,14 @@ def main():
     if not args.glossary.exists():
         sys.exit(f"Error: {args.glossary} not found")
 
-    # Always extract and merge
     yaml_to_pot(args.glossary, args.pot)
 
+    # The glossary catalogue is repository-owned -- it is not a Weblate component -- so this script
+    # is its writer and must keep every .po in step with the template it just regenerated. Remove
+    # this loop at the moment the component is registered on Weblate, or there will be two writers
+    # on one file again, which is the failure the rest of the pipeline exists to prevent.
     for lang in args.languages:
-        po_path = args.po_dir / f"glossary.{lang}.po"
-        merge_po(args.pot, po_path)
+        merge_po(args.pot, args.po_dir / f"glossary.{lang}.po")
 
     if args.generate_yaml:
         generate_yaml(args.po_dir, args.glossary, args.languages,

@@ -172,6 +172,6 @@ output_path <- as_null(args$output)
 if (is.null(output_path)) {
   cat(out)
 } else {
-  writeLines(out, output_path, useBytes = TRUE)
+  write_lines_lf(out, output_path)
   logInfo("Patient data written to '{output_path}'.")
 }

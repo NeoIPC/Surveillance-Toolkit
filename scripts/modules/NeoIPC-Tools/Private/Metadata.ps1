@@ -1,3 +1,4 @@
+#Requires -Version 7.6
 # NeoIPC metadata pipeline — shared core (private, not exported).
 # Type-map-independent primitives: UID validity + deterministic mint, the one list
 # tokenizer, parent-id grouping, and the recursive noise normalizer. Static data tables
@@ -934,6 +935,16 @@ function ConvertTo-NeoIPCCsvField {
     [OutputType([string])]
     param([AllowNull()][AllowEmptyString()][string]$Value)
     if ([string]::IsNullOrEmpty($Value)) { return '' }
+
+    # Normalize CRLF *inside* the value to LF before escaping. The writer pins the row terminator
+    # (StreamWriter.NewLine = "`n"), but that says nothing about newlines embedded in a cell — and a
+    # multi-line DHIS2 description entered on Windows arrives as CRLF. Left alone it lands inside the
+    # quoted field, producing a file with LF row endings and CRLF within a cell: a *mixed* file, which is
+    # the one state this project treats as corrupt rather than merely wrong, and which the hygiene check
+    # reports as `w/mixed`. Only CRLF pairs are rewritten, never a lone CR, because a bare 0x0D can be
+    # legitimate data. Import-Csv reads embedded LF back unchanged, so the round-trip is stable.
+    $Value = $Value -replace "`r`n", "`n"
+
     if ($Value -match '[,"\r\n]' -or $Value -ne $Value.Trim()) { return '"' + ($Value -replace '"', '""') + '"' }
     return $Value
 }

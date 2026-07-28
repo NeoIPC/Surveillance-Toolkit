@@ -1,3 +1,6 @@
+#!/usr/bin/env pwsh
+#Requires -Version 7.6
+
 <#
 .SYNOPSIS
 Batch-generate Partner Reports for one or more sites and languages.
@@ -364,7 +367,11 @@ try {
         $dataFilePathForR = $absoluteDataFilePath -replace '\\', '/'
         $tempRFilePath = [System.IO.Path]::GetTempFileName() -replace '\.tmp$', '.R'
         try {
-            @"
+            # Not Set-Content: it appends [Environment]::NewLine after the string it is given, while
+            # the here-string's own newlines come from this file (LF). On Windows that produced a
+            # genuinely MIXED file — LF throughout the body, CRLF at the end — which is the state
+            # that is corrupt rather than merely wrong. WriteAllText writes the text verbatim.
+            $rScript = @"
 x <- jsonlite::unserializeJSON(readChar('$dataFilePathForR', file.info('$dataFilePathForR')`$size))
 if (inherits(x, 'neoipcr_bnch_ds')) {
   cat(paste(x`$metadata`$own`$dataset_options`$department_filter, collapse = ','))
@@ -373,7 +380,8 @@ if (inherits(x, 'neoipcr_bnch_ds')) {
 } else {
   stop('Unknown data type in file')
 }
-"@ | Set-Content -LiteralPath $tempRFilePath -Encoding utf8
+"@
+            [System.IO.File]::WriteAllText($tempRFilePath, (($rScript -replace "`r`n", "`n") + "`n"), [System.Text.UTF8Encoding]::new($false))
             $siteString = & Rscript --vanilla $tempRFilePath 2>$null
         } finally {
             Remove-Item -LiteralPath $tempRFilePath -ErrorAction SilentlyContinue

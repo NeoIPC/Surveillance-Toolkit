@@ -1,4 +1,12 @@
 {
+  // Line endings and encoding are declared in .gitattributes and .editorconfig, but VS Code does not
+  // honour .editorconfig without the EditorConfig.EditorConfig extension — so these two are repeated
+  // here to cover an editor that does not have it installed. Only the settings that apply universally
+  // are duplicated; the per-glob carve-outs (.po, .pot, .dhis2) stay in .editorconfig, which can
+  // express them and VS Code settings cannot.
+  "files.eol": "\n",
+  "files.encoding": "utf8",
+
   "editor.rulers": [120],
   "[r]": {
     "editor.rulers": [80]

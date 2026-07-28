@@ -1,3 +1,4 @@
+#Requires -Version 7.6
 # Public surface for the NeoIPC data-dictionary generator. Flattens the assembled DHIS2 metadata package
 # into a technology-agnostic spreadsheet (CSV + optional multi-tab XLSX). The transforms live in
 # Private/DataDictionary.ps1; this file is the cmdlet wiring only. No DHIS2 API calls.

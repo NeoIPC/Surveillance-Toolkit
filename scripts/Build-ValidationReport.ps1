@@ -1,3 +1,6 @@
+#!/usr/bin/env pwsh
+#Requires -Version 7.6
+
 <#
 .SYNOPSIS
 Generate Validation Reports for one or more sites, or a combined report for all departments.

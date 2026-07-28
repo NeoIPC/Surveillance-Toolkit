@@ -1,3 +1,4 @@
+#Requires -Version 7.6
 # Private DHIS2 HTTP layer — not exported from the module.
 # All public functions that call the DHIS2 API should go through these functions.
 

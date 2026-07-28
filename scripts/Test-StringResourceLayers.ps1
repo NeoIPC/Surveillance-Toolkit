@@ -1,4 +1,6 @@
 #!/usr/bin/env pwsh
+#Requires -Version 7.6
+
 <#
 .SYNOPSIS
     Detects duplicate string values across YAML string resource layers.
@@ -55,6 +57,32 @@ if (-not $AllowlistPath) {
 # =========================================================
 # Function definitions
 # =========================================================
+
+# -------------------------------------------------
+# Write YAML back as UTF-8 without a BOM and with LF line endings
+# -------------------------------------------------
+# `$lines | Set-Content $path` joins with [Environment]::NewLine and appends one more, so on Windows
+# -Fix rewrote every committed string-resource file in CRLF. These files are also read and rewritten by
+# po4a and by Weblate, both of which use LF, so a run here left a file that disagreed with itself.
+function Write-YamlLines {
+    param(
+        [Parameter(Mandatory)][string]$FilePath,
+        [string[]]$Lines
+    )
+
+    # Refuse an empty write. `$empty | Set-Content` was a NO-OP — PowerShell never invokes the cmdlet when
+    # the pipeline yields nothing — so the file was left alone. WriteAllText has no such behaviour and would
+    # replace the file with a single newline, i.e. silently destroy a committed string-resource catalogue if
+    # a caller's filtering ever produced an empty list. Throwing keeps the old outcome (content intact) while
+    # making the impossible case loud instead of destructive.
+    if ($null -eq $Lines -or $Lines.Count -eq 0) {
+        throw "Refusing to write an empty line list to '$FilePath': that would erase the file. " +
+            'This indicates a bug in the caller, since every caller here rewrites an existing catalogue.'
+    }
+
+    $text = ($Lines -join "`n") + "`n"
+    [System.IO.File]::WriteAllText($FilePath, $text, [System.Text.UTF8Encoding]::new($false))
+}
 
 # -------------------------------------------------
 # Recursively flatten YAML into (dotted-key-path, string-value) pairs
@@ -364,7 +392,7 @@ function Remove-YamlKey {
         }
     }
 
-    $newLines | Set-Content $FilePath
+    Write-YamlLines -FilePath $FilePath -Lines $newLines
     return $true
 }
 
@@ -429,7 +457,7 @@ function Add-YamlKey {
         $lines.Insert($insertAt, "$indent$lastSeg`: $quotedValue") | Out-Null
     }
 
-    $lines | Set-Content $FilePath
+    Write-YamlLines -FilePath $FilePath -Lines $lines
 }
 
 # -------------------------------------------------
@@ -676,7 +704,7 @@ function Optimize-YamlFileKeys {
     }
 
     $sorted = Invoke-BlockSort -Lines $lines -Start 0 -End $lines.Count -Indent 0
-    $sorted | Set-Content $FilePath
+    Write-YamlLines -FilePath $FilePath -Lines $sorted
 }
 
 # -------------------------------------------------
@@ -713,7 +741,7 @@ function Invoke-Changeset {
             foreach ($change in $fg.Group) {
                 $lines[$change.LineIndex] = $change.NewContent
             }
-            $lines | Set-Content $filePath
+            Write-YamlLines -FilePath $filePath -Lines $lines
             $relPath = [System.IO.Path]::GetRelativePath($repoRoot, $filePath) -replace '\\', '/'
             Write-Host "  Updated $($fg.Group.Count) R code reference(s) in $relPath" -ForegroundColor Green
         }

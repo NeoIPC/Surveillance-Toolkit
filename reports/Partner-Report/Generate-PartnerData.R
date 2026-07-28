@@ -207,6 +207,6 @@ if (is.null(outputFile)) {
   if (!dir.exists(outputDir)) {
     dir.create(outputDir, recursive = TRUE, showWarnings = FALSE)
   }
-  writeLines(json, outputFile, useBytes = TRUE)
+  write_lines_lf(json, outputFile)
   logInfo("Partner data written to: {outputFile}")
 }

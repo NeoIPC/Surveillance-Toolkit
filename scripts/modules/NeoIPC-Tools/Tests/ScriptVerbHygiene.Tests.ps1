@@ -1,10 +1,22 @@
+#Requires -Version 7.6
 #requires -Module Pester
 
-# Approved-verb hygiene gate. Every command script in scripts/ must start with an
-# approved PowerShell verb (Get-Verb), and every function the scripts/modules define
-# must too. The file-name check is custom because PSScriptAnalyzer's PSUseApprovedVerbs
-# inspects function definitions, not script basenames — so it alone would not catch a
-# script file named with an unapproved verb (e.g. Generate-*.ps1 / Make-*.ps1).
+<#
+.SYNOPSIS
+    Pester gate enforcing approved-verb naming on script files and module functions.
+
+.DESCRIPTION
+    Every command script under scripts/ must begin with an approved PowerShell verb (Get-Verb), and so
+    must every function the modules under scripts/modules define.
+
+    The file-name half is a custom check rather than a PSScriptAnalyzer rule, and deliberately so:
+    PSUseApprovedVerbs inspects function definitions, not script basenames, so on its own it would not
+    catch a script file named with an unapproved verb such as Generate-Something.ps1 or Make-Thing.ps1.
+    The function half does delegate to PSUseApprovedVerbs, and is skipped when PSScriptAnalyzer is absent.
+
+.EXAMPLE
+    Invoke-Pester -Path scripts/modules/NeoIPC-Tools/Tests/ScriptVerbHygiene.Tests.ps1
+#>
 
 BeforeAll {
     $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..' '..' '..' '..')).Path

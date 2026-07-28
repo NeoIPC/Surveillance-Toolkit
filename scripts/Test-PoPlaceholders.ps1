@@ -1,3 +1,6 @@
+#!/usr/bin/env pwsh
+#Requires -Version 7.6
+
 <#
 .SYNOPSIS
     Validates that placeholders in PO file translations haven't been replaced with constant values.
@@ -25,8 +28,12 @@
 
 .PARAMETER Category
     Filter PO files by category based on filename pattern.
-    Valid values: reports, documentation, glossary, infectious_agents, scripts, all
+    Valid values: reports, documentation, glossary, infectious_agents, antibiotics, metadata, all
     Default: all
+
+    The PowerShell message catalogue has no category here because it does not follow the
+    <category>.<lang>.po naming the filter matches — its files are scripts/po/<lang>.po, named by
+    language alone. Validate it with `-Path scripts/po` instead, leaving Category at 'all'.
 
 .PARAMETER Quiet
     Suppress summary output. Only violations are displayed.
@@ -59,13 +66,18 @@
 [CmdletBinding()]
 param(
     [Parameter()]
-    [string]$Path = "po\*.po",
+    # Resolved from the script's own location, not $PWD, so the default works from any working
+    # directory. The previous default ("po\*.po") was relative to the current directory, so it matched
+    # nothing whenever the script ran from anywhere but the repository root — which, combined with the
+    # no-match exit below, made this silently validate zero files. The backslash was not the cause:
+    # PowerShell accepts it as a separator on Linux too.
+    [string]$Path = (Join-Path (Split-Path -Parent $PSScriptRoot) 'po'),
     
     [Parameter()]
     [string[]]$Include,
     
     [Parameter()]
-    [ValidateSet('reports', 'documentation', 'glossary', 'infectious_agents', 'scripts', 'all')]
+    [ValidateSet('reports', 'documentation', 'glossary', 'infectious_agents', 'antibiotics', 'metadata', 'all')]
     [string]$Category = 'all',
     
     [Parameter()]
@@ -665,7 +677,11 @@ if ($Include) {
 }
 else {
     if (Test-Path $Path -PathType Container) {
-        $filesToValidate = Get-ChildItem -Path $Path -Filter "*.po" -File | Select-Object -ExpandProperty FullName
+        # -Filter "*.po" also matches *.pot on Windows (legacy short-name matching), so check the
+        # extension explicitly — the .pot templates are not translations and have nothing to compare.
+        $filesToValidate = Get-ChildItem -Path $Path -Filter "*.po" -File |
+            Where-Object { $_.Extension -eq '.po' } |
+            Select-Object -ExpandProperty FullName
     }
     elseif (Test-Path $Path) {
         $filesToValidate = @((Get-Item $Path).FullName)
@@ -684,8 +700,10 @@ if ($Category -ne 'all') {
 }
 
 if ($filesToValidate.Count -eq 0) {
-    Write-Warning "No PO files found matching the specified criteria."
-    exit 0
+    # Fail rather than pass. As a CI gate, "validated nothing" reported as success is the worst
+    # outcome available: it looks green while checking no files at all.
+    Write-Error "No PO files found matching the specified criteria (Path: '$Path', Category: '$Category')."
+    exit 1
 }
 
 Write-Host "Validating $($filesToValidate.Count) PO file(s)..." -ForegroundColor Cyan
@@ -798,7 +816,10 @@ if (-not $Quiet) {
 
 # Write output file if specified
 if ($OutputFile) {
-    $output.ToString() | Out-File -FilePath $OutputFile -Encoding UTF8
+    # Out-File appends [Environment]::NewLine after the string, producing a mixed file: LF inside the
+    # accumulated report text and a lone CRLF at the end. Write the string verbatim instead.
+    [System.IO.File]::WriteAllText(
+        $OutputFile, ($output.ToString() -replace "`r`n", "`n"), [System.Text.UTF8Encoding]::new($false))
     Write-Host
     Write-Host "Results written to: $OutputFile" -ForegroundColor Cyan
 }

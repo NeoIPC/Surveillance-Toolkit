@@ -1,3 +1,4 @@
+#Requires -Version 7.6
 # NeoIPC metadata pipeline — per-expression text-file externalisation.
 #
 # The expression-heavy fields live in one text file per expression under <directory>/expressions/, rather than packed
@@ -105,9 +106,12 @@ function Get-NeoIPCMetadataExpressionFilePath {
 }
 
 function Write-NeoIPCMetadataExpressionFiles {
-    # Emit side (directory): for every externalised expression column with a non-empty value, write the value verbatim
+    # Emit side (directory): for every externalised expression column with a non-empty value, write the value
     # to <Directory>/expressions/<type>/<id>.<column>.dhis2 and REPLACE the row cell with the relative file path.
-    # Mutates $Rows in place. Verbatim bytes (no added newline) so the read-back round-trips with zero diff.
+    # Mutates $Rows in place. The file is written as conforming text — trailing whitespace stripped, exactly one
+    # closing newline — and the read side strips that again, so write-then-read round-trips the value and the
+    # expression reaching the API payload is unchanged. (This deliberately no longer writes verbatim bytes: see
+    # the note at the write call below for why the generator conforms rather than the editors carving it out.)
     [CmdletBinding()]
     param([Parameter(Mandatory)]$Rows, [Parameter(Mandatory)][string]$Directory)
     $ruleSeg = Get-NeoIPCMetadataExpressionRuleSegmentMap -RuleRows $Rows['programRules']
@@ -126,7 +130,20 @@ function Write-NeoIPCMetadataExpressionFiles {
                 $abs = Join-Path $Directory ($rel -replace '/', [System.IO.Path]::DirectorySeparatorChar)
                 $sub = Split-Path -Parent $abs
                 if (-not (Test-Path -LiteralPath $sub)) { New-Item -ItemType Directory -Path $sub -Force | Out-Null }
-                [System.IO.File]::WriteAllText($abs, $val, [System.Text.UTF8Encoding]::new($false))
+                # Emit a conforming text file — trailing whitespace stripped, exactly one closing newline —
+                # rather than expecting an .editorconfig carve-out to protect unconventional output. The
+                # generator is the right place to fix this: an editor honouring `insert_final_newline` would
+                # otherwise add a newline that the next externalisation removed, leaving two writers
+                # disagreeing about one file, which is the failure the whole text contract exists to stop.
+                # Two expressions were found already carrying a stray trailing newline from exactly that.
+                #
+                # Safe because trailing whitespace is not content here: the DHIS2 expression grammar skips
+                # whitespace between tokens, so neither the space some expressions carried after a closing
+                # ')' nor this newline changes how anything evaluates. The reader strips it again, so the
+                # value that reaches the API payload is unchanged and the round-trip stays stable — write
+                # then read is idempotent for any input.
+                $val = $val.TrimEnd()
+                [System.IO.File]::WriteAllText($abs, $val + "`n", [System.Text.UTF8Encoding]::new($false))
                 $row[$col] = $rel
             }
         }
@@ -135,9 +152,11 @@ function Write-NeoIPCMetadataExpressionFiles {
 
 function Read-NeoIPCMetadataExpressionFiles {
     # Read side (directory): the inverse — for every externalised expression column whose cell is a file reference
-    # (matches the expressions/...dhis2 pattern), read the file content verbatim back into the cell. Mutates $Rows in
-    # place. An inline value (no reference pattern) is left untouched, so an un-migrated or hand-authored inline
-    # expression still reads. Fails loud on a referenced-but-missing file (a broken reference).
+    # (matches the expressions/...dhis2 pattern), read the file content back into the cell with its trailing
+    # whitespace stripped — mirroring the write side, which appends exactly one newline so the file conforms to the
+    # text contract. Interior newlines of a multi-line expression and any leading whitespace are untouched. Mutates
+    # $Rows in place. An inline value (no reference pattern) is left untouched, so an un-migrated or hand-authored
+    # inline expression still reads. Fails loud on a referenced-but-missing file (a broken reference).
     [CmdletBinding()]
     param([Parameter(Mandatory)]$Rows, [Parameter(Mandatory)][string]$Directory)
     foreach ($type in @($Rows.Keys)) {
@@ -150,7 +169,12 @@ function Read-NeoIPCMetadataExpressionFiles {
                 if (-not $script:NeoIPCMetadataExpressionRefPattern.IsMatch($val)) { continue }
                 $abs = Join-Path $Directory ($val -replace '/', [System.IO.Path]::DirectorySeparatorChar)
                 if (-not (Test-Path -LiteralPath $abs)) { throw "Expression file referenced by $type '$([string]$row['id'])' column '$col' not found: '$val'." }
-                $row[$col] = [System.IO.File]::ReadAllText($abs)
+                # TrimEnd mirrors the write side, which strips trailing whitespace and appends exactly one
+                # newline so the file conforms to the text contract like every other committed file. The
+                # expression that reaches the API payload therefore carries neither, and write-then-read is
+                # idempotent. Safe for content too: leading whitespace and every interior newline of a
+                # multi-line expression are untouched.
+                $row[$col] = [System.IO.File]::ReadAllText($abs).TrimEnd()
             }
         }
     }

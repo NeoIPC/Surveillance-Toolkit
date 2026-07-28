@@ -22,7 +22,7 @@ combination and topical agents are excluded.
 | File | Contents |
 |------|----------|
 | `NeoIPC-Antibiotics.csv` | The substance/option table — `id, atc_code, name, atc_group, aware_category, uid`. One row per DHIS2 option (the **systemic** antibiotics — the WHO ATC `J01` branch plus a few deliberately-added systemic non-J01 substances). The WHO **AWaRe** classification is folded in as the `aware_category` column. |
-| `NeoIPC-Antibiotic-Groups.csv` | The 34 WHO ATC **level-4** chemical subgroups — `code, name, shortName, description, uid`. A substance joins a group by its `atc_group` column; the `ATC5` option-group-set is built from these. |
+| `NeoIPC-Antibiotic-Groups.csv` | The 34 WHO ATC **level-4** chemical subgroups — `code, name, shortName, uid`. A substance joins a group by its `atc_group` column; the `ATC5` option-group-set is built from these. Carries **no `description`**: only 17 of 34 groups ever had one, nothing consumed them, and being verbatim WHOCC prose they were this directory's largest block of reproduced upstream text, so the column was dropped (see [Translations](#translations)). |
 | `NeoIPC-Antibiotic-AWaRe-Groups.csv` | The 3 WHO **AWaRe** groups — `code, category, name, shortName, description, uid`. A substance joins by its `aware_category`; the `WHO_AWARE` option-group-set is built from these. |
 | `ListElements.csv` | The printed-list UI labels (the `New-AntibioticsList` table headers). |
 
@@ -39,15 +39,51 @@ never for identity.
 
 ## Translations
 
-Antibiotic translations live in a single bilingual gettext component **`po/antibiotics.pot` + `po/antibiotics.<lang>.po`**,
-keyed by the English string. It covers the substance names, all antibiotic group / group-set names, shortNames and
-descriptions, and the printed-list UI labels. Regenerate it with `./scripts/Invoke-Localization.ps1 -Update -Config antibiotics`
+Antibiotic translations live in a single bilingual gettext catalogue **`po/antibiotics.pot` + `po/antibiotics.<lang>.po`**,
+keyed by the English string. It covers the substance names, all antibiotic group / group-set names and shortNames, the
+AWaRe group and group-set descriptions, and the printed-list UI labels. The **ATC group descriptions are deliberately
+not carried**: only 17 of 34 groups ever had one, nothing consumed them and none had been translated, and being
+WHOCC prose they were the sharpest edge of this directory's licensing question. The column is gone from
+`NeoIPC-Antibiotic-Groups.csv`, so the generated DHIS2 option groups carry no description either — nothing consumed
+them, and none had been translated. Regenerate the catalogue with `./scripts/Invoke-Localization.ps1 -Update -Config antibiotics`
 (or as part of `-Config all`). The previous `NeoIPC-Antibiotics.<lang>.csv` / `ListElements.<lang>.csv` translation
 sidecars and the standalone `WHO-AWaRe-Classification-2021.csv` are **retired** (folded into the files above + the PO).
 
+### This catalogue is not on Weblate, and cannot be
+
+Four NeoIPC catalogues are hosted on [Hosted Weblate](https://hosted.weblate.org/projects/neoipc/) for community
+translation — reports, protocol documentation, infectious agents and DHIS2 metadata. This one is not, and unlike the
+glossary and the PowerShell message strings, which are simply not registered yet, it cannot be. Hosted Weblate's free plan requires every component to carry a **free (libre) licence**,
+and a **NonCommercial** term is not one — so the component was rejected as *"does not meet the Libre hosting
+conditions"* and has been removed.
+
+The sibling infectious-agent catalogue **was** relicensed from CC BY-NC-ND to CC BY 4.0, on the reasoning that po4a
+extracts only taxonomic names, synonyms and rank labels from it — none of the upstream material the licence exists to
+protect, and names are not copyrightable in any case. That argument does not simply transfer here. Dropping the ATC
+group descriptions removed the clearest block of reproduced prose, but two things still carry upstream expression: the
+**AWaRe group and group-set descriptions**, which define the three categories and are retained because they are
+clinically meaningful to anyone reading a report; and, less obviously but more substantially, the **classification
+itself** — which substance sits in which ATC group and which AWaRe category is WHO's editorial work, and a selection
+and arrangement of that kind is what a database right protects even where the individual names are not copyrightable.
+
+So the licence question is a legal judgement, not a mechanical one, and it has not been settled — the CC BY-NC-SA
+3.0 IGO declaration stands until it is. Anyone tempted to relicense this catalogue on the strength of the
+infectious-agent precedent should read that paragraph again first.
+
+Two consequences follow, both deliberate:
+
+- **The `.po` files are repository-owned.** The catalogue-ownership rule that makes Weblate the sole writer of a `.po`
+  does not apply to them: `Export-NeoIPCAntibioticTranslation` writes both the `.pot` and each `.po`, and the
+  continuous-integration gate that rejects hand-written changes to Weblate-owned catalogues deliberately excludes them.
+- **Translations are contributed through this repository** — a pull request against `po/antibiotics.<lang>.po` — rather
+  than through Weblate. There is no bot to overwrite them.
+
+If the licence question is ever resolved in favour of a free licence, the component can be registered on Weblate and
+both consequences above reversed.
+
 ## Attribution
 
-- **WHO ATC/DDD** — the ATC codes, the substance names and the ATC group names/descriptions are based on
+- **WHO ATC/DDD** — the ATC codes, the substance names and the ATC group names are based on
   information from the [WHO Collaborating Centre for Drug Statistics Methodology, Oslo](https://www.whocc.no/)
   ([ATC/DDD copyright & disclaimer](https://atcddd.fhi.no/copyright_disclaimer/)). Reproduced here for NeoIPC's
   **non-commercial** infection-surveillance use, with attribution; the ATC classification is reproduced unchanged
@@ -60,4 +96,4 @@ sidecars and the standalone `WHO-AWaRe-Classification-2021.csv` are **retired** 
 
 ## Licensing
 
-The repository as a whole is MIT-licensed, but this directory is a **derivative** of the WHO AWaRe classification (CC BY-NC-SA 3.0 IGO). ShareAlike requires the derivative to keep the same licence, so the effective license is **CC BY-NC-SA 3.0 IGO**; the ATC codes, substance names and group descriptions it also carries are reproduced unchanged from the WHOCC ATC/DDD index, not adapted. See [`LICENSE.md`](LICENSE.md) for the full reasoning.
+The repository as a whole is MIT-licensed, but this directory is a **derivative** of the WHO AWaRe classification (CC BY-NC-SA 3.0 IGO). ShareAlike requires the derivative to keep the same licence, so the effective license is **CC BY-NC-SA 3.0 IGO**; the ATC codes, substance names and group names it also carries are reproduced unchanged from the WHOCC ATC/DDD index, not adapted (the ATC group *descriptions* are no longer carried at all — see [Translations](#translations)). See [`LICENSE.md`](LICENSE.md) for the full reasoning.

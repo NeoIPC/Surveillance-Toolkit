@@ -1,12 +1,35 @@
+#Requires -Version 7.6
 #requires -Module Pester
 
-# Internals (Import-AntibioticPoTranslation) are exercised via InModuleScope so the private (non-exported) helpers
-# are in scope. The Import-Module at file top runs during Pester's discovery phase, which InModuleScope requires
-# (a BeforeAll import is too late — discovery would fail with "No modules named 'NeoIPC-BuildTools' are loaded").
+<#
+.SYNOPSIS
+    Pester tests for the NeoIPC-BuildTools antibiotic list and translation import.
+
+.DESCRIPTION
+    Covers Import-AntibioticPoTranslation and New-AntibioticsList: catalogue parsing (real translations
+    kept; header, identical, fuzzy and obsolete entries skipped), multi-line continuation reassembly,
+    culture parent-chain fallback, ordinal case sensitivity, and the AWaRe badge mapping.
+
+    Internals are reached through InModuleScope so the private, non-exported helpers are in scope. The
+    Import-Module at file top runs during Pester's discovery phase, which InModuleScope requires — a
+    BeforeAll import would be too late, and discovery would fail reporting that no such module is loaded.
+
+.EXAMPLE
+    Invoke-Pester -Path scripts/modules/NeoIPC-BuildTools/Tests/NeoIPC-BuildTools.Tests.ps1
+#>
 $ErrorActionPreference = 'Stop'
 Import-Module -Name (Join-Path $PSScriptRoot '..') -Force
 
 InModuleScope 'NeoIPC-BuildTools' {
+
+    BeforeAll {
+        # Set-TestFileContent — writes fixtures with LF endings on every platform, so a fixture means
+        # the same thing on a Windows developer machine and on the Linux CI runner. Dot-sourced from an
+        # outermost BeforeAll because neither script scope nor the top of InModuleScope is visible
+        # during Pester's run phase (see the header of TestFileHelpers.ps1).
+        . (Join-Path $PSScriptRoot '..' '..' 'TestFileHelpers.ps1')
+    }
+
     Describe 'Import-AntibioticPoTranslation' {
         BeforeAll {
             $script:poDir = Join-Path $TestDrive 'po'
@@ -38,7 +61,30 @@ InModuleScope 'NeoIPC-BuildTools' {
                 ''
                 'msgid "Substance"'
                 'msgstr "Substanz"'
-            ) | Set-Content -LiteralPath (Join-Path $script:poDir 'antibiotics.de.po') -Encoding utf8NoBOM
+            ) | Set-TestFileContent -LiteralPath (Join-Path $script:poDir 'antibiotics.de.po') -Encoding utf8NoBOM
+        }
+
+        It 'reads a CRLF catalogue identically to the LF form' {
+            # The fixture writers in this suite are pinned to LF, so this case makes the CRLF-input
+            # coverage explicit instead of relying on which platform runs the suite. It matters here in
+            # particular: a gettext catalogue is rewritten in turn by po4a, msgmerge and Weblate, and a
+            # Windows-side tool can hand this reader a CRLF file at any time. The bytes are written
+            # deliberately with WriteAllText — routing them through Set-TestFileContent would normalize
+            # them and the test would assert nothing.
+            $crlfDir = Join-Path $TestDrive 'po-crlf'
+            New-Item -ItemType Directory -Path $crlfDir -Force | Out-Null
+            $lfText = [System.IO.File]::ReadAllText((Join-Path $script:poDir 'antibiotics.de.po'))
+            [System.IO.File]::WriteAllText(
+                (Join-Path $crlfDir 'antibiotics.de.po'),
+                ($lfText -replace "`n", "`r`n"),
+                [System.Text.UTF8Encoding]::new($false))
+
+            $fromCrlf = Import-AntibioticPoTranslation -PoDirectory $crlfDir -TargetCulture ([CultureInfo]'de')
+            $fromLf   = Import-AntibioticPoTranslation -PoDirectory $script:poDir -TargetCulture ([CultureInfo]'de')
+
+            $fromCrlf['Meropenem'] | Should -BeExactly 'Meropenem DE'
+            $fromCrlf['Substance'] | Should -BeExactly 'Substanz'
+            ($fromCrlf.Keys | Sort-Object) -join '|' | Should -BeExactly (($fromLf.Keys | Sort-Object) -join '|')
         }
 
         It 'maps real translations and skips header / identical / fuzzy / obsolete entries' {
@@ -77,11 +123,11 @@ InModuleScope 'NeoIPC-BuildTools' {
             @('id,atc_code,name,atc_group,aware_category',
                 'J01DH02,J01DH02,Meropenem,J01DH,Watch',        # ATC code + AWaRe
                 'tmp_001,,Micronomicin,J01GB,Watch',            # blank ATC code (tmp_* id) + AWaRe
-                'J01XX99,J01XX99,Noclass,J01XX,') | Set-Content -LiteralPath (Join-Path $abx 'NeoIPC-Antibiotics.csv') -Encoding utf8NoBOM   # no AWaRe category
-            @('id,value', 'substance,Substance', 'atc_code,ATC-Code', 'aware_category,AWaRe Category') | Set-Content -LiteralPath (Join-Path $abx 'ListElements.csv') -Encoding utf8NoBOM
+                'J01XX99,J01XX99,Noclass,J01XX,') | Set-TestFileContent -LiteralPath (Join-Path $abx 'NeoIPC-Antibiotics.csv') -Encoding utf8NoBOM   # no AWaRe category
+            @('id,value', 'substance,Substance', 'atc_code,ATC-Code', 'aware_category,AWaRe Category') | Set-TestFileContent -LiteralPath (Join-Path $abx 'ListElements.csv') -Encoding utf8NoBOM
             $po = Join-Path $root 'po'
             New-Item -ItemType Directory -Path $po -Force | Out-Null
-            @('msgid ""', 'msgstr ""', '"Language: de\n"', '', 'msgid "Meropenem"', 'msgstr "Meropenem DE"', '', 'msgid "Substance"', 'msgstr "Substanz"') | Set-Content -LiteralPath (Join-Path $po 'antibiotics.de.po') -Encoding utf8NoBOM
+            @('msgid ""', 'msgstr ""', '"Language: de\n"', '', 'msgid "Meropenem"', 'msgstr "Meropenem DE"', '', 'msgid "Substance"', 'msgstr "Substanz"') | Set-TestFileContent -LiteralPath (Join-Path $po 'antibiotics.de.po') -Encoding utf8NoBOM
             $script:listMeta = Join-Path $root 'meta'
         }
 

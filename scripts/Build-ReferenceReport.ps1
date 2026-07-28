@@ -1,3 +1,31 @@
+#!/usr/bin/env pwsh
+#Requires -Version 7.6
+
+<#
+.SYNOPSIS
+    Renders the NeoIPC Surveillance Reference Report.
+
+.DESCRIPTION
+    Wrapper around the Reference-Report Quarto report — the aggregate reference/benchmark view across
+    participating departments, as opposed to the single-department Partner Report.
+
+    Two modes, selected by parameter set. Online resolves DHIS2 credentials through the shared auth helper
+    and acquires the reference dataset from the instance. DataFile renders from a previously exported
+    dataset instead, which needs no credentials and makes a render reproducible from a fixed input.
+
+.PARAMETER DataFile
+    Render from this previously exported dataset rather than querying DHIS2.
+
+.PARAMETER OutputFormats
+    One or more of pdf, html, docx, json. Defaults to pdf.
+
+.EXAMPLE
+    ./scripts/Build-ReferenceReport.ps1 -OutputFormats pdf,html
+
+.EXAMPLE
+    ./scripts/Build-ReferenceReport.ps1 ./reference-data.json -OutputFormats pdf
+#>
+
 [CmdletBinding(SupportsShouldProcess = $true, DefaultParameterSetName = 'Online')]
 param(
     [Parameter(ParameterSetName='Online')]

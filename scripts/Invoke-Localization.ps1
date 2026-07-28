@@ -1,4 +1,5 @@
 #!/usr/bin/env pwsh
+#Requires -Version 7.6
 
 <#
 .SYNOPSIS
@@ -8,17 +9,49 @@
     Wraps po4a, the glossary script, YAML key extraction, and string layer
     validation into a single entry point with tab-completable parameters.
 
+    Catalogue ownership: the repository owns every .pot template. It also owns the
+    catalogues of the three domains that are NOT hosted on Weblate — glossary,
+    scripts and antibiotics — each of which has a writer here that keeps it in step
+    with its template: update-glossary-po.py, po4a, and the NeoIPC-Tools antibiotic
+    exporter respectively. For the rest (reports, documentation, infectious_agents,
+    metadata) Weblate is the only writer, and po4a msgmerges them as an unavoidable
+    side effect of every run, so -Update restores those from HEAD once the localized
+    artifacts exist. Two writers on one catalogue is what conflicts every language at
+    once: both sides rewrite adjacent header lines (POT-Creation-Date against
+    PO-Revision-Date / Last-Translator / Language-Team / X-Generator) inside a single
+    hunk git cannot auto-merge.
+
+    One gap remains and is not covered here: po/metadata.<lang>.po is Weblate-owned,
+    but Export-NeoIPCMetadataTranslation still rewrites it. That cmdlet belongs to the
+    metadata pipeline, which this script never invokes, so a run of -Update cannot
+    trip it — but a metadata refresh can.
+
     Update pipeline (default -Config all):
       1. Fix string layer duplicates (Test-StringResourceLayers.ps1 -Fix)
       2. Update YAML keys in po4a configs (Update-Po4aYamlKeys.ps1)
-      3. Run po4a to extract/generate localized files
+      3. Run po4a to regenerate the .pot and the localized files, then restore
+         every Weblate-owned .po so the run leaves them byte-identical
       4. Update glossary PO and generate localized YAML
+
+    Render mode:
+      Runs po4a with --no-update: produces the localized artifacts from the
+      catalogues exactly as committed, writing neither .pot nor .po.
 
     Test mode:
       Runs string layer validation in read-only mode.
 
 .PARAMETER Update
-    Run the update pipeline.
+    Run the update pipeline: regenerate the .pot templates, render the localized
+    artifacts, and leave every Weblate-owned .po byte-identical. Refuses to start
+    when a Weblate-owned .po already has uncommitted changes, because the restore
+    that follows po4a would discard them.
+
+.PARAMETER Render
+    Render the localized artifacts only, writing neither .pot nor .po. Supports the
+    po4a configs (reports, documentation, infectious_agents, scripts) or 'all'; the
+    glossary and antibiotic catalogues are produced by generators with no read-only
+    mode. Use this for builds. It renders every language the config declares; there is no
+    single-language switch.
 
 .PARAMETER Test
     Run read-only string layer validation.
@@ -44,7 +77,13 @@
 
 .EXAMPLE
     Invoke-Localization -Update
-    Run the full pipeline for all configs.
+    Run the full pipeline for all configs. Changes the .pot templates; leaves every
+    Weblate-owned .po untouched.
+
+.EXAMPLE
+    Invoke-Localization -Render -Config reports
+    Regenerate the localized report sources from the committed catalogues without
+    touching po/reports.pot or any po/reports.*.po.
 
 .EXAMPLE
     Invoke-Localization -Update -Config reports
@@ -80,17 +119,23 @@ param(
     [Parameter(Mandatory, ParameterSetName = 'Update')]
     [switch]$Update,
 
+    [Parameter(Mandatory, ParameterSetName = 'Render')]
+    [switch]$Render,
+
     [Parameter(Mandatory, ParameterSetName = 'Test')]
     [switch]$Test,
 
     [Parameter(ParameterSetName = 'Update')]
+    [Parameter(ParameterSetName = 'Render')]
     [ValidateSet('reports', 'documentation', 'infectious_agents', 'scripts', 'glossary', 'antibiotics', 'all')]
     [string]$Config = 'all',
 
     [Parameter(ParameterSetName = 'Update')]
+    [Parameter(ParameterSetName = 'Render')]
     [switch]$Force,
 
     [Parameter(ParameterSetName = 'Update')]
+    [Parameter(ParameterSetName = 'Render')]
     [switch]$DryRun,
 
     [Parameter(ParameterSetName = 'Update')]
@@ -114,6 +159,13 @@ $configMap = @{
 }
 $po4aConfigs = @('reports', 'documentation', 'infectious_agents', 'scripts')
 
+# Which of those catalogues Weblate owns. `scripts` is deliberately absent: scripts/po/*.po is not
+# registered as a Weblate component, so it stays repository-owned and this pipeline is the only thing
+# that keeps it current. Guarding it as Weblate's would freeze it at HEAD — po4a's msgmerge of a new
+# message key would be discarded, and no other writer exists to add it — and would abort the run on a
+# legitimate hand edit. po/glossary.*.po is likewise repository-owned, and is not a po4a config.
+$weblateOwnedPo4aConfigs = @('reports', 'documentation', 'infectious_agents')
+
 # Each product po4a config derives its --package-version from that product's VERSION file (the single
 # source of truth), passed to po4a on the command line so the version lives in exactly one place. scripts/
 # is not an independently-versioned product and has no entry (it keeps whatever its .cfg declares).
@@ -123,24 +175,36 @@ $versionFileMap = @{
     infectious_agents  = 'metadata/common/infectious-agents/VERSION'
 }
 
-# po4a cannot be told a custom file header, so after it runs we rewrite the .pot/.po header comment block
-# into the NeoIPC house style (matching po/glossary.pot). The license is PER PRODUCT: reports + scripts are
-# MIT (the project's own code, under the repository licence); documentation is CC BY 4.0 (the project's own
-# documentation content, matching the DHIS2/UiO metadata convention); infectious_agents is CC BY-NC-ND 4.0
-# (its LICENSE.md — the strictest upstream terms: MycoBank NoDerivatives + CDC). (The antibiotics catalogue
-# is CC BY-NC-SA 3.0 IGO — a derivative of the ShareAlike-licensed WHO AWaRe classification — but is
-# generated by NeoIPC-Tools, not po4a.)
+# po4a cannot be told a custom file header, so after it runs we rewrite the .pot header comment block into
+# the NeoIPC house style (matching po/glossary.pot).
+#
+# A catalogue's licence is set DELIBERATELY here; it is not inherited from the licence of the directory the
+# strings were extracted from, and the two routinely differ. What governs a catalogue is what the catalogue
+# actually contains. Concretely: metadata/common/infectious-agents/ is CC BY-NC-ND 4.0 because of its
+# upstream sources, but po4a extracts only `keys='Name ConceptType Value'` from it — taxonomic names,
+# synonyms, rank labels, controlled values, plus NeoIPC's own header/footer prose. None of the upstream
+# descriptions, authorities or references travels with them, and names are not copyrightable in any case.
+# A NoDerivatives term could not apply to a translation catalogue regardless: a translation *is* a
+# derivative work, so an ND catalogue could not lawfully be translated at all, which is its only purpose.
+#
+# These values must match each Weblate component's `license` field, because that is what is displayed to a
+# contributor as the terms they are contributing under.
+#
+# KNOWN DISCREPANCY, and it cannot be fixed from here. This map governs the `.pot` only. The existing
+# `po/reports.<lang>.po` still say MIT and the `po/infectious_agents.<lang>.po` still say
+# CC BY-NC-ND 4.0, because those files are Weblate-owned — the pipeline stopped rewriting their headers
+# when Weblate became their sole writer, and `msgmerge` preserves a target file's header comment block
+# rather than taking the template's. So the correction has to be made through Weblate (upload, or an
+# addon that rewrites the header), not by editing the catalogues here: a hand-edit would be exactly the
+# two-writer state this whole design removes, and the continuous-integration gate would reject it.
+# Until that happens the `.pot` and the `.po` of those two catalogues disagree about their licence.
 $catalogHeaderMap = @{
-    reports           = @{ Package = 'NeoIPC Surveillance Reports';               License = 'MIT' }
+    reports           = @{ Package = 'NeoIPC Surveillance Reports';               License = 'Creative Commons Attribution 4.0 International' }
     documentation     = @{ Package = 'NeoIPC Surveillance Documentation';         License = 'Creative Commons Attribution 4.0 International' }
-    infectious_agents = @{ Package = 'NeoIPC Surveillance Infectious Agent List'; License = 'Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International' }
+    infectious_agents = @{ Package = 'NeoIPC Surveillance Infectious Agent List'; License = 'Creative Commons Attribution 4.0 International' }
     scripts           = @{ Package = 'NeoIPC Surveillance Scripts';               License = 'MIT' }
 }
 $copyrightHolder = 'Charité – Universitätsmedizin Berlin'
-$languageDisplayNames = @{
-    af = 'Afrikaans'; de = 'German';  el = 'Greek';   es = 'Spanish'; et = 'Estonian'
-    fr = 'French';    it = 'Italian'; ne = 'Nepali';  tr = 'Turkish'
-}
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -192,13 +256,18 @@ function Invoke-Po4a {
 
         # --package-version to pass to po4a, from the product's VERSION file (the single source of truth).
         # Empty for configs without a product VERSION (e.g. scripts), which keep whatever their .cfg declares.
-        [string]$PackageVersion
+        [string]$PackageVersion,
+
+        # Pass po4a's --no-update: "Do not change the POT and PO files, only the translation may be
+        # updated." Renders the localized artifacts from the catalogues exactly as committed.
+        [switch]$NoUpdate
     )
 
     Test-Po4aSubmodule
 
     $keepArg = if ($Force) { ' --keep 0' } else { '' }
     $pkgVerArg = if ($PackageVersion) { " --package-version $PackageVersion" } else { '' }
+    $noUpdateArg = if ($NoUpdate) { ' --no-update' } else { '' }
 
     if ($IsWindows) {
         if (-not (Get-Command wsl -ErrorAction SilentlyContinue)) {
@@ -220,7 +289,7 @@ function Invoke-Po4a {
             $wslRoot = (wsl wslpath -a .).Trim()
             # PERL_UNICODE=SDA: decode @ARGV + default open() layers as UTF-8 so po4a reads the .cfg's
             # non-ASCII --copyright-holder correctly (otherwise it double-encodes it into the .pot header).
-            $cmd = "cd '$wslRoot' && PERL_UNICODE=SDA PERLLIB=tools/po4a/lib tools/po4a/po4a $ConfigPath$pkgVerArg$keepArg"
+            $cmd = "cd '$wslRoot' && PERL_UNICODE=SDA PERLLIB=tools/po4a/lib tools/po4a/po4a $ConfigPath$pkgVerArg$keepArg$noUpdateArg"
 
             if ($DryRun) {
                 Write-Host "[DryRun] wsl -e bash -c `"$cmd`""
@@ -235,33 +304,145 @@ function Invoke-Po4a {
             Pop-Location
         }
     } else {
-        $env:PERLLIB = Join-Path $po4aSubmodule 'lib'
-        # See the Windows branch: force UTF-8 so the non-ASCII --copyright-holder is not double-encoded.
-        $env:PERL_UNICODE = 'SDA'
         $po4aExe = Join-Path $po4aSubmodule 'po4a'
+        $perlLib = Join-Path $po4aSubmodule 'lib'
         $fullConfigPath = Join-Path $repoRoot $ConfigPath
 
+        # Build the argument vector once so the -DryRun echo cannot drift from what is actually run.
+        $po4aArgs = @($fullConfigPath)
+        if ($PackageVersion) { $po4aArgs += '--package-version'; $po4aArgs += $PackageVersion }
+        if ($Force)          { $po4aArgs += '--keep'; $po4aArgs += '0' }
+        if ($NoUpdate)       { $po4aArgs += '--no-update' }
+
         if ($DryRun) {
-            Write-Host "[DryRun] PERL_UNICODE=SDA PERLLIB=$($env:PERLLIB) $po4aExe $fullConfigPath$pkgVerArg$keepArg"
+            Write-Host "[DryRun] PERL_UNICODE=SDA PERLLIB=$perlLib $po4aExe $($po4aArgs -join ' ')"
         } else {
             Write-Host "Running po4a: $ConfigPath"
-            $po4aArgs = @($fullConfigPath)
-            if ($PackageVersion) { $po4aArgs += '--package-version'; $po4aArgs += $PackageVersion }
-            if ($Force) { $po4aArgs += '--keep'; $po4aArgs += '0' }
-            & $po4aExe @po4aArgs
-            if ($LASTEXITCODE -ne 0) {
-                throw "po4a failed for $ConfigPath (exit code $LASTEXITCODE)"
+            # PERL_UNICODE=SDA: see the Windows branch — force UTF-8 so the non-ASCII
+            # --copyright-holder is not double-encoded. Restored in the finally so the caller's
+            # session is left exactly as it was found (a script run in-process shares it).
+            $priorPerlLib = $env:PERLLIB
+            $priorPerlUnicode = $env:PERL_UNICODE
+            try {
+                $env:PERLLIB = $perlLib
+                $env:PERL_UNICODE = 'SDA'
+                & $po4aExe @po4aArgs
+                if ($LASTEXITCODE -ne 0) {
+                    throw "po4a failed for $ConfigPath (exit code $LASTEXITCODE)"
+                }
+            } finally {
+                # [NullString]::Value *removes* the variable; $null would bind to [string] as '' and
+                # leave it empty-but-present, so a consumer's default-when-unset never fires.
+                foreach ($restore in @(
+                        @{ Name = 'PERLLIB';      Value = $priorPerlLib },
+                        @{ Name = 'PERL_UNICODE'; Value = $priorPerlUnicode })) {
+                    $value = if ($null -eq $restore.Value) { [NullString]::Value } else { $restore.Value }
+                    [Environment]::SetEnvironmentVariable($restore.Name, $value, 'Process')
+                }
             }
         }
     }
 }
 
-function Repair-Po4aHeaders {
+function Get-Po4aCatalogPath {
+    # The .pot and per-language .po paths a po4a config declares, repo-relative. Both the template
+    # header repair and the .po restore need these, and two copies of the parsing would diverge.
+    param([Parameter(Mandatory)][string]$ConfigPath)
+
+    $langs = @(); $potRel = $null; $poPattern = $null
+    foreach ($l in (Get-Content -LiteralPath $ConfigPath)) {
+        if     ($l -match '^\[po4a_langs\]\s+(.+)$')                { $langs = ($Matches[1].Trim() -split '\s+') }
+        elseif ($l -match '^\[po4a_paths\]\s+(\S+)\s+\$lang:(\S+)') { $potRel = $Matches[1]; $poPattern = $Matches[2] }
+    }
+
+    $po = [ordered]@{}
+    if ($poPattern) {
+        foreach ($lang in $langs) { $po[$lang] = ($poPattern -replace '\$lang', $lang) }
+    }
+    [pscustomobject]@{ Pot = $potRel; Po = $po }
+}
+
+function Assert-CleanWeblatePo {
+    # Weblate owns these .po files, so the pipeline restores them after a generator writes them (see
+    # Restore-WeblateOwnedPo). That restore is a `git restore`, which would silently destroy any
+    # uncommitted work already in the tree — so refuse to start when there is some. There is
+    # deliberately no override switch: -Force already means --keep 0, and losing a translator's
+    # in-progress edit is not a thing to make convenient.
+    param([Parameter(Mandatory)][string[]]$RelativePath)
+
+    $paths = $RelativePath
+    if (-not $paths) { return }
+
+    # Check the exit status explicitly. PowerShell does not surface a native command's failure as a
+    # terminating error unless $PSNativeCommandUseErrorActionPreference is on, and it is not — so a
+    # failed `git status` yields no output, which is indistinguishable from "clean" and would let
+    # this guard fail OPEN, which is the one thing it must never do.
+    $dirty = @(git -C $repoRoot status --porcelain -- @paths | Where-Object { $_ })
+    if ($LASTEXITCODE -ne 0) {
+        throw ("Cannot determine whether the Weblate-owned .po files are clean " +
+               "(git status exit code $LASTEXITCODE); refusing to run.")
+    }
+    if ($dirty) {
+        throw ("Weblate-owned .po files have uncommitted changes; refusing to run because the " +
+               "post-po4a restore would discard them:`n  " + (($dirty | ForEach-Object { $_.Trim() }) -join "`n  ") +
+               "`nCommit, stash or discard them first.")
+    }
+}
+
+function Restore-WeblateOwnedPo {
+    # po4a rewrites the .po files as a side effect of producing its .pot — "The PO files are always
+    # re-generated based on the POT with msgmerge -U" (its own docs) — and offers no flag that
+    # suppresses only that. Weblate is the only writer of the catalogues passed here, so they are
+    # restored from HEAD once po4a has produced the localized artifacts. That is what keeps the
+    # repository out of the header hunk Weblate also writes.
+    #
+    # Only Weblate-owned catalogues are ever passed in. The antibiotic and glossary catalogues are
+    # repository-owned and are written by their own generators, so restoring them would discard the
+    # regeneration and freeze them at HEAD with nothing else to maintain them.
+    param([Parameter(Mandatory)][string[]]$RelativePath)
+
+    $declared = @($RelativePath)
+    if (-not $declared) { return }
+
+    # `git restore` is atomic over its pathspec: a single path HEAD does not carry aborts the whole
+    # command, so every other catalogue would be left exactly as po4a's msgmerge rewrote it — the
+    # two-writer state this exists to prevent. Adding a language to [po4a_langs] does precisely that,
+    # because po4a msginits a catalogue for it that HEAD has never seen. So partition first.
+    # Check the exit status before partitioning. A failed `ls-tree` produces no output, which reads
+    # as "HEAD contains none of them" — putting EVERY declared catalogue into $created, the branch
+    # that deletes. Failing here is inconvenient; failing open here removes the catalogues.
+    $inHead = @(git -C $repoRoot ls-tree -r --name-only HEAD -- @declared)
+    if ($LASTEXITCODE -ne 0) {
+        throw ("Cannot list the Weblate-owned .po files in HEAD " +
+               "(git ls-tree exit code $LASTEXITCODE); refusing to partition them for restore/delete.")
+    }
+    $tracked = @($declared | Where-Object { $inHead -contains $_ })
+    $created = @($declared | Where-Object { $inHead -notcontains $_ -and (Test-Path (Join-Path $repoRoot $_)) })
+
+    if ($tracked) {
+        git -C $repoRoot restore --source=HEAD --worktree -- @tracked
+        if ($LASTEXITCODE -ne 0) {
+            throw "Failed to restore Weblate-owned .po files after po4a (git restore exit code $LASTEXITCODE)."
+        }
+    }
+
+    # A catalogue po4a created for a language HEAD does not carry is the repository authoring a .po,
+    # which is Weblate's job — it adds a language from the .pot. Delete it rather than commit it.
+    foreach ($rel in $created) {
+        Remove-Item -LiteralPath (Join-Path $repoRoot $rel) -Force
+        # State the observation, not a conclusion about who created it: all this branch knows is that
+        # HEAD has no such file. Asserting "po4a created it" told an operator the deletion was correct
+        # even when the partition was wrong, which is the opposite of what a message here should do.
+        Write-Host "  removed $rel (not present in HEAD; Weblate adds new languages from the .pot)"
+    }
+}
+
+function Repair-Po4aTemplateHeader {
     # po4a emits gettext-boilerplate file headers ("SOME DESCRIPTIVE TITLE", "Copyright (C) YEAR ...",
-    # "same license as the PACKAGE package", "FIRST AUTHOR ...") and offers no way to set a custom header, so
-    # this rewrites the leading comment block of the .pot + .po files it generated for one config into the
-    # NeoIPC house style (matching po/glossary.pot / po/glossary.de.po): title / copyright / license, then
-    # "Automatically generated" (.pot) or the preserved translator lines (.po). Idempotent.
+    # "same license as the PACKAGE package", "FIRST AUTHOR ...") and offers no way to set a custom
+    # header, so this rewrites the leading comment block of the .pot it generated for one config into
+    # the NeoIPC house style (matching po/glossary.pot): title / copyright / license / "Automatically
+    # generated". Idempotent. The .po files are Weblate's, and are not touched.
     param(
         [Parameter(Mandatory)][string]$ConfigPath,
         [Parameter(Mandatory)][string]$Package,
@@ -271,11 +452,7 @@ function Repair-Po4aHeaders {
     $licenseLine   = "# This file is distributed under the $License license"
     $utf8NoBom     = [System.Text.UTF8Encoding]::new($false)
 
-    $langs = @(); $potRel = $null; $poPattern = $null
-    foreach ($l in (Get-Content -LiteralPath $ConfigPath)) {
-        if     ($l -match '^\[po4a_langs\]\s+(.+)$')                { $langs = ($Matches[1].Trim() -split '\s+') }
-        elseif ($l -match '^\[po4a_paths\]\s+(\S+)\s+\$lang:(\S+)') { $potRel = $Matches[1]; $poPattern = $Matches[2] }
-    }
+    $potRel = (Get-Po4aCatalogPath -ConfigPath $ConfigPath).Pot
 
     # Split a catalog into (leading comment lines, body starting at `msgid ""`). $null if no header entry.
     function Split-Catalog([string]$Path) {
@@ -304,22 +481,6 @@ function Repair-Po4aHeaders {
         }
     }
 
-    # --- .po (per language): preserve the translator attribution lines ---
-    foreach ($lang in $langs) {
-        if (-not $poPattern) { break }
-        $poPath = Join-Path $repoRoot ($poPattern -replace '\$lang', $lang)
-        $h = Split-Catalog $poPath
-        if (-not $h) { continue }
-        $langName = if ($languageDisplayNames.ContainsKey($lang)) { $languageDisplayNames[$lang] } else { $lang }
-        $licIdx = -1
-        for ($j = 0; $j -lt $h.Comment.Count; $j++) { if ($h.Comment[$j] -match 'distributed under') { $licIdx = $j; break } }
-        $translators = @()
-        if ($licIdx -ge 0 -and $licIdx -lt $h.Comment.Count - 1) {
-            $translators = @($h.Comment[($licIdx + 1)..($h.Comment.Count - 1)] | Where-Object { $_ -notmatch '^#,\s*fuzzy' })
-        }
-        $comment = @("# $langName translations for the $Package", $copyrightLine, $licenseLine) + $translators
-        Save-Catalog $poPath $comment $h.Body
-    }
 }
 
 function Invoke-UpdateYamlKeys {
@@ -361,9 +522,14 @@ function Invoke-UpdateGlossary {
 }
 
 function Invoke-AntibioticTranslation {
-    # Regenerate po/antibiotics.pot (+ msgmerge the existing po/antibiotics.<locale>.po) from the canonical
-    # antibiotic sources via the NeoIPC-Tools module. Pure PowerShell — no po4a, no Python. The antibiotic domain
-    # is its own bilingual gettext component keyed by the English name (see metadata/common/antibiotics/README.md).
+    # Regenerate po/antibiotics.pot and msgmerge the existing po/antibiotics.<locale>.po from the canonical
+    # antibiotic sources via the NeoIPC-Tools module. Pure PowerShell — no po4a, no Python.
+    #
+    # This catalogue is repository-owned: unlike the others it is NOT hosted on Weblate, because its
+    # content is CC BY-NC-SA 3.0 IGO and a NonCommercial term is not a free licence, which Hosted
+    # Weblate's free plan requires. So this exporter is the only writer of both the .pot and the .po,
+    # and the pipeline must leave its output in place rather than restoring it.
+    # See metadata/common/antibiotics/README.md.
     $module = Join-Path $repoRoot 'scripts' 'modules' 'NeoIPC-Tools'
 
     if ($DryRun) {
@@ -372,7 +538,7 @@ function Invoke-AntibioticTranslation {
         Write-Host "Updating antibiotic translation catalogue (po/antibiotics.pot + .po)"
         Import-Module -Name $module -Force -Verbose:$false
         $result = Export-NeoIPCAntibioticTranslation
-        Write-Host ("  antibiotics.pot: {0} strings; updated locales: {1}" -f $result.StringCount, (($result.UpdatedLocales -join ', ')))
+        Write-Host ("  antibiotics.pot: {0} strings; updated locales: {1}" -f $result.StringCount, ($result.UpdatedLocales -join ', '))
     }
 }
 
@@ -418,19 +584,30 @@ if ($Update) {
         }
     }
 
-    # Step 2-3: Update YAML keys then run po4a
+    # Step 2-3: Update YAML keys then run po4a. po4a msgmerges the .po files as a side effect and
+    # offers no way to suppress only that, so they are restored from HEAD afterwards — Weblate is
+    # their only writer. The restore runs in a finally so a po4a failure cannot leave them rewritten.
     if ($runPo4a) {
         $targets = if ($Config -eq 'all') { $po4aConfigs } else { @($Config) }
         foreach ($target in $targets) {
             $cfgPath = $configMap[$target]
+            $fullCfgPath = Join-Path $repoRoot $cfgPath
+            $ownedPo = if ($weblateOwnedPo4aConfigs -contains $target) {
+                @((Get-Po4aCatalogPath -ConfigPath $fullCfgPath).Po.Values)
+            } else { @() }
+            if ($ownedPo -and -not $DryRun) { Assert-CleanWeblatePo -RelativePath $ownedPo }
             Invoke-UpdateYamlKeys -ConfigPath $cfgPath
             $pkgVer = if ($versionFileMap.ContainsKey($target)) {
                 (Get-Content -LiteralPath (Join-Path $repoRoot $versionFileMap[$target]) -Raw).Trim()
             } else { $null }
-            Invoke-Po4a -ConfigPath $cfgPath -PackageVersion $pkgVer
+            try {
+                Invoke-Po4a -ConfigPath $cfgPath -PackageVersion $pkgVer
+            } finally {
+                if ($ownedPo -and -not $DryRun) { Restore-WeblateOwnedPo -RelativePath $ownedPo }
+            }
             if (-not $DryRun -and $catalogHeaderMap.ContainsKey($target)) {
                 $hdr = $catalogHeaderMap[$target]
-                Repair-Po4aHeaders -ConfigPath (Join-Path $repoRoot $cfgPath) -Package $hdr.Package -License $hdr.License
+                Repair-Po4aTemplateHeader -ConfigPath $fullCfgPath -Package $hdr.Package -License $hdr.License
             }
         }
     }
@@ -440,12 +617,36 @@ if ($Update) {
         Invoke-UpdateGlossary
     }
 
-    # Step 5: Update the antibiotic translation catalogue (NeoIPC-Tools, not po4a)
+    # Step 5: Update the antibiotic translation catalogue (NeoIPC-Tools, not po4a). No clean-tree
+    # assertion and no restore: this catalogue is repository-owned, so its .po are the exporter's to
+    # write and freezing them at HEAD would discard every regeneration with nothing else to supply it.
     if ($runAntibiotics) {
         Invoke-AntibioticTranslation
     }
 
     Write-Host "`nLocalization update complete."
+}
+elseif ($Render) {
+    # Render-only: po4a --no-update ("Do not change the POT and PO files, only the translation may be
+    # updated"). Produces the localized artifacts from the catalogues exactly as committed, writing
+    # neither .pot nor .po — so it needs no clean-tree assertion and no restore.
+    #
+    # Restricted to the po4a configs. The glossary and antibiotic catalogues are produced by
+    # generators that regenerate their .pot/.po in the same pass and have no equivalent read-only
+    # mode, so -Render cannot honour its contract for them.
+    if ($po4aConfigs -notcontains $Config -and $Config -ne 'all') {
+        throw "-Render supports the po4a configs ($($po4aConfigs -join ', ')) or 'all'; '$Config' is generated by a different tool."
+    }
+
+    $targets = if ($Config -eq 'all') { $po4aConfigs } else { @($Config) }
+    foreach ($target in $targets) {
+        $pkgVer = if ($versionFileMap.ContainsKey($target)) {
+            (Get-Content -LiteralPath (Join-Path $repoRoot $versionFileMap[$target]) -Raw).Trim()
+        } else { $null }
+        Invoke-Po4a -ConfigPath $configMap[$target] -PackageVersion $pkgVer -NoUpdate
+    }
+
+    Write-Host "`nLocalized artifacts rendered; catalogues untouched."
 }
 elseif ($Test) {
     exit (Invoke-TestStringLayers)
