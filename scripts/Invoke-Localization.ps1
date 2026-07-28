@@ -9,13 +9,15 @@
     Wraps po4a, the glossary script, YAML key extraction, and string layer
     validation into a single entry point with tab-completable parameters.
 
-    Catalogue ownership: the repository owns the .pot templates; Weblate owns
-    the .po translations and is their only writer. po4a msgmerges the .po files as an
-    unavoidable side effect of every run, so -Update restores them from HEAD once
-    the localized artifacts exist. Two writers on one .po is what conflicts every
-    language of a catalogue at once: both sides rewrite adjacent header lines
-    (POT-Creation-Date against PO-Revision-Date / Last-Translator / Language-Team /
-    X-Generator) inside a single hunk git cannot auto-merge.
+    Catalogue ownership: the repository owns every .pot template. It also owns the
+    .po of the three catalogues that are NOT hosted on Weblate — glossary, scripts
+    and antibiotics — and this pipeline is their only writer. For the rest (reports,
+    documentation, infectious_agents, metadata) Weblate is the only writer, and po4a
+    msgmerges them as an unavoidable side effect of every run, so -Update restores
+    those from HEAD once the localized artifacts exist. Two writers on one .po is
+    what conflicts every language of a catalogue at once: both sides rewrite adjacent
+    header lines (POT-Creation-Date against PO-Revision-Date / Last-Translator /
+    Language-Team / X-Generator) inside a single hunk git cannot auto-merge.
 
     Update pipeline (default -Config all):
       1. Fix string layer duplicates (Test-StringResourceLayers.ps1 -Fix)
@@ -54,7 +56,7 @@
     - infectious_agents:  po/infectious_agents.po4a.cfg
     - scripts:            scripts/po4a.cfg
     - glossary:           glossary via update-glossary-po.py
-    - antibiotics:        po/antibiotics.pot via NeoIPC-Tools Export-NeoIPCAntibioticTranslation
+    - antibiotics:        po/antibiotics.pot + .po via NeoIPC-Tools Export-NeoIPCAntibioticTranslation
     - all:                all of the above
 
 .PARAMETER Force
@@ -344,23 +346,6 @@ function Get-Po4aCatalogPath {
     [pscustomobject]@{ Pot = $potRel; Po = $po }
 }
 
-function Get-WeblateOwnedPoPath {
-    # The Weblate-owned catalogues a step is about to overwrite, repo-relative. Two sources, because
-    # the generators that write them are of two kinds: the po4a configs declare theirs in the .cfg,
-    # while the antibiotic catalogue is produced by a NeoIPC-Tools cmdlet with no such declaration.
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory, ParameterSetName = 'Config')][string]$ConfigPath,
-        [Parameter(Mandatory, ParameterSetName = 'Glob')][string]$Glob
-    )
-
-    if ($PSCmdlet.ParameterSetName -eq 'Config') {
-        return @((Get-Po4aCatalogPath -ConfigPath $ConfigPath).Po.Values)
-    }
-    @(Get-ChildItem -Path (Join-Path $repoRoot $Glob) -File -ErrorAction SilentlyContinue |
-        ForEach-Object { [System.IO.Path]::GetRelativePath($repoRoot, $_.FullName) -replace '\\', '/' })
-}
-
 function Assert-CleanWeblatePo {
     # Weblate owns these .po files, so the pipeline restores them after a generator writes them (see
     # Restore-WeblateOwnedPo). That restore is a `git restore`, which would silently destroy any
@@ -500,9 +485,14 @@ function Invoke-UpdateGlossary {
 }
 
 function Invoke-AntibioticTranslation {
-    # Regenerate po/antibiotics.pot (+ msgmerge the existing po/antibiotics.<locale>.po) from the canonical
-    # antibiotic sources via the NeoIPC-Tools module. Pure PowerShell — no po4a, no Python. The antibiotic domain
-    # is its own bilingual gettext component keyed by the English name (see metadata/common/antibiotics/README.md).
+    # Regenerate po/antibiotics.pot and msgmerge the existing po/antibiotics.<locale>.po from the canonical
+    # antibiotic sources via the NeoIPC-Tools module. Pure PowerShell — no po4a, no Python.
+    #
+    # This catalogue is repository-owned: unlike the others it is NOT hosted on Weblate, because its
+    # content is CC BY-NC-SA 3.0 IGO and a NonCommercial term is not a free licence, which Hosted
+    # Weblate's free plan requires. So this exporter is the only writer of both the .pot and the .po,
+    # and the pipeline must leave its output in place rather than restoring it.
+    # See metadata/common/antibiotics/README.md.
     $module = Join-Path $repoRoot 'scripts' 'modules' 'NeoIPC-Tools'
 
     if ($DryRun) {
@@ -511,9 +501,7 @@ function Invoke-AntibioticTranslation {
         Write-Host "Updating antibiotic translation catalogue (po/antibiotics.pot + .po)"
         Import-Module -Name $module -Force -Verbose:$false
         $result = Export-NeoIPCAntibioticTranslation
-        # Deliberately not reporting UpdatedLocales: the exporter does rewrite each locale, but the
-        # caller restores them, so naming them here would tell the reader the opposite of what lands.
-        Write-Host ("  antibiotics.pot: {0} strings" -f $result.StringCount)
+        Write-Host ("  antibiotics.pot: {0} strings; updated locales: {1}" -f $result.StringCount, ($result.UpdatedLocales -join ', '))
     }
 }
 
@@ -568,7 +556,7 @@ if ($Update) {
             $cfgPath = $configMap[$target]
             $fullCfgPath = Join-Path $repoRoot $cfgPath
             $ownedPo = if ($weblateOwnedPo4aConfigs -contains $target) {
-                Get-WeblateOwnedPoPath -ConfigPath $fullCfgPath
+                @((Get-Po4aCatalogPath -ConfigPath $fullCfgPath).Po.Values)
             } else { @() }
             if ($ownedPo -and -not $DryRun) { Assert-CleanWeblatePo -RelativePath $ownedPo }
             Invoke-UpdateYamlKeys -ConfigPath $cfgPath
@@ -592,19 +580,11 @@ if ($Update) {
         Invoke-UpdateGlossary
     }
 
-    # Step 5: Update the antibiotic translation catalogue (NeoIPC-Tools, not po4a). Its exporter
-    # msgmerges every existing po/antibiotics.<locale>.po in code, and those are Weblate-owned, so the
-    # same clean-tree assertion and restore apply here as to po4a. Without them a plain -Update leaves
-    # Weblate's header fields overwritten with the exporter's placeholders, and the developer who then
-    # commits is rejected by the catalogue-ownership gate.
+    # Step 5: Update the antibiotic translation catalogue (NeoIPC-Tools, not po4a). No clean-tree
+    # assertion and no restore: this catalogue is repository-owned, so its .po are the exporter's to
+    # write and freezing them at HEAD would discard every regeneration with nothing else to supply it.
     if ($runAntibiotics) {
-        $antibioticPo = if ($DryRun) { @() } else { Get-WeblateOwnedPoPath -Glob 'po/antibiotics.*.po' }
-        if ($antibioticPo) { Assert-CleanWeblatePo -RelativePath $antibioticPo }
-        try {
-            Invoke-AntibioticTranslation
-        } finally {
-            if ($antibioticPo) { Restore-WeblateOwnedPo -RelativePath $antibioticPo }
-        }
+        Invoke-AntibioticTranslation
     }
 
     Write-Host "`nLocalization update complete."

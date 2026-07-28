@@ -59,10 +59,13 @@ jobs:
                 # That commit touches a .po whenever both sides changed one, so a committer check against HEAD
                 # rejects pull requests whose every real commit is Weblate's.
                 head="${{ github.event.pull_request.head.sha }}"
-                # Weblate-owned: every catalogue registered as a Weblate component. po/glossary.*.po and
-                # scripts/po/*.po are deliberately absent — they are not on Weblate and remain repository-owned,
-                # so a hand edit there is legitimate. Add a catalogue here when it is registered on Weblate.
-                owned='po/reports\..*\.po|po/documentation\..*\.po|po/infectious_agents\..*\.po|po/antibiotics\..*\.po|po/metadata\..*\.po'
+                # Weblate-owned: every catalogue registered as a Weblate component. po/glossary.*.po,
+                # scripts/po/*.po and po/antibiotics.*.po are deliberately absent — they are not on Weblate and
+                # remain repository-owned, so a hand edit or a generator run there is legitimate. The antibiotic
+                # catalogue cannot be hosted: its content is CC BY-NC-SA 3.0 IGO, and a NonCommercial term is not
+                # a free licence, which Hosted Weblate's free plan requires. Add a catalogue here when it is
+                # registered on Weblate, and remove it here when it is not.
+                owned='po/reports\..*\.po|po/documentation\..*\.po|po/infectious_agents\..*\.po|po/metadata\..*\.po'
                 # Weblate commits everything it pushes under this one identity, whoever wrote the translation,
                 # so a per-commit committer check recognises Weblate's own output no matter who opened the pull
                 # request. Exempting by pull-request author instead would reject the drain pull requests we open

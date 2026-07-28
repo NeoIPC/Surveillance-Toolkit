@@ -39,11 +39,38 @@ never for identity.
 
 ## Translations
 
-Antibiotic translations live in a single bilingual gettext component **`po/antibiotics.pot` + `po/antibiotics.<lang>.po`**,
+Antibiotic translations live in a single bilingual gettext catalogue **`po/antibiotics.pot` + `po/antibiotics.<lang>.po`**,
 keyed by the English string. It covers the substance names, all antibiotic group / group-set names, shortNames and
 descriptions, and the printed-list UI labels. Regenerate it with `./scripts/Invoke-Localization.ps1 -Update -Config antibiotics`
 (or as part of `-Config all`). The previous `NeoIPC-Antibiotics.<lang>.csv` / `ListElements.<lang>.csv` translation
 sidecars and the standalone `WHO-AWaRe-Classification-2021.csv` are **retired** (folded into the files above + the PO).
+
+### This catalogue is not on Weblate, and cannot be
+
+Every other NeoIPC catalogue is hosted on [Hosted Weblate](https://hosted.weblate.org/projects/neoipc/) for community
+translation. This one is not. Hosted Weblate's free plan requires every component to carry a **free (libre) licence**,
+and a **NonCommercial** term is not one — so the component was rejected as *"does not meet the Libre hosting
+conditions"* and has been removed.
+
+The licence is not a mislabelling that could be corrected. The sibling infectious-agent catalogue **was** relicensed
+from CC BY-NC-ND to CC BY 4.0, on the reasoning that po4a extracts only taxonomic names, synonyms and rank labels from
+it — none of the upstream material the licence exists to protect, and names are not copyrightable in any case. That
+argument does **not** transfer here: alongside the substance names this catalogue carries the ATC **group
+descriptions**, which are WHO's own prose reproduced verbatim, for example *"This group comprises tetracycline
+antibacterials inhibiting the bacterial protein synthesis through binding to the 30-S part of ribosomes."* That is
+protected expression, so CC BY-NC-SA 3.0 IGO is the correct licence and the catalogue stays off the hosted platform.
+
+Two consequences follow, both deliberate:
+
+- **The `.po` files are repository-owned.** The catalogue-ownership rule that makes Weblate the sole writer of a `.po`
+  does not apply to them: `Export-NeoIPCAntibioticTranslation` writes both the `.pot` and each `.po`, and the
+  continuous-integration gate that rejects hand-written changes to Weblate-owned catalogues deliberately excludes them.
+- **Translations are contributed through this repository** — a pull request against `po/antibiotics.<lang>.po` — rather
+  than through Weblate. There is no bot to overwrite them.
+
+Removing the NonCommercial term would require permission from the copyright holder, or dropping the group descriptions
+from the extracted strings. Neither is planned; if either happens, the component can be registered and the two
+consequences above reversed.
 
 ## Attribution
 
