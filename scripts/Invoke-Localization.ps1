@@ -364,7 +364,15 @@ function Assert-CleanWeblatePo {
     $paths = $RelativePath
     if (-not $paths) { return }
 
+    # Check the exit status explicitly. PowerShell does not surface a native command's failure as a
+    # terminating error unless $PSNativeCommandUseErrorActionPreference is on, and it is not — so a
+    # failed `git status` yields no output, which is indistinguishable from "clean" and would let
+    # this guard fail OPEN, which is the one thing it must never do.
     $dirty = @(git -C $repoRoot status --porcelain -- @paths | Where-Object { $_ })
+    if ($LASTEXITCODE -ne 0) {
+        throw ("Cannot determine whether the Weblate-owned .po files are clean " +
+               "(git status exit code $LASTEXITCODE); refusing to run.")
+    }
     if ($dirty) {
         throw ("Weblate-owned .po files have uncommitted changes; refusing to run because the " +
                "post-po4a restore would discard them:`n  " + (($dirty | ForEach-Object { $_.Trim() }) -join "`n  ") +
@@ -391,7 +399,14 @@ function Restore-WeblateOwnedPo {
     # command, so every other catalogue would be left exactly as po4a's msgmerge rewrote it — the
     # two-writer state this exists to prevent. Adding a language to [po4a_langs] does precisely that,
     # because po4a msginits a catalogue for it that HEAD has never seen. So partition first.
+    # Check the exit status before partitioning. A failed `ls-tree` produces no output, which reads
+    # as "HEAD contains none of them" — putting EVERY declared catalogue into $created, the branch
+    # that deletes. Failing here is inconvenient; failing open here removes the catalogues.
     $inHead = @(git -C $repoRoot ls-tree -r --name-only HEAD -- @declared)
+    if ($LASTEXITCODE -ne 0) {
+        throw ("Cannot list the Weblate-owned .po files in HEAD " +
+               "(git ls-tree exit code $LASTEXITCODE); refusing to partition them for restore/delete.")
+    }
     $tracked = @($declared | Where-Object { $inHead -contains $_ })
     $created = @($declared | Where-Object { $inHead -notcontains $_ -and (Test-Path (Join-Path $repoRoot $_)) })
 
