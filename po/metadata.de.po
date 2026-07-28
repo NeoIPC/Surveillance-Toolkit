@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NeoIPC Metadata\n"
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"PO-Revision-Date: 2026-07-28 06:50+0000\n"
-"Last-Translator: Anonymous <noreply@weblate.org>\n"
+"PO-Revision-Date: 2026-07-28 06:51+0000\n"
+"Last-Translator: Brar Piening <brar@gmx.de>\n"
 "Language-Team: German <https://hosted.weblate.org/projects/neoipc/neoipc-"
 "dhis2-metadata/de/>\n"
 "Language: de\n"
@@ -32,7 +32,7 @@ msgstr ""
 #, priority:200
 msgctxt "dataElements/NEOIPC_ADMISSION_DOL/FORM_NAME"
 msgid "Admission on day of life"
-msgstr "Aufnahme am Lebenstag"
+msgstr ""
 
 #, priority:10
 msgctxt "dataElements/NEOIPC_ADMISSION_DOL/DESCRIPTION"
@@ -52,7 +52,7 @@ msgstr ""
 #, priority:200
 msgctxt "dataElements/NEOIPC_ADMISSION_LOS/FORM_NAME"
 msgid "Day of occurrence after admission"
-msgstr "Tag des Auftretens nach der Aufnahme"
+msgstr ""
 
 #, priority:10
 msgctxt "dataElements/NEOIPC_ADMISSION_LOS/DESCRIPTION"
@@ -72,7 +72,7 @@ msgstr ""
 #, priority:200
 msgctxt "dataElements/NEOIPC_ADMISSION_TYPE/FORM_NAME"
 msgid "Admission type"
-msgstr "Aufnahmeart"
+msgstr ""
 
 #, priority:10
 msgctxt "dataElements/NEOIPC_ADMISSION_TYPE/DESCRIPTION"
@@ -92,7 +92,7 @@ msgstr ""
 #, priority:200
 msgctxt "dataElements/NEOIPC_BSI_AB_TREATMENT/FORM_NAME"
 msgid "Intravenous antibiotic therapy for five or more days initiated"
-msgstr "Intravenöse antibiotische Therapie für fünf oder mehr Tage begonnen"
+msgstr ""
 
 #, priority:10
 msgctxt "dataElements/NEOIPC_BSI_AB_TREATMENT/DESCRIPTION"
@@ -112,7 +112,7 @@ msgstr ""
 #, priority:200
 msgctxt "dataElements/NEOIPC_BSI_ACIDOSIS/FORM_NAME"
 msgid "Unexplained metabolic acidosis"
-msgstr "Unerklärte metabolische Azidose"
+msgstr ""
 
 #, priority:10
 msgctxt "dataElements/NEOIPC_BSI_ACIDOSIS/DESCRIPTION"
@@ -133,8 +133,6 @@ msgstr ""
 msgctxt "dataElements/NEOIPC_BSI_APNOEA/FORM_NAME"
 msgid "New/more frequent episodes of apnea or increases in oxygen demand or ventilatory support"
 msgstr ""
-"Neue/vermehrte Apnoe-Episoden oder erhöhter Sauerstoffbedarf oder "
-"Atemunterstützung"
 
 #, priority:10
 msgctxt "dataElements/NEOIPC_BSI_APNOEA/DESCRIPTION"
@@ -154,7 +152,7 @@ msgstr ""
 #, priority:200
 msgctxt "dataElements/NEOIPC_BSI_BRADYCARDIA/FORM_NAME"
 msgid "New/more frequent bradycardia or tachycardia"
-msgstr "Neue/vermehrte Bradykardie oder Tachykardie"
+msgstr ""
 
 #, priority:10
 msgctxt "dataElements/NEOIPC_BSI_BRADYCARDIA/DESCRIPTION"
@@ -174,7 +172,7 @@ msgstr ""
 #, priority:200
 msgctxt "dataElements/NEOIPC_BSI_CRP/FORM_NAME"
 msgid "Increased level of CRP"
-msgstr "Erhöhter CRP-Wert"
+msgstr ""
 
 #, priority:10
 msgctxt "dataElements/NEOIPC_BSI_CRP/DESCRIPTION"
@@ -194,7 +192,7 @@ msgstr ""
 #, priority:200
 msgctxt "dataElements/NEOIPC_BSI_DEV_ASS/FORM_NAME"
 msgid "Vascular catheter association"
-msgstr "Gefäßkatheter-Assoziation"
+msgstr ""
 
 #, priority:10
 msgctxt "dataElements/NEOIPC_BSI_DEV_ASS/DESCRIPTION"
@@ -214,7 +212,7 @@ msgstr ""
 #, priority:200
 msgctxt "dataElements/NEOIPC_BSI_DOL/FORM_NAME"
 msgid "Day of life"
-msgstr "Lebenstag"
+msgstr ""
 
 #, priority:10
 msgctxt "dataElements/NEOIPC_BSI_DOL/DESCRIPTION"
@@ -234,7 +232,7 @@ msgstr ""
 #, priority:200
 msgctxt "dataElements/NEOIPC_BSI_FEEDING_INTOLERANCE/FORM_NAME"
 msgid "Enteral feeding intolerance, abdominal distension or ileus"
-msgstr "Unverträglichkeit der enteralen Ernährung, Blähungen oder Ileus"
+msgstr ""
 
 #, priority:10
 msgctxt "dataElements/NEOIPC_BSI_FEEDING_INTOLERANCE/DESCRIPTION"
@@ -254,7 +252,7 @@ msgstr ""
 #, priority:200
 msgctxt "dataElements/NEOIPC_BSI_HYPERGLYCAEMIA/FORM_NAME"
 msgid "New and unexplained hyperglycaemia/hypoglycaemia"
-msgstr "Neu auftretende und ungeklärte Hyperglykämie/Hypoglykämie"
+msgstr ""
 
 #, priority:10
 msgctxt "dataElements/NEOIPC_BSI_HYPERGLYCAEMIA/DESCRIPTION"
@@ -274,7 +272,7 @@ msgstr ""
 #, priority:200
 msgctxt "dataElements/NEOIPC_BSI_INTERLEUKIN/FORM_NAME"
 msgid "Increased level of interleukin (IL) 6 or 8"
-msgstr "Erhöhte Werte von Interleukin (IL) 6 oder 8"
+msgstr ""
 
 #, priority:10
 msgctxt "dataElements/NEOIPC_BSI_INTERLEUKIN/DESCRIPTION"
@@ -294,7 +292,7 @@ msgstr ""
 #, priority:200
 msgctxt "dataElements/NEOIPC_BSI_IRRITABILITY/FORM_NAME"
 msgid "Irritability, lethargy, apathy or unstable condition"
-msgstr "Reizbarkeit, Lethargie, Apathie oder ein instabiler Allgemeinzustand"
+msgstr ""
 
 #, priority:10
 msgctxt "dataElements/NEOIPC_BSI_IRRITABILITY/DESCRIPTION"
@@ -314,7 +312,7 @@ msgstr ""
 #, priority:200
 msgctxt "dataElements/NEOIPC_BSI_IT_RATIO/FORM_NAME"
 msgid "I/T-Ratio > 0.2"
-msgstr "I/T-Ratio > 0.2"
+msgstr ""
 
 #, priority:10
 msgctxt "dataElements/NEOIPC_BSI_IT_RATIO/DESCRIPTION"
@@ -334,7 +332,7 @@ msgstr ""
 #, priority:200
 msgctxt "dataElements/NEOIPC_BSI_LOS/FORM_NAME"
 msgid "Day of occurrence after admission"
-msgstr "Tag des Auftretens nach der Aufnahme"
+msgstr ""
 
 #, priority:10
 msgctxt "dataElements/NEOIPC_BSI_LOS/DESCRIPTION"
@@ -354,7 +352,7 @@ msgstr ""
 #, priority:200
 msgctxt "dataElements/NEOIPC_BSI_NO_POS_CULTURE/FORM_NAME"
 msgid "No positive blood culture"
-msgstr "Keine positive Blutkultur"
+msgstr ""
 
 #, priority:10
 msgctxt "dataElements/NEOIPC_BSI_NO_POS_CULTURE/DESCRIPTION"
@@ -374,7 +372,7 @@ msgstr ""
 #, priority:200
 msgctxt "dataElements/NEOIPC_BSI_PATHOGEN_1/FORM_NAME"
 msgid "Organism 1"
-msgstr "Erreger 1"
+msgstr ""
 
 #, priority:10
 msgctxt "dataElements/NEOIPC_BSI_PATHOGEN_1/DESCRIPTION"
@@ -5061,24 +5059,20 @@ msgctxt "dataElements/NEOIPC_SURVEILLANCE_END_REASON/DESCRIPTION"
 msgid "Reason for the end of surveillance. This can be either death or the discharge/transfer of the patient."
 msgstr ""
 
-#, priority:150
+#, fuzzy, priority:150
 msgctxt "options/NEOIPC_ADMISSION_TYPES/1/NAME"
 msgid "Admitted from delivery room (initial admission for infants delivered in your hospital)"
-msgstr ""
-"Aufnahme aus dem Kreißsaal (Erste Aufnahme für in Ihrem Krankenhaus "
-"entbundene Säuglinge)"
+msgstr "Hier entbunden; für in Ihrem Krankenhaus entbundene Säuglinge"
 
-#, priority:150
+#, fuzzy, priority:150
 msgctxt "options/NEOIPC_ADMISSION_TYPES/2/NAME"
 msgid "Transferred/readmitted to your hospital on the day of birth"
-msgstr "Am Tag der Geburt in Ihr Krankenhaus verlegt/wiederaufgenommen"
+msgstr "Am Tag der Geburt in Ihr Zentrum verlegt"
 
-#, priority:150
+#, fuzzy, priority:150
 msgctxt "options/NEOIPC_ADMISSION_TYPES/3/NAME"
 msgid "Transferred/readmitted to your hospital the day after birth or later"
-msgstr ""
-"Am Tag nach der Geburt oder später in Ihr Krankenhaus verlegt/"
-"wiederaufgenommen"
+msgstr "Am Tag nach der Geburt oder später in Ihr Krankenhaus verlegt"
 
 #, priority:150
 msgctxt "options/NEOIPC_ASA_SCORE/1/NAME"
@@ -5162,12 +5156,12 @@ msgstr "Nicht beatmungsassoziiert"
 #, priority:150
 msgctxt "options/NEOIPC_HAP_DEVICE_ASS/1/NAME"
 msgid "Non-invasive ventilatory support (CPAP, HFNC)"
-msgstr "Non-Invasive Atemuntersützung (CPAP, High-Flow)"
+msgstr "Non-Invasive Beatmung"
 
 #, priority:150
 msgctxt "options/NEOIPC_HAP_DEVICE_ASS/2/NAME"
 msgid "Invasive ventilation (intubation)"
-msgstr "Invasive Beatmung (Intubation)"
+msgstr "Invasive Beatmung"
 
 #, priority:150
 msgctxt "options/NEOIPC_HAP_RESPIRATORY_TRACT_SAMPLE_SOURCES/1/NAME"
