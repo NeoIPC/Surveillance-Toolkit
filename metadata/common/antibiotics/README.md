@@ -22,7 +22,7 @@ combination and topical agents are excluded.
 | File | Contents |
 |------|----------|
 | `NeoIPC-Antibiotics.csv` | The substance/option table — `id, atc_code, name, atc_group, aware_category, uid`. One row per DHIS2 option (the **systemic** antibiotics — the WHO ATC `J01` branch plus a few deliberately-added systemic non-J01 substances). The WHO **AWaRe** classification is folded in as the `aware_category` column. |
-| `NeoIPC-Antibiotic-Groups.csv` | The 34 WHO ATC **level-4** chemical subgroups — `code, name, shortName, uid`. A substance joins a group by its `atc_group` column; the `ATC5` option-group-set is built from these. Carries **no `description`**: only half the groups ever had one and it restated the group name, so the column was dropped (see [Translations](#translations)). |
+| `NeoIPC-Antibiotic-Groups.csv` | The 34 WHO ATC **level-4** chemical subgroups — `code, name, shortName, uid`. A substance joins a group by its `atc_group` column; the `ATC5` option-group-set is built from these. Carries **no `description`**: only 17 of 34 groups ever had one, nothing consumed them, and being verbatim WHOCC prose they were this directory's largest block of reproduced upstream text, so the column was dropped (see [Translations](#translations)). |
 | `NeoIPC-Antibiotic-AWaRe-Groups.csv` | The 3 WHO **AWaRe** groups — `code, category, name, shortName, description, uid`. A substance joins by its `aware_category`; the `WHO_AWARE` option-group-set is built from these. |
 | `ListElements.csv` | The printed-list UI labels (the `New-AntibioticsList` table headers). |
 
@@ -42,7 +42,7 @@ never for identity.
 Antibiotic translations live in a single bilingual gettext catalogue **`po/antibiotics.pot` + `po/antibiotics.<lang>.po`**,
 keyed by the English string. It covers the substance names, all antibiotic group / group-set names and shortNames, the
 AWaRe group and group-set descriptions, and the printed-list UI labels. The **ATC group descriptions are deliberately
-not carried**: only half the groups ever had one (17 of 34), they restate what the group name already says, and being
+not carried**: only 17 of 34 groups ever had one, nothing consumed them and none had been translated, and being
 WHOCC prose they were the sharpest edge of this directory's licensing question. The column is gone from
 `NeoIPC-Antibiotic-Groups.csv`, so the generated DHIS2 option groups carry no description either — nothing consumed
 them, and none had been translated. Regenerate the catalogue with `./scripts/Invoke-Localization.ps1 -Update -Config antibiotics`

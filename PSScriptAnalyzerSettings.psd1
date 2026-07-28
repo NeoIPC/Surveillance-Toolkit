@@ -17,7 +17,7 @@
     # PowerShell file containing a non-ASCII character, which is most of them here — the scripts carry
     # German text and "Charité" throughout. The rule encodes a Windows PowerShell 5.1 assumption: 5.1
     # reads a BOM-less file as Windows-1252, so such a script needed a BOM to survive. This project
-    # requires PowerShell 7 (every .ps1 and .psm1 declares #Requires -Version 7.0), and 7 defaults to
+    # requires PowerShell 7 (every .ps1 and .psm1 declares #Requires -Version 7.6), and 7 defaults to
     # UTF-8, so the premise no longer holds.
     #
     # Two measured facts make adding BOMs actively wrong here rather than merely unnecessary:

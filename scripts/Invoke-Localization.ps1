@@ -189,6 +189,15 @@ $versionFileMap = @{
 #
 # These values must match each Weblate component's `license` field, because that is what is displayed to a
 # contributor as the terms they are contributing under.
+#
+# KNOWN DISCREPANCY, and it cannot be fixed from here. This map governs the `.pot` only. The existing
+# `po/reports.<lang>.po` still say MIT and the `po/infectious_agents.<lang>.po` still say
+# CC BY-NC-ND 4.0, because those files are Weblate-owned — the pipeline stopped rewriting their headers
+# when Weblate became their sole writer, and `msgmerge` preserves a target file's header comment block
+# rather than taking the template's. So the correction has to be made through Weblate (upload, or an
+# addon that rewrites the header), not by editing the catalogues here: a hand-edit would be exactly the
+# two-writer state this whole design removes, and the continuous-integration gate would reject it.
+# Until that happens the `.pot` and the `.po` of those two catalogues disagree about their licence.
 $catalogHeaderMap = @{
     reports           = @{ Package = 'NeoIPC Surveillance Reports';               License = 'Creative Commons Attribution 4.0 International' }
     documentation     = @{ Package = 'NeoIPC Surveillance Documentation';         License = 'Creative Commons Attribution 4.0 International' }
@@ -421,7 +430,10 @@ function Restore-WeblateOwnedPo {
     # which is Weblate's job — it adds a language from the .pot. Delete it rather than commit it.
     foreach ($rel in $created) {
         Remove-Item -LiteralPath (Join-Path $repoRoot $rel) -Force
-        Write-Host "  removed $rel (po4a created it; Weblate adds new languages from the .pot)"
+        # State the observation, not a conclusion about who created it: all this branch knows is that
+        # HEAD has no such file. Asserting "po4a created it" told an operator the deletion was correct
+        # even when the partition was wrong, which is the opposite of what a message here should do.
+        Write-Host "  removed $rel (not present in HEAD; Weblate adds new languages from the .pot)"
     }
 }
 

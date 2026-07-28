@@ -64,7 +64,9 @@ function Export-NeoIPCAntibioticTranslation {
         if (-not (Test-NeoIPCMetadataPoSyntax -Path $potPath)) { Write-Warning "msgfmt reported issues in $potPath." }
     }
 
-    # Existing per-locale catalogues: msgmerge-update only (Weblate creates new locales from the .pot).
+    # Existing per-locale catalogues: msgmerge-update only. Nothing creates new ones -- this catalogue
+    # is not a Weblate component (its licence is not free, which Hosted Weblate's free plan requires),
+    # so a new language is added by hand and maintained here from then on.
     $localeRe = [regex]('^' + [regex]::Escape($PoBaseName) + '\.(?<loc>[^.]+)\.po$')
     $updated = [System.Collections.Generic.List[string]]::new()
     foreach ($f in @(Get-ChildItem -LiteralPath $resolvedPo -Filter "$PoBaseName.*.po" -File -ErrorAction SilentlyContinue | Sort-Object Name)) {

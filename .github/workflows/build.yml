@@ -101,8 +101,11 @@ jobs:
                   echo "      Invoke-Localization.ps1 -Update restores them; seeing them here is a bug in that script."
                   echo "  po/metadata.*"
                   echo "      Export-NeoIPCMetadataTranslation rewrote them. Invoke-Localization.ps1 does NOT cover"
-                  echo "      that catalogue, so re-running it will not help — restore them with"
-                  echo "      git restore --source=HEAD --worktree -- po/metadata.*.po and commit only po/metadata.pot."
+                  echo "      that catalogue, so re-running it will not help. Restore them from the BASE branch,"
+                  echo "      not from HEAD — by the time this gate fires the change is already committed, so"
+                  echo "      --source=HEAD would restore the very version being rejected:"
+                  echo "      git restore --source=origin/main --worktree -- po/metadata.*.po"
+                  echo "      then commit only po/metadata.pot."
                   exit 1
                 fi
                 echo "No Weblate-owned catalogue was modified outside Weblate."

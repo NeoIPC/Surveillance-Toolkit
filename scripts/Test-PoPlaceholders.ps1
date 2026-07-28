@@ -67,8 +67,10 @@
 param(
     [Parameter()]
     # Resolved from the script's own location, not $PWD, so the default works from any working
-    # directory and on any platform. A backslash-globbed default ("po\*.po") matched nothing on Linux,
-    # which combined with the no-match exit below made this silently validate zero files.
+    # directory. The previous default ("po\*.po") was relative to the current directory, so it matched
+    # nothing whenever the script ran from anywhere but the repository root — which, combined with the
+    # no-match exit below, made this silently validate zero files. The backslash was not the cause:
+    # PowerShell accepts it as a separator on Linux too.
     [string]$Path = (Join-Path (Split-Path -Parent $PSScriptRoot) 'po'),
     
     [Parameter()]
