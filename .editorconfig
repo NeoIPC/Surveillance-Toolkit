@@ -19,7 +19,9 @@ trim_trailing_whitespace = true
 [*.md]
 trim_trailing_whitespace = false
 
-# gettext catalogues are machine-written and must round-trip byte-for-byte; leave every byte alone.
+# gettext catalogues are machine-written: never add or trim whitespace here. LF and UTF-8 still apply,
+# as everywhere — a catalogue's own header declares charset=UTF-8, and carving it out of the line-ending
+# contract is what produced mixed-CRLF corruption before. Only the two whitespace properties are off.
 [*.{po,pot}]
 insert_final_newline = false
 trim_trailing_whitespace = false
