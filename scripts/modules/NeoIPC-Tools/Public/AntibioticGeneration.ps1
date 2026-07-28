@@ -169,7 +169,8 @@ function New-NeoIPCAntibioticOptionGroup {
         matches. Members are option UIDs resolved from -OptionSet (so the two new oral-split options are included),
         ordered by option code for stable diffs.
 
-        The ATC group's name/shortName/description come from NeoIPC-Antibiotic-Groups.csv; the AWaRe groups'
+        The ATC group's name/shortName come from NeoIPC-Antibiotic-Groups.csv, which carries no description column —
+        the ATC group descriptions were dropped as inconsistently populated and of little value; the AWaRe groups'
         name/shortName/description come from NeoIPC-Antibiotic-AWaRe-Groups.csv (both abstract reference lists). Each
         group's UID is its source CSV's `uid` column (minted deterministically from the code when blank); the
         optionSet ref is the generated set's UID. -ExistingPackage is OPTIONAL and supplies only each group's deployed

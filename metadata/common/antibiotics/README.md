@@ -40,8 +40,12 @@ never for identity.
 ## Translations
 
 Antibiotic translations live in a single bilingual gettext catalogue **`po/antibiotics.pot` + `po/antibiotics.<lang>.po`**,
-keyed by the English string. It covers the substance names, all antibiotic group / group-set names, shortNames and
-descriptions, and the printed-list UI labels. Regenerate it with `./scripts/Invoke-Localization.ps1 -Update -Config antibiotics`
+keyed by the English string. It covers the substance names, all antibiotic group / group-set names and shortNames, the
+AWaRe group and group-set descriptions, and the printed-list UI labels. The **ATC group descriptions are deliberately
+not carried**: only half the groups ever had one (17 of 34), they restate what the group name already says, and being
+WHOCC prose they were the sharpest edge of this directory's licensing question. The column is gone from
+`NeoIPC-Antibiotic-Groups.csv`, so the generated DHIS2 option groups carry no description either — nothing consumed
+them, and none had been translated. Regenerate the catalogue with `./scripts/Invoke-Localization.ps1 -Update -Config antibiotics`
 (or as part of `-Config all`). The previous `NeoIPC-Antibiotics.<lang>.csv` / `ListElements.<lang>.csv` translation
 sidecars and the standalone `WHO-AWaRe-Classification-2021.csv` are **retired** (folded into the files above + the PO).
 
@@ -52,13 +56,18 @@ translation. This one is not. Hosted Weblate's free plan requires every componen
 and a **NonCommercial** term is not one — so the component was rejected as *"does not meet the Libre hosting
 conditions"* and has been removed.
 
-The licence is not a mislabelling that could be corrected. The sibling infectious-agent catalogue **was** relicensed
-from CC BY-NC-ND to CC BY 4.0, on the reasoning that po4a extracts only taxonomic names, synonyms and rank labels from
-it — none of the upstream material the licence exists to protect, and names are not copyrightable in any case. That
-argument does **not** transfer here: alongside the substance names this catalogue carries the ATC **group
-descriptions**, which are WHO's own prose reproduced verbatim, for example *"This group comprises tetracycline
-antibacterials inhibiting the bacterial protein synthesis through binding to the 30-S part of ribosomes."* That is
-protected expression, so CC BY-NC-SA 3.0 IGO is the correct licence and the catalogue stays off the hosted platform.
+The sibling infectious-agent catalogue **was** relicensed from CC BY-NC-ND to CC BY 4.0, on the reasoning that po4a
+extracts only taxonomic names, synonyms and rank labels from it — none of the upstream material the licence exists to
+protect, and names are not copyrightable in any case. That argument does not simply transfer here. Dropping the ATC
+group descriptions removed the clearest block of reproduced prose, but two things still carry upstream expression: the
+**AWaRe group and group-set descriptions**, which define the three categories and are retained because they are
+clinically meaningful to anyone reading a report; and, less obviously but more substantially, the **classification
+itself** — which substance sits in which ATC group and which AWaRe category is WHO's editorial work, and a selection
+and arrangement of that kind is what a database right protects even where the individual names are not copyrightable.
+
+So the licence question is a legal judgement, not a mechanical one, and it has not been settled — the CC BY-NC-SA
+3.0 IGO declaration stands until it is. Anyone tempted to relicense this catalogue on the strength of the
+infectious-agent precedent should read that paragraph again first.
 
 Two consequences follow, both deliberate:
 
@@ -68,13 +77,12 @@ Two consequences follow, both deliberate:
 - **Translations are contributed through this repository** — a pull request against `po/antibiotics.<lang>.po` — rather
   than through Weblate. There is no bot to overwrite them.
 
-Removing the NonCommercial term would require permission from the copyright holder, or dropping the group descriptions
-from the extracted strings. Neither is planned; if either happens, the component can be registered and the two
-consequences above reversed.
+If the licence question is ever resolved in favour of a free licence, the component can be registered on Weblate and
+both consequences above reversed.
 
 ## Attribution
 
-- **WHO ATC/DDD** — the ATC codes, the substance names and the ATC group names/descriptions are based on
+- **WHO ATC/DDD** — the ATC codes, the substance names and the ATC group names are based on
   information from the [WHO Collaborating Centre for Drug Statistics Methodology, Oslo](https://www.whocc.no/)
   ([ATC/DDD copyright & disclaimer](https://atcddd.fhi.no/copyright_disclaimer/)). Reproduced here for NeoIPC's
   **non-commercial** infection-surveillance use, with attribution; the ATC classification is reproduced unchanged
@@ -87,4 +95,4 @@ consequences above reversed.
 
 ## Licensing
 
-The repository as a whole is MIT-licensed, but this directory is a **derivative** of the WHO AWaRe classification (CC BY-NC-SA 3.0 IGO). ShareAlike requires the derivative to keep the same licence, so the effective license is **CC BY-NC-SA 3.0 IGO**; the ATC codes, substance names and group descriptions it also carries are reproduced unchanged from the WHOCC ATC/DDD index, not adapted. See [`LICENSE.md`](LICENSE.md) for the full reasoning.
+The repository as a whole is MIT-licensed, but this directory is a **derivative** of the WHO AWaRe classification (CC BY-NC-SA 3.0 IGO). ShareAlike requires the derivative to keep the same licence, so the effective license is **CC BY-NC-SA 3.0 IGO**; the ATC codes, substance names and group names it also carries are reproduced unchanged from the WHOCC ATC/DDD index, not adapted (the ATC group *descriptions* are no longer carried at all — see [Translations](#translations)). See [`LICENSE.md`](LICENSE.md) for the full reasoning.

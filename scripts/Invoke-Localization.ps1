@@ -9,13 +9,13 @@
     Wraps po4a, the glossary script, YAML key extraction, and string layer
     validation into a single entry point with tab-completable parameters.
 
-    Catalogue ownership: the repository owns every .pot template. It also owns the
-    .po of the three catalogues that are NOT hosted on Weblate — glossary, scripts
-    and antibiotics — and this pipeline is their only writer. For the rest (reports,
-    documentation, infectious_agents, metadata) Weblate is the only writer, and po4a
-    msgmerges them as an unavoidable side effect of every run, so -Update restores
-    those from HEAD once the localized artifacts exist. Two writers on one .po is
-    what conflicts every language of a catalogue at once: both sides rewrite adjacent
+    Catalogue ownership: the repository owns every .pot template, and also owns the
+    catalogues of the three domains that are NOT hosted on Weblate — glossary,
+    scripts and antibiotics — where this pipeline is their only writer. For the rest
+    (reports, documentation, infectious_agents, metadata) Weblate is the only writer,
+    and po4a msgmerges them as an unavoidable side effect of every run, so -Update
+    restores those from HEAD once the localized artifacts exist. Two writers on one
+    catalogue is what conflicts every language at once: both sides rewrite adjacent
     header lines (POT-Creation-Date against PO-Revision-Date / Last-Translator /
     Language-Team / X-Generator) inside a single hunk git cannot auto-merge.
 

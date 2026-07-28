@@ -750,13 +750,7 @@ msgstr ""
 msgid "Tetracyclines"
 msgstr ""
 
-msgid "This group comprises tetracycline antibacterials inhibiting the bacterial protein synthesis through binding to the 30-S part of ribosomes."
-msgstr ""
-
 msgid "Amphenicols"
-msgstr ""
-
-msgid "This group comprises amphenicol antibacterials inhibiting the bacterial protein synthesis."
 msgstr ""
 
 msgid "Penicillins with extended spectrum"
@@ -765,13 +759,7 @@ msgstr ""
 msgid "Extended spectrum Penicillins "
 msgstr ""
 
-msgid "This group comprises penicillins with enhanced activity against gram negative rods, e.g. ampicillin and similar antibiotics."
-msgstr ""
-
 msgid "Beta-lactamase sensitive penicillins"
-msgstr ""
-
-msgid "This group comprises penicillin beta-lactam antibacterials, inhibiting the bacterial cell wall synthesis."
 msgstr ""
 
 msgid "Beta-lactamase resistant penicillins"
@@ -786,16 +774,10 @@ msgstr ""
 msgid "Penicillins + beta-lactamase inhibitors"
 msgstr ""
 
-msgid "This group comprises combinations of penicillins and/or beta-lactamase inhibitors. Combinations containing one penicillin and enzyme inhibitor are classified at different 5th levels according to the penicillin."
-msgstr ""
-
 msgid "First-generation cephalosporins"
 msgstr ""
 
 msgid "1st gen. cephalosporins"
-msgstr ""
-
-msgid "The first generation compounds have relatively narrow spectrum of activity focused primarily on the gram-positive cocci."
 msgstr ""
 
 msgid "Second-generation cephalosporins"
@@ -804,25 +786,16 @@ msgstr ""
 msgid "2nd gen. cephalosporins"
 msgstr ""
 
-msgid "The second generation cephalosporins have a variable activity against gram-positive cocci but have increased activity against gram-negative bacteria. The cephamycin group is included in the second-generation cephalosporins."
-msgstr ""
-
 msgid "Third-generation cephalosporins"
 msgstr ""
 
 msgid "3rd gen. cephalosporins"
 msgstr ""
 
-msgid "The third generation cephalosporins have a marked activity against gram-negative bacteria. Limited activity against gram-positive cocci, particularly methicillin susceptible S. aureus, might occur."
-msgstr ""
-
 msgid "Fourth-generation cephalosporins"
 msgstr ""
 
 msgid "4th gen. cephalosporins"
-msgstr ""
-
-msgid "The fourth generation cephalosporins have activity against gram-positive cocci and a broad array of gram-negative bacteria, including P. aeruginosa and many of the Enterobacteriaceae with inducible chromosomal b-lactamases."
 msgstr ""
 
 msgid "Monobactams"
@@ -840,19 +813,10 @@ msgstr ""
 msgid "Short-acting sulfonamides"
 msgstr ""
 
-msgid "This group comprises sulfonamides with a biological half-life not exceeding approx. 7 hours."
-msgstr ""
-
 msgid "Intermediate-acting sulfonamides"
 msgstr ""
 
-msgid "This group comprises sulfonamides with a biological half-life of approx. 11-12 hours."
-msgstr ""
-
 msgid "Long-acting sulfonamides"
-msgstr ""
-
-msgid "This group comprises sulfonamides with a biological half-life of approx. 35 hours or more."
 msgstr ""
 
 msgid "Combinations of sulfonamides and trimethoprim, incl. derivatives"
@@ -891,30 +855,16 @@ msgstr ""
 msgid "Glycopeptides"
 msgstr ""
 
-msgid "This group comprises glycopeptide antibacterials, inhibiting the cell wall synthesis of gram positive bacteria. Lipoglycopeptide antibacterials are also included in this group. Teicoplanin and intravenous preparations of vancomycin are classified in this group. Oral formulations containing vancomycin are classified in A07A."
-msgstr ""
-
 msgid "Polymyxins"
 msgstr ""
 
-msgid "This group comprises polymyxin antibacterials acting on the bacterial cytoplasm membrane."
-msgstr ""
-
 msgid "Steroid antibacterials"
-msgstr ""
-
-msgid "This group comprises steroid antibacterials, inhibiting the binding of bacterial transfer-RNA and the 50-S part of the ribosomes."
 msgstr ""
 
 msgid "Imidazole derivatives"
 msgstr ""
 
 msgid "Imidazoles"
-msgstr ""
-
-msgid ""
-"This group comprises imidazole antibacterials acting through active metabolites in anaerobic bacteria. Only formulations for parenteral use of e.g. metronidazole are classified in this group. Oral formulations and suppositories of imidazole derivatives are classified in P01 - Antiprotozoals. Pessaries are classified in G01 - Gynecological antiinfectives and antiseptics.\n"
-"The DDDs for the parenteral imidazole formulations are based on the treatment of anaerobic bacteria infections."
 msgstr ""
 
 msgid "Nitrofuran derivatives"
@@ -927,9 +877,6 @@ msgid "Other"
 msgstr ""
 
 msgid "Antimycobacterial Antibiotics"
-msgstr ""
-
-msgid "This group comprises antibiotics specifically used in tuberculosis, except streptomycin - see comment under J04AM. Other antibiotics, see J01 -Antibacterials for systemic use."
 msgstr ""
 
 msgid "Antiprotozoal Nitroimidazole derivatives"
