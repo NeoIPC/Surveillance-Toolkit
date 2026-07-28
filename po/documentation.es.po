@@ -10,7 +10,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
 "POT-Creation-Date: 2026-07-07 00:12+0200\n"
 "PO-Revision-Date: 2026-07-28 11:26+0000\n"
-"Last-Translator: Anonymous <noreply@weblate.org>\n"
+"Last-Translator: Libre <6n0n1m0s@proton.me>\n"
 "Language-Team: Spanish <https://hosted.weblate.org/projects/neoipc/neoipc-core-surveillance-protocol/es/>\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
@@ -97,9 +97,7 @@ msgstr "Desarrollar y aplicar un enfoque innovador para la evaluación de las in
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:35
 #, fuzzy
 msgid "Robust assessment of the effectiveness of interventions in a randomised controlled trial (RCT)"
-msgstr ""
-"Evaluación rigurosa de la eficacia de las intervenciones en un ensayo "
-"controlado aleatorio (ECA)"
+msgstr "Evaluación rigurosa de la eficacia de las intervenciones en un ensayo controlado aleatorio (ECA)"
 
 #. type: #introduction-what-is-the-neo-ipc-project
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:36
@@ -195,10 +193,7 @@ msgstr "Procedimientos de cumplimentación y almacenamiento de formularios"
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:69
 #, fuzzy
 msgid "Data security and data privacy (protection of information that might be used to identify a patient outside of your department or hospital)"
-msgstr ""
-"Seguridad y privacidad de los datos (protección de la información que "
-"pudiera utilizarse para identificar a un paciente fuera de su departamento u "
-"hospital)"
+msgstr "Seguridad y privacidad de los datos (protección de la información que pudiera utilizarse para identificar a un paciente fuera de su departamento u hospital)"
 
 #. type: #introduction-advice-for-use-and-requirements-for-participation
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:70
@@ -1633,10 +1628,7 @@ msgstr "[[data-dictionary-patient-master-data-admission-information-admission-da
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:582
 #, fuzzy
 msgid "For infants that have not been delivered in your own hospital, record the infant's day of life on the day of admission (Day of birth = Day of Life 1.  The next day, starting at 00:00, is the second day of life.)"
-msgstr ""
-"Para niños que no ha sido entregado en vuestro hospital propio, récord el "
-"día del niño de vida en el día de admisión (Día de Día = de nacimiento de "
-"Vida 1.  Al día siguiente, empezando en 00:00, es el segundo día de vida.)"
+msgstr "Para niños que no ha sido entregado en vuestro hospital propio, récord el día del niño de vida en el día de admisión (Día de Día = de nacimiento de Vida 1.  Al día siguiente, empezando en 00:00, es el segundo día de vida.)"
 
 #. type: Title ====
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:584
@@ -2246,20 +2238,13 @@ msgstr "ERV: Enterococos resistentes a la vancomicina"
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:691
 #, fuzzy
 msgid "3GCR: Multi drug resistant gram-negative pathogen resistant to 3rd generation Cephalosporins according to own lab’s cut-off values (refers to phenotypic resistance or ESBL-producing organisms)"
-msgstr ""
-"3GCR: Multi droga grama-resistente el patógeno negativo resistente a 3ª "
-"generación Cephalosporins según el corte del laboratorio propio-de valores "
-"(refiere a phenotypic resistencia o ESBL-produciendo organismos)"
+msgstr "3GCR: Multi droga grama-resistente el patógeno negativo resistente a 3ª generación Cephalosporins según el corte del laboratorio propio-de valores (refiere a phenotypic resistencia o ESBL-produciendo organismos)"
 
 #. type: #data-dictionary-general-infection-data
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:692
 #, fuzzy
 msgid "Carbapenem resistant: Resistant to at least one of the following (Imipenem, Meropenem, Ertapenem) according to own lab's cut-off values (refers to phenotypic resistance or carbapenemase-producing organisms.)"
-msgstr ""
-"Resistente a los carbapenémicos: Resistente al menos a uno de los siguientes "
-"(imipenem, meropenem, ertapenem) según los valores de corte de nuestro "
-"propio laboratorio (se refiere a la resistencia fenotípica o a los "
-"organismos productores de carbapenemasa)."
+msgstr "Resistente a los carbapenémicos: Resistente al menos a uno de los siguientes (imipenem, meropenem, ertapenem) según los valores de corte de nuestro propio laboratorio (se refiere a la resistencia fenotípica o a los organismos productores de carbapenemasa)."
 
 #. type: #data-dictionary-general-infection-data
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:693
@@ -2313,11 +2298,7 @@ msgstr "La recopilación de datos sobre la ISQ secundaria es opcional; por lo ta
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:707
 #, fuzzy
 msgid "Yes: if you are following patients for secondary BSI and the patient has developed a secondary sepsis that meets the definition of NeoIPC (activates a field below where you can enter identified organisms)"
-msgstr ""
-"Sí: si estás realizando el seguimiento de pacientes con infección sanguínea "
-"secundaria y el paciente ha desarrollado una sepsis secundaria que cumple la "
-"definición de NeoIPC (se activa un campo debajo en el que puedes introducir "
-"los organismos identificados)"
+msgstr "Sí: si estás realizando el seguimiento de pacientes con infección sanguínea secundaria y el paciente ha desarrollado una sepsis secundaria que cumple la definición de NeoIPC (se activa un campo debajo en el que puedes introducir los organismos identificados)"
 
 #. type: #data-dictionary-general-infection-data
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:708
@@ -2593,10 +2574,7 @@ msgstr "Nuevo inicio de soporte respiratorio o aumento del nivel de soporte resp
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:771
 #, fuzzy
 msgid "Increase in need for FiO2 ≥ 0.25 (25 points) within 24 hours (daily minimum FiO2 values must be taken into account here)"
-msgstr ""
-"Aumento de la necesidad de una FiO₂ ≥ 0,25 (25 puntos) en un plazo de 24 "
-"horas (en este caso deben tenerse en cuenta los valores mínimos diarios de "
-"FiO₂)"
+msgstr "Aumento de la necesidad de una FiO₂ ≥ 0,25 (25 puntos) en un plazo de 24 horas (en este caso deben tenerse en cuenta los valores mínimos diarios de FiO₂)"
 
 #. type: Plain text
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:773
@@ -3101,9 +3079,7 @@ msgstr "Las tasas de infección del sitio quirúrgico (ISQ) definen el porcentaj
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:923
 #, fuzzy
 msgid "stem:[\"Overall SSI Rate\" = \"Total SSI Cases\" / \"Total Number of Surgeries\" xx 100]"
-msgstr ""
-"stem:[\"Tasa global de SSI\" = \"Total de casos de SSI\" / \"Número total de "
-"intervenciones quirúrgicas\" × 100]"
+msgstr "stem:[\"Tasa global de SSI\" = \"Total de casos de SSI\" / \"Número total de intervenciones quirúrgicas\" × 100]"
 
 #. type: #data-analysis-infections-surgical-site-infections
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:925
@@ -3814,10 +3790,7 @@ msgstr "Episodios nuevos/más frecuentes de bradicardia (<80/min) o taquicardia 
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:64
 #, fuzzy
 msgid "Impaired peripheral perfusion (Capillary refill time of > 3s or skin mottling or core/peripheral temperature gap > 2 °C)"
-msgstr ""
-"Alteración de la perfusión periférica (tiempo de relleno capilar > 3 s, "
-"manchas en la piel o diferencia de temperatura entre el centro y la "
-"periferia > 2 °C)"
+msgstr "Alteración de la perfusión periférica (tiempo de relleno capilar > 3 s, manchas en la piel o diferencia de temperatura entre el centro y la periferia > 2 °C)"
 
 #. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Clinical-Sepsis-Definition.adoc:15
@@ -4240,9 +4213,7 @@ msgstr "Aspirado traqueal purulento"
 #: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:16
 #, fuzzy
 msgid "New or more frequent symptoms of respiratory distress (retraction, nasal flaring, grunting, chest indrawing)"
-msgstr ""
-"Síntomas nuevos o más frecuentes de dificultad respiratoria (retracción, "
-"aleteo nasal, gruñidos, hundimiento torácico)"
+msgstr "Síntomas nuevos o más frecuentes de dificultad respiratoria (retracción, aleteo nasal, gruñidos, hundimiento torácico)"
 
 #. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:17
@@ -4278,9 +4249,7 @@ msgstr "Nuevo inicio de asistencia respiratoria o aumento del nivel existente de
 #: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:25
 #, fuzzy
 msgid "Increase in need for FiO~2~ ≥ 0.25 (25 points) within 24 hours (daily minimum FiO~2~ values must be taken into account)"
-msgstr ""
-"Aumento de la necesidad de una FiO~2~ ≥ 0,25 (25 puntos) en un plazo de 24 "
-"horas (se deben tener en cuenta los valores mínimos diarios de FiO~2~)"
+msgstr "Aumento de la necesidad de una FiO~2~ ≥ 0,25 (25 puntos) en un plazo de 24 horas (se deben tener en cuenta los valores mínimos diarios de FiO~2~)"
 
 #. type: Plain text
 #: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:33
@@ -4328,8 +4297,7 @@ msgstr "Infección del sitio quirúrgico (ISQ) incisional superficial"
 #: doc/protocol/definitions/NeoIPC-Core-Superficial-Incisional-SSI-Definition.adoc:5
 #, fuzzy
 msgid "**First symptoms occur within 30 days after the operation**"
-msgstr ""
-"**Los primeros síntomas aparecen en los 30 días siguientes a la operación**"
+msgstr "**Los primeros síntomas aparecen en los 30 días siguientes a la operación**"
 
 #. type: delimited block * 4
 #: doc/protocol/definitions/NeoIPC-Core-Superficial-Incisional-SSI-Definition.adoc:8
