@@ -28,8 +28,12 @@
 
 .PARAMETER Category
     Filter PO files by category based on filename pattern.
-    Valid values: reports, documentation, glossary, infectious_agents, scripts, all
+    Valid values: reports, documentation, glossary, infectious_agents, antibiotics, metadata, all
     Default: all
+
+    The PowerShell message catalogue has no category here because it does not follow the
+    <category>.<lang>.po naming the filter matches — its files are scripts/po/<lang>.po, named by
+    language alone. Validate it with `-Path scripts/po` instead, leaving Category at 'all'.
 
 .PARAMETER Quiet
     Suppress summary output. Only violations are displayed.
@@ -71,7 +75,7 @@ param(
     [string[]]$Include,
     
     [Parameter()]
-    [ValidateSet('reports', 'documentation', 'glossary', 'infectious_agents', 'scripts', 'all')]
+    [ValidateSet('reports', 'documentation', 'glossary', 'infectious_agents', 'antibiotics', 'metadata', 'all')]
     [string]$Category = 'all',
     
     [Parameter()]

@@ -84,9 +84,12 @@ and metadata products for validation but publishes nothing.
   streams; the tag prefix identifies the product. Pass `--latest=false` when publishing an off-stream
   release if you do not want it to claim the badge.
 - Each product's version is independent; they do **not** have to move together. The `--package-version`
-  stamped into each localized `.pot`/`.po` header is derived from that product's `VERSION` file at
-  localization time (documentation → protocol, reports → reports, infectious_agents → infectious-agents),
-  so it tracks the version automatically and cannot drift — there is nothing to hand-edit.
+  stamped into each `.pot` header is derived from that product's `VERSION` file at localization time
+  (documentation → protocol, reports → reports, infectious_agents → infectious-agents), so the template
+  tracks the version automatically and cannot drift — there is nothing to hand-edit. The `.po` headers
+  are **not** written here: Weblate owns those catalogues, and the version reaches them when its
+  *msgmerge* add-on next brings them up to the pushed `.pot`. So a `.po` header can legitimately lag its
+  `.pot` between a version bump and that merge.
 - The **metadata** packages are **generated build artifacts**, never committed (see
   `metadata/dist/README.md`); they exist only as Release assets and CI build artifacts. The **reports**
   product has **no** generated package: its render-ready sources ship in the tag's auto source archive

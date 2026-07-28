@@ -41,7 +41,8 @@
     Render the localized artifacts only, writing neither .pot nor .po. Supports the
     po4a configs (reports, documentation, infectious_agents, scripts) or 'all'; the
     glossary and antibiotic catalogues are produced by generators with no read-only
-    mode. Use this for builds and for rendering a single language.
+    mode. Use this for builds. It renders every language the config declares; there is no
+    single-language switch.
 
 .PARAMETER Test
     Run read-only string layer validation.
