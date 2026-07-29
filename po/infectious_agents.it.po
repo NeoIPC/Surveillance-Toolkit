@@ -2,10 +2,11 @@
 # Copyright (C) Charité – Universitätsmedizin Berlin
 # This file is distributed under the Creative Commons Attribution 4.0 International license
 #
+# Prefill add-on <noreply-addon-prefill@weblate.org>, 2026.
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"PO-Revision-Date: 2026-07-29 06:56+0000\n"
+"PO-Revision-Date: 2026-07-29 18:44+0000\n"
 "Language-Team: Italian <https://hosted.weblate.org/projects/neoipc/neoipc-infectious-agents/it/>\n"
 "Language: it\n"
 "MIME-Version: 1.0\n"
