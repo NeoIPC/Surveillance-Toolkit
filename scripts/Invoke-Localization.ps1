@@ -13,18 +13,19 @@
     catalogues of the three domains that are NOT hosted on Weblate — glossary,
     scripts and antibiotics — each of which has a writer here that keeps it in step
     with its template: update-glossary-po.py, po4a, and the NeoIPC-Tools antibiotic
-    exporter respectively. For the rest (reports, documentation, infectious_agents,
-    metadata) Weblate is the only writer, and po4a msgmerges them as an unavoidable
-    side effect of every run, so -Update restores those from HEAD once the localized
-    artifacts exist. Two writers on one catalogue is what conflicts every language at
+    exporter respectively. For the three this script does touch (reports, documentation,
+    infectious_agents) Weblate is the only writer, and po4a msgmerges them as an
+    unavoidable side effect of every run, so -Update restores those from HEAD once the
+    localized artifacts exist. Two writers on one catalogue is what conflicts every language at
     once: both sides rewrite adjacent header lines (POT-Creation-Date against
     PO-Revision-Date / Last-Translator / Language-Team / X-Generator) inside a single
     hunk git cannot auto-merge.
 
-    One gap remains and is not covered here: po/metadata.<lang>.po is Weblate-owned,
-    but Export-NeoIPCMetadataTranslation still rewrites it. That cmdlet belongs to the
-    metadata pipeline, which this script never invokes, so a run of -Update cannot
-    trip it — but a metadata refresh can.
+    The metadata catalogue is Weblate-owned too, but reaches that guarantee by a different
+    route and is not covered here: it has no po4a config, so there is nothing for this
+    script to restore. Its template is written by Export-NeoIPCMetadataTranslation in the
+    metadata pipeline, which this script never invokes, and that cmdlet emits
+    po/metadata.pot alone.
 
     Update pipeline (default -Config all):
       1. Fix string layer duplicates (Test-StringResourceLayers.ps1 -Fix)

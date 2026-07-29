@@ -81,7 +81,8 @@ only the dependency-closure seed and the round-trip oracle.
    |                                              regenerate UIDs            |
    | New-NeoIPCPathogen* / New-NeoIPCSubstance*   ontology + matrix -> objs  |
    | New-NeoIPCMetadataPackage                    assemble play / production |
-   | Export / Import-NeoIPCMetadataTranslation    <-> po/metadata.<lang>.po  |
+   | Export-NeoIPCMetadataTranslation             -> po/metadata.pot         |
+   | Import-NeoIPCMetadataTranslation             <- po/metadata.<lang>.po   |
    +------------------------------------------------------------------------+
         |
         v
@@ -422,8 +423,17 @@ and mostly internal labels. Nothing is dropped; instead each string gets a Webla
 translators clear the user-facing strings first: form-entry labels (`200`) > option
 values / notifications / org-unit names (`150`) > user-facing titles (`100`, the
 default) > the internal remainder (program-rule / data-element names, `10`). Retune
-that table as needs change. The committed component lives in
-`po/metadata.pot` + `po/metadata.<lang>.po`.
+that table as needs change. The flag goes in the template and nowhere else: Weblate
+treats `po/metadata.pot` as this bilingual component's source translation, reads the
+flag there, and strips it when writing each language.
+
+**Direction matters, and it is not symmetric.** This module **writes** `po/metadata.pot`
+and reads it back nowhere; it **reads** `po/metadata.<lang>.po` and writes them never.
+Those language catalogues are Weblate's — Weblate brings each one up to a changed
+template through its own msgmerge add-on, and creates the catalogue for a newly added
+language from the template — and two writers on one of them conflicts every language of
+the catalogue at once. So `Export-NeoIPCMetadataTranslation` has no parameter that could
+name a language, and neither does any helper beneath it.
 
 **Source = the assembled package, not the directory.** `Export-NeoIPCMetadataTranslation`
 takes either `-Package` (a parsed package) or `-Path` (a raw export). The committed
@@ -452,17 +462,19 @@ New-Item -ItemType Directory -Path $overlay | Out-Null
 'username,organisationUnit'         | Set-Content (Join-Path $overlay 'userOrgUnitAssignments.csv')
 $pkg = (New-NeoIPCMetadataPackage -ExportPath ./metadata.json -MetadataDirectory ./metadata `
             -Variant production -OverlayPath $overlay -PassThru).Package
-Export-NeoIPCMetadataTranslation -Package $pkg -PoDirectory ./po -Locale de -Validate   # regenerate .pot + msgmerge .po
+Export-NeoIPCMetadataTranslation -Package $pkg -PoDirectory ./po -Validate   # regenerates po/metadata.pot only
 
 # Quick ad-hoc extract from a raw export (NOT for the committed component — stale family names):
-Export-NeoIPCMetadataTranslation -Path ./metadata.json -PoDirectory ./po -Locale de
+Export-NeoIPCMetadataTranslation -Path ./metadata.json -PoDirectory ./po
 
-# Apply: per-language PO back onto a package as translations[] (fuzzy and
-# empty entries skipped), emitting the importable JSON.
+# Apply: every language catalogue present under -PoDirectory back onto a package as
+# translations[] (fuzzy and empty entries skipped), emitting the importable JSON. Which
+# languages exist is Weblate's decision, so they are discovered rather than listed; pass
+# -Locale to narrow to a subset.
 Import-NeoIPCMetadataTranslation -Path ./metadata.json -PoDirectory ./po -OutputPath ./metadata.translated.json
 ```
 
-PO emit/parse/merge are pure PowerShell (Pester-tested round-trip), mirroring how
+PO emit, parse and inject are pure PowerShell (Pester-tested), mirroring how
 the reports' glossary PO is managed in `scripts/update-glossary-po.py`. `-Validate`
 runs `msgfmt -c` (via WSL on Windows) when gettext is available.
 

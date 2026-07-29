@@ -203,8 +203,11 @@ determinism".
   safety net logs zero embedded UIDs missing from the structured/name-resolved closure.
 - **Expression:** the linter flags the known real issues (precedence / `== -1`); `-Canonicalize`
   rewrites the name-arg d2-functions.
-- **Translations:** `translations[]` → PO → `translations[]` is lossless; the `.pot` builds; the
-  Weblate component loads.
+- **Translations:** the `.pot` builds from a package and the Weblate component loads it; a language
+  catalogue Weblate wrote injects back onto a package as `translations[]`. The round trip is one-way
+  by design and cannot be asserted in both directions: the exporter emits the template only, because
+  every `po/metadata.<lang>.po` belongs to Weblate and a second writer conflicts every language of
+  the catalogue at once.
 - **Package:** the generated play package imports into a local DHIS2 (dry-run → import); the
   app's department picker populates; synthetic test users authenticate.
 

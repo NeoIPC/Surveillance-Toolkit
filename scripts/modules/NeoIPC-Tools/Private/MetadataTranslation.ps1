@@ -15,13 +15,19 @@
 #   msgstr  = the translated value (empty in the .pot)
 #
 # Two intermediate shapes flow through here:
-#   UNIT  = { Type, Key, Property, Token, Msgctxt, Msgid, ObjectId, Translations(locale->value) } — extracted
-#           from a package, one per (object, translatable field). Carries every locale's value at once.
-#   ENTRY = { Msgctxt, Msgid, Msgstr, Fuzzy } — a single PO record for ONE language; what gets written/read/merged.
+#   UNIT  = { Type, Key, Property, Token, Msgctxt, Msgid, ObjectId, Priority } — extracted from a package, one per
+#           (object, translatable field).
+#   ENTRY = { Msgctxt, Msgid, Msgstr, Fuzzy, Priority } — a single PO record; what gets written and read.
 #
-# Emit/parse/merge/inject are pure PowerShell (no external process), so the whole round-trip is Pester-testable on
-# a standalone checkout — mirroring how the reports' glossary PO is managed in code (scripts/update-glossary-po.py),
-# not via the msgmerge CLI. This engine never calls the DHIS2 API. PO output is UTF-8; msgfmt (WSL) can validate it.
+# The flow is deliberately asymmetric, and that asymmetry is the ownership model rather than an oversight. WRITING
+# goes one way only — units to the .pot — because every metadata.<lang>.po belongs to Weblate, which brings each
+# one up to a changed template through its own msgmerge add-on and creates the catalogue for a newly added
+# language. Nothing here writes a .po, and no function here takes a locale to write one with. READING goes the
+# other way: Read-NeoIPCMetadataPoText parses Weblate's catalogues and Add-NeoIPCMetadataTranslationToPackage
+# injects them onto a package as translations[]. Emit, parse and inject are pure PowerShell (no external process),
+# so the round-trip is Pester-testable on a standalone checkout — mirroring how the reports' glossary PO is managed
+# in code (scripts/update-glossary-po.py). This engine never calls the DHIS2 API. PO output is UTF-8; msgfmt (WSL)
+# can validate it.
 
 function Get-NeoIPCMetadataTranslatableField {
     # The ordered (property, token) pairs translatable on a type: the INTERSECTION of the type map's mapped
@@ -243,20 +249,19 @@ function Get-NeoIPCMetadataTranslationUnit {
             # New-NeoIPCMetadataPackage drops translations, so this PO is their SOLE translation source on the
             # importable package — mirroring the directory exclusion here would permanently drop every generated-family
             # translation. Do NOT add the generated predicate to the PO path.
-            # Index this object's existing translations by token: token -> { locale -> value }.
-            $existing = @{}
+            # Which TOKENS this object already carries a translation for. Only the token set is needed — the
+            # values are not read, because a template carries source strings and never a translation. The set
+            # exists solely to warn below about a translations[] entry whose token the type map does not carry.
+            $existingTokens = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::Ordinal)
             foreach ($t in @($obj['translations'])) {
                 if ($t -is [System.Collections.IDictionary] -and $t['property'] -and $t['locale']) {
-                    $tok = [string]$t['property']
-                    if (-not $existing.ContainsKey($tok)) { $existing[$tok] = [ordered]@{} }
-                    $existing[$tok][[string]$t['locale']] = [string]$t['value']
+                    [void]$existingTokens.Add([string]$t['property'])
                 }
             }
             $fieldIndex = 0
             foreach ($field in $fields) {
                 $base = $obj[$field.Property]
                 if ($null -eq $base -or [string]$base -eq '') { continue }
-                $translations = if ($existing.ContainsKey($field.Token)) { $existing[$field.Token] } else { [ordered]@{} }
                 $priority = if ($priorities -and $priorities.Contains($field.Token)) { [int]$priorities[$field.Token] } else { $script:NeoIPCMetadataLowTranslationPriority }
                 $typeDecorated.Add([pscustomobject]@{
                         SortKey   = $key
@@ -270,13 +275,12 @@ function Get-NeoIPCMetadataTranslationUnit {
                             Msgid        = [string]$base
                             ObjectId     = [string]$obj['id']
                             Priority     = $priority
-                            Translations = $translations
                         }
                     })
                 $fieldIndex++
             }
             $ignoredTokens = $script:NeoIPCMetadataTranslationIgnoredTokens[$type]
-            foreach ($tok in $existing.Keys) {
+            foreach ($tok in $existingTokens) {
                 if (-not $tokens.Contains($tok) -and ($tok -notin $ignoredTokens)) {
                     Write-Warning ("translations[] entry on {0} '{1}' uses token {2}, which the type map does not carry as a translatable field; it is not exported to PO." -f $type, $key, $tok)
                 }
@@ -311,20 +315,15 @@ function Get-NeoIPCMetadataTranslationUnit {
 }
 
 function ConvertTo-NeoIPCMetadataPoEntry {
-    # Project translation units to single-language PO entries. -Locale '' yields .pot entries (empty msgstr);
-    # a real locale fills msgstr from each unit's Translations[$Locale]. Fuzzy is always false here (fuzziness
-    # only arises from a source-vs-translation mismatch during Merge-NeoIPCMetadataPoEntry).
+    # Project translation units to template entries: msgstr empty and never fuzzy, because a template carries the
+    # source strings only. Filling a msgstr here would mean writing a translation into a catalogue Weblate owns.
     [CmdletBinding()]
     [OutputType([System.Collections.Generic.List[object]])]
-    param(
-        [Parameter(Mandatory)][System.Collections.Generic.List[object]]$Unit,
-        [string]$Locale = ''
-    )
+    param([Parameter(Mandatory)][System.Collections.Generic.List[object]]$Unit)
     $entries = [System.Collections.Generic.List[object]]::new()
     foreach ($u in $Unit) {
-        $msgstr = if ($Locale -and $u.Translations.Contains($Locale)) { [string]$u.Translations[$Locale] } else { '' }
         $priority = if ($u.Contains('Priority')) { [int]$u.Priority } else { 100 }
-        $entries.Add([ordered]@{ Msgctxt = $u.Msgctxt; Msgid = $u.Msgid; Msgstr = $msgstr; Fuzzy = $false; Priority = $priority })
+        $entries.Add([ordered]@{ Msgctxt = $u.Msgctxt; Msgid = $u.Msgid; Msgstr = ''; Fuzzy = $false; Priority = $priority })
     }
     return , $entries
 }
@@ -369,18 +368,18 @@ function ConvertFrom-NeoIPCPoString {
 }
 
 function Write-NeoIPCMetadataPoText {
-    # Render PO entries to PO text. -Locale '' (default) writes a .pot header (Language: en, blank msgstr expected);
-    # a non-empty -Locale writes that language's header. Each entry's Weblate flags line carries fuzzy + priority:NNN
-    # (priority 100 = default, no flag). The header is the standard empty-msgid entry; metadata mirrors the reports'
-    # glossary PO (NeoIPC copyright, CC BY 4.0). Output is LF-terminated (StringBuilder.AppendLine would emit the
-    # platform newline) to match every other catalogue under po/.
+    # Render entries to the gettext template text: an English source header and one record per entry, whose
+    # Weblate flags line carries fuzzy + priority:NNN (priority 100 = default, no flag). There is deliberately no
+    # per-language mode: the header is always Language: en and no caller can ask for another, because every
+    # metadata.<lang>.po is Weblate's. That constrains the header, not the body — hand this function an entry
+    # carrying a msgstr and it will render it, which is what lets a test build a fixture. What is removed is the
+    # ability to ADDRESS a language, which is what made the old exporter a second writer. The header is the
+    # standard empty-msgid entry; metadata mirrors the reports' glossary PO (NeoIPC copyright, CC BY 4.0). Output
+    # is LF-terminated (StringBuilder.AppendLine would emit the platform newline) to match every other catalogue
+    # under po/.
     [CmdletBinding()]
     [OutputType([string])]
-    param(
-        [Parameter(Mandatory)][System.Collections.Generic.List[object]]$Entry,
-        [string]$Locale = ''
-    )
-    $lang = if ($Locale) { $Locale } else { 'en' }
+    param([Parameter(Mandatory)][System.Collections.Generic.List[object]]$Entry)
     $sb = [System.Text.StringBuilder]::new()
     [void]$sb.AppendLine('# Translations for the NeoIPC DHIS2 metadata.')
     [void]$sb.AppendLine('# Copyright (C) Charité – Universitätsmedizin Berlin')
@@ -394,7 +393,7 @@ function Write-NeoIPCMetadataPoText {
     [void]$sb.AppendLine('"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"')
     [void]$sb.AppendLine('"Last-Translator: Automatically generated\n"')
     [void]$sb.AppendLine('"Language-Team: none\n"')
-    [void]$sb.AppendLine(('"Language: {0}\n"' -f $lang))
+    [void]$sb.AppendLine('"Language: en\n"')
     [void]$sb.AppendLine('"MIME-Version: 1.0\n"')
     [void]$sb.AppendLine('"Content-Type: text/plain; charset=UTF-8\n"')
     [void]$sb.AppendLine('"Content-Transfer-Encoding: 8bit\n"')
@@ -476,36 +475,6 @@ function Read-NeoIPCMetadataPoText {
     return , $entries
 }
 
-function Merge-NeoIPCMetadataPoEntry {
-    # Merge freshly-extracted source entries (New, msgstr empty) with an existing language PO (Existing), the way
-    # msgmerge would: key by msgctxt. New is authoritative for which entries exist and for the msgid (English
-    # source). When the existing PO has the same msgctxt:
-    #   - same msgid  -> keep its msgstr and fuzzy flag (an unchanged source keeps the translation untouched);
-    #   - changed msgid -> keep the msgstr but mark fuzzy (the source moved; the translator must review).
-    # Entries only in Existing are dropped (obsolete). Output preserves New's order. Returns the merged entries.
-    [CmdletBinding()]
-    [OutputType([System.Collections.Generic.List[object]])]
-    param(
-        [Parameter(Mandatory)][System.Collections.Generic.List[object]]$New,
-        [Parameter(Mandatory)][AllowNull()][System.Collections.Generic.List[object]]$Existing
-    )
-    $byCtx = @{}
-    foreach ($e in @($Existing)) { if ($e.Msgctxt) { $byCtx[[string]$e.Msgctxt] = $e } }
-    $merged = [System.Collections.Generic.List[object]]::new()
-    foreach ($n in $New) {
-        $old = $byCtx[[string]$n.Msgctxt]
-        $msgstr = ''
-        $fuzzy = $false
-        if ($old -and -not [string]::IsNullOrEmpty([string]$old.Msgstr)) {
-            $msgstr = [string]$old.Msgstr
-            $fuzzy = [bool]$old.Fuzzy -or ([string]$old.Msgid -ne [string]$n.Msgid)
-        }
-        $priority = if ($n.Contains('Priority')) { [int]$n.Priority } else { 100 }   # priority is source-set: New wins
-        $merged.Add([ordered]@{ Msgctxt = $n.Msgctxt; Msgid = $n.Msgid; Msgstr = $msgstr; Fuzzy = $fuzzy; Priority = $priority })
-    }
-    return , $merged
-}
-
 function Add-NeoIPCMetadataTranslationToPackage {
     # Inject per-locale PO translations onto a package's objects as translations[] = [{ property, locale, value }].
     # PoByLocale is { locale -> parsed entry list (Read-NeoIPCMetadataPoText output) }. Fuzzy and empty entries
@@ -558,9 +527,16 @@ function Add-NeoIPCMetadataTranslationToPackage {
                 foreach ($field in $orderedFields) {
                     $ctx = "$type/$key/$($field.Token)"
                     $val = if ($localeMap.ContainsKey($ctx)) { $localeMap[$ctx] } else { $null }
-                    if (-not [string]::IsNullOrEmpty($val)) {
-                        $rebuilt.Add([ordered]@{ property = $field.Token; locale = $locale; value = $val })
-                    }
+                    if ([string]::IsNullOrEmpty($val)) { continue }
+                    # Skip a translation identical to the base value: DHIS2 falls back to the base field when a
+                    # locale has no translation, so storing the same string again changes nothing a client sees
+                    # and only inflates the package. This is not the catalogue's business — a translator marking a
+                    # Latin binomial as correct-unchanged in their language is a real editorial decision, and the
+                    # catalogue keeps it — but the decision is already expressed by the fallback. The antibiotic
+                    # and pathogen option generators emit translations[] on the same rule. Ordinal comparison:
+                    # a case difference is a different rendering, not the same one.
+                    if ([string]::Equals([string]$obj[$field.Property], [string]$val, [System.StringComparison]::Ordinal)) { continue }
+                    $rebuilt.Add([ordered]@{ property = $field.Token; locale = $locale; value = $val })
                 }
             }
             if ($rebuilt.Count -gt 0) { $obj['translations'] = $rebuilt.ToArray() }
