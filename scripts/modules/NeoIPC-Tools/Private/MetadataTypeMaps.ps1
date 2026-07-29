@@ -29,10 +29,11 @@ $script:NeoIPCMetadataDisplayProjections = @(
 )
 
 # Fields dropped from the per-type CSV directory AND ignored by the structural comparator. `translations` is
-# deliberately NOT carried in CSV cells: i18n lives in a separate, translator-facing gettext PO component
-# (po/metadata.<lang>.po), converted to/from each object's translations[] by Export/Import-NeoIPCMetadataTranslation
-# (see Private/MetadataTranslation.ps1). So the CSV round-trip stays purely structural — translations are stripped
-# here by Remove-NeoIPCMetadataNoise and round-tripped losslessly through the PO path instead.
+# deliberately NOT carried in CSV cells: i18n lives in a separate, translator-facing gettext PO component whose
+# source template Export-NeoIPCMetadataTranslation writes and whose per-language catalogues (po/metadata.<lang>.po,
+# Weblate-owned) Import-NeoIPCMetadataTranslation reads back onto each object's translations[] (see
+# Private/MetadataTranslation.ps1). So the CSV round-trip stays purely structural — translations are stripped
+# here by Remove-NeoIPCMetadataNoise and carried through the PO path instead.
 $script:NeoIPCMetadataDeferredFields = @('translations')
 
 # Whole object TYPES excluded from the package entirely (not field-stripping): account/PII-shaped
@@ -355,10 +356,6 @@ $script:NeoIPCMetadataTranslationIgnoredTokens = @{
     programStages      = @('FORM_NAME')
     trackedEntityTypes = @('FORM_NAME')
 }
-
-# Default target languages for the metadata PO component — the same nine the reports' po4a / glossary pipeline
-# targets (see Surveillance-Toolkit CLAUDE.md). Overridable per call via the cmdlets' -Locale parameter.
-$script:NeoIPCMetadataTranslationLocales = @('af', 'de', 'el', 'es', 'et', 'fr', 'it', 'ne', 'tr')
 
 # Per-string Weblate PRIORITY for the metadata PO. The converter exports the FULL @Translatable surface (DHIS2
 # marks `name` @Translatable on every object — BaseIdentifiableObject.getDisplayName — so nothing is dropped),

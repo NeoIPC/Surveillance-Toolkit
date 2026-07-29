@@ -33,6 +33,39 @@ InModuleScope 'NeoIPC-Tools' {
         # visible during Pester's run phase (see the header of TestFileHelpers.ps1).
         . (Join-Path $PSScriptRoot '..' '..' 'TestFileHelpers.ps1')
 
+        # New-LanguagePoText — render a per-language gettext catalogue for the PO reader to parse. It lives in
+        # the tests, not the module, for two reasons. The module deliberately cannot write a metadata.<lang>.po
+        # at all — Weblate owns those and is their only writer — so there is no production writer to borrow. And
+        # a fixture built independently is what makes the reader's coverage real: rendering with the module's own
+        # writer and reading it straight back would prove only that the two agree with each other, not that
+        # either matches what Weblate produces. Shaped like Weblate's output rather than the module's template
+        # writer: no source flags (Weblate strips priority:NNN when writing a language) and no wrapping.
+        function New-LanguagePoText {
+            param(
+                [Parameter(Mandatory)][string]$Locale,
+                # msgctxt -> msgstr, or msgctxt -> @{ Msgid; Msgstr; Fuzzy } when the entry needs a source string
+                # distinct from its translation, or the needs-editing flag.
+                [Parameter(Mandatory)][hashtable]$Translation
+            )
+            $sb = [System.Text.StringBuilder]::new()
+            # The empty-msgid record is the gettext HEADER, and only the header. Every real entry below carries an
+            # English source as its msgid, which is what Weblate writes; a catalogue of empty msgids would be a
+            # shape no parser ever meets.
+            [void]$sb.Append("msgid `"`"`nmsgstr `"`"`n`"Language: $Locale\n`"`n" +
+                "`"MIME-Version: 1.0\n`"`n`"Content-Type: text/plain; charset=UTF-8\n`"`n")
+            foreach ($ctx in $Translation.Keys) {
+                $v = $Translation[$ctx]
+                $isMap = $v -is [System.Collections.IDictionary]
+                $msgstr = if ($isMap) { [string]$v.Msgstr } else { [string]$v }
+                # Default the source to the msgctxt's trailing token, so a caller that only cares about the
+                # translation still produces a well-formed entry; supply Msgid to control it.
+                $msgid = if ($isMap -and $v.Contains('Msgid')) { [string]$v.Msgid } else { ($ctx -split '/')[-1] }
+                if ($isMap -and $v.Fuzzy) { [void]$sb.Append("`n#, fuzzy`n") } else { [void]$sb.Append("`n") }
+                [void]$sb.Append("msgctxt `"$ctx`"`nmsgid `"$msgid`"`nmsgstr `"$msgstr`"`n")
+            }
+            return $sb.ToString()
+        }
+
         # Round-trip one object through row<->object and report semantic equality the way the comparator
         # sees it (normalized + canonical). Returns the row and rebuilt object too, for cell-level asserts.
         function Get-RowRoundTrip {
@@ -2264,12 +2297,15 @@ InModuleScope 'NeoIPC-Tools' {
                 }
             }
             function Get-InjectedFixture {
-                # Extract -> per-locale PO -> parse -> inject into a translations-stripped copy. Returns the package.
-                $src = New-TranslationFixture
-                $units = Get-NeoIPCMetadataTranslationUnit -Package $src
-                $po = @{}
-                foreach ($loc in 'de', 'es') {
-                    $po[$loc] = Read-NeoIPCMetadataPoText -Text (Write-NeoIPCMetadataPoText -Entry (ConvertTo-NeoIPCMetadataPoEntry -Unit $units -Locale $loc) -Locale $loc)
+                # Weblate-shaped per-locale PO -> parse -> inject into a translations-stripped copy. Returns the package.
+                $po = @{
+                    de = Read-NeoIPCMetadataPoText -Text (New-LanguagePoText -Locale 'de' -Translation @{
+                            'options/NEOIPC_ASA_SCORE/1/NAME'             = 'ASA I (de)'
+                            'organisationUnitGroups/NEO_DEPARTMENT/NAME'  = 'Abteilungen'
+                        })
+                    es = Read-NeoIPCMetadataPoText -Text (New-LanguagePoText -Locale 'es' -Translation @{
+                            'options/NEOIPC_ASA_SCORE/1/NAME' = 'ASA I (es)'
+                        })
                 }
                 $clean = ConvertFrom-NeoIPCMetadataJsonText -Json (New-TranslationFixture | ConvertTo-Json -Depth 40)
                 foreach ($t in 'options', 'organisationUnitGroups') { foreach ($o in @($clean[$t])) { $o.Remove('translations') | Out-Null } }
@@ -2337,25 +2373,26 @@ InModuleScope 'NeoIPC-Tools' {
             $keys | Should -Not -Contain 'organisationUnits/AT/SHORT_NAME'
             $keys | Should -Contain 'organisationUnitGroups/NEO_DEPARTMENT/NAME'      # group label kept
         }
-        It 'sources msgid from the English base value and gathers existing translations by locale' {
+        It 'sources msgid from the English base value' {
             $units = Get-NeoIPCMetadataTranslationUnit -Package (New-TranslationFixture)
             $u = $units | Where-Object { $_.Msgctxt -eq 'options/NEOIPC_ASA_SCORE/1/NAME' }
             $u.Msgid | Should -BeExactly 'ASA I'
-            $u.Translations['de'] | Should -BeExactly 'ASA I (de)'
-            $u.Translations['es'] | Should -BeExactly 'ASA I (es)'
         }
-        It 'emits a .pot with empty msgstr and a .<lang>.po with the language msgstr' {
+        It 'emits an English template whose every msgstr is empty, whatever the package already carries' {
+            # The fixture's option and department BOTH carry translations[]; none of them may reach the template.
+            # A translated string in a .pot would be a translation this repository authored into Weblate's domain.
             $units = Get-NeoIPCMetadataTranslationUnit -Package (New-TranslationFixture)
             $pot = Write-NeoIPCMetadataPoText -Entry (ConvertTo-NeoIPCMetadataPoEntry -Unit $units)
             $pot | Should -Match '(?m)^msgctxt "organisationUnitGroups/NEO_DEPARTMENT/NAME"'
             $pot | Should -Match '(?m)^"Language: en\\n"'
-            $poDe = Write-NeoIPCMetadataPoText -Entry (ConvertTo-NeoIPCMetadataPoEntry -Unit $units -Locale 'de') -Locale 'de'
-            $poDe | Should -Match '(?m)^"Language: de\\n"'
-            $poDe | Should -Match 'Abteilungen'
+            $pot | Should -Not -Match 'Abteilungen'
+            $pot | Should -Not -Match 'ASA I \((de|es)\)'
+            @(($pot -split "`n") | Where-Object { $_ -match '^msgstr ' -and $_ -ne 'msgstr ""' }) | Should -BeNullOrEmpty
         }
-        It 'parses a .po back, skipping the header entry' {
-            $units = Get-NeoIPCMetadataTranslationUnit -Package (New-TranslationFixture)
-            $entries = Read-NeoIPCMetadataPoText -Text (Write-NeoIPCMetadataPoText -Entry (ConvertTo-NeoIPCMetadataPoEntry -Unit $units -Locale 'de') -Locale 'de')
+        It 'parses a language catalogue back, skipping the header entry' {
+            $entries = Read-NeoIPCMetadataPoText -Text (New-LanguagePoText -Locale 'de' -Translation @{
+                    'organisationUnitGroups/NEO_DEPARTMENT/NAME' = 'Abteilungen'
+                })
             @($entries | Where-Object { -not $_.Msgctxt }).Count | Should -Be 0          # no empty-context header entry
             ($entries | Where-Object { $_.Msgctxt -eq 'organisationUnitGroups/NEO_DEPARTMENT/NAME' }).Msgstr | Should -BeExactly 'Abteilungen'
         }
@@ -2395,44 +2432,31 @@ InModuleScope 'NeoIPC-Tools' {
         }
     }
 
-    Describe 'PO merge + fuzzy handling (msgmerge-equivalent, in code)' {
+    Describe 'PO projection + fuzzy handling' {
         BeforeAll {
             function New-Entry { param($Ctx, $Id, $Str = '', $Fuzzy = $false) [ordered]@{ Msgctxt = $Ctx; Msgid = $Id; Msgstr = $Str; Fuzzy = $Fuzzy } }
             function New-EntryList { $l = [System.Collections.Generic.List[object]]::new(); foreach ($e in $args) { $l.Add($e) }; return , $l }
         }
-        It 'projects units to .pot entries with empty msgstr, and to language entries with the value' {
+        It 'projects a unit to a template entry with an empty msgstr even when the object is already translated' {
             $units = Get-NeoIPCMetadataTranslationUnit -Package ([ordered]@{
                     optionSets = @( [ordered]@{ id = 'OSaaaaaaaa1'; code = 'S'; name = 'Set' } )
                     options    = @( [ordered]@{ id = 'OPaaaaaaaa1'; code = '1'; name = 'One'; optionSet = [ordered]@{ id = 'OSaaaaaaaa1' }
                             translations = @( [ordered]@{ property = 'NAME'; locale = 'de'; value = 'Eins' } ) } ) })
             $optName = $units | Where-Object { $_.Msgctxt -eq 'options/S/1/NAME' }
-            (ConvertTo-NeoIPCMetadataPoEntry -Unit (New-EntryList $optName) | ForEach-Object { $_.Msgstr }) | Should -Be @('')
-            (ConvertTo-NeoIPCMetadataPoEntry -Unit (New-EntryList $optName) -Locale 'de' | ForEach-Object { $_.Msgstr }) | Should -Be @('Eins')
+            $projected = ConvertTo-NeoIPCMetadataPoEntry -Unit (New-EntryList $optName)
+            ($projected | ForEach-Object { $_.Msgstr }) | Should -Be @('')
         }
-        It 'preserves a translation when the source msgid is unchanged' {
-            $new = New-EntryList (New-Entry 'a/b/NAME' 'Hello')
-            $old = New-EntryList (New-Entry 'a/b/NAME' 'Hello' 'Hallo')
-            $m = Merge-NeoIPCMetadataPoEntry -New $new -Existing $old
-            $m[0].Msgstr | Should -BeExactly 'Hallo'
-            $m[0].Fuzzy | Should -BeFalse
-        }
-        It 'keeps but fuzzies a translation when the source msgid changed' {
-            $new = New-EntryList (New-Entry 'a/b/NAME' 'Hello there')
-            $old = New-EntryList (New-Entry 'a/b/NAME' 'Hello' 'Hallo')
-            $m = Merge-NeoIPCMetadataPoEntry -New $new -Existing $old
-            $m[0].Msgstr | Should -BeExactly 'Hallo'
-            $m[0].Fuzzy | Should -BeTrue
-        }
-        It 'drops obsolete entries and leaves brand-new ones untranslated' {
-            $new = New-EntryList (New-Entry 'a/b/NAME' 'Hello') (New-Entry 'a/c/NAME' 'New')
-            $old = New-EntryList (New-Entry 'a/b/NAME' 'Hello' 'Hallo') (New-Entry 'gone/x/NAME' 'Gone' 'Weg')
-            $m = Merge-NeoIPCMetadataPoEntry -New $new -Existing $old
-            @($m | ForEach-Object { $_.Msgctxt }) | Should -Be @('a/b/NAME', 'a/c/NAME')
-            ($m | Where-Object { $_.Msgctxt -eq 'a/c/NAME' }).Msgstr | Should -BeExactly ''
+        It 'exposes no way to project or render a translated language catalogue' {
+            # Structural, not behavioural, and that is the point: the guarantee is that no parameter exists to
+            # ask for one. A behavioural check ("this call produced an empty msgstr") would pass just as well
+            # against a writer that still takes a locale and merely was not given one here.
+            (Get-Command ConvertTo-NeoIPCMetadataPoEntry).Parameters.Keys | Should -Not -Contain 'Locale'
+            (Get-Command Write-NeoIPCMetadataPoText).Parameters.Keys | Should -Not -Contain 'Locale'
+            (Get-Command Export-NeoIPCMetadataTranslation).Parameters.Keys | Should -Not -Contain 'Locale'
         }
         It 'round-trips the fuzzy flag through write/read' {
             $entries = New-EntryList (New-Entry 'a/b/NAME' 'Hello' 'Hallo' $true)
-            $back = Read-NeoIPCMetadataPoText -Text (Write-NeoIPCMetadataPoText -Entry $entries -Locale 'de')
+            $back = Read-NeoIPCMetadataPoText -Text (Write-NeoIPCMetadataPoText -Entry $entries)
             $back[0].Fuzzy | Should -BeTrue
         }
         It 'injection skips a fuzzy entry (unreviewed translation is not applied)' {
@@ -2455,49 +2479,125 @@ InModuleScope 'NeoIPC-Tools' {
             }
             [System.IO.File]::WriteAllText($script:trExport, ($pkg | ConvertTo-Json -Depth 40), [System.Text.UTF8Encoding]::new($false))
         }
-        It 'writes metadata.pot + one metadata.<lang>.po per requested locale' {
-            Export-NeoIPCMetadataTranslation -Path $script:trExport -PoDirectory $script:trPoDir -Locale de, es
-            Test-Path (Join-Path $script:trPoDir 'metadata.pot') | Should -BeTrue
-            Test-Path (Join-Path $script:trPoDir 'metadata.de.po') | Should -BeTrue
-            Test-Path (Join-Path $script:trPoDir 'metadata.es.po') | Should -BeTrue
+        It 'writes metadata.pot and nothing else' {
+            # The load-bearing half is the second assertion. Weblate owns every metadata.<lang>.po and is their
+            # only writer; a run of this cmdlet must leave the directory holding exactly one file it authored.
+            $dir = Join-Path $TestDrive 'tr-pot-only'
+            Export-NeoIPCMetadataTranslation -Path $script:trExport -PoDirectory $dir
+            @(Get-ChildItem -LiteralPath $dir -File | ForEach-Object { $_.Name }) | Should -Be @('metadata.pot')
         }
-        It 'seeds a new .po from the package existing translations[]' {
-            Export-NeoIPCMetadataTranslation -Path $script:trExport -PoDirectory $script:trPoDir -Locale de, es
-            (Get-Content (Join-Path $script:trPoDir 'metadata.de.po') -Raw) | Should -Match 'ASA I \(de\)'
-            (Get-Content (Join-Path $script:trPoDir 'metadata.es.po') -Raw) | Should -Not -Match 'ASA I \(de\)'
+        It 'does not overwrite or delete a language catalogue that is already there' {
+            # The realistic shape: po/ already holds Weblate's catalogues when the exporter runs over it.
+            $dir = Join-Path $TestDrive 'tr-existing'
+            New-Item -ItemType Directory -Path $dir -Force | Out-Null
+            $de = Join-Path $dir 'metadata.de.po'
+            $before = New-LanguagePoText -Locale 'de' -Translation @{ 'options/NEOIPC_ASA_SCORE/1/NAME' = 'ASA I (de)' }
+            [System.IO.File]::WriteAllText($de, $before, [System.Text.UTF8Encoding]::new($false))
+            Export-NeoIPCMetadataTranslation -Path $script:trExport -PoDirectory $dir
+            [System.IO.File]::ReadAllText($de) | Should -BeExactly $before
         }
         It 'emits an empty msgstr in the .pot template' {
-            Export-NeoIPCMetadataTranslation -Path $script:trExport -PoDirectory $script:trPoDir -Locale de
+            Export-NeoIPCMetadataTranslation -Path $script:trExport -PoDirectory $script:trPoDir
             $pot = Get-Content (Join-Path $script:trPoDir 'metadata.pot') -Raw
             $pot | Should -Match 'msgctxt "options/NEOIPC_ASA_SCORE/1/NAME"'
             $pot | Should -Not -Match 'ASA I \(de\)'
         }
-        It 'round-trips: Export then Import reconstructs translations[] from the .po files' {
-            Export-NeoIPCMetadataTranslation -Path $script:trExport -PoDirectory $script:trPoDir -Locale de, es
-            $inj = Import-NeoIPCMetadataTranslation -Path $script:trExport -PoDirectory $script:trPoDir -Locale de, es -PassThru
+        It 'Import reconstructs translations[] from the language catalogues Weblate wrote' {
+            $dir = Join-Path $TestDrive 'tr-import'
+            New-Item -ItemType Directory -Path $dir -Force | Out-Null
+            [System.IO.File]::WriteAllText((Join-Path $dir 'metadata.de.po'),
+                (New-LanguagePoText -Locale 'de' -Translation @{ 'options/NEOIPC_ASA_SCORE/1/NAME' = 'ASA I (de)' }),
+                [System.Text.UTF8Encoding]::new($false))
+            $inj = Import-NeoIPCMetadataTranslation -Path $script:trExport -PoDirectory $dir -PassThru
             $opt = @($inj['options'])[0]
             @($opt['translations'] | ForEach-Object { '{0}:{1}={2}' -f $_['property'], $_['locale'], $_['value'] }) | Should -Be @('NAME:de=ASA I (de)')
         }
-        It 'preserves a translator-supplied msgstr across re-export (msgmerge-equivalent)' {
-            Export-NeoIPCMetadataTranslation -Path $script:trExport -PoDirectory $script:trPoDir -Locale es
-            $esPath = Join-Path $script:trPoDir 'metadata.es.po'
-            $entries = Read-NeoIPCMetadataPoText -Text (Get-Content $esPath -Raw)
-            ($entries | Where-Object { $_.Msgctxt -eq 'organisationUnitGroups/NEO_DEPARTMENT/NAME' }).Msgstr = 'Departments (es)'
-            [System.IO.File]::WriteAllText($esPath, (Write-NeoIPCMetadataPoText -Entry $entries -Locale 'es'), [System.Text.UTF8Encoding]::new($false))
-            Export-NeoIPCMetadataTranslation -Path $script:trExport -PoDirectory $script:trPoDir -Locale es
-            (Get-Content $esPath -Raw) | Should -Match 'Departments \(es\)'
+        It 'Import discovers the catalogues present rather than consulting a fixed language list' {
+            # A language Weblate adds must import without a code change here; metadata.pot must not be mistaken
+            # for a catalogue (its name differs only in the trailing character).
+            $dir = Join-Path $TestDrive 'tr-discover'
+            New-Item -ItemType Directory -Path $dir -Force | Out-Null
+            Export-NeoIPCMetadataTranslation -Path $script:trExport -PoDirectory $dir
+            foreach ($loc in 'de', 'pt_BR') {
+                [System.IO.File]::WriteAllText((Join-Path $dir "metadata.$loc.po"),
+                    (New-LanguagePoText -Locale $loc -Translation @{ 'options/NEOIPC_ASA_SCORE/1/NAME' = "ASA I ($loc)" }),
+                    [System.Text.UTF8Encoding]::new($false))
+            }
+            $inj = Import-NeoIPCMetadataTranslation -Path $script:trExport -PoDirectory $dir -PassThru
+            # -BeExactly so a locale whose casing drifted (pt_br for pt_BR) fails rather than compares equal.
+            @(@($inj['options'])[0]['translations'] | ForEach-Object { $_['locale'] }) | Should -BeExactly @('de', 'pt_BR')
+        }
+        It 'Import omits a translation identical to the base value, because DHIS2 falls back to it' {
+            # A translator confirming that a Latin name is correct-unchanged in their language is a real decision
+            # and the catalogue keeps it — but the package need not carry it, since the fallback already yields
+            # that string. Without this, a fully confirmed nomenclature catalogue would inject thousands of
+            # entries that change nothing a client sees.
+            $dir = Join-Path $TestDrive 'tr-same'
+            New-Item -ItemType Directory -Path $dir -Force | Out-Null
+            [System.IO.File]::WriteAllText((Join-Path $dir 'metadata.de.po'),
+                (New-LanguagePoText -Locale 'de' -Translation @{
+                        'options/NEOIPC_ASA_SCORE/1/NAME'            = @{ Msgid = 'ASA I'; Msgstr = 'ASA I' }
+                        'organisationUnitGroups/NEO_DEPARTMENT/NAME' = @{ Msgid = 'Departments'; Msgstr = 'Abteilungen' }
+                    }), [System.Text.UTF8Encoding]::new($false))
+            $inj = Import-NeoIPCMetadataTranslation -Path $script:trExport -PoDirectory $dir -PassThru
+            @($inj['options'])[0].Contains('translations') | Should -BeFalse          # identical to 'ASA I' — omitted
+            @(@($inj['organisationUnitGroups'])[0]['translations'] | ForEach-Object { $_['value'] }) |
+                Should -BeExactly @('Abteilungen')                                     # genuinely different — kept
+        }
+        It 'Import skips a needs-editing entry read from a Weblate-shaped catalogue' {
+            # The fuzzy skip is asserted elsewhere against a hand-built entry list; this exercises the whole
+            # path — a '#, fuzzy' line in real catalogue text, through the parser, to the injection filter.
+            $dir = Join-Path $TestDrive 'tr-fuzzy'
+            New-Item -ItemType Directory -Path $dir -Force | Out-Null
+            [System.IO.File]::WriteAllText((Join-Path $dir 'metadata.de.po'),
+                (New-LanguagePoText -Locale 'de' -Translation @{
+                        'options/NEOIPC_ASA_SCORE/1/NAME' = @{ Msgid = 'ASA I'; Msgstr = 'ASA I (unreviewed)'; Fuzzy = $true }
+                    }), [System.Text.UTF8Encoding]::new($false))
+            $inj = Import-NeoIPCMetadataTranslation -Path $script:trExport -PoDirectory $dir -PassThru
+            @($inj['options'])[0].Contains('translations') | Should -BeFalse
+        }
+        It 'Import refuses rather than stripping when no catalogue matches' {
+            # Injection rebuilds translations[] from what is loaded, so an empty set deletes rather than skips.
+            $empty = Join-Path $TestDrive 'tr-empty'
+            New-Item -ItemType Directory -Path $empty -Force | Out-Null
+            { Import-NeoIPCMetadataTranslation -Path $script:trExport -PoDirectory $empty } | Should -Throw '*strip*'
+        }
+        It 'Import uses the catalogue spelling of a locale, not the caller mis-cased argument' {
+            # -in compares case-insensitively, so 'DE' passes the narrowing filter; the emitted locale must
+            # still be 'de', because DHIS2 resolves locale identifiers case-sensitively.
+            $dir = Join-Path $TestDrive 'tr-case'
+            New-Item -ItemType Directory -Path $dir -Force | Out-Null
+            [System.IO.File]::WriteAllText((Join-Path $dir 'metadata.de.po'),
+                (New-LanguagePoText -Locale 'de' -Translation @{ 'options/NEOIPC_ASA_SCORE/1/NAME' = 'ASA I (de)' }),
+                [System.Text.UTF8Encoding]::new($false))
+            $inj = Import-NeoIPCMetadataTranslation -Path $script:trExport -PoDirectory $dir -Locale DE -PassThru
+            # -BeExactly, not -Be: Should -Be is case-INSENSITIVE, so it would accept the very 'DE' this test
+            # exists to reject. A casing assertion written with -Be cannot fail.
+            @(@($inj['options'])[0]['translations'] | ForEach-Object { $_['locale'] }) | Should -BeExactly @('de')
+        }
+        It 'Import narrows to the named locales when -Locale is given' {
+            $dir = Join-Path $TestDrive 'tr-narrow'
+            New-Item -ItemType Directory -Path $dir -Force | Out-Null
+            foreach ($loc in 'de', 'fr') {
+                [System.IO.File]::WriteAllText((Join-Path $dir "metadata.$loc.po"),
+                    (New-LanguagePoText -Locale $loc -Translation @{ 'options/NEOIPC_ASA_SCORE/1/NAME' = "ASA I ($loc)" }),
+                    [System.Text.UTF8Encoding]::new($false))
+            }
+            # 'el' is named but has no catalogue — skipped, not an error.
+            $inj = Import-NeoIPCMetadataTranslation -Path $script:trExport -PoDirectory $dir -Locale de, el -PassThru
+            @(@($inj['options'])[0]['translations'] | ForEach-Object { $_['locale'] }) | Should -Be @('de')
         }
         It 'throws on a missing export file / PO directory' {
             { Export-NeoIPCMetadataTranslation -Path (Join-Path $TestDrive 'no.json') -PoDirectory $script:trPoDir } | Should -Throw '*not found*'
             { Import-NeoIPCMetadataTranslation -Path $script:trExport -PoDirectory (Join-Path $TestDrive 'no-po-dir') } | Should -Throw '*not found*'
         }
-        It '-Validate throws when msgfmt reports the generated PO invalid' {
+        It '-Validate throws when msgfmt reports the generated template invalid' {
             Mock Test-NeoIPCMetadataPoSyntax { $false }
-            { Export-NeoIPCMetadataTranslation -Path $script:trExport -PoDirectory (Join-Path $TestDrive 'tr-val-bad') -Locale de -Validate } | Should -Throw '*failed msgfmt validation*'
+            { Export-NeoIPCMetadataTranslation -Path $script:trExport -PoDirectory (Join-Path $TestDrive 'tr-val-bad') -Validate } | Should -Throw '*failed msgfmt validation*'
         }
-        It '-Validate does not throw when the generated PO is valid' {
+        It '-Validate does not throw when the generated template is valid' {
             Mock Test-NeoIPCMetadataPoSyntax { $true }
-            { Export-NeoIPCMetadataTranslation -Path $script:trExport -PoDirectory (Join-Path $TestDrive 'tr-val-ok') -Locale de -Validate } | Should -Not -Throw
+            { Export-NeoIPCMetadataTranslation -Path $script:trExport -PoDirectory (Join-Path $TestDrive 'tr-val-ok') -Validate } | Should -Not -Throw
         }
     }
 
@@ -2592,12 +2692,15 @@ InModuleScope 'NeoIPC-Tools' {
             foreach ($g in @($inj['optionGroups'])) { $g['translations'] | Should -Not -BeNullOrEmpty }        # ATC + AWaRe groups kept
             foreach ($s in @($inj['optionGroupSets'])) { $s['translations'] | Should -Not -BeNullOrEmpty }     # ATC5 + WHO_AWARE group-sets kept
         }
-        It 'Merge takes the priority from the source (New) side' {
-            $new = New-EntryList (New-Entry 'a/b/NAME' 'Hello'); $new[0].Priority = 200
-            $old = New-EntryList (New-Entry 'a/b/NAME' 'Hello' 'Hallo'); $old[0].Priority = 10
-            $m = Merge-NeoIPCMetadataPoEntry -New $new -Existing $old
-            $m[0].Priority | Should -Be 200
-            $m[0].Msgstr | Should -BeExactly 'Hallo'
+        It 'carries the source priority into the template, where Weblate reads it' {
+            # priority:NNN is a property of the SOURCE string, so it belongs in the template and nowhere else:
+            # Weblate treats the template as this bilingual component's source translation and strips the flag
+            # when writing each language. Emitting it per language is churn Weblate undoes on its next write.
+            $units = Get-NeoIPCMetadataTranslationUnit -Package ([ordered]@{
+                    dataElements = @( [ordered]@{ id = 'DEaaaaaaaa1'; code = 'DE1'; name = 'Internal'; formName = 'Label' } ) })
+            $txt = Write-NeoIPCMetadataPoText -Entry (ConvertTo-NeoIPCMetadataPoEntry -Unit $units)
+            $txt | Should -Match '(?m)^#, priority:200$'      # the data-entry label, elevated
+            $txt | Should -Match '(?m)^#, priority:10$'       # the internal name, deprioritised
         }
         It 'injects translations[] in deterministic (locale asc, then token) order regardless of PoByLocale key order' {
             $pkg = [ordered]@{ organisationUnitGroups = @( [ordered]@{ id = 'OGaaaaaaaa1'; code = 'NEO_DEPARTMENT'; name = 'Departments'; shortName = 'Depts' } ) }

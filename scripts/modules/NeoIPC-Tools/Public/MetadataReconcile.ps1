@@ -75,8 +75,9 @@ function Update-NeoIPCMetadataDirectory {
             that the directory should represent as a stand-alone rule. An 'Unclassified' generated delta is surfaced
             loudly (warning) — an unexpected change to investigate, never silently written.
 
-          - PO (with -Apply + -PoDirectory): the translation catalogue is refreshed from the SCOPED package (NOT the
-            raw export), msgmerge-style (msgstrs preserved, changed sources fuzzed, obsolete entries dropped).
+          - PO (with -Apply + -PoDirectory): the gettext SOURCE TEMPLATE (metadata.pot) is regenerated from the
+            SCOPED package (NOT the raw export). The per-language catalogues are Weblate's and are never written
+            here — Weblate brings each one up to the changed template through its own msgmerge add-on.
 
         -APPLY SAFETY. -Apply refreshes the directory and PO in place, so it is guarded twice:
           - git-or-refuse + clean-or-refuse: the directory (and the PO directory, if given) must be inside a git
@@ -96,11 +97,12 @@ function Update-NeoIPCMetadataDirectory {
         export omits them). When given, the templates are spliced into the incoming package (Merge-NeoIPCMetadataJson)
         and reconciled; when omitted, programNotificationTemplates is reported, not auto-written.
     .PARAMETER PoDirectory
-        Optional directory of the gettext PO catalogue (po/). When given with -Apply, the catalogue is refreshed
-        from the SCOPED package. When omitted, the PO is left untouched (and the report notes it was skipped).
+        Optional directory of the gettext catalogue (po/). When given with -Apply, the source template
+        metadata.pot is regenerated from the SCOPED package; the Weblate-owned language catalogues there are
+        never touched. When omitted, the template is left alone (and the report notes it was skipped).
     .PARAMETER Apply
-        Write the reconciled changes (row-merge the affected CSVs + refresh the PO). Without it, the cmdlet only
-        reports the drift and changes nothing. Requires a git-tracked, clean directory.
+        Write the reconciled changes (row-merge the affected CSVs + regenerate the source template). Without it,
+        the cmdlet only reports the drift and changes nothing. Requires a git-tracked, clean directory.
     #>
     [CmdletBinding(SupportsShouldProcess)]
     [OutputType([pscustomobject])]
@@ -261,7 +263,7 @@ function Update-NeoIPCMetadataDirectory {
                     Remove-Item -LiteralPath $scopedJson -Force -ErrorAction SilentlyContinue
                 }
             }
-            if ($PoDirectory -and $PSCmdlet.ShouldProcess($PoDirectory, 'refresh the translation catalogue from the scoped package')) {
+            if ($PoDirectory -and $PSCmdlet.ShouldProcess($PoDirectory, 'regenerate the translation source template from the scoped package')) {
                 Export-NeoIPCMetadataTranslation -Package (Get-NeoIPCMetadataScopedConfig -ExportPath $sourcePath) -PoDirectory $PoDirectory -Validate
                 $poUpdated = $true
             }

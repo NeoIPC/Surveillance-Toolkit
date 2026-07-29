@@ -96,14 +96,17 @@ jobs:
                   echo
                   echo "Translations, corrections and terminology go through https://hosted.weblate.org/projects/neoipc/"
                   echo
-                  echo "If a local run produced these, which tool it was decides the remedy:"
+                  echo "If a local run produced these, which catalogue it is decides the remedy:"
                   echo "  po/reports.* po/documentation.* po/infectious_agents.*"
                   echo "      Invoke-Localization.ps1 -Update restores them; seeing them here is a bug in that script."
                   echo "  po/metadata.*"
-                  echo "      Export-NeoIPCMetadataTranslation rewrote them. Invoke-Localization.ps1 does NOT cover"
-                  echo "      that catalogue, so re-running it will not help. Restore them from the BASE branch,"
-                  echo "      not from HEAD — by the time this gate fires the change is already committed, so"
-                  echo "      --source=HEAD would restore the very version being rejected:"
+                  echo "      Export-NeoIPCMetadataTranslation did NOT write these: it emits po/metadata.pot alone"
+                  echo "      and has no parameter that could name a language. Two routes remain — a hand edit, or"
+                  echo "      Export-NeoIPCAntibioticTranslation, whose -PoBaseName accepts any catalogue name and"
+                  echo "      whose -PoDirectory defaults to po/, so -PoBaseName metadata rewrites all of them."
+                  echo "      Restore them from the BASE branch, not from HEAD — by the time this gate fires the"
+                  echo "      change is already committed, so --source=HEAD would restore the very version being"
+                  echo "      rejected:"
                   echo "      git restore --source=origin/main --worktree -- po/metadata.*.po"
                   echo "      then commit only po/metadata.pot."
                   exit 1

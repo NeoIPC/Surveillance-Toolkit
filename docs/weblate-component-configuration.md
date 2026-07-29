@@ -186,24 +186,26 @@ per-language completion statistics, and `append_trailers` adds `Co-authored-by:`
 `Translate-URL:` per language. Only the **subject line** is unrepresentative, being the first squashed
 message's subject. Read the body or the file list; do not take the subject as a summary.
 
-The add-on's `commit_message` is therefore set to
-`Translations update from Weblate ({{ component_name }})`. Template markup applies to add-on messages,
-so the component name interpolates. Two deliberate choices:
+The add-on's `commit_message` is therefore set to the static text
+`Translations update from Weblate`.
 
-- **`{{ author }}` is available but adds nothing here.** Because the add-on squashes per author, the
-  contributor is already recorded in that same commit's `Co-authored-by:` trailer; repeating it in the
-  subject would be redundant, and the variable's exact expansion has not been checked. The component
-  is the useful discriminator, since the body already enumerates every language.
-- **The trade is real and was made knowingly.** That field is used *"instead of the combined commit
-  messages from the squashed commits"*, so the per-language `Currently translated at …%` lines are
-  lost. The `Translate-URL:` trailers still name every language touched, and those percentages are a
-  point-in-time snapshot that is stale the moment it is written.
+**It was first set to `Translations update from Weblate ({{ component_name }})`, and that did not
+work.** The markup documentation lists add-on *messages* among the templated fields, which reads as
+though the component name would interpolate — but the Squash add-on's own `commit_message` key is not
+one of them. Four commits landed on the `weblate-reports` branch carrying the literal braces in their
+subject. They never reached `main`: the placeholder was replaced with static text and a *Reset and
+reapply* re-derived the branch, which is exactly the containment the check below was written for.
+Do not restore the templated form on the strength of the documentation; it has been tried.
 
-The Squash add-on's own `commit_message` key is not named in the markup documentation (which lists the
-project- and component-level message fields), so **check that the placeholder actually rendered on the
-next drain** before merging. Squashed commits land on a `weblate-<catalogue>` branch and are visible in
-the pull request first; if the braces come through literally, replace it with static text and nothing
-will have reached `main`.
+One deliberate trade remains, and it was made knowingly: the field is used *"instead of the combined
+commit messages from the squashed commits"*, so the per-language `Currently translated at …%` lines
+are lost. The `Translate-URL:` trailers still name every language touched, and those percentages are a
+point-in-time snapshot that is stale the moment it is written.
+
+**The general lesson is worth more than the setting.** Any templated value here is a claim about
+Weblate's behaviour that the documentation may not actually support for the specific field being set.
+Squashed commits land on a `weblate-<catalogue>` branch and are visible in the pull request before
+they reach `main`, so read the rendered subject there rather than assuming it interpolated.
 
 The stored copies were also fossils in their own right: one still referenced
 `component_linked_childs`, a Weblate template variable since renamed to `component_linked_children`.

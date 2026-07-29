@@ -735,42 +735,39 @@ function Import-NeoIPCMetadata {
 function Export-NeoIPCMetadataTranslation {
     <#
     .SYNOPSIS
-        Extract a metadata package's translatable strings to gettext PO (metadata.pot + per-locale metadata.<lang>.po).
+        Extract a metadata package's translatable strings to the gettext source template metadata.pot.
     .DESCRIPTION
         Walks every translatable property of every object (name / shortName / description / formName /
-        subjectTemplate / ...; the DHIS2 ObjectTranslation tokens verified against refs/dhis2-core) and writes a
-        bilingual gettext PO component (msgid = English source, msgstr = translation) beside the reports'
-        documentation / glossary PO:
-          - metadata.pot — the English source template. msgctxt = <type>/<key>/<TOKEN> (key = optionSetCode/
-            optionCode for options, else code — code-stable across UID regeneration and matching the legacy
-            .<locale>.csv sidecars — else the object UID for the types that carry no code (program rule actions and
-            the placeholder validation rule), whose msgctxt is therefore NOT regeneration-stable), msgid = the
-            English base value, msgstr empty.
-          - metadata.<lang>.po — per language. An EXISTING .po is refreshed msgmerge-style (in code): the source
-            msgid is updated, the translator's msgstr is preserved, an entry whose source changed is kept but
-            marked fuzzy, and entries no longer in the source are dropped. A MISSING .po is created and seeded from
-            the package's existing translations[] so nothing already translated in the export is lost.
-        After the first export the .po files (Weblate) are the source of truth; Import-NeoIPCMetadataTranslation
-        pushes them back onto a package. The two domain-authored option sets (NEOIPC_PATHOGENS,
-        NEOIPC_ANTIMICROBIAL_SUBSTANCES) are excluded here as everywhere — their translations belong with the
-        option generation from the canonical YAML / antibiotics CSV. No DHIS2 API calls.
+        subjectTemplate / ...; the DHIS2 ObjectTranslation tokens verified against refs/dhis2-core) and writes the
+        English source template beside the reports' documentation / glossary PO. Each entry has
+        msgctxt = <type>/<key>/<TOKEN> (key = optionSetCode/optionCode for options, else code — code-stable across
+        UID regeneration and matching the legacy per-locale CSV sidecars — else the object UID for the types that
+        carry no code (program rule actions and the placeholder validation rule), whose msgctxt is therefore NOT
+        regeneration-stable), msgid = the English base value, an empty msgstr, and its Weblate priority:NNN flag.
+        A source-string flag belongs on the source string alone: Weblate reads it from the template, which it
+        treats as this bilingual component's source translation, and strips it when writing each language.
+
+        Only the template is written. Every per-language catalogue is Weblate's, and Weblate is its only writer —
+        it brings each one up to a changed template through its own msgmerge add-on, and creates the catalogue for
+        a newly added language from this template. A second writer on those files conflicts every language of the
+        catalogue at once, because both sides rewrite adjacent header lines in one hunk git cannot auto-merge.
+        Import-NeoIPCMetadataTranslation reads them back onto a package. The two domain-authored option sets
+        (NEOIPC_PATHOGENS, NEOIPC_ANTIMICROBIAL_SUBSTANCES) are excluded here as everywhere — their translations
+        belong with the option generation from the canonical YAML / antibiotics CSV. No DHIS2 API calls.
     .PARAMETER Path
         Path to a DHIS2 metadata export JSON to extract from.
     .PARAMETER Package
         An already-parsed metadata package (hashtable) to extract from, instead of -Path.
     .PARAMETER PoDirectory
-        Directory for metadata.pot + metadata.<lang>.po (created if absent).
-    .PARAMETER Locale
-        Languages to (re)generate. Default: the nine NeoIPC target languages.
+        Directory for metadata.pot (created if absent).
     .PARAMETER Validate
-        Run `msgfmt -c` on each generated .po (best-effort; via WSL on Windows; skipped if gettext is unavailable).
+        Run `msgfmt -c` on the generated template (best-effort; via WSL on Windows; skipped if gettext is unavailable).
     #>
     [CmdletBinding(SupportsShouldProcess, DefaultParameterSetName = 'Path')]
     param(
         [Parameter(Mandatory, ParameterSetName = 'Path')][string]$Path,
         [Parameter(Mandatory, ParameterSetName = 'Package')]$Package,
         [Parameter(Mandatory)][string]$PoDirectory,
-        [string[]]$Locale = $script:NeoIPCMetadataTranslationLocales,
         [switch]$Validate
     )
     if ($PSCmdlet.ParameterSetName -eq 'Path') {
@@ -793,23 +790,6 @@ function Export-NeoIPCMetadataTranslation {
         if ($Validate -and -not (Test-NeoIPCMetadataPoSyntax -Path $potPath)) { throw "Generated $potPath failed msgfmt validation." }
     }
     Write-Verbose ("metadata.pot: {0} source string(s)." -f $potEntries.Count)
-
-    foreach ($loc in $Locale) {
-        $poPath = Join-Path $PoDirectory "metadata.$loc.po"
-        if (Test-Path -LiteralPath $poPath) {
-            $existing = Read-NeoIPCMetadataPoText -Text (Get-Content -LiteralPath $poPath -Raw)
-            $entries = Merge-NeoIPCMetadataPoEntry -New $potEntries -Existing $existing
-        }
-        else {
-            $entries = ConvertTo-NeoIPCMetadataPoEntry -Unit $units -Locale $loc
-        }
-        if ($PSCmdlet.ShouldProcess($poPath, 'Write PO')) {
-            [System.IO.File]::WriteAllText($poPath, (Write-NeoIPCMetadataPoText -Entry $entries -Locale $loc), [System.Text.UTF8Encoding]::new($false))
-            if ($Validate -and -not (Test-NeoIPCMetadataPoSyntax -Path $poPath)) { throw "Generated $poPath failed msgfmt validation." }
-        }
-        $translated = @($entries | Where-Object { -not $_.Fuzzy -and -not [string]::IsNullOrEmpty([string]$_.Msgstr) }).Count
-        Write-Verbose ("metadata.{0}.po: {1}/{2} translated." -f $loc, $translated, $entries.Count)
-    }
 }
 
 function Import-NeoIPCMetadataTranslation {
@@ -830,7 +810,13 @@ function Import-NeoIPCMetadataTranslation {
     .PARAMETER PoDirectory
         Directory containing metadata.<lang>.po.
     .PARAMETER Locale
-        Languages to apply. Default: the nine NeoIPC target languages (missing .po files are skipped).
+        Languages to apply. Default: every language whose catalogue is present in PoDirectory. Which languages
+        exist is Weblate's decision, not this repository's — it creates a catalogue when a language is added and
+        no local list is consulted — so discovering them is what keeps a newly added language from being silently
+        dropped on import. Naming locales explicitly narrows that set, matched against the catalogues found so the
+        catalogue's own spelling of a locale is what reaches the package. A named language with no catalogue is
+        skipped; if that leaves nothing to apply the cmdlet throws rather than rebuild every translations[] from
+        an empty set, which would strip the package instead of leaving it alone.
     .PARAMETER OutputPath
         Optional file to write the JSON to (UTF-8, no BOM); if omitted the JSON string is returned (unless -PassThru).
     .PARAMETER Compress
@@ -844,7 +830,7 @@ function Import-NeoIPCMetadataTranslation {
         [Parameter(Mandatory, ParameterSetName = 'Path')][string]$Path,
         [Parameter(Mandatory, ParameterSetName = 'Package')]$Package,
         [Parameter(Mandatory)][string]$PoDirectory,
-        [string[]]$Locale = $script:NeoIPCMetadataTranslationLocales,
+        [string[]]$Locale,
         [string]$OutputPath,
         [switch]$Compress,
         [switch]$PassThru
@@ -859,12 +845,37 @@ function Import-NeoIPCMetadataTranslation {
     }
     if (-not (Test-Path -LiteralPath $PoDirectory)) { throw "PO directory not found: '$PoDirectory'." }
 
+    # Matched by regex rather than -Filter because the pattern has to yield the locale, not just select files:
+    # the capture is what names the language. It also pins the shape to exactly one dot-segment between the base
+    # name and the extension, so metadata.pot cannot be read as a catalogue whatever the matching engine does with
+    # a `*.po` wildcard. Sorted so the discovered set is deterministic — Get-ChildItem's own order is
+    # filesystem-dependent.
+    $present = @(Get-ChildItem -LiteralPath $PoDirectory -File | ForEach-Object {
+            if ($_.Name -match '^metadata\.(?<locale>[^.]+)\.po$') { $Matches['locale'] }
+        } | Sort-Object)
+    # Select FROM the discovered set, never from the caller's argument: -in compares case-insensitively, so
+    # -Locale 'DE' passes a filter meant to validate it and would otherwise carry that spelling into both the
+    # filename and the emitted translations[] locale — which DHIS2 treats as a different locale from 'de', so
+    # the German UI would silently fall back to English. The catalogue's own spelling is authoritative.
+    $wanted = if ($PSBoundParameters.ContainsKey('Locale')) { @($present | Where-Object { $_ -in $Locale }) } else { $present }
+
+    # Injection rebuilds each object's translations[] entirely from what is loaded here, so an empty set does not
+    # mean "change nothing" — it means "the catalogues say this object has no translations", and every existing
+    # one is dropped. Silently wiping a package because -PoDirectory pointed a level too high, or at a checkout
+    # Weblate has not populated yet, is the wrong failure; say so instead.
+    if ($present.Count -eq 0) {
+        throw ("No metadata.<lang>.po found in '$PoDirectory'. Importing from it would rebuild every " +
+               "translations[] from nothing and so strip the package's existing translations.")
+    }
+    if ($wanted.Count -eq 0) {
+        throw ("None of the requested locale(s) has a catalogue in '$PoDirectory' (present: " +
+               ($present -join ', ') + "). Importing anyway would strip the package's existing translations.")
+    }
+
     $poByLocale = @{}
-    foreach ($loc in $Locale) {
+    foreach ($loc in $wanted) {
         $poPath = Join-Path $PoDirectory "metadata.$loc.po"
-        if (Test-Path -LiteralPath $poPath) {
-            $poByLocale[$loc] = Read-NeoIPCMetadataPoText -Text (Get-Content -LiteralPath $poPath -Raw)
-        }
+        $poByLocale[$loc] = Read-NeoIPCMetadataPoText -Text (Get-Content -LiteralPath $poPath -Raw)
     }
     Write-Verbose ("Applying translations from {0} PO file(s): {1}." -f $poByLocale.Count, (@($poByLocale.Keys | Sort-Object) -join ', '))
     $result = Add-NeoIPCMetadataTranslationToPackage -Package $pkg -PoByLocale $poByLocale
