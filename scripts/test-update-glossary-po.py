@@ -159,14 +159,46 @@ def check_plural_form_count(failures):
     """A new plural entry gets as many forms as its locale's rule declares -- derived, never assumed."""
     module = load_generator()
 
+    # Written independently of the generator's pattern rather than importing it: reusing the
+    # implementation's own regex would compare it against itself and pass however wrong it is. It has to
+    # be at least as permissive, though, or an entry the generator parses fine reports here as a
+    # generator defect -- so whitespace around the "=" is accepted, as it is there.
+    declares = re.compile(r"\bnplurals\s*=\s*(\d+)")
+
     for lang, rule in module.PLURAL_FORMS.items():
-        declared = int(re.search(r"nplurals=(\d+)", rule).group(1))
+        match = declares.search(rule)
+        if not match:
+            # Report it; do not let .group() raise, which would abort this function and take every
+            # later check in it down with the one bad entry.
+            failures.append(
+                f"PLURAL_FORMS[{lang!r}] declares no nplurals: {rule!r} -- the number of forms a new "
+                "plural entry gets is read from it"
+            )
+            continue
+        declared = int(match.group(1))
         derived = module._plural_form_count(lang)
         if derived != declared:
             failures.append(
                 f"_plural_form_count({lang!r}) returned {derived}, but that locale's rule declares "
                 f"nplurals={declared}"
             )
+
+    # The generator must refuse a malformed rule rather than default to a count. Exercised on an
+    # in-memory entry; the real table is untouched.
+    module.PLURAL_FORMS["xx"] = "plural=n != 1;"
+    try:
+        module._plural_form_count("xx")
+    except ValueError:
+        pass
+    except KeyError:
+        failures.append("_plural_form_count('xx') raised KeyError -- the malformed-rule branch is unreachable")
+    else:
+        failures.append(
+            "_plural_form_count('xx') did not raise on a rule declaring no nplurals -- a malformed entry "
+            "would silently decide how many forms every new plural entry gets"
+        )
+    finally:
+        del module.PLURAL_FORMS["xx"]
 
     # 'ru' is the concrete case, not a hypothetical one: this repository prefers the official WHO
     # translation where one exists, and Russian is one of the six WHO languages -- at nplurals=3.
