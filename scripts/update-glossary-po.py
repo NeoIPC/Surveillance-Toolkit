@@ -324,6 +324,40 @@ def _language_name(lang):
     return LANGUAGE_NAMES[lang]
 
 
+def _plural_forms(lang):
+    """The Plural-Forms rule Weblate writes for a locale, or raise.
+
+    Refuses for the same reason _language_name does: an omitted rule does not mean "no plural rule", it means
+    Weblate supplies its own on its next write and rewrites the header.
+    """
+    if lang not in PLURAL_FORMS:
+        raise KeyError(
+            f"No plural rule known for locale {lang!r}. Add it to PLURAL_FORMS, taking the value Weblate "
+            f"writes for that language. Omitting the field silently would let Weblate add its own and rewrite "
+            f"the header."
+        )
+    return PLURAL_FORMS[lang]
+
+
+def _plural_form_count(lang):
+    """How many msgstr[N] forms an entry in this locale carries, read from that locale's own rule.
+
+    Derived rather than assumed, so the header cannot declare one plural count over a structure carrying
+    another. A hard-coded 2 next to a table that locales get added to is the same failure as guessing a
+    language name from its code, one level further down, and nothing here would catch it. Every locale listed
+    today is nplurals=2, so this changes no catalogue -- but two of the six languages with an official WHO
+    translation are outside it (Russian 3, Arabic 6).
+    """
+    rule = _plural_forms(lang)
+    match = re.search(r"\bnplurals\s*=\s*(\d+)", rule)
+    if not match:
+        raise ValueError(
+            f"The plural rule for locale {lang!r} declares no nplurals: {rule!r}. Fix its entry in "
+            f"PLURAL_FORMS -- the number of forms a new plural entry is created with is read from it."
+        )
+    return int(match.group(1))
+
+
 _CONTRIBUTOR_RE = re.compile(r".*<\S+@\S+>.*\d{4,4}")
 _ADDRESS_RE = re.compile(r"<([^>]+)>")
 NON_HUMAN_IDENTITIES_PATH = Path(__file__).resolve().parent.parent / "po" / "non-human-identities.yaml"
@@ -385,13 +419,7 @@ def _po_metadata(lang, pot_metadata):
     meta["Language-Team"] = "{0} <{1}>".format(
         _language_name(lang), WEBLATE_COMPONENT_URL.format(lang=lang)
     )
-    if lang not in PLURAL_FORMS:
-        raise KeyError(
-            f"No plural rule known for locale {lang!r}. Add it to PLURAL_FORMS, taking the value Weblate "
-            f"writes for that language. Omitting the field silently would let Weblate add its own and rewrite "
-            f"the header."
-        )
-    meta["Plural-Forms"] = PLURAL_FORMS[lang]
+    meta["Plural-Forms"] = _plural_forms(lang)
     return meta
 
 
@@ -413,7 +441,7 @@ def merge_po(pot_path, po_path):
                 msgid=entry.msgid,
                 msgid_plural=entry.msgid_plural,
                 msgstr="" if not entry.msgid_plural else None,
-                msgstr_plural=({i: "" for i in range(2)}
+                msgstr_plural=({i: "" for i in range(_plural_form_count(lang))}
                                if entry.msgid_plural else None),
                 comment=entry.comment,
                 occurrences=entry.occurrences,
@@ -482,7 +510,7 @@ def merge_po(pot_path, po_path):
                 msgid=pot_entry.msgid,
                 msgid_plural=pot_entry.msgid_plural,
                 msgstr="" if not pot_entry.msgid_plural else None,
-                msgstr_plural=({i: "" for i in range(2)}
+                msgstr_plural=({i: "" for i in range(_plural_form_count(lang))}
                                if pot_entry.msgid_plural else None),
                 comment=pot_entry.comment,
                 occurrences=pot_entry.occurrences,
