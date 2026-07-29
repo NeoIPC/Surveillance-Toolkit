@@ -869,7 +869,7 @@ function Import-NeoIPCMetadataTranslation {
     }
     if ($wanted.Count -eq 0) {
         throw ("None of the requested locale(s) has a catalogue in '$PoDirectory' (present: " +
-               ($present -join ', ') + '). Importing anyway would strip the package existing translations.')
+               ($present -join ', ') + "). Importing anyway would strip the package's existing translations.")
     }
 
     $poByLocale = @{}
