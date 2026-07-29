@@ -299,13 +299,63 @@ def _po_header_comment(lang):
     mistaken for an author. The bare "#" is the last line the contributor machinery preserves, so real
     contributors land immediately below it.
     """
-    lang_name = LANGUAGE_NAMES.get(lang, lang)
     return (
-        f"{lang_name} translations for the NeoIPC Surveillance Glossary\n"
+        f"{_language_name(lang)} translations for the NeoIPC Surveillance Glossary\n"
         "Copyright (C) Charité – Universitätsmedizin Berlin\n"
         "This file is distributed under the Creative Commons "
         "Attribution 4.0 International license\n"
     )
+
+
+def _language_name(lang):
+    """The English language name Weblate uses for a locale, or raise.
+
+    Never falls back to the raw locale code. The code and the name are not interchangeable: falling back puts
+    "af" where Weblate writes "Afrikaans", so the Language-Team this generator emits differs from the one
+    Weblate emits, and Weblate rewrites the header on its next write -- the exact churn this contract removes.
+    Get-NeoIPCPoLanguageName refuses for the same reason; the two writers have to agree or the contract is a
+    fiction.
+    """
+    if lang not in LANGUAGE_NAMES:
+        raise KeyError(
+            f"No English language name known for locale {lang!r}. Add it to LANGUAGE_NAMES, taking the name "
+            f"Weblate uses for that language, rather than guessing it from the code."
+        )
+    return LANGUAGE_NAMES[lang]
+
+
+def _plural_forms(lang):
+    """The Plural-Forms rule Weblate writes for a locale, or raise.
+
+    Refuses for the same reason _language_name does: an omitted rule does not mean "no plural rule", it means
+    Weblate supplies its own on its next write and rewrites the header.
+    """
+    if lang not in PLURAL_FORMS:
+        raise KeyError(
+            f"No plural rule known for locale {lang!r}. Add it to PLURAL_FORMS, taking the value Weblate "
+            f"writes for that language. Omitting the field silently would let Weblate add its own and rewrite "
+            f"the header."
+        )
+    return PLURAL_FORMS[lang]
+
+
+def _plural_form_count(lang):
+    """How many msgstr[N] forms an entry in this locale carries, read from that locale's own rule.
+
+    Derived rather than assumed, so the header cannot declare one plural count over a structure carrying
+    another. A hard-coded 2 next to a table that locales get added to is the same failure as guessing a
+    language name from its code, one level further down, and nothing here would catch it. Every locale listed
+    today is nplurals=2, so this changes no catalogue -- but two of the six languages with an official WHO
+    translation are outside it (Russian 3, Arabic 6).
+    """
+    rule = _plural_forms(lang)
+    match = re.search(r"\bnplurals\s*=\s*(\d+)", rule)
+    if not match:
+        raise ValueError(
+            f"The plural rule for locale {lang!r} declares no nplurals: {rule!r}. Fix its entry in "
+            f"PLURAL_FORMS -- the number of forms a new plural entry is created with is read from it."
+        )
+    return int(match.group(1))
 
 
 _CONTRIBUTOR_RE = re.compile(r".*<\S+@\S+>.*\d{4,4}")
@@ -367,10 +417,9 @@ def _po_metadata(lang, pot_metadata):
     meta = {k: v for k, v in pot_metadata.items() if k != "POT-Creation-Date"}
     meta["Language"] = lang
     meta["Language-Team"] = "{0} <{1}>".format(
-        LANGUAGE_NAMES.get(lang, lang), WEBLATE_COMPONENT_URL.format(lang=lang)
+        _language_name(lang), WEBLATE_COMPONENT_URL.format(lang=lang)
     )
-    if lang in PLURAL_FORMS:
-        meta["Plural-Forms"] = PLURAL_FORMS[lang]
+    meta["Plural-Forms"] = _plural_forms(lang)
     return meta
 
 
@@ -392,7 +441,7 @@ def merge_po(pot_path, po_path):
                 msgid=entry.msgid,
                 msgid_plural=entry.msgid_plural,
                 msgstr="" if not entry.msgid_plural else None,
-                msgstr_plural=({i: "" for i in range(2)}
+                msgstr_plural=({i: "" for i in range(_plural_form_count(lang))}
                                if entry.msgid_plural else None),
                 comment=entry.comment,
                 occurrences=entry.occurrences,
@@ -461,7 +510,7 @@ def merge_po(pot_path, po_path):
                 msgid=pot_entry.msgid,
                 msgid_plural=pot_entry.msgid_plural,
                 msgstr="" if not pot_entry.msgid_plural else None,
-                msgstr_plural=({i: "" for i in range(2)}
+                msgstr_plural=({i: "" for i in range(_plural_form_count(lang))}
                                if pot_entry.msgid_plural else None),
                 comment=pot_entry.comment,
                 occurrences=pot_entry.occurrences,

@@ -21,6 +21,11 @@ translator note while the file's header block does not, and that YAML keys becom
 checked too, since a silent regression there loses every translator note without touching a byte of
 line-ending hygiene.
 
+**Plural-form count.** A new plural entry must get as many msgstr[N] forms as its locale's rule
+declares. This one also needs two techniques, and for the same reason as the byte hygiene: every
+locale configured today is nplurals=2, so a hard-coded 2 and a derived one agree, and the functional
+check would pass with the derivation reverted. The source scan is what makes the revert visible.
+
 Why a standalone script rather than pytest: this repository has no Python test infrastructure and its
 CI installs no Python at all (Perl for po4a, .NET, PowerShell -- never Python), so
 update-glossary-po.py is a developer-machine-only tool. CI-side coverage for the byte invariant comes
@@ -31,6 +36,7 @@ Run it after touching the script:
     python scripts/test-update-glossary-po.py
 """
 
+import importlib.util
 import re
 import subprocess
 import sys
@@ -134,6 +140,102 @@ def check_writers_pin_newline(failures):
         )
 
 
+def load_generator():
+    """Import update-glossary-po.py as a module.
+
+    Its filename is not an identifier, so importlib is the only route. Importing it is safe: everything
+    below the constants and helpers sits behind the __main__ guard. Bytecode writing is suppressed first --
+    the import would otherwise leave an untracked scripts/__pycache__/ behind on every run, and this
+    repository produces no Python bytecode anywhere else to have taught .gitignore about.
+    """
+    sys.dont_write_bytecode = True
+    spec = importlib.util.spec_from_file_location("update_glossary_po", SCRIPT)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def check_plural_form_count(failures):
+    """A new plural entry gets as many forms as its locale's rule declares -- derived, never assumed."""
+    module = load_generator()
+
+    # Written independently of the generator's pattern rather than importing it: reusing the
+    # implementation's own regex would compare it against itself and pass however wrong it is. It has to
+    # be at least as permissive, though, or an entry the generator parses fine reports here as a
+    # generator defect -- so whitespace around the "=" is accepted, as it is there.
+    #
+    # The two literals are identical today, which makes the duplication look accidental. It is not: fold
+    # them into one shared constant and this check silently stops being able to detect a wrong pattern,
+    # because it would then be using it. The protection is prospective -- when the generator's regex
+    # changes, this one does not follow, the check goes red, and someone looks.
+    declares = re.compile(r"\bnplurals\s*=\s*(\d+)")
+
+    for lang, rule in module.PLURAL_FORMS.items():
+        match = declares.search(rule)
+        if not match:
+            # Report it; do not let .group() raise, which would abort this function and take every
+            # later check in it down with the one bad entry.
+            failures.append(
+                f"PLURAL_FORMS[{lang!r}] declares no nplurals: {rule!r} -- the number of forms a new "
+                "plural entry gets is read from it"
+            )
+            continue
+        declared = int(match.group(1))
+        derived = module._plural_form_count(lang)
+        if derived != declared:
+            failures.append(
+                f"_plural_form_count({lang!r}) returned {derived}, but that locale's rule declares "
+                f"nplurals={declared}"
+            )
+
+    # The generator must refuse a malformed rule rather than default to a count. Exercised on an
+    # in-memory entry; the real table is untouched.
+    module.PLURAL_FORMS["xx"] = "plural=n != 1;"
+    try:
+        module._plural_form_count("xx")
+    except ValueError:
+        pass
+    except KeyError:
+        failures.append("_plural_form_count('xx') raised KeyError -- the malformed-rule branch is unreachable")
+    else:
+        failures.append(
+            "_plural_form_count('xx') did not raise on a rule declaring no nplurals -- a malformed entry "
+            "would silently decide how many forms every new plural entry gets"
+        )
+    finally:
+        del module.PLURAL_FORMS["xx"]
+
+    # 'ru' is the concrete case, not a hypothetical one: this repository prefers the official WHO
+    # translation where one exists, and Russian is one of the six WHO languages -- at nplurals=3.
+    for lang in ("zz", "ru"):
+        try:
+            module._plural_form_count(lang)
+        except KeyError:
+            pass
+        else:
+            failures.append(
+                f"_plural_form_count({lang!r}) did not raise -- an unconfigured locale would have its "
+                "number of plural forms guessed rather than refused"
+            )
+
+    # The scan above cannot fail while every configured locale is nplurals=2, because a hard-coded 2
+    # returns the right answer by coincidence. This is the check that goes red on a revert.
+    source = _code_only(SCRIPT.read_text(encoding="utf-8"))
+    initialisers = list(_call_arguments(source, r"msgstr_plural=\("))
+    for call in initialisers:
+        if re.search(r"range\(\s*\d", call):
+            failures.append(
+                f"update-glossary-po.py: msgstr_plural=({call.strip()}) hard-codes its form count -- it "
+                "must be read from PLURAL_FORMS, or adding a locale with nplurals != 2 writes a catalogue "
+                "whose header and structure disagree"
+            )
+    if not initialisers:
+        failures.append(
+            "update-glossary-po.py: found no msgstr_plural initialiser to check -- this test's source scan "
+            "has gone stale and is silently asserting nothing"
+        )
+
+
 def run_script(tmp, *extra):
     """Invoke the real script; return its CompletedProcess."""
     return subprocess.run(
@@ -215,7 +317,10 @@ def main():
         # 4. The source-level pinning, which is what can go red on a LF platform.
         check_writers_pin_newline(failures)
 
-        # 5. Prove the byte detector itself works, so a vacuous pass is impossible.
+        # 5. The plural-form count is derived from the locale's rule, not hard-coded.
+        check_plural_form_count(failures)
+
+        # 6. Prove the byte detector itself works, so a vacuous pass is impossible.
         detector = []
         check_bytes("detector probe (CRLF)", b'msgid "a"\r\nmsgstr "b"\r\n', detector)
         check_bytes("detector probe (BOM)", b'\xef\xbb\xbfmsgid "a"\n', detector)
