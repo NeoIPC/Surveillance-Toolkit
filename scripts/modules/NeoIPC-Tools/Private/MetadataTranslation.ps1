@@ -381,22 +381,8 @@ function Write-NeoIPCMetadataPoText {
     [OutputType([string])]
     param([Parameter(Mandatory)][System.Collections.Generic.List[object]]$Entry)
     $sb = [System.Text.StringBuilder]::new()
-    [void]$sb.AppendLine('# Translations for the NeoIPC DHIS2 metadata.')
-    [void]$sb.AppendLine('# Copyright (C) Charité – Universitätsmedizin Berlin')
-    [void]$sb.AppendLine('# This file is distributed under the Creative Commons Attribution 4.0 International license')
-    [void]$sb.AppendLine('# Automatically generated')
-    [void]$sb.AppendLine('#')
-    [void]$sb.AppendLine('msgid ""')
-    [void]$sb.AppendLine('msgstr ""')
-    [void]$sb.AppendLine('"Project-Id-Version: NeoIPC Metadata\n"')
-    [void]$sb.AppendLine('"Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"')
-    [void]$sb.AppendLine('"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"')
-    [void]$sb.AppendLine('"Last-Translator: Automatically generated\n"')
-    [void]$sb.AppendLine('"Language-Team: none\n"')
-    [void]$sb.AppendLine('"Language: en\n"')
-    [void]$sb.AppendLine('"MIME-Version: 1.0\n"')
-    [void]$sb.AppendLine('"Content-Type: text/plain; charset=UTF-8\n"')
-    [void]$sb.AppendLine('"Content-Transfer-Encoding: 8bit\n"')
+    [void]$sb.Append((Write-NeoIPCPoHeader -Product 'NeoIPC Surveillance DHIS2 Metadata' `
+                -License 'Creative Commons Attribution 4.0 International'))
     foreach ($e in $Entry) {
         [void]$sb.AppendLine()
         # Weblate flags line: fuzzy (translator state) + priority:NNN (source-set focus). 100 is the default — no flag.
