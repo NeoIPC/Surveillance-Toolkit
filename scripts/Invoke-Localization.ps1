@@ -440,10 +440,21 @@ function Restore-WeblateOwnedPo {
 
 function Repair-Po4aTemplateHeader {
     # po4a emits gettext-boilerplate file headers ("SOME DESCRIPTIVE TITLE", "Copyright (C) YEAR ...",
-    # "same license as the PACKAGE package", "FIRST AUTHOR ...") and offers no way to set a custom
-    # header, so this rewrites the leading comment block of the .pot it generated for one config into
-    # the NeoIPC house style (matching po/glossary.pot): title / copyright / license / "Automatically
-    # generated". Idempotent. The .po files are Weblate's, and are not touched.
+    # "same license as the PACKAGE package", "FIRST AUTHOR ...") and offers no way to set a custom header, so
+    # this rewrites the leading comment block of the .pot it generated for one config into the NeoIPC house
+    # style: title / copyright / licence / a bare "#". Idempotent. The .po files are Weblate's, and are not
+    # touched — which is also what makes the Language-Team rewrite below safe, since on a catalogue that field
+    # holds the component URL Weblate wrote and blanking it would churn all 33 of them.
+    #
+    # The header contract is defined once, in the NeoIPC-Tools module (Private/PoHeader.ps1); this reproduces
+    # it for the one writer that cannot call into it, because po4a produces the file and we only get to correct
+    # it afterwards. Keep the two in step — Tests/PoHeader.Tests.ps1 asserts they agree.
+    #
+    # Three fields are DELETED rather than normalised. Project-Id-Version froze at a version the products left
+    # behind; Last-Translator is frozen by po_set_last_translator=false, so it would name a translator who can
+    # never change; X-Generator is a Weblate version string that rewrote every catalogue on each upgrade. Note
+    # the deletion of Last-Translator is exactly what po4a will undo if anyone runs it directly instead of
+    # through this script — it re-emits "FULL NAME <EMAIL@ADDRESS>" (tools/po4a/lib/Locale/Po4a/Po.pm).
     param(
         [Parameter(Mandatory)][string]$ConfigPath,
         [Parameter(Mandatory)][string]$Package,
@@ -472,12 +483,11 @@ function Repair-Po4aTemplateHeader {
         $potPath = Join-Path $repoRoot $potRel
         $h = Split-Catalog $potPath
         if ($h) {
-            $comment = @("# Translations for the $Package", $copyrightLine, $licenseLine, "# Automatically generated")
-            # Match glossary.pot's header metadata (po4a leaves author placeholders in the .pot).
-            $body = @($h.Body | ForEach-Object {
-                $_ -replace '^"Last-Translator: .*\\n"$', '"Last-Translator: Automatically generated\n"' `
-                   -replace '^"Language-Team: .*\\n"$',   '"Language-Team: none\n"'
-            })
+            $comment = @("# Translations for the $Package", $copyrightLine, $licenseLine, '#')
+            # Drop the fields that cannot stay true, and normalise the one that can (see the header above).
+            $body = @($h.Body |
+                Where-Object { $_ -notmatch '^"(Project-Id-Version|Last-Translator|X-Generator): .*\\n"$' } |
+                ForEach-Object { $_ -replace '^"Language-Team: .*\\n"$', '"Language-Team: none\n"' })
             Save-Catalog $potPath $comment $body
         }
     }

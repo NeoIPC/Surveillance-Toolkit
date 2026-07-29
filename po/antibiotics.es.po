@@ -1,19 +1,17 @@
-# Translations for the NeoIPC antibiotic substance and group lists.
+# Spanish translations for the NeoIPC Surveillance Antibiotic List
 # Copyright (C) Charité – Universitätsmedizin Berlin
 # This file is distributed under the Creative Commons Attribution-NonCommercial-ShareAlike 3.0 IGO license
-# Automatically generated
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: NeoIPC Antibiotics\n"
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
 
 msgid "Demeclocycline"
 msgstr "Demeclociclina"

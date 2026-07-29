@@ -86,24 +86,9 @@ function Write-NeoIPCAntibioticPoText {
         [Parameter(Mandatory)][System.Collections.Generic.List[object]]$Entry,
         [string]$Locale = ''
     )
-    $lang = if ($Locale) { $Locale } else { 'en' }
     $sb = [System.Text.StringBuilder]::new()
-    [void]$sb.AppendLine('# Translations for the NeoIPC antibiotic substance and group lists.')
-    [void]$sb.AppendLine('# Copyright (C) Charité – Universitätsmedizin Berlin')
-    [void]$sb.AppendLine('# This file is distributed under the Creative Commons Attribution-NonCommercial-ShareAlike 3.0 IGO license')
-    [void]$sb.AppendLine('# Automatically generated')
-    [void]$sb.AppendLine('#')
-    [void]$sb.AppendLine('msgid ""')
-    [void]$sb.AppendLine('msgstr ""')
-    [void]$sb.AppendLine('"Project-Id-Version: NeoIPC Antibiotics\n"')
-    [void]$sb.AppendLine('"Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"')
-    [void]$sb.AppendLine('"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"')
-    [void]$sb.AppendLine('"Last-Translator: Automatically generated\n"')
-    [void]$sb.AppendLine('"Language-Team: none\n"')
-    [void]$sb.AppendLine(('"Language: {0}\n"' -f $lang))
-    [void]$sb.AppendLine('"MIME-Version: 1.0\n"')
-    [void]$sb.AppendLine('"Content-Type: text/plain; charset=UTF-8\n"')
-    [void]$sb.AppendLine('"Content-Transfer-Encoding: 8bit\n"')
+    [void]$sb.Append((Write-NeoIPCPoHeader -Product 'NeoIPC Surveillance Antibiotic List' `
+                -License 'Creative Commons Attribution-NonCommercial-ShareAlike 3.0 IGO' -Locale $Locale))
     foreach ($e in $Entry) {
         [void]$sb.AppendLine()
         if ($e.Fuzzy) { [void]$sb.AppendLine('#, fuzzy') }

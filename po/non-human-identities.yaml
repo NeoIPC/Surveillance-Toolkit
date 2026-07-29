@@ -1,0 +1,65 @@
+# Identities that appear in translation credits but are not people.
+#
+# Every writer that reads or produces a credit consults this file: update-glossary-po.py (Python) when it
+# carries contributor lines forward, the NeoIPC-Tools module (PowerShell) when it checks a catalogue, and the
+# report renderer (R) when it acknowledges translators. It is data rather than code precisely so those three
+# cannot drift apart — which is the failure this whole header exercise exists to correct.
+#
+# MATCH ON THE ADDRESS, NEVER THE DISPLAY NAME. `noreply@weblate.org` appears under two different names in
+# this repository's own history — "Anonymous" and "Weblate (bot)" — so a name-keyed list would exclude one and
+# silently credit the other. The reverse also holds: one human here appears under two addresses, which is why
+# crediting needs identity collapse and not merely this exclusion.
+#
+# Being on this list means "do not credit as a translator". It does not mean the work is not real: `Anonymous`
+# is Weblate's identity for an action with no signed-in user, and here that has always been the maintainer's
+# own scripted or bulk operations, not an unnamed contributor.
+
+# Any address at these domains is non-human. Weblate mints its bot and anonymous identities under
+# weblate.org, so the domain covers add-ons that do not exist yet as well as the ones below.
+excluded_domains:
+    - weblate.org
+
+# Addresses that the domain rule does not cover, or that are worth naming so a reader knows they were
+# considered. `seen_as` records where each was actually observed in this repository, so the list stays
+# evidence-based rather than speculative.
+excluded_addresses:
+    - address: noreply@weblate.org
+      seen_as: [commit author, co-author trailer]
+      names: [Anonymous, Weblate (bot)]
+      why: >-
+          Weblate's identity for an action with no signed-in user. Never reaches a PO header, because the
+          Contributors-in-comment add-on skips this exact address, but it is the most frequent identity in
+          commit trailers, so any credit route reading trailers must exclude it.
+    - address: hosted@weblate.org
+      seen_as: [commit author, co-author trailer]
+      names: [Hosted Weblate]
+      why: The Hosted Weblate service account, added to every squashed commit by append_trailers.
+    - address: noreply-addon-prefill@weblate.org
+      seen_as: [PO header, commit author, co-author trailer]
+      names: [Prefill add-on]
+      why: >-
+          The Prefill add-on, which filled every string with its English source. Uninstalled, but its credit
+          lines remain in catalogues it touched.
+    - address: noreply-addon-languages@weblate.org
+      seen_as: [PO header, co-author trailer]
+      names: [Languages add-on]
+      why: The add-on that creates a catalogue when a language is added to a component.
+    - address: noreply@anthropic.com
+      seen_as: [co-author trailer]
+      names: [Claude]
+      why: >-
+          An AI co-author trailer on one commit, contrary to the project guardrail that a tool is not a
+          co-author. It stays in history — rewriting published history would be worse — but it must never be
+          credited as a translator.
+    - address: noreply@github.com
+      seen_as: [committer]
+      names: [GitHub]
+      why: >-
+          The committer on every squash merge. It can never be a translation credit, but it dominates any
+          route that derives credits from committer data rather than authorship.
+
+# Placeholder author lines left by gettext tooling. These are not addresses and are matched literally.
+# They are not contributors and must not be carried forward when a header is rewritten.
+excluded_literals:
+    - FIRST AUTHOR <EMAIL@ADDRESS>
+    - FULL NAME <EMAIL@ADDRESS>

@@ -48,6 +48,7 @@ Usage:
 
 import argparse
 import datetime
+import functools
 import re
 import sys
 from pathlib import Path
@@ -67,26 +68,49 @@ PLURAL_SUFFIX = re.compile(r"_plural(?:_(tc|sc))?$")
 FLAGS_LINE = re.compile(r"^flags:\s*(.+)$", re.IGNORECASE)
 DEFAULT_LANGUAGES = ["af", "de", "el", "es", "et", "fr", "it", "ne", "tr"]
 
+# The header contract is defined once, in the NeoIPC-Tools module (Private/PoHeader.ps1). This is the same
+# contract expressed in Python, because this generator cannot call into a PowerShell module; the two are held
+# in step by Tests/PoHeader.Tests.ps1, which renders both and compares them.
+#
+# The trailing bare "#" is load-bearing, not decoration. translate-toolkit's updatecontributor — which
+# Weblate's "Contributors in comment" add-on delegates to — splits the comment block at the first line matching
+# r".*<\S+@\S+>.*\d{4,4}" (an e-mail AND a four-digit year). Everything before it is preserved untouched;
+# contributors are appended after the last one; anything following them is dropped if empty. So the "#" belongs
+# BELOW the licence and ABOVE any contributor, where it is the final preserved line.
 POT_HEADER_COMMENT = (
     "Translations for the NeoIPC Surveillance Glossary\n"
     "Copyright (C) Charité – Universitätsmedizin Berlin\n"
     "This file is distributed under the Creative Commons "
     "Attribution 4.0 International license\n"
-    "Automatically generated"
 )
 
+# Deliberately absent: Project-Id-Version (its version suffix froze while the products moved on),
+# Last-Translator (frozen by po_set_last_translator=false, so it would name a translator who can never change)
+# and X-Generator (a Weblate version string that rewrote every catalogue on each upgrade). POT-Creation-Date is
+# stamped in the TEMPLATE only — msgmerge does not refresh it in a catalogue, where it silently goes stale.
 POT_METADATA = {
-    "Project-Id-Version": "NeoIPC Surveillance Glossary 0.9",
     "Report-Msgid-Bugs-To": "NeoIPC-Support@charite.de",
     "POT-Creation-Date": "",  # filled at generation time
     "PO-Revision-Date": "YEAR-MO-DA HO:MI+ZONE",
-    "Last-Translator": "Automatically generated",
     "Language-Team": "none",
     "Language": "en",
     "MIME-Version": "1.0",
     "Content-Type": "text/plain; charset=UTF-8",
     "Content-Transfer-Encoding": "8bit",
 }
+
+# Weblate writes Language-Team as "<English name> <component URL>" and a plural rule per language. Both are
+# pre-filled with the values Weblate itself produces, so that registering neoipc-glossary as a component (which
+# makes these files Weblate-owned) yields no header diff at all. LANGUAGE_NAMES, defined further down, supplies
+# the English names.
+PLURAL_FORMS = {
+    "af": "nplurals=2; plural=n != 1;", "de": "nplurals=2; plural=n != 1;",
+    "el": "nplurals=2; plural=n != 1;", "es": "nplurals=2; plural=n != 1;",
+    "et": "nplurals=2; plural=n != 1;", "fr": "nplurals=2; plural=n > 1;",
+    "it": "nplurals=2; plural=n != 1;", "ne": "nplurals=2; plural=n != 1;",
+    "tr": "nplurals=2; plural=n != 1;",
+}
+WEBLATE_COMPONENT_URL = "https://hosted.weblate.org/projects/neoipc/neoipc-glossary/{lang}/"
 
 
 def _comment_lines(tokens):
@@ -267,15 +291,87 @@ LANGUAGE_NAMES = {
 
 
 def _po_header_comment(lang):
-    """Generate the file-level comment block for a new PO file."""
+    """Generate the file-level comment block for a new PO file.
+
+    Ends on a bare "#" and carries no author placeholder. "FIRST AUTHOR <EMAIL@ADDRESS>, YEAR." is the exact
+    string translate-toolkit treats as the marker for where contributors begin, and the truncated form used
+    here previously was neither that marker nor a valid contributor line — it simply sat in the block being
+    mistaken for an author. The bare "#" is the last line the contributor machinery preserves, so real
+    contributors land immediately below it.
+    """
     lang_name = LANGUAGE_NAMES.get(lang, lang)
     return (
         f"{lang_name} translations for the NeoIPC Surveillance Glossary\n"
         "Copyright (C) Charité – Universitätsmedizin Berlin\n"
         "This file is distributed under the Creative Commons "
         "Attribution 4.0 International license\n"
-        "FIRST AUTHOR <EMAIL@ADDRESS>"
     )
+
+
+_CONTRIBUTOR_RE = re.compile(r".*<\S+@\S+>.*\d{4,4}")
+_ADDRESS_RE = re.compile(r"<([^>]+)>")
+NON_HUMAN_IDENTITIES_PATH = Path(__file__).resolve().parent.parent / "po" / "non-human-identities.yaml"
+
+
+@functools.lru_cache(maxsize=1)
+def _non_human_identities():
+    """The shared exclusion list, read from po/non-human-identities.yaml.
+
+    Data rather than code, because PowerShell and R consult the same file: a list maintained separately in
+    three languages is one that disagrees with itself. See that file for why matching is on the address and
+    never on the display name.
+    """
+    with open(NON_HUMAN_IDENTITIES_PATH, encoding="utf-8") as handle:
+        data = YAML(typ="safe").load(handle) or {}
+    return (
+        {d.lower() for d in data.get("excluded_domains", [])},
+        {e["address"].lower() for e in data.get("excluded_addresses", [])},
+        set(data.get("excluded_literals", [])),
+    )
+
+
+def is_non_human(line):
+    """Whether a credit line names something other than a person."""
+    domains, addresses, literals = _non_human_identities()
+    if any(literal in line for literal in literals):
+        return True
+    match = _ADDRESS_RE.search(line)
+    if not match:
+        return False
+    address = match.group(1).lower()
+    return address in addresses or address.rsplit("@", 1)[-1] in domains
+
+
+def _retained_contributors(header):
+    """The contributor lines worth keeping from an existing header, as text to append below the bare "#".
+
+    Recognises a contributor with translate-toolkit's own rule -- an e-mail AND a four-digit year -- so that
+    what we keep is exactly what its updatecontributor() will later treat as the contributor run. Anything
+    failing it (the truncated "FIRST AUTHOR <EMAIL@ADDRESS>" placeholder that used to sit here, a bare name)
+    is not a contributor and is dropped rather than carried forward.
+    """
+    kept = [
+        line for line in (header or "").split("\n")
+        if _CONTRIBUTOR_RE.match(line) and not is_non_human(line)
+    ]
+    return "".join("\n" + line for line in kept)
+
+
+def _po_metadata(lang, pot_metadata):
+    """Header fields for a catalogue: the template's, minus what belongs only to a template, plus per-language.
+
+    POT-Creation-Date is dropped: msgmerge does not refresh it in a catalogue, so it records the age of a
+    template generation that has long since moved on. Language-Team and Plural-Forms are pre-filled with what
+    Weblate writes, so registering the component produces no diff.
+    """
+    meta = {k: v for k, v in pot_metadata.items() if k != "POT-Creation-Date"}
+    meta["Language"] = lang
+    meta["Language-Team"] = "{0} <{1}>".format(
+        LANGUAGE_NAMES.get(lang, lang), WEBLATE_COMPONENT_URL.format(lang=lang)
+    )
+    if lang in PLURAL_FORMS:
+        meta["Plural-Forms"] = PLURAL_FORMS[lang]
+    return meta
 
 
 def merge_po(pot_path, po_path):
@@ -289,8 +385,7 @@ def merge_po(pot_path, po_path):
         # Create a new PO from the POT
         po = polib.POFile()
         po.header = _po_header_comment(lang)
-        po.metadata = {**pot.metadata}
-        po.metadata["Language"] = lang
+        po.metadata = _po_metadata(lang, pot.metadata)
         for entry in pot:
             new_entry = polib.POEntry(
                 msgctxt=entry.msgctxt,
@@ -324,8 +419,8 @@ def merge_po(pot_path, po_path):
             existing_by_msgid[entry.msgid] = entry
 
     new_po = polib.POFile()
-    new_po.header = po.header or _po_header_comment(lang)
-    new_po.metadata = {**po.metadata}
+    new_po.header = _po_header_comment(lang) + _retained_contributors(po.header)
+    new_po.metadata = _po_metadata(lang, pot.metadata)
 
     for pot_entry in pot:
         key = (pot_entry.msgctxt, pot_entry.msgid)
