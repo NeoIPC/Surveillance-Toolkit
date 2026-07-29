@@ -365,7 +365,13 @@ jobs:
                 # PSScriptAnalyzer backs the approved-verb *function* check (PSUseApprovedVerbs) in
                 # ScriptVerbHygiene.Tests.ps1; the file-name half of that gate is a custom Pester check.
                 Install-Module -Name PSScriptAnalyzer -Force -Scope CurrentUser -SkipPublisherCheck
-                Invoke-Pester -Path scripts/modules/NeoIPC-Tools/Tests/DataDictionary.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/BuildReport.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/ScriptVerbHygiene.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/PlayData.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/MetadataContent.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/Metadata.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/MetadataVerify.Tests.ps1 -CI
+                # PoHeader.Tests.ps1 asserts the catalogue header contract against the COMMITTED files, so it
+                # is the only check that catches a header drifting in by a route nobody anticipated -- a hand
+                # edit, a writer nobody remembered to update, or a Weblate add-on writing a credit the
+                # exclusion list rejects. That last one is not hypothetical: the add-on re-adds a bot credit
+                # to every infectious-agents catalogue whenever those translations are touched, and a
+                # translation pull request is exactly where no human is reading the diff.
+                Invoke-Pester -Path scripts/modules/NeoIPC-Tools/Tests/DataDictionary.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/BuildReport.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/ScriptVerbHygiene.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/PlayData.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/MetadataContent.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/Metadata.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/MetadataVerify.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/PoHeader.Tests.ps1 -CI
 
             - name: Generate data dictionary
               if: github.ref_type != 'tag' || steps.rel.outputs.product == 'metadata'
