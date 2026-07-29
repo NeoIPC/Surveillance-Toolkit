@@ -3,10 +3,11 @@
 # This file is distributed under the Creative Commons Attribution 4.0 International license
 #
 # Brar Piening <brar.piening@charite.de>, 2026.
+# Brar Piening <brar@gmx.de>, 2026.
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"PO-Revision-Date: 2026-07-29 17:27+0000\n"
+"PO-Revision-Date: 2026-07-29 17:28+0000\n"
 "Language-Team: German <https://hosted.weblate.org/projects/neoipc/neoipc-dhis2-metadata/de/>\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
@@ -4874,17 +4875,13 @@ msgctxt "options/NEOIPC_ASA_SCORE/4/NAME"
 msgid ""
 "ASA IV - A patient with severe systemic disease that is a constant threat to "
 "life"
-msgstr ""
-"ASA IV - Ein Patient mit schwerer systemischer Erkrankung, die eine ständige "
-"Bedrohung für das Leben darstellt"
+msgstr "ASA IV - Ein Patient mit schwerer systemischer Erkrankung, die eine ständige Bedrohung für das Leben darstellt"
 
 msgctxt "options/NEOIPC_ASA_SCORE/5/NAME"
 msgid ""
 "ASA V - A moribund patient who is not expected to survive without the "
 "operation"
-msgstr ""
-"ASA V - Ein moribunder (todkranker) Patient, der ohne die Operation "
-"voraussichtlich nicht überleben wird"
+msgstr "ASA V - Ein moribunder (todkranker) Patient, der ohne die Operation voraussichtlich nicht überleben wird"
 
 msgctxt "options/NEOIPC_BSI_DEVICE_ASS/0/NAME"
 msgid "Not catheter-associated"
@@ -4970,9 +4967,7 @@ msgctxt "options/NEOIPC_SSI_TYPE/3/NAME"
 msgid ""
 "...tissue deeper than fascial/muscle layer, opened/manipulated during the "
 "procedure"
-msgstr ""
-"...Gewebe tiefer als Faszien-/Muskelschicht, während der Prozedur eröffnet/"
-"manipuliert"
+msgstr "...Gewebe tiefer als Faszien-/Muskelschicht, während der Prozedur eröffnet/manipuliert"
 
 msgctxt "options/NEOIPC_SURVEILLANCE_END_REASON/1/NAME"
 msgid "Discharge/Transfer"
