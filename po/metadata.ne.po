@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"PO-Revision-Date: 2026-07-29 17:43+0000\n"
 "Language-Team: Nepali <https://hosted.weblate.org/projects/neoipc/neoipc-dhis2-metadata/ne/>\n"
 "Language: ne\n"
 "MIME-Version: 1.0\n"
