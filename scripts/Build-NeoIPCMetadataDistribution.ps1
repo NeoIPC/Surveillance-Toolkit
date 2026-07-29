@@ -54,7 +54,10 @@ if (-not (Test-Path -LiteralPath $OutputDirectory)) { New-Item -ItemType Directo
 
 # --- Alpha manifest policy (the values; the module only provides the mechanism) -------------------------------------
 # DHIS2Version is pinned to the NeoIPC DHIS2 deployment version (the dhis2/core image tag in the deployment's
-# compose file). The version is the required -Version param (no default — the caller always decides): CI passes the
+# compose file), which doubles as the lowest release the packages are actually exercised against. It names a
+# verified release rather than the lowest that could theoretically work: 2.40.3.2 carries a confirmed defect
+# fixed in 2.40.4, and no release below 2.40.12.0 is tested, so the stamp follows what is tested.
+# The version is the required -Version param (no default — the caller always decides): CI passes the
 # metadata release version on a metadata-v* release build, else the metadata/VERSION file (the metadata product's
 # source of truth).
 # healthArea tagging, DHIS2Build and the WHO sharing/group conventions are deferred to the standards-package design
@@ -62,7 +65,7 @@ if (-not (Test-Path -LiteralPath $OutputDirectory)) { New-Item -ItemType Directo
 $packageCode = 'NEOIPC_CORE'
 $packageType = 'TRK'
 $packageVersion = $Version
-$dhis2Version = '2.40.3.2'
+$dhis2Version = '2.40.12.0'
 $locale = 'en'
 
 function New-AlphaManifest([string]$NameSuffix, [string]$Description) {
