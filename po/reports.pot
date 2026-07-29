@@ -1,14 +1,12 @@
 # Translations for the NeoIPC Surveillance Reports
 # Copyright (C) Charité – Universitätsmedizin Berlin
 # This file is distributed under the Creative Commons Attribution 4.0 International license
-# Automatically generated
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: NeoIPC Surveillance Reports 0.0.1-alpha\n"
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-07-26 23:28+0200\n"
+"POT-Creation-Date: 2026-07-29 17:52+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "Language: en\n"
 "MIME-Version: 1.0\n"
