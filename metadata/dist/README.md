@@ -39,8 +39,50 @@ manifest key it does not recognise — but they do **not** yet follow the WHO `d
 manifest conventions. A standards-compliant package, together with the user-group / role / permission model it
 depends on, will supersede them.
 
+## Supported DHIS2 versions — 2.40 and 2.41
+
+The packages are generated for, and verified against, **2.40.12.0** and **2.41.9.0**; the manifest declares
+`2.40.12.0`. On those two the two-pass import described below connects reliably, every time.
+
+Earlier 2.40 patches are **not** supported: `2.40.3.2` carries a confirmed defect, fixed in `2.40.4`, and nothing
+between `2.40.4` and `2.40.12.0` is currently exercised — so the declared version names a currently-verified
+release rather than the lowest that might work.
+
+**On 2.42 and 2.43 the import is not reliable.** There, a metadata import intermittently drops the members of
+owned ordered collections: an `optionGroupSet` declaring 34 `optionGroups` arrives holding 0, and the import
+summary reports nothing wrong. The behaviour is non-deterministic *across* instances but **sticky within one** —
+a given instance reproduces the same outcome on every retry, so re-importing never clears it and only a freshly
+created instance gives a different draw. The evidence points inside DHIS2's own import path rather than at
+anything the package can encode around: the database itself ends up wrong on a bad draw, and the server caches
+have been ruled out empirically. The root cause is not pinned.
+
+The practical consequence on 2.42+ is that a successful-looking import is not evidence of a correct one. **Read
+the option-group sets back and check their member counts** before treating the instance as provisioned. The
+NeoIPC deployment runs 2.41 or older and is unaffected.
+
 ## Importing
 
 Import into a target instance with `idScheme=UID` and a dry run first (via the DHIS2 **Import/Export** app, or a
 metadata-import `POST` with `importMode=VALIDATE` then `COMMIT`). The install base assigns the program to no org
 units — assign it to your hierarchy after import. The play package targets a fresh/empty instance.
+
+**Apply the package twice.** This is not optional and not a retry: DHIS2 does not link an object's *owned*
+reference collections to objects created in the **same** payload, so a single import leaves
+`optionGroupSet.optionGroups`, `programRule.programRuleActions` and `userGroup.managedGroups` members-less —
+**while reporting `status=OK`**. The second, identical import runs when every referenced object already exists,
+and connects them. (Nested collections such as `optionGroup.options` link on the first pass; it is specific to
+those three.) Skip it and you get an instance whose AWaRe and ATC option-group sets are empty and whose program
+rules carry no actions, with nothing in either import summary to say so.
+
+The toolkit's own importer does this for you — pass `-ConnectReferences`, and name the target explicitly so the
+call cannot fall back to a default host:
+
+```pwsh
+Import-NeoIPCMetadata -Hostname dhis2.example.org -Path <package>.json -ConnectReferences
+```
+
+`Test-NeoIPCMetadataImport` is then the authoritative check that the collections actually linked. A second
+`status=OK` is **not** that proof; on 2.42+ the second pass reports OK and still drops them (above).
+
+After importing, verify rather than assume: read the option-group sets back and check their member counts. That
+advice is essential on 2.42+, where the drop is silent and sticky, and cheap everywhere else.
