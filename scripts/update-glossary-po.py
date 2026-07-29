@@ -299,13 +299,29 @@ def _po_header_comment(lang):
     mistaken for an author. The bare "#" is the last line the contributor machinery preserves, so real
     contributors land immediately below it.
     """
-    lang_name = LANGUAGE_NAMES.get(lang, lang)
     return (
-        f"{lang_name} translations for the NeoIPC Surveillance Glossary\n"
+        f"{_language_name(lang)} translations for the NeoIPC Surveillance Glossary\n"
         "Copyright (C) Charité – Universitätsmedizin Berlin\n"
         "This file is distributed under the Creative Commons "
         "Attribution 4.0 International license\n"
     )
+
+
+def _language_name(lang):
+    """The English language name Weblate uses for a locale, or raise.
+
+    Never falls back to the raw locale code. The code and the name are not interchangeable: falling back puts
+    "af" where Weblate writes "Afrikaans", so the Language-Team this generator emits differs from the one
+    Weblate emits, and Weblate rewrites the header on its next write -- the exact churn this contract removes.
+    Get-NeoIPCPoLanguageName refuses for the same reason; the two writers have to agree or the contract is a
+    fiction.
+    """
+    if lang not in LANGUAGE_NAMES:
+        raise KeyError(
+            f"No English language name known for locale {lang!r}. Add it to LANGUAGE_NAMES, taking the name "
+            f"Weblate uses for that language, rather than guessing it from the code."
+        )
+    return LANGUAGE_NAMES[lang]
 
 
 _CONTRIBUTOR_RE = re.compile(r".*<\S+@\S+>.*\d{4,4}")
@@ -367,10 +383,15 @@ def _po_metadata(lang, pot_metadata):
     meta = {k: v for k, v in pot_metadata.items() if k != "POT-Creation-Date"}
     meta["Language"] = lang
     meta["Language-Team"] = "{0} <{1}>".format(
-        LANGUAGE_NAMES.get(lang, lang), WEBLATE_COMPONENT_URL.format(lang=lang)
+        _language_name(lang), WEBLATE_COMPONENT_URL.format(lang=lang)
     )
-    if lang in PLURAL_FORMS:
-        meta["Plural-Forms"] = PLURAL_FORMS[lang]
+    if lang not in PLURAL_FORMS:
+        raise KeyError(
+            f"No plural rule known for locale {lang!r}. Add it to PLURAL_FORMS, taking the value Weblate "
+            f"writes for that language. Omitting the field silently would let Weblate add its own and rewrite "
+            f"the header."
+        )
+    meta["Plural-Forms"] = PLURAL_FORMS[lang]
     return meta
 
 
