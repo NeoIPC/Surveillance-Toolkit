@@ -163,6 +163,11 @@ def check_plural_form_count(failures):
     # implementation's own regex would compare it against itself and pass however wrong it is. It has to
     # be at least as permissive, though, or an entry the generator parses fine reports here as a
     # generator defect -- so whitespace around the "=" is accepted, as it is there.
+    #
+    # The two literals are identical today, which makes the duplication look accidental. It is not: fold
+    # them into one shared constant and this check silently stops being able to detect a wrong pattern,
+    # because it would then be using it. The protection is prospective -- when the generator's regex
+    # changes, this one does not follow, the check goes red, and someone looks.
     declares = re.compile(r"\bnplurals\s*=\s*(\d+)")
 
     for lang, rule in module.PLURAL_FORMS.items():
