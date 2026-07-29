@@ -74,9 +74,15 @@ and connects them. (Nested collections such as `optionGroup.options` link on the
 those three.) Skip it and you get an instance whose AWaRe and ATC option-group sets are empty and whose program
 rules carry no actions, with nothing in either import summary to say so.
 
-The toolkit's own importer does this for you — `Import-NeoIPCMetadataPackage -ConnectReferences` — and
-`Test-NeoIPCMetadataImport` is the authoritative check that the collections actually linked. A second `status=OK`
-is **not** that proof; on 2.42+ the second pass reports OK and still drops them (above).
+The toolkit's own importer does this for you — pass `-ConnectReferences`, and name the target explicitly so the
+call cannot fall back to a default host:
+
+```pwsh
+Import-NeoIPCMetadata -Hostname dhis2.example.org -Path <package>.json -ConnectReferences
+```
+
+`Test-NeoIPCMetadataImport` is then the authoritative check that the collections actually linked. A second
+`status=OK` is **not** that proof; on 2.42+ the second pass reports OK and still drops them (above).
 
 After importing, verify rather than assume: read the option-group sets back and check their member counts. That
 advice is essential on 2.42+, where the drop is silent and sticky, and cheap everywhere else.

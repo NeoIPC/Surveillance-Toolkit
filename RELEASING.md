@@ -93,4 +93,4 @@ and metadata products for validation but publishes nothing.
 - The **metadata** packages are **generated build artifacts**, never committed (see
   `metadata/dist/README.md`); they exist only as Release assets and CI build artifacts. The **reports**
   product has **no** generated package: its render-ready sources ship in the tag's auto source archive
-  (a slimmer bundle is deferred — see `ToDo.md`), alongside the attached `compatibility.yml`.
+  (a slimmer, render-ready bundle is deferred), alongside the attached `compatibility.yml`.
