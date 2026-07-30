@@ -11,13 +11,23 @@ that is a different kind of object and is out of scope here.
 | `neoipc-dhis2-metadata` | `po/metadata.*.po` | `po/metadata.pot` |
 | `neoipc-glossary` | `po/glossary.*.po` | `po/glossary.pot` |
 
-`neoipc-glossary` carries one deviation the others do not: **`is_glossary: true`**, so its 41 curated
-terms are simultaneously translatable *and* the terminology source surfacing in every other component's
-sidebar. That is the reason it was registered as a component rather than seeded into the TBX store — one
-artifact serving both purposes, with no one-way copy to drift. Its keys are an API contract with the R
-report code (`sR$surveillance_end` and friends), which is why the template stays repository-owned while
-the translations are Weblate's: exactly the `.pot`/`.po` seam, and the reason the catalogue is generated
-rather than hand-written.
+`neoipc-glossary` carries two deviations the others do not, both deliberate. **`is_glossary: true`**, so
+its 41 curated terms are simultaneously translatable *and* the terminology source surfacing in every
+other component's sidebar — the reason it was registered as a component rather than seeded into the TBX
+store, one artifact serving both purposes with no one-way copy to drift. And a component-level
+**`variant_regex`** of `_(tc|sc|plural|plural_tc|plural_sc)$`, because this is the only catalogue whose
+keys carry casing and number variants of one concept; the regex groups them in the translator's view so
+a term and its title-case form are edited together instead of appearing as unrelated strings.
+
+Its keys are an API contract with the R report code (`sR$surveillance_end` and friends), which is why
+the template stays repository-owned while the translations are Weblate's: exactly the `.pot`/`.po` seam,
+and the reason the catalogue is generated rather than hand-written.
+
+**Expect one churn commit on its first drain.** The retired repository-side merge copied the template's
+source flags (`terminology`, `read-only`) into every catalogue. Weblate strips source flags when it
+writes a `.po`, so its first write removes them — a header-and-flags-only diff, self-correcting, and not
+worth a repository-side edit to pre-empt. The `ignore-same` flags are the exception: that one is
+translator-managed, and German carries two more than the other languages, which is real state to keep.
 
 Those five are configured **identically except where this document gives a reason.** That rule is the
 point of the file: the components were created at different times against different Weblate defaults,
@@ -56,7 +66,7 @@ reason is added below.
 | `auto_lock_error` | `true` | Fail-closed. A component that cannot push accumulates work that cannot reach git; locking makes that visible instead of letting it pile up silently. It clears itself once a push succeeds |
 | `commit_pending_age` | `24` | A safety net only. The drain commits explicitly rather than waiting for it |
 | `file_format_params.dos_eol` | `false` | The repository is LF-only. Weblate is one of the writers of these files, so this is the same contract as pinning newlines in every other tool that touches them |
-| `file_format_params.po_line_wrap` | `65535` | Must match the repository side. Three po4a configs (`reports`, `documentation`, `infectious_agents`) pass `--wrap-po newlines`; `scripts/po4a.cfg` passes `--wrap-po no`; and `metadata` has no po4a config at all — it is written by `Write-NeoIPCMetadataPoText`, which emits one line per field and never wraps. All of them therefore expect an unwrapped file. A mismatch means each writer re-flows what the other wrote: one component sitting at the xgettext default of 77 produced an 18,000-line diff of pure re-wrapping |
+| `file_format_params.po_line_wrap` | `65535` | Must match the repository side. Three po4a configs (`reports`, `documentation`, `infectious_agents`) pass `--wrap-po newlines`; `scripts/po4a.cfg` passes `--wrap-po no`; `metadata` has no po4a config at all — it is written by `Write-NeoIPCMetadataPoText`, which emits one line per field and never wraps; and `glossary` is written by `update-glossary-po.py`, which pins polib's `wrapwidth` to 65535 because polib's default of 78 had made it the only wrapped template here (longest line 91, against 1830 in the po4a-generated ones). All five therefore expect an unwrapped file. A mismatch means each writer re-flows what the other wrote: one component sitting at the xgettext default of 77 produced an 18,000-line diff of pure re-wrapping |
 | `file_format_params.po_keep_previous` | `true` | Keeps `#| msgid` so translators can see what a changed source string used to say |
 | `file_format_params.po_remove_obsolete` | `false` | Obsolete entries are cheap and let a reverted source change recover its translation |
 | `file_format_params.po_no_location` | `false` | Keep `#:` source references wherever line numbers *might* be real — stripping them is lossy and hard to reverse. Measured. The protocol documentation is fully informative (10 files, lines 1–1032). Reports is mixed: of 67 `.Rmd` files referenced, **45 carry real line numbers and 22 carry only `:1`**, as do all 10 YAML/YML files (six string-resource files and four `_quarto-en.yml` configs) — so roughly a quarter of its references are informative and the rest are dead weight. The infectious-agent list is 99.4 % `:1` but still carries 23 real AsciiDoc references. The metadata catalogue emits no location comments at all, so the setting is moot there. Since the repository-browser URL is configured, these become clickable links to the surrounding context |
@@ -78,10 +88,14 @@ Two settings differ: one deliberate, one inert. Everything else is uniform.
 
 ### Deliberate
 
-**`priority` — 60 reports, 80 documentation, 100 metadata, 120 infectious-agents.**
+**`priority` — 60 glossary, 60 reports, 80 documentation, 100 metadata, 120 infectious-agents.**
 Component priority orders the translation queue across the whole project.
 
-**Reports first.** They are essentially what generates the impact of the whole NeoIPC Surveillance
+**The glossary alongside reports.** It is 41 terms, so it is cheap to finish, and it feeds both the
+controlled vocabulary the reports render and the terminology sidebar every other component sees — so
+settling it first makes every later decision cheaper and more consistent.
+
+**Reports first too.** They are essentially what generates the impact of the whole NeoIPC Surveillance
 project, and they have the greatest audience reach.
 
 **Then the protocol documentation.** The surveillance protocol and the definitions are the heart of

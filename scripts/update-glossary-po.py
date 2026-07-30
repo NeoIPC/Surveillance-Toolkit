@@ -61,14 +61,15 @@ try:
 except ImportError:
     sys.exit("Error: polib is required. Install with: pip install polib")
 
-VARIANT_SUFFIXES = re.compile(r"_(tc|sc|plural(?:_tc|_sc)?)$")
 PLURAL_SUFFIX = re.compile(r"_plural(?:_(tc|sc))?$")
 FLAGS_LINE = re.compile(r"^flags:\s*(.+)$", re.IGNORECASE)
 DEFAULT_LANGUAGES = ["af", "de", "el", "es", "et", "fr", "it", "ne", "tr"]
 
 # The header contract is defined once, in the NeoIPC-Tools module (Private/PoHeader.ps1). This is the same
-# contract expressed in Python, because this generator cannot call into a PowerShell module; the two are held
-# in step by Tests/PoHeader.Tests.ps1, which renders both and compares them.
+# contract expressed in Python, because this generator cannot call into a PowerShell module. Nothing renders
+# both and compares them; what holds them in step is that Tests/PoHeader.Tests.ps1 asserts the contract
+# against every COMMITTED catalogue and template, so a header this generator writes differently fails there
+# whichever writer produced it.
 #
 # The trailing bare "#" is load-bearing, not decoration. translate-toolkit's updatecontributor — which
 # Weblate's "Contributors in comment" add-on delegates to — splits the comment block at the first line matching

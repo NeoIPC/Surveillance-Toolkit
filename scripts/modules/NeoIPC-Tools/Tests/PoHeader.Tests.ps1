@@ -11,9 +11,9 @@
     serialised onto a single physical line, and nothing noticed: the whole suite passed both before and after
     the header was changed, because no test asserted it.
 
-    Three writers now, and the glossary catalogues are checked here rather than produced here: they became
-    Weblate's, so the generator emits only its template and Weblate writes their headers. That makes the last
-    Describe the only thing standing between a Weblate-side header change and the contract.
+    The glossary catalogues are now checked here rather than produced here: they became Weblate's, so the
+    generator writes only its own template's header and Weblate writes theirs. That makes the last Describe
+    the only thing standing between a Weblate-side header change and the contract.
 
     These tests are that assertion. The last Describe is the one that matters most — it checks the COMMITTED
     files rather than the writers, so a catalogue that drifts by any route at all is caught, including a hand

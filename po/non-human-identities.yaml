@@ -1,10 +1,10 @@
 # Identities that appear in translation credits but are not people.
 #
-# Every consumer of a credit line consults this file: the NeoIPC-Tools module (PowerShell) when it checks a
-# catalogue against the header contract, and the report renderer (R) when it acknowledges translators. It is
-# data rather than code precisely so those cannot drift apart — which is the failure this whole header
-# exercise exists to correct. update-glossary-po.py read it too, until the glossary catalogues became
-# Weblate's and the generator stopped carrying contributor lines forward at all.
+# One consumer reads it today: the NeoIPC-Tools module (PowerShell), when it checks a catalogue against the
+# header contract. It is data rather than code so that a second consumer in another language reads this list
+# rather than a copy of it — a list maintained twice is one that disagrees with itself, which is the failure
+# the whole header exercise exists to correct. update-glossary-po.py was such a consumer until the glossary
+# catalogues became Weblate's and the generator stopped carrying contributor lines forward at all.
 #
 # MATCH ON THE ADDRESS, NEVER THE DISPLAY NAME. `noreply@weblate.org` appears under two different names in
 # this repository's own history — "Anonymous" and "Weblate (bot)" — so a name-keyed list would exclude one and

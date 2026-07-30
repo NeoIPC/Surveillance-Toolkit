@@ -523,7 +523,7 @@ function Invoke-UpdateGlossary {
     if ($DryRun) {
         Write-Host "[DryRun] $python $($glossaryArgs -join ' ')"
     } else {
-        Write-Host "Updating glossary PO and generating localized YAML"
+        Write-Host "Updating the glossary template and generating localized YAML"
         Push-Location $repoRoot
         try {
             & $python @glossaryArgs

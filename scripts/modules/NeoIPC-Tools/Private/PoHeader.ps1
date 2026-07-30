@@ -45,10 +45,10 @@ $script:NeoIPCPoPluralForms = @{
 function Test-NeoIPCPoNonHumanIdentity {
     # Whether a credit line names something other than a person, per po/non-human-identities.yaml.
     #
-    # The list is DATA, shared with update-glossary-po.py (Python) and the report renderer (R), because a list
-    # maintained separately in three languages is one that disagrees with itself. Matching is on the ADDRESS,
-    # never the display name: `noreply@weblate.org` appears in this repository's history under two different
-    # names, so a name-keyed rule excludes one and silently credits the other.
+    # The list is DATA rather than code so that a consumer in another language reads it instead of keeping a
+    # copy — a list maintained twice is one that disagrees with itself. This function is its only reader today.
+    # Matching is on the ADDRESS, never the display name: `noreply@weblate.org` appears in this repository's
+    # history under two different names, so a name-keyed rule excludes one and silently credits the other.
     [CmdletBinding()]
     [OutputType([bool])]
     param([Parameter(Mandatory)][AllowEmptyString()][string]$AuthorLine)
