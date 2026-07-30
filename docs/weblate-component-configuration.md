@@ -63,10 +63,14 @@ request for a new language instead of mailing it. Patched.
 **`repo` must be the repository's *exact* canonical clone URL — casing and `.git` suffix included.** It is
 not merely an address to clone from: the incoming webhook is matched against it, so a URL that clones
 perfectly can still fail to match. Weblate then falls back to a fuzzy match and raises *"The repository hook
-does not match exactly"*, and that fallback is scheduled for removal in Weblate 2026.9 — after which an
-inexact URL means the hook silently stops updating the component, and translations sit unnoticed until the
-next scheduled pull. Take the value from the forge rather than typing it:
-`gh api repos/<owner>/<repo> --jq .clone_url` returns exactly what the payload carries. Two ways this went
+does not match exactly"*, and that fallback is going away: upstream issue
+[WeblateOrg/weblate#19855](https://github.com/WeblateOrg/weblate/issues/19855), *"Remove fallback matching
+from webhooks"*, targets **2026.9** — *"Drop fallback matching code two releases later, so if #19854 lands
+in 2026.7, remove it in 2026.9."* After that an inexact URL means the hook silently stops updating the
+component, and translations sit unnoticed until the next scheduled pull. Take the value from the forge
+rather than typing it: `gh api repos/<owner>/<repo> --jq .clone_url` returns exactly what the payload
+carries, and an unauthenticated `curl https://api.github.com/repos/<owner>/<repo>` gives the same field
+where `gh` is not to hand — it is not otherwise a dependency of this repository's tooling. Two ways this went
 wrong here on one day, neither visible until Weblate complained: a component created against
 `…/NeoIPC/neoipc-app.git` where the repository is canonically `NeoIPC/NeoIPC-App` — GitHub clones
 case-insensitively, so nothing looked wrong — and two of the components in this file carrying the URL

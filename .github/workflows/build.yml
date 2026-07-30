@@ -85,9 +85,19 @@ jobs:
 
                 offending=""
                 for f in $(printf '%s\n' "$changed" | grep -E "^($owned)$" || true); do
+                  # The git call is separated from the grep deliberately. With `|| true` spanning the whole
+                  # pipeline, a git failure — a missing ref, an unreadable path — produced an empty string,
+                  # which this loop reads as "no non-Weblate committers" and the gate then PASSES. A guard
+                  # whose error path is indistinguishable from its success path fails open, which is the one
+                  # direction it must never fail. Only the grep's own "no matches" status is ignored, since
+                  # that is its way of saying the file is clean.
+                  if ! committers=$(git log --format='%ce' "$base".."$head" -- "$f"); then
+                    echo "::error::Could not read the commit history of $f — the gate cannot vouch for this pull request."
+                    exit 1
+                  fi
                   # Not `grep -q`: it exits on the first hit, and SIGPIPE plus `pipefail` would then report
                   # the pipeline as failed, which reads here as "no offence found" and silently passes.
-                  others=$(git log --format='%ce' "$base".."$head" -- "$f" | grep -vFx "$weblate" || true)
+                  others=$(printf '%s\n' "$committers" | grep -vFx "$weblate" || true)
                   if [ -n "$others" ]; then offending="${offending}${f}"$'\n'; fi
                 done
                 if [ -n "$offending" ]; then
