@@ -1,6 +1,6 @@
 # Weblate component configuration
 
-The `neoipc` project on Hosted Weblate hosts four gettext catalogues, plus a TBX terminology store
+The `neoipc` project on Hosted Weblate hosts five gettext catalogues, plus a TBX terminology store
 that is a different kind of object and is out of scope here.
 
 | Component | Catalogue | Source template |
@@ -9,8 +9,17 @@ that is a different kind of object and is out of scope here.
 | `neoipc-core-surveillance-protocol` | `po/documentation.*.po` | `po/documentation.pot` |
 | `neoipc-infectious-agents` | `po/infectious_agents.*.po` | `po/infectious_agents.pot` |
 | `neoipc-dhis2-metadata` | `po/metadata.*.po` | `po/metadata.pot` |
+| `neoipc-glossary` | `po/glossary.*.po` | `po/glossary.pot` |
 
-Those four are configured **identically except where this document gives a reason.** That rule is the
+`neoipc-glossary` carries one deviation the others do not: **`is_glossary: true`**, so its 41 curated
+terms are simultaneously translatable *and* the terminology source surfacing in every other component's
+sidebar. That is the reason it was registered as a component rather than seeded into the TBX store — one
+artifact serving both purposes, with no one-way copy to drift. Its keys are an API contract with the R
+report code (`sR$surveillance_end` and friends), which is why the template stays repository-owned while
+the translations are Weblate's: exactly the `.pot`/`.po` seam, and the reason the catalogue is generated
+rather than hand-written.
+
+Those five are configured **identically except where this document gives a reason.** That rule is the
 point of the file: the components were created at different times against different Weblate defaults,
 and the resulting drift was invisible until someone compared them by hand. A difference with no reason
 recorded here is drift, and should be removed rather than explained after the fact.
@@ -36,7 +45,7 @@ every `.po` produces thousands of lines of churn that Weblate removes again on t
 
 ## Settings that must not diverge
 
-These are uniform across all four components. Changing one on a single component is drift unless a
+These are uniform across all five components. Changing one on a single component is drift unless a
 reason is added below.
 
 | Setting | Value | Why it is load-bearing |
@@ -117,9 +126,9 @@ clearly above the nomenclature, which is identical in most languages.
 
 ### Inert
 
-**`edit_template` — `true` on three, `false` on metadata. Inert; the difference does not matter.**
+**`edit_template` — `false` on metadata, `true` elsewhere. Inert; the difference does not matter.**
 The setting governs whether users may edit the *monolingual base file*, which is the `template` field
-— and `template` is empty on all four components, because they are bilingual. There is nothing for it
+— and `template` is empty on all five components, because they are bilingual. There is nothing for it
 to act on, whatever its value.
 
 Worth recording because the opposite conclusion is easy to reach: the source translation *is* backed

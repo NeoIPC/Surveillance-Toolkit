@@ -1,13 +1,16 @@
 #Requires -Version 7.6
 # The single definition of a NeoIPC gettext catalogue header.
 #
-# Four writers produce these files — po4a (post-processed by scripts/Invoke-Localization.ps1),
+# Four writers produced these files — po4a (post-processed by scripts/Invoke-Localization.ps1),
 # scripts/update-glossary-po.py, and the two exporters in this module — and each used to carry its own copy of
 # the header. They drifted: eight different comment-block shapes, three spellings of the copyright line (one of
 # them ASCII-transliterated), a product name that disagreed with its own Project-Id-Version, and a header
 # serialised onto a single physical line. This file is why the two exporters can no longer drift from each
-# other; the Python generator and the po4a post-processor implement the same contract in their own languages
-# and are held to it by Tests/PoHeader.Tests.ps1.
+# other; the po4a post-processor implements the same contract in its own language, and all of them are held to
+# it by Tests/PoHeader.Tests.ps1, which asserts against the committed files and runs in CI.
+#
+# Three writers now: the glossary generator emits only its template, because those catalogues became Weblate's,
+# so it carries no per-language header machinery to drift.
 #
 # THE BLOCK STRUCTURE IS NOT COSMETIC. translate-toolkit's `updatecontributor` — which Weblate's
 # "Contributors in comment" add-on delegates to — splits the comment block at the first line matching

@@ -5,11 +5,15 @@
     Pester tests for the shared gettext catalogue header contract.
 
 .DESCRIPTION
-    Four writers produce the catalogues under po/ — po4a (corrected by scripts/Invoke-Localization.ps1),
+    Four writers produced the catalogues under po/ — po4a (corrected by scripts/Invoke-Localization.ps1),
     scripts/update-glossary-po.py, and the two exporters in this module. They drifted into eight different
     comment-block shapes, three spellings of the copyright line (one ASCII-transliterated), and a header
     serialised onto a single physical line, and nothing noticed: the whole suite passed both before and after
     the header was changed, because no test asserted it.
+
+    Three writers now, and the glossary catalogues are checked here rather than produced here: they became
+    Weblate's, so the generator emits only its template and Weblate writes their headers. That makes the last
+    Describe the only thing standing between a Weblate-side header change and the contract.
 
     These tests are that assertion. The last Describe is the one that matters most — it checks the COMMITTED
     files rather than the writers, so a catalogue that drifts by any route at all is caught, including a hand

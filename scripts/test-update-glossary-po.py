@@ -1,14 +1,22 @@
 #!/usr/bin/env python3
 """Regression test for update-glossary-po.py: it runs the script and checks what it wrote.
 
-Two invariants are covered, and they need different techniques because one of them cannot be
+Three invariants are covered, and they need different techniques because two of them cannot be
 observed from the output on every platform.
 
-**Byte hygiene.** All three artifacts the script produces -- po/glossary.pot, po/glossary.<lang>.po
-and glossary.<lang>.yaml -- are committed and read by other tools (Weblate's msgmerge add-on, the
-reports' R string-resource cascade). Python's io.open() default translates every "\\n" to os.linesep,
-so without an explicit newline="\\n" the same script emits CRLF on Windows and LF on Linux. The end-
-to-end run below asserts the bytes of every artifact.
+**Catalogue ownership.** po/glossary.<lang>.po belongs to Weblate's neoipc-glossary component. This
+script writes the template and must not touch a catalogue -- two writers on one .po is what conflicts
+every language at once, both sides rewriting adjacent header lines inside a hunk git cannot merge.
+The check runs the script over a directory already holding a catalogue and asserts that file is
+byte-identical afterwards, which is the property that matters and is invisible in a diff of the
+script. The CI gate enforces the same rule from the other end, by rejecting a commit that changes an
+owned catalogue outside Weblate; this catches it before a commit exists.
+
+**Byte hygiene.** Both artifacts the script produces -- po/glossary.pot and glossary.<lang>.yaml --
+are committed and read by other tools (Weblate's msgmerge add-on, the reports' R string-resource
+cascade). Python's io.open() default translates every "\\n" to os.linesep, so without an explicit
+newline="\\n" the same script emits CRLF on Windows and LF on Linux. The end-to-end run below asserts
+the bytes of every artifact.
 
 **That assertion cannot catch a revert on Linux**, where os.linesep is already "\\n": deleting every
 newline="\\n" changes nothing observable. So the pinning is *also* asserted against the source, which
@@ -21,11 +29,6 @@ translator note while the file's header block does not, and that YAML keys becom
 checked too, since a silent regression there loses every translator note without touching a byte of
 line-ending hygiene.
 
-**Plural-form count.** A new plural entry must get as many msgstr[N] forms as its locale's rule
-declares. This one also needs two techniques, and for the same reason as the byte hygiene: every
-locale configured today is nplurals=2, so a hard-coded 2 and a derived one agree, and the functional
-check would pass with the derivation reverted. The source scan is what makes the revert visible.
-
 Why a standalone script rather than pytest: this repository has no Python test infrastructure and its
 CI installs no Python at all (Perl for po4a, .NET, PowerShell -- never Python), so
 update-glossary-po.py is a developer-machine-only tool. CI-side coverage for the byte invariant comes
@@ -36,7 +39,6 @@ Run it after touching the script:
     python scripts/test-update-glossary-po.py
 """
 
-import importlib.util
 import re
 import subprocess
 import sys
@@ -140,100 +142,51 @@ def check_writers_pin_newline(failures):
         )
 
 
-def load_generator():
-    """Import update-glossary-po.py as a module.
+def check_leaves_catalogues_alone(tmp, failures):
+    """The script must not touch po/glossary.<lang>.po -- those belong to Weblate.
 
-    Its filename is not an identifier, so importlib is the only route. Importing it is safe: everything
-    below the constants and helpers sits behind the __main__ guard. Bytecode writing is suppressed first --
-    the import would otherwise leave an untracked scripts/__pycache__/ behind on every run, and this
-    repository produces no Python bytecode anywhere else to have taught .gitignore about.
+    Asserted on the bytes of a catalogue that already exists, because that is the property with
+    consequences. A source scan for "no .po writer" would pass the moment someone reintroduced one
+    under a different name, and the damage from two writers is not visible in a diff of this script
+    at all -- it shows up later as a conflict in every language of the catalogue at once.
+
+    The fixture deliberately carries a stale msgid the template no longer has, plus a real
+    translation. A reintroduced merge would rewrite the header, drop the stale entry, or both, and
+    every one of those changes the bytes.
     """
-    sys.dont_write_bytecode = True
-    spec = importlib.util.spec_from_file_location("update_glossary_po", SCRIPT)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
+    po_path = tmp / "po" / "glossary.de.po"
+    stale = (
+        "# German translations for the NeoIPC Surveillance Glossary\n"
+        "# Copyright (C) Charité – Universitätsmedizin Berlin\n"
+        "#\n"
+        'msgid ""\n'
+        'msgstr ""\n'
+        '"Language: de\\n"\n'
+        '"MIME-Version: 1.0\\n"\n'
+        '"Content-Type: text/plain; charset=UTF-8\\n"\n'
+        '"Content-Transfer-Encoding: 8bit\\n"\n'
+        "\n"
+        'msgctxt "a_key_the_template_does_not_have"\n'
+        'msgid "Gone"\n'
+        'msgstr "Weg"\n'
+    )
+    po_path.write_text(stale, encoding="utf-8", newline="\n")
+    before = read_bytes(po_path)
 
+    result = run_script(tmp)
+    if result.returncode != 0:
+        failures.append(f"the script exited {result.returncode} with a catalogue present: {result.stderr.strip()}")
+        return
 
-def check_plural_form_count(failures):
-    """A new plural entry gets as many forms as its locale's rule declares -- derived, never assumed."""
-    module = load_generator()
-
-    # Written independently of the generator's pattern rather than importing it: reusing the
-    # implementation's own regex would compare it against itself and pass however wrong it is. It has to
-    # be at least as permissive, though, or an entry the generator parses fine reports here as a
-    # generator defect -- so whitespace around the "=" is accepted, as it is there.
-    #
-    # The two literals are identical today, which makes the duplication look accidental. It is not: fold
-    # them into one shared constant and this check silently stops being able to detect a wrong pattern,
-    # because it would then be using it. The protection is prospective -- when the generator's regex
-    # changes, this one does not follow, the check goes red, and someone looks.
-    declares = re.compile(r"\bnplurals\s*=\s*(\d+)")
-
-    for lang, rule in module.PLURAL_FORMS.items():
-        match = declares.search(rule)
-        if not match:
-            # Report it; do not let .group() raise, which would abort this function and take every
-            # later check in it down with the one bad entry.
-            failures.append(
-                f"PLURAL_FORMS[{lang!r}] declares no nplurals: {rule!r} -- the number of forms a new "
-                "plural entry gets is read from it"
-            )
-            continue
-        declared = int(match.group(1))
-        derived = module._plural_form_count(lang)
-        if derived != declared:
-            failures.append(
-                f"_plural_form_count({lang!r}) returned {derived}, but that locale's rule declares "
-                f"nplurals={declared}"
-            )
-
-    # The generator must refuse a malformed rule rather than default to a count. Exercised on an
-    # in-memory entry; the real table is untouched.
-    module.PLURAL_FORMS["xx"] = "plural=n != 1;"
-    try:
-        module._plural_form_count("xx")
-    except ValueError:
-        pass
-    except KeyError:
-        failures.append("_plural_form_count('xx') raised KeyError -- the malformed-rule branch is unreachable")
-    else:
+    after = read_bytes(po_path)
+    if after != before:
         failures.append(
-            "_plural_form_count('xx') did not raise on a rule declaring no nplurals -- a malformed entry "
-            "would silently decide how many forms every new plural entry gets"
+            "po/glossary.de.po changed -- this script must write only the template. A catalogue writer "
+            "here puts two writers on one Weblate-owned file, which conflicts every language at once."
         )
-    finally:
-        del module.PLURAL_FORMS["xx"]
-
-    # 'ru' is the concrete case, not a hypothetical one: this repository prefers the official WHO
-    # translation where one exists, and Russian is one of the six WHO languages -- at nplurals=3.
-    for lang in ("zz", "ru"):
-        try:
-            module._plural_form_count(lang)
-        except KeyError:
-            pass
-        else:
-            failures.append(
-                f"_plural_form_count({lang!r}) did not raise -- an unconfigured locale would have its "
-                "number of plural forms guessed rather than refused"
-            )
-
-    # The scan above cannot fail while every configured locale is nplurals=2, because a hard-coded 2
-    # returns the right answer by coincidence. This is the check that goes red on a revert.
-    source = _code_only(SCRIPT.read_text(encoding="utf-8"))
-    initialisers = list(_call_arguments(source, r"msgstr_plural=\("))
-    for call in initialisers:
-        if re.search(r"range\(\s*\d", call):
-            failures.append(
-                f"update-glossary-po.py: msgstr_plural=({call.strip()}) hard-codes its form count -- it "
-                "must be read from PLURAL_FORMS, or adding a locale with nplurals != 2 writes a catalogue "
-                "whose header and structure disagree"
-            )
-    if not initialisers:
-        failures.append(
-            "update-glossary-po.py: found no msgstr_plural initialiser to check -- this test's source scan "
-            "has gone stale and is silently asserting nothing"
-        )
+    for name in ("glossary.af.po", "glossary.fr.po"):
+        if (tmp / "po" / name).exists():
+            failures.append(f"po/{name} was created -- Weblate creates a catalogue from new_base, not this script")
 
 
 def run_script(tmp, *extra):
@@ -261,7 +214,7 @@ def main():
         (tmp / "po").mkdir()
         (tmp / "glossary.yaml").write_text(GLOSSARY_YAML, encoding="utf-8", newline="\n")
 
-        # 1. Run the script for real: glossary.yaml -> .pot, then merged into glossary.de.po.
+        # 1. Run the script for real: glossary.yaml -> glossary.pot, and nothing else under po/.
         result = run_script(tmp)
         if result.returncode != 0:
             print(f"FAIL update-glossary-po.py exited {result.returncode}")
@@ -271,11 +224,15 @@ def main():
 
         pot_path = tmp / "po" / "glossary.pot"
         po_path = tmp / "po" / "glossary.de.po"
-        for label, path in (("glossary.pot", pot_path), ("glossary.de.po", po_path)):
-            if not path.exists():
-                failures.append(f"{label}: the script did not write it")
-                continue
-            check_bytes(label, read_bytes(path), failures)
+        if not pot_path.exists():
+            failures.append("glossary.pot: the script did not write it")
+        else:
+            check_bytes("glossary.pot", read_bytes(pot_path), failures)
+        if po_path.exists():
+            failures.append(
+                "po/glossary.de.po was created from an empty po/ -- the catalogues are Weblate's, and "
+                "Weblate creates a new one from new_base"
+            )
 
         # 2. The content round-trip: keys became msgctxt, the key comment became a translator note,
         #    the header block did NOT, flags survived, and non-ASCII is intact.
@@ -295,12 +252,27 @@ def main():
             if "Charité test" not in pot_text:
                 failures.append("glossary.pot: non-ASCII content did not survive the round trip")
 
-        # 3. Translate, then run again with --generate-yaml to exercise the third writer.
-        if po_path.exists():
-            po = polib.pofile(str(po_path))
-            for entry in po:
-                entry.msgstr = "Übersetzung"
-            po.save(str(po_path), newline="\n")
+        # 3. Stand in for Weblate: write the catalogue this script no longer writes, translate it, and
+        #    run --generate-yaml, which reads it. The fixture is built from the template so the msgctxt
+        #    keys match; only Weblate's role is being simulated, not its file format.
+        if pot_path.exists():
+            pot = polib.pofile(str(pot_path))
+            weblate_po = polib.POFile()
+            weblate_po.header = (
+                "German translations for the NeoIPC Surveillance Glossary\n"
+                "Copyright (C) Charité – Universitätsmedizin Berlin\n"
+            )
+            weblate_po.metadata = {
+                "Language": "de",
+                "MIME-Version": "1.0",
+                "Content-Type": "text/plain; charset=UTF-8",
+                "Content-Transfer-Encoding": "8bit",
+            }
+            for entry in pot:
+                weblate_po.append(polib.POEntry(
+                    msgctxt=entry.msgctxt, msgid=entry.msgid, msgstr="Übersetzung",
+                ))
+            weblate_po.save(str(po_path), newline="\n")
 
             result = run_script(tmp, "--generate-yaml", "--threshold", "0")
             if result.returncode != 0:
@@ -317,8 +289,8 @@ def main():
         # 4. The source-level pinning, which is what can go red on a LF platform.
         check_writers_pin_newline(failures)
 
-        # 5. The plural-form count is derived from the locale's rule, not hard-coded.
-        check_plural_form_count(failures)
+        # 5. Ownership: a catalogue already in po/ must come out byte-identical.
+        check_leaves_catalogues_alone(tmp, failures)
 
         # 6. Prove the byte detector itself works, so a vacuous pass is impossible.
         detector = []

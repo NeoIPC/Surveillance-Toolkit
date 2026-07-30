@@ -51,9 +51,9 @@ sidecars and the standalone `WHO-AWaRe-Classification-2021.csv` are **retired** 
 
 ### This catalogue is not on Weblate, and cannot be
 
-Four NeoIPC catalogues are hosted on [Hosted Weblate](https://hosted.weblate.org/projects/neoipc/) for community
-translation — reports, protocol documentation, infectious agents and DHIS2 metadata. This one is not, and unlike the
-glossary and the PowerShell message strings, which are simply not registered yet, it cannot be. Hosted Weblate's free plan requires every component to carry a **free (libre) licence**,
+Five NeoIPC catalogues are hosted on [Hosted Weblate](https://hosted.weblate.org/projects/neoipc/) for community
+translation — reports, protocol documentation, infectious agents, DHIS2 metadata and the glossary. This one is not,
+and unlike the PowerShell message strings, which are simply not registered yet, it cannot be. Hosted Weblate's free plan requires every component to carry a **free (libre) licence**,
 and a **NonCommercial** term is not one — so the component was rejected as *"does not meet the Libre hosting
 conditions"* and has been removed.
 

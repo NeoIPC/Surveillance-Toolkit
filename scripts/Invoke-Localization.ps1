@@ -10,10 +10,11 @@
     validation into a single entry point with tab-completable parameters.
 
     Catalogue ownership: the repository owns every .pot template. It also owns the
-    catalogues of the three domains that are NOT hosted on Weblate — glossary,
-    scripts and antibiotics — each of which has a writer here that keeps it in step
-    with its template: update-glossary-po.py, po4a, and the NeoIPC-Tools antibiotic
-    exporter respectively. For the three this script does touch (reports, documentation,
+    catalogues of the two domains that are NOT hosted on Weblate — scripts and
+    antibiotics — each of which has a writer here that keeps it in step with its
+    template: po4a and the NeoIPC-Tools antibiotic exporter respectively. The glossary
+    catalogues are Weblate's, written by the neoipc-glossary component; nothing in this
+    repository writes them. For the three this script does touch (reports, documentation,
     infectious_agents) Weblate is the only writer, and po4a msgmerges them as an
     unavoidable side effect of every run, so -Update restores those from HEAD once the
     localized artifacts exist. Two writers on one catalogue is what conflicts every language at
@@ -164,7 +165,8 @@ $po4aConfigs = @('reports', 'documentation', 'infectious_agents', 'scripts')
 # registered as a Weblate component, so it stays repository-owned and this pipeline is the only thing
 # that keeps it current. Guarding it as Weblate's would freeze it at HEAD — po4a's msgmerge of a new
 # message key would be discarded, and no other writer exists to add it — and would abort the run on a
-# legitimate hand edit. po/glossary.*.po is likewise repository-owned, and is not a po4a config.
+# legitimate hand edit. po/glossary.*.po is Weblate-owned but is not a po4a config either, so it never
+# reaches this list — the glossary generator writes only its template, so there is nothing to restore.
 $weblateOwnedPo4aConfigs = @('reports', 'documentation', 'infectious_agents')
 
 # Each product po4a config derives its --package-version from that product's VERSION file (the single
@@ -397,9 +399,11 @@ function Restore-WeblateOwnedPo {
     # restored from HEAD once po4a has produced the localized artifacts. That is what keeps the
     # repository out of the header hunk Weblate also writes.
     #
-    # Only Weblate-owned catalogues are ever passed in. The antibiotic and glossary catalogues are
-    # repository-owned and are written by their own generators, so restoring them would discard the
-    # regeneration and freeze them at HEAD with nothing else to maintain them.
+    # Only the Weblate-owned catalogues of a po4a config are ever passed in. The antibiotic catalogues
+    # are repository-owned and written by their own generator, so restoring them would discard the
+    # regeneration and freeze them at HEAD with nothing else to maintain them. The glossary catalogues
+    # are Weblate's but reach po4a not at all, and their generator writes only the template, so there is
+    # never anything of theirs to restore.
     param([Parameter(Mandatory)][string[]]$RelativePath)
 
     $declared = @($RelativePath)
