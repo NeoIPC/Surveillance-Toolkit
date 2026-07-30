@@ -84,7 +84,22 @@ jobs:
                 fi
 
                 offending=""
-                for f in $(printf '%s\n' "$changed" | grep -E "^($owned)$" || true); do
+                matched=$(printf '%s\n' "$changed" | grep -E "^($owned)$" || true)
+                # `while IFS= read -r`, not `for f in $(…)`: the unquoted expansion word-splits on IFS, so a
+                # matching path containing a space arrives as two fragments, neither of which names a real
+                # file — `git log -- po/reports.de` returns nothing, the loop reads that as "no non-Weblate
+                # committers", and the gate passes. Same shape as the two fail-opens below: an error state
+                # indistinguishable from the clean state. Reachable only via a hand-created path, since
+                # Weblate's own `language_regex` cannot produce one — but "correct because today's filemask
+                # happens to yield space-free paths" is a property of the data, not of this gate.
+                #
+                # Fed by a here-string rather than a pipe: a piped `while` runs in a SUBSHELL, so every
+                # `offending=` assignment would be discarded at `done` and the gate would pass on precisely
+                # the files it had just rejected.
+                while IFS= read -r f; do
+                  # A here-string always emits at least one line, so an empty match list arrives here as a
+                  # single empty string rather than as no iterations at all.
+                  [ -n "$f" ] || continue
                   # The git call is separated from the grep deliberately. With `|| true` spanning the whole
                   # pipeline, a git failure — a missing ref, an unreadable path — produced an empty string,
                   # which this loop reads as "no non-Weblate committers" and the gate then PASSES. A guard
@@ -99,10 +114,10 @@ jobs:
                   # the pipeline as failed, which reads here as "no offence found" and silently passes.
                   others=$(printf '%s\n' "$committers" | grep -vFx "$weblate" || true)
                   if [ -n "$others" ]; then offending="${offending}${f}"$'\n'; fi
-                done
+                done <<< "$matched"
                 if [ -n "$offending" ]; then
                   echo "::error::This pull request modifies Weblate-owned .po files. Weblate is their only writer."
-                  echo "$offending" | while read -r f; do [ -n "$f" ] && echo "::error file=$f::$f is owned by Weblate — make the change there, not here."; done
+                  echo "$offending" | while IFS= read -r f; do [ -n "$f" ] && echo "::error file=$f::$f is owned by Weblate — make the change there, not here."; done
                   echo
                   echo "Translations, corrections and terminology go through https://hosted.weblate.org/projects/neoipc/"
                   echo
