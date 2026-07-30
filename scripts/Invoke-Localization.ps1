@@ -48,6 +48,12 @@
     when a Weblate-owned .po already has uncommitted changes, because the restore
     that follows po4a would discard them.
 
+    Both that refusal and the restore need a git working tree. Where there is none —
+    the container image build copies this source without one — no catalogue is under
+    version control, nothing can be committed from the tree, and so neither applies;
+    both are skipped, with a line in the log saying so. Wherever a working tree does
+    exist, every git failure remains fatal.
+
 .PARAMETER Render
     Render the localized artifacts only, writing neither .pot nor .po. Supports the
     po4a configs (reports, documentation, infectious_agents, scripts) or 'all'; the
@@ -365,6 +371,42 @@ function Get-Po4aCatalogPath {
     [pscustomobject]@{ Pot = $potRel; Po = $po }
 }
 
+function Test-GitWorkingTree {
+    # Whether a git repository governs $repoRoot. Both halves of the catalogue-ownership machinery below —
+    # the clean-tree assertion and the post-po4a restore — are operations on a repository, and there is one
+    # context that legitimately has none: the container image build runs this pipeline over a plain copy of
+    # the source. The NeoIPC-Reporting Dockerfile removes .git in every one of its three toolkit-source
+    # modes, and in workspace mode it has no choice — what it copies is a submodule's .git GITLINK FILE,
+    # whose target path does not exist inside the image. So "no repository" is a permanent property of that
+    # build rather than a fault, and in it there is nothing to protect: no catalogue is under version
+    # control, so none can be committed from this tree and nothing that happens to it can reach Weblate.
+    #
+    # The decision rests on the LOCAL marker alone, and deliberately does NOT ask git whether the tree is
+    # usable. Inferring absence from a git exit code fails OPEN, which is the one direction this must never
+    # fail: `git rev-parse` exits non-zero for several reasons that are not absence — dubious ownership
+    # under safe.directory, or an inherited GIT_DIR naming a missing directory — and each of those arises
+    # with .git sitting right there. Reading that as "no repository" skips both guards INSIDE a real working
+    # tree, which is exactly the state that can lose a translator's uncommitted work. Reproduced rather than
+    # supposed: with .git present and intact, GIT_TEST_ASSUME_DIFFERENT_OWNER=1 makes rev-parse exit 128.
+    #
+    # So a present marker means enforce, and a broken repository is then caught downstream instead of here:
+    # the two functions below check $LASTEXITCODE on every git call and throw, so an unusable repository
+    # aborts the run with a message naming what failed. Fail-closed, by construction.
+    if (Test-Path -LiteralPath (Join-Path $repoRoot '.git')) { return $true }
+
+    # No marker. Confirm git agrees rather than assuming it: a GIT_DIR in the environment, or a repository
+    # in a PARENT directory, means one is in play after all, and neither is a state to guess about. It is
+    # also the more dangerous direction — a parent repository that does not track the catalogues would give
+    # `ls-tree` an empty answer, which the restore reads as "HEAD has never seen these" and DELETES them.
+    git -C $repoRoot rev-parse --git-dir *> $null
+    if ($LASTEXITCODE -eq 0) {
+        throw ("No .git in '$repoRoot', yet git resolves a repository for it (check GIT_DIR, or a parent " +
+               'directory that is itself a repository). Refusing to guess whether the Weblate-owned ' +
+               'catalogues are under version control here.')
+    }
+    return $false
+}
+
 function Assert-CleanWeblatePo {
     # Weblate owns these .po files, so the pipeline restores them after a generator writes them (see
     # Restore-WeblateOwnedPo). That restore is a `git restore`, which would silently destroy any
@@ -603,6 +645,16 @@ if ($Update) {
     # offers no way to suppress only that, so they are restored from HEAD afterwards — Weblate is
     # their only writer. The restore runs in a finally so a po4a failure cannot leave them rewritten.
     if ($runPo4a) {
+        # Decided ONCE, before the loop, so the assertion and the restore can never disagree about it —
+        # a per-call test could assert on one config and skip the restore on the next, which is the
+        # two-writer state rather than either behaviour. Announced, because a silent skip is the one way
+        # this could hide a real repository whose .git had gone missing.
+        $enforceCatalogueOwnership = Test-GitWorkingTree
+        if (-not $enforceCatalogueOwnership) {
+            Write-Host ("Not a git working tree ($repoRoot): the Weblate-owned catalogues are not under " +
+                        "version control here, so the clean-tree assertion and the post-po4a restore do " +
+                        "not apply and are skipped. This is the source-copy build path (see Test-GitWorkingTree).")
+        }
         $targets = if ($Config -eq 'all') { $po4aConfigs } else { @($Config) }
         foreach ($target in $targets) {
             $cfgPath = $configMap[$target]
@@ -610,7 +662,9 @@ if ($Update) {
             $ownedPo = if ($weblateOwnedPo4aConfigs -contains $target) {
                 @((Get-Po4aCatalogPath -ConfigPath $fullCfgPath).Po.Values)
             } else { @() }
-            if ($ownedPo -and -not $DryRun) { Assert-CleanWeblatePo -RelativePath $ownedPo }
+            if ($ownedPo -and -not $DryRun -and $enforceCatalogueOwnership) {
+                Assert-CleanWeblatePo -RelativePath $ownedPo
+            }
             Invoke-UpdateYamlKeys -ConfigPath $cfgPath
             $pkgVer = if ($versionFileMap.ContainsKey($target)) {
                 (Get-Content -LiteralPath (Join-Path $repoRoot $versionFileMap[$target]) -Raw).Trim()
@@ -618,7 +672,9 @@ if ($Update) {
             try {
                 Invoke-Po4a -ConfigPath $cfgPath -PackageVersion $pkgVer
             } finally {
-                if ($ownedPo -and -not $DryRun) { Restore-WeblateOwnedPo -RelativePath $ownedPo }
+                if ($ownedPo -and -not $DryRun -and $enforceCatalogueOwnership) {
+                    Restore-WeblateOwnedPo -RelativePath $ownedPo
+                }
             }
             if (-not $DryRun -and $catalogHeaderMap.ContainsKey($target)) {
                 $hdr = $catalogHeaderMap[$target]
