@@ -15,6 +15,10 @@
 #                   cased key is swallowed — it never becomes an entry, its value is attached to the
 #                   uncased base, and it comes back named `key_plural`. Do not author one at all; give
 #                   the plural a single uncased `key_plural` and let the case variants be plain keys.
+#                   This rule is deliberately stricter than the check: the generator refuses a cased
+#                   plural key only when its uncased base is also present, so a lone `key_plural_tc`
+#                   would pass and round-trip intact. Following the simpler rule costs nothing and keeps
+#                   the convention describable in one sentence; the difference is a choice, not a gap.
 #   Descriptions  — YAML comments above a key become PO translator notes (#.)
 #   Context       — YAML key becomes msgctxt (enables variant_regex grouping)
 #   Location      — source file path + line number written as #: occurrence
