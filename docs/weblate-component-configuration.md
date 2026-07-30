@@ -73,11 +73,31 @@ working mechanism looks like too. And a count of flags in the template proves on
 them. What settles it is the target unit's own `flags`/`priority`, and the order the translate view
 actually offers.
 
-Unresolved: whether a source unit's **`extra_flags`** (the database field, which the API and
-`wlc edit-unit --extra-flags` can write) propagates to targets where the source unit's *file* flags do
-not. That distinction decides whether a per-string scheme needs one write or one per language, and it
-cannot be settled from the client — it needs either the server source or a reversible write on one string
-and a re-read of its targets.
+**A source unit's `extra_flags` DOES reach every language, and that is the only per-string route there
+is.** Established by a reversible probe on one string, since no amount of reading settles it. Setting
+`extra_flags: "priority:900"` on the source unit of a `priority:10` string moved its German target from
+`priority: 100` to `900`, its flag panel from empty to `priority:900`, and its position in the German
+queue from fourth to first — while the source unit's own `flags` stayed `priority:10`, i.e. the file
+value, untouched. Clearing `extra_flags` reverted all three. `needs_commit` was false throughout: this
+field is Weblate's database, so it produces nothing for the repository to commit.
+
+Attempting the same on the *target* unit is refused outright — *"Source strings properties can be set only
+on source strings"* — so there is no per-language flag at all. One write per string covers all nine.
+
+| Route | Reaches the target? |
+|---|---|
+| Source unit's **file** flags, i.e. what the `.pot` carries | **No** |
+| Source unit's **`extra_flags`** (API, `wlc edit-unit --extra-flags`) | **Yes**, all languages |
+| Target unit's `extra_flags` | **Rejected by the API** |
+
+Consequences worth stating before anyone builds on this. A per-string scheme that must actually take
+effect has to go through the API, which means it is **invisible in git and absent from a freshly created
+component** — so the repository has to stay the source of truth with the API call as a reconciliation
+step, and a declarative *rule* (a Bulk edit add-on's query, which is small enough to record here) is
+preferable to thousands of imperative writes that cannot be. And when checking whether a flag is live for
+a language, read the **target's** `priority` field or its flag panel — **not** the target's API `flags`
+field, which stayed `""` throughout even while `priority:900` was demonstrably in effect and ordering the
+queue.
 
 The middle row is the one that surprises people. For a bilingual gettext component Weblate treats the
 `.pot` as the **source translation** (`is_source: true`, `filename: po/<catalogue>.pot`), so
