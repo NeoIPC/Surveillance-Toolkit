@@ -84,7 +84,24 @@ jobs:
                 fi
 
                 offending=""
-                matched=$(printf '%s\n' "$changed" | grep -E "^($owned)$" || true)
+                # `|| true` would ignore EVERY non-zero status; the contract this gate wants is narrower and
+                # is stated in the loop below — grep's exit 1 means "no matches", which is how it says the
+                # input is clean, and anything ABOVE 1 is grep itself failing. Collapsing the two lets a
+                # filter that could not run read as "nothing owned was changed": measured under Actions'
+                # `bash -eo pipefail`, an unrunnable pattern took the old form to "PASSED, exit 0" on a
+                # changed catalogue it should have rejected. Not reachable while `$owned` is a literal that
+                # compiles — but "correct because today's pattern happens to compile" is a property of the
+                # input rather than of this gate, which is the same reasoning that closed the rename and
+                # word-splitting escapes above.
+                #
+                # `|| rc=$?` rather than a bare assignment: under `set -e` a failing command substitution
+                # ends the step before the status can be inspected at all.
+                rc=0
+                matched=$(printf '%s\n' "$changed" | grep -E "^($owned)$") || rc=$?
+                if [ "$rc" -gt 1 ]; then
+                  echo "::error::The ownership filter could not run (grep exit $rc) — the gate cannot vouch for this pull request."
+                  exit 1
+                fi
                 # `while IFS= read -r`, not `for f in $(…)`: the unquoted expansion word-splits on IFS, so a
                 # matching path containing a space arrives as two fragments, neither of which names a real
                 # file — `git log -- po/reports.de` returns nothing, the loop reads that as "no non-Weblate
@@ -112,7 +129,17 @@ jobs:
                   fi
                   # Not `grep -q`: it exits on the first hit, and SIGPIPE plus `pipefail` would then report
                   # the pipeline as failed, which reads here as "no offence found" and silently passes.
-                  others=$(printf '%s\n' "$committers" | grep -vFx "$weblate" || true)
+                  # Same narrowing as the filter above, and here the two statuses are load-bearing in
+                  # opposite directions: `grep -vFx` exits 1 when every committer IS Weblate — the clean
+                  # case, which must stay ignored — and 0 when a non-Weblate committer exists, which is the
+                  # offence. So this cannot become a bare `grep` with no `||` at all; 0 and 1 are both
+                  # expected answers and only 2 and above mean the filter failed.
+                  rc=0
+                  others=$(printf '%s\n' "$committers" | grep -vFx "$weblate") || rc=$?
+                  if [ "$rc" -gt 1 ]; then
+                    echo "::error::The committer filter could not run for $f (grep exit $rc) — the gate cannot vouch for this pull request."
+                    exit 1
+                  fi
                   if [ -n "$others" ]; then offending="${offending}${f}"$'\n'; fi
                 done <<< "$matched"
                 if [ -n "$offending" ]; then
