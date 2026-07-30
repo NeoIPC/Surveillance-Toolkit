@@ -137,7 +137,10 @@ jobs:
                   echo "      Restore them from the BASE branch, not from HEAD — by the time this gate fires the"
                   echo "      change is already committed, so --source=HEAD would restore the very version being"
                   echo "      rejected:"
-                  echo "      git restore --source=origin/main --worktree -- po/metadata.*.po"
+                  # $base, not a hard-coded origin/main: the job already computed the real base ref, and a
+                  # literal would print the wrong instruction the moment this runs against any other base
+                  # branch — inside the failure message of a gate, where the reader is least able to check it.
+                  echo "      git restore --source=$base --worktree -- po/metadata.*.po"
                   echo "      then commit only po/metadata.pot."
                   exit 1
                 fi
