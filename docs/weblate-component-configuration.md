@@ -13,8 +13,8 @@ that is a different kind of object and is out of scope here.
 
 `neoipc-glossary` carries two deviations the others do not, both deliberate. **`is_glossary: true`**, so
 its 41 curated terms are simultaneously translatable *and* the terminology source surfacing in every
-other component's sidebar — the reason it was registered as a component rather than seeded into the TBX
-store, one artifact serving both purposes with no one-way copy to drift. And a component-level
+other component's sidebar — the reason it is a component rather than terms seeded into the TBX store, one
+artifact serving both purposes with no one-way copy to drift. And a component-level
 **`variant_regex`** of `_(tc|sc|plural|plural_tc|plural_sc)$`, because this is the only catalogue whose
 keys carry casing and number variants of one concept; the regex groups them in the translator's view so
 a term and its title-case form are edited together instead of appearing as unrelated strings.
@@ -22,6 +22,10 @@ a term and its title-case form are edited together instead of appearing as unrel
 Its keys are an API contract with the R report code (`sR$surveillance_end` and friends), which is why
 the template stays repository-owned while the translations are Weblate's: exactly the `.pot`/`.po` seam,
 and the reason the catalogue is generated rather than hand-written.
+
+**Registering it and cutting `scripts/update-glossary-po.py` back to the template are one change and land
+together.** Either half alone is a defect: register first and the repository is a second writer of files
+Weblate now owns, remove the merge first and nothing keeps the catalogues in step with a changed template.
 
 **Expect one churn commit on its first drain.** The retired repository-side merge copied the template's
 source flags (`terminology`, `read-only`) into every catalogue. Weblate strips source flags when it
@@ -103,12 +107,16 @@ a language, read the **target's** `priority` field or its flag panel — **not**
 field, which stayed `""` throughout even while `priority:900` was demonstrably in effect and ordering the
 queue.
 
-The middle row is the one that surprises people. For a bilingual gettext component Weblate treats the
-`.pot` as the **source translation** (`is_source: true`, `filename: po/<catalogue>.pot`), so
-`priority:N` and other source-string flags are read from there and apply to every language. Weblate
-deliberately **strips them when writing each `.po`**, because a source property has no business being
-duplicated per language. Write such flags into the `.pot` only; a generator that also writes them into
-every `.po` produces thousands of lines of churn that Weblate removes again on the next write.
+Why the `.pot` is nonetheless the right home for source metadata: for a bilingual gettext component
+Weblate treats it as the **source translation** (`is_source: true`, `filename: po/<catalogue>.pot`), so
+source-string flags are read from there onto the source units — and Weblate deliberately **strips them
+when writing each `.po`**, because a source property has no business being duplicated per language. Write
+such flags into the `.pot` only; a generator that also writes them into every `.po` produces thousands of
+lines of churn that Weblate removes again on the next write.
+
+What that does *not* buy is effect on the target units, which is the distinction the rest of this section
+establishes. Both statements hold at once: the template is where the flag belongs, and the template is not
+how the flag reaches a translator.
 
 ## Settings that must not diverge
 
@@ -130,10 +138,10 @@ reason is added below.
 | `enable_suggestions` | `true` | The editorial model is peers advise, editor decides; suggestions are how peers advise |
 | `suggestion_voting` / `suggestion_autoaccept` | `false` / `0` | Voting needs at least two active contributors in a language before it reads as anything but a second obstacle |
 | `manage_units` | `false` | Source strings come from this repository. Translators must not add or remove them |
-| `license` | `CC-BY-4.0` | Should match what the catalogue's own PO header declares. **Two currently do not** — every `po/reports.<lang>.po` header still says MIT and every `po/infectious_agents.<lang>.po` header still says CC BY-NC-ND 4.0, while both components are registered here as CC BY 4.0. The decision is that the **headers** are wrong and are to be corrected (a NoDerivatives term cannot govern a translation catalogue, since a translation is the paradigm derivative work). Until that lands, this row states the target, not the state |
+| `license` | `CC-BY-4.0` | Matches what every catalogue's own PO header declares, on all five. Two did not: `reports` headers said MIT and `infectious_agents` said CC BY-NC-ND 4.0. The headers were the wrong side — a NoDerivatives term cannot govern a translation catalogue, since a translation is the paradigm derivative work — and they were corrected. Keep them in step: the header and this field are two statements of one fact, and a reader who finds only one of them must not be misled |
 | `report_source_bugs` | `NeoIPC-Support@charite.de` | Gives translators a route for source-string problems that is not a pull request comment |
 | `language_regex` | `^[^.]+$` | The filemask contains dots, so the language code must not swallow them |
-| `allow_translation_propagation` | `true` | The setting is **directional** — it controls whether updates in *other* components translate into *this* one. The protocol documentation and the DHIS2 metadata share 33 source strings, including whole clinical definitions reproduced verbatim as form help text; translated independently those drift, and drift between the protocol and what a clinician reads while entering data is a data-quality problem, not an inconsistency. Note it is prospective: enabling it does not backfill existing strings |
+| `allow_translation_propagation` | `true` | The setting is **directional** — it controls whether updates in *other* components translate into *this* one. It matches on `(context, source)`, which is why the pair it was originally justified by cannot benefit: the protocol documentation and the DHIS2 metadata do share 33 source strings, including clinical definitions reproduced verbatim as form help text, but all 2 820 metadata units carry a `msgctxt` and all 689 documentation units carry none, so no key ever matches. Measured, the reach is **documentation↔reports (8 keys)** and **documentation↔infectious agents (6)**. Keep it on for those, and treat the protocol-to-form-text drift — a real data-quality problem, not a cosmetic inconsistency — as unsolved by this setting. Note it is prospective in any case: enabling it does not backfill existing strings |
 | `new_lang` | `contact` | Anyone signed in could otherwise create a new language file, and for the infectious-agent list that is 4 107 empty strings. Requesting contact keeps the door open while putting an administrator in the loop |
 | `secondary_language` | German | Shows translators a second reference rendering beside English, in the one language the maintainer can personally vet |
 | `file_format_params.po_set_last_translator` | `false` | Would write a contributor's e-mail address into the `Last-Translator` header. The contributor list maintained by the *Contributors in comment* add-on already records authorship, and the most recent single contributor is not interesting on its own |
@@ -141,7 +149,9 @@ reason is added below.
 
 ## Every remaining difference, and why
 
-Two settings differ: one deliberate, one inert. Everything else is uniform.
+Four settings differ: three deliberate, one inert. Everything else is uniform. The three deliberate ones
+are the component `priority` below, and the glossary's `is_glossary` and `variant_regex`, both explained
+where the component is introduced at the top of this file.
 
 ### Deliberate
 
@@ -169,17 +179,28 @@ priority**, which is why the catalogue that matters most carries 60 rather than 
 "priority", pointing in opposite directions, is a genuine trap — confirm against the wording in the
 component settings UI, which labels the values ("Very high" … "Very low") rather than showing numbers.
 
-### Priority within a component — intended, not yet configured
+### Priority within a component — intended, and not achievable from the repository
 
 Component priority is only half of it: the ordering above holds *between* catalogues, and two of them
-have a further ordering *inside* them that component priority cannot express. That needs the
-`priority:N` string flag, which lives in the `.pot` — see the source-flag rule above.
+have a further ordering *inside* them that component priority cannot express. That needs a per-string
+priority.
 
-**None of this is in place today.** `po/reports.pot` and `po/infectious_agents.pot` contain **zero**
-`priority:N` flags; the only catalogue with a within-component ordering is `metadata`
-(2,329 × `priority:10`, 293 × `priority:200`, 92 × `priority:150`), generated by the metadata
-pipeline. What follows is the intended ordering, recorded so the flags can be written deliberately
-rather than invented later.
+**Writing `priority:N` into the `.pot` does not deliver it**, and `metadata` is the proof rather than
+the exception. That catalogue carries 2,714 such flags (2,329 × `priority:10`, 293 × `priority:200`,
+92 × `priority:150`), emitted by the metadata pipeline — and it orders nobody's queue, because those
+flags reach the source units and stop there. So **no catalogue has a working within-component ordering
+today**, including the one that looks configured. The measurements and the three-way confirmation are
+above, under *Where each kind of fact lives*.
+
+The route that does work is a **source-string extra flag** set through the web interface or the API,
+which propagates to every language from one write. Its cost is that it lives in Weblate's database:
+invisible in git, unreviewable in a pull request, and absent from a component recreated from scratch.
+That argues for expressing an ordering as a *rule* — a Bulk edit add-on's query, which is small enough
+to record here — rather than as thousands of individual writes that cannot be.
+
+`po/reports.pot` and `po/infectious_agents.pot` carry zero `priority:N` flags, which is now the correct
+state rather than an omission to correct: the flag would be inert there too. What follows is the
+intended ordering, recorded so that whoever configures it does so deliberately rather than inventing it.
 
 **Within reports**, the Partner Report, the Patient-Data Report and the Partner Certificate rank
 highest: they are meant to reach non-academic team members, patients and the general public, who have
@@ -229,8 +250,9 @@ which are permanent once merged. Do not let anyone widen that promise.
 
 `commit_message`, `add_message`, `delete_message`, `merge_message`, `addon_message` and
 `pull_message` were each stored separately per component — metadata in a conventional-commit style
-(`chore(l10n): …`), the other three as near-copies of an older Weblate default. All six are now
-identical everywhere and inherited from the project.
+(`chore(l10n): …`), the other three then-existing components as near-copies of an older Weblate default.
+All six are now identical everywhere and inherited from the project, which is also what a newly created
+component gets by default, so a fifth one needs nothing done to it here.
 
 Unifying them mattered for more than tidiness: **the stored value is what takes effect the moment
 anyone unticks "inherit from project"**, so divergent copies are a latent surprise rather than dead
