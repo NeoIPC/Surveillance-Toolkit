@@ -10,10 +10,11 @@
 #                   file. (a) TWO SLOTS ONLY, so a language declaring three or six forms cannot be
 #                   represented. No entry uses a plural family today, which is why Ukrainian, Russian
 #                   (3 forms) and Arabic (6) are unaffected — it is adding the first family while one
-#                   of them is present that would force the schema to grow. (b) NOT ON A CASED KEY:
-#                   `key_plural` and `key_plural_tc` resolve to the same base, so pairing keeps one and
-#                   loses the other, and the surviving spelling collides with the key the reader
-#                   synthesises. Author a cased plural as its own key with no plural counterpart.
+#                   of them is present that would force the schema to grow. (b) NO CASED PLURAL KEY:
+#                   `key_plural_tc` and `key_plural_sc` resolve to the same base as `key_plural`, so the
+#                   cased key is swallowed — it never becomes an entry, its value is attached to the
+#                   uncased base, and it comes back named `key_plural`. Do not author one at all; give
+#                   the plural a single uncased `key_plural` and let the case variants be plain keys.
 #   Descriptions  — YAML comments above a key become PO translator notes (#.)
 #   Context       — YAML key becomes msgctxt (enables variant_regex grouping)
 #   Location      — source file path + line number written as #: occurrence
@@ -29,8 +30,8 @@
 #   key_sc      = Sentence case (first word capitalised)
 #   key_tc      = Title case (all major words capitalised)
 #   key_plural  = Plural form
-#   Suffixes can combine: key_plural_tc — but author it as a plain key, never alongside a key_plural
-#     for the same base; see the Plurals note above for why the pair cannot round-trip.
+#   Suffixes can combine in principle, but NOT key_plural_tc / key_plural_sc — the generator refuses
+#     them, because pairing cannot keep a cased plural apart from the uncased one. See Plurals above.
 #   Abbreviations (CVC, HAP, INV, NEC, SSI) are always uppercase — no variants.
 #   Proper nouns (NeoIPC Surveillance) keep their canonical casing.
 #

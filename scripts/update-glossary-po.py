@@ -66,7 +66,6 @@ except ImportError:
     sys.exit("Error: polib is required. Install with: pip install polib")
 
 PLURAL_SUFFIX = re.compile(r"_plural(?:_(tc|sc))?$")
-CASE_SUFFIX = re.compile(r"_(tc|sc)$")
 FLAGS_LINE = re.compile(r"^flags:\s*(.+)$", re.IGNORECASE)
 
 # The header contract is defined once, in the NeoIPC-Tools module (Private/PoHeader.ps1). This is the same
@@ -217,8 +216,27 @@ def yaml_to_pot(glossary_path, pot_path):
     plural_pairs = {}
     for key in data:
         base = find_plural_base(key)
-        if base and base in data:
-            plural_pairs[base] = key
+        if not (base and base in data):
+            continue
+        # A CASED plural key cannot be paired. PLURAL_SUFFIX strips `_plural_tc` and `_plural_sc` to the
+        # same base as `_plural`, so the cased key is swallowed: it never becomes an entry of its own, its
+        # value is attached to the uncased base as that entry's msgid_plural, and the reader then emits it
+        # back under the uncased `<base>_plural` name. Authoring the four keys the naming convention
+        # documents for one term yields three, one holding the wrong value.
+        #
+        # Caught here, against glossary.yaml, because this is the only place the distinction survives:
+        # by the time a catalogue exists the plural sits on the uncased msgctxt, so nothing downstream can
+        # tell a cased family from an ordinary one. Refusing at authoring time is also where the author
+        # can act on it.
+        cased = PLURAL_SUFFIX.search(key).group(1)
+        if cased:
+            sys.exit(
+                f"Error: {glossary_path.name}: {key!r} is a cased plural key, which this schema cannot "
+                f"express. Pairing resolves it to {base!r}, so its value would be emitted back as "
+                f"'{base}_plural' and {key!r} would disappear. Give the plural form one key per case "
+                f"({base}_plural) and no cased plural, or extend the schema to keep them apart."
+            )
+        plural_pairs[base] = key
 
     # Track which keys are handled as plural counterparts
     handled_as_plural = set(plural_pairs.values())
@@ -269,20 +287,16 @@ def yaml_to_pot(glossary_path, pot_path):
 
 
 def _reject_unsupported_plurals(po_dir, languages):
-    """Refuse the two plural shapes this schema cannot round-trip, before anything is written.
+    """Refuse a plural family with more forms than the YAML can hold, before anything is written.
 
-    Both are unreachable today -- no glossary entry declares a plural family at all -- and both become
-    reachable through an ordinary glossary edit rather than through anything exotic.
+    glossary.<lang>.yaml holds `key` and `key_plural`, so a language declaring three or six forms cannot
+    be represented. Scoped to the ENTRY, not the language: a three-form language is fine while no entry
+    carries a plural family, which is why Ukrainian and Arabic work today. Unreachable now -- no glossary
+    entry declares a plural family -- and reachable through an ordinary glossary edit.
 
-    MORE THAN TWO FORMS. glossary.<lang>.yaml holds `key` and `key_plural`, so a language declaring three
-    or six forms cannot be represented. Scoped to the entry, not the language: a three-form language is
-    fine while no entry carries a plural family, which is why Ukrainian and Arabic work today.
-
-    A CASED PLURAL FAMILY. The naming convention documents `key_plural_tc` as valid, but the pairing keys
-    on the base name and `key_plural` and `key_plural_tc` share one, so the second silently replaces the
-    first; the loser is then emitted as a standalone entry and collides on the way back with the key the
-    reader synthesises. Round-tripping the four documented keys of one term yields three, one of them
-    holding the wrong value, with the cased plural gone. Refusing beats emitting that.
+    The other unrepresentable shape, a cased plural key, is refused in yaml_to_pot instead. It has to be:
+    once a catalogue exists the plural sits on the uncased msgctxt, so nothing here can tell a cased
+    family from an ordinary one.
     """
     for lang in languages:
         po_path = po_dir / f"glossary.{lang}.po"
@@ -297,15 +311,6 @@ def _reject_unsupported_plurals(po_dir, languages):
                     f"forms, and glossary.<lang>.yaml has two slots for them ('{entry.msgctxt}' and "
                     f"'{entry.msgctxt}_plural'). The schema needs extending to hold this language's "
                     f"forms -- do not narrow --languages to work around it, that drops the language."
-                )
-            if entry.msgctxt and CASE_SUFFIX.search(entry.msgctxt):
-                sys.exit(
-                    f"Error: {po_path.name}: {entry.msgctxt!r} carries a plural family on a cased key. "
-                    f"The generator would write '{entry.msgctxt}_plural', not the "
-                    f"'{CASE_SUFFIX.sub('', entry.msgctxt)}_plural"
-                    f"{CASE_SUFFIX.search(entry.msgctxt).group(0)}' the naming convention documents, and "
-                    f"the two spellings collide. Author the cased plural as its own key without a plural "
-                    f"counterpart, or extend the schema."
                 )
 
 
