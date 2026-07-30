@@ -264,6 +264,13 @@ def main():
         if pot_path.exists():
             pot = polib.pofile(str(pot_path))
             weblate_po = polib.POFile()
+            # Shaped the way WEBLATE writes a catalogue, not the way polib defaults to. This is
+            # load-bearing for the ownership check below: at polib's default wrapwidth of 78 a short
+            # fixture is a polib FIXED POINT, so a re-save produces identical bytes and the byte
+            # comparison cannot see a writer at all. A planted po.save() passed the whole suite green
+            # until this line existed. 65535 is what every component declares, and the long entry below
+            # is what makes the difference observable.
+            weblate_po.wrapwidth = 65535
             weblate_po.header = (
                 "German translations for the NeoIPC Surveillance Glossary\n"
                 "Copyright (C) Charité – Universitätsmedizin Berlin\n"
@@ -278,6 +285,17 @@ def main():
                 weblate_po.append(polib.POEntry(
                     msgctxt=entry.msgctxt, msgid=entry.msgid, msgstr="Übersetzung",
                 ))
+            # One entry longer than polib's default wrap width, so the fixture is NOT a polib fixed
+            # point. Without it every line is short enough that polib re-serialises the file
+            # identically whatever its wrapwidth, and the ownership assertion below is vacuous.
+            weblate_po.append(polib.POEntry(
+                msgctxt="a_long_entry_so_the_fixture_is_not_a_polib_fixed_point",
+                msgid="This project has received funding from the European Union's Horizon 2020 "
+                      "research and innovation programme under grant agreement number 965328.",
+                msgstr="Dieses Projekt wurde aus dem Forschungs- und Innovationsprogramm Horizont "
+                       "2020 der Europäischen Union unter der Finanzhilfevereinbarung Nummer 965328 "
+                       "gefördert.",
+            ))
             weblate_po.save(str(po_path), newline="\n")
 
             # Bracket THIS run, not just the bare one. --generate-yaml is the mode the pipeline actually
@@ -291,6 +309,25 @@ def main():
             if result.returncode != 0:
                 failures.append(f"--generate-yaml exited {result.returncode}: {result.stderr.strip()}")
             else:
+                # The BELOW-threshold path too, which is the one a normal -Update takes for every
+                # language today -- nine catalogues sit far under the default 80 -- so leaving it
+                # unbracketed leaves the common branch unguarded. The fixture is fully translated, so
+                # an impossible threshold is what forces the skip.
+                before_skip = read_bytes(po_path)
+                skipped = run_script(tmp, "--generate-yaml", "--threshold", "101")
+                if skipped.returncode != 0:
+                    failures.append(f"--generate-yaml (skip path) exited {skipped.returncode}")
+                elif read_bytes(po_path) != before_skip:
+                    failures.append(
+                        "po/glossary.de.po changed on the below-threshold path of --generate-yaml -- "
+                        "the branch that skips a language must still not write its catalogue"
+                    )
+                elif "Skipped de" not in skipped.stdout:
+                    failures.append(
+                        "the below-threshold path did not report skipping -- this check is asserting "
+                        f"nothing (stdout: {skipped.stdout.strip()[:120]!r})"
+                    )
+
                 if read_bytes(po_path) != before_generate:
                     failures.append(
                         "po/glossary.de.po changed during --generate-yaml -- that path reads the catalogue "

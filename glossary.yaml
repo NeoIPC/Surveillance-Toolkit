@@ -1,6 +1,7 @@
 # NeoIPC Surveillance Glossary
 #
-# Managed via monolingual gettext PO for Weblate (not po4a).
+# Managed via bilingual gettext PO for Weblate (not po4a): the key becomes msgctxt, the English value
+# becomes msgid.
 # Run `python scripts/update-glossary-po.py` after editing this file.
 #
 # Weblate feature mapping (YAML → PO):
@@ -56,6 +57,10 @@ human_milk_sc: "Human milk"
 inv: INV
 kangaroo_care: "kangaroo care"
 kangaroo_care_sc: "Kangaroo care"
+# An initialism, so most languages keep it verbatim; suppress the unchanged-translation check rather
+# than have every language answer it. Declared here because a flag set on a catalogue does not survive
+# msgmerge — gettext models no custom flags, so only the template's are restored.
+# flags: ignore-same
 nec: NEC
 necrotising_enterocolitis: "necrotising enterocolitis"
 necrotising_enterocolitis_sc: "Necrotising enterocolitis"
@@ -82,6 +87,8 @@ surgical_site_infection: "surgical site infection"
 surgical_site_infection_sc: "Surgical site infection"
 surgical_site_infection_tc: "Surgical Site Infection"
 surveillance: surveillance
+# Several languages render this identically to English in its sentence-case form; same reasoning as `nec`.
+# flags: ignore-same
 surveillance_sc: Surveillance
 surveillance_end: "surveillance end"
 surveillance_end_sc: "Surveillance end"

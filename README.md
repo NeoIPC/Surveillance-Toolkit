@@ -111,8 +111,8 @@ changes one is a scientific change, not an editorial one, so raise an issue firs
 translated text lives in gettext catalogues, not in the source files: change the English string and
 regenerate, never hand-edit a generated localized file.
 
-**Translations.** The protocol, the report text, the infectious-agent names and the DHIS2 metadata
-are translated on [Weblate](https://hosted.weblate.org/projects/neoipc/), who support this project's
+**Translations.** The protocol, the report text, the infectious-agent names, the DHIS2 metadata and the
+controlled vocabulary are translated on [Weblate](https://hosted.weblate.org/projects/neoipc/), who support this project's
 translation effort with their software, expertise and free hosting. Contributions in any language are
 welcome, and no git knowledge is needed — translating in the web interface is enough. Feedback on a
 translation belongs in Weblate's per-string comments, where the person who wrote it will see it,

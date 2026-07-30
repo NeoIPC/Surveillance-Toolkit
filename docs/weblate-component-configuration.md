@@ -23,15 +23,46 @@ Its keys are an API contract with the R report code (`sR$surveillance_end` and f
 the template stays repository-owned while the translations are Weblate's: exactly the `.pot`/`.po` seam,
 and the reason the catalogue is generated rather than hand-written.
 
-**Registering it and cutting `scripts/update-glossary-po.py` back to the template are one change and land
-together.** Either half alone is a defect: register first and the repository is a second writer of files
-Weblate now owns, remove the merge first and nothing keeps the catalogues in step with a changed template.
+> **Configured here, not yet created.** `neoipc-glossary` does not exist on the instance: the project
+> currently has four gettext components plus the TBX store whose slug is `glossary`. Every "five" in this
+> file states the target, not the state, until the component is created — the same convention this file
+> uses for the within-component ordering below.
+>
+> **Register it with:** `vcs: git`, `repo`/`push`/`branch` copied from `neoipc-dhis2-metadata`,
+> `push_branch: weblate-glossary`, `filemask: po/glossary.*.po`, `new_base: po/glossary.pot`,
+> `template:` **empty** (this is a *bilingual* catalogue — see below), `file_format: po`,
+> `license: CC-BY-4.0`, `is_glossary: true`, `variant_regex: _(tc|sc|plural|plural_tc|plural_sc)$`,
+> `priority: 60`, and the uniform settings from *Settings that must not diverge*.
+>
+> **Then set `manage_units` back to `false`.** Weblate's component-creation branch forces it to `true`
+> for a glossary component, and it is not among the fields the creation form submits, so the operator
+> gets `true` whatever they intended. Leaving it there would let a translator add or remove terms — and
+> these msgids are an API contract with the R report code.
+>
+> **Delete this block in the commit that completes the registration.** Registering the component and
+> cutting `scripts/update-glossary-po.py` back to the template are one change: register first and the
+> repository is a second writer of files Weblate now owns; remove the merge first and nothing keeps the
+> catalogues in step with a changed template. Nothing else makes the window visible — `merge_po` is gone,
+> no `.pot`-to-`.po` parity check exists, and the placeholder gate compares `.po` files only, so a
+> `glossary.yaml` change made during the window leaves nine catalogues behind the template with nothing
+> reporting it.
 
-**Expect one churn commit on its first drain.** The retired repository-side merge copied the template's
-source flags (`terminology`, `read-only`) into every catalogue. Weblate strips source flags when it
-writes a `.po`, so its first write removes them — a header-and-flags-only diff, self-correcting, and not
-worth a repository-side edit to pre-empt. The `ignore-same` flags are the exception: that one is
-translator-managed, and German carries two more than the other languages, which is real state to keep.
+**Expect one churn commit on its first drain — about 28 changed lines per language, 35 for German.**
+Roughly six of those are the header and flags: the retired repository-side merge copied the template's
+flags into every catalogue, and `msgmerge --previous --no-wrap` — the arguments Weblate uses, because
+this document mandates `po_line_wrap: 65535` — discards **all** of them. That is gettext modelling no
+custom flags, not Weblate stripping *source* flags; a `fuzzy` injected alongside survives the same merge
+while `ignore-same` does not. The remaining ~22 lines are the three translator-comment blocks re-flowing
+and one long entry unwrapping, which follows from the `po_line_wrap` contract meeting catalogues polib
+wrote at 78 and would happen against the previous template too.
+
+**The `ignore-same` flags needed action, and got it.** Only a flag in the *template* survives a merge, so
+`nec` and `surveillance_sc` — whose suppressions existed in `po/glossary.de.po` alone, kept alive by the
+per-language flag-merging code this change deletes — would have been destroyed on the first drain and
+been unrestorable, since the ownership gate now rejects a repository-side edit to a catalogue. Both are
+source-equals-target, so *Unchanged translation* would then have started firing on them with nothing
+recording that the suppression was deliberate. They are now declared in `glossary.yaml`, which puts them
+in the template where every language inherits them durably.
 
 Those five are configured **identically except where this document gives a reason.** That rule is the
 point of the file: the components were created at different times against different Weblate defaults,

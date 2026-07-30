@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Convert glossary.yaml to/from monolingual gettext PO format.
+"""Convert glossary.yaml to/from bilingual gettext PO format.
+
+Bilingual rather than monolingual: msgctxt carries the YAML key and msgid carries the English
+source, so the component's template field stays empty and new_base points at the .pot.
 
 Replaces po4a for glossary management, providing full PO feature support:
 msgctxt (variant grouping), msgid_plural (plurals), translator comments,
@@ -270,9 +273,14 @@ def generate_yaml(po_dir, glossary_path, languages, threshold=80):
             continue
 
         po = polib.pofile(str(po_path))
-        total = len(po)
+        # polib's own percentage, not len(po): POFile subclasses list, so obsolete "#~" entries count
+        # toward its length while never counting as translated, which drags the percentage down and can
+        # skip a language that is in fact complete. Obsolete entries used to be impossible here because
+        # the retired merge rebuilt each catalogue from the template; now that Weblate owns them and
+        # po_remove_obsolete is deliberately false, they are normal state.
+        pct = po.percent_translated()
         translated_count = len(po.translated_entries())
-        pct = (translated_count / total * 100) if total > 0 else 0
+        total = len([e for e in po if not e.obsolete])
 
         if pct < threshold:
             print(
@@ -316,7 +324,7 @@ def generate_yaml(po_dir, glossary_path, languages, threshold=80):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Convert glossary.yaml to/from monolingual gettext PO"
+        description="Convert glossary.yaml to/from bilingual gettext PO"
     )
     parser.add_argument(
         "--glossary",

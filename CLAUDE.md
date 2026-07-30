@@ -233,7 +233,7 @@ wsl -e bash -c "cd $(wsl wslpath -a .) && PERLLIB=tools/po4a/lib tools/po4a/po4a
 | `infectious_agents.po4a.cfg` | Pathogen taxonomy |
 | `scripts/po4a.cfg` | PowerShell message strings |
 
-**Note:** The glossary (`glossary.yaml`) is **not** managed by po4a. It uses a custom script (`scripts/update-glossary-po.py`) that generates monolingual gettext PO with `msgctxt` for Weblate variant grouping and plural support. See the helper scripts table below.
+**Note:** The glossary (`glossary.yaml`) is **not** managed by po4a. It uses a custom script (`scripts/update-glossary-po.py`) that generates **bilingual** gettext PO — `msgctxt` carries the YAML key and `msgid` carries the English source — giving Weblate variant grouping and plural support. Bilingual is the operative word at registration: the component's `template` field stays **empty** and `new_base` points at `po/glossary.pot`. See the helper scripts table below.
 
 ### Target languages
 
@@ -246,7 +246,7 @@ af, de, el, es, et, fr, it, ne, tr (9 languages)
 | `Invoke-Localization.ps1` | Unified localization wrapper with tab completion. `-Update` runs the full pipeline (fix layers → YAML keys → po4a → glossary). `-Test` runs read-only validation. See `-Config`, `-Force`, `-DryRun` switches. |
 | `Update-Po4aYamlKeys.ps1` | Auto-extract YAML keys for po4a config (run after changing YAML structure) |
 | `Test-PoPlaceholders.ps1` | Validate placeholder consistency between source and translations |
-| `update-glossary-po.py` | Convert `glossary.yaml` to/from monolingual gettext PO (replaces po4a for glossary). Requires `ruamel.yaml` and `polib`. Run after editing `glossary.yaml` to regenerate `po/glossary.pot` — **the template and nothing else under `po/`**. The catalogues belong to the `neoipc-glossary` Weblate component: its msgmerge add-on brings them up to a changed template and its `new_base` creates one for a language Weblate adds, so this script has no per-language header machinery at all. `--generate-yaml` reads whatever Weblate has committed and produces the localized `glossary.<lang>.yaml`. |
+| `update-glossary-po.py` | Convert `glossary.yaml` to/from bilingual gettext PO (replaces po4a for glossary). Requires `ruamel.yaml` and `polib`. Run after editing `glossary.yaml` to regenerate `po/glossary.pot` — **the template and nothing else under `po/`**. The catalogues belong to the `neoipc-glossary` Weblate component: its msgmerge add-on brings them up to a changed template and its `new_base` creates one for a language Weblate adds, so this script has no per-language header machinery at all. `--generate-yaml` reads whatever Weblate has committed and produces the localized `glossary.<lang>.yaml`. |
 
 ### Importing existing translations
 
