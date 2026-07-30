@@ -303,6 +303,13 @@ def _reject_unsupported_plurals(po_dir, languages):
         if not po_path.exists():
             continue
         for entry in polib.pofile(str(po_path)):
+            # Obsolete "#~" entries are skipped, because the emitter never sees one: it iterates
+            # translated_entries(), which excludes them. Validating what the emitter cannot reach means
+            # refusing on state the configuration deliberately keeps -- po_remove_obsolete is false on
+            # purpose -- so a retired plural family would withhold output for the whole run and name a
+            # key nobody uses. A guard that blocks correct output is worse than the gap it closes.
+            if entry.obsolete:
+                continue
             if not (entry.msgid_plural and entry.msgstr_plural):
                 continue
             if len(entry.msgstr_plural) > 2:
@@ -335,7 +342,12 @@ def generate_yaml(po_dir, glossary_path, languages, threshold=80):
             continue
 
         po = polib.pofile(str(po_path))
-        translated_count = len(po.translated_entries())
+        # One list, used for the count, the decision and the emission below, so all three are about the
+        # same entries by construction. They agreed before only because polib's translated_entries()
+        # happens to exclude obsolete ones while the denominator excluded them explicitly -- the same
+        # invisible agreement that made the percentage look wrong to two readers, one level down.
+        translated = [e for e in po.translated_entries() if not e.obsolete]
+        translated_count = len(translated)
         total = len([e for e in po if not e.obsolete])
         # Computed from the two counts the message prints, so the decision and the printed figure are
         # provably the same numbers rather than agreeing because polib happens to define its percentage
@@ -363,7 +375,7 @@ def generate_yaml(po_dir, glossary_path, languages, threshold=80):
             continue
 
         translations = {}
-        for entry in po.translated_entries():
+        for entry in translated:
             if not entry.msgctxt:
                 continue
 
