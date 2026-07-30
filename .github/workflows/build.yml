@@ -117,7 +117,18 @@ jobs:
                 done <<< "$matched"
                 if [ -n "$offending" ]; then
                   echo "::error::This pull request modifies Weblate-owned .po files. Weblate is their only writer."
-                  echo "$offending" | while IFS= read -r f; do [ -n "$f" ] && echo "::error file=$f::$f is owned by Weblate — make the change there, not here."; done
+                  # `|| continue`, not `[ -n "$f" ] && echo`: `$offending` ends in a newline and `echo` adds
+                  # another, so the last iteration reads "" and the `&&` short-circuits to status 1. That
+                  # becomes the loop's exit status, and under Actions' `bash --noprofile --norc -eo pipefail`
+                  # it ends the step right here — discarding every guidance line below, which is the whole
+                  # point of the failure path. The gate still rejects correctly; the person who tripped it
+                  # just loses the per-catalogue remedies written to help them fix it. The checking loop above
+                  # already uses `|| continue` for this reason, and a here-string rather than a pipe keeps the
+                  # two loops the same shape.
+                  while IFS= read -r f; do
+                    [ -n "$f" ] || continue
+                    echo "::error file=$f::$f is owned by Weblate — make the change there, not here."
+                  done <<< "$offending"
                   echo
                   echo "Translations, corrections and terminology go through https://hosted.weblate.org/projects/neoipc/"
                   echo
