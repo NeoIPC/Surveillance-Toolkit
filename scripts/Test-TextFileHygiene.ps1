@@ -371,12 +371,42 @@ if ($unusable) {
     exit 1
 }
 
+$inspectedNothing = [System.Collections.Generic.List[string]]::new()
 foreach ($repo in $repoList) {
     $label = Split-Path $repo -Leaf
     $checkedRepos++
+    # Sampled per root rather than over the run — see the guard below for why that distinction is the
+    # whole point.
+    $filesBefore = $checkedFiles
     Test-LineEnding      -Repo $repo -Label $label
     Test-Encoding        -Repo $repo -Label $label
     Test-PowerShellHeader -Repo $repo -Label $label
+    if ($checkedFiles -eq $filesBefore) { $inspectedNothing.Add($repo) }
+}
+
+# A root that inspected NOTHING must not count as checked. The preflight above proves each root can
+# ENUMERATE; it does not prove that any file survived the declared-binary filter, and those are different
+# claims. A .gitattributes regression declaring the whole tree binary (`* -text`) satisfies the preflight —
+# `ls-files --eol` returns rows for every path — and then every row is skipped, so the root contributes zero
+# findings and zero inspected files while still counting as swept. Measured, not reasoned: a repository
+# holding `* -text`, one CRLF file and one file with a UTF-8 BOM printed "Text-file hygiene OK: 0 file(s)"
+# and exited 0, seeing neither planted defect.
+#
+# Per ROOT, because only the TOTAL is reported: in a multi-root scope a healthy root's files keep that total
+# non-zero, so one root dropping to zero is invisible in the green line. Same blindness the enumeration
+# preflight above closes for a different cause; a run-level count cannot see this one.
+#
+# This is also the state that looks most normal — the checkout is complete, git is healthy, every command
+# succeeds — and this is the repository where seven CRLF catalogues did sit undetected, so the check whose
+# .DESCRIPTION promises the whole declared scope was inspected has to be able to keep that promise.
+if ($inspectedNothing.Count) {
+    Write-Host ("Cannot check text-file hygiene: {0} of {1} repository/ies in scope enumerated tracked files but left none to inspect:" -f $inspectedNothing.Count, $repoList.Count) -ForegroundColor Red
+    $inspectedNothing | ForEach-Object { Write-Host ("  {0}" -f $_) -ForegroundColor Red }
+    Write-Host ''
+    Write-Host 'Every tracked path there was skipped as declared-binary, so no line-ending, BOM or encoding' -ForegroundColor DarkGray
+    Write-Host 'check ran against any of them. Check .gitattributes before assuming the checkout is at fault:' -ForegroundColor DarkGray
+    Write-Host 'a stray `* -text` or `* binary` exempts an entire tree from every check in this script.' -ForegroundColor DarkGray
+    Write-Host ''
 }
 
 if ($failures.Count) {
@@ -385,8 +415,12 @@ if ($failures.Count) {
     Write-Host ''
     Write-Host 'Expected: LF line endings, UTF-8 without a BOM, and the canonical PowerShell header' -ForegroundColor DarkGray
     Write-Host "(#!/usr/bin/env pwsh where run directly, #Requires -Version $floor, blank line, help block)." -ForegroundColor DarkGray
-    exit 1
 }
+
+# Both conditions are terminal, and the exit is deliberately here rather than inside either block: a root that
+# inspected nothing is a failed run whether or not the roots that DID inspect something came back clean, and
+# an `exit 1` inside the block above would have reported findings while returning before this one was scored.
+if ($failures.Count -or $inspectedNothing.Count) { exit 1 }
 
 Write-Host ("Text-file hygiene OK: {0} file(s) across {1} repository/ies." -f $checkedFiles, $checkedRepos) -ForegroundColor Green
 # Declare the verdict explicitly. Falling off the end leaves $LASTEXITCODE holding whatever the last internal
