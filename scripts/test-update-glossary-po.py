@@ -1,8 +1,16 @@
 #!/usr/bin/env python3
 """Regression test for update-glossary-po.py: it runs the script and checks what it wrote.
 
-Three invariants are covered, and they need different techniques — one of them because it cannot be
-observed from the output on every platform, the others because the obvious observation is vacuous.
+Four invariants are covered, and three of them need a technique beyond "run it and look": one cannot be
+observed from the output on every platform, one is invisible unless the fixture is shaped to reveal it,
+and one is about the committed files rather than about behaviour at all.
+
+**Template matches source.** po/glossary.pot must be what the committed glossary.yaml currently
+produces. This is the only check here asserted against the REAL committed files rather than a fixture,
+which is what lets it catch something a fixture never can: the template going stale. It has already
+earned that — it caught 41 location references left pointing one line early by an edit made after the
+last regeneration, and, in failing for the wrong reason while being written, the fact that the
+generator wrote whatever path it was handed into a committed and publicly shipped file.
 
 **Catalogue ownership.** po/glossary.<lang>.po belongs to Weblate's neoipc-glossary component. This
 script writes the template and must not touch a catalogue -- two writers on one .po is what conflicts
