@@ -5,7 +5,12 @@
 # Run `python scripts/update-glossary-po.py` after editing this file.
 #
 # Weblate feature mapping (YAML → PO):
-#   Plurals       — key + key_plural paired into msgid / msgid_plural
+#   Plurals       — key + key_plural paired into msgid / msgid_plural. Two slots only, so a language
+#                   with more than two plural forms cannot be fully represented. No entry uses this
+#                   today, which is why languages like Ukrainian, Russian (3 forms) and Arabic (6)
+#                   are unaffected; adding the first plural family while one of them is present is
+#                   what would force the schema to grow, and the generator refuses rather than
+#                   silently dropping forms.
 #   Descriptions  — YAML comments above a key become PO translator notes (#.)
 #   Context       — YAML key becomes msgctxt (enables variant_regex grouping)
 #   Location      — source file path + line number written as #: occurrence
