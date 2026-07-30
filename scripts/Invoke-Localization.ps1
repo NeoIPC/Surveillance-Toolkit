@@ -394,13 +394,21 @@ function Test-GitWorkingTree {
     #     fatal: not a git repository (or any of the parent directories): .git
     #     fatal: detected dubious ownership in repository at '<path>'
     #
-    # so a safe.directory refusal — the classic case of a host-owned checkout bind-mounted into a container
-    # running as root — returned "no repository" for a directory a repository governs, and skipped BOTH
-    # guards inside a real working tree. That is exactly the state that loses a translator's uncommitted
-    # work, and it was the failure the old comment cited as its reason for distrusting exit codes while
-    # depending on one. Matching the message instead would work here (this build prints English even under
+    # so a safe.directory refusal — a host-owned checkout bind-mounted into a container running as root —
+    # returned "no repository" for a directory a repository governs, and skipped BOTH guards inside a real
+    # working tree. That is exactly the state that loses a translator's uncommitted work, and it was the
+    # failure the old comment cited as its reason for distrusting exit codes while depending on one.
+    # safe.directory is only the most likely member of the class, not the class: EVERY non-absence failure
+    # read as absence, an invalid gitfile above the tree (`fatal: invalid gitfile format`) among them.
+    # Matching the message instead would work here (this build prints English even under
     # LC_ALL=de_DE.UTF-8, checked) but stakes the guard on a string's shape; the marker walk depends on
     # nothing, needs no subprocess, and makes the rule uniform.
+    #
+    # One consequence to know before reading an abort as a bug: with git no longer consulted, this walk IS
+    # the definition of "a repository governs this", and it is a SUPERSET of git's own discovery. Where
+    # GIT_CEILING_DIRECTORIES or GIT_DISCOVERY_ACROSS_FILESYSTEM stops git short of an ancestor that has a
+    # .git, git finds nothing and this aborts anyway. That is the safe direction and is deliberate — an
+    # abort naming the ancestor is recoverable, whereas the skip it replaced was silent.
     #
     # A broken repository is caught downstream rather than here: the two functions below check $LASTEXITCODE
     # on every git call and throw, so an unusable repository aborts the run naming what failed.
