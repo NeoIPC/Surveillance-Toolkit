@@ -283,11 +283,6 @@ def generate_yaml(po_dir, glossary_path, languages, threshold=80):
             continue
 
         po = polib.pofile(str(po_path))
-        # polib's own percentage, not len(po): POFile subclasses list, so obsolete "#~" entries count
-        # toward its length while never counting as translated, which drags the percentage down and can
-        # skip a language that is in fact complete. Obsolete entries used to be impossible here because
-        # the retired merge rebuilt each catalogue from the template; now that Weblate owns them and
-        # po_remove_obsolete is deliberately false, they are normal state.
         translated_count = len(po.translated_entries())
         total = len([e for e in po if not e.obsolete])
         # polib's own percentage, not translated/len(po): POFile subclasses list, so obsolete "#~"
