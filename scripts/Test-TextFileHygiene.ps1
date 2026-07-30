@@ -42,6 +42,10 @@
 
     Exit code is 0 when clean, 1 when any check fails. Nothing is modified.
 
+    The scope is all-or-nothing: every repository the run puts in scope must be a checked-out working tree,
+    and the run fails naming the ones that are not. A green result therefore always means the whole declared
+    scope was inspected, never that part of it was quietly skipped.
+
 .PARAMETER Path
     Repository root to check. Defaults to this repository's root (this script's parent directory).
 
@@ -104,7 +108,9 @@ function Get-RepoList {
             }
         }
     }
-    $roots | Where-Object { Test-Path (Join-Path $_ '.git') -PathType Any }
+    # Every declared root is returned, checked out or not. This used to drop the ones that are not working
+    # trees, which is what made a narrowed sweep look like a clean one — see the scope check at the call site.
+    $roots
 }
 
 function Get-EolRow {
@@ -312,7 +318,60 @@ function Test-PowerShellHeader {
     }
 }
 
-foreach ($repo in (Get-RepoList -Root (Resolve-Path -LiteralPath $Path))) {
+# Everything in scope is swept in full or the run fails; the scope never quietly shrinks. Passing over a root
+# is indistinguishable in the output from having checked it, and that is not hypothetical: two uninitialized
+# submodules took a superproject sweep from eight repositories to six and it still printed OK, and a source
+# tree with no repository at all printed "OK: 0 file(s) across 0 repository/ies" and exited 0. A gate that
+# inspected nothing while reporting success is the one outcome this whole contract exists to make impossible.
+#
+# The test is that each root ENUMERATES, not that a `.git` entry exists beside it, and the difference is the
+# whole point. A `.git` gitlink file whose target gitdir is gone — what copying or archiving a superproject
+# without its .git/modules produces — is a perfectly ordinary file, so a presence test passes it; every
+# `git -C <root> ls-files` then exits 128 with no output, which none of the three checks below inspects
+# (they read $LASTEXITCODE nowhere, and on this PowerShell a failing native command does not throw), so the
+# root contributes zero findings and zero files while still counting as checked. Since only the TOTAL file
+# count is reported, that zero is invisible. Measured, not reasoned: a superproject with one healthy and one
+# gitlink-broken submodule printed "Text-file hygiene OK: 5 file(s) across 3 repository/ies" with a planted
+# CRLF file in the broken one never seen — and its process exit code was whatever git happened to set last,
+# so whether that green message also counted as a passing run depended on which repository came last in
+# .gitmodules. So ask git to list the files, and require an answer.
+#
+# `exit 1` rather than `throw`: a regression harness invokes this script with `&` and scores $LASTEXITCODE,
+# so a terminating error would propagate into that caller instead of counting as a failed run.
+$rootPath = (Resolve-Path -LiteralPath $Path).Path
+$repoList = @(Get-RepoList -Root $rootPath)
+
+$unusable = foreach ($repo in $repoList) {
+    if (-not (Test-Path -LiteralPath $repo -PathType Container)) {
+        [pscustomobject]@{ Repo = $repo; Reason = 'the directory does not exist' }
+        continue
+    }
+    # `--eol`, not a bare `ls-files`: this preflight exists to establish that the sweep below can enumerate,
+    # and the sweep runs `git ls-files --eol` (see Get-EolRow), which inspects no exit code of its own. Prove
+    # the guarantee with the command that will actually be used, so the two are about the same thing by
+    # construction rather than by coincidence — a git old enough to lack `--eol`, or any failure specific to
+    # that option, would otherwise pass the preflight and then sweep nothing.
+    $listed = @(& git -C $repo ls-files --eol 2>$null)
+    if ($LASTEXITCODE -ne 0) {
+        [pscustomobject]@{ Repo = $repo; Reason = "git cannot enumerate it (ls-files --eol exit $LASTEXITCODE) — not checked out, or a .git pointing at a gitdir that is gone" }
+    } elseif ($listed.Count -eq 0) {
+        [pscustomobject]@{ Repo = $repo; Reason = 'it has no tracked files, so a sweep of it would prove nothing' }
+    }
+}
+$unusable = @($unusable)
+if ($unusable) {
+    Write-Host ("Cannot check text-file hygiene: {0} of {1} repository/ies in scope cannot be swept:" -f $unusable.Count, $repoList.Count) -ForegroundColor Red
+    $unusable | ForEach-Object { Write-Host ("  {0}`n      {1}" -f $_.Repo, $_.Reason) -ForegroundColor Red }
+    Write-Host ''
+    if ($unusable.Repo -contains $rootPath) {
+        Write-Host "'$rootPath' is not a usable git working tree, so it has no tracked files to check." -ForegroundColor DarkGray
+    } else {
+        Write-Host "Check the submodules out first: git submodule update --init -- $SubmodulePrefix" -ForegroundColor DarkGray
+    }
+    exit 1
+}
+
+foreach ($repo in $repoList) {
     $label = Split-Path $repo -Leaf
     $checkedRepos++
     Test-LineEnding      -Repo $repo -Label $label
@@ -330,3 +389,7 @@ if ($failures.Count) {
 }
 
 Write-Host ("Text-file hygiene OK: {0} file(s) across {1} repository/ies." -f $checkedFiles, $checkedRepos) -ForegroundColor Green
+# Declare the verdict explicitly. Falling off the end leaves $LASTEXITCODE holding whatever the last internal
+# `git` call set — or, when the scope was empty so no `git` ran at all, whatever the CALLER had there already.
+# A caller reading that is scoring this run off residue, and a regression harness did exactly that.
+exit 0

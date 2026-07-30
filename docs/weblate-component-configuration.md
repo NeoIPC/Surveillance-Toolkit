@@ -1,8 +1,10 @@
 # Weblate component configuration
 
-The `neoipc` project on Hosted Weblate hosts **four** gettext catalogues today and a fifth,
-`neoipc-glossary`, that is configured here but not yet created on the instance — see the note under the
-table. Plus a TBX terminology store, which is a different kind of object and is out of scope here.
+The `neoipc` project on Hosted Weblate hosts **six** gettext catalogues, plus a TBX terminology store,
+which is a different kind of object and is out of scope here. **Five of the six are backed by this
+repository and are what this document governs**; the sixth, `neoipc-app`, is the app's own interface
+catalogue from a different repository, and it appears here only where it is an exception to something
+stated below. Every other count in this file means those five.
 
 | Component | Catalogue | Source template |
 |---|---|---|
@@ -24,29 +26,46 @@ Its keys are an API contract with the R report code (`sR$surveillance_end` and f
 the template stays repository-owned while the translations are Weblate's: exactly the `.pot`/`.po` seam,
 and the reason the catalogue is generated rather than hand-written.
 
-> **Configured here, not yet created.** `neoipc-glossary` does not exist on the instance: the project
-> currently has four gettext components plus the TBX store whose slug is `glossary`. Every "five" in this
-> file states the target, not the state, until the component is created — the same convention this file
-> uses for the within-component ordering below.
->
-> **Register it with:** `vcs: git`, `repo`/`push`/`branch` copied from `neoipc-dhis2-metadata`,
-> `push_branch: weblate-glossary`, `filemask: po/glossary.*.po`, `new_base: po/glossary.pot`,
-> `template:` **empty** (this is a *bilingual* catalogue — see below), `file_format: po`,
-> `license: CC-BY-4.0`, `is_glossary: true`, `variant_regex: _(tc|sc|plural|plural_tc|plural_sc)$`,
-> `priority: 60`, and the uniform settings from *Settings that must not diverge*.
->
-> **Then set `manage_units` back to `false`.** Weblate's component-creation branch forces it to `true`
-> for a glossary component, and it is not among the fields the creation form submits, so the operator
-> gets `true` whatever they intended. Leaving it there would let a translator add or remove terms — and
-> these msgids are an API contract with the R report code.
->
-> **Delete this block in the commit that completes the registration.** Registering the component and
-> cutting `scripts/update-glossary-po.py` back to the template are one change: register first and the
-> repository is a second writer of files Weblate now owns; remove the merge first and nothing keeps the
-> catalogues in step with a changed template. Nothing else makes the window visible — `merge_po` is gone,
-> no `.pot`-to-`.po` parity check exists, and the placeholder gate compares `.po` files only, so a
-> `glossary.yaml` change made during the window leaves nine catalogues behind the template with nothing
-> reporting it.
+### Creating a component: three settings the creation branch decides for you
+
+`neoipc-glossary` was created through the API on 2026-07-30 — `vcs: git`, `repo`/`push`/`branch` and the
+uniform settings below, `push_branch: weblate-glossary`, `filemask: po/glossary.*.po`,
+`new_base: po/glossary.pot`, `template:` **empty** (bilingual — see above), `file_format: po`,
+`is_glossary: true`, `variant_regex: _(tc|sc|plural|plural_tc|plural_sc)$`, `priority: 60`. Three of the
+values that came back were not the values sent, and none of them announced.
+
+**They are not universal, so do not treat them as a checklist.** An earlier revision of this paragraph
+said "the next component created here will meet the same three"; the next component — `neoipc-app`, from
+a different repository — met **none** of them, and came back exactly as sent. Each of the three has a
+specific trigger, which is what to check for: `manage_units` is forced for a **glossary** component,
+linking happens when the `repo` URL **matches an existing component**, and the `new_lang` reset travelled
+with the linking rather than standing on its own. Read the response back and compare it to what you sent;
+that habit generalises, and a list of three remembered symptoms does not.
+
+**`manage_units` is forced to `true`** for a glossary component, whatever the request said — so patch it
+back to `false` afterwards and verify. Left `true`, a translator can add or remove terms, and these
+msgids are an API contract with the R report code.
+
+**Weblate silently *links* a component whose `repo` matches an existing one.** The request carried a
+plain repository URL and no link field; the response carried
+`linked_component: …/neoipc-dhis2-metadata/`. A linked component cannot own a push branch — operations
+route through the parent — so `push_branch` came back as **`weblate-metadata`**, and glossary
+translations would have been pushed onto the metadata catalogue's branch, mixing two catalogues into
+whichever drain reached it first. That is the failure the one-component-per-catalogue topology exists to
+prevent, arrived at by accident. `PATCH`ing `repo` with the same URL it already showed cleared
+`linked_component`; `push_branch` then had to be set again, since the linked component had never really
+held it. **Read `linked_component` back after any create**, and do not trust `repo` to tell you: it
+displayed the real URL throughout, while the component was linked.
+
+**`new_lang` came back `none`** where `contact` was sent, which would silently drop a translator's
+request for a new language instead of mailing it. Patched.
+
+Two method notes, both learned the same way. Read the uniform settings **from a sibling component over
+the API** and post those values, rather than transcribing them from this document — uniformity then holds
+by construction, and the field names are the API's own. And do **not** send `license` or any of the six
+`*_message` fields: storing a value unticks the corresponding `inherit_*` flag and strands the component
+on a frozen copy, whereas leaving them unsent inherits the project's — which is where the canonical text
+lives. `effective_license` confirms the result (`CC-BY-4.0` here, with `license: ''`).
 
 **Expect one churn commit on its first drain — about 28 changed lines per language, 35 for German.**
 Roughly six of those are the header and flags: the retired repository-side merge copied the template's
@@ -170,7 +189,7 @@ reason is added below.
 | `enable_suggestions` | `true` | The editorial model is peers advise, editor decides; suggestions are how peers advise |
 | `suggestion_voting` / `suggestion_autoaccept` | `false` / `0` | Voting needs at least two active contributors in a language before it reads as anything but a second obstacle |
 | `manage_units` | `false` | Source strings come from this repository. Translators must not add or remove them |
-| `license` | `CC-BY-4.0` | Matches what every catalogue's own PO header declares, on all five. Two did not: `reports` headers said MIT and `infectious_agents` said CC BY-NC-ND 4.0. The headers were the wrong side — a NoDerivatives term cannot govern a translation catalogue, since a translation is the paradigm derivative work — and they were corrected. Keep them in step: the header and this field are two statements of one fact, and a reader who finds only one of them must not be misled |
+| `license` | `CC-BY-4.0`, **inherited** | Set at project level; `effective_license` reads `CC-BY-4.0` on all five, which is what every catalogue's own PO header declares. **Do not put this field in a component-creation payload:** supplying it there unticks `inherit_license`, freezing a copy of what should follow the project — the same trap as [Message templates](#message-templates). Measured 2026-07-30, the state is not uniform and does not need to be: `neoipc-glossary`, created without the field, holds `license: ''`; the four older components hold a stored `CC-BY-4.0` **with `inherit_license` still true**, so that value is inert and they are *not* frozen — worth knowing before "correcting" them, since a stored value alone is not the defect. The `neoipc-app` component (other repository, out of scope above) is the one deliberate divergence: it stores `MIT` with `inherit_license` false, because its catalogues are licensed with the code rather than with the surveillance content. **The PO headers agree with this field today, and two of them once did not:** `reports` declared MIT and `infectious_agents` declared CC BY-NC-ND 4.0. The headers were the wrong side of that disagreement — a NoDerivatives term cannot govern a translation catalogue, since a translation is the paradigm derivative work — and they were corrected. Keep them in step: the header and this field are two statements of one fact, and a reader who finds only one of them must not be misled |
 | `report_source_bugs` | `NeoIPC-Support@charite.de` | Gives translators a route for source-string problems that is not a pull request comment |
 | `language_regex` | `^[^.]+$` | The filemask contains dots, so the language code must not swallow them |
 | `allow_translation_propagation` | `true` | The setting is **directional** — it controls whether updates in *other* components translate into *this* one. It matches on `(context, source)`, which is why the pair it was originally justified by cannot benefit: the protocol documentation and the DHIS2 metadata do share 33 source strings, including clinical definitions reproduced verbatim as form help text, but all 2 820 metadata units carry a `msgctxt` and all 689 documentation units carry none, so no key ever matches. Measured, the reach is **documentation↔reports (8 keys)** and **documentation↔infectious agents (6)**. The same reasoning makes it **inert for the glossary in both directions** — all 41 of its units carry a `msgctxt` and it shares no key with any other component — which is worth stating because the glossary looks like the component that would benefit most: it is the controlled vocabulary, and terms in it appear verbatim in the reports catalogue. What shares those is `is_glossary` and the terminology sidebar, not this setting. Keep it on for the pairs that can use it, and treat the protocol-to-form-text drift — a real quality problem, not a cosmetic inconsistency — as unsolved by it. Prospective in any case: enabling it does not backfill existing strings |
@@ -187,15 +206,37 @@ where the component is introduced at the top of this file.
 
 ### Deliberate
 
-**`priority` — 60 glossary, 60 reports, 80 documentation, 100 metadata, 120 infectious-agents.**
-Component priority orders the translation queue across the whole project.
+**`priority` — 60 glossary, 80 reports, 100 documentation, 120 metadata, 140 infectious-agents.**
+Component priority is meant to order the translation queue across the whole project.
 
-**The glossary alongside reports.** It is 41 terms, so it is cheap to finish, and it feeds both the
-controlled vocabulary the reports render and the terminology sidebar every other component sees — so
-settling it first makes every later decision cheaper and more consistent.
+**The field cannot be raised, only the others lowered.** `priority` is a five-value *choice* field —
+60 "Very high", 80, 100, 120, 140 "Very low", lower being offered earlier — so 60 is the ceiling and
+there is no way to lift one component above another already sitting there. Giving the glossary the top
+slot alone therefore meant demoting the other four by one step each, which is what the values above are.
+That exhausts the scale exactly, so the next component added here cannot be slotted between two existing
+ones; it can only join one of them.
 
-**Reports first too.** They are essentially what generates the impact of the whole NeoIPC Surveillance
+**The glossary alone at the top.** It is 41 terms, so it is cheap to finish, and its renderings are
+reused across every other catalogue — it feeds both the controlled vocabulary the reports render and the
+terminology sidebar every other component sees. Settling it first makes every later decision cheaper and
+more consistent, and settling it *late* means terminology decisions arrive after the strings that needed
+them. It previously shared 60 with reports; a tie is not what "first" means, which is why the cascade
+was applied.
+
+**Then the reports.** They are essentially what generates the impact of the whole NeoIPC Surveillance
 project, and they have the greatest audience reach.
+
+> **Unverified: that any of this orders anything.** The field accepts the values and reads them back, and
+> its own help text says *"Components with higher priority are offered first to translators"* — but that
+> is the claim, not evidence for it, and the sibling `priority:N` *string* flag carried an equally clear
+> claim while ordering nothing (see [Priority within a component](#priority-within-a-component--intended-and-not-achievable-from-the-repository)).
+> The mechanism here is different — a stored component field rather than a flag Weblate strips out of a
+> file — so that failure does not implicate it, and naming that difference is still not proof. The only
+> observable is the rendered project page, and that is a **human** interface: Hosted Weblate deliberately
+> keeps automated clients out of its HTML, and the API — which is the machine interface, and is where every
+> other finding in this document came from — returns components in creation order, so it cannot show the
+> effect. Confirming this is therefore a person opening the project page and reading the order off it.
+> Until someone has, treat the ordering as intended rather than established.
 
 **Then the protocol documentation.** The surveillance protocol and the definitions are the heart of
 the work and the reference for everyone working within the project.
