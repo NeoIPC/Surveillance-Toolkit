@@ -34,6 +34,10 @@ point of the file: the components were created at different times against differ
 and the resulting drift was invisible until someone compared them by hand. A difference with no reason
 recorded here is drift, and should be removed rather than explained after the fact.
 
+For which *quality checks* to switch on rather than how a flag is delivered, see
+[`weblate-checks-adoption.md`](weblate-checks-adoption.md), which carries a decision for every built-in
+check and fixup measured against these catalogues.
+
 ## Where each kind of fact lives
 
 Several settings only make sense against this split, and getting it wrong wastes hours — a source
