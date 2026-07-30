@@ -60,6 +60,23 @@ displayed the real URL throughout, while the component was linked.
 **`new_lang` came back `none`** where `contact` was sent, which would silently drop a translator's
 request for a new language instead of mailing it. Patched.
 
+**`repo` must be the repository's *exact* canonical clone URL — casing and `.git` suffix included.** It is
+not merely an address to clone from: the incoming webhook is matched against it, so a URL that clones
+perfectly can still fail to match. Weblate then falls back to a fuzzy match and raises *"The repository hook
+does not match exactly"*, and that fallback is going away: upstream issue
+[WeblateOrg/weblate#19855](https://github.com/WeblateOrg/weblate/issues/19855), *"Remove fallback matching
+from webhooks"*, targets **2026.9** — *"Drop fallback matching code two releases later, so if #19854 lands
+in 2026.7, remove it in 2026.9."* After that an inexact URL means the hook silently stops updating the
+component, and translations sit unnoticed until the next scheduled pull. Take the value from the forge
+rather than typing it: `gh api repos/<owner>/<repo> --jq .clone_url` returns exactly what the payload
+carries, and an unauthenticated `curl https://api.github.com/repos/<owner>/<repo>` gives the same field
+where `gh` is not to hand — it is not otherwise a dependency of this repository's tooling. Two ways this went
+wrong here on one day, neither visible until Weblate complained: a component created against
+`…/NeoIPC/neoipc-app.git` where the repository is canonically `NeoIPC/NeoIPC-App` — GitHub clones
+case-insensitively, so nothing looked wrong — and two of the components in this file carrying the URL
+**without** its `.git` suffix while their three siblings had it, which is also the uniformity deviation the
+table below says should not exist. All six now match; a `PATCH` of `repo` fixes it and does not re-link.
+
 Two method notes, both learned the same way. Read the uniform settings **from a sibling component over
 the API** and post those values, rather than transcribing them from this document — uniformity then holds
 by construction, and the field names are the API's own. And do **not** send `license` or any of the six
@@ -182,7 +199,7 @@ reason is added below.
 | `auto_lock_error` | `true` | Fail-closed. A component that cannot push accumulates work that cannot reach git; locking makes that visible instead of letting it pile up silently. It clears itself once a push succeeds |
 | `commit_pending_age` | `24` | A safety net only. The drain commits explicitly rather than waiting for it |
 | `file_format_params.dos_eol` | `false` | The repository is LF-only. Weblate is one of the writers of these files, so this is the same contract as pinning newlines in every other tool that touches them |
-| `file_format_params.po_line_wrap` | `65535` | Must match the repository side. Three po4a configs (`reports`, `documentation`, `infectious_agents`) pass `--wrap-po newlines`; `scripts/po4a.cfg` passes `--wrap-po no`; `metadata` has no po4a config at all — it is written by `Write-NeoIPCMetadataPoText`, which emits one line per field and never wraps; and `glossary` is written by `update-glossary-po.py`, which pins polib's `wrapwidth` to 65535 because polib's default of 78 had made it the only wrapped template here (longest line 91, against 1830 in the po4a-generated ones). All five therefore expect an unwrapped file. A mismatch means each writer re-flows what the other wrote: one component sitting at the xgettext default of 77 produced an 18,000-line diff of pure re-wrapping |
+| `file_format_params.po_line_wrap` | `65535` | Must match the repository side. All four po4a configs — `reports`, `documentation`, `infectious_agents` and `scripts/po4a.cfg` — pass `--wrap-po newlines`; the last of those passed `--wrap-po no` until the catalogue headers were unified, so a `no` found in older text is stale rather than a different behaviour. `metadata` has no po4a config at all — it is written by `Write-NeoIPCMetadataPoText`, which emits one line per field and never wraps; and `glossary` is written by `update-glossary-po.py`, which pins polib's `wrapwidth` to 65535 because polib's default of 78 had made it the only wrapped template here (longest line 91, against 1830 in the po4a-generated ones). All five therefore expect an unwrapped file — **five components**, per this document's convention, not five writers: `scripts/po4a.cfg` is a *writer* but backs no component, because `scripts/po/*.po` is repository-owned and not on Weblate. The instruction-file guardrail counts the same things as **six writers**; the two numerals are correct and mean different things, three lines apart in subject matter, so check which is meant before reconciling them. A mismatch means each writer re-flows what the other wrote: one component sitting at the xgettext default of 77 produced an 18,000-line diff of pure re-wrapping |
 | `file_format_params.po_keep_previous` | `true` | Keeps `#| msgid` so translators can see what a changed source string used to say |
 | `file_format_params.po_remove_obsolete` | `false` | Obsolete entries are cheap and let a reverted source change recover its translation |
 | `file_format_params.po_no_location` | `false` | Keep `#:` source references wherever line numbers *might* be real — stripping them is lossy and hard to reverse. Measured. The protocol documentation is fully informative (10 files, lines 1–1032). Reports is mixed: of 67 `.Rmd` files referenced, **45 carry real line numbers and 22 carry only `:1`**, as do all 10 YAML/YML files (six string-resource files and four `_quarto-en.yml` configs) — so roughly a quarter of its references are informative and the rest are dead weight. The infectious-agent list is 99.4 % `:1` but still carries 23 real AsciiDoc references. The metadata catalogue emits no location comments at all, so the setting is moot there. Since the repository-browser URL is configured, these become clickable links to the surrounding context |

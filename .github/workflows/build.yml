@@ -84,15 +84,51 @@ jobs:
                 fi
 
                 offending=""
-                for f in $(printf '%s\n' "$changed" | grep -E "^($owned)$" || true); do
+                matched=$(printf '%s\n' "$changed" | grep -E "^($owned)$" || true)
+                # `while IFS= read -r`, not `for f in $(…)`: the unquoted expansion word-splits on IFS, so a
+                # matching path containing a space arrives as two fragments, neither of which names a real
+                # file — `git log -- po/reports.de` returns nothing, the loop reads that as "no non-Weblate
+                # committers", and the gate passes. Same shape as the two fail-opens below: an error state
+                # indistinguishable from the clean state. Reachable only via a hand-created path, since
+                # Weblate's own `language_regex` cannot produce one — but "correct because today's filemask
+                # happens to yield space-free paths" is a property of the data, not of this gate.
+                #
+                # Fed by a here-string rather than a pipe: a piped `while` runs in a SUBSHELL, so every
+                # `offending=` assignment would be discarded at `done` and the gate would pass on precisely
+                # the files it had just rejected.
+                while IFS= read -r f; do
+                  # A here-string always emits at least one line, so an empty match list arrives here as a
+                  # single empty string rather than as no iterations at all.
+                  [ -n "$f" ] || continue
+                  # The git call is separated from the grep deliberately. With `|| true` spanning the whole
+                  # pipeline, a git failure — a missing ref, an unreadable path — produced an empty string,
+                  # which this loop reads as "no non-Weblate committers" and the gate then PASSES. A guard
+                  # whose error path is indistinguishable from its success path fails open, which is the one
+                  # direction it must never fail. Only the grep's own "no matches" status is ignored, since
+                  # that is its way of saying the file is clean.
+                  if ! committers=$(git log --format='%ce' "$base".."$head" -- "$f"); then
+                    echo "::error::Could not read the commit history of $f — the gate cannot vouch for this pull request."
+                    exit 1
+                  fi
                   # Not `grep -q`: it exits on the first hit, and SIGPIPE plus `pipefail` would then report
                   # the pipeline as failed, which reads here as "no offence found" and silently passes.
-                  others=$(git log --format='%ce' "$base".."$head" -- "$f" | grep -vFx "$weblate" || true)
+                  others=$(printf '%s\n' "$committers" | grep -vFx "$weblate" || true)
                   if [ -n "$others" ]; then offending="${offending}${f}"$'\n'; fi
-                done
+                done <<< "$matched"
                 if [ -n "$offending" ]; then
                   echo "::error::This pull request modifies Weblate-owned .po files. Weblate is their only writer."
-                  echo "$offending" | while read -r f; do [ -n "$f" ] && echo "::error file=$f::$f is owned by Weblate — make the change there, not here."; done
+                  # `|| continue`, not `[ -n "$f" ] && echo`: `$offending` ends in a newline and `echo` adds
+                  # another, so the last iteration reads "" and the `&&` short-circuits to status 1. That
+                  # becomes the loop's exit status, and under Actions' `bash --noprofile --norc -eo pipefail`
+                  # it ends the step right here — discarding every guidance line below, which is the whole
+                  # point of the failure path. The gate still rejects correctly; the person who tripped it
+                  # just loses the per-catalogue remedies written to help them fix it. The checking loop above
+                  # already uses `|| continue` for this reason, and a here-string rather than a pipe keeps the
+                  # two loops the same shape.
+                  while IFS= read -r f; do
+                    [ -n "$f" ] || continue
+                    echo "::error file=$f::$f is owned by Weblate — make the change there, not here."
+                  done <<< "$offending"
                   echo
                   echo "Translations, corrections and terminology go through https://hosted.weblate.org/projects/neoipc/"
                   echo
@@ -112,7 +148,10 @@ jobs:
                   echo "      Restore them from the BASE branch, not from HEAD — by the time this gate fires the"
                   echo "      change is already committed, so --source=HEAD would restore the very version being"
                   echo "      rejected:"
-                  echo "      git restore --source=origin/main --worktree -- po/metadata.*.po"
+                  # $base, not a hard-coded origin/main: the job already computed the real base ref, and a
+                  # literal would print the wrong instruction the moment this runs against any other base
+                  # branch — inside the failure message of a gate, where the reader is least able to check it.
+                  echo "      git restore --source=$base --worktree -- po/metadata.*.po"
                   echo "      then commit only po/metadata.pot."
                   exit 1
                 fi

@@ -92,6 +92,9 @@ $floor = [version]$RequiredPowerShellVersion
 $failures = [System.Collections.Generic.List[string]]::new()
 $checkedFiles = 0
 $checkedRepos = 0
+# Why a tracked path was not inspected, kept apart so the empty-root guard can name the actual cause.
+$skippedBinary = 0
+$skippedAbsent = 0
 
 function Get-RepoList {
     param([string]$Root)
@@ -202,9 +205,16 @@ function Test-Encoding {
 
     $strict = [System.Text.UTF8Encoding]::new($false, $true)
     foreach ($file in (& git -C $Repo ls-files)) {
-        if (-not $file -or $binary.Contains($file)) { continue }
+        if (-not $file) { continue }
+        # Two different reasons a tracked path is not inspected, counted apart. They are
+        # indistinguishable in `$checkedFiles`, and the empty-root guard reports which one emptied a
+        # root — so folding them together lets that message name `.gitattributes` for a checkout fault
+        # and send the reader to the wrong file, which is worse than saying nothing.
+        if ($binary.Contains($file)) { $script:skippedBinary++; continue }
         $full = Join-Path $Repo $file
-        if (-not (Test-Path -LiteralPath $full -PathType Leaf)) { continue }
+        # Tracked but not on disk: deleted from the working tree, excluded by a sparse checkout, or an
+        # uninitialised submodule — a directory rather than a Leaf either way.
+        if (-not (Test-Path -LiteralPath $full -PathType Leaf)) { $script:skippedAbsent++; continue }
 
         # Absolute path: [System.IO.File] resolves a relative path against the PROCESS working
         # directory, not PowerShell's location, so a relative one here silently reads the wrong file.
@@ -371,12 +381,69 @@ if ($unusable) {
     exit 1
 }
 
+$inspectedNothing = [System.Collections.Generic.List[object]]::new()
 foreach ($repo in $repoList) {
     $label = Split-Path $repo -Leaf
     $checkedRepos++
+    # Sampled per root rather than over the run — see the guard below for why that distinction is the
+    # whole point. The skip counters are sampled the same way so the cause reported for a root is that
+    # root's, not the run's running total.
+    $filesBefore = $checkedFiles
+    $binaryBefore = $skippedBinary
+    $absentBefore = $skippedAbsent
     Test-LineEnding      -Repo $repo -Label $label
     Test-Encoding        -Repo $repo -Label $label
     Test-PowerShellHeader -Repo $repo -Label $label
+    if ($checkedFiles -eq $filesBefore) {
+        $inspectedNothing.Add([pscustomobject]@{
+            Repo   = $repo
+            Binary = $skippedBinary - $binaryBefore
+            Absent = $skippedAbsent - $absentBefore
+        })
+    }
+}
+
+# A root that inspected NOTHING must not count as checked. The preflight above proves each root can
+# ENUMERATE; it does not prove that any file survived the declared-binary filter, and those are different
+# claims. A .gitattributes regression declaring the whole tree binary (`* -text`) satisfies the preflight —
+# `ls-files --eol` returns rows for every path — and then every row is skipped, so the root contributes zero
+# findings and zero inspected files while still counting as swept. Measured, not reasoned: a repository
+# holding `* -text`, one CRLF file and one file with a UTF-8 BOM printed "Text-file hygiene OK: 0 file(s)"
+# and exited 0, seeing neither planted defect.
+#
+# Per ROOT, because only the TOTAL is reported: in a multi-root scope a healthy root's files keep that total
+# non-zero, so one root dropping to zero is invisible in the green line. Same blindness the enumeration
+# preflight above closes for a different cause; a run-level count cannot see this one.
+#
+# The declared-binary case is the one that looks most normal — the checkout is complete, git is healthy,
+# every command succeeds — and this is the repository where seven CRLF catalogues did sit undetected, so the
+# check whose .DESCRIPTION promises the whole declared scope was inspected has to be able to keep it.
+#
+# It is NOT the only way a root empties, which is why the cause is reported rather than assumed. A tracked
+# path that is absent from the working tree — deleted, excluded by a sparse checkout, or an uninitialised
+# submodule — is skipped by the same counter. Naming `.gitattributes` there would point at the one file that
+# is fine and steer the reader away from the checkout, which is the actual fault: a message that
+# under-specifies costs a minute, one that misdirects costs however long it takes to stop believing it.
+if ($inspectedNothing.Count) {
+    Write-Host ("Cannot check text-file hygiene: {0} of {1} repository/ies in scope enumerated tracked files but left none to inspect:" -f $inspectedNothing.Count, $repoList.Count) -ForegroundColor Red
+    foreach ($root in $inspectedNothing) {
+        $why =
+            if ($root.Binary -and $root.Absent) {
+                "$($root.Binary) declared binary, $($root.Absent) absent from the working tree"
+            } elseif ($root.Binary) {
+                "all $($root.Binary) declared binary — check .gitattributes for a stray '* -text' or '* binary'"
+            } elseif ($root.Absent) {
+                "all $($root.Absent) tracked but absent from the working tree — an incomplete or sparse checkout, not .gitattributes"
+            } else {
+                'no tracked path reached the encoding check at all'
+            }
+        Write-Host ("  {0}`n      {1}" -f $root.Repo, $why) -ForegroundColor Red
+    }
+    Write-Host ''
+    Write-Host 'Nothing there was checked for line endings, a BOM or valid UTF-8. The cause named above decides' -ForegroundColor DarkGray
+    Write-Host 'the fix: a whole-tree binary declaration exempts a tree from every check in this script, while' -ForegroundColor DarkGray
+    Write-Host 'absent files were never there to check in the first place.' -ForegroundColor DarkGray
+    Write-Host ''
 }
 
 if ($failures.Count) {
@@ -385,8 +452,12 @@ if ($failures.Count) {
     Write-Host ''
     Write-Host 'Expected: LF line endings, UTF-8 without a BOM, and the canonical PowerShell header' -ForegroundColor DarkGray
     Write-Host "(#!/usr/bin/env pwsh where run directly, #Requires -Version $floor, blank line, help block)." -ForegroundColor DarkGray
-    exit 1
 }
+
+# Both conditions are terminal, and the exit is deliberately here rather than inside either block: a root that
+# inspected nothing is a failed run whether or not the roots that DID inspect something came back clean, and
+# an `exit 1` inside the block above would have reported findings while returning before this one was scored.
+if ($failures.Count -or $inspectedNothing.Count) { exit 1 }
 
 Write-Host ("Text-file hygiene OK: {0} file(s) across {1} repository/ies." -f $checkedFiles, $checkedRepos) -ForegroundColor Green
 # Declare the verdict explicitly. Falling off the end leaves $LASTEXITCODE holding whatever the last internal
