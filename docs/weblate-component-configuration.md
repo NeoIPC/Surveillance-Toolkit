@@ -1,7 +1,8 @@
 # Weblate component configuration
 
-The `neoipc` project on Hosted Weblate hosts five gettext catalogues, plus a TBX terminology store
-that is a different kind of object and is out of scope here.
+The `neoipc` project on Hosted Weblate hosts **four** gettext catalogues today and a fifth,
+`neoipc-glossary`, that is configured here but not yet created on the instance — see the note under the
+table. Plus a TBX terminology store, which is a different kind of object and is out of scope here.
 
 | Component | Catalogue | Source template |
 |---|---|---|

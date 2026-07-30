@@ -22,7 +22,8 @@ headers, and scripts/modules/NeoIPC-Tools/Tests/PoHeader.Tests.ps1 -- which runs
 and asserts against the committed files -- is what holds them to the contract.
 
 Reading the catalogues is still this script's business: --generate-yaml produces
-glossary.<lang>.yaml from whatever Weblate has committed.
+glossary.<lang>.yaml for every glossary.<lang>.po it finds in --po-dir, so a language
+Weblate adds is picked up without editing anything here. Pass --languages to narrow it.
 
 Naming convention in glossary.yaml:
     key             = AMA canonical (lowercase)
@@ -66,7 +67,6 @@ except ImportError:
 
 PLURAL_SUFFIX = re.compile(r"_plural(?:_(tc|sc))?$")
 FLAGS_LINE = re.compile(r"^flags:\s*(.+)$", re.IGNORECASE)
-DEFAULT_LANGUAGES = ["af", "de", "el", "es", "et", "fr", "it", "ne", "tr"]
 
 # The header contract is defined once, in the NeoIPC-Tools module (Private/PoHeader.ps1). This is the same
 # contract expressed in Python, because this generator cannot call into a PowerShell module. Nothing renders
@@ -366,8 +366,9 @@ def main():
     parser.add_argument(
         "--languages",
         type=lambda s: s.split(","),
-        default=DEFAULT_LANGUAGES,
-        help="Comma-separated language codes to generate localized YAML for",
+        default=None,
+        help="Comma-separated language codes to generate localized YAML for "
+             "(default: every glossary.<lang>.po found in --po-dir)",
     )
     parser.add_argument(
         "--generate-yaml",
@@ -389,7 +390,18 @@ def main():
     yaml_to_pot(args.glossary, args.pot)
 
     if args.generate_yaml:
-        generate_yaml(args.po_dir, args.glossary, args.languages,
+        # Discover the catalogues present rather than defaulting to a fixed list. Weblate owns which
+        # languages exist and adds one whenever a request is accepted, so a hard-coded list silently
+        # skips the new language's YAML until someone notices and edits this file. Same reasoning, and
+        # the same fix, as the metadata importer's locale discovery.
+        languages = args.languages
+        if languages is None:
+            languages = sorted(
+                p.name.split(".")[1] for p in args.po_dir.glob("glossary.*.po")
+            )
+            if not languages:
+                print(f"No glossary.<lang>.po found in {args.po_dir}; nothing to generate.")
+        generate_yaml(args.po_dir, args.glossary, languages,
                       threshold=args.threshold)
 
 

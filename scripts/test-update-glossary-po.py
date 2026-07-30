@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Regression test for update-glossary-po.py: it runs the script and checks what it wrote.
 
-Three invariants are covered, and they need different techniques because two of them cannot be
-observed from the output on every platform.
+Three invariants are covered, and they need different techniques — one of them because it cannot be
+observed from the output on every platform, the others because the obvious observation is vacuous.
 
 **Catalogue ownership.** po/glossary.<lang>.po belongs to Weblate's neoipc-glossary component. This
 script writes the template and must not touch a catalogue -- two writers on one .po is what conflicts
