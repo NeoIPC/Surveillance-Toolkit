@@ -193,14 +193,14 @@ $versionFileMap = @{
 # These values must match each Weblate component's `license` field, because that is what is displayed to a
 # contributor as the terms they are contributing under.
 #
-# KNOWN DISCREPANCY, and it cannot be fixed from here. This map governs the `.pot` only. The existing
-# `po/reports.<lang>.po` still say MIT and the `po/infectious_agents.<lang>.po` still say
-# CC BY-NC-ND 4.0, because those files are Weblate-owned — the pipeline stopped rewriting their headers
-# when Weblate became their sole writer, and `msgmerge` preserves a target file's header comment block
-# rather than taking the template's. So the correction has to be made through Weblate (upload, or an
-# addon that rewrites the header), not by editing the catalogues here: a hand-edit would be exactly the
-# two-writer state this whole design removes, and the continuous-integration gate would reject it.
-# Until that happens the `.pot` and the `.po` of those two catalogues disagree about their licence.
+# This map governs the `.pot` only. The catalogues once disagreed with it — `po/reports.<lang>.po` said
+# MIT and `po/infectious_agents.<lang>.po` said CC BY-NC-ND 4.0 — and the discrepancy could not be closed
+# from here, because those files are Weblate-owned: the pipeline stopped rewriting their headers when
+# Weblate became their sole writer, and `msgmerge` preserves a target's header comment block rather than
+# taking the template's. It was closed through Weblate instead, which is the only route that is not the
+# two-writer state this design removes and that the continuous-integration gate would reject. All five
+# catalogues now declare CC BY 4.0, matching their components. Should they diverge again, the correction
+# belongs on the Weblate side for the same reason.
 $catalogHeaderMap = @{
     reports           = @{ Package = 'NeoIPC Surveillance Reports';               License = 'Creative Commons Attribution 4.0 International' }
     documentation     = @{ Package = 'NeoIPC Surveillance Documentation';         License = 'Creative Commons Attribution 4.0 International' }
