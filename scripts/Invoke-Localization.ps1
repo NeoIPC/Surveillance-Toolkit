@@ -385,28 +385,41 @@ function Test-GitWorkingTree {
     # it there is nothing to protect: no catalogue is under version control, so none can be committed from
     # this tree and nothing that happens to it can reach Weblate.
     #
-    # The decision rests on the LOCAL marker alone, and deliberately does NOT ask git whether the tree is
-    # usable. Inferring absence from a git exit code fails OPEN, which is the one direction this must never
-    # fail: `git rev-parse` exits non-zero for several reasons that are not absence — dubious ownership
-    # under safe.directory, or an inherited GIT_DIR naming a missing directory — and each of those arises
-    # with .git sitting right there. Reading that as "no repository" skips both guards INSIDE a real working
-    # tree, which is exactly the state that can lose a translator's uncommitted work. Reproduced rather than
-    # supposed: with .git present and intact, GIT_TEST_ASSUME_DIFFERENT_OWNER=1 makes rev-parse exit 128.
+    # MARKERS DECIDE; GIT NEVER DOES. Absence has to be positively established — no marker here, none above,
+    # none in the environment — and is never inferred from a git command failing, which is the one direction
+    # this must not fail. An earlier revision asked `git rev-parse --git-dir` and read a non-zero exit as
+    # "no repository". That is unsound because the exit code cannot carry the distinction: measured, both of
+    # these are 128 and only the message differs —
     #
-    # So a present marker means enforce, and a broken repository is then caught downstream instead of here:
-    # the two functions below check $LASTEXITCODE on every git call and throw, so an unusable repository
-    # aborts the run with a message naming what failed. Fail-closed, by construction.
+    #     fatal: not a git repository (or any of the parent directories): .git
+    #     fatal: detected dubious ownership in repository at '<path>'
+    #
+    # so a safe.directory refusal — the classic case of a host-owned checkout bind-mounted into a container
+    # running as root — returned "no repository" for a directory a repository governs, and skipped BOTH
+    # guards inside a real working tree. That is exactly the state that loses a translator's uncommitted
+    # work, and it was the failure the old comment cited as its reason for distrusting exit codes while
+    # depending on one. Matching the message instead would work here (this build prints English even under
+    # LC_ALL=de_DE.UTF-8, checked) but stakes the guard on a string's shape; the marker walk depends on
+    # nothing, needs no subprocess, and makes the rule uniform.
+    #
+    # A broken repository is caught downstream rather than here: the two functions below check $LASTEXITCODE
+    # on every git call and throw, so an unusable repository aborts the run naming what failed.
     if (Test-Path -LiteralPath (Join-Path $repoRoot '.git')) { return $true }
 
-    # No marker. Confirm git agrees rather than assuming it: a GIT_DIR in the environment, or a repository
-    # in a PARENT directory, means one is in play after all, and neither is a state to guess about. It is
-    # also the more dangerous direction — a parent repository that does not track the catalogues would give
-    # `ls-tree` an empty answer, which the restore reads as "HEAD has never seen these" and DELETES them.
-    git -C $repoRoot rev-parse --git-dir *> $null
-    if ($LASTEXITCODE -eq 0) {
-        throw ("No .git in '$repoRoot', yet git resolves a repository for it (check GIT_DIR, or a parent " +
-               'directory that is itself a repository). Refusing to guess whether the Weblate-owned ' +
-               'catalogues are under version control here.')
+    # No local marker, so a repository may still govern this directory from the environment or from above.
+    # Neither is a state to guess about, and the parent case is the more dangerous one: a parent repository
+    # that does not track the catalogues gives `ls-tree` an empty answer, which the restore reads as "HEAD
+    # has never seen these" and DELETES them. Refuse rather than choose.
+    if ($env:GIT_DIR) {
+        throw ("No .git in '$repoRoot', yet GIT_DIR is set ('$env:GIT_DIR'), so a repository governs it. " +
+               'Refusing to guess whether the Weblate-owned catalogues are under version control here.')
+    }
+    for ($ancestor = (Get-Item -LiteralPath $repoRoot).Parent; $ancestor; $ancestor = $ancestor.Parent) {
+        if (Test-Path -LiteralPath (Join-Path $ancestor.FullName '.git')) {
+            throw ("No .git in '$repoRoot', but '$($ancestor.FullName)' has one, so a repository governs " +
+                   'it. Refusing to guess whether the Weblate-owned catalogues are under version control ' +
+                   'here.')
+        }
     }
     return $false
 }
