@@ -309,6 +309,19 @@ def generate_yaml(po_dir, glossary_path, languages, threshold=80):
                 continue
 
             if entry.msgid_plural and entry.msgstr_plural:
+                # The YAML schema has exactly two slots for a plural family -- `key` and `key_plural` --
+                # so a locale whose rule declares more than two forms cannot be represented here. Refuse
+                # rather than write the first two and drop the rest, which would be a silent, per-form
+                # loss visible nowhere. Reachable because the languages are now discovered rather than
+                # listed: Weblate accepting a request for Russian (3) or Arabic (6) is all it takes, and
+                # both are among the languages this project prefers an official rendering for.
+                if len(entry.msgstr_plural) > 2:
+                    raise ValueError(
+                        f"{po_path.name}: {entry.msgctxt!r} carries {len(entry.msgstr_plural)} plural "
+                        f"forms, and glossary.<lang>.yaml can express two ('{entry.msgctxt}' and "
+                        f"'{entry.msgctxt}_plural'). Extend the schema before adding a locale with "
+                        f"nplurals > 2, or exclude this language with --languages."
+                    )
                 # Singular
                 if entry.msgstr_plural.get(0):
                     translations[entry.msgctxt] = entry.msgstr_plural[0]
