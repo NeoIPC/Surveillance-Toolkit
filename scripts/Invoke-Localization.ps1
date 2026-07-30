@@ -375,11 +375,15 @@ function Test-GitWorkingTree {
     # Whether a git repository governs $repoRoot. Both halves of the catalogue-ownership machinery below —
     # the clean-tree assertion and the post-po4a restore — are operations on a repository, and there is one
     # context that legitimately has none: the container image build runs this pipeline over a plain copy of
-    # the source. The NeoIPC-Reporting Dockerfile removes .git in every one of its three toolkit-source
-    # modes, and in workspace mode it has no choice — what it copies is a submodule's .git GITLINK FILE,
-    # whose target path does not exist inside the image. So "no repository" is a permanent property of that
-    # build rather than a fault, and in it there is nothing to protect: no catalogue is under version
-    # control, so none can be committed from this tree and nothing that happens to it can reach Weblate.
+    # the source. The NeoIPC-Reporting Dockerfile deletes .git in every one of its three toolkit-source
+    # modes, so the container image reaches this script with NO marker at all and takes the skip path.
+    # Workspace mode is the one worth spelling out, because what it copies before that deletion is a
+    # submodule's .git GITLINK FILE whose target path does not exist inside the image — so the deletion is
+    # what keeps the state unambiguous rather than merely tidy. Were it ever dropped there, the marker would
+    # be present and this function would enforce, and the enforcement would then fail on a repository git
+    # cannot resolve. So "no repository" is a permanent property of that build rather than a fault, and in
+    # it there is nothing to protect: no catalogue is under version control, so none can be committed from
+    # this tree and nothing that happens to it can reach Weblate.
     #
     # The decision rests on the LOCAL marker alone, and deliberately does NOT ask git whether the tree is
     # usable. Inferring absence from a git exit code fails OPEN, which is the one direction this must never

@@ -346,9 +346,14 @@ $unusable = foreach ($repo in $repoList) {
         [pscustomobject]@{ Repo = $repo; Reason = 'the directory does not exist' }
         continue
     }
-    $listed = @(& git -C $repo ls-files 2>$null)
+    # `--eol`, not a bare `ls-files`: this preflight exists to establish that the sweep below can enumerate,
+    # and the sweep runs `git ls-files --eol` (see Get-EolRow), which inspects no exit code of its own. Prove
+    # the guarantee with the command that will actually be used, so the two are about the same thing by
+    # construction rather than by coincidence — a git old enough to lack `--eol`, or any failure specific to
+    # that option, would otherwise pass the preflight and then sweep nothing.
+    $listed = @(& git -C $repo ls-files --eol 2>$null)
     if ($LASTEXITCODE -ne 0) {
-        [pscustomobject]@{ Repo = $repo; Reason = "git cannot enumerate it (ls-files exit $LASTEXITCODE) — not checked out, or a .git pointing at a gitdir that is gone" }
+        [pscustomobject]@{ Repo = $repo; Reason = "git cannot enumerate it (ls-files --eol exit $LASTEXITCODE) — not checked out, or a .git pointing at a gitdir that is gone" }
     } elseif ($listed.Count -eq 0) {
         [pscustomobject]@{ Repo = $repo; Reason = 'it has no tracked files, so a sweep of it would prove nothing' }
     }
