@@ -199,6 +199,16 @@ def yaml_to_pot(glossary_path, pot_path):
     pot.wrapwidth = 65535
     pot.header = POT_HEADER_COMMENT
     pot.metadata = {**POT_METADATA}
+
+    # The "#:" location must be repository-relative with forward slashes, whatever path the caller
+    # passed. It is written into a committed, publicly shipped file, so an absolute --glossary would put
+    # a developer's home directory into the template -- and the po4a-generated templates alongside it are
+    # repository-relative, so this also keeps the family consistent. Falls back to the bare filename for
+    # a source outside the repository, which is the only remaining way to name it without leaking a path.
+    try:
+        location = glossary_path.resolve().relative_to(Path(__file__).resolve().parent.parent).as_posix()
+    except ValueError:
+        location = glossary_path.name
     now = datetime.datetime.now(datetime.timezone.utc)
     pot.metadata["POT-Creation-Date"] = now.strftime("%Y-%m-%d %H:%M%z")
 
@@ -229,7 +239,7 @@ def yaml_to_pot(glossary_path, pot_path):
             "msgctxt": key,
             "msgid": value,
             "msgstr": "",
-            "occurrences": [(str(glossary_path), str(line_no))],
+            "occurrences": [(location, str(line_no))],
         }
 
         if desc_lines:
@@ -278,9 +288,18 @@ def generate_yaml(po_dir, glossary_path, languages, threshold=80):
         # skip a language that is in fact complete. Obsolete entries used to be impossible here because
         # the retired merge rebuilt each catalogue from the template; now that Weblate owns them and
         # po_remove_obsolete is deliberately false, they are normal state.
-        pct = po.percent_translated()
         translated_count = len(po.translated_entries())
         total = len([e for e in po if not e.obsolete])
+        # polib's own percentage, not translated/len(po): POFile subclasses list, so obsolete "#~"
+        # entries count toward its length while never counting as translated, which drags the figure
+        # down and can skip a language that is in fact complete. Obsolete entries used to be impossible
+        # here because the retired merge rebuilt each catalogue from the template; now that Weblate owns
+        # them and po_remove_obsolete is deliberately false, they are normal state.
+        #
+        # The empty case is spelt out because polib and the previous arithmetic disagree on it: polib
+        # returns 100 for a catalogue with no live entries, which would pass any threshold. Nothing
+        # here should be generated from a catalogue that has no strings.
+        pct = po.percent_translated() if total > 0 else 0
 
         if pct < threshold:
             print(

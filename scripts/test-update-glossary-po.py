@@ -212,6 +212,50 @@ def run_script(tmp, *extra):
     )
 
 
+def check_committed_template_matches_source(tmp, failures):
+    """po/glossary.pot must be what glossary.yaml currently produces.
+
+    This is the one relationship the repository still owns end to end, and nothing was checking it.
+    It broke immediately: a commit added two flag comments, regenerated the template, then reworded a
+    header comment from one line to two and did not regenerate again — leaving all 41 `#:` location
+    references pointing one line early. Because `po_no_location` is deliberately false so those become
+    clickable links, and because msgmerge copies locations from the template into every catalogue, a
+    stale template propagates the error to all nine languages on the next drain.
+
+    Asserted against the REAL committed files rather than a fixture, since a fixture cannot go stale.
+    POT-Creation-Date is excluded — it moves on every run by design.
+    """
+    repo = SCRIPT.parent.parent
+    out = tmp / "parity"
+    out.mkdir()
+    # An ABSOLUTE --glossary on purpose. It used to change the "#:" locations, because the generator
+    # wrote the path it was handed straight into a committed file — so this call both compares the
+    # template and asserts that the location no longer depends on how the caller spelt the path.
+    result = subprocess.run(
+        [sys.executable, str(SCRIPT),
+         "--glossary", str(repo / "glossary.yaml"),
+         "--pot", str(out / "glossary.pot"),
+         "--po-dir", str(out)],
+        capture_output=True, text=True,
+    )
+    if result.returncode != 0:
+        failures.append(f"regenerating the template from the committed glossary.yaml failed: "
+                        f"{result.stderr.strip()[:200]}")
+        return
+
+    def comparable(path):
+        text = path.read_text(encoding="utf-8")
+        return [ln for ln in text.split("\n") if not ln.startswith('"POT-Creation-Date:')]
+
+    committed = repo / "po" / "glossary.pot"
+    if comparable(committed) != comparable(out / "glossary.pot"):
+        failures.append(
+            "po/glossary.pot is not what glossary.yaml produces — run "
+            "`python scripts/update-glossary-po.py` and commit the result. Most likely a glossary.yaml "
+            "edit changed line numbers after the template was last generated."
+        )
+
+
 def main():
     failures = []
 
@@ -347,7 +391,34 @@ def main():
         # 5. Ownership: a catalogue already in po/ must come out byte-identical.
         check_leaves_catalogues_alone(tmp, failures)
 
-        # 6. Prove the byte detector itself works, so a vacuous pass is impossible.
+        # 6. The ABSENT-catalogue branch. Weblate creates a catalogue for a new language from new_base;
+        #    this script must not, and a writer planted in that branch would create all nine at once.
+        #    Cheaper to assert than to reason about: run over a po/ holding only the template.
+        absent = tmp / "absent"
+        (absent / "po").mkdir(parents=True)
+        (absent / "glossary.yaml").write_text(GLOSSARY_YAML, encoding="utf-8", newline="\n")
+        r = subprocess.run(
+            [sys.executable, str(SCRIPT),
+             "--glossary", str(absent / "glossary.yaml"),
+             "--pot", str(absent / "po" / "glossary.pot"),
+             "--po-dir", str(absent / "po"),
+             "--languages", "de,fr,af", "--generate-yaml", "--threshold", "0"],
+            capture_output=True, text=True,
+        )
+        if r.returncode != 0:
+            failures.append(f"run over a catalogue-less po/ exited {r.returncode}: {r.stderr.strip()[:160]}")
+        else:
+            created = sorted(p.name for p in (absent / "po").glob("glossary.*.po"))
+            if created:
+                failures.append(
+                    f"the script created {created} from an empty po/ — Weblate creates a catalogue for a "
+                    "new language from new_base, and a writer in that branch creates every language at once"
+                )
+
+        # 7. Prove the committed template is what the committed source produces.
+        check_committed_template_matches_source(tmp, failures)
+
+        # 8. Prove the byte detector itself works, so a vacuous pass is impossible.
         detector = []
         check_bytes("detector probe (CRLF)", b'msgid "a"\r\nmsgstr "b"\r\n', detector)
         check_bytes("detector probe (BOM)", b'\xef\xbb\xbfmsgid "a"\n', detector)
