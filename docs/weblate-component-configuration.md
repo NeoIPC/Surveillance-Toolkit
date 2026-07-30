@@ -60,6 +60,19 @@ displayed the real URL throughout, while the component was linked.
 **`new_lang` came back `none`** where `contact` was sent, which would silently drop a translator's
 request for a new language instead of mailing it. Patched.
 
+**`repo` must be the repository's *exact* canonical clone URL — casing and `.git` suffix included.** It is
+not merely an address to clone from: the incoming webhook is matched against it, so a URL that clones
+perfectly can still fail to match. Weblate then falls back to a fuzzy match and raises *"The repository hook
+does not match exactly"*, and that fallback is scheduled for removal in Weblate 2026.9 — after which an
+inexact URL means the hook silently stops updating the component, and translations sit unnoticed until the
+next scheduled pull. Take the value from the forge rather than typing it:
+`gh api repos/<owner>/<repo> --jq .clone_url` returns exactly what the payload carries. Two ways this went
+wrong here on one day, neither visible until Weblate complained: a component created against
+`…/NeoIPC/neoipc-app.git` where the repository is canonically `NeoIPC/NeoIPC-App` — GitHub clones
+case-insensitively, so nothing looked wrong — and two of the components in this file carrying the URL
+**without** its `.git` suffix while their three siblings had it, which is also the uniformity deviation the
+table below says should not exist. All six now match; a `PATCH` of `repo` fixes it and does not re-link.
+
 Two method notes, both learned the same way. Read the uniform settings **from a sibling component over
 the API** and post those values, rather than transcribing them from this document — uniformity then holds
 by construction, and the field names are the API's own. And do **not** send `license` or any of the six
