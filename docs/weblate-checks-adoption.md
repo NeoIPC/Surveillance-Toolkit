@@ -1,0 +1,226 @@
+# Weblate quality checks: what to enable, and what not to
+
+Weblate ships roughly ninety built-in checks and seven automatic fixups. This file records a decision for
+every one of them against *these* catalogues, so the question is settled once rather than re-argued from
+the documentation each time someone notices a check that sounds useful.
+
+Every recommendation below was measured against the files in `po/`, and every "turn it on" row was
+challenged by someone other than its author before it was written down. Where a count is given it came
+from parsing the catalogue, not from reading the check's description.
+
+Read [`weblate-component-configuration.md`](weblate-component-configuration.md) first for **how a flag
+reaches a string at all** — that is a separate and counter-intuitive subject, and getting it wrong wastes
+more time than choosing the wrong check.
+
+## Two mechanics that decide everything else
+
+**A check's identifier is not the flag that enables it.** The check called `asciidoc-markup` is switched on
+by the flag `asciidoc-text`; `md-syntax`, `md-link` and `md-reflink` all come from the single flag
+`md-text`. Setting the identifier does nothing. Every row below gives the flag string to type.
+
+**"Automatically enabled for X files" never fires here.** These catalogues are gettext PO, extracted *from*
+AsciiDoc, Markdown and YAML by po4a. Weblate sees PO, so every format-triggered auto-enablement is inert
+and the flag must be explicit.
+
+## Enable these
+
+Set component flags in *Component → Translation flags*. Per-string flags are source-string extra flags,
+reachable only through the web interface or the API — never the `.pot`, for the reason the configuration
+reference explains.
+
+### `asciidoc-text` — protocol documentation, then infectious agents
+
+```
+asciidoc-text
+```
+
+The highest-value check available, because it is the only thing that notices a **translated
+cross-reference anchor**. Coverage: 121 of 689 documentation source strings carry an AsciiDoc token (34
+`name:target[]` macros, 11 `<<xref>>`, 75 `[[anchor]]`, 3 passthrough); 13 of 4107 infectious-agent
+strings, all from `Output-Header.adoc` / `Output-Footer.adoc` — the 4084 taxonomy entries carry none, so
+component scope is safe there.
+
+It finds real, shipping defects — see *Defects this survey found* below.
+
+Prerequisite before enabling it on infectious agents: the three Creative-Commons licence strings from
+`Output-Footer.adoc` need per-string `ignore-asciidoc-markup`. Translators deliberately localised the deed
+URL (`…/4.0/[` → `…/4.0/deed.de[`), and because the check normalises a macro to name-plus-target, a
+deliberately different URL always fires.
+
+Known limits, so nobody assumes more cover than exists: the check collects only macros, `<<xref>>`,
+`[[anchor]]` and passthroughs — **not** bold, italic, monospace or attribute references. And its macro
+pattern absorbs a preceding word, so `daysfootnote:x[]` against `Tagefootnote:x[]` fires although the
+footnote is intact; fix that in the source rather than with a flag.
+
+### `md-text` — reports
+
+```
+md-text
+```
+
+Enables `md-link`, `md-syntax` and `md-reflink` (the last is inert — no referents). Coverage: 27 of 774
+strings carry a Markdown link (31 instances), 16 carry syntax tokens (37 instances, 15 of them inline R
+spans).
+
+Also repairs something invisible: `reports.pot` tags 190 entries `markdown-text`, but that is **po4a's**
+flag, not Weblate's. Weblate applies no Markdown awareness anywhere today, including the markdown-link
+exclusion inside `punctuation_spacing`, which tests `'md-text' in unit.all_flags`.
+
+Do **not** set it on the protocol documentation: 34 entries, no findings, it misses AsciiDoc's own
+constructs, and it switches the translator's editor into Markdown mode for AsciiDoc text.
+
+Limits: `md-syntax` compares *sets* of delimiters, so a translation keeping one backtick pair and dropping
+six others passes — entries here carry 4, 5 and 7 spans. `md-link` only inspects targets beginning `.`,
+`#` or `{`, none of ours, so it degrades to link-count parity and a silently rewritten URL passes. Neither
+replaces the repository's own placeholder gate.
+
+### `placeholders` — reports, one flag with four alternatives
+
+```
+placeholders:r"`r [^`]+`":r"@(fig|tbl|eq|sec|lst|thm|lem|cor|prp|cnj|def|exm|exr)-[a-zA-Z0-9_-]+":r"\{[a-zA-Z_][a-zA-Z0-9_]*\}":r"\{#[A-Za-z0-9._-]+\}"
+```
+
+`placeholders:` is a **single** flag whose value is a colon-separated list, so a second line replaces the
+first rather than adding to it — hence one flag covering inline R spans, Quarto cross-references, glue
+`{named}` placeholders and Quarto heading anchors. Colons inside a member would break the quoting; none of
+these four contains one.
+
+Puts 15 inline-R spans, 107 cross-references, 30 glue placeholders and 40 heading anchors under
+enforcement. A mangled `{#sec-…}` silently breaks every `@sec-` reference to that section and nothing else
+catches it.
+
+**Settle the inline-R policy before enabling.** Either an `` `r …` `` span is opaque — in which case adopt
+this and restructure the one string whose German translation renders literals *inside* the span — or spans
+are partly translatable, which no count- or content-based check can express and which stays human review.
+Six German report units already differ in their span set. Without a decision the first finding gets argued
+about instead of fixed.
+
+Caveat: it is *not* a no-op on token-free sources. A placeholder the target invents always fires, which is
+a feature (a translation that adds a cross-reference is a defect) but it means every unit is in scope.
+
+### `placeholders` — DHIS2 metadata
+
+```
+placeholders:r"[#AV]\{[^}]+\}"
+```
+
+A different regex from the reports one, so this cannot be a project-level flag. Covers 177 of 2820 strings
+(267 tokens). The character class is minimal by measurement rather than guesswork: a census of the
+character before every `{` in the catalogue returns exactly `#`, `V` and `A`.
+
+### `c-format` — reports, transitionally
+
+```
+c-format
+```
+
+114 of 774 strings carry a C-printf token (223 tokens: `%s` ×191, `%i` ×29). This is a **transitional**
+adoption: the target state is named `{}` placeholders everywhere, and this covers `%s` only until they are
+gone.
+
+Three of the 223 tokens are not placeholders and will produce permanent noise — a `% a` inside "Values
+above 100% are expected", a msgid that is literally `%`, and a `%x` inside an inline R span. Suppress those
+three per string rather than leaving them to teach translators that the check cries wolf.
+
+### `xml-text` — six documentation strings, per-string only
+
+The six `documentation.pot` entries extracted from the decision-flow `.resx` carry escaped entities in the
+msgid. `xml-invalid` is automatic but only engages on strings it recognises as XML-like; forcing it on these
+six needs per-string `xml-text`.
+
+Per-string **only**: `documentation.pot` is regenerated by po4a on every pipeline run and po4a cannot emit
+custom per-string flags, so a flag written into the template is destroyed on the next run.
+
+### `url` — one string
+
+One msgid in the whole project is nothing but a URL (`https://neoipc.org/`). Worth the per-string `url`
+flag; must **not** be set at component level, where it would demand every target validate as a URL.
+
+### `discard:<flag>` — the escape hatch
+
+```
+discard:<flag-name>
+```
+
+What makes the component-level recommendations reversible per string: `discard:asciidoc-text` on the six
+`.resx`-sourced documentation units, `discard:md-text` on any YAML-sourced reports unit that misbehaves,
+`discard:placeholders` where needed. Like every per-string flag it is a source-string extra flag, so it is
+invisible in git — the trade-off the configuration reference records.
+
+## Defects this survey found
+
+These are not configuration; they are broken translations that are shipping. They are fixed **through
+Weblate**, because the catalogues are Weblate-owned.
+
+**Translated cross-reference anchors — about ten, in German and Spanish.** Five German `<<xref>>` ids
+(`<<bsi-spezifischen Daten_cvc>>`, `<<bsi-spezifische-daten_pvc>>`, `<<bsi-spezifischen Daten_pvc>>`,
+`<<pneumonie-spezifischen-daten_inv>>`, `<<pneumonie-spezifische-daten_niv>>`), one Spanish
+(`<<neumonia-specific-data_inv>>`), one `xref:` pointing at an anchor that does not exist, one dropped
+`xref:patient-progress-chart[]`, and `footnote:` rendered as `Fußnote:` / `nota:`. Each silently breaks a
+cross-reference in the rendered protocol.
+
+Confirmed genuine rather than a language convention: all 75 `[[anchor]]` definitions *are* translated in
+German and not one id was altered, and none of the German xref targets exists as an anchor anywhere.
+
+**Merge-conflict markers in translated text — fifteen strings.** German (3) and Spanish (12)
+`documentation` entries contain raw po4a/`msgcat` conflict text in the `msgstr`, e.g.
+`#-#-#-#-#  NeoIPC-Core-Protocol.de.adoc:169 (type Block title)  #-#-#-#-#`. **The three German ones are
+not fuzzy**, so they are shippable. They also account for roughly 40 % of the project's entire current
+check noise — fixing them improves every other measurement before a single flag is set.
+
+**Dropped Markdown links and inline R spans — four.** Spanish and Italian both dropped a link from the
+Reference-Report introduction; German dropped the inline R span from two table-introduction paragraphs,
+silently removing computed content from the rendered report.
+
+## What stays in the repository's own gate
+
+Weblate cannot express these, so `scripts/Test-PoPlaceholders.ps1` remains necessary rather than redundant:
+
+- **Content** equality of an inline R span. A translation that rewrites a variable name inside `` `r …` ``
+  keeps the token count and passes every Weblate check — and that is arbitrary code reaching the renderer,
+  not a formatting slip.
+- **Count** parity where Weblate compares sets: both `md-syntax` and `md-link` degrade to set or count
+  comparisons that a partial drop survives.
+- Anything requiring real logic. Custom checks need a Python class registered server-side, which a hosted
+  instance cannot accept.
+
+## Fixups: no decision to make, but you must know
+
+Fixups **mutate a translation on save**. They are a server-level list, not configurable per project, so
+these are facts to work around rather than choices.
+
+- **Punctuation spacing** inserts a space character before `: ; ! ?` in **French**, and we have French
+  catalogues. Any rule banning non-ASCII characters must be scoped to hyphens alone or it will fight this
+  on every French string.
+- **Trailing ellipsis** rewrites `...` to `…`.
+- Zero-width-space removal, control-character removal, Devanagari danda, unsafe-HTML cleanup and the
+  leading/trailing whitespace fixer complete the list.
+
+## Rejected, so it is not re-litigated
+
+The entire per-language format-string family is **not applicable**: PHP, Java (printf and MessageFormat),
+JavaScript, ECMAScript templates, i18next, Qt, Ruby, Scheme, Lua, Objective-C, Object Pascal, AngularJS,
+Automattic, Vue, Laravel, Perl (both), C#, percent-placeholders. Several are exact behavioural aliases of
+`c-format` under another name; several actively misparse our content — Laravel's pattern *is* AsciiDoc
+macro syntax, Scheme's is AsciiDoc subscript, and `python_format` would accept `%(name)s`, which R's
+`sprintf` does not.
+
+`safe-html` is rejected on measurement: no source string contains HTML, while its attached fixup would
+strip the Markdown links that *are* there.
+
+`ignore-all-checks` is rejected explicitly because it is the obvious shortcut for bulk-suppressing the
+nomenclature strings and it would discard the checks that still matter on them.
+
+The Fluent family is inapplicable, and its two syntax checks are actively wrong here — they validate
+rather than compare.
+
+## Traps worth keeping
+
+- A check identifier is not its enabling flag.
+- "Automatic for X files" does not fire for gettext PO extracted from X.
+- **Fuzzy units are checked.** Any measurement taken over non-fuzzy units alone understates the benefit —
+  most live findings here sit on fuzzy units.
+- `md-syntax`, `asciidoc-markup` and `placeholders` have **no source-side early return**, so a
+  component-level flag puts every unit in scope and a token the *target* invents fires on its own.
+- `po_line_wrap`, `check_flags` and per-string flags are three different delivery routes with three
+  different persistence properties. See the configuration reference.

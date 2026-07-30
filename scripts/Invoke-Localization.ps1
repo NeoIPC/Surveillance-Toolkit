@@ -10,10 +10,11 @@
     validation into a single entry point with tab-completable parameters.
 
     Catalogue ownership: the repository owns every .pot template. It also owns the
-    catalogues of the three domains that are NOT hosted on Weblate — glossary,
-    scripts and antibiotics — each of which has a writer here that keeps it in step
-    with its template: update-glossary-po.py, po4a, and the NeoIPC-Tools antibiotic
-    exporter respectively. For the three this script does touch (reports, documentation,
+    catalogues of the two domains that are NOT hosted on Weblate — scripts and
+    antibiotics — each of which has a writer here that keeps it in step with its
+    template: po4a and the NeoIPC-Tools antibiotic exporter respectively. The glossary
+    catalogues are Weblate's, written by the neoipc-glossary component; nothing in this
+    repository writes them. For the three this script does touch (reports, documentation,
     infectious_agents) Weblate is the only writer, and po4a msgmerges them as an
     unavoidable side effect of every run, so -Update restores those from HEAD once the
     localized artifacts exist. Two writers on one catalogue is what conflicts every language at
@@ -32,7 +33,7 @@
       2. Update YAML keys in po4a configs (Update-Po4aYamlKeys.ps1)
       3. Run po4a to regenerate the .pot and the localized files, then restore
          every Weblate-owned .po so the run leaves them byte-identical
-      4. Update glossary PO and generate localized YAML
+      4. Update the glossary template and generate localized YAML
 
     Render mode:
       Runs po4a with --no-update: produces the localized artifacts from the
@@ -164,7 +165,8 @@ $po4aConfigs = @('reports', 'documentation', 'infectious_agents', 'scripts')
 # registered as a Weblate component, so it stays repository-owned and this pipeline is the only thing
 # that keeps it current. Guarding it as Weblate's would freeze it at HEAD — po4a's msgmerge of a new
 # message key would be discarded, and no other writer exists to add it — and would abort the run on a
-# legitimate hand edit. po/glossary.*.po is likewise repository-owned, and is not a po4a config.
+# legitimate hand edit. po/glossary.*.po is Weblate-owned but is not a po4a config either, so it never
+# reaches this list — the glossary generator writes only its template, so there is nothing to restore.
 $weblateOwnedPo4aConfigs = @('reports', 'documentation', 'infectious_agents')
 
 # Each product po4a config derives its --package-version from that product's VERSION file (the single
@@ -191,14 +193,14 @@ $versionFileMap = @{
 # These values must match each Weblate component's `license` field, because that is what is displayed to a
 # contributor as the terms they are contributing under.
 #
-# KNOWN DISCREPANCY, and it cannot be fixed from here. This map governs the `.pot` only. The existing
-# `po/reports.<lang>.po` still say MIT and the `po/infectious_agents.<lang>.po` still say
-# CC BY-NC-ND 4.0, because those files are Weblate-owned — the pipeline stopped rewriting their headers
-# when Weblate became their sole writer, and `msgmerge` preserves a target file's header comment block
-# rather than taking the template's. So the correction has to be made through Weblate (upload, or an
-# addon that rewrites the header), not by editing the catalogues here: a hand-edit would be exactly the
-# two-writer state this whole design removes, and the continuous-integration gate would reject it.
-# Until that happens the `.pot` and the `.po` of those two catalogues disagree about their licence.
+# This map governs the `.pot` only. The catalogues once disagreed with it — `po/reports.<lang>.po` said
+# MIT and `po/infectious_agents.<lang>.po` said CC BY-NC-ND 4.0 — and the discrepancy could not be closed
+# from here, because those files are Weblate-owned: the pipeline stopped rewriting their headers when
+# Weblate became their sole writer, and `msgmerge` preserves a target's header comment block rather than
+# taking the template's. It was closed through Weblate instead, which is the only route that is not the
+# two-writer state this design removes and that the continuous-integration gate would reject. All five
+# catalogues now declare CC BY 4.0, matching their components. Should they diverge again, the correction
+# belongs on the Weblate side for the same reason.
 $catalogHeaderMap = @{
     reports           = @{ Package = 'NeoIPC Surveillance Reports';               License = 'Creative Commons Attribution 4.0 International' }
     documentation     = @{ Package = 'NeoIPC Surveillance Documentation';         License = 'Creative Commons Attribution 4.0 International' }
@@ -397,9 +399,11 @@ function Restore-WeblateOwnedPo {
     # restored from HEAD once po4a has produced the localized artifacts. That is what keeps the
     # repository out of the header hunk Weblate also writes.
     #
-    # Only Weblate-owned catalogues are ever passed in. The antibiotic and glossary catalogues are
-    # repository-owned and are written by their own generators, so restoring them would discard the
-    # regeneration and freeze them at HEAD with nothing else to maintain them.
+    # Only the Weblate-owned catalogues of a po4a config are ever passed in. The antibiotic catalogues
+    # are repository-owned and written by their own generator, so restoring them would discard the
+    # regeneration and freeze them at HEAD with nothing else to maintain them. The glossary catalogues
+    # are Weblate's but reach po4a not at all, and their generator writes only the template, so there is
+    # never anything of theirs to restore.
     param([Parameter(Mandatory)][string[]]$RelativePath)
 
     $declared = @($RelativePath)
@@ -444,7 +448,7 @@ function Repair-Po4aTemplateHeader {
     # this rewrites the leading comment block of the .pot it generated for one config into the NeoIPC house
     # style: title / copyright / licence / a bare "#". Idempotent. The .po files are Weblate's, and are not
     # touched — which is also what makes the Language-Team rewrite below safe, since on a catalogue that field
-    # holds the component URL Weblate wrote and blanking it would churn all 33 of them.
+    # holds the component URL Weblate wrote and blanking it would churn every Weblate-owned catalogue.
     #
     # The header contract is defined once, in the NeoIPC-Tools module (Private/PoHeader.ps1); this reproduces
     # it for the one writer that cannot call into it, because po4a produces the file and we only get to correct
@@ -519,7 +523,7 @@ function Invoke-UpdateGlossary {
     if ($DryRun) {
         Write-Host "[DryRun] $python $($glossaryArgs -join ' ')"
     } else {
-        Write-Host "Updating glossary PO and generating localized YAML"
+        Write-Host "Updating the glossary template and generating localized YAML"
         Push-Location $repoRoot
         try {
             & $python @glossaryArgs
@@ -642,9 +646,10 @@ elseif ($Render) {
     # updated"). Produces the localized artifacts from the catalogues exactly as committed, writing
     # neither .pot nor .po — so it needs no clean-tree assertion and no restore.
     #
-    # Restricted to the po4a configs. The glossary and antibiotic catalogues are produced by
-    # generators that regenerate their .pot/.po in the same pass and have no equivalent read-only
-    # mode, so -Render cannot honour its contract for them.
+    # Restricted to the po4a configs. The glossary and antibiotic generators have no read-only mode:
+    # yaml_to_pot runs unconditionally on every invocation of the glossary script, so it rewrites its
+    # template whatever else is asked of it, and the antibiotic exporter likewise. -Render therefore
+    # cannot honour "writes neither .pot nor .po" for them.
     if ($po4aConfigs -notcontains $Config -and $Config -ne 'all') {
         throw "-Render supports the po4a configs ($($po4aConfigs -join ', ')) or 'all'; '$Config' is generated by a different tool."
     }

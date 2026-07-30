@@ -1,26 +1,29 @@
 #!/usr/bin/env python3
-"""Convert glossary.yaml to/from monolingual gettext PO format.
+"""Convert glossary.yaml to/from bilingual gettext PO format.
+
+Bilingual rather than monolingual: msgctxt carries the YAML key and msgid carries the English
+source, so the component's template field stays empty and new_base points at the .pot.
 
 Replaces po4a for glossary management, providing full PO feature support:
 msgctxt (variant grouping), msgid_plural (plurals), translator comments,
 flags, locations with line numbers, and additional states.
 
-Catalogue ownership: this script writes BOTH po/glossary.pot and every
-po/glossary.<lang>.po, and it is their only writer.
+Catalogue ownership: this script writes po/glossary.pot and NOTHING ELSE under po/.
+The catalogues are Weblate's, written by the neoipc-glossary component; its msgmerge
+add-on is what brings them up to a changed template, and its new_base creates a
+catalogue for a language Weblate adds. A generator writing them as well would put
+two writers on one file, which is what conflicts every language of a catalogue at
+once -- both sides rewrite adjacent header lines inside a single hunk git cannot
+auto-merge.
 
-That is the opposite of the rule for the other catalogues here, and deliberately
-so. The others are Weblate components, so Weblate owns their .po and its msgmerge
-add-on brings them up to a changed .pot; a generator writing them as well would
-put two writers on one file, which is what conflicts every language of a catalogue
-at once -- both sides rewrite adjacent header lines inside a single hunk git
-cannot auto-merge. The glossary is NOT registered as a component, so no second
-writer exists and this script has to keep the catalogues in step with the template
-itself. Nothing else would: a term added to glossary.yaml would otherwise reach
-the .pot alone, be translatable nowhere, and silently never appear in any
-generated glossary.<lang>.yaml.
+This script therefore has no per-language header machinery at all: no language-name
+or plural-rule table, no contributor filtering, no flag merging. Weblate writes those
+headers, and scripts/modules/NeoIPC-Tools/Tests/PoHeader.Tests.ps1 -- which runs in CI
+and asserts against the committed files -- is what holds them to the contract.
 
-**Remove the merge the moment the component is registered on Weblate**, or the
-two-writer conflict returns here.
+Reading the catalogues is still this script's business: --generate-yaml produces
+glossary.<lang>.yaml for every glossary.<lang>.po it finds in --po-dir, so a language
+Weblate adds is picked up without editing anything here. Pass --languages to narrow it.
 
 Naming convention in glossary.yaml:
     key             = AMA canonical (lowercase)
@@ -39,7 +42,7 @@ YAML comment conventions:
     See https://docs.weblate.org/en/latest/admin/checks.html for available flags.
 
 Usage:
-    # Extract YAML -> POT, and merge the result into every language catalogue
+    # Extract YAML -> POT. Writes po/glossary.pot only; the catalogues are Weblate's.
     python scripts/update-glossary-po.py
 
     # Also generate localized YAML from the committed PO files
@@ -48,7 +51,6 @@ Usage:
 
 import argparse
 import datetime
-import functools
 import re
 import sys
 from pathlib import Path
@@ -63,14 +65,14 @@ try:
 except ImportError:
     sys.exit("Error: polib is required. Install with: pip install polib")
 
-VARIANT_SUFFIXES = re.compile(r"_(tc|sc|plural(?:_tc|_sc)?)$")
 PLURAL_SUFFIX = re.compile(r"_plural(?:_(tc|sc))?$")
 FLAGS_LINE = re.compile(r"^flags:\s*(.+)$", re.IGNORECASE)
-DEFAULT_LANGUAGES = ["af", "de", "el", "es", "et", "fr", "it", "ne", "tr"]
 
 # The header contract is defined once, in the NeoIPC-Tools module (Private/PoHeader.ps1). This is the same
-# contract expressed in Python, because this generator cannot call into a PowerShell module; the two are held
-# in step by Tests/PoHeader.Tests.ps1, which renders both and compares them.
+# contract expressed in Python, because this generator cannot call into a PowerShell module. Nothing renders
+# both and compares them; what holds them in step is that Tests/PoHeader.Tests.ps1 asserts the contract
+# against every COMMITTED catalogue and template, so a header this generator writes differently fails there
+# whichever writer produced it.
 #
 # The trailing bare "#" is load-bearing, not decoration. translate-toolkit's updatecontributor — which
 # Weblate's "Contributors in comment" add-on delegates to — splits the comment block at the first line matching
@@ -98,19 +100,6 @@ POT_METADATA = {
     "Content-Type": "text/plain; charset=UTF-8",
     "Content-Transfer-Encoding": "8bit",
 }
-
-# Weblate writes Language-Team as "<English name> <component URL>" and a plural rule per language. Both are
-# pre-filled with the values Weblate itself produces, so that registering neoipc-glossary as a component (which
-# makes these files Weblate-owned) yields no header diff at all. LANGUAGE_NAMES, defined further down, supplies
-# the English names.
-PLURAL_FORMS = {
-    "af": "nplurals=2; plural=n != 1;", "de": "nplurals=2; plural=n != 1;",
-    "el": "nplurals=2; plural=n != 1;", "es": "nplurals=2; plural=n != 1;",
-    "et": "nplurals=2; plural=n != 1;", "fr": "nplurals=2; plural=n > 1;",
-    "it": "nplurals=2; plural=n != 1;", "ne": "nplurals=2; plural=n != 1;",
-    "tr": "nplurals=2; plural=n != 1;",
-}
-WEBLATE_COMPONENT_URL = "https://hosted.weblate.org/projects/neoipc/neoipc-glossary/{lang}/"
 
 
 def _comment_lines(tokens):
@@ -203,8 +192,23 @@ def yaml_to_pot(glossary_path, pot_path):
         sys.exit(f"Error: {glossary_path} is empty or invalid YAML")
 
     pot = polib.POFile()
+    # Match the po_line_wrap=65535 every Weblate component here declares. polib defaults to
+    # wrapwidth=78, which made this the only wrapped template in the repository -- longest line 91
+    # against 625-1830 in the po4a-generated ones -- so the template and the catalogues Weblate writes
+    # from it disagreed on line breaking, for no reason anyone chose.
+    pot.wrapwidth = 65535
     pot.header = POT_HEADER_COMMENT
     pot.metadata = {**POT_METADATA}
+
+    # The "#:" location must be repository-relative with forward slashes, whatever path the caller
+    # passed. It is written into a committed, publicly shipped file, so an absolute --glossary would put
+    # a developer's home directory into the template -- and the po4a-generated templates alongside it are
+    # repository-relative, so this also keeps the family consistent. Falls back to the bare filename for
+    # a source outside the repository, which is the only remaining way to name it without leaking a path.
+    try:
+        location = glossary_path.resolve().relative_to(Path(__file__).resolve().parent.parent).as_posix()
+    except ValueError:
+        location = glossary_path.name
     now = datetime.datetime.now(datetime.timezone.utc)
     pot.metadata["POT-Creation-Date"] = now.strftime("%Y-%m-%d %H:%M%z")
 
@@ -212,8 +216,27 @@ def yaml_to_pot(glossary_path, pot_path):
     plural_pairs = {}
     for key in data:
         base = find_plural_base(key)
-        if base and base in data:
-            plural_pairs[base] = key
+        if not (base and base in data):
+            continue
+        # A CASED plural key cannot be paired. PLURAL_SUFFIX strips `_plural_tc` and `_plural_sc` to the
+        # same base as `_plural`, so the cased key is swallowed: it never becomes an entry of its own, its
+        # value is attached to the uncased base as that entry's msgid_plural, and the reader then emits it
+        # back under the uncased `<base>_plural` name. Authoring the four keys the naming convention
+        # documents for one term yields three, one holding the wrong value.
+        #
+        # Caught here, against glossary.yaml, because this is the only place the distinction survives:
+        # by the time a catalogue exists the plural sits on the uncased msgctxt, so nothing downstream can
+        # tell a cased family from an ordinary one. Refusing at authoring time is also where the author
+        # can act on it.
+        cased = PLURAL_SUFFIX.search(key).group(1)
+        if cased:
+            sys.exit(
+                f"Error: {glossary_path.name}: {key!r} is a cased plural key, which this schema cannot "
+                f"express. Pairing resolves it to {base!r}, so its value would be emitted back as "
+                f"'{base}_plural' and {key!r} would disappear. Give the plural form one key per case "
+                f"({base}_plural) and no cased plural, or extend the schema to keep them apart."
+            )
+        plural_pairs[base] = key
 
     # Track which keys are handled as plural counterparts
     handled_as_plural = set(plural_pairs.values())
@@ -235,7 +258,7 @@ def yaml_to_pot(glossary_path, pot_path):
             "msgctxt": key,
             "msgid": value,
             "msgstr": "",
-            "occurrences": [(str(glossary_path), str(line_no))],
+            "occurrences": [(location, str(line_no))],
         }
 
         if desc_lines:
@@ -263,267 +286,39 @@ def yaml_to_pot(glossary_path, pot_path):
     return pot
 
 
-# Flags that are managed by translators/Weblate, not by the source YAML.
-# These are preserved from existing PO files during merge; all other flags
-# are replaced by whatever the POT specifies.
-TRANSLATOR_FLAGS = {"fuzzy", "ignore-same"}
+def _reject_unsupported_plurals(po_dir, languages):
+    """Refuse a plural family with more forms than the YAML can hold, before anything is written.
 
+    glossary.<lang>.yaml holds `key` and `key_plural`, so a language declaring three or six forms cannot
+    be represented. Scoped to the ENTRY, not the language: a three-form language is fine while no entry
+    carries a plural family, which is why Ukrainian and Arabic work today. Unreachable now -- no glossary
+    entry declares a plural family -- and reachable through an ordinary glossary edit.
 
-def _merge_flags(pot_flags, po_flags):
-    """Merge source flags (from POT/YAML) with translator flags (from PO).
-
-    POT flags are authoritative — they replace all non-translator flags.
-    Only translator-managed flags (e.g. ``fuzzy``) are preserved from the
-    existing PO.  Returns a deduplicated list.
+    The other unrepresentable shape, a cased plural key, is refused in yaml_to_pot instead. It has to be:
+    once a catalogue exists the plural sits on the uncased msgctxt, so nothing here can tell a cased
+    family from an ordinary one.
     """
-    merged = list(pot_flags or [])
-    for f in (po_flags or []):
-        if f in TRANSLATOR_FLAGS and f not in merged:
-            merged.append(f)
-    return merged
-
-
-LANGUAGE_NAMES = {
-    "af": "Afrikaans", "de": "German", "es": "Spanish", "et": "Estonian",
-    "el": "Greek", "fr": "French", "it": "Italian", "ne": "Nepali",
-    "tr": "Turkish",
-}
-
-
-def _po_header_comment(lang):
-    """Generate the file-level comment block for a new PO file.
-
-    Ends on a bare "#" and carries no author placeholder. "FIRST AUTHOR <EMAIL@ADDRESS>, YEAR." is the exact
-    string translate-toolkit treats as the marker for where contributors begin, and the truncated form used
-    here previously was neither that marker nor a valid contributor line — it simply sat in the block being
-    mistaken for an author. The bare "#" is the last line the contributor machinery preserves, so real
-    contributors land immediately below it.
-    """
-    return (
-        f"{_language_name(lang)} translations for the NeoIPC Surveillance Glossary\n"
-        "Copyright (C) Charité – Universitätsmedizin Berlin\n"
-        "This file is distributed under the Creative Commons "
-        "Attribution 4.0 International license\n"
-    )
-
-
-def _language_name(lang):
-    """The English language name Weblate uses for a locale, or raise.
-
-    Never falls back to the raw locale code. The code and the name are not interchangeable: falling back puts
-    "af" where Weblate writes "Afrikaans", so the Language-Team this generator emits differs from the one
-    Weblate emits, and Weblate rewrites the header on its next write -- the exact churn this contract removes.
-    Get-NeoIPCPoLanguageName refuses for the same reason; the two writers have to agree or the contract is a
-    fiction.
-    """
-    if lang not in LANGUAGE_NAMES:
-        raise KeyError(
-            f"No English language name known for locale {lang!r}. Add it to LANGUAGE_NAMES, taking the name "
-            f"Weblate uses for that language, rather than guessing it from the code."
-        )
-    return LANGUAGE_NAMES[lang]
-
-
-def _plural_forms(lang):
-    """The Plural-Forms rule Weblate writes for a locale, or raise.
-
-    Refuses for the same reason _language_name does: an omitted rule does not mean "no plural rule", it means
-    Weblate supplies its own on its next write and rewrites the header.
-    """
-    if lang not in PLURAL_FORMS:
-        raise KeyError(
-            f"No plural rule known for locale {lang!r}. Add it to PLURAL_FORMS, taking the value Weblate "
-            f"writes for that language. Omitting the field silently would let Weblate add its own and rewrite "
-            f"the header."
-        )
-    return PLURAL_FORMS[lang]
-
-
-def _plural_form_count(lang):
-    """How many msgstr[N] forms an entry in this locale carries, read from that locale's own rule.
-
-    Derived rather than assumed, so the header cannot declare one plural count over a structure carrying
-    another. A hard-coded 2 next to a table that locales get added to is the same failure as guessing a
-    language name from its code, one level further down, and nothing here would catch it. Every locale listed
-    today is nplurals=2, so this changes no catalogue -- but two of the six languages with an official WHO
-    translation are outside it (Russian 3, Arabic 6).
-    """
-    rule = _plural_forms(lang)
-    match = re.search(r"\bnplurals\s*=\s*(\d+)", rule)
-    if not match:
-        raise ValueError(
-            f"The plural rule for locale {lang!r} declares no nplurals: {rule!r}. Fix its entry in "
-            f"PLURAL_FORMS -- the number of forms a new plural entry is created with is read from it."
-        )
-    return int(match.group(1))
-
-
-_CONTRIBUTOR_RE = re.compile(r".*<\S+@\S+>.*\d{4,4}")
-_ADDRESS_RE = re.compile(r"<([^>]+)>")
-NON_HUMAN_IDENTITIES_PATH = Path(__file__).resolve().parent.parent / "po" / "non-human-identities.yaml"
-
-
-@functools.lru_cache(maxsize=1)
-def _non_human_identities():
-    """The shared exclusion list, read from po/non-human-identities.yaml.
-
-    Data rather than code, because PowerShell and R consult the same file: a list maintained separately in
-    three languages is one that disagrees with itself. See that file for why matching is on the address and
-    never on the display name.
-    """
-    with open(NON_HUMAN_IDENTITIES_PATH, encoding="utf-8") as handle:
-        data = YAML(typ="safe").load(handle) or {}
-    return (
-        {d.lower() for d in data.get("excluded_domains", [])},
-        {e["address"].lower() for e in data.get("excluded_addresses", [])},
-        set(data.get("excluded_literals", [])),
-    )
-
-
-def is_non_human(line):
-    """Whether a credit line names something other than a person."""
-    domains, addresses, literals = _non_human_identities()
-    if any(literal in line for literal in literals):
-        return True
-    match = _ADDRESS_RE.search(line)
-    if not match:
-        return False
-    address = match.group(1).lower()
-    return address in addresses or address.rsplit("@", 1)[-1] in domains
-
-
-def _retained_contributors(header):
-    """The contributor lines worth keeping from an existing header, as text to append below the bare "#".
-
-    Recognises a contributor with translate-toolkit's own rule -- an e-mail AND a four-digit year -- so that
-    what we keep is exactly what its updatecontributor() will later treat as the contributor run. Anything
-    failing it (the truncated "FIRST AUTHOR <EMAIL@ADDRESS>" placeholder that used to sit here, a bare name)
-    is not a contributor and is dropped rather than carried forward.
-    """
-    kept = [
-        line for line in (header or "").split("\n")
-        if _CONTRIBUTOR_RE.match(line) and not is_non_human(line)
-    ]
-    return "".join("\n" + line for line in kept)
-
-
-def _po_metadata(lang, pot_metadata):
-    """Header fields for a catalogue: the template's, minus what belongs only to a template, plus per-language.
-
-    POT-Creation-Date is dropped: msgmerge does not refresh it in a catalogue, so it records the age of a
-    template generation that has long since moved on. Language-Team and Plural-Forms are pre-filled with what
-    Weblate writes, so registering the component produces no diff.
-    """
-    meta = {k: v for k, v in pot_metadata.items() if k != "POT-Creation-Date"}
-    meta["Language"] = lang
-    meta["Language-Team"] = "{0} <{1}>".format(
-        _language_name(lang), WEBLATE_COMPONENT_URL.format(lang=lang)
-    )
-    meta["Plural-Forms"] = _plural_forms(lang)
-    return meta
-
-
-def merge_po(pot_path, po_path):
-    """Merge a POT into an existing PO file, preserving translations."""
-    pot = polib.pofile(str(pot_path))
-
-    # Extract language code from filename (glossary.<lang>.po)
-    lang = po_path.stem.split(".")[-1]
-
-    if not po_path.exists():
-        # Create a new PO from the POT
-        po = polib.POFile()
-        po.header = _po_header_comment(lang)
-        po.metadata = _po_metadata(lang, pot.metadata)
-        for entry in pot:
-            new_entry = polib.POEntry(
-                msgctxt=entry.msgctxt,
-                msgid=entry.msgid,
-                msgid_plural=entry.msgid_plural,
-                msgstr="" if not entry.msgid_plural else None,
-                msgstr_plural=({i: "" for i in range(_plural_form_count(lang))}
-                               if entry.msgid_plural else None),
-                comment=entry.comment,
-                occurrences=entry.occurrences,
-            )
-            if entry.flags:
-                new_entry.flags = list(entry.flags)
-            po.append(new_entry)
-        po.save(str(po_path), newline="\n")
-        print(f"Created {po_path}")
-        return
-
-    po = polib.pofile(str(po_path))
-
-    # Build lookup of existing translations by (msgctxt, msgid)
-    existing = {}
-    for entry in po:
-        existing[(entry.msgctxt, entry.msgid)] = entry
-
-    # Also try matching by msgid alone (for migration from po4a which had
-    # no msgctxt)
-    existing_by_msgid = {}
-    for entry in po:
-        if not entry.msgctxt and entry.msgid:
-            existing_by_msgid[entry.msgid] = entry
-
-    new_po = polib.POFile()
-    new_po.header = _po_header_comment(lang) + _retained_contributors(po.header)
-    new_po.metadata = _po_metadata(lang, pot.metadata)
-
-    for pot_entry in pot:
-        key = (pot_entry.msgctxt, pot_entry.msgid)
-
-        if key in existing:
-            # Exact match — preserve translation, merge flags
-            old = existing[key]
-            merged_flags = _merge_flags(pot_entry.flags, old.flags)
-            new_entry = polib.POEntry(
-                msgctxt=pot_entry.msgctxt,
-                msgid=pot_entry.msgid,
-                msgid_plural=pot_entry.msgid_plural,
-                msgstr=old.msgstr if not pot_entry.msgid_plural else "",
-                msgstr_plural=(old.msgstr_plural
-                               if pot_entry.msgid_plural else None),
-                comment=pot_entry.comment,
-                occurrences=pot_entry.occurrences,
-            )
-            new_entry.flags = merged_flags
-        elif pot_entry.msgid in existing_by_msgid:
-            # Migration: match by msgid (old po4a entry without msgctxt)
-            old = existing_by_msgid[pot_entry.msgid]
-            new_entry = polib.POEntry(
-                msgctxt=pot_entry.msgctxt,
-                msgid=pot_entry.msgid,
-                msgid_plural=pot_entry.msgid_plural,
-                msgstr=old.msgstr if not pot_entry.msgid_plural else "",
-                msgstr_plural=(old.msgstr_plural
-                               if pot_entry.msgid_plural else None),
-                comment=pot_entry.comment,
-                occurrences=pot_entry.occurrences,
-            )
-            new_entry.flags = _merge_flags(pot_entry.flags, old.flags)
-        else:
-            # New entry — no translation yet
-            new_entry = polib.POEntry(
-                msgctxt=pot_entry.msgctxt,
-                msgid=pot_entry.msgid,
-                msgid_plural=pot_entry.msgid_plural,
-                msgstr="" if not pot_entry.msgid_plural else None,
-                msgstr_plural=({i: "" for i in range(_plural_form_count(lang))}
-                               if pot_entry.msgid_plural else None),
-                comment=pot_entry.comment,
-                occurrences=pot_entry.occurrences,
-            )
-            if pot_entry.flags:
-                new_entry.flags = list(pot_entry.flags)
-
-        new_po.append(new_entry)
-
-    new_po.save(str(po_path), newline="\n")
-    translated = len([e for e in new_po if e.msgstr or
-                      (e.msgstr_plural and any(e.msgstr_plural.values()))])
-    print(f"Updated {po_path} ({translated}/{len(new_po)} translated)")
+    for lang in languages:
+        po_path = po_dir / f"glossary.{lang}.po"
+        if not po_path.exists():
+            continue
+        for entry in polib.pofile(str(po_path)):
+            # Obsolete "#~" entries are skipped, because the emitter never sees one: it iterates
+            # translated_entries(), which excludes them. Validating what the emitter cannot reach means
+            # refusing on state the configuration deliberately keeps -- po_remove_obsolete is false on
+            # purpose -- so a retired plural family would withhold output for the whole run and name a
+            # key nobody uses. A guard that blocks correct output is worse than the gap it closes.
+            if entry.obsolete:
+                continue
+            if not (entry.msgid_plural and entry.msgstr_plural):
+                continue
+            if len(entry.msgstr_plural) > 2:
+                sys.exit(
+                    f"Error: {po_path.name}: {entry.msgctxt!r} carries {len(entry.msgstr_plural)} plural "
+                    f"forms, and glossary.<lang>.yaml has two slots for them ('{entry.msgctxt}' and "
+                    f"'{entry.msgctxt}_plural'). The schema needs extending to hold this language's "
+                    f"forms -- do not narrow --languages to work around it, that drops the language."
+                )
 
 
 def generate_yaml(po_dir, glossary_path, languages, threshold=80):
@@ -536,29 +331,57 @@ def generate_yaml(po_dir, glossary_path, languages, threshold=80):
     yaml.preserve_quotes = True
     yaml.default_flow_style = False
 
+    # Validate every catalogue BEFORE writing any of them, so a refusal cannot leave some languages
+    # generated and others not. Raising from inside the write loop produced exactly that: one YAML on
+    # disk, the next language's absent, and no indication which state the caller was in.
+    _reject_unsupported_plurals(po_dir, languages)
+
     for lang in languages:
         po_path = po_dir / f"glossary.{lang}.po"
         if not po_path.exists():
             continue
 
         po = polib.pofile(str(po_path))
-        total = len(po)
-        translated_count = len(po.translated_entries())
-        pct = (translated_count / total * 100) if total > 0 else 0
+        # One list, used for the count, the decision and the emission below, so all three are about the
+        # same entries by construction. They agreed before only because polib's translated_entries()
+        # happens to exclude obsolete ones while the denominator excluded them explicitly -- the same
+        # invisible agreement that made the percentage look wrong to two readers, one level down.
+        translated = [e for e in po.translated_entries() if not e.obsolete]
+        translated_count = len(translated)
+        total = len([e for e in po if not e.obsolete])
+        # Computed from the two counts the message prints, so the decision and the printed figure are
+        # provably the same numbers rather than agreeing because polib happens to define its percentage
+        # the same way. That equivalence is real -- polib's percent_translated() uses exactly these two
+        # values -- but it is invisible here and two reviewers read the mismatch as a defect, which is
+        # reason enough to stop depending on another package's internal definition.
+        #
+        # Obsolete "#~" entries are excluded from the denominator: POFile subclasses list, so len(po)
+        # counts them while they can never be translated, which would drag the figure down and skip a
+        # language that is in fact complete. They used to be impossible here because the retired merge
+        # rebuilt each catalogue from the template; now that Weblate owns them and po_remove_obsolete is
+        # deliberately false, they are normal state.
+        #
+        # Floor division, not rounding: the threshold is an integer, and floor(x) < T exactly when
+        # x < T, so the decision is unchanged while the printed percentage can never round up to look
+        # as though it had passed. An empty catalogue reports 0 rather than polib's 100 -- nothing
+        # should be generated from a catalogue with no strings.
+        pct = (translated_count * 100) // total if total > 0 else 0
 
         if pct < threshold:
             print(
                 f"Skipped {lang}: {translated_count}/{total} translated "
-                f"({pct:.0f}% < {threshold}% threshold)"
+                f"({pct}% < {threshold}% threshold)"
             )
             continue
 
         translations = {}
-        for entry in po.translated_entries():
+        for entry in translated:
             if not entry.msgctxt:
                 continue
 
             if entry.msgid_plural and entry.msgstr_plural:
+                # Shapes this cannot represent were refused before any file was written; see
+                # _reject_unsupported_plurals.
                 # Singular
                 if entry.msgstr_plural.get(0):
                     translations[entry.msgctxt] = entry.msgstr_plural[0]
@@ -588,7 +411,7 @@ def generate_yaml(po_dir, glossary_path, languages, threshold=80):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Convert glossary.yaml to/from monolingual gettext PO"
+        description="Convert glossary.yaml to/from bilingual gettext PO"
     )
     parser.add_argument(
         "--glossary",
@@ -611,8 +434,9 @@ def main():
     parser.add_argument(
         "--languages",
         type=lambda s: s.split(","),
-        default=DEFAULT_LANGUAGES,
-        help="Comma-separated language codes to generate localized YAML for",
+        default=None,
+        help="Comma-separated language codes to generate localized YAML for "
+             "(default: every glossary.<lang>.po found in --po-dir)",
     )
     parser.add_argument(
         "--generate-yaml",
@@ -633,15 +457,19 @@ def main():
 
     yaml_to_pot(args.glossary, args.pot)
 
-    # The glossary catalogue is repository-owned -- it is not a Weblate component -- so this script
-    # is its writer and must keep every .po in step with the template it just regenerated. Remove
-    # this loop at the moment the component is registered on Weblate, or there will be two writers
-    # on one file again, which is the failure the rest of the pipeline exists to prevent.
-    for lang in args.languages:
-        merge_po(args.pot, args.po_dir / f"glossary.{lang}.po")
-
     if args.generate_yaml:
-        generate_yaml(args.po_dir, args.glossary, args.languages,
+        # Discover the catalogues present rather than defaulting to a fixed list. Weblate owns which
+        # languages exist and adds one whenever a request is accepted, so a hard-coded list silently
+        # skips the new language's YAML until someone notices and edits this file. Same reasoning, and
+        # the same fix, as the metadata importer's locale discovery.
+        languages = args.languages
+        if languages is None:
+            languages = sorted(
+                p.name.split(".")[1] for p in args.po_dir.glob("glossary.*.po")
+            )
+            if not languages:
+                print(f"No glossary.<lang>.po found in {args.po_dir}; nothing to generate.")
+        generate_yaml(args.po_dir, args.glossary, languages,
                       threshold=args.threshold)
 
 

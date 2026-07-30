@@ -59,13 +59,13 @@ jobs:
                 # That commit touches a .po whenever both sides changed one, so a committer check against HEAD
                 # rejects pull requests whose every real commit is Weblate's.
                 head="${{ github.event.pull_request.head.sha }}"
-                # Weblate-owned: every catalogue registered as a Weblate component. po/glossary.*.po,
-                # scripts/po/*.po and po/antibiotics.*.po are deliberately absent — they are not on Weblate and
-                # remain repository-owned, so a hand edit or a generator run there is legitimate. The antibiotic
+                # Weblate-owned: every catalogue registered as a Weblate component. scripts/po/*.po and
+                # po/antibiotics.*.po are deliberately absent — they are not on Weblate and remain
+                # repository-owned, so a hand edit or a generator run there is legitimate. The antibiotic
                 # catalogue cannot be hosted: its content is CC BY-NC-SA 3.0 IGO, and a NonCommercial term is not
                 # a free licence, which Hosted Weblate's free plan requires. Add a catalogue here when it is
                 # registered on Weblate, and remove it here when it is not.
-                owned='po/reports\..*\.po|po/documentation\..*\.po|po/infectious_agents\..*\.po|po/metadata\..*\.po'
+                owned='po/reports\..*\.po|po/documentation\..*\.po|po/infectious_agents\..*\.po|po/metadata\..*\.po|po/glossary\..*\.po'
                 # Weblate commits everything it pushes under this one identity, whoever wrote the translation,
                 # so a per-commit committer check recognises Weblate's own output no matter who opened the pull
                 # request. Exempting by pull-request author instead would reject the drain pull requests we open
@@ -99,6 +99,11 @@ jobs:
                   echo "If a local run produced these, which catalogue it is decides the remedy:"
                   echo "  po/reports.* po/documentation.* po/infectious_agents.*"
                   echo "      Invoke-Localization.ps1 -Update restores them; seeing them here is a bug in that script."
+                  echo "  po/glossary.*"
+                  echo "      update-glossary-po.py did NOT write these: it emits po/glossary.pot alone and has no"
+                  echo "      per-language write path at all. A hand edit is the likely route; the same"
+                  echo "      Export-NeoIPCAntibioticTranslation -PoBaseName hazard described below applies here too."
+                  echo "      Restore from the BASE branch and commit only po/glossary.pot."
                   echo "  po/metadata.*"
                   echo "      Export-NeoIPCMetadataTranslation did NOT write these: it emits po/metadata.pot alone"
                   echo "      and has no parameter that could name a language. Two routes remain — a hand edit, or"

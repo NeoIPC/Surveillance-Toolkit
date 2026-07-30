@@ -1,9 +1,10 @@
 # Identities that appear in translation credits but are not people.
 #
-# Every writer that reads or produces a credit consults this file: update-glossary-po.py (Python) when it
-# carries contributor lines forward, the NeoIPC-Tools module (PowerShell) when it checks a catalogue, and the
-# report renderer (R) when it acknowledges translators. It is data rather than code precisely so those three
-# cannot drift apart — which is the failure this whole header exercise exists to correct.
+# One consumer reads it today: the NeoIPC-Tools module (PowerShell), when it checks a catalogue against the
+# header contract. It is data rather than code so that a second consumer in another language reads this list
+# rather than a copy of it — a list maintained twice is one that disagrees with itself, which is the failure
+# the whole header exercise exists to correct. update-glossary-po.py was such a consumer until the glossary
+# catalogues became Weblate's and the generator stopped carrying contributor lines forward at all.
 #
 # MATCH ON THE ADDRESS, NEVER THE DISPLAY NAME. `noreply@weblate.org` appears under two different names in
 # this repository's own history — "Anonymous" and "Weblate (bot)" — so a name-keyed list would exclude one and
@@ -16,6 +17,15 @@
 
 # Any address at these domains is non-human. Weblate mints its bot and anonymous identities under
 # weblate.org, so the domain covers add-ons that do not exist yet as well as the ones below.
+#
+# That is stronger than it looks, and it is why the domain rule rather than the address list is the
+# mechanism here. Weblate generates an internal bot account's address from a documented template,
+# INTERNAL_BOT_EMAIL_TEMPLATE, defaulting to `noreply-{scope}-{name}@weblate.org` — so every such
+# account, present and future, is one address at this domain. `noreply-addon-prefill@weblate.org` is
+# simply that template with scope=addon and name=prefill. The list below therefore cannot fall behind
+# a newly installed add-on: the entries are EVIDENCE of what was actually observed and why it matters,
+# not the thing doing the excluding. Verified by classifying template-shaped addresses this repository
+# has never seen; all are rejected by the domain rule alone.
 excluded_domains:
     - weblate.org
 
@@ -27,9 +37,12 @@ excluded_addresses:
       seen_as: [commit author, co-author trailer]
       names: [Anonymous, Weblate (bot)]
       why: >-
-          Weblate's identity for an action with no signed-in user. Never reaches a PO header, because the
-          Contributors-in-comment add-on skips this exact address, but it is the most frequent identity in
-          commit trailers, so any credit route reading trailers must exclude it.
+          Weblate's identity for an action with no signed-in user. Observed never to reach a PO header —
+          a commit authored under it added no credit line, where one authored by an add-on address did —
+          but the reason is a hypothesis, not a demonstrated mechanism: the Contributors-in-comment
+          add-on's own filtering is not documented, and settling it needs the Weblate server source,
+          which this project deliberately does not check out. It is the most frequent identity in commit
+          trailers either way, so any credit route reading trailers must exclude it.
     - address: hosted@weblate.org
       seen_as: [commit author, co-author trailer]
       names: [Hosted Weblate]

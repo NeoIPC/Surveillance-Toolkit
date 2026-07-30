@@ -1,13 +1,17 @@
 #Requires -Version 7.6
 # The single definition of a NeoIPC gettext catalogue header.
 #
-# Four writers produce these files — po4a (post-processed by scripts/Invoke-Localization.ps1),
+# Four writers produced these files — po4a (post-processed by scripts/Invoke-Localization.ps1),
 # scripts/update-glossary-po.py, and the two exporters in this module — and each used to carry its own copy of
 # the header. They drifted: eight different comment-block shapes, three spellings of the copyright line (one of
 # them ASCII-transliterated), a product name that disagreed with its own Project-Id-Version, and a header
 # serialised onto a single physical line. This file is why the two exporters can no longer drift from each
-# other; the Python generator and the po4a post-processor implement the same contract in their own languages
-# and are held to it by Tests/PoHeader.Tests.ps1.
+# other; the po4a post-processor implements the same contract in its own language, and all of them are held to
+# it by Tests/PoHeader.Tests.ps1, which asserts against the committed files and runs in CI.
+#
+# All four still write a header; what changed is which file. The glossary generator no longer writes a
+# CATALOGUE header — those catalogues became Weblate's — but it still writes its own template's header from
+# its own copy of the contract, so it remains one of the writers this file exists to keep in step.
 #
 # THE BLOCK STRUCTURE IS NOT COSMETIC. translate-toolkit's `updatecontributor` — which Weblate's
 # "Contributors in comment" add-on delegates to — splits the comment block at the first line matching
@@ -41,10 +45,10 @@ $script:NeoIPCPoPluralForms = @{
 function Test-NeoIPCPoNonHumanIdentity {
     # Whether a credit line names something other than a person, per po/non-human-identities.yaml.
     #
-    # The list is DATA, shared with update-glossary-po.py (Python) and the report renderer (R), because a list
-    # maintained separately in three languages is one that disagrees with itself. Matching is on the ADDRESS,
-    # never the display name: `noreply@weblate.org` appears in this repository's history under two different
-    # names, so a name-keyed rule excludes one and silently credits the other.
+    # The list is DATA rather than code so that a consumer in another language reads it instead of keeping a
+    # copy — a list maintained twice is one that disagrees with itself. This function is its only reader today.
+    # Matching is on the ADDRESS, never the display name: `noreply@weblate.org` appears in this repository's
+    # history under two different names, so a name-keyed rule excludes one and silently credits the other.
     [CmdletBinding()]
     [OutputType([bool])]
     param([Parameter(Mandatory)][AllowEmptyString()][string]$AuthorLine)

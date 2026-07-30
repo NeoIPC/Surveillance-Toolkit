@@ -1,10 +1,24 @@
 # NeoIPC Surveillance Glossary
 #
-# Managed via monolingual gettext PO for Weblate (not po4a).
+# Managed via bilingual gettext PO for Weblate (not po4a): the key becomes msgctxt, the English value
+# becomes msgid.
 # Run `python scripts/update-glossary-po.py` after editing this file.
 #
 # Weblate feature mapping (YAML → PO):
-#   Plurals       — key + key_plural paired into msgid / msgid_plural
+#   Plurals       — key + key_plural paired into msgid / msgid_plural. Two limits, and the generator
+#                   refuses rather than emitting something wrong in either case, before it writes any
+#                   file. (a) TWO SLOTS ONLY, so a language declaring three or six forms cannot be
+#                   represented. No entry uses a plural family today, which is why Ukrainian, Russian
+#                   (3 forms) and Arabic (6) are unaffected — it is adding the first family while one
+#                   of them is present that would force the schema to grow. (b) NO CASED PLURAL KEY:
+#                   `key_plural_tc` and `key_plural_sc` resolve to the same base as `key_plural`, so the
+#                   cased key is swallowed — it never becomes an entry, its value is attached to the
+#                   uncased base, and it comes back named `key_plural`. Do not author one at all; give
+#                   the plural a single uncased `key_plural` and let the case variants be plain keys.
+#                   This rule is deliberately stricter than the check: the generator refuses a cased
+#                   plural key only when its uncased base is also present, so a lone `key_plural_tc`
+#                   would pass and round-trip intact. Following the simpler rule costs nothing and keeps
+#                   the convention describable in one sentence; the difference is a choice, not a gap.
 #   Descriptions  — YAML comments above a key become PO translator notes (#.)
 #   Context       — YAML key becomes msgctxt (enables variant_regex grouping)
 #   Location      — source file path + line number written as #: occurrence
@@ -20,7 +34,8 @@
 #   key_sc      = Sentence case (first word capitalised)
 #   key_tc      = Title case (all major words capitalised)
 #   key_plural  = Plural form
-#   Suffixes can combine: key_plural_tc
+#   Suffixes can combine in principle, but NOT key_plural_tc / key_plural_sc — the generator refuses
+#     them, because pairing cannot keep a cased plural apart from the uncased one. See Plurals above.
 #   Abbreviations (CVC, HAP, INV, NEC, SSI) are always uppercase — no variants.
 #   Proper nouns (NeoIPC Surveillance) keep their canonical casing.
 #
@@ -56,6 +71,10 @@ human_milk_sc: "Human milk"
 inv: INV
 kangaroo_care: "kangaroo care"
 kangaroo_care_sc: "Kangaroo care"
+# An initialism, so most languages keep it verbatim; suppress the unchanged-translation check rather
+# than have every language answer it. Declared here because a flag set on a catalogue does not survive
+# msgmerge — gettext models no custom flags, so only the template's are restored.
+# flags: ignore-same
 nec: NEC
 necrotising_enterocolitis: "necrotising enterocolitis"
 necrotising_enterocolitis_sc: "Necrotising enterocolitis"
@@ -82,6 +101,8 @@ surgical_site_infection: "surgical site infection"
 surgical_site_infection_sc: "Surgical site infection"
 surgical_site_infection_tc: "Surgical Site Infection"
 surveillance: surveillance
+# Several languages render this identically to English in its sentence-case form; same reasoning as `nec`.
+# flags: ignore-same
 surveillance_sc: Surveillance
 surveillance_end: "surveillance end"
 surveillance_end_sc: "Surveillance end"
