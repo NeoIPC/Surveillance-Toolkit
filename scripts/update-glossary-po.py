@@ -38,7 +38,7 @@ YAML comment conventions:
     See https://docs.weblate.org/en/latest/admin/checks.html for available flags.
 
 Usage:
-    # Extract YAML -> POT, and merge the result into every language catalogue
+    # Extract YAML -> POT. Writes po/glossary.pot only; the catalogues are Weblate's.
     python scripts/update-glossary-po.py
 
     # Also generate localized YAML from the committed PO files
@@ -188,6 +188,11 @@ def yaml_to_pot(glossary_path, pot_path):
         sys.exit(f"Error: {glossary_path} is empty or invalid YAML")
 
     pot = polib.POFile()
+    # Match the po_line_wrap=65535 every Weblate component here declares. polib defaults to
+    # wrapwidth=78, which made this the only wrapped template in the repository -- longest line 91
+    # against 625-1830 in the po4a-generated ones -- so the template and the catalogues Weblate writes
+    # from it disagreed on line breaking, for no reason anyone chose.
+    pot.wrapwidth = 65535
     pot.header = POT_HEADER_COMMENT
     pot.metadata = {**POT_METADATA}
     now = datetime.datetime.now(datetime.timezone.utc)

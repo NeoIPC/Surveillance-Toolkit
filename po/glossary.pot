@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-07-29 15:53+0000\n"
+"POT-Creation-Date: 2026-07-30 04:36+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Language-Team: none\n"
 "Language: en\n"
@@ -13,8 +13,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#. WHO AWaRe antibiotic category. The official WHO translation is normative:
-#. Spanish "Acceso", per the
+#. WHO AWaRe antibiotic category. The official WHO translation is normative: Spanish "Acceso", per the
 #. WHO AWaRe antibiotic book. Do not invent a local rendering.
 #: glossary.yaml:41
 #, terminology
@@ -56,9 +55,7 @@ msgstr ""
 
 #: glossary.yaml:50
 msgctxt "h2020_funding_statement"
-msgid ""
-"This project has received funding from the European Union's Horizon 2020 "
-"research and innovation programme under grant agreement No 965328."
+msgid "This project has received funding from the European Union's Horizon 2020 research and innovation programme under grant agreement No 965328."
 msgstr ""
 
 #: glossary.yaml:53
@@ -157,8 +154,7 @@ msgctxt "pvc"
 msgid "PVC"
 msgstr ""
 
-#. WHO AWaRe antibiotic category. The official WHO translation is normative:
-#. Spanish "Reserva", per the
+#. WHO AWaRe antibiotic category. The official WHO translation is normative: Spanish "Reserva", per the
 #. WHO AWaRe antibiotic book.
 #: glossary.yaml:76
 #, terminology
@@ -226,14 +222,10 @@ msgctxt "surveillance_end_tc"
 msgid "Surveillance End"
 msgstr ""
 
-#. WHO AWaRe antibiotic category. The official WHO translation is normative:
-#. Spanish "Precaución", per
-#. the WHO AWaRe antibiotic book — NOT "Vigilancia", which this project uses
-#. for "surveillance" and
-#. would therefore collide, and not the bare verb "Ver". Italian is
-#. deliberately left untranslated
-#. rather than inheriting "Sorveglianza" from the reports catalogue, which has
-#. the same collision; it
+#. WHO AWaRe antibiotic category. The official WHO translation is normative: Spanish "Precaución", per
+#. the WHO AWaRe antibiotic book — NOT "Vigilancia", which this project uses for "surveillance" and
+#. would therefore collide, and not the bare verb "Ver". Italian is deliberately left untranslated
+#. rather than inheriting "Sorveglianza" from the reports catalogue, which has the same collision; it
 #. needs the WHO Italian edition rather than a guess.
 #: glossary.yaml:95
 #, terminology

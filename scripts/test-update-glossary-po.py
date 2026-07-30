@@ -12,6 +12,12 @@ byte-identical afterwards, which is the property that matters and is invisible i
 script. The CI gate enforces the same rule from the other end, by rejecting a commit that changes an
 owned catalogue outside Weblate; this catches it before a commit exists.
 
+**BOTH invocations are bracketed, and that is not redundant.** The bare run and the --generate-yaml run
+take different paths: only the latter opens a catalogue into a mutable polib object, and it is the one
+the pipeline actually invokes. An earlier version asserted the bare run alone; a catalogue writer
+planted inside generate_yaml passed the entire suite green. Assert both, or the assertion covers the
+path where the mistake is least likely.
+
 **Byte hygiene.** Both artifacts the script produces -- po/glossary.pot and glossary.<lang>.yaml --
 are committed and read by other tools (Weblate's msgmerge add-on, the reports' R string-resource
 cascade). Python's io.open() default translates every "\\n" to os.linesep, so without an explicit
@@ -274,10 +280,22 @@ def main():
                 ))
             weblate_po.save(str(po_path), newline="\n")
 
+            # Bracket THIS run, not just the bare one. --generate-yaml is the mode the pipeline actually
+            # invokes (Invoke-Localization.ps1 passes it), and generate_yaml is the only place the script
+            # opens a catalogue into a mutable polib object -- so it is where an accidental po.save() is
+            # one line away. Asserted here rather than only in step 5 because a writer added inside
+            # generate_yaml passed the whole suite green: proven by planting one, not assumed.
+            before_generate = read_bytes(po_path)
+
             result = run_script(tmp, "--generate-yaml", "--threshold", "0")
             if result.returncode != 0:
                 failures.append(f"--generate-yaml exited {result.returncode}: {result.stderr.strip()}")
             else:
+                if read_bytes(po_path) != before_generate:
+                    failures.append(
+                        "po/glossary.de.po changed during --generate-yaml -- that path reads the catalogue "
+                        "and must not write it. A writer there is two writers on a Weblate-owned file."
+                    )
                 yaml_path = tmp / "glossary.de.yaml"
                 if not yaml_path.exists():
                     failures.append("glossary.de.yaml: the script did not write it")

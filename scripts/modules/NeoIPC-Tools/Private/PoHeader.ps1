@@ -9,8 +9,9 @@
 # other; the po4a post-processor implements the same contract in its own language, and all of them are held to
 # it by Tests/PoHeader.Tests.ps1, which asserts against the committed files and runs in CI.
 #
-# Three writers now: the glossary generator emits only its template, because those catalogues became Weblate's,
-# so it carries no per-language header machinery to drift.
+# All four still write a header; what changed is which file. The glossary generator no longer writes a
+# CATALOGUE header — those catalogues became Weblate's — but it still writes its own template's header from
+# its own copy of the contract, so it remains one of the writers this file exists to keep in step.
 #
 # THE BLOCK STRUCTURE IS NOT COSMETIC. translate-toolkit's `updatecontributor` — which Weblate's
 # "Contributors in comment" add-on delegates to — splits the comment block at the first line matching
