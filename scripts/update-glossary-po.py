@@ -66,6 +66,7 @@ except ImportError:
     sys.exit("Error: polib is required. Install with: pip install polib")
 
 PLURAL_SUFFIX = re.compile(r"_plural(?:_(tc|sc))?$")
+CASE_SUFFIX = re.compile(r"_(tc|sc)$")
 FLAGS_LINE = re.compile(r"^flags:\s*(.+)$", re.IGNORECASE)
 
 # The header contract is defined once, in the NeoIPC-Tools module (Private/PoHeader.ps1). This is the same
@@ -267,6 +268,47 @@ def yaml_to_pot(glossary_path, pot_path):
     return pot
 
 
+def _reject_unsupported_plurals(po_dir, languages):
+    """Refuse the two plural shapes this schema cannot round-trip, before anything is written.
+
+    Both are unreachable today -- no glossary entry declares a plural family at all -- and both become
+    reachable through an ordinary glossary edit rather than through anything exotic.
+
+    MORE THAN TWO FORMS. glossary.<lang>.yaml holds `key` and `key_plural`, so a language declaring three
+    or six forms cannot be represented. Scoped to the entry, not the language: a three-form language is
+    fine while no entry carries a plural family, which is why Ukrainian and Arabic work today.
+
+    A CASED PLURAL FAMILY. The naming convention documents `key_plural_tc` as valid, but the pairing keys
+    on the base name and `key_plural` and `key_plural_tc` share one, so the second silently replaces the
+    first; the loser is then emitted as a standalone entry and collides on the way back with the key the
+    reader synthesises. Round-tripping the four documented keys of one term yields three, one of them
+    holding the wrong value, with the cased plural gone. Refusing beats emitting that.
+    """
+    for lang in languages:
+        po_path = po_dir / f"glossary.{lang}.po"
+        if not po_path.exists():
+            continue
+        for entry in polib.pofile(str(po_path)):
+            if not (entry.msgid_plural and entry.msgstr_plural):
+                continue
+            if len(entry.msgstr_plural) > 2:
+                sys.exit(
+                    f"Error: {po_path.name}: {entry.msgctxt!r} carries {len(entry.msgstr_plural)} plural "
+                    f"forms, and glossary.<lang>.yaml has two slots for them ('{entry.msgctxt}' and "
+                    f"'{entry.msgctxt}_plural'). The schema needs extending to hold this language's "
+                    f"forms -- do not narrow --languages to work around it, that drops the language."
+                )
+            if entry.msgctxt and CASE_SUFFIX.search(entry.msgctxt):
+                sys.exit(
+                    f"Error: {po_path.name}: {entry.msgctxt!r} carries a plural family on a cased key. "
+                    f"The generator would write '{entry.msgctxt}_plural', not the "
+                    f"'{CASE_SUFFIX.sub('', entry.msgctxt)}_plural"
+                    f"{CASE_SUFFIX.search(entry.msgctxt).group(0)}' the naming convention documents, and "
+                    f"the two spellings collide. Author the cased plural as its own key without a plural "
+                    f"counterpart, or extend the schema."
+                )
+
+
 def generate_yaml(po_dir, glossary_path, languages, threshold=80):
     """Generate glossary.<lang>.yaml from translated PO files.
 
@@ -277,6 +319,11 @@ def generate_yaml(po_dir, glossary_path, languages, threshold=80):
     yaml.preserve_quotes = True
     yaml.default_flow_style = False
 
+    # Validate every catalogue BEFORE writing any of them, so a refusal cannot leave some languages
+    # generated and others not. Raising from inside the write loop produced exactly that: one YAML on
+    # disk, the next language's absent, and no indication which state the caller was in.
+    _reject_unsupported_plurals(po_dir, languages)
+
     for lang in languages:
         po_path = po_dir / f"glossary.{lang}.po"
         if not po_path.exists():
@@ -285,21 +332,28 @@ def generate_yaml(po_dir, glossary_path, languages, threshold=80):
         po = polib.pofile(str(po_path))
         translated_count = len(po.translated_entries())
         total = len([e for e in po if not e.obsolete])
-        # polib's own percentage, not translated/len(po): POFile subclasses list, so obsolete "#~"
-        # entries count toward its length while never counting as translated, which drags the figure
-        # down and can skip a language that is in fact complete. Obsolete entries used to be impossible
-        # here because the retired merge rebuilt each catalogue from the template; now that Weblate owns
-        # them and po_remove_obsolete is deliberately false, they are normal state.
+        # Computed from the two counts the message prints, so the decision and the printed figure are
+        # provably the same numbers rather than agreeing because polib happens to define its percentage
+        # the same way. That equivalence is real -- polib's percent_translated() uses exactly these two
+        # values -- but it is invisible here and two reviewers read the mismatch as a defect, which is
+        # reason enough to stop depending on another package's internal definition.
         #
-        # The empty case is spelt out because polib and the previous arithmetic disagree on it: polib
-        # returns 100 for a catalogue with no live entries, which would pass any threshold. Nothing
-        # here should be generated from a catalogue that has no strings.
-        pct = po.percent_translated() if total > 0 else 0
+        # Obsolete "#~" entries are excluded from the denominator: POFile subclasses list, so len(po)
+        # counts them while they can never be translated, which would drag the figure down and skip a
+        # language that is in fact complete. They used to be impossible here because the retired merge
+        # rebuilt each catalogue from the template; now that Weblate owns them and po_remove_obsolete is
+        # deliberately false, they are normal state.
+        #
+        # Floor division, not rounding: the threshold is an integer, and floor(x) < T exactly when
+        # x < T, so the decision is unchanged while the printed percentage can never round up to look
+        # as though it had passed. An empty catalogue reports 0 rather than polib's 100 -- nothing
+        # should be generated from a catalogue with no strings.
+        pct = (translated_count * 100) // total if total > 0 else 0
 
         if pct < threshold:
             print(
                 f"Skipped {lang}: {translated_count}/{total} translated "
-                f"({pct:.0f}% < {threshold}% threshold)"
+                f"({pct}% < {threshold}% threshold)"
             )
             continue
 
@@ -309,24 +363,8 @@ def generate_yaml(po_dir, glossary_path, languages, threshold=80):
                 continue
 
             if entry.msgid_plural and entry.msgstr_plural:
-                # The YAML schema has exactly two slots per plural family -- `key` and `key_plural` --
-                # so an ENTRY carrying more than two forms cannot be represented. Refuse rather than
-                # write the first two and drop the rest, which would be a silent per-form loss visible
-                # nowhere.
-                #
-                # This is scoped to the entry, not to the language, and the difference matters: a
-                # language with nplurals > 2 is fine here, because the glossary declares no plural
-                # family at all -- 0 of 41 entries -- so nothing reaches this branch. Ukrainian (3),
-                # Russian (3) and Arabic (6) all generate normally today. What would trip it is adding
-                # a `_plural` key to glossary.yaml while such a language is present, and the schema is
-                # what would need extending then, not the language excluded.
-                if len(entry.msgstr_plural) > 2:
-                    raise ValueError(
-                        f"{po_path.name}: {entry.msgctxt!r} carries {len(entry.msgstr_plural)} plural "
-                        f"forms, and glossary.<lang>.yaml has two slots for them ('{entry.msgctxt}' and "
-                        f"'{entry.msgctxt}_plural'). The schema needs extending to hold this language's "
-                        f"forms -- do not narrow --languages to work around it, that drops the language."
-                    )
+                # Shapes this cannot represent were refused before any file was written; see
+                # _reject_unsupported_plurals.
                 # Singular
                 if entry.msgstr_plural.get(0):
                     translations[entry.msgctxt] = entry.msgstr_plural[0]

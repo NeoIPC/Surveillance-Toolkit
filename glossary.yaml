@@ -5,12 +5,15 @@
 # Run `python scripts/update-glossary-po.py` after editing this file.
 #
 # Weblate feature mapping (YAML → PO):
-#   Plurals       — key + key_plural paired into msgid / msgid_plural. Two slots only, so a language
-#                   with more than two plural forms cannot be fully represented. No entry uses this
-#                   today, which is why languages like Ukrainian, Russian (3 forms) and Arabic (6)
-#                   are unaffected; adding the first plural family while one of them is present is
-#                   what would force the schema to grow, and the generator refuses rather than
-#                   silently dropping forms.
+#   Plurals       — key + key_plural paired into msgid / msgid_plural. Two limits, and the generator
+#                   refuses rather than emitting something wrong in either case, before it writes any
+#                   file. (a) TWO SLOTS ONLY, so a language declaring three or six forms cannot be
+#                   represented. No entry uses a plural family today, which is why Ukrainian, Russian
+#                   (3 forms) and Arabic (6) are unaffected — it is adding the first family while one
+#                   of them is present that would force the schema to grow. (b) NOT ON A CASED KEY:
+#                   `key_plural` and `key_plural_tc` resolve to the same base, so pairing keeps one and
+#                   loses the other, and the surviving spelling collides with the key the reader
+#                   synthesises. Author a cased plural as its own key with no plural counterpart.
 #   Descriptions  — YAML comments above a key become PO translator notes (#.)
 #   Context       — YAML key becomes msgctxt (enables variant_regex grouping)
 #   Location      — source file path + line number written as #: occurrence
@@ -26,7 +29,8 @@
 #   key_sc      = Sentence case (first word capitalised)
 #   key_tc      = Title case (all major words capitalised)
 #   key_plural  = Plural form
-#   Suffixes can combine: key_plural_tc
+#   Suffixes can combine: key_plural_tc — but author it as a plain key, never alongside a key_plural
+#     for the same base; see the Plurals note above for why the pair cannot round-trip.
 #   Abbreviations (CVC, HAP, INV, NEC, SSI) are always uppercase — no variants.
 #   Proper nouns (NeoIPC Surveillance) keep their canonical casing.
 #

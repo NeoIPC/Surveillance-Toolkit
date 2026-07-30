@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-07-30 07:20+0000\n"
+"POT-Creation-Date: 2026-07-30 07:55+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Language-Team: none\n"
 "Language: en\n"
@@ -15,75 +15,75 @@ msgstr ""
 
 #. WHO AWaRe antibiotic category. The official WHO translation is normative: Spanish "Acceso", per the
 #. WHO AWaRe antibiotic book. Do not invent a local rendering.
-#: glossary.yaml:47
+#: glossary.yaml:51
 #, terminology
 msgctxt "access"
 msgid "Access"
 msgstr ""
 
-#: glossary.yaml:48
+#: glossary.yaml:52
 msgctxt "admission"
 msgid "admission"
 msgstr ""
 
-#: glossary.yaml:49
+#: glossary.yaml:53
 msgctxt "admission_sc"
 msgid "Admission"
 msgstr ""
 
-#: glossary.yaml:50
+#: glossary.yaml:54
 msgctxt "antibiotics"
 msgid "antibiotics"
 msgstr ""
 
-#: glossary.yaml:51
+#: glossary.yaml:55
 msgctxt "antibiotics_sc"
 msgid "Antibiotics"
 msgstr ""
 
 #. AWaRe is a WHO acronym (Access, Watch, Reserve) — not translatable
-#: glossary.yaml:54
+#: glossary.yaml:58
 #, read-only, terminology
 msgctxt "aware"
 msgid "AWaRe"
 msgstr ""
 
-#: glossary.yaml:55
+#: glossary.yaml:59
 msgctxt "cvc"
 msgid "CVC"
 msgstr ""
 
-#: glossary.yaml:56
+#: glossary.yaml:60
 msgctxt "h2020_funding_statement"
 msgid "This project has received funding from the European Union's Horizon 2020 research and innovation programme under grant agreement No 965328."
 msgstr ""
 
-#: glossary.yaml:59
+#: glossary.yaml:63
 msgctxt "hap"
 msgid "HAP"
 msgstr ""
 
-#: glossary.yaml:60
+#: glossary.yaml:64
 msgctxt "human_milk"
 msgid "human milk"
 msgstr ""
 
-#: glossary.yaml:61
+#: glossary.yaml:65
 msgctxt "human_milk_sc"
 msgid "Human milk"
 msgstr ""
 
-#: glossary.yaml:62
+#: glossary.yaml:66
 msgctxt "inv"
 msgid "INV"
 msgstr ""
 
-#: glossary.yaml:63
+#: glossary.yaml:67
 msgctxt "kangaroo_care"
 msgid "kangaroo care"
 msgstr ""
 
-#: glossary.yaml:64
+#: glossary.yaml:68
 msgctxt "kangaroo_care_sc"
 msgid "Kangaroo care"
 msgstr ""
@@ -91,139 +91,139 @@ msgstr ""
 #. An initialism, so most languages keep it verbatim; suppress the unchanged-translation check rather
 #. than have every language answer it. Declared here because a flag set on a catalogue does not survive
 #. msgmerge — gettext models no custom flags, so only the template's are restored.
-#: glossary.yaml:69
+#: glossary.yaml:73
 #, ignore-same
 msgctxt "nec"
 msgid "NEC"
 msgstr ""
 
-#: glossary.yaml:70
+#: glossary.yaml:74
 msgctxt "necrotising_enterocolitis"
 msgid "necrotising enterocolitis"
 msgstr ""
 
-#: glossary.yaml:71
+#: glossary.yaml:75
 msgctxt "necrotising_enterocolitis_sc"
 msgid "Necrotising enterocolitis"
 msgstr ""
 
-#: glossary.yaml:72
+#: glossary.yaml:76
 msgctxt "necrotising_enterocolitis_tc"
 msgid "Necrotising Enterocolitis"
 msgstr ""
 
-#: glossary.yaml:74
+#: glossary.yaml:78
 #, ignore-same
 msgctxt "neoipc_surveillance"
 msgid "NeoIPC Surveillance"
 msgstr ""
 
-#: glossary.yaml:75
+#: glossary.yaml:79
 msgctxt "niv"
 msgid "NIV"
 msgstr ""
 
-#: glossary.yaml:76
+#: glossary.yaml:80
 msgctxt "pneumonia"
 msgid "pneumonia"
 msgstr ""
 
-#: glossary.yaml:77
+#: glossary.yaml:81
 msgctxt "pneumonia_sc"
 msgid "Pneumonia"
 msgstr ""
 
-#: glossary.yaml:78
+#: glossary.yaml:82
 msgctxt "primary_sepsis_bsi"
 msgid "primary sepsis/BSI"
 msgstr ""
 
-#: glossary.yaml:79
+#: glossary.yaml:83
 msgctxt "primary_sepsis_bsi_sc"
 msgid "Primary sepsis/BSI"
 msgstr ""
 
-#: glossary.yaml:80
+#: glossary.yaml:84
 msgctxt "primary_sepsis_bsi_tc"
 msgid "Primary Sepsis/BSI"
 msgstr ""
 
-#: glossary.yaml:81
+#: glossary.yaml:85
 msgctxt "probiotics"
 msgid "Probiotics"
 msgstr ""
 
-#: glossary.yaml:82
+#: glossary.yaml:86
 msgctxt "pvc"
 msgid "PVC"
 msgstr ""
 
 #. WHO AWaRe antibiotic category. The official WHO translation is normative: Spanish "Reserva", per the
 #. WHO AWaRe antibiotic book.
-#: glossary.yaml:86
+#: glossary.yaml:90
 #, terminology
 msgctxt "reserve"
 msgid "Reserve"
 msgstr ""
 
-#: glossary.yaml:87
+#: glossary.yaml:91
 msgctxt "ssi"
 msgid "SSI"
 msgstr ""
 
-#: glossary.yaml:88
+#: glossary.yaml:92
 msgctxt "surgical_procedure"
 msgid "surgical procedure"
 msgstr ""
 
-#: glossary.yaml:89
+#: glossary.yaml:93
 msgctxt "surgical_procedure_sc"
 msgid "Surgical procedure"
 msgstr ""
 
-#: glossary.yaml:90
+#: glossary.yaml:94
 msgctxt "surgical_procedure_tc"
 msgid "Surgical Procedure"
 msgstr ""
 
-#: glossary.yaml:91
+#: glossary.yaml:95
 msgctxt "surgical_site_infection"
 msgid "surgical site infection"
 msgstr ""
 
-#: glossary.yaml:92
+#: glossary.yaml:96
 msgctxt "surgical_site_infection_sc"
 msgid "Surgical site infection"
 msgstr ""
 
-#: glossary.yaml:93
+#: glossary.yaml:97
 msgctxt "surgical_site_infection_tc"
 msgid "Surgical Site Infection"
 msgstr ""
 
-#: glossary.yaml:94
+#: glossary.yaml:98
 msgctxt "surveillance"
 msgid "surveillance"
 msgstr ""
 
 #. Several languages render this identically to English in its sentence-case form; same reasoning as `nec`.
-#: glossary.yaml:97
+#: glossary.yaml:101
 #, ignore-same
 msgctxt "surveillance_sc"
 msgid "Surveillance"
 msgstr ""
 
-#: glossary.yaml:98
+#: glossary.yaml:102
 msgctxt "surveillance_end"
 msgid "surveillance end"
 msgstr ""
 
-#: glossary.yaml:99
+#: glossary.yaml:103
 msgctxt "surveillance_end_sc"
 msgid "Surveillance end"
 msgstr ""
 
-#: glossary.yaml:100
+#: glossary.yaml:104
 msgctxt "surveillance_end_tc"
 msgid "Surveillance End"
 msgstr ""
@@ -233,7 +233,7 @@ msgstr ""
 #. would therefore collide, and not the bare verb "Ver". Italian is deliberately left untranslated
 #. rather than inheriting "Sorveglianza" from the reports catalogue, which has the same collision; it
 #. needs the WHO Italian edition rather than a guess.
-#: glossary.yaml:107
+#: glossary.yaml:111
 #, terminology
 msgctxt "watch"
 msgid "Watch"
