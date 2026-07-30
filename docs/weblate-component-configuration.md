@@ -59,6 +59,14 @@ apart.** Observed on the live instance, three independent ways agreeing:
 
 So the scheme is stored and inert *for its stated purpose*: it does not reorder any translator's work.
 
+A detail that makes the asymmetry legible: the source unit's flag panel shows `priority:200, read-only`,
+but the template carries only `priority:200` — Weblate adds `read-only` itself, so what that panel displays
+is a **merged** set rather than the file's. The target panel for the same string displays nothing at all,
+not even an injected flag. Two consequences worth knowing before reasoning about either: `read-only` on a
+source unit is Weblate's own marker and not something to look for in the `.pot`, and the panel's pencil
+edits `extra_flags` while the panel *displays* the merge, so a flag can be visible there and not be
+editable away.
+
 Two traps to avoid when reasoning about this. The `.po` files contain no flags at all, but that proves
 nothing either way — Weblate strips source flags when it writes a target file, so their absence is what a
 working mechanism looks like too. And a count of flags in the template proves only that the template has
