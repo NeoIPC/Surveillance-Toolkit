@@ -46,6 +46,31 @@ property was twice looked for in the wrong file and the wrong language.
 | Explanation, labels, screenshots | Weblate's database only | yes (reset does not clear them) |
 | Approval state, comments, suggestions, votes | Weblate's database only | not represented in gettext at all |
 
+**Storing a source flag is not the same as it taking effect, and `priority:N` is the case where they come
+apart.** Observed on the live instance, three independent ways agreeing:
+
+1. Every source unit of `neoipc-dhis2-metadata` carries the flag the template gives it
+   (`flags: "priority:10"`, `"priority:200"` — 2,714 of them). The template is parsed; the flags are real.
+2. The **target** units of the same strings carry `flags: ""` and `priority: 100`, the default — and the
+   translate view's own string-information panel for `dataElements/NEOIPC_ADMISSION_DOL/NAME` in German
+   reports no flags set at all.
+3. The German queue offers `NAME`, `SHORT_NAME`, `FORM_NAME`, `DESCRIPTION` in that order — positional —
+   where `FORM_NAME` at `priority:200` would come first if priority were ordering it.
+
+So the scheme is stored and inert *for its stated purpose*: it does not reorder any translator's work.
+
+Two traps to avoid when reasoning about this. The `.po` files contain no flags at all, but that proves
+nothing either way — Weblate strips source flags when it writes a target file, so their absence is what a
+working mechanism looks like too. And a count of flags in the template proves only that the template has
+them. What settles it is the target unit's own `flags`/`priority`, and the order the translate view
+actually offers.
+
+Unresolved: whether a source unit's **`extra_flags`** (the database field, which the API and
+`wlc edit-unit --extra-flags` can write) propagates to targets where the source unit's *file* flags do
+not. That distinction decides whether a per-string scheme needs one write or one per language, and it
+cannot be settled from the client — it needs either the server source or a reversible write on one string
+and a re-read of its targets.
+
 The middle row is the one that surprises people. For a bilingual gettext component Weblate treats the
 `.pot` as the **source translation** (`is_source: true`, `filename: po/<catalogue>.pot`), so
 `priority:N` and other source-string flags are read from there and apply to every language. Weblate
