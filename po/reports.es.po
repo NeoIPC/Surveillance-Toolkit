@@ -6,6 +6,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
+"POT-Creation-Date: 2026-07-31 17:48+0200\n"
 "PO-Revision-Date: 2026-07-29 17:27+0000\n"
 "Language-Team: Spanish <https://hosted.weblate.org/projects/neoipc/neoipc-reports/es/>\n"
 "Language: es\n"
@@ -284,10 +285,11 @@ msgstr "Este es un análisis especial que"
 msgid "Sum of patient days"
 msgstr "Suma de días de hospitalización"
 
-#. type: Hash Value: headings antibiotic_utilisation
+#. type: Hash Value: headings antibiotic_utilization
 #: reports/common.yaml:1
-#, no-wrap
-msgid "Antibiotic Utilisation"
+#, fuzzy, no-wrap
+#| msgid "Antibiotic Utilisation"
+msgid "Antibiotic Utilization"
 msgstr "Utilización de antibióticos"
 
 #. type: Hash Value: headings antimicrobial_susceptibility_testing
@@ -386,10 +388,10 @@ msgstr "Procedimientos quirúrgicos por categoría"
 msgid "The agent-per-infection rate measures how frequently specific pathogens are detected relative to the number of infections in which any infectious agent was identified. Values above 100% are expected and indicate polymicrobial infections. Diagnostic challenges specific to neonates — including low blood volume reducing culture sensitivity and elevated contamination risk — may influence detection patterns."
 msgstr "La tasa de agentes por infección mide la frecuencia con la que se detectan patógenos específicos en relación con el número de infecciones en las que se identificó algún agente infeccioso. Es normal que los valores superen el 100 % e indican infecciones polimicrobianas. Las dificultades diagnósticas específicas de los recién nacidos —entre ellas, el bajo volumen sanguíneo, que reduce la sensibilidad de los cultivos, y el elevado riesgo de contaminación— pueden influir en los patrones de detección."
 
-#. type: Hash Value: methods antibiotic_utilisation
+#. type: Hash Value: methods antibiotic_utilization
 #: reports/common.yaml:1
 #, fuzzy, no-wrap
-msgid "Antibiotic utilisation is reported per individual substance, grouped by ATC pharmacological subgroup. The exposure density rate measures substance-days per 100 patient-days. Antibiotic days are counted from the first dose to the last dose of a therapy inclusive. Each substance is counted separately; a patient receiving two antibiotics on the same day contributes one day to each substance's tally. Because of combination therapy, the sum of individual substance rates can exceed the total antibiotic exposure rate shown in the risk and protective factors table."
+msgid "Antibiotic utilization is reported per individual substance, grouped by ATC pharmacological subgroup. The exposure density rate measures substance-days per 100 patient-days. Antibiotic days are counted from the first dose to the last dose of a therapy inclusive. Each substance is counted separately; a patient receiving two antibiotics on the same day contributes one day to each substance's tally. Because of combination therapy, the sum of individual substance rates can exceed the total antibiotic exposure rate shown in the risk and protective factors table."
 msgstr "El uso de antibióticos se registra por sustancia individual, agrupadas por subgrupo farmacológico de la clasificación ATC. La tasa de densidad de exposición mide los días-sustancia por cada 100 días-paciente. Los días de tratamiento con antibióticos se cuentan desde la primera dosis hasta la última dosis de un tratamiento, ambas incluidas. Cada sustancia se cuenta por separado; un paciente que reciba dos antibióticos el mismo día contribuye con un día al recuento de cada sustancia. Debido a los tratamientos combinados, la suma de las tasas de cada sustancia puede superar la tasa total de exposición a antibióticos que figura en la tabla de factores de riesgo y de protección."
 
 #. type: Hash Value: methods ci_quartile_auto_note
@@ -612,7 +614,7 @@ msgstr "%s: Número total de patógenos resistentes a los antibióticos en todas
 #: reports/common.yaml:1
 #, fuzzy, no-wrap
 #| msgid "%s: The resistant pathogen infection rate calculated across all infants from all departments."
-msgid "No resistant pathogen infection data available for this report settings."
+msgid "No resistant pathogen infection data available for these report settings."
 msgstr "No hay datos disponibles sobre infecciones por patógenos resistentes en los entornos objeto de este informe."
 
 #. type: Hash Value: tbl-abr-infection-rate pooled_footnote
@@ -672,8 +674,9 @@ msgstr "%s: Número total de agentes infecciosos en todas las infecciones."
 
 #. type: Hash Value: tbl-agent-per-infection-rate no_data
 #: reports/common.yaml:1
-#, no-wrap
-msgid "No infectious agent data available for this report settings."
+#, fuzzy, no-wrap
+#| msgid "No infectious agent data available for this report settings."
+msgid "No infectious agent data available for these report settings."
 msgstr "No hay datos disponibles sobre agentes infecciosos para los ajustes de este informe."
 
 #. type: Hash Value: tbl-agent-per-infection-rate pooled_footnote
@@ -713,63 +716,63 @@ msgstr "Número de agentes infecciosos detectados en infecciones"
 msgid "Infectious agents detected in nosocomial infections"
 msgstr "Agentes infecciosos detectados en infecciones nosocomiales"
 
-#. type: Hash Value: tbl-antibiotic-utilisation atc_footnote
+#. type: Hash Value: tbl-antibiotic-utilization atc_footnote
 #: reports/common.yaml:1
 #, fuzzy, no-wrap
 msgid "ATC: Anatomical Therapeutic Chemical classification (WHO). Substances are grouped by pharmacological subgroup (ATC 5th level). See %s for details."
 msgstr "ATC: Clasificación Anatómica, Terapéutica y Química (OMS). Las sustancias se agrupan por subgrupos farmacológicos (5.º nivel ATC). Para más detalles, véase %s."
 
-#. type: Hash Value: tbl-antibiotic-utilisation aware_column_footnote
+#. type: Hash Value: tbl-antibiotic-utilization aware_column_footnote
 #: reports/common.yaml:1
 #, fuzzy, no-wrap
 msgid "WHO AWaRe classification (Access, Watch, Reserve). See %s."
 msgstr "Clasificación AWaRe de la OMS (Acceso, Vigilancia, Reserva). Véase %s."
 
-#. type: Hash Value: tbl-antibiotic-utilisation exposure_density_rate
+#. type: Hash Value: tbl-antibiotic-utilization exposure_density_rate
 #: reports/common.yaml:1
 #, fuzzy, no-wrap
 #| msgid "Risk Density Rate"
 msgid "Antibiotic Exposure Density Rate"
 msgstr "Tasa de densidad de riesgo"
 
-#. type: Hash Value: tbl-antibiotic-utilisation n_footnote
+#. type: Hash Value: tbl-antibiotic-utilization n_footnote
 #: reports/common.yaml:1
 #, fuzzy, no-wrap
 #| msgid "%s: The aggregated number of device-associated infections in all infants."
 msgid "%s: The aggregated number of substance-days recorded across all infants."
 msgstr "%s: Número agregado de infecciones asociadas a dispositivos en todos los lactantes."
 
-#. type: Hash Value: tbl-antibiotic-utilisation no_data
+#. type: Hash Value: tbl-antibiotic-utilization no_data
 #: reports/common.yaml:1
 #, fuzzy, no-wrap
 #| msgid "No of infections with agent"
-msgid "No antibiotic utilisation data available for this report settings."
+msgid "No antibiotic utilization data available for these report settings."
 msgstr "No se dispone de datos sobre el uso de antibióticos para los entornos objeto de este informe."
 
-#. type: Hash Value: tbl-antibiotic-utilisation pooled_footnote
+#. type: Hash Value: tbl-antibiotic-utilization pooled_footnote
 #: reports/common.yaml:1
 #, fuzzy, no-wrap
 #| msgid "%s: The Risk Density Rate calculated across all infants from all departments in the reference data."
 msgid "%s: The Antibiotic Exposure Density Rate calculated across all infants from all departments in the reference data."
 msgstr "%s: La tasa de densidad de riesgo calculada para todos los bebés de todos los departamentos en los datos de referencia."
 
-#. type: Hash Value: tbl-antibiotic-utilisation quartile_footnote
+#. type: Hash Value: tbl-antibiotic-utilization quartile_footnote
 #: reports/common.yaml:1
 #, fuzzy, no-wrap
 #| msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Risk Density Rates of the departments in the reference data. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of device days is greater than or equal to one according to the pooled Risk Density Rate."
 msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Antibiotic Exposure Density Rates of the departments in the reference data. Q₂ represents the median. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of substance-days is greater than or equal to one according to the pooled rate."
 msgstr "%s, %s, %s: Los cuartiles (%s, %s y %s cuantiles) de las tasas de densidad de riesgo de los departamentos en los datos de referencia. Estos cuartiles solo se muestran cuando el número de departamentos que contribuyen al denominador es mayor o igual a cinco, y cuando el número medio de días de dispositivo es mayor o igual a uno según la tasa de densidad de riesgo agrupada."
 
-#. type: Hash Value: tbl-antibiotic-utilisation substance_days
+#. type: Hash Value: tbl-antibiotic-utilization substance_days
 #: reports/common.yaml:1
 #, fuzzy, no-wrap
 msgid "Substance-days"
 msgstr "Días de substancia"
 
-#. type: Hash Value: tbl-antibiotic-utilisation tbl-cap
+#. type: Hash Value: tbl-antibiotic-utilization tbl-cap
 #: reports/common.yaml:1
 #, fuzzy, no-wrap
-msgid "Antibiotic utilisation by pharmacological subgroup and substance"
+msgid "Antibiotic utilization by pharmacological subgroup and substance"
 msgstr "Uso de antibióticos por subgrupo farmacológico y sustancia"
 
 #. type: Hash Value: tbl-device-associated-incidence-density-rates cvc
@@ -832,7 +835,7 @@ msgstr "Neumonía asociada al soporte ventilatorio"
 #. type: Hash Value: tbl-device-associated-incidence-density-rates no_data
 #: reports/common.yaml:1
 #, fuzzy, no-wrap
-msgid "No device-associated infection data available for this report settings."
+msgid "No device-associated infection data available for these report settings."
 msgstr "No hay datos disponibles sobre infecciones asociadas a dispositivos para los parámetros de este informe."
 
 #. type: Hash Value: tbl-device-associated-incidence-density-rates pooled_footnote
@@ -896,7 +899,7 @@ msgstr "Número de infecciones"
 #: reports/common.yaml:1
 #, fuzzy, no-wrap
 #| msgid "No of infections with agent"
-msgid "No infection data available for this report settings."
+msgid "No infection data available for these report settings."
 msgstr "No hay datos sobre infecciones disponibles para los parámetros de este informe."
 
 #. type: Hash Value: tbl-incidence-density-rates pooled_footnote
@@ -935,7 +938,7 @@ msgstr "%s: Número agregado de infecciones en las que se registró al menos un 
 #: reports/common.yaml:1
 #, fuzzy, no-wrap
 #| msgid "No of infections with agent"
-msgid "No infectious agent detection data available for this report settings."
+msgid "No infectious agent detection data available for these report settings."
 msgstr "No hay datos disponibles sobre la detección de agentes infecciosos para los entornos de este informe."
 
 #. type: Hash Value: tbl-infectious-agent-detection-rate pooled_footnote
@@ -986,7 +989,7 @@ msgstr "%s: Número total de infecciones en todos los bebés."
 #: reports/common.yaml:1
 #, fuzzy, no-wrap
 #| msgid "No of infections with agent"
-msgid "No organism-specific resistance data available for this report settings."
+msgid "No organism-specific resistance data available for these report settings."
 msgstr "No se dispone de datos sobre la resistencia específica de ningún organismo para los parámetros de este informe."
 
 #. type: Hash Value: tbl-organism-resistance-rate pooled_footnote
@@ -1051,7 +1054,7 @@ msgstr "%s: El número agregado de patógenos resistentes a los antibióticos qu
 #. type: Hash Value: tbl-resistance-test-rate no_data
 #: reports/common.yaml:1
 #, fuzzy, no-wrap
-msgid "No antibiotic resistance diagnostics data available for this report settings."
+msgid "No antibiotic resistance diagnostics data available for these report settings."
 msgstr "No hay datos de diagnóstico sobre la resistencia a los antibióticos disponibles para los parámetros de este informe."
 
 #. type: Hash Value: tbl-resistance-test-rate pooled_footnote
@@ -1090,12 +1093,6 @@ msgstr "Número de patógenos con pruebas registradas de resistencia a los antib
 #, no-wrap
 msgid "Antibiotic resistance diagnostics"
 msgstr "Diagnóstico de la resistencia a los antibióticos"
-
-#. type: Hash Value: tbl-risk-density-rates access
-#: reports/common.yaml:1
-#, no-wrap
-msgid "Access"
-msgstr "Acceso"
 
 #. type: Hash Value: tbl-risk-density-rates any
 #: reports/common.yaml:1
@@ -1137,7 +1134,7 @@ msgstr "Se registra un día de «cuidado canguro» cuando el paciente ha recibid
 #. type: Hash Value: tbl-risk-density-rates no_data
 #: reports/common.yaml:1
 #, fuzzy, no-wrap
-msgid "No risk/protective factor data available for this report settings."
+msgid "No risk/protective factor data available for these report settings."
 msgstr "No hay datos disponibles sobre factores de riesgo o de protección para los entornos objeto de este informe."
 
 #. type: Hash Value: tbl-risk-density-rates pooled_footnote
@@ -1153,12 +1150,6 @@ msgstr "%s: La tasa de densidad de riesgo calculada para todos los bebés de tod
 #| msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Risk Density Rates of the departments in the reference data. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of device days is greater than or equal to one according to the pooled Risk Density Rate."
 msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Exposure Density Rates of the departments in the reference data. Q₂ represents the median. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of device days is greater than or equal to one according to the pooled Exposure Density Rate."
 msgstr "%s, %s, %s: Los cuartiles (%s, %s y %s cuantiles) de las tasas de densidad de riesgo de los departamentos en los datos de referencia. Estos cuartiles solo se muestran cuando el número de departamentos que contribuyen al denominador es mayor o igual a cinco, y cuando el número medio de días de dispositivo es mayor o igual a uno según la tasa de densidad de riesgo agrupada."
-
-#. type: Hash Value: tbl-risk-density-rates reserve
-#: reports/common.yaml:1
-#, no-wrap
-msgid "Reserve"
-msgstr "Reserva"
 
 #. type: Hash Value: tbl-risk-density-rates tbl-cap
 #: reports/common.yaml:1
@@ -1179,12 +1170,6 @@ msgstr "Catéter vascular"
 msgid "Ventilatory support"
 msgstr "Asistencia respiratoria"
 
-#. type: Hash Value: tbl-risk-density-rates watch
-#: reports/common.yaml:1
-#, no-wrap
-msgid "Watch"
-msgstr "Ver"
-
 #. type: Hash Value: tbl-secondary-bsi-rates n_footnote
 #: reports/common.yaml:1
 #, fuzzy, no-wrap
@@ -1195,7 +1180,7 @@ msgstr "%s: Número agregado de infecciones en las que se registró al menos un 
 #. type: Hash Value: tbl-secondary-bsi-rates no_data
 #: reports/common.yaml:1
 #, fuzzy, no-wrap
-msgid "No secondary BSI data available for this report settings."
+msgid "No secondary BSI data available for these report settings."
 msgstr "No hay datos secundarios de BSI disponibles para los parámetros de este informe."
 
 #. type: Hash Value: tbl-secondary-bsi-rates pooled_footnote
@@ -1342,10 +1327,11 @@ msgstr "Número de procedimientos"
 msgid "Surgical procedures by category"
 msgstr "Procedimientos quirúrgicos por categoría"
 
-#. type: Hash Value: tbl-surgical-procedure-rates to_be_categorised
+#. type: Hash Value: tbl-surgical-procedure-rates to_be_categorized
 #: reports/common.yaml:1
-#, no-wrap
-msgid "Not yet categorised"
+#, fuzzy, no-wrap
+#| msgid "Not yet categorised"
+msgid "Not yet categorized"
 msgstr "Aún sin clasificar"
 
 #. type: Hash Value: total
@@ -1565,7 +1551,7 @@ msgstr "La resistencia elevada a la colistina (COLR) constituye un motivo de gra
 #. type: Hash Value: outlier abr_gram_positive_mrsa_high
 #: reports/Partner-Report/content/_sR.yaml:1
 #, fuzzy, no-wrap
-msgid "Elevated methicillin-resistant Staphylococcus aureus (MRSA) rates may warrant review of screening, decolonisation, and contact isolation practices."
+msgid "Elevated methicillin-resistant Staphylococcus aureus (MRSA) rates may warrant review of screening, decolonization, and contact isolation practices."
 msgstr "Las tasas elevadas de Staphylococcus aureus resistente a la meticilina (SARM) podrían justificar una revisión de las prácticas de cribado, descolonización y aislamiento de contactos."
 
 #. type: Hash Value: outlier abr_gram_positive_vre_high
@@ -1979,13 +1965,13 @@ msgstr ""
 #. type: Hash Value: outlier nec_interpretation_high_despite_microbiome
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The necrotising enterocolitis rate is above the reference range despite high human milk feeding and probiotic use. Other contributing factors may warrant assessment."
+msgid "The necrotizing enterocolitis rate is above the reference range despite high human milk feeding and probiotic use. Other contributing factors may warrant assessment."
 msgstr ""
 
 #. type: Hash Value: outlier nec_interpretation_high_low_microbiome
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The necrotising enterocolitis rate is above the reference range in a context where human milk feeding or probiotic use is below it. Microbiome-supportive strategies may be a relevant consideration."
+msgid "The necrotizing enterocolitis rate is above the reference range in a context where human milk feeding or probiotic use is below it. Microbiome-supportive strategies may be a relevant consideration."
 msgstr ""
 
 #. type: Hash Value: outlier pairing_bsi action_elevated
@@ -2258,13 +2244,13 @@ msgstr "Neumonía asociada al soporte ventilatorio"
 #. type: Hash Value: outlier pairing_nec action_elevated
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "Strengthening lactation support, donor milk availability, or feeding pathways may help reduce necrotising enterocolitis risk."
+msgid "Strengthening lactation support, donor milk availability, or feeding pathways may help reduce necrotizing enterocolitis risk."
 msgstr ""
 
 #. type: Hash Value: outlier pairing_nec action_elevated_narrowed
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "Case mix, feeding advancement protocols, and necrotising enterocolitis diagnostic criteria may warrant review."
+msgid "Case mix, feeding advancement protocols, and necrotizing enterocolitis diagnostic criteria may warrant review."
 msgstr ""
 
 #. type: Hash Value: outlier pairing_nec action_elevated_secondary
@@ -2283,7 +2269,7 @@ msgstr ""
 #: reports/Partner-Report/content/_sR.yaml:1
 #, fuzzy, no-wrap
 #| msgid "Necrotising Enterocolitis"
-msgid "necrotising enterocolitis rate"
+msgid "necrotizing enterocolitis rate"
 msgstr "Enterocolitis necrotizante"
 
 #. type: Hash Value: outlier pairing_nec primary_paired_label
@@ -2554,14 +2540,14 @@ msgstr "%s: El número total de días en que el factor de riesgo/protección est
 msgid "%s: The percentage of infections in your department where this infectious agent was detected."
 msgstr "%s: El porcentaje de infecciones en tu departamento en las que se detectó este agente infeccioso."
 
-#. type: Hash Value: tbl-antibiotic-utilisation n_footnote
+#. type: Hash Value: tbl-antibiotic-utilization n_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
 #, fuzzy, no-wrap
 #| msgid "%s: The aggregated number surgical procedures performed in all infants."
 msgid "%s: The aggregated number of substance-days recorded in your department's infants."
 msgstr "%s: Número total de procedimientos quirúrgicos realizados en todos los bebés."
 
-#. type: Hash Value: tbl-antibiotic-utilisation rate_footnote
+#. type: Hash Value: tbl-antibiotic-utilization rate_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
 #, fuzzy, no-wrap
 #| msgid "%s: The Risk Density Rate calculated for your unit's infants."
@@ -2719,7 +2705,7 @@ msgstr "La epidemiología de los agentes infecciosos que causan infecciones noso
 #: reports/Partner-Report/content/_infectious-agents.Rmd:3
 #, fuzzy, no-wrap
 #| msgid "In total, `r dR$numberOfInfectiousAgents` infectious agents were detected in the `r dR$numberOfInfectionsWithAgent` infections that were reported to have yielded at least one agent from either the primary infection and/or the secondary bloodstream infection resulting from it (@tbl-agent-per-infection-rate). These `r dR$numberOfInfectionsWithAgent` diagnostic-positive infections out of `r dR$overallNumberOfInfections` overall infections represent an Infectious Agent Detection Rate of `r dR$infectiousAgentDetectionRate` per 100 infections (@tbl-infectious-agent-detection-rate).\n"
-msgid "In your data, `r dR$own$numberOfInfectiousAgents` infectious agents were detected in `r dR$own$numberOfInfectionsWithAgent` infections out of `r dR$own$overallNumberOfInfections` total infections (including sepsis/BSI, pneumonia, necrotising enterocolitis, and surgical site infections), representing an infectious agent detection rate of `r dR$own$infectiousAgentDetectionRate` per 100 infections. The following tables provide detailed information on pathogen distribution and antimicrobial resistance patterns.\n"
+msgid "In your data, `r dR$own$numberOfInfectiousAgents` infectious agents were detected in `r dR$own$numberOfInfectionsWithAgent` infections out of `r dR$own$overallNumberOfInfections` total infections (including sepsis/BSI, pneumonia, necrotizing enterocolitis, and surgical site infections), representing an infectious agent detection rate of `r dR$own$infectiousAgentDetectionRate` per 100 infections. The following tables provide detailed information on pathogen distribution and antimicrobial resistance patterns.\n"
 msgstr "En total, se detectaron `r dR$numberOfInfectiousAgents` agentes infecciosos en las `r dR$numberOfInfectionsWithAgent` infecciones que, según se informó, habían producido al menos un agente, ya fuera de la infección primaria o de la infección secundaria del torrente sanguíneo resultante de ella (@tbl-agent-per-infection-rate). Estas `r dR$numberOfInfectionsWithAgent` infecciones con diagnóstico positivo de un total de `r dR$overallNumberOfInfections` infecciones representan una tasa de detección de agentes infecciosos del `r dR$infectiousAgentDetectionRate` por cada 100 infecciones (@tbl-infectious-agent-detection-rate).\n"
 
 #. type: Plain text
@@ -2801,9 +2787,9 @@ msgid "Antimicrobial susceptibility testing (AST) is fundamental to both individ
 msgstr ""
 
 #. type: Plain text
-#: reports/Partner-Report/content/_tbl-intro-antibiotic-utilisation.Rmd:1
+#: reports/Partner-Report/content/_tbl-intro-antibiotic-utilization.Rmd:1
 #, no-wrap
-msgid "@tbl-antibiotic-utilisation details antibiotic exposure at the level of individual substances, grouped by ATC pharmacological subgroup. Bold rows show the aggregated rate for each subgroup; indented rows show the rate for each substance within that subgroup. Comparing substance-level patterns with the reference data can help identify opportunities for antibiotic stewardship.\n"
+msgid "@tbl-antibiotic-utilization details antibiotic exposure at the level of individual substances, grouped by ATC pharmacological subgroup. Bold rows show the aggregated rate for each subgroup; indented rows show the rate for each substance within that subgroup. Comparing substance-level patterns with the reference data can help identify opportunities for antibiotic stewardship.\n"
 msgstr ""
 
 #. type: Plain text
@@ -2819,11 +2805,12 @@ msgid "@tbl-surgical-procedure-rates presents rates of various surgical procedur
 msgstr ""
 
 #. type: Plain text
-#: reports/Partner-Report/content/_methods-antibiotic-utilisation.Rmd:1
-#: reports/Reference-Report/content/_methods-antibiotic-utilisation.Rmd:1
-#, no-wrap
-msgid "`r sR$methods$antibiotic_utilisation`\n"
-msgstr ""
+#: reports/Partner-Report/content/_methods-antibiotic-utilization.Rmd:1
+#: reports/Reference-Report/content/_methods-antibiotic-utilization.Rmd:1
+#, fuzzy, no-wrap
+#| msgid "Antibiotic Utilisation"
+msgid "`r sR$methods$antibiotic_utilization`\n"
+msgstr "Utilización de antibióticos"
 
 #. type: Plain text
 #: reports/Partner-Report/content/_tbl-intro-secondary-bsi.Rmd:1
@@ -3329,7 +3316,7 @@ msgstr "Este informe presenta datos de unidades neonatales de un solo país. Est
 msgid "Presence of Risk and Protective Factors"
 msgstr "Factores de riesgo y de protección"
 
-#. type: Hash Value: tbl-antibiotic-utilisation n_footnote
+#. type: Hash Value: tbl-antibiotic-utilization n_footnote
 #: reports/Reference-Report/content/_sR.yaml:1
 #, fuzzy, no-wrap
 #| msgid "%s: The aggregated number of infections in all infants."
@@ -3371,7 +3358,7 @@ msgstr "Dado que el proceso, aunque cuenta con el apoyo de diversas herramientas
 #: reports/Reference-Report/content/_nosocomial_infections.Rmd:2
 #, fuzzy, no-wrap
 #| msgid "Nosocomial infections represent the primary endpoint of NeoIPC surveillance. In @tbl-incidence-density-rates, the incidence densities of sepsis/BSI, pneumonia and necrotising enterocolitis, as well as the combined endpoint 'severe infection', are displayed. Overall `r dR$numberOfSevereInfections` severe infections were recorded in `r dR$numberOfPatients` infants resulting in an average number of `r dR$averageSevereInfectionsPerPatient` infections per patient.\n"
-msgid "Nosocomial infections represent the primary endpoint of NeoIPC surveillance. In`r dR$refIDRTable` the incidence densities of sepsis/BSI, pneumonia and necrotising enterocolitis, as well as the combined endpoint 'severe infection', are displayed. Overall `r dR$numberOfSevereInfections` severe infections were recorded in `r dR$numberOfPatients` infants resulting in an average number of `r dR$averageSevereInfectionsPerPatient` infections per patient.\n"
+msgid "Nosocomial infections represent the primary endpoint of NeoIPC surveillance. In`r dR$refIDRTable` the incidence densities of sepsis/BSI, pneumonia and necrotizing enterocolitis, as well as the combined endpoint 'severe infection', are displayed. Overall `r dR$numberOfSevereInfections` severe infections were recorded in `r dR$numberOfPatients` infants resulting in an average number of `r dR$averageSevereInfectionsPerPatient` infections per patient.\n"
 msgstr "Las infecciones nosocomiales representan el criterio de valoración principal de la vigilancia del NeoIPC. En @tbl-incidence-density-rates se muestran las densidades de incidencia de sepsis/BSI, neumonía y enterocolitis necrotizante, así como el criterio de valoración combinado «infección grave». En total, se registraron `r dR$numberOfSevereInfections` infecciones graves en `r dR$numberOfPatients` lactantes, lo que supone una media de `r dR$averageSevereInfectionsPerPatient` infecciones por paciente.\n"
 
 #. type: Plain text
@@ -3687,7 +3674,7 @@ msgstr ""
 #. type: Hash Value: problems 30 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The sepsis occurred within the first two days of hospitalisation of a referred or (re-)admitted patient (day of hospitalisation is %i). See @sec-problem-details-20."
+msgid "The sepsis occurred within the first two days of hospitalization of a referred or (re-)admitted patient (day of hospitalization is %i). See @sec-problem-details-20."
 msgstr ""
 
 #. type: Hash Value: problems 31 description
@@ -3711,31 +3698,31 @@ msgstr ""
 #. type: Hash Value: problems 34 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The pneumonia occurred within the first two days of hospitalisation of a referred or (re-)admitted patient (day of hospitalisation is %i). See @sec-problem-details-20."
+msgid "The pneumonia occurred within the first two days of hospitalization of a referred or (re-)admitted patient (day of hospitalization is %i). See @sec-problem-details-20."
 msgstr ""
 
 #. type: Hash Value: problems 35 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The day of life stored in the necrotising enterocolitis form (%i) does not match the calculated value (%i). See @sec-problem-details-17."
+msgid "The day of life stored in the necrotizing enterocolitis form (%i) does not match the calculated value (%i). See @sec-problem-details-17."
 msgstr ""
 
 #. type: Hash Value: problems 36 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The day of occurrence after admission stored in the necrotising enterocolitis form (%i) does not match the calculated value (%i). See @sec-problem-details-18."
+msgid "The day of occurrence after admission stored in the necrotizing enterocolitis form (%i) does not match the calculated value (%i). See @sec-problem-details-18."
 msgstr ""
 
 #. type: Hash Value: problems 37 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The necrotising enterocolitis occurred within the first 3 days of life (day of life is %i). See @sec-problem-details-19."
+msgid "The necrotizing enterocolitis occurred within the first 3 days of life (day of life is %i). See @sec-problem-details-19."
 msgstr ""
 
 #. type: Hash Value: problems 38 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The necrotising enterocolitis occurred within the first two days of hospitalisation of a referred or (re-)admitted patient (day of hospitalisation is %i). See @sec-problem-details-20."
+msgid "The necrotizing enterocolitis occurred within the first two days of hospitalization of a referred or (re-)admitted patient (day of hospitalization is %i). See @sec-problem-details-20."
 msgstr ""
 
 #. type: Hash Value: problems 39 description
@@ -3838,8 +3825,8 @@ msgstr "Tasa de procedimientos quirúrgicos"
 msgid ""
 "To ensure that all partners can base their decisions on valid data, we strive for the highest possible data quality for the individual analyses and reference reports of the NeoIPC surveillance.\n"
 "Wherever possible, we try to check the validity of the data as soon as it is entered and, if necessary, ask the person entering the data to make corrections.\n"
-"Unfortunately, our surveillance platform cannot recognise all possible problems at the time of entry.\n"
-"At regular intervals, especially before reference reports are created, we therefore try to identify these problems using special database queries, summarise them in this report and send it to our partners with a request for correction.\n"
+"Unfortunately, our surveillance platform cannot recognize all possible problems at the time of entry.\n"
+"At regular intervals, especially before reference reports are created, we therefore try to identify these problems using special database queries, summarize them in this report and send it to our partners with a request for correction.\n"
 "To make the correction as efficient as possible, the report in @sec-problems contains a link for each patient record in which a problem has been identified, which leads directly to the Tracked Entity Instance Dashboard of the patient record in question.\n"
 "In addition, @sec-problem-details details the issues encountered so that you can understand the potential impact and ways to avoid the problem in the future.\n"
 "In @sec-solutions we have also outlined the various steps that can be taken to resolve the issue.\n"
@@ -3936,7 +3923,7 @@ msgstr ""
 msgid ""
 "What remains is a patient record without patient enrolment, which exists in the system as a data orphan.\n"
 "These patient records will not appear in the list of registered patients and their data cannot be listed in any reports, as most of the information required for analysis is missing.\n"
-"However, if you try to enter a new patient with the same NeoIPC Patient ID, the system will recognise that this ID is already being used by a different patient and will reject the entry.\n"
+"However, if you try to enter a new patient with the same NeoIPC Patient ID, the system will recognize that this ID is already being used by a different patient and will reject the entry.\n"
 msgstr ""
 
 #. type: Plain text
@@ -4497,7 +4484,7 @@ msgstr ""
 #. type: Title ###
 #: reports/Validation-Report/en/_problem_detail_0020.Rmd:1
 #, no-wrap
-msgid "The Infection Occurred Within the First Two Days of Hospitalisation of a Referred or (Re-)Admitted Patient {#sec-problem-details-20}"
+msgid "The Infection Occurred Within the First Two Days of Hospitalization of a Referred or (Re-)Admitted Patient {#sec-problem-details-20}"
 msgstr ""
 
 #. type: Plain text
@@ -4967,6 +4954,18 @@ msgstr ""
 #, no-wrap
 msgid "![The Next and Previous buttons in the event timeline of the Tracked Entity Instance Dashboard](img/fig-event-timeline-full.png){#fig-event-timeline-full fig-alt=\"A screenshot of the Tracked Entity Instance Dashboard with the Next and Previous buttons in the event timeline highlighted\"}\n"
 msgstr ""
+
+#, no-wrap
+#~ msgid "Access"
+#~ msgstr "Acceso"
+
+#, no-wrap
+#~ msgid "Reserve"
+#~ msgstr "Reserva"
+
+#, no-wrap
+#~ msgid "Watch"
+#~ msgstr "Ver"
 
 #, no-wrap
 #~ msgid "Device-associated infections can be found in @tbl-device-associated-incidence-density-rates.\n"
