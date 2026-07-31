@@ -1,3 +1,4 @@
+[#def-lcbsi-pathogen]
 .Laboratory-confirmed bloodstream infection with recognised pathogen
 [%unbreakable]
 ****

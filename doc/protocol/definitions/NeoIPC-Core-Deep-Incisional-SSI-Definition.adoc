@@ -1,3 +1,4 @@
+[#def-ssi-deep]
 .Deep incisional SSI
 [%unbreakable]
 ****
