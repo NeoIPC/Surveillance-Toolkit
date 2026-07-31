@@ -216,7 +216,15 @@ foreach ($targetCulture in $targetCultures)
         $outputFile = Get-LocalisedPath $artifactsFolder 'index.html' $targetCulture
         Build-Target $outputFile (@($protocolFile)+@(Export-AsciiDocReferences $protocolFile $att)) {
             Write-Information "Generating HTML"
-            asciidoctor -a $revNumberArg -a $revRemark -a $revDate -b html5 -w --failure-level=WARN -D $(Resolve-Path $artifactsFolder -Relative) -o $([System.IO.Path]::GetFileName($outputFile)) $(Resolve-Path $protocolFile -Relative)
+            # -v, not -w. Asciidoctor reports a cross-reference whose target does not exist as
+            # "possible invalid reference" at INFO level, guarded by `if logger.info?`, so at the
+            # default WARN level it is never emitted at all: the anchor is rendered, the link is dead,
+            # and the build is green. Seven such references shipped in this protocol undetected.
+            # Raising the failure level to match is safe rather than noisy - INFO has nine call sites
+            # in Asciidoctor 2.0.26 (refs/asciidoctor), and every one is a real defect: a dropped
+            # include, a reference to a missing attribute, a bad inline-macro substitution, or this.
+            # None fires on a document that is correct, and this repository uses no optional includes.
+            asciidoctor -a $revNumberArg -a $revRemark -a $revDate -b html5 -v --failure-level=INFO -D $(Resolve-Path $artifactsFolder -Relative) -o $([System.IO.Path]::GetFileName($outputFile)) $(Resolve-Path $protocolFile -Relative)
             if (-not $?) { exit 1 }
             Write-Verbose "Linting HTML"
 
@@ -256,7 +264,7 @@ foreach ($targetCulture in $targetCultures)
         $docbookFile = Get-LocalisedPath $protocolDir $docBookFileName $targetCulture
         Build-Target $docbookFile (@($protocolFile)+@(Export-AsciiDocReferences $protocolFile $att)) {
             Write-Verbose "Generating DocBook xml"
-            asciidoctor -a $revNumberArg -a $revRemark -a $revDate -b docbook -w --failure-level=WARN -D $(Resolve-Path $protocolDir -Relative) -o $([System.IO.Path]::GetFileName($docbookFile)) $(Resolve-Path $protocolFile -Relative)
+            asciidoctor -a $revNumberArg -a $revRemark -a $revDate -b docbook -v --failure-level=INFO -D $(Resolve-Path $protocolDir -Relative) -o $([System.IO.Path]::GetFileName($docbookFile)) $(Resolve-Path $protocolFile -Relative)
             if (-not $?) { exit 1 }
         }
     }
@@ -271,9 +279,9 @@ foreach ($targetCulture in $targetCultures)
                 Write-Information "Generating PDF"
                 if ($IsWindows) {
                     Write-Warning "Asciidoctor Mathematical is not supported on Windows. The STEM expressions will not be converted in your pdf output."
-                    asciidoctor-pdf -a compress -a $revNumberArg -a $revRemark -a $revDate -w --failure-level=WARN -D $(Resolve-Path $artifactsFolder -Relative) -o $([System.IO.Path]::GetFileName($outputFile)) $(Resolve-Path $protocolFile -Relative)
+                    asciidoctor-pdf -a compress -a $revNumberArg -a $revRemark -a $revDate -v --failure-level=INFO -D $(Resolve-Path $artifactsFolder -Relative) -o $([System.IO.Path]::GetFileName($outputFile)) $(Resolve-Path $protocolFile -Relative)
                 } else {
-                    asciidoctor-pdf -a compress -a $revNumberArg -a $revRemark -a $revDate -a mathematical-format=svg -r asciidoctor-mathematical -w --failure-level=WARN -D $(Resolve-Path $artifactsFolder -Relative) -o $([System.IO.Path]::GetFileName($outputFile)) $(Resolve-Path $protocolFile -Relative)
+                    asciidoctor-pdf -a compress -a $revNumberArg -a $revRemark -a $revDate -a mathematical-format=svg -r asciidoctor-mathematical -v --failure-level=INFO -D $(Resolve-Path $artifactsFolder -Relative) -o $([System.IO.Path]::GetFileName($outputFile)) $(Resolve-Path $protocolFile -Relative)
                 }
                 if (-not $?) { exit 1 }
             }
