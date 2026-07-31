@@ -1,3 +1,4 @@
+[#def-lcbsi-cc-twice]
 .Laboratory-Confirmed Bloodstream Infection with Common Commensal Detected Twice
 [%unbreakable]
 ****
@@ -22,6 +23,7 @@
 ** Increased levels of interleukin (IL) 6 or 8
 ****
 
+[#def-lcbsi-cc-lab-finding]
 .Laboratory-Confirmed Bloodstream Infection with Common Commensal and Laboratory Finding
 [%unbreakable]
 ****
@@ -48,6 +50,7 @@
 * Platelet count of < 100 × 10^9^/L (<100 × 10^3^/μL)
 ****
 
+[#def-lcbsi-cc-treatment]
 .Laboratory-Confirmed Bloodstream Infection with Common Commensal and Five Day Treatment
 [%unbreakable]
 ****

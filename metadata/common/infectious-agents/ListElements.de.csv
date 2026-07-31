@@ -16,7 +16,7 @@ fungal_species_complex,VALUE,t,Fungal species complex,Artenkomplex von Pilzen
 fungal_variety,VALUE,t,Fungal variety,Pilzvarietät
 mrsa,VALUE,f,MRSA,
 name,VALUE,f,Name,
-recognised_pathogen,VALUE,t,Recognised pathogen,Anerkannter Krankheitserreger
+recognized_pathogen,VALUE,t,Recognized pathogen,Anerkannter Krankheitserreger
 recorded_resistances,VALUE,t,Recorded Resistances,Erfasste Resistenzen
 synonym_for,VALUE,t,synonym for,Synonym für
 type,VALUE,t,Type,Typ

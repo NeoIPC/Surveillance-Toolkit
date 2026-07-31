@@ -540,7 +540,7 @@ function New-PathogenList {
     }
 
     $commonCommensalString = $listElements['common_commensal']
-    $recognisedPathogenString = $listElements['recognised_pathogen']
+    $recognizedPathogenString = $listElements['recognized_pathogen']
     $MRSAString = $listElements['mrsa']
     $VREString = $listElements['vre']
     $3GCRString = $listElements['3gcr']
@@ -614,36 +614,36 @@ function New-PathogenList {
         if ($infectiousAgentConcept.is_cc -ceq 't') {
             $pathogenicity = $commonCommensalString
         } elseif ($infectiousAgentConcept.is_cc -ceq 'f') {
-            $pathogenicity = $recognisedPathogenString
+            $pathogenicity = $recognizedPathogenString
         }  else {
-            throw "Unexpected boolen value '$($infectiousAgentConcept.is_cc)' in line $lineNo file '$infectiousAgentConceptsFile'."
+            throw "Unexpected boolean value '$($infectiousAgentConcept.is_cc)' in line $lineNo file '$infectiousAgentConceptsFile'."
         }
 
         $recordedResistances = [System.Collections.Generic.List[string]]::new()
         if ($infectiousAgentConcept.show_mrsa -ceq 't') {
             $recordedResistances.Add($MRSAString)
         } elseif (-not($infectiousAgentConcept.show_mrsa -ceq 'f')) {
-            throw "Unexpected boolen value '$($infectiousAgentConcept.show_mrsa)' in line $lineNo file '$infectiousAgentConceptsFile'."
+            throw "Unexpected boolean value '$($infectiousAgentConcept.show_mrsa)' in line $lineNo file '$infectiousAgentConceptsFile'."
         }
         if ($infectiousAgentConcept.show_vre -ceq 't') {
             $recordedResistances.Add($VREString)
         } elseif (-not($infectiousAgentConcept.show_vre -ceq 'f')) {
-            throw "Unexpected boolen value '$($infectiousAgentConcept.show_vre)' in line $lineNo file '$infectiousAgentConceptsFile'."
+            throw "Unexpected boolean value '$($infectiousAgentConcept.show_vre)' in line $lineNo file '$infectiousAgentConceptsFile'."
         }
         if ($infectiousAgentConcept.show_3gcr -ceq 't') {
             $recordedResistances.Add($3GCRString)
         } elseif (-not($infectiousAgentConcept.show_3gcr -ceq 'f')) {
-            throw "Unexpected boolen value '$($infectiousAgentConcept.show_3gcr)' in line $lineNo file '$infectiousAgentConceptsFile'."
+            throw "Unexpected boolean value '$($infectiousAgentConcept.show_3gcr)' in line $lineNo file '$infectiousAgentConceptsFile'."
         }
         if ($infectiousAgentConcept.show_carb_r -ceq 't') {
             $recordedResistances.Add($carbapenemsString)
         } elseif (-not($infectiousAgentConcept.show_carb_r -ceq 'f')) {
-            throw "Unexpected boolen value '$($infectiousAgentConcept.show_carb_r)' in line $lineNo file '$infectiousAgentConceptsFile'."
+            throw "Unexpected boolean value '$($infectiousAgentConcept.show_carb_r)' in line $lineNo file '$infectiousAgentConceptsFile'."
         }
         if ($infectiousAgentConcept.show_coli_r -ceq 't') {
             $recordedResistances.Add($colistinString)
         } elseif (-not($infectiousAgentConcept.show_coli_r -ceq 'f')) {
-            throw "Unexpected boolen value '$($infectiousAgentConcept.show_coli_r)' in line $lineNo file '$infectiousAgentConceptsFile'."
+            throw "Unexpected boolean value '$($infectiousAgentConcept.show_coli_r)' in line $lineNo file '$infectiousAgentConceptsFile'."
         }
 
         $infectiousAgentConceptId = [uint]::Parse($infectiousAgentConcept.id)

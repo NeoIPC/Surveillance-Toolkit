@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-07-23 08:30+0200\n"
+"POT-Creation-Date: 2026-07-31 16:15+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Language-Team: none\n"
 "Language: en\n"
@@ -230,7 +230,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "dataElements/NEOIPC_BSI_FEEDING_INTOLERANCE/DESCRIPTION"
-msgid "Enteral feeding intolerance, abdominal distension or ileus without imaging findings or surgical findings that would otherwise suggest a necrotizing entrocolitis or a spontaneous intestinal perforation."
+msgid "Enteral feeding intolerance, abdominal distension or ileus without imaging findings or surgical findings that would otherwise suggest a necrotizing enterocolitis or a spontaneous intestinal perforation."
 msgstr ""
 
 #, priority:10
@@ -5342,7 +5342,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "dataElementGroups/NEOIPC_NEC/NAME"
-msgid "NeoIPC Necrotising enterocolitis"
+msgid "NeoIPC Necrotizing enterocolitis"
 msgstr ""
 
 #, priority:10
@@ -5417,7 +5417,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "trackedEntityAttributes/NEOIPC_TEA_BIRTH_WEIGHT/DESCRIPTION"
-msgid "The infant’s weight immediately after birth in grams. Typically this value is based on a measurement but in case the birth weigth is unknown or has a highly pathological value that does not reflect the maturity of the infant (e.g. hydrops fetalis) you can enter the birth weight that is estimated by the treating physician."
+msgid "The infant’s weight immediately after birth in grams. Typically this value is based on a measurement but in case the birth weight is unknown or has a highly pathological value that does not reflect the maturity of the infant (e.g. hydrops fetalis) you can enter the birth weight that is estimated by the treating physician."
 msgstr ""
 
 #, priority:150
@@ -5457,7 +5457,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "trackedEntityAttributes/NEOIPC_TEA_GEST_AGE/DESCRIPTION"
-msgid "The gestational age, expressed in completed weeks and days (e.g., 25 weeks and 4 days: 25+4) at the time of birth. Typically this refers to the gestational age as it was calculated or estimated by the mother's obstetrician but where this is not available (e.g. in unobserved pregnancies) the gestational age assesed by the treating physician (e.g. via the Ballard score) may be recorded."
+msgid "The gestational age, expressed in completed weeks and days (e.g., 25 weeks and 4 days: 25+4) at the time of birth. Typically this refers to the gestational age as it was calculated or estimated by the mother's obstetrician but where this is not available (e.g. in unobserved pregnancies) the gestational age assessed by the treating physician (e.g. via the Ballard score) may be recorded."
 msgstr ""
 
 #, priority:150
@@ -13595,7 +13595,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "attributes/NEODECO_RR_SURVEILLANCE_END/NAME"
-msgid "NeoDECO Surveillance end for restricted randomisation"
+msgid "NeoDECO Surveillance end for restricted randomization"
 msgstr ""
 
 #, priority:10

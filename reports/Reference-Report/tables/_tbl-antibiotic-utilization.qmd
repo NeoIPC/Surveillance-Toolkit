@@ -1,4 +1,4 @@
-### `{r} sR$headings$antibiotic_utilisation`
+### `{r} sR$headings$antibiotic_utilization`
 
 ```{r}
 #| output: asis
@@ -7,7 +7,7 @@
 
 ```{r}
 #| output: asis
-include_localised("_methods-antibiotic-utilisation.Rmd")
+include_localised("_methods-antibiotic-utilization.Rmd")
 ```
 
 ```{r}
@@ -16,12 +16,12 @@ include_localised("_methods-antibiotic-utilisation.Rmd")
 ```
 
 ```{r}
-#| label: tbl-antibiotic-utilisation
-#| tbl-cap: !expr 'sR$`tbl-antibiotic-utilisation`$`tbl-cap`'
+#| label: tbl-antibiotic-utilization
+#| tbl-cap: !expr 'sR$`tbl-antibiotic-utilization`$`tbl-cap`'
 #| tbl-cap-location: top
 
 tbl_data <- reference_data |>
-  neoipcr::get_antibiotic_utilisation_table()
+  neoipcr::get_antibiotic_utilization_table()
 
 if (nrow(tbl_data) > 0 && sum(tbl_data$n, na.rm = TRUE) > 0) {
 
@@ -152,7 +152,7 @@ if (nrow(tbl_data) > 0 && sum(tbl_data$n, na.rm = TRUE) > 0) {
 
   gt_tbl <- gt_tbl |>
     tab_spanner(
-      label = sR$`tbl-antibiotic-utilisation`$exposure_density_rate,
+      label = sR$`tbl-antibiotic-utilization`$exposure_density_rate,
       columns = tidyselect::any_of(
         c(sR$table_headers$pooled,
           sR$table_headers$q1,
@@ -171,9 +171,9 @@ if (nrow(tbl_data) > 0 && sum(tbl_data$n, na.rm = TRUE) > 0) {
       footnote = md(
         paste0(
           "$$\\text{",
-          sR$`tbl-antibiotic-utilisation`$exposure_density_rate,
+          sR$`tbl-antibiotic-utilization`$exposure_density_rate,
           "} = \\frac{\\text{",
-          sR$`tbl-antibiotic-utilisation`$substance_days,
+          sR$`tbl-antibiotic-utilization`$substance_days,
           "}}{\\text{",
           sR$patient_days,
           "}} \\times ",
@@ -185,21 +185,21 @@ if (nrow(tbl_data) > 0 && sum(tbl_data$n, na.rm = TRUE) > 0) {
     ) |>
     tab_footnote(
       footnote = sprintf(
-        sR$`tbl-antibiotic-utilisation`$n_footnote,
+        sR$`tbl-antibiotic-utilization`$n_footnote,
         sR$table_headers$n),
       locations = cells_column_labels(columns = sR$table_headers$n),
       placement = "right") |>
     tab_footnote(
       footnote = md(
         sprintf(
-          sR$`tbl-antibiotic-utilisation`$atc_footnote,
+          sR$`tbl-antibiotic-utilization`$atc_footnote,
           "[whocc.no/atc_ddd_index/](https://www.whocc.no/atc_ddd_index/)")),
       locations = cells_stub(rows = tbl_data$row_type == "atc5"),
       placement = "right") |>
     tab_footnote(
       footnote = md(
         sprintf(
-          sR$`tbl-antibiotic-utilisation`$aware_column_footnote,
+          sR$`tbl-antibiotic-utilization`$aware_column_footnote,
           "[aware.essentialmeds.org](https://aware.essentialmeds.org/)")),
       locations = cells_column_labels(columns = "aware"),
       placement = "right") |>
@@ -220,6 +220,6 @@ if (nrow(tbl_data) > 0 && sum(tbl_data$n, na.rm = TRUE) > 0) {
 
   gt_tbl
 } else {
-  no_data_table(sR$`tbl-antibiotic-utilisation`$no_data)
+  no_data_table(sR$`tbl-antibiotic-utilization`$no_data)
 }
 ```

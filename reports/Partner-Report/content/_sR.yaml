@@ -325,13 +325,13 @@ outlier:
     to implementation such as staffing constraints, department layout,
     parental access restrictions, or documentation practices.
   nec_interpretation_high_despite_microbiome: >-
-    The necrotising enterocolitis rate is above the reference range
+    The necrotizing enterocolitis rate is above the reference range
     despite high human milk feeding and probiotic use. Other
     contributing factors may warrant assessment.
 
   # ── NEC interpretation (cross-table context) ───────────────────────
   nec_interpretation_high_low_microbiome: >-
-    The necrotising enterocolitis rate is above the reference range
+    The necrotizing enterocolitis rate is above the reference range
     in a context where
     human milk feeding or probiotic use is below it.
     Microbiome-supportive strategies may be a relevant consideration.
@@ -472,9 +472,9 @@ outlier:
     above_is_concerning: true
     action_elevated: >-
       Strengthening lactation support, donor milk availability, or
-      feeding pathways may help reduce necrotising enterocolitis risk.
+      feeding pathways may help reduce necrotizing enterocolitis risk.
     action_elevated_narrowed: >-
-      Case mix, feeding advancement protocols, and necrotising
+      Case mix, feeding advancement protocols, and necrotizing
       enterocolitis diagnostic criteria may warrant review.
     action_elevated_secondary: >-
       Feeding protocols, probiotic administration practices, and
@@ -482,7 +482,7 @@ outlier:
     action_low: >-
       This may reflect effective feeding and protective care
       practices or case mix differences.
-    metric_label: "necrotising enterocolitis rate"
+    metric_label: "necrotizing enterocolitis rate"
     primary_paired_label: "human milk exposure"
     primary_paired_label_sc: "Human milk exposure"
     secondary_paired_label: "probiotic exposure"
@@ -671,7 +671,7 @@ outlier:
     Gram-negative infections.
   abr_gram_positive_mrsa_high: >-
     Elevated methicillin-resistant Staphylococcus aureus (MRSA)
-    rates may warrant review of screening, decolonisation, and
+    rates may warrant review of screening, decolonization, and
     contact isolation practices.
   abr_gram_positive_vre_high: >-
     Elevated vancomycin-resistant Enterococcus (VRE) rates may
@@ -714,7 +714,7 @@ tbl-resistance-test-rate:
   n_footnote: "%s: The number of pathogens in your department's infants for which the relevant resistance test result was recorded (tested positive or negative)."
   rate_footnote: "%s: The proportion of pathogens eligible for this resistance test for which a result was recorded. Eligibility is determined by the infectious agent: only pathogens where the resistance mechanism is clinically relevant are included in the denominator."
 
-tbl-antibiotic-utilisation:
+tbl-antibiotic-utilization:
   n_footnote: >-
     %s: The aggregated number of substance-days recorded in your department's
     infants.

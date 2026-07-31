@@ -1,3 +1,4 @@
+[#def-ssi-organ-space]
 .Organ/space SSI
 [%unbreakable]
 ****

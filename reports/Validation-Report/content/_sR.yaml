@@ -158,8 +158,8 @@ problems:
       date in the enrolment (%s). See @sec-problem-details-3.
   "30":
     description: >-
-      The sepsis occurred within the first two days of hospitalisation of a
-      referred or (re-)admitted patient (day of hospitalisation is %i).
+      The sepsis occurred within the first two days of hospitalization of a
+      referred or (re-)admitted patient (day of hospitalization is %i).
       See @sec-problem-details-20.
   "31":
     description: >-
@@ -176,27 +176,27 @@ problems:
       is %i). See @sec-problem-details-19.
   "34":
     description: >-
-      The pneumonia occurred within the first two days of hospitalisation of a
-      referred or (re-)admitted patient (day of hospitalisation is %i).
+      The pneumonia occurred within the first two days of hospitalization of a
+      referred or (re-)admitted patient (day of hospitalization is %i).
       See @sec-problem-details-20.
   "35":
     description: >-
-      The day of life stored in the necrotising enterocolitis form (%i) does
+      The day of life stored in the necrotizing enterocolitis form (%i) does
       not match the calculated value (%i). See @sec-problem-details-17.
   "36":
     description: >-
-      The day of occurrence after admission stored in the necrotising
+      The day of occurrence after admission stored in the necrotizing
       enterocolitis form (%i) does not match the calculated value (%i).
       See @sec-problem-details-18.
   "37":
     description: >-
-      The necrotising enterocolitis occurred within the first 3 days of life
+      The necrotizing enterocolitis occurred within the first 3 days of life
       (day of life is %i). See @sec-problem-details-19.
   "38":
     description: >-
-      The necrotising enterocolitis occurred within the first two days of
-      hospitalisation of a referred or (re-)admitted patient (day of
-      hospitalisation is %i). See @sec-problem-details-20.
+      The necrotizing enterocolitis occurred within the first two days of
+      hospitalization of a referred or (re-)admitted patient (day of
+      hospitalization is %i). See @sec-problem-details-20.
   "39":
     description: >-
       The day of life stored in the surgical procedure form (%i) does not

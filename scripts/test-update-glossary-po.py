@@ -77,7 +77,7 @@ GLOSSARY_YAML = """\
 # flags: terminology
 access: "Access"
 charite: "Charité test"
-necrotising_enterocolitis: "necrotising enterocolitis"
+necrotizing_enterocolitis: "necrotizing enterocolitis"
 """
 
 

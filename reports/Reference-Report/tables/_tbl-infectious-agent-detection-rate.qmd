@@ -35,7 +35,7 @@ tbl <- tbl_data |>
       as.character(.data$inf),
       "all" ~ sR$total,
       "bsi" ~ sR$primary_sepsis_bsi_sc,
-      "nec" ~ sR$necrotising_enterocolitis_sc,
+      "nec" ~ sR$necrotizing_enterocolitis_sc,
       "ssi" ~ sR$surgical_site_infection_sc,
       "hap" ~ sR$pneumonia_sc))
 

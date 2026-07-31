@@ -21,7 +21,7 @@ Where code and the definitions in this repository disagree, the definitions win.
 
 | Path | Contents |
 |------|----------|
-| [`doc/protocol/`](doc/protocol/) | The **NeoIPC Core Surveillance Protocol** in AsciiDoc, including the eight normative case definitions under [`definitions/`](doc/protocol/definitions/) — clinical sepsis, the two laboratory-confirmed bloodstream-infection variants, the three surgical-site-infection depths, necrotising enterocolitis and pneumonia. |
+| [`doc/protocol/`](doc/protocol/) | The **NeoIPC Core Surveillance Protocol** in AsciiDoc, including the eight normative case definitions under [`definitions/`](doc/protocol/definitions/) — clinical sepsis, the two laboratory-confirmed bloodstream-infection variants, the three surgical-site-infection depths, necrotizing enterocolitis and pneumonia. |
 | [`metadata/`](metadata/) | The **canonical DHIS2 configuration** for the `NEOIPC_CORE` tracker program — data elements, option sets, program rules, tracked-entity attributes and the organisation-unit scaffold — authored as reviewable per-type CSVs plus externalised expression files rather than one opaque JSON blob. See [`metadata/common/README.md`](metadata/common/README.md). |
 | [`metadata/common/infectious-agents/`](metadata/common/infectious-agents/) | The **NeoIPC Infectious Agent List** — a pragmatic ontology of organisms with their synonyms and phenotypic resistance categories, named from LPSN, MycoBank and ICTV. Licensed separately; see below. |
 | [`metadata/common/antibiotics/`](metadata/common/antibiotics/) | The **NeoIPC Antibiotics List** — substances, groups and WHO AWaRe categories. Licensed separately; see below. |

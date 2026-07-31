@@ -1,3 +1,4 @@
+[#def-ssi-superficial]
 .Superficial incisional SSI
 [%unbreakable]
 ****

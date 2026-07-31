@@ -36,7 +36,7 @@ tbl <- tbl_data |>
       "si" ~ sR$si,
       "bsi" ~ sR$primary_sepsis_bsi_sc,
       "hap" ~ sR$pneumonia_sc,
-      "nec" ~ sR$necrotising_enterocolitis_sc))
+      "nec" ~ sR$necrotizing_enterocolitis_sc))
 
 cw <- compute_col_widths(tbl_data, stub_min = 25)
 
@@ -115,7 +115,7 @@ gt_tbl <- gt_tbl |>
     id = "grp_si") |>
   tab_row_group(
     label = sR$other,
-    rows = tidyselect::any_of(sR$necrotising_enterocolitis_sc),
+    rows = tidyselect::any_of(sR$necrotizing_enterocolitis_sc),
     id = "grp_othr") |>
   row_group_order(groups = c("grp_si", "grp_othr")) |>
   gt::tab_stub_indent(

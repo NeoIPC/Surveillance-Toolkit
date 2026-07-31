@@ -1584,13 +1584,36 @@ compute_col_widths <- function(tbl_data, stub_min, has_reference = TRUE,
 
 if(!exists("params")) params <- list()
 
+# NEOIPC-PERMANENT(dataset-format): never remove this. A dataset serialized
+# before neoipcr renamed its antibiotic table to the -ize spelling carries
+# `antibiotic_utilisation_table`, and nothing errors on the old name — the
+# field is simply absent under the new one, so the table is dropped as "no
+# data" and the metric registry never classifies it. Silently.
+#
+# This is not a transitional shim and must not be grouped with one. A file on
+# disk outlives every deployment of this code, and no one can establish that
+# the last dataset predating the rename has been read for the last time — so
+# there is no condition that retires this, and deleting it would break reports
+# that render correctly today. Both file parameters deserialize, and both
+# `neoipcr_rep_ds` and `neoipcr_bnch_ds` carry the field, so every object read
+# from disk passes through here once, before anything looks at it.
+rename_legacy_antibiotic_table <- function(ds) {
+  if (is.null(ds) || is.null(ds$antibiotic_utilisation_table)) return(ds)
+  if (is.null(ds$antibiotic_utilization_table))
+    ds$antibiotic_utilization_table <- ds$antibiotic_utilisation_table
+  ds$antibiotic_utilisation_table <- NULL
+  logInfo("Dataset predates the antibiotic-table rename; reading it as ",
+          "'antibiotic_utilization_table'.")
+  ds
+}
+
 if (!is.null(params$referenceDataFile)) {
   if (!file.exists(params$referenceDataFile))
     stop(sprintf("The file '%s' does not exist.", params$referenceDataFile))
-  reference_data <- jsonlite::unserializeJSON(
+  reference_data <- rename_legacy_antibiotic_table(jsonlite::unserializeJSON(
     readChar(
         params$referenceDataFile,
-        file.info(params$referenceDataFile)$size))
+        file.info(params$referenceDataFile)$size)))
 } else {
   reference_data <- NULL
 }
@@ -1611,9 +1634,9 @@ typedParams <- list(
 if (!is.null(params$partnerDataFile)) {
   if (!file.exists(params$partnerDataFile))
     stop(sprintf("The file '%s' does not exist.", params$partnerDataFile))
-  partner_data <- jsonlite::unserializeJSON(
+  partner_data <- rename_legacy_antibiotic_table(jsonlite::unserializeJSON(
     readChar(params$partnerDataFile,
-             file.info(params$partnerDataFile)$size))
+             file.info(params$partnerDataFile)$size)))
 
   if (inherits(partner_data, "neoipcr_bnch_ds")) {
     if (!is.null(reference_data))
@@ -1683,7 +1706,7 @@ if (!is.null(params$partnerDataFile)) {
 # Tables needing non-default args for row identification
 metric_classify_args <- list(
   usage_density_rate_table = list(identifier_col = "factor"),
-  antibiotic_utilisation_table = list(identifier_col = "row_id"),
+  antibiotic_utilization_table = list(identifier_col = "row_id"),
   infectious_agent_detection_rate_per_agent_table = list(identifier_col = "group"),
   abr_infection_rate_table = list(combine_cols = c("abr", "group")),
   resistance_test_rate_table = list(combine_cols = c("abr", "cond"))

@@ -31,8 +31,8 @@
 #
 # Naming convention:
 #   base key    = AMA canonical (lowercase)
-#   key_sc      = Sentence case (first word capitalised)
-#   key_tc      = Title case (all major words capitalised)
+#   key_sc      = Sentence case (first word capitalized)
+#   key_tc      = Title case (all major words capitalized)
 #   key_plural  = Plural form
 #   Suffixes can combine in principle, but NOT key_plural_tc / key_plural_sc — the generator refuses
 #     them, because pairing cannot keep a cased plural apart from the uncased one. See Plurals above.
@@ -50,6 +50,9 @@
 # Variant grouping is handled by the Weblate component's variant_regex
 # setting: _(tc|sc|plural|plural_tc|plural_sc)$
 
+# Resistance category: third-generation cephalosporin resistance.
+# flags: terminology
+3gcr: "3GCR"
 # WHO AWaRe antibiotic category. The official WHO translation is normative: Spanish "Acceso", per the
 # WHO AWaRe antibiotic book. Do not invent a local rendering.
 # flags: terminology
@@ -61,24 +64,53 @@ antibiotics_sc: Antibiotics
 # AWaRe is a WHO acronym (Access, Watch, Reserve) — not translatable
 # flags: read-only, terminology
 aware: "AWaRe"
+# Bloodstream infection.
+# flags: terminology
+bsi: "BSI"
+# Birthweight.
+# flags: terminology
+bw: "BW"
+# Resistance category: carbapenem resistance.
+# flags: terminology
+carbr: "CARBR"
+# Resistance category: colistin resistance.
+# flags: terminology
+colr: "COLR"
 cvc: CVC
+# Resistance mechanism: extended-spectrum beta-lactamase. Underlies 3GCR rather than being a category
+# of its own.
+# flags: terminology
+esbl: ESBL
+# Gestational age.
+# flags: terminology
+ga: "GA"
 h2020_funding_statement: >-
   This project has received funding from the European Union's Horizon 2020
   research and innovation programme under grant agreement No 965328.
 hap: HAP
 human_milk: "human milk"
 human_milk_sc: "Human milk"
+# International Classification of Health Interventions, the WHO classification the surgical procedure
+# codes come from.
+# flags: terminology
+ichi: "ICHI"
 inv: INV
 kangaroo_care: "kangaroo care"
 kangaroo_care_sc: "Kangaroo care"
+# Laboratory-confirmed bloodstream infection.
+# flags: terminology
+lcbsi: "LCBSI"
+# Resistance category: methicillin-resistant Staphylococcus aureus.
+# flags: terminology
+mrsa: "MRSA"
 # An initialism, so most languages keep it verbatim; suppress the unchanged-translation check rather
 # than have every language answer it. Declared here because a flag set on a catalogue does not survive
 # msgmerge — gettext models no custom flags, so only the template's are restored.
 # flags: ignore-same
 nec: NEC
-necrotising_enterocolitis: "necrotising enterocolitis"
-necrotising_enterocolitis_sc: "Necrotising enterocolitis"
-necrotising_enterocolitis_tc: "Necrotising Enterocolitis"
+necrotizing_enterocolitis: "necrotizing enterocolitis"
+necrotizing_enterocolitis_sc: "Necrotizing enterocolitis"
+necrotizing_enterocolitis_tc: "Necrotizing Enterocolitis"
 # flags: ignore-same
 neoipc_surveillance: "NeoIPC Surveillance"
 niv: NIV
@@ -107,6 +139,9 @@ surveillance_sc: Surveillance
 surveillance_end: "surveillance end"
 surveillance_end_sc: "Surveillance end"
 surveillance_end_tc: "Surveillance End"
+# Resistance category: vancomycin-resistant Enterococcus.
+# flags: terminology
+vre: "VRE"
 # WHO AWaRe antibiotic category. The official WHO translation is normative: Spanish "Precaución", per
 # the WHO AWaRe antibiotic book — NOT "Vigilancia", which this project uses for "surveillance" and
 # would therefore collide, and not the bare verb "Ver". Italian is deliberately left untranslated

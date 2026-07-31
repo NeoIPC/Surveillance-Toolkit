@@ -1,10 +1,10 @@
-Damit alle Partner ihre Entscheidungen auf eine valide Datengrundlage stellen können, streben wir eine möglichst hohe Datenqualität für die Einzelauswertungen und Referenzberichte der NeoIPC-Surveillance an.
-Wo immer möglich, versuchen wir, die Validität der Daten bereits bei der Eingabe zu überprüfen und gegebenenfalls den Eingebenden zur Korrektur aufzufordern.
-Leider kann unsere Surveillance-Plattform nicht alle möglichen Probleme bereits bei der Eingabe erkennen.
-In regelmäßigen Abständen, insbesondere vor der Erstellung von Referenzberichten, versuchen wir daher, diese Probleme durch spezielle Datenbankabfragen zu identifizieren, in diesem Bericht zusammenzufassen und mit der Bitte um Korrektur an unsere Partner zu versenden.
-Um die Korrektur so effizient wie möglich zu gestalten, enthält der Bericht in @sec-problems für jede Patientenakte, in der ein Problem erkannt wurde, einen Link, der direkt zum Tracked Entity Instance Dashboard der betreffenden Patientenakte führt.
-Darüber hinaus werden in @sec-problem-details die aufgetretenen Probleme detailliert beschrieben, so dass Sie die möglichen Auswirkungen und Wege zur zukünftigen Vermeidung des Problems verstehen können.
-In @sec-solutions haben wir auch die verschiedenen Schritte dargestellt, die zur Lösung des Problems unternommen werden können.
+To ensure that all partners can base their decisions on valid data, we strive for the highest possible data quality for the individual analyses and reference reports of the NeoIPC surveillance.
+Wherever possible, we try to check the validity of the data as soon as it is entered and, if necessary, ask the person entering the data to make corrections.
+Unfortunately, our surveillance platform cannot recognize all possible problems at the time of entry.
+At regular intervals, especially before reference reports are created, we therefore try to identify these problems using special database queries, summarize them in this report and send it to our partners with a request for correction.
+To make the correction as efficient as possible, the report in @sec-problems contains a link for each patient record in which a problem has been identified, which leads directly to the Tracked Entity Instance Dashboard of the patient record in question.
+In addition, @sec-problem-details details the issues encountered so that you can understand the potential impact and ways to avoid the problem in the future.
+In @sec-solutions we have also outlined the various steps that can be taken to resolve the issue.
 
 ::: {.callout-warning}
 ## Auf Links in per E-Mail erhaltenen Dokumenten klicken
