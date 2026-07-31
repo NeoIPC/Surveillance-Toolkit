@@ -43,8 +43,8 @@ tbl <- tbl_data |>
       "other" ~ sR$other,
       "not_surgery" ~ sR$`tbl-surgical-procedure-rates`$not_surgery,
       "to_be_categorized" ~ sR$`tbl-surgical-procedure-rates`$to_be_categorized,
-      # NEOIPC-COMPAT(category-spelling): see the Partner Report's copy of this
-      # table for the reasoning.
+      # NEOIPC-PERMANENT(dataset-format): never remove this — see the Partner
+      # Report's copy of this table for the reasoning.
       "to_be_categorised" ~ sR$`tbl-surgical-procedure-rates`$to_be_categorized))
 
 cw <- compute_col_widths(tbl_data, stub_min = 30)

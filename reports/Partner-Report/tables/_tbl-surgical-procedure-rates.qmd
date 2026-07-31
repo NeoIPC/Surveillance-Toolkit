@@ -87,10 +87,11 @@ if (has_data) {
         "other" ~ sR$other,
         "not_surgery" ~ sR$`tbl-surgical-procedure-rates`$not_surgery,
         "to_be_categorized" ~ sR$`tbl-surgical-procedure-rates`$to_be_categorized,
-        # NEOIPC-COMPAT(category-spelling): neoipcr emitted the -ise form of
-        # this procedure-category code before the house spelling settled on
-        # -ize, so a dataset computed by an older neoipcr still carries it.
-        # Remove once no reachable dataset predates that rename.
+        # NEOIPC-PERMANENT(dataset-format): never remove this. `pro_cat` is a
+        # column of `surgery_rate_table`, which arrives inside a dataset that
+        # may have been serialized before the category code took its -ize
+        # spelling. A file on disk outlives the code, so no condition retires
+        # this; dropping the older code would leave those rows unlabelled.
         "to_be_categorised" ~ sR$`tbl-surgical-procedure-rates`$to_be_categorized)) |>
     gt(rowname_col = "pro_cat") |>
     sub_missing() |>

@@ -1584,14 +1584,19 @@ compute_col_widths <- function(tbl_data, stub_min, has_reference = TRUE,
 
 if(!exists("params")) params <- list()
 
-# NEOIPC-COMPAT(antibiotic-table-field): a dataset serialized before neoipcr
-# renamed its antibiotic table to the -ize spelling still carries
-# `antibiotic_utilisation_table`. Nothing errors on the old name — the field is
-# simply absent under the new one, so the table would be dropped as "no data"
-# and the metric registry would never classify it, silently. Both the reference
-# and the partner file are read from disk and can predate the rename, and both
-# `neoipcr_rep_ds` and `neoipcr_bnch_ds` carry the field, so every deserialized
-# object goes through here. Remove once no serialized dataset predates it.
+# NEOIPC-PERMANENT(dataset-format): never remove this. A dataset serialized
+# before neoipcr renamed its antibiotic table to the -ize spelling carries
+# `antibiotic_utilisation_table`, and nothing errors on the old name — the
+# field is simply absent under the new one, so the table is dropped as "no
+# data" and the metric registry never classifies it. Silently.
+#
+# This is not a transitional shim and must not be grouped with one. A file on
+# disk outlives every deployment of this code, and no one can establish that
+# the last dataset predating the rename has been read for the last time — so
+# there is no condition that retires this, and deleting it would break reports
+# that render correctly today. Both file parameters deserialize, and both
+# `neoipcr_rep_ds` and `neoipcr_bnch_ds` carry the field, so every object read
+# from disk passes through here once, before anything looks at it.
 rename_legacy_antibiotic_table <- function(ds) {
   if (is.null(ds) || is.null(ds$antibiotic_utilisation_table)) return(ds)
   if (is.null(ds$antibiotic_utilization_table))
