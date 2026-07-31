@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-07-31 20:31+0200\n"
+"POT-Creation-Date: 2026-07-31 20:35+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Language-Team: none\n"
 "Language: en\n"
@@ -1003,13 +1003,13 @@ msgstr ""
 msgid "Organism-specific resistance rates"
 msgstr ""
 
-#. type: Hash Value: tbl-resistance-test-rate car_if_3gcr
+#. type: Hash Value: tbl-resistance-test-rate carbr_if_3gcr
 #: reports/common.yaml:1
 #, no-wrap
 msgid "in case of 3GCR"
 msgstr ""
 
-#. type: Hash Value: tbl-resistance-test-rate cor_if_3gcr_and_car
+#. type: Hash Value: tbl-resistance-test-rate colr_if_3gcr_and_carbr
 #: reports/common.yaml:1
 #, no-wrap
 msgid "in case of 3GCR and CARBR"

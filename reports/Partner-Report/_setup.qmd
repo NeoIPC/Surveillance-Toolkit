@@ -1098,8 +1098,8 @@ localize_metric_name <- function(metric_id, sR, table_name = NULL) {
       }
       # Known testing conditions → parenthesized qualifier
       condition_map <- list(
-        if_3gcr = "car_if_3gcr",
-        "if_3gcr&car" = "cor_if_3gcr_and_car"
+        if_3gcr = "carbr_if_3gcr",
+        "if_3gcr&car" = "colr_if_3gcr_and_carbr"
       )
       cond_sR_key <- condition_map[[condition_key]]
       if (!is.null(cond_sR_key) &&

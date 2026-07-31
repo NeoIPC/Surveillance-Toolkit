@@ -78,12 +78,12 @@ if (!is.null(benchmark_data$resistance_test_rate_table) &&
         "car_routine" ~ sR$carbr_label,
         "car_if_3gcr" ~ paste0(
           "\\- ",
-          sR$`tbl-resistance-test-rate`$car_if_3gcr,
+          sR$`tbl-resistance-test-rate`$carbr_if_3gcr,
           collapse = ""),
         "cor_routine" ~ sR$colr_label,
         "cor_if_3gcr&car" ~ paste0(
           "\\- ",
-          sR$`tbl-resistance-test-rate`$cor_if_3gcr_and_car,
+          sR$`tbl-resistance-test-rate`$colr_if_3gcr_and_carbr,
           collapse = ""),
         "mrsa_routine" ~ sR$mrsa_label,
         "vre_routine" ~ sR$vre_label),

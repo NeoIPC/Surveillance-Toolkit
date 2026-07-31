@@ -193,8 +193,8 @@ tbl-infectious-agent-detection-rate:
   rate_numerator: "No of infections with agent"
   tbl-cap: "Infections in which an infectious agent has been identified, including secondary BSI following the infection."
 tbl-resistance-test-rate:
-  car_if_3gcr: "in case of 3GCR"
-  cor_if_3gcr_and_car: "in case of 3GCR and CARBR"
+  carbr_if_3gcr: "in case of 3GCR"
+  colr_if_3gcr_and_carbr: "in case of 3GCR and CARBR"
   n_footnote: "%s: The aggregated number of antibiotic resistant pathogens that have a documented test for antibiotic resistance."
   no_data: "No antibiotic resistance diagnostics data available for these report settings."
   pooled_footnote: "%s: The antibiotic resistance test rate calculated across all infants from all departments."
