@@ -14,6 +14,14 @@
 #             actually established by testing.
 
 neoipcr:
+  # RAISE BOTH AT THE NEXT neoipcr RELEASE. The reports call
+  # `neoipcr::get_antibiotic_utilization_table()` and read the
+  # `antibiotic_utilization_table` field, which exist only from the commit that
+  # renamed them off the `-ise` spelling. No released tag carries them yet, so
+  # no floor can name one and `minimum` below is the last version that could be
+  # declared rather than the one the code actually needs — it is a placeholder,
+  # not a measurement. The CI gate checks only that the declared tag *exists*;
+  # nothing detects a floor that is too low, so this comment is the mechanism.
   tested: v0.0.0.9000
   minimum: v0.0.0.9000
 
