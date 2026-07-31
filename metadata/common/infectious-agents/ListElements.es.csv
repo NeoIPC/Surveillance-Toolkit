@@ -16,7 +16,7 @@ fungal_species_complex,VALUE,t,Fungal species complex,Complejo de especies de ho
 fungal_variety,VALUE,t,Fungal variety,Variedad de hongos
 mrsa,VALUE,t,MRSA,SARM
 name,VALUE,t,Name,Nombre
-recognised_pathogen,VALUE,t,Recognised pathogen,Patógeno reconocido
+recognized_pathogen,VALUE,t,Recognized pathogen,Patógeno reconocido
 recorded_resistances,VALUE,t,Recorded Resistances,Resistencias registradas
 synonym_for,VALUE,t,synonym for,sinónimo de
 type,VALUE,t,Type,Tipo

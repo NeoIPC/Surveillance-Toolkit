@@ -28,7 +28,7 @@ benchmarking_guidance: >-
   burden across the network.
 headings:
   presence_of_risk_and_protective_factors: Presence of Risk and Protective Factors
-tbl-antibiotic-utilisation:
+tbl-antibiotic-utilization:
   n_footnote: >-
     %s: The aggregated number of substance-days recorded in all infants.
 tbl-risk-density-rates:

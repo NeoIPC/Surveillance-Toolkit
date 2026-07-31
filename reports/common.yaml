@@ -44,7 +44,7 @@ gramm_abbreviation: "g"
 header:
   department: Department
 headings:
-  antibiotic_utilisation: Antibiotic Utilization
+  antibiotic_utilization: Antibiotic Utilization
   antimicrobial_susceptibility_testing: Antimicrobial Susceptibility Testing
   detection_of_infectious_agents: Detection of Infectious Agents
   device_associated_infections: Device-Associated Infections
@@ -117,7 +117,7 @@ tbl-abr-infection-rate:
   rate_name: "Resistant pathogen infection rate"
   rate_numerator: "Number of antibiotic resistant pathogens in infections"
   tbl-cap: "Nosocomial infections with resistant pathogens"
-tbl-antibiotic-utilisation:
+tbl-antibiotic-utilization:
   aware_column_footnote: >-
     WHO AWaRe classification (Access, Watch, Reserve). See %s.
   atc_footnote: >-
@@ -243,7 +243,7 @@ tbl-surgical-procedure-rates:
   rate_name: "Surgical Procedure Rate"
   rate_numerator: "No of procedures"
   tbl-cap: "Surgical procedures by category"
-  to_be_categorised: "Not yet categorized"
+  to_be_categorized: "Not yet categorized"
 total: "Total"
 unit_separator: " "
 methods:
@@ -288,7 +288,7 @@ methods:
     The figures show both the frequency distribution (histogram with density
     curve) and summary statistics (boxplot with quartiles and pooled arithmetic
     mean).
-  antibiotic_utilisation: >-
+  antibiotic_utilization: >-
     Antibiotic utilization is reported per individual substance, grouped by ATC
     pharmacological subgroup. The exposure density rate measures substance-days
     per 100 patient-days. Antibiotic days are counted from the first dose to the

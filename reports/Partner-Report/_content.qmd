@@ -385,7 +385,7 @@ include_localised("_risk-factors.Rmd")
 .show(params$includeAntibioticUtilisationTable)
 ```
 
-{{< include tables/_tbl-antibiotic-utilisation.qmd >}}
+{{< include tables/_tbl-antibiotic-utilization.qmd >}}
 
 {{< pagebreak >}}
 

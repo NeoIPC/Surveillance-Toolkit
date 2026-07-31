@@ -714,7 +714,7 @@ tbl-resistance-test-rate:
   n_footnote: "%s: The number of pathogens in your department's infants for which the relevant resistance test result was recorded (tested positive or negative)."
   rate_footnote: "%s: The proportion of pathogens eligible for this resistance test for which a result was recorded. Eligibility is determined by the infectious agent: only pathogens where the resistance mechanism is clinically relevant are included in the denominator."
 
-tbl-antibiotic-utilisation:
+tbl-antibiotic-utilization:
   n_footnote: >-
     %s: The aggregated number of substance-days recorded in your department's
     infants.

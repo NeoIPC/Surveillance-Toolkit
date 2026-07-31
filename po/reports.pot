@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-07-31 16:07+0200\n"
+"POT-Creation-Date: 2026-07-31 16:32+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Language-Team: none\n"
 "Language: en\n"
@@ -283,7 +283,7 @@ msgstr ""
 msgid "Sum of patient days"
 msgstr ""
 
-#. type: Hash Value: headings antibiotic_utilisation
+#. type: Hash Value: headings antibiotic_utilization
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Antibiotic Utilization"
@@ -385,7 +385,7 @@ msgstr ""
 msgid "The agent-per-infection rate measures how frequently specific pathogens are detected relative to the number of infections in which any infectious agent was identified. Values above 100% are expected and indicate polymicrobial infections. Diagnostic challenges specific to neonates — including low blood volume reducing culture sensitivity and elevated contamination risk — may influence detection patterns."
 msgstr ""
 
-#. type: Hash Value: methods antibiotic_utilisation
+#. type: Hash Value: methods antibiotic_utilization
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Antibiotic utilization is reported per individual substance, grouped by ATC pharmacological subgroup. The exposure density rate measures substance-days per 100 patient-days. Antibiotic days are counted from the first dose to the last dose of a therapy inclusive. Each substance is counted separately; a patient receiving two antibiotics on the same day contributes one day to each substance's tally. Because of combination therapy, the sum of individual substance rates can exceed the total antibiotic exposure rate shown in the risk and protective factors table."
@@ -709,55 +709,55 @@ msgstr ""
 msgid "Infectious agents detected in nosocomial infections"
 msgstr ""
 
-#. type: Hash Value: tbl-antibiotic-utilisation atc_footnote
+#. type: Hash Value: tbl-antibiotic-utilization atc_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "ATC: Anatomical Therapeutic Chemical classification (WHO). Substances are grouped by pharmacological subgroup (ATC 5th level). See %s for details."
 msgstr ""
 
-#. type: Hash Value: tbl-antibiotic-utilisation aware_column_footnote
+#. type: Hash Value: tbl-antibiotic-utilization aware_column_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "WHO AWaRe classification (Access, Watch, Reserve). See %s."
 msgstr ""
 
-#. type: Hash Value: tbl-antibiotic-utilisation exposure_density_rate
+#. type: Hash Value: tbl-antibiotic-utilization exposure_density_rate
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Antibiotic Exposure Density Rate"
 msgstr ""
 
-#. type: Hash Value: tbl-antibiotic-utilisation n_footnote
+#. type: Hash Value: tbl-antibiotic-utilization n_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The aggregated number of substance-days recorded across all infants."
 msgstr ""
 
-#. type: Hash Value: tbl-antibiotic-utilisation no_data
+#. type: Hash Value: tbl-antibiotic-utilization no_data
 #: reports/common.yaml:1
 #, no-wrap
 msgid "No antibiotic utilization data available for this report settings."
 msgstr ""
 
-#. type: Hash Value: tbl-antibiotic-utilisation pooled_footnote
+#. type: Hash Value: tbl-antibiotic-utilization pooled_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s: The Antibiotic Exposure Density Rate calculated across all infants from all departments in the reference data."
 msgstr ""
 
-#. type: Hash Value: tbl-antibiotic-utilisation quartile_footnote
+#. type: Hash Value: tbl-antibiotic-utilization quartile_footnote
 #: reports/common.yaml:1
 #, no-wrap
 msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Antibiotic Exposure Density Rates of the departments in the reference data. Q₂ represents the median. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of substance-days is greater than or equal to one according to the pooled rate."
 msgstr ""
 
-#. type: Hash Value: tbl-antibiotic-utilisation substance_days
+#. type: Hash Value: tbl-antibiotic-utilization substance_days
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Substance-days"
 msgstr ""
 
-#. type: Hash Value: tbl-antibiotic-utilisation tbl-cap
+#. type: Hash Value: tbl-antibiotic-utilization tbl-cap
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Antibiotic utilization by pharmacological subgroup and substance"
@@ -1285,7 +1285,7 @@ msgstr ""
 msgid "Surgical procedures by category"
 msgstr ""
 
-#. type: Hash Value: tbl-surgical-procedure-rates to_be_categorised
+#. type: Hash Value: tbl-surgical-procedure-rates to_be_categorized
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Not yet categorized"
@@ -2473,13 +2473,13 @@ msgstr ""
 msgid "%s: The percentage of infections in your department where this infectious agent was detected."
 msgstr ""
 
-#. type: Hash Value: tbl-antibiotic-utilisation n_footnote
+#. type: Hash Value: tbl-antibiotic-utilization n_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "%s: The aggregated number of substance-days recorded in your department's infants."
 msgstr ""
 
-#. type: Hash Value: tbl-antibiotic-utilisation rate_footnote
+#. type: Hash Value: tbl-antibiotic-utilization rate_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "%s: The Antibiotic Exposure Density Rate calculated for your department's infants."
@@ -2702,9 +2702,9 @@ msgid "Antimicrobial susceptibility testing (AST) is fundamental to both individ
 msgstr ""
 
 #. type: Plain text
-#: reports/Partner-Report/content/_tbl-intro-antibiotic-utilisation.Rmd:1
+#: reports/Partner-Report/content/_tbl-intro-antibiotic-utilization.Rmd:1
 #, markdown-text, no-wrap
-msgid "@tbl-antibiotic-utilisation details antibiotic exposure at the level of individual substances, grouped by ATC pharmacological subgroup. Bold rows show the aggregated rate for each subgroup; indented rows show the rate for each substance within that subgroup. Comparing substance-level patterns with the reference data can help identify opportunities for antibiotic stewardship.\n"
+msgid "@tbl-antibiotic-utilization details antibiotic exposure at the level of individual substances, grouped by ATC pharmacological subgroup. Bold rows show the aggregated rate for each subgroup; indented rows show the rate for each substance within that subgroup. Comparing substance-level patterns with the reference data can help identify opportunities for antibiotic stewardship.\n"
 msgstr ""
 
 #. type: Plain text
@@ -2720,10 +2720,10 @@ msgid "@tbl-surgical-procedure-rates presents rates of various surgical procedur
 msgstr ""
 
 #. type: Plain text
-#: reports/Partner-Report/content/_methods-antibiotic-utilisation.Rmd:1
-#: reports/Reference-Report/content/_methods-antibiotic-utilisation.Rmd:1
+#: reports/Partner-Report/content/_methods-antibiotic-utilization.Rmd:1
+#: reports/Reference-Report/content/_methods-antibiotic-utilization.Rmd:1
 #, markdown-text, no-wrap
-msgid "`r sR$methods$antibiotic_utilisation`\n"
+msgid "`r sR$methods$antibiotic_utilization`\n"
 msgstr ""
 
 #. type: Plain text
@@ -3212,7 +3212,7 @@ msgstr ""
 msgid "Presence of Risk and Protective Factors"
 msgstr ""
 
-#. type: Hash Value: tbl-antibiotic-utilisation n_footnote
+#. type: Hash Value: tbl-antibiotic-utilization n_footnote
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "%s: The aggregated number of substance-days recorded in all infants."

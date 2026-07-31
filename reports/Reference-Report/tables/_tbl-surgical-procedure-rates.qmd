@@ -42,7 +42,7 @@ tbl <- tbl_data |>
       "oesophageal_surgery" ~ sR$`tbl-surgical-procedure-rates`$oesophageal_surgery,
       "other" ~ sR$other,
       "not_surgery" ~ sR$`tbl-surgical-procedure-rates`$not_surgery,
-      "to_be_categorised" ~ sR$`tbl-surgical-procedure-rates`$to_be_categorised))
+      "to_be_categorised" ~ sR$`tbl-surgical-procedure-rates`$to_be_categorized))
 
 cw <- compute_col_widths(tbl_data, stub_min = 30)
 

@@ -540,7 +540,7 @@ function New-PathogenList {
     }
 
     $commonCommensalString = $listElements['common_commensal']
-    $recognisedPathogenString = $listElements['recognised_pathogen']
+    $recognizedPathogenString = $listElements['recognized_pathogen']
     $MRSAString = $listElements['mrsa']
     $VREString = $listElements['vre']
     $3GCRString = $listElements['3gcr']
@@ -614,7 +614,7 @@ function New-PathogenList {
         if ($infectiousAgentConcept.is_cc -ceq 't') {
             $pathogenicity = $commonCommensalString
         } elseif ($infectiousAgentConcept.is_cc -ceq 'f') {
-            $pathogenicity = $recognisedPathogenString
+            $pathogenicity = $recognizedPathogenString
         }  else {
             throw "Unexpected boolen value '$($infectiousAgentConcept.is_cc)' in line $lineNo file '$infectiousAgentConceptsFile'."
         }
