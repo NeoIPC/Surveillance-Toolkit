@@ -1683,7 +1683,7 @@ if (!is.null(params$partnerDataFile)) {
 # Tables needing non-default args for row identification
 metric_classify_args <- list(
   usage_density_rate_table = list(identifier_col = "factor"),
-  antibiotic_utilisation_table = list(identifier_col = "row_id"),
+  antibiotic_utilization_table = list(identifier_col = "row_id"),
   infectious_agent_detection_rate_per_agent_table = list(identifier_col = "group"),
   abr_infection_rate_table = list(combine_cols = c("abr", "group")),
   resistance_test_rate_table = list(combine_cols = c("abr", "cond"))

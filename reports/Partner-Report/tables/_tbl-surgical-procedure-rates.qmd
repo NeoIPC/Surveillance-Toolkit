@@ -86,6 +86,11 @@ if (has_data) {
         "oesophageal_surgery" ~ sR$`tbl-surgical-procedure-rates`$oesophageal_surgery,
         "other" ~ sR$other,
         "not_surgery" ~ sR$`tbl-surgical-procedure-rates`$not_surgery,
+        "to_be_categorized" ~ sR$`tbl-surgical-procedure-rates`$to_be_categorized,
+        # NEOIPC-COMPAT(category-spelling): neoipcr emitted the -ise form of
+        # this procedure-category code before the house spelling settled on
+        # -ize, so a dataset computed by an older neoipcr still carries it.
+        # Remove once no reachable dataset predates that rename.
         "to_be_categorised" ~ sR$`tbl-surgical-procedure-rates`$to_be_categorized)) |>
     gt(rowname_col = "pro_cat") |>
     sub_missing() |>

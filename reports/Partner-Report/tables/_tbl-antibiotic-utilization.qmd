@@ -37,12 +37,12 @@ include_localised("_methods-antibiotic-utilisation.Rmd")
 #| tbl-cap-location: top
 
 # Conditionally render table only if department data exists
-if (!is.null(benchmark_data$antibiotic_utilisation_table) &&
-    sum(benchmark_data$antibiotic_utilisation_table$n_own, na.rm = TRUE) > 0) {
+if (!is.null(benchmark_data$antibiotic_utilization_table) &&
+    sum(benchmark_data$antibiotic_utilization_table$n_own, na.rm = TRUE) > 0) {
 
-  has_reference <- "pooled_ref" %in% names(benchmark_data$antibiotic_utilisation_table)
+  has_reference <- "pooled_ref" %in% names(benchmark_data$antibiotic_utilization_table)
 
-  tbl_data <- benchmark_data$antibiotic_utilisation_table
+  tbl_data <- benchmark_data$antibiotic_utilization_table
 
   # Map AWaRe factor to inline badge (HTML) or letter (PDF)
   aware_colors <- c(A = "#6eb43d", W = "#fddf01", R = "#ee2d24")
@@ -319,12 +319,12 @@ if (!is.null(benchmark_data$antibiotic_utilisation_table) &&
 ```{r}
 #| output: asis
 if (exists("has_reference") && has_reference &&
-    !is.null(benchmark_data$antibiotic_utilisation_table)) {
+    !is.null(benchmark_data$antibiotic_utilization_table)) {
   # ATC5-level outlier interpretation using metric_registry
-  states <- metric_registry$antibiotic_utilisation_table
+  states <- metric_registry$antibiotic_utilization_table
   if (!is.null(states) && has_outliers(states)) {
     # Filter to ATC5 rows only
-    atc5_rows <- benchmark_data$antibiotic_utilisation_table |>
+    atc5_rows <- benchmark_data$antibiotic_utilization_table |>
       dplyr::filter(.data$row_type == "atc5")
     atc5_states <- states[names(states) %in% atc5_rows$row_id]
 

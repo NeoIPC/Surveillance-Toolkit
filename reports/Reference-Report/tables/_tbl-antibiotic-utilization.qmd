@@ -21,7 +21,7 @@ include_localised("_methods-antibiotic-utilisation.Rmd")
 #| tbl-cap-location: top
 
 tbl_data <- reference_data |>
-  neoipcr::get_antibiotic_utilisation_table()
+  neoipcr::get_antibiotic_utilization_table()
 
 if (nrow(tbl_data) > 0 && sum(tbl_data$n, na.rm = TRUE) > 0) {
 
