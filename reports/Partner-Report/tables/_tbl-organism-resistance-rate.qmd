@@ -84,10 +84,10 @@ if (!is.null(benchmark_data$organism_resistance_rate_table) &&
       abr = dplyr::recode_values(
         .data$abr,
         "3gcr" ~ "3gcr",
-        "car" ~ sR$car,
-        "cor" ~ sR$cor,
-        "mrsa" ~ sR$mrsa,
-        "vre" ~ sR$vre),
+        "car" ~ sR$carbr_label,
+        "cor" ~ sR$colr_label,
+        "mrsa" ~ sR$mrsa_label,
+        "vre" ~ sR$vre_label),
       level = .data$level + 2) |>
     dplyr::group_by(.data$abr) |>
     gt(rowname_col = "group") |>
@@ -117,7 +117,7 @@ if (!is.null(benchmark_data$organism_resistance_rate_table) &&
       indent = gt::from_column(column = "level")
     ) |>
     tab_row_group(
-      label = gt::md(sR$`3gcr`),
+      label = gt::md(sR$`3gcr_label`),
       rows = abr == "3gcr"
     ) |>
     tab_style(

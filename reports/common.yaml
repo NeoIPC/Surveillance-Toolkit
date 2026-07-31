@@ -9,9 +9,9 @@
 #
 # Language: en
 
-3gcr: "3^rd^ gen. cephalosporin resistance (3GCR)"
-car: "Carbapenem resistance (CARBR)"
-cor: "Colistin resistance (COLR)"
+3gcr_label: "3^rd^ gen. cephalosporin resistance (3GCR)"
+carbr_label: "Carbapenem resistance (CARBR)"
+colr_label: "Colistin resistance (COLR)"
 countryNames:
   Estonia: Estonia
   Germany: Germany
@@ -82,7 +82,7 @@ headerList:
   specialAnalysisHint: "This is a special analysis that"
   admissionsExceedRecordsNote: "Admissions may exceed records when a patient had more than one admission episode during the surveillance period"
   sumOfPatientDays: Sum of patient days
-mrsa: "Methicillin-resistant Staphylococcus aureus (MRSA)"
+mrsa_label: "Methicillin-resistant Staphylococcus aureus (MRSA)"
 no_data: No data.
 not_available: Not available.
 other: Other
@@ -369,7 +369,7 @@ methods:
   surgical_procedures: >-
     Surgical procedure rates are calculated per 100 patients, not per 1,000
     patient-days. One patient may contribute multiple procedures.
-vre: "Vancomycin-resistant Enterococcus (VRE)"
+vre_label: "Vancomycin-resistant Enterococcus (VRE)"
 week_abbreviation: "w"
 worldBankClassNames:
   H: High income

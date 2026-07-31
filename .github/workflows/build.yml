@@ -184,6 +184,40 @@ jobs:
                 fi
                 echo "No Weblate-owned catalogue was modified outside Weblate."
 
+    po-placeholders:
+        # Placeholder integrity between each msgid and its msgstr: printf tokens, inline R spans, Quarto
+        # cross-references, .NET-style placeholders and LaTeX text markers. Two of those Weblate's own
+        # server-side checks cannot express, which is why this stays a repository gate rather than being
+        # retired into component flags — the CONTENT of an inline R span (a translation that rewrites a
+        # variable name inside `r ...` keeps the token count, passes every Weblate check, and feeds a
+        # different expression to the renderer), and count parity wherever Weblate compares sets, which a
+        # partial drop survives. Which checks Weblate does cover is measured per catalogue in
+        # docs/weblate-checks-adoption.md.
+        #
+        # Its own job for the same reason text-hygiene is one: a finding names the catalogue and line
+        # rather than being buried in a render log, and it reports without waiting on the toolchain setup.
+        #
+        # REPORT-ONLY, deliberately and temporarily. The committed catalogues already carry violations,
+        # and every one of them sits inside a Weblate-owned .po that the ownership gate above forbids
+        # changing here — so a blocking gate today would fail every pull request over defects that can
+        # only be fixed through Weblate. This makes them visible on every run until they are; dropping
+        # -ReportOnly is the whole of the change that makes it blocking.
+        runs-on: ubuntu-26.04
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                # Reads the committed catalogues only; no submodule and no toolchain are involved.
+                submodules: false
+
+            - name: Check placeholder integrity between source and translations
+              shell: pwsh
+              # -ReportOnly rather than the step's own continue-on-error, and the difference is the point:
+              # continue-on-error swallows EVERY non-zero exit, including the one this script raises when
+              # it matched no files at all. That would be a gate reporting success having inspected
+              # nothing — the failure shape this repository has already been bitten by. The switch waives
+              # the violation count; a run that could not inspect anything still fails.
+              run: ./scripts/Test-PoPlaceholders.ps1 -ReportOnly
+
     build-docs:
         # Pinned to an explicit image for reproducibility; 26.04 provides the .NET 10 / PowerShell 7.6
         # runtime the NeoIPC-Tools module and data-dictionary generator require.
@@ -433,8 +467,10 @@ jobs:
                 # powershell-yaml: the metadata assembler reads the infectious-agents / sharing YAML when
                 # building the package the data dictionary flattens.
                 Install-Module -Name powershell-yaml -MinimumVersion 0.4.2 -Force -Scope CurrentUser -SkipPublisherCheck
-                # PSScriptAnalyzer backs the approved-verb *function* check (PSUseApprovedVerbs) in
-                # ScriptVerbHygiene.Tests.ps1; the file-name half of that gate is a custom Pester check.
+                # PSScriptAnalyzer backs two gates: the approved-verb *function* check (PSUseApprovedVerbs)
+                # in ScriptVerbHygiene.Tests.ps1 — whose file-name half is a custom Pester check — and
+                # PSAvoidAssignmentToAutomaticVariable in AutomaticVariableHygiene.Tests.ps1. Both Describe
+                # blocks skip themselves when it is absent, so forgetting it here would pass silently.
                 Install-Module -Name PSScriptAnalyzer -Force -Scope CurrentUser -SkipPublisherCheck
                 # PoHeader.Tests.ps1 asserts the catalogue header contract against the COMMITTED files, so it
                 # is the only check that catches a header drifting in by a route nobody anticipated -- a hand
@@ -442,7 +478,7 @@ jobs:
                 # exclusion list rejects. That last one is not hypothetical: the add-on re-adds a bot credit
                 # to every infectious-agents catalogue whenever those translations are touched, and a
                 # translation pull request is exactly where no human is reading the diff.
-                Invoke-Pester -Path scripts/modules/NeoIPC-Tools/Tests/DataDictionary.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/BuildReport.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/ScriptVerbHygiene.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/PlayData.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/MetadataContent.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/Metadata.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/MetadataVerify.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/PoHeader.Tests.ps1 -CI
+                Invoke-Pester -Path scripts/modules/NeoIPC-Tools/Tests/DataDictionary.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/BuildReport.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/ScriptVerbHygiene.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/PlayData.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/MetadataContent.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/Metadata.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/MetadataVerify.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/PoHeader.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/AutomaticVariableHygiene.Tests.ps1 -CI
 
             - name: Generate data dictionary
               if: github.ref_type != 'tag' || steps.rel.outputs.product == 'metadata'

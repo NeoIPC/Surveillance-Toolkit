@@ -194,6 +194,16 @@ Weblate cannot express these, so `scripts/Test-PoPlaceholders.ps1` remains neces
 - Anything requiring real logic. Custom checks need a Python class registered server-side, which a hosted
   instance cannot accept.
 
+It runs in CI as the `po-placeholders` job, **report-only** for now: the committed catalogues already carry
+violations, and every one of them sits in a Weblate-owned `.po` that the ownership gate forbids changing in
+a pull request, so a blocking gate would fail every pull request over defects only Weblate can fix. Run the
+script for the current count rather than quoting one — it moves with every drain. Dropping `-ReportOnly`
+from the job is the whole of the change that makes it blocking, and the right moment is once the findings
+below are fixed through Weblate. The switch waives the violation count and nothing else: a run that matched
+no files, or a catalogue it could not parse, still fails. That is deliberate — waiving the failure with the
+workflow's own `continue-on-error` would have waived those too, and a gate reporting success having
+inspected nothing is the failure shape this repository has already been bitten by.
+
 ## Fixups: no decision to make, but you must know
 
 Fixups **mutate a translation on save**. They are a server-level list, not configurable per project, so

@@ -37,19 +37,19 @@ tbl <- tbl_data |>
     dplyr::mutate(
       abr = dplyr::recode_values(
         .data$abr,
-        "3gcr_routine" ~ sR$`3gcr`,
-        "car_routine" ~ sR$car,
+        "3gcr_routine" ~ sR$`3gcr_label`,
+        "car_routine" ~ sR$carbr_label,
         "car_if_3gcr" ~ paste0(
           "\\- ",
           sR$`tbl-resistance-test-rate`$car_if_3gcr,
           collapse = ""),
-        "cor_routine" ~ sR$cor,
+        "cor_routine" ~ sR$colr_label,
         "cor_if_3gcr&car" ~ paste0(
           "\\- ",
           sR$`tbl-resistance-test-rate`$cor_if_3gcr_and_car,
           collapse = ""),
-        "mrsa_routine" ~ sR$mrsa,
-        "vre_routine" ~ sR$vre),
+        "mrsa_routine" ~ sR$mrsa_label,
+        "vre_routine" ~ sR$vre_label),
       .before = 1) |>
   dplyr::rename(
     !!sR$table_headers$n := "n",

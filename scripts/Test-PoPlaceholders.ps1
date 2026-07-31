@@ -41,6 +41,11 @@
 .PARAMETER OutputFile
     Path to write validation results. Output is formatted text with all violations and summary.
 
+.PARAMETER ReportOnly
+    Report the violations without failing on them: the exit code becomes 0 however many are found.
+    A run that could not inspect anything still exits non-zero, so this waives the verdict on the
+    translations without also waiving the check that this script ran at all.
+
 .EXAMPLE
     .\Test-PoPlaceholders.ps1
     Validates all PO files in the po\ directory.
@@ -60,7 +65,8 @@
 .NOTES
     Author: NeoIPC Surveillance Toolkit
     Date: January 26, 2026
-    Exit Code: Number of violations found (capped at 255)
+    Exit Code: Number of violations found (capped at 255), or 0 under -ReportOnly. A run that matched
+    no files exits 1 either way — "inspected nothing" is not a pass.
 #>
 
 [CmdletBinding()]
@@ -84,7 +90,10 @@ param(
     [switch]$Quiet,
     
     [Parameter()]
-    [string]$OutputFile
+    [string]$OutputFile,
+
+    [Parameter()]
+    [switch]$ReportOnly
 )
 
 #region Helper Functions
@@ -107,9 +116,13 @@ function Get-PoEntries {
     # Regex to match PO entries with comments, msgid, and msgstr
     $pattern = '(?ms)^(#.*?\n)?(msgid\s+"(?:[^"\\]|\\.)*"(?:\n"(?:[^"\\]|\\.)*")*)\s+(msgstr\s+"(?:[^"\\]|\\.)*"(?:\n"(?:[^"\\]|\\.)*")*)'
     
-    $matches = [regex]::Matches($content, $pattern)
-    
-    foreach ($match in $matches) {
+    # Not $matches: that is PowerShell's automatic variable, and this function also relies on the real
+    # one further down, where `$comments -match ...` populates it and the capture group is read back.
+    # Binding the collection to that same name put both in one scope, and it survived only because
+    # foreach evaluates its collection once before -match overwrites it.
+    $entryMatches = [regex]::Matches($content, $pattern)
+
+    foreach ($match in $entryMatches) {
         $comments = $match.Groups[1].Value
         $msgidBlock = $match.Groups[2].Value
         $msgstrBlock = $match.Groups[3].Value
@@ -286,9 +299,10 @@ function Get-PrintfPlaceholders {
     
     # Match printf placeholders: %[-+0 #]*[0-9]*\.?[0-9]*[sdifuxoegcp]
     $pattern = '%[-+0 #]*[0-9]*\.?[0-9]*[sdifuxoegcp]'
-    $matches = [regex]::Matches($Text, $pattern)
-    
-    return @($matches | ForEach-Object { $_.Value })
+    # Not $matches - that name belongs to PowerShell's automatic variable.
+    $tokenMatches = [regex]::Matches($Text, $pattern)
+
+    return @($tokenMatches | ForEach-Object { $_.Value })
 }
 
 function Get-RCodeExpressions {
@@ -304,9 +318,10 @@ function Get-RCodeExpressions {
     
     # Match R code: `r ...`
     $pattern = '`r\s+[^`]+'
-    $matches = [regex]::Matches($Text, $pattern)
-    
-    return @($matches | ForEach-Object { $_.Value })
+    # Not $matches - that name belongs to PowerShell's automatic variable.
+    $tokenMatches = [regex]::Matches($Text, $pattern)
+
+    return @($tokenMatches | ForEach-Object { $_.Value })
 }
 
 function Get-QuartoCrossRefs {
@@ -322,9 +337,10 @@ function Get-QuartoCrossRefs {
     
     # Match Quarto cross-references: @fig-*, @tbl-*, etc.
     $pattern = '@(fig|tbl|eq|sec|lst|thm|lem|cor|prp|cnj|def|exm|exr)-[a-zA-Z0-9_-]+'
-    $matches = [regex]::Matches($Text, $pattern)
-    
-    return @($matches | ForEach-Object { $_.Value })
+    # Not $matches - that name belongs to PowerShell's automatic variable.
+    $tokenMatches = [regex]::Matches($Text, $pattern)
+
+    return @($tokenMatches | ForEach-Object { $_.Value })
 }
 
 function Get-DotNetPlaceholders {
@@ -340,9 +356,10 @@ function Get-DotNetPlaceholders {
     
     # Match .NET placeholders: {0}, {1}, {0:format}, etc.
     $pattern = '\{[0-9]+(?::[^}]*)?\}'
-    $matches = [regex]::Matches($Text, $pattern)
-    
-    return @($matches | ForEach-Object { $_.Value })
+    # Not $matches - that name belongs to PowerShell's automatic variable.
+    $tokenMatches = [regex]::Matches($Text, $pattern)
+
+    return @($tokenMatches | ForEach-Object { $_.Value })
 }
 
 function Get-LaTeXTextMarkers {
@@ -358,9 +375,10 @@ function Get-LaTeXTextMarkers {
     
     # Match LaTeX text markers: \text{...}
     $pattern = '\\text\{[^}]*\}'
-    $matches = [regex]::Matches($Text, $pattern)
-    
-    return @($matches | ForEach-Object { $_.Value })
+    # Not $matches - that name belongs to PowerShell's automatic variable.
+    $tokenMatches = [regex]::Matches($Text, $pattern)
+
+    return @($tokenMatches | ForEach-Object { $_.Value })
 }
 
 function Test-PlaceholderMatch {
@@ -712,14 +730,26 @@ Write-Host
 $allViolations = New-Object System.Collections.ArrayList
 $totalEntries = 0
 $fileStats = @{}
+# A catalogue this script could not parse. Kept apart from the violations because it is a statement
+# about the run rather than about a translation, and so must fail even under -ReportOnly.
+$unparseable = [System.Collections.Generic.List[string]]::new()
 
 foreach ($file in $filesToValidate) {
     $fileName = Split-Path -Leaf $file
     Write-Verbose "Processing $fileName..."
-    
+
     $entries = Get-PoEntries -FilePath $file
+    # Every well-formed catalogue yields at least its own header entry, whose msgstr holds the header
+    # fields — measured across all 49 committed catalogues, the smallest of which still parses to one.
+    # So zero entries means the file could not be read or parsed, and without this the two states are
+    # indistinguishable: an unreadable or malformed catalogue contributes no entries, raises no
+    # violation, and is then counted among the files this script reports as validated.
+    if ($entries.Count -eq 0) {
+        $unparseable.Add($file)
+        continue
+    }
     $totalEntries += $entries.Count
-    
+
     $fileViolations = 0
     
     foreach ($entry in $entries) {
@@ -824,7 +854,32 @@ if ($OutputFile) {
     Write-Host "Results written to: $OutputFile" -ForegroundColor Cyan
 }
 
-# Return exit code (violation count capped at 255)
+# A catalogue that could not be parsed fails the run whatever -ReportOnly says: the switch waives the
+# verdict on the translations, never the question of whether this script managed to read them.
+if ($unparseable.Count -gt 0) {
+    Write-Host
+    foreach ($file in $unparseable) {
+        Write-Host "${file}:1:1: error: parsed no entries — unreadable or not a PO file." -ForegroundColor Red
+    }
+    Write-Host "$($unparseable.Count) catalogue(s) could not be inspected; this run vouches for nothing." -ForegroundColor Red
+    exit 1
+}
+
+# Two different things can go wrong here and they must not collapse into one exit code. Violations are
+# a statement about the translations; matching no files at all is a statement about this script, and that
+# one exits non-zero above regardless of -ReportOnly. Hence the policy lives here rather than in the
+# caller: a workflow step waiving the failure with its own continue-on-error would waive both, and a gate
+# reporting success having inspected nothing is the exact shape this repository has already been bitten
+# by. The switch waives the violation count and nothing else.
+if ($ReportOnly) {
+    if ($allViolations.Count -gt 0) {
+        Write-Host
+        Write-Host "Reported only: $($allViolations.Count) violation(s) did not fail this run." -ForegroundColor Yellow
+    }
+    exit 0
+}
+
+# Violation count capped at 255 — an exit code cannot carry more.
 $exitCode = [Math]::Min($allViolations.Count, 255)
 exit $exitCode
 
