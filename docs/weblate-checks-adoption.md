@@ -234,6 +234,46 @@ nomenclature strings and it would discard the checks that still matter on them.
 The Fluent family is inapplicable, and its two syntax checks are actively wrong here — they validate
 rather than compare.
 
+## The five string-information fields, and who owns each
+
+A translator's sidebar carries five things beside the string. They divide cleanly by **where the truth
+lives**, and that division decides everything about how they are maintained.
+
+| field | source of truth | reaches Weblate by | survives a component reset |
+|---|---|---|---|
+| Source string description | the `.pot` `#.` comment | generated, committed | yes — it is re-read from the template |
+| Flags (source) | the `.pot` `#,` line | generated, committed | yes |
+| Flags (per-string extra) | Weblate database | web interface or API | yes, but invisible to git |
+| Explanation | Weblate database | web interface or API | yes, but invisible to git |
+| Labels | Weblate database | web interface, API or bulk edit | yes, but invisible to git |
+| Screenshots | Weblate database plus an uploaded image | API | yes, but invisible to git |
+
+**Anything derivable from the authored source belongs in the template.** It is then reviewable in a diff,
+survives every `msgmerge`, and cannot drift from the string it describes. po4a already does this much: the
+`type: Title ==` a translator sees on a protocol heading is a `#.` comment it extracted.
+
+**Everything else lives only in Weblate's database, and that is a durability problem rather than a
+preference.** This project has already reset components to recover from a diverged checkout; a reset
+preserves the database, but a *recreate* does not, and neither route is covered by any backup this
+repository controls. So database-only content needs a **committed manifest and a script that applies it**,
+or it is one accident from being lost with no way to tell what was there.
+
+### What fills each field is per catalogue, not uniform
+
+The discipline is the same everywhere; the content is not, because the catalogues do not resemble each
+other. Filling them uniformly would be worse than filling them well.
+
+| catalogue | description | source flags | explanation earns its place when |
+|---|---|---|---|
+| `documentation` | po4a's block type | `asciidoc-text` | an anchor id or macro name must survive unchanged |
+| `reports` | the YAML key path, once `msgctxt` exists | `md-text`, `placeholders` | a placeholder's resolved value is not guessable from its name |
+| `glossary` | the authored YAML comment | `terminology`, `read-only` | a term collides with another this project uses — `Watch` against *surveillance* |
+| `metadata` | the DHIS2 object and field | `placeholders` | the string is a data-entry label whose length is constrained |
+| `infectious_agents` | rank and concept type | `ignore-same` | the language's own convention for nomenclature is the question |
+
+Screenshots are worth the effort only where the msgid cannot carry the context — a composed callout
+clause, a table cell whose meaning depends on its column. A heading does not need one.
+
 ## Traps worth keeping
 
 - A check identifier is not its enabling flag.
