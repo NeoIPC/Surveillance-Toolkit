@@ -31,8 +31,8 @@
 #
 # Naming convention:
 #   base key    = AMA canonical (lowercase)
-#   key_sc      = Sentence case (first word capitalised)
-#   key_tc      = Title case (all major words capitalised)
+#   key_sc      = Sentence case (first word capitalized)
+#   key_tc      = Title case (all major words capitalized)
 #   key_plural  = Plural form
 #   Suffixes can combine in principle, but NOT key_plural_tc / key_plural_sc — the generator refuses
 #     them, because pairing cannot keep a cased plural apart from the uncased one. See Plurals above.
@@ -108,9 +108,9 @@ mrsa: "MRSA"
 # msgmerge — gettext models no custom flags, so only the template's are restored.
 # flags: ignore-same
 nec: NEC
-necrotising_enterocolitis: "necrotising enterocolitis"
-necrotising_enterocolitis_sc: "Necrotising enterocolitis"
-necrotising_enterocolitis_tc: "Necrotising Enterocolitis"
+necrotizing_enterocolitis: "necrotizing enterocolitis"
+necrotizing_enterocolitis_sc: "Necrotizing enterocolitis"
+necrotizing_enterocolitis_tc: "Necrotizing Enterocolitis"
 # flags: ignore-same
 neoipc_surveillance: "NeoIPC Surveillance"
 niv: NIV

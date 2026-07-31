@@ -44,7 +44,7 @@ gramm_abbreviation: "g"
 header:
   department: Department
 headings:
-  antibiotic_utilisation: Antibiotic Utilisation
+  antibiotic_utilisation: Antibiotic Utilization
   antimicrobial_susceptibility_testing: Antimicrobial Susceptibility Testing
   detection_of_infectious_agents: Detection of Infectious Agents
   device_associated_infections: Device-Associated Infections
@@ -126,7 +126,7 @@ tbl-antibiotic-utilisation:
   exposure_density_rate: "Antibiotic Exposure Density Rate"
   n_footnote: >-
     %s: The aggregated number of substance-days recorded across all infants.
-  no_data: "No antibiotic utilisation data available for this report settings."
+  no_data: "No antibiotic utilization data available for this report settings."
   pooled_footnote: >-
     %s: The Antibiotic Exposure Density Rate calculated across all infants from
     all departments in the reference data.
@@ -138,7 +138,7 @@ tbl-antibiotic-utilisation:
     and when the median number of substance-days is greater than or equal to one
     according to the pooled rate.
   substance_days: "Substance-days"
-  tbl-cap: "Antibiotic utilisation by pharmacological subgroup and substance"
+  tbl-cap: "Antibiotic utilization by pharmacological subgroup and substance"
 tbl-organism-resistance-rate:
   n_footnote: "%s: The aggregated number of resistant detections of the organism."
   no_data: "No organism-specific resistance data available for this report settings."
@@ -243,7 +243,7 @@ tbl-surgical-procedure-rates:
   rate_name: "Surgical Procedure Rate"
   rate_numerator: "No of procedures"
   tbl-cap: "Surgical procedures by category"
-  to_be_categorised: "Not yet categorised"
+  to_be_categorised: "Not yet categorized"
 total: "Total"
 unit_separator: " "
 methods:
@@ -289,7 +289,7 @@ methods:
     curve) and summary statistics (boxplot with quartiles and pooled arithmetic
     mean).
   antibiotic_utilisation: >-
-    Antibiotic utilisation is reported per individual substance, grouped by ATC
+    Antibiotic utilization is reported per individual substance, grouped by ATC
     pharmacological subgroup. The exposure density rate measures substance-days
     per 100 patient-days. Antibiotic days are counted from the first dose to the
     last dose of a therapy inclusive. Each substance is counted separately; a

@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-07-31 11:07+0000\n"
+"POT-Creation-Date: 2026-07-31 14:05+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Language-Team: none\n"
 "Language: en\n"
@@ -170,18 +170,18 @@ msgid "NEC"
 msgstr ""
 
 #: glossary.yaml:111
-msgctxt "necrotising_enterocolitis"
-msgid "necrotising enterocolitis"
+msgctxt "necrotizing_enterocolitis"
+msgid "necrotizing enterocolitis"
 msgstr ""
 
 #: glossary.yaml:112
-msgctxt "necrotising_enterocolitis_sc"
-msgid "Necrotising enterocolitis"
+msgctxt "necrotizing_enterocolitis_sc"
+msgid "Necrotizing enterocolitis"
 msgstr ""
 
 #: glossary.yaml:113
-msgctxt "necrotising_enterocolitis_tc"
-msgid "Necrotising Enterocolitis"
+msgctxt "necrotizing_enterocolitis_tc"
+msgid "Necrotizing Enterocolitis"
 msgstr ""
 
 #: glossary.yaml:115

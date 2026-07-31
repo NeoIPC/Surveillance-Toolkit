@@ -33,7 +33,7 @@ tbl <- tbl_data |>
   dplyr::mutate(
     Infection = dplyr::recode_values(
       as.character(.data$event_type_key),
-      "nec" ~ sR$necrotising_enterocolitis_sc,
+      "nec" ~ sR$necrotizing_enterocolitis_sc,
       "ssi" ~ sR$surgical_site_infection_sc,
       "hap" ~ sR$pneumonia_sc),
     .keep = "unused")

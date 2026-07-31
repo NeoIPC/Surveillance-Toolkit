@@ -82,7 +82,7 @@ if (!is.null(benchmark_data$infectious_agent_detection_rate_per_inf_type_table) 
         as.character(.data$inf),
         "all" ~ sR$total,
         "bsi" ~ sR$primary_sepsis_bsi_sc,
-        "nec" ~ sR$necrotising_enterocolitis_sc,
+        "nec" ~ sR$necrotizing_enterocolitis_sc,
         "ssi" ~ sR$surgical_site_infection_sc,
         "hap" ~ sR$pneumonia_sc)) |>
     gt(rowname_col = "inf") |>
