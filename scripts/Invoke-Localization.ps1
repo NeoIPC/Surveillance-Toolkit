@@ -550,19 +550,27 @@ function Repair-Po4aTemplateHeader {
     }
 
     # --- .pot ---
-    if ($potRel) {
-        $potPath = Join-Path $repoRoot $potRel
-        $h = Split-Catalog $potPath
-        if ($h) {
-            $comment = @("# Translations for the $Package", $copyrightLine, $licenseLine, '#')
-            # Drop the fields that cannot stay true, and normalise the one that can (see the header above).
-            $body = @($h.Body |
-                Where-Object { $_ -notmatch '^"(Project-Id-Version|Last-Translator|X-Generator): .*\\n"$' } |
-                ForEach-Object { $_ -replace '^"Language-Team: .*\\n"$', '"Language-Team: none\n"' })
-            Save-Catalog $potPath $comment $body
-        }
+    # Both lookups below throw rather than skip. They are the only thing standing between po4a's
+    # boilerplate and a committed template, and a repair that silently declines leaves the run
+    # reporting success while the header it exists to fix is the raw "SOME DESCRIPTIVE TITLE"
+    # block — which then fails the header-contract test in CI instead, one push later.
+    if (-not $potRel) {
+        throw "Cannot repair the template header: no .pot path is declared in '$ConfigPath'."
     }
 
+    $potPath = Join-Path $repoRoot $potRel
+    $h = Split-Catalog $potPath
+    if (-not $h) {
+        throw ("Cannot repair the header of '$potRel': the file is missing, or it has no " +
+               'header entry (no bare `msgid ""` line).')
+    }
+
+    $comment = @("# Translations for the $Package", $copyrightLine, $licenseLine, '#')
+    # Drop the fields that cannot stay true, and normalise the one that can (see the header above).
+    $body = @($h.Body |
+        Where-Object { $_ -notmatch '^"(Project-Id-Version|Last-Translator|X-Generator): .*\\n"$' } |
+        ForEach-Object { $_ -replace '^"Language-Team: .*\\n"$', '"Language-Team: none\n"' })
+    Save-Catalog $potPath $comment $body
 }
 
 function Invoke-UpdateYamlKeys {
