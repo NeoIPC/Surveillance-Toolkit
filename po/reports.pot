@@ -1,13 +1,17 @@
-# Translations for the NeoIPC Surveillance Reports
-# Copyright (C) Charité – Universitätsmedizin Berlin
-# This file is distributed under the Creative Commons Attribution 4.0 International license
+# SOME DESCRIPTIVE TITLE
+# Copyright (C) YEAR Charité – Universitätsmedizin Berlin
+# This file is distributed under the same license as the NeoIPC Surveillance Reports package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
+#, fuzzy
 msgid ""
 msgstr ""
+"Project-Id-Version: NeoIPC Surveillance Reports 0.0.1-alpha\n"
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-07-31 16:32+0200\n"
+"POT-Creation-Date: 2026-07-31 17:33+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Language-Team: none\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: en\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -610,7 +614,7 @@ msgstr ""
 #. type: Hash Value: tbl-abr-infection-rate no_data
 #: reports/common.yaml:1
 #, no-wrap
-msgid "No resistant pathogen infection data available for this report settings."
+msgid "No resistant pathogen infection data available for these report settings."
 msgstr ""
 
 #. type: Hash Value: tbl-abr-infection-rate pooled_footnote
@@ -670,7 +674,7 @@ msgstr ""
 #. type: Hash Value: tbl-agent-per-infection-rate no_data
 #: reports/common.yaml:1
 #, no-wrap
-msgid "No infectious agent data available for this report settings."
+msgid "No infectious agent data available for these report settings."
 msgstr ""
 
 #. type: Hash Value: tbl-agent-per-infection-rate pooled_footnote
@@ -736,7 +740,7 @@ msgstr ""
 #. type: Hash Value: tbl-antibiotic-utilization no_data
 #: reports/common.yaml:1
 #, no-wrap
-msgid "No antibiotic utilization data available for this report settings."
+msgid "No antibiotic utilization data available for these report settings."
 msgstr ""
 
 #. type: Hash Value: tbl-antibiotic-utilization pooled_footnote
@@ -820,7 +824,7 @@ msgstr ""
 #. type: Hash Value: tbl-device-associated-incidence-density-rates no_data
 #: reports/common.yaml:1
 #, no-wrap
-msgid "No device-associated infection data available for this report settings."
+msgid "No device-associated infection data available for these report settings."
 msgstr ""
 
 #. type: Hash Value: tbl-device-associated-incidence-density-rates pooled_footnote
@@ -880,7 +884,7 @@ msgstr ""
 #. type: Hash Value: tbl-incidence-density-rates no_data
 #: reports/common.yaml:1
 #, no-wrap
-msgid "No infection data available for this report settings."
+msgid "No infection data available for these report settings."
 msgstr ""
 
 #. type: Hash Value: tbl-incidence-density-rates pooled_footnote
@@ -916,7 +920,7 @@ msgstr ""
 #. type: Hash Value: tbl-infectious-agent-detection-rate no_data
 #: reports/common.yaml:1
 #, no-wrap
-msgid "No infectious agent detection data available for this report settings."
+msgid "No infectious agent detection data available for these report settings."
 msgstr ""
 
 #. type: Hash Value: tbl-infectious-agent-detection-rate pooled_footnote
@@ -964,7 +968,7 @@ msgstr ""
 #. type: Hash Value: tbl-organism-resistance-rate no_data
 #: reports/common.yaml:1
 #, no-wrap
-msgid "No organism-specific resistance data available for this report settings."
+msgid "No organism-specific resistance data available for these report settings."
 msgstr ""
 
 #. type: Hash Value: tbl-organism-resistance-rate pooled_footnote
@@ -1024,7 +1028,7 @@ msgstr ""
 #. type: Hash Value: tbl-resistance-test-rate no_data
 #: reports/common.yaml:1
 #, no-wrap
-msgid "No antibiotic resistance diagnostics data available for this report settings."
+msgid "No antibiotic resistance diagnostics data available for these report settings."
 msgstr ""
 
 #. type: Hash Value: tbl-resistance-test-rate pooled_footnote
@@ -1102,7 +1106,7 @@ msgstr ""
 #. type: Hash Value: tbl-risk-density-rates no_data
 #: reports/common.yaml:1
 #, no-wrap
-msgid "No risk/protective factor data available for this report settings."
+msgid "No risk/protective factor data available for these report settings."
 msgstr ""
 
 #. type: Hash Value: tbl-risk-density-rates pooled_footnote
@@ -1144,7 +1148,7 @@ msgstr ""
 #. type: Hash Value: tbl-secondary-bsi-rates no_data
 #: reports/common.yaml:1
 #, no-wrap
-msgid "No secondary BSI data available for this report settings."
+msgid "No secondary BSI data available for these report settings."
 msgstr ""
 
 #. type: Hash Value: tbl-secondary-bsi-rates pooled_footnote

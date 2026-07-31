@@ -62,7 +62,28 @@ sortedDetails <- problem_detail_info |>
   dplyr::select(filePath, usedSolutions) |>
   dplyr::distinct()
 
-problem_detail_files <- Sys.glob(sortedDetails$filePath)
+# po4a omits a localized problem-detail file whenever its translation falls
+# below the completeness threshold, and the absence is reported by the file
+# simply not being there — so resolving these by glob dropped the problem's
+# explanation from the report with no error and no trace. Fall back to the
+# English source, which is always present, so an untranslated detail degrades
+# to English rather than to silence.
+localized_details <- sortedDetails$filePath
+english_details <- sub("^[^/]+/", "en/", localized_details)
+untranslated <- !file.exists(localized_details)
+
+if (any(untranslated))
+  logWarn("Problem detail(s) not available in this language, using English: ",
+          paste(basename(localized_details[untranslated]), collapse = ", "))
+
+problem_detail_files <- ifelse(untranslated, english_details, localized_details)
+absent <- !file.exists(problem_detail_files)
+
+if (any(absent))
+  logError("Problem detail(s) missing in every language: ",
+           paste(basename(problem_detail_files[absent]), collapse = ", "))
+
+problem_detail_files <- problem_detail_files[!absent]
 
 for (problem_detail_file in problem_detail_files) {
   cat(sep = "\n", knitr::knit_child(quiet = TRUE, text = readr::read_file(problem_detail_file)))

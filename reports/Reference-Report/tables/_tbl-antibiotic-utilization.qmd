@@ -7,7 +7,7 @@
 
 ```{r}
 #| output: asis
-include_localised("_methods-antibiotic-utilisation.Rmd")
+include_localised("_methods-antibiotic-utilization.Rmd")
 ```
 
 ```{r}

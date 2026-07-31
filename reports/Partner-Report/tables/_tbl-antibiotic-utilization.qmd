@@ -7,7 +7,7 @@
 
 ```{r}
 #| output: asis
-include_localised("_tbl-intro-antibiotic-utilisation.Rmd")
+include_localised("_tbl-intro-antibiotic-utilization.Rmd")
 ```
 
 ```{r}
@@ -22,7 +22,7 @@ include_localised("_tbl-intro-antibiotic-utilisation.Rmd")
 
 ```{r}
 #| output: asis
-include_localised("_methods-antibiotic-utilisation.Rmd")
+include_localised("_methods-antibiotic-utilization.Rmd")
 ```
 
 ```{r}
