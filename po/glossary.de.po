@@ -3,10 +3,12 @@
 # This file is distributed under the Creative Commons Attribution 4.0 International license
 #
 # Brar Piening <brar.piening@charite.de>, 2026.
+# Brar Piening <brar@gmx.de>, 2026.
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"POT-Creation-Date: 2026-07-31 14:05+0000\n"
+"PO-Revision-Date: 2026-07-31 19:55+0000\n"
 "Language-Team: German <https://hosted.weblate.org/projects/neoipc/neoipc-glossary/de/>\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
@@ -14,235 +16,289 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
 
-#. WHO AWaRe antibiotic category. The official WHO translation is normative:
-#. Spanish "Acceso", per the
+#. Resistance category: third-generation cephalosporin resistance.
+#: glossary.yaml:55
+msgctxt "3gcr"
+msgid "3GCR"
+msgstr "3GCR"
+
+#. WHO AWaRe antibiotic category. The official WHO translation is normative: Spanish "Acceso", per the
 #. WHO AWaRe antibiotic book. Do not invent a local rendering.
-#: glossary.yaml:41
-#, terminology
+#: glossary.yaml:59
 msgctxt "access"
 msgid "Access"
-msgstr ""
+msgstr "Access"
 
-#: glossary.yaml:42
+#: glossary.yaml:60
 msgctxt "admission"
 msgid "admission"
-msgstr ""
+msgstr "Aufnahme"
 
-#: glossary.yaml:43
+#: glossary.yaml:61
 msgctxt "admission_sc"
 msgid "Admission"
-msgstr ""
+msgstr "Aufnahme"
 
-#: glossary.yaml:44
+#: glossary.yaml:62
 msgctxt "antibiotics"
 msgid "antibiotics"
-msgstr ""
+msgstr "Antibiotika"
 
-#: glossary.yaml:45
+#: glossary.yaml:63
 msgctxt "antibiotics_sc"
 msgid "Antibiotics"
-msgstr ""
+msgstr "Antibiotika"
 
 #. AWaRe is a WHO acronym (Access, Watch, Reserve) — not translatable
-#: glossary.yaml:48
-#, read-only, terminology
+#: glossary.yaml:66
 msgctxt "aware"
 msgid "AWaRe"
 msgstr ""
 
-#: glossary.yaml:49
+#. Bloodstream infection.
+#: glossary.yaml:69
+msgctxt "bsi"
+msgid "BSI"
+msgstr "BSI"
+
+#. Birthweight.
+#: glossary.yaml:72
+msgctxt "bw"
+msgid "BW"
+msgstr "GG"
+
+#. Resistance category: carbapenem resistance.
+#: glossary.yaml:75
+msgctxt "carbr"
+msgid "CARBR"
+msgstr "CARBR"
+
+#. Resistance category: colistin resistance.
+#: glossary.yaml:78
+msgctxt "colr"
+msgid "COLR"
+msgstr "COLR"
+
+#: glossary.yaml:79
 msgctxt "cvc"
 msgid "CVC"
-msgstr ""
+msgstr "ZVK"
 
-#: glossary.yaml:50
+#. Resistance mechanism: extended-spectrum beta-lactamase. Underlies 3GCR rather than being a category
+#. of its own.
+#: glossary.yaml:83
+msgctxt "esbl"
+msgid "ESBL"
+msgstr "ESBL"
+
+#. Gestational age.
+#: glossary.yaml:86
+msgctxt "ga"
+msgid "GA"
+msgstr "GA"
+
+#: glossary.yaml:87
 msgctxt "h2020_funding_statement"
-msgid ""
-"This project has received funding from the European Union's Horizon 2020 "
-"research and innovation programme under grant agreement No 965328."
-msgstr ""
-"Dieses Projekt wurde im Rahmen des Forschungs- und Innovationsprogramms "
-"Horizont 2020 der Europäischen Union unter der Fördervereinbarung Nr. 965328"
-" gefördert."
+msgid "This project has received funding from the European Union's Horizon 2020 research and innovation programme under grant agreement No 965328."
+msgstr "Dieses Projekt wurde im Rahmen des Forschungs- und Innovationsprogramms Horizont 2020 der Europäischen Union unter der Fördervereinbarung Nr. 965328 gefördert."
 
-#: glossary.yaml:53
+#: glossary.yaml:90
 msgctxt "hap"
 msgid "HAP"
-msgstr ""
+msgstr "Pneumonie"
 
-#: glossary.yaml:54
+#: glossary.yaml:91
 msgctxt "human_milk"
 msgid "human milk"
-msgstr ""
+msgstr "Humanmilch"
 
-#: glossary.yaml:55
+#: glossary.yaml:92
 msgctxt "human_milk_sc"
 msgid "Human milk"
-msgstr ""
+msgstr "Humanmilch"
 
-#: glossary.yaml:56
+#. International Classification of Health Interventions, the WHO classification the surgical procedure
+#. codes come from.
+#: glossary.yaml:96
+msgctxt "ichi"
+msgid "ICHI"
+msgstr "ICHI"
+
+#: glossary.yaml:97
 msgctxt "inv"
 msgid "INV"
-msgstr ""
+msgstr "INV"
 
-#: glossary.yaml:57
+#: glossary.yaml:98
 msgctxt "kangaroo_care"
 msgid "kangaroo care"
-msgstr ""
+msgstr "Känguru-Pflege"
 
-#: glossary.yaml:58
+#: glossary.yaml:99
 msgctxt "kangaroo_care_sc"
 msgid "Kangaroo care"
-msgstr ""
+msgstr "Känguru-Pflege"
 
-#: glossary.yaml:59
-#, ignore-same
+#. Laboratory-confirmed bloodstream infection.
+#: glossary.yaml:102
+msgctxt "lcbsi"
+msgid "LCBSI"
+msgstr "LBBSI"
+
+#. Resistance category: methicillin-resistant Staphylococcus aureus.
+#: glossary.yaml:105
+msgctxt "mrsa"
+msgid "MRSA"
+msgstr "MRSA"
+
+#. An initialism, so most languages keep it verbatim; suppress the unchanged-translation check rather
+#. than have every language answer it. Declared here because a flag set on a catalogue does not survive
+#. msgmerge — gettext models no custom flags, so only the template's are restored.
+#: glossary.yaml:110
 msgctxt "nec"
 msgid "NEC"
 msgstr "NEC"
 
-#: glossary.yaml:60
-msgctxt "necrotising_enterocolitis"
-msgid "necrotising enterocolitis"
-msgstr ""
+#: glossary.yaml:111
+msgctxt "necrotizing_enterocolitis"
+msgid "necrotizing enterocolitis"
+msgstr "nekrotisierende Enterokolitis"
 
-#: glossary.yaml:61
-msgctxt "necrotising_enterocolitis_sc"
-msgid "Necrotising enterocolitis"
-msgstr ""
+#: glossary.yaml:112
+msgctxt "necrotizing_enterocolitis_sc"
+msgid "Necrotizing enterocolitis"
+msgstr "Nekrotisierende Enterokolitis"
 
-#: glossary.yaml:62
-msgctxt "necrotising_enterocolitis_tc"
-msgid "Necrotising Enterocolitis"
-msgstr ""
+#: glossary.yaml:113
+msgctxt "necrotizing_enterocolitis_tc"
+msgid "Necrotizing Enterocolitis"
+msgstr "Nekrotisierende Enterokolitis"
 
-#: glossary.yaml:64
-#, ignore-same
+#: glossary.yaml:115
 msgctxt "neoipc_surveillance"
 msgid "NeoIPC Surveillance"
 msgstr "NeoIPC Surveillance"
 
-#: glossary.yaml:65
+#: glossary.yaml:116
 msgctxt "niv"
 msgid "NIV"
-msgstr ""
+msgstr "NIV"
 
-#: glossary.yaml:66
+#: glossary.yaml:117
 msgctxt "pneumonia"
 msgid "pneumonia"
-msgstr ""
+msgstr "Pneumonie"
 
-#: glossary.yaml:67
+#: glossary.yaml:118
 msgctxt "pneumonia_sc"
 msgid "Pneumonia"
-msgstr ""
+msgstr "Pneumonie"
 
-#: glossary.yaml:68
+#: glossary.yaml:119
 msgctxt "primary_sepsis_bsi"
 msgid "primary sepsis/BSI"
-msgstr ""
+msgstr "primäre Sepsis/BSI"
 
-#: glossary.yaml:69
+#: glossary.yaml:120
 msgctxt "primary_sepsis_bsi_sc"
 msgid "Primary sepsis/BSI"
-msgstr ""
+msgstr "Primäre Sepsis/BSI"
 
-#: glossary.yaml:70
+#: glossary.yaml:121
 msgctxt "primary_sepsis_bsi_tc"
 msgid "Primary Sepsis/BSI"
-msgstr ""
+msgstr "Primäre Sepsis/BSI"
 
-#: glossary.yaml:71
+#: glossary.yaml:122
 msgctxt "probiotics"
 msgid "Probiotics"
-msgstr ""
+msgstr "Probiotika"
 
-#: glossary.yaml:72
+#: glossary.yaml:123
 msgctxt "pvc"
 msgid "PVC"
-msgstr ""
+msgstr "PVK"
 
-#. WHO AWaRe antibiotic category. The official WHO translation is normative:
-#. Spanish "Reserva", per the
+#. WHO AWaRe antibiotic category. The official WHO translation is normative: Spanish "Reserva", per the
 #. WHO AWaRe antibiotic book.
-#: glossary.yaml:76
-#, terminology
+#: glossary.yaml:127
 msgctxt "reserve"
 msgid "Reserve"
-msgstr ""
+msgstr "Reserve"
 
-#: glossary.yaml:77
+#: glossary.yaml:128
 msgctxt "ssi"
 msgid "SSI"
-msgstr ""
+msgstr "WI"
 
-#: glossary.yaml:78
+#: glossary.yaml:129
 msgctxt "surgical_procedure"
 msgid "surgical procedure"
-msgstr ""
+msgstr "chirurgischer Eingriff"
 
-#: glossary.yaml:79
+#: glossary.yaml:130
 msgctxt "surgical_procedure_sc"
 msgid "Surgical procedure"
-msgstr ""
+msgstr "Chirurgischer Eingriff"
 
-#: glossary.yaml:80
+#: glossary.yaml:131
 msgctxt "surgical_procedure_tc"
 msgid "Surgical Procedure"
-msgstr ""
+msgstr "Chirurgischer Eingriff"
 
-#: glossary.yaml:81
+#: glossary.yaml:132
 msgctxt "surgical_site_infection"
 msgid "surgical site infection"
-msgstr ""
+msgstr "postoperative Wundinfektion"
 
-#: glossary.yaml:82
+#: glossary.yaml:133
 msgctxt "surgical_site_infection_sc"
 msgid "Surgical site infection"
-msgstr ""
+msgstr "Postoperative Wundinfektion"
 
-#: glossary.yaml:83
+#: glossary.yaml:134
 msgctxt "surgical_site_infection_tc"
 msgid "Surgical Site Infection"
-msgstr ""
+msgstr "Postoperative Wundinfektion"
 
-#: glossary.yaml:84
+#: glossary.yaml:135
 msgctxt "surveillance"
 msgid "surveillance"
 msgstr "Surveillance"
 
-#: glossary.yaml:85
-#, ignore-same
+#. Several languages render this identically to English in its sentence-case form; same reasoning as `nec`.
+#: glossary.yaml:138
 msgctxt "surveillance_sc"
 msgid "Surveillance"
 msgstr "Surveillance"
 
-#: glossary.yaml:86
+#: glossary.yaml:139
 msgctxt "surveillance_end"
 msgid "surveillance end"
-msgstr ""
+msgstr "Ende der Surveillance"
 
-#: glossary.yaml:87
+#: glossary.yaml:140
 msgctxt "surveillance_end_sc"
 msgid "Surveillance end"
-msgstr ""
+msgstr "Ende der Surveillance"
 
-#: glossary.yaml:88
+#: glossary.yaml:141
 msgctxt "surveillance_end_tc"
 msgid "Surveillance End"
-msgstr ""
+msgstr "Ende der Surveillance"
 
-#. WHO AWaRe antibiotic category. The official WHO translation is normative:
-#. Spanish "Precaución", per
-#. the WHO AWaRe antibiotic book — NOT "Vigilancia", which this project uses
-#. for "surveillance" and
-#. would therefore collide, and not the bare verb "Ver". Italian is
-#. deliberately left untranslated
-#. rather than inheriting "Sorveglianza" from the reports catalogue, which has
-#. the same collision; it
+#. Resistance category: vancomycin-resistant Enterococcus.
+#: glossary.yaml:144
+msgctxt "vre"
+msgid "VRE"
+msgstr "VRE"
+
+#. WHO AWaRe antibiotic category. The official WHO translation is normative: Spanish "Precaución", per
+#. the WHO AWaRe antibiotic book — NOT "Vigilancia", which this project uses for "surveillance" and
+#. would therefore collide, and not the bare verb "Ver". Italian is deliberately left untranslated
+#. rather than inheriting "Sorveglianza" from the reports catalogue, which has the same collision; it
 #. needs the WHO Italian edition rather than a guess.
-#: glossary.yaml:95
-#, terminology
+#: glossary.yaml:151
 msgctxt "watch"
 msgid "Watch"
-msgstr ""
+msgstr "Watch"
