@@ -27,8 +27,20 @@
 # Project-Id-Version (its version suffix froze at 0.9 while the products moved on), X-Generator (a Weblate
 # version string, which rewrote every catalogue on each upgrade until po_set_x_generator was turned off),
 # Last-Translator (frozen by po_set_last_translator=false, so it named a translator who could never change),
-# and POT-Creation-Date in a CATALOGUE — msgmerge does not refresh it, so it had drifted three weeks out in
-# infectious_agents. It stays in the TEMPLATE, where the generator stamps it and it is true by construction.
+# and POT-Creation-Date in a REPOSITORY-OWNED CATALOGUE — no writer here refreshes it, so it had drifted three
+# weeks out in infectious_agents. It stays in the TEMPLATE, where the generator stamps it and it is true by
+# construction.
+#
+# A WEBLATE-OWNED CATALOGUE is exempt from that last one, because the premise behind it does not hold there.
+# Weblate rewrites the field from the template whenever the template changes, and the values it wrote after
+# the anchor and spelling work match their template byte for byte in every catalogue and language — so the
+# field is refreshed rather than stale, which is the only property the exclusion was ever protecting. The
+# exemption is not a preference: Weblate offers no way to suppress the field. Its ten po_* file-format
+# parameters cover X-Generator, Last-Translator, Language-Team and msgid-bug address, and none of them
+# touches this, so the alternative was a second writer on files Weblate owns — the arrangement this whole
+# contract exists to prevent. The residue is that between a template change and the next drain the catalogues
+# name the older template; that corrects itself on the drain and is why the exemption is granted by ownership
+# rather than by asserting the two agree, which would block every source-string change until someone drained.
 
 # English language names as Weblate writes them into Language-Team, and the plural rule it writes per language.
 # Sourced from the catalogues Weblate itself produced, not from a specification, so they match byte for byte.
@@ -41,6 +53,17 @@ $script:NeoIPCPoPluralForms = @{
     es = 'nplurals=2; plural=n != 1;'; et = 'nplurals=2; plural=n != 1;'; fr = 'nplurals=2; plural=n > 1;'
     it = 'nplurals=2; plural=n != 1;'; ne = 'nplurals=2; plural=n != 1;'; tr = 'nplurals=2; plural=n != 1;'
 }
+
+# The catalogues registered as Weblate components, named by the stem their files share. Weblate is their only
+# writer, which is what makes the POT-Creation-Date exemption above safe to grant to exactly these and to
+# nothing else. po/antibiotics.*.po and scripts/po/*.po are deliberately absent: neither is on Weblate, both
+# stay repository-owned, and a generator run or a hand edit there is legitimate. The catalogue-ownership job
+# in .github/workflows/build.yml states the same list as a bash regex for a check that cannot run PowerShell;
+# registering a catalogue on Weblate means adding it in both places, and de-registering means removing it
+# from both.
+$script:NeoIPCWeblateOwnedCatalogue = @(
+    'documentation', 'glossary', 'infectious_agents', 'metadata', 'reports'
+)
 
 function Test-NeoIPCPoNonHumanIdentity {
     # Whether a credit line names something other than a person, per po/non-human-identities.yaml.
