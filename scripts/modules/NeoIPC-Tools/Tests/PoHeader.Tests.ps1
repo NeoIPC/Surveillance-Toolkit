@@ -168,13 +168,28 @@ InModuleScope 'NeoIPC-Tools' {
             }
             $bad | Should -BeNullOrEmpty
         }
-        It 'keeps POT-Creation-Date in templates only' {
+        It 'keeps POT-Creation-Date in templates and out of repository-owned catalogues' {
             $bad = foreach ($f in $script:catalogues) {
                 $h = Get-CatalogueHeader -Path $f.FullName
-                if (-not $h.IsTemplate -and $h.Fields.Contains('POT-Creation-Date')) { "$($h.Name): has it" }
-                if ($h.IsTemplate -and -not $h.Fields.Contains('POT-Creation-Date')) { "$($h.Name): lacks it" }
+                $has = $h.Fields.Contains('POT-Creation-Date')
+                if ($h.IsTemplate) {
+                    if (-not $has) { "$($h.Name): lacks it" }
+                    continue
+                }
+                # Weblate rewrites the field from the template on every template change, so in the catalogues
+                # it owns the field is refreshed rather than stale, and staleness is the whole reason the
+                # field is excluded elsewhere. Private/PoHeader.ps1 carries the argument and the list.
+                if (($h.Name -split '\.')[0] -in $script:NeoIPCWeblateOwnedCatalogue) { continue }
+                if ($has) { "$($h.Name): has it" }
             }
             $bad | Should -BeNullOrEmpty
+        }
+        It 'exempts only the catalogues Weblate writes' {
+            # The exemption is sound only where Weblate is the writer. A catalogue this repository writes that
+            # gained the field would be stale by the original argument, so it must stay subject to the rule --
+            # antibiotics because its licence bars it from Weblate, scripts/po because its mechanism does.
+            $script:NeoIPCWeblateOwnedCatalogue | Should -Not -Contain 'antibiotics'
+            $script:NeoIPCWeblateOwnedCatalogue | Should -Not -Contain 'de'
         }
         It 'credits no non-human identity' {
             $bad = foreach ($f in $script:catalogues) {
