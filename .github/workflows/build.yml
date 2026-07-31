@@ -218,6 +218,48 @@ jobs:
               # the violation count; a run that could not inspect anything still fails.
               run: ./scripts/Test-PoPlaceholders.ps1 -ReportOnly
 
+    python-tests:
+        # The Python tools under scripts/ had no gate at all. That was defensible while there was one of
+        # them and it was a developer-machine convenience; it stops being defensible as the Python surface
+        # grows, and it was already costing more than it looked — test-update-glossary-po.py asserts the
+        # committed po/glossary.pot still matches what the committed glossary.yaml produces, which is a
+        # claim about the repository that only a run can check. It caught 41 stale location references
+        # once. Nothing has run it since.
+        #
+        # Its own job, like text-hygiene and po-placeholders: it needs none of the toolchain build-docs
+        # spends minutes assembling, so a failure here names itself in seconds instead of arriving at the
+        # end of a render log.
+        runs-on: ubuntu-26.04
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                # The tests read committed files and re-run the generators over them; no submodule is
+                # involved, and po4a (the one thing that would need tools/po4a) is not exercised here.
+                submodules: false
+
+            - uses: actions/setup-python@v5
+              with:
+                # Pinned for the same reason the runner image is: an interpreter that moves under the gate
+                # turns an unrelated release into a red build nobody changed anything to cause.
+                python-version: '3.13'
+
+            - name: Install pytest and the generators' dependencies
+              # The tests run the real scripts rather than importing pieces of them, so they need what
+              # those scripts need. Minimum versions rather than exact pins: these are stable, widely-used
+              # libraries, and pinning them exactly would make this gate a dependency-bump chore.
+              run: python -m pip install --upgrade pytest 'ruamel.yaml>=0.18' 'polib>=1.2'
+
+            - name: Run the Python tests
+              # pytest discovers, so a new tool's test is gated by existing here rather than by someone
+              # remembering to add a line -- and it collects test_*.py, which is why the one file that
+              # predates this job is named with underscores rather than the hyphens the other scripts use.
+              #
+              # It also settles the empty case, which is the hazard a hand-rolled loop has to remember:
+              # pytest exits 5 when it collects nothing, so "the gate ran zero tests" is a non-zero exit by
+              # construction rather than by anyone recalling that a gate which inspects nothing has already
+              # bitten this repository twice.
+              run: python -m pytest scripts/ -v
+
     build-docs:
         # Pinned to an explicit image for reproducibility; 26.04 provides the .NET 10 / PowerShell 7.6
         # runtime the NeoIPC-Tools module and data-dictionary generator require.
