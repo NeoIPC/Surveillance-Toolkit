@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-07-31 13:03+0200\n"
+"POT-Creation-Date: 2026-07-31 15:50+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Language-Team: none\n"
 "Language: en\n"
@@ -85,7 +85,7 @@ msgstr ""
 
 #. type: #sec-intro-what-neoipc-project
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:35
-msgid "Robust assessment of the effectiveness of interventions in a randomised controlled trial (RCT)"
+msgid "Robust assessment of the effectiveness of interventions in a randomized controlled trial (RCT)"
 msgstr ""
 
 #. type: #sec-intro-what-neoipc-project
@@ -297,7 +297,7 @@ msgstr ""
 
 #. type: #sec-mgmt-data-submission
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:128
-msgid "One of the advantages of using the web-based reporting system is the fact that you can use it to create standardised department-based reports at any time with a few clicks and compare them to the NeoIPC reference reports that are published annually."
+msgid "One of the advantages of using the web-based reporting system is the fact that you can use it to create standardized department-based reports at any time with a few clicks and compare them to the NeoIPC reference reports that are published annually."
 msgstr ""
 
 #. type: #sec-mgmt-data-submission
@@ -380,7 +380,7 @@ msgstr ""
 
 #. type: #sec-collect
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:159
-msgid "Necrotising enterocilitis"
+msgid "Necrotizing enterocolitis"
 msgstr ""
 
 #. type: #sec-collect
@@ -485,38 +485,38 @@ msgstr ""
 #. type: Title ====
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:204
 #, no-wrap
-msgid "Pseudonymisation Table"
+msgid "Pseudonymization Table"
 msgstr ""
 
-#. type: #sec-collect-pseudonymisation-table
+#. type: #sec-collect-pseudonymization-table
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:208
 msgid "If you have a legal or other requirement to unambiguously identify patients in the online reporting platform, you must assign each patient a NeoIPC-ID at the time of enrolment.  The NeoIPC-ID is a unique random identifier, which allows you to identify that patient within your department.  This makes it possible for you to use the anonymous data stored in the system to refer to specific patients, e.g. in case of readmission or data correction, but makes it impossible for third parties to do the same."
 msgstr ""
 
-#. type: #sec-collect-pseudonymisation-table
+#. type: #sec-collect-pseudonymization-table
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:211
 msgid "Each patient can only have one NeoIPC identification number.  When a patient is discharged and then readmitted, the initial follow-up ends at the time of discharge, and a new enrolment must be made using the same NeoIPC ID number when the patient is readmitted."
 msgstr ""
 
-#. type: #sec-collect-pseudonymisation-table
+#. type: #sec-collect-pseudonymization-table
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:216
-msgid "You are responsible for organizing patient data retrieval based on unique ids.  We advise you to generate a pseudonymisation list that contains NeoIPC ID (unique random numbers) together with other identifying information (name, birthdate, patient id from the hospital information system) or to note that information on the paper-based patient surveillance master data sheet.  You must store the pseudonymisation list and the paper sheets under the same conditions you store secret patient healthcare data and destroy it or the contained information in a secure way as soon as it is no longer needed.  To ensure data privacy, you should never use an identifier that is used in any context other than the NeoIPC Surveillance and that you do not fully control (e.g. do **not** use the patient id from your hospital information system, the patient name, or any unique identifier that is used elsewhere) while creating NeoIPC ID."
+msgid "You are responsible for organizing patient data retrieval based on unique ids.  We advise you to generate a pseudonymization list that contains NeoIPC ID (unique random numbers) together with other identifying information (name, birthdate, patient id from the hospital information system) or to note that information on the paper-based patient surveillance master data sheet.  You must store the pseudonymization list and the paper sheets under the same conditions you store secret patient healthcare data and destroy it or the contained information in a secure way as soon as it is no longer needed.  To ensure data privacy, you should never use an identifier that is used in any context other than the NeoIPC Surveillance and that you do not fully control (e.g. do **not** use the patient id from your hospital information system, the patient name, or any unique identifier that is used elsewhere) while creating NeoIPC ID."
 msgstr ""
 
-#. type: #sec-collect-pseudonymisation-table
+#. type: #sec-collect-pseudonymization-table
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:218
 msgid "For the generation of reference reports, NeoIPC does not need to track individual patients and the IDs you assign will not be used by NeoIPC in any way."
 msgstr ""
 
-#. type: #sec-collect-pseudonymisation-table
+#. type: #sec-collect-pseudonymization-table
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:220
-msgid "To create a pseudonymisation list you can use the templates (excel spreadsheet and paper datasheet) available in the https://neoipc.org/surveillance/resources/[resources section] of our website."
+msgid "To create a pseudonymization list you can use the templates (excel spreadsheet and paper datasheet) available in the https://neoipc.org/surveillance/resources/[resources section] of our website."
 msgstr ""
 
 #. type: Block title
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:222
 #, no-wrap
-msgid "Example pseudonymisation list"
+msgid "Example pseudonymization list"
 msgstr ""
 
 #. type: Table
@@ -636,7 +636,7 @@ msgstr ""
 
 #. type: #sec-collect-infection-data-collection
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:297
-msgid "Neonatal infections can broadly be separated into early-onset and late-onset infections.  Most of the early-onset infections result from pregnancy- and delivery-associated risks where the causative pathogens typically affect the mother in the form of microbial colonisation or infection before causing an infection in the child.  Most of the late-onset infections, in contrast, result from healthcare-associated risks, and the pathogens causing these infections typically stem from persons or inanimate surfaces that get in close contact with the infant during neonatal care.  Since only the latter are immediately actionable for the healthcare professionals working on neonatology wards, NeoIPC puts a focus on those “nosocomial” late-onset infections but tries to also support you, when trying to perform surveillance of early-onset infections.  Although a fixed time-based cut-off value does not exactly capture whether an infection was acquired from the NICU environment, there is a relatively broad international consensus that a 72-hour cut-off value serves as a good estimator for nosocomial infections in neonatology.  For this reason, infections, where the first symptoms occur within a 72-hour window after birth, should not be considered nosocomial infections and therefore should not be recorded in the NeoIPC core module.  It is, however, possible to record them separately as early-onset infections if you opt into the NeoIPC early-onset infection module.  If an infection begins before 72 hours and is clearly hospital-acquired (i.e., there are clear signs of infection on the catheter entry site) or starts after 72 hours and is clearly vertical (e.g., all transplacental infections that are not evident at birth, like toxoplasmosis, CMV, HIV, rubella, and syphilis), this cut-off value can be ignored."
+msgid "Neonatal infections can broadly be separated into early-onset and late-onset infections.  Most of the early-onset infections result from pregnancy- and delivery-associated risks where the causative pathogens typically affect the mother in the form of microbial colonization or infection before causing an infection in the child.  Most of the late-onset infections, in contrast, result from healthcare-associated risks, and the pathogens causing these infections typically stem from persons or inanimate surfaces that get in close contact with the infant during neonatal care.  Since only the latter are immediately actionable for the healthcare professionals working on neonatology wards, NeoIPC puts a focus on those “nosocomial” late-onset infections but tries to also support you, when trying to perform surveillance of early-onset infections.  Although a fixed time-based cut-off value does not exactly capture whether an infection was acquired from the NICU environment, there is a relatively broad international consensus that a 72-hour cut-off value serves as a good estimator for nosocomial infections in neonatology.  For this reason, infections, where the first symptoms occur within a 72-hour window after birth, should not be considered nosocomial infections and therefore should not be recorded in the NeoIPC core module.  It is, however, possible to record them separately as early-onset infections if you opt into the NeoIPC early-onset infection module.  If an infection begins before 72 hours and is clearly hospital-acquired (i.e., there are clear signs of infection on the catheter entry site) or starts after 72 hours and is clearly vertical (e.g., all transplacental infections that are not evident at birth, like toxoplasmosis, CMV, HIV, rubella, and syphilis), this cut-off value can be ignored."
 msgstr ""
 
 #. type: #sec-collect-infection-data-collection
@@ -680,16 +680,17 @@ msgstr ""
 msgid "NeoIPC-Core-Primary-Sepsis-BSI-Reporting-Sheet-Image.png"
 msgstr ""
 
-#. type: Title ===
+#. type: horizontal
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:318
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:443
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:993
 #, no-wrap
-msgid "Necrotising Enterocolitis"
+msgid "Necrotizing Enterocolitis"
 msgstr ""
 
-#. type: #sec-collect-necrotising-enterocolitis
+#. type: #sec-collect-necrotizing-enterocolitis
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:320
-msgid "If an eligible infant develops a necrotizing enterocolitis according to the NeoIPC surveillance criteria (see Infection Definitions: Necrotising Enterocolitis (NEC)) during the surveillance period, you should record and submit the required data using the data collection sheet below and/or via the online reporting platform."
+msgid "If an eligible infant develops a necrotizing enterocolitis according to the NeoIPC surveillance criteria (see Infection Definitions: Necrotizing Enterocolitis (NEC)) during the surveillance period, you should record and submit the required data using the data collection sheet below and/or via the online reporting platform."
 msgstr ""
 
 #. image::NeoIPC-Core-NEC-Reporting-Sheet-Image.svg[NEC reporting sheet,{full-width},pdfwidth=75%,opts=inline,align="center"]
@@ -859,7 +860,7 @@ msgstr ""
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:41
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:60
 #: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc:63
-#: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:14
+#: doc/protocol/definitions/NeoIPC-Core-Necrotizing-Enterocolitis-Definition.adoc:14
 #: doc/protocol/definitions/NeoIPC-Core-Organ-Space-SSI-Definition.adoc:8
 #: doc/protocol/definitions/NeoIPC-Core-Organ-Space-SSI-Definition.adoc:11
 #: doc/protocol/definitions/NeoIPC-Core-Pneumonia-Definition.adoc:8
@@ -909,7 +910,7 @@ msgstr ""
 
 #. type: #sec-def-primary-sepsis-bloodstream-infection
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:408
-msgid "To account for these limitations, sepsis is classified as either culture negative (clinical sepsis) or culture proven (Laboratory-confirmed bloodstream infection = LCBSI) in the NeoIPC surveillance system.  A LCBSI is further classified into two categories based on the culture result, distinguishing recognised pathogens from common commensals, because for the latter it is often unclear whether growth represents true infection or contamination, and NeoIPC therefore applies additional criteria to improve the specificity of surveillance in this category (see <<sec-def-lcbsi-caused-common-commensals>>)."
+msgid "To account for these limitations, sepsis is classified as either culture negative (clinical sepsis) or culture proven (Laboratory-confirmed bloodstream infection = LCBSI) in the NeoIPC surveillance system.  A LCBSI is further classified into two categories based on the culture result, distinguishing recognized pathogens from common commensals, because for the latter it is often unclear whether growth represents true infection or contamination, and NeoIPC therefore applies additional criteria to improve the specificity of surveillance in this category (see <<sec-def-lcbsi-caused-common-commensals>>)."
 msgstr ""
 
 #. type: #sec-def-primary-sepsis-bloodstream-infection
@@ -929,7 +930,7 @@ msgstr ""
 
 #. type: #sec-def-primary-sepsis-bloodstream-infection
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:415
-msgid "LCBSI caused by a recognised pathogen*"
+msgid "LCBSI caused by a recognized pathogen*"
 msgstr ""
 
 #. type: #sec-def-primary-sepsis-bloodstream-infection
@@ -952,7 +953,7 @@ msgstr ""
 #. type: Title ====
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:426
 #, no-wrap
-msgid "LCBSI caused by a Recognised Pathogen"
+msgid "LCBSI caused by a Recognized Pathogen"
 msgstr ""
 
 #. type: Title ====
@@ -976,9 +977,9 @@ msgstr ""
 msgid "In any case, because of this fact, you should be very careful when comparing rates of LCBSI caused by common commensals across different settings."
 msgstr ""
 
-#. type: #sec-def-necrotising-enterocolitis
+#. type: #sec-def-necrotizing-enterocolitis
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:448
-msgid "Necrotising Enterocolitis (NEC) surveillance criteria consist of either a combination of radiological findings and clinical signs or a diagnosis based on surgical and/or pathological evidence.  The NEC dataset includes information on whether the patient has an intestinal perforation.  However, this is not one of the surveillance definition criteria.  This means that you should not report cases where you have surgical evidence of intestinal perforation without evidence of primary necrosis or pneumatosis intestinalis (e.g. spontaneous bowel perforation) as NEC."
+msgid "Necrotizing Enterocolitis (NEC) surveillance criteria consist of either a combination of radiological findings and clinical signs or a diagnosis based on surgical and/or pathological evidence.  The NEC dataset includes information on whether the patient has an intestinal perforation.  However, this is not one of the surveillance definition criteria.  This means that you should not report cases where you have surgical evidence of intestinal perforation without evidence of primary necrosis or pneumatosis intestinalis (e.g. spontaneous bowel perforation) as NEC."
 msgstr ""
 
 #. type: #sec-def-pneumonia
@@ -1185,7 +1186,7 @@ msgstr ""
 #. type: Labeled list
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:550
 #, no-wrap
-msgid "[[dd-enroling-organisation-unit]]Enroling organisation unit"
+msgid "[[dd-enrolling-organization-unit]]Enrolling organization unit"
 msgstr ""
 
 #. type: #sec-dd-enrolment
@@ -1201,12 +1202,12 @@ msgstr ""
 
 #. type: #sec-dd-enrolment
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:553
-msgid "The unique id you assign to the patient for tracking in the reporting platform.  We advise you to store this information in a pseudonymisation list."
+msgid "The unique id you assign to the patient for tracking in the reporting platform.  We advise you to store this information in a pseudonymization list."
 msgstr ""
 
 #. type: #sec-dd-enrolment
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:558
-msgid "Use this identifier to uniquely identify a patient in the system.  Ideally use a unique random string of characters.  If you have a requirement to identify a patient you have entered here, you can use this identifier as the NeoIPC key for pseudonymisation.  NEVER use an identifier that is used anywhere else and that you do not fully control (e.g. do NOT use the patient id from your hospital information system)."
+msgid "Use this identifier to uniquely identify a patient in the system.  Ideally use a unique random string of characters.  If you have a requirement to identify a patient you have entered here, you can use this identifier as the NeoIPC key for pseudonymization.  NEVER use an identifier that is used anywhere else and that you do not fully control (e.g. do NOT use the patient id from your hospital information system)."
 msgstr ""
 
 #. type: Labeled list
@@ -1244,7 +1245,7 @@ msgstr ""
 
 #. type: #sec-dd-enrolment
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:567
-msgid "The gestational age, expressed in completed weeks and days (e.g., 25 weeks and 4 days: 25+4) at the time of birth.  Typically this refers to the gestational age as it was calculated or estimated by the mother's obstetrician but where this is not available (e.g. in unobserved pregnancies) the gestational age assesed by the treating physician (e.g. via the Ballard score) may be recorded."
+msgid "The gestational age, expressed in completed weeks and days (e.g., 25 weeks and 4 days: 25+4) at the time of birth.  Typically this refers to the gestational age as it was calculated or estimated by the mother's obstetrician but where this is not available (e.g. in unobserved pregnancies) the gestational age assessed by the treating physician (e.g. via the Ballard score) may be recorded."
 msgstr ""
 
 #. type: Labeled list
@@ -1255,7 +1256,7 @@ msgstr ""
 
 #. type: #sec-dd-enrolment
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:569
-msgid "The infant’s weight immediately after birth in grams.  Typically this value is based on a measurement but in case the birth weigth is unknown or has a highly pathological value that does not reflect the maturity of the infant (e.g. hydrops fetalis) you can enter the birth weight that is estimated by the treating physician."
+msgid "The infant’s weight immediately after birth in grams.  Typically this value is based on a measurement but in case the birth weight is unknown or has a highly pathological value that does not reflect the maturity of the infant (e.g. hydrops fetalis) you can enter the birth weight that is estimated by the treating physician."
 msgstr ""
 
 #. type: Labeled list
@@ -1906,7 +1907,7 @@ msgstr ""
 
 #. type: #sec-dd-general-infection-data
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:700
-msgid "A type of micro-organism (e.g., coagulase-negative staphylococci), that is commonly present on epithelium-covered body surfaces (e.g., skin).  When one or multiple of these species grow in a blood culture, a contamination is more likely than when a recognised pathogen grows.  See Master Organism List on https://neoipc.org/surveillance/resources/"
+msgid "A type of micro-organism (e.g., coagulase-negative staphylococci), that is commonly present on epithelium-covered body surfaces (e.g., skin).  When one or multiple of these species grow in a blood culture, a contamination is more likely than when a recognized pathogen grows.  See Master Organism List on https://neoipc.org/surveillance/resources/"
 msgstr ""
 
 #. type: Labeled list
@@ -2183,7 +2184,7 @@ msgstr ""
 
 #. type: #sec-dd-bsi-specific-data
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:771
-msgid "Enteral feeding intolerance, abdominal distension or ileus without imaging findings or surgical findings that would otherwise suggest a necrotizing entrocolitis or a spontaneous intestinal perforation."
+msgid "Enteral feeding intolerance, abdominal distension or ileus without imaging findings or surgical findings that would otherwise suggest a necrotizing enterocolitis or a spontaneous intestinal perforation."
 msgstr ""
 
 #. type: Labeled list
@@ -2206,7 +2207,7 @@ msgstr ""
 #. type: Labeled list
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:776
 #, no-wrap
-msgid "[[dd-portal-veinous-gas]]Portal veinous gas"
+msgid "[[dd-portal-venous-gas]]Portal venous gas"
 msgstr ""
 
 #. type: #sec-dd-nec-specific-data
@@ -2515,22 +2516,22 @@ msgstr ""
 
 #. type: #sec-analysis-device-utilization
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:863
-msgid "stem:[\"CVC Utilisation Rate\" = \"Total CVC Days\" / \"Total Patient Days\" xx 100 ]"
+msgid "stem:[\"CVC Utilization Rate\" = \"Total CVC Days\" / \"Total Patient Days\" xx 100 ]"
 msgstr ""
 
 #. type: #sec-analysis-device-utilization
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:865
-msgid "stem:[\"PVC Utilisation Rate\" = \"Total PVC Days\" / \"Total Patient Days\" xx 100 ]"
+msgid "stem:[\"PVC Utilization Rate\" = \"Total PVC Days\" / \"Total Patient Days\" xx 100 ]"
 msgstr ""
 
 #. type: #sec-analysis-device-utilization
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:867
-msgid "stem:[\"INV Utilisation Rate\" = \"Total INV Days\" / \"Total Patient Days\" xx 100 ]"
+msgid "stem:[\"INV Utilization Rate\" = \"Total INV Days\" / \"Total Patient Days\" xx 100 ]"
 msgstr ""
 
 #. type: #sec-analysis-device-utilization
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:869
-msgid "stem:[\"NIV Utilisation Rate\" = \"Total NIV Days\" / \"Total Patient Days\" xx 100]"
+msgid "stem:[\"NIV Utilization Rate\" = \"Total NIV Days\" / \"Total Patient Days\" xx 100]"
 msgstr ""
 
 #. type: Title ====
@@ -2868,7 +2869,7 @@ msgstr ""
 
 #. type: horizontal
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:979
-msgid "Computer Tomography"
+msgid "Computed Tomography"
 msgstr ""
 
 #. type: Labeled list
@@ -3020,11 +3021,6 @@ msgstr ""
 msgid "[[abbr-nec]]NEC"
 msgstr ""
 
-#. type: horizontal
-#: doc/protocol/NeoIPC-Core-Protocol.adoc:993
-msgid "Necrotizing Enterocolitis"
-msgstr ""
-
 #. type: Labeled list
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:993
 #, no-wrap
@@ -3110,7 +3106,7 @@ msgstr ""
 
 #. type: horizontal
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:1001
-msgid "Randomised Controlled Trial"
+msgid "Randomized Controlled Trial"
 msgstr ""
 
 #. type: Labeled list
@@ -3533,101 +3529,101 @@ msgid "*The day of the first dose and the day of the last dose are counted.  Day
 msgstr ""
 
 #. type: Block title
-#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Recognised-Pathogen-Definition.adoc:2
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Recognized-Pathogen-Definition.adoc:2
 #, no-wrap
-msgid "Laboratory-confirmed bloodstream infection with recognised pathogen"
+msgid "Laboratory-confirmed bloodstream infection with recognized pathogen"
 msgstr ""
 
 #. type: delimited block * 4
-#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Recognised-Pathogen-Definition.adoc:6
-msgid "**Recognised pathogen is recovered from a blood and/or cerebrospinal fluid culture**"
+#: doc/protocol/definitions/NeoIPC-Core-LCBSI-With-Recognized-Pathogen-Definition.adoc:6
+msgid "**Recognized pathogen is recovered from a blood and/or cerebrospinal fluid culture**"
 msgstr ""
 
 #. type: Block title
-#: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:2
+#: doc/protocol/definitions/NeoIPC-Core-Necrotizing-Enterocolitis-Definition.adoc:2
 #, no-wrap
 msgid "Symptom-based NEC"
 msgstr ""
 
 #. type: delimited block * 4
-#: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:6
+#: doc/protocol/definitions/NeoIPC-Core-Necrotizing-Enterocolitis-Definition.adoc:6
 msgid "**At least of ONE the following radiological signs (imaging technologies: X-ray, CT, MRI, ultrasound):**"
 msgstr ""
 
 #. type: delimited block * 4
-#: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:9
+#: doc/protocol/definitions/NeoIPC-Core-Necrotizing-Enterocolitis-Definition.adoc:9
 msgid "Pneumoperitoneum"
 msgstr ""
 
 #. type: delimited block * 4
-#: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:10
-#: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:33
+#: doc/protocol/definitions/NeoIPC-Core-Necrotizing-Enterocolitis-Definition.adoc:10
+#: doc/protocol/definitions/NeoIPC-Core-Necrotizing-Enterocolitis-Definition.adoc:33
 msgid "Pneumatosis intestinalis"
 msgstr ""
 
 #. type: delimited block * 4
-#: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:11
+#: doc/protocol/definitions/NeoIPC-Core-Necrotizing-Enterocolitis-Definition.adoc:11
 msgid "Portal venous gas (Hepatobiliary gas)"
 msgstr ""
 
 #. type: delimited block * 4
-#: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:12
+#: doc/protocol/definitions/NeoIPC-Core-Necrotizing-Enterocolitis-Definition.adoc:12
 msgid "Fixed bowel loops (≥ 24h)"
 msgstr ""
 
 #. type: delimited block * 4
-#: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:15
+#: doc/protocol/definitions/NeoIPC-Core-Necrotizing-Enterocolitis-Definition.adoc:15
 msgid "**At least ONE of the following clinical signs:**"
 msgstr ""
 
 #. type: delimited block * 4
-#: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:16
+#: doc/protocol/definitions/NeoIPC-Core-Necrotizing-Enterocolitis-Definition.adoc:16
 msgid "Abdominal distention"
 msgstr ""
 
 #. type: delimited block * 4
-#: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:17
+#: doc/protocol/definitions/NeoIPC-Core-Necrotizing-Enterocolitis-Definition.adoc:17
 msgid "Abdominal discoloration or shiny/reddish skin tone"
 msgstr ""
 
 #. type: delimited block * 4
-#: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:18
+#: doc/protocol/definitions/NeoIPC-Core-Necrotizing-Enterocolitis-Definition.adoc:18
 msgid "Repeated occult (guaiac test) or visible blood in stool (no anal fissure)"
 msgstr ""
 
 #. type: delimited block * 4
-#: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:19
+#: doc/protocol/definitions/NeoIPC-Core-Necrotizing-Enterocolitis-Definition.adoc:19
 msgid "Increasing/pronounced vomiting (e.g. bilious or bloody)"
 msgstr ""
 
 #. type: delimited block * 4
-#: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:20
+#: doc/protocol/definitions/NeoIPC-Core-Necrotizing-Enterocolitis-Definition.adoc:20
 msgid "Increased gastric residuals from previous feeding"
 msgstr ""
 
 #. type: delimited block * 4
-#: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:21
+#: doc/protocol/definitions/NeoIPC-Core-Necrotizing-Enterocolitis-Definition.adoc:21
 msgid "Bilious gastric aspirate (not from transpyloric feeding tube)"
 msgstr ""
 
 #. type: Plain text
-#: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:24
+#: doc/protocol/definitions/NeoIPC-Core-Necrotizing-Enterocolitis-Definition.adoc:24
 msgid "**OR**"
 msgstr ""
 
 #. type: Block title
-#: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:26
+#: doc/protocol/definitions/NeoIPC-Core-Necrotizing-Enterocolitis-Definition.adoc:26
 #, no-wrap
 msgid "Surgical NEC"
 msgstr ""
 
 #. type: delimited block * 4
-#: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:30
+#: doc/protocol/definitions/NeoIPC-Core-Necrotizing-Enterocolitis-Definition.adoc:30
 msgid "**At least of ONE the following surgical or pathological findings:**"
 msgstr ""
 
 #. type: delimited block * 4
-#: doc/protocol/definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc:32
+#: doc/protocol/definitions/NeoIPC-Core-Necrotizing-Enterocolitis-Definition.adoc:32
 msgid "Extensive bowel necrosis (> 2 cm of bowel affected)"
 msgstr ""
 

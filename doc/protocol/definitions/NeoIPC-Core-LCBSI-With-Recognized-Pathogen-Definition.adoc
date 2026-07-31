@@ -1,0 +1,6 @@
+[#def-lcbsi-pathogen]
+.Laboratory-confirmed bloodstream infection with recognized pathogen
+[%unbreakable]
+****
+**Recognized pathogen is recovered from a blood and/or cerebrospinal fluid culture**
+****

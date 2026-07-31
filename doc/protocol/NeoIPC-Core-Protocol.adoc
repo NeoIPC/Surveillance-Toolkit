@@ -31,7 +31,7 @@ Within the NeoIPC project, we want to support you with infection prevention and 
 We are an international team of clinicians and scientists from 13 collaborating partner institutions with a proven record in the areas of neonatal intensive care, neonatal infection, infection prevention and control (IPC), implementation science, microbiology, and surveillance, who collaborate in this project to achieve two overarching goals:
 
 . Develop and implement an innovative approach towards the evaluation of IPC interventions in neonatology via:
-.. Robust assessment of the effectiveness of interventions in a randomised controlled trial (RCT)
+.. Robust assessment of the effectiveness of interventions in a randomized controlled trial (RCT)
 .. Identification of a suitable implementation strategy.
 . Generate widely relevant and globally transferable outputs to improve IPC in neonatal care through:
 .. Formation of a clinical practice network to support the implementation of IPC in neonatal care, including a variety of practice settings like neonatal intensive care unit (NICU), high care, special care, and kangaroo care (KC).
@@ -124,7 +124,7 @@ Since DHIS2 is a freely available open source system, you have multiple options 
 * Deploy it nationally or regionally (or use an existing national or regional deployment) to form a national or regional network of units performing surveillance.
 * Use the NeoIPC project's https://neoipc.charite.de/[instance] of the system which is currently operated by the team at the German National Reference Centre for Surveillance of Nosocomial Infections at Charité's Institute for Hygiene and Environmental Medicine.
 
-One of the advantages of using the web-based reporting system is the fact that you can use it to create standardised department-based reports at any time with a few clicks and compare them to the NeoIPC reference reports that are published annually.
+One of the advantages of using the web-based reporting system is the fact that you can use it to create standardized department-based reports at any time with a few clicks and compare them to the NeoIPC reference reports that are published annually.
 
 To create the reference report, we carry out a calculation at a specified time every year using the data available in the NeoIPC database at that point in time.
 In order to make this possible, you must have completed all data entry and addition of missing information from the previous year within 6 weeks after the end of a calendar year.
@@ -155,7 +155,7 @@ In addition, if an eligible infant develops a healthcare-associated infection wi
 
 * Blood stream infection
 * Pneumonia
-* Necrotising enterocilitis
+* Necrotizing enterocolitis
 * Surgical site infection
 
 Only these infections acquired in participating neonatology departments should be recorded.
@@ -200,8 +200,8 @@ An infant that is not eligible in the core module may still be eligible in anoth
 === Patient Data Collection
 Whenever an eligible patient is admitted or readmitted to one of the wards in your neonatology department, you should enrol this patient, preferably directly into the online reporting platform.
 
-[#sec-collect-pseudonymisation-table]
-==== Pseudonymisation Table
+[#sec-collect-pseudonymization-table]
+==== Pseudonymization Table
 If you have a legal or other requirement to unambiguously identify patients in the online reporting platform, you must assign each patient a NeoIPC-ID at the time of enrolment.
 The NeoIPC-ID is a unique random identifier, which allows you to identify that patient within your department.
 This makes it possible for you to use the anonymous data stored in the system to refer to specific patients, e.g. in case of readmission or data correction, but makes it impossible for third parties to do the same.
@@ -210,16 +210,16 @@ Each patient can only have one NeoIPC identification number.
 When a patient is discharged and then readmitted, the initial follow-up ends at the time of discharge, and a new enrolment must be made using the same NeoIPC ID number when the patient is readmitted.
 
 You are responsible for organizing patient data retrieval based on unique ids.
-We advise you to generate a pseudonymisation list that contains NeoIPC ID (unique random numbers) together with other identifying information (name, birthdate, patient id from the hospital information system) or to note that information on the paper-based patient surveillance master data sheet.
-You must store the pseudonymisation list and the paper sheets under the same conditions you store secret patient healthcare data and destroy it or the contained information in a secure way as soon as it is no longer needed.
+We advise you to generate a pseudonymization list that contains NeoIPC ID (unique random numbers) together with other identifying information (name, birthdate, patient id from the hospital information system) or to note that information on the paper-based patient surveillance master data sheet.
+You must store the pseudonymization list and the paper sheets under the same conditions you store secret patient healthcare data and destroy it or the contained information in a secure way as soon as it is no longer needed.
 To ensure data privacy, you should never use an identifier that is used in any context other than the NeoIPC Surveillance and that you do not fully control (e.g. do **not** use the patient id from your hospital information system, the patient name, or any unique identifier that is used elsewhere) while creating NeoIPC ID.
 
 For the generation of reference reports, NeoIPC does not need to track individual patients and the IDs you assign will not be used by NeoIPC in any way.
 
-NOTE: To create a pseudonymisation list you can use the templates (excel spreadsheet and paper datasheet) available in the https://neoipc.org/surveillance/resources/[resources section] of our website.
+NOTE: To create a pseudonymization list you can use the templates (excel spreadsheet and paper datasheet) available in the https://neoipc.org/surveillance/resources/[resources section] of our website.
 
-[#tbl-pseudonymisation-example]
-.Example pseudonymisation list
+[#tbl-pseudonymization-example]
+.Example pseudonymization list
 [cols=">1,^2,^2,^3,^2,^4"]
 |===
 |№ |NeoIPC-ID |Patient-ID |Patient Name |Date of Birth |Comments
@@ -287,7 +287,7 @@ image::NeoIPC-Core-Surgical-Procedure-Data-Collection-Sheet-Image.png[Surgical p
 Hospital-acquired bloodstream infections, pneumonia, NEC, and surgical site infections in eligible patients should be documented until the end of the surveillance period.
 
 Neonatal infections can broadly be separated into early-onset and late-onset infections.
-Most of the early-onset infections result from pregnancy- and delivery-associated risks where the causative pathogens typically affect the mother in the form of microbial colonisation or infection before causing an infection in the child.
+Most of the early-onset infections result from pregnancy- and delivery-associated risks where the causative pathogens typically affect the mother in the form of microbial colonization or infection before causing an infection in the child.
 Most of the late-onset infections, in contrast, result from healthcare-associated risks, and the pathogens causing these infections typically stem from persons or inanimate surfaces that get in close contact with the infant during neonatal care.
 Since only the latter are immediately actionable for the healthcare professionals working on neonatology wards, NeoIPC puts a focus on those “nosocomial” late-onset infections but tries to also support you, when trying to perform surveillance of early-onset infections.
 Although a fixed time-based cut-off value does not exactly capture whether an infection was acquired from the NICU environment, there is a relatively broad international consensus that a 72-hour cut-off value serves as a good estimator for nosocomial infections in neonatology.
@@ -314,9 +314,9 @@ If an eligible infant develops a hospital-acquired primary sepsis/bloodstream in
 image::NeoIPC-Core-Primary-Sepsis-BSI-Reporting-Sheet-Image.png[Primary sepsis/BSI reporting sheet,{full-width},pdfwidth=75%,align="center"]
 
 <<<
-[#sec-collect-necrotising-enterocolitis]
-==== Necrotising Enterocolitis
-If an eligible infant develops a necrotizing enterocolitis according to the NeoIPC surveillance criteria (see Infection Definitions: Necrotising Enterocolitis (NEC)) during the surveillance period, you should record and submit the required data using the data collection sheet below and/or via the online reporting platform.
+[#sec-collect-necrotizing-enterocolitis]
+==== Necrotizing Enterocolitis
+If an eligible infant develops a necrotizing enterocolitis according to the NeoIPC surveillance criteria (see Infection Definitions: Necrotizing Enterocolitis (NEC)) during the surveillance period, you should record and submit the required data using the data collection sheet below and/or via the online reporting platform.
 
 [#fig-nec-sheet]
 .NEC reporting sheet
@@ -404,14 +404,14 @@ First, the small blood volumes obtainable from very low birth weight infants lim
 Second, the technical difficulty of venipuncture in very small infants increases the risk of skin flora contamination, which reduces the specificity of a positive culture when common commensal organisms are grown.
 
 To account for these limitations, sepsis is classified as either culture negative (clinical sepsis) or culture proven (Laboratory-confirmed bloodstream infection = LCBSI) in the NeoIPC surveillance system.
-A LCBSI is further classified into two categories based on the culture result, distinguishing recognised pathogens from common commensals, because for the latter it is often unclear whether growth represents true infection or contamination, and NeoIPC therefore applies additional criteria to improve the specificity of surveillance in this category (see <<sec-def-lcbsi-caused-common-commensals>>).
+A LCBSI is further classified into two categories based on the culture result, distinguishing recognized pathogens from common commensals, because for the latter it is often unclear whether growth represents true infection or contamination, and NeoIPC therefore applies additional criteria to improve the specificity of surveillance in this category (see <<sec-def-lcbsi-caused-common-commensals>>).
 
 Infections caused by microorganisms that enter the bloodstream from a primary infection site (except for catheter-associated infections) are not counted in this section.
 For detailed information, please see xref:sec-collect-secondary-bloodstream-infection[Secondary Bloodstream Infection].
 
 . Clinical sepsis (infection without a detected organism)
 . Laboratory-confirmed bloodstream infection
-.. LCBSI caused by a recognised pathogen*
+.. LCBSI caused by a recognized pathogen*
 .. LCBSI caused by a common commensal*
 
 *See xref:sec-agent-list[List of Infectious Agents]
@@ -422,9 +422,9 @@ For detailed information, please see xref:sec-collect-secondary-bloodstream-infe
 include::definitions/NeoIPC-Core-Clinical-Sepsis-Definition.adoc[]
 
 <<<
-[#sec-def-lcbsi-caused-recognised-pathogen]
-==== LCBSI caused by a Recognised Pathogen
-include::definitions/NeoIPC-Core-LCBSI-With-Recognised-Pathogen-Definition.adoc[]
+[#sec-def-lcbsi-caused-recognized-pathogen]
+==== LCBSI caused by a Recognized Pathogen
+include::definitions/NeoIPC-Core-LCBSI-With-Recognized-Pathogen-Definition.adoc[]
 
 [#sec-def-lcbsi-caused-common-commensals]
 ==== LCBSI caused by Common Commensals
@@ -439,14 +439,14 @@ In any case, because of this fact, you should be very careful when comparing rat
 
 include::definitions/NeoIPC-Core-LCBSI-With-Common-Commensal-Definition.adoc[]
 
-[#sec-def-necrotising-enterocolitis]
-=== Necrotising Enterocolitis
-Necrotising Enterocolitis (NEC) surveillance criteria consist of either a combination of radiological findings and clinical signs or a diagnosis based on surgical and/or pathological evidence.
+[#sec-def-necrotizing-enterocolitis]
+=== Necrotizing Enterocolitis
+Necrotizing Enterocolitis (NEC) surveillance criteria consist of either a combination of radiological findings and clinical signs or a diagnosis based on surgical and/or pathological evidence.
 The NEC dataset includes information on whether the patient has an intestinal perforation.
 However, this is not one of the surveillance definition criteria.
 This means that you should not report cases where you have surgical evidence of intestinal perforation without evidence of primary necrosis or pneumatosis intestinalis (e.g. spontaneous bowel perforation) as NEC.
 
-include::definitions/NeoIPC-Core-Necrotising-Enterocolitis-Definition.adoc[]
+include::definitions/NeoIPC-Core-Necrotizing-Enterocolitis-Definition.adoc[]
 
 [#sec-def-pneumonia]
 === Pneumonia
@@ -547,13 +547,13 @@ NOTE: A companion machine-readable *data dictionary* — a spreadsheet listing e
 === Patient Master Data
 [#sec-dd-enrolment]
 ==== Enrolment
-[[dd-enroling-organisation-unit]]Enroling organisation unit:: The unit you want to register the new patient.
+[[dd-enrolling-organization-unit]]Enrolling organization unit:: The unit you want to register the new patient.
 [[dd-neoipc-id]]NeoIPC-ID (NeoIPC patient identifier):: The unique id you assign to the patient for tracking in the reporting platform.
-We advise you to store this information in a pseudonymisation list.
+We advise you to store this information in a pseudonymization list.
 +
 NOTE: Use this identifier to uniquely identify a patient in the system.
 Ideally use a unique random string of characters.
-If you have a requirement to identify a patient you have entered here, you can use this identifier as the NeoIPC key for pseudonymisation.
+If you have a requirement to identify a patient you have entered here, you can use this identifier as the NeoIPC key for pseudonymization.
 NEVER use an identifier that is used anywhere else and that you do not fully control (e.g. do NOT use the patient id from your hospital information system).
 
 [[dd-patient-id]]Patient-ID:: The unique id of the patient in the hospital, which most of the time comes from the hospital information system (HIS) or the patient data management system (PDMS).
@@ -563,9 +563,9 @@ NOTE: The patient ID and the patient name are not part of the NeoIPC dataset and
 They are available on the data collection paper sheets so that you can identify the patient within the hospital and to look up the file in the hospital information system.
 
 [[dd-ga]]Gestational age (GA):: The gestational age, expressed in completed weeks and days (e.g., 25 weeks and 4 days: 25+4) at the time of birth.
-Typically this refers to the gestational age as it was calculated or estimated by the mother's obstetrician but where this is not available (e.g. in unobserved pregnancies) the gestational age assesed by the treating physician (e.g. via the Ballard score) may be recorded.
+Typically this refers to the gestational age as it was calculated or estimated by the mother's obstetrician but where this is not available (e.g. in unobserved pregnancies) the gestational age assessed by the treating physician (e.g. via the Ballard score) may be recorded.
 [[dd-bw]]Birthweight (BW):: The infant’s weight immediately after birth in grams.
-Typically this value is based on a measurement but in case the birth weigth is unknown or has a highly pathological value that does not reflect the maturity of the infant (e.g. hydrops fetalis) you can enter the birth weight that is estimated by the treating physician.
+Typically this value is based on a measurement but in case the birth weight is unknown or has a highly pathological value that does not reflect the maturity of the infant (e.g. hydrops fetalis) you can enter the birth weight that is estimated by the treating physician.
 [[dd-sex]]Sex:: Typically the phenotypic sex of the patient.
 If sex cannot be determined from the patient's phenotype or genotype, or if the genotype is neither XX nor XY, it is considered undetermined for purposes of surveillance.
 +
@@ -695,7 +695,7 @@ If a surgical site infection occurs, this information will be used to determine 
 If no symptoms occur, the day of first positive culture at the primary infection site.
 
 [[dd-common-commensal]]Common commensal:: A type of micro-organism (e.g., coagulase-negative staphylococci), that is commonly present on epithelium-covered body surfaces (e.g., skin).
-When one or multiple of these species grow in a blood culture, a contamination is more likely than when a recognised pathogen grows.
+When one or multiple of these species grow in a blood culture, a contamination is more likely than when a recognized pathogen grows.
 See Master Organism List on https://neoipc.org/surveillance/resources/
 
 [[dd-mdros]]Multidrug-resistant organisms (MDROs):: Select the one(s) applicable to the isolated organism;
@@ -767,13 +767,13 @@ If the infant died, was discharged, or transferred before the end of the five-da
 
 [[dd-apnoea-or-oxygen-increase]]New/more frequent episodes of apnoea or increases in oxygen demand or ventilatory support:: New or increased frequency of episodes of apnea lasting more than 20 seconds, or an increase in the amount of oxygen required to maintain adequate oxygenation, or an escalation of ventilatory support, such as increased flow with high-flow therapy or intubation for invasive ventilation.
 
-[[dd-enteral-feeding-intolerance]]Enteral feeding intolerance, abdominal distension or ileus:: Enteral feeding intolerance, abdominal distension or ileus without imaging findings or surgical findings that would otherwise suggest a necrotizing entrocolitis or a spontaneous intestinal perforation.
+[[dd-enteral-feeding-intolerance]]Enteral feeding intolerance, abdominal distension or ileus:: Enteral feeding intolerance, abdominal distension or ileus without imaging findings or surgical findings that would otherwise suggest a necrotizing enterocolitis or a spontaneous intestinal perforation.
 
 [[dd-unexplained-metabolic-acidosis]]Unexplained metabolic acidosis:: Unexplained metabolic acidosis with a base deficit greater (more negative) than 10 mmol/L (10 mEq/L).
 
 [#sec-dd-nec-specific-data]
 ==== NEC Specific Data
-[[dd-portal-veinous-gas]]Portal veinous gas:: Accumulation of gas (-bubbles) in the portal vein and its branches.
+[[dd-portal-venous-gas]]Portal venous gas:: Accumulation of gas (-bubbles) in the portal vein and its branches.
 
 [#sec-dd-pneumonia-specific-data]
 ==== Pneumonia Specific Data
@@ -859,13 +859,13 @@ For the core module, the rates are generally stratified into 4 groups according 
 A device utilization rate describes the percentage of patient days on which a specific device was used.
 It is calculated by dividing the number of device days by the number of patient days and multiplying the result by 100.
 
-stem:["CVC Utilisation Rate" = "Total CVC Days" / "Total Patient Days" xx 100 ]
+stem:["CVC Utilization Rate" = "Total CVC Days" / "Total Patient Days" xx 100 ]
 
-stem:["PVC Utilisation Rate" = "Total PVC Days" / "Total Patient Days" xx 100 ]
+stem:["PVC Utilization Rate" = "Total PVC Days" / "Total Patient Days" xx 100 ]
 
-stem:["INV Utilisation Rate" = "Total INV Days" / "Total Patient Days" xx 100 ]
+stem:["INV Utilization Rate" = "Total INV Days" / "Total Patient Days" xx 100 ]
 
-stem:["NIV Utilisation Rate" = "Total NIV Days" / "Total Patient Days" xx 100]
+stem:["NIV Utilization Rate" = "Total NIV Days" / "Total Patient Days" xx 100]
 
 [#sec-analysis-antibiotic-use]
 ==== Antibiotic Use
@@ -975,7 +975,7 @@ When the standardized infection rate is less than one, you observed less infecti
 [[abbr-cmv]]CMV:: Cytomegalovirus
 [[abbr-crp]]CRP:: C-reactive Protein
 [[abbr-csf]]CSF:: Cerebrospinal Fluid
-[[abbr-ct]]CT:: Computer Tomography
+[[abbr-ct]]CT:: Computed Tomography
 [[abbr-cvc]]CVC:: Central Venous Catheter
 [[abbr-ecmo]]ECMO:: Extracorporeal Membrane Oxygenation
 [[abbr-esbl]]ESBL:: Extended spectrum beta-lactamase
@@ -997,7 +997,7 @@ When the standardized infection rate is less than one, you observed less infecti
 [[abbr-picc]]PICC:: Peripherally Inserted Central Venous Catheter
 [[abbr-plt]]PLT:: Platelet
 [[abbr-pvc]]PVC:: Peripheral Venous Catheter
-[[abbr-rct]]RCT:: Randomised Controlled Trial
+[[abbr-rct]]RCT:: Randomized Controlled Trial
 [[abbr-ssi]]SSI:: Surgical Site Infection
 [[abbr-uac]]UAC:: Umbilical Artery Catheter
 [[abbr-uvc]]UVC:: Umbilical Venous Catheter

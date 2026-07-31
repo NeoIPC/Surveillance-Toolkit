@@ -35,8 +35,8 @@ asciidoc-text
 ```
 
 The highest-value check available, because it is the only thing that notices a **translated
-cross-reference anchor**. Coverage: 121 of 689 documentation source strings carry an AsciiDoc token (34
-`name:target[]` macros, 11 `<<xref>>`, 75 `[[anchor]]`, 3 passthrough); 13 of 4107 infectious-agent
+cross-reference anchor**. Coverage: 160 of 686 documentation source strings carry an AsciiDoc token (34
+`name:target[]` macros, 11 `<<xref>>`, 117 `[[anchor]]`, 2 passthrough); 13 of 4107 infectious-agent
 strings, all from `Output-Header.adoc` / `Output-Footer.adoc` — the 4084 taxonomy entries carry none, so
 component scope is safe there.
 
@@ -159,8 +159,18 @@ Weblate**, because the catalogues are Weblate-owned.
 `xref:patient-progress-chart[]`, and `footnote:` rendered as `Fußnote:` / `nota:`. Each silently breaks a
 cross-reference in the rendered protocol.
 
-Confirmed genuine rather than a language convention: all 75 `[[anchor]]` definitions *are* translated in
-German and not one id was altered, and none of the German xref targets exists as an anchor anywhere.
+Confirmed genuine rather than a language convention: when this was surveyed, every `[[anchor]]`
+definition was translated in German with its id carried through unchanged, and none of the German xref
+targets existed as an anchor anywhere — so the ids in those references were invented rather than
+translated from something real.
+
+That survey ran before the protocol gained its explicit short-anchor scheme, and the anchor half of it
+has since been overtaken: **every** id was rewritten in that pass, so a count taken against the current
+template measures the new scheme rather than the surveyed one. The finding it supports is unaffected —
+five German references still point at targets that exist in no language, which is exactly the defect
+`asciidoc-text` is being enabled to catch, and the reason the scheme was made explicit in the first
+place. Re-derive the anchor counts from `po/documentation.pot` rather than quoting the numbers above;
+the coverage figures earlier in this document have been re-measured against the current template.
 
 **Merge-conflict markers in translated text — fifteen strings.** German (3) and Spanish (12)
 `documentation` entries contain raw po4a/`msgcat` conflict text in the `msgstr`, e.g.
