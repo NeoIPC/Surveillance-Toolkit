@@ -1584,13 +1584,31 @@ compute_col_widths <- function(tbl_data, stub_min, has_reference = TRUE,
 
 if(!exists("params")) params <- list()
 
+# NEOIPC-COMPAT(antibiotic-table-field): a dataset serialized before neoipcr
+# renamed its antibiotic table to the -ize spelling still carries
+# `antibiotic_utilisation_table`. Nothing errors on the old name — the field is
+# simply absent under the new one, so the table would be dropped as "no data"
+# and the metric registry would never classify it, silently. Both the reference
+# and the partner file are read from disk and can predate the rename, and both
+# `neoipcr_rep_ds` and `neoipcr_bnch_ds` carry the field, so every deserialized
+# object goes through here. Remove once no serialized dataset predates it.
+rename_legacy_antibiotic_table <- function(ds) {
+  if (is.null(ds) || is.null(ds$antibiotic_utilisation_table)) return(ds)
+  if (is.null(ds$antibiotic_utilization_table))
+    ds$antibiotic_utilization_table <- ds$antibiotic_utilisation_table
+  ds$antibiotic_utilisation_table <- NULL
+  logInfo("Dataset predates the antibiotic-table rename; reading it as ",
+          "'antibiotic_utilization_table'.")
+  ds
+}
+
 if (!is.null(params$referenceDataFile)) {
   if (!file.exists(params$referenceDataFile))
     stop(sprintf("The file '%s' does not exist.", params$referenceDataFile))
-  reference_data <- jsonlite::unserializeJSON(
+  reference_data <- rename_legacy_antibiotic_table(jsonlite::unserializeJSON(
     readChar(
         params$referenceDataFile,
-        file.info(params$referenceDataFile)$size))
+        file.info(params$referenceDataFile)$size)))
 } else {
   reference_data <- NULL
 }
@@ -1611,9 +1629,9 @@ typedParams <- list(
 if (!is.null(params$partnerDataFile)) {
   if (!file.exists(params$partnerDataFile))
     stop(sprintf("The file '%s' does not exist.", params$partnerDataFile))
-  partner_data <- jsonlite::unserializeJSON(
+  partner_data <- rename_legacy_antibiotic_table(jsonlite::unserializeJSON(
     readChar(params$partnerDataFile,
-             file.info(params$partnerDataFile)$size))
+             file.info(params$partnerDataFile)$size)))
 
   if (inherits(partner_data, "neoipcr_bnch_ds")) {
     if (!is.null(reference_data))
