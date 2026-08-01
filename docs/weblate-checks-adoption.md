@@ -164,6 +164,34 @@ converts terminology agreement into enforcement across every other catalogue, an
 strings rather than a project. Read the component's own statistics for where each language stands; these
 figures move whenever anyone translates a term.
 
+### `python-brace-format` — the end state, blocked on a source change
+
+```
+python-brace-format
+```
+
+**Not enabled, and not rejected either.** It is the standard gettext flag for exactly the `{named}` syntax
+this project is migrating towards, so it is where the reports catalogue should end up: a standard flag
+instead of a hand-written regex, with the same coverage.
+
+One thing blocks it, and it is in the strings rather than in the check. **A brace here is not always a
+placeholder.** In `po/reports.pot`, 40 source strings carry a Quarto heading anchor such as
+`{#sec-problems}` against 30 carrying a glue placeholder. `#sec-problems` is not a valid format field, so
+today the check would report a syntax error on more strings than it covers correctly — and a check that is
+wrong more often than right teaches translators to dismiss it, which costs more than the check is worth.
+That is why `placeholders:` carries an explicit alternative per construct: distinguishing them is the
+whole job.
+
+**The unblocking is a source change, not a re-measurement.** Those anchors are markup inside translatable
+text, which the source-string migration's own first principle says should not be there — a translator has
+no decision to make about `{#sec-problems}` and cannot safely alter it. Move them out and the collision
+disappears; enable this and drop the corresponding `placeholders:` alternative in the same step, since the
+two would then overlap.
+
+*(It was once proposed as a replacement for `placeholders:` on the grounds that that flag could not take a
+regex. It can, and the reports flag uses that form, so ignore that argument if it resurfaces — the anchors
+are the real reason and the only one that has to change.)*
+
 ### `discard:<flag>` — the escape hatch
 
 ```
@@ -252,27 +280,6 @@ Automattic, Vue, Laravel, Perl (both), C#, percent-placeholders. Several are exa
 `c-format` under another name; several actively misparse our content — Laravel's pattern *is* AsciiDoc
 macro syntax, Scheme's is AsciiDoc subscript, and `python_format` would accept `%(name)s`, which R's
 `sprintf` does not.
-
-**`python-brace-format` is rejected, and it is the one worth explaining** — it looks like the obvious
-tool, being the standard gettext flag for exactly the `{named}` syntax this project is migrating towards,
-and it was proposed as a replacement for the `placeholders:` flag on the grounds that `placeholders:`
-could not take a regex. That premise was wrong; it can, and the reports flag uses that form.
-
-The measured objection is stronger than the retracted one: **a brace here is not always a placeholder.**
-In `po/reports.pot`, 40 source strings carry a Quarto heading anchor such as `{#sec-problems}` against 30
-carrying a glue placeholder. `#sec-problems` is not a valid Python format field, so the check would report
-a syntax error on more strings than it covers correctly — and a check that is wrong more often than it is
-right teaches translators to dismiss it, which costs more than the check is worth.
-
-`placeholders:` with an explicit alternative per construct is what distinguishes them, and it is why that
-flag carries four patterns rather than one.
-
-**What would make it viable is a source change, not a re-measurement.** The heading anchors are markup
-sitting inside translatable strings, which the source-string migration's own first principle says should
-not be there — a translator has no decision to make about `{#sec-problems}` and cannot safely change it.
-Move those out of the translatable text and the collision disappears, at which point this check covers
-what remains and covers it with a standard flag rather than a hand-written regex. Until then it is the
-wrong tool, and the reason is the anchors rather than the check.
 
 `safe-html` is rejected on measurement: no source string contains HTML, while its attached fixup would
 strip the Markdown links that *are* there.
