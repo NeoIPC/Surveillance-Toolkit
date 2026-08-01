@@ -315,6 +315,77 @@ class TestTrailerFiltering:
         assert self.strip(body) == "Translation: NeoIPC"
 
 
+class TestNonHumanIdentitiesParse:
+    """Where the sets above actually come from, read from the committed list rather than restated.
+
+    The tests above supply their own sets, so they establish what the filter does with a correct one and
+    nothing about whether the real one arrives correct. That is the half that fails open: every step of
+    the parse answers a shape it does not recognize with an empty collection, and empty sets are not an
+    error -- they are a filter that keeps every trailer, so a tool lands on main as a co-author and the
+    only signal is the absence of one.
+
+    The list has a second reader in PowerShell with its own tests, which is why this exists: the point of
+    keeping it as shared data is that two languages read one file, and a test on either side alone
+    guards its own parser against a file that is still fine rather than the pair.
+    """
+
+    LIST = Path(sync_weblate.__file__).parent.parent / "po" / "non-human-identities.yaml"
+
+    @pytest.fixture
+    def committed(self, monkeypatch: pytest.MonkeyPatch) -> tuple[set[str], set[str]]:
+        """The real file's bytes through the real parse, with only the network stubbed out."""
+        text = self.LIST.read_text(encoding="utf-8")
+        monkeypatch.setattr(sync_weblate, "run", lambda *a, **k: text)
+        return sync_weblate.non_human_identities()
+
+    def test_the_committed_list_yields_both_sets_non_empty(self, committed):
+        domains, addresses = committed
+        assert domains, "no excluded domains parsed — every trailer would be kept"
+        assert addresses, "no excluded addresses parsed — every trailer would be kept"
+
+    def test_the_domain_rule_survives_the_parse(self, committed):
+        # One entry, and it is what covers every add-on identity the platform has not minted yet.
+        domains, _ = committed
+        assert "weblate.org" in domains
+
+    @pytest.mark.parametrize("address", ["noreply@anthropic.com", "noreply@github.com"])
+    def test_the_addresses_no_domain_rule_covers_survive_the_parse(self, committed, address):
+        # These two are the ones the address list is load-bearing for: nothing else excludes them, so
+        # they go red if the entries stop being mappings with an `address` key — the shape change that
+        # would otherwise empty the set in silence.
+        _, addresses = committed
+        assert address in addresses
+
+    def test_the_committed_list_strips_the_trailer_the_squash_exists_to_remove(self, committed):
+        # End to end on the real data: parse, then filter, on the one trailer append_trailers adds to
+        # every squashed commit.
+        domains, addresses = committed
+        body = ("Co-authored-by: Hosted Weblate <hosted@weblate.org>\n"
+                "Co-authored-by: Brar Piening <brar@gmx.de>")
+        result = sync_weblate.strip_non_human_trailers(body, domains, addresses)
+        assert "hosted@weblate.org" not in result
+        assert "brar@gmx.de" in result
+
+    def test_it_is_read_from_the_default_branch_rather_than_the_checkout(
+            self, monkeypatch: pytest.MonkeyPatch):
+        # Reading over the network is deliberate -- it works from any directory and reads what is on
+        # main -- so a renamed path fails here rather than by returning a checkout's stale copy.
+        asked = []
+        monkeypatch.setattr(sync_weblate, "run",
+                            lambda command, **k: (asked.append(command), "excluded_domains: [x]")[1])
+        sync_weblate.non_human_identities()
+        assert sync_weblate.NON_HUMAN_IDENTITIES in " ".join(asked[0])
+
+    def test_a_shape_it_does_not_recognize_yields_nothing_rather_than_raising(
+            self, monkeypatch: pytest.MonkeyPatch):
+        # Pinning the fail-open behaviour rather than endorsing it: the parse cannot distinguish "no
+        # tools listed" from "the file changed shape", which is exactly why the assertions above are
+        # made against the committed file instead of a fixture.
+        monkeypatch.setattr(sync_weblate, "run",
+                            lambda *a, **k: "excluded_addresses:\n  - noreply@weblate.org\n")
+        assert sync_weblate.non_human_identities() == (set(), set())
+
+
 class TestCopilotRequestVerification:
     """The forge accepts a review request it will not honour, so the answer has to be read.
 
