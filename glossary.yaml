@@ -49,6 +49,22 @@
 #
 # Variant grouping is handled by the Weblate component's variant_regex
 # setting: _(tc|sc|plural|plural_tc|plural_sc)$
+#
+# That grouping applies to this component's own translation view and NOT to the glossary sidebar in
+# other components, which is a separate lookup — confirmed by observation rather than inferred: a
+# protocol string containing "Kangaroo care" shows both `kangaroo_care` and `kangaroo_care_sc` as
+# separate glossary hits with the same German rendering, while variant_regex is correctly set.
+#
+# It is not a corner case: 16 of the 52 keys here are casing variants whose base key is also present,
+# so a third of this file produces a doubled sidebar entry wherever it matches. The duplication is
+# noise rather than a defect — both hits say the same thing — but it dilutes the sidebar that carries
+# the terminology decisions, which is the mechanism the whole terminology story rests on.
+#
+# Worth weighing if it ever grates: the casing variants exist so the R code can render a term in
+# sentence or title case, which is a concern of the renderer and not of the translator. As glossary
+# terms they teach nothing the base key does not. Dropping `terminology` from the variants would empty
+# the duplicates out of the sidebar while leaving them translatable — untested, and a decision rather
+# than a fix.
 
 # Resistance category: third-generation cephalosporin resistance.
 # flags: terminology
