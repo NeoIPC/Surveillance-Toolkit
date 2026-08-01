@@ -133,6 +133,16 @@ _CHECK_DISPLAY = {
 # one either side of the middle, and nothing at all for medium. Matching it means the two views agree at
 # a glance instead of having to be translated between. Medium is deliberately blank rather than a dash --
 # it is the default, and marking the default draws the eye to the rows that least need it.
+# What an open pull request needs next, by the state of its checks: the phrase, its colour, and whether
+# it is a defect. A request whose checks failed or never reported cannot be merged and is nobody's turn
+# until someone looks, so both count.
+_PULL_REQUEST_VERDICT = {
+    CHECKS_GREEN: ("awaiting merge", "32", False),
+    CHECKS_RUNNING: ("awaiting checks", "33", False),
+    CHECKS_FAILED: ("CHECKS FAILED", "31", True),
+    CHECKS_NONE: ("no checks reported", "31", True),
+}
+
 _PRIORITY_DISPLAY = {
     60: ("↑↑", "31", "very high"),
     80: ("↑", "33", "high"),
@@ -295,10 +305,16 @@ class ComponentState:
         if self.is_stranded:
             return styled("STRANDED — pushed with no pull request; run drain", "31"), True
         if self.open_pull_request is not None:
+            # What a pull request needs is decided by its checks, not by its existence. Saying
+            # "awaiting merge" while they are still running invites a merge that cannot happen yet and
+            # describes a state nobody can act on; naming the check state says whose turn it is.
+            phrase, colour, problem = _PULL_REQUEST_VERDICT[self.checks]
             number = self.open_pull_request
             reference = linked(f"#{number}", f"https://github.com/{FORGE_REPO}/pull/{number}")
-            separator = " " if STYLED else ", "
-            return f"awaiting merge — {reference}{separator}{render_checks(self.checks)}", False
+            # The icon repeats the phrase, which is worth it while it can be scanned and redundant once
+            # it has degraded to words.
+            icon = f" {render_checks(self.checks)}" if STYLED else ""
+            return f"{styled(phrase, colour)} — {reference}{icon}", problem
         if self.has_pending_work:
             return "translations waiting — run drain", False
         return styled("idle", "2"), False

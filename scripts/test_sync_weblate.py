@@ -144,16 +144,33 @@ class TestVerdict:
         assert "run drain" in verdict
         assert not problem
 
-    def test_a_ready_pull_request_names_it_and_its_checks(self):
+    def test_a_ready_pull_request_awaits_a_merge(self):
         verdict, problem = state(branch_tip="a" * 40, open_pull_request=129,
                                  checks=sync_weblate.CHECKS_GREEN).verdict
-        assert verdict == "awaiting merge — #129, checks green"
+        assert verdict == "awaiting merge — #129"
         assert not problem
 
-    def test_a_pull_request_with_failing_checks_says_so(self):
-        verdict, _ = state(branch_tip="a" * 40, open_pull_request=129,
-                           checks=sync_weblate.CHECKS_FAILED).verdict
+    def test_a_pull_request_whose_checks_are_running_does_not_await_a_merge(self):
+        # It cannot be merged yet, so calling it "awaiting merge" invites an action that would fail and
+        # describes a state nobody can act on.
+        verdict, problem = state(branch_tip="a" * 40, open_pull_request=130,
+                                 checks=sync_weblate.CHECKS_RUNNING).verdict
+        assert verdict == "awaiting checks — #130"
+        assert not problem
+
+    def test_a_pull_request_with_failing_checks_is_a_defect(self):
+        verdict, problem = state(branch_tip="a" * 40, open_pull_request=129,
+                                 checks=sync_weblate.CHECKS_FAILED).verdict
         assert "CHECKS FAILED" in verdict
+        assert problem
+
+    def test_a_pull_request_with_no_checks_at_all_is_a_defect(self):
+        # Every branch here runs checks, so none reported means something did not start rather than
+        # that there was nothing to run -- and merging on it would waive the gate silently.
+        verdict, problem = state(branch_tip="a" * 40, open_pull_request=129,
+                                 checks=sync_weblate.CHECKS_NONE).verdict
+        assert "no checks" in verdict
+        assert problem
 
     def test_superseded_is_a_defect(self):
         verdict, problem = state(branch_tip="b" * 40, open_pull_request=1).verdict
