@@ -179,10 +179,35 @@ Read the check accordingly: **it finds strings worth looking at, not strings tha
 alongside the `md-syntax` and `md-link` limits below, which degrade to set and count comparisons for the
 same practical reason.
 
+#### It is blind to a term inside a compound, which matters most in German
+
+The search is bounded: `boundary = r"\b" if unit.translation.language.uses_whitespace() else ""`. For
+German that means it looks for `\bAufnahme\b` — and in *Aufnahmedaten* the term is followed by another
+word character, so there is no boundary and the match fails. The check then reports the term as not
+followed, on a translation that follows it perfectly.
+
+**In a compounding language this is not an edge case, it is how nouns are built**, so expect it wherever a
+glossary term appears only as a compound element. It has already fired on *Admission → Aufnahme* against a
+correct *Aufnahmedaten*. The boundary exists so a term does not match inside an unrelated word; in German
+it instead makes the check blind to the commonest correct usage. The same applies to Dutch, Finnish,
+Hungarian and Turkish.
+
+The inverse is worth knowing before a CJK language joins: `uses_whitespace()` is false for Chinese and
+Japanese, so there the boundary is empty and matching is plain substring — the opposite trade, and it will
+behave differently rather than merely less well.
+
+Dismiss such a finding on the string rather than adjusting the glossary. Adding compound forms as terms
+would be unbounded — German composes freely — and each one added would then have to be maintained as
+terminology it is not.
+
 Three further behaviours from the same function, each load-bearing:
 
 - **Variants are excluded** (`include_variants=False`), so the casing variants that duplicate in the
-  translator's *sidebar* do not duplicate in the *check*. The sidebar duplication is display-only.
+  translator's *sidebar* do not duplicate in the *check*. The sidebar duplication is display-only — and it
+  compounds with the project holding **two** glossary stores, so one concept can return three sidebar
+  entries: the TBX store's, and both casing variants from `neoipc-glossary`. Terms from every glossary in
+  a project are merged into one list with no way to select between them, which is why there is one
+  curated vocabulary rather than several.
 - **`read-only` inverts the test** to demand the source term verbatim, which is what makes an entry like
   `aware: "AWaRe"` behave as intended.
 - **`forbidden` inverts it the other way**: the check fires when the forbidden rendering *is* present.
