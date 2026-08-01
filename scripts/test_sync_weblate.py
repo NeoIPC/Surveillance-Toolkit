@@ -234,6 +234,58 @@ class TestVerdict:
         assert verdict.startswith("MERGE FAILURE")
 
 
+class TestTrailerFiltering:
+    """A tool is not a co-author, and the platform's add-on cannot be told to stop saying it is."""
+
+    DOMAINS = {"weblate.org"}
+    ADDRESSES = {"noreply@anthropic.com", "noreply@github.com"}
+
+    def strip(self, body: str) -> str:
+        return sync_weblate.strip_non_human_trailers(body, self.DOMAINS, self.ADDRESSES)
+
+    def test_a_person_is_kept(self):
+        assert "Brar" in self.strip("Co-authored-by: Brar Piening <brar@gmx.de>")
+
+    def test_the_service_account_is_dropped_by_its_domain(self):
+        # The observed case: append_trailers adds this to every squashed commit.
+        assert self.strip("Co-authored-by: Hosted Weblate <hosted@weblate.org>") == ""
+
+    def test_an_unseen_address_at_an_excluded_domain_is_dropped(self):
+        # The domain rule exists so a newly installed add-on cannot slip through by being unlisted.
+        assert self.strip("Co-authored-by: Some New Add-on <noreply-addon-new@weblate.org>") == ""
+
+    def test_an_ai_trailer_is_dropped_by_its_address(self):
+        assert self.strip("Co-authored-by: Claude <noreply@anthropic.com>") == ""
+
+    def test_matching_is_on_the_address_not_the_display_name(self):
+        # The same address appears under several names in this project's history, so a name-keyed
+        # filter would drop one spelling and silently credit the other.
+        assert self.strip("Co-authored-by: Anonymous <noreply@weblate.org>") == ""
+        assert self.strip("Co-authored-by: Weblate (bot) <noreply@weblate.org>") == ""
+
+    def test_a_human_at_a_lookalike_domain_is_kept(self):
+        # weblate.org is excluded; a person's own address that merely contains it is not.
+        assert "person" in self.strip("Co-authored-by: A Person <person@notweblate.org.example>")
+
+    def test_non_trailer_lines_survive_untouched(self):
+        body = "Translate-URL: https://hosted.weblate.org/projects/neoipc/\nTranslation: NeoIPC"
+        assert self.strip(body) == body
+
+    def test_a_mixed_block_keeps_only_the_people(self):
+        body = ("Translation: NeoIPC/NeoIPC-Glossary\n"
+                "\n"
+                "Co-authored-by: Hosted Weblate <hosted@weblate.org>\n"
+                "Co-authored-by: Brar Piening <brar@gmx.de>")
+        result = self.strip(body)
+        assert "hosted@weblate.org" not in result
+        assert "brar@gmx.de" in result
+        assert "Translation: NeoIPC/NeoIPC-Glossary" in result
+
+    def test_a_trailing_blank_run_left_by_a_removal_is_collapsed(self):
+        body = "Translation: NeoIPC\n\nCo-authored-by: Hosted Weblate <hosted@weblate.org>\n"
+        assert self.strip(body) == "Translation: NeoIPC"
+
+
 class TestCopilotRequestVerification:
     """The forge accepts a review request it will not honour, so the answer has to be read.
 

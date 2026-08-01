@@ -367,16 +367,20 @@ with `git cat-file`, never through a shell string conversion.
 
 ### A squashed commit's subject names one language; its body covers them all
 
-The *Squash* add-on runs with `squash: author`, so each drain produces **one commit per contributor**,
-spanning every language that contributor touched — within one component, since the add-on's scope is
-per component. Observed on `main`: a commit titled *"Translated using Weblate (Turkish)"* changes
-eight of the infectious-agent catalogue's language files (`de`, `el`, `es`, `et`, `fr`, `it`, `ne`,
-`tr`).
+The *Squash* add-on runs with `squash: all`, so each drain produces **exactly one commit**, spanning
+every language and contributor — within one component, since the add-on's scope is per component. That
+single commit is what makes the pull request safe to squash-merge, so the setting is load-bearing
+rather than cosmetic.
 
 The commit itself is complete — the **body** concatenates every squashed commit's message with its
 per-language completion statistics, and `append_trailers` adds `Co-authored-by:` plus one
 `Translate-URL:` per language. Only the **subject line** is unrepresentative, being the first squashed
 message's subject. Read the body or the file list; do not take the subject as a summary.
+
+Those trailers are the record of who translated what, since squashing everything into one commit means
+the author field can no longer name them. They also include Weblate's own service account, which the
+add-on cannot be told to omit — so the squash message is where it gets removed. See
+`po/non-human-identities.yaml`.
 
 The add-on's `commit_message` is therefore set to the static text
 `Translations update from Weblate`.

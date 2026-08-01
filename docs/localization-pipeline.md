@@ -120,17 +120,23 @@ whatever was merged is already on `main` and what Weblate discards is a redundan
 Never hand-edit a catalogue to resolve this, and never reach for a plain `reset`, which is destructive.
 The cost of a lost race is a locked component plus one reset — a nuisance, not damage.
 
-## Merging: rebase, never squash
+## Merging: squash, and check the message
 
-Pull requests raised from a `weblate-<catalogue>` branch are merged with **"Rebase and merge"**. This is
-the single exception to this project's squash-everything rule, and it exists because a squash gives the
-commits a different patch identity, after which git cannot prove `main` already contains Weblate's work.
-It then replays and conflicts — across every component, not just the one merged.
+Pull requests raised from a `weblate-<catalogue>` branch are squashed like every other pull request
+here. **Refuse one whose branch carries more than one commit.**
 
-The exception is narrow: it covers only the pull requests raised from those branches. Any other pull
-request against this repository — including one that changes the catalogues, this pipeline, or these
-rules — is squash-merged as usual, because Weblate has never seen those commits and holds nothing to
-replay.
+One commit is what makes a squash safe. Squashing it reproduces its patch exactly, so Weblate still
+recognizes its own work as merged and drops it on the next rebase. Several commits fuse into a patch
+matching none of them, and Weblate replays work it can no longer prove had landed — conflicting across
+every component, not just the one merged. That is what squash-merging three translation pull requests
+did on 2026-07-27, and it is why the count is checked rather than assumed: the Squash add-on collapses
+each push to one commit, but that is a setting, not a law.
+
+**Read the pre-filled message before confirming.** On a single-commit branch it is that commit's own
+message, so it needs no rewriting — but `append_trailers` credits Weblate's own service account as a
+co-author, and the squash is the only point at which that trailer can be dropped. A tool is not a
+contributor. Which identities those are is recorded in `po/non-human-identities.yaml`, matched on
+address rather than display name, because one address appears there under several names.
 
 **Delete the head branch on merge.** A rebase merge rewrites SHAs, so the pushed tip stops being an
 ancestor of `main`, Weblate's next push is rejected as non-fast-forward, and with *Lock on error* enabled

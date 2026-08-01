@@ -78,6 +78,7 @@ import contextlib
 import errno
 import json
 import os
+import re
 import subprocess
 import sys
 import time
@@ -87,6 +88,7 @@ from typing import Any
 
 try:
     import requests
+    from ruamel.yaml import YAML
     from wlc import Weblate
     from wlc.config import WeblateConfig
     from wlc.exceptions import WeblateException
@@ -408,6 +410,54 @@ COPILOT_REVIEWER = "copilot-pull-request-reviewer[bot]"
 # A translation drain routinely exceeds both, so the request is skipped rather than spent.
 COPILOT_MAX_FILES = 300
 COPILOT_MAX_LINES = 20_000
+
+
+NON_HUMAN_IDENTITIES = "po/non-human-identities.yaml"
+_TRAILER = re.compile(r"^co-authored-by:.*<([^>]+)>\s*$", re.IGNORECASE)
+
+
+def non_human_identities() -> tuple[set[str], set[str]]:
+    """The domains and addresses that are not people, from the repository's own shared list.
+
+    Read over the network rather than from a checkout, so this keeps working from any directory, and
+    so it reads what is on the default branch rather than whatever the caller happens to have.
+
+    The list is deliberately shared data rather than a constant here: its own header says it exists so
+    that a second consumer in another language reads it instead of keeping a copy, because a list
+    maintained twice is one that disagrees with itself.
+    """
+    raw = run(["gh", "api", f"repos/{FORGE_REPO}/contents/{NON_HUMAN_IDENTITIES}",
+               "-H", "Accept: application/vnd.github.raw"])
+    data = YAML(typ="safe").load(raw) or {}
+    domains = {str(d).lower() for d in (data.get("excluded_domains") or [])}
+    addresses = {str(e["address"]).lower() for e in (data.get("excluded_addresses") or [])
+                 if isinstance(e, dict) and e.get("address")}
+    return domains, addresses
+
+
+def strip_non_human_trailers(body: str, domains: set[str], addresses: set[str]) -> str:
+    """Remove co-author trailers that credit a tool rather than a person.
+
+    Matched on the ADDRESS, never the display name. The same address appears in this project's history
+    under several names, so a name-keyed filter would drop one spelling and silently credit the other --
+    which the shared list says in as many words.
+
+    This is the whole reason a squash beats a replay here: the platform's add-on writes a trailer for
+    every identity in the range and offers no way to exclude its own, so a verbatim replay carries a
+    tool as a co-author, against the rule that a tool is not one. A squash has an editing point.
+    """
+    kept: list[str] = []
+    for line in body.splitlines():
+        match = _TRAILER.match(line.strip())
+        if match:
+            address = match.group(1).lower()
+            if address in addresses or address.rsplit("@", 1)[-1] in domains:
+                continue
+        kept.append(line)
+    # Collapse the blank run a removed trailer can leave at the end.
+    while kept and not kept[-1].strip():
+        kept.pop()
+    return "\n".join(kept)
 
 
 def copilot_was_requested(response: object) -> bool:
@@ -773,9 +823,10 @@ def command_drain(client: Weblate, args: argparse.Namespace) -> int:
 def open_drain_pull_request(state: ComponentState) -> int:
     body = (
         "Translations drained from Weblate.\n\n"
-        "Merge this with \"Rebase and merge\". A squash gives these commits a different patch identity, "
-        "after which Weblate cannot recognise its own work as already merged and replays it into a "
-        "conflict across every component at once.\n"
+        "Squash-merge this, as with every other pull request here. The branch carries a single commit, "
+        "so the squash reproduces its patch exactly and Weblate still recognises its own work as "
+        "merged; squashing also drops the co-author trailer naming Weblate's own service account, "
+        "which a verbatim replay would carry as though a tool were a contributor.\n"
     )
     url = run(["gh", "pr", "create", "--repo", FORGE_REPO, "--base", "main",
                "--head", state.push_branch,
@@ -785,16 +836,40 @@ def open_drain_pull_request(state: ComponentState) -> int:
 
 
 def merge_drain_pull_request(state: ComponentState, *, admin: bool) -> None:
-    """Rebase-merge, never squash.
+    """Squash-merge, like every other pull request here, and drop the tool co-authors on the way.
 
-    Squashing is what this repository does everywhere else, and is exactly wrong here: it rewrites the
-    commits' patch identity, so Weblate can no longer prove main contains its work.
+    Squashing used to be forbidden for these branches because it fused several commits into one whose
+    patch matched none of them, leaving the platform unable to prove its work had landed. That reason
+    is gone: its own add-on now collapses each push to a single commit, and squashing one commit
+    reproduces its patch exactly -- measured, identical patch id, and then confirmed by a real merge
+    after which the component reported no divergence at all.
+
+    What squashing adds is an editing point. The platform's add-on writes a co-author trailer for every
+    identity in the range and cannot exclude its own, so replaying a commit verbatim credits a tool as a
+    co-author, against the rule that a tool is not one. Composing the message removes exactly those.
     """
+    ahead = gh_json(["api", f"repos/{FORGE_REPO}/compare/main...{state.push_branch}", "--jq",
+                     ".ahead_by"])
+    # The single-commit property is what makes a squash patch-identical, and it is a setting on the
+    # platform rather than a law -- so it is checked here rather than assumed. More than one commit
+    # means the setting changed, and squashing then reproduces the failure this rule used to prevent.
+    if ahead != 1:
+        raise DrainError(f"{state.push_branch} carries {ahead} commits, not one. A squash would fuse "
+                         f"them into a patch matching none of them, and the component would replay its "
+                         f"work into a conflict. Check the Squash add-on is set to one commit.")
+
+    message = str(gh_json(["api", f"repos/{FORGE_REPO}/commits/{state.branch_tip}", "--jq",
+                           ".commit.message"]) or "")
+    domains, addresses = non_human_identities()
+    _, _, body = message.partition("\n")
+
     # --match-head-commit makes the check-then-merge atomic at the forge. Re-reading state immediately
     # beforehand narrows the window; only this closes it, and the window is exactly long enough for a
     # translator's save to rewrite the range and turn the merge into a project-wide replay.
     command = ["gh", "pr", "merge", str(state.open_pull_request), "--repo", FORGE_REPO,
-               "--rebase", "--delete-branch", "--match-head-commit", state.branch_tip]
+               "--squash", "--delete-branch", "--match-head-commit", state.branch_tip,
+               "--subject", f"Translations update from Weblate ({state.slug})",
+               "--body", strip_non_human_trailers(body, domains, addresses)]
     if admin:
         command.append("--admin")
     run(command)
@@ -805,7 +880,7 @@ def merge_drain_pull_request(state: ComponentState, *, admin: bool) -> None:
     if branch_tip(state.push_branch) is not None:
         raise DrainError(f"merged #{state.open_pull_request}, but {state.push_branch} still exists. "
                          f"Delete it before the next drain or Weblate's next push will be rejected.")
-    print(f"  merged #{state.open_pull_request} (rebase) and confirmed {state.push_branch} is gone")
+    print(f"  merged #{state.open_pull_request} (squash) and confirmed {state.push_branch} is gone")
 
 
 def command_lock(client: Weblate, _args: argparse.Namespace) -> int:
