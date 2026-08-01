@@ -33,14 +33,21 @@ Credentials come from the wlc configuration or the environment. There is deliber
 option: a key passed on a command line lands in the shell history, the process list and any transcript.
 
 Forge calls authenticate as whoever `gh` is logged in as, which the drain prints before it writes
-anything. Setting GH_TOKEN for the invocation runs them as a different account, and doing so is what
-makes the review requirement satisfiable: a repository that requires an approving review will not let an
-account approve a pull request it opened itself, so a drain run as the maintainer can only be merged by
-overriding branch protection, while one opened by a separate automation account can be approved
-normally. Scope the variable to the command rather than exporting it, or every later `gh` in that shell
-silently acts as the bot too.
+anything. Running them as a separate automation account is what makes the review requirement
+satisfiable: a repository that requires an approving review will not let an account approve a pull
+request it opened itself, so a drain run as the maintainer can only be merged by overriding branch
+protection, while one opened by an automation account can be approved normally -- which puts the
+override back to being exceptional rather than the only way anything ever merges.
 
-    GH_TOKEN=<bot token> sync-weblate.py drain neoipc-glossary
+Two ways to select that account, both scoped to the invocation rather than exported, because an exported
+value silently reroutes every later `gh` in that shell including the ones typed by hand:
+
+    GH_CONFIG_DIR=<a config directory holding the bot's login> sync-weblate.py drain <component>
+    GH_TOKEN=<the bot's token> sync-weblate.py drain <component>
+
+Prefer the first. It keeps the credential in the same store `gh auth login` put it in, whereas a token
+in an environment variable is one `env` or one crash report away from being read; authenticate the bot
+once with that variable set and it stays available without ever appearing in a command.
 
 `status` is read-only and may be run at any time, including beside a running drain: nothing on its call
 path writes, which is asserted mechanically by the companion test rather than left to inspection. Two
