@@ -19,6 +19,7 @@ The module name has a hyphen, so it is loaded by path rather than imported.
 
 from __future__ import annotations
 
+import ast
 import importlib.util
 import sys
 from pathlib import Path
@@ -122,6 +123,57 @@ class TestRefusedOperations:
     def test_a_response_without_a_result_field_passes(self):
         # Not every endpoint reports this way; absence must not be read as refusal.
         sync_weblate.checked({"detail": "queued"}, "push")
+
+
+class TestStatusIsReadOnly:
+    """`status` must never change anything, so it is safe to run beside a drain.
+
+    Asserted against the call graph rather than by running it, because the property has to hold on every
+    path including the ones a test would not take, and because it is the kind of thing a later edit
+    breaks silently: adding one convenient repair to a reporting command is an easy change to make and
+    an invisible one to notice.
+    """
+
+    MUTATORS = {"lock", "unlock", "push", "commit", "post"}
+
+    @staticmethod
+    def reachable(name: str, functions: dict, seen: set[str] | None = None) -> set[str]:
+        seen = set() if seen is None else seen
+        if name in seen or name not in functions:
+            return seen
+        seen.add(name)
+        for node in ast.walk(functions[name]):
+            if isinstance(node, ast.Call) and isinstance(node.func, ast.Name):
+                TestStatusIsReadOnly.reachable(node.func.id, functions, seen)
+        return seen
+
+    def test_status_reaches_no_mutating_call(self):
+        source = Path(sync_weblate.__file__).read_text(encoding="utf-8")
+        functions = {n.name: n for n in ast.parse(source).body if isinstance(n, ast.FunctionDef)}
+        offenders = []
+        for name in self.reachable("command_status", functions):
+            for node in ast.walk(functions[name]):
+                if not isinstance(node, ast.Call):
+                    continue
+                if getattr(node.func, "attr", None) in self.MUTATORS:
+                    offenders.append(f"{name}: .{node.func.attr}()")
+                if isinstance(node.func, ast.Name) and node.func.id == "run" and node.args:
+                    literal = ast.dump(node.args[0])
+                    if any(word in literal for word in ("DELETE", "'create'", "'merge'")):
+                        offenders.append(f"{name}: run(...) mutates")
+        assert not offenders, f"status can mutate via: {offenders}"
+
+    def test_the_check_would_notice_a_mutating_command(self):
+        # Guards the guard: run it against drain, which certainly mutates, so a broken detector cannot
+        # pass the test above by finding nothing anywhere.
+        source = Path(sync_weblate.__file__).read_text(encoding="utf-8")
+        functions = {n.name: n for n in ast.parse(source).body if isinstance(n, ast.FunctionDef)}
+        found = [
+            name for name in self.reachable("command_drain", functions)
+            for node in ast.walk(functions[name])
+            if isinstance(node, ast.Call) and getattr(node.func, "attr", None) in self.MUTATORS
+        ]
+        assert found, "the detector found no mutation in drain, so it cannot vouch for status"
 
 
 class TestPriorityLabel:

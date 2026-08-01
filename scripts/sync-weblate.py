@@ -32,6 +32,15 @@ rather than as hermetic.
 Credentials come from the wlc configuration or the environment. There is deliberately no --api-key
 option: a key passed on a command line lands in the shell history, the process list and any transcript.
 
+`status` is read-only and may be run at any time, including beside a running drain: nothing on its call
+path writes, which is asserted mechanically by the companion test rather than left to inspection. Two
+things to expect if you do. It reports whatever is true at that instant, so mid-drain it may show a
+component whose branch has been deleted and not yet re-pushed -- accurate, and momentarily alarming. And
+it spends the same forge request budget as the drain, which now treats a forge failure as fatal rather
+than reading it as "the branch is not there", so polling it in a tight loop during a drain is not free.
+
+Every other subcommand writes, and none of them is safe to run beside another.
+
 Two limitations it does not pretend to solve. Serialization holds within one invocation, not across
 two: nothing stops a second drain being started from another shell, and the two would race exactly as
 two people would. And a process killed outright leaves the components it locked locked, because there
@@ -552,7 +561,8 @@ def build_parser() -> argparse.ArgumentParser:
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = parser.add_subparsers(dest="command", required=True)
 
-    sub.add_parser("status", help="report each component's state; repairs nothing")
+    sub.add_parser("status",
+                   help="report each component's state; read-only, safe to run during a drain")
 
     # One component, positionally, and no --all: a drain is serial because merging one invalidates the
     # push branch of every other, so a batch switch would be an invitation to the failure this prevents.
