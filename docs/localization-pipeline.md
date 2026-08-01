@@ -80,6 +80,18 @@ for each component, one at a time:
     unlock it
 ```
 
+`scripts/sync-weblate.py` implements exactly that loop; `drain <component>` is one invocation and does
+the whole cycle, and `status` reports where every component stands without touching anything. Run the
+drain as the **automation account** rather than as yourself: a repository that requires an approving
+review will not let an account approve a pull request it opened, so a drain run as the maintainer can
+only be merged by overriding branch protection, while one opened by the automation account is approved
+normally. The tool prints which identity it is acting as before it writes anything.
+
+One consequence of that account has to be handled by hand: it holds no Copilot entitlement, so a review
+request is accepted and then silently dropped. The tool detects that and says so instead of claiming it
+asked — when it does, request the review yourself. It also declines to ask at all for a pull request past
+Copilot's limits of 300 files or 20,000 lines, which most translation drains exceed.
+
 Weblate's own tip is readable without fetching objects, which matters because fetching its export into a
 clone that holds the superseded commits fails object negotiation:
 
