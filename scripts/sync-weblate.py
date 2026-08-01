@@ -578,6 +578,11 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: Sequence[str] | None = None) -> int:
+    # Line-buffer stdout. Python block-buffers it whenever it is not a terminal, so every progress line
+    # of a drain -- which spends minutes waiting on checks -- stays invisible until the process exits.
+    # That leaves an operator unable to tell a working run from a hung one, which is the state in which
+    # people kill runs that were fine and nurse runs that were not.
+    sys.stdout.reconfigure(line_buffering=True)
     args = build_parser().parse_args(argv)
     commands = {
         "status": command_status,
