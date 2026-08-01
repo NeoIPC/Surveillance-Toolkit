@@ -52,15 +52,32 @@ Known limits, so nobody assumes more cover than exists: the check collects only 
 pattern absorbs a preceding word, so `daysfootnote:x[]` against `Tagefootnote:x[]` fires although the
 footnote is intact.
 
-**Suppress those per string; the source cannot be fixed.** An earlier revision here said to fix the source
-instead, which is wrong: AsciiDoc requires an inline footnote to sit immediately against the text it
-annotates, and Asciidoctor's own `InlineFootnoteMacroRx` has no left boundary — it matches from `footnote`
-onwards and leaves whatever precedes it as ordinary text, which is exactly why `daysfootnote:x[]` renders
-as *days* followed by the marker. Asciidoctor's documentation says as much, noting that the requirement
-"can make the text harder to read". Inserting a space would change the rendered output, so the check is
-simply wrong here and `ignore-asciidoc-markup` on the affected strings is the honest remedy — the same
-treatment the Creative Commons licence strings get, and for the same reason: the source is correct and the
-check cannot see it.
+**The source is correct as written, and an earlier revision here wrongly said to fix it.** AsciiDoc
+requires an inline footnote to sit immediately against the text it annotates: Asciidoctor's
+`InlineFootnoteMacroRx` has no left boundary, so it matches from `footnote` onwards and leaves whatever
+precedes it as ordinary text — which is why `daysfootnote:x[]` renders as *days* followed by the marker.
+Inserting a space to satisfy the check would change the output. Two real remedies, in preference order:
+
+**Externalize the footnote, which fixes the cause rather than the symptom.** Asciidoctor supports
+assigning a footnote to a document attribute and referencing it, because "attribute references are
+expanded before footnotes are parsed":
+
+```asciidoc
+:fn-ab-days: footnote:ab-days-comment[The day of the first dose and the day of ...]
+
+The cumulative number of days{fn-ab-days} when the infant received ...
+```
+
+The translatable string then carries `{fn-ab-days}` instead of `footnote:ab-days-comment[]` — which is
+this project's own principle applied, since markup does not belong in a string a translator has to carry
+through unchanged, and there is no decision for them to make about a footnote id. It also reads better in
+the source, which is why the technique exists. Two things to know: formatting inside an externalized
+footnote needs `pass:c,q[…]`, and this check does **not** inspect attribute references, so the false
+positive disappears and so does the (nonexistent) protection — cover it with a `placeholders:` alternative
+if that matters.
+
+**Otherwise suppress per string** with `ignore-asciidoc-markup`, the same treatment the Creative Commons
+licence strings get and for the same reason: the source is right and the check cannot see it.
 
 ### `md-text` — reports
 
