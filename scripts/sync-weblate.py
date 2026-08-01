@@ -413,9 +413,15 @@ COPILOT_MAX_LINES = 20_000
 def request_copilot_review(number: int) -> None:
     """Ask Copilot to review, unless the diff is past what it will look at.
 
-    Skipping is reported rather than silent. A pull request nobody mentioned was too large to review
-    reads exactly like one that was reviewed and found clean, and these are the pull requests least
-    likely to get a human reading instead.
+    Asking is all this does. A request is accepted even when the quota that would answer it is spent,
+    and the failure then arrives later as a review saying only that it encountered an error -- so this
+    reports what it asked for rather than what will happen, and nothing downstream waits on the answer.
+    The forge's review decision tracks approving reviews, and a Copilot review is a comment, so an
+    absent one never holds a drain up.
+
+    Skipping for size is reported rather than silent. A pull request nobody mentioned was too large to
+    review reads exactly like one that was reviewed and found clean, and these are the pull requests
+    least likely to get a human reading instead.
     """
     size = gh_json(["pr", "view", str(number), "--repo", FORGE_REPO,
                     "--json", "additions,deletions,changedFiles"]) or {}
@@ -429,7 +435,7 @@ def request_copilot_review(number: int) -> None:
         run(["gh", "api", "--silent", "-X", "POST",
              f"repos/{FORGE_REPO}/pulls/{number}/requested_reviewers",
              "-f", f"reviewers[]={COPILOT_REVIEWER}"])
-        print("  requested a Copilot review")
+        print("  asked Copilot for a review (it declines silently when its quota is spent)")
     except DrainError as error:
         # A refused review request is not worth abandoning a drain over -- the quota runs out, and the
         # human review is the one branch protection actually requires.
