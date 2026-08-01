@@ -60,12 +60,16 @@ merge cycle.
 
 ### The procedure
 
-Lock first. Locking removes trigger 1 for the duration; nothing removes trigger 2, which is why the
-verification sits immediately before the merge rather than in a batch beforehand.
+Lock the component being drained, and only that one. Locking removes trigger 1 for it; nothing removes
+trigger 2, which is why the verification sits immediately before the merge rather than in a batch
+beforehand. The others need no lock, because none of them can supersede this branch: every component is
+standalone and so holds its own checkout, and each push branch carries its own catalogue's files alone —
+so nothing committed elsewhere is in this branch or in this component's export. Locking them as well
+would freeze every translator in the project for the length of somebody else's drain.
 
 ```
-lock every component            # removes trigger 1; the unlock must be guaranteed, including on abort
 for each component, one at a time:
+    lock it                     # removes trigger 1; the unlock must be guaranteed, including on abort
     force-update weblate-<catalogue> to Weblate's current tip
     wait for checks to settle
     wait for the approval                           <- under the lock, not between two invocations
@@ -73,7 +77,7 @@ for each component, one at a time:
     squash-merge                                    <- refusing a branch that carries more than one commit
     confirm the head branch is gone
     let Weblate pull the new main and settle
-unlock every component
+    unlock it
 ```
 
 Weblate's own tip is readable without fetching objects, which matters because fetching its export into a

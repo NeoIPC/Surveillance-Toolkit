@@ -878,9 +878,12 @@ def command_drain(client: Weblate, args: argparse.Namespace) -> int:
     component = operable(client, record)
     print(f"  acting on the forge as {forge_identity()}")
 
-    # Every component is locked, not just the one being drained: a translation saved anywhere in the
-    # project reaches main through this merge and would supersede the branch mid-flight.
-    with components_locked([operable(client, r) for r in records], enabled=not args.no_lock):
+    # Only the component being drained, because only its own translations can supersede its branch.
+    # The components are standalone, so each holds its own checkout and nothing committed in one
+    # reaches another's; and each push branch carries that catalogue's files alone, so merging this one
+    # cannot carry another's work to main either. Locking all of them froze every catalogue in the
+    # project for the length of a drain -- which now includes waiting for a person to approve.
+    with components_locked([component], enabled=not args.no_lock):
         state = read_state(client, record)
         # An empty push branch means Weblate pushes to the branch it translates -- main. Every guard
         # here is built on the branch name, and each collapses to a benign value when it is empty, so
