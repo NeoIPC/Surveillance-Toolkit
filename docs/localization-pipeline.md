@@ -91,10 +91,10 @@ Locking is a deliberate step here, not merely something that happens to a compon
 must be structural rather than remembered: a component left locked is invisible to the maintainer and
 silently blocks every translator, which is how a lock outlived its incident once already.
 
-**The approval is waited for under that lock, in the same run that merges.** A pull request the drain
-opened itself needs someone else's approval, and splitting that across two invocations — approve after
-the first, merge in a second — puts a person's attention span inside the window the lock exists to
-close. Anything committed in that gap re-squashes the range, so the merging run finds the branch
+**The approval is waited for under that lock, in the same run that merges, and there is no way to split
+it.** A pull request the drain opened itself needs someone else's approval, and splitting that across two
+invocations — approve after the first, merge in a second — puts a person's attention span inside the
+window the lock exists to close. Anything committed in that gap re-squashes the range, so the merging run finds the branch
 superseded and recreates it — which deletes the head branch, closes the approved pull request, and
 spends the approval on something that no longer exists. The operator learns this from the forge refusing
 the merge for want of a review, which describes the symptom and not the cause. So the merging run holds

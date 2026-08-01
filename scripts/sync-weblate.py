@@ -67,7 +67,6 @@ died is worth following with one.
     sync-weblate.py status
     sync-weblate.py status neoipc-reports
     sync-weblate.py drain neoipc-glossary
-    sync-weblate.py drain neoipc-glossary --merge
     sync-weblate.py lock / unlock
     sync-weblate.py repair neoipc-reports
 """
@@ -872,7 +871,15 @@ def command_status(client: Weblate, args: argparse.Namespace) -> int:
 
 
 def command_drain(client: Weblate, args: argparse.Namespace) -> int:
-    """Take one component's translations from Weblate to a pull request, and optionally merge it."""
+    """Take one component's translations from Weblate to main, in one invocation.
+
+    There is deliberately no switch to stop after opening the pull request. Doing so releases the lock
+    with the request open, and an approval given in that state can be invalidated by any translation that
+    lands before the merging run starts -- which then recreates the branch and closes the approved
+    request. A drain that stops short of merging is not half a drain; it is the hazard this arrangement
+    exists to remove. To abandon one, decline to approve: the wait times out, nothing is merged, and the
+    component is unlocked on the way out.
+    """
     records = repository_components(client)
     record = find_component(records, args.component)
     component = operable(client, record)
@@ -908,16 +915,10 @@ def command_drain(client: Weblate, args: argparse.Namespace) -> int:
 
         if state.is_superseded:
             if approval_would_be_discarded(state):
-                # Both destinations below are stderr: the refusal reaches it through main's handler.
-                reference = pull_request_reference(state.open_pull_request, on_stderr=True)
-                if not args.merge:
-                    raise DrainError(
-                        f"{reference} is approved, but a translation has landed since and its branch is "
-                        f"superseded. Recreating it closes that request and the approval goes with it. "
-                        f"Re-run with --merge, which opens the replacement and waits for you to approve "
-                        f"that one, so no approval is discarded unnoticed.")
-                print(f"  WARNING: {reference} is approved but superseded, so it is being replaced; "
-                      f"that approval does not carry to its replacement.", file=sys.stderr)
+                print(f"  WARNING: "
+                      f"{pull_request_reference(state.open_pull_request, on_stderr=True)} is approved "
+                      f"but superseded, so it is being replaced; that approval does not carry to its "
+                      f"replacement, which this run will wait for you to approve.", file=sys.stderr)
             recreate_push_branch(state, component)
         elif not state.branch_exists:
             print(f"  pushing {state.push_branch}")
@@ -934,15 +935,6 @@ def command_drain(client: Weblate, args: argparse.Namespace) -> int:
             state = read_state(client, record)
 
         wait_for_checks(state.push_branch)
-
-        if not args.merge:
-            state = read_state(client, record)
-            print(f"{state.slug}: pull request {pull_request_reference(state.open_pull_request)} is "
-                  f"ready, and the component is about to be unlocked. Approving it now and merging in a "
-                  f"later run risks losing that approval to a translation landing in between; running "
-                  f"again with --merge closes that window by waiting for the approval under the lock.")
-            return 0
-
         wait_for_approval(state)
 
         # Re-read immediately before merging rather than trusting the state gathered above. The lock
@@ -1088,15 +1080,13 @@ def build_parser() -> argparse.ArgumentParser:
 
     # One component, positionally, and no --all: a drain is serial because merging one invalidates the
     # push branch of every other, so a batch switch would be an invitation to the failure this prevents.
-    drain = subcommand("drain", "drain ONE component to a pull request")
+    drain = subcommand("drain", "drain ONE component: pull request, approval, merge")
     drain.add_argument("component", help="component slug, e.g. neoipc-glossary")
-    drain.add_argument("--merge", action="store_true",
-                       help="merge the pull request once its checks are green")
     drain.add_argument("--admin", action="store_true",
                        help="merge with the administrator override (main requires a review that a "
                             "self-authored pull request cannot obtain)")
     drain.add_argument("--no-lock", action="store_true",
-                       help="do not lock the components; a translation saved mid-drain will then "
+                       help="do not lock the component; a translation saved mid-drain will then "
                             "supersede the branch and the drain will have to be repeated")
 
     subcommand("lock", "lock every component backed by this repository")
