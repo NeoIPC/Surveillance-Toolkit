@@ -58,6 +58,7 @@ from __future__ import annotations
 
 import argparse
 import contextlib
+import errno
 import json
 import os
 import subprocess
@@ -111,33 +112,72 @@ _CHECK_DISPLAY = {
     CHECKS_NONE: ("?", "2", "no checks"),
 }
 
+# Priority as Weblate itself draws it on the project page: a doubled chevron for the extremes, a single
+# one either side of the middle, and nothing at all for medium. Matching it means the two views agree at
+# a glance instead of having to be translated between. Medium is deliberately blank rather than a dash --
+# it is the default, and marking the default draws the eye to the rows that least need it.
+_PRIORITY_DISPLAY = {
+    60: ("↑↑", "31", "very high"),
+    80: ("↑", "33", "high"),
+    100: ("", "0", "medium"),
+    120: ("↓", "2", "low"),
+    140: ("↓↓", "2", "very low"),
+}
+
+
+def _icons_are_encodable() -> bool:
+    """Whether this stream can carry the icons at all.
+
+    Checked rather than assumed, and checked even when styling is being forced: a stream encoded in a
+    legacy code page cannot represent a check mark or a chevron, and writing one raises rather than
+    degrading. Forcing colour is a request for prettier output, not for a crash.
+    """
+    probe = "".join(icon for icon, _, _ in (*_CHECK_DISPLAY.values(), *_PRIORITY_DISPLAY.values()))
+    try:
+        probe.encode(sys.stdout.encoding or "ascii")
+    except (UnicodeEncodeError, LookupError):
+        return False
+    return True
+
+
+def _enable_windows_virtual_terminal() -> bool:
+    """A Windows console refuses these sequences as literal text until this is turned on."""
+    try:
+        import ctypes
+
+        kernel32 = ctypes.windll.kernel32
+        handle = kernel32.GetStdHandle(-11)  # STD_OUTPUT_HANDLE
+        mode = ctypes.c_uint32()
+        if not kernel32.GetConsoleMode(handle, ctypes.byref(mode)):
+            return False
+        return bool(kernel32.SetConsoleMode(handle, mode.value | 0x0004))
+    except Exception:  # noqa: BLE001 - any failure here means "not supported", never a crash
+        return False
+
 
 def _terminal_supports_styling() -> bool:
     """Whether it is safe to emit colour, icons and hyperlinks.
 
-    Every condition here is a way the output is read by something that is not a person at a terminal.
-    Redirected output goes to a file or a pipe, where an escape sequence is corruption rather than
-    colour and an icon may not even be encodable; NO_COLOR is the agreed way for a user to say they do
-    not want any (https://no-color.org); TERM=dumb is how a terminal says it cannot render it.
-    """
-    if not sys.stdout.isatty() or "NO_COLOR" in os.environ or os.environ.get("TERM") == "dumb":
-        return False
-    if sys.platform == "win32":
-        # A Windows console understands these sequences only once virtual-terminal processing is turned
-        # on, and refuses them as literal text otherwise. Best effort: if it cannot be enabled, the
-        # console is one that would have shown the raw escapes, so styling stays off.
-        try:
-            import ctypes
+    The two environment variables are the agreed way to override the guess in either direction, and
+    FORCE_COLOR wins where both are set, per https://force-color.org. Forcing is what makes the output
+    usable through a pager or in a log viewer that renders escapes, neither of which is a terminal as
+    far as isatty is concerned.
 
-            kernel32 = ctypes.windll.kernel32
-            handle = kernel32.GetStdHandle(-11)  # STD_OUTPUT_HANDLE
-            mode = ctypes.c_uint32()
-            if not kernel32.GetConsoleMode(handle, ctypes.byref(mode)):
-                return False
-            return bool(kernel32.SetConsoleMode(handle, mode.value | 0x0004))
-        except Exception:  # noqa: BLE001 - any failure here means "not supported", never a crash
-            return False
-    return True
+    Everything else is a way of detecting that the reader is not a person at a terminal: redirected
+    output goes to a file or a pipe, where an escape sequence is corruption rather than colour, and
+    TERM=dumb is how a terminal says it cannot render one.
+    """
+    force = os.environ.get("FORCE_COLOR")
+    if force is not None and force != "0":
+        return _icons_are_encodable()
+    if force == "0" or "NO_COLOR" in os.environ or os.environ.get("TERM") == "dumb":
+        return False
+    if not sys.stdout.isatty():
+        return False
+    # Only worth attempting on a real console; a forced stream is not one, and asking would fail.
+    if sys.platform == "win32" and not _enable_windows_virtual_terminal():
+        return False
+    return _icons_are_encodable()
 
 
 STYLED = _terminal_supports_styling()
@@ -156,6 +196,17 @@ def render_checks(checks: str) -> str:
     """An icon where it can be seen, the words where it cannot -- never nothing."""
     icon, colour, words = _CHECK_DISPLAY.get(checks, ("?", "2", checks))
     return styled(icon, colour) if STYLED else words
+
+
+def render_priority(priority: int, width: int) -> str:
+    """Weblate's chevrons where they can be seen, its words where they cannot.
+
+    Padded before it is styled, never after: the escape sequences carry no width, so padding the styled
+    string would count them as characters and pull every column after this one out of line.
+    """
+    icon, colour, words = _PRIORITY_DISPLAY.get(priority, ("", "0", str(priority)))
+    text = icon if STYLED else words
+    return styled(text.ljust(width), colour) if STYLED else text.ljust(width)
 
 
 class DrainError(RuntimeError):
@@ -508,13 +559,18 @@ def command_status(client: Weblate, _args: argparse.Namespace) -> int:
     problems = 0
     # Rows arrive most-important-first from repository_components; the priority column is shown so the
     # order reads as deliberate rather than arbitrary.
-    print(f"{'component':<38}{'priority':<11}{'branch':<26}{'needs'}")
+    # Narrow enough for two chevrons where they render, wide enough for "very high" where they do not.
+    priority_width = 4 if STYLED else 11
+    print(f"{'component':<38}{'pri':<{priority_width}}{'branch':<26}{'needs'}"
+          if STYLED else
+          f"{'component':<38}{'priority':<{priority_width}}{'branch':<26}{'needs'}")
     for record in repository_components(client):
         state = read_state(client, record)
         verdict, is_problem = state.verdict
         problems += is_problem
         branch = state.push_branch if state.branch_exists else "—"
-        print(f"{state.slug:<38}{state.priority_label:<11}{branch:<26}{verdict}")
+        print(f"{state.slug:<38}{render_priority(state.priority, priority_width)}"
+              f"{branch:<26}{verdict}")
     return 1 if problems else 0
 
 
@@ -716,6 +772,19 @@ def main(argv: Sequence[str] | None = None) -> int:
     except (DrainError, WeblateException, requests.RequestException) as error:
         print(f"error: {error}", file=sys.stderr)
         return 1
+    except (BrokenPipeError, OSError) as error:
+        # `status | head` closes the pipe while there is still output to write. That is an ordinary
+        # thing to type, and it should end quietly rather than in a traceback about the reader being
+        # gone. Windows raises OSError EINVAL where POSIX raises BrokenPipeError, so both are caught,
+        # and anything else is re-raised because it is a real failure wearing the same class.
+        if isinstance(error, OSError) and not isinstance(error, BrokenPipeError):
+            if error.errno not in (errno.EPIPE, errno.EINVAL):
+                raise
+        # Point the interpreter's own final flush at nothing, so it cannot fail the same way on exit
+        # and print a second, uglier report of the same event.
+        with contextlib.suppress(OSError):
+            os.dup2(os.open(os.devnull, os.O_WRONLY), sys.stdout.fileno())
+        return 0
 
 
 if __name__ == "__main__":

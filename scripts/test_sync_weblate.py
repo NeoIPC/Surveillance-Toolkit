@@ -197,6 +197,58 @@ class TestStyling:
     def test_styling_is_off_when_output_is_not_a_terminal(self):
         assert not sync_weblate.STYLED
 
+    def test_no_color_disables_styling(self, monkeypatch: pytest.MonkeyPatch):
+        monkeypatch.delenv("FORCE_COLOR", raising=False)
+        monkeypatch.setenv("NO_COLOR", "1")
+        assert not sync_weblate._terminal_supports_styling()
+
+    def test_force_color_enables_styling_without_a_terminal(self, monkeypatch: pytest.MonkeyPatch):
+        # The case that makes forcing worth supporting: a pager or a log viewer renders escapes but is
+        # not a terminal, so the guess based on isatty is wrong in the useful direction.
+        monkeypatch.delenv("NO_COLOR", raising=False)
+        monkeypatch.setenv("FORCE_COLOR", "1")
+        assert sync_weblate._terminal_supports_styling()
+
+    def test_force_color_zero_disables_styling(self, monkeypatch: pytest.MonkeyPatch):
+        monkeypatch.delenv("NO_COLOR", raising=False)
+        monkeypatch.setenv("FORCE_COLOR", "0")
+        assert not sync_weblate._terminal_supports_styling()
+
+    def test_force_color_wins_over_no_color(self, monkeypatch: pytest.MonkeyPatch):
+        # Both set is a contradiction the user has to be able to resolve; force-color.org gives the
+        # answer, and picking the other one would make FORCE_COLOR unusable on a machine where
+        # NO_COLOR is exported globally -- which is exactly where someone needs to override it.
+        monkeypatch.setenv("NO_COLOR", "1")
+        monkeypatch.setenv("FORCE_COLOR", "1")
+        assert sync_weblate._terminal_supports_styling()
+
+    def test_styling_stays_off_when_the_icons_cannot_be_encoded(self, monkeypatch: pytest.MonkeyPatch):
+        # Forcing colour asks for prettier output, never for a crash: a legacy code page cannot carry a
+        # check mark, and writing one raises rather than degrading.
+        class LegacyStream:
+            encoding = "cp1252"
+
+            @staticmethod
+            def isatty() -> bool:
+                return True
+
+        monkeypatch.setenv("FORCE_COLOR", "1")
+        monkeypatch.setattr(sync_weblate.sys, "stdout", LegacyStream())
+        assert not sync_weblate._terminal_supports_styling()
+
+    def test_a_capable_encoding_permits_the_icons(self, monkeypatch: pytest.MonkeyPatch):
+        # Guards the guard: the check above must be rejecting the encoding rather than always failing.
+        class ModernStream:
+            encoding = "utf-8"
+
+            @staticmethod
+            def isatty() -> bool:
+                return True
+
+        monkeypatch.setenv("FORCE_COLOR", "1")
+        monkeypatch.setattr(sync_weblate.sys, "stdout", ModernStream())
+        assert sync_weblate._terminal_supports_styling()
+
     def test_unstyled_text_is_returned_unchanged(self):
         assert sync_weblate.styled("SUPERSEDED", "31") == "SUPERSEDED"
 
