@@ -284,3 +284,10 @@ clause, a table cell whose meaning depends on its column. A heading does not nee
   component-level flag puts every unit in scope and a token the *target* invents fires on its own.
 - `po_line_wrap`, `check_flags` and per-string flags are three different delivery routes with three
   different persistence properties. See the configuration reference.
+- **The source string description says which format a string came from, and where.** po4a writes its
+  extraction type into the note, so the sidebar answers "is this Markdown or AsciiDoc or a YAML value?"
+  without opening anything: `type: Hash Value: <key>` is a YAML mapping value under that key,
+  `type: #sec-<id>` is the AsciiDoc section the string sits in. Worth knowing before judging whether a
+  component-level flag suits a particular string — a YAML value looks like plain text and frequently is
+  not, since the report string resources carry Markdown, links and inline R spans. Reading the note beats
+  querying the API for the same fact.
