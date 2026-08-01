@@ -153,8 +153,41 @@ metadata and the app. **Not** on infectious agents: those 4,107 entries are nome
 terminology check has nothing there to enforce and any match would be coincidental.
 
 Measured at enablement: **zero findings on all four**, and again once German's glossary was completed the
-same day. That is a real pass rather than an inert check — German holds the whole glossary against
-several hundred translated report units, so there was ample for it to fire on.
+same day. That reading was wrong, and the way it was wrong is the useful part: six of the seven device
+and infection abbreviations carried a German rendering but **no `terminology` flag**, so they were not in
+the glossary the check consults and could not be enforced at all. Adding the flag produced a real finding
+within hours. A quiet check is evidence of nothing until you know its terms are actually reaching it.
+
+#### What it actually compares, and the limitation that follows
+
+From `weblate/checks/glossary.py`: for each glossary term matching the source, it searches the **target**
+for the expected rendering — `term.target` normally, or the *source* term where the entry is `read-only` —
+case-insensitively, bounded by `\b` in languages that use whitespace and unbounded in those that do not.
+Present once anywhere: satisfied. Absent: flagged.
+
+**So it cannot detect an untranslated term. It can only detect the absence of the translated one.** The
+distinction is not academic. A German protocol string carried **three** occurrences of `PVC` where the
+glossary says `PVK` — one inside an AsciiDoc cross-reference, two in prose. The check fired; correcting a
+**single** occurrence introduced `PVK`, which satisfied the term and cleared the check while two `PVC`
+remained in the shipped text.
+
+Markup has nothing to do with it — the target is searched as plain text, and a term inside `<<…>>` counts
+exactly like one in prose. What makes the leftovers invisible is that `PVC` is never searched for at any
+point.
+
+Read the check accordingly: **it finds strings worth looking at, not strings that are finished.** It sits
+alongside the `md-syntax` and `md-link` limits below, which degrade to set and count comparisons for the
+same practical reason.
+
+Three further behaviours from the same function, each load-bearing:
+
+- **Variants are excluded** (`include_variants=False`), so the casing variants that duplicate in the
+  translator's *sidebar* do not duplicate in the *check*. The sidebar duplication is display-only.
+- **`read-only` inverts the test** to demand the source term verbatim, which is what makes an entry like
+  `aware: "AWaRe"` behave as intended.
+- **`forbidden` inverts it the other way**: the check fires when the forbidden rendering *is* present.
+  That is the mechanism for recording a wrong rendering — *Watch → Vigilancia* — as a rule rather than a
+  note, and it is confirmed in the code rather than assumed from the documentation.
 
 **The dependency worth knowing: the check can only bite in a language once that language's glossary is
 translated.** Spanish and Italian carry a handful of terms between them, so almost nothing is enforceable
