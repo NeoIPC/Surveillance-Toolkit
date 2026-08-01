@@ -76,6 +76,8 @@ carbr: "CARBR"
 # Resistance category: colistin resistance.
 # flags: terminology
 colr: "COLR"
+# Central Venous Catheter.
+# flags: terminology
 cvc: CVC
 # Resistance mechanism: extended-spectrum beta-lactamase. Underlies 3GCR rather than being a category
 # of its own.
@@ -87,6 +89,8 @@ ga: "GA"
 h2020_funding_statement: >-
   This project has received funding from the European Union's Horizon 2020
   research and innovation programme under grant agreement No 965328.
+# Hospital-acquired pneumonia.
+# flags: terminology
 hap: HAP
 human_milk: "human milk"
 human_milk_sc: "Human milk"
@@ -94,6 +98,8 @@ human_milk_sc: "Human milk"
 # codes come from.
 # flags: terminology
 ichi: "ICHI"
+# Invasive Ventilation.
+# flags: terminology
 inv: INV
 kangaroo_care: "kangaroo care"
 kangaroo_care_sc: "Kangaroo care"
@@ -103,16 +109,19 @@ lcbsi: "LCBSI"
 # Resistance category: methicillin-resistant Staphylococcus aureus.
 # flags: terminology
 mrsa: "MRSA"
-# An initialism, so most languages keep it verbatim; suppress the unchanged-translation check rather
-# than have every language answer it. Declared here because a flag set on a catalogue does not survive
-# msgmerge — gettext models no custom flags, so only the template's are restored.
-# flags: ignore-same
+# Necrotizing Enterocolitis. An initialism, so most languages keep it verbatim; suppress the
+# unchanged-translation check rather than have every language answer it. Declared here because a flag
+# set on a catalogue does not survive msgmerge — gettext models no custom flags, so only the template's
+# are restored.
+# flags: ignore-same, terminology
 nec: NEC
 necrotizing_enterocolitis: "necrotizing enterocolitis"
 necrotizing_enterocolitis_sc: "Necrotizing enterocolitis"
 necrotizing_enterocolitis_tc: "Necrotizing Enterocolitis"
 # flags: ignore-same
 neoipc_surveillance: "NeoIPC Surveillance"
+# Non-invasive Ventilation.
+# flags: terminology
 niv: NIV
 pneumonia: pneumonia
 pneumonia_sc: Pneumonia
@@ -120,11 +129,15 @@ primary_sepsis_bsi: "primary sepsis/BSI"
 primary_sepsis_bsi_sc: "Primary sepsis/BSI"
 primary_sepsis_bsi_tc: "Primary Sepsis/BSI"
 probiotics: Probiotics
+# Peripheral Venous Catheter.
+# flags: terminology
 pvc: PVC
 # WHO AWaRe antibiotic category. The official WHO translation is normative: Spanish "Reserva", per the
 # WHO AWaRe antibiotic book.
 # flags: terminology
 reserve: "Reserve"
+# Surgical Site Infection.
+# flags: terminology
 ssi: SSI
 surgical_procedure: "surgical procedure"
 surgical_procedure_sc: "Surgical procedure"
