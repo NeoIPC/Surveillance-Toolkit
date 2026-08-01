@@ -27,7 +27,7 @@ jobs:
         # being buried in a render log, and so it reports in seconds without waiting on the toolchain setup.
         runs-on: ubuntu-26.04
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v7
               with:
                 # The check reads the working tree and the index, so the submodule is not needed — and
                 # tools/po4a is third-party upstream that this contract deliberately does not cover.
@@ -45,7 +45,7 @@ jobs:
         if: github.event_name == 'pull_request'
         runs-on: ubuntu-26.04
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v7
               with:
                 # Need the base commit to diff against; a shallow clone has neither side.
                 fetch-depth: 0
@@ -204,7 +204,7 @@ jobs:
         # -ReportOnly is the whole of the change that makes it blocking.
         runs-on: ubuntu-26.04
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v7
               with:
                 # Reads the committed catalogues only; no submodule and no toolchain are involved.
                 submodules: false
@@ -231,13 +231,13 @@ jobs:
         # end of a render log.
         runs-on: ubuntu-26.04
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v7
               with:
                 # The tests read committed files and re-run the generators over them; no submodule is
                 # involved, and po4a (the one thing that would need tools/po4a) is not exercised here.
                 submodules: false
 
-            - uses: actions/setup-python@v5
+            - uses: actions/setup-python@v6
               with:
                 # Pinned for the same reason the runner image is: an interpreter that moves under the gate
                 # turns an unrelated release into a red build nobody changed anything to cause.
