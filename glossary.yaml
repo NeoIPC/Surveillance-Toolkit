@@ -58,13 +58,8 @@
 # It is not a corner case: 16 of the 52 keys here are casing variants whose base key is also present,
 # so a third of this file produces a doubled sidebar entry wherever it matches. The duplication is
 # noise rather than a defect — both hits say the same thing — but it dilutes the sidebar that carries
-# the terminology decisions, which is the mechanism the whole terminology story rests on.
-#
-# Worth weighing if it ever grates: the casing variants exist so the R code can render a term in
-# sentence or title case, which is a concern of the renderer and not of the translator. As glossary
-# terms they teach nothing the base key does not. Dropping `terminology` from the variants would empty
-# the duplicates out of the sidebar while leaving them translatable — untested, and a decision rather
-# than a fix.
+# the terminology decisions. What to do about it, if anything, is part of the casing-and-plural
+# convention rather than a property of this file.
 
 # Resistance category: third-generation cephalosporin resistance.
 # flags: terminology
