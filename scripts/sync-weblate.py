@@ -97,7 +97,8 @@ except ImportError:
     sys.exit("Error: wlc is required. Install with: pip install wlc")
 
 PROJECT = "neoipc"
-# Which repository backs a component is read from Weblate, per component -- see forge_repo.
+# Which repository backs a component, and where its git export lives, are both read from Weblate per
+# component -- see forge_repo and weblate_tip. Nothing about a component's location is composed here.
 #
 # The list of not-a-person identities is the one thing still pinned to a repository. Which identities are
 # tools is a fact about the project rather than about any repository, so the organization's own .github
@@ -107,7 +108,6 @@ PROJECT = "neoipc"
 # being kept elsewhere, so a component in another repository reads this one over the network instead.
 IDENTITIES_REPO = "NeoIPC/Surveillance-Toolkit"
 _GITHUB_REPO = re.compile(r"github\.com[:/](?P<owner>[^/]+?)/(?P<name>[^/]+?)(?:\.git)?/?$")
-GIT_EXPORT = "https://hosted.weblate.org/git/{project}/{slug}/"
 
 # How long to wait for the forge to finish running checks on a freshly pushed branch, and how often to
 # ask. A drain is interactive and rare, so a slow poll costs nothing and a rate limit costs a retry.
@@ -355,6 +355,16 @@ class ComponentState:
         """
         # Only the last column is styled, so escape sequences cannot disturb the padding of the ones
         # before it.
+        #
+        # No push branch comes first because it is the state every other test here is blind to. Each of
+        # them is derived from the branch, and each collapses to a benign value when there is none: no
+        # branch exists, so nothing can be superseded or stranded; no pull request is found, so none is
+        # awaited -- and the row lands on "idle" having established nothing. That is the same collapse
+        # the drain refuses outright, and reporting it as fine is how the misconfiguration survives until
+        # someone tries to drain it.
+        if not self.push_branch:
+            return styled("NO PUSH BRANCH — Weblate would push straight at the translated branch",
+                          "31"), True
         if self.merge_failure:
             return styled(f"MERGE FAILURE: {self.merge_failure} — run repair", "31"), True
         if self.is_superseded:
@@ -429,8 +439,14 @@ def gh_json(args: Sequence[str]) -> object:
     return json.loads(output) if output else None
 
 
-def weblate_tip(slug: str) -> str:
+def weblate_tip(record: Record) -> str:
     """The component's current commit, read without fetching any objects.
+
+    The export URL comes from the record for the same reason the backing repository does: Weblate
+    already knows it, and composing one here from the project and the slug is a second copy that goes
+    wrong silently. It would not even survive a component being filed under a category -- the export
+    path gains the category's slug, so the composed URL points at nothing and every command, including
+    read-only status, dies talking about the export rather than about the category.
 
     ls-remote rather than fetch because Weblate's export refuses a fetch into a clone that already holds
     the commits its history has since replaced -- which is exactly the clone doing the draining.
@@ -439,7 +455,11 @@ def weblate_tip(slug: str) -> str:
     every pushed branch compare unequal to it and so read as superseded, which is a recommendation to
     delete and recreate four branches on the strength of a network blip.
     """
-    url = GIT_EXPORT.format(project=PROJECT, slug=slug)
+    slug = record["slug"]
+    url = str(record.get("git_export") or "")
+    if not url:
+        raise DrainError(f"{slug}: Weblate reports no git export URL for it, so its current commit "
+                         f"cannot be read. Check the component is not still being created.")
     output = run(["git", "ls-remote", url, "refs/heads/main"])
     if not output:
         raise DrainError(f"{slug}: its export has no main branch, which should be impossible")
@@ -631,10 +651,12 @@ def connect() -> Weblate:
 
 
 def repository_components(client: Weblate) -> list[Record]:
-    """The components backed by this repository, discovered rather than listed, as raw API records.
+    """Every component this tool can drive, discovered rather than listed, as raw API records.
 
-    A hard-coded list is a second place to register a component, and the one nobody updates. Weblate
-    already knows which components point here and what push branch each uses.
+    Every component in the project, whichever repository backs it -- the tool drives more than one, and
+    scoping this to a single repository is what made `neoipc-app` invisible to it. A hard-coded list is
+    a second place to register a component, and the one nobody updates. Weblate already knows which
+    repository each points at and what push branch each uses.
 
     Raw records rather than modelled objects because the model does not carry every field: push_branch
     is absent from Component.PARAMS, so attribute access on it raises rather than returning the value
@@ -682,12 +704,12 @@ def forge_repo(record: Record) -> str:
 def find_component(records: Sequence[Record], slug: str) -> Record:
     """The record for one slug, or a refusal naming the slugs that exist.
 
-    Naming them matters more than it looks: a component this repository does not back is
-    indistinguishable from a typo, and a Weblate slug is not derivable from the catalogue's name.
+    Naming them matters more than it looks: a component this tool does not drive is indistinguishable
+    from a typo, and a Weblate slug is not derivable from the catalogue's name.
     """
     record = next((r for r in records if r["slug"] == slug), None)
     if record is None:
-        raise DrainError(f"unknown component '{slug}'. This repository backs: "
+        raise DrainError(f"unknown component '{slug}'. This tool drives: "
                          f"{', '.join(r['slug'] for r in records)}")
     return record
 
@@ -711,7 +733,7 @@ def read_state(client: Weblate, record: Record) -> ComponentState:
         needs_commit=bool(weblate_state["needs_commit"]),
         needs_push=bool(weblate_state["needs_push"]),
         merge_failure=str(weblate_state["merge_failure"] or ""),
-        weblate_tip=weblate_tip(slug),
+        weblate_tip=weblate_tip(record),
         branch_tip=branch_tip(branch, forge) if branch else None,
         open_pull_request=pull_request[0] if pull_request else None,
         checks=pull_request[1] if pull_request else "",
@@ -769,7 +791,12 @@ def check_outcome(node: Record) -> tuple[str, str]:
 def wait_for_checks(branch: str, repo: str) -> None:
     """Block until every check on the branch's pull request has settled, then fail on a red one."""
     deadline = time.monotonic() + CHECK_TIMEOUT_SECONDS
-    bad = {"FAILURE", "TIMED_OUT", "CANCELLED", "ACTION_REQUIRED", "STARTUP_FAILURE", "STALE"}
+    # An allow-list rather than a list of the conclusions known to be bad, because this is the
+    # aggregation the merge is gated on: a conclusion nobody anticipated -- one the forge adds later, or
+    # the value check_outcome falls back to -- has to read as not-green, and under a deny-list it reads
+    # as green and merges. It is also exactly what open_pull_request accepts, so what `status` reports
+    # and what the drain acts on cannot diverge for one rollup.
+    good = {"SUCCESS", "NEUTRAL", "SKIPPED"}
     while True:
         data = gh_json(["pr", "view", "--repo", repo, branch, "--json", "statusCheckRollup"])
         nodes = (data or {}).get("statusCheckRollup") or []
@@ -779,7 +806,7 @@ def wait_for_checks(branch: str, repo: str) -> None:
         outcomes = [check_outcome(n) for n in nodes]
         pending = [name for name, state in outcomes if state == "PENDING"]
         if nodes and not pending:
-            failed = [name for name, state in outcomes if state in bad]
+            failed = [name for name, state in outcomes if state not in good]
             if failed:
                 raise DrainError(f"checks failed on {branch}: {', '.join(failed)}")
             print(f"  checks settled, {len(outcomes)} green")
@@ -978,6 +1005,16 @@ def command_drain(client: Weblate, args: argparse.Namespace) -> int:
         state = read_state(client, record)
         if state.is_superseded:
             raise DrainError(f"{state.slug} moved while the drain waited; run the drain again")
+        # The checks were green before the approval wait, which blocks for as long as it takes a person
+        # to answer. That is ample time for one to go red -- a re-run, a status posted asynchronously
+        # (the Copilot review this drain itself requested is one), a check newly made required. Merging
+        # with --admin bypasses branch protection, so this is the only thing standing in the way. Nothing
+        # is lost by refusing: the branch and its approval both survive, so the drain can simply be run
+        # again once the check is dealt with.
+        if state.checks != CHECKS_GREEN:
+            raise DrainError(f"{state.slug} was approved, but its checks are no longer green "
+                             f"({state.checks}); refusing to merge. Deal with them and run the drain "
+                             f"again — the branch and its approval both survive.")
 
         merge_drain_pull_request(state, admin=args.admin)
         merged = run(["gh", "api", f"repos/{state.forge_repo}/commits/main", "--jq", ".sha"])
@@ -1126,8 +1163,11 @@ def build_parser() -> argparse.ArgumentParser:
                        help="do not lock the component; a translation saved mid-drain will then "
                             "supersede the branch and the drain will have to be repeated")
 
-    subcommand("lock", "lock every component backed by this repository")
-    subcommand("unlock", "unlock every component backed by this repository")
+    # Every component in the project, not this repository's: these two are the widest thing the tool
+    # does, and an operator freezing one catalogue's translators has to know they are freezing all of
+    # them -- including the ones another repository backs.
+    subcommand("lock", "lock every component this tool drives, across all backing repositories")
+    subcommand("unlock", "unlock every component this tool drives, across all backing repositories")
 
     repair = subcommand("repair", "reset and reapply a diverged component")
     repair.add_argument("component", help="component slug, e.g. neoipc-glossary")
