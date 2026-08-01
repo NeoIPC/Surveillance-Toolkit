@@ -23,9 +23,14 @@ po/reports.<lang>.po        po/documentation.<lang>.po      po/infectious_agents
 po/metadata.<lang>.po       po/glossary.<lang>.po
 ```
 
-**One catalogue is the opposite case** and a pull request is exactly right for it, because it is not on
-Weblate at all: `po/antibiotics.<lang>.po`, whose source content is under a licence that Weblate's free
-hosting does not accept, so it stays here.
+**One catalogue you can translate is the opposite case** and a pull request is exactly right for it,
+because it is not on Weblate at all: `po/antibiotics.<lang>.po`, whose source content is under a licence
+that Weblate's free hosting does not accept, so it stays here.
+
+There is a second catalogue outside Weblate, `scripts/po/*.po`, and it is **not** open for translation by
+anyone — the messages in it are consumed by a mechanism that is not safe to feed community-supplied text,
+which is why it was never registered. It is listed here only so its absence from the block above does not
+read as an oversight. Please do not send translations for it.
 
 ## Everything else goes through a pull request
 

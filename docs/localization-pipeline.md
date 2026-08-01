@@ -82,9 +82,11 @@ for each component, one at a time:
 
 `scripts/sync-weblate.py` implements exactly that loop; `drain <component>` is one invocation and does
 the whole cycle, and `status` reports where every component stands without touching anything. It covers
-**every component in the Weblate project**, not only this repository's — which repository backs each one
-is read from Weblate per component, so a catalogue living in another repository (the app's `i18n/*.po`)
-is drained the same way and by the same command. The account it runs as needs push rights on whichever
+**every git-backed component in the Weblate project**, not only this repository's — which repository
+backs each one is read from Weblate per component, so a catalogue living in another repository (the app's
+`i18n/*.po`) is drained the same way and by the same command. The filter is on that backing, so the one
+component it does not list is the Weblate-local terminology store, which has no repository behind it and
+nothing to drain; asking it to act on that one answers `unknown component`, which reads as a typo. The account it runs as needs push rights on whichever
 repository that is. Run the
 drain as the **automation account** rather than as yourself: a repository that requires an approving
 review will not let an account approve a pull request it opened, so a drain run as the maintainer can

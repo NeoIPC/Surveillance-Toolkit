@@ -74,11 +74,17 @@ source, even where it looks like a word.
   `{#sec-methods}`. Same rule as the protocol's: the identifier is a name, not a word.
 - **Named placeholders**: `{count}`, `{department}`. Keep every one, spelled exactly. Their *order* may
   change freely to suit your language — that is precisely why they are named rather than numbered.
-- A few older strings still use `%s` instead. Same rule, and here the order **cannot** change, which is
-  why they are being replaced.
+- **`%s` and `%i`**, which are still the *majority* form here — around one string in seven carries one,
+  against a much smaller number using the named form above. Same rule about keeping them, but here the
+  order **cannot** change: they are filled positionally, so swapping two puts each value in the other's
+  place. That is why they are being replaced, and why until they are, a sentence whose natural word order
+  differs from English is worth a comment rather than a rearrangement.
 
-**In the DHIS2 metadata** — tokens like `#{NEOIPC_BSI_PATHOGEN_1}` and `V{event_date}`. Identifiers
-again: keep them verbatim.
+**In the DHIS2 metadata** — tokens like `V{program_name}`, `A{yQwpowV0o08}` and
+`#{NeoIPC HAP Virus detected}`. All three are identifiers; keep them verbatim, braces included. The last
+form is the one to watch, and it is common: the text inside those braces is an English phrase naming a
+field, not a phrase for the reader, so it looks translatable and is not. Translating it does not produce
+an awkward sentence — it stops the rule from finding the field at all.
 
 **In the glossary** — nothing. Plain terms.
 

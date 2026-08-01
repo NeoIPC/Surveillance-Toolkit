@@ -63,18 +63,29 @@ assigning a footnote to a document attribute and referencing it, because "attrib
 expanded before footnotes are parsed":
 
 ```asciidoc
+//po4a: entry fn-ab-days
 :fn-ab-days: footnote:ab-days-comment[The day of the first dose and the day of ...]
 
 The cumulative number of days{fn-ab-days} when the infant received ...
 ```
 
-The translatable string then carries `{fn-ab-days}` instead of `footnote:ab-days-comment[]` — which is
-this project's own principle applied, since markup does not belong in a string a translator has to carry
-through unchanged, and there is no decision for them to make about a footnote id. It also reads better in
-the source, which is why the technique exists. Two things to know: formatting inside an externalized
-footnote needs `pass:c,q[…]`, and this check does **not** inspect attribute references, so the false
-positive disappears and so does the (nonexistent) protection — cover it with a `placeholders:` alternative
-if that matters.
+**The `//po4a: entry` line is not optional and its absence fails silently.** po4a translates an attribute
+entry only where one has declared it — `AsciiDoc.pm` gates the `translate()` call on that name being
+registered, and its own documentation says *"This declares an attribute entry as being translatable. By
+default, they are not translated."* Without the directive the value is pushed through verbatim: the
+footnote's prose never reaches `po/documentation.pot`, so it ships in English in all nine languages while
+the build stays green and the check goes quiet — the loudest possible way to look like a fix. No
+`//po4a: entry` exists anywhere in this repository today, so this is the first, and every externalized
+footnote needs its own.
+
+With the directive in place the translatable surface is unchanged in size but better shaped: the prose
+becomes a unit of its own and the sentence carries `{fn-ab-days}` instead of `footnote:ab-days-comment[]`
+— this project's own principle applied, since markup does not belong in a string a translator has to
+carry through unchanged, and there is no decision for them to make about a footnote id. It also reads
+better in the source, which is why the technique exists. Two further things to know: formatting inside an
+externalized footnote needs `pass:c,q[…]`, and this check does **not** inspect attribute references, so
+the false positive disappears and so does the (nonexistent) protection — cover it with a `placeholders:`
+alternative if that matters.
 
 **Otherwise suppress per string** with `ignore-asciidoc-markup`, the same treatment the Creative Commons
 licence strings get and for the same reason: the source is right and the check cannot see it.
@@ -180,8 +191,8 @@ metadata and the app. **Not** on infectious agents: those 4,107 entries are nome
 terminology check has nothing there to enforce and any match would be coincidental.
 
 Measured at enablement: **zero findings on all four**, and again once German's glossary was completed the
-same day. That reading was wrong, and the way it was wrong is the useful part: six of the seven device
-and infection abbreviations carried a German rendering but **no `terminology` flag**, so they were not in
+same day. That reading was wrong, and the way it was wrong is the useful part: all seven device and
+infection abbreviations carried a German rendering but **no `terminology` flag**, so they were not in
 the glossary the check consults and could not be enforced at all. Adding the flag produced a real finding
 within hours. A quiet check is evidence of nothing until you know its terms are actually reaching it.
 
@@ -406,15 +417,26 @@ source-string migration does exactly that, wholesale. So a manifest guards the r
 scheduled one, and it should be built when something actually needs it rather than as a precondition for
 writing any explanation at all.
 
-Two consequences follow. **Where guidance is derivable from the authored source, put it in the description
-and no manifest arises** — the glossary already does this, its generator carrying YAML comments through
-into the template, so a third of its terms ship guidance that survives everything. **Where it is not, an
-explanation is the only route**: po4a's AsciiDoc and YAML modules have no translator-comment support at
-all — read from po4a's own source, where only the TeX and Texinfo modules do — so nothing authored can
-reach the `documentation`, `reports` or `infectious_agents` descriptions. Those explanations therefore
-carry the same sequencing constraint as editorial approval, and for the same reason: both are
-database-only and both die with the unit, so both are written **after** the migration that rewrites
-msgids, not before it.
+Two consequences follow, and the second is **per catalogue rather than blanket** — an earlier revision
+here said no po4a module carries translator comments, which is wrong for the one catalogue where it
+matters most.
+
+**Where guidance is derivable from the authored source, put it in the description and no manifest
+arises.** The glossary does this already, its generator carrying YAML comments through into the template.
+Measure the proportion from the current template rather than quoting one here; this branch alone moved it.
+
+**`documentation` can do the same, from the AsciiDoc source.** `AsciiDoc.pm` collects `//` line comments
+and `////` comment blocks and passes them to every `translate()` call as the `comment` option, which
+`TransTractor.pm` maps to the PO `automatic` field — the `#.` line this document's own table names as the
+source of truth for a source-string description. So a note written above a protocol paragraph reaches the
+translator, is reviewable in a pull request, and survives a recreate, a reset and the source-string
+migration alike. Prefer it to an explanation wherever the guidance belongs to the document.
+
+**`reports` and `infectious_agents` genuinely cannot**, and this is where an explanation is the only
+route: `Text.pm` declares a comments list and never fills it, and `Yaml.pm` has no comment handling at
+all. Those explanations carry the same sequencing constraint as editorial approval, and for the same
+reason: both are database-only and both die with the unit, so both are written **after** the migration
+that rewrites msgids, not before it.
 
 ### What fills each field is per catalogue, not uniform
 

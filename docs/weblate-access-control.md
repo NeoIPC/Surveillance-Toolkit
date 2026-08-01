@@ -11,12 +11,15 @@ Roles are referred to by **number** everywhere in the API, and nothing it return
 role a number is. This table is the translation, read off the role picker in the web interface — the one
 place that shows a name and its id together.
 
-It lists the **sixteen roles a project team may hold**, which is what that picker offers. Upstream defines
-**eighteen**; the difference is roles that are not project-scoped and so cannot be granted here at all —
-*Workspace administration* (id 19, the one value the API will confirm), *Add workspace projects*, and
-*Add new projects*, which is presumably the id 20 held by the site-wide `Project creators` team. Ids 15
-and 16 exist in the sequence and appear in no project picker; what they are has not been established, and
-nothing here needs them.
+It lists the **sixteen roles a project team may hold**, which is what that picker offers. That is not the
+whole role set, and the rest is only partly known — so take the picker as authoritative for what can be
+granted, and treat the total as open. Three roles are visibly outside it because they are not
+project-scoped: *Workspace administration* (id 19, the one value the API will confirm), *Add workspace
+projects*, and *Add new projects*, which is presumably the id 20 held by the site-wide `Project creators`
+team. Ids 15 and 16 exist in the sequence and appear in no project picker; what they are has not been
+established, and nothing here needs them. An earlier revision put upstream's total at eighteen, which
+these do not add up to — the number was never verified against upstream and is dropped rather than
+patched.
 
 | id | role | id | role |
 |---|---|---|---|
