@@ -99,6 +99,52 @@ that worked. Judge it by re-reading the team, never by the absence of an excepti
 **`/api/roles/` is not an inventory.** It returns three roles to a project token and refuses the rest by
 id, which is why the table above exists.
 
+## The review workflow, as configured
+
+Reviews are on for translations and for source strings. Suggestions are on for every component,
+auto-accept is off, and **voting is off**: with most languages at zero percent, two gates on a pipeline
+with no throughput reads to a contributor as "nothing I do ever lands". Turn voting on for a language once
+it has two or more active contributors, not before.
+
+`state:translated` means translated but **not yet approved**, so that search *is* the review queue. The
+first of these is the one to hand an editor:
+
+```
+https://hosted.weblate.org/search/neoipc/-/<lang>/?q=state%3Atranslated   one language, whole project
+https://hosted.weblate.org/search/neoipc/?q=state%3Atranslated            every language
+https://hosted.weblate.org/projects/neoipc/-/<lang>/                      that language's overview
+```
+
+**Approving is a deliberate act, not a side effect of saving.** It is logged as its own change, and a
+reviewer's own save leaves a string *translated* rather than *approved* — established from the state
+rather than from documentation, which is silent on it: a language holding approved and unapproved strings
+side by side could not look like that if saving approved.
+
+**Quote the right queue size when recruiting.** A raw count includes the organism nomenclature, which the
+project instructions already handle by batch confirmation rather than string by string — so the honest
+number for a prospective editor is the queue *without* the infectious-agent component, and it is a small
+fraction of the total. Read the current figures before quoting any; they move with every drain.
+
+## Recusal, because permissions cannot express it
+
+`Administration` is project-wide and **not** language-scoped, so whoever holds it can approve any
+language, including ones they cannot read. Weblate has no setting meaning "not your own translation", and
+no combination of teams produces one — a reviewer team grants approval over a language, not over other
+people's work within it.
+
+So it is a stated convention, the way editorial recusal works in journals:
+
+- **An editor does not approve their own translation.** Saving it is the contribution; approving it is a
+  second person's judgement, and one person cannot be both.
+- **Where a language has only one editor**, their own work stays *translated* and waits. That is the
+  honest state — it says "nobody has read this yet", which is true — and it is better than an approval
+  that means only that the translator approved of themselves.
+- **A project administrator does not approve a language they cannot read.** The permission allows it; the
+  convention is that it is used for mechanical corrections and never for language judgements.
+
+The editor-facing statement of the same rule is in [`translating.md`](translating.md), which is what a
+reviewer actually reads.
+
 ## Where a person does this
 
 **Operations → Users → Access control** in the project menu. That is where team membership is managed,

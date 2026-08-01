@@ -127,10 +127,25 @@ Review is enabled on this project. A string you save is *translated*; a reviewer
 *approved*. Both states are visible in the sidebar, and `state:translated` as a search is exactly the
 queue of work awaiting review in your language — worth bookmarking if you review.
 
-**Reviewer teams are being formed and are not yet in place for every language.** Until yours has one,
-your translations land and are used without a second reader. That is a reason to flag anything you were
-unsure about in a comment rather than to hesitate over saving it — an uncertain translation with a
-comment is far more useful than a confident one without.
+**Every language has a reviewer team; several are still without members.** Until yours has one, your
+translations land and are used without a second reader. That is a reason to flag anything you were unsure
+about in a comment rather than to hesitate over saving it — an uncertain translation with a comment is far
+more useful than a confident one without.
+
+### If you review
+
+**Do not approve your own translation.** Saving it is your contribution; approving it is a second
+person's judgement, and one person cannot be both. Weblate will let you — no permission expresses "not
+your own work" — so it is a convention rather than a control, in the way editorial recusal works in
+journals.
+
+Where you are the only editor for your language, your own translations stay *translated* and wait. That
+is the honest state: it says nobody has read this yet, which is true, and it is more useful than an
+approval meaning only that you approved of yourself. If a second reader appears later, the queue is
+exactly the strings still sitting in that state.
+
+The same applies upwards. Someone holding project administration can approve any language, including ones
+they cannot read; the convention is that they do not, except for mechanical corrections.
 
 **Comments are the channel for anything that needs a person.** They support `@username` mentions, they
 notify, and they stay attached to the string. Do not send translation feedback through a pull request on
