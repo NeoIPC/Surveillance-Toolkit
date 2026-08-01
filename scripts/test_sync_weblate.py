@@ -146,13 +146,13 @@ class TestVerdict:
 
     def test_a_ready_pull_request_names_it_and_its_checks(self):
         verdict, problem = state(branch_tip="a" * 40, open_pull_request=129,
-                                 checks="checks green").verdict
+                                 checks=sync_weblate.CHECKS_GREEN).verdict
         assert verdict == "awaiting merge — #129, checks green"
         assert not problem
 
     def test_a_pull_request_with_failing_checks_says_so(self):
         verdict, _ = state(branch_tip="a" * 40, open_pull_request=129,
-                           checks="CHECKS FAILED").verdict
+                           checks=sync_weblate.CHECKS_FAILED).verdict
         assert "CHECKS FAILED" in verdict
 
     def test_superseded_is_a_defect(self):
@@ -174,7 +174,7 @@ class TestVerdict:
         # The dangerous confusion: a superseded branch usually DOES have a pull request, and reporting
         # that one first would invite the merge that replays Weblate's work across every component.
         verdict, problem = state(branch_tip="b" * 40, open_pull_request=129,
-                                 checks="checks green").verdict
+                                 checks=sync_weblate.CHECKS_GREEN).verdict
         assert verdict.startswith("SUPERSEDED")
         assert problem
 
@@ -183,6 +183,49 @@ class TestVerdict:
         # cannot succeed.
         verdict, _ = state(merge_failure="conflict", branch_tip="b" * 40).verdict
         assert verdict.startswith("MERGE FAILURE")
+
+
+class TestStyling:
+    """Colour, icons and hyperlinks must vanish when nothing can render them.
+
+    These tests run with output captured, so STYLED is false and they assert the degraded form -- which
+    is the form that matters. An escape sequence in a file or a pipe is corruption, and an icon on a
+    console whose encoding cannot carry it is an exception rather than a symbol, so the plain path is
+    the one that must never lose information.
+    """
+
+    def test_styling_is_off_when_output_is_not_a_terminal(self):
+        assert not sync_weblate.STYLED
+
+    def test_unstyled_text_is_returned_unchanged(self):
+        assert sync_weblate.styled("SUPERSEDED", "31") == "SUPERSEDED"
+
+    def test_unstyled_links_keep_their_text_and_drop_the_escape(self):
+        assert sync_weblate.linked("#129", "https://example.invalid/129") == "#129"
+
+    def test_check_state_falls_back_to_words_rather_than_an_icon(self):
+        # The icon carries the meaning when it can be seen; without it the words must, because a row
+        # that said nothing at all would be worse than a long one.
+        assert sync_weblate.render_checks(sync_weblate.CHECKS_GREEN) == "checks green"
+        assert sync_weblate.render_checks(sync_weblate.CHECKS_FAILED) == "CHECKS FAILED"
+        assert sync_weblate.render_checks(sync_weblate.CHECKS_RUNNING) == "checks running"
+        assert sync_weblate.render_checks(sync_weblate.CHECKS_NONE) == "no checks"
+
+    def test_an_unknown_check_state_still_renders_something(self):
+        assert sync_weblate.render_checks("surprising") == "surprising"
+
+    def test_no_verdict_leaks_an_escape_sequence_when_unstyled(self):
+        cases = [
+            state(),
+            state(needs_push=True),
+            state(branch_tip="a" * 40, open_pull_request=129, checks=sync_weblate.CHECKS_GREEN),
+            state(branch_tip="a" * 40),
+            state(branch_tip="b" * 40, open_pull_request=1),
+            state(merge_failure="conflict"),
+        ]
+        for case in cases:
+            verdict, _ = case.verdict
+            assert "\033" not in verdict, f"escape leaked into: {verdict!r}"
 
 
 class TestStatusIsReadOnly:

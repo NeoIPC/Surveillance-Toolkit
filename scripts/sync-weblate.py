@@ -97,6 +97,66 @@ DEFAULT_PRIORITY = 100
 # client's Component omits fields the endpoint sends -- push_branch among them.
 Record = dict[str, Any]
 
+# How a component's checks stand, as a token rather than a sentence, so the report can render it as an
+# icon where that works and as words where it does not.
+CHECKS_GREEN = "green"
+CHECKS_RUNNING = "running"
+CHECKS_FAILED = "failed"
+CHECKS_NONE = "none"
+
+_CHECK_DISPLAY = {
+    CHECKS_GREEN: ("✓", "32", "checks green"),
+    CHECKS_RUNNING: ("…", "33", "checks running"),
+    CHECKS_FAILED: ("✗", "31", "CHECKS FAILED"),
+    CHECKS_NONE: ("?", "2", "no checks"),
+}
+
+
+def _terminal_supports_styling() -> bool:
+    """Whether it is safe to emit colour, icons and hyperlinks.
+
+    Every condition here is a way the output is read by something that is not a person at a terminal.
+    Redirected output goes to a file or a pipe, where an escape sequence is corruption rather than
+    colour and an icon may not even be encodable; NO_COLOR is the agreed way for a user to say they do
+    not want any (https://no-color.org); TERM=dumb is how a terminal says it cannot render it.
+    """
+    if not sys.stdout.isatty() or "NO_COLOR" in os.environ or os.environ.get("TERM") == "dumb":
+        return False
+    if sys.platform == "win32":
+        # A Windows console understands these sequences only once virtual-terminal processing is turned
+        # on, and refuses them as literal text otherwise. Best effort: if it cannot be enabled, the
+        # console is one that would have shown the raw escapes, so styling stays off.
+        try:
+            import ctypes
+
+            kernel32 = ctypes.windll.kernel32
+            handle = kernel32.GetStdHandle(-11)  # STD_OUTPUT_HANDLE
+            mode = ctypes.c_uint32()
+            if not kernel32.GetConsoleMode(handle, ctypes.byref(mode)):
+                return False
+            return bool(kernel32.SetConsoleMode(handle, mode.value | 0x0004))
+        except Exception:  # noqa: BLE001 - any failure here means "not supported", never a crash
+            return False
+    return True
+
+
+STYLED = _terminal_supports_styling()
+
+
+def styled(text: str, colour: str) -> str:
+    return f"\033[{colour}m{text}\033[0m" if STYLED else text
+
+
+def linked(text: str, url: str) -> str:
+    """Render text as a terminal hyperlink where the terminal understands one (OSC 8)."""
+    return f"\033]8;;{url}\033\\{text}\033]8;;\033\\" if STYLED else text
+
+
+def render_checks(checks: str) -> str:
+    """An icon where it can be seen, the words where it cannot -- never nothing."""
+    icon, colour, words = _CHECK_DISPLAY.get(checks, ("?", "2", checks))
+    return styled(icon, colour) if STYLED else words
+
 
 class DrainError(RuntimeError):
     """A drain could not proceed safely. The message says what to do about it."""
@@ -157,17 +217,23 @@ class ComponentState:
         The boolean is whether the row is a defect. Waiting for a merge and holding untranslated work
         are ordinary states, so only the three that need repair make the command exit non-zero.
         """
+        # Only the last column is styled, so escape sequences cannot disturb the padding of the ones
+        # before it.
         if self.merge_failure:
-            return f"MERGE FAILURE: {self.merge_failure} — run repair", True
+            return styled(f"MERGE FAILURE: {self.merge_failure} — run repair", "31"), True
         if self.is_superseded:
-            return "SUPERSEDED — branch carries a commit Weblate no longer holds; run drain", True
+            return styled("SUPERSEDED — branch carries a commit Weblate no longer holds; run drain",
+                          "31"), True
         if self.is_stranded:
-            return "STRANDED — pushed with no pull request; run drain", True
+            return styled("STRANDED — pushed with no pull request; run drain", "31"), True
         if self.open_pull_request is not None:
-            return f"awaiting merge — #{self.open_pull_request}, {self.checks}", False
+            number = self.open_pull_request
+            reference = linked(f"#{number}", f"https://github.com/{FORGE_REPO}/pull/{number}")
+            separator = " " if STYLED else ", "
+            return f"awaiting merge — {reference}{separator}{render_checks(self.checks)}", False
         if self.has_pending_work:
             return "translations waiting — run drain", False
-        return "idle", False
+        return styled("idle", "2"), False
 
 
 def run(command: Sequence[str], *, timeout: int = SUBPROCESS_TIMEOUT_SECONDS) -> str:
@@ -252,13 +318,13 @@ def open_pull_request(branch: str) -> tuple[int, str] | None:
     nodes = data[0].get("statusCheckRollup") or []
     outcomes = [state for _, state in (check_outcome(n) for n in nodes)]
     if not outcomes:
-        checks = "no checks"
+        checks = CHECKS_NONE
     elif "PENDING" in outcomes:
-        checks = "checks running"
+        checks = CHECKS_RUNNING
     elif any(o not in ("SUCCESS", "NEUTRAL", "SKIPPED") for o in outcomes):
-        checks = "CHECKS FAILED"
+        checks = CHECKS_FAILED
     else:
-        checks = "checks green"
+        checks = CHECKS_GREEN
     return data[0]["number"], checks
 
 
