@@ -559,11 +559,11 @@ def command_status(client: Weblate, _args: argparse.Namespace) -> int:
     problems = 0
     # Rows arrive most-important-first from repository_components; the priority column is shown so the
     # order reads as deliberate rather than arbitrary.
-    # Narrow enough for two chevrons where they render, wide enough for "very high" where they do not.
-    priority_width = 4 if STYLED else 11
-    print(f"{'component':<38}{'pri':<{priority_width}}{'branch':<26}{'needs'}"
-          if STYLED else
-          f"{'component':<38}{'priority':<{priority_width}}{'branch':<26}{'needs'}")
+    # Wide enough for two chevrons and its own heading where they render, wide enough for "very high"
+    # where they do not.
+    priority_width = 5 if STYLED else 11
+    priority_heading = "prio" if STYLED else "priority"
+    print(f"{'component':<38}{priority_heading:<{priority_width}}{'branch':<26}{'needs'}")
     for record in repository_components(client):
         state = read_state(client, record)
         verdict, is_problem = state.verdict
