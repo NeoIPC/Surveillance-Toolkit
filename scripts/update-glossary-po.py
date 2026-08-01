@@ -248,17 +248,21 @@ def yaml_to_pot(glossary_path, pot_path):
 
         value = str(data[key])
 
-        # Line number (1-based) for the #: location reference
-        line_no = data.lc.key(key)[0] + 1
-
         # Comments: description + flags
         desc_lines, entry_flags = get_key_comments(data, keys, idx)
 
+        # The location reference names the file and deliberately carries no line number. Every entry in
+        # this catalogue comes from the same file, and its msgctxt is already the YAML key, so the line
+        # was the only part that varied -- and the only part that churned: inserting one term rewrote
+        # the reference of every entry below it, so a one-term change arrived as a diff touching most
+        # of the file, in both the template and the catalogues msgmerge propagates it to. It was not
+        # merely noisy either; a stale set of them once drifted a line out and had to be caught by a
+        # test. Nothing is lost, because the key locates the term far better than a line number does.
         entry_kwargs = {
             "msgctxt": key,
             "msgid": value,
             "msgstr": "",
-            "occurrences": [(location, str(line_no))],
+            "occurrences": [(location, "")],
         }
 
         if desc_lines:
