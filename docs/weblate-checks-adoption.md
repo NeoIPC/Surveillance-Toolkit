@@ -50,7 +50,17 @@ deliberately different URL always fires.
 Known limits, so nobody assumes more cover than exists: the check collects only macros, `<<xref>>`,
 `[[anchor]]` and passthroughs — **not** bold, italic, monospace or attribute references. And its macro
 pattern absorbs a preceding word, so `daysfootnote:x[]` against `Tagefootnote:x[]` fires although the
-footnote is intact; fix that in the source rather than with a flag.
+footnote is intact.
+
+**Suppress those per string; the source cannot be fixed.** An earlier revision here said to fix the source
+instead, which is wrong: AsciiDoc requires an inline footnote to sit immediately against the text it
+annotates, and Asciidoctor's own `InlineFootnoteMacroRx` has no left boundary — it matches from `footnote`
+onwards and leaves whatever precedes it as ordinary text, which is exactly why `daysfootnote:x[]` renders
+as *days* followed by the marker. Asciidoctor's documentation says as much, noting that the requirement
+"can make the text harder to read". Inserting a space would change the rendered output, so the check is
+simply wrong here and `ignore-asciidoc-markup` on the affected strings is the honest remedy — the same
+treatment the Creative Commons licence strings get, and for the same reason: the source is correct and the
+check cannot see it.
 
 ### `md-text` — reports
 
