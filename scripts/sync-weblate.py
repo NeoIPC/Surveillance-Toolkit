@@ -410,6 +410,20 @@ COPILOT_MAX_FILES = 300
 COPILOT_MAX_LINES = 20_000
 
 
+def copilot_was_requested(response: object) -> bool:
+    """Whether the forge's answer shows the review request actually took.
+
+    Separated out and checked because the status code does not say. An account with no Copilot
+    entitlement receives HTTP 200 for the request and a response whose reviewer list simply does not
+    contain it -- accepted, and dropped. The reviewer appears under a display name rather than the
+    login the request used, so this matches on the prefix rather than on equality.
+    """
+    if not isinstance(response, dict):
+        return False
+    reviewers = response.get("requested_reviewers") or []
+    return any(str(r.get("login", "")).lower().startswith("copilot") for r in reviewers)
+
+
 def request_copilot_review(number: int) -> None:
     """Ask Copilot to review, unless the diff is past what it will look at.
 
@@ -432,14 +446,25 @@ def request_copilot_review(number: int) -> None:
               f"{COPILOT_MAX_FILES} / {COPILOT_MAX_LINES}, so it would decline")
         return
     try:
-        run(["gh", "api", "--silent", "-X", "POST",
-             f"repos/{FORGE_REPO}/pulls/{number}/requested_reviewers",
-             "-f", f"reviewers[]={COPILOT_REVIEWER}"])
-        print("  asked Copilot for a review (it declines silently when its quota is spent)")
+        response = gh_json(["api", "-X", "POST",
+                            f"repos/{FORGE_REPO}/pulls/{number}/requested_reviewers",
+                            "-f", f"reviewers[]={COPILOT_REVIEWER}"])
     except DrainError as error:
-        # A refused review request is not worth abandoning a drain over -- the quota runs out, and the
-        # human review is the one branch protection actually requires.
+        # A refused review request is not worth abandoning a drain over -- the human review is the one
+        # branch protection actually requires.
         print(f"  WARNING: could not request a Copilot review: {error}", file=sys.stderr)
+        return
+
+    if copilot_was_requested(response):
+        print("  asked Copilot for a review (it declines silently when its quota is spent)")
+    else:
+        # The exit code cannot be trusted here. An account without a Copilot entitlement gets HTTP 200
+        # and a response with the reviewer simply absent -- the request is accepted and dropped. Saying
+        # "asked Copilot" on that response would announce a review that was never going to happen,
+        # which is worse than not asking, because someone waits for it.
+        print(f"  WARNING: the Copilot review request was accepted and then dropped. The account this "
+              f"ran as has no Copilot entitlement; request it by hand on #{number}, or run the drain "
+              f"as an account that has one.", file=sys.stderr)
 
 
 def forge_identity() -> str:

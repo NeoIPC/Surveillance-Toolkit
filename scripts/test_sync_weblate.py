@@ -234,6 +234,37 @@ class TestVerdict:
         assert verdict.startswith("MERGE FAILURE")
 
 
+class TestCopilotRequestVerification:
+    """The forge accepts a review request it will not honour, so the answer has to be read.
+
+    An account without a Copilot entitlement gets HTTP 200 and a response with the reviewer absent.
+    Trusting the status code there announces a review that never happens, and someone waits for it --
+    which is exactly what occurred before this check existed.
+    """
+
+    def test_a_response_listing_copilot_counts_as_requested(self):
+        assert sync_weblate.copilot_was_requested(
+            {"requested_reviewers": [{"login": "Copilot"}]})
+
+    def test_the_display_name_is_matched_not_the_login_used_to_ask(self):
+        # The request names copilot-pull-request-reviewer[bot]; the response says "Copilot".
+        assert sync_weblate.copilot_was_requested(
+            {"requested_reviewers": [{"login": "copilot-pull-request-reviewer[bot]"}]})
+
+    def test_an_empty_reviewer_list_is_not_a_request(self):
+        # The observed failure: accepted, and dropped.
+        assert not sync_weblate.copilot_was_requested({"requested_reviewers": []})
+
+    def test_another_reviewer_alone_is_not_a_request(self):
+        assert not sync_weblate.copilot_was_requested({"requested_reviewers": [{"login": "Brar"}]})
+
+    def test_a_response_without_the_field_is_not_a_request(self):
+        assert not sync_weblate.copilot_was_requested({})
+
+    def test_a_non_object_response_is_not_a_request(self):
+        assert not sync_weblate.copilot_was_requested(None)
+
+
 class TestStyling:
     """Colour, icons and hyperlinks must vanish when nothing can render them.
 
