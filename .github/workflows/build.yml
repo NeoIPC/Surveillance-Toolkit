@@ -221,7 +221,7 @@ jobs:
     python-tests:
         # The Python tools under scripts/ had no gate at all. That was defensible while there was one of
         # them and it was a developer-machine convenience; it stops being defensible as the Python surface
-        # grows, and it was already costing more than it looked — test-update-glossary-po.py asserts the
+        # grows, and it was already costing more than it looked — test_update_glossary_po.py asserts the
         # committed po/glossary.pot still matches what the committed glossary.yaml produces, which is a
         # claim about the repository that only a run can check. It caught 41 stale location references
         # once. Nothing has run it since.
@@ -247,7 +247,14 @@ jobs:
               # The tests run the real scripts rather than importing pieces of them, so they need what
               # those scripts need. Minimum versions rather than exact pins: these are stable, widely-used
               # libraries, and pinning them exactly would make this gate a dependency-bump chore.
-              run: python -m pip install --upgrade pytest 'ruamel.yaml>=0.18' 'polib>=1.2'
+              #
+              # wlc has to be here even though no test talks to Weblate: sync-weblate.py imports it at
+              # module scope and answers ImportError with sys.exit, so loading its test file raises
+              # SystemExit during COLLECTION. That is not one red test -- it tears the session down before
+              # any file is collected, so every other test stops running too and the job reports an
+              # internal error rather than a failure. requests is wlc's own dependency, named here because
+              # sync-weblate.py imports it directly.
+              run: python -m pip install --upgrade pytest 'ruamel.yaml>=0.18' 'polib>=1.2' wlc requests
 
             - name: Run the Python tests
               # pytest discovers, so a new tool's test is gated by existing here rather than by someone

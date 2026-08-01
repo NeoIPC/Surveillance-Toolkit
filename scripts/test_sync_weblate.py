@@ -8,9 +8,11 @@ that looked settled because it had no `conclusion` field. Those are exactly the 
 cannot be relied on to reveal, because the state that triggers them is rare and the wrong answer looks
 like success.
 
-What is NOT covered here, and why: the drain sequence itself talks to Weblate and to the forge, and a
-mock of both would assert that the code calls what the mock expects rather than that the round trip
-works. Its evidence is a real drain.
+What is NOT covered here, and why: the drain *sequence* talks to Weblate and to the forge, and a mock of
+both would assert that the code calls what the mock expects rather than that the round trip works. Its
+evidence is a real drain. The refusals along that sequence are a different matter and are covered --
+each is a classification made before anything is touched, which is precisely what a live run is least
+likely to reach, since it fires only on a state that should never occur.
 
 The module name has a hyphen, so it is loaded by path rather than imported.
 
@@ -19,6 +21,7 @@ The module name has a hyphen, so it is loaded by path rather than imported.
 
 from __future__ import annotations
 
+import argparse
 import ast
 import importlib.util
 import sys
@@ -33,6 +36,19 @@ assert _SPEC and _SPEC.loader
 sync_weblate = importlib.util.module_from_spec(_SPEC)
 sys.modules["sync_weblate"] = sync_weblate
 _SPEC.loader.exec_module(sync_weblate)
+
+
+@pytest.fixture(autouse=True)
+def unstyled(monkeypatch: pytest.MonkeyPatch):
+    """Pin the styling flags off for every test that does not say otherwise.
+
+    They are computed once at import from the ambient environment, so without this a machine or a runner
+    that exports FORCE_COLOR turns a sixth of this file red for a reason that has nothing to do with the
+    code -- every assertion on a rendered string compares against the plain form. Pinning them also makes
+    the styled branch reachable deliberately, by a test that sets them, rather than by accident.
+    """
+    monkeypatch.setattr(sync_weblate, "STYLED", False)
+    monkeypatch.setattr(sync_weblate, "STYLED_ERRORS", False)
 
 
 def state(**overrides) -> sync_weblate.ComponentState:
@@ -339,8 +355,19 @@ class TestStyling:
     the one that must never lose information.
     """
 
-    def test_styling_is_off_when_output_is_not_a_terminal(self):
-        assert not sync_weblate.STYLED
+    def test_styling_is_off_when_output_is_not_a_terminal(self, monkeypatch: pytest.MonkeyPatch):
+        # Asserted against a stream this test supplies rather than against the module-level flag, which
+        # is whatever the machine running the suite happened to make it.
+        class Redirected:
+            encoding = "utf-8"
+
+            @staticmethod
+            def isatty() -> bool:
+                return False
+
+        monkeypatch.delenv("FORCE_COLOR", raising=False)
+        monkeypatch.delenv("NO_COLOR", raising=False)
+        assert not sync_weblate._terminal_supports_styling(Redirected())
 
     def test_no_color_disables_styling(self, monkeypatch: pytest.MonkeyPatch):
         monkeypatch.delenv("FORCE_COLOR", raising=False)
@@ -425,6 +452,16 @@ class TestStyling:
     def test_an_unknown_check_state_still_renders_something(self):
         assert sync_weblate.render_checks("surprising") == "surprising"
 
+    def test_the_styled_branch_wraps_rather_than_replaces(self, monkeypatch: pytest.MonkeyPatch):
+        # The other half of every assertion here, and the half that can corrupt a stream: the plain form
+        # has to survive inside the escapes, or degrading and not degrading disagree about the text.
+        monkeypatch.setattr(sync_weblate, "STYLED", True)
+        assert sync_weblate.styled("SUPERSEDED", "31") == "\033[31mSUPERSEDED\033[0m"
+        assert sync_weblate.render_checks(sync_weblate.CHECKS_FAILED) == "\033[31m✗\033[0m"
+        verdict, problem = state(merge_failure="conflict").verdict
+        assert "MERGE FAILURE: conflict" in verdict and verdict.startswith("\033[31m")
+        assert problem
+
     def test_no_verdict_leaks_an_escape_sequence_when_unstyled(self):
         cases = [
             state(),
@@ -449,6 +486,26 @@ class TestStatusIsReadOnly:
     """
 
     MUTATORS = {"lock", "unlock", "push", "commit", "post"}
+    MUTATING_ARGUMENTS = ("DELETE", "'create'", "'merge'")
+
+    @staticmethod
+    def definitions() -> dict[str, ast.FunctionDef]:
+        """Every function and method in the module, by name.
+
+        Methods have to be in here. `command_status` reaches its verdict through ComponentState, so a
+        table built from the module's top-level definitions alone leaves every method of that class
+        outside the analysis -- and a mutating call added to `verdict`, which runs for every row the
+        command prints, would be invisible to the guard below.
+        """
+        source = Path(sync_weblate.__file__).read_text(encoding="utf-8")
+        found: dict[str, ast.FunctionDef] = {}
+        for node in ast.walk(ast.parse(source)):
+            if isinstance(node, ast.FunctionDef):
+                # Flattening the namespaces is only safe while the names are unique; a collision would
+                # silently drop one of the two out of the analysis.
+                assert node.name not in found, f"two definitions are named {node.name}"
+                found[node.name] = node
+        return found
 
     @staticmethod
     def reachable(name: str, functions: dict, seen: set[str] | None = None) -> set[str]:
@@ -459,35 +516,73 @@ class TestStatusIsReadOnly:
         for node in ast.walk(functions[name]):
             if isinstance(node, ast.Call) and isinstance(node.func, ast.Name):
                 TestStatusIsReadOnly.reachable(node.func.id, functions, seen)
+            # A property is reached by attribute access, not by a call, so following calls alone stops
+            # at `state.verdict` -- the one method `status` runs on every row.
+            elif isinstance(node, ast.Attribute):
+                TestStatusIsReadOnly.reachable(node.attr, functions, seen)
         return seen
 
-    def test_status_reaches_no_mutating_call(self):
-        source = Path(sync_weblate.__file__).read_text(encoding="utf-8")
-        functions = {n.name: n for n in ast.parse(source).body if isinstance(n, ast.FunctionDef)}
-        offenders = []
-        for name in self.reachable("command_status", functions):
+    @staticmethod
+    def bound_literals(function: ast.FunctionDef) -> dict[str, str]:
+        """Every local assigned in this function, dumped, so an argument named here can still be read.
+
+        Without this the detector sees only a literal argument, and the one call it most needs to catch
+        is written the other way: the merge assembles its command into a variable and then passes the
+        name, which dumps to `Name(id='command')` and matches nothing.
+        """
+        bound: dict[str, str] = {}
+        for node in ast.walk(function):
+            if isinstance(node, ast.Assign):
+                for target in node.targets:
+                    if isinstance(target, ast.Name):
+                        bound[target.id] = ast.dump(node.value)
+        return bound
+
+    @classmethod
+    def mutations(cls, root: str) -> tuple[list[str], list[str]]:
+        """What the call graph under `root` mutates, by each of the two routes, reported separately.
+
+        Separately because the two arms fail independently: one detects a Weblate client call, the other
+        a forge command, and a test that merged them would pass on either alone.
+        """
+        functions = cls.definitions()
+        client_calls, commands = [], []
+        for name in cls.reachable(root, functions):
+            arguments = cls.bound_literals(functions[name])
             for node in ast.walk(functions[name]):
                 if not isinstance(node, ast.Call):
                     continue
-                if getattr(node.func, "attr", None) in self.MUTATORS:
-                    offenders.append(f"{name}: .{node.func.attr}()")
+                if getattr(node.func, "attr", None) in cls.MUTATORS:
+                    client_calls.append(f"{name}: .{node.func.attr}()")
                 if isinstance(node.func, ast.Name) and node.func.id == "run" and node.args:
-                    literal = ast.dump(node.args[0])
-                    if any(word in literal for word in ("DELETE", "'create'", "'merge'")):
-                        offenders.append(f"{name}: run(...) mutates")
-        assert not offenders, f"status can mutate via: {offenders}"
+                    dumped = " ".join(
+                        arguments.get(argument.id, "") if isinstance(argument, ast.Name)
+                        else ast.dump(argument)
+                        for argument in node.args)
+                    if any(word in dumped for word in cls.MUTATING_ARGUMENTS):
+                        commands.append(f"{name}: run(...) mutates")
+        return client_calls, commands
 
-    def test_the_check_would_notice_a_mutating_command(self):
+    def test_status_reaches_no_mutating_call(self):
+        client_calls, commands = self.mutations("command_status")
+        assert not client_calls + commands, f"status can mutate via: {client_calls + commands}"
+
+    def test_the_check_would_notice_a_mutating_client_call(self):
         # Guards the guard: run it against drain, which certainly mutates, so a broken detector cannot
         # pass the test above by finding nothing anywhere.
-        source = Path(sync_weblate.__file__).read_text(encoding="utf-8")
-        functions = {n.name: n for n in ast.parse(source).body if isinstance(n, ast.FunctionDef)}
-        found = [
-            name for name in self.reachable("command_drain", functions)
-            for node in ast.walk(functions[name])
-            if isinstance(node, ast.Call) and getattr(node.func, "attr", None) in self.MUTATORS
-        ]
-        assert found, "the detector found no mutation in drain, so it cannot vouch for status"
+        client_calls, _ = self.mutations("command_drain")
+        assert client_calls, "the detector found no client mutation in drain, so it cannot vouch for status"
+
+    def test_the_check_would_notice_a_mutating_command(self):
+        # The other arm needs its own guard for the same reason, and more sharply: it can only see what
+        # a call's arguments dump to, so it is the half that silently stops matching.
+        _, commands = self.mutations("command_drain")
+        assert commands, "the detector found no mutating command in drain, so it cannot vouch for status"
+
+    def test_the_verdict_is_inside_the_analysis(self):
+        # The reachable set is what the guard is worth; a traversal that stops before ComponentState
+        # would still report status as clean, having examined none of what it prints.
+        assert "verdict" in self.reachable("command_status", self.definitions())
 
 
 class TestForgeJsonReads:
@@ -610,6 +705,240 @@ class TestComponentLookup:
         with pytest.raises(sync_weblate.DrainError) as refusal:
             sync_weblate.find_component(self.RECORDS, "neoipc-report")
         assert "neoipc-glossary, neoipc-reports" in str(refusal.value)
+
+
+class StubClient:
+    """Just enough of the Weblate client to list components: a project, and pages keyed by URL."""
+
+    def __init__(self, pages: dict[str, dict]):
+        self.pages = pages
+        self.requested: list[str] = []
+
+    @staticmethod
+    def get_project(slug: str) -> dict:
+        return {"slug": slug}
+
+    def get(self, url: str) -> dict:
+        self.requested.append(url)
+        return self.pages[url]
+
+
+class TestComponentDiscovery:
+    """What the tool can see. Every failure here is an omission, and an omission is silent by nature.
+
+    A component missing from this list is never drained and nothing anywhere reports it -- which is how
+    the app catalogue stayed invisible while a hard-coded repository name decided the set.
+    """
+
+    FIRST = "projects/neoipc/components/"
+    SECOND = "projects/neoipc/components/?page=2"
+
+    def component(self, slug: str, *, priority: int = 100, repo: str | None = None) -> dict:
+        default = "https://github.com/NeoIPC/Surveillance-Toolkit.git"
+        return {"slug": slug, "priority": priority, "repo": default if repo is None else repo}
+
+    def test_every_page_is_read(self):
+        # Reading only the first page stops at the page size, and Weblate's default is well inside the
+        # number of components this project will hold.
+        client = StubClient({
+            self.FIRST: {"results": [self.component("neoipc-reports")], "next": self.SECOND},
+            self.SECOND: {"results": [self.component("neoipc-app")], "next": None},
+        })
+        found = [r["slug"] for r in sync_weblate.repository_components(client)]
+        assert found == ["neoipc-app", "neoipc-reports"]
+        assert client.requested == [self.FIRST, self.SECOND]
+
+    def test_a_component_with_no_git_backing_is_left_out(self):
+        # The Weblate-local terminology store. It has nothing to drain, and forge_repo would refuse it.
+        client = StubClient({self.FIRST: {"results": [
+            self.component("neoipc-reports"),
+            self.component("glossary", repo="local:"),
+        ], "next": None}})
+        assert [r["slug"] for r in sync_weblate.repository_components(client)] == ["neoipc-reports"]
+
+    def test_the_most_urgent_component_is_listed_first(self):
+        # The direction is the trap: Weblate's COMPONENT priority runs 60 = very high to 140 = very low,
+        # opposite to its per-string one, so sorting descending puts the most urgent last and reads as an
+        # ordering rather than as a defect.
+        client = StubClient({self.FIRST: {"results": [
+            self.component("neoipc-infectious-agents", priority=140),
+            self.component("neoipc-glossary", priority=60),
+            self.component("neoipc-reports", priority=80),
+        ], "next": None}})
+        assert [r["slug"] for r in sync_weblate.repository_components(client)] == [
+            "neoipc-glossary", "neoipc-reports", "neoipc-infectious-agents"]
+
+
+class TestWeblateTip:
+    """The commit every supersession judgement is made against, and where it is read from."""
+
+    EXPORT = "https://hosted.weblate.org/git/neoipc/nomenclature/neoipc-glossary/"
+
+    def test_the_export_url_is_taken_from_the_component(self, monkeypatch: pytest.MonkeyPatch):
+        # Composing it from the project and the slug is a second copy of something Weblate already
+        # states, and it is wrong for any component filed under a category -- the export path carries the
+        # category slug too, so the composed URL resolves to nothing and every command dies on it.
+        asked = []
+
+        def fake_run(command, **_kwargs):
+            asked.append(command)
+            return f"{'a' * 40}\trefs/heads/main"
+
+        monkeypatch.setattr(sync_weblate, "run", fake_run)
+        record = {"slug": "neoipc-glossary", "git_export": self.EXPORT}
+        assert sync_weblate.weblate_tip(record) == "a" * 40
+        assert self.EXPORT in asked[0]
+
+    def test_a_component_with_no_export_is_refused_by_name(self, monkeypatch: pytest.MonkeyPatch):
+        monkeypatch.setattr(sync_weblate, "run", lambda *a, **k: "")
+        with pytest.raises(sync_weblate.DrainError) as refusal:
+            sync_weblate.weblate_tip({"slug": "neoipc-glossary"})
+        assert "neoipc-glossary" in str(refusal.value)
+
+    def test_an_export_without_main_is_refused_rather_than_read_as_absent(
+            self, monkeypatch: pytest.MonkeyPatch):
+        # Returning nothing here would make every pushed branch compare unequal and so read as
+        # superseded -- a recommendation to delete and recreate every branch over a network blip.
+        monkeypatch.setattr(sync_weblate, "run", lambda *a, **k: "")
+        with pytest.raises(sync_weblate.DrainError):
+            sync_weblate.weblate_tip({"slug": "neoipc-glossary", "git_export": self.EXPORT})
+
+
+class TestBranchTip:
+    """Whose commit the branch is compared against. Attributing another branch's tip inverts supersession."""
+
+    # Distinct commits per branch, so an assertion can tell which one was picked. Deriving them from the
+    # names would collide here, both branches starting with the same letter -- and a colliding fixture
+    # makes the test below pass whichever ref the code returns, which is the one thing it must not do.
+    SHAS = {"weblate-glossary": "a" * 40, "weblate-glossary-old": "b" * 40}
+
+    def refs(self, *names: str) -> list[dict]:
+        return [{"ref": f"refs/heads/{n}", "object": {"sha": self.SHAS[n]}} for n in names]
+
+    def test_an_absent_branch_is_absence_rather_than_an_error(self, monkeypatch: pytest.MonkeyPatch):
+        monkeypatch.setattr(sync_weblate, "gh_json", lambda command: [])
+        assert sync_weblate.branch_tip("weblate-glossary", "NeoIPC/x") is None
+
+    def test_a_prefix_sibling_does_not_supply_the_tip(self, monkeypatch: pytest.MonkeyPatch):
+        # matching-refs is a prefix match, so a leftover weblate-glossary-old comes back alongside the
+        # real branch. Taking the first would compare the wrong commit against Weblate's -- reading a
+        # current branch as superseded (the drain then deletes it, discarding an approved pull request)
+        # or a superseded one as current (it merges work Weblate no longer holds).
+        monkeypatch.setattr(sync_weblate, "gh_json",
+                            lambda command: self.refs("weblate-glossary-old", "weblate-glossary"))
+        assert sync_weblate.branch_tip("weblate-glossary", "NeoIPC/x") == self.SHAS["weblate-glossary"]
+
+    def test_the_prefix_sibling_alone_reads_as_absent(self, monkeypatch: pytest.MonkeyPatch):
+        monkeypatch.setattr(sync_weblate, "gh_json", lambda command: self.refs("weblate-glossary-old"))
+        assert sync_weblate.branch_tip("weblate-glossary", "NeoIPC/x") is None
+
+
+class TestMergeGate:
+    """The aggregation the merge is actually gated on, as opposed to the one the status row displays."""
+
+    def rollup(self, monkeypatch: pytest.MonkeyPatch, *nodes: dict) -> None:
+        monkeypatch.setattr(sync_weblate, "gh_json",
+                            lambda command: {"statusCheckRollup": list(nodes)})
+
+    def check(self, name: str, conclusion: str) -> dict:
+        return {"name": name, "status": "COMPLETED", "conclusion": conclusion}
+
+    def test_green_checks_settle(self, monkeypatch: pytest.MonkeyPatch):
+        self.rollup(monkeypatch, self.check("build", "SUCCESS"), self.check("lint", "SKIPPED"))
+        sync_weblate.wait_for_checks("weblate-glossary", "NeoIPC/x")
+
+    def test_a_failed_check_is_named(self, monkeypatch: pytest.MonkeyPatch):
+        self.rollup(monkeypatch, self.check("build", "SUCCESS"), self.check("text-hygiene", "FAILURE"))
+        with pytest.raises(sync_weblate.DrainError) as refusal:
+            sync_weblate.wait_for_checks("weblate-glossary", "NeoIPC/x")
+        assert "text-hygiene" in str(refusal.value)
+
+    def test_an_unrecognized_conclusion_blocks_the_merge(self, monkeypatch: pytest.MonkeyPatch):
+        # The direction that matters. This is the gate the merge runs on, so a conclusion the forge adds
+        # later -- or one this classifier fell back to -- has to read as not-green. Listing the bad ones
+        # instead means anything unanticipated is merged, silently and with an approval already spent.
+        self.rollup(monkeypatch, self.check("build", "SOMETHING_NEW"))
+        with pytest.raises(sync_weblate.DrainError):
+            sync_weblate.wait_for_checks("weblate-glossary", "NeoIPC/x")
+
+    def test_an_empty_rollup_is_not_a_pass(self, monkeypatch: pytest.MonkeyPatch):
+        # Tolerated while checks may still appear, refused once they cannot: merging on an empty rollup
+        # waives the gate entirely, and does it without saying anything.
+        monkeypatch.setattr(sync_weblate, "CHECK_TIMEOUT_SECONDS", -1)
+        self.rollup(monkeypatch)
+        with pytest.raises(sync_weblate.DrainError) as refusal:
+            sync_weblate.wait_for_checks("weblate-glossary", "NeoIPC/x")
+        assert "ungated" in str(refusal.value)
+
+    def test_checks_still_running_at_the_deadline_are_named(self, monkeypatch: pytest.MonkeyPatch):
+        monkeypatch.setattr(sync_weblate, "CHECK_TIMEOUT_SECONDS", -1)
+        self.rollup(monkeypatch, {"name": "build", "status": "IN_PROGRESS", "conclusion": None})
+        with pytest.raises(sync_weblate.DrainError) as refusal:
+            sync_weblate.wait_for_checks("weblate-glossary", "NeoIPC/x")
+        assert "build" in str(refusal.value)
+
+
+class TestSingleCommitRefusal:
+    """One commit is what makes a squash patch-identical, and it is a remote setting rather than a law."""
+
+    class Reached(Exception):
+        """Raised past the guard, so a test can assert the guard let something through."""
+
+    def merging(self, monkeypatch: pytest.MonkeyPatch, ahead: int) -> None:
+        def fake_run(command, **_kwargs):
+            if "compare/main...weblate-glossary" in " ".join(command):
+                return str(ahead)
+            raise TestSingleCommitRefusal.Reached(" ".join(command))
+
+        monkeypatch.setattr(sync_weblate, "run", fake_run)
+        sync_weblate.merge_drain_pull_request(
+            state(branch_tip="a" * 40, open_pull_request=133), admin=False)
+
+    @pytest.mark.parametrize("ahead", [0, 2, 7])
+    def test_anything_but_one_commit_is_refused(self, monkeypatch: pytest.MonkeyPatch, ahead):
+        # Both directions are wrong and neither is obviously so. More than one fuses commits into a patch
+        # matching none of them, and the component replays work it can no longer prove had landed --
+        # conflicting on every component at once, which is what happened. Zero means the branch is already
+        # contained in main, so there is nothing to merge and --match-head-commit is guarding nothing.
+        with pytest.raises(sync_weblate.DrainError) as refusal:
+            self.merging(monkeypatch, ahead)
+        assert str(ahead) in str(refusal.value)
+
+    def test_a_single_commit_is_let_through(self, monkeypatch: pytest.MonkeyPatch):
+        # Guards the guard from the other side: without this, inverting the comparison would refuse every
+        # drain there is and no test above would notice.
+        with pytest.raises(TestSingleCommitRefusal.Reached) as reached:
+            self.merging(monkeypatch, 1)
+        assert "commits/" in str(reached.value)
+
+
+class TestNoPushBranch:
+    """Weblate pushing at the branch it translates -- main -- which every other guard here is blind to."""
+
+    def test_the_status_row_calls_it_a_problem(self):
+        # Every branch-derived test collapses to something benign: no branch exists, so nothing is
+        # superseded or stranded and no pull request is awaited. Without its own case the row reads
+        # "idle" and the command exits zero, having established nothing about the component.
+        verdict, problem = state(push_branch="").verdict
+        assert problem
+        assert "NO PUSH BRANCH" in verdict
+
+    def test_pending_work_does_not_mask_it(self):
+        verdict, problem = state(push_branch="", needs_push=True).verdict
+        assert problem
+        assert "NO PUSH BRANCH" in verdict
+
+    def test_the_drain_refuses_before_touching_anything(self, monkeypatch: pytest.MonkeyPatch):
+        record = {"slug": "neoipc-glossary", "priority": 60, "push_branch": "",
+                  "repo": "https://github.com/NeoIPC/Surveillance-Toolkit.git"}
+        monkeypatch.setattr(sync_weblate, "repository_components", lambda client: [record])
+        monkeypatch.setattr(sync_weblate, "operable", lambda client, r: object())
+        monkeypatch.setattr(sync_weblate, "read_state", lambda client, r: state(push_branch=""))
+        monkeypatch.setattr(sync_weblate, "forge_identity", lambda: "someone")
+        arguments = argparse.Namespace(component="neoipc-glossary", no_lock=True, admin=False)
+        with pytest.raises(sync_weblate.DrainError) as refusal:
+            sync_weblate.command_drain(None, arguments)
+        assert "no push branch" in str(refusal.value)
 
 
 class TestArgumentSurface:
