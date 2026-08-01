@@ -47,6 +47,7 @@ def state(**overrides) -> sync_weblate.ComponentState:
         weblate_tip="a" * 40,
         branch_tip=None,
         open_pull_request=None,
+        checks="",
     )
     return sync_weblate.ComponentState(**{**defaults, **overrides})
 
@@ -123,6 +124,65 @@ class TestRefusedOperations:
     def test_a_response_without_a_result_field_passes(self):
         # Not every endpoint reports this way; absence must not be read as refusal.
         sync_weblate.checked({"detail": "queued"}, "push")
+
+
+class TestVerdict:
+    """One row, one answer to "what does this need next".
+
+    The precedence tests are the point. Several of these conditions co-occur, and reporting the wrong
+    one sends the operator to the wrong command -- most damagingly by suggesting a merge for a branch
+    that must not be merged.
+    """
+
+    def test_idle_component_needs_nothing(self):
+        verdict, problem = state().verdict
+        assert verdict == "idle"
+        assert not problem
+
+    def test_untranslated_work_is_reported_but_is_not_a_defect(self):
+        verdict, problem = state(needs_push=True).verdict
+        assert "run drain" in verdict
+        assert not problem
+
+    def test_a_ready_pull_request_names_it_and_its_checks(self):
+        verdict, problem = state(branch_tip="a" * 40, open_pull_request=129,
+                                 checks="checks green").verdict
+        assert verdict == "awaiting merge — #129, checks green"
+        assert not problem
+
+    def test_a_pull_request_with_failing_checks_says_so(self):
+        verdict, _ = state(branch_tip="a" * 40, open_pull_request=129,
+                           checks="CHECKS FAILED").verdict
+        assert "CHECKS FAILED" in verdict
+
+    def test_superseded_is_a_defect(self):
+        verdict, problem = state(branch_tip="b" * 40, open_pull_request=1).verdict
+        assert verdict.startswith("SUPERSEDED")
+        assert problem
+
+    def test_stranded_is_a_defect(self):
+        verdict, problem = state(branch_tip="a" * 40).verdict
+        assert verdict.startswith("STRANDED")
+        assert problem
+
+    def test_merge_failure_is_a_defect_and_names_the_repair(self):
+        verdict, problem = state(merge_failure="rebase conflict").verdict
+        assert "run repair" in verdict
+        assert problem
+
+    def test_supersession_outranks_an_open_pull_request(self):
+        # The dangerous confusion: a superseded branch usually DOES have a pull request, and reporting
+        # that one first would invite the merge that replays Weblate's work across every component.
+        verdict, problem = state(branch_tip="b" * 40, open_pull_request=129,
+                                 checks="checks green").verdict
+        assert verdict.startswith("SUPERSEDED")
+        assert problem
+
+    def test_merge_failure_outranks_supersession(self):
+        # Both need a command, but repair has to happen first; draining a component in merge failure
+        # cannot succeed.
+        verdict, _ = state(merge_failure="conflict", branch_tip="b" * 40).verdict
+        assert verdict.startswith("MERGE FAILURE")
 
 
 class TestStatusIsReadOnly:

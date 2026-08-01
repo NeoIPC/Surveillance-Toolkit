@@ -115,6 +115,7 @@ class ComponentState:
     weblate_tip: str
     branch_tip: str | None
     open_pull_request: int | None
+    checks: str
 
     @property
     def priority_label(self) -> str:
@@ -143,6 +144,30 @@ class ComponentState:
     @property
     def has_pending_work(self) -> bool:
         return self.needs_commit or self.needs_push
+
+    @property
+    def verdict(self) -> tuple[str, bool]:
+        """What this component needs next, and whether that counts as a problem.
+
+        One verdict rather than a set of flags, because the question an operator actually has is what to
+        do, and a row that says "ok" for both a finished component and one holding a pull request nobody
+        has merged answers it for neither. Ordered by urgency: a state that blocks the next drain is
+        reported ahead of one that merely waits for a person.
+
+        The boolean is whether the row is a defect. Waiting for a merge and holding untranslated work
+        are ordinary states, so only the three that need repair make the command exit non-zero.
+        """
+        if self.merge_failure:
+            return f"MERGE FAILURE: {self.merge_failure} — run repair", True
+        if self.is_superseded:
+            return "SUPERSEDED — branch carries a commit Weblate no longer holds; run drain", True
+        if self.is_stranded:
+            return "STRANDED — pushed with no pull request; run drain", True
+        if self.open_pull_request is not None:
+            return f"awaiting merge — #{self.open_pull_request}, {self.checks}", False
+        if self.has_pending_work:
+            return "translations waiting — run drain", False
+        return "idle", False
 
 
 def run(command: Sequence[str], *, timeout: int = SUBPROCESS_TIMEOUT_SECONDS) -> str:
@@ -214,10 +239,27 @@ def branch_tip(branch: str) -> str | None:
     return exact[0]["object"]["sha"] if exact else None
 
 
-def open_pull_request(branch: str) -> int | None:
+def open_pull_request(branch: str) -> tuple[int, str] | None:
+    """The open pull request for this branch and the state of its checks, or None if there is none.
+
+    The rollup comes back in the same request as the number, so knowing whether a drained branch is
+    actually mergeable costs nothing beyond what asking whether it has a pull request already costs.
+    """
     data = gh_json(["pr", "list", "--repo", FORGE_REPO, "--head", branch, "--state", "open",
-                    "--json", "number"])
-    return data[0]["number"] if data else None
+                    "--json", "number,statusCheckRollup"])
+    if not data:
+        return None
+    nodes = data[0].get("statusCheckRollup") or []
+    outcomes = [state for _, state in (check_outcome(n) for n in nodes)]
+    if not outcomes:
+        checks = "no checks"
+    elif "PENDING" in outcomes:
+        checks = "checks running"
+    elif any(o not in ("SUCCESS", "NEUTRAL", "SKIPPED") for o in outcomes):
+        checks = "CHECKS FAILED"
+    else:
+        checks = "checks green"
+    return data[0]["number"], checks
 
 
 def checked(result: object, what: str) -> None:
@@ -278,6 +320,7 @@ def read_state(client: Weblate, record: Record) -> ComponentState:
     repo = operable(client, record).repository()
     slug = record["slug"]
     branch = record.get("push_branch") or ""
+    pull_request = open_pull_request(branch) if branch else None
     return ComponentState(
         slug=slug,
         priority=record.get("priority") or DEFAULT_PRIORITY,
@@ -287,7 +330,8 @@ def read_state(client: Weblate, record: Record) -> ComponentState:
         merge_failure=str(repo["merge_failure"] or ""),
         weblate_tip=weblate_tip(slug),
         branch_tip=branch_tip(branch) if branch else None,
-        open_pull_request=open_pull_request(branch) if branch else None,
+        open_pull_request=pull_request[0] if pull_request else None,
+        checks=pull_request[1] if pull_request else "",
     )
 
 
@@ -398,21 +442,13 @@ def command_status(client: Weblate, _args: argparse.Namespace) -> int:
     problems = 0
     # Rows arrive most-important-first from repository_components; the priority column is shown so the
     # order reads as deliberate rather than arbitrary.
-    print(f"{'component':<38}{'priority':<11}{'pending':<9}{'branch':<26}{'state'}")
+    print(f"{'component':<38}{'priority':<11}{'branch':<26}{'needs'}")
     for record in repository_components(client):
         state = read_state(client, record)
-        notes: list[str] = []
-        if state.merge_failure:
-            notes.append(f"MERGE FAILURE: {state.merge_failure}")
-        if state.is_superseded:
-            notes.append("SUPERSEDED — branch carries a commit Weblate no longer holds")
-        if state.is_stranded:
-            notes.append("STRANDED — pushed with no open pull request")
-        problems += bool(notes)
-        pending = "yes" if state.has_pending_work else "-"
-        branch = state.push_branch if state.branch_exists else "(not pushed)"
-        print(f"{state.slug:<38}{state.priority_label:<11}{pending:<9}{branch:<26}"
-              f"{'; '.join(notes) or 'ok'}")
+        verdict, is_problem = state.verdict
+        problems += is_problem
+        branch = state.push_branch if state.branch_exists else "—"
+        print(f"{state.slug:<38}{state.priority_label:<11}{branch:<26}{verdict}")
     return 1 if problems else 0
 
 
