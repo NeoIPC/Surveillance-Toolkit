@@ -194,7 +194,7 @@ reason is added below.
 | Setting | Value | Why it is load-bearing |
 |---|---|---|
 | `vcs` | `git` | Weblate pushes a branch and never calls the forge API; pull requests are opened by this repository's own tooling, so Weblate's credentials need push rights and nothing else |
-| `merge_style` | `rebase` | Keeps Weblate's history linear so its branch stays rebase-mergeable. Merging upstream instead would put merge commits into every translation pull request |
+| `merge_style` | `rebase` | Keeps Weblate's history linear, which with the Squash add-on is what leaves the single commit a squash merge needs to stay patch-identical. Merging upstream instead would put merge commits into every translation pull request |
 | `push_on_commit` | `false` | **Load-bearing.** The Squash add-on rewrites the un-merged commit range after each commit cycle, so a branch tip that was already pushed is orphaned and the next push is rejected as non-fast-forward. With `auto_lock_error` on, that rejection locks the component against translators. Pushing once per drain, immediately before opening the pull request, avoids the window entirely |
 | `auto_lock_error` | `true` | Fail-closed. A component that cannot push accumulates work that cannot reach git; locking makes that visible instead of letting it pile up silently. It clears itself once a push succeeds |
 | `commit_pending_age` | `24` | A safety net only. The drain commits explicitly rather than waiting for it |
@@ -365,18 +365,23 @@ a first attempt to measure this counted 23 carriage returns in a commit, which w
 PowerShell's `Out-String` joining lines with `\r\n`, not a property of the commit. Measure git objects
 with `git cat-file`, never through a shell string conversion.
 
-### A squashed commit's subject names one language; its body covers them all
+### One commit per drain, a fixed subject, and trailers as the record
 
-The *Squash* add-on runs with `squash: author`, so each drain produces **one commit per contributor**,
-spanning every language that contributor touched — within one component, since the add-on's scope is
-per component. Observed on `main`: a commit titled *"Translated using Weblate (Turkish)"* changes
-eight of the infectious-agent catalogue's language files (`de`, `el`, `es`, `et`, `fr`, `it`, `ne`,
-`tr`).
+The *Squash* add-on runs with `squash: all`, so each drain produces **exactly one commit**, spanning
+every language and contributor — within one component, since the add-on's scope is per component. That
+single commit is what makes the pull request safe to squash-merge, so the setting is load-bearing
+rather than cosmetic.
 
-The commit itself is complete — the **body** concatenates every squashed commit's message with its
-per-language completion statistics, and `append_trailers` adds `Co-authored-by:` plus one
-`Translate-URL:` per language. Only the **subject line** is unrepresentative, being the first squashed
-message's subject. Read the body or the file list; do not take the subject as a summary.
+Nothing in that commit summarises what changed, and nothing is meant to. The subject is the static
+`commit_message` set below, identical on every drain of every component, and the body carries only what
+`append_trailers` adds — `Co-authored-by:` plus one `Translate-URL:` per language. So the **file list is
+what says which catalogues moved** and the trailers say who moved them. Do not read the subject as a
+summary; there is none to read.
+
+Those trailers are the record of who translated what, since squashing everything into one commit means
+the author field can no longer name them. They also include Weblate's own service account, which the
+add-on cannot be told to omit — so the squash message is where it gets removed. See
+`po/non-human-identities.yaml`.
 
 The add-on's `commit_message` is therefore set to the static text
 `Translations update from Weblate`.

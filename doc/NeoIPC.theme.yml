@@ -1,4 +1,29 @@
 extends: default
+# The families the diagrams ask for, which the inherited catalogue does not carry: it registers Noto
+# Serif and M+ 1mn only, so an SVG naming anything else falls through to the generic `sans-serif`, and
+# that resolves to Helvetica -- one of the fourteen fonts a PDF does not embed. Those are WinAnsi, so
+# every character outside Latin-1 is replaced with the logical-NOT sign: a Greek diagram label renders
+# as a row of them, which makes this a localization defect rather than a typographic one. It degrades
+# quietly in both directions, too -- the substitution is reported below Asciidoctor's default log level,
+# and an astral codepoint is truncated to a wrong glyph with no diagnostic at all.
+#
+# `merge: true` is load-bearing: without it this REPLACES the inherited catalogue rather than extending
+# it, and the body font disappears with it. Both faces ship with Asciidoctor PDF and are SIL OFL, so
+# this adds no dependency and no licence question.
+font:
+  catalog:
+    merge: true
+    Noto Sans:
+      normal: GEM_FONTS_DIR/notosans-regular-subset.ttf
+      bold: GEM_FONTS_DIR/notosans-bold-subset.ttf
+      italic: GEM_FONTS_DIR/notosans-italic-subset.ttf
+      bold_italic: GEM_FONTS_DIR/notosans-bold_italic-subset.ttf
+    # Named `icon` because that is the family the decision-flow template selects for its outcome marks.
+    icon:
+      normal: GEM_FONTS_DIR/notoemoji-subset.ttf
+      bold: GEM_FONTS_DIR/notoemoji-subset.ttf
+      italic: GEM_FONTS_DIR/notoemoji-subset.ttf
+      bold_italic: GEM_FONTS_DIR/notoemoji-subset.ttf
 footer:
   recto:
     left:

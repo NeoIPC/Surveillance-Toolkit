@@ -29,6 +29,11 @@ reports/**/*.html
 reports/**/*.md
 reports/**/*_files/**
 reports/**/_output
+# Rendered documentation — the sources under docs/ are Markdown; anything Quarto or Pandoc produces
+# beside them is build output. Note the asymmetry with reports/ above, which also ignores *.md: here the
+# .md files ARE the source and must stay tracked.
+docs/*.html
+docs/*_files/
 reports/ICHE-Health-Intervention-Codes.csv
 data/
 # Provisioned (not committed) DocumentFormat.OpenXml assemblies for the data-dictionary .xlsx writer
@@ -37,5 +42,8 @@ scripts/modules/NeoIPC-Tools/lib/bin/
 scripts/modules/NeoIPC-Tools/lib/obj/
 # Pester -CI test report (NUnit XML) — a transient run artifact, never committed.
 testResults.xml
+# Python bytecode caches, created wherever the scripts or their tests are run.
+__pycache__/
+.pytest_cache/
 # Scratch / throwaway artifacts, never committed (the durable procedures live in the relevant READMEs).
 /tmp/

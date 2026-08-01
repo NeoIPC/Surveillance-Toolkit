@@ -43,14 +43,15 @@ translator note while the file's header block does not, and that YAML keys becom
 checked too, since a silent regression there loses every translator note without touching a byte of
 line-ending hygiene.
 
-Why a standalone script rather than pytest: this repository has no Python test infrastructure and its
-CI installs no Python at all (Perl for po4a, .NET, PowerShell -- never Python), so
-update-glossary-po.py is a developer-machine-only tool. CI-side coverage for the byte invariant comes
-from the text-hygiene gate, which rejects any committed file carrying CRLF or a BOM.
+This ran on a developer's machine and nowhere else until the python-tests job began running it, which
+is why its checks are written as functions accumulating into a shared list rather than as pytest cases:
+they predate the framework. A thin pytest entry point at the foot of the file makes the suite
+collectable without restructuring it; the checks themselves are unchanged.
 
-Run it after touching the script:
+Run it either way:
 
-    python scripts/test-update-glossary-po.py
+    pytest scripts/test_update_glossary_po.py
+    python scripts/test_update_glossary_po.py
 """
 
 import re
@@ -443,6 +444,19 @@ def main():
 
     print("PASS update-glossary-po.py writes LF, no BOM, and round-trips notes, flags and msgctxt")
     return 0
+
+
+def test_update_glossary_po():
+    """Drive the whole suite as one pytest case.
+
+    Deliberately coarse. The checks below predate pytest here and are written as functions that
+    accumulate into a shared `failures` list rather than as independent tests, so wrapping `main()` makes
+    them collectable without restructuring 450 lines of working test code as a side effect of adding a
+    gate. Nothing is verified less thoroughly than before -- only the reporting is coarser, and `main()`
+    prints every individual failure before returning. Splitting the `check_*` functions into separate
+    test functions is worth doing on their own merits, not as part of wiring CI.
+    """
+    assert main() == 0, "see the printed FAIL lines above for the individual checks"
 
 
 if __name__ == "__main__":

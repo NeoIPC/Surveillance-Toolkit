@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-07-31 17:48+0200\n"
+"POT-Creation-Date: 2026-07-31 20:35+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Language-Team: none\n"
 "Language: en\n"
@@ -13,19 +13,19 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#. type: Hash Value: 3gcr
+#. type: Hash Value: 3gcr_label
 #: reports/common.yaml:1
 #, no-wrap
 msgid "3^rd^ gen. cephalosporin resistance (3GCR)"
 msgstr ""
 
-#. type: Hash Value: car
+#. type: Hash Value: carbr_label
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Carbapenem resistance (CARBR)"
 msgstr ""
 
-#. type: Hash Value: cor
+#. type: Hash Value: colr_label
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Colistin resistance (COLR)"
@@ -499,7 +499,7 @@ msgstr ""
 msgid "Surgical procedure rates are calculated per 100 patients, not per 1,000 patient-days. One patient may contribute multiple procedures."
 msgstr ""
 
-#. type: Hash Value: mrsa
+#. type: Hash Value: mrsa_label
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Methicillin-resistant Staphylococcus aureus (MRSA)"
@@ -1003,13 +1003,13 @@ msgstr ""
 msgid "Organism-specific resistance rates"
 msgstr ""
 
-#. type: Hash Value: tbl-resistance-test-rate car_if_3gcr
+#. type: Hash Value: tbl-resistance-test-rate carbr_if_3gcr
 #: reports/common.yaml:1
 #, no-wrap
 msgid "in case of 3GCR"
 msgstr ""
 
-#. type: Hash Value: tbl-resistance-test-rate cor_if_3gcr_and_car
+#. type: Hash Value: tbl-resistance-test-rate colr_if_3gcr_and_carbr
 #: reports/common.yaml:1
 #, no-wrap
 msgid "in case of 3GCR and CARBR"
@@ -1303,7 +1303,7 @@ msgstr ""
 msgid " "
 msgstr ""
 
-#. type: Hash Value: vre
+#. type: Hash Value: vre_label
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Vancomycin-resistant Enterococcus (VRE)"

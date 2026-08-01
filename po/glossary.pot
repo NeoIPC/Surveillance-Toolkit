@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-08-01 06:07+0000\n"
+"POT-Creation-Date: 2026-08-01 15:38+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Language-Team: none\n"
 "Language: en\n"
@@ -83,7 +83,9 @@ msgctxt "colr"
 msgid "COLR"
 msgstr ""
 
+#. Central Venous Catheter.
 #: glossary.yaml
+#, terminology
 msgctxt "cvc"
 msgid "CVC"
 msgstr ""
@@ -108,7 +110,9 @@ msgctxt "h2020_funding_statement"
 msgid "This project has received funding from the European Union's Horizon 2020 research and innovation programme under grant agreement No 965328."
 msgstr ""
 
+#. Hospital-acquired pneumonia.
 #: glossary.yaml
+#, terminology
 msgctxt "hap"
 msgid "HAP"
 msgstr ""
@@ -131,7 +135,9 @@ msgctxt "ichi"
 msgid "ICHI"
 msgstr ""
 
+#. Invasive Ventilation.
 #: glossary.yaml
+#, terminology
 msgctxt "inv"
 msgid "INV"
 msgstr ""
@@ -160,11 +166,12 @@ msgctxt "mrsa"
 msgid "MRSA"
 msgstr ""
 
-#. An initialism, so most languages keep it verbatim; suppress the unchanged-translation check rather
-#. than have every language answer it. Declared here because a flag set on a catalogue does not survive
-#. msgmerge — gettext models no custom flags, so only the template's are restored.
+#. Necrotizing Enterocolitis. An initialism, so most languages keep it verbatim; suppress the
+#. unchanged-translation check rather than have every language answer it. Declared here because a flag
+#. set on a catalogue does not survive msgmerge — gettext models no custom flags, so only the template's
+#. are restored.
 #: glossary.yaml
-#, ignore-same
+#, ignore-same, terminology
 msgctxt "nec"
 msgid "NEC"
 msgstr ""
@@ -190,7 +197,9 @@ msgctxt "neoipc_surveillance"
 msgid "NeoIPC Surveillance"
 msgstr ""
 
+#. Non-invasive Ventilation.
 #: glossary.yaml
+#, terminology
 msgctxt "niv"
 msgid "NIV"
 msgstr ""
@@ -225,7 +234,9 @@ msgctxt "probiotics"
 msgid "Probiotics"
 msgstr ""
 
+#. Peripheral Venous Catheter.
 #: glossary.yaml
+#, terminology
 msgctxt "pvc"
 msgid "PVC"
 msgstr ""
@@ -238,7 +249,9 @@ msgctxt "reserve"
 msgid "Reserve"
 msgstr ""
 
+#. Surgical Site Infection.
 #: glossary.yaml
+#, terminology
 msgctxt "ssi"
 msgid "SSI"
 msgstr ""

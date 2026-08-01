@@ -27,7 +27,7 @@ jobs:
         # being buried in a render log, and so it reports in seconds without waiting on the toolchain setup.
         runs-on: ubuntu-26.04
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v7
               with:
                 # The check reads the working tree and the index, so the submodule is not needed — and
                 # tools/po4a is third-party upstream that this contract deliberately does not cover.
@@ -45,7 +45,7 @@ jobs:
         if: github.event_name == 'pull_request'
         runs-on: ubuntu-26.04
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v7
               with:
                 # Need the base commit to diff against; a shallow clone has neither side.
                 fetch-depth: 0
@@ -183,6 +183,89 @@ jobs:
                   exit 1
                 fi
                 echo "No Weblate-owned catalogue was modified outside Weblate."
+
+    po-placeholders:
+        # Placeholder integrity between each msgid and its msgstr: printf tokens, inline R spans, Quarto
+        # cross-references, .NET-style placeholders and LaTeX text markers. Two of those Weblate's own
+        # server-side checks cannot express, which is why this stays a repository gate rather than being
+        # retired into component flags — the CONTENT of an inline R span (a translation that rewrites a
+        # variable name inside `r ...` keeps the token count, passes every Weblate check, and feeds a
+        # different expression to the renderer), and count parity wherever Weblate compares sets, which a
+        # partial drop survives. Which checks Weblate does cover is measured per catalogue in
+        # docs/weblate-checks-adoption.md.
+        #
+        # Its own job for the same reason text-hygiene is one: a finding names the catalogue and line
+        # rather than being buried in a render log, and it reports without waiting on the toolchain setup.
+        #
+        # REPORT-ONLY, deliberately and temporarily. The committed catalogues already carry violations,
+        # and every one of them sits inside a Weblate-owned .po that the ownership gate above forbids
+        # changing here — so a blocking gate today would fail every pull request over defects that can
+        # only be fixed through Weblate. This makes them visible on every run until they are; dropping
+        # -ReportOnly is the whole of the change that makes it blocking.
+        runs-on: ubuntu-26.04
+        steps:
+            - uses: actions/checkout@v7
+              with:
+                # Reads the committed catalogues only; no submodule and no toolchain are involved.
+                submodules: false
+
+            - name: Check placeholder integrity between source and translations
+              shell: pwsh
+              # -ReportOnly rather than the step's own continue-on-error, and the difference is the point:
+              # continue-on-error swallows EVERY non-zero exit, including the one this script raises when
+              # it matched no files at all. That would be a gate reporting success having inspected
+              # nothing — the failure shape this repository has already been bitten by. The switch waives
+              # the violation count; a run that could not inspect anything still fails.
+              run: ./scripts/Test-PoPlaceholders.ps1 -ReportOnly
+
+    python-tests:
+        # The Python tools under scripts/ had no gate at all. That was defensible while there was one of
+        # them and it was a developer-machine convenience; it stops being defensible as the Python surface
+        # grows, and it was already costing more than it looked — test_update_glossary_po.py asserts the
+        # committed po/glossary.pot still matches what the committed glossary.yaml produces, which is a
+        # claim about the repository that only a run can check. It caught 41 stale location references
+        # once. Nothing has run it since.
+        #
+        # Its own job, like text-hygiene and po-placeholders: it needs none of the toolchain build-docs
+        # spends minutes assembling, so a failure here names itself in seconds instead of arriving at the
+        # end of a render log.
+        runs-on: ubuntu-26.04
+        steps:
+            - uses: actions/checkout@v7
+              with:
+                # The tests read committed files and re-run the generators over them; no submodule is
+                # involved, and po4a (the one thing that would need tools/po4a) is not exercised here.
+                submodules: false
+
+            - uses: actions/setup-python@v6
+              with:
+                # Pinned for the same reason the runner image is: an interpreter that moves under the gate
+                # turns an unrelated release into a red build nobody changed anything to cause.
+                python-version: '3.13'
+
+            - name: Install pytest and the generators' dependencies
+              # The tests run the real scripts rather than importing pieces of them, so they need what
+              # those scripts need. Minimum versions rather than exact pins: these are stable, widely-used
+              # libraries, and pinning them exactly would make this gate a dependency-bump chore.
+              #
+              # wlc has to be here even though no test talks to Weblate: sync-weblate.py imports it at
+              # module scope and answers ImportError with sys.exit, so loading its test file raises
+              # SystemExit during COLLECTION. That is not one red test -- it tears the session down before
+              # any file is collected, so every other test stops running too and the job reports an
+              # internal error rather than a failure. requests is wlc's own dependency, named here because
+              # sync-weblate.py imports it directly.
+              run: python -m pip install --upgrade pytest 'ruamel.yaml>=0.18' 'polib>=1.2' wlc requests
+
+            - name: Run the Python tests
+              # pytest discovers, so a new tool's test is gated by existing here rather than by someone
+              # remembering to add a line -- and it collects test_*.py, which is why the one file that
+              # predates this job is named with underscores rather than the hyphens the other scripts use.
+              #
+              # It also settles the empty case, which is the hazard a hand-rolled loop has to remember:
+              # pytest exits 5 when it collects nothing, so "the gate ran zero tests" is a non-zero exit by
+              # construction rather than by anyone recalling that a gate which inspects nothing has already
+              # bitten this repository twice.
+              run: python -m pytest scripts/ -v
 
     build-docs:
         # Pinned to an explicit image for reproducibility; 26.04 provides the .NET 10 / PowerShell 7.6
@@ -433,8 +516,10 @@ jobs:
                 # powershell-yaml: the metadata assembler reads the infectious-agents / sharing YAML when
                 # building the package the data dictionary flattens.
                 Install-Module -Name powershell-yaml -MinimumVersion 0.4.2 -Force -Scope CurrentUser -SkipPublisherCheck
-                # PSScriptAnalyzer backs the approved-verb *function* check (PSUseApprovedVerbs) in
-                # ScriptVerbHygiene.Tests.ps1; the file-name half of that gate is a custom Pester check.
+                # PSScriptAnalyzer backs two gates: the approved-verb *function* check (PSUseApprovedVerbs)
+                # in ScriptVerbHygiene.Tests.ps1 — whose file-name half is a custom Pester check — and
+                # PSAvoidAssignmentToAutomaticVariable in AutomaticVariableHygiene.Tests.ps1. Both Describe
+                # blocks skip themselves when it is absent, so forgetting it here would pass silently.
                 Install-Module -Name PSScriptAnalyzer -Force -Scope CurrentUser -SkipPublisherCheck
                 # PoHeader.Tests.ps1 asserts the catalogue header contract against the COMMITTED files, so it
                 # is the only check that catches a header drifting in by a route nobody anticipated -- a hand
@@ -442,7 +527,7 @@ jobs:
                 # exclusion list rejects. That last one is not hypothetical: the add-on re-adds a bot credit
                 # to every infectious-agents catalogue whenever those translations are touched, and a
                 # translation pull request is exactly where no human is reading the diff.
-                Invoke-Pester -Path scripts/modules/NeoIPC-Tools/Tests/DataDictionary.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/BuildReport.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/ScriptVerbHygiene.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/PlayData.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/MetadataContent.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/Metadata.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/MetadataVerify.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/PoHeader.Tests.ps1 -CI
+                Invoke-Pester -Path scripts/modules/NeoIPC-Tools/Tests/DataDictionary.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/BuildReport.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/ScriptVerbHygiene.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/PlayData.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/MetadataContent.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/Metadata.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/MetadataVerify.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/PoHeader.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/AutomaticVariableHygiene.Tests.ps1 -CI
 
             - name: Generate data dictionary
               if: github.ref_type != 'tag' || steps.rel.outputs.product == 'metadata'

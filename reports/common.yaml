@@ -9,9 +9,9 @@
 #
 # Language: en
 
-3gcr: "3^rd^ gen. cephalosporin resistance (3GCR)"
-car: "Carbapenem resistance (CARBR)"
-cor: "Colistin resistance (COLR)"
+3gcr_label: "3^rd^ gen. cephalosporin resistance (3GCR)"
+carbr_label: "Carbapenem resistance (CARBR)"
+colr_label: "Colistin resistance (COLR)"
 countryNames:
   Estonia: Estonia
   Germany: Germany
@@ -82,7 +82,7 @@ headerList:
   specialAnalysisHint: "This is a special analysis that"
   admissionsExceedRecordsNote: "Admissions may exceed records when a patient had more than one admission episode during the surveillance period"
   sumOfPatientDays: Sum of patient days
-mrsa: "Methicillin-resistant Staphylococcus aureus (MRSA)"
+mrsa_label: "Methicillin-resistant Staphylococcus aureus (MRSA)"
 no_data: No data.
 not_available: Not available.
 other: Other
@@ -193,8 +193,8 @@ tbl-infectious-agent-detection-rate:
   rate_numerator: "No of infections with agent"
   tbl-cap: "Infections in which an infectious agent has been identified, including secondary BSI following the infection."
 tbl-resistance-test-rate:
-  car_if_3gcr: "in case of 3GCR"
-  cor_if_3gcr_and_car: "in case of 3GCR and CARBR"
+  carbr_if_3gcr: "in case of 3GCR"
+  colr_if_3gcr_and_carbr: "in case of 3GCR and CARBR"
   n_footnote: "%s: The aggregated number of antibiotic resistant pathogens that have a documented test for antibiotic resistance."
   no_data: "No antibiotic resistance diagnostics data available for these report settings."
   pooled_footnote: "%s: The antibiotic resistance test rate calculated across all infants from all departments."
@@ -369,7 +369,7 @@ methods:
   surgical_procedures: >-
     Surgical procedure rates are calculated per 100 patients, not per 1,000
     patient-days. One patient may contribute multiple procedures.
-vre: "Vancomycin-resistant Enterococcus (VRE)"
+vre_label: "Vancomycin-resistant Enterococcus (VRE)"
 week_abbreviation: "w"
 worldBankClassNames:
   H: High income

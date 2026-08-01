@@ -1,0 +1,17 @@
+# Review routing for this repository.
+#
+# A pattern here REQUESTS a review; it does not require one. Branch protection decides that
+# separately, and `require_code_owner_reviews` is off on `main`, so nothing in this file can make a
+# merge harder. What it changes is that a pull request arrives with a reviewer already assigned
+# instead of waiting to be noticed.
+#
+# GitHub never requests a review from the pull request's own author, so a request opened by the
+# automation account routes here while one opened by the maintainer routes to nobody. That is the same
+# reason the translation drains are opened by the bot: an author cannot approve their own pull
+# request, so a self-authored one can only be merged by overriding branch protection — and an override
+# that happens on every merge stops meaning anything.
+#
+# The catch-all is deliberate while there is one reviewer. Narrowing it by path would only create gaps
+# that route nowhere, which is worse than routing everything to the same person. Add specific paths
+# above it when there is a second reviewer to route to.
+* @Brar
