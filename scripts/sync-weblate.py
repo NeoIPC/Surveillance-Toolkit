@@ -163,7 +163,7 @@ _PRIORITY_DISPLAY = {
 }
 
 
-def _icons_are_encodable() -> bool:
+def _icons_are_encodable(stream: Any) -> bool:
     """Whether this stream can carry the icons at all.
 
     Checked rather than assumed, and checked even when styling is being forced: a stream encoded in a
@@ -172,19 +172,24 @@ def _icons_are_encodable() -> bool:
     """
     probe = "".join(icon for icon, _, _ in (*_CHECK_DISPLAY.values(), *_PRIORITY_DISPLAY.values()))
     try:
-        probe.encode(sys.stdout.encoding or "ascii")
+        probe.encode(stream.encoding or "ascii")
     except (UnicodeEncodeError, LookupError):
         return False
     return True
 
 
-def _enable_windows_virtual_terminal() -> bool:
+# GetStdHandle identifiers, from the Windows console API.
+STDOUT_HANDLE = -11
+STDERR_HANDLE = -12
+
+
+def _enable_windows_virtual_terminal(handle_id: int) -> bool:
     """A Windows console refuses these sequences as literal text until this is turned on."""
     try:
         import ctypes
 
         kernel32 = ctypes.windll.kernel32
-        handle = kernel32.GetStdHandle(-11)  # STD_OUTPUT_HANDLE
+        handle = kernel32.GetStdHandle(handle_id)
         mode = ctypes.c_uint32()
         if not kernel32.GetConsoleMode(handle, ctypes.byref(mode)):
             return False
@@ -193,8 +198,14 @@ def _enable_windows_virtual_terminal() -> bool:
         return False
 
 
-def _terminal_supports_styling() -> bool:
-    """Whether it is safe to emit colour, icons and hyperlinks.
+def _terminal_supports_styling(stream: Any = None) -> bool:
+    """Whether it is safe to emit colour, icons and hyperlinks on this stream.
+
+    Asked per stream, because redirecting one and not the other is an ordinary thing to do
+    (`2> errors.txt`) and the answer genuinely differs: an escape sequence is colour on a console and
+    corruption in a file, so deciding once for stdout and then writing a styled warning to stderr
+    corrupts whichever of the two was redirected. Defaults to stdout, and resolves that at call time
+    rather than binding it at import, so a replaced stream is honoured.
 
     The two environment variables are the agreed way to override the guess in either direction, and
     FORCE_COLOR wins where both are set, per https://force-color.org. Forcing is what makes the output
@@ -202,32 +213,48 @@ def _terminal_supports_styling() -> bool:
     far as isatty is concerned.
 
     Everything else is a way of detecting that the reader is not a person at a terminal: redirected
-    output goes to a file or a pipe, where an escape sequence is corruption rather than colour, and
-    TERM=dumb is how a terminal says it cannot render one.
+    output goes to a file or a pipe, and TERM=dumb is how a terminal says it cannot render one.
     """
+    stream = sys.stdout if stream is None else stream
     force = os.environ.get("FORCE_COLOR")
     if force is not None and force != "0":
-        return _icons_are_encodable()
+        return _icons_are_encodable(stream)
     if force == "0" or "NO_COLOR" in os.environ or os.environ.get("TERM") == "dumb":
         return False
-    if not sys.stdout.isatty():
+    if not stream.isatty():
         return False
     # Only worth attempting on a real console; a forced stream is not one, and asking would fail.
-    if sys.platform == "win32" and not _enable_windows_virtual_terminal():
+    handle_id = STDERR_HANDLE if stream is sys.stderr else STDOUT_HANDLE
+    if sys.platform == "win32" and not _enable_windows_virtual_terminal(handle_id):
         return False
-    return _icons_are_encodable()
+    return _icons_are_encodable(stream)
 
 
-STYLED = _terminal_supports_styling()
+STYLED = _terminal_supports_styling(sys.stdout)
+STYLED_ERRORS = _terminal_supports_styling(sys.stderr)
 
 
 def styled(text: str, colour: str) -> str:
     return f"\033[{colour}m{text}\033[0m" if STYLED else text
 
 
-def linked(text: str, url: str) -> str:
-    """Render text as a terminal hyperlink where the terminal understands one (OSC 8)."""
-    return f"\033]8;;{url}\033\\{text}\033]8;;\033\\" if STYLED else text
+def linked(text: str, url: str, *, enabled: bool | None = None) -> str:
+    """Render text as a terminal hyperlink where the terminal understands one (OSC 8).
+
+    `enabled` names the stream this is bound for; the default is stdout, where most output goes.
+    """
+    return (f"\033]8;;{url}\033\\{text}\033]8;;\033\\"
+            if (STYLED if enabled is None else enabled) else text)
+
+
+def pull_request_reference(number: int, *, on_stderr: bool = False) -> str:
+    """`#N`, clickable where the stream it is bound for can render a hyperlink.
+
+    The number is what the operator reads; the link is what saves them retyping it into a browser. Both
+    matter, which is why this degrades to the bare `#N` rather than to a URL.
+    """
+    return linked(f"#{number}", f"https://github.com/{FORGE_REPO}/pull/{number}",
+                  enabled=STYLED_ERRORS if on_stderr else STYLED)
 
 
 def render_checks(checks: str) -> str:
@@ -325,8 +352,7 @@ class ComponentState:
             else:
                 phrase, colour, problem = _REVIEW_VERDICT.get(
                     self.review, (f"review: {self.review}", "33", False))
-            number = self.open_pull_request
-            reference = linked(f"#{number}", f"https://github.com/{FORGE_REPO}/pull/{number}")
+            reference = pull_request_reference(self.open_pull_request)
             # The icon repeats the phrase, which is worth it while it can be scanned and redundant once
             # it has degraded to words.
             icon = f" {render_checks(self.checks)}" if STYLED else ""
@@ -514,8 +540,9 @@ def request_copilot_review(number: int) -> None:
         # "asked Copilot" on that response would announce a review that was never going to happen,
         # which is worse than not asking, because someone waits for it.
         print(f"  WARNING: the Copilot review request was accepted and then dropped. The account this "
-              f"ran as has no Copilot entitlement; request it by hand on #{number}, or run the drain "
-              f"as an account that has one.", file=sys.stderr)
+              f"ran as has no Copilot entitlement; request it by hand on "
+              f"{pull_request_reference(number, on_stderr=True)}, or run the drain as an account that "
+              f"has one.", file=sys.stderr)
 
 
 def forge_identity() -> str:
@@ -810,7 +837,7 @@ def command_drain(client: Weblate, args: argparse.Namespace) -> int:
 
         if state.open_pull_request is None:
             number = open_drain_pull_request(state)
-            print(f"  opened pull request #{number}")
+            print(f"  opened pull request {pull_request_reference(number)}")
             request_copilot_review(number)
             state = read_state(client, record)
 
@@ -823,8 +850,8 @@ def command_drain(client: Weblate, args: argparse.Namespace) -> int:
             raise DrainError(f"{state.slug} moved while its checks ran; run the drain again")
 
         if not args.merge:
-            print(f"{state.slug}: pull request #{state.open_pull_request} is ready. "
-                  f"Re-run with --merge once you have approved it.")
+            print(f"{state.slug}: pull request {pull_request_reference(state.open_pull_request)} is "
+                  f"ready. Re-run with --merge once you have approved it.")
             return 0
 
         merge_drain_pull_request(state, admin=args.admin)
@@ -892,9 +919,11 @@ def merge_drain_pull_request(state: ComponentState, *, admin: bool) -> None:
     # non-fast-forward, and with Lock on error that rejection locks the component against translators.
     # --delete-branch asks; this establishes it, because the request is unreliable for fork branches.
     if branch_tip(state.push_branch) is not None:
-        raise DrainError(f"merged #{state.open_pull_request}, but {state.push_branch} still exists. "
-                         f"Delete it before the next drain or Weblate's next push will be rejected.")
-    print(f"  merged #{state.open_pull_request} (squash) and confirmed {state.push_branch} is gone")
+        raise DrainError(f"merged {pull_request_reference(state.open_pull_request, on_stderr=True)}, "
+                         f"but {state.push_branch} still exists. Delete it before the next drain or "
+                         f"Weblate's next push will be rejected.")
+    print(f"  merged {pull_request_reference(state.open_pull_request)} (squash) and confirmed "
+          f"{state.push_branch} is gone")
 
 
 def command_lock(client: Weblate, _args: argparse.Namespace) -> int:

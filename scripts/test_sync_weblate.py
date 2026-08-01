@@ -387,6 +387,19 @@ class TestStyling:
     def test_unstyled_links_keep_their_text_and_drop_the_escape(self):
         assert sync_weblate.linked("#129", "https://example.invalid/129") == "#129"
 
+    def test_a_reference_follows_the_stream_it_is_bound_for(self, monkeypatch: pytest.MonkeyPatch):
+        # Redirecting one stream and not the other is ordinary (`2> errors.txt`), so a warning bound for
+        # stderr must not inherit stdout's answer -- the escape would land in the file.
+        monkeypatch.setattr(sync_weblate, "STYLED", True)
+        monkeypatch.setattr(sync_weblate, "STYLED_ERRORS", False)
+        assert sync_weblate.pull_request_reference(133, on_stderr=True) == "#133"
+        assert sync_weblate.pull_request_reference(133).startswith("\033]8;;https://github.com/")
+
+    def test_a_reference_degrades_to_the_number_rather_than_the_url(self):
+        # The number is what identifies the pull request in conversation; a bare URL would read as
+        # noise in a log and lose the thing the operator actually quotes.
+        assert sync_weblate.pull_request_reference(133) == "#133"
+
     def test_check_state_falls_back_to_words_rather_than_an_icon(self):
         # The icon carries the meaning when it can be seen; without it the words must, because a row
         # that said nothing at all would be worse than a long one.
