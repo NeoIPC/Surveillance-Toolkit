@@ -1089,8 +1089,27 @@ localize_metric_name <- function(metric_id, sR, table_name = NULL) {
     if (length(parts) == 2) {
       abr_key <- parts[1]
       condition_key <- parts[2]
-      # Localize the resistance mechanism
-      localized_abr <- if (!is.null(sR[[abr_key]])) sR[[abr_key]] else abr_key
+      # Localize the resistance category. Neither mapping is the identity, and
+      # both are the ones the resistance tables apply to their row labels — which
+      # this text has to match. The dataset abbreviates carbapenem and colistin
+      # resistance as `car`/`cor` while the categories are CARBR and COLR; and the
+      # descriptive label lives under a `_label` key, because the bare glossary
+      # term is carried separately as terminology.
+      abr_label_key <- list(
+        "3gcr" = "3gcr_label",
+        car = "carbr_label",
+        cor = "colr_label",
+        mrsa = "mrsa_label",
+        vre = "vre_label"
+      )[[abr_key]]
+      localized_abr <- if (!is.null(abr_label_key) && !is.null(sR[[abr_label_key]])) {
+        sR[[abr_label_key]]
+      } else {
+        logDebug(paste0(
+          "localize_metric_name: no display label found for resistance ",
+          "category '{abr_key}'. Using raw identifier as fallback."))
+        abr_key
+      }
       # Routine is the default — omit the suffix. Only show the condition
       # for non-routine cases (e.g., "in case of 3GCR").
       if (condition_key == "routine") {
