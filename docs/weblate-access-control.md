@@ -18,17 +18,16 @@ It lists the **sixteen roles a project team may hold**, which is what that picke
 and 16 exist in the sequence and appear in no project picker; what they are has not been established, and
 nothing here needs them.
 
-| id | role | | id | role |
-|---|---|---|---|---|
-| 1 | Add suggestion | | 10 | Manage repository |
-| 2 | Access repository | | 11 | **Administration** |
-| 3 | Power user | | 12 | Billing |
-| 4 | Translate | | 13 | Manage translation memory |
-| 5 | Edit source | | 14 | Automatic translation |
-| 6 | Manage languages | | 17 | **Translation coordinator** |
-| 7 | Manage glossary | | 18 | Bulk editing |
-| 8 | Manage screenshots | | | |
-| **9** | **Review strings** | | | |
+| id | role | id | role |
+|---|---|---|---|
+| 1 | Add suggestion | **9** | **Review strings** |
+| 2 | Access repository | 10 | Manage repository |
+| 3 | Power user | 11 | **Administration** |
+| 4 | Translate | 12 | Billing |
+| 5 | Edit source | 13 | Manage translation memory |
+| 6 | Manage languages | 14 | Automatic translation |
+| 7 | Manage glossary | **17** | **Translation coordinator** |
+| 8 | Manage screenshots | 18 | Bulk editing |
 
 These are this instance's numbers. They are database keys, not an ordering anyone chose: they do not
 match the order the roles appear in Weblate's source, where `Administration` is first and is id 11, and
