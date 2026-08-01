@@ -277,18 +277,24 @@ foreach ($targetCulture in $targetCultures)
             $outputFile = Get-LocalisedPath $artifactsFolder 'NeoIPC-Core-Protocol.pdf' $targetCulture
             Build-Target $outputFile (@($protocolFile)+@(Export-AsciiDocReferences $protocolFile $att)) {
                 Write-Information "Generating PDF"
-                # No --failure-level here, unlike the two Asciidoctor backends above. That setting was
-                # measured against Asciidoctor's own INFO call sites, and Asciidoctor PDF is a separate
-                # gem whose diagnostics were never audited against the same claim. Applied here it fails
-                # on output that is correct -- the ballot-box characters in the eligibility table warn
-                # about a Windows-1252 conversion and then render perfectly -- while staying silent on
-                # output that is broken, which is how a diagram rendered every label in a substituted
-                # font, replaced Greek with the logical-NOT sign, and truncated an astral codepoint,
-                # all without one diagnostic. A gate that fires on the correct case and misses the
-                # broken one is worse than none, because it teaches the reader to route around it.
+                # No --failure-level here, unlike the two Asciidoctor backends above -- and not at any
+                # value, which is the part worth reading before "fixing" this by setting WARN instead.
+                # Asciidoctor PDF emits NOTHING at INFO: it has zero logger.info sites and two
+                # logger.info? guards, both wrapping logger.WARN calls (the AFM encoding fallback and
+                # the missing-glyph report). So it uses info? as a verbosity switch on warn-severity
+                # messages, the opposite idiom to core's, where logger.info is both the severity and the
+                # emission. -v alone unlocks them, at WARN -- so every failure level from WARN down
+                # fails on them, and the INFO in the flag was never the operative part. Visibility was.
                 #
-                # -v stays. Only the gate was wrong; the diagnostics are how the font substitution was
-                # found at all, and they are worth reading in the log even when nothing fails on them.
+                # What it fails on is output that is correct: the ballot-box characters in the
+                # eligibility table warn about a Windows-1252 conversion and then render perfectly. What
+                # it stays silent on is output that was broken -- a diagram drawn entirely in a
+                # substituted font, Greek replaced by the logical-NOT sign, an astral codepoint
+                # truncated, not one diagnostic between them. A gate that fires on the correct case and
+                # misses the broken one is worse than none, because it teaches the reader around it.
+                #
+                # -v stays. Only the gate was wrong; those same warnings are how the font substitution
+                # was found at all, and they are worth reading in the log without failing the build.
                 if ($IsWindows) {
                     Write-Warning "Asciidoctor Mathematical is not supported on Windows. The STEM expressions will not be converted in your pdf output."
                     asciidoctor-pdf -a compress -a $revNumberArg -a $revRemark -a $revDate -v -D $(Resolve-Path $artifactsFolder -Relative) -o $([System.IO.Path]::GetFileName($outputFile)) $(Resolve-Path $protocolFile -Relative)
