@@ -194,7 +194,7 @@ reason is added below.
 | Setting | Value | Why it is load-bearing |
 |---|---|---|
 | `vcs` | `git` | Weblate pushes a branch and never calls the forge API; pull requests are opened by this repository's own tooling, so Weblate's credentials need push rights and nothing else |
-| `merge_style` | `rebase` | Keeps Weblate's history linear so its branch stays rebase-mergeable. Merging upstream instead would put merge commits into every translation pull request |
+| `merge_style` | `rebase` | Keeps Weblate's history linear, which with the Squash add-on is what leaves the single commit a squash merge needs to stay patch-identical. Merging upstream instead would put merge commits into every translation pull request |
 | `push_on_commit` | `false` | **Load-bearing.** The Squash add-on rewrites the un-merged commit range after each commit cycle, so a branch tip that was already pushed is orphaned and the next push is rejected as non-fast-forward. With `auto_lock_error` on, that rejection locks the component against translators. Pushing once per drain, immediately before opening the pull request, avoids the window entirely |
 | `auto_lock_error` | `true` | Fail-closed. A component that cannot push accumulates work that cannot reach git; locking makes that visible instead of letting it pile up silently. It clears itself once a push succeeds |
 | `commit_pending_age` | `24` | A safety net only. The drain commits explicitly rather than waiting for it |

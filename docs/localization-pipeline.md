@@ -37,7 +37,7 @@ files it writes, and a field Weblate refreshes is left alone in the files Weblat
 ## A drain, and why it is not a batch operation
 
 A **drain** moves translations from Weblate into `main`: commit → push to `weblate-<catalogue>` → open a
-pull request → **rebase**-merge it → delete the branch.
+pull request → **squash**-merge it → delete the branch.
 
 The critical property is that a pushed `weblate-<catalogue>` branch is **perishable**. Two independent
 events invalidate it, and after either one the branch carries a commit Weblate no longer holds:
@@ -69,7 +69,7 @@ for each component, one at a time:
     force-update weblate-<catalogue> to Weblate's current tip
     wait for checks to settle
     re-verify: branch tip == Weblate's tip          <- immediately before merging, not earlier
-    rebase-merge
+    squash-merge                                    <- refusing a branch that carries more than one commit
     confirm the head branch is gone
     let Weblate pull the new main and settle
 unlock every component
@@ -138,7 +138,7 @@ co-author, and the squash is the only point at which that trailer can be dropped
 contributor. Which identities those are is recorded in `po/non-human-identities.yaml`, matched on
 address rather than display name, because one address appears there under several names.
 
-**Delete the head branch on merge.** A rebase merge rewrites SHAs, so the pushed tip stops being an
+**Delete the head branch on merge.** A squash merge rewrites SHAs, so the pushed tip stops being an
 ancestor of `main`, Weblate's next push is rejected as non-fast-forward, and with *Lock on error* enabled
 that rejection locks the component against translators.
 
