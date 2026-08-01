@@ -277,11 +277,23 @@ foreach ($targetCulture in $targetCultures)
             $outputFile = Get-LocalisedPath $artifactsFolder 'NeoIPC-Core-Protocol.pdf' $targetCulture
             Build-Target $outputFile (@($protocolFile)+@(Export-AsciiDocReferences $protocolFile $att)) {
                 Write-Information "Generating PDF"
+                # No --failure-level here, unlike the two Asciidoctor backends above. That setting was
+                # measured against Asciidoctor's own INFO call sites, and Asciidoctor PDF is a separate
+                # gem whose diagnostics were never audited against the same claim. Applied here it fails
+                # on output that is correct -- the ballot-box characters in the eligibility table warn
+                # about a Windows-1252 conversion and then render perfectly -- while staying silent on
+                # output that is broken, which is how a diagram rendered every label in a substituted
+                # font, replaced Greek with the logical-NOT sign, and truncated an astral codepoint,
+                # all without one diagnostic. A gate that fires on the correct case and misses the
+                # broken one is worse than none, because it teaches the reader to route around it.
+                #
+                # -v stays. Only the gate was wrong; the diagnostics are how the font substitution was
+                # found at all, and they are worth reading in the log even when nothing fails on them.
                 if ($IsWindows) {
                     Write-Warning "Asciidoctor Mathematical is not supported on Windows. The STEM expressions will not be converted in your pdf output."
-                    asciidoctor-pdf -a compress -a $revNumberArg -a $revRemark -a $revDate -v --failure-level=INFO -D $(Resolve-Path $artifactsFolder -Relative) -o $([System.IO.Path]::GetFileName($outputFile)) $(Resolve-Path $protocolFile -Relative)
+                    asciidoctor-pdf -a compress -a $revNumberArg -a $revRemark -a $revDate -v -D $(Resolve-Path $artifactsFolder -Relative) -o $([System.IO.Path]::GetFileName($outputFile)) $(Resolve-Path $protocolFile -Relative)
                 } else {
-                    asciidoctor-pdf -a compress -a $revNumberArg -a $revRemark -a $revDate -a mathematical-format=svg -r asciidoctor-mathematical -v --failure-level=INFO -D $(Resolve-Path $artifactsFolder -Relative) -o $([System.IO.Path]::GetFileName($outputFile)) $(Resolve-Path $protocolFile -Relative)
+                    asciidoctor-pdf -a compress -a $revNumberArg -a $revRemark -a $revDate -a mathematical-format=svg -r asciidoctor-mathematical -v -D $(Resolve-Path $artifactsFolder -Relative) -o $([System.IO.Path]::GetFileName($outputFile)) $(Resolve-Path $protocolFile -Relative)
                 }
                 if (-not $?) { exit 1 }
             }
