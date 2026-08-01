@@ -30,6 +30,6 @@ Describe 'Automatic-variable hygiene' -Skip:(-not (Get-Module -ListAvailable PSS
         $findings = Invoke-ScriptAnalyzer -Path (Join-Path $repoRoot 'scripts') -Recurse `
             -IncludeRule PSAvoidAssignmentToAutomaticVariable
         ($findings | ForEach-Object { '{0}:{1} {2}' -f $_.ScriptName, $_.Line, $_.Message } | Out-String).Trim() |
-            Should -BeExactly '' -Because 'an automatic variable name shadows the engine own'
+            Should -BeExactly '' -Because "an automatic variable name shadows the engine's own"
     }
 }
