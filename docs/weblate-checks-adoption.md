@@ -283,8 +283,25 @@ survives every `msgmerge`, and cannot drift from the string it describes. po4a a
 **Everything else lives only in Weblate's database, and that is a durability problem rather than a
 preference.** This project has already reset components to recover from a diverged checkout; a reset
 preserves the database, but a *recreate* does not, and neither route is covered by any backup this
-repository controls. So database-only content needs a **committed manifest and a script that applies it**,
-or it is one accident from being lost with no way to tell what was there.
+repository controls.
+
+**Size the remedy to the failure, though.** A committed manifest with a script that applies it is keyed to
+the source string, so it restores what a *component recreate* destroyed — msgids are unchanged there. It
+does nothing about the likelier destroyer: editing a source string retires its unit and takes the
+explanation with it, and invalidates the manifest entry for that msgid in the same stroke. The
+source-string migration does exactly that, wholesale. So a manifest guards the rare accident and not the
+scheduled one, and it should be built when something actually needs it rather than as a precondition for
+writing any explanation at all.
+
+Two consequences follow. **Where guidance is derivable from the authored source, put it in the description
+and no manifest arises** — the glossary already does this, its generator carrying YAML comments through
+into the template, so a third of its terms ship guidance that survives everything. **Where it is not, an
+explanation is the only route**: po4a's AsciiDoc and YAML modules have no translator-comment support at
+all — read from po4a's own source, where only the TeX and Texinfo modules do — so nothing authored can
+reach the `documentation`, `reports` or `infectious_agents` descriptions. Those explanations therefore
+carry the same sequencing constraint as editorial approval, and for the same reason: both are
+database-only and both die with the unit, so both are written **after** the migration that rewrites
+msgids, not before it.
 
 ### What fills each field is per catalogue, not uniform
 
