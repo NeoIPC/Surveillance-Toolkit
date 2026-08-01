@@ -39,6 +39,7 @@ def state(**overrides) -> sync_weblate.ComponentState:
     """A component state with everything benign, so each test states only what it is about."""
     defaults = dict(
         slug="neoipc-glossary",
+        forge_repo="NeoIPC/Surveillance-Toolkit",
         priority=60,
         push_branch="weblate-glossary",
         needs_commit=False,
@@ -404,13 +405,14 @@ class TestStyling:
         # stderr must not inherit stdout's answer -- the escape would land in the file.
         monkeypatch.setattr(sync_weblate, "STYLED", True)
         monkeypatch.setattr(sync_weblate, "STYLED_ERRORS", False)
-        assert sync_weblate.pull_request_reference(133, on_stderr=True) == "#133"
-        assert sync_weblate.pull_request_reference(133).startswith("\033]8;;https://github.com/")
+        assert sync_weblate.pull_request_reference(133, "NeoIPC/x", on_stderr=True) == "#133"
+        assert sync_weblate.pull_request_reference(133, "NeoIPC/x").startswith(
+            "\033]8;;https://github.com/NeoIPC/x/pull/133")
 
     def test_a_reference_degrades_to_the_number_rather_than_the_url(self):
         # The number is what identifies the pull request in conversation; a bare URL would read as
         # noise in a log and lose the thing the operator actually quotes.
-        assert sync_weblate.pull_request_reference(133) == "#133"
+        assert sync_weblate.pull_request_reference(133, "NeoIPC/x") == "#133"
 
     def test_check_state_falls_back_to_words_rather_than_an_icon(self):
         # The icon carries the meaning when it can be seen; without it the words must, because a row
@@ -563,6 +565,37 @@ class TestApprovalGate:
         # that matters.
         assert not sync_weblate.approval_would_be_discarded(
             state(branch_tip="b" * 40, open_pull_request=133, review="REVIEW_REQUIRED"))
+
+
+class TestBackingRepository:
+    """Which repository backs a component is Weblate's to say, and getting it wrong fails by omission."""
+
+    @pytest.mark.parametrize("url", [
+        "https://github.com/NeoIPC/NeoIPC-App.git",
+        "https://github.com/NeoIPC/NeoIPC-App",
+        "https://github.com/NeoIPC/NeoIPC-App/",
+        "git@github.com:NeoIPC/NeoIPC-App.git",
+    ])
+    def test_the_repository_is_read_from_the_component(self, url):
+        assert sync_weblate.forge_repo({"slug": "neoipc-app", "repo": url}) == "NeoIPC/NeoIPC-App"
+
+    def test_a_component_this_cannot_drive_is_refused_by_name(self):
+        # The Weblate-local terminology store has no git backing. Refusing it loudly beats returning
+        # something plausible, which is how the previous constant behaved: it silently matched nothing.
+        with pytest.raises(sync_weblate.DrainError) as refusal:
+            sync_weblate.forge_repo({"slug": "glossary", "repo": "local:"})
+        assert "glossary" in str(refusal.value)
+
+    def test_a_second_repository_is_not_filtered_out(self):
+        # The regression this replaces: a constant naming one repository excluded every component backed
+        # by another -- not with an error but by absence, so the app catalogue was missing from every
+        # listing of what needed draining, and nothing anywhere said so.
+        records = [
+            {"slug": "neoipc-reports", "repo": "https://github.com/NeoIPC/Surveillance-Toolkit.git"},
+            {"slug": "neoipc-app", "repo": "https://github.com/NeoIPC/NeoIPC-App.git"},
+        ]
+        assert {sync_weblate.forge_repo(r) for r in records} == {
+            "NeoIPC/Surveillance-Toolkit", "NeoIPC/NeoIPC-App"}
 
 
 class TestComponentLookup:

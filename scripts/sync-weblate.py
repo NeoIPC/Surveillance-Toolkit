@@ -97,7 +97,16 @@ except ImportError:
     sys.exit("Error: wlc is required. Install with: pip install wlc")
 
 PROJECT = "neoipc"
-FORGE_REPO = "NeoIPC/Surveillance-Toolkit"
+# Which repository backs a component is read from Weblate, per component -- see forge_repo.
+#
+# The list of not-a-person identities is the one thing still pinned to a repository. Which identities are
+# tools is a fact about the project rather than about any repository, so the organization's own .github
+# repository would be the tidier home -- but the list has readers that cannot fetch it: the PO header
+# gate reads it from the checkout by relative path, and the translator credits are assembled during a
+# render that has no network. Those need it committed here, and its header exists to stop a second copy
+# being kept elsewhere, so a component in another repository reads this one over the network instead.
+IDENTITIES_REPO = "NeoIPC/Surveillance-Toolkit"
+_GITHUB_REPO = re.compile(r"github\.com[:/](?P<owner>[^/]+?)/(?P<name>[^/]+?)(?:\.git)?/?$")
 GIT_EXPORT = "https://hosted.weblate.org/git/{project}/{slug}/"
 
 # How long to wait for the forge to finish running checks on a freshly pushed branch, and how often to
@@ -256,13 +265,13 @@ def linked(text: str, url: str, *, enabled: bool | None = None) -> str:
             if (STYLED if enabled is None else enabled) else text)
 
 
-def pull_request_reference(number: int, *, on_stderr: bool = False) -> str:
+def pull_request_reference(number: int, repo: str, *, on_stderr: bool = False) -> str:
     """`#N`, clickable where the stream it is bound for can render a hyperlink.
 
     The number is what the operator reads; the link is what saves them retyping it into a browser. Both
     matter, which is why this degrades to the bare `#N` rather than to a URL.
     """
-    return linked(f"#{number}", f"https://github.com/{FORGE_REPO}/pull/{number}",
+    return linked(f"#{number}", f"https://github.com/{repo}/pull/{number}",
                   enabled=STYLED_ERRORS if on_stderr else STYLED)
 
 
@@ -292,6 +301,7 @@ class ComponentState:
     """Everything one component's row needs, gathered once."""
 
     slug: str
+    forge_repo: str
     priority: int
     push_branch: str
     needs_commit: bool
@@ -361,7 +371,7 @@ class ComponentState:
             else:
                 phrase, colour, problem = _REVIEW_VERDICT.get(
                     self.review, (f"review: {self.review}", "33", False))
-            reference = pull_request_reference(self.open_pull_request)
+            reference = pull_request_reference(self.open_pull_request, self.forge_repo)
             # Work queued behind an open request is otherwise invisible, and it is precisely what will
             # supersede the branch the moment it is committed -- so it changes what merging this costs,
             # and the operator has to be able to see it without opening Weblate.
@@ -436,7 +446,7 @@ def weblate_tip(slug: str) -> str:
     return output.split()[0]
 
 
-def branch_tip(branch: str) -> str | None:
+def branch_tip(branch: str, repo: str) -> str | None:
     """The pushed branch's commit, or None if the branch genuinely does not exist.
 
     matching-refs rather than the commits endpoint: it answers an absent branch with an empty array and
@@ -445,7 +455,7 @@ def branch_tip(branch: str) -> str | None:
     token and a 5xx -- and reading any of those as "not pushed" is how a drain pushes over a branch that
     is already there.
     """
-    refs = gh_json(["api", f"repos/{FORGE_REPO}/git/matching-refs/heads/{branch}"]) or []
+    refs = gh_json(["api", f"repos/{repo}/git/matching-refs/heads/{branch}"]) or []
     # matching-refs is a prefix match, so a branch whose name prefixes another's would return both.
     exact = [r for r in refs if r["ref"] == f"refs/heads/{branch}"]
     return exact[0]["object"]["sha"] if exact else None
@@ -473,7 +483,7 @@ def non_human_identities() -> tuple[set[str], set[str]]:
     that a second consumer in another language reads it instead of keeping a copy, because a list
     maintained twice is one that disagrees with itself.
     """
-    raw = run(["gh", "api", f"repos/{FORGE_REPO}/contents/{NON_HUMAN_IDENTITIES}",
+    raw = run(["gh", "api", f"repos/{IDENTITIES_REPO}/contents/{NON_HUMAN_IDENTITIES}",
                "-H", "Accept: application/vnd.github.raw"])
     data = YAML(typ="safe").load(raw) or {}
     domains = {str(d).lower() for d in (data.get("excluded_domains") or [])}
@@ -521,7 +531,7 @@ def copilot_was_requested(response: object) -> bool:
     return any(str(r.get("login", "")).lower().startswith("copilot") for r in reviewers)
 
 
-def request_copilot_review(number: int) -> None:
+def request_copilot_review(number: int, repo: str) -> None:
     """Ask Copilot to review, unless the diff is past what it will look at.
 
     Asking is all this does. A request is accepted even when the quota that would answer it is spent,
@@ -534,7 +544,7 @@ def request_copilot_review(number: int) -> None:
     review reads exactly like one that was reviewed and found clean, and these are the pull requests
     least likely to get a human reading instead.
     """
-    size = gh_json(["pr", "view", str(number), "--repo", FORGE_REPO,
+    size = gh_json(["pr", "view", str(number), "--repo", repo,
                     "--json", "additions,deletions,changedFiles"]) or {}
     files = int(size.get("changedFiles", 0))
     lines = int(size.get("additions", 0)) + int(size.get("deletions", 0))
@@ -544,7 +554,7 @@ def request_copilot_review(number: int) -> None:
         return
     try:
         response = gh_json(["api", "-X", "POST",
-                            f"repos/{FORGE_REPO}/pulls/{number}/requested_reviewers",
+                            f"repos/{repo}/pulls/{number}/requested_reviewers",
                             "-f", f"reviewers[]={COPILOT_REVIEWER}"])
     except DrainError as error:
         # A refused review request is not worth abandoning a drain over -- the human review is the one
@@ -561,8 +571,8 @@ def request_copilot_review(number: int) -> None:
         # which is worse than not asking, because someone waits for it.
         print(f"  WARNING: the Copilot review request was accepted and then dropped. The account this "
               f"ran as has no Copilot entitlement; request it by hand on "
-              f"{pull_request_reference(number, on_stderr=True)}, or run the drain as an account that "
-              f"has one.", file=sys.stderr)
+              f"{pull_request_reference(number, repo, on_stderr=True)}, or run the drain as an account "
+              f"that has one.", file=sys.stderr)
 
 
 def forge_identity() -> str:
@@ -577,13 +587,13 @@ def forge_identity() -> str:
     return run(["gh", "api", "user", "--jq", ".login"]) or "unknown"
 
 
-def open_pull_request(branch: str) -> tuple[int, str, str] | None:
+def open_pull_request(branch: str, repo: str) -> tuple[int, str, str] | None:
     """The open pull request for this branch, the state of its checks and its review decision.
 
     All three come back in one request, so knowing whether a drained branch is actually mergeable costs
     nothing beyond what asking whether it has a pull request already costs.
     """
-    data = gh_json(["pr", "list", "--repo", FORGE_REPO, "--head", branch, "--state", "open",
+    data = gh_json(["pr", "list", "--repo", repo, "--head", branch, "--state", "open",
                     "--json", "number,statusCheckRollup,reviewDecision"])
     if not data:
         return None
@@ -641,13 +651,32 @@ def repository_components(client: Weblate) -> list[Record]:
         page = client.get(url)
         records.extend(page["results"])
         url = page.get("next")
-    mine = [r for r in records if FORGE_REPO.lower() in str(r.get("repo", "")).lower()]
+    # Every component this tool can drive, whichever repository backs it -- not just one repository's.
+    # The exclusion is the Weblate-local terminology store, which has no git backing at all.
+    mine = [r for r in records if _GITHUB_REPO.search(str(r.get("repo") or ""))]
     # Most important first, then alphabetically. Note the direction: Weblate's COMPONENT priority runs
     # the opposite way to its per-string one -- 60 is "Very high" and 140 is "Very low" -- so ascending
     # is the order the project wants these worked, and a plain descending sort would invert it. Sorted
     # here rather than in one command so every listing agrees.
     mine.sort(key=lambda r: (r.get("priority") or DEFAULT_PRIORITY, r["slug"]))
     return mine
+
+
+def forge_repo(record: Record) -> str:
+    """The owner/name backing this component, taken from Weblate rather than hard-coded here.
+
+    The same reasoning that keeps the component list out of this file applies to the repository, and
+    more sharply: a constant here is a second place to record something Weblate already knows, and it
+    fails by *omission* -- a component backed by another repository did not error, it simply never
+    appeared in any listing, so `neoipc-app` was invisible to a tool whose whole purpose is to say what
+    needs draining.
+    """
+    url = str(record.get("repo") or "")
+    match = _GITHUB_REPO.search(url)
+    if match is None:
+        raise DrainError(f"{record['slug']} is backed by {url or '(nothing)'}, which is not a repository "
+                         f"this tool knows how to drive")
+    return f"{match['owner']}/{match['name']}"
 
 
 def find_component(records: Sequence[Record], slug: str) -> Record:
@@ -669,19 +698,21 @@ def operable(client: Weblate, record: Record) -> Component:
 
 
 def read_state(client: Weblate, record: Record) -> ComponentState:
-    repo = operable(client, record).repository()
+    weblate_state = operable(client, record).repository()
     slug = record["slug"]
+    forge = forge_repo(record)
     branch = record.get("push_branch") or ""
-    pull_request = open_pull_request(branch) if branch else None
+    pull_request = open_pull_request(branch, forge) if branch else None
     return ComponentState(
         slug=slug,
+        forge_repo=forge,
         priority=record.get("priority") or DEFAULT_PRIORITY,
         push_branch=branch,
-        needs_commit=bool(repo["needs_commit"]),
-        needs_push=bool(repo["needs_push"]),
-        merge_failure=str(repo["merge_failure"] or ""),
+        needs_commit=bool(weblate_state["needs_commit"]),
+        needs_push=bool(weblate_state["needs_push"]),
+        merge_failure=str(weblate_state["merge_failure"] or ""),
         weblate_tip=weblate_tip(slug),
-        branch_tip=branch_tip(branch) if branch else None,
+        branch_tip=branch_tip(branch, forge) if branch else None,
         open_pull_request=pull_request[0] if pull_request else None,
         checks=pull_request[1] if pull_request else "",
         review=pull_request[2] if pull_request else "",
@@ -735,12 +766,12 @@ def check_outcome(node: Record) -> tuple[str, str]:
     return name, {"PENDING": "PENDING", "EXPECTED": "PENDING", "SUCCESS": "SUCCESS"}.get(state, "FAILURE")
 
 
-def wait_for_checks(branch: str) -> None:
+def wait_for_checks(branch: str, repo: str) -> None:
     """Block until every check on the branch's pull request has settled, then fail on a red one."""
     deadline = time.monotonic() + CHECK_TIMEOUT_SECONDS
     bad = {"FAILURE", "TIMED_OUT", "CANCELLED", "ACTION_REQUIRED", "STARTUP_FAILURE", "STALE"}
     while True:
-        data = gh_json(["pr", "view", "--repo", FORGE_REPO, branch, "--json", "statusCheckRollup"])
+        data = gh_json(["pr", "view", "--repo", repo, branch, "--json", "statusCheckRollup"])
         nodes = (data or {}).get("statusCheckRollup") or []
         # An empty rollup is not "everything passed" -- it is the forge not having reported anything
         # yet, or having reported nothing at all. Merging on it waives the gate silently, so it is only
@@ -798,11 +829,12 @@ def wait_for_approval(state: ComponentState) -> None:
     recreates it, which closes the very pull request that was approved. Waiting here holds the lock
     across that gap instead, so there is no gap to commit into.
     """
-    print(f"  waiting for approval on {pull_request_reference(state.open_pull_request)} — approve it "
-          f"now; the component stays locked until this returns")
+    print(f"  waiting for approval on "
+          f"{pull_request_reference(state.open_pull_request, state.forge_repo)} — approve it now; the "
+          f"component stays locked until this returns")
     deadline = time.monotonic() + APPROVAL_TIMEOUT_SECONDS
     while True:
-        pull_request = open_pull_request(state.push_branch)
+        pull_request = open_pull_request(state.push_branch, state.forge_repo)
         if pull_request is None:
             raise DrainError(f"the pull request for {state.push_branch} closed while its approval was "
                              f"outstanding; run the drain again")
@@ -843,7 +875,7 @@ def recreate_push_branch(state: ComponentState, component) -> None:
     """
     print(f"  branch {state.push_branch} is superseded ({state.branch_tip[:7]} vs "
           f"{state.weblate_tip[:7]}); recreating it")
-    run(["gh", "api", "-X", "DELETE", f"repos/{FORGE_REPO}/git/refs/heads/{state.push_branch}"])
+    run(["gh", "api", "-X", "DELETE", f"repos/{state.forge_repo}/git/refs/heads/{state.push_branch}"])
     checked(component.push(), f"push {state.push_branch}")
 
 
@@ -883,7 +915,9 @@ def command_drain(client: Weblate, args: argparse.Namespace) -> int:
     records = repository_components(client)
     record = find_component(records, args.component)
     component = operable(client, record)
-    print(f"  acting on the forge as {forge_identity()}")
+    # Which repository, not only which account: components are backed by more than one, and the account's
+    # rights are granted per repository -- so a drain that cannot push says which door it was refused at.
+    print(f"  acting on {forge_repo(record)} as {forge_identity()}")
 
     # Only the component being drained, because only its own translations can supersede its branch.
     # The components are standalone, so each holds its own checkout and nothing committed in one
@@ -916,7 +950,8 @@ def command_drain(client: Weblate, args: argparse.Namespace) -> int:
         if state.is_superseded:
             if approval_would_be_discarded(state):
                 print(f"  WARNING: "
-                      f"{pull_request_reference(state.open_pull_request, on_stderr=True)} is approved "
+                      f"{pull_request_reference(state.open_pull_request, state.forge_repo, on_stderr=True)} "
+                      f"is approved "
                       f"but superseded, so it is being replaced; that approval does not carry to its "
                       f"replacement, which this run will wait for you to approve.", file=sys.stderr)
             recreate_push_branch(state, component)
@@ -930,11 +965,11 @@ def command_drain(client: Weblate, args: argparse.Namespace) -> int:
 
         if state.open_pull_request is None:
             number = open_drain_pull_request(state)
-            print(f"  opened pull request {pull_request_reference(number)}")
-            request_copilot_review(number)
+            print(f"  opened pull request {pull_request_reference(number, state.forge_repo)}")
+            request_copilot_review(number, state.forge_repo)
             state = read_state(client, record)
 
-        wait_for_checks(state.push_branch)
+        wait_for_checks(state.push_branch, state.forge_repo)
         wait_for_approval(state)
 
         # Re-read immediately before merging rather than trusting the state gathered above. The lock
@@ -945,7 +980,7 @@ def command_drain(client: Weblate, args: argparse.Namespace) -> int:
             raise DrainError(f"{state.slug} moved while the drain waited; run the drain again")
 
         merge_drain_pull_request(state, admin=args.admin)
-        merged = run(["gh", "api", f"repos/{FORGE_REPO}/commits/main", "--jq", ".sha"])
+        merged = run(["gh", "api", f"repos/{state.forge_repo}/commits/main", "--jq", ".sha"])
         wait_until_settled(component, merged)
         print(f"{state.slug}: drained and merged as {merged[:7]}")
     return 0
@@ -959,7 +994,7 @@ def open_drain_pull_request(state: ComponentState) -> int:
         "merged; squashing also drops the co-author trailer naming Weblate's own service account, "
         "which a verbatim replay would carry as though a tool were a contributor.\n"
     )
-    url = run(["gh", "pr", "create", "--repo", FORGE_REPO, "--base", "main",
+    url = run(["gh", "pr", "create", "--repo", state.forge_repo, "--base", "main",
                "--head", state.push_branch,
                "--title", f"Translations update from Weblate ({state.slug})",
                "--body", body])
@@ -979,7 +1014,7 @@ def merge_drain_pull_request(state: ComponentState, *, admin: bool) -> None:
     identity in the range and cannot exclude its own, so replaying a commit verbatim credits a tool as a
     co-author, against the rule that a tool is not one. Composing the message removes exactly those.
     """
-    ahead = int(run(["gh", "api", f"repos/{FORGE_REPO}/compare/main...{state.push_branch}", "--jq",
+    ahead = int(run(["gh", "api", f"repos/{state.forge_repo}/compare/main...{state.push_branch}", "--jq",
                      ".ahead_by"]))
     # The single-commit property is what makes a squash patch-identical, and it is a setting on the
     # platform rather than a law -- so it is checked here rather than assumed. More than one commit
@@ -990,7 +1025,7 @@ def merge_drain_pull_request(state: ComponentState, *, admin: bool) -> None:
                          f"work into a conflict. Check the Squash add-on is set to one commit.")
 
     # run rather than gh_json: --jq on a string field emits the bare value, which is not JSON.
-    message = run(["gh", "api", f"repos/{FORGE_REPO}/commits/{state.branch_tip}", "--jq",
+    message = run(["gh", "api", f"repos/{state.forge_repo}/commits/{state.branch_tip}", "--jq",
                    ".commit.message"])
     domains, addresses = non_human_identities()
     _, _, body = message.partition("\n")
@@ -998,7 +1033,7 @@ def merge_drain_pull_request(state: ComponentState, *, admin: bool) -> None:
     # --match-head-commit makes the check-then-merge atomic at the forge. Re-reading state immediately
     # beforehand narrows the window; only this closes it, and the window is exactly long enough for a
     # translator's save to rewrite the range and turn the merge into a project-wide replay.
-    command = ["gh", "pr", "merge", str(state.open_pull_request), "--repo", FORGE_REPO,
+    command = ["gh", "pr", "merge", str(state.open_pull_request), "--repo", state.forge_repo,
                "--squash", "--delete-branch", "--match-head-commit", state.branch_tip,
                "--subject", f"Translations update from Weblate ({state.slug})",
                "--body", strip_non_human_trailers(body, domains, addresses)]
@@ -1009,11 +1044,13 @@ def merge_drain_pull_request(state: ComponentState, *, admin: bool) -> None:
     # The pipeline requires the head branch to be gone: a surviving one makes Weblate's next push
     # non-fast-forward, and with Lock on error that rejection locks the component against translators.
     # --delete-branch asks; this establishes it, because the request is unreliable for fork branches.
-    if branch_tip(state.push_branch) is not None:
-        raise DrainError(f"merged {pull_request_reference(state.open_pull_request, on_stderr=True)}, "
-                         f"but {state.push_branch} still exists. Delete it before the next drain or "
+    if branch_tip(state.push_branch, state.forge_repo) is not None:
+        raise DrainError(f"merged "
+                         f"{pull_request_reference(state.open_pull_request, state.forge_repo, on_stderr=True)}"
+                         f", but {state.push_branch} still exists. Delete it before the next drain or "
                          f"Weblate's next push will be rejected.")
-    print(f"  merged {pull_request_reference(state.open_pull_request)} (squash) and confirmed "
+    print(f"  merged {pull_request_reference(state.open_pull_request, state.forge_repo)} (squash) and "
+          f"confirmed "
           f"{state.push_branch} is gone")
 
 
