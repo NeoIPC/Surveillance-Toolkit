@@ -473,3 +473,51 @@ class TestPriorityLabel:
 
     def test_an_unknown_priority_falls_back_to_its_number(self):
         assert state(priority=42).priority_label == "42"
+
+
+class TestComponentLookup:
+    """A slug that resolves to nothing is indistinguishable from a typo unless the refusal says so."""
+
+    RECORDS = [{"slug": "neoipc-glossary"}, {"slug": "neoipc-reports"}]
+
+    def test_a_known_slug_yields_its_record(self):
+        assert sync_weblate.find_component(self.RECORDS, "neoipc-reports") is self.RECORDS[1]
+
+    def test_an_unknown_slug_names_the_ones_that_exist(self):
+        with pytest.raises(sync_weblate.DrainError) as refusal:
+            sync_weblate.find_component(self.RECORDS, "neoipc-report")
+        assert "neoipc-glossary, neoipc-reports" in str(refusal.value)
+
+
+class TestArgumentSurface:
+    """A mistyped invocation gets no diagnostic but this one, so it has to name the right thing."""
+
+    def parse(self, *argv):
+        return sync_weblate.build_parser().parse_known_args(list(argv))
+
+    def test_status_reports_on_one_component_when_given_a_slug(self):
+        args, extra = self.parse("status", "neoipc-reports")
+        assert (args.component, extra) == ("neoipc-reports", [])
+
+    def test_status_reports_on_every_component_when_given_none(self):
+        args, extra = self.parse("status")
+        assert (args.component, extra) == (None, [])
+
+    @pytest.mark.parametrize("argv", [["-?"], ["status", "-?"], ["drain", "-?"],
+                                      ["lock", "-?"], ["unlock", "-?"], ["repair", "-?"]])
+    def test_the_powershell_help_flag_works_at_every_level(self, argv, capsys):
+        # argparse installs -h/--help and cannot be given a third alias, so every parser has to opt out
+        # of that pair and put all three back -- which a subcommand added later can silently miss.
+        with pytest.raises(SystemExit) as exit:
+            sync_weblate.build_parser().parse_known_args(argv)
+        assert exit.value.code == 0
+        assert "show this help message" in capsys.readouterr().out
+
+    @pytest.mark.parametrize("name", ["status", "drain", "lock", "unlock", "repair"])
+    def test_every_subcommand_records_itself_so_a_stray_argument_names_it(self, name):
+        # argparse hands a leftover to the TOP-LEVEL parser, whose usage line lists only the subcommand
+        # names -- so the error reads as though the subcommand were the unrecognized part. main reports
+        # it against this parser instead, which a sixth subcommand added with a bare add_parser would
+        # silently opt out of.
+        args, _ = self.parse(name, "neoipc-glossary")
+        assert args.subcommand_parser.prog.endswith(f" {name}")

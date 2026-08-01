@@ -65,6 +65,7 @@ is no exit path left to run -- `unlock` is the recovery, and `status` will not t
 died is worth following with one.
 
     sync-weblate.py status
+    sync-weblate.py status neoipc-reports
     sync-weblate.py drain neoipc-glossary
     sync-weblate.py drain neoipc-glossary --merge
     sync-weblate.py lock / unlock
@@ -602,6 +603,19 @@ def repository_components(client: Weblate) -> list[Record]:
     return mine
 
 
+def find_component(records: Sequence[Record], slug: str) -> Record:
+    """The record for one slug, or a refusal naming the slugs that exist.
+
+    Naming them matters more than it looks: a component this repository does not back is
+    indistinguishable from a typo, and a Weblate slug is not derivable from the catalogue's name.
+    """
+    record = next((r for r in records if r["slug"] == slug), None)
+    if record is None:
+        raise DrainError(f"unknown component '{slug}'. This repository backs: "
+                         f"{', '.join(r['slug'] for r in records)}")
+    return record
+
+
 def operable(client: Weblate, record: Record) -> Component:
     """The modelled object for a component record, for lock, commit, push and repository operations."""
     return Component(weblate=client, **record)
@@ -729,8 +743,11 @@ def recreate_push_branch(state: ComponentState, component) -> None:
     checked(component.push(), f"push {state.push_branch}")
 
 
-def command_status(client: Weblate, _args: argparse.Namespace) -> int:
-    """Report each component's state. Read-only: it repairs nothing, by design."""
+def command_status(client: Weblate, args: argparse.Namespace) -> int:
+    """Report each component's state, or one component's. Read-only: it repairs nothing, by design."""
+    records = repository_components(client)
+    if args.component:
+        records = [find_component(records, args.component)]
     problems = 0
     # Rows arrive most-important-first from repository_components; the priority column is shown so the
     # order reads as deliberate rather than arbitrary.
@@ -739,7 +756,7 @@ def command_status(client: Weblate, _args: argparse.Namespace) -> int:
     priority_width = 5 if STYLED else 11
     priority_heading = "prio" if STYLED else "priority"
     print(f"{'component':<38}{priority_heading:<{priority_width}}{'branch':<26}{'needs'}")
-    for record in repository_components(client):
+    for record in records:
         state = read_state(client, record)
         verdict, is_problem = state.verdict
         problems += is_problem
@@ -752,10 +769,7 @@ def command_status(client: Weblate, _args: argparse.Namespace) -> int:
 def command_drain(client: Weblate, args: argparse.Namespace) -> int:
     """Take one component's translations from Weblate to a pull request, and optionally merge it."""
     records = repository_components(client)
-    record = next((r for r in records if r["slug"] == args.component), None)
-    if record is None:
-        known = ", ".join(sorted(r["slug"] for r in records))
-        raise DrainError(f"unknown component '{args.component}'. This repository backs: {known}")
+    record = find_component(records, args.component)
     component = operable(client, record)
     print(f"  acting on the forge as {forge_identity()}")
 
@@ -904,9 +918,7 @@ def command_repair(client: Weblate, args: argparse.Namespace) -> int:
     The plain 'reset' operation, which the client also exposes, discards them and is never what is
     wanted here.
     """
-    record = next((r for r in repository_components(client) if r["slug"] == args.component), None)
-    if record is None:
-        raise DrainError(f"unknown component '{args.component}'")
+    record = find_component(repository_components(client), args.component)
     if not args.yes:
         raise DrainError(f"repair rebuilds {args.component}'s checkout from main. Pass --yes to confirm.")
     # reset-keep rather than the client's reset(): the wrapped operation discards pending translations,
@@ -916,17 +928,39 @@ def command_repair(client: Weblate, args: argparse.Namespace) -> int:
     return 0
 
 
+def with_help(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
+    """Give a parser -h/--help/-?, replacing argparse's own pair.
+
+    `-?` is what every other script in scripts/ answers to, that being PowerShell's convention for
+    comment-based help. argparse cannot add a third alias to the pair it installs itself, so each
+    parser is built with add_help=False and this puts all three back. Quote it in a POSIX shell --
+    `?` is a glob character, so an unquoted -? is whatever the shell decides it matches.
+    """
+    parser.add_argument("-h", "--help", "-?", action="help", default=argparse.SUPPRESS,
+                        help="show this help message and exit")
+    return parser
+
+
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description=__doc__.split("\n", 1)[0],
-                                     formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = with_help(argparse.ArgumentParser(description=__doc__.split("\n", 1)[0],
+                                               formatter_class=argparse.RawDescriptionHelpFormatter,
+                                               add_help=False))
     sub = parser.add_subparsers(dest="command", required=True)
 
-    sub.add_parser("status",
-                   help="report each component's state; read-only, safe to run during a drain")
+    def subcommand(name: str, summary: str) -> argparse.ArgumentParser:
+        """Add a subcommand that records itself, so main can report a stray argument against it."""
+        added = with_help(sub.add_parser(name, help=summary, add_help=False))
+        added.set_defaults(subcommand_parser=added)
+        return added
+
+    status = subcommand("status",
+                        "report each component's state; read-only, safe to run during a drain")
+    status.add_argument("component", nargs="?",
+                        help="report on this component alone; omit for every component")
 
     # One component, positionally, and no --all: a drain is serial because merging one invalidates the
     # push branch of every other, so a batch switch would be an invitation to the failure this prevents.
-    drain = sub.add_parser("drain", help="drain ONE component to a pull request")
+    drain = subcommand("drain", "drain ONE component to a pull request")
     drain.add_argument("component", help="component slug, e.g. neoipc-glossary")
     drain.add_argument("--merge", action="store_true",
                        help="merge the pull request once its checks are green")
@@ -937,11 +971,11 @@ def build_parser() -> argparse.ArgumentParser:
                        help="do not lock the components; a translation saved mid-drain will then "
                             "supersede the branch and the drain will have to be repeated")
 
-    sub.add_parser("lock", help="lock every component backed by this repository")
-    sub.add_parser("unlock", help="unlock every component backed by this repository")
+    subcommand("lock", "lock every component backed by this repository")
+    subcommand("unlock", "unlock every component backed by this repository")
 
-    repair = sub.add_parser("repair", help="reset and reapply a diverged component")
-    repair.add_argument("component")
+    repair = subcommand("repair", "reset and reapply a diverged component")
+    repair.add_argument("component", help="component slug, e.g. neoipc-glossary")
     repair.add_argument("--yes", action="store_true", help="confirm the reset")
 
     return parser
@@ -953,7 +987,14 @@ def main(argv: Sequence[str] | None = None) -> int:
     # That leaves an operator unable to tell a working run from a hung one, which is the state in which
     # people kill runs that were fine and nurse runs that were not.
     sys.stdout.reconfigure(line_buffering=True)
-    args = build_parser().parse_args(argv)
+    # parse_known_args, so a stray argument is reported against the subcommand that was actually named.
+    # argparse hands a leftover back to the top-level parser, whose usage line lists only the subcommand
+    # names -- so `status neoipc-reports` failed under a usage line that never mentions status, reading
+    # as though the subcommand itself were the unrecognized part. Anything left over is still an error;
+    # only which parser reports it changes.
+    args, unrecognized = build_parser().parse_known_args(argv)
+    if unrecognized:
+        args.subcommand_parser.error(f"unrecognized arguments: {' '.join(unrecognized)}")
     commands = {
         "status": command_status,
         "drain": command_drain,
