@@ -48,6 +48,7 @@ def state(**overrides) -> sync_weblate.ComponentState:
         branch_tip=None,
         open_pull_request=None,
         checks="",
+        review="",
     )
     return sync_weblate.ComponentState(**{**defaults, **overrides})
 
@@ -144,11 +145,42 @@ class TestVerdict:
         assert "run drain" in verdict
         assert not problem
 
-    def test_a_ready_pull_request_awaits_a_merge(self):
+    def test_an_approved_pull_request_awaits_a_merge(self):
         verdict, problem = state(branch_tip="a" * 40, open_pull_request=129,
-                                 checks=sync_weblate.CHECKS_GREEN).verdict
+                                 checks=sync_weblate.CHECKS_GREEN, review="APPROVED").verdict
         assert verdict == "awaiting merge — #129"
         assert not problem
+
+    def test_green_checks_without_a_review_await_the_review(self):
+        # The case this repository is always in: checks pass in minutes, the review is the real gate,
+        # and calling it "awaiting merge" says it is the operator's turn when it is the reviewer's.
+        verdict, problem = state(branch_tip="a" * 40, open_pull_request=130,
+                                 checks=sync_weblate.CHECKS_GREEN, review="REVIEW_REQUIRED").verdict
+        assert verdict == "awaiting review — #130"
+        assert not problem
+
+    def test_requested_changes_are_a_defect(self):
+        verdict, problem = state(branch_tip="a" * 40, open_pull_request=130,
+                                 checks=sync_weblate.CHECKS_GREEN,
+                                 review="CHANGES_REQUESTED").verdict
+        assert "CHANGES REQUESTED" in verdict
+        assert problem
+
+    def test_no_review_requirement_means_nothing_is_awaited(self):
+        # A null decision is the forge saying it asks for no review, not that one is outstanding.
+        verdict, problem = state(branch_tip="a" * 40, open_pull_request=129,
+                                 checks=sync_weblate.CHECKS_GREEN, review="").verdict
+        assert verdict == "awaiting merge — #129"
+        assert not problem
+
+    def test_failing_checks_outrank_an_outstanding_review(self):
+        # A red check blocks whoever approves, and reviewing a branch whose build is broken is work
+        # done twice, so the check is the one to report.
+        verdict, problem = state(branch_tip="a" * 40, open_pull_request=130,
+                                 checks=sync_weblate.CHECKS_FAILED,
+                                 review="REVIEW_REQUIRED").verdict
+        assert "CHECKS FAILED" in verdict
+        assert problem
 
     def test_a_pull_request_whose_checks_are_running_does_not_await_a_merge(self):
         # It cannot be merged yet, so calling it "awaiting merge" invites an action that would fail and

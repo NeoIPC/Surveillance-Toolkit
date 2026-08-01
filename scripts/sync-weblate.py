@@ -133,14 +133,22 @@ _CHECK_DISPLAY = {
 # one either side of the middle, and nothing at all for medium. Matching it means the two views agree at
 # a glance instead of having to be translated between. Medium is deliberately blank rather than a dash --
 # it is the default, and marking the default draws the eye to the rows that least need it.
-# What an open pull request needs next, by the state of its checks: the phrase, its colour, and whether
-# it is a defect. A request whose checks failed or never reported cannot be merged and is nobody's turn
-# until someone looks, so both count.
-_PULL_REQUEST_VERDICT = {
-    CHECKS_GREEN: ("awaiting merge", "32", False),
+# What an open pull request needs while its checks are unfinished or unhappy. Checks are consulted
+# before the review because a red one blocks regardless of who has approved, and reviewing a branch
+# whose build is broken is work done twice.
+_CHECK_VERDICT = {
     CHECKS_RUNNING: ("awaiting checks", "33", False),
     CHECKS_FAILED: ("CHECKS FAILED", "31", True),
     CHECKS_NONE: ("no checks reported", "31", True),
+}
+
+# And what it needs once they are green, by the forge's own review decision. A null decision means the
+# repository asks for no review, so there is nothing left to wait for.
+_REVIEW_VERDICT = {
+    "APPROVED": ("awaiting merge", "32", False),
+    "REVIEW_REQUIRED": ("awaiting review", "36", False),
+    "CHANGES_REQUESTED": ("CHANGES REQUESTED", "31", True),
+    "": ("awaiting merge", "32", False),
 }
 
 _PRIORITY_DISPLAY = {
@@ -254,6 +262,7 @@ class ComponentState:
     branch_tip: str | None
     open_pull_request: int | None
     checks: str
+    review: str
 
     @property
     def priority_label(self) -> str:
@@ -305,10 +314,14 @@ class ComponentState:
         if self.is_stranded:
             return styled("STRANDED — pushed with no pull request; run drain", "31"), True
         if self.open_pull_request is not None:
-            # What a pull request needs is decided by its checks, not by its existence. Saying
-            # "awaiting merge" while they are still running invites a merge that cannot happen yet and
-            # describes a state nobody can act on; naming the check state says whose turn it is.
-            phrase, colour, problem = _PULL_REQUEST_VERDICT[self.checks]
+            # What a pull request needs is decided by its checks and its review, not by its existence.
+            # Saying "awaiting merge" while either is outstanding invites a merge that cannot happen and
+            # describes a state nobody can act on; naming the blocking one says whose turn it is.
+            if self.checks in _CHECK_VERDICT:
+                phrase, colour, problem = _CHECK_VERDICT[self.checks]
+            else:
+                phrase, colour, problem = _REVIEW_VERDICT.get(
+                    self.review, (f"review: {self.review}", "33", False))
             number = self.open_pull_request
             reference = linked(f"#{number}", f"https://github.com/{FORGE_REPO}/pull/{number}")
             # The icon repeats the phrase, which is worth it while it can be scanned and redundant once
@@ -389,6 +402,40 @@ def branch_tip(branch: str) -> str | None:
     return exact[0]["object"]["sha"] if exact else None
 
 
+COPILOT_REVIEWER = "copilot-pull-request-reviewer[bot]"
+# Copilot silently declines to review a pull request past either of these, and no exclusion mechanism
+# reduces the count -- not .gitattributes, not linguist-generated, not the documented exclusion list.
+# A translation drain routinely exceeds both, so the request is skipped rather than spent.
+COPILOT_MAX_FILES = 300
+COPILOT_MAX_LINES = 20_000
+
+
+def request_copilot_review(number: int) -> None:
+    """Ask Copilot to review, unless the diff is past what it will look at.
+
+    Skipping is reported rather than silent. A pull request nobody mentioned was too large to review
+    reads exactly like one that was reviewed and found clean, and these are the pull requests least
+    likely to get a human reading instead.
+    """
+    size = gh_json(["pr", "view", str(number), "--repo", FORGE_REPO,
+                    "--json", "additions,deletions,changedFiles"]) or {}
+    files = int(size.get("changedFiles", 0))
+    lines = int(size.get("additions", 0)) + int(size.get("deletions", 0))
+    if files >= COPILOT_MAX_FILES or lines >= COPILOT_MAX_LINES:
+        print(f"  no Copilot review requested: {files} files / {lines} lines is past its limit of "
+              f"{COPILOT_MAX_FILES} / {COPILOT_MAX_LINES}, so it would decline")
+        return
+    try:
+        run(["gh", "api", "--silent", "-X", "POST",
+             f"repos/{FORGE_REPO}/pulls/{number}/requested_reviewers",
+             "-f", f"reviewers[]={COPILOT_REVIEWER}"])
+        print("  requested a Copilot review")
+    except DrainError as error:
+        # A refused review request is not worth abandoning a drain over -- the quota runs out, and the
+        # human review is the one branch protection actually requires.
+        print(f"  WARNING: could not request a Copilot review: {error}", file=sys.stderr)
+
+
 def forge_identity() -> str:
     """The account the forge calls are authenticated as.
 
@@ -401,14 +448,14 @@ def forge_identity() -> str:
     return run(["gh", "api", "user", "--jq", ".login"]) or "unknown"
 
 
-def open_pull_request(branch: str) -> tuple[int, str] | None:
-    """The open pull request for this branch and the state of its checks, or None if there is none.
+def open_pull_request(branch: str) -> tuple[int, str, str] | None:
+    """The open pull request for this branch, the state of its checks and its review decision.
 
-    The rollup comes back in the same request as the number, so knowing whether a drained branch is
-    actually mergeable costs nothing beyond what asking whether it has a pull request already costs.
+    All three come back in one request, so knowing whether a drained branch is actually mergeable costs
+    nothing beyond what asking whether it has a pull request already costs.
     """
     data = gh_json(["pr", "list", "--repo", FORGE_REPO, "--head", branch, "--state", "open",
-                    "--json", "number,statusCheckRollup"])
+                    "--json", "number,statusCheckRollup,reviewDecision"])
     if not data:
         return None
     nodes = data[0].get("statusCheckRollup") or []
@@ -421,7 +468,8 @@ def open_pull_request(branch: str) -> tuple[int, str] | None:
         checks = CHECKS_FAILED
     else:
         checks = CHECKS_GREEN
-    return data[0]["number"], checks
+    # A null decision means the repository requires no review, not that one is outstanding.
+    return data[0]["number"], checks, data[0].get("reviewDecision") or ""
 
 
 def checked(result: object, what: str) -> None:
@@ -494,6 +542,7 @@ def read_state(client: Weblate, record: Record) -> ComponentState:
         branch_tip=branch_tip(branch) if branch else None,
         open_pull_request=pull_request[0] if pull_request else None,
         checks=pull_request[1] if pull_request else "",
+        review=pull_request[2] if pull_request else "",
     )
 
 
@@ -667,6 +716,7 @@ def command_drain(client: Weblate, args: argparse.Namespace) -> int:
         if state.open_pull_request is None:
             number = open_drain_pull_request(state)
             print(f"  opened pull request #{number}")
+            request_copilot_review(number)
             state = read_state(client, record)
 
         wait_for_checks(state.push_branch)
