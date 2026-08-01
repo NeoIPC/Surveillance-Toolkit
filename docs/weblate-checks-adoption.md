@@ -152,15 +152,17 @@ Turns *Does not follow glossary* on, which is what makes the terminology decisio
 metadata and the app. **Not** on infectious agents: those 4,107 entries are nomenclature, so a
 terminology check has nothing there to enforce and any match would be coincidental.
 
-Measured at enablement: **zero findings on all four**. That is a real pass rather than an inert check —
-German carries 51 of the glossary's 52 terms and 489 translated report units, so there was ample for it
-to fire on.
+Measured at enablement: **zero findings on all four**, and again once German's glossary was completed the
+same day. That is a real pass rather than an inert check — German holds the whole glossary against
+several hundred translated report units, so there was ample for it to fire on.
 
 **The dependency worth knowing: the check can only bite in a language once that language's glossary is
-translated.** Spanish has 3 of 52 terms and Italian 2, so almost nothing is enforceable in either yet,
-however much report prose they accumulate. This is what makes the glossary component's *Very high*
-priority operational rather than decorative — translating those 52 terms first is what converts
-terminology agreement into enforcement across every other catalogue, and it is 52 strings.
+translated.** Spanish and Italian carry a handful of terms between them, so almost nothing is enforceable
+in either yet, however much report prose they accumulate. This is what makes the glossary component's
+*Very high* priority operational rather than decorative — translating that component first is what
+converts terminology agreement into enforcement across every other catalogue, and it is a few dozen
+strings rather than a project. Read the component's own statistics for where each language stands; these
+figures move whenever anyone translates a term.
 
 ### `discard:<flag>` — the escape hatch
 
