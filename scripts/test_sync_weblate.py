@@ -488,6 +488,34 @@ class TestStatusIsReadOnly:
         assert found, "the detector found no mutation in drain, so it cannot vouch for status"
 
 
+class TestForgeJsonReads:
+    """A parse that only runs on a rare path fails where nobody is positioned to recover from it."""
+
+    def test_no_json_read_narrows_its_output_with_jq(self):
+        # The client prints a selected string bare, so `--jq .commit.message` returns text that
+        # json.loads rejects. It reached the merge step -- past the checks, past the approval -- before
+        # anything ran it, which is why this is asserted structurally rather than left to a live run.
+        source = Path(sync_weblate.__file__).read_text(encoding="utf-8")
+        offenders = [
+            ast.unparse(node)
+            for node in ast.walk(ast.parse(source))
+            if isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Name) and node.func.id == "gh_json"
+            and "--jq" in ast.dump(node)
+        ]
+        assert not offenders, f"gh_json cannot parse a --jq selection: {offenders}"
+
+    def test_the_check_would_notice_one(self):
+        # Guards the guard: the detector must be capable of finding the pattern it vouches for.
+        found = [
+            node for node in ast.walk(ast.parse('gh_json(["api", "x", "--jq", ".a"])'))
+            if isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Name) and node.func.id == "gh_json"
+            and "--jq" in ast.dump(node)
+        ]
+        assert found, "the detector cannot see a --jq selection, so it vouches for nothing"
+
+
 class TestPriorityLabel:
     """The component scale is inverted relative to the per-string one, so the number reads backwards."""
 

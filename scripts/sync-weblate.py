@@ -408,7 +408,14 @@ def run(command: Sequence[str], *, timeout: int = SUBPROCESS_TIMEOUT_SECONDS) ->
 
 
 def gh_json(args: Sequence[str]) -> object:
-    """Call the forge CLI and parse its JSON. Any failure raises; absence is a caller's question."""
+    """Call the forge CLI and parse its JSON. Any failure raises; absence is a caller's question.
+
+    Never pass --jq. It narrows the output to whatever the filter selects, and the client prints a
+    selected string bare -- so a commit message comes back unquoted and parsing it raises, on a path
+    that can go months without running. Read a scalar with run() instead, which wants text anyway. A
+    test enforces this, because the failure surfaces at the worst possible moment otherwise: this cost a
+    drain its merge, at the step after the approval had already been given.
+    """
     output = run(["gh", *args])
     return json.loads(output) if output else None
 
@@ -977,8 +984,8 @@ def merge_drain_pull_request(state: ComponentState, *, admin: bool) -> None:
     identity in the range and cannot exclude its own, so replaying a commit verbatim credits a tool as a
     co-author, against the rule that a tool is not one. Composing the message removes exactly those.
     """
-    ahead = gh_json(["api", f"repos/{FORGE_REPO}/compare/main...{state.push_branch}", "--jq",
-                     ".ahead_by"])
+    ahead = int(run(["gh", "api", f"repos/{FORGE_REPO}/compare/main...{state.push_branch}", "--jq",
+                     ".ahead_by"]))
     # The single-commit property is what makes a squash patch-identical, and it is a setting on the
     # platform rather than a law -- so it is checked here rather than assumed. More than one commit
     # means the setting changed, and squashing then reproduces the failure this rule used to prevent.
@@ -987,8 +994,9 @@ def merge_drain_pull_request(state: ComponentState, *, admin: bool) -> None:
                          f"them into a patch matching none of them, and the component would replay its "
                          f"work into a conflict. Check the Squash add-on is set to one commit.")
 
-    message = str(gh_json(["api", f"repos/{FORGE_REPO}/commits/{state.branch_tip}", "--jq",
-                           ".commit.message"]) or "")
+    # run rather than gh_json: --jq on a string field emits the bare value, which is not JSON.
+    message = run(["gh", "api", f"repos/{FORGE_REPO}/commits/{state.branch_tip}", "--jq",
+                   ".commit.message"])
     domains, addresses = non_human_identities()
     _, _, body = message.partition("\n")
 
