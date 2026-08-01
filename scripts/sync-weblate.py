@@ -105,6 +105,10 @@ GIT_EXPORT = "https://hosted.weblate.org/git/{project}/{slug}/"
 # ask. A drain is interactive and rare, so a slow poll costs nothing and a rate limit costs a retry.
 CHECK_TIMEOUT_SECONDS = 900
 CHECK_POLL_SECONDS = 20
+# How long to wait for a person to approve the pull request the drain opened. The component stays locked
+# for this, so the timeout is what bounds how long a drain nobody is watching can block its translators;
+# expiring fails the drain, which releases the lock on the way out.
+APPROVAL_TIMEOUT_SECONDS = 3600
 # After a merge, Weblate has to pull the new main and rebase whatever is still pending before the next
 # component can be drained. Nothing signals that, so it is polled.
 SETTLE_TIMEOUT_SECONDS = 300
@@ -144,6 +148,12 @@ _CHECK_VERDICT = {
     CHECKS_FAILED: ("CHECKS FAILED", "31", True),
     CHECKS_NONE: ("no checks reported", "31", True),
 }
+
+# What a review decision means to the merge gate: nothing left to wait for, a reviewer saying no, or a
+# reviewer who has not answered yet.
+REVIEW_SETTLED = "SETTLED"
+REVIEW_REFUSED = "REFUSED"
+REVIEW_WAITING = "WAITING"
 
 # And what it needs once they are green, by the forge's own review decision. A null decision means the
 # repository asks for no review, so there is nothing left to wait for.
@@ -353,10 +363,14 @@ class ComponentState:
                 phrase, colour, problem = _REVIEW_VERDICT.get(
                     self.review, (f"review: {self.review}", "33", False))
             reference = pull_request_reference(self.open_pull_request)
+            # Work queued behind an open request is otherwise invisible, and it is precisely what will
+            # supersede the branch the moment it is committed -- so it changes what merging this costs,
+            # and the operator has to be able to see it without opening Weblate.
+            pending = " + translations waiting" if self.has_pending_work else ""
             # The icon repeats the phrase, which is worth it while it can be scanned and redundant once
             # it has degraded to words.
             icon = f" {render_checks(self.checks)}" if STYLED else ""
-            return f"{styled(phrase, colour)} — {reference}{icon}", problem
+            return f"{styled(phrase, colour)} — {reference}{pending}{icon}", problem
         if self.has_pending_work:
             return "translations waiting — run drain", False
         return styled("idle", "2"), False
@@ -742,6 +756,63 @@ def wait_for_checks(branch: str) -> None:
         time.sleep(CHECK_POLL_SECONDS)
 
 
+def approval_would_be_discarded(state: ComponentState) -> bool:
+    """Whether recreating this branch would throw away an approval someone has already given.
+
+    Recreating deletes the head branch, which closes its pull request -- so an approval given before a
+    translation landed is spent on a request that no longer exists. Worth detecting here rather than
+    letting the forge refuse the merge later, because the forge's refusal talks about branch protection
+    and says nothing about the approval having gone stale.
+    """
+    return (state.is_superseded
+            and state.open_pull_request is not None
+            and state.review == "APPROVED")
+
+
+def approval_outcome(review: str) -> str:
+    """Classify a forge review decision for the merge gate.
+
+    An empty decision means the repository requires no review at all, which is settled rather than
+    outstanding: reading it as outstanding would hang every drain against a repository that has no such
+    protection, and reading a genuinely outstanding one as settled would merge past a reviewer.
+    """
+    if review == "CHANGES_REQUESTED":
+        return REVIEW_REFUSED
+    if review in ("APPROVED", ""):
+        return REVIEW_SETTLED
+    return REVIEW_WAITING
+
+
+def wait_for_approval(state: ComponentState) -> None:
+    """Block until the pull request is approved, so the merge follows the approval by seconds.
+
+    This is what keeps an approval spendable. Approving in one invocation and merging in a later one
+    puts a person's attention span between the two, and anything committed to the component in that gap
+    re-squashes the un-merged range -- after which the merging run finds the branch superseded and
+    recreates it, which closes the very pull request that was approved. Waiting here holds the lock
+    across that gap instead, so there is no gap to commit into.
+    """
+    print(f"  waiting for approval on {pull_request_reference(state.open_pull_request)} — approve it "
+          f"now; the component stays locked until this returns")
+    deadline = time.monotonic() + APPROVAL_TIMEOUT_SECONDS
+    while True:
+        pull_request = open_pull_request(state.push_branch)
+        if pull_request is None:
+            raise DrainError(f"the pull request for {state.push_branch} closed while its approval was "
+                             f"outstanding; run the drain again")
+        outcome = approval_outcome(pull_request[2])
+        if outcome == REVIEW_REFUSED:
+            raise DrainError(f"changes were requested on {state.push_branch}'s pull request. Address "
+                             f"them in Weblate -- never by editing a catalogue -- and drain again.")
+        if outcome == REVIEW_SETTLED:
+            print("  approved" if pull_request[2] else "  no review required by this repository")
+            return
+        if time.monotonic() > deadline:
+            raise DrainError(f"no approval within {APPROVAL_TIMEOUT_SECONDS}s. Nothing was merged and "
+                             f"the component is unlocked; re-run the drain when you can approve it.")
+        time.sleep(CHECK_POLL_SECONDS)
+
+
 def wait_until_settled(component, merged_tip: str) -> None:
     """Wait for Weblate to pull the merged main, so the next component starts from a settled instance."""
     deadline = time.monotonic() + SETTLE_TIMEOUT_SECONDS
@@ -826,6 +897,17 @@ def command_drain(client: Weblate, args: argparse.Namespace) -> int:
                                  f"it accepted; refusing to drain a partial state")
 
         if state.is_superseded:
+            if approval_would_be_discarded(state):
+                # Both destinations below are stderr: the refusal reaches it through main's handler.
+                reference = pull_request_reference(state.open_pull_request, on_stderr=True)
+                if not args.merge:
+                    raise DrainError(
+                        f"{reference} is approved, but a translation has landed since and its branch is "
+                        f"superseded. Recreating it closes that request and the approval goes with it. "
+                        f"Re-run with --merge, which opens the replacement and waits for you to approve "
+                        f"that one, so no approval is discarded unnoticed.")
+                print(f"  WARNING: {reference} is approved but superseded, so it is being replaced; "
+                      f"that approval does not carry to its replacement.", file=sys.stderr)
             recreate_push_branch(state, component)
         elif not state.branch_exists:
             print(f"  pushing {state.push_branch}")
@@ -843,16 +925,22 @@ def command_drain(client: Weblate, args: argparse.Namespace) -> int:
 
         wait_for_checks(state.push_branch)
 
-        # Re-read immediately before merging rather than trusting the state gathered above: a
-        # translation saved while the checks ran would have rewritten the range under us.
+        if not args.merge:
+            state = read_state(client, record)
+            print(f"{state.slug}: pull request {pull_request_reference(state.open_pull_request)} is "
+                  f"ready, and the component is about to be unlocked. Approving it now and merging in a "
+                  f"later run risks losing that approval to a translation landing in between; running "
+                  f"again with --merge closes that window by waiting for the approval under the lock.")
+            return 0
+
+        wait_for_approval(state)
+
+        # Re-read immediately before merging rather than trusting the state gathered above. The lock
+        # covers a translation being saved, but nothing covers main moving under us -- a pull request
+        # touching no catalogue at all rebases every push branch in the project.
         state = read_state(client, record)
         if state.is_superseded:
-            raise DrainError(f"{state.slug} moved while its checks ran; run the drain again")
-
-        if not args.merge:
-            print(f"{state.slug}: pull request {pull_request_reference(state.open_pull_request)} is "
-                  f"ready. Re-run with --merge once you have approved it.")
-            return 0
+            raise DrainError(f"{state.slug} moved while the drain waited; run the drain again")
 
         merge_drain_pull_request(state, admin=args.admin)
         merged = run(["gh", "api", f"repos/{FORGE_REPO}/commits/main", "--jq", ".sha"])

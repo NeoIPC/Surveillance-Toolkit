@@ -182,6 +182,18 @@ class TestVerdict:
         assert "CHECKS FAILED" in verdict
         assert problem
 
+    def test_work_queued_behind_an_open_request_is_visible(self):
+        # It was not: the row reported the request's state and said nothing about translations waiting,
+        # so the thing that supersedes the branch the moment it is committed was invisible.
+        phrase, _ = state(branch_tip="a" * 40, open_pull_request=133, review="APPROVED",
+                          checks=sync_weblate.CHECKS_GREEN, needs_commit=True).verdict
+        assert "translations waiting" in phrase
+
+    def test_an_open_request_with_nothing_queued_says_nothing_extra(self):
+        phrase, _ = state(branch_tip="a" * 40, open_pull_request=133, review="APPROVED",
+                          checks=sync_weblate.CHECKS_GREEN).verdict
+        assert "translations waiting" not in phrase
+
     def test_a_pull_request_whose_checks_are_running_does_not_await_a_merge(self):
         # It cannot be merged yet, so calling it "awaiting merge" invites an action that would fail and
         # describes a state nobody can act on.
@@ -486,6 +498,43 @@ class TestPriorityLabel:
 
     def test_an_unknown_priority_falls_back_to_its_number(self):
         assert state(priority=42).priority_label == "42"
+
+
+class TestApprovalGate:
+    """What the merge waits for, and what it refuses to spend without saying so."""
+
+    @pytest.mark.parametrize(("review", "outcome"), [
+        ("APPROVED", sync_weblate.REVIEW_SETTLED),
+        ("", sync_weblate.REVIEW_SETTLED),
+        ("REVIEW_REQUIRED", sync_weblate.REVIEW_WAITING),
+        ("CHANGES_REQUESTED", sync_weblate.REVIEW_REFUSED),
+    ])
+    def test_a_review_decision_is_classified(self, review, outcome):
+        assert sync_weblate.approval_outcome(review) == outcome
+
+    def test_an_unknown_decision_waits_rather_than_merging(self):
+        # The safe direction: a decision this does not recognize might be a reviewer saying no, and
+        # waiting costs a timeout while guessing "settled" merges past them.
+        assert sync_weblate.approval_outcome("SOMETHING_NEW") == sync_weblate.REVIEW_WAITING
+
+    def test_no_review_requirement_does_not_hang_the_drain(self):
+        # A repository without the protection returns a null decision, which arrives here as "". Reading
+        # it as outstanding would wait out the full timeout on every such drain and merge nothing.
+        assert sync_weblate.approval_outcome("") == sync_weblate.REVIEW_SETTLED
+
+    def test_replacing_an_approved_superseded_branch_is_flagged(self):
+        assert sync_weblate.approval_would_be_discarded(
+            state(branch_tip="b" * 40, open_pull_request=133, review="APPROVED"))
+
+    def test_an_approved_branch_that_is_current_loses_nothing(self):
+        assert not sync_weblate.approval_would_be_discarded(
+            state(branch_tip="a" * 40, open_pull_request=133, review="APPROVED"))
+
+    def test_a_superseded_branch_nobody_approved_loses_nothing(self):
+        # Recreating this is routine; warning about it would train the operator to ignore the warning
+        # that matters.
+        assert not sync_weblate.approval_would_be_discarded(
+            state(branch_tip="b" * 40, open_pull_request=133, review="REVIEW_REQUIRED"))
 
 
 class TestComponentLookup:
