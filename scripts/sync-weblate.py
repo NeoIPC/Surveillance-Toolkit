@@ -32,6 +32,16 @@ rather than as hermetic.
 Credentials come from the wlc configuration or the environment. There is deliberately no --api-key
 option: a key passed on a command line lands in the shell history, the process list and any transcript.
 
+Forge calls authenticate as whoever `gh` is logged in as, which the drain prints before it writes
+anything. Setting GH_TOKEN for the invocation runs them as a different account, and doing so is what
+makes the review requirement satisfiable: a repository that requires an approving review will not let an
+account approve a pull request it opened itself, so a drain run as the maintainer can only be merged by
+overriding branch protection, while one opened by a separate automation account can be approved
+normally. Scope the variable to the command rather than exporting it, or every later `gh` in that shell
+silently acts as the bot too.
+
+    GH_TOKEN=<bot token> sync-weblate.py drain neoipc-glossary
+
 `status` is read-only and may be run at any time, including beside a running drain: nothing on its call
 path writes, which is asserted mechanically by the companion test rather than left to inspection. Two
 things to expect if you do. It reports whatever is true at that instant, so mid-drain it may show a
@@ -356,6 +366,18 @@ def branch_tip(branch: str) -> str | None:
     return exact[0]["object"]["sha"] if exact else None
 
 
+def forge_identity() -> str:
+    """The account the forge calls are authenticated as.
+
+    Worth printing before anything is written, because it is invisible otherwise until it shows up as
+    the author of a pull request. It also decides whether a merge needs the administrator override: a
+    repository requiring an approving review will not let an account approve what it opened itself, so
+    a drain run as the maintainer must override and one run as a separate automation account need not.
+    """
+    # run rather than gh_json: --jq on a string field emits the bare value, which is not JSON.
+    return run(["gh", "api", "user", "--jq", ".login"]) or "unknown"
+
+
 def open_pull_request(branch: str) -> tuple[int, str] | None:
     """The open pull request for this branch and the state of its checks, or None if there is none.
 
@@ -582,6 +604,7 @@ def command_drain(client: Weblate, args: argparse.Namespace) -> int:
         known = ", ".join(sorted(r["slug"] for r in records))
         raise DrainError(f"unknown component '{args.component}'. This repository backs: {known}")
     component = operable(client, record)
+    print(f"  acting on the forge as {forge_identity()}")
 
     # Every component is locked, not just the one being drained: a translation saved anywhere in the
     # project reaches main through this merge and would supersede the branch mid-flight.
