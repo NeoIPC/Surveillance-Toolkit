@@ -1,0 +1,28 @@
+# Chrome for the generated data collection sheets — the words a form needs that are not field labels.
+#
+# Every label on a sheet comes from the canonical metadata (dataElements' formName, options' name,
+# programStageSections' name) and is translated in po/metadata.<lang>.po. These are what is left: the
+# words the FORM says rather than the words the DATA MODEL says. They live here because a sheet cannot be
+# assembled without them and there is nowhere in the metadata they belong — a checkbox's "Yes" is not a
+# property of any data element.
+#
+# Keep this list short. A string that describes a field belongs in the metadata, not here; the test is
+# whether it would still be needed if the sheet were a different shape.
+
+# The two labels on a yes/no checkbox pair.
+boolean_yes: "Yes"
+boolean_no: "No"
+
+# Shown against a field the protocol requires. Kept as a word rather than an asterisk so that it survives
+# being read aloud, and so that a translator can choose a form that fits the language.
+required: "required"
+
+# No page-number string, deliberately: a sheet is always ONE page. It is filled in at a cot side, and a
+# form that runs onto a second sheet loses half of itself. A stage whose fields will not fit gets a denser
+# layout; the generator refuses to spill onto another page rather than numbering the pieces.
+
+# Identifying header, repeated on every sheet so a loose page can be put back with the right patient.
+# Deliberately NOT the NeoIPC-ID: these sheets stay in the hospital and carry local identifiers, which is
+# exactly why the protocol says the patient ID and name must never be submitted.
+patient_identifier: "Patient ID"
+patient_name: "Patient name"
