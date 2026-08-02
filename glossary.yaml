@@ -30,14 +30,23 @@
 # be read as part of this header and never reach translators.
 #
 # Naming convention:
-#   base key    = AMA canonical (lowercase)
-#   key_sc      = Sentence case (first word capitalized)
-#   key_tc      = Title case (all major words capitalized)
+#   base key    = AMA canonical (lowercase). ONE key per term — there are no casing variants here.
 #   key_plural  = Plural form
-#   Suffixes can combine in principle, but NOT key_plural_tc / key_plural_sc — the generator refuses
-#     them, because pairing cannot keep a cased plural apart from the uncased one. See Plurals above.
 #   Abbreviations (CVC, HAP, INV, NEC, SSI) are always uppercase — no variants.
 #   Proper nouns (NeoIPC Surveillance) keep their canonical casing.
+#
+# CASING IS NOT STORED HERE. `key_sc` is derived at render time from the base term, and `key_tc` no
+# longer exists at all. Casing is a rendering concern — the renderer knows whether it is starting a
+# label or a sentence; the translator supplies the term. Three things were wrong with storing it:
+# translators translated the same word twice; every cased variant produced a second, identical hit in
+# every other component's glossary sidebar, diluting the terminology decisions it exists to carry; and
+# the casing axis multiplied against the plural axis, so one term needing six Arabic forms would have
+# needed eighteen keys. Title case was carried for five terms and rendered by nothing at all.
+#
+# The rules live in reports/sentence-case.yaml, which is repository-owned and not translatable. A
+# language with no rule declared there is a build failure rather than a guess, because a wrong capital
+# in a published report is silent. That file is also where a term whose sentence-case form no rule can
+# produce gets an explicit override.
 #
 # Available flags (see https://docs.weblate.org/en/latest/admin/checks.html):
 #   read-only          — non-editable, translation locked
@@ -47,19 +56,16 @@
 #   placeholders:...   — expected placeholder strings
 #   regex:PATTERN      — translation must match regex
 #
-# Variant grouping is handled by the Weblate component's variant_regex
-# setting: _(tc|sc|plural|plural_tc|plural_sc)$
+# Variant grouping is handled by the Weblate component's variant_regex setting, which still needs to
+# cover the plural suffix. It groups variants in THIS component's own translation view and does not
+# reach the glossary sidebar other components show, which is a separate lookup — established by
+# observation rather than inferred, back when a protocol string containing "Kangaroo care" produced two
+# sidebar hits carrying the same German while variant_regex was set correctly.
 #
-# That grouping applies to this component's own translation view and NOT to the glossary sidebar in
-# other components, which is a separate lookup — confirmed by observation rather than inferred: a
-# protocol string containing "Kangaroo care" shows both `kangaroo_care` and `kangaroo_care_sc` as
-# separate glossary hits with the same German rendering, while variant_regex is correctly set.
-#
-# It is not a corner case: 16 of the 52 keys here are casing variants whose base key is also present,
-# so a third of this file produces a doubled sidebar entry wherever it matches. The duplication is
-# noise rather than a defect — both hits say the same thing — but it dilutes the sidebar that carries
-# the terminology decisions. What to do about it, if anything, is part of the casing-and-plural
-# convention rather than a property of this file.
+# That doubling is what retiring the casing variants removed: sixteen of the fifty-two keys here were
+# casing variants of a key that was also present, so a third of the file duplicated itself in the
+# sidebar wherever it matched. Neither hit was wrong — both said the same thing — which is precisely
+# why it was worth removing rather than fixing: it cost translator attention and taught nothing.
 
 # Resistance category: third-generation cephalosporin resistance.
 # flags: terminology
@@ -69,9 +75,7 @@
 # flags: terminology
 access: "Access"
 admission: admission
-admission_sc: Admission
 antibiotics: antibiotics
-antibiotics_sc: Antibiotics
 # AWaRe is a WHO acronym (Access, Watch, Reserve) — not translatable
 # flags: read-only, terminology
 aware: "AWaRe"
@@ -104,7 +108,6 @@ h2020_funding_statement: >-
 # flags: terminology
 hap: HAP
 human_milk: "human milk"
-human_milk_sc: "Human milk"
 # International Classification of Health Interventions, the WHO classification the surgical procedure
 # codes come from.
 # flags: terminology
@@ -113,7 +116,6 @@ ichi: "ICHI"
 # flags: terminology
 inv: INV
 kangaroo_care: "kangaroo care"
-kangaroo_care_sc: "Kangaroo care"
 # Laboratory-confirmed bloodstream infection.
 # flags: terminology
 lcbsi: "LCBSI"
@@ -127,18 +129,13 @@ mrsa: "MRSA"
 # flags: ignore-same, terminology
 nec: NEC
 necrotizing_enterocolitis: "necrotizing enterocolitis"
-necrotizing_enterocolitis_sc: "Necrotizing enterocolitis"
-necrotizing_enterocolitis_tc: "Necrotizing Enterocolitis"
 # flags: ignore-same
 neoipc_surveillance: "NeoIPC Surveillance"
 # Non-invasive Ventilation.
 # flags: terminology
 niv: NIV
 pneumonia: pneumonia
-pneumonia_sc: Pneumonia
 primary_sepsis_bsi: "primary sepsis/BSI"
-primary_sepsis_bsi_sc: "Primary sepsis/BSI"
-primary_sepsis_bsi_tc: "Primary Sepsis/BSI"
 probiotics: Probiotics
 # Peripheral Venous Catheter.
 # flags: terminology
@@ -151,18 +148,9 @@ reserve: "Reserve"
 # flags: terminology
 ssi: SSI
 surgical_procedure: "surgical procedure"
-surgical_procedure_sc: "Surgical procedure"
-surgical_procedure_tc: "Surgical Procedure"
 surgical_site_infection: "surgical site infection"
-surgical_site_infection_sc: "Surgical site infection"
-surgical_site_infection_tc: "Surgical Site Infection"
 surveillance: surveillance
-# Several languages render this identically to English in its sentence-case form; same reasoning as `nec`.
-# flags: ignore-same
-surveillance_sc: Surveillance
 surveillance_end: "surveillance end"
-surveillance_end_sc: "Surveillance end"
-surveillance_end_tc: "Surveillance End"
 # Resistance category: vancomycin-resistant Enterococcus.
 # flags: terminology
 vre: "VRE"

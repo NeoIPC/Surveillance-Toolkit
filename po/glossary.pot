@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-08-01 15:38+0000\n"
+"POT-Creation-Date: 2026-08-02 16:30+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Language-Team: none\n"
 "Language: en\n"
@@ -34,18 +34,8 @@ msgid "admission"
 msgstr ""
 
 #: glossary.yaml
-msgctxt "admission_sc"
-msgid "Admission"
-msgstr ""
-
-#: glossary.yaml
 msgctxt "antibiotics"
 msgid "antibiotics"
-msgstr ""
-
-#: glossary.yaml
-msgctxt "antibiotics_sc"
-msgid "Antibiotics"
 msgstr ""
 
 #. AWaRe is a WHO acronym (Access, Watch, Reserve) — not translatable
@@ -122,11 +112,6 @@ msgctxt "human_milk"
 msgid "human milk"
 msgstr ""
 
-#: glossary.yaml
-msgctxt "human_milk_sc"
-msgid "Human milk"
-msgstr ""
-
 #. International Classification of Health Interventions, the WHO classification the surgical procedure
 #. codes come from.
 #: glossary.yaml
@@ -145,11 +130,6 @@ msgstr ""
 #: glossary.yaml
 msgctxt "kangaroo_care"
 msgid "kangaroo care"
-msgstr ""
-
-#: glossary.yaml
-msgctxt "kangaroo_care_sc"
-msgid "Kangaroo care"
 msgstr ""
 
 #. Laboratory-confirmed bloodstream infection.
@@ -182,16 +162,6 @@ msgid "necrotizing enterocolitis"
 msgstr ""
 
 #: glossary.yaml
-msgctxt "necrotizing_enterocolitis_sc"
-msgid "Necrotizing enterocolitis"
-msgstr ""
-
-#: glossary.yaml
-msgctxt "necrotizing_enterocolitis_tc"
-msgid "Necrotizing Enterocolitis"
-msgstr ""
-
-#: glossary.yaml
 #, ignore-same
 msgctxt "neoipc_surveillance"
 msgid "NeoIPC Surveillance"
@@ -210,23 +180,8 @@ msgid "pneumonia"
 msgstr ""
 
 #: glossary.yaml
-msgctxt "pneumonia_sc"
-msgid "Pneumonia"
-msgstr ""
-
-#: glossary.yaml
 msgctxt "primary_sepsis_bsi"
 msgid "primary sepsis/BSI"
-msgstr ""
-
-#: glossary.yaml
-msgctxt "primary_sepsis_bsi_sc"
-msgid "Primary sepsis/BSI"
-msgstr ""
-
-#: glossary.yaml
-msgctxt "primary_sepsis_bsi_tc"
-msgid "Primary Sepsis/BSI"
 msgstr ""
 
 #: glossary.yaml
@@ -262,28 +217,8 @@ msgid "surgical procedure"
 msgstr ""
 
 #: glossary.yaml
-msgctxt "surgical_procedure_sc"
-msgid "Surgical procedure"
-msgstr ""
-
-#: glossary.yaml
-msgctxt "surgical_procedure_tc"
-msgid "Surgical Procedure"
-msgstr ""
-
-#: glossary.yaml
 msgctxt "surgical_site_infection"
 msgid "surgical site infection"
-msgstr ""
-
-#: glossary.yaml
-msgctxt "surgical_site_infection_sc"
-msgid "Surgical site infection"
-msgstr ""
-
-#: glossary.yaml
-msgctxt "surgical_site_infection_tc"
-msgid "Surgical Site Infection"
 msgstr ""
 
 #: glossary.yaml
@@ -291,26 +226,9 @@ msgctxt "surveillance"
 msgid "surveillance"
 msgstr ""
 
-#. Several languages render this identically to English in its sentence-case form; same reasoning as `nec`.
-#: glossary.yaml
-#, ignore-same
-msgctxt "surveillance_sc"
-msgid "Surveillance"
-msgstr ""
-
 #: glossary.yaml
 msgctxt "surveillance_end"
 msgid "surveillance end"
-msgstr ""
-
-#: glossary.yaml
-msgctxt "surveillance_end_sc"
-msgid "Surveillance end"
-msgstr ""
-
-#: glossary.yaml
-msgctxt "surveillance_end_tc"
-msgid "Surveillance End"
 msgstr ""
 
 #. Resistance category: vancomycin-resistant Enterococcus.

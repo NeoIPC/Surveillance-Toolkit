@@ -75,6 +75,50 @@ parse_locales <- function(x) {
   return(locales)
 }
 
+# Sentence-case one glossary term for a language.
+#
+# Casing is a rendering concern, so it is applied here rather than stored as a second translated key
+# beside every term. The rules live in reports/sentence-case.yaml, which is repository-owned.
+#
+# Fails rather than guesses, in both directions it can be wrong:
+#   - a language with no declared rule stops the render, because the alternative to failing is publishing
+#     a wrong capital in a clinical report, silently;
+#   - a term that does not begin with a letter stops too, since "capitalise the first character" is not
+#     meaningful there — an Afrikaans term opening with the article 'n is the case in view, where the
+#     capital belongs on the following word.
+sentence_case <- function(text, language, rules, key = NULL) {
+  spec <- rules[[language]]
+  if (is.null(spec) || is.null(spec$rule)) {
+    stop(sprintf(paste0("No sentence-case rule declared for language '%s'. Add one to ",
+                        "reports/sentence-case.yaml before rendering this language."), language),
+         call. = FALSE)
+  }
+  if (!is.null(key) && !is.null(spec$overrides[[key]])) return(spec$overrides[[key]])
+  if (!nzchar(text)) return(text)
+  if (identical(spec$rule, "unchanged")) return(text)
+
+  first <- substr(text, 1, 1)
+  rest <- substr(text, 2, nchar(text))
+  if (!grepl("^[[:alpha:]]$", first)) {
+    stop(sprintf(paste0("Cannot sentence-case '%s' for language '%s': it does not begin with a letter, ",
+                        "so which character takes the capital is a language question. Add an override ",
+                        "for '%s' in reports/sentence-case.yaml."), text, language,
+                 if (is.null(key)) text else key),
+         call. = FALSE)
+  }
+  upper <- switch(spec$rule,
+    # stringr::str_to_upper takes a locale and resolves it through ICU, so the language's own casing
+    # rules apply rather than the build machine's. That matters concretely: Turkish `i` uppercases to
+    # `İ` (U+0130) and base toupper() yields a plain `I` unless the PROCESS locale is Turkish, which a
+    # container rendering nine languages is not. Delegating also covers languages nobody here has
+    # enumerated — Azerbaijani shares the Turkish rule, Lithuanian has its own — so this is correct for
+    # locales that have not been thought about, which a hand-written branch could never be.
+    capitalize_first = stringr::str_to_upper(first, locale = language),
+    stop(sprintf("Unknown sentence-case rule '%s' for language '%s'.", spec$rule, language),
+         call. = FALSE))
+  paste0(upper, rest)
+}
+
 get_string_resources <- function(x) {
   handlers <- list('bool#no' = function(x) x)
 
@@ -85,6 +129,9 @@ get_string_resources <- function(x) {
   } else {
     sR <- list()
   }
+  # Which keys the glossary contributes, captured before anything overrides it: these are the terms whose
+  # sentence-case form is derived below rather than translated separately.
+  glossary_terms <- names(sR)
 
   # Layer 1: common (overrides glossary)
   sR <- modifyList(sR, yaml::read_yaml("../common.yaml", handlers = handlers))
@@ -127,6 +174,24 @@ get_string_resources <- function(x) {
     if(file.exists(yaml_path)) sR <- modifyList(
       sR,
       yaml::read_yaml(file = yaml_path, handlers = handlers))
+  }
+
+  # Derive the sentence-case variant of every glossary term, after the whole cascade so it is built from
+  # the translation that actually won. Storing these as separate keys meant translating each term twice
+  # and duplicating it in every other component's glossary sidebar; worse, the casing axis multiplied
+  # against plural forms, so a six-form language would have needed eighteen keys for one term.
+  #
+  # A term that already carries an explicit `_sc` is left alone — that is the escape hatch for a language
+  # whose rule cannot produce the right answer, and it is why this runs last rather than first.
+  rules <- yaml::read_yaml("../sentence-case.yaml", handlers = handlers)
+  for (term in glossary_terms) {
+    if (grepl("_(sc|tc)$", term)) next
+    variant <- paste0(term, "_sc")
+    if (!is.null(sR[[variant]])) next
+    value <- sR[[term]]
+    if (is.character(value) && length(value) == 1) {
+      sR[[variant]] <- sentence_case(value, localeObj$language, rules, key = term)
+    }
   }
 
   return(sR)

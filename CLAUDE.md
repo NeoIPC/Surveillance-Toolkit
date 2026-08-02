@@ -168,21 +168,19 @@ All reports store the string resource result in `sR` (accessed via `sR$key`).
 
 ### Glossary naming convention
 
-`glossary.yaml` uses a suffix-based naming convention for casing and plural variants:
+**One key per term.** `glossary.yaml` holds the AMA canonical (lowercase) form — `necrotizing_enterocolitis: "necrotizing enterocolitis"` — and nothing else for that term.
 
-| Suffix | Meaning | Example key | Example value |
-|--------|---------|-------------|---------------|
-| *(none)* | AMA canonical (lowercase) | `necrotizing_enterocolitis` | `"necrotizing enterocolitis"` |
-| `_sc` | Sentence case | `necrotizing_enterocolitis_sc` | `"Necrotizing enterocolitis"` |
-| `_tc` | Title case | `necrotizing_enterocolitis_tc` | `"Necrotizing Enterocolitis"` |
-| `_plural` | Plural form | `patient_day_plural` | `"patient days"` |
+**Casing is derived, not stored.** `sR$necrotizing_enterocolitis_sc` still works and still returns `"Necrotizing enterocolitis"`; it is produced by `get_string_resources()` after the whole cascade rather than translated as a second key. `_tc` no longer exists in any form — it was carried for five terms and read by nothing.
 
-- Abbreviations (CVC, HAP, INV, NEC, SSI) are always uppercase — no variants needed.
-- Proper nouns (NeoIPC Surveillance) keep their canonical casing — no variants needed.
-- Single-word terms: `_sc` and `_tc` produce the same result — use `_sc` only.
-- Suffixes can combine: `patient_day_plural_tc` = "Patient Days".
-- Weblate `variant_regex`: `_(tc|sc|plural|plural_tc|plural_sc)$` groups variants in the sidebar.
-- R code picks the appropriate variant: `sR$necrotizing_enterocolitis_sc` for labels, `sR$necrotizing_enterocolitis` for running text.
+Casing is a rendering concern: the renderer knows whether it is starting a label or a sentence, and the translator supplies the term. Storing it made translators translate the same word twice, put a second identical hit in every other component's glossary sidebar — diluting the terminology decisions the sidebar exists to carry — and multiplied against the plural axis, so a term needing six Arabic forms would have needed eighteen keys.
+
+- The per-language rules live in [`reports/sentence-case.yaml`](reports/sentence-case.yaml), which is **repository-owned and not translatable**. A language with no rule declared there is a **build failure**, never a guess: a wrong capital in a published clinical report is silent, so the only safe alternative to failing is not shipping it.
+- The rule uppercases **the first character only**, through `stringr::str_to_upper(locale = …)`, which resolves the language's own casing via ICU. Turkish is the case that shows why the locale must be threaded through: `i` uppercases to `İ`, and base `toupper()` gives a plain `I` unless the *process* locale is Turkish, which the rendering container is not. Delegating also covers languages nobody has enumerated — Azerbaijani shares the Turkish rule, Lithuanian has its own. Nepali is declared caseless. A term that does not begin with a letter fails, since which character takes the capital is then a language question — the Afrikaans article `'n` is the case in view.
+- **Never `str_to_sentence()` or `str_to_title()`**, despite the names. Both normalise the whole string, and this glossary is largely abbreviations. Measured against the values the retired keys held, uppercasing the first character alone reproduces 6 of 6; `str_to_sentence()` reproduces 5, turning `primary sepsis/BSI` into `Primary sepsis/bsi`. `str_to_title()` renders `AWaRe` as `Aware` and `BSI` as `Bsi`. Only the first character may be touched.
+- That file is also where a term whose sentence-case form no rule can produce gets an explicit override.
+- **Do not add a `_sc` or `_tc` key to `glossary.yaml`.** If a rendering needs a form the rule cannot produce, the override belongs in `sentence-case.yaml`.
+- Abbreviations (CVC, HAP, INV, NEC, SSI) are always uppercase, and proper nouns (NeoIPC Surveillance) keep their canonical casing — both are unaffected, since capitalising an already-capital first letter changes nothing.
+- `_plural` remains a named variant of its own. No term uses it today, so treat any example of one as illustrative rather than as a key you can look up.
 - A term and the display label built from it are **separate entries in separate layers, and must not share a key**. The bare term belongs here (`mrsa: MRSA`, `3gcr: 3GCR`) so Weblate can carry it as terminology into every catalogue's sidebar; the descriptive label a table actually renders belongs in `reports/common.yaml` under a `_label` key (`mrsa_label: "Methicillin-resistant Staphylococcus aureus (MRSA)"`). Reusing one key across both layers does not merely duplicate — `common.yaml` sits later in the cascade and silently overrides, so the glossary entry becomes unreachable and translating it changes nothing anyone sees.
 
 ---

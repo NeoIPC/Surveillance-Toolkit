@@ -1,0 +1,71 @@
+# How each target language forms SENTENCE CASE from a glossary term.
+#
+# Casing is a rendering concern, not a translation one, so it lives here rather than in the catalogue.
+# Storing a `_sc` variant beside every term made translators translate the same word twice, produced a
+# duplicate hit in every other component's glossary sidebar, and — the reason it had to stop — multiplied
+# against plural forms: a term needing six Arabic forms would have needed eighteen keys.
+#
+# This file is REPOSITORY-OWNED and deliberately not translatable. A translator supplies the term; the
+# renderer decides how it is capitalised at the start of a label or heading.
+#
+# Rules:
+#   capitalize_first  Uppercase the FIRST CHARACTER ONLY, through stringr::str_to_upper(locale = …),
+#                     which resolves the language's own casing rules via ICU. Turkish `i` therefore
+#                     uppercases to `İ` (U+0130) where base toupper() gives a plain `I` unless the
+#                     process locale is Turkish — which a container rendering nine languages is not.
+#                     Delegating also covers languages nobody here has enumerated: Azerbaijani shares
+#                     the Turkish rule, Lithuanian has its own.
+#   unchanged         The script has no case, so sentence case is the term itself.
+#
+# NOT str_to_sentence() and NOT str_to_title(), despite the names. Both normalise the WHOLE string, and
+# this glossary is largely abbreviations: measured against the values the retired `_sc` keys held,
+# uppercasing the first character alone reproduces 6 of 6, while str_to_sentence() reproduces 5 — it
+# turns "primary sepsis/BSI" into "Primary sepsis/bsi". str_to_title() is worse for the same reason,
+# rendering "AWaRe" as "Aware" and "BSI" as "Bsi". Only the first character may be touched.
+#
+# A language with NO entry here is a build failure, not a guess. That is the point: a wrong capital in a
+# published clinical report is silent, and the alternative to failing is shipping it. Adding a language
+# means declaring its rule before its first render.
+#
+# `overrides` supplies the finished sentence-case form for one term where no rule can produce it. Use it
+# sparingly and say why; it reintroduces exactly the duplication this file exists to remove.
+
+en:
+  # The source language. Declared like any other, because a default render resolves its locale the same
+  # way a translated one does and would otherwise stop — which is exactly what this file's own gate
+  # caught, the coverage test having read po4a's TARGET list, where the source language does not appear.
+  rule: capitalize_first
+
+af:
+  # Afrikaans capitalises normally, but a term opening with the article 'n takes the capital on the NEXT
+  # word ('n boek -> 'n Boek). The non-letter guard in the renderer refuses such a term rather than
+  # producing "'n boek", so if one ever appears it lands here as an override instead of shipping wrong.
+  rule: capitalize_first
+
+de:
+  rule: capitalize_first
+
+el:
+  # Greek keeps the accent on a sentence-initial capital; only all-caps drops it, which this never does.
+  rule: capitalize_first
+
+es:
+  rule: capitalize_first
+
+et:
+  rule: capitalize_first
+
+fr:
+  rule: capitalize_first
+
+it:
+  rule: capitalize_first
+
+ne:
+  # Devanagari is caseless.
+  rule: unchanged
+
+tr:
+  # Dotted/dotless I. Nothing special is needed here beyond declaring the language: the rule passes the
+  # code to ICU, which knows that `i` uppercases to `İ` in Turkish.
+  rule: capitalize_first
