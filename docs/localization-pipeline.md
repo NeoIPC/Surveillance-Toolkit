@@ -201,3 +201,47 @@ An upload matches on `msgid`, so an entry whose source string has since changed 
 silently dropped. Check a prepared file against the live catalogue before sending it: two entries in one
 73-entry upload here targeted msgids that a spelling fix had already retired, and would have vanished
 without a word.
+
+## Rendering a translated document
+
+po4a writes a translated source into `doc/protocol/<language>/`, so a localized build renders a document
+that sits **one directory below** the untranslated one. Everything the document reaches by a relative path
+therefore means something different, and the references split into two classes that do not share a root:
+
+| class | lives at | reached by |
+|---|---|---|
+| **localized** — the protocol, its definitions, the generated antibiotic and infectious-agent lists | `doc/protocol/<language>/` | `{locale-dir}`, which the build sets to the language, or `.` for the untranslated source |
+| **shared** — the header, `img/`, the PDF theme | `doc/protocol/` | plain relative paths, kept working by asciidoctor's `--base-dir` |
+
+Picking one root breaks the other class, and it breaks it *quietly*: with only `--base-dir`, a German
+build reads the **English** definitions and the English appendix lists and renders perfectly; with only
+the culture directory, it finds no images and no header. Both roots are passed on every render.
+
+`--base-dir` is what makes the shared half work, because it sets `{docdir}`, and `{docdir}` is what a
+relative include and `imagesdir` resolve against. That is worth knowing precisely, since the
+documentation does not say it and the behaviour is easy to get backwards: rendering `root/sub/doc.adoc`
+with `--base-dir root` reports `docdir=<…>/root` and resolves `include::header.adoc` to `root/header.adoc`.
+It governs output paths too, so `-D` and `-o` are passed absolute — a relative output directory would
+land under `doc/protocol/`.
+
+Two consequences that are not obvious from the switches:
+
+- **`lang` must be passed to the renderer**, not merely computed. The document keys two things on it —
+  asciidoctor's own caption translations in `doc/locale/attributes-<lang>.adoc`, and the localized title
+  page and watermark — and a build that omits it produces a document in the target language with English
+  captions and an English cover, with no diagnostic anywhere.
+- **A fragment that a document `include`s carries `--keep 0`**, while the document itself keeps the
+  threshold. The threshold decides whether a translation is fit to publish, and that is a judgement about
+  the document, not about each fragment it assembles. German sits at 91.89 % overall and one of its
+  definitions holds two untranslated strings; at the shared threshold po4a withholds that file and the
+  whole German build fails on a missing include. Withholding a fragment protects nobody — it only decides
+  whether the reader gets that paragraph in English or gets no document at all.
+
+**The set of rendered cultures is asserted, not observed.** `Build-NeoIPCCoreProtocol.ps1` compares what
+it discovered against `po/documentation.po4a.cfg`, the one witness to where a translated source lives that
+is independent of the build's own convention — comparing discovery against the filesystem it just read
+would establish nothing. It fails when the config declares a translated protocol that exists and discovery
+did not find it, and it names the languages held below the threshold on every run. Both halves exist
+because this failed silently for seven months: po4a moved its output into subdirectories, the builder kept
+globbing the flat name nothing writes any more, and a build that renders one culture exits exactly like
+one that renders ten.
