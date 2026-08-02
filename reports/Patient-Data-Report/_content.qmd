@@ -5,15 +5,18 @@
 #| output: asis
 cat("# ", sR$title, "\n\n")
 cat("## ", sR$subtitle, "\n\n")
-cat(glue::glue(sR$generated_on, date = format(Sys.Date(), format = "%x")), "\n\n")
+generated_on <- interpolate_translation(
+  sR$generated_on, date = format(Sys.Date(), format = "%x"))
+cat(generated_on, "\n\n")
 ```
 
 ```{r}
 #| label: Patient not found
 #| output: asis
 #| eval: !expr '!patient_found'
-cat(glue::glue(sR$patient_not_found,
-  patient_id = patient_id, department_code = department_code), "\n")
+not_found <- interpolate_translation(
+  sR$patient_not_found, patient_id = patient_id, department_code = department_code)
+cat(not_found, "\n")
 ```
 
 ```{r}
@@ -26,7 +29,7 @@ cat("## ", sR$section$demographics, "\n\n")
 ga_weeks <- patient$total_gestation_days %/% 7
 ga_days <- patient$total_gestation_days %% 7
 ga_display <- if (!is.na(patient$total_gestation_days)) {
-  glue::glue(sR$gestational_age_format, weeks = ga_weeks, days = ga_days)
+  interpolate_translation(sR$gestational_age_format, weeks = ga_weeks, days = ga_days)
 } else {
   sR$not_available
 }

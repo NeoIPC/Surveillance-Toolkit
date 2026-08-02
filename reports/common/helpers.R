@@ -132,6 +132,44 @@ get_string_resources <- function(x) {
   return(sR)
 }
 
+# Interpolate {name} placeholders into a TRANSLATED string.
+#
+# Use this for every string that came out of a catalogue; never glue::glue().
+#
+# glue() resolves each brace as an R EXPRESSION in the environment given by .envir, which defaults to the
+# caller's frame. Report templates come from gettext catalogues that any account signed in to Weblate may
+# write, so glue() on one is arbitrary R evaluated at render time with every local binding in scope, inside
+# the container that renders clinical reports. Measured, not inferred: a template of "{nchar(secret)}"
+# returns 23.
+#
+# Two mechanisms, because they close different holes and only the pair closes both:
+#   glue_safe()        looks each brace up as a NAME and never evaluates, so no expression can run;
+#   .envir = emptyenv() leaves nothing to look up but the values supplied here, so no binding can leak.
+# glue_safe() alone still reads the caller's frame; emptyenv() alone still evaluates whatever it finds.
+#
+# The safety lives in this function rather than in an argument repeated at each call site, which is the
+# point: the source-string migration adds many more interpolations, and a rule that must be remembered
+# every time is a rule that will be missed once. Here, forgetting it is not possible.
+#
+# Returns a glue object, exactly as glue() did — several call sites rely on that class, and forcing
+# character would be an unrelated behaviour change.
+interpolate_translation <- function(.template, ...) {
+  glue::glue_safe(.template, ..., .envir = emptyenv())
+}
+
+# Interpolate into ALREADY-COMPOSED translated text, against an explicit allow-list.
+#
+# Needed where a string is assembled from several translated fragments and only then scanned for
+# placeholders, so the values cannot be passed as named arguments to the call that produced each fragment.
+# `allowed` is the complete set of names that text may reference.
+#
+# Note glue_data_safe() is NOT an allow-list on its own: its data argument is a first lookup that falls
+# back to .envir, so without emptyenv() a name absent from the list still resolves against the caller.
+# Verified — dropping .envir here lets a template read a caller variable again.
+interpolate_composed_translation <- function(.template, allowed) {
+  glue::glue_data_safe(allowed, .template, .envir = emptyenv())
+}
+
 get_localised_path <- function(file_name, language, territory) {
   if (!is.null(territory)) {
     yaml_path <- paste0("content.", language, "_", territory, "/", file_name)
