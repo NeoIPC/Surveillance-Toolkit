@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import re
 import sys
 from dataclasses import dataclass, field as dc_field
 from pathlib import Path
@@ -69,14 +70,23 @@ MARK = 260                              # a choose-one circle or choose-any squa
 MARK_GAP = 180                          # between a mark and its text
 COMMENTS_MIN = 1200                     # below this the leftover is a gap, not a usable writing space
 
-BAND_FILL = "#bdd7ee"
-ACCENT = "#2e74b5"                      # the blue of the two hand-drawn figures' headings
+# The brand's two primary colours, from the NeoIPC visual guideline: PANTONE 7460 C and 1495 C. Taken
+# from the guideline rather than sampled from an artifact -- an earlier guess of #2e74b5 was a Word
+# default that merely looked similar.
+ACCENT = "#0083c1"
+BRAND_ORANGE = "#ff9015"
+BAND_FILL = "#cfe7f4"                   # a tint of the brand blue, light enough to print behind text
 
-# Referenced rather than inlined, because the only logo in the repository is a raster. A vector logo
-# would be inlined instead, which would make a sheet self-contained -- no dependency on what sits beside
-# it -- and would keep the last raster out of a figure that is otherwise entirely text and lines.
-LOGO = "LOGO_NEOIPC_2.png"
-LOGO_W, LOGO_H = 4200, 1861             # 6344 x 2810 in the hand-drawn sheet, kept to that aspect
+# The logo is INLINED, not referenced. It is vector, so there is no raster anywhere on a sheet, and a
+# sheet carries its own logo instead of depending on what happens to sit beside it -- which matters for
+# the standalone print forms, which do not live in the protocol's image directory. prawn-svg renders
+# <symbol> and <use>, verified rather than assumed.
+#
+# The guideline gives the vertical lockup a 30 mm minimum and forbids altering its proportions, so the
+# width below is a deliberate margin above that minimum and the height is derived from the artwork's own
+# aspect rather than chosen.
+LOGO_FILE = "NeoIPC-Logo-Horizontal.svg"
+LOGO_W = 4200                           # 42 mm, above the guideline's 40 mm minimum for this lockup
 
 
 @dataclass
@@ -193,6 +203,35 @@ class Catalogue:
 
     def get(self, context: str, source: str) -> str:
         return self.entries.get(context, source)
+
+
+class Logo:
+    """The brand logo, inlined into each sheet as a <symbol> so a sheet carries its own artwork.
+
+    Referencing it instead would bind every sheet to the directory it was written into, because
+    prawn-svg resolves an <image> href relative to the SVG file rather than to the document embedding
+    it -- which is fine for the protocol's figures and wrong for the standalone print forms. Inlining
+    also keeps the sheets entirely vector: no raster anywhere, at any print size.
+    """
+
+    def __init__(self, path: Path):
+        source = path.read_text(encoding="utf-8")
+        self.view_box = re.search(r'viewBox="([^"]+)"', source).group(1)
+        _, _, w, h = (float(v) for v in self.view_box.split())
+        self.aspect = w / h
+        body = source.split("</style>", 1)[1].rsplit("</svg>", 1)[0]
+        self.body = [line for line in body.splitlines() if line.strip()]
+
+    def definition(self) -> list[str]:
+        return (
+            [f'  <symbol id="neoipc-logo" viewBox="{self.view_box}">']
+            + [f"  {line}" for line in self.body]
+            + ["  </symbol>"]
+        )
+
+    def place(self, x: int, y: int, width: int) -> list[str]:
+        height = round(width / self.aspect)
+        return [f'  <use href="#neoipc-logo" x="{x}" y="{y}" width="{width}" height="{height}"/>']
 
 
 class LayoutRules:
@@ -375,8 +414,10 @@ class SvgWriter:
     regenerating with unchanged metadata produces a byte-identical file.
     """
 
-    def __init__(self, face: Face, bold: Face, chrome: dict[str, str], layout: LayoutRules, language: str | None):
-        self.face, self.bold, self.chrome, self.layout, self.language = face, bold, chrome, layout, language
+    def __init__(self, face: Face, bold: Face, chrome: dict[str, str], layout: LayoutRules, logo: Logo,
+                 language: str | None):
+        self.face, self.bold, self.chrome, self.layout = face, bold, chrome, layout
+        self.logo, self.language = logo, language
         self.missing: dict[str, set[str]] = {}
 
     def _text(self, text: str, size: int, bold: bool = False) -> None:
@@ -404,8 +445,13 @@ class SvgWriter:
             "    circle.mark { fill: none; stroke: #000; stroke-width: 18; }",
             "    line.rule { stroke: #000; stroke-width: 12; }",
             "    line.write { stroke: #000; stroke-width: 12; }",
+            # The inlined logo's paths carry these classes. Defined here rather than kept inside the
+            # symbol so the sheet has exactly one stylesheet -- and because a symbol whose own <style>
+            # was dropped renders in the default fill, which is black, silently.
+            "    .brand-blue { fill: %s; }" % ACCENT,
+            "    .brand-orange { fill: %s; }" % BRAND_ORANGE,
             "  </style>",
-        ]
+        ] + self.logo.definition()
         return "\n".join(head + body + ["</svg>", ""])
 
 
@@ -424,13 +470,7 @@ def layout_sheet(sheet: Sheet, writer: SvgWriter) -> list[str]:
     writer._text(sheet.title, SUBTITLE_SIZE)
 
     y = MARGIN_TOP + TITLE_SIZE
-    # The logo is referenced relative to this file, which is the rule prawn-svg actually applies to an
-    # <image> href -- relative to the SVG, not to the document embedding it. So the emitter's output
-    # directory has to hold the logo, and the build is what guarantees that.
-    out.append(
-        f'  <image id="logo" xlink:href="{LOGO}" x="{PAGE_W - MARGIN_X - LOGO_W}" y="{MARGIN_TOP - 300}" '
-        f'width="{LOGO_W}" height="{LOGO_H}"/>'
-    )
+    out.extend(writer.logo.place(PAGE_W - MARGIN_X - LOGO_W, MARGIN_TOP - 300, LOGO_W))
     out.append(f'  <text id="heading" class="title" x="{MARGIN_X}" y="{y}">{_esc(heading)}</text>')
     y += SUBTITLE_SIZE + 220
     out.append(f'  <text id="{sheet.slug}-title" class="subtitle" x="{MARGIN_X}" y="{y}">{_esc(sheet.title)}</text>')
@@ -663,6 +703,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--fonts", type=Path, default=repo / "common" / "fonts")
     parser.add_argument("--strings", type=Path, default=repo / "common" / "sheet-strings.yaml")
     parser.add_argument("--layout", type=Path, default=repo / "common" / "sheet-layout.yaml")
+    parser.add_argument("--logo", type=Path, default=repo / "common" / "img" / LOGO_FILE)
     parser.add_argument("--po", type=Path, default=repo / "po")
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--language", default=None, help="culture code; omit for the untranslated source")
@@ -675,6 +716,7 @@ def main(argv: list[str] | None = None) -> int:
     catalogue = Catalogue(po_path)
     chrome = load_chrome(args.strings, catalogue)
     rules = LayoutRules(args.layout)
+    logo = Logo(args.logo)
 
     # Devanagari is a separate face because Noto Sans does not cover it -- see common/fonts/README.md.
     family = "NotoSansDevanagari" if args.language == "ne" else "NotoSans"
@@ -692,7 +734,7 @@ def main(argv: list[str] | None = None) -> int:
     suffix = f".{args.language}" if args.language else ""
     written, failures = [], []
     for sheet in sheets:
-        writer = SvgWriter(face, bold, chrome, rules, args.language)
+        writer = SvgWriter(face, bold, chrome, rules, logo, args.language)
         try:
             body = layout_sheet(sheet, writer)
         except Overflow as overflow:
