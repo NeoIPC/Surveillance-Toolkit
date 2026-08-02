@@ -13,6 +13,8 @@ build
 doc/protocol/NeoIPC-Antibiotics*.adoc
 doc/protocol/NeoIPC-Infectious-Agents*.adoc
 doc/protocol/NeoIPC-Core-Protocol*.xml
+# Copied into the protocol's img/ by the build from common/img/, which is where the source lives.
+doc/protocol/img/AWaRe-*.svg
 doc/protocol/img/NeoIPC-Core-Decision-Flow*.svg
 doc/protocol/img/NeoIPC-Core-Master-Data-Collection-Sheet-Image*.svg
 doc/protocol/img/NeoIPC-Core-Master-Data-Collection-Sheet*.svg

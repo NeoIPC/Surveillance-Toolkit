@@ -162,4 +162,42 @@ InModuleScope 'NeoIPC-BuildTools' {
             $tmpLine | Should -Match '^\|Micronomicin \| \|'                            # empty ATC cell
         }
     }
+
+    Describe 'Get-Po4aOutputPath' {
+        BeforeAll {
+            # A config in the shape of po/documentation.po4a.cfg: a langs line, an [options] line whose
+            # free-form tail must not be mistaken for a document entry, two document entries with
+            # different masters, and a comment. The second master is what distinguishes "reads the entry
+            # it was asked for" from "reads the last entry it saw".
+            $script:cfg = Join-Path $TestDrive 'documentation.po4a.cfg'
+            Set-TestFileContent -LiteralPath $script:cfg -Value @(
+                '[po4a_langs] de es tr'
+                '[po4a_paths] po/documentation.pot $lang:po/documentation.$lang.po'
+                '[options] --width 0 --master-charset UTF-8 --package-name "NeoIPC Surveillance Documentation"'
+                ''
+                '# a comment naming doc/protocol/NeoIPC-Core-Protocol.adoc, which must not be parsed'
+                '[type: asciidoc] doc/protocol/NeoIPC-Core-Protocol.adoc $lang:doc/protocol/$lang/NeoIPC-Core-Protocol.adoc opt:"-o compat=asciidoctor"'
+                '[type: asciidoc] doc/protocol/definitions/Some-Definition.adoc $lang:doc/protocol/$lang/definitions/Some-Definition.adoc opt:"-o compat=asciidoctor --keep 0"'
+            )
+        }
+
+        It 'returns one record per declared language, with $lang substituted' {
+            $paths = @(Get-Po4aOutputPath $script:cfg 'doc/protocol/NeoIPC-Core-Protocol.adoc')
+            $paths.Count | Should -Be 3
+            $paths.Language | Should -Be @('de', 'es', 'tr')
+            $paths[0].Path | Should -BeExactly 'doc/protocol/de/NeoIPC-Core-Protocol.adoc'
+        }
+
+        It 'reads the entry for the master it was asked for, not another one' {
+            $paths = @(Get-Po4aOutputPath $script:cfg 'doc/protocol/definitions/Some-Definition.adoc')
+            $paths[1].Path | Should -BeExactly 'doc/protocol/es/definitions/Some-Definition.adoc'
+        }
+
+        It 'throws when the config declares no translation of that master' {
+            # Silence rather than a wrong path: a caller checking its own convention against this one must
+            # not be told "no languages declared" when the truth is "this file is not in the config".
+            { Get-Po4aOutputPath $script:cfg 'doc/protocol/Not-In-The-Config.adoc' } |
+                Should -Throw '*declares no translated path*'
+        }
+    }
 }

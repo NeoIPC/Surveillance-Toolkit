@@ -75,6 +75,7 @@ FunctionsToExport = @(
     'Export-AsciiDocIds'
     'Export-AsciiDocReferences'
     'Get-LocalisedPath'
+    'Get-Po4aOutputPath'
     'Import-Translations'
     'New-AntibioticsList'
     'New-PathogenList'

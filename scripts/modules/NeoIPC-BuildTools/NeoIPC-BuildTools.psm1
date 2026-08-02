@@ -72,10 +72,28 @@ function Export-AsciiDocReferences {
         [Parameter(Mandatory, Position = 0)]
         [string]$LiteralPath,
         [Parameter(Position = 2)]
-        [hashtable]$Attributes
+        [hashtable]$Attributes,
+        # The directory this file's own include and image targets resolve against, when that is not the
+        # directory the file sits in. Mirrors asciidoctor's --base-dir, which sets {docdir} and therefore
+        # governs how the ROOT document's relative targets are resolved -- verified by observation, not
+        # from the documentation: rendering root/sub/doc.adoc with --base-dir root reports
+        # docdir=<...>/root and resolves include::header.adoc to root/header.adoc.
+        #
+        # It applies to INCLUDES at this level only and is deliberately not passed down the recursion,
+        # because a NESTED include resolves against the directory of the file containing it
+        # (Reader#push_include sets @dir from the included file), not against the base directory.
+        [string]$BaseDirectory,
+        # Where img/ sits, propagated through the recursion -- because IMAGES follow the opposite rule to
+        # includes: an image target resolves against {imagesdir}, a document attribute resolved against
+        # {docdir}, so every image::/image: in every included file resolves against the same root no
+        # matter how deep it is. Resolving them per file is what made this warn about
+        # doc/protocol/de/img/AWaRe-A.svg, a path asciidoctor never looks for.
+        [string]$ImagesRoot
     )
 
     $file = Get-Item -LiteralPath $LiteralPath
+    $resolveFrom = if ($BaseDirectory) { $BaseDirectory } else { $file.DirectoryName }
+    if (-not $ImagesRoot) { $ImagesRoot = $resolveFrom }
     $skip = $false;
     Get-Content -LiteralPath $file.FullName |
     ForEach-Object {
@@ -134,10 +152,10 @@ function Export-AsciiDocReferences {
                         break
                     }
                 }
-                $childFile = Join-Path -Path $file.DirectoryName -ChildPath $expanded -Resolve -ErrorAction SilentlyContinue -ErrorVariable includeFileError
+                $childFile = Join-Path -Path $resolveFrom -ChildPath $expanded -Resolve -ErrorAction SilentlyContinue -ErrorVariable includeFileError
                 if ($childFile) {
                     $childFile
-                    Export-AsciiDocReferences -LiteralPath $childFile -Attributes $Attributes
+                    Export-AsciiDocReferences -LiteralPath $childFile -Attributes $Attributes -ImagesRoot $ImagesRoot
                 }
                 else {
                     foreach ($w in $includeFileError) {
@@ -158,7 +176,7 @@ function Export-AsciiDocReferences {
                         break
                     }
                 }
-                $imageFile = Join-Path -Path $file.DirectoryName -ChildPath 'img' -AdditionalChildPath $expanded -Resolve -ErrorAction SilentlyContinue -ErrorVariable includeFileError
+                $imageFile = Join-Path -Path $ImagesRoot -ChildPath 'img' -AdditionalChildPath $expanded -Resolve -ErrorAction SilentlyContinue -ErrorVariable includeFileError
                 if ($imageFile) {
                     $imageFile
                 }
@@ -276,6 +294,73 @@ function Get-LocalisedPath {
         }
         if ($All) { $path } else { return $path }
     } while ($TargetCulture.Name)
+}
+
+function Get-Po4aOutputPath {
+    <#
+    .SYNOPSIS
+        Where a po4a config declares it will write each language's translation of one master file.
+
+    .DESCRIPTION
+        Reads the [po4a_langs] line and the document entry whose master is $MasterPath, and returns one
+        record per declared language with $lang substituted into the entry's translated-path template.
+
+        This exists so a build can check its own idea of where a translated source lives against the
+        config that actually writes it, instead of against itself. The localized protocol went seven
+        months without being built because those two drifted: po4a moved its output into per-language
+        subdirectories and the builder kept globbing the flat culture-suffixed name it had always used,
+        which nothing writes any more. Nothing failed -- a build that renders one culture exits exactly
+        like one that renders ten -- so the config is the only independent witness available.
+
+        Paths come back exactly as the config writes them: repository-relative, forward slashes. The
+        caller joins them to the repository root.
+
+    .PARAMETER ConfigPath
+        The po4a config file to read.
+
+    .PARAMETER MasterPath
+        The untranslated source, written as the config writes it (repository-relative, forward slashes).
+
+    .EXAMPLE
+        Get-Po4aOutputPath po/documentation.po4a.cfg doc/protocol/NeoIPC-Core-Protocol.adoc
+    #>
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory, Position = 0)]
+        [string]$ConfigPath,
+        [Parameter(Mandatory, Position = 1)]
+        [string]$MasterPath
+    )
+
+    $languages = @()
+    $template = $null
+    foreach ($line in (Get-Content -LiteralPath $ConfigPath)) {
+        $line = $line.Trim()
+        if (-not $line -or $line.StartsWith('#')) { continue }
+        if ($line -match '^\[po4a_langs\]\s+(.+)$') {
+            $languages = $Matches[1] -split '\s+' | Where-Object { $_ }
+            continue
+        }
+        # A document entry: [type: <fmt>] <master> $lang:<translated> [opt:"..."]. Split on whitespace
+        # rather than pattern-matching the whole line, because the opt: tail is quoted and free-form.
+        if ($line -match '^\[type:\s*[^\]]+\]\s+(.+)$') {
+            $fields = $Matches[1] -split '\s+'
+            if ($fields[0] -ne $MasterPath) { continue }
+            $template = $fields | Where-Object { $_.StartsWith('$lang:') } | Select-Object -First 1
+            if ($template) { $template = $template.Substring('$lang:'.Length) }
+        }
+    }
+
+    if (-not $template) {
+        throw "'$ConfigPath' declares no translated path for master '$MasterPath'."
+    }
+
+    foreach ($language in $languages) {
+        [PSCustomObject]@{
+            Language = $language
+            Path     = $template.Replace('$lang', $language)
+        }
+    }
 }
 
 function Import-Translations {

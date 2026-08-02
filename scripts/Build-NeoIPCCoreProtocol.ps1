@@ -62,7 +62,8 @@ $antibioticsFileName = 'NeoIPC-Antibiotics.adoc'
 $protocolFileName = 'NeoIPC-Core-Protocol.adoc'
 $docBookFileName = [System.IO.Path]::ChangeExtension($protocolFileName, 'xml')
 
-if ($null -eq $TargetCultures) {
+$discoveredCultures = $null -eq $TargetCultures
+if ($discoveredCultures) {
     # Discover cultures from the per-language subdirectories po4a writes, plus the invariant source at
     # the directory root. A directory counts only if it holds the protocol itself, which is what keeps
     # img/, resx/, xslt/ and definitions/ out and means no name has to be excluded by hand.
@@ -89,6 +90,34 @@ else {
     }
 }
 
+if ($discoveredCultures) {
+    # Assert the discovered set against the localization config, the one independent witness to where a
+    # translated protocol lives. Discovery reads the filesystem; so does any check derived from it, which
+    # is why comparing discovery to itself would establish nothing. The config is written by the side that
+    # produces those files, so the two agreeing is a real statement -- and their disagreeing is exactly
+    # the defect that hid here for seven months, when po4a moved its output and the builder did not follow.
+    #
+    # Only for auto-discovery: naming -TargetCultures is an explicit request for a subset, and the loop
+    # above already fails on a culture whose source is absent.
+    $declaredSources = Get-Po4aOutputPath (Join-Path $poDir 'documentation.po4a.cfg') 'doc/protocol/NeoIPC-Core-Protocol.adoc'
+    $writtenSources = @($declaredSources | Where-Object { Test-Path -LiteralPath (Join-Path $workspaceFolder $_.Path) -PathType Leaf })
+    $renderedNames = @($TargetCultures | ForEach-Object { $_.Name } | Where-Object { $_ })
+    $overlooked = @($writtenSources | Where-Object { $_.Language -notin $renderedNames })
+    if ($overlooked) {
+        Write-Error ("The localization config declares a translated protocol at $($overlooked.Path -join ', ') " +
+            "and the file is there, but culture discovery did not find it. The build and " +
+            "po/documentation.po4a.cfg disagree about where a translated source lives.")
+        exit 1
+    }
+    # Report the languages po4a declared and did not write, so a reduced culture set is never silent. They
+    # are below the config's --keep threshold: po4a withholds a translation too sparse to publish, which is
+    # working as intended and is not an error.
+    $withheld = @($declaredSources | Where-Object { $_.Language -notin @($writtenSources.Language) })
+    if ($withheld) {
+        Write-Host ("Below the localization threshold, no source written, not built: {0}" -f (($withheld.Language) -join ', '))
+    }
+}
+
 # Name the set rather than leaving it to be inferred from what appears in artifacts/. A build that
 # renders one culture and a build that renders ten differ in nothing else an operator sees, which is how
 # the seven-month gap above went unnoticed.
@@ -105,8 +134,9 @@ Write-Host ("Building the protocol for {0} culture(s): {1}" -f $TargetCultures.C
 if ($Clean) {
     $artifactsFolder | Where-Object { Test-Path -LiteralPath $_ -PathType Container } | Remove-Item -Recurse -Force -Verbose:($VerbosePreference -eq 'Continue')
     $TargetCultures | ForEach-Object {
-        Get-LocalisedPath $protocolDir $antibioticsFileName $_ | Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } | Remove-Item -Verbose:($VerbosePreference -eq 'Continue')
-        Get-LocalisedPath $protocolDir $infectiousAgentsFileName $_ | Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } | Remove-Item -Verbose:($VerbosePreference -eq 'Continue')
+        # -Subdirectory on both lists, matching where the build now writes them.
+        Get-LocalisedPath $protocolDir $antibioticsFileName $_ -Subdirectory | Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } | Remove-Item -Verbose:($VerbosePreference -eq 'Continue')
+        Get-LocalisedPath $protocolDir $infectiousAgentsFileName $_ -Subdirectory | Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } | Remove-Item -Verbose:($VerbosePreference -eq 'Continue')
         Get-LocalisedPath $protocolDir $docBookFileName $_ | Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } | Remove-Item -Verbose:($VerbosePreference -eq 'Continue')
         # ToDo: Remove generated SVG files
     }
@@ -191,7 +221,33 @@ foreach ($targetCulture in $targetCultures)
         Write-Information "Generating NeoIPC Core Protocol for the default locale (en-GB)"
     }
 
-    $antibioticsListFile = Get-LocalisedPath $protocolDir $antibioticsFileName $targetCulture
+    # This document reaches two kinds of file and they live in different places, which is why the renderer
+    # needs both switches below rather than one root.
+    #
+    # SHARED, at doc/protocol: the header, img/, the PDF theme. Reached by plain relative paths, so
+    # --base-dir has to keep pointing here even when the source being rendered is one level down.
+    # Asciidoctor's base directory is what {docdir} becomes, and {docdir} is what a relative target
+    # resolves against -- so this single flag preserves every shared reference unchanged.
+    #
+    # LOCALIZED, at doc/protocol/<culture>: the translated protocol, its definitions, and the two
+    # generated lists. Reached through {locale-dir}, which is '.' for the invariant source at the root.
+    #
+    # `lang` reaches asciidoctor here for the first time. It was only ever put in $attributes, which is
+    # read by the dependency lister and by nothing else -- so the two things the document keys on it,
+    # doc/locale/attributes-<lang>.adoc (asciidoctor's own caption translations) and the localized title
+    # page and watermark, were never selected. A localized build silently used English captions and the
+    # English title page, and nobody saw it because no localized build has run since 2025-12-29.
+    $localeDir = if ($targetCulture.Name) { $targetCulture.Name } else { '.' }
+    $attributes['locale-dir'] = $localeDir
+    $cultureArgs = @('-B', $protocolDir, '-a', "locale-dir=$localeDir")
+    if ($targetCulture.Name) { $cultureArgs += @('-a', "lang=$($targetCulture.TwoLetterISOLanguageName)") }
+
+    # Beside the translated protocol, not flat with a culture suffix: the protocol reaches both generated
+    # lists through {locale-dir}, the same prefix its localized definitions use, so a culture's fragments
+    # are all in one place and the include line is identical for every culture. Flat would resolve the
+    # German protocol's list include to the English list -- silently, since a list in the wrong language
+    # renders perfectly well.
+    $antibioticsListFile = Get-LocalisedPath $protocolDir $antibioticsFileName $targetCulture -Subdirectory
     # New-AntibioticsList reads the base antibiotic + UI-label CSVs plus the per-locale gettext catalogue
     # po/antibiotics.<lang>.po (the translation source that replaced the retired .<lang>.csv sidecars), so the
     # incremental-build dependency set must track all three (the two base CSVs always exist; the .po is per-locale).
@@ -207,7 +263,7 @@ foreach ($targetCulture in $targetCultures)
         $lines = New-AntibioticsList -TargetCulture $targetCulture -MetadataPath $metadataFolder -AsciiDoc
         [System.IO.File]::WriteAllText($antibioticsListFile, (($lines -join "`n") + "`n"), [System.Text.UTF8Encoding]::new($false))
     }
-    $infectiousAgentsListFile = Get-LocalisedPath $protocolDir $infectiousAgentsFileName $targetCulture
+    $infectiousAgentsListFile = Get-LocalisedPath $protocolDir $infectiousAgentsFileName $targetCulture -Subdirectory
     Build-Target $infectiousAgentsListFile (Get-LocalisedPath $infectiousAgentsDir 'NeoIPC-Pathogen-Concepts.csv' $targetCulture -All -Existing),(Get-LocalisedPath $infectiousAgentsDir 'NeoIPC-Pathogen-Synonyms.csv' $targetCulture -All -Existing) {
         Write-Verbose "Generating list of infectious agents"
         $lines = New-PathogenList -TargetCulture $targetCulture -MetadataPath $metadataFolder -AsciiDoc
@@ -242,7 +298,7 @@ foreach ($targetCulture in $targetCultures)
         $att = $attributes.Clone()
         $att['backend-html5'] = $true
         $outputFile = Get-LocalisedPath $artifactsFolder 'index.html' $targetCulture
-        Build-Target $outputFile (@($protocolFile)+@(Export-AsciiDocReferences $protocolFile $att)) {
+        Build-Target $outputFile (@($protocolFile)+@(Export-AsciiDocReferences $protocolFile $att -BaseDirectory $protocolDir)) {
             Write-Information "Generating HTML"
             # -v, not -w. Asciidoctor reports a cross-reference whose target does not exist as
             # "possible invalid reference" at INFO level, guarded by `if logger.info?`, so at the
@@ -252,7 +308,10 @@ foreach ($targetCulture in $targetCultures)
             # in Asciidoctor 2.0.26 (refs/asciidoctor), and every one is a real defect: a dropped
             # include, a reference to a missing attribute, a bad inline-macro substitution, or this.
             # None fires on a document that is correct, and this repository uses no optional includes.
-            asciidoctor -a $revNumberArg -a $revRemark -a $revDate -b html5 -v --failure-level=INFO -D $(Resolve-Path $artifactsFolder -Relative) -o $([System.IO.Path]::GetFileName($outputFile)) $(Resolve-Path $protocolFile -Relative)
+            # -D and the source are absolute because @cultureArgs carries --base-dir: asciidoctor resolves
+            # a relative output directory against the base directory, not the working directory, so the
+            # relative form the four renderer calls used would write into doc/protocol/artifacts.
+            asciidoctor @cultureArgs -a $revNumberArg -a $revRemark -a $revDate -b html5 -v --failure-level=INFO -D $artifactsFolder -o $([System.IO.Path]::GetFileName($outputFile)) $protocolFile
             if (-not $?) { exit 1 }
             Write-Verbose "Linting HTML"
 
@@ -290,9 +349,9 @@ foreach ($targetCulture in $targetCultures)
         $att = $attributes.Clone()
         $att['backend-docbook5'] = $true
         $docbookFile = Get-LocalisedPath $protocolDir $docBookFileName $targetCulture
-        Build-Target $docbookFile (@($protocolFile)+@(Export-AsciiDocReferences $protocolFile $att)) {
+        Build-Target $docbookFile (@($protocolFile)+@(Export-AsciiDocReferences $protocolFile $att -BaseDirectory $protocolDir)) {
             Write-Verbose "Generating DocBook xml"
-            asciidoctor -a $revNumberArg -a $revRemark -a $revDate -b docbook -v --failure-level=INFO -D $(Resolve-Path $protocolDir -Relative) -o $([System.IO.Path]::GetFileName($docbookFile)) $(Resolve-Path $protocolFile -Relative)
+            asciidoctor @cultureArgs -a $revNumberArg -a $revRemark -a $revDate -b docbook -v --failure-level=INFO -D $protocolDir -o $([System.IO.Path]::GetFileName($docbookFile)) $protocolFile
             if (-not $?) { exit 1 }
         }
     }
@@ -303,7 +362,7 @@ foreach ($targetCulture in $targetCultures)
             $att = $attributes.Clone()
             $att['backend-pdf'] = $true
             $outputFile = Get-LocalisedPath $artifactsFolder 'NeoIPC-Core-Protocol.pdf' $targetCulture
-            Build-Target $outputFile (@($protocolFile)+@(Export-AsciiDocReferences $protocolFile $att)) {
+            Build-Target $outputFile (@($protocolFile)+@(Export-AsciiDocReferences $protocolFile $att -BaseDirectory $protocolDir)) {
                 Write-Information "Generating PDF"
                 # No --failure-level here, unlike the two Asciidoctor backends above -- and not at any
                 # value, which is the part worth reading before "fixing" this by setting WARN instead.
@@ -325,9 +384,9 @@ foreach ($targetCulture in $targetCultures)
                 # was found at all, and they are worth reading in the log without failing the build.
                 if ($IsWindows) {
                     Write-Warning "Asciidoctor Mathematical is not supported on Windows. The STEM expressions will not be converted in your pdf output."
-                    asciidoctor-pdf -a compress -a $revNumberArg -a $revRemark -a $revDate -v -D $(Resolve-Path $artifactsFolder -Relative) -o $([System.IO.Path]::GetFileName($outputFile)) $(Resolve-Path $protocolFile -Relative)
+                    asciidoctor-pdf @cultureArgs -a compress -a $revNumberArg -a $revRemark -a $revDate -v -D $artifactsFolder -o $([System.IO.Path]::GetFileName($outputFile)) $protocolFile
                 } else {
-                    asciidoctor-pdf -a compress -a $revNumberArg -a $revRemark -a $revDate -a mathematical-format=svg -r asciidoctor-mathematical -v -D $(Resolve-Path $artifactsFolder -Relative) -o $([System.IO.Path]::GetFileName($outputFile)) $(Resolve-Path $protocolFile -Relative)
+                    asciidoctor-pdf @cultureArgs -a compress -a $revNumberArg -a $revRemark -a $revDate -a mathematical-format=svg -r asciidoctor-mathematical -v -D $artifactsFolder -o $([System.IO.Path]::GetFileName($outputFile)) $protocolFile
                 }
                 if (-not $?) { exit 1 }
             }
