@@ -94,10 +94,24 @@ generator assert the fit instead of hoping for it.
 
 Two constraints on *which* font is measured, both of which make a wrong answer look right:
 
-- **It must be a family the PDF theme registers.** `doc/NeoIPC.theme.yml` registers `Noto Sans` and
-  `icon`, with `Noto Serif` as the fallback. An SVG naming anything else — the existing badges say
-  `font-family:Arial` — gets substituted, and substitution here is not cosmetic: it is what replaced every
-  non-Latin-1 character with the logical-NOT sign in an earlier figure.
+- **It must be a family the PDF theme registers, and the fallback list must never be reached.**
+  `doc/NeoIPC.theme.yml` registers `Noto Sans` and `icon`, with `Noto Serif` as the document fallback.
+  prawn-svg builds its registry from the Prawn document's registered families and merges externally
+  scanned system fonts *behind* them, so a registered name always wins — and a name that is not
+  registered is looked for in `/Library/Fonts`, `/usr/share/fonts/truetype` and two others, which is
+  per-machine and matches nothing in CI.
+
+  What happens at the end of that list is the part that has already cost this project a defect.
+  `Prawn::SVG::Font::GENERIC_CSS_FONT_MAPPING` resolves `sans-serif` to **Helvetica** — an AFM core font
+  with Windows-1252 encoding and no embedded glyphs at all. That is the whole mechanism behind every
+  non-Latin-1 character in an earlier figure rendering as the logical-NOT sign: not a corrupted file, a
+  correct fallback to a font that cannot represent the text. `font-family:"Noto Sans", Arial, Helvetica,
+  sans-serif` is therefore a trap dressed as prudence, and the existing AWaRe badges saying plain
+  `font-family:Arial` resolve to nothing on any machine this builds on.
+
+  **Generated sheets name exactly one family, `Noto Sans`, with no fallback list.** A missing font must
+  fail rather than degrade, because the degraded form is silent and is wrong precisely in the languages
+  this exists to serve.
 - **It must be the same file the PDF embeds.** The theme points at `GEM_FONTS_DIR/notosans-*-subset.ttf`,
   asciidoctor-pdf's own pre-subsetted build, which lives inside the gem. Measuring a system Noto Sans
   instead would agree on the advance width of every glyph it happens to share and be silently wrong about
