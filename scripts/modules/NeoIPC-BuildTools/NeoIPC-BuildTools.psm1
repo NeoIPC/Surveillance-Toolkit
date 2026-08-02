@@ -227,6 +227,20 @@ function Get-LocalisedPath {
         [Parameter(Mandatory, ParameterSetName = 'LiteralPath', Position = 1)]
         [Parameter(Mandatory, ParameterSetName = 'DirectoryFile', Position = 2)]
         [CultureInfo]$TargetCulture,
+        # Resolve to <Directory>/<culture>/<File> instead of the flat <Directory>/<File>.<culture>.<ext>.
+        #
+        # Two conventions exist because two tools own different halves. po4a writes a translated SOURCE
+        # into a per-language subdirectory, which is what the localization config declares and what
+        # doc/protocol/.gitignore expects. Everything this build GENERATES stays flat with a culture
+        # suffix, so that building several cultures cannot have one overwrite another. Most call sites
+        # want the flat form and are deliberately left alone; only a po4a-written input takes this switch.
+        #
+        # Reading the flat form for a po4a-written source is what stopped the localized protocol being
+        # built at all: the writer moved to subdirectories, the reader kept globbing the flat name that
+        # nothing produces any more, and a build rendering one culture exits exactly like one rendering
+        # three.
+        [Parameter(ParameterSetName = 'DirectoryFile')]
+        [switch]$Subdirectory,
         [switch]$Resolve,
         [switch]$All,
         [switch]$Existing
@@ -234,7 +248,18 @@ function Get-LocalisedPath {
 
     do {
         if (-not $LiteralPath) { $LiteralPath = Join-Path -Path $Directory -ChildPath $File }
-        $path = [System.IO.Path]::ChangeExtension($LiteralPath, $TargetCulture.Name + [System.IO.Path]::GetExtension($LiteralPath))
+        $path = if ($Subdirectory) {
+            # The invariant culture has an empty Name and is the untranslated source, which sits at the
+            # directory root under both conventions — so this collapses to the same path the flat form
+            # yields, which is why an English build worked throughout.
+            if ($TargetCulture.Name) {
+                Join-Path -Path $Directory -ChildPath $TargetCulture.Name -AdditionalChildPath $File
+            } else {
+                $LiteralPath
+            }
+        } else {
+            [System.IO.Path]::ChangeExtension($LiteralPath, $TargetCulture.Name + [System.IO.Path]::GetExtension($LiteralPath))
+        }
         $TargetCulture = $TargetCulture.Parent
         if ($Resolve) {
             if ($Existing) {
