@@ -21,6 +21,17 @@ sheet_heading: "NeoIPC – Core Module (VLBW/VPT Infants)"
 legend_one: "You can select only one option."
 legend_many: "You can select multiple options."
 
+# Heads the space left at the foot of the table. The sheet is one page and the fields rarely fill it
+# exactly; the remainder becomes room to write rather than white space.
+comments: "Comments"
+
+# Points the reader at the protocol for anything the form cannot say in a row. The section names are
+# translated as part of the protocol itself, so they are named here in full rather than cross-referenced:
+# a sheet is printed on its own and cannot resolve a reference into a document the reader may not have.
+footer_reference: >-
+  For more information, please see the Data Dictionary and Abbreviations sections of the NeoIPC Core
+  Module protocol.
+
 # Shown against a field the protocol requires. Kept as a word rather than an asterisk so that it survives
 # being read aloud, and so that a translator can choose a form that fits the language.
 required: "required"

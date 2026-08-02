@@ -67,9 +67,16 @@ ROW_PAD = 70                            # vertical padding above and below a row
 SECTION_BAND_H = 460
 MARK = 260                              # a choose-one circle or choose-any square
 MARK_GAP = 180                          # between a mark and its text
+COMMENTS_MIN = 1200                     # below this the leftover is a gap, not a usable writing space
 
 BAND_FILL = "#bdd7ee"
 ACCENT = "#2e74b5"                      # the blue of the two hand-drawn figures' headings
+
+# Referenced rather than inlined, because the only logo in the repository is a raster. A vector logo
+# would be inlined instead, which would make a sheet self-contained -- no dependency on what sits beside
+# it -- and would keep the last raster out of a figure that is otherwise entirely text and lines.
+LOGO = "LOGO_NEOIPC_2.png"
+LOGO_W, LOGO_H = 4200, 1861             # 6344 x 2810 in the hand-drawn sheet, kept to that aspect
 
 
 @dataclass
@@ -380,7 +387,8 @@ class SvgWriter:
 
     def sheet_svg(self, sheet: Sheet, body: list[str]) -> str:
         head = [
-            '<svg version="1.1" viewBox="0 0 %d %d" xmlns="http://www.w3.org/2000/svg">' % (PAGE_W, PAGE_H),
+            '<svg version="1.1" viewBox="0 0 %d %d" xmlns="http://www.w3.org/2000/svg" '
+            'xmlns:xlink="http://www.w3.org/1999/xlink">' % (PAGE_W, PAGE_H),
             "  <style>",
             "    text { font-family: 'Noto Sans'; fill: #000; }",
             "    text.title { font-size: %dpx; fill: %s; }" % (TITLE_SIZE, ACCENT),
@@ -416,6 +424,13 @@ def layout_sheet(sheet: Sheet, writer: SvgWriter) -> list[str]:
     writer._text(sheet.title, SUBTITLE_SIZE)
 
     y = MARGIN_TOP + TITLE_SIZE
+    # The logo is referenced relative to this file, which is the rule prawn-svg actually applies to an
+    # <image> href -- relative to the SVG, not to the document embedding it. So the emitter's output
+    # directory has to hold the logo, and the build is what guarantees that.
+    out.append(
+        f'  <image id="logo" xlink:href="{LOGO}" x="{PAGE_W - MARGIN_X - LOGO_W}" y="{MARGIN_TOP - 300}" '
+        f'width="{LOGO_W}" height="{LOGO_H}"/>'
+    )
     out.append(f'  <text id="heading" class="title" x="{MARGIN_X}" y="{y}">{_esc(heading)}</text>')
     y += SUBTITLE_SIZE + 220
     out.append(f'  <text id="{sheet.slug}-title" class="subtitle" x="{MARGIN_X}" y="{y}">{_esc(sheet.title)}</text>')
@@ -426,6 +441,17 @@ def layout_sheet(sheet: Sheet, writer: SvgWriter) -> list[str]:
     for section in sheet.sections:
         y = _emit_section(body, section, y, writer)
 
+    # Whatever the fields leave over becomes room to write, so the page is used rather than trailing off
+    # into white space. The comments band is emitted before the frame is sized so the frame encloses it.
+    legend_h = 2 * (MARK + 180) + 500
+    footer_h = SMALL_SIZE + 300
+    spare = (PAGE_H - MARGIN_BOTTOM - legend_h - footer_h) - y
+    if spare > COMMENTS_MIN:
+        writer._text(writer.chrome["comments"], LABEL_SIZE)
+        body.append(f'  <text class="label" x="{TEXT_X}" y="{y + ROW_PAD + LABEL_SIZE}">{_esc(writer.chrome["comments"])}</text>')
+        y += spare
+        body.append(f'  <line class="rule" x1="{MARGIN_X}" y1="{y}" x2="{MARGIN_X + CONTENT_W}" y2="{y}"/>')
+
     # The frame is emitted after the rows because its height is only known once they are laid out, and it
     # is emitted BEFORE them in document order so the band fills and rules draw over it rather than under.
     out.append(
@@ -433,6 +459,7 @@ def layout_sheet(sheet: Sheet, writer: SvgWriter) -> list[str]:
     )
     out.extend(body)
     y = _emit_legend(out, y, writer)
+    y = _emit_footer(out, y, writer)
 
     usable = PAGE_H - MARGIN_BOTTOM
     if y > usable:
@@ -453,6 +480,15 @@ def _emit_legend(out: list[str], y: int, writer: SvgWriter) -> int:
         _mark(out, f"legend-{'one' if radio else 'many'}", TEXT_X, y, radio)
         out.append(f'  <text class="legend" x="{TEXT_X + MARK + MARK_GAP}" y="{y + MARK - 20}">{_esc(text)}</text>')
         y += MARK + 180
+    return y
+
+
+def _emit_footer(out: list[str], y: int, writer: SvgWriter) -> int:
+    text = writer.chrome["footer_reference"]
+    writer._text(text, SMALL_SIZE)
+    for line in _fit(writer, text, SMALL_SIZE, CONTENT_W, "footer", "footer"):
+        y += SMALL_SIZE + 60
+        out.append(f'  <text class="legend" x="{MARGIN_X}" y="{y}">{_esc(line)}</text>')
     return y
 
 
