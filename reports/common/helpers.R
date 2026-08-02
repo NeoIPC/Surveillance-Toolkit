@@ -87,15 +87,20 @@ parse_locales <- function(x) {
 #     meaningful there — an Afrikaans term opening with the article 'n is the case in view, where the
 #     capital belongs on the following word.
 sentence_case <- function(text, language, rules, key = NULL) {
-  spec <- rules[[language]]
-  if (is.null(spec) || is.null(spec$rule)) {
-    stop(sprintf(paste0("No sentence-case rule declared for language '%s'. Add one to ",
-                        "reports/sentence-case.yaml before rendering this language."), language),
+  # The declared-language list is the only reason this can fail rather than guess. ICU fails OPEN: an
+  # unrecognised locale does not raise, it falls back to the root locale and returns a plausible capital
+  # — so without this check a newly added language would render with a rule nobody had checked, wrongly
+  # only where it matters, and silently.
+  if (!language %in% rules$languages) {
+    stop(sprintf(paste0("Language '%s' is not listed in reports/sentence-case.yaml. Add it once its ",
+                        "sentence-case behaviour has been checked; an unlisted language is refused ",
+                        "rather than guessed, because ICU would silently fall back to the root locale."),
+                 language),
          call. = FALSE)
   }
-  if (!is.null(key) && !is.null(spec$overrides[[key]])) return(spec$overrides[[key]])
+  override <- rules$overrides[[language]][[key]]
+  if (!is.null(key) && !is.null(override)) return(override)
   if (!nzchar(text)) return(text)
-  if (identical(spec$rule, "unchanged")) return(text)
 
   first <- substr(text, 1, 1)
   rest <- substr(text, 2, nchar(text))
@@ -106,17 +111,12 @@ sentence_case <- function(text, language, rules, key = NULL) {
                  if (is.null(key)) text else key),
          call. = FALSE)
   }
-  upper <- switch(spec$rule,
-    # stringr::str_to_upper takes a locale and resolves it through ICU, so the language's own casing
-    # rules apply rather than the build machine's. That matters concretely: Turkish `i` uppercases to
-    # `İ` (U+0130) and base toupper() yields a plain `I` unless the PROCESS locale is Turkish, which a
-    # container rendering nine languages is not. Delegating also covers languages nobody here has
-    # enumerated — Azerbaijani shares the Turkish rule, Lithuanian has its own — so this is correct for
-    # locales that have not been thought about, which a hand-written branch could never be.
-    capitalize_first = stringr::str_to_upper(first, locale = language),
-    stop(sprintf("Unknown sentence-case rule '%s' for language '%s'.", spec$rule, language),
-         call. = FALSE))
-  paste0(upper, rest)
+  # Only the FIRST character, and through a locale-aware call. Turkish `i` uppercases to `İ` (U+0130)
+  # where base toupper() yields a plain `I` outside a Turkish process locale, and delegating covers
+  # locales nobody here has enumerated. Never str_to_sentence() or str_to_title(): both normalise the
+  # whole string and would render "primary sepsis/BSI" as "Primary sepsis/bsi" and "AWaRe" as "Aware".
+  # A caseless script comes back unchanged from this without needing to be a special case.
+  paste0(stringr::str_to_upper(first, locale = language), rest)
 }
 
 get_string_resources <- function(x) {

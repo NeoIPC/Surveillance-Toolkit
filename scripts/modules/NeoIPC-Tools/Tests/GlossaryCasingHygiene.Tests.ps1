@@ -70,7 +70,7 @@ Describe 'Glossary casing' {
         $langs = @('en') + (([regex]::Match($cfg, '(?m)^\[po4a_langs\]\s*(.+)$').Groups[1].Value -split '\s+') |
             Where-Object { $_ })
         $declared = Select-String -LiteralPath (Join-Path $repoRoot 'reports' 'sentence-case.yaml') `
-            -Pattern '^([a-z]{2}):' | ForEach-Object { $_.Matches[0].Groups[1].Value }
+            -Pattern '^\s+-\s+([a-z]{2})\s*$' | ForEach-Object { $_.Matches[0].Groups[1].Value }
         $missing = $langs | Where-Object { $_ -notin $declared }
         ($missing -join ', ') | Should -BeExactly '' -Because (
             'an undeclared language stops the render, so it must be declared before it is built')
