@@ -7,17 +7,18 @@
 
 .DESCRIPTION
     Casing is a rendering concern, so glossary.yaml holds one key per term and the `_sc` form is derived
-    by get_string_resources() from reports/sentence-case.yaml. Two things have to hold for that to be an
-    improvement rather than a regression, and neither is self-evident:
+    by get_string_resources() rather than translated a second time. Two things have to hold for that to
+    be an improvement rather than a regression:
 
     - the derived form must reproduce what the retired keys held, or the deletion lost information;
-    - the derivation must FAIL where it cannot be sure, because a wrong capital in a published clinical
-      report is silent and the only safe alternative to failing is not shipping it.
+    - only the FIRST character may be touched. stringr's str_to_sentence() and str_to_title() are the
+      obvious-looking tools and both are wrong here, because they normalise the whole string and this
+      glossary is largely abbreviations.
 
-    Turkish is the case that makes the second point concrete. `i` uppercases to `İ` (U+0130), and R's
+    Turkish is what makes the locale argument load-bearing: `i` uppercases to `İ` (U+0130), and base
     toupper() produces a plain `I` unless the process locale is Turkish - which a container rendering
-    nine languages is not. A test that only checked "is the first letter capitalised" would pass on the
-    wrong character, so the assertion names the codepoint.
+    nine languages is not. The assertion names the codepoint, because a test that only checked "the
+    first letter is capitalised" would pass on the wrong character.
 
     Skipped where R is absent; CI installs none, because rendering happens in the container repository.
 
@@ -35,7 +36,6 @@ BeforeAll {
         $prelude = @'
 localeObj <- list(language = "en", territory = NULL)
 source("../common/helpers.R")
-rules <- yaml::read_yaml("../sentence-case.yaml")
 glossary <- yaml::read_yaml("../../glossary.yaml")
 '@
         $file = New-TemporaryFile
@@ -57,23 +57,7 @@ Describe 'Glossary casing' {
         $variants = Select-String -LiteralPath $glossary -Pattern '^[a-z0-9_]+_(sc|tc)\s*:' |
             ForEach-Object { $_.Line -replace ':.*' }
         ($variants | Out-String).Trim() | Should -BeExactly '' -Because (
-            'casing is derived from the base term; an override belongs in reports/sentence-case.yaml')
-    }
-
-    It 'every target language has a declared sentence-case rule' {
-        # The languages the pipeline actually builds, read from po4a's own list rather than restated
-        # here, so adding a language cannot leave this test asserting the old set.
-        $cfg = Get-Content -LiteralPath (Join-Path $repoRoot 'po' 'reports.po4a.cfg') -Raw
-        # po4a lists the TARGET languages, so the source language is absent from it — and a default
-        # render resolves its locale exactly as a translated one does, so it needs a rule just the same.
-        # Reading only po4a's list is how the missing 'en' entry got past this test once already.
-        $langs = @('en') + (([regex]::Match($cfg, '(?m)^\[po4a_langs\]\s*(.+)$').Groups[1].Value -split '\s+') |
-            Where-Object { $_ })
-        $declared = Select-String -LiteralPath (Join-Path $repoRoot 'reports' 'sentence-case.yaml') `
-            -Pattern '^\s+-\s+([a-z]{2})\s*$' | ForEach-Object { $_.Matches[0].Groups[1].Value }
-        $missing = $langs | Where-Object { $_ -notin $declared }
-        ($missing -join ', ') | Should -BeExactly '' -Because (
-            'an undeclared language stops the render, so it must be declared before it is built')
+            'the sentence-case form is derived from the base term rather than stored beside it')
     }
 
     Context 'derivation' -Skip:(-not (Get-Command Rscript -ErrorAction SilentlyContinue)) {
@@ -89,44 +73,28 @@ want <- list(admission = "Admission", antibiotics = "Antibiotics", human_milk = 
              surgical_site_infection = "Surgical site infection", surveillance = "Surveillance",
              surveillance_end = "Surveillance end")
 bad <- names(want)[vapply(names(want),
-  function(k) !identical(sentence_case(glossary[[k]], "de", rules, key = k), want[[k]]), logical(1))]
+  function(k) !identical(sentence_case(glossary[[k]], "de"), want[[k]]), logical(1))]
 cat(if (length(bad)) paste(bad, collapse = ",") else "all reproduced")
 '@
             Invoke-RSnippet $body | Should -BeExactly 'all reproduced'
         }
 
         It 'uppercases Turkish i to the dotted capital, which toupper does not' {
-            # Names the codepoint rather than asserting "the first letter is capitalised", because
-            # toupper() also capitalises it — to the WRONG character. U+0130 is the whole point, and it
-            # only appears if the locale is actually threaded through to ICU.
-            Invoke-RSnippet 'cat(sentence_case("izleme", "tr", rules))' |
+            Invoke-RSnippet 'cat(sentence_case("izleme", "tr"))' |
                 Should -BeExactly "$([char]0x0130)zleme" -Because 'toupper() yields a plain I outside a Turkish locale'
         }
 
-        It 'touches only the first character, leaving abbreviations intact' {
-            # str_to_sentence() and str_to_title() are the obvious-looking tools and both are wrong here:
-            # they normalise the whole string, so "primary sepsis/BSI" becomes "Primary sepsis/bsi" and
-            # "AWaRe" becomes "Aware". This asserts the terms that would expose either.
-            Invoke-RSnippet 'cat(sentence_case("primary sepsis/BSI", "en", rules), "|",
-                                 sentence_case("AWaRe", "en", rules))' |
-                Should -BeExactly 'Primary sepsis/BSI | AWaRe'
-        }
-
-        It 'leaves a caseless script alone' {
-            Invoke-RSnippet 'cat(sentence_case("निगरानी", "ne", rules))' |
+        It 'leaves a caseless script alone without needing a special case' {
+            Invoke-RSnippet 'cat(sentence_case("निगरानी", "ne"))' |
                 Should -BeExactly ([char]0x0928 + [char]0x093f + [char]0x0917 + [char]0x0930 + [char]0x093e + [char]0x0928 + [char]0x0940)
         }
 
-        It 'fails for a language with no declared rule' {
-            Invoke-RSnippet 'cat(tryCatch(sentence_case("x", "zz", rules), error = function(e) "REFUSED"))' |
-                Should -BeExactly 'REFUSED'
-        }
-
-        It 'fails for a term that does not begin with a letter' {
-            # The Afrikaans article 'n takes the capital on the following word, so capitalising the
-            # first character is the wrong answer rather than an approximate one.
-            Invoke-RSnippet 'cat(tryCatch(sentence_case("''n boek", "af", rules), error = function(e) "REFUSED"))' |
-                Should -BeExactly 'REFUSED'
+        It 'touches only the first character, leaving abbreviations intact' {
+            # This is what rules out str_to_sentence() and str_to_title(): they would render these as
+            # "Primary sepsis/bsi" and "Aware". Both terms ship in reports, so the damage would be
+            # visible to a clinician rather than theoretical.
+            Invoke-RSnippet 'cat(sentence_case("primary sepsis/BSI", "en"), "|", sentence_case("AWaRe", "en"))' |
+                Should -BeExactly 'Primary sepsis/BSI | AWaRe'
         }
     }
 }

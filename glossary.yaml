@@ -43,10 +43,10 @@
 # the casing axis multiplied against the plural axis, so one term needing six Arabic forms would have
 # needed eighteen keys. Title case was carried for five terms and rendered by nothing at all.
 #
-# The rules live in reports/sentence-case.yaml, which is repository-owned and not translatable. A
-# language with no rule declared there is a build failure rather than a guess, because a wrong capital
-# in a published report is silent. That file is also where a term whose sentence-case form no rule can
-# produce gets an explicit override.
+# The rule is `sentence_case()` in reports/common/helpers.R: uppercase the FIRST CHARACTER ONLY, through
+# stringr's locale-aware casing, so Turkish `i` becomes `İ` and a caseless script comes back unchanged.
+# Never str_to_sentence() or str_to_title() — both normalise the whole string, which would render
+# "primary sepsis/BSI" as "Primary sepsis/bsi" and "AWaRe" as "Aware".
 #
 # Available flags (see https://docs.weblate.org/en/latest/admin/checks.html):
 #   read-only          — non-editable, translation locked

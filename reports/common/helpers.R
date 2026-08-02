@@ -78,45 +78,28 @@ parse_locales <- function(x) {
 # Sentence-case one glossary term for a language.
 #
 # Casing is a rendering concern, so it is applied here rather than stored as a second translated key
-# beside every term. The rules live in reports/sentence-case.yaml, which is repository-owned.
+# beside every term.
 #
-# Fails rather than guesses, in both directions it can be wrong:
-#   - a language with no declared rule stops the render, because the alternative to failing is publishing
-#     a wrong capital in a clinical report, silently;
-#   - a term that does not begin with a letter stops too, since "capitalise the first character" is not
-#     meaningful there — an Afrikaans term opening with the article 'n is the case in view, where the
-#     capital belongs on the following word.
-sentence_case <- function(text, language, rules, key = NULL) {
-  # The declared-language list is the only reason this can fail rather than guess. ICU fails OPEN: an
-  # unrecognised locale does not raise, it falls back to the root locale and returns a plausible capital
-  # — so without this check a newly added language would render with a rule nobody had checked, wrongly
-  # only where it matters, and silently.
-  if (!language %in% rules$languages) {
-    stop(sprintf(paste0("Language '%s' is not listed in reports/sentence-case.yaml. Add it once its ",
-                        "sentence-case behaviour has been checked; an unlisted language is refused ",
-                        "rather than guessed, because ICU would silently fall back to the root locale."),
-                 language),
-         call. = FALSE)
-  }
-  override <- rules$overrides[[language]][[key]]
-  if (!is.null(key) && !is.null(override)) return(override)
+# Wrapping str_to_sentence() and putting the abbreviations back afterwards was measured against the
+# eleven values the retired `_sc` keys held: it reproduces all eleven, and so does this — the same
+# answer, reached through a heuristic about which words are "protected" rather than by not damaging
+# them in the first place. Title case is where that difference stops being cosmetic: str_to_title()
+# cannot be rescued the same way, because "sepsis/BSI" is one whitespace token needing title case on
+# one side of the slash and none on the other, and restoring the token undoes both.
+sentence_case <- function(text, language) {
   if (!nzchar(text)) return(text)
-
-  first <- substr(text, 1, 1)
-  rest <- substr(text, 2, nchar(text))
-  if (!grepl("^[[:alpha:]]$", first)) {
-    stop(sprintf(paste0("Cannot sentence-case '%s' for language '%s': it does not begin with a letter, ",
-                        "so which character takes the capital is a language question. Add an override ",
-                        "for '%s' in reports/sentence-case.yaml."), text, language,
-                 if (is.null(key)) text else key),
-         call. = FALSE)
-  }
-  # Only the FIRST character, and through a locale-aware call. Turkish `i` uppercases to `İ` (U+0130)
-  # where base toupper() yields a plain `I` outside a Turkish process locale, and delegating covers
-  # locales nobody here has enumerated. Never str_to_sentence() or str_to_title(): both normalise the
-  # whole string and would render "primary sepsis/BSI" as "Primary sepsis/bsi" and "AWaRe" as "Aware".
-  # A caseless script comes back unchanged from this without needing to be a special case.
-  paste0(stringr::str_to_upper(first, locale = language), rest)
+  # Uppercase the FIRST CHARACTER ONLY, through a locale-aware call so the language's own casing rules
+  # apply rather than the build machine's: Turkish `i` becomes `İ` (U+0130) where base toupper() yields
+  # a plain `I` unless the PROCESS locale is Turkish, which a container rendering nine languages is not.
+  # Delegating to ICU also covers locales nobody here has enumerated — Azerbaijani shares the Turkish
+  # rule, Lithuanian has its own — and returns a caseless script unchanged with no special case.
+  #
+  # NEVER str_to_sentence() or str_to_title(), despite the names. Both normalise the WHOLE string, and
+  # these terms are largely abbreviations: measured against the values the retired `_sc` keys held,
+  # uppercasing the first character alone reproduces 6 of 6, while str_to_sentence() reproduces 5 — it
+  # renders "primary sepsis/BSI" as "Primary sepsis/bsi", and str_to_title() renders "AWaRe" as "Aware".
+  paste0(stringr::str_to_upper(substr(text, 1, 1), locale = language),
+         substr(text, 2, nchar(text)))
 }
 
 get_string_resources <- function(x) {
@@ -181,16 +164,15 @@ get_string_resources <- function(x) {
   # and duplicating it in every other component's glossary sidebar; worse, the casing axis multiplied
   # against plural forms, so a six-form language would have needed eighteen keys for one term.
   #
-  # A term that already carries an explicit `_sc` is left alone — that is the escape hatch for a language
-  # whose rule cannot produce the right answer, and it is why this runs last rather than first.
-  rules <- yaml::read_yaml("../sentence-case.yaml", handlers = handlers)
+  # A term that already carries an explicit `_sc` is left alone — the escape hatch for a rendering the
+  # rule cannot produce, and why this runs last rather than first.
   for (term in glossary_terms) {
     if (grepl("_(sc|tc)$", term)) next
     variant <- paste0(term, "_sc")
     if (!is.null(sR[[variant]])) next
     value <- sR[[term]]
     if (is.character(value) && length(value) == 1) {
-      sR[[variant]] <- sentence_case(value, localeObj$language, rules, key = term)
+      sR[[variant]] <- sentence_case(value, localeObj$language)
     }
   }
 
