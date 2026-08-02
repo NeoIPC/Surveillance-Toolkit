@@ -328,6 +328,55 @@ function Test-PowerShellHeader {
     }
 }
 
+function Test-ConvertToJsonDepth {
+    param([string]$Repo, [string]$Label)
+
+    # ConvertTo-Json defaults to -Depth 2 and drops everything below it. The default is wrong here in the
+    # way that costs most: the object still serialises, the output still looks like JSON, and the only
+    # signal is a warning on a stream nobody reads in CI. A workspace poll script put a nested GraphQL
+    # error into a job log as `@{line=1; column=9}` — a PowerShell hashtable stringified where JSON was
+    # meant — and that string was the diagnostic for an outage, so the one place it degraded was the one
+    # place someone was reading. Nothing here is defended against depth, so there is no case for a
+    # shallower cap and the rule is simply the maximum the parameter accepts (its range is 0..100).
+    #
+    # Matched on the AST, not by grepping the command name: many textual hits are the phrase appearing
+    # inside explanatory comments, and a regex cannot tell those from a call.
+    foreach ($file in (& git -C $Repo ls-files '*.ps1' '*.psm1')) {
+        if (-not $file) { continue }
+        $full = Join-Path $Repo $file
+        if (-not (Test-Path -LiteralPath $full -PathType Leaf)) { continue }
+
+        $tokens = $null; $errors = $null
+        $ast = [System.Management.Automation.Language.Parser]::ParseFile($full, [ref]$tokens, [ref]$errors)
+        # A file that does not parse is already reported by the header check; saying so twice is noise.
+        if ($errors.Count) { continue }
+
+        $calls = $ast.FindAll({
+                param($node)
+                $node -is [System.Management.Automation.Language.CommandAst] -and
+                $node.GetCommandName() -eq 'ConvertTo-Json'
+            }, $true)
+
+        foreach ($call in $calls) {
+            # PowerShell binds any unambiguous prefix, so -Dep and -D reach -Depth exactly as -Depth does.
+            $hasDepth = $call.CommandElements | Where-Object {
+                $_ -is [System.Management.Automation.Language.CommandParameterAst] -and
+                $_.ParameterName -and
+                'Depth'.StartsWith($_.ParameterName, [System.StringComparison]::OrdinalIgnoreCase)
+            }
+            # A splatted call carries its parameters in a hashtable this check cannot read, so it is left
+            # alone rather than failed on a construct the check does not understand.
+            $isSplatted = $call.CommandElements | Where-Object {
+                $_ -is [System.Management.Automation.Language.VariableExpressionAst] -and $_.Splatted
+            }
+            if (-not $hasDepth -and -not $isSplatted) {
+                $failures.Add("$Label`: $file line $($call.Extent.StartLineNumber) calls ConvertTo-Json " +
+                    'without -Depth — the default of 2 truncates silently; pass -Depth 100')
+            }
+        }
+    }
+}
+
 # Everything in scope is swept in full or the run fails; the scope never quietly shrinks. Passing over a root
 # is indistinguishable in the output from having checked it, and that is not hypothetical: two uninitialized
 # submodules took a superproject sweep from eight repositories to six and it still printed OK, and a source
@@ -394,6 +443,7 @@ foreach ($repo in $repoList) {
     Test-LineEnding      -Repo $repo -Label $label
     Test-Encoding        -Repo $repo -Label $label
     Test-PowerShellHeader -Repo $repo -Label $label
+    Test-ConvertToJsonDepth -Repo $repo -Label $label
     if ($checkedFiles -eq $filesBefore) {
         $inspectedNothing.Add([pscustomobject]@{
             Repo   = $repo
