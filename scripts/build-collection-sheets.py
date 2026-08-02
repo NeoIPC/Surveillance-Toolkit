@@ -249,6 +249,28 @@ class LayoutRules:
             rules = yaml.load(handle) or {}
         self.default = rules.get("default_boolean", "tick")
         self.styles: dict[str, str] = rules.get("boolean_style") or {}
+        self.section_order: dict[str, list[str]] = rules.get("section_order") or {}
+
+    def order_sections(self, stage_code: str, sections: list[dict]) -> list[dict]:
+        """Print order, which is not the capture order the metadata records.
+
+        Refuses a list that does not account for every section of the stage. Silently dropping one would
+        not read as a layout mistake on the finished sheet -- it would read as a field that is not
+        collected.
+        """
+        wanted = self.section_order.get(stage_code)
+        if not wanted:
+            return sorted(sections, key=lambda s: _as_int(s["sortOrder"]))
+        present = {s["code"] for s in sections}
+        if set(wanted) != present:
+            missing = ", ".join(sorted(present - set(wanted))) or "none"
+            unknown = ", ".join(sorted(set(wanted) - present)) or "none"
+            raise LookupError(
+                f"section_order for {stage_code} does not match the stage: not listed = {missing}; "
+                f"listed but not in the stage = {unknown}. Every section must be named."
+            )
+        by_code = {s["code"]: s for s in sections}
+        return [by_code[code] for code in wanted]
 
     def boolean_style(self, field: Field) -> str:
         if field.options or field.value_type not in ("BOOLEAN", "TRUE_ONLY"):
@@ -321,13 +343,12 @@ class Overflow(Exception):
 # ── Sheet assembly ──────────────────────────────────────────────────────────────────────────────────
 
 
-def build_sheets(meta: Metadata, catalogue: Catalogue) -> list[Sheet]:
+def build_sheets(meta: Metadata, catalogue: Catalogue, rules: LayoutRules) -> list[Sheet]:
     """One sheet per program stage, in the stages' own sort order."""
     sections_by_stage: dict[str, list[dict]] = {}
     for section in meta.sections:
         sections_by_stage.setdefault(section["programStage"], []).append(section)
-    for group in sections_by_stage.values():
-        group.sort(key=lambda s: _as_int(s["sortOrder"]))
+    # Ordering happens per stage below, because it needs the stage's code to look up an override.
 
     elements_by_stage: dict[str, dict[str, dict]] = {}
     for link in meta.stage_elements:
@@ -341,7 +362,7 @@ def build_sheets(meta: Metadata, catalogue: Catalogue) -> list[Sheet]:
             slug=_slug(stage["code"]),
             title=catalogue.get(f"programStages/{stage['code']}/NAME", stage["name"]),
         )
-        for section in sections_by_stage.get(stage["id"], []):
+        for section in rules.order_sections(stage["code"], sections_by_stage.get(stage["id"], [])):
             model = Section(
                 code=section["code"],
                 title=catalogue.get(f"programStageSections/{section['code']}/NAME", section["name"]),
@@ -724,7 +745,7 @@ def main(argv: list[str] | None = None) -> int:
     bold = Face(args.fonts / f"{family}-Bold.ttf")
 
     meta = Metadata(args.metadata)
-    sheets = build_sheets(meta, catalogue)
+    sheets = build_sheets(meta, catalogue, rules)
     if args.sheet:
         sheets = [s for s in sheets if s.code == args.sheet]
         if not sheets:

@@ -26,6 +26,21 @@ boolean_style:
   NEOIPC_BSI_AB_TREATMENT: yes_no
   NEOIPC_BSI_NO_POS_CULTURE: yes_no
 
+# The order sections are PRINTED in, where it differs from programStageSections' sortOrder.
+#
+# Those are two different questions and the metadata only answers one of them. DHIS2's order is capture
+# ergonomics -- what a person clicks through on a screen, arranged for technical reasons -- while a
+# sheet's order is the order someone fills a form in with a pen. On the surveillance-end sheet they
+# disagree outright: the stage puts Antibiotics first, and the published form ends with it, because a
+# person records the end of surveillance and the cumulative day counts before totting up the substances.
+#
+# A list here must name EVERY section of that stage. A partial list would silently drop the sections it
+# omits, which on a form is not a layout problem but a lost field.
+section_order:
+  NEOIPC_STG_SURV_END:
+    - NEOIPC_SURV_END_STG_SECT_END
+    - NEOIPC_SURV_END_STG_SECT_AB
+
 # Editorial groupings: several elements printed as ONE row, because asking them separately would be
 # repetitive on paper and the answer is a single choice in practice. The elements keep their separate
 # existence in the data model; only the printed form collapses them.
