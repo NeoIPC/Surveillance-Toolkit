@@ -1,0 +1,42 @@
+# Presentation decisions for the generated data collection sheets.
+#
+# The canonical metadata says what is collected; it does not say how a form should ASK for it, and the
+# published forms make choices that cannot be derived from any field in it. This file is where those
+# choices are written down, so the generator reads a decision instead of guessing one.
+#
+# It is NOT a second source of truth for the data model. Nothing here names a field the metadata does not
+# already define, adds a field, or changes a label. If a change to this file would alter what is
+# collected rather than how it is printed, it belongs in metadata/common/ instead.
+#
+# Why a mapping is unavoidable: the value type does not determine the marker, and the published forms are
+# the proof. `NEOIPC_BSI_AB_THERAPY` is TRUE_ONLY and is printed as a pair of choose-one circles, Yes and
+# No; the nine BOOLEAN signs-and-symptoms elements beside it are each printed as a single choose-any
+# square. That is the opposite of what either type suggests, it is a considered editorial choice about how
+# a criterion reads on paper, and a generator that inferred it from valueType would confidently get it
+# backwards.
+
+# How a field with no option set is asked. Keyed by data element code; `default_boolean` covers the rest.
+#
+#   tick    a single square. Presence is what is recorded -- the natural form for a criterion in a list.
+#   yes_no  a pair of circles. Use where the negative answer carries information of its own.
+#   write   a ruled space. The default for numbers and free text.
+default_boolean: tick
+
+boolean_style:
+  NEOIPC_BSI_AB_TREATMENT: yes_no
+  NEOIPC_BSI_NO_POS_CULTURE: yes_no
+
+# Editorial groupings: several elements printed as ONE row, because asking them separately would be
+# repetitive on paper and the answer is a single choice in practice. The elements keep their separate
+# existence in the data model; only the printed form collapses them.
+#
+# Each group carries a footnote so the sheet says plainly what the reader is being asked to do — a
+# collapsed row without one is a form that quietly loses a distinction the model draws.
+groups: []
+
+# Repeated slots (organism 1..n, antibiotic substance 1..n) are printed as compact blocks rather than as
+# one labelled row per element. How many slots a sheet prints is a decision about the paper, not about the
+# model: the published master sheet offers six antibiotic substance slots where the metadata carries nine,
+# and the published BSI sheet offers three organism slots. Record the printed count here so that the
+# difference is deliberate and visible rather than an accident of whoever last edited a Word file.
+slots: {}

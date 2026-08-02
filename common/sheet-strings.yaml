@@ -9,9 +9,17 @@
 # Keep this list short. A string that describes a field belongs in the metadata, not here; the test is
 # whether it would still be needed if the sheet were a different shape.
 
-# The two labels on a yes/no checkbox pair.
+# The two labels on a yes/no pair.
 boolean_yes: "Yes"
 boolean_no: "No"
+
+# The heading above every sheet. The line below it is the stage's own name, which comes from the metadata.
+sheet_heading: "NeoIPC – Core Module (VLBW/VPT Infants)"
+
+# The legend that gives the two markers their meaning. Without it the shapes are decoration, and a reader
+# has no way to know that one of them means "pick exactly one".
+legend_one: "You can select only one option."
+legend_many: "You can select multiple options."
 
 # Shown against a field the protocol requires. Kept as a word rather than an asterisk so that it survives
 # being read aloud, and so that a translator can choose a form that fits the language.

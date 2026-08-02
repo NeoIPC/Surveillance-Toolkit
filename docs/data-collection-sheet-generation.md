@@ -151,16 +151,27 @@ What the published forms actually do, read off them rather than assumed:
 - Every sheet opens with a **Patient** band carrying the local patient ID and name — the identifiers the
   protocol forbids submitting, present precisely because the paper stays in the hospital.
 
-Two things there are **editorial and not derivable**, and generation must not pretend otherwise. The
-published BSI sheet collapses MRSA, VRE and 3GCR into a single row carrying a footnote — "mark the
-resistance profile appropriate to the isolated microorganism" — where the metadata has one element each;
-and it shows three organism slots where the metadata may hold more. Where the form groups or truncates
-what the model separates, that is a decision, and it belongs in an explicit, checked-in mapping rather
-than in the generator's inference.
+### What is editorial, and why a mapping is unavoidable
 
-That the two disagree is itself the argument for generating: the published master sheet offers **six**
-antibiotic substance slots and the metadata carries **nine**. The form has been behind the data model, in
-public, with nothing to say so.
+**The value type does not determine how a field is asked, and the published forms prove it by inverting
+what either type suggests.** `NEOIPC_BSI_AB_TREATMENT` is `TRUE_ONLY` and is printed as a pair of
+choose-one circles, Yes and No. The nine `BOOLEAN` signs-and-symptoms elements beside it are each printed
+as a single choose-any square, with no negative answer at all. A generator inferring the marker from
+`valueType` would confidently get both backwards, so the decision is read from `common/sheet-layout.yaml`
+rather than derived. That file holds presentation only — it may not name a field the metadata does not
+define, add one, or change a label.
+
+The other editorial act is **grouping**: the published BSI sheet collapses MRSA, VRE and 3GCR into one row
+under a footnote, "mark the resistance profile appropriate to the isolated microorganism", where the
+metadata has an element each. A collapsed row without that footnote is a form that quietly loses a
+distinction the model draws, so the mapping carries the footnote with the group.
+
+**Slot counts are the same kind of decision, and one of them is currently wrong in public.** Checked
+rather than assumed: BSI, HAP and SSI each carry exactly three organism slots in the metadata and the
+published sheets print three, so nothing is truncated there. But the metadata carries **nine** antibiotic
+substance slots and the published master sheet offers **six**. The form has been behind the data model, on
+the website, with nothing to say so — which is the argument for generating, and the reason the printed
+count is recorded as a decision instead of left to whoever last edited a Word file.
 
 ## House style: the output is read by people
 

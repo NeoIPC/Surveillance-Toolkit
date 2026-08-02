@@ -47,24 +47,27 @@ except ImportError:  # pragma: no cover
 # their head. A4 portrait is 21000 x 29700.
 
 PAGE_W, PAGE_H = 21000, 29700
-MARGIN_X, MARGIN_TOP, MARGIN_BOTTOM = 1000, 1000, 1500
+MARGIN_X, MARGIN_TOP, MARGIN_BOTTOM = 1250, 1000, 1200
 CONTENT_W = PAGE_W - 2 * MARGIN_X
 
-# The label column takes the left 58 % of the content width. Chosen once, here, rather than per sheet:
-# a form whose columns move from page to page is harder to fill in than one with a slightly cramped label.
-LABEL_W = int(CONTENT_W * 0.58)
-INPUT_X = MARGIN_X + LABEL_W + 200
+# There is no input COLUMN. A field is a full-width row: the label in bold at the left, and the rest of
+# the row is the space to write in -- which is what the published forms do and is most of why they fit one
+# page. Splitting the row into a label column and an input column, which is the obvious first design,
+# wastes the majority of the sheet and turned the primary sepsis form into three pages.
+TEXT_X = MARGIN_X + 180                 # left text inset inside the table
+OPTION_INDENT = 700                     # options sit indented under their field
+OPTION_GAP = 700                        # space between options laid out along one line
 
-TITLE_SIZE, SECTION_SIZE, LABEL_SIZE, OPTION_SIZE, SMALL_SIZE = 620, 380, 320, 300, 260
-LINE_GAP = 120          # leading between wrapped lines of one label
-ROW_PAD = 130           # vertical padding inside a field row
-SECTION_BAND_H = 620
-BOX_H = 420             # a single-line entry box
-CHECK = 300             # a checkbox square
+TITLE_SIZE, SUBTITLE_SIZE = 560, 400
+SECTION_SIZE, LABEL_SIZE, OPTION_SIZE, SMALL_SIZE = 340, 320, 300, 250
+LINE_GAP = 110                          # leading between wrapped lines of one text run
+ROW_PAD = 100                           # vertical padding above and below a row's text
+SECTION_BAND_H = 520
+MARK = 260                              # a choose-one circle or choose-any square
+MARK_GAP = 180                          # between a mark and its text
 
-# An option's text starts after its checkbox and a gap, and runs to the right margin.
-OPTION_X = INPUT_X + CHECK + 150
-OPTION_W = PAGE_W - MARGIN_X - OPTION_X
+BAND_FILL = "#bdd7ee"
+ACCENT = "#2e74b5"                      # the blue of the two hand-drawn figures' headings
 
 
 @dataclass
@@ -165,6 +168,28 @@ class Catalogue:
 
     def get(self, context: str, source: str) -> str:
         return self.entries.get(context, source)
+
+
+class LayoutRules:
+    """The editorial half: how a field is ASKED, which the metadata does not say.
+
+    The published forms settle that this cannot be inferred. `NEOIPC_BSI_AB_TREATMENT` is TRUE_ONLY and
+    is printed as a choose-one Yes/No pair; the BOOLEAN signs-and-symptoms elements beside it are each a
+    single choose-any square with no negative answer. Reading valueType would get both backwards, so the
+    decision is looked up here and an unlisted field takes the declared default.
+    """
+
+    def __init__(self, path: Path):
+        yaml = YAML(typ="safe")
+        with path.open(encoding="utf-8") as handle:
+            rules = yaml.load(handle) or {}
+        self.default = rules.get("default_boolean", "tick")
+        self.styles: dict[str, str] = rules.get("boolean_style") or {}
+
+    def boolean_style(self, field: Field) -> str:
+        if field.options or field.value_type not in ("BOOLEAN", "TRUE_ONLY"):
+            return "write"
+        return self.styles.get(field.code, self.default)
 
 
 def load_chrome(path: Path, catalogue: Catalogue) -> dict[str, str]:
@@ -290,7 +315,14 @@ def _field_of(meta: Metadata, catalogue: Catalogue, element: dict, link: dict) -
         value_type=element["valueType"],
         compulsory=(link.get("compulsory") or "").lower() == "true",
         options=options,
-        radio=(link.get("renderOptionsAsRadio") or "").lower() == "true",
+        # An option-set field holds ONE value, so its choices are choose-one: a circle. Deliberately not
+        # taken from renderOptionsAsRadio, which is a widget hint for the capture app rather than a
+        # statement about cardinality -- it is False for the admission type, a field with exactly one
+        # answer, and reading it would print choose-any squares against a question that permits one tick.
+        # Where a published form re-expresses a combined option as several independent ticks -- the BSI
+        # organism source, whose set carries Blood, CSF and Both -- that is an editorial decision and
+        # belongs in the layout mapping, not here.
+        radio=True,
     )
 
 
@@ -309,8 +341,8 @@ class SvgWriter:
     regenerating with unchanged metadata produces a byte-identical file.
     """
 
-    def __init__(self, face: Face, bold: Face, chrome: dict[str, str], language: str | None):
-        self.face, self.bold, self.chrome, self.language = face, bold, chrome, language
+    def __init__(self, face: Face, bold: Face, chrome: dict[str, str], layout: LayoutRules, language: str | None):
+        self.face, self.bold, self.chrome, self.layout, self.language = face, bold, chrome, layout, language
         self.missing: dict[str, set[str]] = {}
 
     def _text(self, text: str, size: int, bold: bool = False) -> None:
@@ -319,20 +351,23 @@ class SvgWriter:
         if absent:
             self.missing.setdefault(face.path.name, set()).update(absent)
 
-    def sheet_svg(self, sheet: Sheet, page: int, pages: int, body: list[str]) -> str:
+    def sheet_svg(self, sheet: Sheet, body: list[str]) -> str:
         head = [
             '<svg version="1.1" viewBox="0 0 %d %d" xmlns="http://www.w3.org/2000/svg">' % (PAGE_W, PAGE_H),
             "  <style>",
             "    text { font-family: 'Noto Sans'; fill: #000; }",
-            "    text.title { font-size: %dpx; font-weight: bold; }" % TITLE_SIZE,
-            "    text.section { font-size: %dpx; font-weight: bold; }" % SECTION_SIZE,
-            "    text.label { font-size: %dpx; }" % LABEL_SIZE,
+            "    text.title { font-size: %dpx; fill: %s; }" % (TITLE_SIZE, ACCENT),
+            "    text.subtitle { font-size: %dpx; fill: %s; }" % (SUBTITLE_SIZE, ACCENT),
+            "    text.section { font-size: %dpx; text-anchor: middle; }" % SECTION_SIZE,
+            "    text.label { font-size: %dpx; font-weight: bold; }" % LABEL_SIZE,
             "    text.option { font-size: %dpx; }" % OPTION_SIZE,
-            "    text.small { font-size: %dpx; fill: #444; }" % SMALL_SIZE,
-            "    rect.box { fill: none; stroke: #000; stroke-width: 20; }",
-            "    rect.check { fill: none; stroke: #000; stroke-width: 20; }",
-            "    rect.band { fill: #e8eef4; stroke: none; }",
-            "    line.rule { stroke: #999; stroke-width: 12; }",
+            "    text.legend { font-size: %dpx; font-style: italic; }" % SMALL_SIZE,
+            "    rect.band { fill: %s; stroke: none; }" % BAND_FILL,
+            "    rect.frame { fill: none; stroke: #000; stroke-width: 20; }",
+            "    rect.mark { fill: none; stroke: #000; stroke-width: 18; }",
+            "    circle.mark { fill: none; stroke: #000; stroke-width: 18; }",
+            "    line.rule { stroke: #000; stroke-width: 12; }",
+            "    line.write { stroke: #000; stroke-width: 12; }",
             "  </style>",
         ]
         return "\n".join(head + body + ["</svg>", ""])
@@ -348,13 +383,28 @@ def layout_sheet(sheet: Sheet, writer: SvgWriter) -> list[str]:
     on its own by spilling onto another page.
     """
     out: list[str] = []
-    y = MARGIN_TOP + TITLE_SIZE
-    writer._text(sheet.title, TITLE_SIZE, bold=True)
-    out.append(f'  <text id="{sheet.slug}-title" class="title" x="{MARGIN_X}" y="{y}">{_esc(sheet.title)}</text>')
-    y += 700
+    heading = writer.chrome["sheet_heading"]
+    writer._text(heading, TITLE_SIZE)
+    writer._text(sheet.title, SUBTITLE_SIZE)
 
+    y = MARGIN_TOP + TITLE_SIZE
+    out.append(f'  <text id="heading" class="title" x="{MARGIN_X}" y="{y}">{_esc(heading)}</text>')
+    y += SUBTITLE_SIZE + 220
+    out.append(f'  <text id="{sheet.slug}-title" class="subtitle" x="{MARGIN_X}" y="{y}">{_esc(sheet.title)}</text>')
+    y += 400
+
+    table_top = y
+    body: list[str] = []
     for section in sheet.sections:
-        y = _emit_section(out, section, y, writer)
+        y = _emit_section(body, section, y, writer)
+
+    # The frame is emitted after the rows because its height is only known once they are laid out, and it
+    # is emitted BEFORE them in document order so the band fills and rules draw over it rather than under.
+    out.append(
+        f'  <rect class="frame" x="{MARGIN_X}" y="{table_top}" width="{CONTENT_W}" height="{y - table_top}"/>'
+    )
+    out.extend(body)
+    y = _emit_legend(out, y, writer)
 
     usable = PAGE_H - MARGIN_BOTTOM
     if y > usable:
@@ -366,43 +416,105 @@ def layout_sheet(sheet: Sheet, writer: SvgWriter) -> list[str]:
     return out
 
 
+def _emit_legend(out: list[str], y: int, writer: SvgWriter) -> int:
+    """What the two markers mean. Every published sheet carries it, and without it the shapes are decor."""
+    y += 500
+    for radio, key in ((True, "legend_one"), (False, "legend_many")):
+        text = writer.chrome[key]
+        writer._text(text, SMALL_SIZE)
+        _mark(out, f"legend-{'one' if radio else 'many'}", TEXT_X, y, radio)
+        out.append(f'  <text class="legend" x="{TEXT_X + MARK + MARK_GAP}" y="{y + MARK - 20}">{_esc(text)}</text>')
+        y += MARK + 180
+    return y
+
+
 def _emit_section(out: list[str], section: Section, y: int, writer: SvgWriter) -> int:
-    writer._text(section.title, SECTION_SIZE, bold=True)
+    writer._text(section.title, SECTION_SIZE)
     out.append(f'  <rect class="band" x="{MARGIN_X}" y="{y}" width="{CONTENT_W}" height="{SECTION_BAND_H}"/>')
     out.append(
-        f'  <text id="{_slug(section.code)}" class="section" x="{MARGIN_X + 150}" '
-        f'y="{y + SECTION_BAND_H - 180}">{_esc(section.title)}</text>'
+        f'  <text id="{_slug(section.code)}" class="section" x="{PAGE_W // 2}" '
+        f'y="{y + SECTION_BAND_H - 150}">{_esc(section.title)}</text>'
     )
-    y += SECTION_BAND_H + ROW_PAD
+    y += SECTION_BAND_H
 
     for field in section.fields:
         y = _emit_field(out, field, y, writer)
-    return y + ROW_PAD
+        out.append(f'  <line class="rule" x1="{MARGIN_X}" y1="{y}" x2="{MARGIN_X + CONTENT_W}" y2="{y}"/>')
+    return y
 
 
 def _emit_field(out: list[str], field: Field, y: int, writer: SvgWriter) -> int:
+    """One field is one full-width row: bold label, then whatever it needs to be answered."""
     label = field.label + (f" ({writer.chrome['required']})" if field.compulsory else "")
     writer._text(label, LABEL_SIZE)
-    lines = _fit(writer, label, LABEL_SIZE, LABEL_W, field.code, "label")
+    style = writer.layout.boolean_style(field)
 
-    # Option text is wrapped and measured exactly like a label. Wrapping only the labels is how the first
-    # emitter ran the admission type's longest choice off the right edge of the page: the two columns are
-    # different widths, so a rule applied to one of them says nothing about the other.
-    option_lines = [
-        _fit(writer, option, OPTION_SIZE, OPTION_W, field.code, f"option {index + 1}")
-        for index, option in enumerate(field.options)
-    ]
-    for option in field.options:
+    y += ROW_PAD
+    label_x = TEXT_X
+    if style == "tick":
+        # The tick sits on the label's own line: a criterion in a list reads as one thing to mark, not as
+        # a question followed by an answer. This is the shape the published sheets use for every
+        # signs-and-symptoms and laboratory-findings element.
+        _mark(out, field.code.lower().replace("_", "-"), TEXT_X, y + 40, radio=False)
+        label_x = TEXT_X + MARK + MARK_GAP
+
+    available = MARGIN_X + CONTENT_W - label_x - 180
+    for line in _fit(writer, label, LABEL_SIZE, available, field.code, "label"):
+        out.append(f'  <text class="label" x="{label_x}" y="{y + LABEL_SIZE}">{_esc(line)}</text>')
+        y += LABEL_SIZE + LINE_GAP
+    y -= LINE_GAP
+
+    options = field.options
+    radio = field.radio
+    if not options and style == "yes_no":
+        options = [writer.chrome["boolean_yes"], writer.chrome["boolean_no"]]
+        radio = True
+    if options:
+        y = _emit_options(out, field, options, radio, y + LINE_GAP, writer)
+
+    return y + ROW_PAD
+
+
+def _emit_options(out: list[str], field: Field, options: list[str], radio: bool, y: int, writer: SvgWriter) -> int:
+    """Lay the choices along one line when they fit, and one per line when they do not.
+
+    Fitting them horizontally is the single biggest reason the published sheets hold a page, and it is a
+    measurement decision rather than a rule of thumb -- which is why the one-page requirement is reachable
+    at all instead of being something to negotiate away.
+    """
+    ident = field.code.lower().replace("_", "-")
+    for option in options:
         writer._text(option, OPTION_SIZE)
 
-    top = y
-    for line in lines:
-        out.append(f'  <text class="label" x="{MARGIN_X + 150}" y="{y + LABEL_SIZE}">{_esc(line)}</text>')
-        y += LABEL_SIZE + LINE_GAP
+    left = TEXT_X + OPTION_INDENT
+    available = MARGIN_X + CONTENT_W - left - 180
+    widths = [writer.face.width(option, OPTION_SIZE) for option in options]
+    inline = sum(w + MARK + MARK_GAP for w in widths) + OPTION_GAP * (len(options) - 1)
 
-    y = max(y, top + _input_height(field, option_lines))
-    _emit_input(out, field, top, writer, option_lines)
-    return y + ROW_PAD
+    if inline <= available:
+        x = left
+        for index, option in enumerate(options):
+            _mark(out, f"{ident}-{index + 1}", int(x), y + 30, radio)
+            out.append(f'  <text class="option" x="{int(x + MARK + MARK_GAP)}" y="{y + OPTION_SIZE}">{_esc(option)}</text>')
+            x += MARK + MARK_GAP + widths[index] + OPTION_GAP
+        return y + OPTION_SIZE + LINE_GAP
+
+    for index, option in enumerate(options):
+        _mark(out, f"{ident}-{index + 1}", left, y + 30, radio)
+        text_x = left + MARK + MARK_GAP
+        for line in _fit(writer, option, OPTION_SIZE, available - MARK - MARK_GAP, field.code, f"option {index + 1}"):
+            out.append(f'  <text class="option" x="{text_x}" y="{y + OPTION_SIZE}">{_esc(line)}</text>')
+            y += OPTION_SIZE + LINE_GAP
+    return y
+
+
+def _mark(out: list[str], ident: str, x: int, y: int, radio: bool) -> None:
+    """A choose-one circle or a choose-any square, which the legend on every sheet explains."""
+    if radio:
+        r = MARK // 2
+        out.append(f'  <circle id="{ident}" class="mark" cx="{x + r}" cy="{y + r}" r="{r}"/>')
+    else:
+        out.append(f'  <rect id="{ident}" class="mark" x="{x}" y="{y}" width="{MARK}" height="{MARK}"/>')
 
 
 def _fit(writer: SvgWriter, text: str, size: int, width: int, code: str, what: str) -> list[str]:
@@ -423,45 +535,6 @@ def _fit(writer: SvgWriter, text: str, size: int, width: int, code: str, what: s
     return lines
 
 
-def _input_height(field: Field, option_lines: list[list[str]]) -> int:
-    if option_lines:
-        return sum(max(CHECK, len(lines) * (OPTION_SIZE + LINE_GAP)) + 120 for lines in option_lines)
-    if field.value_type == "BOOLEAN":
-        return CHECK + 120
-    return BOX_H
-
-
-def _emit_input(out: list[str], field: Field, y: int, writer: SvgWriter, option_lines: list[list[str]]) -> None:
-    width = PAGE_W - MARGIN_X - INPUT_X
-    ident = field.code.lower().replace("_", "-")
-
-    if option_lines:
-        oy = y
-        for index, lines in enumerate(option_lines):
-            out.append(f'  <rect id="{ident}-{index + 1}" class="check" x="{INPUT_X}" y="{oy}" width="{CHECK}" height="{CHECK}"/>')
-            ty = oy + CHECK - 40
-            for line in lines:
-                out.append(f'  <text class="option" x="{OPTION_X}" y="{ty}">{_esc(line)}</text>')
-                ty += OPTION_SIZE + LINE_GAP
-            oy += max(CHECK, len(lines) * (OPTION_SIZE + LINE_GAP)) + 120
-        return
-
-    if field.value_type == "BOOLEAN":
-        for index, key in enumerate(("boolean_yes", "boolean_no")):
-            word = writer.chrome[key]
-            writer._text(word, OPTION_SIZE)
-            ox = INPUT_X + index * 2200
-            out.append(f'  <rect id="{ident}-{key.split("_")[1]}" class="check" x="{ox}" y="{y}" width="{CHECK}" height="{CHECK}"/>')
-            out.append(f'  <text class="option" x="{ox + CHECK + 150}" y="{y + CHECK - 40}">{_esc(word)}</text>')
-        return
-
-    if field.value_type == "TRUE_ONLY":
-        out.append(f'  <rect id="{ident}" class="check" x="{INPUT_X}" y="{y}" width="{CHECK}" height="{CHECK}"/>')
-        return
-
-    out.append(f'  <rect id="{ident}" class="box" x="{INPUT_X}" y="{y}" width="{width}" height="{BOX_H}"/>')
-
-
 def _esc(text: str) -> str:
     return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
@@ -475,6 +548,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--metadata", type=Path, default=repo / "metadata" / "common")
     parser.add_argument("--fonts", type=Path, default=repo / "common" / "fonts")
     parser.add_argument("--strings", type=Path, default=repo / "common" / "sheet-strings.yaml")
+    parser.add_argument("--layout", type=Path, default=repo / "common" / "sheet-layout.yaml")
     parser.add_argument("--po", type=Path, default=repo / "po")
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--language", default=None, help="culture code; omit for the untranslated source")
@@ -486,6 +560,7 @@ def main(argv: list[str] | None = None) -> int:
         return _fail(f"no catalogue at {po_path}; --language must name a culture the metadata catalogue has")
     catalogue = Catalogue(po_path)
     chrome = load_chrome(args.strings, catalogue)
+    rules = LayoutRules(args.layout)
 
     # Devanagari is a separate face because Noto Sans does not cover it -- see common/fonts/README.md.
     family = "NotoSansDevanagari" if args.language == "ne" else "NotoSans"
@@ -503,7 +578,7 @@ def main(argv: list[str] | None = None) -> int:
     suffix = f".{args.language}" if args.language else ""
     written, failures = [], []
     for sheet in sheets:
-        writer = SvgWriter(face, bold, chrome, args.language)
+        writer = SvgWriter(face, bold, chrome, rules, args.language)
         try:
             body = layout_sheet(sheet, writer)
         except Overflow as overflow:
@@ -515,7 +590,7 @@ def main(argv: list[str] | None = None) -> int:
                 failures.append(f"{sheet.code}: {font_name} has no glyph for {shown}")
             continue
         target = args.out / f"NeoIPC-Core-{sheet.slug}-Sheet{suffix}.svg"
-        target.write_text(writer.sheet_svg(sheet, 1, 1, body), encoding="utf-8", newline="\n")
+        target.write_text(writer.sheet_svg(sheet, body), encoding="utf-8", newline="\n")
         written.append(target)
 
     for line in failures:
