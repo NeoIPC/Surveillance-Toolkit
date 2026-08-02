@@ -59,10 +59,12 @@ OPTION_INDENT = 700                     # options sit indented under their field
 OPTION_GAP = 700                        # space between options laid out along one line
 
 TITLE_SIZE, SUBTITLE_SIZE = 560, 400
-SECTION_SIZE, LABEL_SIZE, OPTION_SIZE, SMALL_SIZE = 340, 320, 300, 250
-LINE_GAP = 110                          # leading between wrapped lines of one text run
-ROW_PAD = 100                           # vertical padding above and below a row's text
-SECTION_BAND_H = 520
+SECTION_SIZE, LABEL_SIZE, OPTION_SIZE, SMALL_SIZE = 320, 300, 280, 240
+# The vertical rhythm is measured against the published forms rather than chosen for comfort: they fit an
+# infection sheet onto one page, so their row pitch is the budget this has to work within.
+LINE_GAP = 90                           # leading between wrapped lines of one text run
+ROW_PAD = 70                            # vertical padding above and below a row's text
+SECTION_BAND_H = 460
 MARK = 260                              # a choose-one circle or choose-any square
 MARK_GAP = 180                          # between a mark and its text
 
@@ -80,6 +82,22 @@ class Field:
     compulsory: bool
     options: list[str] = dc_field(default_factory=list)
     radio: bool = False
+    write_in: bool = False
+
+    @property
+    def is_child(self) -> bool:
+        """A field the metadata marks as belonging to the one above it, by starting its form name '- '.
+
+        The convention is the authors' own and covers 117 of the 252 elements -- an organism slot's name,
+        source and resistance flags all hang off its `Organism N` row that way. Reading it is what lets a
+        slot be printed as one compact block instead of nine labelled rows, which is the whole difference
+        between the infection sheets fitting a page and running to three.
+        """
+        return self.label.startswith("- ")
+
+    @property
+    def short_label(self) -> str:
+        return self.label.removeprefix("- ").strip()
 
 
 @dataclass
@@ -303,9 +321,17 @@ def build_sheets(meta: Metadata, catalogue: Catalogue) -> list[Sheet]:
 def _field_of(meta: Metadata, catalogue: Catalogue, element: dict, link: dict) -> Field:
     code = element["code"]
     options: list[str] = []
+    write_in = False
     if element.get("optionSet"):
         option_set = meta.option_set_by_id.get(element["optionSet"])
-        if option_set is not None:
+        if option_set is None:
+            # A set referenced by UID that optionSets.csv does not define -- the organism list, which is
+            # authored in the infectious-agents catalogue and runs to hundreds of entries. It cannot be
+            # ticked on paper, so the field becomes a write-in line, which is what the published sheets
+            # do. Handled explicitly: falling through to "no options" produces the same output by
+            # accident, and would go on doing so if a small set ever went missing by mistake.
+            write_in = True
+        else:
             for opt in meta.options_by_set.get(option_set["id"], []):
                 context = f"options/{option_set['code']}/{opt['code']}/NAME"
                 options.append(catalogue.get(context, opt["name"]))
@@ -323,6 +349,7 @@ def _field_of(meta: Metadata, catalogue: Catalogue, element: dict, link: dict) -
         # organism source, whose set carries Blood, CSF and Both -- that is an editorial decision and
         # belongs in the layout mapping, not here.
         radio=True,
+        write_in=write_in,
     )
 
 
@@ -361,6 +388,7 @@ class SvgWriter:
             "    text.section { font-size: %dpx; text-anchor: middle; }" % SECTION_SIZE,
             "    text.label { font-size: %dpx; font-weight: bold; }" % LABEL_SIZE,
             "    text.option { font-size: %dpx; }" % OPTION_SIZE,
+            "    text.child { font-size: %dpx; font-weight: bold; }" % OPTION_SIZE,
             "    text.legend { font-size: %dpx; font-style: italic; }" % SMALL_SIZE,
             "    rect.band { fill: %s; stroke: none; }" % BAND_FILL,
             "    rect.frame { fill: none; stroke: #000; stroke-width: 20; }",
@@ -437,10 +465,60 @@ def _emit_section(out: list[str], section: Section, y: int, writer: SvgWriter) -
     )
     y += SECTION_BAND_H
 
-    for field in section.fields:
-        y = _emit_field(out, field, y, writer)
-        out.append(f'  <line class="rule" x1="{MARGIN_X}" y1="{y}" x2="{MARGIN_X + CONTENT_W}" y2="{y}"/>')
+    for index, field in enumerate(section.fields):
+        y = _emit_child(out, field, y, writer) if field.is_child else _emit_field(out, field, y, writer)
+        # A rule closes a GROUP, not every field: a slot and its children are one thing on the page, and
+        # ruling between them would break up the block the '- ' convention exists to express.
+        following = section.fields[index + 1] if index + 1 < len(section.fields) else None
+        if following is None or not following.is_child:
+            out.append(f'  <line class="rule" x1="{MARGIN_X}" y1="{y}" x2="{MARGIN_X + CONTENT_W}" y2="{y}"/>')
     return y
+
+
+def _emit_child(out: list[str], field: Field, y: int, writer: SvgWriter) -> int:
+    """A sub-field on one line: its short label, then its choices along the same line.
+
+    This is where the page is won. Nine fields per organism slot, each given a label row and its own
+    option rows underneath, is most of two pages for one section; the same nine as compact lines under
+    their slot header is a block.
+    """
+    label = field.short_label
+    writer._text(label, OPTION_SIZE)
+    y += ROW_PAD // 2
+
+    x = TEXT_X + OPTION_INDENT
+    out.append(f'  <text class="child" x="{x}" y="{y + OPTION_SIZE}">{_esc(label)}</text>')
+    x += writer.face.width(label, OPTION_SIZE) + OPTION_GAP
+    right = MARGIN_X + CONTENT_W - 180
+    baseline = y + OPTION_SIZE
+
+    options, radio = field.options, field.radio
+    if not options and not field.write_in:
+        style = writer.layout.boolean_style(field)
+        if style == "yes_no":
+            options, radio = [writer.chrome["boolean_yes"], writer.chrome["boolean_no"]], True
+        elif style == "tick":
+            _mark(out, field.code.lower().replace("_", "-"), int(x), y + 30, radio=False)
+            return baseline + LINE_GAP
+
+    if not options:
+        out.append(f'  <line class="write" x1="{int(x)}" y1="{baseline + 60}" x2="{right}" y2="{baseline + 60}"/>')
+        return baseline + LINE_GAP
+
+    for option in options:
+        writer._text(option, OPTION_SIZE)
+    widths = [writer.face.width(option, OPTION_SIZE) for option in options]
+    needed = sum(w + MARK + MARK_GAP for w in widths) + OPTION_GAP * (len(options) - 1)
+    if x + needed > right:
+        # The choices will not share the label's line, so fall back to the indented block a parent uses.
+        return _emit_options(out, field, options, radio, baseline + LINE_GAP, writer)
+
+    ident = field.code.lower().replace("_", "-")
+    for index, option in enumerate(options):
+        _mark(out, f"{ident}-{index + 1}", int(x), y + 30, radio)
+        out.append(f'  <text class="option" x="{int(x + MARK + MARK_GAP)}" y="{baseline}">{_esc(option)}</text>')
+        x += MARK + MARK_GAP + widths[index] + OPTION_GAP
+    return baseline + LINE_GAP
 
 
 def _emit_field(out: list[str], field: Field, y: int, writer: SvgWriter) -> int:
