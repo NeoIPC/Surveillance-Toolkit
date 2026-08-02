@@ -5,20 +5,6 @@
 # Run `python scripts/update-glossary-po.py` after editing this file.
 #
 # Weblate feature mapping (YAML → PO):
-#   Plurals       — key + key_plural paired into msgid / msgid_plural. Two limits, and the generator
-#                   refuses rather than emitting something wrong in either case, before it writes any
-#                   file. (a) TWO SLOTS ONLY, so a language declaring three or six forms cannot be
-#                   represented. No entry uses a plural family today, which is why Ukrainian, Russian
-#                   (3 forms) and Arabic (6) are unaffected — it is adding the first family while one
-#                   of them is present that would force the schema to grow. (b) NO CASED PLURAL KEY:
-#                   `key_plural_tc` and `key_plural_sc` resolve to the same base as `key_plural`, so the
-#                   cased key is swallowed — it never becomes an entry, its value is attached to the
-#                   uncased base, and it comes back named `key_plural`. Do not author one at all; give
-#                   the plural a single uncased `key_plural` and let the case variants be plain keys.
-#                   This rule is deliberately stricter than the check: the generator refuses a cased
-#                   plural key only when its uncased base is also present, so a lone `key_plural_tc`
-#                   would pass and round-trip intact. Following the simpler rule costs nothing and keeps
-#                   the convention describable in one sentence; the difference is a choice, not a gap.
 #   Descriptions  — YAML comments above a key become PO translator notes (#.)
 #   Context       — YAML key becomes msgctxt (enables variant_regex grouping)
 #   Location      — source file path + line number written as #: occurrence
@@ -31,7 +17,6 @@
 #
 # Naming convention:
 #   base key    = AMA canonical (lowercase). ONE key per term — there are no casing variants here.
-#   key_plural  = Plural form
 #   Abbreviations (CVC, HAP, INV, NEC, SSI) are always uppercase — no variants.
 #   Proper nouns (NeoIPC Surveillance) keep their canonical casing.
 #

@@ -4,9 +4,19 @@
 Bilingual rather than monolingual: msgctxt carries the YAML key and msgid carries the English
 source, so the component's template field stays empty and new_base points at the .pot.
 
-Replaces po4a for glossary management, providing full PO feature support:
-msgctxt (variant grouping), msgid_plural (plurals), translator comments,
-flags, locations with line numbers, and additional states.
+Replaces po4a for glossary management, providing PO features po4a cannot reach:
+msgctxt (variant grouping), translator comments, flags, locations, and additional
+states.
+
+It emits ONE FORM PER KEY. A two-slot plural implementation lived here and was
+removed: it could hold a singular and a plural and nothing else, so a language
+declaring three forms (Ukrainian, Polish) or six (Arabic) was unrepresentable,
+and it carried a refusal for cased plural keys that pairing would silently
+swallow. None of it was ever exercised -- the project contains no plural family
+at all -- and it was the wrong shape for the n-form support that has to replace
+it, so leaving it in place would have offered a future reader something that
+looks like plural support and is not. Removing it changed the template by zero
+bytes.
 
 Catalogue ownership: this script writes po/glossary.pot and NOTHING ELSE under po/.
 The catalogues are Weblate's, written by the neoipc-glossary component; its msgmerge
@@ -26,11 +36,12 @@ glossary.<lang>.yaml for every glossary.<lang>.po it finds in --po-dir, so a lan
 Weblate adds is picked up without editing anything here. Pass --languages to narrow it.
 
 Naming convention in glossary.yaml:
-    key             = AMA canonical (lowercase)
-    key_sc          = Sentence case
-    key_tc          = Title case
-    key_plural      = Plural form
-    Suffixes can combine: key_plural_tc
+    key             = AMA canonical (lowercase). One key per term.
+
+    Casing is NOT stored: `key_sc` is derived at render time by get_string_resources()
+    and `key_tc` does not exist. Casing is a rendering concern, and storing it made
+    translators render the same word twice, doubled the term in every other component's
+    glossary sidebar, and multiplied against the plural axis.
 
 YAML comment conventions:
     # Description text for translators       -> PO #. extracted comment
@@ -65,7 +76,6 @@ try:
 except ImportError:
     sys.exit("Error: polib is required. Install with: pip install polib")
 
-PLURAL_SUFFIX = re.compile(r"_plural(?:_(tc|sc))?$")
 FLAGS_LINE = re.compile(r"^flags:\s*(.+)$", re.IGNORECASE)
 
 # The header contract is defined once, in the NeoIPC-Tools module (Private/PoHeader.ps1). This is the same
@@ -173,14 +183,6 @@ def get_key_comments(yaml_data, keys, index):
     return None, []
 
 
-def find_plural_base(key):
-    """If key is a _plural variant, return the base key. Otherwise None."""
-    match = PLURAL_SUFFIX.search(key)
-    if match:
-        return key[: match.start()]
-    return None
-
-
 def yaml_to_pot(glossary_path, pot_path):
     """Read glossary.yaml and generate glossary.pot with msgctxt."""
     yaml = YAML()
@@ -212,40 +214,8 @@ def yaml_to_pot(glossary_path, pot_path):
     now = datetime.datetime.now(datetime.timezone.utc)
     pot.metadata["POT-Creation-Date"] = now.strftime("%Y-%m-%d %H:%M%z")
 
-    # Collect plural pairs: base_key -> plural_key
-    plural_pairs = {}
-    for key in data:
-        base = find_plural_base(key)
-        if not (base and base in data):
-            continue
-        # A CASED plural key cannot be paired. PLURAL_SUFFIX strips `_plural_tc` and `_plural_sc` to the
-        # same base as `_plural`, so the cased key is swallowed: it never becomes an entry of its own, its
-        # value is attached to the uncased base as that entry's msgid_plural, and the reader then emits it
-        # back under the uncased `<base>_plural` name. Authoring the four keys the naming convention
-        # documents for one term yields three, one holding the wrong value.
-        #
-        # Caught here, against glossary.yaml, because this is the only place the distinction survives:
-        # by the time a catalogue exists the plural sits on the uncased msgctxt, so nothing downstream can
-        # tell a cased family from an ordinary one. Refusing at authoring time is also where the author
-        # can act on it.
-        cased = PLURAL_SUFFIX.search(key).group(1)
-        if cased:
-            sys.exit(
-                f"Error: {glossary_path.name}: {key!r} is a cased plural key, which this schema cannot "
-                f"express. Pairing resolves it to {base!r}, so its value would be emitted back as "
-                f"'{base}_plural' and {key!r} would disappear. Give the plural form one key per case "
-                f"({base}_plural) and no cased plural, or extend the schema to keep them apart."
-            )
-        plural_pairs[base] = key
-
-    # Track which keys are handled as plural counterparts
-    handled_as_plural = set(plural_pairs.values())
-
     keys = list(data.keys())
     for idx, key in enumerate(keys):
-        if key in handled_as_plural:
-            continue  # handled as part of its base key's entry
-
         value = str(data[key])
 
         # Comments: description + flags
@@ -268,14 +238,6 @@ def yaml_to_pot(glossary_path, pot_path):
         if desc_lines:
             entry_kwargs["comment"] = "\n".join(desc_lines)
 
-        # If this key has a plural counterpart, create a plural entry
-        if key in plural_pairs:
-            plural_key = plural_pairs[key]
-            plural_value = str(data[plural_key])
-            entry_kwargs["msgid_plural"] = plural_value
-            entry_kwargs["msgstr_plural"] = {0: "", 1: ""}
-            del entry_kwargs["msgstr"]
-
         entry = polib.POEntry(**entry_kwargs)
         if entry_flags:
             entry.flags = entry_flags
@@ -290,41 +252,6 @@ def yaml_to_pot(glossary_path, pot_path):
     return pot
 
 
-def _reject_unsupported_plurals(po_dir, languages):
-    """Refuse a plural family with more forms than the YAML can hold, before anything is written.
-
-    glossary.<lang>.yaml holds `key` and `key_plural`, so a language declaring three or six forms cannot
-    be represented. Scoped to the ENTRY, not the language: a three-form language is fine while no entry
-    carries a plural family, which is why Ukrainian and Arabic work today. Unreachable now -- no glossary
-    entry declares a plural family -- and reachable through an ordinary glossary edit.
-
-    The other unrepresentable shape, a cased plural key, is refused in yaml_to_pot instead. It has to be:
-    once a catalogue exists the plural sits on the uncased msgctxt, so nothing here can tell a cased
-    family from an ordinary one.
-    """
-    for lang in languages:
-        po_path = po_dir / f"glossary.{lang}.po"
-        if not po_path.exists():
-            continue
-        for entry in polib.pofile(str(po_path)):
-            # Obsolete "#~" entries are skipped, because the emitter never sees one: it iterates
-            # translated_entries(), which excludes them. Validating what the emitter cannot reach means
-            # refusing on state the configuration deliberately keeps -- po_remove_obsolete is false on
-            # purpose -- so a retired plural family would withhold output for the whole run and name a
-            # key nobody uses. A guard that blocks correct output is worse than the gap it closes.
-            if entry.obsolete:
-                continue
-            if not (entry.msgid_plural and entry.msgstr_plural):
-                continue
-            if len(entry.msgstr_plural) > 2:
-                sys.exit(
-                    f"Error: {po_path.name}: {entry.msgctxt!r} carries {len(entry.msgstr_plural)} plural "
-                    f"forms, and glossary.<lang>.yaml has two slots for them ('{entry.msgctxt}' and "
-                    f"'{entry.msgctxt}_plural'). The schema needs extending to hold this language's "
-                    f"forms -- do not narrow --languages to work around it, that drops the language."
-                )
-
-
 def generate_yaml(po_dir, glossary_path, languages, threshold=80):
     """Generate glossary.<lang>.yaml from translated PO files.
 
@@ -334,11 +261,6 @@ def generate_yaml(po_dir, glossary_path, languages, threshold=80):
     yaml = YAML()
     yaml.preserve_quotes = True
     yaml.default_flow_style = False
-
-    # Validate every catalogue BEFORE writing any of them, so a refusal cannot leave some languages
-    # generated and others not. Raising from inside the write loop produced exactly that: one YAML on
-    # disk, the next language's absent, and no indication which state the caller was in.
-    _reject_unsupported_plurals(po_dir, languages)
 
     for lang in languages:
         po_path = po_dir / f"glossary.{lang}.po"
@@ -383,17 +305,7 @@ def generate_yaml(po_dir, glossary_path, languages, threshold=80):
             if not entry.msgctxt:
                 continue
 
-            if entry.msgid_plural and entry.msgstr_plural:
-                # Shapes this cannot represent were refused before any file was written; see
-                # _reject_unsupported_plurals.
-                # Singular
-                if entry.msgstr_plural.get(0):
-                    translations[entry.msgctxt] = entry.msgstr_plural[0]
-                # Plural
-                plural_key = entry.msgctxt + "_plural"
-                if entry.msgstr_plural.get(1):
-                    translations[plural_key] = entry.msgstr_plural[1]
-            elif entry.msgstr:
+            if entry.msgstr:
                 translations[entry.msgctxt] = entry.msgstr
 
         if not translations:
