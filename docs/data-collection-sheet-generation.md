@@ -119,6 +119,49 @@ Two constraints on *which* font is measured, both of which make a wrong answer l
   So the fonts move into the repository and the theme points at them, making the measured file and the
   embedded file the same file by construction. Noto is SIL OFL, which the licence guardrail requires.
 
+## The layout follows the published forms; the visual style follows the two hand-drawn SVGs
+
+These are two separate references and they are not interchangeable. **Arrangement** comes from the forms
+already published for partners — one A4 page each, made in Word — because those are what people have been
+filling in. **Visual language** comes from the repository's own SVGs. Neither is a starting point to
+improvise from.
+
+What the published forms actually do, read off them rather than assumed:
+
+- **One full-width ruled table, not two columns.** A field is a row: the label in bold, ending in a colon,
+  and the rest of the row is the space to write in. A separate input column, which a naive generator
+  reaches for first, wastes most of the page and is why an early attempt ran three pages.
+- **Sections are centred bands** in light blue across the full width.
+- **Options are indented rows** under their field, marked `○` for choose-one and `□` for choose-any —
+  with a legend at the foot of every sheet stating exactly that. The marker is therefore derivable:
+  `renderOptionsAsRadio` decides it.
+- **Short option sets run horizontally.** "No / CVC-associated / PVC-associated" sits on one line; a set
+  whose text is long breaks to one option per line. This is the single biggest contributor to fitting the
+  page, and it is a measurement decision, which is why measuring is what makes the one-page rule
+  attainable rather than a constraint to negotiate with.
+- **A repeated slot is a compact block, not a run of labelled fields.** An organism slot is a write-in
+  line with its source options inline — `Organism 1: ______ , recovered from □ Blood □ CSF` — followed by
+  its resistance rows, each a three-option inline run. Three slots occupy about twelve lines. The same
+  fields given one labelled row each occupy the better part of two pages, which is exactly what the first
+  emitter did.
+- **Hints sit inline**, in italic parentheses inside the option or in a second column against the field
+  (`(weeks + days, e.g. 25+4)`, `grams`).
+- **Footnotes at the foot**, with superscript markers, plus a line pointing at the protocol's Data
+  Dictionary and Abbreviations sections.
+- Every sheet opens with a **Patient** band carrying the local patient ID and name — the identifiers the
+  protocol forbids submitting, present precisely because the paper stays in the hospital.
+
+Two things there are **editorial and not derivable**, and generation must not pretend otherwise. The
+published BSI sheet collapses MRSA, VRE and 3GCR into a single row carrying a footnote — "mark the
+resistance profile appropriate to the isolated microorganism" — where the metadata has one element each;
+and it shows three organism slots where the metadata may hold more. Where the form groups or truncates
+what the model separates, that is a decision, and it belongs in an explicit, checked-in mapping rather
+than in the generator's inference.
+
+That the two disagree is itself the argument for generating: the published master sheet offers **six**
+antibiotic substance slots and the metadata carries **nine**. The form has been behind the data model, in
+public, with nothing to say so.
+
 ## House style: the output is read by people
 
 These SVGs are deliberately plain, and a generator is held to the same standard as the hand-written
