@@ -662,6 +662,7 @@ def layout_sheet(sheet: Sheet, writer: SvgWriter) -> list[str]:
 
     table_top = y
     body: list[str] = []
+    y = _emit_patient_block(body, y, writer)
     for section in sheet.sections:
         y = _emit_section(body, section, y, writer)
 
@@ -734,6 +735,43 @@ def _emit_footer(out: list[str], y: int, writer: SvgWriter) -> int:
     for line in _fit(writer, text, SMALL_SIZE, CONTENT_W, "footer", "footer"):
         y += SMALL_SIZE + 60
         out.append(f'  <text class="legend" x="{MARGIN_X}" y="{y}">{_esc(line)}</text>')
+    return y
+
+
+def _emit_patient_block(out: list[str], y: int, writer: SvgWriter) -> int:
+    """Who this sheet is about -- on every sheet, because a loose page has to be filed to a patient.
+
+    These two fields exist on the paper and nowhere else. The sheet is completed at a cot side and stays
+    in the hospital, so it must name the patient unambiguously; the surveillance dataset must never carry
+    that, and the note says so on the page rather than leaving it to the protocol. A person holding a form
+    cannot be expected to know which of those two things they are doing.
+    """
+    title = writer.chrome["section_patient"]
+    writer._text(title, SECTION_SIZE)
+    out.append(f'  <rect class="band" x="{MARGIN_X}" y="{y}" width="{CONTENT_W}" height="{SECTION_BAND_H}"/>')
+    out.append(
+        f'  <text id="patient" class="section" x="{PAGE_W // 2}" y="{y + SECTION_BAND_H - 150}">{_esc(title)}</text>'
+    )
+    y += SECTION_BAND_H
+
+    for key in ("patient_identifier", "patient_name"):
+        label = writer.chrome[key]
+        writer._text(label, LABEL_SIZE)
+        y += ROW_PAD
+        for line in _fit(writer, label, LABEL_SIZE, CONTENT_W - 360, key, "label"):
+            out.append(f'  <text class="label" x="{TEXT_X}" y="{y + LABEL_SIZE}">{_esc(line)}</text>')
+            y += LABEL_SIZE + LINE_GAP
+        y += ROW_PAD - LINE_GAP
+        out.append(f'  <line class="rule" x1="{MARGIN_X}" y1="{y}" x2="{MARGIN_X + CONTENT_W}" y2="{y}"/>')
+
+    note = writer.chrome["patient_note"]
+    writer._text(note, SMALL_SIZE)
+    y += ROW_PAD
+    for line in _fit(writer, note, SMALL_SIZE, CONTENT_W - 360, "patient_note", "note"):
+        out.append(f'  <text class="legend" x="{TEXT_X}" y="{y + SMALL_SIZE}">{_esc(line)}</text>')
+        y += SMALL_SIZE + LINE_GAP
+    y += ROW_PAD - LINE_GAP
+    out.append(f'  <line class="rule" x1="{MARGIN_X}" y1="{y}" x2="{MARGIN_X + CONTENT_W}" y2="{y}"/>')
     return y
 
 
