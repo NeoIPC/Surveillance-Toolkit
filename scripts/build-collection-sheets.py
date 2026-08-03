@@ -1437,7 +1437,21 @@ def _fit(writer: SvgWriter, text: str, size: int, width: int, code: str, what: s
 
 
 def _esc(text: str) -> str:
-    return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+    """Escape for XML, and drop every soft hyphen on the way out.
+
+    A soft hyphen is a note from the translator to the layout -- "this word may divide here" -- and the
+    renderer must never receive one, because prawn-svg draws U+00AD as a visible hyphen: a word that never
+    needed to break comes out with a hyphen through the middle of it. `Face.wrap` already strips them and
+    writes a real hyphen where a break is actually taken, but wrapping is not the only way text reaches
+    the page. Paired criteria, inline choice runs, the legend and the sheet's own heading are all emitted
+    directly, and every one of them leaked: a German test render read "Kern-modul", "Druck-schmerz" and
+    "Temperatur-auffälligkeiten", none of which had broken anywhere.
+
+    Stripping here rather than at each of those call sites makes it a property of emission instead of a
+    rule every future emitter has to remember.
+    """
+    return (text.replace(SOFT_HYPHEN, "")
+            .replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;"))
 
 
 # ── Entry point ─────────────────────────────────────────────────────────────────────────────────────
