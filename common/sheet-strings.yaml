@@ -16,6 +16,14 @@ boolean_no: "No"
 # The heading above every sheet. The line below it is the stage's own name, which comes from the metadata.
 sheet_heading: "NeoIPC – Core Module (VLBW/VPT Infants)"
 
+# The master sheet is assembled from the enrolment attributes and two stages, so it has no stage name of
+# its own to use as a subtitle.
+sheet_master_title: "Master Data Collection Sheet"
+
+# The band over the enrolment attributes. They are attributes of the patient rather than of any one
+# surveillance event, so there is no program stage section carrying a name for them.
+section_enrolment: "Enrolment"
+
 # The legend that gives the two markers their meaning. Without it the shapes are decoration, and a reader
 # has no way to know that one of them means "pick exactly one".
 legend_one: "You can select only one option."

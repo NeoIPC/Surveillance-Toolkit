@@ -26,6 +26,23 @@ boolean_style:
   NEOIPC_BSI_AB_TREATMENT: yes_no
   NEOIPC_BSI_NO_POS_CULTURE: yes_no
 
+# Sheets assembled from more than one stage.
+#
+# A form is not always a program stage. The master sheet is what a partner fills in when a patient is
+# enrolled and again when surveillance ends, so it carries the enrolment attributes and two stages on one
+# page -- a division of labour that belongs to the paper, not to the data model, and that nothing in the
+# metadata expresses. A stage named here is not also printed on its own.
+#
+# `enrolment` is the tracked-entity attributes rather than a stage; everything else is a stage code.
+composites:
+  master:
+    slug: master
+    title_key: sheet_master_title
+    blocks:
+      - enrolment
+      - NEOIPC_STG_ADM
+      - NEOIPC_STG_SURV_END
+
 # The order sections are PRINTED in, where it differs from programStageSections' sortOrder.
 #
 # Those are two different questions and the metadata only answers one of them. DHIS2's order is capture

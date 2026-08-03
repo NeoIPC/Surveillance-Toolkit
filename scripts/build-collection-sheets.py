@@ -153,6 +153,8 @@ class Metadata:
         self.elements = self._read("dataElements.csv")
         self.option_sets = self._read("optionSets.csv")
         self.options = self._read("options.csv")
+        self.attributes = self._read("trackedEntityAttributes.csv")
+        self.program_attributes = self._read("programTrackedEntityAttributes.csv")
 
         self.element_by_id = {r["id"]: r for r in self.elements}
         self.option_set_by_id = {r["id"]: r for r in self.option_sets}
@@ -250,6 +252,12 @@ class LayoutRules:
         self.default = rules.get("default_boolean", "tick")
         self.styles: dict[str, str] = rules.get("boolean_style") or {}
         self.section_order: dict[str, list[str]] = rules.get("section_order") or {}
+        self.composites: dict[str, dict] = rules.get("composites") or {}
+
+    @property
+    def absorbed_stages(self) -> set[str]:
+        """Stages printed as part of a composite, and therefore not printed on their own as well."""
+        return {block for c in self.composites.values() for block in c["blocks"] if block != "enrolment"}
 
     def order_sections(self, stage_code: str, sections: list[dict]) -> list[dict]:
         """Print order, which is not the capture order the metadata records.
@@ -343,7 +351,8 @@ class Overflow(Exception):
 # ── Sheet assembly ──────────────────────────────────────────────────────────────────────────────────
 
 
-def build_sheets(meta: Metadata, catalogue: Catalogue, rules: LayoutRules) -> list[Sheet]:
+def build_sheets(meta: Metadata, catalogue: Catalogue, rules: LayoutRules,
+                 chrome: dict[str, str]) -> list[Sheet]:
     """One sheet per program stage, in the stages' own sort order."""
     sections_by_stage: dict[str, list[dict]] = {}
     for section in meta.sections:
@@ -382,7 +391,68 @@ def build_sheets(meta: Metadata, catalogue: Catalogue, rules: LayoutRules) -> li
             sheet.sections.append(model)
         if sheet.sections:
             sheets.append(sheet)
-    return sheets
+
+    return _apply_composites(sheets, meta, catalogue, rules, chrome)
+
+
+def _apply_composites(
+    sheets: list[Sheet], meta: Metadata, catalogue: Catalogue, rules: LayoutRules, chrome: dict[str, str]
+) -> list[Sheet]:
+    """Fold the stages a composite claims into one sheet, and drop them as standalone sheets."""
+    if not rules.composites:
+        return sheets
+    by_code = {s.code: s for s in sheets}
+    composed: list[Sheet] = []
+    for name, spec in rules.composites.items():
+        sheet = Sheet(code=name.upper(), slug=spec["slug"], title=chrome[spec["title_key"]])
+        for block in spec["blocks"]:
+            if block == "enrolment":
+                sheet.sections.append(_enrolment_section(meta, catalogue, chrome))
+                continue
+            stage = by_code.get(block)
+            if stage is None:
+                raise LookupError(f"composite {name!r} names {block}, which is not a stage with sections")
+            sheet.sections.extend(stage.sections)
+        composed.append(sheet)
+
+    absorbed = rules.absorbed_stages
+    return composed + [s for s in sheets if s.code not in absorbed]
+
+
+def _enrolment_section(meta: Metadata, catalogue: Catalogue, chrome: dict[str, str]) -> Section:
+    """The patient's own attributes, which belong to no stage and so have no section to name them."""
+    by_id = {a["id"]: a for a in meta.attributes}
+    section = Section(code="ENROLMENT", title=chrome["section_enrolment"], description="")
+    for link in sorted(meta.program_attributes, key=lambda r: _as_int(r["sortOrder"])):
+        attribute = by_id.get(link["trackedEntityAttribute"])
+        if attribute is None:
+            raise LookupError(f"programTrackedEntityAttributes references unknown attribute {link['trackedEntityAttribute']}")
+        code = attribute["code"]
+        section.fields.append(
+            Field(
+                code=code,
+                label=catalogue.get(f"trackedEntityAttributes/{code}/FORM_NAME", Metadata.label_of(attribute)),
+                value_type=attribute["valueType"],
+                # An attribute says `mandatory` where a stage element says `compulsory`; same question.
+                compulsory=(link.get("mandatory") or "").lower() == "true",
+                options=_options_of(meta, catalogue, attribute)[0],
+                radio=True,
+                write_in=_options_of(meta, catalogue, attribute)[1],
+            )
+        )
+    return section
+
+
+def _options_of(meta: Metadata, catalogue: Catalogue, element: dict) -> tuple[list[str], bool]:
+    if not element.get("optionSet"):
+        return [], False
+    option_set = meta.option_set_by_id.get(element["optionSet"])
+    if option_set is None:
+        return [], True
+    return [
+        catalogue.get(f"options/{option_set['code']}/{opt['code']}/NAME", opt["name"])
+        for opt in meta.options_by_set.get(option_set["id"], [])
+    ], False
 
 
 def _field_of(meta: Metadata, catalogue: Catalogue, element: dict, link: dict) -> Field:
@@ -745,7 +815,7 @@ def main(argv: list[str] | None = None) -> int:
     bold = Face(args.fonts / f"{family}-Bold.ttf")
 
     meta = Metadata(args.metadata)
-    sheets = build_sheets(meta, catalogue, rules)
+    sheets = build_sheets(meta, catalogue, rules, chrome)
     if args.sheet:
         sheets = [s for s in sheets if s.code == args.sheet]
         if not sheets:
