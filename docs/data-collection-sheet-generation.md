@@ -88,15 +88,33 @@ Generation measures with **fontTools**: advance widths in the actual face at the
 the cell width the generator chose, emitted as explicit `<tspan>` with `dy`. Never renderer-side wrapping
 (SVG 2 `inline-size`, `<foreignObject>`) — the explicit form is what ships and renders today.
 
-**Summing advance widths is not shaping, and for one target language that matters.** The measurement adds
-up each codepoint's advance from `hmtx`. In Latin that ignores kerning and is a slight underestimate. In
-Devanagari it is simply wrong: Noto Sans Devanagari carries `GSUB` and `GPOS`, consonants fuse into
-conjuncts, vowel signs reorder around them and marks stack — so nine codepoints of `स्वास्थ्य` are not
-nine glyphs, and their advances do not add up to the width of what gets drawn. The error runs in the
-unsafe direction, letting text through that will overflow. The fix is a shaping engine (HarfBuzz, via
-`uharfbuzz`), not more constants, and it has to agree with what prawn-svg does when it draws the same
-string — measuring correctly against a renderer that shapes differently trades one wrong number for
-another.
+**Summing advance widths is not shaping — and because the renderer does not shape either, the sum is
+exact.** The measurement adds up each codepoint's advance from `hmtx`. What matters is whether the
+renderer does more, and it does not: `prawn/svg/renderer.rb` hands the raw string to Prawn's `draw_text`
+and takes its width from `width_of`, and prawn-svg contains no shaping layer anywhere. So the sum is not
+an approximation of the drawn width, it *is* the drawn width, and adding a shaping engine here (HarfBuzz
+via `uharfbuzz`) would introduce a disagreement with the renderer rather than resolve one.
+
+Kerning is requested — `width_of(text, kerning: true)` — and has nothing to act on. All four faces in
+`common/fonts/` carry `GPOS` and **no `kern` table**, so a consumer of the legacy table finds no pairs.
+asciidoctor-pdf's own bundled subset is the other way round, a `kern` table of 15,534 pairs and no `GPOS`,
+which is a second reason the theme points at this repository's fonts rather than the gem's: the file
+measured and the file embedded must be the same file, and it should also be the one whose width is
+predictable.
+
+**The casualty is Devanagari, and it is a rendering defect rather than a measurement one.** Noto Sans
+Devanagari carries `GSUB` and `GPOS` because the script needs them — consonants fuse into conjuncts, the
+vowel sign ि is drawn *before* the consonant it follows in memory, and marks stack. None of it is applied.
+Proven from the file rather than from a preview: a probe rendering `स्वास्थ्य` at 300 units produces the
+content-stream operator `<212223242122252226> Tj` — **nine** glyph codes for nine codepoints, in logical
+order, three of them the virama that shaping exists to consume. A conforming viewer draws nine separate
+letters where a Nepali reader expects three clusters.
+
+Two things follow, and the second is the reason this is written down here. Measuring it correctly would
+not help, because the renderer would still draw it wrongly; the fix is a renderer that shapes, not a
+better ruler. And **a rendered preview cannot be used to check this**: the rasterizer used to view that
+probe reshaped the text from the PDF's `ToUnicode` map and displayed perfectly formed conjuncts, so the
+page looked correct while the file was wrong. The content stream is the evidence; a picture of it is not.
 
 **Overflow is a build failure.** Today an over-long label runs outside its box and nobody learns until
 someone opens the PDF, which for a localized build meant nobody ever did. Measurement is what lets the
@@ -196,19 +214,25 @@ new language away from being wrong, and the failure would appear only in a rende
 that until this week nobody was building. Spanish's longest is 11 and English's 11, which is why the
 constants have never been felt: they were tuned by eye against the two languages that fit.
 
-**Hyphenation is the answer to the compound, and it is language data rather than an algorithm.** Breaking
-on whitespace cannot help a single long word; breaking *inside* it needs to know where the legal points
-are, which differs per language and is exactly what a Hunspell hyphenation dictionary encodes. So this
-follows the same shape as the fonts: a per-language asset that ships with the repository, chosen by the
-language being generated, with the licence of each dictionary checked before it is added — several are
-not permissive, and the rule against non-permissive dependencies is not limited to fonts.
+**Breaking inside a word is the answer to the compound, and the break points come from the translator, not
+from a dictionary.** Breaking on whitespace cannot help a single long word. A Hunspell hyphenation
+dictionary per language was the obvious route and was rejected: it is nine assets to ship, each with a
+licence to clear — several are not permissive, and the rule against non-permissive dependencies is not
+limited to fonts — and each one only *guesses* where a compound may divide, which for coined clinical
+compounds is exactly where a pattern file is weakest.
 
-Three things it must not become. Hyphenation **relaxes** the fit rule, it does not remove it: a fragment
-that still will not fit has to fail the build exactly as an unbreakable token does today. It must be
-applied to **rendering only** — a translator never sees or supplies a break, which is the same principle
-that took the line splitting away from them. And it is not automatically welcome in every string: a
-hyphenated clinical term can be misread, so a label that must not break needs a way to say so, in the
-layout mapping rather than by hoping the dictionary agrees.
+A **soft hyphen** (U+00AD) in the source string is used instead. It costs no dependency, no per-language
+asset and no licence, and it puts the decision with the person who actually knows: where
+`Gestations{shy}alter` may divide is a fact about German, not about this layout. The renderer never sees
+one — `Face.wrap` strips every soft hyphen and writes a real hyphen only where a break is actually taken,
+which is possible because the generator emits explicit lines rather than asking the renderer to wrap. So
+whether prawn-svg honours U+00AD never arises, and a string that does not need to break carries no visible
+mark.
+
+Two properties it must keep. A break point **relaxes** the fit rule and does not remove it: a fragment
+that still will not fit fails the build exactly as an unbreakable token does. And it is opt-in per string
+rather than applied by a rule, so a clinical term that would be misread when divided simply carries no
+soft hyphen — no mapping entry, no exception list, and nothing to keep in step with the text.
 
 Two things follow. The decision flow moves onto the same measured layout as the sheets rather than
 waiting behind them — its need is more urgent, not less, because its boxes are fixed and its text is
@@ -244,30 +268,78 @@ collapses to a shade and the distinction between a section band and the non-tran
 So that block also carries a solid edge bar, which survives greyscale, photocopying and colour-blindness.
 A distinction a form makes only in hue is a distinction it does not make.
 
-## The alignment grid — the next layout pass, and why it is one problem rather than four
+## The alignment grid
 
-Everything currently positions itself relative to whatever precedes it on its own row. That is why the
-sheet reads as untidy in four separate-looking ways which are all the same defect:
+Everything used to position itself relative to whatever preceded it on its own row, which made the sheet
+read as untidy in four separate-looking ways that were all one defect. The fix is one column, and it
+resolves all four.
 
-- **Marks do not line up.** A row's choices begin after its label, so every row starts its circles at a
-  different x. On `Organism 3` the Yes/No/Not-tested columns step visibly rightwards down the block.
-  They belong on a **fixed column**, the same one on every row of a sheet, with the label truncated or
-  wrapped if it would reach it.
-- **The write-in rule doubles the row rule.** A rule at the text baseline sits a few units above the rule
-  closing the row, so the bottom of a box shows two lines a hair apart. Either the row's own rule is the
-  writing line — which is what the published forms do — or the write-in rule is placed clearly above it.
-  Not both.
-- **Nothing separates a label from the space to write in.** The published forms end every label with a
-  colon, so the eye knows where the question stops. A colon is **not** safe to append in code: French
-  requires a space before it and other languages punctuate differently, so it belongs to the translated
-  string or to a per-language rule, never to the emitter.
-- **A column separator would carry that boundary** more robustly than punctuation, and is the usual
-  answer on a ruled form — but it interacts with the fixed mark column above, which is why these are one
-  decision rather than four fixes.
+**The answer column.** One x per sheet where every answer that shares its label's line begins — a space to
+write in, a Yes/No pair, an organism's resistance run. Before it, an organism slot's three resistance rows
+stepped visibly rightwards because each began wherever its own label ended.
+
+**Its position is searched, not chosen.** Two pressures pull against each other: move the column right and
+long labels stop wrapping, move it left and more choice runs fit on their label's line. Which wins depends
+on the text, so it depends on the language — a constant tuned against English would be wrong for the other
+eight. Since the layout is a pure function of the text, `best_layout` lays each sheet out at every
+candidate position and keeps the one leaving the most room, where "most room" is the comments box that
+absorbs the leftover. Maximizing it is the same as minimizing the sheet, so the search optimizes exactly
+the property the sheets are judged on. In English it settles between 50 and 67.5 mm across the six sheets.
+
+**Not every row has a cell.** A criterion carrying its tick at the left, and a question whose choices are
+listed beneath it, both span the sheet. They are not forced into the column: option text runs to 11 155
+units — full clinical sentences such as the SSI infection-type definitions — so confining an option block
+to the answer side would wrap it into a narrow ribbon and cost far more height than the alignment is
+worth. Those rows keep the full width, and the column's stroke is simply absent beside them, which is what
+a ruled form does with a full-width row.
+
+**The column is what separates a label from the space to write in.** The published forms use a colon,
+which is not safe to append in code — French requires a space before it and other languages punctuate
+differently, so a colon belongs to the translated string or to a per-language rule, never to the emitter.
+A rule needs no such knowledge. It is drawn per row rather than as one line down the page, because the
+spanning rows have no cell for it to bound; consecutive bounded rows abut exactly, so it reads as one
+column wherever there actually is one.
+
+**The rule closing a row is the line written on**, which is what the published forms do. A separate
+writing rule at the text baseline sat about half a millimetre above it and read as a printing fault. Only
+a row whose closing rule is elsewhere — a slot header with children under it — draws a line of its own,
+and a paired row (an antibiotic substance and its days) divides its two cells with a vertical stroke of
+the same weight as the column rather than with a second horizontal one.
 
 **The same grid should govern every generated figure**, not only the sheets: the decision flow's boxes,
-the progress chart's columns and the sheets' rows are the same design object seen three ways, and each
-one drifting on its own is how the current inconsistency arose.
+the progress chart's columns and the sheets' rows are the same design object seen three ways, and each one
+drifting on its own is how the inconsistency arose in the first place.
+
+## The width budget, and which language spends it
+
+The sheets are generated per language, so each gets its own column and its own wrapping — no single layout
+has to serve all nine. What does not adapt is the **page**, and that is where a longer translation is felt.
+
+`build-collection-sheets.py` reports the spare on every run because a sheet with 1 mm of headroom passes
+the same green build as one with 30. Converting that to the expansion each sheet can absorb before it
+stops fitting, measured by scaling every advance width:
+
+| sheet | absorbs up to |
+|---|---|
+| surgery, NEC | ×2.0 or more |
+| master | ×1.74 |
+| primary sepsis/BSI | ×1.24 |
+| SSI, pneumonia | does not fit in English yet |
+
+Against that, NeoIPC's own measured expansion — rendered width of `msgstr` over `msgid` across the
+translated catalogues — is a median of **1.12–1.15** for German and Spanish and a p90 of **1.35**, with
+individual strings reaching 1.9. So the BSI sheet survives a typical German translation and not an
+unusual one, which is a real risk rather than a theoretical one.
+
+Two caveats on those numbers. The **metadata catalogue, which is what the sheets read, is essentially
+untranslated** — German is at 1 %, the other five at 0 % — so the expansion figures above are borrowed
+from the documentation and reports catalogues, and no German sheet has ever been laid out. And Devanagari
+is **15 % wider than Latin at the same point size for identical text**, which is a property of the face
+rather than of Nepali, and comes on top of whatever Nepali's own expansion turns out to be.
+
+The four target languages that build compounds — German, Estonian, Turkish, Afrikaans — are the ones to
+watch, and not because of their average width: the failure mode on a form is a single unbreakable token,
+which is what the soft-hyphen convention above exists for.
 
 ## House style: the output is read by people
 

@@ -22,6 +22,7 @@ import argparse
 import csv
 import re
 import sys
+from collections.abc import Callable
 from dataclasses import dataclass, field as dc_field
 from pathlib import Path
 
@@ -79,6 +80,17 @@ MARK = 260                              # a choose-one circle or choose-any squa
 MARK_GAP = 110                          # between a mark and its own word: deliberately tighter
 OPTION_SEP = 820                        # between one option and the next, so the pairing reads
 COMMENTS_MIN = 1200                     # below this the leftover is a gap, not a usable writing space
+
+# The answer column: ONE x per sheet where every answer that shares its label's line begins -- a space to
+# write in, a Yes/No pair, an organism's resistance run. Before it, each row started its answer wherever
+# its own label happened to end, so nothing lined up with anything and a slot's three resistance rows
+# stepped visibly rightwards down the block.
+#
+# Its position is searched rather than chosen: `_best_column` lays the sheet out at each candidate and
+# keeps the one that leaves the most room. A constant would have to be re-tuned for every language, which
+# is exactly the failure mode of the character-counting wrapper this generator replaces.
+LABEL_COL_MIN, LABEL_COL_MAX, LABEL_COL_STEP = 5000, 11000, 250
+COLUMN_GAP = 300                        # clear space between the longest label and the column
 
 # Real superscript codepoints rather than a baseline shift, so a marker survives being copied out of the
 # PDF and is one character to measure. The font's coverage is checked like any other text on the sheet.
@@ -653,11 +665,17 @@ class SvgWriter:
     """
 
     def __init__(self, face: Face, bold: Face, chrome: dict[str, str], layout: LayoutRules, logo: Logo,
-                 language: str | None):
+                 language: str | None, label_width: int = LABEL_COL_MAX):
         self.face, self.bold, self.chrome, self.layout = face, bold, chrome, layout
         self.logo, self.language = logo, language
         self.missing: dict[str, set[str]] = {}
         self.footnotes: list[str] = []
+        # Where the answers begin. One value for the whole sheet, so a mark on the first row and a mark on
+        # the last sit on the same vertical.
+        self.answer_x = MARGIN_X + label_width
+        # How much page is left once everything is placed -- the size of the comments box, and the only
+        # honest measure of how much longer a translation may be before the sheet stops fitting.
+        self.spare = 0
 
     def footnote(self, key: str) -> str:
         """Register a footnote and return the superscript marker that refers to it.
@@ -703,6 +721,12 @@ class SvgWriter:
             "    circle.mark { fill: none; stroke: #000; stroke-width: 18; }",
             "    line.rule { stroke: #000; stroke-width: 12; }",
             "    line.write { stroke: #000; stroke-width: 12; }",
+            # The answer column's own stroke. Drawn per row rather than as one full-height line, because
+            # the rows that span the sheet -- a criterion with its tick at the left, a question whose
+            # choices are listed beneath it -- have no cell for it to bound, and a line through their
+            # text would be a defect rather than a grid. Consecutive bounded rows abut, so the strokes
+            # read as one column wherever there actually is one.
+            "    line.column { stroke: #000; stroke-width: 12; }",
             # The inlined logo's paths carry these classes. Defined here rather than kept inside the
             # symbol so the sheet has exactly one stylesheet -- and because a symbol whose own <style>
             # was dropped renders in the default fill, which is black, silently.
@@ -772,6 +796,7 @@ def layout_sheet(sheet: Sheet, writer: SvgWriter) -> list[str]:
         for i, k in enumerate(writer.footnotes)
     ) + (200 if writer.footnotes else 0)
     spare = (PAGE_H - MARGIN_BOTTOM - legend_h - footer_h - notes_h) - y
+    writer.spare = spare
     if spare > 0:
         # The leftover is ALWAYS absorbed, so the bottom margin equals the other three exactly. Taking it
         # only when it exceeded the minimum meant a sheet with a little space left simply abandoned it --
@@ -808,6 +833,40 @@ def layout_sheet(sheet: Sheet, writer: SvgWriter) -> list[str]:
             out,
         )
     return out
+
+
+def best_layout(
+    sheet: Sheet, make_writer: Callable[[int], SvgWriter]
+) -> tuple[SvgWriter, list[str] | None, Overflow | None]:
+    """Lay the sheet out at every candidate answer column and keep the roomiest result.
+
+    The column's position cannot be a constant, and the two pressures on it pull opposite ways: move it
+    right and long labels stop wrapping, move it left and more choice runs fit on their label's line.
+    Which wins depends on the label and option text -- so it depends on the LANGUAGE, and a number tuned
+    against English would have to be re-tuned for each of the other eight and would still be wrong for the
+    ninth. Since the layout is a pure function of the text, the position is measured the same way
+    everything else here is: lay it out, and keep what leaves the most room.
+
+    'Most room' is the comments box, which absorbs whatever the fields leave over -- so maximizing it is
+    the same as minimizing the sheet, and it optimizes the property the sheets are actually judged on.
+    """
+    best: tuple[tuple[int, int, int], SvgWriter, list[str] | None, Overflow | None] | None = None
+    for width in range(LABEL_COL_MIN, LABEL_COL_MAX + 1, LABEL_COL_STEP):
+        writer = make_writer(width)
+        failure: Overflow | None = None
+        try:
+            body = layout_sheet(sheet, writer)
+        except Overflow as overflow:
+            body, failure = overflow.body, overflow
+        # A column that fits beats one that does not, whatever their spare. Among failures, one that got
+        # far enough to measure a page beats one that could not place a word at all.
+        score = writer.spare if body is not None else -(10 ** 9)
+        # Widest spare wins; a tie goes to the NARROWER label column, which is the same layout with more
+        # room to write in. Ties are the normal case once the column clears every label on the sheet.
+        key = (0 if failure is None else -1, score, -width)
+        if best is None or key > best[0]:
+            best = (key, writer, body, failure)
+    return best[1], best[2], best[3]
 
 
 def _emit_legend(out: list[str], y: int, writer: SvgWriter) -> int:
@@ -868,11 +927,16 @@ def _emit_patient_block(out: list[str], y: int, writer: SvgWriter) -> int:
     for key in ("patient_identifier", "patient_name"):
         label = writer.chrome[key]
         writer._text(label, LABEL_SIZE)
+        top = y
         y += writer.face.pad_at(LABEL_SIZE)
-        for line in _fit(writer, label, LABEL_SIZE, CONTENT_W - 360, key, "label"):
+        for line in _fit(writer, label, LABEL_SIZE, writer.answer_x - COLUMN_GAP - TEXT_X, key, "label"):
             out.append(f'  <text class="label" x="{TEXT_X}" y="{y + writer.face.cap_at(LABEL_SIZE)}">{_esc(line)}</text>')
             y += LABEL_SIZE + LINE_GAP
         y += writer.face.pad_at(LABEL_SIZE) - LINE_GAP
+        # Written on the same column as every other answer, and on the rule closing the row. These two
+        # rows are where the sheet's grid is established for its reader, so they follow it rather than
+        # setting a second convention at the top of the page.
+        _column(out, top, y, writer)
         out.append(f'  <line class="rule" x1="{MARGIN_X}" y1="{y}" x2="{MARGIN_X + CONTENT_W}" y2="{y}"/>')
 
     note = writer.chrome["patient_note"]
@@ -912,11 +976,17 @@ def _emit_section(out: list[str], section: Section, y: int, writer: SvgWriter) -
 
     fields = _collapse_groups(section.fields, writer)
     for index, field in enumerate(fields):
-        y = _emit_child(out, field, y, writer) if field.is_child else _emit_field(out, field, y, writer)
         # A rule closes a GROUP, not every field: a slot and its children are one thing on the page, and
         # ruling between them would break up the block the '- ' convention exists to express.
+        #
+        # The row that CLOSES a group has to know, because that rule is then the line it is written on --
+        # which is what the published forms do. Drawing a writing rule as well put two lines half a
+        # millimetre apart at the foot of every such box, close enough to read as a printing fault.
         following = fields[index + 1] if index + 1 < len(fields) else None
-        if following is None or not following.is_child:
+        closes = following is None or not following.is_child
+        emit = _emit_child if field.is_child else _emit_field
+        y = emit(out, field, y, writer, closes)
+        if closes:
             out.append(f'  <line class="rule" x1="{MARGIN_X}" y1="{y}" x2="{MARGIN_X + CONTENT_W}" y2="{y}"/>')
     return y
 
@@ -975,22 +1045,29 @@ def _collapse_groups(fields: list[Field], writer: SvgWriter) -> list[Field]:
     return out
 
 
-def _emit_child(out: list[str], field: Field, y: int, writer: SvgWriter) -> int:
-    """A sub-field on one line: its short label, then its choices along the same line.
+def _emit_child(out: list[str], field: Field, y: int, writer: SvgWriter, closes_group: bool = True) -> int:
+    """A sub-field on one line: its short label, then its answer at the sheet's answer column.
 
     This is where the page is won. Nine fields per organism slot, each given a label row and its own
     option rows underneath, is most of two pages for one section; the same nine as compact lines under
     their slot header is a block.
+
+    The answer starts at the column rather than after the label, which is what makes a slot read as a
+    block at all: with each row starting its marks wherever its own label ended, an organism's three
+    resistance rows stepped visibly rightwards down the sheet and no two rows agreed on anything.
     """
     label = field.short_label
     writer._text(label, OPTION_SIZE)
+    top = y
     y += writer.face.pad_at(OPTION_SIZE) // 2
 
     x = TEXT_X + OPTION_INDENT
-    out.append(f'  <text class="child" x="{x}" y="{y + writer.face.cap_at(OPTION_SIZE)}">{_esc(label)}</text>')
-    x += writer.face.width(label, OPTION_SIZE) + OPTION_GAP
-    right = MARGIN_X + CONTENT_W - 180
     baseline = y + writer.face.cap_at(OPTION_SIZE)
+    for line in _fit(writer, label, OPTION_SIZE, writer.answer_x - COLUMN_GAP - x, field.code, "label"):
+        out.append(f'  <text class="child" x="{x}" y="{baseline}">{_esc(line)}</text>')
+        baseline += OPTION_SIZE + LINE_GAP
+    baseline -= OPTION_SIZE + LINE_GAP
+    right = MARGIN_X + CONTENT_W - 180
 
     options, radio = field.options, field.radio
     if not options and not field.write_in:
@@ -998,73 +1075,115 @@ def _emit_child(out: list[str], field: Field, y: int, writer: SvgWriter) -> int:
         if style == "yes_no":
             options, radio = [writer.chrome["boolean_yes"], writer.chrome["boolean_no"]], True
         elif style == "tick":
-            _mark(out, field.code.lower().replace("_", "-"), int(x), baseline, False, writer)
-            return baseline + writer.face.pad_at(OPTION_SIZE)
+            _mark(out, _ident(field), writer.answer_x, baseline, False, writer)
+            return _column(out, top, baseline + writer.face.pad_at(OPTION_SIZE), writer)
 
     if not options:
-        out.append(f'  <line class="write" x1="{int(x)}" y1="{baseline + 60}" x2="{right}" y2="{baseline + 60}"/>')
-        return baseline + writer.face.pad_at(OPTION_SIZE)
+        bottom = baseline + writer.face.pad_at(OPTION_SIZE)
+        # A write-in cell is bounded on the left by the column and below by the rule closing the group.
+        # Only where that rule is elsewhere -- another child follows this one -- does the cell need a
+        # line of its own.
+        if not closes_group:
+            out.append(f'  <line class="write" x1="{writer.answer_x}" y1="{bottom}" x2="{right}" y2="{bottom}"/>')
+        return _column(out, top, bottom, writer)
 
     for option in options:
         writer._text(option, OPTION_SIZE)
     widths = [writer.face.width(option, OPTION_SIZE) for option in options]
     needed = sum(w + MARK + MARK_GAP for w in widths) + OPTION_SEP * (len(options) - 1)
-    if x + needed > right:
-        # The choices will not share the label's line, so fall back to the indented block a parent uses.
+    if writer.answer_x + needed > right:
+        # The choices will not share the label's line, so fall back to the indented block a parent uses,
+        # which has the full width to wrap into. That block spans the column, so no stroke is drawn.
         return _emit_options(out, field, options, radio, baseline + LINE_GAP, writer)
 
-    ident = field.code.lower().replace("_", "-")
+    ident = _ident(field)
+    x = writer.answer_x
     for index, option in enumerate(options):
         _mark(out, f"{ident}-{index + 1}", int(x), baseline, radio, writer)
         out.append(f'  <text class="option" x="{int(x + MARK + MARK_GAP)}" y="{baseline}">{_esc(option)}</text>')
         x += MARK + MARK_GAP + widths[index] + OPTION_SEP
-    return baseline + LINE_GAP
+    return _column(out, top, baseline + LINE_GAP, writer)
 
 
-def _emit_field(out: list[str], field: Field, y: int, writer: SvgWriter) -> int:
+def _emit_field(out: list[str], field: Field, y: int, writer: SvgWriter, closes_group: bool = True) -> int:
     """One field is one full-width row: bold label, then whatever it needs to be answered."""
     label = field.label + (f" ({writer.chrome['required']})" if field.compulsory else "")
     writer._text(label, LABEL_SIZE)
     style = writer.layout.boolean_style(field)
 
+    options, radio = field.options, field.radio
+    if not options and style == "yes_no":
+        options = [writer.chrome["boolean_yes"], writer.chrome["boolean_no"]]
+        radio = True
+    # A row is either answered ON its own line -- a space to write in, starting at the answer column --
+    # or it spans the sheet: a criterion whose tick sits at the left, or a question whose choices are
+    # listed beneath it. Only the first kind has a cell, so only that kind is bounded by the column, and
+    # only that kind gives up width to it.
+    answered_here = style != "tick" and not options
+
+    top = y
     y += writer.face.pad_at(LABEL_SIZE)
     label_x = TEXT_X
     if style == "tick":
         # The tick sits on the label's own line: a criterion in a list reads as one thing to mark, not as
         # a question followed by an answer. This is the shape the published sheets use for every
         # signs-and-symptoms and laboratory-findings element.
-        _mark(out, field.code.lower().replace("_", "-"), TEXT_X, y + writer.face.cap_at(LABEL_SIZE), False, writer, LABEL_SIZE)
+        _mark(out, _ident(field), TEXT_X, y + writer.face.cap_at(LABEL_SIZE), False, writer, LABEL_SIZE)
         label_x = TEXT_X + MARK + MARK_GAP
 
-    available = MARGIN_X + CONTENT_W - label_x - 180
-    for line in _fit(writer, label, LABEL_SIZE, available, field.code, "label"):
-        out.append(f'  <text class="label" x="{label_x}" y="{y + writer.face.cap_at(LABEL_SIZE)}">{_esc(line)}</text>')
+    edge = writer.answer_x - COLUMN_GAP if answered_here else MARGIN_X + CONTENT_W - 180
+    baseline = y + writer.face.cap_at(LABEL_SIZE)
+    for line in _fit(writer, label, LABEL_SIZE, edge - label_x, field.code, "label"):
+        out.append(f'  <text class="label" x="{label_x}" y="{baseline}">{_esc(line)}</text>')
         y += LABEL_SIZE + LINE_GAP
+        baseline += LABEL_SIZE + LINE_GAP
     y -= LINE_GAP
+    baseline -= LABEL_SIZE + LINE_GAP
 
     if field.trailing:
-        # Two values on one row: the field's own write-in space, then the second, then its unit word.
-        writer._text(field.trailing, LABEL_SIZE)
-        right = MARGIN_X + CONTENT_W - 180
-        unit_w = writer.face.width(field.trailing, LABEL_SIZE)
-        unit_x = right - unit_w
-        second_x = unit_x - 2400
-        baseline = y + 60
-        start = label_x + writer.face.width(label, LABEL_SIZE) + 300
-        out.append(f'  <line class="write" x1="{int(start)}" y1="{baseline}" x2="{int(second_x) - 300}" y2="{baseline}"/>')
-        out.append(f'  <line class="write" x1="{int(second_x)}" y1="{baseline}" x2="{int(unit_x) - 200}" y2="{baseline}"/>')
-        out.append(f'  <text class="label" x="{int(unit_x)}" y="{y}">{_esc(field.trailing)}</text>')
-        return y + writer.face.pad_at(LABEL_SIZE)
+        return _emit_paired_row(out, field, top, y, baseline, writer, closes_group)
 
-    options = field.options
-    radio = field.radio
-    if not options and style == "yes_no":
-        options = [writer.chrome["boolean_yes"], writer.chrome["boolean_no"]]
-        radio = True
     if options:
-        y = _emit_options(out, field, options, radio, y + LINE_GAP, writer)
+        return _emit_options(out, field, options, radio, y + LINE_GAP, writer) + writer.face.pad_at(LABEL_SIZE)
 
-    return y + writer.face.pad_at(LABEL_SIZE)
+    y += writer.face.pad_at(LABEL_SIZE)
+    if answered_here:
+        # The rule closing the row IS the line written on, which is what the published forms do and what
+        # keeps a row showing one line at its foot rather than two a fraction of a millimetre apart. A
+        # field that heads a group of children is the exception: its rule is several rows further down.
+        if not closes_group:
+            out.append(
+                f'  <line class="write" x1="{writer.answer_x}" y1="{y}" '
+                f'x2="{MARGIN_X + CONTENT_W - 180}" y2="{y}"/>'
+            )
+        _column(out, top, y, writer)
+    return y
+
+
+def _emit_paired_row(out: list[str], field: Field, top: int, y: int, baseline: int, writer: SvgWriter,
+                     closes_group: bool) -> int:
+    """A row carrying two values -- an antibiotic substance and the number of days it was given.
+
+    Both are written on the rule that closes the row, so the row shows one line at its foot instead of a
+    writing rule sitting just above the rule beneath it. What divides the two cells is a vertical stroke
+    of the same weight and kind as the answer column's, so the row reads as three cells of one table
+    rather than as two underscores floating in it.
+    """
+    writer._text(field.trailing, LABEL_SIZE)
+    right = MARGIN_X + CONTENT_W - 180
+    unit_x = int(right - writer.face.width(field.trailing, LABEL_SIZE))
+    divider = unit_x - 2400
+    # The unit word sits on the label's own baseline. Placing it at the row's foot instead dropped it
+    # below every other word on its line by the difference between the font size and the cap height.
+    out.append(f'  <text class="label" x="{unit_x}" y="{baseline}">{_esc(field.trailing)}</text>')
+
+    bottom = y + writer.face.pad_at(LABEL_SIZE)
+    if not closes_group:
+        out.append(f'  <line class="write" x1="{writer.answer_x}" y1="{bottom}" x2="{divider}" y2="{bottom}"/>')
+        out.append(f'  <line class="write" x1="{divider}" y1="{bottom}" x2="{unit_x - 200}" y2="{bottom}"/>')
+    _column(out, top, bottom, writer)
+    out.append(f'  <line class="column" x1="{divider}" y1="{top}" x2="{divider}" y2="{bottom}"/>')
+    return bottom
 
 
 def _emit_options(out: list[str], field: Field, options: list[str], radio: bool, y: int, writer: SvgWriter) -> int:
@@ -1118,6 +1237,23 @@ def _mark(out: list[str], ident: str, x: int, baseline: int, radio: bool, writer
             f'  <rect id="{ident}" class="mark" x="{x}" y="{centre - MARK // 2}" '
             f'width="{MARK}" height="{MARK}"/>'
         )
+
+
+def _column(out: list[str], top: int, bottom: int, writer: SvgWriter) -> int:
+    """Bound one row's answer cell on the left, and return the row's foot so callers can `return` it.
+
+    Drawn per row rather than as one line down the sheet, because the rows that span it have no cell for
+    it to bound and a stroke through their text would be a defect rather than a grid.
+    """
+    out.append(
+        f'  <line class="column" x1="{writer.answer_x}" y1="{top}" x2="{writer.answer_x}" y2="{bottom}"/>'
+    )
+    return bottom
+
+
+def _ident(field: Field) -> str:
+    """The element's own code as an SVG id -- semantic, and traceable back to the metadata."""
+    return field.code.lower().replace("_", "-")
 
 
 def _fit(writer: SvgWriter, text: str, size: int, width: int, code: str, what: str) -> list[str]:
@@ -1189,16 +1325,15 @@ def main(argv: list[str] | None = None) -> int:
     suffix = f".{args.language}" if args.language else ""
     written, failures = [], []
     for sheet in sheets:
-        writer = SvgWriter(face, bold, chrome, rules, logo, args.language)
-        try:
-            body = layout_sheet(sheet, writer)
-        except Overflow as overflow:
-            failures.append(str(overflow))
+        writer, body, failure = best_layout(
+            sheet, lambda width: SvgWriter(face, bold, chrome, rules, logo, args.language, width)
+        )
+        if failure is not None:
+            failures.append(str(failure))
             # Reviewing a sheet that does not fit is the only way to decide WHAT to cut, so the file can
             # be written on request -- reported as a failure either way, and the exit status is unchanged.
-            if not (args.allow_overflow and overflow.body):
+            if not (args.allow_overflow and body):
                 continue
-            body = overflow.body
         if writer.missing:
             for font_name, chars in sorted(writer.missing.items()):
                 shown = " ".join(f"U+{ord(c):04X} {c!r}" for c in sorted(chars))
@@ -1206,12 +1341,16 @@ def main(argv: list[str] | None = None) -> int:
             continue
         target = args.out / f"NeoIPC-Core-{sheet.slug}-Sheet{suffix}.svg"
         target.write_text(writer.sheet_svg(sheet, body), encoding="utf-8", newline="\n")
-        written.append(target)
+        # The spare is how much page is left over, and it is the only honest measure of how much longer a
+        # translation of this sheet may be before it stops fitting. Reported on every run because the
+        # one-page rule is a requirement rather than a preference, and a sheet at 2 mm of headroom passes
+        # the same green build as one at 30.
+        written.append((target, (writer.answer_x - MARGIN_X) / 100, writer.spare / 100))
 
     for line in failures:
         print(f"error: {line}", file=sys.stderr)
-    for target in written:
-        print(f"wrote {target}")
+    for target, column, spare in written:
+        print(f"wrote {target} (answer column {column:.1f} mm, {spare:.1f} mm spare)")
     return 1 if failures else 0
 
 
