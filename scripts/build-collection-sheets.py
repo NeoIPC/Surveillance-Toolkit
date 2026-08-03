@@ -1991,15 +1991,21 @@ def _typst_preamble(sheet: Sheet, composer: Composer) -> list[str]:
 #set text(font: ({families}), fallback: false, top-edge: "baseline", bottom-edge: "baseline",
           dir: {direction})
 
-// What the layout measured a run at, against what the engine will actually draw. Shaping and kerning
-// only ever remove advance in these faces -- a kern pair closes a gap, a conjunct replaces several
-// glyphs with one -- so the engine's width should never exceed the sum of advances the layout was built
-// from. "Should" is an argument rather than a proof, so it is checked on every run: if shaping ever
-// widened one, the sheet would silently overlap its own column rule, and this stops the compile instead.
+// What the layout measured a run at, against what the engine will actually draw, checked on every run.
+//
+// The layout sums advance widths; the engine also applies kerning and ligatures, so the two disagree
+// slightly and NOT always in the same direction. Measured on the longest line of the surgical-site
+// sheet: 184.6368 mm summed against 184.6848 mm drawn, the engine wider by 0.03 %.
+//
+// The tolerance is set from what a disagreement would have to be before it could matter, rather than
+// from that number. Everything this exists to catch is at least two orders larger: a run set in the
+// wrong face differs by 6 % (the same line upright is 195.87 mm), and a script whose shaping the layout
+// cannot see differs by 16 % (Devanagari). Half a percent sits above the noise and far below either, so
+// a wrong face still stops the compile and a rounding difference does not.
 #let fit(w, body) = context {{
   let drawn = measure(body).width
   assert(
-    drawn <= w * u + u,
+    drawn <= w * u * 1.005 + u,
     message: "drawn " + repr(drawn) + " wide, past the " + repr(w * u) + " the layout allowed for it",
   )
   body

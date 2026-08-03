@@ -281,29 +281,38 @@ without a page number template"*), so the oracle works and the answer really is 
 remains the gate for both outputs; the page count is worth asserting anyway, as a check that everything
 was placed at all.
 
-### The consequence for measurement: the sum bounds what the engine draws
+### The consequence for measurement: the sum is exact for Latin and unsound for Devanagari
 
-Summing `hmtx` advances is exact for prawn-svg **because prawn-svg does not shape**. Typst does, so the
-sum stops being exact there — but it errs in the safe direction, which is what keeps it usable. Measured,
-in the faces and at the sizes the sheets use:
+Summing `hmtx` advances is exact for prawn-svg **because prawn-svg does not shape**. Typst shapes, so the
+two disagree — and how much, and in which direction, depends on the script:
 
 | run | sum of advances | Typst | ratio |
 |---|---|---|---|
 | `Patient ID`, regular and bold | 13.97 / 15.05 mm | identical | 1.000 |
 | `Temperaturauffälligkeiten`, bold | 39.90 mm | 39.57 mm | 0.992 |
 | `AVATAR Two Yaws`, bold | 27.36 mm | 26.49 mm | 0.968 |
+| a 175-character English line, italic | 184.637 mm | 184.685 mm | 1.0003 |
 | `स्वास्थ्य सेवा`, Devanagari | 15.41 mm | 12.87 mm | 0.835 |
+| a Devanagari label on the master sheet | 12.34 pt | 13.84 pt | **1.12** |
 
-Shaping and kerning only remove advance in these faces — a `GPOS` pair closes a gap, a conjunct replaces
-several glyphs with one — so what the generator measures bounds what the engine draws, and a cell it
-declares to fit cannot overflow. The cost is width given up in a shaped script, which for Devanagari is a
-sixth of every run.
+**For Latin the disagreement is feature application and is negligible** — kerning and ligatures, a few
+hundredths of a percent, in either direction. **For Devanagari the sum is simply not a measurement of the
+drawn text.** A combining mark carries little or no advance in `hmtx` while the shaped cluster it joins
+has real width, and conjuncts replace several glyphs with one; the two effects pull opposite ways, so one
+string comes out 16 % narrower than the sum and another 12 % wider. There is no safe direction to lean in.
 
-**That is an argument rather than a proof, so the emitted document checks it.** Every placed run carries
-the width the generator measured for it and asserts against `measure()`, the engine's own ruler applied to
-the shaped text it is about to draw. If shaping ever widened a run, the compile fails and names it instead
-of the sheet silently overlapping its own column rule. It costs nothing worth counting: 400 asserted runs
-compile in 0.19 s.
+So a Nepali sheet **cannot be laid out by this generator as it stands** — not because the form does not
+fit, but because the ruler does not measure what gets drawn. Closing that needs shaping-aware measurement
+(HarfBuzz through `uharfbuzz`, which is what the engine itself uses); until then the honest position is
+that Nepali strings are translated and the sheet is not producible.
+
+**None of this was argued into place — the emitted document checks it.** Every placed run carries the
+width the generator measured for it and asserts against `measure()`, the engine's own ruler applied to the
+shaped text it is about to draw. That assertion is what turned "shaping only ever narrows" from a
+confident claim into a measured falsehood, and it is what stops a Nepali sheet from shipping with text
+through its own rules. The tolerance is half a percent, set from what a disagreement would have to be
+before it could matter: a run in the wrong face differs by 6 %, an unshaped script by 12–16 %, and feature
+application by 0.03 %. It costs nothing worth counting — 400 asserted runs compile in 0.19 s.
 
 ### What the emitted `.typ` contains
 
