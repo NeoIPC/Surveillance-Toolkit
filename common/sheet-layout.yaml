@@ -109,6 +109,18 @@ omit:
 row_units:
   DAYS: unit_days
 
+# Fields whose code ends in one of these is not printed on any sheet.
+#
+# `NEOIPC_<stage>_PATHOGEN_<n>_NAME` -- eighteen of them, one per organism slot, all named "- Name" -- is
+# the free-text fallback for an organism the coded list does not offer. On a screen that is a second
+# control and a real distinction. On paper there IS no list, so both fields are the same act: write the
+# organism's name on the slot's own line. Printing them as two rows asked the same question twice and cost
+# a row per slot, which on the surgical-site sheet is six.
+#
+# The data model keeps both. This omits the row, not the field: whoever enters the data still chooses the
+# coded organism where one fits and types the name where it does not.
+omit_suffixes: [NAME]
+
 groups:
   - suffixes: [3GCR, MRSA, VRE]
     label_key: resistance_organism_specific

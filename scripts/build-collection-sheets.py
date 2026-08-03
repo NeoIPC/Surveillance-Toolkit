@@ -84,6 +84,10 @@ MARK = 260                              # a choose-one circle or choose-any squa
 MARK_GAP = 110                          # between a mark and its own word: deliberately tighter
 OPTION_SEP = 820                        # between one option and the next, so the pairing reads
 COMMENTS_MIN = 1200                     # below this the leftover is a gap, not a usable writing space
+# How far a writing line runs when it is drawn inside a block rather than closing a row. Left to reach the
+# right margin it read as a rule across the page rather than as a field to write one organism's name on --
+# and an organism name is a few words, not a sentence.
+WRITE_IN_MAX = 6500
 
 # The answer column: ONE x per sheet where every answer that shares its label's line begins -- a space to
 # write in, a Yes/No pair, an organism's resistance run. Before it, each row started its answer wherever
@@ -323,7 +327,13 @@ class LayoutRules:
         self.composites: dict[str, dict] = rules.get("composites") or {}
         self.groups: list[dict] = rules.get("groups") or []
         self.omitted: set[str] = set(rules.get("omit") or [])
+        self.omitted_suffixes: tuple[str, ...] = tuple(rules.get("omit_suffixes") or ())
         self.row_units: dict[str, str] = rules.get("row_units") or {}
+
+    def prints(self, field: Field) -> bool:
+        """Whether this field gets a row of its own on a sheet."""
+        return (field.code not in self.omitted
+                and not any(field.code.endswith(f"_{s}") for s in self.omitted_suffixes))
 
     def continues_row(self, previous: Field | None, field: Field, chrome: dict[str, str]) -> str | None:
         """The unit word to print at the end of `previous`'s row, if `field` belongs on it.
@@ -1080,7 +1090,7 @@ def _collapse_groups(fields: list[Field], writer: SvgWriter) -> list[Field]:
     form relative to the data model, and grouping across slots would put one organism's answer on
     another's line -- both of which read as a working sheet.
     """
-    fields = [f for f in fields if f.code not in writer.layout.omitted]
+    fields = [f for f in fields if writer.layout.prints(f)]
 
     # Fold a continuation onto the row before it, before any grouping runs: a field that is part of
     # another's row is not a row of its own and must not be counted as one.
@@ -1166,8 +1176,9 @@ def _emit_child(out: list[str], field: Field, y: int, writer: SvgWriter, closes_
         # Only where that rule is elsewhere -- another child follows this one -- does the cell need a
         # line of its own.
         if not closes_group:
+            end = min(writer.answer_text_x + WRITE_IN_MAX, right)
             out.append(
-                f'  <line class="write" x1="{writer.answer_text_x}" y1="{bottom}" x2="{right}" y2="{bottom}"/>'
+                f'  <line class="write" x1="{writer.answer_text_x}" y1="{bottom}" x2="{end}" y2="{bottom}"/>'
             )
         return _column(out, top, bottom, writer)
 
@@ -1260,9 +1271,9 @@ def _emit_field(out: list[str], field: Field, y: int, writer: SvgWriter, closes_
         # keeps a row showing one line at its foot rather than two a fraction of a millimetre apart. A
         # field that heads a group of children is the exception: its rule is several rows further down.
         if not closes_group:
+            end = min(writer.answer_text_x + WRITE_IN_MAX, MARGIN_X + CONTENT_W - TEXT_INSET)
             out.append(
-                f'  <line class="write" x1="{writer.answer_text_x}" y1="{y}" '
-                f'x2="{MARGIN_X + CONTENT_W - TEXT_INSET}" y2="{y}"/>'
+                f'  <line class="write" x1="{writer.answer_text_x}" y1="{y}" x2="{end}" y2="{y}"/>'
             )
         _column(out, top, y, writer)
     return y
