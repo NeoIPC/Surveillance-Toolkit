@@ -95,6 +95,10 @@ COMMENTS_MIN = 1200                     # below this the leftover is a gap, not 
 # is exactly the failure mode of the character-counting wrapper this generator replaces.
 LABEL_COL_MIN, LABEL_COL_MAX, LABEL_COL_STEP = 5000, 11000, 250
 COLUMN_GAP = 300                        # clear space between the longest label and the column
+# Between a criterion in the left half and the box of the one in the right half. It has to be wide enough
+# to read as two columns rather than as one run-on line: at a bare text inset the last word of a long
+# label finished flush against the next box, which is legible and looks like a defect.
+PAIR_GUTTER = 700
 
 # Real superscript codepoints rather than a baseline shift, so a marker survives being copied out of the
 # PDF and is one character to measure. The font's coverage is checked like any other text on the sheet.
@@ -319,20 +323,21 @@ class LayoutRules:
         self.composites: dict[str, dict] = rules.get("composites") or {}
         self.groups: list[dict] = rules.get("groups") or []
         self.omitted: set[str] = set(rules.get("omit") or [])
-        self.row_suffixes: list[str] = rules.get("row_suffixes") or []
+        self.row_units: dict[str, str] = rules.get("row_units") or {}
 
-    def continues_row(self, previous: Field | None, field: Field) -> str | None:
+    def continues_row(self, previous: Field | None, field: Field, chrome: dict[str, str]) -> str | None:
         """The unit word to print at the end of `previous`'s row, if `field` belongs on it.
 
-        The relationship is stated by the codes -- `X_DAYS` is the days of `X` -- and the unit is what is
-        left of the child's own form name once the parent's is removed, so it stays translated rather than
-        being a word invented here.
+        The relationship is stated by the codes -- `X_DAYS` is the days of `X`. The unit word is a figure
+        string rather than a fragment of the child's own form name: deriving it by subtracting the
+        parent's label from the child's works only where a language happens to build one out of the other,
+        and fails silently everywhere else.
         """
         if previous is None:
             return None
-        for suffix in self.row_suffixes:
+        for suffix, key in self.row_units.items():
             if field.code == f"{previous.code}_{suffix}":
-                return field.label.replace(previous.label, "").strip() or suffix.lower()
+                return chrome[key]
         return None
 
     def group_of(self, field: Field) -> dict | None:
@@ -993,21 +998,79 @@ def _emit_section(out: list[str], section: Section, y: int, writer: SvgWriter) -
         ty += SECTION_SIZE + LINE_GAP
     y += band_h
 
-    fields = _collapse_groups(section.fields, writer)
-    for index, field in enumerate(fields):
+    rows = _pair_ticks(_collapse_groups(section.fields, writer), writer)
+    for index, row in enumerate(rows):
         # A rule closes a GROUP, not every field: a slot and its children are one thing on the page, and
         # ruling between them would break up the block the '- ' convention exists to express.
         #
         # The row that CLOSES a group has to know, because that rule is then the line it is written on --
         # which is what the published forms do. Drawing a writing rule as well put two lines half a
         # millimetre apart at the foot of every such box, close enough to read as a printing fault.
-        following = fields[index + 1] if index + 1 < len(fields) else None
+        following = rows[index + 1][0] if index + 1 < len(rows) else None
         closes = following is None or not following.is_child
-        emit = _emit_child if field.is_child else _emit_field
-        y = emit(out, field, y, writer, closes)
+        if len(row) == 2:
+            y = _emit_tick_pair(out, row, y, writer)
+        else:
+            emit = _emit_child if row[0].is_child else _emit_field
+            y = emit(out, row[0], y, writer, closes)
         if closes:
             out.append(f'  <line class="rule" x1="{MARGIN_X}" y1="{y}" x2="{MARGIN_X + CONTENT_W}" y2="{y}"/>')
     return y
+
+
+def _is_tick(field: Field, writer: SvgWriter) -> bool:
+    """A criterion marked with a single box on its own line, with no answer beside it."""
+    return (not field.is_child and not field.options
+            and writer.layout.boolean_style(field) == "tick")
+
+
+def _pair_ticks(fields: list[Field], writer: SvgWriter) -> list[tuple[Field, ...]]:
+    """Put two tick criteria on one row wherever both fit half the width.
+
+    A criterion is a box and a few words, and it was taking a full-width row -- so two thirds of every one
+    of them was blank paper. The signs-and-symptoms and laboratory-findings blocks are almost entirely
+    these, which is why the infection sheets ran over a page while the space to fix it sat unused beside
+    every line.
+
+    Pairing is greedy and conditional on measurement, so a criterion whose text needs the full width still
+    gets it and nothing is squeezed. Fields with children are never paired: a slot header and the block
+    hanging off it are one thing, and splitting that across a half-row would break the group the rule
+    below it closes.
+    """
+    half = (CONTENT_W - 2 * TEXT_INSET) // 2
+
+    def fits(field: Field) -> bool:
+        label = field.label + (f" ({writer.chrome['required']})" if field.compulsory else "")
+        return writer.face.width(label, LABEL_SIZE) + MARK + MARK_GAP + PAIR_GUTTER <= half
+
+    rows: list[tuple[Field, ...]] = []
+    index = 0
+    while index < len(fields):
+        following = fields[index + 1] if index + 1 < len(fields) else None
+        after = fields[index + 2] if index + 2 < len(fields) else None
+        if (following is not None and _is_tick(fields[index], writer) and _is_tick(following, writer)
+                and (after is None or not after.is_child)
+                and fits(fields[index]) and fits(following)):
+            rows.append((fields[index], following))
+            index += 2
+        else:
+            rows.append((fields[index],))
+            index += 1
+    return rows
+
+
+def _emit_tick_pair(out: list[str], pair: tuple[Field, ...], y: int, writer: SvgWriter) -> int:
+    """Two criteria side by side, on the same baseline, each on its own column."""
+    y += writer.face.pad_at(LABEL_SIZE)
+    baseline = y + writer.face.cap_at(LABEL_SIZE)
+    for field, x in zip(pair, (TEXT_X, MARGIN_X + CONTENT_W // 2)):
+        label = field.label + (f" ({writer.chrome['required']})" if field.compulsory else "")
+        writer._text(label, LABEL_SIZE)
+        _mark(out, _ident(field), x, baseline, False, writer, LABEL_SIZE)
+        out.append(
+            f'  <text class="label" x="{x + MARK + MARK_GAP}" y="{baseline}">{_esc(label)}</text>'
+        )
+    return y + LABEL_SIZE + writer.face.pad_at(LABEL_SIZE)
 
 
 def _collapse_groups(fields: list[Field], writer: SvgWriter) -> list[Field]:
@@ -1023,7 +1086,7 @@ def _collapse_groups(fields: list[Field], writer: SvgWriter) -> list[Field]:
     # another's row is not a row of its own and must not be counted as one.
     folded: list[Field] = []
     for field in fields:
-        unit = writer.layout.continues_row(folded[-1] if folded else None, field)
+        unit = writer.layout.continues_row(folded[-1] if folded else None, field, writer.chrome)
         if unit is None:
             folded.append(field)
         else:
@@ -1136,11 +1199,23 @@ def _emit_field(out: list[str], field: Field, y: int, writer: SvgWriter, closes_
     if not options and style == "yes_no":
         options = [writer.chrome["boolean_yes"], writer.chrome["boolean_no"]]
         radio = True
-    # A row is either answered ON its own line -- a space to write in, starting at the answer column --
-    # or it spans the sheet: a criterion whose tick sits at the left, or a question whose choices are
-    # listed beneath it. Only the first kind has a cell, so only that kind is bounded by the column, and
-    # only that kind gives up width to it.
-    answered_here = style != "tick" and not options
+
+    # Choices short enough to sit on their label's own line do so, at the answer column, instead of taking
+    # an indented row beneath it. A Yes/No pair given a row of its own costs the same height as a
+    # paragraph, and the sheets that overflow are full of them.
+    #
+    # It is measured rather than decided, so the same field moves back below its label in a language whose
+    # options are longer -- which is why the inconsistency this introduces is tolerable: it is not "short
+    # ones are treated differently", it is "each row uses the space it has".
+    widths = [writer.face.width(option, OPTION_SIZE) for option in options]
+    needed = (sum(w + MARK + MARK_GAP for w in widths) + OPTION_SEP * (len(options) - 1)) if options else 0
+    inline = bool(options) and writer.answer_text_x + needed <= MARGIN_X + CONTENT_W - TEXT_INSET
+
+    # A row is either answered ON its own line -- a space to write in, or a choice run, both starting at
+    # the answer column -- or it spans the sheet: a criterion whose tick sits at the left, or a question
+    # whose choices are too long and are listed beneath it. Only the first kind has a cell, so only that
+    # kind is bounded by the column, and only that kind gives up label width to it.
+    answered_here = style != "tick" and (not options or inline)
 
     top = y
     y += writer.face.pad_at(LABEL_SIZE)
@@ -1163,6 +1238,18 @@ def _emit_field(out: list[str], field: Field, y: int, writer: SvgWriter, closes_
 
     if field.trailing:
         return _emit_paired_row(out, field, top, y, baseline, writer, closes_group)
+
+    if inline:
+        ident = _ident(field)
+        x = writer.answer_text_x
+        for index, option in enumerate(options):
+            writer._text(option, OPTION_SIZE)
+            _mark(out, f"{ident}-{index + 1}", int(x), baseline, radio, writer)
+            out.append(
+                f'  <text class="option" x="{int(x + MARK + MARK_GAP)}" y="{baseline}">{_esc(option)}</text>'
+            )
+            x += MARK + MARK_GAP + widths[index] + OPTION_SEP
+        return _column(out, top, y + writer.face.pad_at(LABEL_SIZE), writer)
 
     if options:
         return _emit_options(out, field, options, radio, y + LINE_GAP, writer) + writer.face.pad_at(LABEL_SIZE)

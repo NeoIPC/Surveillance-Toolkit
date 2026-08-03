@@ -92,10 +92,22 @@ omit:
 # writes them together -- "Antibiotic substance 1: ______ : ____ days" -- which is both shorter and
 # clearer, and nine slots as eighteen rows was over a third of the master sheet.
 #
-# Matched on the code, which already states the relationship: a field whose code is another's plus one of
-# these suffixes belongs to it. The unit word printed at the end of the row is what remains of the child's
-# own form name once the parent's is removed, so it stays translated and is not invented here.
-row_suffixes: [DAYS]
+# Matched on the code, which already states the relationship: a field whose code is another's plus this
+# suffix belongs to it. The value is the figure-strings key holding the unit word to print at the end of
+# the row.
+#
+# That word used to be derived by subtracting the parent's form name from the child's, which works in
+# English because one happens to be the other plus a suffix, and is string surgery on TRANSLATED text
+# everywhere else: a language that does not build the child's label that way yields either the whole label
+# or nothing, silently, in the languages nobody here proof-reads. It is a word this layout needs, so it is
+# a string this layout owns.
+#
+# Renaming the metadata's own form names to the '- child' convention would have removed the problem too,
+# and was rejected: the DHIS2 capture form renders one flat labelled row per field, so nine rows reading
+# '- days' would be ambiguous there, and 'Antibiotic substance 1 days' is self-describing in the data
+# dictionary, in export headers and in validation messages as well as on the form.
+row_units:
+  DAYS: unit_days
 
 groups:
   - suffixes: [3GCR, MRSA, VRE]
