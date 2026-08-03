@@ -47,10 +47,17 @@ the string in Weblate is just as welcome; someone will carry it across.
 The repository's terms are in [`LICENSE`](LICENSE). Some directories carry their own, narrower terms for
 content taken from an external source; where they do, a `LICENSE.md` sits beside the content and says so.
 
-Translations contributed through Weblate are published under **CC BY 4.0**, and Weblate shows you the full
-contributor agreement before your first contribution. Please read it rather than clicking through: it
-explains what becomes a permanent part of the public git history, including the name and e-mail address on
-your Weblate account.
+Translations contributed to **this repository's** catalogues through Weblate are published under
+**CC BY 4.0**, and Weblate shows you the full contributor agreement before your first contribution. Please
+read it rather than clicking through: it explains what becomes a permanent part of the public git history,
+including the name and e-mail address on your Weblate account.
+
+The `neoipc` project on Weblate also hosts the **App** catalogue, which belongs to a different repository
+and is **MIT** — licensed with the software it ships in rather than with the surveillance content. So
+"translations here are CC BY 4.0" is true of the components listed above and not of everything you can
+reach from the same project page. [`docs/translating.md`](docs/translating.md) sets out the per-catalogue
+position, including why the infectious-agents catalogue is CC BY 4.0 while the directory it is extracted
+from is not.
 
 ## Questions
 

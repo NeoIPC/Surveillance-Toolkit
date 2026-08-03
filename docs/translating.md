@@ -21,6 +21,13 @@ rather than symbolic: a term translated here becomes the agreed rendering everyw
 *not* translated here cannot be enforced anywhere else. Clearing it is an afternoon and it makes every
 other catalogue easier to review.
 
+**Two different things are called "glossary" here, and only one of them is yours to translate.**
+`neoipc-glossary` is the component described above — real strings, translated like any other catalogue.
+The *glossary* that appears in the sidebar while you work on some other string is Weblate's own
+terminology store, which shows you the agreed term for a word in the string you are looking at. Terms
+land in the sidebar because they were translated in the component; the sidebar is a view, not a place to
+work.
+
 **Each term appears once**, in the form it takes in running text — `necrotizing enterocolitis`, lower
 case. Where a report needs it capitalized for a label or a heading, the capital is applied when the report
 is built, not translated as a second entry. So translate the term as you would write it mid-sentence, and
@@ -183,10 +190,15 @@ Review is enabled on this project. A string you save is *translated*; a reviewer
 *approved*. Both states are visible in the sidebar, and `state:translated` as a search is exactly the
 queue of work awaiting review in your language — worth bookmarking if you review.
 
-**Every language has a reviewer team; several are still without members.** Until yours has one, your
+**Every language has a reviewer team, and some of them have no members yet** — the project page shows
+which, and it is the only place that can tell you, because it changes. Where yours is empty your
 translations land and are used without a second reader. That is a reason to flag anything you were unsure
 about in a comment rather than to hesitate over saving it — an uncertain translation with a comment is far
 more useful than a confident one without.
+
+**To reach the reviewer for your language**, comment on the string and `@`-mention them; the *Editors —
+&lt;Language&gt;* team on the project page is who that is. For anything not about a particular string,
+**NeoIPC-Support@charite.de** reaches the maintainers.
 
 ### If you review
 
@@ -217,6 +229,34 @@ Judge the wording; the marks are the translator's answer to a layout question, n
 **Strings marked "needs editing" that look like untouched English** are not translations anyone made.
 They come from an earlier bulk import and mean nothing has been decided for that string yet. Treat them
 as untranslated.
+
+## What your translation is published under
+
+**Everything you translate in this project's Weblate components is published under
+[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)** — the protocol, the reports, the glossary, the
+DHIS2 metadata and the infectious agents alike. Weblate shows you the contributor agreement before your
+first contribution; please read it rather than clicking through, because it says plainly that the name and
+e-mail address on your Weblate account become a permanent part of the public git history.
+
+Two things that look like exceptions and are worth understanding, because they say something about how
+this project thinks:
+
+- **The infectious-agents catalogue is CC BY 4.0 even though the directory it comes from is not.** That
+  directory is CC BY-NC-ND 4.0, because it compiles content from LPSN, MycoBank, ICTV and NHSN under their
+  terms. The catalogue is not, and the reason is what the catalogue actually contains: the extraction is
+  limited to organism names, rank labels such as *Species* and *Genus*, and controlled values such as
+  *Unknown*. None of the upstream descriptions, authorities or references — the material those licences
+  exist to protect — is carried across, and names and short phrases are not subject to copyright in any
+  case. (A NoDerivatives term could not have governed it regardless: a translation *is* a derivative work,
+  so such a catalogue could not lawfully be translated at all, which is its only purpose.)
+- **The App catalogue is MIT**, not CC BY 4.0, because it is part of a software interface and is licensed
+  with the code it ships in rather than with the surveillance content. It belongs to a different
+  repository; the component is in the same Weblate project, so you may well meet it.
+
+One catalogue in this repository is **not** on Weblate at all and is not covered by the above:
+`po/antibiotics.<lang>.po`. Its source content carries a NonCommercial term, which is not a free licence
+and which Weblate's free hosting does not accept, so it stays here and is translated through a pull
+request instead. `CONTRIBUTING.md` says how.
 
 ## When something is wrong in the English
 
