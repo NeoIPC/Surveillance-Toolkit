@@ -196,6 +196,20 @@ new language away from being wrong, and the failure would appear only in a rende
 that until this week nobody was building. Spanish's longest is 11 and English's 11, which is why the
 constants have never been felt: they were tuned by eye against the two languages that fit.
 
+**Hyphenation is the answer to the compound, and it is language data rather than an algorithm.** Breaking
+on whitespace cannot help a single long word; breaking *inside* it needs to know where the legal points
+are, which differs per language and is exactly what a Hunspell hyphenation dictionary encodes. So this
+follows the same shape as the fonts: a per-language asset that ships with the repository, chosen by the
+language being generated, with the licence of each dictionary checked before it is added — several are
+not permissive, and the rule against non-permissive dependencies is not limited to fonts.
+
+Three things it must not become. Hyphenation **relaxes** the fit rule, it does not remove it: a fragment
+that still will not fit has to fail the build exactly as an unbreakable token does today. It must be
+applied to **rendering only** — a translator never sees or supplies a break, which is the same principle
+that took the line splitting away from them. And it is not automatically welcome in every string: a
+hyphenated clinical term can be misread, so a label that must not break needs a way to say so, in the
+layout mapping rather than by hoping the dictionary agrees.
+
 Two things follow. The decision flow moves onto the same measured layout as the sheets rather than
 waiting behind them — its need is more urgent, not less, because its boxes are fixed and its text is
 long. And its eight strings move out of `.resx` with it: they are already whole sentences, so nothing
