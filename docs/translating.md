@@ -127,6 +127,41 @@ the document is claiming, and this is the single most common thing corrected in 
 strings, so if your language groups digits differently, that is a glossary-level fix rather than a
 per-string one. Ask rather than improvising per string.
 
+## Long words, and how to tell us where they may break
+
+Some of what you translate is not prose on a page: field labels and option names from the **DHIS2
+metadata** catalogue are printed onto the data collection sheets — the paper forms filled in at a cot
+side — where each has a box of a fixed width. The layout measures your text in the real font and wraps it
+between words. What it cannot do is break *inside* a word, and a language that builds compounds produces
+words no box will hold: *Gestationsalter* is already a single token wider than several of the boxes it
+appears in.
+
+**You can say where such a word may divide, by putting a soft hyphen at each point.** It is the invisible
+character U+00AD, and it is a hint rather than a hyphen: nothing is drawn where you put it. If the word
+fits, it is simply not used. If the word has to break, it breaks at one of the points you marked and a
+real hyphen appears there — never anywhere else.
+
+- **Type it** by adding it once to *Special characters* in your Weblate profile — the row of characters
+  above the editing box is built from that setting plus per-language punctuation, so a soft hyphen is
+  there only if you put it there. Otherwise paste one. It is invisible wherever you type it, which is
+  expected; Weblate will show the string as changed although it looks identical.
+- **Mark every plausible point**, not just one: `Gestations­alter`, `Antibiotika­kategorie`. The
+  layout picks whichever fits and ignores the rest, so more points give it more room and cost nothing.
+- **Leave a word unmarked when it must not be divided.** A clinical term split across a line can be
+  misread, and that judgement is yours. There is no list to maintain and no setting to change — an
+  unmarked word simply never breaks.
+- **They are never wrong in a string that does not need them.** A marked word that always fits behaves
+  exactly as an unmarked one.
+
+If a word cannot be made to fit even with the breaks you gave it, the build stops and says which string
+and which box — it does not quietly print text running off the edge of the form, which is what the
+previous generation of this tooling did for years. So an over-long label comes back to you as a question
+rather than shipping as a defect.
+
+Two things this is **not**. It is not hyphenation of the running text — the protocol and the reports set
+their own text and need nothing from you. And it is not a way to force a line break: it only ever offers
+one.
+
 ## Review
 
 Review is enabled on this project. A string you save is *translated*; a reviewer then marks it
@@ -157,6 +192,12 @@ they cannot read; the convention is that they do not, except for mechanical corr
 notify, and they stay attached to the string. Do not send translation feedback through a pull request on
 GitHub: those are opened by an automation account and the translator who wrote the string will never see
 the comment.
+
+**Leave soft hyphens alone.** A metadata string may carry invisible U+00AD marks saying where a long
+compound is allowed to divide on the printed collection sheets (see *Long words* above). They render as
+nothing, so a translation carrying them looks identical to one that does not — and retyping the word to
+"clean it up" removes information the layout depends on, with no visible sign that anything changed.
+Judge the wording; the marks are the translator's answer to a layout question, not a typo.
 
 **Strings marked "needs editing" that look like untouched English** are not translations anyone made.
 They come from an earlier bulk import and mean nothing has been decided for that string yet. Treat them
