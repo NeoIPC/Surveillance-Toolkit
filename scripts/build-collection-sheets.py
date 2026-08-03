@@ -624,13 +624,19 @@ def _emit_footer(out: list[str], y: int, writer: SvgWriter) -> int:
 
 
 def _emit_section(out: list[str], section: Section, y: int, writer: SvgWriter) -> int:
+    # Bounded like every other run. A section title is localized metadata, centred in a band, and it was
+    # the one text on the sheet that was only checked for missing glyphs -- so a longer translation would
+    # have run out past the band's ends and off the page, in exactly the languages nobody proof-reads.
     writer._text(section.title, SECTION_SIZE)
-    out.append(f'  <rect class="band" x="{MARGIN_X}" y="{y}" width="{CONTENT_W}" height="{SECTION_BAND_H}"/>')
-    out.append(
-        f'  <text id="{_slug(section.code)}" class="section" x="{PAGE_W // 2}" '
-        f'y="{y + SECTION_BAND_H - 150}">{_esc(section.title)}</text>'
-    )
-    y += SECTION_BAND_H
+    lines = _fit(writer, section.title, SECTION_SIZE, CONTENT_W - 360, section.code, "section title")
+    band_h = SECTION_BAND_H + (len(lines) - 1) * (SECTION_SIZE + LINE_GAP)
+    out.append(f'  <rect class="band" x="{MARGIN_X}" y="{y}" width="{CONTENT_W}" height="{band_h}"/>')
+    ty = y + SECTION_BAND_H - 150
+    for index, line in enumerate(lines):
+        ident = f' id="{_slug(section.code)}"' if index == 0 else ""
+        out.append(f'  <text{ident} class="section" x="{PAGE_W // 2}" y="{ty}">{_esc(line)}</text>')
+        ty += SECTION_SIZE + LINE_GAP
+    y += band_h
 
     for index, field in enumerate(section.fields):
         y = _emit_child(out, field, y, writer) if field.is_child else _emit_field(out, field, y, writer)
