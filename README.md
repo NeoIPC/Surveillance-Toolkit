@@ -156,8 +156,9 @@ rather than as licences.
 *Fondazione Penta ETS* is the organisation's current legal name and the form to use. **Not** *Fondazione
 Penta ONLUS*, which is the pre-2023 designation and still appears in older material.
 
-**The notice travels with each file, not only with this table.** The SVGs carry it as a comment and a
-`<metadata>` element; the PNGs carry it as a PNG `Copyright` text chunk, readable with any image tool.
+**The notice travels with each file, not only with this table** — and each names *its own* rights holder,
+not a blanket one. The SVGs carry it as a comment and a `<metadata>` element; the PNGs as a `Copyright`
+text chunk; the one JPEG as a comment segment. All are readable with any image tool.
 That matters because a logo leaves this repository constantly — pasted into a slide, attached to an
 e-mail, lifted from a rendered PDF — and at that moment the README is not travelling with it. If a logo
 file is ever replaced, **re-apply the notice**: the chunk is spliced in after `IHDR` without re-encoding
