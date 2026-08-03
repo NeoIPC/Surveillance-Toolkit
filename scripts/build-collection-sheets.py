@@ -664,7 +664,8 @@ class SvgWriter:
     def sheet_svg(self, sheet: Sheet, body: list[str]) -> str:
         head = [
             '<svg version="1.1" viewBox="0 0 %d %d" xmlns="http://www.w3.org/2000/svg" '
-            'xmlns:xlink="http://www.w3.org/1999/xlink">' % (PAGE_W, PAGE_H),
+            'xmlns:xlink="http://www.w3.org/1999/xlink" role="img">' % (PAGE_W, PAGE_H),
+            *self._accessible_names(sheet),
             "  <style>",
             "    text { font-family: 'Noto Sans'; fill: #000; }",
             "    text.title { font-size: %dpx; fill: %s; }" % (TITLE_SIZE, ACCENT),
@@ -696,6 +697,19 @@ class SvgWriter:
             "  </style>",
         ] + self.logo.definition()
         return "\n".join(head + body + ["</svg>", ""])
+
+    def _accessible_names(self, sheet: Sheet) -> list[str]:
+        """<title> and <desc>, which are what a screen reader announces for the figure.
+
+        An SVG without them is an unlabelled graphic: inlined into the protocol's HTML it reads as
+        nothing at all, and accessibility is a stated goal of this toolkit rather than a nicety. The
+        description names the sections so a reader who cannot see the sheet still learns its shape.
+        """
+        sections = ", ".join(s.title for s in sheet.sections)
+        return [
+            f"  <title>{_esc(self.chrome['sheet_heading'])} — {_esc(sheet.title)}</title>",
+            f"  <desc>{_esc(sheet.title)} data collection sheet. Sections: {_esc(sections)}.</desc>",
+        ]
 
 
 def layout_sheet(sheet: Sheet, writer: SvgWriter) -> list[str]:
