@@ -472,7 +472,15 @@ original rather than to a lower one because a machine writes it:
 - deterministic ordering, so regenerating after an unrelated metadata change yields an **empty diff**
 - no editor namespace, no generated path soup
 
-A generator whose output churns is a generator nobody can review, which is the same failure as a
+**Determinism is a correctness property here, not a review one.** The sheets are build output, like the
+decision flow before them: generated per language during the protocol build and never committed, so
+nothing diffs them and no commit carries their noise. What an empty diff on regeneration actually proves
+is that the generator has no hidden state — no set iteration order, no dictionary ordering, no clock — and
+a generator that emits different bytes from identical inputs has a defect somewhere whether or not anyone
+would have seen it. That is why the same property is required of the **PDF** engine too, and why an engine
+whose document ID comes from the wall clock was disqualified for it.
+
+A generator whose output churns is also a generator nobody can review, which is the same failure as a
 whole-file re-wrap. The empty-diff property is a check, not an aspiration.
 
 ## Language
