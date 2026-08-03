@@ -42,6 +42,12 @@ from ruamel.yaml import YAML
 WORD = re.compile(r"[A-Za-z0-9]*[A-Za-z][A-Za-z0-9]*(?:[/'’-][A-Za-z0-9]+)*")
 SPLIT = re.compile(r"[/'’-]")
 
+# A Roman numeral is a NUMBER that happens to be written in Latin letters, so it falls under the same
+# exemption as the digits: choosing a numeral system is a separate decision from choosing a script. The
+# ASA physical status classes are written I to VI in clinical use nearly everywhere, and a language that
+# prefers 1 to 6 is equally exempt -- what neither should do is fail a check about translation.
+ROMAN = re.compile(r"^(?=[IVXLCDM]+$)M*(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$")
+
 
 def accepted(glossary: Path, extra: list[str]) -> set[str]:
     """Every token a sheet may legitimately carry in Latin, upper-cased.
@@ -64,7 +70,14 @@ def residue(pdf: Path, allowed: set[str]) -> Counter[str]:
     found: Counter[str] = Counter()
     for match in WORD.finditer(text):
         word = match.group(0)
+        # The WHOLE token first, then its parts. Checking only the parts made a glossary term containing
+        # a one-letter part unmatchable: "I/T" splits to I and T, neither of which may be admitted on its
+        # own, so the term was reported as untranslated in every language that has it.
+        if word.upper() in allowed:
+            continue
         if all(part.upper() in allowed for part in SPLIT.split(word) if part):
+            continue
+        if ROMAN.match(word):
             continue
         found[word] += 1
     return found
