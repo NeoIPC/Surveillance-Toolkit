@@ -798,7 +798,7 @@ def main(argv: list[str] | None = None) -> int:
     repo = Path(__file__).resolve().parent.parent
     parser.add_argument("--metadata", type=Path, default=repo / "metadata" / "common")
     parser.add_argument("--fonts", type=Path, default=repo / "common" / "fonts")
-    parser.add_argument("--strings", type=Path, default=repo / "common" / "sheet-strings.yaml")
+    parser.add_argument("--strings", type=Path, default=repo / "common" / "figure-strings.yaml")
     parser.add_argument("--layout", type=Path, default=repo / "common" / "sheet-layout.yaml")
     parser.add_argument("--logo", type=Path, default=repo / "common" / "img" / LOGO_FILE)
     parser.add_argument("--po", type=Path, default=repo / "po")
