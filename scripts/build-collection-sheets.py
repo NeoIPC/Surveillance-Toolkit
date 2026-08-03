@@ -196,6 +196,12 @@ class Section:
     title: str
     description: str
     fields: list[Field] = dc_field(default_factory=list)
+    # Whether the section gets a titled band. A stage's main section restates the sheet's own subtitle --
+    # "Surgical Site Infection" over "Surgical Site Infection (SSI)" -- so on a sheet that IS that stage
+    # the band says nothing the reader has not just read. The other bands stay: several of their fields
+    # depend on them for meaning, and two rows on the surgical-site sheet are the same words under
+    # different headings.
+    banded: bool = True
 
 
 @dataclass
@@ -607,6 +613,9 @@ def build_sheets(meta: Metadata, catalogue: Catalogue, rules: LayoutRules,
             # the same date twice reads as two questions.
             if not sheet.sections:
                 model.fields.append(_event_date_field(catalogue, stage))
+                # Only on a sheet that is this one stage. Folded into a composite the same section sits
+                # under a title that is not its own, and its band is the only thing naming it.
+                model.banded = not section["code"].endswith("_SECT_MAIN")
 
             # The section's dataElements column is a space-separated UID list and IS the authored order
             # of the fields within it; programStageDataElements.sortOrder orders the stage as a whole and
@@ -1105,16 +1114,17 @@ def _emit_section(out: list[str], section: Section, y: int, writer: SvgWriter) -
     # Bounded like every other run. A section title is localized metadata, centred in a band, and it was
     # the one text on the sheet that was only checked for missing glyphs -- so a longer translation would
     # have run out past the band's ends and off the page, in exactly the languages nobody proof-reads.
-    writer._text(section.title, SECTION_SIZE)
-    lines = _fit(writer, section.title, SECTION_SIZE, CONTENT_W - 360, section.code, "section title")
-    band_h = SECTION_BAND_H + (len(lines) - 1) * (SECTION_SIZE + LINE_GAP)
-    out.append(f'  <rect class="band" x="{MARGIN_X}" y="{y}" width="{CONTENT_W}" height="{band_h}"/>')
-    ty = y + SECTION_BAND_H - 150
-    for index, line in enumerate(lines):
-        ident = f' id="{_slug(section.code)}"' if index == 0 else ""
-        out.append(f'  <text{ident} class="section" x="{PAGE_W // 2}" y="{ty}">{_esc(line)}</text>')
-        ty += SECTION_SIZE + LINE_GAP
-    y += band_h
+    if section.banded:
+        writer._text(section.title, SECTION_SIZE)
+        lines = _fit(writer, section.title, SECTION_SIZE, CONTENT_W - 360, section.code, "section title")
+        band_h = SECTION_BAND_H + (len(lines) - 1) * (SECTION_SIZE + LINE_GAP)
+        out.append(f'  <rect class="band" x="{MARGIN_X}" y="{y}" width="{CONTENT_W}" height="{band_h}"/>')
+        ty = y + SECTION_BAND_H - 150
+        for index, line in enumerate(lines):
+            ident = f' id="{_slug(section.code)}"' if index == 0 else ""
+            out.append(f'  <text{ident} class="section" x="{PAGE_W // 2}" y="{ty}">{_esc(line)}</text>')
+            ty += SECTION_SIZE + LINE_GAP
+        y += band_h
 
     rows = _pair_ticks(_collapse_groups(section.fields, writer), writer)
     for index, row in enumerate(rows):
