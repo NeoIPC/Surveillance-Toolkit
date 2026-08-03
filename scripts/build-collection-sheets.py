@@ -138,6 +138,12 @@ HYPHEN = "-"
 # docs/data-collection-sheet-generation.md.
 RIGHT_TO_LEFT = frozenset({"ar", "arc", "ckb", "dv", "fa", "he", "ks", "ku", "ps", "sd", "ug", "ur", "yi"})
 
+# Languages whose script needs a face of its own, in front of the Latin one every sheet also needs. Noto
+# is split by script deliberately, so this is a property of the fonts rather than a workaround: adding a
+# language written in a script Noto Sans does not carry means adding its file to common/fonts and a line
+# here. See common/fonts/README.md.
+SCRIPT_FONTS = {"ne": "NotoSansDevanagari"}
+
 # The brand's two colours, as carried by common/img/NeoIPC-Logo.svg. An earlier accent of #2e74b5 was a
 # word-processor default that merely looked similar and was sampled from nothing; see
 # docs/data-collection-sheet-generation.md for the palette and how each derived tint is arrived at.
@@ -491,7 +497,7 @@ def load_chrome(path: Path, language: str | None) -> dict[str, str]:
 
 
 class Face:
-    """Advance widths and coverage from the font file the PDF will embed.
+    """Advance widths and coverage from one font file the output will embed.
 
     Both halves matter. The width is what makes wrapping fit a real box instead of a character count --
     the XSLT this replaces measured `string-length`, to which IIIII and WWWWW are the same size. The
@@ -506,6 +512,9 @@ class Face:
         self.units = self.font["head"].unitsPerEm
         self.widths = {name: adv for name, (adv, _) in self.font["hmtx"].metrics.items()}
         self.cmap = self.font.getBestCmap()
+        # The name a renderer resolves the family by, read from the file rather than written here so that
+        # what is asked for and what was measured cannot come apart.
+        self.family = self.font["name"].getBestFamilyName()
         # How far the face reaches below the baseline, as a fraction of the em. A row sized from the font
         # size alone leaves no room for it, so a descender crosses the rule closing the row -- the 'y' of
         # "Day of life" fusing with the line under it.
@@ -525,26 +534,105 @@ class Face:
     def cap_at(self, size: int) -> int:
         return round(self._cap * size)
 
-    def pad_at(self, size: int) -> int:
-        """Equal space above the capitals and below the baseline.
+    def has(self, ch: str) -> bool:
+        return ord(ch) in self.cmap
+
+    def advance(self, ch: str) -> float:
+        """One character's advance as a fraction of the em, so faces on different grids still add up."""
+        glyph = self.cmap.get(ord(ch))
+        return self.widths.get(glyph, self.widths.get(".notdef", 0)) / self.units
+
+
+class Typeface:
+    """The faces a sheet may draw from, in the order they are preferred.
+
+    A sheet is bilingual whenever its language is not written in Latin script, and not by accident: the
+    resistance categories are established abbreviations that are deliberately not translated, so MRSA, VRE
+    and 3GCR are on every sheet in every language, as is the project's own name. Noto splits by script, so
+    Noto Sans Devanagari carries no Latin at all and a Nepali sheet drawn from it alone is every Latin
+    character missing.
+
+    This is the opposite of the fallback the one-family rule bars. That rule is against a name resolving
+    to whatever a machine happens to have installed, silently and differently per machine; this is a list
+    of this repository's own files, in a stated order, named in the output so both renderers resolve the
+    same two.
+    """
+
+    def __init__(self, faces: list[Face]):
+        self.faces = faces
+        # Latin is FIRST, in every language, and the order is not arbitrary: the two faces overlap on 60
+        # codepoints -- every digit and every punctuation mark. With the script's face in front, a Nepali
+        # sheet would draw its digits, brackets and slashes from the Devanagari design and the Latin
+        # letters beside them from another, on the same line.
+        self.primary = faces[0]
+        self.families = [face.family for face in faces]
+        self.name = " + ".join(face.path.name for face in faces)
+
+    def cap_at(self, size: int) -> int:
+        """Where the baseline sits below a row's top -- taken from the Latin face in every language.
+
+        It decides position rather than height, so a shared value is what makes a row of Latin sit the
+        same way on a Nepali sheet as on an English one.
+        """
+        return self.primary.cap_at(size)
+
+    def descent_at(self, size: int, text: str) -> int:
+        """The deepest reach below the baseline among the faces that will actually draw this text."""
+        return max(face.descent_at(size) for face in self._drawing(text))
+
+    def pad_at(self, size: int, text: str) -> int:
+        """Equal space above the capitals and below the baseline, sized to what the run is drawn in.
 
         Balancing the full ink box instead -- caps above the baseline, descender below -- is correct
         typographically and looks wrong here, because most labels on a form have no descender at all. The
-        reserved space below then reads as emptiness and the row looks top-heavy, which is the same
-        complaint as before with the sign reversed. So the padding is symmetric about the baseline, and
-        the descender clears INTO the lower half rather than being added beneath it.
+        reserved space below then reads as emptiness and the row looks top-heavy. So the padding is
+        symmetric about the baseline, and the descender clears INTO the lower half rather than being
+        added beneath it.
+
+        Per text rather than per sheet, because the faces disagree by a third: Noto Sans reaches 293
+        thousandths of the em below the baseline and Noto Sans Devanagari 408, which the script needs for
+        its below-base marks. Charging every row the deeper figure costs 0.68 mm a row -- 17 mm down a
+        sheet of fifty, enough on its own to push one off its page -- while charging every row the
+        shallower one puts a Devanagari mark through the rule that closes it. So each row is padded for
+        the text it actually holds, and a sheet in a language nobody has translated yet lays out exactly
+        like the English one, because it is drawing exactly the same faces.
         """
-        return max(ROW_PAD, self.descent_at(size) + DESCENDER_CLEARANCE)
+        return max(ROW_PAD, self.descent_at(size, text) + DESCENDER_CLEARANCE)
+
+    def _drawing(self, text: str) -> list[Face]:
+        """The faces this text is drawn from -- the first one holding each character, never all of them.
+
+        The distinction matters because the faces overlap: asking which faces CONTAIN some character of
+        the text returns the Devanagari one for any label carrying a digit, and a page of Latin would then
+        be padded for a script it never draws.
+        """
+        used: list[Face] = []
+        for ch in text:
+            if ch.isspace():
+                continue
+            face = self._face_for(ch)
+            if face not in used:
+                used.append(face)
+        return used or [self.primary]
+
+    def _face_for(self, ch: str) -> Face:
+        """The first face in the stack holding the character, which is the one that will draw it.
+
+        Both renderers resolve a family list this way, so measuring in a different order from the one
+        they draw in would be measuring a different sheet.
+        """
+        return next((face for face in self.faces if face.has(ch)), self.primary)
 
     def missing(self, text: str) -> set[str]:
-        return {ch for ch in text if ord(ch) not in self.cmap and not ch.isspace()}
+        """Characters no face in the stack can draw. A space is nobody's glyph and never missing."""
+        return {ch for ch in text
+                if not ch.isspace() and not any(face.has(ch) for face in self.faces)}
 
     def width(self, text: str, size: int) -> float:
-        total = 0
-        for ch in text.replace(SOFT_HYPHEN, ""):
-            glyph = self.cmap.get(ord(ch))
-            total += self.widths.get(glyph, self.widths.get(".notdef", 0))
-        return total * size / self.units
+        return sum(self._advance(ch) for ch in text.replace(SOFT_HYPHEN, "")) * size
+
+    def _advance(self, ch: str) -> float:
+        return self._face_for(ch).advance(ch)
 
     def wrap(self, text: str, size: int, max_width: int) -> list[str]:
         """Greedy wrap on whitespace, and inside a word wherever the translator allowed one.
@@ -972,7 +1060,7 @@ class Composer:
     reviewable is that regenerating with unchanged metadata produces a byte-identical file.
     """
 
-    def __init__(self, face: Face, bold: Face, chrome: dict[str, str], layout: LayoutRules, logo: Logo,
+    def __init__(self, face: Typeface, bold: Typeface, chrome: dict[str, str], layout: LayoutRules, logo: Logo,
                  language: str | None, label_width: int = LABEL_COL_MAX):
         self.face, self.bold, self.chrome, self.layout = face, bold, chrome, layout
         self.logo, self.language = logo, language
@@ -1015,7 +1103,7 @@ class Composer:
         face = self.face_of(bold)
         absent = face.missing(text)
         if absent:
-            self.missing.setdefault(face.path.name, set()).update(absent)
+            self.missing.setdefault(face.name, set()).update(absent)
 
     def measured(self, run: Text) -> float:
         """The width this generator makes of a placed run, in grid units.
@@ -1090,7 +1178,7 @@ def layout_sheet(sheet: Sheet, composer: Composer) -> list[Shape]:
         # only when it exceeded the minimum meant a sheet with a little space left simply abandoned it --
         # which is why the primary sepsis sheet ended 12 mm higher than the others while every constant
         # said they should match.
-        if spare >= LABEL_SIZE + 2 * composer.face.pad_at(LABEL_SIZE):
+        if spare >= LABEL_SIZE + 2 * composer.face.pad_at(LABEL_SIZE, composer.chrome["comments"]):
             # Labelled whenever the label itself fits, which is a measurement rather than a judgement --
             # it costs no height, being drawn inside the space it names. A fixed minimum was tried and
             # left a box with no heading at the foot of a tight sheet, which reads as a mistake rather
@@ -1238,12 +1326,12 @@ def _emit_patient_block(out: list[Shape], y: int, composer: Composer) -> int:
         label = composer.chrome[key]
         composer._text(label, LABEL_SIZE, bold=True)
         top = y
-        y += composer.face.pad_at(LABEL_SIZE)
+        y += composer.face.pad_at(LABEL_SIZE, label)
         for line in _fit(composer, label, LABEL_SIZE, composer.answer_x - COLUMN_GAP - TEXT_X, key, "label",
                          bold=True):
             out.append(Text(TEXT_X, y + composer.face.cap_at(LABEL_SIZE), line, "label"))
             y += LABEL_SIZE + LINE_GAP
-        y += composer.face.pad_at(LABEL_SIZE) - LINE_GAP
+        y += composer.face.pad_at(LABEL_SIZE, label) - LINE_GAP
         # Written on the same column as every other answer, and on the rule closing the row. These two
         # rows are where the sheet's grid is established for its reader, so they follow it rather than
         # setting a second convention at the top of the page.
@@ -1252,11 +1340,11 @@ def _emit_patient_block(out: list[Shape], y: int, composer: Composer) -> int:
 
     note = composer.chrome["patient_note"]
     composer._text(note, SMALL_SIZE)
-    y += composer.face.pad_at(SMALL_SIZE)
+    y += composer.face.pad_at(SMALL_SIZE, note)
     for line in _fit(composer, note, SMALL_SIZE, CONTENT_W - 360, "patient_note", "note"):
         out.append(Text(TEXT_X, y + composer.face.cap_at(SMALL_SIZE), line, "note"))
         y += SMALL_SIZE + LINE_GAP
-    y += composer.face.pad_at(SMALL_SIZE) - LINE_GAP
+    y += composer.face.pad_at(SMALL_SIZE, note) - LINE_GAP
     out.append(Line(MARGIN_X, y, MARGIN_X + CONTENT_W, y, "rule"))
 
     height = y - block_top
@@ -1286,12 +1374,12 @@ def _emit_section(out: list[Shape], section: Section, y: int, composer: Composer
         # asked which case applies used to be. It says more than that question did: the options never
         # carried the 30-day and 90-day windows.
         composer._text(section.definition, SMALL_SIZE)
-        y += composer.face.pad_at(SMALL_SIZE)
+        y += composer.face.pad_at(SMALL_SIZE, section.definition)
         for line in _fit(composer, section.definition, SMALL_SIZE, CONTENT_W - 2 * TEXT_INSET,
                          section.code, "definition"):
             out.append(Text(TEXT_X, y + composer.face.cap_at(SMALL_SIZE), line, "note"))
             y += SMALL_SIZE + LINE_GAP
-        y += composer.face.pad_at(SMALL_SIZE) - LINE_GAP
+        y += composer.face.pad_at(SMALL_SIZE, section.definition) - LINE_GAP
         out.append(Line(MARGIN_X, y, MARGIN_X + CONTENT_W, y, "hair"))
 
     rows = _pair_ticks(_collapse_groups(section.fields, composer), composer)
@@ -1336,8 +1424,8 @@ def _pair_ticks(fields: list[Field], composer: Composer) -> list[tuple[Field, ..
     half = (CONTENT_W - 2 * TEXT_INSET) // 2
 
     def fits(field: Field) -> bool:
-        label = field.label + (f" ({composer.chrome['required']})" if field.compulsory else "")
-        return composer.bold.width(label, LABEL_SIZE) + MARK + MARK_GAP + PAIR_GUTTER <= half
+        return (composer.bold.width(_required(field, composer), LABEL_SIZE)
+                + MARK + MARK_GAP + PAIR_GUTTER <= half)
 
     rows: list[tuple[Field, ...]] = []
     index = 0
@@ -1357,14 +1445,16 @@ def _pair_ticks(fields: list[Field], composer: Composer) -> list[tuple[Field, ..
 
 def _emit_tick_pair(out: list[Shape], pair: tuple[Field, ...], y: int, composer: Composer) -> int:
     """Two criteria side by side, on the same baseline, each on its own column."""
-    y += composer.face.pad_at(LABEL_SIZE)
+    labels = [_required(field, composer) for field in pair]
+    # Both criteria share the row, so the row is padded for both of them.
+    pad = composer.face.pad_at(LABEL_SIZE, " ".join(labels))
+    y += pad
     baseline = y + composer.face.cap_at(LABEL_SIZE)
-    for field, x in zip(pair, (TEXT_X, MARGIN_X + CONTENT_W // 2)):
-        label = field.label + (f" ({composer.chrome['required']})" if field.compulsory else "")
+    for field, label, x in zip(pair, labels, (TEXT_X, MARGIN_X + CONTENT_W // 2)):
         composer._text(label, LABEL_SIZE, bold=True)
         _mark(out, _ident(field), x, baseline, False, composer, LABEL_SIZE)
         out.append(Text(x + MARK + MARK_GAP, baseline, label, "label"))
-    return y + LABEL_SIZE + composer.face.pad_at(LABEL_SIZE)
+    return y + LABEL_SIZE + pad
 
 
 def _collapse_groups(fields: list[Field], composer: Composer) -> list[Field]:
@@ -1435,7 +1525,7 @@ def _emit_child(out: list[Shape], field: Field, y: int, composer: Composer, clos
     label = field.short_label
     composer._text(label, OPTION_SIZE, bold=True)
     top = y
-    y += composer.face.pad_at(OPTION_SIZE) // 2
+    y += composer.face.pad_at(OPTION_SIZE, label) // 2
 
     x = TEXT_X + OPTION_INDENT
     baseline = y + composer.face.cap_at(OPTION_SIZE)
@@ -1453,11 +1543,11 @@ def _emit_child(out: list[Shape], field: Field, y: int, composer: Composer, clos
             options, radio = [composer.chrome["boolean_yes"], composer.chrome["boolean_no"]], True
         elif style == "tick":
             _mark(out, _ident(field), composer.answer_text_x, baseline, False, composer)
-            return _column(out, top, baseline + composer.face.pad_at(OPTION_SIZE), composer)
+            return _column(out, top, baseline + composer.face.pad_at(OPTION_SIZE, label), composer)
 
     if not options:
         # Bounded by the grid, like every other cell.
-        return _column(out, top, baseline + composer.face.pad_at(OPTION_SIZE), composer)
+        return _column(out, top, baseline + composer.face.pad_at(OPTION_SIZE, label), composer)
 
     for option in options:
         composer._text(option, OPTION_SIZE)
@@ -1479,7 +1569,7 @@ def _emit_child(out: list[Shape], field: Field, y: int, composer: Composer, clos
 
 def _emit_field(out: list[Shape], field: Field, y: int, composer: Composer, closes_group: bool = True) -> int:
     """One field is one full-width row: bold label, then whatever it needs to be answered."""
-    label = field.label + (f" ({composer.chrome['required']})" if field.compulsory else "")
+    label = _required(field, composer)
     composer._text(label, LABEL_SIZE, bold=True)
     style = composer.layout.boolean_style(field)
 
@@ -1506,7 +1596,8 @@ def _emit_field(out: list[Shape], field: Field, y: int, composer: Composer, clos
     answered_here = style != "tick" and (not options or inline)
 
     top = y
-    y += composer.face.pad_at(LABEL_SIZE)
+    # Only the label is on the row's first line, so only the label decides the clearance above it.
+    y += composer.face.pad_at(LABEL_SIZE, label)
     label_x = TEXT_X
     if style == "tick":
         # The tick sits on the label's own line: a criterion in a list reads as one thing to mark, not as
@@ -1535,12 +1626,15 @@ def _emit_field(out: list[Shape], field: Field, y: int, composer: Composer, clos
             _mark(out, f"{ident}-{index + 1}", int(x), baseline, radio, composer)
             out.append(Text(int(x + MARK + MARK_GAP), baseline, option, "option"))
             x += MARK + MARK_GAP + widths[index] + OPTION_SEP
-        return _column(out, top, y + composer.face.pad_at(LABEL_SIZE), composer)
+        # The choice run shares the label's line, so both decide the clearance below it.
+        return _column(out, top, y + composer.face.pad_at(LABEL_SIZE, " ".join([label, *options])), composer)
 
     if options:
-        return _emit_options(out, field, options, radio, y + LINE_GAP, composer) + composer.face.pad_at(LABEL_SIZE)
+        # The choices are the last thing in the block, so they are what the closing clearance is for.
+        return (_emit_options(out, field, options, radio, y + LINE_GAP, composer)
+                + composer.face.pad_at(LABEL_SIZE, " ".join(options)))
 
-    y += composer.face.pad_at(LABEL_SIZE)
+    y += composer.face.pad_at(LABEL_SIZE, label)
     if answered_here:
         # No writing line: the cell is the box formed by the frame, the column and the rules above and
         # below this row. Drawing one inside it would either double the rule beneath or float in the
@@ -1566,7 +1660,7 @@ def _emit_paired_row(out: list[Shape], field: Field, top: int, y: int, baseline:
     # below every other word on its line by the difference between the font size and the cap height.
     out.append(Text(unit_x, baseline, field.trailing, "label"))
 
-    bottom = y + composer.face.pad_at(LABEL_SIZE)
+    bottom = y + composer.face.pad_at(LABEL_SIZE, f"{_required(field, composer)} {field.trailing}")
     _column(out, top, bottom, composer)
     out.append(Line(divider, top, divider, bottom, "column"))
     return bottom
@@ -1630,6 +1724,15 @@ def _column(out: list[Shape], top: int, bottom: int, composer: Composer) -> int:
     """
     out.append(Line(composer.answer_x, top, composer.answer_x, bottom, "column"))
     return bottom
+
+
+def _required(field: Field, composer: Composer) -> str:
+    """The label as printed, which says so where the protocol requires an answer.
+
+    A word rather than an asterisk, so it survives being read aloud and a translator can choose a form
+    that fits the language.
+    """
+    return field.label + (f" ({composer.chrome['required']})" if field.compulsory else "")
 
 
 def _ident(field: Field) -> str:
@@ -1702,7 +1805,11 @@ def svg_document(sheet: Sheet, shapes: list[Shape], composer: Composer) -> str:
         f"  <title>{_esc(title_of(sheet, composer))}</title>",
         f"  <desc>{_esc(description_of(sheet))}</desc>",
         "  <style>",
-        "    text { font-family: 'Noto Sans'; fill: #000; }",
+        # The families this sheet was measured in, in the order it was measured -- and NO generic at the
+        # end. `sans-serif` looks like prudence and is a trap: prawn-svg maps it to Helvetica, a core font
+        # with Windows-1252 encoding and no embedded glyphs, so every character outside Latin-1 comes out
+        # as the logical-NOT sign. A missing font must fail rather than degrade.
+        "    text { font-family: %s; fill: #000; }" % _css_families(composer.face),
         *(f"    .{name} {{ {_css_text(style)} }}" for name, style in STYLES.items()),
         *(f"    .{kind} {{ {_css_shape(kind, ink)} }}" for kind, ink in INKS.items()),
         # The inlined logo's paths carry these classes. Defined here rather than kept inside the symbol so
@@ -1713,6 +1820,10 @@ def svg_document(sheet: Sheet, shapes: list[Shape], composer: Composer) -> str:
         "  </style>",
     ] + composer.logo.definition()
     return "\n".join(head + [_svg_shape(shape) for shape in shapes] + ["</svg>", ""])
+
+
+def _css_families(face: Typeface) -> str:
+    return ", ".join(f"'{family}'" for family in face.families)
 
 
 def _css_text(style: Style) -> str:
@@ -1781,6 +1892,7 @@ def _typst_preamble(sheet: Sheet, composer: Composer) -> list[str]:
                          for kind, ink in INKS.items() if ink.stroke and kind in _LINE_KINDS)
     blocks = ",\n".join(f'  "{kind}": (fill: {_typst_colour(ink.fill)}, stroke: {_typst_stroke(ink)})'
                         for kind, ink in INKS.items() if kind not in _LINE_KINDS)
+    families = ", ".join(_quoted(family) for family in composer.face.families)
     return f"""// Generated by scripts/build-collection-sheets.py from metadata/common. Do not edit.
 //
 // Compile with this repository's own fonts and nothing else:
@@ -1808,7 +1920,7 @@ def _typst_preamble(sheet: Sheet, composer: Composer) -> list[str]:
 // top-edge and bottom-edge at the baseline give a text box no height at all, which is what makes `place`
 // position a run by its BASELINE -- the same reference every measurement in the layout is taken from.
 // `fallback: false` keeps a missing glyph missing instead of borrowing one from another family.
-#set text(font: "Noto Sans", fallback: false, top-edge: "baseline", bottom-edge: "baseline")
+#set text(font: ({families}), fallback: false, top-edge: "baseline", bottom-edge: "baseline")
 
 // What the layout measured a run at, against what the engine will actually draw. Shaping and kerning
 // only ever remove advance in these faces -- a kern pair closes a gap, a conjunct replaces several
@@ -1955,10 +2067,12 @@ def main(argv: list[Shape] | None = None) -> int:
     rules = LayoutRules(args.layout)
     logo = Logo(args.logo)
 
-    # Devanagari is a separate face because Noto Sans does not cover it -- see common/fonts/README.md.
-    family = "NotoSansDevanagari" if args.language == "ne" else "NotoSans"
-    face = Face(args.fonts / f"{family}-Regular.ttf")
-    bold = Face(args.fonts / f"{family}-Bold.ttf")
+    # Latin first -- see Typeface -- then the language's own script where it needs a second face.
+    stems = ["NotoSans"]
+    if args.language in SCRIPT_FONTS:
+        stems.append(SCRIPT_FONTS[args.language])
+    face = Typeface([Face(args.fonts / f"{stem}-Regular.ttf") for stem in stems])
+    bold = Typeface([Face(args.fonts / f"{stem}-Bold.ttf") for stem in stems])
 
     meta = Metadata(args.metadata)
     sheets = build_sheets(meta, catalogue, rules, chrome)

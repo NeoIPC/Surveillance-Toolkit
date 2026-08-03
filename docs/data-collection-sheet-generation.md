@@ -334,20 +334,33 @@ The logo is a wordmark, so its accessible name is the word it draws, read from t
 asserting it carries nothing — and that assertion is irreversible: *"once something is marked as an
 artifact, you cannot make any of its contents accessible again"*.
 
-### One face per language is not enough, and Nepali is where that shows
+### A sheet is bilingual whenever its language is not Latin-scripted
 
-The generator picks a single family per language — Noto Sans, or Noto Sans Devanagari for Nepali — and
-refuses to emit anything the chosen face cannot draw. For `ne` the refusal covers the whole sheet: Noto
-Sans Devanagari carries **no Latin glyphs at all**, and a Nepali form still contains Latin, by design. The
-resistance categories are established abbreviations and are deliberately not translated, so MRSA, VRE,
-3GCR and CRP are on the sheet in any language, as is the project's own name.
+Not by accident, and not fixable by translating harder: the resistance categories are established
+abbreviations that are deliberately not translated, so MRSA, VRE, 3GCR and CRP are on every sheet in every
+language, as is the project's own name. Noto splits by script, so Noto Sans Devanagari carries **no Latin
+letters at all** — a Nepali sheet drawn from it alone is every Latin character missing, which is exactly
+what the coverage check reported.
 
-A sheet is therefore bilingual whenever its language is not Latin-scripted, and what it needs is a
-per-language font **stack** rather than a face: measure each character in the first shipped face that has
-it, name both families in the SVG's `font-family` and in Typst's `font:` list, and let the coverage check
-pass when their union covers the text. Both faces are already in `common/fonts/` and both are SIL OFL, so
-it adds no dependency. This is not the silent fallback the rules above exist to prevent — the list is this
-repository's own files in a stated order, which is its opposite.
+So a language gets a **stack** of faces rather than one: each character is measured in the first shipped
+face that holds it, both families are named in the SVG's `font-family` and in Typst's `font:` list, and
+the coverage check passes when their union covers the text. Both faces are already in `common/fonts/` and
+both are SIL OFL. This is the opposite of the silent fallback the rules above bar — it is this
+repository's own files, in a stated order, named in the output so each renderer resolves the same two.
+
+Two details in it are decisions, and both were wrong on the first attempt:
+
+- **Latin comes first, in every language.** The obvious order is the language's own script first, and it
+  is wrong here because the two faces **overlap on 60 codepoints** — every digit and every punctuation
+  mark. With Devanagari in front, a Nepali sheet would draw its digits, brackets and slashes from one
+  design and the Latin letters beside them from another, on the same line.
+- **Vertical clearance is per row, not per sheet.** Noto Sans reaches 293 thousandths of the em below the
+  baseline; Noto Sans Devanagari reaches 408, which the script needs for its below-base marks. Charging
+  every row the deeper figure costs 0.68 mm a row, which over a sheet of fifty is 17 mm — enough on its
+  own to push the surgical-site sheet off its page, which it did. Charging every row the shallower one
+  puts a Devanagari mark through the rule closing it. So each row is padded for the text it holds, and a
+  sheet in a language nobody has translated yet lays out **byte-identically to the English one**, because
+  it is drawing exactly the same faces.
 
 ## The layout follows the published forms; the visual style follows the two hand-drawn SVGs
 
