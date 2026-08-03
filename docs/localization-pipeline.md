@@ -237,6 +237,27 @@ Two consequences that are not obvious from the switches:
   whole German build fails on a missing include. Withholding a fragment protects nobody — it only decides
   whether the reader gets that paragraph in English or gets no document at all.
 
+### The captions are translated outside this pipeline, and four languages have nobody to translate them
+
+`doc/locale/attributes-<lang>.adoc` holds the 19 attributes Asciidoctor emits as generated text — *Figure*,
+*Table*, *Note*, *Caution*, *Appendix*, *Table of Contents* and the rest. Asciidoctor's own documentation is
+explicit that these do **not** follow `lang` automatically: it "works automatically with the DocBook toolchain
+but requires manual configuration for HTML/PDF output", which is why the selector above exists.
+
+Two things about that set are worth knowing before a language is switched on.
+
+**They are vendored, not authored.** All five files here — `de`, `en`, `es`, `it`, `tr` — are byte-identical to
+Asciidoctor's own, so nothing has been translated locally and nothing needs reviewing. Of the four target
+languages with no file, **`fr` exists upstream** and is a copy away. **`af`, `el`, `et` and `ne` do not exist
+upstream at all**, so 19 strings each — 76 in total — have to be translated by someone, and they sit in no
+catalogue, no component and no gate. They are part of the translation surface that nothing currently counts.
+
+**A missing file fails the build rather than falling back.** The selector is
+`ifdef::lang[include::attributes-{lang}.adoc[]]`, and an unresolved include is a WARN, which the protocol build
+turns into a failure by running at `--failure-level=INFO`. That is the right behaviour and it is currently
+latent: only German clears po4a's threshold, so no other language reaches the renderer. It becomes live on the
+day one does.
+
 **The set of rendered cultures is asserted, not observed.** `Build-NeoIPCCoreProtocol.ps1` compares what
 it discovered against `po/documentation.po4a.cfg`, the one witness to where a translated source lives that
 is independent of the build's own convention — comparing discovery against the filesystem it just read
