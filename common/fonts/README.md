@@ -5,7 +5,20 @@ Typefaces the build **embeds**, kept here rather than taken from the machine or 
 | file | family | upstream |
 |---|---|---|
 | `NotoSans-Regular.ttf`, `NotoSans-Bold.ttf` | Noto Sans (v2.015) | [notofonts/latin-greek-cyrillic](https://github.com/notofonts/latin-greek-cyrillic) |
+| `NotoSans-Italic.ttf`, `NotoSans-BoldItalic.ttf` | Noto Sans (v2.008) | [googlefonts/noto-fonts](https://github.com/googlefonts/noto-fonts) |
 | `NotoSansDevanagari-Regular.ttf`, `NotoSansDevanagari-Bold.ttf` | Noto Sans Devanagari | [notofonts/devanagari](https://github.com/notofonts/devanagari) |
+
+**The italics are a release behind the uprights, and that is checked rather than tolerated.** Noto builds
+and versions its italics separately, so v2.015 uprights and v2.008 italics is the pairing upstream
+offers. Compared face to face: the italic's character map is 125 codepoints smaller, **none** of them
+Greek, Cyrillic or Latin-Extended — they are Vedic combining marks, Roman numerals and a currency sign —
+and its descender and cap height are identical to the upright's, which is what lets one row rhythm serve
+both. If a future skew did cost a glyph some language needs, the generator's coverage check fails the
+build rather than substituting one, so the risk is a stopped build and never a wrong sheet.
+
+**Devanagari has no italic and needs none** — the script has no such distinction. A style asking for one
+in Nepali gets the upright Devanagari face, which is a fallback among the files here rather than to
+whatever a machine has installed.
 
 All four are **SIL Open Font License 1.1**, which the licence guardrail requires. `OFL-NotoSans.txt` and
 `OFL-NotoSansDevanagari.txt` are the upstream licence texts; they are separate files because the two

@@ -922,16 +922,21 @@ def _slug(code: str) -> str:
 class Style:
     """A named way of setting text: what the SVG carries as a CSS class and Typst as a `let` binding.
 
-    Deliberately no italic. common/fonts ships Regular and Bold, so a request for any other variant is
-    answered by whatever the renderer finds elsewhere -- prawn-svg reaches the theme's gem-bundled italic
-    subset, Typst reaches a system font unless told not to -- and neither is the file this generator
-    measured. The small print is distinguished by being small.
+    It names the FACE as well as the size, and everything measures through it. Nothing here takes a
+    weight or a slant as a separate argument, because that separation is what let a run be measured in
+    one file and drawn in another -- twice, once for bold and once for italic, each time producing a
+    sheet whose fit had been checked against text nobody was going to see.
     """
 
     size: int
     bold: bool = False
+    italic: bool = False
     colour: str = "#000"
     centred: bool = False
+
+    @property
+    def face(self) -> tuple[bool, bool]:
+        return self.bold, self.italic
 
 
 STYLES: dict[str, Style] = {
@@ -941,7 +946,9 @@ STYLES: dict[str, Style] = {
     "label": Style(LABEL_SIZE, bold=True),
     "option": Style(OPTION_SIZE),
     "child": Style(OPTION_SIZE, bold=True),
-    "note": Style(SMALL_SIZE),
+    # The small print -- the legend, the footnotes, the footer, the note on the patient block and the
+    # case definitions. Italic sets it apart from the questions without another size or another colour.
+    "note": Style(SMALL_SIZE, italic=True),
 }
 
 
@@ -1086,9 +1093,21 @@ class Composer:
     reviewable is that regenerating with unchanged metadata produces a byte-identical file.
     """
 
-    def __init__(self, face: Typeface, bold: Typeface, chrome: dict[str, str], layout: LayoutRules, logo: Logo,
+    def __init__(self, faces: dict[tuple[bool, bool], Typeface], chrome: dict[str, str],
+                 layout: LayoutRules, logo: Logo,
                  language: str | None, label_width: int = LABEL_COL_MAX):
-        self.face, self.bold, self.chrome, self.layout = face, bold, chrome, layout
+        self.faces, self.chrome, self.layout = faces, chrome, layout
+        # The upright regular face, which is what the vertical rhythm is taken from. That is sound only
+        # because the four faces agree on the two metrics it uses, so it is asserted rather than assumed:
+        # a family whose italic sat deeper would need the rhythm to follow the style like the width does.
+        self.face = faces[False, False]
+        for other in faces.values():
+            if (other.primary.descent_at(1000), other.primary.cap_at(1000)) != (
+                    self.face.primary.descent_at(1000), self.face.primary.cap_at(1000)):
+                raise ValueError(
+                    f"{other.name} does not share the vertical metrics of {self.face.name}; the row "
+                    "rhythm is taken from one face and would be wrong for text set in this one."
+                )
         self.logo, self.language = logo, language
         self.rtl = language in RIGHT_TO_LEFT
         self.missing: dict[str, set[str]] = {}
@@ -1113,21 +1132,20 @@ class Composer:
             self.footnotes.append(key)
         return SUPERSCRIPTS[self.footnotes.index(key)]
 
-    def face_of(self, bold: bool) -> Face:
-        """The face a run is actually drawn in.
+    def face_of(self, style: str) -> Typeface:
+        """The faces a run in this style is actually drawn from.
 
-        Labels and child labels are bold, and bold is wider. Measuring them in the regular face
-        under-measured every one of them, which is not a rounding error: it decided where the answer
-        column could sit, whether a label wrapped, whether two criteria could share a row, and whether the
-        sheet was declared to fit -- and it let a fitted label overrun into the column it was fitted
-        against, by little enough to look like a rendering artifact rather than a measurement bug.
-
-        Vertical metrics stay with the regular face so every row keeps one rhythm.
+        Keyed by the STYLE rather than by a weight or a slant passed alongside it, because that is what
+        went wrong twice. Labels are bold and bold is wider, and measuring them upright under-measured
+        every one: it decided where the answer column could sit, whether a label wrapped, whether two
+        criteria shared a row, and whether the sheet was declared to fit -- letting a fitted label overrun
+        the column it had been fitted against by little enough to read as a rendering artifact. The small
+        print then repeated it in the other direction, measured upright and drawn slanted.
         """
-        return self.bold if bold else self.face
+        return self.faces[STYLES[style].face]
 
-    def _text(self, text: str, size: int, bold: bool = False) -> None:
-        face = self.face_of(bold)
+    def _text(self, text: str, style: str) -> None:
+        face = self.face_of(style)
         absent = face.missing(text)
         if absent:
             self.missing.setdefault(face.name, set()).update(absent)
@@ -1138,8 +1156,7 @@ class Composer:
         What the print emitter asserts against: the engine re-measures the same run with its own shaper
         and refuses to draw it wider than this.
         """
-        style = STYLES[run.style]
-        return self.face_of(style.bold).width(run.text, style.size)
+        return self.face_of(run.style).width(run.text, STYLES[run.style].size)
 
 
 def title_of(sheet: Sheet, composer: Composer) -> str:
@@ -1164,8 +1181,8 @@ def layout_sheet(sheet: Sheet, composer: Composer) -> list[Shape]:
     """
     out: list[Shape] = []
     heading = composer.chrome["sheet_heading"]
-    composer._text(heading, TITLE_SIZE)
-    composer._text(sheet.title, SUBTITLE_SIZE)
+    composer._text(heading, "title")
+    composer._text(sheet.title, "subtitle")
 
     y = MARGIN_TOP + TITLE_SIZE
     out.append(composer.logo.place(PAGE_W - MARGIN_X - LOGO_W, MARGIN_TOP, LOGO_W))
@@ -1188,13 +1205,13 @@ def layout_sheet(sheet: Sheet, composer: Composer) -> list[Shape]:
     # approximation here is a gap at the bottom of every sheet.
     legend_h = _legend_height(composer)
     footer_h = len(
-        _fit(composer, composer.chrome["footer_reference"], SMALL_SIZE, CONTENT_W, "footer", "footer")
+        _fit(composer, composer.chrome["footer_reference"], "note", CONTENT_W, "footer", "footer")
     ) * (SMALL_SIZE + 60)
     # Footnotes are part of the budget, not an afterthought. They are known by now -- a collapsed group
     # registers its note while its section is laid out -- and leaving them out let the comments box grow
     # into the space they needed, which turned two sheets that fitted into two that did not.
     notes_h = sum(
-        len(_fit(composer, f"{SUPERSCRIPTS[i]} {composer.chrome[k]}", SMALL_SIZE, CONTENT_W, "footnote", k))
+        len(_fit(composer, f"{SUPERSCRIPTS[i]} {composer.chrome[k]}", "note", CONTENT_W, "footnote", k))
         * (SMALL_SIZE + 60)
         for i, k in enumerate(composer.footnotes)
     ) + (NOTES_TRAIL if composer.footnotes else 0)
@@ -1211,7 +1228,7 @@ def layout_sheet(sheet: Sheet, composer: Composer) -> list[Shape]:
             # left a box with no heading at the foot of a tight sheet, which reads as a mistake rather
             # than as room to write. Below this the space is genuinely too small to head, and it stays
             # blank rather than carrying a label that would not fit above it.
-            composer._text(composer.chrome["comments"], LABEL_SIZE)
+            composer._text(composer.chrome["comments"], "label")
             body.append(Text(TEXT_X, y + ROW_PAD + composer.face.cap_at(LABEL_SIZE),
                              composer.chrome["comments"], "label"))
         y += spare
@@ -1282,7 +1299,7 @@ def _legend_rows(composer: Composer) -> int:
     with them. Whether they fit together is a measurement like every other one here, so a language whose
     legend is longer simply gets the stacked form back.
     """
-    widths = [composer.face.width(text, SMALL_SIZE) + MARK + MARK_GAP for _, text in _legend_entries(composer)]
+    widths = [composer.face_of("note").width(text, SMALL_SIZE) + MARK + MARK_GAP for _, text in _legend_entries(composer)]
     return 1 if sum(widths) + LEGEND_SEP <= CONTENT_W - 2 * TEXT_INSET else 2
 
 
@@ -1298,11 +1315,11 @@ def _emit_legend(out: list[Shape], y: int, composer: Composer) -> int:
     one_row = _legend_rows(composer) == 1
     x, baseline = TEXT_X, y + MARK - 20
     for radio, text in _legend_entries(composer):
-        composer._text(text, SMALL_SIZE)
+        composer._text(text, "note")
         _mark(out, f"legend-{'one' if radio else 'many'}", int(x), baseline, radio, composer, SMALL_SIZE)
         out.append(Text(int(x + MARK + MARK_GAP), baseline, text, "note"))
         if one_row:
-            x += MARK + MARK_GAP + composer.face.width(text, SMALL_SIZE) + LEGEND_SEP
+            x += MARK + MARK_GAP + composer.face_of("note").width(text, SMALL_SIZE) + LEGEND_SEP
         else:
             baseline += LEGEND_ROW
     return y + _legend_rows(composer) * (LEGEND_ROW)
@@ -1312,8 +1329,8 @@ def _emit_footnotes(out: list[Shape], y: int, composer: Composer) -> int:
     """The notes the collapsed rows point at. A group without its note is a question with no stated rule."""
     for index, key in enumerate(composer.footnotes):
         text = f"{SUPERSCRIPTS[index]} {composer.chrome[key]}"
-        composer._text(text, SMALL_SIZE)
-        for line in _fit(composer, text, SMALL_SIZE, CONTENT_W, "footnote", key):
+        composer._text(text, "note")
+        for line in _fit(composer, text, "note", CONTENT_W, "footnote", key):
             y += SMALL_SIZE + 60
             out.append(Text(MARGIN_X, y, line, "note"))
     return y + (NOTES_TRAIL if composer.footnotes else 0)
@@ -1321,8 +1338,8 @@ def _emit_footnotes(out: list[Shape], y: int, composer: Composer) -> int:
 
 def _emit_footer(out: list[Shape], y: int, composer: Composer) -> int:
     text = composer.chrome["footer_reference"]
-    composer._text(text, SMALL_SIZE)
-    for line in _fit(composer, text, SMALL_SIZE, CONTENT_W, "footer", "footer"):
+    composer._text(text, "note")
+    for line in _fit(composer, text, "note", CONTENT_W, "footer", "footer"):
         y += SMALL_SIZE + 60
         out.append(Text(MARGIN_X, y, line, "note"))
     return y
@@ -1337,7 +1354,7 @@ def _emit_patient_block(out: list[Shape], y: int, composer: Composer) -> int:
     cannot be expected to know which of those two things they are doing.
     """
     title = composer.chrome["section_patient"]
-    composer._text(title, SECTION_SIZE)
+    composer._text(title, "section")
     out.append(Box(MARGIN_X, y, CONTENT_W, SECTION_BAND_H, "band"))
     out.append(Text(PAGE_W // 2, y + SECTION_BAND_H - 150, title, "section", "patient"))
     y += SECTION_BAND_H
@@ -1351,11 +1368,10 @@ def _emit_patient_block(out: list[Shape], y: int, composer: Composer) -> int:
 
     for key in ("patient_identifier", "patient_name"):
         label = composer.chrome[key]
-        composer._text(label, LABEL_SIZE, bold=True)
+        composer._text(label, "label")
         top = y
         y += composer.face.pad_at(LABEL_SIZE, label)
-        for line in _fit(composer, label, LABEL_SIZE, composer.answer_x - COLUMN_GAP - TEXT_X, key, "label",
-                         bold=True):
+        for line in _fit(composer, label, "label", composer.answer_x - COLUMN_GAP - TEXT_X, key, "label"):
             out.append(Text(TEXT_X, y + composer.face.cap_at(LABEL_SIZE), line, "label"))
             y += LABEL_SIZE + LINE_GAP
         y += composer.face.pad_at(LABEL_SIZE, label) - LINE_GAP
@@ -1366,9 +1382,9 @@ def _emit_patient_block(out: list[Shape], y: int, composer: Composer) -> int:
         out.append(Line(MARGIN_X, y, MARGIN_X + CONTENT_W, y, "rule"))
 
     note = composer.chrome["patient_note"]
-    composer._text(note, SMALL_SIZE)
+    composer._text(note, "note")
     y += composer.face.pad_at(SMALL_SIZE, note)
-    for line in _fit(composer, note, SMALL_SIZE, CONTENT_W - 360, "patient_note", "note"):
+    for line in _fit(composer, note, "note", CONTENT_W - 360, "patient_note", "note"):
         out.append(Text(TEXT_X, y + composer.face.cap_at(SMALL_SIZE), line, "note"))
         y += SMALL_SIZE + LINE_GAP
     y += composer.face.pad_at(SMALL_SIZE, note) - LINE_GAP
@@ -1385,8 +1401,8 @@ def _emit_section(out: list[Shape], section: Section, y: int, composer: Composer
     # the one text on the sheet that was only checked for missing glyphs -- so a longer translation would
     # have run out past the band's ends and off the page, in exactly the languages nobody proof-reads.
     if section.banded:
-        composer._text(section.title, SECTION_SIZE)
-        lines = _fit(composer, section.title, SECTION_SIZE, CONTENT_W - 360, section.code, "section title")
+        composer._text(section.title, "section")
+        lines = _fit(composer, section.title, "section", CONTENT_W - 360, section.code, "section title")
         band_h = SECTION_BAND_H + (len(lines) - 1) * (SECTION_SIZE + LINE_GAP)
         out.append(Box(MARGIN_X, y, CONTENT_W, band_h, "band"))
         ty = y + SECTION_BAND_H - 150
@@ -1400,9 +1416,9 @@ def _emit_section(out: list[Shape], section: Section, y: int, composer: Composer
         # The case this section covers, in the protocol's own words, standing where the question that
         # asked which case applies used to be. It says more than that question did: the options never
         # carried the 30-day and 90-day windows.
-        composer._text(section.definition, SMALL_SIZE)
+        composer._text(section.definition, "note")
         y += composer.face.pad_at(SMALL_SIZE, section.definition)
-        for line in _fit(composer, section.definition, SMALL_SIZE, CONTENT_W - 2 * TEXT_INSET,
+        for line in _fit(composer, section.definition, "note", CONTENT_W - 2 * TEXT_INSET,
                          section.code, "definition"):
             out.append(Text(TEXT_X, y + composer.face.cap_at(SMALL_SIZE), line, "note"))
             y += SMALL_SIZE + LINE_GAP
@@ -1451,7 +1467,7 @@ def _pair_ticks(fields: list[Field], composer: Composer) -> list[tuple[Field, ..
     half = (CONTENT_W - 2 * TEXT_INSET) // 2
 
     def fits(field: Field) -> bool:
-        return (composer.bold.width(_required(field, composer), LABEL_SIZE)
+        return (composer.face_of("label").width(_required(field, composer), LABEL_SIZE)
                 + MARK + MARK_GAP + PAIR_GUTTER <= half)
 
     rows: list[tuple[Field, ...]] = []
@@ -1478,7 +1494,7 @@ def _emit_tick_pair(out: list[Shape], pair: tuple[Field, ...], y: int, composer:
     y += pad
     baseline = y + composer.face.cap_at(LABEL_SIZE)
     for field, label, x in zip(pair, labels, (TEXT_X, MARGIN_X + CONTENT_W // 2)):
-        composer._text(label, LABEL_SIZE, bold=True)
+        composer._text(label, "label")
         _mark(out, _ident(field), x, baseline, False, composer, LABEL_SIZE)
         out.append(Text(x + MARK + MARK_GAP, baseline, label, "label"))
     return y + LABEL_SIZE + pad
@@ -1550,14 +1566,13 @@ def _emit_child(out: list[Shape], field: Field, y: int, composer: Composer, clos
     resistance rows stepped visibly rightwards down the sheet and no two rows agreed on anything.
     """
     label = field.short_label
-    composer._text(label, OPTION_SIZE, bold=True)
+    composer._text(label, "child")
     top = y
     y += composer.face.pad_at(OPTION_SIZE, label) // 2
 
     x = TEXT_X + OPTION_INDENT
     baseline = y + composer.face.cap_at(OPTION_SIZE)
-    for line in _fit(composer, label, OPTION_SIZE, composer.answer_x - COLUMN_GAP - x, field.code, "label",
-                     bold=True):
+    for line in _fit(composer, label, "child", composer.answer_x - COLUMN_GAP - x, field.code, "label"):
         out.append(Text(x, baseline, line, "child"))
         baseline += OPTION_SIZE + LINE_GAP
     baseline -= OPTION_SIZE + LINE_GAP
@@ -1577,8 +1592,8 @@ def _emit_child(out: list[Shape], field: Field, y: int, composer: Composer, clos
         return _column(out, top, baseline + composer.face.pad_at(OPTION_SIZE, label), composer)
 
     for option in options:
-        composer._text(option, OPTION_SIZE)
-    widths = [composer.face.width(option, OPTION_SIZE) for option in options]
+        composer._text(option, "option")
+    widths = [composer.face_of("option").width(option, OPTION_SIZE) for option in options]
     needed = sum(w + MARK + MARK_GAP for w in widths) + OPTION_SEP * (len(options) - 1)
     if composer.answer_text_x + needed > right:
         # The choices will not share the label's line, so fall back to the indented block a parent uses,
@@ -1597,7 +1612,7 @@ def _emit_child(out: list[Shape], field: Field, y: int, composer: Composer, clos
 def _emit_field(out: list[Shape], field: Field, y: int, composer: Composer, closes_group: bool = True) -> int:
     """One field is one full-width row: bold label, then whatever it needs to be answered."""
     label = _required(field, composer)
-    composer._text(label, LABEL_SIZE, bold=True)
+    composer._text(label, "label")
     style = composer.layout.boolean_style(field)
 
     options, radio = field.options, field.radio
@@ -1612,7 +1627,7 @@ def _emit_field(out: list[Shape], field: Field, y: int, composer: Composer, clos
     # It is measured rather than decided, so the same field moves back below its label in a language whose
     # options are longer -- which is why the inconsistency this introduces is tolerable: it is not "short
     # ones are treated differently", it is "each row uses the space it has".
-    widths = [composer.face.width(option, OPTION_SIZE) for option in options]
+    widths = [composer.face_of("option").width(option, OPTION_SIZE) for option in options]
     needed = (sum(w + MARK + MARK_GAP for w in widths) + OPTION_SEP * (len(options) - 1)) if options else 0
     inline = bool(options) and composer.answer_text_x + needed <= MARGIN_X + CONTENT_W - TEXT_INSET
 
@@ -1635,7 +1650,7 @@ def _emit_field(out: list[Shape], field: Field, y: int, composer: Composer, clos
 
     edge = composer.answer_x - COLUMN_GAP if answered_here else MARGIN_X + CONTENT_W - 180
     baseline = y + composer.face.cap_at(LABEL_SIZE)
-    for line in _fit(composer, label, LABEL_SIZE, edge - label_x, field.code, "label", bold=True):
+    for line in _fit(composer, label, "label", edge - label_x, field.code, "label"):
         out.append(Text(label_x, baseline, line, "label"))
         y += LABEL_SIZE + LINE_GAP
         baseline += LABEL_SIZE + LINE_GAP
@@ -1649,7 +1664,7 @@ def _emit_field(out: list[Shape], field: Field, y: int, composer: Composer, clos
         ident = _ident(field)
         x = composer.answer_text_x
         for index, option in enumerate(options):
-            composer._text(option, OPTION_SIZE)
+            composer._text(option, "option")
             _mark(out, f"{ident}-{index + 1}", int(x), baseline, radio, composer)
             out.append(Text(int(x + MARK + MARK_GAP), baseline, option, "option"))
             x += MARK + MARK_GAP + widths[index] + OPTION_SEP
@@ -1679,9 +1694,9 @@ def _emit_paired_row(out: list[Shape], field: Field, top: int, y: int, baseline:
     of the same weight and kind as the answer column's, so the row reads as three cells of one table
     rather than as two underscores floating in it.
     """
-    composer._text(field.trailing, LABEL_SIZE, bold=True)
+    composer._text(field.trailing, "label")
     right = MARGIN_X + CONTENT_W - 180
-    unit_x = int(right - composer.bold.width(field.trailing, LABEL_SIZE))
+    unit_x = int(right - composer.face_of("label").width(field.trailing, LABEL_SIZE))
     divider = unit_x - 2400
     # The unit word sits on the label's own baseline. Placing it at the row's foot instead dropped it
     # below every other word on its line by the difference between the font size and the cap height.
@@ -1702,11 +1717,11 @@ def _emit_options(out: list[Shape], field: Field, options: list[str], radio: boo
     """
     ident = field.code.lower().replace("_", "-")
     for option in options:
-        composer._text(option, OPTION_SIZE)
+        composer._text(option, "option")
 
     left = TEXT_X + OPTION_INDENT
     available = MARGIN_X + CONTENT_W - left - 180
-    widths = [composer.face.width(option, OPTION_SIZE) for option in options]
+    widths = [composer.face_of("option").width(option, OPTION_SIZE) for option in options]
     inline = sum(w + MARK + MARK_GAP for w in widths) + OPTION_SEP * (len(options) - 1)
 
     if inline <= available:
@@ -1721,7 +1736,7 @@ def _emit_options(out: list[Shape], field: Field, options: list[str], radio: boo
     for index, option in enumerate(options):
         _mark(out, f"{ident}-{index + 1}", left, y + composer.face.cap_at(OPTION_SIZE), radio, composer)
         text_x = left + MARK + MARK_GAP
-        for line in _fit(composer, option, OPTION_SIZE, available - MARK - MARK_GAP, field.code, f"option {index + 1}"):
+        for line in _fit(composer, option, "option", available - MARK - MARK_GAP, field.code, f"option {index + 1}"):
             out.append(Text(text_x, y + composer.face.cap_at(OPTION_SIZE), line, "option"))
             y += OPTION_SIZE + LINE_GAP
     return y
@@ -1767,15 +1782,19 @@ def _ident(field: Field) -> str:
     return field.code.lower().replace("_", "-")
 
 
-def _fit(composer: Composer, text: str, size: int, width: int, code: str, what: str,
-         bold: bool = False) -> list[str]:
-    """Wrap to the cell, and refuse to emit anything that still does not fit.
+def _fit(composer: Composer, text: str, style: str, width: int, code: str, what: str) -> list[str]:
+    """Wrap to the cell in the style's own face, and refuse to emit anything that still does not fit.
+
+    The style carries the size and the face together, so the text cannot be wrapped to one measurement
+    and then set in another -- which is the whole reason a run's style rather than its size is what gets
+    passed around.
 
     `wrap` cannot break inside a word, so a single token wider than the cell comes back as its own
     over-long line. That is the German-compound case, and emitting it anyway is precisely what the XSLT
     wrapper did -- silently, because character counting cannot tell that it happened.
     """
-    face = composer.face_of(bold)
+    size = STYLES[style].size
+    face = composer.face_of(style)
     lines = face.wrap(text, size, width)
     widest = max(face.width(line, size) for line in lines)
     if widest > width:
@@ -1863,6 +1882,8 @@ def _css_text(style: Style) -> str:
     parts = [f"font-size: {style.size}px"]
     if style.bold:
         parts.append("font-weight: bold")
+    if style.italic:
+        parts.append("font-style: italic")
     if style.colour != "#000":
         parts.append(f"fill: {style.colour}")
     if style.centred:
@@ -2031,6 +2052,8 @@ def _typst_text_args(style: Style) -> str:
     args = [f"size: {style.size} * u"]
     if style.bold:
         args.append('weight: "bold"')
+    if style.italic:
+        args.append('style: "italic"')
     if style.colour != "#000":
         args.append(f'fill: {_typst_colour(style.colour)}')
     return ", ".join(args)
@@ -2110,8 +2133,14 @@ def main(argv: list[Shape] | None = None) -> int:
     stems = ["NotoSans"]
     if args.language in SCRIPT_FONTS:
         stems.append(SCRIPT_FONTS[args.language])
-    face = Typeface([Face(args.fonts / f"{stem}-Regular.ttf") for stem in stems])
-    bold = Typeface([Face(args.fonts / f"{stem}-Bold.ttf") for stem in stems])
+    # One stack per variant a style can ask for. A script without an italic of its own -- Devanagari has
+    # none, and the tradition it comes from has no such distinction -- simply repeats its upright face,
+    # so a note set in it stays legible instead of resolving to nothing.
+    faces = {
+        (bold, italic): Typeface([Face(args.fonts / f"{stem}-{_variant(stem, bold, italic)}.ttf")
+                                  for stem in stems])
+        for bold in (False, True) for italic in (False, True)
+    }
 
     meta = Metadata(args.metadata)
     sheets = build_sheets(meta, catalogue, rules, chrome)
@@ -2125,7 +2154,7 @@ def main(argv: list[Shape] | None = None) -> int:
     written, failures = [], []
     for sheet in sheets:
         composer, body, failure = best_layout(
-            sheet, lambda width: Composer(face, bold, chrome, rules, logo, args.language, width)
+            sheet, lambda width: Composer(faces, chrome, rules, logo, args.language, width)
         )
         if failure is not None:
             failures.append(str(failure))
@@ -2159,6 +2188,18 @@ def main(argv: list[Shape] | None = None) -> int:
     for target, column, spare in written:
         print(f"wrote {target} (answer column {column:.1f} mm, {spare:.1f} mm spare)")
     return 1 if failures else 0
+
+
+def _variant(stem: str, bold: bool, italic: bool) -> str:
+    """The file name suffix for one variant of a family, and what to do when it does not exist.
+
+    Only Noto Sans ships all four here. A family with no italic falls back to its upright face rather
+    than to nothing -- which is a fallback WITHIN the shipped files, chosen and stated, not the silent
+    resolution to whatever a machine has installed that the one-family rule exists to prevent.
+    """
+    if italic and stem == "NotoSans":
+        return "BoldItalic" if bold else "Italic"
+    return "Bold" if bold else "Regular"
 
 
 def _fail(message: str) -> int:
