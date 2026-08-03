@@ -52,7 +52,15 @@ PAGE_W, PAGE_H = 21000, 29700
 # One margin, all four sides. They were 12.5 / 10 / 12 mm, which is not a design -- it is three numbers
 # that were each plausible on their own. The comments box grows to whatever is left, so the bottom margin
 # is exact rather than approximate, and an even border is then simply a matter of using one value.
-MARGIN = 1250
+#
+# 10 mm is where the measured benefit stops. Narrowing the margin buys height twice over -- directly, two
+# millimetres of page per millimetre of margin, and indirectly, because the extra width stops labels
+# wrapping and lets more choice runs sit on their own label's line. The indirect half is the larger one
+# and it is entirely spent by 10 mm: from 12.5 the pneumonia sheet gains 17.7 mm for 2.5 mm of margin,
+# while every step below 10 gains exactly the mechanical 2 mm and nothing more, on every sheet. So a
+# narrower margin past this point trades a real risk -- office printers reserve an unprintable border, and
+# a clipped form is discovered by the partner who prints it -- for a benefit that has already been taken.
+MARGIN = 1000
 MARGIN_X = MARGIN_TOP = MARGIN_BOTTOM = MARGIN
 CONTENT_W = PAGE_W - 2 * MARGIN_X
 
