@@ -1,5 +1,9 @@
 <svg version="1.1" viewBox="0 0 797.8 226.7" xmlns="http://www.w3.org/2000/svg">
   <title>NeoIPC</title>
+  <!-- The NeoIPC logo is owned by Fondazione Penta ETS. It is NOT covered by this repository's MIT
+       licence; it is present so that NeoIPC documents can identify themselves. Confirm any reuse beyond
+       this repository with the NeoIPC/Penta team before publishing. -->
+  <metadata>Copyright Fondazione Penta ETS. All rights reserved. Not licensed under this repository's MIT licence.</metadata>
   <!-- The horizontal lockup, composed from the vector artwork of the vertical one. Only the gap
        between the mark and the wordmark and their vertical alignment are set here, and both are
        measured off LOGO_NEOIPC_2.png, the official horizontal artwork, for which no vector source

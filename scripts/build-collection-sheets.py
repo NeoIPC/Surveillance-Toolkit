@@ -244,8 +244,15 @@ class Logo:
         self.body = [line for line in body.splitlines() if line.strip()]
 
     def definition(self) -> list[str]:
+        # The notice travels with the artwork. A generated sheet is a distributed file that contains the
+        # logo, so stating the rights holder only in the repository's README would leave every copy of it
+        # silent about who owns the mark on it.
         return (
-            [f'  <symbol id="neoipc-logo" viewBox="{self.view_box}">']
+            [
+                "  <!-- The NeoIPC logo below is owned by Fondazione Penta ETS and is not covered by this",
+                "       repository's MIT licence. Confirm any reuse with the NeoIPC/Penta team. -->",
+                f'  <symbol id="neoipc-logo" viewBox="{self.view_box}">',
+            ]
             + [f"  {line}" for line in self.body]
             + ["  </symbol>"]
         )

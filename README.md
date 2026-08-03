@@ -122,6 +122,9 @@ rather than on a pull request.
 
 Except where noted below, this repository is licensed under the [MIT License](LICENSE).
 
+Two kinds of exception follow: data directories whose upstream terms are stricter than MIT, and the logos
+and marks, which are nobody's to license here at all.
+
 Two data directories compile content from upstream sources whose terms are stricter than MIT. The effective license of each is dictated by what its sources permit — not a restriction NeoIPC chose to impose — and each carries its own `LICENSE.md` with the reasoning and full attribution:
 
 | Directory | Effective license | Upstream sources |
@@ -130,6 +133,25 @@ Two data directories compile content from upstream sources whose terms are stric
 | [`metadata/common/antibiotics/`](metadata/common/antibiotics/LICENSE.md) | CC BY-NC-SA 3.0 IGO | WHO AWaRe classification / ATC/DDD index |
 
 The two directories land on different Creative Commons terms because their upstream licences differ. The infectious-agent list is **no-derivatives** — its MycoBank source is CC BY-NC-ND, incorporated with permission. The antibiotic list is a **derivative** of the WHO AWaRe classification (CC BY-NC-SA 3.0 IGO); ShareAlike requires a derivative to keep the same licence, so it is CC BY-NC-SA 3.0 IGO (the ATC codes, substance names and group descriptions it also carries are reproduced unchanged from the WHOCC ATC/DDD index, not adapted). We apply the licence the upstream terms require, no stricter.
+
+### Logos and marks
+
+**The NeoIPC logo is owned by Fondazione Penta ETS and is not covered by the MIT licence.** It is
+included here because this repository's own documents and reports display it; that is not a grant to
+anyone else. Confirm any reuse beyond this repository with the NeoIPC/Penta team before publishing.
+
+| Path | Rights holder |
+|------|---------------|
+| [`common/img/NeoIPC-Logo.svg`](common/img/NeoIPC-Logo.svg), [`common/img/NeoIPC-Logo-Horizontal.svg`](common/img/NeoIPC-Logo-Horizontal.svg) | Fondazione Penta ETS |
+| [`common/logos/LOGO_NEOIPC.png`, `LOGO_NEOIPC_2.png`](common/logos/) | Fondazione Penta ETS |
+| [`doc/protocol/img/`](doc/protocol/img/) `LOGO_NEOIPC.png`, `LOGO_NEOIPC_2.png` | Fondazione Penta ETS |
+| [`reports/logos/`](reports/logos/) `LOGO_NEOIPC.png`, `LOGO_NEOIPC_2.png` | Fondazione Penta ETS |
+| [`reports/logos/`](reports/logos/) `eu-flag.png`, `eu-flag-hr.jpg` | European Union — the emblem is governed by the [EU's own conditions of use](https://commission.europa.eu/about/visual-identity_en), not by this licence |
+| [`common/logos/`](common/logos/) `by.xlarge.png`, `cc.xlarge.png` | Creative Commons — its trademarks, used to mark licence terms, and not licensed by this repository |
+
+A mark is not content. Every entry here is present so that a NeoIPC document can identify itself or
+credit a funder, and none of them is offered for reuse — which is why they are listed as rights holders
+rather than as licences.
 
 The gettext translation catalogues under [`po/`](po/) declare their licence in their own headers, and all of them declare CC BY 4.0, matching their templates. Two once did not — the translated `reports` catalogues carried MIT and the `infectious_agents` ones CC BY-NC-ND 4.0 — and the templates were the side that had it right: a catalogue of extracted strings is not automatically bound by the licence of the directory it was extracted from, and a no-derivatives term cannot govern a translation, which *is* a derivative work. Because the translated files are written by the translation platform rather than by this repository, that correction was applied there rather than here, and the same route applies should they ever diverge again.
 
