@@ -489,8 +489,21 @@ as a whole-file re-wrap. Regenerating identically is a check, not an aspiration.
 
 ## Language
 
-The generator is Python. The specific argument is text measurement: fontTools reads the real face and has
-no cross-platform equivalent reachable from PowerShell — `System.Drawing` is not available on every
-platform this must run on, and everything here must work on Windows, Linux and macOS. Reading the CSVs is
-the trivial part of the job and does not drive the choice. This is the "a specific argument for a specific
-script" bar that the language-fit question sets, met on the measurement rather than on preference.
+The generator is Python, and the argument is the **catalogue**.
+
+A localized sheet is assembled from `po/metadata.<lang>.po` and two YAML files, so the generator is
+localization tooling and sits where this repository already reserves a place for Python on a library
+argument: `polib` for gettext, `ruamel.yaml` for YAML. PowerShell has no gettext parser, and hand-rolling
+one over a `.po` is what the parse-a-format-with-its-own-parser rule exists to prevent. Reading the CSVs
+is the trivial part of the job and drives nothing.
+
+Measurement does not decide it, and the candidate that looks as though it should is **`SixLabors.Fonts`**
+— .NET, so it runs wherever PowerShell does, and it does more than fontTools: a Universal Shaping Engine
+for complex scripts, and the Unicode Bidirectional Algorithm. Its **licence** rules it out. The Six Labors
+Split License grants Apache-2.0 terms only to a non-profit, a for-profit under a revenue threshold, or a
+transitive consumer, and a permission that depends on who is running the code is not permissive — NeoIPC's
+partners are the parties it distinguishes between. Versions before June 2022 were Apache-2.0, which is no
+way round it: pinning a font library four years back to escape a relicence forgoes the shaping that made
+it worth having.
+
+No shaping ruler is needed here in any case. Typst shapes, and measures what it is about to draw.
