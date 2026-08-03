@@ -74,6 +74,11 @@ COMMENTS_MIN = 1200                     # below this the leftover is a gap, not 
 # PDF and is one character to measure. The font's coverage is checked like any other text on the sheet.
 SUPERSCRIPTS = "¹²³⁴⁵⁶⁷⁸⁹"
 
+# A soft hyphen in a source string marks where its word may break; a real hyphen is what gets drawn if a
+# break is taken there. The soft one never reaches the renderer.
+SOFT_HYPHEN = "­"
+HYPHEN = "-"
+
 # The brand's two primary colours, from the NeoIPC visual guideline: PANTONE 7460 C and 1495 C. Taken
 # from the guideline rather than sampled from an artifact -- an earlier guess of #2e74b5 was a Word
 # default that merely looked similar.
@@ -330,30 +335,68 @@ class Face:
 
     def width(self, text: str, size: int) -> float:
         total = 0
-        for ch in text:
+        for ch in text.replace(SOFT_HYPHEN, ""):
             glyph = self.cmap.get(ord(ch))
             total += self.widths.get(glyph, self.widths.get(".notdef", 0))
         return total * size / self.units
 
     def wrap(self, text: str, size: int, max_width: int) -> list[str]:
-        """Greedy wrap on whitespace, measured in the real face.
+        """Greedy wrap on whitespace, and inside a word wherever the translator allowed one.
 
-        A single word wider than the cell is NOT broken and NOT silently emitted: it is returned as its
-        own line and the caller fails on it. Emitting it whole is what the XSLT did, and it is the normal
-        case for a German compound.
+        A soft hyphen (U+00AD) in the source marks a place the word may break. It is the translator's
+        call because it is a fact about their language rather than about this layout -- where
+        `Gestations{shy}alter` may split is something they know and a pattern file only guesses at. No
+        dependency, no per-language dictionary, and no licence to clear.
+
+        The renderer never sees one. Every soft hyphen is stripped, and a REAL hyphen is written only at
+        the point a break actually happens, which is possible because this emits explicit lines rather
+        than asking the renderer to wrap. So it does not matter whether prawn-svg honours U+00AD -- a
+        question that would otherwise decide whether the text came out with stray hyphens in it.
+
+        A word still too wide with every break taken is neither broken nor silently emitted: the caller
+        fails on it, exactly as before. Hyphenation relaxes the fit rule; it does not remove it.
         """
         lines: list[str] = []
         current = ""
         for word in text.split():
             candidate = f"{current} {word}".strip()
             if current and self.width(candidate, size) > max_width:
-                lines.append(current)
+                lines.append(current.replace(SOFT_HYPHEN, ""))
                 current = word
             else:
                 current = candidate
+
+            while self.width(current, size) > max_width and SOFT_HYPHEN in current:
+                found = self._break_at_soft_hyphen(current, size, max_width)
+                if found is None:
+                    break
+                head, position = found
+                lines.append(head)
+                # Slice the ORIGINAL string by the break's own position. Slicing by the head's length
+                # would be short by however many soft hyphens the head absorbed, which silently
+                # re-included characters already printed.
+                current = current[position + 1:]
+
         if current:
-            lines.append(current)
+            lines.append(current.replace(SOFT_HYPHEN, ""))
         return lines or [""]
+
+    def _break_at_soft_hyphen(self, text: str, size: int, max_width: int) -> tuple[str, int] | None:
+        """The longest prefix ending at a permitted break that still fits once its hyphen is added.
+
+        Returns the text to draw AND the break's index in the original string, because the two differ by
+        however many soft hyphens the prefix contained.
+        """
+        best = None
+        for position, ch in enumerate(text):
+            if ch != SOFT_HYPHEN:
+                continue
+            head = text[:position].replace(SOFT_HYPHEN, "") + HYPHEN
+            if self.width(head, size) <= max_width:
+                best = (head, position)
+            else:
+                break
+        return best
 
 
 class Overflow(Exception):
