@@ -445,6 +445,25 @@ under a footnote, "mark the resistance profile appropriate to the isolated micro
 metadata has an element each. A collapsed row without that footnote is a form that quietly loses a
 distinction the model draws, so the mapping carries the footnote with the group.
 
+**That row's label is a pattern, and the three terms in it come from the glossary.** Each is controlled
+terminology the glossary already carries, so writing `MRSA/VRE/3GCR` into the figure text would be a
+fourth home for words that have one, and would let a form drift from the wording every other document is
+held to. What the figure text holds instead is `{mrsa}/{vre}/{gcr3}` — the placeholders resolved from the
+glossary, the rest the translator's.
+
+**A pattern rather than a separator the emitter joins with**, and the difference is not stylistic.
+Joining presumes the shape: *n* items, one delimiter, repeated, in a fixed order. That is a Latin list
+convention rather than a property of writing, and it forecloses a conjunction before the last item, an
+enumeration comma, a different order, or a rendering that is not a list at all — none of which an emitter
+can be asked to decide for nine languages. The same reasoning already applies to the colon after a label,
+which is why one is not appended in code either. The cost is one check: every declared placeholder must
+appear and no undeclared one may, and the build fails otherwise, because a label that quietly lost a
+placeholder would stop offering a resistance category the model still keeps.
+
+The placeholder names are the layout's, not the glossary's, for one mechanical reason: `{3gcr}` leads
+with a digit, which every brace-format checker in this pipeline rejects. `common/sheet-layout.yaml` maps
+`gcr3` to the glossary's `3gcr`, so the exposed name stays a valid identifier.
+
 **Slot counts are the same kind of decision, and one of them is currently wrong in public.** Checked
 rather than assumed: BSI, HAP and SSI each carry exactly three organism slots in the metadata and the
 published sheets print three, so nothing is truncated there. But the metadata carries **nine** antibiotic
@@ -561,36 +580,57 @@ the same weight as the column rather than with a second horizontal one.
 the progress chart's columns and the sheets' rows are the same design object seen three ways, and each one
 drifting on its own is how the inconsistency arose in the first place.
 
-## The width budget, and which language spends it
+## The budget a translation spends is height, not width
 
 The sheets are generated per language, so each gets its own column and its own wrapping — no single layout
 has to serve all nine. What does not adapt is the **page**, and that is where a longer translation is felt.
+`build-collection-sheets.py` reports the spare on every run, because a sheet with 1 mm of headroom passes
+the same green build as one with 30.
 
-`build-collection-sheets.py` reports the spare on every run because a sheet with 1 mm of headroom passes
-the same green build as one with 30. Converting that to the expansion each sheet can absorb before it
-stops fitting, measured by scaling every advance width:
+The expectation was that a translation costs width, and that Devanagari costs more of it than most:
+**15 % wider than Latin at the same point size for identical text**, which is a property of the face
+rather than of Nepali. Measuring a real one inverts both halves of that.
 
-| sheet | absorbs up to |
-|---|---|
-| surgery, NEC | ×2.0 or more |
-| master | ×1.74 |
-| primary sepsis/BSI | ×1.24 |
-| SSI, pneumonia | does not fit in English yet |
+Nepali's own expansion, over the **333** metadata units it has translated, shaped with the engine that
+draws them: median **0.766**, mean 0.778, p90 1.000, and 0.29 at the narrowest. Devanagari draws each
+glyph wider and needs far fewer of them — *Abdominal distension* is `पेट फुल्नु` at 0.31 — so a Nepali
+sheet is **narrower** than the English one it came from, not wider. The only entries at or above 1.0 are
+the abbreviations that are deliberately identical in both.
 
-Against that, NeoIPC's own measured expansion — rendered width of `msgstr` over `msgid` across the
-translated catalogues — is a median of **1.12–1.15** for German and Spanish and a p90 of **1.35**, with
-individual strings reaching 1.9. So the BSI sheet survives a typical German translation and not an
-unusual one, which is a real risk rather than a theoretical one.
+And it still grew. Between the same sheet laid out with English labels and with Nepali ones, the surgical
+site sheet gained 22 grid units of height while losing two rows and two text runs — so not wrapping. Its
+row pitch says what it was: with English labels the pitch is **526** ten times over, and with Nepali
+labels that value is **absent** and 594 appears thirteen times. The step is exactly the 68 units by which
+Noto Sans Devanagari reaches below the baseline further than Noto Sans does, which is the per-row
+clearance recorded above. **A row costs 0.68 mm the moment its text becomes Devanagari**, whatever that
+text says.
 
-Two caveats on those numbers. The **metadata catalogue, which is what the sheets read, is essentially
-untranslated** — German is at 1 %, the other five at 0 % — so the expansion figures above are borrowed
-from the documentation and reports catalogues, and no German sheet has ever been laid out. And Devanagari
-is **15 % wider than Latin at the same point size for identical text**, which is a property of the face
-rather than of Nepali, and comes on top of whatever Nepali's own expansion turns out to be.
+So the budget is spent one row at a time and is a function of *how many rows are translated*, not of how
+long the translation is. That is a worse property than width would have been, because it cannot be
+recovered by wording: a translator who shortens a label saves nothing, and a sheet gets taller as
+translation progresses. Where it currently lands, with the six sheets fully Nepali except the deliberate
+abbreviations:
 
-The four target languages that build compounds — German, Estonian, Turkish, Afrikaans — are the ones to
-watch, and not because of their average width: the failure mode on a form is a single unbreakable token,
-which is what the soft-hyphen convention above exists for.
+| sheet | English | Nepali |
+|---|---|---|
+| surgery | 148.8 mm | 142.0 mm |
+| NEC | 115.3 mm | 113.5 mm |
+| primary sepsis/BSI | 73.9 mm | 65.4 mm |
+| pneumonia | 50.5 mm | 47.1 mm |
+| master | 43.1 mm | 24.7 mm |
+| surgical site | 7.7 mm | **−0.2 mm** |
+
+The surgical site sheet is therefore **the one sheet that does not fit in Nepali**, and it misses by
+0.08 % of the page. It is also the sheet with nothing left to translate, so that figure is where Nepali
+ends rather than a number that gets worse.
+
+For the other languages the picture is still borrowed and still about width: rendered width of `msgstr`
+over `msgid` across the documentation and reports catalogues is a median of **1.12–1.15** for German and
+Spanish, a p90 of **1.35**, and individual strings reaching 1.9 — measured there because the metadata
+catalogue those sheets read is at 1 % German and 0 % elsewhere. Those are the languages where the
+compounding four — German, Estonian, Turkish, Afrikaans — are worth watching, and not for their average
+width: the failure mode on a form is a single unbreakable token, which is what the soft-hyphen convention
+above exists for.
 
 ## House style: the output is read by people
 

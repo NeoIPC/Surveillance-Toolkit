@@ -166,6 +166,12 @@ keep_calculated:
 groups:
   - suffixes: [3GCR, MRSA, VRE]
     label_key: resistance_organism_specific
+    # Which glossary term fills each placeholder of that label. The names are the placeholders, not the
+    # glossary keys, because a placeholder must be a valid identifier: `{3gcr}` leads with a digit, which
+    # every brace-format checker in this pipeline would reject, so the slot is `gcr3` and the mapping
+    # says which term goes in it. Order is NOT here -- it is wherever the translator puts the
+    # placeholders, which is the point of the label being a pattern.
+    label_terms: {mrsa: mrsa, vre: vre, gcr3: 3gcr}
     footnote_key: resistance_organism_specific_note
 
 # Repeated slots (organism 1..n, antibiotic substance 1..n) are printed as compact blocks rather than as

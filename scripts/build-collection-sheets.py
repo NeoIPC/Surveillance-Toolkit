@@ -475,14 +475,16 @@ class LayoutRules:
         return self.styles.get(field.code, self.default)
 
 
-def load_chrome(path: Path, language: str | None) -> dict[str, str]:
-    """The figure text, taking the localized YAML po4a writes when there is one.
+def load_localized(path: Path, language: str | None) -> dict[str, str]:
+    """A YAML string resource, taking the localized sibling its pipeline writes when there is one.
 
-    These strings are NOT looked up in the metadata catalogue. They are extracted from
-    common/figure-strings.yaml into the documentation catalogue, and po4a writes the translation back as
-    a sibling YAML -- so the translation arrives as a file, not as a msgctxt. An earlier version keyed
-    them `sheetStrings/<key>`, a context that appears in no catalogue in this repository, so every
-    localized run silently emitted English chrome while looking like it had tried.
+    Two files arrive this way and neither is looked up in the metadata catalogue. The figure text is
+    extracted from common/figure-strings.yaml into the documentation catalogue, and po4a writes the
+    translation back as a sibling YAML; the glossary is extracted by its own generator into its own
+    component and written back the same way. So a translation arrives as a file, not as a msgctxt. An
+    earlier version keyed the figure text `sheetStrings/<key>`, a context that appears in no catalogue in
+    this repository, so every localized run silently emitted English chrome while looking like it had
+    tried.
     """
     localized = path.with_suffix(f".{language}.yaml") if language else None
     source = localized if localized and localized.exists() else path
@@ -1136,9 +1138,9 @@ class Composer:
     """
 
     def __init__(self, faces: dict[tuple[bool, bool], Typeface], chrome: dict[str, str],
-                 layout: LayoutRules, logo: Logo,
+                 glossary: dict[str, str], layout: LayoutRules, logo: Logo,
                  language: str | None, label_width: int = LABEL_COL_MAX):
-        self.faces, self.chrome, self.layout = faces, chrome, layout
+        self.faces, self.chrome, self.glossary, self.layout = faces, chrome, glossary, layout
         # The upright regular face, which is what the vertical rhythm is taken from. That is sound only
         # because the four faces agree on the two metrics it uses, so it is asserted rather than assumed:
         # a family whose italic sat deeper would need the rhythm to follow the style like the width does.
@@ -1163,6 +1165,29 @@ class Composer:
         # How much page is left once everything is placed -- the size of the comments box, and the only
         # honest measure of how much longer a translation may be before the sheet stops fitting.
         self.spare = 0
+
+    def fill(self, pattern: str, terms: dict[str, str]) -> str:
+        """Resolve a label pattern's `{placeholder}`s from the glossary.
+
+        Not `str.format`, which would also read `{}` and `{0}` and would raise on a stray brace a
+        translator left behind; this replaces exactly the placeholders the layout declared and then
+        checks what is left.
+
+        Both failures are the build's rather than the reader's. A placeholder the pattern never used
+        means a term silently vanished -- on this row, a resistance category the form stops offering
+        while the data model still keeps it -- and one left unresolved means a translator invented a
+        name, which would print a brace on a form somebody fills in with a pen.
+        """
+        out = pattern
+        for placeholder, term in terms.items():
+            out = out.replace(f"{{{placeholder}}}", self.glossary[term])
+        if missing := [p for p in terms if f"{{{p}}}" not in pattern]:
+            raise ValueError(f"label pattern {pattern!r} never uses {', '.join(sorted(missing))}, so the "
+                             f"term{'s' if len(missing) > 1 else ''} it stands for would not be printed")
+        if left := re.findall(r"\{[^{}]*\}", out):
+            raise ValueError(f"label pattern {pattern!r} uses {', '.join(left)}, which the layout does "
+                             f"not map to a glossary term")
+        return out
 
     def footnote(self, key: str) -> str:
         """Register a footnote and return the superscript marker that refers to it.
@@ -1581,11 +1606,12 @@ def _collapse_groups(fields: list[Field], composer: Composer) -> list[Field]:
             run.append(candidate)
 
         marker = composer.footnote(group["footnote_key"])
+        label = composer.fill(composer.chrome[group["label_key"]], group["label_terms"])
         out.append(
             Field(
                 code=f"{prefix}_{'_'.join(group['suffixes'])}",
                 # The '- ' keeps it a child of the slot it belongs to, exactly as its members were.
-                label=f"- {composer.chrome[group['label_key']]}{marker}",
+                label=f"- {label}{marker}",
                 value_type=run[0].value_type,
                 compulsory=any(f.compulsory for f in run),
                 options=run[0].options,
@@ -2149,6 +2175,7 @@ def main(argv: list[Shape] | None = None) -> int:
     parser.add_argument("--metadata", type=Path, default=repo / "metadata" / "common")
     parser.add_argument("--fonts", type=Path, default=repo / "common" / "fonts")
     parser.add_argument("--strings", type=Path, default=repo / "common" / "figure-strings.yaml")
+    parser.add_argument("--glossary", type=Path, default=repo / "glossary.yaml")
     parser.add_argument("--layout", type=Path, default=repo / "common" / "sheet-layout.yaml")
     parser.add_argument("--logo", type=Path, default=repo / "common" / "img" / LOGO_FILE)
     parser.add_argument("--po", type=Path, default=repo / "po")
@@ -2174,7 +2201,8 @@ def main(argv: list[Shape] | None = None) -> int:
     if po_path is not None and not po_path.exists():
         return _fail(f"no catalogue at {po_path}; --language must name a culture the metadata catalogue has")
     catalogue = Catalogue(po_path)
-    chrome = load_chrome(args.strings, args.language)
+    chrome = load_localized(args.strings, args.language)
+    glossary = load_localized(args.glossary, args.language)
     rules = LayoutRules(args.layout)
     logo = Logo(args.logo)
 
@@ -2203,7 +2231,7 @@ def main(argv: list[Shape] | None = None) -> int:
     written, failures = [], []
     for sheet in sheets:
         composer, body, failure = best_layout(
-            sheet, lambda width: Composer(faces, chrome, rules, logo, args.language, width)
+            sheet, lambda width: Composer(faces, chrome, glossary, rules, logo, args.language, width)
         )
         if failure is not None:
             failures.append(str(failure))
