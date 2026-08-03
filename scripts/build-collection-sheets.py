@@ -68,7 +68,10 @@ SECTION_SIZE, LABEL_SIZE, OPTION_SIZE, SMALL_SIZE = 320, 300, 280, 240
 # The vertical rhythm is measured against the published forms rather than chosen for comfort: they fit an
 # infection sheet onto one page, so their row pitch is the budget this has to work within.
 LINE_GAP = 90                           # leading between wrapped lines of one text run
-ROW_PAD = 70                            # vertical padding above and below a row's text
+# Padding ABOVE the cap height and BELOW the descender, both of which are now measured from the face, so
+# this is clearance on top of the letters rather than a guess that had to cover them. It was 70 while it
+# was also standing in for the descender it did not know about, which is what made rows bottom-heavy.
+ROW_PAD = 45
 SECTION_BAND_H = 460
 MARK = 260                              # a choose-one circle or choose-any square
 MARK_GAP = 180                          # between a mark and its text
@@ -375,6 +378,24 @@ class Face:
         self.units = self.font["head"].unitsPerEm
         self.widths = {name: adv for name, (adv, _) in self.font["hmtx"].metrics.items()}
         self.cmap = self.font.getBestCmap()
+        # How far the face reaches below the baseline, as a fraction of the em. A row sized from the font
+        # size alone leaves no room for it, so a descender crosses the rule closing the row -- the 'y' of
+        # "Day of life" fusing with the line under it.
+        self._descent = abs(self.font["hhea"].descent) / self.units
+
+        # Where the capitals reach above the baseline. Placing a baseline one full em below the row's top
+        # leaves a gap the height of the em ABOVE the letters and nothing below them, which is why rows
+        # looked bottom-heavy and their descenders still met the rule. Positioning from the cap height
+        # instead balances the row and, because caps are about seven tenths of an em, costs no height.
+        os2 = self.font["OS/2"]
+        cap = getattr(os2, "sCapHeight", 0) or round(0.7 * self.units)
+        self._cap = cap / self.units
+
+    def descent_at(self, size: int) -> int:
+        return round(self._descent * size)
+
+    def cap_at(self, size: int) -> int:
+        return round(self._cap * size)
 
     def missing(self, text: str) -> set[str]:
         return {ch for ch in text if ord(ch) not in self.cmap and not ch.isspace()}
@@ -733,7 +754,7 @@ def layout_sheet(sheet: Sheet, writer: SvgWriter) -> list[str]:
             # millimetres under it invites writing that will not fit.
             writer._text(writer.chrome["comments"], LABEL_SIZE)
             body.append(
-                f'  <text class="label" x="{TEXT_X}" y="{y + ROW_PAD + LABEL_SIZE}">'
+                f'  <text class="label" x="{TEXT_X}" y="{y + ROW_PAD + writer.face.cap_at(LABEL_SIZE)}">'
                 f'{_esc(writer.chrome["comments"])}</text>'
             )
         y += spare
@@ -821,18 +842,18 @@ def _emit_patient_block(out: list[str], y: int, writer: SvgWriter) -> int:
         writer._text(label, LABEL_SIZE)
         y += ROW_PAD
         for line in _fit(writer, label, LABEL_SIZE, CONTENT_W - 360, key, "label"):
-            out.append(f'  <text class="label" x="{TEXT_X}" y="{y + LABEL_SIZE}">{_esc(line)}</text>')
+            out.append(f'  <text class="label" x="{TEXT_X}" y="{y + writer.face.cap_at(LABEL_SIZE)}">{_esc(line)}</text>')
             y += LABEL_SIZE + LINE_GAP
-        y += ROW_PAD - LINE_GAP
+        y += writer.face.descent_at(LABEL_SIZE) + ROW_PAD - LINE_GAP
         out.append(f'  <line class="rule" x1="{MARGIN_X}" y1="{y}" x2="{MARGIN_X + CONTENT_W}" y2="{y}"/>')
 
     note = writer.chrome["patient_note"]
     writer._text(note, SMALL_SIZE)
     y += ROW_PAD
     for line in _fit(writer, note, SMALL_SIZE, CONTENT_W - 360, "patient_note", "note"):
-        out.append(f'  <text class="legend" x="{TEXT_X}" y="{y + SMALL_SIZE}">{_esc(line)}</text>')
+        out.append(f'  <text class="legend" x="{TEXT_X}" y="{y + writer.face.cap_at(SMALL_SIZE)}">{_esc(line)}</text>')
         y += SMALL_SIZE + LINE_GAP
-    y += ROW_PAD - LINE_GAP
+    y += writer.face.descent_at(SMALL_SIZE) + ROW_PAD - LINE_GAP
     out.append(f'  <line class="rule" x1="{MARGIN_X}" y1="{y}" x2="{MARGIN_X + CONTENT_W}" y2="{y}"/>')
 
     height = y - block_top
@@ -938,10 +959,10 @@ def _emit_child(out: list[str], field: Field, y: int, writer: SvgWriter) -> int:
     y += ROW_PAD // 2
 
     x = TEXT_X + OPTION_INDENT
-    out.append(f'  <text class="child" x="{x}" y="{y + OPTION_SIZE}">{_esc(label)}</text>')
+    out.append(f'  <text class="child" x="{x}" y="{y + writer.face.cap_at(OPTION_SIZE)}">{_esc(label)}</text>')
     x += writer.face.width(label, OPTION_SIZE) + OPTION_GAP
     right = MARGIN_X + CONTENT_W - 180
-    baseline = y + OPTION_SIZE
+    baseline = y + writer.face.cap_at(OPTION_SIZE)
 
     options, radio = field.options, field.radio
     if not options and not field.write_in:
@@ -950,11 +971,11 @@ def _emit_child(out: list[str], field: Field, y: int, writer: SvgWriter) -> int:
             options, radio = [writer.chrome["boolean_yes"], writer.chrome["boolean_no"]], True
         elif style == "tick":
             _mark(out, field.code.lower().replace("_", "-"), int(x), y + 30, radio=False)
-            return baseline + LINE_GAP
+            return baseline + writer.face.descent_at(OPTION_SIZE) + LINE_GAP
 
     if not options:
         out.append(f'  <line class="write" x1="{int(x)}" y1="{baseline + 60}" x2="{right}" y2="{baseline + 60}"/>')
-        return baseline + LINE_GAP
+        return baseline + writer.face.descent_at(OPTION_SIZE) + LINE_GAP
 
     for option in options:
         writer._text(option, OPTION_SIZE)
@@ -989,7 +1010,7 @@ def _emit_field(out: list[str], field: Field, y: int, writer: SvgWriter) -> int:
 
     available = MARGIN_X + CONTENT_W - label_x - 180
     for line in _fit(writer, label, LABEL_SIZE, available, field.code, "label"):
-        out.append(f'  <text class="label" x="{label_x}" y="{y + LABEL_SIZE}">{_esc(line)}</text>')
+        out.append(f'  <text class="label" x="{label_x}" y="{y + writer.face.cap_at(LABEL_SIZE)}">{_esc(line)}</text>')
         y += LABEL_SIZE + LINE_GAP
     y -= LINE_GAP
 
@@ -1005,7 +1026,7 @@ def _emit_field(out: list[str], field: Field, y: int, writer: SvgWriter) -> int:
         out.append(f'  <line class="write" x1="{int(start)}" y1="{baseline}" x2="{int(second_x) - 300}" y2="{baseline}"/>')
         out.append(f'  <line class="write" x1="{int(second_x)}" y1="{baseline}" x2="{int(unit_x) - 200}" y2="{baseline}"/>')
         out.append(f'  <text class="label" x="{int(unit_x)}" y="{y}">{_esc(field.trailing)}</text>')
-        return y + ROW_PAD
+        return y + writer.face.descent_at(LABEL_SIZE) + ROW_PAD
 
     options = field.options
     radio = field.radio
@@ -1015,7 +1036,7 @@ def _emit_field(out: list[str], field: Field, y: int, writer: SvgWriter) -> int:
     if options:
         y = _emit_options(out, field, options, radio, y + LINE_GAP, writer)
 
-    return y + ROW_PAD
+    return y + writer.face.descent_at(LABEL_SIZE) + ROW_PAD
 
 
 def _emit_options(out: list[str], field: Field, options: list[str], radio: bool, y: int, writer: SvgWriter) -> int:
@@ -1038,7 +1059,7 @@ def _emit_options(out: list[str], field: Field, options: list[str], radio: bool,
         x = left
         for index, option in enumerate(options):
             _mark(out, f"{ident}-{index + 1}", int(x), y + 30, radio)
-            out.append(f'  <text class="option" x="{int(x + MARK + MARK_GAP)}" y="{y + OPTION_SIZE}">{_esc(option)}</text>')
+            out.append(f'  <text class="option" x="{int(x + MARK + MARK_GAP)}" y="{y + writer.face.cap_at(OPTION_SIZE)}">{_esc(option)}</text>')
             x += MARK + MARK_GAP + widths[index] + OPTION_GAP
         return y + OPTION_SIZE + LINE_GAP
 
@@ -1046,7 +1067,7 @@ def _emit_options(out: list[str], field: Field, options: list[str], radio: bool,
         _mark(out, f"{ident}-{index + 1}", left, y + 30, radio)
         text_x = left + MARK + MARK_GAP
         for line in _fit(writer, option, OPTION_SIZE, available - MARK - MARK_GAP, field.code, f"option {index + 1}"):
-            out.append(f'  <text class="option" x="{text_x}" y="{y + OPTION_SIZE}">{_esc(line)}</text>')
+            out.append(f'  <text class="option" x="{text_x}" y="{y + writer.face.cap_at(OPTION_SIZE)}">{_esc(line)}</text>')
             y += OPTION_SIZE + LINE_GAP
     return y
 
