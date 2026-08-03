@@ -92,6 +92,8 @@ MARK = 260                              # a choose-one circle or choose-any squa
 MARK_GAP = 110                          # between a mark and its own word: deliberately tighter
 OPTION_SEP = 820                        # between one option and the next, so the pairing reads
 COMMENTS_MIN = 1200                     # below this the leftover is a gap, not a usable writing space
+LEGEND_LEAD = 240                       # between the last footnote and the legend
+LEGEND_SEP = 1200                       # between the two legend entries when they share a row
 
 # The answer column: ONE x per sheet where every answer that shares its label's line begins -- a space to
 # write in, a Yes/No pair, an organism's resistance run. Before it, each row started its answer wherever
@@ -842,7 +844,7 @@ def layout_sheet(sheet: Sheet, writer: SvgWriter) -> list[str]:
     # visible band of unused paper when it wrapped to one line and would have overflowed had it wrapped
     # to three -- and the whole point of the comments box is that it absorbs EXACTLY what is left, so an
     # approximation here is a gap at the bottom of every sheet.
-    legend_h = 2 * (MARK + 180) + 500
+    legend_h = _legend_height(writer)
     footer_h = len(
         _fit(writer, writer.chrome["footer_reference"], SMALL_SIZE, CONTENT_W, "footer", "footer")
     ) * (SMALL_SIZE + 60)
@@ -928,16 +930,43 @@ def best_layout(
     return best[1], best[2], best[3]
 
 
+def _legend_entries(writer: SvgWriter) -> list[tuple[bool, str]]:
+    return [(True, writer.chrome["legend_one"]), (False, writer.chrome["legend_many"])]
+
+
+def _legend_rows(writer: SvgWriter) -> int:
+    """One row when both entries fit on it, two when they do not.
+
+    Two sentences of half a dozen words each were taking a row apiece and most of the foot of the page
+    with them. Whether they fit together is a measurement like every other one here, so a language whose
+    legend is longer simply gets the stacked form back.
+    """
+    widths = [writer.face.width(text, SMALL_SIZE) + MARK + MARK_GAP for _, text in _legend_entries(writer)]
+    return 1 if sum(widths) + LEGEND_SEP <= CONTENT_W - 2 * TEXT_INSET else 2
+
+
+def _legend_height(writer: SvgWriter) -> int:
+    """What `_emit_legend` will take. The page budget and the emitter must not disagree: the comments box
+    absorbs the difference between them, so an estimate here is a wrong bottom margin on every sheet."""
+    return LEGEND_LEAD + _legend_rows(writer) * (MARK + 180)
+
+
 def _emit_legend(out: list[str], y: int, writer: SvgWriter) -> int:
     """What the two markers mean. Every published sheet carries it, and without it the shapes are decor."""
-    y += 500
-    for radio, key in ((True, "legend_one"), (False, "legend_many")):
-        text = writer.chrome[key]
+    y += LEGEND_LEAD
+    one_row = _legend_rows(writer) == 1
+    x, baseline = TEXT_X, y + MARK - 20
+    for radio, text in _legend_entries(writer):
         writer._text(text, SMALL_SIZE)
-        _mark(out, f"legend-{'one' if radio else 'many'}", TEXT_X, y + MARK - 20, radio, writer, SMALL_SIZE)
-        out.append(f'  <text class="legend" x="{TEXT_X + MARK + MARK_GAP}" y="{y + MARK - 20}">{_esc(text)}</text>')
-        y += MARK + 180
-    return y
+        _mark(out, f"legend-{'one' if radio else 'many'}", int(x), baseline, radio, writer, SMALL_SIZE)
+        out.append(
+            f'  <text class="legend" x="{int(x + MARK + MARK_GAP)}" y="{baseline}">{_esc(text)}</text>'
+        )
+        if one_row:
+            x += MARK + MARK_GAP + writer.face.width(text, SMALL_SIZE) + LEGEND_SEP
+        else:
+            baseline += MARK + 180
+    return y + _legend_rows(writer) * (MARK + 180)
 
 
 def _emit_footnotes(out: list[str], y: int, writer: SvgWriter) -> int:
