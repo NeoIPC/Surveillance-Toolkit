@@ -48,7 +48,11 @@ except ImportError:  # pragma: no cover
 # their head. A4 portrait is 21000 x 29700.
 
 PAGE_W, PAGE_H = 21000, 29700
-MARGIN_X, MARGIN_TOP, MARGIN_BOTTOM = 1250, 1000, 1200
+# One margin, all four sides. They were 12.5 / 10 / 12 mm, which is not a design -- it is three numbers
+# that were each plausible on their own. The comments box grows to whatever is left, so the bottom margin
+# is exact rather than approximate, and an even border is then simply a matter of using one value.
+MARGIN = 1250
+MARGIN_X = MARGIN_TOP = MARGIN_BOTTOM = MARGIN
 CONTENT_W = PAGE_W - 2 * MARGIN_X
 
 # There is no input COLUMN. A field is a full-width row: the label in bold at the left, and the rest of
@@ -688,7 +692,7 @@ def layout_sheet(sheet: Sheet, writer: SvgWriter) -> list[str]:
     writer._text(sheet.title, SUBTITLE_SIZE)
 
     y = MARGIN_TOP + TITLE_SIZE
-    out.extend(writer.logo.place(PAGE_W - MARGIN_X - LOGO_W, MARGIN_TOP - 300, LOGO_W))
+    out.extend(writer.logo.place(PAGE_W - MARGIN_X - LOGO_W, MARGIN_TOP, LOGO_W))
     out.append(f'  <text id="heading" class="title" x="{MARGIN_X}" y="{y}">{_esc(heading)}</text>')
     y += SUBTITLE_SIZE + 220
     out.append(f'  <text id="{sheet.slug}-title" class="subtitle" x="{MARGIN_X}" y="{y}">{_esc(sheet.title)}</text>')
@@ -702,8 +706,14 @@ def layout_sheet(sheet: Sheet, writer: SvgWriter) -> list[str]:
 
     # Whatever the fields leave over becomes room to write, so the page is used rather than trailing off
     # into white space. The comments band is emitted before the frame is sized so the frame encloses it.
+    # Every trailing block is measured, not estimated. Guessing the footer at one line's height left a
+    # visible band of unused paper when it wrapped to one line and would have overflowed had it wrapped
+    # to three -- and the whole point of the comments box is that it absorbs EXACTLY what is left, so an
+    # approximation here is a gap at the bottom of every sheet.
     legend_h = 2 * (MARK + 180) + 500
-    footer_h = SMALL_SIZE + 300
+    footer_h = len(
+        _fit(writer, writer.chrome["footer_reference"], SMALL_SIZE, CONTENT_W, "footer", "footer")
+    ) * (SMALL_SIZE + 60)
     # Footnotes are part of the budget, not an afterthought. They are known by now -- a collapsed group
     # registers its note while its section is laid out -- and leaving them out let the comments box grow
     # into the space they needed, which turned two sheets that fitted into two that did not.
@@ -713,9 +723,19 @@ def layout_sheet(sheet: Sheet, writer: SvgWriter) -> list[str]:
         for i, k in enumerate(writer.footnotes)
     ) + (200 if writer.footnotes else 0)
     spare = (PAGE_H - MARGIN_BOTTOM - legend_h - footer_h - notes_h) - y
-    if spare > COMMENTS_MIN:
-        writer._text(writer.chrome["comments"], LABEL_SIZE)
-        body.append(f'  <text class="label" x="{TEXT_X}" y="{y + ROW_PAD + LABEL_SIZE}">{_esc(writer.chrome["comments"])}</text>')
+    if spare > 0:
+        # The leftover is ALWAYS absorbed, so the bottom margin equals the other three exactly. Taking it
+        # only when it exceeded the minimum meant a sheet with a little space left simply abandoned it --
+        # which is why the primary sepsis sheet ended 12 mm higher than the others while every constant
+        # said they should match.
+        if spare > COMMENTS_MIN:
+            # Below that, there is room for the space but not for a heading over it: a label with two
+            # millimetres under it invites writing that will not fit.
+            writer._text(writer.chrome["comments"], LABEL_SIZE)
+            body.append(
+                f'  <text class="label" x="{TEXT_X}" y="{y + ROW_PAD + LABEL_SIZE}">'
+                f'{_esc(writer.chrome["comments"])}</text>'
+            )
         y += spare
         body.append(f'  <line class="rule" x1="{MARGIN_X}" y1="{y}" x2="{MARGIN_X + CONTENT_W}" y2="{y}"/>')
 
