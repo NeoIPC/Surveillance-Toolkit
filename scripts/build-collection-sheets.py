@@ -336,11 +336,20 @@ class LayoutRules:
         return self.styles.get(field.code, self.default)
 
 
-def load_chrome(path: Path, catalogue: Catalogue) -> dict[str, str]:
+def load_chrome(path: Path, language: str | None) -> dict[str, str]:
+    """The figure text, taking the localized YAML po4a writes when there is one.
+
+    These strings are NOT looked up in the metadata catalogue. They are extracted from
+    common/figure-strings.yaml into the documentation catalogue, and po4a writes the translation back as
+    a sibling YAML -- so the translation arrives as a file, not as a msgctxt. An earlier version keyed
+    them `sheetStrings/<key>`, a context that appears in no catalogue in this repository, so every
+    localized run silently emitted English chrome while looking like it had tried.
+    """
+    localized = path.with_suffix(f".{language}.yaml") if language else None
+    source = localized if localized and localized.exists() else path
     yaml = YAML(typ="safe")
-    with path.open(encoding="utf-8") as handle:
-        strings = yaml.load(handle)
-    return {k: catalogue.get(f"sheetStrings/{k}", v) for k, v in strings.items()}
+    with source.open(encoding="utf-8") as handle:
+        return yaml.load(handle)
 
 
 # ── Measurement ─────────────────────────────────────────────────────────────────────────────────────
@@ -391,7 +400,10 @@ class Face:
         """
         lines: list[str] = []
         current = ""
-        for word in text.split():
+        # Split on the ASCII space ONLY. Python's argument-less split() treats U+00A0 as whitespace, so
+        # it breaks at exactly the joins a non-breaking space exists to prevent -- an operator from its
+        # number, a value from its unit. Empty pieces from runs of spaces are dropped here instead.
+        for word in (w for w in text.split(" ") if w):
             candidate = f"{current} {word}".strip()
             if current and self.width(candidate, size) > max_width:
                 lines.append(current.replace(SOFT_HYPHEN, ""))
@@ -1073,7 +1085,7 @@ def main(argv: list[str] | None = None) -> int:
     if po_path is not None and not po_path.exists():
         return _fail(f"no catalogue at {po_path}; --language must name a culture the metadata catalogue has")
     catalogue = Catalogue(po_path)
-    chrome = load_chrome(args.strings, catalogue)
+    chrome = load_chrome(args.strings, args.language)
     rules = LayoutRules(args.layout)
     logo = Logo(args.logo)
 
