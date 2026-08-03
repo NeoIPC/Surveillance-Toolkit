@@ -105,6 +105,18 @@ SUPERSCRIPTS = "¹²³⁴⁵⁶⁷⁸⁹"
 SOFT_HYPHEN = "­"
 HYPHEN = "-"
 
+# Languages this emitter must REFUSE rather than lay out. It has no notion of direction at all: every
+# coordinate here runs left to right, marks are placed to the left of the words they belong to, and the
+# answer column is measured from the left margin. Given right-to-left text it would produce a sheet that
+# is confidently, silently wrong -- and wrong in a way nobody on the team can proof-read.
+#
+# The refusal is the honest form of "not yet supported": a language may be translated, and its catalogue
+# is worth having, but a form that reverses a patient identifier is worse than no form. Removing an entry
+# from this set is not the fix; adding direction support is, and this set is what will go when it lands.
+# The renderer cannot help either -- the PDF stack applies no bidirectional reordering, see
+# docs/data-collection-sheet-generation.md.
+RIGHT_TO_LEFT = frozenset({"ar", "arc", "ckb", "dv", "fa", "he", "ks", "ku", "ps", "sd", "ug", "ur", "yi"})
+
 # The brand's two colours, as carried by common/img/NeoIPC-Logo.svg. An earlier accent of #2e74b5 was a
 # word-processor default that merely looked similar and was sampled from nothing; see
 # docs/data-collection-sheet-generation.md for the palette and how each derived tint is arrived at.
@@ -1313,6 +1325,13 @@ def main(argv: list[str] | None = None) -> int:
         "still exits non-zero, so a build cannot pass by asking for it.",
     )
     args = parser.parse_args(argv)
+
+    if args.language in RIGHT_TO_LEFT:
+        return _fail(
+            f"{args.language} is written right to left and this generator lays out left to right only. "
+            "It would emit a sheet that looks finished and reads backwards, which is worse than emitting "
+            "none. Adding direction support is what unblocks this -- not removing the language."
+        )
 
     po_path = args.po / f"metadata.{args.language}.po" if args.language else None
     if po_path is not None and not po_path.exists():
