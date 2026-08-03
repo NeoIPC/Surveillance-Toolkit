@@ -91,7 +91,6 @@ SECTION_BAND_H = 460
 MARK = 260                              # a choose-one circle or choose-any square
 MARK_GAP = 110                          # between a mark and its own word: deliberately tighter
 OPTION_SEP = 820                        # between one option and the next, so the pairing reads
-COMMENTS_MIN = 1200                     # below this the leftover is a gap, not a usable writing space
 LEGEND_LEAD = 100                       # between the last footnote and the legend
 LEGEND_SEP = 1200                       # between the two legend entries when they share a row
 LEGEND_ROW = MARK + 60                  # a legend row: its mark, plus air below it
@@ -957,9 +956,12 @@ def layout_sheet(sheet: Sheet, writer: SvgWriter) -> list[str]:
         # only when it exceeded the minimum meant a sheet with a little space left simply abandoned it --
         # which is why the primary sepsis sheet ended 12 mm higher than the others while every constant
         # said they should match.
-        if spare > COMMENTS_MIN:
-            # Below that, there is room for the space but not for a heading over it: a label with two
-            # millimetres under it invites writing that will not fit.
+        if spare >= LABEL_SIZE + 2 * writer.face.pad_at(LABEL_SIZE):
+            # Labelled whenever the label itself fits, which is a measurement rather than a judgement --
+            # it costs no height, being drawn inside the space it names. A fixed minimum was tried and
+            # left a box with no heading at the foot of a tight sheet, which reads as a mistake rather
+            # than as room to write. Below this the space is genuinely too small to head, and it stays
+            # blank rather than carrying a label that would not fit above it.
             writer._text(writer.chrome["comments"], LABEL_SIZE)
             body.append(
                 f'  <text class="label" x="{TEXT_X}" y="{y + ROW_PAD + writer.face.cap_at(LABEL_SIZE)}">'
