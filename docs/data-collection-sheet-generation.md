@@ -88,6 +88,16 @@ Generation measures with **fontTools**: advance widths in the actual face at the
 the cell width the generator chose, emitted as explicit `<tspan>` with `dy`. Never renderer-side wrapping
 (SVG 2 `inline-size`, `<foreignObject>`) — the explicit form is what ships and renders today.
 
+**Summing advance widths is not shaping, and for one target language that matters.** The measurement adds
+up each codepoint's advance from `hmtx`. In Latin that ignores kerning and is a slight underestimate. In
+Devanagari it is simply wrong: Noto Sans Devanagari carries `GSUB` and `GPOS`, consonants fuse into
+conjuncts, vowel signs reorder around them and marks stack — so nine codepoints of `स्वास्थ्य` are not
+nine glyphs, and their advances do not add up to the width of what gets drawn. The error runs in the
+unsafe direction, letting text through that will overflow. The fix is a shaping engine (HarfBuzz, via
+`uharfbuzz`), not more constants, and it has to agree with what prawn-svg does when it draws the same
+string — measuring correctly against a renderer that shapes differently trades one wrong number for
+another.
+
 **Overflow is a build failure.** Today an over-long label runs outside its box and nobody learns until
 someone opens the PDF, which for a localized build meant nobody ever did. Measurement is what lets the
 generator assert the fit instead of hoping for it.
