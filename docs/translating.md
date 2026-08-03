@@ -33,7 +33,7 @@ anything else in this guide does:
 
 | document | who reads it |
 |---|---|
-| **Partner-Certificate** | pinned to a wall in the hospital — the general public |
+| **Partner-Certificate** | possibly the general public — a department may display it, may keep it in a folder and produce it on request, or may not use it at all. Write it for a lay reader either way |
 | **Reference-Report** | published on the NeoIPC website — the general public, including political stakeholders |
 | **Patient-Data-Report** | parents, and possibly legal teams acting for them |
 | **Partner-Report** | everyone on the ward whose work can affect infection rates — investigators, but just as much the nursing staff, and in some settings the cleaning staff |
