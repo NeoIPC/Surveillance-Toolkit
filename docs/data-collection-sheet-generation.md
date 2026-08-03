@@ -125,6 +125,18 @@ still yields what was written. Read from the content stream, on the same evident
 finding above. A Nepali form is therefore reachable; what stands between is coverage rather than shaping,
 below.
 
+**Whether a sheet is actually translated is checked against the finished PDF**, by
+[`scripts/check-figure-language.py`](../scripts/check-figure-language.py), which extracts its text and
+reports every Latin word the glossary does not account for. Reading the generator's own output would not
+answer the question, and three weaker forms of the check were each wrong in a way that read as success:
+asking whether a whole text run was Latin passed `CRP/इन्टरल्युकिन बढेको` as translated, since the run also
+holds Devanagari; keeping the acceptable acronyms in a list inside the check made it pass by widening the
+list rather than by translating anything; and admitting a one-character part of a glossary term put a bare
+`I` in that list, which swallowed an ASA class numeral standing alone. What the check accepts is the
+glossary, so changing the answer means making a terminology decision where terminology decisions live.
+Digits are exempt: a numeral system is a separate choice from a script, and these forms carry clinical
+thresholds that stay Western.
+
 **Overflow is a build failure.** Today an over-long label runs outside its box and nobody learns until
 someone opens the PDF, which for a localized build meant nobody ever did. Measurement is what lets the
 generator assert the fit instead of hoping for it.
