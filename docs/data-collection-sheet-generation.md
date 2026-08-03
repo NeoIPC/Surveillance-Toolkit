@@ -472,16 +472,20 @@ original rather than to a lower one because a machine writes it:
 - deterministic ordering, so regenerating after an unrelated metadata change yields an **empty diff**
 - no editor namespace, no generated path soup
 
-**Determinism is a correctness property here, not a review one.** The sheets are build output, like the
-decision flow before them: generated per language during the protocol build and never committed, so
-nothing diffs them and no commit carries their noise. What an empty diff on regeneration actually proves
-is that the generator has no hidden state — no set iteration order, no dictionary ordering, no clock — and
-a generator that emits different bytes from identical inputs has a defect somewhere whether or not anyone
-would have seen it. That is why the same property is required of the **PDF** engine too, and why an engine
-whose document ID comes from the wall clock was disqualified for it.
+**The output is read by a person, and that is the whole point of the rules above.** The sheets are build
+output — generated per language during the protocol build, like the decision flow before them, and never
+committed — so no commit carries their noise and nothing diffs them. What is reviewed is the **file**: a
+maintainer opens a generated SVG and reads it, which is possible only because its ids come from the
+metadata codes, its presentation sits in classes, its coordinates are integers on one grid, and it
+contains no path soup. Every rule above serves that, and none of them serves a diff.
 
-A generator whose output churns is also a generator nobody can review, which is the same failure as a
-whole-file re-wrap. The empty-diff property is a check, not an aspiration.
+Determinism serves it too, and one thing besides: identical bytes from identical inputs prove the
+generator carries no hidden state — no set iteration order, no dictionary ordering, no clock. A generator
+that fails that has a defect whether or not anyone would have noticed, which is why the same property is
+required of the **PDF** engine, and why one whose document ID comes from the wall clock was disqualified.
+
+A generator whose output churns is also a generator nobody can read twice the same way, the same failure
+as a whole-file re-wrap. Regenerating identically is a check, not an aspiration.
 
 ## Language
 
