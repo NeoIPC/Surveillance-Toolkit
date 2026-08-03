@@ -109,6 +109,9 @@ class Field:
     options: list[str] = dc_field(default_factory=list)
     radio: bool = False
     write_in: bool = False
+    # The unit word closing this field's row, where another field's value shares it -- "days" against an
+    # antibiotic substance. Set by the layout, never read from the metadata.
+    trailing: str | None = None
 
     @property
     def is_child(self) -> bool:
@@ -263,6 +266,22 @@ class LayoutRules:
         self.section_order: dict[str, list[str]] = rules.get("section_order") or {}
         self.composites: dict[str, dict] = rules.get("composites") or {}
         self.groups: list[dict] = rules.get("groups") or []
+        self.omitted: set[str] = set(rules.get("omit") or [])
+        self.row_suffixes: list[str] = rules.get("row_suffixes") or []
+
+    def continues_row(self, previous: Field | None, field: Field) -> str | None:
+        """The unit word to print at the end of `previous`'s row, if `field` belongs on it.
+
+        The relationship is stated by the codes -- `X_DAYS` is the days of `X` -- and the unit is what is
+        left of the child's own form name once the parent's is removed, so it stays translated rather than
+        being a word invented here.
+        """
+        if previous is None:
+            return None
+        for suffix in self.row_suffixes:
+            if field.code == f"{previous.code}_{suffix}":
+                return field.label.replace(previous.label, "").strip() or suffix.lower()
+        return None
 
     def group_of(self, field: Field) -> dict | None:
         """The printed group a field belongs to, matched on the suffix its code ends in."""
@@ -400,7 +419,15 @@ class Face:
 
 
 class Overflow(Exception):
-    """A label that cannot be laid out faithfully. Never rendered anyway -- the build stops."""
+    """Content that cannot be laid out faithfully. The build stops.
+
+    Carries the SVG body it got to, so `--allow-overflow` can write the sheet for review. Nothing else
+    reads it: a normal run discards the body along with the sheet.
+    """
+
+    def __init__(self, message: str, body: list[str] | None = None):
+        super().__init__(message)
+        self.body = body
 
 
 # ── Sheet assembly ──────────────────────────────────────────────────────────────────────────────────
@@ -672,7 +699,8 @@ def layout_sheet(sheet: Sheet, writer: SvgWriter) -> list[str]:
         raise Overflow(
             f"{sheet.code}: content runs to {y} on a page whose usable height ends at {usable} "
             f"({y / usable:.2f} pages). A sheet must fit one page, so this needs a denser layout for "
-            f"this stage -- not a second page."
+            f"this stage -- not a second page.",
+            out,
         )
     return out
 
@@ -742,6 +770,19 @@ def _collapse_groups(fields: list[Field], writer: SvgWriter) -> list[Field]:
     form relative to the data model, and grouping across slots would put one organism's answer on
     another's line -- both of which read as a working sheet.
     """
+    fields = [f for f in fields if f.code not in writer.layout.omitted]
+
+    # Fold a continuation onto the row before it, before any grouping runs: a field that is part of
+    # another's row is not a row of its own and must not be counted as one.
+    folded: list[Field] = []
+    for field in fields:
+        unit = writer.layout.continues_row(folded[-1] if folded else None, field)
+        if unit is None:
+            folded.append(field)
+        else:
+            folded[-1].trailing = unit
+    fields = folded
+
     out: list[Field] = []
     index = 0
     while index < len(fields):
@@ -843,6 +884,20 @@ def _emit_field(out: list[str], field: Field, y: int, writer: SvgWriter) -> int:
         y += LABEL_SIZE + LINE_GAP
     y -= LINE_GAP
 
+    if field.trailing:
+        # Two values on one row: the field's own write-in space, then the second, then its unit word.
+        writer._text(field.trailing, LABEL_SIZE)
+        right = MARGIN_X + CONTENT_W - 180
+        unit_w = writer.face.width(field.trailing, LABEL_SIZE)
+        unit_x = right - unit_w
+        second_x = unit_x - 2400
+        baseline = y + 60
+        start = label_x + writer.face.width(label, LABEL_SIZE) + 300
+        out.append(f'  <line class="write" x1="{int(start)}" y1="{baseline}" x2="{int(second_x) - 300}" y2="{baseline}"/>')
+        out.append(f'  <line class="write" x1="{int(second_x)}" y1="{baseline}" x2="{int(unit_x) - 200}" y2="{baseline}"/>')
+        out.append(f'  <text class="label" x="{int(unit_x)}" y="{y}">{_esc(field.trailing)}</text>')
+        return y + ROW_PAD
+
     options = field.options
     radio = field.radio
     if not options and style == "yes_no":
@@ -933,6 +988,12 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--language", default=None, help="culture code; omit for the untranslated source")
     parser.add_argument("--sheet", default=None, help="only this stage code, e.g. NEOIPC_STG_BSI")
+    parser.add_argument(
+        "--allow-overflow",
+        action="store_true",
+        help="write a sheet that does not fit its page anyway, for review. Still reports the failure and "
+        "still exits non-zero, so a build cannot pass by asking for it.",
+    )
     args = parser.parse_args(argv)
 
     po_path = args.po / f"metadata.{args.language}.po" if args.language else None
@@ -964,7 +1025,11 @@ def main(argv: list[str] | None = None) -> int:
             body = layout_sheet(sheet, writer)
         except Overflow as overflow:
             failures.append(str(overflow))
-            continue
+            # Reviewing a sheet that does not fit is the only way to decide WHAT to cut, so the file can
+            # be written on request -- reported as a failure either way, and the exit status is unchanged.
+            if not (args.allow_overflow and overflow.body):
+                continue
+            body = overflow.body
         if writer.missing:
             for font_name, chars in sorted(writer.missing.items()):
                 shown = " ".join(f"U+{ord(c):04X} {c!r}" for c in sorted(chars))

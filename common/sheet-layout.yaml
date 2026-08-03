@@ -72,6 +72,31 @@ section_order:
 # the form to pick which category applies; without the note saying so, the row is a question with no
 # stated rule, and whoever later transcribes the tick into DHIS2 has to guess which of the three elements
 # it meant.
+# Fields the form does not ask for, because nobody fills them in.
+#
+# This is not "fields we think are unimportant" -- it is fields whose value the system derives. Asking for
+# one on paper asks a person to compute what a program rule computes, and gives them a second place to
+# get it wrong.
+#
+# `NeoIPC_TEA_TOTAL_GESTATION_DAYS` is gestational age in days, derived from `NEOIPC_TEA_GEST_AGE`, which
+# the form does ask for in the weeks+days form a clinician actually uses. (Its odd casing is deliberate
+# and cannot be changed; the two attributes must stay in step, which is exactly why only one of them is a
+# question.)
+omit:
+  - NeoIPC_TEA_TOTAL_GESTATION_DAYS
+
+# A field that continues the row of the one before it, rather than starting its own.
+#
+# `NEOIPC_SURVEILLANCE_END_AB_SUBST_01_DAYS` is the number of days of the substance named in
+# `..._AB_SUBST_01`; it is not a separate question and reads as one on its own line. The published form
+# writes them together -- "Antibiotic substance 1: ______ : ____ days" -- which is both shorter and
+# clearer, and nine slots as eighteen rows was over a third of the master sheet.
+#
+# Matched on the code, which already states the relationship: a field whose code is another's plus one of
+# these suffixes belongs to it. The unit word printed at the end of the row is what remains of the child's
+# own form name once the parent's is removed, so it stays translated and is not invented here.
+row_suffixes: [DAYS]
+
 groups:
   - suffixes: [3GCR, MRSA, VRE]
     label_key: resistance_organism_specific
