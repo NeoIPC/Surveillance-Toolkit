@@ -244,6 +244,31 @@ collapses to a shade and the distinction between a section band and the non-tran
 So that block also carries a solid edge bar, which survives greyscale, photocopying and colour-blindness.
 A distinction a form makes only in hue is a distinction it does not make.
 
+## The alignment grid — the next layout pass, and why it is one problem rather than four
+
+Everything currently positions itself relative to whatever precedes it on its own row. That is why the
+sheet reads as untidy in four separate-looking ways which are all the same defect:
+
+- **Marks do not line up.** A row's choices begin after its label, so every row starts its circles at a
+  different x. On `Organism 3` the Yes/No/Not-tested columns step visibly rightwards down the block.
+  They belong on a **fixed column**, the same one on every row of a sheet, with the label truncated or
+  wrapped if it would reach it.
+- **The write-in rule doubles the row rule.** A rule at the text baseline sits a few units above the rule
+  closing the row, so the bottom of a box shows two lines a hair apart. Either the row's own rule is the
+  writing line — which is what the published forms do — or the write-in rule is placed clearly above it.
+  Not both.
+- **Nothing separates a label from the space to write in.** The published forms end every label with a
+  colon, so the eye knows where the question stops. A colon is **not** safe to append in code: French
+  requires a space before it and other languages punctuate differently, so it belongs to the translated
+  string or to a per-language rule, never to the emitter.
+- **A column separator would carry that boundary** more robustly than punctuation, and is the usual
+  answer on a ruled form — but it interacts with the fixed mark column above, which is why these are one
+  decision rather than four fixes.
+
+**The same grid should govern every generated figure**, not only the sheets: the decision flow's boxes,
+the progress chart's columns and the sheets' rows are the same design object seen three ways, and each
+one drifting on its own is how the current inconsistency arose.
+
 ## House style: the output is read by people
 
 These SVGs are deliberately plain, and a generator is held to the same standard as the hand-written
