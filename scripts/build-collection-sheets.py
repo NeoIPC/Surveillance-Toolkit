@@ -29,7 +29,7 @@ import csv
 import re
 import sys
 from collections.abc import Callable
-from dataclasses import dataclass, field as dc_field
+from dataclasses import dataclass, field as dc_field, replace
 from pathlib import Path
 
 try:
@@ -126,16 +126,9 @@ SUPERSCRIPTS = "¹²³⁴⁵⁶⁷⁸⁹"
 SOFT_HYPHEN = "­"
 HYPHEN = "-"
 
-# Languages this emitter must REFUSE rather than lay out. It has no notion of direction at all: every
-# coordinate here runs left to right, marks are placed to the left of the words they belong to, and the
-# answer column is measured from the left margin. Given right-to-left text it would produce a sheet that
-# is confidently, silently wrong -- and wrong in a way nobody on the team can proof-read.
-#
-# The refusal is the honest form of "not yet supported": a language may be translated, and its catalogue
-# is worth having, but a form that reverses a patient identifier is worse than no form. Removing an entry
-# from this set is not the fix; adding direction support is, and this set is what will go when it lands.
-# The renderer cannot help either -- the PDF stack applies no bidirectional reordering, see
-# docs/data-collection-sheet-generation.md.
+# Languages written right to left. The layout itself is direction-agnostic: it does its arithmetic in one
+# direction and the finished page is mirrored, so a form for one of these reads from the right without any
+# emitter needing to know. See `mirror`.
 RIGHT_TO_LEFT = frozenset({"ar", "arc", "ckb", "dv", "fa", "he", "ks", "ku", "ps", "sd", "ug", "ur", "yi"})
 
 # Languages whose script needs a face of its own, in front of the Latin one every sheet also needs. Noto
@@ -1049,6 +1042,39 @@ class Emblem:
 Shape = Text | Line | Box | Dot | Emblem
 
 
+def mirror(shapes: list[Shape]) -> list[Shape]:
+    """Reflect a finished page about its vertical centre, for a language written right to left.
+
+    **Direction is not a concern of the layout at all.** Everything above measures and places in one
+    direction -- labels at the left, answers to their right, a mark before the word it belongs to -- and
+    this turns the finished result round. Doing it in one pass over the placements, rather than teaching
+    each emitter about direction, is what makes that possible: there is no second set of positioning rules
+    to keep in step, and no emitter that can be right for one direction and quietly wrong for the other.
+
+    Everything measured from a left edge mirrors by taking its own width off. A text run is the exception
+    and does not need one: its x is an ANCHOR rather than an edge, so the mirrored anchor is simply the
+    run's other end, and the serializers anchor text to the right on a mirrored page.
+
+    What this does NOT do is reorder glyphs within a run. That is the Unicode Bidirectional Algorithm's
+    job and belongs to whatever draws the text -- Typst applies it against the base direction the emitted
+    document declares, and a browser applies it to the SVG. See docs/data-collection-sheet-generation.md
+    for which consumers can and cannot.
+    """
+    return [_mirrored(shape) for shape in shapes]
+
+
+def _mirrored(shape: Shape) -> Shape:
+    match shape:
+        case Text():
+            return replace(shape, x=PAGE_W - shape.x)
+        case Line():
+            return replace(shape, x1=PAGE_W - shape.x1, x2=PAGE_W - shape.x2)
+        case Box() | Emblem():
+            return replace(shape, x=PAGE_W - shape.x - shape.width)
+        case Dot():
+            return replace(shape, cx=PAGE_W - shape.cx)
+
+
 # ── Layout ──────────────────────────────────────────────────────────────────────────────────────────
 
 
@@ -1064,6 +1090,7 @@ class Composer:
                  language: str | None, label_width: int = LABEL_COL_MAX):
         self.face, self.bold, self.chrome, self.layout = face, bold, chrome, layout
         self.logo, self.language = logo, language
+        self.rtl = language in RIGHT_TO_LEFT
         self.missing: dict[str, set[str]] = {}
         self.footnotes: list[str] = []
         # Where the answers begin. One value for the whole sheet, so a mark on the first row and a mark on
@@ -1809,7 +1836,13 @@ def svg_document(sheet: Sheet, shapes: list[Shape], composer: Composer) -> str:
         # end. `sans-serif` looks like prudence and is a trap: prawn-svg maps it to Helvetica, a core font
         # with Windows-1252 encoding and no embedded glyphs, so every character outside Latin-1 comes out
         # as the logical-NOT sign. A missing font must fail rather than degrade.
-        "    text { font-family: %s; fill: #000; }" % _css_families(composer.face),
+        #
+        # On a mirrored page every run's x is its right-hand end, and the base direction is what a
+        # bidirectional reorderer resolves each run against.
+        "    text { font-family: %s; fill: #000;%s }" % (
+            _css_families(composer.face),
+            " direction: rtl; text-anchor: end;" if composer.rtl else "",
+        ),
         *(f"    .{name} {{ {_css_text(style)} }}" for name, style in STYLES.items()),
         *(f"    .{kind} {{ {_css_shape(kind, ink)} }}" for kind, ink in INKS.items()),
         # The inlined logo's paths carry these classes. Defined here rather than kept inside the symbol so
@@ -1833,6 +1866,8 @@ def _css_text(style: Style) -> str:
     if style.colour != "#000":
         parts.append(f"fill: {style.colour}")
     if style.centred:
+        # Stated on the style rather than left to the base rule, so it wins in both directions: a section
+        # title is centred on the page whichever way the page reads.
         parts.append("text-anchor: middle")
     return "; ".join(parts) + ";"
 
@@ -1893,6 +1928,18 @@ def _typst_preamble(sheet: Sheet, composer: Composer) -> list[str]:
     blocks = ",\n".join(f'  "{kind}": (fill: {_typst_colour(ink.fill)}, stroke: {_typst_stroke(ink)})'
                         for kind, ink in INKS.items() if kind not in _LINE_KINDS)
     families = ", ".join(_quoted(family) for family in composer.face.families)
+    direction = "rtl" if composer.rtl else "ltr"
+    # On a mirrored page a run's x is its right-hand end, so it is placed from the page's right edge. The
+    # two forms are the same statement about where a run goes, expressed from whichever side it starts.
+    anchor = (
+        "#let at(x, y, style, w, s) = place(\n"
+        f"  top + right, dx: (x - {PAGE_W}) * u, dy: y * u, fit(w, styles.at(style)(s)),\n"
+        ")"
+        if composer.rtl else
+        "#let at(x, y, style, w, s) = place(\n"
+        "  top + left, dx: x * u, dy: y * u, fit(w, styles.at(style)(s)),\n"
+        ")"
+    )
     return f"""// Generated by scripts/build-collection-sheets.py from metadata/common. Do not edit.
 //
 // Compile with this repository's own fonts and nothing else:
@@ -1920,7 +1967,8 @@ def _typst_preamble(sheet: Sheet, composer: Composer) -> list[str]:
 // top-edge and bottom-edge at the baseline give a text box no height at all, which is what makes `place`
 // position a run by its BASELINE -- the same reference every measurement in the layout is taken from.
 // `fallback: false` keeps a missing glyph missing instead of borrowing one from another family.
-#set text(font: ({families}), fallback: false, top-edge: "baseline", bottom-edge: "baseline")
+#set text(font: ({families}), fallback: false, top-edge: "baseline", bottom-edge: "baseline",
+          dir: {direction})
 
 // What the layout measured a run at, against what the engine will actually draw. Shaping and kerning
 // only ever remove advance in these faces -- a kern pair closes a gap, a conjunct replaces several
@@ -1946,9 +1994,7 @@ def _typst_preamble(sheet: Sheet, composer: Composer) -> list[str]:
 {blocks},
 )
 
-#let at(x, y, style, w, s) = place(
-  top + left, dx: x * u, dy: y * u, fit(w, styles.at(style)(s)),
-)
+{anchor}
 // A section title is centred on the page rather than on anything the layout placed, so it is positioned
 // from the page's own middle instead of from a left edge and a measured width.
 #let mid(x, y, style, w, s) = place(
@@ -2052,13 +2098,6 @@ def main(argv: list[Shape] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
-    if args.language in RIGHT_TO_LEFT:
-        return _fail(
-            f"{args.language} is written right to left and this generator lays out left to right only. "
-            "It would emit a sheet that looks finished and reads backwards, which is worse than emitting "
-            "none. Adding direction support is what unblocks this -- not removing the language."
-        )
-
     po_path = args.po / f"metadata.{args.language}.po" if args.language else None
     if po_path is not None and not po_path.exists():
         return _fail(f"no catalogue at {po_path}; --language must name a culture the metadata catalogue has")
@@ -2102,10 +2141,13 @@ def main(argv: list[Shape] | None = None) -> int:
         # Not `with_suffix`: the stem already ends in the culture code, which is exactly what that would
         # take to be the extension and replace.
         stem = args.out / f"NeoIPC-Core-{sheet.name}-Sheet{suffix}"
+        # Turned round once, after the page is finished and before either output is written, so both are
+        # written from the same placements in this direction as in the other.
+        placed = mirror(body) if composer.rtl else body
         for name, extension, document in OUTPUTS:
             if args.format in ("both", name):
                 target = stem.with_name(f"{stem.name}.{extension}")
-                target.write_text(document(sheet, body, composer), encoding="utf-8", newline="\n")
+                target.write_text(document(sheet, placed, composer), encoding="utf-8", newline="\n")
         # The spare is how much page is left over, and it is the only honest measure of how much longer a
         # translation of this sheet may be before it stops fitting. Reported on every run because the
         # one-page rule is a requirement rather than a preference, and a sheet at 2 mm of headroom passes

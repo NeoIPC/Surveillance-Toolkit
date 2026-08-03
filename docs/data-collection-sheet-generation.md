@@ -348,7 +348,34 @@ the coverage check passes when their union covers the text. Both faces are alrea
 both are SIL OFL. This is the opposite of the silent fallback the rules above bar — it is this
 repository's own files, in a stated order, named in the output so each renderer resolves the same two.
 
-Two details in it are decisions, and both were wrong on the first attempt:
+### Direction is not the layout's concern
+
+A right-to-left language is served by **mirroring the finished page**, not by a second set of positioning
+rules. Everything above measures and places in one direction; a single pass over the placements then
+reflects the page about its vertical centre, and labels move to the right, the answer column to the left,
+and every mark to the far side of the word it belongs to. A run's `x` is an anchor rather than an edge, so
+it needs no width subtracted — the mirrored anchor is simply the run's other end, and both serializers
+anchor text to the right on a mirrored page. Section titles are centred and so are unmoved.
+
+Doing it there is the whole reason it is small: there is no second positioning path to keep in step, and
+no emitter that can be right for one direction and quietly wrong for the other.
+
+**Mirroring is not reordering.** Which glyph precedes which within a run is the Unicode Bidirectional
+Algorithm's job and belongs to whatever draws the text. Typst applies it against the base direction the
+emitted document declares, and a browser applies it to the SVG; `prawn-svg` applies none, so an inlined
+figure in a right-to-left language is the one consumer that would still be wrong — the same limit already
+recorded for shaping, reached by the same route.
+
+Verified by mirroring a language whose catalogue exists rather than by argument: the resulting page is
+correct in every position, and the trailing full stops migrate to the left of each sentence, which is
+correct resolution of neutral characters against a right-to-left base and is exactly what would happen to
+the Latin abbreviations inside a Hebrew sheet.
+
+**What is still missing before a Hebrew sheet exists** is not the layout: it is a face — Noto Sans does
+not carry Hebrew, so `common/fonts/` needs Noto Sans Hebrew and `SCRIPT_FONTS` a line — and a `he`
+catalogue to translate into.
+
+Two details in the font stack are decisions, and both were wrong on the first attempt:
 
 - **Latin comes first, in every language.** The obvious order is the language's own script first, and it
   is wrong here because the two faces **overlap on 60 codepoints** — every digit and every punctuation
