@@ -147,6 +147,43 @@ Two constraints on *which* font is measured, both of which make a wrong answer l
   So the fonts move into the repository and the theme points at them, making the measured file and the
   embedded file the same file by construction. Noto is SIL OFL, which the licence guardrail requires.
 
+## The route out: render the form once, properly, and import the page
+
+The renderer limits above look like they bound what the forms can ever be. They do not, and the reason is
+that **asciidoctor-pdf can import a PDF page** — `image::form.pdf[]`, backed by `prawn-templates`, which is
+already one of its runtime dependencies. That inverts the dependency: instead of handing asciidoctor-pdf an
+SVG it must draw, hand it a page that has already been drawn by an engine that can.
+
+**The import preserves real text, and this was established rather than assumed.** Importing a generated
+sheet into a host document and comparing content streams: the page arrives as a `/Subtype /Form` XObject,
+the source's embedded TrueType fonts come with it, and **all 30 of the form's glyph-showing operators
+appear byte-verbatim in the host** — `4d6173746572204461746120436f6c6c656374696f6e205368656574` is
+*Master Data Collection Sheet*, unchanged. Nothing is rasterized and nothing is re-laid-out.
+
+So whatever shaping and bidirectional reordering the producing engine performed is **baked into the glyph
+stream before asciidoctor-pdf ever sees it**, and asciidoctor-pdf's inability to shape stops mattering for
+the forms. One artifact then serves both consumers: the standalone sheet a partner prints and fills in at a
+cot side, and the figure inside the protocol. They cannot drift, because they are the same file.
+
+That also changes what the SVG is for. It stays the source the layout engine emits and the thing a browser
+can show, but it is no longer what the published PDF is built from — which removes prawn-svg from the
+forms' path entirely, along with its silently-ignored filters and its unshaped text.
+
+**Four caveats, all found in the source or the documentation rather than discovered later:**
+
+- **Importing disables compression for the whole document.** `import_page` sets `state.compress = false`
+  with the comment *"can't use compression if using template"*. On a protocol that is already several
+  megabytes this is not a rounding error, and it interacts directly with the separate work on PDF size.
+- **Running content is skipped on imported pages.** The converter explicitly refuses to draw on them —
+  *"don't write on pages which are imported / inserts (otherwise we can get a corrupt PDF)"* — so an
+  imported form carries no page number, header or footer from the protocol.
+- **The import must be a direct descendant of the document or a section.** Nested in a delimited block or
+  a table cell, the documented behaviour is *"unspecified"*.
+- **Tags do not necessarily survive the embedding.** The glyph stream does; a structure tree is a
+  document-level object and there is no reason to expect one to merge. This is currently moot — the
+  protocol's PDF is untagged either way, because asciidoctor-pdf has no tagged-PDF support — so the
+  accessible artifact is the **standalone** form. Do not claim otherwise for the protocol without checking.
+
 ## The layout follows the published forms; the visual style follows the two hand-drawn SVGs
 
 These are two separate references and they are not interchangeable. **Arrangement** comes from the forms
