@@ -49,9 +49,11 @@ outside this repository, which makes them a third statement of the same field li
 generator is what removes that, and it is also what makes them localizable, since today they exist in
 English only.
 
-The standalone PDF is rendered from the generated SVG through **asciidoctor-pdf**, on a generated
-one-page AsciiDoc, rather than through a second SVG renderer. One renderer means one set of quirks, and
-they are the quirks already characterised below.
+The two are emitted from one set of placements: the layout measures and positions everything once, and
+each output serializes that. So they cannot disagree about which fields a sheet has, in what order, or
+where anything sits — only about typography too fine to see. The SVG is written by this generator; the PDF
+is compiled by **Typst** from a `.typ` this generator also writes, for the reasons set out under *Which
+engine draws it*.
 
 ## What the renderer actually supports
 
@@ -116,6 +118,13 @@ better ruler. And **a rendered preview cannot be used to check this**: the raste
 probe reshaped the text from the PDF's `ToUnicode` map and displayed perfectly formed conjuncts, so the
 page looked correct while the file was wrong. The content stream is the evidence; a picture of it is not.
 
+**The print path has that renderer, so the defect is now the SVG path's alone.** The same `स्वास्थ्य`
+through Typst draws **six** glyphs for those nine codepoints — the three viramas consumed, conjuncts
+formed — and it wraps the many-to-one runs in `/Span <</ActualText …>>`, so extracting or copying the text
+still yields what was written. Read from the content stream, on the same evidentiary standard as the
+finding above. A Nepali form is therefore reachable; what stands between is coverage rather than shaping,
+below.
+
 **Overflow is a build failure.** Today an over-long label runs outside its box and nobody learns until
 someone opens the PDF, which for a localized build meant nobody ever did. Measurement is what lets the
 generator assert the fit instead of hoping for it.
@@ -140,12 +149,25 @@ Two constraints on *which* font is measured, both of which make a wrong answer l
   **Generated sheets name exactly one family, `Noto Sans`, with no fallback list.** A missing font must
   fail rather than degrade, because the degraded form is silent and is wrong precisely in the languages
   this exists to serve.
-- **It must be the same file the PDF embeds.** The theme points at `GEM_FONTS_DIR/notosans-*-subset.ttf`,
-  asciidoctor-pdf's own pre-subsetted build, which lives inside the gem. Measuring a system Noto Sans
-  instead would agree on the advance width of every glyph it happens to share and be silently wrong about
-  the ones it does not — which is precisely the non-Latin coverage this project has open questions about.
-  So the fonts move into the repository and the theme points at them, making the measured file and the
-  embedded file the same file by construction. Noto is SIL OFL, which the licence guardrail requires.
+- **It must be the same file the output embeds.** Measuring some other Noto Sans agrees on the advance
+  width of every glyph the two happen to share and is silently wrong about the ones they do not — which is
+  exactly the non-Latin coverage this project has open questions about. The faces therefore live in
+  `common/fonts/`, and each consumer has to be pointed at them; Noto is SIL OFL, which the licence
+  guardrail requires.
+
+  **The print path gets this by construction, and it needs one flag to do so.** `--font-path` *adds* to
+  whatever the machine has installed rather than replacing it, so a face the document asks for and
+  `common/fonts` does not ship is answered by some other file, chosen silently and differently per
+  machine — the same failure as the Helvetica fallback above, reached from the other side. Measured:
+  `typst fonts --font-path common/fonts` sees **198** families, and with `--ignore-system-fonts` it sees
+  six — this repository's two, plus the four Typst has built in. So the compile passes
+  `--ignore-system-fonts`, and the emitted `.typ` says why at the top of every file.
+
+  **The SVG path does not have it yet.** `doc/NeoIPC.theme.yml` registers `Noto Sans` from
+  `GEM_FONTS_DIR/notosans-*-subset.ttf`, asciidoctor-pdf's own pre-subsetted build inside the gem, so a
+  figure rendered into the protocol is drawn with a different file from the one measured here. Pointing
+  the theme at `common/fonts/` is part of wiring the sheets into the protocol build, and until it happens
+  the identity holds for the printed form and not for the figure.
 
 ## The route out: render the form once, properly, and import the page
 
@@ -250,22 +272,82 @@ that this generator's advance sum does not, so the two will differ slightly, and
 a printed form nobody can see it and nothing depends on it. Insisting otherwise would mean reimplementing
 Typst's shaping in Python to chase a difference no reader can perceive.
 
-**The one-page rule moves with the print path.** Today it is asserted by measuring; for the PDF it becomes
-exact and trivial — compile, count pages, fail if there is more than one. That is a stronger gate than the
-current one because it is the engine's own answer rather than a prediction of it.
+**The one-page rule stays with the generator, because the engine cannot answer it.** Counting the compiled
+document's pages looks like the natural gate and is vacuous: every element is `place`d, which is out of
+flow, so content running past the bottom edge is drawn outside the page and clipped rather than starting a
+second one. Established rather than assumed — a document placing a line at 400 mm exports to a single PNG
+without complaint, while one containing a real `pagebreak` refuses (*"cannot export multiple images
+without a page number template"*), so the oracle works and the answer really is one page. Measurement
+remains the gate for both outputs; the page count is worth asserting anyway, as a check that everything
+was placed at all.
 
-### The consequence for measurement, which reverses an earlier conclusion
+### The consequence for measurement: the sum bounds what the engine draws
 
-This document already records that summing `hmtx` advances is exact **because prawn-svg does not shape**,
-and that adding HarfBuzz would introduce a disagreement rather than resolve one. Both remain true of the
-current renderer, and both stop being true the moment Typst draws the page: Typst *does* shape, so the
-naive sum would no longer be what gets drawn, and the one-page gate would be measuring a width the engine
-does not produce.
+Summing `hmtx` advances is exact for prawn-svg **because prawn-svg does not shape**. Typst does, so the
+sum stops being exact there — but it errs in the safe direction, which is what keeps it usable. Measured,
+in the faces and at the sizes the sheets use:
 
-So the same change that is wrong today becomes necessary after the switch — measure with the shaper the
-engine uses, or let the engine do the measuring and give up the exact one-page control the generator
-currently has. That is a decision to take deliberately when the emitter is built, and it is the reason
-this paragraph exists rather than being discovered by a form that overflows in Nepali.
+| run | sum of advances | Typst | ratio |
+|---|---|---|---|
+| `Patient ID`, regular and bold | 13.97 / 15.05 mm | identical | 1.000 |
+| `Temperaturauffälligkeiten`, bold | 39.90 mm | 39.57 mm | 0.992 |
+| `AVATAR Two Yaws`, bold | 27.36 mm | 26.49 mm | 0.968 |
+| `स्वास्थ्य सेवा`, Devanagari | 15.41 mm | 12.87 mm | 0.835 |
+
+Shaping and kerning only remove advance in these faces — a `GPOS` pair closes a gap, a conjunct replaces
+several glyphs with one — so what the generator measures bounds what the engine draws, and a cell it
+declares to fit cannot overflow. The cost is width given up in a shaped script, which for Devanagari is a
+sixth of every run.
+
+**That is an argument rather than a proof, so the emitted document checks it.** Every placed run carries
+the width the generator measured for it and asserts against `measure()`, the engine's own ruler applied to
+the shaped text it is about to draw. If shaping ever widened a run, the compile fails and names it instead
+of the sheet silently overlapping its own column rule. It costs nothing worth counting: 400 asserted runs
+compile in 0.19 s.
+
+### What the emitted `.typ` contains
+
+One `#place` per element, at the coordinates the layout already chose, so nothing reflows and the two
+outputs cannot disagree about what is on a sheet or where. Four things in it are decisions rather than
+mechanics:
+
+- **Runs are positioned by their baseline**, which is what every measurement here is relative to.
+  `#set text(top-edge: "baseline", bottom-edge: "baseline")` gives a text box no height at all, so
+  `place(dy: …)` puts the baseline exactly where the layout put it — verified by `measure()` returning
+  zero height for every style on the sheet.
+- **Text goes in as a string, not as markup**, so a label containing `#`, `*`, `_`, `@` or a leading `-`
+  is a label rather than a directive, an emphasis or a list item. Two characters to escape instead of a
+  dozen.
+- **Coordinates stay the integers the SVG carries**, through `#let u = 0.01mm`. `#at(1180, 3367, …)` is
+  the same number as `x="1180"`, so the one-grid rule survives into the second output instead of being an
+  SVG-only property.
+- **The document date is `auto`, and the compile pins it** — `SOURCE_DATE_EPOCH`, or
+  `--creation-timestamp`. PDF/A requires a date, and taking it from the wall clock would make two compiles
+  of one source differ. Verified byte-identical at a fixed epoch.
+
+`--pdf-standard a-2a,ua-1` is what the sheets export under, and it is checked rather than asserted: the
+first attempt **failed the export**, because the logo carried no alternative text. That refusal is the
+property that made Typst the choice.
+
+The logo is a wordmark, so its accessible name is the word it draws, read from the artwork's own
+`<title>` rather than written here. Marking it a `pdf.artifact` would have satisfied the same gate while
+asserting it carries nothing — and that assertion is irreversible: *"once something is marked as an
+artifact, you cannot make any of its contents accessible again"*.
+
+### One face per language is not enough, and Nepali is where that shows
+
+The generator picks a single family per language — Noto Sans, or Noto Sans Devanagari for Nepali — and
+refuses to emit anything the chosen face cannot draw. For `ne` the refusal covers the whole sheet: Noto
+Sans Devanagari carries **no Latin glyphs at all**, and a Nepali form still contains Latin, by design. The
+resistance categories are established abbreviations and are deliberately not translated, so MRSA, VRE,
+3GCR and CRP are on the sheet in any language, as is the project's own name.
+
+A sheet is therefore bilingual whenever its language is not Latin-scripted, and what it needs is a
+per-language font **stack** rather than a face: measure each character in the first shipped face that has
+it, name both families in the SVG's `font-family` and in Typst's `font:` list, and let the coverage check
+pass when their union covers the text. Both faces are already in `common/fonts/` and both are SIL OFL, so
+it adds no dependency. This is not the silent fallback the rules above exist to prevent — the list is this
+repository's own files in a stated order, which is its opposite.
 
 ## The layout follows the published forms; the visual style follows the two hand-drawn SVGs
 
@@ -497,13 +579,15 @@ argument: `polib` for gettext, `ruamel.yaml` for YAML. PowerShell has no gettext
 one over a `.po` is what the parse-a-format-with-its-own-parser rule exists to prevent. Reading the CSVs
 is the trivial part of the job and drives nothing.
 
-Measurement does not decide it, and the candidate that looks as though it should is **`SixLabors.Fonts`**
-— .NET, so it runs wherever PowerShell does, and it does more than fontTools: a Universal Shaping Engine
-for complex scripts, and the Unicode Bidirectional Algorithm. Its **licence** rules it out. The Six Labors
-Split License grants Apache-2.0 terms only to a non-profit, a for-profit under a revenue threshold, or a
-transitive consumer, and a permission that depends on who is running the code is not permissive — NeoIPC's
-partners are the parties it distinguishes between. Versions before June 2022 were Apache-2.0, which is no
-way round it: pinning a font library four years back to escape a relicence forgoes the shaping that made
-it worth having.
+Measurement does not decide it, which is worth saying because the candidate that looks as though it
+should is a good one: **`SixLabors.Fonts`** is .NET, so it runs wherever PowerShell does, and it does more
+than fontTools — a Universal Shaping Engine for complex scripts, and the Unicode Bidirectional Algorithm.
+It answers the measurement question and leaves the catalogue question, which is the one that binds.
+
+Its licence would bar it in any case. The Six Labors Split License conditions its Apache-2.0 grant on
+properties of whoever is running the code — non-profit status, revenue, whether the dependency is direct —
+rather than on the code itself, so this repository cannot pass a usable permission on to whoever clones
+it. Versions before June 2022 were Apache-2.0 and are no way round it: pinning a font library four years
+back to escape a relicence forgoes the shaping that made it worth having.
 
 No shaping ruler is needed here in any case. Typst shapes, and measures what it is about to draw.

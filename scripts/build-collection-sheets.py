@@ -1,15 +1,21 @@
 #!/usr/bin/env python3
-"""Generate the NeoIPC data collection sheets as SVG from the canonical metadata.
+"""Generate the NeoIPC data collection sheets from the canonical metadata.
 
 The sheets are the paper equivalent of the DHIS2 program stages, so they are derived rather than drawn:
 sections, field order, labels, option lists and mandatory flags all come from metadata/common/. See
 docs/data-collection-sheet-generation.md for the contract this works to and for the renderer behaviour it
 has to respect.
 
+Each sheet is written twice from ONE set of placements -- an SVG, which the protocol inlines so its text
+stays real text, and a Typst source, which compiles to the form a partner prints. Sharing the layout is
+what stops the two drifting: they can differ in typography too fine to see, never in what is on the page.
+
 Run it:
 
     python scripts/build-collection-sheets.py --out doc/protocol/img
     python scripts/build-collection-sheets.py --out doc/protocol/img --language de
+
+    typst compile --font-path common/fonts --ignore-system-fonts --pdf-standard a-2a,ua-1 <sheet>.typ
 
 Exit status is non-zero when a sheet cannot be laid out faithfully -- a label that will not fit its cell,
 or text the embedded font has no glyph for. Both are silent defects in the machinery this replaces, and
@@ -321,11 +327,18 @@ class Logo:
     also keeps the sheets entirely vector: no raster anywhere, at any print size.
     """
 
+    NOTICE = ("The NeoIPC logo is owned by Fondazione Penta ETS and is not covered by this repository's "
+              "MIT licence. Confirm any reuse with the NeoIPC/Penta team.")
+
     def __init__(self, path: Path):
         source = path.read_text(encoding="utf-8")
         self.view_box = re.search(r'viewBox="([^"]+)"', source).group(1)
         _, _, w, h = (float(v) for v in self.view_box.split())
         self.aspect = w / h
+        # The artwork's own <title>, which is what a screen reader is told the mark says. Read from the
+        # file rather than written here: it is a wordmark, so its accessible name is the word it draws,
+        # and that is a fact about the artwork. Not translated -- it is a name.
+        self.name = re.search(r"<title>([^<]+)</title>", source).group(1)
         body = source.split("</style>", 1)[1].rsplit("</svg>", 1)[0]
         self.body = [line for line in body.splitlines() if line.strip()]
 
@@ -335,17 +348,30 @@ class Logo:
         # silent about who owns the mark on it.
         return (
             [
-                "  <!-- The NeoIPC logo below is owned by Fondazione Penta ETS and is not covered by this",
-                "       repository's MIT licence. Confirm any reuse with the NeoIPC/Penta team. -->",
+                f"  <!-- {self.NOTICE} -->",
                 f'  <symbol id="neoipc-logo" viewBox="{self.view_box}">',
             ]
             + [f"  {line}" for line in self.body]
             + ["  </symbol>"]
         )
 
-    def place(self, x: int, y: int, width: int) -> list[str]:
-        height = round(width / self.aspect)
-        return [f'  <use href="#neoipc-logo" x="{x}" y="{y}" width="{width}" height="{height}"/>']
+    def standalone(self) -> str:
+        """The artwork as an SVG that carries its own stylesheet.
+
+        The `<symbol>` above leans on the sheet's one stylesheet for its two brand fills, which is right
+        where the sheet is the document. Anywhere else -- handed to an engine that reads the artwork on
+        its own -- those classes resolve to nothing and every path renders in the default fill, which is
+        black, silently. So the standalone form restates them.
+        """
+        return (
+            f'<svg version="1.1" viewBox="{self.view_box}" xmlns="http://www.w3.org/2000/svg">'
+            f"<style>.brand-blue{{fill:{ACCENT};}}.brand-orange{{fill:{BRAND_ORANGE};}}</style>"
+            + "".join(line.strip() for line in self.body)
+            + "</svg>"
+        )
+
+    def place(self, x: int, y: int, width: int) -> Emblem:
+        return Emblem(x, y, width, round(width / self.aspect))
 
 
 class LayoutRules:
@@ -585,11 +611,11 @@ class Face:
 class Overflow(Exception):
     """Content that cannot be laid out faithfully. The build stops.
 
-    Carries the SVG body it got to, so `--allow-overflow` can write the sheet for review. Nothing else
-    reads it: a normal run discards the body along with the sheet.
+    Carries what it had placed by the time it gave up, so `--allow-overflow` can write the sheet for
+    review. Nothing else reads it: a normal run discards it along with the sheet.
     """
 
-    def __init__(self, message: str, body: list[str] | None = None):
+    def __init__(self, message: str, body: list[Shape] | None = None):
         super().__init__(message)
         self.body = body
 
@@ -804,15 +830,146 @@ def _slug(code: str) -> str:
     return code.removeprefix("NEOIPC_STG_").lower().replace("_", "-")
 
 
-# ── Layout and emission ─────────────────────────────────────────────────────────────────────────────
+# ── What a sheet is made of ─────────────────────────────────────────────────────────────────────────
+#
+# The layout produces PLACEMENTS rather than markup, and each output serializes them. That split is what
+# keeps the two renderings from drifting: the screen figure and the printed form are one set of decisions
+# written out twice, rather than two layouts somebody has to keep in step.
 
 
-class SvgWriter:
-    """Emits the minimal, hand-written style the repository uses for its figures.
+@dataclass(frozen=True)
+class Style:
+    """A named way of setting text: what the SVG carries as a CSS class and Typst as a `let` binding.
 
-    Semantic ids from the metadata code, presentation in classes, integer coordinates, deterministic
-    order, no transform matrices and no per-element style. The property that makes it reviewable is that
-    regenerating with unchanged metadata produces a byte-identical file.
+    Deliberately no italic. common/fonts ships Regular and Bold, so a request for any other variant is
+    answered by whatever the renderer finds elsewhere -- prawn-svg reaches the theme's gem-bundled italic
+    subset, Typst reaches a system font unless told not to -- and neither is the file this generator
+    measured. The small print is distinguished by being small.
+    """
+
+    size: int
+    bold: bool = False
+    colour: str = "#000"
+    centred: bool = False
+
+
+STYLES: dict[str, Style] = {
+    "title": Style(TITLE_SIZE, colour=ACCENT),
+    "subtitle": Style(SUBTITLE_SIZE, colour=ACCENT),
+    "section": Style(SECTION_SIZE, centred=True),
+    "label": Style(LABEL_SIZE, bold=True),
+    "option": Style(OPTION_SIZE),
+    "child": Style(OPTION_SIZE, bold=True),
+    "note": Style(SMALL_SIZE),
+}
+
+
+@dataclass(frozen=True)
+class Ink:
+    """How a shape is filled and stroked, in one table for lines, boxes and marks alike.
+
+    Every filled block is bounded. An area of colour with no edge has nothing to sit against, so it reads
+    as a stain on the page rather than as a region of the table -- and on a ruled form, where every other
+    block IS bounded, the unbounded one looks like a printing fault.
+
+    Three rule weights, and the SPREAD between them is what makes the grid readable rather than the
+    absolute values: the frame at 0.20 mm, a row or block boundary at 0.16, and a row inside a block at
+    0.10. A first attempt used 0.06 mm for the inner rule, which is sub-pixel on screen and marginal on
+    paper -- emitted on every sheet and visible on none, which looks exactly like not being emitted.
+    """
+
+    fill: str | None = None
+    stroke: int = 0
+
+
+INKS: dict[str, Ink] = {
+    "band": Ink(BAND_FILL, 12),
+    "notransmit": Ink(NOTRANSMIT_FILL, 12),
+    # A second, redundant signal: these sheets are printed, frequently in greyscale, where the tint above
+    # collapses to a shade barely distinguishable from the section bands. A solid bar survives that, and
+    # survives colour-blindness, which a hue on its own does not.
+    "notransmit-edge": Ink("#000"),
+    "frame": Ink(stroke=20),
+    "mark": Ink(stroke=18),
+    "rule": Ink(stroke=16),
+    # Between two rows of one slot. Every row is a cell of a ruled table, so every row is closed -- but a
+    # slot and the fields hanging off it are still one thing, and ruling them all alike dissolves that.
+    "hair": Ink(stroke=10),
+    # The answer column's own stroke, drawn per row rather than as one full-height line: the rows that
+    # span the sheet have no cell for it to bound, and a line through their text would be a defect rather
+    # than a grid. Consecutive bounded rows abut, so the strokes read as one column where there is one.
+    "column": Ink(stroke=16),
+}
+
+
+@dataclass
+class Text:
+    """A run on one line, positioned by its BASELINE.
+
+    The baseline rather than a box top, because that is what every measurement here is relative to: the
+    cap height above it, the descender below it, and the optical centre a mark sits on. Both renderings
+    can express it -- it is what SVG's `y` means, and what Typst's becomes once the text box is set to
+    have no height at all.
+    """
+
+    x: int
+    y: int
+    text: str
+    style: str
+    ident: str | None = None
+
+
+@dataclass
+class Line:
+    x1: int
+    y1: int
+    x2: int
+    y2: int
+    kind: str
+
+
+@dataclass
+class Box:
+    x: int
+    y: int
+    width: int
+    height: int
+    kind: str
+    ident: str | None = None
+
+
+@dataclass
+class Dot:
+    """A choose-one circle, positioned by its centre."""
+
+    cx: int
+    cy: int
+    r: int
+    ident: str | None = None
+
+
+@dataclass
+class Emblem:
+    """Where the logo goes. The artwork itself is carried once per document by `Logo`."""
+
+    x: int
+    y: int
+    width: int
+    height: int
+
+
+Shape = Text | Line | Box | Dot | Emblem
+
+
+# ── Layout ──────────────────────────────────────────────────────────────────────────────────────────
+
+
+class Composer:
+    """Measures the text and places it, in the minimal style the repository uses for its figures.
+
+    Semantic ids from the metadata code, presentation in named styles, integer coordinates on one grid,
+    deterministic order, no transforms and no per-element styling. The property that makes the result
+    reviewable is that regenerating with unchanged metadata produces a byte-identical file.
     """
 
     def __init__(self, face: Face, bold: Face, chrome: dict[str, str], layout: LayoutRules, logo: Logo,
@@ -860,73 +1017,29 @@ class SvgWriter:
         if absent:
             self.missing.setdefault(face.path.name, set()).update(absent)
 
-    def sheet_svg(self, sheet: Sheet, body: list[str]) -> str:
-        head = [
-            '<svg version="1.1" viewBox="0 0 %d %d" xmlns="http://www.w3.org/2000/svg" '
-            'xmlns:xlink="http://www.w3.org/1999/xlink" role="img">' % (PAGE_W, PAGE_H),
-            *self._accessible_names(sheet),
-            "  <style>",
-            "    text { font-family: 'Noto Sans'; fill: #000; }",
-            "    text.title { font-size: %dpx; fill: %s; }" % (TITLE_SIZE, ACCENT),
-            "    text.subtitle { font-size: %dpx; fill: %s; }" % (SUBTITLE_SIZE, ACCENT),
-            "    text.section { font-size: %dpx; text-anchor: middle; }" % SECTION_SIZE,
-            "    text.label { font-size: %dpx; font-weight: bold; }" % LABEL_SIZE,
-            "    text.option { font-size: %dpx; }" % OPTION_SIZE,
-            "    text.child { font-size: %dpx; font-weight: bold; }" % OPTION_SIZE,
-            "    text.legend { font-size: %dpx; font-style: italic; }" % SMALL_SIZE,
-            # Every filled block is bounded. An area of colour with no edge has nothing to sit against,
-            # so it reads as a stain on the page rather than as a region of the table -- and on a ruled
-            # form, where every other block IS bounded, the unbounded one looks like a printing fault.
-            "    rect.band { fill: %s; stroke: #000; stroke-width: 12; }" % BAND_FILL,
-            "    rect.notransmit { fill: %s; stroke: #000; stroke-width: 12; }" % NOTRANSMIT_FILL,
-            # A second, redundant signal: these sheets are printed, frequently in greyscale, where the
-            # tint above collapses to a shade barely distinguishable from the section bands. The bar
-            # survives that, and survives colour-blindness, which a hue on its own does not.
-            "    rect.notransmit-edge { fill: #000; stroke: none; }",
-            "    rect.frame { fill: none; stroke: #000; stroke-width: 20; }",
-            "    rect.mark { fill: none; stroke: #000; stroke-width: 18; }",
-            "    circle.mark { fill: none; stroke: #000; stroke-width: 18; }",
-            # Three weights, and the spread between them is what makes the grid readable rather than the
-            # absolute values: the frame at 0.20 mm, a row or block boundary at 0.16, and a row inside a
-            # block at 0.10. A first attempt used half the row weight for the inner rule, 0.06 mm, which
-            # is sub-pixel on screen and marginal on paper -- it was emitted on every sheet and visible on
-            # none, which looks exactly like not having been emitted at all.
-            "    line.rule { stroke: #000; stroke-width: 16; }",
-            # Between two rows of one slot. Every row is a cell of a ruled table, so every row is closed --
-            # but a slot and the fields hanging off it are still one thing, and ruling them all alike
-            # dissolves that. The lighter stroke closes the cell without breaking up the block.
-            "    line.hair { stroke: #000; stroke-width: 10; }",
-            # The answer column's own stroke. Drawn per row rather than as one full-height line, because
-            # the rows that span the sheet -- a criterion with its tick at the left, a question whose
-            # choices are listed beneath it -- have no cell for it to bound, and a line through their
-            # text would be a defect rather than a grid. Consecutive bounded rows abut, so the strokes
-            # read as one column wherever there actually is one.
-            "    line.column { stroke: #000; stroke-width: 16; }",
-            # The inlined logo's paths carry these classes. Defined here rather than kept inside the
-            # symbol so the sheet has exactly one stylesheet -- and because a symbol whose own <style>
-            # was dropped renders in the default fill, which is black, silently.
-            "    .brand-blue { fill: %s; }" % ACCENT,
-            "    .brand-orange { fill: %s; }" % BRAND_ORANGE,
-            "  </style>",
-        ] + self.logo.definition()
-        return "\n".join(head + body + ["</svg>", ""])
+    def measured(self, run: Text) -> float:
+        """The width this generator makes of a placed run, in grid units.
 
-    def _accessible_names(self, sheet: Sheet) -> list[str]:
-        """<title> and <desc>, which are what a screen reader announces for the figure.
-
-        An SVG without them is an unlabelled graphic: inlined into the protocol's HTML it reads as
-        nothing at all, and accessibility is a stated goal of this toolkit rather than a nicety. The
-        description names the sections so a reader who cannot see the sheet still learns its shape.
+        What the print emitter asserts against: the engine re-measures the same run with its own shaper
+        and refuses to draw it wider than this.
         """
-        sections = ", ".join(s.title for s in sheet.sections)
-        return [
-            f"  <title>{_esc(self.chrome['sheet_heading'])} — {_esc(sheet.title)}</title>",
-            f"  <desc>{_esc(sheet.title)} data collection sheet. Sections: {_esc(sections)}.</desc>",
-        ]
+        style = STYLES[run.style]
+        return self.face_of(style.bold).width(run.text, style.size)
 
 
-def layout_sheet(sheet: Sheet, writer: SvgWriter) -> list[str]:
-    """Flow the sheet's sections down the page, returning SVG body lines.
+def title_of(sheet: Sheet, composer: Composer) -> str:
+    """What the document is called -- the same words in the SVG's <title> and the PDF's metadata."""
+    return f"{composer.chrome['sheet_heading']} — {sheet.title}"
+
+
+def description_of(sheet: Sheet) -> str:
+    """Names the sections, so a reader who cannot see the sheet still learns its shape."""
+    sections = ", ".join(s.title for s in sheet.sections)
+    return f"{sheet.title} data collection sheet. Sections: {sections}."
+
+
+def layout_sheet(sheet: Sheet, composer: Composer) -> list[Shape]:
+    """Flow the sheet's sections down the page, returning what to draw and where.
 
     **A sheet is one page.** That is a requirement of the artifact, not a limitation of this emitter: it
     is filled in at a cot side, and a form that runs onto a second sheet loses half of itself. So there
@@ -934,23 +1047,23 @@ def layout_sheet(sheet: Sheet, writer: SvgWriter) -> list[str]:
     which is a decision about the form, taken deliberately, rather than something a generator may resolve
     on its own by spilling onto another page.
     """
-    out: list[str] = []
-    heading = writer.chrome["sheet_heading"]
-    writer._text(heading, TITLE_SIZE)
-    writer._text(sheet.title, SUBTITLE_SIZE)
+    out: list[Shape] = []
+    heading = composer.chrome["sheet_heading"]
+    composer._text(heading, TITLE_SIZE)
+    composer._text(sheet.title, SUBTITLE_SIZE)
 
     y = MARGIN_TOP + TITLE_SIZE
-    out.extend(writer.logo.place(PAGE_W - MARGIN_X - LOGO_W, MARGIN_TOP, LOGO_W))
-    out.append(f'  <text id="heading" class="title" x="{MARGIN_X}" y="{y}">{_esc(heading)}</text>')
+    out.append(composer.logo.place(PAGE_W - MARGIN_X - LOGO_W, MARGIN_TOP, LOGO_W))
+    out.append(Text(MARGIN_X, y, heading, "title", "heading"))
     y += SUBTITLE_SIZE + 220
-    out.append(f'  <text id="{sheet.slug}-title" class="subtitle" x="{MARGIN_X}" y="{y}">{_esc(sheet.title)}</text>')
+    out.append(Text(MARGIN_X, y, sheet.title, "subtitle", f"{sheet.slug}-title"))
     y += 400
 
     table_top = y
-    body: list[str] = []
-    y = _emit_patient_block(body, y, writer)
+    body: list[Shape] = []
+    y = _emit_patient_block(body, y, composer)
     for section in sheet.sections:
-        y = _emit_section(body, section, y, writer)
+        y = _emit_section(body, section, y, composer)
 
     # Whatever the fields leave over becomes room to write, so the page is used rather than trailing off
     # into white space. The comments band is emitted before the frame is sized so the frame encloses it.
@@ -958,49 +1071,45 @@ def layout_sheet(sheet: Sheet, writer: SvgWriter) -> list[str]:
     # visible band of unused paper when it wrapped to one line and would have overflowed had it wrapped
     # to three -- and the whole point of the comments box is that it absorbs EXACTLY what is left, so an
     # approximation here is a gap at the bottom of every sheet.
-    legend_h = _legend_height(writer)
+    legend_h = _legend_height(composer)
     footer_h = len(
-        _fit(writer, writer.chrome["footer_reference"], SMALL_SIZE, CONTENT_W, "footer", "footer")
+        _fit(composer, composer.chrome["footer_reference"], SMALL_SIZE, CONTENT_W, "footer", "footer")
     ) * (SMALL_SIZE + 60)
     # Footnotes are part of the budget, not an afterthought. They are known by now -- a collapsed group
     # registers its note while its section is laid out -- and leaving them out let the comments box grow
     # into the space they needed, which turned two sheets that fitted into two that did not.
     notes_h = sum(
-        len(_fit(writer, f"{SUPERSCRIPTS[i]} {writer.chrome[k]}", SMALL_SIZE, CONTENT_W, "footnote", k))
+        len(_fit(composer, f"{SUPERSCRIPTS[i]} {composer.chrome[k]}", SMALL_SIZE, CONTENT_W, "footnote", k))
         * (SMALL_SIZE + 60)
-        for i, k in enumerate(writer.footnotes)
-    ) + (NOTES_TRAIL if writer.footnotes else 0)
+        for i, k in enumerate(composer.footnotes)
+    ) + (NOTES_TRAIL if composer.footnotes else 0)
     spare = (PAGE_H - MARGIN_BOTTOM - legend_h - footer_h - notes_h) - y
-    writer.spare = spare
+    composer.spare = spare
     if spare > 0:
         # The leftover is ALWAYS absorbed, so the bottom margin equals the other three exactly. Taking it
         # only when it exceeded the minimum meant a sheet with a little space left simply abandoned it --
         # which is why the primary sepsis sheet ended 12 mm higher than the others while every constant
         # said they should match.
-        if spare >= LABEL_SIZE + 2 * writer.face.pad_at(LABEL_SIZE):
+        if spare >= LABEL_SIZE + 2 * composer.face.pad_at(LABEL_SIZE):
             # Labelled whenever the label itself fits, which is a measurement rather than a judgement --
             # it costs no height, being drawn inside the space it names. A fixed minimum was tried and
             # left a box with no heading at the foot of a tight sheet, which reads as a mistake rather
             # than as room to write. Below this the space is genuinely too small to head, and it stays
             # blank rather than carrying a label that would not fit above it.
-            writer._text(writer.chrome["comments"], LABEL_SIZE)
-            body.append(
-                f'  <text class="label" x="{TEXT_X}" y="{y + ROW_PAD + writer.face.cap_at(LABEL_SIZE)}">'
-                f'{_esc(writer.chrome["comments"])}</text>'
-            )
+            composer._text(composer.chrome["comments"], LABEL_SIZE)
+            body.append(Text(TEXT_X, y + ROW_PAD + composer.face.cap_at(LABEL_SIZE),
+                             composer.chrome["comments"], "label"))
         y += spare
-        body.append(f'  <line class="rule" x1="{MARGIN_X}" y1="{y}" x2="{MARGIN_X + CONTENT_W}" y2="{y}"/>')
+        body.append(Line(MARGIN_X, y, MARGIN_X + CONTENT_W, y, "rule"))
 
     # The frame goes LAST, so it draws on top of everything inside it. Emitted first, every band and
     # shaded block painted over its edges, and the table's outline broke wherever a fill met it -- most
     # visibly down the left side, where the tinted patient block simply erased it.
     out.extend(body)
-    out.append(
-        f'  <rect class="frame" x="{MARGIN_X}" y="{table_top}" width="{CONTENT_W}" height="{y - table_top}"/>'
-    )
-    y = _emit_footnotes(out, y, writer)
-    y = _emit_legend(out, y, writer)
-    y = _emit_footer(out, y, writer)
+    out.append(Box(MARGIN_X, table_top, CONTENT_W, y - table_top, "frame"))
+    y = _emit_footnotes(out, y, composer)
+    y = _emit_legend(out, y, composer)
+    y = _emit_footer(out, y, composer)
 
     usable = PAGE_H - MARGIN_BOTTOM
     if y > usable:
@@ -1014,8 +1123,8 @@ def layout_sheet(sheet: Sheet, writer: SvgWriter) -> list[str]:
 
 
 def best_layout(
-    sheet: Sheet, make_writer: Callable[[int], SvgWriter]
-) -> tuple[SvgWriter, list[str] | None, Overflow | None]:
+    sheet: Sheet, make_composer: Callable[[int], Composer]
+) -> tuple[Composer, list[Shape] | None, Overflow | None]:
     """Lay the sheet out at every candidate answer column and keep the roomiest result.
 
     The column's position cannot be a constant, and the two pressures on it pull opposite ways: move it
@@ -1028,85 +1137,83 @@ def best_layout(
     'Most room' is the comments box, which absorbs whatever the fields leave over -- so maximizing it is
     the same as minimizing the sheet, and it optimizes the property the sheets are actually judged on.
     """
-    best: tuple[tuple[int, int, int], SvgWriter, list[str] | None, Overflow | None] | None = None
+    best: tuple[tuple[int, int, int], Composer, list[Shape] | None, Overflow | None] | None = None
     for width in range(LABEL_COL_MIN, LABEL_COL_MAX + 1, LABEL_COL_STEP):
-        writer = make_writer(width)
+        composer = make_composer(width)
         failure: Overflow | None = None
         try:
-            body = layout_sheet(sheet, writer)
+            body = layout_sheet(sheet, composer)
         except Overflow as overflow:
             body, failure = overflow.body, overflow
         # A column that fits beats one that does not, whatever their spare. Among failures, one that got
         # far enough to measure a page beats one that could not place a word at all.
-        score = writer.spare if body is not None else -(10 ** 9)
+        score = composer.spare if body is not None else -(10 ** 9)
         # Widest spare wins; a tie goes to the NARROWER label column, which is the same layout with more
         # room to write in. Ties are the normal case once the column clears every label on the sheet.
         key = (0 if failure is None else -1, score, -width)
         if best is None or key > best[0]:
-            best = (key, writer, body, failure)
+            best = (key, composer, body, failure)
     return best[1], best[2], best[3]
 
 
-def _legend_entries(writer: SvgWriter) -> list[tuple[bool, str]]:
-    return [(True, writer.chrome["legend_one"]), (False, writer.chrome["legend_many"])]
+def _legend_entries(composer: Composer) -> list[tuple[bool, str]]:
+    return [(True, composer.chrome["legend_one"]), (False, composer.chrome["legend_many"])]
 
 
-def _legend_rows(writer: SvgWriter) -> int:
+def _legend_rows(composer: Composer) -> int:
     """One row when both entries fit on it, two when they do not.
 
     Two sentences of half a dozen words each were taking a row apiece and most of the foot of the page
     with them. Whether they fit together is a measurement like every other one here, so a language whose
     legend is longer simply gets the stacked form back.
     """
-    widths = [writer.face.width(text, SMALL_SIZE) + MARK + MARK_GAP for _, text in _legend_entries(writer)]
+    widths = [composer.face.width(text, SMALL_SIZE) + MARK + MARK_GAP for _, text in _legend_entries(composer)]
     return 1 if sum(widths) + LEGEND_SEP <= CONTENT_W - 2 * TEXT_INSET else 2
 
 
-def _legend_height(writer: SvgWriter) -> int:
+def _legend_height(composer: Composer) -> int:
     """What `_emit_legend` will take. The page budget and the emitter must not disagree: the comments box
     absorbs the difference between them, so an estimate here is a wrong bottom margin on every sheet."""
-    return LEGEND_LEAD + _legend_rows(writer) * (LEGEND_ROW)
+    return LEGEND_LEAD + _legend_rows(composer) * (LEGEND_ROW)
 
 
-def _emit_legend(out: list[str], y: int, writer: SvgWriter) -> int:
+def _emit_legend(out: list[Shape], y: int, composer: Composer) -> int:
     """What the two markers mean. Every published sheet carries it, and without it the shapes are decor."""
     y += LEGEND_LEAD
-    one_row = _legend_rows(writer) == 1
+    one_row = _legend_rows(composer) == 1
     x, baseline = TEXT_X, y + MARK - 20
-    for radio, text in _legend_entries(writer):
-        writer._text(text, SMALL_SIZE)
-        _mark(out, f"legend-{'one' if radio else 'many'}", int(x), baseline, radio, writer, SMALL_SIZE)
-        out.append(
-            f'  <text class="legend" x="{int(x + MARK + MARK_GAP)}" y="{baseline}">{_esc(text)}</text>'
-        )
+    for radio, text in _legend_entries(composer):
+        composer._text(text, SMALL_SIZE)
+        _mark(out, f"legend-{'one' if radio else 'many'}", int(x), baseline, radio, composer, SMALL_SIZE)
+        out.append(Text(int(x + MARK + MARK_GAP), baseline, text, "note"))
         if one_row:
-            x += MARK + MARK_GAP + writer.face.width(text, SMALL_SIZE) + LEGEND_SEP
+            x += MARK + MARK_GAP + composer.face.width(text, SMALL_SIZE) + LEGEND_SEP
         else:
             baseline += LEGEND_ROW
-    return y + _legend_rows(writer) * (LEGEND_ROW)
+    return y + _legend_rows(composer) * (LEGEND_ROW)
 
 
-def _emit_footnotes(out: list[str], y: int, writer: SvgWriter) -> int:
+def _emit_footnotes(out: list[Shape], y: int, composer: Composer) -> int:
     """The notes the collapsed rows point at. A group without its note is a question with no stated rule."""
-    for index, key in enumerate(writer.footnotes):
-        text = f"{SUPERSCRIPTS[index]} {writer.chrome[key]}"
-        writer._text(text, SMALL_SIZE)
-        for line in _fit(writer, text, SMALL_SIZE, CONTENT_W, "footnote", key):
+    for index, key in enumerate(composer.footnotes):
+        text = f"{SUPERSCRIPTS[index]} {composer.chrome[key]}"
+        composer._text(text, SMALL_SIZE)
+        for line in _fit(composer, text, SMALL_SIZE, CONTENT_W, "footnote", key):
             y += SMALL_SIZE + 60
-            out.append(f'  <text class="legend" x="{MARGIN_X}" y="{y}">{_esc(line)}</text>')
-    return y + (NOTES_TRAIL if writer.footnotes else 0)
+            out.append(Text(MARGIN_X, y, line, "note"))
+    return y + (NOTES_TRAIL if composer.footnotes else 0)
 
 
-def _emit_footer(out: list[str], y: int, writer: SvgWriter) -> int:
-    text = writer.chrome["footer_reference"]
-    writer._text(text, SMALL_SIZE)
-    for line in _fit(writer, text, SMALL_SIZE, CONTENT_W, "footer", "footer"):
+def _emit_footer(out: list[Shape], y: int, composer: Composer) -> int:
+    text = composer.chrome["footer_reference"]
+    composer._text(text, SMALL_SIZE)
+    for line in _fit(composer, text, SMALL_SIZE, CONTENT_W, "footer", "footer"):
         y += SMALL_SIZE + 60
-        out.append(f'  <text class="legend" x="{MARGIN_X}" y="{y}">{_esc(line)}</text>')
+        out.append(Text(MARGIN_X, y, line, "note"))
     return y
 
 
-def _emit_patient_block(out: list[str], y: int, writer: SvgWriter) -> int:
+def _emit_patient_block(out: list[Shape], y: int, composer: Composer) -> int:
     """Who this sheet is about -- on every sheet, because a loose page has to be filed to a patient.
 
     These two fields exist on the paper and nowhere else. The sheet is completed at a cot side and stays
@@ -1114,70 +1221,63 @@ def _emit_patient_block(out: list[str], y: int, writer: SvgWriter) -> int:
     that, and the note says so on the page rather than leaving it to the protocol. A person holding a form
     cannot be expected to know which of those two things they are doing.
     """
-    title = writer.chrome["section_patient"]
-    writer._text(title, SECTION_SIZE)
-    out.append(f'  <rect class="band" x="{MARGIN_X}" y="{y}" width="{CONTENT_W}" height="{SECTION_BAND_H}"/>')
-    out.append(
-        f'  <text id="patient" class="section" x="{PAGE_W // 2}" y="{y + SECTION_BAND_H - 150}">{_esc(title)}</text>'
-    )
+    title = composer.chrome["section_patient"]
+    composer._text(title, SECTION_SIZE)
+    out.append(Box(MARGIN_X, y, CONTENT_W, SECTION_BAND_H, "band"))
+    out.append(Text(PAGE_W // 2, y + SECTION_BAND_H - 150, title, "section", "patient"))
     y += SECTION_BAND_H
 
     # The shaded block is laid down first so the rows and the note draw over it; its height is only known
-    # once they are measured, so the rect is patched in afterwards at a remembered index.
+    # once they are measured, so the two boxes are patched in afterwards at a remembered index.
     block_top = y
     shading = len(out)
-    out.append("")
-    out.append("")
+    out.append(Box(0, 0, 0, 0, "notransmit"))
+    out.append(Box(0, 0, 0, 0, "notransmit-edge"))
 
     for key in ("patient_identifier", "patient_name"):
-        label = writer.chrome[key]
-        writer._text(label, LABEL_SIZE, bold=True)
+        label = composer.chrome[key]
+        composer._text(label, LABEL_SIZE, bold=True)
         top = y
-        y += writer.face.pad_at(LABEL_SIZE)
-        for line in _fit(writer, label, LABEL_SIZE, writer.answer_x - COLUMN_GAP - TEXT_X, key, "label",
+        y += composer.face.pad_at(LABEL_SIZE)
+        for line in _fit(composer, label, LABEL_SIZE, composer.answer_x - COLUMN_GAP - TEXT_X, key, "label",
                          bold=True):
-            out.append(f'  <text class="label" x="{TEXT_X}" y="{y + writer.face.cap_at(LABEL_SIZE)}">{_esc(line)}</text>')
+            out.append(Text(TEXT_X, y + composer.face.cap_at(LABEL_SIZE), line, "label"))
             y += LABEL_SIZE + LINE_GAP
-        y += writer.face.pad_at(LABEL_SIZE) - LINE_GAP
+        y += composer.face.pad_at(LABEL_SIZE) - LINE_GAP
         # Written on the same column as every other answer, and on the rule closing the row. These two
         # rows are where the sheet's grid is established for its reader, so they follow it rather than
         # setting a second convention at the top of the page.
-        _column(out, top, y, writer)
-        out.append(f'  <line class="rule" x1="{MARGIN_X}" y1="{y}" x2="{MARGIN_X + CONTENT_W}" y2="{y}"/>')
+        _column(out, top, y, composer)
+        out.append(Line(MARGIN_X, y, MARGIN_X + CONTENT_W, y, "rule"))
 
-    note = writer.chrome["patient_note"]
-    writer._text(note, SMALL_SIZE)
-    y += writer.face.pad_at(SMALL_SIZE)
-    for line in _fit(writer, note, SMALL_SIZE, CONTENT_W - 360, "patient_note", "note"):
-        out.append(f'  <text class="legend" x="{TEXT_X}" y="{y + writer.face.cap_at(SMALL_SIZE)}">{_esc(line)}</text>')
+    note = composer.chrome["patient_note"]
+    composer._text(note, SMALL_SIZE)
+    y += composer.face.pad_at(SMALL_SIZE)
+    for line in _fit(composer, note, SMALL_SIZE, CONTENT_W - 360, "patient_note", "note"):
+        out.append(Text(TEXT_X, y + composer.face.cap_at(SMALL_SIZE), line, "note"))
         y += SMALL_SIZE + LINE_GAP
-    y += writer.face.pad_at(SMALL_SIZE) - LINE_GAP
-    out.append(f'  <line class="rule" x1="{MARGIN_X}" y1="{y}" x2="{MARGIN_X + CONTENT_W}" y2="{y}"/>')
+    y += composer.face.pad_at(SMALL_SIZE) - LINE_GAP
+    out.append(Line(MARGIN_X, y, MARGIN_X + CONTENT_W, y, "rule"))
 
     height = y - block_top
-    out[shading] = (
-        f'  <rect class="notransmit" x="{MARGIN_X}" y="{block_top}" width="{CONTENT_W}" height="{height}"/>'
-    )
-    out[shading + 1] = (
-        f'  <rect class="notransmit-edge" x="{MARGIN_X}" y="{block_top}" width="{NOTRANSMIT_BAR}" '
-        f'height="{height}"/>'
-    )
+    out[shading] = Box(MARGIN_X, block_top, CONTENT_W, height, "notransmit")
+    out[shading + 1] = Box(MARGIN_X, block_top, NOTRANSMIT_BAR, height, "notransmit-edge")
     return y
 
 
-def _emit_section(out: list[str], section: Section, y: int, writer: SvgWriter) -> int:
+def _emit_section(out: list[Shape], section: Section, y: int, composer: Composer) -> int:
     # Bounded like every other run. A section title is localized metadata, centred in a band, and it was
     # the one text on the sheet that was only checked for missing glyphs -- so a longer translation would
     # have run out past the band's ends and off the page, in exactly the languages nobody proof-reads.
     if section.banded:
-        writer._text(section.title, SECTION_SIZE)
-        lines = _fit(writer, section.title, SECTION_SIZE, CONTENT_W - 360, section.code, "section title")
+        composer._text(section.title, SECTION_SIZE)
+        lines = _fit(composer, section.title, SECTION_SIZE, CONTENT_W - 360, section.code, "section title")
         band_h = SECTION_BAND_H + (len(lines) - 1) * (SECTION_SIZE + LINE_GAP)
-        out.append(f'  <rect class="band" x="{MARGIN_X}" y="{y}" width="{CONTENT_W}" height="{band_h}"/>')
+        out.append(Box(MARGIN_X, y, CONTENT_W, band_h, "band"))
         ty = y + SECTION_BAND_H - 150
         for index, line in enumerate(lines):
-            ident = f' id="{_slug(section.code)}"' if index == 0 else ""
-            out.append(f'  <text{ident} class="section" x="{PAGE_W // 2}" y="{ty}">{_esc(line)}</text>')
+            out.append(Text(PAGE_W // 2, ty, line, "section",
+                            _slug(section.code) if index == 0 else None))
             ty += SECTION_SIZE + LINE_GAP
         y += band_h
 
@@ -1185,19 +1285,16 @@ def _emit_section(out: list[str], section: Section, y: int, writer: SvgWriter) -
         # The case this section covers, in the protocol's own words, standing where the question that
         # asked which case applies used to be. It says more than that question did: the options never
         # carried the 30-day and 90-day windows.
-        writer._text(section.definition, SMALL_SIZE)
-        y += writer.face.pad_at(SMALL_SIZE)
-        for line in _fit(writer, section.definition, SMALL_SIZE, CONTENT_W - 2 * TEXT_INSET,
+        composer._text(section.definition, SMALL_SIZE)
+        y += composer.face.pad_at(SMALL_SIZE)
+        for line in _fit(composer, section.definition, SMALL_SIZE, CONTENT_W - 2 * TEXT_INSET,
                          section.code, "definition"):
-            out.append(
-                f'  <text class="legend" x="{TEXT_X}" y="{y + writer.face.cap_at(SMALL_SIZE)}">'
-                f'{_esc(line)}</text>'
-            )
+            out.append(Text(TEXT_X, y + composer.face.cap_at(SMALL_SIZE), line, "note"))
             y += SMALL_SIZE + LINE_GAP
-        y += writer.face.pad_at(SMALL_SIZE) - LINE_GAP
-        out.append(f'  <line class="hair" x1="{MARGIN_X}" y1="{y}" x2="{MARGIN_X + CONTENT_W}" y2="{y}"/>')
+        y += composer.face.pad_at(SMALL_SIZE) - LINE_GAP
+        out.append(Line(MARGIN_X, y, MARGIN_X + CONTENT_W, y, "hair"))
 
-    rows = _pair_ticks(_collapse_groups(section.fields, writer), writer)
+    rows = _pair_ticks(_collapse_groups(section.fields, composer), composer)
     for index, row in enumerate(rows):
         # EVERY row is closed, because every row is a cell of a ruled table. A space to write in that is
         # bounded on all four sides -- the frame, the answer column, and the rules above and below it --
@@ -1209,22 +1306,21 @@ def _emit_section(out: list[str], section: Section, y: int, writer: SvgWriter) -
         following = rows[index + 1][0] if index + 1 < len(rows) else None
         closes = following is None or not following.is_child
         if len(row) == 2:
-            y = _emit_tick_pair(out, row, y, writer)
+            y = _emit_tick_pair(out, row, y, composer)
         else:
             emit = _emit_child if row[0].is_child else _emit_field
-            y = emit(out, row[0], y, writer, closes)
-        weight = "rule" if closes else "hair"
-        out.append(f'  <line class="{weight}" x1="{MARGIN_X}" y1="{y}" x2="{MARGIN_X + CONTENT_W}" y2="{y}"/>')
+            y = emit(out, row[0], y, composer, closes)
+        out.append(Line(MARGIN_X, y, MARGIN_X + CONTENT_W, y, "rule" if closes else "hair"))
     return y
 
 
-def _is_tick(field: Field, writer: SvgWriter) -> bool:
+def _is_tick(field: Field, composer: Composer) -> bool:
     """A criterion marked with a single box on its own line, with no answer beside it."""
     return (not field.is_child and not field.options
-            and writer.layout.boolean_style(field) == "tick")
+            and composer.layout.boolean_style(field) == "tick")
 
 
-def _pair_ticks(fields: list[Field], writer: SvgWriter) -> list[tuple[Field, ...]]:
+def _pair_ticks(fields: list[Field], composer: Composer) -> list[tuple[Field, ...]]:
     """Put two tick criteria on one row wherever both fit half the width.
 
     A criterion is a box and a few words, and it was taking a full-width row -- so two thirds of every one
@@ -1240,15 +1336,15 @@ def _pair_ticks(fields: list[Field], writer: SvgWriter) -> list[tuple[Field, ...
     half = (CONTENT_W - 2 * TEXT_INSET) // 2
 
     def fits(field: Field) -> bool:
-        label = field.label + (f" ({writer.chrome['required']})" if field.compulsory else "")
-        return writer.bold.width(label, LABEL_SIZE) + MARK + MARK_GAP + PAIR_GUTTER <= half
+        label = field.label + (f" ({composer.chrome['required']})" if field.compulsory else "")
+        return composer.bold.width(label, LABEL_SIZE) + MARK + MARK_GAP + PAIR_GUTTER <= half
 
     rows: list[tuple[Field, ...]] = []
     index = 0
     while index < len(fields):
         following = fields[index + 1] if index + 1 < len(fields) else None
         after = fields[index + 2] if index + 2 < len(fields) else None
-        if (following is not None and _is_tick(fields[index], writer) and _is_tick(following, writer)
+        if (following is not None and _is_tick(fields[index], composer) and _is_tick(following, composer)
                 and (after is None or not after.is_child)
                 and fits(fields[index]) and fits(following)):
             rows.append((fields[index], following))
@@ -1259,34 +1355,32 @@ def _pair_ticks(fields: list[Field], writer: SvgWriter) -> list[tuple[Field, ...
     return rows
 
 
-def _emit_tick_pair(out: list[str], pair: tuple[Field, ...], y: int, writer: SvgWriter) -> int:
+def _emit_tick_pair(out: list[Shape], pair: tuple[Field, ...], y: int, composer: Composer) -> int:
     """Two criteria side by side, on the same baseline, each on its own column."""
-    y += writer.face.pad_at(LABEL_SIZE)
-    baseline = y + writer.face.cap_at(LABEL_SIZE)
+    y += composer.face.pad_at(LABEL_SIZE)
+    baseline = y + composer.face.cap_at(LABEL_SIZE)
     for field, x in zip(pair, (TEXT_X, MARGIN_X + CONTENT_W // 2)):
-        label = field.label + (f" ({writer.chrome['required']})" if field.compulsory else "")
-        writer._text(label, LABEL_SIZE, bold=True)
-        _mark(out, _ident(field), x, baseline, False, writer, LABEL_SIZE)
-        out.append(
-            f'  <text class="label" x="{x + MARK + MARK_GAP}" y="{baseline}">{_esc(label)}</text>'
-        )
-    return y + LABEL_SIZE + writer.face.pad_at(LABEL_SIZE)
+        label = field.label + (f" ({composer.chrome['required']})" if field.compulsory else "")
+        composer._text(label, LABEL_SIZE, bold=True)
+        _mark(out, _ident(field), x, baseline, False, composer, LABEL_SIZE)
+        out.append(Text(x + MARK + MARK_GAP, baseline, label, "label"))
+    return y + LABEL_SIZE + composer.face.pad_at(LABEL_SIZE)
 
 
-def _collapse_groups(fields: list[Field], writer: SvgWriter) -> list[Field]:
+def _collapse_groups(fields: list[Field], composer: Composer) -> list[Field]:
     """Replace each run of grouped fields with the single row the form prints for them.
 
     The run must be CONSECUTIVE and share a slot prefix. Grouping across a gap would silently reorder the
     form relative to the data model, and grouping across slots would put one organism's answer on
     another's line -- both of which read as a working sheet.
     """
-    fields = [f for f in fields if writer.layout.prints(f)]
+    fields = [f for f in fields if composer.layout.prints(f)]
 
     # Fold a continuation onto the row before it, before any grouping runs: a field that is part of
     # another's row is not a row of its own and must not be counted as one.
     folded: list[Field] = []
     for field in fields:
-        unit = writer.layout.continues_row(folded[-1] if folded else None, field, writer.chrome)
+        unit = composer.layout.continues_row(folded[-1] if folded else None, field, composer.chrome)
         if unit is None:
             folded.append(field)
         else:
@@ -1297,7 +1391,7 @@ def _collapse_groups(fields: list[Field], writer: SvgWriter) -> list[Field]:
     index = 0
     while index < len(fields):
         field = fields[index]
-        group = writer.layout.group_of(field)
+        group = composer.layout.group_of(field)
         if group is None:
             out.append(field)
             index += 1
@@ -1307,16 +1401,16 @@ def _collapse_groups(fields: list[Field], writer: SvgWriter) -> list[Field]:
         run = [field]
         while index + len(run) < len(fields):
             candidate = fields[index + len(run)]
-            if writer.layout.group_of(candidate) is not group or not candidate.code.startswith(prefix):
+            if composer.layout.group_of(candidate) is not group or not candidate.code.startswith(prefix):
                 break
             run.append(candidate)
 
-        marker = writer.footnote(group["footnote_key"])
+        marker = composer.footnote(group["footnote_key"])
         out.append(
             Field(
                 code=f"{prefix}_{'_'.join(group['suffixes'])}",
                 # The '- ' keeps it a child of the slot it belongs to, exactly as its members were.
-                label=f"- {writer.chrome[group['label_key']]}{marker}",
+                label=f"- {composer.chrome[group['label_key']]}{marker}",
                 value_type=run[0].value_type,
                 compulsory=any(f.compulsory for f in run),
                 options=run[0].options,
@@ -1327,7 +1421,7 @@ def _collapse_groups(fields: list[Field], writer: SvgWriter) -> list[Field]:
     return out
 
 
-def _emit_child(out: list[str], field: Field, y: int, writer: SvgWriter, closes_group: bool = True) -> int:
+def _emit_child(out: list[Shape], field: Field, y: int, composer: Composer, closes_group: bool = True) -> int:
     """A sub-field on one line: its short label, then its answer at the sheet's answer column.
 
     This is where the page is won. Nine fields per organism slot, each given a label row and its own
@@ -1339,59 +1433,59 @@ def _emit_child(out: list[str], field: Field, y: int, writer: SvgWriter, closes_
     resistance rows stepped visibly rightwards down the sheet and no two rows agreed on anything.
     """
     label = field.short_label
-    writer._text(label, OPTION_SIZE, bold=True)
+    composer._text(label, OPTION_SIZE, bold=True)
     top = y
-    y += writer.face.pad_at(OPTION_SIZE) // 2
+    y += composer.face.pad_at(OPTION_SIZE) // 2
 
     x = TEXT_X + OPTION_INDENT
-    baseline = y + writer.face.cap_at(OPTION_SIZE)
-    for line in _fit(writer, label, OPTION_SIZE, writer.answer_x - COLUMN_GAP - x, field.code, "label",
+    baseline = y + composer.face.cap_at(OPTION_SIZE)
+    for line in _fit(composer, label, OPTION_SIZE, composer.answer_x - COLUMN_GAP - x, field.code, "label",
                      bold=True):
-        out.append(f'  <text class="child" x="{x}" y="{baseline}">{_esc(line)}</text>')
+        out.append(Text(x, baseline, line, "child"))
         baseline += OPTION_SIZE + LINE_GAP
     baseline -= OPTION_SIZE + LINE_GAP
     right = MARGIN_X + CONTENT_W - 180
 
     options, radio = field.options, field.radio
     if not options and not field.write_in:
-        style = writer.layout.boolean_style(field)
+        style = composer.layout.boolean_style(field)
         if style == "yes_no":
-            options, radio = [writer.chrome["boolean_yes"], writer.chrome["boolean_no"]], True
+            options, radio = [composer.chrome["boolean_yes"], composer.chrome["boolean_no"]], True
         elif style == "tick":
-            _mark(out, _ident(field), writer.answer_text_x, baseline, False, writer)
-            return _column(out, top, baseline + writer.face.pad_at(OPTION_SIZE), writer)
+            _mark(out, _ident(field), composer.answer_text_x, baseline, False, composer)
+            return _column(out, top, baseline + composer.face.pad_at(OPTION_SIZE), composer)
 
     if not options:
         # Bounded by the grid, like every other cell.
-        return _column(out, top, baseline + writer.face.pad_at(OPTION_SIZE), writer)
+        return _column(out, top, baseline + composer.face.pad_at(OPTION_SIZE), composer)
 
     for option in options:
-        writer._text(option, OPTION_SIZE)
-    widths = [writer.face.width(option, OPTION_SIZE) for option in options]
+        composer._text(option, OPTION_SIZE)
+    widths = [composer.face.width(option, OPTION_SIZE) for option in options]
     needed = sum(w + MARK + MARK_GAP for w in widths) + OPTION_SEP * (len(options) - 1)
-    if writer.answer_text_x + needed > right:
+    if composer.answer_text_x + needed > right:
         # The choices will not share the label's line, so fall back to the indented block a parent uses,
         # which has the full width to wrap into. That block spans the column, so no stroke is drawn.
-        return _emit_options(out, field, options, radio, baseline + LINE_GAP, writer)
+        return _emit_options(out, field, options, radio, baseline + LINE_GAP, composer)
 
     ident = _ident(field)
-    x = writer.answer_text_x
+    x = composer.answer_text_x
     for index, option in enumerate(options):
-        _mark(out, f"{ident}-{index + 1}", int(x), baseline, radio, writer)
-        out.append(f'  <text class="option" x="{int(x + MARK + MARK_GAP)}" y="{baseline}">{_esc(option)}</text>')
+        _mark(out, f"{ident}-{index + 1}", int(x), baseline, radio, composer)
+        out.append(Text(int(x + MARK + MARK_GAP), baseline, option, "option"))
         x += MARK + MARK_GAP + widths[index] + OPTION_SEP
-    return _column(out, top, baseline + LINE_GAP, writer)
+    return _column(out, top, baseline + LINE_GAP, composer)
 
 
-def _emit_field(out: list[str], field: Field, y: int, writer: SvgWriter, closes_group: bool = True) -> int:
+def _emit_field(out: list[Shape], field: Field, y: int, composer: Composer, closes_group: bool = True) -> int:
     """One field is one full-width row: bold label, then whatever it needs to be answered."""
-    label = field.label + (f" ({writer.chrome['required']})" if field.compulsory else "")
-    writer._text(label, LABEL_SIZE, bold=True)
-    style = writer.layout.boolean_style(field)
+    label = field.label + (f" ({composer.chrome['required']})" if field.compulsory else "")
+    composer._text(label, LABEL_SIZE, bold=True)
+    style = composer.layout.boolean_style(field)
 
     options, radio = field.options, field.radio
     if not options and style == "yes_no":
-        options = [writer.chrome["boolean_yes"], writer.chrome["boolean_no"]]
+        options = [composer.chrome["boolean_yes"], composer.chrome["boolean_no"]]
         radio = True
 
     # Choices short enough to sit on their label's own line do so, at the answer column, instead of taking
@@ -1401,9 +1495,9 @@ def _emit_field(out: list[str], field: Field, y: int, writer: SvgWriter, closes_
     # It is measured rather than decided, so the same field moves back below its label in a language whose
     # options are longer -- which is why the inconsistency this introduces is tolerable: it is not "short
     # ones are treated differently", it is "each row uses the space it has".
-    widths = [writer.face.width(option, OPTION_SIZE) for option in options]
+    widths = [composer.face.width(option, OPTION_SIZE) for option in options]
     needed = (sum(w + MARK + MARK_GAP for w in widths) + OPTION_SEP * (len(options) - 1)) if options else 0
-    inline = bool(options) and writer.answer_text_x + needed <= MARGIN_X + CONTENT_W - TEXT_INSET
+    inline = bool(options) and composer.answer_text_x + needed <= MARGIN_X + CONTENT_W - TEXT_INSET
 
     # A row is either answered ON its own line -- a space to write in, or a choice run, both starting at
     # the answer column -- or it spans the sheet: a criterion whose tick sits at the left, or a question
@@ -1412,52 +1506,50 @@ def _emit_field(out: list[str], field: Field, y: int, writer: SvgWriter, closes_
     answered_here = style != "tick" and (not options or inline)
 
     top = y
-    y += writer.face.pad_at(LABEL_SIZE)
+    y += composer.face.pad_at(LABEL_SIZE)
     label_x = TEXT_X
     if style == "tick":
         # The tick sits on the label's own line: a criterion in a list reads as one thing to mark, not as
         # a question followed by an answer. This is the shape the published sheets use for every
         # signs-and-symptoms and laboratory-findings element.
-        _mark(out, _ident(field), TEXT_X, y + writer.face.cap_at(LABEL_SIZE), False, writer, LABEL_SIZE)
+        _mark(out, _ident(field), TEXT_X, y + composer.face.cap_at(LABEL_SIZE), False, composer, LABEL_SIZE)
         label_x = TEXT_X + MARK + MARK_GAP
 
-    edge = writer.answer_x - COLUMN_GAP if answered_here else MARGIN_X + CONTENT_W - 180
-    baseline = y + writer.face.cap_at(LABEL_SIZE)
-    for line in _fit(writer, label, LABEL_SIZE, edge - label_x, field.code, "label", bold=True):
-        out.append(f'  <text class="label" x="{label_x}" y="{baseline}">{_esc(line)}</text>')
+    edge = composer.answer_x - COLUMN_GAP if answered_here else MARGIN_X + CONTENT_W - 180
+    baseline = y + composer.face.cap_at(LABEL_SIZE)
+    for line in _fit(composer, label, LABEL_SIZE, edge - label_x, field.code, "label", bold=True):
+        out.append(Text(label_x, baseline, line, "label"))
         y += LABEL_SIZE + LINE_GAP
         baseline += LABEL_SIZE + LINE_GAP
     y -= LINE_GAP
     baseline -= LABEL_SIZE + LINE_GAP
 
     if field.trailing:
-        return _emit_paired_row(out, field, top, y, baseline, writer, closes_group)
+        return _emit_paired_row(out, field, top, y, baseline, composer, closes_group)
 
     if inline:
         ident = _ident(field)
-        x = writer.answer_text_x
+        x = composer.answer_text_x
         for index, option in enumerate(options):
-            writer._text(option, OPTION_SIZE)
-            _mark(out, f"{ident}-{index + 1}", int(x), baseline, radio, writer)
-            out.append(
-                f'  <text class="option" x="{int(x + MARK + MARK_GAP)}" y="{baseline}">{_esc(option)}</text>'
-            )
+            composer._text(option, OPTION_SIZE)
+            _mark(out, f"{ident}-{index + 1}", int(x), baseline, radio, composer)
+            out.append(Text(int(x + MARK + MARK_GAP), baseline, option, "option"))
             x += MARK + MARK_GAP + widths[index] + OPTION_SEP
-        return _column(out, top, y + writer.face.pad_at(LABEL_SIZE), writer)
+        return _column(out, top, y + composer.face.pad_at(LABEL_SIZE), composer)
 
     if options:
-        return _emit_options(out, field, options, radio, y + LINE_GAP, writer) + writer.face.pad_at(LABEL_SIZE)
+        return _emit_options(out, field, options, radio, y + LINE_GAP, composer) + composer.face.pad_at(LABEL_SIZE)
 
-    y += writer.face.pad_at(LABEL_SIZE)
+    y += composer.face.pad_at(LABEL_SIZE)
     if answered_here:
         # No writing line: the cell is the box formed by the frame, the column and the rules above and
         # below this row. Drawing one inside it would either double the rule beneath or float in the
         # middle of the cell, and both were tried.
-        _column(out, top, y, writer)
+        _column(out, top, y, composer)
     return y
 
 
-def _emit_paired_row(out: list[str], field: Field, top: int, y: int, baseline: int, writer: SvgWriter,
+def _emit_paired_row(out: list[Shape], field: Field, top: int, y: int, baseline: int, composer: Composer,
                      closes_group: bool) -> int:
     """A row carrying two values -- an antibiotic substance and the number of days it was given.
 
@@ -1466,21 +1558,21 @@ def _emit_paired_row(out: list[str], field: Field, top: int, y: int, baseline: i
     of the same weight and kind as the answer column's, so the row reads as three cells of one table
     rather than as two underscores floating in it.
     """
-    writer._text(field.trailing, LABEL_SIZE, bold=True)
+    composer._text(field.trailing, LABEL_SIZE, bold=True)
     right = MARGIN_X + CONTENT_W - 180
-    unit_x = int(right - writer.bold.width(field.trailing, LABEL_SIZE))
+    unit_x = int(right - composer.bold.width(field.trailing, LABEL_SIZE))
     divider = unit_x - 2400
     # The unit word sits on the label's own baseline. Placing it at the row's foot instead dropped it
     # below every other word on its line by the difference between the font size and the cap height.
-    out.append(f'  <text class="label" x="{unit_x}" y="{baseline}">{_esc(field.trailing)}</text>')
+    out.append(Text(unit_x, baseline, field.trailing, "label"))
 
-    bottom = y + writer.face.pad_at(LABEL_SIZE)
-    _column(out, top, bottom, writer)
-    out.append(f'  <line class="column" x1="{divider}" y1="{top}" x2="{divider}" y2="{bottom}"/>')
+    bottom = y + composer.face.pad_at(LABEL_SIZE)
+    _column(out, top, bottom, composer)
+    out.append(Line(divider, top, divider, bottom, "column"))
     return bottom
 
 
-def _emit_options(out: list[str], field: Field, options: list[str], radio: bool, y: int, writer: SvgWriter) -> int:
+def _emit_options(out: list[Shape], field: Field, options: list[str], radio: bool, y: int, composer: Composer) -> int:
     """Lay the choices along one line when they fit, and one per line when they do not.
 
     Fitting them horizontally is the single biggest reason the published sheets hold a page, and it is a
@@ -1489,31 +1581,32 @@ def _emit_options(out: list[str], field: Field, options: list[str], radio: bool,
     """
     ident = field.code.lower().replace("_", "-")
     for option in options:
-        writer._text(option, OPTION_SIZE)
+        composer._text(option, OPTION_SIZE)
 
     left = TEXT_X + OPTION_INDENT
     available = MARGIN_X + CONTENT_W - left - 180
-    widths = [writer.face.width(option, OPTION_SIZE) for option in options]
+    widths = [composer.face.width(option, OPTION_SIZE) for option in options]
     inline = sum(w + MARK + MARK_GAP for w in widths) + OPTION_SEP * (len(options) - 1)
 
     if inline <= available:
         x = left
         for index, option in enumerate(options):
-            _mark(out, f"{ident}-{index + 1}", int(x), y + writer.face.cap_at(OPTION_SIZE), radio, writer)
-            out.append(f'  <text class="option" x="{int(x + MARK + MARK_GAP)}" y="{y + writer.face.cap_at(OPTION_SIZE)}">{_esc(option)}</text>')
+            baseline = y + composer.face.cap_at(OPTION_SIZE)
+            _mark(out, f"{ident}-{index + 1}", int(x), baseline, radio, composer)
+            out.append(Text(int(x + MARK + MARK_GAP), baseline, option, "option"))
             x += MARK + MARK_GAP + widths[index] + OPTION_SEP
         return y + OPTION_SIZE + LINE_GAP
 
     for index, option in enumerate(options):
-        _mark(out, f"{ident}-{index + 1}", left, y + writer.face.cap_at(OPTION_SIZE), radio, writer)
+        _mark(out, f"{ident}-{index + 1}", left, y + composer.face.cap_at(OPTION_SIZE), radio, composer)
         text_x = left + MARK + MARK_GAP
-        for line in _fit(writer, option, OPTION_SIZE, available - MARK - MARK_GAP, field.code, f"option {index + 1}"):
-            out.append(f'  <text class="option" x="{text_x}" y="{y + writer.face.cap_at(OPTION_SIZE)}">{_esc(line)}</text>')
+        for line in _fit(composer, option, OPTION_SIZE, available - MARK - MARK_GAP, field.code, f"option {index + 1}"):
+            out.append(Text(text_x, y + composer.face.cap_at(OPTION_SIZE), line, "option"))
             y += OPTION_SIZE + LINE_GAP
     return y
 
 
-def _mark(out: list[str], ident: str, x: int, baseline: int, radio: bool, writer: SvgWriter,
+def _mark(out: list[Shape], ident: str, x: int, baseline: int, radio: bool, composer: Composer,
           size: int = OPTION_SIZE) -> None:
     """A choose-one circle or a choose-any square, centred on the text it belongs to.
 
@@ -1522,26 +1615,20 @@ def _mark(out: list[str], ident: str, x: int, baseline: int, radio: bool, writer
     being measured from the face. Placed from the row's top instead, every mark drifted low and the
     drift grew with the size of the text beside it.
     """
-    centre = baseline - writer.face.cap_at(size) // 2
+    centre = baseline - composer.face.cap_at(size) // 2
     if radio:
-        r = MARK // 2
-        out.append(f'  <circle id="{ident}" class="mark" cx="{x + r}" cy="{centre}" r="{r}"/>')
+        out.append(Dot(x + MARK // 2, centre, MARK // 2, ident))
     else:
-        out.append(
-            f'  <rect id="{ident}" class="mark" x="{x}" y="{centre - MARK // 2}" '
-            f'width="{MARK}" height="{MARK}"/>'
-        )
+        out.append(Box(x, centre - MARK // 2, MARK, MARK, "mark", ident))
 
 
-def _column(out: list[str], top: int, bottom: int, writer: SvgWriter) -> int:
+def _column(out: list[Shape], top: int, bottom: int, composer: Composer) -> int:
     """Bound one row's answer cell on the left, and return the row's foot so callers can `return` it.
 
     Drawn per row rather than as one line down the sheet, because the rows that span it have no cell for
     it to bound and a stroke through their text would be a defect rather than a grid.
     """
-    out.append(
-        f'  <line class="column" x1="{writer.answer_x}" y1="{top}" x2="{writer.answer_x}" y2="{bottom}"/>'
-    )
+    out.append(Line(composer.answer_x, top, composer.answer_x, bottom, "column"))
     return bottom
 
 
@@ -1550,7 +1637,7 @@ def _ident(field: Field) -> str:
     return field.code.lower().replace("_", "-")
 
 
-def _fit(writer: SvgWriter, text: str, size: int, width: int, code: str, what: str,
+def _fit(composer: Composer, text: str, size: int, width: int, code: str, what: str,
          bold: bool = False) -> list[str]:
     """Wrap to the cell, and refuse to emit anything that still does not fit.
 
@@ -1558,7 +1645,7 @@ def _fit(writer: SvgWriter, text: str, size: int, width: int, code: str, what: s
     over-long line. That is the German-compound case, and emitting it anyway is precisely what the XSLT
     wrapper did -- silently, because character counting cannot tell that it happened.
     """
-    face = writer.face_of(bold)
+    face = composer.face_of(bold)
     lines = face.wrap(text, size, width)
     widest = max(face.width(line, size) for line in lines)
     if widest > width:
@@ -1570,28 +1657,263 @@ def _fit(writer: SvgWriter, text: str, size: int, width: int, code: str, what: s
     return lines
 
 
-def _esc(text: str) -> str:
-    """Escape for XML, and drop every soft hyphen on the way out.
+def _plain(text: str) -> str:
+    """Drop every soft hyphen on the way out, whichever output is being written.
 
-    A soft hyphen is a note from the translator to the layout -- "this word may divide here" -- and the
-    renderer must never receive one, because prawn-svg draws U+00AD as a visible hyphen: a word that never
-    needed to break comes out with a hyphen through the middle of it. `Face.wrap` already strips them and
-    writes a real hyphen where a break is actually taken, but wrapping is not the only way text reaches
-    the page. Paired criteria, inline choice runs, the legend and the sheet's own heading are all emitted
-    directly, and every one of them leaked: a German test render read "Kern-modul", "Druck-schmerz" and
-    "Temperatur-auffälligkeiten", none of which had broken anywhere.
+    A soft hyphen is a note from the translator to the layout -- "this word may divide here" -- and no
+    renderer must ever receive one, because a renderer that draws U+00AD puts a hyphen through the middle
+    of a word that never needed to break. `Face.wrap` already strips them and writes a real hyphen where a
+    break is actually taken, but wrapping is not the only way text reaches the page. Paired criteria,
+    inline choice runs, the legend and the sheet's own heading are all placed directly, and every one of
+    them leaked: a German test render read "Kern-modul", "Druck-schmerz" and "Temperatur-auffälligkeiten",
+    none of which had broken anywhere.
 
-    Stripping here rather than at each of those call sites makes it a property of emission instead of a
-    rule every future emitter has to remember.
+    Stripping in the funnel every serializer goes through makes it a property of emission rather than a
+    rule each new one has to remember.
     """
-    return (text.replace(SOFT_HYPHEN, "")
-            .replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;"))
+    return text.replace(SOFT_HYPHEN, "")
+
+
+def _esc(text: str) -> str:
+    """Escape for XML."""
+    return _plain(text).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+
+def _quoted(text: str) -> str:
+    """A Typst string literal.
+
+    Text goes into the `.typ` as a string rather than as markup, so a label containing `#`, `*`, `_`, `@`
+    or a leading `-` is a label rather than a directive, an emphasis or a list item. That leaves exactly
+    two characters to escape instead of the dozen Typst's markup mode would.
+    """
+    return '"' + _plain(text).replace("\\", "\\\\").replace('"', '\\"') + '"'
+
+
+# ── Serializing ─────────────────────────────────────────────────────────────────────────────────────
+
+
+def svg_document(sheet: Sheet, shapes: list[Shape], composer: Composer) -> str:
+    """The screen figure, inlined into the protocol so its text stays real text."""
+    head = [
+        '<svg version="1.1" viewBox="0 0 %d %d" xmlns="http://www.w3.org/2000/svg" '
+        'xmlns:xlink="http://www.w3.org/1999/xlink" role="img">' % (PAGE_W, PAGE_H),
+        # What a screen reader announces. Without them an inlined figure is an unlabelled graphic, which
+        # reads as nothing at all, and accessibility is a stated goal of this toolkit rather than a nicety.
+        f"  <title>{_esc(title_of(sheet, composer))}</title>",
+        f"  <desc>{_esc(description_of(sheet))}</desc>",
+        "  <style>",
+        "    text { font-family: 'Noto Sans'; fill: #000; }",
+        *(f"    .{name} {{ {_css_text(style)} }}" for name, style in STYLES.items()),
+        *(f"    .{kind} {{ {_css_shape(kind, ink)} }}" for kind, ink in INKS.items()),
+        # The inlined logo's paths carry these classes. Defined here rather than kept inside the symbol so
+        # the sheet has exactly one stylesheet -- and because a symbol whose own <style> was dropped
+        # renders in the default fill, which is black, silently.
+        "    .brand-blue { fill: %s; }" % ACCENT,
+        "    .brand-orange { fill: %s; }" % BRAND_ORANGE,
+        "  </style>",
+    ] + composer.logo.definition()
+    return "\n".join(head + [_svg_shape(shape) for shape in shapes] + ["</svg>", ""])
+
+
+def _css_text(style: Style) -> str:
+    parts = [f"font-size: {style.size}px"]
+    if style.bold:
+        parts.append("font-weight: bold")
+    if style.colour != "#000":
+        parts.append(f"fill: {style.colour}")
+    if style.centred:
+        parts.append("text-anchor: middle")
+    return "; ".join(parts) + ";"
+
+
+def _css_shape(kind: str, ink: Ink) -> str:
+    parts = []
+    if kind not in _LINE_KINDS:
+        # A rect defaults to being filled black, so an unfilled one has to say so; a line has no interior
+        # for the property to describe and saying it there is noise in a file people read.
+        parts.append(f"fill: {ink.fill or 'none'}")
+    parts.append(f"stroke: #000; stroke-width: {ink.stroke}" if ink.stroke else "stroke: none")
+    return "; ".join(parts) + ";"
+
+
+def _svg_shape(shape: Shape) -> str:
+    match shape:
+        case Text():
+            return (f'  <text{_svg_id(shape.ident)} class="{shape.style}" x="{shape.x}" y="{shape.y}">'
+                    f"{_esc(shape.text)}</text>")
+        case Line():
+            return (f'  <line class="{shape.kind}" x1="{shape.x1}" y1="{shape.y1}" '
+                    f'x2="{shape.x2}" y2="{shape.y2}"/>')
+        case Box():
+            return (f'  <rect{_svg_id(shape.ident)} class="{shape.kind}" x="{shape.x}" y="{shape.y}" '
+                    f'width="{shape.width}" height="{shape.height}"/>')
+        case Dot():
+            return (f'  <circle{_svg_id(shape.ident)} class="mark" cx="{shape.cx}" cy="{shape.cy}" '
+                    f'r="{shape.r}"/>')
+        case Emblem():
+            return (f'  <use href="#neoipc-logo" x="{shape.x}" y="{shape.y}" '
+                    f'width="{shape.width}" height="{shape.height}"/>')
+
+
+def _svg_id(ident: str | None) -> str:
+    """Semantic ids come from the metadata code, so a row on the page is traceable to what it collects.
+    Shapes that carry no meaning of their own -- a rule, a frame -- carry no id either."""
+    return f' id="{ident}"' if ident else ""
+
+
+def typst_document(sheet: Sheet, shapes: list[Shape], composer: Composer) -> str:
+    """The printed form: one page, drawn by an engine that shapes text and can declare a conformance.
+
+    Every element is placed absolutely, at the coordinates the layout already chose, so nothing here
+    reflows and the two outputs cannot disagree about what is on the sheet or where.
+    """
+    return "\n".join(
+        _typst_preamble(sheet, composer)
+        + [_typst_shape(shape, composer) for shape in shapes]
+        + [""]
+    )
+
+
+def _typst_preamble(sheet: Sheet, composer: Composer) -> list[str]:
+    styles = ",\n".join(f"  {name}: s => text({_typst_text_args(style)}, s)"
+                        for name, style in STYLES.items())
+    strokes = ",\n".join(f'  "{kind}": {ink.stroke} * u + black'
+                         for kind, ink in INKS.items() if ink.stroke and kind in _LINE_KINDS)
+    blocks = ",\n".join(f'  "{kind}": (fill: {_typst_colour(ink.fill)}, stroke: {_typst_stroke(ink)})'
+                        for kind, ink in INKS.items() if kind not in _LINE_KINDS)
+    return f"""// Generated by scripts/build-collection-sheets.py from metadata/common. Do not edit.
+//
+// Compile with this repository's own fonts and nothing else:
+//
+//   typst compile --font-path common/fonts --ignore-system-fonts --pdf-standard a-2a,ua-1 <this file>
+//
+// --ignore-system-fonts is not optional. --font-path ADDS to whatever the machine has installed rather
+// than replacing it, so without it a face this document asks for and common/fonts does not ship is
+// answered by some other file -- a different one per machine, chosen silently.
+//
+// Set SOURCE_DATE_EPOCH, or pass --creation-timestamp, for a reproducible file. Left to itself the
+// document date is the wall clock, and two compiles of one source then differ.
+
+#set document(
+  title: {_quoted(title_of(sheet, composer))},
+  description: {_quoted(description_of(sheet))},
+  date: auto,
+)
+
+// The sheet's grid: hundredths of a millimetre, carrying the same integers as the SVG so a coordinate
+// here and a coordinate there are the same number.
+#let u = 0.01mm
+
+#set page(width: {PAGE_W} * u, height: {PAGE_H} * u, margin: 0pt)
+// top-edge and bottom-edge at the baseline give a text box no height at all, which is what makes `place`
+// position a run by its BASELINE -- the same reference every measurement in the layout is taken from.
+// `fallback: false` keeps a missing glyph missing instead of borrowing one from another family.
+#set text(font: "Noto Sans", fallback: false, top-edge: "baseline", bottom-edge: "baseline")
+
+// What the layout measured a run at, against what the engine will actually draw. Shaping and kerning
+// only ever remove advance in these faces -- a kern pair closes a gap, a conjunct replaces several
+// glyphs with one -- so the engine's width should never exceed the sum of advances the layout was built
+// from. "Should" is an argument rather than a proof, so it is checked on every run: if shaping ever
+// widened one, the sheet would silently overlap its own column rule, and this stops the compile instead.
+#let fit(w, body) = context {{
+  let drawn = measure(body).width
+  assert(
+    drawn <= w * u + u,
+    message: "drawn " + repr(drawn) + " wide, past the " + repr(w * u) + " the layout allowed for it",
+  )
+  body
+}}
+
+#let styles = (
+{styles},
+)
+#let strokes = (
+{strokes},
+)
+#let blocks = (
+{blocks},
+)
+
+#let at(x, y, style, w, s) = place(
+  top + left, dx: x * u, dy: y * u, fit(w, styles.at(style)(s)),
+)
+// A section title is centred on the page rather than on anything the layout placed, so it is positioned
+// from the page's own middle instead of from a left edge and a measured width.
+#let mid(x, y, style, w, s) = place(
+  top + center, dx: (x - {PAGE_W // 2}) * u, dy: y * u, fit(w, styles.at(style)(s)),
+)
+#let stroke-between(kind, x1, y1, x2, y2) = place(
+  top + left, line(start: (x1 * u, y1 * u), end: (x2 * u, y2 * u), stroke: strokes.at(kind)),
+)
+#let block-at(kind, x, y, w, h) = place(
+  top + left, dx: x * u, dy: y * u, rect(width: w * u, height: h * u, ..blocks.at(kind)),
+)
+#let dot-at(x, y, r) = place(
+  top + left, dx: (x - r) * u, dy: (y - r) * u, circle(radius: r * u, ..blocks.at("mark")),
+)
+
+// {Logo.NOTICE}
+#let emblem = {_quoted(composer.logo.standalone())}
+// The mark is a wordmark, so what it says IS its accessible name -- not decoration to be hidden from a
+// screen reader as an artifact, which would be irreversible and would assert it carries nothing.
+#let emblem-at(x, y, w, h) = place(
+  top + left, dx: x * u, dy: y * u,
+  image(bytes(emblem), format: "svg", alt: {_quoted(composer.logo.name)},
+        width: w * u, height: h * u),
+)
+""".splitlines()
+
+
+# Which inks describe a stroked path rather than a filled block. Both come out of one table, because the
+# weights are chosen against each other and splitting them invites two half-tables that drift.
+_LINE_KINDS = frozenset({"rule", "hair", "column"})
+
+
+def _typst_text_args(style: Style) -> str:
+    args = [f"size: {style.size} * u"]
+    if style.bold:
+        args.append('weight: "bold"')
+    if style.colour != "#000":
+        args.append(f'fill: {_typst_colour(style.colour)}')
+    return ", ".join(args)
+
+
+def _typst_colour(colour: str | None) -> str:
+    if colour is None:
+        return "none"
+    return "black" if colour == "#000" else f'rgb("{colour}")'
+
+
+def _typst_stroke(ink: Ink) -> str:
+    return f"{ink.stroke} * u + black" if ink.stroke else "none"
+
+
+def _typst_shape(shape: Shape, composer: Composer) -> str:
+    match shape:
+        case Text():
+            place = "mid" if STYLES[shape.style].centred else "at"
+            width = round(composer.measured(shape), 1)
+            return (f'#{place}({shape.x}, {shape.y}, "{shape.style}", {width}, '
+                    f"{_quoted(shape.text)})")
+        case Line():
+            return f'#stroke-between("{shape.kind}", {shape.x1}, {shape.y1}, {shape.x2}, {shape.y2})'
+        case Box():
+            return (f'#block-at("{shape.kind}", {shape.x}, {shape.y}, '
+                    f"{shape.width}, {shape.height})")
+        case Dot():
+            return f"#dot-at({shape.cx}, {shape.cy}, {shape.r})"
+        case Emblem():
+            return f"#emblem-at({shape.x}, {shape.y}, {shape.width}, {shape.height})"
 
 
 # ── Entry point ─────────────────────────────────────────────────────────────────────────────────────
 
+# The two renderings of one layout: the figure the protocol inlines, and the source of the form a partner
+# prints. Named here so `--format` and the writing loop cannot disagree about what either one is called.
+OUTPUTS = (("svg", "svg", svg_document), ("typst", "typ", typst_document))
 
-def main(argv: list[str] | None = None) -> int:
+
+def main(argv: list[Shape] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     repo = Path(__file__).resolve().parent.parent
     parser.add_argument("--metadata", type=Path, default=repo / "metadata" / "common")
@@ -1603,6 +1925,13 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--language", default=None, help="culture code; omit for the untranslated source")
     parser.add_argument("--sheet", default=None, help="only this stage code, e.g. NEOIPC_STG_BSI")
+    parser.add_argument(
+        "--format",
+        choices=("svg", "typst", "both"),
+        default="both",
+        help="svg is the protocol's figure, typst the source of the printed form. Both are the same "
+        "layout, so writing one is a convenience and never a different sheet.",
+    )
     parser.add_argument(
         "--allow-overflow",
         action="store_true",
@@ -1642,8 +1971,8 @@ def main(argv: list[str] | None = None) -> int:
     suffix = f".{args.language}" if args.language else ""
     written, failures = [], []
     for sheet in sheets:
-        writer, body, failure = best_layout(
-            sheet, lambda width: SvgWriter(face, bold, chrome, rules, logo, args.language, width)
+        composer, body, failure = best_layout(
+            sheet, lambda width: Composer(face, bold, chrome, rules, logo, args.language, width)
         )
         if failure is not None:
             failures.append(str(failure))
@@ -1651,18 +1980,23 @@ def main(argv: list[str] | None = None) -> int:
             # be written on request -- reported as a failure either way, and the exit status is unchanged.
             if not (args.allow_overflow and body):
                 continue
-        if writer.missing:
-            for font_name, chars in sorted(writer.missing.items()):
+        if composer.missing:
+            for font_name, chars in sorted(composer.missing.items()):
                 shown = " ".join(f"U+{ord(c):04X} {c!r}" for c in sorted(chars))
                 failures.append(f"{sheet.code}: {font_name} has no glyph for {shown}")
             continue
-        target = args.out / f"NeoIPC-Core-{sheet.name}-Sheet{suffix}.svg"
-        target.write_text(writer.sheet_svg(sheet, body), encoding="utf-8", newline="\n")
+        # Not `with_suffix`: the stem already ends in the culture code, which is exactly what that would
+        # take to be the extension and replace.
+        stem = args.out / f"NeoIPC-Core-{sheet.name}-Sheet{suffix}"
+        for name, extension, document in OUTPUTS:
+            if args.format in ("both", name):
+                target = stem.with_name(f"{stem.name}.{extension}")
+                target.write_text(document(sheet, body, composer), encoding="utf-8", newline="\n")
         # The spare is how much page is left over, and it is the only honest measure of how much longer a
         # translation of this sheet may be before it stops fitting. Reported on every run because the
         # one-page rule is a requirement rather than a preference, and a sheet at 2 mm of headroom passes
         # the same green build as one at 30.
-        written.append((target, (writer.answer_x - MARGIN_X) / 100, writer.spare / 100))
+        written.append((stem, (composer.answer_x - MARGIN_X) / 100, composer.spare / 100))
 
     for line in failures:
         print(f"error: {line}", file=sys.stderr)
