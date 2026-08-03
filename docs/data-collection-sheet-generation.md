@@ -233,6 +233,27 @@ while `resvg` has already moved to `harfrust` — a maintenance risk, not a pres
 **#8667**, a compiler panic when a right-to-left paragraph ends in a combining mark, is the one that could
 actually bite this layout; smoke-test it before committing.
 
+### Typst cannot own both outputs, so there are two renderings and one content model
+
+The tempting simplification — let Typst emit the SVG too, with `--format svg`, and have one layout engine
+for everything — does not work. **Typst converts all text to paths in SVG export**, deliberately, so that
+a file looks identical everywhere; making it emit real text is an open request upstream. Paths are
+unselectable, unsearchable and invisible to a screen reader, which is exactly what the protocol's inline
+figure must not be, and what the `<title>`/`<desc>` work here exists to avoid.
+
+So the shape is settled: **SVG from this generator's own layout for the screen, PDF from Typst for print**,
+with the PDF also serving the protocol through page import. Two renderings, one content model.
+
+What they must agree on is **fields, order, wording, options and mandatory flags** — everything derived
+from the metadata. What they need not agree on is sub-millimetre typography: Typst applies `GPOS` kerning
+that this generator's advance sum does not, so the two will differ slightly, and on a screen figure against
+a printed form nobody can see it and nothing depends on it. Insisting otherwise would mean reimplementing
+Typst's shaping in Python to chase a difference no reader can perceive.
+
+**The one-page rule moves with the print path.** Today it is asserted by measuring; for the PDF it becomes
+exact and trivial — compile, count pages, fail if there is more than one. That is a stronger gate than the
+current one because it is the engine's own answer rather than a prediction of it.
+
 ### The consequence for measurement, which reverses an earlier conclusion
 
 This document already records that summing `hmtx` advances is exact **because prawn-svg does not shape**,
