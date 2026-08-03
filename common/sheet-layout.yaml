@@ -64,7 +64,18 @@ section_order:
 #
 # Each group carries a footnote so the sheet says plainly what the reader is being asked to do — a
 # collapsed row without one is a form that quietly loses a distinction the model draws.
-groups: []
+# Keyed by the suffix a code ends in, so one entry covers every slot of every section that has them --
+# three slots each in four sections across two sheets, which listing codes would have made 36 entries and
+# a maintenance trap the first time a slot was added.
+#
+# The footnote is not optional decoration. Collapsing three elements into one row asks the person filling
+# the form to pick which category applies; without the note saying so, the row is a question with no
+# stated rule, and whoever later transcribes the tick into DHIS2 has to guess which of the three elements
+# it meant.
+groups:
+  - suffixes: [3GCR, MRSA, VRE]
+    label_key: resistance_organism_specific
+    footnote_key: resistance_organism_specific_note
 
 # Repeated slots (organism 1..n, antibiotic substance 1..n) are printed as compact blocks rather than as
 # one labelled row per element. How many slots a sheet prints is a decision about the paper, not about the

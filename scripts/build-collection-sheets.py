@@ -70,6 +70,10 @@ MARK = 260                              # a choose-one circle or choose-any squa
 MARK_GAP = 180                          # between a mark and its text
 COMMENTS_MIN = 1200                     # below this the leftover is a gap, not a usable writing space
 
+# Real superscript codepoints rather than a baseline shift, so a marker survives being copied out of the
+# PDF and is one character to measure. The font's coverage is checked like any other text on the sheet.
+SUPERSCRIPTS = "¹²³⁴⁵⁶⁷⁸⁹"
+
 # The brand's two primary colours, from the NeoIPC visual guideline: PANTONE 7460 C and 1495 C. Taken
 # from the guideline rather than sampled from an artifact -- an earlier guess of #2e74b5 was a Word
 # default that merely looked similar.
@@ -253,6 +257,14 @@ class LayoutRules:
         self.styles: dict[str, str] = rules.get("boolean_style") or {}
         self.section_order: dict[str, list[str]] = rules.get("section_order") or {}
         self.composites: dict[str, dict] = rules.get("composites") or {}
+        self.groups: list[dict] = rules.get("groups") or []
+
+    def group_of(self, field: Field) -> dict | None:
+        """The printed group a field belongs to, matched on the suffix its code ends in."""
+        for group in self.groups:
+            if any(field.code.endswith(f"_{suffix}") for suffix in group["suffixes"]):
+                return group
+        return None
 
     @property
     def absorbed_stages(self) -> set[str]:
@@ -510,6 +522,17 @@ class SvgWriter:
         self.face, self.bold, self.chrome, self.layout = face, bold, chrome, layout
         self.logo, self.language = logo, language
         self.missing: dict[str, set[str]] = {}
+        self.footnotes: list[str] = []
+
+    def footnote(self, key: str) -> str:
+        """Register a footnote and return the superscript marker that refers to it.
+
+        Numbered in the order they are first needed, so a sheet reads top to bottom, and deduplicated:
+        one group repeated across three organism slots is one note, not three identical ones.
+        """
+        if key not in self.footnotes:
+            self.footnotes.append(key)
+        return SUPERSCRIPTS[self.footnotes.index(key)]
 
     def _text(self, text: str, size: int, bold: bool = False) -> None:
         face = self.bold if bold else self.face
@@ -576,7 +599,15 @@ def layout_sheet(sheet: Sheet, writer: SvgWriter) -> list[str]:
     # into white space. The comments band is emitted before the frame is sized so the frame encloses it.
     legend_h = 2 * (MARK + 180) + 500
     footer_h = SMALL_SIZE + 300
-    spare = (PAGE_H - MARGIN_BOTTOM - legend_h - footer_h) - y
+    # Footnotes are part of the budget, not an afterthought. They are known by now -- a collapsed group
+    # registers its note while its section is laid out -- and leaving them out let the comments box grow
+    # into the space they needed, which turned two sheets that fitted into two that did not.
+    notes_h = sum(
+        len(_fit(writer, f"{SUPERSCRIPTS[i]} {writer.chrome[k]}", SMALL_SIZE, CONTENT_W, "footnote", k))
+        * (SMALL_SIZE + 60)
+        for i, k in enumerate(writer.footnotes)
+    ) + (200 if writer.footnotes else 0)
+    spare = (PAGE_H - MARGIN_BOTTOM - legend_h - footer_h - notes_h) - y
     if spare > COMMENTS_MIN:
         writer._text(writer.chrome["comments"], LABEL_SIZE)
         body.append(f'  <text class="label" x="{TEXT_X}" y="{y + ROW_PAD + LABEL_SIZE}">{_esc(writer.chrome["comments"])}</text>')
@@ -589,6 +620,7 @@ def layout_sheet(sheet: Sheet, writer: SvgWriter) -> list[str]:
         f'  <rect class="frame" x="{MARGIN_X}" y="{table_top}" width="{CONTENT_W}" height="{y - table_top}"/>'
     )
     out.extend(body)
+    y = _emit_footnotes(out, y, writer)
     y = _emit_legend(out, y, writer)
     y = _emit_footer(out, y, writer)
 
@@ -612,6 +644,17 @@ def _emit_legend(out: list[str], y: int, writer: SvgWriter) -> int:
         out.append(f'  <text class="legend" x="{TEXT_X + MARK + MARK_GAP}" y="{y + MARK - 20}">{_esc(text)}</text>')
         y += MARK + 180
     return y
+
+
+def _emit_footnotes(out: list[str], y: int, writer: SvgWriter) -> int:
+    """The notes the collapsed rows point at. A group without its note is a question with no stated rule."""
+    for index, key in enumerate(writer.footnotes):
+        text = f"{SUPERSCRIPTS[index]} {writer.chrome[key]}"
+        writer._text(text, SMALL_SIZE)
+        for line in _fit(writer, text, SMALL_SIZE, CONTENT_W, "footnote", key):
+            y += SMALL_SIZE + 60
+            out.append(f'  <text class="legend" x="{MARGIN_X}" y="{y}">{_esc(line)}</text>')
+    return y + (200 if writer.footnotes else 0)
 
 
 def _emit_footer(out: list[str], y: int, writer: SvgWriter) -> int:
@@ -638,14 +681,56 @@ def _emit_section(out: list[str], section: Section, y: int, writer: SvgWriter) -
         ty += SECTION_SIZE + LINE_GAP
     y += band_h
 
-    for index, field in enumerate(section.fields):
+    fields = _collapse_groups(section.fields, writer)
+    for index, field in enumerate(fields):
         y = _emit_child(out, field, y, writer) if field.is_child else _emit_field(out, field, y, writer)
         # A rule closes a GROUP, not every field: a slot and its children are one thing on the page, and
         # ruling between them would break up the block the '- ' convention exists to express.
-        following = section.fields[index + 1] if index + 1 < len(section.fields) else None
+        following = fields[index + 1] if index + 1 < len(fields) else None
         if following is None or not following.is_child:
             out.append(f'  <line class="rule" x1="{MARGIN_X}" y1="{y}" x2="{MARGIN_X + CONTENT_W}" y2="{y}"/>')
     return y
+
+
+def _collapse_groups(fields: list[Field], writer: SvgWriter) -> list[Field]:
+    """Replace each run of grouped fields with the single row the form prints for them.
+
+    The run must be CONSECUTIVE and share a slot prefix. Grouping across a gap would silently reorder the
+    form relative to the data model, and grouping across slots would put one organism's answer on
+    another's line -- both of which read as a working sheet.
+    """
+    out: list[Field] = []
+    index = 0
+    while index < len(fields):
+        field = fields[index]
+        group = writer.layout.group_of(field)
+        if group is None:
+            out.append(field)
+            index += 1
+            continue
+
+        prefix = field.code.rsplit("_", 1)[0]
+        run = [field]
+        while index + len(run) < len(fields):
+            candidate = fields[index + len(run)]
+            if writer.layout.group_of(candidate) is not group or not candidate.code.startswith(prefix):
+                break
+            run.append(candidate)
+
+        marker = writer.footnote(group["footnote_key"])
+        out.append(
+            Field(
+                code=f"{prefix}_{'_'.join(group['suffixes'])}",
+                # The '- ' keeps it a child of the slot it belongs to, exactly as its members were.
+                label=f"- {writer.chrome[group['label_key']]}{marker}",
+                value_type=run[0].value_type,
+                compulsory=any(f.compulsory for f in run),
+                options=run[0].options,
+                radio=run[0].radio,
+            )
+        )
+        index += len(run)
+    return out
 
 
 def _emit_child(out: list[str], field: Field, y: int, writer: SvgWriter) -> int:
