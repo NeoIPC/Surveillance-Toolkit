@@ -7,6 +7,7 @@ Typefaces the build **embeds**, kept here rather than taken from the machine or 
 | `NotoSans-Regular.ttf`, `NotoSans-Bold.ttf` | Noto Sans (v2.015) | [notofonts/latin-greek-cyrillic](https://github.com/notofonts/latin-greek-cyrillic) |
 | `NotoSans-Italic.ttf`, `NotoSans-BoldItalic.ttf` | Noto Sans (v2.008) | [googlefonts/noto-fonts](https://github.com/googlefonts/noto-fonts) |
 | `NotoSansDevanagari-Regular.ttf`, `NotoSansDevanagari-Bold.ttf` | Noto Sans Devanagari | [notofonts/devanagari](https://github.com/notofonts/devanagari) |
+| `NotoSansHebrew-Regular.ttf`, `NotoSansHebrew-Bold.ttf` | Noto Sans Hebrew | [notofonts/hebrew](https://github.com/notofonts/hebrew) |
 
 **The italics are a release behind the uprights, and that is checked rather than tolerated.** Noto builds
 and versions its italics separately, so v2.015 uprights and v2.008 italics is the pairing upstream

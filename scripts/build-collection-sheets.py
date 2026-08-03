@@ -38,6 +38,11 @@ except ImportError:  # pragma: no cover - dependency is declared in CI and in th
     sys.exit("fontTools is required: python -m pip install fonttools")
 
 try:
+    import uharfbuzz as hb
+except ImportError:  # pragma: no cover
+    sys.exit("uharfbuzz is required: python -m pip install uharfbuzz")
+
+try:
     from ruamel.yaml import YAML
 except ImportError:  # pragma: no cover
     sys.exit("ruamel.yaml is required: python -m pip install 'ruamel.yaml>=0.18'")
@@ -135,7 +140,7 @@ RIGHT_TO_LEFT = frozenset({"ar", "arc", "ckb", "dv", "fa", "he", "ks", "ku", "ps
 # is split by script deliberately, so this is a property of the fonts rather than a workaround: adding a
 # language written in a script Noto Sans does not carry means adding its file to common/fonts and a line
 # here. See common/fonts/README.md.
-SCRIPT_FONTS = {"ne": "NotoSansDevanagari"}
+SCRIPT_FONTS = {"ne": "NotoSansDevanagari", "he": "NotoSansHebrew"}
 
 # The brand's two colours, as carried by common/img/NeoIPC-Logo.svg. An earlier accent of #2e74b5 was a
 # word-processor default that merely looked similar and was sampled from nothing; see
@@ -503,8 +508,8 @@ class Face:
         self.path = path
         self.font = TTFont(str(path))
         self.units = self.font["head"].unitsPerEm
-        self.widths = {name: adv for name, (adv, _) in self.font["hmtx"].metrics.items()}
         self.cmap = self.font.getBestCmap()
+        self._font: "hb.Font | None" = None
         # The name a renderer resolves the family by, read from the file rather than written here so that
         # what is asked for and what was measured cannot come apart.
         self.family = self.font["name"].getBestFamilyName()
@@ -530,10 +535,33 @@ class Face:
     def has(self, ch: str) -> bool:
         return ord(ch) in self.cmap
 
-    def advance(self, ch: str) -> float:
-        """One character's advance as a fraction of the em, so faces on different grids still add up."""
-        glyph = self.cmap.get(ord(ch))
-        return self.widths.get(glyph, self.widths.get(".notdef", 0)) / self.units
+    def shaped_width(self, text: str) -> float:
+        """What this face actually draws `text` as, in ems, with the script's own shaping applied.
+
+        Summing `hmtx` advances instead is exact only where nothing shapes. It is close for Latin, where
+        the difference is kerning and ligatures worth hundredths of a percent -- and it is not a
+        measurement at all for Devanagari, where a combining mark carries almost no advance of its own
+        while the cluster it joins has real width, and a conjunct replaces several glyphs with one. Those
+        pull opposite ways: one string came out a sixth narrower than the sum and another an eighth wider,
+        so there was no direction to lean in and no tolerance that would have covered both.
+
+        HarfBuzz is what the engine shapes with -- Typst through `rustybuzz`, a port of it -- so this asks
+        the same question of the same file and gets the same answer.
+        """
+        buffer = hb.Buffer()
+        buffer.add_str(text)
+        # Fills in script, language and direction from the text itself, which is what decides whether
+        # Devanagari reordering or Hebrew's right-to-left run applies at all.
+        buffer.guess_segment_properties()
+        hb.shape(self._shaper, buffer)
+        return sum(p.x_advance for p in buffer.glyph_positions) / self.units
+
+    @property
+    def _shaper(self) -> "hb.Font":
+        """Built once per face and kept, because constructing it parses the whole font."""
+        if self._font is None:
+            self._font = hb.Font(hb.Face(self.path.read_bytes()))
+        return self._font
 
 
 class Typeface:
@@ -622,10 +650,24 @@ class Typeface:
                 if not ch.isspace() and not any(face.has(ch) for face in self.faces)}
 
     def width(self, text: str, size: int) -> float:
-        return sum(self._advance(ch) for ch in text.replace(SOFT_HYPHEN, "")) * size
+        """Shaped, one run per face, which is how a renderer draws it too.
 
-    def _advance(self, ch: str) -> float:
-        return self._face_for(ch).advance(ch)
+        A renderer shapes each run of characters it resolves to one face and lays the runs side by side,
+        so kerning across a face boundary is not applied by anyone -- and measuring the whole string
+        through a single face would measure something nobody draws.
+        """
+        return sum(face.shaped_width(run) for face, run in self._runs(text)) * size
+
+    def _runs(self, text: str) -> list[tuple[Face, str]]:
+        """Split into maximal runs sharing one face, in order."""
+        runs: list[tuple[Face, str]] = []
+        for ch in text.replace(SOFT_HYPHEN, ""):
+            face = self._face_for(ch)
+            if runs and runs[-1][0] is face:
+                runs[-1] = (face, runs[-1][1] + ch)
+            else:
+                runs.append((face, ch))
+        return runs
 
     def wrap(self, text: str, size: int, max_width: int) -> list[str]:
         """Greedy wrap on whitespace, and inside a word wherever the translator allowed one.
@@ -1993,19 +2035,20 @@ def _typst_preamble(sheet: Sheet, composer: Composer) -> list[str]:
 
 // What the layout measured a run at, against what the engine will actually draw, checked on every run.
 //
-// The layout sums advance widths; the engine also applies kerning and ligatures, so the two disagree
-// slightly and NOT always in the same direction. Measured on the longest line of the surgical-site
-// sheet: 184.6368 mm summed against 184.6848 mm drawn, the engine wider by 0.03 %.
+// The slack is ONE grid unit -- a hundredth of a millimetre, for the rounding in getting a float onto
+// this grid -- and no proportional term at all. Both sides shape with HarfBuzz against the same file,
+// the layout through `uharfbuzz` and the engine through `rustybuzz`, so they agree exactly rather than
+// approximately: measured across every run of every sheet in English and Nepali, none needed more.
 //
-// The tolerance is set from what a disagreement would have to be before it could matter, rather than
-// from that number. Everything this exists to catch is at least two orders larger: a run set in the
-// wrong face differs by 6 % (the same line upright is 195.87 mm), and a script whose shaping the layout
-// cannot see differs by 16 % (Devanagari). Half a percent sits above the noise and far below either, so
-// a wrong face still stops the compile and a rounding difference does not.
+// A proportional term is what an unshaped measurement would need, and it would cost most of what this
+// check is worth. The disagreements it exists to catch -- a run set in the wrong face, or a script whose
+// shaping the measurement cannot see -- are 6 % and 12 to 16 %, but the ones worth catching EARLY are
+// far smaller than that, and half a percent of a full-width line is a third of a millimetre of overlap
+// admitted silently.
 #let fit(w, body) = context {{
   let drawn = measure(body).width
   assert(
-    drawn <= w * u * 1.005 + u,
+    drawn <= w * u + u,
     message: "drawn " + repr(drawn) + " wide, past the " + repr(w * u) + " the layout allowed for it",
   )
   body
@@ -2197,11 +2240,15 @@ def main(argv: list[Shape] | None = None) -> int:
 
 
 def _variant(stem: str, bold: bool, italic: bool) -> str:
-    """The file name suffix for one variant of a family, and what to do when it does not exist.
+    """The file name suffix for one variant of a family.
 
-    Only Noto Sans ships all four here. A family with no italic falls back to its upright face rather
-    than to nothing -- which is a fallback WITHIN the shipped files, chosen and stated, not the silent
-    resolution to whatever a machine has installed that the one-family rule exists to prevent.
+    Only Noto Sans ships four; the others ship upright faces alone, and asking one of them for an italic
+    gets its upright. That is not a stand-in for a file somebody forgot to add. **Neither Devanagari nor
+    Hebrew has an italic**: Devanagari has no such tradition and emphasises by other means, and Hebrew's
+    historical semi-cursive marks a register rather than emphasis, so an "italic" Hebrew face is a Latin
+    convention mechanically applied. Setting the small print upright in those languages is what their
+    typography actually calls for, and the distinction it carries in Latin -- against the questions
+    around it -- is carried by size in every language anyway.
     """
     if italic and stem == "NotoSans":
         return "BoldItalic" if bold else "Italic"
