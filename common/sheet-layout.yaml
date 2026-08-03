@@ -98,6 +98,16 @@ omit: []
 #
 # The DHIS2 form is untouched: it keeps the question, where the sections are navigation rather than the
 # whole page.
+# What each sheet's FILE is called. Title case is the default and is right for a word -- Surgery, Master --
+# so only the stages whose name is an abbreviation are listed, and a stage added later is named sensibly
+# without anyone remembering this exists. Not the same as the SVG id, which stays lower case because it is
+# an identifier rather than something a person reads when choosing a form to print.
+sheet_names:
+  NEOIPC_STG_BSI: BSI
+  NEOIPC_STG_NEC: NEC
+  NEOIPC_STG_SSI: SSI
+  NEOIPC_STG_HAP: HAP
+
 fold_questions:
   - field: NEOIPC_SSI_INFECTION_TYPE
     into:

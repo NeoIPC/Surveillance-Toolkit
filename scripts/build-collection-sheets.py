@@ -213,6 +213,11 @@ class Sheet:
     title: str
     sections: list[Section] = dc_field(default_factory=list)
 
+    # What the file is called. Separate from `slug`, which stays lower case because it is an SVG id: a
+    # file name is read by a person choosing which form to print, and "bsi" and "hap" are abbreviations
+    # that a person expects to see in capitals.
+    name: str = ""
+
 
 # ── Metadata ────────────────────────────────────────────────────────────────────────────────────────
 
@@ -369,7 +374,17 @@ class LayoutRules:
         self.folded: dict[str, dict[str, str]] = {
             entry["field"]: entry["into"] for entry in (rules.get("fold_questions") or [])
         }
+        self.sheet_names: dict[str, str] = rules.get("sheet_names") or {}
         self.row_units: dict[str, str] = rules.get("row_units") or {}
+
+    def file_name(self, code: str, slug: str) -> str:
+        """What a sheet's file is called, which is read by whoever picks a form to print.
+
+        Title case by default, which is right for a word, and overridden where the stage's name is an
+        abbreviation and a person expects capitals. Listing only the exceptions means a stage added later
+        gets a sensible name without anyone remembering to add one.
+        """
+        return self.sheet_names.get(code) or slug.replace("-", " ").title().replace(" ", "-")
 
     def prints(self, field: Field) -> bool:
         """Whether this field gets a row of its own on a sheet."""
@@ -600,6 +615,7 @@ def build_sheets(meta: Metadata, catalogue: Catalogue, rules: LayoutRules,
         sheet = Sheet(
             code=stage["code"],
             slug=_slug(stage["code"]),
+            name=rules.file_name(stage["code"], _slug(stage["code"])),
             title=catalogue.get(f"programStages/{stage['code']}/NAME", stage["name"]),
         )
         for section in rules.order_sections(stage["code"], sections_by_stage.get(stage["id"], [])):
@@ -654,7 +670,12 @@ def _apply_composites(
     by_code = {s.code: s for s in sheets}
     composed: list[Sheet] = []
     for name, spec in rules.composites.items():
-        sheet = Sheet(code=name.upper(), slug=spec["slug"], title=chrome[spec["title_key"]])
+        sheet = Sheet(
+            code=name.upper(),
+            slug=spec["slug"],
+            title=chrome[spec["title_key"]],
+            name=rules.file_name(name.upper(), spec["slug"]),
+        )
         for block in spec["blocks"]:
             if block == "enrolment":
                 sheet.sections.append(_enrolment_section(meta, catalogue, chrome))
@@ -1635,7 +1656,7 @@ def main(argv: list[str] | None = None) -> int:
                 shown = " ".join(f"U+{ord(c):04X} {c!r}" for c in sorted(chars))
                 failures.append(f"{sheet.code}: {font_name} has no glyph for {shown}")
             continue
-        target = args.out / f"NeoIPC-Core-{sheet.slug}-Sheet{suffix}.svg"
+        target = args.out / f"NeoIPC-Core-{sheet.name}-Sheet{suffix}.svg"
         target.write_text(writer.sheet_svg(sheet, body), encoding="utf-8", newline="\n")
         # The spare is how much page is left over, and it is the only honest measure of how much longer a
         # translation of this sheet may be before it stops fitting. Reported on every run because the
