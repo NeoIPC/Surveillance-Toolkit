@@ -84,10 +84,6 @@ MARK = 260                              # a choose-one circle or choose-any squa
 MARK_GAP = 110                          # between a mark and its own word: deliberately tighter
 OPTION_SEP = 820                        # between one option and the next, so the pairing reads
 COMMENTS_MIN = 1200                     # below this the leftover is a gap, not a usable writing space
-# How far a writing line runs when it is drawn inside a block rather than closing a row. Left to reach the
-# right margin it read as a rule across the page rather than as a field to write one organism's name on --
-# and an organism name is a few words, not a sentence.
-WRITE_IN_MAX = 6500
 
 # The answer column: ONE x per sheet where every answer that shares its label's line begins -- a space to
 # write in, a Yes/No pair, an organism's resistance run. Before it, each row started its answer wherever
@@ -766,14 +762,22 @@ class SvgWriter:
             "    rect.frame { fill: none; stroke: #000; stroke-width: 20; }",
             "    rect.mark { fill: none; stroke: #000; stroke-width: 18; }",
             "    circle.mark { fill: none; stroke: #000; stroke-width: 18; }",
-            "    line.rule { stroke: #000; stroke-width: 12; }",
-            "    line.write { stroke: #000; stroke-width: 12; }",
+            # Three weights, and the spread between them is what makes the grid readable rather than the
+            # absolute values: the frame at 0.20 mm, a row or block boundary at 0.16, and a row inside a
+            # block at 0.10. A first attempt used half the row weight for the inner rule, 0.06 mm, which
+            # is sub-pixel on screen and marginal on paper -- it was emitted on every sheet and visible on
+            # none, which looks exactly like not having been emitted at all.
+            "    line.rule { stroke: #000; stroke-width: 16; }",
+            # Between two rows of one slot. Every row is a cell of a ruled table, so every row is closed --
+            # but a slot and the fields hanging off it are still one thing, and ruling them all alike
+            # dissolves that. The lighter stroke closes the cell without breaking up the block.
+            "    line.hair { stroke: #000; stroke-width: 10; }",
             # The answer column's own stroke. Drawn per row rather than as one full-height line, because
             # the rows that span the sheet -- a criterion with its tick at the left, a question whose
             # choices are listed beneath it -- have no cell for it to bound, and a line through their
             # text would be a defect rather than a grid. Consecutive bounded rows abut, so the strokes
             # read as one column wherever there actually is one.
-            "    line.column { stroke: #000; stroke-width: 12; }",
+            "    line.column { stroke: #000; stroke-width: 16; }",
             # The inlined logo's paths carry these classes. Defined here rather than kept inside the
             # symbol so the sheet has exactly one stylesheet -- and because a symbol whose own <style>
             # was dropped renders in the default fill, which is black, silently.
@@ -1024,12 +1028,13 @@ def _emit_section(out: list[str], section: Section, y: int, writer: SvgWriter) -
 
     rows = _pair_ticks(_collapse_groups(section.fields, writer), writer)
     for index, row in enumerate(rows):
-        # A rule closes a GROUP, not every field: a slot and its children are one thing on the page, and
-        # ruling between them would break up the block the '- ' convention exists to express.
+        # EVERY row is closed, because every row is a cell of a ruled table. A space to write in that is
+        # bounded on all four sides -- the frame, the answer column, and the rules above and below it --
+        # needs no line of its own, which is what a writing rule floating inside an unruled block looked
+        # like: a stray mark rather than a field.
         #
-        # The row that CLOSES a group has to know, because that rule is then the line it is written on --
-        # which is what the published forms do. Drawing a writing rule as well put two lines half a
-        # millimetre apart at the foot of every such box, close enough to read as a printing fault.
+        # The weight carries what the rule used to carry by its presence: a slot and the fields hanging
+        # off it stay one block, separated by hairlines, and the full rule falls at the block's edge.
         following = rows[index + 1][0] if index + 1 < len(rows) else None
         closes = following is None or not following.is_child
         if len(row) == 2:
@@ -1037,8 +1042,8 @@ def _emit_section(out: list[str], section: Section, y: int, writer: SvgWriter) -
         else:
             emit = _emit_child if row[0].is_child else _emit_field
             y = emit(out, row[0], y, writer, closes)
-        if closes:
-            out.append(f'  <line class="rule" x1="{MARGIN_X}" y1="{y}" x2="{MARGIN_X + CONTENT_W}" y2="{y}"/>')
+        weight = "rule" if closes else "hair"
+        out.append(f'  <line class="{weight}" x1="{MARGIN_X}" y1="{y}" x2="{MARGIN_X + CONTENT_W}" y2="{y}"/>')
     return y
 
 
@@ -1186,16 +1191,8 @@ def _emit_child(out: list[str], field: Field, y: int, writer: SvgWriter, closes_
             return _column(out, top, baseline + writer.face.pad_at(OPTION_SIZE), writer)
 
     if not options:
-        bottom = baseline + writer.face.pad_at(OPTION_SIZE)
-        # A write-in cell is bounded on the left by the column and below by the rule closing the group.
-        # Only where that rule is elsewhere -- another child follows this one -- does the cell need a
-        # line of its own.
-        if not closes_group:
-            end = min(writer.answer_text_x + WRITE_IN_MAX, right)
-            out.append(
-                f'  <line class="write" x1="{writer.answer_text_x}" y1="{bottom}" x2="{end}" y2="{bottom}"/>'
-            )
-        return _column(out, top, bottom, writer)
+        # Bounded by the grid, like every other cell.
+        return _column(out, top, baseline + writer.face.pad_at(OPTION_SIZE), writer)
 
     for option in options:
         writer._text(option, OPTION_SIZE)
@@ -1282,14 +1279,9 @@ def _emit_field(out: list[str], field: Field, y: int, writer: SvgWriter, closes_
 
     y += writer.face.pad_at(LABEL_SIZE)
     if answered_here:
-        # The rule closing the row IS the line written on, which is what the published forms do and what
-        # keeps a row showing one line at its foot rather than two a fraction of a millimetre apart. A
-        # field that heads a group of children is the exception: its rule is several rows further down.
-        if not closes_group:
-            end = min(writer.answer_text_x + WRITE_IN_MAX, MARGIN_X + CONTENT_W - TEXT_INSET)
-            out.append(
-                f'  <line class="write" x1="{writer.answer_text_x}" y1="{y}" x2="{end}" y2="{y}"/>'
-            )
+        # No writing line: the cell is the box formed by the frame, the column and the rules above and
+        # below this row. Drawing one inside it would either double the rule beneath or float in the
+        # middle of the cell, and both were tried.
         _column(out, top, y, writer)
     return y
 
@@ -1312,13 +1304,6 @@ def _emit_paired_row(out: list[str], field: Field, top: int, y: int, baseline: i
     out.append(f'  <text class="label" x="{unit_x}" y="{baseline}">{_esc(field.trailing)}</text>')
 
     bottom = y + writer.face.pad_at(LABEL_SIZE)
-    if not closes_group:
-        out.append(
-            f'  <line class="write" x1="{writer.answer_text_x}" y1="{bottom}" x2="{divider}" y2="{bottom}"/>'
-        )
-        out.append(
-            f'  <line class="write" x1="{divider + TEXT_INSET}" y1="{bottom}" x2="{unit_x - 200}" y2="{bottom}"/>'
-        )
     _column(out, top, bottom, writer)
     out.append(f'  <line class="column" x1="{divider}" y1="{top}" x2="{divider}" y2="{bottom}"/>')
     return bottom
