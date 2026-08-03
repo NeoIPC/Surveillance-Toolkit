@@ -4,7 +4,7 @@
        between the mark and the wordmark and their vertical alignment are set here, and both are
        measured off LOGO_NEOIPC_2.png, the official horizontal artwork, for which no vector source
        exists: gap = 0.2096 and wordmark top offset = 0.2222, each as a fraction of the mark's
-       width. The visual guideline forbids altering the spacing between the elements, so nothing
+       width. The spacing between the logo's elements is not ours to alter, so nothing
        here is chosen -- the component proportions match the official raster to within a percent. -->
   <style>
     .brand-blue { fill: #0083c1; }

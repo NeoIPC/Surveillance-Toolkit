@@ -215,28 +215,29 @@ waiting behind them — its need is more urgent, not less, because its boxes are
 long. And its eight strings move out of `.resx` with it: they are already whole sentences, so nothing
 about them needs splitting by a translator, and the wrapping was never theirs to think about.
 
-## Palette: two primaries from the guideline, everything else derived from them
+## Palette: two brand colours, everything else derived from them
 
-The NeoIPC visual guideline names exactly two primary colours, and a generated sheet uses no third hue.
-Recorded here so that "on brand" is checkable rather than asserted:
+A generated sheet uses no third hue. Recorded here so that "on brand" is checkable rather than asserted:
 
-| value | where it comes from |
+| value | what it is |
 |---|---|
-| `#0083c1` | **from the guideline** — PANTONE 7460 C, the brand blue. Headings and the logo's blue. |
-| `#ff9015` | **from the guideline** — PANTONE 1495 C, the brand orange. The logo's orange. |
+| `#0083c1` | the brand blue, as carried by `common/img/NeoIPC-Logo.svg`. Headings. |
+| `#ff9015` | the brand orange, from the same artwork. |
 | `#cfe7f4` | derived: a tint of the brand blue, light enough to carry black text over it. Section bands. |
 | `#ffe4c4` | derived: a tint of the brand orange. The fields that never leave the hospital. |
 | black, greys | neutrals — rules, text and the solid edge bar. |
 
-Two things this rules out, both of which had crept in. An **earlier accent of `#2e74b5`** was a word-processor
-default that merely resembled the brand blue; it was never sampled from anything. And the hand-drawn
-master sheet shades its patient block in **`#E0D3DE`**, a mauve that appears in no brand document — the
-generated sheets use a tint of the brand orange for that job instead, so the page still carries two hues
-and the difference reads as deliberate rather than as an accident of whoever drew it.
+Both brand values are the logo artwork's own, normalised: the converted vector carried `#0083c2` and
+`#ff9016`, a rounding artifact of the colour conversion.
 
-The tints are derived rather than specified, which is the honest description: the guideline gives the two
-primaries and a grey scale, and says nothing about backgrounds behind body text. Deriving from a primary
-keeps that decision inside the brand instead of importing a colour from outside it.
+Two things this rules out, both of which had crept in. An **earlier accent of `#2e74b5`** was a
+word-processor default that merely resembled the brand blue and was never sampled from anything. And the
+hand-drawn master sheet shades its patient block in **`#E0D3DE`**, a mauve that belongs to no NeoIPC
+artwork — generated sheets use a tint of the brand orange for that job, so the page carries two hues and
+the difference reads as deliberate.
+
+The tints are derived rather than given, which is the honest description. Deriving them from a brand
+colour keeps the decision inside the palette instead of importing a hue from outside it.
 
 **Colour is never the only signal.** These sheets are printed, routinely in greyscale, where every tint
 collapses to a shade and the distinction between a section band and the non-transmitted block disappears.

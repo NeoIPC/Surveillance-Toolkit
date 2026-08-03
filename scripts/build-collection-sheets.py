@@ -79,9 +79,9 @@ SUPERSCRIPTS = "¹²³⁴⁵⁶⁷⁸⁹"
 SOFT_HYPHEN = "­"
 HYPHEN = "-"
 
-# The brand's two primary colours, from the NeoIPC visual guideline: PANTONE 7460 C and 1495 C. Taken
-# from the guideline rather than sampled from an artifact -- an earlier guess of #2e74b5 was a Word
-# default that merely looked similar.
+# The brand's two colours, as carried by common/img/NeoIPC-Logo.svg. An earlier accent of #2e74b5 was a
+# word-processor default that merely looked similar and was sampled from nothing; see
+# docs/data-collection-sheet-generation.md for the palette and how each derived tint is arrived at.
 ACCENT = "#0083c1"
 BRAND_ORANGE = "#ff9015"
 BAND_FILL = "#cfe7f4"                   # a tint of the brand blue, light enough to print behind text
@@ -98,11 +98,11 @@ NOTRANSMIT_BAR = 60                     # the solid edge that carries the distin
 # the standalone print forms, which do not live in the protocol's image directory. prawn-svg renders
 # <symbol> and <use>, verified rather than assumed.
 #
-# The guideline gives the vertical lockup a 30 mm minimum and forbids altering its proportions, so the
-# width below is a deliberate margin above that minimum and the height is derived from the artwork's own
-# aspect rather than chosen.
+# The logo has a minimum legible size and its proportions are not ours to alter, so the width below sits
+# deliberately above that minimum and the height is derived from the artwork's own aspect rather than
+# chosen. See common/img/README.md before changing it.
 LOGO_FILE = "NeoIPC-Logo-Horizontal.svg"
-LOGO_W = 4200                           # 42 mm, above the guideline's 40 mm minimum for this lockup
+LOGO_W = 4200                           # 42 mm
 
 
 @dataclass
