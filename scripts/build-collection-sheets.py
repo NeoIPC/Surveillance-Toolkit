@@ -202,6 +202,9 @@ class Section:
     # depend on them for meaning, and two rows on the surgical-site sheet are the same words under
     # different headings.
     banded: bool = True
+    # The case definition printed under the band, where the question that used to distinguish this section
+    # from its siblings has been folded away. Empty on every section that still has its question.
+    definition: str = ""
 
 
 @dataclass
@@ -635,7 +638,7 @@ def build_sheets(meta: Metadata, catalogue: Catalogue, rules: LayoutRules,
                     continue
                 link = links.get(uid, {})
                 model.fields.append(_field_of(meta, catalogue, element, link))
-            _fold_definition(model, meta, catalogue, rules, chrome)
+            _fold_definition(model, rules)
             sheet.sections.append(model)
         if sheet.sections:
             sheets.append(sheet)
@@ -691,36 +694,25 @@ def _enrolment_section(meta: Metadata, catalogue: Catalogue, chrome: dict[str, s
     return section
 
 
-def _fold_definition(section: Section, meta: Metadata, catalogue: Catalogue, rules: LayoutRules,
-                     chrome: dict[str, str]) -> None:
-    """Title a section with the case it covers, where a folded question's option defines it.
+def _fold_definition(section: Section, rules: LayoutRules) -> None:
+    """Print a section's own description, where the question that used to distinguish it has been folded.
 
-    Both halves are strings that already exist and are already translated -- the section's own name, and
-    the option's own text. Only the join belongs to the layout, and it is a figure string rather than a
-    separator written here, because where two clauses meet is a decision a language makes.
+    The section keeps its short name and gains the definition beneath it, taken verbatim from the metadata
+    rather than assembled. Two earlier attempts were worse and both are worth remembering.
+
+    Renaming the section to carry the case definition would have put a THIRD statement of it in the
+    metadata, and a lossy one: the descriptions here carry the 30-day and 90-day windows that the
+    question's options omit, so a name built from an option would promote the shorter version to a heading
+    and leave the complete one unused.
+
+    Composing the heading from the section's name plus the option's text -- both already translated, so
+    apparently free -- was worse still. The option is a sentence fragment written to complete "Infection
+    involves ...", and a language whose verb governs the case of what follows leaves it stranded when the
+    verb is removed. The translator would never see it either: they translate one string, shown as an
+    option under a question, with nothing to tell them it is also half a heading.
     """
-    for field_code, mapping in rules.folded.items():
-        option_code = mapping.get(section.code)
-        if option_code is None:
-            continue
-        element = next((e for e in meta.elements if e["code"] == field_code), None)
-        if element is None:
-            raise LookupError(f"fold_questions names {field_code}, which is not a data element")
-        option_set = meta.option_set_by_id[element["optionSet"]]
-        option = next(
-            (o for o in meta.options_by_set[option_set["id"]] if o["code"] == option_code), None
-        )
-        if option is None:
-            raise LookupError(
-                f"fold_questions maps {section.code} to option {option_code!r}, which "
-                f"{option_set['code']} does not define"
-            )
-        definition = catalogue.get(
-            f"options/{option_set['code']}/{option['code']}/NAME", option["name"]
-        ).lstrip(". ")
-        section.title = chrome["section_with_definition"].format(
-            section=section.title, definition=definition
-        )
+    if section.code in {code for mapping in rules.folded.values() for code in mapping}:
+        section.definition = section.description.strip()
 
 
 def _event_date_field(catalogue: Catalogue, stage: dict) -> Field:
@@ -1165,6 +1157,22 @@ def _emit_section(out: list[str], section: Section, y: int, writer: SvgWriter) -
             out.append(f'  <text{ident} class="section" x="{PAGE_W // 2}" y="{ty}">{_esc(line)}</text>')
             ty += SECTION_SIZE + LINE_GAP
         y += band_h
+
+    if section.definition:
+        # The case this section covers, in the protocol's own words, standing where the question that
+        # asked which case applies used to be. It says more than that question did: the options never
+        # carried the 30-day and 90-day windows.
+        writer._text(section.definition, SMALL_SIZE)
+        y += writer.face.pad_at(SMALL_SIZE)
+        for line in _fit(writer, section.definition, SMALL_SIZE, CONTENT_W - 2 * TEXT_INSET,
+                         section.code, "definition"):
+            out.append(
+                f'  <text class="legend" x="{TEXT_X}" y="{y + writer.face.cap_at(SMALL_SIZE)}">'
+                f'{_esc(line)}</text>'
+            )
+            y += SMALL_SIZE + LINE_GAP
+        y += writer.face.pad_at(SMALL_SIZE) - LINE_GAP
+        out.append(f'  <line class="hair" x1="{MARGIN_X}" y1="{y}" x2="{MARGIN_X + CONTENT_W}" y2="{y}"/>')
 
     rows = _pair_ticks(_collapse_groups(section.fields, writer), writer)
     for index, row in enumerate(rows):
