@@ -72,6 +72,8 @@ LINE_GAP = 90                           # leading between wrapped lines of one t
 # this is clearance on top of the letters rather than a guess that had to cover them. It was 70 while it
 # was also standing in for the descender it did not know about, which is what made rows bottom-heavy.
 ROW_PAD = 45
+# How far a descender must stay clear of the rule closing its row.
+DESCENDER_CLEARANCE = 25
 SECTION_BAND_H = 460
 MARK = 260                              # a choose-one circle or choose-any square
 MARK_GAP = 180                          # between a mark and its text
@@ -396,6 +398,17 @@ class Face:
 
     def cap_at(self, size: int) -> int:
         return round(self._cap * size)
+
+    def pad_at(self, size: int) -> int:
+        """Equal space above the capitals and below the baseline.
+
+        Balancing the full ink box instead -- caps above the baseline, descender below -- is correct
+        typographically and looks wrong here, because most labels on a form have no descender at all. The
+        reserved space below then reads as emptiness and the row looks top-heavy, which is the same
+        complaint as before with the sign reversed. So the padding is symmetric about the baseline, and
+        the descender clears INTO the lower half rather than being added beneath it.
+        """
+        return max(ROW_PAD, self.descent_at(size) + DESCENDER_CLEARANCE)
 
     def missing(self, text: str) -> set[str]:
         return {ch for ch in text if ord(ch) not in self.cmap and not ch.isspace()}
@@ -858,7 +871,7 @@ def _emit_patient_block(out: list[str], y: int, writer: SvgWriter) -> int:
         for line in _fit(writer, label, LABEL_SIZE, CONTENT_W - 360, key, "label"):
             out.append(f'  <text class="label" x="{TEXT_X}" y="{y + writer.face.cap_at(LABEL_SIZE)}">{_esc(line)}</text>')
             y += LABEL_SIZE + LINE_GAP
-        y += writer.face.descent_at(LABEL_SIZE) + ROW_PAD - LINE_GAP
+        y += writer.face.pad_at(LABEL_SIZE) - LINE_GAP
         out.append(f'  <line class="rule" x1="{MARGIN_X}" y1="{y}" x2="{MARGIN_X + CONTENT_W}" y2="{y}"/>')
 
     note = writer.chrome["patient_note"]
@@ -867,7 +880,7 @@ def _emit_patient_block(out: list[str], y: int, writer: SvgWriter) -> int:
     for line in _fit(writer, note, SMALL_SIZE, CONTENT_W - 360, "patient_note", "note"):
         out.append(f'  <text class="legend" x="{TEXT_X}" y="{y + writer.face.cap_at(SMALL_SIZE)}">{_esc(line)}</text>')
         y += SMALL_SIZE + LINE_GAP
-    y += writer.face.descent_at(SMALL_SIZE) + ROW_PAD - LINE_GAP
+    y += writer.face.pad_at(SMALL_SIZE) - LINE_GAP
     out.append(f'  <line class="rule" x1="{MARGIN_X}" y1="{y}" x2="{MARGIN_X + CONTENT_W}" y2="{y}"/>')
 
     height = y - block_top
@@ -970,7 +983,7 @@ def _emit_child(out: list[str], field: Field, y: int, writer: SvgWriter) -> int:
     """
     label = field.short_label
     writer._text(label, OPTION_SIZE)
-    y += ROW_PAD // 2
+    y += writer.face.pad_at(OPTION_SIZE) // 2
 
     x = TEXT_X + OPTION_INDENT
     out.append(f'  <text class="child" x="{x}" y="{y + writer.face.cap_at(OPTION_SIZE)}">{_esc(label)}</text>')
@@ -985,11 +998,11 @@ def _emit_child(out: list[str], field: Field, y: int, writer: SvgWriter) -> int:
             options, radio = [writer.chrome["boolean_yes"], writer.chrome["boolean_no"]], True
         elif style == "tick":
             _mark(out, field.code.lower().replace("_", "-"), int(x), y + 30, radio=False)
-            return baseline + writer.face.descent_at(OPTION_SIZE) + LINE_GAP
+            return baseline + writer.face.pad_at(OPTION_SIZE)
 
     if not options:
         out.append(f'  <line class="write" x1="{int(x)}" y1="{baseline + 60}" x2="{right}" y2="{baseline + 60}"/>')
-        return baseline + writer.face.descent_at(OPTION_SIZE) + LINE_GAP
+        return baseline + writer.face.pad_at(OPTION_SIZE)
 
     for option in options:
         writer._text(option, OPTION_SIZE)
@@ -1013,7 +1026,7 @@ def _emit_field(out: list[str], field: Field, y: int, writer: SvgWriter) -> int:
     writer._text(label, LABEL_SIZE)
     style = writer.layout.boolean_style(field)
 
-    y += ROW_PAD
+    y += writer.face.pad_at(LABEL_SIZE)
     label_x = TEXT_X
     if style == "tick":
         # The tick sits on the label's own line: a criterion in a list reads as one thing to mark, not as
@@ -1040,7 +1053,7 @@ def _emit_field(out: list[str], field: Field, y: int, writer: SvgWriter) -> int:
         out.append(f'  <line class="write" x1="{int(start)}" y1="{baseline}" x2="{int(second_x) - 300}" y2="{baseline}"/>')
         out.append(f'  <line class="write" x1="{int(second_x)}" y1="{baseline}" x2="{int(unit_x) - 200}" y2="{baseline}"/>')
         out.append(f'  <text class="label" x="{int(unit_x)}" y="{y}">{_esc(field.trailing)}</text>')
-        return y + writer.face.descent_at(LABEL_SIZE) + ROW_PAD
+        return y + writer.face.pad_at(LABEL_SIZE)
 
     options = field.options
     radio = field.radio
@@ -1050,7 +1063,7 @@ def _emit_field(out: list[str], field: Field, y: int, writer: SvgWriter) -> int:
     if options:
         y = _emit_options(out, field, options, radio, y + LINE_GAP, writer)
 
-    return y + writer.face.descent_at(LABEL_SIZE) + ROW_PAD
+    return y + writer.face.pad_at(LABEL_SIZE)
 
 
 def _emit_options(out: list[str], field: Field, options: list[str], radio: bool, y: int, writer: SvgWriter) -> int:
