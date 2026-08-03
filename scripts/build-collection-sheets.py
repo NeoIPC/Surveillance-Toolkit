@@ -721,8 +721,21 @@ class SvgWriter:
             self.footnotes.append(key)
         return SUPERSCRIPTS[self.footnotes.index(key)]
 
+    def face_of(self, bold: bool) -> Face:
+        """The face a run is actually drawn in.
+
+        Labels and child labels are bold, and bold is wider. Measuring them in the regular face
+        under-measured every one of them, which is not a rounding error: it decided where the answer
+        column could sit, whether a label wrapped, whether two criteria could share a row, and whether the
+        sheet was declared to fit -- and it let a fitted label overrun into the column it was fitted
+        against, by little enough to look like a rendering artifact rather than a measurement bug.
+
+        Vertical metrics stay with the regular face so every row keeps one rhythm.
+        """
+        return self.bold if bold else self.face
+
     def _text(self, text: str, size: int, bold: bool = False) -> None:
-        face = self.bold if bold else self.face
+        face = self.face_of(bold)
         absent = face.missing(text)
         if absent:
             self.missing.setdefault(face.path.name, set()).update(absent)
@@ -960,10 +973,11 @@ def _emit_patient_block(out: list[str], y: int, writer: SvgWriter) -> int:
 
     for key in ("patient_identifier", "patient_name"):
         label = writer.chrome[key]
-        writer._text(label, LABEL_SIZE)
+        writer._text(label, LABEL_SIZE, bold=True)
         top = y
         y += writer.face.pad_at(LABEL_SIZE)
-        for line in _fit(writer, label, LABEL_SIZE, writer.answer_x - COLUMN_GAP - TEXT_X, key, "label"):
+        for line in _fit(writer, label, LABEL_SIZE, writer.answer_x - COLUMN_GAP - TEXT_X, key, "label",
+                         bold=True):
             out.append(f'  <text class="label" x="{TEXT_X}" y="{y + writer.face.cap_at(LABEL_SIZE)}">{_esc(line)}</text>')
             y += LABEL_SIZE + LINE_GAP
         y += writer.face.pad_at(LABEL_SIZE) - LINE_GAP
@@ -1051,7 +1065,7 @@ def _pair_ticks(fields: list[Field], writer: SvgWriter) -> list[tuple[Field, ...
 
     def fits(field: Field) -> bool:
         label = field.label + (f" ({writer.chrome['required']})" if field.compulsory else "")
-        return writer.face.width(label, LABEL_SIZE) + MARK + MARK_GAP + PAIR_GUTTER <= half
+        return writer.bold.width(label, LABEL_SIZE) + MARK + MARK_GAP + PAIR_GUTTER <= half
 
     rows: list[tuple[Field, ...]] = []
     index = 0
@@ -1075,7 +1089,7 @@ def _emit_tick_pair(out: list[str], pair: tuple[Field, ...], y: int, writer: Svg
     baseline = y + writer.face.cap_at(LABEL_SIZE)
     for field, x in zip(pair, (TEXT_X, MARGIN_X + CONTENT_W // 2)):
         label = field.label + (f" ({writer.chrome['required']})" if field.compulsory else "")
-        writer._text(label, LABEL_SIZE)
+        writer._text(label, LABEL_SIZE, bold=True)
         _mark(out, _ident(field), x, baseline, False, writer, LABEL_SIZE)
         out.append(
             f'  <text class="label" x="{x + MARK + MARK_GAP}" y="{baseline}">{_esc(label)}</text>'
@@ -1149,13 +1163,14 @@ def _emit_child(out: list[str], field: Field, y: int, writer: SvgWriter, closes_
     resistance rows stepped visibly rightwards down the sheet and no two rows agreed on anything.
     """
     label = field.short_label
-    writer._text(label, OPTION_SIZE)
+    writer._text(label, OPTION_SIZE, bold=True)
     top = y
     y += writer.face.pad_at(OPTION_SIZE) // 2
 
     x = TEXT_X + OPTION_INDENT
     baseline = y + writer.face.cap_at(OPTION_SIZE)
-    for line in _fit(writer, label, OPTION_SIZE, writer.answer_x - COLUMN_GAP - x, field.code, "label"):
+    for line in _fit(writer, label, OPTION_SIZE, writer.answer_x - COLUMN_GAP - x, field.code, "label",
+                     bold=True):
         out.append(f'  <text class="child" x="{x}" y="{baseline}">{_esc(line)}</text>')
         baseline += OPTION_SIZE + LINE_GAP
     baseline -= OPTION_SIZE + LINE_GAP
@@ -1203,7 +1218,7 @@ def _emit_child(out: list[str], field: Field, y: int, writer: SvgWriter, closes_
 def _emit_field(out: list[str], field: Field, y: int, writer: SvgWriter, closes_group: bool = True) -> int:
     """One field is one full-width row: bold label, then whatever it needs to be answered."""
     label = field.label + (f" ({writer.chrome['required']})" if field.compulsory else "")
-    writer._text(label, LABEL_SIZE)
+    writer._text(label, LABEL_SIZE, bold=True)
     style = writer.layout.boolean_style(field)
 
     options, radio = field.options, field.radio
@@ -1240,7 +1255,7 @@ def _emit_field(out: list[str], field: Field, y: int, writer: SvgWriter, closes_
 
     edge = writer.answer_x - COLUMN_GAP if answered_here else MARGIN_X + CONTENT_W - 180
     baseline = y + writer.face.cap_at(LABEL_SIZE)
-    for line in _fit(writer, label, LABEL_SIZE, edge - label_x, field.code, "label"):
+    for line in _fit(writer, label, LABEL_SIZE, edge - label_x, field.code, "label", bold=True):
         out.append(f'  <text class="label" x="{label_x}" y="{baseline}">{_esc(line)}</text>')
         y += LABEL_SIZE + LINE_GAP
         baseline += LABEL_SIZE + LINE_GAP
@@ -1288,9 +1303,9 @@ def _emit_paired_row(out: list[str], field: Field, top: int, y: int, baseline: i
     of the same weight and kind as the answer column's, so the row reads as three cells of one table
     rather than as two underscores floating in it.
     """
-    writer._text(field.trailing, LABEL_SIZE)
+    writer._text(field.trailing, LABEL_SIZE, bold=True)
     right = MARGIN_X + CONTENT_W - 180
-    unit_x = int(right - writer.face.width(field.trailing, LABEL_SIZE))
+    unit_x = int(right - writer.bold.width(field.trailing, LABEL_SIZE))
     divider = unit_x - 2400
     # The unit word sits on the label's own baseline. Placing it at the row's foot instead dropped it
     # below every other word on its line by the difference between the font size and the cap height.
@@ -1379,15 +1394,17 @@ def _ident(field: Field) -> str:
     return field.code.lower().replace("_", "-")
 
 
-def _fit(writer: SvgWriter, text: str, size: int, width: int, code: str, what: str) -> list[str]:
+def _fit(writer: SvgWriter, text: str, size: int, width: int, code: str, what: str,
+         bold: bool = False) -> list[str]:
     """Wrap to the cell, and refuse to emit anything that still does not fit.
 
     `wrap` cannot break inside a word, so a single token wider than the cell comes back as its own
     over-long line. That is the German-compound case, and emitting it anyway is precisely what the XSLT
     wrapper did -- silently, because character counting cannot tell that it happened.
     """
-    lines = writer.face.wrap(text, size, width)
-    widest = max(writer.face.width(line, size) for line in lines)
+    face = writer.face_of(bold)
+    lines = face.wrap(text, size, width)
+    widest = max(face.width(line, size) for line in lines)
     if widest > width:
         raise Overflow(
             f"{code}: the {what} {text!r} contains a word wider than its {width}-unit cell "
