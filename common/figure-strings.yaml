@@ -157,6 +157,12 @@ resistance_organism_specific_note: >-
 # being read aloud, and so that a translator can choose a form that fits the language.
 required: "required"
 
+# Joins a section's own name to the definition of the case it covers, where a question on the sheet asks
+# only which section applies. The two halves are both existing translated strings -- the section's name and
+# the option's text -- so nothing normative is rewritten here; what this owns is the join, which is a
+# layout decision and differs by language. Keep the placeholders; their order may change.
+section_with_definition: "{section} – {definition}"
+
 # The unit closing a row that carries two values -- "Antibiotic substance 1: ____ : __ days". It is the
 # layout's own word rather than part of any field's name, because the row it closes is a layout decision.
 unit_days: "days"

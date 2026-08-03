@@ -81,6 +81,30 @@ section_order:
 # added and nothing says so.
 omit: []
 
+# A question whose every answer is already a section of the same sheet.
+#
+# The surgical-site sheet asks "Infection involves ..." with three options, and then rules three sections
+# named after exactly those three cases. The question and the headings are the same distinction printed
+# twice, and the question costs four rows -- a label and three options -- to say what the reader can see.
+#
+# So the definition moves into the heading it defines and the question comes off the sheet. Each section
+# is titled with its own name joined to the option's own text, both already translated; the join is a
+# figure string, because where the two halves meet is a layout decision and differs by language.
+#
+# What this trades is worth stating: the platform still holds the field, and on paper its value is now
+# implied by which section the collector filled in rather than marked explicitly. That is sound where the
+# criteria are what define the case -- which is what these three sections are -- and it does mean a
+# patient meeting criteria in more than one section is resolved at data entry rather than at the cot side.
+#
+# The DHIS2 form is untouched: it keeps the question, where the sections are navigation rather than the
+# whole page.
+fold_questions:
+  - field: NEOIPC_SSI_INFECTION_TYPE
+    into:
+      NEOIPC_SSI_STG_SECT_SUPERFICIAL_INCISIONAL: "1"
+      NEOIPC_SSI_STG_SECT_DEEP_INCISIONAL: "2"
+      NEOIPC_SSI_STG_SECT_ORGAN_SPACE: "3"
+
 # A field that continues the row of the one before it, rather than starting its own.
 #
 # `NEOIPC_SURVEILLANCE_END_AB_SUBST_01_DAYS` is the number of days of the substance named in

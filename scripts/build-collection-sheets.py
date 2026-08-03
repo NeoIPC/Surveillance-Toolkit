@@ -362,6 +362,11 @@ class LayoutRules:
         self.omitted: set[str] = set(rules.get("omit") or [])
         self.omitted_suffixes: tuple[str, ...] = tuple(rules.get("omit_suffixes") or ())
         self.keep_calculated: set[str] = set(rules.get("keep_calculated") or [])
+        # field code -> {section code: option code}. A question whose every answer names a section of the
+        # same sheet: the answer moves into the heading and the question comes off the page.
+        self.folded: dict[str, dict[str, str]] = {
+            entry["field"]: entry["into"] for entry in (rules.get("fold_questions") or [])
+        }
         self.row_units: dict[str, str] = rules.get("row_units") or {}
 
     def prints(self, field: Field) -> bool:
@@ -626,8 +631,11 @@ def build_sheets(meta: Metadata, catalogue: Catalogue, rules: LayoutRules,
                     raise LookupError(f"section {section['code']} references unknown element {uid}")
                 if element["code"] in meta.calculated and element["code"] not in rules.keep_calculated:
                     continue
+                if element["code"] in rules.folded:
+                    continue
                 link = links.get(uid, {})
                 model.fields.append(_field_of(meta, catalogue, element, link))
+            _fold_definition(model, meta, catalogue, rules, chrome)
             sheet.sections.append(model)
         if sheet.sections:
             sheets.append(sheet)
@@ -681,6 +689,38 @@ def _enrolment_section(meta: Metadata, catalogue: Catalogue, chrome: dict[str, s
             )
         )
     return section
+
+
+def _fold_definition(section: Section, meta: Metadata, catalogue: Catalogue, rules: LayoutRules,
+                     chrome: dict[str, str]) -> None:
+    """Title a section with the case it covers, where a folded question's option defines it.
+
+    Both halves are strings that already exist and are already translated -- the section's own name, and
+    the option's own text. Only the join belongs to the layout, and it is a figure string rather than a
+    separator written here, because where two clauses meet is a decision a language makes.
+    """
+    for field_code, mapping in rules.folded.items():
+        option_code = mapping.get(section.code)
+        if option_code is None:
+            continue
+        element = next((e for e in meta.elements if e["code"] == field_code), None)
+        if element is None:
+            raise LookupError(f"fold_questions names {field_code}, which is not a data element")
+        option_set = meta.option_set_by_id[element["optionSet"]]
+        option = next(
+            (o for o in meta.options_by_set[option_set["id"]] if o["code"] == option_code), None
+        )
+        if option is None:
+            raise LookupError(
+                f"fold_questions maps {section.code} to option {option_code!r}, which "
+                f"{option_set['code']} does not define"
+            )
+        definition = catalogue.get(
+            f"options/{option_set['code']}/{option['code']}/NAME", option["name"]
+        ).lstrip(". ")
+        section.title = chrome["section_with_definition"].format(
+            section=section.title, definition=definition
+        )
 
 
 def _event_date_field(catalogue: Catalogue, stage: dict) -> Field:
