@@ -121,6 +121,18 @@ property was twice looked for in the wrong file and the wrong language.
 | Source string flags, including `priority:N` | `po/<catalogue>.pot` | yes |
 | Explanation, labels, screenshots | Weblate's database only | yes (reset does not clear them) |
 | Approval state, comments, suggestions, votes | Weblate's database only | not represented in gettext at all |
+| Which languages a component has | Weblate's database only | yes, but nothing here can restore or assert it |
+
+**The language set is the one of those with no representation in this repository at all, and it drifted.**
+A component's languages are added one component at a time and do not propagate, so the six components had
+settled into three different sets: `he` and `uk` in the metadata component and the two glossaries only,
+`es` and `it` in everything *except* metadata. Nothing in git could have shown that, and no gate here can
+check it — which is the argument for the **Add missing languages** add-on
+([`weblate.consistency.languages`](https://docs.weblate.org/en/latest/admin/addons.html#addon-weblate-consistency-languages))
+rather than for remembering to add each language six times. Unlike most add-ons it is scoped to the whole
+project, it runs on installation, daily, and whenever a language is added, and it only ever **adds** —
+so a language deliberately withheld from one component is not expressible once it is on. Its own stated
+limit is that components shared *from another project* are outside its reach; none of NeoIPC's are.
 
 **Storing a source flag is not the same as it taking effect, and `priority:N` is the case where they come
 apart.** Observed on the live instance, three independent ways agreeing:
@@ -188,7 +200,7 @@ how the flag reaches a translator.
 
 ## Settings that must not diverge
 
-These are uniform across all five components. Changing one on a single component is drift unless a
+These are uniform across all six bilingual components. Changing one on a single component is drift unless a
 reason is added below.
 
 | Setting | Value | Why it is load-bearing |
@@ -310,7 +322,7 @@ clearly above the nomenclature, which is identical in most languages.
 
 **`edit_template` — `false` on metadata, `true` elsewhere. Inert; the difference does not matter.**
 The setting governs whether users may edit the *monolingual base file*, which is the `template` field
-— and `template` is empty on all five components, because they are bilingual. There is nothing for it
+— and `template` is empty on all six bilingual components, because they are bilingual. There is nothing for it
 to act on, whatever its value.
 
 Worth recording because the opposite conclusion is easy to reach: the source translation *is* backed

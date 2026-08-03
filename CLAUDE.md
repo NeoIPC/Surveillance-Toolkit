@@ -247,7 +247,13 @@ wsl -e bash -c "cd $(wsl wslpath -a .) && PERLLIB=tools/po4a/lib tools/po4a/po4a
 
 ### Target languages
 
-af, de, el, es, et, fr, it, ne, tr (9 languages)
+af, de, el, es, et, fr, he, it, ne, tr, uk (11 languages), from an English source. Hebrew is the first
+right-to-left target and Ukrainian the first with a three-form plural rule, so both exercise machinery the
+other nine do not.
+
+The set is the same in **every** Weblate component, which is a property to keep rather than an observation:
+adding a language to one component does not propagate, and the components had silently drifted into three
+different language sets before this was checked.
 
 ### Helper scripts (in `scripts/`)
 
