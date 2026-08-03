@@ -649,8 +649,11 @@ class SvgWriter:
             "    text.option { font-size: %dpx; }" % OPTION_SIZE,
             "    text.child { font-size: %dpx; font-weight: bold; }" % OPTION_SIZE,
             "    text.legend { font-size: %dpx; font-style: italic; }" % SMALL_SIZE,
-            "    rect.band { fill: %s; stroke: none; }" % BAND_FILL,
-            "    rect.notransmit { fill: %s; stroke: none; }" % NOTRANSMIT_FILL,
+            # Every filled block is bounded. An area of colour with no edge has nothing to sit against,
+            # so it reads as a stain on the page rather than as a region of the table -- and on a ruled
+            # form, where every other block IS bounded, the unbounded one looks like a printing fault.
+            "    rect.band { fill: %s; stroke: #000; stroke-width: 12; }" % BAND_FILL,
+            "    rect.notransmit { fill: %s; stroke: #000; stroke-width: 12; }" % NOTRANSMIT_FILL,
             # A second, redundant signal: these sheets are printed, frequently in greyscale, where the
             # tint above collapses to a shade barely distinguishable from the section bands. The bar
             # survives that, and survives colour-blindness, which a hue on its own does not.
@@ -716,12 +719,13 @@ def layout_sheet(sheet: Sheet, writer: SvgWriter) -> list[str]:
         y += spare
         body.append(f'  <line class="rule" x1="{MARGIN_X}" y1="{y}" x2="{MARGIN_X + CONTENT_W}" y2="{y}"/>')
 
-    # The frame is emitted after the rows because its height is only known once they are laid out, and it
-    # is emitted BEFORE them in document order so the band fills and rules draw over it rather than under.
+    # The frame goes LAST, so it draws on top of everything inside it. Emitted first, every band and
+    # shaded block painted over its edges, and the table's outline broke wherever a fill met it -- most
+    # visibly down the left side, where the tinted patient block simply erased it.
+    out.extend(body)
     out.append(
         f'  <rect class="frame" x="{MARGIN_X}" y="{table_top}" width="{CONTENT_W}" height="{y - table_top}"/>'
     )
-    out.extend(body)
     y = _emit_footnotes(out, y, writer)
     y = _emit_legend(out, y, writer)
     y = _emit_footer(out, y, writer)
