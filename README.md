@@ -153,6 +153,9 @@ A mark is not content. Every entry here is present so that a NeoIPC document can
 credit a funder, and none of them is offered for reuse — which is why they are listed as rights holders
 rather than as licences.
 
+*Fondazione Penta ETS* is the organisation's current legal name and the form to use. **Not** *Fondazione
+Penta ONLUS*, which is the pre-2023 designation and still appears in older material.
+
 The gettext translation catalogues under [`po/`](po/) declare their licence in their own headers, and all of them declare CC BY 4.0, matching their templates. Two once did not — the translated `reports` catalogues carried MIT and the `infectious_agents` ones CC BY-NC-ND 4.0 — and the templates were the side that had it right: a catalogue of extracted strings is not automatically bound by the licence of the directory it was extracted from, and a no-derivatives term cannot govern a translation, which *is* a derivative work. Because the translated files are written by the translation platform rather than by this repository, that correction was applied there rather than here, and the same route applies should they ever diverge again.
 
 ## Funding
