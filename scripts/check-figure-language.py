@@ -16,6 +16,14 @@ a script, and most of these forms carry clinical thresholds that stay Western.
 Exits non-zero when anything is left, so it can gate a build.
 
     python scripts/check-figure-language.py artifacts/sheets-ne
+
+**It only means anything for a target written in another script.** The whole inference is "Latin here is
+text nobody translated", which holds for Nepali, Greek, Hebrew and Ukrainian and is nonsense for German,
+Turkish, Spanish, French, Italian, Afrikaans and Estonian -- there a perfect translation is Latin from end
+to end and this would report every word of it. Passing one of those is refused rather than answered, since
+a check that returns a confident wrong number is worse than one that declines. For a Latin-scripted
+target the equivalent question is whether the catalogue has a translation for every string the sheets
+consume, which is asked of the catalogue and not of the PDF.
 """
 
 from __future__ import annotations
@@ -62,6 +70,10 @@ def residue(pdf: Path, allowed: set[str]) -> Counter[str]:
     return found
 
 
+# Target languages this cannot speak about, because they are written in the same script as the source.
+LATIN_SCRIPTED = {"af", "de", "en", "es", "et", "fr", "it", "tr"}
+
+
 def main(argv: list[str] | None = None) -> int:
     repo = Path(__file__).resolve().parent.parent
     parser = argparse.ArgumentParser(description=__doc__,
@@ -75,6 +87,14 @@ def main(argv: list[str] | None = None) -> int:
     pdfs = sorted(args.directory.glob("*.pdf"))
     if not pdfs:
         print(f"no compiled sheet in {args.directory}", file=sys.stderr)
+        return 2
+
+    # Sheets are written as <name>.<culture>.pdf, so the culture is the second-to-last suffix.
+    culture = pdfs[0].stem.rsplit(".", 1)[-1] if "." in pdfs[0].stem else "en"
+    if culture in LATIN_SCRIPTED:
+        print(f"{culture} is written in the Latin script, so 'Latin means untranslated' does not hold and "
+              f"this check would report a correct translation as entirely missing. Ask the catalogue "
+              f"whether every string the sheets consume has a translation instead.", file=sys.stderr)
         return 2
 
     allowed = accepted(args.glossary, args.allow)
