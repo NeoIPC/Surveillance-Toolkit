@@ -72,18 +72,14 @@ section_order:
 # the form to pick which category applies; without the note saying so, the row is a question with no
 # stated rule, and whoever later transcribes the tick into DHIS2 has to guess which of the three elements
 # it meant.
-# Fields the form does not ask for, because nobody fills them in.
+# Fields the form does not ask for, named one at a time.
 #
-# This is not "fields we think are unimportant" -- it is fields whose value the system derives. Asking for
-# one on paper asks a person to compute what a program rule computes, and gives them a second place to
-# get it wrong.
-#
-# `NeoIPC_TEA_TOTAL_GESTATION_DAYS` is gestational age in days, derived from `NEOIPC_TEA_GEST_AGE`, which
-# the form does ask for in the weeks+days form a clinician actually uses. (Its odd casing is deliberate
-# and cannot be changed; the two attributes must stay in step, which is exactly why only one of them is a
-# question.)
-omit:
-  - NeoIPC_TEA_TOTAL_GESTATION_DAYS
+# Reserved for a field that is not derivable as computed and still does not belong on paper. It is empty:
+# `NeoIPC_TEA_TOTAL_GESTATION_DAYS`, which used to be listed here, is assigned by a program rule from
+# `NEOIPC_TEA_GEST_AGE` and so is now covered by the rule below along with the other twelve -- which is
+# the better outcome, since a list of derived fields maintained by hand goes stale the moment a rule is
+# added and nothing says so.
+omit: []
 
 # A field that continues the row of the one before it, rather than starting its own.
 #
@@ -120,6 +116,18 @@ row_units:
 # The data model keeps both. This omits the row, not the field: whoever enters the data still chooses the
 # coded organism where one fits and types the name where it does not.
 omit_suffixes: [NAME]
+
+# Fields the platform computes are left off the sheets, derived from the program rules rather than listed
+# here: anything a rule ASSIGNs is worked out from other answers. Asking for one on paper asks someone at
+# a cot side to do arithmetic the system does -- and to do it without the inputs, since the event dates
+# those rules read were not on the form at all until they were added beside them.
+#
+# These are the exceptions, kept deliberately despite being computed.
+keep_calculated:
+  # Patient days is a cross-check rather than a value to look up: it is written beside the device days on
+  # the same sheet, and a device count that exceeds it is wrong on its face. Losing it would remove the
+  # only arithmetic the paper form can catch by itself.
+  - NEOIPC_SURVEILLANCE_END_PATIENT_DAYS
 
 groups:
   - suffixes: [3GCR, MRSA, VRE]

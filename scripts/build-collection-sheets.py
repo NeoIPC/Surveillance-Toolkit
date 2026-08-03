@@ -92,8 +92,10 @@ MARK = 260                              # a choose-one circle or choose-any squa
 MARK_GAP = 110                          # between a mark and its own word: deliberately tighter
 OPTION_SEP = 820                        # between one option and the next, so the pairing reads
 COMMENTS_MIN = 1200                     # below this the leftover is a gap, not a usable writing space
-LEGEND_LEAD = 240                       # between the last footnote and the legend
+LEGEND_LEAD = 100                       # between the last footnote and the legend
 LEGEND_SEP = 1200                       # between the two legend entries when they share a row
+LEGEND_ROW = MARK + 60                  # a legend row: its mark, plus air below it
+NOTES_TRAIL = 60                        # under the last footnote
 
 # The answer column: ONE x per sheet where every answer that shares its label's line begins -- a space to
 # write in, a Yes/No pair, an organism's resistance run. Before it, each row started its answer wherever
@@ -226,9 +228,28 @@ class Metadata:
         self.options = self._read("options.csv")
         self.attributes = self._read("trackedEntityAttributes.csv")
         self.program_attributes = self._read("programTrackedEntityAttributes.csv")
+        self.programs = self._read("programs.csv")
+        self.rule_actions = self._read("programRuleActions.csv")
 
         self.element_by_id = {r["id"]: r for r in self.elements}
         self.option_set_by_id = {r["id"]: r for r in self.option_sets}
+        # Fields the platform works out for itself, derived rather than listed: anything a program rule
+        # ASSIGNs is computed from other answers, so asking for it on paper asks someone at a cot side to
+        # do arithmetic the system does -- and to do it without the inputs, since the dates those rules
+        # read were not on the form at all. Thirteen data elements and one attribute, found this way
+        # instead of by hand, so a rule added later takes its field off the sheet with it.
+        self.calculated = {
+            self.element_by_id[a["dataElement"]]["code"]
+            for a in self.rule_actions
+            if a["programRuleActionType"] == "ASSIGN" and a.get("dataElement") in self.element_by_id
+        } | {
+            attribute["code"]
+            for a in self.rule_actions
+            if a["programRuleActionType"] == "ASSIGN"
+            for attribute in self.attributes
+            if attribute["id"] == a.get("trackedEntityAttribute")
+        }
+
         self.options_by_set: dict[str, list[dict]] = {}
         for opt in self.options:
             self.options_by_set.setdefault(opt["optionSet"], []).append(opt)
@@ -334,6 +355,7 @@ class LayoutRules:
         self.groups: list[dict] = rules.get("groups") or []
         self.omitted: set[str] = set(rules.get("omit") or [])
         self.omitted_suffixes: tuple[str, ...] = tuple(rules.get("omit_suffixes") or ())
+        self.keep_calculated: set[str] = set(rules.get("keep_calculated") or [])
         self.row_units: dict[str, str] = rules.get("row_units") or {}
 
     def prints(self, field: Field) -> bool:
@@ -575,6 +597,17 @@ def build_sheets(meta: Metadata, catalogue: Catalogue, rules: LayoutRules,
                     f"programStageSections/{section['code']}/DESCRIPTION", section["description"]
                 ),
             )
+            # The event's own date, at the head of the stage's first section. It is not a data element --
+            # in DHIS2 it is the event date -- so nothing in dataElements.csv carries it and the sheets
+            # had no date on them at all, while asking for two values computed FROM it. Its label is the
+            # stage's `executionDateLabel`, already translatable in the metadata catalogue.
+            #
+            # The enrolment block deliberately gets none: the program's enrolment date is labelled
+            # "Admission date" exactly as the admission stage's event date is, and a form that asks for
+            # the same date twice reads as two questions.
+            if not sheet.sections:
+                model.fields.append(_event_date_field(catalogue, stage))
+
             # The section's dataElements column is a space-separated UID list and IS the authored order
             # of the fields within it; programStageDataElements.sortOrder orders the stage as a whole and
             # would interleave sections if used here.
@@ -582,6 +615,8 @@ def build_sheets(meta: Metadata, catalogue: Catalogue, rules: LayoutRules,
                 element = meta.element_by_id.get(uid)
                 if element is None:
                     raise LookupError(f"section {section['code']} references unknown element {uid}")
+                if element["code"] in meta.calculated and element["code"] not in rules.keep_calculated:
+                    continue
                 link = links.get(uid, {})
                 model.fields.append(_field_of(meta, catalogue, element, link))
             sheet.sections.append(model)
@@ -637,6 +672,24 @@ def _enrolment_section(meta: Metadata, catalogue: Catalogue, chrome: dict[str, s
             )
         )
     return section
+
+
+def _event_date_field(catalogue: Catalogue, stage: dict) -> Field:
+    """The date the event happened, which every sheet needs and none of them carried.
+
+    DHIS2 keeps it on the event rather than in a data element, so it appears in no CSV of fields and was
+    invisible to a generator reading only those. It is the one answer the rest of the stage is anchored
+    to -- the day-of-life and days-since-admission figures are computed from it -- so a form without it
+    cannot be transcribed.
+    """
+    return Field(
+        code=f"{stage['code']}_EVENT_DATE",
+        label=catalogue.get(
+            f"programStages/{stage['code']}/EXECUTION_DATE_LABEL", stage["executionDateLabel"]
+        ),
+        value_type="DATE",
+        compulsory=True,
+    )
 
 
 def _options_of(meta: Metadata, catalogue: Catalogue, element: dict) -> tuple[list[str], bool]:
@@ -855,7 +908,7 @@ def layout_sheet(sheet: Sheet, writer: SvgWriter) -> list[str]:
         len(_fit(writer, f"{SUPERSCRIPTS[i]} {writer.chrome[k]}", SMALL_SIZE, CONTENT_W, "footnote", k))
         * (SMALL_SIZE + 60)
         for i, k in enumerate(writer.footnotes)
-    ) + (200 if writer.footnotes else 0)
+    ) + (NOTES_TRAIL if writer.footnotes else 0)
     spare = (PAGE_H - MARGIN_BOTTOM - legend_h - footer_h - notes_h) - y
     writer.spare = spare
     if spare > 0:
@@ -948,7 +1001,7 @@ def _legend_rows(writer: SvgWriter) -> int:
 def _legend_height(writer: SvgWriter) -> int:
     """What `_emit_legend` will take. The page budget and the emitter must not disagree: the comments box
     absorbs the difference between them, so an estimate here is a wrong bottom margin on every sheet."""
-    return LEGEND_LEAD + _legend_rows(writer) * (MARK + 180)
+    return LEGEND_LEAD + _legend_rows(writer) * (LEGEND_ROW)
 
 
 def _emit_legend(out: list[str], y: int, writer: SvgWriter) -> int:
@@ -965,8 +1018,8 @@ def _emit_legend(out: list[str], y: int, writer: SvgWriter) -> int:
         if one_row:
             x += MARK + MARK_GAP + writer.face.width(text, SMALL_SIZE) + LEGEND_SEP
         else:
-            baseline += MARK + 180
-    return y + _legend_rows(writer) * (MARK + 180)
+            baseline += LEGEND_ROW
+    return y + _legend_rows(writer) * (LEGEND_ROW)
 
 
 def _emit_footnotes(out: list[str], y: int, writer: SvgWriter) -> int:
@@ -977,7 +1030,7 @@ def _emit_footnotes(out: list[str], y: int, writer: SvgWriter) -> int:
         for line in _fit(writer, text, SMALL_SIZE, CONTENT_W, "footnote", key):
             y += SMALL_SIZE + 60
             out.append(f'  <text class="legend" x="{MARGIN_X}" y="{y}">{_esc(line)}</text>')
-    return y + (200 if writer.footnotes else 0)
+    return y + (NOTES_TRAIL if writer.footnotes else 0)
 
 
 def _emit_footer(out: list[str], y: int, writer: SvgWriter) -> int:
