@@ -86,6 +86,13 @@ ACCENT = "#0083c1"
 BRAND_ORANGE = "#ff9015"
 BAND_FILL = "#cfe7f4"                   # a tint of the brand blue, light enough to print behind text
 
+# The fields that stay in the hospital are marked in a tint of the brand's OTHER primary, so the sheet
+# still uses two hues rather than three and the difference is the point rather than decoration. The
+# hand-drawn master sheet used a mauve for the same job; that colour is in no brand document, and orange
+# reads as "look at this" where an unrelated hue reads as an accident.
+NOTRANSMIT_FILL = "#ffe4c4"
+NOTRANSMIT_BAR = 60                     # the solid edge that carries the distinction into a greyscale print
+
 # The logo is INLINED, not referenced. It is vector, so there is no raster anywhere on a sheet, and a
 # sheet carries its own logo instead of depending on what happens to sit beside it -- which matters for
 # the standalone print forms, which do not live in the protocol's image directory. prawn-svg renders
@@ -624,6 +631,11 @@ class SvgWriter:
             "    text.child { font-size: %dpx; font-weight: bold; }" % OPTION_SIZE,
             "    text.legend { font-size: %dpx; font-style: italic; }" % SMALL_SIZE,
             "    rect.band { fill: %s; stroke: none; }" % BAND_FILL,
+            "    rect.notransmit { fill: %s; stroke: none; }" % NOTRANSMIT_FILL,
+            # A second, redundant signal: these sheets are printed, frequently in greyscale, where the
+            # tint above collapses to a shade barely distinguishable from the section bands. The bar
+            # survives that, and survives colour-blindness, which a hue on its own does not.
+            "    rect.notransmit-edge { fill: #000; stroke: none; }",
             "    rect.frame { fill: none; stroke: #000; stroke-width: 20; }",
             "    rect.mark { fill: none; stroke: #000; stroke-width: 18; }",
             "    circle.mark { fill: none; stroke: #000; stroke-width: 18; }",
@@ -754,6 +766,13 @@ def _emit_patient_block(out: list[str], y: int, writer: SvgWriter) -> int:
     )
     y += SECTION_BAND_H
 
+    # The shaded block is laid down first so the rows and the note draw over it; its height is only known
+    # once they are measured, so the rect is patched in afterwards at a remembered index.
+    block_top = y
+    shading = len(out)
+    out.append("")
+    out.append("")
+
     for key in ("patient_identifier", "patient_name"):
         label = writer.chrome[key]
         writer._text(label, LABEL_SIZE)
@@ -772,6 +791,15 @@ def _emit_patient_block(out: list[str], y: int, writer: SvgWriter) -> int:
         y += SMALL_SIZE + LINE_GAP
     y += ROW_PAD - LINE_GAP
     out.append(f'  <line class="rule" x1="{MARGIN_X}" y1="{y}" x2="{MARGIN_X + CONTENT_W}" y2="{y}"/>')
+
+    height = y - block_top
+    out[shading] = (
+        f'  <rect class="notransmit" x="{MARGIN_X}" y="{block_top}" width="{CONTENT_W}" height="{height}"/>'
+    )
+    out[shading + 1] = (
+        f'  <rect class="notransmit-edge" x="{MARGIN_X}" y="{block_top}" width="{NOTRANSMIT_BAR}" '
+        f'height="{height}"/>'
+    )
     return y
 
 
