@@ -61,7 +61,7 @@ CONTENT_W = PAGE_W - 2 * MARGIN_X
 # wastes the majority of the sheet and turned the primary sepsis form into three pages.
 TEXT_X = MARGIN_X + 180                 # left text inset inside the table
 OPTION_INDENT = 700                     # options sit indented under their field
-OPTION_GAP = 700                        # space between options laid out along one line
+OPTION_GAP = 700                        # indent step for an option block
 
 TITLE_SIZE, SUBTITLE_SIZE = 560, 400
 SECTION_SIZE, LABEL_SIZE, OPTION_SIZE, SMALL_SIZE = 320, 300, 280, 240
@@ -76,7 +76,8 @@ ROW_PAD = 45
 DESCENDER_CLEARANCE = 25
 SECTION_BAND_H = 460
 MARK = 260                              # a choose-one circle or choose-any square
-MARK_GAP = 180                          # between a mark and its text
+MARK_GAP = 110                          # between a mark and its own word: deliberately tighter
+OPTION_SEP = 820                        # between one option and the next, so the pairing reads
 COMMENTS_MIN = 1200                     # below this the leftover is a gap, not a usable writing space
 
 # Real superscript codepoints rather than a baseline shift, so a marker survives being copied out of the
@@ -815,7 +816,7 @@ def _emit_legend(out: list[str], y: int, writer: SvgWriter) -> int:
     for radio, key in ((True, "legend_one"), (False, "legend_many")):
         text = writer.chrome[key]
         writer._text(text, SMALL_SIZE)
-        _mark(out, f"legend-{'one' if radio else 'many'}", TEXT_X, y, radio)
+        _mark(out, f"legend-{'one' if radio else 'many'}", TEXT_X, y + MARK - 20, radio, writer, SMALL_SIZE)
         out.append(f'  <text class="legend" x="{TEXT_X + MARK + MARK_GAP}" y="{y + MARK - 20}">{_esc(text)}</text>')
         y += MARK + 180
     return y
@@ -867,7 +868,7 @@ def _emit_patient_block(out: list[str], y: int, writer: SvgWriter) -> int:
     for key in ("patient_identifier", "patient_name"):
         label = writer.chrome[key]
         writer._text(label, LABEL_SIZE)
-        y += ROW_PAD
+        y += writer.face.pad_at(LABEL_SIZE)
         for line in _fit(writer, label, LABEL_SIZE, CONTENT_W - 360, key, "label"):
             out.append(f'  <text class="label" x="{TEXT_X}" y="{y + writer.face.cap_at(LABEL_SIZE)}">{_esc(line)}</text>')
             y += LABEL_SIZE + LINE_GAP
@@ -876,7 +877,7 @@ def _emit_patient_block(out: list[str], y: int, writer: SvgWriter) -> int:
 
     note = writer.chrome["patient_note"]
     writer._text(note, SMALL_SIZE)
-    y += ROW_PAD
+    y += writer.face.pad_at(SMALL_SIZE)
     for line in _fit(writer, note, SMALL_SIZE, CONTENT_W - 360, "patient_note", "note"):
         out.append(f'  <text class="legend" x="{TEXT_X}" y="{y + writer.face.cap_at(SMALL_SIZE)}">{_esc(line)}</text>')
         y += SMALL_SIZE + LINE_GAP
@@ -997,7 +998,7 @@ def _emit_child(out: list[str], field: Field, y: int, writer: SvgWriter) -> int:
         if style == "yes_no":
             options, radio = [writer.chrome["boolean_yes"], writer.chrome["boolean_no"]], True
         elif style == "tick":
-            _mark(out, field.code.lower().replace("_", "-"), int(x), y + 30, radio=False)
+            _mark(out, field.code.lower().replace("_", "-"), int(x), baseline, False, writer)
             return baseline + writer.face.pad_at(OPTION_SIZE)
 
     if not options:
@@ -1007,16 +1008,16 @@ def _emit_child(out: list[str], field: Field, y: int, writer: SvgWriter) -> int:
     for option in options:
         writer._text(option, OPTION_SIZE)
     widths = [writer.face.width(option, OPTION_SIZE) for option in options]
-    needed = sum(w + MARK + MARK_GAP for w in widths) + OPTION_GAP * (len(options) - 1)
+    needed = sum(w + MARK + MARK_GAP for w in widths) + OPTION_SEP * (len(options) - 1)
     if x + needed > right:
         # The choices will not share the label's line, so fall back to the indented block a parent uses.
         return _emit_options(out, field, options, radio, baseline + LINE_GAP, writer)
 
     ident = field.code.lower().replace("_", "-")
     for index, option in enumerate(options):
-        _mark(out, f"{ident}-{index + 1}", int(x), y + 30, radio)
+        _mark(out, f"{ident}-{index + 1}", int(x), baseline, radio, writer)
         out.append(f'  <text class="option" x="{int(x + MARK + MARK_GAP)}" y="{baseline}">{_esc(option)}</text>')
-        x += MARK + MARK_GAP + widths[index] + OPTION_GAP
+        x += MARK + MARK_GAP + widths[index] + OPTION_SEP
     return baseline + LINE_GAP
 
 
@@ -1032,7 +1033,7 @@ def _emit_field(out: list[str], field: Field, y: int, writer: SvgWriter) -> int:
         # The tick sits on the label's own line: a criterion in a list reads as one thing to mark, not as
         # a question followed by an answer. This is the shape the published sheets use for every
         # signs-and-symptoms and laboratory-findings element.
-        _mark(out, field.code.lower().replace("_", "-"), TEXT_X, y + 40, radio=False)
+        _mark(out, field.code.lower().replace("_", "-"), TEXT_X, y + writer.face.cap_at(LABEL_SIZE), False, writer, LABEL_SIZE)
         label_x = TEXT_X + MARK + MARK_GAP
 
     available = MARGIN_X + CONTENT_W - label_x - 180
@@ -1080,18 +1081,18 @@ def _emit_options(out: list[str], field: Field, options: list[str], radio: bool,
     left = TEXT_X + OPTION_INDENT
     available = MARGIN_X + CONTENT_W - left - 180
     widths = [writer.face.width(option, OPTION_SIZE) for option in options]
-    inline = sum(w + MARK + MARK_GAP for w in widths) + OPTION_GAP * (len(options) - 1)
+    inline = sum(w + MARK + MARK_GAP for w in widths) + OPTION_SEP * (len(options) - 1)
 
     if inline <= available:
         x = left
         for index, option in enumerate(options):
-            _mark(out, f"{ident}-{index + 1}", int(x), y + 30, radio)
+            _mark(out, f"{ident}-{index + 1}", int(x), y + writer.face.cap_at(OPTION_SIZE), radio, writer)
             out.append(f'  <text class="option" x="{int(x + MARK + MARK_GAP)}" y="{y + writer.face.cap_at(OPTION_SIZE)}">{_esc(option)}</text>')
-            x += MARK + MARK_GAP + widths[index] + OPTION_GAP
+            x += MARK + MARK_GAP + widths[index] + OPTION_SEP
         return y + OPTION_SIZE + LINE_GAP
 
     for index, option in enumerate(options):
-        _mark(out, f"{ident}-{index + 1}", left, y + 30, radio)
+        _mark(out, f"{ident}-{index + 1}", left, y + writer.face.cap_at(OPTION_SIZE), radio, writer)
         text_x = left + MARK + MARK_GAP
         for line in _fit(writer, option, OPTION_SIZE, available - MARK - MARK_GAP, field.code, f"option {index + 1}"):
             out.append(f'  <text class="option" x="{text_x}" y="{y + writer.face.cap_at(OPTION_SIZE)}">{_esc(line)}</text>')
@@ -1099,13 +1100,24 @@ def _emit_options(out: list[str], field: Field, options: list[str], radio: bool,
     return y
 
 
-def _mark(out: list[str], ident: str, x: int, y: int, radio: bool) -> None:
-    """A choose-one circle or a choose-any square, which the legend on every sheet explains."""
+def _mark(out: list[str], ident: str, x: int, baseline: int, radio: bool, writer: SvgWriter,
+          size: int = OPTION_SIZE) -> None:
+    """A choose-one circle or a choose-any square, centred on the text it belongs to.
+
+    Takes the text's BASELINE, not a row offset. The mark has to sit on the optical middle of the band
+    the letters occupy -- between the baseline and the cap height -- and that band moved when rows began
+    being measured from the face. Placed from the row's top instead, every mark drifted low and the
+    drift grew with the size of the text beside it.
+    """
+    centre = baseline - writer.face.cap_at(size) // 2
     if radio:
         r = MARK // 2
-        out.append(f'  <circle id="{ident}" class="mark" cx="{x + r}" cy="{y + r}" r="{r}"/>')
+        out.append(f'  <circle id="{ident}" class="mark" cx="{x + r}" cy="{centre}" r="{r}"/>')
     else:
-        out.append(f'  <rect id="{ident}" class="mark" x="{x}" y="{y}" width="{MARK}" height="{MARK}"/>')
+        out.append(
+            f'  <rect id="{ident}" class="mark" x="{x}" y="{centre - MARK // 2}" '
+            f'width="{MARK}" height="{MARK}"/>'
+        )
 
 
 def _fit(writer: SvgWriter, text: str, size: int, width: int, code: str, what: str) -> list[str]:
