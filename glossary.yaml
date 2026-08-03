@@ -61,6 +61,11 @@
 access: "Access"
 admission: admission
 antibiotics: antibiotics
+# Physical status classification of the American Society of Anesthesiologists, printed on the surgical
+# procedure sheet with its Roman-numeral classes. The classification's own abbreviation, so most
+# languages keep it verbatim.
+# flags: ignore-same, terminology
+asa: "ASA"
 # AWaRe is a WHO acronym (Access, Watch, Reserve) — not translatable
 # flags: read-only, terminology
 aware: "AWaRe"
@@ -76,6 +81,12 @@ carbr: "CARBR"
 # Resistance category: colistin resistance.
 # flags: terminology
 colr: "COLR"
+# Continuous Positive Airway Pressure, a mode of non-invasive ventilatory support.
+# flags: ignore-same, terminology
+cpap: "CPAP"
+# C-reactive protein, an inflammatory marker the sepsis and pneumonia sheets ask about.
+# flags: ignore-same, terminology
+crp: "CRP"
 # Central Venous Catheter.
 # flags: terminology
 cvc: CVC
@@ -92,11 +103,21 @@ h2020_funding_statement: >-
 # Hospital-acquired pneumonia.
 # flags: terminology
 hap: HAP
+# High-Flow Nasal Cannula, a mode of non-invasive ventilatory support.
+# flags: ignore-same, terminology
+hfnc: "HFNC"
 human_milk: "human milk"
+# Ratio of immature to total neutrophils. Written as the bare abbreviation rather than "I/T ratio" so
+# that it matches the token as it appears in a label, which is what puts it in a translator's sidebar.
+# flags: ignore-same, terminology
+i_t: "I/T"
 # International Classification of Health Interventions, the WHO classification the surgical procedure
 # codes come from.
 # flags: terminology
 ichi: "ICHI"
+# Interleukin, an inflammatory marker; the sepsis sheet asks about IL-6 and IL-8.
+# flags: ignore-same, terminology
+il: "IL"
 # Invasive Ventilation.
 # flags: terminology
 inv: INV
@@ -136,6 +157,12 @@ surgical_procedure: "surgical procedure"
 surgical_site_infection: "surgical site infection"
 surveillance: surveillance
 surveillance_end: "surveillance end"
+# Very Low Birth Weight. One of the two criteria that make an infant eligible, so it heads every sheet.
+# flags: ignore-same, terminology
+vlbw: "VLBW"
+# Very Preterm. The other eligibility criterion, and the reason both appear together on every heading.
+# flags: ignore-same, terminology
+vpt: "VPT"
 # Resistance category: vancomycin-resistant Enterococcus.
 # flags: terminology
 vre: "VRE"
