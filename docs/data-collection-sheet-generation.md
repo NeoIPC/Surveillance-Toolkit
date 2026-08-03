@@ -183,6 +183,24 @@ substance slots and the published master sheet offers **six**. The form has been
 the website, with nothing to say so — which is the argument for generating, and the reason the printed
 count is recorded as a decision instead of left to whoever last edited a Word file.
 
+## The decision flow needs this before the sheets do
+
+The same wrapper wraps the protocol's decision-flow figure, and there the margin is already gone. Its
+XSLT wraps against `maxLen` constants of **38** and **16** characters, and the German translation's
+longest word is **`Gestationsalter`, at 15**. One character of headroom, in a language that builds
+compounds — and because the recursion cannot break inside a word, a token that exceeds the constant is
+emitted whole and runs out of its box with nothing reporting it.
+
+So the figure is not comfortably within its limits; it is one wording change, one longer compound, or one
+new language away from being wrong, and the failure would appear only in a rendered PDF for a language
+that until this week nobody was building. Spanish's longest is 11 and English's 11, which is why the
+constants have never been felt: they were tuned by eye against the two languages that fit.
+
+Two things follow. The decision flow moves onto the same measured layout as the sheets rather than
+waiting behind them — its need is more urgent, not less, because its boxes are fixed and its text is
+long. And its eight strings move out of `.resx` with it: they are already whole sentences, so nothing
+about them needs splitting by a translator, and the wrapping was never theirs to think about.
+
 ## House style: the output is read by people
 
 These SVGs are deliberately plain, and a generator is held to the same standard as the hand-written
