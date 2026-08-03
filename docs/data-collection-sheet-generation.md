@@ -184,6 +184,68 @@ forms' path entirely, along with its silently-ignored filters and its unshaped t
   protocol's PDF is untagged either way, because asciidoctor-pdf has no tagged-PDF support — so the
   accessible artifact is the **standalone** form. Do not claim otherwise for the protocol without checking.
 
+## Which engine draws it — and why the answer is not an SVG converter
+
+The import route above says *how* a properly-drawn page reaches the protocol. This is *what should draw
+it*, established by surveying twelve permissively-licensed engines against shaping, bidirectional text,
+tagged PDF, PDF/A, metadata, determinism, platform and licence, with each load-bearing claim then
+challenged by an independent reviewer that was given the claim and not the reasoning.
+
+**SVG as the input to a PDF engine is dead, and not for the reason it first appears.** Every engine that
+can emit a structure tree collapses an SVG into exactly one node: WeasyPrint maps both `img` and `{svg}svg`
+to `Figure` and scrapes `/Alt` only from `<title>`; Typst's own accessibility guide says "Neither PNGs nor
+SVGs are accessible on their own"; Apache FOP states it outright. **The correction matters more than the
+finding**: FOP does *not* rasterize the text — its `NativeTextPainter` writes real PDF text operators, as
+do WeasyPrint, Typst and krilla-svg. So the failure mode is **real, selectable, untagged text**. It looks
+right, it copies and pastes, and it is inaccessible — which means neither a visual check nor a copy-paste
+check can detect it, and "the text survived" is not evidence of anything.
+
+**One SVG defect disqualifies that path for right-to-left regardless of tagging:** `usvg` hard-codes the
+bidirectional paragraph base level to left-to-right — `BidiInfo::new(text, Some(Level::ltr()))` — so a
+Hebrew or Arabic string resolves against an LTR base and its trailing neutrals and punctuation land in the
+wrong place. Anything routed through usvg inherits it, which includes `resvg`, `krilla-svg`, and Typst's
+own `image()` of an SVG.
+
+**The engine is Typst** (Apache-2.0), with the generator gaining a second emitter that writes native
+`.typ` using absolute placement. It wins on precisely the axes this project has already declared
+first-class, and one of them is uncanny: **Typst fails the export rather than emitting a document that
+falsely claims a conformance** — the same rule as the guardrail here. Beyond that: tagged PDF on by
+default with an explicit opt-out, PDF/UA-1 and the accessible PDF/A `a`-levels, a real Unicode
+Bidirectional Algorithm with a *configurable* paragraph base level, HarfBuzz-derived shaping, native
+`SOURCE_DATE_EPOCH`, a content-hash document ID with no clock in any branch, and one statically linked
+binary on all three platforms — no host Pango to drift between a developer's Windows machine and CI.
+
+The fallback is **krilla** driven from a small Rust shim, chosen deliberately because Typst *is* krilla
+plus a layout engine: falling back costs only the layout, shaping and bidi layer and preserves every
+PDF-side property, so the conformance story would not need re-establishing.
+
+Why not the others, in one line each: **WeasyPrint** — bidi unsupported by its own documentation, and an
+open report of a corrupted `ToUnicode` map and empty `TJ` for Arabic, which breaks extraction and with it
+PDF/A-2u and PDF/UA. **Apache FOP** — Devanagari only partial, ZWJ and ZWNJ unsupported, and a trailer
+`/ID` wired to the wall clock with no injection point, so byte-identical regeneration is impossible.
+**Batik, resvg, librsvg** — no structure tree at all. **PDFBox** — an assembly layer, not an engine.
+**Ghostscript** — AGPL, excluded on licence. **LuaLaTeX** — genuinely viable and the only route to
+PDF/UA-2, but babel's `bidi=basic` is explicitly not a full Bidirectional Algorithm, and `tagpdf`
+self-describes as unstable and wants a moving format, which sits badly beside a reproducibility guarantee.
+
+**Two risks to carry rather than forget.** `rustybuzz` is archived and frozen at HarfBuzz 10.1.0 semantics
+while `resvg` has already moved to `harfrust` — a maintenance risk, not a present defect. And Typst issue
+**#8667**, a compiler panic when a right-to-left paragraph ends in a combining mark, is the one that could
+actually bite this layout; smoke-test it before committing.
+
+### The consequence for measurement, which reverses an earlier conclusion
+
+This document already records that summing `hmtx` advances is exact **because prawn-svg does not shape**,
+and that adding HarfBuzz would introduce a disagreement rather than resolve one. Both remain true of the
+current renderer, and both stop being true the moment Typst draws the page: Typst *does* shape, so the
+naive sum would no longer be what gets drawn, and the one-page gate would be measuring a width the engine
+does not produce.
+
+So the same change that is wrong today becomes necessary after the switch — measure with the shaper the
+engine uses, or let the engine do the measuring and give up the exact one-page control the generator
+currently has. That is a decision to take deliberately when the emitter is built, and it is the reason
+this paragraph exists rather than being discovered by a form that overflows in Nepali.
+
 ## The layout follows the published forms; the visual style follows the two hand-drawn SVGs
 
 These are two separate references and they are not interchangeable. **Arrangement** comes from the forms
