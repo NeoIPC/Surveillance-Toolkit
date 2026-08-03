@@ -202,6 +202,52 @@ silently dropped. Check a prepared file against the live catalogue before sendin
 73-entry upload here targeted msgids that a spelling fix had already retired, and would have vanished
 without a word.
 
+## What a change of renderer, or of source format, would do to all this
+
+Two different questions that are easy to run together, and they become available at very different times.
+Recorded here because the first is being acted on and the second is not, and the difference matters.
+
+**A change of renderer changes nothing in this document.** Typst drawing a page instead of asciidoctor-pdf
+leaves AsciiDoc, po4a, every catalogue and every rule above exactly as they are. That is the whole appeal:
+the shaping, bidirectional text, tagged-PDF and PDF/A properties are won without touching translation.
+
+**A change of source format would delete most of this document**, and replace it with something markedly
+smaller. Typst reads `yaml()`, `json()`, `toml()`, `csv()` and `xml()` at compile time, and Weblate speaks
+YAML and JSON directly as **monolingual** formats — with plurals and with developer comments, which it
+takes from the closest comment above the key. So the chain becomes:
+
+> `strings.yaml` ↔ **Weblate** ↔ `strings.<lang>.yaml` → the renderer reads it
+
+Weblate writes the file the renderer reads. No `.pot` to regenerate, no `msgmerge`, no generation step
+producing a localized source — and, most consequentially, **no second writer**. The ownership rule at the
+top of this document, `Invoke-Localization.ps1`'s restore-from-`HEAD`, its refusal to start on a dirty
+catalogue, and the `Test-GitWorkingTree` reasoning behind that refusal all exist because po4a and Weblate
+both write the same `.po`. If Weblate is the only writer of a file nothing else generates, the conflict
+cannot occur and the machinery guarding against it is not ported — it is unnecessary.
+
+**Two things to verify before betting on that**, because both would change the size of the prize: that
+Weblate's YAML plural support and comment extraction behave as documented on a real component, and whether
+the same is true of nested keys. If they hold, much of the work planned around gettext plural forms and
+`#.` comment emission is solving a problem the format would no longer have.
+
+**What it costs is segmentation, and the cost lands on authors rather than translators.** po4a's real
+value is that it cuts a document into translatable units automatically. A keyed data file needs a human to
+key every paragraph — 686 of them for the protocol — and that burden is the author's. The translator's
+experience is much the same either way: strings without much document context, which is exactly why
+screenshots matter here.
+
+So the answer differs **by content type**, along a line this project has already drawn:
+
+| content | under a data-file pipeline |
+|---|---|
+| keyed strings — form labels, figure text, glossary, DHIS2 metadata, app interface | strictly better; they are already keyed, and po4a is overhead |
+| document prose — the protocol | worse, unless something segments it: a po4a module for the format, prose kept in a format po4a already reads, or a conversion step |
+
+One incidental gain worth recording, because it closes a gap this repository currently carries: Typst
+ships translations of its own generated text for **af, el, et and tr**, and for **he and ar** — three of
+the four target languages for which upstream Asciidoctor has no `attributes-<lang>.adoc` at all. The
+76-string caption gap noted above would shrink to at most Nepali.
+
 ## Rendering a translated document
 
 po4a writes a translated source into `doc/protocol/<language>/`, so a localized build renders a document
