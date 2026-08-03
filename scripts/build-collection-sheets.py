@@ -60,7 +60,11 @@ CONTENT_W = PAGE_W - 2 * MARGIN_X
 # the row is the space to write in -- which is what the published forms do and is most of why they fit one
 # page. Splitting the row into a label column and an input column, which is the obvious first design,
 # wastes the majority of the sheet and turned the primary sepsis form into three pages.
-TEXT_X = MARGIN_X + 180                 # left text inset inside the table
+# How far content sits inside the rule to its left. Used at the table's own edge and again at the answer
+# column, so a mark in a cell stands off its rule by the same amount a label stands off the frame --
+# placed exactly on the column, a circle touches the line and the pair reads as one smudged glyph.
+TEXT_INSET = 180
+TEXT_X = MARGIN_X + TEXT_INSET
 OPTION_INDENT = 700                     # options sit indented under their field
 OPTION_GAP = 700                        # indent step for an option block
 
@@ -673,6 +677,9 @@ class SvgWriter:
         # Where the answers begin. One value for the whole sheet, so a mark on the first row and a mark on
         # the last sit on the same vertical.
         self.answer_x = MARGIN_X + label_width
+        # Where content inside the answer cell begins, inset from the column rule exactly as a label is
+        # inset from the table's own frame.
+        self.answer_text_x = self.answer_x + TEXT_INSET
         # How much page is left once everything is placed -- the size of the comments box, and the only
         # honest measure of how much longer a translation may be before the sheet stops fitting.
         self.spare = 0
@@ -1075,7 +1082,7 @@ def _emit_child(out: list[str], field: Field, y: int, writer: SvgWriter, closes_
         if style == "yes_no":
             options, radio = [writer.chrome["boolean_yes"], writer.chrome["boolean_no"]], True
         elif style == "tick":
-            _mark(out, _ident(field), writer.answer_x, baseline, False, writer)
+            _mark(out, _ident(field), writer.answer_text_x, baseline, False, writer)
             return _column(out, top, baseline + writer.face.pad_at(OPTION_SIZE), writer)
 
     if not options:
@@ -1084,20 +1091,22 @@ def _emit_child(out: list[str], field: Field, y: int, writer: SvgWriter, closes_
         # Only where that rule is elsewhere -- another child follows this one -- does the cell need a
         # line of its own.
         if not closes_group:
-            out.append(f'  <line class="write" x1="{writer.answer_x}" y1="{bottom}" x2="{right}" y2="{bottom}"/>')
+            out.append(
+                f'  <line class="write" x1="{writer.answer_text_x}" y1="{bottom}" x2="{right}" y2="{bottom}"/>'
+            )
         return _column(out, top, bottom, writer)
 
     for option in options:
         writer._text(option, OPTION_SIZE)
     widths = [writer.face.width(option, OPTION_SIZE) for option in options]
     needed = sum(w + MARK + MARK_GAP for w in widths) + OPTION_SEP * (len(options) - 1)
-    if writer.answer_x + needed > right:
+    if writer.answer_text_x + needed > right:
         # The choices will not share the label's line, so fall back to the indented block a parent uses,
         # which has the full width to wrap into. That block spans the column, so no stroke is drawn.
         return _emit_options(out, field, options, radio, baseline + LINE_GAP, writer)
 
     ident = _ident(field)
-    x = writer.answer_x
+    x = writer.answer_text_x
     for index, option in enumerate(options):
         _mark(out, f"{ident}-{index + 1}", int(x), baseline, radio, writer)
         out.append(f'  <text class="option" x="{int(x + MARK + MARK_GAP)}" y="{baseline}">{_esc(option)}</text>')
@@ -1153,8 +1162,8 @@ def _emit_field(out: list[str], field: Field, y: int, writer: SvgWriter, closes_
         # field that heads a group of children is the exception: its rule is several rows further down.
         if not closes_group:
             out.append(
-                f'  <line class="write" x1="{writer.answer_x}" y1="{y}" '
-                f'x2="{MARGIN_X + CONTENT_W - 180}" y2="{y}"/>'
+                f'  <line class="write" x1="{writer.answer_text_x}" y1="{y}" '
+                f'x2="{MARGIN_X + CONTENT_W - TEXT_INSET}" y2="{y}"/>'
             )
         _column(out, top, y, writer)
     return y
@@ -1179,8 +1188,12 @@ def _emit_paired_row(out: list[str], field: Field, top: int, y: int, baseline: i
 
     bottom = y + writer.face.pad_at(LABEL_SIZE)
     if not closes_group:
-        out.append(f'  <line class="write" x1="{writer.answer_x}" y1="{bottom}" x2="{divider}" y2="{bottom}"/>')
-        out.append(f'  <line class="write" x1="{divider}" y1="{bottom}" x2="{unit_x - 200}" y2="{bottom}"/>')
+        out.append(
+            f'  <line class="write" x1="{writer.answer_text_x}" y1="{bottom}" x2="{divider}" y2="{bottom}"/>'
+        )
+        out.append(
+            f'  <line class="write" x1="{divider + TEXT_INSET}" y1="{bottom}" x2="{unit_x - 200}" y2="{bottom}"/>'
+        )
     _column(out, top, bottom, writer)
     out.append(f'  <line class="column" x1="{divider}" y1="{top}" x2="{divider}" y2="{bottom}"/>')
     return bottom
