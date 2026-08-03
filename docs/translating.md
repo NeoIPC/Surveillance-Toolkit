@@ -21,15 +21,30 @@ rather than symbolic: a term translated here becomes the agreed rendering everyw
 *not* translated here cannot be enforced anywhere else. Clearing it is an afternoon and it makes every
 other catalogue easier to review.
 
-Many terms appear three times in different casings — `necrotizing enterocolitis`, `Necrotizing
-enterocolitis`, `Necrotizing Enterocolitis`. That is not duplication: reports use the first in running
-text, the second for a label, the third in a heading. Your language may well not distinguish them, in
-which case the same rendering three times is the correct answer. Weblate groups the variants together so
-you can see them side by side.
+**Each term appears once**, in the form it takes in running text — `necrotizing enterocolitis`, lower
+case. Where a report needs it capitalized for a label or a heading, the capital is applied when the report
+is built, not translated as a second entry. So translate the term as you would write it mid-sentence, and
+if your language capitalizes differently from English that is handled for you. (Terms that are capitals
+anyway — `BSI`, `MRSA`, `NeoIPC Surveillance` — are unaffected.)
 
-**Reports** — the prose partners actually read: methods paragraphs, table headings, footnotes, and the
-interpretation text beside an unusual result. The most consequential catalogue for tone, and the one
-where the style rules below matter most.
+**Reports** — five separate documents in one catalogue, and they are **not** written for the same reader.
+The location line under each string tells you which one you are in, and it changes the register more than
+anything else in this guide does:
+
+| document | who reads it |
+|---|---|
+| **Partner-Certificate** | pinned to a wall in the hospital — the general public |
+| **Reference-Report** | published on the NeoIPC website — the general public, including political stakeholders |
+| **Patient-Data-Report** | parents, and possibly legal teams acting for them |
+| **Partner-Report** | everyone on the ward whose work can affect infection rates — investigators, but just as much the nursing staff, and in some settings the cleaning staff |
+| **Validation-Report** | data collectors and team leads, checking their own data |
+
+Two consequences. **"Clinical register" is the wrong default** — the Partner-Report is read by people who
+are not clinicians and whose work matters just as much, so plain language beats professional shorthand
+wherever both are accurate. And a large shared layer (`reports/common.yaml`) is used by **all five**, so a
+string there has to work on a wall, in a parent's hands, and in a data collector's checklist at once. If
+one of those readings makes a shared string impossible in your language, say so in a comment rather than
+choosing which reader to serve — that is a problem with the English, and it is fixable.
 
 **Core surveillance protocol** — the reference document describing the surveillance itself: definitions,
 inclusion criteria, data collection. Read by clinicians and infection-control staff setting up a
