@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-08-04 18:14+0200\n"
+"POT-Creation-Date: 2026-08-04 18:45+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Language-Team: none\n"
 "Language: en\n"
@@ -1730,9 +1730,7 @@ msgstr ""
 
 #. type: Hash Value: boolean_yes
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:656
-#: doc/protocol/NeoIPC-Core-Protocol.adoc:659
-#: doc/protocol/resx/NeoIPC-Core-Decision-Flow.resx:4
-#: common/figure-strings.yaml:1
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:659 common/figure-strings.yaml:1
 #, no-wrap
 msgid "Yes"
 msgstr ""
@@ -1744,9 +1742,7 @@ msgstr ""
 
 #. type: Hash Value: boolean_no
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:657
-#: doc/protocol/NeoIPC-Core-Protocol.adoc:660
-#: doc/protocol/resx/NeoIPC-Core-Decision-Flow.resx:7
-#: common/figure-strings.yaml:1
+#: doc/protocol/NeoIPC-Core-Protocol.adoc:660 common/figure-strings.yaml:1
 #, no-wrap
 msgid "No"
 msgstr ""
@@ -3817,45 +3813,6 @@ msgstr ""
 msgid "A localized stab wound or pin site infection. Note: A laparoscopic trocar site is considered a surgical incision and not a stab wound.  If a surgeon uses a laparoscopic trocar site to place a drain at the end of a procedure this is considered a surgical incision."
 msgstr ""
 
-#. type: Hash Value: decision_admitted
-#: doc/protocol/resx/NeoIPC-Core-Decision-Flow.resx:10
-#: common/figure-strings.yaml:1
-#, no-wrap
-msgid "Admitted to your department within 120 days after birth?"
-msgstr ""
-
-#. type: Content of: <root><data><value>
-#: doc/protocol/resx/NeoIPC-Core-Decision-Flow.resx:13
-#, no-wrap
-msgid "i.e., stillborn babies, delivery room death, day of life &gt; 120"
-msgstr ""
-
-#. type: Content of: <root><data><value>
-#: doc/protocol/resx/NeoIPC-Core-Decision-Flow.resx:16
-#, no-wrap
-msgid "Gestational age &lt; 32 weeks?"
-msgstr ""
-
-#. type: Content of: <root><data><value>
-#: doc/protocol/resx/NeoIPC-Core-Decision-Flow.resx:19
-#, no-wrap
-msgid "Birthweight &lt; 1500g?"
-msgstr ""
-
-#. type: Hash Value: decision_eligible
-#: doc/protocol/resx/NeoIPC-Core-Decision-Flow.resx:22
-#: common/figure-strings.yaml:1
-#, no-wrap
-msgid "Eligible"
-msgstr ""
-
-#. type: Hash Value: decision_ineligible
-#: doc/protocol/resx/NeoIPC-Core-Decision-Flow.resx:25
-#: common/figure-strings.yaml:1
-#, no-wrap
-msgid "Ineligible"
-msgstr ""
-
 #. type: Hash Value: chart_days
 #: common/figure-strings.yaml:1
 #, no-wrap
@@ -3886,16 +3843,34 @@ msgstr ""
 msgid "Comments"
 msgstr ""
 
+#. type: Hash Value: decision_admitted
+#: common/figure-strings.yaml:1
+#, no-wrap
+msgid "Admitted to your department within 120 days after birth?"
+msgstr ""
+
 #. type: Hash Value: decision_birthweight
 #: common/figure-strings.yaml:1
 #, no-wrap
 msgid "Birthweight < 1500g?"
 msgstr ""
 
+#. type: Hash Value: decision_eligible
+#: common/figure-strings.yaml:1
+#, no-wrap
+msgid "Eligible"
+msgstr ""
+
 #. type: Hash Value: decision_gestational_age
 #: common/figure-strings.yaml:1
 #, no-wrap
 msgid "Gestational age < 32 weeks?"
+msgstr ""
+
+#. type: Hash Value: decision_ineligible
+#: common/figure-strings.yaml:1
+#, no-wrap
+msgid "Ineligible"
 msgstr ""
 
 #. type: Hash Value: decision_not_admitted
