@@ -34,6 +34,14 @@ boolean_no: "No"
 # against a 16-character box, and the German for "gestational age" is 15 — one character of headroom, in
 # a language that builds compounds.
 
+# A comparison and its number must not be split across a line break -- "< 32" and "> 120" have to stay
+# whole. The version these replace enforced that with a non-breaking space, which was the only mechanism
+# available to it: its wrapper splits on a plain space and had no other way to protect a break point.
+# That is recorded here because the intent is easy to lose once that wrapper is gone and the only trace
+# of it is a badly-broken printed sheet. Whatever draws these must honour it by MEASURING, not by a
+# space character -- this project bars non-breaking spaces in string resources for exactly the reason
+# they were needed here, that they make a layout decision inside translatable text.
+#
 # The question at the top of the flow: was the infant admitted within the eligibility window?
 decision_admitted: "Admitted to your department within 120 days after birth?"
 # The counter-case, listing what falls outside it.
@@ -152,9 +160,10 @@ required: "required"
 # layout's own word rather than part of any field's name, because the row it closes is a layout decision.
 unit_days: "days"
 
-# No page-number string, deliberately: a sheet is always ONE page. It is filled in at a cot side, and a
-# form that runs onto a second sheet loses half of itself. A stage whose fields will not fit gets a denser
-# layout; the generator refuses to spill onto another page rather than numbering the pieces.
+# No page-number string, deliberately: a sheet must be ONE page. It is filled in at a cot side, and a
+# form that runs onto a second sheet loses half of itself. A stage whose fields will not fit needs a
+# denser layout; spilling onto another page and numbering the pieces is not an option a generator may
+# take on its own.
 
 # Identifying header, repeated on every sheet so a loose page can be put back with the right patient.
 # Deliberately NOT the NeoIPC-ID: these sheets stay in the hospital and carry local identifiers, which is
