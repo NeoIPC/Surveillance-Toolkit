@@ -149,6 +149,26 @@ the document is claiming, and this is the single most common thing corrected in 
 strings, so if your language groups digits differently, that is a glossary-level fix rather than a
 per-string one. Ask rather than improvising per string.
 
+**Borrowed abbreviations — three answers, and the right one is a fact about your language.** MRSA, CRP,
+CVC and the rest reach you in Latin, and what to do with them differs by language rather than by taste:
+
+1. **Your language has its own abbreviation.** Use it. Ukrainian writes *СРБ* for CRP, *НЕК* for NEC,
+   *ЦВК* for CVC, *ІОХВ* for a surgical site infection — those are in ministry documents, not coined.
+2. **Your language writes the Latin one.** Keep it. The same Ukrainian sources print *MRSA*, *CPAP*,
+   *HFNC* and *ASA* untranslated, and Israeli clinical documentation keeps almost all of them.
+3. **Your language spells it out letter by letter.** Nepali does this: *सीआरपी*, *एमआरएसए*.
+
+**What none of them is: an abbreviation you build yourself from a translated expansion.** A form printed
+with a plausible-looking abbreviation nobody recognises is worse than one printed in English, because the
+reader cannot tell it is wrong. Where your language has no established form — Ukrainian has none for
+*3GCR* or *VPT*, and does not abbreviate either — say so in a comment and leave the Latin.
+
+**One trap, and it is invisible.** On a Cyrillic or Greek keyboard the Latin letters cost a layout switch
+while *С Р А О Е Т* sit under your fingers and are pixel-identical to *C P A O E T*. Typing CPAP as
+*СРАР* looks exactly right and is a different string: search will not find it, sorting misplaces it, and
+a screen reader reads it in the wrong language. If an abbreviation stays in Latin, type it in Latin.
+`scripts/check-mixed-script.py` catches this, but it is much easier not to do.
+
 ## Long words, and how to tell us where they may break
 
 Some of what you translate is not prose on a page: field labels and option names from the **DHIS2
