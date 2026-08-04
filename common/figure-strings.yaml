@@ -44,8 +44,9 @@ boolean_no: "No"
 #
 # The question at the top of the flow: was the infant admitted within the eligibility window?
 decision_admitted: "Admitted to your department within 120 days after birth?"
-# The counter-case, listing what falls outside it.
-decision_not_admitted: "i.e. stillbirths, death in the delivery room, day of life > 120"
+# The counter-case, listing what falls outside it. "i.e.," with the comma, which is what both other uses
+# in this catalogue do and what the string this replaces had; dropping it was an accident of rewording.
+decision_not_admitted: "i.e., stillbirths, death in the delivery room, day of life > 120"
 decision_gestational_age: "Gestational age < 32 weeks?"
 decision_birthweight: "Birthweight < 1500g?"
 # The two outcomes. Not "included"/"excluded": eligibility is a property of the patient, and the protocol

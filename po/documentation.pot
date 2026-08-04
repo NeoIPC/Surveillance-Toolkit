@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-08-04 19:05+0200\n"
+"POT-Creation-Date: 2026-08-04 19:24+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Language-Team: none\n"
 "Language: en\n"
@@ -3876,7 +3876,7 @@ msgstr ""
 #. type: Hash Value: decision_not_admitted
 #: common/figure-strings.yaml:1
 #, no-wrap
-msgid "i.e. stillbirths, death in the delivery room, day of life > 120"
+msgid "i.e., stillbirths, death in the delivery room, day of life > 120"
 msgstr ""
 
 #. type: Hash Value: footer_reference
