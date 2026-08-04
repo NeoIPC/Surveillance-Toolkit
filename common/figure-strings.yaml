@@ -131,14 +131,15 @@ footer_reference: >-
 # n items, one delimiter, repeated, in a fixed order. That is a Latin list convention and not a property
 # of writing in general. Here the whole construction is the translator's -- the punctuation, the spacing,
 # a conjunction before the last item, a different order, or a phrase that is not a list at all. All three
-# placeholders must appear; a label that quietly lost one would ask for a resistance category the sheet
-# no longer offers, so the build refuses it rather than printing it.
+# placeholders must appear: a label that quietly lost one would ask for a resistance category the sheet
+# no longer offers, so whatever consumes this must refuse it rather than print it. Nothing in this
+# repository consumes it yet -- these strings are here so translators can start before the generator
+# exists -- so that is a requirement on the consumer, not a description of today.
 #
 # Two of the three placeholders are the glossary's own keys; the third is NOT, and the difference is
 # mechanical rather than an oversight. The glossary key is `3gcr`, and `{3gcr}` leads with a digit, which
-# every brace-format checker in this pipeline rejects as a field name -- so the slot is `gcr3` and the
-# mapping from it to the glossary term lives with the layout, in common/sheet-layout.yaml. Do not
-# "correct" it to `{3gcr}`: nothing would resolve it.
+# no brace-format checker accepts as a field name -- so the slot is `gcr3`, and mapping it back to the
+# glossary term belongs with the layout rather than here. Do not "correct" it to `{3gcr}`.
 resistance_organism_specific: "{mrsa}/{vre}/{gcr3}"
 resistance_organism_specific_note: >-
   Mark the resistance category appropriate to the isolated organism and answer for that one.
