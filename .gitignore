@@ -47,3 +47,6 @@ __pycache__/
 .pytest_cache/
 # Scratch / throwaway artifacts, never committed (the durable procedures live in the relevant READMEs).
 /tmp/
+
+# Localized figure text, written by po4a from common/figure-strings.yaml on every run.
+common/figure-strings.*.yaml
