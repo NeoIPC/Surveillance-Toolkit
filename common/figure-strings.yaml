@@ -1,0 +1,168 @@
+# Text that GENERATED FIGURES need and that no data model owns — the collection sheets and the protocol's
+# decision flow alike.
+#
+# One file rather than one per figure, and that is not tidiness: the decision flow and the sheets both
+# need the words "Yes" and "No", so a file each would have translated the same two words twice and shown
+# a translator two entries with nothing to choose between them. That is the duplication the glossary work
+# has just finished removing; it does not get reintroduced here.
+#
+# Deliberately consolidated BEFORE any of it reaches Weblate. Renaming a key costs nothing today and
+# costs every language's translation once a component exists.
+#
+# Every label on a sheet comes from the canonical metadata (dataElements' formName, options' name,
+# programStageSections' name) and is translated in po/metadata.<lang>.po. These are what is left: the
+# words the FORM says rather than the words the DATA MODEL says. They live here because a sheet cannot be
+# assembled without them and there is nowhere in the metadata they belong — a checkbox's "Yes" is not a
+# property of any data element.
+#
+# Keep this list short. A string that describes a field belongs in the metadata, not here; the test is
+# whether it would still be needed if the sheet were a different shape.
+
+# The two labels on a yes/no pair. Shared with the decision flow's branch labels, which is the reason
+# this file covers every generated figure rather than one per figure.
+boolean_yes: "Yes"
+boolean_no: "No"
+
+# ── The protocol's decision flow ────────────────────────────────────────────────────────────────────
+#
+# Moved here from doc/protocol/resx/NeoIPC-Core-Decision-Flow.resx, a .NET resource format that was the
+# only one of its kind in this repository and the reason three of the four figure families never reached
+# the translation pipeline at all. These eight are whole sentences: the line breaks in the figure are the
+# renderer's business, measured against the real font, and were never a translator's to supply.
+#
+# They are the strings under the most pressure on the page. The wrapper being replaced counts characters
+# against a 16-character box, and the German for "gestational age" is 15 — one character of headroom, in
+# a language that builds compounds.
+
+# The question at the top of the flow: was the infant admitted within the eligibility window?
+decision_admitted: "Admitted to your department within 120 days after birth?"
+# The counter-case, listing what falls outside it.
+decision_not_admitted: "i.e. stillbirths, death in the delivery room, day of life > 120"
+decision_gestational_age: "Gestational age < 32 weeks?"
+decision_birthweight: "Birthweight < 1500g?"
+# The two outcomes. Not "included"/"excluded": eligibility is a property of the patient, and the protocol
+# uses these two words throughout.
+decision_eligible: "Eligible"
+decision_ineligible: "Ineligible"
+
+# ── The protocol's title page and its preview watermark ────────────────────────────────────────────
+#
+# The last two figure strings that reached no catalogue at all. Their .resx carried three keys: the
+# funding statement, which is already a glossary term (h2020_funding_statement) and stays there because
+# the reports print it too; these two; and a hard-coded translator credit, which is not a translatable
+# string but a fact about who translated, and belongs to the acknowledgement work rather than here.
+#
+# German and Spanish renderings of both already exist in the .resx files and are real translations. They
+# have to be carried into the catalogue rather than dropped when that machinery is retired.
+
+# The project's name as a phrase, on the title page. Translatable despite naming the project: "Project"
+# is a common noun and moves -- German writes "NeoIPC Projekt", Spanish "Proyecto NeoIPC", which also
+# changes the word order. The bare mark "NeoIPC" is a name and never translated.
+neoipc_project: "NeoIPC Project"
+
+# Stamped across a protocol that is not yet the published version. It says the DOCUMENT is provisional,
+# not the surveillance -- a reader who mistakes one for the other has been told something false about
+# their own data, which is why it is a full phrase rather than the word "Preview" alone.
+preview_version: "Preview Version"
+
+# The heading above every sheet. The line below it is the stage's own name, which comes from the metadata.
+sheet_heading: "NeoIPC – Core Module (VLBW/VPT Infants)"
+
+# The master sheet is assembled from the enrolment attributes and two stages, so it has no stage name of
+# its own to use as a subtitle.
+sheet_master_title: "Master Data Collection Sheet"
+
+# ── The patient progress chart ──────────────────────────────────────────────────────────────────────
+#
+# The one sheet whose ROWS are fields and whose COLUMNS are days: the surveillance-end day counts, one
+# row each, against a month. Everything on it that names a field comes from the metadata like every
+# other sheet; these four are what the transposition itself needs.
+
+chart_title: "Patient Progress Chart"
+
+# Heads the column of row labels. Not "Field" or "Measure": each row is counted in days, and the column
+# headings beside it are day numbers, so this is what the numbers to its right are numbering.
+chart_days: "Days"
+
+# Which month this sheet covers. A stay routinely spans more than one, so a chart without it cannot be
+# filed or reassembled once the sheets are separated.
+chart_month_year: "Month/Year"
+
+# Distinguishes two charts for the same patient in the same month -- a second sheet when the first is
+# full of corrections, or a stay that ran past the columns. Paper needs this and the platform does not,
+# which is why it is here rather than in the metadata.
+chart_number: "Chart no"
+
+# Heads the last column, which totals the row. One letter on the published form because the column is a
+# day wide; a language whose word for "total" begins differently should say so here.
+chart_total: "T"
+
+# The band over the enrolment attributes. They are attributes of the patient rather than of any one
+# surveillance event, so there is no program stage section carrying a name for them.
+section_enrolment: "Enrolment"
+
+# The legend that gives the two markers their meaning. Without it the shapes are decoration, and a reader
+# has no way to know that one of them means "pick exactly one".
+legend_one: "You can select only one option."
+legend_many: "You can select multiple options."
+
+# Heads the space left at the foot of the table. The sheet is one page and the fields rarely fill it
+# exactly; the remainder becomes room to write rather than white space.
+comments: "Comments"
+
+# Points the reader at the protocol for anything the form cannot say in a row. The section names are
+# translated as part of the protocol itself, so they are named here in full rather than cross-referenced:
+# a sheet is printed on its own and cannot resolve a reference into a document the reader may not have.
+footer_reference: >-
+  For more information, please see the Data Dictionary and Abbreviations sections of the NeoIPC Core
+  Module protocol.
+
+# The note for the one printed row that stands for three resistance categories the data model keeps
+# separate. They are organism-specific and mutually exclusive for a single isolate -- MRSA is by
+# definition Staphylococcus aureus, VRE by definition Enterococcus, and 3GCR principally an
+# Enterobacterales question -- so at most one of the three can apply to any organism written on the line
+# above.
+#
+# The label is a PATTERN, and the three placeholders are filled from the glossary, which already carries
+# all three as controlled terminology -- spelling them out here would put the same terms in a fourth
+# place and let a figure drift from the wording every other document is held to.
+#
+# It is a pattern rather than a separator the emitter joins with, because joining assumes the shape:
+# n items, one delimiter, repeated, in a fixed order. That is a Latin list convention and not a property
+# of writing in general. Here the whole construction is the translator's -- the punctuation, the spacing,
+# a conjunction before the last item, a different order, or a phrase that is not a list at all. All three
+# placeholders must appear; a label that quietly lost one would ask for a resistance category the sheet
+# no longer offers, so the build refuses it rather than printing it.
+resistance_organism_specific: "{mrsa}/{vre}/{gcr3}"
+resistance_organism_specific_note: >-
+  Mark the resistance category appropriate to the isolated organism and answer for that one.
+
+# Shown against a field the protocol requires. Kept as a word rather than an asterisk so that it survives
+# being read aloud, and so that a translator can choose a form that fits the language.
+required: "required"
+
+# The unit closing a row that carries two values -- "Antibiotic substance 1: ____ : __ days". It is the
+# layout's own word rather than part of any field's name, because the row it closes is a layout decision.
+unit_days: "days"
+
+# No page-number string, deliberately: a sheet is always ONE page. It is filled in at a cot side, and a
+# form that runs onto a second sheet loses half of itself. A stage whose fields will not fit gets a denser
+# layout; the generator refuses to spill onto another page rather than numbering the pieces.
+
+# Identifying header, repeated on every sheet so a loose page can be put back with the right patient.
+# Deliberately NOT the NeoIPC-ID: these sheets stay in the hospital and carry local identifiers, which is
+# exactly why the protocol says the patient ID and name must never be submitted.
+section_patient: "Patient"
+patient_identifier: "Patient ID"
+patient_name: "Patient name"
+
+# Why identifying the patient is right HERE and wrong in the platform, said on the sheet itself rather
+# than left to the protocol. The sheet is filled in at a cot side and filed in the hospital, so it needs
+# to name the patient unambiguously; the surveillance dataset must never carry that. Someone holding the
+# paper has to be told which of those two things they are doing.
+#
+# One sentence, not four. The hand-drawn sheet carried it pre-split across four lines because its
+# wrapper could not measure; the line breaks are the renderer's business and were never the writer's.
+patient_note: >-
+  These fields serve to unambiguously identify the patient within the hospital. They are not part of the
+  NeoIPC surveillance dataset and must not be transmitted to the data collection platform.
