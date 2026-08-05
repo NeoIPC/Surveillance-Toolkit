@@ -20,10 +20,9 @@ namespaces stripped rather than something anyone would maintain by hand.
 
 ## The progress chart is one of the family, not an exception to it
 
-It reads as the exception — a grid of days rather than a list of questions — and that appearance cost this
-work a false start, recorded here because it is the natural conclusion and it is wrong. **Its rows are
-derivable, one for one.** Every one of the eighteen is a surveillance-end day count that the master sheet
-also prints: `NEOIPC_SURVEILLANCE_END_PATIENT_DAYS`, the four device counts, human milk, kangaroo care,
+It reads as the exception — a grid of days rather than a list of questions — and that reading is wrong in
+the way that matters: **its rows are derivable, one for one.** Every one of the eighteen is a
+surveillance-end day count that the master sheet also prints: `NEOIPC_SURVEILLANCE_END_PATIENT_DAYS`, the four device counts, human milk, kangaroo care,
 probiotic, the antibiotic total, and the nine substance slots. So it is generated from the same metadata,
 in the same order, by the same generator.
 
@@ -686,24 +685,22 @@ Which means the interesting question is not what fits today but what fits once t
 and for the surgical-site sheet in Nepali those two answers differ. Measured against the same catalogue in
 its two states:
 
-| Nepali surgical-site sheet, drawn from | spare |
-|---|---|
-| the translations a reviewer has confirmed | **+1.3 mm** |
-| those plus the drafts still awaiting review | **−1.2 mm** |
+| Nepali surgical-site sheet, drawn from | spare at a 10 mm margin | at 8 mm |
+|---|---|---|
+| the translations a reviewer has confirmed | +1.3 mm | +6.8 mm |
+| those plus the drafts still awaiting review | **−1.2 mm** | **+2.8 mm** |
 
-**So it clears the margin now and stops clearing it when the outstanding Nepali drafts are approved**,
-without anybody touching the layout, the metadata or the wording — which is what "the budget is height"
-costs in practice. It is the tightest sheet in the family and the first to reach the limit; the others
-have between 24 and 142 mm of headroom in the same run.
+So a sheet can pass today and fail on nothing but the completion of its own review, and the margin is what
+absorbs that. The surgical-site sheet is the tightest in the family and the first to reach the limit; the
+others hold between 24 and 146 mm in the same run.
 
-**Be precise about what that failure is, because it is not what the word "overflow" suggests.** The gate
-measures against the **bottom margin**, not the paper: at −1.2 mm the content stops 8.8 mm above the page
-edge, so nothing is clipped, nothing is lost, and a printed copy looks entirely normal. What it breaches
-is this project's own 10 mm border, and it stays well clear of the ~5 mm unprintable edge an office
-printer reserves. That makes it a deliberately conservative gate rather than an alarm — the margin is
-where the headroom for the *next* translation lives, so losing it silently is how a form eventually does
-reach the paper's edge. A denser surgical-site layout is work to schedule before those approvals land, not
-an emergency, and anyone reviewing the file will correctly see nothing wrong with it.
+**Be precise about what the failure is, because it is not what the word "overflow" suggests.** The gate
+measures against the **bottom margin**, not the paper. Content 1.2 mm past a 10 mm margin still stops
+8.8 mm above the page edge: nothing is clipped, nothing is lost, and a printed copy looks entirely normal
+— anyone opening the file to look for the damage will correctly find none. What is spent is the border,
+and the border is where the headroom for the *next* translation lives, which is why losing it counts as a
+failure at all. That makes the gate deliberately conservative rather than an alarm, and it is why the
+remedy can be a margin as readily as a denser layout: both return the same commodity.
 
 **No figure from a run belongs in this document.** These two are here because the *comparison* is the
 finding; the per-sheet spares are not, and a table of them has already gone stale twice — once when

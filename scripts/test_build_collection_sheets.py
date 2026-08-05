@@ -191,9 +191,16 @@ def test_the_chart_grid_does_not_grow_with_the_script(english: Path, tmp_path: P
 
 
 def _grid_pitches(svg: str) -> list[int]:
-    """The gaps between the full-width rules, less the four above the grid and the comments box below."""
-    ys = sorted({int(m) for m in re.findall(r'<line class="rule" x1="1000" y1="(\d+)"', svg)})
-    return [b - a for a, b in zip(ys, ys[1:])][4:-1]
+    """The gaps between the full-width rules, less the four above the grid and the comments box below.
+
+    The left edge comes from the generator rather than being written here: hard-coded, it silently matches
+    nothing when the margin changes, and every comparison built on it then passes on two empty lists.
+    """
+    left = generator_module().MARGIN_X
+    ys = sorted({int(m) for m in re.findall(rf'<line class="rule" x1="{left}" y1="(\d+)"', svg)})
+    pitches = [b - a for a, b in zip(ys, ys[1:])][4:-1]
+    assert pitches, "no grid rows found; the rule that finds them no longer matches the generator's output"
+    return pitches
 
 
 def test_mirroring_reflects_a_page_about_its_own_width() -> None:

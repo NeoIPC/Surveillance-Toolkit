@@ -66,18 +66,22 @@ except ImportError:  # pragma: no cover
 # meant the chart quietly measuring itself against the other orientation's page.
 PORTRAIT = (21000, 29700)
 LANDSCAPE = (29700, 21000)
-# One margin, all four sides. They were 12.5 / 10 / 12 mm, which is not a design -- it is three numbers
-# that were each plausible on their own. The comments box grows to whatever is left, so the bottom margin
-# is exact rather than approximate, and an even border is then simply a matter of using one value.
+# One margin, all four sides. The comments box grows to whatever is left, so the bottom margin is exact
+# rather than approximate, and an even border is then simply a matter of using one value.
 #
-# 10 mm is where the measured benefit stops. Narrowing the margin buys height twice over -- directly, two
-# millimetres of page per millimetre of margin, and indirectly, because the extra width stops labels
-# wrapping and lets more choice runs sit on their own label's line. The indirect half is the larger one
-# and it is entirely spent by 10 mm: from 12.5 the pneumonia sheet gains 17.7 mm for 2.5 mm of margin,
-# while every step below 10 gains exactly the mechanical 2 mm and nothing more, on every sheet. So a
-# narrower margin past this point trades a real risk -- office printers reserve an unprintable border, and
-# a clipped form is discovered by the partner who prints it -- for a benefit that has already been taken.
-MARGIN = 1000
+# The floor is the printer: a consumer printer is safe from about 6.4 mm (0.25 in), so this keeps 1.6 mm
+# in hand. The bleed allowance that governs commercially trimmed matter does not apply -- nothing on these
+# forms runs to the edge, and a partner prints them on A4 rather than trimming them.
+#
+# The ceiling is height, and it is what makes the margin worth spending care on rather than rounding to a
+# comfortable number. A millimetre of margin costs two millimetres of page on every form, and the sheets
+# are held to one page each while their translations get longer.
+#
+# It costs a second time through the width, and by an amount no constant can express: a narrower page
+# wraps labels that would otherwise sit on one line and pushes `best_layout` onto a different answer
+# column. That is a function of the text and so of the language -- 2 mm of margin is worth 4 mm of page on
+# the English primary-sepsis sheet and 7.9 mm on the Nepali one, whose column moves 20 mm.
+MARGIN = 800
 MARGIN_X = MARGIN_TOP = MARGIN_BOTTOM = MARGIN
 
 # There is no input COLUMN. A field is a full-width row: the label in bold at the left, and the rest of
