@@ -13,11 +13,35 @@ extends: default
 font:
   catalog:
     merge: true
+    # This repository's own files rather than the gem's pre-subsetted build, because the generated figures
+    # are laid out by MEASURING these faces: an advance width read from one file and drawn from another
+    # agrees about every glyph the two happen to share and is silently wrong about the rest. The gem's
+    # subset also carries a legacy `kern` table and no `GPOS`, where these carry `GPOS` and no `kern`, so
+    # the two do not even apply the same pair adjustments.
     Noto Sans:
-      normal: GEM_FONTS_DIR/notosans-regular-subset.ttf
-      bold: GEM_FONTS_DIR/notosans-bold-subset.ttf
-      italic: GEM_FONTS_DIR/notosans-italic-subset.ttf
-      bold_italic: GEM_FONTS_DIR/notosans-bold_italic-subset.ttf
+      normal: NotoSans-Regular.ttf
+      bold: NotoSans-Bold.ttf
+      italic: NotoSans-Italic.ttf
+      bold_italic: NotoSans-BoldItalic.ttf
+    # The script and symbol faces a generated figure names alongside Noto Sans. A family the document asks
+    # for and the theme does not register is looked for in the machine's own font directories and, failing
+    # that, resolves to Helvetica -- which has no glyphs outside Latin-1 and renders the rest as the
+    # logical-NOT sign, silently. Registering them here is what stops that.
+    Noto Sans Devanagari:
+      normal: NotoSansDevanagari-Regular.ttf
+      bold: NotoSansDevanagari-Bold.ttf
+      italic: NotoSansDevanagari-Regular.ttf
+      bold_italic: NotoSansDevanagari-Bold.ttf
+    Noto Sans Hebrew:
+      normal: NotoSansHebrew-Regular.ttf
+      bold: NotoSansHebrew-Bold.ttf
+      italic: NotoSansHebrew-Regular.ttf
+      bold_italic: NotoSansHebrew-Bold.ttf
+    Noto Sans Math:
+      normal: NotoSansMath-Regular.ttf
+      bold: NotoSansMath-Regular.ttf
+      italic: NotoSansMath-Regular.ttf
+      bold_italic: NotoSansMath-Regular.ttf
     # Named `icon` because that is the family the decision-flow template selects for its outcome marks.
     icon:
       normal: GEM_FONTS_DIR/notoemoji-subset.ttf

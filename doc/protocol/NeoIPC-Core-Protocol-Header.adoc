@@ -32,6 +32,14 @@ endif::[]
 ifdef::backend-pdf[]
 :full-width: pdfwidth=100%
 :pdf-theme: {docdir}/../NeoIPC.theme.yml
+// Where the theme looks for the faces it names. This repository's own fonts come first so that the
+// figures are DRAWN from the same files the generator MEASURED; the gem's directory stays on the list
+// because the theme still names asciidoctor-pdf's own bundled faces for everything else.
+//
+// {docdir} is doc/protocol for every culture -- the build pins --base-dir there so that shared
+// references keep working when the source being rendered is one level down -- so this one path serves
+// the localized builds unchanged.
+:pdf-fontsdir: {docdir}/../../common/fonts;GEM_FONTS_DIR
 endif::[]
 ifdef::backend-docbook5[]
 :full-width: scaledwidth=100%
