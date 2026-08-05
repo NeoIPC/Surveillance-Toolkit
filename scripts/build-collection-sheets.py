@@ -1295,6 +1295,9 @@ class Composer:
         # How much page is left once everything is placed -- the size of the comments box, and the only
         # honest measure of how much longer a translation may be before the sheet stops fitting.
         self.spare = 0
+        # Ways this form is unfit that are neither a fit failure nor a missing glyph -- reported like
+        # both, so a defective form fails the build rather than being written and looking finished.
+        self.problems: list[str] = []
 
     @property
     def content_w(self) -> int:
@@ -1485,6 +1488,11 @@ def _emit_filing_row(out: list[Shape], y: int, composer: Composer) -> int:
                             y + composer.face.pad_at(LABEL_SIZE, label) + composer.face.cap_at(LABEL_SIZE),
                             line, "label"))
         _column(out, top, top + height, composer, answer)
+    # The divider between the two cells, at the same weight as the column that opens each of them. Without
+    # it the row reads as ONE field with a stray word in the middle of the space to write in: the first
+    # cell's writing area runs straight into the second cell's label, and nothing says where one question
+    # ends and the next begins. It is the same stroke a paired row on a sheet uses for the same reason.
+    out.append(Line(MARGIN_X + half, top, MARGIN_X + half, top + height, "column"))
     out.append(Line(MARGIN_X, top + height, MARGIN_X + composer.content_w, top + height, "rule"))
     return top + height
 
@@ -1766,6 +1774,19 @@ def _emit_patient_block(out: list[Shape], y: int, composer: Composer) -> int:
     shading = len(out)
     out.append(Box(0, 0, 0, 0, "notransmit"))
     out.append(Box(0, 0, 0, 0, "notransmit-edge"))
+
+    # These two exist to tell one patient from another, so they have to tell each OTHER apart first. A
+    # translation that renders both the same is not a wording preference: it leaves a person holding the
+    # form with two identical lines and no way to know which takes the identifier and which the name, and
+    # it looks entirely finished. Checked here because it is a property of the pair rather than of either
+    # string, so no per-string check in the translation pipeline can see it.
+    identifying = [composer.chrome[k] for k in ("patient_identifier", "patient_name")]
+    if identifying[0] == identifying[1]:
+        composer.problems.append(
+            f"the patient block's two fields both read {identifying[0]!r}, so the form cannot say which "
+            f"line takes the identifier and which the name; the two source strings need distinct "
+            f"translations in this language"
+        )
 
     for key in ("patient_identifier", "patient_name"):
         label = composer.chrome[key]
@@ -2619,6 +2640,13 @@ def main(argv: list[Shape] | None = None) -> int:
                 shown = " ".join(f"U+{ord(c):04X} {c!r}" for c in sorted(chars))
                 failures.append(f"{form.code}: {font_name} has no glyph for {shown}")
             continue
+        if composer.problems:
+            failures.extend(f"{form.code}: {problem}" for problem in composer.problems)
+            # A defect in an unreviewed translation is what a review render EXISTS to show, so the file is
+            # written and the reviewer can see it. The exit status is unchanged either way, so a build
+            # still cannot pass by asking for drafts -- the same bargain `--allow-overflow` strikes.
+            if not args.include_drafts:
+                continue
         # Not `with_suffix`: the stem already ends in the culture code, which is exactly what that would
         # take to be the extension and replace.
         stem = args.out / f"{stem_name}{suffix}"
