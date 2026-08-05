@@ -107,13 +107,14 @@ chart_number: "Chart no"
 # a lone "T" or "G" says nothing about what the column holds, and each language would have to invent its
 # own ambiguity. A summation sign is read the same everywhere and needs no translation to be understood.
 #
-# It is U+03A3 GREEK CAPITAL LETTER SIGMA, not U+2211 N-ARY SUMMATION, and that is a coverage decision
-# rather than a typographic preference: none of the faces in common/fonts carries U+2211, so the correct
-# mathematical operator would fail the glyph check. The two are near-identical in shape.
+# It is U+2211 N-ARY SUMMATION -- the operator -- and not the Greek capital sigma it resembles. The two
+# look alike and are different things: sigma is a LETTER, so a screen reader announces it as one,
+# extraction yields one, and a Greek reader meets a character of their own alphabet doing an operator's
+# job. Noto Sans Math is in the font stack so that the right character can be drawn.
 #
 # Still translatable: a language with an established convention of its own can override it. Leaving it as
 # it stands is the expected answer, and identical to the source is a legitimate translation here.
-chart_total: "Σ"
+chart_total: "∑"
 
 # What a reader who cannot see the page is told it holds. It reaches them twice -- as the SVG's <desc>,
 # which a screen reader announces, and as the PDF's Subject -- so it is user-facing text and belongs here

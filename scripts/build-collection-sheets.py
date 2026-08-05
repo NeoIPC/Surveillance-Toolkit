@@ -164,6 +164,25 @@ RIGHT_TO_LEFT = frozenset({"ar", "arc", "ckb", "dv", "fa", "he", "ks", "ku", "ps
 # here. See common/fonts/README.md.
 SCRIPT_FONTS = {"ne": "NotoSansDevanagari", "he": "NotoSansHebrew"}
 
+# Mathematical symbols, in every language, as the LAST face in the stack -- reached only for a character
+# neither the Latin face nor the language's own script face carries.
+#
+# It is here so that a symbol can be a symbol. A summation sign is U+2211, an operator; the Greek capital
+# sigma that Noto Sans does carry is a LETTER, and substituting one for the other is wrong in exactly the
+# way this project cares about -- a screen reader announces "Greek capital letter sigma", extraction
+# yields a letter, and a Greek reader sees a character of their own alphabet doing an operator's job.
+#
+# It harmonizes rather than merely coexisting, which is measured rather than assumed: Noto Sans Math and
+# Noto Sans agree exactly on cap height (714), x-height (536) and ascent (1069), so a symbol sits on the
+# same optical line as the digits beside it. Its descent is deeper (423 against 293), which costs nothing
+# here because a row's height is measured from its label rather than from the symbols in its cells.
+MATH_FONT = "NotoSansMath"
+
+# Families shipping a single upright face. Asking one of these for a bold or an italic gets its regular,
+# which is not a stand-in for a file somebody forgot: Noto Sans Math has no weights, and a mathematical
+# operator has no italic form to fall back to.
+SINGLE_FACE = frozenset({MATH_FONT})
+
 # The brand's two colours, as carried by common/img/NeoIPC-Logo.svg. An earlier accent of #2e74b5 was a
 # word-processor default that merely looked similar and was sampled from nothing; see
 # docs/data-collection-sheet-generation.md for the palette and how each derived tint is arrived at.
@@ -2588,6 +2607,7 @@ def main(argv: list[Shape] | None = None) -> int:
     stems = ["NotoSans"]
     if args.language in SCRIPT_FONTS:
         stems.append(SCRIPT_FONTS[args.language])
+    stems.append(MATH_FONT)
     # One stack per variant a style can ask for. A script without an italic of its own -- Devanagari has
     # none, and the tradition it comes from has no such distinction -- simply repeats its upright face,
     # so a note set in it stays legible instead of resolving to nothing.
@@ -2687,6 +2707,8 @@ def _variant(stem: str, bold: bool, italic: bool) -> str:
     typography actually calls for, and the distinction it carries in Latin -- against the questions
     around it -- is carried by size in every language anyway.
     """
+    if stem in SINGLE_FACE:
+        return "Regular"
     if italic and stem == "NotoSans":
         return "BoldItalic" if bold else "Italic"
     return "Bold" if bold else "Regular"

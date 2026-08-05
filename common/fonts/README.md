@@ -8,6 +8,7 @@ Typefaces the build **embeds**, kept here rather than taken from the machine or 
 | `NotoSans-Italic.ttf`, `NotoSans-BoldItalic.ttf` | Noto Sans (v2.008) | [googlefonts/noto-fonts](https://github.com/googlefonts/noto-fonts) |
 | `NotoSansDevanagari-Regular.ttf`, `NotoSansDevanagari-Bold.ttf` | Noto Sans Devanagari | [notofonts/devanagari](https://github.com/notofonts/devanagari) |
 | `NotoSansHebrew-Regular.ttf`, `NotoSansHebrew-Bold.ttf` | Noto Sans Hebrew | [notofonts/hebrew](https://github.com/notofonts/hebrew) |
+| `NotoSansMath-Regular.ttf` | Noto Sans Math (v2.001) | [notofonts/math](https://github.com/notofonts/math) |
 
 **The italics are a release behind the uprights, and that is checked rather than tolerated.** Noto builds
 and versions its italics separately, so v2.015 uprights and v2.008 italics is the pairing upstream
@@ -19,12 +20,22 @@ build rather than substituting one, so the risk is a stopped build and never a w
 
 **Devanagari has no italic and needs none** — the script has no such distinction. A style asking for one
 in Nepali gets the upright Devanagari face, which is a fallback among the files here rather than to
-whatever a machine has installed.
+whatever a machine has installed. **Noto Sans Math ships a single weight**, so it answers every style with
+its upright: a mathematical operator has no bold or italic form to fall back to.
 
-All four are **SIL Open Font License 1.1**, which the licence guardrail requires. `OFL-NotoSans.txt` and
-`OFL-NotoSansDevanagari.txt` are the upstream licence texts; they are separate files because the two
-families come from different upstream repositories and carry different copyright lines, and the OFL
-requires the licence to travel with the font.
+**Noto Sans Math is last in every language's stack**, reached only for a character neither the Latin face
+nor the language's own script face carries. It is here so that a symbol can be a symbol rather than the
+letter that resembles it — a summation sign is U+2211, an operator, while the Greek capital sigma Noto
+Sans already carries is a letter, and a screen reader, a text extractor and a Greek reader all treat the
+two differently. It harmonizes rather than merely coexisting, and that is measured: cap height 714,
+x-height 536 and ascent 1069, identical to Noto Sans, so a symbol sits on the same optical line as the
+digits beside it. Its descent is deeper — 423 against 293 — which costs nothing here, because a row's
+height is measured from its label rather than from the symbols in its cells.
+
+Every family is **SIL Open Font License 1.1**, which the licence guardrail requires. The `OFL-*.txt` files
+are the upstream licence texts, one per family: they are separate because the families come from
+different upstream repositories and carry different copyright lines, and the OFL requires the licence to
+travel with the font.
 
 ## Why the fonts are here rather than on the machine
 
@@ -52,6 +63,12 @@ embedded glyphs — so a document that falls through to a generic family gets a 
 anything outside Latin-1, and renders every other character as the logical-NOT sign. Nothing warns. That
 has already happened here.
 
-Two rules follow, and both are enforced rather than remembered: a generated figure names exactly one
-concrete family and never a fallback list, and text is checked against the face's character map before it
-is laid out, so a glyph the font lacks fails the build instead of reaching a PDF nobody opens.
+Two rules follow, and both are enforced rather than remembered: a generated figure names **only concrete
+families shipped here — never a generic** such as `sans-serif`, which is what falls through to Helvetica;
+and text is checked against the character maps before it is laid out, so a glyph no face carries fails the
+build instead of reaching a PDF nobody opens.
+
+A stack of concrete families is the opposite of that fallback rather than a softer version of it. Each
+name resolves to a file in this directory, in a stated order, and the same order is written into both
+outputs, so every renderer resolves the same faces. What is barred is a name resolving to whatever a
+machine happens to have.
