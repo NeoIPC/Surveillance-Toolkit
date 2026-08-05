@@ -1555,13 +1555,23 @@ def _emit_grid(out: list[Shape], chart: Chart, y: int, composer: Composer) -> in
 
     # The heading row, then one row per field. Both are measured the same way and both take the written
     # minimum, so the grid has one pitch from top to bottom.
-    def row_height(text: str, style: str) -> int:
+    #
+    # A row here is taller than its text needs, because the cell is sized for a hand rather than for the
+    # label. That surplus is split ABOVE and BELOW rather than left under the words: charged entirely to
+    # the bottom -- which is what a natural row does, where there is no surplus to charge -- every label
+    # hangs from the top of its cell and the day numbers and the total sign sit visibly high in a grid
+    # whose cells are otherwise empty. Splitting it centres the text in the cell it belongs to.
+    def row_metrics(text: str, style: str) -> tuple[int, int]:
+        """The row's height, and how far its baseline sits below the row's top."""
         size = STYLES[style].size
-        return max(CHART_ROW_MIN, 2 * composer.face.pad_at(size, text) + size)
+        pad = composer.face.pad_at(size, text)
+        natural = 2 * pad + size
+        height = max(CHART_ROW_MIN, natural)
+        return height, (height - natural) // 2 + pad + composer.face.cap_at(size)
 
     top = y
-    height = row_height(head, "label")
-    baseline = y + composer.face.pad_at(LABEL_SIZE, head) + composer.face.cap_at(LABEL_SIZE)
+    height, drop = row_metrics(head, "label")
+    baseline = y + drop
     out.append(Text(MARGIN_X + TEXT_INSET, baseline, head, "label"))
     for index, text in enumerate([str(d) for d in range(1, chart.days + 1)] + [total]):
         # Centred in its own cell. `mid` in the print emitter and `text-anchor: middle` in the SVG both
@@ -1572,9 +1582,8 @@ def _emit_grid(out: list[Shape], chart: Chart, y: int, composer: Composer) -> in
     out.append(Line(MARGIN_X, y, MARGIN_X + composer.content_w, y, "rule"))
 
     for row in chart.rows:
-        height = row_height(row.label, "label")
-        baseline = y + composer.face.pad_at(LABEL_SIZE, row.label) + composer.face.cap_at(LABEL_SIZE)
-        out.append(Text(MARGIN_X + TEXT_INSET, baseline, row.label, "label", _ident(row)))
+        height, drop = row_metrics(row.label, "label")
+        out.append(Text(MARGIN_X + TEXT_INSET, y + drop, row.label, "label", _ident(row)))
         y += height
         out.append(Line(MARGIN_X, y, MARGIN_X + composer.content_w, y, "rule"))
 
