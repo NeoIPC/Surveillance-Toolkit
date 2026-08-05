@@ -72,12 +72,27 @@ Describe 'Report interpolation hygiene' {
         $offenders = Get-ChildItem -LiteralPath $reportsDir -Recurse -File -Include '*.qmd', '*.Rmd', '*.R' |
             ForEach-Object {
                 $file = $_
-                Get-Content -LiteralPath $file.FullName | ForEach-Object { $script:n = 0 } {
-                    $script:n++
-                    # A line whose first non-space character is '#' is an R comment or a markdown heading;
-                    # neither is a call. This project writes about glue in prose constantly.
-                    if ($_ -notmatch '^\s*#' -and $_ -match $pattern) {
-                        '{0}:{1}' -f [IO.Path]::GetRelativePath($repoRoot, $file.FullName), $script:n
+                # An R COMMENT is skipped, because this project writes about glue in prose constantly and
+                # a sentence naming it is not a call. A markdown HEADING is not, and the earlier form
+                # treated the two as one case: a Quarto heading opens with '#' too, headings here carry
+                # inline R routinely, and `# Results for `r glue::glue(...)`` was therefore excluded from
+                # the one gate that would have caught it.
+                #
+                # Which one a '#' line is cannot be read off the line — `# text` is a valid heading AND a
+                # valid R comment, and an ATX rule alone reports every comment in every .R file. It takes
+                # the file and the chunk: in .R every '#' is a comment, and in .qmd/.Rmd only those inside
+                # a ```{r} fence are.
+                $inChunk = $file.Extension -eq '.R'
+                $lineNumber = 0
+                foreach ($line in (Get-Content -LiteralPath $file.FullName)) {
+                    $lineNumber++
+                    if ($file.Extension -ne '.R') {
+                        if ($line -match '^\s*```+\s*\{') { $inChunk = $true; continue }
+                        elseif ($line -match '^\s*```+\s*$') { $inChunk = $false; continue }
+                    }
+                    if ($inChunk -and $line -match '^\s*#') { continue }
+                    if ($line -match $pattern) {
+                        '{0}:{1}' -f [IO.Path]::GetRelativePath($repoRoot, $file.FullName), $lineNumber
                     }
                 }
             }
@@ -87,7 +102,16 @@ Describe 'Report interpolation hygiene' {
             'use interpolate_translation() from reports/common/helpers.R')
     }
 
-    Context 'the helper refuses evaluation' -Skip:(-not (Get-Command Rscript -ErrorAction SilentlyContinue)) {
+    # These four are what make this a security gate rather than a grep: the one above proves nobody CALLS
+    # the unsafe function, and only these prove the safe one refuses to evaluate. Skipping them locally is
+    # a convenience for a machine without R; skipping them on a runner means the property is asserted by
+    # nothing at all, and reads in the log exactly like proving it. So CI is required to have R.
+    Context 'the helper refuses evaluation' -Skip:(-not $env:CI -and -not (Get-Command Rscript -ErrorAction SilentlyContinue)) {
+
+        It 'has R available, because a runner without it would silently prove nothing' -Skip:(-not $env:CI) {
+            Get-Command Rscript -ErrorAction SilentlyContinue |
+                Should -Not -BeNullOrEmpty -Because 'the behavioural half of this gate needs Rscript'
+        }
 
         It 'refuses to execute a function call written into a translated string' {
             Invoke-RSnippet 'cat(tryCatch(as.character(interpolate_translation("{Sys.time()}")),

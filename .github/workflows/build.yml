@@ -564,6 +564,20 @@ jobs:
               shell: pwsh
               run: ./scripts/Build-NeoIPCCoreProtocol.ps1 -InformationAction Continue -WarningAction:Stop
 
+            - name: Install R for the interpolation gate's behavioural half
+              # ReportInterpolationHygiene proves that a translated string cannot reach R's evaluator, and
+              # the half that PROVES it runs R: it asks the helper to interpolate `{Sys.time()}` and
+              # requires a refusal. Those assertions were skipped wherever Rscript was absent, which is
+              # every runner, so the security property was gated by a grep alone and the log read the same
+              # either way. The test now fails on a runner without R rather than skipping, so this step is
+              # what keeps it green — and glue comes from apt because the helper calls glue_safe.
+              if: github.ref_type != 'tag' || steps.rel.outputs.product == 'metadata'
+              shell: bash
+              run: |
+                sudo apt-get update -qq
+                sudo apt-get install -qq r-base-core r-cran-glue
+                Rscript -e 'cat(R.version.string, "| glue", as.character(packageVersion("glue")), "\n")'
+
             # ── Metadata product group (continued) ─────────────────────────────────────────────────────────────
             - name: Provision and test NeoIPC-Tools
               if: github.ref_type != 'tag' || steps.rel.outputs.product == 'metadata'
