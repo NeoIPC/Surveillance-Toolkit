@@ -46,8 +46,12 @@
     .mark { fill: none; stroke: #fff; stroke-width: 14; stroke-linecap: round; stroke-linejoin: round; }
   </style>
   <defs>
-    <marker id="decision-flow-arrowhead" refX="4" refY="0" orient="auto" markerWidth="10" markerHeight="9" overflow="visible">
-      <path d="M -2,-4 9,0 -2,4 c 2,-2.33 2,-5.66 0,-8 z"/>
+    <!-- refX is the TIP, so the head stops where the connector does. Anywhere else and the front of it
+         is drawn inside the node the arrow points into, which paints over it: what a reader sees is a
+         triangle with its point cut flat against the edge. Marker units are multiples of the stroke
+         width, so this head is 8 x 6 of them = 3.5 x 2.6 mm, short enough to clear a branch label. -->
+    <marker id="decision-flow-arrowhead" refX="6" refY="0" orient="auto" markerWidth="8" markerHeight="6" overflow="visible">
+      <path d="M -2,-3 L 6,0 L -2,3 c 1.5,-1.75 1.5,-4.25 0,-6 z"/>
     </marker>
     <symbol id="decision-flow-tick" viewBox="0 0 100 100">
       <path class="mark" d="M 12,52 L 38,80 L 88,20"/>
