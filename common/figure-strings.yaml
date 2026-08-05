@@ -102,9 +102,18 @@ chart_month_year: "Month/Year"
 # which is why it is here rather than in the metadata.
 chart_number: "Chart no"
 
-# Heads the last column, which totals the row. One letter on the published form because the column is a
-# day wide; a language whose word for "total" begins differently should say so here.
-chart_total: "T"
+# Heads the last column, which totals the row. The column is one day wide, so it holds a symbol rather
+# than a word -- and a symbol rather than an initial, because an initial is ambiguous in every language:
+# a lone "T" or "G" says nothing about what the column holds, and each language would have to invent its
+# own ambiguity. A summation sign is read the same everywhere and needs no translation to be understood.
+#
+# It is U+03A3 GREEK CAPITAL LETTER SIGMA, not U+2211 N-ARY SUMMATION, and that is a coverage decision
+# rather than a typographic preference: none of the faces in common/fonts carries U+2211, so the correct
+# mathematical operator would fail the glyph check. The two are near-identical in shape.
+#
+# Still translatable: a language with an established convention of its own can override it. Leaving it as
+# it stands is the expected answer, and identical to the source is a legitimate translation here.
+chart_total: "Σ"
 
 # What a reader who cannot see the page is told it holds. It reaches them twice -- as the SVG's <desc>,
 # which a screen reader announces, and as the PDF's Subject -- so it is user-facing text and belongs here
