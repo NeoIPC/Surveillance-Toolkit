@@ -34,25 +34,44 @@ boolean_no: "No"
 # against a 16-character box, and the German for "gestational age" is 15 — one character of headroom, in
 # a language that builds compounds.
 
-# A comparison and its number must not be split across a line break -- "< 32" and "> 120" have to stay
-# whole. The version these replace enforced that with a non-breaking space, which was the only mechanism
-# available to it: its wrapper splits on a plain space and had no other way to protect a break point.
-# That is recorded here because the intent is easy to lose once that wrapper is gone and the only trace
-# of it is a badly-broken printed sheet. Whatever draws these must honour it by MEASURING, not by a
-# space character -- this project bars non-breaking spaces in string resources for exactly the reason
-# they were needed here, that they make a layout decision inside translatable text.
+# Three of these carry NON-BREAKING SPACES (U+00A0), which the project's number-and-unit rule permits
+# where a specific line-break problem is documented. This is that documentation, and the rule is narrow:
+# a THRESHOLD is one term, so its operator, its value and its unit are held together. What is bound is
+# therefore every space inside "< 32 weeks", "< 1500 g" and "> 120", and nothing else -- the "120 days"
+# in the first question is prose rather than a threshold, nothing is being compared to it, and a line
+# ending on that number reads perfectly normally where one ending on "Birthweight <" does not.
+#
+# It is the SAME mechanism as the soft hyphen these strings may also carry, pointed the other way. A soft
+# hyphen says a word MAY divide here; a non-breaking space says these two MAY NOT be divided. Both are
+# facts about the language rather than about this layout -- which is why both belong to whoever writes
+# the sentence -- and both are honoured by the wrapper rather than by the renderer: it splits on the
+# ASCII space alone, so a non-breaking one is simply not a place it can break.
+#
+# Both are invisible, in an editor and in a diff alike, so a translator can neither see one nor easily
+# type one. That is what the Weblate explanation on these units is for, and why it is worth saying here
+# that a translation which loses them is not wrong -- it has only lost a refinement the source made.
 #
 # The question at the top of the flow: was the infant admitted within the eligibility window?
 decision_admitted: "Admitted to your department within 120 days after birth?"
 # The counter-case, listing what falls outside it. "i.e.," with the comma, which is what both other uses
 # in this catalogue do and what the string this replaces had; dropping it was an accident of rewording.
-decision_not_admitted: "i.e., stillbirths, death in the delivery room, day of life > 120"
-decision_gestational_age: "Gestational age < 32 weeks?"
-decision_birthweight: "Birthweight < 1500g?"
+decision_not_admitted: "i.e., stillbirths, death in the delivery room, day of life > 120"
+decision_gestational_age: "Gestational age < 32 weeks?"
+decision_birthweight: "Birthweight < 1500 g?"
 # The two outcomes. Not "included"/"excluded": eligibility is a property of the patient, and the protocol
 # uses these two words throughout.
 decision_eligible: "Eligible"
 decision_ineligible: "Ineligible"
+
+# What a reader who cannot see the figure is told it holds. The protocol's own image macro carries alt
+# text, and an INLINED figure keeps none of it -- asciidoctor drops the alt when it inlines the SVG, in
+# the PDF and in the HTML alike -- so without these the flow chart is an unlabelled graphic. The sheets
+# carry the same pair for the same reason.
+decision_title: "Eligibility decision flow"
+decision_description: >-
+  Three questions decide whether an infant is eligible for the NeoIPC core module. Admitted to your
+  department within 120 days after birth, gestational age under 32 weeks, birthweight under 1500 grams —
+  an infant admitted in time and meeting either threshold is eligible, and any other answer is not.
 
 # ── The protocol's title page and its preview watermark ────────────────────────────────────────────
 #

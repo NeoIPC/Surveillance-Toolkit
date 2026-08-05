@@ -683,6 +683,15 @@ that still will not fit fails the build exactly as an unbreakable token does. An
 rather than applied by a rule, so a clinical term that would be misread when divided simply carries no
 soft hyphen — no mapping entry, no exception list, and nothing to keep in step with the text.
 
+**Its mirror is the non-breaking space, and the wrapper honours it by construction.** `Face.wrap` splits
+on the ASCII space alone, so U+00A0 is simply not a place a break can be taken — one mechanism says a
+word *may* divide here and the other says these two *may not*, and neither is the layout's decision to
+make. A threshold is where it earns its keep: `< 32 weeks` and `< 1500 g` are single terms, and a line
+ending on `Birthweight <` reads as a truncated sentence rather than as a comparison. The rule against
+non-breaking spaces in string resources is a rule against making a *layout* decision inside translatable
+text, and it admits a documented exception for exactly this; the documentation is in
+`common/figure-strings.yaml`, beside the strings that carry them.
+
 Its eight strings move out of `.resx` accordingly: they are already whole sentences, so nothing about them
 needs splitting by a translator, and the wrapping was never theirs to think about.
 
@@ -706,6 +715,29 @@ derived palette exactly, and the output is then a plain house-style SVG — sema
 coordinates, no editor namespace — that a maintainer edits directly. The one-off code that emitted it is
 not kept: the SVG is the source afterwards, and the palette stays reproducible because its derivation is
 recorded above rather than living in a script.
+
+The skeletons live in `doc/protocol/figures/`, which is source, while `doc/protocol/img/` is where the
+build writes. That separation is what the `.resx` and XSLT pair failed to make: a template and its
+rendering sat in the same tree under names that differed by a suffix.
+
+**Three rules make the template hold its own geometry**, and they are stated in the file so that editing
+it does not require reading this one:
+
+- **A labelled node is a `<g>` whose first child is its region** — a `rect`, a `circle` or an `ellipse`.
+  The label is fitted to that region, so moving or resizing the shape moves the text with it. The
+  alternative, an `x`/`y`/width on the text node, states the same geometry twice and lets a hand edit
+  change a box without changing what is measured against it. An oval's region is the largest rectangle
+  inside it — half-axes over root two, which is exact rather than a fudge factor.
+- **A `<use>` in the group is a mark**, and it reserves the top of the region; the label takes what is
+  left underneath. That is what lets a terminal carry both a tick and a word without a second mechanism.
+- **A `<text>`'s content is a pattern of `{key}` placeholders**, resolved against
+  `common/figure-strings.yaml` — the same mechanism as the resistance label on the sheets, and for the
+  same reason: it needs no naming convention, it survives a key appearing three times on one page, and
+  the template carries no second copy of the English.
+
+A box holds three lines in a question where German needs two, seven in the note where Spanish needs five,
+and one in a branch label, which must never wrap. Those figures are what the geometry was chosen against;
+they are not a budget to spend down, because the languages that will need them have not been written yet.
 
 **A box cannot grow at render time, so it is authored for the worst language.** This is the real
 constraint the template accepts in exchange for its simplicity, and it is the stricter half of the
