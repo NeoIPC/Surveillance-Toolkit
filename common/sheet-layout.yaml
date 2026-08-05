@@ -43,6 +43,30 @@ composites:
       - NEOIPC_STG_ADM
       - NEOIPC_STG_SURV_END
 
+# The patient progress chart: the same fields as a sheet's rows, turned on their side against a month.
+#
+# It is NOT a form for a stage, and that is the whole of what makes it different. Every other form asks
+# for the values the platform stores; this one is the working paper someone keeps at the cot side to
+# ARRIVE at them -- a day count is reached by marking days as they happen, and the total is what is
+# afterwards written on the master sheet and entered. So its rows are that stage's day counts, its
+# columns are the days of a month, and the last column is the total those rows are being counted towards.
+#
+# Which rows, derived rather than listed: every field of the stage below whose code ends in the suffix,
+# in the same order the master sheet prints them. Listing the fourteen by hand would be a third statement
+# of the field list -- after the metadata and the master sheet -- and the one that goes stale silently
+# when a day count is added, since nothing about a missing row LOOKS wrong on a printed grid.
+#
+# The chart carries no legend and no `required` markers. Both belong to a form that captures values; this
+# page has neither a choose-one circle nor a choose-any square on it, and what is compulsory is a property
+# of the master sheet's fields rather than of the tally that feeds them.
+chart:
+  stage: NEOIPC_STG_SURV_END
+  suffix: DAYS
+  # The longest month. The chart covers one, is filed by Month/Year, and a stay spanning two gets a second
+  # sheet -- which is what `chart_number` distinguishes. Not a layout constant: a chart of a fortnight or
+  # of six weeks would be a different decision about the paper, so it is recorded here rather than buried.
+  days: 31
+
 # The order sections are PRINTED in, where it differs from programStageSections' sortOrder.
 #
 # Those are two different questions and the metadata only answers one of them. DHIS2's order is capture

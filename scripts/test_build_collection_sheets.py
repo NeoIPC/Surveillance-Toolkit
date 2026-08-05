@@ -26,6 +26,8 @@ committed here, so the test needs no network and no fixture of its own.
 
 from __future__ import annotations
 
+import csv
+import importlib.util
 import re
 import subprocess
 import sys
@@ -35,7 +37,25 @@ import pytest
 
 REPO = Path(__file__).resolve().parent.parent
 GENERATOR = REPO / "scripts" / "build-collection-sheets.py"
-SHEETS = 6
+# Six reporting sheets and the progress chart. The chart is one of the family rather than a thing beside
+# it: same generator, same page furniture, same one-page rule -- turned on its side.
+SHEETS = 7
+
+
+def generator_module():
+    """Import the generator so a function can be exercised directly rather than through the CLI.
+
+    Needed because the file name carries hyphens, which `import` cannot spell. Used for the properties
+    that no rendered file can show -- what mirroring does to a landscape page, above all, since no
+    right-to-left catalogue is committed here to render one from.
+    """
+    spec = importlib.util.spec_from_file_location("build_collection_sheets", GENERATOR)
+    module = importlib.util.module_from_spec(spec)
+    # Registered BEFORE it is executed: `@dataclass` resolves a field's annotation by looking its own
+    # module up in sys.modules, so a module that is not there yet fails while defining `Field`.
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
 
 
 def generate(out: Path, *extra: str) -> subprocess.CompletedProcess[str]:
@@ -105,3 +125,93 @@ def test_coordinates_are_integers_on_one_grid(english: Path) -> None:
         fractional += [f"{sheet.name}: {m.group(0)}"
                        for m in re.finditer(r'\b(?:x|y|x1|y1|x2|y2|cx|cy|width|height)="\d+\.\d+"', body)]
     assert not fractional, f"coordinates off the grid: {fractional[:5]}"
+
+
+# ── The progress chart ──────────────────────────────────────────────────────────────────────────────
+
+
+def chart(directory: Path, language: str = "") -> str:
+    suffix = f".{language}" if language else ""
+    return (directory / f"NeoIPC-Core-Patient-Progress-Chart{suffix}.svg").read_text(encoding="utf-8")
+
+
+def test_the_chart_holds_every_day_count_the_stage_has(english: Path) -> None:
+    """The rows must be exactly the stage's day counts -- not a subset that happens to look complete.
+
+    This is the chart's sharpest failure mode and the reason it is derived rather than drawn: a MISSING
+    row on a grid looks exactly like a grid. There is no gap, no stray label, no failed measurement and
+    nothing for a proof-reader to catch, so a day count added to the stage would simply stop being
+    tallied, on paper, silently.
+
+    Compared against the metadata rather than against a list kept here, because a list kept here is the
+    same defect one level up. If this goes red because a field was added, that is the test working: put
+    the new row on the chart, or record deliberately why a day count is not tallied.
+    """
+    with (REPO / "metadata" / "common" / "dataElements.csv").open(encoding="utf-8", newline="") as handle:
+        expected = {row["code"] for row in csv.DictReader(handle)
+                    if row["code"].startswith("NEOIPC_SURVEILLANCE_END_") and row["code"].endswith("_DAYS")}
+    module = generator_module()
+    ids = set(re.findall(r'<text id="(neoipc-surveillance-end-[a-z0-9-]*-days)"', chart(english)))
+    assert {module._slug(code) for code in expected} == ids
+
+
+def test_the_chart_is_landscape_and_the_sheets_are_not(english: Path) -> None:
+    """A month of columns does not fit a portrait page, which is why the page size travels per form."""
+    assert 'viewBox="0 0 29700 21000"' in chart(english)
+    sheet = (english / "NeoIPC-Core-BSI-Sheet.svg").read_text(encoding="utf-8")
+    assert 'viewBox="0 0 21000 29700"' in sheet
+
+
+def test_the_chart_carries_no_legend(english: Path) -> None:
+    """The legend explains a circle and a square. This page has neither, so it would explain nothing.
+
+    Read off the emitted marks rather than declared per form, so a sheet that lost its options would drop
+    its legend too instead of printing a key to shapes it no longer has.
+    """
+    legend = "You can select only one option."
+    assert legend not in chart(english)
+    assert legend in (english / "NeoIPC-Core-BSI-Sheet.svg").read_text(encoding="utf-8")
+
+
+def test_the_chart_grid_does_not_grow_with_the_script(english: Path, tmp_path: Path) -> None:
+    """Its rows are sized for a HAND, and a hand is taller than the type in any script shipped here.
+
+    That is what makes the grid's height independent of the language -- the 0.68 mm per row a Devanagari
+    translation costs every reporting sheet costs the chart nothing. Measured, not assumed: at a label
+    size of 300, Noto Sans and Noto Sans Hebrew both want 526 for a row and Noto Sans Devanagari 594, so
+    the property holds for any floor at or above 594 and breaks below it. A face for a script with deeper
+    marks than Devanagari would turn this red, which is the point of asserting it rather than trusting the
+    arithmetic to stay true as fonts are added.
+    """
+    assert generate(tmp_path / "ne", "--language", "ne", "--format", "svg").returncode == 0
+    pitches = {lang: _grid_pitches(text) for lang, text in
+               (("en", chart(english)), ("ne", chart(tmp_path / "ne", "ne")))}
+    assert pitches["en"] == pitches["ne"], f"the grid changed height with the script: {pitches}"
+    assert len(set(pitches["en"])) == 1, f"the grid has more than one row pitch: {sorted(set(pitches['en']))}"
+
+
+def _grid_pitches(svg: str) -> list[int]:
+    """The gaps between the full-width rules, less the four above the grid and the comments box below."""
+    ys = sorted({int(m) for m in re.findall(r'<line class="rule" x1="1000" y1="(\d+)"', svg)})
+    return [b - a for a, b in zip(ys, ys[1:])][4:-1]
+
+
+def test_mirroring_reflects_a_page_about_its_own_width() -> None:
+    """A landscape page must be mirrored about 29700, not about whatever the portrait sheets use.
+
+    The whole point of the page size travelling with the form. Mirroring the chart about the portrait
+    width would put most of it at a negative coordinate -- off the page, clipped, and reported by nothing,
+    since `place` neither reflows nor complains. Exercised directly because no right-to-left catalogue is
+    committed here, so no rendered file can reach this path.
+    """
+    module = generator_module()
+    page_w = module.LANDSCAPE[0]
+    shapes = [module.Text(28000, 500, "x", "label"), module.Box(28000, 500, 900, 100, "band"),
+              module.Line(1000, 500, 28700, 500, "rule"), module.Dot(28000, 500, 130)]
+    mirrored = module.mirror(shapes, page_w)
+    for shape in mirrored:
+        for value in (getattr(shape, "x", None), getattr(shape, "x1", None),
+                      getattr(shape, "x2", None), getattr(shape, "cx", None)):
+            if value is not None:
+                assert 0 <= value <= page_w, f"{shape} left the page when mirrored about {page_w}"
+    assert module.mirror(mirrored, page_w) == shapes, "mirroring twice is not the identity"

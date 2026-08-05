@@ -18,6 +18,33 @@ stops after the first few fields, and `NeoIPC-Core-Patient-Progress-Chart.svg`, 
 carries 367 `<path>` elements where the grid should be `<rect>` and `<line>` — editor output with the
 namespaces stripped rather than something anyone would maintain by hand.
 
+## The progress chart is one of the family, not an exception to it
+
+It reads as the exception — a grid of days rather than a list of questions — and that appearance cost this
+work a false start, recorded here because it is the natural conclusion and it is wrong. **Its rows are
+derivable, one for one.** Every one of the eighteen is a surveillance-end day count that the master sheet
+also prints: `NEOIPC_SURVEILLANCE_END_PATIENT_DAYS`, the four device counts, human milk, kangaroo care,
+probiotic, the antibiotic total, and the nine substance slots. So it is generated from the same metadata,
+in the same order, by the same generator.
+
+What genuinely is not in the metadata is the **transposition** — thirty-one day columns, a totals column,
+and the two fields that let a loose sheet be filed (Month/Year, Chart no). Those are decisions about
+paper, exactly like the marker on a boolean or the printed slot count, and they live in
+`common/sheet-layout.yaml` with the rest of them. Nothing about the chart needed a second mechanism.
+
+Two consequences follow from being generated rather than drawn, and the second is why the argument matters
+more here than on any sheet. It becomes localizable, which it has never been. And a row can no longer go
+missing: **on a grid, an absent row looks exactly like a grid** — no gap, no stray label, nothing a
+proof-reader could catch — so a day count added to the stage would simply stop being tallied, on paper,
+with nothing to say so. `test_the_chart_holds_every_day_count_the_stage_has` compares the printed rows
+against the metadata for that reason.
+
+The chart carries **no legend and no `required` markers**. Both belong to a form that captures values;
+this page has neither a choose-one circle nor a choose-any square on it, and whether an answer is
+compulsory is a property of the master sheet's fields rather than of the tally that feeds them. The
+legend's absence is read off the marks actually emitted rather than declared per form, so a sheet that
+lost its options would drop its legend with them instead of printing a key to shapes it no longer has.
+
 ## Source
 
 `metadata/common/`, and nothing else:
@@ -124,6 +151,14 @@ formed — and it wraps the many-to-one runs in `/Span <</ActualText …>>`, so 
 still yields what was written. Read from the content stream, on the same evidentiary standard as the
 finding above. A Nepali form is therefore reachable; what stands between is coverage rather than shaping,
 below.
+
+**A draft is not a translation, and the generator will not treat one as though it were.** Weblate marks
+every unreviewed string as needing edit, which gettext carries as `fuzzy`, and a form drawn from those is
+indistinguishable from a finished one — so the default is to ignore them and print the English source,
+which is legible and obviously incomplete. That default makes the one job a reviewer has impossible,
+because nobody can approve wording they have never seen on the page, so `--include-drafts` turns it off
+for review renders and the run then *says* how many labels came from unconfirmed translations. The switch
+exists so that publishing unreviewed wording takes a deliberate act rather than a forgotten default.
 
 **Whether a sheet is actually translated is checked against the finished PDF**, by
 [`scripts/check-figure-language.py`](../scripts/check-figure-language.py), which extracts its text and
@@ -483,6 +518,13 @@ substance slots and the published master sheet offers **six**. The form has been
 the website, with nothing to say so — which is the argument for generating, and the reason the printed
 count is recorded as a decision instead of left to whoever last edited a Word file.
 
+**Both now print nine**, and the chart is what forced the question rather than leaving it open. The
+published chart also offers six, so a generated chart that kept six would have sat in the same package as
+a generated master sheet offering nine — reintroducing, between two forms a partner fills in together, the
+exact model-versus-paper drift that generating them was meant to remove. `slots:` in
+`common/sheet-layout.yaml` is therefore empty, which means *print what the metadata carries*; an entry
+there is how a printed count would be deliberately held below it.
+
 ## The decision flow needs this before the sheets do
 
 The same wrapper wraps the protocol's decision-flow figure, and there the margin is already gone. Its
@@ -592,6 +634,24 @@ the same weight as the column rather than with a second horizontal one.
 the progress chart's columns and the sheets' rows are the same design object seen three ways, and each one
 drifting on its own is how the inconsistency arose in the first place.
 
+The chart is where that stopped being an aspiration. It shares `_open_page` and `_close_page` with the
+sheets **literally** — the same logo placement, the same two type sizes, the same patient block, the same
+comments box absorbing the leftover, the same one-page rule and the same measured footer — so what differs
+between a sheet and the chart is only the body between them. A chart that merely *resembled* the sheets
+would have drifted from them the first time either was touched, and the family reads as one set of forms
+only for as long as its edges are the same decision rather than two decisions that currently agree.
+
+**Its one column is measured like the sheets' answer column, and it is the only form here that can fail on
+WIDTH.** A sheet runs out of page at the bottom; the chart's row labels and its thirty-two columns compete
+for one line, so a language whose labels are longer takes the space out of the cells somebody writes in.
+Below `CHART_COL_MIN` a cell is too small to write a day count in — which no font metric can answer,
+because that text is written rather than set — and the build fails rather than shipping a grid that merely
+looks tight. The row height is a floor of the same kind, and it buys a property the sheets cannot have:
+at 7.0 mm it is taller than the type in every script shipped here (Noto Sans and Noto Sans Hebrew want
+5.26 mm for a row, Noto Sans Devanagari 5.94), so **the grid's height does not depend on its language** and
+the per-row Devanagari cost recorded below is one the chart simply does not pay. It would break below
+5.94 mm, which is what a face for a script with deeper marks needs checking against.
+
 ## The budget a translation spends is height, not width
 
 The sheets are generated per language, so each gets its own column and its own wrapping — no single layout
@@ -619,22 +679,36 @@ text says.
 
 So the budget is spent one row at a time and is a function of *how many rows are translated*, not of how
 long the translation is. That is a worse property than width would have been, because it cannot be
-recovered by wording: a translator who shortens a label saves nothing, and a sheet gets taller as
-translation progresses. Where it currently lands, with the six sheets fully Nepali except the deliberate
-abbreviations:
+recovered by wording: a translator who shortens a label saves nothing, and **a sheet gets taller as
+translation progresses**.
 
-| sheet | English | Nepali |
-|---|---|---|
-| surgery | 148.8 mm | 142.0 mm |
-| NEC | 115.3 mm | 113.5 mm |
-| primary sepsis/BSI | 73.9 mm | 65.4 mm |
-| pneumonia | 50.5 mm | 47.1 mm |
-| master | 43.1 mm | 24.7 mm |
-| surgical site | 7.7 mm | **−0.2 mm** |
+Which means the interesting question is not what fits today but what fits once the reviewing is finished,
+and for the surgical-site sheet in Nepali those two answers differ. Measured against the same catalogue in
+its two states:
 
-The surgical site sheet is therefore **the one sheet that does not fit in Nepali**, and it misses by
-0.08 % of the page. It is also the sheet with nothing left to translate, so that figure is where Nepali
-ends rather than a number that gets worse.
+| Nepali surgical-site sheet, drawn from | spare |
+|---|---|
+| the translations a reviewer has confirmed | **+1.3 mm** |
+| those plus the drafts still awaiting review | **−1.2 mm** |
+
+**So it clears the margin now and stops clearing it when the outstanding Nepali drafts are approved**,
+without anybody touching the layout, the metadata or the wording — which is what "the budget is height"
+costs in practice. It is the tightest sheet in the family and the first to reach the limit; the others
+have between 24 and 142 mm of headroom in the same run.
+
+**Be precise about what that failure is, because it is not what the word "overflow" suggests.** The gate
+measures against the **bottom margin**, not the paper: at −1.2 mm the content stops 8.8 mm above the page
+edge, so nothing is clipped, nothing is lost, and a printed copy looks entirely normal. What it breaches
+is this project's own 10 mm border, and it stays well clear of the ~5 mm unprintable edge an office
+printer reserves. That makes it a deliberately conservative gate rather than an alarm — the margin is
+where the headroom for the *next* translation lives, so losing it silently is how a form eventually does
+reach the paper's edge. A denser surgical-site layout is work to schedule before those approvals land, not
+an emergency, and anyone reviewing the file will correctly see nothing wrong with it.
+
+**No figure from a run belongs in this document.** These two are here because the *comparison* is the
+finding; the per-sheet spares are not, and a table of them has already gone stale twice — once when
+Devanagari clearance changed the rhythm, once when the catalogue grew. `build-collection-sheets.py`
+prints the spare for every form on every run, and that is the number to read.
 
 For the other languages the picture is still borrowed and still about width: rendered width of `msgstr`
 over `msgid` across the documentation and reports catalogues is a median of **1.12–1.15** for German and

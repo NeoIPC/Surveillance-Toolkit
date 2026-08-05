@@ -59,7 +59,13 @@ except ImportError:  # pragma: no cover
 # coordinates stay integers and a reviewer reading the SVG can convert one to a position on the page in
 # their head. A4 portrait is 21000 x 29700.
 
-PAGE_W, PAGE_H = 21000, 29700
+# A4 both ways round. A reporting sheet is a column of fields and is portrait; the progress chart is a
+# month of columns and is landscape, which is a property of what the page holds rather than a preference.
+# The size travels on the `Composer` rather than in a global, so the two can be laid out by one engine --
+# it is read by the frame, the mirror, the centred titles and both serializers, and a global would have
+# meant the chart quietly measuring itself against the other orientation's page.
+PORTRAIT = (21000, 29700)
+LANDSCAPE = (29700, 21000)
 # One margin, all four sides. They were 12.5 / 10 / 12 mm, which is not a design -- it is three numbers
 # that were each plausible on their own. The comments box grows to whatever is left, so the bottom margin
 # is exact rather than approximate, and an even border is then simply a matter of using one value.
@@ -73,7 +79,6 @@ PAGE_W, PAGE_H = 21000, 29700
 # a clipped form is discovered by the partner who prints it -- for a benefit that has already been taken.
 MARGIN = 1000
 MARGIN_X = MARGIN_TOP = MARGIN_BOTTOM = MARGIN
-CONTENT_W = PAGE_W - 2 * MARGIN_X
 
 # There is no input COLUMN. A field is a full-width row: the label in bold at the left, and the rest of
 # the row is the space to write in -- which is what the published forms do and is most of why they fit one
@@ -121,6 +126,19 @@ COLUMN_GAP = 300                        # clear space between the longest label 
 # to read as two columns rather than as one run-on line: at a bare text inset the last word of a long
 # label finished flush against the next box, which is legible and looks like a defect.
 PAIR_GUTTER = 700
+
+# The progress chart's grid. Both are minima for a cell somebody writes a number in BY HAND, which is the
+# one measurement on these forms that no font can answer: the text in a chart cell is written, not set.
+# They are taken from the published chart, which has been filled in for years at 6.87 x 6.90 mm.
+CHART_COL_MIN = 600                     # a day column: two digits, or a tick, written with a ballpoint
+# The row keeps the published 6.9 mm rather than shrinking to what a label needs, and that buys a property
+# worth more than the millimetre: it is TALLER THAN THE TEXT IN EVERY SCRIPT SHIPPED HERE, so the chart's
+# height does not depend on its language, and the 0.68 mm per row that a Devanagari translation costs
+# every reporting sheet costs the chart nothing. Measured at a label size of 300 rather than derived: Noto
+# Sans and Noto Sans Hebrew both want 526 for a row, Noto Sans Devanagari 594. This clears the tallest of
+# them by 106, and the property fails below 594 -- which is what a face for a script with deeper marks
+# than Devanagari would need checking against before it is added to SCRIPT_FONTS.
+CHART_ROW_MIN = 700
 
 # Real superscript codepoints rather than a baseline shift, so a marker survives being copied out of the
 # PDF and is one character to measure. The font's coverage is checked like any other text on the sheet.
@@ -229,6 +247,25 @@ class Sheet:
     name: str = ""
 
 
+@dataclass
+class Chart:
+    """The progress chart: a stage's day counts as rows, against the days of a month as columns.
+
+    Same fields, same metadata, same page furniture as a sheet -- transposed. It is the working paper the
+    totals on the master sheet are arrived at, which is why it holds no options, no marks and no mandatory
+    flags: nothing on it is captured, and everything on it is counted.
+    """
+
+    slug: str
+    name: str
+    title: str
+    days: int
+    rows: list[Field] = dc_field(default_factory=list)
+
+    # The code is the stage the rows come from, so an overflow names something a reader can act on.
+    code: str = ""
+
+
 # ── Metadata ────────────────────────────────────────────────────────────────────────────────────────
 
 
@@ -310,13 +347,26 @@ class Catalogue:
     obviously incomplete, while a missing glyph is a mark nobody can read and nothing announces.
     """
 
-    def __init__(self, po_path: Path | None):
+    def __init__(self, po_path: Path | None, drafts: bool = False):
         self.entries: dict[str, str] = {}
+        # How many of the labels in use are a translator's unreviewed draft. Counted so a run can SAY so:
+        # a form drawn from drafts looks exactly as finished as one drawn from approved translations, and
+        # the difference is invisible in the artifact itself.
+        self.drafted = 0
         if po_path is None:
             return
         for entry in polib.pofile(str(po_path)):
-            if entry.msgctxt and entry.translated():
-                self.entries[entry.msgctxt] = entry.msgstr
+            if not entry.msgctxt or not entry.msgstr:
+                continue
+            # `translated()` is False for an entry marked needing-edit, which is what Weblate writes for
+            # every draft. That is the right default -- a published form must not present unreviewed
+            # wording as though a reviewer had passed it -- and it is the wrong behaviour for the one job
+            # a reviewer actually needs, which is to SEE the draft on the page before approving it.
+            if entry.fuzzy:
+                if not drafts:
+                    continue
+                self.drafted += 1
+            self.entries[entry.msgctxt] = entry.msgstr
 
     def get(self, context: str, source: str) -> str:
         return self.entries.get(context, source)
@@ -406,6 +456,7 @@ class LayoutRules:
         }
         self.sheet_names: dict[str, str] = rules.get("sheet_names") or {}
         self.row_units: dict[str, str] = rules.get("row_units") or {}
+        self.chart: dict = rules.get("chart") or {}
 
     def file_name(self, code: str, slug: str) -> str:
         """What a sheet's file is called, which is read by whoever picks a form to print.
@@ -748,9 +799,14 @@ class Overflow(Exception):
 # ── Sheet assembly ──────────────────────────────────────────────────────────────────────────────────
 
 
-def build_sheets(meta: Metadata, catalogue: Catalogue, rules: LayoutRules,
-                 chrome: dict[str, str]) -> list[Sheet]:
-    """One sheet per program stage, in the stages' own sort order."""
+def build_stage_sheets(meta: Metadata, catalogue: Catalogue, rules: LayoutRules) -> list[Sheet]:
+    """One sheet per program stage, in the stages' own sort order, before any composite claims it.
+
+    Kept separate from `build_sheets` because the progress chart reads it too: the chart's rows are a
+    stage's day counts in the order that stage is printed, and after the composites have run the stage it
+    needs is no longer a sheet of its own. Deriving the chart from the same walk is what makes a row on it
+    and a row on the master sheet the same field rather than two lists that agree today.
+    """
     sections_by_stage: dict[str, list[dict]] = {}
     for section in meta.sections:
         sections_by_stage.setdefault(section["programStage"], []).append(section)
@@ -809,7 +865,44 @@ def build_sheets(meta: Metadata, catalogue: Catalogue, rules: LayoutRules,
         if sheet.sections:
             sheets.append(sheet)
 
-    return _apply_composites(sheets, meta, catalogue, rules, chrome)
+    return sheets
+
+
+def build_sheets(meta: Metadata, catalogue: Catalogue, rules: LayoutRules,
+                 chrome: dict[str, str]) -> list[Sheet]:
+    """The sheets as printed: the stages, with those a composite claims folded into it."""
+    return _apply_composites(build_stage_sheets(meta, catalogue, rules), meta, catalogue, rules, chrome)
+
+
+def build_chart(sheets: list[Sheet], rules: LayoutRules, chrome: dict[str, str]) -> Chart | None:
+    """The progress chart's rows: one stage's day counts, in the order that stage is printed.
+
+    Derived from the sheets rather than listed, so a day count added to the stage appears on the chart
+    with it. That matters more here than anywhere else on these forms, because a MISSING row on a grid
+    looks exactly like a grid -- there is no gap, no stray label and no failed measurement to notice.
+    """
+    spec = rules.chart
+    if not spec:
+        return None
+    stage = next((s for s in sheets if s.code == spec["stage"]), None)
+    if stage is None:
+        raise LookupError(f"chart names stage {spec['stage']}, which has no sheet to take its rows from")
+    suffix = f"_{spec['suffix']}"
+    slug = "patient-progress-chart"
+    chart = Chart(
+        slug=slug,
+        # Named by the same rule as a sheet, so the family's file names come from one place. It keeps the
+        # name the published chart already has, which is what the protocol's figure refers to.
+        name=rules.file_name(stage.code, slug),
+        title=chrome["chart_title"],
+        days=spec["days"],
+        code=stage.code,
+    )
+    chart.rows = [field for section in stage.sections for field in section.fields
+                  if field.code.endswith(suffix)]
+    if not chart.rows:
+        raise LookupError(f"no field of {stage.code} ends in {suffix}, so the chart would have no rows")
+    return chart
 
 
 def _apply_composites(
@@ -993,6 +1086,11 @@ STYLES: dict[str, Style] = {
     # The small print -- the legend, the footnotes, the footer, the note on the patient block and the
     # case definitions. Italic sets it apart from the questions without another size or another colour.
     "note": Style(SMALL_SIZE, italic=True),
+    # A day number over the progress chart's grid, and the marker over its total column. Centred on the
+    # column rather than on the page -- `centred` means "anchored at its own x", which the page-centred
+    # section titles reach by being placed at the page's middle. Upright, because a column heading is not
+    # small print: it is read while writing in the cell beneath it.
+    "day": Style(SMALL_SIZE, centred=True),
 }
 
 
@@ -1093,7 +1191,7 @@ class Emblem:
 Shape = Text | Line | Box | Dot | Emblem
 
 
-def mirror(shapes: list[Shape]) -> list[Shape]:
+def mirror(shapes: list[Shape], page_w: int) -> list[Shape]:
     """Reflect a finished page about its vertical centre, for a language written right to left.
 
     **Direction is not a concern of the layout at all.** Everything above measures and places in one
@@ -1111,19 +1209,19 @@ def mirror(shapes: list[Shape]) -> list[Shape]:
     document declares, and a browser applies it to the SVG. See docs/data-collection-sheet-generation.md
     for which consumers can and cannot.
     """
-    return [_mirrored(shape) for shape in shapes]
+    return [_mirrored(shape, page_w) for shape in shapes]
 
 
-def _mirrored(shape: Shape) -> Shape:
+def _mirrored(shape: Shape, page_w: int) -> Shape:
     match shape:
         case Text():
-            return replace(shape, x=PAGE_W - shape.x)
+            return replace(shape, x=page_w - shape.x)
         case Line():
-            return replace(shape, x1=PAGE_W - shape.x1, x2=PAGE_W - shape.x2)
+            return replace(shape, x1=page_w - shape.x1, x2=page_w - shape.x2)
         case Box() | Emblem():
-            return replace(shape, x=PAGE_W - shape.x - shape.width)
+            return replace(shape, x=page_w - shape.x - shape.width)
         case Dot():
-            return replace(shape, cx=PAGE_W - shape.cx)
+            return replace(shape, cx=page_w - shape.cx)
 
 
 # ── Layout ──────────────────────────────────────────────────────────────────────────────────────────
@@ -1139,8 +1237,10 @@ class Composer:
 
     def __init__(self, faces: dict[tuple[bool, bool], Typeface], chrome: dict[str, str],
                  glossary: dict[str, str], layout: LayoutRules, logo: Logo,
-                 language: str | None, label_width: int = LABEL_COL_MAX):
+                 language: str | None, label_width: int = LABEL_COL_MAX,
+                 page: tuple[int, int] = PORTRAIT):
         self.faces, self.chrome, self.glossary, self.layout = faces, chrome, glossary, layout
+        self.page_w, self.page_h = page
         # The upright regular face, which is what the vertical rhythm is taken from. That is sound only
         # because the four faces agree on the two metrics it uses, so it is asserted rather than assumed:
         # a family whose italic sat deeper would need the rhythm to follow the style like the width does.
@@ -1165,6 +1265,11 @@ class Composer:
         # How much page is left once everything is placed -- the size of the comments box, and the only
         # honest measure of how much longer a translation may be before the sheet stops fitting.
         self.spare = 0
+
+    @property
+    def content_w(self) -> int:
+        """The width between the margins: what the table spans and what every full-width run wraps to."""
+        return self.page_w - 2 * MARGIN_X
 
     def fill(self, pattern: str, terms: dict[str, str]) -> str:
         """Resolve a label pattern's `{placeholder}`s from the glossary.
@@ -1226,15 +1331,24 @@ class Composer:
         return self.face_of(run.style).width(run.text, STYLES[run.style].size)
 
 
-def title_of(sheet: Sheet, composer: Composer) -> str:
+def title_of(form: Sheet | Chart, composer: Composer) -> str:
     """What the document is called -- the same words in the SVG's <title> and the PDF's metadata."""
-    return f"{composer.chrome['sheet_heading']} — {sheet.title}"
+    return f"{composer.chrome['sheet_heading']} — {form.title}"
 
 
-def description_of(sheet: Sheet) -> str:
-    """Names the sections, so a reader who cannot see the sheet still learns its shape."""
-    sections = ", ".join(s.title for s in sheet.sections)
-    return f"{sheet.title} data collection sheet. Sections: {sections}."
+def description_of(form: Sheet | Chart) -> str:
+    """What a reader who cannot see the page is told it holds.
+
+    A sheet is described by its sections and a chart by its rows and its span, because those are what each
+    one's shape actually is. Naming the chart's rows matters more than it looks: they are the whole content
+    of a grid, and a grid described only as a grid tells a screen-reader user nothing at all.
+    """
+    if isinstance(form, Chart):
+        rows = ", ".join(row.label for row in form.rows)
+        return (f"{form.title}. A table of {len(form.rows)} rows against {form.days} days and a total "
+                f"column. Rows: {rows}.")
+    sections = ", ".join(s.title for s in form.sections)
+    return f"{form.title} data collection sheet. Sections: {sections}."
 
 
 def layout_sheet(sheet: Sheet, composer: Composer) -> list[Shape]:
@@ -1247,16 +1361,7 @@ def layout_sheet(sheet: Sheet, composer: Composer) -> list[Shape]:
     on its own by spilling onto another page.
     """
     out: list[Shape] = []
-    heading = composer.chrome["sheet_heading"]
-    composer._text(heading, "title")
-    composer._text(sheet.title, "subtitle")
-
-    y = MARGIN_TOP + TITLE_SIZE
-    out.append(composer.logo.place(PAGE_W - MARGIN_X - LOGO_W, MARGIN_TOP, LOGO_W))
-    out.append(Text(MARGIN_X, y, heading, "title", "heading"))
-    y += SUBTITLE_SIZE + 220
-    out.append(Text(MARGIN_X, y, sheet.title, "subtitle", f"{sheet.slug}-title"))
-    y += 400
+    y = _open_page(out, sheet.title, sheet.slug, composer)
 
     table_top = y
     body: list[Shape] = []
@@ -1264,25 +1369,173 @@ def layout_sheet(sheet: Sheet, composer: Composer) -> list[Shape]:
     for section in sheet.sections:
         y = _emit_section(body, section, y, composer)
 
-    # Whatever the fields leave over becomes room to write, so the page is used rather than trailing off
-    # into white space. The comments band is emitted before the frame is sized so the frame encloses it.
-    # Every trailing block is measured, not estimated. Guessing the footer at one line's height left a
-    # visible band of unused paper when it wrapped to one line and would have overflowed had it wrapped
-    # to three -- and the whole point of the comments box is that it absorbs EXACTLY what is left, so an
-    # approximation here is a gap at the bottom of every sheet.
-    legend_h = _legend_height(composer)
+    return _close_page(out, body, table_top, y, sheet.code, composer)
+
+
+def layout_chart(chart: Chart, composer: Composer) -> list[Shape]:
+    """Flow the chart: the shared head, the patient block, the filing row, then the grid.
+
+    Same page furniture as a sheet and the same one-page rule; what differs is the body, which is a table
+    of rows against days rather than a run of sections. The two share `_open_page` and `_close_page`
+    literally rather than by resemblance, so the family cannot drift apart at the edges.
+    """
+    out: list[Shape] = []
+    y = _open_page(out, chart.title, chart.slug, composer)
+
+    table_top = y
+    body: list[Shape] = []
+    y = _emit_patient_block(body, y, composer)
+    y = _emit_filing_row(body, y, composer)
+    y = _emit_grid(body, chart, y, composer)
+
+    return _close_page(out, body, table_top, y, chart.code, composer)
+
+
+def _emit_filing_row(out: list[Shape], y: int, composer: Composer) -> int:
+    """Which month this chart covers, and which of that month's charts it is.
+
+    Paper-only, like the two identifying fields above -- the platform stores a stay, not a stack of sheets,
+    so nothing in the metadata names either. They are NOT under the block that must not be transmitted:
+    that tint means "identifies the patient", and a month and a sheet number identify neither. Reusing it
+    here would have made the one signal on these forms that carries a data-protection rule mean two things.
+    """
+    labels = [composer.chrome["chart_month_year"], composer.chrome["chart_number"]]
+    half = composer.content_w // 2
+    top = y
+    height = max(composer.face.pad_at(LABEL_SIZE, text) * 2 + LABEL_SIZE for text in labels)
+    for label, left in zip(labels, (MARGIN_X, MARGIN_X + half)):
+        composer._text(label, "label")
+        answer = left + (composer.answer_x - MARGIN_X)
+        for line in _fit(composer, label, "label", answer - COLUMN_GAP - (left + TEXT_INSET),
+                         "chart_filing", "label"):
+            out.append(Text(left + TEXT_INSET,
+                            y + composer.face.pad_at(LABEL_SIZE, label) + composer.face.cap_at(LABEL_SIZE),
+                            line, "label"))
+        _column(out, top, top + height, composer, answer)
+    out.append(Line(MARGIN_X, top + height, MARGIN_X + composer.content_w, top + height, "rule"))
+    return top + height
+
+
+def _emit_grid(out: list[Shape], chart: Chart, y: int, composer: Composer) -> int:
+    """The chart proper: a row per day count, a column per day, and a column for the total.
+
+    **The column width is measured, not chosen, and it fails on WIDTH** -- the only form in this family
+    that can. A sheet runs out of page at the bottom, so its failure is a height; here the labels and the
+    thirty-two columns compete for one line, and a language whose labels are longer takes the space out of
+    the cells somebody writes in. Below `CHART_COL_MIN` a cell is too small to write a number in, which no
+    font metric can tell us and which would otherwise ship as a grid that merely looks tight.
+    """
+    labels = [row.label for row in chart.rows] + [composer.chrome["chart_days"]]
+    for text in labels:
+        composer._text(text, "label")
+    # The label column has to hold the widest of them whole: these are field names, and wrapping one would
+    # cost every row the extra line, on a page whose rows are already at a hand-written minimum.
+    needed = max(composer.face_of("label").width(text, LABEL_SIZE) for text in labels)
+    wanted = int(needed) + 2 * TEXT_INSET
+    columns = chart.days + 1
+    # Integers on the one grid: the cell width is floored, and the label column absorbs what that leaves,
+    # so every column boundary lands on a whole unit instead of accumulating a rounding error across
+    # thirty-two of them.
+    col_w = (composer.content_w - wanted) // columns
+    if col_w < CHART_COL_MIN:
+        raise Overflow(
+            f"{chart.code}: the row labels need {wanted} of the {composer.content_w} across the page, "
+            f"leaving {col_w} for each of the {columns} columns where {CHART_COL_MIN} is the least a "
+            f"person can write a day count in. The labels are what has to give, not the cells.",
+            out,
+        )
+    grid_x = MARGIN_X + composer.content_w - columns * col_w
+
+    head = composer.chrome["chart_days"]
+    total = composer.chrome["chart_total"]
+    composer._text(head, "label")
+    composer._text(total, "day")
+    for day in range(1, chart.days + 1):
+        composer._text(str(day), "day")
+
+    # The heading row, then one row per field. Both are measured the same way and both take the written
+    # minimum, so the grid has one pitch from top to bottom.
+    def row_height(text: str, style: str) -> int:
+        size = STYLES[style].size
+        return max(CHART_ROW_MIN, 2 * composer.face.pad_at(size, text) + size)
+
+    top = y
+    height = row_height(head, "label")
+    baseline = y + composer.face.pad_at(LABEL_SIZE, head) + composer.face.cap_at(LABEL_SIZE)
+    out.append(Text(MARGIN_X + TEXT_INSET, baseline, head, "label"))
+    for index, text in enumerate([str(d) for d in range(1, chart.days + 1)] + [total]):
+        # Centred in its own cell. `mid` in the print emitter and `text-anchor: middle` in the SVG both
+        # anchor a run at its x, so the same placement centres a day number over its column and a section
+        # title over the page.
+        out.append(Text(grid_x + index * col_w + col_w // 2, baseline, text, "day"))
+    y += height
+    out.append(Line(MARGIN_X, y, MARGIN_X + composer.content_w, y, "rule"))
+
+    for row in chart.rows:
+        height = row_height(row.label, "label")
+        baseline = y + composer.face.pad_at(LABEL_SIZE, row.label) + composer.face.cap_at(LABEL_SIZE)
+        out.append(Text(MARGIN_X + TEXT_INSET, baseline, row.label, "label", _ident(row)))
+        y += height
+        out.append(Line(MARGIN_X, y, MARGIN_X + composer.content_w, y, "rule"))
+
+    # The verticals last, so they run the whole table in one stroke each rather than per row. The label
+    # column and the total column are bounded at the weight the sheets bound an answer cell with; the days
+    # between them are ruled at the lighter one, so thirty-one boundaries read as one field of cells
+    # instead of as thirty-one separate columns.
+    for index in range(columns + 1):
+        x = grid_x + index * col_w
+        kind = "column" if index in (0, columns - 1, columns) else "hair"
+        out.append(Line(x, top, x, y, kind))
+    return y
+
+
+def _open_page(out: list[Shape], subtitle: str, slug: str, composer: Composer) -> int:
+    """The head every generated form shares: the mark, the module heading, and what this one is.
+
+    One function rather than a copy per layout, because a chart that merely *resembled* the sheets would
+    drift from them the first time either was touched -- and the family reads as one set of forms only for
+    as long as the logo, the heading and the two type sizes are literally the same decision.
+    """
+    heading = composer.chrome["sheet_heading"]
+    composer._text(heading, "title")
+    composer._text(subtitle, "subtitle")
+
+    y = MARGIN_TOP + TITLE_SIZE
+    out.append(composer.logo.place(composer.page_w - MARGIN_X - LOGO_W, MARGIN_TOP, LOGO_W))
+    out.append(Text(MARGIN_X, y, heading, "title", "heading"))
+    y += SUBTITLE_SIZE + 220
+    out.append(Text(MARGIN_X, y, subtitle, "subtitle", f"{slug}-title"))
+    return y + 400
+
+
+def _close_page(out: list[Shape], body: list[Shape], table_top: int, y: int, code: str,
+                composer: Composer) -> list[Shape]:
+    """Absorb the leftover into the comments box, frame the table, and set the small print under it.
+
+    Whatever the body leaves over becomes room to write, so the page is used rather than trailing off into
+    white space. Every trailing block is MEASURED, not estimated: guessing the footer at one line's height
+    left a visible band of unused paper when it wrapped to one line and would have overflowed had it
+    wrapped to three -- and the whole point of the comments box is that it absorbs exactly what is left, so
+    an approximation here is a wrong bottom margin on every form.
+    """
+    # The legend explains a choose-one circle and a choose-any square, so it belongs on a page that has
+    # them and is noise on one that does not -- the progress chart's cells are written in, not marked.
+    # Read off what the body actually emitted rather than declared per form: a flag set at the top of a
+    # layout is a second statement of the same fact, and it is the copy nobody updates.
+    marked = any(isinstance(s, Dot) or (isinstance(s, Box) and s.kind == "mark") for s in body)
+    legend_h = _legend_height(composer) if marked else 0
     footer_h = len(
-        _fit(composer, composer.chrome["footer_reference"], "note", CONTENT_W, "footer", "footer")
+        _fit(composer, composer.chrome["footer_reference"], "note", composer.content_w, "footer", "footer")
     ) * (SMALL_SIZE + 60)
     # Footnotes are part of the budget, not an afterthought. They are known by now -- a collapsed group
     # registers its note while its section is laid out -- and leaving them out let the comments box grow
     # into the space they needed, which turned two sheets that fitted into two that did not.
     notes_h = sum(
-        len(_fit(composer, f"{SUPERSCRIPTS[i]} {composer.chrome[k]}", "note", CONTENT_W, "footnote", k))
+        len(_fit(composer, f"{SUPERSCRIPTS[i]} {composer.chrome[k]}", "note", composer.content_w, "footnote", k))
         * (SMALL_SIZE + 60)
         for i, k in enumerate(composer.footnotes)
     ) + (NOTES_TRAIL if composer.footnotes else 0)
-    spare = (PAGE_H - MARGIN_BOTTOM - legend_h - footer_h - notes_h) - y
+    spare = (composer.page_h - MARGIN_BOTTOM - legend_h - footer_h - notes_h) - y
     composer.spare = spare
     if spare > 0:
         # The leftover is ALWAYS absorbed, so the bottom margin equals the other three exactly. Taking it
@@ -1299,32 +1552,39 @@ def layout_sheet(sheet: Sheet, composer: Composer) -> list[Shape]:
             body.append(Text(TEXT_X, y + ROW_PAD + composer.face.cap_at(LABEL_SIZE),
                              composer.chrome["comments"], "label"))
         y += spare
-        body.append(Line(MARGIN_X, y, MARGIN_X + CONTENT_W, y, "rule"))
+        body.append(Line(MARGIN_X, y, MARGIN_X + composer.content_w, y, "rule"))
 
     # The frame goes LAST, so it draws on top of everything inside it. Emitted first, every band and
     # shaded block painted over its edges, and the table's outline broke wherever a fill met it -- most
     # visibly down the left side, where the tinted patient block simply erased it.
     out.extend(body)
-    out.append(Box(MARGIN_X, table_top, CONTENT_W, y - table_top, "frame"))
+    out.append(Box(MARGIN_X, table_top, composer.content_w, y - table_top, "frame"))
     y = _emit_footnotes(out, y, composer)
-    y = _emit_legend(out, y, composer)
+    if marked:
+        y = _emit_legend(out, y, composer)
     y = _emit_footer(out, y, composer)
 
-    usable = PAGE_H - MARGIN_BOTTOM
+    usable = composer.page_h - MARGIN_BOTTOM
     if y > usable:
+        # Says which limit was passed and by how much, because the two are far apart and the difference
+        # decides how urgent this is. Breaching the MARGIN leaves a form that prints and reads perfectly
+        # -- a reviewer opening the file sees nothing wrong, which is exactly why the number has to be
+        # stated rather than described. Reaching the PAGE EDGE is what actually loses content, and the
+        # margin is the headroom that keeps the next translation away from it.
         raise Overflow(
-            f"{sheet.code}: content runs to {y} on a page whose usable height ends at {usable} "
-            f"({y / usable:.2f} pages). A sheet must fit one page, so this needs a denser layout for "
-            f"this stage -- not a second page.",
+            f"{code}: content runs to {y}, which is {y - usable} past the {MARGIN_BOTTOM}-unit bottom "
+            f"margin and still {composer.page_h - y} clear of the page edge. Nothing is clipped; what is "
+            f"gone is the room the next translation needs, so this wants a denser layout.",
             out,
         )
     return out
 
 
 def best_layout(
-    sheet: Sheet, make_composer: Callable[[int], Composer]
+    form: Sheet | Chart, make_composer: Callable[[int], Composer],
+    lay_out: Callable[[Sheet | Chart, Composer], list[Shape]] = None,
 ) -> tuple[Composer, list[Shape] | None, Overflow | None]:
-    """Lay the sheet out at every candidate answer column and keep the roomiest result.
+    """Lay the form out at every candidate answer column and keep the roomiest result.
 
     The column's position cannot be a constant, and the two pressures on it pull opposite ways: move it
     right and long labels stop wrapping, move it left and more choice runs fit on their label's line.
@@ -1336,12 +1596,13 @@ def best_layout(
     'Most room' is the comments box, which absorbs whatever the fields leave over -- so maximizing it is
     the same as minimizing the sheet, and it optimizes the property the sheets are actually judged on.
     """
+    lay_out = lay_out or layout_sheet
     best: tuple[tuple[int, int, int], Composer, list[Shape] | None, Overflow | None] | None = None
     for width in range(LABEL_COL_MIN, LABEL_COL_MAX + 1, LABEL_COL_STEP):
         composer = make_composer(width)
         failure: Overflow | None = None
         try:
-            body = layout_sheet(sheet, composer)
+            body = lay_out(form, composer)
         except Overflow as overflow:
             body, failure = overflow.body, overflow
         # A column that fits beats one that does not, whatever their spare. Among failures, one that got
@@ -1367,7 +1628,7 @@ def _legend_rows(composer: Composer) -> int:
     legend is longer simply gets the stacked form back.
     """
     widths = [composer.face_of("note").width(text, SMALL_SIZE) + MARK + MARK_GAP for _, text in _legend_entries(composer)]
-    return 1 if sum(widths) + LEGEND_SEP <= CONTENT_W - 2 * TEXT_INSET else 2
+    return 1 if sum(widths) + LEGEND_SEP <= composer.content_w - 2 * TEXT_INSET else 2
 
 
 def _legend_height(composer: Composer) -> int:
@@ -1397,7 +1658,7 @@ def _emit_footnotes(out: list[Shape], y: int, composer: Composer) -> int:
     for index, key in enumerate(composer.footnotes):
         text = f"{SUPERSCRIPTS[index]} {composer.chrome[key]}"
         composer._text(text, "note")
-        for line in _fit(composer, text, "note", CONTENT_W, "footnote", key):
+        for line in _fit(composer, text, "note", composer.content_w, "footnote", key):
             y += SMALL_SIZE + 60
             out.append(Text(MARGIN_X, y, line, "note"))
     return y + (NOTES_TRAIL if composer.footnotes else 0)
@@ -1406,7 +1667,7 @@ def _emit_footnotes(out: list[Shape], y: int, composer: Composer) -> int:
 def _emit_footer(out: list[Shape], y: int, composer: Composer) -> int:
     text = composer.chrome["footer_reference"]
     composer._text(text, "note")
-    for line in _fit(composer, text, "note", CONTENT_W, "footer", "footer"):
+    for line in _fit(composer, text, "note", composer.content_w, "footer", "footer"):
         y += SMALL_SIZE + 60
         out.append(Text(MARGIN_X, y, line, "note"))
     return y
@@ -1422,8 +1683,8 @@ def _emit_patient_block(out: list[Shape], y: int, composer: Composer) -> int:
     """
     title = composer.chrome["section_patient"]
     composer._text(title, "section")
-    out.append(Box(MARGIN_X, y, CONTENT_W, SECTION_BAND_H, "band"))
-    out.append(Text(PAGE_W // 2, y + SECTION_BAND_H - 150, title, "section", "patient"))
+    out.append(Box(MARGIN_X, y, composer.content_w, SECTION_BAND_H, "band"))
+    out.append(Text(composer.page_w // 2, y + SECTION_BAND_H - 150, title, "section", "patient"))
     y += SECTION_BAND_H
 
     # The shaded block is laid down first so the rows and the note draw over it; its height is only known
@@ -1446,19 +1707,19 @@ def _emit_patient_block(out: list[Shape], y: int, composer: Composer) -> int:
         # rows are where the sheet's grid is established for its reader, so they follow it rather than
         # setting a second convention at the top of the page.
         _column(out, top, y, composer)
-        out.append(Line(MARGIN_X, y, MARGIN_X + CONTENT_W, y, "rule"))
+        out.append(Line(MARGIN_X, y, MARGIN_X + composer.content_w, y, "rule"))
 
     note = composer.chrome["patient_note"]
     composer._text(note, "note")
     y += composer.face.pad_at(SMALL_SIZE, note)
-    for line in _fit(composer, note, "note", CONTENT_W - 360, "patient_note", "note"):
+    for line in _fit(composer, note, "note", composer.content_w - 360, "patient_note", "note"):
         out.append(Text(TEXT_X, y + composer.face.cap_at(SMALL_SIZE), line, "note"))
         y += SMALL_SIZE + LINE_GAP
     y += composer.face.pad_at(SMALL_SIZE, note) - LINE_GAP
-    out.append(Line(MARGIN_X, y, MARGIN_X + CONTENT_W, y, "rule"))
+    out.append(Line(MARGIN_X, y, MARGIN_X + composer.content_w, y, "rule"))
 
     height = y - block_top
-    out[shading] = Box(MARGIN_X, block_top, CONTENT_W, height, "notransmit")
+    out[shading] = Box(MARGIN_X, block_top, composer.content_w, height, "notransmit")
     out[shading + 1] = Box(MARGIN_X, block_top, NOTRANSMIT_BAR, height, "notransmit-edge")
     return y
 
@@ -1469,12 +1730,12 @@ def _emit_section(out: list[Shape], section: Section, y: int, composer: Composer
     # have run out past the band's ends and off the page, in exactly the languages nobody proof-reads.
     if section.banded:
         composer._text(section.title, "section")
-        lines = _fit(composer, section.title, "section", CONTENT_W - 360, section.code, "section title")
+        lines = _fit(composer, section.title, "section", composer.content_w - 360, section.code, "section title")
         band_h = SECTION_BAND_H + (len(lines) - 1) * (SECTION_SIZE + LINE_GAP)
-        out.append(Box(MARGIN_X, y, CONTENT_W, band_h, "band"))
+        out.append(Box(MARGIN_X, y, composer.content_w, band_h, "band"))
         ty = y + SECTION_BAND_H - 150
         for index, line in enumerate(lines):
-            out.append(Text(PAGE_W // 2, ty, line, "section",
+            out.append(Text(composer.page_w // 2, ty, line, "section",
                             _slug(section.code) if index == 0 else None))
             ty += SECTION_SIZE + LINE_GAP
         y += band_h
@@ -1485,12 +1746,12 @@ def _emit_section(out: list[Shape], section: Section, y: int, composer: Composer
         # carried the 30-day and 90-day windows.
         composer._text(section.definition, "note")
         y += composer.face.pad_at(SMALL_SIZE, section.definition)
-        for line in _fit(composer, section.definition, "note", CONTENT_W - 2 * TEXT_INSET,
+        for line in _fit(composer, section.definition, "note", composer.content_w - 2 * TEXT_INSET,
                          section.code, "definition"):
             out.append(Text(TEXT_X, y + composer.face.cap_at(SMALL_SIZE), line, "note"))
             y += SMALL_SIZE + LINE_GAP
         y += composer.face.pad_at(SMALL_SIZE, section.definition) - LINE_GAP
-        out.append(Line(MARGIN_X, y, MARGIN_X + CONTENT_W, y, "hair"))
+        out.append(Line(MARGIN_X, y, MARGIN_X + composer.content_w, y, "hair"))
 
     rows = _pair_ticks(_collapse_groups(section.fields, composer), composer)
     for index, row in enumerate(rows):
@@ -1508,7 +1769,7 @@ def _emit_section(out: list[Shape], section: Section, y: int, composer: Composer
         else:
             emit = _emit_child if row[0].is_child else _emit_field
             y = emit(out, row[0], y, composer, closes)
-        out.append(Line(MARGIN_X, y, MARGIN_X + CONTENT_W, y, "rule" if closes else "hair"))
+        out.append(Line(MARGIN_X, y, MARGIN_X + composer.content_w, y, "rule" if closes else "hair"))
     return y
 
 
@@ -1531,7 +1792,7 @@ def _pair_ticks(fields: list[Field], composer: Composer) -> list[tuple[Field, ..
     hanging off it are one thing, and splitting that across a half-row would break the group the rule
     below it closes.
     """
-    half = (CONTENT_W - 2 * TEXT_INSET) // 2
+    half = (composer.content_w - 2 * TEXT_INSET) // 2
 
     def fits(field: Field) -> bool:
         return (composer.face_of("label").width(_required(field, composer), LABEL_SIZE)
@@ -1560,7 +1821,7 @@ def _emit_tick_pair(out: list[Shape], pair: tuple[Field, ...], y: int, composer:
     pad = composer.face.pad_at(LABEL_SIZE, " ".join(labels))
     y += pad
     baseline = y + composer.face.cap_at(LABEL_SIZE)
-    for field, label, x in zip(pair, labels, (TEXT_X, MARGIN_X + CONTENT_W // 2)):
+    for field, label, x in zip(pair, labels, (TEXT_X, MARGIN_X + composer.content_w // 2)):
         composer._text(label, "label")
         _mark(out, _ident(field), x, baseline, False, composer, LABEL_SIZE)
         out.append(Text(x + MARK + MARK_GAP, baseline, label, "label"))
@@ -1644,7 +1905,7 @@ def _emit_child(out: list[Shape], field: Field, y: int, composer: Composer, clos
         out.append(Text(x, baseline, line, "child"))
         baseline += OPTION_SIZE + LINE_GAP
     baseline -= OPTION_SIZE + LINE_GAP
-    right = MARGIN_X + CONTENT_W - 180
+    right = MARGIN_X + composer.content_w - 180
 
     options, radio = field.options, field.radio
     if not options and not field.write_in:
@@ -1697,7 +1958,7 @@ def _emit_field(out: list[Shape], field: Field, y: int, composer: Composer, clos
     # ones are treated differently", it is "each row uses the space it has".
     widths = [composer.face_of("option").width(option, OPTION_SIZE) for option in options]
     needed = (sum(w + MARK + MARK_GAP for w in widths) + OPTION_SEP * (len(options) - 1)) if options else 0
-    inline = bool(options) and composer.answer_text_x + needed <= MARGIN_X + CONTENT_W - TEXT_INSET
+    inline = bool(options) and composer.answer_text_x + needed <= MARGIN_X + composer.content_w - TEXT_INSET
 
     # A row is either answered ON its own line -- a space to write in, or a choice run, both starting at
     # the answer column -- or it spans the sheet: a criterion whose tick sits at the left, or a question
@@ -1716,7 +1977,7 @@ def _emit_field(out: list[Shape], field: Field, y: int, composer: Composer, clos
         _mark(out, _ident(field), TEXT_X, y + composer.face.cap_at(LABEL_SIZE), False, composer, LABEL_SIZE)
         label_x = TEXT_X + MARK + MARK_GAP
 
-    edge = composer.answer_x - COLUMN_GAP if answered_here else MARGIN_X + CONTENT_W - 180
+    edge = composer.answer_x - COLUMN_GAP if answered_here else MARGIN_X + composer.content_w - 180
     baseline = y + composer.face.cap_at(LABEL_SIZE)
     for line in _fit(composer, label, "label", edge - label_x, field.code, "label"):
         out.append(Text(label_x, baseline, line, "label"))
@@ -1763,7 +2024,7 @@ def _emit_paired_row(out: list[Shape], field: Field, top: int, y: int, baseline:
     rather than as two underscores floating in it.
     """
     composer._text(field.trailing, "label")
-    right = MARGIN_X + CONTENT_W - 180
+    right = MARGIN_X + composer.content_w - 180
     unit_x = int(right - composer.face_of("label").width(field.trailing, LABEL_SIZE))
     divider = unit_x - 2400
     # The unit word sits on the label's own baseline. Placing it at the row's foot instead dropped it
@@ -1788,7 +2049,7 @@ def _emit_options(out: list[Shape], field: Field, options: list[str], radio: boo
         composer._text(option, "option")
 
     left = TEXT_X + OPTION_INDENT
-    available = MARGIN_X + CONTENT_W - left - 180
+    available = MARGIN_X + composer.content_w - left - 180
     widths = [composer.face_of("option").width(option, OPTION_SIZE) for option in options]
     inline = sum(w + MARK + MARK_GAP for w in widths) + OPTION_SEP * (len(options) - 1)
 
@@ -1826,13 +2087,18 @@ def _mark(out: list[Shape], ident: str, x: int, baseline: int, radio: bool, comp
         out.append(Box(x, centre - MARK // 2, MARK, MARK, "mark", ident))
 
 
-def _column(out: list[Shape], top: int, bottom: int, composer: Composer) -> int:
+def _column(out: list[Shape], top: int, bottom: int, composer: Composer, x: int | None = None) -> int:
     """Bound one row's answer cell on the left, and return the row's foot so callers can `return` it.
 
     Drawn per row rather than as one line down the sheet, because the rows that span it have no cell for
     it to bound and a stroke through their text would be a defect rather than a grid.
+
+    `x` defaults to the sheet's one answer column. The chart's filing row overrides it because that row
+    carries two cells side by side, each wanting the column at the same offset into its own half -- which
+    is the same rule applied twice, not a second convention.
     """
-    out.append(Line(composer.answer_x, top, composer.answer_x, bottom, "column"))
+    at = composer.answer_x if x is None else x
+    out.append(Line(at, top, at, bottom, "column"))
     return bottom
 
 
@@ -1909,15 +2175,15 @@ def _quoted(text: str) -> str:
 # ── Serializing ─────────────────────────────────────────────────────────────────────────────────────
 
 
-def svg_document(sheet: Sheet, shapes: list[Shape], composer: Composer) -> str:
+def svg_document(form: Sheet | Chart, shapes: list[Shape], composer: Composer) -> str:
     """The screen figure, inlined into the protocol so its text stays real text."""
     head = [
         '<svg version="1.1" viewBox="0 0 %d %d" xmlns="http://www.w3.org/2000/svg" '
-        'xmlns:xlink="http://www.w3.org/1999/xlink" role="img">' % (PAGE_W, PAGE_H),
+        'xmlns:xlink="http://www.w3.org/1999/xlink" role="img">' % (composer.page_w, composer.page_h),
         # What a screen reader announces. Without them an inlined figure is an unlabelled graphic, which
         # reads as nothing at all, and accessibility is a stated goal of this toolkit rather than a nicety.
-        f"  <title>{_esc(title_of(sheet, composer))}</title>",
-        f"  <desc>{_esc(description_of(sheet))}</desc>",
+        f"  <title>{_esc(title_of(form, composer))}</title>",
+        f"  <desc>{_esc(description_of(form))}</desc>",
         "  <style>",
         # The families this sheet was measured in, in the order it was measured -- and NO generic at the
         # end. `sans-serif` looks like prudence and is a trap: prawn-svg maps it to Helvetica, a core font
@@ -1996,20 +2262,20 @@ def _svg_id(ident: str | None) -> str:
     return f' id="{ident}"' if ident else ""
 
 
-def typst_document(sheet: Sheet, shapes: list[Shape], composer: Composer) -> str:
+def typst_document(form: Sheet | Chart, shapes: list[Shape], composer: Composer) -> str:
     """The printed form: one page, drawn by an engine that shapes text and can declare a conformance.
 
     Every element is placed absolutely, at the coordinates the layout already chose, so nothing here
     reflows and the two outputs cannot disagree about what is on the sheet or where.
     """
     return "\n".join(
-        _typst_preamble(sheet, composer)
+        _typst_preamble(form, composer)
         + [_typst_shape(shape, composer) for shape in shapes]
         + [""]
     )
 
 
-def _typst_preamble(sheet: Sheet, composer: Composer) -> list[str]:
+def _typst_preamble(form: Sheet | Chart, composer: Composer) -> list[str]:
     styles = ",\n".join(f"  {name}: s => text({_typst_text_args(style)}, s)"
                         for name, style in STYLES.items())
     strokes = ",\n".join(f'  "{kind}": {ink.stroke} * u + black'
@@ -2022,7 +2288,7 @@ def _typst_preamble(sheet: Sheet, composer: Composer) -> list[str]:
     # two forms are the same statement about where a run goes, expressed from whichever side it starts.
     anchor = (
         "#let at(x, y, style, w, s) = place(\n"
-        f"  top + right, dx: (x - {PAGE_W}) * u, dy: y * u, fit(w, styles.at(style)(s)),\n"
+        f"  top + right, dx: (x - {composer.page_w}) * u, dy: y * u, fit(w, styles.at(style)(s)),\n"
         ")"
         if composer.rtl else
         "#let at(x, y, style, w, s) = place(\n"
@@ -2043,8 +2309,8 @@ def _typst_preamble(sheet: Sheet, composer: Composer) -> list[str]:
 // document date is the wall clock, and two compiles of one source then differ.
 
 #set document(
-  title: {_quoted(title_of(sheet, composer))},
-  description: {_quoted(description_of(sheet))},
+  title: {_quoted(title_of(form, composer))},
+  description: {_quoted(description_of(form))},
   date: auto,
 )
 
@@ -2052,7 +2318,7 @@ def _typst_preamble(sheet: Sheet, composer: Composer) -> list[str]:
 // here and a coordinate there are the same number.
 #let u = 0.01mm
 
-#set page(width: {PAGE_W} * u, height: {PAGE_H} * u, margin: 0pt)
+#set page(width: {composer.page_w} * u, height: {composer.page_h} * u, margin: 0pt)
 // top-edge and bottom-edge at the baseline give a text box no height at all, which is what makes `place`
 // position a run by its BASELINE -- the same reference every measurement in the layout is taken from.
 // `fallback: false` keeps a missing glyph missing instead of borrowing one from another family.
@@ -2094,7 +2360,7 @@ def _typst_preamble(sheet: Sheet, composer: Composer) -> list[str]:
 // A section title is centred on the page rather than on anything the layout placed, so it is positioned
 // from the page's own middle instead of from a left edge and a measured width.
 #let mid(x, y, style, w, s) = place(
-  top + center, dx: (x - {PAGE_W // 2}) * u, dy: y * u, fit(w, styles.at(style)(s)),
+  top + center, dx: (x - {composer.page_w // 2}) * u, dy: y * u, fit(w, styles.at(style)(s)),
 )
 #let stroke-between(kind, x1, y1, x2, y2) = place(
   top + left, line(start: (x1 * u, y1 * u), end: (x2 * u, y2 * u), stroke: strokes.at(kind)),
@@ -2181,13 +2447,22 @@ def main(argv: list[Shape] | None = None) -> int:
     parser.add_argument("--po", type=Path, default=repo / "po")
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--language", default=None, help="culture code; omit for the untranslated source")
-    parser.add_argument("--sheet", default=None, help="only this stage code, e.g. NEOIPC_STG_BSI")
+    parser.add_argument("--sheet", default=None,
+                        help="only this form: a stage code such as NEOIPC_STG_BSI, MASTER for the "
+                        "composite, or the chart's own stage for the progress chart")
     parser.add_argument(
         "--format",
         choices=("svg", "typst", "both"),
         default="both",
         help="svg is the protocol's figure, typst the source of the printed form. Both are the same "
         "layout, so writing one is a convenience and never a different sheet.",
+    )
+    parser.add_argument(
+        "--include-drafts",
+        action="store_true",
+        help="use translations a reviewer has not yet confirmed. For REVIEW renders only: a reviewer "
+        "cannot approve wording they have never seen on the page, and every catalogue here starts as "
+        "drafts. Off by default, because a form built this way is indistinguishable from a finished one.",
     )
     parser.add_argument(
         "--allow-overflow",
@@ -2200,7 +2475,7 @@ def main(argv: list[Shape] | None = None) -> int:
     po_path = args.po / f"metadata.{args.language}.po" if args.language else None
     if po_path is not None and not po_path.exists():
         return _fail(f"no catalogue at {po_path}; --language must name a culture the metadata catalogue has")
-    catalogue = Catalogue(po_path)
+    catalogue = Catalogue(po_path, drafts=args.include_drafts)
     chrome = load_localized(args.strings, args.language)
     glossary = load_localized(args.glossary, args.language)
     rules = LayoutRules(args.layout)
@@ -2220,40 +2495,58 @@ def main(argv: list[Shape] | None = None) -> int:
     }
 
     meta = Metadata(args.metadata)
-    sheets = build_sheets(meta, catalogue, rules, chrome)
+    # The chart reads the stages before the composites claim them, because the stage its rows come from is
+    # folded into the master sheet and is no longer a sheet of its own afterwards.
+    stage_sheets = build_stage_sheets(meta, catalogue, rules)
+    sheets = _apply_composites(stage_sheets, meta, catalogue, rules, chrome)
+    chart = build_chart(stage_sheets, rules, chrome)
+
+    # What is drawn, and how each one is drawn: a sheet flows sections down a portrait page, the chart
+    # lays a grid across a landscape one. Everything past this point treats them identically -- one
+    # column search, one fit check, one coverage check, one pair of outputs.
+    forms: list[tuple[Sheet | Chart, Callable[..., list[Shape]], tuple[int, int], str]] = [
+        (sheet, layout_sheet, PORTRAIT, f"NeoIPC-Core-{sheet.name}-Sheet") for sheet in sheets
+    ]
+    if chart is not None:
+        forms.append((chart, layout_chart, LANDSCAPE, f"NeoIPC-Core-{chart.name}"))
     if args.sheet:
-        sheets = [s for s in sheets if s.code == args.sheet]
-        if not sheets:
+        forms = [entry for entry in forms if entry[0].code == args.sheet]
+        if not forms:
             return _fail(f"no stage with code {args.sheet}")
 
     args.out.mkdir(parents=True, exist_ok=True)
     suffix = f".{args.language}" if args.language else ""
     written, failures = [], []
-    for sheet in sheets:
+    for form, lay_out, page, stem_name in forms:
         composer, body, failure = best_layout(
-            sheet, lambda width: Composer(faces, chrome, glossary, rules, logo, args.language, width)
+            form,
+            # `page` is bound here rather than captured, so each form is measured against its own
+            # orientation instead of whichever one the loop happened to end on.
+            lambda width, page=page: Composer(faces, chrome, glossary, rules, logo, args.language,
+                                              width, page),
+            lay_out,
         )
         if failure is not None:
             failures.append(str(failure))
-            # Reviewing a sheet that does not fit is the only way to decide WHAT to cut, so the file can
+            # Reviewing a form that does not fit is the only way to decide WHAT to cut, so the file can
             # be written on request -- reported as a failure either way, and the exit status is unchanged.
             if not (args.allow_overflow and body):
                 continue
         if composer.missing:
             for font_name, chars in sorted(composer.missing.items()):
                 shown = " ".join(f"U+{ord(c):04X} {c!r}" for c in sorted(chars))
-                failures.append(f"{sheet.code}: {font_name} has no glyph for {shown}")
+                failures.append(f"{form.code}: {font_name} has no glyph for {shown}")
             continue
         # Not `with_suffix`: the stem already ends in the culture code, which is exactly what that would
         # take to be the extension and replace.
-        stem = args.out / f"NeoIPC-Core-{sheet.name}-Sheet{suffix}"
+        stem = args.out / f"{stem_name}{suffix}"
         # Turned round once, after the page is finished and before either output is written, so both are
         # written from the same placements in this direction as in the other.
-        placed = mirror(body) if composer.rtl else body
+        placed = mirror(body, composer.page_w) if composer.rtl else body
         for name, extension, document in OUTPUTS:
             if args.format in ("both", name):
                 target = stem.with_name(f"{stem.name}.{extension}")
-                target.write_text(document(sheet, placed, composer), encoding="utf-8", newline="\n")
+                target.write_text(document(form, placed, composer), encoding="utf-8", newline="\n")
         # The spare is how much page is left over, and it is the only honest measure of how much longer a
         # translation of this sheet may be before it stops fitting. Reported on every run because the
         # one-page rule is a requirement rather than a preference, and a sheet at 2 mm of headroom passes
@@ -2264,6 +2557,12 @@ def main(argv: list[Shape] | None = None) -> int:
         print(f"error: {line}", file=sys.stderr)
     for target, column, spare in written:
         print(f"wrote {target} (answer column {column:.1f} mm, {spare:.1f} mm spare)")
+    if catalogue.drafted:
+        # Said on every run that used one, because nothing in the artifact shows it. A form drawn partly
+        # from drafts is finished-looking and is not finished, and the person holding it is the only one
+        # who can tell the difference -- so they have to be told.
+        print(f"note: {catalogue.drafted} label(s) came from translations no reviewer has confirmed; "
+              f"these forms are for review, not for publication")
     return 1 if failures else 0
 
 
