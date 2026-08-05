@@ -146,7 +146,12 @@ if ($Clean) {
         Get-LocalisedPath $protocolDir $antibioticsFileName $_ -Subdirectory | Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } | Remove-Item -Verbose:($VerbosePreference -eq 'Continue')
         Get-LocalisedPath $protocolDir $infectiousAgentsFileName $_ -Subdirectory | Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } | Remove-Item -Verbose:($VerbosePreference -eq 'Continue')
         Get-LocalisedPath $protocolDir $docBookFileName $_ | Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } | Remove-Item -Verbose:($VerbosePreference -eq 'Continue')
-        # ToDo: Remove generated SVG files
+        # Everything in a culture's image directory is generated or copied there, so the whole directory
+        # goes -- except the two logo rasters this repository authors, which live in the invariant
+        # culture's directory because that is also doc/protocol/img.
+        Get-ChildItem -Path (Get-LocalisedPath $protocolDir 'img' $_ -Subdirectory) -File -ErrorAction SilentlyContinue |
+            Where-Object { $_.Name -notlike 'LOGO_NEOIPC*.png' } |
+            Remove-Item -Verbose:($VerbosePreference -eq 'Continue')
     }
     return
 }
@@ -154,11 +159,6 @@ if ($Clean) {
 if (-not $artifactsFolder) {
     Write-Debug -Message "Creating build artifacts directory"
     $artifactsFolder = (New-Item -Path $workspaceFolder -Name 'artifacts' -ItemType Directory).FullName
-}
-$artifactsImgFolder = Join-Path -Resolve -Path $artifactsFolder -ChildPath 'img' -ErrorAction SilentlyContinue
-if (-not $artifactsImgFolder) {
-    Write-Debug -Message "Creating build artifacts image directory"
-    $artifactsImgFolder = (New-Item -Path $artifactsFolder -Name 'img' -ItemType Directory).FullName
 }
 
 # Document version metadata, derived from doc/protocol/VERSION (the release source of truth) so it stays in
@@ -188,20 +188,57 @@ $decisionFlow = New-Object System.Xml.Xsl.XslCompiledTransform
 $decisionFlow.Load((Get-ChildItem $transDir/NeoIPC-Core-Decision-Flow.xslt).FullName, [System.Xml.Xsl.XsltSettings]::TrustedXslt, $resolver)
 
 
-$AWaReASrc = (Join-Path -Resolve -Path $commonImgDir -ChildPath 'AWaRe-A.svg')
-$AWaReADest = (Join-Path -Path $imgDir -ChildPath 'AWaRe-A.svg')
-Build-Target $AWaReADest $AWaReASrc {
-    Copy-Item -LiteralPath $AWaReASrc -Destination $AWaReADest
-}
-$AWaReWSrc = (Join-Path -Resolve -Path $commonImgDir -ChildPath 'AWaRe-W.svg')
-$AWaReWDest = (Join-Path -Path $imgDir -ChildPath 'AWaRe-W.svg')
-Build-Target $AWaReWDest $AWaReWSrc {
-    Copy-Item -LiteralPath $AWaReWSrc -Destination $AWaReWDest
-}
-$AWaReRSrc = (Join-Path -Resolve -Path $commonImgDir -ChildPath 'AWaRe-R.svg')
-$AWaReRDest = (Join-Path -Path $imgDir -ChildPath 'AWaRe-R.svg')
-Build-Target $AWaReRDest $AWaReRSrc {
-    Copy-Item -LiteralPath $AWaReRSrc -Destination $AWaReRDest
+# Images the protocol reaches that this build does not generate, and what each class may do.
+#
+# Both classes are copied into every culture's image directory, so that one directory holds every image
+# the document needs and no target has to name a culture. They differ in what a localized variant beside
+# the source MEANS.
+#
+# An INVARIANT MARK may not vary by language. The NeoIPC logo is a wordmark -- the mark is a name, which
+# is why even its text form is never translated -- and a licence badge's recognizability is the whole of
+# its function, so a localized variant of either is a defect rather than an improvement. The build
+# therefore refuses one instead of quietly preferring it.
+$invariantMarks = @{ $imgDir = @('LOGO_NEOIPC.png') }
+# A SHARED FIGURE simply has no localized form yet, and the distinction that matters is `may it vary`
+# rather than `can it be localized`: the set that cannot is smaller than it looks and keeps shrinking.
+# The AWaRe badges are the case in point -- each draws a single letter, WHO governs its own translations
+# of the categories, and a Spanish badge accordingly reads A/P/R. Until one exists, every culture gets the
+# shared file, and a culture that gains one starts being served it with no change to the document.
+$sharedFigures = @{ $commonImgDir = @('AWaRe-A.svg', 'AWaRe-W.svg', 'AWaRe-R.svg') }
+
+function Copy-CultureImage {
+    # Put one image into a culture's image directory, preferring that culture's own file over the shared
+    # one. $Invariant marks an image that must be identical in every language: a localized variant of one
+    # is refused rather than used, because a build that silently prefers it would publish a mark nobody
+    # decided to vary.
+    param(
+        [Parameter(Mandatory)][string]$SourceDirectory,
+        [Parameter(Mandatory)][string]$FileName,
+        [Parameter(Mandatory)][string]$DestinationDirectory,
+        [Parameter(Mandatory)][CultureInfo]$TargetCulture,
+        [switch]$Invariant
+    )
+
+    # Most specific first, and empty for a culture with no file of its own. For the invariant culture this
+    # is the shared file itself, which is why that case needs no branch of its own.
+    $localised = @(Get-LocalisedPath $SourceDirectory $FileName $TargetCulture -All -Existing)
+    $shared = Join-Path -Path $SourceDirectory -ChildPath $FileName
+    if ($Invariant -and $TargetCulture.Name -and $localised) {
+        throw ("'$FileName' is a mark that must read the same in every language, and " +
+            "'$($localised[0])' is a per-culture variant of it. Remove the variant, or move the image " +
+            "out of the invariant set if it really is one a language may change.")
+    }
+    $source = if ($localised) { $localised[0] } else { $shared }
+    if (-not (Test-Path -LiteralPath $source -PathType Leaf)) {
+        throw "The protocol needs the image '$FileName', and there is none at '$shared'."
+    }
+    $destination = Join-Path -Path $DestinationDirectory -ChildPath $FileName
+    # The invariant culture's directory IS the shared one for anything already stored there, so there is
+    # nothing to copy and Copy-Item would refuse to copy a file onto itself.
+    if ((Resolve-Path -LiteralPath $source).Path -eq $destination) { return }
+    Build-Target $destination $source {
+        Copy-Item -LiteralPath $source -Destination $destination
+    }
 }
 
 $attributes = @{}
@@ -227,13 +264,14 @@ foreach ($targetCulture in $targetCultures)
     # This document reaches two kinds of file and they live in different places, which is why the renderer
     # needs both switches below rather than one root.
     #
-    # SHARED, at doc/protocol: the header, img/, the PDF theme. Reached by plain relative paths, so
+    # SHARED, at doc/protocol: the header and the PDF theme. Reached by plain relative paths, so
     # --base-dir has to keep pointing here even when the source being rendered is one level down.
     # Asciidoctor's base directory is what {docdir} becomes, and {docdir} is what a relative target
     # resolves against -- so this single flag preserves every shared reference unchanged.
     #
-    # LOCALIZED, at doc/protocol/<culture>: the translated protocol, its definitions, and the two
-    # generated lists. Reached through {locale-dir}, which is '.' for the invariant source at the root.
+    # LOCALIZED, at doc/protocol/<culture>: the translated protocol, its definitions, the two generated
+    # lists and this culture's images. Reached through {locale-dir}, which is '.' for the invariant
+    # source at the root.
     #
     # `lang` reaches asciidoctor here for the first time. It was only ever put in $attributes, which is
     # read by the dependency lister and by nothing else -- so the two things the document keys on it,
@@ -244,6 +282,28 @@ foreach ($targetCulture in $targetCultures)
     $attributes['locale-dir'] = $localeDir
     $cultureArgs = @('-B', $protocolDir, '-a', "locale-dir=$localeDir")
     if ($targetCulture.Name) { $cultureArgs += @('-a', "lang=$($targetCulture.TwoLetterISOLanguageName)") }
+
+    # One image directory per culture, holding every image the protocol needs -- this culture's own figure
+    # where there is one, the shared file otherwise. The document's `:imagesdir:` is {locale-dir}/img, so
+    # each target is a plain file name that resolves to the right file in every language, and neither the
+    # document nor a translator has to encode a culture in one.
+    $cultureImgDir = Get-LocalisedPath $protocolDir 'img' $targetCulture -Subdirectory
+    if (-not (Test-Path -LiteralPath $cultureImgDir -PathType Container)) {
+        Write-Debug -Message "Creating the image directory for '$localeDir'"
+        $null = New-Item -Path $cultureImgDir -ItemType Directory
+    }
+    foreach ($entry in $invariantMarks.GetEnumerator()) {
+        $entry.Value | ForEach-Object {
+            Copy-CultureImage -SourceDirectory $entry.Key -FileName $_ -DestinationDirectory $cultureImgDir `
+                -TargetCulture $targetCulture -Invariant
+        }
+    }
+    foreach ($entry in $sharedFigures.GetEnumerator()) {
+        $entry.Value | ForEach-Object {
+            Copy-CultureImage -SourceDirectory $entry.Key -FileName $_ -DestinationDirectory $cultureImgDir `
+                -TargetCulture $targetCulture
+        }
+    }
 
     # Beside the translated protocol, not flat with a culture suffix: the protocol reaches both generated
     # lists through {locale-dir}, the same prefix its localized definitions use, so a culture's fragments
@@ -272,19 +332,25 @@ foreach ($targetCulture in $targetCultures)
         $lines = New-PathogenList -TargetCulture $targetCulture -MetadataPath $metadataFolder -AsciiDoc
         [System.IO.File]::WriteAllText($infectiousAgentsListFile, (($lines -join "`n") + "`n"), [System.Text.UTF8Encoding]::new($false))
     }
-    Build-Target (Get-LocalisedPath $imgDir 'NeoIPC-Core-Title-Page.svg' $targetCulture) (Get-LocalisedPath $resDir 'NeoIPC-Core-Title-Page.resx' $targetCulture -All -Existing),(Join-Path $transDir 'NeoIPC-Core-Title-Page.xslt') {
+    # The three transformed figures and the seven generated sheets are written into this culture's image
+    # directory under their plain names. The culture is the DIRECTORY, never the file name -- which is
+    # what lets the document name each of them once, for every language.
+    #
+    # Their .resx inputs keep the flat culture-suffixed convention, because that is how those files are
+    # stored rather than anything this build chooses.
+    Build-Target (Join-Path $cultureImgDir 'NeoIPC-Core-Title-Page.svg') (Get-LocalisedPath $resDir 'NeoIPC-Core-Title-Page.resx' $targetCulture -All -Existing),(Join-Path $transDir 'NeoIPC-Core-Title-Page.xslt') {
         Write-Verbose "Generating title page background SVG"
-        $titlePage.Transform("$resDir/NeoIPC-Core-Title-Page$localeSuffix.resx", "$imgDir/NeoIPC-Core-Title-Page$localeSuffix.svg")
+        $titlePage.Transform("$resDir/NeoIPC-Core-Title-Page$localeSuffix.resx", (Join-Path $cultureImgDir 'NeoIPC-Core-Title-Page.svg'))
     }
     if ($preRelease) {
-        Build-Target (Get-LocalisedPath $imgDir 'Preview-Watermark.svg' $targetCulture) (Get-LocalisedPath $resDir 'Preview-Watermark.resx' $targetCulture -All -Existing),(Join-Path $transDir 'Preview-Watermark.xslt') {
+        Build-Target (Join-Path $cultureImgDir 'Preview-Watermark.svg') (Get-LocalisedPath $resDir 'Preview-Watermark.resx' $targetCulture -All -Existing),(Join-Path $transDir 'Preview-Watermark.xslt') {
             Write-Verbose "Generating preview watermark SVG"
-            $previewWatermark.Transform("$resDir/Preview-Watermark$localeSuffix.resx", "$imgDir/Preview-Watermark$localeSuffix.svg")
+            $previewWatermark.Transform("$resDir/Preview-Watermark$localeSuffix.resx", (Join-Path $cultureImgDir 'Preview-Watermark.svg'))
         }
     }
-    Build-Target (Get-LocalisedPath $imgDir 'NeoIPC-Core-Decision-Flow.svg' $targetCulture) (Get-LocalisedPath $resDir 'NeoIPC-Core-Decision-Flow.resx' $targetCulture -All -Existing),(Join-Path $transDir 'NeoIPC-Core-Decision-Flow.xslt') {
+    Build-Target (Join-Path $cultureImgDir 'NeoIPC-Core-Decision-Flow.svg') (Get-LocalisedPath $resDir 'NeoIPC-Core-Decision-Flow.resx' $targetCulture -All -Existing),(Join-Path $transDir 'NeoIPC-Core-Decision-Flow.xslt') {
         Write-Verbose "Generating decision flow SVG"
-        $decisionFlow.Transform("$resDir/NeoIPC-Core-Decision-Flow$localeSuffix.resx", "$imgDir/NeoIPC-Core-Decision-Flow$localeSuffix.svg")
+        $decisionFlow.Transform("$resDir/NeoIPC-Core-Decision-Flow$localeSuffix.resx", (Join-Path $cultureImgDir 'NeoIPC-Core-Decision-Flow.svg'))
     }
     # The seven collection sheets, derived from the canonical metadata rather than transformed from a
     # hand-maintained resource file. ONE run emits all of them, so the target is one representative sheet
@@ -308,9 +374,9 @@ foreach ($targetCulture in $targetCultures)
         $sheetGenerator
     ) + @(Get-LocalisedPath $commonDir 'figure-strings.yaml' $targetCulture -All -Existing) +
         @(Get-LocalisedPath $poDir 'metadata.po' $targetCulture -All -Existing)
-    Build-Target (Get-LocalisedPath $imgDir 'NeoIPC-Core-Master-Sheet.svg' $targetCulture) $sheetInputs {
+    Build-Target (Join-Path $cultureImgDir 'NeoIPC-Core-Master-Sheet.svg') $sheetInputs {
         Write-Verbose "Generating the data collection sheets"
-        $sheetArgs = @('--out', $imgDir, '--format', 'svg')
+        $sheetArgs = @('--out', $cultureImgDir, '--format', 'svg')
         if ($targetCulture.Name) { $sheetArgs += @('--language', $targetCulture.TwoLetterISOLanguageName) }
         & $python $sheetGenerator @sheetArgs
         if ($LASTEXITCODE -ne 0) {
@@ -322,6 +388,21 @@ foreach ($targetCulture in $targetCultures)
     # resolved in this loop is generated by this build and stays flat with a culture suffix.
     $protocolFile = Get-LocalisedPath $protocolDir $protocolFileName $targetCulture -Resolve -Subdirectory
     if ($All -or $Html) {
+        # HTML keeps its images as files, so they have to travel with it: an inlined figure is part of the
+        # page, but a plain `image:` macro becomes an <img src> that the browser resolves against the
+        # document. Asciidoctor never copies an image, so the artifacts directory needs the same per-culture
+        # layout the source tree has -- which is what {locale-dir}/img means on this side of the build.
+        #
+        # Until this, artifacts/img was created empty and nothing was ever put in it, so every AWaRe badge
+        # in the published protocol -- one on each of some two thousand antibiotic rows -- was a broken
+        # image. The whole directory is copied rather than the subset a reference count says is needed, so
+        # that adding a figure to the document cannot quietly reintroduce that.
+        $htmlImgDir = Get-LocalisedPath $artifactsFolder 'img' $targetCulture -Subdirectory
+        if (-not (Test-Path -LiteralPath $htmlImgDir -PathType Container)) {
+            $null = New-Item -Path $htmlImgDir -ItemType Directory -Force
+        }
+        Copy-Item -Path (Join-Path $cultureImgDir '*') -Destination $htmlImgDir -Force
+
         $att = $attributes.Clone()
         $att['backend-html5'] = $true
         $outputFile = Get-LocalisedPath $artifactsFolder 'index.html' $targetCulture

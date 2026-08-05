@@ -3,26 +3,33 @@ Gizem Karadağ; Adrie Bekker; Angela Dramowski; Paul Heath; Begoña Loureiro_Gon
 // PDF/HTML document metadata. asciidoctor-pdf has no native dc:rights field, so the licence is recorded
 // in Keywords (and stated in full on the "Licensing and attribution" colophon page).
 :keywords: NeoIPC, neonatal infection surveillance, VLBW, VPT, healthcare-associated infection; licence: protocol text and List of Infectious Agents CC BY 4.0, List of Antibiotics CC BY-NC-SA 3.0 IGO
-:imagesdir: ./img
-// Where THIS culture's localized fragments live, relative to doc/protocol -- the directory po4a writes a
-// translated source into. The invariant source is the directory root, so `.` is both the default and what
-// an English build uses; a localized build is rendered from doc/protocol/<culture>/ with asciidoctor's
-// --base-dir still pointing at doc/protocol, and the build passes the culture name here.
+// Where THIS culture's files live, relative to doc/protocol -- the directory po4a writes a translated
+// source into. The invariant source is the directory root, so `.` is both the default and what an English
+// build uses; a localized build is rendered from doc/protocol/<culture>/ with asciidoctor's --base-dir
+// still pointing at doc/protocol, and the build passes the culture name here.
 //
-// It exists because the two reference classes in this document resolve to different places and cannot
-// share one root: definitions and the generated lists are localized and live beside the translated
-// protocol, while the header, the images and the PDF theme are shared and live at the root. Without it a
-// localized build reads either the English definitions or no images, depending which root you pick.
+// It exists because the definitions, the generated lists and the images are all per-culture while the
+// header and the PDF theme are shared, so the two classes cannot share one root. Without it a localized
+// build reads either the English definitions or no images, depending which root you pick.
 //
 // The build always passes this, so the ifndef only fires when the document is rendered by hand.
 ifndef::locale-dir[:locale-dir: .]
-ifdef::lang[:title-page-background-image: image:NeoIPC-Core-Title-Page.{lang}.svg[]]
-ifndef::lang[:title-page-background-image: image:NeoIPC-Core-Title-Page.svg[]]
-:revsuffix: 
+// One image directory per culture, assembled by the build: this culture's own figure where there is one,
+// the shared file otherwise. So every image target in this document is a plain file name with no culture
+// in it, and a figure that becomes localizable later simply starts being found here, with no change to
+// the document at all.
+//
+// Naming the culture in the target is what this replaces, and it put a build convention in front of the
+// wrong person: the target is a translatable unit, so localizing a figure meant a TRANSLATOR editing
+// NeoIPC-Core-Decision-Flow.svg into NeoIPC-Core-Decision-Flow.de.svg -- with nothing to tell them so,
+// and with a wrong answer showing the English figure silently, because a filename that resolves is
+// indistinguishable from the right one.
+:imagesdir: {locale-dir}/img
+:title-page-background-image: image:NeoIPC-Core-Title-Page.svg[]
+:revsuffix:
 ifdef::revremark[]
 :revsuffix: -{revremark}
-ifdef::lang[:page-foreground-image: image:Preview-Watermark.{lang}.svg[]]
-ifndef::lang[:page-foreground-image: image:Preview-Watermark.svg[]]
+:page-foreground-image: image:Preview-Watermark.svg[]
 endif::revremark[]
 :title-logo-image: image:LOGO_NEOIPC.png[pdfwidth=60mm,align=center]
 include::../locale/attributes.adoc[]

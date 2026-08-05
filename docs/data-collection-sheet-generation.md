@@ -12,11 +12,11 @@ with the same fields, the same option lists and the same mandatory flags. Everyt
 already authored in `metadata/common/`, so a drawn sheet is a second statement of facts that already have
 a canonical home — and it can disagree with the data model without anything saying so.
 
-Hand-drawing was tried and abandoned half-way, which is the practical half of the argument. Two SVGs
-survive from it: `NeoIPC-Core-Master-Data-Collection-Sheet.svg`, which is minimal and hand-written and
-stops after the first few fields, and `NeoIPC-Core-Patient-Progress-Chart.svg`, which is A4 landscape and
-carries 367 `<path>` elements where the grid should be `<rect>` and `<line>` — editor output with the
-namespaces stripped rather than something anyone would maintain by hand.
+Hand-drawing was tried and abandoned half-way, which is the practical half of the argument. Two SVGs came
+out of it and neither is in the tree any more: a master sheet that was minimal and hand-written and
+stopped after the first few fields, and a chart that was A4 landscape and carried 367 `<path>` elements
+where the grid should be `<rect>` and `<line>` — editor output with the namespaces stripped rather than
+something anyone would maintain by hand. Both are recoverable from git history; nothing reads them.
 
 ## The progress chart is one of the family, not an exception to it
 
@@ -113,9 +113,55 @@ appears. A construct that hides something must never be a mask here.
 **The generator emits neither**, because its layout needs neither: everything on a form is a rule, a
 block, a mark or a run of text.
 
-The relative-`href` rule is why the existing generated sheet loses its logo: it carries
-`xlink:href="img/LOGO_NEOIPC_2.png"` while sitting *in* `img/`, so the renderer looks for `img/img/…`.
-A raster referenced from a generated SVG is named relative to that SVG.
+The relative-`href` rule is why a raster referenced from a generated SVG is named relative to *that SVG*
+rather than to the document: an `xlink:href="img/LOGO_NEOIPC_2.png"` written from inside `img/` sends the
+renderer looking for `img/img/…`.
+
+## One image directory per culture, and the two things a figure may be
+
+Every image the protocol reaches is named without a culture in it — `NeoIPC-Core-Master-Sheet.svg`, not
+`NeoIPC-Core-Master-Sheet.de.svg` — and the build decides which file that is by assembling **one image
+directory per culture**: `doc/protocol/img` for the untranslated source, `doc/protocol/<culture>/img`
+beside each translated one, which is where po4a already puts that culture's protocol, definitions and
+generated lists. `:imagesdir:` is `{locale-dir}/img`, so a target resolves inside the culture being built
+and a figure that becomes localizable later simply starts being found there, with no change to the
+document at all.
+
+**What this replaces put a build convention in front of the wrong person.** po4a extracts a block image's
+target as its own translatable unit, so localizing a figure meant a *translator* answering
+`NeoIPC-Core-Decision-Flow.svg` with `NeoIPC-Core-Decision-Flow.de.svg` — a filename convention nobody
+told them about, in a field that looks like text to translate. German did exactly that. Getting it wrong
+is silent in the worst way: a target that still resolves shows the English figure, and only a target that
+fails to resolve says anything at all. The extraction is therefore switched off — `noimagetargets` in
+`po/documentation.po4a.cfg`, which also suppresses po4a's default registration of the image *attribute*
+list, so `image[1,alt,title,link]` is re-registered without the trailing `_` to keep the alt text, title
+and link translatable while leaving the target alone. **Alt text is a translator's; a file name is not.**
+
+**The classification is `may it vary`, not `can it be localized`** — the second question has a shrinking
+answer and would need re-asking every time it shrinks. So:
+
+| class | what the build does | example |
+|---|---|---|
+| generated per culture | written straight into that culture's directory | the seven sheets, the decision flow, the title page, the preview watermark |
+| shared, may gain a localized form | that culture's file where one exists, the shared file otherwise | the AWaRe badges |
+| invariant mark | shared file only; a per-culture variant **fails the build** | the NeoIPC logo |
+
+The AWaRe badges are why the middle row is not the same as the bottom one. Each draws a single letter and
+WHO governs its own translations of the categories, so a Spanish badge reads A/P/R — *Watch* is
+*Precaución*. They are localizable figures nobody has localized yet, and a design split along
+"localizable" would have filed them with the logo and had to be reopened.
+
+The NeoIPC logo is the bottom row because **a wordmark is a name**, which is why even its text form is
+never translated; a licence badge would be there too, its recognizability being the whole of its function.
+A localized variant of either is a defect rather than an improvement, so the build refuses one instead of
+quietly preferring it — the failure mode of silently preferring being a mark that nobody decided to vary,
+published in one language only.
+
+**HTML keeps its images as files, so they travel with the document.** An inlined figure is part of the
+page, but a plain `image:` macro becomes an `<img src>` the browser resolves against the document, and
+asciidoctor never copies an image. The same per-culture layout is therefore reproduced under `artifacts/`.
+Until it was, `artifacts/img` was created empty and never written to, so every AWaRe badge in the
+published HTML protocol — one on each of some two thousand antibiotic rows — was a broken image.
 
 ## Text measurement, and the font it must measure
 
@@ -221,11 +267,12 @@ Two constraints on *which* font is measured, both of which make a wrong answer l
   six — this repository's two, plus the four Typst has built in. So the compile passes
   `--ignore-system-fonts`, and the emitted `.typ` says why at the top of every file.
 
-  **The SVG path does not have it yet.** `doc/NeoIPC.theme.yml` registers `Noto Sans` from
-  `GEM_FONTS_DIR/notosans-*-subset.ttf`, asciidoctor-pdf's own pre-subsetted build inside the gem, so a
-  figure rendered into the protocol is drawn with a different file from the one measured here. Pointing
-  the theme at `common/fonts/` is part of wiring the sheets into the protocol build, and until it happens
-  the identity holds for the printed form and not for the figure.
+  **The SVG path gets it from the theme, and the order of one setting is what makes it hold.**
+  `doc/NeoIPC.theme.yml` names `Noto Sans` by its file, and the protocol header puts `common/fonts` ahead
+  of `GEM_FONTS_DIR` on `:pdf-fontsdir:` — the gem's directory stays on the list because the theme still
+  names asciidoctor-pdf's own bundled faces for everything else. Reversed, the figure would be drawn with
+  the gem's pre-subsetted `notosans-*-subset.ttf` instead of the file measured here, which is a different
+  file with a `kern` table and no `GPOS`.
 
 ## What a generated document declares about itself
 

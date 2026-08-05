@@ -130,9 +130,8 @@ def test_coordinates_are_integers_on_one_grid(english: Path) -> None:
 # ── The progress chart ──────────────────────────────────────────────────────────────────────────────
 
 
-def chart(directory: Path, language: str = "") -> str:
-    suffix = f".{language}" if language else ""
-    return (directory / f"NeoIPC-Core-Patient-Progress-Chart{suffix}.svg").read_text(encoding="utf-8")
+def chart(directory: Path) -> str:
+    return (directory / "NeoIPC-Core-Patient-Progress-Chart.svg").read_text(encoding="utf-8")
 
 
 def test_the_chart_holds_every_day_count_the_stage_has(english: Path) -> None:
@@ -188,7 +187,7 @@ def test_the_chart_grid_does_not_grow_with_the_script(english: Path, tmp_path: P
     """
     assert generate(tmp_path / "ne", "--language", "ne", "--format", "svg").returncode == 0
     pitches = {lang: _grid_pitches(text) for lang, text in
-               (("en", chart(english)), ("ne", chart(tmp_path / "ne", "ne")))}
+               (("en", chart(english)), ("ne", chart(tmp_path / "ne")))}
     assert pitches["en"] == pitches["ne"], f"the grid changed height with the script: {pitches}"
     assert len(set(pitches["en"])) == 1, f"the grid has more than one row pitch: {sorted(set(pitches['en']))}"
 

@@ -13,7 +13,7 @@ what stops the two drifting: they can differ in typography too fine to see, neve
 Run it:
 
     python scripts/build-collection-sheets.py --out doc/protocol/img
-    python scripts/build-collection-sheets.py --out doc/protocol/img --language de
+    python scripts/build-collection-sheets.py --out doc/protocol/de/img --language de
 
     typst compile --font-path common/fonts --ignore-system-fonts --pdf-standard a-2a,ua-1 <sheet>.typ
 
@@ -2688,7 +2688,6 @@ def main(argv: list[Shape] | None = None) -> int:
             return _fail(f"no stage with code {args.sheet}")
 
     args.out.mkdir(parents=True, exist_ok=True)
-    suffix = f".{args.language}" if args.language else ""
     written, failures = [], []
     for form, lay_out, page, stem_name in forms:
         composer, body, failure = best_layout(
@@ -2717,9 +2716,10 @@ def main(argv: list[Shape] | None = None) -> int:
             # still cannot pass by asking for drafts -- the same bargain `--allow-overflow` strikes.
             if not args.include_drafts:
                 continue
-        # Not `with_suffix`: the stem already ends in the culture code, which is exactly what that would
-        # take to be the extension and replace.
-        stem = args.out / f"{stem_name}{suffix}"
+        # The CULTURE is the directory, never the file name: one output directory per language, which is
+        # the convention the translated sources already follow. So a document referring to a sheet names
+        # a plain file that is correct in every language, and nobody has to translate a file name.
+        stem = args.out / stem_name
         # Turned round once, after the page is finished and before either output is written, so both are
         # written from the same placements in this direction as in the other.
         placed = mirror(body, composer.page_w) if composer.rtl else body
