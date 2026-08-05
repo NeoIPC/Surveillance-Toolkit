@@ -245,7 +245,7 @@ if (has_data) {
   }
 
   if (any(!is.na(tbl_data$pooled_own) & tbl_data$n_own < sparse_threshold, na.rm = TRUE)) {
-    sparse_note <- glue::glue(if (include_rate_ci) sR$sparse_data_footnote else sR$sparse_data_footnote_no_ci, threshold = sparse_threshold)
+    sparse_note <- interpolate_translation(if (include_rate_ci) sR$sparse_data_footnote else sR$sparse_data_footnote_no_ci, threshold = sparse_threshold)
     tbl <- tbl |>
       gt::tab_footnote(
         footnote = sparse_note,

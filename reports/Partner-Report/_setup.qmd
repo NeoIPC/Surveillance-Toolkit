@@ -109,7 +109,7 @@ select_clause <- function(concordance, paired_coarse, pairing, sR,
     ""
   )
   if (is.null(clause_template) || !nzchar(clause_template)) return("")
-  as.character(glue::glue(clause_template,
+  as.character(interpolate_translation(clause_template,
     paired_label = pairing$paired_label %||% "",
     paired_label_sc = pairing$paired_label_sc %||%
       tools::toTitleCase(pairing$paired_label %||% ""),
@@ -152,7 +152,7 @@ compose_interpretation <- function(metric_state, pairing, paired_state, sR) {
     opening_template <- if (metric_is_pooled && !is.null(templates$opening_below_pooled))
       templates$opening_below_pooled else templates$opening_below
   }
-  opening <- as.character(glue::glue(opening_template,
+  opening <- as.character(interpolate_translation(opening_template,
     metric_label = pairing$metric_label, .open = "{", .close = "}"))
 
   # Part 2: Clause (empty for unpaired metrics)
@@ -171,10 +171,28 @@ compose_interpretation <- function(metric_state, pairing, paired_state, sR) {
   action <- select_action(metric_coarse, concordance, pairing)
   if (is.null(action)) return(paste0(opening, clause, "."))
 
-  # Resolve conditional cross-reference placeholders ({ref_detection_table} etc.)
+  # Resolve the conditional cross-reference placeholders left in the ACTION fragment. The opening and
+  # clause were already interpolated above with named arguments; only the action can still carry one.
+  #
+  # This is the only place composed translated text is re-scanned, so it is the only place a catalogue
+  # string could reach a binding nobody meant to expose. It previously evaluated against parent.frame() —
+  # one frame WIDER than glue's already permissive default — which put every local, and everything up the
+  # enclosing chain to the global environment, within reach of whatever a translator wrote.
+  #
+  # The allow-list below is the complete set, established from the catalogue rather than assumed: across
+  # every outlier string, the action fragments reference these two names and nothing else. Both are
+  # cross-reference fragments that are "" when the target table is absent from the report.
+  #
+  # Looked up here rather than passed in by each of the eight call sites, so the allowed set is stated
+  # once and cannot drift between them. Note the emptyenv() inside the helper is what makes this an
+  # allow-list at all: glue_data_safe's data argument is a first lookup that otherwise falls back to the
+  # caller's frame, so the list alone would restrict nothing.
+  allowed <- list(
+    ref_detection_table = if (exists("ref_detection_table")) ref_detection_table else "",
+    ref_dev_ass_table   = if (exists("ref_dev_ass_table"))   ref_dev_ass_table   else ""
+  )
   result <- paste0(opening, clause, ". ", action)
-  as.character(glue::glue(result, .envir = parent.frame(),
-                           .open = "{", .close = "}"))
+  as.character(interpolate_composed_translation(result, allowed))
 }
 
 # Helper: look up an interpretation string, returning it or NULL.
@@ -374,9 +392,9 @@ interpret_severe_infection <- function(state_map, sR, registry = NULL) {
       hap_coarse <- coarse_state(hap_state)
       opening_template <- if (hap_coarse == "high")
         sR$outlier$composed$opening_above else sR$outlier$composed$opening_below
-      opening <- as.character(glue::glue(opening_template,
+      opening <- as.character(interpolate_translation(opening_template,
         metric_label = pairing$metric_label, .open = "{", .close = "}"))
-      clause <- as.character(glue::glue(sR$outlier$composed$clause_fallback,
+      clause <- as.character(interpolate_translation(sR$outlier$composed$clause_fallback,
         primary_paired_label = pairing$primary_paired_label,
         primary_paired_ref = pairing$primary_paired_ref,
         fallback_paired_label_sc = pairing$fallback_paired_label_sc,
@@ -466,7 +484,7 @@ interpret_nec <- function(state_map, sR, registry = NULL) {
   templates <- sR$outlier$composed
   opening_template <- if (nec_coarse == "high")
     templates$opening_above else templates$opening_below
-  opening <- as.character(glue::glue(opening_template,
+  opening <- as.character(interpolate_translation(opening_template,
     metric_label = pairing$metric_label, .open = "{", .close = "}"))
 
   # Priority resolution: human milk (primary), then probiotics (secondary)
@@ -1280,7 +1298,7 @@ format_outlier_text <- function(outlier_groups, sR) {
     metric_names <- knitr::combine_words(paste0('"', generic_labels, '"'))
     template <- sR$outlier$generic_summary
     if (!is.null(template)) {
-      parts <- c(parts, as.character(glue::glue(
+      parts <- c(parts, as.character(interpolate_translation(
         template, metric_names = metric_names,
         .open = "{", .close = "}"
       )))

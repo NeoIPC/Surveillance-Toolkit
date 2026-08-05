@@ -21,15 +21,37 @@ rather than symbolic: a term translated here becomes the agreed rendering everyw
 *not* translated here cannot be enforced anywhere else. Clearing it is an afternoon and it makes every
 other catalogue easier to review.
 
-Many terms appear three times in different casings — `necrotizing enterocolitis`, `Necrotizing
-enterocolitis`, `Necrotizing Enterocolitis`. That is not duplication: reports use the first in running
-text, the second for a label, the third in a heading. Your language may well not distinguish them, in
-which case the same rendering three times is the correct answer. Weblate groups the variants together so
-you can see them side by side.
+**Two different things are called "glossary" here, and only one of them is yours to translate.**
+`neoipc-glossary` is the component described above — real strings, translated like any other catalogue.
+The *glossary* that appears in the sidebar while you work on some other string is Weblate's own
+terminology store, which shows you the agreed term for a word in the string you are looking at. Terms
+land in the sidebar because they were translated in the component; the sidebar is a view, not a place to
+work.
 
-**Reports** — the prose partners actually read: methods paragraphs, table headings, footnotes, and the
-interpretation text beside an unusual result. The most consequential catalogue for tone, and the one
-where the style rules below matter most.
+**Each term appears once**, in the form it takes in running text — `necrotizing enterocolitis`, lower
+case. Where a report needs it capitalized for a label or a heading, the capital is applied when the report
+is built, not translated as a second entry. So translate the term as you would write it mid-sentence, and
+if your language capitalizes differently from English that is handled for you. (Terms that are capitals
+anyway — `BSI`, `MRSA`, `NeoIPC Surveillance` — are unaffected.)
+
+**Reports** — five separate documents in one catalogue, and they are **not** written for the same reader.
+The location line under each string tells you which one you are in, and it changes the register more than
+anything else in this guide does:
+
+| document | who reads it |
+|---|---|
+| **Partner-Certificate** | possibly the general public — a department may display it, may keep it in a folder and produce it on request, or may not use it at all. Write it for a lay reader either way |
+| **Reference-Report** | published on the NeoIPC website — the general public, including political stakeholders |
+| **Patient-Data-Report** | parents, and possibly legal teams acting for them |
+| **Partner-Report** | everyone on the ward whose work can affect infection rates — investigators, but just as much the nursing staff, and in some settings the cleaning staff |
+| **Validation-Report** | data collectors and team leads, checking their own data |
+
+Two consequences. **"Clinical register" is the wrong default** — the Partner-Report is read by people who
+are not clinicians and whose work matters just as much, so plain language beats professional shorthand
+wherever both are accurate. And a large shared layer (`reports/common.yaml`) is used by **all five**, so a
+string there has to work on a wall, in a parent's hands, and in a data collector's checklist at once. If
+one of those readings makes a shared string impossible in your language, say so in a comment rather than
+choosing which reader to serve — that is a problem with the English, and it is fixable.
 
 **Core surveillance protocol** — the reference document describing the surveillance itself: definitions,
 inclusion criteria, data collection. Read by clinicians and infection-control staff setting up a
@@ -127,16 +149,76 @@ the document is claiming, and this is the single most common thing corrected in 
 strings, so if your language groups digits differently, that is a glossary-level fix rather than a
 per-string one. Ask rather than improvising per string.
 
+**Borrowed abbreviations — three answers, and the right one is a fact about your language.** MRSA, CRP,
+CVC and the rest reach you in Latin, and what to do with them differs by language rather than by taste:
+
+1. **Your language has its own abbreviation.** Use it. Ukrainian writes *СРБ* for CRP, *НЕК* for NEC,
+   *ЦВК* for CVC, *ІОХВ* for a surgical site infection — those are in ministry documents, not coined.
+2. **Your language writes the Latin one.** Keep it. The same Ukrainian sources print *MRSA*, *CPAP*,
+   *HFNC* and *ASA* untranslated, and Israeli clinical documentation keeps almost all of them.
+3. **Your language spells it out letter by letter.** Nepali does this: *सीआरपी*, *एमआरएसए*.
+
+**What none of them is: an abbreviation you build yourself from a translated expansion.** A form printed
+with a plausible-looking abbreviation nobody recognises is worse than one printed in English, because the
+reader cannot tell it is wrong. Where your language has no established form — Ukrainian has none for
+*3GCR* or *VPT*, and does not abbreviate either — say so in a comment and leave the Latin.
+
+**One trap, and it is invisible.** On a Cyrillic or Greek keyboard the Latin letters cost a layout switch
+while *С Р А О Е Т* sit under your fingers and are pixel-identical to *C P A O E T*. Typing CPAP as
+*СРАР* looks exactly right and is a different string: search will not find it, sorting misplaces it, and
+a screen reader reads it in the wrong language. If an abbreviation stays in Latin, type it in Latin.
+`scripts/check-mixed-script.py` catches this, but it is much easier not to do.
+
+## Long words, and how to tell us where they may break
+
+Some of what you translate is not prose on a page: field labels and option names from the **DHIS2
+metadata** catalogue are printed onto the data collection sheets — the paper forms filled in at a cot
+side — where each has a box of a fixed width. The layout measures your text in the real font and wraps it
+between words. What it cannot do is break *inside* a word, and a language that builds compounds produces
+words no box will hold: *Gestationsalter* is already a single token wider than several of the boxes it
+appears in.
+
+**You can say where such a word may divide, by putting a soft hyphen at each point.** It is the invisible
+character U+00AD, and it is a hint rather than a hyphen: nothing is drawn where you put it. If the word
+fits, it is simply not used. If the word has to break, it breaks at one of the points you marked and a
+real hyphen appears there — never anywhere else.
+
+- **Type it** by adding it once to *Special characters* in your Weblate profile — the row of characters
+  above the editing box is built from that setting plus per-language punctuation, so a soft hyphen is
+  there only if you put it there. Otherwise paste one. It is invisible wherever you type it, which is
+  expected; Weblate will show the string as changed although it looks identical.
+- **Mark every plausible point**, not just one: `Gestations­alter`, `Antibiotika­kategorie`. The
+  layout picks whichever fits and ignores the rest, so more points give it more room and cost nothing.
+- **Leave a word unmarked when it must not be divided.** A clinical term split across a line can be
+  misread, and that judgement is yours. There is no list to maintain and no setting to change — an
+  unmarked word simply never breaks.
+- **They are never wrong in a string that does not need them.** A marked word that always fits behaves
+  exactly as an unmarked one.
+
+If a word cannot be made to fit even with the breaks you gave it, the build stops and says which string
+and which box — it does not quietly print text running off the edge of the form, which is what the
+previous generation of this tooling did for years. So an over-long label comes back to you as a question
+rather than shipping as a defect.
+
+Two things this is **not**. It is not hyphenation of the running text — the protocol and the reports set
+their own text and need nothing from you. And it is not a way to force a line break: it only ever offers
+one.
+
 ## Review
 
 Review is enabled on this project. A string you save is *translated*; a reviewer then marks it
 *approved*. Both states are visible in the sidebar, and `state:translated` as a search is exactly the
 queue of work awaiting review in your language — worth bookmarking if you review.
 
-**Every language has a reviewer team; several are still without members.** Until yours has one, your
+**Every language has a reviewer team, and some of them have no members yet** — the project page shows
+which, and it is the only place that can tell you, because it changes. Where yours is empty your
 translations land and are used without a second reader. That is a reason to flag anything you were unsure
 about in a comment rather than to hesitate over saving it — an uncertain translation with a comment is far
 more useful than a confident one without.
+
+**To reach the reviewer for your language**, comment on the string and `@`-mention them; the *Editors —
+&lt;Language&gt;* team on the project page is who that is. For anything not about a particular string,
+**NeoIPC-Support@charite.de** reaches the maintainers.
 
 ### If you review
 
@@ -158,9 +240,43 @@ notify, and they stay attached to the string. Do not send translation feedback t
 GitHub: those are opened by an automation account and the translator who wrote the string will never see
 the comment.
 
+**Leave soft hyphens alone.** A metadata string may carry invisible U+00AD marks saying where a long
+compound is allowed to divide on the printed collection sheets (see *Long words* above). They render as
+nothing, so a translation carrying them looks identical to one that does not — and retyping the word to
+"clean it up" removes information the layout depends on, with no visible sign that anything changed.
+Judge the wording; the marks are the translator's answer to a layout question, not a typo.
+
 **Strings marked "needs editing" that look like untouched English** are not translations anyone made.
 They come from an earlier bulk import and mean nothing has been decided for that string yet. Treat them
 as untranslated.
+
+## What your translation is published under
+
+**Everything you translate in this project's Weblate components is published under
+[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)** — the protocol, the reports, the glossary, the
+DHIS2 metadata and the infectious agents alike. Weblate shows you the contributor agreement before your
+first contribution; please read it rather than clicking through, because it says plainly that the name and
+e-mail address on your Weblate account become a permanent part of the public git history.
+
+Two things that look like exceptions and are worth understanding, because they say something about how
+this project thinks:
+
+- **The infectious-agents catalogue is CC BY 4.0 even though the directory it comes from is not.** That
+  directory is CC BY-NC-ND 4.0, because it compiles content from LPSN, MycoBank, ICTV and NHSN under their
+  terms. The catalogue is not, and the reason is what the catalogue actually contains: the extraction is
+  limited to organism names, rank labels such as *Species* and *Genus*, and controlled values such as
+  *Unknown*. None of the upstream descriptions, authorities or references — the material those licences
+  exist to protect — is carried across, and names and short phrases are not subject to copyright in any
+  case. (A NoDerivatives term could not have governed it regardless: a translation *is* a derivative work,
+  so such a catalogue could not lawfully be translated at all, which is its only purpose.)
+- **The App catalogue is MIT**, not CC BY 4.0, because it is part of a software interface and is licensed
+  with the code it ships in rather than with the surveillance content. It belongs to a different
+  repository; the component is in the same Weblate project, so you may well meet it.
+
+One catalogue in this repository is **not** on Weblate at all and is not covered by the above:
+`po/antibiotics.<lang>.po`. Its source content carries a NonCommercial term, which is not a free licence
+and which Weblate's free hosting does not accept, so it stays here and is translated through a pull
+request instead. `CONTRIBUTING.md` says how.
 
 ## When something is wrong in the English
 

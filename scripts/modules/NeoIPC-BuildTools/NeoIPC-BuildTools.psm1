@@ -19,8 +19,6 @@
     Import-Module ./scripts/modules/NeoIPC-BuildTools -Force
 #>
 
-[AppContext]::SetSwitch("Switch.System.Xml.AllowDefaultResolver", $true);
-
 $AtcUrlTemplate = 'https://www.whocc.no/atc_ddd_index/?code={0}&showdescription=yes'
 $AWaReUrlTemplate = 'https://aware.essentialmeds.org/list?query=%22{0}%22'
 $LspnUrlTemplate = 'https://lpsn.dsmz.de/{0}'
@@ -72,10 +70,28 @@ function Export-AsciiDocReferences {
         [Parameter(Mandatory, Position = 0)]
         [string]$LiteralPath,
         [Parameter(Position = 2)]
-        [hashtable]$Attributes
+        [hashtable]$Attributes,
+        # The directory this file's own include and image targets resolve against, when that is not the
+        # directory the file sits in. Mirrors asciidoctor's --base-dir, which sets {docdir} and therefore
+        # governs how the ROOT document's relative targets are resolved -- verified by observation, not
+        # from the documentation: rendering root/sub/doc.adoc with --base-dir root reports
+        # docdir=<...>/root and resolves include::header.adoc to root/header.adoc.
+        #
+        # It applies to INCLUDES at this level only and is deliberately not passed down the recursion,
+        # because a NESTED include resolves against the directory of the file containing it
+        # (Reader#push_include sets @dir from the included file), not against the base directory.
+        [string]$BaseDirectory,
+        # Where img/ sits, propagated through the recursion -- because IMAGES follow the opposite rule to
+        # includes: an image target resolves against {imagesdir}, a document attribute resolved against
+        # {docdir}, so every image::/image: in every included file resolves against the same root no
+        # matter how deep it is. Resolving them per file is what made this warn about
+        # doc/protocol/de/img/AWaRe-A.svg, a path asciidoctor never looks for.
+        [string]$ImagesRoot
     )
 
     $file = Get-Item -LiteralPath $LiteralPath
+    $resolveFrom = if ($BaseDirectory) { $BaseDirectory } else { $file.DirectoryName }
+    if (-not $ImagesRoot) { $ImagesRoot = $resolveFrom }
     $skip = $false;
     Get-Content -LiteralPath $file.FullName |
     ForEach-Object {
@@ -134,10 +150,10 @@ function Export-AsciiDocReferences {
                         break
                     }
                 }
-                $childFile = Join-Path -Path $file.DirectoryName -ChildPath $expanded -Resolve -ErrorAction SilentlyContinue -ErrorVariable includeFileError
+                $childFile = Join-Path -Path $resolveFrom -ChildPath $expanded -Resolve -ErrorAction SilentlyContinue -ErrorVariable includeFileError
                 if ($childFile) {
                     $childFile
-                    Export-AsciiDocReferences -LiteralPath $childFile -Attributes $Attributes
+                    Export-AsciiDocReferences -LiteralPath $childFile -Attributes $Attributes -ImagesRoot $ImagesRoot
                 }
                 else {
                     foreach ($w in $includeFileError) {
@@ -158,7 +174,7 @@ function Export-AsciiDocReferences {
                         break
                     }
                 }
-                $imageFile = Join-Path -Path $file.DirectoryName -ChildPath 'img' -AdditionalChildPath $expanded -Resolve -ErrorAction SilentlyContinue -ErrorVariable includeFileError
+                $imageFile = Join-Path -Path $ImagesRoot -ChildPath 'img' -AdditionalChildPath $expanded -Resolve -ErrorAction SilentlyContinue -ErrorVariable includeFileError
                 if ($imageFile) {
                     $imageFile
                 }
@@ -227,6 +243,20 @@ function Get-LocalisedPath {
         [Parameter(Mandatory, ParameterSetName = 'LiteralPath', Position = 1)]
         [Parameter(Mandatory, ParameterSetName = 'DirectoryFile', Position = 2)]
         [CultureInfo]$TargetCulture,
+        # Resolve to <Directory>/<culture>/<File> instead of the flat <Directory>/<File>.<culture>.<ext>.
+        #
+        # Two conventions exist because two tools own different halves. po4a writes a translated SOURCE
+        # into a per-language subdirectory, which is what the localization config declares and what
+        # doc/protocol/.gitignore expects. Everything this build GENERATES stays flat with a culture
+        # suffix, so that building several cultures cannot have one overwrite another. Most call sites
+        # want the flat form and are deliberately left alone; only a po4a-written input takes this switch.
+        #
+        # Reading the flat form for a po4a-written source is what stopped the localized protocol being
+        # built at all: the writer moved to subdirectories, the reader kept globbing the flat name that
+        # nothing produces any more, and a build rendering one culture exits exactly like one rendering
+        # three.
+        [Parameter(ParameterSetName = 'DirectoryFile')]
+        [switch]$Subdirectory,
         [switch]$Resolve,
         [switch]$All,
         [switch]$Existing
@@ -234,7 +264,18 @@ function Get-LocalisedPath {
 
     do {
         if (-not $LiteralPath) { $LiteralPath = Join-Path -Path $Directory -ChildPath $File }
-        $path = [System.IO.Path]::ChangeExtension($LiteralPath, $TargetCulture.Name + [System.IO.Path]::GetExtension($LiteralPath))
+        $path = if ($Subdirectory) {
+            # The invariant culture has an empty Name and is the untranslated source, which sits at the
+            # directory root under both conventions — so this collapses to the same path the flat form
+            # yields, which is why an English build worked throughout.
+            if ($TargetCulture.Name) {
+                Join-Path -Path $Directory -ChildPath $TargetCulture.Name -AdditionalChildPath $File
+            } else {
+                $LiteralPath
+            }
+        } else {
+            [System.IO.Path]::ChangeExtension($LiteralPath, $TargetCulture.Name + [System.IO.Path]::GetExtension($LiteralPath))
+        }
         $TargetCulture = $TargetCulture.Parent
         if ($Resolve) {
             if ($Existing) {
@@ -251,6 +292,73 @@ function Get-LocalisedPath {
         }
         if ($All) { $path } else { return $path }
     } while ($TargetCulture.Name)
+}
+
+function Get-Po4aOutputPath {
+    <#
+    .SYNOPSIS
+        Where a po4a config declares it will write each language's translation of one master file.
+
+    .DESCRIPTION
+        Reads the [po4a_langs] line and the document entry whose master is $MasterPath, and returns one
+        record per declared language with $lang substituted into the entry's translated-path template.
+
+        This exists so a build can check its own idea of where a translated source lives against the
+        config that actually writes it, instead of against itself. The localized protocol went seven
+        months without being built because those two drifted: po4a moved its output into per-language
+        subdirectories and the builder kept globbing the flat culture-suffixed name it had always used,
+        which nothing writes any more. Nothing failed -- a build that renders one culture exits exactly
+        like one that renders ten -- so the config is the only independent witness available.
+
+        Paths come back exactly as the config writes them: repository-relative, forward slashes. The
+        caller joins them to the repository root.
+
+    .PARAMETER ConfigPath
+        The po4a config file to read.
+
+    .PARAMETER MasterPath
+        The untranslated source, written as the config writes it (repository-relative, forward slashes).
+
+    .EXAMPLE
+        Get-Po4aOutputPath po/documentation.po4a.cfg doc/protocol/NeoIPC-Core-Protocol.adoc
+    #>
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory, Position = 0)]
+        [string]$ConfigPath,
+        [Parameter(Mandatory, Position = 1)]
+        [string]$MasterPath
+    )
+
+    $languages = @()
+    $template = $null
+    foreach ($line in (Get-Content -LiteralPath $ConfigPath)) {
+        $line = $line.Trim()
+        if (-not $line -or $line.StartsWith('#')) { continue }
+        if ($line -match '^\[po4a_langs\]\s+(.+)$') {
+            $languages = $Matches[1] -split '\s+' | Where-Object { $_ }
+            continue
+        }
+        # A document entry: [type: <fmt>] <master> $lang:<translated> [opt:"..."]. Split on whitespace
+        # rather than pattern-matching the whole line, because the opt: tail is quoted and free-form.
+        if ($line -match '^\[type:\s*[^\]]+\]\s+(.+)$') {
+            $fields = $Matches[1] -split '\s+'
+            if ($fields[0] -ne $MasterPath) { continue }
+            $template = $fields | Where-Object { $_.StartsWith('$lang:') } | Select-Object -First 1
+            if ($template) { $template = $template.Substring('$lang:'.Length) }
+        }
+    }
+
+    if (-not $template) {
+        throw "'$ConfigPath' declares no translated path for master '$MasterPath'."
+    }
+
+    foreach ($language in $languages) {
+        [PSCustomObject]@{
+            Language = $language
+            Path     = $template.Replace('$lang', $language)
+        }
+    }
 }
 
 function Import-Translations {
@@ -450,8 +558,23 @@ function New-AntibioticsList {
     $awareCategoryString = $listElements['aware_category']
     $substanceString = $listElements['substance']
 
-    # AWaRe category (folded into NeoIPC-Antibiotics.csv) -> the single-letter code used for the AWaRe-<X>.svg badge.
-    $awareCode = @{ Access = 'A'; Watch = 'W'; Reserve = 'R' }
+    # The AWaRe categories, read from the canonical CSV rather than listed here. Two things come from it,
+    # and neither can be a map of the three categories that exist today: WHO has added a fourth, `Not
+    # recommended`, and a row in that file is all it should take to print it.
+    #
+    # The badge FILE is named from the category, matching what build-collection-sheets.py writes -- the
+    # rule is stated in both places because the two are in different languages, and a badge that resolves
+    # to the wrong file is silent. It cannot be named from the letter: the letter is the initial of a
+    # translated word, so the Spanish Watch badge reads P, and `AWaRe-P.svg` would need the culture back
+    # in a file name that the per-culture image directories exist to keep out of.
+    #
+    # The badge's ALT TEXT is the category's own name, translated. It was the letter, which is one Latin
+    # character that means nothing read aloud and would be actively wrong once the letter localizes.
+    $awareGroupsFile = Join-Path -Resolve -Path $antibioticsFolderPath -ChildPath 'NeoIPC-Antibiotic-AWaRe-Groups.csv'
+    $awareNames = [System.Collections.Generic.Dictionary[string, string]]::new()
+    Import-Csv -LiteralPath $awareGroupsFile -Encoding utf8NoBOM | ForEach-Object {
+        $awareNames[$_.category] = if ($translations.ContainsKey($_.name)) { $translations[$_.name] } else { $_.name }
+    }
 
     # Iterate the substances and emit each translated row in the requested format.
     Import-Csv -LiteralPath $antibioticsFile -Encoding utf8NoBOM |
@@ -461,12 +584,14 @@ function New-AntibioticsList {
         $atcUrl = if ($_.atc_code) { $AtcUrlTemplate -f $_.atc_code } else { $null }
         # AWaRe badge + search link, only where WHO has classified the substance; the search term is the English name.
         $awareCategory = $null
+        $awareName = $null
         $awareUrl = $null
-        if ($_.aware_category -and $awareCode.ContainsKey($_.aware_category)) {
-            $awareCategory = $awareCode[$_.aware_category]
+        if ($_.aware_category -and $awareNames.ContainsKey($_.aware_category)) {
+            $awareCategory = $_.aware_category
+            $awareName = $awareNames[$_.aware_category]
             $awareUrl = $AWaReUrlTemplate -f [System.Web.HttpUtility]::UrlEncode($_.name)
         }
-        [PSCustomObject][ordered]@{ Id = $_.id; Substance = $substance; AtcCode = $_.atc_code; AtcUrl = $atcUrl; AWaReCategory = $awareCategory; AWaReUrl = $awareUrl }
+        [PSCustomObject][ordered]@{ Id = $_.id; Substance = $substance; AtcCode = $_.atc_code; AtcUrl = $atcUrl; AWaReCategory = $awareCategory; AWaReName = $awareName; AWaReUrl = $awareUrl }
     } |
     Sort-Object -Culture $TargetCulture -Property 'Substance' |
     ForEach-Object -Begin {
@@ -478,7 +603,7 @@ function New-AntibioticsList {
         }
     } -Process {
         if ($AsciiDoc) {
-            $awareCell = if ($_.AWaReCategory) { "$($_.AWaReUrl)[image:AWaRe-$($_.AWaReCategory).svg[$($_.AWaReCategory),20],window=_blank]" } else { '' }
+            $awareCell = if ($_.AWaReCategory) { "$($_.AWaReUrl)[image:AWaRe-$($_.AWaReCategory -replace ' ', '-').svg[$($_.AWaReName),20],window=_blank]" } else { '' }
             $atcCell = if ($_.AtcCode) { "$($_.AtcUrl)[$($_.AtcCode),window=_blank]" } else { '' }
             Write-Output "|$($_.Substance) |$atcCell |$awareCell"
         } else {
@@ -959,4 +1084,50 @@ function Get-CodeMap {
     end {
         return $map
     }
+}
+
+function Find-Python {
+    <#
+    .SYNOPSIS
+        The path to a working Python 3 interpreter.
+
+    .DESCRIPTION
+        Tries `python3` and then `python`, and **runs each candidate** rather than trusting that the name
+        resolves. On Windows `python3` is a Microsoft Store stub that sits on PATH, reports itself to
+        Get-Command like any other executable, and exits 9009 without running anything -- so a build that
+        picked it by name would fail later, somewhere unrelated to the choice.
+
+        Throws when neither works, because every caller needs an interpreter and a build that continues
+        without one produces a missing artifact instead of a stopped build.
+
+    .EXAMPLE
+        & (Find-Python) script.py --out out/
+    #>
+    [CmdletBinding()]
+    [OutputType([string])]
+    param()
+
+    foreach ($candidate in @('python3', 'python')) {
+        $found = Get-Command $candidate -ErrorAction SilentlyContinue
+        if (-not $found) { continue }
+        try {
+            $null = & $found.Source --version 2>&1
+            if ($LASTEXITCODE -eq 0) { return $found.Source }
+        } catch {
+            # An unrunnable candidate is not an error here: the next one may work, and running out of
+            # candidates is what raises below. Recorded rather than swallowed, so a machine where both
+            # fail can be diagnosed without guessing which one was tried.
+            Write-Debug "Candidate interpreter '$candidate' did not run: $($_.Exception.Message)"
+        }
+    }
+    $PSCmdlet.ThrowTerminatingError(
+        [System.Management.Automation.ErrorRecord]::new(
+            [System.InvalidOperationException]::new(
+                "Python not found. Install Python 3 and ensure 'python3' or 'python' is on PATH."
+            ),
+            'PythonNotFound',
+            [System.Management.Automation.ErrorCategory]::ObjectNotFound,
+            $null
+        )
+    )
 }

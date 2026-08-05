@@ -75,6 +75,33 @@ parse_locales <- function(x) {
   return(locales)
 }
 
+# Sentence-case one glossary term for a language.
+#
+# Casing is a rendering concern, so it is applied here rather than stored as a second translated key
+# beside every term.
+#
+# Wrapping str_to_sentence() and putting the abbreviations back afterwards was measured against the
+# eleven values the retired `_sc` keys held: it reproduces all eleven, and so does this — the same
+# answer, reached through a heuristic about which words are "protected" rather than by not damaging
+# them in the first place. Title case is where that difference stops being cosmetic: str_to_title()
+# cannot be rescued the same way, because "sepsis/BSI" is one whitespace token needing title case on
+# one side of the slash and none on the other, and restoring the token undoes both.
+sentence_case <- function(text, language) {
+  if (!nzchar(text)) return(text)
+  # Uppercase the FIRST CHARACTER ONLY, through a locale-aware call so the language's own casing rules
+  # apply rather than the build machine's: Turkish `i` becomes `İ` (U+0130) where base toupper() yields
+  # a plain `I` unless the PROCESS locale is Turkish, which a container rendering nine languages is not.
+  # Delegating to ICU also covers locales nobody here has enumerated — Azerbaijani shares the Turkish
+  # rule, Lithuanian has its own — and returns a caseless script unchanged with no special case.
+  #
+  # NEVER str_to_sentence() or str_to_title(), despite the names. Both normalise the WHOLE string, and
+  # these terms are largely abbreviations: measured against the values the retired `_sc` keys held,
+  # uppercasing the first character alone reproduces 11 of 11, while str_to_sentence() reproduces 10 — it
+  # renders "primary sepsis/BSI" as "Primary sepsis/bsi", and str_to_title() renders "AWaRe" as "Aware".
+  paste0(stringr::str_to_upper(substr(text, 1, 1), locale = language),
+         substr(text, 2, nchar(text)))
+}
+
 get_string_resources <- function(x) {
   handlers <- list('bool#no' = function(x) x)
 
@@ -85,6 +112,9 @@ get_string_resources <- function(x) {
   } else {
     sR <- list()
   }
+  # Which keys the glossary contributes, captured before anything overrides it: these are the terms whose
+  # sentence-case form is derived below rather than translated separately.
+  glossary_terms <- names(sR)
 
   # Layer 1: common (overrides glossary)
   sR <- modifyList(sR, yaml::read_yaml("../common.yaml", handlers = handlers))
@@ -129,7 +159,62 @@ get_string_resources <- function(x) {
       yaml::read_yaml(file = yaml_path, handlers = handlers))
   }
 
+  # Derive the sentence-case variant of every glossary term, after the whole cascade so it is built from
+  # the translation that actually won. Storing these as separate keys meant translating each term twice
+  # and duplicating it in every other component's glossary sidebar; worse, the casing axis multiplied
+  # against plural forms, so a six-form language would have needed eighteen keys for one term.
+  #
+  # A term that already carries an explicit `_sc` is left alone — the escape hatch for a rendering the
+  # rule cannot produce, and why this runs last rather than first.
+  for (term in glossary_terms) {
+    if (grepl("_(sc|tc)$", term)) next
+    variant <- paste0(term, "_sc")
+    if (!is.null(sR[[variant]])) next
+    value <- sR[[term]]
+    if (is.character(value) && length(value) == 1) {
+      sR[[variant]] <- sentence_case(value, localeObj$language)
+    }
+  }
+
   return(sR)
+}
+
+# Interpolate {name} placeholders into a TRANSLATED string.
+#
+# Use this for every string that came out of a catalogue; never glue::glue().
+#
+# glue() resolves each brace as an R EXPRESSION in the environment given by .envir, which defaults to the
+# caller's frame. Report templates come from gettext catalogues that any account signed in to Weblate may
+# write, so glue() on one is arbitrary R evaluated at render time with every local binding in scope, inside
+# the container that renders clinical reports. Measured, not inferred: a template of "{nchar(secret)}"
+# returns 23.
+#
+# Two mechanisms, because they close different holes and only the pair closes both:
+#   glue_safe()        looks each brace up as a NAME and never evaluates, so no expression can run;
+#   .envir = emptyenv() leaves nothing to look up but the values supplied here, so no binding can leak.
+# glue_safe() alone still reads the caller's frame; emptyenv() alone still evaluates whatever it finds.
+#
+# The safety lives in this function rather than in an argument repeated at each call site, which is the
+# point: the source-string migration adds many more interpolations, and a rule that must be remembered
+# every time is a rule that will be missed once. Here, forgetting it is not possible.
+#
+# Returns a glue object, exactly as glue() did — several call sites rely on that class, and forcing
+# character would be an unrelated behaviour change.
+interpolate_translation <- function(.template, ...) {
+  glue::glue_safe(.template, ..., .envir = emptyenv())
+}
+
+# Interpolate into ALREADY-COMPOSED translated text, against an explicit allow-list.
+#
+# Needed where a string is assembled from several translated fragments and only then scanned for
+# placeholders, so the values cannot be passed as named arguments to the call that produced each fragment.
+# `allowed` is the complete set of names that text may reference.
+#
+# Note glue_data_safe() is NOT an allow-list on its own: its data argument is a first lookup that falls
+# back to .envir, so without emptyenv() a name absent from the list still resolves against the caller.
+# Verified — dropping .envir here lets a template read a caller variable again.
+interpolate_composed_translation <- function(.template, allowed) {
+  glue::glue_data_safe(allowed, .template, .envir = emptyenv())
 }
 
 get_localised_path <- function(file_name, language, territory) {

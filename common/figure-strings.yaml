@@ -34,25 +34,44 @@ boolean_no: "No"
 # against a 16-character box, and the German for "gestational age" is 15 — one character of headroom, in
 # a language that builds compounds.
 
-# A comparison and its number must not be split across a line break -- "< 32" and "> 120" have to stay
-# whole. The version these replace enforced that with a non-breaking space, which was the only mechanism
-# available to it: its wrapper splits on a plain space and had no other way to protect a break point.
-# That is recorded here because the intent is easy to lose once that wrapper is gone and the only trace
-# of it is a badly-broken printed sheet. Whatever draws these must honour it by MEASURING, not by a
-# space character -- this project bars non-breaking spaces in string resources for exactly the reason
-# they were needed here, that they make a layout decision inside translatable text.
+# Three of these carry NON-BREAKING SPACES (U+00A0), which the project's number-and-unit rule permits
+# where a specific line-break problem is documented. This is that documentation, and the rule is narrow:
+# a THRESHOLD is one term, so its operator, its value and its unit are held together. What is bound is
+# therefore every space inside "< 32 weeks", "< 1500 g" and "> 120", and nothing else -- the "120 days"
+# in the first question is prose rather than a threshold, nothing is being compared to it, and a line
+# ending on that number reads perfectly normally where one ending on "Birthweight <" does not.
+#
+# It is the SAME mechanism as the soft hyphen these strings may also carry, pointed the other way. A soft
+# hyphen says a word MAY divide here; a non-breaking space says these two MAY NOT be divided. Both are
+# facts about the language rather than about this layout -- which is why both belong to whoever writes
+# the sentence -- and both are honoured by the wrapper rather than by the renderer: it splits on the
+# ASCII space alone, so a non-breaking one is simply not a place it can break.
+#
+# Both are invisible, in an editor and in a diff alike, so a translator can neither see one nor easily
+# type one. That is what the Weblate explanation on these units is for, and why it is worth saying here
+# that a translation which loses them is not wrong -- it has only lost a refinement the source made.
 #
 # The question at the top of the flow: was the infant admitted within the eligibility window?
 decision_admitted: "Admitted to your department within 120 days after birth?"
 # The counter-case, listing what falls outside it. "i.e.," with the comma, which is what both other uses
 # in this catalogue do and what the string this replaces had; dropping it was an accident of rewording.
-decision_not_admitted: "i.e., stillbirths, death in the delivery room, day of life > 120"
-decision_gestational_age: "Gestational age < 32 weeks?"
-decision_birthweight: "Birthweight < 1500g?"
+decision_not_admitted: "i.e., stillbirths, death in the delivery room, day of life > 120"
+decision_gestational_age: "Gestational age < 32 weeks?"
+decision_birthweight: "Birthweight < 1500 g?"
 # The two outcomes. Not "included"/"excluded": eligibility is a property of the patient, and the protocol
 # uses these two words throughout.
 decision_eligible: "Eligible"
 decision_ineligible: "Ineligible"
+
+# What a reader who cannot see the figure is told it holds. The protocol's own image macro carries alt
+# text, and an INLINED figure keeps none of it -- asciidoctor drops the alt when it inlines the SVG, in
+# the PDF and in the HTML alike -- so without these the flow chart is an unlabelled graphic. The sheets
+# carry the same pair for the same reason.
+decision_title: "Eligibility decision flow"
+decision_description: >-
+  Three questions decide whether an infant is eligible for the NeoIPC core module. Admitted to your
+  department within 120 days after birth, gestational age under 32 weeks, birthweight under 1500 grams —
+  an infant admitted in time and meeting either threshold is eligible, and any other answer is not.
 
 # ── The protocol's title page and its preview watermark ────────────────────────────────────────────
 #
@@ -69,10 +88,23 @@ decision_ineligible: "Ineligible"
 # changes the word order. The bare mark "NeoIPC" is a name and never translated.
 neoipc_project: "NeoIPC Project"
 
+# What a reader who cannot see the title page is told the panel at its foot holds. The page is placed as
+# a background image, so the document's own title is set over it by asciidoctor and is announced
+# separately; this describes only what the artwork itself carries.
+title_page_description: >-
+  The NeoIPC project, at https://neoipc.org, with the European Union flag and the Horizon 2020 funding
+  statement.
+
 # Stamped across a protocol that is not yet the published version. It says the DOCUMENT is provisional,
 # not the surveillance -- a reader who mistakes one for the other has been told something false about
 # their own data, which is why it is a full phrase rather than the word "Preview" alone.
 preview_version: "Preview Version"
+
+# What a reader who cannot see the watermark is told it says. It is the only thing on that figure, so
+# the description says what the STAMP means rather than describing a diagonal word, which is a fact
+# about the drawing and not about the document.
+preview_description: >-
+  This document is a preview version and is not the published protocol.
 
 # The heading above every sheet. The line below it is the stage's own name, which comes from the metadata.
 sheet_heading: "NeoIPC – Core Module (VLBW/VPT Infants)"
@@ -102,9 +134,53 @@ chart_month_year: "Month/Year"
 # which is why it is here rather than in the metadata.
 chart_number: "Chart no"
 
-# Heads the last column, which totals the row. One letter on the published form because the column is a
-# day wide; a language whose word for "total" begins differently should say so here.
-chart_total: "T"
+# Heads the last column, which totals the row. The column is one day wide, so it holds a symbol rather
+# than a word -- and a symbol rather than an initial, because an initial is ambiguous in every language:
+# a lone "T" or "G" says nothing about what the column holds, and each language would have to invent its
+# own ambiguity. A summation sign is read the same everywhere and needs no translation to be understood.
+#
+# It is U+2211 N-ARY SUMMATION -- the operator -- and not the Greek capital sigma it resembles. The two
+# look alike and are different things: sigma is a LETTER, so a screen reader announces it as one,
+# extraction yields one, and a Greek reader meets a character of their own alphabet doing an operator's
+# job. Noto Sans Math is in the font stack so that the right character can be drawn.
+#
+# Still translatable: a language with an established convention of its own can override it. Leaving it as
+# it stands is the expected answer, and identical to the source is a legitimate translation here.
+chart_total: "∑"
+
+# What a reader who cannot see the page is told it holds. It reaches them twice -- as the SVG's <desc>,
+# which a screen reader announces, and as the PDF's Subject -- so it is user-facing text and belongs here
+# rather than being assembled in the generator, where it would be English wrapped around translated
+# section names.
+#
+# {title} is the form's own name and {sections} the list of its sections, both already translated in the
+# metadata catalogue; the sentence around them is this file's.
+#
+# The dash before the list is a WORKAROUND FOR A DEFECT in po4a, not an editorial choice, and it is a
+# stopgap that goes when this file stops being extracted by po4a's YAML module.
+#
+# po4a rejects any line where a colon and a space are followed immediately by an opening brace or
+# bracket. The guard is aimed at inline flow collections, which YAML::Tiny genuinely cannot parse -- but
+# it is a raw-line regex that never inspects the parsed value, so it also rejects ordinary prose that puts
+# a placeholder after a colon, and comment lines, both of which YAML::Tiny handles perfectly. Nothing
+# structural escapes it: not quoting, not a block scalar, not a comment, because the check runs over every
+# line of the document. Hence a dash here, and hence this paragraph describing the pattern instead of
+# showing it. Until then: keep a colon away from any placeholder that follows it, anywhere in this file.
+sheet_description: >-
+  {title} data collection sheet. Sections — {sections}.
+
+# The same for the progress chart, whose shape is a grid rather than a run of sections. Deliberately says
+# nothing about HOW MANY rows or days: a count in a sentence makes the sentence count-dependent, and the
+# number of rows is not something a reader of the description needs.
+chart_description: >-
+  {title}. One row per measure, one column per day of the month, and a column for the row's total.
+  Rows — {rows}.
+
+# What goes between two items of a generated list -- the section names and row names above. Unlike the
+# resistance label, which is a pattern precisely because a fixed separator presumes a Latin list
+# convention, a list of n names cannot be a pattern: n varies with the form. So the separator itself is
+# translatable, which is the nearest thing to giving the translator the construction.
+list_separator: ", "
 
 # The band over the enrolment attributes. They are attributes of the patient rather than of any one
 # surveillance event, so there is no program stage section carrying a name for them.
@@ -170,6 +246,15 @@ unit_days: "days"
 # Deliberately NOT the NeoIPC-ID: these sheets stay in the hospital and carry local identifiers, which is
 # exactly why the protocol says the patient ID and name must never be submitted.
 section_patient: "Patient"
+
+# The identifier the HOSPITAL already uses for this patient -- typically the unique, usually numeric
+# number it assigns on first admission. NeoIPC only advises: the value never leaves the hospital, so what
+# goes on the line is the hospital's own business as long as it identifies the patient unambiguously.
+#
+# It must not read the same as `patient_name`. Both name the patient, and a translation that renders them
+# alike leaves two identical lines and no way to tell which takes which -- which is why the generator
+# refuses a form whose two identifying labels are equal, and why this needs an explanation in Weblate
+# rather than only here: po4a discards these comments, so a translator never sees them.
 patient_identifier: "Patient ID"
 patient_name: "Patient name"
 

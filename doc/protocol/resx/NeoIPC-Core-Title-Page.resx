@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<root>
-    <data name="funding_statement" xml:space="preserve">
-        <value>This project has received funding from the European Union’s Horizon 2020 research and innovation programme under grant agreement No 965328.</value>
-    </data>
-    <data name="neoipc_project" xml:space="preserve">
-        <value>NeoIPC Project</value>
-    </data>
-</root>

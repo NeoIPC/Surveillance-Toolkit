@@ -106,21 +106,27 @@ Contributions are welcome. Much of this repository is incomplete or thin on docu
 the tools and the partner network are being built at the same time; issues and pull requests that
 sharpen either are useful.
 
-Two things are worth knowing before you start. Case definitions are normative — a pull request that
-changes one is a scientific change, not an editorial one, so raise an issue first. And the reports'
-translated text lives in gettext catalogues, not in the source files: change the English string and
-regenerate, never hand-edit a generated localized file.
+**[`CONTRIBUTING.md`](CONTRIBUTING.md) is the way in.** It says which changes go through a pull request
+and which go through Weblate, and why a pull request touching a translation catalogue is closed before a
+human sees it. If you are translating, read **[`docs/translating.md`](docs/translating.md)** first: what
+each catalogue is and who reads it, the markup that must survive your translation unchanged, what each
+catalogue is published under, and how review works here.
 
-**Translations.** The protocol, the report text, the infectious-agent names, the DHIS2 metadata and the
-controlled vocabulary are translated on [Weblate](https://hosted.weblate.org/projects/neoipc/), who support this project's
-translation effort with their software, expertise and free hosting. Contributions in any language are
-welcome, and no git knowledge is needed — translating in the web interface is enough. Feedback on a
-translation belongs in Weblate's per-string comments, where the person who wrote it will see it,
-rather than on a pull request.
+Two things are worth knowing whichever route you take. Case definitions are normative — a pull request
+that changes one is a scientific change, not an editorial one, so raise an issue first. And translated
+text lives in gettext catalogues, not in the source files: change the English string and regenerate, never
+hand-edit a generated localized file.
+
+**Translations** are hosted on [Weblate](https://hosted.weblate.org/projects/neoipc/), who support this
+project's translation effort with their software, expertise and free hosting. Contributions in any
+language are welcome and no git knowledge is needed — the web interface is enough.
 
 ## Licensing
 
 Except where noted below, this repository is licensed under the [MIT License](LICENSE).
+
+Two kinds of exception follow: data directories whose upstream terms are stricter than MIT, and the logos
+and marks, which are nobody's to license here at all.
 
 Two data directories compile content from upstream sources whose terms are stricter than MIT. The effective license of each is dictated by what its sources permit — not a restriction NeoIPC chose to impose — and each carries its own `LICENSE.md` with the reasoning and full attribution:
 
@@ -130,6 +136,36 @@ Two data directories compile content from upstream sources whose terms are stric
 | [`metadata/common/antibiotics/`](metadata/common/antibiotics/LICENSE.md) | CC BY-NC-SA 3.0 IGO | WHO AWaRe classification / ATC/DDD index |
 
 The two directories land on different Creative Commons terms because their upstream licences differ. The infectious-agent list is **no-derivatives** — its MycoBank source is CC BY-NC-ND, incorporated with permission. The antibiotic list is a **derivative** of the WHO AWaRe classification (CC BY-NC-SA 3.0 IGO); ShareAlike requires a derivative to keep the same licence, so it is CC BY-NC-SA 3.0 IGO (the ATC codes, substance names and group descriptions it also carries are reproduced unchanged from the WHOCC ATC/DDD index, not adapted). We apply the licence the upstream terms require, no stricter.
+
+### Logos and marks
+
+**The NeoIPC logo is owned by Fondazione Penta ETS and is not covered by the MIT licence.** It is
+included here because this repository's own documents and reports display it; that is not a grant to
+anyone else. Confirm any reuse beyond this repository with the NeoIPC/Penta team before publishing.
+
+| Path | Rights holder |
+|------|---------------|
+| [`common/img/NeoIPC-Logo.svg`](common/img/NeoIPC-Logo.svg), [`common/img/NeoIPC-Logo-Horizontal.svg`](common/img/NeoIPC-Logo-Horizontal.svg) | Fondazione Penta ETS |
+| [`common/logos/LOGO_NEOIPC.png`, `LOGO_NEOIPC_2.png`](common/logos/) | Fondazione Penta ETS |
+| [`doc/protocol/img/`](doc/protocol/img/) `LOGO_NEOIPC.png`, `LOGO_NEOIPC_2.png` | Fondazione Penta ETS |
+| [`reports/logos/`](reports/logos/) `LOGO_NEOIPC.png`, `LOGO_NEOIPC_2.png` | Fondazione Penta ETS |
+| [`reports/logos/`](reports/logos/) `eu-flag.png`, `eu-flag-hr.jpg` | European Union — the emblem is governed by the [EU's own conditions of use](https://commission.europa.eu/about/visual-identity_en), not by this licence |
+| [`common/logos/`](common/logos/) `by.xlarge.png`, `cc.xlarge.png` | Creative Commons — its trademarks, used to mark licence terms, and not licensed by this repository |
+
+A mark is not content. Every entry here is present so that a NeoIPC document can identify itself or
+credit a funder, and none of them is offered for reuse — which is why they are listed as rights holders
+rather than as licences.
+
+*Fondazione Penta ETS* is the organisation's current legal name and the form to use. **Not** *Fondazione
+Penta ONLUS*, which is the pre-2023 designation and still appears in older material.
+
+**The notice travels with each file, not only with this table** — and each names *its own* rights holder,
+not a blanket one. The SVGs carry it as a comment and a `<metadata>` element; the PNGs as a `Copyright`
+text chunk; the one JPEG as a comment segment. All are readable with any image tool.
+That matters because a logo leaves this repository constantly — pasted into a slide, attached to an
+e-mail, lifted from a rendered PDF — and at that moment the README is not travelling with it. If a logo
+file is ever replaced, **re-apply the notice**: the chunk is spliced in after `IHDR` without re-encoding
+the image, so it can be added to a new file without touching a pixel of it.
 
 The gettext translation catalogues under [`po/`](po/) declare their licence in their own headers, and all of them declare CC BY 4.0, matching their templates. Two once did not — the translated `reports` catalogues carried MIT and the `infectious_agents` ones CC BY-NC-ND 4.0 — and the templates were the side that had it right: a catalogue of extracted strings is not automatically bound by the licence of the directory it was extracted from, and a no-derivatives term cannot govern a translation, which *is* a derivative work. Because the translated files are written by the translation platform rather than by this repository, that correction was applied there rather than here, and the same route applies should they ever diverge again.
 

@@ -173,7 +173,7 @@ gt_tbl <- gt_tbl |>
 # Sparse-data footnote for N < sparse_threshold
 if (any(!is.na(tbl_data$pooled) & tbl_data$n < sparse_threshold, na.rm = TRUE)) {
   fn_text <- if (include_pooled_ci) sR$sparse_data_footnote else sR$sparse_data_footnote_no_ci
-  fn_text <- glue::glue(fn_text, threshold = sparse_threshold)
+  fn_text <- interpolate_translation(fn_text, threshold = sparse_threshold)
   gt_tbl <- gt_tbl |>
     gt::tab_footnote(
       footnote = fn_text,

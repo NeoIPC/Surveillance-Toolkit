@@ -160,13 +160,17 @@ Three of the 223 tokens are not placeholders and will produce permanent noise �
 above 100% are expected", a msgid that is literally `%`, and a `%x` inside an inline R span. Suppress those
 three per string rather than leaving them to teach translators that the check cries wolf.
 
-### `xml-text` — three documentation strings, per-string only
+### `xml-text` — no longer applicable, and worth knowing why
 
-Eight `documentation.pot` entries come from the decision-flow `.resx`, and **three** of them carry escaped
-entities in the msgid — the two `&lt;` thresholds and the one `&gt;`. The other five are bare words
-(`Yes`, `No`, `Eligible`, `Ineligible`) and one entity-free question, which have nothing for the check to
-protect. `xml-invalid` is automatic but only engages on strings it recognises as XML-like; forcing it on
-those three needs per-string `xml-text`.
+It was adopted for three decision-flow strings whose msgids carried escaped entities — the two `&lt;`
+thresholds and the one `&gt;` — extracted from a `.NET` resource file that has since been retired. The
+same three now come from `common/figure-strings.yaml`, where `<` and `>` are ordinary characters, so
+there is nothing left for the check to protect and nothing to flag per string.
+
+The lesson generalises past this one check: **an escaped msgid is a property of the format a string was
+extracted FROM, not of the string.** Moving a source between extractors changes what a translator sees
+and therefore which checks apply, which is the sort of thing that is invisible until a check either fires
+on everything or silently stops firing at all.
 
 *(This said six until the units were counted at enablement. Measure from the current template rather than
 quoting the number, as with the anchor counts further down.)*
@@ -294,10 +298,45 @@ are the real reason and the only one that has to change.)*
 discard:<flag-name>
 ```
 
-What makes the component-level recommendations reversible per string: `discard:asciidoc-text` on the six
-`.resx`-sourced documentation units, `discard:md-text` on any YAML-sourced reports unit that misbehaves,
+What makes the component-level recommendations reversible per string: `discard:asciidoc-text` on a
+documentation unit that is a bare word rather than markup, `discard:md-text` on any YAML-sourced reports
+unit that misbehaves,
 `discard:placeholders` where needed. Like every per-string flag it is a source-string extra flag, so it is
 invisible in git — the trade-off the configuration reference records.
+
+### `max-size` — the metadata labels a generated form has to fit, once the generator emits the flags
+
+```
+max-size:<width>[:<lines>], font-family:<name>, font-size:<points>
+```
+
+**Adopted in principle, not yet wired**, and it replaces `max-length` rather than joining it. The two are
+not variants of one idea: `max-length:100` counts *characters*, which is the same proxy the XSLT wrapper
+used and the reason it failed — `IIIII` and `WWWWW` are the same length to a counter and nothing like the
+same width on paper. `max-size` renders the translation and measures **pixels**, wrapping it across the
+number of lines allowed. Verified against the upstream documentation, whose own example is
+`max-size:500:2, font-family:ubuntu, font-size:22`.
+
+What makes it worth doing here rather than merely correct: the repository now ships the very font files
+the build embeds, in `common/fonts/`. Upload those to the Weblate project and one file governs all three
+places a width is decided — the check a translator sees while typing, the measurement the sheet generator
+lays out with, and the face the PDF embeds. Today only the last two agree, and the translator finds out
+by having their work rejected by a build they never see.
+
+Two things to settle before enabling it, neither of which the checks documentation answers:
+
+- **How a font becomes available.** `font-family` names something the project already holds; the check
+  page does not say how it gets there, so the font-management side has to be read before this is
+  configured, not after.
+- **The flags are per string, not per component.** A label's real budget is the width of *its* cell, and
+  the cells differ per field, so a single component-level `max-size` would be wrong almost everywhere. It
+  therefore has to be emitted per entry, by whatever writes the metadata catalogue, from the same layout
+  the generator uses. That makes this a downstream consequence of the sheet generator rather than a
+  configuration change that can be made on its own.
+
+The generator's own measurement stays regardless. Weblate cannot know a cell's width, so the check is
+feed-forward for the translator and the build gate remains the backstop — the one that actually refuses
+to publish a sheet whose text does not fit.
 
 ## Defects this survey found
 

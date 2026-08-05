@@ -11,7 +11,8 @@
     after editing one list does not regenerate everything:
 
     - the antibiotics list and the infectious-agents list, both localized from their gettext catalogues;
-    - the title-page background SVG, transformed from the localized resource file.
+    - the collection sheets, derived from the canonical metadata;
+    - the drawn figures, whose hand-maintained skeletons are localized by measurement.
 
     Localized output paths carry a culture suffix, so building several cultures does not overwrite one
     another.
@@ -53,36 +54,104 @@ $infectiousAgentsDir = Join-Path -Resolve -Path $metadataFolder -ChildPath 'comm
 $docDir = Join-Path -Resolve -Path $workspaceFolder -ChildPath 'doc'
 $protocolDir = Join-Path -Resolve -Path $docDir -ChildPath 'protocol'
 $imgDir = Join-Path -Resolve -Path $protocolDir -ChildPath 'img'
-$commonImgDir = Join-Path -Resolve -Path $workspaceFolder -ChildPath 'common' -AdditionalChildPath 'img'
-$resDir = Join-Path -Resolve -Path $protocolDir -ChildPath 'resx'
-$transDir = Join-Path -Resolve -Path $protocolDir -ChildPath 'xslt'
+# The hand-maintained skeletons for the figures that are drawn rather than derived. Source, unlike
+# everything the build writes into img/.
+$figuresDir = Join-Path -Resolve -Path $protocolDir -ChildPath 'figures'
+$commonDir = Join-Path -Resolve -Path $workspaceFolder -ChildPath 'common'
+# The collection sheets are derived from the canonical metadata by a generator rather than transformed
+# from a resource file, so this build needs the metadata directory it reads and an interpreter to run it.
+# Resolved once, here, because a missing interpreter should stop the build before any culture is rendered
+# rather than part-way through the first one.
+$sheetMetadataDir = Join-Path -Resolve -Path $metadataFolder -ChildPath 'common'
+$sheetGenerator = Join-Path -Resolve -Path $PSScriptRoot -ChildPath 'build-collection-sheets.py'
+$python = Find-Python
 
 $infectiousAgentsFileName = 'NeoIPC-Infectious-Agents.adoc'
 $antibioticsFileName = 'NeoIPC-Antibiotics.adoc'
 $protocolFileName = 'NeoIPC-Core-Protocol.adoc'
 $docBookFileName = [System.IO.Path]::ChangeExtension($protocolFileName, 'xml')
 
-if ($null -eq $TargetCultures) {
-    $TargetCultures = Get-Item "$protocolDir/NeoIPC-Core-Protocol.*adoc" |
-    ForEach-Object { [CultureInfo]($_.Name -replace 'NeoIPC-Core-Protocol\.?([^.]*)\.adoc','$1') }
+$discoveredCultures = $null -eq $TargetCultures
+if ($discoveredCultures) {
+    # Discover cultures from the per-language subdirectories po4a writes, plus the invariant source at
+    # the directory root. A directory counts only if it holds the protocol itself, which is what keeps
+    # img/, figures/ and definitions/ out and means no name has to be excluded by hand.
+    #
+    # Discovery is gated below rather than trusted, because a build that finds one culture exits exactly
+    # as one that finds ten: nothing about a reduced set is visible in the exit status, the output tree or
+    # the log unless the build says so itself.
+    $TargetCultures = @([CultureInfo]::InvariantCulture) + @(
+        Get-ChildItem -Path $protocolDir -Directory |
+        Where-Object { Test-Path -LiteralPath (Join-Path -Path $_.FullName -ChildPath $protocolFileName) -PathType Leaf } |
+        ForEach-Object { [CultureInfo]$_.Name }
+    )
 }
 else {
     foreach ($c in $TargetCultures) {
-        $p = Join-Path -Path $protocolDir -ChildPath "NeoIPC-Core-Protocol.$c.adoc"
+        $p = Get-LocalisedPath $protocolDir $protocolFileName $c -Subdirectory
         if (-not (Test-Path -LiteralPath $p -PathType Leaf)) {
-            Write-Error "File '$p' does not exist."
+            Write-Error ("File '$p' does not exist. Run the localization pipeline first — po4a writes " +
+                "the translated protocol into doc/protocol/<culture>/, and only writes one at all for a " +
+                "culture whose catalogue is translated above po4a's --keep threshold.")
             exit 1
         }
     }
 }
 
+if ($discoveredCultures) {
+    # Assert the discovered set against the localization config, the one independent witness to where a
+    # translated protocol lives. Discovery reads the filesystem; so does any check derived from it, which
+    # is why comparing discovery to itself would establish nothing. The config is written by the side that
+    # produces those files, so the two agreeing is a real statement -- and their disagreeing is exactly
+    # the defect that hid here for seven months, when po4a moved its output and the builder did not follow.
+    #
+    # Only for auto-discovery: naming -TargetCultures is an explicit request for a subset, and the loop
+    # above already fails on a culture whose source is absent.
+    $declaredSources = Get-Po4aOutputPath (Join-Path $poDir 'documentation.po4a.cfg') 'doc/protocol/NeoIPC-Core-Protocol.adoc'
+    $writtenSources = @($declaredSources | Where-Object { Test-Path -LiteralPath (Join-Path $workspaceFolder $_.Path) -PathType Leaf })
+    $renderedNames = @($TargetCultures | ForEach-Object { $_.Name } | Where-Object { $_ })
+    $overlooked = @($writtenSources | Where-Object { $_.Language -notin $renderedNames })
+    if ($overlooked) {
+        Write-Error ("The localization config declares a translated protocol at $($overlooked.Path -join ', ') " +
+            "and the file is there, but culture discovery did not find it. The build and " +
+            "po/documentation.po4a.cfg disagree about where a translated source lives.")
+        exit 1
+    }
+    # Report the languages po4a declared and did not write, so a reduced culture set is never silent. They
+    # are below the config's --keep threshold: po4a withholds a translation too sparse to publish, which is
+    # working as intended and is not an error.
+    $withheld = @($declaredSources | Where-Object { $_.Language -notin @($writtenSources.Language) })
+    if ($withheld) {
+        Write-Host ("Below the localization threshold, no source written, not built: {0}" -f (($withheld.Language) -join ', '))
+    }
+}
+
+# Name the set rather than leaving it to be inferred from what appears in artifacts/. A build that
+# renders one culture and a build that renders ten differ in nothing else an operator sees, which is how
+# the seven-month gap above went unnoticed.
+#
+# Write-Host rather than Write-Information deliberately, against PSAvoidUsingWriteHost: this file's five
+# existing Write-Information calls emit NOTHING by default, because $InformationPreference is
+# SilentlyContinue and neither this script nor its module sets it. A line that announces what the build
+# is about to do, and that nobody sees unless they already knew to ask for it, does not do the job it
+# exists for. Which stream progress belongs on across this repository is a settled question nowhere and
+# is tracked separately; until it is settled, being visible wins.
+Write-Host ("Building the protocol for {0} culture(s): {1}" -f $TargetCultures.Count,
+    (($TargetCultures | ForEach-Object { if ($_.Name) { $_.Name } else { 'invariant' } }) -join ', '))
+
 if ($Clean) {
     $artifactsFolder | Where-Object { Test-Path -LiteralPath $_ -PathType Container } | Remove-Item -Recurse -Force -Verbose:($VerbosePreference -eq 'Continue')
     $TargetCultures | ForEach-Object {
-        Get-LocalisedPath $protocolDir $antibioticsFileName $_ | Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } | Remove-Item -Verbose:($VerbosePreference -eq 'Continue')
-        Get-LocalisedPath $protocolDir $infectiousAgentsFileName $_ | Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } | Remove-Item -Verbose:($VerbosePreference -eq 'Continue')
+        # -Subdirectory on both lists, matching where the build now writes them.
+        Get-LocalisedPath $protocolDir $antibioticsFileName $_ -Subdirectory | Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } | Remove-Item -Verbose:($VerbosePreference -eq 'Continue')
+        Get-LocalisedPath $protocolDir $infectiousAgentsFileName $_ -Subdirectory | Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } | Remove-Item -Verbose:($VerbosePreference -eq 'Continue')
         Get-LocalisedPath $protocolDir $docBookFileName $_ | Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } | Remove-Item -Verbose:($VerbosePreference -eq 'Continue')
-        # ToDo: Remove generated SVG files
+        # Everything in a culture's image directory is generated or copied there, so the whole directory
+        # goes -- except the two logo rasters this repository authors, which live in the invariant
+        # culture's directory because that is also doc/protocol/img.
+        Get-ChildItem -Path (Get-LocalisedPath $protocolDir 'img' $_ -Subdirectory) -File -ErrorAction SilentlyContinue |
+            Where-Object { $_.Name -notlike 'LOGO_NEOIPC*.png' } |
+            Remove-Item -Verbose:($VerbosePreference -eq 'Continue')
     }
     return
 }
@@ -90,11 +159,6 @@ if ($Clean) {
 if (-not $artifactsFolder) {
     Write-Debug -Message "Creating build artifacts directory"
     $artifactsFolder = (New-Item -Path $workspaceFolder -Name 'artifacts' -ItemType Directory).FullName
-}
-$artifactsImgFolder = Join-Path -Resolve -Path $artifactsFolder -ChildPath 'img' -ErrorAction SilentlyContinue
-if (-not $artifactsImgFolder) {
-    Write-Debug -Message "Creating build artifacts image directory"
-    $artifactsImgFolder = (New-Item -Path $artifactsFolder -Name 'img' -ItemType Directory).FullName
 }
 
 # Document version metadata, derived from doc/protocol/VERSION (the release source of truth) so it stays in
@@ -111,38 +175,47 @@ $revNumber = ((($version -split '-', 2)[0] -split '\.')[0..1] -join '.')
 $revNumberArg = "revnumber=$revNumber"
 if ($preRelease) { $revRemark = "revremark=$preRelease" } else { $revRemark = 'revremark!' }
 
-[AppContext]::SetSwitch("Switch.System.Xml.AllowDefaultResolver", $true);
-$resolver = New-Object System.Xml.XmlUrlResolver
 
-$titlePage = New-Object System.Xml.Xsl.XslCompiledTransform
-$titlePage.Load((Get-ChildItem $transDir/NeoIPC-Core-Title-Page.xslt).FullName, [System.Xml.Xsl.XsltSettings]::TrustedXslt, $resolver)
+# The images the protocol reaches that this build does not generate. Every one of them is an INVARIANT
+# MARK: it may not vary by language. The NeoIPC logo is a wordmark -- the mark is a name, which is why
+# even its text form is never translated -- and a licence badge's recognizability would be the whole of
+# its function. A localized variant of either is a defect rather than an improvement, so the build refuses
+# one instead of quietly preferring it.
+#
+# Everything else the protocol shows is generated per culture, including the AWaRe badges: each draws a
+# single letter, and WHO governs its own translations of the categories, so a Spanish badge reads A/P/R.
+$invariantMarks = @{ $imgDir = @('LOGO_NEOIPC.png') }
 
-$previewWatermark = New-Object System.Xml.Xsl.XslCompiledTransform
-$previewWatermark.Load((Get-ChildItem $transDir/Preview-Watermark.xslt).FullName, [System.Xml.Xsl.XsltSettings]::TrustedXslt, $resolver)
+function Copy-InvariantMark {
+    # Put a mark that must read the same in every language into one culture's image directory, refusing a
+    # per-culture variant of it rather than using one. The refusal is the point: preferring the variant is
+    # what a build would otherwise do, silently, publishing a mark nobody decided to vary.
+    param(
+        [Parameter(Mandatory)][string]$SourceDirectory,
+        [Parameter(Mandatory)][string]$FileName,
+        [Parameter(Mandatory)][string]$DestinationDirectory,
+        [Parameter(Mandatory)][CultureInfo]$TargetCulture
+    )
 
-$decisionFlow = New-Object System.Xml.Xsl.XslCompiledTransform
-$decisionFlow.Load((Get-ChildItem $transDir/NeoIPC-Core-Decision-Flow.xslt).FullName, [System.Xml.Xsl.XsltSettings]::TrustedXslt, $resolver)
-
-$masterDataSheet = New-Object System.Xml.Xsl.XslCompiledTransform
-$masterDataSheet.Load((Get-ChildItem $transDir/NeoIPC-Core-Master-Data-Collection-Sheet.xslt).FullName, [System.Xml.Xsl.XsltSettings]::TrustedXslt, $resolver)
-
-$masterDataSheetImage = New-Object System.Xml.Xsl.XslCompiledTransform
-$masterDataSheetImage.Load((Get-ChildItem $transDir/NeoIPC-Core-Master-Data-Collection-Sheet-Image.xslt).FullName, [System.Xml.Xsl.XsltSettings]::TrustedXslt, $resolver)
-
-$AWaReASrc = (Join-Path -Resolve -Path $commonImgDir -ChildPath 'AWaRe-A.svg')
-$AWaReADest = (Join-Path -Path $imgDir -ChildPath 'AWaRe-A.svg')
-Build-Target $AWaReADest $AWaReASrc {
-    Copy-Item -LiteralPath $AWaReASrc -Destination $AWaReADest
-}
-$AWaReWSrc = (Join-Path -Resolve -Path $commonImgDir -ChildPath 'AWaRe-W.svg')
-$AWaReWDest = (Join-Path -Path $imgDir -ChildPath 'AWaRe-W.svg')
-Build-Target $AWaReWDest $AWaReWSrc {
-    Copy-Item -LiteralPath $AWaReWSrc -Destination $AWaReWDest
-}
-$AWaReRSrc = (Join-Path -Resolve -Path $commonImgDir -ChildPath 'AWaRe-R.svg')
-$AWaReRDest = (Join-Path -Path $imgDir -ChildPath 'AWaRe-R.svg')
-Build-Target $AWaReRDest $AWaReRSrc {
-    Copy-Item -LiteralPath $AWaReRSrc -Destination $AWaReRDest
+    # Most specific first, and empty for a culture with no file of its own -- which is the state every
+    # culture is supposed to be in. For the invariant culture it is the shared file itself.
+    $localised = @(Get-LocalisedPath $SourceDirectory $FileName $TargetCulture -All -Existing)
+    $shared = Join-Path -Path $SourceDirectory -ChildPath $FileName
+    if ($TargetCulture.Name -and $localised) {
+        throw ("'$FileName' is a mark that must read the same in every language, and " +
+            "'$($localised[0])' is a per-culture variant of it. Remove the variant, or move the image " +
+            "out of the invariant set if it really is one a language may change.")
+    }
+    if (-not (Test-Path -LiteralPath $shared -PathType Leaf)) {
+        throw "The protocol needs the image '$FileName', and there is none at '$shared'."
+    }
+    $destination = Join-Path -Path $DestinationDirectory -ChildPath $FileName
+    # The invariant culture's directory IS where these are stored, so there is nothing to copy and
+    # Copy-Item would refuse to copy a file onto itself.
+    if ((Resolve-Path -LiteralPath $shared).Path -eq $destination) { return }
+    Build-Target $destination $shared {
+        Copy-Item -LiteralPath $shared -Destination $destination
+    }
 }
 
 $attributes = @{}
@@ -155,23 +228,71 @@ foreach ($targetCulture in $targetCultures)
     if ($targetCulture.Name)
     {
         $revDate = "revdate=$([datetime]::UtcNow.ToString('d', $targetCulture))"
-        $localeSuffix = ".$($targetCulture.Name)"
         Write-Information "Generating NeoIPC documentation for locale '$($targetCulture.Name)'"
     }
     else
     {
         $revDate = "revdate=$([datetime]::UtcNow.ToString('yyyy-MM-dd'))"
-        $localeSuffix = ""
         Write-Information "Generating NeoIPC Core Protocol for the default locale (en-GB)"
     }
 
-    $antibioticsListFile = Get-LocalisedPath $protocolDir $antibioticsFileName $targetCulture
+    # This document reaches two kinds of file and they live in different places, which is why the renderer
+    # needs both switches below rather than one root.
+    #
+    # SHARED, at doc/protocol: the header and the PDF theme. Reached by plain relative paths, so
+    # --base-dir has to keep pointing here even when the source being rendered is one level down.
+    # Asciidoctor's base directory is what {docdir} becomes, and {docdir} is what a relative target
+    # resolves against -- so this single flag preserves every shared reference unchanged.
+    #
+    # LOCALIZED, at doc/protocol/<culture>: the translated protocol, its definitions, the two generated
+    # lists and this culture's images. Reached through {locale-dir}, which is '.' for the invariant
+    # source at the root.
+    #
+    # `lang` reaches asciidoctor here for the first time. It was only ever put in $attributes, which is
+    # read by the dependency lister and by nothing else -- so the two things the document keys on it,
+    # doc/locale/attributes-<lang>.adoc (asciidoctor's own caption translations) and the localized title
+    # page and watermark, were never selected. A localized build silently used English captions and the
+    # English title page, and nobody saw it because no localized build has run since 2025-12-29.
+    $localeDir = if ($targetCulture.Name) { $targetCulture.Name } else { '.' }
+    $attributes['locale-dir'] = $localeDir
+    $cultureArgs = @('-B', $protocolDir, '-a', "locale-dir=$localeDir")
+    if ($targetCulture.Name) { $cultureArgs += @('-a', "lang=$($targetCulture.TwoLetterISOLanguageName)") }
+
+    # One image directory per culture, holding every image the protocol needs -- this culture's own figure
+    # where there is one, the shared file otherwise. The document's `:imagesdir:` is {locale-dir}/img, so
+    # each target is a plain file name that resolves to the right file in every language, and neither the
+    # document nor a translator has to encode a culture in one.
+    $cultureImgDir = Get-LocalisedPath $protocolDir 'img' $targetCulture -Subdirectory
+    if (-not (Test-Path -LiteralPath $cultureImgDir -PathType Container)) {
+        Write-Debug -Message "Creating the image directory for '$localeDir'"
+        $null = New-Item -Path $cultureImgDir -ItemType Directory
+    }
+    foreach ($entry in $invariantMarks.GetEnumerator()) {
+        $entry.Value | ForEach-Object {
+            Copy-InvariantMark -SourceDirectory $entry.Key -FileName $_ `
+                -DestinationDirectory $cultureImgDir -TargetCulture $targetCulture
+        }
+    }
+
+    # Beside the translated protocol, not flat with a culture suffix: the protocol reaches both generated
+    # lists through {locale-dir}, the same prefix its localized definitions use, so a culture's fragments
+    # are all in one place and the include line is identical for every culture. Flat would resolve the
+    # German protocol's list include to the English list -- silently, since a list in the wrong language
+    # renders perfectly well.
+    $antibioticsListFile = Get-LocalisedPath $protocolDir $antibioticsFileName $targetCulture -Subdirectory
     # New-AntibioticsList reads the base antibiotic + UI-label CSVs plus the per-locale gettext catalogue
     # po/antibiotics.<lang>.po (the translation source that replaced the retired .<lang>.csv sidecars), so the
     # incremental-build dependency set must track all three (the two base CSVs always exist; the .po is per-locale).
+    #
+    # The AWaRe groups file is one of them because the badge cell is derived from it -- both which file
+    # the row points at and the name a screen reader reads out. The module is another: this list is
+    # assembled by code rather than copied, so a change to the assembler changes the output exactly as a
+    # change to the data does, and a target that tracks only the data goes stale silently.
     $antibioticsListInputs = @(
         (Join-Path $antibioticsDir 'NeoIPC-Antibiotics.csv')
         (Join-Path $antibioticsDir 'ListElements.csv')
+        (Join-Path $antibioticsDir 'NeoIPC-Antibiotic-AWaRe-Groups.csv')
+        (Join-Path -Path $PSScriptRoot -ChildPath 'modules' -AdditionalChildPath 'NeoIPC-BuildTools', 'NeoIPC-BuildTools.psm1')
     ) + @(Get-LocalisedPath $poDir 'antibiotics.po' $targetCulture -All -Existing)
     Build-Target $antibioticsListFile $antibioticsListInputs {
         Write-Verbose "Generating list of antibiotics"
@@ -181,40 +302,135 @@ foreach ($targetCulture in $targetCultures)
         $lines = New-AntibioticsList -TargetCulture $targetCulture -MetadataPath $metadataFolder -AsciiDoc
         [System.IO.File]::WriteAllText($antibioticsListFile, (($lines -join "`n") + "`n"), [System.Text.UTF8Encoding]::new($false))
     }
-    $infectiousAgentsListFile = Get-LocalisedPath $protocolDir $infectiousAgentsFileName $targetCulture
+    $infectiousAgentsListFile = Get-LocalisedPath $protocolDir $infectiousAgentsFileName $targetCulture -Subdirectory
     Build-Target $infectiousAgentsListFile (Get-LocalisedPath $infectiousAgentsDir 'NeoIPC-Pathogen-Concepts.csv' $targetCulture -All -Existing),(Get-LocalisedPath $infectiousAgentsDir 'NeoIPC-Pathogen-Synonyms.csv' $targetCulture -All -Existing) {
         Write-Verbose "Generating list of infectious agents"
         $lines = New-PathogenList -TargetCulture $targetCulture -MetadataPath $metadataFolder -AsciiDoc
         [System.IO.File]::WriteAllText($infectiousAgentsListFile, (($lines -join "`n") + "`n"), [System.Text.UTF8Encoding]::new($false))
     }
-    Build-Target (Get-LocalisedPath $imgDir 'NeoIPC-Core-Title-Page.svg' $targetCulture) (Get-LocalisedPath $resDir 'NeoIPC-Core-Title-Page.resx' $targetCulture -All -Existing),(Join-Path $transDir 'NeoIPC-Core-Title-Page.xslt') {
-        Write-Verbose "Generating title page background SVG"
-        $titlePage.Transform("$resDir/NeoIPC-Core-Title-Page$localeSuffix.resx", "$imgDir/NeoIPC-Core-Title-Page$localeSuffix.svg")
-    }
-    if ($preRelease) {
-        Build-Target (Get-LocalisedPath $imgDir 'Preview-Watermark.svg' $targetCulture) (Get-LocalisedPath $resDir 'Preview-Watermark.resx' $targetCulture -All -Existing),(Join-Path $transDir 'Preview-Watermark.xslt') {
-            Write-Verbose "Generating preview watermark SVG"
-            $previewWatermark.Transform("$resDir/Preview-Watermark$localeSuffix.resx", "$imgDir/Preview-Watermark$localeSuffix.svg")
+    # The seven collection sheets, derived from the canonical metadata rather than transformed from a
+    # hand-maintained resource file -- and, in the same run, the figures that ARE drawn rather than
+    # derived, whose skeletons live in doc/protocol/figures. Those two are different jobs and one tool,
+    # because localizing either needs the same three things and nothing else in this repository has all
+    # of them: the fonts to measure in, the wrapping, and this culture's figure strings.
+    #
+    # ONE run emits all of them, so the target is one representative sheet and the inputs are everything
+    # the generator reads: the metadata it derives fields from, the presentation decisions, the figure
+    # strings, the skeletons, the generator itself, and this locale's catalogues.
+    #
+    # A missing metadata catalogue stops the build rather than yielding a silently English sheet. The
+    # culture set here is what po4a actually produced, so a culture arriving without one is a gap worth
+    # hearing about rather than papering over.
+    $sheetInputs = @(
+        (Join-Path $sheetMetadataDir 'dataElements.csv')
+        (Join-Path $sheetMetadataDir 'programStageSections.csv')
+        (Join-Path $sheetMetadataDir 'programStageDataElements.csv')
+        (Join-Path $sheetMetadataDir 'optionSets.csv')
+        (Join-Path $sheetMetadataDir 'options.csv')
+        (Join-Path $sheetMetadataDir 'trackedEntityAttributes.csv')
+        (Join-Path $sheetMetadataDir 'programTrackedEntityAttributes.csv')
+        (Join-Path -Path $sheetMetadataDir -ChildPath 'antibiotics' -AdditionalChildPath 'NeoIPC-Antibiotic-AWaRe-Groups.csv')
+        (Join-Path $commonDir 'sheet-layout.yaml')
+        (Join-Path $commonDir 'figure-strings.yaml')
+        (Join-Path $workspaceFolder 'glossary.yaml')
+        $sheetGenerator
+    ) + @(Get-ChildItem -Path $figuresDir -Filter '*.svg' -File | Select-Object -ExpandProperty FullName) +
+        @(Get-LocalisedPath $commonDir 'figure-strings.yaml' $targetCulture -All -Existing) +
+        @(Get-LocalisedPath $poDir 'metadata.po' $targetCulture -All -Existing)
+    Build-Target (Join-Path $cultureImgDir 'NeoIPC-Core-Master-Sheet.svg') $sheetInputs {
+        Write-Verbose "Generating the data collection sheets"
+        $sheetArgs = @('--out', $cultureImgDir, '--format', 'svg')
+        if ($targetCulture.Name) { $sheetArgs += @('--language', $targetCulture.TwoLetterISOLanguageName) }
+        # A form printed from a pre-release protocol says so on its face. The sheets are detached from the
+        # document the moment somebody prints one, so the page watermark cannot speak for them: whoever is
+        # holding it at a cot side has no other way to know the definitions on it are provisional.
+        if ($preRelease) { $sheetArgs += '--preview' }
+        & $python $sheetGenerator @sheetArgs
+        if ($LASTEXITCODE -ne 0) {
+            throw "The data collection sheets could not be generated for '$(
+                if ($targetCulture.Name) { $targetCulture.Name } else { 'the invariant culture' })'."
+        }
+        # The generator draws every skeleton it finds, which is right: it has no business knowing what a
+        # release is. Whether the document REFERENCES the watermark is this build's business, and only a
+        # pre-release does -- `:page-foreground-image:` sits inside `ifdef::revremark[]`. Left behind, it
+        # would ship in a final release's HTML assets as a file saying "Preview Version" about a document
+        # that is not one, which is a worse thing to publish than it looks.
+        if (-not $preRelease) {
+            Remove-Item -Path (Join-Path $cultureImgDir 'Preview-Watermark.svg') -ErrorAction Ignore
         }
     }
-    Build-Target (Get-LocalisedPath $imgDir 'NeoIPC-Core-Decision-Flow.svg' $targetCulture) (Get-LocalisedPath $resDir 'NeoIPC-Core-Decision-Flow.resx' $targetCulture -All -Existing),(Join-Path $transDir 'NeoIPC-Core-Decision-Flow.xslt') {
-        Write-Verbose "Generating decision flow SVG"
-        $decisionFlow.Transform("$resDir/NeoIPC-Core-Decision-Flow$localeSuffix.resx", "$imgDir/NeoIPC-Core-Decision-Flow$localeSuffix.svg")
+    # The forms a partner prints, compiled from the same layout the figures above were drawn from. They are
+    # a deliverable of the protocol product rather than an input to the document, so they are written to
+    # artifacts/ and attached to a protocol release, never to the image directory the document reads.
+    #
+    # The culture set is this loop's, which is the decision rather than a convenience: a language the
+    # protocol is not published in does not get published forms either. The sheets could be built for more
+    # languages than that -- their labels come from the metadata catalogue and do not depend on the
+    # protocol's translation level at all -- and shipping a form labelled with a language it is mostly not
+    # written in is the misdeclaration the protocol's own threshold exists to prevent.
+    $formsDir = Get-LocalisedPath $artifactsFolder 'forms' $targetCulture -Subdirectory
+    Build-Target (Join-Path $formsDir 'NeoIPC-Core-Master-Sheet.pdf') $sheetInputs {
+        Write-Information "Compiling the printed collection forms"
+        if (-not (Test-Path -LiteralPath $formsDir -PathType Container)) {
+            $null = New-Item -Path $formsDir -ItemType Directory -Force
+        }
+        # --figures at a path that does not exist: the drawn figures belong to the document, not to the
+        # forms, and the generator documents this as the way to skip them.
+        $formArgs = @('--out', $formsDir, '--format', 'typst',
+                      '--figures', (Join-Path $formsDir 'no-drawn-figures'))
+        if ($targetCulture.Name) { $formArgs += @('--language', $targetCulture.TwoLetterISOLanguageName) }
+        if ($preRelease) { $formArgs += '--preview' }
+        & $python $sheetGenerator @formArgs
+        if ($LASTEXITCODE -ne 0) {
+            throw "The printed collection forms could not be generated for '$(
+                if ($targetCulture.Name) { $targetCulture.Name } else { 'the invariant culture' })'."
+        }
+        # Named here rather than left to fail as "term not recognized" three lines down. The forms are part
+        # of the protocol product now, so building the protocol means building them: a build that quietly
+        # skipped them would publish a release missing a deliverable, with nothing saying so.
+        if (-not (Get-Command typst -ErrorAction Ignore)) {
+            throw ('typst is not on PATH, so the printed collection forms cannot be compiled. Install the ' +
+                   'version this repository measures against (see docs/data-collection-sheet-generation.md).')
+        }
+        $fontsDir = Join-Path $commonDir 'fonts'
+        foreach ($source in Get-ChildItem -LiteralPath $formsDir -Filter '*.typ' -File) {
+            # --ignore-system-fonts is not optional: --font-path ADDS to whatever the machine has
+            # installed, so without it a face this repository does not ship is answered by some other
+            # file, chosen silently and differently per machine. The standard is checked rather than
+            # asserted -- Typst fails the export instead of emitting a document that misdeclares one.
+            & typst compile --font-path $fontsDir --ignore-system-fonts --pdf-standard 'a-2a,ua-1' `
+                $source.FullName ([System.IO.Path]::ChangeExtension($source.FullName, 'pdf'))
+            if ($LASTEXITCODE -ne 0) { throw "Typst could not compile '$($source.Name)'." }
+        }
+        # What is left behind is Typst source and the badges the generator emits whatever format is asked
+        # of it. Neither is a form, and this directory is published as-is.
+        Get-ChildItem -LiteralPath $formsDir -File |
+            Where-Object { $_.Extension -ne '.pdf' } |
+            Remove-Item -Force
     }
-    Build-Target (Get-LocalisedPath $imgDir 'NeoIPC-Core-Master-Data-Collection-Sheet.svg' $targetCulture) (Get-LocalisedPath $resDir 'NeoIPC-Core-Master-Data-Collection-Sheet.resx' $targetCulture -All -Existing),(Join-Path $transDir 'NeoIPC-Core-Master-Data-Collection-Sheet.xslt') {
-        Write-Verbose "Generating master data collection sheet SVG"
-        $masterDataSheet.Transform("$resDir/NeoIPC-Core-Master-Data-Collection-Sheet$localeSuffix.resx", "$imgDir/NeoIPC-Core-Master-Data-Collection-Sheet$localeSuffix.svg")
-    }
-    Build-Target (Get-LocalisedPath $imgDir 'NeoIPC-Core-Master-Data-Collection-Sheet-Image.svg' $targetCulture) (Get-LocalisedPath $resDir 'NeoIPC-Core-Master-Data-Collection-Sheet.resx' $targetCulture -All -Existing),(Join-Path $transDir 'NeoIPC-Core-Master-Data-Collection-Sheet-Image.xslt') {
-        Write-Verbose "Generating master data collection sheet image SVG"
-        $masterDataSheetImage.Transform("$resDir/NeoIPC-Core-Master-Data-Collection-Sheet$localeSuffix.resx", "$imgDir/NeoIPC-Core-Master-Data-Collection-Sheet-Image$localeSuffix.svg")
-    }
-    $protocolFile = Get-LocalisedPath $protocolDir $protocolFileName $targetCulture -Resolve
+
+    # The protocol source is po4a's output, so it takes the subdirectory convention. Everything else
+    # resolved in this loop is generated by this build and stays flat with a culture suffix.
+    $protocolFile = Get-LocalisedPath $protocolDir $protocolFileName $targetCulture -Resolve -Subdirectory
     if ($All -or $Html) {
+        # HTML keeps its images as files, so they have to travel with it: an inlined figure is part of the
+        # page, but a plain `image:` macro becomes an <img src> that the browser resolves against the
+        # document. Asciidoctor never copies an image, so the artifacts directory needs the same per-culture
+        # layout the source tree has -- which is what {locale-dir}/img means on this side of the build.
+        #
+        # The whole directory goes, rather than the subset a reference count says is needed: a figure
+        # nobody remembers to copy is a broken image in the published HTML and renders perfectly in the
+        # PDF, so the count is exactly the thing that must not be trusted.
+        $htmlImgDir = Get-LocalisedPath $artifactsFolder 'img' $targetCulture -Subdirectory
+        if (-not (Test-Path -LiteralPath $htmlImgDir -PathType Container)) {
+            $null = New-Item -Path $htmlImgDir -ItemType Directory -Force
+        }
+        Copy-Item -Path (Join-Path $cultureImgDir '*') -Destination $htmlImgDir -Force
+
         $att = $attributes.Clone()
         $att['backend-html5'] = $true
         $outputFile = Get-LocalisedPath $artifactsFolder 'index.html' $targetCulture
-        Build-Target $outputFile (@($protocolFile)+@(Export-AsciiDocReferences $protocolFile $att)) {
+        Build-Target $outputFile (@($protocolFile)+@(Export-AsciiDocReferences $protocolFile $att -BaseDirectory $protocolDir)) {
             Write-Information "Generating HTML"
             # -v, not -w. Asciidoctor reports a cross-reference whose target does not exist as
             # "possible invalid reference" at INFO level, guarded by `if logger.info?`, so at the
@@ -224,7 +440,10 @@ foreach ($targetCulture in $targetCultures)
             # in Asciidoctor 2.0.26 (refs/asciidoctor), and every one is a real defect: a dropped
             # include, a reference to a missing attribute, a bad inline-macro substitution, or this.
             # None fires on a document that is correct, and this repository uses no optional includes.
-            asciidoctor -a $revNumberArg -a $revRemark -a $revDate -b html5 -v --failure-level=INFO -D $(Resolve-Path $artifactsFolder -Relative) -o $([System.IO.Path]::GetFileName($outputFile)) $(Resolve-Path $protocolFile -Relative)
+            # -D and the source are absolute because @cultureArgs carries --base-dir: asciidoctor resolves
+            # a relative output directory against the base directory, not the working directory, so the
+            # relative form the four renderer calls used would write into doc/protocol/artifacts.
+            asciidoctor @cultureArgs -a $revNumberArg -a $revRemark -a $revDate -b html5 -v --failure-level=INFO -D $artifactsFolder -o $([System.IO.Path]::GetFileName($outputFile)) $protocolFile
             if (-not $?) { exit 1 }
             Write-Verbose "Linting HTML"
 
@@ -262,9 +481,9 @@ foreach ($targetCulture in $targetCultures)
         $att = $attributes.Clone()
         $att['backend-docbook5'] = $true
         $docbookFile = Get-LocalisedPath $protocolDir $docBookFileName $targetCulture
-        Build-Target $docbookFile (@($protocolFile)+@(Export-AsciiDocReferences $protocolFile $att)) {
+        Build-Target $docbookFile (@($protocolFile)+@(Export-AsciiDocReferences $protocolFile $att -BaseDirectory $protocolDir)) {
             Write-Verbose "Generating DocBook xml"
-            asciidoctor -a $revNumberArg -a $revRemark -a $revDate -b docbook -v --failure-level=INFO -D $(Resolve-Path $protocolDir -Relative) -o $([System.IO.Path]::GetFileName($docbookFile)) $(Resolve-Path $protocolFile -Relative)
+            asciidoctor @cultureArgs -a $revNumberArg -a $revRemark -a $revDate -b docbook -v --failure-level=INFO -D $protocolDir -o $([System.IO.Path]::GetFileName($docbookFile)) $protocolFile
             if (-not $?) { exit 1 }
         }
     }
@@ -275,7 +494,7 @@ foreach ($targetCulture in $targetCultures)
             $att = $attributes.Clone()
             $att['backend-pdf'] = $true
             $outputFile = Get-LocalisedPath $artifactsFolder 'NeoIPC-Core-Protocol.pdf' $targetCulture
-            Build-Target $outputFile (@($protocolFile)+@(Export-AsciiDocReferences $protocolFile $att)) {
+            Build-Target $outputFile (@($protocolFile)+@(Export-AsciiDocReferences $protocolFile $att -BaseDirectory $protocolDir)) {
                 Write-Information "Generating PDF"
                 # No --failure-level here, unlike the two Asciidoctor backends above -- and not at any
                 # value, which is the part worth reading before "fixing" this by setting WARN instead.
@@ -297,9 +516,9 @@ foreach ($targetCulture in $targetCultures)
                 # was found at all, and they are worth reading in the log without failing the build.
                 if ($IsWindows) {
                     Write-Warning "Asciidoctor Mathematical is not supported on Windows. The STEM expressions will not be converted in your pdf output."
-                    asciidoctor-pdf -a compress -a $revNumberArg -a $revRemark -a $revDate -v -D $(Resolve-Path $artifactsFolder -Relative) -o $([System.IO.Path]::GetFileName($outputFile)) $(Resolve-Path $protocolFile -Relative)
+                    asciidoctor-pdf @cultureArgs -a compress -a $revNumberArg -a $revRemark -a $revDate -v -D $artifactsFolder -o $([System.IO.Path]::GetFileName($outputFile)) $protocolFile
                 } else {
-                    asciidoctor-pdf -a compress -a $revNumberArg -a $revRemark -a $revDate -a mathematical-format=svg -r asciidoctor-mathematical -v -D $(Resolve-Path $artifactsFolder -Relative) -o $([System.IO.Path]::GetFileName($outputFile)) $(Resolve-Path $protocolFile -Relative)
+                    asciidoctor-pdf @cultureArgs -a compress -a $revNumberArg -a $revRemark -a $revDate -a mathematical-format=svg -r asciidoctor-mathematical -v -D $artifactsFolder -o $([System.IO.Path]::GetFileName($outputFile)) $protocolFile
                 }
                 if (-not $?) { exit 1 }
             }

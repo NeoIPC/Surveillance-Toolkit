@@ -3,7 +3,10 @@ de/
 es/
 et/
 fr/
-gr/
+# el, not gr: po/documentation.po4a.cfg declares Greek as `el`, its ISO 639-1 language code, and po4a
+# names the output directory after the language. `gr` is Greece's country code and matches nothing po4a
+# writes, so a Greek render left its directory untracked.
+el/
 it/
 ne/
 tr/

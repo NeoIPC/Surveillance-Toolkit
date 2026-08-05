@@ -1,0 +1,164 @@
+<!-- The protocol's eligibility decision flow: a HAND-MAINTAINED skeleton, not build output.
+
+     Unlike the data collection sheets beside it, nothing here is derived from the metadata: the
+     boxes, the arrows and the proportions are a drawn design, so this file is the source and is
+     edited directly. The build does exactly one thing to it: for each <text> below it resolves the
+     {placeholder} against common/figure-strings.yaml in the culture being built, wraps the result
+     by MEASURING it in the face named here, and writes explicit <tspan>s. See
+     docs/data-collection-sheet-generation.md.
+
+     Three rules the build depends on, so keep them when editing:
+
+       * A labelled node is a <g> whose FIRST child is its region: a rect, a circle or an
+         ellipse. Text is fitted to that region, so moving or resizing the shape moves the label
+         with it and there is no second copy of the geometry to keep in step. An oval's region is
+         the largest rectangle inside it.
+       * A <use> in the group is a mark, and it reserves the top of the region; the label takes
+         what is left underneath.
+       * A box cannot grow at render time, so each is sized here for the longest translation and
+         text that will not fit FAILS THE BUILD rather than overrunning. There is room for three
+         lines in a question box where German needs two, seven in the note where Spanish needs
+         five, and one in a branch label, which must never wrap.
+
+     Every <text> also carries an x and a y, and they are a CONVENIENCE rather than part of the
+     contract: they put a single centred line where its region would put it, so that opening this
+     file shows the figure instead of a heap of placeholders in the corner. The build recomputes
+     both once it knows how many lines the culture's text takes, so there is no point hand-tuning
+     them; move the box and re-run the build instead.
+
+     Widening any box costs a connector the run it is drawn along, so the columns are balanced
+     rather than each being as large as it could be. What each region survives, as a multiple of
+     the English it was measured against: 1.6 for the note, 1.9 for either outcome, 2.1 for the
+     first question, 2.3 for a branch label and 3.7 for the two short questions. Set beside the
+     1.35 that nine tenths of this project's own translations stay under, the note and the two
+     outcomes are the ones to watch, and a branch label is the one that cannot be wrapped out of
+     trouble, so it is sized for Swahili "Hapana", the widest rendering of these two words found
+     in any language.
+
+     Coordinates are hundredths of a millimetre on A4 landscape, the grid the sheets use, so the
+     centre line at 13350 is 133.5 mm from the left edge. -->
+<svg viewBox="0 0 29700 21000" xmlns="http://www.w3.org/2000/svg" role="img" xml:lang="en">
+  <!-- What a screen reader announces. The protocol's own image macro carries alt text and
+       asciidoctor drops it when it inlines the figure, so without these this is an unlabelled
+       graphic in the published PDF and HTML alike. -->
+  <title>{decision_title}</title>
+  <desc>{decision_description}</desc>
+  <style>
+    /* line-height is what the build sets one wrapped line below the last. No SVG renderer reads it --
+       the build writes explicit tspans, so nothing is left for one to wrap -- but it is the property
+       this quantity IS, and putting it here keeps the whole type scale in one place instead of half
+       here and half in the generator. */
+    text { font-family: 'Noto Sans'; font-size: 600px; line-height: 740px; fill: #000; text-anchor: middle; }
+    .branch { font-size: 520px; line-height: 640px; font-weight: bold; }
+    .note-text { font-size: 520px; line-height: 640px; }
+    .terminal-label { font-weight: bold; }
+    .on-dark { fill: #fff; }
+    .page { fill: #fff; stroke: none; }
+    .question { fill: #0083c1; stroke: #00528d; stroke-width: 60; }
+    .eligible { fill: #408f46; stroke: #005e14; stroke-width: 60; }
+    .ineligible { fill: #bd584b; stroke: #86261d; stroke-width: 60; }
+    .note { fill: #ffe4c4; stroke: #ff9015; stroke-width: 60; }
+    .yes { fill: #fff; stroke: #000; stroke-width: 44; }
+    .no { fill: #000; stroke: #000; stroke-width: 44; }
+    .connector { fill: none; stroke: #000; stroke-width: 44; marker-end: url(#decision-flow-arrowhead); }
+  </style>
+  <defs>
+    <!-- refX is the TIP, so the head stops where the connector does. Anywhere else and the
+         front of it is drawn inside the node the arrow points into, which paints over it: what a
+         reader sees is a triangle with its point cut flat against the edge. Marker units are
+         multiples of the stroke width, so this head is 8 x 6 of them = 3.5 x 2.6 mm, short enough
+         to clear a branch label. -->
+    <marker id="decision-flow-arrowhead" refX="6" refY="0" orient="auto" markerWidth="8" markerHeight="6" overflow="visible">
+      <path d="M -2,-3 L 6,0 L -2,3 c 1.5,-1.75 1.5,-4.25 0,-6 z"/>
+    </marker>
+    <!-- The two marks carry their own presentation rather than a class, which is the one place
+         in this file that departs from putting presentation in the stylesheet. Renderers
+         disagree about whether a document stylesheet reaches inside a <symbol>, and Inkscape
+         does not apply it: the tick then falls back to the default fill and draws as a filled
+         black triangle, while the cross, two zero-area subpaths, draws as nothing at all.
+         An attribute is the lowest-priority styling there is, so a definition carrying its own
+         is self-contained without overriding anything. Widths here are in the symbol's own
+         100-unit box. -->
+    <symbol id="decision-flow-tick" viewBox="0 0 100 100">
+      <path d="M 12,52 L 38,80 L 88,20" fill="none" stroke="#fff" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="decision-flow-cross" viewBox="0 0 100 100">
+      <path d="M 20,20 L 80,80 M 80,20 L 20,80" fill="none" stroke="#fff" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+  </defs>
+  <!-- White rather than transparent: the connectors are black, and a figure inlined into a page
+       that is not white would lose them. -->
+  <rect class="page" x="0" y="0" width="29700" height="21000"/>
+
+  <!-- Every connector before every node, so the long no-branch passes BEHIND the note it runs to,
+       and every arrowhead is covered by the node it points into rather than sitting on top. -->
+  <path class="connector" id="decision-flow-admitted-no" d="M 6900,2140 H 3400 V 17590 H 9150"/>
+  <path class="connector" id="decision-flow-admitted-yes" d="M 13350,3480 V 5530"/>
+  <path class="connector" id="decision-flow-gestational-age-yes" d="M 19800,6870 H 23290"/>
+  <path class="connector" id="decision-flow-gestational-age-no" d="M 13350,8210 V 10260"/>
+  <path class="connector" id="decision-flow-birthweight-yes" d="M 19800,11600 H 23290"/>
+  <path class="connector" id="decision-flow-birthweight-no" d="M 13350,12940 V 14990"/>
+
+  <!-- The three questions. One width and one height for all of them: sizing each to its
+       own text is what left the first box on a different edge from the two below it. -->
+  <g id="decision-flow-admitted">
+    <rect class="question" x="6900" y="800" width="12900" height="2680" rx="500"/>
+    <text class="on-dark" x="13350" y="2350">{decision_admitted}</text>
+  </g>
+  <g id="decision-flow-gestational-age">
+    <rect class="question" x="6900" y="5530" width="12900" height="2680" rx="500"/>
+    <text class="on-dark" x="13350" y="7080">{decision_gestational_age}</text>
+  </g>
+  <g id="decision-flow-birthweight">
+    <rect class="question" x="6900" y="10260" width="12900" height="2680" rx="500"/>
+    <text class="on-dark" x="13350" y="11810">{decision_birthweight}</text>
+  </g>
+
+  <!-- What falls outside the first question. Square-cornered and in the other brand
+       hue, because it annotates the flow rather than being a step in it. -->
+  <g id="decision-flow-not-admitted">
+    <rect class="note" x="800" y="5530" width="5200" height="5400"/>
+    <text class="note-text" x="3400" y="8420">{decision_not_admitted}</text>
+  </g>
+
+  <!-- The two outcomes. Green and red carry the meaning, so they are placed at the brand
+       blue's own lightness and chroma and rotated in hue; the marks repeat it in shape,
+       for a reader who cannot separate the two colours or is holding a greyscale print. -->
+  <g id="decision-flow-eligible">
+    <circle class="eligible" cx="25600" cy="9230" r="3300"/>
+    <use href="#decision-flow-tick" x="24850" y="7300" width="1500" height="1500"/>
+    <text class="on-dark terminal-label" x="25600" y="10400">{decision_eligible}</text>
+  </g>
+  <g id="decision-flow-ineligible">
+    <ellipse class="ineligible" cx="13350" cy="17590" rx="4200" ry="2600"/>
+    <use href="#decision-flow-cross" x="12700" y="16000" width="1300" height="1300"/>
+    <text class="on-dark terminal-label" x="13350" y="18580">{decision_ineligible}</text>
+  </g>
+
+  <!-- Which way each branch was answered, on the connector it labels. Filled black for
+       no and white for yes, which is a second signal beside the word. -->
+  <g id="decision-flow-admitted-no-label">
+    <rect class="no" x="3850" y="1560" width="2600" height="1160"/>
+    <text class="branch on-dark" x="5150" y="2320">{boolean_no}</text>
+  </g>
+  <g id="decision-flow-admitted-yes-label">
+    <rect class="yes" x="12050" y="3920" width="2600" height="1160"/>
+    <text class="branch" x="13350" y="4680">{boolean_yes}</text>
+  </g>
+  <g id="decision-flow-gestational-age-yes-label">
+    <rect class="yes" x="20240" y="6290" width="2600" height="1160"/>
+    <text class="branch" x="21540" y="7060">{boolean_yes}</text>
+  </g>
+  <g id="decision-flow-gestational-age-no-label">
+    <rect class="no" x="12050" y="8660" width="2600" height="1160"/>
+    <text class="branch on-dark" x="13350" y="9420">{boolean_no}</text>
+  </g>
+  <g id="decision-flow-birthweight-yes-label">
+    <rect class="yes" x="20240" y="11020" width="2600" height="1160"/>
+    <text class="branch" x="21540" y="11780">{boolean_yes}</text>
+  </g>
+  <g id="decision-flow-birthweight-no-label">
+    <rect class="no" x="12050" y="13380" width="2600" height="1160"/>
+    <text class="branch on-dark" x="13350" y="14140">{boolean_no}</text>
+  </g>
+</svg>

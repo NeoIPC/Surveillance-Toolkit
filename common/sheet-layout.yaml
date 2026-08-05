@@ -1,0 +1,233 @@
+# Presentation decisions for the generated data collection sheets.
+#
+# The canonical metadata says what is collected; it does not say how a form should ASK for it, and the
+# published forms make choices that cannot be derived from any field in it. This file is where those
+# choices are written down, so the generator reads a decision instead of guessing one.
+#
+# It is NOT a second source of truth for the data model. Nothing here names a field the metadata does not
+# already define, adds a field, or changes a label. If a change to this file would alter what is
+# collected rather than how it is printed, it belongs in metadata/common/ instead.
+#
+# Why a mapping is unavoidable: the value type does not determine the marker, and the published forms are
+# the proof. `NEOIPC_BSI_AB_THERAPY` is TRUE_ONLY and is printed as a pair of choose-one circles, Yes and
+# No; the nine BOOLEAN signs-and-symptoms elements beside it are each printed as a single choose-any
+# square. That is the opposite of what either type suggests, it is a considered editorial choice about how
+# a criterion reads on paper, and a generator that inferred it from valueType would confidently get it
+# backwards.
+
+# How a field with no option set is asked. Keyed by data element code; `default_boolean` covers the rest.
+#
+#   tick    a single square. Presence is what is recorded -- the natural form for a criterion in a list.
+#   yes_no  a pair of circles. Use where the negative answer carries information of its own.
+#   write   a ruled space. The default for numbers and free text.
+default_boolean: tick
+
+boolean_style:
+  NEOIPC_BSI_AB_TREATMENT: yes_no
+  NEOIPC_BSI_NO_POS_CULTURE: yes_no
+
+# Sheets assembled from more than one stage.
+#
+# A form is not always a program stage. The master sheet is what a partner fills in when a patient is
+# enrolled and again when surveillance ends, so it carries the enrolment attributes and two stages on one
+# page -- a division of labour that belongs to the paper, not to the data model, and that nothing in the
+# metadata expresses. A stage named here is not also printed on its own.
+#
+# `enrolment` is the tracked-entity attributes rather than a stage; everything else is a stage code.
+composites:
+  master:
+    slug: master
+    title_key: sheet_master_title
+    blocks:
+      - enrolment
+      - NEOIPC_STG_ADM
+      - NEOIPC_STG_SURV_END
+
+# The patient progress chart: the same fields as a sheet's rows, turned on their side against a month.
+#
+# It is NOT a form for a stage, and that is the whole of what makes it different. Every other form asks
+# for the values the platform stores; this one is the working paper someone keeps at the cot side to
+# ARRIVE at them -- a day count is reached by marking days as they happen, and the total is what is
+# afterwards written on the master sheet and entered. So its rows are that stage's day counts, its
+# columns are the days of a month, and the last column is the total those rows are being counted towards.
+#
+# Which rows, derived rather than listed: every field of the stage below whose code ends in the suffix,
+# in the same order the master sheet prints them. Listing the fourteen by hand would be a third statement
+# of the field list -- after the metadata and the master sheet -- and the one that goes stale silently
+# when a day count is added, since nothing about a missing row LOOKS wrong on a printed grid.
+#
+# The chart carries no legend and no `required` markers. Both belong to a form that captures values; this
+# page has neither a choose-one circle nor a choose-any square on it, and what is compulsory is a property
+# of the master sheet's fields rather than of the tally that feeds them.
+chart:
+  stage: NEOIPC_STG_SURV_END
+  suffix: DAYS
+  # The longest month. The chart covers one, is filed by Month/Year, and a stay spanning two gets a second
+  # sheet -- which is what `chart_number` distinguishes. Not a layout constant: a chart of a fortnight or
+  # of six weeks would be a different decision about the paper, so it is recorded here rather than buried.
+  days: 31
+
+# The order sections are PRINTED in, where it differs from programStageSections' sortOrder.
+#
+# Those are two different questions and the metadata only answers one of them. DHIS2's order is capture
+# ergonomics -- what a person clicks through on a screen, arranged for technical reasons -- while a
+# sheet's order is the order someone fills a form in with a pen. On the surveillance-end sheet they
+# disagree outright: the stage puts Antibiotics first, and the published form ends with it, because a
+# person records the end of surveillance and the cumulative day counts before totting up the substances.
+#
+# A list here must name EVERY section of that stage. A partial list would silently drop the sections it
+# omits, which on a form is not a layout problem but a lost field.
+section_order:
+  NEOIPC_STG_SURV_END:
+    - NEOIPC_SURV_END_STG_SECT_END
+    - NEOIPC_SURV_END_STG_SECT_AB
+
+# Editorial groupings: several elements printed as ONE row, because asking them separately would be
+# repetitive on paper and the answer is a single choice in practice. The elements keep their separate
+# existence in the data model; only the printed form collapses them.
+#
+# Each group carries a footnote so the sheet says plainly what the reader is being asked to do — a
+# collapsed row without one is a form that quietly loses a distinction the model draws.
+# Keyed by the suffix a code ends in, so one entry covers every slot of every section that has them --
+# three slots each in four sections across two sheets, which listing codes would have made 36 entries and
+# a maintenance trap the first time a slot was added.
+#
+# The footnote is not optional decoration. Collapsing three elements into one row asks the person filling
+# the form to pick which category applies; without the note saying so, the row is a question with no
+# stated rule, and whoever later transcribes the tick into DHIS2 has to guess which of the three elements
+# it meant.
+# Fields the form does not ask for, named one at a time.
+#
+# Reserved for a field that is not derivable as computed and still does not belong on paper. It is empty:
+# `NeoIPC_TEA_TOTAL_GESTATION_DAYS`, which used to be listed here, is assigned by a program rule from
+# `NEOIPC_TEA_GEST_AGE` and so is now covered by the rule below along with the other twelve -- which is
+# the better outcome, since a list of derived fields maintained by hand goes stale the moment a rule is
+# added and nothing says so.
+omit: []
+
+# A question whose every answer is already a section of the same sheet.
+#
+# The surgical-site sheet asks "Infection involves ..." with three options, and then rules three sections
+# named after exactly those three cases. The question and the headings are the same distinction printed
+# twice, and the question costs four rows -- a label and three options -- to say what the reader can see.
+#
+# So the definition moves into the heading it defines and the question comes off the sheet. Each section
+# is titled with its own name joined to the option's own text, both already translated; the join is a
+# figure string, because where the two halves meet is a layout decision and differs by language.
+#
+# What this trades is worth stating: the platform still holds the field, and on paper its value is now
+# implied by which section the collector filled in rather than marked explicitly. That is sound where the
+# criteria are what define the case -- which is what these three sections are -- and it does mean a
+# patient meeting criteria in more than one section is resolved at data entry rather than at the cot side.
+#
+# The DHIS2 form is untouched: it keeps the question, where the sections are navigation rather than the
+# whole page.
+# What each sheet's FILE is called. Title case is the default and is right for a word -- Surgery, Master --
+# so only the stages whose name is an abbreviation are listed, and a stage added later is named sensibly
+# without anyone remembering this exists. Not the same as the SVG id, which stays lower case because it is
+# an identifier rather than something a person reads when choosing a form to print.
+sheet_names:
+  NEOIPC_STG_BSI: BSI
+  NEOIPC_STG_NEC: NEC
+  NEOIPC_STG_SSI: SSI
+  NEOIPC_STG_HAP: HAP
+
+fold_questions:
+  - field: NEOIPC_SSI_INFECTION_TYPE
+    into:
+      NEOIPC_SSI_STG_SECT_SUPERFICIAL_INCISIONAL: "1"
+      NEOIPC_SSI_STG_SECT_DEEP_INCISIONAL: "2"
+      NEOIPC_SSI_STG_SECT_ORGAN_SPACE: "3"
+
+# A field that continues the row of the one before it, rather than starting its own.
+#
+# `NEOIPC_SURVEILLANCE_END_AB_SUBST_01_DAYS` is the number of days of the substance named in
+# `..._AB_SUBST_01`; it is not a separate question and reads as one on its own line. The published form
+# writes them together -- "Antibiotic substance 1: ______ : ____ days" -- which is both shorter and
+# clearer, and nine slots as eighteen rows was over a third of the master sheet.
+#
+# Matched on the code, which already states the relationship: a field whose code is another's plus this
+# suffix belongs to it. The value is the figure-strings key holding the unit word to print at the end of
+# the row.
+#
+# That word used to be derived by subtracting the parent's form name from the child's, which works in
+# English because one happens to be the other plus a suffix, and is string surgery on TRANSLATED text
+# everywhere else: a language that does not build the child's label that way yields either the whole label
+# or nothing, silently, in the languages nobody here proof-reads. It is a word this layout needs, so it is
+# a string this layout owns.
+#
+# Renaming the metadata's own form names to the '- child' convention would have removed the problem too,
+# and was rejected: the DHIS2 capture form renders one flat labelled row per field, so nine rows reading
+# '- days' would be ambiguous there, and 'Antibiotic substance 1 days' is self-describing in the data
+# dictionary, in export headers and in validation messages as well as on the form.
+row_units:
+  DAYS: unit_days
+
+# Fields whose code ends in one of these is not printed on any sheet.
+#
+# `NEOIPC_<stage>_PATHOGEN_<n>_NAME` -- eighteen of them, one per organism slot, all named "- Name" -- is
+# the free-text fallback for an organism the coded list does not offer. On a screen that is a second
+# control and a real distinction. On paper there IS no list, so both fields are the same act: write the
+# organism's name on the slot's own line. Printing them as two rows asked the same question twice and cost
+# a row per slot, which on the surgical-site sheet is six.
+#
+# The data model keeps both. This omits the row, not the field: whoever enters the data still chooses the
+# coded organism where one fits and types the name where it does not.
+omit_suffixes: [NAME]
+
+# Fields the platform computes are left off the sheets, derived from the program rules rather than listed
+# here: anything a rule ASSIGNs is worked out from other answers. Asking for one on paper asks someone at
+# a cot side to do arithmetic the system does -- and to do it without the inputs, since the event dates
+# those rules read were not on the form at all until they were added beside them.
+#
+# These are the exceptions, kept deliberately despite being computed.
+keep_calculated:
+  # Patient days is a cross-check rather than a value to look up: it is written beside the device days on
+  # the same sheet, and a device count that exceeds it is wrong on its face. Losing it would remove the
+  # only arithmetic the paper form can catch by itself.
+  - NEOIPC_SURVEILLANCE_END_PATIENT_DAYS
+
+groups:
+  - suffixes: [3GCR, MRSA, VRE]
+    label_key: resistance_organism_specific
+    # Which glossary term fills each placeholder of that label. The names are the placeholders, not the
+    # glossary keys, because a placeholder must be a valid identifier: `{3gcr}` leads with a digit, which
+    # every brace-format checker in this pipeline would reject, so the slot is `gcr3` and the mapping
+    # says which term goes in it. Order is NOT here -- it is wherever the translator puts the
+    # placeholders, which is the point of the label being a pattern.
+    label_terms: {mrsa: mrsa, vre: vre, gcr3: 3gcr}
+    footnote_key: resistance_organism_specific_note
+
+# Repeated slots (organism 1..n, antibiotic substance 1..n) are printed as compact blocks rather than as
+# one labelled row per element, and every sheet prints as many as the metadata carries. There is no key
+# here for holding a printed count BELOW that, and no code that would read one: an empty `slots: {}` sat
+# here inviting exactly that entry, and setting one changed nothing at all, silently.
+#
+# The divergence it was meant to record is real and is resolved the other way -- the published master
+# sheet offers six antibiotic substance slots where the metadata carries nine, so the published form is
+# behind the data model and the generated one is not. Should a printed count ever need to be held below
+# the model's deliberately, that needs a mechanism, and this comment is not one.
+
+# The WHO AWaRe badges the protocol's antibiotic table prints, one per row. The SET of badges comes from
+# metadata/common/antibiotics/NeoIPC-Antibiotic-AWaRe-Groups.csv, so a category WHO adds gets a badge
+# without anyone editing a list; this block supplies only what the metadata does not say, keyed by that
+# file's `category` value.
+#
+# `fill` and `ink` are WHO's own badge colours and the ink chosen to read on each. A badge is a
+# traffic-light signal before it is a letter, so the pairing is a legibility decision rather than a
+# palette one -- and the sheets' two-brand-colour rule does not reach here, because these are not NeoIPC's
+# colours to choose.
+#
+# `letter` overrides the derived initial for one language. The default is the first character of the
+# category's glossary term, upper-cased in that language's own rules, which is right almost everywhere:
+# Spanish `Precaución` gives P, matching WHO's own Spanish badge. Override where an initial is the wrong
+# letter -- a digraph that must not be split, or a language with an established badge letter of its own.
+# Keyed language -> category. Recorded here rather than offered to translators because a badge letter is a
+# statement about WHO's published materials in that language, checkable against them, and not a free
+# translation.
+aware_badges:
+  colours:
+    Access: {fill: "#6eb43d", ink: "#fff"}
+    Watch: {fill: "#fddf01", ink: "#000"}
+    Reserve: {fill: "#ee2d24", ink: "#fff"}
+  letter: {}

@@ -175,6 +175,20 @@ $po4aConfigs = @('reports', 'documentation', 'infectious_agents', 'scripts')
 # reaches this list — the glossary generator writes only its template, so there is nothing to restore.
 $weblateOwnedPo4aConfigs = @('reports', 'documentation', 'infectious_agents')
 
+# Every template this pipeline writes, from all three generators -- po4a, the glossary script and the
+# antibiotic exporter. Listed rather than globbed for `*.pot`, because tools/po4a is a submodule carrying
+# its own test fixtures and a repo-wide glob would sweep them in.
+$potPaths = @(
+    'po/reports.pot'
+    'po/documentation.pot'
+    'po/infectious_agents.pot'
+    'po/glossary.pot'
+    'po/antibiotics.pot'
+    'scripts/po/scripts.pot'
+)
+# po/metadata.pot is deliberately absent: it is written by Export-NeoIPCMetadataTranslation in the
+# metadata pipeline, which this script never invokes, so nothing here can churn it.
+
 # Each product po4a config derives its --package-version from that product's VERSION file (the single
 # source of truth), passed to po4a on the command line so the version lives in exactly one place. scripts/
 # is not an independently-versioned product and has no entry (it keeps whatever its .cfg declares).
@@ -236,26 +250,11 @@ function Test-Po4aSubmodule {
 }
 
 function Find-Python {
-    foreach ($cmd in @('python3', 'python')) {
-        $found = Get-Command $cmd -ErrorAction SilentlyContinue
-        if ($found) {
-            # Verify it's real Python, not the Windows Store stub (exit 9009)
-            try {
-                $null = & $found.Source --version 2>&1
-                if ($LASTEXITCODE -eq 0) { return $found.Source }
-            } catch { }
-        }
-    }
-    $PSCmdlet.ThrowTerminatingError(
-        [System.Management.Automation.ErrorRecord]::new(
-            [System.InvalidOperationException]::new(
-                "Python not found. Install Python 3 and ensure 'python3' or 'python' is on PATH."
-            ),
-            'PythonNotFound',
-            [System.Management.Automation.ErrorCategory]::ObjectNotFound,
-            $null
-        )
-    )
+    # Delegates to NeoIPC-BuildTools, which the protocol build also needs it from. Imported here rather
+    # than at the top of the script because this is the only place that wants it, and the module is not
+    # otherwise a dependency of the localization pipeline.
+    Import-Module -Name (Join-Path $repoRoot 'scripts' 'modules' 'NeoIPC-BuildTools') -Force -Verbose:$false
+    return NeoIPC-BuildTools\Find-Python
 }
 
 function Invoke-Po4a {
@@ -573,6 +572,104 @@ function Repair-Po4aTemplateHeader {
     Save-Catalog $potPath $comment $body
 }
 
+function Remove-PoCreationDate {
+    # Strip POT-Creation-Date from a REPOSITORY-OWNED catalogue, which the header contract excludes it from.
+    #
+    # The field belongs in a template and in the catalogues Weblate owns, where Weblate refreshes it from
+    # the template on every change. Nothing refreshes it in a catalogue this repository writes, so it
+    # records when some past run happened and drifts from then on -- it had gone three years stale before
+    # the contract removed it.
+    #
+    # It gets in because po4a's msgmerge copies the template's header field into every .po it touches, and
+    # for the Weblate-owned catalogues that never shows: they are restored from HEAD immediately afterwards.
+    # scripts/po is the one po4a config whose catalogues this repository keeps, so it is the one place the
+    # copy survives the run -- and it survives silently, in a file a commit sweeps up with everything else.
+    param([Parameter(Mandatory)][string[]]$RelativePath)
+
+    foreach ($rel in $RelativePath) {
+        $full = Join-Path $repoRoot $rel
+        if (-not (Test-Path -LiteralPath $full)) { continue }
+        $text = [System.IO.File]::ReadAllText($full)
+        $stripped = $text -replace '(?m)^"POT-Creation-Date: .*\\n"\r?\n', ''
+        if ($stripped -cne $text) {
+            [System.IO.File]::WriteAllText($full, $stripped, [System.Text.UTF8Encoding]::new($false))
+            Write-Host "  $rel is repository-owned; removed the POT-Creation-Date msgmerge copied into it"
+        }
+    }
+}
+
+function Get-TemplateSnapshot {
+    # Every template's bytes as this run found them, so a run that changes nothing else can put them back.
+    # Bytes rather than text: the restore has to be byte-identical, and decoding a file in order to compare
+    # it is how a line ending or a BOM changes without anyone asking for it.
+    $snapshot = @{}
+    foreach ($rel in $potPaths) {
+        $full = Join-Path $repoRoot $rel
+        if (Test-Path -LiteralPath $full) { $snapshot[$rel] = [System.IO.File]::ReadAllBytes($full) }
+    }
+    $snapshot
+}
+
+function Test-TimestampOnlyChange {
+    # Whether two versions of a template differ ONLY in POT-Creation-Date.
+    param(
+        [Parameter(Mandatory)][byte[]]$Before,
+        [Parameter(Mandatory)][byte[]]$After
+    )
+
+    $old = [System.Text.Encoding]::UTF8.GetString($Before) -split "`n"
+    $new = [System.Text.Encoding]::UTF8.GetString($After) -split "`n"
+    if ($old.Count -ne $new.Count) { return $false }
+
+    $differing = 0
+    for ($i = 0; $i -lt $old.Count; $i++) {
+        # -ceq, not -eq: PowerShell compares strings case-INSENSITIVELY by default, so a msgid whose only
+        # change was its casing would be read as unchanged and the template silently reverted.
+        if ($old[$i] -ceq $new[$i]) { continue }
+        # Both sides have to be the header field. One side alone means a line moved to where the other's
+        # header sits, or a source string mentions the field -- either way a real change.
+        if ($old[$i] -notmatch '^"POT-Creation-Date:' -or $new[$i] -notmatch '^"POT-Creation-Date:') {
+            return $false
+        }
+        $differing++
+    }
+    $differing -gt 0
+}
+
+function Restore-TimestampOnlyTemplate {
+    # Where the churn comes from is worth naming, because po4a is the obvious suspect and is innocent:
+    # `move_po_if_needed` diffs with `-I'^"POT-Creation-Date:'` and keeps the OLD file when nothing else
+    # differs, so po4a deliberately leaves the field alone. What rewrites it here is this script's own
+    # `Repair-Po4aTemplateHeader`, which rebuilds the header block unconditionally afterwards, plus the
+    # glossary and antibiotic exporters, which write their templates whole on every invocation.
+    #
+    # A template differing in nothing but POT-Creation-Date is pure churn: it
+    # carries no new unit, and committing it makes Weblate merge that header into every catalogue of the
+    # component -- a diff across nine languages for no content. It also destroys the signal, because a run
+    # that genuinely changed one template then looks exactly like a run that changed six, and the reader
+    # has to diff each one to find out which.
+    #
+    # The effect on the field is worth stating, since it is a change of meaning rather than a suppression:
+    # POT-Creation-Date comes to say when the template last CHANGED rather than when it was last
+    # regenerated, which is the more useful of the two and is what a reader assumes it already meant.
+    # Nothing depends on it advancing -- neither the gettext tools nor Weblate reads it as a version.
+    #
+    # Compared against the bytes this run started from rather than against HEAD, which is what makes it
+    # right in the two awkward cases: a template already modified before the run keeps those modifications
+    # instead of losing them, and a tree with no git repository is treated like any other.
+    param([Parameter(Mandatory)][hashtable]$Snapshot)
+
+    foreach ($rel in ($Snapshot.Keys | Sort-Object)) {
+        $full = Join-Path $repoRoot $rel
+        if (-not (Test-Path -LiteralPath $full)) { continue }
+        $before = $Snapshot[$rel]
+        if (Test-TimestampOnlyChange -Before $before -After ([System.IO.File]::ReadAllBytes($full))) {
+            [System.IO.File]::WriteAllBytes($full, $before)
+            Write-Host "  $rel changed only its POT-Creation-Date; left as it was"
+        }
+    }
+}
+
 function Invoke-UpdateYamlKeys {
     param(
         [Parameter(Mandatory)]
@@ -674,6 +771,14 @@ if ($Update) {
         }
     }
 
+    # Taken before any generator runs and put back in the finally below, so a template that gained nothing
+    # but a fresh POT-Creation-Date is left as it was. In a finally rather than on the success path because
+    # a failed run would otherwise leave its churn behind, and the NEXT run would then snapshot that churn
+    # as its baseline and keep it for good.
+    $potSnapshot = Get-TemplateSnapshot
+
+    try {
+
     # Step 2-3: Update YAML keys then run po4a. po4a msgmerges the .po files as a side effect and
     # offers no way to suppress only that, so they are restored from HEAD afterwards — Weblate is
     # their only writer. The restore runs in a finally so a po4a failure cannot leave them rewritten.
@@ -708,6 +813,11 @@ if ($Update) {
                 if ($ownedPo -and -not $DryRun -and $enforceCatalogueOwnership) {
                     Restore-WeblateOwnedPo -RelativePath $ownedPo
                 }
+                elseif (-not $ownedPo -and -not $DryRun) {
+                    # No restore protects this config's catalogues, so what po4a copied into their headers
+                    # is what gets committed.
+                    Remove-PoCreationDate -RelativePath @((Get-Po4aCatalogPath -ConfigPath $fullCfgPath).Po.Values)
+                }
             }
             if (-not $DryRun -and $catalogHeaderMap.ContainsKey($target)) {
                 $hdr = $catalogHeaderMap[$target]
@@ -726,6 +836,10 @@ if ($Update) {
     # write and freezing them at HEAD would discard every regeneration with nothing else to supply it.
     if ($runAntibiotics) {
         Invoke-AntibioticTranslation
+    }
+
+    } finally {
+        Restore-TimestampOnlyTemplate -Snapshot $potSnapshot
     }
 
     Write-Host "`nLocalization update complete."

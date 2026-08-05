@@ -254,7 +254,33 @@ jobs:
               # any file is collected, so every other test stops running too and the job reports an
               # internal error rather than a failure. requests is wlc's own dependency, named here because
               # sync-weblate.py imports it directly.
-              run: python -m pip install --upgrade pytest 'ruamel.yaml>=0.18' 'polib>=1.2' wlc requests
+              #
+              # fontTools and uharfbuzz are what the collection sheets are MEASURED with, so the generator
+              # refuses to start without them and every one of its tests goes red here while passing on a
+              # developer's machine -- which is the direction that gets noticed late, because the gate is
+              # failing on its own environment rather than on the code under test.
+              #
+              # tinycss2 reads the type scale out of a drawn figure's own stylesheet, which is where it
+              # belongs: a size stated in the figure and again in the generator is a build that measures
+              # at one and draws at the other.
+              run: python -m pip install --upgrade pytest 'ruamel.yaml>=0.18' 'polib>=1.2'
+                   'fonttools>=4.50' 'uharfbuzz>=0.39' 'tinycss2>=1.3' wlc requests
+
+            - name: Install Typst
+              shell: bash
+              # The engine that draws the printed forms. Pinned, and the pin is a contract rather than
+              # caution: the generator measures with uharfbuzz while Typst shapes with rustybuzz, a port of
+              # the same library, and every run the emitted document places asserts that the two agree
+              # exactly. A different engine version is a different shaper, so the assertion only means
+              # something against a known one. Taken from the release rather than a distribution package,
+              # which lags and would drift the version out from under that assertion.
+              #
+              # Its absence does not quietly skip the test: the suite fails by name wherever CI is set,
+              # because a gate that stops running reads exactly like one that passes.
+              run: |
+                curl -fsSL https://github.com/typst/typst/releases/download/v0.15.1/typst-x86_64-unknown-linux-musl.tar.xz | tar -xJ
+                sudo install -m 0755 typst-x86_64-unknown-linux-musl/typst /usr/local/bin/typst
+                typst --version
 
             - name: Run the Python tests
               # pytest discovers, so a new tool's test is gated by existing here rather than by someone
@@ -477,6 +503,41 @@ jobs:
                 sudo env CMAKE_POLICY_VERSION_MINIMUM=3.5 gem install mathematical:1.7.0 asciidoctor-pdf asciidoctor-bibtex asciidoctor-diagram asciimath asciidoctor-mathematical
                 sudo npm install -g @linthtml/linthtml
 
+            - uses: actions/setup-python@v6
+              if: github.ref_type != 'tag' || steps.rel.outputs.product == 'protocol'
+              with:
+                # Pinned to match the python-tests job: the same generator runs in both, and an
+                # interpreter that moves under one of them turns an unrelated release into a red build.
+                python-version: '3.13'
+
+            - name: Install the collection-sheet generator's dependencies
+              # The protocol build generates its own figures, so this job runs build-collection-sheets.py
+              # and needs what that script imports. Deliberately the same list the python-tests job
+              # installs: fontTools and uharfbuzz are what the sheets are MEASURED with, tinycss2 reads a
+              # drawn figure's type scale out of its own stylesheet, and polib and ruamel.yaml read the
+              # catalogue and the layout. The generator refuses to start without any of them rather than
+              # drawing something it could not measure — which is how this job failed the first time it
+              # ran, having had the toolchain for everything except the figures it now produces.
+              #
+              # Find-Python takes `python3` before `python`, and setup-python puts its own first on PATH,
+              # so this installs into the interpreter the build will actually use.
+              if: github.ref_type != 'tag' || steps.rel.outputs.product == 'protocol'
+              shell: bash
+              run: python -m pip install --upgrade
+                   'fonttools>=4.50' 'uharfbuzz>=0.39' 'tinycss2>=1.3' 'polib>=1.2' 'ruamel.yaml>=0.18'
+
+            - name: Install Typst (the printed forms' engine)
+              # The protocol build compiles the collection forms a partner prints, so the protocol toolchain
+              # now includes Typst. Pinned for the same reason the test job pins it: the generator measures
+              # with uharfbuzz and Typst shapes with rustybuzz, and every run the emitted document places
+              # asserts the two agree exactly, so a different version is a different shaper.
+              if: github.ref_type != 'tag' || steps.rel.outputs.product == 'protocol'
+              shell: bash
+              run: |
+                curl -fsSL https://github.com/typst/typst/releases/download/v0.15.1/typst-x86_64-unknown-linux-musl.tar.xz | tar -xJ
+                sudo install -m 0755 typst-x86_64-unknown-linux-musl/typst /usr/local/bin/typst
+                typst --version
+
             # Use the pinned po4a submodule (tools/po4a) — the Ubuntu apt po4a is too old to recognise the
             # --width / --wrap-po options our configs use. Invocation matches the CLAUDE.md "po4a setup" section.
             - name: Run po4a (infectious agents)
@@ -503,6 +564,24 @@ jobs:
               shell: pwsh
               run: ./scripts/Build-NeoIPCCoreProtocol.ps1 -InformationAction Continue -WarningAction:Stop
 
+            - name: Install R for the interpolation gate's behavioural half
+              # ReportInterpolationHygiene proves that a translated string cannot reach R's evaluator, and
+              # the half that PROVES it runs R: it asks the helper to interpolate `{Sys.time()}` and
+              # requires a refusal. Those assertions were skipped wherever Rscript was absent, which is
+              # every runner, so the security property was gated by a grep alone and the log read the same
+              # either way. The test now fails on a runner without R rather than skipping, so this step is
+              # what keeps it green — and glue comes from apt because the helper calls glue_safe.
+              #
+              # It sits in the METADATA product group, next to the Pester run it serves, and carries that
+              # group's condition rather than the protocol's. The two have to stay identical: any path
+              # where Pester runs without R is now a red build rather than a quiet skip.
+              if: github.ref_type != 'tag' || steps.rel.outputs.product == 'metadata'
+              shell: bash
+              run: |
+                sudo apt-get update -qq
+                sudo apt-get install -qq r-base-core r-cran-glue
+                Rscript -e 'cat(R.version.string, "| glue", as.character(packageVersion("glue")), "\n")'
+
             # ── Metadata product group (continued) ─────────────────────────────────────────────────────────────
             - name: Provision and test NeoIPC-Tools
               if: github.ref_type != 'tag' || steps.rel.outputs.product == 'metadata'
@@ -527,7 +606,7 @@ jobs:
                 # exclusion list rejects. That last one is not hypothetical: the add-on re-adds a bot credit
                 # to every infectious-agents catalogue whenever those translations are touched, and a
                 # translation pull request is exactly where no human is reading the diff.
-                Invoke-Pester -Path scripts/modules/NeoIPC-Tools/Tests/DataDictionary.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/BuildReport.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/ScriptVerbHygiene.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/PlayData.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/MetadataContent.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/Metadata.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/MetadataVerify.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/PoHeader.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/AutomaticVariableHygiene.Tests.ps1 -CI
+                Invoke-Pester -Path scripts/modules/NeoIPC-Tools/Tests/DataDictionary.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/BuildReport.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/ScriptVerbHygiene.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/PlayData.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/MetadataContent.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/Metadata.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/MetadataVerify.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/PoHeader.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/AutomaticVariableHygiene.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/ReportInterpolationHygiene.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/PoTemplateChurn.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/GlossaryCasingHygiene.Tests.ps1 -CI
 
             - name: Generate data dictionary
               if: github.ref_type != 'tag' || steps.rel.outputs.product == 'metadata'
@@ -563,6 +642,31 @@ jobs:
                   reports)  cp reports/compatibility.yml ./artifacts/release-assets/ ;;
                 esac
                 ls -la ./artifacts/release-assets/
+
+            - name: Bundle the printed collection forms, one archive per culture
+              # The forms a partner prints, compiled by the protocol build into artifacts/<culture>/forms
+              # (and artifacts/forms for the untranslated source). One archive each rather than loose PDFs:
+              # a release's assets share a FLAT namespace, and every culture's forms carry the same file
+              # names, so uploading them individually would have each culture overwrite the last.
+              if: github.ref_type == 'tag' && steps.rel.outputs.product == 'protocol'
+              shell: bash
+              run: |
+                mkdir -p ./artifacts/release-assets
+                staged="$PWD/artifacts/release-assets"
+                shopt -s nullglob
+                for dir in ./artifacts/forms ./artifacts/*/forms; do
+                  [ -d "$dir" ] || continue
+                  culture=$(basename "$(dirname "$dir")")
+                  case "$culture" in
+                    artifacts) name="NeoIPC-Core-Collection-Forms" ;;
+                    *)         name="NeoIPC-Core-Collection-Forms-$culture" ;;
+                  esac
+                  (cd "$dir" && zip -q -r "$staged/$name.zip" .)
+                  echo "bundled $dir -> $name.zip"
+                done
+                # A protocol release without forms is a release missing a deliverable, so say so here rather
+                # than letting the upload succeed with nothing to upload.
+                ls "$staged"/NeoIPC-Core-Collection-Forms*.zip >/dev/null
 
             - name: Bundle the infectious agent list (source + translations)
               # Canonical YAML + the po4a-generated localized NeoIPC-Infectious-Agents.<lang>.yaml + the UID map.

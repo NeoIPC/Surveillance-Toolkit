@@ -70,21 +70,6 @@ $inputFileInfos = @(
         source_language = 'en'
     }
     @{
-        paths = Join-Path -Path $workspaceFolder -ChildPath 'doc' -AdditionalChildPath 'protocol','resx','*.resx' -Resolve | ForEach-Object {
-            $swallow = $false
-            foreach ($c in $cultureNames) {
-                if ([System.IO.Path]::GetFileNameWithoutExtension($_).EndsWith(".$c")) {
-                    $swallow = $true
-                    break
-                }
-            }
-            if (-not $swallow) {
-                $_
-            }
-        }
-        type = 'resx'
-    }
-    @{
         paths = @(Join-Path -Path $workspaceFolder -ChildPath 'doc' -AdditionalChildPath 'protocol','*.adoc' -Resolve) +
         @(Join-Path -Path $workspaceFolder -ChildPath 'doc' -AdditionalChildPath 'protocol','definitions','*.adoc' -Resolve) | ForEach-Object {
             $fileBaseName = [System.IO.Path]::GetFileNameWithoutExtension($_)
@@ -155,12 +140,6 @@ foreach ($inputFileInfo in $inputFileInfos ) {
             $newPath = Join-Path -Path $inputFileInfo.path.DirectoryName -ChildPath ($inputFileInfo.path.Name -replace "([^A-Za-z0-9])$($inputFileInfo.source_language)([^A-Za-z0-9])","`$1$($CultureInfo.Name)`$2")
             # Copy the file with conditional confirmation
             Copy-Item -Path $inputFileInfo.path -Destination $newPath -Confirm:(Test-Path $newPath)
-        }
-        'resx' {
-            foreach ($path in $inputFileInfo.paths) {
-                $newPath = [System.IO.Path]::ChangeExtension($path, $($CultureInfo.Name)+$([System.IO.Path]::GetExtension($path)))
-                Copy-Item -LiteralPath $path -Destination $newPath -Confirm:(Test-Path $newPath)
-            }
         }
         'adoc' {
             foreach ($path in $inputFileInfo.paths) {

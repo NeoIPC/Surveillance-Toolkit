@@ -201,3 +201,114 @@ An upload matches on `msgid`, so an entry whose source string has since changed 
 silently dropped. Check a prepared file against the live catalogue before sending it: two entries in one
 73-entry upload here targeted msgids that a spelling fix had already retired, and would have vanished
 without a word.
+
+## What a change of renderer, or of source format, would do to all this
+
+Two different questions that are easy to run together, and they become available at very different times.
+Recorded here because the first is being acted on and the second is not, and the difference matters.
+
+**A change of renderer changes nothing in this document.** Typst drawing a page instead of asciidoctor-pdf
+leaves AsciiDoc, po4a, every catalogue and every rule above exactly as they are. That is the whole appeal:
+the shaping, bidirectional text, tagged-PDF and PDF/A properties are won without touching translation.
+
+**A change of source format would delete most of this document**, and replace it with something markedly
+smaller. Typst reads `yaml()`, `json()`, `toml()`, `csv()` and `xml()` at compile time, and Weblate speaks
+YAML and JSON directly as **monolingual** formats — with plurals and with developer comments, which it
+takes from the closest comment above the key. So the chain becomes:
+
+> `strings.yaml` ↔ **Weblate** ↔ `strings.<lang>.yaml` → the renderer reads it
+
+Weblate writes the file the renderer reads. No `.pot` to regenerate, no `msgmerge`, no generation step
+producing a localized source — and, most consequentially, **no second writer**. The ownership rule at the
+top of this document, `Invoke-Localization.ps1`'s restore-from-`HEAD`, its refusal to start on a dirty
+catalogue, and the `Test-GitWorkingTree` reasoning behind that refusal all exist because po4a and Weblate
+both write the same `.po`. If Weblate is the only writer of a file nothing else generates, the conflict
+cannot occur and the machinery guarding against it is not ported — it is unnecessary.
+
+**Two things to verify before betting on that**, because both would change the size of the prize: that
+Weblate's YAML plural support and comment extraction behave as documented on a real component, and whether
+the same is true of nested keys. If they hold, much of the work planned around gettext plural forms and
+`#.` comment emission is solving a problem the format would no longer have.
+
+**What it costs is segmentation, and the cost lands on authors rather than translators.** po4a's real
+value is that it cuts a document into translatable units automatically. A keyed data file needs a human to
+key every paragraph — 686 of them for the protocol — and that burden is the author's. The translator's
+experience is much the same either way: strings without much document context, which is exactly why
+screenshots matter here.
+
+So the answer differs **by content type**, along a line this project has already drawn:
+
+| content | under a data-file pipeline |
+|---|---|
+| keyed strings — form labels, figure text, glossary, DHIS2 metadata, app interface | strictly better; they are already keyed, and po4a is overhead |
+| document prose — the protocol | worse, unless something segments it: a po4a module for the format, prose kept in a format po4a already reads, or a conversion step |
+
+One incidental gain worth recording, because it closes a gap this repository currently carries: Typst
+ships translations of its own generated text for **af, el, et and tr**, and for **he and ar** — three of
+the four target languages for which upstream Asciidoctor has no `attributes-<lang>.adoc` at all. The
+76-string caption gap noted above would shrink to at most Nepali.
+
+## Rendering a translated document
+
+po4a writes a translated source into `doc/protocol/<language>/`, so a localized build renders a document
+that sits **one directory below** the untranslated one. Everything the document reaches by a relative path
+therefore means something different, and the references split into two classes that do not share a root:
+
+| class | lives at | reached by |
+|---|---|---|
+| **localized** — the protocol, its definitions, the generated antibiotic and infectious-agent lists | `doc/protocol/<language>/` | `{locale-dir}`, which the build sets to the language, or `.` for the untranslated source |
+| **shared** — the header, `img/`, the PDF theme | `doc/protocol/` | plain relative paths, kept working by asciidoctor's `--base-dir` |
+
+Picking one root breaks the other class, and it breaks it *quietly*: with only `--base-dir`, a German
+build reads the **English** definitions and the English appendix lists and renders perfectly; with only
+the culture directory, it finds no images and no header. Both roots are passed on every render.
+
+`--base-dir` is what makes the shared half work, because it sets `{docdir}`, and `{docdir}` is what a
+relative include and `imagesdir` resolve against. That is worth knowing precisely, since the
+documentation does not say it and the behaviour is easy to get backwards: rendering `root/sub/doc.adoc`
+with `--base-dir root` reports `docdir=<…>/root` and resolves `include::header.adoc` to `root/header.adoc`.
+It governs output paths too, so `-D` and `-o` are passed absolute — a relative output directory would
+land under `doc/protocol/`.
+
+Two consequences that are not obvious from the switches:
+
+- **`lang` must be passed to the renderer**, not merely computed. The document keys two things on it —
+  asciidoctor's own caption translations in `doc/locale/attributes-<lang>.adoc`, and the localized title
+  page and watermark — and a build that omits it produces a document in the target language with English
+  captions and an English cover, with no diagnostic anywhere.
+- **A fragment that a document `include`s carries `--keep 0`**, while the document itself keeps the
+  threshold. The threshold decides whether a translation is fit to publish, and that is a judgement about
+  the document, not about each fragment it assembles. German sits at 91.89 % overall and one of its
+  definitions holds two untranslated strings; at the shared threshold po4a withholds that file and the
+  whole German build fails on a missing include. Withholding a fragment protects nobody — it only decides
+  whether the reader gets that paragraph in English or gets no document at all.
+
+### The captions are translated outside this pipeline, and four languages have nobody to translate them
+
+`doc/locale/attributes-<lang>.adoc` holds the 19 attributes Asciidoctor emits as generated text — *Figure*,
+*Table*, *Note*, *Caution*, *Appendix*, *Table of Contents* and the rest. Asciidoctor's own documentation is
+explicit that these do **not** follow `lang` automatically: it "works automatically with the DocBook toolchain
+but requires manual configuration for HTML/PDF output", which is why the selector above exists.
+
+Two things about that set are worth knowing before a language is switched on.
+
+**They are vendored, not authored.** All five files here — `de`, `en`, `es`, `it`, `tr` — are byte-identical to
+Asciidoctor's own, so nothing has been translated locally and nothing needs reviewing. Of the five target
+languages with no file, **`fr` exists upstream** and is a copy away. **`af`, `el`, `et` and `ne` do not exist
+upstream at all**, so 19 strings each — 76 in total — have to be translated by someone, and they sit in no
+catalogue, no component and no gate. They are part of the translation surface that nothing currently counts.
+
+**A missing file fails the build rather than falling back.** The selector is
+`ifdef::lang[include::attributes-{lang}.adoc[]]`, and an unresolved include is a WARN, which the protocol build
+turns into a failure by running at `--failure-level=INFO`. That is the right behaviour and it is currently
+latent: only German clears po4a's threshold, so no other language reaches the renderer. It becomes live on the
+day one does.
+
+**The set of rendered cultures is asserted, not observed.** `Build-NeoIPCCoreProtocol.ps1` compares what
+it discovered against `po/documentation.po4a.cfg`, the one witness to where a translated source lives that
+is independent of the build's own convention — comparing discovery against the filesystem it just read
+would establish nothing. It fails when the config declares a translated protocol that exists and discovery
+did not find it, and it names the languages held below the threshold on every run. Both halves exist
+because this failed silently for seven months: po4a moved its output into subdirectories, the builder kept
+globbing the flat name nothing writes any more, and a build that renders one culture exits exactly like
+one that renders ten.

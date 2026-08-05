@@ -1,0 +1,36 @@
+<!-- Stamped across a protocol that is not the published version: a HAND-MAINTAINED skeleton, not build
+     output. See the header of NeoIPC-Core-Decision-Flow.svg for the contract the build works to, and
+     docs/data-collection-sheet-generation.md for why a drawn figure gets a template at all.
+
+     The whole figure is one word set on the page's diagonal, so two things here differ from the other
+     skeletons and both are deliberate.
+
+     The rotation is on the GROUP rather than on the text, which is what lets the region be an ordinary
+     upright rectangle: inside the group the page has been turned, so the box is measured and filled the
+     same way every other one is, and nothing has to know about angles. Coordinates inside it are
+     relative to the page's centre, which is why they run negative.
+
+     Its region is the only one in this repository that draws nothing. A watermark has no box, no fill
+     and no edge, yet it still has a width it may not exceed, and stating that as a rect is what lets
+     the build refuse a translation too wide for the page instead of running it off the corner. At 30000
+     it is a little under the page's own diagonal of 36376.
+
+     Three things the version this replaces asked for and did not get, all silently: `dominant-baseline:
+     central`, which prawn-svg does not accept (it takes only auto and middle) and so ignored, leaving
+     the word low by half a cap height; `font-weight: 900`, which resolves to a Black face this project
+     does not ship; and a font-family list ending in Arial, Helvetica and sans-serif, every entry of
+     which is a way not to find out that the first one failed. -->
+<svg viewBox="0 0 21000 29700" xmlns="http://www.w3.org/2000/svg" role="img" xml:lang="en">
+  <title>{preview_version}</title>
+  <desc>{preview_description}</desc>
+  <style>
+    text { font-family: 'Noto Sans'; font-size: 2550px; line-height: 3060px; font-weight: bold;
+           fill: #000; text-anchor: middle; opacity: 0.3; }
+    /* The region draws nothing; it states how much room the word has. */
+    .extent { fill: none; stroke: none; }
+  </style>
+  <g id="preview-watermark" transform="translate(10500 14850) rotate(-45)">
+    <rect class="extent" x="-15000" y="-1800" width="30000" height="3600"/>
+    <text>{preview_version}</text>
+  </g>
+</svg>

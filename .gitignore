@@ -13,11 +13,15 @@ build
 doc/protocol/NeoIPC-Antibiotics*.adoc
 doc/protocol/NeoIPC-Infectious-Agents*.adoc
 doc/protocol/NeoIPC-Core-Protocol*.xml
-doc/protocol/img/NeoIPC-Core-Decision-Flow*.svg
-doc/protocol/img/NeoIPC-Core-Master-Data-Collection-Sheet-Image*.svg
-doc/protocol/img/NeoIPC-Core-Master-Data-Collection-Sheet*.svg
-doc/protocol/img/NeoIPC-Core-Title-Page*.svg
-doc/protocol/img/Preview-Watermark*.svg
+# One image directory per culture, assembled by the protocol build: the figures it generates for that
+# language, plus the shared artwork copied in so that every image target resolves inside one directory.
+# All of it is output. What this repository AUTHORS is the two logo rasters at doc/protocol/img and the
+# artwork under common/img, so those are named back in rather than the whole tree being ignored.
+doc/protocol/img/*
+!doc/protocol/img/LOGO_NEOIPC.png
+!doc/protocol/img/LOGO_NEOIPC_2.png
+doc/protocol/*/img/
+common/figure-strings.*.yaml
 glossary.*.yaml
 metadata/common/infectious-agents/NeoIPC-Infectious-Agents.*.yaml
 metadata/common/infectious-agents/Output-Footer.*.adoc
