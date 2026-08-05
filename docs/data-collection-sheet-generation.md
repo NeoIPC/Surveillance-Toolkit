@@ -237,6 +237,20 @@ because nobody can approve wording they have never seen on the page, so `--inclu
 for review renders and the run then *says* how many labels came from unconfirmed translations. The switch
 exists so that publishing unreviewed wording takes a deliberate act rather than a forgotten default.
 
+**A sheet's two kinds of text arrive by different routes, and only one of them is committed.** The labels
+are the metadata's, translated in `po/metadata.<lang>.po`, which is in git — so a German sheet's labels
+build from a clean checkout. The chrome is `common/figure-strings.yaml`, extracted into the documentation
+catalogue and written back by po4a as a sibling YAML that is **build output and gitignored**. So the same
+command draws German labels under English chrome on a fresh checkout and both in German where the pipeline
+has run, with nothing in the output saying which happened.
+
+That is why the chrome is gated separately rather than riding along with the labels: the protocol build
+runs po4a and then generates a sheet per culture, so an overflowing translation of a form's own words
+fails there, while the tests pin the chrome to a path they own and measure the labels. What that build
+gate rests on is worth stating, because it lapses quietly rather than redly — po4a writes a culture's
+protocol only above its `--keep` threshold, so a language falling below it stops being discovered, and
+stops being checked, without anything failing.
+
 **Whether a sheet is actually translated is checked against the finished PDF**, by
 [`scripts/check-figure-language.py`](../scripts/check-figure-language.py), which extracts its text and
 reports every Latin word the glossary does not account for. Reading the generator's own output would not

@@ -94,6 +94,27 @@ def figure_files(directory: Path) -> list[Path]:
     return sorted(path for path in directory.glob("*.svg") if path.name in drawn)
 
 
+def chrome_at(directory: Path, **localized: dict[str, str]) -> Path:
+    """A copy of the figure strings, with whatever localized siblings the caller asks for beside it.
+
+    What matters is what is NOT beside it. `common/figure-strings.<lang>.yaml` is po4a output and
+    gitignored, so it is absent on a clean checkout and present on a machine where the pipeline has run --
+    and the generator lays it over the source wherever it finds one. A test reading the repository's own
+    copy therefore measures a different thing in the two places, and a run can be green on one and red on
+    the other with nothing saying which was which. Copying into a directory the test owns pins it.
+    """
+    directory.mkdir(parents=True, exist_ok=True)
+    source = directory / "figure-strings.yaml"
+    source.write_bytes((REPO / "common" / "figure-strings.yaml").read_bytes())
+    for language, overrides in localized.items():
+        # newline pinned: Path.write_text translates to os.linesep otherwise, and this repository's files
+        # are LF everywhere. A fixture is still a file the hygiene rules apply to.
+        (directory / f"figure-strings.{language}.yaml").write_text(
+            "".join(f'{key}: "{value}"\n' for key, value in overrides.items()),
+            encoding="utf-8", newline="\n")
+    return source
+
+
 @pytest.fixture(scope="module")
 def english(tmp_path_factory: pytest.TempPathFactory) -> Path:
     out = tmp_path_factory.mktemp("sheets-en")
@@ -109,10 +130,49 @@ def test_every_sheet_fits_one_page(english: Path) -> None:
 
 
 def test_a_localized_run_fits_too(tmp_path: Path) -> None:
-    """German, whose catalogue is committed here — the compounding language most likely to overflow."""
-    result = generate(tmp_path / "de", "--language", "de")
+    """German LABELS, which is the compounding language most likely to overflow.
+
+    The chrome is pinned to the English source so this measures the same thing everywhere. That makes it
+    a narrower claim than the name suggests, and deliberately so: the labels come from
+    `po/metadata.de.po`, which is committed, while the German chrome is po4a output that a clean checkout
+    does not carry. The localized chrome has its own gate, and it is not here -- the protocol build runs
+    po4a and then generates a sheet per culture, where an overflow fails the build. What that gate rests
+    on is worth knowing: po4a writes a culture's protocol only above its `--keep` threshold, so a
+    language whose translation fell below it would stop being discovered, and the gate would go quiet
+    rather than red.
+    """
+    out = tmp_path / "de"
+    result = generate(out, "--language", "de", "--strings", str(chrome_at(tmp_path / "chrome")))
     assert result.returncode == 0, f"the German sheets do not fit:\n{result.stdout}\n{result.stderr}"
-    assert len(sheet_files(tmp_path / "de")) == SHEETS
+    assert len(sheet_files(out)) == SHEETS
+
+
+def test_localized_chrome_reaches_the_page_and_is_measured(tmp_path: Path) -> None:
+    """The words the FORM says must arrive on the page, and be measured when they do.
+
+    Both halves have already failed here in the way that reads as success. An earlier version keyed this
+    text with a context appearing in no catalogue of this repository, so every localized run emitted
+    English chrome while reporting that it had localized; and text placed without being measured overruns
+    its box with nothing to say so. Exercised through a fixture rather than a real catalogue because
+    po4a's output is not committed, and this has to hold on any checkout.
+    """
+    out = tmp_path / "de"
+    plain = chrome_at(tmp_path / "plain", de={"boolean_yes": "Jawohl"})
+    result = generate(out, "--language", "de", "--strings", str(plain))
+    assert result.returncode == 0, f"the fixture chrome does not fit:\n{result.stdout}\n{result.stderr}"
+    assert "Jawohl" in (out / "NeoIPC-Core-BSI-Sheet.svg").read_text(encoding="utf-8"), (
+        "the localized chrome never reached the page, so the run emitted English while reporting that it "
+        "had built a German sheet")
+
+    huge = chrome_at(tmp_path / "huge", de={"boolean_yes": "Ja" * 200})
+    refused = generate(tmp_path / "de-huge", "--language", "de", "--strings", str(huge))
+    assert refused.returncode != 0, ("a chrome string far wider than its row was accepted, so localized "
+                                     "chrome is placed without being measured")
+    # Named rather than merely non-zero: a build can exit 1 for reasons that have nothing to do with the
+    # string under test, and that failure would read exactly like this one.
+    assert "JaJa" in refused.stdout + refused.stderr, (
+        f"the build failed without naming the chrome string, so this proves nothing about measurement:"
+        f"\n{refused.stdout}\n{refused.stderr}")
 
 
 def test_regenerating_produces_identical_bytes(english: Path, tmp_path: Path) -> None:
