@@ -1406,14 +1406,22 @@ def description_of(form: Sheet | Chart, composer: Composer) -> str:
 
 
 def keywords_of(form: Sheet | Chart, composer: Composer) -> list[str]:
-    """What a catalogue or a search engine indexes the published form by.
+    """What a metadata-only catalogue indexes the published form by.
 
-    Split on the language's own separator rather than on a comma, so the list a translator wrote is the
-    list that gets indexed. Someone looking for a Nepali form searches in Nepali; keywords left in English
-    would make each translation findable only by people who did not need it.
+    **Deliberately small, and every term is one the page itself carries.** Keywords are worth far less
+    than they look. Google has ignored the field since 2009 and ranks a PDF on its title and its text;
+    Google Scholar reads the landing page's `citation_*` tags rather than the file; and Bing uses the
+    field only as a SPAM signal, where the trigger is keywords that do not appear in the document. So a
+    generous list of resonant phrases is the one construction that can actively hurt, and full-text search
+    already finds anything that is genuinely on the page.
+
+    What is left is a real but narrow consumer -- a document system or repository that indexes metadata
+    without indexing text. These serve it, cost nothing, and cannot misrepresent the form: the words are
+    the form's own name and the module it belongs to, both already translated in the metadata catalogue
+    and both printed at the top of the page. No new string to translate, and no separator to join with,
+    because the engine takes a list.
     """
-    composed = composer.compose("keywords", title=form.title, module=composer.chrome["sheet_heading"])
-    return [word.strip() for word in composed.split(composer.chrome["list_separator"].strip()) if word.strip()]
+    return [form.title, composer.chrome["sheet_heading"]]
 
 
 def layout_sheet(sheet: Sheet, composer: Composer) -> list[Shape]:

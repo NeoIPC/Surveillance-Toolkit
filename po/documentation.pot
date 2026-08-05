@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-08-05 08:33+0200\n"
+"POT-Creation-Date: 2026-08-05 08:58+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Language-Team: none\n"
 "Language: en\n"
@@ -3889,12 +3889,6 @@ msgstr ""
 #: common/figure-strings.yaml:1
 #, no-wrap
 msgid "For more information, please see the Data Dictionary and Abbreviations sections of the NeoIPC Core Module protocol."
-msgstr ""
-
-#. type: Hash Value: keywords
-#: common/figure-strings.yaml:1
-#, no-wrap
-msgid "{title}, {module}, neonatal surveillance, healthcare-associated infection, infection prevention and control, data collection form"
 msgstr ""
 
 #. type: Hash Value: legend_many

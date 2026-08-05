@@ -134,18 +134,6 @@ chart_description: >-
   {title}. One row per measure, one column per day of the month, and a column for the row's total.
   Rows — {rows}.
 
-# What a search engine and a document catalogue index the published form by. Localized, because someone
-# looking for a Nepali form searches in Nepali -- keywords left in English would make every translation
-# discoverable only to people who did not need it.
-#
-# The list is the translator's, not a fixed set with words swapped: a language may need more terms or
-# fewer, and the ones that earn their place differ. {title} is the form's own name and {module} the
-# heading it sits under, both translated already. "NeoIPC" is a name and stays as it is wherever a
-# translator puts it.
-keywords: >-
-  {title}, {module}, neonatal surveillance, healthcare-associated infection, infection prevention and
-  control, data collection form
-
 # What goes between two items of a generated list -- the section names and row names above. Unlike the
 # resistance label, which is a pattern precisely because a fixed separator presumes a Latin list
 # convention, a list of n names cannot be a pattern: n varies with the form. So the separator itself is

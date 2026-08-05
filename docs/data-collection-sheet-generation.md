@@ -227,6 +227,41 @@ Two constraints on *which* font is measured, both of which make a wrong answer l
   the theme at `common/fonts/` is part of wiring the sheets into the protocol build, and until it happens
   the identity holds for the printed form and not for the figure.
 
+## What a generated document declares about itself
+
+Every document this project generates carries four metadata fields, and they are worth very different
+amounts. The rule that follows applies to the reports and the protocol as much as to these forms.
+
+**The language must be right, and it is the one that can be actively false.** A localized PDF that
+declares `/Lang (en)` tells a screen reader to pronounce Devanagari with English rules, and asserts a
+PDF/UA property it does not have. Both outputs state their own language.
+
+**The title does most of the real work.** It is what a search engine shows as the result, and what a
+document system files the form under. It is translated and it names the form.
+
+**The description is user-facing accessibility text**, reaching a reader twice — as the SVG's `<desc>`,
+which a screen reader announces, and as the PDF's Subject. Every word of it is translated; assembled from
+an English frame around translated names, it would be read out half in each language.
+
+**The keywords are worth much less than they look, and a generous list can actively hurt.** Established
+rather than assumed:
+
+| consumer | uses the keyword field? |
+|---|---|
+| Google | No — ignored since 2009; a PDF ranks on its title and its text |
+| Bing | No positive use; read as a **spam** signal, triggered by keywords **absent from the document** |
+| Google Scholar | No — it reads `citation_*` tags on the landing page, not the file |
+| document systems and repositories (desktop search, SharePoint, DSpace, Zotero) | **Yes** — `/Keywords` and XMP `dc:subject` |
+
+Only the last is a real consumer, and it is narrow: anything genuinely on the page is already found by
+full-text search. So the field is kept **small, and every term in it appears on the page** — the form's
+own name and the module it belongs to. A resonant list of terms the document does not contain is the one
+construction that is worse than saying nothing, and it also costs translator time in every language for
+no gain. The reports reach the same shape from the other direction, with three terms apiece.
+
+**Where discoverability actually comes from**, in order: the document's text being real text rather than a
+raster; the title; and the page that links to the file. None of it is in the keyword field.
+
 ## The route out: render the form once, properly, and import the page
 
 The renderer limits above look like they bound what the forms can ever be. They do not, and the reason is
