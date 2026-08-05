@@ -547,8 +547,25 @@ count comes from Typst's own refusal to export several images without a page-num
 a gate that stops running reads exactly like one that passes, a missing engine **fails** on a runner and
 only skips on a developer's machine.
 
-**What no build does yet is compile them for publication.** The protocol build asks the generator for SVG
-alone, so the printed forms exist as `.typ`, and as an artifact of that test, and nowhere else.
+**The protocol build compiles them, and they ship with the protocol.** Each culture's forms are written to
+`artifacts/<culture>/forms`, bundled one archive per culture, and attached to a protocol release. Three
+decisions are behind that shape, and each rules out something that looks reasonable:
+
+- **They are a deliverable of the protocol product, not an input to the document.** So they go to
+  `artifacts/`, never to the image directory the document reads — a printable standalone form sitting among
+  the figures asciidoctor embeds is the category error the SVG/PDF split exists to prevent.
+- **The culture set is the protocol's own**, which is a decision rather than a convenience. A form could be
+  built for more languages than that: its labels come from the metadata catalogue and do not depend on the
+  protocol's translation level at all. Publishing one for a language the protocol is not published in
+  would ship a document labelled with a language it is largely not written in — the misdeclaration the
+  `--keep` threshold exists to prevent, reached by a different route.
+- **One archive per culture, because a release's assets share a flat namespace.** Every culture's forms
+  carry the same file names, so attaching them individually would have each culture silently overwrite the
+  last.
+
+The pre-release stamp follows the protocol's, for a reason particular to forms: a sheet is detached from
+the document the moment somebody prints it, so the document's own watermark cannot speak for it, and
+whoever is holding one at a cot side has no other way to know its definitions are provisional.
 
 The logo is a wordmark, so its accessible name is the word it draws, read from the artwork's own
 `<title>` rather than written here. Marking it a `pdf.artifact` would have satisfied the same gate while

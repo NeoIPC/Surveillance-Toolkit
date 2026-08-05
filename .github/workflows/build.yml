@@ -503,6 +503,18 @@ jobs:
                 sudo env CMAKE_POLICY_VERSION_MINIMUM=3.5 gem install mathematical:1.7.0 asciidoctor-pdf asciidoctor-bibtex asciidoctor-diagram asciimath asciidoctor-mathematical
                 sudo npm install -g @linthtml/linthtml
 
+            - name: Install Typst (the printed forms' engine)
+              # The protocol build compiles the collection forms a partner prints, so the protocol toolchain
+              # now includes Typst. Pinned for the same reason the test job pins it: the generator measures
+              # with uharfbuzz and Typst shapes with rustybuzz, and every run the emitted document places
+              # asserts the two agree exactly, so a different version is a different shaper.
+              if: github.ref_type != 'tag' || steps.rel.outputs.product == 'protocol'
+              shell: bash
+              run: |
+                curl -fsSL https://github.com/typst/typst/releases/download/v0.15.1/typst-x86_64-unknown-linux-musl.tar.xz | tar -xJ
+                sudo install -m 0755 typst-x86_64-unknown-linux-musl/typst /usr/local/bin/typst
+                typst --version
+
             # Use the pinned po4a submodule (tools/po4a) — the Ubuntu apt po4a is too old to recognise the
             # --width / --wrap-po options our configs use. Invocation matches the CLAUDE.md "po4a setup" section.
             - name: Run po4a (infectious agents)
@@ -589,6 +601,31 @@ jobs:
                   reports)  cp reports/compatibility.yml ./artifacts/release-assets/ ;;
                 esac
                 ls -la ./artifacts/release-assets/
+
+            - name: Bundle the printed collection forms, one archive per culture
+              # The forms a partner prints, compiled by the protocol build into artifacts/<culture>/forms
+              # (and artifacts/forms for the untranslated source). One archive each rather than loose PDFs:
+              # a release's assets share a FLAT namespace, and every culture's forms carry the same file
+              # names, so uploading them individually would have each culture overwrite the last.
+              if: github.ref_type == 'tag' && steps.rel.outputs.product == 'protocol'
+              shell: bash
+              run: |
+                mkdir -p ./artifacts/release-assets
+                staged="$PWD/artifacts/release-assets"
+                shopt -s nullglob
+                for dir in ./artifacts/forms ./artifacts/*/forms; do
+                  [ -d "$dir" ] || continue
+                  culture=$(basename "$(dirname "$dir")")
+                  case "$culture" in
+                    artifacts) name="NeoIPC-Core-Collection-Forms" ;;
+                    *)         name="NeoIPC-Core-Collection-Forms-$culture" ;;
+                  esac
+                  (cd "$dir" && zip -q -r "$staged/$name.zip" .)
+                  echo "bundled $dir -> $name.zip"
+                done
+                # A protocol release without forms is a release missing a deliverable, so say so here rather
+                # than letting the upload succeed with nothing to upload.
+                ls "$staged"/NeoIPC-Core-Collection-Forms*.zip >/dev/null
 
             - name: Bundle the infectious agent list (source + translations)
               # Canonical YAML + the po4a-generated localized NeoIPC-Infectious-Agents.<lang>.yaml + the UID map.
