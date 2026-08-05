@@ -377,6 +377,22 @@ def _grid_pitches(svg: str) -> list[int]:
     return pitches
 
 
+def test_a_heading_that_would_reach_the_logo_is_refused(tmp_path: Path) -> None:
+    """The heading and the logo share a horizontal band, and nothing on that path measures.
+
+    A longer translation is drawn straight under the mark. It cannot wrap — a second line would move
+    every row on the form down and the one-page rule would then fail somewhere that is not the cause — so
+    the build has to refuse it and say which run and by how much.
+    """
+    strings = chrome_at(tmp_path / "chrome",
+                        de={"sheet_heading": "NeoIPC – Kernmodul für sehr untergewichtige "
+                                             "und sehr unreife Fruehgeborene"})
+    refused = generate(tmp_path / "de", "--language", "de", "--strings", str(strings))
+    assert refused.returncode != 0, "a heading long enough to reach the logo was accepted"
+    assert "logo" in refused.stdout + refused.stderr, (
+        f"the build failed without naming what it collided with:\n{refused.stdout}\n{refused.stderr}")
+
+
 def test_a_filing_label_that_wraps_gets_a_line_of_its_own(tmp_path: Path) -> None:
     """Two runs at the same baseline print on top of each other, and nothing reports it.
 
@@ -630,6 +646,38 @@ def test_a_label_that_will_not_fit_fails_the_build(tmp_path: Path) -> None:
     with pytest.raises(module.Overflow) as raised:
         module.localize_figure(skeleton, chrome, {}, faces, None, [])
     assert "decision-flow-eligible" in str(raised.value)
+
+
+def test_a_mark_that_clips_its_region_away_fails_the_build(tmp_path: Path) -> None:
+    """Moving a mark down the region is exactly the edit the skeleton invites, and it used to go silent.
+
+    The template's own header says a labelled node's shape decides where its text goes and that text
+    which will not fit fails the build. A `<use>` counts against the region wherever it sits, so a mark
+    dragged toward the foot leaves nothing underneath it — and a region clipped to nothing once produced
+    a negative height that placed the label outside the shape rather than refusing it, because the
+    capacity of any region was reported as at least one line.
+    """
+    module = generator_module()
+    fit = module.Fit(x=0, y=0, width=5400, height=-400)
+    style = module.TextStyle(size=400, pitch=500, bold=False, italic=False)
+    assert fit.capacity(style) == 0, "a region with no room reports space for a line"
+
+    skeleton = f"""<svg xmlns="{SVG_NS}" viewBox="0 0 10000 10000"><style>
+      text {{ font-family: "Noto Sans"; font-size: 400px; line-height: 500px; }}
+    </style>
+      <g id="clipped"><rect x="1000" y="1000" width="6000" height="3000"/>
+        <use href="#mark" x="1200" y="3600" width="600" height="600"/>
+        <text>{{decision_eligible}}</text>
+      </g>
+    </svg>"""
+    chrome = module.load_localized(REPO / "common" / "figure-strings.yaml", None)
+    fonts = REPO / "common" / "fonts"
+    faces = {(bold, italic): module.Typeface(
+        [module.Face(fonts / f"NotoSans-{module._variant('NotoSans', bold, italic)}.ttf")], "en")
+        for bold in (False, True) for italic in (False, True)}
+    with pytest.raises(module.Overflow) as raised:
+        module.localize_figure(skeleton, chrome, {}, faces, None, [])
+    assert "clipped" in str(raised.value)
 
 
 def test_a_placeholder_no_string_answers_fails_the_build(tmp_path: Path) -> None:

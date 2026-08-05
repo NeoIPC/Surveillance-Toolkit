@@ -1747,8 +1747,25 @@ def _open_page(out: list[Shape], subtitle: str, slug: str, composer: Composer) -
     if composer.preview:
         out.append(_watermark(composer))
 
+    logo_x = composer.page_w - MARGIN_X - LOGO_W
+    # Measured against the room the logo leaves. Both runs are translated, both are set at the two largest
+    # sizes on the page, and the logo occupies the same horizontal band -- so a longer rendering is drawn
+    # UNDER the mark. Nothing else on this path looks: `_text` records glyph coverage and measures nothing,
+    # so the failure is silent, and it is one nobody can miss once printed.
+    #
+    # Refused rather than wrapped, unlike a field label. These are single-line runs by construction: a
+    # heading that took a second line would move every row on the form down by one line height, and the
+    # one-page rule would then fail somewhere else entirely, naming a row that is not the problem.
+    for text, style, size in ((heading, "title", TITLE_SIZE), (subtitle, "subtitle", SUBTITLE_SIZE)):
+        width = composer.face_of(style).width(text, size)
+        if width > logo_x - COLUMN_GAP - MARGIN_X:
+            raise Overflow(
+                f"the {style} {text!r} draws {width / 100:.1f} mm, which reaches the logo at "
+                f"{(logo_x - COLUMN_GAP) / 100:.1f} mm. It is set on one line by design, so it has to be "
+                f"shortened rather than wrapped.")
+
     y = MARGIN_TOP + TITLE_SIZE
-    out.append(composer.logo.place(composer.page_w - MARGIN_X - LOGO_W, MARGIN_TOP, LOGO_W))
+    out.append(composer.logo.place(logo_x, MARGIN_TOP, LOGO_W))
     out.append(Text(MARGIN_X, y, heading, "title", "heading"))
     y += SUBTITLE_SIZE + 220
     out.append(Text(MARGIN_X, y, subtitle, "subtitle", f"{slug}-title"))
@@ -2819,7 +2836,13 @@ class Fit:
     height: int
 
     def capacity(self, style: TextStyle) -> int:
-        return 1 + max(0, self.height - style.size) // style.pitch
+        # Zero when there is not room for a first line. Returning an unconditional 1 reads as harmless --
+        # every region holds at least one line, surely -- and it is what lets a region clipped to nothing
+        # place its label anyway: the caller's `len(lines) > capacity` gate can then never fire, so text
+        # is drawn outside the shape it belongs to and the build says nothing.
+        if self.height < style.size:
+            return 0
+        return 1 + (self.height - style.size) // style.pitch
 
 
 def region_of(group: "ET.Element") -> Fit:
@@ -2847,10 +2870,21 @@ def region_of(group: "ET.Element") -> Fit:
     top = y
     # A mark reserves the top of the region, so the label takes what is left underneath it. That is what
     # lets a terminal carry both a tick and a word without a second mechanism for saying where each goes.
+    #
+    # Any `<use>` in the group counts, wherever it sits -- which is deliberate, since a mark low in the
+    # region still occupies it -- so a mark near the bottom leaves little or nothing, and one below the
+    # region's own foot leaves less than nothing. The skeleton is the documented editing surface and its
+    # header promises that a label which will not fit fails the build, so a region clipped away has to be
+    # refused here rather than yielding a negative height for the caller to place text into.
     for mark in group.iter(f"{_SVG}use"):
         top = max(top, round(_attr(mark, "y") + _attr(mark, "height")))
+    remaining = round(y + height - top - 2 * FIGURE_INSET)
+    if remaining <= 0:
+        raise Overflow(
+            f"{_describe(group)}: its marks reach the foot of its region, leaving no room for a label. "
+            f"Move the mark up, or make the region taller.")
     return Fit(round(x + FIGURE_INSET), round(top + FIGURE_INSET),
-               round(width - 2 * FIGURE_INSET), round(y + height - top - 2 * FIGURE_INSET))
+               round(width - 2 * FIGURE_INSET), remaining)
 
 
 def _attr(element: "ET.Element", name: str) -> float:
