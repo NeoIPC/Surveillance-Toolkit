@@ -284,8 +284,11 @@ Two constraints on *which* font is measured, both of which make a wrong answer l
   `doc/NeoIPC.theme.yml` registers `Noto Sans` and `icon`, with `Noto Serif` as the document fallback.
   prawn-svg builds its registry from the Prawn document's registered families and merges externally
   scanned system fonts *behind* them, so a registered name always wins — and a name that is not
-  registered is looked for in `/Library/Fonts`, `/usr/share/fonts/truetype` and two others, which is
-  per-machine and matches nothing in CI.
+  registered is looked for in **five** directories — `/Library/Fonts`, `/System/Library/Fonts`,
+  `$HOME/Library/Fonts`, `/usr/share/fonts/truetype` and `/mnt/c/Windows/Fonts` — which is per-machine and
+  matches nothing in CI. The last is the one to know about: it is the WSL mount, so a Ruby process run
+  under WSL on a developer's Windows machine can resolve the entire Windows font set, which is exactly how
+  a stray `Arial` renders perfectly for its author and reaches nothing on the runner.
 
   What happens at the end of that list is the part that has already cost this project a defect, and it
   has **two** endings rather than one. A **generic** keyword goes through
@@ -630,12 +633,15 @@ the same Typst compile, so none of them is a second layout:
 | route | what it gives | what it costs |
 |---|---|---|
 | **PDF page import** — `image::form.pdf[]` | real text, shaped and bidi-resolved, byte-verbatim through the embedding | no page number or running content on the imported page; compression off for the whole document |
-| **Typst SVG** — `--format svg` | correct glyphs, correct shaping, scales | **all text becomes paths**: unselectable, unsearchable, nothing for a screen reader but `<title>`/`<desc>` |
+| **Typst SVG** — `--format svg` | correct glyphs, correct shaping, scales | **all text becomes paths**, and the export writes **no `<title>` or `<desc>` at all**: unselectable, unsearchable, and an unlabelled graphic to a screen reader |
 | **Typst PNG** — `--format png` | works anywhere | raster: loses the text layer *and* resolution independence |
 
-So the order of preference is the order of that table, and the second row is a real fallback rather than
-a bad one: against a figure whose script renders as tofu, paths that are correct are worth more than text
-that is wrong, and the accessible name survives in `<title>` either way. It is the *published protocol's*
+So the order of preference is the order of that table, and the gap between the first row and the second is
+wider than it looks. Against a figure whose script renders as tofu, paths that are correct are worth more
+than text that is wrong — but the second row costs the accessible name outright rather than merely the
+text layer, because `typst-svg` writes neither element and nothing here can add one to a file it did not
+author. Checked in the crate rather than inferred from the paths-not-text property, which is a separate
+limitation that would be survivable on its own. It is the *published protocol's*
 own accessibility goal that decides between them — which is why the first row is the target and the
 second is what to reach for if the import route proves impractical.
 

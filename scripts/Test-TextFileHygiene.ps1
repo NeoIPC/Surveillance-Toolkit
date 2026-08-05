@@ -369,6 +369,10 @@ function Test-ConvertToJsonDepth {
             $isSplatted = $call.CommandElements | Where-Object {
                 $_ -is [System.Management.Automation.Language.VariableExpressionAst] -and $_.Splatted
             }
+            # Presence, not the value. A considered `-Depth 6` is not the defect this exists to catch —
+            # the silent one is the DEFAULT of 2, which nobody chose. What the right value is where
+            # somebody did choose is a decision worth taking against a real instance rather than in
+            # advance, and none has appeared.
             if (-not $hasDepth -and -not $isSplatted) {
                 $failures.Add("$Label`: $file line $($call.Extent.StartLineNumber) calls ConvertTo-Json " +
                     'without -Depth — the default of 2 truncates silently; pass -Depth 100')

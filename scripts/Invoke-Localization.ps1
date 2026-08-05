@@ -593,7 +593,7 @@ function Remove-PoCreationDate {
         $stripped = $text -replace '(?m)^"POT-Creation-Date: .*\\n"\r?\n', ''
         if ($stripped -cne $text) {
             [System.IO.File]::WriteAllText($full, $stripped, [System.Text.UTF8Encoding]::new($false))
-            Write-Host "  $rel is repository-owned; removed the POT-Creation-Date po4a copied into it"
+            Write-Host "  $rel is repository-owned; removed the POT-Creation-Date msgmerge copied into it"
         }
     }
 }
@@ -637,8 +637,13 @@ function Test-TimestampOnlyChange {
 }
 
 function Restore-TimestampOnlyTemplate {
-    # po4a rewrites POT-Creation-Date on every run whether or not a single source string changed, and the
-    # glossary and antibiotic exporters do the same. A template differing in nothing else is pure churn: it
+    # Where the churn comes from is worth naming, because po4a is the obvious suspect and is innocent:
+    # `move_po_if_needed` diffs with `-I'^"POT-Creation-Date:'` and keeps the OLD file when nothing else
+    # differs, so po4a deliberately leaves the field alone. What rewrites it here is this script's own
+    # `Repair-Po4aTemplateHeader`, which rebuilds the header block unconditionally afterwards, plus the
+    # glossary and antibiotic exporters, which write their templates whole on every invocation.
+    #
+    # A template differing in nothing but POT-Creation-Date is pure churn: it
     # carries no new unit, and committing it makes Weblate merge that header into every catalogue of the
     # component -- a diff across nine languages for no content. It also destroys the signal, because a run
     # that genuinely changed one template then looks exactly like a run that changed six, and the reader

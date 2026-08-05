@@ -431,7 +431,10 @@ def test_the_totals_marker_centres_on_the_day_numbers(english: Path) -> None:
     placed = {text: int(y) for y, text in
               re.findall(r'<text class="day" x="-?\d+" y="(\d+)">([^<]*)</text>', svg)}
     marker = next(t for t in placed if not t.isdigit())
-    faces = [module.Face(Path("common/fonts") / f"{stem}-Regular.ttf")
+    # REPO-relative like every other test here. A bare "common/fonts" resolves against the working
+    # directory, so this one test errored when pytest was run from scripts/ — and errored rather than
+    # failed, which reads as a broken environment instead of a broken test.
+    faces = [module.Face(REPO / "common" / "fonts" / f"{stem}-Regular.ttf")
              for stem in ("NotoSans", module.MATH_FONT)]
     typeface = module.Typeface(faces)
     size = module.STYLES["day"].size
@@ -471,9 +474,14 @@ def badge_rules(letters: dict | None = None):
 def test_a_badge_letter_is_the_category_initial(term, language, expected, why) -> None:
     """The letter is derived from the glossary term, upper-cased in that language's own rules."""
     module = generator_module()
-    glossary = {"watch": term, "access": term}
+    # The other categories carry a DECOY whose initial is none of the expected answers. With the same term
+    # under every key, the derivation of the key from the category was unexercised: hard-coding `watch`
+    # left all six cases green while emitting W for Access and Reserve against the real glossary.
+    glossary = {"watch": term, "access": "Zugang", "reserve": "Zurückhaltung"}
     letter = module.badge_letter("Watch", glossary, badge_rules(), language)
     assert letter == expected, f"{why}: {term!r} in {language} gave {letter!r}, not {expected!r}"
+    assert module.badge_letter("Access", glossary, badge_rules(), language) == "Z", (
+        "the category did not decide which glossary term was read")
 
 
 def test_a_recorded_letter_overrides_the_derived_one() -> None:
@@ -543,11 +551,18 @@ def test_mirroring_reflects_a_page_about_its_own_width() -> None:
     shapes = [module.Text(28000, 500, "x", "label"), module.Box(28000, 500, 900, 100, "band"),
               module.Line(1000, 500, 28700, 500, "rule"), module.Dot(28000, 500, 130)]
     mirrored = module.mirror(shapes, page_w)
-    for shape in mirrored:
-        for value in (getattr(shape, "x", None), getattr(shape, "x1", None),
-                      getattr(shape, "x2", None), getattr(shape, "cx", None)):
-            if value is not None:
-                assert 0 <= value <= page_w, f"{shape} left the page when mirrored about {page_w}"
+
+    # The exact reflected coordinates, not a range. Asserting only that everything stayed on the page and
+    # that mirroring twice is the identity looks like two independent checks and is neither: every input
+    # here is already on the page, and the identity holds for any involution including doing nothing at
+    # all. Both survive `mirror` returning its argument unchanged, and both survive dropping the width
+    # subtraction that makes a box reflect about its far edge rather than its near one.
+    text, box, line, dot = mirrored
+    assert text.x == page_w - 28000, "a run's anchor is its other end after mirroring"
+    assert box.x == page_w - 28000 - 900, "a box reflects about its far edge, so its width comes off too"
+    assert (line.x1, line.x2) == (page_w - 1000, page_w - 28700), "both ends of a rule move"
+    assert dot.cx == page_w - 28000, "a mark's centre is a point, so no width is subtracted from it"
+
     assert module.mirror(mirrored, page_w) == shapes, "mirroring twice is not the identity"
 
 
