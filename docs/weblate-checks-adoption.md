@@ -160,13 +160,17 @@ Three of the 223 tokens are not placeholders and will produce permanent noise �
 above 100% are expected", a msgid that is literally `%`, and a `%x` inside an inline R span. Suppress those
 three per string rather than leaving them to teach translators that the check cries wolf.
 
-### `xml-text` — three documentation strings, per-string only
+### `xml-text` — no longer applicable, and worth knowing why
 
-Eight `documentation.pot` entries come from the decision-flow `.resx`, and **three** of them carry escaped
-entities in the msgid — the two `&lt;` thresholds and the one `&gt;`. The other five are bare words
-(`Yes`, `No`, `Eligible`, `Ineligible`) and one entity-free question, which have nothing for the check to
-protect. `xml-invalid` is automatic but only engages on strings it recognises as XML-like; forcing it on
-those three needs per-string `xml-text`.
+It was adopted for three decision-flow strings whose msgids carried escaped entities — the two `&lt;`
+thresholds and the one `&gt;` — extracted from a `.NET` resource file that has since been retired. The
+same three now come from `common/figure-strings.yaml`, where `<` and `>` are ordinary characters, so
+there is nothing left for the check to protect and nothing to flag per string.
+
+The lesson generalises past this one check: **an escaped msgid is a property of the format a string was
+extracted FROM, not of the string.** Moving a source between extractors changes what a translator sees
+and therefore which checks apply, which is the sort of thing that is invisible until a check either fires
+on everything or silently stops firing at all.
 
 *(This said six until the units were counted at enablement. Measure from the current template rather than
 quoting the number, as with the anchor counts further down.)*
@@ -294,8 +298,9 @@ are the real reason and the only one that has to change.)*
 discard:<flag-name>
 ```
 
-What makes the component-level recommendations reversible per string: `discard:asciidoc-text` on the six
-`.resx`-sourced documentation units, `discard:md-text` on any YAML-sourced reports unit that misbehaves,
+What makes the component-level recommendations reversible per string: `discard:asciidoc-text` on a
+documentation unit that is a bare word rather than markup, `discard:md-text` on any YAML-sourced reports
+unit that misbehaves,
 `discard:placeholders` where needed. Like every per-string flag it is a source-string extra flag, so it is
 invisible in git — the trade-off the configuration reference records.
 

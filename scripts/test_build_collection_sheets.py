@@ -440,10 +440,12 @@ def test_a_line_is_not_separated_from_the_next_by_rendered_whitespace(english: P
     it puts a stray space into the text a screen reader reads and anything extracting the figure gets."""
     for figure in figure_files(english):
         for label in ET.parse(figure).getroot().iter(f"{{{SVG_NS}}}text"):
-            assert not (label.text or "").strip("") or label.text is None, \
-                "a text element carries character data of its own beside its tspans"
+            if len(label) == 0:
+                continue        # its own words, which the pass-through test checks instead
+            assert not (label.text or "").strip(), \
+                f"{figure.name}: a wrapped label carries character data of its own beside its tspans"
             for span in label:
-                assert span.tail is None or span.tail == "", "a tspan is followed by rendered whitespace"
+                assert not (span.tail or ""), f"{figure.name}: a tspan is followed by rendered whitespace"
 
 
 def test_a_label_that_will_not_fit_fails_the_build(tmp_path: Path) -> None:
@@ -458,7 +460,7 @@ def test_a_label_that_will_not_fit_fails_the_build(tmp_path: Path) -> None:
         [module.Face(fonts / f"NotoSans-{module._variant('NotoSans', bold, italic)}.ttf")], "en")
         for bold in (False, True) for italic in (False, True)}
     with pytest.raises(module.Overflow) as raised:
-        module.localize_figure(skeleton, chrome, faces, None, [])
+        module.localize_figure(skeleton, chrome, {}, faces, None, [])
     assert "decision-flow-eligible" in str(raised.value)
 
 
@@ -474,7 +476,7 @@ def test_a_placeholder_no_string_answers_fails_the_build(tmp_path: Path) -> None
         [module.Face(fonts / f"NotoSans-{module._variant('NotoSans', bold, italic)}.ttf")], "en")
         for bold in (False, True) for italic in (False, True)}
     with pytest.raises(module.Overflow) as raised:
-        module.localize_figure(skeleton, chrome, faces, None, [])
+        module.localize_figure(skeleton, chrome, {}, faces, None, [])
     assert "decision_birthweight" in str(raised.value)
 
 
@@ -530,3 +532,24 @@ def test_mirroring_a_page_reflects_the_angle_of_what_is_on_it() -> None:
     mirrored = module.mirror([turned], module.PORTRAIT[0])[0]
     assert mirrored.angle == 45, "the stamp kept its lean when the page was mirrored"
     assert module.mirror([mirrored], module.PORTRAIT[0])[0] == turned, "mirroring twice is not identity"
+
+
+def test_a_text_outside_a_labelled_group_is_passed_through_untouched(english: Path) -> None:
+    """How a skeleton says a string is NOT translated, and it has to survive being said.
+
+    Only a <text> inside a <g> is resolved, measured and re-placed; anything else is the skeleton's own
+    words. The whitespace-cleanup that follows indenting has to skip those, because for a text element
+    carrying character data rather than tspans, clearing it is not tidying -- it is the content.
+    """
+    seen = 0
+    for figure in figure_files(english):
+        root = ET.parse(figure).getroot()
+        in_group = {id(label) for group in root.iter(f"{{{SVG_NS}}}g")
+                    for label in group.iter(f"{{{SVG_NS}}}text")}
+        for label in root.iter(f"{{{SVG_NS}}}text"):
+            if id(label) in in_group:
+                continue
+            seen += 1
+            assert (label.text or "").strip(), (
+                f"{figure.name}: a standalone text element came out empty, so its content was thrown away")
+    assert seen, "no figure exercises the pass-through path, so this asserts nothing"

@@ -734,8 +734,8 @@ non-breaking spaces in string resources is a rule against making a *layout* deci
 text, and it admits a documented exception for exactly this; the documentation is in
 `common/figure-strings.yaml`, beside the strings that carry them.
 
-Its eight strings move out of `.resx` accordingly: they are already whole sentences, so nothing about them
-needs splitting by a translator, and the wrapping was never theirs to think about.
+Its eight strings live in `common/figure-strings.yaml` accordingly: they are whole sentences, so nothing
+about them needs splitting by a translator, and the wrapping was never theirs to think about.
 
 ### A drawn figure gets a template, not a layout engine
 
@@ -786,8 +786,9 @@ constraint the template accepts in exchange for its simplicity, and it is the st
 bargain: measurement decides whether the text fits, and text that does not fit **fails the build** rather
 than silently overrunning. Sizing generously once is cheap; the figure is A4 landscape and mostly air.
 
-Retiring this way takes the seven XSLT files and the `.resx` files with it — including the two that wrap
-text by counting characters, which is what none of the above could be built on.
+Three figures are drawn this way — the decision flow, the title page and the preview watermark — and
+retiring them took the seven XSLT files and the twelve `.NET` resource files with them, including the two
+transforms that wrapped text by counting characters, which is what none of the above could be built on.
 
 ## Palette: two brand colours, everything else derived from them
 

@@ -2693,6 +2693,11 @@ class TextStyle:
     pitch: int
     bold: bool
     italic: bool
+    # Which end of its box a line is anchored to, as the stylesheet says. The build has to agree with the
+    # renderer about this or the two disagree about where the text starts: an anchor placed at the box's
+    # centre under `text-anchor: start` sets the line running from the middle of the box to beyond its
+    # right edge, which measures as fitting and draws as not.
+    anchor: str = "start"
 
     @property
     def face(self) -> tuple[bool, bool]:
@@ -2746,7 +2751,8 @@ class Stylesheet:
         # stated here rather than silently, because a figure that declares none is relying on it.
         pitch = _css_length(resolved.get("line-height")) or round(size * 1.2)
         return TextStyle(size, pitch, resolved.get("font-weight") == "bold",
-                         resolved.get("font-style") == "italic")
+                         resolved.get("font-style") == "italic",
+                         resolved.get("text-anchor", "start"))
 
 
 def _css_length(value: str | None) -> int | None:
@@ -2820,7 +2826,8 @@ def _describe(element: "ET.Element") -> str:
     return element.get("id") or f"<{element.tag.split('}')[-1]}>"
 
 
-def localize_figure(source: str, chrome: dict[str, str], faces: dict[tuple[bool, bool], Typeface],
+def localize_figure(source: str, chrome: dict[str, str], glossary: dict[str, str],
+                    faces: dict[tuple[bool, bool], Typeface],
                     language: str | None, problems: list[str]) -> str:
     """One drawn figure, in one culture: the skeleton with its labels resolved, measured and set.
 
@@ -2859,18 +2866,24 @@ def localize_figure(source: str, chrome: dict[str, str], faces: dict[tuple[bool,
 
     for element in root.iter():
         if element.tag in (f"{_SVG}title", f"{_SVG}desc"):
-            element.text = _resolve(element.text or "", chrome, _describe(root))
+            element.text = _resolve(element.text or "", chrome, glossary, _describe(root))
     for group in root.iter(f"{_SVG}g"):
         label = group.find(f"{_SVG}text")
         if label is None:
             continue
-        _set_label(label, group, sheet, chrome, faces, problems)
+        _set_label(label, group, sheet, chrome, glossary, faces, problems)
 
     ET.indent(root, space="  ")
     for label in root.iter(f"{_SVG}text"):
         # Undo what indenting did INSIDE a text element. Whitespace between tspans is rendered content in
         # SVG, so an indented one draws a stray space at the end of every line and puts one into anything
         # extracting the text -- which is the copy of it a screen reader reads.
+        #
+        # Only where there ARE tspans. A text element outside a labelled group is passed through exactly
+        # as the skeleton wrote it, which is how a skeleton says a string is not translated -- and
+        # clearing its character data unconditionally is not a stray space, it is the text.
+        if len(label) == 0:
+            continue
         label.text = None
         for line in label:
             line.tail = None
@@ -2878,8 +2891,9 @@ def localize_figure(source: str, chrome: dict[str, str], faces: dict[tuple[bool,
 
 
 def _set_label(label: "ET.Element", group: "ET.Element", sheet: Stylesheet, chrome: dict[str, str],
-               faces: dict[tuple[bool, bool], Typeface], problems: list[str]) -> None:
-    text = _resolve(label.text or "", chrome, _describe(group))
+               glossary: dict[str, str], faces: dict[tuple[bool, bool], Typeface],
+               problems: list[str]) -> None:
+    text = _resolve(label.text or "", chrome, glossary, _describe(group))
     style = sheet.style_of(label)
     typeface = faces[style.face]
     fit = region_of(group)
@@ -2897,32 +2911,40 @@ def _set_label(label: "ET.Element", group: "ET.Element", sheet: Stylesheet, chro
         shown = " ".join(f"U+{ord(c):04X} {c!r}" for c in sorted(missing))
         problems.append(f"{_describe(group)}: {typeface.name} has no glyph for {shown}")
 
-    # The block is centred in what the region has left, and every line is anchored at the same x, so the
-    # skeleton's own `text-anchor` decides how each one sits against it.
+    # The block is centred in what the region has left; where each LINE sits across it is the
+    # stylesheet's business, so the anchor is placed at the end of the box that `text-anchor` names.
     first = fit.y + (fit.height - (len(lines) - 1) * style.pitch) // 2 + typeface.cap_at(style.size) // 2
-    label.set("x", str(fit.x + fit.width // 2))
+    anchor = {"middle": fit.x + fit.width // 2, "end": fit.x + fit.width}.get(style.anchor, fit.x)
+    label.set("x", str(anchor))
     label.set("y", str(first))
     label.text = None
     for index, line in enumerate(lines):
         span = ET.SubElement(label, f"{_SVG}tspan")
-        span.set("x", str(fit.x + fit.width // 2))
+        span.set("x", str(anchor))
         if index:
             span.set("dy", str(style.pitch))
         span.text = line
 
 
-def _resolve(pattern: str, chrome: dict[str, str], where: str) -> str:
+def _resolve(pattern: str, chrome: dict[str, str], glossary: dict[str, str], where: str) -> str:
     """Every `{key}` in a skeleton's text, replaced by this culture's string.
 
-    A key the strings file does not carry is a build failure rather than a literal brace on the page: it
-    means the figure asks for something nobody translates, and a figure quietly printing `{decision_x}`
-    to a partner is the outcome this exists to prevent.
+    The figure strings first and the glossary behind them, because a figure needs both and they are
+    different things: the words a FORM says live in one, and controlled terminology that several
+    documents must agree on lives in the other. The funding statement is the case in point -- the reports
+    print it too, so it stays terminology and a figure names it rather than keeping a second copy.
+
+    A key neither carries is a build failure rather than a literal brace on the page: it means the figure
+    asks for something nobody translates, and a figure quietly printing `{decision_x}` to a partner is the
+    outcome this exists to prevent.
     """
     def one(match: "re.Match[str]") -> str:
         key = match.group(1)
-        if key not in chrome:
-            raise Overflow(f"{where}: no string is defined for {{{key}}}")
-        return chrome[key]
+        if key in chrome:
+            return chrome[key]
+        if key in glossary:
+            return glossary[key]
+        raise Overflow(f"{where}: neither the figure strings nor the glossary define {{{key}}}")
 
     return re.sub(r"\{(\w+)\}", one, pattern.strip())
 
@@ -3228,7 +3250,7 @@ def main(argv: list[Shape] | None = None) -> int:
     # measurement and its chrome, and nothing else in the repository has all three.
     for skeleton in sorted(args.figures.glob("*.svg")) if args.figures.is_dir() else []:
         try:
-            drawn = localize_figure(skeleton.read_text(encoding="utf-8"), chrome, faces,
+            drawn = localize_figure(skeleton.read_text(encoding="utf-8"), chrome, glossary, faces,
                                     args.language, failures)
         except Overflow as overflow:
             failures.append(f"{skeleton.name}: {overflow}")

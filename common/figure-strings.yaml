@@ -88,6 +88,13 @@ decision_description: >-
 # changes the word order. The bare mark "NeoIPC" is a name and never translated.
 neoipc_project: "NeoIPC Project"
 
+# What a reader who cannot see the title page is told the panel at its foot holds. The page is placed as
+# a background image, so the document's own title is set over it by asciidoctor and is announced
+# separately; this describes only what the artwork itself carries.
+title_page_description: >-
+  The NeoIPC project, at https://neoipc.org, with the European Union flag and the Horizon 2020 funding
+  statement.
+
 # Stamped across a protocol that is not yet the published version. It says the DOCUMENT is provisional,
 # not the surveillance -- a reader who mistakes one for the other has been told something false about
 # their own data, which is why it is a full phrase rather than the word "Preview" alone.

@@ -11,7 +11,8 @@
     after editing one list does not regenerate everything:
 
     - the antibiotics list and the infectious-agents list, both localized from their gettext catalogues;
-    - the title-page background SVG, transformed from the localized resource file.
+    - the collection sheets, derived from the canonical metadata;
+    - the drawn figures, whose hand-maintained skeletons are localized by measurement.
 
     Localized output paths carry a culture suffix, so building several cultures does not overwrite one
     another.
@@ -53,8 +54,6 @@ $infectiousAgentsDir = Join-Path -Resolve -Path $metadataFolder -ChildPath 'comm
 $docDir = Join-Path -Resolve -Path $workspaceFolder -ChildPath 'doc'
 $protocolDir = Join-Path -Resolve -Path $docDir -ChildPath 'protocol'
 $imgDir = Join-Path -Resolve -Path $protocolDir -ChildPath 'img'
-$resDir = Join-Path -Resolve -Path $protocolDir -ChildPath 'resx'
-$transDir = Join-Path -Resolve -Path $protocolDir -ChildPath 'xslt'
 # The hand-maintained skeletons for the figures that are drawn rather than derived. Source, unlike
 # everything the build writes into img/.
 $figuresDir = Join-Path -Resolve -Path $protocolDir -ChildPath 'figures'
@@ -76,7 +75,7 @@ $discoveredCultures = $null -eq $TargetCultures
 if ($discoveredCultures) {
     # Discover cultures from the per-language subdirectories po4a writes, plus the invariant source at
     # the directory root. A directory counts only if it holds the protocol itself, which is what keeps
-    # img/, resx/, xslt/ and definitions/ out and means no name has to be excluded by hand.
+    # img/, figures/ and definitions/ out and means no name has to be excluded by hand.
     #
     # Discovery is gated below rather than trusted, because a build that finds one culture exits exactly
     # as one that finds ten: nothing about a reduced set is visible in the exit status, the output tree or
@@ -176,13 +175,6 @@ $revNumber = ((($version -split '-', 2)[0] -split '\.')[0..1] -join '.')
 $revNumberArg = "revnumber=$revNumber"
 if ($preRelease) { $revRemark = "revremark=$preRelease" } else { $revRemark = 'revremark!' }
 
-[AppContext]::SetSwitch("Switch.System.Xml.AllowDefaultResolver", $true);
-$resolver = New-Object System.Xml.XmlUrlResolver
-
-$titlePage = New-Object System.Xml.Xsl.XslCompiledTransform
-$titlePage.Load((Get-ChildItem $transDir/NeoIPC-Core-Title-Page.xslt).FullName, [System.Xml.Xsl.XsltSettings]::TrustedXslt, $resolver)
-
-
 
 # The images the protocol reaches that this build does not generate. Every one of them is an INVARIANT
 # MARK: it may not vary by language. The NeoIPC logo is a wordmark -- the mark is a name, which is why
@@ -236,13 +228,11 @@ foreach ($targetCulture in $targetCultures)
     if ($targetCulture.Name)
     {
         $revDate = "revdate=$([datetime]::UtcNow.ToString('d', $targetCulture))"
-        $localeSuffix = ".$($targetCulture.Name)"
         Write-Information "Generating NeoIPC documentation for locale '$($targetCulture.Name)'"
     }
     else
     {
         $revDate = "revdate=$([datetime]::UtcNow.ToString('yyyy-MM-dd'))"
-        $localeSuffix = ""
         Write-Information "Generating NeoIPC Core Protocol for the default locale (en-GB)"
     }
 
@@ -317,16 +307,6 @@ foreach ($targetCulture in $targetCultures)
         Write-Verbose "Generating list of infectious agents"
         $lines = New-PathogenList -TargetCulture $targetCulture -MetadataPath $metadataFolder -AsciiDoc
         [System.IO.File]::WriteAllText($infectiousAgentsListFile, (($lines -join "`n") + "`n"), [System.Text.UTF8Encoding]::new($false))
-    }
-    # The three transformed figures and the seven generated sheets are written into this culture's image
-    # directory under their plain names. The culture is the DIRECTORY, never the file name -- which is
-    # what lets the document name each of them once, for every language.
-    #
-    # Their .resx inputs keep the flat culture-suffixed convention, because that is how those files are
-    # stored rather than anything this build chooses.
-    Build-Target (Join-Path $cultureImgDir 'NeoIPC-Core-Title-Page.svg') (Get-LocalisedPath $resDir 'NeoIPC-Core-Title-Page.resx' $targetCulture -All -Existing),(Join-Path $transDir 'NeoIPC-Core-Title-Page.xslt') {
-        Write-Verbose "Generating title page background SVG"
-        $titlePage.Transform("$resDir/NeoIPC-Core-Title-Page$localeSuffix.resx", (Join-Path $cultureImgDir 'NeoIPC-Core-Title-Page.svg'))
     }
     # The seven collection sheets, derived from the canonical metadata rather than transformed from a
     # hand-maintained resource file -- and, in the same run, the figures that ARE drawn rather than
