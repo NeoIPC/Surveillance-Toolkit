@@ -236,26 +236,11 @@ function Test-Po4aSubmodule {
 }
 
 function Find-Python {
-    foreach ($cmd in @('python3', 'python')) {
-        $found = Get-Command $cmd -ErrorAction SilentlyContinue
-        if ($found) {
-            # Verify it's real Python, not the Windows Store stub (exit 9009)
-            try {
-                $null = & $found.Source --version 2>&1
-                if ($LASTEXITCODE -eq 0) { return $found.Source }
-            } catch { }
-        }
-    }
-    $PSCmdlet.ThrowTerminatingError(
-        [System.Management.Automation.ErrorRecord]::new(
-            [System.InvalidOperationException]::new(
-                "Python not found. Install Python 3 and ensure 'python3' or 'python' is on PATH."
-            ),
-            'PythonNotFound',
-            [System.Management.Automation.ErrorCategory]::ObjectNotFound,
-            $null
-        )
-    )
+    # Delegates to NeoIPC-BuildTools, which the protocol build also needs it from. Imported here rather
+    # than at the top of the script because this is the only place that wants it, and the module is not
+    # otherwise a dependency of the localization pipeline.
+    Import-Module -Name (Join-Path $repoRoot 'scripts' 'modules' 'NeoIPC-BuildTools') -Force -Verbose:$false
+    return NeoIPC-BuildTools\Find-Python
 }
 
 function Invoke-Po4a {

@@ -1,6 +1,6 @@
-<svg version="1.1" viewBox="0 0 29700 21000" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" role="img" xml:lang="en">
-  <title>NeoIPC – Core Module (VLBW/VPT Infants) — Patient Progress Chart</title>
-  <desc>Patient Progress Chart. One row per measure, one column per day of the month, and a column for the row's total. Rows — Patient days, CVC days, PVC days, INV days, NIV days, Human milk days, Kangaroo care days, Probiotic days, Antibiotic days, Antibiotic substance 1 days, Antibiotic substance 2 days, Antibiotic substance 3 days, Antibiotic substance 4 days, Antibiotic substance 5 days, Antibiotic substance 6 days, Antibiotic substance 7 days, Antibiotic substance 8 days, Antibiotic substance 9 days.</desc>
+<svg version="1.1" viewBox="0 0 21000 29700" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" role="img" xml:lang="en">
+  <title>NeoIPC – Core Module (VLBW/VPT Infants) — Master Data Collection Sheet</title>
+  <desc>Master Data Collection Sheet data collection sheet. Sections — Enrolment, Enrolment's Admission Information, End of Surveillance, Antibiotics.</desc>
   <style>
     text { font-family: 'Noto Sans', 'Noto Sans Math'; fill: #000; }
     .title { font-size: 560px; fill: #0083c1; }
@@ -23,7 +23,7 @@
     .brand-orange { fill: #ff9015; }
   </style>
   <!-- The NeoIPC logo is owned by Fondazione Penta ETS and is not covered by this repository's MIT licence. Confirm any reuse with the NeoIPC/Penta team. -->
-  <symbol id="patient-progress-chart-neoipc-logo" viewBox="0 0 797.8 226.7">
+  <symbol id="master-neoipc-logo" viewBox="0 0 797.8 226.7">
     <g transform="translate(-224.5 -112.1)">
       <path class="brand-blue" d="M 344.03125 202.027344 L 348.339844 209.886719 C 348.925781 210.953125 349.808594 211.832031 350.875 212.414062 L 358.746094 216.703125 C 359.890625 217.328125 359.890625 218.96875 358.75 219.597656 L 350.894531 223.910156 C 349.824219 224.496094 348.945312 225.375 348.363281 226.445312 L 344.074219 234.3125 C 343.449219 235.457031 341.808594 235.460938 341.179688 234.316406 L 336.871094 226.460938 C 336.285156 225.390625 335.402344 224.515625 334.332031 223.929688 L 326.464844 219.640625 C 325.320312 219.015625 325.316406 217.375 326.460938 216.746094 L 334.320312 212.4375 C 335.386719 211.851562 336.265625 210.972656 336.847656 209.898438 L 341.136719 202.03125 C 341.761719 200.886719 343.402344 200.882812 344.03125 202.027344"/>
       <path class="brand-blue" d="M 377.597656 184.820312 L 380.757812 190.582031 C 381.191406 191.367188 381.835938 192.011719 382.617188 192.4375 L 388.390625 195.585938 C 389.230469 196.042969 389.230469 197.246094 388.394531 197.707031 L 382.632812 200.867188 C 381.847656 201.296875 381.203125 201.941406 380.777344 202.726562 L 377.628906 208.5 C 377.171875 209.339844 375.96875 209.339844 375.507812 208.503906 L 372.347656 202.738281 C 371.917969 201.957031 371.269531 201.3125 370.488281 200.882812 L 364.714844 197.738281 C 363.875 197.28125 363.875 196.074219 364.710938 195.617188 L 370.476562 192.453125 C 371.257812 192.023438 371.902344 191.378906 372.332031 190.59375 L 375.476562 184.820312 C 375.933594 183.984375 377.136719 183.980469 377.597656 184.820312"/>
@@ -47,132 +47,165 @@
       <path class="brand-blue" d="M 405.589844 503.722656 C 404.347656 504.035156 402.988281 504.191406 401.507812 504.191406 C 396.050781 504.191406 393.332031 501.902344 393.332031 497.324219 L 393.332031 394.695312 C 393.953125 394.445312 394.917969 394.164062 396.21875 393.855469 C 397.519531 393.554688 398.910156 393.394531 400.390625 393.394531 C 405.707031 393.394531 408.367188 395.683594 408.367188 400.261719 L 408.367188 502.894531 C 407.75 503.140625 406.828125 503.414062 405.589844 503.722656"/>
     </g>
   </symbol>
-  <use href="#patient-progress-chart-neoipc-logo" x="24700" y="800" width="4200" height="1193"/>
-  <text id="patient-progress-chart-heading" class="title" x="800" y="1360">NeoIPC – Core Module (VLBW/VPT Infants)</text>
-  <text id="patient-progress-chart-patient-progress-chart-title" class="subtitle" x="800" y="1980">Patient Progress Chart</text>
-  <rect class="band" x="800" y="2380" width="28100" height="460"/>
-  <text id="patient-progress-chart-patient" class="section" x="14850" y="2690">Patient</text>
-  <rect class="notransmit" x="800" y="2840" width="28100" height="1482"/>
-  <rect class="notransmit-edge" x="800" y="2840" width="60" height="1482"/>
+  <use href="#master-neoipc-logo" x="16000" y="800" width="4200" height="1193"/>
+  <text id="master-heading" class="title" x="800" y="1360">NeoIPC – Core Module (VLBW/VPT Infants)</text>
+  <text id="master-master-title" class="subtitle" x="800" y="1980">Master Data Collection Sheet</text>
+  <rect class="band" x="800" y="2380" width="19400" height="460"/>
+  <text id="master-patient" class="section" x="10500" y="2690">Patient</text>
+  <rect class="notransmit" x="800" y="2840" width="19400" height="1812"/>
+  <rect class="notransmit-edge" x="800" y="2840" width="60" height="1812"/>
   <text class="label" x="980" y="3167">Patient ID</text>
-  <line class="column" x1="5800" y1="2840" x2="5800" y2="3366"/>
-  <line class="rule" x1="800" y1="3366" x2="28900" y2="3366"/>
+  <line class="column" x1="7800" y1="2840" x2="7800" y2="3366"/>
+  <line class="rule" x1="800" y1="3366" x2="20200" y2="3366"/>
   <text class="label" x="980" y="3693">Patient name</text>
-  <line class="column" x1="5800" y1="3366" x2="5800" y2="3892"/>
-  <line class="rule" x1="800" y1="3892" x2="28900" y2="3892"/>
-  <text class="note" x="980" y="4158">These fields serve to unambiguously identify the patient within the hospital. They are not part of the NeoIPC surveillance dataset and must not be transmitted to the data collection platform.</text>
-  <line class="rule" x1="800" y1="4322" x2="28900" y2="4322"/>
-  <text class="label" x="980" y="4649">Month/Year</text>
-  <line class="column" x1="5800" y1="4322" x2="5800" y2="4848"/>
-  <text class="label" x="15030" y="4649">Chart no</text>
-  <line class="column" x1="19850" y1="4322" x2="19850" y2="4848"/>
-  <line class="column" x1="14850" y1="4322" x2="14850" y2="4848"/>
-  <line class="rule" x1="800" y1="4848" x2="28900" y2="4848"/>
-  <text class="label" x="980" y="5262">Days</text>
-  <text class="day" x="5621" y="5262">1</text>
-  <text class="day" x="6360" y="5262">2</text>
-  <text class="day" x="7099" y="5262">3</text>
-  <text class="day" x="7838" y="5262">4</text>
-  <text class="day" x="8577" y="5262">5</text>
-  <text class="day" x="9316" y="5262">6</text>
-  <text class="day" x="10055" y="5262">7</text>
-  <text class="day" x="10794" y="5262">8</text>
-  <text class="day" x="11533" y="5262">9</text>
-  <text class="day" x="12272" y="5262">10</text>
-  <text class="day" x="13011" y="5262">11</text>
-  <text class="day" x="13750" y="5262">12</text>
-  <text class="day" x="14489" y="5262">13</text>
-  <text class="day" x="15228" y="5262">14</text>
-  <text class="day" x="15967" y="5262">15</text>
-  <text class="day" x="16706" y="5262">16</text>
-  <text class="day" x="17445" y="5262">17</text>
-  <text class="day" x="18184" y="5262">18</text>
-  <text class="day" x="18923" y="5262">19</text>
-  <text class="day" x="19662" y="5262">20</text>
-  <text class="day" x="20401" y="5262">21</text>
-  <text class="day" x="21140" y="5262">22</text>
-  <text class="day" x="21879" y="5262">23</text>
-  <text class="day" x="22618" y="5262">24</text>
-  <text class="day" x="23357" y="5262">25</text>
-  <text class="day" x="24096" y="5262">26</text>
-  <text class="day" x="24835" y="5262">27</text>
-  <text class="day" x="25574" y="5262">28</text>
-  <text class="day" x="26313" y="5262">29</text>
-  <text class="day" x="27052" y="5262">30</text>
-  <text class="day" x="27791" y="5262">31</text>
-  <text class="day" x="28530" y="5233">∑</text>
-  <line class="rule" x1="800" y1="5548" x2="28900" y2="5548"/>
-  <text id="patient-progress-chart-neoipc-surveillance-end-patient-days" class="label" x="980" y="5962">Patient days</text>
-  <line class="rule" x1="800" y1="6248" x2="28900" y2="6248"/>
-  <text id="patient-progress-chart-neoipc-surveillance-end-cvc-days" class="label" x="980" y="6662">CVC days</text>
-  <line class="rule" x1="800" y1="6948" x2="28900" y2="6948"/>
-  <text id="patient-progress-chart-neoipc-surveillance-end-pvc-days" class="label" x="980" y="7362">PVC days</text>
-  <line class="rule" x1="800" y1="7648" x2="28900" y2="7648"/>
-  <text id="patient-progress-chart-neoipc-surveillance-end-inv-days" class="label" x="980" y="8062">INV days</text>
-  <line class="rule" x1="800" y1="8348" x2="28900" y2="8348"/>
-  <text id="patient-progress-chart-neoipc-surveillance-end-niv-days" class="label" x="980" y="8762">NIV days</text>
-  <line class="rule" x1="800" y1="9048" x2="28900" y2="9048"/>
-  <text id="patient-progress-chart-neoipc-surveillance-end-human-milk-days" class="label" x="980" y="9462">Human milk days</text>
-  <line class="rule" x1="800" y1="9748" x2="28900" y2="9748"/>
-  <text id="patient-progress-chart-neoipc-surveillance-end-kangaroo-care-days" class="label" x="980" y="10162">Kangaroo care days</text>
-  <line class="rule" x1="800" y1="10448" x2="28900" y2="10448"/>
-  <text id="patient-progress-chart-neoipc-surveillance-end-probiotic-days" class="label" x="980" y="10862">Probiotic days</text>
-  <line class="rule" x1="800" y1="11148" x2="28900" y2="11148"/>
-  <text id="patient-progress-chart-neoipc-surveillance-end-ab-days" class="label" x="980" y="11562">Antibiotic days</text>
-  <line class="rule" x1="800" y1="11848" x2="28900" y2="11848"/>
-  <text id="patient-progress-chart-neoipc-surveillance-end-ab-subst-01-days" class="label" x="980" y="12262">Antibiotic substance 1 days</text>
-  <line class="rule" x1="800" y1="12548" x2="28900" y2="12548"/>
-  <text id="patient-progress-chart-neoipc-surveillance-end-ab-subst-02-days" class="label" x="980" y="12962">Antibiotic substance 2 days</text>
-  <line class="rule" x1="800" y1="13248" x2="28900" y2="13248"/>
-  <text id="patient-progress-chart-neoipc-surveillance-end-ab-subst-03-days" class="label" x="980" y="13662">Antibiotic substance 3 days</text>
-  <line class="rule" x1="800" y1="13948" x2="28900" y2="13948"/>
-  <text id="patient-progress-chart-neoipc-surveillance-end-ab-subst-04-days" class="label" x="980" y="14362">Antibiotic substance 4 days</text>
-  <line class="rule" x1="800" y1="14648" x2="28900" y2="14648"/>
-  <text id="patient-progress-chart-neoipc-surveillance-end-ab-subst-05-days" class="label" x="980" y="15062">Antibiotic substance 5 days</text>
-  <line class="rule" x1="800" y1="15348" x2="28900" y2="15348"/>
-  <text id="patient-progress-chart-neoipc-surveillance-end-ab-subst-06-days" class="label" x="980" y="15762">Antibiotic substance 6 days</text>
-  <line class="rule" x1="800" y1="16048" x2="28900" y2="16048"/>
-  <text id="patient-progress-chart-neoipc-surveillance-end-ab-subst-07-days" class="label" x="980" y="16462">Antibiotic substance 7 days</text>
-  <line class="rule" x1="800" y1="16748" x2="28900" y2="16748"/>
-  <text id="patient-progress-chart-neoipc-surveillance-end-ab-subst-08-days" class="label" x="980" y="17162">Antibiotic substance 8 days</text>
-  <line class="rule" x1="800" y1="17448" x2="28900" y2="17448"/>
-  <text id="patient-progress-chart-neoipc-surveillance-end-ab-subst-09-days" class="label" x="980" y="17862">Antibiotic substance 9 days</text>
-  <line class="rule" x1="800" y1="18148" x2="28900" y2="18148"/>
-  <line class="column" x1="5252" y1="4848" x2="5252" y2="18148"/>
-  <line class="hair" x1="5991" y1="4848" x2="5991" y2="18148"/>
-  <line class="hair" x1="6730" y1="4848" x2="6730" y2="18148"/>
-  <line class="hair" x1="7469" y1="4848" x2="7469" y2="18148"/>
-  <line class="hair" x1="8208" y1="4848" x2="8208" y2="18148"/>
-  <line class="hair" x1="8947" y1="4848" x2="8947" y2="18148"/>
-  <line class="hair" x1="9686" y1="4848" x2="9686" y2="18148"/>
-  <line class="hair" x1="10425" y1="4848" x2="10425" y2="18148"/>
-  <line class="hair" x1="11164" y1="4848" x2="11164" y2="18148"/>
-  <line class="hair" x1="11903" y1="4848" x2="11903" y2="18148"/>
-  <line class="hair" x1="12642" y1="4848" x2="12642" y2="18148"/>
-  <line class="hair" x1="13381" y1="4848" x2="13381" y2="18148"/>
-  <line class="hair" x1="14120" y1="4848" x2="14120" y2="18148"/>
-  <line class="hair" x1="14859" y1="4848" x2="14859" y2="18148"/>
-  <line class="hair" x1="15598" y1="4848" x2="15598" y2="18148"/>
-  <line class="hair" x1="16337" y1="4848" x2="16337" y2="18148"/>
-  <line class="hair" x1="17076" y1="4848" x2="17076" y2="18148"/>
-  <line class="hair" x1="17815" y1="4848" x2="17815" y2="18148"/>
-  <line class="hair" x1="18554" y1="4848" x2="18554" y2="18148"/>
-  <line class="hair" x1="19293" y1="4848" x2="19293" y2="18148"/>
-  <line class="hair" x1="20032" y1="4848" x2="20032" y2="18148"/>
-  <line class="hair" x1="20771" y1="4848" x2="20771" y2="18148"/>
-  <line class="hair" x1="21510" y1="4848" x2="21510" y2="18148"/>
-  <line class="hair" x1="22249" y1="4848" x2="22249" y2="18148"/>
-  <line class="hair" x1="22988" y1="4848" x2="22988" y2="18148"/>
-  <line class="hair" x1="23727" y1="4848" x2="23727" y2="18148"/>
-  <line class="hair" x1="24466" y1="4848" x2="24466" y2="18148"/>
-  <line class="hair" x1="25205" y1="4848" x2="25205" y2="18148"/>
-  <line class="hair" x1="25944" y1="4848" x2="25944" y2="18148"/>
-  <line class="hair" x1="26683" y1="4848" x2="26683" y2="18148"/>
-  <line class="hair" x1="27422" y1="4848" x2="27422" y2="18148"/>
-  <line class="column" x1="28161" y1="4848" x2="28161" y2="18148"/>
-  <line class="column" x1="28900" y1="4848" x2="28900" y2="18148"/>
-  <text class="label" x="980" y="18407">Comments</text>
-  <line class="rule" x1="800" y1="19900" x2="28900" y2="19900"/>
-  <rect class="frame" x="800" y="2380" width="28100" height="17520"/>
-  <text class="note" x="800" y="20200">For more information, please see the Data Dictionary and Abbreviations sections of the NeoIPC Core Module protocol.</text>
+  <line class="column" x1="7800" y1="3366" x2="7800" y2="3892"/>
+  <line class="rule" x1="800" y1="3892" x2="20200" y2="3892"/>
+  <text class="note" x="980" y="4158">These fields serve to unambiguously identify the patient within the hospital. They are not part of the NeoIPC surveillance dataset and must not be transmitted to the data collection</text>
+  <text class="note" x="980" y="4488">platform.</text>
+  <line class="rule" x1="800" y1="4652" x2="20200" y2="4652"/>
+  <rect class="band" x="800" y="4652" width="19400" height="460"/>
+  <text id="master-enrolment" class="section" x="10500" y="4962">Enrolment</text>
+  <text class="label" x="980" y="5439">NeoIPC patient identifier (required)</text>
+  <line class="column" x1="7800" y1="5112" x2="7800" y2="5638"/>
+  <line class="rule" x1="800" y1="5638" x2="20200" y2="5638"/>
+  <text class="label" x="980" y="5965">Gestational age (weeks and days e.g. 25+4)</text>
+  <line class="column" x1="7800" y1="5638" x2="7800" y2="6164"/>
+  <line class="rule" x1="800" y1="6164" x2="20200" y2="6164"/>
+  <text class="label" x="980" y="6491">Birth weight</text>
+  <line class="column" x1="7800" y1="6164" x2="7800" y2="6690"/>
+  <line class="rule" x1="800" y1="6690" x2="20200" y2="6690"/>
+  <text class="label" x="980" y="7017">Total gestation days</text>
+  <line class="column" x1="7800" y1="6690" x2="7800" y2="7216"/>
+  <line class="rule" x1="800" y1="7216" x2="20200" y2="7216"/>
+  <text class="label" x="980" y="7543">Number of infants in birth</text>
+  <line class="column" x1="7800" y1="7216" x2="7800" y2="7742"/>
+  <line class="rule" x1="800" y1="7742" x2="20200" y2="7742"/>
+  <text class="label" x="980" y="8069">Delivery mode (required)</text>
+  <circle id="master-neoipc-tea-delivery-mode-1" class="mark" cx="8110" cy="7969" r="130"/>
+  <text class="option" x="8350" y="8069">Vaginal</text>
+  <circle id="master-neoipc-tea-delivery-mode-2" class="mark" cx="10266" cy="7969" r="130"/>
+  <text class="option" x="10506" y="8069">Caesarean section (elective)</text>
+  <circle id="master-neoipc-tea-delivery-mode-3" class="mark" cx="15089" cy="7969" r="130"/>
+  <text class="option" x="15329" y="8069">Caesarean section (emergency)</text>
+  <line class="column" x1="7800" y1="7742" x2="7800" y2="8268"/>
+  <line class="rule" x1="800" y1="8268" x2="20200" y2="8268"/>
+  <rect id="master-neoipc-tea-multiple-birth" class="mark" x="980" y="8358" width="260" height="260"/>
+  <text class="label" x="1350" y="8595">Multiple birth</text>
+  <line class="rule" x1="800" y1="8794" x2="20200" y2="8794"/>
+  <text class="label" x="980" y="9121">Sex (required)</text>
+  <circle id="master-neoipc-tea-sex-1" class="mark" cx="8110" cy="9021" r="130"/>
+  <text class="option" x="8350" y="9121">Female</text>
+  <circle id="master-neoipc-tea-sex-2" class="mark" cx="10252" cy="9021" r="130"/>
+  <text class="option" x="10492" y="9121">Male</text>
+  <circle id="master-neoipc-tea-sex-3" class="mark" cx="12083" cy="9021" r="130"/>
+  <text class="option" x="12323" y="9121">Undetermined</text>
+  <line class="column" x1="7800" y1="8794" x2="7800" y2="9320"/>
+  <line class="rule" x1="800" y1="9320" x2="20200" y2="9320"/>
+  <rect class="band" x="800" y="9320" width="19400" height="460"/>
+  <text id="master-neoipc-adm-stg-sect-info" class="section" x="10500" y="9630">Enrolment's Admission Information</text>
+  <text class="label" x="980" y="10107">Admission date (required)</text>
+  <line class="column" x1="7800" y1="9780" x2="7800" y2="10306"/>
+  <line class="rule" x1="800" y1="10306" x2="20200" y2="10306"/>
+  <text class="label" x="980" y="10633">Admission type (required)</text>
+  <circle id="master-neoipc-admission-type-1" class="mark" cx="1810" cy="10909" r="130"/>
+  <text class="option" x="2050" y="11009">Admitted from delivery room (initial admission for infants delivered in your hospital)</text>
+  <circle id="master-neoipc-admission-type-2" class="mark" cx="1810" cy="11279" r="130"/>
+  <text class="option" x="2050" y="11379">Transferred/readmitted to your hospital on the day of birth</text>
+  <circle id="master-neoipc-admission-type-3" class="mark" cx="1810" cy="11649" r="130"/>
+  <text class="option" x="2050" y="11749">Transferred/readmitted to your hospital the day after birth or later</text>
+  <line class="rule" x1="800" y1="12032" x2="20200" y2="12032"/>
+  <rect class="band" x="800" y="12032" width="19400" height="460"/>
+  <text id="master-neoipc-surv-end-stg-sect-end" class="section" x="10500" y="12342">End of Surveillance</text>
+  <text class="label" x="980" y="12819">Surveillance end date (required)</text>
+  <line class="column" x1="7800" y1="12492" x2="7800" y2="13018"/>
+  <line class="rule" x1="800" y1="13018" x2="20200" y2="13018"/>
+  <text class="label" x="980" y="13345">Reason (required)</text>
+  <circle id="master-neoipc-surveillance-end-reason-1" class="mark" cx="8110" cy="13245" r="130"/>
+  <text class="option" x="8350" y="13345">Discharge/Transfer</text>
+  <circle id="master-neoipc-surveillance-end-reason-2" class="mark" cx="11808" cy="13245" r="130"/>
+  <text class="option" x="12048" y="13345">Death</text>
+  <line class="column" x1="7800" y1="13018" x2="7800" y2="13544"/>
+  <line class="rule" x1="800" y1="13544" x2="20200" y2="13544"/>
+  <text class="label" x="980" y="13871">Patient days (required)</text>
+  <line class="column" x1="7800" y1="13544" x2="7800" y2="14070"/>
+  <line class="rule" x1="800" y1="14070" x2="20200" y2="14070"/>
+  <text class="label" x="980" y="14397">CVC days (required)</text>
+  <line class="column" x1="7800" y1="14070" x2="7800" y2="14596"/>
+  <line class="rule" x1="800" y1="14596" x2="20200" y2="14596"/>
+  <text class="label" x="980" y="14923">PVC days (required)</text>
+  <line class="column" x1="7800" y1="14596" x2="7800" y2="15122"/>
+  <line class="rule" x1="800" y1="15122" x2="20200" y2="15122"/>
+  <text class="label" x="980" y="15449">INV days (required)</text>
+  <line class="column" x1="7800" y1="15122" x2="7800" y2="15648"/>
+  <line class="rule" x1="800" y1="15648" x2="20200" y2="15648"/>
+  <text class="label" x="980" y="15975">NIV days (required)</text>
+  <line class="column" x1="7800" y1="15648" x2="7800" y2="16174"/>
+  <line class="rule" x1="800" y1="16174" x2="20200" y2="16174"/>
+  <text class="label" x="980" y="16501">Human milk days (required)</text>
+  <line class="column" x1="7800" y1="16174" x2="7800" y2="16700"/>
+  <line class="rule" x1="800" y1="16700" x2="20200" y2="16700"/>
+  <text class="label" x="980" y="17027">Kangaroo care days (required)</text>
+  <line class="column" x1="7800" y1="16700" x2="7800" y2="17226"/>
+  <line class="rule" x1="800" y1="17226" x2="20200" y2="17226"/>
+  <text class="label" x="980" y="17553">Probiotic days (required)</text>
+  <line class="column" x1="7800" y1="17226" x2="7800" y2="17752"/>
+  <line class="rule" x1="800" y1="17752" x2="20200" y2="17752"/>
+  <rect class="band" x="800" y="17752" width="19400" height="460"/>
+  <text id="master-neoipc-surv-end-stg-sect-ab" class="section" x="10500" y="18062">Antibiotics</text>
+  <text class="label" x="980" y="18539">Antibiotic days (required)</text>
+  <line class="column" x1="7800" y1="18212" x2="7800" y2="18738"/>
+  <line class="rule" x1="800" y1="18738" x2="20200" y2="18738"/>
+  <text class="label" x="980" y="19065">Antibiotic substance 1</text>
+  <text class="label" x="19328" y="19065">days</text>
+  <line class="column" x1="7800" y1="18738" x2="7800" y2="19264"/>
+  <line class="column" x1="16928" y1="18738" x2="16928" y2="19264"/>
+  <line class="rule" x1="800" y1="19264" x2="20200" y2="19264"/>
+  <text class="label" x="980" y="19591">Antibiotic substance 2</text>
+  <text class="label" x="19328" y="19591">days</text>
+  <line class="column" x1="7800" y1="19264" x2="7800" y2="19790"/>
+  <line class="column" x1="16928" y1="19264" x2="16928" y2="19790"/>
+  <line class="rule" x1="800" y1="19790" x2="20200" y2="19790"/>
+  <text class="label" x="980" y="20117">Antibiotic substance 3</text>
+  <text class="label" x="19328" y="20117">days</text>
+  <line class="column" x1="7800" y1="19790" x2="7800" y2="20316"/>
+  <line class="column" x1="16928" y1="19790" x2="16928" y2="20316"/>
+  <line class="rule" x1="800" y1="20316" x2="20200" y2="20316"/>
+  <text class="label" x="980" y="20643">Antibiotic substance 4</text>
+  <text class="label" x="19328" y="20643">days</text>
+  <line class="column" x1="7800" y1="20316" x2="7800" y2="20842"/>
+  <line class="column" x1="16928" y1="20316" x2="16928" y2="20842"/>
+  <line class="rule" x1="800" y1="20842" x2="20200" y2="20842"/>
+  <text class="label" x="980" y="21169">Antibiotic substance 5</text>
+  <text class="label" x="19328" y="21169">days</text>
+  <line class="column" x1="7800" y1="20842" x2="7800" y2="21368"/>
+  <line class="column" x1="16928" y1="20842" x2="16928" y2="21368"/>
+  <line class="rule" x1="800" y1="21368" x2="20200" y2="21368"/>
+  <text class="label" x="980" y="21695">Antibiotic substance 6</text>
+  <text class="label" x="19328" y="21695">days</text>
+  <line class="column" x1="7800" y1="21368" x2="7800" y2="21894"/>
+  <line class="column" x1="16928" y1="21368" x2="16928" y2="21894"/>
+  <line class="rule" x1="800" y1="21894" x2="20200" y2="21894"/>
+  <text class="label" x="980" y="22221">Antibiotic substance 7</text>
+  <text class="label" x="19328" y="22221">days</text>
+  <line class="column" x1="7800" y1="21894" x2="7800" y2="22420"/>
+  <line class="column" x1="16928" y1="21894" x2="16928" y2="22420"/>
+  <line class="rule" x1="800" y1="22420" x2="20200" y2="22420"/>
+  <text class="label" x="980" y="22747">Antibiotic substance 8</text>
+  <text class="label" x="19328" y="22747">days</text>
+  <line class="column" x1="7800" y1="22420" x2="7800" y2="22946"/>
+  <line class="column" x1="16928" y1="22420" x2="16928" y2="22946"/>
+  <line class="rule" x1="800" y1="22946" x2="20200" y2="22946"/>
+  <text class="label" x="980" y="23273">Antibiotic substance 9</text>
+  <text class="label" x="19328" y="23273">days</text>
+  <line class="column" x1="7800" y1="22946" x2="7800" y2="23472"/>
+  <line class="column" x1="16928" y1="22946" x2="16928" y2="23472"/>
+  <line class="rule" x1="800" y1="23472" x2="20200" y2="23472"/>
+  <text class="label" x="980" y="23731">Comments</text>
+  <line class="rule" x1="800" y1="28180" x2="20200" y2="28180"/>
+  <rect class="frame" x="800" y="2380" width="19400" height="25800"/>
+  <circle id="master-legend-one" class="mark" cx="1110" cy="28435" r="130"/>
+  <text class="note" x="1350" y="28520">You can select only one option.</text>
+  <rect id="master-legend-many" class="mark" x="5816" y="28305" width="260" height="260"/>
+  <text class="note" x="6186" y="28520">You can select multiple options.</text>
+  <text class="note" x="800" y="28900">For more information, please see the Data Dictionary and Abbreviations sections of the NeoIPC Core Module protocol.</text>
 </svg>

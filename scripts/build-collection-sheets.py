@@ -420,14 +420,14 @@ class Logo:
         body = source.split("</style>", 1)[1].rsplit("</svg>", 1)[0]
         self.body = [line for line in body.splitlines() if line.strip()]
 
-    def definition(self) -> list[str]:
+    def definition(self, prefix: str) -> list[str]:
         # The notice travels with the artwork. A generated sheet is a distributed file that contains the
         # logo, so stating the rights holder only in the repository's README would leave every copy of it
         # silent about who owns the mark on it.
         return (
             [
                 f"  <!-- {self.NOTICE} -->",
-                f'  <symbol id="neoipc-logo" viewBox="{self.view_box}">',
+                f'  <symbol id="{prefix}-neoipc-logo" viewBox="{self.view_box}">',
             ]
             + [f"  {line}" for line in self.body]
             + ["  </symbol>"]
@@ -2362,8 +2362,8 @@ def svg_document(form: Sheet | Chart, shapes: list[Shape], composer: Composer) -
         "    .brand-blue { fill: %s; }" % ACCENT,
         "    .brand-orange { fill: %s; }" % BRAND_ORANGE,
         "  </style>",
-    ] + composer.logo.definition()
-    return "\n".join(head + [_svg_shape(shape) for shape in shapes] + ["</svg>", ""])
+    ] + composer.logo.definition(form.slug)
+    return "\n".join(head + [_svg_shape(shape, form.slug) for shape in shapes] + ["</svg>", ""])
 
 
 def _css_families(face: Typeface) -> str:
@@ -2395,29 +2395,35 @@ def _css_shape(kind: str, ink: Ink) -> str:
     return "; ".join(parts) + ";"
 
 
-def _svg_shape(shape: Shape) -> str:
+def _svg_shape(shape: Shape, prefix: str) -> str:
     match shape:
         case Text():
-            return (f'  <text{_svg_id(shape.ident)} class="{shape.style}" x="{shape.x}" y="{shape.y}">'
-                    f"{_esc(shape.text)}</text>")
+            return (f'  <text{_svg_id(shape.ident, prefix)} class="{shape.style}" x="{shape.x}" '
+                    f'y="{shape.y}">{_esc(shape.text)}</text>')
         case Line():
             return (f'  <line class="{shape.kind}" x1="{shape.x1}" y1="{shape.y1}" '
                     f'x2="{shape.x2}" y2="{shape.y2}"/>')
         case Box():
-            return (f'  <rect{_svg_id(shape.ident)} class="{shape.kind}" x="{shape.x}" y="{shape.y}" '
-                    f'width="{shape.width}" height="{shape.height}"/>')
+            return (f'  <rect{_svg_id(shape.ident, prefix)} class="{shape.kind}" x="{shape.x}" '
+                    f'y="{shape.y}" width="{shape.width}" height="{shape.height}"/>')
         case Dot():
-            return (f'  <circle{_svg_id(shape.ident)} class="mark" cx="{shape.cx}" cy="{shape.cy}" '
-                    f'r="{shape.r}"/>')
+            return (f'  <circle{_svg_id(shape.ident, prefix)} class="mark" cx="{shape.cx}" '
+                    f'cy="{shape.cy}" r="{shape.r}"/>')
         case Emblem():
-            return (f'  <use href="#neoipc-logo" x="{shape.x}" y="{shape.y}" '
+            return (f'  <use href="#{prefix}-neoipc-logo" x="{shape.x}" y="{shape.y}" '
                     f'width="{shape.width}" height="{shape.height}"/>')
 
 
-def _svg_id(ident: str | None) -> str:
+def _svg_id(ident: str | None, prefix: str) -> str:
     """Semantic ids come from the metadata code, so a row on the page is traceable to what it collects.
-    Shapes that carry no meaning of their own -- a rule, a frame -- carry no id either."""
-    return f' id="{ident}"' if ident else ""
+    Shapes that carry no meaning of their own -- a rule, a frame -- carry no id either.
+
+    **Qualified by the form**, because these figures are inlined into the protocol with `opts=inline` and
+    an id has to be unique in the DOCUMENT, not in the file. Seven forms share a heading, a patient band
+    and a legend, and several share a field: the surveillance-end day counts appear on the master sheet
+    and again on the progress chart. Unqualified, one page carried twenty-eight duplicate ids.
+    """
+    return f' id="{prefix}-{ident}"' if ident else ""
 
 
 def typst_document(form: Sheet | Chart, shapes: list[Shape], composer: Composer) -> str:

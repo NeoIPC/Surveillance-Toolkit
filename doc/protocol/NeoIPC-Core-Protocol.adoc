@@ -242,8 +242,7 @@ However, if you submit data to NeoIPC, the information you collect on the master
 
 [#fig-master-sheet]
 .Master data collection sheet
-//image::NeoIPC-Core-Master-Data-Collection-Sheet-Image.svg[Master data collection sheet,{full-width},pdfwidth=75%,opts=inline,align="center"]
-image::NeoIPC-Core-Master-Data-Collection-Sheet-Image.png[Master data collection sheet,{full-width},pdfwidth=75%,align="center"]
+image::NeoIPC-Core-Master-Sheet.svg[Master data collection sheet,{full-width},pdfwidth=75%,opts=inline,align="center"]
 
 <<<
 [#sec-collect-progress-chart]
@@ -266,8 +265,7 @@ In this case, any readmission should be recorded as a new admission, and the adm
 
 [#fig-progress-chart]
 .Patient progress chart
-//image::NeoIPC-Core-Patient-Progress-Chart-Image.svg[Patient progress chart,{full-width},pdfwidth=100%,opts=inline,align="center"]
-image::NeoIPC-Core-Patient-Progress-Chart-Image.png[Patient progress chart,{full-width},pdfwidth=100%,align="center"]
+image::NeoIPC-Core-Patient-Progress-Chart.svg[Patient progress chart,{full-width},pdfwidth=100%,opts=inline,align="center"]
 
 <<<
 [#sec-collect-surgical-procedure-data-collection]
@@ -279,8 +277,7 @@ In addition to the recording of the procedure, you need to start following up th
 
 [#fig-surgical-sheet]
 .Surgical procedure data collection sheet
-//image::NeoIPC-Core-Surgical-Procedure-Data-Collection-Sheet-Image.svg[Surgical procedure data collection sheet,{full-width},pdfwidth=75%,opts=inline,align="center"]
-image::NeoIPC-Core-Surgical-Procedure-Data-Collection-Sheet-Image.png[Surgical procedure data collection sheet,{full-width},pdfwidth=75%,align="center"]
+image::NeoIPC-Core-Surgery-Sheet.svg[Surgical procedure data collection sheet,{full-width},pdfwidth=75%,opts=inline,align="center"]
 
 [#sec-collect-infection-data-collection]
 === Infection Data Collection
@@ -310,8 +307,7 @@ If an eligible infant develops a hospital-acquired primary sepsis/bloodstream in
 
 [#fig-bsi-sheet]
 .Primary sepsis/BSI reporting sheet
-//image::NeoIPC-Core-Primary-Sepsis-BSI-Reporting-Sheet-Image.svg[Primary sepsis/BSI reporting sheet,{full-width},pdfwidth=75%,opts=inline,align="center"]
-image::NeoIPC-Core-Primary-Sepsis-BSI-Reporting-Sheet-Image.png[Primary sepsis/BSI reporting sheet,{full-width},pdfwidth=75%,align="center"]
+image::NeoIPC-Core-BSI-Sheet.svg[Primary sepsis/BSI reporting sheet,{full-width},pdfwidth=75%,opts=inline,align="center"]
 
 <<<
 [#sec-collect-necrotizing-enterocolitis]
@@ -320,8 +316,7 @@ If an eligible infant develops a necrotizing enterocolitis according to the NeoI
 
 [#fig-nec-sheet]
 .NEC reporting sheet
-//image::NeoIPC-Core-NEC-Reporting-Sheet-Image.svg[NEC reporting sheet,{full-width},pdfwidth=75%,opts=inline,align="center"]
-image::NeoIPC-Core-NEC-Reporting-Sheet-Image.png[NEC reporting sheet,{full-width},pdfwidth=75%,align="center"]
+image::NeoIPC-Core-NEC-Sheet.svg[NEC reporting sheet,{full-width},pdfwidth=75%,opts=inline,align="center"]
 
 <<<
 [#sec-collect-pneumonia]
@@ -330,8 +325,7 @@ If an eligible infant develops a hospital-acquired pneumonia according to the Ne
 
 [#fig-pneumonia-sheet]
 .Pneumonia reporting sheet
-//image::NeoIPC-Core-Pneumonia-Reporting-Sheet-Image.svg[Pneumonia reporting sheet,{full-width},pdfwidth=75%,opts=inline,align="center"]
-image::NeoIPC-Core-Pneumonia-Reporting-Sheet-Image.png[Pneumonia reporting sheet,{full-width},pdfwidth=75%,align="center"]
+image::NeoIPC-Core-HAP-Sheet.svg[Pneumonia reporting sheet,{full-width},pdfwidth=75%,opts=inline,align="center"]
 
 <<<
 [#sec-collect-surgical-site-infections]
@@ -340,8 +334,7 @@ If an eligible infant develops a surgical site infection according to the NeoIPC
 
 [#fig-ssi-sheet]
 .SSI reporting sheet
-//image::NeoIPC-Core-SSI-Reporting-Sheet-Image.svg[SSI reporting sheet,{full-width},pdfwidth=75%,opts=inline,align="center"]
-image::NeoIPC-Core-SSI-Reporting-Sheet-Image.png[SSI reporting sheet,{full-width},pdfwidth=75%,align="center"]
+image::NeoIPC-Core-SSI-Sheet.svg[SSI reporting sheet,{full-width},pdfwidth=75%,opts=inline,align="center"]
 
 <<<
 [#sec-collect-device-associated-infection]

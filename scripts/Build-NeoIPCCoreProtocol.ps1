@@ -56,6 +56,14 @@ $imgDir = Join-Path -Resolve -Path $protocolDir -ChildPath 'img'
 $commonImgDir = Join-Path -Resolve -Path $workspaceFolder -ChildPath 'common' -AdditionalChildPath 'img'
 $resDir = Join-Path -Resolve -Path $protocolDir -ChildPath 'resx'
 $transDir = Join-Path -Resolve -Path $protocolDir -ChildPath 'xslt'
+$commonDir = Join-Path -Resolve -Path $workspaceFolder -ChildPath 'common'
+# The collection sheets are derived from the canonical metadata by a generator rather than transformed
+# from a resource file, so this build needs the metadata directory it reads and an interpreter to run it.
+# Resolved once, here, because a missing interpreter should stop the build before any culture is rendered
+# rather than part-way through the first one.
+$sheetMetadataDir = Join-Path -Resolve -Path $metadataFolder -ChildPath 'common'
+$sheetGenerator = Join-Path -Resolve -Path $PSScriptRoot -ChildPath 'build-collection-sheets.py'
+$python = Find-Python
 
 $infectiousAgentsFileName = 'NeoIPC-Infectious-Agents.adoc'
 $antibioticsFileName = 'NeoIPC-Antibiotics.adoc'
@@ -179,11 +187,6 @@ $previewWatermark.Load((Get-ChildItem $transDir/Preview-Watermark.xslt).FullName
 $decisionFlow = New-Object System.Xml.Xsl.XslCompiledTransform
 $decisionFlow.Load((Get-ChildItem $transDir/NeoIPC-Core-Decision-Flow.xslt).FullName, [System.Xml.Xsl.XsltSettings]::TrustedXslt, $resolver)
 
-$masterDataSheet = New-Object System.Xml.Xsl.XslCompiledTransform
-$masterDataSheet.Load((Get-ChildItem $transDir/NeoIPC-Core-Master-Data-Collection-Sheet.xslt).FullName, [System.Xml.Xsl.XsltSettings]::TrustedXslt, $resolver)
-
-$masterDataSheetImage = New-Object System.Xml.Xsl.XslCompiledTransform
-$masterDataSheetImage.Load((Get-ChildItem $transDir/NeoIPC-Core-Master-Data-Collection-Sheet-Image.xslt).FullName, [System.Xml.Xsl.XsltSettings]::TrustedXslt, $resolver)
 
 $AWaReASrc = (Join-Path -Resolve -Path $commonImgDir -ChildPath 'AWaRe-A.svg')
 $AWaReADest = (Join-Path -Path $imgDir -ChildPath 'AWaRe-A.svg')
@@ -283,13 +286,37 @@ foreach ($targetCulture in $targetCultures)
         Write-Verbose "Generating decision flow SVG"
         $decisionFlow.Transform("$resDir/NeoIPC-Core-Decision-Flow$localeSuffix.resx", "$imgDir/NeoIPC-Core-Decision-Flow$localeSuffix.svg")
     }
-    Build-Target (Get-LocalisedPath $imgDir 'NeoIPC-Core-Master-Data-Collection-Sheet.svg' $targetCulture) (Get-LocalisedPath $resDir 'NeoIPC-Core-Master-Data-Collection-Sheet.resx' $targetCulture -All -Existing),(Join-Path $transDir 'NeoIPC-Core-Master-Data-Collection-Sheet.xslt') {
-        Write-Verbose "Generating master data collection sheet SVG"
-        $masterDataSheet.Transform("$resDir/NeoIPC-Core-Master-Data-Collection-Sheet$localeSuffix.resx", "$imgDir/NeoIPC-Core-Master-Data-Collection-Sheet$localeSuffix.svg")
-    }
-    Build-Target (Get-LocalisedPath $imgDir 'NeoIPC-Core-Master-Data-Collection-Sheet-Image.svg' $targetCulture) (Get-LocalisedPath $resDir 'NeoIPC-Core-Master-Data-Collection-Sheet.resx' $targetCulture -All -Existing),(Join-Path $transDir 'NeoIPC-Core-Master-Data-Collection-Sheet-Image.xslt') {
-        Write-Verbose "Generating master data collection sheet image SVG"
-        $masterDataSheetImage.Transform("$resDir/NeoIPC-Core-Master-Data-Collection-Sheet$localeSuffix.resx", "$imgDir/NeoIPC-Core-Master-Data-Collection-Sheet-Image$localeSuffix.svg")
+    # The seven collection sheets, derived from the canonical metadata rather than transformed from a
+    # hand-maintained resource file. ONE run emits all of them, so the target is one representative sheet
+    # and the inputs are everything the generator reads: the metadata it derives fields from, the
+    # presentation decisions, the figure strings, the generator itself, and this locale's catalogues.
+    #
+    # A missing metadata catalogue stops the build rather than yielding a silently English sheet. The
+    # culture set here is what po4a actually produced, so a culture arriving without one is a gap worth
+    # hearing about rather than papering over.
+    $sheetInputs = @(
+        (Join-Path $sheetMetadataDir 'dataElements.csv')
+        (Join-Path $sheetMetadataDir 'programStageSections.csv')
+        (Join-Path $sheetMetadataDir 'programStageDataElements.csv')
+        (Join-Path $sheetMetadataDir 'optionSets.csv')
+        (Join-Path $sheetMetadataDir 'options.csv')
+        (Join-Path $sheetMetadataDir 'trackedEntityAttributes.csv')
+        (Join-Path $sheetMetadataDir 'programTrackedEntityAttributes.csv')
+        (Join-Path $commonDir 'sheet-layout.yaml')
+        (Join-Path $commonDir 'figure-strings.yaml')
+        (Join-Path $workspaceFolder 'glossary.yaml')
+        $sheetGenerator
+    ) + @(Get-LocalisedPath $commonDir 'figure-strings.yaml' $targetCulture -All -Existing) +
+        @(Get-LocalisedPath $poDir 'metadata.po' $targetCulture -All -Existing)
+    Build-Target (Get-LocalisedPath $imgDir 'NeoIPC-Core-Master-Sheet.svg' $targetCulture) $sheetInputs {
+        Write-Verbose "Generating the data collection sheets"
+        $sheetArgs = @('--out', $imgDir, '--format', 'svg')
+        if ($targetCulture.Name) { $sheetArgs += @('--language', $targetCulture.TwoLetterISOLanguageName) }
+        & $python $sheetGenerator @sheetArgs
+        if ($LASTEXITCODE -ne 0) {
+            throw "The data collection sheets could not be generated for '$(
+                if ($targetCulture.Name) { $targetCulture.Name } else { 'the invariant culture' })'."
+        }
     }
     # The protocol source is po4a's output, so it takes the subdirectory convention. Everything else
     # resolved in this loop is generated by this build and stays flat with a culture suffix.

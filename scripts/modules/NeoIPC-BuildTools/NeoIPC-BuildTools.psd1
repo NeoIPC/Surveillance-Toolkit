@@ -74,6 +74,7 @@ FunctionsToExport = @(
     'Build-Target'
     'Export-AsciiDocIds'
     'Export-AsciiDocReferences'
+    'Find-Python'
     'Get-LocalisedPath'
     'Get-Po4aOutputPath'
     'Import-Translations'

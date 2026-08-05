@@ -1,6 +1,6 @@
-<svg version="1.1" viewBox="0 0 29700 21000" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" role="img" xml:lang="en">
-  <title>NeoIPC – Core Module (VLBW/VPT Infants) — Patient Progress Chart</title>
-  <desc>Patient Progress Chart. One row per measure, one column per day of the month, and a column for the row's total. Rows — Patient days, CVC days, PVC days, INV days, NIV days, Human milk days, Kangaroo care days, Probiotic days, Antibiotic days, Antibiotic substance 1 days, Antibiotic substance 2 days, Antibiotic substance 3 days, Antibiotic substance 4 days, Antibiotic substance 5 days, Antibiotic substance 6 days, Antibiotic substance 7 days, Antibiotic substance 8 days, Antibiotic substance 9 days.</desc>
+<svg version="1.1" viewBox="0 0 21000 29700" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" role="img" xml:lang="en">
+  <title>NeoIPC – Core Module (VLBW/VPT Infants) — Pneumonia</title>
+  <desc>Pneumonia data collection sheet. Sections — Hospital-Acquired Pneumonia, Clinical and Laboratory Criteria, Identified Organisms Recovered from the Respiratory Tract, Secondary Bloodstream Infection (BSI)/Sepsis.</desc>
   <style>
     text { font-family: 'Noto Sans', 'Noto Sans Math'; fill: #000; }
     .title { font-size: 560px; fill: #0083c1; }
@@ -23,7 +23,7 @@
     .brand-orange { fill: #ff9015; }
   </style>
   <!-- The NeoIPC logo is owned by Fondazione Penta ETS and is not covered by this repository's MIT licence. Confirm any reuse with the NeoIPC/Penta team. -->
-  <symbol id="patient-progress-chart-neoipc-logo" viewBox="0 0 797.8 226.7">
+  <symbol id="hap-neoipc-logo" viewBox="0 0 797.8 226.7">
     <g transform="translate(-224.5 -112.1)">
       <path class="brand-blue" d="M 344.03125 202.027344 L 348.339844 209.886719 C 348.925781 210.953125 349.808594 211.832031 350.875 212.414062 L 358.746094 216.703125 C 359.890625 217.328125 359.890625 218.96875 358.75 219.597656 L 350.894531 223.910156 C 349.824219 224.496094 348.945312 225.375 348.363281 226.445312 L 344.074219 234.3125 C 343.449219 235.457031 341.808594 235.460938 341.179688 234.316406 L 336.871094 226.460938 C 336.285156 225.390625 335.402344 224.515625 334.332031 223.929688 L 326.464844 219.640625 C 325.320312 219.015625 325.316406 217.375 326.460938 216.746094 L 334.320312 212.4375 C 335.386719 211.851562 336.265625 210.972656 336.847656 209.898438 L 341.136719 202.03125 C 341.761719 200.886719 343.402344 200.882812 344.03125 202.027344"/>
       <path class="brand-blue" d="M 377.597656 184.820312 L 380.757812 190.582031 C 381.191406 191.367188 381.835938 192.011719 382.617188 192.4375 L 388.390625 195.585938 C 389.230469 196.042969 389.230469 197.246094 388.394531 197.707031 L 382.632812 200.867188 C 381.847656 201.296875 381.203125 201.941406 380.777344 202.726562 L 377.628906 208.5 C 377.171875 209.339844 375.96875 209.339844 375.507812 208.503906 L 372.347656 202.738281 C 371.917969 201.957031 371.269531 201.3125 370.488281 200.882812 L 364.714844 197.738281 C 363.875 197.28125 363.875 196.074219 364.710938 195.617188 L 370.476562 192.453125 C 371.257812 192.023438 371.902344 191.378906 372.332031 190.59375 L 375.476562 184.820312 C 375.933594 183.984375 377.136719 183.980469 377.597656 184.820312"/>
@@ -47,132 +47,298 @@
       <path class="brand-blue" d="M 405.589844 503.722656 C 404.347656 504.035156 402.988281 504.191406 401.507812 504.191406 C 396.050781 504.191406 393.332031 501.902344 393.332031 497.324219 L 393.332031 394.695312 C 393.953125 394.445312 394.917969 394.164062 396.21875 393.855469 C 397.519531 393.554688 398.910156 393.394531 400.390625 393.394531 C 405.707031 393.394531 408.367188 395.683594 408.367188 400.261719 L 408.367188 502.894531 C 407.75 503.140625 406.828125 503.414062 405.589844 503.722656"/>
     </g>
   </symbol>
-  <use href="#patient-progress-chart-neoipc-logo" x="24700" y="800" width="4200" height="1193"/>
-  <text id="patient-progress-chart-heading" class="title" x="800" y="1360">NeoIPC – Core Module (VLBW/VPT Infants)</text>
-  <text id="patient-progress-chart-patient-progress-chart-title" class="subtitle" x="800" y="1980">Patient Progress Chart</text>
-  <rect class="band" x="800" y="2380" width="28100" height="460"/>
-  <text id="patient-progress-chart-patient" class="section" x="14850" y="2690">Patient</text>
-  <rect class="notransmit" x="800" y="2840" width="28100" height="1482"/>
-  <rect class="notransmit-edge" x="800" y="2840" width="60" height="1482"/>
+  <use href="#hap-neoipc-logo" x="16000" y="800" width="4200" height="1193"/>
+  <text id="hap-heading" class="title" x="800" y="1360">NeoIPC – Core Module (VLBW/VPT Infants)</text>
+  <text id="hap-hap-title" class="subtitle" x="800" y="1980">Pneumonia</text>
+  <rect class="band" x="800" y="2380" width="19400" height="460"/>
+  <text id="hap-patient" class="section" x="10500" y="2690">Patient</text>
+  <rect class="notransmit" x="800" y="2840" width="19400" height="1812"/>
+  <rect class="notransmit-edge" x="800" y="2840" width="60" height="1812"/>
   <text class="label" x="980" y="3167">Patient ID</text>
-  <line class="column" x1="5800" y1="2840" x2="5800" y2="3366"/>
-  <line class="rule" x1="800" y1="3366" x2="28900" y2="3366"/>
+  <line class="column" x1="6050" y1="2840" x2="6050" y2="3366"/>
+  <line class="rule" x1="800" y1="3366" x2="20200" y2="3366"/>
   <text class="label" x="980" y="3693">Patient name</text>
-  <line class="column" x1="5800" y1="3366" x2="5800" y2="3892"/>
-  <line class="rule" x1="800" y1="3892" x2="28900" y2="3892"/>
-  <text class="note" x="980" y="4158">These fields serve to unambiguously identify the patient within the hospital. They are not part of the NeoIPC surveillance dataset and must not be transmitted to the data collection platform.</text>
-  <line class="rule" x1="800" y1="4322" x2="28900" y2="4322"/>
-  <text class="label" x="980" y="4649">Month/Year</text>
-  <line class="column" x1="5800" y1="4322" x2="5800" y2="4848"/>
-  <text class="label" x="15030" y="4649">Chart no</text>
-  <line class="column" x1="19850" y1="4322" x2="19850" y2="4848"/>
-  <line class="column" x1="14850" y1="4322" x2="14850" y2="4848"/>
-  <line class="rule" x1="800" y1="4848" x2="28900" y2="4848"/>
-  <text class="label" x="980" y="5262">Days</text>
-  <text class="day" x="5621" y="5262">1</text>
-  <text class="day" x="6360" y="5262">2</text>
-  <text class="day" x="7099" y="5262">3</text>
-  <text class="day" x="7838" y="5262">4</text>
-  <text class="day" x="8577" y="5262">5</text>
-  <text class="day" x="9316" y="5262">6</text>
-  <text class="day" x="10055" y="5262">7</text>
-  <text class="day" x="10794" y="5262">8</text>
-  <text class="day" x="11533" y="5262">9</text>
-  <text class="day" x="12272" y="5262">10</text>
-  <text class="day" x="13011" y="5262">11</text>
-  <text class="day" x="13750" y="5262">12</text>
-  <text class="day" x="14489" y="5262">13</text>
-  <text class="day" x="15228" y="5262">14</text>
-  <text class="day" x="15967" y="5262">15</text>
-  <text class="day" x="16706" y="5262">16</text>
-  <text class="day" x="17445" y="5262">17</text>
-  <text class="day" x="18184" y="5262">18</text>
-  <text class="day" x="18923" y="5262">19</text>
-  <text class="day" x="19662" y="5262">20</text>
-  <text class="day" x="20401" y="5262">21</text>
-  <text class="day" x="21140" y="5262">22</text>
-  <text class="day" x="21879" y="5262">23</text>
-  <text class="day" x="22618" y="5262">24</text>
-  <text class="day" x="23357" y="5262">25</text>
-  <text class="day" x="24096" y="5262">26</text>
-  <text class="day" x="24835" y="5262">27</text>
-  <text class="day" x="25574" y="5262">28</text>
-  <text class="day" x="26313" y="5262">29</text>
-  <text class="day" x="27052" y="5262">30</text>
-  <text class="day" x="27791" y="5262">31</text>
-  <text class="day" x="28530" y="5233">∑</text>
-  <line class="rule" x1="800" y1="5548" x2="28900" y2="5548"/>
-  <text id="patient-progress-chart-neoipc-surveillance-end-patient-days" class="label" x="980" y="5962">Patient days</text>
-  <line class="rule" x1="800" y1="6248" x2="28900" y2="6248"/>
-  <text id="patient-progress-chart-neoipc-surveillance-end-cvc-days" class="label" x="980" y="6662">CVC days</text>
-  <line class="rule" x1="800" y1="6948" x2="28900" y2="6948"/>
-  <text id="patient-progress-chart-neoipc-surveillance-end-pvc-days" class="label" x="980" y="7362">PVC days</text>
-  <line class="rule" x1="800" y1="7648" x2="28900" y2="7648"/>
-  <text id="patient-progress-chart-neoipc-surveillance-end-inv-days" class="label" x="980" y="8062">INV days</text>
-  <line class="rule" x1="800" y1="8348" x2="28900" y2="8348"/>
-  <text id="patient-progress-chart-neoipc-surveillance-end-niv-days" class="label" x="980" y="8762">NIV days</text>
-  <line class="rule" x1="800" y1="9048" x2="28900" y2="9048"/>
-  <text id="patient-progress-chart-neoipc-surveillance-end-human-milk-days" class="label" x="980" y="9462">Human milk days</text>
-  <line class="rule" x1="800" y1="9748" x2="28900" y2="9748"/>
-  <text id="patient-progress-chart-neoipc-surveillance-end-kangaroo-care-days" class="label" x="980" y="10162">Kangaroo care days</text>
-  <line class="rule" x1="800" y1="10448" x2="28900" y2="10448"/>
-  <text id="patient-progress-chart-neoipc-surveillance-end-probiotic-days" class="label" x="980" y="10862">Probiotic days</text>
-  <line class="rule" x1="800" y1="11148" x2="28900" y2="11148"/>
-  <text id="patient-progress-chart-neoipc-surveillance-end-ab-days" class="label" x="980" y="11562">Antibiotic days</text>
-  <line class="rule" x1="800" y1="11848" x2="28900" y2="11848"/>
-  <text id="patient-progress-chart-neoipc-surveillance-end-ab-subst-01-days" class="label" x="980" y="12262">Antibiotic substance 1 days</text>
-  <line class="rule" x1="800" y1="12548" x2="28900" y2="12548"/>
-  <text id="patient-progress-chart-neoipc-surveillance-end-ab-subst-02-days" class="label" x="980" y="12962">Antibiotic substance 2 days</text>
-  <line class="rule" x1="800" y1="13248" x2="28900" y2="13248"/>
-  <text id="patient-progress-chart-neoipc-surveillance-end-ab-subst-03-days" class="label" x="980" y="13662">Antibiotic substance 3 days</text>
-  <line class="rule" x1="800" y1="13948" x2="28900" y2="13948"/>
-  <text id="patient-progress-chart-neoipc-surveillance-end-ab-subst-04-days" class="label" x="980" y="14362">Antibiotic substance 4 days</text>
-  <line class="rule" x1="800" y1="14648" x2="28900" y2="14648"/>
-  <text id="patient-progress-chart-neoipc-surveillance-end-ab-subst-05-days" class="label" x="980" y="15062">Antibiotic substance 5 days</text>
-  <line class="rule" x1="800" y1="15348" x2="28900" y2="15348"/>
-  <text id="patient-progress-chart-neoipc-surveillance-end-ab-subst-06-days" class="label" x="980" y="15762">Antibiotic substance 6 days</text>
-  <line class="rule" x1="800" y1="16048" x2="28900" y2="16048"/>
-  <text id="patient-progress-chart-neoipc-surveillance-end-ab-subst-07-days" class="label" x="980" y="16462">Antibiotic substance 7 days</text>
-  <line class="rule" x1="800" y1="16748" x2="28900" y2="16748"/>
-  <text id="patient-progress-chart-neoipc-surveillance-end-ab-subst-08-days" class="label" x="980" y="17162">Antibiotic substance 8 days</text>
-  <line class="rule" x1="800" y1="17448" x2="28900" y2="17448"/>
-  <text id="patient-progress-chart-neoipc-surveillance-end-ab-subst-09-days" class="label" x="980" y="17862">Antibiotic substance 9 days</text>
-  <line class="rule" x1="800" y1="18148" x2="28900" y2="18148"/>
-  <line class="column" x1="5252" y1="4848" x2="5252" y2="18148"/>
-  <line class="hair" x1="5991" y1="4848" x2="5991" y2="18148"/>
-  <line class="hair" x1="6730" y1="4848" x2="6730" y2="18148"/>
-  <line class="hair" x1="7469" y1="4848" x2="7469" y2="18148"/>
-  <line class="hair" x1="8208" y1="4848" x2="8208" y2="18148"/>
-  <line class="hair" x1="8947" y1="4848" x2="8947" y2="18148"/>
-  <line class="hair" x1="9686" y1="4848" x2="9686" y2="18148"/>
-  <line class="hair" x1="10425" y1="4848" x2="10425" y2="18148"/>
-  <line class="hair" x1="11164" y1="4848" x2="11164" y2="18148"/>
-  <line class="hair" x1="11903" y1="4848" x2="11903" y2="18148"/>
-  <line class="hair" x1="12642" y1="4848" x2="12642" y2="18148"/>
-  <line class="hair" x1="13381" y1="4848" x2="13381" y2="18148"/>
-  <line class="hair" x1="14120" y1="4848" x2="14120" y2="18148"/>
-  <line class="hair" x1="14859" y1="4848" x2="14859" y2="18148"/>
-  <line class="hair" x1="15598" y1="4848" x2="15598" y2="18148"/>
-  <line class="hair" x1="16337" y1="4848" x2="16337" y2="18148"/>
-  <line class="hair" x1="17076" y1="4848" x2="17076" y2="18148"/>
-  <line class="hair" x1="17815" y1="4848" x2="17815" y2="18148"/>
-  <line class="hair" x1="18554" y1="4848" x2="18554" y2="18148"/>
-  <line class="hair" x1="19293" y1="4848" x2="19293" y2="18148"/>
-  <line class="hair" x1="20032" y1="4848" x2="20032" y2="18148"/>
-  <line class="hair" x1="20771" y1="4848" x2="20771" y2="18148"/>
-  <line class="hair" x1="21510" y1="4848" x2="21510" y2="18148"/>
-  <line class="hair" x1="22249" y1="4848" x2="22249" y2="18148"/>
-  <line class="hair" x1="22988" y1="4848" x2="22988" y2="18148"/>
-  <line class="hair" x1="23727" y1="4848" x2="23727" y2="18148"/>
-  <line class="hair" x1="24466" y1="4848" x2="24466" y2="18148"/>
-  <line class="hair" x1="25205" y1="4848" x2="25205" y2="18148"/>
-  <line class="hair" x1="25944" y1="4848" x2="25944" y2="18148"/>
-  <line class="hair" x1="26683" y1="4848" x2="26683" y2="18148"/>
-  <line class="hair" x1="27422" y1="4848" x2="27422" y2="18148"/>
-  <line class="column" x1="28161" y1="4848" x2="28161" y2="18148"/>
-  <line class="column" x1="28900" y1="4848" x2="28900" y2="18148"/>
-  <text class="label" x="980" y="18407">Comments</text>
-  <line class="rule" x1="800" y1="19900" x2="28900" y2="19900"/>
-  <rect class="frame" x="800" y="2380" width="28100" height="17520"/>
-  <text class="note" x="800" y="20200">For more information, please see the Data Dictionary and Abbreviations sections of the NeoIPC Core Module protocol.</text>
+  <line class="column" x1="6050" y1="3366" x2="6050" y2="3892"/>
+  <line class="rule" x1="800" y1="3892" x2="20200" y2="3892"/>
+  <text class="note" x="980" y="4158">These fields serve to unambiguously identify the patient within the hospital. They are not part of the NeoIPC surveillance dataset and must not be transmitted to the data collection</text>
+  <text class="note" x="980" y="4488">platform.</text>
+  <line class="rule" x1="800" y1="4652" x2="20200" y2="4652"/>
+  <text class="label" x="980" y="4979">Infection date (required)</text>
+  <line class="column" x1="6050" y1="4652" x2="6050" y2="5178"/>
+  <line class="rule" x1="800" y1="5178" x2="20200" y2="5178"/>
+  <rect id="hap-neoipc-hap-imaging-findings" class="mark" x="980" y="5268" width="260" height="260"/>
+  <text class="label" x="1350" y="5505">Imaging findings (required)</text>
+  <rect id="hap-neoipc-hap-respiratory-support" class="mark" x="10500" y="5268" width="260" height="260"/>
+  <text class="label" x="10870" y="5505">Beginning or increase in respiratory support (required)</text>
+  <line class="rule" x1="800" y1="5704" x2="20200" y2="5704"/>
+  <text class="label" x="980" y="6031">Device association (required)</text>
+  <circle id="hap-neoipc-hap-device-association-1" class="mark" cx="1810" cy="6307" r="130"/>
+  <text class="option" x="2050" y="6407">Not ventilatory support associated</text>
+  <circle id="hap-neoipc-hap-device-association-2" class="mark" cx="7533" cy="6307" r="130"/>
+  <text class="option" x="7773" y="6407">Non-invasive ventilatory support (CPAP, HFNC)</text>
+  <circle id="hap-neoipc-hap-device-association-3" class="mark" cx="14783" cy="6307" r="130"/>
+  <text class="option" x="15023" y="6407">Invasive ventilation (intubation)</text>
+  <line class="rule" x1="800" y1="6690" x2="20200" y2="6690"/>
+  <rect class="band" x="800" y="6690" width="19400" height="460"/>
+  <text id="hap-neoipc-hap-stg-sect-clin-lab-crit" class="section" x="10500" y="7000">Clinical and Laboratory Criteria</text>
+  <text class="label" x="980" y="7477">Culture/non-culture based</text>
+  <text class="label" x="980" y="7867">microbiologic testing (required)</text>
+  <circle id="hap-neoipc-hap-microbiological-test-result-1" class="mark" cx="6360" cy="7767" r="130"/>
+  <text class="option" x="6600" y="7867">Yes</text>
+  <circle id="hap-neoipc-hap-microbiological-test-result-2" class="mark" cx="7986" cy="7767" r="130"/>
+  <text class="option" x="8226" y="7867">No</text>
+  <circle id="hap-neoipc-hap-microbiological-test-result-3" class="mark" cx="9558" cy="7767" r="130"/>
+  <text class="option" x="9798" y="7867">Not tested</text>
+  <line class="column" x1="6050" y1="7150" x2="6050" y2="8066"/>
+  <line class="rule" x1="800" y1="8066" x2="20200" y2="8066"/>
+  <rect id="hap-neoipc-hap-bradycardia" class="mark" x="980" y="8156" width="260" height="260"/>
+  <text class="label" x="1350" y="8393">New/more frequent bradycardia or tachycardia</text>
+  <rect id="hap-neoipc-hap-tachypnoea" class="mark" x="10500" y="8156" width="260" height="260"/>
+  <text class="label" x="10870" y="8393">Tachypnoea/Apnoeas</text>
+  <line class="rule" x1="800" y1="8592" x2="20200" y2="8592"/>
+  <rect id="hap-neoipc-hap-purulent-tracheal-aspirate" class="mark" x="980" y="8682" width="260" height="260"/>
+  <text class="label" x="1350" y="8919">Purulent tracheal aspirate</text>
+  <rect id="hap-neoipc-hap-respiratory-distress" class="mark" x="10500" y="8682" width="260" height="260"/>
+  <text class="label" x="10870" y="8919">Respiratory distress</text>
+  <line class="rule" x1="800" y1="9118" x2="20200" y2="9118"/>
+  <rect id="hap-neoipc-hap-fever" class="mark" x="980" y="9208" width="260" height="260"/>
+  <text class="label" x="1350" y="9445">Temperature abnormalities</text>
+  <rect id="hap-neoipc-hap-increased-respiratory-secretion" class="mark" x="10500" y="9208" width="260" height="260"/>
+  <text class="label" x="10870" y="9445">Increased respiratory secretion</text>
+  <line class="rule" x1="800" y1="9644" x2="20200" y2="9644"/>
+  <rect id="hap-neoipc-hap-laboratory-findings" class="mark" x="980" y="9734" width="260" height="260"/>
+  <text class="label" x="1350" y="9971">Increased CRP/interleukin</text>
+  <rect id="hap-neoipc-hap-it-ratio" class="mark" x="10500" y="9734" width="260" height="260"/>
+  <text class="label" x="10870" y="9971">I/T-Ratio &gt; 0.2</text>
+  <line class="rule" x1="800" y1="10170" x2="20200" y2="10170"/>
+  <rect class="band" x="800" y="10170" width="19400" height="460"/>
+  <text id="hap-neoipc-hap-stg-sect-agents" class="section" x="10500" y="10480">Identified Organisms Recovered from the Respiratory Tract</text>
+  <text class="label" x="980" y="10957">Organism 1</text>
+  <line class="column" x1="6050" y1="10630" x2="6050" y2="11156"/>
+  <line class="hair" x1="800" y1="11156" x2="20200" y2="11156"/>
+  <text class="child" x="1680" y="11409">Source</text>
+  <circle id="hap-neoipc-hap-pathogen-1-source-1" class="mark" cx="6360" cy="11309" r="130"/>
+  <text class="option" x="6600" y="11409">Upper respiratory tract</text>
+  <circle id="hap-neoipc-hap-pathogen-1-source-2" class="mark" cx="10564" cy="11309" r="130"/>
+  <text class="option" x="10804" y="11409">Lower respiratory tract</text>
+  <circle id="hap-neoipc-hap-pathogen-1-source-3" class="mark" cx="14750" cy="11309" r="130"/>
+  <text class="option" x="14990" y="11409">Upper and lower respiratory tract</text>
+  <line class="column" x1="6050" y1="11156" x2="6050" y2="11499"/>
+  <line class="hair" x1="800" y1="11499" x2="20200" y2="11499"/>
+  <text class="child" x="1680" y="11752">MRSA/VRE/3GCR¹</text>
+  <circle id="hap-neoipc-hap-pathogen-1-3gcr-mrsa-vre-1" class="mark" cx="6360" cy="11652" r="130"/>
+  <text class="option" x="6600" y="11752">Yes</text>
+  <circle id="hap-neoipc-hap-pathogen-1-3gcr-mrsa-vre-2" class="mark" cx="7986" cy="11652" r="130"/>
+  <text class="option" x="8226" y="11752">No</text>
+  <circle id="hap-neoipc-hap-pathogen-1-3gcr-mrsa-vre-3" class="mark" cx="9558" cy="11652" r="130"/>
+  <text class="option" x="9798" y="11752">Not tested</text>
+  <line class="column" x1="6050" y1="11499" x2="6050" y2="11842"/>
+  <line class="hair" x1="800" y1="11842" x2="20200" y2="11842"/>
+  <text class="child" x="1680" y="12095">Carbapenem-resistant</text>
+  <circle id="hap-neoipc-hap-pathogen-1-car-1" class="mark" cx="6360" cy="11995" r="130"/>
+  <text class="option" x="6600" y="12095">Yes</text>
+  <circle id="hap-neoipc-hap-pathogen-1-car-2" class="mark" cx="7986" cy="11995" r="130"/>
+  <text class="option" x="8226" y="12095">No</text>
+  <circle id="hap-neoipc-hap-pathogen-1-car-3" class="mark" cx="9558" cy="11995" r="130"/>
+  <text class="option" x="9798" y="12095">Not tested</text>
+  <line class="column" x1="6050" y1="11842" x2="6050" y2="12185"/>
+  <line class="hair" x1="800" y1="12185" x2="20200" y2="12185"/>
+  <text class="child" x="1680" y="12438">Colistin-resistant</text>
+  <circle id="hap-neoipc-hap-pathogen-1-cor-1" class="mark" cx="6360" cy="12338" r="130"/>
+  <text class="option" x="6600" y="12438">Yes</text>
+  <circle id="hap-neoipc-hap-pathogen-1-cor-2" class="mark" cx="7986" cy="12338" r="130"/>
+  <text class="option" x="8226" y="12438">No</text>
+  <circle id="hap-neoipc-hap-pathogen-1-cor-3" class="mark" cx="9558" cy="12338" r="130"/>
+  <text class="option" x="9798" y="12438">Not tested</text>
+  <line class="column" x1="6050" y1="12185" x2="6050" y2="12528"/>
+  <line class="rule" x1="800" y1="12528" x2="20200" y2="12528"/>
+  <text class="label" x="980" y="12855">Organism 2</text>
+  <line class="column" x1="6050" y1="12528" x2="6050" y2="13054"/>
+  <line class="hair" x1="800" y1="13054" x2="20200" y2="13054"/>
+  <text class="child" x="1680" y="13307">Source</text>
+  <circle id="hap-neoipc-hap-pathogen-2-source-1" class="mark" cx="6360" cy="13207" r="130"/>
+  <text class="option" x="6600" y="13307">Upper respiratory tract</text>
+  <circle id="hap-neoipc-hap-pathogen-2-source-2" class="mark" cx="10564" cy="13207" r="130"/>
+  <text class="option" x="10804" y="13307">Lower respiratory tract</text>
+  <circle id="hap-neoipc-hap-pathogen-2-source-3" class="mark" cx="14750" cy="13207" r="130"/>
+  <text class="option" x="14990" y="13307">Upper and lower respiratory tract</text>
+  <line class="column" x1="6050" y1="13054" x2="6050" y2="13397"/>
+  <line class="hair" x1="800" y1="13397" x2="20200" y2="13397"/>
+  <text class="child" x="1680" y="13650">MRSA/VRE/3GCR¹</text>
+  <circle id="hap-neoipc-hap-pathogen-2-3gcr-mrsa-vre-1" class="mark" cx="6360" cy="13550" r="130"/>
+  <text class="option" x="6600" y="13650">Yes</text>
+  <circle id="hap-neoipc-hap-pathogen-2-3gcr-mrsa-vre-2" class="mark" cx="7986" cy="13550" r="130"/>
+  <text class="option" x="8226" y="13650">No</text>
+  <circle id="hap-neoipc-hap-pathogen-2-3gcr-mrsa-vre-3" class="mark" cx="9558" cy="13550" r="130"/>
+  <text class="option" x="9798" y="13650">Not tested</text>
+  <line class="column" x1="6050" y1="13397" x2="6050" y2="13740"/>
+  <line class="hair" x1="800" y1="13740" x2="20200" y2="13740"/>
+  <text class="child" x="1680" y="13993">Carbapenem-resistant</text>
+  <circle id="hap-neoipc-hap-pathogen-2-car-1" class="mark" cx="6360" cy="13893" r="130"/>
+  <text class="option" x="6600" y="13993">Yes</text>
+  <circle id="hap-neoipc-hap-pathogen-2-car-2" class="mark" cx="7986" cy="13893" r="130"/>
+  <text class="option" x="8226" y="13993">No</text>
+  <circle id="hap-neoipc-hap-pathogen-2-car-3" class="mark" cx="9558" cy="13893" r="130"/>
+  <text class="option" x="9798" y="13993">Not tested</text>
+  <line class="column" x1="6050" y1="13740" x2="6050" y2="14083"/>
+  <line class="hair" x1="800" y1="14083" x2="20200" y2="14083"/>
+  <text class="child" x="1680" y="14336">Colistin-resistant</text>
+  <circle id="hap-neoipc-hap-pathogen-2-cor-1" class="mark" cx="6360" cy="14236" r="130"/>
+  <text class="option" x="6600" y="14336">Yes</text>
+  <circle id="hap-neoipc-hap-pathogen-2-cor-2" class="mark" cx="7986" cy="14236" r="130"/>
+  <text class="option" x="8226" y="14336">No</text>
+  <circle id="hap-neoipc-hap-pathogen-2-cor-3" class="mark" cx="9558" cy="14236" r="130"/>
+  <text class="option" x="9798" y="14336">Not tested</text>
+  <line class="column" x1="6050" y1="14083" x2="6050" y2="14426"/>
+  <line class="rule" x1="800" y1="14426" x2="20200" y2="14426"/>
+  <text class="label" x="980" y="14753">Organism 3</text>
+  <line class="column" x1="6050" y1="14426" x2="6050" y2="14952"/>
+  <line class="hair" x1="800" y1="14952" x2="20200" y2="14952"/>
+  <text class="child" x="1680" y="15205">Source</text>
+  <circle id="hap-neoipc-hap-pathogen-3-source-1" class="mark" cx="6360" cy="15105" r="130"/>
+  <text class="option" x="6600" y="15205">Upper respiratory tract</text>
+  <circle id="hap-neoipc-hap-pathogen-3-source-2" class="mark" cx="10564" cy="15105" r="130"/>
+  <text class="option" x="10804" y="15205">Lower respiratory tract</text>
+  <circle id="hap-neoipc-hap-pathogen-3-source-3" class="mark" cx="14750" cy="15105" r="130"/>
+  <text class="option" x="14990" y="15205">Upper and lower respiratory tract</text>
+  <line class="column" x1="6050" y1="14952" x2="6050" y2="15295"/>
+  <line class="hair" x1="800" y1="15295" x2="20200" y2="15295"/>
+  <text class="child" x="1680" y="15548">MRSA/VRE/3GCR¹</text>
+  <circle id="hap-neoipc-hap-pathogen-3-3gcr-mrsa-vre-1" class="mark" cx="6360" cy="15448" r="130"/>
+  <text class="option" x="6600" y="15548">Yes</text>
+  <circle id="hap-neoipc-hap-pathogen-3-3gcr-mrsa-vre-2" class="mark" cx="7986" cy="15448" r="130"/>
+  <text class="option" x="8226" y="15548">No</text>
+  <circle id="hap-neoipc-hap-pathogen-3-3gcr-mrsa-vre-3" class="mark" cx="9558" cy="15448" r="130"/>
+  <text class="option" x="9798" y="15548">Not tested</text>
+  <line class="column" x1="6050" y1="15295" x2="6050" y2="15638"/>
+  <line class="hair" x1="800" y1="15638" x2="20200" y2="15638"/>
+  <text class="child" x="1680" y="15891">Carbapenem-resistant</text>
+  <circle id="hap-neoipc-hap-pathogen-3-car-1" class="mark" cx="6360" cy="15791" r="130"/>
+  <text class="option" x="6600" y="15891">Yes</text>
+  <circle id="hap-neoipc-hap-pathogen-3-car-2" class="mark" cx="7986" cy="15791" r="130"/>
+  <text class="option" x="8226" y="15891">No</text>
+  <circle id="hap-neoipc-hap-pathogen-3-car-3" class="mark" cx="9558" cy="15791" r="130"/>
+  <text class="option" x="9798" y="15891">Not tested</text>
+  <line class="column" x1="6050" y1="15638" x2="6050" y2="15981"/>
+  <line class="hair" x1="800" y1="15981" x2="20200" y2="15981"/>
+  <text class="child" x="1680" y="16234">Colistin-resistant</text>
+  <circle id="hap-neoipc-hap-pathogen-3-cor-1" class="mark" cx="6360" cy="16134" r="130"/>
+  <text class="option" x="6600" y="16234">Yes</text>
+  <circle id="hap-neoipc-hap-pathogen-3-cor-2" class="mark" cx="7986" cy="16134" r="130"/>
+  <text class="option" x="8226" y="16234">No</text>
+  <circle id="hap-neoipc-hap-pathogen-3-cor-3" class="mark" cx="9558" cy="16134" r="130"/>
+  <text class="option" x="9798" y="16234">Not tested</text>
+  <line class="column" x1="6050" y1="15981" x2="6050" y2="16324"/>
+  <line class="rule" x1="800" y1="16324" x2="20200" y2="16324"/>
+  <rect class="band" x="800" y="16324" width="19400" height="460"/>
+  <text id="hap-neoipc-hap-stg-sect-sec-bsi" class="section" x="10500" y="16634">Secondary Bloodstream Infection (BSI)/Sepsis</text>
+  <text class="label" x="980" y="17111">Secondary bloodstream</text>
+  <text class="label" x="980" y="17501">infection (required)</text>
+  <circle id="hap-neoipc-hap-secondary-bsi-1" class="mark" cx="6360" cy="17401" r="130"/>
+  <text class="option" x="6600" y="17501">Yes</text>
+  <circle id="hap-neoipc-hap-secondary-bsi-2" class="mark" cx="7986" cy="17401" r="130"/>
+  <text class="option" x="8226" y="17501">No</text>
+  <circle id="hap-neoipc-hap-secondary-bsi-3" class="mark" cx="9558" cy="17401" r="130"/>
+  <text class="option" x="9798" y="17501">No follow-up</text>
+  <line class="column" x1="6050" y1="16784" x2="6050" y2="17700"/>
+  <line class="rule" x1="800" y1="17700" x2="20200" y2="17700"/>
+  <text class="label" x="980" y="18027">Organism 1</text>
+  <line class="column" x1="6050" y1="17700" x2="6050" y2="18226"/>
+  <line class="hair" x1="800" y1="18226" x2="20200" y2="18226"/>
+  <text class="child" x="1680" y="18479">MRSA/VRE/3GCR¹</text>
+  <circle id="hap-neoipc-hap-sec-bsi-pathogen-1-3gcr-mrsa-vre-1" class="mark" cx="6360" cy="18379" r="130"/>
+  <text class="option" x="6600" y="18479">Yes</text>
+  <circle id="hap-neoipc-hap-sec-bsi-pathogen-1-3gcr-mrsa-vre-2" class="mark" cx="7986" cy="18379" r="130"/>
+  <text class="option" x="8226" y="18479">No</text>
+  <circle id="hap-neoipc-hap-sec-bsi-pathogen-1-3gcr-mrsa-vre-3" class="mark" cx="9558" cy="18379" r="130"/>
+  <text class="option" x="9798" y="18479">Not tested</text>
+  <line class="column" x1="6050" y1="18226" x2="6050" y2="18569"/>
+  <line class="hair" x1="800" y1="18569" x2="20200" y2="18569"/>
+  <text class="child" x="1680" y="18822">Carbapenem-resistant</text>
+  <circle id="hap-neoipc-hap-sec-bsi-pathogen-1-car-1" class="mark" cx="6360" cy="18722" r="130"/>
+  <text class="option" x="6600" y="18822">Yes</text>
+  <circle id="hap-neoipc-hap-sec-bsi-pathogen-1-car-2" class="mark" cx="7986" cy="18722" r="130"/>
+  <text class="option" x="8226" y="18822">No</text>
+  <circle id="hap-neoipc-hap-sec-bsi-pathogen-1-car-3" class="mark" cx="9558" cy="18722" r="130"/>
+  <text class="option" x="9798" y="18822">Not tested</text>
+  <line class="column" x1="6050" y1="18569" x2="6050" y2="18912"/>
+  <line class="hair" x1="800" y1="18912" x2="20200" y2="18912"/>
+  <text class="child" x="1680" y="19165">Colistin-resistant</text>
+  <circle id="hap-neoipc-hap-sec-bsi-pathogen-1-cor-1" class="mark" cx="6360" cy="19065" r="130"/>
+  <text class="option" x="6600" y="19165">Yes</text>
+  <circle id="hap-neoipc-hap-sec-bsi-pathogen-1-cor-2" class="mark" cx="7986" cy="19065" r="130"/>
+  <text class="option" x="8226" y="19165">No</text>
+  <circle id="hap-neoipc-hap-sec-bsi-pathogen-1-cor-3" class="mark" cx="9558" cy="19065" r="130"/>
+  <text class="option" x="9798" y="19165">Not tested</text>
+  <line class="column" x1="6050" y1="18912" x2="6050" y2="19255"/>
+  <line class="rule" x1="800" y1="19255" x2="20200" y2="19255"/>
+  <text class="label" x="980" y="19582">Organism 2</text>
+  <line class="column" x1="6050" y1="19255" x2="6050" y2="19781"/>
+  <line class="hair" x1="800" y1="19781" x2="20200" y2="19781"/>
+  <text class="child" x="1680" y="20034">MRSA/VRE/3GCR¹</text>
+  <circle id="hap-neoipc-hap-sec-bsi-pathogen-2-3gcr-mrsa-vre-1" class="mark" cx="6360" cy="19934" r="130"/>
+  <text class="option" x="6600" y="20034">Yes</text>
+  <circle id="hap-neoipc-hap-sec-bsi-pathogen-2-3gcr-mrsa-vre-2" class="mark" cx="7986" cy="19934" r="130"/>
+  <text class="option" x="8226" y="20034">No</text>
+  <circle id="hap-neoipc-hap-sec-bsi-pathogen-2-3gcr-mrsa-vre-3" class="mark" cx="9558" cy="19934" r="130"/>
+  <text class="option" x="9798" y="20034">Not tested</text>
+  <line class="column" x1="6050" y1="19781" x2="6050" y2="20124"/>
+  <line class="hair" x1="800" y1="20124" x2="20200" y2="20124"/>
+  <text class="child" x="1680" y="20377">Carbapenem-resistant</text>
+  <circle id="hap-neoipc-hap-sec-bsi-pathogen-2-car-1" class="mark" cx="6360" cy="20277" r="130"/>
+  <text class="option" x="6600" y="20377">Yes</text>
+  <circle id="hap-neoipc-hap-sec-bsi-pathogen-2-car-2" class="mark" cx="7986" cy="20277" r="130"/>
+  <text class="option" x="8226" y="20377">No</text>
+  <circle id="hap-neoipc-hap-sec-bsi-pathogen-2-car-3" class="mark" cx="9558" cy="20277" r="130"/>
+  <text class="option" x="9798" y="20377">Not tested</text>
+  <line class="column" x1="6050" y1="20124" x2="6050" y2="20467"/>
+  <line class="hair" x1="800" y1="20467" x2="20200" y2="20467"/>
+  <text class="child" x="1680" y="20720">Colistin-resistant</text>
+  <circle id="hap-neoipc-hap-sec-bsi-pathogen-2-cor-1" class="mark" cx="6360" cy="20620" r="130"/>
+  <text class="option" x="6600" y="20720">Yes</text>
+  <circle id="hap-neoipc-hap-sec-bsi-pathogen-2-cor-2" class="mark" cx="7986" cy="20620" r="130"/>
+  <text class="option" x="8226" y="20720">No</text>
+  <circle id="hap-neoipc-hap-sec-bsi-pathogen-2-cor-3" class="mark" cx="9558" cy="20620" r="130"/>
+  <text class="option" x="9798" y="20720">Not tested</text>
+  <line class="column" x1="6050" y1="20467" x2="6050" y2="20810"/>
+  <line class="rule" x1="800" y1="20810" x2="20200" y2="20810"/>
+  <text class="label" x="980" y="21137">Organism 3</text>
+  <line class="column" x1="6050" y1="20810" x2="6050" y2="21336"/>
+  <line class="hair" x1="800" y1="21336" x2="20200" y2="21336"/>
+  <text class="child" x="1680" y="21589">MRSA/VRE/3GCR¹</text>
+  <circle id="hap-neoipc-hap-sec-bsi-pathogen-3-3gcr-mrsa-vre-1" class="mark" cx="6360" cy="21489" r="130"/>
+  <text class="option" x="6600" y="21589">Yes</text>
+  <circle id="hap-neoipc-hap-sec-bsi-pathogen-3-3gcr-mrsa-vre-2" class="mark" cx="7986" cy="21489" r="130"/>
+  <text class="option" x="8226" y="21589">No</text>
+  <circle id="hap-neoipc-hap-sec-bsi-pathogen-3-3gcr-mrsa-vre-3" class="mark" cx="9558" cy="21489" r="130"/>
+  <text class="option" x="9798" y="21589">Not tested</text>
+  <line class="column" x1="6050" y1="21336" x2="6050" y2="21679"/>
+  <line class="hair" x1="800" y1="21679" x2="20200" y2="21679"/>
+  <text class="child" x="1680" y="21932">Carbapenem-resistant</text>
+  <circle id="hap-neoipc-hap-sec-bsi-pathogen-3-car-1" class="mark" cx="6360" cy="21832" r="130"/>
+  <text class="option" x="6600" y="21932">Yes</text>
+  <circle id="hap-neoipc-hap-sec-bsi-pathogen-3-car-2" class="mark" cx="7986" cy="21832" r="130"/>
+  <text class="option" x="8226" y="21932">No</text>
+  <circle id="hap-neoipc-hap-sec-bsi-pathogen-3-car-3" class="mark" cx="9558" cy="21832" r="130"/>
+  <text class="option" x="9798" y="21932">Not tested</text>
+  <line class="column" x1="6050" y1="21679" x2="6050" y2="22022"/>
+  <line class="hair" x1="800" y1="22022" x2="20200" y2="22022"/>
+  <text class="child" x="1680" y="22275">Colistin-resistant</text>
+  <circle id="hap-neoipc-hap-sec-bsi-pathogen-3-cor-1" class="mark" cx="6360" cy="22175" r="130"/>
+  <text class="option" x="6600" y="22275">Yes</text>
+  <circle id="hap-neoipc-hap-sec-bsi-pathogen-3-cor-2" class="mark" cx="7986" cy="22175" r="130"/>
+  <text class="option" x="8226" y="22275">No</text>
+  <circle id="hap-neoipc-hap-sec-bsi-pathogen-3-cor-3" class="mark" cx="9558" cy="22175" r="130"/>
+  <text class="option" x="9798" y="22275">Not tested</text>
+  <line class="column" x1="6050" y1="22022" x2="6050" y2="22365"/>
+  <line class="rule" x1="800" y1="22365" x2="20200" y2="22365"/>
+  <text class="label" x="980" y="22624">Comments</text>
+  <line class="rule" x1="800" y1="27820" x2="20200" y2="27820"/>
+  <rect class="frame" x="800" y="2380" width="19400" height="25440"/>
+  <text class="note" x="800" y="28120">¹ Mark the resistance category appropriate to the isolated organism and answer for that one.</text>
+  <circle id="hap-legend-one" class="mark" cx="1110" cy="28435" r="130"/>
+  <text class="note" x="1350" y="28520">You can select only one option.</text>
+  <rect id="hap-legend-many" class="mark" x="5816" y="28305" width="260" height="260"/>
+  <text class="note" x="6186" y="28520">You can select multiple options.</text>
+  <text class="note" x="800" y="28900">For more information, please see the Data Dictionary and Abbreviations sections of the NeoIPC Core Module protocol.</text>
 </svg>

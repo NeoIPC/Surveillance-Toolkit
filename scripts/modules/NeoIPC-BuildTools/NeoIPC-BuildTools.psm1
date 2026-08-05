@@ -1070,3 +1070,49 @@ function Get-CodeMap {
         return $map
     }
 }
+
+function Find-Python {
+    <#
+    .SYNOPSIS
+        The path to a working Python 3 interpreter.
+
+    .DESCRIPTION
+        Tries `python3` and then `python`, and **runs each candidate** rather than trusting that the name
+        resolves. On Windows `python3` is a Microsoft Store stub that sits on PATH, reports itself to
+        Get-Command like any other executable, and exits 9009 without running anything -- so a build that
+        picked it by name would fail later, somewhere unrelated to the choice.
+
+        Throws when neither works, because every caller needs an interpreter and a build that continues
+        without one produces a missing artifact instead of a stopped build.
+
+    .EXAMPLE
+        & (Find-Python) script.py --out out/
+    #>
+    [CmdletBinding()]
+    [OutputType([string])]
+    param()
+
+    foreach ($candidate in @('python3', 'python')) {
+        $found = Get-Command $candidate -ErrorAction SilentlyContinue
+        if (-not $found) { continue }
+        try {
+            $null = & $found.Source --version 2>&1
+            if ($LASTEXITCODE -eq 0) { return $found.Source }
+        } catch {
+            # An unrunnable candidate is not an error here: the next one may work, and running out of
+            # candidates is what raises below. Recorded rather than swallowed, so a machine where both
+            # fail can be diagnosed without guessing which one was tried.
+            Write-Debug "Candidate interpreter '$candidate' did not run: $($_.Exception.Message)"
+        }
+    }
+    $PSCmdlet.ThrowTerminatingError(
+        [System.Management.Automation.ErrorRecord]::new(
+            [System.InvalidOperationException]::new(
+                "Python not found. Install Python 3 and ensure 'python3' or 'python' is on PATH."
+            ),
+            'PythonNotFound',
+            [System.Management.Automation.ErrorCategory]::ObjectNotFound,
+            $null
+        )
+    )
+}

@@ -151,7 +151,10 @@ def test_the_chart_holds_every_day_count_the_stage_has(english: Path) -> None:
         expected = {row["code"] for row in csv.DictReader(handle)
                     if row["code"].startswith("NEOIPC_SURVEILLANCE_END_") and row["code"].endswith("_DAYS")}
     module = generator_module()
-    ids = set(re.findall(r'<text id="(neoipc-surveillance-end-[a-z0-9-]*-days)"', chart(english)))
+    # Ids are qualified by the form, because these figures are inlined into one HTML document and an id
+    # has to be unique there rather than in its own file.
+    ids = set(re.findall(r'<text id="patient-progress-chart-(neoipc-surveillance-end-[a-z0-9-]*-days)"',
+                         chart(english)))
     assert {module._slug(code) for code in expected} == ids
 
 
