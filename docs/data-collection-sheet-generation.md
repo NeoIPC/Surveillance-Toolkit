@@ -92,14 +92,26 @@ why, and neither alone would have been trusted.
 | `<symbol>` + `<use>`, with `viewBox` | renders, scaled correctly |
 | `<g>`, `<defs>`, `<clipPath>`, `<marker>`, gradients | supported |
 | `<image>` raster | renders; **`xlink:href` resolves relative to the SVG file**, not to the document |
-| `<filter>` (incl. `feDropShadow`) | **silently ignored** |
-| `<mask>` | **silently ignored** |
+| `<filter>` (incl. `feDropShadow`) | **silently ignored** — fails closed, see below |
+| `<mask>` | **silently ignored** — fails OPEN, see below |
 | `<foreignObject>` | ignored |
 
-`prawn/svg/elements.rb` maps `filter:` and `mask:` to `Elements::Ignored`, commented `# unsupported`. No
-warning is emitted, so a decorative shadow that does nothing is indistinguishable from one that works —
-which is how the existing master sheet's drop shadow went unnoticed. **The generator emits no filters and
-no masks**; anything that would need one is not decoration this project can afford.
+`prawn/svg/elements.rb` maps both `filter:` and `mask:` to `Elements::Ignored`, commented `# unsupported`,
+and `Ignored#parse` raises `SkipElementQuietly` — no warning on either. **The two are not equally
+harmless, and the difference is the whole point.**
+
+A **filter** fails closed: the shape draws without its decoration. A drop shadow goes missing and nothing
+is misrepresented, so a browser shows the SVG with the shadow and the PDF without it — a cosmetic
+divergence between the two outputs and no more. It is also forward-compatible: an artwork carrying one
+simply starts working if prawn-svg gains support, so there is no reason to strip a filter from hand-drawn
+artwork.
+
+A **mask** fails open, and that is a real hazard. Neither the `<mask>` element nor the `mask=` attribute is
+consumed anywhere in `lib/`, so a masked shape renders **fully visible** — whatever the mask was hiding
+appears. A construct that hides something must never be a mask here.
+
+**The generator emits neither**, because its layout needs neither: everything on a form is a rule, a
+block, a mark or a run of text.
 
 The relative-`href` rule is why the existing generated sheet loses its logo: it carries
 `xlink:href="img/LOGO_NEOIPC_2.png"` while sitting *in* `img/`, so the renderer looks for `img/img/…`.
