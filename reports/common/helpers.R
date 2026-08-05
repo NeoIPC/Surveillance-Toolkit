@@ -96,7 +96,7 @@ sentence_case <- function(text, language) {
   #
   # NEVER str_to_sentence() or str_to_title(), despite the names. Both normalise the WHOLE string, and
   # these terms are largely abbreviations: measured against the values the retired `_sc` keys held,
-  # uppercasing the first character alone reproduces 6 of 6, while str_to_sentence() reproduces 5 — it
+  # uppercasing the first character alone reproduces 11 of 11, while str_to_sentence() reproduces 10 — it
   # renders "primary sepsis/BSI" as "Primary sepsis/bsi", and str_to_title() renders "AWaRe" as "Aware".
   paste0(stringr::str_to_upper(substr(text, 1, 1), locale = language),
          substr(text, 2, nchar(text)))

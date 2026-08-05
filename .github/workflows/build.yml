@@ -571,6 +571,10 @@ jobs:
               # every runner, so the security property was gated by a grep alone and the log read the same
               # either way. The test now fails on a runner without R rather than skipping, so this step is
               # what keeps it green — and glue comes from apt because the helper calls glue_safe.
+              #
+              # It sits in the METADATA product group, next to the Pester run it serves, and carries that
+              # group's condition rather than the protocol's. The two have to stay identical: any path
+              # where Pester runs without R is now a red build rather than a quiet skip.
               if: github.ref_type != 'tag' || steps.rel.outputs.product == 'metadata'
               shell: bash
               run: |
