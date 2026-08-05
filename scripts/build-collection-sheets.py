@@ -33,6 +33,7 @@ from dataclasses import dataclass, field as dc_field, replace
 from pathlib import Path
 
 try:
+    from fontTools.pens.boundsPen import BoundsPen
     from fontTools.ttLib import TTFont
 except ImportError:  # pragma: no cover - dependency is declared in CI and in the docs
     sys.exit("fontTools is required: python -m pip install fonttools")
@@ -618,6 +619,24 @@ class Face:
     def cap_at(self, size: int) -> int:
         return round(self._cap * size)
 
+    def ink_centre(self, text: str) -> float:
+        """Half-way between the highest and lowest ink of `text`, in ems above the baseline.
+
+        The baseline is where a LETTER sits, and it is the wrong reference for a symbol. A mathematical
+        operator is drawn about the maths axis instead: U+2211 shares the digits' cap height and reaches
+        240 thousandths BELOW the baseline, so set on the same line as the numbers it heads it appears to
+        sag by that much. Comparing the two centres is what lets one be aligned to the other.
+        """
+        glyphs = self.font.getGlyphSet()
+        pen = BoundsPen(glyphs)
+        for char in text:
+            name = self.cmap.get(ord(char))
+            if name:
+                glyphs[name].draw(pen)
+        if pen.bounds is None:
+            return self._cap / 2
+        return (pen.bounds[1] + pen.bounds[3]) / 2 / self.units
+
     def has(self, ch: str) -> bool:
         return ord(ch) in self.cmap
 
@@ -754,6 +773,17 @@ class Typeface:
         through a single face would measure something nobody draws.
         """
         return sum(face.shaped_width(run, self.language) for face, run in self._runs(text)) * size
+
+    def optical_lift(self, symbol: str, against: str, size: int) -> int:
+        """How far to raise `symbol` so its ink centres on the same line as `against`'s.
+
+        Zero for anything drawn from the same face as the text beside it, so this costs nothing where it
+        is not needed. It is not zero for a symbol taken from the maths face, which is drawn about the
+        maths axis rather than sitting on the baseline.
+        """
+        centres = [max(face.ink_centre(run) for face, run in self._runs(text))
+                   for text in (against, symbol)]
+        return round((centres[0] - centres[1]) * size)
 
     def _runs(self, text: str) -> list[tuple[Face, str]]:
         """Split into maximal runs sharing one face, in order."""
@@ -1573,11 +1603,16 @@ def _emit_grid(out: list[Shape], chart: Chart, y: int, composer: Composer) -> in
     height, drop = row_metrics(head, "label")
     baseline = y + drop
     out.append(Text(MARGIN_X + TEXT_INSET, baseline, head, "label"))
+    # The totals marker is a SYMBOL among numbers, so it is aligned to the numbers' optical centre rather
+    # than dropped on their baseline. Measured from the glyphs rather than nudged by hand, and zero
+    # whenever the marker is drawn from the same face as the digits.
+    lift = composer.face_of("day").optical_lift(total, str(chart.days), SMALL_SIZE)
     for index, text in enumerate([str(d) for d in range(1, chart.days + 1)] + [total]):
         # Centred in its own cell. `mid` in the print emitter and `text-anchor: middle` in the SVG both
         # anchor a run at its x, so the same placement centres a day number over its column and a section
         # title over the page.
-        out.append(Text(grid_x + index * col_w + col_w // 2, baseline, text, "day"))
+        out.append(Text(grid_x + index * col_w + col_w // 2,
+                        baseline - (lift if text is total else 0), text, "day"))
     y += height
     out.append(Line(MARGIN_X, y, MARGIN_X + composer.content_w, y, "rule"))
 

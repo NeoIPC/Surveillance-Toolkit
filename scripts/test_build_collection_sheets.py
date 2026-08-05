@@ -203,6 +203,32 @@ def _grid_pitches(svg: str) -> list[int]:
     return pitches
 
 
+def test_the_totals_marker_centres_on_the_day_numbers(english: Path) -> None:
+    """A symbol among numbers is aligned to their optical centre, not dropped on their baseline.
+
+    U+2211 shares the digits' cap height and reaches 240 thousandths of an em BELOW the baseline, because
+    an n-ary operator is drawn about the maths axis. Set on the numbers' own baseline it sags by that
+    much. Asserted on the ink rather than on the placement, so it stays true if the marker, the face or
+    the size changes -- and it is measurably false without the lift, which is the point of having it.
+    """
+    module = generator_module()
+    svg = chart(english)
+    placed = {text: int(y) for y, text in
+              re.findall(r'<text class="day" x="-?\d+" y="(\d+)">([^<]*)</text>', svg)}
+    marker = next(t for t in placed if not t.isdigit())
+    faces = [module.Face(Path("common/fonts") / f"{stem}-Regular.ttf")
+             for stem in ("NotoSans", module.MATH_FONT)]
+    typeface = module.Typeface(faces)
+    size = module.STYLES["day"].size
+
+    def centre(text: str) -> float:
+        top = placed[text]
+        return top - max(face.ink_centre(run) for face, run in typeface._runs(text)) * size
+
+    assert abs(centre(marker) - centre("31")) <= 1, (
+        f"{marker!r} sits {centre(marker) - centre('31'):.1f} units off the day numbers' optical centre")
+
+
 def test_mirroring_reflects_a_page_about_its_own_width() -> None:
     """A landscape page must be mirrored about 29700, not about whatever the portrait sheets use.
 
