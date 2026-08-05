@@ -55,6 +55,9 @@ $protocolDir = Join-Path -Resolve -Path $docDir -ChildPath 'protocol'
 $imgDir = Join-Path -Resolve -Path $protocolDir -ChildPath 'img'
 $resDir = Join-Path -Resolve -Path $protocolDir -ChildPath 'resx'
 $transDir = Join-Path -Resolve -Path $protocolDir -ChildPath 'xslt'
+# The hand-maintained skeletons for the figures that are drawn rather than derived. Source, unlike
+# everything the build writes into img/.
+$figuresDir = Join-Path -Resolve -Path $protocolDir -ChildPath 'figures'
 $commonDir = Join-Path -Resolve -Path $workspaceFolder -ChildPath 'common'
 # The collection sheets are derived from the canonical metadata by a generator rather than transformed
 # from a resource file, so this build needs the metadata directory it reads and an interpreter to run it.
@@ -181,9 +184,6 @@ $titlePage.Load((Get-ChildItem $transDir/NeoIPC-Core-Title-Page.xslt).FullName, 
 
 $previewWatermark = New-Object System.Xml.Xsl.XslCompiledTransform
 $previewWatermark.Load((Get-ChildItem $transDir/Preview-Watermark.xslt).FullName, [System.Xml.Xsl.XsltSettings]::TrustedXslt, $resolver)
-
-$decisionFlow = New-Object System.Xml.Xsl.XslCompiledTransform
-$decisionFlow.Load((Get-ChildItem $transDir/NeoIPC-Core-Decision-Flow.xslt).FullName, [System.Xml.Xsl.XsltSettings]::TrustedXslt, $resolver)
 
 
 # The images the protocol reaches that this build does not generate. Every one of them is an INVARIANT
@@ -336,14 +336,15 @@ foreach ($targetCulture in $targetCultures)
             $previewWatermark.Transform("$resDir/Preview-Watermark$localeSuffix.resx", (Join-Path $cultureImgDir 'Preview-Watermark.svg'))
         }
     }
-    Build-Target (Join-Path $cultureImgDir 'NeoIPC-Core-Decision-Flow.svg') (Get-LocalisedPath $resDir 'NeoIPC-Core-Decision-Flow.resx' $targetCulture -All -Existing),(Join-Path $transDir 'NeoIPC-Core-Decision-Flow.xslt') {
-        Write-Verbose "Generating decision flow SVG"
-        $decisionFlow.Transform("$resDir/NeoIPC-Core-Decision-Flow$localeSuffix.resx", (Join-Path $cultureImgDir 'NeoIPC-Core-Decision-Flow.svg'))
-    }
     # The seven collection sheets, derived from the canonical metadata rather than transformed from a
-    # hand-maintained resource file. ONE run emits all of them, so the target is one representative sheet
-    # and the inputs are everything the generator reads: the metadata it derives fields from, the
-    # presentation decisions, the figure strings, the generator itself, and this locale's catalogues.
+    # hand-maintained resource file -- and, in the same run, the figures that ARE drawn rather than
+    # derived, whose skeletons live in doc/protocol/figures. Those two are different jobs and one tool,
+    # because localizing either needs the same three things and nothing else in this repository has all
+    # of them: the fonts to measure in, the wrapping, and this culture's figure strings.
+    #
+    # ONE run emits all of them, so the target is one representative sheet and the inputs are everything
+    # the generator reads: the metadata it derives fields from, the presentation decisions, the figure
+    # strings, the skeletons, the generator itself, and this locale's catalogues.
     #
     # A missing metadata catalogue stops the build rather than yielding a silently English sheet. The
     # culture set here is what po4a actually produced, so a culture arriving without one is a gap worth
@@ -361,7 +362,8 @@ foreach ($targetCulture in $targetCultures)
         (Join-Path $commonDir 'figure-strings.yaml')
         (Join-Path $workspaceFolder 'glossary.yaml')
         $sheetGenerator
-    ) + @(Get-LocalisedPath $commonDir 'figure-strings.yaml' $targetCulture -All -Existing) +
+    ) + @(Get-ChildItem -Path $figuresDir -Filter '*.svg' -File | Select-Object -ExpandProperty FullName) +
+        @(Get-LocalisedPath $commonDir 'figure-strings.yaml' $targetCulture -All -Existing) +
         @(Get-LocalisedPath $poDir 'metadata.po' $targetCulture -All -Existing)
     Build-Target (Join-Path $cultureImgDir 'NeoIPC-Core-Master-Sheet.svg') $sheetInputs {
         Write-Verbose "Generating the data collection sheets"

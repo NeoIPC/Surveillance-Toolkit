@@ -31,12 +31,15 @@ import importlib.util
 import re
 import subprocess
 import sys
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 import pytest
 
 REPO = Path(__file__).resolve().parent.parent
 GENERATOR = REPO / "scripts" / "build-collection-sheets.py"
+SVG_NS = "http://www.w3.org/2000/svg"
+XML_NS = "http://www.w3.org/XML/1998/namespace"
 # Six reporting sheets and the progress chart. The chart is one of the family rather than a thing beside
 # it: same generator, same page furniture, same one-page rule -- turned on its side.
 SHEETS = 7
@@ -65,14 +68,30 @@ def generate(out: Path, *extra: str) -> subprocess.CompletedProcess[str]:
     )
 
 
-def sheet_files(directory: Path, extension: str = "svg") -> list[Path]:
-    """The forms, excluding the AWaRe badges that share the output directory.
+SKELETONS = REPO / "doc" / "protocol" / "figures"
 
-    The badges are drawn by the same run and into the same place -- a culture's image directory holds
-    every image the protocol needs — but they are not sheets: no page, no grid, no printed form. Matching
-    them here would compare them against rules written for something else.
+
+def sheet_files(directory: Path, extension: str = "svg") -> list[Path]:
+    """The forms, excluding everything else the same run writes into the same place.
+
+    A culture's image directory holds every image the protocol needs, so a run also leaves the AWaRe
+    badges and the figures that are DRAWN rather than derived there. Neither is a sheet -- no page, no
+    grid, no printed form -- and matching them here would judge them against rules written for something
+    else: a decision flow is arrows, so it is path soup by construction.
+
+    Which files those are is derived rather than listed: a drawn figure is one whose skeleton is in
+    doc/protocol/figures, so the title page and the watermark drop out of these tests when they arrive
+    without anyone remembering to exclude them.
     """
-    return sorted(directory.glob(f"NeoIPC-Core-*.{extension}"))
+    drawn = {path.name for path in SKELETONS.glob("*.svg")}
+    return sorted(path for path in directory.glob(f"NeoIPC-Core-*.{extension}")
+                  if path.with_suffix(".svg").name not in drawn)
+
+
+def figure_files(directory: Path) -> list[Path]:
+    """The drawn figures a run produced, matched to the skeletons they came from."""
+    drawn = {path.name for path in SKELETONS.glob("*.svg")}
+    return sorted(path for path in directory.glob("*.svg") if path.name in drawn)
 
 
 @pytest.fixture(scope="module")
@@ -346,3 +365,134 @@ def test_mirroring_reflects_a_page_about_its_own_width() -> None:
             if value is not None:
                 assert 0 <= value <= page_w, f"{shape} left the page when mirrored about {page_w}"
     assert module.mirror(mirrored, page_w) == shapes, "mirroring twice is not the identity"
+
+
+# ── The figures that are drawn rather than derived ──────────────────────────────────────────────────
+#
+# A sheet's layout is computed from the metadata; the decision flow's is a design somebody settled and
+# checked in. So what is gated here is the other half: that each label is resolved for the culture, that
+# it is MEASURED into the box its own group declares, and that the two ways this can go wrong are build
+# failures rather than a figure that quietly prints a placeholder or overruns a box.
+
+
+def test_a_drawn_figure_is_written_and_holds_no_placeholder(english: Path) -> None:
+    """Every `{key}` has become a string, including in the title and description a screen reader reads."""
+    figures = figure_files(english)
+    assert figures, "the run produced no drawn figure at all"
+    for figure in figures:
+        body = figure.read_text(encoding="utf-8")
+        assert not re.search(r"\{\w+\}", body), f"{figure.name} still carries an unresolved placeholder"
+        tree = ET.parse(figure)
+        for tag in ("title", "desc"):
+            element = tree.getroot().find(f"{{{SVG_NS}}}{tag}")
+            assert element is not None and (element.text or "").strip(), \
+                f"{figure.name} has no <{tag}>, so an inlined copy of it is an unlabelled graphic"
+
+
+def test_every_label_fits_the_box_its_own_group_declares(english: Path) -> None:
+    """The property the template trades a layout engine for.
+
+    Re-measured here rather than trusted: the generator asserts it while writing, so a test that only
+    re-read the file would be asking the same code the same question. This asks the geometry instead --
+    every line's width against the region the group's own shape gives it, and the block's height against
+    what is left of that region under any mark.
+    """
+    module = generator_module()
+    fonts = REPO / "common" / "fonts"
+    faces = {(bold, italic): module.Typeface(
+        [module.Face(fonts / f"NotoSans-{module._variant('NotoSans', bold, italic)}.ttf")], "en")
+        for bold in (False, True) for italic in (False, True)}
+    for figure in figure_files(english):
+        root = ET.parse(figure).getroot()
+        sheet = module.Stylesheet(root.find(f"{{{SVG_NS}}}style").text)
+        for group in root.iter(f"{{{SVG_NS}}}g"):
+            label = group.find(f"{{{SVG_NS}}}text")
+            if label is None:
+                continue
+            style = sheet.style_of(label)
+            fit = module.region_of(group)
+            face = faces[style.face]
+            lines = [span.text or "" for span in label]
+            assert lines, f"{group.get('id')} has no line in it at all"
+            for line in lines:
+                width = face.width(line, style.size)
+                assert width <= fit.width, (
+                    f"{group.get('id')}: {line!r} draws {width:.0f} in a box of {fit.width}")
+            assert len(lines) <= fit.capacity(style), (
+                f"{group.get('id')}: {len(lines)} lines in a box holding {fit.capacity(style)}")
+
+
+def test_a_drawn_figure_names_the_faces_the_culture_is_measured_in(english: Path) -> None:
+    """The one thing a skeleton cannot state for itself, because it does not know the culture.
+
+    A figure that kept the skeleton's single family would draw a Nepali label in a face carrying no
+    Devanagari -- and prawn-svg answers an unresolvable family with the document's own fallback, so the
+    result is a readable line in the wrong script rather than anything that reports itself.
+    """
+    for figure in figure_files(english):
+        css = ET.parse(figure).getroot().find(f"{{{SVG_NS}}}style").text
+        assert "Noto Sans" in css
+        assert "sans-serif" not in css, f"{figure.name} names a generic family, which resolves to Helvetica"
+
+
+def test_a_line_is_not_separated_from_the_next_by_rendered_whitespace(english: Path) -> None:
+    """Indenting inside a <text> is not cosmetic: whitespace between tspans is drawn content in SVG, so
+    it puts a stray space into the text a screen reader reads and anything extracting the figure gets."""
+    for figure in figure_files(english):
+        for label in ET.parse(figure).getroot().iter(f"{{{SVG_NS}}}text"):
+            assert not (label.text or "").strip("") or label.text is None, \
+                "a text element carries character data of its own beside its tspans"
+            for span in label:
+                assert span.tail is None or span.tail == "", "a tspan is followed by rendered whitespace"
+
+
+def test_a_label_that_will_not_fit_fails_the_build(tmp_path: Path) -> None:
+    """Red without the guard. The failure this replaces was silent: the wrapper counted characters, so a
+    long word was emitted whole and drew straight out of its box with nothing reporting it."""
+    module = generator_module()
+    skeleton = (SKELETONS / "NeoIPC-Core-Decision-Flow.svg").read_text(encoding="utf-8")
+    chrome = module.load_localized(REPO / "common" / "figure-strings.yaml", None)
+    chrome = dict(chrome, decision_eligible="Eligible " * 40)
+    fonts = REPO / "common" / "fonts"
+    faces = {(bold, italic): module.Typeface(
+        [module.Face(fonts / f"NotoSans-{module._variant('NotoSans', bold, italic)}.ttf")], "en")
+        for bold in (False, True) for italic in (False, True)}
+    with pytest.raises(module.Overflow) as raised:
+        module.localize_figure(skeleton, chrome, faces, None, [])
+    assert "decision-flow-eligible" in str(raised.value)
+
+
+def test_a_placeholder_no_string_answers_fails_the_build(tmp_path: Path) -> None:
+    """Also red without the guard, and the more insidious of the two: a figure printing `{decision_x}` to
+    a partner looks like a rendering bug rather than a missing translation, so it is refused instead."""
+    module = generator_module()
+    skeleton = (SKELETONS / "NeoIPC-Core-Decision-Flow.svg").read_text(encoding="utf-8")
+    chrome = module.load_localized(REPO / "common" / "figure-strings.yaml", None)
+    del chrome["decision_birthweight"]
+    fonts = REPO / "common" / "fonts"
+    faces = {(bold, italic): module.Typeface(
+        [module.Face(fonts / f"NotoSans-{module._variant('NotoSans', bold, italic)}.ttf")], "en")
+        for bold in (False, True) for italic in (False, True)}
+    with pytest.raises(module.Overflow) as raised:
+        module.localize_figure(skeleton, chrome, faces, None, [])
+    assert "decision_birthweight" in str(raised.value)
+
+
+def test_a_localized_figure_is_well_formed_and_declares_its_language(tmp_path: Path) -> None:
+    """Red without the expanded-name fix, and only on a LOCALIZED run.
+
+    The untranslated build never sets the language, so it never meets this: setting `xml:lang` by its
+    literal string adds a SECOND attribute beside the one the skeleton already carries under its expanded
+    name, both serialize alike, and the result is a duplicate attribute that no parser will accept. What
+    the reader gets is not a broken figure but no figure -- asciidoctor drops it and substitutes the alt
+    text -- so nothing about the page says the build produced rubbish.
+    """
+    result = generate(tmp_path / "de", "--language", "de")
+    assert result.returncode == 0, f"{result.stdout}\n{result.stderr}"
+    figures = figure_files(tmp_path / "de")
+    assert figures, "the localized run produced no drawn figure"
+    for figure in figures:
+        body = figure.read_text(encoding="utf-8")
+        assert body.count("xml:lang") == 1, f"{figure.name} declares its language more than once"
+        root = ET.fromstring(body)          # raises on a duplicate attribute
+        assert root.get(f"{{{XML_NS}}}lang") == "de", f"{figure.name} does not declare the culture built"

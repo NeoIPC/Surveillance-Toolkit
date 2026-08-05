@@ -529,6 +529,33 @@ the coverage check passes when their union covers the text. Both faces are alrea
 both are SIL OFL. This is the opposite of the silent fallback the rules above bar — it is this
 repository's own files, in a stated order, named in the output so each renderer resolves the same two.
 
+**Two of the three consumers honour that stack. prawn-svg does not, and it is the one the protocol's PDF
+goes through.** It resolves the family list to exactly **one** font and draws every character from it,
+with no per-character fallback — so on a bilingual page one of the two scripts is always tofu, and which
+one depends only on the order.
+
+Established both ways, because neither half alone would have settled it. **What happens**: the same
+figure rendered twice with nothing changed but that order — with `Noto Sans` first the Devanagari drew as
+empty boxes; with `Noto Sans Devanagari` first the Devanagari drew correctly and every Latin letter
+became an empty box, while the digits, `<`, `>` and `?` survived both, being among the 60 codepoints the
+two faces share. An explanation that was wrong could not have produced that second half. **Why**:
+`FontRegistry#load` is `FontFamilyParser.parse(family).detect { … break font if font.installed? }`, so it
+returns the *first installed* family and stops, and `TextComponent#apply_font` then issues one `font`
+call for the whole run. The list is a preference about **availability**, which is not what it means in a
+browser. `fallback_font_name` is a single document-level last resort appended to that list rather than a
+chain, and Prawn's own per-character `fallback_fonts` is never reached.
+
+The consequence is not small, because **every non-Latin sheet is bilingual by construction** — the
+resistance abbreviations and the project's own name are never translated. So a Nepali or Hebrew figure
+cannot render correctly through this path at all, whichever order it names. What is affected is exactly
+the protocol's **inlined SVG figures**: the browser applies per-character fallback and so does Typst, so
+the published HTML and the printed forms are unaffected.
+
+That makes the page-import route below load-bearing rather than an improvement: handing asciidoctor-pdf a
+page Typst has already drawn is what removes prawn-svg from the figures' path, and with it this limit.
+Until then, **say what holds**: the protocol PDF renders its figures correctly in Latin-script languages,
+and a language needing a second face needs that route first.
+
 ### Direction is not the layout's concern
 
 A right-to-left language is served by **mirroring the finished page**, not by a second set of positioning
@@ -958,9 +985,16 @@ The generator is Python, and the argument is the **catalogue**.
 
 A localized sheet is assembled from `po/metadata.<lang>.po` and two YAML files, so the generator is
 localization tooling and sits where this repository already reserves a place for Python on a library
-argument: `polib` for gettext, `ruamel.yaml` for YAML. PowerShell has no gettext parser, and hand-rolling
-one over a `.po` is what the parse-a-format-with-its-own-parser rule exists to prevent. Reading the CSVs
-is the trivial part of the job and drives nothing.
+argument: `polib` for gettext, `ruamel.yaml` for YAML, `tinycss2` for the stylesheet a drawn figure
+declares its type scale in. PowerShell has no gettext parser, and hand-rolling one over a `.po` is what
+the parse-a-format-with-its-own-parser rule exists to prevent. Reading the CSVs is the trivial part of
+the job and drives nothing.
+
+The CSS one earns its place on the same argument rather than on size. The subset a skeleton uses is
+tiny — a type selector, class selectors, nothing nested — but the first thing a `selector { … }` regex
+gets wrong is a comment containing a brace, and the second is a comment that does not: it folds the
+`/* … */` into the selector after it. Neither raises anything. What comes out is a label measured at the
+wrong size, which is a figure that overflows or a build that refuses one that would have fitted.
 
 Measurement does not decide it, which is worth saying because the candidate that looks as though it
 should is a good one: **`SixLabors.Fonts`** is .NET, so it runs wherever PowerShell does, and it does more

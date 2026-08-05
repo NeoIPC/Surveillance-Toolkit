@@ -44,9 +44,13 @@
   <title>{decision_title}</title>
   <desc>{decision_description}</desc>
   <style>
-    text { font-family: 'Noto Sans'; font-size: 600px; fill: #000; text-anchor: middle; }
-    .branch { font-size: 520px; font-weight: bold; }
-    .note-text { font-size: 520px; }
+    /* line-height is what the build sets one wrapped line below the last. No SVG renderer reads it --
+       the build writes explicit tspans, so nothing is left for one to wrap -- but it is the property
+       this quantity IS, and putting it here keeps the whole type scale in one place instead of half
+       here and half in the generator. */
+    text { font-family: 'Noto Sans'; font-size: 600px; line-height: 740px; fill: #000; text-anchor: middle; }
+    .branch { font-size: 520px; line-height: 640px; font-weight: bold; }
+    .note-text { font-size: 520px; line-height: 640px; }
     .terminal-label { font-weight: bold; }
     .on-dark { fill: #fff; }
     .page { fill: #fff; stroke: none; }

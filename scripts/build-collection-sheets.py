@@ -30,6 +30,7 @@ import math
 import re
 import sys
 import unicodedata
+import xml.etree.ElementTree as ET
 from collections.abc import Callable
 from dataclasses import dataclass, field as dc_field, replace
 from pathlib import Path
@@ -54,6 +55,11 @@ try:
     import polib
 except ImportError:  # pragma: no cover
     sys.exit("polib is required: python -m pip install 'polib>=1.2'")
+
+try:
+    import tinycss2
+except ImportError:  # pragma: no cover
+    sys.exit("tinycss2 is required: python -m pip install 'tinycss2>=1.3'")
 
 
 # ── Geometry ────────────────────────────────────────────────────────────────────────────────────────
@@ -2607,6 +2613,263 @@ def badge_overflow(badge: Badge, face: Typeface) -> str | None:
             f"language in the layout rules.")
 
 
+# ── Drawn figures ───────────────────────────────────────────────────────────────────────────────────
+#
+# The protocol also carries figures that are DRAWN rather than derived -- the eligibility decision flow
+# above all. Their boxes, arrows and proportions are a design somebody settled, so re-deriving them per
+# build would replace a decision with an approximation of it; what they need is not a layout engine but a
+# template. Each keeps a hand-maintained skeleton under doc/protocol/figures/, and this resolves its
+# labels for a culture, wraps them by measurement and writes explicit tspans.
+#
+# The skeleton states its own contract in its own header. What is here is the half that has to live in
+# code: the inset, the fitting, and the two things a template cannot know -- which faces this culture
+# draws in, and what language the document is in.
+
+# Clear space between a region's edge and the text inside it. The skeletons are authored against this, so
+# changing it re-fits every drawn figure -- which the build will report rather than hide.
+FIGURE_INSET = 300
+
+
+@dataclass(frozen=True)
+class TextStyle:
+    """How one label is set, resolved from the skeleton's own stylesheet rather than declared here.
+
+    The type scale belongs to the figure: a maintainer opening the file has to be able to see it and
+    change it, and a size stated in two places is a build that measures at one and draws at the other.
+    """
+
+    size: int
+    pitch: int
+    bold: bool
+    italic: bool
+
+    @property
+    def face(self) -> tuple[bool, bool]:
+        return self.bold, self.italic
+
+
+class Stylesheet:
+    """The subset of CSS a skeleton uses, read with a parser rather than matched with a regex.
+
+    A regex over `selector { declarations }` is wrong on the first comment containing a brace and silently
+    wrong on the first one that does not -- it would fold `/* ... */` into the selector that follows it,
+    and the failure is a label measured at the wrong size rather than an error. The subset itself is
+    small and stated: a type selector, class selectors, and no nesting, media queries or `!important`.
+
+    Specificity is not implemented, it is DECIDED: a type rule applies first and class rules after it, in
+    the order the stylesheet lists them, which is what a browser resolves for selectors of exactly these
+    two shapes. A skeleton reaching for anything more would need this to grow with it.
+    """
+
+    def __init__(self, css: str):
+        self.type_rules: dict[str, dict[str, str]] = {}
+        self.class_rules: list[tuple[str, dict[str, str]]] = []
+        for rule in tinycss2.parse_stylesheet(css, skip_comments=True, skip_whitespace=True):
+            if rule.type != "qualified-rule":
+                continue
+            selector = tinycss2.serialize(rule.prelude).strip()
+            declarations = {
+                declaration.lower_name: tinycss2.serialize(declaration.value).strip()
+                for declaration in tinycss2.parse_blocks_contents(rule.content)
+                if declaration.type == "declaration"
+            }
+            if selector.startswith("."):
+                self.class_rules.append((selector[1:], declarations))
+            else:
+                # MERGED, not replaced. Two rules may share a selector -- the localizer appends one to
+                # name the culture's faces -- and a stylesheet where the second silently discarded the
+                # first would leave the appended rule as the whole of `text`, taking the type scale with
+                # it. Later declarations win per property, which is what the cascade does.
+                self.type_rules.setdefault(selector, {}).update(declarations)
+
+    def style_of(self, element: "ET.Element") -> TextStyle:
+        resolved = dict(self.type_rules.get("text", {}))
+        classes = (element.get("class") or "").split()
+        for name, declarations in self.class_rules:
+            if name in classes:
+                resolved.update(declarations)
+        size = _css_length(resolved.get("font-size"))
+        if size is None:
+            raise Overflow(f"{_describe(element)}: no font-size resolves for it")
+        # Absent leading falls back to a fifth of the size again, which is the ratio the skeletons use --
+        # stated here rather than silently, because a figure that declares none is relying on it.
+        pitch = _css_length(resolved.get("line-height")) or round(size * 1.2)
+        return TextStyle(size, pitch, resolved.get("font-weight") == "bold",
+                         resolved.get("font-style") == "italic")
+
+
+def _css_length(value: str | None) -> int | None:
+    """A `px` length, or a bare number, as the integer grid unit it names."""
+    if not value:
+        return None
+    match = re.fullmatch(r"(-?\d+(?:\.\d+)?)(?:px)?", value.strip())
+    return round(float(match.group(1))) if match else None
+
+
+SVG_NS = "http://www.w3.org/2000/svg"
+XML_NS = "http://www.w3.org/XML/1998/namespace"
+_SVG = f"{{{SVG_NS}}}"
+# Which children of a labelled group are its region, in the order a skeleton may use them. A `use` is a
+# mark rather than a region and is handled separately.
+_REGION_TAGS = (f"{_SVG}rect", f"{_SVG}circle", f"{_SVG}ellipse")
+
+
+@dataclass(frozen=True)
+class Fit:
+    """The rectangle a label may occupy: a region, inset, and clipped under any mark above it."""
+
+    x: int
+    y: int
+    width: int
+    height: int
+
+    def capacity(self, style: TextStyle) -> int:
+        return 1 + max(0, self.height - style.size) // style.pitch
+
+
+def region_of(group: "ET.Element") -> Fit:
+    """Where this group's label goes, taken from the group's own geometry and nowhere else.
+
+    An oval's region is the largest axis-aligned rectangle inside it, whose half-axes are the ellipse's
+    over root two -- exact rather than a fudge factor, and the reason a terminal's label can be fitted
+    without anyone authoring a second invisible box for it.
+    """
+    shape = next((child for child in group if child.tag in _REGION_TAGS), None)
+    if shape is None:
+        raise Overflow(f"{group.get('id')}: no rect, circle or ellipse to fit its label into")
+    if shape.tag == f"{_SVG}rect":
+        x, y = _attr(shape, "x"), _attr(shape, "y")
+        width, height = _attr(shape, "width"), _attr(shape, "height")
+    else:
+        cx, cy = _attr(shape, "cx"), _attr(shape, "cy")
+        radius = _attr(shape, "r") if shape.tag == f"{_SVG}circle" else None
+        rx = radius if radius is not None else _attr(shape, "rx")
+        ry = radius if radius is not None else _attr(shape, "ry")
+        half_w, half_h = rx / math.sqrt(2), ry / math.sqrt(2)
+        x, y = round(cx - half_w), round(cy - half_h)
+        width, height = round(2 * half_w), round(2 * half_h)
+
+    top = y
+    # A mark reserves the top of the region, so the label takes what is left underneath it. That is what
+    # lets a terminal carry both a tick and a word without a second mechanism for saying where each goes.
+    for mark in group.iter(f"{_SVG}use"):
+        top = max(top, round(_attr(mark, "y") + _attr(mark, "height")))
+    return Fit(round(x + FIGURE_INSET), round(top + FIGURE_INSET),
+               round(width - 2 * FIGURE_INSET), round(y + height - top - 2 * FIGURE_INSET))
+
+
+def _attr(element: "ET.Element", name: str) -> float:
+    value = element.get(name)
+    if value is None:
+        raise Overflow(f"{element.tag.split('}')[-1]} has no {name}")
+    return float(value)
+
+
+def _describe(element: "ET.Element") -> str:
+    return element.get("id") or f"<{element.tag.split('}')[-1]}>"
+
+
+def localize_figure(source: str, chrome: dict[str, str], faces: dict[tuple[bool, bool], Typeface],
+                    language: str | None, problems: list[str]) -> str:
+    """One drawn figure, in one culture: the skeleton with its labels resolved, measured and set.
+
+    Everything the figure IS comes from the skeleton. What happens here is only that each `{placeholder}`
+    becomes this culture's string, each string is wrapped to the box its group declares, and the result is
+    written back as explicit tspans -- never as renderer-side wrapping, which the sheets do not use either
+    and which prawn-svg would not honour.
+    """
+    ET.register_namespace("", SVG_NS)
+    root = ET.fromstring(source)
+    css = root.find(f"{_SVG}style")
+    if css is None or not css.text:
+        raise Overflow("the skeleton carries no stylesheet, so nothing can be measured against it")
+    sheet = Stylesheet(css.text)
+    face = faces[(False, False)]
+
+    if language:
+        # By its EXPANDED name. The skeleton already carries `xml:lang="en"`, and a parser stores that
+        # under `{...XML/1998/namespace}lang` -- so setting the literal string `xml:lang` adds a second,
+        # different attribute, and both then serialize to the same name. The result is a duplicate
+        # attribute, which is fatally malformed, and it appears only on a LOCALIZED run: the untranslated
+        # one never sets the language and so never sees it.
+        root.set(f"{{{XML_NS}}}lang", language)
+    # The faces this culture draws in, appended rather than substituted: a later rule of equal specificity
+    # wins, so the skeleton's own stylesheet is left exactly as its maintainer wrote it. Latin stays first
+    # for the reason it does on every sheet -- the two faces overlap on every digit and every punctuation
+    # mark, and the script's face in front would draw those from one design and the letters beside them
+    # from another.
+    css.text = f"{css.text.rstrip()}\n    text {{ font-family: {_css_families(face)}; }}\n  "
+
+    for element in root.iter():
+        if element.tag in (f"{_SVG}title", f"{_SVG}desc"):
+            element.text = _resolve(element.text or "", chrome, _describe(root))
+    for group in root.iter(f"{_SVG}g"):
+        label = group.find(f"{_SVG}text")
+        if label is None:
+            continue
+        _set_label(label, group, sheet, chrome, faces, problems)
+
+    ET.indent(root, space="  ")
+    for label in root.iter(f"{_SVG}text"):
+        # Undo what indenting did INSIDE a text element. Whitespace between tspans is rendered content in
+        # SVG, so an indented one draws a stray space at the end of every line and puts one into anything
+        # extracting the text -- which is the copy of it a screen reader reads.
+        label.text = None
+        for line in label:
+            line.tail = None
+    return ET.tostring(root, encoding="unicode", xml_declaration=False) + "\n"
+
+
+def _set_label(label: "ET.Element", group: "ET.Element", sheet: Stylesheet, chrome: dict[str, str],
+               faces: dict[tuple[bool, bool], Typeface], problems: list[str]) -> None:
+    text = _resolve(label.text or "", chrome, _describe(group))
+    style = sheet.style_of(label)
+    typeface = faces[style.face]
+    fit = region_of(group)
+    lines = typeface.wrap(text, style.size, fit.width)
+    widest = max(typeface.width(line, style.size) for line in lines)
+    capacity = fit.capacity(style)
+    if len(lines) > capacity or widest > fit.width:
+        raise Overflow(
+            f"{_describe(group)}: {text!r} needs {len(lines)} line(s) of "
+            f"{widest:.0f} in a box holding {capacity} of {fit.width}. Widen the box in the skeleton, or "
+            f"mark where the word may divide with a soft hyphen."
+        )
+    missing = typeface.missing(text)
+    if missing:
+        shown = " ".join(f"U+{ord(c):04X} {c!r}" for c in sorted(missing))
+        problems.append(f"{_describe(group)}: {typeface.name} has no glyph for {shown}")
+
+    # The block is centred in what the region has left, and every line is anchored at the same x, so the
+    # skeleton's own `text-anchor` decides how each one sits against it.
+    first = fit.y + (fit.height - (len(lines) - 1) * style.pitch) // 2 + typeface.cap_at(style.size) // 2
+    label.set("x", str(fit.x + fit.width // 2))
+    label.set("y", str(first))
+    label.text = None
+    for index, line in enumerate(lines):
+        span = ET.SubElement(label, f"{_SVG}tspan")
+        span.set("x", str(fit.x + fit.width // 2))
+        if index:
+            span.set("dy", str(style.pitch))
+        span.text = line
+
+
+def _resolve(pattern: str, chrome: dict[str, str], where: str) -> str:
+    """Every `{key}` in a skeleton's text, replaced by this culture's string.
+
+    A key the strings file does not carry is a build failure rather than a literal brace on the page: it
+    means the figure asks for something nobody translates, and a figure quietly printing `{decision_x}`
+    to a partner is the outcome this exists to prevent.
+    """
+    def one(match: "re.Match[str]") -> str:
+        key = match.group(1)
+        if key not in chrome:
+            raise Overflow(f"{where}: no string is defined for {{{key}}}")
+        return chrome[key]
+
+    return re.sub(r"\{(\w+)\}", one, pattern.strip())
+
+
 def typst_document(form: Sheet | Chart, shapes: list[Shape], composer: Composer) -> str:
     """The printed form: one page, drawn by an engine that shapes text and can declare a conformance.
 
@@ -2797,6 +3060,10 @@ def main(argv: list[Shape] | None = None) -> int:
     parser.add_argument("--glossary", type=Path, default=repo / "glossary.yaml")
     parser.add_argument("--layout", type=Path, default=repo / "common" / "sheet-layout.yaml")
     parser.add_argument("--logo", type=Path, default=repo / "common" / "img" / LOGO_FILE)
+    parser.add_argument("--figures", type=Path, default=repo / "doc" / "protocol" / "figures",
+                        help="hand-maintained skeletons for the figures that are drawn rather than "
+                        "derived. Each is localized by resolving its labels and setting them measured; "
+                        "point this at a directory that does not exist to skip them.")
     parser.add_argument("--po", type=Path, default=repo / "po")
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--language", default=None, help="culture code; omit for the untranslated source")
@@ -2869,7 +3136,7 @@ def main(argv: list[Shape] | None = None) -> int:
             return _fail(f"no stage with code {args.sheet}")
 
     args.out.mkdir(parents=True, exist_ok=True)
-    written, failures = [], []
+    written, drawn_figures, failures = [], [], []
 
     # The badges are drawn here rather than in a tool of their own because they need exactly what this
     # generator has and nothing else does: the glossary term, the language's casing, and a face to measure
@@ -2883,6 +3150,18 @@ def main(argv: list[Shape] | None = None) -> int:
         target = args.out / f"{badge.stem}.svg"
         target.write_text(badge_document(badge, faces[(True, False)], args.language or "en"),
                           encoding="utf-8", newline="\n")
+
+    # The drawn figures, for the same reason the badges are here: they need this generator's faces, its
+    # measurement and its chrome, and nothing else in the repository has all three.
+    for skeleton in sorted(args.figures.glob("*.svg")) if args.figures.is_dir() else []:
+        try:
+            drawn = localize_figure(skeleton.read_text(encoding="utf-8"), chrome, faces,
+                                    args.language, failures)
+        except Overflow as overflow:
+            failures.append(f"{skeleton.name}: {overflow}")
+            continue
+        (args.out / skeleton.name).write_text(drawn, encoding="utf-8", newline="\n")
+        drawn_figures.append(skeleton.name)
 
     for form, lay_out, page, stem_name in forms:
         composer, body, failure = best_layout(
@@ -2932,6 +3211,8 @@ def main(argv: list[Shape] | None = None) -> int:
         print(f"error: {line}", file=sys.stderr)
     for target, column, spare in written:
         print(f"wrote {target} (answer column {column:.1f} mm, {spare:.1f} mm spare)")
+    for target in drawn_figures:
+        print(f"wrote {target} (drawn figure)")
     if catalogue.drafted:
         # Said on every run that used one, because nothing in the artifact shows it. A form drawn partly
         # from drafts is finished-looking and is not finished, and the person holding it is the only one
