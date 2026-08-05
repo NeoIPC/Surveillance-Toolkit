@@ -20,8 +20,17 @@
          lines in a question box where German needs two, seven in the note where Spanish needs
          five, and one in a branch label, which must never wrap.
 
-     Coordinates are hundredths of a millimetre on A4 landscape, the grid the sheets use, so 13500
-     is 135 mm from the left edge. -->
+     Widening any box costs a connector the run it is drawn along, so the columns are balanced
+     rather than each being as large as it could be. What each region survives, as a multiple of
+     the English it was measured against: 1.6 for the note, 1.9 for either outcome, 2.1 for the
+     first question, 2.3 for a branch label and 3.7 for the two short questions. Set beside the
+     1.35 that nine tenths of this project's own translations stay under, the note and the two
+     outcomes are the ones to watch -- and a branch label is the one that cannot be wrapped out
+     of trouble, so it is sized for Swahili "Hapana", the widest rendering of these two words
+     found in any language.
+
+     Coordinates are hundredths of a millimetre on A4 landscape, the grid the sheets use, so the
+     centre line at 13350 is 133.5 mm from the left edge. -->
 <svg viewBox="0 0 29700 21000" xmlns="http://www.w3.org/2000/svg" role="img" xml:lang="en">
   <!-- What a screen reader announces. The protocol's own image macro carries alt text and
        asciidoctor drops it when it inlines the figure, so without these this is an unlabelled
@@ -46,10 +55,11 @@
     .mark { fill: none; stroke: #fff; stroke-width: 14; stroke-linecap: round; stroke-linejoin: round; }
   </style>
   <defs>
-    <!-- refX is the TIP, so the head stops where the connector does. Anywhere else and the front of it
-         is drawn inside the node the arrow points into, which paints over it: what a reader sees is a
-         triangle with its point cut flat against the edge. Marker units are multiples of the stroke
-         width, so this head is 8 x 6 of them = 3.5 x 2.6 mm, short enough to clear a branch label. -->
+    <!-- refX is the TIP, so the head stops where the connector does. Anywhere else and the
+         front of it is drawn inside the node the arrow points into, which paints over it: what a
+         reader sees is a triangle with its point cut flat against the edge. Marker units are
+         multiples of the stroke width, so this head is 8 x 6 of them = 3.5 x 2.6 mm, short enough
+         to clear a branch label. -->
     <marker id="decision-flow-arrowhead" refX="6" refY="0" orient="auto" markerWidth="8" markerHeight="6" overflow="visible">
       <path d="M -2,-3 L 6,0 L -2,3 c 1.5,-1.75 1.5,-4.25 0,-6 z"/>
     </marker>
@@ -66,32 +76,32 @@
 
   <!-- Every connector before every node, so the long no-branch passes BEHIND the note it runs to,
        and every arrowhead is covered by the node it points into rather than sitting on top. -->
-  <path class="connector" id="decision-flow-admitted-no" d="M 7000,2140 H 3600 V 17590 H 9300"/>
-  <path class="connector" id="decision-flow-admitted-yes" d="M 13500,3480 V 5530"/>
-  <path class="connector" id="decision-flow-gestational-age-yes" d="M 20000,6870 H 23390"/>
-  <path class="connector" id="decision-flow-gestational-age-no" d="M 13500,8210 V 10260"/>
-  <path class="connector" id="decision-flow-birthweight-yes" d="M 20000,11600 H 23390"/>
-  <path class="connector" id="decision-flow-birthweight-no" d="M 13500,12940 V 14990"/>
+  <path class="connector" id="decision-flow-admitted-no" d="M 6900,2140 H 3400 V 17590 H 9150"/>
+  <path class="connector" id="decision-flow-admitted-yes" d="M 13350,3480 V 5530"/>
+  <path class="connector" id="decision-flow-gestational-age-yes" d="M 19800,6870 H 23290"/>
+  <path class="connector" id="decision-flow-gestational-age-no" d="M 13350,8210 V 10260"/>
+  <path class="connector" id="decision-flow-birthweight-yes" d="M 19800,11600 H 23290"/>
+  <path class="connector" id="decision-flow-birthweight-no" d="M 13350,12940 V 14990"/>
 
   <!-- The three questions. One width and one height for all of them: sizing each to its
        own text is what left the first box on a different edge from the two below it. -->
   <g id="decision-flow-admitted">
-    <rect class="question" x="7000" y="800" width="13000" height="2680" rx="500"/>
+    <rect class="question" x="6900" y="800" width="12900" height="2680" rx="500"/>
     <text class="on-dark">{decision_admitted}</text>
   </g>
   <g id="decision-flow-gestational-age">
-    <rect class="question" x="7000" y="5530" width="13000" height="2680" rx="500"/>
+    <rect class="question" x="6900" y="5530" width="12900" height="2680" rx="500"/>
     <text class="on-dark">{decision_gestational_age}</text>
   </g>
   <g id="decision-flow-birthweight">
-    <rect class="question" x="7000" y="10260" width="13000" height="2680" rx="500"/>
+    <rect class="question" x="6900" y="10260" width="12900" height="2680" rx="500"/>
     <text class="on-dark">{decision_birthweight}</text>
   </g>
 
   <!-- What falls outside the first question. Square-cornered and in the other brand
        hue, because it annotates the flow rather than being a step in it. -->
   <g id="decision-flow-not-admitted">
-    <rect class="note" x="800" y="5530" width="5600" height="5400"/>
+    <rect class="note" x="800" y="5530" width="5200" height="5400"/>
     <text class="note-text">{decision_not_admitted}</text>
   </g>
 
@@ -99,40 +109,40 @@
        blue's own lightness and chroma and rotated in hue; the marks repeat it in shape,
        for a reader who cannot separate the two colours or is holding a greyscale print. -->
   <g id="decision-flow-eligible">
-    <circle class="eligible" cx="25700" cy="9230" r="3300"/>
-    <use href="#decision-flow-tick" x="24950" y="7300" width="1500" height="1500"/>
+    <circle class="eligible" cx="25600" cy="9230" r="3300"/>
+    <use href="#decision-flow-tick" x="24850" y="7300" width="1500" height="1500"/>
     <text class="on-dark terminal-label">{decision_eligible}</text>
   </g>
   <g id="decision-flow-ineligible">
-    <ellipse class="ineligible" cx="13500" cy="17590" rx="4200" ry="2600"/>
-    <use href="#decision-flow-cross" x="12850" y="16000" width="1300" height="1300"/>
+    <ellipse class="ineligible" cx="13350" cy="17590" rx="4200" ry="2600"/>
+    <use href="#decision-flow-cross" x="12700" y="16000" width="1300" height="1300"/>
     <text class="on-dark terminal-label">{decision_ineligible}</text>
   </g>
 
   <!-- Which way each branch was answered, on the connector it labels. Filled black for
        no and white for yes, which is a second signal beside the word. -->
   <g id="decision-flow-admitted-no-label">
-    <rect class="no" x="4200" y="1560" width="2200" height="1160"/>
+    <rect class="no" x="3850" y="1560" width="2600" height="1160"/>
     <text class="branch on-dark">{boolean_no}</text>
   </g>
   <g id="decision-flow-admitted-yes-label">
-    <rect class="yes" x="12400" y="3920" width="2200" height="1160"/>
+    <rect class="yes" x="12050" y="3920" width="2600" height="1160"/>
     <text class="branch">{boolean_yes}</text>
   </g>
   <g id="decision-flow-gestational-age-yes-label">
-    <rect class="yes" x="20600" y="6290" width="2200" height="1160"/>
+    <rect class="yes" x="20240" y="6290" width="2600" height="1160"/>
     <text class="branch">{boolean_yes}</text>
   </g>
   <g id="decision-flow-gestational-age-no-label">
-    <rect class="no" x="12400" y="8660" width="2200" height="1160"/>
+    <rect class="no" x="12050" y="8660" width="2600" height="1160"/>
     <text class="branch on-dark">{boolean_no}</text>
   </g>
   <g id="decision-flow-birthweight-yes-label">
-    <rect class="yes" x="20600" y="11020" width="2200" height="1160"/>
+    <rect class="yes" x="20240" y="11020" width="2600" height="1160"/>
     <text class="branch">{boolean_yes}</text>
   </g>
   <g id="decision-flow-birthweight-no-label">
-    <rect class="no" x="12400" y="13380" width="2200" height="1160"/>
+    <rect class="no" x="12050" y="13380" width="2600" height="1160"/>
     <text class="branch on-dark">{boolean_no}</text>
   </g>
 </svg>
