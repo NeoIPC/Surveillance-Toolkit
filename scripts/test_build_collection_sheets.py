@@ -377,6 +377,31 @@ def _grid_pitches(svg: str) -> list[int]:
     return pitches
 
 
+def test_a_filing_label_that_wraps_gets_a_line_of_its_own(tmp_path: Path) -> None:
+    """Two runs at the same baseline print on top of each other, and nothing reports it.
+
+    The chart's filing cells are the one place a wrapped label used to be drawn at a single measured
+    baseline inside a row sized for one line. English fits on one line everywhere, so the defect could
+    only ever appear in a translation — and it appears as an illegible smear rather than as a build
+    failure, which is the combination the fit gate exists to prevent.
+    """
+    out = tmp_path / "de"
+    label = "Monat und Jahr der Erfassung dieses Blattes sowie der Name der Abteilung"
+    strings = chrome_at(tmp_path / "chrome", de={"chart_month_year": label})
+    result = generate(out, "--language", "de", "--strings", str(strings))
+    assert result.returncode == 0, f"the wrapped filing label does not fit:\n{result.stderr}"
+
+    chart = ET.fromstring((out / "NeoIPC-Core-Patient-Progress-Chart.svg").read_text(encoding="utf-8"))
+    # Selected by membership rather than by first word: which word a wrapped line begins with is the
+    # wrapper's decision, so matching on one would make this test depend on the very thing it measures.
+    runs = [el for el in chart.iter(f"{{{SVG_NS}}}text")
+            if (el.text or "").strip() and (el.text or "").strip() in label]
+    assert len(runs) > 1, "the label did not wrap, so this test is no longer exercising anything"
+    baselines = {el.get("y") for el in runs}
+    assert len(baselines) == len(runs), (
+        f"{len(runs)} lines of the filing label share {len(baselines)} baseline(s), so they overprint")
+
+
 def test_the_totals_marker_centres_on_the_day_numbers(english: Path) -> None:
     """A symbol among numbers is aligned to their optical centre, not dropped on their baseline.
 

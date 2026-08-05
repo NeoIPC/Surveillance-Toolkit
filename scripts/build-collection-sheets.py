@@ -405,10 +405,16 @@ class Catalogue:
         for entry in polib.pofile(str(po_path)):
             if not entry.msgctxt or not entry.msgstr:
                 continue
-            # `translated()` is False for an entry marked needing-edit, which is what Weblate writes for
-            # every draft. That is the right default -- a published form must not present unreviewed
-            # wording as though a reviewer had passed it -- and it is the wrong behaviour for the one job
-            # a reviewer actually needs, which is to SEE the draft on the page before approving it.
+            # `fuzzy` is gettext's NEEDS-EDITING state: what msgmerge sets on a near-match, and what a
+            # translator sets to flag their own work. Skipping it by default is right -- a near-match is a
+            # guess about a string that changed -- and wrong for the one job a reviewer has, which is to
+            # SEE the wording on the page, so --include-drafts turns it off for a review render.
+            #
+            # It is NOT a review gate, and must not be described as one. Weblate's *translated* state --
+            # "waiting for review" where reviews are enabled -- has no gettext representation at all, so an
+            # unapproved translation arrives here as an ordinary msgstr indistinguishable from an approved
+            # one. Nothing in this catalogue can separate them; only the API knows, and this build makes no
+            # network calls.
             if entry.fuzzy:
                 if not drafts:
                     continue
@@ -1608,15 +1614,26 @@ def _emit_filing_row(out: list[Shape], y: int, composer: Composer) -> int:
     labels = [composer.chrome["chart_month_year"], composer.chrome["chart_number"]]
     half = composer.content_w // 2
     top = y
-    height = max(composer.face.pad_at(LABEL_SIZE, text) * 2 + LABEL_SIZE for text in labels)
+    # Both cells are wrapped BEFORE the row is sized, because the height depends on how many lines the
+    # longer of the two takes. Sizing first and drawing afterwards reads as the natural order and is wrong
+    # here in a way nothing reports: with the height fixed at one line, every wrapped line lands on that
+    # one baseline and the row prints on top of itself, inside rules that never grew. English fits on one
+    # line, so it stays invisible until a language whose wording is longer -- which is every language this
+    # exists to serve.
+    placed = []
     for label, left in zip(labels, (MARGIN_X, MARGIN_X + half)):
         composer._text(label, "label")
         answer = left + (composer.answer_x - MARGIN_X)
-        for line in _fit(composer, label, "label", answer - COLUMN_GAP - (left + TEXT_INSET),
-                         "chart_filing", "label"):
-            out.append(Text(left + TEXT_INSET,
-                            y + composer.face.pad_at(LABEL_SIZE, label) + composer.face.cap_at(LABEL_SIZE),
-                            line, "label"))
+        placed.append((label, left, answer,
+                       _fit(composer, label, "label", answer - COLUMN_GAP - (left + TEXT_INSET),
+                            "chart_filing", "label")))
+    height = (max(composer.face.pad_at(LABEL_SIZE, label) * 2 + LABEL_SIZE for label in labels)
+              + (max(len(lines) for *_, lines in placed) - 1) * (LABEL_SIZE + LINE_GAP))
+    for label, left, answer, lines in placed:
+        baseline = y + composer.face.pad_at(LABEL_SIZE, label) + composer.face.cap_at(LABEL_SIZE)
+        for line in lines:
+            out.append(Text(left + TEXT_INSET, baseline, line, "label"))
+            baseline += LABEL_SIZE + LINE_GAP
         _column(out, top, top + height, composer, answer)
     # The divider between the two cells, at the same weight as the column that opens each of them. Without
     # it the row reads as ONE field with a stray word in the middle of the space to write in: the first

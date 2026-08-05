@@ -229,13 +229,24 @@ still yields what was written. Read from the content stream, on the same evident
 finding above. A Nepali form is therefore reachable; what stands between is coverage rather than shaping,
 below.
 
-**A draft is not a translation, and the generator will not treat one as though it were.** Weblate marks
-every unreviewed string as needing edit, which gettext carries as `fuzzy`, and a form drawn from those is
-indistinguishable from a finished one — so the default is to ignore them and print the English source,
-which is legible and obviously incomplete. That default makes the one job a reviewer has impossible,
-because nobody can approve wording they have never seen on the page, so `--include-drafts` turns it off
-for review renders and the run then *says* how many labels came from unconfirmed translations. The switch
-exists so that publishing unreviewed wording takes a deliberate act rather than a forgotten default.
+**An entry marked *needs editing* is not a translation, and the generator will not treat one as though it
+were.** gettext carries that state as `fuzzy`, it is what `msgmerge` sets on a near-match and what a
+translator sets when flagging their own work, and a form drawn from those is indistinguishable from a
+finished one — so the default is to ignore them and print the English source, which is legible and
+obviously incomplete. `--include-drafts` turns that off for a review render, because nobody can approve
+wording they have never seen on the page, and the run then says how many labels came from such entries.
+
+**What this does *not* do is gate on review state, and the distinction matters because the weaker
+guarantee is the tempting one to claim.** Weblate's states are *needs editing*, *translated* (displayed as
+*waiting for review* where reviews are enabled) and *approved* — and only the first is `fuzzy`. A
+translation a reviewer has not yet approved is in the second, which gettext has no way to express, so it
+reaches the catalogue as an ordinary `msgstr` indistinguishable from an approved one. Whether it reaches
+the file at all is a per-project commit policy rather than a property of the format.
+
+So a build cannot tell reviewed wording from unreviewed by reading the catalogue, and no switch here can
+make it. Doing that would mean asking the API for each unit's state — which is a network call in a build
+that deliberately has none, and a different design from the one this file describes. State the guarantee
+that holds: **fuzzy entries are skipped by default**; approval is not visible from here.
 
 **A sheet's two kinds of text arrive by different routes, and only one of them is committed.** The labels
 are the metadata's, translated in `po/metadata.<lang>.po`, which is in git — so a German sheet's labels
