@@ -379,10 +379,17 @@ function Write-NeoIPCMetadataPoText {
     # under po/.
     [CmdletBinding()]
     [OutputType([string])]
-    param([Parameter(Mandatory)][System.Collections.Generic.List[object]]$Entry)
+    param(
+        [Parameter(Mandatory)][System.Collections.Generic.List[object]]$Entry,
+        # The POT-Creation-Date to stamp, instead of now. The exporter passes the date already on disk so it
+        # can ask "would this render be identical?" -- a template whose only difference is a fresher
+        # timestamp carries no new unit, and writing it makes Weblate merge that header into every language.
+        [string]$PotCreationDate
+    )
     $sb = [System.Text.StringBuilder]::new()
     [void]$sb.Append((Write-NeoIPCPoHeader -Product 'NeoIPC Surveillance DHIS2 Metadata' `
-                -License 'Creative Commons Attribution 4.0 International'))
+                -License 'Creative Commons Attribution 4.0 International' `
+                -PotCreationDate $PotCreationDate))
     foreach ($e in $Entry) {
         [void]$sb.AppendLine()
         # Weblate flags line: fuzzy (translator state) + priority:NNN (source-set focus). 100 is the default — no flag.

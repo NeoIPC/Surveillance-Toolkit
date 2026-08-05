@@ -785,8 +785,27 @@ function Export-NeoIPCMetadataTranslation {
     $units = Get-NeoIPCMetadataTranslationUnit -Package $pkg
     $potEntries = ConvertTo-NeoIPCMetadataPoEntry -Unit $units
     $potPath = Join-Path $PoDirectory 'metadata.pot'
+    # Keep the date already on disk when nothing else changed. POT-Creation-Date is stamped from the clock,
+    # so a regeneration that found no new string still produces a different file -- and committing that makes
+    # Weblate merge the header into every language of the component, a diff across nine catalogues carrying
+    # no content. It also destroys the signal, since a run that changed one template then looks exactly like
+    # a run that changed nothing.
+    #
+    # Asked by re-rendering with the OLD date and comparing, rather than by diffing around the date line:
+    # this writer is ours, so it can simply be asked "would this be the same file?", which is exact and needs
+    # no rule about which lines are allowed to differ. When something DID change the fresh stamp is kept, so
+    # the field comes to mean when the template last changed -- which is what a reader assumes it means.
+    $potText = Write-NeoIPCMetadataPoText -Entry $potEntries
+    if (Test-Path -LiteralPath $potPath) {
+        $existing = [System.IO.File]::ReadAllText($potPath)
+        $wasStamped = [regex]::Match($existing, '(?m)^"POT-Creation-Date: (?<stamp>.+)\\n"$')
+        if ($wasStamped.Success) {
+            $asBefore = Write-NeoIPCMetadataPoText -Entry $potEntries -PotCreationDate $wasStamped.Groups['stamp'].Value
+            if ($asBefore -ceq $existing) { $potText = $asBefore }
+        }
+    }
     if ($PSCmdlet.ShouldProcess($potPath, 'Write POT')) {
-        [System.IO.File]::WriteAllText($potPath, (Write-NeoIPCMetadataPoText -Entry $potEntries), [System.Text.UTF8Encoding]::new($false))
+        [System.IO.File]::WriteAllText($potPath, $potText, [System.Text.UTF8Encoding]::new($false))
         if ($Validate -and -not (Test-NeoIPCMetadataPoSyntax -Path $potPath)) { throw "Generated $potPath failed msgfmt validation." }
     }
     Write-Verbose ("metadata.pot: {0} source string(s)." -f $potEntries.Count)

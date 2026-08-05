@@ -2502,6 +2502,37 @@ InModuleScope 'NeoIPC-Tools' {
             $pot | Should -Match 'msgctxt "options/NEOIPC_ASA_SCORE/1/NAME"'
             $pot | Should -Not -Match 'ASA I \(de\)'
         }
+        It 'keeps the creation date already on disk when nothing else changed' {
+            # Seeded with an obviously old stamp rather than exported twice in a row: POT-Creation-Date has
+            # minute resolution, so two consecutive runs agree anyway and the test would pass with no
+            # suppression at all -- proving nothing about the thing it names.
+            $dir = Join-Path $TestDrive 'tr-stamp-kept'
+            Export-NeoIPCMetadataTranslation -Path $script:trExport -PoDirectory $dir
+            $pot = Join-Path $dir 'metadata.pot'
+            $seeded = ([System.IO.File]::ReadAllText($pot) -replace
+                '(?m)^"POT-Creation-Date: .+\\n"$', '"POT-Creation-Date: 2020-01-01 00:00+0000\n"')
+            [System.IO.File]::WriteAllText($pot, $seeded, [System.Text.UTF8Encoding]::new($false))
+
+            Export-NeoIPCMetadataTranslation -Path $script:trExport -PoDirectory $dir
+            [System.IO.File]::ReadAllText($pot) | Should -BeExactly $seeded
+        }
+        It 'advances the creation date when the template really changed' {
+            # The dangerous direction: a suppression that fires on a real change would keep a stale template
+            # and silently drop a source string. The seeded file differs in a msgid, so the re-render cannot
+            # match it and the fresh stamp has to win.
+            $dir = Join-Path $TestDrive 'tr-stamp-advanced'
+            Export-NeoIPCMetadataTranslation -Path $script:trExport -PoDirectory $dir
+            $pot = Join-Path $dir 'metadata.pot'
+            $seeded = (([System.IO.File]::ReadAllText($pot) -replace
+                '(?m)^"POT-Creation-Date: .+\\n"$', '"POT-Creation-Date: 2020-01-01 00:00+0000\n"') -replace
+                'ASA I', 'ASA one')
+            [System.IO.File]::WriteAllText($pot, $seeded, [System.Text.UTF8Encoding]::new($false))
+
+            Export-NeoIPCMetadataTranslation -Path $script:trExport -PoDirectory $dir
+            $written = [System.IO.File]::ReadAllText($pot)
+            $written | Should -Not -Match '2020-01-01 00:00'
+            $written | Should -Not -Match 'ASA one'
+        }
         It 'Import reconstructs translations[] from the language catalogues Weblate wrote' {
             $dir = Join-Path $TestDrive 'tr-import'
             New-Item -ItemType Directory -Path $dir -Force | Out-Null
