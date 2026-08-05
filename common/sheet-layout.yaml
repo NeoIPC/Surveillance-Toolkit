@@ -199,11 +199,14 @@ groups:
     footnote_key: resistance_organism_specific_note
 
 # Repeated slots (organism 1..n, antibiotic substance 1..n) are printed as compact blocks rather than as
-# one labelled row per element. How many slots a sheet prints is a decision about the paper, not about the
-# model: the published master sheet offers six antibiotic substance slots where the metadata carries nine,
-# and the published BSI sheet offers three organism slots. Record the printed count here so that the
-# difference is deliberate and visible rather than an accident of whoever last edited a Word file.
-slots: {}
+# one labelled row per element, and every sheet prints as many as the metadata carries. There is no key
+# here for holding a printed count BELOW that, and no code that would read one: an empty `slots: {}` sat
+# here inviting exactly that entry, and setting one changed nothing at all, silently.
+#
+# The divergence it was meant to record is real and is resolved the other way -- the published master
+# sheet offers six antibiotic substance slots where the metadata carries nine, so the published form is
+# behind the data model and the generated one is not. Should a printed count ever need to be held below
+# the model's deliberately, that needs a mechanism, and this comment is not one.
 
 # The WHO AWaRe badges the protocol's antibiotic table prints, one per row. The SET of badges comes from
 # metadata/common/antibiotics/NeoIPC-Antibiotic-AWaRe-Groups.csv, so a category WHO adds gets a badge

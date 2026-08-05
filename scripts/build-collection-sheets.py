@@ -2303,8 +2303,8 @@ def _emit_field(out: list[Shape], field: Field, y: int, composer: Composer, clos
     y += composer.face.pad_at(LABEL_SIZE, label)
     if answered_here:
         # No writing line: the cell is the box formed by the frame, the column and the rules above and
-        # below this row. Drawing one inside it would either double the rule beneath or float in the
-        # middle of the cell, and both were tried.
+        # below this row. A line drawn inside it either doubles the rule beneath or floats mid-cell, and
+        # both read as a printing fault rather than as somewhere to write.
         _column(out, top, y, composer)
     return y
 

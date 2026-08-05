@@ -762,22 +762,25 @@ count is recorded as a decision instead of left to whoever last edited a Word fi
 **Both now print nine**, and the chart is what forced the question rather than leaving it open. The
 published chart also offers six, so a generated chart that kept six would have sat in the same package as
 a generated master sheet offering nine — reintroducing, between two forms a partner fills in together, the
-exact model-versus-paper drift that generating them was meant to remove. `slots:` in
-`common/sheet-layout.yaml` is therefore empty, which means *print what the metadata carries*; an entry
-there is how a printed count would be deliberately held below it.
+exact model-versus-paper drift that generating them was meant to remove. So every sheet prints what the
+metadata carries, and there is no way to hold a printed count below it — `common/sheet-layout.yaml` once
+offered an empty `slots:` key for that and nothing read it, so an entry there changed nothing and said
+nothing. Holding a count below the model's would need a mechanism; none exists, and nothing wants one.
 
-## The decision flow needs this before the sheets do
+## The decision flow is why the compound had to be answered first
 
-The same wrapper wraps the protocol's decision-flow figure, and there the margin is already gone. Its
-XSLT wraps against `maxLen` constants of **38** and **16** characters, and the German translation's
-longest word is **`Gestationsalter`, at 15**. One character of headroom, in a language that builds
-compounds — and because the recursion cannot break inside a word, a token that exceeds the constant is
-emitted whole and runs out of its box with nothing reporting it.
+The protocol's decision-flow figure is the tightest text on any generated page, and the machinery it used
+to be wrapped by is what made that dangerous. That XSLT counted **characters** against `maxLen` constants
+of **38** and **16**, tuned by eye against English and Spanish, whose longest words are 11 — while
+German's is **`Gestationsalter`, at 15**. One character of headroom in a language that builds compounds,
+and a token exceeding the constant was emitted whole and ran out of its box with nothing reporting it.
+The figure was one wording change, one longer compound or one new language from being wrong, and the
+failure would have surfaced only in a rendered PDF for a language nobody was building.
 
-So the figure is not comfortably within its limits; it is one wording change, one longer compound, or one
-new language away from being wrong, and the failure would appear only in a rendered PDF for a language
-that until this week nobody was building. Spanish's longest is 11 and English's 11, which is why the
-constants have never been felt: they were tuned by eye against the two languages that fit.
+That wrapper is gone, and measurement now refuses what does not fit rather than drawing it. What the
+episode leaves behind is the requirement below, which measurement alone does not satisfy: a single German
+compound wider than its box is a build failure, not a wrapped line, unless something says where it may
+divide.
 
 **Breaking inside a word is the answer to the compound, and the break points come from the translator, not
 from a dictionary.** Breaking on whitespace cannot help a single long word. A Hunspell hyphenation
