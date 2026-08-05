@@ -1934,7 +1934,7 @@ def _close_page(out: list[Shape], body: list[Shape], table_top: int, y: int, cod
 
 def best_layout(
     form: Sheet | Chart, make_composer: Callable[[int], Composer],
-    lay_out: Callable[[Sheet | Chart, Composer], list[Shape]] = None,
+    lay_out: Callable[[Sheet | Chart, Composer], list[Shape]] | None = None,
 ) -> tuple[Composer, list[Shape] | None, Overflow | None]:
     """Lay the form out at every candidate answer column and keep the roomiest result.
 
@@ -3290,7 +3290,7 @@ def _typst_shape(shape: Shape, composer: Composer) -> str:
 OUTPUTS = (("svg", "svg", svg_document), ("typst", "typ", typst_document))
 
 
-def main(argv: list[Shape] | None = None) -> int:
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     repo = Path(__file__).resolve().parent.parent
     parser.add_argument("--metadata", type=Path, default=repo / "metadata" / "common")
