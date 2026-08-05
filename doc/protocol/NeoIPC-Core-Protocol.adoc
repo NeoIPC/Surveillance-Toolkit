@@ -390,11 +390,6 @@ To assign a secondary bloodstream infection to a pneumonia, NEC, or an SSI, the 
 **AND**
 . At least one organism from the blood specimen matches an organism identified from the primary infection site.
 
-[#fig-secondary-bsi-sheet]
-.Secondary BSI reporting sheet
-//image::NeoIPC-Core-Secondary-BSI-Reporting-Sheet-Image.svg[Secondary BSI reporting sheet,{full-width},pdfwidth=100%,opts=inline,align="center"]
-image::NeoIPC-Core-Secondary-BSI-Reporting-Sheet-Image.png[Secondary BSI reporting sheet,{full-width},pdfwidth=100%,align="center"]
-
 [#sec-def]
 == Infection Definitions
 [#sec-def-primary-sepsis-bloodstream-infection]
