@@ -190,12 +190,19 @@ The XSLT this replaces wrapped text by counting **characters** — a hand-rolled
 token longer than the constant is emitted whole and overflows, and XSLT 1.0 has no font metrics at all, so
 fitting text to a box is not expressible in the language the code was written in.
 
-Generation measures with **fontTools**: advance widths in the actual face at the actual size, wrapped to
-the cell width the generator chose, emitted as explicit `<tspan>` with `dy`. Never renderer-side wrapping
-(SVG 2 `inline-size`, `<foreignObject>`) — the explicit form is what ships and renders today.
+Generation measures in the actual face at the actual size, wrapped to the cell width the generator chose,
+and emits explicit `<tspan>` with `dy`. Never renderer-side wrapping (SVG 2 `inline-size`,
+`<foreignObject>`) — the explicit form is what ships and renders today.
 
-**Summing advance widths is not shaping — and because the renderer does not shape either, the sum is
-exact.** The measurement adds up each codepoint's advance from `hmtx`. What matters is whether the
+**The generator shapes, with HarfBuzz through `uharfbuzz`.** The two paragraphs that follow are the
+argument for the *simpler* ruler it started with — summing `hmtx` advances via fontTools — and they are
+kept because that argument is sound for prawn-svg and is what a reader needs in order to see why it
+stopped being enough. It stopped the moment a second engine drew the same layout: Typst shapes, and
+*Measurement shapes* below records what the sum then gets wrong and by how much. Read these two as the
+reason the ruler changed rather than as what it is.
+
+**Summing advance widths is not shaping — and because prawn-svg does not shape either, the sum is exact
+for it.** That measurement adds up each codepoint's advance from `hmtx`. What matters is whether the
 renderer does more, and it does not: `prawn/svg/renderer.rb` hands the raw string to Prawn's `draw_text`
 and takes its width from `width_of`, and prawn-svg contains no shaping layer anywhere. So the sum is not
 an approximation of the drawn width, it *is* the drawn width, and adding a shaping engine here (HarfBuzz
@@ -560,9 +567,13 @@ mechanics:
 - **Coordinates stay the integers the SVG carries**, through `#let u = 0.01mm`. `#at(1180, 3367, …)` is
   the same number as `x="1180"`, so the one-grid rule survives into the second output instead of being an
   SVG-only property.
-- **The document date is `auto`, and the compile pins it** — `SOURCE_DATE_EPOCH`, or
-  `--creation-timestamp`. PDF/A requires a date, and taking it from the wall clock would make two compiles
-  of one source differ. Verified byte-identical at a fixed epoch.
+- **The document date is `auto`, and pinning it is the caller's to do** — Typst honours
+  `SOURCE_DATE_EPOCH`, and `--creation-timestamp` says it outright. PDF/A requires a date, and taking it
+  from the wall clock makes two compiles of one source differ; verified byte-identical at a fixed epoch,
+  and verified to differ without one. **The protocol build sets neither**, so a form built by it carries a
+  wall-clock `xmp:CreateDate` and is not reproducible today. That is a property of this build rather than
+  of the engine, and the emitted `.typ` says so at the top of every file so nobody infers otherwise from a
+  differing checksum.
 
 `--pdf-standard a-2a,ua-1` is what the sheets export under, and it is checked rather than asserted: the
 first attempt **failed the export**, because the logo carried no alternative text. That refusal is the
@@ -1007,8 +1018,13 @@ The expectation was that a translation costs width, and that Devanagari costs mo
 **15 % wider than Latin at the same point size for identical text**, which is a property of the face
 rather than of Nepali. Measuring a real one inverts both halves of that.
 
-Nepali's own expansion, over the **333** metadata units it has translated, shaped with the engine that
-draws them: median **0.766**, mean 0.778, p90 1.000, and 0.29 at the narrowest. Devanagari draws each
+Nepali's own expansion, over the **333** metadata units it had translated **in the tree these were
+measured against**, shaped with the engine that draws them: median **0.766**, mean 0.778, p90 1.000, and
+0.29 at the narrowest. **That tree is not this one, and the figures cannot be reproduced from a clean
+checkout** — the committed `po/metadata.ne.po` holds 2820 entries and translates none of them, because
+Weblate owns those catalogues and has not pushed. Every per-language number in this section came from a
+tree with Weblate's drafts pulled in, and is kept for the shape of the finding rather than as something to
+re-derive; the same inference has been drawn twice already, each time costing a re-derivation to undo. Devanagari draws each
 glyph wider and needs far fewer of them — *Abdominal distension* is `पेट फुल्नु` at 0.31 — so a Nepali
 sheet is **narrower** than the English one it came from, not wider. The only entries at or above 1.0 are
 the abbreviations that are deliberately identical in both.
@@ -1026,31 +1042,23 @@ long the translation is. That is a worse property than width would have been, be
 recovered by wording: a translator who shortens a label saves nothing, and **a sheet gets taller as
 translation progresses**.
 
-Which means the interesting question is not what fits today but what fits once the reviewing is finished,
-and for the surgical-site sheet in Nepali those two answers differ. Measured against the same catalogue in
-its two states:
+**Every sheet fits in every language that has a catalogue, with the drafts included** — the state that
+costs the most height, since drafts are additional translated rows. The margin is what bought that: at
+10 mm the tightest sheet went 1.2 mm past it once its drafts were counted, and at 8 mm the same sheet
+holds. The surgical-site sheet remains the tightest of the seven and is the one to watch as a language
+completes; it is not close to failing.
 
-| Nepali surgical-site sheet, drawn from | spare at a 10 mm margin | at 8 mm |
-|---|---|---|
-| the translations a reviewer has confirmed | +1.3 mm | +6.8 mm |
-| those plus the drafts still awaiting review | **−1.2 mm** | **+2.8 mm** |
+Read the spare off a run rather than from here. It is printed for every form on every run, and a table of
+it in this document has gone stale twice — once when the Devanagari clearance changed the rhythm, once
+when the catalogue grew.
 
-So a sheet can pass today and fail on nothing but the completion of its own review, and the margin is what
-absorbs that. The surgical-site sheet is the tightest in the family and the first to reach the limit; the
-others hold between 24 and 146 mm in the same run.
-
-**Be precise about what the failure is, because it is not what the word "overflow" suggests.** The gate
-measures against the **bottom margin**, not the paper. Content 1.2 mm past a 10 mm margin still stops
-8.8 mm above the page edge: nothing is clipped, nothing is lost, and a printed copy looks entirely normal
-— anyone opening the file to look for the damage will correctly find none. What is spent is the border,
-and the border is where the headroom for the *next* translation lives, which is why losing it counts as a
+**Be precise about what a failure here is, because it is not what the word "overflow" suggests.** The gate
+measures against the **bottom margin**, not the paper. Content a millimetre past the margin still stops
+well above the page edge: nothing is clipped, nothing is lost, and a printed copy looks entirely normal —
+anyone opening the file to look for the damage will correctly find none. What is spent is the border, and
+the border is where the headroom for the *next* translation lives, which is why losing it counts as a
 failure at all. That makes the gate deliberately conservative rather than an alarm, and it is why the
 remedy can be a margin as readily as a denser layout: both return the same commodity.
-
-**No figure from a run belongs in this document.** These two are here because the *comparison* is the
-finding; the per-sheet spares are not, and a table of them has already gone stale twice — once when
-Devanagari clearance changed the rhythm, once when the catalogue grew. `build-collection-sheets.py`
-prints the spare for every form on every run, and that is the number to read.
 
 For the other languages the picture is still borrowed and still about width: rendered width of `msgstr`
 over `msgid` across the documentation and reports catalogues is a median of **1.12–1.15** for German and

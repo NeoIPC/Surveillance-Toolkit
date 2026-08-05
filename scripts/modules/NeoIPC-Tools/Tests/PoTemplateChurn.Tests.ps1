@@ -72,9 +72,14 @@ Describe 'Test-TimestampOnlyChange' {
               'Birthweight', 'Birth weight') | Should -BeFalse
     }
 
-    It 'keeps a source string that changed only in case' {
-        # -eq would call these equal. A casing fix to a msgid is a real change to a translatable unit.
-        Test-Churn($script:Template -replace 'Birthweight', 'birthweight') | Should -BeFalse
+    It 'keeps a source string that changed only in case, when the date moved too' {
+        # The date HAS to move here, and an earlier version of this case omitted it and proved nothing:
+        # with a case-only edit and an unchanged date, `-eq` sees no differing line at all and `-ceq` sees
+        # one that is not the date, and both answer "not timestamp-only". The regression only appears once
+        # the date also moves — then `-eq` finds the date as the ONLY difference, reports timestamp-only,
+        # and the restore silently discards the casing fix.
+        Test-Churn (($script:Template -replace '2026-08-05 10:00', '2026-08-06 11:30') -replace
+                    'Birthweight', 'birthweight') | Should -BeFalse
     }
 
     It 'keeps a template that gained a unit' {

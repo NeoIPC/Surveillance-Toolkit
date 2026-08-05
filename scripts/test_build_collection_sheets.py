@@ -34,6 +34,8 @@ import shutil
 import subprocess
 import sys
 import xml.etree.ElementTree as ET
+
+import polib
 from pathlib import Path
 
 import pytest
@@ -306,6 +308,33 @@ def chart(directory: Path) -> str:
     return (directory / "NeoIPC-Core-Patient-Progress-Chart.svg").read_text(encoding="utf-8")
 
 
+def test_the_patient_band_grows_for_a_long_title_and_the_comments_label_is_refused(tmp_path: Path) -> None:
+    """Two runs that recorded glyph coverage and measured nothing.
+
+    The patient block's section title is the same construct as every other section band and sat on the one
+    code path that never fitted it, so a longer translation ran out of its band while its siblings wrapped.
+    The comments label was gated on height alone. It is refused rather than wrapped, because a comments
+    label taking a second line eats the writing space the box exists to provide.
+    """
+    long_title = ("Angaben zur Patientin oder zum Patienten sowie zur aufnehmenden Abteilung und zu "
+                  "den Kennzeichen, die dieses Blatt eindeutig einer Person zuordnen")
+    out = tmp_path / "de"
+    strings = chrome_at(tmp_path / "chrome", de={"section_patient": long_title})
+    result = generate(out, "--language", "de", "--strings", str(strings))
+    assert result.returncode == 0, f"the wrapped patient band does not fit:\n{result.stderr}"
+    band = ET.fromstring((out / "NeoIPC-Core-BSI-Sheet.svg").read_text(encoding="utf-8"))
+    titled = [el for el in band.iter(f"{{{SVG_NS}}}text")
+              if (el.text or "").strip() and (el.text or "").strip() in long_title]
+    assert len(titled) > 1, "the title did not wrap, so this is no longer exercising the band"
+    assert len({el.get("y") for el in titled}) == len(titled), "the wrapped band lines share a baseline"
+
+    wide = chrome_at(tmp_path / "wide", de={"comments": "Bemerkungen " * 30})
+    refused = generate(tmp_path / "de-wide", "--language", "de", "--strings", str(wide))
+    assert refused.returncode != 0, "a comments label wider than its own box was accepted"
+    assert "comments label" in refused.stdout + refused.stderr, (
+        f"the build failed without naming the label:\n{refused.stdout}\n{refused.stderr}")
+
+
 def test_a_field_the_platform_computes_is_not_printed_as_a_blank(english: Path) -> None:
     """A program rule ASSIGNs total gestation days from the gestational age printed beside it.
 
@@ -374,7 +403,28 @@ def test_the_chart_grid_does_not_grow_with_the_script(english: Path, tmp_path: P
     marks than Devanagari would turn this red, which is the point of asserting it rather than trusting the
     arithmetic to stay true as fonts are added.
     """
-    assert generate(tmp_path / "ne", "--language", "ne", "--format", "svg").returncode == 0
+    # A SYNTHETIC Devanagari catalogue, because the committed one carries none. `po/metadata.ne.po` holds
+    # 2820 entries and translates none of them, so a run at `--language ne` produces a chart with no
+    # Devanagari in it — and this test then compared the English page with itself and passed on any
+    # arithmetic at all, including a floor removed entirely. The property is real; the measurement was not.
+    po = tmp_path / "po"
+    po.mkdir()
+    catalogue = polib.pofile(str(REPO / "po" / "metadata.pot"))
+    for entry in catalogue:
+        # Short on purpose. Every label becomes this, so a long one would overflow the reporting sheets
+        # and fail the run for a reason that has nothing to do with what the chart is being asked here.
+        entry.msgstr = "सेवा"
+    catalogue.save(str(po / "metadata.ne.po"))
+
+    # The chart alone, because this fixture is deliberately harsher than any real catalogue: EVERY label
+    # becomes Devanagari, so every row on every sheet pays the per-row clearance while none of the
+    # terminology a real translation keeps in Latin is left to pay nothing. Real languages all fit; this
+    # fixture does not, and that says nothing about them. What it buys is a chart with Devanagari in it,
+    # which the committed Nepali catalogue cannot supply.
+    assert generate(tmp_path / "ne", "--language", "ne", "--format", "svg",
+                    "--po", str(po), "--sheet", "NEOIPC_STG_SURV_END").returncode == 0
+    devanagari = sum(1 for ch in chart(tmp_path / "ne") if "ऀ" <= ch <= "ॿ")
+    assert devanagari > 0, "the fixture produced no Devanagari, so the scripts are not being compared"
     pitches = {lang: _grid_pitches(text) for lang, text in
                (("en", chart(english)), ("ne", chart(tmp_path / "ne")))}
     assert pitches["en"] == pitches["ne"], f"the grid changed height with the script: {pitches}"

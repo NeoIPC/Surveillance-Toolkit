@@ -1838,9 +1838,17 @@ def _close_page(out: list[Shape], body: list[Shape], table_top: int, y: int, cod
             # left a box with no heading at the foot of a tight sheet, which reads as a mistake rather
             # than as room to write. Below this the space is genuinely too small to head, and it stays
             # blank rather than carrying a label that would not fit above it.
-            composer._text(composer.chrome["comments"], "label")
-            body.append(Text(TEXT_X, y + ROW_PAD + composer.face.cap_at(LABEL_SIZE),
-                             composer.chrome["comments"], "label"))
+            # Gated on height above; the width was never checked. It is one word by design and set on one
+            # line, so it is measured and refused rather than wrapped — a wrapped comments label would eat
+            # the writing space the box exists to provide.
+            comments = composer.chrome["comments"]
+            composer._text(comments, "label")
+            room = composer.content_w - 2 * TEXT_INSET
+            width = composer.face_of("label").width(comments, LABEL_SIZE)
+            if width > room:
+                raise Overflow(f"the comments label {comments!r} draws {width / 100:.1f} mm across a box "
+                               f"{room / 100:.1f} mm wide")
+            body.append(Text(TEXT_X, y + ROW_PAD + composer.face.cap_at(LABEL_SIZE), comments, "label"))
         y += spare
         body.append(Line(MARGIN_X, y, MARGIN_X + composer.content_w, y, "rule"))
 
@@ -1973,9 +1981,18 @@ def _emit_patient_block(out: list[Shape], y: int, composer: Composer) -> int:
     """
     title = composer.chrome["section_patient"]
     composer._text(title, "section")
-    out.append(Box(MARGIN_X, y, composer.content_w, SECTION_BAND_H, "band"))
-    out.append(Text(composer.page_w // 2, y + SECTION_BAND_H - 150, title, "section", "patient"))
-    y += SECTION_BAND_H
+    # Wrapped and grown exactly as an ordinary section band is. This is the same construct on a different
+    # code path, and it was the path with no width check at all: `_text` records glyph coverage and
+    # measures nothing, so a longer translation of this one title ran out of its band while every other
+    # section title on the sheet was fitted.
+    lines = _fit(composer, title, "section", composer.content_w - 360, "ENROLMENT", "section title")
+    band_h = SECTION_BAND_H + (len(lines) - 1) * (SECTION_SIZE + LINE_GAP)
+    out.append(Box(MARGIN_X, y, composer.content_w, band_h, "band"))
+    ty = y + SECTION_BAND_H - 150
+    for index, line in enumerate(lines):
+        out.append(Text(composer.page_w // 2, ty, line, "section", "patient" if index == 0 else None))
+        ty += SECTION_SIZE + LINE_GAP
+    y += band_h
 
     # The shaded block is laid down first so the rows and the note draw over it; its height is only known
     # once they are measured, so the two boxes are patched in afterwards at a remembered index.

@@ -19,8 +19,6 @@
     Import-Module ./scripts/modules/NeoIPC-BuildTools -Force
 #>
 
-[AppContext]::SetSwitch("Switch.System.Xml.AllowDefaultResolver", $true);
-
 $AtcUrlTemplate = 'https://www.whocc.no/atc_ddd_index/?code={0}&showdescription=yes'
 $AWaReUrlTemplate = 'https://aware.essentialmeds.org/list?query=%22{0}%22'
 $LspnUrlTemplate = 'https://lpsn.dsmz.de/{0}'
