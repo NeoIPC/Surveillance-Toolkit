@@ -556,6 +556,21 @@ page Typst has already drawn is what removes prawn-svg from the figures' path, a
 Until then, **say what holds**: the protocol PDF renders its figures correctly in Latin-script languages,
 and a language needing a second face needs that route first.
 
+**Three routes reach a correct non-Latin figure, and they trade different things.** All three draw from
+the same Typst compile, so none of them is a second layout:
+
+| route | what it gives | what it costs |
+|---|---|---|
+| **PDF page import** — `image::form.pdf[]` | real text, shaped and bidi-resolved, byte-verbatim through the embedding | no page number or running content on the imported page; compression off for the whole document |
+| **Typst SVG** — `--format svg` | correct glyphs, correct shaping, scales | **all text becomes paths**: unselectable, unsearchable, nothing for a screen reader but `<title>`/`<desc>` |
+| **Typst PNG** — `--format png` | works anywhere | raster: loses the text layer *and* resolution independence |
+
+So the order of preference is the order of that table, and the second row is a real fallback rather than
+a bad one: against a figure whose script renders as tofu, paths that are correct are worth more than text
+that is wrong, and the accessible name survives in `<title>` either way. It is the *published protocol's*
+own accessibility goal that decides between them — which is why the first row is the target and the
+second is what to reach for if the import route proves impractical.
+
 ### Direction is not the layout's concern
 
 A right-to-left language is served by **mirroring the finished page**, not by a second set of positioning

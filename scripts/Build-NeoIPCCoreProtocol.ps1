@@ -182,8 +182,6 @@ $resolver = New-Object System.Xml.XmlUrlResolver
 $titlePage = New-Object System.Xml.Xsl.XslCompiledTransform
 $titlePage.Load((Get-ChildItem $transDir/NeoIPC-Core-Title-Page.xslt).FullName, [System.Xml.Xsl.XsltSettings]::TrustedXslt, $resolver)
 
-$previewWatermark = New-Object System.Xml.Xsl.XslCompiledTransform
-$previewWatermark.Load((Get-ChildItem $transDir/Preview-Watermark.xslt).FullName, [System.Xml.Xsl.XsltSettings]::TrustedXslt, $resolver)
 
 
 # The images the protocol reaches that this build does not generate. Every one of them is an INVARIANT
@@ -330,12 +328,6 @@ foreach ($targetCulture in $targetCultures)
         Write-Verbose "Generating title page background SVG"
         $titlePage.Transform("$resDir/NeoIPC-Core-Title-Page$localeSuffix.resx", (Join-Path $cultureImgDir 'NeoIPC-Core-Title-Page.svg'))
     }
-    if ($preRelease) {
-        Build-Target (Join-Path $cultureImgDir 'Preview-Watermark.svg') (Get-LocalisedPath $resDir 'Preview-Watermark.resx' $targetCulture -All -Existing),(Join-Path $transDir 'Preview-Watermark.xslt') {
-            Write-Verbose "Generating preview watermark SVG"
-            $previewWatermark.Transform("$resDir/Preview-Watermark$localeSuffix.resx", (Join-Path $cultureImgDir 'Preview-Watermark.svg'))
-        }
-    }
     # The seven collection sheets, derived from the canonical metadata rather than transformed from a
     # hand-maintained resource file -- and, in the same run, the figures that ARE drawn rather than
     # derived, whose skeletons live in doc/protocol/figures. Those two are different jobs and one tool,
@@ -369,10 +361,22 @@ foreach ($targetCulture in $targetCultures)
         Write-Verbose "Generating the data collection sheets"
         $sheetArgs = @('--out', $cultureImgDir, '--format', 'svg')
         if ($targetCulture.Name) { $sheetArgs += @('--language', $targetCulture.TwoLetterISOLanguageName) }
+        # A form printed from a pre-release protocol says so on its face. The sheets are detached from the
+        # document the moment somebody prints one, so the page watermark cannot speak for them: whoever is
+        # holding it at a cot side has no other way to know the definitions on it are provisional.
+        if ($preRelease) { $sheetArgs += '--preview' }
         & $python $sheetGenerator @sheetArgs
         if ($LASTEXITCODE -ne 0) {
             throw "The data collection sheets could not be generated for '$(
                 if ($targetCulture.Name) { $targetCulture.Name } else { 'the invariant culture' })'."
+        }
+        # The generator draws every skeleton it finds, which is right: it has no business knowing what a
+        # release is. Whether the document REFERENCES the watermark is this build's business, and only a
+        # pre-release does -- `:page-foreground-image:` sits inside `ifdef::revremark[]`. Left behind, it
+        # would ship in a final release's HTML assets as a file saying "Preview Version" about a document
+        # that is not one, which is a worse thing to publish than it looks.
+        if (-not $preRelease) {
+            Remove-Item -Path (Join-Path $cultureImgDir 'Preview-Watermark.svg') -ErrorAction Ignore
         }
     }
     # The protocol source is po4a's output, so it takes the subdirectory convention. Everything else

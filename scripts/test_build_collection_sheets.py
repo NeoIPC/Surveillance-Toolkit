@@ -496,3 +496,37 @@ def test_a_localized_figure_is_well_formed_and_declares_its_language(tmp_path: P
         assert body.count("xml:lang") == 1, f"{figure.name} declares its language more than once"
         root = ET.fromstring(body)          # raises on a duplicate attribute
         assert root.get(f"{{{XML_NS}}}lang") == "de", f"{figure.name} does not declare the culture built"
+
+
+def test_the_preview_stamp_is_off_by_default_and_on_when_asked(english: Path, tmp_path: Path) -> None:
+    """Both directions, because either one alone is wrong in a way that matters.
+
+    A form that says it is provisional when it is not undermines every published one; a form that stays
+    silent when it IS provisional gets filled in at a cot side against definitions that may still move.
+    Only the build knows which it is making, so the generator is told rather than guessing.
+    """
+    for sheet in sheet_files(english):
+        assert "preview-watermark" not in sheet.read_text(encoding="utf-8"), \
+            f"{sheet.name} carries a preview stamp on an ordinary run"
+
+    preview = tmp_path / "preview"
+    assert generate(preview, "--preview").returncode == 0
+    stamped = sheet_files(preview)
+    assert stamped, "the preview run produced no sheet"
+    for sheet in stamped:
+        body = sheet.read_text(encoding="utf-8")
+        assert "preview-watermark" in body, f"{sheet.name} has no preview stamp"
+        assert 'transform="rotate(-45' in body, f"{sheet.name}'s stamp is not on the diagonal"
+    for source in sheet_files(preview, "typ"):
+        assert "#turned(" in source.read_text(encoding="utf-8"), \
+            f"{source.name} does not stamp the printed form, only the figure"
+
+
+def test_mirroring_a_page_reflects_the_angle_of_what_is_on_it() -> None:
+    """A run rising to the right rises to the left once the page is turned over. Exercised directly:
+    no right-to-left catalogue is committed here, so no rendered file can reach this."""
+    module = generator_module()
+    turned = module.Text(10500, 14850, "x", "watermark", "preview-watermark", angle=-45)
+    mirrored = module.mirror([turned], module.PORTRAIT[0])[0]
+    assert mirrored.angle == 45, "the stamp kept its lean when the page was mirrored"
+    assert module.mirror([mirrored], module.PORTRAIT[0])[0] == turned, "mirroring twice is not identity"

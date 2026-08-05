@@ -106,6 +106,17 @@ OPTION_INDENT = 700                     # options sit indented under their field
 OPTION_GAP = 700                        # indent step for an option block
 
 TITLE_SIZE, SUBTITLE_SIZE = 560, 400
+
+# The preview watermark's own type, and the grey it is set in. It is drawn BEHIND the form rather than
+# over it at low opacity: a form is written on, so anything crossing the lines somebody writes between has
+# to be faint enough to ignore, and behind-and-pale is a property of the drawing rather than of a renderer
+# honouring `opacity` -- which Typst and prawn-svg both do, differently.
+WATERMARK_SIZE = 2550
+# The grey the protocol's own page watermark comes out as -- black at three tenths opacity over white --
+# so the stamp on a form and the stamp on the page it belongs to are the same mark rather than two.
+WATERMARK_INK = "#b3b3b3"
+# Along the rising diagonal, which is where a watermark goes and also where the longest run fits.
+WATERMARK_ANGLE = -45
 SECTION_SIZE, LABEL_SIZE, OPTION_SIZE, SMALL_SIZE = 320, 300, 280, 240
 # The vertical rhythm is measured against the published forms rather than chosen for comfort: they fit an
 # infection sheet onto one page, so their row pitch is the budget this has to work within.
@@ -1202,6 +1213,9 @@ STYLES: dict[str, Style] = {
     # section titles reach by being placed at the page's middle. Upright, because a column heading is not
     # small print: it is read while writing in the cell beneath it.
     "day": Style(SMALL_SIZE, centred=True),
+    # Stamped across a form built from a protocol that is not the published one. Bold and pale rather
+    # than large and faint: at this size a regular weight reads as a printing artifact.
+    "watermark": Style(WATERMARK_SIZE, bold=True, colour=WATERMARK_INK, centred=True),
 }
 
 
@@ -1258,6 +1272,10 @@ class Text:
     text: str
     style: str
     ident: str | None = None
+    # Degrees clockwise about this run's own anchor. Zero for everything a form says; the preview
+    # watermark is the one run that is not level, and carrying it here rather than as a shape of its own
+    # is what keeps it inside the mirror and both serializers instead of beside them.
+    angle: int = 0
 
 
 @dataclass
@@ -1326,7 +1344,10 @@ def mirror(shapes: list[Shape], page_w: int) -> list[Shape]:
 def _mirrored(shape: Shape, page_w: int) -> Shape:
     match shape:
         case Text():
-            return replace(shape, x=page_w - shape.x)
+            # A mirrored page reflects an angle as well as a position: a run rising to the right rises to
+            # the left once the page is turned over, and a watermark that kept its sign would lean the
+            # wrong way against everything around it.
+            return replace(shape, x=page_w - shape.x, angle=-shape.angle)
         case Line():
             return replace(shape, x1=page_w - shape.x1, x2=page_w - shape.x2)
         case Box() | Emblem():
@@ -1349,8 +1370,11 @@ class Composer:
     def __init__(self, faces: dict[tuple[bool, bool], Typeface], chrome: dict[str, str],
                  glossary: dict[str, str], layout: LayoutRules, logo: Logo,
                  language: str | None, label_width: int = LABEL_COL_MAX,
-                 page: tuple[int, int] = PORTRAIT):
+                 page: tuple[int, int] = PORTRAIT, preview: bool = False):
         self.faces, self.chrome, self.glossary, self.layout = faces, chrome, glossary, layout
+        # Whether this form is drawn from a protocol that is not the published one. A property of the
+        # BUILD rather than of any form, which is why it arrives here and not in the layout rules.
+        self.preview = preview
         self.page_w, self.page_h = page
         # The upright regular face, which is what the vertical rhythm is taken from. That is sound only
         # because the four faces agree on the two metrics it uses, so it is asserted rather than assumed:
@@ -1681,12 +1705,35 @@ def _open_page(out: list[Shape], subtitle: str, slug: str, composer: Composer) -
     composer._text(heading, "title")
     composer._text(subtitle, "subtitle")
 
+    # FIRST, so everything the form says is drawn over it. A watermark on top would have to be faint
+    # enough to read through, and a form is written on as well as read.
+    if composer.preview:
+        out.append(_watermark(composer))
+
     y = MARGIN_TOP + TITLE_SIZE
     out.append(composer.logo.place(composer.page_w - MARGIN_X - LOGO_W, MARGIN_TOP, LOGO_W))
     out.append(Text(MARGIN_X, y, heading, "title", "heading"))
     y += SUBTITLE_SIZE + 220
     out.append(Text(MARGIN_X, y, subtitle, "subtitle", f"{slug}-title"))
     return y + 400
+
+
+def _watermark(composer: Composer) -> Text:
+    """The preview stamp, centred on the page and set along its rising diagonal.
+
+    Its fit is checked like every other run, against the diagonal rather than the width: that is both
+    where it lies and the longest line the page has, so a translation that will not go there would not go
+    anywhere. It fails the build rather than running off a corner, where it would be clipped into
+    something that reads as a different word.
+    """
+    text = composer.chrome["preview_version"]
+    room = round(math.hypot(composer.page_w - 2 * MARGIN_X, composer.page_h - 2 * MARGIN_TOP))
+    width = composer.face_of("watermark").width(text, WATERMARK_SIZE)
+    if width > room:
+        raise Overflow(f"the preview watermark {text!r} draws {width:.0f} across a page whose usable "
+                       f"diagonal is {room}. Shorten it, or lower WATERMARK_SIZE.")
+    return Text(composer.page_w // 2, composer.page_h // 2, text, "watermark", "preview-watermark",
+                angle=WATERMARK_ANGLE)
 
 
 def _close_page(out: list[Shape], body: list[Shape], table_top: int, y: int, code: str,
@@ -2435,8 +2482,12 @@ def _css_shape(kind: str, ink: Ink) -> str:
 def _svg_shape(shape: Shape, prefix: str) -> str:
     match shape:
         case Text():
+            # A rotation about the run's own anchor, which is the one transform on a sheet. `matrix` is
+            # what the house style bars -- it is unreadable and stands in for coordinates somebody could
+            # have written down; a named rotate about a stated point is neither.
+            turn = f' transform="rotate({shape.angle} {shape.x} {shape.y})"' if shape.angle else ""
             return (f'  <text{_svg_id(shape.ident, prefix)} class="{shape.style}" x="{shape.x}" '
-                    f'y="{shape.y}">{_esc(shape.text)}</text>')
+                    f'y="{shape.y}"{turn}>{_esc(shape.text)}</text>')
         case Line():
             return (f'  <line class="{shape.kind}" x1="{shape.x1}" y1="{shape.y1}" '
                     f'x2="{shape.x2}" y2="{shape.y2}"/>')
@@ -2779,7 +2830,13 @@ def localize_figure(source: str, chrome: dict[str, str], faces: dict[tuple[bool,
     and which prawn-svg would not honour.
     """
     ET.register_namespace("", SVG_NS)
-    root = ET.fromstring(source)
+    try:
+        root = ET.fromstring(source)
+    except ET.ParseError as broken:
+        # A skeleton is hand-edited, so this is a normal thing to get wrong -- and easy to get wrong in
+        # a way that reads as fine, since `--` is illegal INSIDE an XML comment and prose uses it freely.
+        # Reported as a build failure naming the file and the position rather than as a traceback.
+        raise Overflow(f"is not well-formed XML: {broken}") from broken
     css = root.find(f"{_SVG}style")
     if css is None or not css.text:
         raise Overflow("the skeleton carries no stylesheet, so nothing can be measured against it")
@@ -2987,6 +3044,12 @@ def _typst_preamble(form: Sheet | Chart, composer: Composer) -> list[str]:
 #let dot-at(x, y, r) = place(
   top + left, dx: (x - r) * u, dy: (y - r) * u, circle(radius: r * u, ..blocks.at("mark")),
 )
+// Turned about its own centre rather than its baseline, which is what makes the angle independent of
+// how tall the run happens to be. Only the preview watermark uses it.
+#let turned(x, y, deg, style, w, s) = place(
+  top + left, dx: (x - w / 2) * u, dy: y * u,
+  rotate(deg * 1deg, origin: center + horizon, fit(w, styles.at(style)(s))),
+)
 
 // {Logo.NOTICE}
 #let emblem = {_quoted(composer.logo.standalone())}
@@ -3029,8 +3092,11 @@ def _typst_stroke(ink: Ink) -> str:
 def _typst_shape(shape: Shape, composer: Composer) -> str:
     match shape:
         case Text():
-            place = "mid" if STYLES[shape.style].centred else "at"
             width = round(composer.measured(shape), 1)
+            if shape.angle:
+                return (f'#turned({shape.x}, {shape.y}, {shape.angle}, "{shape.style}", {width}, '
+                        f"{_quoted(shape.text)})")
+            place = "mid" if STYLES[shape.style].centred else "at"
             return (f'#{place}({shape.x}, {shape.y}, "{shape.style}", {width}, '
                     f"{_quoted(shape.text)})")
         case Line():
@@ -3083,6 +3149,13 @@ def main(argv: list[Shape] | None = None) -> int:
         help="use translations a reviewer has not yet confirmed. For REVIEW renders only: a reviewer "
         "cannot approve wording they have never seen on the page, and every catalogue here starts as "
         "drafts. Off by default, because a form built this way is indistinguishable from a finished one.",
+    )
+    parser.add_argument(
+        "--preview",
+        action="store_true",
+        help="stamp every form with the preview watermark, for a protocol that is not the published "
+        "version. Off by default, because a form saying it is provisional when it is not is as wrong as "
+        "one that stays silent when it is -- and only the build knows which this is.",
     )
     parser.add_argument(
         "--allow-overflow",
@@ -3169,7 +3242,7 @@ def main(argv: list[Shape] | None = None) -> int:
             # `page` is bound here rather than captured, so each form is measured against its own
             # orientation instead of whichever one the loop happened to end on.
             lambda width, page=page: Composer(faces, chrome, glossary, rules, logo, args.language,
-                                              width, page),
+                                              width, page, preview=args.preview),
             lay_out,
         )
         if failure is not None:

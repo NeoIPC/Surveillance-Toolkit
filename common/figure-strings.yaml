@@ -93,6 +93,12 @@ neoipc_project: "NeoIPC Project"
 # their own data, which is why it is a full phrase rather than the word "Preview" alone.
 preview_version: "Preview Version"
 
+# What a reader who cannot see the watermark is told it says. It is the only thing on that figure, so
+# the description says what the STAMP means rather than describing a diagonal word, which is a fact
+# about the drawing and not about the document.
+preview_description: >-
+  This document is a preview version and is not the published protocol.
+
 # The heading above every sheet. The line below it is the stage's own name, which comes from the metadata.
 sheet_heading: "NeoIPC – Core Module (VLBW/VPT Infants)"
 
