@@ -15,7 +15,16 @@ a script, and most of these forms carry clinical thresholds that stay Western.
 
 Exits non-zero when anything is left, so it can gate a build.
 
-    python scripts/check-figure-language.py artifacts/sheets-ne
+    python scripts/check-figure-language.py artifacts/ne/forms --culture ne
+
+The culture is stated rather than inferred from a file name: sheets are named without one, on purpose, so
+that no image target names a language. It falls back to the directory (`<culture>/forms`) and refuses a
+path it cannot read, because the alternative -- defaulting to English -- made every run decline itself
+with the message that English is Latin-scripted.
+
+The glossary it accepts terminology from is that culture's, and a missing one is refused. Built from the
+English glossary the allow-list holds ADMISSION, PNEUMONIA and SURVEILLANCE, which is the residue this
+exists to find.
 
 **It only means anything for a target written in another script.** The whole inference is "Latin here is
 text nobody translated", which holds for Nepali, Greek, Hebrew and Ukrainian and is nonsense for German,
@@ -87,12 +96,31 @@ def residue(pdf: Path, allowed: set[str]) -> Counter[str]:
 LATIN_SCRIPTED = {"af", "de", "en", "es", "et", "fr", "it", "tr"}
 
 
+# Directory names the build uses beneath a culture, which therefore never name one themselves.
+_NOT_A_CULTURE = {"forms", "img", "artifacts", "sheets"}
+
+
+def _culture_of(directory: Path) -> str | None:
+    """The culture a build wrote into this directory, or None when the path does not say.
+
+    Walks upwards because the layout is `<culture>/forms`, and stops at the first name that is not a
+    fixed subdirectory. Returning None rather than a guess is the point: the previous version's fallback
+    to "en" turned an unrecognised path into a silent refusal that named the wrong language.
+    """
+    for part in (directory.name, *(parent.name for parent in directory.parents)):
+        if part and part not in _NOT_A_CULTURE:
+            return part
+    return None
+
+
 def main(argv: list[str] | None = None) -> int:
     repo = Path(__file__).resolve().parent.parent
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("directory", type=Path, help="a directory of compiled sheets")
-    parser.add_argument("--glossary", type=Path, default=repo / "glossary.yaml")
+    parser.add_argument("--culture", help="the language the sheets were built in, e.g. ne")
+    parser.add_argument("--glossary", type=Path,
+                        help="terminology to accept in Latin; defaults to the culture's own glossary")
     parser.add_argument("--allow", nargs="*", default=["NeoIPC"],
                         help="names that are not terminology and belong in no glossary")
     args = parser.parse_args(argv)
@@ -102,15 +130,43 @@ def main(argv: list[str] | None = None) -> int:
         print(f"no compiled sheet in {args.directory}", file=sys.stderr)
         return 2
 
-    # Sheets are written as <name>.<culture>.pdf, so the culture is the second-to-last suffix.
-    culture = pdfs[0].stem.rsplit(".", 1)[-1] if "." in pdfs[0].stem else "en"
+    # NOT taken from the file name. Sheets are deliberately named without a culture in them -- so that no
+    # image target names a language and no translator is asked to answer one -- and a script inferring
+    # `<name>.<culture>.pdf` therefore found no suffix, fell back to "en", and refused every run with the
+    # message that English is Latin-scripted. The check could not run for any culture at all.
+    #
+    # So the caller states it, and the directory is only a fallback: the build writes each culture to
+    # `artifacts/<culture>/forms`, so the culture is the first parent whose name is not a fixed
+    # subdirectory. Guessing is what failed; guessing with one more rule is not the fix, which is why an
+    # unrecognisable path is refused rather than assumed to be English.
+    culture = args.culture or _culture_of(args.directory.resolve())
+    if not culture:
+        print(f"cannot tell which language {args.directory} holds. Pass --culture.", file=sys.stderr)
+        return 2
+    culture = culture.replace("_", "-").split("-")[0].lower()
     if culture in LATIN_SCRIPTED:
         print(f"{culture} is written in the Latin script, so 'Latin means untranslated' does not hold and "
               f"this check would report a correct translation as entirely missing. Ask the catalogue "
               f"whether every string the sheets consume has a translation instead.", file=sys.stderr)
         return 2
 
-    allowed = accepted(args.glossary, args.allow)
+    # The CULTURE'S glossary, not the English one. The allow-list is what a sheet may carry in Latin, and
+    # built from English it contains ADMISSION, PNEUMONIA, SURVEILLANCE and ENTEROCOLITIS -- ordinary words
+    # a Nepali sheet must translate. Those are exactly the residue this exists to report, so the English
+    # glossary does not weaken the check, it inverts it: the more terminology a language has yet to
+    # translate, the more untranslated text is accepted as legitimate.
+    #
+    # Refused rather than fallen back on when the localized glossary is absent. Falling back would answer
+    # with a number that reads like a pass, and a language whose glossary is untranslated is precisely the
+    # one whose sheets have the most English left in them.
+    glossary = args.glossary or repo / f"glossary.{culture}.yaml"
+    if not glossary.exists():
+        print(f"{glossary.name} does not exist, so there is no way to tell terminology this language keeps "
+              f"in Latin from text nobody has translated. Generate it, or pass --glossary deliberately.",
+              file=sys.stderr)
+        return 2
+
+    allowed = accepted(glossary, args.allow)
     total: Counter[str] = Counter()
     for pdf in pdfs:
         found = residue(pdf, allowed)

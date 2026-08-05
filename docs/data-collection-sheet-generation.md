@@ -274,6 +274,20 @@ glossary, so changing the answer means making a terminology decision where termi
 Digits are exempt: a numeral system is a separate choice from a script, and these forms carry clinical
 thresholds that stay Western.
 
+**Which glossary is the whole check, and the English one inverts it.** The allow-list has to be the
+*culture's* glossary: built from English it contains `ADMISSION`, `PNEUMONIA`, `SURVEILLANCE` and
+`ENTEROCOLITIS`, which are precisely the words an untranslated Nepali sheet would show, so the more
+terminology a language has yet to translate, the more untranslated text is accepted as legitimate.
+Missing that glossary is refused rather than fallen back on, because a language whose terminology is
+untranslated is the one whose sheets have the most English left in them — the fallback would answer with
+a number that reads like a pass.
+
+**The culture is stated by the caller, not read off a file name.** Sheets are deliberately named without
+a culture in them, so a script looking for `<name>.<culture>.pdf` finds no suffix; taking English as the
+default then made every run refuse itself with the message that English is Latin-scripted, and the check
+could not run for any language at all. The directory is a fallback (`<culture>/forms`), and a path it
+cannot read is refused rather than guessed at.
+
 **Overflow is a build failure.** Today an over-long label runs outside its box and nobody learns until
 someone opens the PDF, which for a localized build meant nobody ever did. Measurement is what lets the
 generator assert the fit instead of hoping for it.
