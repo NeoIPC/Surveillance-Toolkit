@@ -1,0 +1,19 @@
+# Which Weblate project the `wlc` client talks to when a command is given no object.
+#
+# wlc walks up from the working directory for this file and reads it AFTER the user's own config, so it
+# layers on top: the URL and the [keys] section stay in ~/.config/weblate and are not repeated here. wlc
+# refuses to start if a `key` appears in the [weblate] section at all, so this file cannot come to hold a
+# credential by accident.
+#
+# It is worth checking in because the alternative is remembering: `wlc list-components` without an object
+# is not an error, it is a command against whatever project the client happened to default to, and an
+# upload aimed that way writes someone else's catalogue.
+#
+# `translation` is wlc's name for the default object at any level -- project, component or translation --
+# rather than a translation specifically.
+#
+# `list-components` does NOT honour it, and reads as though the client were misconfigured when it does
+# not: given no argument it skips the default entirely and lists every public component on the server,
+# so the first screenful is somebody else's project. Pass `wlc list-components neoipc` to list ours.
+[weblate]
+translation = neoipc
