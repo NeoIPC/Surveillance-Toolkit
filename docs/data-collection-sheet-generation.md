@@ -683,10 +683,37 @@ that still will not fit fails the build exactly as an unbreakable token does. An
 rather than applied by a rule, so a clinical term that would be misread when divided simply carries no
 soft hyphen — no mapping entry, no exception list, and nothing to keep in step with the text.
 
-Two things follow. The decision flow moves onto the same measured layout as the sheets rather than
-waiting behind them — its need is more urgent, not less, because its boxes are fixed and its text is
-long. And its eight strings move out of `.resx` with it: they are already whole sentences, so nothing
-about them needs splitting by a translator, and the wrapping was never theirs to think about.
+Its eight strings move out of `.resx` accordingly: they are already whole sentences, so nothing about them
+needs splitting by a translator, and the wrapping was never theirs to think about.
+
+### A drawn figure gets a template, not a layout engine
+
+**What decides the tool is where the information lives.** A sheet is *derived* — its fields, their order,
+their options and their mandatory flags come from the metadata, so nobody can place them in advance and a
+layout engine is unavoidable. The decision flow, the title page and the watermark are *drawn*: their
+boxes, arrows and proportions are a design somebody settled, and generating them per build would re-derive
+by code what a person had already decided — badly, and at the cost of arrow routing nobody asked for.
+
+So each keeps a **hand-maintained SVG skeleton**, and the build does one thing to it: resolve each text
+node's string for the culture, wrap it by measurement, and write explicit `<tspan>`s. That is the whole
+of the localization path, and it reuses the sheets' own `Typeface` — the same faces, the same shaper, the
+same soft-hyphen handling that lets a German compound divide where a translator said it may.
+
+**The skeleton is generated once and then checked in as source.** Producing it by hand is what left the
+figure it replaces with three question boxes on two different widths, `rx` set where the renderer does not
+read it, and a label at 1.85:1. Generating it once places every box from the same rules and applies the
+derived palette exactly, and the output is then a plain house-style SVG — semantic ids, classes, integer
+coordinates, no editor namespace — that a maintainer edits directly. The one-off code that emitted it is
+not kept: the SVG is the source afterwards, and the palette stays reproducible because its derivation is
+recorded above rather than living in a script.
+
+**A box cannot grow at render time, so it is authored for the worst language.** This is the real
+constraint the template accepts in exchange for its simplicity, and it is the stricter half of the
+bargain: measurement decides whether the text fits, and text that does not fit **fails the build** rather
+than silently overrunning. Sizing generously once is cheap; the figure is A4 landscape and mostly air.
+
+Retiring this way takes the seven XSLT files and the `.resx` files with it — including the two that wrap
+text by counting characters, which is what none of the above could be built on.
 
 ## Palette: two brand colours, everything else derived from them
 
