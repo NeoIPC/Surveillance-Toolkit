@@ -332,7 +332,7 @@ function Test-ConvertToJsonDepth {
     param([string]$Repo, [string]$Label)
 
     # ConvertTo-Json defaults to -Depth 2 and drops everything below it. The default is wrong here in the
-    # way that costs most: the object still serialises, the output still looks like JSON, and the only
+    # way that costs most: the object still serializes, the output still looks like JSON, and the only
     # signal is a warning on a stream nobody reads in CI. A workspace poll script put a nested GraphQL
     # error into a job log as `@{line=1; column=9}` — a PowerShell hashtable stringified where JSON was
     # meant — and that string was the diagnostic for an outage, so the one place it degraded was the one

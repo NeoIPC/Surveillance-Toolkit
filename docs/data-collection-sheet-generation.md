@@ -209,7 +209,7 @@ an approximation of the drawn width, it *is* the drawn width, and adding a shapi
 via `uharfbuzz`) would introduce a disagreement with the renderer rather than resolve one.
 
 Kerning is requested — `width_of(text, kerning: true)` — and has nothing to act on. Every face in
-`common/fonts/` carry `GPOS` and **no `kern` table**, so a consumer of the legacy table finds no pairs.
+`common/fonts/` carries `GPOS` and **no `kern` table**, so a consumer of the legacy table finds no pairs.
 asciidoctor-pdf's own bundled subset is the other way round, a `kern` table of 15,534 pairs and no `GPOS`,
 which is a second reason the theme points at this repository's fonts rather than the gem's: the file
 measured and the file embedded must be the same file, and it should also be the one whose width is
