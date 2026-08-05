@@ -353,6 +353,44 @@ def test_a_layout_naming_metadata_that_does_not_exist_is_refused(tmp_path: Path)
         f"the build failed without naming the offending code:\n{refused.stdout}\n{refused.stderr}")
 
 
+def test_every_hand_maintained_svg_is_well_formed_xml() -> None:
+    """The artwork is XML, and for as long as nothing parsed it, nothing could say it was not.
+
+    The horizontal logo carried `--` inside a comment, which XML forbids, and shipped that way because
+    its one consumer matched it with regexes — a text scan cannot fail on malformed markup. The generator
+    now parses the logo it inlines and the skeletons it localizes, so those are enforced by being used;
+    this covers the artwork no generator reads, which is where such a defect can sit indefinitely.
+    """
+    sources = sorted((REPO / "common" / "img").glob("*.svg"))
+    sources += sorted((REPO / "doc" / "protocol" / "figures").glob("*.svg"))
+    assert sources, "no artwork was found to check, so this asserts nothing"
+    for source in sources:
+        try:
+            ET.parse(source)
+        except ET.ParseError as broken:
+            raise AssertionError(f"{source.relative_to(REPO)} is not well-formed XML: {broken}") from broken
+
+
+def test_a_group_whose_slot_is_short_of_a_member_is_refused(tmp_path: Path) -> None:
+    """The collapsed row's label names every declared member, whatever the slot actually carried.
+
+    It is one translated sentence with a placeholder per suffix, so it cannot narrow itself to a shorter
+    run — dropping a placeholder from a translator's sentence does not leave it grammatical. A slot that
+    loses a member would therefore go on printing a question about a resistance category nobody collects
+    any more, and the sheet would look right, diff clean and exit 0. Declaring a suffix no field carries
+    is the same state seen from the generator's side.
+    """
+    layout = tmp_path / "sheet-layout.yaml"
+    layout.write_text(
+        (REPO / "common" / "sheet-layout.yaml").read_text(encoding="utf-8")
+        .replace("suffixes: [3GCR, MRSA, VRE]", "suffixes: [3GCR, COLR, MRSA, VRE]", 1),
+        encoding="utf-8", newline="\n")
+    refused = generate(tmp_path / "out", "--layout", str(layout))
+    assert refused.returncode != 0, "a group printing a label for a member the slot does not carry was accepted"
+    assert "COLR" in refused.stdout + refused.stderr, (
+        f"the build failed without naming the unmatched member:\n{refused.stdout}\n{refused.stderr}")
+
+
 def test_a_totals_heading_that_spells_the_word_is_refused(tmp_path: Path) -> None:
     """It heads one column of a grid sized for handwriting, and it was the one heading never measured.
 

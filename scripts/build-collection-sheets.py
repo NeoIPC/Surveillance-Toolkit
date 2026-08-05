@@ -228,6 +228,10 @@ NOTRANSMIT_BAR = 60                     # the solid edge that carries the distin
 LOGO_FILE = "NeoIPC-Logo-Horizontal.svg"
 LOGO_W = 4200                           # 42 mm
 
+SVG_NS = "http://www.w3.org/2000/svg"
+XML_NS = "http://www.w3.org/XML/1998/namespace"
+_SVG = f"{{{SVG_NS}}}"
+
 
 @dataclass
 class Field:
@@ -444,29 +448,48 @@ class Logo:
     # wherever the stylesheet does apply, it is still what decides.
     FILLS = {"brand-blue": ACCENT, "brand-orange": BRAND_ORANGE}
 
+    # What the document says about itself rather than draws: read for their content, then left behind.
+    # The stylesheet in particular must not travel into the symbol, since `standalone` writes its own.
+    FURNITURE = (f"{_SVG}title", f"{_SVG}desc", f"{_SVG}metadata", f"{_SVG}style")
+
     def __init__(self, path: Path):
-        source = path.read_text(encoding="utf-8")
-        self.view_box = re.search(r'viewBox="([^"]+)"', source).group(1)
+        # Read with the format's own parser, like every other SVG here. The body is then the elements
+        # that draw, selected by what they are -- where taking the source text after `</style>` made the
+        # artwork's structure a function of the order somebody happened to write its prologue in.
+        root = ET.parse(path).getroot()
+        self.view_box = root.get("viewBox")
         _, _, w, h = (float(v) for v in self.view_box.split())
         self.aspect = w / h
         # The artwork's own <title>, which is what a screen reader is told the mark says. Read from the
         # file rather than written here: it is a wordmark, so its accessible name is the word it draws,
         # and that is a fact about the artwork. Not translated -- it is a name.
-        self.name = re.search(r"<title>([^<]+)</title>", source).group(1)
-        body = source.split("</style>", 1)[1].rsplit("</svg>", 1)[0]
-        # A substitution that matches nothing is precisely the silent failure the attributes exist to
-        # prevent, so the artwork is required to write every brand class in the one form the replacement
-        # reaches -- as many `class="…"` occurrences as there are `brand-` tokens.
-        if sum(body.count(f'class="{name}"') for name in self.FILLS) != body.count("brand-"):
-            raise ValueError(f"{path}: a brand class is written in a form the fill attribute cannot reach")
-        self.body = [self._painted(line) for line in body.splitlines() if line.strip()]
+        self.name = root.findtext(f"{_SVG}title")
+        drawing = ET.Element("g")
+        drawing.extend(child for child in root if child.tag not in self.FURNITURE)
+        for element in drawing.iter():
+            self._paint(element, path)
+            # The namespace is declared by the document this is embedded in, so carrying a prefix here
+            # would redeclare it on every path of the mark.
+            element.tag = element.tag.removeprefix(_SVG)
+        ET.indent(drawing, space="  ")
+        self.body = [line for child in drawing
+                     for line in ET.tostring(child, encoding="unicode").splitlines() if line.strip()]
 
     @classmethod
-    def _painted(cls, line: str) -> str:
-        """One line of the artwork, with its class's fill restated as a presentation attribute."""
-        for name, fill in cls.FILLS.items():
-            line = line.replace(f'class="{name}"', f'class="{name}" fill="{fill}"')
-        return line
+    def _paint(cls, element: "ET.Element", path: Path) -> None:
+        """Restate an element's brand class as a presentation attribute.
+
+        A class that styles nothing is the silent failure the attributes exist to prevent -- the mark
+        opens black wherever the stylesheet does not reach inside a symbol, with nothing to say so -- so
+        a `brand-` class this does not know a fill for is refused rather than passed through.
+        """
+        classes = (element.get("class") or "").split()
+        for name in classes:
+            if not name.startswith("brand-"):
+                continue
+            if name not in cls.FILLS:
+                raise ValueError(f"{path}: {name} is styled by the artwork but has no fill here")
+            element.set("fill", cls.FILLS[name])
 
     def definition(self, prefix: str) -> list[str]:
         # The notice travels with the artwork. A generated sheet is a distributed file that contains the
@@ -607,10 +630,12 @@ class LayoutRules:
 
     def group_of(self, field: Field) -> dict | None:
         """The printed group a field belongs to, matched on the suffix its code ends in."""
-        for group in self.groups:
-            if any(field.code.endswith(f"_{suffix}") for suffix in group["suffixes"]):
-                return group
-        return None
+        return next((group for group in self.groups if self.suffix_in(field, group)), None)
+
+    @staticmethod
+    def suffix_in(field: Field, group: dict) -> str | None:
+        """Which of the group's suffixes this field's code ends in, if any."""
+        return next((s for s in group["suffixes"] if field.code.endswith(f"_{s}")), None)
 
     @property
     def absorbed_stages(self) -> set[str]:
@@ -2240,6 +2265,19 @@ def _collapse_groups(fields: list[Field], composer: Composer) -> list[Field]:
                 break
             run.append(candidate)
 
+        # The label is one translated sentence carrying a placeholder per declared suffix, so it names
+        # every member whether or not the slot held one. A run short of a member would therefore print a
+        # question about a resistance category the data model no longer collects, and one carrying an
+        # extra would drop it from a row that looks complete -- both at exit 0, in a file that diffs
+        # clean. Refuse instead, as an unaccounted-for section does: the label cannot narrow itself,
+        # because a placeholder cannot be removed from a translator's sentence and leave it grammatical.
+        present = sorted(composer.layout.suffix_in(f, group) for f in run)
+        if present != sorted(group["suffixes"]):
+            raise LookupError(
+                f"{prefix} carries {', '.join(present)}, but the group prints a label naming "
+                f"{', '.join(sorted(group['suffixes']))}"
+            )
+
         marker = composer.footnote(group["footnote_key"])
         label = composer.fill(composer.chrome[group["label_key"]], group["label_terms"])
         out.append(
@@ -2897,9 +2935,6 @@ def _css_length(value: str | None) -> int | None:
     return round(float(match.group(1))) if match else None
 
 
-SVG_NS = "http://www.w3.org/2000/svg"
-XML_NS = "http://www.w3.org/XML/1998/namespace"
-_SVG = f"{{{SVG_NS}}}"
 # Which children of a labelled group are its region, in the order a skeleton may use them. A `use` is a
 # mark rather than a region and is handled separately.
 _REGION_TAGS = (f"{_SVG}rect", f"{_SVG}circle", f"{_SVG}ellipse")

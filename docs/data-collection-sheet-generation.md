@@ -50,11 +50,18 @@ lost its options would drop its legend with them instead of printing a key to sh
 
 | what a form needs | where it is |
 |---|---|
-| section structure and order | `programStageSections.csv` — `sortOrder`, `dataElements` |
-| field order, mandatory, widget | `programStageDataElements.csv` — `sortOrder`, `compulsory`, `renderOptionsAsRadio` |
+| section structure and order | `programStageSections.csv` — `sortOrder` for the sections, `dataElements` for the field order within each |
+| whether an answer is required | `programStageDataElements.csv` — `compulsory`, and nothing else |
 | the printed label | `dataElements.csv` — `formName`, with `valueType` and `optionSet` |
 | choice lists | `optionSets.csv` / `options.csv` |
 | the enrolment block | `trackedEntityAttributes.csv` + `programTrackedEntityAttributes.csv` |
+
+**Two columns of `programStageDataElements.csv` are deliberately left unread**, and both are ones a reader
+expects to be used. Its `sortOrder` orders the stage as a whole, so ordering fields by it would interleave
+the sections; the authored order within a section is that section's own `dataElements` list.
+`renderOptionsAsRadio` is a widget hint for the capture app rather than a statement about how many answers
+a question takes — it is `false` for the admission type, which takes exactly one — so the marker is decided
+by cardinality instead, and both call sites say so.
 
 **No intermediate document.** A YAML layer between the metadata and the generator would be a second place
 these facts live, which is the defect being removed rather than a step towards removing it.
@@ -116,6 +123,12 @@ block, a mark or a run of text.
 The relative-`href` rule is why a raster referenced from a generated SVG is named relative to *that SVG*
 rather than to the document: an `xlink:href="img/LOGO_NEOIPC_2.png"` written from inside `img/` sends the
 renderer looking for `img/img/…`.
+
+**The artwork is read with an XML parser**, like every other SVG input here, and the body it inlines is
+the elements that draw rather than whatever text followed the stylesheet. Two things follow for whoever
+edits the logo: the file has to be well-formed — a comment may not contain `--`, which is the rule XML
+states and no text scan can enforce — and a `brand-` class the generator knows no fill for is refused
+rather than passed through, because a class that styles nothing is exactly the failure below.
 
 **A document stylesheet does not reliably reach inside a `<symbol>`, so the logo states its colours
 twice.** The inlined mark's paths carry `.brand-blue` and `.brand-orange`, and the rule defining them
@@ -725,8 +738,8 @@ What the published forms actually do, read off them rather than assumed:
   reaches for first, wastes most of the page and is why an early attempt ran three pages.
 - **Sections are centred bands** in light blue across the full width.
 - **Options are indented rows** under their field, marked `○` for choose-one and `□` for choose-any —
-  with a legend at the foot of every sheet stating exactly that. The marker is therefore derivable:
-  `renderOptionsAsRadio` decides it.
+  with a legend at the foot of every sheet stating exactly that. The marker is therefore derivable —
+  from how many answers the question takes, which for an option-set field is one.
 - **Short option sets run horizontally.** "No / CVC-associated / PVC-associated" sits on one line; a set
   whose text is long breaks to one option per line. This is the single biggest contributor to fitting the
   page, and it is a measurement decision, which is why measuring is what makes the one-page rule
