@@ -53,7 +53,6 @@ $infectiousAgentsDir = Join-Path -Resolve -Path $metadataFolder -ChildPath 'comm
 $docDir = Join-Path -Resolve -Path $workspaceFolder -ChildPath 'doc'
 $protocolDir = Join-Path -Resolve -Path $docDir -ChildPath 'protocol'
 $imgDir = Join-Path -Resolve -Path $protocolDir -ChildPath 'img'
-$commonImgDir = Join-Path -Resolve -Path $workspaceFolder -ChildPath 'common' -AdditionalChildPath 'img'
 $resDir = Join-Path -Resolve -Path $protocolDir -ChildPath 'resx'
 $transDir = Join-Path -Resolve -Path $protocolDir -ChildPath 'xslt'
 $commonDir = Join-Path -Resolve -Path $workspaceFolder -ChildPath 'common'
@@ -76,10 +75,9 @@ if ($discoveredCultures) {
     # the directory root. A directory counts only if it holds the protocol itself, which is what keeps
     # img/, resx/, xslt/ and definitions/ out and means no name has to be excluded by hand.
     #
-    # This globbed the flat NeoIPC-Core-Protocol.<culture>.adoc until now — a name nothing has written
-    # since the localization restructure moved po4a's output into subdirectories. The glob then matched
-    # the invariant source alone, so every run rendered English and exited exactly as a run that
-    # rendered ten would.
+    # Discovery is gated below rather than trusted, because a build that finds one culture exits exactly
+    # as one that finds ten: nothing about a reduced set is visible in the exit status, the output tree or
+    # the log unless the build says so itself.
     $TargetCultures = @([CultureInfo]::InvariantCulture) + @(
         Get-ChildItem -Path $protocolDir -Directory |
         Where-Object { Test-Path -LiteralPath (Join-Path -Path $_.FullName -ChildPath $protocolFileName) -PathType Leaf } |
@@ -188,56 +186,45 @@ $decisionFlow = New-Object System.Xml.Xsl.XslCompiledTransform
 $decisionFlow.Load((Get-ChildItem $transDir/NeoIPC-Core-Decision-Flow.xslt).FullName, [System.Xml.Xsl.XsltSettings]::TrustedXslt, $resolver)
 
 
-# Images the protocol reaches that this build does not generate, and what each class may do.
+# The images the protocol reaches that this build does not generate. Every one of them is an INVARIANT
+# MARK: it may not vary by language. The NeoIPC logo is a wordmark -- the mark is a name, which is why
+# even its text form is never translated -- and a licence badge's recognizability would be the whole of
+# its function. A localized variant of either is a defect rather than an improvement, so the build refuses
+# one instead of quietly preferring it.
 #
-# Both classes are copied into every culture's image directory, so that one directory holds every image
-# the document needs and no target has to name a culture. They differ in what a localized variant beside
-# the source MEANS.
-#
-# An INVARIANT MARK may not vary by language. The NeoIPC logo is a wordmark -- the mark is a name, which
-# is why even its text form is never translated -- and a licence badge's recognizability is the whole of
-# its function, so a localized variant of either is a defect rather than an improvement. The build
-# therefore refuses one instead of quietly preferring it.
+# Everything else the protocol shows is generated per culture, including the AWaRe badges: each draws a
+# single letter, and WHO governs its own translations of the categories, so a Spanish badge reads A/P/R.
 $invariantMarks = @{ $imgDir = @('LOGO_NEOIPC.png') }
-# A SHARED FIGURE simply has no localized form yet, and the distinction that matters is `may it vary`
-# rather than `can it be localized`: the set that cannot is smaller than it looks and keeps shrinking.
-# The AWaRe badges are the case in point -- each draws a single letter, WHO governs its own translations
-# of the categories, and a Spanish badge accordingly reads A/P/R. Until one exists, every culture gets the
-# shared file, and a culture that gains one starts being served it with no change to the document.
-$sharedFigures = @{ $commonImgDir = @('AWaRe-A.svg', 'AWaRe-W.svg', 'AWaRe-R.svg') }
 
-function Copy-CultureImage {
-    # Put one image into a culture's image directory, preferring that culture's own file over the shared
-    # one. $Invariant marks an image that must be identical in every language: a localized variant of one
-    # is refused rather than used, because a build that silently prefers it would publish a mark nobody
-    # decided to vary.
+function Copy-InvariantMark {
+    # Put a mark that must read the same in every language into one culture's image directory, refusing a
+    # per-culture variant of it rather than using one. The refusal is the point: preferring the variant is
+    # what a build would otherwise do, silently, publishing a mark nobody decided to vary.
     param(
         [Parameter(Mandatory)][string]$SourceDirectory,
         [Parameter(Mandatory)][string]$FileName,
         [Parameter(Mandatory)][string]$DestinationDirectory,
-        [Parameter(Mandatory)][CultureInfo]$TargetCulture,
-        [switch]$Invariant
+        [Parameter(Mandatory)][CultureInfo]$TargetCulture
     )
 
-    # Most specific first, and empty for a culture with no file of its own. For the invariant culture this
-    # is the shared file itself, which is why that case needs no branch of its own.
+    # Most specific first, and empty for a culture with no file of its own -- which is the state every
+    # culture is supposed to be in. For the invariant culture it is the shared file itself.
     $localised = @(Get-LocalisedPath $SourceDirectory $FileName $TargetCulture -All -Existing)
     $shared = Join-Path -Path $SourceDirectory -ChildPath $FileName
-    if ($Invariant -and $TargetCulture.Name -and $localised) {
+    if ($TargetCulture.Name -and $localised) {
         throw ("'$FileName' is a mark that must read the same in every language, and " +
             "'$($localised[0])' is a per-culture variant of it. Remove the variant, or move the image " +
             "out of the invariant set if it really is one a language may change.")
     }
-    $source = if ($localised) { $localised[0] } else { $shared }
-    if (-not (Test-Path -LiteralPath $source -PathType Leaf)) {
+    if (-not (Test-Path -LiteralPath $shared -PathType Leaf)) {
         throw "The protocol needs the image '$FileName', and there is none at '$shared'."
     }
     $destination = Join-Path -Path $DestinationDirectory -ChildPath $FileName
-    # The invariant culture's directory IS the shared one for anything already stored there, so there is
-    # nothing to copy and Copy-Item would refuse to copy a file onto itself.
-    if ((Resolve-Path -LiteralPath $source).Path -eq $destination) { return }
-    Build-Target $destination $source {
-        Copy-Item -LiteralPath $source -Destination $destination
+    # The invariant culture's directory IS where these are stored, so there is nothing to copy and
+    # Copy-Item would refuse to copy a file onto itself.
+    if ((Resolve-Path -LiteralPath $shared).Path -eq $destination) { return }
+    Build-Target $destination $shared {
+        Copy-Item -LiteralPath $shared -Destination $destination
     }
 }
 
@@ -294,14 +281,8 @@ foreach ($targetCulture in $targetCultures)
     }
     foreach ($entry in $invariantMarks.GetEnumerator()) {
         $entry.Value | ForEach-Object {
-            Copy-CultureImage -SourceDirectory $entry.Key -FileName $_ -DestinationDirectory $cultureImgDir `
-                -TargetCulture $targetCulture -Invariant
-        }
-    }
-    foreach ($entry in $sharedFigures.GetEnumerator()) {
-        $entry.Value | ForEach-Object {
-            Copy-CultureImage -SourceDirectory $entry.Key -FileName $_ -DestinationDirectory $cultureImgDir `
-                -TargetCulture $targetCulture
+            Copy-InvariantMark -SourceDirectory $entry.Key -FileName $_ `
+                -DestinationDirectory $cultureImgDir -TargetCulture $targetCulture
         }
     }
 
@@ -314,9 +295,16 @@ foreach ($targetCulture in $targetCultures)
     # New-AntibioticsList reads the base antibiotic + UI-label CSVs plus the per-locale gettext catalogue
     # po/antibiotics.<lang>.po (the translation source that replaced the retired .<lang>.csv sidecars), so the
     # incremental-build dependency set must track all three (the two base CSVs always exist; the .po is per-locale).
+    #
+    # The AWaRe groups file is one of them because the badge cell is derived from it -- both which file
+    # the row points at and the name a screen reader reads out. The module is another: this list is
+    # assembled by code rather than copied, so a change to the assembler changes the output exactly as a
+    # change to the data does, and a target that tracks only the data goes stale silently.
     $antibioticsListInputs = @(
         (Join-Path $antibioticsDir 'NeoIPC-Antibiotics.csv')
         (Join-Path $antibioticsDir 'ListElements.csv')
+        (Join-Path $antibioticsDir 'NeoIPC-Antibiotic-AWaRe-Groups.csv')
+        (Join-Path -Path $PSScriptRoot -ChildPath 'modules' -AdditionalChildPath 'NeoIPC-BuildTools', 'NeoIPC-BuildTools.psm1')
     ) + @(Get-LocalisedPath $poDir 'antibiotics.po' $targetCulture -All -Existing)
     Build-Target $antibioticsListFile $antibioticsListInputs {
         Write-Verbose "Generating list of antibiotics"
@@ -368,6 +356,7 @@ foreach ($targetCulture in $targetCultures)
         (Join-Path $sheetMetadataDir 'options.csv')
         (Join-Path $sheetMetadataDir 'trackedEntityAttributes.csv')
         (Join-Path $sheetMetadataDir 'programTrackedEntityAttributes.csv')
+        (Join-Path -Path $sheetMetadataDir -ChildPath 'antibiotics' -AdditionalChildPath 'NeoIPC-Antibiotic-AWaRe-Groups.csv')
         (Join-Path $commonDir 'sheet-layout.yaml')
         (Join-Path $commonDir 'figure-strings.yaml')
         (Join-Path $workspaceFolder 'glossary.yaml')
@@ -393,10 +382,9 @@ foreach ($targetCulture in $targetCultures)
         # document. Asciidoctor never copies an image, so the artifacts directory needs the same per-culture
         # layout the source tree has -- which is what {locale-dir}/img means on this side of the build.
         #
-        # Until this, artifacts/img was created empty and nothing was ever put in it, so every AWaRe badge
-        # in the published protocol -- one on each of some two thousand antibiotic rows -- was a broken
-        # image. The whole directory is copied rather than the subset a reference count says is needed, so
-        # that adding a figure to the document cannot quietly reintroduce that.
+        # The whole directory goes, rather than the subset a reference count says is needed: a figure
+        # nobody remembers to copy is a broken image in the published HTML and renders perfectly in the
+        # PDF, so the count is exactly the thing that must not be trusted.
         $htmlImgDir = Get-LocalisedPath $artifactsFolder 'img' $targetCulture -Subdirectory
         if (-not (Test-Path -LiteralPath $htmlImgDir -PathType Container)) {
             $null = New-Item -Path $htmlImgDir -ItemType Directory -Force

@@ -65,6 +65,16 @@ def generate(out: Path, *extra: str) -> subprocess.CompletedProcess[str]:
     )
 
 
+def sheet_files(directory: Path, extension: str = "svg") -> list[Path]:
+    """The forms, excluding the AWaRe badges that share the output directory.
+
+    The badges are drawn by the same run and into the same place -- a culture's image directory holds
+    every image the protocol needs — but they are not sheets: no page, no grid, no printed form. Matching
+    them here would compare them against rules written for something else.
+    """
+    return sorted(directory.glob(f"NeoIPC-Core-*.{extension}"))
+
+
 @pytest.fixture(scope="module")
 def english(tmp_path_factory: pytest.TempPathFactory) -> Path:
     out = tmp_path_factory.mktemp("sheets-en")
@@ -75,15 +85,15 @@ def english(tmp_path_factory: pytest.TempPathFactory) -> Path:
 
 def test_every_sheet_fits_one_page(english: Path) -> None:
     """No --allow-overflow, so this is the real gate rather than the escape hatch."""
-    assert len(list(english.glob("*.svg"))) == SHEETS
-    assert len(list(english.glob("*.typ"))) == SHEETS
+    assert len(sheet_files(english)) == SHEETS
+    assert len(sheet_files(english, "typ")) == SHEETS
 
 
 def test_a_localized_run_fits_too(tmp_path: Path) -> None:
     """German, whose catalogue is committed here — the compounding language most likely to overflow."""
     result = generate(tmp_path / "de", "--language", "de")
     assert result.returncode == 0, f"the German sheets do not fit:\n{result.stdout}\n{result.stderr}"
-    assert len(list((tmp_path / "de").glob("*.svg"))) == SHEETS
+    assert len(sheet_files(tmp_path / "de")) == SHEETS
 
 
 def test_regenerating_produces_identical_bytes(english: Path, tmp_path: Path) -> None:
@@ -110,7 +120,7 @@ def test_house_style(english: Path, pattern: str, what: str) -> None:
     a generator's laziness. Everything after it is the generator's own output.
     """
     offenders = []
-    for sheet in sorted(english.glob("*.svg")):
+    for sheet in sheet_files(english):
         body = sheet.read_text(encoding="utf-8").split("</symbol>", 1)[-1]
         if re.search(pattern, body):
             offenders.append(sheet.name)
@@ -120,7 +130,7 @@ def test_house_style(english: Path, pattern: str, what: str) -> None:
 def test_coordinates_are_integers_on_one_grid(english: Path) -> None:
     """A fractional coordinate means something bypassed the grid the whole layout is expressed in."""
     fractional: list[str] = []
-    for sheet in sorted(english.glob("*.svg")):
+    for sheet in sheet_files(english):
         body = sheet.read_text(encoding="utf-8").split("</symbol>", 1)[-1]
         fractional += [f"{sheet.name}: {m.group(0)}"
                        for m in re.finditer(r'\b(?:x|y|x1|y1|x2|y2|cx|cy|width|height)="\d+\.\d+"', body)]
@@ -229,6 +239,92 @@ def test_the_totals_marker_centres_on_the_day_numbers(english: Path) -> None:
 
     assert abs(centre(marker) - centre("31")) <= 1, (
         f"{marker!r} sits {centre(marker) - centre('31'):.1f} units off the day numbers' optical centre")
+
+
+# ── The AWaRe badges ────────────────────────────────────────────────────────────────────────────────
+#
+# Exercised through the functions rather than through rendered files, and deliberately: the committed
+# glossaries translate none of the three categories, so every catalogue here yields A, W and R and a test
+# reading the output would pass whether or not the derivation worked at all.
+
+
+def badge_rules(letters: dict | None = None):
+    """The real layout rules, with an optional per-language letter override written in."""
+    module = generator_module()
+    rules = module.LayoutRules(REPO / "common" / "sheet-layout.yaml")
+    if letters is not None:
+        rules.badge_letters = letters
+    return rules
+
+
+@pytest.mark.parametrize("term, language, expected, why", [
+    ("Precaución", "es", "P", "WHO's own Spanish for Watch, whose badge reads P and not W"),
+    ("Access", "en", "A", "the untranslated case, which every committed glossary is in"),
+    ("ihtiyat", "tr", "İ", "Turkish capitalises i with its dot; the Unicode default gives a plain I"),
+    ("ihtiyat", "en", "I", "and the same word in a language without that rule keeps the plain capital"),
+    ("पहुँच", "ne", "प", "Devanagari is caseless, so the initial comes back exactly as written"),
+    ("किताब", "ne", "कि", "a vowel sign belongs to the consonant it is written on, so both come"),
+])
+def test_a_badge_letter_is_the_category_initial(term, language, expected, why) -> None:
+    """The letter is derived from the glossary term, upper-cased in that language's own rules."""
+    module = generator_module()
+    glossary = {"watch": term, "access": term}
+    letter = module.badge_letter("Watch", glossary, badge_rules(), language)
+    assert letter == expected, f"{why}: {term!r} in {language} gave {letter!r}, not {expected!r}"
+
+
+def test_a_recorded_letter_overrides_the_derived_one() -> None:
+    """The escape hatch for a language whose badge letter is not its category's initial.
+
+    The term and the override deliberately begin with different letters, so the two branches cannot both
+    be satisfied by the same answer -- which is what a `Gwylio`/`G` pair would have done, passing whether
+    the override was consulted or not.
+    """
+    module = generator_module()
+    glossary = {"watch": "Ychwanegol"}
+    rules = badge_rules({"cy": {"Watch": "G"}})
+    assert module.badge_letter("Watch", glossary, rules, "cy") == "G", "the recorded letter must win"
+    assert module.badge_letter("Watch", glossary, rules, "en") == "Y", "and reach no other language"
+
+
+def test_a_category_with_no_glossary_term_fails() -> None:
+    """Falling back to the English word would hide a terminology gap behind a plausible badge."""
+    module = generator_module()
+    with pytest.raises(LookupError, match="glossary term"):
+        module.badge_letter("Watch", {}, badge_rules(), "de")
+
+
+def test_a_letter_too_wide_for_its_circle_is_refused() -> None:
+    """The failure a derived initial can actually produce, and the reason the fit is measured.
+
+    `Ш` is nearly twice the width of `W`, and a badge printed 20 units across has nothing to absorb that
+    with. Asserted against a real face rather than a nominal width, so it stays true as fonts change --
+    and paired with a letter that must PASS, since a check that refuses everything would also be green.
+    """
+    module = generator_module()
+    face = module.Typeface([module.Face(REPO / "common" / "fonts" / "NotoSans-Bold.ttf")])
+    fits = module.Badge("Watch", "W", "#fff", "#000", "AWaRe Watch")
+    assert module.badge_overflow(fits, face) is None, "a Latin capital must fit its own badge"
+    wide = module.Badge("Watch", "MMMM", "#fff", "#000", "AWaRe Watch")
+    assert module.badge_overflow(wide, face) is not None, "a letter wider than the disc must be refused"
+
+
+def test_the_badge_set_comes_from_the_metadata(english: Path) -> None:
+    """One badge per AWaRe category the metadata defines -- so WHO's fourth costs no code change."""
+    with (REPO / "metadata" / "common" / "antibiotics" / "NeoIPC-Antibiotic-AWaRe-Groups.csv").open(
+            encoding="utf-8", newline="") as handle:
+        categories = {row["category"] for row in csv.DictReader(handle)}
+    written = {p.stem.removeprefix("AWaRe-").replace("-", " ") for p in english.glob("AWaRe-*.svg")}
+    assert written == categories, f"badges {written} do not match the categories {categories}"
+
+
+def test_a_badge_names_no_font_the_repository_does_not_ship(english: Path) -> None:
+    """A family the renderer cannot resolve does not fail: prawn-svg draws the text in the document's
+    fallback face instead, so a badge naming one comes out in the protocol's serif and nothing says so."""
+    for badge in sorted(english.glob("AWaRe-*.svg")):
+        body = badge.read_text(encoding="utf-8")
+        assert "Arial" not in body and "sans-serif" not in body, f"{badge.name} names a font we do not ship"
+        assert "Noto Sans" in body, f"{badge.name} does not name the family it was measured in"
 
 
 def test_mirroring_reflects_a_page_about_its_own_width() -> None:

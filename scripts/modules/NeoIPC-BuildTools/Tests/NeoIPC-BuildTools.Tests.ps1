@@ -125,25 +125,61 @@ InModuleScope 'NeoIPC-BuildTools' {
                 'tmp_001,,Micronomicin,J01GB,Watch',            # blank ATC code (tmp_* id) + AWaRe
                 'J01XX99,J01XX99,Noclass,J01XX,') | Set-TestFileContent -LiteralPath (Join-Path $abx 'NeoIPC-Antibiotics.csv') -Encoding utf8NoBOM   # no AWaRe category
             @('id,value', 'substance,Substance', 'atc_code,ATC-Code', 'aware_category,AWaRe Category') | Set-TestFileContent -LiteralPath (Join-Path $abx 'ListElements.csv') -Encoding utf8NoBOM
+            # The categories, which decide both the badge file a row points at and the name read out for
+            # it. `Not recommended` is here because it is the category with a space in it, and the file
+            # name is the category with spaces hyphenated -- a rule stated in two languages, so a fixture
+            # that only ever saw single words would let the two drift apart unnoticed.
+            @('code,category,name,shortName,description,uid',
+                'WHO_AWARE_WATCH,Watch,AWaRe Watch,AWaRe W,,O8M678OescV',
+                'WHO_AWARE_NOT_RECOMMENDED,Not recommended,AWaRe Not recommended,AWaRe N,,jH2kLp9QrSt') |
+                Set-TestFileContent -LiteralPath (Join-Path $abx 'NeoIPC-Antibiotic-AWaRe-Groups.csv') -Encoding utf8NoBOM
             $po = Join-Path $root 'po'
             New-Item -ItemType Directory -Path $po -Force | Out-Null
             @('msgid ""', 'msgstr ""', '"Language: de\n"', '', 'msgid "Meropenem"', 'msgstr "Meropenem DE"', '', 'msgid "Substance"', 'msgstr "Substanz"') | Set-TestFileContent -LiteralPath (Join-Path $po 'antibiotics.de.po') -Encoding utf8NoBOM
             $script:listMeta = Join-Path $root 'meta'
         }
 
-        It 'localizes the substance name and maps the AWaRe category to its badge letter' {
+        It 'localizes the substance name and carries the AWaRe category and its name' {
             $rows = @(New-AntibioticsList -TargetCulture ([CultureInfo]'de') -MetadataPath $script:listMeta)
             $rows.Count | Should -Be 3
             $mero = @($rows | Where-Object { $_.Id -eq 'J01DH02' })[0]
             $mero.Substance | Should -BeExactly 'Meropenem DE'
-            $mero.AWaReCategory | Should -BeExactly 'W'
+            # The category itself rather than a letter: the letter is the initial of a translated word and
+            # varies by language, so it cannot identify the badge or name it for a screen reader.
+            $mero.AWaReCategory | Should -BeExactly 'Watch'
+            $mero.AWaReName | Should -BeExactly 'AWaRe Watch'
         }
         It 'guards a blank atc_code (tmp_* ids): no ATC code/url, AWaRe still present' {
             $rows = @(New-AntibioticsList -TargetCulture ([CultureInfo]'de') -MetadataPath $script:listMeta)
             $tmp = @($rows | Where-Object { $_.Id -eq 'tmp_001' })[0]
             $tmp.AtcCode | Should -BeExactly ''
             $tmp.AtcUrl | Should -BeNullOrEmpty
-            $tmp.AWaReCategory | Should -BeExactly 'W'
+            $tmp.AWaReCategory | Should -BeExactly 'Watch'
+        }
+        It 'AsciiDoc mode: names the badge file from the category and the alt text from its name' {
+            $ad = @(New-AntibioticsList -TargetCulture ([CultureInfo]'de') -MetadataPath $script:listMeta -AsciiDoc)
+            $mero = @($ad | Where-Object { $_ -match 'Meropenem' })[0]
+            $mero | Should -Match 'image:AWaRe-Watch\.svg\[AWaRe Watch,20\]'
+        }
+        It 'AsciiDoc mode: hyphenates a category whose name carries a space' {
+            # `Not recommended` is WHO's fourth category and the only one that is two words, so it is the
+            # only row that can catch the file-name rule drifting from the generator's. On a metadata tree
+            # of its own: rewriting the shared one would leave whichever test ran next reading a substance
+            # list it did not provision.
+            $spaced = Join-Path -Path $TestDrive -ChildPath 'abxspaced'
+            $spacedAbx = Join-Path -Path $spaced -ChildPath 'common' -AdditionalChildPath 'antibiotics'
+            New-Item -ItemType Directory -Path $spacedAbx -Force | Out-Null
+            @('id,atc_code,name,atc_group,aware_category', 'J01ZZ01,J01ZZ01,Combo,J01ZZ,Not recommended') |
+                Set-TestFileContent -LiteralPath (Join-Path -Path $spacedAbx -ChildPath 'NeoIPC-Antibiotics.csv') -Encoding utf8NoBOM
+            @('id,value', 'substance,Substance', 'atc_code,ATC-Code', 'aware_category,AWaRe Category') |
+                Set-TestFileContent -LiteralPath (Join-Path -Path $spacedAbx -ChildPath 'ListElements.csv') -Encoding utf8NoBOM
+            @('code,category,name,shortName,description,uid',
+                'WHO_AWARE_NOT_RECOMMENDED,Not recommended,AWaRe Not recommended,AWaRe N,,jH2kLp9QrSt') |
+                Set-TestFileContent -LiteralPath (Join-Path -Path $spacedAbx -ChildPath 'NeoIPC-Antibiotic-AWaRe-Groups.csv') -Encoding utf8NoBOM
+
+            $ad = @(New-AntibioticsList -TargetCulture ([CultureInfo]::InvariantCulture) -MetadataPath $spaced -AsciiDoc)
+            @($ad | Where-Object { $_ -match 'Combo' })[0] |
+                Should -Match 'image:AWaRe-Not-recommended\.svg\[AWaRe Not recommended,20\]'
         }
         It 'emits no AWaRe badge when the substance has no aware_category' {
             $rows = @(New-AntibioticsList -TargetCulture ([CultureInfo]'de') -MetadataPath $script:listMeta)

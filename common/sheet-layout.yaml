@@ -204,3 +204,27 @@ groups:
 # and the published BSI sheet offers three organism slots. Record the printed count here so that the
 # difference is deliberate and visible rather than an accident of whoever last edited a Word file.
 slots: {}
+
+# The WHO AWaRe badges the protocol's antibiotic table prints, one per row. The SET of badges comes from
+# metadata/common/antibiotics/NeoIPC-Antibiotic-AWaRe-Groups.csv, so a category WHO adds gets a badge
+# without anyone editing a list; this block supplies only what the metadata does not say, keyed by that
+# file's `category` value.
+#
+# `fill` and `ink` are WHO's own badge colours and the ink chosen to read on each. A badge is a
+# traffic-light signal before it is a letter, so the pairing is a legibility decision rather than a
+# palette one -- and the sheets' two-brand-colour rule does not reach here, because these are not NeoIPC's
+# colours to choose.
+#
+# `letter` overrides the derived initial for one language. The default is the first character of the
+# category's glossary term, upper-cased in that language's own rules, which is right almost everywhere:
+# Spanish `Precaución` gives P, matching WHO's own Spanish badge. Override where an initial is the wrong
+# letter -- a digraph that must not be split, or a language with an established badge letter of its own.
+# Keyed language -> category. Recorded here rather than offered to translators because a badge letter is a
+# statement about WHO's published materials in that language, checkable against them, and not a free
+# translation.
+aware_badges:
+  colours:
+    Access: {fill: "#6eb43d", ink: "#fff"}
+    Watch: {fill: "#fddf01", ink: "#000"}
+    Reserve: {fill: "#ee2d24", ink: "#fff"}
+  letter: {}

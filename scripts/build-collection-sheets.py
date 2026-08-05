@@ -26,8 +26,10 @@ from __future__ import annotations
 
 import argparse
 import csv
+import math
 import re
 import sys
+import unicodedata
 from collections.abc import Callable
 from dataclasses import dataclass, field as dc_field, replace
 from pathlib import Path
@@ -314,6 +316,10 @@ class Metadata:
         self.program_attributes = self._read("programTrackedEntityAttributes.csv")
         self.programs = self._read("programs.csv")
         self.rule_actions = self._read("programRuleActions.csv")
+        # WHO's AWaRe categories, in the order the file lists them. The BADGES are drawn one per row, so a
+        # category WHO adds -- it has added a fourth, `Not recommended` -- reaches the protocol's antibiotic
+        # table by being written here, with nothing to find and edit in a generator.
+        self.aware_groups = self._read("antibiotics/NeoIPC-Antibiotic-AWaRe-Groups.csv")
 
         self.element_by_id = {r["id"]: r for r in self.elements}
         self.option_set_by_id = {r["id"]: r for r in self.option_sets}
@@ -481,6 +487,11 @@ class LayoutRules:
         self.sheet_names: dict[str, str] = rules.get("sheet_names") or {}
         self.row_units: dict[str, str] = rules.get("row_units") or {}
         self.chart: dict = rules.get("chart") or {}
+        badges: dict = rules.get("aware_badges") or {}
+        self.badge_colours: dict[str, dict[str, str]] = badges.get("colours") or {}
+        # language -> category -> letter. Empty until a language needs one, which is the expected state:
+        # the derived initial is right wherever the category's own word begins with the badge's letter.
+        self.badge_letters: dict[str, dict[str, str]] = badges.get("letter") or {}
 
     def file_name(self, code: str, slug: str) -> str:
         """What a sheet's file is called, which is read by whoever picks a form to print.
@@ -619,6 +630,18 @@ class Face:
     def cap_at(self, size: int) -> int:
         return round(self._cap * size)
 
+    def ink_bounds(self, text: str) -> tuple[float, float, float, float] | None:
+        """The drawn extent of `text` in ems: (left, bottom, right, top), or None where it draws nothing."""
+        glyphs = self.font.getGlyphSet()
+        pen = BoundsPen(glyphs)
+        for char in text:
+            name = self.cmap.get(ord(char))
+            if name:
+                glyphs[name].draw(pen)
+        if pen.bounds is None:
+            return None
+        return tuple(value / self.units for value in pen.bounds)
+
     def ink_centre(self, text: str) -> float:
         """Half-way between the highest and lowest ink of `text`, in ems above the baseline.
 
@@ -627,15 +650,10 @@ class Face:
         240 thousandths BELOW the baseline, so set on the same line as the numbers it heads it appears to
         sag by that much. Comparing the two centres is what lets one be aligned to the other.
         """
-        glyphs = self.font.getGlyphSet()
-        pen = BoundsPen(glyphs)
-        for char in text:
-            name = self.cmap.get(ord(char))
-            if name:
-                glyphs[name].draw(pen)
-        if pen.bounds is None:
+        bounds = self.ink_bounds(text)
+        if bounds is None:
             return self._cap / 2
-        return (pen.bounds[1] + pen.bounds[3]) / 2 / self.units
+        return (bounds[1] + bounds[3]) / 2
 
     def has(self, ch: str) -> bool:
         return ord(ch) in self.cmap
@@ -773,6 +791,19 @@ class Typeface:
         through a single face would measure something nobody draws.
         """
         return sum(face.shaped_width(run, self.language) for face, run in self._runs(text)) * size
+
+    def ink_height(self, text: str, size: int) -> float:
+        """How tall `text` actually draws, top of its ink to bottom, across the faces that draw it.
+
+        The font size is not that height: it is the em, which is deliberately larger than anything in it.
+        A fit against a shape rather than a box needs the real extent, which is why this measures ink and
+        `cap_at` -- which answers a different question, where a baseline goes -- does not serve.
+        """
+        extents = [face.ink_bounds(run) for face, run in self._runs(text)]
+        drawn = [bounds for bounds in extents if bounds is not None]
+        if not drawn:
+            return 0.0
+        return (max(b[3] for b in drawn) - min(b[1] for b in drawn)) * size
 
     def optical_lift(self, symbol: str, against: str, size: int) -> int:
         """How far to raise `symbol` so its ink centres on the same line as `against`'s.
@@ -2426,6 +2457,156 @@ def _svg_id(ident: str | None, prefix: str) -> str:
     return f' id="{prefix}-{ident}"' if ident else ""
 
 
+# ── The AWaRe badges ────────────────────────────────────────────────────────────────────────────────
+#
+# One letter in a coloured circle, printed beside every row of the protocol's antibiotic table. They are
+# generated for the same reason the sheets are: the letter is the initial of a WORD, and the word is
+# translated, so a Spanish badge reads A/P/R because `Watch` is `Precaución`.
+#
+# A 100-unit box, a circle of radius 49 and a letter set at 60 -- the size the printed table has always
+# scaled from, so it is not this generator's to change. Where the letter SITS is measured rather than
+# chosen, which is what lets the letter vary at all.
+BADGE_BOX = 100
+BADGE_RADIUS = 49
+BADGE_LETTER_SIZE = 60
+
+# Where the default upper-casing is wrong. Python's `str.upper()` is Unicode's own default case mapping,
+# which is right for every language here except the dotted-i languages: Turkish and Azerbaijani write the
+# capital of `i` as `İ`, and the default gives `I`, a different letter that is also a Turkish letter. A
+# caseless script needs no entry -- `.upper()` returns Devanagari unchanged, which is the correct answer.
+DOTTED_I_LANGUAGES = frozenset({"tr", "az"})
+
+
+@dataclass(frozen=True)
+class Badge:
+    """One AWaRe category as it is printed: a letter, a circle colour and the ink that reads on it."""
+
+    category: str
+    letter: str
+    fill: str
+    ink: str
+    name: str
+
+    @property
+    def stem(self) -> str:
+        """The file name, which must be the same in every language.
+
+        Keyed on the CATEGORY rather than the letter, because the letter is what varies: `AWaRe-A.svg`
+        holding a `P` would be a name that lies, and one holding the English letter in every language
+        would put the culture back into the file name that the per-culture image directories took out.
+        """
+        return f"AWaRe-{self.category.replace(' ', '-')}"
+
+
+def build_badges(meta: Metadata, rules: LayoutRules, glossary: dict[str, str],
+                 catalogue_language: str | None) -> list[Badge]:
+    """One badge per AWaRe category the metadata defines, in the order it defines them."""
+    language = catalogue_language or "en"
+    badges = []
+    for group in meta.aware_groups:
+        category = (group.get("category") or "").strip()
+        if not category:
+            raise LookupError(f"AWaRe group {group.get('code')} has no category, so no badge can be drawn")
+        colours = rules.badge_colours.get(category)
+        if not colours:
+            raise LookupError(
+                f"AWaRe category {category!r} has no badge colours in the layout rules. A category WHO "
+                f"adds needs its own colours recorded before it can be printed.")
+        badges.append(Badge(
+            category=category,
+            letter=badge_letter(category, glossary, rules, language),
+            fill=colours["fill"],
+            ink=colours["ink"],
+            name=Metadata.label_of(group),
+        ))
+    return badges
+
+
+def badge_letter(category: str, glossary: dict[str, str], rules: LayoutRules, language: str) -> str:
+    """The letter a badge draws: an override where one is recorded, else the category's own initial.
+
+    The initial comes from the GLOSSARY rather than from the metadata's English category name, because
+    that is where this project's terminology decisions live and where WHO's official rendering of each
+    category is recorded. A category with no glossary term is a gap in the terminology rather than
+    something to paper over with the English word, so it fails.
+    """
+    override = (rules.badge_letters.get(language) or {}).get(category)
+    if override:
+        return override
+    key = category.lower().replace(" ", "_")
+    term = (glossary.get(key) or "").strip()
+    if not term:
+        raise LookupError(
+            f"AWaRe category {category!r} has no glossary term under {key!r}, so its badge letter cannot "
+            f"be derived. Add the term -- WHO publishes its own translation of each category -- or record "
+            f"a letter for this language in the layout rules.")
+    return _initial(term, language)
+
+
+def _initial(term: str, language: str) -> str:
+    """The first letter of `term`, upper-cased in `language`'s own rules.
+
+    Takes the first CLUSTER rather than the first codepoint: a Devanagari letter is a consonant plus the
+    marks that belong to it, and slicing one codepoint off would draw a bare consonant that is not the
+    letter anyone would name. Combining marks are what distinguishes the two, so they come along.
+    """
+    first = term[0]
+    for char in term[1:]:
+        if unicodedata.category(char) not in ("Mn", "Mc", "Me"):
+            break
+        first += char
+    if first[0] == "i" and language in DOTTED_I_LANGUAGES:
+        return "İ" + first[1:]
+    return first.upper()
+
+
+def badge_document(badge: Badge, face: Typeface, language: str) -> str:
+    """The badge as an SVG, with its letter centred by measurement rather than by eye."""
+    # Horizontally the renderer does it: `text-anchor: middle` centres the ADVANCE, which is what any
+    # engine drawing this will do, so measuring it here would only be a second opinion about the same
+    # number. Vertically nothing centres a letter for you -- text sits on a baseline -- so the baseline is
+    # placed such that the letter's own ink centres on the circle's, which is the same reasoning the
+    # summation sign on the progress chart needed.
+    lift = face.primary.ink_centre(badge.letter) * BADGE_LETTER_SIZE
+    baseline = BADGE_BOX / 2 + lift
+    return "\n".join([
+        '<svg version="1.1" viewBox="0 0 %d %d" xmlns="http://www.w3.org/2000/svg" role="img" '
+        'xml:lang="%s">' % (BADGE_BOX, BADGE_BOX, language),
+        f"  <title>{_esc(badge.name)}</title>",
+        "  <style>",
+        # Named exactly as the sheets name theirs, and with no generic family after it. A family the
+        # renderer cannot resolve does not fail -- prawn-svg draws the text in the DOCUMENT's fallback
+        # face instead, silently, so a badge asking for a font nobody ships comes out set in the
+        # protocol's serif rather than in the sans it is meant to be. Verified from the content stream
+        # rather than from a preview, which shows a letter either way.
+        "    text { font-family: %s; font-weight: bold; font-size: %dpx; text-anchor: middle; }" % (
+            _css_families(face), BADGE_LETTER_SIZE),
+        "  </style>",
+        f'  <circle cx="{BADGE_BOX // 2}" cy="{BADGE_BOX // 2}" r="{BADGE_RADIUS}" fill="{badge.fill}"/>',
+        f'  <text x="{BADGE_BOX // 2}" y="{baseline:.3f}" fill="{badge.ink}">{_esc(badge.letter)}</text>',
+        "</svg>",
+        "",
+    ])
+
+
+def badge_overflow(badge: Badge, face: Typeface) -> str | None:
+    """Why this letter does not fit its circle, or None where it does.
+
+    A letter wider than the disc is the failure a derived initial can actually produce: `Ш`, `Ж` and the
+    Devanagari clusters are far wider than `A`, and a badge drawn 20 units across in the printed table has
+    no room to absorb it. The test is the real one rather than a rule of thumb -- a box of width w and
+    height h centred in a circle of radius r fits exactly when (w/2)² + (h/2)² ≤ r² -- so it neither
+    rejects a letter that would have been fine nor passes one that spills over the edge.
+    """
+    width = face.width(badge.letter, BADGE_LETTER_SIZE)
+    height = face.ink_height(badge.letter, BADGE_LETTER_SIZE)
+    if math.hypot(width / 2, height / 2) <= BADGE_RADIUS:
+        return None
+    return (f"{badge.category}: the letter {badge.letter!r} draws {width:.1f}×{height:.1f} in a badge of "
+            f"radius {BADGE_RADIUS}, so it does not fit the circle. Record a shorter letter for this "
+            f"language in the layout rules.")
+
+
 def typst_document(form: Sheet | Chart, shapes: list[Shape], composer: Composer) -> str:
     """The printed form: one page, drawn by an engine that shapes text and can declare a conformance.
 
@@ -2689,6 +2870,20 @@ def main(argv: list[Shape] | None = None) -> int:
 
     args.out.mkdir(parents=True, exist_ok=True)
     written, failures = [], []
+
+    # The badges are drawn here rather than in a tool of their own because they need exactly what this
+    # generator has and nothing else does: the glossary term, the language's casing, and a face to measure
+    # the letter in. They are not sheets -- no page, no layout, no printed form -- so they take neither the
+    # column search nor the Typst emitter, and `--sheet` narrows the forms without touching them.
+    for badge in build_badges(meta, rules, glossary, args.language):
+        overflow = badge_overflow(badge, faces[(True, False)])
+        if overflow is not None:
+            failures.append(overflow)
+            continue
+        target = args.out / f"{badge.stem}.svg"
+        target.write_text(badge_document(badge, faces[(True, False)], args.language or "en"),
+                          encoding="utf-8", newline="\n")
+
     for form, lay_out, page, stem_name in forms:
         composer, body, failure = best_layout(
             form,

@@ -127,41 +127,45 @@ generated lists. `:imagesdir:` is `{locale-dir}/img`, so a target resolves insid
 and a figure that becomes localizable later simply starts being found there, with no change to the
 document at all.
 
-**What this replaces put a build convention in front of the wrong person.** po4a extracts a block image's
-target as its own translatable unit, so localizing a figure meant a *translator* answering
-`NeoIPC-Core-Decision-Flow.svg` with `NeoIPC-Core-Decision-Flow.de.svg` — a filename convention nobody
-told them about, in a field that looks like text to translate. German did exactly that. Getting it wrong
-is silent in the worst way: a target that still resolves shows the English figure, and only a target that
-fails to resolve says anything at all. The extraction is therefore switched off — `noimagetargets` in
-`po/documentation.po4a.cfg`, which also suppresses po4a's default registration of the image *attribute*
-list, so `image[1,alt,title,link]` is re-registered without the trailing `_` to keep the alt text, title
-and link translatable while leaving the target alone. **Alt text is a translator's; a file name is not.**
+**A target is not offered for translation, and that is what the directory buys.** po4a extracts a block
+image's target as its own translatable unit, on the reasoning that a translation may want to point at a
+translated image — which asks a *translator* to answer `NeoIPC-Core-Decision-Flow.svg` with
+`NeoIPC-Core-Decision-Flow.de.svg`, a filename convention nothing tells them about, in a field that looks
+like text to translate. It is silent in the worst way: a target that still resolves shows the English
+figure, and only one that fails to resolve says anything at all. So the extraction is switched off —
+`noimagetargets` in `po/documentation.po4a.cfg`, which also suppresses po4a's default registration of the
+image *attribute* list, so `image[1,alt,title,link]` is re-registered without the trailing `_` to keep the
+alt text, title and link translatable while leaving the target alone. **Alt text is a translator's; a file
+name is not.**
 
 **The classification is `may it vary`, not `can it be localized`** — the second question has a shrinking
 answer and would need re-asking every time it shrinks. So:
 
 | class | what the build does | example |
 |---|---|---|
-| generated per culture | written straight into that culture's directory | the seven sheets, the decision flow, the title page, the preview watermark |
-| shared, may gain a localized form | that culture's file where one exists, the shared file otherwise | the AWaRe badges |
-| invariant mark | shared file only; a per-culture variant **fails the build** | the NeoIPC logo |
+| generated per culture | written straight into that culture's directory | the seven sheets, the AWaRe badges, the decision flow, the title page, the preview watermark |
+| invariant mark | the shared file only; a per-culture variant **fails the build** | the NeoIPC logo |
 
-The AWaRe badges are why the middle row is not the same as the bottom one. Each draws a single letter and
-WHO governs its own translations of the categories, so a Spanish badge reads A/P/R — *Watch* is
-*Precaución*. They are localizable figures nobody has localized yet, and a design split along
-"localizable" would have filed them with the logo and had to be reopened.
-
-The NeoIPC logo is the bottom row because **a wordmark is a name**, which is why even its text form is
+The NeoIPC logo is the second row because **a wordmark is a name**, which is why even its text form is
 never translated; a licence badge would be there too, its recognizability being the whole of its function.
 A localized variant of either is a defect rather than an improvement, so the build refuses one instead of
 quietly preferring it — the failure mode of silently preferring being a mark that nobody decided to vary,
 published in one language only.
 
+**A third class is worth naming even though nothing is in it: a shared figure that may gain a localized
+form.** It would be served this culture's file wherever one appeared and the shared file otherwise.
+
+It is named rather than left out because of which question the classification asks. The axis is **may it
+vary**, not *can it be localized* — the second has a shrinking answer, and a figure that looks unlocalizable
+usually is not: the AWaRe badges read as fixed marks and are a single translated letter each. Sorting by
+the second question puts figures in the invariant row that have to be taken out of it again, and the
+invariant row is the one whose members the build refuses to vary.
+
 **HTML keeps its images as files, so they travel with the document.** An inlined figure is part of the
 page, but a plain `image:` macro becomes an `<img src>` the browser resolves against the document, and
-asciidoctor never copies an image. The same per-culture layout is therefore reproduced under `artifacts/`.
-Until it was, `artifacts/img` was created empty and never written to, so every AWaRe badge in the
-published HTML protocol — one on each of some two thousand antibiotic rows — was a broken image.
+**asciidoctor never copies an image**. The same per-culture layout is therefore reproduced under
+`artifacts/`, and a figure that is not inlined is a broken image in the published HTML the moment it is
+not — which is invisible in the PDF, where the same target embeds correctly.
 
 ## Text measurement, and the font it must measure
 
@@ -242,13 +246,19 @@ Two constraints on *which* font is measured, both of which make a wrong answer l
   registered is looked for in `/Library/Fonts`, `/usr/share/fonts/truetype` and two others, which is
   per-machine and matches nothing in CI.
 
-  What happens at the end of that list is the part that has already cost this project a defect.
-  `Prawn::SVG::Font::GENERIC_CSS_FONT_MAPPING` resolves `sans-serif` to **Helvetica** — an AFM core font
-  with Windows-1252 encoding and no embedded glyphs at all. That is the whole mechanism behind every
+  What happens at the end of that list is the part that has already cost this project a defect, and it
+  has **two** endings rather than one. A **generic** keyword goes through
+  `Prawn::SVG::Font::GENERIC_CSS_FONT_MAPPING`, which resolves `sans-serif` to **Helvetica** — an AFM core
+  font with Windows-1252 encoding and no embedded glyphs at all, and the whole mechanism behind every
   non-Latin-1 character in an earlier figure rendering as the logical-NOT sign: not a corrupted file, a
-  correct fallback to a font that cannot represent the text. `font-family:"Noto Sans", Arial, Helvetica,
-  sans-serif` is therefore a trap dressed as prudence, and the existing AWaRe badges saying plain
-  `font-family:Arial` resolve to nothing on any machine this builds on.
+  correct fallback to a font that cannot represent the text. A **named** family the renderer cannot
+  resolve does not reach that mapping at all — it is drawn in the *document's* fallback face, so a figure
+  asking for `Arial` comes out set in the protocol's serif. Measured from the content stream of a figure
+  rendered both ways, because a rendered preview shows a letter under either outcome.
+
+  Both are silent, and they fail in opposite directions — one produces unreadable glyphs, the other a
+  perfectly readable letter in the wrong typeface. `font-family:"Noto Sans", Arial, Helvetica, sans-serif`
+  is therefore a trap dressed as prudence: every entry after the first is a way to not find out.
 
   **Generated sheets name exactly one family, `Noto Sans`, with no fallback list.** A missing font must
   fail rather than degrade, because the degraded form is silent and is wrong precisely in the languages

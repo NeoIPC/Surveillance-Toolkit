@@ -19,11 +19,10 @@ ifndef::locale-dir[:locale-dir: .]
 // in it, and a figure that becomes localizable later simply starts being found here, with no change to
 // the document at all.
 //
-// Naming the culture in the target is what this replaces, and it put a build convention in front of the
-// wrong person: the target is a translatable unit, so localizing a figure meant a TRANSLATOR editing
-// NeoIPC-Core-Decision-Flow.svg into NeoIPC-Core-Decision-Flow.de.svg -- with nothing to tell them so,
-// and with a wrong answer showing the English figure silently, because a filename that resolves is
-// indistinguishable from the right one.
+// A culture is never named in a target, because po4a extracts a target as a translatable unit and a
+// translator asked to turn NeoIPC-Core-Decision-Flow.svg into NeoIPC-Core-Decision-Flow.de.svg has no
+// way to know the convention -- and a wrong answer shows the English figure silently, a filename that
+// resolves being indistinguishable from the right one.
 :imagesdir: {locale-dir}/img
 :title-page-background-image: image:NeoIPC-Core-Title-Page.svg[]
 :revsuffix:

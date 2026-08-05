@@ -560,8 +560,23 @@ function New-AntibioticsList {
     $awareCategoryString = $listElements['aware_category']
     $substanceString = $listElements['substance']
 
-    # AWaRe category (folded into NeoIPC-Antibiotics.csv) -> the single-letter code used for the AWaRe-<X>.svg badge.
-    $awareCode = @{ Access = 'A'; Watch = 'W'; Reserve = 'R' }
+    # The AWaRe categories, read from the canonical CSV rather than listed here. Two things come from it,
+    # and neither can be a map of the three categories that exist today: WHO has added a fourth, `Not
+    # recommended`, and a row in that file is all it should take to print it.
+    #
+    # The badge FILE is named from the category, matching what build-collection-sheets.py writes -- the
+    # rule is stated in both places because the two are in different languages, and a badge that resolves
+    # to the wrong file is silent. It cannot be named from the letter: the letter is the initial of a
+    # translated word, so the Spanish Watch badge reads P, and `AWaRe-P.svg` would need the culture back
+    # in a file name that the per-culture image directories exist to keep out of.
+    #
+    # The badge's ALT TEXT is the category's own name, translated. It was the letter, which is one Latin
+    # character that means nothing read aloud and would be actively wrong once the letter localizes.
+    $awareGroupsFile = Join-Path -Resolve -Path $antibioticsFolderPath -ChildPath 'NeoIPC-Antibiotic-AWaRe-Groups.csv'
+    $awareNames = [System.Collections.Generic.Dictionary[string, string]]::new()
+    Import-Csv -LiteralPath $awareGroupsFile -Encoding utf8NoBOM | ForEach-Object {
+        $awareNames[$_.category] = if ($translations.ContainsKey($_.name)) { $translations[$_.name] } else { $_.name }
+    }
 
     # Iterate the substances and emit each translated row in the requested format.
     Import-Csv -LiteralPath $antibioticsFile -Encoding utf8NoBOM |
@@ -571,12 +586,14 @@ function New-AntibioticsList {
         $atcUrl = if ($_.atc_code) { $AtcUrlTemplate -f $_.atc_code } else { $null }
         # AWaRe badge + search link, only where WHO has classified the substance; the search term is the English name.
         $awareCategory = $null
+        $awareName = $null
         $awareUrl = $null
-        if ($_.aware_category -and $awareCode.ContainsKey($_.aware_category)) {
-            $awareCategory = $awareCode[$_.aware_category]
+        if ($_.aware_category -and $awareNames.ContainsKey($_.aware_category)) {
+            $awareCategory = $_.aware_category
+            $awareName = $awareNames[$_.aware_category]
             $awareUrl = $AWaReUrlTemplate -f [System.Web.HttpUtility]::UrlEncode($_.name)
         }
-        [PSCustomObject][ordered]@{ Id = $_.id; Substance = $substance; AtcCode = $_.atc_code; AtcUrl = $atcUrl; AWaReCategory = $awareCategory; AWaReUrl = $awareUrl }
+        [PSCustomObject][ordered]@{ Id = $_.id; Substance = $substance; AtcCode = $_.atc_code; AtcUrl = $atcUrl; AWaReCategory = $awareCategory; AWaReName = $awareName; AWaReUrl = $awareUrl }
     } |
     Sort-Object -Culture $TargetCulture -Property 'Substance' |
     ForEach-Object -Begin {
@@ -588,7 +605,7 @@ function New-AntibioticsList {
         }
     } -Process {
         if ($AsciiDoc) {
-            $awareCell = if ($_.AWaReCategory) { "$($_.AWaReUrl)[image:AWaRe-$($_.AWaReCategory).svg[$($_.AWaReCategory),20],window=_blank]" } else { '' }
+            $awareCell = if ($_.AWaReCategory) { "$($_.AWaReUrl)[image:AWaRe-$($_.AWaReCategory -replace ' ', '-').svg[$($_.AWaReName),20],window=_blank]" } else { '' }
             $atcCell = if ($_.AtcCode) { "$($_.AtcUrl)[$($_.AtcCode),window=_blank]" } else { '' }
             Write-Output "|$($_.Substance) |$atcCell |$awareCell"
         } else {
