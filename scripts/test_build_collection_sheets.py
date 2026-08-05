@@ -306,6 +306,23 @@ def chart(directory: Path) -> str:
     return (directory / "NeoIPC-Core-Patient-Progress-Chart.svg").read_text(encoding="utf-8")
 
 
+def test_a_field_the_platform_computes_is_not_printed_as_a_blank(english: Path) -> None:
+    """A program rule ASSIGNs total gestation days from the gestational age printed beside it.
+
+    Printing both asks whoever holds the form to multiply weeks by seven and add the days — work the
+    platform does, offered as a blank to get wrong, immediately below the field it derives from. The stage
+    fields were already excluded this way; the enrolment block was not, so the one computed ATTRIBUTE in
+    the model reached the paper.
+    """
+    labels = re.findall(r'<text[^>]*class="label"[^>]*>([^<]*)</text>',
+                        (english / "NeoIPC-Core-Master-Sheet.svg").read_text(encoding="utf-8"))
+    gestation = [text for text in labels if "estation" in text]
+    assert any("weeks and days" in text for text in gestation), (
+        "the authored gestational age field is missing, so this test is measuring the wrong thing")
+    assert not [text for text in gestation if "otal" in text], (
+        f"a computed field is printed for someone to fill in: {gestation}")
+
+
 def test_the_chart_holds_every_day_count_the_stage_has(english: Path) -> None:
     """The rows must be exactly the stage's day counts -- not a subset that happens to look complete.
 

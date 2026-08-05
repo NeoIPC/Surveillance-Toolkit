@@ -1070,7 +1070,7 @@ def _apply_composites(
         )
         for block in spec["blocks"]:
             if block == "enrolment":
-                sheet.sections.append(_enrolment_section(meta, catalogue, chrome))
+                sheet.sections.append(_enrolment_section(meta, catalogue, chrome, rules))
                 continue
             stage = by_code.get(block)
             if stage is None:
@@ -1082,7 +1082,8 @@ def _apply_composites(
     return composed + [s for s in sheets if s.code not in absorbed]
 
 
-def _enrolment_section(meta: Metadata, catalogue: Catalogue, chrome: dict[str, str]) -> Section:
+def _enrolment_section(meta: Metadata, catalogue: Catalogue, chrome: dict[str, str],
+                       rules: LayoutRules) -> Section:
     """The patient's own attributes, which belong to no stage and so have no section to name them."""
     by_id = {a["id"]: a for a in meta.attributes}
     section = Section(code="ENROLMENT", title=chrome["section_enrolment"], description="")
@@ -1091,6 +1092,13 @@ def _enrolment_section(meta: Metadata, catalogue: Catalogue, chrome: dict[str, s
         if attribute is None:
             raise LookupError(f"programTrackedEntityAttributes references unknown attribute {link['trackedEntityAttribute']}")
         code = attribute["code"]
+        # The same exclusion the stage fields get, which this block was not applying. A program rule
+        # ASSIGNs total gestation days from the gestational age beside it, so printing both asks whoever
+        # holds the form to multiply weeks by seven and add the days -- work the platform does, offered as
+        # a blank to get wrong, next to the field it is derived from. `keep_calculated` is the way to print
+        # one deliberately.
+        if code in meta.calculated and code not in rules.keep_calculated:
+            continue
         section.fields.append(
             Field(
                 code=code,
