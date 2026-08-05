@@ -208,7 +208,7 @@ and takes its width from `width_of`, and prawn-svg contains no shaping layer any
 an approximation of the drawn width, it *is* the drawn width, and adding a shaping engine here (HarfBuzz
 via `uharfbuzz`) would introduce a disagreement with the renderer rather than resolve one.
 
-Kerning is requested — `width_of(text, kerning: true)` — and has nothing to act on. All four faces in
+Kerning is requested — `width_of(text, kerning: true)` — and has nothing to act on. Every face in
 `common/fonts/` carry `GPOS` and **no `kern` table**, so a consumer of the legacy table finds no pairs.
 asciidoctor-pdf's own bundled subset is the other way round, a `kern` table of 15,534 pairs and no `GPOS`,
 which is a second reason the theme points at this repository's fonts rather than the gem's: the file
@@ -693,9 +693,9 @@ correct in every position, and the trailing full stops migrate to the left of ea
 correct resolution of neutral characters against a right-to-left base and is exactly what would happen to
 the Latin abbreviations inside a Hebrew sheet.
 
-**What is still missing before a Hebrew sheet exists** is not the layout: it is a face — Noto Sans does
-not carry Hebrew, so `common/fonts/` needs Noto Sans Hebrew and `SCRIPT_FONTS` a line — and a `he`
-catalogue to translate into.
+**What is still missing before a Hebrew sheet exists is only the translation.** The layout was never the
+obstacle, and the face is no longer one either: Noto Sans carries no Hebrew, so Noto Sans Hebrew ships in
+`common/fonts/` and `SCRIPT_FONTS` names it. What is left is a `he` catalogue to translate into.
 
 Two details in the font stack are decisions, and both were wrong on the first attempt:
 
@@ -963,7 +963,9 @@ on the text, so it depends on the language — a constant tuned against English 
 eight. Since the layout is a pure function of the text, `best_layout` lays each sheet out at every
 candidate position and keeps the one leaving the most room, where "most room" is the comments box that
 absorbs the leftover. Maximizing it is the same as minimizing the sheet, so the search optimizes exactly
-the property the sheets are judged on. In English it settles between 50 and 67.5 mm across the six sheets.
+the property the sheets are judged on. In English it settles anywhere from the 50 mm floor to 87.5 mm
+across the seven forms — read the figure off a run rather than from here, since it moves whenever a label
+does.
 
 **Not every row has a cell.** A criterion carrying its tick at the left, and a question whose choices are
 listed beneath it, both span the sheet. They are not forced into the column: option text runs to 11 155

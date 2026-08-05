@@ -335,6 +335,39 @@ def test_the_patient_band_grows_for_a_long_title_and_the_comments_label_is_refus
         f"the build failed without naming the label:\n{refused.stdout}\n{refused.stderr}")
 
 
+def test_a_layout_naming_metadata_that_does_not_exist_is_refused(tmp_path: Path) -> None:
+    """Every one of these resolves by dict lookup or set membership, so a wrong name never raises.
+
+    It stops matching, and the sheet is generated with a boolean drawn the wrong way, a field that should
+    have been omitted printed, or a group quietly short of a member. The design reference states that this
+    file may not name a field the metadata does not define; nothing enforced it.
+    """
+    layout = tmp_path / "sheet-layout.yaml"
+    layout.write_text(
+        (REPO / "common" / "sheet-layout.yaml").read_text(encoding="utf-8")
+        .replace("NEOIPC_BSI_AB_TREATMENT", "NEOIPC_BSI_AB_TREATMENTX", 1),
+        encoding="utf-8", newline="\n")
+    refused = generate(tmp_path / "out", "--layout", str(layout))
+    assert refused.returncode != 0, "a layout naming a field the metadata does not define was accepted"
+    assert "NEOIPC_BSI_AB_TREATMENTX" in refused.stdout + refused.stderr, (
+        f"the build failed without naming the offending code:\n{refused.stdout}\n{refused.stderr}")
+
+
+def test_a_totals_heading_that_spells_the_word_is_refused(tmp_path: Path) -> None:
+    """It heads one column of a grid sized for handwriting, and it was the one heading never measured.
+
+    The row-label header is measured into the label column's width; this one was placed centred in a
+    column floored at what a person can write a day count in. English `T` and the summation sign fit; a
+    language spelling the word does not — and this project's own notes record a German rendering of it as
+    the English initial, so lengthening it is a translation waiting to happen rather than a hypothetical.
+    """
+    strings = chrome_at(tmp_path / "chrome", de={"chart_total": "Gesamt"})
+    refused = generate(tmp_path / "de", "--language", "de", "--strings", str(strings))
+    assert refused.returncode != 0, "a totals heading wider than its own column was accepted"
+    assert "totals heading" in refused.stdout + refused.stderr, (
+        f"the build failed without naming the heading:\n{refused.stdout}\n{refused.stderr}")
+
+
 def test_a_field_the_platform_computes_is_not_printed_as_a_blank(english: Path) -> None:
     """A program rule ASSIGNs total gestation days from the gestational age printed beside it.
 

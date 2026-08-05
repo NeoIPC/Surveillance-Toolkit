@@ -536,6 +536,46 @@ class LayoutRules:
         # the derived initial is right wherever the category's own word begins with the badge's letter.
         self.badge_letters: dict[str, dict[str, str]] = badges.get("letter") or {}
 
+    def validate(self, meta: "Metadata") -> None:
+        """Refuse a layout naming a metadata code that does not exist.
+
+        Every one of these resolves by plain dict lookup or set membership, so a typo, a renamed element or
+        a code the model dropped does not raise -- it simply stops matching, and the sheet is generated
+        with a boolean drawn the wrong way, a field that should have been omitted printed, or a group that
+        silently loses a member. The file holds presentation only and may not name a field the metadata
+        does not define; that invariant was stated and enforced by nothing.
+
+        Reported together rather than one at a time: a rename usually breaks several entries at once, and
+        fixing them one build per name is how a metadata change turns into an afternoon.
+        """
+        known = {row["code"] for row in meta.elements if row.get("code")}
+        known |= {row["code"] for row in meta.attributes if row.get("code")}
+        stages = {row["code"] for row in meta.stages if row.get("code")}
+
+        unknown: list[str] = []
+        # `row_units` is keyed by a code SUFFIX and `composites` by a composite's own name, so neither is
+        # checked against the codes — their contents are, below. Getting that wrong is easy and quiet in
+        # the same way the defect this guards against is: a check reporting a key that was never a code
+        # would send the next reader to correct the data rather than the check.
+        for where, names in (("boolean_style", self.styles), ("omit", self.omitted),
+                             ("keep_calculated", self.keep_calculated), ("fold_questions", self.folded)):
+            unknown += [f"{where}: {name}" for name in sorted(names) if name not in known]
+        for group in self.groups:
+            unknown += [f"groups: {name}" for name in sorted(group.get("fields") or []) if name not in known]
+        for where, names in (("section_order", self.section_order), ("sheet_names", self.sheet_names)):
+            unknown += [f"{where}: {name}" for name in sorted(names) if name not in stages]
+        for name, spec in self.composites.items():
+            unknown += [f"composites.{name}.blocks: {block}" for block in (spec.get("blocks") or [])
+                        if block != "enrolment" and block not in stages]
+        if (stage := self.chart.get("stage")) and stage not in stages:
+            unknown.append(f"chart.stage: {stage}")
+
+        if unknown:
+            raise LookupError(
+                "common/sheet-layout.yaml names metadata that does not exist. It carries presentation "
+                "decisions about fields the model defines, so a name that matches nothing is silently "
+                "ignored rather than applied:\n  " + "\n  ".join(unknown))
+
     def file_name(self, code: str, slug: str) -> str:
         """What a sheet's file is called, which is read by whoever picks a form to print.
 
@@ -1686,6 +1726,20 @@ def _emit_grid(out: list[Shape], chart: Chart, y: int, composer: Composer) -> in
     total = composer.chrome["chart_total"]
     composer._text(head, "label")
     composer._text(total, "day")
+
+    # The row-label header is measured above, through `labels`; this one was not, and it is the one a
+    # translator is most likely to lengthen. It heads the totals column, so it has that column's width and
+    # no more -- and the column is floored at what a person can write a day count in, not at what a word
+    # fits in. English `T` and the summation sign both sit inside it; a language spelling the word does
+    # not, which is a translation this file's own notes invite rather than a hypothetical.
+    total_w = composer.face_of("day").width(total, STYLES["day"].size)
+    if total_w > col_w - 2 * TEXT_INSET:
+        raise Overflow(
+            f"{chart.code}: the totals heading {total!r} draws {total_w} across a column {col_w} wide. "
+            f"It heads one column of a grid sized for handwriting, so it has to be an abbreviation or a "
+            f"symbol rather than a word.",
+            out,
+        )
     for day in range(1, chart.days + 1):
         composer._text(str(day), "day")
 
@@ -3308,6 +3362,7 @@ def main(argv: list[Shape] | None = None) -> int:
     }
 
     meta = Metadata(args.metadata)
+    rules.validate(meta)
     # The chart reads the stages before the composites claim them, because the stage its rows come from is
     # folded into the master sheet and is no longer a sheet of its own afterwards.
     stage_sheets = build_stage_sheets(meta, catalogue, rules)
