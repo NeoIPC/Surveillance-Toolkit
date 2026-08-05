@@ -540,12 +540,22 @@ def load_localized(path: Path, language: str | None) -> dict[str, str]:
     earlier version keyed the figure text `sheetStrings/<key>`, a context that appears in no catalogue in
     this repository, so every localized run silently emitted English chrome while looking like it had
     tried.
+
+    **The localized file is laid OVER the English one rather than replacing it**, which is the cascade
+    every other string resource here uses: a level supplies only the keys it overrides. Replacing it makes
+    a key that exists in the source and not yet in the sibling a crash rather than an untranslated string
+    -- and since po4a writes those siblings, every localized run breaks between adding a string and
+    regenerating eleven files. Falling back to the source is also the rule already applied to a metadata
+    label: English on a Nepali form is legible and visibly incomplete, which a traceback is not.
     """
-    localized = path.with_suffix(f".{language}.yaml") if language else None
-    source = localized if localized and localized.exists() else path
     yaml = YAML(typ="safe")
-    with source.open(encoding="utf-8") as handle:
-        return yaml.load(handle)
+    with path.open(encoding="utf-8") as handle:
+        strings: dict[str, str] = yaml.load(handle)
+    localized = path.with_suffix(f".{language}.yaml") if language else None
+    if localized and localized.exists():
+        with localized.open(encoding="utf-8") as handle:
+            strings.update(yaml.load(handle) or {})
+    return strings
 
 
 # ── Measurement ─────────────────────────────────────────────────────────────────────────────────────
@@ -592,7 +602,7 @@ class Face:
     def has(self, ch: str) -> bool:
         return ord(ch) in self.cmap
 
-    def shaped_width(self, text: str) -> float:
+    def shaped_width(self, text: str, language: str = "en") -> float:
         """What this face actually draws `text` as, in ems, with the script's own shaping applied.
 
         Summing `hmtx` advances instead is exact only where nothing shapes. It is close for Latin, where
@@ -610,6 +620,11 @@ class Face:
         # Fills in script, language and direction from the text itself, which is what decides whether
         # Devanagari reordering or Hebrew's right-to-left run applies at all.
         buffer.guess_segment_properties()
+        # Then override the language it guessed with the one the document declares. The guess reads the
+        # SCRIPT and cannot know which language is being set in it, and a font may key a feature on the
+        # difference -- Noto Sans Devanagari draws Nepali 7 % wider than Hindi in the same script. The
+        # engine is told the language explicitly, so the ruler has to be told the same thing.
+        buffer.language = language
         hb.shape(self._shaper, buffer)
         return sum(p.x_advance for p in buffer.glyph_positions) / self.units
 
@@ -636,8 +651,14 @@ class Typeface:
     same two.
     """
 
-    def __init__(self, faces: list[Face]):
+    def __init__(self, faces: list[Face], language: str = "en"):
         self.faces = faces
+        # The language the OUTPUT declares, passed to the shaper because a font may apply a feature keyed
+        # on it. Noto Sans Devanagari does: `ड्रेनबाट पिप बग्नु` draws 7 % wider under `ne` than under `en`
+        # -- and identically under `hi`, which is the same script, so this is a language system in the
+        # font rather than anything to do with Devanagari. Guessing it from the text cannot find that, so
+        # a measurement taken without it disagrees with the engine exactly where such a feature applies.
+        self.language = language
         # Latin is FIRST, in every language, and the order is not arbitrary: the two faces overlap on 60
         # codepoints -- every digit and every punctuation mark. With the script's face in front, a Nepali
         # sheet would draw its digits, brackets and slashes from the Devanagari design and the Latin
@@ -713,7 +734,7 @@ class Typeface:
         so kerning across a face boundary is not applied by anyone -- and measuring the whole string
         through a single face would measure something nobody draws.
         """
-        return sum(face.shaped_width(run) for face, run in self._runs(text)) * size
+        return sum(face.shaped_width(run, self.language) for face, run in self._runs(text)) * size
 
     def _runs(self, text: str) -> list[tuple[Face, str]]:
         """Split into maximal runs sharing one face, in order."""
@@ -1257,6 +1278,11 @@ class Composer:
                     "rhythm is taken from one face and would be wrong for text set in this one."
                 )
         self.logo, self.language = logo, language
+        # What the finished document DECLARES it is written in -- the SVG's xml:lang and the PDF's /Lang.
+        # Not cosmetic: a screen reader picks its pronunciation rules from it, so a Devanagari page
+        # declaring English is read aloud wrongly, and PDF/UA requires the declaration to be right rather
+        # than merely present. The untranslated source really is English, so that is the honest default.
+        self.language_tag = language or "en"
         self.rtl = language in RIGHT_TO_LEFT
         self.missing: dict[str, set[str]] = {}
         self.footnotes: list[str] = []
@@ -1297,6 +1323,27 @@ class Composer:
             raise ValueError(f"label pattern {pattern!r} uses {', '.join(left)}, which the layout does "
                              f"not map to a glossary term")
         return out
+
+    def compose(self, key: str, **values: str) -> str:
+        """Resolve a chrome string's `{placeholder}`s from values the layout supplies.
+
+        The sibling of `fill`, which resolves them from the glossary. Same strictness for the same reason:
+        a placeholder the pattern never uses means something the reader was meant to be told is silently
+        absent, and one left unresolved prints a brace at whoever is listening.
+        """
+        out = self.chrome[key]
+        for placeholder, value in values.items():
+            out = out.replace(f"{{{placeholder}}}", value)
+        if missing := [p for p in values if f"{{{p}}}" not in self.chrome[key]]:
+            raise ValueError(f"{key} never uses {', '.join(sorted(missing))}, so what it stands for "
+                             f"would not be said at all")
+        if left := re.findall(r"\{[^{}]*\}", out):
+            raise ValueError(f"{key} uses {', '.join(left)}, which the layout does not supply")
+        return out
+
+    def join(self, items: list[str]) -> str:
+        """Run a generated list together with the separator this language uses."""
+        return self.chrome["list_separator"].join(items)
 
     def footnote(self, key: str) -> str:
         """Register a footnote and return the superscript marker that refers to it.
@@ -1340,19 +1387,33 @@ def title_of(form: Sheet | Chart, composer: Composer) -> str:
     return f"{composer.chrome['sheet_heading']} — {form.title}"
 
 
-def description_of(form: Sheet | Chart) -> str:
+def description_of(form: Sheet | Chart, composer: Composer) -> str:
     """What a reader who cannot see the page is told it holds.
 
-    A sheet is described by its sections and a chart by its rows and its span, because those are what each
-    one's shape actually is. Naming the chart's rows matters more than it looks: they are the whole content
-    of a grid, and a grid described only as a grid tells a screen-reader user nothing at all.
+    A sheet is described by its sections and a chart by its rows, because those are what each one's shape
+    actually is. Naming the chart's rows matters more than it looks: they are the whole content of a grid,
+    and a grid described only as a grid tells a screen-reader user nothing at all.
+
+    Every word of it is translated -- the sentence from this repository's figure strings, the names from
+    the metadata catalogue. Assembled in the generator instead, it would be an English frame around
+    translated content, which is what a screen reader would then read out in a language nobody chose.
     """
     if isinstance(form, Chart):
-        rows = ", ".join(row.label for row in form.rows)
-        return (f"{form.title}. A table of {len(form.rows)} rows against {form.days} days and a total "
-                f"column. Rows: {rows}.")
-    sections = ", ".join(s.title for s in form.sections)
-    return f"{form.title} data collection sheet. Sections: {sections}."
+        return composer.compose("chart_description", title=form.title,
+                                rows=composer.join([row.label for row in form.rows]))
+    return composer.compose("sheet_description", title=form.title,
+                            sections=composer.join([s.title for s in form.sections]))
+
+
+def keywords_of(form: Sheet | Chart, composer: Composer) -> list[str]:
+    """What a catalogue or a search engine indexes the published form by.
+
+    Split on the language's own separator rather than on a comma, so the list a translator wrote is the
+    list that gets indexed. Someone looking for a Nepali form searches in Nepali; keywords left in English
+    would make each translation findable only by people who did not need it.
+    """
+    composed = composer.compose("keywords", title=form.title, module=composer.chrome["sheet_heading"])
+    return [word.strip() for word in composed.split(composer.chrome["list_separator"].strip()) if word.strip()]
 
 
 def layout_sheet(sheet: Sheet, composer: Composer) -> list[Shape]:
@@ -2183,11 +2244,12 @@ def svg_document(form: Sheet | Chart, shapes: list[Shape], composer: Composer) -
     """The screen figure, inlined into the protocol so its text stays real text."""
     head = [
         '<svg version="1.1" viewBox="0 0 %d %d" xmlns="http://www.w3.org/2000/svg" '
-        'xmlns:xlink="http://www.w3.org/1999/xlink" role="img">' % (composer.page_w, composer.page_h),
+        'xmlns:xlink="http://www.w3.org/1999/xlink" role="img" xml:lang="%s">'
+        % (composer.page_w, composer.page_h, composer.language_tag),
         # What a screen reader announces. Without them an inlined figure is an unlabelled graphic, which
         # reads as nothing at all, and accessibility is a stated goal of this toolkit rather than a nicety.
         f"  <title>{_esc(title_of(form, composer))}</title>",
-        f"  <desc>{_esc(description_of(form))}</desc>",
+        f"  <desc>{_esc(description_of(form, composer))}</desc>",
         "  <style>",
         # The families this sheet was measured in, in the order it was measured -- and NO generic at the
         # end. `sans-serif` looks like prudence and is a trap: prawn-svg maps it to Helvetica, a core font
@@ -2288,6 +2350,8 @@ def _typst_preamble(form: Sheet | Chart, composer: Composer) -> list[str]:
                         for kind, ink in INKS.items() if kind not in _LINE_KINDS)
     families = ", ".join(_quoted(family) for family in composer.face.families)
     direction = "rtl" if composer.rtl else "ltr"
+    # A trailing comma so a one-element list stays a list rather than collapsing to a bare string.
+    keywords = "".join(f"{_quoted(word)}, " for word in keywords_of(form, composer))
     # On a mirrored page a run's x is its right-hand end, so it is placed from the page's right edge. The
     # two forms are the same statement about where a run goes, expressed from whichever side it starts.
     anchor = (
@@ -2314,7 +2378,8 @@ def _typst_preamble(form: Sheet | Chart, composer: Composer) -> list[str]:
 
 #set document(
   title: {_quoted(title_of(form, composer))},
-  description: {_quoted(description_of(form))},
+  description: {_quoted(description_of(form, composer))},
+  keywords: ({keywords}),
   date: auto,
 )
 
@@ -2326,8 +2391,13 @@ def _typst_preamble(form: Sheet | Chart, composer: Composer) -> list[str]:
 // top-edge and bottom-edge at the baseline give a text box no height at all, which is what makes `place`
 // position a run by its BASELINE -- the same reference every measurement in the layout is taken from.
 // `fallback: false` keeps a missing glyph missing instead of borrowing one from another family.
+//
+// `lang` is what the exported PDF declares as its own language, and it has to be right rather than
+// merely present: a screen reader takes its pronunciation rules from it, so a page of Devanagari
+// declaring English is read aloud in the wrong language, and PDF/UA is not met by a declaration that is
+// false. Typst would otherwise default it to English on every localized form.
 #set text(font: ({families}), fallback: false, top-edge: "baseline", bottom-edge: "baseline",
-          dir: {direction})
+          lang: {_quoted(composer.language_tag)}, dir: {direction})
 
 // What the layout measured a run at, against what the engine will actually draw, checked on every run.
 //
@@ -2494,7 +2564,7 @@ def main(argv: list[Shape] | None = None) -> int:
     # so a note set in it stays legible instead of resolving to nothing.
     faces = {
         (bold, italic): Typeface([Face(args.fonts / f"{stem}-{_variant(stem, bold, italic)}.ttf")
-                                  for stem in stems])
+                                  for stem in stems], args.language or "en")
         for bold in (False, True) for italic in (False, True)
     }
 

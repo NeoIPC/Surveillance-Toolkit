@@ -358,6 +358,28 @@ own while the cluster it joins has real width, and a conjunct replaces several g
 pull opposite ways, so one string came out a sixth narrower than the sum and another an eighth wider, and
 no tolerance covers both.
 
+### The ruler must be told the language, not just the script
+
+A shaper takes a script *and* a language, and a font may key a feature on the language alone. Noto Sans
+Devanagari does. The same string, the same face, the same size:
+
+| declared language | drawn width |
+|---|---|
+| `en` | 52.92 pt |
+| `hi` | 52.92 pt |
+| `ne` | **56.67 pt** |
+
+Hindi and Nepali are the same script and differ by 7 %, so this is a language system in the font rather
+than anything about Devanagari. HarfBuzz's `guess_segment_properties` reads the **script** and cannot know
+which language is being set in it, so a measurement that relies on the guess disagrees with the engine
+exactly where such a feature applies — and only in the languages that have one, which is the worst place
+for a disagreement to hide.
+
+So the document's language reaches both sides: the emitted `.typ` declares it, and the shaping buffer is
+given it after the guess has filled in script and direction. **The emitted assertion is what caught this**
+— a Nepali label came out 7 % wider than the layout had allowed — which is the case for asserting every
+run rather than sampling.
+
 **So the generator shapes too, with the same engine.** `Typeface.width` splits a string into runs by the
 face each character resolves to — which is what a renderer does, so kerning across a face boundary is
 applied by nobody — and asks HarfBuzz, through `uharfbuzz`, for each run. Typst shapes through

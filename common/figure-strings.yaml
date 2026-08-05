@@ -106,6 +106,52 @@ chart_number: "Chart no"
 # day wide; a language whose word for "total" begins differently should say so here.
 chart_total: "T"
 
+# What a reader who cannot see the page is told it holds. It reaches them twice -- as the SVG's <desc>,
+# which a screen reader announces, and as the PDF's Subject -- so it is user-facing text and belongs here
+# rather than being assembled in the generator, where it would be English wrapped around translated
+# section names.
+#
+# {title} is the form's own name and {sections} the list of its sections, both already translated in the
+# metadata catalogue; the sentence around them is this file's.
+#
+# The dash before the list is a WORKAROUND FOR A DEFECT in po4a, not an editorial choice, and it is a
+# stopgap that goes when this file stops being extracted by po4a's YAML module.
+#
+# po4a rejects any line where a colon and a space are followed immediately by an opening brace or
+# bracket. The guard is aimed at inline flow collections, which YAML::Tiny genuinely cannot parse -- but
+# it is a raw-line regex that never inspects the parsed value, so it also rejects ordinary prose that puts
+# a placeholder after a colon, and comment lines, both of which YAML::Tiny handles perfectly. Nothing
+# structural escapes it: not quoting, not a block scalar, not a comment, because the check runs over every
+# line of the document. Hence a dash here, and hence this paragraph describing the pattern instead of
+# showing it. Until then: keep a colon away from any placeholder that follows it, anywhere in this file.
+sheet_description: >-
+  {title} data collection sheet. Sections — {sections}.
+
+# The same for the progress chart, whose shape is a grid rather than a run of sections. Deliberately says
+# nothing about HOW MANY rows or days: a count in a sentence makes the sentence count-dependent, and the
+# number of rows is not something a reader of the description needs.
+chart_description: >-
+  {title}. One row per measure, one column per day of the month, and a column for the row's total.
+  Rows — {rows}.
+
+# What a search engine and a document catalogue index the published form by. Localized, because someone
+# looking for a Nepali form searches in Nepali -- keywords left in English would make every translation
+# discoverable only to people who did not need it.
+#
+# The list is the translator's, not a fixed set with words swapped: a language may need more terms or
+# fewer, and the ones that earn their place differ. {title} is the form's own name and {module} the
+# heading it sits under, both translated already. "NeoIPC" is a name and stays as it is wherever a
+# translator puts it.
+keywords: >-
+  {title}, {module}, neonatal surveillance, healthcare-associated infection, infection prevention and
+  control, data collection form
+
+# What goes between two items of a generated list -- the section names and row names above. Unlike the
+# resistance label, which is a pattern precisely because a fixed separator presumes a Latin list
+# convention, a list of n names cannot be a pattern: n varies with the form. So the separator itself is
+# translatable, which is the nearest thing to giving the translator the construction.
+list_separator: ", "
+
 # The band over the enrolment attributes. They are attributes of the patient rather than of any one
 # surveillance event, so there is no program stage section carrying a name for them.
 section_enrolment: "Enrolment"

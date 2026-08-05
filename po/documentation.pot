@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-08-04 19:24+0200\n"
+"POT-Creation-Date: 2026-08-05 08:33+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Language-Team: none\n"
 "Language: en\n"
@@ -3819,6 +3819,12 @@ msgstr ""
 msgid "Days"
 msgstr ""
 
+#. type: Hash Value: chart_description
+#: common/figure-strings.yaml:1
+#, no-wrap
+msgid "{title}. One row per measure, one column per day of the month, and a column for the row's total. Rows — {rows}."
+msgstr ""
+
 #. type: Hash Value: chart_month_year
 #: common/figure-strings.yaml:1
 #, no-wrap
@@ -3885,6 +3891,12 @@ msgstr ""
 msgid "For more information, please see the Data Dictionary and Abbreviations sections of the NeoIPC Core Module protocol."
 msgstr ""
 
+#. type: Hash Value: keywords
+#: common/figure-strings.yaml:1
+#, no-wrap
+msgid "{title}, {module}, neonatal surveillance, healthcare-associated infection, infection prevention and control, data collection form"
+msgstr ""
+
 #. type: Hash Value: legend_many
 #: common/figure-strings.yaml:1
 #, no-wrap
@@ -3895,6 +3907,12 @@ msgstr ""
 #: common/figure-strings.yaml:1
 #, no-wrap
 msgid "You can select only one option."
+msgstr ""
+
+#. type: Hash Value: list_separator
+#: common/figure-strings.yaml:1
+#, no-wrap
+msgid ", "
 msgstr ""
 
 #. type: Hash Value: patient_identifier
@@ -3943,6 +3961,12 @@ msgstr ""
 #: common/figure-strings.yaml:1
 #, no-wrap
 msgid "Patient"
+msgstr ""
+
+#. type: Hash Value: sheet_description
+#: common/figure-strings.yaml:1
+#, no-wrap
+msgid "{title} data collection sheet. Sections — {sections}."
 msgstr ""
 
 #. type: Hash Value: sheet_heading
