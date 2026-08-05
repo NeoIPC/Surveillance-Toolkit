@@ -204,6 +204,15 @@ unit_days: "days"
 # Deliberately NOT the NeoIPC-ID: these sheets stay in the hospital and carry local identifiers, which is
 # exactly why the protocol says the patient ID and name must never be submitted.
 section_patient: "Patient"
+
+# The identifier the HOSPITAL already uses for this patient -- typically the unique, usually numeric
+# number it assigns on first admission. NeoIPC only advises: the value never leaves the hospital, so what
+# goes on the line is the hospital's own business as long as it identifies the patient unambiguously.
+#
+# It must not read the same as `patient_name`. Both name the patient, and a translation that renders them
+# alike leaves two identical lines and no way to tell which takes which -- which is why the generator
+# refuses a form whose two identifying labels are equal, and why this needs an explanation in Weblate
+# rather than only here: po4a discards these comments, so a translator never sees them.
 patient_identifier: "Patient ID"
 patient_name: "Patient name"
 
