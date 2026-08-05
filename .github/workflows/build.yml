@@ -254,7 +254,13 @@ jobs:
               # any file is collected, so every other test stops running too and the job reports an
               # internal error rather than a failure. requests is wlc's own dependency, named here because
               # sync-weblate.py imports it directly.
-              run: python -m pip install --upgrade pytest 'ruamel.yaml>=0.18' 'polib>=1.2' wlc requests
+              #
+              # fontTools and uharfbuzz are what the collection sheets are MEASURED with, so the generator
+              # refuses to start without them and every one of its tests goes red here while passing on a
+              # developer's machine -- which is the direction that gets noticed late, because the gate is
+              # failing on its own environment rather than on the code under test.
+              run: python -m pip install --upgrade pytest 'ruamel.yaml>=0.18' 'polib>=1.2'
+                   'fonttools>=4.50' 'uharfbuzz>=0.39' wlc requests
 
             - name: Run the Python tests
               # pytest discovers, so a new tool's test is gated by existing here rather than by someone
