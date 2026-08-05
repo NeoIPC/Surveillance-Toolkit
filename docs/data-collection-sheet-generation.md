@@ -712,6 +712,32 @@ the difference reads as deliberate.
 The tints are derived rather than given, which is the honest description. Deriving them from a brand
 colour keeps the decision inside the palette instead of importing a hue from outside it.
 
+### The decision flow carries meaning in colour, so its hues are derived rather than borrowed
+
+A form's colours are decoration; the decision flow's are not — green means *eligible* and red means
+*ineligible*, and no other element on the page says so. That rules out both easy answers: the semantic
+pair cannot be dropped for the brand palette, and it cannot stay at whatever a word processor offered.
+
+So they are **placed at the brand blue's own perceptual coordinates and rotated in hue**. `#0083c1` is
+OKLCh(L 0.582, C 0.133, H 240°); green and red take that lightness and chroma at H 145° and H 29°, and
+each stroke is the same hue and chroma at 72 % of the lightness. The result reads as one family because
+the three fills are *equally light and equally saturated* — which is what "visually aligned" has to mean
+if it is to be checkable — while staying unmistakably green and red.
+
+| role | fill | stroke | ink | contrast |
+|---|---|---|---|---|
+| question box | `#0083c1` | `#00528d` | white | 4.19 |
+| eligible | `#408f46` | `#005e14` | white | 4.01 |
+| ineligible | `#bd584b` | `#86261d` | white | 4.51 |
+| note box | `#ffe4c4` | `#ff9015` | black | 17.15 |
+| *no* connector | black | black | white | 21.00 |
+| *yes* connector | white | black | black | 21.00 |
+
+**Every pairing clears WCAG AA for large text, and that is the point rather than a bonus.** The figure
+this replaces set white on `#92D050` at **1.85:1** — below even the lenient large-text threshold of 3.0,
+in a published protocol — so the label a reader most needs was the one they could not read. Contrast is
+therefore a property of the palette here, checked when a colour changes, not an audit performed later.
+
 **Colour is never the only signal.** These sheets are printed, routinely in greyscale, where every tint
 collapses to a shade and the distinction between a section band and the non-transmitted block disappears.
 So that block also carries a solid edge bar, which survives greyscale, photocopying and colour-blindness.
