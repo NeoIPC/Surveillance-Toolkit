@@ -117,6 +117,22 @@ The relative-`href` rule is why a raster referenced from a generated SVG is name
 rather than to the document: an `xlink:href="img/LOGO_NEOIPC_2.png"` written from inside `img/` sends the
 renderer looking for `img/img/…`.
 
+**A document stylesheet does not reliably reach inside a `<symbol>`, so the logo states its colours
+twice.** The inlined mark's paths carry `.brand-blue` and `.brand-orange`, and the rule defining them
+lives in the sheet's one stylesheet. prawn-svg and browsers apply it — which is why every sheet rendered
+so far has a coloured logo, and why no rendered output would ever reveal the problem. **Inkscape does
+not**, so a mark styled by class alone opens black there. Proven on the decision flow by an asymmetric
+pair: a tick styled that way fell back to the default fill and drew as a filled triangle, while a cross
+drawn as zero-area subpaths vanished outright — two different wrong results from one cause, which an
+explanation that was merely plausible could not have produced.
+
+So each path carries its fill as a **presentation attribute** as well. The class stays, and the direction
+matters: CSS outranks a presentation attribute, so the stylesheet is still what decides wherever it is
+read at all, and `brand-blue` remains something a consumer can restyle. The attribute only fills the gap
+where no stylesheet is applied. What it buys is that a maintainer opening a generated sheet sees the
+mark — which is the whole justification for the house style below, and the one consumer no published
+output speaks for.
+
 ## One image directory per culture, and the two things a figure may be
 
 Every image the protocol reaches is named without a culture in it — `NeoIPC-Core-Master-Sheet.svg`, not

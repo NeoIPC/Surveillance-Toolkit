@@ -431,6 +431,13 @@ class Logo:
     NOTICE = ("The NeoIPC logo is owned by Fondazione Penta ETS and is not covered by this repository's "
               "MIT licence. Confirm any reuse with the NeoIPC/Penta team.")
 
+    # The two brand fills, keyed by the class the artwork's paths carry. Restated as presentation
+    # attributes on every path, because renderers disagree about whether a document stylesheet reaches
+    # inside a <symbol> and Inkscape does not apply it -- a mark styled by class alone opens black there,
+    # with nothing to say so. The classes stay: an attribute is the lowest-priority styling there is, so
+    # wherever the stylesheet does apply, it is still what decides.
+    FILLS = {"brand-blue": ACCENT, "brand-orange": BRAND_ORANGE}
+
     def __init__(self, path: Path):
         source = path.read_text(encoding="utf-8")
         self.view_box = re.search(r'viewBox="([^"]+)"', source).group(1)
@@ -441,7 +448,19 @@ class Logo:
         # and that is a fact about the artwork. Not translated -- it is a name.
         self.name = re.search(r"<title>([^<]+)</title>", source).group(1)
         body = source.split("</style>", 1)[1].rsplit("</svg>", 1)[0]
-        self.body = [line for line in body.splitlines() if line.strip()]
+        # A substitution that matches nothing is precisely the silent failure the attributes exist to
+        # prevent, so the artwork is required to write every brand class in the one form the replacement
+        # reaches -- as many `class="…"` occurrences as there are `brand-` tokens.
+        if sum(body.count(f'class="{name}"') for name in self.FILLS) != body.count("brand-"):
+            raise ValueError(f"{path}: a brand class is written in a form the fill attribute cannot reach")
+        self.body = [self._painted(line) for line in body.splitlines() if line.strip()]
+
+    @classmethod
+    def _painted(cls, line: str) -> str:
+        """One line of the artwork, with its class's fill restated as a presentation attribute."""
+        for name, fill in cls.FILLS.items():
+            line = line.replace(f'class="{name}"', f'class="{name}" fill="{fill}"')
+        return line
 
     def definition(self, prefix: str) -> list[str]:
         # The notice travels with the artwork. A generated sheet is a distributed file that contains the
@@ -459,10 +478,11 @@ class Logo:
     def standalone(self) -> str:
         """The artwork as an SVG that carries its own stylesheet.
 
-        The `<symbol>` above leans on the sheet's one stylesheet for its two brand fills, which is right
-        where the sheet is the document. Anywhere else -- handed to an engine that reads the artwork on
-        its own -- those classes resolve to nothing and every path renders in the default fill, which is
-        black, silently. So the standalone form restates them.
+        The paths carry their fills as attributes either way, so this is what decides the colour rather
+        than what rescues it: CSS outranks a presentation attribute, so a consumer that reads the
+        stylesheet takes the class rule and one that does not takes the attribute, and the two agree.
+        Keeping the rule is what leaves `brand-blue` and `brand-orange` meaningful to anything that
+        wants to restyle the mark.
         """
         return (
             f'<svg version="1.1" viewBox="{self.view_box}" xmlns="http://www.w3.org/2000/svg">'
@@ -2440,9 +2460,10 @@ def svg_document(form: Sheet | Chart, shapes: list[Shape], composer: Composer) -
         ),
         *(f"    .{name} {{ {_css_text(style)} }}" for name, style in STYLES.items()),
         *(f"    .{kind} {{ {_css_shape(kind, ink)} }}" for kind, ink in INKS.items()),
-        # The inlined logo's paths carry these classes. Defined here rather than kept inside the symbol so
-        # the sheet has exactly one stylesheet -- and because a symbol whose own <style> was dropped
-        # renders in the default fill, which is black, silently.
+        # The inlined logo's paths carry these classes, and the same two fills as attributes. The rule
+        # lives here rather than inside the symbol so the sheet has exactly one stylesheet; the attribute
+        # is what a renderer that does not reach inside a <symbol> falls back to. CSS outranks it, so
+        # this rule still decides wherever it is read at all.
         "    .brand-blue { fill: %s; }" % ACCENT,
         "    .brand-orange { fill: %s; }" % BRAND_ORANGE,
         "  </style>",

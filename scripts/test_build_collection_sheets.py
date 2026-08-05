@@ -146,6 +146,25 @@ def test_house_style(english: Path, pattern: str, what: str) -> None:
     assert not offenders, f"{what} in {offenders}"
 
 
+def test_the_logo_carries_its_fills_where_a_stylesheet_may_not_reach(english: Path) -> None:
+    """The mark must not depend on a document stylesheet reaching inside a <symbol>.
+
+    Renderers disagree about whether it does, and Inkscape does not apply it -- so a mark styled by class
+    alone opens black there, with nothing to say so. prawn-svg and browsers do apply it, which is why
+    every sheet rendered so far has a coloured logo and why this cannot be caught by looking at one.
+    The colours come from the generator rather than being restated here, so the two cannot drift.
+    """
+    fills = generator_module().Logo.FILLS
+    for sheet in sheet_files(english):
+        symbol = ET.fromstring(sheet.read_text(encoding="utf-8")).find(f"{{{SVG_NS}}}symbol")
+        assert symbol is not None, f"{sheet.name} inlines no logo"
+        classed = [el for el in symbol.iter() if el.get("class") in fills]
+        assert classed, f"{sheet.name}: the inlined logo carries no brand class at all"
+        unpainted = [el.get("class") for el in classed if el.get("fill") != fills[el.get("class")]]
+        assert not unpainted, (f"{sheet.name}: {len(unpainted)} logo path(s) state their colour only as a "
+                               f"class, so they render black wherever the stylesheet is not applied")
+
+
 def test_coordinates_are_integers_on_one_grid(english: Path) -> None:
     """A fractional coordinate means something bypassed the grid the whole layout is expressed in."""
     fractional: list[str] = []
