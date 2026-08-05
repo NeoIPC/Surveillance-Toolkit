@@ -540,6 +540,16 @@ mechanics:
 first attempt **failed the export**, because the logo carried no alternative text. That refusal is the
 property that made Typst the choice.
 
+The test suite compiles every emitted form under those flags and reads the conformance **out of the
+finished file** rather than trusting that the flag was accepted — a plain compile declares neither
+`pdfaid` nor `pdfuaid`, so the two cases are distinguishable and the check is worth running. The page
+count comes from Typst's own refusal to export several images without a page-number template. And because
+a gate that stops running reads exactly like one that passes, a missing engine **fails** on a runner and
+only skips on a developer's machine.
+
+**What no build does yet is compile them for publication.** The protocol build asks the generator for SVG
+alone, so the printed forms exist as `.typ`, and as an artifact of that test, and nowhere else.
+
 The logo is a wordmark, so its accessible name is the word it draws, read from the artwork's own
 `<title>` rather than written here. Marking it a `pdf.artifact` would have satisfied the same gate while
 asserting it carries nothing — and that assertion is irreversible: *"once something is marked as an

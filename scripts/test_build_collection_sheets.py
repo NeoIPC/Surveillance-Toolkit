@@ -28,7 +28,9 @@ from __future__ import annotations
 
 import csv
 import importlib.util
+import os
 import re
+import shutil
 import subprocess
 import sys
 import xml.etree.ElementTree as ET
@@ -223,6 +225,68 @@ def test_the_logo_carries_its_fills_where_a_stylesheet_may_not_reach(english: Pa
         unpainted = [el.get("class") for el in classed if el.get("fill") != fills[el.get("class")]]
         assert not unpainted, (f"{sheet.name}: {len(unpainted)} logo path(s) state their colour only as a "
                                f"class, so they render black wherever the stylesheet is not applied")
+
+
+TYPST_FONTS = ("--font-path", str(REPO / "common" / "fonts"), "--ignore-system-fonts")
+
+
+def typst_binary() -> str:
+    """Typst, or a skip -- except on a runner, where its absence is a failure.
+
+    A developer who has not installed it should not be blocked; a runner without it must not report a
+    green gate for a check that never ran. That asymmetry is the whole point, and it is the failure mode
+    this suite has already had to write down once elsewhere: a gate that quietly stops running is
+    indistinguishable, in the log, from one that passes.
+
+    `--font-path` ADDS to whatever the machine has installed rather than replacing it, so
+    `--ignore-system-fonts` is not optional -- without it a face this repository does not ship is answered
+    by some other file, chosen silently and differently per machine.
+    """
+    found = shutil.which("typst")
+    if found:
+        return found
+    if os.environ.get("CI"):
+        pytest.fail("typst is missing on this runner, so the form a partner prints is not gated at all")
+    pytest.skip("typst is not installed, so the printed form is not exercised here")
+
+
+def test_the_printed_form_compiles_to_an_accessible_archival_pdf(english: Path, tmp_path: Path) -> None:
+    """The half of the layout no SVG can show: what the engine actually draws.
+
+    Three claims, and the first is what makes the others worth having. Every run the emitted document
+    places carries its own measured width and checks it against `measure()`, so a compile that succeeds is
+    this generator's ruler agreeing with the engine's -- the disagreement that made the generator adopt a
+    shaper at all, and the one thing no rendered SVG would ever reveal.
+
+    Then that the document is one page, taken from Typst's own refusal to export several images without a
+    page-number template. It does not catch content running past the bottom edge: everything is `place`d,
+    so that is clipped rather than flowing, and the generator's measurement is the gate for it. What it
+    catches is a document that gained a page.
+
+    Then that the file really declares PDF/A-2a and PDF/UA-1, read out of its own metadata rather than
+    inferred from the flag having been accepted -- an assertion in a document nobody verified is the exact
+    thing this project refuses to ship.
+    """
+    binary = typst_binary()
+    sources = sheet_files(english, "typ")
+    assert len(sources) == SHEETS, f"only {len(sources)} printable form(s) were emitted"
+    for source in sources:
+        pdf = tmp_path / f"{source.stem}.pdf"
+        built = subprocess.run(
+            [binary, "compile", *TYPST_FONTS, "--pdf-standard", "a-2a,ua-1", str(source), str(pdf)],
+            capture_output=True, text=True, encoding="utf-8")
+        assert built.returncode == 0, (f"{source.name} does not compile, so a width this generator "
+                                       f"measured disagrees with what the engine draws:\n{built.stderr}")
+        blob = pdf.read_bytes()
+        for marker, what in ((b"pdfaid", "PDF/A at all"), (b"part>2", "PDF/A part 2"),
+                             (b"conformance>A", "the accessible A conformance level"),
+                             (b"pdfuaid", "PDF/UA")):
+            assert marker in blob, f"{pdf.name} does not declare {what}, though the export was asked for it"
+
+        page = tmp_path / f"{source.stem}.png"
+        single = subprocess.run([binary, "compile", "--format", "png", *TYPST_FONTS, str(source), str(page)],
+                                capture_output=True, text=True, encoding="utf-8")
+        assert single.returncode == 0, (f"{source.name} is no longer one page:\n{single.stderr}")
 
 
 def test_coordinates_are_integers_on_one_grid(english: Path) -> None:
