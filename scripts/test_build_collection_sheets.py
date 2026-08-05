@@ -416,11 +416,14 @@ def test_the_chart_grid_does_not_grow_with_the_script(english: Path, tmp_path: P
         entry.msgstr = "सेवा"
     catalogue.save(str(po / "metadata.ne.po"))
 
-    # The chart alone, because this fixture is deliberately harsher than any real catalogue: EVERY label
-    # becomes Devanagari, so every row on every sheet pays the per-row clearance while none of the
-    # terminology a real translation keeps in Latin is left to pay nothing. Real languages all fit; this
-    # fixture does not, and that says nothing about them. What it buys is a chart with Devanagari in it,
-    # which the committed Nepali catalogue cannot supply.
+    # The chart alone, because this fixture is degenerate in a way no catalogue is: every label becomes
+    # the SAME short string, which collapses the answer-column search to its 50 mm minimum on every sheet
+    # (a real Nepali run settles the surgical-site sheet at 87.5 mm). A narrow answer column leaves option
+    # runs too little width to sit on their label's line, so they take rows of their own and the sheet
+    # grows -- the surgical-site sheet then runs 23.5 mm past its margin.
+    #
+    # That is an artefact of uniform labels and not of the script: a real fully-Devanagari sheet fits.
+    # Naming the cause matters, because "Devanagari overflows a sheet" is the wrong lesson to leave here.
     assert generate(tmp_path / "ne", "--language", "ne", "--format", "svg",
                     "--po", str(po), "--sheet", "NEOIPC_STG_SURV_END").returncode == 0
     devanagari = sum(1 for ch in chart(tmp_path / "ne") if "ऀ" <= ch <= "ॿ")
