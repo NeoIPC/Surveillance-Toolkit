@@ -5,6 +5,21 @@
 # Check if reference data is available
 has_reference <- "ref" %in% benchmark_data$dataset_names
 
+# An uploaded partner dataset carrying its own benchmark supersedes a reference
+# dataset named in the same request, and the two need not describe the same
+# cohort. Say so above the comparison rather than only in the log: everything
+# below — quartiles, outlier flags, the comparability callout — then describes
+# the benchmark that was used instead of the one that was asked for, and a
+# reader of the finished report has no other way to tell.
+if (reference_overridden) {
+  cat(sep = "\n", c(
+    "::: {.callout-important}",
+    sR$headerList$embeddedBenchmarkUsed,
+    ":::",
+    ""
+  ))
+}
+
 if (!has_reference) {
   cat(sep = "\n", c(
     paste0(sR$headerList$created,":"),

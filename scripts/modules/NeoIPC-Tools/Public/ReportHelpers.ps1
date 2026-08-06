@@ -166,7 +166,14 @@ function Invoke-QuartoRender {
             $isError = $true
             $pendingErrorLine = $s
         }
-        elseif ($s -match "^(`e\[39m)?(`e\[33m)?WARNING") {
+        elseif ($s -match "^(`e\[39m)?(`e\[33m)?WARN(ING)?\b") {
+            # Two producers, two spellings: Quarto and Pandoc write WARNING,
+            # while the reports' own `logger` layout writes "{level} [{ns}]"
+            # and its level is the string WARN. Matching only the long form
+            # sent every R-side warning to the else branch, where
+            # Write-Verbose hides it unless -Verbose was passed — so a report
+            # could warn about the data it was built from while the build log
+            # stayed silent at the verbosity people actually run.
             $s | Write-Warning
         }
         else {
@@ -281,7 +288,10 @@ function Invoke-Rscript {
             $errorLines.Add($s) | Out-Null
             Write-Host $s -ForegroundColor Red
         }
-        elseif ($s -match "^(`e\[39m)?(`e\[33m)?WARNING") {
+        elseif ($s -match "^(`e\[39m)?(`e\[33m)?WARN(ING)?\b") {
+            # `logger` writes WARN, not WARNING — see Invoke-QuartoRender.
+            # The data-generation scripts log through it too, so the long-form
+            # match hid their warnings here for the same reason.
             $s | Write-Warning
         }
         else {

@@ -1668,6 +1668,10 @@ typedParams <- list(
   includeInvalidPatients = get_validation_exceptions(params$validationExceptionFile)
 )
 
+# Assigned on every path, because the header reads it unconditionally and a
+# variable that exists only on one branch is a chunk-order trap.
+reference_overridden <- FALSE
+
 if (!is.null(params$partnerDataFile)) {
   if (!file.exists(params$partnerDataFile))
     stop(sprintf("The file '%s' does not exist.", params$partnerDataFile))
@@ -1676,11 +1680,20 @@ if (!is.null(params$partnerDataFile)) {
              file.info(params$partnerDataFile)$size)))
 
   if (inherits(partner_data, "neoipcr_bnch_ds")) {
-    # A benchmarked dataset carries its own reference, so referenceDataFile adds
-    # nothing to it. Ignoring it rather than aborting is deliberate: supplying
-    # both is redundant, not contradictory, and a caller cannot inspect the
-    # file's class before sending, so it has no way to avoid the combination.
-    if (!is.null(reference_data))
+    # A benchmarked dataset carries its own reference, so a referenceDataFile
+    # cannot be honoured without recomputing what is already there. It is
+    # ignored rather than fatal because a caller cannot inspect the file's class
+    # before sending, so it has no way to avoid the combination.
+    #
+    # The two need not name the same cohort, so this is a substitution and not
+    # merely a redundancy: the report is benchmarked against the reference the
+    # file carries, which may not be the one that was asked for. Every
+    # reference-derived output — quartiles, outlier flags, the comparability
+    # callout — then describes a cohort the caller did not choose. That is why
+    # the header says so in the document itself: the log line reaches whoever
+    # ran the render, while the report outlives them and travels further.
+    reference_overridden <- !is.null(reference_data)
+    if (reference_overridden)
       logWarn("partnerDataFile carries its own benchmark; ignoring referenceDataFile.")
     benchmark_data <- partner_data
     # Extract unit codes from the "own" dataset's metadata

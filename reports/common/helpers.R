@@ -201,7 +201,17 @@ get_string_resources <- function(x) {
 # Returns a glue object, exactly as glue() did — several call sites rely on that class, and forcing
 # character would be an unrelated behaviour change.
 interpolate_translation <- function(.template, ...) {
-  glue::glue_safe(.template, ..., .envir = emptyenv())
+  # Force the supplied values HERE, in this frame, before glue sees them. glue
+  # takes `...` as expressions and evaluates them in `.envir`, so passing them
+  # through unforced means every argument is looked up in emptyenv() — where a
+  # literal survives and a variable cannot. `threshold = sparse_threshold` then
+  # fails with "object 'sparse_threshold' not found", naming a variable that is
+  # perfectly in scope at the call site, which reads as a scoping bug in the
+  # report rather than as an unresolvable argument here. The failure needs a
+  # template that references the argument AND data that reaches that branch, so
+  # it hides until a footnote finally has cause to fire.
+  args <- list(...)
+  do.call(glue::glue_safe, c(list(.template), args, list(.envir = emptyenv())))
 }
 
 # Interpolate into ALREADY-COMPOSED translated text, against an explicit allow-list.

@@ -56,6 +56,10 @@ headerList:
     The effective analysis period is the time span between the surveillance end
     date of the earliest included patient and the surveillance end date of the
     latest included patient in the dataset.
+  embeddedBenchmarkUsed: >
+    The benchmark below is the one stored in the uploaded partner data file. The
+    reference dataset named in this request was not applied, so the comparison
+    reflects the stored benchmark rather than the requested one.
   filterDiffersFootnote: >
     Note: This filter differs from the reference dataset.
   multiCountryBenchmarkHint: >
