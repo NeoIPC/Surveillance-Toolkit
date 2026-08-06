@@ -1676,8 +1676,12 @@ if (!is.null(params$partnerDataFile)) {
              file.info(params$partnerDataFile)$size)))
 
   if (inherits(partner_data, "neoipcr_bnch_ds")) {
+    # A benchmarked dataset carries its own reference, so referenceDataFile adds
+    # nothing to it. Ignoring it rather than aborting is deliberate: supplying
+    # both is redundant, not contradictory, and a caller cannot inspect the
+    # file's class before sending, so it has no way to avoid the combination.
     if (!is.null(reference_data))
-      stop("partnerDataFile already contains benchmark data; referenceDataFile is not applicable.")
+      logWarn("partnerDataFile carries its own benchmark; ignoring referenceDataFile.")
     benchmark_data <- partner_data
     # Extract unit codes from the "own" dataset's metadata
     data_unit_codes <- partner_data$metadata$own$dataset_options$department_filter
