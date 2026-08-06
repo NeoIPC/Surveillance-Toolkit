@@ -20,6 +20,9 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
   description had stated a single threshold, more than 4 ×10⁹/L, which is neither arm of the
   definition. The corrected text reaches the tracker form, the data dictionary and the collection
   sheets, which are all rendered from the same row.
+- `NEOIPC_TEA_BIRTH_WEIGHT` carries its unit in its form label, `Birth weight (g)`, where only its
+  description named it; the description no longer repeats it. The collection sheets print the label
+  alone, so a birth weight written on paper said nothing about whether it was in grams or kilograms.
 
 ## [0.1.0-alpha] - 2026-09-07
 

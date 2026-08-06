@@ -186,6 +186,13 @@ keep_calculated:
   # the same sheet, and a device count that exceeds it is wrong on its face. Losing it would remove the
   # only arithmetic the paper form can catch by itself.
   - NEOIPC_SURVEILLANCE_END_PATIENT_DAYS
+  # The day of life at admission is assigned by a rule for the first two admission types only --
+  # delivered here, or admitted on the day of birth, where it is necessarily 1. For a patient transferred
+  # in later it is a value only a person knows, so treating it as computed hides a question the published
+  # form asks. Paper
+  # also has no conditionality: a sheet cannot reveal a field once an option above it is ticked, so it is
+  # printed unconditionally and left blank where the rule would have filled it in.
+  - NEOIPC_ADMISSION_DOL
 
 groups:
   - suffixes: [3GCR, MRSA, VRE]
