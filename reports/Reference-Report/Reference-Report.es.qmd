@@ -9,7 +9,7 @@ params:
   gestationWeeksFrom: NULL
   gestationWeeksTo: NULL
   reportingCountries: NULL
-  hospitalFilter: NULL
+  departmentFilter: NULL
   testUnitFilter: true
   defaultPatientFilter: true
   validationExceptionFile: NULL

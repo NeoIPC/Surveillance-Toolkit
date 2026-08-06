@@ -30,6 +30,7 @@ printUsage <- function() {
     "  --gestationWeeksFrom, -g <number>    Minimal included gestational age\n",
     "  --gestationWeeksTo, -G <number>      Maximal included gestational age\n",
     "  --reportingCountries, -c <list>      Comma-separated ISO codes\n",
+    "  --departmentFilter, -d <list>        Comma-separated department codes\n",
     "  --includeTestUnits, -t               Include test departments\n",
     "  --includeNonCorePatients, -n         Include non-core patients\n",
     "  --validationExceptionFile, -v <path> Input CSV file path\n",
@@ -61,6 +62,7 @@ short_map <- list(
   g = "gestationWeeksFrom",
   G = "gestationWeeksTo",
   c = "reportingCountries",
+  d = "departmentFilter",
   t = "includeTestUnits",
   n = "includeNonCorePatients",
   v = "validationExceptionFile",
@@ -111,6 +113,7 @@ getDatasetOptions <- function(
   gestationWeeksFrom,
   gestationWeeksTo,
   reportingCountries,
+  departmentFilter,
   includeTestUnits,
   includeNonCorePatients,
   validationExceptionFile
@@ -143,6 +146,7 @@ getDatasetOptions <- function(
     gestational_age_from = gestationWeeksFrom,
     gestational_age_to = gestationWeeksTo,
     country_filter = reportingCountries,
+    department_filter = departmentFilter,
     include_test_data = isTRUE(includeTestUnits),
     include_ineligible_patients = isTRUE(includeNonCorePatients),
     include_invalid_patients = getValidationExceptions(
@@ -288,6 +292,7 @@ birthWeightTo <- as_number_or_null(args$birthWeightTo)
 gestationWeeksFrom <- as_number_or_null(args$gestationWeeksFrom)
 gestationWeeksTo <- as_number_or_null(args$gestationWeeksTo)
 reportingCountries <- as_vector_or_null(args$reportingCountries)
+departmentFilter <- as_vector_or_null(args$departmentFilter)
 includeTestUnits <- as_bool(args$includeTestUnits, default = FALSE)
 includeNonCorePatients <- as_bool(
   args$includeNonCorePatients,
@@ -309,6 +314,7 @@ datasetOptions <- getDatasetOptions(
   gestationWeeksFrom = gestationWeeksFrom,
   gestationWeeksTo = gestationWeeksTo,
   reportingCountries = reportingCountries,
+  departmentFilter = departmentFilter,
   includeTestUnits = includeTestUnits,
   includeNonCorePatients = includeNonCorePatients,
   validationExceptionFile = validationExceptionFile

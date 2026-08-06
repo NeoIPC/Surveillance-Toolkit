@@ -299,6 +299,7 @@ get_dataset_options <- function(
     gestationWeeksFrom,
     gestationWeeksTo,
     reportingCountries,
+    departmentFilter,
     testUnitFilter,
     defaultPatientFilter,
     validationExceptionFile
@@ -321,6 +322,8 @@ get_dataset_options <- function(
       gestational_age_to = gestationWeeksTo,
       country_filter = if (!is.null(reportingCountries))
         unlist(strsplit(reportingCountries, ",")),
+      department_filter = if (!is.null(departmentFilter))
+        unlist(strsplit(departmentFilter, ",")),
       include_test_data = !dplyr::coalesce(testUnitFilter, TRUE),
       include_ineligible_patients = !dplyr::coalesce(defaultPatientFilter, TRUE),
       include_invalid_patients = get_validation_exceptions(
