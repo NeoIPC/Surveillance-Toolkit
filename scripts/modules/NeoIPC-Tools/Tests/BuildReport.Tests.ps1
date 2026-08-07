@@ -130,3 +130,48 @@ Describe 'Get-NeoIPCParameterSnapshot' {
         $a.hash | Should -BeExactly $b.hash
     }
 }
+
+Describe 'Get-NeoIPCRenderLogLevel' {
+    BeforeAll {
+        $script:esc = [char]27
+    }
+
+    It 'classifies <Expected> for <Description>' -ForEach @(
+        # The reports' own logger layout is "{level} [{namespace}] {msg}".
+        @{ Description = 'a logger WARN record'; Line = 'WARN [partner-report] sparse'; Expected = 'Warning' }
+        @{ Description = 'a logger ERROR record'; Line = 'ERROR [neoipcr] boom'; Expected = 'Error' }
+        # Quarto's own diagnostics.
+        @{ Description = 'a Quarto WARNING'; Line = 'WARNING: unresolved link'; Expected = 'Warning' }
+        # Pandoc brackets its verbosity; Quarto forwards that stderr verbatim.
+        @{ Description = 'a bracketed Pandoc warning'; Line = '[WARNING] Could not fetch resource'; Expected = 'Warning' }
+        @{ Description = 'a bracketed Pandoc error'; Line = '[ERROR] Could not convert'; Expected = 'Error' }
+        # LaTeX announces an error with a leading bang.
+        @{ Description = 'a LaTeX error'; Line = '! Undefined control sequence'; Expected = 'Error' }
+        @{ Description = 'a German R error'; Line = 'Fehler in eval(x): nicht gefunden'; Expected = 'Error' }
+        # Not levels at all.
+        @{ Description = 'an INFO record'; Line = 'INFO [neoipcr] 42 rows'; Expected = $null }
+        @{ Description = 'a word merely starting with WARN'; Line = 'WARNINGS_ENABLED=1'; Expected = $null }
+        @{ Description = 'an indented continuation line'; Line = '  [WARNING] continued'; Expected = $null }
+        # ^ must bind to every alternative: a sticky error flag means one mid-line
+        # "Fehler" would otherwise stamp the whole render as failed.
+        @{ Description = 'Fehler in the middle of a line'; Line = 'Es trat kein Fehler auf'; Expected = $null }
+    ) {
+        Get-NeoIPCRenderLogLevel -Line $Line | Should -BeExactly $Expected
+    }
+
+    # Quarto wraps the WHOLE of knitr's stderr in red — colors.red(output) in
+    # refs/quarto-cli/src/execute/rmd.ts — optionally after a reset, so every
+    # warning and error the R engine raises during a render arrives coloured.
+    # A classifier admitting only some colours drops all of them silently.
+    It 'sees through any run of ANSI colour sequences' {
+        Get-NeoIPCRenderLogLevel -Line "$esc[31mWARN [partner-report] sparse" | Should -BeExactly 'Warning'
+        Get-NeoIPCRenderLogLevel -Line "$esc[39m$esc[31mWARN [partner-report] sparse" | Should -BeExactly 'Warning'
+        Get-NeoIPCRenderLogLevel -Line "$esc[39m$esc[31mFehler in eval(x)" | Should -BeExactly 'Error'
+        Get-NeoIPCRenderLogLevel -Line "$esc[39m[WARNING] Could not fetch" | Should -BeExactly 'Warning'
+        Get-NeoIPCRenderLogLevel -Line "$esc[33mWARNING: yellow still works" | Should -BeExactly 'Warning'
+    }
+
+    It 'returns nothing for an empty line' {
+        Get-NeoIPCRenderLogLevel -Line '' | Should -BeExactly $null
+    }
+}

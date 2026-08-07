@@ -39,9 +39,9 @@ params:
   # @type character[]
   reportingCountries: NULL
 
-  # Hospital codes (NeoIPC site codes) to include.
+  # Department codes (NeoIPC site codes) to include.
   # @type character[]
-  hospitalFilter: NULL
+  departmentFilter: NULL
 
   # Apply the test-unit filter.
   # @type logical

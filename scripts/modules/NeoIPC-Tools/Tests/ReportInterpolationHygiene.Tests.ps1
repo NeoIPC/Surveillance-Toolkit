@@ -131,6 +131,39 @@ Describe 'Report interpolation hygiene' {
                 Should -BeExactly 'n = 5' -Because 'every converted call site passes its values by name'
         }
 
+        # A literal is the ONE shape that survives the defect these two exist to catch: glue evaluates
+        # its arguments in .envir, and a constant needs no lookup there while a variable cannot be found
+        # at all. So the assertion above passes against a helper that resolves nothing a real call site
+        # passes, and did. No call site passes a constant as a data value — the six literals in the tree
+        # are all .open/.close — so these are the shapes that actually ship.
+        It 'resolves a value passed as a variable, not only as a literal' {
+            Invoke-RSnippet 'sparse_threshold <- 5
+                             cat(as.character(interpolate_translation("n = {threshold}",
+                                                                      threshold = sparse_threshold)))' |
+                Should -BeExactly 'n = 5' -Because 'a constant is the one shape that needs no lookup'
+        }
+
+        It 'resolves a list-element lookup, the shape the outlier clauses use' {
+            Invoke-RSnippet 'pairing <- list(metric_label = "pneumonia rate")
+                             cat(as.character(interpolate_translation("The {metric_label}",
+                                                                      metric_label = pairing$metric_label)))' |
+                Should -BeExactly 'The pneumonia rate'
+        }
+
+        It 'refuses an unnamed value, which glue appends to the template' {
+            Invoke-RSnippet 'cat(tryCatch(as.character(interpolate_translation("{v} ", quote(secret), v = 1)),
+                                          error = function(e) "REFUSED"))' |
+                Should -BeExactly 'REFUSED' -Because (
+                    'an unnamed argument is template text rather than data, and is the one shape whose ' +
+                    'value can still be evaluated outside the closed environment')
+        }
+
+        It 'refuses a zero-length value, which would collapse the whole string' {
+            Invoke-RSnippet 'cat(tryCatch(as.character(interpolate_translation("in {d}.", d = NULL)),
+                                          error = function(e) "REFUSED"))' |
+                Should -BeExactly 'REFUSED' -Because 'a collapsed interpolation deletes the sentence silently'
+        }
+
         It 'returns the same class glue::glue did' {
             # Thirteen call sites use the result where a glue object is expected; forcing character there
             # would be an unrelated behaviour change riding along with a security fix.

@@ -2,6 +2,56 @@
 
 <#
 .SYNOPSIS
+Classify one line of Quarto / R render output as an error, a warning, or neither.
+
+.DESCRIPTION
+Returns 'Error', 'Warning' or nothing, so every renderer that reads a child
+process's interleaved stdout+stderr classifies it the same way. It exists as one
+function because the patterns are subtle in three separate ways, and three
+hand-kept copies of them drifted apart:
+
+  * Four spellings of a level. Quarto writes WARNING; Pandoc brackets its own
+    verbosity, "[WARNING] ..." (refs/pandoc/src/Text/Pandoc/Class/IO.hs); the
+    reports' `logger` layout is "{level} [{ns}]", whose level is the string WARN;
+    and LaTeX announces an error with a leading "! ".
+  * ANSI colour. Quarto colours the whole of knitr's stderr RED — literally
+    `colors.red(output)` in refs/quarto-cli/src/execute/rmd.ts — and may emit a
+    reset first, so a line can arrive as ESC[39m ESC[31m WARN. A pattern that
+    anchors on the level word, or that admits only some colours, silently drops
+    every warning and error the R engine raises during a render. Any run of SGR
+    sequences is therefore skipped before the level word is read.
+  * Anchoring. `^(Error)|(Fehler)` binds `^` to the first alternative only, so it
+    matches "Fehler" anywhere in a line — and because callers keep an error flag
+    sticky, one such line stamps the rest of the render as failed.
+
+.PARAMETER Line
+A single line of render output, with its ANSI sequences intact.
+
+.EXAMPLE
+    Get-NeoIPCRenderLogLevel -Line "$([char]27)[31mWARN [partner-report] sparse"
+    Warning
+#>
+function Get-NeoIPCRenderLogLevel {
+    [CmdletBinding()]
+    [OutputType([string])]
+    param(
+        [Parameter(Mandatory, ValueFromPipeline)]
+        [AllowEmptyString()]
+        [string]$Line
+    )
+
+    process {
+        # \e is .NET's escape-character class, so the pattern needs no literal ESC.
+        $ansi = '^(\e\[[0-9;]*m)*'
+        # -match is case-insensitive, so ERROR / error match too.
+        if ($Line -match "$ansi\[?(Error|Fehler|! )") { return 'Error' }
+        if ($Line -match "$ansi\[?WARN(ING)?\b") { return 'Warning' }
+        return $null
+    }
+}
+
+<#
+.SYNOPSIS
 Run a script block with NeoIPC auth environment variables scoped.
 
 .DESCRIPTION
@@ -159,14 +209,15 @@ function Invoke-QuartoRender {
                 Write-Host $s -ForegroundColor Red
             }
         }
-        elseif ($s -match '^(Error|Fehler|! )') {
-            # ^Error / ^Fehler — R / knitr / Quarto wrapper errors.
-            # ^! ...  — LaTeX-style errors (e.g. "! Undefined control sequence").
-            # -match is case-insensitive, so ERROR / error also match.
+        elseif ((Get-NeoIPCRenderLogLevel -Line $s) -eq 'Error') {
             $isError = $true
             $pendingErrorLine = $s
         }
-        elseif ($s -match "^(`e\[39m)?(`e\[33m)?WARNING") {
+        elseif ((Get-NeoIPCRenderLogLevel -Line $s) -eq 'Warning') {
+            # Anything the classifier misses falls to the else branch, where
+            # Write-Verbose hides it unless -Verbose was passed — so a report
+            # could warn about the records it was built from while the build log
+            # stayed silent at the verbosity people actually run.
             $s | Write-Warning
         }
         else {
@@ -273,15 +324,12 @@ function Invoke-Rscript {
                 Write-Host $s -ForegroundColor Red
             }
         }
-        elseif ($s -match '^(Error|Fehler|! )') {
-            # ^Error / ^Fehler — R / rlang errors.
-            # ^! ...  — LaTeX-style errors (rare in Rscript but possible via knitr).
-            # -match is case-insensitive, so ERROR / error also match.
+        elseif ((Get-NeoIPCRenderLogLevel -Line $s) -eq 'Error') {
             $isError = $true
             $errorLines.Add($s) | Out-Null
             Write-Host $s -ForegroundColor Red
         }
-        elseif ($s -match "^(`e\[39m)?(`e\[33m)?WARNING") {
+        elseif ((Get-NeoIPCRenderLogLevel -Line $s) -eq 'Warning') {
             $s | Write-Warning
         }
         else {

@@ -214,6 +214,7 @@ if (!is.null(params$referenceDataFile)) {
         gestationWeeksFrom = params$gestationWeeksFrom,
         gestationWeeksTo = params$gestationWeeksTo,
         reportingCountries = params$reportingCountries,
+        departmentFilter = params$departmentFilter,
         testUnitFilter = params$testUnitFilter,
         defaultPatientFilter = params$defaultPatientFilter,
         validationExceptionFile = params$validationExceptionFile)) |>

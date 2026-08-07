@@ -56,6 +56,11 @@ headerList:
     The effective analysis period is the time span between the surveillance end
     date of the earliest included patient and the surveillance end date of the
     latest included patient in the dataset.
+  embeddedBenchmarkUsed: >
+    The benchmark below is the one stored in the uploaded partner data file. The
+    reference dataset named in this request was not applied, so the comparison
+    reflects the stored benchmark rather than the requested one.
+  embeddedBenchmarkUsedTitle: Benchmark substituted
   filterDiffersFootnote: >
     Note: This filter differs from the reference dataset.
   multiCountryBenchmarkHint: >
@@ -160,10 +165,10 @@ outlier:
     clause_discordant_high: " despite elevated {paired_label}{paired_ref}"
     clause_discordant_low: " despite low {paired_label}{paired_ref}"
     clause_fallback: >-
-      . Reference quartiles for {primary_paired_label}
-      ({primary_paired_ref}) are not yet available.
+      . Reference quartiles for
+      {primary_paired_label}{primary_paired_ref} are not yet available.
       {fallback_paired_label_sc} is {fallback_position} the reference
-      range ({fallback_paired_ref})
+      range{fallback_paired_ref}
     clause_no_quartiles: >-
       . Reference quartiles for {paired_label}{paired_ref} are
       not yet available
@@ -175,13 +180,8 @@ outlier:
       , consistent with low {paired_label}{paired_ref},
       noting that reference quartiles for this metric are not
       yet available
-    clause_discordant_high_pooled: >-
-      despite elevated {paired_label}{paired_ref}, noting
-      that reference quartiles for this metric are not yet
-      available
-    clause_discordant_low_pooled: >-
-      despite low {paired_label}{paired_ref}, noting that
-      reference quartiles for this metric are not yet available
+    clause_discordant_high_pooled: " despite elevated {paired_label}{paired_ref}, noting that reference quartiles for this metric are not yet available"
+    clause_discordant_low_pooled: " despite low {paired_label}{paired_ref}, noting that reference quartiles for this metric are not yet available"
     clause_within_iqr: ". {paired_label_sc} is within the reference range{paired_ref}"
     opening_above: "The {metric_label} is above the reference range"
     opening_above_pooled: "The {metric_label} is above the pooled reference rate"

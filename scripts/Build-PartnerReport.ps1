@@ -613,11 +613,15 @@ if (inherits(x, 'neoipcr_bnch_ds')) {
                                     Write-Error -Message $s
                                 }
                             }
-                            elseif ($s -match '^(Error)|(Fehler)') {
+                            elseif ((Get-NeoIPCRenderLogLevel -Line $s) -eq 'Error') {
+                                # This wrapper classifies its own Quarto output
+                                # rather than going through Invoke-QuartoRender,
+                                # so it shares that function's classifier instead
+                                # of keeping a second copy of the patterns.
                                 $isError = $true
                                 $errorLine = $s
                             }
-                            elseif ($s -match "^(`e\[39m)?(`e\[33m)?WARNING") {
+                            elseif ((Get-NeoIPCRenderLogLevel -Line $s) -eq 'Warning') {
                                 $s | Write-Warning
                             }
                             else {
