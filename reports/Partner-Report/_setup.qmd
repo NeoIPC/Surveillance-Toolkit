@@ -1692,7 +1692,16 @@ if (!is.null(params$partnerDataFile)) {
     # callout — then describes a cohort the caller did not choose. That is why
     # the header says so in the document itself: the log line reaches whoever
     # ran the render, while the report outlives them and travels further.
-    reference_overridden <- !is.null(reference_data)
+    #
+    # Only when the two actually differ, though. The ordinary flow reaches this
+    # branch with the same reference on both sides — a partner downloads a stored
+    # reference, benchmarks against it, uploads the result, and the picker still
+    # holds that reference — and announcing a substitution there would tell the
+    # reader to distrust quartiles that are exactly the ones requested.
+    # get_benchmark_data() copies the reference's metadata verbatim into
+    # metadata$ref, so the comparison is against what was actually embedded.
+    reference_overridden <- !is.null(reference_data) &&
+      !identical(partner_data$metadata$ref, reference_data$metadata)
     if (reference_overridden)
       logWarn("partnerDataFile carries its own benchmark; ignoring referenceDataFile.")
     benchmark_data <- partner_data

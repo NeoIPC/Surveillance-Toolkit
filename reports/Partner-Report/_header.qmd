@@ -11,9 +11,21 @@ has_reference <- "ref" %in% benchmark_data$dataset_names
 # below — quartiles, outlier flags, the comparability callout — then describes
 # the benchmark that was used instead of the one that was asked for, and a
 # reader of the finished report has no other way to tell.
-if (reference_overridden) {
+#
+# Only where there is a comparison to qualify. A dataset carrying no reference of
+# its own still reaches here with one named and ignored, and the notice would then
+# describe quartiles the document does not contain.
+#
+# The title is supplied rather than left to Quarto. The service renders HTML under
+# the `minimal` profile, which forces `theme: none`; without a Bootstrap theme the
+# Bootstrap callout renderer is not selected and the default one synthesizes the
+# title from the callout type — the untranslated literal "Important" — so a German
+# report would carry an English heading on its own disclosure.
+if (has_reference && reference_overridden) {
   cat(sep = "\n", c(
     "::: {.callout-important}",
+    paste0("## ", sR$headerList$embeddedBenchmarkUsedTitle),
+    "",
     sR$headerList$embeddedBenchmarkUsed,
     ":::",
     ""

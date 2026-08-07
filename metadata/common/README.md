@@ -40,6 +40,23 @@ from the id, and carrying it duplicates a name that drifts — the same reason t
 the `display*` family). The directory is self-contained: when no `sharing.yaml` is present (a throwaway work
 directory, e.g. the round-trip gate) the converter derives the profiles from the package and writes one out.
 
+## User roles
+
+`NEOIPC-COMPAT(neoipc-app-key)` — the `NEOIPC_ADMIN` and `ReportViewer` rows in
+[`userRoles.csv`](userRoles.csv) each list **two** app authorities for the same app, `M_neoipcapp` and
+`M_NeoIPC`. A CSV row has no comment syntax, so the marker lives here.
+
+DHIS2 derives an app's "see app" authority from its manifest `short_name`, and the NeoIPC app's was renamed
+`neoipc-app` → `NeoIPC`, which renames the authority with it. Roles import before the new bundle installs,
+so a role listing only the new authority would leave every non-superuser unable to reach the app that is
+still installed — DHIS2 answers an inaccessible app with 404, so it reads as a broken deployment rather
+than as a permission gap. Listing both costs nothing at runtime: `UserRole.authorities` is an unvalidated
+`Set<String>`, and an authority naming an uninstalled app matches nothing.
+
+**Remove `M_neoipcapp` from both rows when no NeoIPC instance still has an app installed under the key
+`neoipc-app`** — checkable per instance from `/api/apps` (the `key` field), which is also what
+`Install-NeoIPCApp.ps1 -NoUpdate` compares against.
+
 ## Expressions
 
 The expression-heavy fields are kept as one text file per expression under [`expressions/`](expressions/), not packed

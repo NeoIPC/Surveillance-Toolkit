@@ -617,7 +617,12 @@ if (inherits(x, 'neoipcr_bnch_ds')) {
                                 $isError = $true
                                 $errorLine = $s
                             }
-                            elseif ($s -match "^(`e\[39m)?(`e\[33m)?WARNING") {
+                            elseif ($s -match "^(`e\[39m)?(`e\[33m)?\[?WARN(ING)?\b") {
+                                # This wrapper classifies its own Quarto output
+                                # rather than going through Invoke-QuartoRender,
+                                # so it needs that function's pattern: Quarto
+                                # writes WARNING, Pandoc writes "[WARNING] …",
+                                # and the reports' `logger` layout writes WARN.
                                 $s | Write-Warning
                             }
                             else {

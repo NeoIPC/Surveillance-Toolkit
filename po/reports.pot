@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-07-31 20:35+0200\n"
+"POT-Creation-Date: 2026-08-07 08:23+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Language-Team: none\n"
 "Language: en\n"
@@ -1441,6 +1441,18 @@ msgstr ""
 msgid "The effective analysis period is the time span between the surveillance end date of the earliest included patient and the surveillance end date of the latest included patient in the dataset.\n"
 msgstr ""
 
+#. type: Hash Value: headerList embeddedBenchmarkUsed
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The benchmark below is the one stored in the uploaded partner data file. The reference dataset named in this request was not applied, so the comparison reflects the stored benchmark rather than the requested one.\n"
+msgstr ""
+
+#. type: Hash Value: headerList embeddedBenchmarkUsedTitle
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Benchmark substituted"
+msgstr ""
+
 #. type: Hash Value: headerList filterDiffersFootnote
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
@@ -1666,7 +1678,7 @@ msgstr ""
 #. type: Hash Value: outlier composed clause_discordant_high_pooled
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "despite elevated {paired_label}{paired_ref}, noting that reference quartiles for this metric are not yet available"
+msgid " despite elevated {paired_label}{paired_ref}, noting that reference quartiles for this metric are not yet available"
 msgstr ""
 
 #. type: Hash Value: outlier composed clause_discordant_low
@@ -1678,13 +1690,13 @@ msgstr ""
 #. type: Hash Value: outlier composed clause_discordant_low_pooled
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "despite low {paired_label}{paired_ref}, noting that reference quartiles for this metric are not yet available"
+msgid " despite low {paired_label}{paired_ref}, noting that reference quartiles for this metric are not yet available"
 msgstr ""
 
 #. type: Hash Value: outlier composed clause_fallback
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid ". Reference quartiles for {primary_paired_label} ({primary_paired_ref}) are not yet available. {fallback_paired_label_sc} is {fallback_position} the reference range ({fallback_paired_ref})"
+msgid ". Reference quartiles for {primary_paired_label}{primary_paired_ref} are not yet available. {fallback_paired_label_sc} is {fallback_position} the reference range{fallback_paired_ref}"
 msgstr ""
 
 #. type: Hash Value: outlier composed clause_no_quartiles

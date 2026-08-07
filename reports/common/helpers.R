@@ -211,6 +211,25 @@ interpolate_translation <- function(.template, ...) {
   # template that references the argument AND data that reaches that branch, so
   # it hides until a footnote finally has cause to fire.
   args <- list(...)
+  # Two argument shapes glue accepts and this function must not, both silent.
+  # An UNNAMED argument is not data at all — glue takes it as another piece of the
+  # template, concatenated onto the end — and do.call splices the forced value into
+  # the call it builds, so a value that is itself a symbol or a call is evaluated
+  # here, reaching exactly the bindings emptyenv() exists to keep out of reach.
+  # A value of length ZERO collapses the whole interpolation to character(0),
+  # discarding the literal text with it, so a NULL argument deletes the sentence
+  # rather than failing (measured on glue 1.8.1). Both are refused rather than
+  # rendered, because either one loses text without saying so.
+  if (length(args) > 0L) {
+    names_given <- names(args)
+    if (is.null(names_given) || any(!nzchar(names_given)))
+      stop("interpolate_translation(): every value must be named — an unnamed ",
+           "argument is template text, not data.")
+    empty <- names_given[lengths(args) == 0L]
+    if (length(empty) > 0L)
+      stop("interpolate_translation(): zero-length value for ",
+           paste(empty, collapse = ", "), " — glue would discard the whole string.")
+  }
   do.call(glue::glue_safe, c(list(.template), args, list(.envir = emptyenv())))
 }
 
