@@ -171,22 +171,29 @@ compose_interpretation <- function(metric_state, pairing, paired_state, sR) {
   action <- select_action(metric_coarse, concordance, pairing)
   if (is.null(action)) return(paste0(opening, clause, "."))
 
-  # Resolve the conditional cross-reference placeholders left in the ACTION fragment. The opening and
-  # clause were already interpolated above with named arguments; only the action can still carry one.
-  #
-  # This is the only place composed translated text is re-scanned, so it is the only place a catalogue
-  # string could reach a binding nobody meant to expose. It previously evaluated against parent.frame() —
-  # one frame WIDER than glue's already permissive default — which put every local, and everything up the
-  # enclosing chain to the global environment, within reach of whatever a translator wrote.
-  #
-  # The allow-list below is the complete set, established from the catalogue rather than assumed: across
-  # every outlier string, the action fragments reference these two names and nothing else. Both are
-  # cross-reference fragments that are "" when the target table is absent from the report.
-  #
-  # Looked up here rather than passed in by each of the eight call sites, so the allowed set is stated
-  # once and cannot drift between them. Note the emptyenv() inside the helper is what makes this an
-  # allow-list at all: glue_data_safe's data argument is a first lookup that otherwise falls back to the
-  # caller's frame, so the list alone would restrict nothing.
+  assemble_interpretation(opening, clause, action)
+}
+
+# Join an interpretation's three parts and resolve the conditional cross-reference placeholders left in
+# the ACTION fragment. Openings and clauses are interpolated with named arguments where they are built;
+# only the action can still carry one, and only a fully assembled string can be re-scanned.
+#
+# Every path that assembles an interpretation must end here — the two that build their parts by hand,
+# as well as compose_interpretation(). A path that pastes the parts itself emits `{ref_detection_table}`
+# into the report verbatim, which is what the HAP fallback branch did for as long as it was unreachable.
+#
+# This is the only place composed translated text is re-scanned, so it is the only place a catalogue
+# string could reach a binding nobody meant to expose. It previously evaluated against parent.frame() —
+# one frame WIDER than glue's already permissive default — which put every local, and everything up the
+# enclosing chain to the global environment, within reach of whatever a translator wrote.
+#
+# The allow-list is the complete set, established from the catalogue rather than assumed: across every
+# outlier string, the action fragments reference these two names and nothing else. Both are
+# cross-reference fragments that are "" when the target table is absent from the report. Stating it here
+# rather than at each call site is what keeps it from drifting between them. Note the emptyenv() inside
+# the helper is what makes this an allow-list at all: glue_data_safe's data argument is a first lookup
+# that otherwise falls back to the caller's frame, so the list alone would restrict nothing.
+assemble_interpretation <- function(opening, clause, action) {
   allowed <- list(
     ref_detection_table = if (exists("ref_detection_table")) ref_detection_table else "",
     ref_dev_ass_table   = if (exists("ref_dev_ass_table"))   ref_dev_ass_table   else ""
@@ -405,7 +412,7 @@ interpret_severe_infection <- function(state_map, sR, registry = NULL) {
       concordance <- classify_concordance(
         hap_state, vs_util_state, pairing$above_is_concerning %||% TRUE)
       action <- select_action(hap_coarse, concordance, pairing)
-      hap_text <- paste0(opening, clause, ". ", action)
+      hap_text <- assemble_interpretation(opening, clause, action)
     } else {
       # Both unavailable
       hap_text <- compose_interpretation(hap_state, pairing, NULL, sR)
@@ -507,7 +514,7 @@ interpret_nec <- function(state_map, sR, registry = NULL) {
       action <- pairing$action_elevated_narrowed
     else
       action <- select_action(nec_coarse, hm_concordance, pairing)
-    return(paste0(opening, clause, ". ", action))
+    return(assemble_interpretation(opening, clause, action))
   }
 
   # Step 2: HM is within IQR or no quartiles — check secondary (probiotics)
@@ -536,13 +543,13 @@ interpret_nec <- function(state_map, sR, registry = NULL) {
       pairing$action_elevated_secondary %||% pairing$action_elevated
     else
       select_action(nec_coarse, pro_concordance, pairing)
-    return(paste0(opening, clause, ". ", action))
+    return(assemble_interpretation(opening, clause, action))
   }
 
   # Step 3: Neither explains — use primary with its concordance
   clause <- select_clause(hm_concordance, hm_coarse, primary_pairing, sR)
   action <- select_action(nec_coarse, hm_concordance, pairing)
-  paste0(opening, clause, ". ", action)
+  assemble_interpretation(opening, clause, action)
 }
 
 interpret_kangaroo_care <- function(state_map, sR, registry = NULL) {

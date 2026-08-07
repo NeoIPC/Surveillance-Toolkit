@@ -41,6 +41,7 @@
         # DataElements
         'Get-NeoIPCDataElementCodes'
         # QuartoHelpers
+        'Get-NeoIPCRenderLogLevel'
         'Invoke-WithNeoIPCAuth'
         'Invoke-QuartoRender'
         'Invoke-Rscript'

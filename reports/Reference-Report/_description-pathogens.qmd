@@ -7,10 +7,10 @@ params:
   reportingPeriodTo: NULL
   birthWeightFrom: NULL
   birthWeightTo: NULL
-  gestationalAgeFrom: NULL
-  gestationalAgeTo: NULL
-  countryFilter: NULL
-  hospitalFilter: NULL
+  gestationWeeksFrom: NULL
+  gestationWeeksTo: NULL
+  reportingCountries: NULL
+  departmentFilter: NULL
   testUnitFilter: true
   defaultPatientFilter: true
 ---
