@@ -230,6 +230,12 @@ interpolate_translation <- function(.template, ...) {
       stop("interpolate_translation(): zero-length value for ",
            paste(empty, collapse = ", "), " — glue would discard the whole string.")
   }
+  # `quote = TRUE` is not an option on this do.call, and it is worth knowing why,
+  # because it is the obvious-looking way to stop do.call re-evaluating anything.
+  # It wraps each argument as `base::quote(<value>)` — an expression where a plain
+  # value stood — and that expression is evaluated in `.envir`. emptyenv() has no
+  # parent and no bindings, so it cannot resolve `::`, and EVERY call then fails
+  # with "could not find function ::". The security property is what breaks it.
   do.call(glue::glue_safe, c(list(.template), args, list(.envir = emptyenv())))
 }
 
