@@ -5,7 +5,7 @@
 - `get_infectious_agent_detection_rates()`
 - `get_infectious_agent_detection_rates_with_department_quartiles()`
 
-**Location**: [neoipcr/R/calc.R](../../neoipcr/R/calc.R)
+**Location**: `R/calc.R` in the `neoipcr` package
 
 ## Objective
 
@@ -13,7 +13,7 @@ Create a comprehensive unit test that verifies `get_infectious_agent_detection_r
 
 ## Test File Location
 
-**Create**: [neoipcr/tests/testthat/test-calc.R](../../neoipcr/tests/testthat/test-calc.R)
+**Create**: `tests/testthat/test-calc.R` in the `neoipcr` package
 
 ## Implementation Steps
 
@@ -321,7 +321,7 @@ The functions being tested depend on:
 
 ## Implementation Checklist
 
-- [ ] Create [test-calc.R](../../neoipcr/tests/testthat/test-calc.R)
+- [ ] Create `tests/testthat/test-calc.R` in `neoipcr`
 - [ ] Implement `create_mock_dataset()` helper with realistic data
 - [ ] Define four test case scenarios
 - [ ] Implement main test logic with shared column comparison
