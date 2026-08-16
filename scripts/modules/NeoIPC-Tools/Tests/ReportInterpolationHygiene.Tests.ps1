@@ -140,7 +140,9 @@ Describe 'Report interpolation hygiene' {
             Invoke-RSnippet 'sparse_threshold <- 5
                              cat(as.character(interpolate_translation("n = {threshold}",
                                                                       threshold = sparse_threshold)))' |
-                Should -BeExactly 'n = 5' -Because 'a constant is the one shape that needs no lookup'
+                Should -BeExactly 'n = 5' -Because (
+                    'a variable must resolve; the literal case above passes even against a helper ' +
+                    'that resolves nothing, because a constant needs no lookup')
         }
 
         It 'resolves a list-element lookup, the shape the outlier clauses use' {
