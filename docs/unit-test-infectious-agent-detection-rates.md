@@ -5,7 +5,7 @@
 - `get_infectious_agent_detection_rates()`
 - `get_infectious_agent_detection_rates_with_department_quartiles()`
 
-**Location**: `R/calc.R` in the `neoipcr` package
+**Location**: `R/calc-rates.R` in the `neoipcr` package
 
 ## Objective
 
@@ -13,16 +13,16 @@ Create a comprehensive unit test that verifies `get_infectious_agent_detection_r
 
 ## Test File Location
 
-**Create**: `tests/testthat/test-calc.R` in the `neoipcr` package
+**Create**: `tests/testthat/test-calc-rates.R` in the `neoipcr` package
 
 ## Implementation Steps
 
 ### Step 1: Create Test File Structure
 
-Create `test-calc.R` in `neoipcr/tests/testthat/` with the following structure:
+Create `test-calc-rates.R` in `neoipcr/tests/testthat/` with the following structure:
 
 ```r
-# Tests for calculation functions in calc.R
+# Tests for calculation functions in calc-rates.R
 
 library(testthat)
 library(neoipcr)
@@ -270,7 +270,7 @@ for (col in quartile_unique_cols) {
 ### Execute Test File
 ```powershell
 # From neoipcr package root
-Rscript -e "testthat::test_file('tests/testthat/test-calc.R')"
+Rscript -e "testthat::test_file('tests/testthat/test-calc-rates.R')"
 ```
 
 ### Execute All Tests
@@ -284,7 +284,7 @@ Rscript -e "devtools::test()"
 Test passed 🎉
 
 ✓ | F W S  OK | Context
-✓ |         4 | test-calc
+✓ |         4 | test-calc-rates
 
 ══ Results ═════════════════════════════════════════════════════════════════════
 Duration: X.X s
@@ -321,7 +321,7 @@ The functions being tested depend on:
 
 ## Implementation Checklist
 
-- [ ] Create `tests/testthat/test-calc.R` in `neoipcr`
+- [ ] Create `tests/testthat/test-calc-rates.R` in `neoipcr`
 - [ ] Implement `create_mock_dataset()` helper with realistic data
 - [ ] Define four test case scenarios
 - [ ] Implement main test logic with shared column comparison
