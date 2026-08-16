@@ -1,7 +1,7 @@
 format:
   html:
     minimal: true
-    # The app (repos/neoipc-app) renders this output's math with bundled KaTeX
+    # The NeoIPC app renders this output's math with bundled KaTeX
     # after mounting the body fragment. Quarto's default would otherwise inject
     # a MathJax loader into the <head> — stripped by the fragment transformer,
     # so dead for the app, and a CDN dependency for a standalone HTML download.
