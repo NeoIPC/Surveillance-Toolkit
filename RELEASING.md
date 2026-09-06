@@ -32,12 +32,13 @@ its release, the product release **fails** — you must bump the list, release i
 `compatibility.yml` first. This makes it impossible to ship a protocol/metadata release that
 incorporates unreleased list content.
 
-The content check tracks the committed source each list's consumers actually read. For the infectious
-agent list that is the canonical `NeoIPC-Infectious-Agents.yaml` + its UID map **and** the legacy
-pathogen CSVs the protocol still compiles (`NeoIPC-Owned-Pathogen-Concepts.csv`,
-`NeoIPC-Pathogen-Concepts.csv`, `NeoIPC-Pathogen-Synonyms.csv`, `ListElements.csv`) — a transitional
-union until the CSV→YAML migration moves the protocol onto the YAML. For the antibiotics list it is the
-antibiotics/groups/AWaRe/list-element CSVs. **Translations are out of scope** — `.po` files churn via
+The content check tracks the committed source each list's consumers actually read. The two products
+read different pathogen sources — the metadata package reads the canonical
+`NeoIPC-Infectious-Agents.yaml` + its UID map, and the protocol compiles the legacy pathogen CSVs
+(`NeoIPC-Owned-Pathogen-Concepts.csv`, `NeoIPC-Pathogen-Concepts.csv`,
+`NeoIPC-Pathogen-Synonyms.csv`, `ListElements.csv`) — so the infectious-agent check tracks both, and a
+change to either forces a list re-release before either product ships it. For the antibiotics list it
+is the antibiotics/groups/AWaRe/list-element CSVs. **Translations are out of scope** — `.po` files churn via
 Weblate, and requiring a list re-release for every translation update before any protocol/metadata
 release would be too strict.
 

@@ -13,7 +13,7 @@ This directory contains the NeoIPC infectious-agent ontology, `NeoIPC-Infectious
 | `ListElements.csv` / `ListElements.<lang>.csv` | The heading and value labels of the printed pathogen table, read by `New-PathogenList` (NeoIPC-BuildTools) when the Core Protocol build renders the list. |
 | `AsciiDoc-PDF.yml` | Asciidoctor-PDF theme for the rendered pathogen reference document. |
 | `Output-Header.adoc` / `Output-Footer.adoc` (+ per-locale variants) | AsciiDoc preamble/postamble for the rendered pathogen reference document. |
-| `NeoIPC-Pathogen-Concepts.csv`, `NeoIPC-Pathogen-Synonyms.csv` (+ per-locale variants) | **Legacy, unmaintained.** Flat-CSV representation predating the YAML, scheduled for removal. Do not consult for ontology questions; use the YAML. |
+| `NeoIPC-Pathogen-Concepts.csv`, `NeoIPC-Pathogen-Synonyms.csv` (+ per-locale variants) | **Legacy, unmaintained.** Flat-CSV representation predating the YAML. Do not consult for ontology questions; use the YAML. |
 
 ## Adding an entry
 
