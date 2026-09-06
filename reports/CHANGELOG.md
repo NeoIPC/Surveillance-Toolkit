@@ -17,8 +17,9 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
 
 - Every PDF is rendered with LuaLaTeX and declares archival PDF/A-4. PDF/UA is deliberately not
   declared: it requires tagged structure, which the KOMA-Script document class cannot emit, and a
-  conformance the file does not have is worse than none. The two distribution figures, the title-page
-  logos and the certificate's signature carry alt text from the localized string cascade.
+  conformance the file does not have is worse than none. The two distribution figures and the
+  certificate's signature carry alt text from the localized string cascade; the title-page logos
+  carry the fixed alt text `NeoIPC`.
 - An opt-in `audit` profile (`quarto render --profile audit`) that overlays axe-core WCAG 2.1 AA checks
   on the four reports that produce HTML; it never composes into a default render, so partner-facing
   and service HTML never carry the bundle.
@@ -30,8 +31,12 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
 
 ### Changed
 
-- The birth-weight and gestational-age distribution figures plot only patients with a recorded value,
-  and their sample-size captions count those patients rather than all patients.
+- The distribution figures' sample-size captions count the patients the figure covers — those with a
+  recorded birth weight or gestational age, as neoipcr's figure data now supplies them — rather than
+  all patients.
+- The Reference Report takes a `departmentFilter` parameter, and `Generate-ReferenceData.R` a
+  `--departmentFilter` option, in place of the `hospitalFilter` parameter, which nothing consumed:
+  surveillance is observed at department level.
 - The report text follows the house spelling — Oxford British, taking the `-ize` form where it is also
   valid American English — so "Antibiotic Utilization" and the table and methods sources named after
   it are renamed accordingly.

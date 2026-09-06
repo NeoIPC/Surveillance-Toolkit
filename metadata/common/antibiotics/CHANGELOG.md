@@ -41,4 +41,5 @@ agents are out of scope by design, not by omission.
 - `ListElements.csv`, the printed table's column labels.
 - The list's own `LICENSE.md` and `README.md`, bundled into the release asset so the archive carries
   its attribution and effective licence rather than depending on the repository around it.
-- German translations, published alongside the source as gettext catalogues.
+- German and Spanish translation catalogues (`po/antibiotics.de.po`, `po/antibiotics.es.po`),
+  published alongside the source.

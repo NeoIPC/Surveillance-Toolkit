@@ -517,10 +517,9 @@ jobs:
                   echo "$list OK: incorporates $declared ($tag); content matches HEAD."
                 }
                 # The two consuming products read DIFFERENT pathogen sources: the metadata package reads the
-                # canonical NeoIPC-Infectious-Agents.yaml, but the protocol still compiles the legacy pathogen CSVs
-                # (New-PathogenList) pending the CSV->YAML migration. Track the union so a change to EITHER source
-                # forces a list re-release before either product ships it. (Drop the legacy CSVs here once the
-                # protocol reads the YAML.) Translations (*.de.csv etc.) stay out of scope.
+                # canonical NeoIPC-Infectious-Agents.yaml, and the protocol compiles the legacy pathogen CSVs
+                # (New-PathogenList). Both are tracked, so a change to EITHER source forces a list re-release
+                # before either product ships it. Translations (*.de.csv etc.) stay out of scope.
                 check_list infectious-agents \
                   metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml \
                   metadata/common/infectious-agents/NeoIPC-Infectious-Agents.uids.csv \

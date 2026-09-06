@@ -53,6 +53,6 @@ so the workflow publishes it as a pre-release and the document renders with a pr
   release build verifies that record byte-for-byte against the released lists — for the infectious-agent
   list, the ontology and the legacy CSVs together — so the protocol cannot claim a list version whose
   content it does not actually print.
-- German translations of both reference lists: the antibiotic list through the gettext catalogue
-  `po/antibiotics.de.po`, the infectious-agent list through the `.de.csv` translation sidecars beside
-  the legacy CSVs.
+- German and Spanish translations of both reference lists: the antibiotic list through the gettext
+  catalogues `po/antibiotics.<lang>.po`, the infectious-agent list through the `.<lang>.csv`
+  translation sidecars beside the legacy CSVs. The document itself shipped in English.
