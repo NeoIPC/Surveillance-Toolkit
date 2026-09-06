@@ -32,15 +32,17 @@ its release, the product release **fails** — you must bump the list, release i
 `compatibility.yml` first. This makes it impossible to ship a protocol/metadata release that
 incorporates unreleased list content.
 
-The content check tracks the committed source each list's consumers actually read. The two products
+The content check tracks the committed source each list's consumers actually read. Those two consumers
 read different pathogen sources — the metadata package reads the canonical
-`NeoIPC-Infectious-Agents.yaml` + its UID map, and the protocol compiles the legacy pathogen CSVs
-(`NeoIPC-Owned-Pathogen-Concepts.csv`, `NeoIPC-Pathogen-Concepts.csv`,
-`NeoIPC-Pathogen-Synonyms.csv`, `ListElements.csv`) — so the infectious-agent check tracks both, and a
-change to either forces a list re-release before either product ships it. For the antibiotics list it
-is the antibiotics/groups/AWaRe/list-element CSVs. **Translations are out of scope** — `.po` files churn via
-Weblate, and requiring a list re-release for every translation update before any protocol/metadata
-release would be too strict.
+`NeoIPC-Infectious-Agents.yaml` + its UID map, and the protocol compiles the pathogen CSVs: the legacy
+concept and synonym tables (`NeoIPC-Pathogen-Concepts.csv`, `NeoIPC-Pathogen-Synonyms.csv`) plus the
+two only the protocol reads (`NeoIPC-Owned-Pathogen-Concepts.csv`, `ListElements.csv`) — so the
+infectious-agent check tracks both sources, and a change to either forces a list re-release before
+either product ships it. For the antibiotics list it is the antibiotics/groups/AWaRe/list-element CSVs.
+**Translations are out of scope** — the `.<lang>.csv` sidecars the protocol's pathogen list reads and
+the `.po` catalogues everything else is translated from change independently of the list content, and
+requiring a list re-release for every translation update before any protocol/metadata release would be
+too strict.
 
 **Consequence — release order.** The very first protocol/metadata release requires the two lists to be
 released first (there is no `<list>-v0.0.1-alpha` tag until you cut it). Order: **release the lists →
