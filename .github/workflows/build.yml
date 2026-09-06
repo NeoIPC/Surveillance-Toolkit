@@ -634,8 +634,8 @@ jobs:
             - name: Run po4a (infectious agents)
               # Generates the localized NeoIPC-Infectious-Agents.<lang>.yaml overlays bundled into the infectious agent
               # list release. The protocol build does not read them: it compiles the pathogen list from the
-              # CSVs (see the incorporation check above).
-              if: github.ref_type != 'tag' || steps.rel.outputs.product == 'protocol' || steps.rel.outputs.product == 'infectious-agents'
+              # CSVs (see the incorporation check above), so a protocol tag skips this step.
+              if: github.ref_type != 'tag' || steps.rel.outputs.product == 'infectious-agents'
               shell: bash
               # PERL_UNICODE=SDA must match scripts/Invoke-Localization.ps1: it decodes @ARGV/open() as UTF-8 so
               # po4a reads the .cfg's non-ASCII --copyright-holder correctly instead of double-encoding it into

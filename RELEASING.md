@@ -39,10 +39,10 @@ concept and synonym tables (`NeoIPC-Pathogen-Concepts.csv`, `NeoIPC-Pathogen-Syn
 two only the protocol reads (`NeoIPC-Owned-Pathogen-Concepts.csv`, `ListElements.csv`) — so the
 infectious-agent check tracks both sources, and a change to either forces a list re-release before
 either product ships it. For the antibiotics list it is the antibiotics/groups/AWaRe/list-element CSVs.
-**Translations are out of scope** — the `.<lang>.csv` sidecars the protocol's pathogen list reads and
-the `.po` catalogues everything else is translated from change independently of the list content, and
-requiring a list re-release for every translation update before any protocol/metadata release would be
-too strict.
+**Translations are out of scope** — the `.<lang>.csv` sidecars that the protocol's pathogen list reads
+and the `.po` catalogues that the rest of the list content is translated from both change independently
+of the list content, and requiring a list re-release for every translation update before any
+protocol/metadata release would be too strict.
 
 **Consequence — release order.** The very first protocol/metadata release requires the two lists to be
 released first (there is no `<list>-v0.0.1-alpha` tag until you cut it). Order: **release the lists →
