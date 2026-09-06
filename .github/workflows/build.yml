@@ -40,11 +40,12 @@ jobs:
     changelog-sections:
         # Every product's current VERSION must already be described in the changelog beside it. The
         # release build enforces the same thing, but only once a tag exists — and a tag here is immutable
-        # (the retag guards reject a moved one), so discovering a missing section at release time costs a
+        # (the retag guard rejects a moved one), so discovering a missing section at release time costs a
         # version number. This catches it while it is still an edit.
         #
         # Runs on every trigger for the same reason text-hygiene does: the condition is a property of the
-        # tree, not of a diff, so a branch that never opens a pull request is checked too.
+        # tree, not of a diff, so a direct push to `main` and a release tag are checked without a pull
+        # request.
         #
         # Its own job rather than a step inside build-docs, so a failure names the offending product in
         # seconds instead of arriving after the toolchain setup.
@@ -68,13 +69,16 @@ jobs:
                     status=1
                     continue
                   fi
-                  # Literal prefix match, not a pattern: a version carries `.` and `-`.
+                  # Literal prefix match, not a pattern: a version carries `.` and `-`. A section ends at the
+                  # next version heading or at a Keep a Changelog link-reference definition (`[x.y.z]: url`),
+                  # so trailing definitions never join the last version's notes.
                   section="$(awk -v want="## [$ver]" '
                     index($0, want) == 1 { inside = 1; next }
                     inside && index($0, "## [") == 1 { exit }
+                    inside && $0 ~ /^\[[^]]+\]: / { exit }
                     inside { print }
                   ' "$cfile")"
-                  if [[ -z "${section//[[:space:]]/}" ]]; then
+                  if [[ -z "$(printf '%s' "$section" | tr -d '[:space:]')" ]]; then
                     echo "::error file=$cfile::$cfile has no non-empty '## [$ver]' section, but $vfile declares $ver. Describe the version before releasing it."
                     status=1
                     continue
@@ -347,8 +351,6 @@ jobs:
         outputs:
           product: ${{ steps.rel.outputs.product }}
           version: ${{ steps.rel.outputs.version }}
-          vfile: ${{ steps.rel.outputs.vfile }}
-          cfile: ${{ steps.rel.outputs.cfile }}
         steps:
             - name: Parse and validate the product release tag
               # This repository publishes FIVE independently-versioned products from one history, each with its own
@@ -421,7 +423,9 @@ jobs:
               # reaches the Release body without also becoming an asset.
               #
               # The heading is matched as a literal prefix rather than as a pattern: a version carries `.`
-              # and `-`, which a regex built from it would interpret.
+              # and `-`, which a regex built from it would interpret. A section ends at the next version
+              # heading or at a Keep a Changelog link-reference definition (`[x.y.z]: url`), so trailing
+              # definitions never join the last version's notes.
               if: github.ref_type == 'tag'
               shell: bash
               run: |
@@ -434,9 +438,10 @@ jobs:
                 section="$(awk -v want="## [$ver]" '
                   index($0, want) == 1 { inside = 1; next }
                   inside && index($0, "## [") == 1 { exit }
+                  inside && $0 ~ /^\[[^]]+\]: / { exit }
                   inside { print }
                 ' "$cfile")"
-                if [[ -z "${section//[[:space:]]/}" ]]; then
+                if [[ -z "$(printf '%s' "$section" | tr -d '[:space:]')" ]]; then
                   echo "::error::$cfile has no non-empty '## [$ver]' section. Add one describing this release before tagging."
                   exit 1
                 fi
@@ -627,8 +632,9 @@ jobs:
             # Use the pinned po4a submodule (tools/po4a) — the Ubuntu apt po4a is too old to recognise the
             # --width / --wrap-po options our configs use. Invocation matches the CLAUDE.md "po4a setup" section.
             - name: Run po4a (infectious agents)
-              # Generates the localized NeoIPC-Infectious-Agents.<lang>.yaml — consumed by the protocol build (pathogen
-              # list) and bundled into the infectious agent list release.
+              # Generates the localized NeoIPC-Infectious-Agents.<lang>.yaml overlays bundled into the infectious agent
+              # list release. The protocol build does not read them: it compiles the pathogen list from the legacy
+              # CSVs (see the incorporation check above).
               if: github.ref_type != 'tag' || steps.rel.outputs.product == 'protocol' || steps.rel.outputs.product == 'infectious-agents'
               shell: bash
               # PERL_UNICODE=SDA must match scripts/Invoke-Localization.ps1: it decodes @ARGV/open() as UTF-8 so
