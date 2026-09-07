@@ -65,6 +65,10 @@ jobs:
                   # Strip a BOM and surrounding whitespace, exactly as the release job reads it.
                   ver="$(sed '1s/^\xef\xbb\xbf//' "$vfile" | tr -d '[:space:]')"
                   if [[ ! -f "$cfile" ]]; then
+                    # Anchored on the VERSION file on purpose: a file that does not exist is in no
+                    # diff, so an annotation on it reaches nobody, while VERSION is what such a pull
+                    # request changes. The empty-section case below anchors on the changelog, which
+                    # exists by then.
                     echo "::error file=$vfile::$cfile does not exist. Every released product documents its versions beside its VERSION file."
                     status=1
                     continue
@@ -629,7 +633,7 @@ jobs:
                 sudo install -m 0755 typst-x86_64-unknown-linux-musl/typst /usr/local/bin/typst
                 typst --version
 
-            # Use the pinned po4a submodule (tools/po4a) — the Ubuntu apt po4a is too old to recognise the
+            # Use the pinned po4a submodule (tools/po4a) — the Ubuntu apt po4a is too old to recognize the
             # --width / --wrap-po options our configs use. Invocation matches the CLAUDE.md "po4a setup" section.
             - name: Run po4a (infectious agents)
               # Generates the localized NeoIPC-Infectious-Agents.<lang>.yaml overlays bundled into the infectious agent
