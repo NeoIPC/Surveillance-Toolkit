@@ -11,6 +11,8 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
 
 ## [Unreleased]
 
+## [1.3.0-preview2] - 2026-09-07
+
 ### Added
 
 - The printed data-collection forms, derived from the DHIS2 metadata in this repository rather than
@@ -24,6 +26,8 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
 
 ### Changed
 
+- The document incorporates the infectious-agent and antibiotics lists at `0.1.0-alpha`, which
+  relabels the recognized-pathogen column of the printed pathogen table in the house spelling.
 - The drawn figures — decision flow, title page and preview watermark — take their strings from the
   gettext catalogue like the rest of the document, replacing the per-figure `.resx` string tables and
   the XSLT that assembled them.

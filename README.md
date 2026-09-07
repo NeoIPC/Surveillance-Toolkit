@@ -54,7 +54,8 @@ release asset, with a synthetic play variant for test instances. It is a generat
 deliberately not committed; [`metadata/dist/README.md`](metadata/dist/README.md) explains where to
 get it and how to import it.
 
-**That package is alpha — expect to adapt it rather than deploy it.** It is version `0.0.1-alpha`.
+**That package is alpha — expect to adapt it rather than deploy it.** Its version is the one in
+[`metadata/VERSION`](metadata/VERSION), which is what the release tag carries.
 It does not yet follow the WHO `dhis2-package-exporter` sharing and manifest conventions: it imports
 because DHIS2 ignores the manifest key it does not recognise, not because it conforms. It also
 attaches the program to no organisation units, so the hierarchy is yours to build and connect.

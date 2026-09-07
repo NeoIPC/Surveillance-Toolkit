@@ -45,7 +45,7 @@ of the list content, and requiring a list re-release for every translation updat
 protocol/metadata release would be too strict.
 
 **Consequence — release order.** The very first protocol/metadata release requires the two lists to be
-released first (there is no `<list>-v0.0.1-alpha` tag until you cut it). Order: **release the lists →
+released first (there is no `<list>-v*` tag until you cut it). Order: **release the lists →
 then protocol/metadata**.
 
 ## Reports compatibility (neoipcr / neoipc-app)

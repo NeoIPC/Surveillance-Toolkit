@@ -13,6 +13,8 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
 
 ## [Unreleased]
 
+## [0.1.0-alpha] - 2026-09-07
+
 ### Added
 
 - Every PDF is rendered with LuaLaTeX and declares archival PDF/A-4. PDF/UA is deliberately not
@@ -40,9 +42,11 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
 - The report text follows the house spelling — Oxford British, taking the `-ize` form where it is also
   valid American English — so "Antibiotic Utilization" and the table and methods sources named after
   it are renamed accordingly.
-- `compatibility.yml` marks its neoipcr versions as a placeholder: the reports call
-  `get_antibiotic_utilization_table()`, which no released neoipcr tag carries, so the declared version
-  is the last that could be declared rather than the one the sources need.
+- `compatibility.yml` declares neoipcr `v0.0.0.9001`, the first release carrying the exported
+  `get_antibiotic_utilization_table()` these reports call, so the declared floor is the one the
+  sources actually need.
+- A dataset serialized before the antibiotic table was renamed is still read, under the name it was
+  written with. The rename is a source-level change only, and a saved dataset is not migrated by it.
 
 ### Fixed
 
