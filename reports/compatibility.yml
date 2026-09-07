@@ -14,18 +14,15 @@
 #             actually established by testing.
 
 neoipcr:
-  # NEOIPC-COMPAT(neoipcr-floor): the reports call
-  # `neoipcr::get_antibiotic_utilization_table()` and read the
-  # `antibiotic_utilization_table` field, which exist only from the commit that
-  # renamed them off the `-ise` spelling. No released tag carries them, so no
-  # floor can name one: both versions below are the last that could be declared
-  # rather than the one the code needs, and are a placeholder rather than a
-  # measurement. The release gate checks only that a declared tag *exists*, so
-  # nothing here detects a floor that is too low. Raise both, and remove this
-  # marker, once a released neoipcr tag carries that function.
-  tested: v0.0.0.9000
-  minimum: v0.0.0.9000
+  # The floor is the exported `get_antibiotic_utilization_table()`, which the Reference
+  # Report calls and which v0.0.0.9001 is the first tag to carry. The field it renamed is
+  # NOT part of the floor: a serialized dataset written under the old name is accepted
+  # permanently, by the shim marked NEOIPC-PERMANENT(dataset-format) in the Partner
+  # Report's setup. The release gate checks only that a declared tag exists, and only
+  # `tested`, so nothing here would catch a floor set too low.
+  tested: v0.0.0.9001
+  minimum: v0.0.0.9001
 
 neoipc-app:
-  tested: v0.0.1-alpha
-  minimum: v0.0.1-alpha
+  tested: v0.1.0-alpha
+  minimum: v0.1.0-alpha

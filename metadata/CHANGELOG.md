@@ -13,6 +13,8 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
 
 ## [Unreleased]
 
+## [0.1.0-alpha] - 2026-09-07
+
 ### Added
 
 - `NEOIPC_HAP_IT_RATIO`, the I/T ratio (immature to total granulocytes) above 0.2, as its own
@@ -28,6 +30,10 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
 
 ### Changed
 
+- The package incorporates the infectious-agent and antibiotics lists at `0.1.0-alpha`. Two of their
+  changes reach the generated metadata: the recognized-pathogen column is relabelled in the house
+  spelling, and the generated ATC option groups no longer carry a description, because the column that
+  supplied it is gone from the antibiotics group table.
 - The generated organism-membership rules — the resistance categories, the recognized-pathogen and the
   virus rules — build their `||` chains as balanced trees, so the DHIS2 2.41 engine, which evaluates
   them by recursion, no longer overflows its stack. The Pneumonia "set virus" rule is generated from
