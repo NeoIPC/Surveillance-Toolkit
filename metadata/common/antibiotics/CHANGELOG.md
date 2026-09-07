@@ -11,6 +11,8 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
 
 ## [Unreleased]
 
+## [0.1.0-alpha] - 2026-09-07
+
 ### Changed
 
 - The translation catalogue `po/antibiotics.pot` + `po/antibiotics.<lang>.po` is maintained in this
