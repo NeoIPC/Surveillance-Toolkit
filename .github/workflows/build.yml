@@ -65,7 +65,7 @@ jobs:
                   # Strip a BOM and surrounding whitespace, exactly as the release job reads it.
                   ver="$(sed '1s/^\xef\xbb\xbf//' "$vfile" | tr -d '[:space:]')"
                   if [[ ! -f "$cfile" ]]; then
-                    # Anchored on VERSION on purpose: an annotation on a path that no longer exists
+                    # Anchored on VERSION on purpose: an annotation on a path that does not exist
                     # cannot land on any line of the pull request, while VERSION is what a pull
                     # request adding a product changes. The empty-section case below anchors on the
                     # changelog, which exists by then.
