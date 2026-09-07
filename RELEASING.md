@@ -5,7 +5,7 @@ has its own version file, its own tag stream, and its own GitHub Release stream:
 
 | Product | Tag prefix | Version file (source of truth) | Release assets |
 |---------|-----------|--------------------------------|----------------|
-| NeoIPC Core Surveillance Protocol | `protocol-v*` | `doc/protocol/VERSION` | `NeoIPC-Core-Protocol*.pdf`, `*.docx`, `compatibility.yml` |
+| NeoIPC Core Surveillance Protocol | `protocol-v*` | `doc/protocol/VERSION` | `NeoIPC-Core-Protocol*.pdf`, `*.docx`, `NeoIPC-Core-Collection-Forms*.zip`, `compatibility.yml` |
 | NeoIPC DHIS2 Metadata Package | `metadata-v*` | `metadata/VERSION` | `metadata-package/*.json`, data-dictionary CSV/XLSX, `compatibility.yml` |
 | NeoIPC Surveillance Reports | `reports-v*` | `reports/VERSION` | `compatibility.yml` (render-ready sources ship in the tag's source archive) |
 | NeoIPC Infectious Agent List | `infectious-agents-v*` | `metadata/common/infectious-agents/VERSION` | `NeoIPC-Infectious-Agents-<ver>.tar.gz` (canonical YAML + po4a-localized YAMLs + UID map) |
@@ -32,14 +32,17 @@ its release, the product release **fails** — you must bump the list, release i
 `compatibility.yml` first. This makes it impossible to ship a protocol/metadata release that
 incorporates unreleased list content.
 
-The content check tracks the committed source each list's consumers actually read. For the infectious
-agent list that is the canonical `NeoIPC-Infectious-Agents.yaml` + its UID map **and** the legacy
-pathogen CSVs the protocol still compiles (`NeoIPC-Owned-Pathogen-Concepts.csv`,
-`NeoIPC-Pathogen-Concepts.csv`, `NeoIPC-Pathogen-Synonyms.csv`, `ListElements.csv`) — a transitional
-union until the CSV→YAML migration moves the protocol onto the YAML. For the antibiotics list it is the
-antibiotics/groups/AWaRe/list-element CSVs. **Translations are out of scope** — `.po` files churn via
-Weblate, and requiring a list re-release for every translation update before any protocol/metadata
-release would be too strict.
+The content check tracks the committed source each list's consumers actually read. Those two consumers
+read different pathogen sources — the metadata package reads the canonical
+`NeoIPC-Infectious-Agents.yaml` + its UID map, and the protocol compiles the pathogen CSVs: the legacy
+concept and synonym tables (`NeoIPC-Pathogen-Concepts.csv`, `NeoIPC-Pathogen-Synonyms.csv`) plus the
+two only the protocol reads (`NeoIPC-Owned-Pathogen-Concepts.csv`, `ListElements.csv`) — so the
+infectious-agent check tracks both sources, and a change to either forces a list re-release before
+either product ships it. For the antibiotics list it is the antibiotics/groups/AWaRe/list-element CSVs.
+**Translations are out of scope** — the `.<lang>.csv` sidecars that the protocol's pathogen list reads
+and the `.po` catalogues that every other rendering of the lists is translated from both change independently
+of the list content, and requiring a list re-release for every translation update before any
+protocol/metadata release would be too strict.
 
 **Consequence — release order.** The very first protocol/metadata release requires the two lists to be
 released first (there is no `<list>-v0.0.1-alpha` tag until you cut it). Order: **release the lists →
@@ -60,8 +63,11 @@ neoipcr/neoipc-app. Order: **release neoipcr + neoipc-app → then the reports**
 
 ## How a release works
 
-1. **Bump the product's version file** on `main` (via a PR): edit the relevant `VERSION` file to the
-   version you intend to release. For a reports release, also update `reports/compatibility.yml` (the
+1. **Bump the product's version file and describe the version** on `main` (via a PR): edit the relevant
+   `VERSION` file to the version you intend to release, and add a non-empty `## [<version>] - <date>`
+   section to the `CHANGELOG.md` beside it — the `changelog-sections` job fails the pull request while
+   that section is missing, and the release publishes it as the Release body. For a reports release,
+   also update `reports/compatibility.yml` (the
    neoipcr / neoipc-app versions the reports were validated against). For a protocol/metadata release,
    make sure `compatibility.yml`'s incorporated list versions point at current list releases.
 2. **Push the release tag** `<product>-v<that-version>`. That single push triggers the release — there
@@ -71,8 +77,8 @@ neoipcr/neoipc-app. Order: **release neoipcr + neoipc-app → then the reports**
    - rejects a moved / retagged tag and enforces the monotonic-version guard;
    - for a protocol/metadata release, runs the incorporation check above;
    - builds **only** that product;
-   - creates the GitHub Release (generated notes; flagged **pre-release** automatically when the version
-     carries a semver pre-release suffix) and attaches that product's assets.
+   - creates the GitHub Release (body from that changelog section; flagged **pre-release** automatically
+     when the version carries a semver pre-release suffix) and attaches that product's assets.
 
 The next version is **not** bumped automatically — bump the product's `VERSION` deliberately in the PR
 that prepares the next release (step 1). Continuous CI (push / PR / manual dispatch) builds the protocol

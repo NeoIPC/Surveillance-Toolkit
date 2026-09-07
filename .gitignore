@@ -31,6 +31,12 @@ metadata/dist/*.json
 output/
 reports/**/*.html
 reports/**/*.md
+# …except the product changelog, which is source rather than a render. The rule above is right for
+# everything else here — a .md under reports/ is normally what Quarto or knitr produced — but this
+# one is hand-written, sits beside reports/VERSION as every product's changelog does, and is read by
+# the release workflow to build the Release body. Without this line it exists locally and is absent
+# from the repository, so the release gate passes for whoever wrote it and fails in CI.
+!reports/CHANGELOG.md
 reports/**/*_files/**
 reports/**/_output
 # Rendered documentation — the sources under docs/ are Markdown; anything Quarto or Pandoc produces

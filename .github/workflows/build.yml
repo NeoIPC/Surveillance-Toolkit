@@ -37,6 +37,60 @@ jobs:
               shell: pwsh
               run: ./scripts/Test-TextFileHygiene.ps1
 
+    changelog-sections:
+        # Every product's current VERSION must already be described in the changelog beside it. The
+        # release build enforces the same thing, but only once a tag exists — and a tag here is immutable
+        # (the retag guard rejects a moved one), so discovering a missing section at release time costs a
+        # version number. This catches it while it is still an edit.
+        #
+        # Runs on every trigger for the same reason text-hygiene does: the condition is a property of the
+        # tree, not of a diff, so a direct push to `main` and a release tag are checked without a pull
+        # request.
+        #
+        # Its own job rather than a step inside build-docs, so a failure names the offending product in
+        # seconds instead of arriving after the toolchain setup.
+        runs-on: ubuntu-26.04
+        steps:
+            - uses: actions/checkout@v7
+              with:
+                submodules: false
+
+            - name: Every product's VERSION has a changelog section
+              shell: bash
+              run: |
+                status=0
+                for vfile in doc/protocol/VERSION metadata/VERSION reports/VERSION \
+                             metadata/common/infectious-agents/VERSION metadata/common/antibiotics/VERSION; do
+                  cfile="${vfile%VERSION}CHANGELOG.md"
+                  # Strip a BOM and surrounding whitespace, exactly as the release job reads it.
+                  ver="$(sed '1s/^\xef\xbb\xbf//' "$vfile" | tr -d '[:space:]')"
+                  if [[ ! -f "$cfile" ]]; then
+                    # Anchored on VERSION on purpose: an annotation on a path that does not exist
+                    # cannot land on any line of the pull request, while VERSION is what a pull
+                    # request adding a product changes. The empty-section case below anchors on the
+                    # changelog, which exists by then.
+                    echo "::error file=$vfile::$cfile does not exist. Every released product documents its versions beside its VERSION file."
+                    status=1
+                    continue
+                  fi
+                  # Literal prefix match, not a pattern: a version carries `.` and `-`. A section ends at the
+                  # next version heading or at a Keep a Changelog link-reference definition (`[x.y.z]: url`),
+                  # so trailing definitions never join the last version's notes.
+                  section="$(awk -v want="## [$ver]" '
+                    index($0, want) == 1 { inside = 1; next }
+                    inside && index($0, "## [") == 1 { exit }
+                    inside && $0 ~ /^\[[^]]+\]: / { exit }
+                    inside { print }
+                  ' "$cfile")"
+                  if [[ -z "$(printf '%s' "$section" | tr -d '[:space:]')" ]]; then
+                    echo "::error file=$cfile::$cfile has no non-empty '## [$ver]' section, but $vfile declares $ver. Describe the version before releasing it."
+                    status=1
+                    continue
+                  fi
+                  echo "$cfile documents $ver."
+                done
+                exit $status
+
     catalogue-ownership:
         # The repository owns the .pot templates; Weblate owns the .po translations and is their only writer.
         # Two writers on one .po is what conflicts every language of a catalogue at once — both sides rewrite
@@ -301,7 +355,6 @@ jobs:
         outputs:
           product: ${{ steps.rel.outputs.product }}
           version: ${{ steps.rel.outputs.version }}
-          vfile: ${{ steps.rel.outputs.vfile }}
         steps:
             - name: Parse and validate the product release tag
               # This repository publishes FIVE independently-versioned products from one history, each with its own
@@ -330,10 +383,13 @@ jobs:
                   infectious-agents) vfile="metadata/common/infectious-agents/VERSION" ;;
                   antibiotics)       vfile="metadata/common/antibiotics/VERSION" ;;
                 esac
+                # Each product's changelog sits beside its VERSION, and supplies the Release body.
+                cfile="${vfile%VERSION}CHANGELOG.md"
                 {
                   echo "product=$product"
                   echo "version=$version"
                   echo "vfile=$vfile"
+                  echo "cfile=$cfile"
                 } >> "$GITHUB_OUTPUT"
                 echo "Parsed release: product=$product version=$version (source of truth: $vfile)."
 
@@ -358,6 +414,45 @@ jobs:
                   exit 1
                 fi
                 echo "Release version matches $vfile ($file)."
+
+            - name: Extract the release notes from the product changelog
+              # The Release body comes from the product's own changelog rather than from generated commit
+              # notes, and this step IS the gate: a missing or empty section fails the release here, before
+              # the expensive build, rather than publishing a Release that describes nothing. There is
+              # deliberately no fallback to --generate-notes, which would silently restore what this replaces.
+              #
+              # It runs here, in build-docs, because release-assets has no checkout — it only downloads
+              # artifacts — so a repository path could not resolve there. The extracted file rides the
+              # existing ./artifacts/ upload; it is matched by none of that job's attach globs, so it
+              # reaches the Release body without also becoming an asset.
+              #
+              # The heading is matched as a literal prefix rather than as a pattern: a version carries `.`
+              # and `-`, which a regex built from it would interpret. A section ends at the next version
+              # heading or at a Keep a Changelog link-reference definition (`[x.y.z]: url`), so trailing
+              # definitions never join the last version's notes.
+              if: github.ref_type == 'tag'
+              shell: bash
+              run: |
+                cfile="${{ steps.rel.outputs.cfile }}"
+                ver="${{ steps.rel.outputs.version }}"
+                if [[ ! -f "$cfile" ]]; then
+                  echo "::error::$cfile does not exist. Every released product documents its versions in a changelog beside its VERSION file."
+                  exit 1
+                fi
+                section="$(awk -v want="## [$ver]" '
+                  index($0, want) == 1 { inside = 1; next }
+                  inside && index($0, "## [") == 1 { exit }
+                  inside && $0 ~ /^\[[^]]+\]: / { exit }
+                  inside { print }
+                ' "$cfile")"
+                if [[ -z "$(printf '%s' "$section" | tr -d '[:space:]')" ]]; then
+                  echo "::error::$cfile has no non-empty '## [$ver]' section. Add one describing this release before tagging."
+                  exit 1
+                fi
+                mkdir -p ./artifacts
+                printf '%s\n' "$section" > ./artifacts/release-notes.md
+                echo "Release notes for $ver taken from $cfile:"
+                cat ./artifacts/release-notes.md
 
             - name: Reject a moved / retagged release tag
               # A tag push with created=false means an existing tag was force-moved. Releases are immutable --
@@ -426,10 +521,10 @@ jobs:
                   echo "$list OK: incorporates $declared ($tag); content matches HEAD."
                 }
                 # The two consuming products read DIFFERENT pathogen sources: the metadata package reads the
-                # canonical NeoIPC-Infectious-Agents.yaml, but the protocol still compiles the legacy pathogen CSVs
-                # (New-PathogenList) pending the CSV->YAML migration. Track the union so a change to EITHER source
-                # forces a list re-release before either product ships it. (Drop the legacy CSVs here once the
-                # protocol reads the YAML.) Translations (*.de.csv etc.) stay out of scope.
+                # canonical NeoIPC-Infectious-Agents.yaml, and the protocol compiles the pathogen CSVs
+                # (New-PathogenList) — the legacy concept and synonym tables plus the two only the protocol
+                # reads. Both sources are tracked, so a change to EITHER forces a list re-release before
+                # either product ships it. Translations (*.de.csv etc.) stay out of scope.
                 check_list infectious-agents \
                   metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml \
                   metadata/common/infectious-agents/NeoIPC-Infectious-Agents.uids.csv \
@@ -538,12 +633,13 @@ jobs:
                 sudo install -m 0755 typst-x86_64-unknown-linux-musl/typst /usr/local/bin/typst
                 typst --version
 
-            # Use the pinned po4a submodule (tools/po4a) — the Ubuntu apt po4a is too old to recognise the
+            # Use the pinned po4a submodule (tools/po4a) — the Ubuntu apt po4a is too old to recognize the
             # --width / --wrap-po options our configs use. Invocation matches the CLAUDE.md "po4a setup" section.
             - name: Run po4a (infectious agents)
-              # Generates the localized NeoIPC-Infectious-Agents.<lang>.yaml — consumed by the protocol build (pathogen
-              # list) and bundled into the infectious agent list release.
-              if: github.ref_type != 'tag' || steps.rel.outputs.product == 'protocol' || steps.rel.outputs.product == 'infectious-agents'
+              # Generates the localized NeoIPC-Infectious-Agents.<lang>.yaml overlays bundled into the infectious agent
+              # list release. The protocol build does not read them: it compiles the pathogen list from the
+              # CSVs (see the incorporation check above), so a protocol tag skips this step.
+              if: github.ref_type != 'tag' || steps.rel.outputs.product == 'infectious-agents'
               shell: bash
               # PERL_UNICODE=SDA must match scripts/Invoke-Localization.ps1: it decodes @ARGV/open() as UTF-8 so
               # po4a reads the .cfg's non-ASCII --copyright-holder correctly instead of double-encoding it into
@@ -714,9 +810,10 @@ jobs:
     release-assets:
         # Create the product's GitHub Release and attach its rendered assets. Split out from build-docs so that
         # job runs with a read-only token; only this release-gated job needs contents: write. Triggered by a
-        # `<product>-v*` tag push: create the Release (generated notes; pre-release when the tag carries a
-        # pre-release suffix), then attach what build-docs rendered/staged. Exactly one product's attach step
-        # fires, keyed off the product build-docs parsed from the tag.
+        # `<product>-v*` tag push: create the Release (body taken from the product's changelog, which
+        # build-docs extracted and uploaded; pre-release when the tag carries a pre-release suffix), then
+        # attach what build-docs rendered/staged. Exactly one product's attach step fires, keyed off the
+        # product build-docs parsed from the tag.
         if: github.ref_type == 'tag'
         needs: build-docs
         runs-on: ubuntu-26.04
@@ -733,17 +830,27 @@ jobs:
                 name: NeoIPC-Surveillance-Toolkit
                 path: ./artifacts
             - name: Create the Release
-              # Tag-driven: create the GitHub Release (generated notes) before attaching assets. Pre-release
-              # only when the VERSION itself carries a semver pre-release suffix (e.g. -alpha, -preview1); a
-              # plain X.Y.Z is final. Test the parsed version, NOT $TAG — every tag's <product>-v prefix
-              # contains a hyphen, so matching $TAG would flag every release as a pre-release.
+              # Tag-driven: create the GitHub Release before attaching assets. The body is the product's own
+              # changelog section, extracted and validated in build-docs — a description written for readers
+              # rather than a list of commit subjects. Pre-release only when the VERSION itself carries a
+              # semver pre-release suffix (e.g. -alpha, -preview1); a plain X.Y.Z is final. Test the parsed
+              # version, NOT $TAG — every tag's <product>-v prefix contains a hyphen, so matching $TAG would
+              # flag every release as a pre-release.
               shell: bash
               run: |
                 ver='${{ needs.build-docs.outputs.version }}'
                 pre=""; case "$ver" in *-*) pre="--prerelease";; esac
+                notes=./artifacts/release-notes.md
+                # build-docs fails the release when the section is missing, so an absent file here means the
+                # artifact did not survive the hand-off rather than that the changelog was incomplete. Say so
+                # instead of falling back to generated notes, which would quietly undo the whole change.
+                if [[ ! -s "$notes" ]]; then
+                  echo "::error::$notes is missing or empty in the downloaded artifact, though build-docs validated it. Not falling back to generated notes."
+                  exit 1
+                fi
                 # Idempotent: a re-run of this job re-executes create; skip if the Release already exists (a
                 # partial earlier run may have created it) so the attach steps below still run.
-                gh release view "$TAG" >/dev/null 2>&1 || gh release create "$TAG" --generate-notes $pre
+                gh release view "$TAG" >/dev/null 2>&1 || gh release create "$TAG" --notes-file "$notes" $pre
             - name: Attach protocol documents
               # PDF + DOCX are self-contained; the HTML references artifacts/img/ so it is not attached as a bare
               # asset (an HTML bundle with its images is a possible future asset). compatibility.yml records the
