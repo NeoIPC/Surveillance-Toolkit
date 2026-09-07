@@ -65,10 +65,10 @@ jobs:
                   # Strip a BOM and surrounding whitespace, exactly as the release job reads it.
                   ver="$(sed '1s/^\xef\xbb\xbf//' "$vfile" | tr -d '[:space:]')"
                   if [[ ! -f "$cfile" ]]; then
-                    # Anchored on the VERSION file on purpose: a file that does not exist is in no
-                    # diff, so an annotation on it reaches nobody, while VERSION is what such a pull
-                    # request changes. The empty-section case below anchors on the changelog, which
-                    # exists by then.
+                    # Anchored on VERSION on purpose: an annotation on a path that no longer exists
+                    # cannot land on any line of the pull request, while VERSION is what a pull
+                    # request adding a product changes. The empty-section case below anchors on the
+                    # changelog, which exists by then.
                     echo "::error file=$vfile::$cfile does not exist. Every released product documents its versions beside its VERSION file."
                     status=1
                     continue

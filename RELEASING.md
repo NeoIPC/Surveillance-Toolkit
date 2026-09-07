@@ -40,7 +40,7 @@ two only the protocol reads (`NeoIPC-Owned-Pathogen-Concepts.csv`, `ListElements
 infectious-agent check tracks both sources, and a change to either forces a list re-release before
 either product ships it. For the antibiotics list it is the antibiotics/groups/AWaRe/list-element CSVs.
 **Translations are out of scope** — the `.<lang>.csv` sidecars that the protocol's pathogen list reads
-and the `.po` catalogues that the lists' other consumers are translated from both change independently
+and the `.po` catalogues that every other rendering of the lists is translated from both change independently
 of the list content, and requiring a list re-release for every translation update before any
 protocol/metadata release would be too strict.
 
