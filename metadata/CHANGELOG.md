@@ -13,6 +13,14 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
 
 ## [Unreleased]
 
+### Fixed
+
+- `NEOIPC_BSI_WBC` describes the white-blood-cell criterion as the protocol defines it: a count
+  below 4 ×10⁹/L or above 20 ×10⁹/L. Its form label had named only an increased count, and its
+  description had stated a single threshold, more than 4 ×10⁹/L, which is neither arm of the
+  definition. The corrected text reaches the tracker form, the data dictionary and the collection
+  sheets, which are all rendered from the same row.
+
 ## [0.1.0-alpha] - 2026-09-07
 
 ### Added
