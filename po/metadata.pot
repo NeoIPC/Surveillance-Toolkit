@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-08-16 09:45+0200\n"
+"POT-Creation-Date: 2026-09-18 08:53+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Language-Team: none\n"
 "Language: en\n"
@@ -985,12 +985,12 @@ msgstr ""
 
 #, priority:200
 msgctxt "dataElements/NEOIPC_BSI_WBC/FORM_NAME"
-msgid "Increased white blood cell count"
+msgid "Decreased or increased white blood cell count"
 msgstr ""
 
 #, priority:10
 msgctxt "dataElements/NEOIPC_BSI_WBC/DESCRIPTION"
-msgid "White blood cell count > 4 ×10⁹/L (4000/µL)"
+msgid "White blood cell count < 4 ×10⁹/L or > 20 ×10⁹/L (< 4 ×10³/µL or > 20 ×10³/µL)"
 msgstr ""
 
 #, priority:10
