@@ -74,9 +74,9 @@ included, and a missing file no longer means "clean".
 
 ## Before a render
 
-`_setup.qmd` asserts that every id in `validation_rule_ids()` has an entry under `problems` in the string
-resources, so a rule added to neoipcr without its sentences fails the render rather than rendering a blank
-line. Whether every placeholder names a field its rule records is settled only where both repositories are
+`_setup.qmd` asserts that every id in `validation_rule_ids()` has a non-empty `description` and `summary`
+under `problems` in the string resources, so a rule added to neoipcr without its sentences fails the render
+rather than rendering a blank line or failing in the header. Whether every placeholder names a field its rule records is settled only where both repositories are
 at hand: the workspace that assembles them runs an offline check that interpolates every template with a
 synthetic finding of the documented shape; on its own, this repository relies on the render.
 

@@ -154,9 +154,12 @@ $wd = Get-Location
 # Snapshot the common-parameter flags and resolve the level (and the Quarto flag
 # array) here in the script scope; inside the Invoke-WithNeoIPCAuth scriptblock
 # $PSBoundParameters is the scriptblock's own (empty) dictionary, so the
-# scriptblock reads the resolved array via closure.
+# scriptblock reads the resolved array via closure. -Rules is snapshotted the
+# same way, by presence rather than value: `-Rules 0` is an array a Boolean
+# test reads as false, and it must reach the render so validate() rejects it.
 $debugRequested   = $PSBoundParameters.ContainsKey('Debug')
 $verboseRequested = $PSBoundParameters.ContainsKey('Verbose')
+$rulesSpecified   = $PSBoundParameters.ContainsKey('Rules')
 $logLevel =
     if ($Quiet) { 'quiet' }
     elseif ($debugRequested) { 'debug' }
@@ -226,7 +229,7 @@ try {
         if ($validationExceptionPath) {
             $quartoArgs += @('-P', "validationExceptionFile:$validationExceptionPath")
         }
-        if ($PSBoundParameters.ContainsKey('Rules')) {
+        if ($rulesSpecified) {
             $quartoArgs += @('-P', "rules:[$($Rules -join ',')]")
         }
         if ($Dhis2Scheme) { $quartoArgs += @('-P', "dhis2Scheme:$Dhis2Scheme") }
@@ -265,7 +268,7 @@ try {
             if ($validationExceptionPath) {
                 $quartoArgs += @('-P', "validationExceptionFile:$validationExceptionPath")
             }
-            if ($Rules) {
+            if ($rulesSpecified) {
                 $quartoArgs += @('-P', "rules:[$($Rules -join ',')]")
             }
             if ($Dhis2Scheme) { $quartoArgs += @('-P', "dhis2Scheme:$Dhis2Scheme") }

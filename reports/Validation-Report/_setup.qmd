@@ -89,20 +89,32 @@ if (!rlang::is_null(departmentFilter))
 
 # The rules live in neoipcr and the sentences that render their findings live
 # in this report's string resources, keyed by rule id. A rule the package runs
-# without a sentence here would render as a blank line, so the two are checked
-# against each other before anything is validated.
+# without its sentence and summary here would render as a blank line or fail
+# the header, so the two are checked against each other before anything is
+# validated: every rule needs a non-empty `description` and `summary`.
 rule_ids <- neoipcr::validation_rule_ids()
-uncatalogued <- setdiff(rule_ids, as.integer(names(sR$problems)))
-if (length(uncatalogued) > 0L)
+has_text <- function(id) {
+  entry <- sR$problems[[as.character(id)]]
+  all(vapply(
+    c("description", "summary"),
+    \(field) is.character(entry[[field]]) && length(entry[[field]]) == 1L &&
+      nzchar(entry[[field]]),
+    logical(1)))
+}
+unsentenced <- rule_ids[!vapply(rule_ids, has_text, logical(1))]
+if (length(unsentenced) > 0L)
   rlang::abort(sprintf(
-    "The string resources carry no entry for validation rule(s) %s.",
-    paste(uncatalogued, collapse = ", ")))
+    "The string resources carry no description and summary for validation rule(s) %s.",
+    paste(unsentenced, collapse = ", ")))
 
 exceptions <- NULL
 if (!is.null(params$validationExceptionFile))
   exceptions <- neoipcr::read_validation_exceptions(params$validationExceptionFile)
 
-rules <- if (is.null(params$rules)) rule_ids else as.integer(unlist(params$rules))
+# An empty `rules` value (NULL, or `[]` from the command line) means every
+# rule; a repeated id is applied once, so the header counts it once.
+rules <- if (length(params$rules) == 0L) rule_ids else
+  unique(as.integer(unlist(params$rules)))
 problems <- neoipcr::validate(data, rules = rules, exceptions = exceptions)
 
 # The header says which rules produced this report, so a document rendered

@@ -292,19 +292,22 @@ get_localised_world_bank_class_names <- function(x) {
 }
 
 # The validation exception list a render applies, read by neoipcr's own reader
-# so the file is checked once, the same way, wherever it is consumed. `FALSE`
-# — no list, every flagged record removed — is the value
-# `dhis2_dataset_options(include_invalid_patients =)` takes when the file is
-# absent.
+# so the file is checked once, the same way, wherever it is consumed. A path
+# given explicitly must exist: neoipcr refuses a missing file like any other
+# invalid list, so a mistyped path cannot silently drop every exception and
+# remove the records it was meant to keep. With no path, the conventional
+# file beside the report is read when present; otherwise the result is
+# `FALSE` — no list, every flagged record removed — the value
+# `dhis2_dataset_options(include_invalid_patients =)` takes without a list.
 get_validation_exceptions <- function(x) {
-  validationExceptionFile <- dplyr::coalesce(x, "validation-exceptions_ref.csv")
-  if (file.exists(validationExceptionFile)) {
-    return(neoipcr::read_validation_exceptions(validationExceptionFile))
-  } else {
-    logWarn("Validation exception file not found: '{validationExceptionFile}'",
-            namespace = "report-common")
-    return(FALSE)
-  }
+  if (!is.null(x))
+    return(neoipcr::read_validation_exceptions(x))
+  default_file <- "validation-exceptions_ref.csv"
+  if (file.exists(default_file))
+    return(neoipcr::read_validation_exceptions(default_file))
+  logWarn("Validation exception file not found: '{default_file}'",
+          namespace = "report-common")
+  FALSE
 }
 
 # The production NeoIPC DHIS2 host. neoipcr (the library) no longer defaults to
