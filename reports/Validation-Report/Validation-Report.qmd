@@ -1,12 +1,44 @@
 ---
 lang: en
 params:
+  # Department codes (NeoIPC site codes) whose records are validated; empty =
+  # every department the session can see.
+  # @type character[]
   departmentFilter: NULL
+
+  # Ids of the validation rules to apply; empty = every rule.
+  # @type integer[]
+  rules: NULL
+
+  # Include the departments flagged as test units.
+  # @type logical
   includeTestData: false
+
+  # Path to a validation-exception file (admin-uploaded) naming the records
+  # to keep despite the rule that flags them.
+  # @type character
   validationExceptionFile: NULL
+
+  # DHIS2 endpoint scheme (http or https). Server-side override; not
+  # exposed via the public API.
+  # @type character
+  # @values [http, https]
   dhis2Scheme: NULL
+
+  # DHIS2 endpoint hostname. Server-side override; not exposed via the
+  # public API.
+  # @type character
   dhis2Hostname: NULL
+
+  # DHIS2 endpoint TCP port. Server-side override; not exposed via the
+  # public API.
+  # @type integer
+  # @range 1..65535
   dhis2Port: NULL
+
+  # DHIS2 API path prefix. Server-side override; not exposed via the
+  # public API.
+  # @type character
   dhis2Path: NULL
 ---
 

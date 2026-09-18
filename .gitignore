@@ -44,7 +44,6 @@ reports/**/_output
 # .md files ARE the source and must stay tracked.
 docs/*.html
 docs/*_files/
-reports/ICHE-Health-Intervention-Codes.csv
 data/
 # Provisioned (not committed) DocumentFormat.OpenXml assemblies for the data-dictionary .xlsx writer
 # (restored by `dotnet publish` of lib/NeoIPC-Tools.Dependencies.csproj; see that file + the data-dictionary README).

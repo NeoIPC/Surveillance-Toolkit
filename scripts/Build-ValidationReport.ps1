@@ -8,9 +8,14 @@ Generate Validation Reports for one or more sites, or a combined report for all 
 .DESCRIPTION
 This script fetches the department/site list from DHIS2, filters by a regex, and renders the Validation Report for each site using Quarto.
 With -Combined, it renders a single report covering all departments (no departmentFilter).
+With -Rules, only the named validation rules are applied; the report's header says which rules were left out.
+A department without findings renders a report saying so.
 
 .EXAMPLE
     .\Build-ValidationReport.ps1 -SiteCodeFilter 'NEO_AT.*' -OutputLocale 'de' -Token $myToken -Verbose
+
+.EXAMPLE
+    .\Build-ValidationReport.ps1 -Combined -Rules 1, 3, 25 -Token $myToken
 
 .EXAMPLE
     .\Build-ValidationReport.ps1 -Combined -OutputLocale 'en' -Token $myToken -JsonReport
@@ -63,6 +68,9 @@ param(
     [string]$Token,
 
     [string]$ValidationExceptionFile,
+
+    [Parameter()]
+    [int[]]$Rules,
 
     [Parameter()]
     [switch]$IncludeTestData,
@@ -218,6 +226,9 @@ try {
         if ($validationExceptionPath) {
             $quartoArgs += @('-P', "validationExceptionFile:$validationExceptionPath")
         }
+        if ($PSBoundParameters.ContainsKey('Rules')) {
+            $quartoArgs += @('-P', "rules:[$($Rules -join ',')]")
+        }
         if ($Dhis2Scheme) { $quartoArgs += @('-P', "dhis2Scheme:$Dhis2Scheme") }
         if ($Dhis2Hostname) { $quartoArgs += @('-P', "dhis2Hostname:$Dhis2Hostname") }
         if ($Dhis2Port) { $quartoArgs += @('-P', "dhis2Port:$Dhis2Port") }
@@ -230,7 +241,7 @@ try {
             $currentEntry = $currentEntry | Complete-NeoIPCBuildStep -Result $result
             if ($result.Status -eq 'Error') {
                 $errors += "Quarto render failed for combined report."
-            } elseif ($result.Status -ne 'NoData') {
+            } else {
                 $outputFiles += (Join-Path $outputDirPath $outFileName)
             }
         } else {
@@ -254,6 +265,9 @@ try {
             if ($validationExceptionPath) {
                 $quartoArgs += @('-P', "validationExceptionFile:$validationExceptionPath")
             }
+            if ($Rules) {
+                $quartoArgs += @('-P', "rules:[$($Rules -join ',')]")
+            }
             if ($Dhis2Scheme) { $quartoArgs += @('-P', "dhis2Scheme:$Dhis2Scheme") }
             if ($Dhis2Hostname) { $quartoArgs += @('-P', "dhis2Hostname:$Dhis2Hostname") }
             if ($Dhis2Port) { $quartoArgs += @('-P', "dhis2Port:$Dhis2Port") }
@@ -266,7 +280,7 @@ try {
                 $currentEntry = $currentEntry | Complete-NeoIPCBuildStep -Result $result
                 if ($result.Status -eq 'Error') {
                     $errors += "Quarto render failed for $siteCode."
-                } elseif ($result.Status -ne 'NoData') {
+                } else {
                     $outputFiles += (Join-Path $outputDirPath $outFileName)
                 }
             } else {

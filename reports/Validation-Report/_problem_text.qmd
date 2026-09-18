@@ -1,0 +1,69 @@
+```{r Problem text}
+#| include: false
+
+# The sentence for one finding is the rule's template from the string
+# resources with the finding's values interpolated — one generic path for
+# every rule, driven by the context fields `neoipcr::validate()` records
+# (documented in its "Context fields" section) and the `{named}` placeholders
+# of `content/_sR.yaml`, which use the same names.
+
+# One finding's values as the named character scalars the templates take.
+# Dates take the locale's date format; a missing value reads as the report's
+# `missing_value` string — worded to sit inside a sentence — so a template
+# never receives an NA.
+format_context <- function(context, sR) {
+  if (is.null(context) || ncol(context) == 0L)
+    return(list())
+  lapply(as.list(context), function(column) {
+    value <- column[[1]]
+    if (length(value) != 1L || is.na(value))
+      return(sR$missing_value)
+    if (inherits(value, "Date") || inherits(value, "POSIXt"))
+      return(format(value, format = "%x"))
+    if (is.numeric(value))
+      return(format(value))
+    as.character(value)
+  })
+}
+
+# The values a rule's template needs beyond the fields the rule records: the
+# localized label of an SSI's infection type (rule 19). The label is looked
+# up on the raw value, so a missing or unknown type falls back to the
+# missing-value string itself rather than dropping the placeholder's value,
+# which would abort the interpolation.
+decorate_context <- function(rule_id, values, context, sR) {
+  if (rule_id == 19L) {
+    label <- sR$ssi_types[[as.character(context$infection_type)]]
+    values$ssi_type <- if (is.null(label)) sR$missing_value else label
+  }
+  values
+}
+
+# The template a finding is rendered with. Rule 20 carries two complete
+# sentences, one for a pathogen recorded as causing a secondary sepsis, rather
+# than one sentence with an optional fragment.
+select_template <- function(rule_id, context, sR) {
+  translation <- sR$problems[[as.character(rule_id)]]
+  if (rule_id == 20L && isTRUE(context$secondary_bsi))
+    translation$description_secondary_bsi
+  else
+    translation$description
+}
+
+# The problem-detail section a rule's finding refers the reader to.
+problem_primary_detail <- function(rule_id)
+  problem_info$primaryDetail[problem_info$id == rule_id]
+
+# The bullet for one finding: the rule's sentence with the finding's values,
+# followed by the cross-reference to the problem's explanation.
+problem_text <- function(rule_id, context, sR) {
+  values <- decorate_context(rule_id, format_context(context, sR), context, sR)
+  sentence <- do.call(
+    interpolate_translation,
+    c(list(select_template(rule_id, context, sR)), values))
+  reference <- interpolate_translation(
+    sR$see_problem_details,
+    reference = paste0("@sec-problem-details-", problem_primary_detail(rule_id)))
+  paste0("* ", sentence, " ", reference)
+}
+```

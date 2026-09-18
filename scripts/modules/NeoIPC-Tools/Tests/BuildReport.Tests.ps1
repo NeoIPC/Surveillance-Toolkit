@@ -103,12 +103,6 @@ Describe 'Complete-NeoIPCBuildStep' {
         $step.status | Should -BeExactly 'error'
         $step.exitCode | Should -Be 1
     }
-    It 'maps a NoData result to a distinct nodata status (not planned)' {
-        $step = New-NeoIPCBuildStep | Complete-NeoIPCBuildStep -Result ([pscustomobject]@{ Status = 'NoData'; ExitCode = 0; Messages = @('No problem detected') })
-        $step.status | Should -BeExactly 'nodata'
-        $step.exitCode | Should -Be 0
-        $step.messages | Should -Be @('No problem detected')
-    }
     It 'accepts explicit -Status / -Messages (for -WhatIf planned steps)' {
         $step = New-NeoIPCBuildStep | Complete-NeoIPCBuildStep -Status 'planned' -Messages @('WhatIf: would render')
         $step.status | Should -BeExactly 'planned'

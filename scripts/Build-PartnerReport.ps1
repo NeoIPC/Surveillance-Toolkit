@@ -586,7 +586,6 @@ if (inherits(x, 'neoipcr_bnch_ds')) {
                     $currentMessages = New-Object System.Collections.Generic.List[string]
                     if ($PSCmdlet.ShouldProcess($target, "Render Partner Report")) {
                         # Execute the render and collect messages
-                        $skipRest = $false
                         $errorLine = ''
                         $isError = $false
 
@@ -597,21 +596,14 @@ if (inherits(x, 'neoipcr_bnch_ds')) {
                         Write-Debug "Quarto command: quarto $($quartoArgsQuoted -join ' ')"
 
                         & quarto @quartoArgs 2>&1 | ForEach-Object -Process {
-                            if ($skipRest) { return }
                             $s = "$_"
                             if ($s -eq 'System.Management.Automation.RemoteException') { $s = '' }
 
                             $currentMessages.Add($s) | Out-Null
 
                             if ($isError) {
-                                if ($s -eq '! No problem detected') {
-                                    Write-Host "No problem detected." -ForegroundColor DarkYellow
-                                    $skipRest = $true
-                                }
-                                else {
-                                    if ($errorLine.Length -gt 0) { Write-Error -Message $errorLine; $errorLine = '' }
-                                    Write-Error -Message $s
-                                }
+                                if ($errorLine.Length -gt 0) { Write-Error -Message $errorLine; $errorLine = '' }
+                                Write-Error -Message $s
                             }
                             elseif ((Get-NeoIPCRenderLogLevel -Line $s) -eq 'Error') {
                                 # This wrapper classifies its own Quarto output
@@ -633,7 +625,7 @@ if (inherits(x, 'neoipcr_bnch_ds')) {
                         $currentEntry.exitCode = $LASTEXITCODE
                         $currentEntry.messages += $currentMessages
 
-                        if (-not $skipRest -and -not $isError -and $LASTEXITCODE -eq 0) {
+                        if (-not $isError -and $LASTEXITCODE -eq 0) {
                             Write-Host "done." -ForegroundColor Green
                             $currentEntry.status = 'success'
                             $outFilePath = if ($outputDirPath) { Join-Path $outputDirPath $outFileName } else { Join-Path $reportDirPath '_output' $outFileName }

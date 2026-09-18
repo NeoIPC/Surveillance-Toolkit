@@ -1,25 +1,10 @@
 ```{r Aggregating problems}
 #| include: false
 
-# Build per-row problem text by invoking the formatter closure registered in
-# _formatters.qmd for the corresponding rule id. Each context is a list
-# produced by the rule file (e.g. x$dol, x$enrolledAt, x$pathogen_name).
-get_problem_text <- function(rule_ids, contexts) {
-  ret <- list()
-  for (i in seq_along(rule_ids)) {
-    id_str <- as.character(rule_ids[i])
-    formatter <- formatters$problems[[id_str]]
-    translation <- sR$problems[[id_str]]
-    ret <- c(ret, list(
-      data.frame(problem_text = formatter(translation, contexts[[i]]))))
-  }
-  ret
-}
-
 if (nrow(problems) > 0) {
   # Resolve display identifiers from the keys carried by `problems`.
   # Kept distinct so downstream code can group/iterate on them. The raw
-  # `context` list-column rides along for the formatter.
+  # `context` list-column rides along for the problem text.
   # Under the schema contract's inheritance rule, patients does NOT
 
   # carry `hospital_key` directly when `include_department = "full"`
@@ -74,7 +59,8 @@ if (nrow(problems) > 0) {
         "adm" ~ "ADM", "pro" ~ "SUR", "bsi" ~ "BSI",
         "nec" ~ "NEC", "ssi" ~ "SSI", "hap" ~ "HAP",
         "end" ~ "END"),
-      problem_text = get_problem_text(.data$rule_id, .data$context))
+      problem_text = purrr::map2_chr(
+        .data$rule_id, .data$context, problem_text, sR = sR))
 }
 ```
 
@@ -105,15 +91,20 @@ multiple_problems_hint <- function(partner_code, patient_id) {
     partner_code,
     ")",
     collapse = "")
-  mailto_body <- sprintf(
-    sR$patient_problem_multiple_hint_email_body, patient_id)
+  mailto_body <- interpolate_translation(
+    sR$patient_problem_multiple_hint_email_body, patient_id = patient_id)
   mailto_content <- paste0(
     support_email_address,
     "?subject=",
-    URLencode(mailto_subject, reserved = TRUE),
+    utils::URLencode(mailto_subject, reserved = TRUE),
     "&body=",
-    URLencode(mailto_body, reserved = TRUE))
-  sprintf(sR$patient_problem_multiple_hint, mailto_content)
+    utils::URLencode(as.character(mailto_body), reserved = TRUE))
+  # The link is markup, so it is built here and handed to the translated
+  # sentence as a value rather than written into the string.
+  support_link <- paste0(
+    "[", sR$support_email_address_link_text, "](mailto:", mailto_content, ")")
+  interpolate_translation(
+    sR$patient_problem_multiple_hint, support_link = support_link)
 }
 
 report_problems <- NULL
@@ -180,7 +171,7 @@ if (exists("problem_results")) {
           cat(header(paste0(
             sR$patient_problem_header_prefix,
             " \"[", pat_id,
-            "](https://neoipc.charite.de/dhis-web-tracker-capture/index.html",
+            "](", tracker_capture_base,
             "#/dashboard?program=", NeoIPC_ProgramId,
             "&ou=", dept_ou,
             "&tei=", pat_tei,
@@ -213,7 +204,6 @@ if (exists("problem_results")) {
 
         non_enrolment_problems <- patient_problems |>
           dplyr::filter(is.na(.data$enrollment_id)) |>
-          tidyr::unnest(cols = c("problem_text")) |>
           dplyr::select("rule_id", "problem_text") |>
           dplyr::distinct() |>
           dplyr::arrange(.data$rule_id)
@@ -256,10 +246,11 @@ if (exists("problem_results")) {
             dplyr::distinct() |>
             dplyr::arrange(.data$event_type, .data$event_date)
 
+          # Split on the event id, the same column as above: an event that
+          # exists without a date is still an event finding.
           non_event_problems <- enrolment_problems |>
             dplyr::filter(.data$enrollment_id == ep_id &
-              is.na(.data$event_date)) |>
-            tidyr::unnest(cols = c("problem_text")) |>
+              is.na(.data$event_id)) |>
             dplyr::select("rule_id", "problem_text") |>
             dplyr::distinct() |>
             dplyr::arrange(.data$rule_id)
@@ -286,12 +277,11 @@ if (exists("problem_results")) {
               paste0(
                 event_problem_header_prefix(ev_type),
                 " ",
-                format(ev_date, format = "%x"),
+                if (is.na(ev_date)) sR$missing_value else format(ev_date, format = "%x"),
                 collapse = ""),
               ev_header_level))
 
             cat(specific_event_problems |>
-              tidyr::unnest(cols = c("problem_text")) |>
               dplyr::pull("problem_text"),
               sep = "\n")
             cat("\n")

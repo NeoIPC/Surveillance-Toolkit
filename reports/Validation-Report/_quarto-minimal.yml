@@ -1,0 +1,6 @@
+format:
+  html:
+    # For a host that embeds this output's body as a fragment inside a page
+    # of its own, as the NeoIPC app does with the reports it shows; PDF is
+    # unaffected (this profile is HTML-only).
+    minimal: true

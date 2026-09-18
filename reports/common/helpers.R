@@ -291,10 +291,15 @@ get_localised_world_bank_class_names <- function(x) {
       })
 }
 
+# The validation exception list a render applies, read by neoipcr's own reader
+# so the file is checked once, the same way, wherever it is consumed. `FALSE`
+# — no list, every flagged record removed — is the value
+# `dhis2_dataset_options(include_invalid_patients =)` takes when the file is
+# absent.
 get_validation_exceptions <- function(x) {
-  validationExceptionFile = dplyr::coalesce(x, "validation-exceptions_ref.csv")
+  validationExceptionFile <- dplyr::coalesce(x, "validation-exceptions_ref.csv")
   if (file.exists(validationExceptionFile)) {
-    return(read_csv(validationExceptionFile, show_col_types = FALSE))
+    return(neoipcr::read_validation_exceptions(validationExceptionFile))
   } else {
     logWarn("Validation exception file not found: '{validationExceptionFile}'",
             namespace = "report-common")

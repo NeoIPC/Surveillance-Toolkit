@@ -152,7 +152,7 @@ Array of arguments to pass to quarto.
 Human-readable description for log messages (e.g. "partner report for NEO_AT_01").
 
 .OUTPUTS
-PSCustomObject with Status ('Success', 'Error', 'NoData'), ExitCode, and Messages.
+PSCustomObject with Status ('Success', 'Error'), ExitCode, and Messages.
 #>
 function Invoke-QuartoRender {
     [CmdletBinding()]
@@ -166,7 +166,6 @@ function Invoke-QuartoRender {
 
     $messages = [System.Collections.Generic.List[string]]::new()
     $errorLines = [System.Collections.Generic.List[string]]::new()
-    $skipRest = $false
     $isError = $false
     $inBacktrace = $false
     $pendingErrorLine = $null
@@ -174,18 +173,13 @@ function Invoke-QuartoRender {
     Write-Debug "Quarto command: quarto $($Arguments -join ' ')"
 
     & quarto @Arguments 2>&1 | ForEach-Object -Process {
-        if ($skipRest) { return }
         $s = "$_"
         if ($s -eq 'System.Management.Automation.RemoteException') { $s = '' }
 
         $messages.Add($s) | Out-Null
 
         if ($isError) {
-            if ($s -eq '! No problem detected') {
-                Write-Host "No problem detected." -ForegroundColor DarkYellow
-                $skipRest = $true
-            }
-            elseif ($s -match '^Backtrace:') {
+            if ($s -match '^Backtrace:') {
                 $inBacktrace = $true
                 if ($pendingErrorLine) {
                     $errorLines.Add($pendingErrorLine) | Out-Null
@@ -225,17 +219,14 @@ function Invoke-QuartoRender {
         }
     }
 
-    if ($pendingErrorLine -and -not $skipRest) {
+    if ($pendingErrorLine) {
         $errorLines.Add($pendingErrorLine) | Out-Null
         Write-Host $pendingErrorLine -ForegroundColor Red
     }
 
     $exitCode = $LASTEXITCODE
 
-    if ($skipRest) {
-        $status = 'NoData'
-    }
-    elseif ($isError -or $exitCode -ne 0) {
+    if ($isError -or $exitCode -ne 0) {
         $status = 'Error'
         if ($exitCode -ne 0) {
             $messages.Add("Quarto exit code $exitCode") | Out-Null

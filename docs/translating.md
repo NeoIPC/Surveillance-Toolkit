@@ -96,11 +96,10 @@ source, even where it looks like a word.
   `{#sec-methods}`. Same rule as the protocol's: the identifier is a name, not a word.
 - **Named placeholders**: `{count}`, `{department}`. Keep every one, spelled exactly. Their *order* may
   change freely to suit your language — that is precisely why they are named rather than numbered.
-- **`%s` and `%i`**, which are still the *majority* form here — around one string in seven carries one,
-  against a much smaller number using the named form above. Same rule about keeping them, but here the
-  order **cannot** change: they are filled positionally, so swapping two puts each value in the other's
-  place. That is why they are being replaced, and why until they are, a sentence whose natural word order
-  differs from English is worth a comment rather than a rearrangement.
+- **`%s`**, which around one string in twelve still carries (no `%i` remains). Same rule about keeping
+  them, but here the order **cannot** change: they are filled positionally, so swapping two puts each
+  value in the other's place. That is why they are being replaced, and why until they are, a sentence
+  whose natural word order differs from English is worth a comment rather than a rearrangement.
 
 **In the DHIS2 metadata** — tokens like `V{program_name}`, `A{yQwpowV0o08}` and
 `#{NeoIPC HAP Virus detected}`. All three are identifiers; keep them verbatim, braces included. The last

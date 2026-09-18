@@ -7,6 +7,10 @@
 # Translated via po4a (po/reports.po4a.cfg) and Weblate.
 # Do not edit generated files (content.<lang>/_sR.yaml) — edit .po files instead.
 #
+# Placeholders are `{named}` after the context fields `neoipcr::validate()`
+# records for each rule (see its "Context fields" section); the names are
+# part of the string and stay as they are in every translation.
+#
 # Language: en
 
 adm_problem_header_prefix: Admission event with the admission date
@@ -17,8 +21,12 @@ hap_problem_header_prefix: Pneumonia event with the infection date
 
 header:
   departments: Departments
+  validation_rules: Validation rules
 nec_problem_header_prefix: Necrotizing enterocolitis event with the infection date
 neoipc_surveillance_partner_code: NeoIPC Surveillance Partner Code
+no_problems_detected: >-
+  No problem was detected in the data of the departments listed above as of
+  the date this report was created.
 patient_problem_dashboard_link_description: >-
   Link to the patient's tracked entity instance dashboard on the NeoIPC Data
   Management Platform
@@ -28,223 +36,263 @@ patient_problem_multiple_hint: >-
   sometimes be difficult to fix multiple problems in a patient record, because
   one single error may be causing more than one problem, or fixing one problem
   may cause a new one. If you are unsure how to proceed, please get in touch
-  with us via our [support e-mail address](mailto:%s) and we will be happy to
-  help you.
+  with us via our {support_link} and we will be happy to help you.
 patient_problem_multiple_hint_email_body: |
   Dear NeoIPC Surveillance support team,
-  my validation report contains multiple errors for the patient with the id '%s'.
+  my validation report contains multiple errors for the patient with the id '{patient_id}'.
   Can you please have a look and get in touch with me?
   Best regards,
 patient_problem_multiple_hint_email_subject: >-
   Support request regarding complex errors in a patient record
+rules_applied_all: "All {count} rules"
+rules_applied_subset: "{applied} of {total} rules; the rules not applied are {not_applied}"
+see_problem_details: "See {reference}."
+missing_value: not available
+support_email_address_link_text: support e-mail address
 
 problems:
   "1":
     description: >-
       The patient record does not have an enrolment.
-      See @sec-problem-details-1.
-  "10":
-    description: >-
-      The patient record has a completed enrolment or surveillance end form
-      but a surgical procedure form is not completed (enrolment status is
-      '%s', surveillance end form status is '%s', surgical procedure form
-      status is '%s'). See @sec-problem-details-7.
-  "11":
-    description: >-
-      The patient record has a completed enrolment or surveillance end form
-      but a surgical site infection form is not completed (enrolment status
-      is '%s', surveillance end form status is '%s', surgical site infection
-      form status is '%s'). See @sec-problem-details-7.
-  "12":
-    description: >-
-      The patient record contains a sepsis form with an infection date that
-      is not within the time frame of a documented enrolment (admission date
-      in the enrolment '%s', admission date in the admission form is '%s',
-      surveillance end date is '%s', sepsis date is '%s').
-      See @sec-problem-details-8.
-  "13":
-    description: >-
-      The patient record contains a necrotizing enterocolitis form with an
-      infection date that is not within the time frame of a documented
-      enrolment (admission date in the enrolment '%s', admission date in
-      the admission form is '%s', surveillance end date is '%s',
-      necrotizing enterocolitis date is '%s').
-      See @sec-problem-details-8.
-  "14":
-    description: >-
-      The patient record contains a pneumonia form with an infection date
-      that is not within the time frame of a documented enrolment (admission
-      date in the enrolment '%s', admission date in the admission form is
-      '%s', surveillance end date is '%s', pneumonia date is '%s').
-      See @sec-problem-details-8.
-  "15":
-    description: >-
-      The patient record contains a surgical procedure form with an infection
-      date that is not within the time frame of a documented enrolment
-      (admission date in the enrolment '%s', admission date in the admission
-      form is '%s', surveillance end date is '%s', surgical procedure date
-      is '%s'). See @sec-problem-details-8.
-  "16":
-    description: >-
-      The patient record contains a surgical site infection form with an
-      infection date that is not within the time frame of a documented
-      enrolment (admission date in the enrolment '%s', admission date in
-      the admission form is '%s', surveillance end date is '%s', surgical
-      site infection date is '%s'). See @sec-problem-details-8.
-  "17":
-    description: >-
-      The patient record contains an enrolment with a time interval that
-      overlaps with that of another enrolment (this enrolment has an interval
-      from %s to %s and the other enrolment has an interval from %s to %s).
-      See @sec-problem-details-9.
-  "18":
-    description: >-
-      The number of patient days (%s) does not match the calculated value
-      (%s). See @sec-problem-details-10.
-  "19":
-    description: >-
-      The surgical site infection (%s) did not occur during the follow-up
-      period of a recorded surgical procedure.
-      See @sec-problem-details-11.
+    summary: The patient record has no enrolment.
   "2":
     description: >-
       The patient record has a completed surveillance end form but the
-      enrolment is still active. See @sec-problem-details-2.
-  "20":
-    description: >-
-      The pathogen manually entered as pathogen %i%s ('%s') cannot be
-      assigned. See @sec-problem-details-12.
-    sec_bsi_part: " causing secondary sepsis"
-  "21":
-    description: >-
-      The sum of all antibiotic substance days (%i) is less than the total
-      number of antibiotic days (%i). See @sec-problem-details-13.
-  "22":
-    description: >-
-      The surgical procedure ('%s') has an invalid ICHI code ('%s') as the
-      main procedure code. See @sec-problem-details-14.
-  "23":
-    description: >-
-      The surgical procedure ('%s') has an invalid ICHI code ('%s') as the
-      first side procedure code. See @sec-problem-details-14.
-  "24":
-    description: >-
-      The surgical procedure ('%s') has an invalid ICHI code ('%s') as the
-      second side procedure code. See @sec-problem-details-14.
-  "25":
-    description: >-
-      The patient record has a completed enrolment but no surveillance end
-      form. See @sec-problem-details-15.
-  "26":
-    description: >-
-      The patient record has a completed enrolment but no admission form.
-      See @sec-problem-details-16.
-  "27":
-    description: >-
-      The day of life stored in the sepsis form (%i) does not match the
-      calculated value (%i). See @sec-problem-details-17.
-  "28":
-    description: >-
-      The day of occurrence after admission stored in the sepsis form (%i)
-      does not match the calculated value (%i).
-      See @sec-problem-details-18.
-  "29":
-    description: >-
-      The sepsis occurred within the first 3 days of life (day of life
-      is %i). See @sec-problem-details-19.
+      enrolment is still active.
+    summary: The surveillance end form is completed while the enrolment is still active.
   "3":
     description: >-
-      The admission date in the admission form (%s) differs from the admission
-      date in the enrolment (%s). See @sec-problem-details-3.
-  "30":
-    description: >-
-      The sepsis occurred within the first two days of hospitalization of a
-      referred or (re-)admitted patient (day of hospitalization is %i).
-      See @sec-problem-details-20.
-  "31":
-    description: >-
-      The day of life stored in the pneumonia form (%i) does not match the
-      calculated value (%i). See @sec-problem-details-17.
-  "32":
-    description: >-
-      The day of occurrence after admission stored in the pneumonia form (%i)
-      does not match the calculated value (%i).
-      See @sec-problem-details-18.
-  "33":
-    description: >-
-      The pneumonia occurred within the first 3 days of life (day of life
-      is %i). See @sec-problem-details-19.
-  "34":
-    description: >-
-      The pneumonia occurred within the first two days of hospitalization of a
-      referred or (re-)admitted patient (day of hospitalization is %i).
-      See @sec-problem-details-20.
-  "35":
-    description: >-
-      The day of life stored in the necrotizing enterocolitis form (%i) does
-      not match the calculated value (%i). See @sec-problem-details-17.
-  "36":
-    description: >-
-      The day of occurrence after admission stored in the necrotizing
-      enterocolitis form (%i) does not match the calculated value (%i).
-      See @sec-problem-details-18.
-  "37":
-    description: >-
-      The necrotizing enterocolitis occurred within the first 3 days of life
-      (day of life is %i). See @sec-problem-details-19.
-  "38":
-    description: >-
-      The necrotizing enterocolitis occurred within the first two days of
-      hospitalization of a referred or (re-)admitted patient (day of
-      hospitalization is %i). See @sec-problem-details-20.
-  "39":
-    description: >-
-      The day of life stored in the surgical procedure form (%i) does not
-      match the calculated value (%i). See @sec-problem-details-17.
+      The admission date in the admission form ({occurredAt}) differs from the
+      admission date in the enrolment ({enrolledAt}).
+    summary: The admission date in the admission form differs from the admission date in the enrolment.
   "4":
     description: >-
-      The date of the end of the surveillance (%s) is earlier than the date of
-      admission on the admission form (%s). See @sec-problem-details-4.
-  "40":
-    description: >-
-      The day of occurrence after admission stored in the surgical procedure
-      form (%i) does not match the calculated value (%i).
-      See @sec-problem-details-18.
-  "41":
-    description: >-
-      The day of life stored in the surgical site infection form (%i) does
-      not match the calculated value (%i). See @sec-problem-details-17.
-  "42":
-    description: >-
-      The day of occurrence after admission stored in the surgical site
-      infection form (%i) does not match the calculated value (%i).
-      See @sec-problem-details-18.
+      The date of the end of the surveillance ({endOccurredAt}) is earlier than
+      the date of admission on the admission form ({admOccurredAt}).
+    summary: The surveillance end date is earlier than the admission date on the admission form.
   "5":
     description: >-
-      The patient record's admission form is not completed (status is '%s').
-      See @sec-problem-details-5.
+      The patient record's admission form is not completed (status is
+      '{status}').
+    summary: The admission form is not completed.
   "6":
     description: >-
       The patient record has a completed enrolment but the surveillance end
-      form is not completed (status is '%s'). See @sec-problem-details-6.
+      form is not completed (status is '{status}').
+    summary: The enrolment is completed but the surveillance end form is not.
   "7":
     description: >-
       The patient record has a completed enrolment or surveillance end form
-      but a sepsis form is not completed (enrolment status is '%s',
-      surveillance end form status is '%s', sepsis form status is '%s').
-      See @sec-problem-details-7.
+      but a sepsis form is not completed (enrolment status is
+      '{enrollment_status}', surveillance end form status is '{end_status}',
+      sepsis form status is '{bsi_status}').
+    summary: The enrolment or the surveillance end form is completed but a sepsis form is not.
   "8":
     description: >-
       The patient record has a completed enrolment or surveillance end form
       but a necrotizing enterocolitis form is not completed (enrolment status
-      is '%s', surveillance end form status is '%s', necrotizing enterocolitis
-      form status is '%s'). See @sec-problem-details-7.
+      is '{enrollment_status}', surveillance end form status is '{end_status}',
+      necrotizing enterocolitis form status is '{nec_status}').
+    summary: The enrolment or the surveillance end form is completed but a necrotizing enterocolitis form is not.
   "9":
     description: >-
       The patient record has a completed enrolment or surveillance end form
-      but a pneumonia form is not completed (enrolment status is '%s',
-      surveillance end form status is '%s', pneumonia form status is '%s').
-      See @sec-problem-details-7.
+      but a pneumonia form is not completed (enrolment status is
+      '{enrollment_status}', surveillance end form status is '{end_status}',
+      pneumonia form status is '{hap_status}').
+    summary: The enrolment or the surveillance end form is completed but a pneumonia form is not.
+  "10":
+    description: >-
+      The patient record has a completed enrolment or surveillance end form
+      but a surgical procedure form is not completed (enrolment status is
+      '{enrollment_status}', surveillance end form status is '{end_status}',
+      surgical procedure form status is '{pro_status}').
+    summary: The enrolment or the surveillance end form is completed but a surgical procedure form is not.
+  "11":
+    description: >-
+      The patient record has a completed enrolment or surveillance end form
+      but a surgical site infection form is not completed (enrolment status
+      is '{enrollment_status}', surveillance end form status is '{end_status}',
+      surgical site infection form status is '{ssi_status}').
+    summary: The enrolment or the surveillance end form is completed but a surgical site infection form is not.
+  "12":
+    description: >-
+      The patient record contains a sepsis form with an infection date that
+      is not within the time frame of a documented enrolment (admission date
+      in the enrolment '{enrolledAt}', admission date in the admission form is
+      '{admOccurredAt}', surveillance end date is '{endOccurredAt}', sepsis
+      date is '{bsiOccurredAt}').
+    summary: A sepsis form is dated outside the time frame of its enrolment.
+  "13":
+    description: >-
+      The patient record contains a necrotizing enterocolitis form with an
+      infection date that is not within the time frame of a documented
+      enrolment (admission date in the enrolment '{enrolledAt}', admission
+      date in the admission form is '{admOccurredAt}', surveillance end date
+      is '{endOccurredAt}', necrotizing enterocolitis date is
+      '{necOccurredAt}').
+    summary: A necrotizing enterocolitis form is dated outside the time frame of its enrolment.
+  "14":
+    description: >-
+      The patient record contains a pneumonia form with an infection date
+      that is not within the time frame of a documented enrolment (admission
+      date in the enrolment '{enrolledAt}', admission date in the admission
+      form is '{admOccurredAt}', surveillance end date is '{endOccurredAt}',
+      pneumonia date is '{hapOccurredAt}').
+    summary: A pneumonia form is dated outside the time frame of its enrolment.
+  "15":
+    description: >-
+      The patient record contains a surgical procedure form with a procedure
+      date that is not within the time frame of a documented enrolment
+      (admission date in the enrolment '{enrolledAt}', admission date in the
+      admission form is '{admOccurredAt}', surveillance end date is
+      '{endOccurredAt}', surgical procedure date is '{proOccurredAt}').
+    summary: A surgical procedure form is dated outside the time frame of its enrolment.
+  "16":
+    description: >-
+      The patient record contains a surgical site infection form with an
+      infection date that is not within the time frame of a documented
+      enrolment (admission date in the enrolment '{enrolledAt}', admission
+      date in the admission form is '{admOccurredAt}', surveillance end date
+      is '{endOccurredAt}', surgical site infection date is
+      '{ssiOccurredAt}').
+    summary: A surgical site infection form is dated outside the time frame of its enrolment.
+  "17":
+    description: >-
+      The patient record contains an enrolment with a time interval that
+      overlaps with that of another enrolment (this enrolment has an interval
+      from {enrolledAt_this} to {endOccurredAt_this} and the other enrolment
+      has an interval from {enrolledAt_other} to {endOccurredAt_other}).
+    summary: The time interval of an enrolment overlaps with that of another enrolment of the same patient.
+  "18":
+    description: >-
+      The number of patient days ({patient_days}) does not match the
+      calculated value ({patient_days_calculated}).
+    summary: The number of patient days does not match the value calculated from the admission and surveillance end dates.
+  "19":
+    description: >-
+      The surgical site infection ({ssi_type}) did not occur during the
+      follow-up period of a recorded surgical procedure.
+    summary: A surgical site infection did not occur during the follow-up period of a recorded surgical procedure.
+  "20":
+    description: >-
+      The pathogen manually entered as pathogen {index} ('{name}') cannot be
+      assigned.
+    description_secondary_bsi: >-
+      The pathogen manually entered as pathogen {index} causing secondary
+      sepsis ('{name}') cannot be assigned.
+    summary: A manually entered pathogen cannot be assigned to a catalogued infectious agent.
+  "21":
+    description: >-
+      The sum of all antibiotic substance days ({ab_substance_days}) is less
+      than the total number of antibiotic days ({ab_days}).
+    summary: The antibiotic substance days sum to less than the total number of antibiotic days.
+  "22":
+    description: >-
+      The surgical procedure ('{procedure_description}') has an invalid ICHI
+      code ('{procedure_code}') as the main procedure code.
+    summary: A surgical procedure has an invalid ICHI code as its main procedure code.
+  "23":
+    description: >-
+      The surgical procedure ('{procedure_description}') has an invalid ICHI
+      code ('{procedure_code}') as the first side procedure code.
+    summary: A surgical procedure has an invalid ICHI code as its first side procedure code.
+  "24":
+    description: >-
+      The surgical procedure ('{procedure_description}') has an invalid ICHI
+      code ('{procedure_code}') as the second side procedure code.
+    summary: A surgical procedure has an invalid ICHI code as its second side procedure code.
+  "25":
+    description: >-
+      The patient record has a completed enrolment but no surveillance end
+      form.
+    summary: The enrolment is completed but has no surveillance end form.
+  "26":
+    description: >-
+      The patient record has a completed enrolment but no admission form.
+    summary: The enrolment is completed but has no admission form.
+  "27":
+    description: >-
+      The day of life stored in the sepsis form ({dol}) does not match the
+      calculated value ({dol_calc}).
+    summary: The day of life stored in the sepsis form does not match the value calculated from the dates.
+  "28":
+    description: >-
+      The day of occurrence after admission stored in the sepsis form ({los})
+      does not match the calculated value ({los_calc}).
+    summary: The day of occurrence after admission stored in the sepsis form does not match the value calculated from the dates.
+  "29":
+    description: >-
+      The sepsis occurred within the first 3 days of life (day of life is
+      {dol}).
+    summary: A sepsis occurred within the first three days of life.
+  "30":
+    description: >-
+      The sepsis occurred within the first two days of hospitalization of a
+      referred or (re-)admitted patient (day of hospitalization is {dos}).
+    summary: A sepsis occurred within the first two days of hospitalization of a referred or (re-)admitted patient.
+  "31":
+    description: >-
+      The day of life stored in the pneumonia form ({dol}) does not match the
+      calculated value ({dol_calc}).
+    summary: The day of life stored in the pneumonia form does not match the value calculated from the dates.
+  "32":
+    description: >-
+      The day of occurrence after admission stored in the pneumonia form
+      ({los}) does not match the calculated value ({los_calc}).
+    summary: The day of occurrence after admission stored in the pneumonia form does not match the value calculated from the dates.
+  "33":
+    description: >-
+      The pneumonia occurred within the first 3 days of life (day of life is
+      {dol}).
+    summary: A pneumonia occurred within the first three days of life.
+  "34":
+    description: >-
+      The pneumonia occurred within the first two days of hospitalization of a
+      referred or (re-)admitted patient (day of hospitalization is {dos}).
+    summary: A pneumonia occurred within the first two days of hospitalization of a referred or (re-)admitted patient.
+  "35":
+    description: >-
+      The day of life stored in the necrotizing enterocolitis form ({dol}) does
+      not match the calculated value ({dol_calc}).
+    summary: The day of life stored in the necrotizing enterocolitis form does not match the value calculated from the dates.
+  "36":
+    description: >-
+      The day of occurrence after admission stored in the necrotizing
+      enterocolitis form ({los}) does not match the calculated value
+      ({los_calc}).
+    summary: The day of occurrence after admission stored in the necrotizing enterocolitis form does not match the value calculated from the dates.
+  "37":
+    description: >-
+      The necrotizing enterocolitis occurred within the first 3 days of life
+      (day of life is {dol}).
+    summary: A necrotizing enterocolitis occurred within the first three days of life.
+  "38":
+    description: >-
+      The necrotizing enterocolitis occurred within the first two days of
+      hospitalization of a referred or (re-)admitted patient (day of
+      hospitalization is {dos}).
+    summary: A necrotizing enterocolitis occurred within the first two days of hospitalization of a referred or (re-)admitted patient.
+  "39":
+    description: >-
+      The day of life stored in the surgical procedure form ({dol}) does not
+      match the calculated value ({dol_calc}).
+    summary: The day of life stored in the surgical procedure form does not match the value calculated from the dates.
+  "40":
+    description: >-
+      The day of occurrence after admission stored in the surgical procedure
+      form ({los}) does not match the calculated value ({los_calc}).
+    summary: The day of occurrence after admission stored in the surgical procedure form does not match the value calculated from the dates.
+  "41":
+    description: >-
+      The day of life stored in the surgical site infection form ({dol}) does
+      not match the calculated value ({dol_calc}).
+    summary: The day of life stored in the surgical site infection form does not match the value calculated from the dates.
+  "42":
+    description: >-
+      The day of occurrence after admission stored in the surgical site
+      infection form ({los}) does not match the calculated value ({los_calc}).
+    summary: The day of occurrence after admission stored in the surgical site infection form does not match the value calculated from the dates.
 ssi_problem_header_prefix: Surgical Site Infection event with the infection date
 ssi_types:
   "1": superficial incisional SSI

@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-08-07 08:23+0200\n"
+"POT-Creation-Date: 2026-09-18 21:58+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Language-Team: none\n"
 "Language: en\n"
@@ -3374,6 +3374,18 @@ msgstr ""
 msgid "Departments"
 msgstr ""
 
+#. type: Hash Value: header validation_rules
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Validation rules"
+msgstr ""
+
+#. type: Hash Value: missing_value
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "not available"
+msgstr ""
+
 #. type: Hash Value: nec_problem_header_prefix
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
@@ -3384,6 +3396,12 @@ msgstr ""
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "NeoIPC Surveillance Partner Code"
+msgstr ""
+
+#. type: Hash Value: no_problems_detected
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "No problem was detected in the data of the departments listed above as of the date this report was created."
 msgstr ""
 
 #. type: Hash Value: patient_problem_dashboard_link_description
@@ -3401,7 +3419,7 @@ msgstr ""
 #. type: Hash Value: patient_problem_multiple_hint
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "We have detected more than one problem in this patient record. It can sometimes be difficult to fix multiple problems in a patient record, because one single error may be causing more than one problem, or fixing one problem may cause a new one. If you are unsure how to proceed, please get in touch with us via our [support e-mail address](mailto:%s) and we will be happy to help you."
+msgid "We have detected more than one problem in this patient record. It can sometimes be difficult to fix multiple problems in a patient record, because one single error may be causing more than one problem, or fixing one problem may cause a new one. If you are unsure how to proceed, please get in touch with us via our {support_link} and we will be happy to help you."
 msgstr ""
 
 #. type: Hash Value: patient_problem_multiple_hint_email_body
@@ -3409,7 +3427,7 @@ msgstr ""
 #, no-wrap
 msgid ""
 "Dear NeoIPC Surveillance support team,\n"
-"my validation report contains multiple errors for the patient with the id '%s'.\n"
+"my validation report contains multiple errors for the patient with the id '{patient_id}'.\n"
 "Can you please have a look and get in touch with me?\n"
 "Best regards,\n"
 msgstr ""
@@ -3423,259 +3441,529 @@ msgstr ""
 #. type: Hash Value: problems 1 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The patient record does not have an enrolment. See @sec-problem-details-1."
+msgid "The patient record does not have an enrolment."
+msgstr ""
+
+#. type: Hash Value: problems 1 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The patient record has no enrolment."
 msgstr ""
 
 #. type: Hash Value: problems 10 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The patient record has a completed enrolment or surveillance end form but a surgical procedure form is not completed (enrolment status is '%s', surveillance end form status is '%s', surgical procedure form status is '%s'). See @sec-problem-details-7."
+msgid "The patient record has a completed enrolment or surveillance end form but a surgical procedure form is not completed (enrolment status is '{enrollment_status}', surveillance end form status is '{end_status}', surgical procedure form status is '{pro_status}')."
+msgstr ""
+
+#. type: Hash Value: problems 10 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The enrolment or the surveillance end form is completed but a surgical procedure form is not."
 msgstr ""
 
 #. type: Hash Value: problems 11 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The patient record has a completed enrolment or surveillance end form but a surgical site infection form is not completed (enrolment status is '%s', surveillance end form status is '%s', surgical site infection form status is '%s'). See @sec-problem-details-7."
+msgid "The patient record has a completed enrolment or surveillance end form but a surgical site infection form is not completed (enrolment status is '{enrollment_status}', surveillance end form status is '{end_status}', surgical site infection form status is '{ssi_status}')."
+msgstr ""
+
+#. type: Hash Value: problems 11 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The enrolment or the surveillance end form is completed but a surgical site infection form is not."
 msgstr ""
 
 #. type: Hash Value: problems 12 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The patient record contains a sepsis form with an infection date that is not within the time frame of a documented enrolment (admission date in the enrolment '%s', admission date in the admission form is '%s', surveillance end date is '%s', sepsis date is '%s'). See @sec-problem-details-8."
+msgid "The patient record contains a sepsis form with an infection date that is not within the time frame of a documented enrolment (admission date in the enrolment '{enrolledAt}', admission date in the admission form is '{admOccurredAt}', surveillance end date is '{endOccurredAt}', sepsis date is '{bsiOccurredAt}')."
+msgstr ""
+
+#. type: Hash Value: problems 12 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "A sepsis form is dated outside the time frame of its enrolment."
 msgstr ""
 
 #. type: Hash Value: problems 13 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The patient record contains a necrotizing enterocolitis form with an infection date that is not within the time frame of a documented enrolment (admission date in the enrolment '%s', admission date in the admission form is '%s', surveillance end date is '%s', necrotizing enterocolitis date is '%s'). See @sec-problem-details-8."
+msgid "The patient record contains a necrotizing enterocolitis form with an infection date that is not within the time frame of a documented enrolment (admission date in the enrolment '{enrolledAt}', admission date in the admission form is '{admOccurredAt}', surveillance end date is '{endOccurredAt}', necrotizing enterocolitis date is '{necOccurredAt}')."
+msgstr ""
+
+#. type: Hash Value: problems 13 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "A necrotizing enterocolitis form is dated outside the time frame of its enrolment."
 msgstr ""
 
 #. type: Hash Value: problems 14 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The patient record contains a pneumonia form with an infection date that is not within the time frame of a documented enrolment (admission date in the enrolment '%s', admission date in the admission form is '%s', surveillance end date is '%s', pneumonia date is '%s'). See @sec-problem-details-8."
+msgid "The patient record contains a pneumonia form with an infection date that is not within the time frame of a documented enrolment (admission date in the enrolment '{enrolledAt}', admission date in the admission form is '{admOccurredAt}', surveillance end date is '{endOccurredAt}', pneumonia date is '{hapOccurredAt}')."
+msgstr ""
+
+#. type: Hash Value: problems 14 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "A pneumonia form is dated outside the time frame of its enrolment."
 msgstr ""
 
 #. type: Hash Value: problems 15 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The patient record contains a surgical procedure form with an infection date that is not within the time frame of a documented enrolment (admission date in the enrolment '%s', admission date in the admission form is '%s', surveillance end date is '%s', surgical procedure date is '%s'). See @sec-problem-details-8."
+msgid "The patient record contains a surgical procedure form with a procedure date that is not within the time frame of a documented enrolment (admission date in the enrolment '{enrolledAt}', admission date in the admission form is '{admOccurredAt}', surveillance end date is '{endOccurredAt}', surgical procedure date is '{proOccurredAt}')."
+msgstr ""
+
+#. type: Hash Value: problems 15 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "A surgical procedure form is dated outside the time frame of its enrolment."
 msgstr ""
 
 #. type: Hash Value: problems 16 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The patient record contains a surgical site infection form with an infection date that is not within the time frame of a documented enrolment (admission date in the enrolment '%s', admission date in the admission form is '%s', surveillance end date is '%s', surgical site infection date is '%s'). See @sec-problem-details-8."
+msgid "The patient record contains a surgical site infection form with an infection date that is not within the time frame of a documented enrolment (admission date in the enrolment '{enrolledAt}', admission date in the admission form is '{admOccurredAt}', surveillance end date is '{endOccurredAt}', surgical site infection date is '{ssiOccurredAt}')."
+msgstr ""
+
+#. type: Hash Value: problems 16 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "A surgical site infection form is dated outside the time frame of its enrolment."
 msgstr ""
 
 #. type: Hash Value: problems 17 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The patient record contains an enrolment with a time interval that overlaps with that of another enrolment (this enrolment has an interval from %s to %s and the other enrolment has an interval from %s to %s). See @sec-problem-details-9."
+msgid "The patient record contains an enrolment with a time interval that overlaps with that of another enrolment (this enrolment has an interval from {enrolledAt_this} to {endOccurredAt_this} and the other enrolment has an interval from {enrolledAt_other} to {endOccurredAt_other})."
+msgstr ""
+
+#. type: Hash Value: problems 17 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The time interval of an enrolment overlaps with that of another enrolment of the same patient."
 msgstr ""
 
 #. type: Hash Value: problems 18 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The number of patient days (%s) does not match the calculated value (%s). See @sec-problem-details-10."
+msgid "The number of patient days ({patient_days}) does not match the calculated value ({patient_days_calculated})."
+msgstr ""
+
+#. type: Hash Value: problems 18 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The number of patient days does not match the value calculated from the admission and surveillance end dates."
 msgstr ""
 
 #. type: Hash Value: problems 19 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The surgical site infection (%s) did not occur during the follow-up period of a recorded surgical procedure. See @sec-problem-details-11."
+msgid "The surgical site infection ({ssi_type}) did not occur during the follow-up period of a recorded surgical procedure."
+msgstr ""
+
+#. type: Hash Value: problems 19 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "A surgical site infection did not occur during the follow-up period of a recorded surgical procedure."
 msgstr ""
 
 #. type: Hash Value: problems 2 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The patient record has a completed surveillance end form but the enrolment is still active. See @sec-problem-details-2."
+msgid "The patient record has a completed surveillance end form but the enrolment is still active."
+msgstr ""
+
+#. type: Hash Value: problems 2 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The surveillance end form is completed while the enrolment is still active."
 msgstr ""
 
 #. type: Hash Value: problems 20 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The pathogen manually entered as pathogen %i%s ('%s') cannot be assigned. See @sec-problem-details-12."
+msgid "The pathogen manually entered as pathogen {index} ('{name}') cannot be assigned."
 msgstr ""
 
-#. type: Hash Value: problems 20 sec_bsi_part
+#. type: Hash Value: problems 20 description_secondary_bsi
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid " causing secondary sepsis"
+msgid "The pathogen manually entered as pathogen {index} causing secondary sepsis ('{name}') cannot be assigned."
+msgstr ""
+
+#. type: Hash Value: problems 20 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "A manually entered pathogen cannot be assigned to a catalogued infectious agent."
 msgstr ""
 
 #. type: Hash Value: problems 21 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The sum of all antibiotic substance days (%i) is less than the total number of antibiotic days (%i). See @sec-problem-details-13."
+msgid "The sum of all antibiotic substance days ({ab_substance_days}) is less than the total number of antibiotic days ({ab_days})."
+msgstr ""
+
+#. type: Hash Value: problems 21 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The antibiotic substance days sum to less than the total number of antibiotic days."
 msgstr ""
 
 #. type: Hash Value: problems 22 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The surgical procedure ('%s') has an invalid ICHI code ('%s') as the main procedure code. See @sec-problem-details-14."
+msgid "The surgical procedure ('{procedure_description}') has an invalid ICHI code ('{procedure_code}') as the main procedure code."
+msgstr ""
+
+#. type: Hash Value: problems 22 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "A surgical procedure has an invalid ICHI code as its main procedure code."
 msgstr ""
 
 #. type: Hash Value: problems 23 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The surgical procedure ('%s') has an invalid ICHI code ('%s') as the first side procedure code. See @sec-problem-details-14."
+msgid "The surgical procedure ('{procedure_description}') has an invalid ICHI code ('{procedure_code}') as the first side procedure code."
+msgstr ""
+
+#. type: Hash Value: problems 23 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "A surgical procedure has an invalid ICHI code as its first side procedure code."
 msgstr ""
 
 #. type: Hash Value: problems 24 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The surgical procedure ('%s') has an invalid ICHI code ('%s') as the second side procedure code. See @sec-problem-details-14."
+msgid "The surgical procedure ('{procedure_description}') has an invalid ICHI code ('{procedure_code}') as the second side procedure code."
+msgstr ""
+
+#. type: Hash Value: problems 24 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "A surgical procedure has an invalid ICHI code as its second side procedure code."
 msgstr ""
 
 #. type: Hash Value: problems 25 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The patient record has a completed enrolment but no surveillance end form. See @sec-problem-details-15."
+msgid "The patient record has a completed enrolment but no surveillance end form."
+msgstr ""
+
+#. type: Hash Value: problems 25 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The enrolment is completed but has no surveillance end form."
 msgstr ""
 
 #. type: Hash Value: problems 26 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The patient record has a completed enrolment but no admission form. See @sec-problem-details-16."
+msgid "The patient record has a completed enrolment but no admission form."
+msgstr ""
+
+#. type: Hash Value: problems 26 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The enrolment is completed but has no admission form."
 msgstr ""
 
 #. type: Hash Value: problems 27 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The day of life stored in the sepsis form (%i) does not match the calculated value (%i). See @sec-problem-details-17."
+msgid "The day of life stored in the sepsis form ({dol}) does not match the calculated value ({dol_calc})."
+msgstr ""
+
+#. type: Hash Value: problems 27 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The day of life stored in the sepsis form does not match the value calculated from the dates."
 msgstr ""
 
 #. type: Hash Value: problems 28 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The day of occurrence after admission stored in the sepsis form (%i) does not match the calculated value (%i). See @sec-problem-details-18."
+msgid "The day of occurrence after admission stored in the sepsis form ({los}) does not match the calculated value ({los_calc})."
+msgstr ""
+
+#. type: Hash Value: problems 28 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The day of occurrence after admission stored in the sepsis form does not match the value calculated from the dates."
 msgstr ""
 
 #. type: Hash Value: problems 29 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The sepsis occurred within the first 3 days of life (day of life is %i). See @sec-problem-details-19."
+msgid "The sepsis occurred within the first 3 days of life (day of life is {dol})."
+msgstr ""
+
+#. type: Hash Value: problems 29 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "A sepsis occurred within the first three days of life."
 msgstr ""
 
 #. type: Hash Value: problems 3 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The admission date in the admission form (%s) differs from the admission date in the enrolment (%s). See @sec-problem-details-3."
+msgid "The admission date in the admission form ({occurredAt}) differs from the admission date in the enrolment ({enrolledAt})."
+msgstr ""
+
+#. type: Hash Value: problems 3 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The admission date in the admission form differs from the admission date in the enrolment."
 msgstr ""
 
 #. type: Hash Value: problems 30 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The sepsis occurred within the first two days of hospitalization of a referred or (re-)admitted patient (day of hospitalization is %i). See @sec-problem-details-20."
+msgid "The sepsis occurred within the first two days of hospitalization of a referred or (re-)admitted patient (day of hospitalization is {dos})."
+msgstr ""
+
+#. type: Hash Value: problems 30 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "A sepsis occurred within the first two days of hospitalization of a referred or (re-)admitted patient."
 msgstr ""
 
 #. type: Hash Value: problems 31 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The day of life stored in the pneumonia form (%i) does not match the calculated value (%i). See @sec-problem-details-17."
+msgid "The day of life stored in the pneumonia form ({dol}) does not match the calculated value ({dol_calc})."
+msgstr ""
+
+#. type: Hash Value: problems 31 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The day of life stored in the pneumonia form does not match the value calculated from the dates."
 msgstr ""
 
 #. type: Hash Value: problems 32 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The day of occurrence after admission stored in the pneumonia form (%i) does not match the calculated value (%i). See @sec-problem-details-18."
+msgid "The day of occurrence after admission stored in the pneumonia form ({los}) does not match the calculated value ({los_calc})."
+msgstr ""
+
+#. type: Hash Value: problems 32 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The day of occurrence after admission stored in the pneumonia form does not match the value calculated from the dates."
 msgstr ""
 
 #. type: Hash Value: problems 33 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The pneumonia occurred within the first 3 days of life (day of life is %i). See @sec-problem-details-19."
+msgid "The pneumonia occurred within the first 3 days of life (day of life is {dol})."
+msgstr ""
+
+#. type: Hash Value: problems 33 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "A pneumonia occurred within the first three days of life."
 msgstr ""
 
 #. type: Hash Value: problems 34 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The pneumonia occurred within the first two days of hospitalization of a referred or (re-)admitted patient (day of hospitalization is %i). See @sec-problem-details-20."
+msgid "The pneumonia occurred within the first two days of hospitalization of a referred or (re-)admitted patient (day of hospitalization is {dos})."
+msgstr ""
+
+#. type: Hash Value: problems 34 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "A pneumonia occurred within the first two days of hospitalization of a referred or (re-)admitted patient."
 msgstr ""
 
 #. type: Hash Value: problems 35 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The day of life stored in the necrotizing enterocolitis form (%i) does not match the calculated value (%i). See @sec-problem-details-17."
+msgid "The day of life stored in the necrotizing enterocolitis form ({dol}) does not match the calculated value ({dol_calc})."
+msgstr ""
+
+#. type: Hash Value: problems 35 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The day of life stored in the necrotizing enterocolitis form does not match the value calculated from the dates."
 msgstr ""
 
 #. type: Hash Value: problems 36 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The day of occurrence after admission stored in the necrotizing enterocolitis form (%i) does not match the calculated value (%i). See @sec-problem-details-18."
+msgid "The day of occurrence after admission stored in the necrotizing enterocolitis form ({los}) does not match the calculated value ({los_calc})."
+msgstr ""
+
+#. type: Hash Value: problems 36 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The day of occurrence after admission stored in the necrotizing enterocolitis form does not match the value calculated from the dates."
 msgstr ""
 
 #. type: Hash Value: problems 37 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The necrotizing enterocolitis occurred within the first 3 days of life (day of life is %i). See @sec-problem-details-19."
+msgid "The necrotizing enterocolitis occurred within the first 3 days of life (day of life is {dol})."
+msgstr ""
+
+#. type: Hash Value: problems 37 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "A necrotizing enterocolitis occurred within the first three days of life."
 msgstr ""
 
 #. type: Hash Value: problems 38 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The necrotizing enterocolitis occurred within the first two days of hospitalization of a referred or (re-)admitted patient (day of hospitalization is %i). See @sec-problem-details-20."
+msgid "The necrotizing enterocolitis occurred within the first two days of hospitalization of a referred or (re-)admitted patient (day of hospitalization is {dos})."
+msgstr ""
+
+#. type: Hash Value: problems 38 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "A necrotizing enterocolitis occurred within the first two days of hospitalization of a referred or (re-)admitted patient."
 msgstr ""
 
 #. type: Hash Value: problems 39 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The day of life stored in the surgical procedure form (%i) does not match the calculated value (%i). See @sec-problem-details-17."
+msgid "The day of life stored in the surgical procedure form ({dol}) does not match the calculated value ({dol_calc})."
+msgstr ""
+
+#. type: Hash Value: problems 39 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The day of life stored in the surgical procedure form does not match the value calculated from the dates."
 msgstr ""
 
 #. type: Hash Value: problems 4 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The date of the end of the surveillance (%s) is earlier than the date of admission on the admission form (%s). See @sec-problem-details-4."
+msgid "The date of the end of the surveillance ({endOccurredAt}) is earlier than the date of admission on the admission form ({admOccurredAt})."
+msgstr ""
+
+#. type: Hash Value: problems 4 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The surveillance end date is earlier than the admission date on the admission form."
 msgstr ""
 
 #. type: Hash Value: problems 40 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The day of occurrence after admission stored in the surgical procedure form (%i) does not match the calculated value (%i). See @sec-problem-details-18."
+msgid "The day of occurrence after admission stored in the surgical procedure form ({los}) does not match the calculated value ({los_calc})."
+msgstr ""
+
+#. type: Hash Value: problems 40 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The day of occurrence after admission stored in the surgical procedure form does not match the value calculated from the dates."
 msgstr ""
 
 #. type: Hash Value: problems 41 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The day of life stored in the surgical site infection form (%i) does not match the calculated value (%i). See @sec-problem-details-17."
+msgid "The day of life stored in the surgical site infection form ({dol}) does not match the calculated value ({dol_calc})."
+msgstr ""
+
+#. type: Hash Value: problems 41 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The day of life stored in the surgical site infection form does not match the value calculated from the dates."
 msgstr ""
 
 #. type: Hash Value: problems 42 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The day of occurrence after admission stored in the surgical site infection form (%i) does not match the calculated value (%i). See @sec-problem-details-18."
+msgid "The day of occurrence after admission stored in the surgical site infection form ({los}) does not match the calculated value ({los_calc})."
+msgstr ""
+
+#. type: Hash Value: problems 42 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The day of occurrence after admission stored in the surgical site infection form does not match the value calculated from the dates."
 msgstr ""
 
 #. type: Hash Value: problems 5 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The patient record's admission form is not completed (status is '%s'). See @sec-problem-details-5."
+msgid "The patient record's admission form is not completed (status is '{status}')."
+msgstr ""
+
+#. type: Hash Value: problems 5 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The admission form is not completed."
 msgstr ""
 
 #. type: Hash Value: problems 6 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The patient record has a completed enrolment but the surveillance end form is not completed (status is '%s'). See @sec-problem-details-6."
+msgid "The patient record has a completed enrolment but the surveillance end form is not completed (status is '{status}')."
+msgstr ""
+
+#. type: Hash Value: problems 6 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The enrolment is completed but the surveillance end form is not."
 msgstr ""
 
 #. type: Hash Value: problems 7 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The patient record has a completed enrolment or surveillance end form but a sepsis form is not completed (enrolment status is '%s', surveillance end form status is '%s', sepsis form status is '%s'). See @sec-problem-details-7."
+msgid "The patient record has a completed enrolment or surveillance end form but a sepsis form is not completed (enrolment status is '{enrollment_status}', surveillance end form status is '{end_status}', sepsis form status is '{bsi_status}')."
+msgstr ""
+
+#. type: Hash Value: problems 7 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The enrolment or the surveillance end form is completed but a sepsis form is not."
 msgstr ""
 
 #. type: Hash Value: problems 8 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The patient record has a completed enrolment or surveillance end form but a necrotizing enterocolitis form is not completed (enrolment status is '%s', surveillance end form status is '%s', necrotizing enterocolitis form status is '%s'). See @sec-problem-details-7."
+msgid "The patient record has a completed enrolment or surveillance end form but a necrotizing enterocolitis form is not completed (enrolment status is '{enrollment_status}', surveillance end form status is '{end_status}', necrotizing enterocolitis form status is '{nec_status}')."
+msgstr ""
+
+#. type: Hash Value: problems 8 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The enrolment or the surveillance end form is completed but a necrotizing enterocolitis form is not."
 msgstr ""
 
 #. type: Hash Value: problems 9 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The patient record has a completed enrolment or surveillance end form but a pneumonia form is not completed (enrolment status is '%s', surveillance end form status is '%s', pneumonia form status is '%s'). See @sec-problem-details-7."
+msgid "The patient record has a completed enrolment or surveillance end form but a pneumonia form is not completed (enrolment status is '{enrollment_status}', surveillance end form status is '{end_status}', pneumonia form status is '{hap_status}')."
+msgstr ""
+
+#. type: Hash Value: problems 9 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The enrolment or the surveillance end form is completed but a pneumonia form is not."
+msgstr ""
+
+#. type: Hash Value: rules_applied_all
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "All {count} rules"
+msgstr ""
+
+#. type: Hash Value: rules_applied_subset
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "{applied} of {total} rules; the rules not applied are {not_applied}"
+msgstr ""
+
+#. type: Hash Value: see_problem_details
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "See {reference}."
 msgstr ""
 
 #. type: Hash Value: ssi_problem_header_prefix
@@ -3700,6 +3988,12 @@ msgstr ""
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "organ/space SSI"
+msgstr ""
+
+#. type: Hash Value: support_email_address_link_text
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "support e-mail address"
 msgstr ""
 
 #. type: Hash Value: sur_problem_header_prefix
