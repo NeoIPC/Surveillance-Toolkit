@@ -120,15 +120,17 @@ if ($OutputDir) {
 
 $isCombined = $PSCmdlet.ParameterSetName -eq 'Combined'
 
-# Resolve ValidationExceptionFile BEFORE changing directory (it's relative to the caller's CWD)
+# Resolve ValidationExceptionFile BEFORE changing directory (it's relative to
+# the caller's CWD). A path that does not resolve aborts the build: dropping it
+# would render without the exceptions the caller asked for, and the report
+# could not tell the difference from a run that never named a file.
 $validationExceptionPath = $null
 if ($ValidationExceptionFile) {
     $resolvedPath = Resolve-Path -LiteralPath $ValidationExceptionFile -ErrorAction SilentlyContinue
-    if ($resolvedPath) {
-        $validationExceptionPath = $resolvedPath.Path
-    } else {
-        Write-Warning "Validation exception file not found: '$ValidationExceptionFile'"
+    if (-not $resolvedPath) {
+        throw "Validation exception file not found: '$ValidationExceptionFile'"
     }
+    $validationExceptionPath = $resolvedPath.Path
 }
 
 if (-not $isCombined) {

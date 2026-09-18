@@ -20,6 +20,10 @@ format_context <- function(context, sR) {
       return(sR$missing_value)
     if (inherits(value, "Date") || inherits(value, "POSIXt"))
       return(format(value, format = "%x"))
+    # Every numeric a rule records is a count of days or an index, so it takes
+    # the reports' integer formatting and its locale's digit grouping.
+    if (is.numeric(value) && value == round(value))
+      return(format_integer(value, big_mark = sR$digit_group_separator))
     if (is.numeric(value))
       return(format(value))
     as.character(value)
