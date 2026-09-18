@@ -89,35 +89,40 @@ if (!rlang::is_null(departmentFilter))
 ```{r Validate}
 #| include: false
 
-# The rules live in neoipcr and the sentences that render their findings live
-# in this report's string resources, keyed by rule id. A rule the package runs
-# without its sentence and summary here would render as a blank line or fail
-# the header, so the two are checked against each other before anything is
-# validated: every rule needs a non-empty `description` and `summary`.
+# The rules live in neoipcr; the sentences that render their findings live
+# in this report's string resources, keyed by rule id, and `_problem_text.qmd`
+# checks that every rule has them before anything is rendered.
 rule_ids <- neoipcr::validation_rule_ids()
-has_text <- function(id) {
-  entry <- sR$problems[[as.character(id)]]
-  all(vapply(
-    c("description", "summary"),
-    \(field) is.character(entry[[field]]) && length(entry[[field]]) == 1L &&
-      nzchar(entry[[field]]),
-    logical(1)))
-}
-unsentenced <- rule_ids[!vapply(rule_ids, has_text, logical(1))]
-if (length(unsentenced) > 0L)
-  rlang::abort(sprintf(
-    "The string resources carry no description and summary for validation rule(s) %s.",
-    paste(unsentenced, collapse = ", ")))
 
 exceptions <- NULL
 if (!is.null(params$validationExceptionFile))
   exceptions <- neoipcr::read_validation_exceptions(params$validationExceptionFile)
 
 # An empty `rules` value (NULL, or `[]` from the command line) means every
-# rule; a repeated id is applied once, so the header counts it once.
-rules <- if (length(params$rules) == 0L) rule_ids else
-  unique(as.integer(unlist(params$rules)))
+# rule; a repeated id is applied once, so the header counts it once. An id
+# that is not a whole number is refused here rather than truncated to one.
+requested_rules <- unique(unlist(params$rules))
+if (length(requested_rules) == 0L) {
+  rules <- rule_ids
+} else {
+  if (!is.numeric(requested_rules) ||
+      !all(is.finite(requested_rules) & requested_rules == round(requested_rules)))
+    rlang::abort(sprintf(
+      "`rules` must name validation rules by their whole-number ids, not %s.",
+      paste(requested_rules, collapse = ", ")))
+  rules <- as.integer(requested_rules)
+}
 problems <- neoipcr::validate(data, rules = rules, exceptions = exceptions)
+
+# A rule the package could not run, for want of a column the dataset does not
+# hold, flags nothing and would read as clean. This import asks for every
+# tier, so such a skip means the dataset is not what the report expects, and
+# the render fails rather than presenting the result as complete.
+rules_skipped <- attr(problems, "rules_skipped")
+if (length(rules_skipped) > 0L)
+  rlang::abort(sprintf(
+    "Validation rule(s) %s could not be applied to the imported dataset; see the log for the column each is missing.",
+    paste(rules_skipped, collapse = ", ")))
 
 # The header says which rules produced this report, so a document rendered
 # with a subset cannot be read as a clean bill on the rules it skipped.

@@ -74,10 +74,15 @@ included, and a missing file no longer means "clean".
 
 ## Before a render
 
-`_setup.qmd` asserts that every id in `validation_rule_ids()` has a non-empty `description` and `summary`
-under `problems` in the string resources, so a rule added to neoipcr without its sentences fails the render
-rather than rendering a blank line or failing in the header. Whether every placeholder names a field its rule records is settled only where both repositories are
-at hand: the workspace that assembles them runs an offline check that interpolates every template with a
+`_problem_text.qmd` asserts that every id in `validation_rule_ids()` has its non-empty templates (the
+`description`, and for rule 20 the `description_secondary_bsi` as well) and `summary` under `problems` in
+the string resources, so a rule added to neoipcr without its sentences fails the render rather than
+rendering a blank line or failing in the header. `_setup.qmd` fails the render when `validate()` reports
+a selected rule it could not run (its `rules_skipped` attribute, set when the dataset lacks a column the
+rule reads): the import asks for every tier, so a skip means the dataset is not what the report expects,
+and a document that claimed those rules would be wrong. Whether every placeholder names a field its
+rule records, or a value `decorate_context()` adds for it, is settled only where both repositories are at
+hand: the workspace that assembles them runs an offline check that interpolates every template with a
 synthetic finding of the documented shape; on its own, this repository relies on the render.
 
 ## Adding a validation rule
