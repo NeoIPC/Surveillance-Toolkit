@@ -378,10 +378,15 @@ get_dataset_options <- function(
 #' backslash as that character itself, so escaping every punctuation character
 #' makes a value someone typed — a free-text pathogen name, a patient id — render
 #' as typed whatever it contains, rather than as emphasis, a link or raw HTML.
+#' A value is a phrase inside a sentence, a heading or a link, where a line
+#' break would end the block it sits in, so runs of whitespace, line breaks
+#' included, become one space first.
 #' @param x character vector
-#' @return the vector with every punctuation character backslash-escaped
+#' @return the vector with its whitespace runs collapsed and every punctuation
+#'   character backslash-escaped
 escape_markdown <- function(x)
-  gsub("([[:punct:]])", "\\\\\\1", x, perl = TRUE)
+  gsub("([[:punct:]])", "\\\\\\1", gsub("[[:space:]]+", " ", x, perl = TRUE),
+       perl = TRUE)
 
 #' Format integer with locale-specific thousand separator
 #' @param x numeric value to format

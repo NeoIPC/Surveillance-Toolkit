@@ -33,9 +33,12 @@ One function renders every rule (`problem_text()` in `_problem_text.qmd`):
 1. `format_context()` turns the one-row context into named character scalars — dates in the locale's
    date format, factors and numbers as text, a missing value as the report's `missing_value` string,
    worded to sit inside a sentence — so `interpolate_translation()` never receives a zero-length or
-   unnamed value, which it refuses. Text is escaped for Markdown at this boundary (`escape_markdown()`
-   in `reports/common/helpers.R`), so a free-text pathogen name or a procedure description renders as
-   typed rather than as emphasis, a link or HTML. The same goes for every string that is placed into
+   unnamed value, which it refuses. Every value is escaped for Markdown at this boundary
+   (`escape_markdown()` in `reports/common/helpers.R`, which first collapses runs of whitespace, line
+   breaks included, to one space, since a value is a phrase and a line break would end the heading or
+   link it sits in), so a free-text pathogen name or a procedure description renders as typed rather
+   than as emphasis, a link or HTML, and a date's or a number's separators — the digit group separator
+   is a translated string — are literal too. The same goes for every string that is placed into
    markup the code builds rather than into a sentence: the patient id and the dashboard link's title in
    a record's heading, the support link's label, the translated SSI type label handed to rule 19's
    template as a value, the rule summaries listed in the header, and the missing-value string wherever

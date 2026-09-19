@@ -8,27 +8,31 @@
 # of `content/_sR.yaml`, which use the same names.
 
 # One finding's values as the named character scalars the templates take.
-# Dates take the locale's date format; a missing value reads as the report's
-# `missing_value` string — worded to sit inside a sentence — so a template
-# never receives an NA. Text is escaped for Markdown here, at the boundary:
-# a free-text pathogen name or a procedure description is whatever someone
-# typed, and must render as that rather than as emphasis, a link or HTML.
+# Dates take the locale's date format and whole numbers — every numeric a
+# rule records is a count of days or an index — the reports' integer
+# formatting with the locale's digit grouping; a missing value reads as the
+# report's `missing_value` string — worded to sit inside a sentence — so a
+# template never receives an NA. Every value is then escaped for Markdown
+# here, at the boundary: a free-text pathogen name or a procedure description
+# is whatever someone typed, and must render as that rather than as emphasis,
+# a link or HTML, and a date's or a number's separators — the digit group
+# separator is a translated string — are literal characters as well.
 format_context <- function(context, sR) {
   if (is.null(context) || ncol(context) == 0L)
     return(list())
   lapply(as.list(context), function(column) {
     value <- column[[1]]
-    if (length(value) != 1L || is.na(value))
-      return(escape_markdown(sR$missing_value))
-    if (inherits(value, "Date") || inherits(value, "POSIXt"))
-      return(format(value, format = "%x"))
-    # Every numeric a rule records is a count of days or an index, so it takes
-    # the reports' integer formatting and its locale's digit grouping.
-    if (is.numeric(value) && value == round(value))
-      return(format_integer(value, big_mark = sR$digit_group_separator))
-    if (is.numeric(value))
-      return(format(value))
-    escape_markdown(as.character(value))
+    text <- if (length(value) != 1L || is.na(value))
+      sR$missing_value
+    else if (inherits(value, "Date") || inherits(value, "POSIXt"))
+      format(value, format = "%x")
+    else if (is.numeric(value) && value == round(value))
+      format_integer(value, big_mark = sR$digit_group_separator)
+    else if (is.numeric(value))
+      format(value)
+    else
+      as.character(value)
+    escape_markdown(text)
   })
 }
 
