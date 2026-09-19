@@ -152,8 +152,8 @@ character before every `{` in the catalogue returns exactly `#`, `V` and `A`.
 c-format
 ```
 
-73 of 825 strings carry a C-printf token, 133 of them `%s`; the `%i` tokens went with the Validation
-Report's descriptions, which now use named placeholders. This is a **transitional** adoption: the target
+73 of 825 strings carry a C-printf token (133 tokens, all `%s`); the `%i` tokens went with the
+Validation Report's descriptions, which now use named placeholders. This is a **transitional** adoption: the target
 state is named `{}` placeholders everywhere, and this covers `%s` only until they are gone.
 
 Three of the tokens are not placeholders and will produce permanent noise — a `% a` inside "Values above

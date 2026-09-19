@@ -92,9 +92,27 @@ if (!rlang::is_null(departmentFilter))
 #| include: false
 
 # The rules live in neoipcr; the sentences that render their findings live
-# in this report's string resources, keyed by rule id, and `_problem_text.qmd`
-# checks that every rule has them before anything is rendered.
+# in this report's string resources, keyed by rule id. A rule the package
+# runs without its templates and `summary` here would render as a blank line
+# or fail the header below, so every rule is checked for them first: the
+# templates are the rule's `description` and, for rule 20, a second complete
+# sentence for a pathogen recorded as causing a secondary sepsis.
 rule_ids <- neoipcr::validation_rule_ids()
+template_keys <- function(rule_id)
+  c("description", if (rule_id == 20L) "description_secondary_bsi")
+has_text <- function(rule_id) {
+  entry <- sR$problems[[as.character(rule_id)]]
+  all(vapply(
+    c(template_keys(rule_id), "summary"),
+    \(field) is.character(entry[[field]]) && length(entry[[field]]) == 1L &&
+      nzchar(entry[[field]]),
+    logical(1)))
+}
+unsentenced <- rule_ids[!vapply(rule_ids, has_text, logical(1))]
+if (length(unsentenced) > 0L)
+  rlang::abort(sprintf(
+    "The string resources carry no complete description and summary for validation rule(s) %s.",
+    paste(unsentenced, collapse = ", ")))
 
 exceptions <- NULL
 if (!is.null(params$validationExceptionFile))

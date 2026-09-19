@@ -45,13 +45,11 @@ decorate_context <- function(rule_id, values, context, sR) {
   values
 }
 
-# The templates a rule renders with: its `description`, and for rule 20 a
-# second complete sentence for a pathogen recorded as causing a secondary
-# sepsis, rather than one sentence with an optional fragment.
-template_keys <- function(rule_id)
-  c("description", if (rule_id == 20L) "description_secondary_bsi")
-
-# The template one finding is rendered with.
+# The template one finding is rendered with: the rule's `description`, or
+# for rule 20 its second complete sentence for a pathogen recorded as causing
+# a secondary sepsis, rather than one sentence with an optional fragment.
+# `_setup.qmd` has checked that every rule carries the templates it renders
+# with before anything is composed.
 select_template <- function(rule_id, context, sR) {
   key <- if (rule_id == 20L && isTRUE(context$secondary_bsi))
     "description_secondary_bsi"
@@ -59,23 +57,6 @@ select_template <- function(rule_id, context, sR) {
     "description"
   sR$problems[[as.character(rule_id)]][[key]]
 }
-
-# A rule the package runs without its templates and `summary` here would
-# render as a blank line or fail the header, so every rule is checked for
-# them before anything is rendered.
-has_text <- function(rule_id) {
-  entry <- sR$problems[[as.character(rule_id)]]
-  all(vapply(
-    c(template_keys(rule_id), "summary"),
-    \(field) is.character(entry[[field]]) && length(entry[[field]]) == 1L &&
-      nzchar(entry[[field]]),
-    logical(1)))
-}
-unsentenced <- rule_ids[!vapply(rule_ids, has_text, logical(1))]
-if (length(unsentenced) > 0L)
-  rlang::abort(sprintf(
-    "The string resources carry no complete description and summary for validation rule(s) %s.",
-    paste(unsentenced, collapse = ", ")))
 
 # The problem-detail section a rule's finding refers the reader to.
 problem_primary_detail <- function(rule_id)

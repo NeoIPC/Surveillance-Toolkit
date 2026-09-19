@@ -10,9 +10,11 @@ rule flags, so the department's data manager can correct them. It is rendered fr
 The rules and the sentences live in different places, on purpose.
 
 - **neoipcr computes.** `neoipcr::validate()` runs the rules and returns one row per finding: the rule
-  id, the keys of the record it concerns (`patient_key`, `enrollment_key`, `event_key`, `NA` where a rule
-  does not operate at that level) and a `context` column holding a one-row tibble of the values the rule
-  compared. A finding is never prose. The rule ids the package knows are `neoipcr::validation_rule_ids()`.
+  id, the keys of the record it concerns at each level (`patient_key`, `enrollment_key`, `event_key`,
+  `NA` where there is none; the level a rule is recorded and exempted on is the one `?validate` names,
+  and an enrolment-level rule that compared a form names that form's event, which is how a finding is
+  filed under the form) and a `context` column holding a one-row tibble of the values the rule compared.
+  A finding is never prose. The rule ids the package knows are `neoipcr::validation_rule_ids()`.
 - **The report renders.** `content/_sR.yaml` holds, per rule id under `problems`, the `description`
   template a finding is rendered with and a placeholder-free `summary` of what the rule checks;
   `_problem_text.qmd` interpolates a finding's context into its template; `_problems.qmd` joins the keys
@@ -79,10 +81,11 @@ included, and a missing file no longer means "clean".
 
 ## Before a render
 
-`_problem_text.qmd` asserts that every id in `validation_rule_ids()` has its non-empty templates (the
-`description`, and for rule 20 the `description_secondary_bsi` as well) and `summary` under `problems` in
-the string resources, so a rule added to neoipcr without its sentences fails the render rather than
-rendering a blank line or failing in the header. `_setup.qmd` fails the render when `validate()` reports
+`_setup.qmd` asserts, before it composes the header, that every id in `validation_rule_ids()` has its
+non-empty templates (the `description`, and for rule 20 the `description_secondary_bsi` as well) and
+`summary` under `problems` in the string resources, so a rule added to neoipcr without its sentences
+fails the render with a message naming the rule rather than rendering a blank line or failing in the
+header. `_setup.qmd` fails the render when `validate()` reports
 a selected rule it could not run (its `rules_skipped` attribute, set when the dataset lacks a column the
 rule reads): the import asks for every tier, so a skip means the dataset is not what the report expects,
 and a document that claimed those rules would be wrong. Whether every placeholder names a field its
