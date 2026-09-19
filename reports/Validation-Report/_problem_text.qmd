@@ -10,7 +10,9 @@
 # One finding's values as the named character scalars the templates take.
 # Dates take the locale's date format; a missing value reads as the report's
 # `missing_value` string — worded to sit inside a sentence — so a template
-# never receives an NA.
+# never receives an NA. Text is escaped for Markdown here, at the boundary:
+# a free-text pathogen name or a procedure description is whatever someone
+# typed, and must render as that rather than as emphasis, a link or HTML.
 format_context <- function(context, sR) {
   if (is.null(context) || ncol(context) == 0L)
     return(list())
@@ -26,7 +28,7 @@ format_context <- function(context, sR) {
       return(format_integer(value, big_mark = sR$digit_group_separator))
     if (is.numeric(value))
       return(format(value))
-    as.character(value)
+    escape_markdown(as.character(value))
   })
 }
 

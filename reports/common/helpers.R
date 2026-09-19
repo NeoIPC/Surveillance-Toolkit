@@ -373,6 +373,17 @@ get_dataset_options <- function(
         validationExceptionFile))
 
 #' Format integer with locale-specific thousand separator
+#' Escape a value for insertion into Pandoc Markdown as literal text.
+#'
+#' Outside code, Pandoc treats any punctuation or space character preceded by a
+#' backslash as that character itself, so escaping every punctuation character
+#' makes a value someone typed — a free-text pathogen name, a patient id — render
+#' as typed whatever it contains, rather than as emphasis, a link or raw HTML.
+#' @param x character vector
+#' @return the vector with every punctuation character backslash-escaped
+escape_markdown <- function(x)
+  gsub("([[:punct:]])", "\\\\\\1", x, perl = TRUE)
+
 #' @param x numeric value to format
 #' @param big_mark thousand separator character
 #' @return formatted string

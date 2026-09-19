@@ -31,7 +31,10 @@ One function renders every rule (`problem_text()` in `_problem_text.qmd`):
 1. `format_context()` turns the one-row context into named character scalars — dates in the locale's
    date format, factors and numbers as text, a missing value as the report's `missing_value` string,
    worded to sit inside a sentence — so `interpolate_translation()` never receives a zero-length or
-   unnamed value, which it refuses.
+   unnamed value, which it refuses. Text is escaped for Markdown at this boundary (`escape_markdown()`
+   in `reports/common/helpers.R`), so a free-text pathogen name or a procedure description renders as
+   typed rather than as emphasis, a link or HTML; the patient id in a record's heading is escaped the
+   same way.
 2. `decorate_context()` adds the values a template needs beyond what the rule records; today that is
    rule 19's localized SSI type label from `ssi_types`, with `missing_value` where the type is missing
    or unknown, so the placeholder always has a value.

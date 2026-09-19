@@ -168,9 +168,11 @@ if (exists("problem_results")) {
         pat_tei <- report_patients[pat_index, "patient_trackedentity"] |>
           dplyr::pull()
         pat_header_level <- dept_header_level + 1
+          # The id is whatever the department typed; escaped, it cannot close
+          # the link text or format the heading.
           cat(header(paste0(
             sR$patient_problem_header_prefix,
-            " \"[", pat_id,
+            " \"[", escape_markdown(pat_id),
             "](", tracker_capture_base,
             "#/dashboard?program=", NeoIPC_ProgramId,
             "&ou=", dept_ou,
