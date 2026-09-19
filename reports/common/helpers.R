@@ -372,7 +372,6 @@ get_dataset_options <- function(
       include_invalid_patients = get_validation_exceptions(
         validationExceptionFile))
 
-#' Format integer with locale-specific thousand separator
 #' Escape a value for insertion into Pandoc Markdown as literal text.
 #'
 #' Outside code, Pandoc treats any punctuation or space character preceded by a
@@ -384,6 +383,7 @@ get_dataset_options <- function(
 escape_markdown <- function(x)
   gsub("([[:punct:]])", "\\\\\\1", x, perl = TRUE)
 
+#' Format integer with locale-specific thousand separator
 #' @param x numeric value to format
 #' @param big_mark thousand separator character
 #' @return formatted string
