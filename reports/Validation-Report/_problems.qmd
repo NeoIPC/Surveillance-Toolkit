@@ -282,7 +282,8 @@ if (exists("problem_results")) {
               paste0(
                 event_problem_header_prefix(ev_type),
                 " ",
-                if (is.na(ev_date)) sR$missing_value else format(ev_date, format = "%x"),
+                if (is.na(ev_date)) escape_markdown(sR$missing_value)
+                else format(ev_date, format = "%x"),
                 collapse = ""),
               ev_header_level))
 

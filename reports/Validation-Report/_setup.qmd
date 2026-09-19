@@ -160,7 +160,9 @@ rules_applied_text <- if (length(rules_not_applied) == 0L) {
         rules_not_applied,
         vapply(
           as.character(rules_not_applied),
-          \(id) sR$problems[[id]]$summary,
+          # A summary is a value handed to the header's template, so it is
+          # escaped like every other value.
+          \(id) escape_markdown(sR$problems[[id]]$summary),
           character(1))),
       collapse = "; "))
 }
