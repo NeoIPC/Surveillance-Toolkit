@@ -64,7 +64,7 @@ way, wherever it is used.
 ## Rule selection and the clean result
 
 The `rules` parameter (`integer[]`) restricts the render to the named rules; absent, every rule runs.
-The header states which rules the document rests on — "All 42 rules", or the count applied and the
+The header states which rules the document rests on — "All 41 rules", or the count applied and the
 rules not applied with their summaries — so a report rendered with a subset cannot be read as a clean
 bill on the rules it skipped. An id neoipcr does not know aborts the render. The `# @type integer[]`
 annotation names the parameter's type for a consumer of the parameter schema; the only such consumer

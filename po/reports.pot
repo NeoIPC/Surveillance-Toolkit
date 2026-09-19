@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-09-18 21:58+0200\n"
+"POT-Creation-Date: 2026-09-19 09:53+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Language-Team: none\n"
 "Language: en\n"
@@ -3522,18 +3522,6 @@ msgstr ""
 msgid "A surgical procedure form is dated outside the time frame of its enrolment."
 msgstr ""
 
-#. type: Hash Value: problems 16 description
-#: reports/Validation-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "The patient record contains a surgical site infection form with an infection date that is not within the time frame of a documented enrolment (admission date in the enrolment '{enrolledAt}', admission date in the admission form is '{admOccurredAt}', surveillance end date is '{endOccurredAt}', surgical site infection date is '{ssiOccurredAt}')."
-msgstr ""
-
-#. type: Hash Value: problems 16 summary
-#: reports/Validation-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "A surgical site infection form is dated outside the time frame of its enrolment."
-msgstr ""
-
 #. type: Hash Value: problems 17 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
@@ -4253,17 +4241,18 @@ msgid "The Patient Record Contains an Event Form With a Date That Is Not Within 
 msgstr ""
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0008.Rmd:7
+#: reports/Validation-Report/en/_problem_detail_0008.Rmd:8
 #, markdown-text, no-wrap
 msgid ""
 "The surveillance period for a patient enrolled in the NeoIPC Surveillance begins on admission and ends when the patient is discharged or dies.\n"
 "Risk factors and infections are only recorded and documented in the NeoIPC Surveillance platform during this period.\n"
-"This approach naturally means that all documented events (infections, surgical procedures) must have occurred between the date of admission and the date on which surveillance ends.\n"
+"This approach naturally means that all documented bloodstream infections, cases of necrotizing enterocolitis, pneumonias and surgical procedures must have occurred between the date of admission and the date on which surveillance ends.\n"
+"A surgical site infection is the exception: it belongs to the follow-up period of its surgical procedure, which may extend beyond the discharge, so its date may lie outside the admission during which it is recorded, for example when the patient is readmitted because of it.\n"
 "An event form with a date that does not fall within this time interval indicates either an input error or a misunderstanding of the intended procedure. The error is not necessarily in the form itself. An incorrect admission date or an incorrect date in the Surveillance-End form can also cause this error.\n"
 msgstr ""
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0008.Rmd:9
+#: reports/Validation-Report/en/_problem_detail_0008.Rmd:10
 #, markdown-text, no-wrap
 msgid ""
 "Please check the relevant data and correct the incorrect date (see @sec-solution-6 and @sec-solution-7).\n"

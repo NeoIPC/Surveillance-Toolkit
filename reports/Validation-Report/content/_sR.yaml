@@ -148,15 +148,6 @@ problems:
       admission form is '{admOccurredAt}', surveillance end date is
       '{endOccurredAt}', surgical procedure date is '{proOccurredAt}').
     summary: A surgical procedure form is dated outside the time frame of its enrolment.
-  "16":
-    description: >-
-      The patient record contains a surgical site infection form with an
-      infection date that is not within the time frame of a documented
-      enrolment (admission date in the enrolment '{enrolledAt}', admission
-      date in the admission form is '{admOccurredAt}', surveillance end date
-      is '{endOccurredAt}', surgical site infection date is
-      '{ssiOccurredAt}').
-    summary: A surgical site infection form is dated outside the time frame of its enrolment.
   "17":
     description: >-
       The patient record contains an enrolment with a time interval that
