@@ -103,12 +103,6 @@ Describe 'Complete-NeoIPCBuildStep' {
         $step.status | Should -BeExactly 'error'
         $step.exitCode | Should -Be 1
     }
-    It 'maps a NoData result to a distinct nodata status (not planned)' {
-        $step = New-NeoIPCBuildStep | Complete-NeoIPCBuildStep -Result ([pscustomobject]@{ Status = 'NoData'; ExitCode = 0; Messages = @('No problem detected') })
-        $step.status | Should -BeExactly 'nodata'
-        $step.exitCode | Should -Be 0
-        $step.messages | Should -Be @('No problem detected')
-    }
     It 'accepts explicit -Status / -Messages (for -WhatIf planned steps)' {
         $step = New-NeoIPCBuildStep | Complete-NeoIPCBuildStep -Status 'planned' -Messages @('WhatIf: would render')
         $step.status | Should -BeExactly 'planned'
@@ -173,5 +167,50 @@ Describe 'Get-NeoIPCRenderLogLevel' {
 
     It 'returns nothing for an empty line' {
         Get-NeoIPCRenderLogLevel -Line '' | Should -BeExactly $null
+    }
+}
+
+Describe 'Invoke-QuartoRender' {
+    BeforeAll {
+        # The helper runs the `quarto` executable. A global stub stands in for it
+        # so the command resolves wherever the tests run; each case then mocks its
+        # behaviour in the module's scope.
+        function global:quarto { param([Parameter(ValueFromRemainingArguments)] $Arguments) }
+    }
+    AfterAll {
+        Remove-Item -Path 'Function:\quarto' -ErrorAction SilentlyContinue
+    }
+
+    # A render that finds nothing to report is an ordinary successful render:
+    # nothing in the output may turn it into anything else, or the per-site
+    # wrappers would drop the clean sites' files.
+    It 'reports Success for a render that exits 0 without an error line' {
+        Mock -ModuleName NeoIPC-Tools -CommandName quarto -MockWith {
+            $global:LASTEXITCODE = 0
+            'processing file: Validation-Report.qmd'
+            'No problem detected'
+            'Output created: report.pdf'
+        }
+        $result = Invoke-QuartoRender -Arguments @('render', 'r.qmd') 6>$null
+        $result.Status | Should -BeExactly 'Success'
+        $result.ExitCode | Should -Be 0
+        $result.Messages | Should -Contain 'Output created: report.pdf'
+    }
+    It 'reports Error for a non-zero exit code' {
+        Mock -ModuleName NeoIPC-Tools -CommandName quarto -MockWith {
+            $global:LASTEXITCODE = 1
+            'Quitting from lines 3-9'
+        }
+        $result = Invoke-QuartoRender -Arguments @('render', 'r.qmd') 6>$null
+        $result.Status | Should -BeExactly 'Error'
+        $result.ExitCode | Should -Be 1
+    }
+    It 'reports Error for an error line even when the exit code is 0' {
+        Mock -ModuleName NeoIPC-Tools -CommandName quarto -MockWith {
+            $global:LASTEXITCODE = 0
+            'ERROR [validation-report] the import failed'
+        }
+        $result = Invoke-QuartoRender -Arguments @('render', 'r.qmd') 6>$null
+        $result.Status | Should -BeExactly 'Error'
     }
 }

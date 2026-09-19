@@ -8,9 +8,14 @@ Generate Validation Reports for one or more sites, or a combined report for all 
 .DESCRIPTION
 This script fetches the department/site list from DHIS2, filters by a regex, and renders the Validation Report for each site using Quarto.
 With -Combined, it renders a single report covering all departments (no departmentFilter).
+With -Rules, only the named validation rules are applied; the report's header says which rules were left out.
+A department without findings renders a report saying so.
 
 .EXAMPLE
     .\Build-ValidationReport.ps1 -SiteCodeFilter 'NEO_AT.*' -OutputLocale 'de' -Token $myToken -Verbose
+
+.EXAMPLE
+    .\Build-ValidationReport.ps1 -Combined -Rules 1, 3, 25 -Token $myToken
 
 .EXAMPLE
     .\Build-ValidationReport.ps1 -Combined -OutputLocale 'en' -Token $myToken -JsonReport
@@ -65,6 +70,9 @@ param(
     [string]$ValidationExceptionFile,
 
     [Parameter()]
+    [int[]]$Rules,
+
+    [Parameter()]
     [switch]$IncludeTestData,
 
     [Parameter()]
@@ -112,15 +120,17 @@ if ($OutputDir) {
 
 $isCombined = $PSCmdlet.ParameterSetName -eq 'Combined'
 
-# Resolve ValidationExceptionFile BEFORE changing directory (it's relative to the caller's CWD)
+# Resolve ValidationExceptionFile BEFORE changing directory (it's relative to
+# the caller's CWD). A path that does not resolve aborts the build: dropping it
+# would render without the exceptions the caller asked for, and the report
+# could not tell the difference from a run that never named a file.
 $validationExceptionPath = $null
 if ($ValidationExceptionFile) {
     $resolvedPath = Resolve-Path -LiteralPath $ValidationExceptionFile -ErrorAction SilentlyContinue
-    if ($resolvedPath) {
-        $validationExceptionPath = $resolvedPath.Path
-    } else {
-        Write-Warning "Validation exception file not found: '$ValidationExceptionFile'"
+    if (-not $resolvedPath) {
+        throw "Validation exception file not found: '$ValidationExceptionFile'"
     }
+    $validationExceptionPath = $resolvedPath.Path
 }
 
 if (-not $isCombined) {
@@ -146,9 +156,12 @@ $wd = Get-Location
 # Snapshot the common-parameter flags and resolve the level (and the Quarto flag
 # array) here in the script scope; inside the Invoke-WithNeoIPCAuth scriptblock
 # $PSBoundParameters is the scriptblock's own (empty) dictionary, so the
-# scriptblock reads the resolved array via closure.
+# scriptblock reads the resolved array via closure. -Rules is snapshotted the
+# same way, by presence rather than value: `-Rules 0` is an array a Boolean
+# test reads as false, and it must reach the render so validate() rejects it.
 $debugRequested   = $PSBoundParameters.ContainsKey('Debug')
 $verboseRequested = $PSBoundParameters.ContainsKey('Verbose')
+$rulesSpecified   = $PSBoundParameters.ContainsKey('Rules')
 $logLevel =
     if ($Quiet) { 'quiet' }
     elseif ($debugRequested) { 'debug' }
@@ -218,6 +231,9 @@ try {
         if ($validationExceptionPath) {
             $quartoArgs += @('-P', "validationExceptionFile:$validationExceptionPath")
         }
+        if ($rulesSpecified) {
+            $quartoArgs += @('-P', "rules:[$($Rules -join ',')]")
+        }
         if ($Dhis2Scheme) { $quartoArgs += @('-P', "dhis2Scheme:$Dhis2Scheme") }
         if ($Dhis2Hostname) { $quartoArgs += @('-P', "dhis2Hostname:$Dhis2Hostname") }
         if ($Dhis2Port) { $quartoArgs += @('-P', "dhis2Port:$Dhis2Port") }
@@ -230,7 +246,7 @@ try {
             $currentEntry = $currentEntry | Complete-NeoIPCBuildStep -Result $result
             if ($result.Status -eq 'Error') {
                 $errors += "Quarto render failed for combined report."
-            } elseif ($result.Status -ne 'NoData') {
+            } else {
                 $outputFiles += (Join-Path $outputDirPath $outFileName)
             }
         } else {
@@ -254,6 +270,9 @@ try {
             if ($validationExceptionPath) {
                 $quartoArgs += @('-P', "validationExceptionFile:$validationExceptionPath")
             }
+            if ($rulesSpecified) {
+                $quartoArgs += @('-P', "rules:[$($Rules -join ',')]")
+            }
             if ($Dhis2Scheme) { $quartoArgs += @('-P', "dhis2Scheme:$Dhis2Scheme") }
             if ($Dhis2Hostname) { $quartoArgs += @('-P', "dhis2Hostname:$Dhis2Hostname") }
             if ($Dhis2Port) { $quartoArgs += @('-P', "dhis2Port:$Dhis2Port") }
@@ -266,7 +285,7 @@ try {
                 $currentEntry = $currentEntry | Complete-NeoIPCBuildStep -Result $result
                 if ($result.Status -eq 'Error') {
                     $errors += "Quarto render failed for $siteCode."
-                } elseif ($result.Status -ne 'NoData') {
+                } else {
                     $outputFiles += (Join-Path $outputDirPath $outFileName)
                 }
             } else {

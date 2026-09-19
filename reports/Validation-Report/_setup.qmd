@@ -20,7 +20,6 @@ language <- localeObj$language
 sR <- get_string_resources(localeObj)
 
 departmentFilter <- params$departmentFilter
-NeoIPC_ProgramId <- "D8mSSpOpsKj"
 support_email_address <- "NeoIPC-Support@charite.de"
 ```
 
@@ -35,6 +34,12 @@ connection_options <- get_connection_options(
   port = params$dhis2Port,
   path = params$dhis2Path)
 
+# The import runs without the validation pass: the report is about the records
+# that pass would remove, so they have to be kept and validated here — the
+# enrolments without an admission form (rule 26) among them, which the
+# import's orphan removal otherwise drops. That also includes the patients
+# with no enrolment, which rule 1 is about and which only
+# `include_unenrolled_patients` keeps in the dataset.
 dataset_options <- neoipcr::dhis2_dataset_options(
   department_filter = departmentFilter,
   include_department = "full",
@@ -57,6 +62,19 @@ dataset_options <- neoipcr::dhis2_dataset_options(
 data <- with_error_trace(neoipcr::import_dhis2(
   connection_options = connection_options,
   dataset_options = dataset_options))
+
+# The problem list links each patient record to its Tracker Capture dashboard
+# on the instance the data came from: the API base URL with the web context in
+# place of the `/api` path, and the program the import resolved by its code.
+tracker_capture_url <- httr2::url_parse(connection_options$base_url)
+api_path <- tracker_capture_url$path
+if (is.null(api_path)) api_path <- ""
+tracker_capture_url$path <- paste0(
+  sub("/api/?$", "", api_path), "/dhis-web-tracker-capture/index.html")
+tracker_capture_base <- httr2::url_build(tracker_capture_url)
+NeoIPC_ProgramId <- data$metadata$programId
+if (is.null(NeoIPC_ProgramId))
+  rlang::abort("The imported metadata carries no program id; the dashboard links cannot be built.")
 ```
 
 ```{r Filter metadata to in-scope departments}
@@ -70,104 +88,83 @@ if (!rlang::is_null(departmentFilter))
     dplyr::filter(.data$code %in% departmentFilter)
 ```
 
-```{r Load and key-transform validation exceptions}
+```{r Validate}
 #| include: false
 
-# User-supplied exceptions arrive in CSV form with
-# RULE_ID, DEPARTMENT_CODE, NEOIPC_PATIENT_ID, ENROLMENT_DATE, EVENT_TYPE, EVENT_DATE.
-# Translate once here into key form (rule_id, patient_key, enrollment_key, event_key)
-# so rule files can anti_join on keys only.
-exception_cols <- tibble(
-  rule_id        = integer(),
-  patient_key    = integer(),
-  enrollment_key = integer(),
-  event_key      = integer())
-
-exceptions <- exception_cols
-
-if (!is.null(params$validationExceptionFile) &&
-    file.exists(params$validationExceptionFile)) {
-  raw_exceptions <- readr::read_csv(
-    params$validationExceptionFile,
-    col_types = "iccDcD",
-    show_col_types = FALSE)
-
-  expected_cols <- c("RULE_ID", "DEPARTMENT_CODE", "NEOIPC_PATIENT_ID",
-                     "ENROLMENT_DATE", "EVENT_TYPE", "EVENT_DATE")
-  actual_cols <- names(raw_exceptions)
-  if (!identical(actual_cols, expected_cols)) {
-    rlang::abort(c(
-      sprintf("Validation exception file has unexpected columns: '%s'",
-              params$validationExceptionFile),
-      i = paste("Expected:", paste(expected_cols, collapse = ", ")),
-      i = paste("Got:",      paste(actual_cols, collapse = ", "))))
-  }
-
-  if (nrow(raw_exceptions) > 0) {
-    # Map DEPARTMENT_CODE → department_key
-    with_dept <- raw_exceptions |>
-      dplyr::inner_join(
-        data$metadata$departments |>
-          dplyr::select("department_key", "code"),
-        dplyr::join_by("DEPARTMENT_CODE" == "code"))
-
-    # Map (department_key, NEOIPC_PATIENT_ID) → patient_key
-    with_pat <- with_dept |>
-      dplyr::left_join(
-        data$patients |>
-          dplyr::select("department_key", "patient_key", "patient_id"),
-        dplyr::join_by("department_key",
-          "NEOIPC_PATIENT_ID" == "patient_id"))
-
-    # Map (patient_key, ENROLMENT_DATE) → enrollment_key
-    with_enr <- with_pat |>
-      dplyr::left_join(
-        data$enrollments |>
-          dplyr::select("patient_key", "enrollment_key", "enrolledAt"),
-        dplyr::join_by("patient_key",
-          "ENROLMENT_DATE" == "enrolledAt"))
-
-    # Map (enrollment_key, EVENT_TYPE, EVENT_DATE) → event_key via events
-    # EVENT_TYPE in the CSV is ADM/PRO/BSI/NEC/SSI/HAP/END; event_type_key is
-    # lower-cased factor adm/pro/bsi/nec/ssi/hap/end.
-    with_evt <- with_enr |>
-      dplyr::mutate(
-        event_type_key = factor(
-          tolower(.data$EVENT_TYPE),
-          levels = c("adm","pro","bsi","nec","ssi","hap","end"))) |>
-      dplyr::left_join(
-        data$events |>
-          dplyr::select("enrollment_key", "event_type_key",
-            "event_key", "occurredAt"),
-        dplyr::join_by("enrollment_key", "event_type_key",
-          "EVENT_DATE" == "occurredAt"))
-
-    exceptions <- with_evt |>
-      dplyr::mutate(
-        rule_id        = as.integer(.data$RULE_ID),
-        patient_key    = .data$patient_key,
-        enrollment_key = .data$enrollment_key,
-        event_key      = .data$event_key,
-        .keep = "none")
-  }
-} else if (!is.null(params$validationExceptionFile)) {
-  rlang::abort(sprintf(
-    "Validation exception file not found: '%s'",
-    params$validationExceptionFile))
+# The rules live in neoipcr; the sentences that render their findings live
+# in this report's string resources, keyed by rule id. A rule the package
+# runs without its templates and `summary` here would render as a blank line
+# or fail the header below, so every rule is checked for them first: the
+# templates are the rule's `description` and, for rule 20, a second complete
+# sentence for a pathogen recorded as causing a secondary sepsis.
+rule_ids <- neoipcr::validation_rule_ids()
+template_keys <- function(rule_id)
+  c("description", if (rule_id == 20L) "description_secondary_bsi")
+has_text <- function(rule_id) {
+  entry <- sR$problems[[as.character(rule_id)]]
+  all(vapply(
+    c(template_keys(rule_id), "summary"),
+    \(field) is.character(entry[[field]]) && length(entry[[field]]) == 1L &&
+      nzchar(entry[[field]]),
+    logical(1)))
 }
-```
+unsentenced <- rule_ids[!vapply(rule_ids, has_text, logical(1))]
+if (length(unsentenced) > 0L)
+  rlang::abort(sprintf(
+    "The string resources carry no complete description and summary for validation rule(s) %s.",
+    paste(unsentenced, collapse = ", ")))
 
-```{r Initialise empty problems tibble}
-#| include: false
+exceptions <- NULL
+if (!is.null(params$validationExceptionFile))
+  exceptions <- neoipcr::read_validation_exceptions(params$validationExceptionFile)
 
-# Modern problem shape: keys plus a per-rule context list-column.
-# Identifier resolution (SITE_CODE, DEPARTMENT_NAME, NEOIPC_PATIENT_ID,
-# PATIENT_TEI, ENROLMENT_ID, EVENT_ID, …) happens at render time in
-# _problems.qmd by joining against metadata, patients, enrollments, events.
-problems <- tibble::tibble(
-  rule_id        = integer(),
-  patient_key    = integer(),
-  enrollment_key = integer(),
-  event_key      = integer(),
-  context        = list())
+# An empty `rules` value (NULL, or `[]` from the command line) means every
+# rule; a repeated id is applied once, so the header counts it once. An id
+# that is not a whole number is refused here rather than truncated to one.
+requested_rules <- unique(unlist(params$rules))
+if (length(requested_rules) == 0L) {
+  rules <- rule_ids
+} else {
+  if (!is.numeric(requested_rules) ||
+      !all(is.finite(requested_rules) & requested_rules == round(requested_rules)))
+    rlang::abort(sprintf(
+      "`rules` must name validation rules by their whole-number ids, not %s.",
+      paste(requested_rules, collapse = ", ")))
+  rules <- as.integer(requested_rules)
+}
+problems <- neoipcr::validate(data, rules = rules, exceptions = exceptions)
+
+# A rule the package could not run, for want of a column the dataset does not
+# hold, flags nothing and would read as clean. This import asks for every
+# tier, so such a skip means the dataset is not what the report expects, and
+# the render fails rather than presenting the result as complete.
+rules_skipped <- attr(problems, "rules_skipped")
+if (length(rules_skipped) > 0L)
+  rlang::abort(sprintf(
+    "Validation rule(s) %s could not be applied to the imported dataset; see the log for the column each is missing.",
+    paste(rules_skipped, collapse = ", ")))
+
+# The header says which rules produced this report, so a document rendered
+# with a subset cannot be read as a clean bill on the rules it skipped.
+rules_not_applied <- setdiff(rule_ids, rules)
+rules_applied_text <- if (length(rules_not_applied) == 0L) {
+  interpolate_translation(sR$rules_applied_all, count = length(rule_ids))
+} else {
+  interpolate_translation(
+    sR$rules_applied_subset,
+    applied     = length(rules),
+    total       = length(rule_ids),
+    not_applied = paste(
+      sprintf(
+        "%d (%s)",
+        rules_not_applied,
+        vapply(
+          as.character(rules_not_applied),
+          # A summary is a value handed to the header's template, so it is
+          # escaped like every other value.
+          \(id) escape_markdown(sR$problems[[id]]$summary),
+          character(1))),
+      collapse = "; "))
+}
+rules_applied_text <- as.character(rules_applied_text)
 ```

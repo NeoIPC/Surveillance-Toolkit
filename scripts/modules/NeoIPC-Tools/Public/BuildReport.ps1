@@ -157,8 +157,8 @@ Record the outcome of a build step.
 
 .DESCRIPTION
 Maps the { Status, ExitCode, Messages } object that Invoke-Rscript / Invoke-QuartoRender
-return onto the step's status (Success->success, Error->error, NoData->nodata; anything
-else leaves the current status), exitCode, and messages (appended). Explicit -Status /
+return onto the step's status (Success->success, Error->error; anything else leaves the
+current status), exitCode, and messages (appended). Explicit -Status /
 -ExitCode / -Messages override, for callers without a helper result (e.g. -WhatIf planned
 steps). Mutates the step in place and returns it.
 #>
@@ -171,7 +171,7 @@ function Complete-NeoIPCBuildStep {
 
         [psobject]$Result,
 
-        [ValidateSet('planned', 'success', 'error', 'nodata')]
+        [ValidateSet('planned', 'success', 'error')]
         [string]$Status,
 
         [object]$ExitCode,
@@ -185,7 +185,6 @@ function Complete-NeoIPCBuildStep {
             switch ($Result.Status) {
                 'Success' { $Step['status'] = 'success' }
                 'Error'   { $Step['status'] = 'error' }
-                'NoData'  { $Step['status'] = 'nodata' }
             }
         }
         if ($PSBoundParameters.ContainsKey('ExitCode')) { $Step['exitCode'] = $ExitCode }

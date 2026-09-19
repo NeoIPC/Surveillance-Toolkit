@@ -113,6 +113,10 @@ Reports live under `reports/`:
 
 `pandoc-quotes.lua` on all four reports. Empty section headers are suppressed in R (conditional cat-emit gated on the section's `show_section_*` flag), not by a Lua filter.
 
+### Validation Report
+
+The rules live in neoipcr (`neoipcr::validate()` returns keys and context values, never prose); the report only renders them, interpolating each finding's context into the `{named}` placeholders of `content/_sR.yaml` — the placeholder names are the context field names documented on `validate()`. Do not add a rule or a formatter on the report side; a rule's sentence and summary belong here, in `content/_sR.yaml`, and nowhere else. See [`docs/validation-report.md`](docs/validation-report.md) for the layering and for how a new rule threads through both repositories.
+
 ### R Data Scripts & Docker Deployment
 
 - **R data scripts** (e.g., `Generate-ReferenceData.R`) live alongside their reports. PowerShell wrappers live in `scripts/`. Shared R functions in `reports/common/`.

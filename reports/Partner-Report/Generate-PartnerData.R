@@ -75,29 +75,6 @@ short_map <- list(
   h = "help"
 )
 
-getValidationExceptions <- function(x) {
-  x <- as_null(x)
-  if (is.null(x)) {
-    return(FALSE)
-  }
-  if (file.exists(x)) {
-    header <- utils::read.csv(x, nrows = 0, stringsAsFactors = FALSE)
-    colClasses <- rep(NA_character_, length(header))
-    names(colClasses) <- names(header)
-    integerColumns <- c("RULE_ID")
-    dateColumns <- c("ENROLMENT_DATE", "EVENT_DATE")
-    for (colName in intersect(integerColumns, names(colClasses))) {
-      colClasses[[colName]] <- "integer"
-    }
-    for (colName in intersect(dateColumns, names(colClasses))) {
-      colClasses[[colName]] <- "Date"
-    }
-    return(utils::read.csv(x, stringsAsFactors = FALSE, colClasses = colClasses))
-  }
-  logWarn("Validation exception file not found: '{x}'")
-  FALSE
-}
-
 args <- parse_args(commandArgs(trailingOnly = TRUE),
   long_map = long_map, short_map = short_map)
 
@@ -158,7 +135,8 @@ datasetOptions <- neoipcr::dhis2_dataset_options(
   gestational_age_from = gestationWeeksFrom,
   gestational_age_to = gestationWeeksTo,
   include_ineligible_patients = includeNonCorePatients,
-  include_invalid_patients = getValidationExceptions(validationExceptionFile),
+  include_invalid_patients = if (is.null(validationExceptionFile)) FALSE else
+    get_validation_exceptions(validationExceptionFile),
   include_world_bank_class = "full",
   include_country = "full",
   include_hospital = "full",

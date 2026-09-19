@@ -323,7 +323,7 @@ Invoke-WithNeoIPCAuth -Auth $auth -ScriptBlock {
 ```powershell
 # Render with error/warning parsing
 $result = Invoke-QuartoRender -Arguments @('render', 'Report.qmd', '--to', 'pdf')
-$result.Status   # 'Success', 'Error', or 'NoData'
+$result.Status   # 'Success' or 'Error'
 
 # Rscript with rlang error handling
 $result = Invoke-Rscript -Arguments @('--vanilla', 'Generate-Data.R', '--output', 'data.json')
@@ -354,8 +354,7 @@ $status = Write-NeoIPCBuildReport -Name 'Partner Report Build' -StartedAt $start
     -SiteCodes $siteCodes -OutputLocales @('en', 'de') -OutputFormats @('pdf')
 
 # Per-step logging: build a step, then record its outcome from an
-# Invoke-Rscript / Invoke-QuartoRender result ('Success' -> success, 'Error' -> error,
-# 'NoData' -> nodata).
+# Invoke-Rscript / Invoke-QuartoRender result ('Success' -> success, 'Error' -> error).
 $step = New-NeoIPCBuildStep -SiteCode 'NEO_DE_01' -OutputLocale 'de' -OutputFormat 'pdf'
 $step = $step | Complete-NeoIPCBuildStep -Result $renderResult
 ```

@@ -1,0 +1,83 @@
+```{r Problem text}
+#| include: false
+
+# The sentence for one finding is the rule's template from the string
+# resources with the finding's values interpolated — one generic path for
+# every rule, driven by the context fields `neoipcr::validate()` records
+# (documented in its "Context fields" section) and the `{named}` placeholders
+# of `content/_sR.yaml`, which use the same names.
+
+# One finding's values as the named character scalars the templates take.
+# Dates take the locale's date format and whole numbers — every numeric a
+# rule records is a count of days or an index — the reports' integer
+# formatting with the locale's digit grouping; a missing value reads as the
+# report's `missing_value` string — worded to sit inside a sentence — so a
+# template never receives an NA. Every value is then escaped for Markdown
+# here, at the boundary: a free-text pathogen name or a procedure description
+# is whatever someone typed, and must render as that rather than as emphasis,
+# a link or HTML, and a date's or a number's separators — the digit group
+# separator is a translated string — are literal characters as well.
+format_context <- function(context, sR) {
+  if (is.null(context) || ncol(context) == 0L)
+    return(list())
+  lapply(as.list(context), function(column) {
+    value <- column[[1]]
+    text <- if (length(value) != 1L || is.na(value))
+      sR$missing_value
+    else if (inherits(value, "Date") || inherits(value, "POSIXt"))
+      format(value, format = "%x")
+    else if (is.numeric(value) && value == round(value))
+      format_integer(value, big_mark = sR$digit_group_separator)
+    else if (is.numeric(value))
+      format(value)
+    else
+      as.character(value)
+    escape_markdown(text)
+  })
+}
+
+# The values a rule's template needs beyond the fields the rule records: the
+# localized label of an SSI's infection type (rule 19). The label is looked
+# up on the raw value, so a missing or unknown type falls back to the
+# missing-value string itself rather than dropping the placeholder's value,
+# which would abort the interpolation.
+decorate_context <- function(rule_id, values, context, sR) {
+  if (rule_id == 19L) {
+    label <- sR$ssi_types[[as.character(context$infection_type)]]
+    # A value, translated or not, is escaped like every other value.
+    values$ssi_type <- escape_markdown(
+      if (is.null(label)) sR$missing_value else label)
+  }
+  values
+}
+
+# The template one finding is rendered with: the rule's `description`, or
+# for rule 20 its second complete sentence for a pathogen recorded as causing
+# a secondary sepsis, rather than one sentence with an optional fragment.
+# `_setup.qmd` has checked that every rule carries the templates it renders
+# with before anything is composed.
+select_template <- function(rule_id, context, sR) {
+  key <- if (rule_id == 20L && isTRUE(context$secondary_bsi))
+    "description_secondary_bsi"
+  else
+    "description"
+  sR$problems[[as.character(rule_id)]][[key]]
+}
+
+# The problem-detail section a rule's finding refers the reader to.
+problem_primary_detail <- function(rule_id)
+  problem_info$primaryDetail[problem_info$id == rule_id]
+
+# The bullet for one finding: the rule's sentence with the finding's values,
+# followed by the cross-reference to the problem's explanation.
+problem_text <- function(rule_id, context, sR) {
+  values <- decorate_context(rule_id, format_context(context, sR), context, sR)
+  sentence <- do.call(
+    interpolate_translation,
+    c(list(select_template(rule_id, context, sR)), values))
+  reference <- interpolate_translation(
+    sR$see_problem_details,
+    reference = paste0("@sec-problem-details-", problem_primary_detail(rule_id)))
+  paste0("* ", sentence, " ", reference)
+}
+```

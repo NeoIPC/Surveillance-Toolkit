@@ -66,9 +66,9 @@ $LcAllByLanguage = @{
     it = 'it_IT.UTF-8'
 }
 
-# Reports whose wrappers are generated. These are the two reports whose params
-# are also snapshotted for the .NET reporting backend.
-$reports = @('Partner-Report', 'Reference-Report')
+# Reports whose wrappers are generated: those with a locale profile group
+# whose master .qmd carries the annotated params block.
+$reports = @('Partner-Report', 'Reference-Report', 'Validation-Report')
 
 # Reads the locale group — the first `- [..]` flow sequence under
 # `profile: > group:` — from a report's _quarto.yml.

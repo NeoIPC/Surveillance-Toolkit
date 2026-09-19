@@ -85,7 +85,7 @@ Recorded so the question is not reopened.
 | `generated_on`, `patient_not_found` | Placeholders receive a date and identifiers. |
 | `outlier.composed.*`, `outlier.generic_summary` | Placeholders receive metric labels and cross-references. |
 | `headerList.*` income-class addenda | Placeholders receive classification names. |
-| `problems.*.description` (Validation-Report) | Placeholders receive dates, statuses, codes and identifiers. `problems.18` mentions a number in parentheses — `The number of patient days (%s) does not match…` — where the noun phrase is fixed and the value is parenthetical. |
+| `problems.*.description` (Validation-Report) | Placeholders receive dates, statuses, codes and identifiers. `problems.18` mentions a number in parentheses — `The number of patient days ({patient_days}) does not match…` — where the noun phrase is fixed and the value is parenthetical. |
 
 ## Method
 

@@ -152,13 +152,13 @@ character before every `{` in the catalogue returns exactly `#`, `V` and `A`.
 c-format
 ```
 
-114 of 774 strings carry a C-printf token (223 tokens: `%s` ×191, `%i` ×29). This is a **transitional**
-adoption: the target state is named `{}` placeholders everywhere, and this covers `%s` only until they are
-gone.
+73 of 825 strings carry a C-printf token (133 tokens, all `%s`); the `%i` tokens went with the
+Validation Report's descriptions, which now use named placeholders. This is a **transitional** adoption: the target
+state is named `{}` placeholders everywhere, and this covers `%s` only until they are gone.
 
-Three of the 223 tokens are not placeholders and will produce permanent noise — a `% a` inside "Values
-above 100% are expected", a msgid that is literally `%`, and a `%x` inside an inline R span. Suppress those
-three per string rather than leaving them to teach translators that the check cries wolf.
+Three of the tokens are not placeholders and will produce permanent noise — a `% a` inside "Values above
+100% are expected", a msgid that is literally `%`, and a `%x` inside an inline R span. Suppress those three
+per string rather than leaving them to teach translators that the check cries wolf.
 
 ### `xml-text` — no longer applicable, and worth knowing why
 

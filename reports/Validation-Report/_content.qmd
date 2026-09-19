@@ -2,23 +2,7 @@
 
 {{< include _mapping.qmd >}}
 
-{{< include _formatters.qmd >}}
-
-```{r Execute validation rules}
-options(knitr.duplicate.label = "allow")
-
-rule_files <- Sys.glob("rules/_rule_[0-9][0-9][0-9][0-9].Rmd") |>
-  sort()
-
-for (rule_file in rule_files) {
-  knitr::knit_child(text = readr::read_file(rule_file), quiet = TRUE)
-}
-```
-
-```{r Abort if the current configuration did not yield any problems}
-if(nrow(problems) < 1)
-  rlang::abort("No problem detected")
-```
+{{< include _problem_text.qmd >}}
 
 `{r} sR$headerList$created`:
 
@@ -28,21 +12,35 @@ if(nrow(problems) < 1)
 
 :   `{r} paste(departments |> pull(code) |> sort(), collapse = ", ")`
 
+`{r} sR$header$validation_rules`:
+
+:   `{r} rules_applied_text`
+
 ```{r Write problems intro}
 #| output: asis
 
-cat(
-  sep = "\n",
-  knitr::knit_child(text = readr::read_file(Sys.glob(paste0(language, "/_problems_intro.Rmd"))), quiet = TRUE)
-)
+# A report with nothing to report says so and stops here: the introduction,
+# the problem details and the solutions all cross-reference sections that
+# exist only when there are findings to explain.
+if (nrow(problems) == 0L) {
+  cat(sR$no_problems_detected, "\n")
+} else {
+  cat(
+    sep = "\n",
+    knitr::knit_child(text = readr::read_file(Sys.glob(paste0(language, "/_problems_intro.Rmd"))), quiet = TRUE)
+  )
+}
 ```
 
 {{< include _problems.qmd >}}
 
-{{< pagebreak >}}
-
 ```{r Write problem details}
 #| output: asis
+
+if (nrow(problems) > 0L) {
+
+cat("::: {.content-visible unless-format=\"html\"}", "\\newpage", ":::", "", sep = "\n")
+
 # Problem details intro
 cat(
   sep = "\n",
@@ -88,12 +86,9 @@ problem_detail_files <- problem_detail_files[!absent]
 for (problem_detail_file in problem_detail_files) {
   cat(sep = "\n", knitr::knit_child(quiet = TRUE, text = readr::read_file(problem_detail_file)))
 }
-```
 
-{{< pagebreak >}}
+cat("::: {.content-visible unless-format=\"html\"}", "\\newpage", ":::", "", sep = "\n")
 
-```{r Write solutions}
-#| output: asis
 # Solutions intro
 cat(
   sep = "\n",
@@ -115,5 +110,7 @@ solution_files <- solution_info |>
 
 for (solution_file in solution_files) {
   cat(sep = "\n", knitr::knit_child(quiet = TRUE, text = readr::read_file(solution_file)))
+}
+
 }
 ```
