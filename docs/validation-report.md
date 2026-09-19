@@ -35,8 +35,11 @@ One function renders every rule (`problem_text()` in `_problem_text.qmd`):
    worded to sit inside a sentence — so `interpolate_translation()` never receives a zero-length or
    unnamed value, which it refuses. Text is escaped for Markdown at this boundary (`escape_markdown()`
    in `reports/common/helpers.R`), so a free-text pathogen name or a procedure description renders as
-   typed rather than as emphasis, a link or HTML; the patient id in a record's heading is escaped the
-   same way.
+   typed rather than as emphasis, a link or HTML. The same goes for every string that is placed into
+   markup the code builds rather than into a sentence: the patient id and the dashboard link's title in
+   a record's heading, the support link's label, and the translated SSI type label handed to rule 19's
+   template as a value. The templates and headings themselves are the report's Markdown and are not
+   escaped.
 2. `decorate_context()` adds the values a template needs beyond what the rule records; today that is
    rule 19's localized SSI type label from `ssi_types`, with `missing_value` where the type is missing
    or unknown, so the placeholder always has a value.

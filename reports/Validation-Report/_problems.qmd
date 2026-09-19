@@ -100,9 +100,11 @@ multiple_problems_hint <- function(partner_code, patient_id) {
     "&body=",
     utils::URLencode(as.character(mailto_body), reserved = TRUE))
   # The link is markup, so it is built here and handed to the translated
-  # sentence as a value rather than written into the string.
+  # sentence as a value rather than written into the string; its label is a
+  # translated string placed inside that markup, so it is escaped like a value.
   support_link <- paste0(
-    "[", sR$support_email_address_link_text, "](mailto:", mailto_content, ")")
+    "[", escape_markdown(sR$support_email_address_link_text),
+    "](mailto:", mailto_content, ")")
   interpolate_translation(
     sR$patient_problem_multiple_hint, support_link = support_link)
 }
@@ -177,7 +179,8 @@ if (exists("problem_results")) {
             "#/dashboard?program=", NeoIPC_ProgramId,
             "&ou=", dept_ou,
             "&tei=", pat_tei,
-            ' "', sR$patient_problem_dashboard_link_description, '")"',
+            ' "', escape_markdown(sR$patient_problem_dashboard_link_description),
+            '")"',
             collapse = ""),
             pat_header_level))
 

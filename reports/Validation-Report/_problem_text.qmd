@@ -19,7 +19,7 @@ format_context <- function(context, sR) {
   lapply(as.list(context), function(column) {
     value <- column[[1]]
     if (length(value) != 1L || is.na(value))
-      return(sR$missing_value)
+      return(escape_markdown(sR$missing_value))
     if (inherits(value, "Date") || inherits(value, "POSIXt"))
       return(format(value, format = "%x"))
     # Every numeric a rule records is a count of days or an index, so it takes
@@ -40,7 +40,9 @@ format_context <- function(context, sR) {
 decorate_context <- function(rule_id, values, context, sR) {
   if (rule_id == 19L) {
     label <- sR$ssi_types[[as.character(context$infection_type)]]
-    values$ssi_type <- if (is.null(label)) sR$missing_value else label
+    # A value, translated or not, is escaped like every other value.
+    values$ssi_type <- escape_markdown(
+      if (is.null(label)) sR$missing_value else label)
   }
   values
 }
