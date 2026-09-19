@@ -35,9 +35,11 @@ connection_options <- get_connection_options(
   path = params$dhis2Path)
 
 # The import runs without the validation pass: the report is about the records
-# that pass would remove, so they have to be kept and validated here. That
-# includes the patients with no enrolment, which rule 1 is about and which
-# only `include_unenrolled_patients` keeps in the dataset.
+# that pass would remove, so they have to be kept and validated here — the
+# enrolments without an admission form (rule 26) among them, which the
+# import's orphan removal otherwise drops. That also includes the patients
+# with no enrolment, which rule 1 is about and which only
+# `include_unenrolled_patients` keeps in the dataset.
 dataset_options <- neoipcr::dhis2_dataset_options(
   department_filter = departmentFilter,
   include_department = "full",

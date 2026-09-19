@@ -49,9 +49,11 @@ built from the connection options the data came from (the API base URL with the 
 
 ## The exception list
 
-The report never removes flagged records: it imports with `include_invalid_patients = TRUE` and calls
-`validate()` itself, passing the list `neoipcr::read_validation_exceptions()` reads from the
-`validationExceptionFile` parameter. neoipcr resolves the list onto the dataset's keys and each rule
+The report never removes flagged records: it imports with `include_invalid_patients = TRUE`, which
+skips the import's validation pass and keeps the enrolments without an admission form that the import's
+orphan removal otherwise drops, together with `include_unenrolled_patients = TRUE` for the patients
+without an enrolment, and calls `validate()` itself, passing the list
+`neoipcr::read_validation_exceptions()` reads from the `validationExceptionFile` parameter. neoipcr resolves the list onto the dataset's keys and each rule
 exempts the records addressed to it. The same reader serves the Partner and Reference Reports through
 `get_validation_exceptions()` in `reports/common/helpers.R`, so a malformed file is refused once, the same
 way, wherever it is used.
