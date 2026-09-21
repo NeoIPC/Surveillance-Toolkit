@@ -24,6 +24,12 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
   wrappers carried for that case is gone.
 - Every validation rule carries a placeholder-free `summary` of what it checks in the string
   resources, for the report header and for any consumer that lists the rules.
+- The Validation Report renders neoipcr's rules 43 and 44, which question an enrolment still active
+  more than 180 days after its admission — without a surveillance end form, or with one that is not
+  completed. Their sentences and explanations say that the infant may still be in the department and
+  the message can then be ignored, and the explanations tell the two cases apart: the form has to be
+  added before the enrolment is completed in the one, and completed rather than added in the other.
+  The report rests on 43 rules and requires neoipcr `v0.0.0.9003`.
 
 ### Changed
 
@@ -47,7 +53,7 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
   its enrolment. A surgical site infection belongs to the follow-up period of its surgical procedure,
   which may extend beyond the discharge and into a readmission, so an infection date outside the
   admission it is recorded in is legitimate as long as a recorded procedure covers it, which rule 19
-  checks. The explanation of the time-frame rules says so; the report now rests on 41 rules.
+  checks. The explanation of the time-frame rules says so.
 
 ### Fixed
 

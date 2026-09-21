@@ -14,16 +14,18 @@
 #             actually established by testing.
 
 neoipcr:
-  # The floor is the exported `validate()` with its exception-list API
-  # (`validation_rule_ids()`, `read_validation_exceptions()`), which the Validation
-  # Report calls and which v0.0.0.9002 is the first tag to carry; the Reference Report's
-  # `get_antibiotic_utilization_table()` (v0.0.0.9001) sits below it. A renamed field is
+  # The floor is the rule set the Validation Report's string catalogue covers: the report
+  # aborts when neoipcr knows a rule the catalogue does not, and v0.0.0.9003 is the first
+  # tag carrying rules 43 and 44, whose strings the catalogue holds. Below it sit the
+  # exported `validate()` with its exception-list API (`validation_rule_ids()`,
+  # `read_validation_exceptions()`, v0.0.0.9002) and the Reference Report's
+  # `get_antibiotic_utilization_table()` (v0.0.0.9001). A renamed field is
   # NOT part of the floor: a serialized dataset written under the old name is accepted
   # permanently, by the shim marked NEOIPC-PERMANENT(dataset-format) in the Partner
   # Report's setup. The release gate checks only that a declared tag exists, and only
   # `tested`, so nothing here would catch a floor set too low.
-  tested: v0.0.0.9002
-  minimum: v0.0.0.9002
+  tested: v0.0.0.9003
+  minimum: v0.0.0.9003
 
 neoipc-app:
   tested: v0.1.0-alpha

@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-09-19 12:27+0200\n"
+"POT-Creation-Date: 2026-09-21 13:52+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Language-Team: none\n"
 "Language: en\n"
@@ -3876,6 +3876,30 @@ msgstr ""
 msgid "The day of occurrence after admission stored in the surgical site infection form does not match the value calculated from the dates."
 msgstr ""
 
+#. type: Hash Value: problems 43 description
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The enrolment has been active for {days_open} days since the admission on {enrolledAt} and has no surveillance end form. If the infant is still in the department, this message can be ignored."
+msgstr ""
+
+#. type: Hash Value: problems 43 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The enrolment is still active more than 180 days after the admission and has no surveillance end form."
+msgstr ""
+
+#. type: Hash Value: problems 44 description
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The enrolment has been active for {days_open} days since the admission on {enrolledAt} and its surveillance end form is not completed (status is '{status}'). If the infant is still in the department, this message can be ignored."
+msgstr ""
+
+#. type: Hash Value: problems 44 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The enrolment is still active more than 180 days after the admission and its surveillance end form is not completed."
+msgstr ""
+
 #. type: Hash Value: problems 5 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
@@ -4667,6 +4691,60 @@ msgstr ""
 #: reports/Validation-Report/en/_problem_detail_0020.Rmd:5
 #, markdown-text, no-wrap
 msgid "Please delete the forms for all infections that are not nosocomial infections according to this definition (see @sec-solution-12) or adjust the infection date (see @sec-solution-7) or the admission date (see @sec-solution-6) if it is an input error.\n"
+msgstr ""
+
+#. type: Title ###
+#: reports/Validation-Report/en/_problem_detail_0021.Rmd:1
+#, markdown-text, no-wrap
+msgid "The Enrolment Has Been Active for More Than 180 Days and Has No Surveillance End Form {#sec-problem-details-21}"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0021.Rmd:7
+#, markdown-text, no-wrap
+msgid ""
+"An enrolment is normally ended, and then completed, when the infant is discharged, transferred or dies.\n"
+"This message appears in the validation report when an enrolment has been active for more than 180 days after the admission date and the patient record has no Surveillance End form.\n"
+"A stay this long is exceptional, so in most cases the infant left the department long ago and the record was never closed.\n"
+"Until it is, the patient's data cannot be included in analyses.\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0021.Rmd:9
+#: reports/Validation-Report/en/_problem_detail_0022.Rmd:8
+#, markdown-text, no-wrap
+msgid "If the infant is in fact still in the department, you can safely ignore this message; it disappears once the surveillance has been ended.\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0021.Rmd:11
+#, markdown-text, no-wrap
+msgid ""
+"Otherwise, please open the Tracked Entity Instance Dashboard of the patient record (see @sec-solution-1), then the enrolment (see @sec-solution-10), add a Surveillance End form (see @sec-solution-14), fill in the data and complete the form (see @sec-solution-8), and only then complete the enrolment (see @sec-solution-4).\n"
+"The Surveillance End form must be added before the enrolment is completed: a completed enrolment without it lacks the denominator data the rates are calculated from.\n"
+msgstr ""
+
+#. type: Title ###
+#: reports/Validation-Report/en/_problem_detail_0022.Rmd:1
+#, markdown-text, no-wrap
+msgid "The Enrolment Has Been Active for More Than 180 Days and Its Surveillance End Form Is Not Completed {#sec-problem-details-22}"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0022.Rmd:6
+#, markdown-text, no-wrap
+msgid ""
+"An enrolment is normally ended, and then completed, when the infant is discharged, transferred or dies.\n"
+"This message appears in the validation report when an enrolment has been active for more than 180 days after the admission date and its Surveillance End form has been started but not completed.\n"
+"A stay this long is exceptional, so in most cases the surveillance did end and only the last two steps, completing the form and completing the enrolment, were left out.\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0022.Rmd:10
+#, markdown-text, no-wrap
+msgid ""
+"Otherwise, please open the Tracked Entity Instance Dashboard of the patient record (see @sec-solution-1), then the enrolment (see @sec-solution-10) and its Surveillance End form (see @sec-solution-15), check the data, complete the form (see @sec-solution-8), and then complete the enrolment (see @sec-solution-4).\n"
+"The form needs to be completed, not added: an enrolment with two Surveillance End forms cannot be analysed either.\n"
 msgstr ""
 
 #. type: Title ###
