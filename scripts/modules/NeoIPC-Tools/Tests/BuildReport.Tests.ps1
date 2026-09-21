@@ -175,18 +175,19 @@ Describe 'Test-NeoIPCRenderWarningHead' {
         $script:esc = [char]27
     }
 
-    # Quarto's normalize filter warns about a stray fence with a message that
-    # begins with a newline, so the head line ends after the location and the
-    # text follows on lines of its own.
-    It 'is true for a warning head whose message follows on the next lines' {
+    # A Quarto filter warning names its source file and line in parentheses;
+    # its message may follow on the same line or, when it begins with a
+    # newline as the stray-fence diagnostic does, on lines of its own.
+    It 'is true for a filter warning head, with or without text on it' {
         Test-NeoIPCRenderWarningHead -Line 'WARNING (C:/Program Files/Quarto/share/filters/main.lua:10090) ' | Should -BeTrue
         Test-NeoIPCRenderWarningHead -Line "$esc[33mWARNING (main.lua:10090) " | Should -BeTrue
         Test-NeoIPCRenderWarningHead -Line 'WARNING (main.lua:10090)' | Should -BeTrue
+        Test-NeoIPCRenderWarningHead -Line 'WARNING (main.lua:14840) Unable to resolve crossref @sec-solution-6' | Should -BeTrue
     }
 
-    It 'is false for a warning that carries its message' {
-        Test-NeoIPCRenderWarningHead -Line 'WARNING (main.lua:10090) unresolved link' | Should -BeFalse
+    It 'is false for a warning that is not a filter warning' {
         Test-NeoIPCRenderWarningHead -Line 'WARNING: unresolved link' | Should -BeFalse
+        Test-NeoIPCRenderWarningHead -Line '[WARNING] Could not fetch resource' | Should -BeFalse
         Test-NeoIPCRenderWarningHead -Line 'WARN [partner-report] sparse' | Should -BeFalse
         Test-NeoIPCRenderWarningHead -Line '' | Should -BeFalse
     }
@@ -293,13 +294,42 @@ Describe 'Invoke-QuartoRender' {
         $result.Status | Should -BeExactly 'Error'
     }
 
-    It 'keeps forwarding a warning that carries its message on one line' {
+    # Quarto colours a filter warning as a whole, so the reset lands on a line
+    # of its own after the message and is the blank line that ends it.
+    It 'ends a one-line filter warning at the colour reset that follows it' {
         Mock -ModuleName NeoIPC-Tools -CommandName quarto -MockWith {
             $global:LASTEXITCODE = 0
-            'WARNING (main.lua:14840) Unable to resolve crossref @sec-solution-6'
+            "$([char]27)[33mWARNING (main.lua:14840) Unable to resolve crossref @sec-solution-6"
+            "$([char]27)[39m"
             'Output created: report.pdf'
         }
         $null = Invoke-QuartoRender -Arguments @('render', 'r.qmd') -WarningVariable warnings 6>$null 3>$null
-        @($warnings | ForEach-Object { $_.Message }) | Should -Be @('WARNING (main.lua:14840) Unable to resolve crossref @sec-solution-6')
+        @($warnings | ForEach-Object { $_.Message }) | Should -Be @("$([char]27)[33mWARNING (main.lua:14840) Unable to resolve crossref @sec-solution-6")
+    }
+
+    It 'forwards the continuation of a filter warning whose head carries text' {
+        Mock -ModuleName NeoIPC-Tools -CommandName quarto -MockWith {
+            $global:LASTEXITCODE = 0
+            'WARNING (main.lua:20000) The first line of the message'
+            'and its second line.'
+            ''
+            'Output created: report.pdf'
+        }
+        $null = Invoke-QuartoRender -Arguments @('render', 'r.qmd') -WarningVariable warnings 6>$null 3>$null
+        @($warnings | ForEach-Object { $_.Message }) | Should -Be @(
+            'WARNING (main.lua:20000) The first line of the message',
+            'and its second line.')
+    }
+
+    # Pandoc's own warnings and the reports' logger records are single lines
+    # with nothing after them to absorb.
+    It 'forwards a non-filter warning alone' {
+        Mock -ModuleName NeoIPC-Tools -CommandName quarto -MockWith {
+            $global:LASTEXITCODE = 0
+            '[WARNING] Could not fetch resource'
+            'Output created: report.pdf'
+        }
+        $null = Invoke-QuartoRender -Arguments @('render', 'r.qmd') -WarningVariable warnings 6>$null 3>$null
+        @($warnings | ForEach-Object { $_.Message }) | Should -Be @('[WARNING] Could not fetch resource')
     }
 }
