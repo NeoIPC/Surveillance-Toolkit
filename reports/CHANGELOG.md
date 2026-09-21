@@ -55,6 +55,9 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
   literal text `:::` whenever the last detail file ended without a final newline, since its fence then
   sat on the line after that file's closing paragraph and Pandoc read it as part of the paragraph. The
   report now ends every included prose file with a blank line of its own.
+- The build wrappers show the text of a Quarto warning whose message follows its `WARNING (…)` head
+  on lines of its own, as the stray-fence diagnostic does. The head alone reached the build log; the
+  lines saying what was warned about were hidden at every verbosity.
 
 ## [0.1.0-alpha] - 2026-09-07
 

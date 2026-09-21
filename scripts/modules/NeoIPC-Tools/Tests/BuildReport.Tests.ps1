@@ -170,6 +170,28 @@ Describe 'Get-NeoIPCRenderLogLevel' {
     }
 }
 
+Describe 'Test-NeoIPCRenderWarningHead' {
+    BeforeAll {
+        $script:esc = [char]27
+    }
+
+    # Quarto's normalize filter warns about a stray fence with a message that
+    # begins with a newline, so the head line ends after the location and the
+    # text follows on lines of its own.
+    It 'is true for a warning head whose message follows on the next lines' {
+        Test-NeoIPCRenderWarningHead -Line 'WARNING (C:/Program Files/Quarto/share/filters/main.lua:10090) ' | Should -BeTrue
+        Test-NeoIPCRenderWarningHead -Line "$esc[33mWARNING (main.lua:10090) " | Should -BeTrue
+        Test-NeoIPCRenderWarningHead -Line 'WARNING (main.lua:10090)' | Should -BeTrue
+    }
+
+    It 'is false for a warning that carries its message' {
+        Test-NeoIPCRenderWarningHead -Line 'WARNING (main.lua:10090) unresolved link' | Should -BeFalse
+        Test-NeoIPCRenderWarningHead -Line 'WARNING: unresolved link' | Should -BeFalse
+        Test-NeoIPCRenderWarningHead -Line 'WARN [partner-report] sparse' | Should -BeFalse
+        Test-NeoIPCRenderWarningHead -Line '' | Should -BeFalse
+    }
+}
+
 Describe 'Invoke-QuartoRender' {
     BeforeAll {
         # The helper runs the `quarto` executable. A global stub stands in for it

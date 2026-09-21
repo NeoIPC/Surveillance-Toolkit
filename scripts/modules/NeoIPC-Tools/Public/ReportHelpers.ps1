@@ -52,6 +52,37 @@ function Get-NeoIPCRenderLogLevel {
 
 <#
 .SYNOPSIS
+Whether a Quarto warning line carries its message on the lines that follow.
+
+.DESCRIPTION
+Quarto's Lua filters print "WARNING (<file>:<line>) <message>" on one line,
+but a message that begins with a newline — the stray-fence diagnostic of the
+normalize filter does — leaves the head line empty after the location and
+puts its text on the following lines, which carry no level of their own.
+Invoke-QuartoRender forwards those lines as part of the warning, up to the
+first blank one; otherwise the build log shows a bare "WARNING (…)" and hides
+what was warned about at every verbosity.
+
+.PARAMETER Line
+One line of the render output, ANSI colour sequences included.
+#>
+function Test-NeoIPCRenderWarningHead {
+    [CmdletBinding()]
+    [OutputType([bool])]
+    param(
+        [Parameter(Mandatory, ValueFromPipeline)]
+        [AllowEmptyString()]
+        [string]$Line
+    )
+
+    process {
+        $ansi = '(\e\[[0-9;]*m)*'
+        return $Line -match ('^' + $ansi + 'WARNING \([^)]*\)\s*' + $ansi + '$')
+    }
+}
+
+<#
+.SYNOPSIS
 Run a script block with NeoIPC auth environment variables scoped.
 
 .DESCRIPTION
@@ -169,6 +200,7 @@ function Invoke-QuartoRender {
     $isError = $false
     $inBacktrace = $false
     $pendingErrorLine = $null
+    $warningBody = $false
 
     Write-Debug "Quarto command: quarto $($Arguments -join ' ')"
 
@@ -213,6 +245,17 @@ function Invoke-QuartoRender {
             # could warn about the records it was built from while the build log
             # stayed silent at the verbosity people actually run.
             $s | Write-Warning
+            # A head without a message is followed by its text on lines that
+            # carry no level of their own, up to the first blank one.
+            $warningBody = Test-NeoIPCRenderWarningHead -Line $s
+        }
+        elseif ($warningBody) {
+            if (($s -replace '\e\[[0-9;]*m', '') -match '^\s*$') {
+                $warningBody = $false
+            }
+            else {
+                $s | Write-Warning
+            }
         }
         else {
             $s | Write-Verbose
