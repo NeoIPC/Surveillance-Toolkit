@@ -277,6 +277,22 @@ Describe 'Invoke-QuartoRender' {
             'Please check the document for errors.')
     }
 
+    It 'keeps a body line that itself reads as an error inside the body, and the render successful' {
+        Mock -ModuleName NeoIPC-Tools -CommandName quarto -MockWith {
+            $global:LASTEXITCODE = 0
+            'WARNING (main.lua:10090) '
+            'ERROR: this sentence belongs to the warning'
+            ''
+            'ERROR [validation-report] a real error after the body'
+        }
+        $result = Invoke-QuartoRender -Arguments @('render', 'r.qmd') -WarningVariable warnings 6>$null 3>$null
+        @($warnings | ForEach-Object { $_.Message }) | Should -Be @(
+            'WARNING (main.lua:10090) ',
+            'ERROR: this sentence belongs to the warning')
+        # The blank line ends the body, so an error after it is still one.
+        $result.Status | Should -BeExactly 'Error'
+    }
+
     It 'keeps forwarding a warning that carries its message on one line' {
         Mock -ModuleName NeoIPC-Tools -CommandName quarto -MockWith {
             $global:LASTEXITCODE = 0

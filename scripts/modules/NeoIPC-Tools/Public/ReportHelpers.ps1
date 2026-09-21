@@ -235,20 +235,21 @@ function Invoke-QuartoRender {
                 Write-Host $s -ForegroundColor Red
             }
         }
-        elseif ((Get-NeoIPCRenderLogLevel -Line $s) -eq 'Error') {
-            $isError = $true
-            $pendingErrorLine = $s
-        }
         elseif ($warningBody) {
             # The body of a warning runs to the first blank line, whatever its
-            # lines look like: a sentence that happens to begin with WARNING is
-            # still part of the message, and must not restart the classification.
+            # lines look like: a sentence that happens to begin with WARNING or
+            # ERROR is still part of the message, and must neither restart the
+            # classification nor mark the render as failed.
             if (($s -replace '\e\[[0-9;]*m', '') -match '^\s*$') {
                 $warningBody = $false
             }
             else {
                 $s | Write-Warning
             }
+        }
+        elseif ((Get-NeoIPCRenderLogLevel -Line $s) -eq 'Error') {
+            $isError = $true
+            $pendingErrorLine = $s
         }
         elseif ((Get-NeoIPCRenderLogLevel -Line $s) -eq 'Warning') {
             # Anything the classifier misses falls to the else branch, where
