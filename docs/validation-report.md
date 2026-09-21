@@ -108,7 +108,10 @@ synthetic finding of the documented shape; on its own, this repository relies on
 2. Here: add `problems.N` with `description` (named placeholders equal to the rule's context fields) and
    `summary` to `content/_sR.yaml`; add its row to `problem_info` in `_mapping.qmd` (`primaryDetail`,
    `usedDetails`), writing a new `en/_problem_detail_NNNN.Rmd` and `_solution_NNNN.Rmd` where no
-   existing one fits and registering them in `problem_detail_info` / `solution_info`; list the new files
+   existing one fits and registering them in `problem_detail_info` / `solution_info`. A detail's
+   `usedSolutions` names the solutions its text cites; the render closes that set over the solutions
+   those cite in turn, so a solution needs no list of its own, and a detail that cites another detail
+   must share every rule's `usedDetails` with it. List the new files
    in `po/reports.po4a.cfg`, regenerate the YAML key list with `scripts/Update-Po4aYamlKeys.ps1`, run
    `scripts/Invoke-Localization.ps1 -Update -NonInteractive` and commit the `.pot`.
 3. Declare the neoipcr release the report now needs in `reports/compatibility.yml`.

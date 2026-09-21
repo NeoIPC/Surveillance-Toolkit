@@ -68,7 +68,7 @@ problem_detail_info <- tibble::tribble(
   14L, 14L, c(1L,4L,5L,9L,10L,15L),                # The Surgical Procedure Has an Invalid ICHI Code
   15L, 15L, c(1L,2L,4L,5L,8L,9L,10L,14L,15L),      # The Patient Record Has a Completed Enrolment but no Surveillance End Form
   16L, 16L, NULL,                                  # The Patient Record Has a Completed Enrolment but no Admission Form
-  17L, 17L, c(1L,4L,5L,8L,9L,10L,11L,15L,18L),     # The Day of Life Stored in the Form Does Not Match the Calculated Value
+  17L, 17L, c(1L,4L,5L,8L,9L,10L,11L,15L),         # The Day of Life Stored in the Form Does Not Match the Calculated Value
   18L, 18L, c(1L,4L,5L,8L,9L,10L,11L,15L),         # The Day of Occurrence After Admission Stored in the Form Does Not Match the Calculated Value
   19L, 19L, c(1L,5L,6L,7L,8L,9L,10L,12L,15L),      # The Infection Occurred Within the First Three Days of Life
   20L, 20L, c(1L,5L,6L,7L,8L,9L,10L,12L,15L),      # The Infection Occurred Within the First Two Days of Hospitalisation of a Referred or (Re-)Admitted Patient
@@ -94,4 +94,33 @@ solution_info <-tibble::tribble(
   12L, 15L, # Deleting an Event Form
   11L, 16L  # Updating Calculated Values in Event Forms
 )
+
+# The solutions a solution's text points at. A report that includes a
+# solution has to include the ones it cites, or the reader meets a reference
+# to a section that is not there. The references are Quarto cross-references
+# (`@sec-solution-N`), which no R parser reads, so they are collected with a
+# pattern; the ids are the same in every language, so the English sources are
+# read whatever language is rendered.
+solution_references <- function(ids) {
+  if (length(ids) == 0L)
+    return(integer())
+  text <- vapply(
+    paste0("en/_solution_", sprintf("%04d", ids), ".Rmd"),
+    readr::read_file, character(1))
+  refs <- unlist(regmatches(text, gregexpr("@sec-solution-[0-9]+", text)))
+  unique(as.integer(sub("@sec-solution-", "", refs, fixed = TRUE)))
+}
+
+# `ids` together with every solution reachable from them through the
+# references in their texts. An id the catalogue does not have is dropped:
+# the offline check in the workspace refuses it, and a render should not.
+close_solutions <- function(ids) {
+  ids <- intersect(unique(as.integer(ids)), solution_info$id)
+  repeat {
+    new_ids <- setdiff(solution_references(ids), ids)
+    if (length(new_ids) == 0L)
+      return(ids)
+    ids <- c(ids, new_ids)
+  }
+}
 ```

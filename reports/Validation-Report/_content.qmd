@@ -102,18 +102,24 @@ cat(
   ""
 )
 
-# Solutions
-solution_files <- solution_info |>
-  dplyr::semi_join(
-    sortedDetails |>
-      dplyr::select(usedSolutions) |>
-      tidyr::unnest_longer(usedSolutions),
-    dplyr::join_by(id == usedSolutions)) |>
+# Solutions: the ones the included details draw on, closed over the solutions
+# those cite in turn, in the catalogue's order. A solution po4a withheld for
+# want of translation falls back to English, as a detail does; resolving the
+# paths by glob dropped it silently and left every reference to it dangling.
+solution_ids <- close_solutions(unlist(sortedDetails$usedSolutions))
+localized_solutions <- solution_info |>
+  dplyr::filter(id %in% solution_ids) |>
   dplyr::arrange(sortOrder) |>
   dplyr::mutate(filePath = paste0(language, "/_solution_", sprintf("%04d", id), ".Rmd"), .keep = "none") |>
-  dplyr::distinct() |>
-  dplyr::pull(filePath) |>
-  Sys.glob()
+  dplyr::pull(filePath)
+english_solutions <- sub("^[^/]+/", "en/", localized_solutions)
+untranslated_solutions <- !file.exists(localized_solutions)
+
+if (any(untranslated_solutions))
+  logWarn("Solution(s) not available in this language, using English: ",
+          paste(basename(localized_solutions[untranslated_solutions]), collapse = ", "))
+
+solution_files <- ifelse(untranslated_solutions, english_solutions, localized_solutions)
 
 for (solution_file in solution_files) {
   cat(sep = "\n", knitr::knit_child(quiet = TRUE, text = readr::read_file(solution_file)), "")

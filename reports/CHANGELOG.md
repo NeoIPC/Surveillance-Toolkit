@@ -59,6 +59,10 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
 
 ### Fixed
 
+- A solution that another included solution cited, but no included explanation did, was left out of
+  the Validation Report, and the reference to it rendered unresolved. The report now includes every
+  solution the included ones cite, and a solution po4a withheld for want of translation falls back to
+  English, as an explanation does, instead of vanishing with its references.
 - The Validation Report's page break between the problem details and the solutions rendered as the
   literal text `:::` whenever the last detail file ended without a final newline, since its fence then
   sat on the line after that file's closing paragraph and Pandoc read it as part of the paragraph. The
