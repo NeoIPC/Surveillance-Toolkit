@@ -189,6 +189,9 @@ Describe 'Test-NeoIPCRenderWarningHead' {
         Test-NeoIPCRenderWarningHead -Line 'WARNING: unresolved link' | Should -BeFalse
         Test-NeoIPCRenderWarningHead -Line '[WARNING] Could not fetch resource' | Should -BeFalse
         Test-NeoIPCRenderWarningHead -Line 'WARN [partner-report] sparse' | Should -BeFalse
+        # Parentheses that do not hold a Lua source location.
+        Test-NeoIPCRenderWarningHead -Line 'WARNING (HTTP status:404) resource not found' | Should -BeFalse
+        Test-NeoIPCRenderWarningHead -Line 'WARNING (see below) ' | Should -BeFalse
         Test-NeoIPCRenderWarningHead -Line '' | Should -BeFalse
     }
 }

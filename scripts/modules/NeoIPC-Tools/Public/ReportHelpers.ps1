@@ -80,8 +80,11 @@ function Test-NeoIPCRenderWarningHead {
     )
 
     process {
+        # The location is the Lua source file and line the filter's own
+        # caller_info() prints; parentheses holding anything else are some
+        # other tool's warning, with no continuation to absorb.
         $ansi = '(\e\[[0-9;]*m)*'
-        return $Line -match ('^' + $ansi + 'WARNING \([^)]*\)')
+        return $Line -match ('^' + $ansi + 'WARNING \([^)]*\.lua:\d+\)')
     }
 }
 
