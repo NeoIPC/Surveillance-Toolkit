@@ -235,4 +235,39 @@ Describe 'Invoke-QuartoRender' {
         $result = Invoke-QuartoRender -Arguments @('render', 'r.qmd') 6>$null
         $result.Status | Should -BeExactly 'Error'
     }
+
+    # Quarto's normalize filter puts its stray-fence message on the lines after
+    # the WARNING head. The whole message must reach the warning stream, the
+    # blank line that ends it must end the forwarding, and the ordinary output
+    # after it must not be reported as a warning.
+    It 'forwards the body of a warning whose head carries no message, up to the blank line' {
+        Mock -ModuleName NeoIPC-Tools -CommandName quarto -MockWith {
+            $global:LASTEXITCODE = 0
+            'processing file: Validation-Report.qmd'
+            'WARNING (C:/Program Files/Quarto/share/filters/main.lua:10090) '
+            'The following string was found in the document: :::'
+            'This usually indicates a problem with a fenced div in the document.'
+            ''
+            'Output created: report.pdf'
+        }
+        $result = Invoke-QuartoRender -Arguments @('render', 'r.qmd') -WarningVariable warnings 6>$null 3>$null
+        $result.Status | Should -BeExactly 'Success'
+        $texts = @($warnings | ForEach-Object { $_.Message })
+        $texts | Should -Contain 'WARNING (C:/Program Files/Quarto/share/filters/main.lua:10090) '
+        $texts | Should -Contain 'The following string was found in the document: :::'
+        $texts | Should -Contain 'This usually indicates a problem with a fenced div in the document.'
+        $texts | Should -Not -Contain 'Output created: report.pdf'
+        $texts | Should -Not -Contain 'processing file: Validation-Report.qmd'
+        $texts.Count | Should -Be 3
+    }
+
+    It 'keeps forwarding a warning that carries its message on one line' {
+        Mock -ModuleName NeoIPC-Tools -CommandName quarto -MockWith {
+            $global:LASTEXITCODE = 0
+            'WARNING (main.lua:14840) Unable to resolve crossref @sec-solution-6'
+            'Output created: report.pdf'
+        }
+        $null = Invoke-QuartoRender -Arguments @('render', 'r.qmd') -WarningVariable warnings 6>$null 3>$null
+        @($warnings | ForEach-Object { $_.Message }) | Should -Be @('WARNING (main.lua:14840) Unable to resolve crossref @sec-solution-6')
+    }
 }
