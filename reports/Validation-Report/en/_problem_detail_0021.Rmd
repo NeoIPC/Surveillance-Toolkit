@@ -9,3 +9,5 @@ If the infant is in fact still in the department, you can safely ignore this mes
 
 Otherwise, please open the Tracked Entity Instance Dashboard of the patient record (see @sec-solution-1), then the enrolment (see @sec-solution-10), add a Surveillance End form (see @sec-solution-14), fill in the data and complete the form (see @sec-solution-8), and only then complete the enrolment (see @sec-solution-4).
 The Surveillance End form must be added before the enrolment is completed: a completed enrolment without it lacks the denominator data the rates are calculated from.
+
+To see every patient record of your department with an active enrolment, including the ones this report does not list yet, use the list filter described in @sec-solution-16.

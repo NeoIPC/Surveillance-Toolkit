@@ -72,25 +72,26 @@ problem_detail_info <- tibble::tribble(
   18L, 18L, c(1L,4L,5L,8L,9L,10L,11L,15L),         # The Day of Occurrence After Admission Stored in the Form Does Not Match the Calculated Value
   19L, 19L, c(1L,5L,6L,7L,8L,9L,10L,12L,15L),      # The Infection Occurred Within the First Three Days of Life
   20L, 20L, c(1L,5L,6L,7L,8L,9L,10L,12L,15L),      # The Infection Occurred Within the First Two Days of Hospitalisation of a Referred or (Re-)Admitted Patient
-  21L, 21L, c(1L,10L,14L,8L,4L),                   # The Enrolment Has Been Active for More Than 180 Days and Has No Surveillance End Form
-  22L, 22L, c(1L,10L,15L,8L,4L)                    # The Enrolment Has Been Active for More Than 180 Days and Its Surveillance End Form Is Not Completed
+  21L, 21L, c(16L,1L,10L,14L,8L,4L),               # The Enrolment Has Been Active for More Than 180 Days and Has No Surveillance End Form
+  22L, 22L, c(16L,1L,10L,15L,8L,4L)                # The Enrolment Has Been Active for More Than 180 Days and Its Surveillance End Form Is Not Completed
 )
 solution_info <-tibble::tribble(
   ~id, ~sortOrder,
-   1L,  1L, # Opening the Tracked Entity Instance Dashboard of a Patient Record
-  10L,  2L, # Opening an Enrolment in the Tracked Entity Instance Dashboard
-   2L,  3L, # Deleting a Patient Record
-   3L,  4L, # Adding an Enrollment to a Patient Record
-   4L,  5L, # Completing an Enrolment
-   5L,  6L, # Reopening a Closed Enrolment to Make Changes
-  13L,  7L, # Deleting an Enrolment
-   6L,  8L, # Changing the Admission Date
-   7L,  9L, # Changing the Date of an Event in an Event Form
-  15L, 10L, # Opening an Event Form
-  14L, 11L, # Adding an Event Form
-   8L, 12L, # Completing an Event Form
-   9L, 13L, # Reopening a Closed Event Form to Make Changes
-  12L, 14L, # Deleting an Event Form
-  11L, 15L  # Updating Calculated Values in Event Forms
+  16L,  1L, # Listing the Patients With an Active Enrolment
+   1L,  2L, # Opening the Tracked Entity Instance Dashboard of a Patient Record
+  10L,  3L, # Opening an Enrolment in the Tracked Entity Instance Dashboard
+   2L,  4L, # Deleting a Patient Record
+   3L,  5L, # Adding an Enrollment to a Patient Record
+   4L,  6L, # Completing an Enrolment
+   5L,  7L, # Reopening a Closed Enrolment to Make Changes
+  13L,  8L, # Deleting an Enrolment
+   6L,  9L, # Changing the Admission Date
+   7L, 10L, # Changing the Date of an Event in an Event Form
+  15L, 11L, # Opening an Event Form
+  14L, 12L, # Adding an Event Form
+   8L, 13L, # Completing an Event Form
+   9L, 14L, # Reopening a Closed Event Form to Make Changes
+  12L, 15L, # Deleting an Event Form
+  11L, 16L  # Updating Calculated Values in Event Forms
 )
 ```

@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-09-21 13:52+0200\n"
+"POT-Creation-Date: 2026-09-21 14:19+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Language-Team: none\n"
 "Language: en\n"
@@ -4058,6 +4058,7 @@ msgstr ""
 #: reports/Validation-Report/en/_solution_0013.Rmd:2
 #: reports/Validation-Report/en/_solution_0014.Rmd:2
 #: reports/Validation-Report/en/_solution_0015.Rmd:2
+#: reports/Validation-Report/en/_solution_0016.Rmd:2
 #, no-wrap
 msgid "\\newpage\n"
 msgstr ""
@@ -4717,11 +4718,18 @@ msgid "If the infant is in fact still in the department, you can safely ignore t
 msgstr ""
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0021.Rmd:11
+#: reports/Validation-Report/en/_problem_detail_0021.Rmd:12
 #, markdown-text, no-wrap
 msgid ""
 "Otherwise, please open the Tracked Entity Instance Dashboard of the patient record (see @sec-solution-1), then the enrolment (see @sec-solution-10), add a Surveillance End form (see @sec-solution-14), fill in the data and complete the form (see @sec-solution-8), and only then complete the enrolment (see @sec-solution-4).\n"
 "The Surveillance End form must be added before the enrolment is completed: a completed enrolment without it lacks the denominator data the rates are calculated from.\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0021.Rmd:13
+#: reports/Validation-Report/en/_problem_detail_0022.Rmd:12
+#, markdown-text, no-wrap
+msgid "To see every patient record of your department with an active enrolment, including the ones this report does not list yet, use the list filter described in @sec-solution-16.\n"
 msgstr ""
 
 #. type: Title ###
@@ -4740,7 +4748,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0022.Rmd:10
+#: reports/Validation-Report/en/_problem_detail_0022.Rmd:11
 #, markdown-text, no-wrap
 msgid ""
 "Otherwise, please open the Tracked Entity Instance Dashboard of the patient record (see @sec-solution-1), then the enrolment (see @sec-solution-10) and its Surveillance End form (see @sec-solution-15), check the data, complete the form (see @sec-solution-8), and then complete the enrolment (see @sec-solution-4).\n"
@@ -5201,4 +5209,34 @@ msgstr ""
 #: reports/Validation-Report/en/_solution_0015.Rmd:11
 #, markdown-text, no-wrap
 msgid "![The Next and Previous buttons in the event timeline of the Tracked Entity Instance Dashboard](img/fig-event-timeline-full.png){#fig-event-timeline-full fig-alt=\"A screenshot of the Tracked Entity Instance Dashboard with the Next and Previous buttons in the event timeline highlighted\"}\n"
+msgstr ""
+
+#. type: Title ###
+#: reports/Validation-Report/en/_solution_0016.Rmd:6
+#, markdown-text, no-wrap
+msgid "Listing the Patients With an Active Enrolment {#sec-solution-16}"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_solution_0016.Rmd:10
+#, markdown-text, no-wrap
+msgid ""
+"Tracker Capture can list every patient record of a department that has an active enrolment.\n"
+"This is the quickest way to find the records the messages about open enrolments refer to, and to see whether any other enrolment is still open that should have been ended.\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_solution_0016.Rmd:15
+#, markdown-text, no-wrap
+msgid ""
+"Open the Tracker Capture app, select your department in the organisation unit tree on the left and the 'NeoIPC Core Module' program at the top, and click 'Lists'.\n"
+"In the toolbar above the list, click the circle button next to the list type; its tooltip reads 'Only those with active enrollment' (see @fig-active-enrolment-filter).\n"
+"The list then shows only the patient records with an active enrolment, and clicking on an entry opens its Tracked Entity Instance Dashboard (see @sec-solution-1).\n"
+"For every record listed whose infant has left the department, end the surveillance and complete the enrolment (see @sec-solution-4).\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_solution_0016.Rmd:16
+#, markdown-text, no-wrap
+msgid "![The filter for patients with an active enrolment in the list toolbar of Tracker Capture](img/fig-active-enrolment-filter.png){#fig-active-enrolment-filter fig-alt=\"The list toolbar of Tracker Capture below the program selector, with 'Lists' selected on the right. Of the four buttons left of the 'Custom working list' selector, the second, a circle, is highlighted, and its tooltip reads 'Only those with active enrollment'.\"}\n"
 msgstr ""

@@ -29,7 +29,9 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
   completed. Their sentences and explanations say that the infant may still be in the department and
   the message can then be ignored, and the explanations tell the two cases apart: the form has to be
   added before the enrolment is completed in the one, and completed rather than added in the other.
-  The report rests on 43 rules and requires neoipcr `v0.0.0.9003`.
+  A new solution shows how Tracker Capture's list filter shows every patient record of a department
+  with an active enrolment, so a site can find the open ones the report does not list yet. The report
+  rests on 43 rules and requires neoipcr `v0.0.0.9003`.
 
 ### Changed
 

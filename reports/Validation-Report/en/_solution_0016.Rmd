@@ -1,0 +1,16 @@
+
+::: {.content-visible unless-format="html"}
+\newpage
+:::
+
+### Listing the Patients With an Active Enrolment {#sec-solution-16}
+
+Tracker Capture can list every patient record of a department that has an active enrolment.
+This is the quickest way to find the records the messages about open enrolments refer to, and to see whether any other enrolment is still open that should have been ended.
+
+Open the Tracker Capture app, select your department in the organisation unit tree on the left and the 'NeoIPC Core Module' program at the top, and click 'Lists'.
+In the toolbar above the list, click the circle button next to the list type; its tooltip reads 'Only those with active enrollment' (see @fig-active-enrolment-filter).
+The list then shows only the patient records with an active enrolment, and clicking on an entry opens its Tracked Entity Instance Dashboard (see @sec-solution-1).
+For every record listed whose infant has left the department, end the surveillance and complete the enrolment (see @sec-solution-4).
+
+![The filter for patients with an active enrolment in the list toolbar of Tracker Capture](img/fig-active-enrolment-filter.png){#fig-active-enrolment-filter fig-alt="The list toolbar of Tracker Capture below the program selector, with 'Lists' selected on the right. Of the four buttons left of the 'Custom working list' selector, the second, a circle, is highlighted, and its tooltip reads 'Only those with active enrollment'."}
