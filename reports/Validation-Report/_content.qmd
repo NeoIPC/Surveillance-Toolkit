@@ -27,7 +27,8 @@ if (nrow(problems) == 0L) {
 } else {
   cat(
     sep = "\n",
-    knitr::knit_child(text = readr::read_file(Sys.glob(paste0(language, "/_problems_intro.Rmd"))), quiet = TRUE)
+    knitr::knit_child(text = readr::read_file(Sys.glob(paste0(language, "/_problems_intro.Rmd"))), quiet = TRUE),
+    ""
   )
 }
 ```
@@ -44,7 +45,8 @@ cat("::: {.content-visible unless-format=\"html\"}", "\\newpage", ":::", "", sep
 # Problem details intro
 cat(
   sep = "\n",
-  knitr::knit_child(text = readr::read_file(Sys.glob(paste0(language, "/_problem_details_intro.Rmd"))), quiet = TRUE)
+  knitr::knit_child(text = readr::read_file(Sys.glob(paste0(language, "/_problem_details_intro.Rmd"))), quiet = TRUE),
+  ""
 )
 
 # Problem details
@@ -83,8 +85,12 @@ if (any(absent))
 
 problem_detail_files <- problem_detail_files[!absent]
 
+# Every child is followed by a blank line of its own. A file that ends without
+# a final newline would otherwise run straight into the next file's first line,
+# and Pandoc reads a heading or a fence on the line after a paragraph as part
+# of that paragraph — so a `:::` opening the next file became literal text.
 for (problem_detail_file in problem_detail_files) {
-  cat(sep = "\n", knitr::knit_child(quiet = TRUE, text = readr::read_file(problem_detail_file)))
+  cat(sep = "\n", knitr::knit_child(quiet = TRUE, text = readr::read_file(problem_detail_file)), "")
 }
 
 cat("::: {.content-visible unless-format=\"html\"}", "\\newpage", ":::", "", sep = "\n")
@@ -92,7 +98,8 @@ cat("::: {.content-visible unless-format=\"html\"}", "\\newpage", ":::", "", sep
 # Solutions intro
 cat(
   sep = "\n",
-  knitr::knit_child(text = readr::read_file(Sys.glob(paste0(language, "/_solutions_intro.Rmd"))), quiet = TRUE)
+  knitr::knit_child(text = readr::read_file(Sys.glob(paste0(language, "/_solutions_intro.Rmd"))), quiet = TRUE),
+  ""
 )
 
 # Solutions
@@ -109,7 +116,7 @@ solution_files <- solution_info |>
   Sys.glob()
 
 for (solution_file in solution_files) {
-  cat(sep = "\n", knitr::knit_child(quiet = TRUE, text = readr::read_file(solution_file)))
+  cat(sep = "\n", knitr::knit_child(quiet = TRUE, text = readr::read_file(solution_file)), "")
 }
 
 }
