@@ -52,6 +52,44 @@ function Get-NeoIPCRenderLogLevel {
 
 <#
 .SYNOPSIS
+Whether a render output line is the head of a Quarto filter warning.
+
+.DESCRIPTION
+Quarto's Lua filters print "WARNING (<file>:<line>) <message>" and colour the
+whole of it, so the colour reset lands on a line of its own after the message
+(refs/quarto-cli/src/resources/filters/common/log.lua). A message may hold
+newlines — the stray-fence diagnostic of the normalize filter begins with one,
+so its head carries no text and every line of the message follows on lines
+that carry no level of their own. Invoke-QuartoRender therefore forwards the
+lines after such a head as part of the warning, up to the first blank one,
+whether the head carries text or not; otherwise the build log shows the head
+alone and hides the rest of what was warned about at every verbosity. Pandoc's
+"[WARNING]" lines and the reports' logger records are single lines and are
+not heads in this sense.
+
+.PARAMETER Line
+One line of the render output, ANSI colour sequences included.
+#>
+function Test-NeoIPCRenderWarningHead {
+    [CmdletBinding()]
+    [OutputType([bool])]
+    param(
+        [Parameter(Mandatory, ValueFromPipeline)]
+        [AllowEmptyString()]
+        [string]$Line
+    )
+
+    process {
+        # The location is the Lua source file and line the filter's own
+        # caller_info() prints; parentheses holding anything else are some
+        # other tool's warning, with no continuation to absorb.
+        $ansi = '(\e\[[0-9;]*m)*'
+        return $Line -match ('^' + $ansi + 'WARNING \([^)]*\.lua:\d+\)')
+    }
+}
+
+<#
+.SYNOPSIS
 Run a script block with NeoIPC auth environment variables scoped.
 
 .DESCRIPTION
@@ -169,6 +207,7 @@ function Invoke-QuartoRender {
     $isError = $false
     $inBacktrace = $false
     $pendingErrorLine = $null
+    $warningBody = $false
 
     Write-Debug "Quarto command: quarto $($Arguments -join ' ')"
 
@@ -203,6 +242,19 @@ function Invoke-QuartoRender {
                 Write-Host $s -ForegroundColor Red
             }
         }
+        elseif ($warningBody) {
+            # The rest of a filter warning runs to the first blank line — the
+            # colour reset Quarto prints after the message — whatever its lines
+            # look like: a sentence that happens to begin with WARNING or ERROR
+            # is still part of the message, and must neither restart the
+            # classification nor mark the render as failed.
+            if (($s -replace '\e\[[0-9;]*m', '') -match '^\s*$') {
+                $warningBody = $false
+            }
+            else {
+                $s | Write-Warning
+            }
+        }
         elseif ((Get-NeoIPCRenderLogLevel -Line $s) -eq 'Error') {
             $isError = $true
             $pendingErrorLine = $s
@@ -213,6 +265,9 @@ function Invoke-QuartoRender {
             # could warn about the records it was built from while the build log
             # stayed silent at the verbosity people actually run.
             $s | Write-Warning
+            # A filter warning's message may continue on lines that carry no
+            # level of their own, up to the first blank one.
+            $warningBody = Test-NeoIPCRenderWarningHead -Line $s
         }
         else {
             $s | Write-Verbose

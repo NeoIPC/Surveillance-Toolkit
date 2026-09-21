@@ -170,6 +170,32 @@ Describe 'Get-NeoIPCRenderLogLevel' {
     }
 }
 
+Describe 'Test-NeoIPCRenderWarningHead' {
+    BeforeAll {
+        $script:esc = [char]27
+    }
+
+    # A Quarto filter warning names its source file and line in parentheses;
+    # its message may follow on the same line or, when it begins with a
+    # newline as the stray-fence diagnostic does, on lines of its own.
+    It 'is true for a filter warning head, with or without text on it' {
+        Test-NeoIPCRenderWarningHead -Line 'WARNING (C:/Program Files/Quarto/share/filters/main.lua:10090) ' | Should -BeTrue
+        Test-NeoIPCRenderWarningHead -Line "$esc[33mWARNING (main.lua:10090) " | Should -BeTrue
+        Test-NeoIPCRenderWarningHead -Line 'WARNING (main.lua:10090)' | Should -BeTrue
+        Test-NeoIPCRenderWarningHead -Line 'WARNING (main.lua:14840) Unable to resolve crossref @sec-solution-6' | Should -BeTrue
+    }
+
+    It 'is false for a warning that is not a filter warning' {
+        Test-NeoIPCRenderWarningHead -Line 'WARNING: unresolved link' | Should -BeFalse
+        Test-NeoIPCRenderWarningHead -Line '[WARNING] Could not fetch resource' | Should -BeFalse
+        Test-NeoIPCRenderWarningHead -Line 'WARN [partner-report] sparse' | Should -BeFalse
+        # Parentheses that do not hold a Lua source location.
+        Test-NeoIPCRenderWarningHead -Line 'WARNING (HTTP status:404) resource not found' | Should -BeFalse
+        Test-NeoIPCRenderWarningHead -Line 'WARNING (see below) ' | Should -BeFalse
+        Test-NeoIPCRenderWarningHead -Line '' | Should -BeFalse
+    }
+}
+
 Describe 'Invoke-QuartoRender' {
     BeforeAll {
         # The helper runs the `quarto` executable. A global stub stands in for it
@@ -212,5 +238,101 @@ Describe 'Invoke-QuartoRender' {
         }
         $result = Invoke-QuartoRender -Arguments @('render', 'r.qmd') 6>$null
         $result.Status | Should -BeExactly 'Error'
+    }
+
+    # Quarto's normalize filter puts its stray-fence message on the lines after
+    # the WARNING head. The whole message must reach the warning stream, the
+    # blank line that ends it must end the forwarding, and the ordinary output
+    # after it must not be reported as a warning.
+    It 'forwards the body of a warning whose head carries no message, up to the blank line' {
+        Mock -ModuleName NeoIPC-Tools -CommandName quarto -MockWith {
+            $global:LASTEXITCODE = 0
+            'processing file: Validation-Report.qmd'
+            'WARNING (C:/Program Files/Quarto/share/filters/main.lua:10090) '
+            'The following string was found in the document: :::'
+            'This usually indicates a problem with a fenced div in the document.'
+            ''
+            'Output created: report.pdf'
+        }
+        $result = Invoke-QuartoRender -Arguments @('render', 'r.qmd') -WarningVariable warnings 6>$null 3>$null
+        $result.Status | Should -BeExactly 'Success'
+        $texts = @($warnings | ForEach-Object { $_.Message })
+        $texts | Should -Contain 'WARNING (C:/Program Files/Quarto/share/filters/main.lua:10090) '
+        $texts | Should -Contain 'The following string was found in the document: :::'
+        $texts | Should -Contain 'This usually indicates a problem with a fenced div in the document.'
+        $texts | Should -Not -Contain 'Output created: report.pdf'
+        $texts | Should -Not -Contain 'processing file: Validation-Report.qmd'
+        $texts.Count | Should -Be 3
+    }
+
+    It 'keeps a body line that itself reads as a warning inside the body' {
+        Mock -ModuleName NeoIPC-Tools -CommandName quarto -MockWith {
+            $global:LASTEXITCODE = 0
+            'WARNING (main.lua:10090) '
+            'WARNING: the document holds a stray fence'
+            'Please check the document for errors.'
+            ''
+            'Output created: report.pdf'
+        }
+        $null = Invoke-QuartoRender -Arguments @('render', 'r.qmd') -WarningVariable warnings 6>$null 3>$null
+        @($warnings | ForEach-Object { $_.Message }) | Should -Be @(
+            'WARNING (main.lua:10090) ',
+            'WARNING: the document holds a stray fence',
+            'Please check the document for errors.')
+    }
+
+    It 'keeps a body line that itself reads as an error inside the body, and the render successful' {
+        Mock -ModuleName NeoIPC-Tools -CommandName quarto -MockWith {
+            $global:LASTEXITCODE = 0
+            'WARNING (main.lua:10090) '
+            'ERROR: this sentence belongs to the warning'
+            ''
+            'ERROR [validation-report] a real error after the body'
+        }
+        $result = Invoke-QuartoRender -Arguments @('render', 'r.qmd') -WarningVariable warnings 6>$null 3>$null
+        @($warnings | ForEach-Object { $_.Message }) | Should -Be @(
+            'WARNING (main.lua:10090) ',
+            'ERROR: this sentence belongs to the warning')
+        # The blank line ends the body, so an error after it is still one.
+        $result.Status | Should -BeExactly 'Error'
+    }
+
+    # Quarto colours a filter warning as a whole, so the reset lands on a line
+    # of its own after the message and is the blank line that ends it.
+    It 'ends a one-line filter warning at the colour reset that follows it' {
+        Mock -ModuleName NeoIPC-Tools -CommandName quarto -MockWith {
+            $global:LASTEXITCODE = 0
+            "$([char]27)[33mWARNING (main.lua:14840) Unable to resolve crossref @sec-solution-6"
+            "$([char]27)[39m"
+            'Output created: report.pdf'
+        }
+        $null = Invoke-QuartoRender -Arguments @('render', 'r.qmd') -WarningVariable warnings 6>$null 3>$null
+        @($warnings | ForEach-Object { $_.Message }) | Should -Be @("$([char]27)[33mWARNING (main.lua:14840) Unable to resolve crossref @sec-solution-6")
+    }
+
+    It 'forwards the continuation of a filter warning whose head carries text' {
+        Mock -ModuleName NeoIPC-Tools -CommandName quarto -MockWith {
+            $global:LASTEXITCODE = 0
+            'WARNING (main.lua:20000) The first line of the message'
+            'and its second line.'
+            ''
+            'Output created: report.pdf'
+        }
+        $null = Invoke-QuartoRender -Arguments @('render', 'r.qmd') -WarningVariable warnings 6>$null 3>$null
+        @($warnings | ForEach-Object { $_.Message }) | Should -Be @(
+            'WARNING (main.lua:20000) The first line of the message',
+            'and its second line.')
+    }
+
+    # Pandoc's own warnings and the reports' logger records are single lines
+    # with nothing after them to absorb.
+    It 'forwards a non-filter warning alone' {
+        Mock -ModuleName NeoIPC-Tools -CommandName quarto -MockWith {
+            $global:LASTEXITCODE = 0
+            '[WARNING] Could not fetch resource'
+            'Output created: report.pdf'
+        }
+        $null = Invoke-QuartoRender -Arguments @('render', 'r.qmd') -WarningVariable warnings 6>$null 3>$null
+        @($warnings | ForEach-Object { $_.Message }) | Should -Be @('[WARNING] Could not fetch resource')
     }
 }

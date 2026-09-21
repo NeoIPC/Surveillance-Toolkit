@@ -42,6 +42,7 @@
         'Get-NeoIPCDataElementCodes'
         # QuartoHelpers
         'Get-NeoIPCRenderLogLevel'
+        'Test-NeoIPCRenderWarningHead'
         'Invoke-WithNeoIPCAuth'
         'Invoke-QuartoRender'
         'Invoke-Rscript'
