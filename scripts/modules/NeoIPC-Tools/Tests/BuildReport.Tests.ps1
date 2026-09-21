@@ -261,6 +261,22 @@ Describe 'Invoke-QuartoRender' {
         $texts.Count | Should -Be 3
     }
 
+    It 'keeps a body line that itself reads as a warning inside the body' {
+        Mock -ModuleName NeoIPC-Tools -CommandName quarto -MockWith {
+            $global:LASTEXITCODE = 0
+            'WARNING (main.lua:10090) '
+            'WARNING: the document holds a stray fence'
+            'Please check the document for errors.'
+            ''
+            'Output created: report.pdf'
+        }
+        $null = Invoke-QuartoRender -Arguments @('render', 'r.qmd') -WarningVariable warnings 6>$null 3>$null
+        @($warnings | ForEach-Object { $_.Message }) | Should -Be @(
+            'WARNING (main.lua:10090) ',
+            'WARNING: the document holds a stray fence',
+            'Please check the document for errors.')
+    }
+
     It 'keeps forwarding a warning that carries its message on one line' {
         Mock -ModuleName NeoIPC-Tools -CommandName quarto -MockWith {
             $global:LASTEXITCODE = 0

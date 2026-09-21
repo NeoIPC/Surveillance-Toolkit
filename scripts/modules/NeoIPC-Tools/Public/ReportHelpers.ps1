@@ -239,6 +239,17 @@ function Invoke-QuartoRender {
             $isError = $true
             $pendingErrorLine = $s
         }
+        elseif ($warningBody) {
+            # The body of a warning runs to the first blank line, whatever its
+            # lines look like: a sentence that happens to begin with WARNING is
+            # still part of the message, and must not restart the classification.
+            if (($s -replace '\e\[[0-9;]*m', '') -match '^\s*$') {
+                $warningBody = $false
+            }
+            else {
+                $s | Write-Warning
+            }
+        }
         elseif ((Get-NeoIPCRenderLogLevel -Line $s) -eq 'Warning') {
             # Anything the classifier misses falls to the else branch, where
             # Write-Verbose hides it unless -Verbose was passed — so a report
@@ -248,14 +259,6 @@ function Invoke-QuartoRender {
             # A head without a message is followed by its text on lines that
             # carry no level of their own, up to the first blank one.
             $warningBody = Test-NeoIPCRenderWarningHead -Line $s
-        }
-        elseif ($warningBody) {
-            if (($s -replace '\e\[[0-9;]*m', '') -match '^\s*$') {
-                $warningBody = $false
-            }
-            else {
-                $s | Write-Warning
-            }
         }
         else {
             $s | Write-Verbose
