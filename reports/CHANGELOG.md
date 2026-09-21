@@ -25,7 +25,7 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
 - Every validation rule carries a placeholder-free `summary` of what it checks in the string
   resources, for the report header and for any consumer that lists the rules.
 - The Validation Report renders neoipcr's rules 43 and 44, which question an enrolment still active
-  more than 180 days after its admission — without a surveillance end form, or with one that is not
+  more than 120 days after its admission — without a surveillance end form, or with one that is not
   completed. Their sentences and explanations say that the infant may still be in the department and
   the message can then be ignored, and the explanations tell the two cases apart: the form has to be
   added before the enrolment is completed in the one, and completed rather than added in the other.

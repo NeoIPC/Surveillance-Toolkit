@@ -72,8 +72,8 @@ problem_detail_info <- tibble::tribble(
   18L, 18L, c(1L,4L,5L,8L,9L,10L,11L,15L),         # The Day of Occurrence After Admission Stored in the Form Does Not Match the Calculated Value
   19L, 19L, c(1L,5L,6L,7L,8L,9L,10L,12L,15L),      # The Infection Occurred Within the First Three Days of Life
   20L, 20L, c(1L,5L,6L,7L,8L,9L,10L,12L,15L),      # The Infection Occurred Within the First Two Days of Hospitalisation of a Referred or (Re-)Admitted Patient
-  21L, 21L, c(16L,1L,10L,14L,8L,4L),               # The Enrolment Has Been Active for More Than 180 Days and Has No Surveillance End Form
-  22L, 22L, c(16L,1L,10L,15L,8L,4L)                # The Enrolment Has Been Active for More Than 180 Days and Its Surveillance End Form Is Not Completed
+  21L, 21L, c(16L,1L,10L,14L,8L,4L),               # The Enrolment Has Been Active for More Than 120 Days and Has No Surveillance End Form
+  22L, 22L, c(16L,1L,10L,15L,8L,4L)                # The Enrolment Has Been Active for More Than 120 Days and Its Surveillance End Form Is Not Completed
 )
 solution_info <-tibble::tribble(
   ~id, ~sortOrder,

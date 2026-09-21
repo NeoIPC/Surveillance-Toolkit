@@ -289,14 +289,14 @@ problems:
       The enrolment has been active for {days_open} days since the admission
       on {enrolledAt} and has no surveillance end form. If the infant is
       still in the department, this message can be ignored.
-    summary: The enrolment is still active more than 180 days after the admission and has no surveillance end form.
+    summary: The enrolment is still active more than 120 days after the admission and has no surveillance end form.
   "44":
     description: >-
       The enrolment has been active for {days_open} days since the admission
       on {enrolledAt} and its surveillance end form is not completed (status
       is '{status}'). If the infant is still in the department, this message
       can be ignored.
-    summary: The enrolment is still active more than 180 days after the admission and its surveillance end form is not completed.
+    summary: The enrolment is still active more than 120 days after the admission and its surveillance end form is not completed.
 ssi_problem_header_prefix: Surgical Site Infection event with the infection date
 ssi_types:
   "1": superficial incisional SSI
