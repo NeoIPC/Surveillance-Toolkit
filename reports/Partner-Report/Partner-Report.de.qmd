@@ -21,6 +21,7 @@ params:
   includeIntroductionTexts: true
   includeMethodsTexts: true
   includeOutlierInterpretation: false
+  includeValidationSummaryTable: true
   includeBirthWeightFigure: true
   includeGestationalAgeFigure: true
   includeIncidenceDensityTable: true

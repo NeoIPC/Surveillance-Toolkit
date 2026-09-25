@@ -46,6 +46,7 @@ header:
 headings:
   antibiotic_utilization: Antibiotic Utilization
   antimicrobial_susceptibility_testing: Antimicrobial Susceptibility Testing
+  data_validation: Data Validation
   detection_of_infectious_agents: Detection of Infectious Agents
   device_associated_infections: Device-Associated Infections
   diagnostics: Diagnostics
@@ -244,6 +245,37 @@ tbl-surgical-procedure-rates:
   rate_numerator: "No of procedures"
   tbl-cap: "Surgical procedures by category"
   to_be_categorized: "Not yet categorized"
+tbl-validation-summary:
+  tbl-cap: "Records removed or exempted by the validation rules"
+  rule_label: "Rule {rule}"
+  records: "Records"
+  removed: "Removed"
+  exempted: "Exempted"
+  patients: "Patient records"
+  admissions: "Patient admissions"
+  forms: "Forms"
+  total_label: "All rules – {records}"
+  removed_footnote: >-
+    {column}: Records the rule flagged; the validation removed each from the
+    dataset before the analysis together with the whole patient record it
+    belongs to, so the total of patient records is the number of patients
+    removed.
+  exempted_footnote: >-
+    {column}: Records the rule flagged that an exception list exempted from
+    it; a record another rule flagged as well is removed all the same.
+  rule_footnote: >-
+    The rules are numbered as in the NeoIPC Validation Report, which explains
+    each rule and lists the affected records.
+  no_removals: "The validation rules removed no record from the dataset."
+  not_available: >-
+    The dataset carries no validation summary: it was written before the
+    analysis package recorded one.
+  pass_not_run: >-
+    The validation rules were not applied to this dataset: it was built with
+    the records they would remove kept in.
+  reference_not_available: >-
+    The reference data carry no validation summary, so none is shown beside
+    the department's.
 total: "Total"
 unit_separator: " "
 methods:

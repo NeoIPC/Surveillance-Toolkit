@@ -117,6 +117,7 @@ param(
         'InfectiousAgents',
         'RiskFactors',
         'Surgery',
+        'ValidationSummary',
         'BirthWeightDistribution',
         'GestationalAgeDistribution',
         'IncidenceDensityRates',
@@ -142,6 +143,7 @@ param(
         'InfectiousAgents',
         'RiskFactors',
         'Surgery',
+        'ValidationSummary',
         'BirthWeightDistribution',
         'GestationalAgeDistribution',
         'IncidenceDensityRates',
@@ -324,6 +326,7 @@ $elementMapping = @{
                                             'includeResistantPathogenInfectionRateTable')
     'RiskFactors'                       = @('includeRiskDensityRateTable')
     'Surgery'                           = @('includeSurgicalProcedureRateTable')
+    'ValidationSummary'                 = @('includeValidationSummaryTable')
     'BirthWeightDistribution'           = @('includeBirthWeightFigure')
     'GestationalAgeDistribution'        = @('includeGestationalAgeFigure')
     'IncidenceDensityRates'             = @('includeIncidenceDensityTable')

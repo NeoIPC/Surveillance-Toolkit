@@ -15,6 +15,40 @@ footer_tex <- sprintf("\\renewcommand{\\FooterText}{%s}", sR$h2020_funding_state
 \FloatBarrier
 :::
 
+```{r}
+#| output: asis
+if (params$includeValidationSummaryTable)
+  cat('::: {.content-visible when-meta="alwaysTrue"}\n\n##',
+      sR$headings$data_validation, '\n\n:::\n')
+```
+
+```{r}
+#| output: asis
+.show(params$includeValidationSummaryTable && params$includeIntroductionTexts)
+```
+
+```{r}
+#| output: asis
+include_localised("_validation-summary.Rmd")
+```
+
+```{r}
+#| output: asis
+.end()
+```
+
+```{r}
+#| output: asis
+.show(params$includeValidationSummaryTable)
+```
+
+{{< include tables/_tbl-validation-summary.qmd >}}
+
+```{r}
+#| output: asis
+.end()
+```
+
 ## `{r} sR$headings$introduction`
 
 ```{r}

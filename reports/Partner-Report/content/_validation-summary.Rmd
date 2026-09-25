@@ -1,0 +1,4 @@
+Before any figure in this report was calculated, the NeoIPC validation rules were applied to your department's data.
+A record a rule flags is removed from the dataset together with the whole patient record it belongs to — the patient's admissions and forms — unless an exception list names it, and the removed records are not part of any figure in this report.
+The table below shows, for each rule that removed or exempted a record, how many records of which kind it concerned, and the totals across all rules; where the report compares your department with reference data that carry a summary of their own, it is shown alongside.
+The Validation Report for your department lists every affected record and explains each rule.

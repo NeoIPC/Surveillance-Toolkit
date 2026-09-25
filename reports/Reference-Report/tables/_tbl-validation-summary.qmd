@@ -1,0 +1,22 @@
+```{r}
+#| output: asis
+#| label: tbl-validation-summary
+#| tbl-cap: !expr 'sR$`tbl-validation-summary`$`tbl-cap`'
+#| tbl-cap-location: top
+
+# NEOIPC-PERMANENT(dataset-format): see rename_legacy_antibiotic_table() in
+# the Partner Report's _setup.qmd. A dataset serialized before neoipcr
+# 0.0.0.9002 carries no validation summary at all, and one built with the
+# validation pass switched off carries an empty one; the section says which
+# instead of failing the render.
+validation_strings <- sR$`tbl-validation-summary`
+summary <- reference_data$validationSummary
+if (is.null(summary)) {
+  no_data_table(validation_strings$not_available)
+} else if (!has_validation_summary(summary)) {
+  no_data_table(validation_strings$pass_not_run)
+} else {
+  tbl <- format_validation_summary_table(list(summary), sR)
+  if (is.null(tbl)) no_data_table(validation_strings$no_removals) else tbl
+}
+```

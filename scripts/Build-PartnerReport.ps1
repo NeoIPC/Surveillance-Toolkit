@@ -174,6 +174,7 @@ param(
     # has its visibility flag forced to true.
     [Parameter()]
     [ValidateSet(
+        'ValidationSummary',
         'BirthWeightDistribution',
         'GestationalAgeDistribution',
         'IncidenceDensityRates',
@@ -194,6 +195,7 @@ param(
     # both -EnableElements and -DisableElements, -DisableElements wins.
     [Parameter()]
     [ValidateSet(
+        'ValidationSummary',
         'BirthWeightDistribution',
         'GestationalAgeDistribution',
         'IncidenceDensityRates',
@@ -228,6 +230,7 @@ $renderFormats = @($OutputFormats | Where-Object { $_ -ne 'json' })
 
 # Map user-friendly element names to internal Quarto parameter names
 $elementMapping = @{
+    'ValidationSummary' = 'includeValidationSummaryTable'
     'BirthWeightDistribution' = 'includeBirthWeightFigure'
     'GestationalAgeDistribution' = 'includeGestationalAgeFigure'
     'IncidenceDensityRates' = 'includeIncidenceDensityTable'
