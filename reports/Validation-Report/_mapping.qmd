@@ -77,8 +77,8 @@ problem_detail_info <- tibble::tribble(
 )
 solution_info <-tibble::tribble(
   ~id, ~sortOrder,
-  16L,  1L, # Listing the Patients With an Active Enrolment
-   1L,  2L, # Opening the Tracked Entity Instance Dashboard of a Patient Record
+   1L,  1L, # Opening the Tracked Entity Instance Dashboard of a Patient Record
+  16L,  2L, # Listing the Patients With an Active Enrolment
   10L,  3L, # Opening an Enrolment in the Tracked Entity Instance Dashboard
    2L,  4L, # Deleting a Patient Record
    3L,  5L, # Adding an Enrollment to a Patient Record
@@ -112,12 +112,14 @@ solution_references <- function(ids) {
 }
 
 # `ids` together with every solution reachable from them through the
-# references in their texts. An id the catalogue does not have is dropped:
-# the offline check in the workspace refuses it, and a render should not.
+# references in their texts. An id the catalogue does not have is dropped,
+# whether given or cited: the offline check in the workspace refuses it, and
+# a render should not — it has no file to read for it.
 close_solutions <- function(ids) {
-  ids <- intersect(unique(as.integer(ids)), solution_info$id)
+  catalogued <- function(x) intersect(unique(as.integer(x)), solution_info$id)
+  ids <- catalogued(ids)
   repeat {
-    new_ids <- setdiff(solution_references(ids), ids)
+    new_ids <- setdiff(catalogued(solution_references(ids)), ids)
     if (length(new_ids) == 0L)
       return(ids)
     ids <- c(ids, new_ids)

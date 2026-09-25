@@ -1,7 +1,7 @@
 ### The Enrolment Has Been Active for More Than 120 Days and Has No Surveillance End Form {#sec-problem-details-21}
 
 An enrolment is normally ended, and then completed, when the infant is discharged, transferred or dies.
-This message appears in the validation report when an enrolment has been active for more than 120 days after the admission date and the patient record has no Surveillance End form.
+This message appears in the validation report when an enrolment has been active for more than 120 days after the admission date and has no Surveillance End form.
 A stay this long is exceptional, so in most cases the infant left the department long ago and the record was never closed.
 Until it is, the patient's data cannot be included in analyses.
 
