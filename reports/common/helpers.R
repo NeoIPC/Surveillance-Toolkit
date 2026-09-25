@@ -463,6 +463,15 @@ format_range_filter <- function(from, to, unit, all_label) {
   }
 }
 
+#' Whether a dataset's validation summary holds anything to show: absent on a
+#' dataset written before neoipcr recorded one, and empty (0×0) on one built
+#' with the validation pass switched off.
+#' @param summary The `validationSummary` slot of a calculated dataset
+#' @return TRUE when the slot is a table with columns
+has_validation_summary <- function(summary) {
+  !is.null(summary) && ncol(summary) > 0L
+}
+
 #' Format the validation summaries of one or more datasets as a table
 #'
 #' One row per rule that removed or exempted a record, in rule order, with the
@@ -499,11 +508,19 @@ format_validation_summary_table <- function(summaries, sR) {
   if (!any(unlist(joined[count_cols]) > 0, na.rm = TRUE))
     return(NULL)
 
+  # interpolate_translation() refuses a zero-length value, so a row set that
+  # is empty — a summary with totals but no rule rows cannot arise from
+  # neoipcr, but the shape is allowed — gets its labels without it.
+  labels_for <- function(template, ...) {
+    values <- list(...)
+    if (length(values[[1]]) == 0L) character() else
+      as.character(interpolate_translation(template, ...))
+  }
   rules <- joined |>
     dplyr::filter(!is.na(.data$rule_id)) |>
     dplyr::arrange(.data$rule_id) |>
     dplyr::mutate(
-      label   = as.character(interpolate_translation(strings$rule_label, rule = .data$rule_id)),
+      label   = labels_for(strings$rule_label, rule = .data$rule_id),
       records = unname(kind_labels[.data$record_kind]),
       total   = FALSE)
   totals <- joined |>
@@ -511,8 +528,8 @@ format_validation_summary_table <- function(summaries, sR) {
     dplyr::mutate(record_kind = factor(.data$record_kind, levels = names(kind_labels))) |>
     dplyr::arrange(.data$record_kind) |>
     dplyr::mutate(
-      label   = as.character(interpolate_translation(
-        strings$total_label, records = unname(kind_labels[as.character(.data$record_kind)]))),
+      label   = labels_for(
+        strings$total_label, records = unname(kind_labels[as.character(.data$record_kind)])),
       records = NA_character_,
       total   = TRUE)
   tbl_data <- dplyr::bind_rows(rules, totals) |>

@@ -13,7 +13,7 @@ validation_strings <- sR$`tbl-validation-summary`
 summary <- reference_data$validationSummary
 if (is.null(summary)) {
   no_data_table(validation_strings$not_available)
-} else if (ncol(summary) == 0L) {
+} else if (!has_validation_summary(summary)) {
   no_data_table(validation_strings$pass_not_run)
 } else {
   tbl <- format_validation_summary_table(list(summary), sR)

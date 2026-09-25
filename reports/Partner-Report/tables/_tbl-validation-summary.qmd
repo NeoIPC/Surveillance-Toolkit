@@ -10,17 +10,19 @@
 # pass switched off carries an empty one; the section says which instead of
 # failing the render.
 validation_strings <- sR$`tbl-validation-summary`
-has_summary <- function(summary) !is.null(summary) && ncol(summary) > 0L
 own_summary <- benchmark_data$validationSummary$own
+ref_summary <- benchmark_data$validationSummary$ref
 if (is.null(own_summary)) {
   no_data_table(validation_strings$not_available)
-} else if (!has_summary(own_summary)) {
+} else if (!has_validation_summary(own_summary)) {
   no_data_table(validation_strings$pass_not_run)
 } else {
+  # The column groups carry the labels the report's other tables give the
+  # two datasets.
   summaries <- list(own_summary)
   names(summaries) <- sR$own_data_label
-  if (has_summary(benchmark_data$validationSummary$ref))
-    summaries[[sR$reference_data]] <- benchmark_data$validationSummary$ref
+  if (has_validation_summary(ref_summary))
+    summaries[[sR$reference_data]] <- ref_summary
   tbl <- format_validation_summary_table(summaries, sR)
   if (is.null(tbl)) no_data_table(validation_strings$no_removals) else tbl
 }
@@ -31,7 +33,7 @@ if (is.null(own_summary)) {
 # A reference dataset without a summary of its own contributes no column
 # group; the reader is told rather than left to wonder.
 if ("ref" %in% benchmark_data$dataset_names &&
-    has_summary(own_summary) &&
-    !has_summary(benchmark_data$validationSummary$ref))
+    has_validation_summary(own_summary) &&
+    !has_validation_summary(ref_summary))
   cat("\n", validation_strings$reference_not_available, "\n", sep = "")
 ```
