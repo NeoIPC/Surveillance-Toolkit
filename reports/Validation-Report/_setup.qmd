@@ -114,6 +114,24 @@ if (length(unsentenced) > 0L)
     "The string resources carry no complete description and summary for validation rule(s) %s.",
     paste(unsentenced, collapse = ", ")))
 
+# Every placeholder a rule's sentences name must be a field the rule records,
+# as `neoipcr::validation_rule_context_fields()` declares them, or `ssi_type`,
+# the label the formatter adds for rule 19; any other placeholder would fail
+# inside the interpolation on the first finding that reaches the sentence.
+context_fields <- neoipcr::validation_rule_context_fields()
+placeholders <- function(text)
+  unique(gsub("[{}]", "", unlist(regmatches(text, gregexpr("\\{[^{}]+\\}", text)))))
+for (rule_id in rule_ids) {
+  entry <- sR$problems[[as.character(rule_id)]]
+  stray <- setdiff(
+    placeholders(unlist(entry[template_keys(rule_id)])),
+    c(context_fields[[as.character(rule_id)]], if (rule_id == 19L) "ssi_type"))
+  if (length(stray) > 0L)
+    rlang::abort(sprintf(
+      "The sentence(s) of validation rule %d name placeholder(s) the rule does not record: %s.",
+      rule_id, paste(stray, collapse = ", ")))
+}
+
 exceptions <- NULL
 if (!is.null(params$validationExceptionFile))
   exceptions <- neoipcr::read_validation_exceptions(params$validationExceptionFile)

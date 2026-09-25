@@ -100,6 +100,10 @@ params:
   # @type logical
   includeOutlierInterpretation: false
 
+  # Include the data-validation summary table.
+  # @type logical
+  includeValidationSummaryTable: true
+
   # Include the birth-weight distribution figure.
   # @type logical
   includeBirthWeightFigure: true

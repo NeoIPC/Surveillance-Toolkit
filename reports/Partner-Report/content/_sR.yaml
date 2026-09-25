@@ -624,7 +624,7 @@ outlier:
     indicate incomplete data capture, a very small population, or
     generation of the report very early after starting surveillance.
 
-  # ── Table 4: Infectious agent groupings ──────────────────────────
+  # ── Infectious agent groupings (tbl-agent-per-infection-rate) ───
   agent_staphylococci_cns_low: >-
     Low coagulase-negative staphylococci detection rates may reflect
     strict blood culture criteria or effective contamination prevention
@@ -653,7 +653,7 @@ outlier:
     may reflect differences in patient population, antibiotic exposure
     patterns, or microbiological sampling practices.
 
-  # ── Table 5: Resistance groupings ────────────────────────────────
+  # ── Resistance groupings (tbl-abr-infection-rate) ───────────────
   abr_gram_negative_3gcr_high_only: >-
     Elevated third-generation cephalosporin resistance (3GCR) without
     corresponding carbapenem resistance elevation may indicate

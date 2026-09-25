@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-09-25 07:12+0200\n"
+"POT-Creation-Date: 2026-09-25 18:32+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Language-Team: none\n"
 "Language: en\n"
@@ -293,6 +293,12 @@ msgstr ""
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Antimicrobial Susceptibility Testing"
+msgstr ""
+
+#. type: Hash Value: headings data_validation
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Data Validation"
 msgstr ""
 
 #. type: Hash Value: headings detection_of_infectious_agents
@@ -1289,6 +1295,102 @@ msgstr ""
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Not yet categorized"
+msgstr ""
+
+#. type: Hash Value: tbl-validation-summary admissions
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Patient admissions"
+msgstr ""
+
+#. type: Hash Value: tbl-validation-summary exempted
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Exempted"
+msgstr ""
+
+#. type: Hash Value: tbl-validation-summary exempted_footnote
+#: reports/common.yaml:1
+#, no-wrap
+msgid "{column}: Records the rule flagged that an exception list exempted from it; a record another rule flagged as well is removed all the same."
+msgstr ""
+
+#. type: Hash Value: tbl-validation-summary forms
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Forms"
+msgstr ""
+
+#. type: Hash Value: tbl-validation-summary no_removals
+#: reports/common.yaml:1
+#, no-wrap
+msgid "The validation rules removed no record from the dataset."
+msgstr ""
+
+#. type: Hash Value: tbl-validation-summary not_available
+#: reports/common.yaml:1
+#, no-wrap
+msgid "The dataset carries no validation summary: it was written before the analysis package recorded one."
+msgstr ""
+
+#. type: Hash Value: tbl-validation-summary pass_not_run
+#: reports/common.yaml:1
+#, no-wrap
+msgid "The validation rules were not applied to this dataset: it was built with the records they would remove kept in."
+msgstr ""
+
+#. type: Hash Value: tbl-validation-summary patients
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Patient records"
+msgstr ""
+
+#. type: Hash Value: tbl-validation-summary records
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Records"
+msgstr ""
+
+#. type: Hash Value: tbl-validation-summary reference_not_available
+#: reports/common.yaml:1
+#, no-wrap
+msgid "The reference data carry no validation summary, so none is shown beside the department's."
+msgstr ""
+
+#. type: Hash Value: tbl-validation-summary removed
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Removed"
+msgstr ""
+
+#. type: Hash Value: tbl-validation-summary removed_footnote
+#: reports/common.yaml:1
+#, no-wrap
+msgid "{column}: Records the rule flagged; the validation removed each from the dataset before the analysis together with the whole patient record it belongs to, so the total of patient records is the number of patients removed."
+msgstr ""
+
+#. type: Hash Value: tbl-validation-summary rule_footnote
+#: reports/common.yaml:1
+#, no-wrap
+msgid "The rules are numbered as in the NeoIPC Validation Report, which explains each rule and lists the affected records."
+msgstr ""
+
+#. type: Hash Value: tbl-validation-summary rule_label
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Rule {rule}"
+msgstr ""
+
+#. type: Hash Value: tbl-validation-summary tbl-cap
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Records removed by the validation rules"
+msgstr ""
+
+#. type: Hash Value: tbl-validation-summary total_label
+#: reports/common.yaml:1
+#, no-wrap
+msgid "All rules – {records}"
 msgstr ""
 
 #. type: Hash Value: total
@@ -2606,6 +2708,16 @@ msgid "The following summary presents key surveillance metrics for this report. 
 msgstr ""
 
 #. type: Plain text
+#: reports/Partner-Report/content/_validation-summary.Rmd:4
+#, markdown-text, no-wrap
+msgid ""
+"Before any figure in this report was calculated, the NeoIPC validation rules were applied to your department's data.\n"
+"A record a rule flags is removed from the dataset together with the whole patient record it belongs to — the patient's admissions and forms — unless an exception list names it, and the removed records are not part of any figure in this report.\n"
+"The table below shows, for each rule that removed or exempted a record, how many records of which kind it concerned, and the totals across all rules; where the report compares your department with reference data that carry a summary of their own, it is shown alongside.\n"
+"The Validation Report for your department lists every affected record and explains each rule.\n"
+msgstr ""
+
+#. type: Plain text
 #: reports/Partner-Report/content/_patient-population.Rmd:1
 #, markdown-text, no-wrap
 msgid "The NeoIPC surveillance system focuses on high-risk neonates to ensure sustainable continuous monitoring. Patients with a birth weight below 1500 g and/or gestational age below 32 weeks at birth are included if admitted within the first 120 days of life. The following figures show the composition of your patient population based on the filter settings specified in the report header.\n"
@@ -3252,6 +3364,16 @@ msgstr ""
 #: reports/Reference-Report/content/_introduction.Rmd:5
 #, markdown-text, no-wrap
 msgid "Rates in this report use different denominators depending on the metric. Incidence density rates and risk and protective factor rates are expressed per patient days. Infectious agent detection rates and resistant pathogen infection rates are expressed per infections in which a pathogen was detected. Surgical procedure rates are expressed per patients. Each table's formula footnote specifies the exact denominator used.\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Reference-Report/content/_validation-summary.Rmd:4
+#, markdown-text, no-wrap
+msgid ""
+"Before any value in this report was calculated, the NeoIPC validation rules were applied to the data of every department contributing to the reference data.\n"
+"A record a rule flags is removed from the dataset together with the whole patient record it belongs to — the patient's admissions and forms — unless an exception list names it, and the removed records are not part of any value in this report.\n"
+"The table below shows, for each rule that removed or exempted a record, how many records of which kind it concerned, and the totals across all rules.\n"
+"The rules are numbered as in the NeoIPC Validation Report, which explains each rule.\n"
 msgstr ""
 
 #. type: Plain text

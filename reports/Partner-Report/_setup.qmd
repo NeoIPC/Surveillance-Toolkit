@@ -242,7 +242,7 @@ interpret_antibiotic_rates <- function(state_map, sR, registry = NULL) {
   unique(Filter(Negate(is.null), parts))
 }
 
-# ── Table 4: Infectious agent groupings ─────────────────────────────
+# ── Infectious agent groupings (tbl-agent-per-infection-rate) ──────
 # Note: classify_metrics() lowercases all metric IDs (identifiers).
 interpret_agent_staphylococci <- function(state_map, sR, registry = NULL) {
   cns <- if ("coagulase-negative staphylococci" %in% names(state_map))
@@ -270,7 +270,7 @@ interpret_agent_enterobacterales <- function(state_map, sR, registry = NULL) {
   Filter(Negate(is.null), parts)
 }
 
-# ── Table 5: Resistance groupings ──────────────────────────────────
+# ── Resistance groupings (tbl-abr-infection-rate) ──────────────────
 # Note: classify_metrics() uses combine_cols = c("abr", "group") and
 # lowercases the combined identifier.
 interpret_abr_gram_negative <- function(state_map, sR, registry = NULL) {
@@ -340,7 +340,8 @@ interpret_severe_infection <- function(state_map, sR, registry = NULL) {
   # Definition 2: Primary sepsis/BSI ↔ device-associated BSI (composite)
   bsi_state <- state_map[["bsi"]]
   if (!is.null(bsi_state) && coarse_state(bsi_state) %in% c("high", "low")) {
-    # Composite resolution: check CVC BSI and PVC BSI from Table 2
+    # Composite resolution: check CVC BSI and PVC BSI from the
+    # device-associated table (tbl-device-associated-incidence-density-rates)
     paired_state <- NULL
     if (!is.null(dev_ass)) {
       cvc_state <- dev_ass[["cvc"]]

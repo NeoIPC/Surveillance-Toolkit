@@ -21,6 +21,7 @@ params:
   includeConfidenceIntervals: "all"
   includeIntroductionTexts: true
   includeMethodsTexts: true
+  includeValidationSummaryTable: true
   includeBirthWeightFigure: true
   includeGestationalAgeFigure: true
   includeIncidenceDensityTable: true

@@ -31,7 +31,18 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
   added before the enrolment is completed in the one, and completed rather than added in the other.
   A new solution shows how Tracker Capture's list filter shows every patient record of a department
   with an active enrolment, so a site can find the open ones the report does not list yet. The report
-  rests on 43 rules and requires neoipcr `v0.0.0.9003`.
+  rests on 43 rules.
+- The Partner and Reference Reports open with a data-validation summary: for each validation rule that
+  removed or exempted a record, the number and kind of records it concerned, and the totals across all
+  rules — the Partner Report's department beside the reference data where the report compares the two.
+  The `includeValidationSummaryTable` parameter (`ValidationSummary` in the build wrappers' element
+  lists) switches it off like any other table; a dataset written before neoipcr recorded the summary
+  renders the section with a sentence saying so. The reports require neoipcr `v0.0.0.9004`, whose
+  reporting period selects the enrolments before the validation pass — below it, the summary would
+  count every out-of-period patient as removed by rule 25.
+- The Validation Report fails the render when a rule's sentence names a placeholder the rule does not
+  record, as `neoipcr::validation_rule_context_fields()` declares the fields, instead of failing
+  inside the interpolation on the first finding that reaches it.
 
 ### Changed
 
@@ -59,6 +70,9 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
 
 ### Fixed
 
+- An antibiotic-utilisation table with no data failed the render with an "unused argument" error, since
+  its no-data branch passed the table's own sentence to a helper that took none; the helper takes the
+  sentence now, and the table renders it.
 - A solution that another included solution cited, but no included explanation did, was left out of
   the Validation Report, and the reference to it rendered unresolved. The report now includes every
   solution the included ones cite, and a solution po4a withheld for want of translation falls back to

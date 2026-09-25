@@ -95,10 +95,10 @@ fails the render with a message naming the rule rather than rendering a blank li
 header. `_setup.qmd` fails the render when `validate()` reports
 a selected rule it could not run (its `rules_skipped` attribute, set when the dataset lacks a column the
 rule reads): the import asks for every tier, so a skip means the dataset is not what the report expects,
-and a document that claimed those rules would be wrong. Whether every placeholder names a field its
-rule records, or a value `decorate_context()` adds for it, is settled only where both repositories are at
-hand: the workspace that assembles them runs an offline check that interpolates every template with a
-synthetic finding of the documented shape; on its own, this repository relies on the render.
+and a document that claimed those rules would be wrong. It also fails the render when a rule's
+sentences name a placeholder the rule does not record, as `neoipcr::validation_rule_context_fields()`
+declares the fields, or that `decorate_context()` does not add for it (`ssi_type` for rule 19), instead
+of failing inside the interpolation on the first finding that reaches the sentence.
 
 ## Adding a validation rule
 

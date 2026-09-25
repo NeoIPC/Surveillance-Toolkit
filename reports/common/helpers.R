@@ -463,6 +463,109 @@ format_range_filter <- function(from, to, unit, all_label) {
   }
 }
 
+#' Format the validation summaries of one or more datasets as a table
+#'
+#' One row per rule that removed or exempted a record, in rule order, with the
+#' kind of record the rule concerns and its counts, then one row per record
+#' kind with the totals across all rules. `summaries` is a list of
+#' `validationSummary` tibbles as neoipcr's `import_dhis2()` documents them
+#' (`rule_id`, `record_kind`, `n_removed`, `n_exempted`, the totals rows
+#' carrying `NA` for the rule); with more than one, the list's names label a
+#' column group per dataset, and a rule one dataset never met shows no count
+#' for it. `NULL` when no summary removed or exempted anything, so the caller
+#' can say so instead of printing a table of zeros.
+#' @param summaries List of validation-summary tibbles, named when more than one
+#' @param sR String resources
+#' @return A gt table, or NULL
+format_validation_summary_table <- function(summaries, sR) {
+  strings <- sR$`tbl-validation-summary`
+  kind_labels <- c(
+    patients    = strings$patients,
+    enrollments = strings$admissions,
+    events      = strings$forms)
+
+  counts <- purrr::map2(summaries, seq_along(summaries), function(summary, i) {
+    summary |>
+      dplyr::select("rule_id", "record_kind", "n_removed", "n_exempted") |>
+      dplyr::mutate(
+        rule_id     = as.integer(.data$rule_id),
+        record_kind = as.character(.data$record_kind)) |>
+      dplyr::rename(
+        !!paste0("removed_", i)  := "n_removed",
+        !!paste0("exempted_", i) := "n_exempted")
+  })
+  joined <- purrr::reduce(counts, dplyr::full_join, by = c("rule_id", "record_kind"))
+  count_cols <- setdiff(names(joined), c("rule_id", "record_kind"))
+  if (!any(joined[count_cols] > 0, na.rm = TRUE))
+    return(NULL)
+
+  rules <- joined |>
+    dplyr::filter(!is.na(.data$rule_id)) |>
+    dplyr::arrange(.data$rule_id) |>
+    dplyr::mutate(
+      label   = as.character(interpolate_translation(strings$rule_label, rule = .data$rule_id)),
+      records = unname(kind_labels[.data$record_kind]),
+      total   = FALSE)
+  totals <- joined |>
+    dplyr::filter(is.na(.data$rule_id)) |>
+    dplyr::mutate(record_kind = factor(.data$record_kind, levels = names(kind_labels))) |>
+    dplyr::arrange(.data$record_kind) |>
+    dplyr::mutate(
+      label   = as.character(interpolate_translation(
+        strings$total_label, records = unname(kind_labels[as.character(.data$record_kind)]))),
+      records = NA_character_,
+      total   = TRUE)
+  tbl_data <- dplyr::bind_rows(rules, totals) |>
+    dplyr::select("label", "records", tidyselect::all_of(count_cols), "total")
+
+  tbl <- tbl_data |>
+    dplyr::select(!"total") |>
+    gt::gt(rowname_col = "label") |>
+    gt::sub_missing(missing_text = "") |>
+    gt::tab_options(
+      latex.use_longtable = TRUE,
+      table.width = gt::pct(100),
+      footnotes.marks = "extended") |>
+    gt::fmt_integer(
+      columns = tidyselect::all_of(count_cols),
+      sep_mark = sR$digit_group_separator,
+      min_sep_threshold = 2) |>
+    gt::cols_label(records = strings$records) |>
+    gt::tab_style(
+      style = gt::cell_text(weight = "bold"),
+      locations = list(
+        gt::cells_column_spanners(),
+        gt::cells_column_labels(),
+        gt::cells_stub(rows = tbl_data$total))) |>
+    gt::tab_style(
+      style = gt::cell_borders(sides = "top", weight = gt::px(2)),
+      locations = list(
+        gt::cells_body(rows = which(tbl_data$total)[1]),
+        gt::cells_stub(rows = which(tbl_data$total)[1]))) |>
+    gt::tab_footnote(
+      footnote = interpolate_translation(strings$removed_footnote, column = strings$removed),
+      locations = gt::cells_column_labels(columns = "removed_1"),
+      placement = "right") |>
+    gt::tab_footnote(
+      footnote = interpolate_translation(strings$exempted_footnote, column = strings$exempted),
+      locations = gt::cells_column_labels(columns = "exempted_1"),
+      placement = "right") |>
+    gt::tab_source_note(strings$rule_footnote)
+
+  for (i in seq_along(summaries)) {
+    cols <- c(paste0("removed_", i), paste0("exempted_", i))
+    tbl <- tbl |>
+      gt::cols_label(
+        !!cols[1] := strings$removed,
+        !!cols[2] := strings$exempted)
+    if (length(summaries) > 1L)
+      tbl <- tbl |>
+        gt::tab_spanner(label = names(summaries)[i], columns = tidyselect::all_of(cols),
+                        id = paste0("dataset_", i))
+  }
+  tbl
+}
+
 #' Format dataset metadata and counts into display-ready values (dR fields)
 #' @param metadata List with data_up_to, effective_analysis_period, countries, dataset_options
 #' @param counts Named list of raw numeric values (n_departments, n_patients, etc.)
@@ -564,15 +667,17 @@ format_dataset_resources <- function(metadata, counts, sR) {
   result
 }
 
-no_data_table <- function() {
+# A sentence in a table's place, shaped as a one-cell longtable outside HTML
+# so the chunk's caption still has a table to sit on.
+no_data_table <- function(message = sR$no_data) {
   cat(
     '::: {.content-visible when-format="html"}',
-    sR$no_data,
+    message,
     ":::",
     "",
     '::: {.content-visible unless-format="html"}',
     "\\begin{longtable}{l}",
-    sR$no_data,
+    message,
     "\\end{longtable}",
     ":::",
     sep = "\n"
