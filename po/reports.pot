@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-09-19 12:27+0200\n"
+"POT-Creation-Date: 2026-09-25 07:12+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Language-Team: none\n"
 "Language: en\n"
@@ -3876,6 +3876,30 @@ msgstr ""
 msgid "The day of occurrence after admission stored in the surgical site infection form does not match the value calculated from the dates."
 msgstr ""
 
+#. type: Hash Value: problems 43 description
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The enrolment has been active for {days_open} days since the admission on {enrolledAt} and has no surveillance end form. If the infant is still in the department, this message can be ignored."
+msgstr ""
+
+#. type: Hash Value: problems 43 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The enrolment is still active more than 120 days after the admission and has no surveillance end form."
+msgstr ""
+
+#. type: Hash Value: problems 44 description
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The enrolment has been active for {days_open} days since the admission on {enrolledAt} and its surveillance end form is not completed (status is '{status}'). If the infant is still in the department, this message can be ignored."
+msgstr ""
+
+#. type: Hash Value: problems 44 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The enrolment is still active more than 120 days after the admission and its surveillance end form is not completed."
+msgstr ""
+
 #. type: Hash Value: problems 5 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
@@ -4034,6 +4058,7 @@ msgstr ""
 #: reports/Validation-Report/en/_solution_0013.Rmd:2
 #: reports/Validation-Report/en/_solution_0014.Rmd:2
 #: reports/Validation-Report/en/_solution_0015.Rmd:2
+#: reports/Validation-Report/en/_solution_0016.Rmd:2
 #, no-wrap
 msgid "\\newpage\n"
 msgstr ""
@@ -4670,6 +4695,72 @@ msgid "Please delete the forms for all infections that are not nosocomial infect
 msgstr ""
 
 #. type: Title ###
+#: reports/Validation-Report/en/_problem_detail_0021.Rmd:1
+#, markdown-text, no-wrap
+msgid "The Enrolment Has Been Active for More Than 120 Days and Has No Surveillance End Form {#sec-problem-details-21}"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0021.Rmd:7
+#, markdown-text, no-wrap
+msgid ""
+"An enrolment is normally ended, and then completed, when the infant is discharged, transferred or dies.\n"
+"This message appears in the validation report when an enrolment has been active for more than 120 days after the admission date and has no Surveillance End form.\n"
+"A stay this long is exceptional, so in most cases the infant left the department long ago and the record was never closed.\n"
+"Until it is, the patient's data cannot be included in analyses.\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0021.Rmd:9
+#, markdown-text, no-wrap
+msgid "If the infant is in fact still in the department, you can safely ignore this message; it disappears once the surveillance has been ended.\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0021.Rmd:12
+#, markdown-text, no-wrap
+msgid ""
+"Otherwise, please open the Tracked Entity Instance Dashboard of the patient record (see @sec-solution-1), then the enrolment (see @sec-solution-10), add a Surveillance End form (see @sec-solution-14), fill in the data and complete the form (see @sec-solution-8), and only then complete the enrolment (see @sec-solution-4).\n"
+"The Surveillance End form must be added before the enrolment is completed: a completed enrolment without it lacks the denominator data the rates are calculated from.\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0021.Rmd:13
+#: reports/Validation-Report/en/_problem_detail_0022.Rmd:12
+#, markdown-text, no-wrap
+msgid "To see every patient record of your department with an active enrolment, including the ones this report does not list yet, use the list filter described in @sec-solution-16.\n"
+msgstr ""
+
+#. type: Title ###
+#: reports/Validation-Report/en/_problem_detail_0022.Rmd:1
+#, markdown-text, no-wrap
+msgid "The Enrolment Has Been Active for More Than 120 Days and Its Surveillance End Form Is Not Completed {#sec-problem-details-22}"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0022.Rmd:6
+#, markdown-text, no-wrap
+msgid ""
+"An enrolment is normally ended, and then completed, when the infant is discharged, transferred or dies.\n"
+"This message appears in the validation report when an enrolment has been active for more than 120 days after the admission date and its Surveillance End form has been started but not completed.\n"
+"A stay this long is exceptional, so in most cases the surveillance did end and only the last two steps, completing the form and completing the enrolment, were left out.\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0022.Rmd:8
+#, markdown-text, no-wrap
+msgid "If the infant is in fact still in the department, you can safely ignore this message; it disappears once the surveillance has been ended and the form completed.\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0022.Rmd:11
+#, markdown-text, no-wrap
+msgid ""
+"Otherwise, please open the Tracked Entity Instance Dashboard of the patient record (see @sec-solution-1), then the enrolment (see @sec-solution-10) and its Surveillance End form (see @sec-solution-15), check the data, complete the form (see @sec-solution-8), and then complete the enrolment (see @sec-solution-4).\n"
+"The existing form is the one to complete: an enrolment holds a single Surveillance End form, so a second one cannot be added.\n"
+msgstr ""
+
+#. type: Title ###
 #: reports/Validation-Report/en/_solution_0001.Rmd:1
 #, markdown-text, no-wrap
 msgid "Opening the Tracked Entity Instance Dashboard of a Patient Record {#sec-solution-1}"
@@ -5123,4 +5214,34 @@ msgstr ""
 #: reports/Validation-Report/en/_solution_0015.Rmd:11
 #, markdown-text, no-wrap
 msgid "![The Next and Previous buttons in the event timeline of the Tracked Entity Instance Dashboard](img/fig-event-timeline-full.png){#fig-event-timeline-full fig-alt=\"A screenshot of the Tracked Entity Instance Dashboard with the Next and Previous buttons in the event timeline highlighted\"}\n"
+msgstr ""
+
+#. type: Title ###
+#: reports/Validation-Report/en/_solution_0016.Rmd:6
+#, markdown-text, no-wrap
+msgid "Listing the Patients With an Active Enrolment {#sec-solution-16}"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_solution_0016.Rmd:10
+#, markdown-text, no-wrap
+msgid ""
+"Tracker Capture can list every patient record of a department that has an active enrolment.\n"
+"This is the quickest way to find the records the messages about open enrolments refer to, and to see whether any other enrolment is still open that should have been ended.\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_solution_0016.Rmd:15
+#, markdown-text, no-wrap
+msgid ""
+"Open the Tracker Capture app, select your department in the organisation unit tree on the left and the 'NeoIPC Core Module' program at the top, and click 'Lists'.\n"
+"In the toolbar above the list, click the circle button next to the list type; its tooltip reads 'Only those with active enrollment' (see @fig-active-enrolment-filter).\n"
+"The list then shows only the patient records with an active enrolment, and clicking on an entry opens its Tracked Entity Instance Dashboard (see @sec-solution-1).\n"
+"For every record listed whose infant has left the department, end the surveillance and complete the enrolment (see @sec-solution-4).\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_solution_0016.Rmd:16
+#, markdown-text, no-wrap
+msgid "![The filter for patients with an active enrolment in the list toolbar of Tracker Capture](img/fig-active-enrolment-filter.png){#fig-active-enrolment-filter fig-alt=\"The list toolbar of Tracker Capture below the program selector, with 'Lists' selected on the right. Of the four buttons left of the 'Custom working list' selector, the second, a circle, is highlighted, and its tooltip reads 'Only those with active enrollment'.\"}\n"
 msgstr ""
