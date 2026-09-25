@@ -246,7 +246,7 @@ tbl-surgical-procedure-rates:
   tbl-cap: "Surgical procedures by category"
   to_be_categorized: "Not yet categorized"
 tbl-validation-summary:
-  tbl-cap: "Records removed by the validation rules"
+  tbl-cap: "Records removed or exempted by the validation rules"
   rule_label: "Rule {rule}"
   records: "Records"
   removed: "Removed"

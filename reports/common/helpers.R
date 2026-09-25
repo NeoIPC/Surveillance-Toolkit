@@ -496,7 +496,7 @@ format_validation_summary_table <- function(summaries, sR) {
   })
   joined <- purrr::reduce(counts, dplyr::full_join, by = c("rule_id", "record_kind"))
   count_cols <- setdiff(names(joined), c("rule_id", "record_kind"))
-  if (!any(joined[count_cols] > 0, na.rm = TRUE))
+  if (!any(unlist(joined[count_cols]) > 0, na.rm = TRUE))
     return(NULL)
 
   rules <- joined |>
