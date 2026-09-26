@@ -115,7 +115,7 @@ Reports live under `reports/`:
 
 ### Validation Report
 
-The rules live in neoipcr (`neoipcr::validate()` returns keys and context values, never prose); the report only renders them, interpolating each finding's context into the `{named}` placeholders of `content/_sR.yaml` — the placeholder names are the context field names documented on `validate()`. Do not add a rule or a formatter on the report side; a rule's sentence and summary belong here, in `content/_sR.yaml`, and nowhere else. See [`docs/validation-report.md`](docs/validation-report.md) for the layering and for how a new rule threads through both repositories.
+The rules live in neoipcr (`neoipcr::validate()` returns keys and context values, never prose); the report only renders them, interpolating each finding's context into the `{named}` placeholders of `content/_sR.yaml` — the placeholder names are the context field names documented on `validate()`. Do not add a rule or a formatter on the report side; a rule's sentence and summary belong here, in `content/_sR.yaml`, and nowhere else. See [`docs/validation-report.md`](docs/validation-report.md) for the layering and for how a new rule threads through both repositories. [`docs/validation-rule-coverage.md`](docs/validation-rule-coverage.md) maps every constraint of the Core Protocol to the rules and the capture-time program rules that enforce it and says who can act on a finding; a new rule is entered there against its protocol anchor, and a finding the partner cannot see in Tracker Capture belongs to the network-side reconciliation that document describes, never to this report.
 
 ### R Data Scripts & Docker Deployment
 

@@ -115,3 +115,6 @@ of failing inside the interpolation on the first finding that reaches the senten
    in `po/reports.po4a.cfg`, regenerate the YAML key list with `scripts/Update-Po4aYamlKeys.ps1`, run
    `scripts/Invoke-Localization.ps1 -Update -NonInteractive` and commit the `.pot`.
 3. Declare the neoipcr release the report now needs in `reports/compatibility.yml`.
+4. Enter the rule in `docs/validation-rule-coverage.md` against the protocol anchor it enforces, and say
+   who can act on its findings; a rule whose findings the partner cannot see in Tracker Capture belongs
+   to the network-side reconciliation that document describes, not to this report.
