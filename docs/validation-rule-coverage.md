@@ -9,7 +9,7 @@ lists every constraint the protocol states, keyed by the protocol's own anchor, 
 what enforces it today and, where nothing does, what would.
 
 The inventory is hand-maintained. It describes the protocol at `doc/protocol/VERSION` 1.3.0-preview2,
-the 43 rules of neoipcr v0.0.0.9004 (ids 1 to 44, 16 withdrawn) and the program rules, compulsory
+the 43 rules of neoipcr v0.0.0.9004 (ids 1 to 44, with id 16 withdrawn) and the program rules, compulsory
 flags and option sets of `metadata/common/`. A change to any of the three has to be reflected here: a
 new protocol constraint gets a row, a new rule is entered in the rows it covers, and a program rule
 that starts or stops enforcing something changes the enforcement column. `docs/validation-report.md`
@@ -70,10 +70,12 @@ whatever the rule says, and when the rule fires on an editable event the client 
 saves the blank and shows an alert. Every NeoIPC stage locks its form once the event is completed, so
 on a completed event such a value is displayed read-only and stays until someone reopens the event,
 at which point the client removes it. A **section** is hidden regardless of the values inside it, and
-those values are left in place, invisible. Three rules hide a section and nothing else, so what they
-hide survives for good: `NEOIPC_BSI_IF_NO_POS_CULTURE` (the organisms of a culture-negative sepsis),
-`NEOIPC_BSI_AGENT_IF_NCC` (the laboratory findings and signs of a recognized-pathogen sepsis) and the
-three `NEOIPC_SSI_INFECTION_TYPE_*` rules (the findings of the other SSI depths). Four rules hide a
+those values are left in place, invisible. Five rules hide a section without blanking any field
+(four of them also make a field of the visible part mandatory, which changes nothing about the
+hidden one), so what they hide survives for good: `NEOIPC_BSI_IF_NO_POS_CULTURE` (the organisms of a
+culture-negative sepsis), `NEOIPC_BSI_AGENT_IF_NCC` (the laboratory findings and signs of a
+recognized-pathogen sepsis) and the three `NEOIPC_SSI_INFECTION_TYPE_*` rules (the findings of the
+other SSI depths). Four rules hide a
 section and blank its fields as well, so what they hide is invisible while the event is completed and
 removed on the next edit: `NEOIPC_SSI_NO_SEC_BSI` (an SSI's secondary-BSI section),
 `NEOIPC_SSI_NO_MIBI_RESULT_AVAILABLE` (an SSI's organisms), `NEOIPC_SSI_NO_INFECTION_TYPE` (the three
@@ -86,10 +88,10 @@ which cannot fire at all.
 |---|---|
 | Covered | 20 |
 | Partial | 34 |
-| Capture time | 62 |
+| Capture time | 61 |
 | Interface only | 14 |
 | Not covered | 28 |
-| Not checkable | 120 |
+| Not checkable | 121 |
 | All | 278 |
 
 The counts are of the rows in the tables below, so they can be recomputed from the file. A row may
@@ -820,7 +822,7 @@ publications. None constrains a record; none is checkable.
 | `sec-collect-secondary-bloodstream-infection` | The secondary-BSI item of a pneumonia, NEC or SSI record may be "No follow-up" when the centre does not follow patients for secondary BSI. | Capture time | — | option set `NEOIPC_YES_NO_NO_FOLLOWUP` |  |
 | `sec-collect-secondary-bloodstream-infection` | A secondary BSI's blood specimen is collected between 3 days before and 13 days after the day of the primary infection. | Not checkable | — | — |  |
 | `sec-collect-secondary-bloodstream-infection` | The day of the primary infection is the day of first symptoms or of the first positive culture at the primary infection site. | Not checkable | — | — |  |
-| `sec-collect-secondary-bloodstream-infection` | At least one organism from the secondary BSI blood specimen matches an organism identified at the primary infection site. | Not covered | — | `NEOIPC_HAP_SEC_BSI_VAL_1_PLUS`, `NEOIPC_SSI_HAS_SEC_BSI` (slot 1 mandatory only) | G12 |
+| `sec-collect-secondary-bloodstream-infection` | At least one organism from the secondary BSI blood specimen matches an organism identified at the primary infection site. | Not covered | — | `NEOIPC_HAP_SEC_BSI_VAL_1_PLUS`, `NEOIPC_NEC_SEC_BSI_VAL_1_PLUS`, `NEOIPC_SSI_HAS_SEC_BSI` (slot 1 mandatory only) | G12 |
 
 ### 4.1 Primary Sepsis / Bloodstream Infection (`sec-def-primary-sepsis-bloodstream-infection`)
 
@@ -995,7 +997,7 @@ publications. None constrains a record; none is checkable.
 | `dd-probiotic-days` | Probiotic days count each day on which the patient received, in any amount, an oral probiotic containing Lactobacillus spp. or Bifidobacterium spp. | Not checkable | — | `NEOIPC_SURVEILLANCE_END_PROBIOTIC_DAYS` compulsory, `NEOIPC_SURV_END_PROBIOTIC_DAYS_VR` |  |
 | `dd-antibiotic-days-total` | Total antibiotic days count each day of a systemic antibiotic course. | Not checkable | — | `NEOIPC_SURVEILLANCE_END_AB_DAYS` compulsory, `NEOIPC_SURV_END_AB_DAYS_VR`, `NEOIPC_SURV_END_AB_SUBST_01_REQUIRE` |  |
 | `dd-antibiotic-days-total`, `dd-antibiotic-days-per-substance` | An antibiotic course counts the day of the first dose, the day of the last dose and every day between them, dose-free days within the course included; days after the last dose are not counted whatever the drug level. | Not checkable | — | — |  |
-| `dd-antibiotic-days-total` | At most one antibiotic day is counted per calendar day, so a day with several antibiotics counts as one antibiotic day. | Capture time | — | `NEOIPC_SURV_END_AB_DAYS_VR` | G9 |
+| `dd-antibiotic-days-total` | At most one antibiotic day is counted per calendar day, so a day with several antibiotics counts as one antibiotic day (no daily timeline is recorded; the checkable consequence, antibiotic days not exceeding patient days, is the row above and G9). | Not checkable | — | — |  |
 | `dd-antibiotic-days-per-substance` | Antibiotic days per substance count, for each recorded systemic antibiotic substance, the days on which the infant received that substance. | Capture time | — | `NEOIPC_SURV_END_AB_SUBST_0n_HIDE`, `NEOIPC_SURV_END_AB_SUBST_01_REQUIRE`, `NEOIPC_SURV_END_AB_SUBST_0n_DAYS_REQUIRE`, the generated substance option set | G10 |
 | `dd-antibiotic-days-per-substance` | *(derived)* No single substance's antibiotic days exceed the total antibiotic days, and the sum of per-substance days is at least the total antibiotic days. | Partial | 21 | `NEOIPC_SURV_END_AB_SUBST_DAYS_VR` (the floor only) | G10 |
 
