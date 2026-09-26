@@ -87,8 +87,8 @@ which cannot fire at all.
 
 | Class | Rows |
 |---|---|
-| Covered | 20 |
-| Partial | 35 |
+| Covered | 19 |
+| Partial | 36 |
 | Capture time | 61 |
 | Interface only | 14 |
 | Not covered | 28 |
@@ -454,7 +454,8 @@ For each isolated organism the applicable resistance categories are recorded, an
 protocol restricts three of them by organism: MRSA to *Staphylococcus aureus*, VRE to enterococci,
 3GCR to gram-negative organisms; the carbapenem and colistin categories it defines by the laboratory's
 cut-off values alone, and their restriction to gram-negative organisms is the configuration's, drawn
-from the "Recorded Resistances" column of the List of Infectious Agents. At capture a triple of
+from the applicability fields of the legacy pathogen CSV that also fill the "Recorded Resistances"
+column of the printed List of Infectious Agents. At capture a triple of
 program rules per pathogen slot derives the applicability from an organism-id list embedded in the
 expression, makes the applicable category mandatory and hides the others. Post hoc nothing reads a
 resistance value against the organism, and the Partner Report's resistance-test table filters on the
@@ -466,7 +467,8 @@ a reconciliation that needs no timestamp and applies the client's own rule to re
 never re-processed. The reconciliation is not included: neoipcr's applicability flags come from the
 legacy pathogen CSVs, the canonical source is
 `metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml`, the two disagree for some organisms
-(the enterococci among them), and the package does not read the applicability from the YAML through
+(the *Raoultella* species, several *Salmonella* serovars and *Staphylococcus argenteus* among them),
+and the package does not read the applicability from the YAML through
 its pathogen taxonomy, which the reconciliation needs. Who acts: the network.
 
 ### G17 — Gestational age text and total days
@@ -515,10 +517,12 @@ problem, not a data-entry one. Not decided.
 
 SSI rates are calculated per procedure category, and every procedure has one. Rules 22 to 24 check
 the grammar of the ICHI (International Classification of Health Interventions) code only, since the
-classification is not bundled; a well-formed code that
-`get_procedure_category()` cannot map falls into "to be categorized" and is rated only in the overall
-SSI rate. Documented here: the category map is the package's, and an unmapped code is a gap in the map
-rather than in the record, so it is better closed by extending the map than by flagging the record.
+classification is not bundled; a well-formed code that `get_procedure_category()` cannot map falls
+into a category of its own, shown as "Not yet categorized" in the procedure tables, and the
+per-category SSI rate the protocol describes is not among the tables today, so nothing further
+depends on the mapping yet. Documented here: the category map is the package's, and an unmapped code
+is a gap in the map rather than in the record, so it is better closed by extending the map than by
+flagging the record.
 
 ### G21 — The scope of NeoIPC-ID uniqueness
 
@@ -704,7 +708,7 @@ publications. None constrains a record; none is checkable.
 |---|---|---|---|---|---|
 | `sec-collect` | *(derived)* Data collection takes place at the patient's bedside during the inpatient stay. | Not checkable | — | — |  |
 | `sec-collect` | Every eligible patient has both a master data collection sheet and a patient progress chart completed. | Partial | 5, 6, 25, 26 | `NEOIPC_STG_ADM` autoGenerateEvent, `NEOIPC_ADMISSION_TYPE` compulsory, `NEOIPC_SURVEILLANCE_END_REASON` compulsory | G24 |
-| `sec-collect` | Every eligible patient who undergoes a surgical procedure has a surgical procedure data collection form completed. | Partial | 19 | — | G24 |
+| `sec-collect` | Every eligible patient who undergoes a surgical procedure has a surgical procedure data collection form completed. | Partial | 10, 19 | — | G24 |
 | `sec-collect` | Every healthcare-associated infection an eligible infant develops within the follow-up period has the corresponding infection data collection sheet completed. | Partial | 7, 8, 9, 11 | `NEOIPC_BSI_CLIN_SEPSIS_VR`, `NEOIPC_BSI_LCBSI_CC_MULT_OR_AB_5D_VR`, `NEOIPC_BSI_LCBSI_CC_ONCE_NO_AB_VR`, `NEOIPC_NEC_VR`, `NEOIPC_HAP_DEFINITION_VR`, `NEOIPC_SSI_SUPERFICIAL_INCISIONAL_VR`, `NEOIPC_SSI_DEEP_INCISIONAL_VR`, `NEOIPC_SSI_ORGAN_SPACE_VR` | G24 |
 | `sec-collect` | A recorded infection is one of bloodstream infection, pneumonia, necrotizing enterocolitis or surgical site infection. | Capture time | — | `NEOIPC_STG_BSI`, `NEOIPC_STG_HAP`, `NEOIPC_STG_NEC`, `NEOIPC_STG_SSI` |  |
 | `sec-collect` | Only infections of the listed types that were acquired in a participating neonatology department are recorded. | Partial | 12, 13, 14, 29, 30, 33, 34, 37, 38 | `NEOIPC_BSI_LOS_LESS_THAN_2`, `NEOIPC_HAP_LOS_LESS_THAN_2`, `NEOIPC_NEC_LOS_LESS_THAN_2` | G24 |
@@ -767,7 +771,7 @@ publications. None constrains a record; none is checkable.
 | `sec-collect-progress-chart` | A patient progress chart exists for every eligible infant throughout the surveillance period. | Not checkable | — | — |  |
 | `sec-collect-progress-chart` | One progress chart holds at most six antibiotic substances and further substances are documented on an additional chart. | Not checkable | — | `NEOIPC_SURVEILLANCE_END_AB_SUBST_01` to `_09` |  |
 | `sec-collect-progress-chart` | A patient's surveillance-end data is the sum of the data in the patient progress charts (the charts are not submitted; rules 18 and 21 check the entered totals, not the charts). | Not checkable | — | `NEOIPC_SURV_END_*_DAYS_VR`, `NEOIPC_SURV_END_PATIENT_DAYS_SET` |  |
-| `sec-collect-progress-chart` | Surveillance-end data is entered in the online reporting platform under the "surveillance end" event. | Covered | 6, 25, 43, 44 | `NEOIPC_STG_SURV_END` |  |
+| `sec-collect-progress-chart` | Surveillance-end data is entered in the online reporting platform under the "surveillance end" event. | Partial | 6, 25, 43, 44 | `NEOIPC_STG_SURV_END` | G24 |
 | `sec-collect-progress-chart` | A patient who leaves the department for up to two days (e.g. for surgery) is not treated as transferred or discharged. | Partial | 17 | — | G5 |
 | `sec-collect-progress-chart` | The data for days spent outside the department during a short absence is recorded when the patient returns. | Not checkable | — | — |  |
 | `sec-collect-progress-chart` | When more than 48 hours pass between transfer and re-admission, data collection ends with "transfer" as the surveillance-end reason. | Not covered | — | option set `NEOIPC_SURVEILLANCE_END_REASON` (no distinct transfer value) | G5 |
@@ -786,7 +790,7 @@ publications. None constrains a record; none is checkable.
 |---|---|---|---|---|---|
 | `sec-collect-infection-data-collection` | Hospital-acquired bloodstream infections, pneumonia, NEC and surgical site infections of eligible patients are documented until the end of the surveillance period. | Partial | 12, 13, 14, 19 | — | G24 |
 | `sec-collect-infection-data-collection` | An infection whose first symptoms occur within 72 hours after birth is not nosocomial and is not recorded in the core module. | Partial | 29, 33, 37 | `NEOIPC_BSI_DOL_VAL_LESS_THAN_4`, `NEOIPC_HAP_DOL_VAL_LESS_THAN_4`, `NEOIPC_NEC_DOL_VAL_LESS_THAN_4` (warnings only) | G23 |
-| `sec-collect-infection-data-collection` | The 72-hour cut-off is ignored when an infection beginning before 72 hours is clearly hospital-acquired or one starting after 72 hours is clearly vertical (the exception list keeps such a record out of the findings of rules 29 to 38). | Not checkable | — | — |  |
+| `sec-collect-infection-data-collection` | The 72-hour cut-off is ignored when an infection beginning before 72 hours is clearly hospital-acquired or one starting after 72 hours is clearly vertical (the exception list keeps such a record out of the findings of rules 29, 30, 33, 34, 37 and 38). | Not checkable | — | — |  |
 | `sec-collect-infection-data-collection` | *(derived)* An infection excluded by the 72-hour cut-off is recorded, if at all, as an early-onset infection in the early-onset module rather than in the core module. | Not checkable | — | — |  |
 | `sec-collect-infection-data-collection` | For a transferred or readmitted patient a sepsis, pneumonia or NEC is nosocomial only when the day of symptom onset is on or after day 3 of the hospital stay (an SSI is attributed to its procedure's follow-up window by rule 19, which may span a readmission). | Covered | 30, 34, 38 | `NEOIPC_BSI_LOS_LESS_THAN_2`, `NEOIPC_HAP_LOS_LESS_THAN_2`, `NEOIPC_NEC_LOS_LESS_THAN_2` |  |
 | `sec-collect-infection-data-collection` | The day of admission counts as day 1 of the hospital stay. | Covered | 28, 32, 36, 40, 42, 30, 34, 38 | `NEOIPC_ADM_SET_LOS`, `NEOIPC_BSI_SET_LOS`, `NEOIPC_HAP_SET_LOS`, `NEOIPC_NEC_SET_LOS`, `NEOIPC_SURGERY_SET_LOS`, `NEOIPC_SSI_SET_LOS` |  |
@@ -1176,5 +1180,7 @@ licence statement constrains reuse, not records.
 
 The recordable organisms are those of the list; the "Assumed Pathogenicity" column is what the
 recognized-pathogen and common-commensal classification reads (G15), and the "Recorded Resistances"
-column is the applicability the per-slot program rules enforce (G16). The list is generated from
-`metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml`, the canonical source.
+column is the applicability the per-slot program rules enforce (G16). The printed list is built from
+the legacy pathogen CSVs (`NeoIPC-Pathogen-Concepts.csv` and its synonyms file), not from the canonical
+`metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml`; the two disagree for some
+organisms, as G16 records.
