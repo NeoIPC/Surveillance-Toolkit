@@ -1,12 +1,13 @@
 # Validation rule coverage of the NeoIPC Core Protocol
 
 The validation rules of `neoipcr::validate()` are meant to be a superset of the explicit rules of the
-NeoIPC Core Protocol: every constraint the protocol states on the surveillance data has an
-enforcement path, either a post-hoc validation rule or a capture-time program rule in the DHIS2
-configuration, and the validation rules may go beyond the protocol to cover implicit invariants and
-DHIS2-specific constraints. This document is the inventory that makes the superset claim checkable. It
-lists every constraint the protocol states, keyed by the protocol's own anchor, and says for each one
-what enforces it today and, where nothing does, what would.
+NeoIPC Core Protocol: every constraint the protocol states on the surveillance data that the dataset
+can show a violation of has an enforcement path, a post-hoc validation rule or a capture-time program
+rule in the DHIS2 configuration, or a recorded reason why it has none; and the validation rules may go
+beyond the protocol to cover implicit invariants and DHIS2-specific constraints. This document is the
+inventory that makes the superset claim checkable. It lists every constraint the protocol states,
+keyed by the protocol's own anchor, and says for each one what enforces it today and, where nothing
+does, what would.
 
 The inventory is hand-maintained. It describes the protocol at `doc/protocol/VERSION` 1.3.0-preview2,
 the 43 rules of neoipcr v0.0.0.9004 (ids 1 to 44, with id 16 withdrawn) and the program rules, compulsory
@@ -87,12 +88,12 @@ which cannot fire at all.
 | Class | Rows |
 |---|---|
 | Covered | 20 |
-| Partial | 34 |
+| Partial | 35 |
 | Capture time | 61 |
 | Interface only | 14 |
 | Not covered | 28 |
 | Not checkable | 121 |
-| All | 278 |
+| All | 279 |
 
 The counts are of the rows in the tables below, so they can be recomputed from the file. A row may
 merge statements that share an anchor and an enforcement, and the sections that hold only process
@@ -167,7 +168,8 @@ out of the birth-weight-stratified rates.
 
 Proposal: a patient-level rule flagging a patient whose birth weight is 1500 g or more or missing and
 whose total gestation days are 224 or more or missing, mirroring the program rule's three branches,
-and a second finding for a missing birth weight. Both need the dataset to carry a department's
+and a second finding for a missing birth weight where the gestational age alone made the infant
+eligible, which the registration allows and the stratified rates cannot use. Both need the dataset to carry a department's
 membership in `NEOIPC_ALL_PATIENTS_ELIGIBLE`, which the import does not read today (it reads only the
 `NEO_DEPARTMENT`, `COUNTRY` and `TEST_UNITS` groups); the rule skips itself until the import provides
 the flag. Who acts: the partner, who sees the birth weight and the gestational age on the registration
@@ -707,7 +709,7 @@ publications. None constrains a record; none is checkable.
 | `sec-collect` | A recorded infection is one of bloodstream infection, pneumonia, necrotizing enterocolitis or surgical site infection. | Capture time | — | `NEOIPC_STG_BSI`, `NEOIPC_STG_HAP`, `NEOIPC_STG_NEC`, `NEOIPC_STG_SSI` |  |
 | `sec-collect` | Only infections of the listed types that were acquired in a participating neonatology department are recorded. | Partial | 12, 13, 14, 29, 30, 33, 34, 37, 38 | `NEOIPC_BSI_LOS_LESS_THAN_2`, `NEOIPC_HAP_LOS_LESS_THAN_2`, `NEOIPC_NEC_LOS_LESS_THAN_2` | G24 |
 | `sec-collect` | Every eligible infant is observed until the end of its surveillance period. | Partial | 43, 44 | — | G24 |
-| `sec-collect` | The surveillance period ends when the infant dies, is transferred, or is discharged from the hospital. | Capture time | — | `NEOIPC_SURVEILLANCE_END_REASON` compulsory, option set `NEOIPC_SURVEILLANCE_END_REASON` | G6 |
+| `sec-collect` | The surveillance period ends when the infant dies, is transferred, or is discharged from the hospital (the end is recorded on a surveillance-end form whose reason is one of those; an end never recorded is visible only as an enrolment left open). | Partial | 25, 43, 44 | `NEOIPC_SURVEILLANCE_END_REASON` compulsory, option set `NEOIPC_SURVEILLANCE_END_REASON` | G6, G24 |
 | `sec-collect` | A patient with a surgical procedure is followed up for SSI for 30 days, or 90 days when an implant is present (rule 19 follows the definitions, which grant the 90 days to deep incisional and organ/space infections only; see the questions below). | Covered | 19 | — |  |
 
 ### 3.1 Case Eligibility Criteria for the Core Module (`sec-collect-case-eligibility-criteria-core`)
@@ -720,7 +722,8 @@ publications. None constrains a record; none is checkable.
 | `sec-collect-case-eligibility-criteria-core` | An eligible infant is admitted to a ward of the neonatal department within 120 days of birth. | Not covered | — | `NEOIPC_ADM_DOL_VAL_150_PLUS` (warning only), `NEOIPC_ADM_TYPE_1`, `NEOIPC_ADM_TYPE_2_PLUS` | G2 |
 | `sec-collect-case-eligibility-criteria-core` | *(derived)* The "within 120 days of birth" window is operationalized by the examples table as admission on day of life at most 120, the day of birth being day 1; a literal reading would admit day 121. | Not covered | — | `NEOIPC_ADM_DOL_VAL_150_PLUS` (warning only), `NEOIPC_ADM_DOL_1` | G2 |
 | `tbl-eligibility-examples` | *(derived)* Birth weight below 1500 g and gestational age below 32 weeks are alternative criteria, so an infant meeting only one of them is eligible. | Capture time | — | `NEOIPC_PATIENT_BW_1500_GRAMS_AND_GA_32_PLUS_WEEKS` | G1 |
-| `tbl-eligibility-examples` | *(derived)* Admission on day of life 120 is eligible and day 121 is not; 1499 g qualifies and 1500 g does not; 31+6 qualifies and 32+0 does not. | Not covered | — | `NEOIPC_PATIENT_BW_1500_GRAMS_AND_GA_32_PLUS_WEEKS`, `NEOIPC_ADM_DOL_VAL_150_PLUS` (warning only) | G1, G2 |
+| `tbl-eligibility-examples` | *(derived)* 1499 g qualifies and 1500 g does not; 31+6 qualifies and 32+0 does not. | Capture time | — | `NEOIPC_PATIENT_BW_1500_GRAMS_AND_GA_32_PLUS_WEEKS` | G1 |
+| `tbl-eligibility-examples` | *(derived)* Admission on day of life 120 is eligible and day 121 is not. | Not covered | — | `NEOIPC_ADM_DOL_VAL_150_PLUS` (warning only, at 150) | G2 |
 
 ### 3.2 Patient Data Collection (`sec-collect-patient-data-collection`)
 
@@ -734,7 +737,7 @@ publications. None constrains a record; none is checkable.
 |---|---|---|---|---|---|
 | `sec-collect-pseudonymization-table` | NeoIPC does not track individual patients for reference-report generation and does not use the assigned NeoIPC-IDs in any way, so the NeoIPC-ID serves the centre's own patient retrieval only. | Not checkable | — | — |  |
 | `sec-collect-pseudonymization-table` | Where patients must be unambiguously identifiable in the platform, each patient is assigned a NeoIPC-ID at the time of enrolment. | Capture time | — | `NEOIPC_PATIENT_ID` mandatory program attribute |  |
-| `sec-collect-pseudonymization-table` | A NeoIPC-ID is a unique random identifier that identifies the patient only within the department. | Capture time | — | `NEOIPC_PATIENT_ID` unique, orgunitScope | G21 |
+| `sec-collect-pseudonymization-table` | A NeoIPC-ID is a unique random identifier that identifies the patient only within the department (uniqueness within the organisation unit is enforced; randomness is not checkable). | Capture time | — | `NEOIPC_PATIENT_ID` unique, orgunitScope | G21 |
 | `sec-collect-pseudonymization-table` | Each patient has exactly one NeoIPC identification number. | Not checkable | — | `NEOIPC_PATIENT_ID` unique, orgunitScope |  |
 | `sec-collect-pseudonymization-table` | A patient's follow-up ends at discharge and a readmission is recorded as a new enrolment. | Partial | 17, 43, 44 | — | G5 |
 | `sec-collect-pseudonymization-table` | A readmitted patient's new enrolment carries the same NeoIPC-ID as the earlier enrolment. | Not checkable | — | `NEOIPC_PATIENT_ID` unique, orgunitScope |  |
@@ -922,7 +925,7 @@ publications. None constrains a record; none is checkable.
 | `sec-def-surgical-site-infection` | A revision procedure in the same area ends the SSI follow-up of the earlier procedure and starts a new follow-up period for the revision procedure. | Not covered | — | `NEOIPC_SURGERY_REVISION_PROCEDURE` compulsory | G13 |
 | `sec-def-surgical-site-infection` | A minor intervention such as a simple puncture of a hematoma/seroma is not a revision procedure and neither terminates SSI surveillance nor starts a new follow-up period. | Not checkable | — | — |  |
 | `sec-def-surgical-site-infection` | A surgical procedure record carries the main procedure and its associated ICHI code. | Capture time | — | `NEOIPC_SURGERY_MAIN_PROCEDURE_CODE` compulsory, `NEOIPC_SURGERY_PROCEDURE_DESCRIPTION` compulsory | G11 |
-| `sec-def-surgical-site-infection` | A surgical procedure record carries at most two further ICHI codes beyond the main procedure, and only for complex interventions that one main procedure cannot adequately describe. | Capture time | — | two side-code data elements exist |  |
+| `sec-def-surgical-site-infection` | A surgical procedure record carries at most two further ICHI codes beyond the main procedure, and only for complex interventions that one main procedure cannot adequately describe (the cap is structural; the complexity condition is a judgement and not checkable). | Capture time | — | two side-code data elements exist |  |
 | `sec-def-surgical-site-infection`, `dd-ssi-type` | The reported SSI type (superficial incisional, deep incisional or organ/space) is the deepest tissue level at which SSI criteria are met during the surveillance period, so no finding of a deeper level is recorded beside a shallower type. | Interface only | — | `NEOIPC_SSI_INFECTION_TYPE_SUPERFICIAL`, `NEOIPC_SSI_INFECTION_TYPE_DEEP`, `NEOIPC_SSI_INFECTION_TYPE_ORGAN_SPACE`, `NEOIPC_SSI_NO_INFECTION_TYPE` | G15 |
 | `sec-def-surgical-site-infection` | *(derived)* When an SSI deepens during the surveillance period, its recorded infection day is the day the deepest-level criteria are met. | Not checkable | — | — |  |
 | `sec-def-surgical-site-infection` | A surgical procedure on a deceased patient (e.g. post-mortem organ-donation surgery) is excluded from SSI surveillance. | Partial | 15 | — | G6 |
@@ -1094,7 +1097,7 @@ pneumonia and the deepest-level rule for the SSI type.
 | `sec-analysis-antibiotic-use` | *(derived)* Only systemic antibiotics count towards antibiotic days. | Not checkable | — | — |  |
 | `sec-analysis-antibiotic-use` | *(derived)* Total antibiotic days is a count of patient days and cannot exceed total patient days. | Capture time | — | `NEOIPC_SURV_END_AB_DAYS_VR` | G9 |
 | `sec-analysis-antibiotic-use` | *(derived)* Antibiotic use is recorded per individual substance (therapy days per substance), not only as an overall antibiotic-day total. | Partial | 21 | `NEOIPC_SURV_END_AB_SUBST_01_REQUIRE`, `NEOIPC_SURV_END_AB_SUBST_01_DAYS_REQUIRE` | G10 |
-| `sec-analysis-antibiotic-use` | *(derived)* Each recorded antibiotic substance maps to a code in the WHO Anatomical Therapeutic Chemical (ATC) classification, which is what the substance groups are derived from. | Capture time | — | the generated option set `NEOIPC_ANTIMICROBIAL_SUBSTANCES` | G19 |
+| `sec-analysis-antibiotic-use` | *(derived)* Each recorded antibiotic substance is an entry of the List of Antibiotics, whose entries carry a WHO Anatomical Therapeutic Chemical (ATC) code from which the substance groups are derived, except for the substances the ATC index does not list, which carry a placeholder code. | Capture time | — | the generated option set `NEOIPC_ANTIMICROBIAL_SUBSTANCES` | G19 |
 | `sec-analysis-antibiotic-use` | *(derived)* Substances are grouped at ATC levels 1, 2, 4 and 5 only. | Not checkable | — | — |  |
 | `sec-analysis-antibiotic-use` | *(derived)* Substance and substance-group use rates are expressed per 1000 patient days according to the prose, while the formula that follows multiplies by 100. | Not checkable | — | — |  |
 | `sec-analysis-antibiotic-use` | *(derived)* Total therapy days for a substance is a count of patient days and cannot exceed the patient days. | Not covered | — | — | G10 |
