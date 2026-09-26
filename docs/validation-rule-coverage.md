@@ -1098,7 +1098,7 @@ pneumonia and the deepest-level rule for the SSI type.
 | `sec-analysis-antibiotic-use` | *(derived)* Substances are grouped at ATC levels 1, 2, 4 and 5 only. | Not checkable | — | — |  |
 | `sec-analysis-antibiotic-use` | *(derived)* Substance and substance-group use rates are expressed per 1000 patient days according to the prose, while the formula that follows multiplies by 100. | Not checkable | — | — |  |
 | `sec-analysis-antibiotic-use` | *(derived)* Total therapy days for a substance is a count of patient days and cannot exceed the patient days. | Not covered | — | — | G10 |
-| `sec-analysis-antibiotic-use` | *(derived)* A patient counted as receiving a specific substance is also a patient receiving any antibiotic, so a record with any substance recorded has antibiotic days of at least one. | Interface only | — | `NEOIPC_SURV_END_AB_SUBST_01_HIDE`, `NEOIPC_SURV_END_AB_SUBST_02_HIDE` | G10 |
+| `sec-analysis-antibiotic-use` | *(derived)* A patient counted as receiving a specific substance is also a patient receiving any antibiotic, so a record with any substance recorded has antibiotic days of at least one. | Interface only | — | `NEOIPC_SURV_END_AB_SUBST_01_HIDE` to `NEOIPC_SURV_END_AB_SUBST_09_HIDE` (slot 1 is hidden until the antibiotic days exceed zero, each later slot until the previous one holds a substance) | G10 |
 | `sec-analysis-antibiotic-use` | *(derived)* The stated formula for the proportion of patients receiving a substance divides therapy days by patient days, contradicting the prose definition (patients over patients) immediately before it. | Not checkable | — | — |  |
 
 ### 6.1.3 Protective Factor Implementation (`sec-analysis-protective-factor-implementation`)
