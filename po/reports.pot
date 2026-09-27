@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-09-27 23:16+0200\n"
+"POT-Creation-Date: 2026-09-27 12:54+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Language-Team: none\n"
 "Language: en\n"
@@ -127,34 +127,34 @@ msgstr ""
 msgid "Distribution of gestational ages of the infants included in this report."
 msgstr ""
 
-#. type: Hash Value: fig-cap bnch
+#. type: Hash Value: fig-cap markers bnch
 #: reports/common.yaml:1
 #, no-wrap
-msgid "A is a histogram in %s steps with a density curve of your own department’s data and a density curve of the reference data and B are two boxplots, one of your own department’s data and one of the reference data."
+msgid "Vertical lines in the boxplots represent the {quantile_25}, {quantile_50} and {quantile_75} quantiles, the diamonds represent the pooled arithmetic means."
 msgstr ""
 
-#. type: Hash Value: fig-cap no-bnch
+#. type: Hash Value: fig-cap markers no-bnch
 #: reports/common.yaml:1
 #, no-wrap
-msgid "A is a histogram in %s steps with a density curve and B is a boxplot."
+msgid "Vertical lines in the boxplot represent the {quantile_25}, {quantile_50} and {quantile_75} quantiles, the diamond represents the pooled arithmetic mean."
 msgstr ""
 
-#. type: Hash Value: fig-cap bnch
+#. type: Hash Value: fig-cap panels bnch
 #: reports/common.yaml:1
 #, no-wrap
-msgid "Vertical lines in the boxplots represent the %s, %s and %s quantiles, the diamonds represent the pooled arithmetic means."
+msgid "A is a histogram in {step} steps with a density curve of your own department’s data and a density curve of the reference data and B are two boxplots, one of your own department’s data and one of the reference data."
 msgstr ""
 
-#. type: Hash Value: fig-cap no-bnch
+#. type: Hash Value: fig-cap panels no-bnch
 #: reports/common.yaml:1
 #, no-wrap
-msgid "Vertical lines in the boxplot represent the %s, %s and %s quantiles, the diamond represents the pooled arithmetic mean."
+msgid "A is a histogram in {step} steps with a density curve and B is a boxplot."
 msgstr ""
 
 #. type: Hash Value: fig_sample_size
 #: reports/common.yaml:1
 #, no-wrap
-msgid "(N = %s patients)"
+msgid "(N = {count} patients)"
 msgstr ""
 
 #. type: Hash Value: gramm_abbreviation
@@ -610,7 +610,7 @@ msgstr ""
 #. type: Hash Value: tbl-abr-infection-rate n_footnote
 #: reports/common.yaml:1
 #, no-wrap
-msgid "%s: The aggregated number of antibiotic resistant pathogens in all infections."
+msgid "{column}: The aggregated number of antibiotic resistant pathogens in all infections."
 msgstr ""
 
 #. type: Hash Value: tbl-abr-infection-rate no_data
@@ -622,13 +622,7 @@ msgstr ""
 #. type: Hash Value: tbl-abr-infection-rate pooled_footnote
 #: reports/common.yaml:1
 #, no-wrap
-msgid "%s: The resistant pathogen infection rate calculated across all infants from all departments."
-msgstr ""
-
-#. type: Hash Value: tbl-abr-infection-rate quartile_footnote
-#: reports/common.yaml:1
-#, no-wrap
-msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the resistant pathogen infection rates of the partner departments. Q₂ represents the median. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected infections with an agents is greater than or equal to one according to the pooled resistant pathogen infection rate."
+msgid "{column}: The resistant pathogen infection rate calculated across all infants from all departments."
 msgstr ""
 
 #. type: Hash Value: tbl-abr-infection-rate rate_denominator
@@ -670,7 +664,7 @@ msgstr ""
 #. type: Hash Value: tbl-agent-per-infection-rate n_footnote
 #: reports/common.yaml:1
 #, no-wrap
-msgid "%s: The aggregated number of infectious agents in all infections."
+msgid "{column}: The aggregated number of infectious agents in all infections."
 msgstr ""
 
 #. type: Hash Value: tbl-agent-per-infection-rate no_data
@@ -682,13 +676,7 @@ msgstr ""
 #. type: Hash Value: tbl-agent-per-infection-rate pooled_footnote
 #: reports/common.yaml:1
 #, no-wrap
-msgid "%s: The Agent-per-Infection Rate calculated across all infants from all departments."
-msgstr ""
-
-#. type: Hash Value: tbl-agent-per-infection-rate quartile_footnote
-#: reports/common.yaml:1
-#, no-wrap
-msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Agent-per-Infection Rates of the partner departments. Q₂ represents the median. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected agents detected in infections is greater than or equal to one according to the pooled Agent-per-Infection Rate."
+msgid "{column}: The Agent-per-Infection Rate calculated across all infants from all departments."
 msgstr ""
 
 #. type: Hash Value: tbl-agent-per-infection-rate rate_denominator
@@ -718,13 +706,13 @@ msgstr ""
 #. type: Hash Value: tbl-antibiotic-utilization atc_footnote
 #: reports/common.yaml:1
 #, no-wrap
-msgid "ATC: Anatomical Therapeutic Chemical classification (WHO). Substances are grouped by pharmacological subgroup (ATC 5th level). See %s for details."
+msgid "ATC: Anatomical Therapeutic Chemical classification (WHO). Substances are grouped by pharmacological subgroup (ATC 5th level). See {link} for details."
 msgstr ""
 
 #. type: Hash Value: tbl-antibiotic-utilization aware_column_footnote
 #: reports/common.yaml:1
 #, no-wrap
-msgid "WHO AWaRe classification (Access, Watch, Reserve). See %s."
+msgid "WHO AWaRe classification (Access, Watch, Reserve). See {link}."
 msgstr ""
 
 #. type: Hash Value: tbl-antibiotic-utilization exposure_density_rate
@@ -736,7 +724,7 @@ msgstr ""
 #. type: Hash Value: tbl-antibiotic-utilization n_footnote
 #: reports/common.yaml:1
 #, no-wrap
-msgid "%s: The aggregated number of substance-days recorded across all infants."
+msgid "{column}: The aggregated number of substance-days recorded across all infants."
 msgstr ""
 
 #. type: Hash Value: tbl-antibiotic-utilization no_data
@@ -748,13 +736,7 @@ msgstr ""
 #. type: Hash Value: tbl-antibiotic-utilization pooled_footnote
 #: reports/common.yaml:1
 #, no-wrap
-msgid "%s: The Antibiotic Exposure Density Rate calculated across all infants from all departments in the reference data."
-msgstr ""
-
-#. type: Hash Value: tbl-antibiotic-utilization quartile_footnote
-#: reports/common.yaml:1
-#, no-wrap
-msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Antibiotic Exposure Density Rates of the departments in the reference data. Q₂ represents the median. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of substance-days is greater than or equal to one according to the pooled rate."
+msgid "{column}: The Antibiotic Exposure Density Rate calculated across all infants from all departments in the reference data."
 msgstr ""
 
 #. type: Hash Value: tbl-antibiotic-utilization substance_days
@@ -814,7 +796,7 @@ msgstr ""
 #. type: Hash Value: tbl-device-associated-incidence-density-rates n_footnote
 #: reports/common.yaml:1
 #, no-wrap
-msgid "%s: The aggregated number of device-associated infections in all infants."
+msgid "{column}: The aggregated number of device-associated infections in all infants."
 msgstr ""
 
 #. type: Hash Value: tbl-device-associated-incidence-density-rates niv
@@ -832,19 +814,13 @@ msgstr ""
 #. type: Hash Value: tbl-device-associated-incidence-density-rates pooled_footnote
 #: reports/common.yaml:1
 #, no-wrap
-msgid "%s: The Device-Associated Incidence Density Rate calculated across all infants from all departments."
+msgid "{column}: The Device-Associated Incidence Density Rate calculated across all infants from all departments."
 msgstr ""
 
 #. type: Hash Value: tbl-device-associated-incidence-density-rates pvc
 #: reports/common.yaml:1
 #, no-wrap
 msgid "PVC-associated sepsis/BSI"
-msgstr ""
-
-#. type: Hash Value: tbl-device-associated-incidence-density-rates quartile_footnote
-#: reports/common.yaml:1
-#, no-wrap
-msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Device-Associated Incidence Density Rates of the partner departments. Q₂ represents the median. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected infections is greater than or equal to one according to the pooled Device-Associated Incidence Density Rate."
 msgstr ""
 
 #. type: Hash Value: tbl-device-associated-incidence-density-rates tbl-cap
@@ -874,7 +850,7 @@ msgstr ""
 #. type: Hash Value: tbl-incidence-density-rates n_footnote
 #: reports/common.yaml:1
 #, no-wrap
-msgid "%s: The aggregated number of infections in all infants."
+msgid "{column}: The aggregated number of infections in all infants."
 msgstr ""
 
 #. type: Hash Value: tbl-incidence-density-rates n_inf
@@ -892,19 +868,13 @@ msgstr ""
 #. type: Hash Value: tbl-incidence-density-rates pooled_footnote
 #: reports/common.yaml:1
 #, no-wrap
-msgid "%s: The Incidence Density Rate calculated across all infants from all departments."
-msgstr ""
-
-#. type: Hash Value: tbl-incidence-density-rates quartile_footnote
-#: reports/common.yaml:1
-#, no-wrap
-msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Incidence Density Rates of the partner departments. Q₂ represents the median. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected infections is greater than or equal to one according to the pooled Incidence Density Rate."
+msgid "{column}: The Incidence Density Rate calculated across all infants from all departments."
 msgstr ""
 
 #. type: Hash Value: tbl-incidence-density-rates si_footnote
 #: reports/common.yaml:1
 #, no-wrap
-msgid "%s is a composite endpoint combining primary sepsis/BSI and pneumonia."
+msgid "{endpoint} is a composite endpoint combining primary sepsis/BSI and pneumonia."
 msgstr ""
 
 #. type: Hash Value: tbl-incidence-density-rates tbl-cap
@@ -916,7 +886,7 @@ msgstr ""
 #. type: Hash Value: tbl-infectious-agent-detection-rate n_footnote
 #: reports/common.yaml:1
 #, no-wrap
-msgid "%s: The aggregated number of infections where at least one infectious agent was recorded."
+msgid "{column}: The aggregated number of infections where at least one infectious agent was recorded."
 msgstr ""
 
 #. type: Hash Value: tbl-infectious-agent-detection-rate no_data
@@ -928,13 +898,7 @@ msgstr ""
 #. type: Hash Value: tbl-infectious-agent-detection-rate pooled_footnote
 #: reports/common.yaml:1
 #, no-wrap
-msgid "%s: The Infectious Agent Detection Rate calculated across all infants from all departments."
-msgstr ""
-
-#. type: Hash Value: tbl-infectious-agent-detection-rate quartile_footnote
-#: reports/common.yaml:1
-#, no-wrap
-msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Infectious Agent Detection Rates of the partner departments. Q₂ represents the median. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected infections with an agents is greater than or equal to one according to the pooled Infectious Agent Detection Rate."
+msgid "{column}: The Infectious Agent Detection Rate calculated across all infants from all departments."
 msgstr ""
 
 #. type: Hash Value: tbl-infectious-agent-detection-rate rate_denominator
@@ -964,7 +928,7 @@ msgstr ""
 #. type: Hash Value: tbl-organism-resistance-rate n_footnote
 #: reports/common.yaml:1
 #, no-wrap
-msgid "%s: The aggregated number of resistant detections of the organism."
+msgid "{column}: The aggregated number of resistant detections of the organism."
 msgstr ""
 
 #. type: Hash Value: tbl-organism-resistance-rate no_data
@@ -976,13 +940,7 @@ msgstr ""
 #. type: Hash Value: tbl-organism-resistance-rate pooled_footnote
 #: reports/common.yaml:1
 #, no-wrap
-msgid "%s: The organism-specific resistance rate calculated across all infants from all departments."
-msgstr ""
-
-#. type: Hash Value: tbl-organism-resistance-rate quartile_footnote
-#: reports/common.yaml:1
-#, no-wrap
-msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the organism-specific resistance rates of the partner departments. Q₂ represents the median. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of tested detections is greater than or equal to one."
+msgid "{column}: The organism-specific resistance rate calculated across all infants from all departments."
 msgstr ""
 
 #. type: Hash Value: tbl-organism-resistance-rate rate_denominator
@@ -1024,7 +982,7 @@ msgstr ""
 #. type: Hash Value: tbl-resistance-test-rate n_footnote
 #: reports/common.yaml:1
 #, no-wrap
-msgid "%s: The aggregated number of antibiotic resistant pathogens that have a documented test for antibiotic resistance."
+msgid "{column}: The aggregated number of antibiotic resistant pathogens that have a documented test for antibiotic resistance."
 msgstr ""
 
 #. type: Hash Value: tbl-resistance-test-rate no_data
@@ -1036,13 +994,7 @@ msgstr ""
 #. type: Hash Value: tbl-resistance-test-rate pooled_footnote
 #: reports/common.yaml:1
 #, no-wrap
-msgid "%s: The antibiotic resistance test rate calculated across all infants from all departments."
-msgstr ""
-
-#. type: Hash Value: tbl-resistance-test-rate quartile_footnote
-#: reports/common.yaml:1
-#, no-wrap
-msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the antibiotic resistance test rates of the partner departments. Q₂ represents the median. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of expected infections with an agents is greater than or equal to one according to the pooled antibiotic resistance test rate."
+msgid "{column}: The antibiotic resistance test rate calculated across all infants from all departments."
 msgstr ""
 
 #. type: Hash Value: tbl-resistance-test-rate rate_denominator
@@ -1084,7 +1036,7 @@ msgstr ""
 #. type: Hash Value: tbl-risk-density-rates aware_footnote
 #: reports/common.yaml:1
 #, no-wrap
-msgid "WHO AWaRe group (see %s). Each antibiotic substance is counted separately. A patient receiving two antibiotics on the same day contributes one day to each substance's tally — so one patient-day may be counted in both the Access and Watch group totals simultaneously."
+msgid "WHO AWaRe group (see {link}). Each antibiotic substance is counted separately. A patient receiving two antibiotics on the same day contributes one day to each substance's tally — so one patient-day may be counted in both the Access and Watch group totals simultaneously."
 msgstr ""
 
 #. type: Hash Value: tbl-risk-density-rates days_with_risk_factor
@@ -1114,13 +1066,7 @@ msgstr ""
 #. type: Hash Value: tbl-risk-density-rates pooled_footnote
 #: reports/common.yaml:1
 #, no-wrap
-msgid "%s: The Exposure Density Rate calculated across all infants from all departments in the reference data."
-msgstr ""
-
-#. type: Hash Value: tbl-risk-density-rates quartile_footnote
-#: reports/common.yaml:1
-#, no-wrap
-msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Exposure Density Rates of the departments in the reference data. Q₂ represents the median. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of device days is greater than or equal to one according to the pooled Exposure Density Rate."
+msgid "{column}: The Exposure Density Rate calculated across all infants from all departments in the reference data."
 msgstr ""
 
 #. type: Hash Value: tbl-risk-density-rates tbl-cap
@@ -1144,7 +1090,7 @@ msgstr ""
 #. type: Hash Value: tbl-secondary-bsi-rates n_footnote
 #: reports/common.yaml:1
 #, no-wrap
-msgid "%s: The aggregated number of infections where a secondary BSI was recorded."
+msgid "{column}: The aggregated number of infections where a secondary BSI was recorded."
 msgstr ""
 
 #. type: Hash Value: tbl-secondary-bsi-rates no_data
@@ -1156,13 +1102,7 @@ msgstr ""
 #. type: Hash Value: tbl-secondary-bsi-rates pooled_footnote
 #: reports/common.yaml:1
 #, no-wrap
-msgid "%s: The secondary BSI rate calculated across all infants from all departments."
-msgstr ""
-
-#. type: Hash Value: tbl-secondary-bsi-rates quartile_footnote
-#: reports/common.yaml:1
-#, no-wrap
-msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the secondary BSI rates of the partner departments. Q₂ represents the median. These quartiles are only displayed when the number of departments contributing is greater than or equal to five."
+msgid "{column}: The secondary BSI rate calculated across all infants from all departments."
 msgstr ""
 
 #. type: Hash Value: tbl-secondary-bsi-rates rate_denominator
@@ -1174,7 +1114,7 @@ msgstr ""
 #. type: Hash Value: tbl-secondary-bsi-rates rate_footnote
 #: reports/common.yaml:1
 #, no-wrap
-msgid "%s: The secondary BSI rate for the department calculated as infections with secondary BSI per 100 infections with follow-up for secondary BSI."
+msgid "{column}: The secondary BSI rate for the department calculated as infections with secondary BSI per 100 infections with follow-up for secondary BSI."
 msgstr ""
 
 #. type: Hash Value: tbl-secondary-bsi-rates rate_name
@@ -1222,7 +1162,7 @@ msgstr ""
 #. type: Hash Value: tbl-surgical-procedure-rates n_footnote
 #: reports/common.yaml:1
 #, no-wrap
-msgid "%s: The aggregated number surgical procedures performed in all infants."
+msgid "{column}: The aggregated number of surgical procedures performed in all infants."
 msgstr ""
 
 #. type: Hash Value: tbl-surgical-procedure-rates neurosurgery
@@ -1258,13 +1198,7 @@ msgstr ""
 #. type: Hash Value: tbl-surgical-procedure-rates pooled_footnote
 #: reports/common.yaml:1
 #, no-wrap
-msgid "%s: The Surgical Procedure Rate calculated across all infants from all departments."
-msgstr ""
-
-#. type: Hash Value: tbl-surgical-procedure-rates quartile_footnote
-#: reports/common.yaml:1
-#, no-wrap
-msgid "%s, %s, %s: The quartiles (%s, %s and %s quantiles) of the Surgical Procedure Rates of the partner departments. Q₂ represents the median. These quartiles are only displayed when the number of departments contributing to the denominator is greater than or equal to five, and when the median number of procedures is greater than or equal to one according to the pooled Surgical Procedure Rate."
+msgid "{column}: The Surgical Procedure Rate calculated across all infants from all departments."
 msgstr ""
 
 #. type: Hash Value: tbl-surgical-procedure-rates rate_denominator
@@ -1417,25 +1351,25 @@ msgstr ""
 msgid "w"
 msgstr ""
 
-#. type: Hash Value: worldBankClassNames high_income
+#. type: Hash Value: worldBankClassNames H
 #: reports/common.yaml:1
 #, no-wrap
 msgid "High income"
 msgstr ""
 
-#. type: Hash Value: worldBankClassNames low_income
+#. type: Hash Value: worldBankClassNames L
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Low income"
 msgstr ""
 
-#. type: Hash Value: worldBankClassNames lower_middle_income
+#. type: Hash Value: worldBankClassNames LM
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Lower middle income"
 msgstr ""
 
-#. type: Hash Value: worldBankClassNames upper_middle_income
+#. type: Hash Value: worldBankClassNames UM
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Upper middle income"
@@ -1576,7 +1510,7 @@ msgstr ""
 #. type: Hash Value: headerList wbClassMismatchAddendum
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "Additionally, the World Bank income classifications differ between your data and the reference data (%s: %s; %s: %s), which may indicate even more substantial differences in healthcare system resources and infrastructure, further affecting comparability of certain indicators.\n"
+msgid "Additionally, the World Bank income classifications differ between your data ({own_classes}) and the reference data ({reference_classes}), which may indicate even more substantial differences in healthcare system resources and infrastructure, further affecting comparability of certain indicators."
 msgstr ""
 
 #. type: Hash Value: headings birth_weight_distribution
@@ -1595,6 +1529,12 @@ msgstr ""
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Presence of Risk and Protective Factors in Your Department"
+msgstr ""
+
+#. type: Hash Value: nosocomial_reference_comparison
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "In the reference data, {infection_count} severe infections were recorded in {patient_count} patients, an average of {average} infections per patient."
 msgstr ""
 
 #. type: Hash Value: outlier abr_gram_negative_3gcr_and_car_high
@@ -2551,10 +2491,16 @@ msgstr ""
 msgid "Reference data"
 msgstr ""
 
+#. type: Hash Value: tbl-abr-infection-rate ast_table_note
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "{reference} reports how completely susceptibility testing was performed; the detected resistant pathogens and the completeness of testing are both needed to interpret resistance burden."
+msgstr ""
+
 #. type: Hash Value: tbl-abr-infection-rate n_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "%s: The aggregated number of infections with resistant pathogens in your department's infants."
+msgid "{column}: The aggregated number of infections with resistant pathogens in your department's infants."
 msgstr ""
 
 #. type: Hash Value: tbl-abr-infection-rate no_resistant_pathogens_note
@@ -2572,139 +2518,158 @@ msgstr ""
 #. type: Hash Value: tbl-abr-infection-rate rate_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "%s: The Antibiotic-Resistant Infection Rate for your department (percentage of infections with resistant pathogens)."
+msgid "{column}: The Antibiotic-Resistant Infection Rate for your department (percentage of infections with resistant pathogens)."
 msgstr ""
 
 #. type: Hash Value: tbl-agent-per-infection-rate n_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "%s: The aggregated number of infections with this infectious agent detected in your department's infants."
+msgid "{column}: The aggregated number of infections with this infectious agent detected in your department's infants."
 msgstr ""
 
 #. type: Hash Value: tbl-agent-per-infection-rate rate_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "%s: The percentage of infections in your department where this infectious agent was detected."
+msgid "{column}: The percentage of infections in your department where this infectious agent was detected."
 msgstr ""
 
 #. type: Hash Value: tbl-antibiotic-utilization n_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "%s: The aggregated number of substance-days recorded in your department's infants."
+msgid "{column}: The aggregated number of substance-days recorded in your department's infants."
 msgstr ""
 
 #. type: Hash Value: tbl-antibiotic-utilization rate_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "%s: The Antibiotic Exposure Density Rate calculated for your department's infants."
+msgid "{column}: The Antibiotic Exposure Density Rate calculated for your department's infants."
 msgstr ""
 
 #. type: Hash Value: tbl-device-associated-incidence-density-rates n_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "%s: The aggregated number of device-associated infections in your department's infants."
+msgid "{column}: The aggregated number of device-associated infections in your department's infants."
 msgstr ""
 
 #. type: Hash Value: tbl-device-associated-incidence-density-rates rate_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "%s: The Device-Associated Incidence Density Rate for your department (infections per 1000 device-days)."
+msgid "{column}: The Device-Associated Incidence Density Rate for your department (infections per 1000 device-days)."
 msgstr ""
 
 #. type: Hash Value: tbl-incidence-density-rates n_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "%s: The aggregated number of infections in your department's infants."
+msgid "{column}: The aggregated number of infections in your department's infants."
 msgstr ""
 
 #. type: Hash Value: tbl-incidence-density-rates rate_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "%s: The Incidence Density Rate for your department (infections per 1000 patient-days)."
+msgid "{column}: The Incidence Density Rate for your department (infections per 1000 patient-days)."
 msgstr ""
 
 #. type: Hash Value: tbl-infectious-agent-detection-rate n_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "%s: The aggregated number of infections with identified infectious agents in your department's infants."
+msgid "{column}: The aggregated number of infections with identified infectious agents in your department's infants."
 msgstr ""
 
 #. type: Hash Value: tbl-infectious-agent-detection-rate rate_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "%s: The Infectious Agent Detection Rate for your department (percentage of infections with identified agent)."
+msgid "{column}: The Infectious Agent Detection Rate for your department (percentage of infections with identified agent)."
+msgstr ""
+
+#. type: Hash Value: tbl-organism-resistance-rate abr_table_contrast
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "While {reference} reports the rate of infections involving resistant pathogens, this table uses organism-level detections as the denominator."
 msgstr ""
 
 #. type: Hash Value: tbl-organism-resistance-rate n_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "%s: The number of resistant detections of this organism in your department's infants."
+msgid "{column}: The number of resistant detections of this organism in your department's infants."
 msgstr ""
 
 #. type: Hash Value: tbl-organism-resistance-rate rate_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "%s: The organism-specific resistance rate for your department (percentage of tested detections that are resistant)."
+msgid "{column}: The organism-specific resistance rate for your department (percentage of tested detections that are resistant)."
+msgstr ""
+
+#. type: Hash Value: tbl-resistance-test-rate abr_table_note
+#: reports/Partner-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "{reference} reports the detected resistant pathogens themselves."
 msgstr ""
 
 #. type: Hash Value: tbl-resistance-test-rate n_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "%s: The number of pathogens in your department's infants for which the relevant resistance test result was recorded (tested positive or negative)."
+msgid "{column}: The number of pathogens in your department's infants for which the relevant resistance test result was recorded (tested positive or negative)."
 msgstr ""
 
 #. type: Hash Value: tbl-resistance-test-rate rate_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "%s: The proportion of pathogens eligible for this resistance test for which a result was recorded. Eligibility is determined by the infectious agent: only pathogens where the resistance mechanism is clinically relevant are included in the denominator."
+msgid "{column}: The proportion of pathogens eligible for this resistance test for which a result was recorded. Eligibility is determined by the infectious agent: only pathogens where the resistance mechanism is clinically relevant are included in the denominator."
 msgstr ""
 
 #. type: Hash Value: tbl-risk-density-rates n_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "%s: The aggregated number of days the risk/protective factor was present in your department's infants.\n"
+msgid "{column}: The aggregated number of days the risk/protective factor was present in your department's infants."
 msgstr ""
 
 #. type: Hash Value: tbl-risk-density-rates rate_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "%s: The Exposure Density Rate calculated for your department's infants.\n"
+msgid "{column}: The Exposure Density Rate calculated for your department's infants."
 msgstr ""
 
 #. type: Hash Value: tbl-secondary-bsi-rates n_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "%s: The aggregated number of infections with secondary bloodstream infection in your department's infants."
+msgid "{column}: The aggregated number of infections with secondary bloodstream infection in your department's infants."
 msgstr ""
 
 #. type: Hash Value: tbl-secondary-bsi-rates rate_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "%s: The Secondary Bloodstream Infection Rate for your department (percentage of infections with secondary BSI)."
+msgid "{column}: The Secondary Bloodstream Infection Rate for your department (percentage of infections with secondary BSI)."
 msgstr ""
 
 #. type: Hash Value: tbl-surgical-procedure-rates n_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "%s: The aggregated number of surgical procedures performed in your department's infants."
+msgid "{column}: The aggregated number of surgical procedures performed in your department's infants."
 msgstr ""
 
 #. type: Hash Value: tbl-surgical-procedure-rates rate_footnote
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "%s: The Surgical Procedure Rate for your department (procedures per 100 patients)."
+msgid "{column}: The Surgical Procedure Rate for your department (procedures per 100 patients)."
 msgstr ""
 
 #. type: Plain text
 #: reports/Partner-Report/content/_introduction.Rmd:2
 #, markdown-text, no-wrap
-msgid "`r if (has_reference) \"This is a [NeoIPC Surveillance](https://neoipc.org/surveillance/)<!-- --> analysis of infection rates in your neonatal department, presented alongside reference data from the NeoIPC Surveillance network to support benchmarking and identification of areas for further review.\" else \"This is a [NeoIPC Surveillance](https://neoipc.org/surveillance/)<!-- --> analysis of infection rates in your neonatal department. This report does not include reference data for benchmarking. It can be used to monitor your department's infection rates over time and to establish a local baseline. For reference data from the NeoIPC Surveillance network, see the Reference Report published at <https://neoipc.org/surveillance/resources/>.\"`\n"
+msgid "This is a [NeoIPC Surveillance](https://neoipc.org/surveillance/)<!-- --> analysis of infection rates in your neonatal department, presented alongside reference data from the NeoIPC Surveillance network to support benchmarking and identification of areas for further review.\n"
 msgstr ""
 
 #. type: Plain text
 #: reports/Partner-Report/content/_introduction.Rmd:3
+#: reports/Partner-Report/content/_introduction_no_reference.Rmd:3
 #, markdown-text, no-wrap
 msgid "The following summary presents key surveillance metrics for this report. A patient record represents an individual patient; patient admissions count separately each admission episode during the surveillance period. Rates in this report use different denominators depending on the metric; each table's formula footnote specifies the exact denominator used.\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Partner-Report/content/_introduction_no_reference.Rmd:2
+#, markdown-text, no-wrap
+msgid "This is a [NeoIPC Surveillance](https://neoipc.org/surveillance/)<!-- --> analysis of infection rates in your neonatal department. This report does not include reference data for benchmarking. It can be used to monitor your department's infection rates over time and to establish a local baseline. Reference data from the NeoIPC Surveillance network are provided by the Reference Report published at <https://neoipc.org/surveillance/resources/>.\n"
 msgstr ""
 
 #. type: Plain text
@@ -2726,7 +2691,7 @@ msgstr ""
 #. type: Plain text
 #: reports/Partner-Report/content/_nosocomial_infections.Rmd:2
 #, markdown-text, no-wrap
-msgid "Healthcare-associated infections represent the primary endpoint of NeoIPC surveillance. In your department, `r dR$own$numberOfSevereInfections` severe infections were recorded in `r dR$own$numberOfPatients` patients, resulting in an average of `r dR$own$averageSevereInfectionsPerPatient` infections per patient`r if (!is.null(dR$ref)) paste0(\", compared to \", dR$ref$numberOfSevereInfections, \" infections in \", dR$ref$numberOfPatients, \" reference patients (average: \", dR$ref$averageSevereInfectionsPerPatient, \")\")`.\n"
+msgid "Healthcare-associated infections represent the primary endpoint of NeoIPC surveillance. In your department, `r dR$own$numberOfSevereInfections` severe infections were recorded in `r dR$own$numberOfPatients` patients, resulting in an average of `r dR$own$averageSevereInfectionsPerPatient` infections per patient.`r nosocomial_reference_comparison`\n"
 msgstr ""
 
 #. type: Plain text
@@ -2804,13 +2769,13 @@ msgstr ""
 #. type: Plain text
 #: reports/Partner-Report/content/_tbl-intro-abr-infection.Rmd:1
 #, markdown-text, no-wrap
-msgid "Antimicrobial resistance poses a critical threat to vulnerable neonatal patients. @tbl-abr-infection-rate displays infection rates caused by resistant pathogens such as MRSA, VRE, and third-generation cephalosporin-resistant organisms. This section reports *detected* resistant pathogens in infections`r if (nzchar(ref_ast_table)) \"; @tbl-resistance-test-rate reports how completely susceptibility testing was performed. Both are needed to interpret resistance burden.\" else \".\"` Monitoring these rates is crucial for assessing the burden of drug-resistant infections in your department and evaluating the effectiveness of antimicrobial stewardship programs. Elevated rates may signal the need for enhanced infection control measures, antibiotic prescribing review, or environmental screening protocols.\n"
+msgid "Antimicrobial resistance poses a critical threat to vulnerable neonatal patients. @tbl-abr-infection-rate displays infection rates caused by resistant pathogens such as MRSA, VRE, and third-generation cephalosporin-resistant organisms. This section reports *detected* resistant pathogens in infections.`r ast_table_note` Monitoring these rates is crucial for assessing the burden of drug-resistant infections in your department and evaluating the effectiveness of antimicrobial stewardship programs. Elevated rates may signal the need for enhanced infection control measures, antibiotic prescribing review, or environmental screening protocols.\n"
 msgstr ""
 
 #. type: Plain text
 #: reports/Partner-Report/content/_tbl-intro-organism-resistance.Rmd:1
 #, markdown-text, no-wrap
-msgid "@tbl-organism-resistance-rate presents organism-specific resistance rates, showing the proportion of each detected pathogen species that carries a given resistance marker.`r if (nzchar(ref_abr_table)) paste0(\" While\", ref_abr_table, \" reports the rate of infections involving resistant pathogens, this table uses organism-level detections as the denominator.\")` This distinction is clinically important: a high organism-specific resistance rate for a particular species may indicate local selective pressure, clonal spread, or gaps in antimicrobial stewardship targeting that organism.\n"
+msgid "@tbl-organism-resistance-rate presents organism-specific resistance rates, showing, for each detected pathogen species, the proportion of detections that fall into a given resistance category.`r abr_table_contrast` This distinction is clinically important: a high organism-specific resistance rate for a particular species may indicate local selective pressure, clonal spread, or gaps in antimicrobial stewardship targeting that organism.\n"
 msgstr ""
 
 #. type: Plain text
@@ -2822,7 +2787,7 @@ msgstr ""
 #. type: Plain text
 #: reports/Partner-Report/content/_tbl-intro-resistance-test.Rmd:1
 #, markdown-text, no-wrap
-msgid "Antimicrobial susceptibility testing (AST) is fundamental to both individual patient management and population-level surveillance. @tbl-resistance-test-rate presents the rate at which pathogens isolated from infections undergo testing for certain relevant antimicrobial resistances. This section assesses testing *completeness*`r if (nzchar(ref_abr_table)) \"; @tbl-abr-infection-rate reports the detected resistant pathogens themselves.\" else \".\"` High testing rates ensure reliable data for antimicrobial stewardship programs and enable accurate assessment of resistance trends. Lower rates may indicate gaps in microbiological diagnostic capacity or protocols that could limit your ability to detect and respond to emerging resistance patterns.\n"
+msgid "Antimicrobial susceptibility testing (AST) is fundamental to both individual patient management and population-level surveillance. @tbl-resistance-test-rate presents the rate at which pathogens isolated from infections undergo testing for certain relevant antimicrobial resistances. This section assesses testing *completeness*.`r abr_table_note` High testing rates ensure reliable data for antimicrobial stewardship programs and enable accurate assessment of resistance trends. Lower rates may indicate gaps in microbiological diagnostic capacity or protocols that could limit your ability to detect and respond to emerging resistance patterns.\n"
 msgstr ""
 
 #. type: Plain text
@@ -2841,13 +2806,6 @@ msgstr ""
 #: reports/Partner-Report/content/_tbl-intro-surgical-procedure.Rmd:1
 #, markdown-text, no-wrap
 msgid "@tbl-surgical-procedure-rates presents rates of various surgical procedures performed in your department, normalized per 100 patients. Understanding your surgical case mix is essential for interpreting infection rates and implementing appropriate surgical site infection prevention protocols. Comparison with reference data helps contextualize your department's surgical workload and associated infection risks.\n"
-msgstr ""
-
-#. type: Plain text
-#: reports/Partner-Report/content/_methods-antibiotic-utilization.Rmd:1
-#: reports/Reference-Report/content/_methods-antibiotic-utilization.Rmd:1
-#, markdown-text, no-wrap
-msgid "`r sR$methods$antibiotic_utilization`\n"
 msgstr ""
 
 #. type: Plain text
@@ -3096,40 +3054,40 @@ msgstr ""
 msgid "N/A"
 msgstr ""
 
-#. type: Hash Value: pathogen_source blood
+#. type: Hash Value: pathogen_source B
 #: reports/Patient-Data-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Blood"
 msgstr ""
 
-#. type: Hash Value: pathogen_source blood_and_cerebrospinal_fluid
+#. type: Hash Value: pathogen_source B+C
 #: reports/Patient-Data-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Blood and cerebrospinal fluid"
 msgstr ""
 
-#. type: Hash Value: pathogen_source cerebrospinal_fluid
+#. type: Hash Value: pathogen_source C
 #: reports/Patient-Data-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Cerebrospinal fluid"
 msgstr ""
 
-#. type: Hash Value: pathogen_source lower_respiratory_tract
+#. type: Hash Value: pathogen_source L
 #: reports/Patient-Data-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Lower respiratory tract"
 msgstr ""
 
-#. type: Hash Value: pathogen_source upper_and_lower_respiratory_tract
-#: reports/Patient-Data-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "Upper and lower respiratory tract"
-msgstr ""
-
-#. type: Hash Value: pathogen_source upper_respiratory_tract
+#. type: Hash Value: pathogen_source U
 #: reports/Patient-Data-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Upper respiratory tract"
+msgstr ""
+
+#. type: Hash Value: pathogen_source U+L
+#: reports/Patient-Data-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Upper and lower respiratory tract"
 msgstr ""
 
 #. type: Hash Value: patient_not_found
@@ -3225,7 +3183,7 @@ msgstr ""
 #. type: Array Element: content
 #: reports/Partner-Certificate/content/_sR.yaml:1
 #, no-wrap
-msgid "This project has received funding from the European Union’s Horizon 2020 research and%sinnovation programme under grant agreement No 965328."
+msgid "This project has received funding from the European Union’s Horizon 2020 research and innovation programme under grant agreement No 965328."
 msgstr ""
 
 #. type: Array Element: content
@@ -3243,13 +3201,13 @@ msgstr ""
 #. type: Array Element: content
 #: reports/Partner-Certificate/content/_sR.yaml:1
 #, no-wrap
-msgid "the neonatal department at %s participated in the NeoIPC Surveillance network."
+msgid "the neonatal department at {hospital} participated in the NeoIPC Surveillance network."
 msgstr ""
 
 #. type: Array Element: content
 #: reports/Partner-Certificate/content/_sR.yaml:1
 #, no-wrap
-msgid "Through active monitoring of %s newborns with birth weights below 1500 grams and/or gestational ages below 32 weeks, the team collected valuable reference data that will be useful for assessing and reducing infection risks in neonatal departments. We are proud and delighted to have them as partners in our mission to improve infection prevention and control in the neonatal setting."
+msgid "Through active monitoring of {patient_count} newborns with birth weights below 1500 grams and/or gestational ages below 32 weeks, the team collected valuable reference data that will be useful for assessing and reducing infection risks in neonatal departments. We are proud and delighted to have them as partners in our mission to improve infection prevention and control in the neonatal setting."
 msgstr ""
 
 #. type: Array Element: content
@@ -3300,6 +3258,12 @@ msgstr ""
 msgid "For benchmarking at unit level, the departmental median (Q₂) is generally more representative than the pooled rate, as it is less influenced by differences in unit size. The pooled rate reflects overall patient-level burden across the network."
 msgstr ""
 
+#. type: Hash Value: device_associated_infections_reference
+#: reports/Reference-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Device-associated infections can be found in {reference}."
+msgstr ""
+
 #. type: Hash Value: headerList datasetCompositionHeader
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
@@ -3315,7 +3279,7 @@ msgstr ""
 #. type: Hash Value: headerList mixedWbClassAddendum
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "Additionally, this dataset includes data from countries whose economies belong to different income groups, as defined by the World Bank (%s). This means that the healthcare systems and infrastructure of the included countries may vary considerably, which could further affect the interpretation and comparability of some indicators."
+msgid "Additionally, this dataset includes data from countries whose economies belong to different income groups, as defined by the World Bank ({classes}). This means that the healthcare systems and infrastructure of the included countries may vary considerably, which could further affect the interpretation and comparability of some indicators."
 msgstr ""
 
 #. type: Hash Value: headerList multiCountryDatasetHint
@@ -3336,16 +3300,22 @@ msgstr ""
 msgid "Presence of Risk and Protective Factors"
 msgstr ""
 
+#. type: Hash Value: incidence_densities_reference
+#: reports/Reference-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The incidence densities of primary sepsis/BSI, pneumonia and necrotizing enterocolitis, as well as the composite endpoint 'severe infection', are displayed in {reference}."
+msgstr ""
+
 #. type: Hash Value: tbl-antibiotic-utilization n_footnote
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "%s: The aggregated number of substance-days recorded in all infants."
+msgid "{column}: The aggregated number of substance-days recorded in all infants."
 msgstr ""
 
 #. type: Hash Value: tbl-risk-density-rates n_footnote
 #: reports/Reference-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "%s: The aggregated number of days the risk/protective factor was present in all infants."
+msgid "{column}: The aggregated number of days the risk/protective factor was present in all infants."
 msgstr ""
 
 #. type: Plain text
@@ -3383,21 +3353,9 @@ msgid "As the process, although supported by various tools, relies on the collec
 msgstr ""
 
 #. type: Plain text
-#: reports/Reference-Report/content/_nosocomial_infections.Rmd:2
+#: reports/Reference-Report/content/_nosocomial_infections.Rmd:1
 #, markdown-text, no-wrap
-msgid "Nosocomial infections represent the primary endpoint of NeoIPC surveillance. In`r dR$refIDRTable` the incidence densities of sepsis/BSI, pneumonia and necrotizing enterocolitis, as well as the combined endpoint 'severe infection', are displayed. Overall `r dR$numberOfSevereInfections` severe infections were recorded in `r dR$numberOfPatients` infants resulting in an average number of `r dR$averageSevereInfectionsPerPatient` infections per patient.\n"
-msgstr ""
-
-#. type: Plain text
-#: reports/Reference-Report/content/_nosocomial_infections.Rmd:4
-#, markdown-text, no-wrap
-msgid "`r sR$benchmarking_guidance`\n"
-msgstr ""
-
-#. type: Plain text
-#: reports/Reference-Report/content/_nosocomial_infections.Rmd:5
-#, markdown-text, no-wrap
-msgid "`r if (nzchar(dR$refDevAssTable)) paste0(\"Device-associated infections can be found in\", dR$refDevAssTable, \".\")`\n"
+msgid "Nosocomial infections represent the primary endpoint of NeoIPC surveillance. Overall `r dR$numberOfSevereInfections` severe infections were recorded in `r dR$numberOfPatients` patients resulting in an average number of `r dR$averageSevereInfectionsPerPatient` infections per patient.\n"
 msgstr ""
 
 #. type: Plain text
@@ -4254,18 +4212,6 @@ msgstr ""
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "A patient recorded as part of a multiple birth has fewer than two infants at birth."
-msgstr ""
-
-#. type: Hash Value: problems 57 description
-#: reports/Validation-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "The patient record holds neither a birth weight nor a gestational age, although the registration requires one of the two."
-msgstr ""
-
-#. type: Hash Value: problems 57 summary
-#: reports/Validation-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "A patient record holds neither a birth weight nor a gestational age."
 msgstr ""
 
 #. type: Hash Value: problems 6 description
@@ -5418,29 +5364,6 @@ msgstr ""
 #: reports/Validation-Report/en/_problem_detail_0032.Rmd:10
 #, markdown-text, no-wrap
 msgid "Please open the patient record's dashboard (see @sec-solution-1) and edit its profile (see @sec-solution-17): clear the multiple birth mark if the infant is a singleton, or correct the number of infants at birth otherwise.\n"
-msgstr ""
-
-#. type: Title ###
-#: reports/Validation-Report/en/_problem_detail_0033.Rmd:1
-#, markdown-text, no-wrap
-msgid "The Patient Record Holds Neither a Birth Weight Nor a Gestational Age {#sec-problem-details-33}"
-msgstr ""
-
-#. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0033.Rmd:6
-#, markdown-text, no-wrap
-msgid ""
-"Eligibility for the Core Module depends on a birth weight below 1500 grams or a gestational age below 32 weeks, and the analyses group the patients by both.\n"
-"The registration form therefore requires one of the two whenever the other is empty, in every department, and refuses a record without either; a record reaches the platform without both only around that form, such as through an import or from before the requirement existed.\n"
-"This message appears in the validation report when a patient record holds neither a birth weight nor a gestational age.\n"
-msgstr ""
-
-#. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0033.Rmd:8
-#, markdown-text, no-wrap
-msgid ""
-"Please open the patient record's dashboard (see @sec-solution-1) and edit its profile (see @sec-solution-17): enter the birth weight, the gestational age, or both.\n"
-"If your department includes only infants who meet these criteria and neither value is known, the infant cannot be shown to be eligible and the record does not belong in the Core Module: please delete it (see @sec-solution-2).\n"
 msgstr ""
 
 #. type: Title ###
