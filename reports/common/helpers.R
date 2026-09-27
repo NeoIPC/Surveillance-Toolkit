@@ -292,12 +292,21 @@ include_localised <- function(file_name) {
   )
 }
 
+# The World Bank income classes' codes, as neoipcr reads them, and the keys their
+# labels carry in the string resources.
+world_bank_class_keys <- c(
+  H = "high_income",
+  UM = "upper_middle_income",
+  LM = "lower_middle_income",
+  L = "low_income")
+
 get_localised_world_bank_class_names <- function(x) {
   x |>
     purrr::map_chr(
       \(x) {
         if (is.na(x) || !nzchar(trimws(x))) return(sR$not_available)
-        val <- sR$worldBankClassNames[[as.character(x)]]
+        key <- world_bank_class_keys[as.character(x)]
+        val <- if (is.na(key)) NULL else sR$worldBankClassNames[[key]]
         if(is.null(val)) x else val
       })
 }
@@ -423,7 +432,8 @@ format_countries <- function(countries) {
         wb_class_label = dplyr::if_else(
           is.na(.data$wb_class) | !nzchar(trimws(.data$wb_class)),
           sR$not_available,
-          (sR$worldBankClassNames |> unlist())[gsub("\\s+", "", .data$wb_class)]
+          (sR$worldBankClassNames |> unlist())[
+            world_bank_class_keys[gsub("\\s+", "", .data$wb_class)]]
         )
       ) |>
       dplyr::mutate(

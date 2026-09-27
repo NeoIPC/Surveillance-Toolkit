@@ -53,12 +53,12 @@ no_infections: "No infections recorded for this patient."
 no_procedures: "No surgical procedures recorded for this patient."
 not_available: "N/A"
 pathogen_source:
-  B: "Blood"
-  B+C: "Blood and cerebrospinal fluid"
-  C: "Cerebrospinal fluid"
-  L: "Lower respiratory tract"
-  U: "Upper respiratory tract"
-  U+L: "Upper and lower respiratory tract"
+  blood: "Blood"
+  blood_and_cerebrospinal_fluid: "Blood and cerebrospinal fluid"
+  cerebrospinal_fluid: "Cerebrospinal fluid"
+  lower_respiratory_tract: "Lower respiratory tract"
+  upper_and_lower_respiratory_tract: "Upper and lower respiratory tract"
+  upper_respiratory_tract: "Upper respiratory tract"
 patient_not_found: "No patient with ID '{patient_id}' was found in department '{department_code}'."
 protective:
 section:

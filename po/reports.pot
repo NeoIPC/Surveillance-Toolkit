@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-09-27 09:37+0200\n"
+"POT-Creation-Date: 2026-09-27 14:32+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Language-Team: none\n"
 "Language: en\n"
@@ -1417,25 +1417,25 @@ msgstr ""
 msgid "w"
 msgstr ""
 
-#. type: Hash Value: worldBankClassNames H
+#. type: Hash Value: worldBankClassNames high_income
 #: reports/common.yaml:1
 #, no-wrap
 msgid "High income"
 msgstr ""
 
-#. type: Hash Value: worldBankClassNames L
+#. type: Hash Value: worldBankClassNames low_income
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Low income"
 msgstr ""
 
-#. type: Hash Value: worldBankClassNames LM
+#. type: Hash Value: worldBankClassNames lower_middle_income
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Lower middle income"
 msgstr ""
 
-#. type: Hash Value: worldBankClassNames UM
+#. type: Hash Value: worldBankClassNames upper_middle_income
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Upper middle income"
@@ -3096,40 +3096,40 @@ msgstr ""
 msgid "N/A"
 msgstr ""
 
-#. type: Hash Value: pathogen_source B
+#. type: Hash Value: pathogen_source blood
 #: reports/Patient-Data-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Blood"
 msgstr ""
 
-#. type: Hash Value: pathogen_source B+C
+#. type: Hash Value: pathogen_source blood_and_cerebrospinal_fluid
 #: reports/Patient-Data-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Blood and cerebrospinal fluid"
 msgstr ""
 
-#. type: Hash Value: pathogen_source C
+#. type: Hash Value: pathogen_source cerebrospinal_fluid
 #: reports/Patient-Data-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Cerebrospinal fluid"
 msgstr ""
 
-#. type: Hash Value: pathogen_source L
+#. type: Hash Value: pathogen_source lower_respiratory_tract
 #: reports/Patient-Data-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Lower respiratory tract"
 msgstr ""
 
-#. type: Hash Value: pathogen_source U
-#: reports/Patient-Data-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "Upper respiratory tract"
-msgstr ""
-
-#. type: Hash Value: pathogen_source U+L
+#. type: Hash Value: pathogen_source upper_and_lower_respiratory_tract
 #: reports/Patient-Data-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Upper and lower respiratory tract"
+msgstr ""
+
+#. type: Hash Value: pathogen_source upper_respiratory_tract
+#: reports/Patient-Data-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Upper respiratory tract"
 msgstr ""
 
 #. type: Hash Value: patient_not_found

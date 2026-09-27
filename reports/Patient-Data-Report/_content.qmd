@@ -146,9 +146,13 @@ format_pathogens <- function(agent_findings, taxonomy) {
   if ("source" %in% names(result)) {
     result <- result |>
       dplyr::mutate(
-        source_label = purrr::map_chr(
-          as.character(source),
-          ~ sR$pathogen_source[[.x]] %||% .x))
+        source_label = purrr::map_chr(as.character(source), function(code) {
+          source_key <- switch(code, "B" = "blood", "C" = "cerebrospinal_fluid",
+                               "B+C" = "blood_and_cerebrospinal_fluid",
+                               "U" = "upper_respiratory_tract", "L" = "lower_respiratory_tract",
+                               "U+L" = "upper_and_lower_respiratory_tract", code)
+          sR$pathogen_source[[source_key]] %||% code
+        }))
     result |>
       dplyr::select(
         !!sR$field$pathogen_name := name,

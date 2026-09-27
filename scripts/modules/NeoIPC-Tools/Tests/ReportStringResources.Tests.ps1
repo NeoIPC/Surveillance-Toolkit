@@ -8,11 +8,13 @@
 
 .DESCRIPTION
     No CI job renders a report, so the code between the string resources and the rendered text is
-    exercised nowhere else. Two parts:
+    exercised nowhere else. Three parts:
 
     - The YAML handlers every string resource is read with (string_resource_handlers() in
       reports/common/helpers.R). A translated label such as Yes reaches the catalogue unquoted, and
       YAML 1.1 would read it as a logical.
+    - The income-class labels the Partner and Reference Reports look up for a class code, whose keys
+      name the class rather than repeat the code.
     - The Validation Report's formatter (_problem_text.qmd with the tables of _mapping.qmd): the
       fallback that shows a stored code where its name is missing, the label a decoration looks up,
       and the choice of a rule's second sentence.
@@ -68,6 +70,19 @@ cat(vapply(parsed, function(value) paste(class(value), format(value)), character
         Invoke-ValidationReportSnippet $body | Should -BeExactly (
             'character Yes|character no|character on|character OFF|character y|character n|' +
             'logical TRUE|logical FALSE|logical TRUE')
+    }
+
+    It 'labels every income class by its code, and shows an unknown code as it is' {
+        $body = @'
+cat(get_localised_world_bank_class_names(c("H", "UM", "LM", "L", "XX")), sep = "|")
+cat("\n")
+countries <- tibble::tibble(name = c("A", "B", "C"), wb_class = c("L M", "H", "XX"))
+cat(format_countries(countries))
+'@
+        $text = Invoke-ValidationReportSnippet $body
+        $text | Should -Match '^High income\|Upper middle income\|Lower middle income\|Low income\|XX'
+        $text | Should -Match 'High income: \*B\*'
+        $text | Should -Match 'Lower middle income: \*A\*'
     }
 
     It 'shows the stored code where a substance has no name' {
