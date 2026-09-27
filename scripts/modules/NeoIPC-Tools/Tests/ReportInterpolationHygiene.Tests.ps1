@@ -396,8 +396,9 @@ merge_bindings <- function(b1, b2) {
 # template the expression can hold, and they are checked like any other; a template the check can see
 # the expression hold must be among them. `rule = "subset"` lets the call pass values a template does
 # not use, for a composer that fills whichever template it picked from one set of values. `unchecked`
-# says why nothing is checked here. An entry no call reaches is itself a finding, so the list cannot
-# outlive the code it describes.
+# says why nothing is checked here. A write into part of sR is keyed by its target and `<-`, and
+# `unchecked` says why the templates it reaches still read as the check's sR holds them. An entry
+# nothing reaches is itself a finding, so the list cannot outlive the code it describes.
 declared <- list(
   "Partner-Report/_setup.qmd in select_clause(): clause_template" = list(
     rule = "subset",
@@ -409,7 +410,13 @@ declared <- list(
     unchecked = "labels_for() hands its template and values on unchanged, and its calls are checked"),
   "Validation-Report/_problem_text.qmd in problem_text(): interpolate_translation passed as a value" = list(
     unchecked = paste("do.call() fills a rule's sentence from its finding's context fields, and the",
-                      "report's setup holds every template to neoipcr's context fields before it renders")))
+                      "report's setup holds every template to neoipcr's context fields before it renders")),
+  "common/helpers.R in get_string_resources(): sR[[variant]] <-" = list(
+    unchecked = paste("it adds the glossary terms' sentence-case variants while it builds the string",
+                      "resources, and the check builds its own with this function")),
+  "Partner-Report/_setup.qmd: sR$outlier[[pairing_name]] <-" = list(
+    unchecked = paste("it adds each pairing's table cross-references beside the pairing's strings, under",
+                      "keys the string resources do not hold, so no string changes")))
 # Functions that hand a template and its values to interpolate_translation() unchanged, whose calls are
 # checked as interpolations.
 wrappers <- "labels_for"
@@ -426,6 +433,13 @@ mentions_read <- 0L
 # for each template the shared code names, the reports whose strings lack it.
 cascade <- ""
 missing_in <- list()
+# The report whose render the code being read runs in; its own code, or the shared code read against
+# its strings. Per report, the paths under sR its code writes into and the templates its calls read,
+# compared once every file of it has been read, since a write in one file reaches a template read in
+# another whatever order they run in.
+current_report <- ""
+writes <- list()
+uses <- list()
 # Off while a pass only gathers bindings: the first pass over a loop body, over a function body and
 # over a file. Such a pass also keeps every value a variable is ever assigned rather than the last.
 checking <- TRUE
@@ -440,6 +454,39 @@ key_of <- function(file, scope, what)
   paste0(file, if (nzchar(scope)) paste0(" in ", scope, "()"), ": ", what)
 sources_of <- function(templates)
   vapply(templates, function(t) paste(deparse(t), collapse = ""), character(1))
+
+# The keys an expression names under sR, from sR down to the first step it computes, such as
+# `[[name]]` or names(); NULL when it is not under sR.
+keys_under_sR <- function(e) {
+  keys <- character()
+  while (is.call(e) && length(e) >= 2L) {
+    static <- length(e) == 3L &&
+      ((identical(e[[1]], as.name("$")) && (is.name(e[[3]]) || is.character(e[[3]]))) ||
+       (identical(e[[1]], as.name("[[")) && is.character(e[[3]]) && length(e[[3]]) == 1L))
+    keys <- if (static) c(as.character(e[[3]]), keys) else character()
+    e <- e[[2]]
+  }
+  if (identical(e, as.name("sR"))) keys else NULL
+}
+
+# Whether two paths under sR reach each other: a write reaches every template at or under the path it
+# names, and a template holding a string is no longer one once something is written under it.
+overlaps <- function(a, b) {
+  n <- min(length(a), length(b))
+  identical(a[seq_len(n)], b[seq_len(n)])
+}
+
+# An assignment into part of sR leaves what it writes, and everything under it, holding something this
+# reading does not follow.
+write_into_sR <- function(target, file, scope) {
+  if (!checking) return(invisible())
+  key <- key_of(file, scope, paste(paste(deparse(target), collapse = " "), "<-"))
+  if (key %in% names(declared)) {
+    reached <<- union(reached, key)
+    return(invisible())
+  }
+  writes[[length(writes) + 1L]] <<- list(report = current_report, keys = keys_under_sR(target), at = key)
+}
 
 check_call <- function(e, file, scope, sR, b) {
   if (!checking) return(invisible())
@@ -488,6 +535,10 @@ check_call <- function(e, file, scope, sR, b) {
   where <- if (nzchar(cascade)) sprintf("%s with %s's strings", file, cascade) else file
   for (i in which(!duplicated(sources))) {
     templates_seen <<- union(templates_seen, paste(file, sources[[i]]))
+    keys <- keys_under_sR(candidates[[i]])
+    if (!is.null(keys))
+      uses[[length(uses) + 1L]] <<- list(report = current_report, keys = keys, where = where,
+                                         source = sources[[i]])
     text <- tryCatch(eval(candidates[[i]], list(sR = sR)), error = function(err) NULL)
     if (!is.character(text) || length(text) != 1L) {
       if (nzchar(cascade)) {
@@ -540,7 +591,9 @@ walk <- function(e, file, scope, sR, b, final) {
       b <- walk(target, file, scope, sR, b, final)
       root <- target
       while (is.call(root) && length(root) >= 2L) root <- root[[2]]
-      if (is.name(root) && !identical(root, as.name("sR")) && as.character(root) %in% names(b))
+      if (identical(root, as.name("sR")))
+        write_into_sR(target, file, scope)
+      else if (is.name(root) && as.character(root) %in% names(b))
         b[[as.character(root)]] <- join(b[[as.character(root)]], unknown)
       return(b)
     }
@@ -658,6 +711,7 @@ for (report in list.dirs(reports, recursive = FALSE)) {
   files <- files[!grepl("^content\\.", files) &
                  !grepl("^(?!en/)[a-z]{2}(-[A-Z]{2})?/", files, perl = TRUE) &
                  !grepl("\\.[a-z]{2}(-[A-Z]{2})?\\.qmd$", files)]
+  current_report <- basename(report)
   for (file in files) check_file(file, paste0(basename(report), "/", file), sR)
   cascades[[basename(report)]] <- sR
   setwd(old)
@@ -669,6 +723,7 @@ for (report in list.dirs(reports, recursive = FALSE)) {
 for (file in list.files(file.path(reports, "common"), pattern = "\\.(qmd|Rmd|R)$")) {
   for (name in names(cascades)) {
     cascade <- name
+    current_report <- name
     check_file(file.path(reports, "common", file), paste0("common/", file), cascades[[name]])
   }
 }
@@ -676,8 +731,13 @@ cascade <- ""
 for (key in names(missing_in))
   if (length(missing_in[[key]]) == length(cascades)) finding("%s names no string", key)
 
+for (u in uses) for (w in writes)
+  if (identical(u$report, w$report) && overlaps(u$keys, w$keys))
+    finding(paste("%s: %s can be changed by %s, after which this reading cannot tell what it holds;",
+                  "declare the write with the reason"), u$where, u$source, w$at)
+
 for (key in setdiff(names(declared), reached))
-  finding("the declaration for %s is reached by no call", key)
+  finding("the declaration for %s is reached by no call or write", key)
 cat(sprintf("CHECKED %d calls, %d templates\n", length(calls_seen), length(templates_seen)))
 cat(unique(findings), sep = "\n")
 '@
