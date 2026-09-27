@@ -396,8 +396,8 @@ merge_bindings <- function(b1, b2) {
 # template the expression can hold, and they are checked like any other; a template the check can see
 # the expression hold must be among them. `rule = "subset"` lets the call pass values a template does
 # not use, for a composer that fills whichever template it picked from one set of values. `unchecked`
-# says why nothing is checked here. A write into part of sR is keyed by its target and `<-`, and
-# `unchecked` says why the templates it reaches still read as the check's sR holds them. An entry
+# says why nothing is checked here. A write to sR, or into part of it, is keyed by its target and `<-`,
+# and `unchecked` says why the templates it reaches still read as the check's sR holds them. An entry
 # nothing reaches is itself a finding, so the list cannot outlive the code it describes.
 declared <- list(
   "Partner-Report/_setup.qmd in select_clause(): clause_template" = list(
@@ -411,6 +411,8 @@ declared <- list(
   "Validation-Report/_problem_text.qmd in problem_text(): interpolate_translation passed as a value" = list(
     unchecked = paste("do.call() fills a rule's sentence from its finding's context fields, and the",
                       "report's setup holds every template to neoipcr's context fields before it renders")),
+  "common/helpers.R in get_string_resources(): sR <-" = list(
+    unchecked = "it builds the string resources in layers, and the check builds its own with this function"),
   "common/helpers.R in get_string_resources(): sR[[variant]] <-" = list(
     unchecked = paste("it adds the glossary terms' sentence-case variants while it builds the string",
                       "resources, and the check builds its own with this function")),
@@ -476,17 +478,21 @@ overlaps <- function(a, b) {
   identical(a[seq_len(n)], b[seq_len(n)])
 }
 
-# An assignment into part of sR leaves what it writes, and everything under it, holding something this
-# reading does not follow.
-write_into_sR <- function(target, file, scope) {
+# An assignment to sR, or into part of it, leaves what it writes, and everything under it, holding
+# something this reading does not follow. `how` names the form of the write, for its key.
+write_into_sR <- function(target, file, scope, how = "<-") {
   if (!checking) return(invisible())
-  key <- key_of(file, scope, paste(paste(deparse(target), collapse = " "), "<-"))
+  key <- key_of(file, scope, paste(paste(deparse(target), collapse = " "), how))
   if (key %in% names(declared)) {
     reached <<- union(reached, key)
     return(invisible())
   }
   writes[[length(writes) + 1L]] <<- list(report = current_report, keys = keys_under_sR(target), at = key)
 }
+
+# Whether a value is the string resources as the check builds them for itself.
+builds_sR <- function(value)
+  is.call(value) && identical(value[[1]], as.name("get_string_resources"))
 
 check_call <- function(e, file, scope, sR, b) {
   if (!checking) return(invisible())
@@ -579,6 +585,10 @@ walk <- function(e, file, scope, sR, b, final) {
     value <- e[[3]]
     if (identical(target, as.name("interpolate_translation")) && checking)
       mentions_read <<- mentions_read + 1L
+    # Assigning sR anything but what get_string_resources() builds writes over every template the
+    # report reads.
+    if (identical(target, as.name("sR")) && !builds_sR(value))
+      write_into_sR(target, file, scope)
     if (is.name(target) && is.call(value) && identical(value[[1]], as.name("function"))) {
       walk(value, file, as.character(target), sR, b, final)
       b[[as.character(target)]] <- unknown
@@ -601,7 +611,8 @@ walk <- function(e, file, scope, sR, b, final) {
     # know.
     if (is.name(target) && identical(head, as.name("<<-")) && nzchar(scope))
       rebound <<- union(rebound, as.character(target))
-    # sR is the string resources whatever builds it: the cascade, or a layer merged onto it.
+    # sR is not bound as a variable: resolve() reads it as the string resources the check builds, and
+    # an assignment to it is a write, above.
     if (is.name(target) && !identical(target, as.name("sR"))) {
       name <- as.character(target)
       b[[name]] <- if (!checking && name %in% names(b)) join(b[[name]], resolve(value, b))
@@ -610,8 +621,11 @@ walk <- function(e, file, scope, sR, b, final) {
     return(b)
   }
   if ((identical(head, as.name("assign")) || identical(head, quote(base::assign))) &&
-      length(e) >= 3L && is.character(e[[2]]))
+      length(e) >= 3L && is.character(e[[2]])) {
     rebound <<- union(rebound, e[[2]])
+    if (identical(e[[2]], "sR") && !builds_sR(e[[3]]))
+      write_into_sR(as.name("sR"), file, scope, "<- through assign()")
+  }
   if (identical(head, as.name("function"))) {
     inner <- merge_bindings(b, final)
     for (parameter in setdiff(names(e[[2]]), "sR")) inner[[parameter]] <- unknown
