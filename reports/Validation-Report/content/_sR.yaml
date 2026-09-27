@@ -297,9 +297,95 @@ problems:
       is '{status}'). If the infant is still in the department, this message
       can be ignored.
     summary: The enrolment is still active more than 120 days after the admission and its surveillance end form is not completed.
+  "45":
+    description: >-
+      The infant was admitted on day of life {dol}, after day of life 120, the
+      last day on which an infant is eligible for the surveillance.
+    summary: The day of life at admission is above 120, the last eligible day.
+  "46":
+    description: >-
+      The admission form records a transfer or readmission after the day of
+      birth, but the day of life at admission is {dol}; the day of birth is
+      day of life 1, so an infant admitted after it is on day of life 2 or
+      later.
+    summary: The day of life at admission of an infant transferred or readmitted after the day of birth is missing or below 2.
+  "47":
+    description: >-
+      The enrolment dated {enrolledAt} records the admission type
+      '{type_label}', but the patient has an earlier enrolment dated
+      {enrolledAt_previous}, so this admission is a transfer or readmission
+      after the day of birth.
+    summary: A later enrolment of the patient is recorded as an admission from the delivery room or on the day of birth.
+  "48":
+    description: >-
+      The enrolment is dated {enrolledAt}, but the patient's death was recorded
+      on {death_date} on the surveillance end form of another enrolment.
+    summary: The enrolment is dated on or after the patient's recorded death.
+  "49":
+    description: >-
+      The infection dated {occurredAt} is recorded fewer than 14 days after the
+      patient's previous infection of the same type, dated
+      {occurredAt_previous}.
+    summary: The same type of infection was recorded again fewer than 14 days after the previous one.
+  "50":
+    description: >-
+      The infection is recorded as {device_label}-associated, but the
+      {device_label} days on the enrolment's surveillance end form are
+      {device_days}.
+    summary: A device-associated infection's enrolment counts no days of that device on its surveillance end form.
+  "51":
+    description: >-
+      The number of {count_label} ({days}) exceeds the number of patient days
+      ({patient_days}).
+    summary: A cumulative day count on the surveillance end form exceeds the number of patient days.
+  "52":
+    description: >-
+      Antibiotic substance entry {index} is incomplete: the substance is
+      {substance} and its days are {days}.
+    summary: An antibiotic substance entry holds a substance without its days or days without a substance.
+  "53":
+    description: >-
+      Antibiotic substance entry {index} ({substance}) records more days
+      ({days}) than the total antibiotic days ({ab_days}) or the patient days
+      ({patient_days}).
+    summary: An antibiotic substance's days exceed the total antibiotic days or the patient days.
+  "54":
+    description: >-
+      The antibiotic substance {substance} is recorded in entry {index} and in
+      entry {index_other}.
+    summary: The same antibiotic substance is recorded in two substance entries.
+  "55":
+    description: >-
+      The secondary bloodstream infection item is '{sec_bsi_label}', but the
+      number of secondary bloodstream infection organisms recorded is
+      {organisms}.
+    summary: The secondary bloodstream infection item disagrees with the secondary bloodstream infection organisms recorded.
+  "56":
+    description: >-
+      The patient is recorded as part of a multiple birth, but the number of
+      infants at birth is {siblings}.
+    summary: A patient recorded as part of a multiple birth has fewer than two infants at birth.
 ssi_problem_header_prefix: Surgical Site Infection event with the infection date
 ssi_types:
   "1": superficial incisional SSI
   "2": deep incisional SSI
   "3": organ/space SSI
+admission_types:
+  "1": admitted from the delivery room
+  "2": transferred or readmitted on the day of birth
+  "3": transferred or readmitted the day after birth or later
+day_counts:
+  cvc_days: CVC days
+  pvc_days: PVC days
+  inv_days: INV days
+  niv_days: NIV days
+  vs_days: INV days and NIV days together
+  ab_days: antibiotic days
+  human_milk_days: human milk days
+  kangaroo_care_days: kangaroo care days
+  probiotic_days: probiotic days
+secondary_bsi_items:
+  "1": "Yes"
+  "0": "No"
+  "-1": No follow-up
 sur_problem_header_prefix: Surgical Procedure event with the procedure date

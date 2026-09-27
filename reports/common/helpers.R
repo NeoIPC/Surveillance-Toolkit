@@ -103,7 +103,11 @@ sentence_case <- function(text, language) {
 }
 
 get_string_resources <- function(x) {
-  handlers <- list('bool#no' = function(x) x)
+  # YAML 1.1 reads a bare yes, no, on, off, y or n as a logical, but in string
+  # resources such a word is a label (po4a writes a translated label like Yes
+  # unquoted), so it stays text; only true and false are logicals.
+  keep_label <- function(x) if (tolower(x) %in% c("true", "false")) as.logical(tolower(x)) else x
+  handlers <- list('bool#no' = keep_label, 'bool#yes' = keep_label)
 
   # Layer 0: glossary (lowest priority — controlled vocabulary)
   glossary_path <- "../../glossary.yaml"

@@ -1,0 +1,10 @@
+### A Cumulative Day Count Exceeds the Number of Patient Days {#sec-problem-details-29}
+
+Every cumulative count on the surveillance end form counts days of the stay: the days with a central or a peripheral venous catheter, with invasive or non-invasive ventilation, with antibiotics, with human milk, with kangaroo care and with probiotics.
+None of them can therefore exceed the number of patient days.
+The days of invasive and non-invasive ventilation are bounded together as well: a day of ventilation counts as either invasive or non-invasive, so their sum cannot exceed the patient days either.
+The platform checks these bounds when the form is completed, but a form completed before the checks existed, or a value changed afterwards, can still violate them.
+This message appears in the validation report when one of the counts exceeds the patient days; there is one message per count.
+
+Please open the surveillance end form (see @sec-solution-15), reopen it for editing if it is completed (see @sec-solution-9) and correct the count.
+If the number of patient days is wrong instead, update it (see @sec-solution-11) and check the other counts against the corrected value.

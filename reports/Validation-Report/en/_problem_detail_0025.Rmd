@@ -1,0 +1,10 @@
+### A Later Enrolment Is Recorded as an Admission From the Delivery Room or on the Day of Birth {#sec-problem-details-25}
+
+Each hospital stay of a patient is recorded as an enrolment of its own, and the admission form of each enrolment records how the infant came to the department: from the delivery room after a birth in the hospital, transferred or readmitted to the hospital on the day of birth, or transferred or readmitted the day after birth or later.
+An enrolment that follows an earlier enrolment of the same patient is a readmission by definition, and a readmission after the day of birth is recorded with the third of these admission types.
+This message appears in the validation report when a later enrolment of a patient records one of the first two.
+
+Either the admission type of the later enrolment is wrong, or the two enrolments describe the same hospital stay.
+
+Please open the later enrolment's admission form (see @sec-solution-15), reopen it for editing if it is completed (see @sec-solution-9) and correct the admission type together with the day of life at admission.
+If the two enrolments describe one stay, please delete the redundant one instead (see @sec-solution-13).

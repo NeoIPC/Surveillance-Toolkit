@@ -1,0 +1,11 @@
+### The Same Type of Infection Was Recorded Again Within 14 Days {#sec-problem-details-27}
+
+According to the NeoIPC Surveillance Protocol, the same type of infection is registered again for a patient only after a minimum of 14 days and a period without relevant symptoms of infection, and a new pathogen isolated at the same site while an infection is present is not a new infection.
+This message appears in the validation report when a patient has two forms of the same infection type (sepsis, necrotizing enterocolitis, pneumonia or surgical site infection) whose infection dates are fewer than 14 days apart, whether in one enrolment or in two enrolments of the patient.
+The later form is the one the message names; when both forms carry the same date, either may carry the message.
+
+In most cases the later form records a continuation of the first infection or a further organism isolated during it, or one of the two infection dates was entered incorrectly.
+
+Please check both forms.
+If the later form does not record a new infection, delete it (see @sec-solution-12) and record any additional organism in the first form instead.
+If a date was entered incorrectly, correct it (see @sec-solution-7).

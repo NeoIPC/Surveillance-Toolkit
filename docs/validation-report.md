@@ -30,7 +30,11 @@ lists them. That section is the contract; this report does not restate it.
 
 One function renders every rule (`problem_text()` in `_problem_text.qmd`):
 
-1. `format_context()` turns the one-row context into named character scalars — dates in the locale's
+1. `fall_back_context()` first replaces a missing field by another field the rule records, where
+   `context_fallbacks` in `_mapping.qmd` pairs the two: rules 52 to 54 record a substance both as the
+   name the form shows and as the code it stores, and a code the option set does not carry has no
+   name, so the sentence shows the code. The setup refuses a pair naming a field the rule does not
+   record. Then `format_context()` turns the one-row context into named character scalars — dates in the locale's
    date format, factors and numbers as text, a missing value as the report's `missing_value` string,
    worded to sit inside a sentence — so `interpolate_translation()` never receives a zero-length or
    unnamed value, which it refuses. Every value is escaped for Markdown at this boundary
@@ -40,13 +44,21 @@ One function renders every rule (`problem_text()` in `_problem_text.qmd`):
    than as emphasis, a link or HTML, and a date's or a number's separators — the digit group separator
    is a translated string — are literal too. The same goes for every string that is placed into
    markup the code builds rather than into a sentence: the patient id and the dashboard link's title in
-   a record's heading, the support link's label, the translated SSI type label handed to rule 19's
-   template as a value, the rule summaries listed in the header, and the missing-value string wherever
+   a record's heading, the support link's label, the translated labels the decorations hand to the
+   templates as values, the rule summaries listed in the header, and the missing-value string wherever
    it stands in for a value. The templates and headings themselves are the report's Markdown and are
    not escaped.
-2. `decorate_context()` adds the values a template needs beyond what the rule records; today that is
-   rule 19's localized SSI type label from `ssi_types`, with `missing_value` where the type is missing
-   or unknown, so the placeholder always has a value.
+2. `decorate_context()` adds the values a template needs beyond what the rule records: a localized
+   label for each coded value `context_decorations` in `_mapping.qmd` names for the rule (rule 19's SSI
+   type from `ssi_types`, rule 47's admission type from `admission_types`, rule 50's device from
+   `devices`, which `label_maps()` assembles from the glossary's abbreviations, rule 51's count from
+   `day_counts`, rule 55's secondary-BSI item from
+   `secondary_bsi_items`), with `missing_value` where the code is missing or unknown, so the
+   placeholder always has a value. A rule whose sentence needs a label for a code it records gets a
+   row in that table and a map in `label_maps()` beside it in `_mapping.qmd`, which names every map by
+   a literal `sR$` reference so that the string-layer check sees the key used; the setup refuses a row
+   whose field the rule does not record, whose map `label_maps()` lacks, or whose placeholder none of
+   the rule's sentences names.
 3. `select_template()` picks the template; rule 20 carries two complete sentences (`description` and
    `description_secondary_bsi`) rather than one sentence with an optional fragment.
 4. The sentence is followed by `see_problem_details`, interpolated with the cross-reference to the
@@ -73,7 +85,7 @@ way, wherever it is used.
 ## Rule selection and the clean result
 
 The `rules` parameter (`integer[]`) restricts the render to the named rules; absent, every rule runs.
-The header states which rules the document rests on — "All 43 rules", or the count applied and the
+The header states which rules the document rests on — "All 55 rules", or the count applied and the
 rules not applied with their summaries — so a report rendered with a subset cannot be read as a clean
 bill on the rules it skipped. An id neoipcr does not know aborts the render. The `# @type integer[]`
 annotation names the parameter's type for a consumer of the parameter schema; the only such consumer
@@ -97,8 +109,9 @@ a selected rule it could not run (its `rules_skipped` attribute, set when the da
 rule reads): the import asks for every tier, so a skip means the dataset is not what the report expects,
 and a document that claimed those rules would be wrong. It also fails the render when a rule's
 sentences name a placeholder the rule does not record, as `neoipcr::validation_rule_context_fields()`
-declares the fields, or that `decorate_context()` does not add for it (`ssi_type` for rule 19), instead
-of failing inside the interpolation on the first finding that reaches the sentence.
+declares the fields, or that `decorate_context()` does not add for it (the placeholders
+`context_decorations` names for the rule), instead of failing inside the interpolation on the first
+finding that reaches the sentence.
 
 ## Adding a validation rule
 
@@ -106,7 +119,11 @@ of failing inside the interpolation on the first finding that reaches the senten
    `validation_rules`, document its context fields in the table on `validate()`, add the detect /
    no-detect / exception tests, note it in `NEWS.md`, and release the package.
 2. Here: add `problems.N` with `description` (named placeholders equal to the rule's context fields) and
-   `summary` to `content/_sR.yaml`; add its row to `problem_info` in `_mapping.qmd` (`primaryDetail`,
+   `summary` to `content/_sR.yaml`, and where the sentence shows a coded value as a label, a row in
+   `context_decorations` with its label map in the string resources, registered in `label_maps()`
+   (and, where a field can be missing while another records the same thing, a row in
+   `context_fallbacks`); add its row to `problem_info` in
+   `_mapping.qmd` (`primaryDetail`,
    `usedDetails`), writing a new `en/_problem_detail_NNNN.Rmd` and `_solution_NNNN.Rmd` where no
    existing one fits and registering them in `problem_detail_info` / `solution_info`. A detail's
    `usedSolutions` names the solutions its text cites; the render closes that set over the solutions

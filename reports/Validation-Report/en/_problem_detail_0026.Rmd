@@ -1,0 +1,10 @@
+### The Enrolment Is Dated On or After the Patient's Recorded Death {#sec-problem-details-26}
+
+When an infant dies, its surveillance ends on the day of death, which is recorded on the surveillance end form with 'Death' as the reason.
+No hospital stay of the patient can begin on or after that day.
+This message appears in the validation report when a patient has a surveillance end form that gives death as the reason and another enrolment whose admission date is on or after the date of that form.
+
+Either the surveillance end form is wrong, because the reason should be 'Discharge/Transfer' or the date is not the day of death, or the later enrolment is wrong, because its admission date was entered incorrectly or because it belongs to a different infant and was created under this patient's NeoIPC-ID by mistake.
+
+Please check the surveillance end form of the enrolment that recorded the death (see @sec-solution-15; reopen it for editing if it is completed, see @sec-solution-9) and the admission date of the later enrolment (see @sec-solution-6).
+If the later enrolment belongs to another infant, please delete it here (see @sec-solution-13) and record it under the correct patient.

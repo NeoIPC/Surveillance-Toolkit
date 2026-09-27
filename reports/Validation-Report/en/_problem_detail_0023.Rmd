@@ -1,0 +1,9 @@
+### The Admission Occurred After Day of Life 120 {#sec-problem-details-23}
+
+An infant is eligible for NeoIPC Surveillance when it is admitted to the neonatal department within 120 days of birth, the day of birth being day of life 1, so an infant admitted on day of life 121 or later is not eligible.
+This message appears in the validation report when the admission form of an infant transferred or readmitted to the hospital the day after birth or later records a day of life at admission above 120.
+For the other two admission types the platform sets the day of life to 1 itself, so their forms are not checked.
+
+Please check the admission form.
+If the day of life was entered incorrectly, open the admission form (see @sec-solution-15), reopen it for editing if it is completed (see @sec-solution-9) and correct the value.
+If the infant was in fact admitted after day of life 120, it is not eligible for the surveillance: please delete the enrolment (see @sec-solution-13), or the whole patient record if this is its only enrolment (see @sec-solution-2).

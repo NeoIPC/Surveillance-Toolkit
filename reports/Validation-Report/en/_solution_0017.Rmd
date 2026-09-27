@@ -1,0 +1,6 @@
+### Changing the Data in a Patient Record's Profile {#sec-solution-17}
+
+The data that describes the patient rather than a single hospital stay, such as the sex, the birth weight or whether the infant is part of a multiple birth, is shown in the ‘Profile’ widget of the Tracked Entity Instance Dashboard (see @sec-solution-1).
+
+To change it, click ‘Edit’ in the heading of the ‘Profile’ widget, correct the fields concerned, for example ‘Multiple birth’ or ‘Number of infants in birth’, and click ‘Save’.
+‘Cancel’ leaves the profile as it was.
