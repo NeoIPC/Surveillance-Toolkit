@@ -348,8 +348,8 @@ jobs:
               run: python -m pytest scripts/ -v
 
     build-docs:
-        # Pinned to an explicit image for reproducibility; 26.04 provides the .NET 10 / PowerShell 7.6
-        # runtime the NeoIPC-Tools module and data-dictionary generator require.
+        # Pinned to an explicit image for reproducibility; 26.04 provides the PowerShell 7.6 runtime the
+        # protocol build requires.
         runs-on: ubuntu-26.04
         # Expose the parsed product release to the release-gated jobs (empty on non-release triggers).
         outputs:
@@ -569,8 +569,6 @@ jobs:
                 check_release NeoIPC/neoipc-app "$(get_tested neoipc-app)"
                 exit $status
 
-            # ── Metadata product group ─────────────────────────────────────────────────────────────────────────
-            # Runs on every non-release trigger (continuous CI builds all products), and on a metadata-v* release.
             # ── po4a toolchain (Perl) ──────────────────────────────────────────────────────────────────────────
             # Needed by the protocol AND the infectious agent list (both localize via po4a).
             - name: Install po4a dependencies
@@ -774,6 +772,8 @@ jobs:
         # than after its protocol build. On a release tag it runs for a metadata release only; build-docs
         # still parses and validates every tag, and the release job waits for both.
         if: github.ref_type != 'tag' || startsWith(github.ref_name, 'metadata-v')
+        # Pinned to an explicit image for reproducibility; 26.04 provides the .NET 10 / PowerShell 7.6
+        # runtime the NeoIPC-Tools module and data-dictionary generator require.
         runs-on: ubuntu-26.04
         steps:
             - uses: actions/checkout@v7

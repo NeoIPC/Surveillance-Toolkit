@@ -15,8 +15,8 @@ These are **generated build artifacts**, not committed to the repository: a comp
 undiffable and bloats the tree, and a committed copy silently goes stale (and once shipped a broken package). They
 are produced from source on every CI build and published two ways:
 
-- **Build artifact** — inside the `NeoIPC-Surveillance-Toolkit` artifact of the `Build` workflow (every push / PR;
-  retained for that run).
+- **Build artifact** — inside the `NeoIPC-Surveillance-Toolkit-metadata` artifact of the `Build` workflow, together
+  with the data dictionary (every push / PR; retained for that run).
 - **Release asset** — attached to a **GitHub Release** when a maintainer **manually** publishes one. Releasing the
   product and choosing its version is a deliberate human step, and the release is marked **pre-release (alpha)**; CI
   only attaches the rendered packages to it.
