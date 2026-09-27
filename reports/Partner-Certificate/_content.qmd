@@ -6,10 +6,17 @@
 #| output: asis
 
 cat(
+  # The funding statement wraps beside the EU emblem the inner footer holds:
+  # the whole block is indented past the emblem, so where a line breaks is the
+  # layout's decision rather than the translation's. It is the certificate's
+  # own string rather than the glossary's term of the same text, because a
+  # language's glossary reaches the reports only once that whole catalogue is
+  # 80 % translated, and the certificate's translations would otherwise wait
+  # on it.
   paste0(
-    "\\cfoot*{\\raggedright \\hspace{1.5cm}",
-    sprintf(sR$content[1], "\\\\ \\hspace{1.5cm}"),
-    "}"),
+    "\\cfoot*{\\parbox[b]{\\linewidth}{\\raggedright\\leftskip=1.5cm\\relax ",
+    sR$content[1],
+    "}}"),
   "\\selectlanguage{british}",
   "",
   "\\begin{center}",
@@ -28,9 +35,9 @@ cat(
     "\\normalsize \\normalfont"
   ),
   "\\vspace*{1.25\\baselineskip}",
-  sprintf(
+  interpolate_translation(
     sR$content[4],
-    paste(
+    hospital = paste(
       "\\vspace*{1.25\\baselineskip}",
       paste0(
         "\\large \\bfseries ",
@@ -47,9 +54,9 @@ cat(
   "",
   "\\vspace*{1.25\\baselineskip}",
   "",
-  sprintf(
+  interpolate_translation(
     sR$content[5],
-    paste0('**', format(data$nPatients), '**')
+    patient_count = paste0('**', format(data$nPatients), '**')
   ),
   "",
   paste0("\\vspace*{", sR$signature_offset, "\\baselineskip}"),

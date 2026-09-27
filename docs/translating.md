@@ -95,11 +95,9 @@ source, even where it looks like a word.
 - **Quarto cross-references**: `@tbl-resistance`, `@fig-rates`, `@sec-methods`, and heading anchors like
   `{#sec-methods}`. Same rule as the protocol's: the identifier is a name, not a word.
 - **Named placeholders**: `{count}`, `{department}`. Keep every one, spelled exactly. Their *order* may
-  change freely to suit your language — that is precisely why they are named rather than numbered.
-- **`%s`**, which around one string in twelve still carries (no `%i` remains). Same rule about keeping
-  them, but here the order **cannot** change: they are filled positionally, so swapping two puts each
-  value in the other's place. That is why they are being replaced, and why until they are, a sentence
-  whose natural word order differs from English is worth a comment rather than a rearrangement.
+  change freely to suit your language — that is precisely why they are named rather than numbered. No
+  report string carries a positional `%s` any more; where an earlier translation still has one, put the
+  name the English source uses in its place.
 
 **In the DHIS2 metadata** — tokens like `V{program_name}`, `A{yQwpowV0o08}` and
 `#{NeoIPC HAP Virus detected}`. All three are identifiers; keep them verbatim, braces included. The last
@@ -120,7 +118,6 @@ but each one exists because the corresponding mistake has shipped here at least 
 | **AsciiDoc markup** | An anchor, cross-reference or macro differs from the source | Restore the identifier exactly; translate only the visible text |
 | **Markdown** | A link or formatting delimiter was dropped or added | Restore it. Dropping one link out of two passes silently, so check them all |
 | **Placeholders** | A `{name}`, `@ref` or inline R span is missing or invented | Restore it exactly. An invented one fires too, which is intentional |
-| **C format** | A `%s` was dropped, added or reordered | Restore it in the source's order |
 | **Unchanged translation** | Your translation is identical to the English | Often correct here — an initialism or a scientific name may be right unchanged. Ignore it in that case |
 
 **One check rewrites your text rather than warning you, and it is on for French.** Weblate inserts a

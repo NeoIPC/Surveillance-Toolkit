@@ -182,12 +182,10 @@ if (metadata_diff$countries_differ) {
     full_message <- paste0(
       base_message,
       " ",
-      sprintf(
+      interpolate_translation(
         sR$headerList$wbClassMismatchAddendum,
-        sR$own_data_label,
-        wb_class_mismatch$own_classes,
-        sR$reference_data,
-        wb_class_mismatch$ref_classes
+        own_classes = wb_class_mismatch$own_classes,
+        reference_classes = wb_class_mismatch$ref_classes
       )
     )
   } else {

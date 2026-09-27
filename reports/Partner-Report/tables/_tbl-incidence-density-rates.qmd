@@ -154,15 +154,15 @@ if (!is.null(benchmark_data$incidence_density_rate_table) &&
       placement = "right"
     ) |>
     tab_footnote(
-      footnote = sprintf(
+      footnote = interpolate_translation(
         sR$`tbl-incidence-density-rates`$n_footnote,
-        sR$table_headers$n),
+        column = sR$table_headers$n),
       locations = cells_column_labels(columns = sR$table_headers$n),
       placement = "right") |>
     tab_footnote(
-      footnote = sprintf(
+      footnote = interpolate_translation(
         sR$`tbl-incidence-density-rates`$rate_footnote,
-        sR$table_headers$rate),
+        column = sR$table_headers$rate),
       locations = cells_column_labels(columns = sR$table_headers$rate),
       placement = "right")
 
@@ -235,9 +235,9 @@ if (!is.null(benchmark_data$incidence_density_rate_table) &&
         id = "reference_data"
       ) |>
       tab_footnote(
-        footnote = sprintf(
+        footnote = interpolate_translation(
           sR$`tbl-incidence-density-rates`$pooled_footnote,
-          sR$table_headers$pooled),
+          column = sR$table_headers$pooled),
         locations = cells_column_labels(columns = sR$table_headers$pooled),
         placement = "right")
   } else {
@@ -263,9 +263,9 @@ if (!is.null(benchmark_data$incidence_density_rate_table) &&
   # SI definition footnote
   tbl <- tbl |>
     gt::tab_footnote(
-      footnote = sprintf(
+      footnote = interpolate_translation(
         sR$`tbl-incidence-density-rates`$si_footnote,
-        sR$si),
+        endpoint = sR$si),
       locations = gt::cells_stub(rows = sR$si),
       placement = "right")
 

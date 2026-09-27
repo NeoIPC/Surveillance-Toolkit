@@ -143,15 +143,15 @@ gt_tbl <- gt_tbl |>
     placement = "right"
   ) |>
   tab_footnote(
-    footnote = sprintf(
+    footnote = interpolate_translation(
       sR$`tbl-secondary-bsi-rates`$n_footnote,
-      sR$table_headers$n),
+      column = sR$table_headers$n),
     locations = cells_column_labels(columns = sR$table_headers$n),
     placement = "right") |>
   tab_footnote(
-    footnote = sprintf(
+    footnote = interpolate_translation(
       sR$`tbl-secondary-bsi-rates`$pooled_footnote,
-      sR$table_headers$pooled),
+      column = sR$table_headers$pooled),
     locations = cells_column_labels(columns = sR$table_headers$pooled),
     placement = "right")
 

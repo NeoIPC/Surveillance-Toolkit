@@ -180,16 +180,16 @@ if (!is.null(benchmark_data$organism_resistance_rate_table) &&
       placement = "right"
     ) |>
     tab_footnote(
-      footnote = sprintf(
+      footnote = interpolate_translation(
         sR$`tbl-organism-resistance-rate`$n_footnote,
-        sR$table_headers$n),
+        column = sR$table_headers$n),
       locations = cells_column_labels(columns = sR$table_headers$n),
       placement = "right"
     ) |>
     tab_footnote(
-      footnote = sprintf(
+      footnote = interpolate_translation(
         sR$`tbl-organism-resistance-rate`$rate_footnote,
-        sR$table_headers$rate),
+        column = sR$table_headers$rate),
       locations = cells_column_labels(columns = sR$table_headers$rate),
       placement = "right"
     )
@@ -263,9 +263,9 @@ if (!is.null(benchmark_data$organism_resistance_rate_table) &&
         id = "reference_data"
       ) |>
       tab_footnote(
-        footnote = sprintf(
+        footnote = interpolate_translation(
           sR$`tbl-organism-resistance-rate`$pooled_footnote,
-          sR$table_headers$pooled),
+          column = sR$table_headers$pooled),
         locations = cells_column_labels(columns = sR$table_headers$pooled),
         placement = "right")
   } else {

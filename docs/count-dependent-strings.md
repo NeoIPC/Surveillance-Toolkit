@@ -36,7 +36,7 @@ The third kind is the one every search misses.
 | kind | how it is spotted | example |
 |---|---|---|
 | Count printed in the string | a placeholder receiving a number | `(N = {n} patients)` |
-| Count printed, but the noun does not agree | reading the sentence | `%s: The aggregated number of infections…` — `%s` is a column symbol |
+| Count printed, but the noun does not agree | reading the sentence | `{column}: The aggregated number of infections…` — `{column}` is a column symbol |
 | **Count not printed at all, and R picks the form** | only by finding the *selection* in code | `if (length(countries) > 1) sR$countries else sR$country` |
 
 The third kind carries no number in the rendered text, so no inspection of the catalogue can find it — the
@@ -51,10 +51,10 @@ the obvious heuristic, which is why the list below was built by reading the sele
 
 | string | where | why |
 |---|---|---|
-| `fig_sample_size` | `reports/common.yaml` | `(N = %s patients)`. Receives a patient count. The noun follows the numeral directly and must agree. |
+| `fig_sample_size` | `reports/common.yaml` | `(N = {count} patients)`. Receives a patient count. The noun follows the numeral directly and must agree. |
 | `sparse_data_footnote` | `reports/common.yaml` | `Fewer than {threshold} events; …`. Receives the sparse-data threshold. |
 | `sparse_data_footnote_no_ci` | `reports/common.yaml` | As above, the variant rendered when confidence intervals are off. |
-| `content[4]` | `reports/Partner-Certificate/content/_sR.yaml` | `…monitoring of %s newborns with birth weights…`. Receives a newborn count. |
+| `content[4]` | `reports/Partner-Certificate/content/_sR.yaml` | `…monitoring of {patient_count} newborns with birth weights…`. Receives a newborn count. |
 | `headerList.country` / `.countries` | Partner-Report, Reference-Report | Selected in R by `length(countries) > 1`. No count is printed; the noun still agrees with one. |
 | `header.department` / `.departments` | Validation-Report | Selected in R by `nrow(departments) > 1`. Same shape. |
 
@@ -79,8 +79,8 @@ Recorded so the question is not reopened.
 
 | string family | why it stays |
 |---|---|
-| every `*_footnote` carrying `%s` (`n_`, `pooled_`, `rate_`, `quartile_`) | The `%s` is a **column symbol** — `N`, `Q₂` — not a count. Nothing agrees with anything. This is the bulk of the 124 placeholder-carrying strings. |
-| `fig-cap` bin-width and quantile captions | `%s` receives a formatted quantity with a unit (`50 g`, `7 days`) or a percentage. "steps" and "quantiles" are fixed plurals describing the construct, not agreeing with the value. |
+| every `*_footnote` carrying `{column}` (`n_`, `pooled_`, `rate_`) | The `{column}` is a **column symbol** — `N`, `Q₂` — not a count. Nothing agrees with anything. This is the bulk of the placeholder-carrying strings. |
+| `fig-cap` bin-width and quantile captions | `{step}` receives a formatted quantity with a unit (`50 g`, `7 days`), and `{quantile_25}`, `{quantile_50}` and `{quantile_75}` a percentage. "steps" and "quantiles" are fixed plurals describing the construct, not agreeing with the value. |
 | `gestational_age_format` (`{weeks}+{days}`) | A numeric format with no words at all. |
 | `generated_on`, `patient_not_found` | Placeholders receive a date and identifiers. |
 | `outlier.composed.*`, `outlier.generic_summary` | Placeholders receive metric labels and cross-references. |

@@ -174,22 +174,22 @@ if (!is.null(benchmark_data$usage_density_rate_table) &&
     placement = "right"
     ) |>
     tab_footnote(
-      footnote = sprintf(
+      footnote = interpolate_translation(
         sR$`tbl-risk-density-rates`$n_footnote,
-        sR$table_headers$n),
+        column = sR$table_headers$n),
       locations = cells_column_labels(columns = sR$table_headers$n),
       placement = "right") |>
     tab_footnote(
-      footnote = sprintf(
+      footnote = interpolate_translation(
         sR$`tbl-risk-density-rates`$rate_footnote,
-        sR$table_headers$rate),
+        column = sR$table_headers$rate),
       locations = cells_column_labels(columns = sR$table_headers$rate),
       placement = "right") |>
     tab_footnote(
       footnote = md(
-        sprintf(
+        interpolate_translation(
           sR$`tbl-risk-density-rates`$aware_footnote,
-          "[aware.essentialmeds.org](https://aware.essentialmeds.org/)")),
+          link = "[aware.essentialmeds.org](https://aware.essentialmeds.org/)")),
       locations = gt::cells_stub(
         rows = tidyselect::any_of(c(
           sR$access,
@@ -273,9 +273,9 @@ if (!is.null(benchmark_data$usage_density_rate_table) &&
     id = "reference_data"
     ) |>
     tab_footnote(
-      footnote = sprintf(
+      footnote = interpolate_translation(
         sR$`tbl-risk-density-rates`$pooled_footnote,
-        sR$table_headers$pooled),
+        column = sR$table_headers$pooled),
       locations = cells_column_labels(columns = sR$table_headers$pooled),
       placement = "right")
   } else {

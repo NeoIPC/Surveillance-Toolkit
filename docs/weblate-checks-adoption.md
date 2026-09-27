@@ -123,15 +123,15 @@ first rather than adding to it — hence one flag covering inline R spans, Quart
 `{named}` placeholders and Quarto heading anchors. Colons inside a member would break the quoting; none of
 these four contains one.
 
-Puts 15 inline-R spans, 107 cross-references, 30 glue placeholders and 40 heading anchors under
-enforcement. A mangled `{#sec-…}` silently breaks every `@sec-` reference to that section and nothing else
+It puts every inline-R span, cross-reference, glue placeholder and heading anchor in the reports catalogue
+under enforcement; count them in `po/reports.pot` rather than quoting a figure that moves with every
+string. A mangled `{#sec-…}` silently breaks every `@sec-` reference to that section and nothing else
 catches it.
 
-**Settle the inline-R policy before enabling.** Either an `` `r …` `` span is opaque — in which case adopt
-this and restructure the one string whose German translation renders literals *inside* the span — or spans
-are partly translatable, which no count- or content-based check can express and which stays human review.
-Six German report units already differ in their span set. Without a decision the first finding gets argued
-about instead of fixed.
+**An inline-R span is opaque.** No report prose keeps sentence text inside an `` `r …` `` span: a span
+carries a value the report's setup computes, and a sentence that varies is written out whole for each case
+or takes only its variable part from a span. So a translation keeps every span exactly as the source has
+it, which is what the inline-R alternative holds it to.
 
 Caveat: it is *not* a no-op on token-free sources. A placeholder the target invents always fires, which is
 a feature (a translation that adds a cross-reference is a defect) but it means every unit is in scope.
@@ -146,19 +146,14 @@ A different regex from the reports one, so this cannot be a project-level flag. 
 (267 tokens). The character class is minimal by measurement rather than guesswork: a census of the
 character before every `{` in the catalogue returns exactly `#`, `V` and `A`.
 
-### `c-format` — reports, transitionally
+### `c-format` — not on the reports component
 
-```
-c-format
-```
-
-73 of 825 strings carry a C-printf token (133 tokens, all `%s`); the `%i` tokens went with the
-Validation Report's descriptions, which now use named placeholders. This is a **transitional** adoption: the target
-state is named `{}` placeholders everywhere, and this covers `%s` only until they are gone.
-
-Three of the tokens are not placeholders and will produce permanent noise — a `% a` inside "Values above
-100% are expected", a msgid that is literally `%`, and a `%x` inside an inline R span. Suppress those three
-per string rather than leaving them to teach translators that the check cries wolf.
+No reports source string carries a C-printf placeholder: every placeholder is named, and
+`ReportInterpolationHygiene.Tests.ps1` fails the build on a printf placeholder in the string resources and
+on `sprintf()` over one. The flag therefore has nothing left to check there, and what it would still report
+is noise: three tokens that are not placeholders — a `% a` inside "Values above 100% are expected", a
+msgid that is literally `%`, and a `%x` inside an inline R span. Leaving it on would teach translators that
+the check cries wolf.
 
 ### `xml-text` — no longer applicable, and worth knowing why
 
@@ -271,14 +266,14 @@ python-brace-format
 ```
 
 **Not enabled, and not rejected either.** It is the standard gettext flag for exactly the `{named}` syntax
-this project is migrating towards, so it is where the reports catalogue should end up: a standard flag
-instead of a hand-written regex, with the same coverage.
+the reports' strings use, so it is where the reports catalogue should end up: a standard flag instead of a
+hand-written regex, with the same coverage.
 
 One thing blocks it, and it is in the strings rather than in the check. **A brace here is not always a
-placeholder.** In `po/reports.pot`, 40 source strings carry a Quarto heading anchor such as
-`{#sec-problems}` against 30 carrying a glue placeholder. `#sec-problems` is not a valid format field, so
-today the check would report a syntax error on more strings than it covers correctly — and a check that is
-wrong more often than right teaches translators to dismiss it, which costs more than the check is worth.
+placeholder.** In `po/reports.pot`, source strings carry Quarto heading anchors such as `{#sec-problems}`
+beside the glue placeholders. `#sec-problems` is not a valid format field, so the check would report a
+syntax error on every string with an anchor — and a check that is wrong that often teaches translators to
+dismiss it, which costs more than the check is worth.
 That is why `placeholders:` carries an explicit alternative per construct: distinguishing them is the
 whole job.
 

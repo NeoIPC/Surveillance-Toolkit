@@ -45,9 +45,9 @@ if (!is.null(mixed_wb_classes) && mixed_wb_classes$has_mixed) {
   full_message <- paste0(
     base_message,
     " ",
-    sprintf(
+    interpolate_translation(
       sR$headerList$mixedWbClassAddendum,
-      mixed_wb_classes$class_names
+      classes = mixed_wb_classes$class_names
     )
   )
 } else {

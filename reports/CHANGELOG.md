@@ -96,6 +96,18 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
   and the certificate's patient count can therefore change with this release. Rule 45 removes nothing there: under the
   default the eligibility filter has already dropped such an admission, and with non-core patients
   requested the pass leaves rule 45 out.
+- Every translatable report string names its placeholders (`{column}`, `{count}`, `{hospital}` and
+  the like) where it used a positional `%s`, and the reports fill them with `interpolate_translation()`.
+  Pester tests keep printf placeholders out of the string resources and `sprintf()` away from them, and
+  hold every interpolation of a string resource to exactly the placeholders of its English template.
+  The Partner and Reference Reports' prose no longer keeps sentence text inside inline R: a sentence
+  that varies is written out in full for each case, as the Partner Report's introduction is with and
+  without reference data, or takes only its variable part from the report's setup. The Partner
+  Certificate's funding statement carries no line break: the footer wraps it beside the EU emblem where
+  the layout needs, instead of where a placeholder in the translation put the break. Translators see new
+  source text for these strings; until it is translated again, the German and Italian certificates and
+  the German Partner Report's nosocomial-infection paragraph fall below the 80 % po4a requires and render
+  in English.
 
 ### Removed
 
@@ -104,6 +116,9 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
   which may extend beyond the discharge and into a readmission, so an infection date outside the
   admission it is recorded in is legitimate as long as a recorded procedure covers it, which rule 19
   checks. The explanation of the time-frame rules says so.
+- The eleven `quartile_footnote` strings, which no table used, and the two
+  `_methods-antibiotic-utilization.Rmd` prose files, which held nothing but an inline R span; the
+  antibiotic-utilization tables write that sentence themselves.
 
 ### Fixed
 
@@ -116,7 +131,7 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
   longer turns into `TRUE`. In the other direction, a bare `false` is now read as a logical where it
   used to stay text, so only `true` and `false` are logicals, and the Partner Report's concordance
   flags are consistently logical.
-- An antibiotic-utilisation table with no data failed the render with an "unused argument" error, since
+- An antibiotic-utilization table with no data failed the render with an "unused argument" error, since
   its no-data branch passed the table's own sentence to a helper that took none; the helper takes the
   sentence now, and the table renders it.
 - A solution that another included solution cited, but no included explanation did, was left out of
@@ -132,6 +147,16 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
   that ends it, where before only the head line reached the build log and any line after it, such as
   the text of the stray-fence diagnostic, went to the module's verbose stream. Pandoc's own warnings
   and the reports' logger records were single lines already and are unchanged, as is `Invoke-Rscript`.
+- The second line of the Partner Certificate's funding statement sat under the EU emblem in the
+  footer, not beside it: TeX discards the space at the start of a line, so the indent that followed
+  the forced break was lost. The statement is now set as one indented block.
+- The Reference Report's nosocomial-infection introduction read "In the incidence densities … are
+  displayed" when the incidence-density table was left out, which the section is shown without
+  whenever one of its other tables is included. The sentences pointing at the incidence-density and
+  device-associated tables are now written only when the report includes the table.
+- A translated figure caption never reached the Partner or Reference Report: the captions were a list
+  of entries, and the string cascade overlays a translation only onto named entries, so every
+  language showed the English caption. They are keyed by name now.
 
 ## [0.1.0-alpha] - 2026-09-07
 

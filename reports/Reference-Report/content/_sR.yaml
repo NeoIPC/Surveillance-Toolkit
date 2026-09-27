@@ -12,7 +12,7 @@
 headerList:
   datasetCompositionHeader: Dataset composition
   effectiveAnalysisPeriodFootnote: "The effective analysis period is the time span between the surveillance end date of the earliest included patient and the surveillance end date of the latest included patient in the dataset."
-  mixedWbClassAddendum: "Additionally, this dataset includes data from countries whose economies belong to different income groups, as defined by the World Bank (%s). This means that the healthcare systems and infrastructure of the included countries may vary considerably, which could further affect the interpretation and comparability of some indicators."
+  mixedWbClassAddendum: "Additionally, this dataset includes data from countries whose economies belong to different income groups, as defined by the World Bank ({classes}). This means that the healthcare systems and infrastructure of the included countries may vary considerably, which could further affect the interpretation and comparability of some indicators."
   multiCountryDatasetHint: This report aggregates data from neonatal departments in several countries. While ideally a single-country report would be preferable, aggregating data across multiple countries is pragmatically necessary when sufficient participation from a single country is not available. This means that, while it reflects a broad spectrum of care structures, it is only suitable as a benchmark to a somewhat limited extent due to the sometimes very different healthcare systems and the resources available there. The aim of NeoIPC Surveillance is therefore always to provide departments with a relevant national or regional report, provided that a sufficient number of departments in the respective region participate in the system.
   singleCountryDatasetHint: This report presents data from neonatal departments in a single country. Because of the relative homogeneity of the healthcare system, it is in principle a good benchmark. However, it should be noted that only a proportion of neonatal departments in a country actually participate in NeoIPC Surveillance. Since participation is voluntary, these are typically hospitals that have a particular interest in infection prevention and are willing and able to provide the resources required for surveillance. The information presented here can therefore not fully describe the situation in the individual countries.
 aware_combination_therapy_footnote: >-
@@ -26,10 +26,15 @@ benchmarking_guidance: >-
   more representative than the pooled rate, as it is less influenced by
   differences in unit size. The pooled rate reflects overall patient-level
   burden across the network.
+device_associated_infections_reference: Device-associated infections can be found in {reference}.
 headings:
   presence_of_risk_and_protective_factors: Presence of Risk and Protective Factors
+incidence_densities_reference: >-
+  The incidence densities of primary sepsis/BSI, pneumonia and necrotizing
+  enterocolitis, as well as the composite endpoint 'severe infection', are
+  displayed in {reference}.
 tbl-antibiotic-utilization:
   n_footnote: >-
-    %s: The aggregated number of substance-days recorded in all infants.
+    {column}: The aggregated number of substance-days recorded in all infants.
 tbl-risk-density-rates:
-  n_footnote: "%s: The aggregated number of days the risk/protective factor was present in all infants."
+  n_footnote: "{column}: The aggregated number of days the risk/protective factor was present in all infants."

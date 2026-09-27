@@ -1489,12 +1489,24 @@ ref_detection_table <- if (params$includeInfectiousAgentDetectionRateTable)
   " (@tbl-infectious-agent-detection-rate)" else ""
 ref_dev_ass_table <- if (params$includeDeviceAssociatedIncidenceDensityTable)
   " (@tbl-device-associated-incidence-density-rates)" else ""
-ref_abr_table <- if (params$includeResistantPathogenInfectionRateTable)
-  " (@tbl-abr-infection-rate)" else ""
 ref_org_rr_table <- if (params$includeOrganismResistanceRateTable)
   " (@tbl-organism-resistance-rate)" else ""
-ref_ast_table <- if (params$includeAntibioticResistanceTestRateTable)
-  " (@tbl-resistance-test-rate)" else ""
+
+# Sentences a table introduction adds only when the table it points to is in
+# the report. Each is a whole translated sentence taking the cross-reference as
+# a value, so the prose files write no text inside their inline R code; an
+# empty string leaves the paragraph reading as it does without the table.
+table_note <- function(include, template, reference)
+  if (include) paste0(" ", interpolate_translation(template, reference = reference)) else ""
+ast_table_note <- table_note(
+  params$includeAntibioticResistanceTestRateTable,
+  sR$`tbl-abr-infection-rate`$ast_table_note, "@tbl-resistance-test-rate")
+abr_table_note <- table_note(
+  params$includeResistantPathogenInfectionRateTable,
+  sR$`tbl-resistance-test-rate`$abr_table_note, "@tbl-abr-infection-rate")
+abr_table_contrast <- table_note(
+  params$includeResistantPathogenInfectionRateTable,
+  sR$`tbl-organism-resistance-rate`$abr_table_contrast, "@tbl-abr-infection-rate")
 
 # ── Section visibility flags ─────────────────────────────────────
 # A section heading is shown iff at least one table in that section
@@ -1850,6 +1862,15 @@ dR <- list(
     NULL
   }
 )
+
+# The reference data's severe-infection figures, a sentence the nosocomial
+# infections introduction adds when the report carries reference data.
+nosocomial_reference_comparison <- if (!is.null(dR$ref))
+  paste0(" ", interpolate_translation(
+    sR$nosocomial_reference_comparison,
+    infection_count = dR$ref$numberOfSevereInfections,
+    patient_count = dR$ref$numberOfPatients,
+    average = dR$ref$averageSevereInfectionsPerPatient)) else ""
 
 # Detect metadata differences for highlighting
 metadata_diff <- if (!is.null(dR$ref)) {

@@ -7,7 +7,7 @@
 
 ```{r}
 #| output: asis
-include_localised("_methods-antibiotic-utilization.Rmd")
+cat(sR$methods$antibiotic_utilization, "", sep = "\n")
 ```
 
 ```{r}
@@ -184,23 +184,23 @@ if (nrow(tbl_data) > 0 && sum(tbl_data$n, na.rm = TRUE) > 0) {
       placement = "right"
     ) |>
     tab_footnote(
-      footnote = sprintf(
+      footnote = interpolate_translation(
         sR$`tbl-antibiotic-utilization`$n_footnote,
-        sR$table_headers$n),
+        column = sR$table_headers$n),
       locations = cells_column_labels(columns = sR$table_headers$n),
       placement = "right") |>
     tab_footnote(
       footnote = md(
-        sprintf(
+        interpolate_translation(
           sR$`tbl-antibiotic-utilization`$atc_footnote,
-          "[whocc.no/atc_ddd_index/](https://www.whocc.no/atc_ddd_index/)")),
+          link = "[whocc.no/atc_ddd_index/](https://www.whocc.no/atc_ddd_index/)")),
       locations = cells_stub(rows = tbl_data$row_type == "atc5"),
       placement = "right") |>
     tab_footnote(
       footnote = md(
-        sprintf(
+        interpolate_translation(
           sR$`tbl-antibiotic-utilization`$aware_column_footnote,
-          "[aware.essentialmeds.org](https://aware.essentialmeds.org/)")),
+          link = "[aware.essentialmeds.org](https://aware.essentialmeds.org/)")),
       locations = cells_column_labels(columns = "aware"),
       placement = "right") |>
     tab_source_note(source_note = sR$aware_combination_therapy_footnote)

@@ -274,10 +274,6 @@ dR$refDetectionTable <- if (params$includeInfectiousAgentDetectionRateTable)
   " (@tbl-infectious-agent-detection-rate)" else ""
 dR$refAgentPerInfTable <- if (params$includeAgentPerInfectionRateTable)
   " (@tbl-agent-per-infection-rate)" else ""
-dR$refIDRTable <- if (params$includeIncidenceDensityTable)
-  " (@tbl-incidence-density-rates)" else ""
-dR$refDevAssTable <- if (params$includeDeviceAssociatedIncidenceDensityTable)
-  " (@tbl-device-associated-incidence-density-rates)" else ""
 
 # ── Section visibility flags ─────────────────────────────────────
 show_section_surgical    <- params$includeSurgicalProcedureRateTable

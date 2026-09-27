@@ -14,6 +14,8 @@
     - R code expressions (`r variable`)
     - Quarto cross-references (@fig-*, @tbl-*, etc.)
     - .NET placeholders ({0}, {1}, etc.)
+    - Named placeholders ({hospital}, {column}, etc.), compared as sets since a translation may
+      reorder them
     - LaTeX text markers (\text{...})
     
     The script reports violations with file paths, line numbers, and context. It returns the
@@ -362,6 +364,28 @@ function Get-DotNetPlaceholders {
     return @($tokenMatches | ForEach-Object { $_.Value })
 }
 
+function Get-NamedPlaceholders {
+    <#
+    .SYNOPSIS
+        Extracts the distinct named placeholders ({name}) from a string, sorted.
+    .DESCRIPTION
+        A name starts with a letter or an underscore, so neither a Quarto heading anchor ({#sec-...})
+        nor a .NET index ({0}) is taken for one.
+    #>
+    param(
+        [Parameter(Mandatory)]
+        [AllowEmptyString()]
+        [string]$Text
+    )
+
+    $pattern = '\{[A-Za-z_][A-Za-z0-9_]*\}'
+    # Not $matches - that name belongs to PowerShell's automatic variable.
+    $tokenMatches = [regex]::Matches($Text, $pattern)
+
+    # Case-sensitive, as glue's names are.
+    return @($tokenMatches | ForEach-Object { $_.Value } | Sort-Object -Unique -CaseSensitive)
+}
+
 function Get-LaTeXTextMarkers {
     <#
     .SYNOPSIS
@@ -542,6 +566,38 @@ function Test-PlaceholderMatch {
     }
     elseif ($msgidDotNet.Count -gt 0) {
         Write-Verbose "  [OK] .NET placeholders match ($($msgidDotNet.Count))"
+    }
+
+    # Test named placeholders. Compared as sets rather than counts or sequences: a translation may
+    # place them in another order, but must keep every name and add none. A dropped name loses its
+    # value from the sentence without an error, and a renamed one aborts the render.
+    $msgidNamed = Get-NamedPlaceholders -Text $Entry.MsgId
+    $msgstrNamed = Get-NamedPlaceholders -Text $Entry.MsgStr
+
+    if (($msgidNamed -join ',') -cne ($msgstrNamed -join ',')) {
+        $hasViolation = $true
+
+        # Point at the first name the translation carries that the source does not, if any.
+        $stringOffset = 0
+        $stray = @($msgstrNamed | Where-Object { $_ -cnotin $msgidNamed })
+        if ($stray.Count -gt 0) {
+            $stringOffset = $Entry.MsgStr.IndexOf($stray[0])
+        }
+
+        if ($stringOffset -lt 0) { $stringOffset = 0 }
+        $position = Get-PoFilePosition -Entry $Entry -StringOffset $stringOffset
+
+        Add-Violation -Violations $Violations -FilePath $FilePath -Entry $Entry `
+            -Type "Named placeholders" `
+            -Expected $msgidNamed.Count `
+            -Found $msgstrNamed.Count `
+            -ExpectedItems ($msgidNamed -join ', ') `
+            -FoundItems ($msgstrNamed -join ', ') `
+            -ErrorLine $position.Line `
+            -ErrorColumn $position.Column
+    }
+    elseif ($msgidNamed.Count -gt 0) {
+        Write-Verbose "  [OK] Named placeholders match ($($msgidNamed.Count))"
     }
     
     # Test LaTeX text markers

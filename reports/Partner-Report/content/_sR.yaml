@@ -75,16 +75,20 @@ headerList:
     country. While this provides a more relevant benchmark due to the relative
     homogeneity of the healthcare system, your department's country differs from the
     reference country, which may affect comparability.
-  wbClassMismatchAddendum: >
+  wbClassMismatchAddendum: >-
     Additionally, the World Bank income classifications differ between your data
-    and the reference data (%s: %s; %s: %s), which may indicate even more
-    substantial differences in healthcare system resources and infrastructure,
-    further affecting comparability of certain indicators.
+    ({own_classes}) and the reference data ({reference_classes}), which may
+    indicate even more substantial differences in healthcare system resources
+    and infrastructure, further affecting comparability of certain indicators.
 
 headings:
   birth_weight_distribution: Birth Weight Distribution
   gestational_age_distribution: Gestational Age Distribution
   presence_of_risk_and_protective_factors: Presence of Risk and Protective Factors in Your Department
+
+nosocomial_reference_comparison: >-
+  In the reference data, {infection_count} severe infections were recorded in
+  {patient_count} patients, an average of {average} infections per patient.
 
 outlier:
 
@@ -682,56 +686,64 @@ own_unit: Own department
 reference_data: Reference data
 
 tbl-abr-infection-rate:
-  n_footnote: "%s: The aggregated number of infections with resistant pathogens in your department's infants."
+  n_footnote: "{column}: The aggregated number of infections with resistant pathogens in your department's infants."
   no_resistant_pathogens_note: >
     No resistant pathogens were detected in your department's infections during this period.
   no_resistant_pathogens_note_ast_ref: >
     If antimicrobial susceptibility testing rates in @tbl-resistance-test-rate are low,
     under-detection of resistant organisms cannot be excluded.
-  rate_footnote: "%s: The Antibiotic-Resistant Infection Rate for your department (percentage of infections with resistant pathogens)."
+  rate_footnote: "{column}: The Antibiotic-Resistant Infection Rate for your department (percentage of infections with resistant pathogens)."
+  ast_table_note: >-
+    {reference} reports how completely susceptibility testing was performed;
+    the detected resistant pathogens and the completeness of testing are both
+    needed to interpret resistance burden.
 
 tbl-organism-resistance-rate:
-  n_footnote: "%s: The number of resistant detections of this organism in your department's infants."
-  rate_footnote: "%s: The organism-specific resistance rate for your department (percentage of tested detections that are resistant)."
+  abr_table_contrast: >-
+    While {reference} reports the rate of infections involving resistant
+    pathogens, this table uses organism-level detections as the denominator.
+  n_footnote: "{column}: The number of resistant detections of this organism in your department's infants."
+  rate_footnote: "{column}: The organism-specific resistance rate for your department (percentage of tested detections that are resistant)."
 
 tbl-agent-per-infection-rate:
-  n_footnote: "%s: The aggregated number of infections with this infectious agent detected in your department's infants."
-  rate_footnote: "%s: The percentage of infections in your department where this infectious agent was detected."
+  n_footnote: "{column}: The aggregated number of infections with this infectious agent detected in your department's infants."
+  rate_footnote: "{column}: The percentage of infections in your department where this infectious agent was detected."
 
 tbl-device-associated-incidence-density-rates:
-  n_footnote: "%s: The aggregated number of device-associated infections in your department's infants."
-  rate_footnote: "%s: The Device-Associated Incidence Density Rate for your department (infections per 1000 device-days)."
+  n_footnote: "{column}: The aggregated number of device-associated infections in your department's infants."
+  rate_footnote: "{column}: The Device-Associated Incidence Density Rate for your department (infections per 1000 device-days)."
 
 tbl-incidence-density-rates:
-  n_footnote: "%s: The aggregated number of infections in your department's infants."
-  rate_footnote: "%s: The Incidence Density Rate for your department (infections per 1000 patient-days)."
+  n_footnote: "{column}: The aggregated number of infections in your department's infants."
+  rate_footnote: "{column}: The Incidence Density Rate for your department (infections per 1000 patient-days)."
 
 tbl-infectious-agent-detection-rate:
-  n_footnote: "%s: The aggregated number of infections with identified infectious agents in your department's infants."
-  rate_footnote: "%s: The Infectious Agent Detection Rate for your department (percentage of infections with identified agent)."
+  n_footnote: "{column}: The aggregated number of infections with identified infectious agents in your department's infants."
+  rate_footnote: "{column}: The Infectious Agent Detection Rate for your department (percentage of infections with identified agent)."
 
 tbl-resistance-test-rate:
-  n_footnote: "%s: The number of pathogens in your department's infants for which the relevant resistance test result was recorded (tested positive or negative)."
-  rate_footnote: "%s: The proportion of pathogens eligible for this resistance test for which a result was recorded. Eligibility is determined by the infectious agent: only pathogens where the resistance mechanism is clinically relevant are included in the denominator."
+  abr_table_note: "{reference} reports the detected resistant pathogens themselves."
+  n_footnote: "{column}: The number of pathogens in your department's infants for which the relevant resistance test result was recorded (tested positive or negative)."
+  rate_footnote: "{column}: The proportion of pathogens eligible for this resistance test for which a result was recorded. Eligibility is determined by the infectious agent: only pathogens where the resistance mechanism is clinically relevant are included in the denominator."
 
 tbl-antibiotic-utilization:
   n_footnote: >-
-    %s: The aggregated number of substance-days recorded in your department's
+    {column}: The aggregated number of substance-days recorded in your department's
     infants.
   rate_footnote: >-
-    %s: The Antibiotic Exposure Density Rate calculated for your department's
+    {column}: The Antibiotic Exposure Density Rate calculated for your department's
     infants.
 tbl-risk-density-rates:
-  n_footnote: >
-    %s: The aggregated number of days the risk/protective factor was present in
+  n_footnote: >-
+    {column}: The aggregated number of days the risk/protective factor was present in
     your department's infants.
-  rate_footnote: >
-    %s: The Exposure Density Rate calculated for your department's infants.
+  rate_footnote: >-
+    {column}: The Exposure Density Rate calculated for your department's infants.
 
 tbl-secondary-bsi-rates:
-  n_footnote: "%s: The aggregated number of infections with secondary bloodstream infection in your department's infants."
-  rate_footnote: "%s: The Secondary Bloodstream Infection Rate for your department (percentage of infections with secondary BSI)."
+  n_footnote: "{column}: The aggregated number of infections with secondary bloodstream infection in your department's infants."
+  rate_footnote: "{column}: The Secondary Bloodstream Infection Rate for your department (percentage of infections with secondary BSI)."
 
 tbl-surgical-procedure-rates:
-  n_footnote: "%s: The aggregated number of surgical procedures performed in your department's infants."
-  rate_footnote: "%s: The Surgical Procedure Rate for your department (procedures per 100 patients)."
+  n_footnote: "{column}: The aggregated number of surgical procedures performed in your department's infants."
+  rate_footnote: "{column}: The Surgical Procedure Rate for your department (procedures per 100 patients)."

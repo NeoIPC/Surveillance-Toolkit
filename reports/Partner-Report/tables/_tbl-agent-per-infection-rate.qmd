@@ -143,16 +143,16 @@ if (!is.null(benchmark_data$infectious_agent_detection_rate_per_agent_table) &&
       )
     ) |>
     tab_footnote(
-      footnote = sprintf(
+      footnote = interpolate_translation(
         sR$`tbl-agent-per-infection-rate`$n_footnote,
-        sR$table_headers$n),
+        column = sR$table_headers$n),
       locations = cells_column_labels(columns = sR$table_headers$n),
       placement = "right"
     ) |>
     tab_footnote(
-      footnote = sprintf(
+      footnote = interpolate_translation(
         sR$`tbl-agent-per-infection-rate`$rate_footnote,
-        sR$table_headers$rate),
+        column = sR$table_headers$rate),
       locations = cells_column_labels(columns = sR$table_headers$rate),
       placement = "right"
     )
@@ -238,9 +238,9 @@ if (!is.null(benchmark_data$infectious_agent_detection_rate_per_agent_table) &&
         level = 2
       ) |>
       tab_footnote(
-        footnote = sprintf(
+        footnote = interpolate_translation(
           sR$`tbl-agent-per-infection-rate`$pooled_footnote,
-          sR$table_headers$pooled),
+          column = sR$table_headers$pooled),
         locations = cells_column_labels(columns = sR$table_headers$pooled),
         placement = "right")
   } else {

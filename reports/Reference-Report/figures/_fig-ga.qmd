@@ -1,7 +1,7 @@
 ```{r}
 #| label: fig-ga
 #| fig-alt: !expr 'sR$`fig-alt`$`fig-ga`$`no-bnch`'
-#| fig-cap: !expr 'paste(sR$`fig-cap`[[1]]$`fig-ga`, sprintf(sR$fig_sample_size, format_integer(sum(reference_data$gestational_age_figure$frequency$n))), sprintf(sR$`fig-cap`[[2]]$`no-bnch`, sprintf("%i%s%s", 7L, sR$unit_separator, sR$day)), sprintf(sR$`fig-cap`[[3]]$`no-bnch`, sprintf("%i%s", 25L, sR$percent_symbol), sprintf("%i%s", 50L, sR$percent_symbol), sprintf("%i%s", 75L, sR$percent_symbol)))'
+#| fig-cap: !expr 'paste(sR$`fig-cap`$`fig-ga`, interpolate_translation(sR$fig_sample_size, count = format_integer(sum(reference_data$gestational_age_figure$frequency$n))), interpolate_translation(sR$`fig-cap`$panels$`no-bnch`, step = sprintf("%i%s%s", 7L, sR$unit_separator, sR$day)), interpolate_translation(sR$`fig-cap`$markers$`no-bnch`, quantile_25 = sprintf("%i%s", 25L, sR$percent_symbol), quantile_50 = sprintf("%i%s", 50L, sR$percent_symbol), quantile_75 = sprintf("%i%s", 75L, sR$percent_symbol)))'
 
 ga_scale_min <- reference_data$gestational_age_figure$scale$min
 ga_scale_max <- reference_data$gestational_age_figure$scale$max
