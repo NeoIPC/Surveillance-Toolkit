@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-09-27 14:53+0200\n"
+"POT-Creation-Date: 2026-09-27 23:34+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Language-Team: none\n"
 "Language: en\n"
@@ -1345,25 +1345,25 @@ msgstr ""
 msgid "w"
 msgstr ""
 
-#. type: Hash Value: worldBankClassNames H
+#. type: Hash Value: worldBankClassNames high_income
 #: reports/common.yaml:1
 #, no-wrap
 msgid "High income"
 msgstr ""
 
-#. type: Hash Value: worldBankClassNames L
+#. type: Hash Value: worldBankClassNames low_income
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Low income"
 msgstr ""
 
-#. type: Hash Value: worldBankClassNames LM
+#. type: Hash Value: worldBankClassNames lower_middle_income
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Lower middle income"
 msgstr ""
 
-#. type: Hash Value: worldBankClassNames UM
+#. type: Hash Value: worldBankClassNames upper_middle_income
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Upper middle income"
@@ -3048,40 +3048,40 @@ msgstr ""
 msgid "N/A"
 msgstr ""
 
-#. type: Hash Value: pathogen_source B
+#. type: Hash Value: pathogen_source blood
 #: reports/Patient-Data-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Blood"
 msgstr ""
 
-#. type: Hash Value: pathogen_source B+C
+#. type: Hash Value: pathogen_source blood_and_cerebrospinal_fluid
 #: reports/Patient-Data-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Blood and cerebrospinal fluid"
 msgstr ""
 
-#. type: Hash Value: pathogen_source C
+#. type: Hash Value: pathogen_source cerebrospinal_fluid
 #: reports/Patient-Data-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Cerebrospinal fluid"
 msgstr ""
 
-#. type: Hash Value: pathogen_source L
+#. type: Hash Value: pathogen_source lower_respiratory_tract
 #: reports/Patient-Data-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Lower respiratory tract"
 msgstr ""
 
-#. type: Hash Value: pathogen_source U
-#: reports/Patient-Data-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "Upper respiratory tract"
-msgstr ""
-
-#. type: Hash Value: pathogen_source U+L
+#. type: Hash Value: pathogen_source upper_and_lower_respiratory_tract
 #: reports/Patient-Data-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Upper and lower respiratory tract"
+msgstr ""
+
+#. type: Hash Value: pathogen_source upper_respiratory_tract
+#: reports/Patient-Data-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Upper respiratory tract"
 msgstr ""
 
 #. type: Hash Value: patient_not_found
@@ -4206,6 +4206,18 @@ msgstr ""
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "A patient recorded as part of a multiple birth has fewer than two infants at birth."
+msgstr ""
+
+#. type: Hash Value: problems 57 description
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The patient record holds neither a birth weight nor a gestational age, although the registration requires one of the two."
+msgstr ""
+
+#. type: Hash Value: problems 57 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "A patient record holds neither a birth weight nor a gestational age."
 msgstr ""
 
 #. type: Hash Value: problems 6 description
@@ -5358,6 +5370,29 @@ msgstr ""
 #: reports/Validation-Report/en/_problem_detail_0032.Rmd:10
 #, markdown-text, no-wrap
 msgid "Please open the patient record's dashboard (see @sec-solution-1) and edit its profile (see @sec-solution-17): clear the multiple birth mark if the infant is a singleton, or correct the number of infants at birth otherwise.\n"
+msgstr ""
+
+#. type: Title ###
+#: reports/Validation-Report/en/_problem_detail_0033.Rmd:1
+#, markdown-text, no-wrap
+msgid "The Patient Record Holds Neither a Birth Weight Nor a Gestational Age {#sec-problem-details-33}"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0033.Rmd:6
+#, markdown-text, no-wrap
+msgid ""
+"Eligibility for the Core Module depends on a birth weight below 1500 grams or a gestational age below 32 weeks, and the analyses group the patients by both.\n"
+"The registration form therefore requires one of the two whenever the other is empty, in every department, and refuses a record without either; a record reaches the platform without both only around that form, such as through an import or from before the requirement existed.\n"
+"This message appears in the validation report when a patient record holds neither a birth weight nor a gestational age.\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0033.Rmd:8
+#, markdown-text, no-wrap
+msgid ""
+"Please open the patient record's dashboard (see @sec-solution-1) and edit its profile (see @sec-solution-17): enter the birth weight, the gestational age, or both.\n"
+"If your department includes only infants who meet these criteria and neither value is known, the infant cannot be shown to be eligible and the record does not belong in the Core Module: please delete it (see @sec-solution-2).\n"
 msgstr ""
 
 #. type: Title ###
