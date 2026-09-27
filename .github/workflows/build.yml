@@ -792,7 +792,8 @@ jobs:
               # every runner, so the security property was gated by a grep alone and the log read the same
               # either way. The test now fails on a runner without R rather than skipping, so this step is
               # what keeps it green — and glue comes from apt because the helper calls glue_safe. The
-              # glossary casing test runs R too, and reads the glossary with yaml.
+              # glossary casing test runs R too: it reads the glossary with yaml and upper-cases through
+              # stringr, whose locale-aware casing comes from stringi.
               #
               # Recommended packages are left out: r-base-core recommends the compiler toolchain and the
               # recommended R packages, and r-cran-glue recommends dplyr, knitr, rmarkdown and testthat,
@@ -800,8 +801,8 @@ jobs:
               shell: bash
               run: |
                 sudo apt-get update -qq
-                sudo apt-get install -qq --no-install-recommends r-base-core r-cran-glue r-cran-yaml
-                Rscript -e 'cat(R.version.string, "| glue", as.character(packageVersion("glue")), "| yaml", as.character(packageVersion("yaml")), "\n")'
+                sudo apt-get install -qq --no-install-recommends r-base-core r-cran-glue r-cran-yaml r-cran-stringr
+                Rscript -e 'cat(R.version.string, "\n"); for (p in c("glue", "yaml", "stringr")) cat(p, as.character(packageVersion(p)), "\n")'
 
             - name: Provision and test NeoIPC-Tools
               shell: pwsh
