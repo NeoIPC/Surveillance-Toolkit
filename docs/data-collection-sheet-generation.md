@@ -755,18 +755,20 @@ What the published forms actually do, read off them rather than assumed:
   Dictionary and Abbreviations sections.
 - Every sheet opens with a **Patient** band carrying the local patient ID and name — the identifiers the
   protocol forbids submitting, present precisely because the paper stays in the hospital.
-- **A hint that is a unit belongs in the label, not the description.** The sheets print `formName`, so a
-  unit stated only in an element's `description` never reaches the page — and a number written on paper
-  without its unit is ambiguous in the way that matters, since 1.2 and 1200 are the same birth weight
-  under different units and nothing downstream can tell which the writer meant. `Birth weight (g)` carries
-  it in the label for that reason.
 
-**Where the generated form deliberately differs from the published one, and why that is not drift.** The
-published sheet nests the count of infants inside the multiple-birth question — `Multiple birth: ○ Yes,
-total number: ___ ○ No` — because paper is short of space and a nested write-in costs no row. The data
-model has two variables, asked in its own order, and the generated form follows the model: whether the
-birth was multiple, and how many. Both forms collect the same two answers; only the arrangement differs,
-and the paper form's arrangement is a space decision that a derived form has no reason to inherit.
+**Where the generated form deliberately differs from the published one, and why that is not drift.**
+
+- **A unit is in the label, not in a hint column.** The published sheet prints `grams` as a hint against
+  the birth weight. The generated sheets print `formName`, so a unit stated only in an element's
+  `description` never reaches the page — and a number written on paper without its unit is ambiguous in
+  the way that matters, since 1.2 and 1200 are the same birth weight under different units and nothing
+  downstream can tell which the writer meant. `Birth weight (g)` carries it in the label for that reason.
+- **The count of infants is a question of its own.** The published sheet nests it inside the
+  multiple-birth question — `Multiple birth: ○ Yes, total number: ___ ○ No` — because paper is short of
+  space and a nested write-in costs no row. The data model has two variables, asked in its own order, and
+  the generated form follows the model: whether the birth was multiple, and how many. Both forms collect
+  the same two answers; only the arrangement differs, and the paper form's arrangement is a space decision
+  that a derived form has no reason to inherit.
 
 ### What is editorial, and why a mapping is unavoidable
 
