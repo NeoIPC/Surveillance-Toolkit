@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-09-27 13:50+0200\n"
+"POT-Creation-Date: 2026-09-27 14:53+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Language-Team: none\n"
 "Language: en\n"
@@ -571,7 +571,7 @@ msgstr ""
 msgid "Surgical Procedures"
 msgstr ""
 
-#. type: Hash Value: table_headers n
+#. type: Hash Value: table_headers count
 #: reports/common.yaml:1
 #, no-wrap
 msgid "N"

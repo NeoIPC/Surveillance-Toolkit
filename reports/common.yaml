@@ -99,7 +99,7 @@ nos_footnote: "n.o.s. = not otherwise specified; isolates identified to genus bu
 sparse_data_footnote: "Fewer than {threshold} events; interpret rate and confidence interval with caution."
 sparse_data_footnote_no_ci: "Fewer than {threshold} events; interpret rate with caution."
 table_headers:
-  n: "N"
+  count: "N"
   pooled: "Pooled"
   q1: "Q₁"
   q2: "Q₂"
