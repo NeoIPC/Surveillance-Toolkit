@@ -195,7 +195,7 @@ if(!exists("params")) params <- list()
 
 if (!is.null(params$referenceDataFile)) {
   if (!file.exists(params$referenceDataFile))
-    stop(sprintf("The file '%s' does not exist.", params$referenceDataFile))
+    rlang::abort(sprintf("The file '%s' does not exist.", params$referenceDataFile))
   reference_data <- jsonlite::unserializeJSON(
     readChar(
         params$referenceDataFile,

@@ -223,12 +223,14 @@ interpolate_translation <- function(.template, ...) {
   if (length(args) > 0L) {
     names_given <- names(args)
     if (is.null(names_given) || any(!nzchar(names_given)))
-      stop("interpolate_translation(): every value must be named — an unnamed ",
-           "argument is template text, not data.")
+      rlang::abort(paste0(
+        "every value must be named — an unnamed argument is template text, ",
+        "not data."))
     empty <- names_given[lengths(args) == 0L]
     if (length(empty) > 0L)
-      stop("interpolate_translation(): zero-length value for ",
-           paste(empty, collapse = ", "), " — glue would discard the whole string.")
+      rlang::abort(paste0(
+        "zero-length value for ", paste(empty, collapse = ", "),
+        " — glue would discard the whole string."))
   }
   # `quote = TRUE` is not an option on this do.call, and it is worth knowing why,
   # because it is the obvious-looking way to stop do.call re-evaluating anything.

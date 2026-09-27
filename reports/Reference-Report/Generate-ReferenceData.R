@@ -146,7 +146,7 @@ backupReferenceDataset <- function(data, backupPath) {
     }
   }
   if (is.na(sevenZip) || sevenZip == "") {
-    stop("7z is required for --backup-dataset but was not found in PATH.")
+    rlang::abort("7z is required for --backup-dataset but was not found in PATH.")
   }
   password <- Sys.getenv("NEOIPC_BACKUP_PASSWORD", unset = NA)
   if (is.na(password) || identical(password, "")) {
@@ -218,10 +218,10 @@ backupReferenceDataset <- function(data, backupPath) {
   status <- close(con)
   con <- NULL
   if (!is.null(status) && status != 0) {
-    stop("7z backup failed with exit code: ", status)
+    rlang::abort(paste0("7z backup failed with exit code: ", status))
   }
   if (!file.exists(backupPath)) {
-    stop("7z backup did not create archive: ", backupPath)
+    rlang::abort(paste0("7z backup did not create archive: ", backupPath))
   }
   invisible(TRUE)
 }
@@ -295,7 +295,7 @@ rawData <- neoipcr::import_dhis2(
 if (!is.null(backupDataset)) {
   backupPath <- backupDataset
   if (is.na(backupPath) || backupPath == "") {
-    stop("--backup-dataset requires a file path.")
+    rlang::abort("--backup-dataset requires a file path.")
   }
   logVerbose("Creating encrypted backup: {backupPath}")
   backupReferenceDataset(rawData, backupPath)
