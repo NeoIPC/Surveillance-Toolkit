@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-09-25 18:49+0200\n"
+"POT-Creation-Date: 2026-09-27 23:16+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Language-Team: none\n"
 "Language: en\n"
@@ -484,7 +484,7 @@ msgstr ""
 #. type: Hash Value: methods risk_density
 #: reports/common.yaml:1
 #, no-wrap
-msgid "Exposure density rates measure the number of days a risk or protective factor was present per 100 patient-days. Device and ventilation days require the device or support to be in place for at least 12 hours on that calendar day. A human milk day requires that the patient's enteral feeding exclusively consists of human milk (including donor milk and fortified breast milk). Probiotic days require an oral probiotic containing Lactobacillus spp. or Bifidobacterium spp. A kangaroo care day is recorded when the patient received intensive skin-to-skin contact for at least 2 hours on a given calendar day. Antibiotic days are counted from the first dose to the last dose of a therapy inclusive, including days where doses were skipped, but not days after the last dose. Antibiotic exposure is recorded per individual substance. For reporting, substance-days are aggregated into WHO AWaRe categories (Access, Watch, Reserve); combination therapy means a single patient-day may contribute substance-days to multiple categories."
+msgid "Exposure density rates measure the number of days a risk or protective factor was present per 100 patient-days. A catheter day requires the catheter to be in place for at least 12 hours on that calendar day, and a ventilation day requires more than 12 hours of the respective support. A human milk day requires that the patient's enteral feeding exclusively consists of human milk (including donor milk and fortified breast milk). Probiotic days require an oral probiotic containing Lactobacillus spp. or Bifidobacterium spp. A kangaroo care day is recorded when the patient received intensive skin-to-skin contact for at least 2 hours on a given calendar day. Antibiotic days are counted from the first dose to the last dose of a therapy inclusive, including days where doses were skipped, but not days after the last dose. Antibiotic exposure is recorded per individual substance. For reporting, substance-days are aggregated into WHO AWaRe categories (Access, Watch, Reserve); combination therapy means a single patient-day may contribute substance-days to multiple categories."
 msgstr ""
 
 #. type: Hash Value: methods secondary_bsi
@@ -1417,25 +1417,25 @@ msgstr ""
 msgid "w"
 msgstr ""
 
-#. type: Hash Value: worldBankClassNames H
+#. type: Hash Value: worldBankClassNames high_income
 #: reports/common.yaml:1
 #, no-wrap
 msgid "High income"
 msgstr ""
 
-#. type: Hash Value: worldBankClassNames L
+#. type: Hash Value: worldBankClassNames low_income
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Low income"
 msgstr ""
 
-#. type: Hash Value: worldBankClassNames LM
+#. type: Hash Value: worldBankClassNames lower_middle_income
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Lower middle income"
 msgstr ""
 
-#. type: Hash Value: worldBankClassNames UM
+#. type: Hash Value: worldBankClassNames upper_middle_income
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Upper middle income"
@@ -2856,22 +2856,22 @@ msgstr ""
 msgid "A secondary bloodstream infection is a BSI that is seeded from a site-specific infection (pneumonia, NEC, or SSI) at another body site, except for catheter-associated infections. @tbl-secondary-bsi-rates shows the rate at which a secondary BSI is attributed to different primary infection types based on the NeoIPC criteria (organism match within a 17-day window around the primary infection). High rates of secondary BSI may indicate delayed diagnosis, inadequate source control, or particularly virulent pathogens, and warrant careful review of clinical protocols and infection management strategies.\n"
 msgstr ""
 
-#. type: Hash Value: admission_type 1
+#. type: Hash Value: admission_type after_day_of_birth
 #: reports/Patient-Data-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "Inborn (delivered at this hospital)"
+msgid "Transferred after day of birth"
 msgstr ""
 
-#. type: Hash Value: admission_type 2
+#. type: Hash Value: admission_type day_of_birth
 #: reports/Patient-Data-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Transferred on day of birth"
 msgstr ""
 
-#. type: Hash Value: admission_type 3
+#. type: Hash Value: admission_type delivery_room
 #: reports/Patient-Data-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "Transferred after day of birth"
+msgid "Inborn (delivered at this hospital)"
 msgstr ""
 
 #. type: Hash Value: days
@@ -3096,40 +3096,40 @@ msgstr ""
 msgid "N/A"
 msgstr ""
 
-#. type: Hash Value: pathogen_source B
+#. type: Hash Value: pathogen_source blood
 #: reports/Patient-Data-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Blood"
 msgstr ""
 
-#. type: Hash Value: pathogen_source B+C
+#. type: Hash Value: pathogen_source blood_and_cerebrospinal_fluid
 #: reports/Patient-Data-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Blood and cerebrospinal fluid"
 msgstr ""
 
-#. type: Hash Value: pathogen_source C
+#. type: Hash Value: pathogen_source cerebrospinal_fluid
 #: reports/Patient-Data-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Cerebrospinal fluid"
 msgstr ""
 
-#. type: Hash Value: pathogen_source L
+#. type: Hash Value: pathogen_source lower_respiratory_tract
 #: reports/Patient-Data-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Lower respiratory tract"
 msgstr ""
 
-#. type: Hash Value: pathogen_source U
-#: reports/Patient-Data-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "Upper respiratory tract"
-msgstr ""
-
-#. type: Hash Value: pathogen_source U+L
+#. type: Hash Value: pathogen_source upper_and_lower_respiratory_tract
 #: reports/Patient-Data-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Upper and lower respiratory tract"
+msgstr ""
+
+#. type: Hash Value: pathogen_source upper_respiratory_tract
+#: reports/Patient-Data-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Upper respiratory tract"
 msgstr ""
 
 #. type: Hash Value: patient_not_found
@@ -3192,16 +3192,16 @@ msgstr ""
 msgid "NeoIPC Surveillance — GDPR Art. 15(3) Data Export"
 msgstr ""
 
-#. type: Hash Value: surveillance_end_reason 1
-#: reports/Patient-Data-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "Discharge/Transfer"
-msgstr ""
-
-#. type: Hash Value: surveillance_end_reason 2
+#. type: Hash Value: surveillance_end_reason death
 #: reports/Patient-Data-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Death"
+msgstr ""
+
+#. type: Hash Value: surveillance_end_reason discharge_or_transfer
+#: reports/Patient-Data-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Discharge/Transfer"
 msgstr ""
 
 #. type: Hash Value: title
@@ -3466,10 +3466,82 @@ msgstr ""
 msgid "Admission event with the admission date"
 msgstr ""
 
+#. type: Hash Value: admission_types after_day_of_birth
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "transferred or readmitted the day after birth or later"
+msgstr ""
+
+#. type: Hash Value: admission_types day_of_birth
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "transferred or readmitted on the day of birth"
+msgstr ""
+
+#. type: Hash Value: admission_types delivery_room
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "admitted from the delivery room"
+msgstr ""
+
 #. type: Hash Value: bsi_problem_header_prefix
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Primary Sepsis/BSI event with the infection date"
+msgstr ""
+
+#. type: Hash Value: day_counts ab_days
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "antibiotic days"
+msgstr ""
+
+#. type: Hash Value: day_counts cvc_days
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "CVC days"
+msgstr ""
+
+#. type: Hash Value: day_counts human_milk_days
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "human milk days"
+msgstr ""
+
+#. type: Hash Value: day_counts inv_days
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "INV days"
+msgstr ""
+
+#. type: Hash Value: day_counts kangaroo_care_days
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "kangaroo care days"
+msgstr ""
+
+#. type: Hash Value: day_counts niv_days
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "NIV days"
+msgstr ""
+
+#. type: Hash Value: day_counts probiotic_days
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "probiotic days"
+msgstr ""
+
+#. type: Hash Value: day_counts pvc_days
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "PVC days"
+msgstr ""
+
+#. type: Hash Value: day_counts vs_days
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "INV days and NIV days together"
 msgstr ""
 
 #. type: Hash Value: end_problem_header_prefix
@@ -4022,6 +4094,66 @@ msgstr ""
 msgid "The enrolment is still active more than 120 days after the admission and its surveillance end form is not completed."
 msgstr ""
 
+#. type: Hash Value: problems 45 description
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The infant was admitted on day of life {dol}, after day of life 120, the last day on which an infant is eligible for the surveillance."
+msgstr ""
+
+#. type: Hash Value: problems 45 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The day of life at admission is above 120, the last eligible day."
+msgstr ""
+
+#. type: Hash Value: problems 46 description
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The admission form records a transfer or readmission after the day of birth, but the day of life at admission is {dol}; the day of birth is day of life 1, so an infant admitted after it is on day of life 2 or later."
+msgstr ""
+
+#. type: Hash Value: problems 46 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The day of life at admission of an infant transferred or readmitted after the day of birth is missing or below 2."
+msgstr ""
+
+#. type: Hash Value: problems 47 description
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The admission form of the enrolment dated {enrolledAt} records the infant as {type_label}, but the patient has an earlier enrolment dated {enrolledAt_previous}, so this admission is a transfer or readmission after the day of birth."
+msgstr ""
+
+#. type: Hash Value: problems 47 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "A later enrolment of the patient is recorded as an admission from the delivery room or on the day of birth."
+msgstr ""
+
+#. type: Hash Value: problems 48 description
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The enrolment is dated {enrolledAt}, but the patient's death was recorded on {death_date} on the surveillance end form of another enrolment."
+msgstr ""
+
+#. type: Hash Value: problems 48 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The enrolment is dated on or after the patient's recorded death."
+msgstr ""
+
+#. type: Hash Value: problems 49 description
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The infection dated {occurredAt} is recorded fewer than 14 days after the patient's previous infection of the same type, dated {occurredAt_previous}."
+msgstr ""
+
+#. type: Hash Value: problems 49 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The same type of infection was recorded again fewer than 14 days after the previous one."
+msgstr ""
+
 #. type: Hash Value: problems 5 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
@@ -4032,6 +4164,108 @@ msgstr ""
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "The admission form is not completed."
+msgstr ""
+
+#. type: Hash Value: problems 50 description
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The infection is recorded as {device_label}-associated, but the {device_label} days on the enrolment's surveillance end form are {device_days}."
+msgstr ""
+
+#. type: Hash Value: problems 50 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "A device-associated infection's enrolment counts no days of that device on its surveillance end form."
+msgstr ""
+
+#. type: Hash Value: problems 51 description
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The number of {count_label} ({days}) exceeds the number of patient days ({patient_days})."
+msgstr ""
+
+#. type: Hash Value: problems 51 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "A cumulative day count on the surveillance end form exceeds the number of patient days."
+msgstr ""
+
+#. type: Hash Value: problems 52 description
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Antibiotic substance entry {index} is incomplete: the substance is {substance} and its days are {days}."
+msgstr ""
+
+#. type: Hash Value: problems 52 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "An antibiotic substance entry holds a substance without its days or days without a substance."
+msgstr ""
+
+#. type: Hash Value: problems 53 description
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Antibiotic substance entry {index} ({substance}) records more days ({days}) than the total antibiotic days ({ab_days}) or the patient days ({patient_days})."
+msgstr ""
+
+#. type: Hash Value: problems 53 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "An antibiotic substance's days exceed the total antibiotic days or the patient days."
+msgstr ""
+
+#. type: Hash Value: problems 54 description
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The antibiotic substance {substance} is recorded in entry {index} and in entry {index_other}."
+msgstr ""
+
+#. type: Hash Value: problems 54 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The same antibiotic substance is recorded in two substance entries."
+msgstr ""
+
+#. type: Hash Value: problems 55 description
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The secondary bloodstream infection item is '{sec_bsi_label}', but the number of secondary bloodstream infection organisms recorded is {organisms}."
+msgstr ""
+
+#. type: Hash Value: problems 55 description_unanswered
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The secondary bloodstream infection item has not been answered, but the number of secondary bloodstream infection organisms recorded is {organisms}."
+msgstr ""
+
+#. type: Hash Value: problems 55 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The secondary bloodstream infection item disagrees with the secondary bloodstream infection organisms recorded."
+msgstr ""
+
+#. type: Hash Value: problems 56 description
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The patient is recorded as part of a multiple birth, but the number of infants at birth is {siblings}."
+msgstr ""
+
+#. type: Hash Value: problems 56 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "A patient recorded as part of a multiple birth has fewer than two infants at birth."
+msgstr ""
+
+#. type: Hash Value: problems 57 description
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The patient record holds neither a birth weight nor a gestational age, although the registration requires one of the two."
+msgstr ""
+
+#. type: Hash Value: problems 57 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "A patient record holds neither a birth weight nor a gestational age."
 msgstr ""
 
 #. type: Hash Value: problems 6 description
@@ -4094,6 +4328,24 @@ msgstr ""
 msgid "{applied} of {total} rules; the rules not applied are {not_applied}"
 msgstr ""
 
+#. type: Hash Value: secondary_bsi_items absent
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "No"
+msgstr ""
+
+#. type: Hash Value: secondary_bsi_items no_follow_up
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "No follow-up"
+msgstr ""
+
+#. type: Hash Value: secondary_bsi_items present
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Yes"
+msgstr ""
+
 #. type: Hash Value: see_problem_details
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
@@ -4106,22 +4358,22 @@ msgstr ""
 msgid "Surgical Site Infection event with the infection date"
 msgstr ""
 
-#. type: Hash Value: ssi_types 1
-#: reports/Validation-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "superficial incisional SSI"
-msgstr ""
-
-#. type: Hash Value: ssi_types 2
+#. type: Hash Value: ssi_types deep_incisional
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "deep incisional SSI"
 msgstr ""
 
-#. type: Hash Value: ssi_types 3
+#. type: Hash Value: ssi_types organ_space
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "organ/space SSI"
+msgstr ""
+
+#. type: Hash Value: ssi_types superficial_incisional
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "superficial incisional SSI"
 msgstr ""
 
 #. type: Hash Value: support_email_address_link_text
@@ -4181,6 +4433,7 @@ msgstr ""
 #: reports/Validation-Report/en/_solution_0014.Rmd:2
 #: reports/Validation-Report/en/_solution_0015.Rmd:2
 #: reports/Validation-Report/en/_solution_0016.Rmd:2
+#: reports/Validation-Report/en/_solution_0017.Rmd:2
 #, no-wrap
 msgid "\\newpage\n"
 msgstr ""
@@ -4883,6 +5136,314 @@ msgid ""
 msgstr ""
 
 #. type: Title ###
+#: reports/Validation-Report/en/_problem_detail_0023.Rmd:1
+#, markdown-text, no-wrap
+msgid "The Admission Occurred After Day of Life 120 {#sec-problem-details-23}"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0023.Rmd:6
+#, markdown-text, no-wrap
+msgid ""
+"An infant is eligible for the Core Module only if it is admitted to a ward of the neonatal department within 120 days of birth, besides meeting the birth weight or gestational age criterion; the day of birth is day of life 1, so an infant admitted on day of life 121 or later is not eligible for the Core Module.\n"
+"This message appears in the validation report when the admission form of an infant transferred or readmitted to the hospital the day after birth or later records a day of life at admission above 120.\n"
+"For the other two admission types the platform sets the day of life to 1 itself, so their forms are not checked.\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0023.Rmd:10
+#, markdown-text, no-wrap
+msgid ""
+"Please check the admission form.\n"
+"If the day of life was entered incorrectly, open the admission form (see @sec-solution-15), reopen it for editing if it is completed (see @sec-solution-9) and correct the value.\n"
+"Afterwards, check whether the day of life values on the enrolment's other forms need to be updated (see @sec-solution-11).\n"
+"If the infant was in fact admitted after day of life 120, it is not eligible for the Core Module: please delete the enrolment (see @sec-solution-13), or the whole patient record if this is its only enrolment (see @sec-solution-2).\n"
+msgstr ""
+
+#. type: Title ###
+#: reports/Validation-Report/en/_problem_detail_0024.Rmd:1
+#, markdown-text, no-wrap
+msgid "The Day of Life at Admission Is Missing or Implausible for a Transferred or Readmitted Infant {#sec-problem-details-24}"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0024.Rmd:6
+#, markdown-text, no-wrap
+msgid ""
+"For an infant transferred or readmitted to the hospital the day after birth or later, the admission form asks for the infant's day of life on the day of admission, because the platform cannot derive it from the admission date alone; for the other two admission types the platform sets it to 1 itself.\n"
+"Such an infant is at least one day old when it is admitted, so its day of life at admission is 2 or more.\n"
+"This message appears in the validation report when the admission form records this admission type but the day of life at admission is missing or below 2.\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0024.Rmd:8
+#, markdown-text, no-wrap
+msgid "The value matters beyond the admission form: the day of life recorded on every later form of the enrolment is calculated from it, so a missing or wrong value makes those values wrong or leaves them unchecked.\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0024.Rmd:10
+#, markdown-text, no-wrap
+msgid ""
+"Please open the admission form (see @sec-solution-15), reopen it for editing if it is completed (see @sec-solution-9) and enter the correct day of life, or correct the admission type if the infant was in fact born in the hospital or admitted on the day of birth.\n"
+"Afterwards, check whether the day of life values on the enrolment's other forms need to be updated (see @sec-solution-11).\n"
+msgstr ""
+
+#. type: Title ###
+#: reports/Validation-Report/en/_problem_detail_0025.Rmd:1
+#, markdown-text, no-wrap
+msgid "A Later Enrolment Is Recorded as an Admission From the Delivery Room or on the Day of Birth {#sec-problem-details-25}"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0025.Rmd:6
+#, markdown-text, no-wrap
+msgid ""
+"Each hospital stay of a patient is recorded as an enrolment of its own, and the admission form of each enrolment records how the infant came to the department: from the delivery room after a birth in the hospital, transferred or readmitted to the hospital on the day of birth, or transferred or readmitted the day after birth or later.\n"
+"An enrolment that follows an earlier enrolment of the same patient is a readmission by definition, and a readmission after the day of birth is recorded with the third of these admission types.\n"
+"This message appears in the validation report when a later enrolment of a patient records one of the first two.\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0025.Rmd:8
+#, markdown-text, no-wrap
+msgid "Either the admission type of the later enrolment is wrong, or the two enrolments describe the same hospital stay.\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0025.Rmd:11
+#, markdown-text, no-wrap
+msgid ""
+"Please open the later enrolment's admission form (see @sec-solution-15), reopen it for editing if it is completed (see @sec-solution-9) and correct the admission type together with the day of life at admission.\n"
+"Afterwards, check whether the day of life values on the enrolment's other forms need to be updated (see @sec-solution-11).\n"
+"If the two enrolments describe one stay, please delete the redundant one instead (see @sec-solution-13).\n"
+msgstr ""
+
+#. type: Title ###
+#: reports/Validation-Report/en/_problem_detail_0026.Rmd:1
+#, markdown-text, no-wrap
+msgid "The Enrolment Is Dated on or after the Patient's Recorded Death {#sec-problem-details-26}"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0026.Rmd:6
+#, markdown-text, no-wrap
+msgid ""
+"When an infant dies, its surveillance ends on the day of death, which is recorded on the surveillance end form with 'Death' as the reason.\n"
+"No other hospital stay of the patient can begin on or after that day.\n"
+"This message appears in the validation report when a patient has a surveillance end form that gives death as the reason and another enrolment whose admission date is on or after the date of that form.\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0026.Rmd:8
+#, markdown-text, no-wrap
+msgid "Either the surveillance end form is wrong, because the reason should be 'Discharge/Transfer' or the date is not the day of death, or the later enrolment is wrong, because its admission date was entered incorrectly or because it belongs to a different infant and was created under this patient's NeoIPC-ID by mistake.\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0026.Rmd:10
+#, markdown-text, no-wrap
+msgid ""
+"Please check the surveillance end form of the enrolment that recorded the death (see @sec-solution-15; reopen it for editing if it is completed, see @sec-solution-9) and the admission date of the later enrolment (see @sec-solution-6).\n"
+"If the later enrolment belongs to another infant, please delete it here (see @sec-solution-13) and record it under the correct patient.\n"
+msgstr ""
+
+#. type: Title ###
+#: reports/Validation-Report/en/_problem_detail_0027.Rmd:1
+#, markdown-text, no-wrap
+msgid "The Same Type of Infection Was Recorded Again Within 14 Days {#sec-problem-details-27}"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0027.Rmd:6
+#, markdown-text, no-wrap
+msgid ""
+"According to the NeoIPC Surveillance Protocol, the same type of infection is registered again for a patient only after a minimum of 14 days and a period without relevant symptoms of infection, and a new pathogen isolated in the same organ system while an infection is recorded is not a new infection.\n"
+"This message appears in the validation report when a patient has two forms of the same infection type (sepsis, necrotizing enterocolitis, pneumonia or surgical site infection) whose infection dates are fewer than 14 days apart, whether in one enrolment or in two enrolments of the patient.\n"
+"The later form is the one the message names; when both forms carry the same date, either may carry the message.\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0027.Rmd:8
+#, markdown-text, no-wrap
+msgid "In most cases the later form records a continuation of the first infection or a further organism isolated during it, or one of the two infection dates was entered incorrectly.\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0027.Rmd:11
+#, markdown-text, no-wrap
+msgid ""
+"Please check both forms.\n"
+"If the later form does not record a new infection, delete it (see @sec-solution-12) and record any additional organism in the first form instead.\n"
+"If a date was entered incorrectly, correct it (see @sec-solution-7).\n"
+msgstr ""
+
+#. type: Title ###
+#: reports/Validation-Report/en/_problem_detail_0028.Rmd:1
+#, markdown-text, no-wrap
+msgid "The Infection Is Recorded as Device-Associated but the Enrolment Has No Days of That Device {#sec-problem-details-28}"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0028.Rmd:6
+#, markdown-text, no-wrap
+msgid ""
+"A sepsis is recorded as associated with a central or peripheral venous catheter, and a pneumonia as associated with invasive or non-invasive ventilation, when the device has been in place for at least three consecutive days on the day of infection or the day before.\n"
+"The surveillance end form of the enrolment counts the days on which each of these devices was in place during the stay, so an enrolment with a device-associated infection has at least one day of that device.\n"
+"This message appears in the validation report when a sepsis or pneumonia form records a device association but the enrolment's completed surveillance end form counts zero days of that device, or none at all.\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0028.Rmd:8
+#, markdown-text, no-wrap
+msgid "Either the device association on the infection form is wrong, or the device days on the surveillance end form are.\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0028.Rmd:9
+#, markdown-text, no-wrap
+msgid "Please check both forms (see @sec-solution-15), reopen the one that is wrong for editing (see @sec-solution-9) and correct it: the device association on the sepsis or pneumonia form, or the device days on the surveillance end form.\n"
+msgstr ""
+
+#. type: Title ###
+#: reports/Validation-Report/en/_problem_detail_0029.Rmd:1
+#, markdown-text, no-wrap
+msgid "A Cumulative Day Count Exceeds the Number of Patient Days {#sec-problem-details-29}"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0029.Rmd:8
+#, markdown-text, no-wrap
+msgid ""
+"Every cumulative count on the surveillance end form counts days of the stay: the days with a central or a peripheral venous catheter, with invasive or non-invasive ventilation, with antibiotics, with human milk, with kangaroo care and with probiotics.\n"
+"None of them can therefore exceed the number of patient days.\n"
+"The days of invasive and non-invasive ventilation are bounded together as well: a day of ventilation counts as either invasive or non-invasive, so their sum cannot exceed the patient days either.\n"
+"The platform checks these bounds when the form is completed, but a form completed before the checks existed, or a value changed afterwards, can still violate them.\n"
+"This message appears in the validation report when one of the counts exceeds the patient days; there is one message per count.\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0029.Rmd:10
+#, markdown-text, no-wrap
+msgid ""
+"Please open the surveillance end form (see @sec-solution-15), reopen it for editing if it is completed (see @sec-solution-9) and correct the count.\n"
+"If the number of patient days is wrong instead, update it (see @sec-solution-11) and check the other counts against the corrected value.\n"
+msgstr ""
+
+#. type: Title ###
+#: reports/Validation-Report/en/_problem_detail_0030.Rmd:1
+#, markdown-text, no-wrap
+msgid "The Antibiotic Substance Entries Are Inconsistent {#sec-problem-details-30}"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0030.Rmd:7
+#, markdown-text, no-wrap
+msgid ""
+"The surveillance end form records, for each systemic antibiotic substance the infant received, the substance and the number of days on which it was given, in up to nine substance entries.\n"
+"An entry holds a substance together with its days.\n"
+"A substance day is an antibiotic day and an antibiotic day is a patient day, so the days of one substance can exceed neither the total antibiotic days nor the patient days.\n"
+"A substance is recorded in one entry only, since its days belong together.\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0030.Rmd:13
+#, markdown-text, no-wrap
+msgid ""
+"Three messages report a violation of these rules: a substance recorded without its days or days recorded without a substance; a substance whose days exceed the total antibiotic days or the patient days, which includes a substance recorded on a form whose total antibiotic days are zero; and the same substance recorded in two entries.\n"
+"The form shows the first entry once antibiotic days are entered and each further entry once the previous one holds a substance.\n"
+"It asks for the substance of the first entry and for the days of every entry whose substance is chosen, and it insists on what it asks for only when the form is completed.\n"
+"It does not ask for the substance of entries 2 to 9 when their days are entered, so days without a substance can be recorded on any form, and a substance without its days on a form that is not completed yet or that was written by a tool that does not apply these checks.\n"
+"The other two shapes are not checked when the data is entered.\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0030.Rmd:15
+#, markdown-text, no-wrap
+msgid ""
+"Please open the surveillance end form (see @sec-solution-15), reopen it for editing if it is completed (see @sec-solution-9) and complete, correct or clear the entries concerned.\n"
+"When a substance appears twice, keep one entry with the correct days and clear the other.\n"
+msgstr ""
+
+#. type: Title ###
+#: reports/Validation-Report/en/_problem_detail_0031.Rmd:1
+#, markdown-text, no-wrap
+msgid "The Secondary Bloodstream Infection Item Disagrees With the Organisms Recorded {#sec-problem-details-31}"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0031.Rmd:6
+#, markdown-text, no-wrap
+msgid ""
+"On the pneumonia, necrotizing enterocolitis and surgical site infection forms, the secondary bloodstream infection item says whether the patient developed a bloodstream infection secondary to that infection: 'Yes', 'No', or 'No follow-up' when the department does not follow its patients for secondary bloodstream infections.\n"
+"When the item is 'Yes', at least one organism isolated from the blood is recorded in the secondary bloodstream infection organism fields; under any other answer no such organism is recorded.\n"
+"This message appears in the validation report when the item is 'Yes' and no organism is recorded, or when the item is 'No', 'No follow-up' or unanswered and organisms are recorded anyway on a pneumonia or necrotizing enterocolitis form.\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0031.Rmd:8
+#, markdown-text, no-wrap
+msgid "The second case arises on a record written by a tool or an older client that did not apply today's checks: the form clears the organisms as soon as the item changes, but on a completed form they stay visible until it is reopened for editing.\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0031.Rmd:9
+#, markdown-text, no-wrap
+msgid "Please open the form (see @sec-solution-15), reopen it for editing if it is completed (see @sec-solution-9) and either set the item to 'Yes' and record the organisms, or set it to the correct answer and clear the organism fields.\n"
+msgstr ""
+
+#. type: Title ###
+#: reports/Validation-Report/en/_problem_detail_0032.Rmd:1
+#, markdown-text, no-wrap
+msgid "Fewer Than Two Infants Recorded for a Multiple Birth {#sec-problem-details-32}"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0032.Rmd:7
+#, markdown-text, no-wrap
+msgid ""
+"The patient record says whether the infant is part of a multiple birth and, when it is, how many infants were delivered from that pregnancy, the infant included.\n"
+"A multiple birth has at least two infants, so the number is 2 or more.\n"
+"This message appears in the validation report when the record marks a multiple birth but the number of infants at birth is below 2.\n"
+"The platform asks for the number as soon as the multiple birth is marked and warns at seven or more, but it accepts a 1.\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0032.Rmd:9
+#, markdown-text, no-wrap
+msgid "Either the infant is not part of a multiple birth, or the number of infants was entered incorrectly.\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0032.Rmd:10
+#, markdown-text, no-wrap
+msgid "Please open the patient record's dashboard (see @sec-solution-1) and edit its profile (see @sec-solution-17): clear the multiple birth mark if the infant is a singleton, or correct the number of infants at birth otherwise.\n"
+msgstr ""
+
+#. type: Title ###
+#: reports/Validation-Report/en/_problem_detail_0033.Rmd:1
+#, markdown-text, no-wrap
+msgid "The Patient Record Holds Neither a Birth Weight Nor a Gestational Age {#sec-problem-details-33}"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0033.Rmd:6
+#, markdown-text, no-wrap
+msgid ""
+"Eligibility for the Core Module depends on a birth weight below 1500 grams or a gestational age below 32 weeks, and the analyses group the patients by both.\n"
+"The registration form therefore requires one of the two whenever the other is empty, in every department, and refuses a record without either; a record reaches the platform without both only around that form, such as through an import or from before the requirement existed.\n"
+"This message appears in the validation report when a patient record holds neither a birth weight nor a gestational age.\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0033.Rmd:8
+#, markdown-text, no-wrap
+msgid ""
+"Please open the patient record's dashboard (see @sec-solution-1) and edit its profile (see @sec-solution-17): enter the birth weight, the gestational age, or both.\n"
+"If your department includes only infants who meet these criteria and neither value is known, the infant cannot be shown to be eligible and the record does not belong in the Core Module: please delete it (see @sec-solution-2).\n"
+msgstr ""
+
+#. type: Title ###
 #: reports/Validation-Report/en/_solution_0001.Rmd:1
 #, markdown-text, no-wrap
 msgid "Opening the Tracked Entity Instance Dashboard of a Patient Record {#sec-solution-1}"
@@ -5366,4 +5927,24 @@ msgstr ""
 #: reports/Validation-Report/en/_solution_0016.Rmd:16
 #, markdown-text, no-wrap
 msgid "![The filter for patients with an active enrolment in the list toolbar of Tracker Capture](img/fig-active-enrolment-filter.png){#fig-active-enrolment-filter fig-alt=\"The list toolbar of Tracker Capture below the program selector, with 'Lists' selected on the right. Of the four buttons left of the 'Custom working list' selector, the second, a circle, is highlighted, and its tooltip reads 'Only those with active enrollment'.\"}\n"
+msgstr ""
+
+#. type: Title ###
+#: reports/Validation-Report/en/_solution_0017.Rmd:6
+#, markdown-text, no-wrap
+msgid "Changing the Data in a Patient Record's Profile {#sec-solution-17}"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_solution_0017.Rmd:9
+#, markdown-text, no-wrap
+msgid "The data that describes the patient rather than a single hospital stay, such as the sex, the birth weight or whether the infant is part of a multiple birth, is shown in the 'Profile' widget of the Tracked Entity Instance Dashboard (see @sec-solution-1).\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_solution_0017.Rmd:11
+#, markdown-text, no-wrap
+msgid ""
+"To change it, click 'Edit' in the heading of the 'Profile' widget, correct the fields concerned, for example 'Multiple birth' or 'Number of infants in birth', and click 'Save'.\n"
+"'Cancel' leaves the profile as it was.\n"
 msgstr ""

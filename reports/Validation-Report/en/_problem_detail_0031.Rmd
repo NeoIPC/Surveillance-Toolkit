@@ -1,0 +1,9 @@
+### The Secondary Bloodstream Infection Item Disagrees With the Organisms Recorded {#sec-problem-details-31}
+
+On the pneumonia, necrotizing enterocolitis and surgical site infection forms, the secondary bloodstream infection item says whether the patient developed a bloodstream infection secondary to that infection: 'Yes', 'No', or 'No follow-up' when the department does not follow its patients for secondary bloodstream infections.
+When the item is 'Yes', at least one organism isolated from the blood is recorded in the secondary bloodstream infection organism fields; under any other answer no such organism is recorded.
+This message appears in the validation report when the item is 'Yes' and no organism is recorded, or when the item is 'No', 'No follow-up' or unanswered and organisms are recorded anyway on a pneumonia or necrotizing enterocolitis form.
+
+The second case arises on a record written by a tool or an older client that did not apply today's checks: the form clears the organisms as soon as the item changes, but on a completed form they stay visible until it is reopened for editing.
+
+Please open the form (see @sec-solution-15), reopen it for editing if it is completed (see @sec-solution-9) and either set the item to 'Yes' and record the organisms, or set it to the correct answer and clear the organism fields.

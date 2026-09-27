@@ -1,0 +1,9 @@
+### The Infection Is Recorded as Device-Associated but the Enrolment Has No Days of That Device {#sec-problem-details-28}
+
+A sepsis is recorded as associated with a central or peripheral venous catheter, and a pneumonia as associated with invasive or non-invasive ventilation, when the device has been in place for at least three consecutive days on the day of infection or the day before.
+The surveillance end form of the enrolment counts the days on which each of these devices was in place during the stay, so an enrolment with a device-associated infection has at least one day of that device.
+This message appears in the validation report when a sepsis or pneumonia form records a device association but the enrolment's completed surveillance end form counts zero days of that device, or none at all.
+
+Either the device association on the infection form is wrong, or the device days on the surveillance end form are.
+
+Please check both forms (see @sec-solution-15), reopen the one that is wrong for editing (see @sec-solution-9) and correct it: the device association on the sepsis or pneumonia form, or the device days on the surveillance end form.

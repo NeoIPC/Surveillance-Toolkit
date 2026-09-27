@@ -30,16 +30,34 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
   the message can then be ignored, and the explanations tell the two cases apart: the form has to be
   added before the enrolment is completed in the one, and completed rather than added in the other.
   A new solution shows how Tracker Capture's list filter shows every patient record of a department
-  with an active enrolment, so a site can find the open ones the report does not list yet. The report
-  rests on 43 rules.
+  with an active enrolment, so a site can find the open ones the report does not list yet.
+- The Validation Report renders neoipcr's rules 45 to 56, twelve rules for constraints of the Core
+  Protocol the partner team can see and correct in Tracker Capture: an admission beyond day of life
+  120; a transferred or readmitted infant without a plausible day of life at admission; a later
+  enrolment typed as an admission from the delivery room or on the day of birth; an enrolment dated on
+  or after the patient's recorded death; the same infection type recorded again within 14 days; a
+  device-associated sepsis or pneumonia on an enrolment without days of that device; a cumulative count
+  above the patient days; inconsistent antibiotic substance entries, each naming the substance, or its
+  stored code where the option set carries no name for it; a secondary bloodstream infection item that
+  disagrees with the organisms recorded with it; and a multiple birth recorded with fewer than two
+  infants. Each has its sentence, summary and explanation, and a new solution shows how to change the
+  data in a patient record's profile. A sentence that shows a coded value (an admission type, a device,
+  a count, the secondary-BSI item) shows its localized label, from label maps in the string resources
+  that the formatter reads through one table; the counts and the secondary-BSI item are worded as the
+  form labels them.
+- The Validation Report renders neoipcr's rule 57, a patient record with neither a birth weight nor a
+  gestational age, although the registration requires one of the two; its explanation asks for one of
+  them in the patient's profile, or, in a department that includes only infants meeting the eligibility
+  criteria, for the record's deletion if neither is known. The report rests on 56 rules and requires
+  neoipcr `v0.0.0.9006`.
 - The Partner and Reference Reports open with a data-validation summary: for each validation rule that
   removed or exempted a record, the number and kind of records it concerned, and the totals across all
   rules — the Partner Report's department beside the reference data where the report compares the two.
   The `includeValidationSummaryTable` parameter (`ValidationSummary` in the build wrappers' element
   lists) switches it off like any other table; a dataset written before neoipcr recorded the summary
-  renders the section with a sentence saying so. The reports require neoipcr `v0.0.0.9004`, whose
-  reporting period selects the enrolments before the validation pass — below it, the summary would
-  count every out-of-period patient as removed by rule 25.
+  renders the section with a sentence saying so. The summary relies on neoipcr's reporting period
+  selecting the enrolments before the validation pass, which it does from `v0.0.0.9004` on — before
+  that, it would count every out-of-period patient as removed by rule 25.
 - The Validation Report fails the render when a rule's sentence names a placeholder the rule does not
   record, as `neoipcr::validation_rule_context_fields()` declares the fields, instead of failing
   inside the interpolation on the first finding that reaches it.
@@ -61,6 +79,23 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
   annotated master, like the Partner and Reference wrappers.
 - The reports raise their errors with `rlang::abort()` and their warnings with `rlang::warn()`, so an
   error appears in the log in rlang's format, with its message on a `! ` line.
+- The Partner and Reference Reports' description of exposure densities states that a ventilation day
+  requires more than 12 hours of the respective support, following the protocol, while a catheter day
+  keeps at least 12 hours.
+- Every report now runs on neoipcr `v0.0.0.9006`, which changes the data of the Partner Report, the
+  Reference Report and the Partner Certificate as well: the import's validation pass, which these
+  reports run by default, also applies rules 46 to 57 and removes the patients they flag — a
+  duplicated antibiotic substance entry, the same infection type recorded again within 14 days, a
+  day count above the patient days, or a patient with neither birth weight nor gestational age, for
+  example. The eligibility filter keeps an admission on day of life 120, which it used to drop, and no
+  longer reads a missing value as ineligible: an admission from the delivery room or on the day of
+  birth without a day of life now stays, and an infant transferred or readmitted after the day of birth
+  without one, like a
+  patient without birth weight and gestational age, is removed by the pass and counted in the
+  validation summary, where the filter used to drop it unreported. Rates, the validation summary tables
+  and the certificate's patient count can therefore change with this release. Rule 45 removes nothing there: under the
+  default the eligibility filter has already dropped such an admission, and with non-core patients
+  requested the pass leaves rule 45 out.
 
 ### Removed
 
@@ -72,6 +107,15 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
 
 ### Fixed
 
+- The Patient Data Report failed at its import on every render: neoipcr before `v0.0.0.9006` failed
+  on the events' timestamps and on enrolment notes read without the DHIS2 enrolment ids, both of which
+  the report requests, and on records without a creator: events created before the instance's upgrade
+  to DHIS2 2.36, and enrolments and tracked entities created before its upgrade to 2.37. It renders with `v0.0.0.9006`, the reports' new floor.
+- A bare `yes` or `on` in a report's string resources stays text, as `no` and `off` already did,
+  where YAML reads it as a logical: a translated label such as `Yes`, which po4a writes unquoted, no
+  longer turns into `TRUE`. In the other direction, a bare `false` is now read as a logical where it
+  used to stay text, so only `true` and `false` are logicals, and the Partner Report's concordance
+  flags are consistently logical.
 - An antibiotic-utilisation table with no data failed the render with an "unused argument" error, since
   its no-data branch passed the table's own sentence to a helper that took none; the helper takes the
   sentence now, and the table renders it.

@@ -102,8 +102,17 @@ sentence_case <- function(text, language) {
          substr(text, 2, nchar(text)))
 }
 
+# The YAML handlers every string resource is read with. YAML 1.1 reads a bare
+# yes, no, on, off, y or n as a logical, but in string resources such a word is
+# a label (po4a writes a translated label like Yes unquoted), so it stays text;
+# only true and false are logicals.
+string_resource_handlers <- function() {
+  keep_label <- function(x) if (tolower(x) %in% c("true", "false")) as.logical(tolower(x)) else x
+  list('bool#no' = keep_label, 'bool#yes' = keep_label)
+}
+
 get_string_resources <- function(x) {
-  handlers <- list('bool#no' = function(x) x)
+  handlers <- string_resource_handlers()
 
   # Layer 0: glossary (lowest priority — controlled vocabulary)
   glossary_path <- "../../glossary.yaml"
@@ -283,12 +292,21 @@ include_localised <- function(file_name) {
   )
 }
 
+# The World Bank income classes' codes, as neoipcr reads them, and the keys their
+# labels carry in the string resources.
+world_bank_class_keys <- c(
+  H = "high_income",
+  UM = "upper_middle_income",
+  LM = "lower_middle_income",
+  L = "low_income")
+
 get_localised_world_bank_class_names <- function(x) {
   x |>
     purrr::map_chr(
       \(x) {
         if (is.na(x) || !nzchar(trimws(x))) return(sR$not_available)
-        val <- sR$worldBankClassNames[[as.character(x)]]
+        key <- world_bank_class_keys[as.character(x)]
+        val <- if (is.na(key)) NULL else sR$worldBankClassNames[[key]]
         if(is.null(val)) x else val
       })
 }
@@ -414,7 +432,8 @@ format_countries <- function(countries) {
         wb_class_label = dplyr::if_else(
           is.na(.data$wb_class) | !nzchar(trimws(.data$wb_class)),
           sR$not_available,
-          (sR$worldBankClassNames |> unlist())[gsub("\\s+", "", .data$wb_class)]
+          (sR$worldBankClassNames |> unlist())[
+            world_bank_class_keys[gsub("\\s+", "", .data$wb_class)]]
         )
       ) |>
       dplyr::mutate(

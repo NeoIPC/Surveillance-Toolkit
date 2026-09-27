@@ -14,21 +14,30 @@
 #             actually established by testing.
 
 neoipcr:
-  # The floor is the neoipcr whose reporting period selects the enrolments before the
-  # validation pass (v0.0.0.9004): the Partner and Reference Reports print the dataset's
-  # validation summary, and below that tag the period took effect through rule 25, so the
-  # summary counted every out-of-period patient as removed by validation. Below it sit the
-  # rule set the Validation Report's string catalogue covers — the report aborts when neoipcr
-  # knows a rule the catalogue does not, and v0.0.0.9003 is the first tag carrying rules 43
-  # and 44 — the exported `validate()` with its exception-list API (`validation_rule_ids()`,
-  # `read_validation_exceptions()`, v0.0.0.9002) and the Reference Report's
-  # `get_antibiotic_utilization_table()` (v0.0.0.9001). A renamed field is
+  # The floor is the neoipcr the Patient Data Report can render with (v0.0.0.9006): the report
+  # imports with timestamps and enrolment notes, which failed every import below it (on the
+  # events' timestamps, and on notes read without the DHIS2 enrolment ids), and with pseudonymized
+  # users, which failed it for records without a creator: events created before the instance's
+  # upgrade to DHIS2 2.36, enrolments and tracked entities before 2.37. The same tag carries rule 57,
+  # a patient
+  # with neither birth weight nor gestational age, which the Validation Report's catalogue now
+  # describes, and the eligibility filter that leaves a missing value to the validation pass, so
+  # that rule 46 reports a missing day of life. Below it sit rules 45 to 56 (v0.0.0.9005), whose
+  # sentences the Validation Report's catalogue carries and whose `multiple_birth` patient column
+  # its import selects; an older package fails the report's setup at that import, whose
+  # `dhis2_dataset_options()` does not accept `multiple_birth`. Below that sit the reporting
+  # period that selects the enrolments before the validation pass (v0.0.0.9004; below that
+  # tag the period took effect through rule 25, so the validation summary the Partner and
+  # Reference Reports print counted every out-of-period patient as removed), rules 43 and 44
+  # (v0.0.0.9003), the exported `validate()` with its exception-list API
+  # (`validation_rule_ids()`, `read_validation_exceptions()`, v0.0.0.9002) and the Reference
+  # Report's `get_antibiotic_utilization_table()` (v0.0.0.9001). A renamed field is
   # NOT part of the floor: a serialized dataset written under the old name is accepted
   # permanently, by the shim marked NEOIPC-PERMANENT(dataset-format) in the Partner
   # Report's setup. The release gate checks only that a declared tag exists, and only
   # `tested`, so nothing here would catch a floor set too low.
-  tested: v0.0.0.9004
-  minimum: v0.0.0.9004
+  tested: v0.0.0.9006
+  minimum: v0.0.0.9006
 
 neoipc-app:
   tested: v0.1.0-alpha

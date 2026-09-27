@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-08-05 19:59+0200\n"
+"POT-Creation-Date: 2026-09-26 22:57+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Language-Team: none\n"
 "Language: en\n"
@@ -1389,7 +1389,7 @@ msgstr ""
 
 #. type: #sec-dd-surveillance-end
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:597
-msgid "The cumulative number of days when the infant was on invasive ventilation (intubated) for at least 12 hours/day."
+msgid "The cumulative number of days when the infant was on invasive ventilation (intubated) for more than 12 hours/day."
 msgstr ""
 
 #. type: Labeled list
@@ -1400,7 +1400,7 @@ msgstr ""
 
 #. type: #sec-dd-surveillance-end
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:598
-msgid "The cumulative number of days when the infant was on non-invasive ventilation (not intubated; e.g. high flow nasal cannulae or CPAP) for at least 12 hours/day."
+msgid "The cumulative number of days when the infant was on non-invasive ventilation (not intubated; e.g. high flow nasal cannulae or CPAP) for more than 12 hours/day."
 msgstr ""
 
 #. type: Labeled list
@@ -2237,7 +2237,7 @@ msgstr ""
 
 #. type: #sec-dd-pneumonia-specific-data
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:793
-msgid "A day in which the patient was ventilated invasively via endotracheal or tracheostomy tube for at least 12 hours cumulatively."
+msgid "A day in which the patient was ventilated invasively via endotracheal or tracheostomy tube for more than 12 hours cumulatively."
 msgstr ""
 
 #. type: Labeled list
@@ -2270,7 +2270,7 @@ msgstr ""
 
 #. type: #sec-dd-pneumonia-specific-data
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:799
-msgid "A day in which the patient received non-invasive ventilatory support via CPAP or High-Flow Nasal Cannula for at least 12 hours cumulatively."
+msgid "A day in which the patient received non-invasive ventilatory support via CPAP or High-Flow Nasal Cannula for more than 12 hours cumulatively."
 msgstr ""
 
 #. type: Labeled list

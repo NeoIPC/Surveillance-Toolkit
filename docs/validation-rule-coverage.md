@@ -9,8 +9,8 @@ inventory that makes the superset claim checkable. It lists every constraint the
 keyed by the protocol's own anchor, and says for each one what enforces it today and, where nothing
 does, what would.
 
-The inventory is hand-maintained. It describes the protocol at `doc/protocol/VERSION` 1.3.0-preview2,
-the 43 rules of neoipcr v0.0.0.9004 (ids 1 to 44, with id 16 withdrawn) and the program rules, compulsory
+The inventory is hand-maintained. It describes the protocol at `doc/protocol/VERSION` 1.3.0-preview2
+together with the changes under [Unreleased] in its changelog, the 56 rules of neoipcr v0.0.0.9006 (ids 1 to 57, with id 16 withdrawn) and the program rules, compulsory
 flags and option sets of `metadata/common/`. A change to any of the three has to be reflected here: a
 new protocol constraint gets a row, a new rule is entered in the rows it covers, and a program rule
 that starts or stops enforcing something changes the enforcement column. `docs/validation-report.md`
@@ -40,7 +40,8 @@ Each row carries the protocol anchor (a section id such as `sec-def-pneumonia`, 
 `tbl-eligibility-examples`, or a data-dictionary term such as `dd-patient-days`), the constraint in
 checkable form, its enforcement class, the neoipcr rules that enforce it, the capture-time
 configuration that enforces it, and a pointer into the gap list below where the enforcement is
-incomplete. A constraint marked *(derived)* is one the protocol states as an example, an analysis
+incomplete or where a gap's decision is what closed it, so a Covered row may name the gap whose rule
+now covers it. A constraint marked *(derived)* is one the protocol states as an example, an analysis
 convention or background rather than as a rule; it is inventoried because a rule can still enforce it.
 
 | Class | Meaning |
@@ -87,13 +88,13 @@ which cannot fire at all.
 
 | Class | Rows |
 |---|---|
-| Covered | 19 |
-| Partial | 36 |
-| Capture time | 61 |
-| Interface only | 14 |
-| Not covered | 28 |
-| Not checkable | 121 |
-| All | 279 |
+| Covered | 30 |
+| Partial | 56 |
+| Capture time | 55 |
+| Interface only | 12 |
+| Not covered | 7 |
+| Not checkable | 120 |
+| All | 280 |
 
 The counts are of the rows in the tables below, so they can be recomputed from the file. A row may
 merge statements that share an anchor and an enforcement, and the sections that hold only process
@@ -142,7 +143,7 @@ rather than repaired. The deployment's history of metadata exports bounds when a
 the interval between two exports; it is a last resort, not a foundation.
 
 The gap list groups the partial, uncovered, capture-time and interface-only rows into the decisions
-they call for. Every gap names the anchors it concerns, what exists today, what is missed, who can act
+they call for; a gap whose decision became a rule keeps the rows that rule now covers. Every gap names the anchors it concerns, what exists today, what is missed, who can act
 on a finding, and the proposed way to close it. Which proposals become rules or reconciliations is a
 maintainer's decision; a proposal is not a commitment.
 
@@ -159,12 +160,18 @@ The protocol admits an infant with a birth weight below 1500 g or a gestational 
 `NEOIPC_PATIENT_BW_1500_GRAMS_AND_GA_32_PLUS_WEEKS` refuses registration with an error when the birth
 weight is 1500 g or more and the total gestation days are 224 or more, or when one of the two fails and
 the other is missing, except in departments of the organisation-unit group
-`NEOIPC_ALL_PATIENTS_ELIGIBLE`. No post-hoc rule reads `patients$birth_weight` or
-`patients$total_gestation_days`; a patient registered through the API, or before the program rule
-existed, passes `validate()`. Birth weight itself is compulsory only when the gestational age is empty
-(regular sites) or at departments in the organisation-unit group `NEOIPC_NEODECO_TRIAL_SITES` (the
-NeoDeco trial sites); elsewhere an empty birth weight only warns, and such a patient silently drops
-out of the birth-weight-stratified rates.
+`NEOIPC_ALL_PATIENTS_ELIGIBLE`. Post hoc, rule 57 flags a patient with neither a birth weight nor a
+gestational age, which the registration refuses in every department, including those where the
+eligibility criteria are disabled; it is not an eligibility rule, so the pass
+applies it whichever patients were requested, and the import's eligibility filter keeps such a patient
+for it rather than dropping it unreported. The other two branches, both criteria failing or one failing
+while the other is missing, have no post-hoc rule: under the import's default the eligibility filter
+leaves such a patient out as ineligible, and a patient registered through the API, or before the
+program rule existed, passes `validate()` where ineligible patients are kept. Birth weight itself is
+compulsory only when the gestational age is empty (regular sites) or at departments in the
+organisation-unit group `NEOIPC_NEODECO_TRIAL_SITES` (the NeoDeco trial sites); elsewhere an empty
+birth weight only warns, and a patient with a gestational age but no birth weight silently drops out
+of the birth-weight-stratified rates.
 
 Proposal: a patient-level rule flagging a patient whose birth weight is 1500 g or more or missing and
 whose total gestation days are 224 or more or missing, mirroring the program rule's three branches,
@@ -173,7 +180,10 @@ eligible, which the registration allows and the stratified rates cannot use. Bot
 membership in `NEOIPC_ALL_PATIENTS_ELIGIBLE`, which the import does not read today (it reads only the
 `NEO_DEPARTMENT`, `COUNTRY` and `TEST_UNITS` groups); the rule skips itself until the import provides
 the flag. Who acts: the partner, who sees the birth weight and the gestational age on the registration
-and can correct them or end the enrolment. Not decided.
+and can correct them or end the enrolment. Decided: rule 57 flags a patient with neither value, which
+no department's registration accepts; the rule on the other branches is documented only, until the
+import carries the department's group membership, which says whether the eligibility criteria apply to
+its patients.
 
 ### G2 — Admission within 120 days of birth
 
@@ -182,14 +192,23 @@ and can correct them or end the enrolment. Not decided.
 An eligible infant is admitted within 120 days of birth; the examples table makes day of life 120
 eligible and day 121 not. The only upper-bound check on the admission day of life is
 `NEOIPC_ADM_DOL_VAL_150_PLUS`, a warning at 150 or more, so an admission on day 121 to 149 raises
-nothing anywhere and one at 150 or more only a warning. No post-hoc rule reads the admission form's
-day of life against a ceiling.
+nothing anywhere and one at 150 or more only a warning. Post hoc, rule 45 reads the admission form's
+day of life against the ceiling of 120.
 
 Proposal: an enrolment-level rule on the admission form flagging a day of life above 120; only
 admission type 3 can trip it, since types 1 and 2 are assigned day 1. The protocol should say whether
 "within 120 days of birth" means day of life at most 120, as the table implies, and the program rule's
 threshold should follow the protocol. Who acts: the partner; the admission form shows the day of
-life. Not decided.
+life. Decided: rule 45 flags a type-3 admission whose day of life is above 120 — the client assigns
+day 1 to the other two types, so a higher value there is the network's, under G3. Eligibility is
+decided per admission, so a readmission after day 120 is ineligible even when the infant's earlier
+stay was eligible, and rule 45 and the eligibility filter treat it so; the program rule's
+threshold is listed among the configuration defects below and the protocol's wording among the
+questions. The rows are Partial: rule 45 is an eligibility rule, so the import's validation pass
+leaves it out when ineligible patients are requested, and under the default the import's eligibility
+filter, which reads the same bound of day 120, has removed the late admission before the pass runs;
+the rule acts where `validate()` runs on a dataset that keeps ineligible patients, the Validation
+Report's.
 
 ### G3 — Admission day of life and admission type
 
@@ -200,16 +219,23 @@ The admission type's three values fix the admission day of life: for an infant d
 hospital or admitted on the day of birth (types 1 and 2) it is 1, for one admitted the day after birth
 or later (type 3) it is at least 2 and must be recorded. At capture `NEOIPC_ADM_TYPE_1` assigns 1 for
 types 1 and 2, `NEOIPC_ADM_TYPE_2_PLUS` makes the field mandatory for type 3 and `NEOIPC_ADM_DOL_1`
-refuses a value below 2 for type 3. No post-hoc rule checks the admission day of life at all. The
-consequence is wider than the field: rules 27, 31, 35, 39 and 41 compute an event's expected day of
+refuses a value below 2 for type 3. Post hoc, rule 46 checks the day of life of a type-3 admission;
+the value the client assigns for the other two types is checked by nothing. The consequence of a
+missing value is wider than the field: rules 27, 31, 35, 39 and 41 compute an event's expected day of
 life from the admission form's value, and a missing value makes their comparison `NA`, which
 `filter()` drops, so those rules are silently disabled for every event of an enrolment whose admission
-form lacks the day of life.
+form lacks the day of life. The import's eligibility filter does not read a missing day of life as
+ineligible: it removes only a recorded day of life above 120, so an admission form without one reaches
+the validation pass under the default too, where rule 46 flags it on a type-3 admission and the pass
+removes the patient with a count in the validation summary, and where it stays in the dataset on a
+type 1 or 2 admission.
 
 Proposal: for types 1 and 2 a reconciliation that sets a missing or different day of life to 1, the
 value the client assigns on every save and the team never chooses; for type 3 an enrolment-level rule
 on the admission form flagging a missing day of life or one below 2. Who acts: the network for the
-assigned value, the partner for the recorded one. Not decided.
+assigned value, the partner for the recorded one. Decided: rule 46 flags an admission of type 3 whose
+day of life is missing or below 2; setting the day of life of an inborn or day-of-birth admission to 1
+is a network-side reconciliation, not yet implemented.
 
 ### G4 — A readmission recorded with the wrong admission type
 
@@ -217,12 +243,13 @@ assigned value, the partner for the recorded one. Not decided.
 
 A readmission after a longer absence is recorded as a new admission with the admission type for a
 transfer or readmission after the day of birth (type 3). Every enrolment that has an earlier
-enrolment of the same patient is by definition such a readmission, yet nothing compares an
+enrolment of the same patient is by definition such a readmission, yet nothing at capture compares an
 enrolment's admission type with the patient's enrolment history: type 1 or 2 on a later enrolment is
-accepted at capture and post hoc.
+accepted, and only rule 47 questions it post hoc.
 
 Proposal: an enrolment-level rule flagging an enrolment with admission type 1 or 2 when the same
-patient has an earlier enrolment. Who acts: the partner. Not decided.
+patient has an earlier enrolment. Who acts: the partner. Decided: rule 47, naming the latest earlier
+enrolment's date; two enrolments on one day are rule 17's overlap, not a readmission.
 
 ### G5 — A short absence split into two enrolments
 
@@ -241,7 +268,7 @@ Proposal: an enrolment-level plausibility rule flagging an enrolment that starts
 after the same patient's previous surveillance end, exemptible like rules 43 and 44 since dates
 cannot resolve 48 hours exactly. Whether the dictionary should split the merged value or the
 collection section quote it is a question for the protocol authority. Who acts: the partner, who merges the two enrolments or
-confirms the absence through an exception. Not decided.
+confirms the absence through an exception. Decided: documented only.
 
 ### G6 — Records after death
 
@@ -249,17 +276,21 @@ confirms the absence through an exception. Not decided.
 
 The surveillance period ends when the infant dies, and SSI follow-up ends early on death; a procedure
 on a deceased patient is excluded. The surveillance-end reason is compulsory and bounded to
-discharge/transfer or death, but no post-hoc rule reads it. Rule 15 flags a procedure dated after its
-enrolment's surveillance-end date, which for a death-ended enrolment is the death date, but not one
-dated on the death day, and no rule relates a death-ended enrolment to the patient's other enrolments
-or events: a later enrolment of a patient whose earlier enrolment ended in death, or any event dated
-after that death, passes.
+discharge/transfer or death, and post hoc only rule 48 reads it. Rule 15 flags a procedure dated after
+its enrolment's surveillance-end date, which for a death-ended enrolment is the death date, but not one
+dated on the death day; rule 48 relates a death-ended enrolment to the patient's other enrolments, and
+an event dated after the death is caught through its enrolment rather than on its own.
 
 Proposal: a patient-level rule flagging, for a patient with an enrolment whose surveillance-end reason
 is death, every other enrolment dated on or after that end date and every event of any type dated
 after it. A procedure dated on the death day itself is indistinguishable from a post-mortem one and
 stays a judgement. Who acts: the partner; either the death date or the later record is wrong, and both
-are on their forms. Not decided.
+are on their forms. Decided: rule 48 flags an enrolment dated on or after the earliest death recorded
+for the patient. An event dated after the death reaches the report through its enrolment: rules 12 to
+15 for the death enrolment's own sepsis, NEC, pneumonia and procedure forms, rule 17 for another
+enrolment whose surveillance reaches past the death, and rule 25 or 43 for one without a
+surveillance-end form. An SSI dated after the death is caught by no rule: it is deliberately outside
+the surveillance-end window, and rule 19 checks only its procedure's follow-up.
 
 ### G7 — The same infection type repeated within 14 days
 
@@ -267,14 +298,14 @@ are on their forms. Not decided.
 
 The same type of infection is registered again only after a minimum of 14 days and a symptom-free
 period, and a new pathogen isolated in the same organ system during a recorded infection is not a new
-infection. The four infection stages are repeatable with no interval, and no program rule or post-hoc
-rule looks at the distance between two events of the same type for one patient. Rules 12 to 15
-compare an event with its enrolment, rule 17 compares enrolments, rule 19 an SSI with procedures; none
-compares two infection events.
+infection. The four infection stages are repeatable with no interval, and no program rule looks at the
+distance between two events of the same type for one patient; post hoc, rule 49 does. Rules 12 to 15
+compare an event with its enrolment, rule 17 compares enrolments, rule 19 an SSI with procedures.
 
 Proposal: an event-level rule flagging, per patient and event type across all of the patient's
 enrolments, the later of two consecutive events of the same type fewer than 14 days apart. The
-symptom-free period is a judgement and stays unchecked. Who acts: the partner. Not decided.
+symptom-free period is a judgement and stays unchecked. Who acts: the partner. Decided: rule 49,
+across the patient's enrolments, with the later event of each pair as the finding.
 
 ### G8 — Device association without device days
 
@@ -291,34 +322,43 @@ re-derived. Its necessary consequence can: a CVC-associated BSI on an enrolment 
 zero, or an INV-associated pneumonia on an enrolment without a day of invasive ventilation, is a
 visible contradiction. No program rule variable reads the surveillance-end stage (the admission stage
 is read that way, so it is possible), and one that did would see only a count entered before the
-infection form was last saved, so the check belongs post hoc; no post-hoc rule joins an infection
-form to the surveillance-end form.
+infection form was last saved, so the check belongs post hoc, where rule 50 joins the infection form
+to the surveillance-end form.
 
 Proposal: an event-level rule on the sepsis and pneumonia forms flagging an association whose device
 has zero or missing days on the enrolment's surveillance-end form. Whether the bound should be the
 protocol's three days (four for a ventilated pneumonia) rather than one is for the protocol authority:
-a device placed before a transfer contributes days this enrolment does not count, and a day with fewer
-than twelve hours of device use is not a device day, so the higher bound can flag legitimate records.
+a device placed before a transfer contributes days this enrolment does not count, and a day below the
+hour threshold (at least twelve hours for a catheter, more than twelve for ventilation) is not a
+device day, so the higher bound can flag legitimate records.
 The rule skips an enrolment without a completed surveillance-end form. Who acts: the partner; the
-association and the day counts are both on their forms. Not decided.
+association and the day counts are both on their forms. Decided: rule 50, with the bound at one day —
+an association whose device has zero or no days on the enrolment's completed surveillance-end form;
+the higher bound waits on the protocol authority's answer. The protocol's instruction to record a
+pneumonia under intermittent use of both ventilation modes as INV-associated stays as written:
+ventilation of either kind raises the infection risk, so the assignment is sound, and a pneumonia so
+assigned on a stay without an INV day is not expected in practice; where it occurs, the rule's
+finding stands, since one infection per zero device-days is a contradiction in the record.
 
 ### G9 — A cumulative day count exceeding the patient days
 
-`dd-patient-days`, `dd-antibiotic-days-total`, `sec-analysis-device-utilization`,
-`sec-analysis-antibiotic-use`, `sec-analysis-protective-factor-implementation`, `abbr-inv`, `abbr-niv`.
+`dd-patient-days`, `dd-antibiotic-days-total`, `dd-inv-day`, `dd-niv-day`, `dd-inv-days`, `dd-niv-days`,
+`sec-analysis-device-utilization`, `sec-analysis-antibiotic-use`,
+`sec-analysis-protective-factor-implementation`, `abbr-inv`, `abbr-niv`.
 
 Every cumulative count on the surveillance-end form (CVC, PVC, INV, NIV, human milk, kangaroo care,
 probiotic and antibiotic days) is a count of patient days and cannot exceed the patient days. Nine
 program rules (`NEOIPC_SURV_END_*_DAYS_VR`) refuse exactly that at entry, with an error action, and
-one of them also refuses a sum of INV and NIV days above the patient days; that bound is the
-configuration's, not the protocol's, since the dictionary counts a day with twelve hours of each
-support as both an INV day and an NIV day. Rule 18 pins the patient days to the enrolment's dates but
-no post-hoc rule compares another count with them, so an API import can carry a count above the
-patient days into every rate.
+one of them also refuses a sum of INV and NIV days above the patient days, the bound the protocol
+intends — a ventilation day counts as either invasive or non-invasive, and the dictionary defines an
+INV day and an NIV day as more than twelve hours of the respective support so that no day counts as
+both. Rule 18 pins the patient days to the enrolment's dates, and rule 51 compares every other count
+with them post hoc, where an API import can carry a count above the patient days.
 
 Proposal: an enrolment-level rule on the surveillance-end form flagging each count that exceeds the
-patient days; the sum of INV and NIV days only if the protocol authority confirms the bound. Who acts: the partner; opening the form re-runs
-the error rules, so the fix is forced on the next save. Not decided.
+patient days, the sum of INV and NIV days included. Who acts: the partner; opening the form re-runs
+the error rules, so the fix is forced on the next save. Decided: rule 51, one finding per count that
+exceeds the patient days, the sum of INV and NIV days among the counts.
 
 ### G10 — The antibiotic substance slots
 
@@ -330,13 +370,16 @@ are recorded without a substance. Rule 21 flags only the shortfall (the substanc
 than the antibiotic days) on forms with antibiotic days, and the capture-time rules only hide, require
 and sum the slots. A substance with no days, days with no substance, the same substance in two slots,
 a substance whose days exceed the antibiotic days or the patient days, and a substance on a form with
-zero antibiotic days are all invisible post hoc. All of them are on the form: a substance recorded on
+zero antibiotic days are rules 52 to 54's findings post hoc. All of them are on the form: a substance recorded on
 a form whose total antibiotic days are zero sits in a slot the rules hide, but a field that holds a
 value is never hidden, so the team sees it, read-only while the event is completed, and the client
 blanks it on the next edit.
 
 Proposal: extend rule 21, or add a sibling on the `substanceDays` rows, to flag each of those shapes
-with the slot's index, substance and days as context. Who acts: the partner. Not decided.
+with the slot's index, substance and days as context. Who acts: the partner. Decided: three sibling
+rules on the `substanceDays` rows — 52 for a substance without its days or days without a substance,
+53 for days above the antibiotic or patient days, a substance on a form with zero antibiotic days
+among them, and 54 for a substance in two slots.
 
 ### G11 — A compulsory value missing from a completed form
 
@@ -357,7 +400,7 @@ Proposal: one event-level completeness rule flagging a completed form that lacks
 marks compulsory, with the form and field as context. The rule needs the compulsory flags in the
 dataset, which the import does not carry today, or a list fixed in the package that the metadata
 tests keep aligned. Who acts: the partner; the form refuses to save without the value once it is
-opened. Not decided.
+opened. Decided: documented only, until the import carries the compulsory flags of the data elements.
 
 ### G12 — Secondary bloodstream infection consistency
 
@@ -365,11 +408,11 @@ opened. Not decided.
 
 Secondary-BSI organisms are recorded only when the secondary-BSI item is Yes, and then at least one;
 at least one of them matches an organism identified at the primary infection site. The first is
-enforced by hide and mandatory-field program rules only; the dataset holds both sides
-(`infectiousAgentFindings$secondary_bsi` against the form's `sec_bsi`) and nothing compares them. The
-second is enforced nowhere: the primary and secondary findings of a pneumonia or an SSI sit on the
-same event and no rule relates them. NEC records no primary-site organisms, so the match cannot be
-assessed there. The shapes of the first differ in who can see them. On an SSI the organisms recorded
+enforced at capture by hide and mandatory-field program rules only; the dataset holds both sides
+(`infectiousAgentFindings$secondary_bsi` against the form's `sec_bsi`), which rule 55 compares post
+hoc. The second is enforced at capture nowhere and post hoc by no rule yet; a pneumonia's or an SSI's
+primary and secondary findings sit on the same event, while NEC records no primary-site organisms, so
+the match could not be assessed there. The shapes of the first differ in who can see them. On an SSI the organisms recorded
 while the item is No or No follow-up sit in a section the rule hides together with its fields, so
 they are invisible while the event is completed and removed by the client on the next edit. On a
 pneumonia or a NEC the same organisms sit in hidden fields, which the form still shows while they
@@ -382,7 +425,19 @@ event is next edited), an event-level rule flagging the same shape on a pneumoni
 without an organism on any of the three, and a second rule flagging a pneumonia or SSI whose secondary
 findings share no organism with its primary findings. The match compares catalogue keys; a
 genus-level entry against a species-level one does not match, which is a limit to state on the rule.
-Who acts: the network for the SSI's hidden organisms, the partner for the rest. Not decided.
+Who acts: the network for the SSI's hidden organisms, the partner for the rest. Decided: the SSI's
+organisms under an item that is not Yes are a network-side reconciliation, not yet implemented; rule
+55 flags Yes without an organism on any of the three forms and organisms under another answer on a
+pneumonia or NEC form; the match of the secondary findings against the primary findings waits on the
+pathogen migration. The package's pathogen tables are built from the legacy catalogue, while the
+option codes the forms store are the canonical catalogue's, and the two disagree on which concept
+some codes name: *Raoultella* is a concept of its own in the package and a synonym of *Klebsiella* in
+the catalogue, and *Candida fabianii* resolves in the package to a second *Cyberlindnera fabianii*
+concept the catalogue does not carry, where the catalogue files it as a synonym of its own. A
+comparison through the package's tables would therefore report a mismatch between an organism and
+itself. The rule follows the pathogen migration, the same dependency G16 waits on: the package
+reading its pathogen tables from `NeoIPC-Infectious-Agents.yaml`, with production carrying the
+canonical metadata.
 
 ### G13 — A revision procedure ends the earlier follow-up
 
@@ -397,7 +452,7 @@ although its follow-up ended at the revision and the revision's own thirty days 
 Proposal: extend rule 19 so that a procedure's window ends the day before the patient's next
 procedure flagged as a revision. "In the same area" is not recorded; the extension assumes a revision
 revises the most recent earlier procedure and says so. Who acts: the partner, who corrects the
-procedure's revision flag or the SSI. Not decided.
+procedure's revision flag or the SSI. Decided: documented only.
 
 ### G14 — Infection present at the time of surgery without recorded signs
 
@@ -444,7 +499,8 @@ Proposal: the reconciliation of the residue shapes first; then five event-level 
 client's definition checks, one per stage, so that a form whose recorded findings meet no definition
 of its type is a finding. The alternative is to leave the definitions to capture time and record that
 an API import is not held to them. Who acts: the network for the residue, the partner for what
-remains. Not decided.
+remains. Decided: the residue shapes are a network-side reconciliation, not yet implemented; once it
+runs, the five definition mirrors become partner-facing rules.
 
 ### G16 — Resistance categories that do not apply to the organism
 
@@ -469,7 +525,8 @@ legacy pathogen CSVs, the canonical source is
 `metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml`, the two disagree for some organisms
 (the *Raoultella* species, several *Salmonella* serovars and *Staphylococcus argenteus* among them),
 and the package does not read the applicability from the YAML through
-its pathogen taxonomy, which the reconciliation needs. Who acts: the network.
+its pathogen taxonomy, which the reconciliation needs. Who acts: the network. Decided: a network-side
+reconciliation, once the pathogen migration lands.
 
 ### G17 — Gestational age text and total days
 
@@ -484,7 +541,8 @@ Proposal: a patient-level rule flagging a gestational age that does not match th
 (`^[2-4][0-9][+][0-6]$`) for the partner, and a reconciliation recomputing the total days from the text
 whenever the two differ or the total is missing: the total is displayed, but the client overwrites it
 from the text on every save, so a disagreement is the client's, not the team's. Who acts: the partner
-for the text, the network for the total. Not decided.
+for the text, the network for the total. Decided: a network-side reconciliation that recomputes the
+total from the text, not yet implemented.
 
 ### G18 — Number of infants at birth below two
 
@@ -492,10 +550,17 @@ for the text, the network for the total. Not decided.
 
 The number of infants at birth is recorded for a multiple birth and is then at least two. The field is
 mandatory when the multiple-birth flag is set and hidden otherwise, but its type admits 1 and nothing
-rejects it. The dataset carries `patients$siblings` but not the multiple-birth flag.
+rejects it. The dataset carries both as `patients$multiple_birth` and `patients$siblings`.
 
 Proposal: a patient-level rule flagging a recorded number below two; a small rule, or a case of a
-patient-consistency rule if G3 and G17 are taken together. Who acts: the partner. Not decided.
+patient-consistency rule if G3 and G17 are taken together. Who acts: the partner. Decided: rule 56
+flags a patient recorded as part of a multiple birth whose number of infants is below two; a patient
+not so recorded is left alone whatever the number says, since a 1 is the correct value for a
+singleton. A multiple birth recorded without a number is not flagged post hoc; only the mandatory
+field enforces its presence at capture, which is why the row is partial. The import's validation
+pass reads the flag and the number whatever patient columns the caller selects, and narrows the
+patients back to the selection afterwards, so only a full-tier dataset whose `patient_columns` is
+empty or names them keeps the two; a later `validate()` on a dataset without them skips rule 56.
 
 ### G19 — A substance code outside the catalogue
 
@@ -509,7 +574,7 @@ the analogue: it flags the explicit "not listed" organism entry, which the partn
 
 Proposal: a detection of a `substanceDays` row whose code is absent from the imported option set,
 reported to the network without repair. Who acts: the network; such a code is a catalogue or migration
-problem, not a data-entry one. Not decided.
+problem, not a data-entry one. Decided: documented only.
 
 ### G20 — A procedure code that maps to no category
 
@@ -612,6 +677,11 @@ changed here; the protocol is normative and a conflict between it and the code i
 - **The SSI follow-up overview** states 30 or 90 days by implant alone (`sec-collect`,
   `sec-collect-surgical-procedure-data-collection`), while the definitions restrict the 90 days to deep
   incisional and organ/space infections; rule 19 follows the definitions.
+- **Rule 50's bound** flags a device association only when the enrolment counts zero days of that
+  device, not fewer than three (four for a ventilated pneumonia): a device placed before a transfer
+  contributes days the enrolment does not count, and a day below the hour threshold is not a device
+  day, so the protocol's bound could flag legitimate records. Whether the higher bound is intended
+  for a stay's cumulative count is open (G8).
 - **Device association** is counted cumulatively in the example table ("≥ 3 CVC days on the day of
   infection", `tbl-infection-device-relationship`) and as consecutive days in the data dictionary
   (`dd-cvc-associated-bsi` and its siblings); the readings diverge when a device is removed and
@@ -631,9 +701,6 @@ changed here; the protocol is normative and a conflict between it and the code i
   infant admitted to the unit after a stay elsewhere in the hospital, and rules 3 and 18 hold the
   admission date and the patient days to the enrolment date. The dictionary also leaves open whether
   the days of a short absence of up to two days count as patient days; rule 18 counts them.
-- **The sum of INV and NIV days** is held to the patient days by `NEOIPC_SURV_END_NIV_INV_DAYS_VR`, a
-  bound the protocol does not state: under the dictionary a day with twelve hours of each support is
-  both an INV day and an NIV day (G9).
 - **The surveillance-end reason** that `sec-collect-progress-chart` names for a long absence,
   "transfer", is not a distinct value in the protocol's own dictionary, which offers "Discharge or
   transfer" and "Death", nor in the option set that mirrors it; the collection section should quote
@@ -713,7 +780,7 @@ publications. None constrains a record; none is checkable.
 | `sec-collect` | A recorded infection is one of bloodstream infection, pneumonia, necrotizing enterocolitis or surgical site infection. | Capture time | — | `NEOIPC_STG_BSI`, `NEOIPC_STG_HAP`, `NEOIPC_STG_NEC`, `NEOIPC_STG_SSI` |  |
 | `sec-collect` | Only infections of the listed types that were acquired in a participating neonatology department are recorded. | Partial | 12, 13, 14, 29, 30, 33, 34, 37, 38 | `NEOIPC_BSI_LOS_LESS_THAN_2`, `NEOIPC_HAP_LOS_LESS_THAN_2`, `NEOIPC_NEC_LOS_LESS_THAN_2` | G24 |
 | `sec-collect` | Every eligible infant is observed until the end of its surveillance period. | Partial | 43, 44 | — | G24 |
-| `sec-collect` | The surveillance period ends when the infant dies, is transferred, or is discharged from the hospital (the end is recorded on a surveillance-end form whose reason is one of those; an end never recorded is visible only as an enrolment left open). | Partial | 25, 43, 44 | `NEOIPC_SURVEILLANCE_END_REASON` compulsory, option set `NEOIPC_SURVEILLANCE_END_REASON` | G6, G24 |
+| `sec-collect` | The surveillance period ends when the infant dies, is transferred, or is discharged from the hospital (the end is recorded on a surveillance-end form whose reason is one of those; an end never recorded is visible only as an enrolment left open). | Partial | 25, 43, 44, 48 | `NEOIPC_SURVEILLANCE_END_REASON` compulsory, option set `NEOIPC_SURVEILLANCE_END_REASON` | G6, G24 |
 | `sec-collect` | A patient with a surgical procedure is followed up for SSI for 30 days, or 90 days when an implant is present (rule 19 follows the definitions, which grant the 90 days to deep incisional and organ/space infections only; see the questions below). | Covered | 19 | — |  |
 
 ### 3.1 Case Eligibility Criteria for the Core Module (`sec-collect-case-eligibility-criteria-core`)
@@ -723,11 +790,11 @@ publications. None constrains a record; none is checkable.
 | `sec-collect-case-eligibility-criteria-core` | An eligible infant is live born. | Not checkable | — | — |  |
 | `sec-collect-case-eligibility-criteria-core` | An infant qualifies on birth weight when the birth weight is less than 1500 grams. | Capture time | — | `NEOIPC_PATIENT_BW_1500_GRAMS_AND_GA_32_PLUS_WEEKS`, `NEOIPC_PATIENT_BW_MANDATORY_IF_GA_MISSING_REGULAR`, `NEOIPC_PATIENT_GA_MANDATORY_IF_BW_MISSING_REGULAR`, `NEOIPC_PATIENT_BW_AND_GA_MANDATORY_NEODECO` | G1 |
 | `sec-collect-case-eligibility-criteria-core` | An infant qualifies on gestational age when the gestational age is less than 32 weeks, i.e. at most 31 weeks 6 days. | Capture time | — | `NEOIPC_PATIENT_BW_1500_GRAMS_AND_GA_32_PLUS_WEEKS`, `NEOIPC_PATIENT_GA_FORMAT_VR`, `NEOIPC_PATIENT_SET_TOTAL_GESTATION_DAYS` | G1 |
-| `sec-collect-case-eligibility-criteria-core` | An eligible infant is admitted to a ward of the neonatal department within 120 days of birth. | Not covered | — | `NEOIPC_ADM_DOL_VAL_150_PLUS` (warning only), `NEOIPC_ADM_TYPE_1`, `NEOIPC_ADM_TYPE_2_PLUS` | G2 |
-| `sec-collect-case-eligibility-criteria-core` | *(derived)* The "within 120 days of birth" window is operationalized by the examples table as admission on day of life at most 120, the day of birth being day 1; a literal reading would admit day 121. | Not covered | — | `NEOIPC_ADM_DOL_VAL_150_PLUS` (warning only), `NEOIPC_ADM_DOL_1` | G2 |
+| `sec-collect-case-eligibility-criteria-core` | An eligible infant is admitted to a ward of the neonatal department within 120 days of birth. | Partial | 45 | `NEOIPC_ADM_DOL_VAL_150_PLUS` (warning only), `NEOIPC_ADM_TYPE_1`, `NEOIPC_ADM_TYPE_2_PLUS` | G2 |
+| `sec-collect-case-eligibility-criteria-core` | *(derived)* The "within 120 days of birth" window is operationalized by the examples table as admission on day of life at most 120, the day of birth being day 1; a literal reading would admit day 121. | Partial | 45 | `NEOIPC_ADM_DOL_VAL_150_PLUS` (warning only), `NEOIPC_ADM_DOL_1` | G2 |
 | `tbl-eligibility-examples` | *(derived)* Birth weight below 1500 g and gestational age below 32 weeks are alternative criteria, so an infant meeting only one of them is eligible. | Capture time | — | `NEOIPC_PATIENT_BW_1500_GRAMS_AND_GA_32_PLUS_WEEKS` | G1 |
 | `tbl-eligibility-examples` | *(derived)* 1499 g qualifies and 1500 g does not; 31+6 qualifies and 32+0 does not. | Capture time | — | `NEOIPC_PATIENT_BW_1500_GRAMS_AND_GA_32_PLUS_WEEKS` | G1 |
-| `tbl-eligibility-examples` | *(derived)* Admission on day of life 120 is eligible and day 121 is not. | Not covered | — | `NEOIPC_ADM_DOL_VAL_150_PLUS` (warning only, at 150) | G2 |
+| `tbl-eligibility-examples` | *(derived)* Admission on day of life 120 is eligible and day 121 is not. | Partial | 45 | `NEOIPC_ADM_DOL_VAL_150_PLUS` (warning only, at 150) | G2 |
 
 ### 3.2 Patient Data Collection (`sec-collect-patient-data-collection`)
 
@@ -757,7 +824,7 @@ publications. None constrains a record; none is checkable.
 |---|---|---|---|---|---|
 | `sec-collect-master-data-collection-sheet` | Each admission or readmission of an eligible patient to the neonatology department results in an enrolment. | Partial | 1 | program `NEOIPC_CORE` onlyEnrollOnce=false | G24 |
 | `sec-collect-master-data-collection-sheet` | An enrolled patient has admission information entered and follow-up data collected on patient progress charts. | Partial | 5, 26 | `NEOIPC_STG_ADM` autoGenerateEvent, openAfterEnrollment; `NEOIPC_ADMISSION_TYPE` compulsory; `NEOIPC_ADM_TYPE_2_PLUS` | G11 |
-| `sec-collect-master-data-collection-sheet` | Follow-up is ended when the patient is discharged, transferred to another hospital or dies. | Partial | 43, 44 | — | G24 |
+| `sec-collect-master-data-collection-sheet` | Follow-up is ended when the patient is discharged, transferred to another hospital or dies. | Partial | 43, 44, 48 | — | G24 |
 | `sec-collect-master-data-collection-sheet` | The surveillance-end data on the master data sheet or in the online system equals the totals of the patient progress chart (the chart is not submitted; rules 18 and 21 check the entered totals against the dates and each other, not against the chart). | Not checkable | — | `NEOIPC_SURV_END_*_DAYS_VR`, `NEOIPC_SURV_END_AB_SUBST_DAYS_VR` |  |
 | `sec-collect-master-data-collection-sheet` | When data is submitted to NeoIPC, all information collected on the master data collection sheet is entered into the online data entry system. | Not checkable | — | — |  |
 
@@ -765,7 +832,7 @@ publications. None constrains a record; none is checkable.
 
 | Anchor | Constraint | Enforcement | Rules | Capture-time | Gap |
 |---|---|---|---|---|---|
-| `sec-collect-progress-chart` | An enrolled eligible patient is followed up with patient progress charts until death, transfer or discharge. | Partial | 43, 44 | — | G24 |
+| `sec-collect-progress-chart` | An enrolled eligible patient is followed up with patient progress charts until death, transfer or discharge. | Partial | 43, 44, 48 | — | G24 |
 | `sec-collect-progress-chart` | Patient days, device days and antibiotic days are recorded in the progress chart, on a daily basis where possible. | Partial | 18 | the nine `NEOIPC_SURVEILLANCE_END_*_DAYS` counts compulsory | G11 |
 | `sec-collect-progress-chart` | The patient progress chart is kept at the facility. | Not checkable | — | — |  |
 | `sec-collect-progress-chart` | A patient progress chart exists for every eligible infant throughout the surveillance period. | Not checkable | — | — |  |
@@ -775,7 +842,7 @@ publications. None constrains a record; none is checkable.
 | `sec-collect-progress-chart` | A patient who leaves the department for up to two days (e.g. for surgery) is not treated as transferred or discharged. | Partial | 17 | — | G5 |
 | `sec-collect-progress-chart` | The data for days spent outside the department during a short absence is recorded when the patient returns. | Not checkable | — | — |  |
 | `sec-collect-progress-chart` | When more than 48 hours pass between transfer and re-admission, data collection ends with "transfer" as the surveillance-end reason. | Not covered | — | option set `NEOIPC_SURVEILLANCE_END_REASON` (no distinct transfer value) | G5 |
-| `sec-collect-progress-chart` | A readmission after a more-than-48-hour absence is recorded as a new admission with admission type "transferred to your centre ≥ 24h postnatal". | Not covered | — | `NEOIPC_ADMISSION_TYPE` compulsory, `NEOIPC_ADM_DOL_1` | G4 |
+| `sec-collect-progress-chart` | A readmission after a more-than-48-hour absence is recorded as a new admission with admission type "transferred to your centre ≥ 24h postnatal". | Covered | 47 | `NEOIPC_ADMISSION_TYPE` compulsory, `NEOIPC_ADM_DOL_1` | G4 |
 
 ### 3.3 Surgical Procedure Data Collection (`sec-collect-surgical-procedure-data-collection`)
 
@@ -795,8 +862,8 @@ publications. None constrains a record; none is checkable.
 | `sec-collect-infection-data-collection` | For a transferred or readmitted patient a sepsis, pneumonia or NEC is nosocomial only when the day of symptom onset is on or after day 3 of the hospital stay (an SSI is attributed to its procedure's follow-up window by rule 19, which may span a readmission). | Covered | 30, 34, 38 | `NEOIPC_BSI_LOS_LESS_THAN_2`, `NEOIPC_HAP_LOS_LESS_THAN_2`, `NEOIPC_NEC_LOS_LESS_THAN_2` |  |
 | `sec-collect-infection-data-collection` | The day of admission counts as day 1 of the hospital stay. | Covered | 28, 32, 36, 40, 42, 30, 34, 38 | `NEOIPC_ADM_SET_LOS`, `NEOIPC_BSI_SET_LOS`, `NEOIPC_HAP_SET_LOS`, `NEOIPC_NEC_SET_LOS`, `NEOIPC_SURGERY_SET_LOS`, `NEOIPC_SSI_SET_LOS` |  |
 | `sec-collect-infection-data-collection` | *(derived)* The elements of an infection definition occur within a 7–10 day timeframe with no more than 2–3 days between elements. | Not checkable | — | — |  |
-| `sec-collect-infection-data-collection` | A new pathogen isolated in the same organ system while a recorded infection is present is not recorded as a new infection. | Not covered | — | — | G7 |
-| `sec-collect-infection-data-collection` | The same type of infection is registered again only after a minimum of 14 days and a period without relevant symptoms of infection. | Not covered | — | the four infection stages are repeatable without an interval | G7 |
+| `sec-collect-infection-data-collection` | A new pathogen isolated in the same organ system while a recorded infection is present is not recorded as a new infection. | Partial | 49 | — | G7 |
+| `sec-collect-infection-data-collection` | The same type of infection is registered again only after a minimum of 14 days and a period without relevant symptoms of infection. | Partial | 49 | the four infection stages are repeatable without an interval | G7 |
 
 ### 3.4.1 to 3.4.4 Primary Sepsis/BSI, NEC, Pneumonia, SSI (`sec-collect-primary-sepsis-bsi`, `sec-collect-necrotizing-enterocolitis`, `sec-collect-pneumonia`, `sec-collect-surgical-site-infections`)
 
@@ -813,13 +880,13 @@ publications. None constrains a record; none is checkable.
 |---|---|---|---|---|---|
 | `sec-collect-device-associated-infection` | *(derived)* Infections following intravenous therapy or mechanical ventilation are recorded as device-associated with the vascular catheter or intubation. | Not checkable | — | `NEOIPC_BSI_DEV_ASS` compulsory, `NEOIPC_HAP_DEVICE_ASSOCIATION` compulsory |  |
 | `sec-collect-device-associated-infection` | A recorded device association is one of invasive ventilation (INV), non-invasive ventilation (NIV), central venous catheter (CVC) or peripheral venous catheter (PVC). | Capture time | — | option sets `NEOIPC_BSI_DEVICE_ASS`, `NEOIPC_HAP_DEVICE_ASS` |  |
-| `sec-collect-device-associated-infection` | Device association is purely time-based: an infection is device-associated only when the device was in use for the defined period before the infection. | Not checkable | — | — |  |
+| `sec-collect-device-associated-infection` | Device association is purely time-based: an infection is device-associated only when the device was in use for the defined period before the infection. | Partial | 50 | — | G8 |
 | `sec-collect-device-associated-infection` | A bloodstream infection meeting both PVC and CVC association criteria is recorded as CVC-associated. | Not checkable | — | — |  |
 | `sec-collect-device-associated-infection` | A pneumonia during intermittent use of both invasive and non-invasive ventilation is recorded as INV-associated. | Not checkable | — | — |  |
 | `tbl-infection-device-relationship` | *(derived)* The example table counts device days cumulatively ("≥ 3 CVC days on the day of infection") whereas the data dictionary requires three consecutive days on the day of infection or the day before; the readings diverge when a device is removed and re-inserted. | Not checkable | — | — |  |
-| `tbl-infection-device-relationship` | An infection is device-associated when the device is in place on the day of infection with at least 3 device days accumulated on that day, and not when fewer than 3 device days have accumulated. | Not covered | — | — | G8 |
-| `tbl-infection-device-relationship` | An infection is device-associated when no device is in place on the day of infection but at least 3 device days had accumulated on the day before infection. | Not covered | — | — | G8 |
-| `tbl-infection-device-relationship` | An infection is not device-associated when the device was in place neither on the day of infection nor on the day before. | Not covered | — | — | G8 |
+| `tbl-infection-device-relationship` | An infection is device-associated when the device is in place on the day of infection with at least 3 device days accumulated on that day, and not when fewer than 3 device days have accumulated. | Partial | 50 | — | G8 |
+| `tbl-infection-device-relationship` | An infection is device-associated when no device is in place on the day of infection but at least 3 device days had accumulated on the day before infection. | Partial | 50 | — | G8 |
+| `tbl-infection-device-relationship` | An infection is not device-associated when the device was in place neither on the day of infection nor on the day before. | Partial | 50 | — | G8 |
 
 ### 3.4.6 Secondary Bloodstream Infection (`sec-collect-secondary-bloodstream-infection`)
 
@@ -906,8 +973,8 @@ publications. None constrains a record; none is checkable.
 | `sec-def-pneumonia`, `dd-organisms-lower-rt`, `dd-organisms-upper-rt` | A fungal or bacterial pneumonia pathogen counts only when identified from secretions of the lower respiratory tract; a viral one from the upper or lower tract. | Interface only | — | `NEOIPC_HAP_LOW_RESP_TRACT_SAMPLE_POS_INFER_TRUE`, `NEOIPC_HAP_LOW_RESP_TRACT_SAMPLE_POS_INFER_FALSE`, `NEOIPC_HAP_SET_VIRUS`, `NEOIPC_HAP_VIRUS_DETECTED_OR_LOW_RESP_SAMPLE_POS` (assignments that feed the definition count; nothing refuses a bacterium recorded from an upper-tract sample), option set `NEOIPC_HAP_RESPIRATORY_TRACT_SAMPLE_SOURCES` | G15 |
 | `sec-def-pneumonia` | A viral pneumonia pathogen is identified by gene, antigen or antibody (the detection method is not recorded). | Not checkable | — | — |  |
 | `sec-def-pneumonia` | Interleukin counts as a pneumonia laboratory criterion only when the laboratory's specification for a pathological value is fulfilled. | Not checkable | — | — |  |
-| `sec-def-pneumonia` | A pneumonia recorded as device-associated occurs in a patient ventilated (invasively or non-invasively) for at least 4 calendar days, counting the day ventilation starts as day 1. | Not covered | — | `NEOIPC_HAP_DEVICE_ASSOCIATION` compulsory | G8 |
-| `sec-def-pneumonia` | The onset date of a device-associated pneumonia is no earlier than day 3 of ventilation. | Not covered | — | — | G8 |
+| `sec-def-pneumonia` | A pneumonia recorded as device-associated occurs in a patient ventilated (invasively or non-invasively) for at least 4 calendar days, counting the day ventilation starts as day 1. | Partial | 50 | `NEOIPC_HAP_DEVICE_ASSOCIATION` compulsory | G8 |
+| `sec-def-pneumonia` | The onset date of a device-associated pneumonia is no earlier than day 3 of ventilation. | Partial | 50 | — | G8 |
 | `def-pneumonia` | A pneumonia has at least one imaging finding showing new changes suggestive of pneumonia. | Capture time | — | `NEOIPC_HAP_DEFINITION_VR`, `NEOIPC_HAP_IMG_FINDINGS_CRIT_FULFILLED_TRUE`, `NEOIPC_HAP_IMG_FINDINGS_CRIT_FULFILLED_FALSE`, `NEOIPC_HAP_IMAGING_FINDINGS` compulsory | G15 |
 | `def-pneumonia` | A pneumonia imaging finding is obtained by X-ray, CT, MRI or ultrasound. | Not checkable | — | — |  |
 | `def-pneumonia` | A pneumonia has new initiation or escalation of respiratory support lasting at least 2 days, preceded by at least 2 days of stability or improvement. | Capture time | — | `NEOIPC_HAP_DEFINITION_VR`, `NEOIPC_HAP_RESP_SUPP_CRIT_FULFILLED_TRUE`, `NEOIPC_HAP_RESP_SUPP_CRIT_FULFILLED_FALSE`, `NEOIPC_HAP_RESPIRATORY_SUPPORT` compulsory | G15 |
@@ -932,7 +999,7 @@ publications. None constrains a record; none is checkable.
 | `sec-def-surgical-site-infection` | A surgical procedure record carries at most two further ICHI codes beyond the main procedure, and only for complex interventions that one main procedure cannot adequately describe (the cap is structural; the complexity condition is a judgement and not checkable). | Capture time | — | two side-code data elements exist |  |
 | `sec-def-surgical-site-infection`, `dd-ssi-type` | The reported SSI type (superficial incisional, deep incisional or organ/space) is the deepest tissue level at which SSI criteria are met during the surveillance period, so no finding of a deeper level is recorded beside a shallower type. | Interface only | — | `NEOIPC_SSI_INFECTION_TYPE_SUPERFICIAL`, `NEOIPC_SSI_INFECTION_TYPE_DEEP`, `NEOIPC_SSI_INFECTION_TYPE_ORGAN_SPACE`, `NEOIPC_SSI_NO_INFECTION_TYPE` | G15 |
 | `sec-def-surgical-site-infection` | *(derived)* When an SSI deepens during the surveillance period, its recorded infection day is the day the deepest-level criteria are met. | Not checkable | — | — |  |
-| `sec-def-surgical-site-infection` | A surgical procedure on a deceased patient (e.g. post-mortem organ-donation surgery) is excluded from SSI surveillance. | Partial | 15 | — | G6 |
+| `sec-def-surgical-site-infection` | A surgical procedure on a deceased patient (e.g. post-mortem organ-donation surgery) is excluded from SSI surveillance. | Partial | 15, 48 | — | G6 |
 
 ### 4.4.1 to 4.4.3 Superficial Incisional, Deep Incisional and Organ/Space SSI (`sec-def-superficial-incisional-ssi`, `def-ssi-superficial`, `sec-def-deep-incisional-ssi`, `def-ssi-deep`, `sec-def-organ-space-ssi`, `def-ssi-organ-space`)
 
@@ -978,7 +1045,7 @@ publications. None constrains a record; none is checkable.
 | `dd-delivery-mode` | Delivery mode takes exactly one value from the enumerated list of delivery modes. | Capture time | — | option set `NEOIPC_DELIVERY_MODES`, mandatory |  |
 | `dd-multiple-birth` | Multiple birth is flagged when the infant is part of a multiple birth. | Not checkable | — | `NEOIPC_TEA_MULTIPLE_BIRTH` TRUE_ONLY |  |
 | `dd-number-of-infants-at-birth` | Number of infants at birth is the total number of infants delivered from the pregnancy, counting the infant being recorded. | Not checkable | — | `NEOIPC_TEA_SIBLINGS` INTEGER_POSITIVE, `NEOIPC_PATIENT_WARN_SIBLINGS_IN_BIRTH_7_PLUS` (warning only) |  |
-| `dd-number-of-infants-at-birth` | *(derived)* Number of infants at birth is recorded for a multiple birth and is then at least 2. | Not covered | — | `NEOIPC_PATIENT_MULTIPLE_BIRTH_IS_SET`, `NEOIPC_PATIENT_MULTIPLE_BIRTH_IS_NOT_SET` (presence only) | G18 |
+| `dd-number-of-infants-at-birth` | *(derived)* Number of infants at birth is recorded for a multiple birth and is then at least 2. | Partial | 56 | `NEOIPC_PATIENT_MULTIPLE_BIRTH_IS_SET`, `NEOIPC_PATIENT_MULTIPLE_BIRTH_IS_NOT_SET` (presence only) | G18 |
 
 ### 5.1.2 Admission Information (`sec-dd-admission-information`)
 
@@ -987,8 +1054,8 @@ publications. None constrains a record; none is checkable.
 | `dd-admission-date` | The admission form records the admission date as the day the patient is admitted to the hospital. | Partial | 3, 26 | DHIS2: the event date is required; `NEOIPC_ADM_DATE_MUST_MATCH_ENR_ADM_DATE` | G11 |
 | `dd-admission-date` | For an infant born in the hospital, the admission date equals the date of birth (no date of birth is collected; the checkable proxy is the admission day of life below). | Not checkable | — | `NEOIPC_ADM_TYPE_1` |  |
 | `dd-admission-type` | Admission type is one of: admitted from the delivery room (delivered in the hospital), transferred or readmitted on the day of birth, transferred or readmitted the day after birth or later. | Capture time | — | `NEOIPC_ADMISSION_TYPE` compulsory, option set `NEOIPC_ADMISSION_TYPES` | G3 |
-| `dd-admission-on-day-of-life` | For an infant not delivered in the hospital, the day of life on the day of admission is recorded; for an inborn infant it is not (the configuration records 1). | Capture time | — | `NEOIPC_ADM_TYPE_2_PLUS`, `NEOIPC_ADM_TYPE_1` | G3 |
-| `dd-admission-on-day-of-life` | Day of life counts from 1 on the day of birth, and each following calendar day starting at 00:00 is the next day of life, so admission on day of life is an integer of at least 1. | Capture time | — | `NEOIPC_ADMISSION_DOL` INTEGER_POSITIVE, `NEOIPC_ADM_DOL_1`, `NEOIPC_ADM_DOL_VAL_150_PLUS` (warning only) | G3 |
+| `dd-admission-on-day-of-life` | For an infant not delivered in the hospital, the day of life on the day of admission is recorded; for an inborn infant it is not (the configuration records 1). | Partial | 46 | `NEOIPC_ADM_TYPE_2_PLUS`, `NEOIPC_ADM_TYPE_1` | G3 |
+| `dd-admission-on-day-of-life` | Day of life counts from 1 on the day of birth, and each following calendar day starting at 00:00 is the next day of life, so admission on day of life is an integer of at least 1. | Partial | 46 | `NEOIPC_ADMISSION_DOL` INTEGER_POSITIVE, `NEOIPC_ADM_DOL_1`, `NEOIPC_ADM_DOL_VAL_150_PLUS` (warning only) | G3 |
 
 ### 5.1.3 Surveillance End (`sec-dd-surveillance-end`)
 
@@ -997,16 +1064,16 @@ publications. None constrains a record; none is checkable.
 | `dd-surveillance-end-date` | The surveillance end form records the surveillance end date as the day data collection and follow-up for the patient stopped. | Partial | 4, 12, 13, 14, 15, 18, 25, 43, 44 | DHIS2: the event date is required | G24 |
 | `dd-surveillance-end-reason` | Surveillance end reason is one of "Discharge or transfer" and "Death". | Capture time | — | `NEOIPC_SURVEILLANCE_END_REASON` compulsory, option set `NEOIPC_SURVEILLANCE_END_REASON` |  |
 | `dd-patient-days` | Patient days count every day of the stay in the department including both the day of admission and the day of discharge/transfer/death, with no minimum duration of stay. | Covered | 18 | `NEOIPC_SURV_END_PATIENT_DAYS_SET`, `NEOIPC_SURVEILLANCE_END_PATIENT_DAYS` compulsory |  |
-| `dd-patient-days` | *(derived)* Patient days is at least 1, at most the number of calendar days from admission date to surveillance end date inclusive, and no other cumulative day count exceeds it. | Partial | 18 | the nine `NEOIPC_SURV_END_*_DAYS_VR` rules | G9 |
-| `dd-cvc-days`, `dd-pvc-days`, `dd-inv-days`, `dd-niv-days` | CVC, PVC, INV and NIV days count each day on which the device was in place, or the ventilation given, for at least 12 hours. | Not checkable | — | the four counts compulsory; `NEOIPC_SURV_END_CVC_DAYS_VR`, `NEOIPC_SURV_END_PVC_DAYS_VR`, `NEOIPC_SURV_END_INV_DAYS_VR`, `NEOIPC_SURV_END_NIV_DAYS_VR`, `NEOIPC_SURV_END_NIV_INV_DAYS_VR` |  |
+| `dd-patient-days` | *(derived)* Patient days is at least 1, at most the number of calendar days from admission date to surveillance end date inclusive, and no other cumulative day count exceeds it. | Covered | 4, 18, 51 | the nine `NEOIPC_SURV_END_*_DAYS_VR` rules | G9 |
+| `dd-cvc-days`, `dd-pvc-days`, `dd-inv-days`, `dd-niv-days` | CVC and PVC days count each day on which the catheter was in place for at least 12 hours; INV and NIV days count each day on which the ventilation was given for more than 12 hours. | Not checkable | — | the four counts compulsory; `NEOIPC_SURV_END_CVC_DAYS_VR`, `NEOIPC_SURV_END_PVC_DAYS_VR`, `NEOIPC_SURV_END_INV_DAYS_VR`, `NEOIPC_SURV_END_NIV_DAYS_VR`, `NEOIPC_SURV_END_NIV_INV_DAYS_VR` |  |
 | `dd-human-milk-days` | Human milk days count each day on which enteral feeding consisted exclusively of own mother's or donor breast milk, with fortified breast milk counting as breast milk. | Not checkable | — | `NEOIPC_SURVEILLANCE_END_HUMAN_MILK_DAYS` compulsory, `NEOIPC_SURV_END_HUMAN_MILK_DAYS_VR` |  |
 | `dd-kangaroo-care-days` | Kangaroo care days count each day on which the patient received kangaroo care (intensive skin-to-skin contact) for at least 2 hours. | Not checkable | — | `NEOIPC_SURVEILLANCE_END_KANGAROO_CARE_DAYS` compulsory, `NEOIPC_SURV_END_KANGAROO_CARE_DAYS_VR` |  |
 | `dd-probiotic-days` | Probiotic days count each day on which the patient received, in any amount, an oral probiotic containing Lactobacillus spp. or Bifidobacterium spp. | Not checkable | — | `NEOIPC_SURVEILLANCE_END_PROBIOTIC_DAYS` compulsory, `NEOIPC_SURV_END_PROBIOTIC_DAYS_VR` |  |
 | `dd-antibiotic-days-total` | Total antibiotic days count each day of a systemic antibiotic course. | Not checkable | — | `NEOIPC_SURVEILLANCE_END_AB_DAYS` compulsory, `NEOIPC_SURV_END_AB_DAYS_VR`, `NEOIPC_SURV_END_AB_SUBST_01_REQUIRE` |  |
 | `dd-antibiotic-days-total`, `dd-antibiotic-days-per-substance` | An antibiotic course counts the day of the first dose, the day of the last dose and every day between them, dose-free days within the course included; days after the last dose are not counted whatever the drug level. | Not checkable | — | — |  |
 | `dd-antibiotic-days-total` | At most one antibiotic day is counted per calendar day, so a day with several antibiotics counts as one antibiotic day (no daily timeline is recorded; the checkable consequence, antibiotic days not exceeding patient days, is the row above and G9). | Not checkable | — | — |  |
-| `dd-antibiotic-days-per-substance` | Antibiotic days per substance count, for each recorded systemic antibiotic substance, the days on which the infant received that substance. | Capture time | — | `NEOIPC_SURV_END_AB_SUBST_0n_HIDE`, `NEOIPC_SURV_END_AB_SUBST_01_REQUIRE`, `NEOIPC_SURV_END_AB_SUBST_0n_DAYS_REQUIRE`, the generated substance option set | G10 |
-| `dd-antibiotic-days-per-substance` | *(derived)* No single substance's antibiotic days exceed the total antibiotic days, and the sum of per-substance days is at least the total antibiotic days. | Partial | 21 | `NEOIPC_SURV_END_AB_SUBST_DAYS_VR` (the floor only) | G10 |
+| `dd-antibiotic-days-per-substance` | Antibiotic days per substance count, for each recorded systemic antibiotic substance, the days on which the infant received that substance. | Partial | 52, 54 | `NEOIPC_SURV_END_AB_SUBST_0n_HIDE`, `NEOIPC_SURV_END_AB_SUBST_01_REQUIRE`, `NEOIPC_SURV_END_AB_SUBST_0n_DAYS_REQUIRE`, the generated substance option set | G10 |
+| `dd-antibiotic-days-per-substance` | *(derived)* No single substance's antibiotic days exceed the total antibiotic days, and the sum of per-substance days is at least the total antibiotic days. | Covered | 21, 53, 54 | `NEOIPC_SURV_END_AB_SUBST_DAYS_VR` (the floor only) | G10 |
 
 ### 5.2 Surgical Procedure (`sec-dd-surgical-procedure`)
 
@@ -1042,16 +1109,16 @@ publications. None constrains a record; none is checkable.
 | `sec-dd-general-infection-data` | Collecting secondary BSI data is optional, and a department not following patients for secondary BSI records No follow-up; Yes is recorded only when the patient developed a secondary sepsis meeting the definition. | Not checkable | — | option set `NEOIPC_YES_NO_NO_FOLLOWUP` |  |
 | `sec-dd-general-infection-data` | The secondary BSI field of an infection takes exactly one of Yes, No or No follow-up. | Capture time | — | `NEOIPC_NEC_SECONDARY_BSI`, `NEOIPC_HAP_SECONDARY_BSI`, `NEOIPC_SSI_SEC_BSI` compulsory, option set `NEOIPC_YES_NO_NO_FOLLOWUP` | G11 |
 | `dd-secondary-bloodstream-infection` | A secondary BSI is a BSI seeded from a site-specific infection at another body site (not a catheter) and is attributed to a NEC, pneumonia or SSI when it occurs within the 17-day period from 3 days before to 13 days after the day of that infection's first symptoms. | Not checkable | — | — |  |
-| `sec-dd-general-infection-data` | Secondary BSI organisms are recorded only when secondary BSI is Yes. | Interface only | — | `NEOIPC_HAP_SEC_BSI_VAL_NO_VAL_OR_0`, `NEOIPC_NEC_SEC_BSI_VAL_NO_VAL_OR_0`, `NEOIPC_SSI_NO_SEC_BSI`, `NEOIPC_HAP_SEC_BSI_VAL_1_PLUS`, `NEOIPC_NEC_SEC_BSI_VAL_1_PLUS`, `NEOIPC_SSI_HAS_SEC_BSI` | G12 |
+| `sec-dd-general-infection-data` | Secondary BSI organisms are recorded only when secondary BSI is Yes. | Partial | 55 | `NEOIPC_HAP_SEC_BSI_VAL_NO_VAL_OR_0`, `NEOIPC_NEC_SEC_BSI_VAL_NO_VAL_OR_0`, `NEOIPC_SSI_NO_SEC_BSI`, `NEOIPC_HAP_SEC_BSI_VAL_1_PLUS`, `NEOIPC_NEC_SEC_BSI_VAL_1_PLUS`, `NEOIPC_SSI_HAS_SEC_BSI` | G12 |
 
 ### 5.3.2 BSI Specific Data (`sec-dd-bsi-specific-data`)
 
 | Anchor | Constraint | Enforcement | Rules | Capture-time | Gap |
 |---|---|---|---|---|---|
 | `dd-cvc`, `dd-pvc` | A CVC is an intravascular catheter terminating at or close to the heart or in a great vessel; a PVC is a catheter placed into a peripheral vein that does not reach one of the great vessels. | Not checkable | — | — |  |
-| `dd-cvc-associated-bsi` | A primary BSI recorded as CVC-associated has the CVC in place for at least three consecutive days on the day of infection (first symptoms or first positive diagnostic test) or the day before. | Not covered | — | — | G8 |
+| `dd-cvc-associated-bsi` | A primary BSI recorded as CVC-associated has the CVC in place for at least three consecutive days on the day of infection (first symptoms or first positive diagnostic test) or the day before. | Partial | 50 | — | G8 |
 | `dd-cvc-day`, `dd-pvc-day` | A CVC-day or PVC-day is a day on which the patient had the catheter in place for at least 12 hours cumulatively. | Not checkable | — | — |  |
-| `dd-pvc-associated-bsi` | A primary BSI recorded as PVC-associated has the PVC present for at least three consecutive days on the day of infection or the day before and does not meet the CVC-associated criteria. | Not covered | — | — | G8 |
+| `dd-pvc-associated-bsi` | A primary BSI recorded as PVC-associated has the PVC present for at least three consecutive days on the day of infection or the day before and does not meet the CVC-associated criteria. | Partial | 50 | — | G8 |
 | `dd-pvc-associated-bsi` | A BSI meeting both the PVC- and the CVC-association criteria is recorded as CVC-associated, not PVC-associated. | Not checkable | — | option set `NEOIPC_BSI_DEVICE_ASS` |  |
 | `dd-iv-antibiotic-initiated` | The intravenous antibiotic therapy criterion is met when antibiotic treatment for at least five days was initiated. | Not covered | — | `NEOIPC_BSI_AB_TREATMENT` TRUE_ONLY (a flag; the course length is not recorded) | G15 |
 | `dd-iv-antibiotic-initiated` | In counting the five-day course, the day of the first dose, the day of the last dose and any dose-free days between them all count; days after the last dose do not; a course cut short by death, discharge or transfer counts when treatment was scheduled for five days or more. | Not checkable | — | — |  |
@@ -1066,9 +1133,10 @@ publications. None constrains a record; none is checkable.
 | `dd-portal-venous-gas` | Portal venous gas is the accumulation of gas bubbles in the portal vein and its branches. | Not checkable | — | — |  |
 | `dd-respiratory-support-increase` | A pneumonia form carries a Beginning or Increase in Respiratory Support criterion field. | Capture time | — | `NEOIPC_HAP_RESPIRATORY_SUPPORT` compulsory, `NEOIPC_HAP_RESP_SUPP_CRIT_FULFILLED_TRUE`, `NEOIPC_HAP_RESP_SUPP_CRIT_FULFILLED_FALSE` | G11 |
 | `dd-inv`, `dd-niv` | Invasive mechanical ventilation is ventilation via an endotracheal or tracheostomy tube; non-invasive ventilatory support is support via CPAP or high-flow nasal cannula. | Not checkable | — | — |  |
-| `dd-inv-associated-pneumonia` | A pneumonia recorded as INV-associated has the patient with an endotracheal or tracheostomy tube for at least 3 consecutive days on the day of infection (first symptoms or first positive culture) or the day before. | Not covered | — | — | G8 |
-| `dd-inv-day`, `dd-niv-day` | An INV-day or NIV-day is a day on which the patient received that ventilation for at least 12 hours cumulatively. | Not checkable | — | — |  |
-| `dd-niv-associated-pneumonia` | A pneumonia recorded as NIV-associated has the patient receiving non-invasive ventilatory support for at least 3 consecutive days on the day of infection or the day before. | Not covered | — | — | G8 |
+| `dd-inv-associated-pneumonia` | A pneumonia recorded as INV-associated has the patient with an endotracheal or tracheostomy tube for at least 3 consecutive days on the day of infection (first symptoms or first positive culture) or the day before. | Partial | 50 | — | G8 |
+| `dd-inv-day`, `dd-niv-day` | An INV-day or NIV-day is a day on which the patient received that ventilation for more than 12 hours cumulatively. | Not checkable | — | — |  |
+| `dd-inv-day`, `dd-niv-day`, `dd-inv-days`, `dd-niv-days` | *(derived)* No day is both an INV day and an NIV day, so INV days and NIV days together cannot exceed the patient days. | Covered | 51 | `NEOIPC_SURV_END_NIV_INV_DAYS_VR` | G9 |
+| `dd-niv-associated-pneumonia` | A pneumonia recorded as NIV-associated has the patient receiving non-invasive ventilatory support for at least 3 consecutive days on the day of infection or the day before. | Partial | 50 | — | G8 |
 | `dd-organisms-respiratory-tract`, `dd-organism-surgical-site` | Organisms identified from the respiratory tract or the surgical site count only when identified by a culture or non-culture microbiologic test performed for clinical diagnosis or treatment, not by active surveillance culture/testing. | Not checkable | — | — |  |
 | `dd-infection-at-surgery` | Infection Present at Time of Surgery is YES only when the sign of infection identified during the procedure applies to the depth of the SSI attributed to that procedure. | Not checkable | — | `NEOIPC_SSI_INFECTION_PRESENT` compulsory |  |
 | `dd-ssi-type` | An SSI form records the SSI type (depth). | Capture time | — | `NEOIPC_SSI_INFECTION_TYPE` compulsory, option set `NEOIPC_SSI_TYPE`, `NEOIPC_SSI_NO_INFECTION_TYPE` | G11 |
@@ -1082,7 +1150,7 @@ pneumonia and the deepest-level rule for the SSI type.
 | Anchor | Constraint | Enforcement | Rules | Capture-time | Gap |
 |---|---|---|---|---|---|
 | `sec-analysis` | *(derived)* Surveillance data from a department feeds both the department's own report and the reference reports, so a department's submitted data is pooled into the reference data set. | Not checkable | — | — |  |
-| `sec-analysis` | *(derived)* Every patient carries a birth weight in grams that places the record in one of four birth-weight strata used for core-module rates. | Not covered | — | `NEOIPC_PATIENT_WARN_BW_EMPTY_REGULAR` (warning only), `NEOIPC_PATIENT_BW_MANDATORY_IF_GA_MISSING_REGULAR`, `NEOIPC_PATIENT_BW_AND_GA_MANDATORY_NEODECO` | G1 |
+| `sec-analysis` | *(derived)* Every patient carries a birth weight in grams that places the record in one of four birth-weight strata used for core-module rates. | Partial | 57 | `NEOIPC_PATIENT_WARN_BW_EMPTY_REGULAR` (warning only), `NEOIPC_PATIENT_BW_MANDATORY_IF_GA_MISSING_REGULAR`, `NEOIPC_PATIENT_BW_AND_GA_MANDATORY_NEODECO` | G1 |
 | `sec-analysis` | *(derived)* The birth-weight strata boundaries are 500 g, 1000 g and 1500 g, written as < 500 g, 500–999 g, 1000–1499 g and > 1500 g (as written, a birth weight of exactly 1500 g falls in no stratum). | Not checkable | — | — |  |
 
 ### 6.1.1 Device Utilization (`sec-analysis-device-utilization`)
@@ -1090,7 +1158,7 @@ pneumonia and the deepest-level rule for the SSI type.
 | Anchor | Constraint | Enforcement | Rules | Capture-time | Gap |
 |---|---|---|---|---|---|
 | `sec-analysis-device-utilization` | A device utilization rate is a percentage: the device days of one device type divided by patient days and multiplied by 100, computed separately per device type. | Not checkable | — | — |  |
-| `sec-analysis-device-utilization` | *(derived)* Device days are counted as the patient days on which a device was used, so for each device type (CVC, PVC, INV, NIV) a record's device days cannot exceed its patient days. | Capture time | — | `NEOIPC_SURV_END_CVC_DAYS_VR`, `NEOIPC_SURV_END_PVC_DAYS_VR`, `NEOIPC_SURV_END_INV_DAYS_VR`, `NEOIPC_SURV_END_NIV_DAYS_VR`, `NEOIPC_SURV_END_NIV_INV_DAYS_VR` | G9 |
+| `sec-analysis-device-utilization` | *(derived)* Device days are counted as the patient days on which a device was used, so for each device type (CVC, PVC, INV, NIV) a record's device days cannot exceed its patient days. | Covered | 51 | `NEOIPC_SURV_END_CVC_DAYS_VR`, `NEOIPC_SURV_END_PVC_DAYS_VR`, `NEOIPC_SURV_END_INV_DAYS_VR`, `NEOIPC_SURV_END_NIV_DAYS_VR`, `NEOIPC_SURV_END_NIV_INV_DAYS_VR` | G9 |
 
 ### 6.1.2 Antibiotic Use (`sec-analysis-antibiotic-use`)
 
@@ -1099,13 +1167,13 @@ pneumonia and the deepest-level rule for the SSI type.
 | `sec-analysis-antibiotic-use` | The overall antibiotic use rate is a percentage: total antibiotic days divided by total patient days and multiplied by 100. | Not checkable | — | — |  |
 | `sec-analysis-antibiotic-use` | The denominator of the proportion of patients receiving a specific substance or substance group is the number of patients receiving any antibiotic, not the number of all patients. | Not checkable | — | — |  |
 | `sec-analysis-antibiotic-use` | *(derived)* Only systemic antibiotics count towards antibiotic days. | Not checkable | — | — |  |
-| `sec-analysis-antibiotic-use` | *(derived)* Total antibiotic days is a count of patient days and cannot exceed total patient days. | Capture time | — | `NEOIPC_SURV_END_AB_DAYS_VR` | G9 |
-| `sec-analysis-antibiotic-use` | *(derived)* Antibiotic use is recorded per individual substance (therapy days per substance), not only as an overall antibiotic-day total. | Partial | 21 | `NEOIPC_SURV_END_AB_SUBST_01_REQUIRE`, `NEOIPC_SURV_END_AB_SUBST_01_DAYS_REQUIRE` | G10 |
+| `sec-analysis-antibiotic-use` | *(derived)* Total antibiotic days is a count of patient days and cannot exceed total patient days. | Covered | 51 | `NEOIPC_SURV_END_AB_DAYS_VR` | G9 |
+| `sec-analysis-antibiotic-use` | *(derived)* Antibiotic use is recorded per individual substance (therapy days per substance), not only as an overall antibiotic-day total. | Partial | 21, 52 | `NEOIPC_SURV_END_AB_SUBST_01_REQUIRE`, `NEOIPC_SURV_END_AB_SUBST_01_DAYS_REQUIRE` | G10 |
 | `sec-analysis-antibiotic-use` | *(derived)* Each recorded antibiotic substance is an entry of the List of Antibiotics, whose entries carry a WHO Anatomical Therapeutic Chemical (ATC) code from which the substance groups are derived, except for the substances the ATC index does not list, which carry a placeholder code. | Capture time | — | the generated option set `NEOIPC_ANTIMICROBIAL_SUBSTANCES` | G19 |
 | `sec-analysis-antibiotic-use` | *(derived)* Substances are grouped at ATC levels 1, 2, 4 and 5 only. | Not checkable | — | — |  |
 | `sec-analysis-antibiotic-use` | *(derived)* Substance and substance-group use rates are expressed per 1000 patient days according to the prose, while the formula that follows multiplies by 100. | Not checkable | — | — |  |
-| `sec-analysis-antibiotic-use` | *(derived)* Total therapy days for a substance is a count of patient days and cannot exceed the patient days. | Not covered | — | — | G10 |
-| `sec-analysis-antibiotic-use` | *(derived)* A patient counted as receiving a specific substance is also a patient receiving any antibiotic, so a record with any substance recorded has antibiotic days of at least one. | Interface only | — | `NEOIPC_SURV_END_AB_SUBST_01_HIDE` to `NEOIPC_SURV_END_AB_SUBST_09_HIDE` (slot 1 is hidden until the antibiotic days exceed zero, each later slot until the previous one holds a substance) | G10 |
+| `sec-analysis-antibiotic-use` | *(derived)* Total therapy days for a substance is a count of patient days and cannot exceed the patient days. | Covered | 53, 54 | — | G10 |
+| `sec-analysis-antibiotic-use` | *(derived)* A patient counted as receiving a specific substance is also a patient receiving any antibiotic, so a record with any substance recorded has antibiotic days of at least one. | Covered | 52, 53 | `NEOIPC_SURV_END_AB_SUBST_01_HIDE` to `NEOIPC_SURV_END_AB_SUBST_09_HIDE` (slot 1 is hidden until the antibiotic days exceed zero, each later slot until the previous one holds a substance) | G10 |
 | `sec-analysis-antibiotic-use` | *(derived)* The stated formula for the proportion of patients receiving a substance divides therapy days by patient days, contradicting the prose definition (patients over patients) immediately before it. | Not checkable | — | — |  |
 
 ### 6.1.3 Protective Factor Implementation (`sec-analysis-protective-factor-implementation`)
@@ -1113,7 +1181,7 @@ pneumonia and the deepest-level rule for the SSI type.
 | Anchor | Constraint | Enforcement | Rules | Capture-time | Gap |
 |---|---|---|---|---|---|
 | `sec-analysis-protective-factor-implementation` | Each protective factor utilization rate (breast milk intake, probiotic usage, kangaroo care implementation) is a percentage: the protective-factor days divided by patient days and multiplied by 100. | Not checkable | — | — |  |
-| `sec-analysis-protective-factor-implementation` | *(derived)* Protective-factor days are the patient days on which a patient received breast milk, probiotic or kangaroo mother care, so each of these three day counts cannot exceed the record's patient days. | Capture time | — | `NEOIPC_SURV_END_HUMAN_MILK_DAYS_VR`, `NEOIPC_SURV_END_PROBIOTIC_DAYS_VR`, `NEOIPC_SURV_END_KANGAROO_CARE_DAYS_VR` | G9 |
+| `sec-analysis-protective-factor-implementation` | *(derived)* Protective-factor days are the patient days on which a patient received breast milk, probiotic or kangaroo mother care, so each of these three day counts cannot exceed the record's patient days. | Covered | 51 | `NEOIPC_SURV_END_HUMAN_MILK_DAYS_VR`, `NEOIPC_SURV_END_PROBIOTIC_DAYS_VR`, `NEOIPC_SURV_END_KANGAROO_CARE_DAYS_VR` | G9 |
 
 ### 6.2.1 Incidence Densities (`sec-analysis-incidence-densities`)
 
@@ -1127,8 +1195,8 @@ pneumonia and the deepest-level rule for the SSI type.
 |---|---|---|---|---|---|
 | `sec-analysis-device-associated-infections` | Device-associated infection rates are expressed per 1000 device days: the device-associated infections divided by the corresponding device days and multiplied by 1000. | Not checkable | — | — |  |
 | `sec-analysis-device-associated-infections` | *(derived)* A device-associated infection is an infection occurring in the presence of the associated device, related to the total days at risk with that device. | Not checkable | — | — |  |
-| `sec-analysis-device-associated-infections` | *(derived)* A CVC-associated BSI is a BSI in a patient with a CVC, and a PVC-associated BSI one in a patient with a PVC, so a department reporting one has non-zero days of that device. | Not covered | — | `NEOIPC_BSI_DEV_ASS` | G8 |
-| `sec-analysis-device-associated-infections` | *(derived)* An INV-associated pneumonia is a pneumonia in a patient on invasive ventilation, and an NIV-associated one in a patient on non-invasive ventilation, so a department reporting one has non-zero days of that ventilation. | Not covered | — | `NEOIPC_HAP_DEVICE_ASSOCIATION` | G8 |
+| `sec-analysis-device-associated-infections` | *(derived)* A CVC-associated BSI is a BSI in a patient with a CVC, and a PVC-associated BSI one in a patient with a PVC, so a department reporting one has non-zero days of that device. | Covered | 50 | `NEOIPC_BSI_DEV_ASS` | G8 |
+| `sec-analysis-device-associated-infections` | *(derived)* An INV-associated pneumonia is a pneumonia in a patient on invasive ventilation, and an NIV-associated one in a patient on non-invasive ventilation, so a department reporting one has non-zero days of that ventilation. | Covered | 50 | `NEOIPC_HAP_DEVICE_ASSOCIATION` | G8 |
 | `sec-analysis-device-associated-infections` | *(derived)* Device association is analyzed only as BSI with a vascular catheter and pneumonia with ventilation; a BSI is not ventilator-associated and a pneumonia is not catheter-associated. | Capture time | — | option sets `NEOIPC_BSI_DEVICE_ASS`, `NEOIPC_HAP_DEVICE_ASS` |  |
 
 ### 6.2.3 Surgical Site Infections (`sec-analysis-surgical-site-infections`)
@@ -1149,9 +1217,9 @@ pneumonia and the deepest-level rule for the SSI type.
 | `sec-analysis-standardized-infection-rate` | A standardized infection rate greater than one means more infections were observed than expected from the department's patient composition, exactly one the same number, and less than one fewer. | Not checkable | — | — |  |
 | `sec-analysis-standardized-infection-rate` | *(derived)* This paragraph refers to 3 birthweight classes whereas the chapter introduction lists 4 birth-weight groups. | Not checkable | — | — |  |
 | `sec-analysis-standardized-infection-rate` | *(derived)* Patient days accrue to the department in which they were spent, so a transferred infant is surveilled per department stay and each department accounts only for its own days. | Partial | 17 | — | G24 |
-| `sec-analysis-standardized-infection-rate` | *(derived)* The SIR requires each patient's birth weight and the day of life of each surveilled day, so birth weight and the admission day of life are recorded for every patient (no date of birth is collected). | Not covered | — | `NEOIPC_ADMISSION_TYPE` compulsory, `NEOIPC_ADM_TYPE_2_PLUS`, `NEOIPC_ADM_TYPE_1`, `NEOIPC_PATIENT_BW_MANDATORY_IF_GA_MISSING_REGULAR`, `NEOIPC_PATIENT_BW_AND_GA_MANDATORY_NEODECO` | G1, G3 |
+| `sec-analysis-standardized-infection-rate` | *(derived)* The SIR requires each patient's birth weight and the day of life of each surveilled day, so birth weight and the admission day of life are recorded for every patient (no date of birth is collected). | Partial | 46, 57 | `NEOIPC_ADMISSION_TYPE` compulsory, `NEOIPC_ADM_TYPE_2_PLUS`, `NEOIPC_ADM_TYPE_1`, `NEOIPC_PATIENT_BW_MANDATORY_IF_GA_MISSING_REGULAR`, `NEOIPC_PATIENT_BW_AND_GA_MANDATORY_NEODECO` | G1, G3 |
 | `sec-analysis-standardized-infection-rate` | *(derived)* The standardized infection rate is calculated for BSI and pneumonia only, from reference-database risks per day of life and birth weight. | Not checkable | — | — |  |
-| `sec-analysis-standardized-infection-rate` | *(derived)* Expected infections are summed over the days each infant spent in the department, so every patient record yields its set of days in the department (admission through surveillance end, as days of life). | Partial | 3, 4, 18, 25, 26 | `NEOIPC_ADM_TYPE_2_PLUS` | G3 |
+| `sec-analysis-standardized-infection-rate` | *(derived)* Expected infections are summed over the days each infant spent in the department, so every patient record yields its set of days in the department (admission through surveillance end, as days of life). | Partial | 3, 4, 18, 25, 26, 46 | `NEOIPC_ADM_TYPE_2_PLUS` | G3 |
 | `sec-analysis-standardized-infection-rate` | *(derived)* The SIR is the ratio of infections observed in a department to infections expected from its patient composition. | Not checkable | — | — |  |
 
 ### 7 Abbreviations (`sec-abbr`)

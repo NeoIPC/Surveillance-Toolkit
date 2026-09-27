@@ -1,6 +1,6 @@
-{{< include _setup.qmd >}}
-
 {{< include _mapping.qmd >}}
+
+{{< include _setup.qmd >}}
 
 {{< include _problem_text.qmd >}}
 

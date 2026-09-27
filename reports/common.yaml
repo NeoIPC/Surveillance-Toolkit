@@ -385,8 +385,9 @@ methods:
     limit the ability to detect resistant organisms.
   risk_density: >-
     Exposure density rates measure the number of days a risk or protective factor
-    was present per 100 patient-days. Device and ventilation days require the
-    device or support to be in place for at least 12 hours on that calendar day.
+    was present per 100 patient-days. A catheter day requires the catheter to
+    be in place for at least 12 hours on that calendar day, and a ventilation
+    day requires more than 12 hours of the respective support.
     A human milk day requires that the patient's enteral feeding exclusively
     consists of human milk (including donor milk and fortified breast milk).
     Probiotic days require an oral probiotic containing Lactobacillus spp. or
@@ -404,7 +405,7 @@ methods:
 vre_label: "Vancomycin-resistant Enterococcus (VRE)"
 week_abbreviation: "w"
 worldBankClassNames:
-  H: High income
-  L: Low income
-  LM: Lower middle income
-  UM: Upper middle income
+  high_income: High income
+  low_income: Low income
+  lower_middle_income: Lower middle income
+  upper_middle_income: Upper middle income

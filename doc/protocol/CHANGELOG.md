@@ -11,6 +11,13 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
 
 ## [Unreleased]
 
+### Changed
+
+- An INV day and an NIV day are days with more than 12 hours of the respective ventilation, where the
+  definitions read "at least 12 hours": at exactly 12 hours of each a day counted as both, so the two
+  counts could together exceed the patient days. A CVC day and a PVC day keep "at least 12 hours",
+  since both lines can be in place on one day.
+
 ### Fixed
 
 - The Master Data Collection Sheet asks the day of life at admission. The sheet left it out as a value

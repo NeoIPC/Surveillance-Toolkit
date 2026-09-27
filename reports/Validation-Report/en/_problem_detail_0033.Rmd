@@ -1,0 +1,8 @@
+### The Patient Record Holds Neither a Birth Weight Nor a Gestational Age {#sec-problem-details-33}
+
+Eligibility for the Core Module depends on a birth weight below 1500 grams or a gestational age below 32 weeks, and the analyses group the patients by both.
+The registration form therefore requires one of the two whenever the other is empty, in every department, and refuses a record without either; a record reaches the platform without both only around that form, such as through an import or from before the requirement existed.
+This message appears in the validation report when a patient record holds neither a birth weight nor a gestational age.
+
+Please open the patient record's dashboard (see @sec-solution-1) and edit its profile (see @sec-solution-17): enter the birth weight, the gestational age, or both.
+If your department includes only infants who meet these criteria and neither value is known, the infant cannot be shown to be eligible and the record does not belong in the Core Module: please delete it (see @sec-solution-2).

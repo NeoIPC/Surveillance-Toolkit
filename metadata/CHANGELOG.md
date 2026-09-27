@@ -13,6 +13,15 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
 
 ## [Unreleased]
 
+### Changed
+
+- `NEOIPC_SURVEILLANCE_END_INV_DAYS` and `NEOIPC_SURVEILLANCE_END_NIV_DAYS` describe a day of the
+  respective ventilation as more than 12 hours of it, where they said at least 12 hours, following
+  the protocol's corrected definitions: at exactly 12 hours of each, a day counted as both, so the
+  two counts could together exceed the patient days. The CVC and PVC day counts keep "at least",
+  since both lines can be in place on one day. The NIV description also names CPAP beside high-flow
+  nasal cannulae, as the protocol does.
+
 ### Fixed
 
 - `NEOIPC_BSI_WBC` describes the white-blood-cell criterion as the protocol defines it: a count

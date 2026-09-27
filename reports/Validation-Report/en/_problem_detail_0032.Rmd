@@ -1,0 +1,10 @@
+### Fewer Than Two Infants Recorded for a Multiple Birth {#sec-problem-details-32}
+
+The patient record says whether the infant is part of a multiple birth and, when it is, how many infants were delivered from that pregnancy, the infant included.
+A multiple birth has at least two infants, so the number is 2 or more.
+This message appears in the validation report when the record marks a multiple birth but the number of infants at birth is below 2.
+The platform asks for the number as soon as the multiple birth is marked and warns at seven or more, but it accepts a 1.
+
+Either the infant is not part of a multiple birth, or the number of infants was entered incorrectly.
+
+Please open the patient record's dashboard (see @sec-solution-1) and edit its profile (see @sec-solution-17): clear the multiple birth mark if the infant is a singleton, or correct the number of infants at birth otherwise.

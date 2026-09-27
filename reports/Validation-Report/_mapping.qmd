@@ -48,7 +48,20 @@ problem_info  <- tibble::tribble(
   41L, 41L, 17L, c(17L,18L),
   42L, 42L, 18L, c(17L,18L),
   43L, 43L, 21L, 21L,
-  44L, 44L, 22L, 22L
+  44L, 44L, 22L, 22L,
+  45L, 45L, 23L, 23L,
+  46L, 46L, 24L, 24L,
+  47L, 47L, 25L, 25L,
+  48L, 48L, 26L, c(3L,26L),
+  49L, 49L, 27L, 27L,
+  50L, 50L, 28L, 28L,
+  51L, 51L, 29L, 29L,
+  52L, 52L, 30L, 30L,
+  53L, 53L, 30L, 30L,
+  54L, 54L, 30L, 30L,
+  55L, 55L, 31L, 31L,
+  56L, 56L, 32L, 32L,
+  57L, 57L, 33L, 33L
 )
 problem_detail_info <- tibble::tribble(
   ~id, ~sortOrder, ~usedSolutions,
@@ -73,26 +86,92 @@ problem_detail_info <- tibble::tribble(
   19L, 19L, c(1L,5L,6L,7L,8L,9L,10L,12L,15L),      # The Infection Occurred Within the First Three Days of Life
   20L, 20L, c(1L,5L,6L,7L,8L,9L,10L,12L,15L),      # The Infection Occurred Within the First Two Days of Hospitalisation of a Referred or (Re-)Admitted Patient
   21L, 21L, c(16L,1L,10L,14L,8L,4L),               # The Enrolment Has Been Active for More Than 120 Days and Has No Surveillance End Form
-  22L, 22L, c(16L,1L,10L,15L,8L,4L)                # The Enrolment Has Been Active for More Than 120 Days and Its Surveillance End Form Is Not Completed
+  22L, 22L, c(16L,1L,10L,15L,8L,4L),               # The Enrolment Has Been Active for More Than 120 Days and Its Surveillance End Form Is Not Completed
+  23L, 23L, c(15L,9L,11L,13L,2L),                  # The Admission Occurred After Day of Life 120
+  24L, 24L, c(15L,9L,11L),                         # The Day of Life at Admission Is Missing or Implausible for a Transferred or Readmitted Infant
+  25L, 25L, c(15L,9L,11L,13L),                     # A Later Enrolment Is Recorded as an Admission From the Delivery Room or on the Day of Birth
+  26L, 26L, c(15L,9L,6L,13L),                      # The Enrolment Is Dated on or after the Patient's Recorded Death
+  27L, 27L, c(12L,7L),                             # The Same Type of Infection Was Recorded Again Within 14 Days
+  28L, 28L, c(15L,9L),                             # The Infection Is Recorded as Device-Associated but the Enrolment Has No Days of That Device
+  29L, 29L, c(15L,9L,11L),                         # A Cumulative Day Count Exceeds the Number of Patient Days
+  30L, 30L, c(15L,9L),                             # The Antibiotic Substance Entries Are Inconsistent
+  31L, 31L, c(15L,9L),                             # The Secondary Bloodstream Infection Item Disagrees With the Organisms Recorded
+  32L, 32L, c(1L,17L),                             # Fewer Than Two Infants Recorded for a Multiple Birth
+  33L, 33L, c(1L,17L,2L)                           # The Patient Record Holds Neither a Birth Weight Nor a Gestational Age
 )
+# The coded values a rule records that a sentence shows as a localized label:
+# the rule, the context field the code is read from, the placeholder the label
+# is written to, and the string-resource map it is looked up in. The formatter
+# adds these placeholders to a finding's values, and the setup's placeholder
+# check accepts them beside the fields the rule records.
+context_decorations <- tibble::tribble(
+  ~rule_id, ~field,           ~placeholder,    ~labels,
+  19L,      "infection_type", "ssi_type",      "ssi_types",
+  47L,      "type",           "type_label",    "admission_types",
+  50L,      "device",         "device_label",  "devices",
+  51L,      "count",          "count_label",   "day_counts",
+  55L,      "sec_bsi",        "sec_bsi_label", "secondary_bsi_items"
+)
+# The maps the decorations look their labels up in, under the names the table
+# above gives them, each keyed on the values the rule's field holds. The string
+# resources key a label by what it means, not by the option code a form
+# stores, so the codes are mapped here and a changed option code changes this
+# function but no translated string. The labels are listed one by one as
+# literal `sR$key` references: the string-layer check reads those to tell a
+# live key from a dead one, and a label reached by a name taken from a table
+# would count as unused. The devices take the glossary's abbreviations, which
+# the sepsis form's options and the surveillance end form's day counts use;
+# the day counts are keyed by neoipcr's count names already.
+label_maps <- function(sR) list(
+  ssi_types = list(
+    "1" = sR$ssi_types$superficial_incisional,
+    "2" = sR$ssi_types$deep_incisional,
+    "3" = sR$ssi_types$organ_space),
+  admission_types = list(
+    "1" = sR$admission_types$delivery_room,
+    "2" = sR$admission_types$day_of_birth,
+    "3" = sR$admission_types$after_day_of_birth),
+  devices = list(
+    cvc = sR$cvc,
+    pvc = sR$pvc,
+    niv = sR$niv,
+    inv = sR$inv),
+  day_counts = sR$day_counts,
+  secondary_bsi_items = list(
+    "1"  = sR$secondary_bsi_items$present,
+    "0"  = sR$secondary_bsi_items$absent,
+    "-1" = sR$secondary_bsi_items$no_follow_up))
+
+# The fields a rule records twice, as a name and as the code it names: where
+# the name is missing, as it is for a code the option set does not carry, the
+# formatter shows the code the record holds in its place. The setup checks
+# that both fields are ones the rule records.
+context_fallbacks <- tibble::tribble(
+  ~rule_id, ~field,      ~fallback,
+  52L,      "substance", "substance_code",
+  53L,      "substance", "substance_code",
+  54L,      "substance", "substance_code"
+)
+
 solution_info <-tibble::tribble(
   ~id, ~sortOrder,
    1L,  1L, # Opening the Tracked Entity Instance Dashboard of a Patient Record
   16L,  2L, # Listing the Patients With an Active Enrolment
   10L,  3L, # Opening an Enrolment in the Tracked Entity Instance Dashboard
-   2L,  4L, # Deleting a Patient Record
-   3L,  5L, # Adding an Enrollment to a Patient Record
-   4L,  6L, # Completing an Enrolment
-   5L,  7L, # Reopening a Closed Enrolment to Make Changes
-  13L,  8L, # Deleting an Enrolment
-   6L,  9L, # Changing the Admission Date
-   7L, 10L, # Changing the Date of an Event in an Event Form
-  15L, 11L, # Opening an Event Form
-  14L, 12L, # Adding an Event Form
-   8L, 13L, # Completing an Event Form
-   9L, 14L, # Reopening a Closed Event Form to Make Changes
-  12L, 15L, # Deleting an Event Form
-  11L, 16L  # Updating Calculated Values in Event Forms
+  17L,  4L, # Changing the Data in a Patient Record's Profile
+   2L,  5L, # Deleting a Patient Record
+   3L,  6L, # Adding an Enrollment to a Patient Record
+   4L,  7L, # Completing an Enrolment
+   5L,  8L, # Reopening a Closed Enrolment to Make Changes
+  13L,  9L, # Deleting an Enrolment
+   6L, 10L, # Changing the Admission Date
+   7L, 11L, # Changing the Date of an Event in an Event Form
+  15L, 12L, # Opening an Event Form
+  14L, 13L, # Adding an Event Form
+   8L, 14L, # Completing an Event Form
+   9L, 15L, # Reopening a Closed Event Form to Make Changes
+  12L, 16L, # Deleting an Event Form
+  11L, 17L  # Updating Calculated Values in Event Forms
 )
 
 # The solutions a solution's text points at. A report that includes a

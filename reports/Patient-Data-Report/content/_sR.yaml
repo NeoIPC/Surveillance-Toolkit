@@ -10,9 +10,9 @@
 # Language: en
 
 admission_type:
-  "1": "Inborn (delivered at this hospital)"
-  "2": "Transferred on day of birth"
-  "3": "Transferred after day of birth"
+  delivery_room: "Inborn (delivered at this hospital)"
+  day_of_birth: "Transferred on day of birth"
+  after_day_of_birth: "Transferred after day of birth"
 days: Days
 device:
   cvc: "Central Venous Catheter (CVC)"
@@ -53,12 +53,12 @@ no_infections: "No infections recorded for this patient."
 no_procedures: "No surgical procedures recorded for this patient."
 not_available: "N/A"
 pathogen_source:
-  B: "Blood"
-  B+C: "Blood and cerebrospinal fluid"
-  C: "Cerebrospinal fluid"
-  L: "Lower respiratory tract"
-  U: "Upper respiratory tract"
-  U+L: "Upper and lower respiratory tract"
+  blood: "Blood"
+  blood_and_cerebrospinal_fluid: "Blood and cerebrospinal fluid"
+  cerebrospinal_fluid: "Cerebrospinal fluid"
+  lower_respiratory_tract: "Lower respiratory tract"
+  upper_and_lower_respiratory_tract: "Upper and lower respiratory tract"
+  upper_respiratory_tract: "Upper respiratory tract"
 patient_not_found: "No patient with ID '{patient_id}' was found in department '{department_code}'."
 protective:
 section:
@@ -73,6 +73,6 @@ sex:
   undetermined: "Undetermined"
 subtitle: "NeoIPC Surveillance — GDPR Art. 15(3) Data Export"
 surveillance_end_reason:
-  "1": "Discharge/Transfer"
-  "2": "Death"
+  discharge_or_transfer: "Discharge/Transfer"
+  death: "Death"
 title: "Patient Data Report"

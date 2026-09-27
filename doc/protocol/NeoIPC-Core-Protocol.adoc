@@ -593,8 +593,8 @@ One of the following:
 [[dd-patient-days]]Patient days:: The cumulative number of days the patient stayed in the department, including the day of admission and the day of discharge/transfer/death (no minimum duration of stay).
 [[dd-cvc-days]]CVC days:: The cumulative number of days when a central venous catheter was in place for at least 12 hours/day.
 [[dd-pvc-days]]PVC days:: The cumulative number of days when a peripheral vascular catheter was in place for at least 12 hours/day.
-[[dd-inv-days]]INV days:: The cumulative number of days when the infant was on invasive ventilation (intubated) for at least 12 hours/day.
-[[dd-niv-days]]NIV days:: The cumulative number of days when the infant was on non-invasive ventilation (not intubated; e.g. high flow nasal cannulae or CPAP) for at least 12 hours/day.
+[[dd-inv-days]]INV days:: The cumulative number of days when the infant was on invasive ventilation (intubated) for more than 12 hours/day.
+[[dd-niv-days]]NIV days:: The cumulative number of days when the infant was on non-invasive ventilation (not intubated; e.g. high flow nasal cannulae or CPAP) for more than 12 hours/day.
 [[dd-human-milk-days]]Human milk days:: The cumulative number of days the patient’s enteral feeding exclusively consists of (own mother’s or donor) breast milk.
 Fortified breast milk is considered as breast milk.
 [[dd-kangaroo-care-days]]Kangaroo care days:: The cumulative number of days the patient received kangaroo care (intensive skin-to-skin-contact) for at least 2 hours.
@@ -789,13 +789,13 @@ NOTE: To meet the criteria of device associated hospital-acquired pneumonia, pat
 
 [[dd-inv-associated-pneumonia]]INV-Associated Pneumonia:: A pneumonia is associated with <<dd-inv,INV>> if the patient had an endotracheal or tracheostomy tube for at least 3 consecutive days on the day of infection (=first symptoms or first positive culture) or on the day before.
 
-[[dd-inv-day]]INV-Day:: A day in which the patient was ventilated invasively via endotracheal or tracheostomy tube for at least 12 hours cumulatively.
+[[dd-inv-day]]INV-Day:: A day in which the patient was ventilated invasively via endotracheal or tracheostomy tube for more than 12 hours cumulatively.
 
 [[dd-niv]]Non-invasive ventilatory support (NIV):: Ventilatory support via CPAP or High-Flow Nasal Cannula.
 
 [[dd-niv-associated-pneumonia]]NIV-Associated Pneumonia:: A pneumonia is associated with <<dd-niv,NIV>> if the patient received non-invasive ventilatory support (e.g., CPAP or High-Flow Nasal Cannula) for at least 3 consecutive days on the day of infection (=first symptoms or first positive culture) or on the day before.
 
-[[dd-niv-day]]NIV-Day:: A day in which the patient received non-invasive ventilatory support via CPAP or High-Flow Nasal Cannula for at least 12 hours cumulatively.
+[[dd-niv-day]]NIV-Day:: A day in which the patient received non-invasive ventilatory support via CPAP or High-Flow Nasal Cannula for more than 12 hours cumulatively.
 
 [[dd-organisms-respiratory-tract]]Organisms Identified From Respiratory Tract:: At least one organism has been identified from respiratory tract by a culture or non-culture based microbiologic testing method which is performed for purposes of clinical diagnosis or treatment (for example, NOT Active Surveillance Culture/Testing (ASC/AST)).
 +
