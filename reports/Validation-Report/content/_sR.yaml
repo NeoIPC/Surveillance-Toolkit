@@ -371,8 +371,8 @@ problems:
     summary: A patient recorded as part of a multiple birth has fewer than two infants at birth.
   "57":
     description: >-
-      The patient record holds neither a birth weight nor a gestational age, so
-      whether the infant is eligible for the surveillance cannot be established.
+      The patient record holds neither a birth weight nor a gestational age,
+      although the registration requires one of the two.
     summary: A patient record holds neither a birth weight nor a gestational age.
 ssi_problem_header_prefix: Surgical Site Infection event with the infection date
 ssi_types:

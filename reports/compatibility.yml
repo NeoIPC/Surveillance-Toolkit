@@ -17,8 +17,9 @@ neoipcr:
   # The floor is the neoipcr the Patient Data Report can render with (v0.0.0.9006): the report
   # imports with timestamps and enrolment notes, which failed every import below it (on the
   # events' timestamps, and on notes read without the DHIS2 enrolment ids), and with pseudonymized
-  # users, which failed it for records created before the instance's DHIS2 2.36 upgrade, since they
-  # carry no creator. The same tag carries rule 57, a patient
+  # users, which failed it for records without a creator: events created before the instance's
+  # upgrade to DHIS2 2.36, enrolments and tracked entities before 2.37. The same tag carries rule 57,
+  # a patient
   # with neither birth weight nor gestational age, which the Validation Report's catalogue now
   # describes, and the eligibility filter that leaves a missing value to the validation pass, so
   # that rule 46 reports a missing day of life. Below it sit rules 45 to 56 (v0.0.0.9005), whose

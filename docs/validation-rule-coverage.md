@@ -161,7 +161,8 @@ The protocol admits an infant with a birth weight below 1500 g or a gestational 
 weight is 1500 g or more and the total gestation days are 224 or more, or when one of the two fails and
 the other is missing, except in departments of the organisation-unit group
 `NEOIPC_ALL_PATIENTS_ELIGIBLE`. Post hoc, rule 57 flags a patient with neither a birth weight nor a
-gestational age, whose eligibility cannot be established; it is not an eligibility rule, so the pass
+gestational age, which the registration refuses in every department, including those where the
+eligibility criteria are disabled; it is not an eligibility rule, so the pass
 applies it whichever patients were requested, and the import's eligibility filter keeps such a patient
 for it rather than dropping it unreported. The other two branches, both criteria failing or one failing
 while the other is missing, have no post-hoc rule: under the import's default the eligibility filter
