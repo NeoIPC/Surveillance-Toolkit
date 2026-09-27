@@ -42,9 +42,9 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
   disagrees with the organisms recorded with it; and a multiple birth recorded with fewer than two
   infants. Each has its sentence, summary and explanation, and a new solution shows how to change the
   data in a patient record's profile. A sentence that shows a coded value (an admission type, a device,
-  a count, the secondary-BSI item) shows its localized label, worded as the form labels the field, from
-  label maps in the string resources that the formatter reads through one table. The report rests on 55
-  rules and requires neoipcr `v0.0.0.9005`.
+  a count, the secondary-BSI item) shows its localized label, from label maps in the string resources
+  that the formatter reads through one table; the counts and the secondary-BSI item are worded as the
+  form labels them. The report rests on 55 rules and requires neoipcr `v0.0.0.9005`.
 - The Partner and Reference Reports open with a data-validation summary: for each validation rule that
   removed or exempted a record, the number and kind of records it concerned, and the totals across all
   rules — the Partner Report's department beside the reference data where the report compares the two.
@@ -77,6 +77,15 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
 - The Partner and Reference Reports' description of exposure densities states that a ventilation day
   requires more than 12 hours of the respective support, following the protocol, while a catheter day
   keeps at least 12 hours.
+- Every report now runs on neoipcr `v0.0.0.9005`, which changes the data of the Partner Report, the
+  Reference Report and the Partner Certificate as well: the import's validation pass, which these
+  reports run by default, also applies rules 46 to 56 and removes the patients they flag — a
+  duplicated antibiotic substance entry, the same infection type recorded again within 14 days, or a
+  day count above the patient days, for example — and the eligibility filter keeps an admission on day
+  of life 120, which it used to drop. Rates, the validation summary tables and the certificate's
+  patient count can therefore change with this release. Rule 45 removes nothing there: under the
+  default the eligibility filter has already dropped such an admission, and with non-core patients
+  requested the pass leaves rule 45 out.
 
 ### Removed
 
@@ -90,7 +99,9 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
 
 - A bare `yes` or `on` in a report's string resources stays text, as `no` and `off` already did,
   where YAML reads it as a logical: a translated label such as `Yes`, which po4a writes unquoted, no
-  longer turns into `TRUE`. Only `true` and `false` are logicals.
+  longer turns into `TRUE`. In the other direction, a bare `false` is now read as a logical where it
+  used to stay text, so only `true` and `false` are logicals, and the Partner Report's concordance
+  flags are consistently logical.
 - An antibiotic-utilisation table with no data failed the render with an "unused argument" error, since
   its no-data branch passed the table's own sentence to a helper that took none; the helper takes the
   sentence now, and the table renders it.

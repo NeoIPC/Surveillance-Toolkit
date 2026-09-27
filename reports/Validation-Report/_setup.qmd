@@ -96,10 +96,13 @@ if (!rlang::is_null(departmentFilter))
 # runs without its templates and `summary` here would render as a blank line
 # or fail the header below, so every rule is checked for them first: the
 # templates are the rule's `description` and, for rule 20, a second complete
-# sentence for a pathogen recorded as causing a secondary sepsis.
+# sentence for a pathogen recorded as causing a secondary sepsis and, for
+# rule 55, one for a secondary-BSI item that was never answered.
 rule_ids <- neoipcr::validation_rule_ids()
 template_keys <- function(rule_id)
-  c("description", if (rule_id == 20L) "description_secondary_bsi")
+  c("description",
+    if (rule_id == 20L) "description_secondary_bsi",
+    if (rule_id == 55L) "description_unanswered")
 has_text <- function(rule_id) {
   entry <- sR$problems[[as.character(rule_id)]]
   all(vapply(
@@ -122,7 +125,12 @@ if (length(unsentenced) > 0L)
 # one the rule records, its label map must be one `label_maps()` in
 # `_mapping.qmd` returns, and its placeholder must be named by the rule's
 # sentence, or the formatter would look a label up on nothing or for nothing.
+# That last check reads the English source sentences: it guards the table
+# itself, and a translation that words a sentence without the label still
+# renders, since an unused value is simply not interpolated.
 maps <- label_maps(sR)
+source_problems <- yaml::read_yaml(
+  "content/_sR.yaml", handlers = string_resource_handlers())$problems
 context_fields <- neoipcr::validation_rule_context_fields()
 placeholders <- function(text)
   unique(gsub("[{}]", "", unlist(regmatches(text, gregexpr("\\{[^{}]+\\}", text)))))
@@ -137,7 +145,7 @@ for (i in seq_len(nrow(context_decorations))) {
       "The decoration of validation rule %d looks its labels up in `%s`, which is not one of the label maps.",
       decoration$rule_id, decoration$labels))
   named_by <- placeholders(unlist(
-    sR$problems[[as.character(decoration$rule_id)]][template_keys(decoration$rule_id)]))
+    source_problems[[as.character(decoration$rule_id)]][template_keys(decoration$rule_id)]))
   if (!decoration$placeholder %in% named_by)
     rlang::abort(sprintf(
       "The decoration of validation rule %d fills the placeholder `%s`, which none of the rule's sentences names.",

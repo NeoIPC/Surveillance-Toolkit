@@ -311,8 +311,8 @@ problems:
     summary: The day of life at admission of an infant transferred or readmitted after the day of birth is missing or below 2.
   "47":
     description: >-
-      The enrolment dated {enrolledAt} records the admission type
-      '{type_label}', but the patient has an earlier enrolment dated
+      The admission form of the enrolment dated {enrolledAt} records the infant
+      as {type_label}, but the patient has an earlier enrolment dated
       {enrolledAt_previous}, so this admission is a transfer or readmission
       after the day of birth.
     summary: A later enrolment of the patient is recorded as an admission from the delivery room or on the day of birth.
@@ -357,6 +357,10 @@ problems:
   "55":
     description: >-
       The secondary bloodstream infection item is '{sec_bsi_label}', but the
+      number of secondary bloodstream infection organisms recorded is
+      {organisms}.
+    description_unanswered: >-
+      The secondary bloodstream infection item has not been answered, but the
       number of secondary bloodstream infection organisms recorded is
       {organisms}.
     summary: The secondary bloodstream infection item disagrees with the secondary bloodstream infection organisms recorded.

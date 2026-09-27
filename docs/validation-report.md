@@ -24,7 +24,8 @@ The rules and the sentences live in different places, on purpose.
 
 The link between the layers is the **context field names**: the placeholders of a template are the
 column names of the rule's context, exactly as the "Context fields" section of `?neoipcr::validate`
-lists them. That section is the contract; this report does not restate it.
+lists them, plus the labels `context_decorations` in `_mapping.qmd` adds for the coded values a
+sentence shows. That section is the contract; this report does not restate it.
 
 ## Rendering a finding
 
@@ -58,9 +59,12 @@ One function renders every rule (`problem_text()` in `_problem_text.qmd`):
    row in that table and a map in `label_maps()` beside it in `_mapping.qmd`, which names every map by
    a literal `sR$` reference so that the string-layer check sees the key used; the setup refuses a row
    whose field the rule does not record, whose map `label_maps()` lacks, or whose placeholder none of
-   the rule's sentences names.
-3. `select_template()` picks the template; rule 20 carries two complete sentences (`description` and
-   `description_secondary_bsi`) rather than one sentence with an optional fragment.
+   the rule's sentences names. That last check reads the English source sentences, since it guards
+   the table: a translation that words a sentence without the label still renders.
+3. `select_template()` picks the template. Two rules carry a second complete sentence rather than one
+   sentence with an optional fragment: rule 20 (`description_secondary_bsi`) for a pathogen recorded as
+   causing a secondary sepsis, and rule 55 (`description_unanswered`) for a secondary-BSI item that
+   was never answered, which has no answer a label could name.
 4. The sentence is followed by `see_problem_details`, interpolated with the cross-reference to the
    rule's `primaryDetail` from `_mapping.qmd`. That column exists because the detail a rule cites is not
    derivable from the details it uses: the day-of-life and day-of-occurrence rules share the same pair of
@@ -118,7 +122,8 @@ finding that reaches the sentence.
 1. neoipcr: implement `validation_rule_N()` in the matching `R/validation-rules-*.R`, register it in
    `validation_rules`, document its context fields in the table on `validate()`, add the detect /
    no-detect / exception tests, note it in `NEWS.md`, and release the package.
-2. Here: add `problems.N` with `description` (named placeholders equal to the rule's context fields) and
+2. Here: add `problems.N` with `description` (named placeholders equal to the rule's context fields,
+   plus the labels its decorations add) and
    `summary` to `content/_sR.yaml`, and where the sentence shows a coded value as a label, a row in
    `context_decorations` with its label map in the string resources, registered in `label_maps()`
    (and, where a field can be missing while another records the same thing, a row in

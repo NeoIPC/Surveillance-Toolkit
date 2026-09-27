@@ -9,8 +9,8 @@ inventory that makes the superset claim checkable. It lists every constraint the
 keyed by the protocol's own anchor, and says for each one what enforces it today and, where nothing
 does, what would.
 
-The inventory is hand-maintained. It describes the protocol at `doc/protocol/VERSION` 1.3.0-preview2,
-the 55 rules of neoipcr v0.0.0.9005 (ids 1 to 56, with id 16 withdrawn) and the program rules, compulsory
+The inventory is hand-maintained. It describes the protocol at `doc/protocol/VERSION` 1.3.0-preview2
+together with the changes under [Unreleased] in its changelog, the 55 rules of neoipcr v0.0.0.9005 (ids 1 to 56, with id 16 withdrawn) and the program rules, compulsory
 flags and option sets of `metadata/common/`. A change to any of the three has to be reflected here: a
 new protocol constraint gets a row, a new rule is entered in the rows it covers, and a program rule
 that starts or stops enforcing something changes the enforcement column. `docs/validation-report.md`
@@ -40,7 +40,8 @@ Each row carries the protocol anchor (a section id such as `sec-def-pneumonia`, 
 `tbl-eligibility-examples`, or a data-dictionary term such as `dd-patient-days`), the constraint in
 checkable form, its enforcement class, the neoipcr rules that enforce it, the capture-time
 configuration that enforces it, and a pointer into the gap list below where the enforcement is
-incomplete. A constraint marked *(derived)* is one the protocol states as an example, an analysis
+incomplete or where a gap's decision is what closed it, so a Covered row may name the gap whose rule
+now covers it. A constraint marked *(derived)* is one the protocol states as an example, an analysis
 convention or background rather than as a rule; it is inventoried because a rule can still enforce it.
 
 | Class | Meaning |
@@ -87,13 +88,13 @@ which cannot fire at all.
 
 | Class | Rows |
 |---|---|
-| Covered | 29 |
-| Partial | 53 |
+| Covered | 30 |
+| Partial | 55 |
 | Capture time | 55 |
 | Interface only | 12 |
-| Not covered | 9 |
-| Not checkable | 121 |
-| All | 279 |
+| Not covered | 8 |
+| Not checkable | 120 |
+| All | 280 |
 
 The counts are of the rows in the tables below, so they can be recomputed from the file. A row may
 merge statements that share an anchor and an enforcement, and the sections that hold only process
@@ -142,7 +143,7 @@ rather than repaired. The deployment's history of metadata exports bounds when a
 the interval between two exports; it is a last resort, not a foundation.
 
 The gap list groups the partial, uncovered, capture-time and interface-only rows into the decisions
-they call for. Every gap names the anchors it concerns, what exists today, what is missed, who can act
+they call for; a gap whose decision became a rule keeps the rows that rule now covers. Every gap names the anchors it concerns, what exists today, what is missed, who can act
 on a finding, and the proposed way to close it. Which proposals become rules or reconciliations is a
 maintainer's decision; a proposal is not a commitment.
 
@@ -213,13 +214,17 @@ the value the client assigns for the other two types is checked by nothing. The 
 missing value is wider than the field: rules 27, 31, 35, 39 and 41 compute an event's expected day of
 life from the admission form's value, and a missing value makes their comparison `NA`, which
 `filter()` drops, so those rules are silently disabled for every event of an enrolment whose admission
-form lacks the day of life.
+form lacks the day of life. That holds where ineligible patients are kept, as in the Validation
+Report's import. Under the import's default the eligibility filter has already dropped such an
+admission form, since a missing value does not pass its `dol <= 120`, so the whole enrolment leaves
+the analysis with no finding and no count in the validation summary.
 
 Proposal: for types 1 and 2 a reconciliation that sets a missing or different day of life to 1, the
 value the client assigns on every save and the team never chooses; for type 3 an enrolment-level rule
 on the admission form flagging a missing day of life or one below 2. Who acts: the network for the
 assigned value, the partner for the recorded one. Decided: rule 46 flags an admission of type 3 whose
-day of life is missing or below 2; setting the day of life of an inborn or day-of-birth admission to 1
+day of life is missing or below 2, its missing-value branch acting only where ineligible patients are
+kept, for the reason above; setting the day of life of an inborn or day-of-birth admission to 1
 is a network-side reconciliation, not yet implemented.
 
 ### G4 — A readmission recorded with the wrong admission type
@@ -313,8 +318,9 @@ to the surveillance-end form.
 Proposal: an event-level rule on the sepsis and pneumonia forms flagging an association whose device
 has zero or missing days on the enrolment's surveillance-end form. Whether the bound should be the
 protocol's three days (four for a ventilated pneumonia) rather than one is for the protocol authority:
-a device placed before a transfer contributes days this enrolment does not count, and a day with fewer
-than twelve hours of device use is not a device day, so the higher bound can flag legitimate records.
+a device placed before a transfer contributes days this enrolment does not count, and a day below the
+hour threshold (at least twelve hours for a catheter, more than twelve for ventilation) is not a
+device day, so the higher bound can flag legitimate records.
 The rule skips an enrolment without a completed surveillance-end form. Who acts: the partner; the
 association and the day counts are both on their forms. Decided: rule 50, with the bound at one day —
 an association whose device has zero or no days on the enrolment's completed surveillance-end form;
@@ -326,8 +332,9 @@ finding stands, since one infection per zero device-days is a contradiction in t
 
 ### G9 — A cumulative day count exceeding the patient days
 
-`dd-patient-days`, `dd-antibiotic-days-total`, `sec-analysis-device-utilization`,
-`sec-analysis-antibiotic-use`, `sec-analysis-protective-factor-implementation`, `abbr-inv`, `abbr-niv`.
+`dd-patient-days`, `dd-antibiotic-days-total`, `dd-inv-day`, `dd-niv-day`, `dd-inv-days`, `dd-niv-days`,
+`sec-analysis-device-utilization`, `sec-analysis-antibiotic-use`,
+`sec-analysis-protective-factor-implementation`, `abbr-inv`, `abbr-niv`.
 
 Every cumulative count on the surveillance-end form (CVC, PVC, INV, NIV, human milk, kangaroo care,
 probiotic and antibiotic days) is a count of patient days and cannot exceed the patient days. Nine
@@ -412,13 +419,15 @@ Who acts: the network for the SSI's hidden organisms, the partner for the rest. 
 organisms under an item that is not Yes are a network-side reconciliation, not yet implemented; rule
 55 flags Yes without an organism on any of the three forms and organisms under another answer on a
 pneumonia or NEC form; the match of the secondary findings against the primary findings waits on the
-pathogen migration. The package's pathogen tables are built from the legacy catalogue and the deployed
-option codes from the canonical one, and the two disagree on which concept some codes name
-(*Raoultella* and *Candida fabianii* are concepts of their own in the package and synonyms of
-*Klebsiella* and *Cyberlindnera fabianii* in the catalogue), so a comparison through the package's
-tables would report a mismatch between an organism and itself. The rule follows once the package
-reads its pathogen tables from `NeoIPC-Infectious-Agents.yaml` and the canonical metadata is
-deployed, the dependency G16 already waits on.
+pathogen migration. The package's pathogen tables are built from the legacy catalogue, while the
+option codes the forms store are the canonical catalogue's, and the two disagree on which concept
+some codes name: *Raoultella* is a concept of its own in the package and a synonym of *Klebsiella* in
+the catalogue, and *Candida fabianii* resolves in the package to a second *Cyberlindnera fabianii*
+concept the catalogue does not carry, where the catalogue files it as a synonym of its own. A
+comparison through the package's tables would therefore report a mismatch between an organism and
+itself. The rule follows the pathogen migration, the same dependency G16 waits on: the package
+reading its pathogen tables from `NeoIPC-Infectious-Agents.yaml`, with production carrying the
+canonical metadata.
 
 ### G13 — A revision procedure ends the earlier follow-up
 
@@ -658,6 +667,11 @@ changed here; the protocol is normative and a conflict between it and the code i
 - **The SSI follow-up overview** states 30 or 90 days by implant alone (`sec-collect`,
   `sec-collect-surgical-procedure-data-collection`), while the definitions restrict the 90 days to deep
   incisional and organ/space infections; rule 19 follows the definitions.
+- **Rule 50's bound** flags a device association only when the enrolment counts zero days of that
+  device, not fewer than three (four for a ventilated pneumonia): a device placed before a transfer
+  contributes days the enrolment does not count, and a day below the hour threshold is not a device
+  day, so the protocol's bound could flag legitimate records. Whether the higher bound is intended
+  for a stay's cumulative count is open (G8).
 - **Device association** is counted cumulatively in the example table ("≥ 3 CVC days on the day of
   infection", `tbl-infection-device-relationship`) and as consecutive days in the data dictionary
   (`dd-cvc-associated-bsi` and its siblings); the readings diverge when a device is removed and
@@ -800,7 +814,7 @@ publications. None constrains a record; none is checkable.
 |---|---|---|---|---|---|
 | `sec-collect-master-data-collection-sheet` | Each admission or readmission of an eligible patient to the neonatology department results in an enrolment. | Partial | 1 | program `NEOIPC_CORE` onlyEnrollOnce=false | G24 |
 | `sec-collect-master-data-collection-sheet` | An enrolled patient has admission information entered and follow-up data collected on patient progress charts. | Partial | 5, 26 | `NEOIPC_STG_ADM` autoGenerateEvent, openAfterEnrollment; `NEOIPC_ADMISSION_TYPE` compulsory; `NEOIPC_ADM_TYPE_2_PLUS` | G11 |
-| `sec-collect-master-data-collection-sheet` | Follow-up is ended when the patient is discharged, transferred to another hospital or dies. | Partial | 43, 44 | — | G24 |
+| `sec-collect-master-data-collection-sheet` | Follow-up is ended when the patient is discharged, transferred to another hospital or dies. | Partial | 43, 44, 48 | — | G24 |
 | `sec-collect-master-data-collection-sheet` | The surveillance-end data on the master data sheet or in the online system equals the totals of the patient progress chart (the chart is not submitted; rules 18 and 21 check the entered totals against the dates and each other, not against the chart). | Not checkable | — | `NEOIPC_SURV_END_*_DAYS_VR`, `NEOIPC_SURV_END_AB_SUBST_DAYS_VR` |  |
 | `sec-collect-master-data-collection-sheet` | When data is submitted to NeoIPC, all information collected on the master data collection sheet is entered into the online data entry system. | Not checkable | — | — |  |
 
@@ -808,7 +822,7 @@ publications. None constrains a record; none is checkable.
 
 | Anchor | Constraint | Enforcement | Rules | Capture-time | Gap |
 |---|---|---|---|---|---|
-| `sec-collect-progress-chart` | An enrolled eligible patient is followed up with patient progress charts until death, transfer or discharge. | Partial | 43, 44 | — | G24 |
+| `sec-collect-progress-chart` | An enrolled eligible patient is followed up with patient progress charts until death, transfer or discharge. | Partial | 43, 44, 48 | — | G24 |
 | `sec-collect-progress-chart` | Patient days, device days and antibiotic days are recorded in the progress chart, on a daily basis where possible. | Partial | 18 | the nine `NEOIPC_SURVEILLANCE_END_*_DAYS` counts compulsory | G11 |
 | `sec-collect-progress-chart` | The patient progress chart is kept at the facility. | Not checkable | — | — |  |
 | `sec-collect-progress-chart` | A patient progress chart exists for every eligible infant throughout the surveillance period. | Not checkable | — | — |  |
@@ -856,7 +870,7 @@ publications. None constrains a record; none is checkable.
 |---|---|---|---|---|---|
 | `sec-collect-device-associated-infection` | *(derived)* Infections following intravenous therapy or mechanical ventilation are recorded as device-associated with the vascular catheter or intubation. | Not checkable | — | `NEOIPC_BSI_DEV_ASS` compulsory, `NEOIPC_HAP_DEVICE_ASSOCIATION` compulsory |  |
 | `sec-collect-device-associated-infection` | A recorded device association is one of invasive ventilation (INV), non-invasive ventilation (NIV), central venous catheter (CVC) or peripheral venous catheter (PVC). | Capture time | — | option sets `NEOIPC_BSI_DEVICE_ASS`, `NEOIPC_HAP_DEVICE_ASS` |  |
-| `sec-collect-device-associated-infection` | Device association is purely time-based: an infection is device-associated only when the device was in use for the defined period before the infection. | Not checkable | — | — |  |
+| `sec-collect-device-associated-infection` | Device association is purely time-based: an infection is device-associated only when the device was in use for the defined period before the infection. | Partial | 50 | — | G8 |
 | `sec-collect-device-associated-infection` | A bloodstream infection meeting both PVC and CVC association criteria is recorded as CVC-associated. | Not checkable | — | — |  |
 | `sec-collect-device-associated-infection` | A pneumonia during intermittent use of both invasive and non-invasive ventilation is recorded as INV-associated. | Not checkable | — | — |  |
 | `tbl-infection-device-relationship` | *(derived)* The example table counts device days cumulatively ("≥ 3 CVC days on the day of infection") whereas the data dictionary requires three consecutive days on the day of infection or the day before; the readings diverge when a device is removed and re-inserted. | Not checkable | — | — |  |
@@ -950,7 +964,7 @@ publications. None constrains a record; none is checkable.
 | `sec-def-pneumonia` | A viral pneumonia pathogen is identified by gene, antigen or antibody (the detection method is not recorded). | Not checkable | — | — |  |
 | `sec-def-pneumonia` | Interleukin counts as a pneumonia laboratory criterion only when the laboratory's specification for a pathological value is fulfilled. | Not checkable | — | — |  |
 | `sec-def-pneumonia` | A pneumonia recorded as device-associated occurs in a patient ventilated (invasively or non-invasively) for at least 4 calendar days, counting the day ventilation starts as day 1. | Partial | 50 | `NEOIPC_HAP_DEVICE_ASSOCIATION` compulsory | G8 |
-| `sec-def-pneumonia` | The onset date of a device-associated pneumonia is no earlier than day 3 of ventilation. | Not covered | — | — | G8 |
+| `sec-def-pneumonia` | The onset date of a device-associated pneumonia is no earlier than day 3 of ventilation. | Partial | 50 | — | G8 |
 | `def-pneumonia` | A pneumonia has at least one imaging finding showing new changes suggestive of pneumonia. | Capture time | — | `NEOIPC_HAP_DEFINITION_VR`, `NEOIPC_HAP_IMG_FINDINGS_CRIT_FULFILLED_TRUE`, `NEOIPC_HAP_IMG_FINDINGS_CRIT_FULFILLED_FALSE`, `NEOIPC_HAP_IMAGING_FINDINGS` compulsory | G15 |
 | `def-pneumonia` | A pneumonia imaging finding is obtained by X-ray, CT, MRI or ultrasound. | Not checkable | — | — |  |
 | `def-pneumonia` | A pneumonia has new initiation or escalation of respiratory support lasting at least 2 days, preceded by at least 2 days of stability or improvement. | Capture time | — | `NEOIPC_HAP_DEFINITION_VR`, `NEOIPC_HAP_RESP_SUPP_CRIT_FULFILLED_TRUE`, `NEOIPC_HAP_RESP_SUPP_CRIT_FULFILLED_FALSE`, `NEOIPC_HAP_RESPIRATORY_SUPPORT` compulsory | G15 |
@@ -1040,7 +1054,7 @@ publications. None constrains a record; none is checkable.
 | `dd-surveillance-end-date` | The surveillance end form records the surveillance end date as the day data collection and follow-up for the patient stopped. | Partial | 4, 12, 13, 14, 15, 18, 25, 43, 44 | DHIS2: the event date is required | G24 |
 | `dd-surveillance-end-reason` | Surveillance end reason is one of "Discharge or transfer" and "Death". | Capture time | — | `NEOIPC_SURVEILLANCE_END_REASON` compulsory, option set `NEOIPC_SURVEILLANCE_END_REASON` |  |
 | `dd-patient-days` | Patient days count every day of the stay in the department including both the day of admission and the day of discharge/transfer/death, with no minimum duration of stay. | Covered | 18 | `NEOIPC_SURV_END_PATIENT_DAYS_SET`, `NEOIPC_SURVEILLANCE_END_PATIENT_DAYS` compulsory |  |
-| `dd-patient-days` | *(derived)* Patient days is at least 1, at most the number of calendar days from admission date to surveillance end date inclusive, and no other cumulative day count exceeds it. | Covered | 18, 51 | the nine `NEOIPC_SURV_END_*_DAYS_VR` rules | G9 |
+| `dd-patient-days` | *(derived)* Patient days is at least 1, at most the number of calendar days from admission date to surveillance end date inclusive, and no other cumulative day count exceeds it. | Covered | 4, 18, 51 | the nine `NEOIPC_SURV_END_*_DAYS_VR` rules | G9 |
 | `dd-cvc-days`, `dd-pvc-days`, `dd-inv-days`, `dd-niv-days` | CVC and PVC days count each day on which the catheter was in place for at least 12 hours; INV and NIV days count each day on which the ventilation was given for more than 12 hours. | Not checkable | — | the four counts compulsory; `NEOIPC_SURV_END_CVC_DAYS_VR`, `NEOIPC_SURV_END_PVC_DAYS_VR`, `NEOIPC_SURV_END_INV_DAYS_VR`, `NEOIPC_SURV_END_NIV_DAYS_VR`, `NEOIPC_SURV_END_NIV_INV_DAYS_VR` |  |
 | `dd-human-milk-days` | Human milk days count each day on which enteral feeding consisted exclusively of own mother's or donor breast milk, with fortified breast milk counting as breast milk. | Not checkable | — | `NEOIPC_SURVEILLANCE_END_HUMAN_MILK_DAYS` compulsory, `NEOIPC_SURV_END_HUMAN_MILK_DAYS_VR` |  |
 | `dd-kangaroo-care-days` | Kangaroo care days count each day on which the patient received kangaroo care (intensive skin-to-skin contact) for at least 2 hours. | Not checkable | — | `NEOIPC_SURVEILLANCE_END_KANGAROO_CARE_DAYS` compulsory, `NEOIPC_SURV_END_KANGAROO_CARE_DAYS_VR` |  |
@@ -1049,7 +1063,7 @@ publications. None constrains a record; none is checkable.
 | `dd-antibiotic-days-total`, `dd-antibiotic-days-per-substance` | An antibiotic course counts the day of the first dose, the day of the last dose and every day between them, dose-free days within the course included; days after the last dose are not counted whatever the drug level. | Not checkable | — | — |  |
 | `dd-antibiotic-days-total` | At most one antibiotic day is counted per calendar day, so a day with several antibiotics counts as one antibiotic day (no daily timeline is recorded; the checkable consequence, antibiotic days not exceeding patient days, is the row above and G9). | Not checkable | — | — |  |
 | `dd-antibiotic-days-per-substance` | Antibiotic days per substance count, for each recorded systemic antibiotic substance, the days on which the infant received that substance. | Partial | 52, 54 | `NEOIPC_SURV_END_AB_SUBST_0n_HIDE`, `NEOIPC_SURV_END_AB_SUBST_01_REQUIRE`, `NEOIPC_SURV_END_AB_SUBST_0n_DAYS_REQUIRE`, the generated substance option set | G10 |
-| `dd-antibiotic-days-per-substance` | *(derived)* No single substance's antibiotic days exceed the total antibiotic days, and the sum of per-substance days is at least the total antibiotic days. | Covered | 21, 53 | `NEOIPC_SURV_END_AB_SUBST_DAYS_VR` (the floor only) | G10 |
+| `dd-antibiotic-days-per-substance` | *(derived)* No single substance's antibiotic days exceed the total antibiotic days, and the sum of per-substance days is at least the total antibiotic days. | Covered | 21, 53, 54 | `NEOIPC_SURV_END_AB_SUBST_DAYS_VR` (the floor only) | G10 |
 
 ### 5.2 Surgical Procedure (`sec-dd-surgical-procedure`)
 
@@ -1111,6 +1125,7 @@ publications. None constrains a record; none is checkable.
 | `dd-inv`, `dd-niv` | Invasive mechanical ventilation is ventilation via an endotracheal or tracheostomy tube; non-invasive ventilatory support is support via CPAP or high-flow nasal cannula. | Not checkable | — | — |  |
 | `dd-inv-associated-pneumonia` | A pneumonia recorded as INV-associated has the patient with an endotracheal or tracheostomy tube for at least 3 consecutive days on the day of infection (first symptoms or first positive culture) or the day before. | Partial | 50 | — | G8 |
 | `dd-inv-day`, `dd-niv-day` | An INV-day or NIV-day is a day on which the patient received that ventilation for more than 12 hours cumulatively. | Not checkable | — | — |  |
+| `dd-inv-day`, `dd-niv-day`, `dd-inv-days`, `dd-niv-days` | *(derived)* No day is both an INV day and an NIV day, so INV days and NIV days together cannot exceed the patient days. | Covered | 51 | `NEOIPC_SURV_END_NIV_INV_DAYS_VR` | G9 |
 | `dd-niv-associated-pneumonia` | A pneumonia recorded as NIV-associated has the patient receiving non-invasive ventilatory support for at least 3 consecutive days on the day of infection or the day before. | Partial | 50 | — | G8 |
 | `dd-organisms-respiratory-tract`, `dd-organism-surgical-site` | Organisms identified from the respiratory tract or the surgical site count only when identified by a culture or non-culture microbiologic test performed for clinical diagnosis or treatment, not by active surveillance culture/testing. | Not checkable | — | — |  |
 | `dd-infection-at-surgery` | Infection Present at Time of Surgery is YES only when the sign of infection identified during the procedure applies to the depth of the SSI attributed to that procedure. | Not checkable | — | `NEOIPC_SSI_INFECTION_PRESENT` compulsory |  |
@@ -1147,7 +1162,7 @@ pneumonia and the deepest-level rule for the SSI type.
 | `sec-analysis-antibiotic-use` | *(derived)* Each recorded antibiotic substance is an entry of the List of Antibiotics, whose entries carry a WHO Anatomical Therapeutic Chemical (ATC) code from which the substance groups are derived, except for the substances the ATC index does not list, which carry a placeholder code. | Capture time | — | the generated option set `NEOIPC_ANTIMICROBIAL_SUBSTANCES` | G19 |
 | `sec-analysis-antibiotic-use` | *(derived)* Substances are grouped at ATC levels 1, 2, 4 and 5 only. | Not checkable | — | — |  |
 | `sec-analysis-antibiotic-use` | *(derived)* Substance and substance-group use rates are expressed per 1000 patient days according to the prose, while the formula that follows multiplies by 100. | Not checkable | — | — |  |
-| `sec-analysis-antibiotic-use` | *(derived)* Total therapy days for a substance is a count of patient days and cannot exceed the patient days. | Covered | 53 | — | G10 |
+| `sec-analysis-antibiotic-use` | *(derived)* Total therapy days for a substance is a count of patient days and cannot exceed the patient days. | Covered | 53, 54 | — | G10 |
 | `sec-analysis-antibiotic-use` | *(derived)* A patient counted as receiving a specific substance is also a patient receiving any antibiotic, so a record with any substance recorded has antibiotic days of at least one. | Covered | 52, 53 | `NEOIPC_SURV_END_AB_SUBST_01_HIDE` to `NEOIPC_SURV_END_AB_SUBST_09_HIDE` (slot 1 is hidden until the antibiotic days exceed zero, each later slot until the previous one holds a substance) | G10 |
 | `sec-analysis-antibiotic-use` | *(derived)* The stated formula for the proportion of patients receiving a substance divides therapy days by patient days, contradicting the prose definition (patients over patients) immediately before it. | Not checkable | — | — |  |
 

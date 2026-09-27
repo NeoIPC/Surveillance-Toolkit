@@ -7,4 +7,5 @@ This message appears in the validation report when a later enrolment of a patien
 Either the admission type of the later enrolment is wrong, or the two enrolments describe the same hospital stay.
 
 Please open the later enrolment's admission form (see @sec-solution-15), reopen it for editing if it is completed (see @sec-solution-9) and correct the admission type together with the day of life at admission.
+Afterwards, check whether the day of life values on the enrolment's other forms need to be updated (see @sec-solution-11).
 If the two enrolments describe one stay, please delete the redundant one instead (see @sec-solution-13).

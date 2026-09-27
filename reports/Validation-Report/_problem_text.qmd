@@ -9,7 +9,7 @@
 
 # One finding's values as the named character scalars the templates take.
 # Dates take the locale's date format and whole numbers — every numeric a
-# rule records is a count of days or an index — the reports' integer
+# rule records is a count or an index — the reports' integer
 # formatting with the locale's digit grouping; a missing value reads as the
 # report's `missing_value` string — worded to sit inside a sentence — so a
 # template never receives an NA. Every value is then escaped for Markdown
@@ -69,14 +69,17 @@ fall_back_context <- function(rule_id, context) {
   context
 }
 
-# The template one finding is rendered with: the rule's `description`, or
-# for rule 20 its second complete sentence for a pathogen recorded as causing
-# a secondary sepsis, rather than one sentence with an optional fragment.
-# `_setup.qmd` has checked that every rule carries the templates it renders
-# with before anything is composed.
+# The template one finding is rendered with: the rule's `description`, or a
+# second complete sentence rather than one sentence with an optional
+# fragment — for rule 20 a pathogen recorded as causing a secondary sepsis,
+# for rule 55 a secondary-BSI item that was never answered, which has no
+# answer a label could name. `_setup.qmd` has checked that every rule carries
+# the templates it renders with before anything is composed.
 select_template <- function(rule_id, context, sR) {
   key <- if (rule_id == 20L && isTRUE(context$secondary_bsi))
     "description_secondary_bsi"
+  else if (rule_id == 55L && is.na(context$sec_bsi[[1]]))
+    "description_unanswered"
   else
     "description"
   sR$problems[[as.character(rule_id)]][[key]]

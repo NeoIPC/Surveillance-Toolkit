@@ -173,7 +173,7 @@ All reports store the string resource result in `sR` (accessed via `sR$key`).
 - Use `|` (literal, keep trailing newline) for strings with intentional newlines (e.g., email templates)
 - Use `>` **only** when a trailing newline is intended (rare)
 - Quote numeric YAML keys: `"1"`, `"2"`, `"3"` (otherwise YAML interprets them as integers)
-- Use the `'bool#no' = function(x) x` handler in `yaml::read_yaml()` to prevent YAML from converting "no" to `FALSE`
+- Read string resources with `string_resource_handlers()` from `reports/common/helpers.R` (as `get_string_resources()` does), which sets one handler on both the `bool#yes` and the `bool#no` tag: YAML 1.1 reads a bare yes, no, on, off, y or n as a logical, but in string resources such a word is a label (po4a writes a translated `Yes` unquoted), so it stays text, and only true and false are logicals
 
 ### Glossary naming convention
 

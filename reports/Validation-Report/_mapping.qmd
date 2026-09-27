@@ -86,10 +86,10 @@ problem_detail_info <- tibble::tribble(
   20L, 20L, c(1L,5L,6L,7L,8L,9L,10L,12L,15L),      # The Infection Occurred Within the First Two Days of Hospitalisation of a Referred or (Re-)Admitted Patient
   21L, 21L, c(16L,1L,10L,14L,8L,4L),               # The Enrolment Has Been Active for More Than 120 Days and Has No Surveillance End Form
   22L, 22L, c(16L,1L,10L,15L,8L,4L),               # The Enrolment Has Been Active for More Than 120 Days and Its Surveillance End Form Is Not Completed
-  23L, 23L, c(15L,9L,13L,2L),                      # The Admission Occurred After Day of Life 120
+  23L, 23L, c(15L,9L,11L,13L,2L),                  # The Admission Occurred After Day of Life 120
   24L, 24L, c(15L,9L,11L),                         # The Day of Life at Admission Is Missing or Implausible for a Transferred or Readmitted Infant
-  25L, 25L, c(15L,9L,13L),                         # A Later Enrolment Is Recorded as an Admission From the Delivery Room or on the Day of Birth
-  26L, 26L, c(15L,9L,6L,13L),                      # The Enrolment Is Dated On or After the Patient's Recorded Death
+  25L, 25L, c(15L,9L,11L,13L),                     # A Later Enrolment Is Recorded as an Admission From the Delivery Room or on the Day of Birth
+  26L, 26L, c(15L,9L,6L,13L),                      # The Enrolment Is Dated on or after the Patient's Recorded Death
   27L, 27L, c(12L,7L),                             # The Same Type of Infection Was Recorded Again Within 14 Days
   28L, 28L, c(15L,9L),                             # The Infection Is Recorded as Device-Associated but the Enrolment Has No Days of That Device
   29L, 29L, c(15L,9L,11L),                         # A Cumulative Day Count Exceeds the Number of Patient Days
@@ -114,7 +114,8 @@ context_decorations <- tibble::tribble(
 # above gives them. They are listed one by one as literal `sR$key` references:
 # the string-layer check reads those to tell a live key from a dead one, and a
 # map reached by a name taken from the table would count as unused. The
-# devices take the glossary's abbreviations, which the forms use as well.
+# devices take the glossary's abbreviations, which the sepsis form's options
+# and the surveillance end form's day counts use.
 label_maps <- function(sR) list(
   ssi_types           = sR$ssi_types,
   admission_types     = sR$admission_types,

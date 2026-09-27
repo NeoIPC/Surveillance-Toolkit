@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-09-27 07:59+0200\n"
+"POT-Creation-Date: 2026-09-27 09:21+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Language-Team: none\n"
 "Language: en\n"
@@ -4121,7 +4121,7 @@ msgstr ""
 #. type: Hash Value: problems 47 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The enrolment dated {enrolledAt} records the admission type '{type_label}', but the patient has an earlier enrolment dated {enrolledAt_previous}, so this admission is a transfer or readmission after the day of birth."
+msgid "The admission form of the enrolment dated {enrolledAt} records the infant as {type_label}, but the patient has an earlier enrolment dated {enrolledAt_previous}, so this admission is a transfer or readmission after the day of birth."
 msgstr ""
 
 #. type: Hash Value: problems 47 summary
@@ -4230,6 +4230,12 @@ msgstr ""
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "The secondary bloodstream infection item is '{sec_bsi_label}', but the number of secondary bloodstream infection organisms recorded is {organisms}."
+msgstr ""
+
+#. type: Hash Value: problems 55 description_unanswered
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The secondary bloodstream infection item has not been answered, but the number of secondary bloodstream infection organisms recorded is {organisms}."
 msgstr ""
 
 #. type: Hash Value: problems 55 summary
@@ -4415,6 +4421,7 @@ msgstr ""
 #: reports/Validation-Report/en/_solution_0014.Rmd:2
 #: reports/Validation-Report/en/_solution_0015.Rmd:2
 #: reports/Validation-Report/en/_solution_0016.Rmd:2
+#: reports/Validation-Report/en/_solution_0017.Rmd:2
 #, no-wrap
 msgid "\\newpage\n"
 msgstr ""
@@ -5126,18 +5133,19 @@ msgstr ""
 #: reports/Validation-Report/en/_problem_detail_0023.Rmd:6
 #, markdown-text, no-wrap
 msgid ""
-"An infant is eligible for NeoIPC Surveillance when it is admitted to the neonatal department within 120 days of birth, the day of birth being day of life 1, so an infant admitted on day of life 121 or later is not eligible.\n"
+"An infant is eligible for the Core Module only if it is admitted to a ward of the neonatal department within 120 days of birth, besides meeting the birth weight or gestational age criterion; the day of birth is day of life 1, so an infant admitted on day of life 121 or later is not eligible for the Core Module.\n"
 "This message appears in the validation report when the admission form of an infant transferred or readmitted to the hospital the day after birth or later records a day of life at admission above 120.\n"
 "For the other two admission types the platform sets the day of life to 1 itself, so their forms are not checked.\n"
 msgstr ""
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0023.Rmd:9
+#: reports/Validation-Report/en/_problem_detail_0023.Rmd:10
 #, markdown-text, no-wrap
 msgid ""
 "Please check the admission form.\n"
 "If the day of life was entered incorrectly, open the admission form (see @sec-solution-15), reopen it for editing if it is completed (see @sec-solution-9) and correct the value.\n"
-"If the infant was in fact admitted after day of life 120, it is not eligible for the surveillance: please delete the enrolment (see @sec-solution-13), or the whole patient record if this is its only enrolment (see @sec-solution-2).\n"
+"Afterwards, check whether the day of life values on the enrolment's other forms need to be updated (see @sec-solution-11).\n"
+"If the infant was in fact admitted after day of life 120, it is not eligible for the Core Module: please delete the enrolment (see @sec-solution-13), or the whole patient record if this is its only enrolment (see @sec-solution-2).\n"
 msgstr ""
 
 #. type: Title ###
@@ -5191,17 +5199,18 @@ msgid "Either the admission type of the later enrolment is wrong, or the two enr
 msgstr ""
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0025.Rmd:10
+#: reports/Validation-Report/en/_problem_detail_0025.Rmd:11
 #, markdown-text, no-wrap
 msgid ""
 "Please open the later enrolment's admission form (see @sec-solution-15), reopen it for editing if it is completed (see @sec-solution-9) and correct the admission type together with the day of life at admission.\n"
+"Afterwards, check whether the day of life values on the enrolment's other forms need to be updated (see @sec-solution-11).\n"
 "If the two enrolments describe one stay, please delete the redundant one instead (see @sec-solution-13).\n"
 msgstr ""
 
 #. type: Title ###
 #: reports/Validation-Report/en/_problem_detail_0026.Rmd:1
 #, markdown-text, no-wrap
-msgid "The Enrolment Is Dated On or After the Patient's Recorded Death {#sec-problem-details-26}"
+msgid "The Enrolment Is Dated on or after the Patient's Recorded Death {#sec-problem-details-26}"
 msgstr ""
 
 #. type: Plain text
@@ -5209,7 +5218,7 @@ msgstr ""
 #, markdown-text, no-wrap
 msgid ""
 "When an infant dies, its surveillance ends on the day of death, which is recorded on the surveillance end form with 'Death' as the reason.\n"
-"No hospital stay of the patient can begin on or after that day.\n"
+"No other hospital stay of the patient can begin on or after that day.\n"
 "This message appears in the validation report when a patient has a surveillance end form that gives death as the reason and another enrolment whose admission date is on or after the date of that form.\n"
 msgstr ""
 
@@ -5237,7 +5246,7 @@ msgstr ""
 #: reports/Validation-Report/en/_problem_detail_0027.Rmd:6
 #, markdown-text, no-wrap
 msgid ""
-"According to the NeoIPC Surveillance Protocol, the same type of infection is registered again for a patient only after a minimum of 14 days and a period without relevant symptoms of infection, and a new pathogen isolated at the same site while an infection is present is not a new infection.\n"
+"According to the NeoIPC Surveillance Protocol, the same type of infection is registered again for a patient only after a minimum of 14 days and a period without relevant symptoms of infection, and a new pathogen isolated in the same organ system while an infection is recorded is not a new infection.\n"
 "This message appears in the validation report when a patient has two forms of the same infection type (sepsis, necrotizing enterocolitis, pneumonia or surgical site infection) whose infection dates are fewer than 14 days apart, whether in one enrolment or in two enrolments of the patient.\n"
 "The later form is the one the message names; when both forms carry the same date, either may carry the message.\n"
 msgstr ""
@@ -5267,7 +5276,7 @@ msgstr ""
 #: reports/Validation-Report/en/_problem_detail_0028.Rmd:6
 #, markdown-text, no-wrap
 msgid ""
-"A sepsis is recorded as associated with a central or peripheral venous catheter, and a pneumonia as associated with invasive or non-invasive ventilation, when the device was in place on the days before the infection.\n"
+"A sepsis is recorded as associated with a central or peripheral venous catheter, and a pneumonia as associated with invasive or non-invasive ventilation, when the device has been in place for at least three consecutive days on the day of infection or the day before.\n"
 "The surveillance end form of the enrolment counts the days on which each of these devices was in place during the stay, so an enrolment with a device-associated infection has at least one day of that device.\n"
 "This message appears in the validation report when a sepsis or pneumonia form records a device association but the enrolment's completed surveillance end form counts zero days of that device, or none at all.\n"
 msgstr ""
@@ -5886,21 +5895,21 @@ msgid "![The filter for patients with an active enrolment in the list toolbar of
 msgstr ""
 
 #. type: Title ###
-#: reports/Validation-Report/en/_solution_0017.Rmd:1
+#: reports/Validation-Report/en/_solution_0017.Rmd:6
 #, markdown-text, no-wrap
 msgid "Changing the Data in a Patient Record's Profile {#sec-solution-17}"
 msgstr ""
 
 #. type: Plain text
-#: reports/Validation-Report/en/_solution_0017.Rmd:4
+#: reports/Validation-Report/en/_solution_0017.Rmd:9
 #, markdown-text, no-wrap
-msgid "The data that describes the patient rather than a single hospital stay, such as the sex, the birth weight or whether the infant is part of a multiple birth, is shown in the ‘Profile’ widget of the Tracked Entity Instance Dashboard (see @sec-solution-1).\n"
+msgid "The data that describes the patient rather than a single hospital stay, such as the sex, the birth weight or whether the infant is part of a multiple birth, is shown in the 'Profile' widget of the Tracked Entity Instance Dashboard (see @sec-solution-1).\n"
 msgstr ""
 
 #. type: Plain text
-#: reports/Validation-Report/en/_solution_0017.Rmd:6
+#: reports/Validation-Report/en/_solution_0017.Rmd:11
 #, markdown-text, no-wrap
 msgid ""
-"To change it, click ‘Edit’ in the heading of the ‘Profile’ widget, correct the fields concerned, for example ‘Multiple birth’ or ‘Number of infants in birth’, and click ‘Save’.\n"
-"‘Cancel’ leaves the profile as it was.\n"
+"To change it, click 'Edit' in the heading of the 'Profile' widget, correct the fields concerned, for example 'Multiple birth' or 'Number of infants in birth', and click 'Save'.\n"
+"'Cancel' leaves the profile as it was.\n"
 msgstr ""

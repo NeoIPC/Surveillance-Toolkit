@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-09-27 10:59+0200\n"
+"POT-Creation-Date: 2026-09-27 11:00+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Language-Team: none\n"
 "Language: en\n"
@@ -4970,7 +4970,7 @@ msgstr ""
 
 #, priority:10
 msgctxt "dataElements/NEOIPC_SURVEILLANCE_END_NIV_DAYS/DESCRIPTION"
-msgid "The cumulative number of days when the infant was on non-invasive ventilation (not intubated; e.g. high flow nasal cannulae) for more than 12 hours/day."
+msgid "The cumulative number of days when the infant was on non-invasive ventilation (not intubated; e.g. high flow nasal cannulae or CPAP) for more than 12 hours/day."
 msgstr ""
 
 #, priority:10
