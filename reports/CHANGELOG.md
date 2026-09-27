@@ -99,15 +99,20 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
 - Every translatable report string names its placeholders (`{column}`, `{count}`, `{hospital}` and
   the like) where it used a positional `%s`, and the reports fill them with `interpolate_translation()`.
   Pester tests keep printf placeholders out of the string resources and `sprintf()` away from them, and
-  hold every interpolation of a string resource to exactly the placeholders of its English template.
+  hold every interpolation of a string resource to the placeholders of its English template: exactly
+  those, or for the outlier composer, which fills whichever template it picked from one set of values,
+  no others; the Validation Report's rule sentences are held to neoipcr's context fields when it renders.
   The Partner and Reference Reports' prose no longer keeps sentence text inside inline R: a sentence
   that varies is written out in full for each case, as the Partner Report's introduction is with and
   without reference data, or takes only its variable part from the report's setup. The Partner
   Certificate's funding statement carries no line break: the footer wraps it beside the EU emblem where
   the layout needs, instead of where a placeholder in the translation put the break. Translators see new
   source text for these strings; until it is translated again, the German and Italian certificates and
-  the German Partner Report's nosocomial-infection paragraph fall below the 80 % po4a requires and render
-  in English.
+  the German Partner Report's nosocomial-infection introduction fall below the 80 % po4a requires and
+  render in English.
+- The Partner Report's organism-resistance introduction and the resistance methods paragraphs of the
+  Partner and Reference Reports call the phenotypes they count resistance categories, where they said
+  resistance markers.
 
 ### Removed
 
@@ -116,7 +121,8 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
   which may extend beyond the discharge and into a readmission, so an infection date outside the
   admission it is recorded in is legitimate as long as a recorded procedure covers it, which rule 19
   checks. The explanation of the time-frame rules says so.
-- The eleven `quartile_footnote` strings, which no table used, and the two
+- The eleven `quartile_footnote` strings, which no table used; the shared secondary-BSI
+  `rate_footnote`, which the Partner Report overrides and the Reference Report does not read; and the two
   `_methods-antibiotic-utilization.Rmd` prose files, which held nothing but an inline R span; the
   antibiotic-utilization tables write that sentence themselves.
 
@@ -147,16 +153,19 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
   that ends it, where before only the head line reached the build log and any line after it, such as
   the text of the stray-fence diagnostic, went to the module's verbose stream. Pandoc's own warnings
   and the reports' logger records were single lines already and are unchanged, as is `Invoke-Rscript`.
-- The second line of the Partner Certificate's funding statement sat under the EU emblem in the
-  footer, not beside it: TeX discards the space at the start of a line, so the indent that followed
-  the forced break was lost. The statement is now set as one indented block.
+- A line of the Partner Certificate's funding statement that wrapped on its own started under the EU
+  emblem in the footer, not beside it: only the lines the translation's own break began were indented,
+  so a translation whose text before that break ran longer than the line put its continuation under the
+  emblem, and the German one came within half a millimetre of it. The statement is now set as one block
+  indented past the emblem, wherever it wraps.
 - The Reference Report's nosocomial-infection introduction read "In the incidence densities … are
   displayed" when the incidence-density table was left out, which the section is shown without
   whenever one of its other tables is included. The sentences pointing at the incidence-density and
   device-associated tables are now written only when the report includes the table.
-- A translated figure caption never reached the Partner or Reference Report: the captions were a list
-  of entries, and the string cascade overlays a translation only onto named entries, so every
-  language showed the English caption. They are keyed by name now.
+- A translated figure caption could never replace the English one in the Partner or Reference Report:
+  the captions were a list of entries, and the string cascade overlays a translation only onto named
+  entries. They are keyed by name now. A language's captions appear once its translation of the
+  shared report strings passes the 80 % po4a requires, which none has yet.
 
 ## [0.1.0-alpha] - 2026-09-07
 

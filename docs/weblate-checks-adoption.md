@@ -146,14 +146,19 @@ A different regex from the reports one, so this cannot be a project-level flag. 
 (267 tokens). The character class is minimal by measurement rather than guesswork: a census of the
 character before every `{` in the catalogue returns exactly `#`, `V` and `A`.
 
-### `c-format` — not on the reports component
+### `c-format` — reports, until `placeholders` is enabled
 
 No reports source string carries a C-printf placeholder: every placeholder is named, and
 `ReportInterpolationHygiene.Tests.ps1` fails the build on a printf placeholder in the string resources and
-on `sprintf()` over one. The flag therefore has nothing left to check there, and what it would still report
-is noise: three tokens that are not placeholders — a `% a` inside "Values above 100% are expected", a
-msgid that is literally `%`, and a `%x` inside an inline R span. Leaving it on would teach translators that
-the check cries wolf.
+on `sprintf()` over one. The translations are another matter. A translation written before the change
+still carries its `%s` against a source that now names the value, and Weblate's format check counts a token
+in the translation as extra even when the source has none, fuzzy units included — so until the
+`placeholders` flag with its glue alternative is enabled, this flag is what reports those units. Enable
+`placeholders` first, since it flags the same units by the missing `{name}`, and remove `c-format` then.
+
+What the flag reports beyond those units is noise: three tokens that are not placeholders — a `% a`
+inside "Values above 100% are expected", a msgid that is literally `%`, and a `%x` inside an inline R span.
+Left on for good, it would teach translators that the check cries wolf.
 
 ### `xml-text` — no longer applicable, and worth knowing why
 

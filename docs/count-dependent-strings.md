@@ -54,7 +54,7 @@ the obvious heuristic, which is why the list below was built by reading the sele
 | `fig_sample_size` | `reports/common.yaml` | `(N = {count} patients)`. Receives a patient count. The noun follows the numeral directly and must agree. |
 | `sparse_data_footnote` | `reports/common.yaml` | `Fewer than {threshold} events; …`. Receives the sparse-data threshold. |
 | `sparse_data_footnote_no_ci` | `reports/common.yaml` | As above, the variant rendered when confidence intervals are off. |
-| `content[4]` | `reports/Partner-Certificate/content/_sR.yaml` | `…monitoring of {patient_count} newborns with birth weights…`. Receives a newborn count. |
+| `content[5]` | `reports/Partner-Certificate/content/_sR.yaml` | `…monitoring of {patient_count} newborns with birth weights…`. Receives a newborn count. |
 | `headerList.country` / `.countries` | Partner-Report, Reference-Report | Selected in R by `length(countries) > 1`. No count is printed; the noun still agrees with one. |
 | `header.department` / `.departments` | Validation-Report | Selected in R by `nrow(departments) > 1`. Same shape. |
 
@@ -79,8 +79,8 @@ Recorded so the question is not reopened.
 
 | string family | why it stays |
 |---|---|
-| every `*_footnote` carrying `{column}` (`n_`, `pooled_`, `rate_`) | The `{column}` is a **column symbol** — `N`, `Q₂` — not a count. Nothing agrees with anything. This is the bulk of the placeholder-carrying strings. |
-| `fig-cap` bin-width and quantile captions | `{step}` receives a formatted quantity with a unit (`50 g`, `7 days`), and `{quantile_25}`, `{quantile_50}` and `{quantile_75}` a percentage. "steps" and "quantiles" are fixed plurals describing the construct, not agreeing with the value. |
+| every `*_footnote` carrying `{column}` (`n_`, `pooled_`, `rate_`, `removed_`, `exempted_`) | The `{column}` is a **column header** — `N`, `Pooled`, `Rate`, `Removed`, `Exempted` — not a count. Nothing agrees with anything. |
+| `fig-cap` bin-width and quantile captions | `{step}` receives a formatted quantity with a unit (`50 g`, `7 day`), and `{quantile_25}`, `{quantile_50}` and `{quantile_75}` a percentage. "steps" and "quantiles" are fixed plurals describing the construct, not agreeing with the value. |
 | `gestational_age_format` (`{weeks}+{days}`) | A numeric format with no words at all. |
 | `generated_on`, `patient_not_found` | Placeholders receive a date and identifiers. |
 | `outlier.composed.*`, `outlier.generic_summary` | Placeholders receive metric labels and cross-references. |

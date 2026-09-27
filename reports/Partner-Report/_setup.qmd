@@ -1495,18 +1495,23 @@ ref_org_rr_table <- if (params$includeOrganismResistanceRateTable)
 # Sentences a table introduction adds only when the table it points to is in
 # the report. Each is a whole translated sentence taking the cross-reference as
 # a value, so the prose files write no text inside their inline R code; an
-# empty string leaves the paragraph reading as it does without the table.
-table_note <- function(include, template, reference)
-  if (include) paste0(" ", interpolate_translation(template, reference = reference)) else ""
+# empty string leaves the paragraph reading as it does without the table. The
+# sentence is interpolated at the call, where the template is named, and is
+# evaluated only when the table is included.
+table_note <- function(include, sentence)
+  if (include) paste0(" ", sentence) else ""
 ast_table_note <- table_note(
   params$includeAntibioticResistanceTestRateTable,
-  sR$`tbl-abr-infection-rate`$ast_table_note, "@tbl-resistance-test-rate")
+  interpolate_translation(sR$`tbl-abr-infection-rate`$ast_table_note,
+                          reference = "@tbl-resistance-test-rate"))
 abr_table_note <- table_note(
   params$includeResistantPathogenInfectionRateTable,
-  sR$`tbl-resistance-test-rate`$abr_table_note, "@tbl-abr-infection-rate")
+  interpolate_translation(sR$`tbl-resistance-test-rate`$abr_table_note,
+                          reference = "@tbl-abr-infection-rate"))
 abr_table_contrast <- table_note(
   params$includeResistantPathogenInfectionRateTable,
-  sR$`tbl-organism-resistance-rate`$abr_table_contrast, "@tbl-abr-infection-rate")
+  interpolate_translation(sR$`tbl-organism-resistance-rate`$abr_table_contrast,
+                          reference = "@tbl-abr-infection-rate"))
 
 # ── Section visibility flags ─────────────────────────────────────
 # A section heading is shown iff at least one table in that section
@@ -1864,8 +1869,14 @@ dR <- list(
 )
 
 # The reference data's severe-infection figures, a sentence the nosocomial
-# infections introduction adds when the report carries reference data.
-nosocomial_reference_comparison <- if (!is.null(dR$ref))
+# infections introduction adds when the report carries reference data. A
+# reference dataset that carries no incidence-density table, or no count in it,
+# has no figure to give, and the sentence is left out: interpolate_translation()
+# refuses a value that is not there.
+reference_severe_infections <- dR$ref[c("numberOfSevereInfections", "numberOfPatients",
+                                        "averageSevereInfectionsPerPatient")]
+nosocomial_reference_comparison <- if (!is.null(dR$ref) &&
+                                       all(lengths(reference_severe_infections) == 1L))
   paste0(" ", interpolate_translation(
     sR$nosocomial_reference_comparison,
     infection_count = dR$ref$numberOfSevereInfections,

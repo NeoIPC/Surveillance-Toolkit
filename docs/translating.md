@@ -118,6 +118,7 @@ but each one exists because the corresponding mistake has shipped here at least 
 | **AsciiDoc markup** | An anchor, cross-reference or macro differs from the source | Restore the identifier exactly; translate only the visible text |
 | **Markdown** | A link or formatting delimiter was dropped or added | Restore it. Dropping one link out of two passes silently, so check them all |
 | **Placeholders** | A `{name}`, `@ref` or inline R span is missing or invented | Restore it exactly. An invented one fires too, which is intentional |
+| **C format** | Your translation still has a `%s` where the English source now names the value | Put the name the source uses in place of the `%s` |
 | **Unchanged translation** | Your translation is identical to the English | Often correct here — an initialism or a scientific name may be right unchanged. Ignore it in that case |
 
 **One check rewrites your text rather than warning you, and it is on for French.** Weblate inserts a

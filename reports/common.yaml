@@ -211,7 +211,6 @@ tbl-secondary-bsi-rates:
   no_data: "No secondary BSI data available for these report settings."
   pooled_footnote: "{column}: The secondary BSI rate calculated across all infants from all departments."
   rate_denominator: "Number of infections with follow-up for secondary BSI"
-  rate_footnote: "{column}: The secondary BSI rate for the department calculated as infections with secondary BSI per 100 infections with follow-up for secondary BSI."
   rate_name: "Secondary BSI rate"
   rate_numerator: "Number of infections with secondary BSI"
   tbl-cap: "Secondary bloodstream infections"
@@ -344,16 +343,17 @@ methods:
     volume reducing culture sensitivity and elevated contamination risk — may
     influence detection patterns.
   resistant_pathogens: >-
-    This section reports the rate at which detected pathogens carry specific
-    resistance markers. An empty table indicates that no resistant organisms were
+    This section reports the rate at which detected pathogens fall into specific
+    resistance categories. An empty table indicates that no resistant organisms were
     detected among tested pathogens — it does not indicate that testing was not
     performed.
   resistant_pathogens_ast_ref: >-
     Resistance testing completeness is reported separately in the
     antimicrobial susceptibility testing section.
   organism_resistance: >-
-    This section reports organism-specific resistance rates — the proportion
-    of each detected organism that carries a given resistance marker. Unlike
+    This section reports organism-specific resistance rates — for each detected
+    organism, the proportion of detections that fall into a given resistance
+    category. Unlike
     the resistant pathogen infection rate, which uses infections as the
     denominator, this metric uses organism-level detections: for example,
     the proportion of all tested Klebsiella pneumoniae detections that are

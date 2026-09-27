@@ -17,7 +17,10 @@
     - Named placeholders ({hospital}, {column}, etc.), compared as sets since a translation may
       reorder them
     - LaTeX text markers (\text{...})
-    
+
+    A fuzzy entry is counted but not checked: po4a renders only translated entries, and a draft that
+    still carries an old placeholder is Weblate's to flag while it waits for review.
+
     The script reports violations with file paths, line numbers, and context. It returns the
     count of violations as the exit code (capped at 255).
 
@@ -193,12 +196,17 @@ function Get-PoString {
     
     $result = ($strings | ForEach-Object { $_.Groups[1].Value }) -join ''
     
-    # Unescape common sequences for comparison
-    $result = $result -replace '\\n', "`n"
-    $result = $result -replace '\\t', "`t"
-    $result = $result -replace '\\"', '"'
-    $result = $result -replace '\\\\', '\'
-    
+    # Unescape in one pass, each escape read from its own backslash: replacing one sequence after
+    # another reads the \t of an escaped \\text as a tab.
+    $result = $result -replace '\\(.)', {
+        switch -CaseSensitive ($_.Groups[1].Value) {
+            'n' { "`n" }
+            't' { "`t" }
+            'r' { "`r" }
+            default { $_ }
+        }
+    }
+
     return $result
 }
 
@@ -370,7 +378,9 @@ function Get-NamedPlaceholders {
         Extracts the distinct named placeholders ({name}) from a string, sorted.
     .DESCRIPTION
         A name starts with a letter or an underscore, so neither a Quarto heading anchor ({#sec-...})
-        nor a .NET index ({0}) is taken for one.
+        nor a .NET index ({0}) is taken for one. Two brace groups are not placeholders either: glue
+        reads a doubled brace as a literal one, so {{name}} is text, and a group straight after a TeX
+        command, as in \text{days}, is that command's argument.
     #>
     param(
         [Parameter(Mandatory)]
@@ -378,9 +388,10 @@ function Get-NamedPlaceholders {
         [string]$Text
     )
 
-    $pattern = '\{[A-Za-z_][A-Za-z0-9_]*\}'
+    $unescaped = $Text -replace '\{\{|\}\}', ''
+    $pattern = '(?<!\\[A-Za-z]+)\{[A-Za-z_][A-Za-z0-9_]*\}'
     # Not $matches - that name belongs to PowerShell's automatic variable.
-    $tokenMatches = [regex]::Matches($Text, $pattern)
+    $tokenMatches = [regex]::Matches($unescaped, $pattern)
 
     # Case-sensitive, as glue's names are.
     return @($tokenMatches | ForEach-Object { $_.Value } | Sort-Object -Unique -CaseSensitive)
@@ -785,6 +796,7 @@ Write-Host
 
 $allViolations = New-Object System.Collections.ArrayList
 $totalEntries = 0
+$fuzzyEntries = 0
 $fileStats = @{}
 # A catalogue this script could not parse. Kept apart from the violations because it is a statement
 # about the run rather than about a translation, and so must fail even under -ReportOnly.
@@ -807,10 +819,16 @@ foreach ($file in $filesToValidate) {
     $totalEntries += $entries.Count
 
     $fileViolations = 0
-    
+    $fileFuzzyEntries = 0
+
     foreach ($entry in $entries) {
+        if ($entry.IsFuzzy) {
+            $fuzzyEntries++
+            $fileFuzzyEntries++
+            continue
+        }
         Write-Verbose "  Checking line $($entry.LineNumber)..."
-        
+
         $hasViolation = Test-PlaceholderMatch -Entry $entry -FilePath $file -Violations $allViolations
         
         if ($hasViolation) {
@@ -819,7 +837,7 @@ foreach ($file in $filesToValidate) {
     }
     
     $fileStats[$file] = @{
-        Entries = $entries.Count
+        Entries = $entries.Count - $fileFuzzyEntries
         Violations = $fileViolations
     }
     
@@ -846,7 +864,8 @@ if (-not $Quiet) {
     Write-Host "VALIDATION SUMMARY" -ForegroundColor Cyan
     Write-Host ("=" * 80) -ForegroundColor Cyan
     Write-Host
-    Write-Host "Total entries validated: $totalEntries"
+    Write-Host "Total entries validated: $($totalEntries - $fuzzyEntries)"
+    Write-Host "Fuzzy entries not checked: $fuzzyEntries"
     Write-Host "Total violations found: $($allViolations.Count)" -ForegroundColor $(if ($allViolations.Count -eq 0) { 'Green' } else { 'Red' })
     Write-Host
     
@@ -877,7 +896,8 @@ if (-not $Quiet) {
     $null = $output.AppendLine("VALIDATION SUMMARY")
     $null = $output.AppendLine("=" * 80)
     $null = $output.AppendLine()
-    $null = $output.AppendLine("Total entries validated: $totalEntries")
+    $null = $output.AppendLine("Total entries validated: $($totalEntries - $fuzzyEntries)")
+    $null = $output.AppendLine("Fuzzy entries not checked: $fuzzyEntries")
     $null = $output.AppendLine("Total violations found: $($allViolations.Count)")
     $null = $output.AppendLine()
     

@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-09-27 12:54+0200\n"
+"POT-Creation-Date: 2026-09-27 13:50+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Language-Team: none\n"
 "Language: en\n"
@@ -442,7 +442,7 @@ msgstr ""
 #. type: Hash Value: methods organism_resistance
 #: reports/common.yaml:1
 #, no-wrap
-msgid "This section reports organism-specific resistance rates — the proportion of each detected organism that carries a given resistance marker. Unlike the resistant pathogen infection rate, which uses infections as the denominator, this metric uses organism-level detections: for example, the proportion of all tested Klebsiella pneumoniae detections that are carbapenem-resistant."
+msgid "This section reports organism-specific resistance rates — for each detected organism, the proportion of detections that fall into a given resistance category. Unlike the resistant pathogen infection rate, which uses infections as the denominator, this metric uses organism-level detections: for example, the proportion of all tested Klebsiella pneumoniae detections that are carbapenem-resistant."
 msgstr ""
 
 #. type: Hash Value: methods patient_population
@@ -472,7 +472,7 @@ msgstr ""
 #. type: Hash Value: methods resistant_pathogens
 #: reports/common.yaml:1
 #, no-wrap
-msgid "This section reports the rate at which detected pathogens carry specific resistance markers. An empty table indicates that no resistant organisms were detected among tested pathogens — it does not indicate that testing was not performed."
+msgid "This section reports the rate at which detected pathogens fall into specific resistance categories. An empty table indicates that no resistant organisms were detected among tested pathogens — it does not indicate that testing was not performed."
 msgstr ""
 
 #. type: Hash Value: methods resistant_pathogens_ast_ref
@@ -1109,12 +1109,6 @@ msgstr ""
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Number of infections with follow-up for secondary BSI"
-msgstr ""
-
-#. type: Hash Value: tbl-secondary-bsi-rates rate_footnote
-#: reports/common.yaml:1
-#, no-wrap
-msgid "{column}: The secondary BSI rate for the department calculated as infections with secondary BSI per 100 infections with follow-up for secondary BSI."
 msgstr ""
 
 #. type: Hash Value: tbl-secondary-bsi-rates rate_name
