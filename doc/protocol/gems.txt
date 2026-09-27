@@ -1,0 +1,12 @@
+# The Ruby gems the protocol build renders with, one name:version per line. The build workflow installs
+# these and caches the result per runner image and Ruby, keyed on this file. The versions listed here change
+# here or not at all; the gems they depend on are resolved when the cache is built, so a new image or Ruby
+# can bring newer ones. `mathematical` is the version asciidoctor-mathematical loads, and is compiled from
+# source when the cache is built.
+mathematical:1.6.20
+asciidoctor:2.0.26
+asciidoctor-pdf:2.3.27
+asciidoctor-bibtex:0.9.0
+asciidoctor-diagram:3.2.1
+asciimath:2.0.6
+asciidoctor-mathematical:0.3.5

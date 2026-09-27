@@ -348,8 +348,8 @@ jobs:
               run: python -m pytest scripts/ -v
 
     build-docs:
-        # Pinned to an explicit image for reproducibility; 26.04 provides the .NET 10 / PowerShell 7.6
-        # runtime the NeoIPC-Tools module and data-dictionary generator require.
+        # Pinned to an explicit image for reproducibility; 26.04 provides the PowerShell 7.6 runtime the
+        # protocol build requires.
         runs-on: ubuntu-26.04
         # Expose the parsed product release to the release-gated jobs (empty on non-release triggers).
         outputs:
@@ -569,14 +569,6 @@ jobs:
                 check_release NeoIPC/neoipc-app "$(get_tested neoipc-app)"
                 exit $status
 
-            # ── Metadata product group ─────────────────────────────────────────────────────────────────────────
-            # Runs on every non-release trigger (continuous CI builds all products), and on a metadata-v* release.
-            - name: Set up .NET 10 (for the data-dictionary .xlsx writer)
-              if: github.ref_type != 'tag' || steps.rel.outputs.product == 'metadata'
-              uses: actions/setup-dotnet@v5
-              with:
-                dotnet-version: '10.0.x'
-
             # ── po4a toolchain (Perl) ──────────────────────────────────────────────────────────────────────────
             # Needed by the protocol AND the infectious agent list (both localize via po4a).
             - name: Install po4a dependencies
@@ -593,10 +585,41 @@ jobs:
               run: |
                 sudo apt-get update -qq
                 sudo apt-get install -qq pandoc librsvg2-bin bison flex libffi-dev libxml2-dev libgdk-pixbuf-2.0-dev libcairo2-dev libpango1.0-dev libwebp-dev fonts-lyx fonts-noto-core
-                # CMAKE_POLICY_VERSION_MINIMUM lets the gems' bundled mtex2MML (an old cmake_minimum_required)
-                # configure under the CMake 4 on Ubuntu 26.04; passed through sudo, which otherwise resets env.
-                sudo env CMAKE_POLICY_VERSION_MINIMUM=3.5 gem install mathematical:1.7.0 asciidoctor-pdf asciidoctor-bibtex asciidoctor-diagram asciimath asciidoctor-mathematical
                 sudo npm install -g @linthtml/linthtml
+
+            # The gems are pinned in doc/protocol/gems.txt and cached per runner image and Ruby: installing
+            # them compiles `mathematical` from source, which dominates the toolchain's setup, and a native
+            # gem is only valid for the Ruby it was compiled against. A new image, a new Ruby or a changed
+            # list builds them again. The image's variables are the runner's environment, which the `env`
+            # expression context does not carry, so a step reads them.
+            - name: Identify the runner image and its Ruby
+              id: image
+              if: github.ref_type != 'tag' || steps.rel.outputs.product == 'protocol'
+              shell: bash
+              run: echo "key=$ImageOS-$ImageVersion-ruby$(ruby -e 'print RUBY_VERSION')" >> "$GITHUB_OUTPUT"
+
+            - name: Restore the protocol build's gems
+              id: gems
+              if: github.ref_type != 'tag' || steps.rel.outputs.product == 'protocol'
+              uses: actions/cache@v6
+              with:
+                path: ~/protocol-gems
+                key: protocol-gems-${{ steps.image.outputs.key }}-${{ hashFiles('doc/protocol/gems.txt') }}
+
+            - name: Install the protocol build's gems
+              if: github.ref_type != 'tag' || steps.rel.outputs.product == 'protocol'
+              shell: bash
+              run: |
+                gems="$HOME/protocol-gems"
+                if [[ '${{ steps.gems.outputs.cache-hit }}' != 'true' ]]; then
+                  # CMAKE_POLICY_VERSION_MINIMUM lets the gems' bundled mtex2MML (an old
+                  # cmake_minimum_required) configure under the CMake 4 on Ubuntu 26.04.
+                  CMAKE_POLICY_VERSION_MINIMUM=3.5 gem install --install-dir "$gems" --no-document \
+                    $(grep -v '^#' doc/protocol/gems.txt)
+                fi
+                echo "GEM_HOME=$gems" >> "$GITHUB_ENV"
+                echo "GEM_PATH=$gems:$(gem env gemdir)" >> "$GITHUB_ENV"
+                echo "$gems/bin" >> "$GITHUB_PATH"
 
             - uses: actions/setup-python@v6
               if: github.ref_type != 'tag' || steps.rel.outputs.product == 'protocol'
@@ -659,70 +682,6 @@ jobs:
               if: github.ref_type != 'tag' || steps.rel.outputs.product == 'protocol'
               shell: pwsh
               run: ./scripts/Build-NeoIPCCoreProtocol.ps1 -InformationAction Continue -WarningAction:Stop
-
-            - name: Install R for the interpolation gate's behavioural half
-              # ReportInterpolationHygiene proves that a translated string cannot reach R's evaluator, and
-              # the half that PROVES it runs R: it asks the helper to interpolate `{Sys.time()}` and
-              # requires a refusal. Those assertions were skipped wherever Rscript was absent, which is
-              # every runner, so the security property was gated by a grep alone and the log read the same
-              # either way. The test now fails on a runner without R rather than skipping, so this step is
-              # what keeps it green — and glue comes from apt because the helper calls glue_safe.
-              #
-              # It sits in the METADATA product group, next to the Pester run it serves, and carries that
-              # group's condition rather than the protocol's. The two have to stay identical: any path
-              # where Pester runs without R is now a red build rather than a quiet skip.
-              if: github.ref_type != 'tag' || steps.rel.outputs.product == 'metadata'
-              shell: bash
-              run: |
-                sudo apt-get update -qq
-                sudo apt-get install -qq r-base-core r-cran-glue
-                Rscript -e 'cat(R.version.string, "| glue", as.character(packageVersion("glue")), "\n")'
-
-            # ── Metadata product group (continued) ─────────────────────────────────────────────────────────────
-            - name: Provision and test NeoIPC-Tools
-              if: github.ref_type != 'tag' || steps.rel.outputs.product == 'metadata'
-              shell: pwsh
-              run: |
-                # Provision the DocumentFormat.OpenXml assembly the .xlsx writer loads, then run the module
-                # tests so the OpenXmlValidator-backed XLSX schema-validity gate runs in CI (it is skipped only
-                # when the assembly is absent).
-                dotnet publish scripts/modules/NeoIPC-Tools/lib -o scripts/modules/NeoIPC-Tools/lib/bin -c Release --nologo
-                Install-Module -Name Pester -MinimumVersion 5.5 -Force -Scope CurrentUser -SkipPublisherCheck
-                # powershell-yaml: the metadata assembler reads the infectious-agents / sharing YAML when
-                # building the package the data dictionary flattens.
-                Install-Module -Name powershell-yaml -MinimumVersion 0.4.2 -Force -Scope CurrentUser -SkipPublisherCheck
-                # PSScriptAnalyzer backs two gates: the approved-verb *function* check (PSUseApprovedVerbs)
-                # in ScriptVerbHygiene.Tests.ps1 — whose file-name half is a custom Pester check — and
-                # PSAvoidAssignmentToAutomaticVariable in AutomaticVariableHygiene.Tests.ps1. Both Describe
-                # blocks skip themselves when it is absent, so forgetting it here would pass silently.
-                Install-Module -Name PSScriptAnalyzer -Force -Scope CurrentUser -SkipPublisherCheck
-                # PoHeader.Tests.ps1 asserts the catalogue header contract against the COMMITTED files, so it
-                # is the only check that catches a header drifting in by a route nobody anticipated -- a hand
-                # edit, a writer nobody remembered to update, or a Weblate add-on writing a credit the
-                # exclusion list rejects. That last one is not hypothetical: the add-on re-adds a bot credit
-                # to every infectious-agents catalogue whenever those translations are touched, and a
-                # translation pull request is exactly where no human is reading the diff.
-                Invoke-Pester -Path scripts/modules/NeoIPC-Tools/Tests/DataDictionary.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/BuildReport.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/ScriptVerbHygiene.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/PlayData.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/MetadataContent.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/Metadata.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/MetadataVerify.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/PoHeader.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/AutomaticVariableHygiene.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/ReportInterpolationHygiene.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/PoTemplateChurn.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/GlossaryCasingHygiene.Tests.ps1 -CI
-
-            - name: Generate data dictionary
-              if: github.ref_type != 'tag' || steps.rel.outputs.product == 'metadata'
-              shell: pwsh
-              run: |
-                # Generate the CSV + .xlsx data dictionary into the uploaded artifacts. Assembled from the
-                # metadata/ directory alone — no DHIS2 API.
-                ./scripts/Build-NeoIPCDataDictionary.ps1 -OutputDirectory ./artifacts/data-dictionary
-
-            - name: Render metadata distribution packages
-              if: github.ref_type != 'tag' || steps.rel.outputs.product == 'metadata'
-              shell: pwsh
-              run: |
-                # Render the importable DHIS2 metadata packages (install base + play) into the uploaded artifacts.
-                # Generated from the metadata/ directory alone — no DHIS2 API. NOT committed (undiffable compressed
-                # blobs): they ship as this build artifact, and as a Release asset on a manually-published release.
-                # The version is always explicit (the generator has no default): the parsed metadata release version
-                # on a metadata release, else the metadata/VERSION file (the source of truth) for the preview artifact.
-                $version = if ('${{ steps.rel.outputs.version }}') { '${{ steps.rel.outputs.version }}' } else { (Get-Content -LiteralPath ./metadata/VERSION -Raw).Trim() }
-                ./scripts/Build-NeoIPCMetadataDistribution.ps1 -OutputDirectory ./artifacts/metadata-package -Version $version
 
             # ── Release assets ─────────────────────────────────────────────────────────────────────────────────
             # Only one product releases at a time, so ./artifacts/release-assets holds just that product's files.
@@ -807,15 +766,108 @@ jobs:
                 name: NeoIPC-Surveillance-Toolkit
                 path: ./artifacts/
 
+    build-metadata:
+        # The metadata product: the NeoIPC-Tools module's tests, the data dictionary and the importable
+        # metadata packages. Nothing here reads what build-docs renders, so it runs beside that job rather
+        # than after its protocol build. On a release tag it runs for a metadata release only; build-docs
+        # still parses and validates every tag, and the release job waits for both.
+        if: github.ref_type != 'tag' || startsWith(github.ref_name, 'metadata-v')
+        # Pinned to an explicit image for reproducibility; 26.04 provides the .NET 10 / PowerShell 7.6
+        # runtime the NeoIPC-Tools module and data-dictionary generator require.
+        runs-on: ubuntu-26.04
+        steps:
+            - uses: actions/checkout@v7
+              with:
+                submodules: true
+
+            - name: Set up .NET 10 (for the data-dictionary .xlsx writer)
+              uses: actions/setup-dotnet@v5
+              with:
+                dotnet-version: '10.0.x'
+
+            - name: Install R for the interpolation gate's behavioural half
+              # ReportInterpolationHygiene proves that a translated string cannot reach R's evaluator, and
+              # the half that PROVES it runs R: it asks the helper to interpolate `{Sys.time()}` and
+              # requires a refusal. Those assertions were skipped wherever Rscript was absent, which is
+              # every runner, so the security property was gated by a grep alone and the log read the same
+              # either way. The test now fails on a runner without R rather than skipping, so this step is
+              # what keeps it green — and glue comes from apt because the helper calls glue_safe. The
+              # glossary casing test runs R too: it reads the glossary with yaml and upper-cases through
+              # stringr, whose locale-aware casing comes from stringi.
+              #
+              # Recommended packages are left out: r-base-core recommends the compiler toolchain and the
+              # recommended R packages, and r-cran-glue recommends dplyr, knitr, rmarkdown and testthat,
+              # none of which the tests read. What the tests need is listed here instead.
+              shell: bash
+              run: |
+                sudo apt-get update -qq
+                sudo apt-get install -qq --no-install-recommends r-base-core r-cran-glue r-cran-yaml r-cran-stringr
+                Rscript -e 'cat(R.version.string, "\n"); for (p in c("glue", "yaml", "stringr")) cat(p, as.character(packageVersion(p)), "\n")'
+
+            - name: Provision and test NeoIPC-Tools
+              shell: pwsh
+              run: |
+                # Provision the DocumentFormat.OpenXml assembly the .xlsx writer loads, then run the module
+                # tests so the OpenXmlValidator-backed XLSX schema-validity gate runs in CI (it is skipped only
+                # when the assembly is absent).
+                dotnet publish scripts/modules/NeoIPC-Tools/lib -o scripts/modules/NeoIPC-Tools/lib/bin -c Release --nologo
+                Install-Module -Name Pester -MinimumVersion 5.5 -Force -Scope CurrentUser -SkipPublisherCheck
+                # powershell-yaml: the metadata assembler reads the infectious-agents / sharing YAML when
+                # building the package the data dictionary flattens.
+                Install-Module -Name powershell-yaml -MinimumVersion 0.4.2 -Force -Scope CurrentUser -SkipPublisherCheck
+                # PSScriptAnalyzer backs two gates: the approved-verb *function* check (PSUseApprovedVerbs)
+                # in ScriptVerbHygiene.Tests.ps1 — whose file-name half is a custom Pester check — and
+                # PSAvoidAssignmentToAutomaticVariable in AutomaticVariableHygiene.Tests.ps1. Both Describe
+                # blocks skip themselves when it is absent, so forgetting it here would pass silently.
+                Install-Module -Name PSScriptAnalyzer -Force -Scope CurrentUser -SkipPublisherCheck
+                # PoHeader.Tests.ps1 asserts the catalogue header contract against the COMMITTED files, so it
+                # is the only check that catches a header drifting in by a route nobody anticipated -- a hand
+                # edit, a writer nobody remembered to update, or a Weblate add-on writing a credit the
+                # exclusion list rejects. That last one is not hypothetical: the add-on re-adds a bot credit
+                # to every infectious-agents catalogue whenever those translations are touched, and a
+                # translation pull request is exactly where no human is reading the diff.
+                Invoke-Pester -Path scripts/modules/NeoIPC-Tools/Tests/DataDictionary.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/BuildReport.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/ScriptVerbHygiene.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/PlayData.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/MetadataContent.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/Metadata.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/MetadataVerify.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/PoHeader.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/AutomaticVariableHygiene.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/ReportInterpolationHygiene.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/PoTemplateChurn.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/GlossaryCasingHygiene.Tests.ps1 -CI
+
+            - name: Generate data dictionary
+              shell: pwsh
+              run: |
+                # Generate the CSV + .xlsx data dictionary into the uploaded artifacts. Assembled from the
+                # metadata/ directory alone — no DHIS2 API.
+                ./scripts/Build-NeoIPCDataDictionary.ps1 -OutputDirectory ./artifacts/data-dictionary
+
+            - name: Render metadata distribution packages
+              shell: pwsh
+              run: |
+                # Render the importable DHIS2 metadata packages (install base + play) into the uploaded artifacts.
+                # Generated from the metadata/ directory alone — no DHIS2 API. NOT committed (undiffable compressed
+                # blobs): they ship as this build artifact, and as a Release asset on a manually-published release.
+                # The version is always explicit (the generator has no default): the metadata/VERSION file, the
+                # source of truth, which build-docs verifies against a metadata release's tag.
+                $version = (Get-Content -LiteralPath ./metadata/VERSION -Raw).Trim()
+                ./scripts/Build-NeoIPCMetadataDistribution.ps1 -OutputDirectory ./artifacts/metadata-package -Version $version
+
+            - name: Upload artifacts
+              uses: actions/upload-artifact@v7
+              with:
+                name: NeoIPC-Surveillance-Toolkit-metadata
+                path: ./artifacts/
+
     release-assets:
         # Create the product's GitHub Release and attach its rendered assets. Split out from build-docs so that
         # job runs with a read-only token; only this release-gated job needs contents: write. Triggered by a
         # `<product>-v*` tag push: create the Release (body taken from the product's changelog, which
         # build-docs extracted and uploaded; pre-release when the tag carries a pre-release suffix), then
-        # attach what build-docs rendered/staged. Exactly one product's attach step fires, keyed off the
+        # attach what build-docs and build-metadata rendered/staged. Exactly one product's attach step fires, keyed off the
         # product build-docs parsed from the tag.
-        if: github.ref_type == 'tag'
-        needs: build-docs
+        #
+        # build-metadata runs on a metadata release only and is skipped on the others, and a job that
+        # needs a skipped job is skipped with it unless its condition says otherwise. So the condition
+        # names the outcomes: build-docs succeeded, and build-metadata succeeded or did not apply.
+        if: >-
+          github.ref_type == 'tag' && !cancelled() &&
+          needs.build-docs.result == 'success' &&
+          contains(fromJSON('["success","skipped"]'), needs.build-metadata.result)
+        needs: [build-docs, build-metadata]
         runs-on: ubuntu-26.04
         permissions:
           contents: write
@@ -825,9 +877,11 @@ jobs:
           TAG: ${{ github.ref_name }}
         steps:
             - name: Download the rendered artifacts
+              # build-docs' artifact and, on a metadata release, build-metadata's, merged into one tree.
               uses: actions/download-artifact@v7
               with:
-                name: NeoIPC-Surveillance-Toolkit
+                pattern: NeoIPC-Surveillance-Toolkit*
+                merge-multiple: true
                 path: ./artifacts
             - name: Create the Release
               # Tag-driven: create the GitHub Release before attaching assets. The body is the product's own
