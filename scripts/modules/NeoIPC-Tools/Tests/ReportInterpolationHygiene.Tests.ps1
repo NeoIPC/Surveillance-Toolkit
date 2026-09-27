@@ -287,21 +287,25 @@ Describe 'Report interpolation hygiene' {
 # The R code of a report file, in the order it runs: an .R file whole; of a .qmd or .Rmd its chunks,
 # the options written into a chunk's header, the `!expr` values of its chunk options and of the
 # front matter, and its inline spans in knitr's `r …` form and Quarto's `{r} …` form. An `!expr`
-# value and an inline span are read when they fit on one line. Read by hand rather than purled, since
-# knitr evaluates chunk options when it purls.
+# value and an inline span are read when they fit on one line; a mention the reading misses is caught
+# by the count in check_file(). Read by hand rather than purled, since knitr evaluates chunk options
+# when it purls.
 code_of <- function(file) {
   lines <- readLines(file, warn = FALSE, encoding = "UTF-8")
   if (grepl("\\.R$", file)) return(lines)
   spans <- function(line, patterns)
     unlist(lapply(patterns, function(p) regmatches(line, gregexpr(p, line, perl = TRUE))[[1]]))
-  option_values <- c("(?<=!expr ').*(?='\\s*$)", "(?<=!expr \").*(?=\"\\s*$)", "(?<=!expr )(?!['\"]).*$")
+  option_values <- c("(?<=!expr ').*(?='\\s*(?:#.*)?$)", "(?<=!expr \").*(?=\"\\s*(?:#.*)?$)",
+                     "(?<=!expr )(?!['\"]).*?(?=\\s+#|\\s*$)")
   inline_spans <- c("(?<=`r ).*?(?=`)", "(?<=`\\{r\\} ).*?(?=`)")
   code <- character()
   in_chunk <- FALSE
   for (line in lines) {
     if (!in_chunk && grepl("^\\s*```+\\s*\\{r", line)) {
       in_chunk <- TRUE
-      header <- sub("^\\s*```+\\s*\\{r[^,]*,?", "", sub("\\}\\s*$", "", line))
+      header <- sub("\\}\\s*$", "", sub("^\\s*```+\\s*\\{r\\s*,?\\s*", "", line))
+      # knitr takes a first element without `=` as the chunk's label.
+      if (!grepl("=", sub(",.*$", "", header))) header <- sub("^[^,]*,?", "", header)
       if (grepl("=", header)) code <- c(code, paste0("list(", header, ")"))
     } else if (in_chunk && grepl("^\\s*```", line)) {
       in_chunk <- FALSE
@@ -353,7 +357,8 @@ resolve <- function(e, b) {
     name <- as.character(e)
     if (!nzchar(name)) return(nothing)
     if (name == "sR") return(list(templates = list(e), unresolved = FALSE))
-    if (name %in% names(b)) return(b[[name]])
+    if (name %in% names(b))
+      return(if (name %in% rebound) join(b[[name]], unknown) else b[[name]])
     return(unknown)
   }
   if (!is.call(e)) return(unknown)
@@ -413,6 +418,10 @@ findings <- character()
 reached <- character()
 calls_seen <- character()
 templates_seen <- character()
+# Per file: the variables bound somewhere this walk does not follow in order (through assign(), or
+# `<<-` inside a function), and how many mentions of interpolate_translation the checking walk reached.
+rebound <- character()
+mentions_read <- 0L
 # The report whose strings the shared code is being checked against, "" for a report's own code, and
 # for each template the shared code names, the reports whose strings lack it.
 cascade <- ""
@@ -447,14 +456,22 @@ check_call <- function(e, file, scope, sR, b) {
             file, call_text)
   # A name starting with a dot is glue's own argument, such as the delimiters, not a value.
   values <- argument_names[nzchar(argument_names) & !startsWith(argument_names, ".")]
-  open <- if (is.character(arguments$.open)) arguments$.open else "{"
-  close <- if (is.character(arguments$.close)) arguments$.close else "}"
+  delimiters <- arguments[intersect(c(".open", ".close"), argument_names)]
+  if (!all(vapply(delimiters, is.character, logical(1))))
+    return(finding("%s: %s sets a delimiter this reading cannot see", file, call_text))
+  open <- if (is.character(arguments[[".open"]])) arguments[[".open"]] else "{"
+  close <- if (is.character(arguments[[".close"]])) arguments[[".close"]] else "}"
   key <- key_of(file, scope, paste(deparse(expression), collapse = " "))
   r <- resolve(expression, b)
   rule <- "exact"
   if (key %in% names(declared)) {
     reached <<- union(reached, key)
     if (!is.null(declared[[key]]$unchecked)) return(invisible())
+  }
+  if (any(forwarded))
+    return(finding(paste("%s: %s forwards `...`, whose values this reading cannot see;",
+                         "declare it with the reason"), file, call_text))
+  if (key %in% names(declared)) {
     candidates <- lapply(declared[[key]]$templates, function(path) str2lang(paste0("sR$", path)))
     unlisted <- setdiff(sources_of(r$templates), sources_of(candidates))
     if (length(unlisted))
@@ -496,6 +513,7 @@ check_call <- function(e, file, scope, sR, b) {
 walk <- function(e, file, scope, sR, b, final) {
   if (is.name(e) || (is.character(e) && length(e) == 1L)) {
     if (checking && identical(as.character(e), "interpolate_translation")) {
+      mentions_read <<- mentions_read + 1L
       key <- key_of(file, scope, "interpolate_translation passed as a value")
       if (key %in% names(declared)) reached <<- union(reached, key)
       else finding("%s: interpolate_translation is passed as a value, so its template cannot be read", file)
@@ -508,12 +526,28 @@ walk <- function(e, file, scope, sR, b, final) {
                           identical(head, as.name("<<-")))) {
     target <- e[[2]]
     value <- e[[3]]
+    if (identical(target, as.name("interpolate_translation")) && checking)
+      mentions_read <<- mentions_read + 1L
     if (is.name(target) && is.call(value) && identical(value[[1]], as.name("function"))) {
       walk(value, file, as.character(target), sR, b, final)
       b[[as.character(target)]] <- unknown
       return(b)
     }
     b <- walk(value, file, scope, sR, b, final)
+    # An assignment into part of a variable (x$a <-, x[["a"]] <-, names(x) <-) leaves it holding
+    # something this reading does not follow.
+    if (is.call(target)) {
+      b <- walk(target, file, scope, sR, b, final)
+      root <- target
+      while (is.call(root) && length(root) >= 2L) root <- root[[2]]
+      if (is.name(root) && !identical(root, as.name("sR")) && as.character(root) %in% names(b))
+        b[[as.character(root)]] <- join(b[[as.character(root)]], unknown)
+      return(b)
+    }
+    # `<<-` inside a function binds a variable of the code around it, at a time this walk does not
+    # know.
+    if (is.name(target) && identical(head, as.name("<<-")) && nzchar(scope))
+      rebound <<- union(rebound, as.character(target))
     # sR is the string resources whatever builds it: the cascade, or a layer merged onto it.
     if (is.name(target) && !identical(target, as.name("sR"))) {
       name <- as.character(target)
@@ -522,6 +556,9 @@ walk <- function(e, file, scope, sR, b, final) {
     }
     return(b)
   }
+  if ((identical(head, as.name("assign")) || identical(head, quote(base::assign))) &&
+      length(e) >= 3L && is.character(e[[2]]))
+    rebound <<- union(rebound, e[[2]])
   if (identical(head, as.name("function"))) {
     inner <- merge_bindings(b, final)
     for (parameter in setdiff(names(e[[2]]), "sR")) inner[[parameter]] <- unknown
@@ -561,6 +598,8 @@ walk <- function(e, file, scope, sR, b, final) {
     looped <- merge_bindings(b, quietly(walk(e[[2]], file, scope, sR, b, final)))
     return(merge_bindings(b, walk(e[[2]], file, scope, sR, looped, final)))
   }
+  if (identical(head, as.name("interpolate_translation")) && checking)
+    mentions_read <<- mentions_read + 1L
   if (identical(head, as.name("interpolate_translation")) ||
       (is.name(head) && as.character(head) %in% wrappers))
     check_call(e, file, scope, sR, b)
@@ -570,8 +609,23 @@ walk <- function(e, file, scope, sR, b, final) {
   b
 }
 
+# The mentions of interpolate_translation in a file outside R comments, counted in its text rather
+# than in what code_of() read, so that code the reading misses shows as a difference.
+mentions_in <- function(file) {
+  lines <- readLines(file, warn = FALSE, encoding = "UTF-8")
+  comment <- grepl("^\\s*#(?!\\|)", lines, perl = TRUE)
+  if (!grepl("\\.R$", file)) {
+    fence <- grepl("^\\s*```", lines)
+    in_chunk <- (cumsum(fence) %% 2L == 1L) & !fence
+    comment <- comment & in_chunk
+  }
+  code <- lines[!comment]
+  sum(lengths(regmatches(code, gregexpr("\\binterpolate_translation\\b", code, perl = TRUE))))
+}
+
 # A file is walked twice: once to gather every value its top level ever assigns, which a function
-# defined in it may read when it is called, and once to check it.
+# defined in it may read when it is called, and once to check it. Every mention of the helper in its
+# text must be one the checking walk reached.
 check_file <- function(file, label, sR) {
   exprs <- tryCatch(parse(text = code_of(file), keep.source = FALSE),
                     error = function(err) {
@@ -583,7 +637,13 @@ check_file <- function(file, label, sR) {
     for (e in exprs) b <- walk(e, label, "", sR, b, final)
     b
   }
+  rebound <<- character()
+  mentions_read <<- 0L
   walk_all(quietly(walk_all(list())))
+  mentions <- mentions_in(file)
+  if (mentions != mentions_read)
+    finding("%s mentions interpolate_translation %d times, but this reading reached %d of them",
+            label, mentions, mentions_read)
 }
 
 cascades <- list()
