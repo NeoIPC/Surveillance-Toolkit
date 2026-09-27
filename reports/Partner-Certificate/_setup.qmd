@@ -32,16 +32,18 @@ if (!is.null(params$signatory)) data$signatory <- params$signatory
 if (!is.null(params$departmentCode)) data$departmentCode <- params$departmentCode
 
 # Abort if we don't have a signatory
-if (is.null(data$signatory)) stop("You have to provide a signatory")
+if (is.null(data$signatory)) rlang::abort("You have to provide a signatory")
 
 # Abort if we don't have a valid signature image path
-if (is.null(data$signatureImagePath)) stop("You have to provide a signatureImagePath")
-if (!file.exists(data$signatureImagePath)) stop(paste0("'", data$signatureImagePath,"' is not a valid file path."))
+if (is.null(data$signatureImagePath)) rlang::abort("You have to provide a signatureImagePath")
+if (!file.exists(data$signatureImagePath)) rlang::abort(paste0("'", data$signatureImagePath,"' is not a valid file path."))
 
 # if we are missing any essential information we try fetch it directly from the
 # NeoIPC Surveillance Platform
 if (is.null(data$startYear) || is.null(data$endYear) || is.null(data$hospitalName) || is.null(data$nPatients)) {
-  if(is.null(data$departmentCode)) stop("There was insufficient data to generate a partner certificate.\nIf you don't have all the information please provide a department code so that the system can acquire the information from the NeoIPC Surveillance Platform.")
+  if(is.null(data$departmentCode)) rlang::abort(c(
+    "There was insufficient data to generate a partner certificate.",
+    i = "If you don't have all the information please provide a department code so that the system can acquire the information from the NeoIPC Surveillance Platform."))
 
   # Initialize our query dates to startYear and/or endYear or NULL
   if (is.null(data$startYear))
@@ -77,7 +79,7 @@ if (is.null(data$startYear) || is.null(data$endYear) || is.null(data$hospitalNam
     dplyr::select(department_key, hospital_key)
 
   if (nrow(department) < 1)
-    stop(paste0("Could not find a department with the code '", data$departmentCode, "'."))
+    rlang::abort(paste0("Could not find a department with the code '", data$departmentCode, "'."))
 
   if (is.null(data$nPatients))
     data$nPatients <- ds$enrollments |>

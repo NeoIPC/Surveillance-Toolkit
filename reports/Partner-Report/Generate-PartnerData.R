@@ -159,7 +159,7 @@ unit_data <- neoipcr::import_dhis2(
 reference_data <- NULL
 if (!is.null(referenceDataFile)) {
   if (!file.exists(referenceDataFile)) {
-    stop(sprintf("Reference data file not found: '%s'", referenceDataFile))
+    rlang::abort(sprintf("Reference data file not found: '%s'", referenceDataFile))
   }
   logVerbose("Loading reference data: {referenceDataFile}")
   reference_data <- jsonlite::unserializeJSON(

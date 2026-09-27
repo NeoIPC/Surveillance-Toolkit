@@ -195,7 +195,7 @@ if(!exists("params")) params <- list()
 
 if (!is.null(params$referenceDataFile)) {
   if (!file.exists(params$referenceDataFile))
-    stop(sprintf("The file '%s' does not exist.", params$referenceDataFile))
+    rlang::abort(sprintf("The file '%s' does not exist.", params$referenceDataFile))
   reference_data <- jsonlite::unserializeJSON(
     readChar(
         params$referenceDataFile,
@@ -228,7 +228,7 @@ if (!is.null(params$referenceDataFile)) {
 # Warn when fewer than 5 departments contribute — reference data from very
 # small groups may expose which departments had specific rare events.
 if (reference_data$n_departments < 5L) {
-  warning(sprintf(
+  rlang::warn(sprintf(
     paste0("Reference data contains only %d department(s). ",
            "Publishing reference reports based on fewer than 5 departments ",
            "is not recommended due to organizational data protection concerns."),

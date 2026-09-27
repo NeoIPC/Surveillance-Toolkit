@@ -888,12 +888,12 @@ classify_metrics <- function(table_data, identifier_col = NULL, combine_cols = N
     })
   } else if (!is.null(identifier_col) && identifier_col %in% names(table_data)) {
     identifiers <- as.character(table_data[[identifier_col]])
-  } else if (!is.null(rownames(table_data)) && !all(rownames(table_data) == as.character(1:nrow(table_data)))) {
+  } else if (!is.null(rownames(table_data)) && !all(rownames(table_data) == as.character(seq_len(nrow(table_data))))) {
     identifiers <- rownames(table_data)
   } else if (ncol(table_data) > 0) {
     identifiers <- as.character(table_data[[1]])
   } else {
-    identifiers <- as.character(1:nrow(table_data))
+    identifiers <- as.character(seq_len(nrow(table_data)))
   }
 
   own_values <- table_data[[own_col_name]]
@@ -1654,7 +1654,7 @@ rename_legacy_antibiotic_table <- function(ds) {
 
 if (!is.null(params$referenceDataFile)) {
   if (!file.exists(params$referenceDataFile))
-    stop(sprintf("The file '%s' does not exist.", params$referenceDataFile))
+    rlang::abort(sprintf("The file '%s' does not exist.", params$referenceDataFile))
   reference_data <- rename_legacy_antibiotic_table(jsonlite::unserializeJSON(
     readChar(
         params$referenceDataFile,
@@ -1682,7 +1682,7 @@ reference_overridden <- FALSE
 
 if (!is.null(params$partnerDataFile)) {
   if (!file.exists(params$partnerDataFile))
-    stop(sprintf("The file '%s' does not exist.", params$partnerDataFile))
+    rlang::abort(sprintf("The file '%s' does not exist.", params$partnerDataFile))
   partner_data <- rename_legacy_antibiotic_table(jsonlite::unserializeJSON(
     readChar(params$partnerDataFile,
              file.info(params$partnerDataFile)$size)))
@@ -1724,7 +1724,7 @@ if (!is.null(params$partnerDataFile)) {
     # Extract unit codes from the dataset's metadata
     data_unit_codes <- partner_data$metadata$dataset_options$department_filter
   } else {
-    stop("partnerDataFile must contain a neoipcr_bnch_ds or neoipcr_rep_ds object.")
+    rlang::abort("partnerDataFile must contain a neoipcr_bnch_ds or neoipcr_rep_ds object.")
   }
 
   # Override unitCodes from data metadata (more reliable than QMD param in DataFile mode)
