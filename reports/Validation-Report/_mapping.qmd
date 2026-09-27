@@ -111,17 +111,34 @@ context_decorations <- tibble::tribble(
   55L,      "sec_bsi",        "sec_bsi_label", "secondary_bsi_items"
 )
 # The maps the decorations look their labels up in, under the names the table
-# above gives them. They are listed one by one as literal `sR$key` references:
-# the string-layer check reads those to tell a live key from a dead one, and a
-# map reached by a name taken from the table would count as unused. The
-# devices take the glossary's abbreviations, which the sepsis form's options
-# and the surveillance end form's day counts use.
+# above gives them, each keyed on the values the rule's field holds. The string
+# resources key a label by what it means, not by the option code a form
+# stores, so the codes are mapped here and a changed option code changes this
+# function but no translated string. The labels are listed one by one as
+# literal `sR$key` references: the string-layer check reads those to tell a
+# live key from a dead one, and a label reached by a name taken from a table
+# would count as unused. The devices take the glossary's abbreviations, which
+# the sepsis form's options and the surveillance end form's day counts use;
+# the day counts are keyed by neoipcr's count names already.
 label_maps <- function(sR) list(
-  ssi_types           = sR$ssi_types,
-  admission_types     = sR$admission_types,
-  devices             = list(cvc = sR$cvc, pvc = sR$pvc, niv = sR$niv, inv = sR$inv),
-  day_counts          = sR$day_counts,
-  secondary_bsi_items = sR$secondary_bsi_items)
+  ssi_types = list(
+    "1" = sR$ssi_types$superficial_incisional,
+    "2" = sR$ssi_types$deep_incisional,
+    "3" = sR$ssi_types$organ_space),
+  admission_types = list(
+    "1" = sR$admission_types$delivery_room,
+    "2" = sR$admission_types$day_of_birth,
+    "3" = sR$admission_types$after_day_of_birth),
+  devices = list(
+    cvc = sR$cvc,
+    pvc = sR$pvc,
+    niv = sR$niv,
+    inv = sR$inv),
+  day_counts = sR$day_counts,
+  secondary_bsi_items = list(
+    "1"  = sR$secondary_bsi_items$present,
+    "0"  = sR$secondary_bsi_items$absent,
+    "-1" = sR$secondary_bsi_items$no_follow_up))
 
 # The fields a rule records twice, as a name and as the code it names: where
 # the name is missing, as it is for a code the option set does not carry, the

@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-09-27 09:21+0200\n"
+"POT-Creation-Date: 2026-09-27 09:37+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Language-Team: none\n"
 "Language: en\n"
@@ -2856,22 +2856,22 @@ msgstr ""
 msgid "A secondary bloodstream infection is a BSI that is seeded from a site-specific infection (pneumonia, NEC, or SSI) at another body site, except for catheter-associated infections. @tbl-secondary-bsi-rates shows the rate at which a secondary BSI is attributed to different primary infection types based on the NeoIPC criteria (organism match within a 17-day window around the primary infection). High rates of secondary BSI may indicate delayed diagnosis, inadequate source control, or particularly virulent pathogens, and warrant careful review of clinical protocols and infection management strategies.\n"
 msgstr ""
 
-#. type: Hash Value: admission_type 1
+#. type: Hash Value: admission_type after_day_of_birth
 #: reports/Patient-Data-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "Inborn (delivered at this hospital)"
+msgid "Transferred after day of birth"
 msgstr ""
 
-#. type: Hash Value: admission_type 2
+#. type: Hash Value: admission_type day_of_birth
 #: reports/Patient-Data-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Transferred on day of birth"
 msgstr ""
 
-#. type: Hash Value: admission_type 3
+#. type: Hash Value: admission_type delivery_room
 #: reports/Patient-Data-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "Transferred after day of birth"
+msgid "Inborn (delivered at this hospital)"
 msgstr ""
 
 #. type: Hash Value: days
@@ -3192,16 +3192,16 @@ msgstr ""
 msgid "NeoIPC Surveillance — GDPR Art. 15(3) Data Export"
 msgstr ""
 
-#. type: Hash Value: surveillance_end_reason 1
-#: reports/Patient-Data-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "Discharge/Transfer"
-msgstr ""
-
-#. type: Hash Value: surveillance_end_reason 2
+#. type: Hash Value: surveillance_end_reason death
 #: reports/Patient-Data-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Death"
+msgstr ""
+
+#. type: Hash Value: surveillance_end_reason discharge_or_transfer
+#: reports/Patient-Data-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Discharge/Transfer"
 msgstr ""
 
 #. type: Hash Value: title
@@ -3466,22 +3466,22 @@ msgstr ""
 msgid "Admission event with the admission date"
 msgstr ""
 
-#. type: Hash Value: admission_types 1
+#. type: Hash Value: admission_types after_day_of_birth
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "admitted from the delivery room"
+msgid "transferred or readmitted the day after birth or later"
 msgstr ""
 
-#. type: Hash Value: admission_types 2
+#. type: Hash Value: admission_types day_of_birth
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "transferred or readmitted on the day of birth"
 msgstr ""
 
-#. type: Hash Value: admission_types 3
+#. type: Hash Value: admission_types delivery_room
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "transferred or readmitted the day after birth or later"
+msgid "admitted from the delivery room"
 msgstr ""
 
 #. type: Hash Value: bsi_problem_header_prefix
@@ -4316,19 +4316,19 @@ msgstr ""
 msgid "{applied} of {total} rules; the rules not applied are {not_applied}"
 msgstr ""
 
-#. type: Hash Value: secondary_bsi_items -1
-#: reports/Validation-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "No follow-up"
-msgstr ""
-
-#. type: Hash Value: secondary_bsi_items 0
+#. type: Hash Value: secondary_bsi_items absent
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "No"
 msgstr ""
 
-#. type: Hash Value: secondary_bsi_items 1
+#. type: Hash Value: secondary_bsi_items no_follow_up
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "No follow-up"
+msgstr ""
+
+#. type: Hash Value: secondary_bsi_items present
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Yes"
@@ -4346,22 +4346,22 @@ msgstr ""
 msgid "Surgical Site Infection event with the infection date"
 msgstr ""
 
-#. type: Hash Value: ssi_types 1
-#: reports/Validation-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "superficial incisional SSI"
-msgstr ""
-
-#. type: Hash Value: ssi_types 2
+#. type: Hash Value: ssi_types deep_incisional
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "deep incisional SSI"
 msgstr ""
 
-#. type: Hash Value: ssi_types 3
+#. type: Hash Value: ssi_types organ_space
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "organ/space SSI"
+msgstr ""
+
+#. type: Hash Value: ssi_types superficial_incisional
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "superficial incisional SSI"
 msgstr ""
 
 #. type: Hash Value: support_email_address_link_text

@@ -192,7 +192,9 @@ admission type 3 can trip it, since types 1 and 2 are assigned day 1. The protoc
 "within 120 days of birth" means day of life at most 120, as the table implies, and the program rule's
 threshold should follow the protocol. Who acts: the partner; the admission form shows the day of
 life. Decided: rule 45 flags a type-3 admission whose day of life is above 120 — the client assigns
-day 1 to the other two types, so a higher value there is the network's, under G3; the program rule's
+day 1 to the other two types, so a higher value there is the network's, under G3. Eligibility is
+decided per admission, so a readmission after day 120 is ineligible even when the infant's earlier
+stay was eligible, and rule 45 and the eligibility filter treat it so; the program rule's
 threshold is listed among the configuration defects below and the protocol's wording among the
 questions. The rows are Partial: rule 45 is an eligibility rule, so the import's validation pass
 leaves it out when ineligible patients are requested, and under the default the import's eligibility

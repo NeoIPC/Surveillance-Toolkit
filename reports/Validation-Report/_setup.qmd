@@ -123,8 +123,10 @@ if (length(unsentenced) > 0L)
 # names them; any other placeholder would fail inside the interpolation on
 # the first finding that reaches the sentence. A decoration's field must be
 # one the rule records, its label map must be one `label_maps()` in
-# `_mapping.qmd` returns, and its placeholder must be named by the rule's
-# sentence, or the formatter would look a label up on nothing or for nothing.
+# `_mapping.qmd` returns and must name a string for every value it maps (a
+# mistyped key in that function reads as nothing), and its placeholder must be
+# named by the rule's sentence, or the formatter would look a label up on
+# nothing or for nothing.
 # That last check reads the English source sentences: it guards the table
 # itself, and a translation that words a sentence without the label still
 # renders, since an unused value is simply not interpolated.
@@ -144,6 +146,12 @@ for (i in seq_len(nrow(context_decorations))) {
     rlang::abort(sprintf(
       "The decoration of validation rule %d looks its labels up in `%s`, which is not one of the label maps.",
       decoration$rule_id, decoration$labels))
+  unlabelled <- names(Filter(
+    function(label) !(is.character(label) && length(label) == 1L), maps[[decoration$labels]]))
+  if (length(unlabelled) > 0L)
+    rlang::abort(sprintf(
+      "The label map `%s` carries no label for the value(s) %s.",
+      decoration$labels, paste(unlabelled, collapse = ", ")))
   named_by <- placeholders(unlist(
     source_problems[[as.character(decoration$rule_id)]][template_keys(decoration$rule_id)]))
   if (!decoration$placeholder %in% named_by)

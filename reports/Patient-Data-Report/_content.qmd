@@ -82,8 +82,10 @@ if (nrow(enrollment) > 0) {
     adm_fields <- c()
     adm_values <- c()
     if ("type" %in% names(adm) && !is.na(adm$type)) {
-      type_label <- sR$admission_type[[as.character(adm$type)]]
-      if (is.null(type_label)) type_label <- as.character(adm$type)
+      type_code <- as.character(adm$type)
+      type_key <- switch(type_code, "1" = "delivery_room", "2" = "day_of_birth",
+                         "3" = "after_day_of_birth", type_code)
+      type_label <- sR$admission_type[[type_key]] %||% type_code
       adm_fields <- c(adm_fields, sR$field$admission_type)
       adm_values <- c(adm_values, type_label)
     }
@@ -319,8 +321,9 @@ se_fields <- c(sR$field$surveillance_end_date)
 se_values <- c(format(se_event$occurredAt, format = "%x"))
 
 if ("reason" %in% names(se) && !is.na(se$reason)) {
-  reason_label <- sR$surveillance_end_reason[[as.character(se$reason)]]
-  if (is.null(reason_label)) reason_label <- as.character(se$reason)
+  reason_code <- as.character(se$reason)
+  reason_key <- switch(reason_code, "1" = "discharge_or_transfer", "2" = "death", reason_code)
+  reason_label <- sR$surveillance_end_reason[[reason_key]] %||% reason_code
   se_fields <- c(se_fields, sR$field$surveillance_end_reason)
   se_values <- c(se_values, reason_label)
 }

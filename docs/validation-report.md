@@ -56,9 +56,12 @@ One function renders every rule (`problem_text()` in `_problem_text.qmd`):
    `day_counts`, rule 55's secondary-BSI item from
    `secondary_bsi_items`), with `missing_value` where the code is missing or unknown, so the
    placeholder always has a value. A rule whose sentence needs a label for a code it records gets a
-   row in that table and a map in `label_maps()` beside it in `_mapping.qmd`, which names every map by
-   a literal `sR$` reference so that the string-layer check sees the key used; the setup refuses a row
-   whose field the rule does not record, whose map `label_maps()` lacks, or whose placeholder none of
+   row in that table and a map in `label_maps()` beside it in `_mapping.qmd`. The string resources key
+   each label by what it means (`delivery_room`, not the option code `1`), and `label_maps()` maps
+   every value the rule's field holds to its label by a literal `sR$` reference, so that the
+   string-layer check sees the key used and a changed option code changes that function but no
+   translated string. The setup refuses a row whose field the rule does not record, whose map
+   `label_maps()` lacks, whose map has no string for one of its values, or whose placeholder none of
    the rule's sentences names. That last check reads the English source sentences, since it guards
    the table: a translation that words a sentence without the label still renders.
 3. `select_template()` picks the template. Two rules carry a second complete sentence rather than one
@@ -125,7 +128,8 @@ finding that reaches the sentence.
 2. Here: add `problems.N` with `description` (named placeholders equal to the rule's context fields,
    plus the labels its decorations add) and
    `summary` to `content/_sR.yaml`, and where the sentence shows a coded value as a label, a row in
-   `context_decorations` with its label map in the string resources, registered in `label_maps()`
+   `context_decorations` with its labels in the string resources under descriptive keys, mapped from
+   the field's values in `label_maps()`
    (and, where a field can be missing while another records the same thing, a row in
    `context_fallbacks`); add its row to `problem_info` in
    `_mapping.qmd` (`primaryDetail`,

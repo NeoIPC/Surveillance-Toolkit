@@ -10,9 +10,9 @@
 # Language: en
 
 admission_type:
-  "1": "Inborn (delivered at this hospital)"
-  "2": "Transferred on day of birth"
-  "3": "Transferred after day of birth"
+  delivery_room: "Inborn (delivered at this hospital)"
+  day_of_birth: "Transferred on day of birth"
+  after_day_of_birth: "Transferred after day of birth"
 days: Days
 device:
   cvc: "Central Venous Catheter (CVC)"
@@ -73,6 +73,6 @@ sex:
   undetermined: "Undetermined"
 subtitle: "NeoIPC Surveillance — GDPR Art. 15(3) Data Export"
 surveillance_end_reason:
-  "1": "Discharge/Transfer"
-  "2": "Death"
+  discharge_or_transfer: "Discharge/Transfer"
+  death: "Death"
 title: "Patient Data Report"

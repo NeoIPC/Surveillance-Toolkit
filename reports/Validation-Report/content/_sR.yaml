@@ -371,13 +371,13 @@ problems:
     summary: A patient recorded as part of a multiple birth has fewer than two infants at birth.
 ssi_problem_header_prefix: Surgical Site Infection event with the infection date
 ssi_types:
-  "1": superficial incisional SSI
-  "2": deep incisional SSI
-  "3": organ/space SSI
+  superficial_incisional: superficial incisional SSI
+  deep_incisional: deep incisional SSI
+  organ_space: organ/space SSI
 admission_types:
-  "1": admitted from the delivery room
-  "2": transferred or readmitted on the day of birth
-  "3": transferred or readmitted the day after birth or later
+  delivery_room: admitted from the delivery room
+  day_of_birth: transferred or readmitted on the day of birth
+  after_day_of_birth: transferred or readmitted the day after birth or later
 day_counts:
   cvc_days: CVC days
   pvc_days: PVC days
@@ -389,7 +389,7 @@ day_counts:
   kangaroo_care_days: kangaroo care days
   probiotic_days: probiotic days
 secondary_bsi_items:
-  "1": "Yes"
-  "0": "No"
-  "-1": No follow-up
+  present: "Yes"
+  absent: "No"
+  no_follow_up: No follow-up
 sur_problem_header_prefix: Surgical Procedure event with the procedure date
