@@ -890,10 +890,9 @@ classify_metrics <- function(table_data, identifier_col = NULL, combine_cols = N
     identifiers <- as.character(table_data[[identifier_col]])
   } else if (!is.null(rownames(table_data)) && !all(rownames(table_data) == as.character(seq_len(nrow(table_data))))) {
     identifiers <- rownames(table_data)
-  } else if (ncol(table_data) > 0) {
-    identifiers <- as.character(table_data[[1]])
   } else {
-    identifiers <- as.character(seq_len(nrow(table_data)))
+    # The table has at least the quartile columns checked above.
+    identifiers <- as.character(table_data[[1]])
   }
 
   own_values <- table_data[[own_col_name]]
