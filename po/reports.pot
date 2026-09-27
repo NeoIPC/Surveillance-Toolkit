@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-09-27 14:32+0200\n"
+"POT-Creation-Date: 2026-09-27 18:46+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Language-Team: none\n"
 "Language: en\n"
@@ -4256,6 +4256,18 @@ msgstr ""
 msgid "A patient recorded as part of a multiple birth has fewer than two infants at birth."
 msgstr ""
 
+#. type: Hash Value: problems 57 description
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The patient record holds neither a birth weight nor a gestational age, so whether the infant is eligible for the surveillance cannot be established."
+msgstr ""
+
+#. type: Hash Value: problems 57 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "A patient record holds neither a birth weight nor a gestational age."
+msgstr ""
+
 #. type: Hash Value: problems 6 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
@@ -5406,6 +5418,29 @@ msgstr ""
 #: reports/Validation-Report/en/_problem_detail_0032.Rmd:10
 #, markdown-text, no-wrap
 msgid "Please open the patient record's dashboard (see @sec-solution-1) and edit its profile (see @sec-solution-17): clear the multiple birth mark if the infant is a singleton, or correct the number of infants at birth otherwise.\n"
+msgstr ""
+
+#. type: Title ###
+#: reports/Validation-Report/en/_problem_detail_0033.Rmd:1
+#, markdown-text, no-wrap
+msgid "The Patient Record Holds Neither a Birth Weight Nor a Gestational Age {#sec-problem-details-33}"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0033.Rmd:6
+#, markdown-text, no-wrap
+msgid ""
+"An infant is eligible for the Core Module when its birth weight is below 1500 grams or its gestational age below 32 weeks, so the patient record needs at least one of the two to show that the infant is eligible.\n"
+"The registration form therefore requires one of them whenever the other is empty, and refuses a record without either; a record reaches the platform without both only around that form, such as through an import or from before the requirement existed.\n"
+"This message appears in the validation report when a patient record holds neither a birth weight nor a gestational age.\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0033.Rmd:8
+#, markdown-text, no-wrap
+msgid ""
+"Please open the patient record's dashboard (see @sec-solution-1) and edit its profile (see @sec-solution-17): enter the birth weight, the gestational age, or both.\n"
+"If neither is known and the infant cannot be shown to be eligible, the record does not belong in the Core Module: please delete it (see @sec-solution-2).\n"
 msgstr ""
 
 #. type: Title ###

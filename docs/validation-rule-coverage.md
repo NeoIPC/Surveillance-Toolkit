@@ -10,7 +10,7 @@ keyed by the protocol's own anchor, and says for each one what enforces it today
 does, what would.
 
 The inventory is hand-maintained. It describes the protocol at `doc/protocol/VERSION` 1.3.0-preview2
-together with the changes under [Unreleased] in its changelog, the 55 rules of neoipcr v0.0.0.9005 (ids 1 to 56, with id 16 withdrawn) and the program rules, compulsory
+together with the changes under [Unreleased] in its changelog, the 56 rules of neoipcr v0.0.0.9006 (ids 1 to 57, with id 16 withdrawn) and the program rules, compulsory
 flags and option sets of `metadata/common/`. A change to any of the three has to be reflected here: a
 new protocol constraint gets a row, a new rule is entered in the rows it covers, and a program rule
 that starts or stops enforcing something changes the enforcement column. `docs/validation-report.md`
@@ -89,10 +89,10 @@ which cannot fire at all.
 | Class | Rows |
 |---|---|
 | Covered | 30 |
-| Partial | 55 |
+| Partial | 56 |
 | Capture time | 55 |
 | Interface only | 12 |
-| Not covered | 8 |
+| Not covered | 7 |
 | Not checkable | 120 |
 | All | 280 |
 
@@ -160,12 +160,17 @@ The protocol admits an infant with a birth weight below 1500 g or a gestational 
 `NEOIPC_PATIENT_BW_1500_GRAMS_AND_GA_32_PLUS_WEEKS` refuses registration with an error when the birth
 weight is 1500 g or more and the total gestation days are 224 or more, or when one of the two fails and
 the other is missing, except in departments of the organisation-unit group
-`NEOIPC_ALL_PATIENTS_ELIGIBLE`. No post-hoc rule reads `patients$birth_weight` or
-`patients$total_gestation_days`; a patient registered through the API, or before the program rule
-existed, passes `validate()`. Birth weight itself is compulsory only when the gestational age is empty
-(regular sites) or at departments in the organisation-unit group `NEOIPC_NEODECO_TRIAL_SITES` (the
-NeoDeco trial sites); elsewhere an empty birth weight only warns, and such a patient silently drops
-out of the birth-weight-stratified rates.
+`NEOIPC_ALL_PATIENTS_ELIGIBLE`. Post hoc, rule 57 flags a patient with neither a birth weight nor a
+gestational age, whose eligibility cannot be established; it is not an eligibility rule, so the pass
+applies it whichever patients were requested, and the import's eligibility filter keeps such a patient
+for it rather than dropping it unreported. The other two branches, both criteria failing or one failing
+while the other is missing, have no post-hoc rule: under the import's default the eligibility filter
+leaves such a patient out as ineligible, and a patient registered through the API, or before the
+program rule existed, passes `validate()` where ineligible patients are kept. Birth weight itself is
+compulsory only when the gestational age is empty (regular sites) or at departments in the
+organisation-unit group `NEOIPC_NEODECO_TRIAL_SITES` (the NeoDeco trial sites); elsewhere an empty
+birth weight only warns, and a patient with a gestational age but no birth weight silently drops out
+of the birth-weight-stratified rates.
 
 Proposal: a patient-level rule flagging a patient whose birth weight is 1500 g or more or missing and
 whose total gestation days are 224 or more or missing, mirroring the program rule's three branches,
@@ -174,8 +179,10 @@ eligible, which the registration allows and the stratified rates cannot use. Bot
 membership in `NEOIPC_ALL_PATIENTS_ELIGIBLE`, which the import does not read today (it reads only the
 `NEO_DEPARTMENT`, `COUNTRY` and `TEST_UNITS` groups); the rule skips itself until the import provides
 the flag. Who acts: the partner, who sees the birth weight and the gestational age on the registration
-and can correct them or end the enrolment. Decided: documented only, until the import carries the
-department's group membership, which says whether the eligibility criteria apply to its patients.
+and can correct them or end the enrolment. Decided: rule 57 flags a patient with neither value, which
+no department's registration accepts; the rule on the other branches is documented only, until the
+import carries the department's group membership, which says whether the eligibility criteria apply to
+its patients.
 
 ### G2 — Admission within 120 days of birth
 
@@ -216,17 +223,17 @@ the value the client assigns for the other two types is checked by nothing. The 
 missing value is wider than the field: rules 27, 31, 35, 39 and 41 compute an event's expected day of
 life from the admission form's value, and a missing value makes their comparison `NA`, which
 `filter()` drops, so those rules are silently disabled for every event of an enrolment whose admission
-form lacks the day of life. That holds where ineligible patients are kept, as in the Validation
-Report's import. Under the import's default the eligibility filter has already dropped such an
-admission form, since a missing value does not pass its `dol <= 120`, so the whole enrolment leaves
-the analysis with no finding and no count in the validation summary.
+form lacks the day of life. The import's eligibility filter does not read a missing day of life as
+ineligible: it removes only a recorded day of life above 120, so an admission form without one reaches
+the validation pass under the default too, where rule 46 flags it on a type-3 admission and the pass
+removes the patient with a count in the validation summary, and where it stays in the dataset on a
+type 1 or 2 admission.
 
 Proposal: for types 1 and 2 a reconciliation that sets a missing or different day of life to 1, the
 value the client assigns on every save and the team never chooses; for type 3 an enrolment-level rule
 on the admission form flagging a missing day of life or one below 2. Who acts: the network for the
 assigned value, the partner for the recorded one. Decided: rule 46 flags an admission of type 3 whose
-day of life is missing or below 2, its missing-value branch acting only where ineligible patients are
-kept, for the reason above; setting the day of life of an inborn or day-of-birth admission to 1
+day of life is missing or below 2; setting the day of life of an inborn or day-of-birth admission to 1
 is a network-side reconciliation, not yet implemented.
 
 ### G4 — A readmission recorded with the wrong admission type
@@ -1142,7 +1149,7 @@ pneumonia and the deepest-level rule for the SSI type.
 | Anchor | Constraint | Enforcement | Rules | Capture-time | Gap |
 |---|---|---|---|---|---|
 | `sec-analysis` | *(derived)* Surveillance data from a department feeds both the department's own report and the reference reports, so a department's submitted data is pooled into the reference data set. | Not checkable | — | — |  |
-| `sec-analysis` | *(derived)* Every patient carries a birth weight in grams that places the record in one of four birth-weight strata used for core-module rates. | Not covered | — | `NEOIPC_PATIENT_WARN_BW_EMPTY_REGULAR` (warning only), `NEOIPC_PATIENT_BW_MANDATORY_IF_GA_MISSING_REGULAR`, `NEOIPC_PATIENT_BW_AND_GA_MANDATORY_NEODECO` | G1 |
+| `sec-analysis` | *(derived)* Every patient carries a birth weight in grams that places the record in one of four birth-weight strata used for core-module rates. | Partial | 57 | `NEOIPC_PATIENT_WARN_BW_EMPTY_REGULAR` (warning only), `NEOIPC_PATIENT_BW_MANDATORY_IF_GA_MISSING_REGULAR`, `NEOIPC_PATIENT_BW_AND_GA_MANDATORY_NEODECO` | G1 |
 | `sec-analysis` | *(derived)* The birth-weight strata boundaries are 500 g, 1000 g and 1500 g, written as < 500 g, 500–999 g, 1000–1499 g and > 1500 g (as written, a birth weight of exactly 1500 g falls in no stratum). | Not checkable | — | — |  |
 
 ### 6.1.1 Device Utilization (`sec-analysis-device-utilization`)
@@ -1209,7 +1216,7 @@ pneumonia and the deepest-level rule for the SSI type.
 | `sec-analysis-standardized-infection-rate` | A standardized infection rate greater than one means more infections were observed than expected from the department's patient composition, exactly one the same number, and less than one fewer. | Not checkable | — | — |  |
 | `sec-analysis-standardized-infection-rate` | *(derived)* This paragraph refers to 3 birthweight classes whereas the chapter introduction lists 4 birth-weight groups. | Not checkable | — | — |  |
 | `sec-analysis-standardized-infection-rate` | *(derived)* Patient days accrue to the department in which they were spent, so a transferred infant is surveilled per department stay and each department accounts only for its own days. | Partial | 17 | — | G24 |
-| `sec-analysis-standardized-infection-rate` | *(derived)* The SIR requires each patient's birth weight and the day of life of each surveilled day, so birth weight and the admission day of life are recorded for every patient (no date of birth is collected). | Partial | 46 | `NEOIPC_ADMISSION_TYPE` compulsory, `NEOIPC_ADM_TYPE_2_PLUS`, `NEOIPC_ADM_TYPE_1`, `NEOIPC_PATIENT_BW_MANDATORY_IF_GA_MISSING_REGULAR`, `NEOIPC_PATIENT_BW_AND_GA_MANDATORY_NEODECO` | G1, G3 |
+| `sec-analysis-standardized-infection-rate` | *(derived)* The SIR requires each patient's birth weight and the day of life of each surveilled day, so birth weight and the admission day of life are recorded for every patient (no date of birth is collected). | Partial | 46, 57 | `NEOIPC_ADMISSION_TYPE` compulsory, `NEOIPC_ADM_TYPE_2_PLUS`, `NEOIPC_ADM_TYPE_1`, `NEOIPC_PATIENT_BW_MANDATORY_IF_GA_MISSING_REGULAR`, `NEOIPC_PATIENT_BW_AND_GA_MANDATORY_NEODECO` | G1, G3 |
 | `sec-analysis-standardized-infection-rate` | *(derived)* The standardized infection rate is calculated for BSI and pneumonia only, from reference-database risks per day of life and birth weight. | Not checkable | — | — |  |
 | `sec-analysis-standardized-infection-rate` | *(derived)* Expected infections are summed over the days each infant spent in the department, so every patient record yields its set of days in the department (admission through surveillance end, as days of life). | Partial | 3, 4, 18, 25, 26, 46 | `NEOIPC_ADM_TYPE_2_PLUS` | G3 |
 | `sec-analysis-standardized-infection-rate` | *(derived)* The SIR is the ratio of infections observed in a department to infections expected from its patient composition. | Not checkable | — | — |  |

@@ -60,7 +60,8 @@ problem_info  <- tibble::tribble(
   53L, 53L, 30L, 30L,
   54L, 54L, 30L, 30L,
   55L, 55L, 31L, 31L,
-  56L, 56L, 32L, 32L
+  56L, 56L, 32L, 32L,
+  57L, 57L, 33L, 33L
 )
 problem_detail_info <- tibble::tribble(
   ~id, ~sortOrder, ~usedSolutions,
@@ -95,7 +96,8 @@ problem_detail_info <- tibble::tribble(
   29L, 29L, c(15L,9L,11L),                         # A Cumulative Day Count Exceeds the Number of Patient Days
   30L, 30L, c(15L,9L),                             # The Antibiotic Substance Entries Are Inconsistent
   31L, 31L, c(15L,9L),                             # The Secondary Bloodstream Infection Item Disagrees With the Organisms Recorded
-  32L, 32L, c(1L,17L)                              # Fewer Than Two Infants Recorded for a Multiple Birth
+  32L, 32L, c(1L,17L),                             # Fewer Than Two Infants Recorded for a Multiple Birth
+  33L, 33L, c(1L,17L,2L)                           # The Patient Record Holds Neither a Birth Weight Nor a Gestational Age
 )
 # The coded values a rule records that a sentence shows as a localized label:
 # the rule, the context field the code is read from, the placeholder the label

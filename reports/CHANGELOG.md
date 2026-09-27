@@ -44,7 +44,11 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
   data in a patient record's profile. A sentence that shows a coded value (an admission type, a device,
   a count, the secondary-BSI item) shows its localized label, from label maps in the string resources
   that the formatter reads through one table; the counts and the secondary-BSI item are worded as the
-  form labels them. The report rests on 55 rules and requires neoipcr `v0.0.0.9005`.
+  form labels them.
+- The Validation Report renders neoipcr's rule 57, a patient record with neither a birth weight nor a
+  gestational age, whose eligibility cannot be established; its explanation asks for one of the two in
+  the patient's profile, or for the record's deletion if neither is known. The report rests on 56 rules
+  and requires neoipcr `v0.0.0.9006`.
 - The Partner and Reference Reports open with a data-validation summary: for each validation rule that
   removed or exempted a record, the number and kind of records it concerned, and the totals across all
   rules — the Partner Report's department beside the reference data where the report compares the two.
@@ -77,13 +81,17 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
 - The Partner and Reference Reports' description of exposure densities states that a ventilation day
   requires more than 12 hours of the respective support, following the protocol, while a catheter day
   keeps at least 12 hours.
-- Every report now runs on neoipcr `v0.0.0.9005`, which changes the data of the Partner Report, the
+- Every report now runs on neoipcr `v0.0.0.9006`, which changes the data of the Partner Report, the
   Reference Report and the Partner Certificate as well: the import's validation pass, which these
-  reports run by default, also applies rules 46 to 56 and removes the patients they flag — a
-  duplicated antibiotic substance entry, the same infection type recorded again within 14 days, or a
-  day count above the patient days, for example — and the eligibility filter keeps an admission on day
-  of life 120, which it used to drop. Rates, the validation summary tables and the certificate's
-  patient count can therefore change with this release. Rule 45 removes nothing there: under the
+  reports run by default, also applies rules 46 to 57 and removes the patients they flag — a
+  duplicated antibiotic substance entry, the same infection type recorded again within 14 days, a
+  day count above the patient days, or a patient with neither birth weight nor gestational age, for
+  example. The eligibility filter keeps an admission on day of life 120, which it used to drop, and no
+  longer reads a missing value as ineligible: an admission from the delivery room or on the day of
+  birth without a day of life now stays, and a transferred or readmitted infant without one, like a
+  patient without birth weight and gestational age, is removed by the pass and counted in the
+  validation summary, where the filter used to drop it unreported. Rates, the validation summary tables
+  and the certificate's patient count can therefore change with this release. Rule 45 removes nothing there: under the
   default the eligibility filter has already dropped such an admission, and with non-core patients
   requested the pass leaves rule 45 out.
 
@@ -97,6 +105,10 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
 
 ### Fixed
 
+- The Patient Data Report failed at its import on every render: neoipcr before `v0.0.0.9006` failed
+  on the events' timestamps and on enrolment notes read without the DHIS2 enrolment ids, both of which
+  the report requests, and on records created before the instance's DHIS2 2.36 upgrade, which carry no
+  creator. It renders with `v0.0.0.9006`, the reports' new floor.
 - A bare `yes` or `on` in a report's string resources stays text, as `no` and `off` already did,
   where YAML reads it as a logical: a translated label such as `Yes`, which po4a writes unquoted, no
   longer turns into `TRUE`. In the other direction, a bare `false` is now read as a logical where it
