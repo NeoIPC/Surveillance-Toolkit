@@ -423,6 +423,31 @@ def test_a_field_the_platform_computes_is_not_printed_as_a_blank(english: Path) 
         f"a computed field is printed for someone to fill in: {gestation}")
 
 
+def test_a_field_a_rule_assigns_only_for_some_records_is_printed(english: Path) -> None:
+    """The day of life at admission is assigned by a rule for the first two admission types only.
+
+    For a patient transferred in later only a person knows it, so `keep_calculated` keeps it on the sheet
+    although a rule computes it for everyone else. Dropping it from that list regenerates the fixture
+    without it, so nothing but this assertion would notice the question gone from the paper.
+    """
+    labels = re.findall(r'<text[^>]*class="label"[^>]*>([^<]*)</text>',
+                        (english / "NeoIPC-Core-Master-Sheet.svg").read_text(encoding="utf-8"))
+    assert "Admission on day of life" in labels, (
+        "the day of life at admission is missing from the sheet, although a person enters it for a "
+        "patient transferred in after the day of birth")
+
+
+def test_the_birth_weight_is_printed_with_its_unit(english: Path) -> None:
+    """The sheets print a field's label and nothing else, so the birth weight's unit has to be in it.
+
+    A weight written on paper without its unit does not say whether it is in grams or kilograms.
+    """
+    labels = re.findall(r'<text[^>]*class="label"[^>]*>([^<]*)</text>',
+                        (english / "NeoIPC-Core-Master-Sheet.svg").read_text(encoding="utf-8"))
+    assert "Birth weight (g)" in labels, (
+        f"the birth weight is printed without its unit: {[t for t in labels if 'eight' in t]}")
+
+
 def test_the_chart_holds_every_day_count_the_stage_has(english: Path) -> None:
     """The rows must be exactly the stage's day counts -- not a subset that happens to look complete.
 

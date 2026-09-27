@@ -11,6 +11,16 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
 
 ## [Unreleased]
 
+### Fixed
+
+- The Master Data Collection Sheet asks the day of life at admission. The sheet left it out as a value
+  a program rule computes, but the rule assigns it only to an infant delivered in the hospital or
+  admitted on the day of birth, where it is 1; for an infant transferred in later only the person
+  filling in the sheet knows it. The sheet asks it unconditionally, since paper cannot reveal a field
+  once an option above it is ticked.
+- The Master Data Collection Sheet prints the birth weight with its unit, `Birth weight (g)`, which the
+  metadata's form label now carries.
+
 ## [1.3.0-preview2] - 2026-09-07
 
 ### Added
