@@ -1,0 +1,10 @@
+# The Ruby gems the protocol build renders with, one name:version per line. The build workflow installs
+# exactly these and caches the result per runner image and Ruby, keyed on this file, so a version changes
+# here or not at all. Their own dependencies are resolved when the cache is built.
+mathematical:1.7.0
+asciidoctor:2.0.26
+asciidoctor-pdf:2.3.27
+asciidoctor-bibtex:0.9.0
+asciidoctor-diagram:3.2.1
+asciimath:2.0.6
+asciidoctor-mathematical:0.3.5
