@@ -25,7 +25,7 @@ tbl_data <- reference_data |>
 
 tbl <- tbl_data |>
   dplyr::rename(
-    !!sR$table_headers$n := "n",
+    !!sR$table_headers$count := "n",
     !!sR$table_headers$pooled := "pooled",
     !!sR$table_headers$q1 := "q1",
     !!sR$table_headers$q2 := "q2",
@@ -60,13 +60,13 @@ gt_tbl <- tbl |>
     footnotes.marks = "extended"
   ) |>
   fmt_number(
-    columns = !sR$table_headers$n,
+    columns = !sR$table_headers$count,
     decimals = 1,
     sep_mark = sR$digit_group_separator,
     min_sep_threshold = 2,
     locale = locale_gt) |>
   fmt_integer(
-    columns = sR$table_headers$n,
+    columns = sR$table_headers$count,
     sep_mark = sR$digit_group_separator,
     min_sep_threshold = 2)
 
@@ -109,7 +109,7 @@ if ("q1_ci_lower" %in% colnames(gt_tbl$`_data`)) {
 gt_tbl <- gt_tbl |>
   cols_width(
     stub() ~ pct(cw$stub),
-    sR$table_headers$n ~ pct(cw$n),
+    sR$table_headers$count ~ pct(cw$n),
     sR$table_headers$pooled ~ pct(cw$pooled),
     sR$table_headers$q1 ~ pct(cw$q),
     sR$table_headers$q2 ~ pct(cw$q),
@@ -181,16 +181,16 @@ gt_tbl <- gt_tbl |>
    placement = "right"
   ) |>
   tab_footnote(
-    footnote = sprintf(
+    footnote = interpolate_translation(
       sR$`tbl-risk-density-rates`$n_footnote,
-      sR$table_headers$n),
-    locations = cells_column_labels(columns = sR$table_headers$n),
+      column = sR$table_headers$count),
+    locations = cells_column_labels(columns = sR$table_headers$count),
     placement = "right") |>
   tab_footnote(
     footnote = md(
-      sprintf(
+      interpolate_translation(
         sR$`tbl-risk-density-rates`$aware_footnote,
-        "[aware.essentialmeds.org](https://aware.essentialmeds.org/)")),
+        link = "[aware.essentialmeds.org](https://aware.essentialmeds.org/)")),
     locations = gt::cells_stub(
       rows = tidyselect::any_of(c(
         sR$access,
@@ -208,7 +208,7 @@ if (any(!is.na(tbl_data$pooled) & tbl_data$n < sparse_threshold, na.rm = TRUE)) 
     gt::tab_footnote(
       footnote = fn_text,
       locations = cells_body(
-        columns = sR$table_headers$n,
+        columns = sR$table_headers$count,
         rows = !is.na(tbl_data$pooled) & tbl_data$n < sparse_threshold),
       placement = "right")
 }

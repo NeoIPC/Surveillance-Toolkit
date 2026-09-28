@@ -817,7 +817,8 @@ jobs:
                 dotnet publish scripts/modules/NeoIPC-Tools/lib -o scripts/modules/NeoIPC-Tools/lib/bin -c Release --nologo
                 Install-Module -Name Pester -MinimumVersion 5.5 -Force -Scope CurrentUser -SkipPublisherCheck
                 # powershell-yaml: the metadata assembler reads the infectious-agents / sharing YAML when
-                # building the package the data dictionary flattens.
+                # building the package the data dictionary flattens, and ReportInterpolationHygiene reads
+                # the reports' string resources with it.
                 Install-Module -Name powershell-yaml -MinimumVersion 0.4.2 -Force -Scope CurrentUser -SkipPublisherCheck
                 # PSScriptAnalyzer backs two gates: the approved-verb *function* check (PSUseApprovedVerbs)
                 # in ScriptVerbHygiene.Tests.ps1 — whose file-name half is a custom Pester check — and
@@ -830,7 +831,7 @@ jobs:
                 # exclusion list rejects. That last one is not hypothetical: the add-on re-adds a bot credit
                 # to every infectious-agents catalogue whenever those translations are touched, and a
                 # translation pull request is exactly where no human is reading the diff.
-                Invoke-Pester -Path scripts/modules/NeoIPC-Tools/Tests/DataDictionary.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/BuildReport.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/ScriptVerbHygiene.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/PlayData.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/MetadataContent.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/Metadata.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/MetadataVerify.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/PoHeader.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/AutomaticVariableHygiene.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/ReportInterpolationHygiene.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/ReportStringResources.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/PoTemplateChurn.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/GlossaryCasingHygiene.Tests.ps1 -CI
+                Invoke-Pester -Path scripts/modules/NeoIPC-Tools/Tests/DataDictionary.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/BuildReport.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/ScriptVerbHygiene.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/PlayData.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/MetadataContent.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/Metadata.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/MetadataVerify.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/PoHeader.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/AutomaticVariableHygiene.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/ReportInterpolationHygiene.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/ReportStringResources.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/PoTemplateChurn.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/GlossaryCasingHygiene.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/PoPlaceholders.Tests.ps1 -CI
 
             - name: Generate data dictionary
               shell: pwsh

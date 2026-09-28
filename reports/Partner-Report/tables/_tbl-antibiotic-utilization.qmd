@@ -22,7 +22,7 @@ include_localised("_tbl-intro-antibiotic-utilization.Rmd")
 
 ```{r}
 #| output: asis
-include_localised("_methods-antibiotic-utilization.Rmd")
+cat(sR$methods$antibiotic_utilization, "", sep = "\n")
 ```
 
 ```{r}
@@ -76,7 +76,7 @@ if (!is.null(benchmark_data$antibiotic_utilization_table) &&
   tbl <- tbl_data |>
     dplyr::select(-tidyselect::any_of("n_ref")) |>
     dplyr::rename(
-      !!sR$table_headers$n := "n_own",
+      !!sR$table_headers$count := "n_own",
       !!sR$table_headers$rate := tidyselect::any_of("pooled_own"),
       !!sR$table_headers$pooled := tidyselect::any_of("pooled_ref"),
       !!sR$table_headers$q1 := tidyselect::any_of("q1_ref"),
@@ -108,13 +108,13 @@ if (!is.null(benchmark_data$antibiotic_utilization_table) &&
       footnotes.marks = "extended"
     ) |>
     fmt_number(
-      columns = !c(sR$table_headers$n, "aware"),
+      columns = !c(sR$table_headers$count, "aware"),
       decimals = 1,
       sep_mark = sR$digit_group_separator,
       min_sep_threshold = 2,
       locale = locale_gt) |>
     fmt_integer(
-      columns = sR$table_headers$n,
+      columns = sR$table_headers$count,
       sep_mark = sR$digit_group_separator,
       min_sep_threshold = 2) |>
     gt::fmt_markdown(columns = "aware")
@@ -130,7 +130,7 @@ if (!is.null(benchmark_data$antibiotic_utilization_table) &&
     cols_width(
       stub() ~ pct(cw$stub - aware_w),
       "aware" ~ pct(aware_w),
-      sR$table_headers$n ~ pct(cw$n),
+      sR$table_headers$count ~ pct(cw$n),
       sR$table_headers$rate ~ pct(cw$rate %||% cw$pooled),
       tidyselect::any_of(sR$table_headers$pooled) ~ pct(cw$pooled),
       tidyselect::any_of(sR$table_headers$q1) ~ pct(cw$q),
@@ -215,7 +215,7 @@ if (!is.null(benchmark_data$antibiotic_utilization_table) &&
       tab_spanner(
         label = sR$own_data_label,
         columns = tidyselect::any_of(
-          c(sR$table_headers$n, sR$table_headers$rate)),
+          c(sR$table_headers$count, sR$table_headers$rate)),
         id = "department_data"
       ) |>
       tab_spanner(
@@ -228,9 +228,9 @@ if (!is.null(benchmark_data$antibiotic_utilization_table) &&
         id = "reference_data"
       ) |>
       tab_footnote(
-        footnote = sprintf(
+        footnote = interpolate_translation(
           sR$`tbl-antibiotic-utilization`$pooled_footnote,
-          sR$table_headers$pooled),
+          column = sR$table_headers$pooled),
         locations = cells_column_labels(columns = sR$table_headers$pooled),
         placement = "right")
   }
@@ -260,23 +260,23 @@ if (!is.null(benchmark_data$antibiotic_utilization_table) &&
       placement = "right"
     ) |>
     tab_footnote(
-      footnote = sprintf(
+      footnote = interpolate_translation(
         sR$`tbl-antibiotic-utilization`$n_footnote,
-        sR$table_headers$n),
-      locations = cells_column_labels(columns = sR$table_headers$n),
+        column = sR$table_headers$count),
+      locations = cells_column_labels(columns = sR$table_headers$count),
       placement = "right") |>
     tab_footnote(
       footnote = md(
-        sprintf(
+        interpolate_translation(
           sR$`tbl-antibiotic-utilization`$atc_footnote,
-          "[whocc.no/atc_ddd_index/](https://www.whocc.no/atc_ddd_index/)")),
+          link = "[whocc.no/atc_ddd_index/](https://www.whocc.no/atc_ddd_index/)")),
       locations = cells_stub(rows = tbl_data$row_type == "atc5"),
       placement = "right") |>
     tab_footnote(
       footnote = md(
-        sprintf(
+        interpolate_translation(
           sR$`tbl-antibiotic-utilization`$aware_column_footnote,
-          "[aware.essentialmeds.org](https://aware.essentialmeds.org/)")),
+          link = "[aware.essentialmeds.org](https://aware.essentialmeds.org/)")),
       locations = cells_column_labels(columns = "aware"),
       placement = "right") |>
     tab_source_note(source_note = sR$aware_combination_therapy_footnote)
@@ -284,9 +284,9 @@ if (!is.null(benchmark_data$antibiotic_utilization_table) &&
   if (has_reference) {
     gt_tbl <- gt_tbl |>
       tab_footnote(
-        footnote = sprintf(
+        footnote = interpolate_translation(
           sR$`tbl-antibiotic-utilization`$rate_footnote,
-          sR$table_headers$rate),
+          column = sR$table_headers$rate),
         locations = cells_column_labels(
           columns = tidyselect::any_of(sR$table_headers$rate)),
         placement = "right")
@@ -300,7 +300,7 @@ if (!is.null(benchmark_data$antibiotic_utilization_table) &&
       gt::tab_footnote(
         footnote = fn_text,
         locations = cells_body(
-          columns = sR$table_headers$n,
+          columns = sR$table_headers$count,
           rows = !is.na(tbl_data$pooled_own) & tbl_data$n_own < sparse_threshold),
         placement = "right")
   }

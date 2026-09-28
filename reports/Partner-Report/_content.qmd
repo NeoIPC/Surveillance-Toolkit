@@ -58,7 +58,10 @@ include_localised("_validation-summary.Rmd")
 
 ```{r}
 #| output: asis
-include_localised("_introduction.Rmd")
+# Two complete introductions rather than one with a conditional sentence, so
+# each is translated as a whole.
+include_localised(
+  if (has_reference) "_introduction.Rmd" else "_introduction_no_reference.Rmd")
 ```
 
 ```{r}

@@ -890,10 +890,9 @@ classify_metrics <- function(table_data, identifier_col = NULL, combine_cols = N
     identifiers <- as.character(table_data[[identifier_col]])
   } else if (!is.null(rownames(table_data)) && !all(rownames(table_data) == as.character(seq_len(nrow(table_data))))) {
     identifiers <- rownames(table_data)
-  } else if (ncol(table_data) > 0) {
-    identifiers <- as.character(table_data[[1]])
   } else {
-    identifiers <- as.character(seq_len(nrow(table_data)))
+    # The table has at least the quartile columns checked above.
+    identifiers <- as.character(table_data[[1]])
   }
 
   own_values <- table_data[[own_col_name]]
@@ -1489,12 +1488,29 @@ ref_detection_table <- if (params$includeInfectiousAgentDetectionRateTable)
   " (@tbl-infectious-agent-detection-rate)" else ""
 ref_dev_ass_table <- if (params$includeDeviceAssociatedIncidenceDensityTable)
   " (@tbl-device-associated-incidence-density-rates)" else ""
-ref_abr_table <- if (params$includeResistantPathogenInfectionRateTable)
-  " (@tbl-abr-infection-rate)" else ""
 ref_org_rr_table <- if (params$includeOrganismResistanceRateTable)
   " (@tbl-organism-resistance-rate)" else ""
-ref_ast_table <- if (params$includeAntibioticResistanceTestRateTable)
-  " (@tbl-resistance-test-rate)" else ""
+
+# Sentences a table introduction adds only when the table it points to is in
+# the report. Each is a whole translated sentence taking the cross-reference as
+# a value, so the prose files write no text inside their inline R code; an
+# empty string leaves the paragraph reading as it does without the table. The
+# sentence is interpolated at the call, where the template is named, and is
+# evaluated only when the table is included.
+table_note <- function(include, sentence)
+  if (include) paste0(" ", sentence) else ""
+ast_table_note <- table_note(
+  params$includeAntibioticResistanceTestRateTable,
+  interpolate_translation(sR$`tbl-abr-infection-rate`$ast_table_note,
+                          reference = "@tbl-resistance-test-rate"))
+abr_table_note <- table_note(
+  params$includeResistantPathogenInfectionRateTable,
+  interpolate_translation(sR$`tbl-resistance-test-rate`$abr_table_note,
+                          reference = "@tbl-abr-infection-rate"))
+abr_table_contrast <- table_note(
+  params$includeResistantPathogenInfectionRateTable,
+  interpolate_translation(sR$`tbl-organism-resistance-rate`$abr_table_contrast,
+                          reference = "@tbl-abr-infection-rate"))
 
 # ── Section visibility flags ─────────────────────────────────────
 # A section heading is shown iff at least one table in that section
@@ -1850,6 +1866,21 @@ dR <- list(
     NULL
   }
 )
+
+# The reference data's severe-infection figures, a sentence the nosocomial
+# infections introduction adds when the report carries reference data. A
+# reference dataset that carries no incidence-density table, or no count in it,
+# has no figure to give, and the sentence is left out: interpolate_translation()
+# refuses a value that is not there.
+reference_severe_infections <- dR$ref[c("numberOfSevereInfections", "numberOfPatients",
+                                        "averageSevereInfectionsPerPatient")]
+nosocomial_reference_comparison <- if (!is.null(dR$ref) &&
+                                       all(lengths(reference_severe_infections) == 1L))
+  paste0(" ", interpolate_translation(
+    sR$nosocomial_reference_comparison,
+    infection_count = dR$ref$numberOfSevereInfections,
+    patient_count = dR$ref$numberOfPatients,
+    average = dR$ref$averageSevereInfectionsPerPatient)) else ""
 
 # Detect metadata differences for highlighting
 metadata_diff <- if (!is.null(dR$ref)) {

@@ -182,6 +182,20 @@ if (show_section_nosocomial)
 ```{r}
 #| output: asis
 include_localised("_nosocomial_infections.Rmd")
+# Each pointer to a table is its own sentence, written only when the report
+# includes that table.
+table_pointers <- c(
+  if (params$includeIncidenceDensityTable)
+    interpolate_translation(
+      sR$incidence_densities_reference,
+      reference = "@tbl-incidence-density-rates"),
+  if (params$includeDeviceAssociatedIncidenceDensityTable)
+    interpolate_translation(
+      sR$device_associated_infections_reference,
+      reference = "@tbl-device-associated-incidence-density-rates"))
+if (length(table_pointers) > 0L)
+  cat(paste(table_pointers, collapse = " "), "", sep = "\n")
+cat(sR$benchmarking_guidance, "", sep = "\n")
 ```
 
 ```{r}

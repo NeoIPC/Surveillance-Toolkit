@@ -19,7 +19,7 @@ include_localised("_fig-intro-gestational-age.Rmd")
 #| label: fig-ga
 #| fig-alt: !expr 'if("ref" %in% benchmark_data$dataset_names) sR$`fig-alt`$`fig-ga`$bnch else sR$`fig-alt`$`fig-ga`$`no-bnch`'
 #| results: asis
-#| fig-cap: !expr 'paste(sR$`fig-cap`[[1]]$`fig-ga`, sprintf(sR$fig_sample_size, format_integer(if (is.null(benchmark_data$gestational_age_figure)) 0L else sum(dplyr::filter(benchmark_data$gestational_age_figure$frequency, dataset == "own")$n))), sprintf(if("ref" %in% benchmark_data$dataset_names) sR$`fig-cap`[[2]]$bnch else sR$`fig-cap`[[2]]$`no-bnch`, sprintf("%i%s%s", 7L, sR$unit_separator, sR$day)), sprintf(if("ref" %in% benchmark_data$dataset_names) sR$`fig-cap`[[3]]$bnch else sR$`fig-cap`[[3]]$`no-bnch`, sprintf("%i%s", 25L, sR$percent_symbol), sprintf("%i%s", 50L, sR$percent_symbol), sprintf("%i%s", 75L, sR$percent_symbol)))'
+#| fig-cap: !expr 'paste(sR$`fig-cap`$`fig-ga`, interpolate_translation(sR$fig_sample_size, count = format_integer(if (is.null(benchmark_data$gestational_age_figure)) 0L else sum(dplyr::filter(benchmark_data$gestational_age_figure$frequency, dataset == "own")$n))), interpolate_translation(if("ref" %in% benchmark_data$dataset_names) sR$`fig-cap`$panels$bnch else sR$`fig-cap`$panels$`no-bnch`, step = sprintf("%i%s%s", 7L, sR$unit_separator, sR$day)), interpolate_translation(if("ref" %in% benchmark_data$dataset_names) sR$`fig-cap`$markers$bnch else sR$`fig-cap`$markers$`no-bnch`, quantile_25 = sprintf("%i%s", 25L, sR$percent_symbol), quantile_50 = sprintf("%i%s", 50L, sR$percent_symbol), quantile_75 = sprintf("%i%s", 75L, sR$percent_symbol)))'
 
 has_ga <- FALSE
 if (!is.null(benchmark_data) && !is.null(benchmark_data$gestational_age_figure)) {
