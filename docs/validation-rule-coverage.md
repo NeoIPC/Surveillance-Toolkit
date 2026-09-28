@@ -82,7 +82,7 @@ section and blank its fields as well, so what they hide is invisible while the e
 removed on the next edit: `NEOIPC_SSI_NO_SEC_BSI` (an SSI's secondary-BSI section),
 `NEOIPC_SSI_NO_MIBI_RESULT_AVAILABLE` (an SSI's organisms), `NEOIPC_SSI_NO_INFECTION_TYPE` (the three
 organism fields of the depth sections) and `NEOIPC_HAP_MIBI_TEST_RESULT_VAL_NO_VAL_OR_0` (a pneumonia's
-organisms, of which only the first slot is blanked; the second and third stay). A field-hiding rule
+organisms, of which only slot 1 is blanked; slots 2 and 3 stay). A field-hiding rule
 that never fires leaves its field visible and untouched, as `NEOIPC_SSI_SUPERFICIAL_INFECTION` does,
 which cannot fire at all.
 
@@ -108,39 +108,41 @@ partner department can act on. Feedback is actionable when the team can understa
 it in Tracker Capture and fix it there. An inconsistency that a hidden section keeps, that a client
 of an earlier version wrote, that a rule which no longer exists allowed, or that a client-assigned
 companion carries is none of those things: the form does not show it, or the team did not cause it.
-So a finding has one of three homes, and the gap entries below say which. neoipcr implements the
-first today; the second is decided here and not implemented, so an inconsistency of that kind
-currently reaches no report and no repair.
+So a finding has one of three homes, and the gap entries below say which. neoipcr implements home 1
+today; home 2 is decided here and not implemented, so an inconsistency of that kind currently reaches
+no report and no repair.
 
-- **A partner-facing rule.** The inconsistency is visible in the form and the team can correct it.
-  It becomes a validation rule, is listed in the Validation Report, removes the record from the
-  analyses until fixed, and is counted in the validation summary as removed or exempted.
-- **Network-side reconciliation.** The inconsistency is invisible, or not of the team's making, or one
-  the client itself removes without asking on the next edit, and the intended state can be inferred
-  reliably. It belongs to a class of its own in neoipcr, separate from the validation findings; the
-  repair is applied before the validation pass and counted in the summary beside the removals, so a
-  report never shows the team a problem they cannot see and never hides a change made to their data.
-  Whether a repair is also written back to DHIS2 by the network is a separate decision the same
-  detection serves either way. An inconsistency the network caused, such as a code a catalogue no
-  longer carries, is detected the same way and reported to the network rather than repaired.
-- **Nothing.** The value is merely one the current form does not ask for. It is not invalid, and a
-  layout that has changed before and will change again is no ground for destroying it; the analyses
-  read only what the definitions use.
+1. **A partner-facing rule.** The inconsistency is visible in the form and the team can correct it.
+   It becomes a validation rule, is listed in the Validation Report, removes the record from the
+   analyses until fixed, and is counted in the validation summary as removed or exempted.
+2. **Network-side reconciliation.** The inconsistency is invisible, or not of the team's making, or one
+   the client itself removes without asking on the next edit, and the intended state can be inferred
+   reliably. It belongs to a class of its own in neoipcr, separate from the validation findings; the
+   repair is applied before the validation pass and counted in the summary beside the removals, so a
+   report never shows the team a problem they cannot see and never hides a change made to their data.
+   Whether a repair is also written back to DHIS2 by the network is a separate decision the same
+   detection serves either way. An inconsistency the network caused, such as a code a catalogue no
+   longer carries, is detected the same way and reported to the network rather than repaired.
+3. **Nothing.** The value is merely one the current form does not ask for. It is not invalid, and a
+   layout that has changed before and will change again is no ground for destroying it; the analyses
+   read only what the definitions use.
 
-Two things decide whether an inconsistency is reconcilable. First, it has to be a contradiction under
-the protocol itself, whatever client or rule set wrote it: no positive culture and a recorded organism,
-findings recorded at a depth other than the recorded SSI type, secondary-BSI organisms on an SSI whose
-secondary-BSI item is No, a resistance category on an organism it cannot apply to, a client-assigned
-companion that disagrees with the value it is derived from. A value that only today's form would hide
-is not a contradiction. Second, the intended state has to follow from the record itself rather than
-from a rule set. Where one of the two values is derived from the other, or can never be right under
-the protocol, it is recomputed or dropped without further evidence. Otherwise the record's own history
-decides: DHIS2 keeps `createdAt` and `updatedAt` on every data value, neoipcr imports them as
-companion columns of every form field under `include_timestamps`, and of two values that contradict
-each other the later one is the one the user meant, whichever client they were using. When the
-timestamps are equal, as after a bulk edit or an import, the record is undecidable and is reported
-rather than repaired. The deployment's history of metadata exports bounds when a rule arrived only to
-the interval between two exports; it is a last resort, not a foundation.
+Two conditions decide whether an inconsistency is reconcilable:
+
+1. It is a contradiction under the protocol itself, whatever client or rule set wrote it: no positive
+   culture and a recorded organism, findings recorded at a depth other than the recorded SSI type,
+   secondary-BSI organisms on an SSI whose secondary-BSI item is No, a resistance category on an
+   organism it cannot apply to, a client-assigned companion that disagrees with the value it is
+   derived from. A value that only today's form would hide is not a contradiction.
+2. The intended state follows from the record itself rather than from a rule set. Where one of the two
+   contradicting values is derived from the other, or can never be right under the protocol, it is
+   recomputed or dropped without further evidence. Otherwise the record's own history decides: DHIS2
+   keeps `createdAt` and `updatedAt` on every data value, neoipcr imports them as companion columns of
+   every form field under `include_timestamps`, and of two values that contradict each other the later
+   one is the one the user meant, whichever client they were using. When the timestamps are equal, as
+   after a bulk edit or an import, the record is undecidable and is reported rather than repaired. The
+   deployment's history of metadata exports bounds when a rule arrived only to the interval between two
+   exports; it is a last resort, not a foundation.
 
 The gap list groups the partial, uncovered, capture-time and interface-only rows into the decisions
 they call for; a gap whose decision became a rule keeps the rows that rule now covers. Every gap names the anchors it concerns, what exists today, what is missed, who can act
@@ -156,16 +158,18 @@ maintainer's decision; a proposal is not a commitment.
 `sec-analysis-standardized-infection-rate`, `abbr-vlbw`, `abbr-vpt`.
 
 The protocol admits an infant with a birth weight below 1500 g or a gestational age below 32 weeks
-(31 weeks 6 days inclusive); either criterion suffices. The program rule
-`NEOIPC_PATIENT_BW_1500_GRAMS_AND_GA_32_PLUS_WEEKS` refuses registration with an error when the birth
-weight is 1500 g or more and the total gestation days are 224 or more, or when one of the two fails and
-the other is missing, except in departments of the organisation-unit group
-`NEOIPC_ALL_PATIENTS_ELIGIBLE`. Post hoc, rule 57 flags a patient with neither a birth weight nor a
-gestational age, which the registration refuses in every department, including those where the
-eligibility criteria are disabled; it is not an eligibility rule, so the pass
-applies it whichever patients were requested, and the import's eligibility filter keeps such a patient
-for it rather than dropping it unreported. The other two branches, both criteria failing or one failing
-while the other is missing, have no post-hoc rule: under the import's default the eligibility filter
+(31 weeks 6 days inclusive); either criterion suffices. The registration refuses three cases:
+
+1. both criteria fail: a birth weight of 1500 g or more and total gestation days of 224 or more;
+2. one criterion fails and the other value is missing;
+3. neither a birth weight nor a gestational age is recorded.
+
+The program rule `NEOIPC_PATIENT_BW_1500_GRAMS_AND_GA_32_PLUS_WEEKS` refuses cases 1 and 2 with an
+error, except in departments of the organisation-unit group `NEOIPC_ALL_PATIENTS_ELIGIBLE`; case 3 is
+refused in every department, including those where the eligibility criteria are disabled. Post hoc,
+rule 57 flags case 3; it is not an eligibility rule, so the pass applies it whichever patients were
+requested, and the import's eligibility filter keeps such a patient for it rather than dropping it
+unreported. Cases 1 and 2 have no post-hoc rule: under the import's default the eligibility filter
 leaves such a patient out as ineligible, and a patient registered through the API, or before the
 program rule existed, passes `validate()` where ineligible patients are kept. Birth weight itself is
 compulsory only when the gestational age is empty (regular sites) or at departments in the
@@ -173,17 +177,19 @@ organisation-unit group `NEOIPC_NEODECO_TRIAL_SITES` (the NeoDeco trial sites); 
 birth weight only warns, and a patient with a gestational age but no birth weight silently drops out
 of the birth-weight-stratified rates.
 
-Proposal: a patient-level rule flagging a patient whose birth weight is 1500 g or more or missing and
-whose total gestation days are 224 or more or missing, mirroring the program rule's three branches,
-and a second finding for a missing birth weight where the gestational age alone made the infant
-eligible, which the registration allows and the stratified rates cannot use. Both need the dataset to carry a department's
-membership in `NEOIPC_ALL_PATIENTS_ELIGIBLE`, which the import does not read today (it reads only the
-`NEO_DEPARTMENT`, `COUNTRY` and `TEST_UNITS` groups); the rule skips itself until the import provides
-the flag. Who acts: the partner, who sees the birth weight and the gestational age on the registration
-and can correct them or end the enrolment. Decided: rule 57 flags a patient with neither value, which
-no department's registration accepts; the rule on the other branches is documented only, until the
-import carries the department's group membership, which says whether the eligibility criteria apply to
-its patients.
+Proposal:
+
+1. a patient-level rule flagging cases 1 and 2, mirroring the program rule;
+2. a finding for a missing birth weight where the gestational age alone made the infant eligible,
+   which the registration allows and the stratified rates cannot use.
+
+Both need the dataset to carry a department's membership in `NEOIPC_ALL_PATIENTS_ELIGIBLE`, which the
+import does not read today (it reads only the `NEO_DEPARTMENT`, `COUNTRY` and `TEST_UNITS` groups); the
+rule skips itself until the import provides the flag. Who acts: the partner, who sees the birth weight
+and the gestational age on the registration and can correct them or end the enrolment. Decided: rule
+57 flags case 3, which no department's registration accepts; the rule for cases 1 and 2 is documented
+only, until the import carries the department's group membership, which says whether the eligibility
+criteria apply to its patients.
 
 ### G2 — Admission within 120 days of birth
 
@@ -200,7 +206,7 @@ admission type 3 can trip it, since types 1 and 2 are assigned day 1. The protoc
 "within 120 days of birth" means day of life at most 120, as the table implies, and the program rule's
 threshold should follow the protocol. Who acts: the partner; the admission form shows the day of
 life. Decided: rule 45 flags a type-3 admission whose day of life is above 120 — the client assigns
-day 1 to the other two types, so a higher value there is the network's, under G3. Eligibility is
+day 1 to types 1 and 2, so a higher value there is the network's, under G3. Eligibility is
 decided per admission, so a readmission after day 120 is ineligible even when the infant's earlier
 stay was eligible, and rule 45 and the eligibility filter treat it so; the program rule's
 threshold is listed among the configuration defects below and the protocol's wording among the
@@ -220,7 +226,7 @@ hospital or admitted on the day of birth (types 1 and 2) it is 1, for one admitt
 or later (type 3) it is at least 2 and must be recorded. At capture `NEOIPC_ADM_TYPE_1` assigns 1 for
 types 1 and 2, `NEOIPC_ADM_TYPE_2_PLUS` makes the field mandatory for type 3 and `NEOIPC_ADM_DOL_1`
 refuses a value below 2 for type 3. Post hoc, rule 46 checks the day of life of a type-3 admission;
-the value the client assigns for the other two types is checked by nothing. The consequence of a
+the value the client assigns for types 1 and 2 is checked by nothing. The consequence of a
 missing value is wider than the field: rules 27, 31, 35, 39 and 41 compute an event's expected day of
 life from the admission form's value, and a missing value makes their comparison `NA`, which
 `filter()` drops, so those rules are silently disabled for every event of an enrolment whose admission
@@ -406,29 +412,35 @@ opened. Decided: documented only, until the import carries the compulsory flags 
 
 `sec-dd-general-infection-data`, `sec-collect-secondary-bloodstream-infection`.
 
-Secondary-BSI organisms are recorded only when the secondary-BSI item is Yes, and then at least one;
-at least one of them matches an organism identified at the primary infection site. The first is
-enforced at capture by hide and mandatory-field program rules only; the dataset holds both sides
-(`infectiousAgentFindings$secondary_bsi` against the form's `sec_bsi`), which rule 55 compares post
-hoc. The second is enforced at capture nowhere and post hoc by no rule yet; a pneumonia's or an SSI's
-primary and secondary findings sit on the same event, while NEC records no primary-site organisms, so
-the match could not be assessed there. The shapes of the first differ in who can see them. On an SSI the organisms recorded
-while the item is No or No follow-up sit in a section the rule hides together with its fields, so
-they are invisible while the event is completed and removed by the client on the next edit. On a
-pneumonia or a NEC the same organisms sit in hidden fields, which the form still shows while they
-hold a value, read-only on a completed event and blanked on the next edit. Yes without an organism is
-a mandatory field left empty on a visible form.
+The protocol sets two requirements:
 
-Proposal: a reconciliation for organisms under an SSI's secondary-BSI item that is not Yes (a
-contradiction under the protocol; the later value wins, which is also what the client does when the
-event is next edited), an event-level rule flagging the same shape on a pneumonia or a NEC and Yes
-without an organism on any of the three, and a second rule flagging a pneumonia or SSI whose secondary
-findings share no organism with its primary findings. The match compares catalogue keys; a
-genus-level entry against a species-level one does not match, which is a limit to state on the rule.
-Who acts: the network for the SSI's hidden organisms, the partner for the rest. Decided: the SSI's
-organisms under an item that is not Yes are a network-side reconciliation, not yet implemented; rule
-55 flags Yes without an organism on any of the three forms and organisms under another answer on a
-pneumonia or NEC form; the match of the secondary findings against the primary findings waits on the
+1. Secondary-BSI organisms are recorded only when the secondary-BSI item is Yes, and then at least one.
+2. At least one of them matches an organism identified at the primary infection site.
+
+Requirement 1 is enforced at capture by hide and mandatory-field program rules only; the dataset holds
+both sides (`infectiousAgentFindings$secondary_bsi` against the form's `sec_bsi`), which rule 55
+compares post hoc. Requirement 2 is enforced at capture nowhere and post hoc by no rule yet; a
+pneumonia's or an SSI's primary and secondary findings sit on the same event, while NEC records no
+primary-site organisms, so the match could not be assessed there. The shapes that break requirement 1
+differ in who can see them. On an SSI the organisms recorded while the item is No or No follow-up sit
+in a section the rule hides together with its fields, so they are invisible while the event is
+completed and removed by the client on the next edit. On a pneumonia or a NEC the same organisms sit in
+hidden fields, which the form still shows while they hold a value, read-only on a completed event and
+blanked on the next edit. Yes without an organism is a mandatory field left empty on a visible form.
+
+Proposal:
+
+1. a reconciliation for organisms under an SSI's secondary-BSI item that is not Yes (a contradiction
+   under the protocol; the later value wins, which is also what the client does when the event is next
+   edited);
+2. an event-level rule flagging the same shape on a pneumonia or a NEC, and Yes without an organism on
+   any of the three forms;
+3. an event-level rule flagging a pneumonia or SSI whose secondary findings share no organism with its
+   primary findings. The match compares catalogue keys; a genus-level entry against a species-level one
+   does not match, which is a limit to state on the rule.
+
+Who acts: the network for proposal 1, the partner for proposals 2 and 3. Decided: proposal 1 is a
+network-side reconciliation, not yet implemented; proposal 2 is rule 55; proposal 3 waits on the
 pathogen migration. The package's pathogen tables are built from the legacy catalogue, while the
 option codes the forms store are the canonical catalogue's, and the two disagree on which concept
 some codes name: *Raoultella* is a concept of its own in the package and a synonym of *Klebsiella* in
