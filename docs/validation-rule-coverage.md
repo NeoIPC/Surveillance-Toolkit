@@ -677,6 +677,12 @@ changed here; the protocol is normative and a conflict between it and the code i
   The protocol defines the end of surveillance as death, transfer or discharge and sets no maximum
   stay, so the threshold is a plausibility threshold, not a protocol rule, and a genuinely long stay
   is exempted through the exception list. Whether the protocol should state such a threshold is open.
+- **Rule 17** finds overlapping enrolments of one patient. An enrolment without a surveillance-end
+  form is treated as under surveillance on its enrolment date only, so it is found when that day
+  falls inside another enrolment's period, or when two such enrolments share the day. Whether an
+  open enrolment should instead count as still ongoing is for the authority to say. That reading
+  would flag every later enrolment of the patient as overlapping it, so an abandoned enrolment that
+  never got its surveillance-end form would flag every later stay.
 - **The eligibility wording** in the introduction ("above 1500 g", "greater than 32 weeks") assigns
   an infant of exactly 1500 g or exactly 32 weeks 0 days to no module, while the criteria section and
   the examples table exclude such an infant from the core module (`sec-intro-what-you-reading-here`
