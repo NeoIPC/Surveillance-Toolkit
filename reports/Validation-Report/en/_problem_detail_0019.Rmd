@@ -10,3 +10,5 @@ We have found that this protocol specification is sometimes overlooked and that 
 We have planned to allow the recording of early-onset infections as part of NeoIPC Surveillance, but this will in any case be done in a separate event form in order to separate those infections with a potential for prevention in the neonatal setting from those whose prevention is more in the domain of antenatal care and obstetrics.
 
 Please delete the forms for all infections that are not nosocomial infections according to the above definition (see @sec-solution-12) or adjust the infection date (see @sec-solution-7) or the admission date (see @sec-solution-6) if it was an input error.
+
+The day of life of the infection is calculated from the day of life at the time of admission recorded on the admission form; if that value is wrong, please correct it (see @sec-solution-18).

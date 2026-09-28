@@ -44,6 +44,8 @@ include_localised("_validation-summary.Rmd")
 
 {{< include tables/_tbl-validation-summary.qmd >}}
 
+{{< include tables/_tbl-reconciliation-summary.qmd >}}
+
 ```{r}
 #| output: asis
 .end()

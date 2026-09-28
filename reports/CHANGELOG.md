@@ -48,8 +48,25 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
 - The Validation Report renders neoipcr's rule 57, a patient record with neither a birth weight nor a
   gestational age, although the registration requires one of the two; its explanation asks for one of
   them in the patient's profile, or, in a department that includes only infants meeting the eligibility
-  criteria, for the record's deletion if neither is known. The report rests on 56 rules and requires
-  neoipcr `v0.0.0.9006`.
+  criteria, for the record's deletion if neither is known.
+- The Validation Report renders neoipcr's rules 58 to 61. Rule 58 reports a gestational-age text in a
+  format other than the one the registration form requires, and its explanation leads to the patient's
+  profile. Rules 59 to 61 report a completed sepsis, necrotizing enterocolitis or surgical site
+  infection form that does not meet the case definition Tracker Capture checks when the form is
+  completed: clinical sepsis for a sepsis form that records no infectious agent, and for a surgical
+  site infection the definition of the type of infection the form records, which the sentence names.
+  Their explanations ask for the form to be reopened, checked against the definitions and completed
+  again, so that Tracker Capture checks it once more, or deleted where the infection meets no
+  definition. The report requires neoipcr `v0.0.0.9007`.
+- A new solution in the Validation Report shows how to correct the day of life at admission, and the
+  explanations of the rules on a day of life that does not match the calculated value and on an
+  infection within the first three days of life cite it: the infection and procedure forms of an
+  enrolment take their day of life from the day of life at admission on its admission form, and for
+  an infant admitted from the delivery room or on the day of birth Tracker Capture sets that value to
+  1 only while the admission form is open for editing, so a completed admission form holding another
+  value is reopened, refreshed and completed again before the enrolment's infection and procedure
+  forms are updated. Until the new text is translated, the German Validation Report shows the solution
+  and the sentences citing it in English.
 - The Partner and Reference Reports open with a data-validation summary: for each validation rule that
   removed or exempted a record, the number and kind of records it concerned, and the totals across all
   rules — the Partner Report's department beside the reference data where the report compares the two.
@@ -58,6 +75,16 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
   renders the section with a sentence saying so. The summary relies on neoipcr's reporting period
   selecting the enrolments before the validation pass, which it does from `v0.0.0.9004` on — before
   that, it would count every out-of-period patient as removed by rule 25.
+- The data-validation section of the Partner and Reference Reports shows, after the validation
+  summary, what the NeoIPC coordinating centre reconciled before the validation rules were applied:
+  for each of neoipcr's reconciliations, the kind of record it acts on and the number of records it
+  repaired and, where there are any, of the records it reported and kept as stored — the Partner
+  Report's department beside the reference data where the report compares the two. A count the
+  import could not establish, since it did not read the records the reconciliation acts on, shows as
+  not available. A dataset written before neoipcr recorded the reconciliations, one built with them
+  switched off and one in which nothing needed reconciling each render a sentence saying so instead.
+  The table follows `includeValidationSummaryTable`, and its introduction says that the Validation
+  Report checks the reconciled values and does not list the reconciliations.
 - The Validation Report fails the render when a rule's sentence names a placeholder the rule does not
   record, as `neoipcr::validation_rule_context_fields()` declares the fields, instead of failing
   inside the interpolation on the first finding that reaches it.
@@ -82,8 +109,8 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
 - The Partner and Reference Reports' description of exposure densities states that a ventilation day
   requires more than 12 hours of the respective support, following the protocol, while a catheter day
   keeps at least 12 hours.
-- Every report now runs on neoipcr `v0.0.0.9006`, which changes the data of the Partner Report, the
-  Reference Report and the Partner Certificate as well: the import's validation pass, which these
+- The move to neoipcr `v0.0.0.9006` changes the data of the Partner Report, the Reference Report and
+  the Partner Certificate as well: the import's validation pass, which these
   reports run by default, also applies rules 46 to 57 and removes the patients they flag — a
   duplicated antibiotic substance entry, the same infection type recorded again within 14 days, a
   day count above the patient days, or a patient with neither birth weight nor gestational age, for
@@ -96,6 +123,25 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
   and the certificate's patient count can therefore change with this release. Rule 45 removes nothing there: under the
   default the eligibility filter has already dropped such an admission, and with non-core patients
   requested the pass leaves rule 45 out.
+- Every report now runs on neoipcr `v0.0.0.9007`, which changes the data of the Partner Report, the
+  Reference Report and the Partner Certificate further. Its import reconciles, before its eligibility
+  and range filters and its validation pass, the stored values Tracker Capture derives itself or keeps
+  in a section it hides, so the filters and the pass judge the reconciled values: a first admission
+  from the delivery room or on the day of birth stored with a day of life above 120 is given day of
+  life 1 and stays, where the eligibility filter used to drop it; total gestation days computed again
+  from the gestational-age text can move a patient across the eligibility bound of 32 weeks, in either
+  direction, or across a requested gestational-age range; total gestation days outside 140 to 349
+  without a text in the required format, a stored 0 among them, are removed: a patient with such a
+  total below 140 days and a birth weight of 1500 g or more is no longer eligible, and a patient with
+  such a total and no birth weight is removed by the pass under rule 57, or rule 58 where the text is
+  in the wrong format; a surgical site infection whose secondary-BSI item is not Yes no longer counts
+  as one with a secondary BSI; and a culture-negative sepsis whose infectious agents are removed
+  counts as an infection without an infectious agent. The pass also applies rules 58 to 61 and removes the patients they flag, a
+  gestational-age text in the wrong format or a completed infection form that does not meet its case
+  definition. Rates, the validation summary tables and the certificate's patient count can therefore
+  change with this release. The Patient Data Report keeps every value as stored: it passes
+  `reconcile = FALSE`, since a copy of the stored record under Article 15 of the GDPR shows the values
+  as they are stored.
 - Every translatable report string names its placeholders (`{column}`, `{count}`, `{hospital}` and
   the like) where it used a positional `%s`, and the reports fill them with `interpolate_translation()`.
   Pester tests keep printf placeholders out of the string resources and `sprintf()` away from them, and
@@ -131,7 +177,8 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
 - The Patient Data Report failed at its import on every render: neoipcr before `v0.0.0.9006` failed
   on the events' timestamps and on enrolment notes read without the DHIS2 enrolment ids, both of which
   the report requests, and on records without a creator: events created before the instance's upgrade
-  to DHIS2 2.36, and enrolments and tracked entities created before its upgrade to 2.37. It renders with `v0.0.0.9006`, the reports' new floor.
+  to DHIS2 2.36, and enrolments and tracked entities created before its upgrade to 2.37. neoipcr
+  `v0.0.0.9006` fixes all three, and the reports now require `v0.0.0.9007`.
 - A bare `yes` or `on` in a report's string resources stays text, as `no` and `off` already did,
   where YAML reads it as a logical: a translated label such as `Yes`, which po4a writes unquoted, no
   longer turns into `TRUE`. In the other direction, a bare `false` is now read as a logical where it
@@ -140,6 +187,9 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
 - An antibiotic-utilization table with no data failed the render with an "unused argument" error, since
   its no-data branch passed the table's own sentence to a helper that took none; the helper takes the
   sentence now, and the table renders it.
+- A sentence the Partner or Reference Report's PDF shows in a table's place wraps within the text
+  block, where it used to be set on one line that a longer sentence, or its translation, ran into the
+  right margin.
 - A solution that another included solution cited, but no included explanation did, was left out of
   the Validation Report, and the reference to it rendered unresolved. The report now includes every
   solution the included ones cite, and a solution po4a withheld for want of translation falls back to

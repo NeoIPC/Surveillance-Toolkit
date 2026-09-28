@@ -113,6 +113,8 @@ ds_opt <- neoipcr::dhis2_dataset_options(
   include_invalid_patients = TRUE,
   include_ineligible_patients = TRUE,
   include_incomplete = c("enrollments", "events"),
+  # A copy of the stored record under GDPR Article 15 shows every value as stored.
+  reconcile = FALSE,
   translate = TRUE
 )
 

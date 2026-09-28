@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-09-27 23:34+0200\n"
+"POT-Creation-Date: 2026-09-28 21:07+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Language-Team: none\n"
 "Language: en\n"
@@ -965,6 +965,96 @@ msgstr ""
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Organism-specific resistance rates"
+msgstr ""
+
+#. type: Hash Value: tbl-reconciliation-summary no_reconciliations
+#: reports/common.yaml:1
+#, no-wrap
+msgid "No record in the data needed reconciling."
+msgstr ""
+
+#. type: Hash Value: tbl-reconciliation-summary not_reconciled
+#: reports/common.yaml:1
+#, no-wrap
+msgid "The reconciliations were not applied to this dataset: it was built with them switched off, so every value is as stored."
+msgstr ""
+
+#. type: Hash Value: tbl-reconciliation-summary not_recorded
+#: reports/common.yaml:1
+#, no-wrap
+msgid "No reconciliation is recorded for this dataset: its data were imported before the analysis package recorded reconciliations."
+msgstr ""
+
+#. type: Hash Value: tbl-reconciliation-summary reconciliations admission_day_of_life
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Day of life set to 1 on the admission form of an infant admitted from the delivery room or on the day of birth"
+msgstr ""
+
+#. type: Hash Value: tbl-reconciliation-summary reconciliations culture_negative_sepsis_agents
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Infectious agents removed from a sepsis form recorded as culture-negative"
+msgstr ""
+
+#. type: Hash Value: tbl-reconciliation-summary reconciliations form_day_of_life
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Day of life of the infection and procedure forms recalculated from a repaired admission form"
+msgstr ""
+
+#. type: Hash Value: tbl-reconciliation-summary reconciliations gestation_days_from_text
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Total gestation days recalculated from the gestational age"
+msgstr ""
+
+#. type: Hash Value: tbl-reconciliation-summary reconciliations implausible_gestation_days
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Total gestation days outside 140 to 349 days removed where no gestational age is recorded in the required format"
+msgstr ""
+
+#. type: Hash Value: tbl-reconciliation-summary reconciliations ssi_secondary_bsi_agents
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Secondary-BSI infectious agents removed from a surgical site infection form whose secondary-BSI item is not Yes"
+msgstr ""
+
+#. type: Hash Value: tbl-reconciliation-summary reference_not_available
+#: reports/common.yaml:1
+#, no-wrap
+msgid "The reference data carry no reconciliation summary, so none is shown beside the department's."
+msgstr ""
+
+#. type: Hash Value: tbl-reconciliation-summary repaired
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Repaired"
+msgstr ""
+
+#. type: Hash Value: tbl-reconciliation-summary reported
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Reported"
+msgstr ""
+
+#. type: Hash Value: tbl-reconciliation-summary reported_footnote
+#: reports/common.yaml:1
+#, no-wrap
+msgid "{column}: Records the reconciliation concerns but kept as stored rather than repaired, since the repair would have left a form that does not meet its case definition."
+msgstr ""
+
+#. type: Hash Value: tbl-reconciliation-summary tbl-cap
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Records the NeoIPC coordinating centre reconciled"
+msgstr ""
+
+#. type: Hash Value: tbl-reconciliation-summary unknown_label
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Reconciliation {reconciliation}"
 msgstr ""
 
 #. type: Hash Value: tbl-resistance-test-rate carbr_if_3gcr
@@ -2667,13 +2757,23 @@ msgid "This is a [NeoIPC Surveillance](https://neoipc.org/surveillance/)<!-- -->
 msgstr ""
 
 #. type: Plain text
-#: reports/Partner-Report/content/_validation-summary.Rmd:4
+#: reports/Partner-Report/content/_validation-summary.Rmd:5
 #, markdown-text, no-wrap
 msgid ""
 "Before any figure in this report was calculated, the NeoIPC validation rules were applied to your department's data.\n"
 "A record a rule flags is removed from the dataset together with the whole patient record it belongs to — the patient's admissions and forms — unless an exception list names it, and the removed records are not part of any figure in this report.\n"
-"The table below shows, for each rule that removed or exempted a record, how many records of which kind it concerned, and the totals across all rules; where the report compares your department with reference data that carry a summary of their own, it is shown alongside.\n"
-"The Validation Report for your department lists every affected record and explains each rule.\n"
+"@tbl-validation-summary shows, for each rule that removed or exempted a record, how many records of which kind it concerned, and the totals across all rules; where the report compares your department with reference data that carry a summary of their own, it is shown alongside.\n"
+"The Validation Report for your department explains each rule and lists every record a rule flags.\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Partner-Report/content/_validation-summary.Rmd:9
+#, markdown-text, no-wrap
+msgid ""
+"Before the rules are applied, the NeoIPC coordinating centre reconciles two kinds of stored values with what Tracker Capture derives and shows: values it derives itself, which your department does not choose, and infectious agents in a section of a form that it hides.\n"
+"Of the values Tracker Capture derives, the coordinating centre reconciles the day of life of an infant admitted from the delivery room or on the day of birth, on the admission form and on the infection and procedure forms of that admission, and the total gestation days, which Tracker Capture computes from the gestational age.\n"
+"@tbl-reconciliation-summary shows how many records of which kind each reconciliation repaired and, where there are any, how many it reported and kept as stored, because a repair would have left a form that does not meet its case definition; reference data that carry a summary of their own are shown alongside.\n"
+"The Validation Report checks the reconciled values and does not list the reconciliations.\n"
 msgstr ""
 
 #. type: Plain text
@@ -3331,13 +3431,23 @@ msgid "Rates in this report use different denominators depending on the metric. 
 msgstr ""
 
 #. type: Plain text
-#: reports/Reference-Report/content/_validation-summary.Rmd:4
+#: reports/Reference-Report/content/_validation-summary.Rmd:5
 #, markdown-text, no-wrap
 msgid ""
 "Before any value in this report was calculated, the NeoIPC validation rules were applied to the data of every department contributing to the reference data.\n"
 "A record a rule flags is removed from the dataset together with the whole patient record it belongs to — the patient's admissions and forms — unless an exception list names it, and the removed records are not part of any value in this report.\n"
-"The table below shows, for each rule that removed or exempted a record, how many records of which kind it concerned, and the totals across all rules.\n"
+"@tbl-validation-summary shows, for each rule that removed or exempted a record, how many records of which kind it concerned, and the totals across all rules.\n"
 "The rules are numbered as in the NeoIPC Validation Report, which explains each rule.\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Reference-Report/content/_validation-summary.Rmd:9
+#, markdown-text, no-wrap
+msgid ""
+"Before the rules are applied, the NeoIPC coordinating centre reconciles two kinds of stored values with what Tracker Capture derives and shows: values it derives itself, which a department does not choose, and infectious agents in a section of a form that it hides.\n"
+"Of the values Tracker Capture derives, the coordinating centre reconciles the day of life of an infant admitted from the delivery room or on the day of birth, on the admission form and on the infection and procedure forms of that admission, and the total gestation days, which Tracker Capture computes from the gestational age.\n"
+"@tbl-reconciliation-summary shows how many records of which kind each reconciliation repaired and, where there are any, how many it reported and kept as stored, because a repair would have left a form that does not meet its case definition.\n"
+"The NeoIPC Validation Report checks the reconciled values and does not list the reconciliations.\n"
 msgstr ""
 
 #. type: Plain text
@@ -4220,6 +4330,30 @@ msgstr ""
 msgid "A patient record holds neither a birth weight nor a gestational age."
 msgstr ""
 
+#. type: Hash Value: problems 58 description
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The gestational age is recorded as '{gest_age}', which is not in the format the registration form requires: the completed weeks as two digits from 20 to 49, a plus sign, and the additional days as one digit from 0 to 6, as in 25+4."
+msgstr ""
+
+#. type: Hash Value: problems 58 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "A patient record's gestational age is recorded in a format other than the one the registration form requires."
+msgstr ""
+
+#. type: Hash Value: problems 59 description
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The completed sepsis form meets neither the definition of a laboratory-confirmed bloodstream infection, since it records no infectious agent, nor that of clinical sepsis, which requires the absence of a positive blood or cerebrospinal fluid culture, intravenous antibiotic therapy for five or more days initiated, and at least two features of generalized infection (the form records {findings})."
+msgstr ""
+
+#. type: Hash Value: problems 59 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "A completed sepsis form without an infectious agent does not meet the definition of clinical sepsis."
+msgstr ""
+
 #. type: Hash Value: problems 6 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
@@ -4230,6 +4364,30 @@ msgstr ""
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "The enrolment is completed but the surveillance end form is not."
+msgstr ""
+
+#. type: Hash Value: problems 60 description
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The numbers of radiological signs ({imaging_count}), clinical signs ({clinical_count}) and surgical or pathological findings ({surgical_count}) recorded on the completed necrotizing enterocolitis form meet neither the symptom-based definition, which requires at least one radiological sign and at least one clinical sign, nor the surgical definition, which requires at least one surgical or pathological finding."
+msgstr ""
+
+#. type: Hash Value: problems 60 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "A completed necrotizing enterocolitis form meets neither the symptom-based nor the surgical definition."
+msgstr ""
+
+#. type: Hash Value: problems 61 description
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The findings recorded on the completed surgical site infection form do not meet the definition of the type of infection it records ({ssi_type})."
+msgstr ""
+
+#. type: Hash Value: problems 61 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "A completed surgical site infection form does not meet the definition of the type of infection it records."
 msgstr ""
 
 #. type: Hash Value: problems 7 description
@@ -4386,6 +4544,7 @@ msgstr ""
 #: reports/Validation-Report/en/_solution_0015.Rmd:2
 #: reports/Validation-Report/en/_solution_0016.Rmd:2
 #: reports/Validation-Report/en/_solution_0017.Rmd:2
+#: reports/Validation-Report/en/_solution_0018.Rmd:2
 #, no-wrap
 msgid "\\newpage\n"
 msgstr ""
@@ -4930,9 +5089,15 @@ msgid "Please update the day of life value in the form (see @sec-solution-11).\n
 msgstr ""
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0017.Rmd:9
+#: reports/Validation-Report/en/_problem_detail_0017.Rmd:10
 #, markdown-text, no-wrap
 msgid "If at the same time the error message appears that the stored day of occurrence after admission does not match the calculated value, which is the majority of cases (see @sec-problem-details-18), you only need to perform the procedure described in @sec-solution-11 once to update both values.\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0017.Rmd:11
+#, markdown-text, no-wrap
+msgid "If the day of life at the time of admission recorded on the admission form is itself wrong, please correct it first (see @sec-solution-18).\n"
 msgstr ""
 
 #. type: Title ###
@@ -4998,9 +5163,15 @@ msgid "We have planned to allow the recording of early-onset infections as part 
 msgstr ""
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0019.Rmd:12
+#: reports/Validation-Report/en/_problem_detail_0019.Rmd:13
 #, markdown-text, no-wrap
 msgid "Please delete the forms for all infections that are not nosocomial infections according to the above definition (see @sec-solution-12) or adjust the infection date (see @sec-solution-7) or the admission date (see @sec-solution-6) if it was an input error.\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0019.Rmd:14
+#, markdown-text, no-wrap
+msgid "The day of life of the infection is calculated from the day of life at the time of admission recorded on the admission form; if that value is wrong, please correct it (see @sec-solution-18).\n"
 msgstr ""
 
 #. type: Title ###
@@ -5393,6 +5564,103 @@ msgstr ""
 msgid ""
 "Please open the patient record's dashboard (see @sec-solution-1) and edit its profile (see @sec-solution-17): enter the birth weight, the gestational age, or both.\n"
 "If your department includes only infants who meet these criteria and neither value is known, the infant cannot be shown to be eligible and the record does not belong in the Core Module: please delete it (see @sec-solution-2).\n"
+msgstr ""
+
+#. type: Title ###
+#: reports/Validation-Report/en/_problem_detail_0034.Rmd:1
+#, markdown-text, no-wrap
+msgid "The Gestational Age Is Recorded in a Format the Registration Form Does Not Accept {#sec-problem-details-34}"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0034.Rmd:7
+#, markdown-text, no-wrap
+msgid ""
+"The patient record holds the gestational age at birth as completed weeks and days, in the format the registration form gives as its example: two digits for the completed weeks, from 20 to 49, a plus sign, and one digit for the additional days, from 0 to 6, as in 25+4 for 25 weeks and 4 days.\n"
+"The platform calculates the total gestation days, on which eligibility for the Core Module and the analyses by gestational age rest, from a gestational age in this format only.\n"
+"The registration form therefore refuses any other format; a gestational age in another format reaches the platform only around that form, such as through an import or from before the check existed.\n"
+"This message appears in the validation report when a patient record holds a gestational age in another format, for example with a space in it, without the plus sign, with a single digit for the weeks or with more than six days.\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0034.Rmd:8
+#, markdown-text, no-wrap
+msgid "Please open the patient record's dashboard (see @sec-solution-1) and edit its profile (see @sec-solution-17): enter the gestational age in the format described above; the platform then calculates the total gestation days from it.\n"
+msgstr ""
+
+#. type: Title ###
+#: reports/Validation-Report/en/_problem_detail_0035.Rmd:1
+#, markdown-text, no-wrap
+msgid "A Sepsis Form Without an Infectious Agent Does Not Meet the Definition of Clinical Sepsis {#sec-problem-details-35}"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0035.Rmd:8
+#, markdown-text, no-wrap
+msgid ""
+"A sepsis form that records no infectious agent cannot describe a laboratory-confirmed bloodstream infection, so it has to describe a clinical sepsis.\n"
+"The NeoIPC Surveillance Protocol defines clinical sepsis by three criteria, all of which must be met: no positive blood or cerebrospinal fluid culture, intravenous antibiotic therapy for five or more days initiated, and at least two clinical or laboratory features of generalized infection, where the laboratory findings count as one feature together, however many of them are present.\n"
+"When a sepsis form is completed, the platform checks it against this definition and refuses to complete it if the definition is not met; it also refuses a form that records neither the absence of a positive culture nor an infectious agent, because the first infectious agent is then compulsory.\n"
+"A completed form that does not meet the definition has therefore reached the platform around these checks, for example through an import, completed before the checks existed, or changed after it was completed.\n"
+"This message appears in the validation report when a completed sepsis form records no infectious agent and does not meet all three criteria of clinical sepsis; the message gives the number of features of generalized infection the form records.\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0035.Rmd:11
+#, markdown-text, no-wrap
+msgid ""
+"Please open the form (see @sec-solution-15), reopen it for editing (see @sec-solution-9), check its entries against the definitions and complete it again (see @sec-solution-8), which makes the platform check them again.\n"
+"If a blood culture was positive, please record the infectious agent it grew instead.\n"
+"If the infection meets no definition of sepsis, it cannot be recorded; please delete the form in that case (see @sec-solution-12).\n"
+msgstr ""
+
+#. type: Title ###
+#: reports/Validation-Report/en/_problem_detail_0036.Rmd:1
+#, markdown-text, no-wrap
+msgid "A Necrotizing Enterocolitis Form Meets Neither Definition {#sec-problem-details-36}"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0036.Rmd:7
+#, markdown-text, no-wrap
+msgid ""
+"The NeoIPC Surveillance Protocol defines necrotizing enterocolitis in two ways: symptom-based, by at least one radiological sign together with at least one clinical sign, or surgical, by at least one surgical or pathological finding.\n"
+"When a necrotizing enterocolitis form is completed, the platform checks it against these definitions and refuses to complete it if it meets neither.\n"
+"A completed form that meets neither has therefore reached the platform around this check, for example through an import, completed before the check existed, or changed after it was completed.\n"
+"This message appears in the validation report when a completed necrotizing enterocolitis form records neither a radiological and a clinical sign nor a surgical or pathological finding; the message gives the number of each the form records.\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0036.Rmd:9
+#, markdown-text, no-wrap
+msgid ""
+"Please open the form (see @sec-solution-15), reopen it for editing (see @sec-solution-9), check its findings against the definitions and complete it again (see @sec-solution-8), which makes the platform check them again.\n"
+"If the infection meets neither definition, it cannot be recorded as necrotizing enterocolitis; please delete the form in that case (see @sec-solution-12).\n"
+msgstr ""
+
+#. type: Title ###
+#: reports/Validation-Report/en/_problem_detail_0037.Rmd:1
+#, markdown-text, no-wrap
+msgid "A Surgical Site Infection Form Does Not Meet the Definition of the Type It Records {#sec-problem-details-37}"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0037.Rmd:7
+#, markdown-text, no-wrap
+msgid ""
+"The surgical site infection form records the type of the infection, superficial incisional, deep incisional or organ/space, and the NeoIPC Surveillance Protocol defines each type by criteria of its own, all of which have to be met; among them is a list of findings of which the form has to record at least one.\n"
+"When the form is completed, the platform checks its findings against that list for the type it records and refuses to complete it if the form records none of them.\n"
+"A completed form that records none of them has therefore reached the platform around this check, for example through an import, completed before the check existed, or changed after it was completed.\n"
+"This message appears in the validation report when the findings on a completed surgical site infection form do not meet the definition of the type of infection the form records.\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0037.Rmd:10
+#, markdown-text, no-wrap
+msgid ""
+"Please open the form (see @sec-solution-15), reopen it for editing (see @sec-solution-9), check the type of infection and the findings against the definitions and complete it again (see @sec-solution-8), which makes the platform check them again.\n"
+"If the findings meet the definition of another type, please correct the type.\n"
+"If they meet none of the three, the infection cannot be recorded as a surgical site infection; please delete the form in that case (see @sec-solution-12).\n"
 msgstr ""
 
 #. type: Title ###
@@ -5899,4 +6167,19 @@ msgstr ""
 msgid ""
 "To change it, click 'Edit' in the heading of the 'Profile' widget, correct the fields concerned, for example 'Multiple birth' or 'Number of infants in birth', and click 'Save'.\n"
 "'Cancel' leaves the profile as it was.\n"
+msgstr ""
+
+#. type: Title ###
+#: reports/Validation-Report/en/_solution_0018.Rmd:6
+#, markdown-text, no-wrap
+msgid "Correcting the Day of Life at Admission {#sec-solution-18}"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_solution_0018.Rmd:10
+#, markdown-text, no-wrap
+msgid ""
+"The day of life on the infection and procedure forms of an enrolment is calculated from the day of life at admission recorded on its admission form, so a wrong value there makes the day of life on those forms wrong too, and they have to be updated as described in @sec-solution-11 once it is corrected.\n"
+"For an infant admitted from the delivery room or on the day of birth, the platform sets the day of life at admission to 1 itself, but only while the admission form is open for editing; a completed admission form keeps the value it held when it was completed.\n"
+"If the admission form of such an infant records another day of life at admission, first reopen the admission form for editing (see @sec-solution-9), refresh the page as described in @sec-solution-11, which sets the value to 1, and complete the admission form again (see @sec-solution-8); then update the enrolment's infection and procedure forms.\n"
 msgstr ""

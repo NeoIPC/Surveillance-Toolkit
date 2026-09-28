@@ -604,6 +604,162 @@ format_validation_summary_table <- function(summaries, sR) {
   tbl
 }
 
+#' Whether a dataset's reconciliation summary holds anything to show: absent
+#' on a dataset written before neoipcr recorded one, or calculated from a raw
+#' dataset written before then, and empty (0×0) on one imported with the
+#' reconciliations switched off.
+#' @param summary The `reconciliationSummary` slot of a calculated dataset
+#' @return TRUE when the slot is a table with columns
+has_reconciliation_summary <- function(summary) {
+  !is.null(summary) && ncol(summary) > 0L
+}
+
+#' The label of each reconciliation, keyed by the id neoipcr gives it
+#'
+#' The string resources key a label by what the reconciliation repairs, not
+#' by its id, so the ids `neoipcr::reconciliation_ids()` lists are mapped
+#' here. The labels are listed one by one as literal `sR$` references: the
+#' string-layer check reads those to tell a live key from a dead one.
+#' @param sR String resources
+#' @return A list of labels named by reconciliation id
+reconciliation_labels <- function(sR) list(
+  "1" = sR$`tbl-reconciliation-summary`$reconciliations$admission_day_of_life,
+  "2" = sR$`tbl-reconciliation-summary`$reconciliations$form_day_of_life,
+  "3" = sR$`tbl-reconciliation-summary`$reconciliations$gestation_days_from_text,
+  "4" = sR$`tbl-reconciliation-summary`$reconciliations$implausible_gestation_days,
+  "5" = sR$`tbl-reconciliation-summary`$reconciliations$ssi_secondary_bsi_agents,
+  "6" = sR$`tbl-reconciliation-summary`$reconciliations$culture_negative_sepsis_agents)
+
+#' The rows of the reconciliation summary table
+#'
+#' One row per reconciliation, in id order, with its label, the kind of record
+#' it acts on and, per dataset, the records it repaired and the ones it
+#' reported and kept as stored. `summaries` is a list of
+#' `reconciliationSummary` tibbles as neoipcr's `import_dhis2()` documents
+#' them (`reconciliation_id`, `record_kind`, `n_repaired`, `n_reported`), in
+#' the order their columns are shown. A count is `NA` where the import could
+#' not read the records the reconciliation acts on, and where a dataset does
+#' not carry the reconciliation at all. The reported columns are left out
+#' unless some dataset reported a record, since a column of zeros tells the
+#' reader nothing. An id without a label, as a dataset written by a newer
+#' neoipcr can carry, is labelled by its number, and a record kind without one
+#' by its name. Kept free of gt so that a test can run it where gt is not
+#' installed.
+#' @param summaries List of reconciliation-summary tibbles
+#' @param sR String resources
+#' @return A tibble with `label`, `records` and, for the i-th summary,
+#'   `repaired_<i>` and, where shown, `reported_<i>`; NULL when every count is
+#'   zero, so the caller can say so instead of printing a table of zeros
+reconciliation_summary_rows <- function(summaries, sR) {
+  strings <- sR$`tbl-reconciliation-summary`
+  kind_labels <- c(
+    patients    = sR$`tbl-validation-summary`$patients,
+    enrollments = sR$`tbl-validation-summary`$admissions,
+    events      = sR$`tbl-validation-summary`$forms)
+  labels <- reconciliation_labels(sR)
+
+  counts <- purrr::map2(summaries, seq_along(summaries), function(summary, i) {
+    summary |>
+      dplyr::select("reconciliation_id", "record_kind", "n_repaired", "n_reported") |>
+      dplyr::mutate(
+        reconciliation_id = as.integer(.data$reconciliation_id),
+        record_kind       = as.character(.data$record_kind)) |>
+      dplyr::rename(
+        !!paste0("repaired_", i) := "n_repaired",
+        !!paste0("reported_", i) := "n_reported")
+  })
+  joined <- purrr::reduce(counts, dplyr::full_join, by = c("reconciliation_id", "record_kind")) |>
+    dplyr::arrange(.data$reconciliation_id)
+  count_cols <- setdiff(names(joined), c("reconciliation_id", "record_kind"))
+  # A missing count is not a zero: the import could not read the records that
+  # reconciliation acts on, so it cannot say that none needed reconciling, and
+  # the table shows the gap rather than a sentence that would hide it.
+  values <- unlist(joined[count_cols])
+  if (all(!is.na(values) & values == 0L))
+    return(NULL)
+  reported_cols <- count_cols[startsWith(count_cols, "reported_")]
+  if (!any(unlist(joined[reported_cols]) > 0L, na.rm = TRUE))
+    count_cols <- setdiff(count_cols, reported_cols)
+
+  label_of <- function(id) {
+    label <- labels[[as.character(id)]]
+    if (is.null(label))
+      as.character(interpolate_translation(strings$unknown_label, reconciliation = id))
+    else
+      label
+  }
+  joined |>
+    dplyr::mutate(
+      label   = purrr::map_chr(.data$reconciliation_id, label_of),
+      records = dplyr::coalesce(unname(kind_labels[.data$record_kind]), .data$record_kind)) |>
+    dplyr::select("label", "records", tidyselect::all_of(count_cols))
+}
+
+#' Format the reconciliation summaries of one or more datasets as a table
+#'
+#' The rows [reconciliation_summary_rows()] builds, as a gt table with a
+#' column group per dataset when there is more than one, each labelled by its
+#' name in `summaries`. A missing count shows as the string resources'
+#' "not available".
+#' @param summaries List of reconciliation-summary tibbles, named when more than one
+#' @param sR String resources
+#' @return A gt table, or NULL when every count is zero
+format_reconciliation_summary_table <- function(summaries, sR) {
+  rows <- reconciliation_summary_rows(summaries, sR)
+  if (is.null(rows))
+    return(NULL)
+  strings <- sR$`tbl-reconciliation-summary`
+  count_cols <- setdiff(names(rows), c("label", "records"))
+
+  tbl <- rows |>
+    gt::gt(rowname_col = "label") |>
+    gt::sub_missing(missing_text = sR$not_available) |>
+    gt::tab_options(
+      latex.use_longtable = TRUE,
+      table.width = gt::pct(100),
+      footnotes.marks = "extended") |>
+    gt::fmt_integer(
+      columns = tidyselect::all_of(count_cols),
+      sep_mark = sR$digit_group_separator,
+      min_sep_threshold = 2) |>
+    gt::cols_label(records = sR$`tbl-validation-summary`$records) |>
+    gt::tab_style(
+      style = gt::cell_text(weight = "bold"),
+      locations = list(gt::cells_column_spanners(), gt::cells_column_labels()))
+  # The labels are phrases, so the stub takes what the other columns leave;
+  # without a width the PDF sets each label on one line past the margin.
+  # cols_width() evaluates its formulas without their environment, so the
+  # values are injected into them.
+  stub_width <- gt::pct(84 - 11 * length(count_cols))
+  tbl <- rlang::inject(gt::cols_width(
+    tbl,
+    gt::stub() ~ !!stub_width,
+    "records" ~ !!gt::pct(16),
+    tidyselect::all_of(!!count_cols) ~ !!gt::pct(11)))
+  if ("reported_1" %in% count_cols)
+    tbl <- tbl |>
+      gt::tab_footnote(
+        footnote = interpolate_translation(strings$reported_footnote, column = strings$reported),
+        locations = gt::cells_column_labels(columns = "reported_1"),
+        placement = "right")
+
+  for (i in seq_along(summaries)) {
+    repaired <- paste0("repaired_", i)
+    reported <- paste0("reported_", i)
+    tbl <- tbl |>
+      gt::cols_label(!!repaired := strings$repaired)
+    if (reported %in% count_cols)
+      tbl <- tbl |>
+        gt::cols_label(!!reported := strings$reported)
+    if (length(summaries) > 1L)
+      tbl <- tbl |>
+        gt::tab_spanner(label = names(summaries)[i],
+                        columns = tidyselect::all_of(intersect(c(repaired, reported), count_cols)),
+                        id = paste0("dataset_", i))
+  }
+  tbl
+}
+
 #' Format dataset metadata and counts into display-ready values (dR fields)
 #' @param metadata List with data_up_to, effective_analysis_period, countries, dataset_options
 #' @param counts Named list of raw numeric values (n_departments, n_patients, etc.)
@@ -706,7 +862,11 @@ format_dataset_resources <- function(metadata, counts, sR) {
 }
 
 # A sentence in a table's place, shaped as a one-cell longtable outside HTML
-# so the chunk's caption still has a table to sit on.
+# so the chunk's caption still has a table to sit on. The cell is a paragraph
+# column as wide as the text block less the column padding, so a sentence
+# longer than a line, as a translation often is, wraps instead of running into
+# the margin the way an `l` column sets it; centring it keeps a short sentence
+# where the natural-width column put it.
 no_data_table <- function(message = sR$no_data) {
   cat(
     '::: {.content-visible when-format="html"}',
@@ -714,8 +874,8 @@ no_data_table <- function(message = sR$no_data) {
     ":::",
     "",
     '::: {.content-visible unless-format="html"}',
-    "\\begin{longtable}{l}",
-    message,
+    "\\begin{longtable}{p{\\dimexpr\\linewidth-2\\tabcolsep\\relax}}",
+    paste0("\\centering ", message),
     "\\end{longtable}",
     ":::",
     sep = "\n"

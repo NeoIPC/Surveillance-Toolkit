@@ -7,3 +7,5 @@ If this error message appears in the validation report, we have determined that 
 Please update the day of life value in the form (see @sec-solution-11).
 
 If at the same time the error message appears that the stored day of occurrence after admission does not match the calculated value, which is the majority of cases (see @sec-problem-details-18), you only need to perform the procedure described in @sec-solution-11 once to update both values.
+
+If the day of life at the time of admission recorded on the admission form is itself wrong, please correct it first (see @sec-solution-18).

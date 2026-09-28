@@ -1,0 +1,27 @@
+```{r}
+#| output: asis
+#| label: tbl-reconciliation-summary
+#| tbl-cap: !expr 'sR$`tbl-reconciliation-summary`$`tbl-cap`'
+#| tbl-cap-location: top
+
+# NEOIPC-PERMANENT(dataset-format): see rename_legacy_antibiotic_table() in
+# the Partner Report's _setup.qmd. A dataset serialized before neoipcr
+# 0.0.0.9007, or calculated from a raw dataset written before it, carries no
+# reconciliation summary, and one imported with the reconciliations switched
+# off carries an empty one; the section says which. Without the first branch
+# such a file would be described as built with the reconciliations switched
+# off, when it predates them.
+reconciliation_strings <- sR$`tbl-reconciliation-summary`
+reconciliation <- reference_data$reconciliationSummary
+if (is.null(reconciliation)) {
+  no_data_table(reconciliation_strings$not_recorded)
+} else if (!has_reconciliation_summary(reconciliation)) {
+  no_data_table(reconciliation_strings$not_reconciled)
+} else {
+  tbl <- format_reconciliation_summary_table(list(reconciliation), sR)
+  if (is.null(tbl))
+    no_data_table(reconciliation_strings$no_reconciliations)
+  else
+    tbl
+}
+```

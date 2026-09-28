@@ -374,6 +374,38 @@ problems:
       The patient record holds neither a birth weight nor a gestational age,
       although the registration requires one of the two.
     summary: A patient record holds neither a birth weight nor a gestational age.
+  "58":
+    description: >-
+      The gestational age is recorded as '{gest_age}', which is not in the
+      format the registration form requires: the completed weeks as two digits
+      from 20 to 49, a plus sign, and the additional days as one digit from 0
+      to 6, as in 25+4.
+    summary: A patient record's gestational age is recorded in a format other than the one the registration form requires.
+  "59":
+    description: >-
+      The completed sepsis form meets neither the definition of a
+      laboratory-confirmed bloodstream infection, since it records no
+      infectious agent, nor that of clinical sepsis, which requires the
+      absence of a positive blood or cerebrospinal fluid culture, intravenous
+      antibiotic therapy for five or more days initiated, and at least two
+      features of generalized infection (the form records {findings}).
+    summary: A completed sepsis form without an infectious agent does not meet the definition of clinical sepsis.
+  "60":
+    description: >-
+      The numbers of radiological signs ({imaging_count}), clinical signs
+      ({clinical_count}) and surgical or pathological findings
+      ({surgical_count}) recorded on the completed necrotizing enterocolitis
+      form meet neither the symptom-based definition, which requires at least
+      one radiological sign and at least one clinical sign, nor the surgical
+      definition, which requires at least one surgical or pathological
+      finding.
+    summary: A completed necrotizing enterocolitis form meets neither the symptom-based nor the surgical definition.
+  "61":
+    description: >-
+      The findings recorded on the completed surgical site infection form do
+      not meet the definition of the type of infection it records
+      ({ssi_type}).
+    summary: A completed surgical site infection form does not meet the definition of the type of infection it records.
 ssi_problem_header_prefix: Surgical Site Infection event with the infection date
 ssi_types:
   superficial_incisional: superficial incisional SSI

@@ -1,0 +1,10 @@
+
+::: {.content-visible unless-format="html"}
+\newpage
+:::
+
+### Correcting the Day of Life at Admission {#sec-solution-18}
+
+The day of life on the infection and procedure forms of an enrolment is calculated from the day of life at admission recorded on its admission form, so a wrong value there makes the day of life on those forms wrong too, and they have to be updated as described in @sec-solution-11 once it is corrected.
+For an infant admitted from the delivery room or on the day of birth, the platform sets the day of life at admission to 1 itself, but only while the admission form is open for editing; a completed admission form keeps the value it held when it was completed.
+If the admission form of such an infant records another day of life at admission, first reopen the admission form for editing (see @sec-solution-9), refresh the page as described in @sec-solution-11, which sets the value to 1, and complete the admission form again (see @sec-solution-8); then update the enrolment's infection and procedure forms.

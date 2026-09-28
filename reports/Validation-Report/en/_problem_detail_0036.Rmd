@@ -1,0 +1,9 @@
+### A Necrotizing Enterocolitis Form Meets Neither Definition {#sec-problem-details-36}
+
+The NeoIPC Surveillance Protocol defines necrotizing enterocolitis in two ways: symptom-based, by at least one radiological sign together with at least one clinical sign, or surgical, by at least one surgical or pathological finding.
+When a necrotizing enterocolitis form is completed, the platform checks it against these definitions and refuses to complete it if it meets neither.
+A completed form that meets neither has therefore reached the platform around this check, for example through an import, completed before the check existed, or changed after it was completed.
+This message appears in the validation report when a completed necrotizing enterocolitis form records neither a radiological and a clinical sign nor a surgical or pathological finding; the message gives the number of each the form records.
+
+Please open the form (see @sec-solution-15), reopen it for editing (see @sec-solution-9), check its findings against the definitions and complete it again (see @sec-solution-8), which makes the platform check them again.
+If the infection meets neither definition, it cannot be recorded as necrotizing enterocolitis; please delete the form in that case (see @sec-solution-12).
