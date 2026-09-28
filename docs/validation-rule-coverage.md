@@ -140,13 +140,13 @@ Two conditions decide whether an inconsistency is reconcilable:
    derived from. A value that only today's form would hide is not a contradiction.
 2. The intended state follows from the record itself rather than from a rule set. Where one of the two
    contradicting values is derived from the other, or can never be right under the protocol, it is
-   recomputed or dropped without further evidence. Otherwise the record's own history decides: DHIS2
-   keeps `createdAt` and `updatedAt` on every data value, neoipcr imports them as companion columns of
-   every form field under `include_timestamps`, and of two values that contradict each other the later
-   one is the one the user meant, whichever client they were using. When the timestamps are equal, as
-   after a bulk edit or an import, the record is undecidable and is reported rather than repaired. The
-   deployment's history of metadata exports bounds when a rule arrived only to the interval between two
-   exports; it is a last resort, not a foundation.
+   recomputed or dropped without further evidence. Otherwise the state Tracker Capture shows wins: it
+   is the state the person entering the data saw and confirmed. Which state that is, is observed for
+   each shape in Tracker Capture, on a synthetic record and on one production instance, rather than
+   inferred. Per-value timestamps cannot decide it. On DHIS2 2.40 and 2.41, Tracker Capture saves a
+   completion or a reopening by resending the whole event, and the server then stamps every value it
+   holds with the time of that save, changed or not, so the order in which two contradicting values
+   were entered is not recorded.
 
 The gap list groups the partial, uncovered, capture-time and interface-only rows into the decisions
 they call for; a gap whose decision became a rule keeps the rows that rule now covers. Every gap names the anchors it concerns, what exists today, what is missed, who can act
@@ -435,8 +435,7 @@ blanked on the next edit. Yes without an organism is a mandatory field left empt
 Proposal:
 
 1. a reconciliation for organisms under an SSI's secondary-BSI item that is not Yes (a contradiction
-   under the protocol; the later value wins, which is also what the client does when the event is next
-   edited);
+   under the protocol, repaired to the state Tracker Capture shows);
 2. an event-level rule flagging the same shape on a pneumonia or a NEC, and Yes without an organism on
    any of the three forms;
 3. an event-level rule flagging a pneumonia or SSI whose secondary findings share no organism with its
@@ -509,8 +508,8 @@ classification through `is_cc` in the package's pathogen catalogue.
 
 For data entered through the interface a definition fails in only one way: residue. A culture-negative
 sepsis with an organism the hidden section kept, or findings of another depth than the SSI's recorded
-type, are contradictions under the protocol, invisible in the form, and reconcilable by the later
-value. What a mirror rule finds after that reconciliation is a form an import or an earlier client left
+type, are contradictions under the protocol, invisible in the form, and reconcilable to the state
+Tracker Capture shows. What a mirror rule finds after that reconciliation is a form an import or an earlier client left
 in a state the definitions do not admit, which the team can see and complete.
 
 Proposal: the reconciliation of the residue shapes first; then five event-level rules mirroring the
