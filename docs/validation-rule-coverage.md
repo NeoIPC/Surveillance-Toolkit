@@ -119,9 +119,10 @@ no report and no repair.
    analyses until fixed, and is counted in the validation summary as removed or exempted.
 2. **Reconciliation by the NeoIPC coordinating centre.** The inconsistency is invisible, or not of
    the team's making, or one the client itself removes without asking on the next edit, and the
-   intended state can be inferred reliably. It belongs to a class of its own in neoipcr, separate from the validation findings; the
-   repair is applied before the validation pass and counted in the summary beside the removals, so a
-   report never shows the team a problem they cannot see and never hides a change made to their data.
+   intended state can be inferred reliably. It belongs to a class of its own in neoipcr, separate
+   from the validation findings; the repair is applied before the validation pass and counted in the
+   summary beside the removals, so a report never shows the team a problem they cannot see and never
+   hides a change made to their data.
    Whether a repair is also written back to DHIS2 by the coordinating centre is a separate decision
    the same detection serves either way. An inconsistency the coordinating centre caused, such as a
    code a catalogue no longer carries, is detected the same way and reported to the coordinating
