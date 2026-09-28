@@ -143,5 +143,6 @@ finding that reaches the sentence.
 3. Declare the neoipcr release the report now needs in `reports/compatibility.yml`.
 4. Enter the rule in `docs/validation-rule-coverage.md` against the protocol anchor it enforces, and say
    who can act on its findings. A finding the partner cannot see in Tracker Capture does not belong in
-   this report: it is a network-side reconciliation, as that document describes, when it is a
-   contradiction under the protocol whose intended state can be inferred, and no rule at all otherwise.
+   this report: it is a reconciliation by the NeoIPC coordinating centre, as that document describes,
+   when it is a contradiction under the protocol whose intended state can be inferred, and no rule at
+   all otherwise.

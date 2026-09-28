@@ -68,19 +68,27 @@ post-hoc rules.
 
 The interface-only class exists because hiding is not enforcement, and the two hiding actions behave
 differently in Tracker Capture. A **field** that holds a value is never hidden: the form renders it
-whatever the rule says, and when the rule fires on an editable event the client blanks the value,
-saves the blank and shows an alert. Every NeoIPC stage locks its form once the event is completed, so
-on a completed event such a value is displayed read-only and stays until someone reopens the event,
-at which point the client removes it. A **section** is hidden regardless of the values inside it, and
-those values are left in place, invisible. Five rules hide a section without blanking any field
+whatever the rule says. The client blanks such a value, saves the blank and shows an alert ("… was
+blanked out and hidden by your last action") only while it processes rule effects on an editable
+form, and it processes them only when an evaluation changes the outcome of some rule: when the form of
+an active event is opened, since every outcome is then new, and after an edit that changes any rule's
+outcome. An edit that changes none, reopening a completed event with "Incomplete" and completing it
+again leave the value where it is, unless a rule of the stage reads the event's status, as the
+admission form's does, so that reopening itself changes an outcome. Every NeoIPC stage locks its form
+once the event is completed, and a locked form is never blanked, so on a completed event such a value
+is displayed read-only and stays until the reopened form is processed. A **section** is hidden
+regardless of the values inside it, and those values are left in place, invisible. A hidden value
+still feeds every rule that reads it: an organism a culture-negative sepsis keeps in its hidden
+section is a recognized pathogen to the rule that hides the laboratory findings and signs, so on the
+completed form those are hidden too. Five rules hide a section without blanking any field
 (four of them also make a field of the visible part mandatory, which changes nothing about the
 hidden one), so what they hide survives for good: `NEOIPC_BSI_IF_NO_POS_CULTURE` (the organisms of a
 culture-negative sepsis), `NEOIPC_BSI_AGENT_IF_NCC` (the laboratory findings and signs of a
 recognized-pathogen sepsis) and the three `NEOIPC_SSI_INFECTION_TYPE_*` rules (the findings of the
 other SSI depths). Four rules hide a
 section and blank its fields as well, so what they hide is invisible while the event is completed and
-removed on the next edit: `NEOIPC_SSI_NO_SEC_BSI` (an SSI's secondary-BSI section),
-`NEOIPC_SSI_NO_MIBI_RESULT_AVAILABLE` (an SSI's organisms), `NEOIPC_SSI_NO_INFECTION_TYPE` (the three
+removed once the client processes the reopened form: `NEOIPC_SSI_NO_SEC_BSI` (an SSI's secondary-BSI
+section), `NEOIPC_SSI_NO_MIBI_RESULT_AVAILABLE` (an SSI's organisms), `NEOIPC_SSI_NO_INFECTION_TYPE` (the three
 organism fields of the depth sections) and `NEOIPC_HAP_MIBI_TEST_RESULT_VAL_NO_VAL_OR_0` (a pneumonia's
 organisms, of which only slot 1 is blanked; slots 2 and 3 stay). A field-hiding rule
 that never fires leaves its field visible and untouched, as `NEOIPC_SSI_SUPERFICIAL_INFECTION` does,
@@ -118,8 +126,8 @@ no report and no repair.
    It becomes a validation rule, is listed in the Validation Report, removes the record from the
    analyses until fixed, and is counted in the validation summary as removed or exempted.
 2. **Reconciliation by the NeoIPC coordinating centre.** The inconsistency is invisible, or not of
-   the team's making, or one the client itself removes without asking on the next edit, and the
-   intended state can be inferred reliably. It belongs to a class of its own in neoipcr, separate
+   the team's making, or one the client itself removes without asking once it processes the
+   reopened form, and the intended state can be inferred reliably. It belongs to a class of its own in neoipcr, separate
    from the validation findings; the repair is applied before the validation pass and counted in the
    summary beside the removals, so a report never shows the team a problem they cannot see and never
    hides a change made to their data.
@@ -140,10 +148,16 @@ Two conditions decide whether an inconsistency is reconcilable:
    derived from. A value that only today's form would hide is not a contradiction.
 2. The intended state follows from the record itself rather than from a rule set. Where one of the two
    contradicting values is derived from the other, or can never be right under the protocol, it is
-   recomputed or dropped without further evidence. Otherwise the state Tracker Capture shows wins: it
-   is the state the person entering the data saw and confirmed. Which state that is, is observed for
-   each shape in Tracker Capture, on a synthetic record and on one production instance, rather than
-   inferred. Per-value timestamps cannot decide it. On DHIS2 2.40 and 2.41, Tracker Capture saves a
+   recomputed or dropped without further evidence. Otherwise the state the completed form shows in
+   Tracker Capture wins. It is what the team sees while working through the Validation Report, since
+   reopening the form and completing it again leave the record as it is; the state changes only once
+   the client processes the reopened form, and what the team then completes is a state they have seen
+   and confirmed. What the person who first entered the record saw cannot always be recovered:
+   today's client blanks a field's value as soon as a rule hiding the field fires on an editable
+   form, so a record that keeps a value in a hidden field was written by an earlier client or rule
+   set, or through the API. Which state the completed form shows is observed for each shape in
+   Tracker Capture, on a synthetic record and on one production instance, rather than inferred.
+   Per-value timestamps cannot decide it. On DHIS2 2.40 and 2.41, Tracker Capture saves a
    completion or a reopening by resending the whole event, and the server then stamps every value it
    holds with the time of that save, changed or not, so the order in which two contradicting values
    were entered is not recorded.
@@ -245,7 +259,11 @@ value the client assigns on every save and the team never chooses; for type 3 an
 on the admission form flagging a missing day of life or one below 2. Who acts: the coordinating centre
 for the assigned value, the partner for the recorded one. Decided: rule 46 flags an admission of type 3
 whose day of life is missing or below 2; setting the day of life of an inborn or day-of-birth
-admission to 1 is a reconciliation by the coordinating centre, not yet implemented.
+admission to 1, and recomputing with it the day of life the event forms derive from the admission
+form's, is a reconciliation by the coordinating centre, not yet implemented. An admission without a
+type is left alone. The client's assign rule sets day 1 in that case too, once the reopened form is
+processed, but its condition reads a missing type as type 1 or 2, and nothing on such a record says
+which admission it was.
 
 ### G4 — A readmission recorded with the wrong admission type
 
@@ -383,7 +401,7 @@ a substance whose days exceed the antibiotic days or the patient days, and a sub
 zero antibiotic days are rules 52 to 54's findings post hoc. All of them are on the form: a substance recorded on
 a form whose total antibiotic days are zero sits in a slot the rules hide, but a field that holds a
 value is never hidden, so the team sees it, read-only while the event is completed, and the client
-blanks it on the next edit.
+blanks it once it processes the reopened form.
 
 Proposal: extend rule 21, or add a sibling on the `substanceDays` rows, to flag each of those shapes
 with the slot's index, substance and days as context. Who acts: the partner. Decided: three sibling
@@ -426,16 +444,18 @@ both sides (`infectiousAgentFindings$secondary_bsi` against the form's `sec_bsi`
 compares post hoc. Requirement 2 is enforced at capture nowhere and post hoc by no rule yet; a
 pneumonia's or an SSI's primary and secondary findings sit on the same event, while NEC records no
 primary-site organisms, so the match could not be assessed there. The shapes that break requirement 1
-differ in who can see them. On an SSI the organisms recorded while the item is No or No follow-up sit
-in a section the rule hides together with its fields, so they are invisible while the event is
-completed and removed by the client on the next edit. On a pneumonia or a NEC the same organisms sit in
-hidden fields, which the form still shows while they hold a value, read-only on a completed event and
-blanked on the next edit. Yes without an organism is a mandatory field left empty on a visible form.
+differ in who can see them. On an SSI the organisms recorded while the item is No, No follow-up or
+unanswered sit in a section the rule hides together with its fields, so they are invisible while the
+event is completed and removed once the client processes the reopened form. On a pneumonia or a NEC
+the same organisms sit in hidden fields, which the form still shows while they hold a value, read-only
+on a completed event and blanked once the reopened form is processed. Yes without an organism is a
+mandatory field left empty on a visible form.
 
 Proposal:
 
 1. a reconciliation for organisms under an SSI's secondary-BSI item that is not Yes (a contradiction
-   under the protocol, repaired to the state Tracker Capture shows);
+   under the protocol, repaired to the state the completed form shows: the item, without the
+   organisms);
 2. an event-level rule flagging the same shape on a pneumonia or a NEC, and Yes without an organism on
    any of the three forms;
 3. an event-level rule flagging a pneumonia or SSI whose secondary findings share no organism with its
@@ -508,8 +528,25 @@ classification through `is_cc` in the package's pathogen catalogue.
 
 For data entered through the interface a definition fails in only one way: residue. A culture-negative
 sepsis with an organism the hidden section kept, or findings of another depth than the SSI's recorded
-type, are contradictions under the protocol, invisible in the form, and reconcilable to the state
-Tracker Capture shows. What a mirror rule finds after that reconciliation is a form an import or an earlier client left
+type, are contradictions under the protocol, invisible in the form, and reconcilable to the state the
+completed form shows. The two residue shapes are:
+
+1. **A culture-negative sepsis with organisms.** The completed form shows the "no positive blood
+   culture" flag and the antibiotic treatment and hides the organisms; when one of them is a
+   recognized pathogen it hides the laboratory findings and signs as well. Once the reopened form is
+   processed the client resolves the contradiction by the order of its rules rather than by the
+   record. An organism in slot 1 blanks the flag and turns the form into a laboratory-confirmed BSI;
+   organisms in slots 2 and 3 alone are blanked themselves. Either way the antibiotic treatment is
+   blanked too when one of the organisms is a recognized pathogen or recovered multiple times, the
+   two cases in which the client hides that field, although a clinical sepsis needs it. Today's
+   interface cannot enter the shape: an organism in slot 1 hides the flag, and clearing slot 1
+   blanks slots 2 and 3. The repair follows the completed form in every slot: the flag and the
+   antibiotic treatment stay, and the organisms are dropped, which makes the signs visible again.
+2. **Findings at another depth than the recorded SSI type.** They stay invisible whatever happens
+   to the form and are never removed; they would appear only if the type were changed to their
+   depth. They need no repair: the definition mirrors read only the recorded type's depth.
+
+What a mirror rule finds after that reconciliation is a form an import or an earlier client left
 in a state the definitions do not admit, which the team can see and complete.
 
 Proposal: the reconciliation of the residue shapes first; then five event-level rules mirroring the
@@ -535,8 +572,8 @@ resistance value against the organism, and the Partner Report's resistance-test 
 recorded values only, which is correct for data entered in the user interface and wrong for an import
 that recorded a category the organism cannot carry, or for a value that stayed in the hidden field when
 the organism was changed after the category was entered. Such a value can never be right; the form
-shows it read-only on a completed event and the client removes it on the next edit, so dropping it is
-a reconciliation that needs no timestamp and applies the client's own rule to records the client
+shows it read-only on a completed event and the client removes it once it processes the reopened
+form, so dropping it is a reconciliation that needs no timestamp and applies the client's own rule to records the client
 never re-processed. The reconciliation is not included: neoipcr's applicability flags come from the
 legacy pathogen CSVs, the canonical source is
 `metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml`, the two disagree for some organisms
@@ -556,10 +593,18 @@ agree.
 
 Proposal: a patient-level rule flagging a gestational age that does not match the client's pattern
 (`^[2-4][0-9][+][0-6]$`) for the partner, and a reconciliation recomputing the total days from the text
-whenever the two differ or the total is missing: the total is displayed, but the client overwrites it
-from the text on every save, so a disagreement is the client's, not the team's. Who acts: the partner
-for the text, the coordinating centre for the total. Decided: a reconciliation by the coordinating
-centre that recomputes the total from the text, not yet implemented.
+whenever the two differ or the total is missing. The team never chooses the total: the dashboard's
+profile does not show it, and the profile's edit form shows it read-only as the client computes it
+from the text, then writes that value with every save of the profile. A disagreement is therefore the
+client's, not the team's. Who acts: the partner for the text, the coordinating centre for the total.
+Decided, not yet implemented, with cases 1 to 3 a reconciliation by the coordinating centre:
+
+1. a text matching the pattern: the total is recomputed from it;
+2. no valid text and a total outside 140 to 349 days, 0 included: the total becomes missing;
+3. no valid text and a total within that range: the total is left alone. The client computes an empty
+   text as 0 and would write that on the next save of the profile, but 0 is never right, while the
+   stored total may be the only record of the gestational age;
+4. a non-empty text failing the pattern: rule 58 flags it for the partner.
 
 ### G18 — Number of infants at birth below two
 
