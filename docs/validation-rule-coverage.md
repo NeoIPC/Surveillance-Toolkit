@@ -108,6 +108,8 @@ partner department can act on. Feedback is actionable when the team can understa
 it in Tracker Capture and fix it there. An inconsistency that a hidden section keeps, that a client
 of an earlier version wrote, that a rule which no longer exists allowed, or that a client-assigned
 companion carries is none of those things: the form does not show it, or the team did not cause it.
+Two parties can act on a finding: the partner, the team at the partner department, and the NeoIPC
+coordinating centre, which runs the DHIS2 platform, its configuration and the processing of the data.
 So a finding has one of three homes, and the gap entries below say which. neoipcr implements home 1
 today; home 2 is decided here and not implemented, so an inconsistency of that kind currently reaches
 no report and no repair.
@@ -115,14 +117,15 @@ no report and no repair.
 1. **A partner-facing rule.** The inconsistency is visible in the form and the team can correct it.
    It becomes a validation rule, is listed in the Validation Report, removes the record from the
    analyses until fixed, and is counted in the validation summary as removed or exempted.
-2. **Network-side reconciliation.** The inconsistency is invisible, or not of the team's making, or one
+2. **Reconciliation by the NeoIPC coordinating centre.** The inconsistency is invisible, or not of the team's making, or one
    the client itself removes without asking on the next edit, and the intended state can be inferred
    reliably. It belongs to a class of its own in neoipcr, separate from the validation findings; the
    repair is applied before the validation pass and counted in the summary beside the removals, so a
    report never shows the team a problem they cannot see and never hides a change made to their data.
-   Whether a repair is also written back to DHIS2 by the network is a separate decision the same
-   detection serves either way. An inconsistency the network caused, such as a code a catalogue no
-   longer carries, is detected the same way and reported to the network rather than repaired.
+   Whether a repair is also written back to DHIS2 by the coordinating centre is a separate decision
+   the same detection serves either way. An inconsistency the coordinating centre caused, such as a
+   code a catalogue no longer carries, is detected the same way and reported to the coordinating
+   centre rather than repaired.
 3. **Nothing.** The value is merely one the current form does not ask for. It is not invalid, and a
    layout that has changed before and will change again is no ground for destroying it; the analyses
    read only what the definitions use.
@@ -206,7 +209,7 @@ admission type 3 can trip it, since types 1 and 2 are assigned day 1. The protoc
 "within 120 days of birth" means day of life at most 120, as the table implies, and the program rule's
 threshold should follow the protocol. Who acts: the partner; the admission form shows the day of
 life. Decided: rule 45 flags a type-3 admission whose day of life is above 120 — the client assigns
-day 1 to types 1 and 2, so a higher value there is the network's, under G3. Eligibility is
+day 1 to types 1 and 2, so a higher value there is the coordinating centre's to reconcile, under G3. Eligibility is
 decided per admission, so a readmission after day 120 is ineligible even when the infant's earlier
 stay was eligible, and rule 45 and the eligibility filter treat it so; the program rule's
 threshold is listed among the configuration defects below and the protocol's wording among the
@@ -238,10 +241,10 @@ type 1 or 2 admission.
 
 Proposal: for types 1 and 2 a reconciliation that sets a missing or different day of life to 1, the
 value the client assigns on every save and the team never chooses; for type 3 an enrolment-level rule
-on the admission form flagging a missing day of life or one below 2. Who acts: the network for the
-assigned value, the partner for the recorded one. Decided: rule 46 flags an admission of type 3 whose
-day of life is missing or below 2; setting the day of life of an inborn or day-of-birth admission to 1
-is a network-side reconciliation, not yet implemented.
+on the admission form flagging a missing day of life or one below 2. Who acts: the coordinating centre
+for the assigned value, the partner for the recorded one. Decided: rule 46 flags an admission of type 3
+whose day of life is missing or below 2; setting the day of life of an inborn or day-of-birth
+admission to 1 is a reconciliation by the coordinating centre, not yet implemented.
 
 ### G4 — A readmission recorded with the wrong admission type
 
@@ -439,9 +442,10 @@ Proposal:
    primary findings. The match compares catalogue keys; a genus-level entry against a species-level one
    does not match, which is a limit to state on the rule.
 
-Who acts: the network for proposal 1, the partner for proposals 2 and 3. Decided: proposal 1 is a
-network-side reconciliation, not yet implemented; proposal 2 is rule 55; proposal 3 waits on the
-pathogen migration. The package's pathogen tables are built from the legacy catalogue, while the
+Who acts: the coordinating centre for proposal 1, the partner for proposals 2 and 3. Decided: proposal
+1 is a reconciliation by the coordinating centre, not yet implemented; proposal 2 is rule 55; proposal
+3 waits on the pathogen migration, and on the protocol revision that settles whether requirement 2
+applies when no infectious agent was identified (see the questions for the protocol authority below). The package's pathogen tables are built from the legacy catalogue, while the
 option codes the forms store are the canonical catalogue's, and the two disagree on which concept
 some codes name: *Raoultella* is a concept of its own in the package and a synonym of *Klebsiella* in
 the catalogue, and *Candida fabianii* resolves in the package to a second *Cyberlindnera fabianii*
@@ -510,9 +514,9 @@ in a state the definitions do not admit, which the team can see and complete.
 Proposal: the reconciliation of the residue shapes first; then five event-level rules mirroring the
 client's definition checks, one per stage, so that a form whose recorded findings meet no definition
 of its type is a finding. The alternative is to leave the definitions to capture time and record that
-an API import is not held to them. Who acts: the network for the residue, the partner for what
-remains. Decided: the residue shapes are a network-side reconciliation, not yet implemented; once it
-runs, the five definition mirrors become partner-facing rules.
+an API import is not held to them. Who acts: the coordinating centre for the residue, the partner for
+what remains. Decided: the residue shapes are a reconciliation by the coordinating centre, not yet
+implemented; once it runs, the five definition mirrors become partner-facing rules.
 
 ### G16 — Resistance categories that do not apply to the organism
 
@@ -537,8 +541,8 @@ legacy pathogen CSVs, the canonical source is
 `metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml`, the two disagree for some organisms
 (the *Raoultella* species, several *Salmonella* serovars and *Staphylococcus argenteus* among them),
 and the package does not read the applicability from the YAML through
-its pathogen taxonomy, which the reconciliation needs. Who acts: the network. Decided: a network-side
-reconciliation, once the pathogen migration lands.
+its pathogen taxonomy, which the reconciliation needs. Who acts: the coordinating centre. Decided: a
+reconciliation by the coordinating centre, once the pathogen migration lands.
 
 ### G17 — Gestational age text and total days
 
@@ -553,8 +557,8 @@ Proposal: a patient-level rule flagging a gestational age that does not match th
 (`^[2-4][0-9][+][0-6]$`) for the partner, and a reconciliation recomputing the total days from the text
 whenever the two differ or the total is missing: the total is displayed, but the client overwrites it
 from the text on every save, so a disagreement is the client's, not the team's. Who acts: the partner
-for the text, the network for the total. Decided: a network-side reconciliation that recomputes the
-total from the text, not yet implemented.
+for the text, the coordinating centre for the total. Decided: a reconciliation by the coordinating
+centre that recomputes the total from the text, not yet implemented.
 
 ### G18 — Number of infants at birth below two
 
@@ -585,8 +589,8 @@ longer carries or one written outside it through the API; nothing flags such a c
 the analogue: it flags the explicit "not listed" organism entry, which the partner resolves.)
 
 Proposal: a detection of a `substanceDays` row whose code is absent from the imported option set,
-reported to the network without repair. Who acts: the network; such a code is a catalogue or migration
-problem, not a data-entry one. Decided: documented only.
+reported to the coordinating centre without repair. Who acts: the coordinating centre; such a code is
+a catalogue or migration problem, not a data-entry one. Decided: documented only.
 
 ### G20 — A procedure code that maps to no category
 
@@ -684,6 +688,14 @@ changed here; the protocol is normative and a conflict between it and the code i
 - **The secondary-BSI window** is defined twice: `sec-collect-secondary-bloodstream-infection`
   counts it from the day of first symptoms or of the first positive culture at the primary site,
   `dd-secondary-bloodstream-infection` from the first symptoms only.
+- **The secondary-BSI match** (G12, requirement 2) is stated unconditionally in
+  `sec-collect-secondary-bloodstream-infection`, so a pneumonia without an identified infectious agent
+  could never have a secondary BSI. `dd-secondary-bloodstream-infection` admits any secondary sepsis
+  that meets a NeoIPC definition, clinical sepsis included, for which the match cannot be met either.
+  Whether the match applies only when an infectious agent was identified, and whether a secondary BSI
+  may be a clinical sepsis, decides the capture configuration's mandatory first slot, rule 55's "Yes
+  without an agent" arm, and G12's proposal 3. Under discussion for a protocol revision in
+  <https://github.com/NeoIPC/Surveillance-Toolkit/issues/156>.
 - **"Within 120 days of birth"** admits day of life 121 on a literal reading, which the examples
   table excludes (G2).
 - **The SSI follow-up overview** states 30 or 90 days by implant alone (`sec-collect`,
