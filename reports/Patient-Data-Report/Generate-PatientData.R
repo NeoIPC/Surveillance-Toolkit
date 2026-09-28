@@ -130,6 +130,9 @@ if (nrow(patient) == 0) {
 
 pk <- patient$patient_key
 
+department <- ds$metadata$departments |>
+  dplyr::filter(department_key == patient$department_key)
+
 result <- list(
   patient = patient,
   enrollment = ds$enrollments |> dplyr::filter(patient_key == pk),
@@ -161,10 +164,13 @@ result <- list(
   infectiousAgentFindings = ds$infectiousAgentFindings |>
     dplyr::semi_join(ds$events |> dplyr::filter(patient_key == pk),
       by = "event_key"),
-  department = ds$metadata$departments |>
-    dplyr::filter(department_key == patient$department_key),
+  department = department,
+  # Under the full department tier the hospital key sits on the department,
+  # not on the patient. A department without a hospital exports an empty
+  # `hospital`.
   hospital = ds$metadata$hospitals |>
-    dplyr::filter(hospital_key == patient$hospital_key)
+    dplyr::semi_join(department, dplyr::join_by(hospital_key),
+                     na_matches = "never")
 )
 
 out <- jsonlite::toJSON(result, pretty = TRUE, auto_unbox = TRUE,

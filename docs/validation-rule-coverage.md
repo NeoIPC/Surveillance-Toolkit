@@ -703,7 +703,8 @@ singleton. A multiple birth recorded without a number is not flagged post hoc; o
 field enforces its presence at capture, which is why the row is partial. The import's validation
 pass reads the flag and the number whatever patient columns the caller selects, and narrows the
 patients back to the selection afterwards, so only a full-tier dataset whose `patient_columns` is
-empty or names them keeps the two; a later `validate()` on a dataset without them skips rule 56.
+empty or names them keeps the two, and the number the finding records is `NA` in the import's
+`validationResults` otherwise; a later `validate()` on a dataset without them skips rule 56.
 
 ### G19 — A substance code outside the catalogue
 

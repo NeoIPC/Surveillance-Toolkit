@@ -179,6 +179,12 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
   the report requests, and on records without a creator: events created before the instance's upgrade
   to DHIS2 2.36, and enrolments and tracked entities created before its upgrade to 2.37. neoipcr
   `v0.0.0.9006` fixes all three, and the reports now require `v0.0.0.9007`.
+- Once past its import, the Patient Data Report still failed for every patient it found, in the
+  rendered report and in the JSON export alike: it looked up the hospital through the patient record's
+  hospital key, which the import leaves off the patient record when it imports the department in full,
+  as the report does, since the department then carries the key. It now takes the hospital from the patient's
+  department; for a department without a hospital, the report leaves the hospital field empty and the
+  JSON export's `hospital` is an empty array.
 - A bare `yes` or `on` in a report's string resources stays text, as `no` and `off` already did,
   where YAML reads it as a logical: a translated label such as `Yes`, which po4a writes unquoted, no
   longer turns into `TRUE`. In the other direction, a bare `false` is now read as a logical where it
