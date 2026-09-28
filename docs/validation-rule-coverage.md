@@ -117,9 +117,9 @@ no report and no repair.
 1. **A partner-facing rule.** The inconsistency is visible in the form and the team can correct it.
    It becomes a validation rule, is listed in the Validation Report, removes the record from the
    analyses until fixed, and is counted in the validation summary as removed or exempted.
-2. **Reconciliation by the NeoIPC coordinating centre.** The inconsistency is invisible, or not of the team's making, or one
-   the client itself removes without asking on the next edit, and the intended state can be inferred
-   reliably. It belongs to a class of its own in neoipcr, separate from the validation findings; the
+2. **Reconciliation by the NeoIPC coordinating centre.** The inconsistency is invisible, or not of
+   the team's making, or one the client itself removes without asking on the next edit, and the
+   intended state can be inferred reliably. It belongs to a class of its own in neoipcr, separate from the validation findings; the
    repair is applied before the validation pass and counted in the summary beside the removals, so a
    report never shows the team a problem they cannot see and never hides a change made to their data.
    Whether a repair is also written back to DHIS2 by the coordinating centre is a separate decision
@@ -209,9 +209,9 @@ admission type 3 can trip it, since types 1 and 2 are assigned day 1. The protoc
 "within 120 days of birth" means day of life at most 120, as the table implies, and the program rule's
 threshold should follow the protocol. Who acts: the partner; the admission form shows the day of
 life. Decided: rule 45 flags a type-3 admission whose day of life is above 120 — the client assigns
-day 1 to types 1 and 2, so a higher value there is the coordinating centre's to reconcile, under G3. Eligibility is
-decided per admission, so a readmission after day 120 is ineligible even when the infant's earlier
-stay was eligible, and rule 45 and the eligibility filter treat it so; the program rule's
+day 1 to types 1 and 2, so a higher value there is the coordinating centre's to reconcile, under
+G3. Eligibility is decided per admission, so a readmission after day 120 is ineligible even when the
+infant's earlier stay was eligible, and rule 45 and the eligibility filter treat it so; the program rule's
 threshold is listed among the configuration defects below and the protocol's wording among the
 questions. The rows are Partial: rule 45 is an eligibility rule, so the import's validation pass
 leaves it out when ineligible patients are requested, and under the default the import's eligibility
@@ -444,9 +444,10 @@ Proposal:
 
 Who acts: the coordinating centre for proposal 1, the partner for proposals 2 and 3. Decided: proposal
 1 is a reconciliation by the coordinating centre, not yet implemented; proposal 2 is rule 55; proposal
-3 waits on the pathogen migration, and on the protocol revision that settles whether requirement 2
-applies when no infectious agent was identified (see the questions for the protocol authority below). The package's pathogen tables are built from the legacy catalogue, while the
-option codes the forms store are the canonical catalogue's, and the two disagree on which concept
+3 waits on the protocol revision that settles whether requirement 2 applies when no infectious agent
+was identified (see the questions for the protocol authority below), and on the pathogen migration.
+The package's pathogen tables are built from the legacy catalogue, while the option codes the forms
+store are the canonical catalogue's, and the two disagree on which concept
 some codes name: *Raoultella* is a concept of its own in the package and a synonym of *Klebsiella* in
 the catalogue, and *Candida fabianii* resolves in the package to a second *Cyberlindnera fabianii*
 concept the catalogue does not carry, where the catalogue files it as a synonym of its own. A
