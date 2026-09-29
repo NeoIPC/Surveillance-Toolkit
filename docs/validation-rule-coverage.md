@@ -77,25 +77,30 @@ whatever the rule says. The client blanks such a value, saves the blank and show
 blanked out and hidden by your last action") only while it processes rule effects on an editable
 form, and it processes them only when an evaluation changes the outcome of some rule: when the form of
 an active event is opened, since every outcome is then new, and after an edit that changes any rule's
-outcome. An edit that changes none, reopening a completed event with "Incomplete" and completing it
-again leave the value where it is, unless a rule of the stage reads the event's status, as the
-admission form's does, so that reopening itself changes an outcome. Every NeoIPC stage locks its form
-once the event is completed, and a locked form is never blanked, so on a completed event such a value
-is displayed read-only and stays until the reopened form is processed. A **section** is hidden
-regardless of the values inside it, and those values are left in place, invisible. A hidden value
-still feeds every rule that reads it: an organism a culture-negative sepsis keeps in its hidden
-section is a recognized pathogen to the rule that hides the laboratory findings and signs, so on the
-completed form those are hidden too. Five rules hide a section without blanking any field
+outcome. An edit that changes none, reopening a completed event with "Incomplete", and completing it
+again all leave the value where it is, unless a rule of the stage reads the event's status, so that
+reopening itself changes an outcome. Only the admission stage has such a rule
+(`NEOIPC_ADM_SET_COMPLETED`), so reopening an admission form makes the client process it at once: for
+an infant admitted from the delivery room or on the day of birth, it writes day of life 1 to the
+reopened form without the page being refreshed (G3). The infection and procedure stages have none, so
+the client derives the day of life of such a form again only once the form is reopened and then
+opened afresh, as refreshing the page does. Every NeoIPC stage locks its form once the event is
+completed, and a locked form is never blanked, so on a completed event such a value is displayed
+read-only and stays until the reopened form is processed. A **section** is hidden regardless of the
+values inside it, and those values are left in place, invisible. A hidden value still feeds every
+rule that reads it, so an infectious agent a culture-negative sepsis keeps in its hidden section
+reaches the recognized-pathogen rule: when it is a recognized pathogen, the laboratory findings and
+signs are hidden too on the completed form. Five rules hide a section without blanking any field
 (four of them also make a field of the visible part mandatory, which changes nothing about the
-hidden one), so what they hide survives for good: `NEOIPC_BSI_IF_NO_POS_CULTURE` (the organisms of a
-culture-negative sepsis), `NEOIPC_BSI_AGENT_IF_NCC` (the laboratory findings and signs of a
-recognized-pathogen sepsis) and the three `NEOIPC_SSI_INFECTION_TYPE_*` rules (the findings of the
-other SSI depths). Four rules hide a
-section and blank its fields as well, so what they hide is invisible while the event is completed and
-removed once the client processes the reopened form: `NEOIPC_SSI_NO_SEC_BSI` (an SSI's secondary-BSI
-section), `NEOIPC_SSI_NO_MIBI_RESULT_AVAILABLE` (an SSI's organisms), `NEOIPC_SSI_NO_INFECTION_TYPE` (the three
-organism fields of the depth sections) and `NEOIPC_HAP_MIBI_TEST_RESULT_VAL_NO_VAL_OR_0` (a pneumonia's
-organisms, of which only slot 1 is blanked; slots 2 and 3 stay). A field-hiding rule
+hidden one), so what they hide survives for good: `NEOIPC_BSI_IF_NO_POS_CULTURE` (the infectious
+agents of a culture-negative sepsis), `NEOIPC_BSI_AGENT_IF_NCC` (the laboratory findings and signs
+of a recognized-pathogen sepsis), and the three `NEOIPC_SSI_INFECTION_TYPE_*` rules (the findings of
+the other SSI depths). Four rules hide a section and blank its fields as well, so what they hide is
+invisible while the event is completed and removed once the client processes the reopened form:
+`NEOIPC_SSI_NO_SEC_BSI` (an SSI's secondary-BSI section), `NEOIPC_SSI_NO_MIBI_RESULT_AVAILABLE` (an
+SSI's infectious agents), `NEOIPC_SSI_NO_INFECTION_TYPE` (the three infectious-agent fields of the
+depth sections), and `NEOIPC_HAP_MIBI_TEST_RESULT_VAL_NO_VAL_OR_0` (a pneumonia's infectious
+agents, of which only slot 1 is blanked; slots 2 and 3 stay). A field-hiding rule
 that never fires leaves its field visible and untouched, as `NEOIPC_SSI_SUPERFICIAL_INFECTION` does,
 which cannot fire at all.
 
@@ -139,12 +144,12 @@ and 2: home 1 as the validation rules, home 2 as the reconciliations of `import_
    report never shows the team a problem they cannot see and never hides a change made to their
    data. The summary counts, per reconciliation, the records the returned dataset holds that it
    repaired and those it reported without repair. `reconciliation_details()` lists, record by
-   record, what the import would repair or report, with the stored value and the one that takes its
-   place, on a dataset imported with every record and every value as stored. One shape is reported
-   to the coordinating centre and kept as stored rather than repaired: a culture-negative sepsis
-   form that names an infectious agent and would not meet the clinical-sepsis definition without it
-   (G15). Whether a repair is also written back to DHIS2 by the coordinating centre is a separate
-   decision the same detection serves either way. An inconsistency the coordinating centre caused,
+   record, what the import would repair or report, with the stored value and what replaces it, or
+   with what the repair removes, on a dataset imported with every record and every value as stored.
+   One shape is reported to the coordinating centre and kept as stored rather than repaired: a
+   culture-negative sepsis form that names an infectious agent and would not meet the
+   clinical-sepsis definition without it (G15). Whether a repair is also written back to DHIS2 by
+   the coordinating centre is a separate decision the same detection serves either way. An inconsistency the coordinating centre caused,
    such as a code a catalogue no longer carries, belongs here as well and is reported to the
    coordinating centre rather than repaired; no such detection is implemented (G19).
 3. **Nothing.** The value is merely one the current form does not ask for. It is not invalid, and a
@@ -274,11 +279,11 @@ reconciliation 1 sets it to 1 before the filter runs, except on a readmission, w
 missing.
 
 Proposal: for types 1 and 2 a reconciliation that sets a missing or different day of life to 1, the
-value the client assigns on every save and the team never chooses; for type 3 an enrolment-level rule
-on the admission form flagging a missing day of life or one below 2. Who acts: the coordinating centre
-for the assigned value, the partner for the recorded one. Decided: rule 46 flags an admission of type 3
-whose day of life is missing or below 2. Two reconciliations by the coordinating centre repair the
-rest:
+value the client assigns whenever it processes the form while it can be edited, and the team never
+chooses; for type 3 an enrolment-level rule on the admission form flagging a missing day of life or
+one below 2. Who acts: the coordinating centre for the assigned value, the partner for the recorded
+one. Decided: rule 46 flags an admission of type 3 whose day of life is missing or below 2. Two
+reconciliations by the coordinating centre repair the rest:
 
 - reconciliation 1 sets the day of life of an admission of type 1 or 2 to 1 where it is missing or
   different, before the import's admission filter runs, so a first admission of either type stored

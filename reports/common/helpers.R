@@ -493,6 +493,66 @@ has_validation_summary <- function(summary) {
   !is.null(summary) && ncol(summary) > 0L
 }
 
+#' The summaries a Partner Report table shows, and a sentence for each dataset
+#' without one
+#'
+#' The validation and the reconciliation summary tables compare the
+#' department's data with the reference data where the report has them. A
+#' dataset's summary slot is shown when it is a table with columns, which is
+#' what [has_validation_summary()] and [has_reconciliation_summary()] both
+#' test. A dataset without one is described by a sentence instead: `absent`
+#' when the slot is missing (`NULL`), as on a dataset written before neoipcr
+#' recorded the summary, and `empty` when it is 0×0, as on one built without
+#' the step the summary counts. The reference data are shown whenever they
+#' carry a summary, whether or not the department's data do. With reference
+#' data, the summaries shown are named by the labels the report's other
+#' tables give the two datasets, so each gets a column group that says whose
+#' it is; without, the department's summary stays unnamed, as a single
+#' dataset's is. When the summaries shown count nothing, the table gives way
+#' to a sentence that names the datasets they belong to, since beside a
+#' sentence about the other dataset an unnamed one would read as describing
+#' the department's data.
+#' @param own The summary slot of the department's data
+#' @param ref The summary slot of the reference data; ignored without them
+#' @param has_reference Whether the report has reference data
+#' @param own_notes,reference_notes The sentences for the department's data
+#'   and for the reference data, named `absent` and `empty`
+#' @param zero_notes The sentences for summaries shown that count nothing,
+#'   named `own`, `reference` and `both` for the datasets they belong to
+#' @param sR String resources
+#' @return A list of `summaries`, the summaries to show, `notes`, the
+#'   sentences for the datasets without one, the department's first, and
+#'   `zero_note`, the sentence for the summaries shown should they count
+#'   nothing, NULL when none is shown
+compared_summaries <- function(own, ref, has_reference, own_notes, reference_notes,
+                               zero_notes, sR) {
+  datasets <- list(
+    list(key = "own", slot = own, notes = own_notes, label = sR$own_data_label))
+  if (has_reference)
+    datasets <- c(datasets, list(list(
+      key = "reference", slot = ref, notes = reference_notes, label = sR$reference_data)))
+  summaries <- list()
+  labels <- character()
+  shown <- character()
+  notes <- character()
+  for (dataset in datasets) {
+    if (is.null(dataset$slot)) {
+      notes <- c(notes, dataset$notes[["absent"]])
+    } else if (ncol(dataset$slot) == 0L) {
+      notes <- c(notes, dataset$notes[["empty"]])
+    } else {
+      summaries <- c(summaries, list(dataset$slot))
+      labels <- c(labels, dataset$label)
+      shown <- c(shown, dataset$key)
+    }
+  }
+  if (has_reference)
+    names(summaries) <- labels
+  zero_note <- if (length(shown) == 2L) zero_notes[["both"]]
+               else if (length(shown) == 1L) zero_notes[[shown]]
+  list(summaries = summaries, notes = notes, zero_note = zero_note)
+}
+
 #' Format the validation summaries of one or more datasets as a table
 #'
 #' One row per rule that removed or exempted a record, in rule order, with the
@@ -500,14 +560,17 @@ has_validation_summary <- function(summary) {
 #' kind with the totals across all rules. `summaries` is a list of
 #' `validationSummary` tibbles as neoipcr's `import_dhis2()` documents them
 #' (`rule_id`, `record_kind`, `n_removed`, `n_exempted`, the totals rows
-#' carrying `NA` for the rule); with more than one, the list's names label a
-#' column group per dataset, and a rule one dataset never met shows no count
-#' for it. `NULL` when no summary removed or exempted anything, so the caller
-#' can say so instead of printing a table of zeros.
-#' @param summaries List of validation-summary tibbles, named when more than one
+#' carrying `NA` for the rule); when the list is named, each name labels a
+#' column group over its dataset's counts, and a rule one dataset never met
+#' shows no count for it. `NULL` when no summary removed or exempted anything,
+#' so the caller can say so instead of printing a table of zeros.
+#' @param summaries List of validation-summary tibbles, named to label each
+#'   dataset's column group
 #' @param sR String resources
+#' @param font_size The table's font size, as `compute_col_widths()` gives the
+#'   report's other tables; NULL keeps gt's default
 #' @return A gt table, or NULL
-format_validation_summary_table <- function(summaries, sR) {
+format_validation_summary_table <- function(summaries, sR, font_size = NULL) {
   strings <- sR$`tbl-validation-summary`
   kind_labels <- c(
     patients    = strings$patients,
@@ -563,6 +626,7 @@ format_validation_summary_table <- function(summaries, sR) {
     gt::tab_options(
       latex.use_longtable = TRUE,
       table.width = gt::pct(100),
+      table.font.size = font_size,
       footnotes.marks = "extended") |>
     gt::fmt_integer(
       columns = tidyselect::all_of(count_cols),
@@ -596,7 +660,7 @@ format_validation_summary_table <- function(summaries, sR) {
       gt::cols_label(
         !!cols[1] := strings$removed,
         !!cols[2] := strings$exempted)
-    if (length(summaries) > 1L)
+    if (!is.null(names(summaries)))
       tbl <- tbl |>
         gt::tab_spanner(label = names(summaries)[i], columns = tidyselect::all_of(cols),
                         id = paste0("dataset_", i))
@@ -629,6 +693,54 @@ reconciliation_labels <- function(sR) list(
   "4" = sR$`tbl-reconciliation-summary`$reconciliations$implausible_gestation_days,
   "5" = sR$`tbl-reconciliation-summary`$reconciliations$ssi_secondary_bsi_agents,
   "6" = sR$`tbl-reconciliation-summary`$reconciliations$culture_negative_sepsis_agents)
+
+#' How the reconciliation labels differ from the reconciliations neoipcr
+#' applies
+#'
+#' A reconciliation without a label keeps its row in the reconciliation table,
+#' labelled by its number, so a difference does not fail the render; it is
+#' reported instead, naming each id neoipcr applies that has no label here and
+#' each id labelled here that neoipcr does not apply. A label whose string
+#' resource is missing counts as no label, since its row falls back the same
+#' way.
+#' @param sR String resources
+#' @param ids The reconciliation ids, as `neoipcr::reconciliation_ids()` lists
+#'   them
+#' @return The warning to log, or NULL when every id has a label and every
+#'   label an id
+reconciliation_label_mismatch <- function(sR, ids) {
+  labels <- reconciliation_labels(sR)
+  labelled <- as.integer(names(labels)[!vapply(labels, is.null, logical(1))])
+  ids <- as.integer(ids)
+  missing <- setdiff(ids, labelled)
+  surplus <- setdiff(labelled, ids)
+  if (length(missing) == 0L && length(surplus) == 0L)
+    return(NULL)
+  paste0(
+    "The reconciliation labels do not match neoipcr::reconciliation_ids()",
+    if (length(missing) > 0L)
+      paste0("; no label for ", paste(missing, collapse = ", ")),
+    if (length(surplus) == 1L)
+      paste0("; a label for ", surplus, ", which neoipcr does not apply"),
+    if (length(surplus) > 1L)
+      paste0("; labels for ", paste(surplus, collapse = ", "),
+             ", which neoipcr does not apply"),
+    ".",
+    if (length(missing) > 0L)
+      " The table labels a reconciliation without a label by its number.")
+}
+
+#' Log a warning when the reconciliation labels differ from the
+#' reconciliations the loaded neoipcr applies, as
+#' [reconciliation_label_mismatch()] describes it.
+#' @param sR String resources
+#' @return The warning, invisibly, or NULL when the labels match
+check_reconciliation_labels <- function(sR) {
+  mismatch <- reconciliation_label_mismatch(sR, neoipcr::reconciliation_ids())
+  if (!is.null(mismatch))
+    logWarn(logger::skip_formatter(mismatch), namespace = "report-common")
+  invisible(mismatch)
+}
 
 #' The rows of the reconciliation summary table
 #'
@@ -697,14 +809,17 @@ reconciliation_summary_rows <- function(summaries, sR) {
 
 #' Format the reconciliation summaries of one or more datasets as a table
 #'
-#' The rows [reconciliation_summary_rows()] builds, as a gt table with a
-#' column group per dataset when there is more than one, each labelled by its
-#' name in `summaries`. A missing count shows as the string resources'
-#' "not available".
-#' @param summaries List of reconciliation-summary tibbles, named when more than one
+#' The rows [reconciliation_summary_rows()] builds, as a gt table; when
+#' `summaries` is named, each name labels a column group over its dataset's
+#' counts. A missing count shows as the dash the report's other tables show
+#' for a missing value, and a note under the table says what it means.
+#' @param summaries List of reconciliation-summary tibbles, named to label
+#'   each dataset's column group
 #' @param sR String resources
+#' @param font_size The table's font size, as `compute_col_widths()` gives the
+#'   report's other tables; NULL keeps gt's default
 #' @return A gt table, or NULL when every count is zero
-format_reconciliation_summary_table <- function(summaries, sR) {
+format_reconciliation_summary_table <- function(summaries, sR, font_size = NULL) {
   rows <- reconciliation_summary_rows(summaries, sR)
   if (is.null(rows))
     return(NULL)
@@ -713,10 +828,11 @@ format_reconciliation_summary_table <- function(summaries, sR) {
 
   tbl <- rows |>
     gt::gt(rowname_col = "label") |>
-    gt::sub_missing(missing_text = sR$not_available) |>
+    gt::sub_missing() |>
     gt::tab_options(
       latex.use_longtable = TRUE,
       table.width = gt::pct(100),
+      table.font.size = font_size,
       footnotes.marks = "extended") |>
     gt::fmt_integer(
       columns = tidyselect::all_of(count_cols),
@@ -726,16 +842,19 @@ format_reconciliation_summary_table <- function(summaries, sR) {
     gt::tab_style(
       style = gt::cell_text(weight = "bold"),
       locations = list(gt::cells_column_spanners(), gt::cells_column_labels()))
-  # The labels are phrases, so the stub takes what the other columns leave;
-  # without a width the PDF sets each label on one line past the margin.
-  # cols_width() evaluates its formulas without their environment, so the
-  # values are injected into them.
-  stub_width <- gt::pct(84 - 11 * length(count_cols))
-  tbl <- rlang::inject(gt::cols_width(
-    tbl,
-    gt::stub() ~ !!stub_width,
-    "records" ~ !!gt::pct(16),
-    tidyselect::all_of(!!count_cols) ~ !!gt::pct(11)))
+  # The labels are phrases, so the stub is the one column given a width,
+  # which wraps them; without one the PDF sets each label on one line past
+  # the margin. The record kinds and the counts take their natural width, as
+  # in the validation summary table, so no header and no column group's label
+  # is set narrower than its text. The stub leaves 20 % of the line to the
+  # record kinds and 13 % to each count, room for headers and column group
+  # labels well beyond the English ones. cols_width() evaluates its formula
+  # without its environment, so the width is injected into it.
+  stub_width <- gt::pct(80 - 13 * length(count_cols))
+  tbl <- rlang::inject(gt::cols_width(tbl, gt::stub() ~ !!stub_width))
+  if (anyNA(rows[count_cols]))
+    tbl <- tbl |>
+      gt::tab_source_note(strings$missing_count_footnote)
   if ("reported_1" %in% count_cols)
     tbl <- tbl |>
       gt::tab_footnote(
@@ -751,7 +870,7 @@ format_reconciliation_summary_table <- function(summaries, sR) {
     if (reported %in% count_cols)
       tbl <- tbl |>
         gt::cols_label(!!reported := strings$reported)
-    if (length(summaries) > 1L)
+    if (!is.null(names(summaries)))
       tbl <- tbl |>
         gt::tab_spanner(label = names(summaries)[i],
                         columns = tidyselect::all_of(intersect(c(repaired, reported), count_cols)),
@@ -861,21 +980,68 @@ format_dataset_resources <- function(metadata, counts, sR) {
   result
 }
 
-# A sentence in a table's place, shaped as a one-cell longtable outside HTML
-# so the chunk's caption still has a table to sit on. The cell is a paragraph
+#' Escape text for insertion into LaTeX as literal text
+#'
+#' Each of the ten characters LaTeX reserves becomes what typesets it, so a
+#' translated sentence placed in raw LaTeX renders as written whatever it
+#' contains, where an `&` would end the table cell it sits in and a `%` drop
+#' the rest of the line. Every other character, non-ASCII included, is left
+#' alone: LuaLaTeX reads it as itself.
+#' @param x character vector
+#' @return the vector with every reserved character escaped
+escape_latex <- function(x) {
+  reserved <- c(
+    "\\" = "\\textbackslash{}", "{" = "\\{", "}" = "\\}", "#" = "\\#",
+    "$" = "\\$", "%" = "\\%", "&" = "\\&", "_" = "\\_",
+    "~" = "\\textasciitilde{}", "^" = "\\textasciicircum{}")
+  vapply(strsplit(x, "", fixed = TRUE), function(chars) {
+    hit <- chars %in% names(reserved)
+    chars[hit] <- reserved[chars[hit]]
+    paste(chars, collapse = "")
+  }, character(1), USE.NAMES = FALSE)
+}
+
+#' Escape a sentence for insertion into Pandoc Markdown as a paragraph of its
+#' own
+#'
+#' Unlike [escape_markdown()], which keeps a value exactly as typed, this
+#' leaves the four characters Pandoc's smart typography reads unescaped — `'`,
+#' `"`, `-` and `.` — so a translation's apostrophes, quotation marks, dashes
+#' and ellipses are set as in the rest of the report. Every other ASCII
+#' punctuation character is backslash-escaped, so none can open emphasis, a
+#' link, math, raw TeX or HTML, or a citation. A paragraph's first characters
+#' can open a list as well, so a leading `-`, and the full stop after a
+#' leading number or word, as in "1." or "z. B.", are escaped too. Runs of
+#' whitespace, line breaks included, become one space first, and the ends are
+#' trimmed, since a line break or an indent could end the paragraph or make it
+#' a code block.
+#' @param x character vector
+#' @return the vector escaped as described
+escape_markdown_paragraph <- function(x) {
+  x <- gsub("[[:space:]]+", " ", trimws(x), perl = TRUE)
+  x <- gsub("([!#$%&()*+,/:;<=>?@\\[\\\\\\]^_`{|}~])", "\\\\\\1", x, perl = TRUE)
+  x <- sub("^-", "\\\\-", x, perl = TRUE)
+  sub("^([[:alnum:]]+)\\.", "\\1\\\\.", x, perl = TRUE)
+}
+
+# A sentence in a table's place, shaped as a one-cell longtable in the PDF so
+# the chunk's caption still has a table to sit on. The cell is a paragraph
 # column as wide as the text block less the column padding, so a sentence
 # longer than a line, as a translation often is, wraps instead of running into
 # the margin the way an `l` column sets it; centring it keeps a short sentence
-# where the natural-width column put it.
+# where the natural-width column put it. The longtable is raw LaTeX, so the
+# sentence is escaped for it. Every other format gets the sentence as a plain
+# paragraph, Word included, escaped for Markdown: Pandoc's docx writer drops a
+# raw LaTeX block, and the sentence with it.
 no_data_table <- function(message = sR$no_data) {
   cat(
-    '::: {.content-visible when-format="html"}',
-    message,
+    '::: {.content-visible unless-format="pdf"}',
+    escape_markdown_paragraph(message),
     ":::",
     "",
-    '::: {.content-visible unless-format="html"}',
+    '::: {.content-visible when-format="pdf"}',
     "\\begin{longtable}{p{\\dimexpr\\linewidth-2\\tabcolsep\\relax}}",
-    paste0("\\centering ", message),
+    paste0("\\centering ", escape_latex(message)),
     "\\end{longtable}",
     ":::",
     sep = "\n"

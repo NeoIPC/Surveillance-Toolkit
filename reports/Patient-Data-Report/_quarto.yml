@@ -40,10 +40,14 @@ format:
         \floatplacement{figure}{H}
         \usepackage{graphicx}
         \usepackage{scrlayer-scrpage}
+        % Both page styles set the page number in the centre of the footer
+        % by default; clearing them leaves the outer edge as its one place,
+        % which the starred \ofoot* fills on the plain page style as well.
+        \clearpairofpagestyles
         \ModifyLayer[addvoffset=-.6ex]{scrheadings.foot.above.line}
         \ModifyLayer[addvoffset=-.6ex]{plain.scrheadings.foot.above.line}
         \ihead{\includegraphics[width=4cm]{../logos/LOGO_NEOIPC_2.png}}
-        \ofoot{\pagemark}
+        \ofoot*{\pagemark}
     classoption: [footsepline=true, plainfootsepline=true]
 profile:
   group:

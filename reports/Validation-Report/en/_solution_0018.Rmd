@@ -5,6 +5,10 @@
 
 ### Correcting the Day of Life at Admission {#sec-solution-18}
 
-The day of life on the infection and procedure forms of an enrolment is calculated from the day of life at admission recorded on its admission form, so a wrong value there makes the day of life on those forms wrong too, and they have to be updated as described in @sec-solution-11 once it is corrected.
-For an infant admitted from the delivery room or on the day of birth, the platform sets the day of life at admission to 1 itself, but only while the admission form is open for editing; a completed admission form keeps the value it held when it was completed.
-If the admission form of such an infant records another day of life at admission, first reopen the admission form for editing (see @sec-solution-9), refresh the page as described in @sec-solution-11, which sets the value to 1, and complete the admission form again (see @sec-solution-8); then update the enrolment's infection and procedure forms.
+The day of life on the infection and procedure forms of an enrolment is calculated from the day of life at admission recorded on its admission form, so a wrong value there makes the day of life on those forms wrong too.
+For an infant admitted from the delivery room or on the day of birth, the platform sets the day of life at admission to 1 itself, but only while the admission form is open for editing; a completed admission form, or one in a completed enrolment, keeps its stored value until it is reopened for editing.
+The validation report already uses day of life 1 at admission for such an infant in its calculations, so the values it shows can differ from those on the forms until the forms are corrected.
+If the admission form of such an infant records another day of life at admission, reopen it for editing (see @sec-solution-9); reopening it makes the platform set the value to 1 at once.
+Check that the form now shows 1 and complete it again (see @sec-solution-8).
+Then, for each infection and procedure form of the enrolment, reopen it for editing if it is completed (see @sec-solution-9), refresh the page as described in @sec-solution-11 so that the platform calculates the form's day of life again, and complete it again if it was completed (see @sec-solution-8).
+If you reopened the enrolment to edit its forms, complete it again as well (see @sec-solution-4).

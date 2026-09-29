@@ -4,11 +4,12 @@
 <#
 .SYNOPSIS
     Pester tests for how the reports read their string resources, how the Validation Report turns a
-    finding into a sentence, and how the Partner and Reference Reports label their reconciliation rows.
+    finding into a sentence, and how the Partner and Reference Reports build their data-validation
+    summary tables.
 
 .DESCRIPTION
     No CI job renders a report, so the code between the string resources and the rendered text is
-    exercised nowhere else. Four parts:
+    exercised nowhere else. Six parts:
 
     - The YAML handlers every string resource is read with (string_resource_handlers() in
       reports/common/helpers.R). A translated label such as Yes reaches the catalogue unquoted, and
@@ -19,16 +20,33 @@
       fallback that shows a stored code where its name is missing, the label a decoration looks up,
       and the choice of a rule's second sentence.
     - The rows of the reconciliation summary table in the Partner and Reference Reports
-      (reconciliation_summary_rows() in reports/common/helpers.R, which the gt formatter wraps and CI
-      cannot run, since its R has no gt): a label per reconciliation id and a fallback for an id
-      without one, the record kinds, when the reported column shows, and when the table gives way to
-      a sentence.
+      (reconciliation_summary_rows() in reports/common/helpers.R, which the gt formatter wraps): a
+      label per reconciliation id and a fallback for an id without one, the record kinds, when the
+      reported column shows, and when the table gives way to a sentence. Beside them, the check that
+      holds those labels to the ids neoipcr applies, given the ids, and which of the Partner Report's
+      two datasets its summary tables show, with the sentence for each dataset that has no summary
+      and the one that names the datasets shown when they count nothing.
+    - The sentence a report shows in a table's place (no_data_table()): escaped for the LaTeX the PDF
+      gets, and for the Markdown every other format reads it from, Word included. Where Pandoc is
+      installed, a test also has Pandoc read that Markdown.
+    - The gt formatters of both summary tables: the dash and the note for a missing count, the font
+      size and the column widths, and the column groups. CI's R has no gt, so this part runs only
+      where gt is installed and is skipped elsewhere; the parts above need no gt.
 
     The report's own setup checks call neoipcr, which no CI runner installs; they are not covered here.
 
 .EXAMPLE
     Invoke-Pester -Path scripts/modules/NeoIPC-Tools/Tests/ReportStringResources.Tests.ps1
 #>
+
+BeforeDiscovery {
+    # Whether R can load gt, which only the summary-table formatters need.
+    $rscriptPath = (Get-Command Rscript -ErrorAction SilentlyContinue)?.Source
+    $hasGt = [bool]$rscriptPath -and
+        ((& $rscriptPath --vanilla -e 'cat(requireNamespace("gt", quietly = TRUE))' 2>$null) -eq 'TRUE')
+    # Whether Pandoc is installed, which only the test that has it read a sentence's Markdown needs.
+    $hasPandoc = [bool](Get-Command pandoc -ErrorAction SilentlyContinue)
+}
 
 BeforeAll {
     $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..' '..' '..' '..')).Path
@@ -259,5 +277,216 @@ rows <- reconciliation_summary_rows(list(own = own, ref = ref), sR)
 cat(nrow(rows), rows$repaired_1[7], rows$repaired_2[7], rows$label[7], sep = "|")
 '@
         Invoke-ReconciliationSnippet $body | Should -BeExactly '7|NA|2|Reconciliation 7'
+    }
+
+    It 'names each id neoipcr applies without a label, and each label neoipcr does not apply' {
+        # The ids are passed as neoipcr::reconciliation_ids() would list them; a label whose string
+        # resource is missing counts as none, since its row falls back to the number as well. Only a
+        # missing label leaves a row labelled by its number, so only then does the warning say so.
+        $body = @'
+cat(is.null(reconciliation_label_mismatch(sR, 1:6))); cat("\n")
+cat(reconciliation_label_mismatch(sR, 1:7)); cat("\n")
+cat(reconciliation_label_mismatch(sR, 1:5)); cat("\n")
+cat(reconciliation_label_mismatch(sR, c(1:5, 8L))); cat("\n")
+unlabelled <- sR
+unlabelled$`tbl-reconciliation-summary`$reconciliations$ssi_secondary_bsi_agents <- NULL
+cat(reconciliation_label_mismatch(unlabelled, 1:6)); cat("\n")
+cat(reconciliation_label_mismatch(sR, 1:4))
+'@
+        $lines = (Invoke-ReconciliationSnippet $body) -split "`n"
+        $lines[0] | Should -BeExactly 'TRUE'
+        $lines[1] | Should -Match '; no label for 7\.'
+        $lines[1] | Should -Not -Match 'a label for'
+        $lines[2] | Should -Match '; a label for 6, which neoipcr does not apply\.$'
+        $lines[2] | Should -Not -Match 'no label for'
+        $lines[3] | Should -Match '; no label for 8; a label for 6, which neoipcr does not apply\.'
+        $lines[4] | Should -Match '; no label for 5\.'
+        $lines[5] | Should -Match '; labels for 5, 6, which neoipcr does not apply\.$'
+        foreach ($line in $lines[1, 3, 4]) {
+            $line | Should -Match 'labels a reconciliation without a label by its number\.$'
+        }
+        foreach ($line in $lines[2, 5]) {
+            $line | Should -Not -Match 'by its number'
+        }
+    }
+
+    It 'shows each dataset of the Partner Report that has a summary, and a sentence for each that has none' {
+        # Each case prints the column groups shown, the sentences for the datasets without a
+        # summary, and the sentence for summaries shown that count nothing, by the key of their
+        # string. A missing slot and an empty one are told apart on either side, the reference data
+        # are shown whenever they carry a summary, and the sentence for a count of nothing names the
+        # datasets shown.
+        $body = @'
+strings <- sR$`tbl-reconciliation-summary`
+own_notes <- c(absent = strings$own_not_recorded, empty = strings$own_not_reconciled)
+reference_notes <- c(absent = strings$reference_not_recorded, empty = strings$reference_not_reconciled)
+zero_notes <- c(
+  own = strings$own_no_reconciliations,
+  reference = strings$reference_no_reconciliations,
+  both = strings$both_no_reconciliations)
+note_keys <- c(own = own_notes, reference = reference_notes)
+summary <- reconciliation_summary(c(1, 0, 0, 0, 0, 0), rep(0, 6))
+unreconciled <- tibble::tibble()
+show <- function(own, ref, has_reference) {
+  shown <- compared_summaries(own, ref, has_reference, own_notes, reference_notes, zero_notes, sR)
+  groups <- if (is.null(names(shown$summaries))) sprintf("%d unnamed", length(shown$summaries))
+            else paste(names(shown$summaries), collapse = "+")
+  zero <- if (is.null(shown$zero_note)) "-" else names(zero_notes)[match(shown$zero_note, zero_notes)]
+  cat(groups, " / ", paste(names(note_keys)[match(shown$notes, note_keys)], collapse = "+"),
+      " / ", zero, "\n", sep = "")
+}
+show(summary, NULL, FALSE)
+show(NULL, NULL, FALSE)
+show(unreconciled, NULL, FALSE)
+show(summary, summary, FALSE)
+show(summary, summary, TRUE)
+show(NULL, summary, TRUE)
+show(unreconciled, summary, TRUE)
+show(summary, NULL, TRUE)
+show(summary, unreconciled, TRUE)
+show(NULL, unreconciled, TRUE)
+'@
+        Invoke-ReconciliationSnippet $body | Should -BeExactly (@(
+            '1 unnamed /  / own'
+            '0 unnamed / own.absent / -'
+            '0 unnamed / own.empty / -'
+            '1 unnamed /  / own'
+            'Your data+Reference data /  / both'
+            'Reference data / own.absent / reference'
+            'Reference data / own.empty / reference'
+            'Your data / reference.absent / own'
+            'Your data / reference.empty / own'
+            ' / own.absent+reference.empty / -') -join "`n")
+    }
+}
+
+Describe 'A sentence in a table''s place' -Skip:(-not $env:CI -and -not (Get-Command Rscript -ErrorAction SilentlyContinue)) {
+
+    It 'escapes the sentence for the LaTeX the PDF gets, and for the Markdown every other format reads' {
+        # Quarto's `pdf` matches LaTeX output only, so the paragraph reaches HTML and Word alike;
+        # Pandoc's Word writer drops a raw LaTeX block.
+        $body = @'
+no_data_table("50 % & more_{x} #1 $5 ~a ^b \\c")
+'@
+        Invoke-ReportSnippet -Report 'Partner-Report' -Body $body | Should -BeExactly (@(
+            '::: {.content-visible unless-format="pdf"}'
+            '50 \% \& more\_\{x\} \#1 \$5 \~a \^b \\c'
+            ':::'
+            ''
+            '::: {.content-visible when-format="pdf"}'
+            '\begin{longtable}{p{\dimexpr\linewidth-2\tabcolsep\relax}}'
+            '\centering 50 \% \& more\_\{x\} \#1 \$5 \textasciitilde{}a \textasciicircum{}b \textbackslash{}c'
+            '\end{longtable}'
+            ':::') -join "`n")
+    }
+
+    It 'leaves every character LaTeX does not reserve as it is, non-ASCII included' {
+        # Compared in R, so the text never crosses a console encoding.
+        $body = @'
+text <- "– „ok“ ü α . , ; : ! ? ' \" ( ) [ ] / | < > = + * -"
+cat(identical(escape_latex(text), text), identical(escape_latex(c("a%", "")), c("a\\%", "")),
+    sep = "|")
+'@
+        Invoke-ReportSnippet -Report 'Partner-Report' -Body $body | Should -BeExactly 'TRUE|TRUE'
+    }
+
+    It 'leaves the characters smart typography reads to it, and escapes a paragraph''s list marker' {
+        # A paragraph that starts with a hyphen, or with a number or a word and a full stop, would
+        # open a list; a line break or an indent would end the paragraph or make it a code block.
+        $body = @'
+cat(escape_markdown_paragraph(c(
+  "it's \"so\" -- and so...", "- a", "1. Juni", "z. B. so", " a\n  b ")), sep = "|")
+'@
+        Invoke-ReportSnippet -Report 'Partner-Report' -Body $body |
+            Should -BeExactly 'it''s "so" -- and so...|\- a|1\. Juni|z\. B. so|a b'
+    }
+
+    It 'gives every other format a paragraph that Pandoc reads as the sentence, beside the PDF block' -Skip:(-not $hasPandoc) {
+        # Pandoc reads the Markdown itself, so an escape that leaves raw TeX, a Div fence or a list
+        # marker live fails here: unescaped, the `\c` swallows the closing fence and nests the PDF block
+        # in this one. HTML stands for every format but the PDF; the entities are decoded so the check
+        # does not depend on how a Pandoc version spells them.
+        $body = @'
+no_data_table("50 % & more_{x} #1 $5 ~a ^b \\c -- it's \"so\"...")
+'@
+        $markdown = Invoke-ReportSnippet -Report 'Partner-Report' -Body $body
+        $html = ($markdown | & pandoc -f markdown -t html --ascii --wrap=none 2>&1) -join "`n"
+        [System.Net.WebUtility]::HtmlDecode($html) | Should -BeExactly (@(
+            '<div class="content-visible" data-unless-format="pdf">'
+            "<p>50 % & more_{x} #1 `$5 ~a ^b \c `u{2013} it`u{2019}s `u{201C}so`u{201D}`u{2026}</p>"
+            '</div>'
+            '<div class="content-visible" data-when-format="pdf">'
+            ''
+            '</div>') -join "`n")
+    }
+}
+
+Describe 'Summary tables' -Skip:(-not $hasGt) {
+
+    BeforeAll {
+        $fixture = @'
+reconciliation_summary <- function(repaired, reported = rep(0, 6))
+  tibble::tibble(
+    reconciliation_id = seq_len(6L),
+    record_kind       = factor(c("enrollments", "events", "patients", "patients", "events", "events")),
+    n_repaired        = as.integer(repaired),
+    n_reported        = as.integer(reported))
+validation_summary <- tibble::tibble(
+  rule_id = c(3L, NA), record_kind = factor(c("patients", "patients")),
+  n_removed = c(2L, 2L), n_exempted = c(0L, 0L))
+latex <- function(tbl) as.character(gt::as_latex(tbl))
+'@
+
+        function Invoke-SummaryTableSnippet {
+            param([string]$Body)
+            Invoke-ReportSnippet -Report 'Partner-Report' -Body "$fixture`n$Body"
+        }
+    }
+
+    It 'shows a missing count as a dash, with a note that says what it means, and only then' {
+        $body = @'
+note <- sR$`tbl-reconciliation-summary`$missing_count_footnote
+unread <- latex(format_reconciliation_summary_table(
+  list(reconciliation_summary(c(NA, 2, 0, 0, NA, 3))), sR, font_size = 11L))
+read <- latex(format_reconciliation_summary_table(
+  list(reconciliation_summary(c(1, 2, 0, 0, 0, 3))), sR, font_size = 11L))
+cat(lengths(regmatches(unread, gregexpr("& — ", unread))),
+    grepl(note, unread, fixed = TRUE), grepl(sR$not_available, unread, fixed = TRUE),
+    grepl(note, read, fixed = TRUE), sep = "|")
+'@
+        Invoke-SummaryTableSnippet $body | Should -BeExactly '2|TRUE|FALSE|FALSE'
+    }
+
+    It 'sets both tables in the font size given, and gives the stub alone a width' {
+        # gt sets a font size in px as three quarters of it in pt and its baseline skip as 1.2 times
+        # that, each rounded to a whole point: 11 px, the size compute_col_widths() gives a table
+        # without confidence intervals, becomes 8 pt (8.25) on a 10 pt baseline skip (9.9). The
+        # counts and the record kinds take their natural width, and the stub leaves 20 % to the
+        # record kinds and 13 % to each count.
+        $body = @'
+two <- latex(format_reconciliation_summary_table(
+  list(reconciliation_summary(c(1, 2, 0, 0, 0, 3), c(0, 0, 0, 0, 0, 2))), sR, font_size = 11L))
+validation <- latex(format_validation_summary_table(list(validation_summary), sR, font_size = 11L))
+cat(grepl("\\fontsize{8.0pt}{10.0pt}", two, fixed = TRUE),
+    grepl("\\fontsize{8.0pt}{10.0pt}", validation, fixed = TRUE),
+    grepl("p{\\dimexpr 0.54\\linewidth", two, fixed = TRUE),
+    grepl("}|lrr}", two, fixed = TRUE), sep = "|")
+'@
+        Invoke-SummaryTableSnippet $body | Should -BeExactly 'TRUE|TRUE|TRUE|TRUE'
+    }
+
+    It 'labels a column group for each named summary, and none for a single unnamed one' {
+        $body = @'
+has_group <- function(tbl, label) grepl(paste0("{{", label, "}}"), latex(tbl), fixed = TRUE)
+cat(has_group(format_reconciliation_summary_table(
+      list("Reference data" = reconciliation_summary(c(1, 0, 0, 0, 0, 0))), sR), "Reference data"),
+    has_group(format_validation_summary_table(
+      list("Reference data" = validation_summary), sR), "Reference data"),
+    grepl("multicolumn", latex(format_reconciliation_summary_table(
+      list(reconciliation_summary(c(1, 0, 0, 0, 0, 0))), sR)), fixed = TRUE),
+    grepl("multicolumn", latex(format_validation_summary_table(list(validation_summary), sR)),
+          fixed = TRUE), sep = "|")
+'@
+        Invoke-SummaryTableSnippet $body | Should -BeExactly 'TRUE|TRUE|FALSE|FALSE'
     }
 }

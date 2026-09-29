@@ -100,7 +100,8 @@ data. A value a finding shows, or the value it is compared with, can differ from
 shows for the same record: the day of life of an infant admitted from the delivery room or on the day of
 birth, for example, is derived from day of life 1 at admission, a value the client writes to the
 admission form only while that form is open for editing. The help on correcting the day of life at
-admission (`en/_solution_0018.Rmd`) says how to bring the stored values in line. The problem details on
+admission (`en/_solution_0018.Rmd`) tells the partner that the report's values can differ from the
+forms' for this reason, and how to bring the stored values in line. The problem details on
 a day of life that does not match the calculated value and on an infection within the first three days
 of life cite it, so the report includes it wherever one of rules 27 to 42 fired except rules 30, 34 and
 38, which concern the day of hospitalization.

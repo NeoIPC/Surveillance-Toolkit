@@ -18,7 +18,8 @@ if (is.null(reconciliation)) {
 } else if (!has_reconciliation_summary(reconciliation)) {
   no_data_table(reconciliation_strings$not_reconciled)
 } else {
-  tbl <- format_reconciliation_summary_table(list(reconciliation), sR)
+  tbl <- format_reconciliation_summary_table(
+    list(reconciliation), sR, font_size = summary_table_font_size)
   if (is.null(tbl))
     no_data_table(reconciliation_strings$no_reconciliations)
   else

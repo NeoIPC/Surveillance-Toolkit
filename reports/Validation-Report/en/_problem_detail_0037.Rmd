@@ -1,10 +1,10 @@
 ### A Surgical Site Infection Form Does Not Meet the Definition of the Type It Records {#sec-problem-details-37}
 
-The surgical site infection form records the type of the infection, superficial incisional, deep incisional or organ/space, and the NeoIPC Surveillance Protocol defines each type by criteria of its own, all of which have to be met; among them is a list of findings of which the form has to record at least one.
+The surgical site infection form records the type of the infection (superficial incisional, deep incisional, or organ/space), and the NeoIPC Surveillance Protocol defines each type by criteria of its own, all of which have to be met; among them is a list of findings of which the form has to record at least one.
 When the form is completed, the platform checks its findings against that list for the type it records and refuses to complete it if the form records none of them.
 A completed form that records none of them has therefore reached the platform around this check, for example through an import, completed before the check existed, or changed after it was completed.
 This message appears in the validation report when the findings on a completed surgical site infection form do not meet the definition of the type of infection the form records.
 
-Please open the form (see @sec-solution-15), reopen it for editing (see @sec-solution-9), check the type of infection and the findings against the definitions and complete it again (see @sec-solution-8), which makes the platform check them again.
+Please open the form (see @sec-solution-15), reopen it for editing (see @sec-solution-9), check the type of infection and the findings against the definitions, and complete it again (see @sec-solution-8), which makes the platform check them again.
 If the findings meet the definition of another type, please correct the type.
 If they meet none of the three, the infection cannot be recorded as a surgical site infection; please delete the form in that case (see @sec-solution-12).

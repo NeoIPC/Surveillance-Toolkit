@@ -16,7 +16,8 @@ if (is.null(summary)) {
 } else if (!has_validation_summary(summary)) {
   no_data_table(validation_strings$pass_not_run)
 } else {
-  tbl <- format_validation_summary_table(list(summary), sR)
+  tbl <- format_validation_summary_table(
+    list(summary), sR, font_size = summary_table_font_size)
   if (is.null(tbl)) no_data_table(validation_strings$no_removals) else tbl
 }
 ```
