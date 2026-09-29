@@ -51,6 +51,9 @@ param(
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
+# The wrappers are read and written through .NET, which resolves a relative path against the process's
+# working directory rather than PowerShell's location, so a relative -ToolkitRoot is resolved here.
+$ToolkitRoot = $PSCmdlet.GetUnresolvedProviderPathFromPSPath($ToolkitRoot)
 $ReportsDir = Join-Path $ToolkitRoot 'reports'
 
 # Language -> POSIX locale for the LC_ALL setup chunk. MUST stay in sync with

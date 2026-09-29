@@ -30,12 +30,20 @@
     ./scripts/Update-Po4aYamlKeys.ps1 -ConfigFile po/reports.po4a.cfg -DryRun
 #>
 
+[CmdletBinding()]
 param(
     [Parameter(Mandatory=$true)]
     [string]$ConfigFile,
 
     [switch]$DryRun
 )
+
+$ErrorActionPreference = 'Stop'
+
+# .NET resolves a relative path against the process's working directory, which is not PowerShell's
+# location once the session has changed directory: the config is resolved once here, so the write
+# below reaches the file that was read.
+$ConfigFile = $PSCmdlet.GetUnresolvedProviderPathFromPSPath($ConfigFile)
 
 Import-Module powershell-yaml
 
@@ -105,30 +113,34 @@ function Update-KeysOption {
 # -------------------------------------------------
 # Main
 # -------------------------------------------------
-$lines = Get-Content $ConfigFile
+$lines = Get-Content -LiteralPath $ConfigFile
 $newLines = @()
 
 foreach ($line in $lines) {
 
     if ($line -match '^\[type:\s*yaml\]\s+([^\s]+)') {
 
+        $yamlPath = $Matches[1]
+
         # Skip lines with manual-keys marker — these have a curated key list
         if ($line -match '#\s*manual-keys') {
-            Write-Host "Skipping (manual-keys): $($Matches[1])"
+            Write-Host "Skipping (manual-keys): $yamlPath"
             $newLines += $line
             continue
         }
 
-        $yamlPath = $Matches[1]
-
-        if (-not (Test-Path $yamlPath)) {
-            $newLines += $line
-            continue
+        # The config's paths are relative to the directory po4a runs in, the repository root. A master
+        # that cannot be found here means the script runs elsewhere, and keeping its line as it was would
+        # report success with a key list nobody refreshed.
+        if (-not (Test-Path -LiteralPath $yamlPath -PathType Leaf)) {
+            throw "YAML master '$yamlPath' not found relative to '$(Get-Location)'. Run from the directory po4a runs in, the repository root."
         }
 
         Write-Host "Processing $yamlPath"
 
-        $yaml = Get-Content $yamlPath -Raw | ConvertFrom-Yaml
+        # ConvertFrom-Yaml is module code, which does not see this script's $ErrorActionPreference: without
+        # -ErrorAction a malformed master would report its error and leave an empty key list behind.
+        $yaml = Get-Content -LiteralPath $yamlPath -Raw | ConvertFrom-Yaml -ErrorAction Stop
 
         $allKeys = Get-YamlKeysRecursive $yaml |
                    Where-Object { $_ } |

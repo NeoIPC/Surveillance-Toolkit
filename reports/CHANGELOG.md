@@ -1,7 +1,7 @@
 # Changelog — NeoIPC reports
 
 Notable changes to the render-ready report sources: the Partner Report, Reference Report, Validation
-Report, Partner Certificate and Patient Data Report, together with the shared `common/` layer and the
+Report, Partner Certificate, and Patient Data Report, together with the shared `common/` layer and the
 localized string resources they draw on.
 
 This product is versioned independently of the others in this repository: its version lives in
@@ -122,7 +122,7 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
 - The Partner and Reference Reports' description of exposure densities states that a ventilation day
   requires more than 12 hours of the respective support, following the protocol, while a catheter day
   keeps at least 12 hours.
-- The move to neoipcr `v0.0.0.9006` changes the data of the Partner Report, the Reference Report and
+- The move to neoipcr `v0.0.0.9006` changes the data of the Partner Report, the Reference Report, and
   the Partner Certificate as well: the import's validation pass, which these
   reports run by default, also applies rules 46 to 57 and removes the patients they flag — a
   duplicated antibiotic substance entry, the same infection type recorded again within 14 days, a
@@ -132,12 +132,12 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
   birth without a day of life now stays, and an infant transferred or readmitted after the day of birth
   without one, like a
   patient without birth weight and gestational age, is removed by the pass and counted in the
-  validation summary, where the filter used to drop it unreported. Rates, the validation summary tables
+  validation summary, where the filter used to drop it unreported. Rates, the validation summary tables,
   and the certificate's patient count can therefore change with this release. Rule 45 removes nothing there: under the
   default the eligibility filter has already dropped such an admission, and with non-core patients
   requested the pass leaves rule 45 out.
 - Every report now runs on neoipcr `v0.0.0.9007`, which changes the data of the Partner Report, the
-  Reference Report and the Partner Certificate further. Its import reconciles, before its eligibility
+  Reference Report, and the Partner Certificate further. Its import reconciles, before its eligibility
   and range filters and its validation pass, the stored values Tracker Capture derives itself or keeps
   in a section it hides, so the filters and the pass judge the reconciled values: a first admission
   from the delivery room or on the day of birth stored with a day of life above 120 is given day of
@@ -190,6 +190,15 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
 
 ### Fixed
 
+- The Partner and Reference Reports' PDF showed no page number on the first page, whose footer set the
+  EU emblem and the funding statement but not the number. Every page is numbered now.
+- The Patient Data Report capitalised its table labels word by word ("Patient Days", "Central Venous
+  Catheter (CVC)") beside labels in sentence case ("Human milk"), and wrote a unit in running text in
+  capitals ("58 Days"). Its labels are in sentence case now, as in the Partner and Reference Reports'
+  tables, and the unit reads "58 days"; its patient-days label is the one the other reports use.
+- The glossary gave "probiotics" a capital as its base term, where every other term is written as in
+  running text and the capitalised form is derived for a label; a sentence naming probiotics would have
+  capitalised it mid-sentence. The risk-density tables use the derived label form.
 - The Patient Data Report failed at its import on every render: neoipcr before `v0.0.0.9006` failed
   on the events' timestamps and on enrolment notes read without the DHIS2 enrolment ids, both of which
   the report requests, and on records without a creator: events created before the instance's upgrade
@@ -222,7 +231,7 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
   which kept only the table's caption: every format but HTML received it as raw LaTeX, which Pandoc's
   Word writer drops. Only the PDF receives it as LaTeX now, escaped for it, and every other format
   receives it as a paragraph escaped for Markdown, so a translation containing a character either
-  reserves, such as `&`, `%`, `_` or a backslash, renders as written instead of breaking the document
+  reserves, such as `&`, `%`, `_`, or a backslash, renders as written instead of breaking the document
   or cutting the sentence short.
 - A solution that another included solution cited, but no included explanation did, was left out of
   the Validation Report, and the reference to it rendered unresolved. The report now includes every

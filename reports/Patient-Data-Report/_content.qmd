@@ -333,7 +333,7 @@ if ("reason" %in% names(se) && !is.na(se$reason)) {
 }
 
 if ("patient_days" %in% names(se) && !is.na(se$patient_days)) {
-  se_fields <- c(se_fields, sR$field$patient_days)
+  se_fields <- c(se_fields, sR$patient_days)
   se_values <- c(se_values, format_days_value(se$patient_days))
 }
 

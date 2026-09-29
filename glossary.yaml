@@ -148,7 +148,7 @@ neoipc_surveillance: "NeoIPC Surveillance"
 niv: NIV
 pneumonia: pneumonia
 primary_sepsis_bsi: "primary sepsis/BSI"
-probiotics: Probiotics
+probiotics: probiotics
 # Peripheral Venous Catheter.
 # flags: terminology
 pvc: PVC

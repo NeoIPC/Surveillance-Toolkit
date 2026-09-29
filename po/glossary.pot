@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-08-05 06:58+0000\n"
+"POT-Creation-Date: 2026-09-29 16:29+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Language-Team: none\n"
 "Language: en\n"
@@ -236,7 +236,7 @@ msgstr ""
 
 #: glossary.yaml
 msgctxt "probiotics"
-msgid "Probiotics"
+msgid "probiotics"
 msgstr ""
 
 #. Peripheral Venous Catheter.

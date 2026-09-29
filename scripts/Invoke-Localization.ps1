@@ -682,7 +682,14 @@ function Invoke-UpdateYamlKeys {
     Write-Host "Updating YAML keys: $ConfigPath"
     $yamlKeysArgs = @{ ConfigFile = $fullConfigPath }
     if ($DryRun) { $yamlKeysArgs['DryRun'] = $true }
-    & $script @yamlKeysArgs
+    # The config's YAML paths are relative to the repository root, where po4a runs.
+    Push-Location $repoRoot
+    try {
+        & $script @yamlKeysArgs
+    }
+    finally {
+        Pop-Location
+    }
 }
 
 function Invoke-UpdateGlossary {

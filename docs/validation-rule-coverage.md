@@ -12,7 +12,7 @@ does, what would.
 The inventory is hand-maintained. It describes the protocol at `doc/protocol/VERSION` 1.3.0-preview2
 together with the changes under [Unreleased] in its changelog, the 60 rules and the six
 reconciliations of neoipcr v0.0.0.9007 (rule ids 1 to 61, with id 16 withdrawn), and the program
-rules, compulsory flags and option sets of `metadata/common/`. A change to any of the three has to be
+rules, compulsory flags, and option sets of `metadata/common/`. A change to any of the three has to be
 reflected here: a new protocol constraint gets a row, a new rule is entered in the rows it covers, a
 new reconciliation in the gap entry it closes, and a program rule that starts or stops enforcing
 something changes the enforcement column. `docs/validation-report.md` describes how a rule threads
@@ -73,7 +73,7 @@ post-hoc rules.
 
 The interface-only class exists because hiding is not enforcement, and the two hiding actions behave
 differently in Tracker Capture. A **field** that holds a value is never hidden: the form renders it
-whatever the rule says. The client blanks such a value, saves the blank and shows an alert ("… was
+whatever the rule says. The client blanks such a value, saves the blank, and shows an alert ("… was
 blanked out and hidden by your last action") only while it processes rule effects on an editable
 form, and it processes them only when an evaluation changes the outcome of some rule: when the form of
 an active event is opened, since every outcome is then new, and after an edit that changes any rule's
@@ -267,7 +267,7 @@ or later (type 3) it is at least 2 and must be recorded. At capture `NEOIPC_ADM_
 types 1 and 2, `NEOIPC_ADM_TYPE_2_PLUS` makes the field mandatory for type 3 and `NEOIPC_ADM_DOL_1`
 refuses a value below 2 for type 3. Post hoc, rule 46 checks the day of life of a type-3 admission;
 the value the client assigns for types 1 and 2 is checked by no rule, and reconciliation 1 repairs
-it. The consequence of a missing value is wider than the field: rules 27, 31, 35, 39 and 41 compute
+it. The consequence of a missing value is wider than the field: rules 27, 31, 35, 39, and 41 compute
 an event's expected day of life from the admission form's value, and a missing value makes their
 comparison `NA`, which
 `filter()` drops, so those rules are silently disabled for every event of an enrolment whose admission
@@ -292,7 +292,7 @@ reconciliations by the coordinating centre repair the rest:
   repaired, the day of life of the infection and procedure forms whose stored value is the one the
   client derived from the stored admission value (that value plus the days from the enrolment date to
   the event date, a missing admission value counting as 0) or is missing. A form whose day of life
-  matches neither stays as stored for rules 27, 31, 35, 39 and 41, since the admission value does not
+  matches neither stays as stored for rules 27, 31, 35, 39, and 41, since the admission value does not
   explain it.
 
 A type-1 or type-2 admission on an enrolment dated after another enrolment of the patient that the
@@ -574,7 +574,7 @@ since the client checks a form only on completion, and an SSI form that records 
 against none of the three, the depth being a compulsory value (G11). None of the three is an
 eligibility rule, so the import's pass removes the patient of a form they flag whichever patients were
 requested. No other rule counts a definition's findings: rules 7 to 11 read only the completion status,
-rules 12 to 15 and 27 to 42 only dates and day counts and, for rules 30, 34 and 38, the admission type.
+rules 12 to 15 and 27 to 42 only dates and day counts and, for rules 30, 34, and 38, the admission type.
 
 The dataset holds the inputs of the three definitions the rules check: the items of the sepsis, NEC
 and SSI forms, the antibiotic-treatment flag among them, and the infectious-agent findings. It cannot
@@ -613,7 +613,7 @@ a state the definitions do not admit, which the team can see and complete.
 
 Proposal: the reconciliation of the residue shapes first; then event-level rules mirroring the
 client's five definition checks (clinical sepsis, laboratory-confirmed BSI with a common commensal,
-NEC, pneumonia and SSI), so that a form whose recorded findings meet no definition of its type is a
+NEC, pneumonia, and SSI), so that a form whose recorded findings meet no definition of its type is a
 finding. The alternative is to leave the definitions to capture time and record that an API import is
 not held to them. Who acts: the coordinating centre for the residue, the partner for what remains.
 Decided: residue shape 1 is reconciliation 6, and residue shape 2 needs none. Reconciliation 6 removes,
@@ -624,7 +624,7 @@ meet the clinical-sepsis definition once they are removed, its features counted 
 them, is reported to the coordinating centre and kept as stored instead: the client hides the signs
 and laboratory findings behind a recognized pathogen, so the team may never have been shown the items
 the definition counts, and rule 59 would flag the form for items it could not see. Three of the five
-mirrors are partner-facing rules: 59 for clinical sepsis, 60 for NEC and 61 for SSI. The rows of the
+mirrors are partner-facing rules: 59 for clinical sepsis, 60 for NEC, and 61 for SSI. The rows of the
 NEC and SSI findings are therefore Covered. Those of the clinical-sepsis definition and of the sepsis
 form's two types are Partial: a form reconciliation 6 reports keeps the negative culture beside its
 infectious agents, and no rule flags it. The mirrors of the laboratory-confirmed BSI with a common
@@ -765,7 +765,7 @@ dedicated rule would only re-express those with a calendar filter. Documented.
 `sec-collect-infection-data-collection`.
 
 An infection whose first symptoms occur within 72 hours after birth is not recorded in the core
-module. Rules 29, 33 and 37 flag a BSI, pneumonia or NEC on a day of life below 4, with the day of
+module. Rules 29, 33, and 37 flag a BSI, pneumonia, or NEC on a day of life below 4, with the day of
 birth as day 1; the data model has calendar days, not hours, so this is the closest reading, and an
 infant born late in the day reaches day 4 well before 72 hours have passed. SSI is deliberately
 outside the rule: a surgical site infection is hospital-acquired by its nature. The protocol should
@@ -797,7 +797,7 @@ The audit surfaces the following points where the protocol text, the configurati
 not say the same thing, or where a rule encodes a reading the protocol does not settle. None is
 changed here; the protocol is normative and a conflict between it and the code is fixed in the code.
 
-- **Rules 30, 34 and 38** flag a sepsis, pneumonia or NEC on day 1 or 2 of the stay of a referred or
+- **Rules 30, 34, and 38** flag a sepsis, pneumonia, or NEC on day 1 or 2 of the stay of a referred or
   readmitted patient without looking at prior enrolments. A patient discharged and readmitted the
   next day with an event on day 2 of the new stay is flagged, although the infection most likely
   belongs to the previous stay rather than being community-acquired; the finding's framing can lead a

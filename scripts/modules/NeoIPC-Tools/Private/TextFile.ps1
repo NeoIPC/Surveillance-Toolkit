@@ -27,7 +27,9 @@ function Write-NeoIPCTextFile {
         runs, so appending one would change every generated file for no benefit.
 
     .PARAMETER Path
-        Destination file path. Its directory must already exist.
+        Destination file path. Its directory must already exist. A relative path is resolved against
+        PowerShell's current location, as every cmdlet resolves it; .NET alone would resolve it against
+        the process's working directory, which a Set-Location does not change.
 
     .PARAMETER Text
         The full file contents. An empty string writes an empty file.
@@ -47,5 +49,6 @@ function Write-NeoIPCTextFile {
         [string]$Text
     )
 
-    [System.IO.File]::WriteAllText($Path, ($Text -replace "`r`n", "`n"), [System.Text.UTF8Encoding]::new($false))
+    $resolved = $PSCmdlet.GetUnresolvedProviderPathFromPSPath($Path)
+    [System.IO.File]::WriteAllText($resolved, ($Text -replace "`r`n", "`n"), [System.Text.UTF8Encoding]::new($false))
 }

@@ -57,6 +57,7 @@ the obvious heuristic, which is why the list below was built by reading the sele
 | `content[5]` | `reports/Partner-Certificate/content/_sR.yaml` | `…monitoring of {patient_count} newborns with birth weights…`. Receives a newborn count. |
 | `headerList.country` / `.countries` | Partner-Report, Reference-Report | Selected in R by `length(countries) > 1`. No count is printed; the noun still agrees with one. |
 | `header.department` / `.departments` | Validation-Report | Selected in R by `nrow(departments) > 1`. Same shape. |
+| `days` | `reports/Patient-Data-Report/content/_sR.yaml` | `paste(n, sR$days)` in `_content.qmd` prints a count of days before the noun, so one day reads "1 days". |
 
 **Six, where the design note that preceded this named three.** The three it named were found by inspecting
 `reports/common.yaml`; the other three live in a report's own `_sR.yaml` or in R code, which is why
