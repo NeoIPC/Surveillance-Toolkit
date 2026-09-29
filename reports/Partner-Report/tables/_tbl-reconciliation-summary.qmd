@@ -1,0 +1,53 @@
+```{r}
+#| output: asis
+#| label: tbl-reconciliation-summary
+#| tbl-cap: !expr 'sR$`tbl-reconciliation-summary`$`tbl-cap`'
+#| tbl-cap-location: top
+
+# NEOIPC-PERMANENT(dataset-format): see rename_legacy_antibiotic_table() in
+# this report's _setup.qmd. A dataset serialized before neoipcr 0.0.0.9007,
+# or calculated from a raw dataset written before it, carries no
+# reconciliation summary, and one imported with the reconciliations switched
+# off carries an empty one; a sentence says which, for the department's data
+# and for the reference data alike. Without the first case such a file would
+# be described as built with the reconciliations switched off, when it
+# predates them.
+reconciliation_strings <- sR$`tbl-reconciliation-summary`
+reconciliation_shown <- compared_summaries(
+  own = benchmark_data$reconciliationSummary$own,
+  ref = benchmark_data$reconciliationSummary$ref,
+  has_reference = "ref" %in% benchmark_data$dataset_names,
+  own_notes = c(
+    absent = reconciliation_strings$own_not_recorded,
+    empty  = reconciliation_strings$own_not_reconciled),
+  reference_notes = c(
+    absent = reconciliation_strings$reference_not_recorded,
+    empty  = reconciliation_strings$reference_not_reconciled),
+  zero_notes = c(
+    own       = reconciliation_strings$own_no_reconciliations,
+    reference = reconciliation_strings$reference_no_reconciliations,
+    both      = reconciliation_strings$both_no_reconciliations),
+  sR = sR)
+reconciliation_notes <- reconciliation_shown$notes
+if (length(reconciliation_shown$summaries) == 0L) {
+  # No dataset has a summary to show: the department's sentence takes the
+  # table's place, and the reference data's follows it.
+  no_data_table(reconciliation_notes[1])
+  reconciliation_notes <- reconciliation_notes[-1]
+} else {
+  tbl <- format_reconciliation_summary_table(
+    reconciliation_shown$summaries, sR, font_size = summary_table_font_size)
+  if (is.null(tbl))
+    no_data_table(reconciliation_shown$zero_note)
+  else
+    tbl
+}
+```
+
+```{r}
+#| output: asis
+# A dataset without a summary of its own contributes no column group; the
+# reader is told why rather than left to wonder.
+for (note in reconciliation_notes)
+  cat("\n", note, "\n", sep = "")
+```

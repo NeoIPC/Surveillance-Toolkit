@@ -7,3 +7,5 @@ Wenn diese Fehlermeldung im Validierungsbericht erscheint, haben wir festgestell
 Bitte aktualisieren Sie den Wert für den Lebenstag im Formular (siehe @sec-solution-11).
 
 Wenn gleichzeitig die Fehlermeldung erscheint, dass der gespeicherte Aufenthaltstag zum Zeitpunkt des Ereignisses nicht mit dem berechneten Wert übereinstimmt, was in der Mehrzahl der Fälle gegeben ist (siehe @sec-problem-details-18), müssen Sie die in @sec-solution-11 angegebene Prozedur nur einmal ausführen, um beide Werte zu aktualisieren.
+
+If the day of life at the time of admission recorded on the admission form is itself wrong, please correct it first (see @sec-solution-18).

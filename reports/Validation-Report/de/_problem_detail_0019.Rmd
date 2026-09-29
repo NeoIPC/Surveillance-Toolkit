@@ -10,3 +10,5 @@ Wir haben festgestellt, dass diese Festlegung im Protokoll manchmal übersehen w
 Wir haben zwar geplant, im Rahmen der NeoIPC Surveillance auch die Erfassung von Early-Onset Infektionen zu ermöglichen, dies wird aber in jedem Fall in einem separaten Ereignisformular erfolgen, um die Infektionen mit Präventionspotential im Bereich der Neonatologie von den Infektionen zu trennen, deren Prävention eher in den Bereich der Schwangerenvorsorge und Geburtsmedizin fällt.
 
 Bitte löschen Sie die Formulare für alle Infektionen, die keine nosokomialen Infektionen im Sinne der obigen Definition sind (siehe @sec-solution-12) oder passen Sie das Infektionsdatum (siehe @sec-solution-7) oder das Aufnahmedatum (siehe @sec-solution-6) an, wenn es sich um einen Eingabefehler handelt.
+
+The day of life of the infection is calculated from the day of life at the time of admission recorded on the admission form; if that value is wrong, please correct it (see @sec-solution-18).

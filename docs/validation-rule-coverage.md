@@ -10,12 +10,13 @@ keyed by the protocol's own anchor, and says for each one what enforces it today
 does, what would.
 
 The inventory is hand-maintained. It describes the protocol at `doc/protocol/VERSION` 1.3.0-preview2
-together with the changes under [Unreleased] in its changelog, the 56 rules of neoipcr v0.0.0.9006 (ids 1 to 57, with id 16 withdrawn) and the program rules, compulsory
-flags and option sets of `metadata/common/`. A change to any of the three has to be reflected here: a
-new protocol constraint gets a row, a new rule is entered in the rows it covers, and a program rule
-that starts or stops enforcing something changes the enforcement column. `docs/validation-report.md`
-describes how a rule threads through neoipcr and the Validation Report; the row here is where its
-protocol anchor is recorded.
+together with the changes under [Unreleased] in its changelog, the 60 rules and the six
+reconciliations of neoipcr v0.0.0.9007 (rule ids 1 to 61, with id 16 withdrawn), and the program
+rules, compulsory flags and option sets of `metadata/common/`. A change to any of the three has to be
+reflected here: a new protocol constraint gets a row, a new rule is entered in the rows it covers, a
+new reconciliation in the gap entry it closes, and a program rule that starts or stops enforcing
+something changes the enforcement column. `docs/validation-report.md` describes how a rule threads
+through neoipcr and the Validation Report; the row here is where its protocol anchor is recorded.
 
 ## How the inventory was produced
 
@@ -25,10 +26,11 @@ list, definition list and table becomes one addressable block carrying its ancho
 Every block was read for constraints on the data or its collection: date windows, eligibility and
 inclusion criteria, required fields and completion semantics, thresholds, classification rules,
 consistency requirements between fields, value domains, and process obligations. Each constraint was
-then mapped to the rule sources in neoipcr (`R/validation-rules-*.R`) and to the capture-time
-configuration (`programRules.csv` with the expression files it references, `programRuleActions.csv`,
-`programStageDataElements.csv`, the option sets). The mapping reads the rule's code, never its
-description: "covered" means the rule's filter flags every violation of the statement as written.
+then mapped to the rule sources in neoipcr (`R/validation-rules-*.R`), its reconciliations
+(`R/reconciliation.R`) and the capture-time configuration (`programRules.csv` with the expression
+files it references, `programRuleActions.csv`, `programStageDataElements.csv`, the option sets). The
+mapping reads the rule's code, never its description: "covered" means the rule's filter flags every
+violation of the statement as written.
 
 The two appendix catalogues, the List of Antibiotics and the List of Infectious Agents, are reference
 data rather than protocol text. Their header paragraphs and column structure are inventoried; their
@@ -56,7 +58,10 @@ convention or background rather than as a rule; it is inventoried because a rule
 A program rule whose only action is a warning, a message or a displayed value does not enforce
 anything and is not counted as capture-time enforcement. The capture-time column of a row lists
 every program rule, compulsory flag, option set or structural property that touches the constraint;
-the class is decided by whether any of them refuses the violation as the row states it.
+the class is decided by whether any of them refuses the violation as the row states it. A
+reconciliation of the NeoIPC coordinating centre (see the three responses below) raises no finding,
+so it decides no row's class either: it repairs a value before the rules judge it, or reports the
+record to the coordinating centre, and the gap entry it closes names it.
 
 Both capture-time classes describe **today's configuration and today's client**. A record entered
 through the API bypasses every program rule; a record older than a rule was never held to it; and
@@ -68,30 +73,43 @@ post-hoc rules.
 
 The interface-only class exists because hiding is not enforcement, and the two hiding actions behave
 differently in Tracker Capture. A **field** that holds a value is never hidden: the form renders it
-whatever the rule says, and when the rule fires on an editable event the client blanks the value,
-saves the blank and shows an alert. Every NeoIPC stage locks its form once the event is completed, so
-on a completed event such a value is displayed read-only and stays until someone reopens the event,
-at which point the client removes it. A **section** is hidden regardless of the values inside it, and
-those values are left in place, invisible. Five rules hide a section without blanking any field
+whatever the rule says. The client blanks such a value, saves the blank and shows an alert ("… was
+blanked out and hidden by your last action") only while it processes rule effects on an editable
+form, and it processes them only when an evaluation changes the outcome of some rule: when the form of
+an active event is opened, since every outcome is then new, and after an edit that changes any rule's
+outcome. An edit that changes none, reopening a completed event with "Incomplete", and completing it
+again all leave the value where it is, unless a rule of the stage reads the event's status, so that
+reopening itself changes an outcome. Only the admission stage has such a rule
+(`NEOIPC_ADM_SET_COMPLETED`), so reopening an admission form makes the client process it at once: for
+an infant admitted from the delivery room or on the day of birth, it writes day of life 1 to the
+reopened form without the page being refreshed (G3). The infection and procedure stages have none, so
+the client derives the day of life of such a form again only once the form is reopened and then
+opened afresh, as refreshing the page does. Every NeoIPC stage locks its form once the event is
+completed, and a locked form is never blanked, so on a completed event such a value is displayed
+read-only and stays until the reopened form is processed. A **section** is hidden regardless of the
+values inside it, and those values are left in place, invisible. A hidden value still feeds every
+rule that reads it, so an infectious agent a culture-negative sepsis keeps in its hidden section
+reaches the recognized-pathogen rule: when it is a recognized pathogen, the laboratory findings and
+signs are hidden too on the completed form. Five rules hide a section without blanking any field
 (four of them also make a field of the visible part mandatory, which changes nothing about the
-hidden one), so what they hide survives for good: `NEOIPC_BSI_IF_NO_POS_CULTURE` (the organisms of a
-culture-negative sepsis), `NEOIPC_BSI_AGENT_IF_NCC` (the laboratory findings and signs of a
-recognized-pathogen sepsis) and the three `NEOIPC_SSI_INFECTION_TYPE_*` rules (the findings of the
-other SSI depths). Four rules hide a
-section and blank its fields as well, so what they hide is invisible while the event is completed and
-removed on the next edit: `NEOIPC_SSI_NO_SEC_BSI` (an SSI's secondary-BSI section),
-`NEOIPC_SSI_NO_MIBI_RESULT_AVAILABLE` (an SSI's organisms), `NEOIPC_SSI_NO_INFECTION_TYPE` (the three
-organism fields of the depth sections) and `NEOIPC_HAP_MIBI_TEST_RESULT_VAL_NO_VAL_OR_0` (a pneumonia's
-organisms, of which only slot 1 is blanked; slots 2 and 3 stay). A field-hiding rule
+hidden one), so what they hide survives for good: `NEOIPC_BSI_IF_NO_POS_CULTURE` (the infectious
+agents of a culture-negative sepsis), `NEOIPC_BSI_AGENT_IF_NCC` (the laboratory findings and signs
+of a recognized-pathogen sepsis), and the three `NEOIPC_SSI_INFECTION_TYPE_*` rules (the findings of
+the other SSI depths). Four rules hide a section and blank its fields as well, so what they hide is
+invisible while the event is completed and removed once the client processes the reopened form:
+`NEOIPC_SSI_NO_SEC_BSI` (an SSI's secondary-BSI section), `NEOIPC_SSI_NO_MIBI_RESULT_AVAILABLE` (an
+SSI's infectious agents), `NEOIPC_SSI_NO_INFECTION_TYPE` (the three infectious-agent fields of the
+depth sections), and `NEOIPC_HAP_MIBI_TEST_RESULT_VAL_NO_VAL_OR_0` (a pneumonia's infectious
+agents, of which only slot 1 is blanked; slots 2 and 3 stay). A field-hiding rule
 that never fires leaves its field visible and untouched, as `NEOIPC_SSI_SUPERFICIAL_INFECTION` does,
 which cannot fire at all.
 
 | Class | Rows |
 |---|---|
-| Covered | 30 |
-| Partial | 56 |
-| Capture time | 55 |
-| Interface only | 12 |
+| Covered | 38 |
+| Partial | 62 |
+| Capture time | 44 |
+| Interface only | 9 |
 | Not covered | 7 |
 | Not checkable | 120 |
 | All | 280 |
@@ -110,23 +128,30 @@ of an earlier version wrote, that a rule which no longer exists allowed, or that
 companion carries is none of those things: the form does not show it, or the team did not cause it.
 Two parties can act on a finding: the partner, the team at the partner department, and the NeoIPC
 coordinating centre, which runs the DHIS2 platform, its configuration and the processing of the data.
-So a finding has one of three homes, and the gap entries below say which. neoipcr implements home 1
-today; home 2 is decided here and not implemented, so an inconsistency of that kind currently reaches
-no report and no repair.
+So a finding has one of three homes, and the gap entries below say which. neoipcr implements homes 1
+and 2: home 1 as the validation rules, home 2 as the reconciliations of `import_dhis2()`.
 
 1. **A partner-facing rule.** The inconsistency is visible in the form and the team can correct it.
    It becomes a validation rule, is listed in the Validation Report, removes the record from the
    analyses until fixed, and is counted in the validation summary as removed or exempted.
 2. **Reconciliation by the NeoIPC coordinating centre.** The inconsistency is invisible, or not of
-   the team's making, or one the client itself removes without asking on the next edit, and the
-   intended state can be inferred reliably. It belongs to a class of its own in neoipcr, separate
-   from the validation findings; the repair is applied before the validation pass and counted in the
-   summary beside the removals, so a report never shows the team a problem they cannot see and never
-   hides a change made to their data.
-   Whether a repair is also written back to DHIS2 by the coordinating centre is a separate decision
-   the same detection serves either way. An inconsistency the coordinating centre caused, such as a
-   code a catalogue no longer carries, is detected the same way and reported to the coordinating
-   centre rather than repaired.
+   the team's making, or one the client itself removes without asking once it processes the
+   reopened form, and the intended state can be inferred reliably. It belongs to a class of its own
+   in neoipcr, separate from the validation findings, with ids of its own (`reconciliation_ids()`).
+   The import applies the repair before its eligibility filters and its validation pass, unless
+   `dhis2_dataset_options()` is given `reconcile = FALSE`, and counts it in the dataset's
+   `reconciliationSummary`, which the Partner and Reference Reports show beside the removals, so a
+   report never shows the team a problem they cannot see and never hides a change made to their
+   data. The summary counts, per reconciliation, the records the returned dataset holds that it
+   repaired and those it reported without repair. `reconciliation_details()` lists, record by
+   record, what the import would repair or report, with the stored value and what replaces it, or
+   with what the repair removes, on a dataset imported with every record and every value as stored.
+   One shape is reported to the coordinating centre and kept as stored rather than repaired: a
+   culture-negative sepsis form that names an infectious agent and would not meet the
+   clinical-sepsis definition without it (G15). Whether a repair is also written back to DHIS2 by
+   the coordinating centre is a separate decision the same detection serves either way. An inconsistency the coordinating centre caused,
+   such as a code a catalogue no longer carries, belongs here as well and is reported to the
+   coordinating centre rather than repaired; no such detection is implemented (G19).
 3. **Nothing.** The value is merely one the current form does not ask for. It is not invalid, and a
    layout that has changed before and will change again is no ground for destroying it; the analyses
    read only what the definitions use.
@@ -140,10 +165,16 @@ Two conditions decide whether an inconsistency is reconcilable:
    derived from. A value that only today's form would hide is not a contradiction.
 2. The intended state follows from the record itself rather than from a rule set. Where one of the two
    contradicting values is derived from the other, or can never be right under the protocol, it is
-   recomputed or dropped without further evidence. Otherwise the state Tracker Capture shows wins: it
-   is the state the person entering the data saw and confirmed. Which state that is, is observed for
-   each shape in Tracker Capture, on a synthetic record and on one production instance, rather than
-   inferred. Per-value timestamps cannot decide it. On DHIS2 2.40 and 2.41, Tracker Capture saves a
+   recomputed or dropped without further evidence. Otherwise the state the completed form shows in
+   Tracker Capture wins. It is what the team sees while working through the Validation Report, since
+   reopening the form and completing it again leave the record as it is; the state changes only once
+   the client processes the reopened form, and what the team then completes is a state they have seen
+   and confirmed. What the person who first entered the record saw cannot always be recovered:
+   today's client blanks a field's value as soon as a rule hiding the field fires on an editable
+   form, so a record that keeps a value in a hidden field was written by an earlier client or rule
+   set, or through the API. Which state the completed form shows is observed for each shape in
+   Tracker Capture, on a synthetic record and on one production instance, rather than inferred.
+   Per-value timestamps cannot decide it. On DHIS2 2.40 and 2.41, Tracker Capture saves a
    completion or a reopening by resending the whole event, and the server then stamps every value it
    holds with the time of that save, changed or not, so the order in which two contradicting values
    were entered is not recorded.
@@ -173,9 +204,14 @@ error, except in departments of the organisation-unit group `NEOIPC_ALL_PATIENTS
 refused in every department, including those where the eligibility criteria are disabled. Post hoc,
 rule 57 flags case 3; it is not an eligibility rule, so the pass applies it whichever patients were
 requested, and the import's eligibility filter keeps such a patient for it rather than dropping it
-unreported. Cases 1 and 2 have no post-hoc rule: under the import's default the eligibility filter
-leaves such a patient out as ineligible, and a patient registered through the API, or before the
-program rule existed, passes `validate()` where ineligible patients are kept. Birth weight itself is
+unreported. Rule 57 reads the gestational age in both its forms, the total gestation days and the
+text: a text that is not empty is a recorded gestational age even in the wrong format, which rule 58
+reports (G17). Under the import's default, reconciliation 4 runs first and removes a total outside 140
+to 349 days beside no text in the required format, a total of 0 among them, so that rule 57 flags a
+patient without a birth weight whose only gestational age was such a total. Cases 1 and 2 have no
+post-hoc rule: under the import's default the eligibility filter leaves such a patient out as
+ineligible, and a patient registered through the API, or before the program rule existed, passes
+`validate()` where ineligible patients are kept. Birth weight itself is
 compulsory only when the gestational age is empty (regular sites) or at departments in the
 organisation-unit group `NEOIPC_NEODECO_TRIAL_SITES` (the NeoDeco trial sites); elsewhere an empty
 birth weight only warns, and a patient with a gestational age but no birth weight silently drops out
@@ -210,15 +246,15 @@ admission type 3 can trip it, since types 1 and 2 are assigned day 1. The protoc
 "within 120 days of birth" means day of life at most 120, as the table implies, and the program rule's
 threshold should follow the protocol. Who acts: the partner; the admission form shows the day of
 life. Decided: rule 45 flags a type-3 admission whose day of life is above 120 — the client assigns
-day 1 to types 1 and 2, so a higher value there is the coordinating centre's to reconcile, under
-G3. Eligibility is decided per admission, so a readmission after day 120 is ineligible even when the
-infant's earlier stay was eligible, and rule 45 and the eligibility filter treat it so; the program rule's
-threshold is listed among the configuration defects below and the protocol's wording among the
-questions. The rows are Partial: rule 45 is an eligibility rule, so the import's validation pass
-leaves it out when ineligible patients are requested, and under the default the import's eligibility
-filter, which reads the same bound of day 120, has removed the late admission before the pass runs;
-the rule acts where `validate()` runs on a dataset that keeps ineligible patients, the Validation
-Report's.
+day 1 to types 1 and 2, so a higher value there is the coordinating centre's to reconcile, which
+reconciliation 1 does on a first admission (G3). Eligibility is decided per admission, so a
+readmission after day 120 is ineligible even when the infant's earlier stay was eligible, and rule 45
+and the eligibility filter treat it so; the program rule's threshold is listed among the
+configuration defects below and the protocol's wording among the questions. The rows are Partial:
+rule 45 is an eligibility rule, so the import's validation pass leaves it out when ineligible
+patients are requested, and under the default the import's eligibility filter, which reads the same
+bound of day 120, has removed the late admission before the pass runs; the rule acts where
+`validate()` runs on a dataset that keeps ineligible patients, the Validation Report's.
 
 ### G3 — Admission day of life and admission type
 
@@ -230,22 +266,41 @@ hospital or admitted on the day of birth (types 1 and 2) it is 1, for one admitt
 or later (type 3) it is at least 2 and must be recorded. At capture `NEOIPC_ADM_TYPE_1` assigns 1 for
 types 1 and 2, `NEOIPC_ADM_TYPE_2_PLUS` makes the field mandatory for type 3 and `NEOIPC_ADM_DOL_1`
 refuses a value below 2 for type 3. Post hoc, rule 46 checks the day of life of a type-3 admission;
-the value the client assigns for types 1 and 2 is checked by nothing. The consequence of a
-missing value is wider than the field: rules 27, 31, 35, 39 and 41 compute an event's expected day of
-life from the admission form's value, and a missing value makes their comparison `NA`, which
+the value the client assigns for types 1 and 2 is checked by no rule, and reconciliation 1 repairs
+it. The consequence of a missing value is wider than the field: rules 27, 31, 35, 39 and 41 compute
+an event's expected day of life from the admission form's value, and a missing value makes their
+comparison `NA`, which
 `filter()` drops, so those rules are silently disabled for every event of an enrolment whose admission
 form lacks the day of life. The import's eligibility filter does not read a missing day of life as
 ineligible: it removes only a recorded day of life above 120, so an admission form without one reaches
 the validation pass under the default too, where rule 46 flags it on a type-3 admission and the pass
-removes the patient with a count in the validation summary, and where it stays in the dataset on a
-type 1 or 2 admission.
+removes the patient with a count in the validation summary. On a type 1 or 2 admission
+reconciliation 1 sets it to 1 before the filter runs, except on a readmission, where it stays
+missing.
 
 Proposal: for types 1 and 2 a reconciliation that sets a missing or different day of life to 1, the
-value the client assigns on every save and the team never chooses; for type 3 an enrolment-level rule
-on the admission form flagging a missing day of life or one below 2. Who acts: the coordinating centre
-for the assigned value, the partner for the recorded one. Decided: rule 46 flags an admission of type 3
-whose day of life is missing or below 2; setting the day of life of an inborn or day-of-birth
-admission to 1 is a reconciliation by the coordinating centre, not yet implemented.
+value the client assigns whenever it processes the form while it can be edited, and the team never
+chooses; for type 3 an enrolment-level rule on the admission form flagging a missing day of life or
+one below 2. Who acts: the coordinating centre for the assigned value, the partner for the recorded
+one. Decided: rule 46 flags an admission of type 3 whose day of life is missing or below 2. Two
+reconciliations by the coordinating centre repair the rest:
+
+- reconciliation 1 sets the day of life of an admission of type 1 or 2 to 1 where it is missing or
+  different, before the import's admission filter runs, so a first admission of either type stored
+  with a day of life above 120 is kept with day 1;
+- reconciliation 2 derives again from day 1, on an enrolment whose admission reconciliation 1
+  repaired, the day of life of the infection and procedure forms whose stored value is the one the
+  client derived from the stored admission value (that value plus the days from the enrolment date to
+  the event date, a missing admission value counting as 0) or is missing. A form whose day of life
+  matches neither stays as stored for rules 27, 31, 35, 39 and 41, since the admission value does not
+  explain it.
+
+A type-1 or type-2 admission on an enrolment dated after another enrolment of the patient that the
+import read, whether or not a reporting period keeps that enrolment, is left as stored: its type is
+what is wrong, which rule 47 reports where the dataset holds both enrolments (G4). An admission
+without a type is left alone. The client's assign rule sets day 1 in that case too, once the reopened
+form is processed, but its condition reads a missing type as type 1 or 2, and nothing on such a
+record says which admission it was.
 
 ### G4 — A readmission recorded with the wrong admission type
 
@@ -383,7 +438,7 @@ a substance whose days exceed the antibiotic days or the patient days, and a sub
 zero antibiotic days are rules 52 to 54's findings post hoc. All of them are on the form: a substance recorded on
 a form whose total antibiotic days are zero sits in a slot the rules hide, but a field that holds a
 value is never hidden, so the team sees it, read-only while the event is completed, and the client
-blanks it on the next edit.
+blanks it once it processes the reopened form.
 
 Proposal: extend rule 21, or add a sibling on the `substanceDays` rows, to flag each of those shapes
 with the slot's index, substance and days as context. Who acts: the partner. Decided: three sibling
@@ -403,7 +458,8 @@ Post hoc only rule 18 flags a missing count (the patient days); the other eight 
 surgery form's main procedure code and description, the SSI type, the secondary-BSI item, the
 pneumonia imaging and respiratory-support booleans, a pathogen's source once a pathogen is set, and every other compulsory
 value can be absent from a completed form unseen. Rule 22 filters missing codes out before its
-grammar check; rule 19 deliberately tolerates a missing SSI type; rule 26 flags a missing admission
+grammar check; rule 19 deliberately tolerates a missing SSI type, and rule 61 judges a form without
+one against no definition; rule 26 flags a missing admission
 form only on a completed enrolment, although the form is auto-generated at enrolment.
 
 Proposal: one event-level completeness rule flagging a completed form that lacks a value its stage
@@ -426,16 +482,18 @@ both sides (`infectiousAgentFindings$secondary_bsi` against the form's `sec_bsi`
 compares post hoc. Requirement 2 is enforced at capture nowhere and post hoc by no rule yet; a
 pneumonia's or an SSI's primary and secondary findings sit on the same event, while NEC records no
 primary-site organisms, so the match could not be assessed there. The shapes that break requirement 1
-differ in who can see them. On an SSI the organisms recorded while the item is No or No follow-up sit
-in a section the rule hides together with its fields, so they are invisible while the event is
-completed and removed by the client on the next edit. On a pneumonia or a NEC the same organisms sit in
-hidden fields, which the form still shows while they hold a value, read-only on a completed event and
-blanked on the next edit. Yes without an organism is a mandatory field left empty on a visible form.
+differ in who can see them. On an SSI the organisms recorded while the item is No, No follow-up or
+unanswered sit in a section the rule hides together with its fields, so they are invisible while the
+event is completed and removed once the client processes the reopened form. On a pneumonia or a NEC
+the same organisms sit in hidden fields, which the form still shows while they hold a value, read-only
+on a completed event and blanked once the reopened form is processed. Yes without an organism is a
+mandatory field left empty on a visible form.
 
 Proposal:
 
 1. a reconciliation for organisms under an SSI's secondary-BSI item that is not Yes (a contradiction
-   under the protocol, repaired to the state Tracker Capture shows);
+   under the protocol, repaired to the state the completed form shows: the item, without the
+   organisms);
 2. an event-level rule flagging the same shape on a pneumonia or a NEC, and Yes without an organism on
    any of the three forms;
 3. an event-level rule flagging a pneumonia or SSI whose secondary findings share no organism with its
@@ -443,16 +501,20 @@ Proposal:
    does not match, which is a limit to state on the rule.
 
 Who acts: the coordinating centre for proposal 1, the partner for proposals 2 and 3. Decided: proposal
-1 is a reconciliation by the coordinating centre, not yet implemented; proposal 2 is rule 55; proposal
-3 waits on the protocol revision that settles whether requirement 2 applies when no infectious agent
-was identified (see the questions for the protocol authority below), and on the pathogen migration.
+1 is reconciliation 5. On an SSI form whose secondary-BSI item is not Yes (No, No follow-up or
+unanswered, a form of which only infectious agents are stored included) it removes the whole
+secondary-BSI section, as the reopened form would blank it: every findings row in it, those that hold
+only a resistance or name companion as well as the infectious agents, and the names entered for them,
+counting the form once. Proposal 2 is rule 55. Proposal 3 waits on the protocol revision that
+settles whether requirement 2 applies when no infectious agent was identified (see the questions for
+the protocol authority below), and on the infectious-agent migration.
 The package's pathogen tables are built from the legacy catalogue, while the option codes the forms
 store are the canonical catalogue's, and the two disagree on which concept
 some codes name: *Raoultella* is a concept of its own in the package and a synonym of *Klebsiella* in
 the catalogue, and *Candida fabianii* resolves in the package to a second *Cyberlindnera fabianii*
 concept the catalogue does not carry, where the catalogue files it as a synonym of its own. A
 comparison through the package's tables would therefore report a mismatch between an organism and
-itself. The rule follows the pathogen migration, the same dependency G16 waits on: the package
+itself. The rule follows the infectious-agent migration, the same dependency G16 waits on: the package
 reading its pathogen tables from `NeoIPC-Infectious-Agents.yaml`, with production carrying the
 canonical metadata.
 
@@ -481,7 +543,7 @@ procedure's free-text signs. A weak consistency check is possible (the flag set 
 covering the SSI under rule 19's windows carries any signs); the judgement behind the flag is not.
 Documented here rather than proposed, since the signs field is free text and optional.
 
-### G15 — The infection definitions are enforced at capture only
+### G15 — Infection forms that meet no definition
 
 `sec-def-primary-sepsis-bloodstream-infection`, `def-clinical-sepsis`, `def-lcbsi-pathogen`,
 `sec-def-lcbsi-caused-common-commensals`, `def-lcbsi-cc-twice`, `def-lcbsi-cc-lab-finding`,
@@ -496,28 +558,80 @@ and the two `NEOIPC_BSI_LCBSI_CC_*_VR` rules for the three sepsis definitions, `
 `NEOIPC_HAP_DEFINITION_VR`, and the three `NEOIPC_SSI_*_VR` rules, each counting the recorded findings
 the way its definition does, with assign rules deriving the counts, the recognized-pathogen and
 common-commensal classification and the organism criterion. A form whose findings do not meet its
-definition cannot be completed in the user interface. No post-hoc rule re-evaluates any definition:
-rules 7 to 11 read only the completion status, rules 12 to 15 and 27 to 42 only dates and day counts
-and, for rules 30, 34 and 38, the admission type.
-A record entered through the API, or completed before a definition rule changed, can therefore hold an
-infection that meets no definition, and the BSI form can be neither clinical sepsis nor
-laboratory-confirmed (no positive-culture flag and no organism) or both. Every input the client counts
-is in the dataset: the sepsis, NEC, pneumonia and SSI booleans, the organism findings with their
-source and the multiple-specimen flag, the antibiotic-treatment flag, and the common-commensal
-classification through `is_cc` in the package's pathogen catalogue.
+definition cannot be completed in the user interface. A record entered through the API, completed
+before a definition rule changed or changed after its completion can nevertheless hold an infection
+that meets no definition, and the BSI form can be neither clinical sepsis nor laboratory-confirmed (no
+positive-culture flag and no infectious agent) or both.
+
+Post hoc, rules 59 to 61 hold a completed form to three of the definitions, as the client checks them
+on completion. Rule 59 holds a sepsis form that records no infectious agent in its three primary
+slots to the clinical-sepsis definition, so it flags a form with neither the negative-culture flag
+nor an infectious agent as well; rule 60 holds a NEC form to the NEC definition; rule 61 holds an SSI
+form to the definition of the depth it records. They read the form as the client does: an item left
+empty is not present, an empty `organisms_*` item reads as none identified, and a form of which only
+infectious agents are stored reads every item as empty. A form that is not completed is not judged,
+since the client checks a form only on completion, and an SSI form that records no depth is judged
+against none of the three, the depth being a compulsory value (G11). None of the three is an
+eligibility rule, so the import's pass removes the patient of a form they flag whichever patients were
+requested. No other rule counts a definition's findings: rules 7 to 11 read only the completion status,
+rules 12 to 15 and 27 to 42 only dates and day counts and, for rules 30, 34 and 38, the admission type.
+
+The dataset holds the inputs of the three definitions the rules check: the items of the sepsis, NEC
+and SSI forms, the antibiotic-treatment flag among them, and the infectious-agent findings. It cannot
+reproduce the definitions of the laboratory-confirmed BSI with a common commensal and of pneumonia
+today. The laboratory-confirmed BSI with a common commensal rests on the client's classification of
+the infectious agents as recognized pathogens or common commensals, an id list embedded in its
+program rules, and the package's legacy classification (`is_cc`) differs from
+that list: it counts the coagulase-negative staphylococci group (code 2776) as a common commensal,
+which the client's list does not. The pneumonia definition rests likewise on the client's list of
+viruses, which the package does not reproduce, and counts the pneumonia form's I/T ratio
+(`NEOIPC_HAP_IT_RATIO`), which the import does not read.
 
 For data entered through the interface a definition fails in only one way: residue. A culture-negative
 sepsis with an organism the hidden section kept, or findings of another depth than the SSI's recorded
-type, are contradictions under the protocol, invisible in the form, and reconcilable to the state
-Tracker Capture shows. What a mirror rule finds after that reconciliation is a form an import or an earlier client left
-in a state the definitions do not admit, which the team can see and complete.
+type, are contradictions under the protocol, invisible in the form, and reconcilable to the state the
+completed form shows. The two residue shapes are:
 
-Proposal: the reconciliation of the residue shapes first; then five event-level rules mirroring the
-client's definition checks, one per stage, so that a form whose recorded findings meet no definition
-of its type is a finding. The alternative is to leave the definitions to capture time and record that
-an API import is not held to them. Who acts: the coordinating centre for the residue, the partner for
-what remains. Decided: the residue shapes are a reconciliation by the coordinating centre, not yet
-implemented; once it runs, the five definition mirrors become partner-facing rules.
+1. **A culture-negative sepsis with organisms.** The completed form shows the "no positive blood
+   culture" flag and the antibiotic treatment and hides the organisms; when one of them is a
+   recognized pathogen it hides the laboratory findings and signs as well. Once the reopened form is
+   processed the client resolves the contradiction by the order of its rules rather than by the
+   record. An organism in slot 1 blanks the flag and turns the form into a laboratory-confirmed BSI;
+   organisms in slots 2 and 3 alone are blanked themselves. Either way the antibiotic treatment is
+   blanked too when one of the organisms is a recognized pathogen or recovered multiple times, the
+   two cases in which the client hides that field, although a clinical sepsis needs it. Today's
+   interface cannot enter the shape: an organism in slot 1 hides the flag, and clearing slot 1
+   blanks slots 2 and 3. The repair follows the completed form in every slot: the flag and the
+   antibiotic treatment stay, and the infectious agents are dropped, which makes the signs visible
+   again.
+2. **Findings at another depth than the recorded SSI type.** They stay invisible whatever happens
+   to the form and are never removed; they would appear only if the type were changed to their
+   depth. They need no repair: rule 61 reads only the recorded type's depth.
+
+What rules 59 to 61 find after that reconciliation is a form an import or an earlier client left in
+a state the definitions do not admit, which the team can see and complete.
+
+Proposal: the reconciliation of the residue shapes first; then event-level rules mirroring the
+client's five definition checks (clinical sepsis, laboratory-confirmed BSI with a common commensal,
+NEC, pneumonia and SSI), so that a form whose recorded findings meet no definition of its type is a
+finding. The alternative is to leave the definitions to capture time and record that an API import is
+not held to them. Who acts: the coordinating centre for the residue, the partner for what remains.
+Decided: residue shape 1 is reconciliation 6, and residue shape 2 needs none. Reconciliation 6 removes,
+on a sepsis form whose culture is recorded as negative, every findings row of the three primary
+slots, those that hold only a resistance or name companion as well as the infectious agents, with the
+names entered for them, and counts the form once. A form that names an infectious agent and would not
+meet the clinical-sepsis definition once they are removed, its features counted as rule 59 counts
+them, is reported to the coordinating centre and kept as stored instead: the client hides the signs
+and laboratory findings behind a recognized pathogen, so the team may never have been shown the items
+the definition counts, and rule 59 would flag the form for items it could not see. Three of the five
+mirrors are partner-facing rules: 59 for clinical sepsis, 60 for NEC and 61 for SSI. The rows of the
+NEC and SSI findings are therefore Covered. Those of the clinical-sepsis definition and of the sepsis
+form's two types are Partial: a form reconciliation 6 reports keeps the negative culture beside its
+infectious agents, and no rule flags it. The mirrors of the laboratory-confirmed BSI with a common
+commensal and of pneumonia wait, with G12's proposal 3 and G16, for the infectious-agent migration
+described under G12, which includes the production deployment of the canonical metadata: through the
+package's legacy classification a mirror would report forms Tracker Capture accepts. The import of the
+pneumonia I/T ratio goes with them.
 
 ### G16 — Resistance categories that do not apply to the organism
 
@@ -535,15 +649,15 @@ resistance value against the organism, and the Partner Report's resistance-test 
 recorded values only, which is correct for data entered in the user interface and wrong for an import
 that recorded a category the organism cannot carry, or for a value that stayed in the hidden field when
 the organism was changed after the category was entered. Such a value can never be right; the form
-shows it read-only on a completed event and the client removes it on the next edit, so dropping it is
-a reconciliation that needs no timestamp and applies the client's own rule to records the client
+shows it read-only on a completed event and the client removes it once it processes the reopened
+form, so dropping it is a reconciliation that needs no timestamp and applies the client's own rule to records the client
 never re-processed. The reconciliation is not included: neoipcr's applicability flags come from the
 legacy pathogen CSVs, the canonical source is
 `metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml`, the two disagree for some organisms
 (the *Raoultella* species, several *Salmonella* serovars and *Staphylococcus argenteus* among them),
 and the package does not read the applicability from the YAML through
 its pathogen taxonomy, which the reconciliation needs. Who acts: the coordinating centre. Decided: a
-reconciliation by the coordinating centre, once the pathogen migration lands.
+reconciliation by the coordinating centre, once the infectious-agent migration lands.
 
 ### G17 — Gestational age text and total days
 
@@ -551,15 +665,32 @@ reconciliation by the coordinating centre, once the pathogen migration lands.
 
 Gestational age is recorded as completed weeks plus days (`25+4`) and, in a second attribute, as
 total days, which the client computes with an assign rule after checking the format with an error
-rule. An API import must supply both, and nothing post hoc checks the text's format or that the two
-agree.
+rule. An API import must supply both. Post hoc, rule 58 checks the text's format, and reconciliations
+3 and 4 hold the total to the text.
 
 Proposal: a patient-level rule flagging a gestational age that does not match the client's pattern
 (`^[2-4][0-9][+][0-6]$`) for the partner, and a reconciliation recomputing the total days from the text
-whenever the two differ or the total is missing: the total is displayed, but the client overwrites it
-from the text on every save, so a disagreement is the client's, not the team's. Who acts: the partner
-for the text, the coordinating centre for the total. Decided: a reconciliation by the coordinating
-centre that recomputes the total from the text, not yet implemented.
+whenever the two differ or the total is missing. The team never chooses the total: the dashboard's
+profile does not show it, and the profile's edit form shows it read-only as the client computes it
+from the text, then writes that value with every save of the profile. A disagreement is therefore the
+client's, not the team's. Who acts: the partner for the text, the coordinating centre for the total.
+Decided, with cases 1 and 2 reconciliations by the coordinating centre, which run in the import's
+patient reader before its eligibility and range filters read the total:
+
+1. a text matching the pattern: reconciliation 3 computes the total from it, the completed weeks
+   times seven plus the days, where the stored total differs or is missing;
+2. no valid text (none, an empty one, or one failing the pattern) and a total outside 140 to 349 days,
+   0 included: reconciliation 4 removes the total;
+3. no valid text and a total within that range: the total is left alone. The client computes an empty
+   text as 0 and would write that on the next save of the profile, but 0 is never right, while the
+   stored total may be the only record of the gestational age;
+4. a non-empty text failing the pattern: rule 58 flags it for the partner. The rule matches the whole
+   text, as the client's check matches the whole value, so a trailing space or line break fails it,
+   and it bounds the completed weeks to 20 to 49 as the pattern does. It is not an eligibility rule.
+
+Rule 57 counts a text that is not empty as a recorded gestational age whatever its format, so a
+patient of case 4 is rule 58's finding and not rule 57's (G1). What the `dd-ga` row leaves unflagged
+is case 3 without any text: a total recorded without the weeks and days.
 
 ### G18 — Number of infants at birth below two
 
@@ -577,7 +708,8 @@ singleton. A multiple birth recorded without a number is not flagged post hoc; o
 field enforces its presence at capture, which is why the row is partial. The import's validation
 pass reads the flag and the number whatever patient columns the caller selects, and narrows the
 patients back to the selection afterwards, so only a full-tier dataset whose `patient_columns` is
-empty or names them keeps the two; a later `validate()` on a dataset without them skips rule 56.
+empty or names them keeps the two, and the number the finding records is `NA` in the import's
+`validationResults` otherwise; a later `validate()` on a dataset without them skips rule 56.
 
 ### G19 — A substance code outside the catalogue
 
@@ -933,10 +1065,10 @@ publications. None constrains a record; none is checkable.
 
 | Anchor | Constraint | Enforcement | Rules | Capture-time | Gap |
 |---|---|---|---|---|---|
-| `sec-def-primary-sepsis-bloodstream-infection` | A primary sepsis/BSI is classified as either culture-negative clinical sepsis or culture-proven laboratory-confirmed bloodstream infection (LCBSI). | Interface only | — | `NEOIPC_BSI_UNLESS_NO_POS_CULTURE`, `NEOIPC_BSI_IF_NO_POS_CULTURE`, `NEOIPC_BSI_NO_POS_CULTURE_HIDE_IF_AGENT_RECORDED` | G15 |
+| `sec-def-primary-sepsis-bloodstream-infection` | A primary sepsis/BSI is classified as either culture-negative clinical sepsis or culture-proven laboratory-confirmed bloodstream infection (LCBSI). | Partial | 59 | `NEOIPC_BSI_UNLESS_NO_POS_CULTURE`, `NEOIPC_BSI_IF_NO_POS_CULTURE`, `NEOIPC_BSI_NO_POS_CULTURE_HIDE_IF_AGENT_RECORDED` | G15 |
 | `sec-def-primary-sepsis-bloodstream-infection` | An LCBSI is classified by its culture result as caused by a recognized pathogen or by a common commensal, and the common-commensal category is subject to additional criteria. | Interface only | — | `NEOIPC_BSI_AGENT_n_SET_NCC`, `NEOIPC_BSI_AGENT_IF_NCC`, `NEOIPC_BSI_AGENT_IF_NCC_OR_AB_TREATMENT`, `NEOIPC_BSI_AGENT_IF_NCC_OR_RECOVERED_MULT` | G15 |
 | `sec-def-primary-sepsis-bloodstream-infection` | A bloodstream infection whose organism entered the bloodstream from a primary infection site (other than a catheter) is not recorded as primary sepsis/BSI but as a secondary BSI. | Not checkable | — | — |  |
-| `sec-def-primary-sepsis-bloodstream-infection` | A primary sepsis/BSI record is of one of exactly two types: clinical sepsis (infection without a detected organism) or laboratory-confirmed bloodstream infection. | Interface only | — | `NEOIPC_BSI_UNLESS_NO_POS_CULTURE`, `NEOIPC_BSI_IF_NO_POS_CULTURE`, `NEOIPC_BSI_NO_POS_CULTURE_HIDE_IF_AGENT_RECORDED` | G15 |
+| `sec-def-primary-sepsis-bloodstream-infection` | A primary sepsis/BSI record is of one of exactly two types: clinical sepsis (infection without a detected organism) or laboratory-confirmed bloodstream infection. | Partial | 59 | `NEOIPC_BSI_UNLESS_NO_POS_CULTURE`, `NEOIPC_BSI_IF_NO_POS_CULTURE`, `NEOIPC_BSI_NO_POS_CULTURE_HIDE_IF_AGENT_RECORDED` | G15 |
 | `sec-def-primary-sepsis-bloodstream-infection` | *(derived)* An infectious agent recorded for a primary sepsis/BSI is taken from the protocol's List of Infectious Agents. | Covered | 20 | `NEOIPC_BSI_AGENT_n_IF_NOT_LISTED`, `NEOIPC_BSI_AGENT_n_NAME_HAS_VAL` |  |
 
 ### 4.1.1 Clinical Sepsis (`sec-def-clinical-sepsis`, `def-clinical-sepsis`)
@@ -947,9 +1079,9 @@ publications. None constrains a record; none is checkable.
 | `sec-def-clinical-sepsis` | Days without a dose between the first and the last dose count as antibiotic treatment days. | Not checkable | — | — |  |
 | `sec-def-clinical-sepsis` | Days after the last dose are not counted as antibiotic treatment days. | Not checkable | — | — |  |
 | `sec-def-clinical-sepsis` | For a patient who died, was discharged or was transferred before completing five days of intravenous antibiotics, the five-day criterion is met when treatment was scheduled for five days or more. | Not checkable | — | — |  |
-| `def-clinical-sepsis` | A clinical sepsis has no positive microbiological blood or cerebrospinal fluid culture. | Interface only | — | `NEOIPC_BSI_IF_NO_POS_CULTURE`, `NEOIPC_BSI_CLIN_SEPSIS_VR` | G15 |
-| `def-clinical-sepsis` | A clinical sepsis has intravenous antibiotic treatment of five or more days initiated. | Capture time | — | `NEOIPC_BSI_IF_NO_POS_CULTURE`, `NEOIPC_BSI_CLIN_SEPSIS_VR` | G15 |
-| `def-clinical-sepsis` | A clinical sepsis has at least two of the listed clinical or laboratory features of generalized infection. | Capture time | — | `NEOIPC_BSI_CLIN_SEPSIS_VR`, `NEOIPC_BSI_SET_FIRST_FINDING_COUNTS`, `NEOIPC_BSI_SET_COMMON_LAB_FINDINGS_COUNT`, `NEOIPC_BSI_SET_TOTAL_COMMON_FINDING_COUNTS`, the per-finding `NEOIPC_BSI_*_SET_COUNT` rules | G15 |
+| `def-clinical-sepsis` | A clinical sepsis has no positive microbiological blood or cerebrospinal fluid culture. | Partial | 59 | `NEOIPC_BSI_IF_NO_POS_CULTURE`, `NEOIPC_BSI_CLIN_SEPSIS_VR` | G15 |
+| `def-clinical-sepsis` | A clinical sepsis has intravenous antibiotic treatment of five or more days initiated. | Partial | 59 | `NEOIPC_BSI_IF_NO_POS_CULTURE`, `NEOIPC_BSI_CLIN_SEPSIS_VR` | G15 |
+| `def-clinical-sepsis` | A clinical sepsis has at least two of the listed clinical or laboratory features of generalized infection. | Partial | 59 | `NEOIPC_BSI_CLIN_SEPSIS_VR`, `NEOIPC_BSI_SET_FIRST_FINDING_COUNTS`, `NEOIPC_BSI_SET_COMMON_LAB_FINDINGS_COUNT`, `NEOIPC_BSI_SET_TOTAL_COMMON_FINDING_COUNTS`, the per-finding `NEOIPC_BSI_*_SET_COUNT` rules | G15 |
 
 ### 4.1.2 LCBSI caused by a Recognized Pathogen (`sec-def-lcbsi-caused-recognized-pathogen`, `def-lcbsi-pathogen`)
 
@@ -980,14 +1112,14 @@ publications. None constrains a record; none is checkable.
 | Anchor | Constraint | Enforcement | Rules | Capture-time | Gap |
 |---|---|---|---|---|---|
 | `sec-def-necrotizing-enterocolitis` | Intestinal perforation is recorded in the NEC dataset but is not a surveillance definition criterion, so its presence is neither required for nor by itself sufficient for recording an NEC. | Not checkable | — | — (no data element records it) |  |
-| `sec-def-necrotizing-enterocolitis` | An NEC meets either a combination of radiological findings and clinical signs or a diagnosis based on surgical and/or pathological evidence. | Capture time | — | `NEOIPC_NEC_VR`, `NEOIPC_NEC_SET_FINDING_COUNTS`, `NEOIPC_NEC_IMG_CLIN_FINDINGS_CRIT_FULFILLED_TRUE`, `NEOIPC_NEC_SURG_FINDINGS_CRIT_FULFILLED_TRUE` | G15 |
+| `sec-def-necrotizing-enterocolitis` | An NEC meets either a combination of radiological findings and clinical signs or a diagnosis based on surgical and/or pathological evidence. | Covered | 60 | `NEOIPC_NEC_VR`, `NEOIPC_NEC_SET_FINDING_COUNTS`, `NEOIPC_NEC_IMG_CLIN_FINDINGS_CRIT_FULFILLED_TRUE`, `NEOIPC_NEC_SURG_FINDINGS_CRIT_FULFILLED_TRUE` | G15 |
 | `sec-def-necrotizing-enterocolitis` | An NEC record states whether the patient has an intestinal perforation. | Not checkable | — | — (no data element records it) |  |
 | `sec-def-necrotizing-enterocolitis` | A case with surgical evidence of intestinal perforation but no evidence of primary necrosis or pneumatosis intestinalis (e.g. spontaneous bowel perforation) is not recorded as NEC. | Not checkable | — | `NEOIPC_NEC_VR` |  |
-| `sec-def-necrotizing-enterocolitis` | An NEC meets either the symptom-based definition or the surgical definition. | Capture time | — | `NEOIPC_NEC_VR`, `NEOIPC_NEC_IMG_CLIN_FINDINGS_CRIT_FULFILLED_TRUE`, `NEOIPC_NEC_SURG_FINDINGS_CRIT_FULFILLED_TRUE` | G15 |
-| `def-nec-symptom` | A symptom-based NEC has at least one of the listed radiological signs. | Capture time | — | `NEOIPC_NEC_VR`, `NEOIPC_NEC_SET_FINDING_COUNTS` | G15 |
+| `sec-def-necrotizing-enterocolitis` | An NEC meets either the symptom-based definition or the surgical definition. | Covered | 60 | `NEOIPC_NEC_VR`, `NEOIPC_NEC_IMG_CLIN_FINDINGS_CRIT_FULFILLED_TRUE`, `NEOIPC_NEC_SURG_FINDINGS_CRIT_FULFILLED_TRUE` | G15 |
+| `def-nec-symptom` | A symptom-based NEC has at least one of the listed radiological signs. | Covered | 60 | `NEOIPC_NEC_VR`, `NEOIPC_NEC_SET_FINDING_COUNTS` | G15 |
 | `def-nec-symptom` | A radiological sign for NEC is obtained by X-ray, CT, MRI or ultrasound. | Not checkable | — | — |  |
-| `def-nec-symptom` | A symptom-based NEC has at least one of the listed clinical signs. | Capture time | — | `NEOIPC_NEC_VR`, `NEOIPC_NEC_SET_FINDING_COUNTS` | G15 |
-| `def-nec-surgical` | A surgical NEC has at least one surgical or pathological finding of extensive bowel necrosis or pneumatosis intestinalis. | Capture time | — | `NEOIPC_NEC_VR`, `NEOIPC_NEC_SURG_FINDINGS_CRIT_FULFILLED_TRUE`, `NEOIPC_NEC_SET_FINDING_COUNTS`, `NEOIPC_NEC_EXTENSIVE_BOWEL_NECROSIS_VAL_TRUE`, `NEOIPC_NEC_PNEUMAT_INT_SURG_VAL_TRUE` | G15 |
+| `def-nec-symptom` | A symptom-based NEC has at least one of the listed clinical signs. | Covered | 60 | `NEOIPC_NEC_VR`, `NEOIPC_NEC_SET_FINDING_COUNTS` | G15 |
+| `def-nec-surgical` | A surgical NEC has at least one surgical or pathological finding of extensive bowel necrosis or pneumatosis intestinalis. | Covered | 60 | `NEOIPC_NEC_VR`, `NEOIPC_NEC_SURG_FINDINGS_CRIT_FULFILLED_TRUE`, `NEOIPC_NEC_SET_FINDING_COUNTS`, `NEOIPC_NEC_EXTENSIVE_BOWEL_NECROSIS_VAL_TRUE`, `NEOIPC_NEC_PNEUMAT_INT_SURG_VAL_TRUE` | G15 |
 | `def-nec-surgical` | Extensive bowel necrosis qualifies as a surgical NEC finding only when more than 2 cm of bowel is affected. | Not checkable | — | — |  |
 
 ### 4.3 Pneumonia (`sec-def-pneumonia`, `def-pneumonia`)
@@ -1041,17 +1173,17 @@ publications. None constrains a record; none is checkable.
 | `sec-def-superficial-incisional-ssi` | Diagnosis or treatment of cellulitis by itself does not satisfy superficial incisional SSI criterion "d"; a stitch abscess alone, a localized stab wound or a pin site infection does not qualify as a superficial incisional SSI; a laparoscopic trocar site is a surgical incision and not a stab wound. | Not checkable | — | — |  |
 | `def-ssi-superficial` | A superficial incisional SSI has its first symptoms within 30 days after the operation. | Covered | 19 | — |  |
 | `def-ssi-superficial` | A superficial incisional SSI involves only the skin and subcutaneous tissue of the incision. | Interface only | — | `NEOIPC_SSI_INFECTION_TYPE` compulsory, `NEOIPC_SSI_INFECTION_TYPE_SUPERFICIAL` | G15 |
-| `def-ssi-superficial` | A superficial incisional SSI has at least one of the listed findings. | Capture time | — | `NEOIPC_SSI_SUPERFICIAL_INCISIONAL_VR`, `NEOIPC_SSI_INFECTION_TYPE_SUPERFICIAL` | G15 |
+| `def-ssi-superficial` | A superficial incisional SSI has at least one of the listed findings. | Covered | 61 | `NEOIPC_SSI_SUPERFICIAL_INCISIONAL_VR`, `NEOIPC_SSI_INFECTION_TYPE_SUPERFICIAL` | G15 |
 | `sec-def-deep-incisional-ssi` | An SSI involving the deep soft tissues of the incision (fascial and muscle layers) is classified as deep incisional. | Interface only | — | `NEOIPC_SSI_INFECTION_TYPE` compulsory, option set `NEOIPC_SSI_TYPE`, `NEOIPC_SSI_INFECTION_TYPE_DEEP` | G15 |
 | `sec-def-deep-incisional-ssi` | The 90-day symptom window for a deep incisional SSI applies only when an implant was left in place. | Covered | 19 | — |  |
 | `def-ssi-deep` | A deep incisional SSI has its first symptoms within 30 days after the operation, or within 90 days when an implant was left in place. | Covered | 19 | — |  |
 | `def-ssi-deep` | A deep incisional SSI involves the deep soft tissues of the incision (for example, fascial and muscle layers). | Interface only | — | `NEOIPC_SSI_INFECTION_TYPE` compulsory, option set `NEOIPC_SSI_TYPE`, `NEOIPC_SSI_INFECTION_TYPE_DEEP` | G15 |
-| `def-ssi-deep` | A deep incisional SSI has at least one of the listed findings. | Capture time | — | `NEOIPC_SSI_DEEP_INCISIONAL_VR`, `NEOIPC_SSI_INFECTION_TYPE_DEEP` | G15 |
+| `def-ssi-deep` | A deep incisional SSI has at least one of the listed findings. | Covered | 61 | `NEOIPC_SSI_DEEP_INCISIONAL_VR`, `NEOIPC_SSI_INFECTION_TYPE_DEEP` | G15 |
 | `sec-def-organ-space-ssi` | An SSI involving any part of the body deeper than the fascial/muscle layers that was opened or manipulated during the procedure is classified as organ/space. | Interface only | — | `NEOIPC_SSI_INFECTION_TYPE` compulsory, option set `NEOIPC_SSI_TYPE`, `NEOIPC_SSI_INFECTION_TYPE_ORGAN_SPACE` | G15 |
 | `sec-def-organ-space-ssi` | The 90-day symptom window for an organ/space SSI applies only when an implant was left in place. | Covered | 19 | — |  |
 | `def-ssi-organ-space` | An organ/space SSI has its first symptoms within 30 days after the operation, or within 90 days when an implant was left in place. | Covered | 19 | — |  |
 | `def-ssi-organ-space` | An organ/space SSI involves a part of the body deeper than the fascial/muscle layers that was opened or manipulated during the operative procedure. | Interface only | — | `NEOIPC_SSI_INFECTION_TYPE` compulsory, option set `NEOIPC_SSI_TYPE`, `NEOIPC_SSI_INFECTION_TYPE_ORGAN_SPACE` | G15 |
-| `def-ssi-organ-space` | An organ/space SSI has at least one of the listed findings. | Capture time | — | `NEOIPC_SSI_ORGAN_SPACE_VR`, `NEOIPC_SSI_INFECTION_TYPE_ORGAN_SPACE` | G15 |
+| `def-ssi-organ-space` | An organ/space SSI has at least one of the listed findings. | Covered | 61 | `NEOIPC_SSI_ORGAN_SPACE_VR`, `NEOIPC_SSI_INFECTION_TYPE_ORGAN_SPACE` | G15 |
 
 ### 5 Data Dictionary (`sec-dd`)
 
@@ -1069,7 +1201,7 @@ publications. None constrains a record; none is checkable.
 | `dd-neoipc-id` | *(derived)* The mapping between NeoIPC-ID and patient is kept in a local pseudonymization list. | Not checkable | — | — |  |
 | `dd-patient-id` | The Patient-ID is the hospital's own unique patient identifier and, like the patient name, is a local-documentation field. | Not checkable | — | — |  |
 | `sec-dd-enrolment` | The patient ID and the patient name are not part of the NeoIPC dataset and are never submitted to the data collection platform; the NeoIPC-ID is never the hospital patient ID or the patient name. | Not checkable | — | — |  |
-| `dd-ga` | Gestational age is recorded as completed weeks plus days at birth in the form weeks+days (e.g. 25+4). | Capture time | — | `NEOIPC_PATIENT_GA_FORMAT_VR`, `NEOIPC_PATIENT_SET_GESTATION_DAYS_AND_WEEKS`, `NEOIPC_PATIENT_SET_TOTAL_GESTATION_DAYS`, `NEOIPC_PATIENT_WARN_GESTATION_DAYS_0_160_OR_310` (warning only) | G17 |
+| `dd-ga` | Gestational age is recorded as completed weeks plus days at birth in the form weeks+days (e.g. 25+4). | Partial | 58 | `NEOIPC_PATIENT_GA_FORMAT_VR`, `NEOIPC_PATIENT_SET_GESTATION_DAYS_AND_WEEKS`, `NEOIPC_PATIENT_SET_TOTAL_GESTATION_DAYS`, `NEOIPC_PATIENT_WARN_GESTATION_DAYS_0_160_OR_310` (warning only) | G17 |
 | `dd-ga` | *(derived)* Gestational age is the obstetrician's calculated or estimated value; only where that is unavailable may the treating physician's assessment (e.g. Ballard score) be recorded. | Not checkable | — | — |  |
 | `dd-bw` | Birthweight is recorded in grams as the infant's weight immediately after birth; where it is unknown or highly pathological, the treating physician's estimate may be entered instead. | Not checkable | — | `NEOIPC_TEA_BIRTH_WEIGHT` INTEGER_POSITIVE, `NEOIPC_PATIENT_WARN_BW_1_299_OR_5000_PLUS` (warning only) |  |
 | `dd-sex` | Sex is recorded as the phenotypic sex, and as undetermined when it cannot be determined from phenotype or genotype or the genotype is neither XX nor XY. | Not checkable | — | option set `NEOIPC_SEX_VALUES` |  |

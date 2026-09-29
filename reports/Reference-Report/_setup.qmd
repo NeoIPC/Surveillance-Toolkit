@@ -108,6 +108,10 @@ options(`gt.locale` = locale_gt)
 
 sR <- get_string_resources(localeObj)
 
+# The reconciliation table labels each reconciliation neoipcr applies; a
+# reconciliation without a label is shown by its number, and the log says so.
+check_reconciliation_labels(sR)
+
 # ── Confidence interval display ─────────────────────────────────────
 # Composable CI components: "pooled", "quartiles".
 # Pass individually or combined (comma-separated).
@@ -181,6 +185,11 @@ compute_col_widths <- function(tbl_data, stub_min = 25,
     font_size = font_size
   )
 }
+
+# The data-validation section's summary tables show counts without a
+# confidence interval, so they take the font size compute_col_widths() gives
+# a table without one.
+summary_table_font_size <- compute_col_widths(tibble::tibble(), stub_min = 0)$font_size
 
 # Sparse data threshold: rows with fewer than this many events are flagged.
 # Default: 16 (relative standard error ≥ 25%, aligned with WA DOH criterion).

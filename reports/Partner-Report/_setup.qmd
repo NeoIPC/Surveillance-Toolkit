@@ -1473,6 +1473,10 @@ options(`gt.locale` = locale_gt)
 
 sR <- get_string_resources(localeObj)
 
+# The reconciliation table labels each reconciliation neoipcr applies; a
+# reconciliation without a label is shown by its number, and the log says so.
+check_reconciliation_labels(sR)
+
 # Inject non-translatable table cross-references into pairing definitions
 for (pairing_name in names(pairing_table_refs)) {
   if (!is.null(sR$outlier[[pairing_name]])) {
@@ -1638,6 +1642,11 @@ compute_col_widths <- function(tbl_data, stub_min, has_reference = TRUE,
     font_size = font_size
   )
 }
+
+# The data-validation section's summary tables show counts without a
+# confidence interval, so they take the font size compute_col_widths() gives
+# a table without one.
+summary_table_font_size <- compute_col_widths(tibble::tibble(), stub_min = 0)$font_size
 ```
 
 ```{r General setup and parameter preparation}

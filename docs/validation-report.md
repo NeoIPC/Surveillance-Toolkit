@@ -50,10 +50,10 @@ One function renders every rule (`problem_text()` in `_problem_text.qmd`):
    it stands in for a value. The templates and headings themselves are the report's Markdown and are
    not escaped.
 2. `decorate_context()` adds the values a template needs beyond what the rule records: a localized
-   label for each coded value `context_decorations` in `_mapping.qmd` names for the rule (rule 19's SSI
-   type from `ssi_types`, rule 47's admission type from `admission_types`, rule 50's device from
-   `devices`, which `label_maps()` assembles from the glossary's abbreviations, rule 51's count from
-   `day_counts`, rule 55's secondary-BSI item from
+   label for each coded value `context_decorations` in `_mapping.qmd` names for the rule (rule 19's and
+   rule 61's SSI type from `ssi_types`, rule 47's admission type from `admission_types`, rule 50's
+   device from `devices`, which `label_maps()` assembles from the glossary's abbreviations, rule 51's
+   count from `day_counts`, rule 55's secondary-BSI item from
    `secondary_bsi_items`), with `missing_value` where the code is missing or unknown, so the
    placeholder always has a value. A rule whose sentence needs a label for a code it records gets a
    row in that table and a map in `label_maps()` beside it in `_mapping.qmd`. The string resources key
@@ -89,12 +89,35 @@ exempts the records addressed to it. The same reader serves the Partner and Refe
 `get_validation_exceptions()` in `reports/common/helpers.R`, so a malformed file is refused once, the same
 way, wherever it is used.
 
+## Reconciled data
+
+The import reconciles, as every import does unless it passes `reconcile = FALSE` to
+`neoipcr::dhis2_dataset_options()`: before anything is validated, it repairs the stored values the NeoIPC
+coordinating centre is responsible for, which are the values Tracker Capture derives itself or keeps in a
+section it hides (`neoipcr::reconciliation_ids()` lists the reconciliations, and the `reconcile`
+argument of `?neoipcr::dhis2_dataset_options` describes them). The report therefore validates reconciled
+data. A value a finding shows, or the value it is compared with, can differ from what Tracker Capture
+shows for the same record: the day of life of an infant admitted from the delivery room or on the day of
+birth, for example, is derived from day of life 1 at admission, a value the client writes to the
+admission form only while that form is open for editing. The help on correcting the day of life at
+admission (`en/_solution_0018.Rmd`) tells the partner that the report's values can differ from the
+forms' for this reason, and how to bring the stored values in line. The problem details on
+a day of life that does not match the calculated value and on an infection within the first three days
+of life cite it, so the report includes it wherever one of rules 27 to 42 fired except rules 30, 34 and
+38, which concern the day of hospitalization.
+
+The report never lists a reconciliation. Repairing what the partner neither chooses nor sees is the
+coordinating centre's task, not the department's, so a reconciliation is not a finding. The Partner and
+Reference Reports show how many records each reconciliation changed, and
+`neoipcr::reconciliation_details()` gives the coordinating centre the record-by-record view.
+
 ## Rule selection and the clean result
 
 The `rules` parameter (`integer[]`) restricts the render to the named rules; absent, every rule runs.
-The header states which rules the document rests on — "All 56 rules", or the count applied and the
-rules not applied with their summaries — so a report rendered with a subset cannot be read as a clean
-bill on the rules it skipped. An id neoipcr does not know aborts the render. The `# @type integer[]`
+The header states which rules the document rests on — all of the rules neoipcr defines, with their
+number (`rules_applied_all`), or the count applied and the rules not applied with their summaries — so
+a report rendered with a subset cannot be read as a clean bill on the rules it skipped. An id neoipcr
+does not know aborts the render. The `# @type integer[]`
 annotation names the parameter's type for a consumer of the parameter schema; the only such consumer
 today, the reporting service's schema generator, maps `character[]` and not yet `integer[]`, which is
 part of what a service endpoint for this report has to add.
@@ -108,7 +131,7 @@ included, and a missing file no longer means "clean".
 ## Before a render
 
 `_setup.qmd` asserts, before it composes the header, that every id in `validation_rule_ids()` has its
-non-empty templates (the `description`, and for rule 20 the `description_secondary_bsi` as well) and
+non-empty templates (the `description`, and for rules 20 and 55 their second sentence as well) and
 `summary` under `problems` in the string resources, so a rule added to neoipcr without its sentences
 fails the render with a message naming the rule rather than rendering a blank line or failing in the
 header. `_setup.qmd` fails the render when `validate()` reports
@@ -143,5 +166,6 @@ finding that reaches the sentence.
 3. Declare the neoipcr release the report now needs in `reports/compatibility.yml`.
 4. Enter the rule in `docs/validation-rule-coverage.md` against the protocol anchor it enforces, and say
    who can act on its findings. A finding the partner cannot see in Tracker Capture does not belong in
-   this report: it is a network-side reconciliation, as that document describes, when it is a
-   contradiction under the protocol whose intended state can be inferred, and no rule at all otherwise.
+   this report: it is a reconciliation by the NeoIPC coordinating centre, as that document describes,
+   when it is a contradiction under the protocol whose intended state can be inferred, and no rule at
+   all otherwise.

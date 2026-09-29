@@ -48,6 +48,8 @@ ds <- with_error_trace(neoipcr::import_dhis2(
     include_invalid_patients = TRUE,
     include_ineligible_patients = TRUE,
     include_incomplete = c("enrollments", "events"),
+    # A copy of the stored record under GDPR Article 15 shows every value as stored.
+    reconcile = FALSE,
     translate = TRUE,
     locale = locale
   )))
@@ -106,7 +108,11 @@ if (patient_found) {
   department <- ds$metadata$departments |>
     dplyr::filter(department_key == patient$department_key)
 
+  # Under the full department tier the hospital key sits on the department,
+  # not on the patient. A department without a hospital leaves `hospital`
+  # without rows.
   hospital <- ds$metadata$hospitals |>
-    dplyr::filter(hospital_key == patient$hospital_key)
+    dplyr::semi_join(department, dplyr::join_by(hospital_key),
+                     na_matches = "never")
 }
 ```

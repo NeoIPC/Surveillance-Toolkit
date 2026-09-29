@@ -1,0 +1,11 @@
+### A Sepsis Form Without an Infectious Agent Does Not Meet the Definition of Clinical Sepsis {#sec-problem-details-35}
+
+A sepsis form that records no infectious agent cannot describe a laboratory-confirmed bloodstream infection, so it has to describe a clinical sepsis.
+The NeoIPC Surveillance Protocol defines clinical sepsis by three criteria, all of which must be met: no positive blood or cerebrospinal fluid culture, intravenous antibiotic therapy for five or more days initiated, and at least two clinical or laboratory features of generalized infection, where the laboratory findings count as one feature together, however many of them are present.
+When a sepsis form is completed, the platform checks it against this definition and refuses to complete it if the definition is not met; it also refuses a form that records neither the absence of a positive culture nor an infectious agent, because the first infectious agent is then compulsory.
+A completed form that does not meet the definition has therefore reached the platform around these checks, for example through an import, completed before the checks existed, or changed after it was completed.
+This message appears in the validation report when a completed sepsis form records no infectious agent and does not meet all three criteria of clinical sepsis; the message gives the number of features of generalized infection the form records.
+
+Please open the form (see @sec-solution-15), reopen it for editing (see @sec-solution-9), check its entries against the definitions, and complete it again (see @sec-solution-8), which makes the platform check them again.
+If a blood culture was positive, please clear 'No positive blood culture' and record the infectious agent it grew instead; the form hides the infectious-agent fields while that item is ticked.
+If the infection meets no definition of sepsis, it cannot be recorded; please delete the form in that case (see @sec-solution-12).

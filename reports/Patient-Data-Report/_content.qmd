@@ -357,15 +357,15 @@ if ("niv_days" %in% names(se) && !is.na(se$niv_days)) {
 
 # Individual protective factor days
 if ("human_milk_days" %in% names(se) && !is.na(se$human_milk_days)) {
-  se_fields <- c(se_fields, sR$human_milk)
+  se_fields <- c(se_fields, sR$human_milk_sc)
   se_values <- c(se_values, format_days_value(se$human_milk_days))
 }
 if ("kangaroo_care_days" %in% names(se) && !is.na(se$kangaroo_care_days)) {
-  se_fields <- c(se_fields, sR$kangaroo_care)
+  se_fields <- c(se_fields, sR$kangaroo_care_sc)
   se_values <- c(se_values, format_days_value(se$kangaroo_care_days))
 }
 if ("probiotic_days" %in% names(se) && !is.na(se$probiotic_days)) {
-  se_fields <- c(se_fields, sR$probiotics)
+  se_fields <- c(se_fields, sR$probiotics_sc)
   se_values <- c(se_values, format_days_value(se$probiotic_days))
 }
 
@@ -374,7 +374,7 @@ knitr::kable(tibble::tibble(Field = se_fields, Value = se_values),
 
 # Antibiotics subsection with substance sub-list
 if ("ab_days" %in% names(se) && !is.na(se$ab_days)) {
-  cat("\n\n### ", sR$antibiotics, "\n\n")
+  cat("\n\n### ", sR$antibiotics_sc, "\n\n")
   cat("- **", sR$field$antibiotic_days, ":** ",
     format_days_value(se$ab_days), "\n", sep = "")
 

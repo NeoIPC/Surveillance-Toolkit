@@ -184,6 +184,61 @@ tbl-infectious-agent-detection-rate:
   rate_name: "Infectious Agent Detection Rate"
   rate_numerator: "No of infections with agent"
   tbl-cap: "Infections in which an infectious agent has been identified, including secondary BSI following the infection."
+tbl-reconciliation-summary:
+  tbl-cap: "Records the NeoIPC coordinating centre reconciled"
+  reconciliations:
+    admission_day_of_life: >-
+      Day of life set to 1 on the admission form of an infant admitted from the
+      delivery room or on the day of birth
+    form_day_of_life: >-
+      Day of life of the infection and procedure forms recalculated from a
+      repaired admission form
+    gestation_days_from_text: "Total gestation days recalculated from the gestational age"
+    implausible_gestation_days: >-
+      Total gestation days outside 140 to 349 days removed where no gestational
+      age is recorded in the required format
+    ssi_secondary_bsi_agents: >-
+      Secondary-BSI infectious agents removed from a surgical site infection form
+      whose secondary-BSI item is not Yes
+    culture_negative_sepsis_agents: >-
+      Infectious agents removed from a sepsis form recorded as culture-negative
+  unknown_label: "Reconciliation {reconciliation}"
+  repaired: "Repaired"
+  reported: "Reported"
+  reported_footnote: >-
+    {column}: Records the reconciliation concerns but kept as stored rather
+    than repaired, since the repair would have left a form that does not meet
+    its case definition.
+  missing_count_footnote: >-
+    A dash marks a count the dataset does not give: its import did not read the
+    records the reconciliation acts on, or was made before the analysis package
+    applied that reconciliation.
+  no_reconciliations: "No record in the data needed reconciling."
+  own_no_reconciliations: "No record in your department's data needed reconciling."
+  reference_no_reconciliations: "No record in the reference data needed reconciling."
+  both_no_reconciliations: >-
+    No record in your department's data or in the reference data needed
+    reconciling.
+  not_recorded: >-
+    No reconciliation is recorded for this dataset: its data were imported
+    before the analysis package recorded reconciliations.
+  not_reconciled: >-
+    The reconciliations were not applied to this dataset: it was built with
+    them switched off, so every value is as stored.
+  own_not_recorded: >-
+    No reconciliation is recorded for your department's data: they were
+    imported before the analysis package recorded reconciliations.
+  own_not_reconciled: >-
+    The reconciliations were not applied to your department's data: they were
+    imported with the reconciliations switched off, so the figures for your
+    department rest on the values as stored.
+  reference_not_recorded: >-
+    No reconciliation is recorded for the reference data: they were imported
+    before the analysis package recorded reconciliations.
+  reference_not_reconciled: >-
+    The reconciliations were not applied to the reference data: they were
+    imported with the reconciliations switched off, so the reference figures
+    rest on the values as stored.
 tbl-resistance-test-rate:
   carbr_if_3gcr: "in case of 3GCR"
   colr_if_3gcr_and_carbr: "in case of 3GCR and CARBR"
@@ -253,15 +308,29 @@ tbl-validation-summary:
     The rules are numbered as in the NeoIPC Validation Report, which explains
     each rule and lists the affected records.
   no_removals: "The validation rules removed no record from the dataset."
+  own_no_removals: "The validation rules removed no record from your department's data."
+  reference_no_removals: "The validation rules removed no record from the reference data."
+  both_no_removals: >-
+    The validation rules removed no record from your department's data or from
+    the reference data.
   not_available: >-
     The dataset carries no validation summary: it was written before the
     analysis package recorded one.
   pass_not_run: >-
     The validation rules were not applied to this dataset: it was built with
     the records they would remove kept in.
+  own_not_available: >-
+    Your department's data carry no validation summary: they were written
+    before the analysis package recorded one.
+  own_pass_not_run: >-
+    The validation rules were not applied to your department's data: they were
+    built with the records the rules would remove kept in.
   reference_not_available: >-
-    The reference data carry no validation summary, so none is shown beside
-    the department's.
+    The reference data carry no validation summary: they were written before
+    the analysis package recorded one.
+  reference_pass_not_run: >-
+    The validation rules were not applied to the reference data: they were
+    built with the records the rules would remove kept in.
 total: "Total"
 unit_separator: " "
 methods:

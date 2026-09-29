@@ -1,0 +1,8 @@
+### The Gestational Age Is Recorded in a Format the Registration Form Does Not Accept {#sec-problem-details-34}
+
+The patient record holds the gestational age at birth as completed weeks and days, in the format the registration form gives as its example: two digits for the completed weeks, from 20 to 49, a plus sign, and one digit for the additional days, from 0 to 6, as in 25+4 for 25 weeks and 4 days.
+The platform calculates the total gestation days, on which eligibility for the Core Module and the analyses by gestational age rest, from a gestational age in this format only.
+The registration form therefore refuses any other format; a gestational age in another format reaches the platform only around that form, such as through an import or from before the check existed.
+This message appears in the validation report when a patient record holds a gestational age in another format, for example with a space in it, without the plus sign, with a single digit for the weeks, or with more than six days.
+
+Please open the patient record's dashboard (see @sec-solution-1) and edit its profile (see @sec-solution-17): enter the gestational age in the format described above; the platform then calculates the total gestation days from it.
