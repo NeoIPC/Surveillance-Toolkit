@@ -192,13 +192,12 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
 
 - The Partner and Reference Reports' PDF showed no page number on the first page, whose footer set the
   EU emblem and the funding statement but not the number. Every page is numbered now.
-- The Patient Data Report capitalised its table labels word by word ("Patient Days", "Central Venous
-  Catheter (CVC)") beside labels in sentence case ("Human milk"), and wrote a unit in running text in
-  capitals ("58 Days"). Its labels are in sentence case now, as in the Partner and Reference Reports'
-  tables, and the unit reads "58 days"; its patient-days label is the one the other reports use.
-- The glossary gave "probiotics" a capital as its base term, where every other term is written as in
-  running text and the capitalised form is derived for a label; a sentence naming probiotics would have
-  capitalised it mid-sentence. The risk-density tables use the derived label form.
+- The Patient Data Report's labels mixed three casings: most capitalised word by word ("Patient Days",
+  "Central Venous Catheter (CVC)"), the human milk and kangaroo care days and the antibiotics heading
+  in lower case, and the day counts' unit capitalised ("58 Days"). Its table labels are in sentence case
+  now, as in the Partner and Reference Reports' tables, its antibiotics heading is capitalised, and the
+  unit reads "58 days"; its patient-days label is the one the other reports use. German keeps its noun
+  capitalisation.
 - The Patient Data Report failed at its import on every render: neoipcr before `v0.0.0.9006` failed
   on the events' timestamps and on enrolment notes read without the DHIS2 enrolment ids, both of which
   the report requests, and on records without a creator: events created before the instance's upgrade
@@ -207,13 +206,9 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
 - Once past its import, the Patient Data Report still failed for every patient it found, in the
   rendered report and in the JSON export alike: it looked up the hospital through the patient record's
   hospital key, which the import leaves off the patient record when it imports the department in full,
-  as the report does, since the department then carries the key. It now takes the hospital from the patient's
-  department; for a department without a hospital, the report leaves the hospital field empty and the
-  JSON export's `hospital` is an empty array.
-- The Patient Data Report labelled the human milk and kangaroo care days of its surveillance-end
-  table, and headed its antibiotics subsection, in lower case, where its other labels and headings are
-  capitalised: it used the shared terms written for running text instead of the capitalised forms the
-  string resources derive from them for a label or heading. German keeps its noun capitalisation.
+  as the report does, since the department then carries the key. It now takes the hospital from the
+  patient's department; for a department without a hospital, the report leaves the hospital field empty
+  and the JSON export's `hospital` is an empty array.
 - The Patient Data Report's PDF footer showed the page number twice, in the centre and at the outer
   edge. It now shows it once, at the outer edge, on every page.
 - A bare `yes` or `on` in a report's string resources stays text, as `no` and `off` already did,
