@@ -354,6 +354,144 @@ get_connection_options <- function(scheme = NULL, hostname = NULL,
   do.call(neoipcr::dhis2_connection_options, args)
 }
 
+#' What keeps an address from serving as the base of the Tracker Capture
+#' links, as `get_tracker_capture_base()` states it in a refusal.
+#'
+#' The address is accepted when its raw text matches, as a whole, the shape
+#' `get_tracker_capture_base()` describes. Otherwise the defect is named by
+#' category, never by quoting the address or any part of it.
+#' @param x The address, as a caller handed it over
+#' @return NULL when the address is accepted, otherwise a verb phrase naming
+#'   the defect ("contains whitespace")
+base_url_defect <- function(x) {
+  if (!is.character(x) || length(x) != 1L || is.na(x))
+    return("is not a single text value")
+  # Matched as bytes, so a character outside ASCII matches none of the ranges
+  # and an invalid encoding cannot raise an error that would bypass the
+  # classed refusal.
+  shape <- regmatches(x, regexec(paste0(
+    "\\A(?i:https?)://",
+    "[A-Za-z0-9_-]+(?:\\.[A-Za-z0-9_-]+)*\\.?",
+    "(?::([0-9]{1,5}))?",
+    "(?:/(?:[A-Za-z0-9._~-]|%[0-9A-Fa-f]{2})*)*\\z"),
+    x, perl = TRUE, useBytes = TRUE))[[1]]
+  valid_port <- function(port) {
+    number <- as.integer(port)
+    number >= 1L && number <= 65535L
+  }
+  if (length(shape) == 2L && (!nzchar(shape[2]) || valid_port(shape[2])))
+    return(NULL)
+
+  if (grepl("[[:space:]]", x, useBytes = TRUE))
+    return("contains whitespace")
+  if (!grepl("^[Hh][Tt][Tt][Pp][Ss]?://", x, useBytes = TRUE))
+    return("does not begin with `http://` or `https://`")
+  if (grepl("@", x, fixed = TRUE, useBytes = TRUE))
+    return(paste("contains an `@`, which is refused wherever it stands, since",
+                 "before the host it introduces a user name or password"))
+  if (grepl("[?#]", x, useBytes = TRUE))
+    return("carries a query or a fragment (a `?` or a `#`, even an empty one)")
+  authority <- sub("/.*$", "", sub("^[^:]*://", "", x, useBytes = TRUE),
+                   useBytes = TRUE)
+  if (startsWith(authority, "["))
+    return("names its host by a bracketed literal, such as an IPv6 address")
+  host <- sub(":.*$", "", authority, useBytes = TRUE)
+  if (!nzchar(host))
+    return("names no host")
+  if (!grepl("\\A[A-Za-z0-9_-]+(?:\\.[A-Za-z0-9_-]+)*\\.?\\z", host,
+             perl = TRUE, useBytes = TRUE))
+    return(paste("has a host that is not made of dot-separated labels of",
+                 "ASCII letters, digits, hyphens and underscores"))
+  if (grepl(":", authority, fixed = TRUE, useBytes = TRUE)) {
+    port <- sub("^[^:]*:", "", authority, useBytes = TRUE)
+    if (!grepl("\\A[0-9]{1,5}\\z", port, perl = TRUE, useBytes = TRUE) ||
+        !valid_port(port))
+      return("has a port that is not a number from 1 to 65535")
+  }
+  paste("has a path with a character other than ASCII letters, digits, `-`,",
+        "`.`, `_`, `~` and a `%` followed by two hexadecimal digits")
+}
+
+#' The Tracker Capture address the Validation Report's patient links start
+#' from.
+#'
+#' The links go where the report's readers reach DHIS2: `public_base_url`
+#' when the caller gives it, as a render that reads the data over an address
+#' inside its own network does, and otherwise the address the data is read
+#' from, the API base URL of `connection_options` with its trailing slashes and
+#' then a trailing `/api` removed from its path.
+#'
+#' Either address must match, on its raw text and as a whole, this shape, or
+#' the render is refused with an error of class
+#' `neoipc_invalid_dhis2_public_base_url`:
+#'
+#' - `http://` or `https://`, the scheme in any case;
+#' - a host of dot-separated labels of ASCII letters, digits, hyphens and
+#'   underscores, optionally ending in a dot, which admits a host name or an
+#'   IPv4 address;
+#' - optionally `:` and a port from 1 to 65535;
+#' - a path of `/`-separated segments of ASCII letters, digits, `-`, `.`, `_`,
+#'   `~` and `%` followed by two hexadecimal digits.
+#'
+#' So no whitespace, user name or password, query or fragment (an empty `?` or
+#' `#` included), bracketed host such as an IPv6 literal, or any other
+#' character. The address is written as it stands into a Markdown link
+#' destination, which Pandoc's Markdown reader ends at an unbalanced `)`,
+#' takes a space before a quote as the start of a link title, collapses other
+#' whitespace, and percent-encodes whitespace, `<`, `>`, `|`, `"`, `{`, `}`,
+#' `[`, `]`, `^` and the backtick, so an address outside the shape could yield
+#' a link that opens somewhere else; the shape is stricter than those
+#' characters, deliberately. The raw text is checked rather than what a URL
+#' parser makes of it, because the link carries the text, and a parser
+#' normalizes: curl reports no query for an empty `?`.
+#'
+#' A refusal names the defect but never repeats the address or any part of
+#' it, since a refused address can carry a password. The condition carries
+#' the defect in its `defect` field as well, as `base_url_defect()` words it.
+#' @param public_base_url The `dhis2PublicBaseUrl` parameter: `NULL` or `""`
+#'   when it is not given, and otherwise expected to be a single string
+#' @param connection_options The connection options the data is read with, as
+#'   `get_connection_options()` returns them; only `base_url` is read
+#' @return The address with any trailing slashes removed and
+#'   `/dhis-web-tracker-capture/index.html` appended
+get_tracker_capture_base <- function(public_base_url, connection_options) {
+  expected_shape <- paste(
+    "Give `http://` or `https://`, a host name or IPv4 address, an optional",
+    "port and any context path, with no user name, password, query or",
+    "fragment.")
+  if (is.null(public_base_url) || identical(public_base_url, "")) {
+    base <- connection_options$base_url
+    # Split at the end of the authority so that only the path loses its
+    # trailing `/api`, never a host of that name.
+    parts <- if (is.character(base) && length(base) == 1L && !is.na(base))
+      regmatches(base, regexec("^([^/]*//[^/]*)(.*)$", base, useBytes = TRUE))[[1]]
+    if (length(parts) == 3L)
+      base <- paste0(parts[2], sub("/api$", "", sub("/+$", "", parts[3])))
+    defect <- base_url_defect(base)
+    if (!is.null(defect))
+      rlang::abort(
+        c("The address the data is read from cannot serve as the base of the Tracker Capture links.",
+          x = paste0("The connection address ", defect, "."),
+          i = paste("Pass `dhis2PublicBaseUrl` (`-Dhis2PublicBaseUrl` with",
+                    "`Build-ValidationReport.ps1`) with the address at which the",
+                    "report's readers reach DHIS2."),
+          i = expected_shape),
+        class = "neoipc_invalid_dhis2_public_base_url",
+        defect = defect)
+  } else {
+    base <- public_base_url
+    defect <- base_url_defect(base)
+    if (!is.null(defect))
+      rlang::abort(
+        c("`dhis2PublicBaseUrl` must be an http or https base URL.",
+          x = paste0("The value given ", defect, "."),
+          i = expected_shape),
+        class = "neoipc_invalid_dhis2_public_base_url",
+        defect = defect)
+  }
+  paste0(sub("/+$", "", base), "/dhis-web-tracker-capture/index.html")
+}
+
 get_dataset_options <- function(
     reportingPeriodFrom,
     reportingPeriodTo,

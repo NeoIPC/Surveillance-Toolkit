@@ -1,8 +1,9 @@
 /*
- * The solutions' Tracker Capture screenshots are wider than the page. Scale
- * them down to its width: the minimal HTML the reporting service renders
- * leaves out Quarto's own rule for this (`.img-fluid`), so without this rule
- * a screenshot keeps its full width and widens the page.
+ * The report's Tracker Capture screenshots, in the problem details and the
+ * solutions, can be wider than the page. Scale every image down to the
+ * page's width: the minimal HTML the reporting service renders leaves out Quarto's
+ * own rule for this (`.img-fluid`), so without this rule a screenshot keeps
+ * its full width and widens the page.
  */
 img {
     max-width: 100%;

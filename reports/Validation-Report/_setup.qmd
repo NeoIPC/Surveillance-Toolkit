@@ -34,6 +34,14 @@ connection_options <- get_connection_options(
   port = params$dhis2Port,
   path = params$dhis2Path)
 
+# The problem list links each patient record to its Tracker Capture dashboard
+# where the report's readers reach DHIS2: dhis2PublicBaseUrl, which a render
+# that reads the data over an internal address passes, or else the address the
+# data is read from. The address is checked here, before the import, so an
+# unusable one is refused without reading any data.
+tracker_capture_base <- get_tracker_capture_base(
+  params$dhis2PublicBaseUrl, connection_options)
+
 # The import runs without the validation pass: the report is about the records
 # that pass would remove, so they have to be kept and validated here — the
 # enrolments without an admission form (rule 26) among them, which the
@@ -63,56 +71,7 @@ data <- with_error_trace(neoipcr::import_dhis2(
   connection_options = connection_options,
   dataset_options = dataset_options))
 
-# The problem list links each patient record to its Tracker Capture dashboard,
-# for the program the import resolved by its code. The links go where the
-# report's readers reach DHIS2: dhis2PublicBaseUrl, which a render that reads
-# the data over an internal address passes, or else the address the data came
-# from, the API base URL with the web context in place of the `/api` path.
-public_base_url <- params$dhis2PublicBaseUrl
-if (is.null(public_base_url) || !nzchar(public_base_url)) {
-  tracker_capture_url <- httr2::url_parse(connection_options$base_url)
-  web_path <- tracker_capture_url$path
-  if (is.null(web_path)) web_path <- ""
-  tracker_capture_url$path <- paste0(
-    sub("/+$", "", sub("/api/?$", "", web_path)),
-    "/dhis-web-tracker-capture/index.html")
-  tracker_capture_base <- httr2::url_build(tracker_capture_url)
-} else {
-  # httr2 checks the address, but the links take it as given: curl cannot
-  # rebuild every host a browser follows, an IPv6 literal among them.
-  parsed <- tryCatch(
-    httr2::url_parse(public_base_url),
-    error = function(cnd) NULL)
-  problem <-
-    if (is.null(parsed)) {
-      "it is not a URL"
-    } else if (!isTRUE(parsed$scheme %in% c("http", "https"))) {
-      "its scheme is not http or https"
-    } else if (is.null(parsed$hostname) || !nzchar(parsed$hostname)) {
-      "it names no host"
-    } else if (!is.null(parsed$username) || !is.null(parsed$password)) {
-      "it carries a user name or password"
-    } else if (!is.null(parsed$query) || !is.null(parsed$fragment)) {
-      "it carries a query or fragment"
-    }
-  if (!is.null(problem)) {
-    # A value carrying credentials is not repeated into the render log.
-    given <- if (!is.null(parsed) &&
-                 (!is.null(parsed$username) || !is.null(parsed$password))) {
-      "The value given"
-    } else {
-      sprintf("'%s'", public_base_url)
-    }
-    rlang::abort(
-      c("`dhis2PublicBaseUrl` must be an http or https base URL.",
-        x = sprintf("%s is refused: %s.", given, problem),
-        i = paste("Give the scheme, host and any context path, with no",
-                  "credentials, query or fragment.")),
-      class = "neoipc_invalid_dhis2_public_base_url")
-  }
-  tracker_capture_base <- paste0(
-    sub("/+$", "", public_base_url), "/dhis-web-tracker-capture/index.html")
-}
+# The dashboard links name the program the import resolved by its code.
 NeoIPC_ProgramId <- data$metadata$programId
 if (is.null(NeoIPC_ProgramId))
   rlang::abort("The imported metadata carries no program id; the dashboard links cannot be built.")
@@ -157,6 +116,18 @@ if (length(unsentenced) > 0L)
   rlang::abort(sprintf(
     "The string resources carry no complete description and summary for validation rule(s) %s.",
     paste(unsentenced, collapse = ", ")))
+# And the other way round: every rule the string resources carry sentences for
+# must be one the package defines. The reporting service offers its callers the
+# rules the string resources list, and neoipcr::validate() aborts on an id it
+# does not know; checked here, such a mismatch fails every render with a
+# message naming the id, not only a render that selects it.
+unruled <- setdiff(names(sR$problems), as.character(rule_ids))
+if (length(unruled) > 0L)
+  rlang::abort(
+    sprintf(
+      "The string resources carry sentences for validation rule(s) %s, which neoipcr does not define.",
+      paste(unruled, collapse = ", ")),
+    class = "neoipc_validation_rule_text_without_rule")
 
 # Every placeholder a rule's sentences name must be a field the rule records,
 # as `neoipcr::validation_rule_context_fields()` declares them, or a label the

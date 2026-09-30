@@ -11,6 +11,15 @@ With -Combined, it renders a single report covering all departments (no departme
 With -Rules, only the named validation rules are applied; the report's header says which rules were left out.
 A department without findings renders a report saying so.
 
+.PARAMETER Dhis2PublicBaseUrl
+The base URL at which the report's readers reach DHIS2, which the Tracker Capture links of the report's
+patients start from: http:// or https://, the host, an optional port and any context path, for example
+https://neoipc.example.org/dhis. Give it when the data is read over an address the readers cannot open,
+such as a tunnel or an internal host. Omitted, the links point at the DHIS2 instance the data is read from.
+The report refuses a value with whitespace, a user name or password, a query or fragment, a bracketed host
+such as an IPv6 literal, or, in the host and path, any character other than ASCII letters, digits,
+hyphens, underscores, full stops, tildes and percent-encoded bytes, without repeating the value.
+
 .EXAMPLE
     .\Build-ValidationReport.ps1 -SiteCodeFilter 'NEO_AT.*' -OutputLocale 'de' -Token $myToken -Verbose
 
@@ -92,7 +101,10 @@ param(
     [Nullable[int]]$Dhis2Port = $null,
 
     [Parameter()]
-    [string]$Dhis2Path = $null
+    [string]$Dhis2Path = $null,
+
+    [Parameter()]
+    [string]$Dhis2PublicBaseUrl = $null
 )
 
 Import-Module (Join-Path $PSScriptRoot 'modules' 'NeoIPC-Tools') -Force -Verbose:$false
@@ -131,6 +143,22 @@ if ($ValidationExceptionFile) {
         throw "Validation exception file not found: '$ValidationExceptionFile'"
     }
     $validationExceptionPath = $resolvedPath.Path
+}
+
+# The build report records the bound parameters and -Debug prints the Quarto
+# command line, so an address carrying a user name or password is refused here,
+# before either is written; the report refuses it too, and neither repeats it.
+if ($Dhis2PublicBaseUrl -and $Dhis2PublicBaseUrl.Contains('@')) {
+    throw ("-Dhis2PublicBaseUrl contains an '@', which before the host introduces a user name or " +
+        'password. Give the address at which the readers reach DHIS2 without credentials.')
+}
+
+# Quarto reads each -P value as YAML, where a plain scalar loses a ` #` comment
+# and surrounding whitespace, so an address the report refuses could reach it
+# as one it accepts. As a single-quoted scalar, its quotes doubled, the value
+# reaches the report exactly as given, and the report's own check decides.
+$publicBaseUrlParam = if ($Dhis2PublicBaseUrl) {
+    "dhis2PublicBaseUrl:'$($Dhis2PublicBaseUrl.Replace("'", "''"))'"
 }
 
 if (-not $isCombined) {
@@ -238,6 +266,7 @@ try {
         if ($Dhis2Hostname) { $quartoArgs += @('-P', "dhis2Hostname:$Dhis2Hostname") }
         if ($Dhis2Port) { $quartoArgs += @('-P', "dhis2Port:$Dhis2Port") }
         if ($Dhis2Path) { $quartoArgs += @('-P', "dhis2Path:$Dhis2Path") }
+        if ($publicBaseUrlParam) { $quartoArgs += @('-P', $publicBaseUrlParam) }
         $quartoArgs += $quartoVerbosityArgs
 
         if ($PSCmdlet.ShouldProcess($outFileName, 'Render combined validation report')) {
@@ -277,6 +306,7 @@ try {
             if ($Dhis2Hostname) { $quartoArgs += @('-P', "dhis2Hostname:$Dhis2Hostname") }
             if ($Dhis2Port) { $quartoArgs += @('-P', "dhis2Port:$Dhis2Port") }
             if ($Dhis2Path) { $quartoArgs += @('-P', "dhis2Path:$Dhis2Path") }
+            if ($publicBaseUrlParam) { $quartoArgs += @('-P', $publicBaseUrlParam) }
             $quartoArgs += $quartoVerbosityArgs
 
             if ($PSCmdlet.ShouldProcess($outFileName, "Render validation report for $siteCode")) {
