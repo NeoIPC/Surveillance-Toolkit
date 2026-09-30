@@ -13,12 +13,15 @@ A department without findings renders a report saying so.
 
 .PARAMETER Dhis2PublicBaseUrl
 The base URL at which the report's readers reach DHIS2, which the Tracker Capture links of the report's
-patients start from: http:// or https://, the host, an optional port and any context path, for example
+patients start from: http:// or https://, the host, an optional port, and any context path, for example
 https://neoipc.example.org/dhis. Give it when the data is read over an address the readers cannot open,
 such as a tunnel or an internal host. Omitted, the links point at the DHIS2 instance the data is read from.
-The report refuses a value with whitespace, a user name or password, a query or fragment, a bracketed host
-such as an IPv6 literal, or, in the host and path, any character other than ASCII letters, digits,
-hyphens, underscores, full stops, tildes and percent-encoded bytes, without repeating the value.
+The host is a host name or an IPv4 address of dot-separated labels of ASCII letters, digits, hyphens, and
+underscores; the path may also carry full stops, tildes, and percent-encoded bytes. Before it authenticates
+or renders, the script itself refuses a value with any '@', which before the host introduces a user name
+or password, and a value with any whitespace or control character. The report refuses any other value
+outside this shape, such as one with a query or fragment or with a bracketed host such as an IPv6 literal.
+Neither refusal repeats the value.
 
 .EXAMPLE
     .\Build-ValidationReport.ps1 -SiteCodeFilter 'NEO_AT.*' -OutputLocale 'de' -Token $myToken -Verbose
@@ -109,6 +112,30 @@ param(
 
 Import-Module (Join-Path $PSScriptRoot 'modules' 'NeoIPC-Tools') -Force -Verbose:$false
 
+# -Dhis2PublicBaseUrl is checked before anything else runs: authentication can
+# prompt for credentials, -OutputDir is created, the build report records the
+# bound parameters, and -Debug prints the Quarto command line. Neither refusal
+# repeats the value, which can carry a password; they are thrown here rather
+# than from a [ValidateScript()], whose own message would repeat it.
+# The report refuses both kinds of value as well, but a value with a line
+# terminator never reaches it: Quarto matches each -P argument against
+# /^([^=:]+)[=:](.*)$/, whose `.` does not match `\n`, `\r`, U+2028, or
+# U+2029, and drops an argument that does not match without a warning
+# (parseMetadataFlagValue() in Quarto's src/command/render/flags.ts, line 510
+# at v1.10.18). The report would then link to the address the data is read
+# from, the one the caller has just said the readers cannot open. .NET's `\s`
+# matches every Unicode separator, so it covers U+2028 and U+2029 as well.
+if ($Dhis2PublicBaseUrl) {
+    if ($Dhis2PublicBaseUrl.Contains('@')) {
+        throw ("-Dhis2PublicBaseUrl contains an '@', which before the host introduces a user name or " +
+            'password. Give the address at which the readers reach DHIS2 without credentials.')
+    }
+    if ($Dhis2PublicBaseUrl -match '[\s\p{Cc}]') {
+        throw ('-Dhis2PublicBaseUrl contains whitespace or a control character, such as a line break. ' +
+            'Give the address at which the readers reach DHIS2 without either.')
+    }
+}
+
 $auth = Resolve-NeoIPCAuth -Token $Token
 
 $reportDirPath = Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..' 'reports' 'Validation-Report')
@@ -145,18 +172,13 @@ if ($ValidationExceptionFile) {
     $validationExceptionPath = $resolvedPath.Path
 }
 
-# The build report records the bound parameters and -Debug prints the Quarto
-# command line, so an address carrying a user name or password is refused here,
-# before either is written; the report refuses it too, and neither repeats it.
-if ($Dhis2PublicBaseUrl -and $Dhis2PublicBaseUrl.Contains('@')) {
-    throw ("-Dhis2PublicBaseUrl contains an '@', which before the host introduces a user name or " +
-        'password. Give the address at which the readers reach DHIS2 without credentials.')
-}
-
-# Quarto reads each -P value as YAML, where a plain scalar loses a ` #` comment
-# and surrounding whitespace, so an address the report refuses could reach it
-# as one it accepts. As a single-quoted scalar, its quotes doubled, the value
-# reaches the report exactly as given, and the report's own check decides.
+# Quarto reads each -P value as YAML, where a plain scalar can arrive as
+# something other than the text given: `~` or `null` as no value, which would
+# let the links fall back to the address the data is read from, and a quoted
+# or bracketed value as its content or as a sequence. As a single-quoted
+# scalar, its quotes doubled, a value that has passed the checks at the top of
+# this script reaches the report as the text given, and the report's own check
+# decides.
 $publicBaseUrlParam = if ($Dhis2PublicBaseUrl) {
     "dhis2PublicBaseUrl:'$($Dhis2PublicBaseUrl.Replace("'", "''"))'"
 }

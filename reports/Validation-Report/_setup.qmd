@@ -23,6 +23,86 @@ departmentFilter <- params$departmentFilter
 support_email_address <- "NeoIPC-Support@charite.de"
 ```
 
+```{r Check the rule sentences}
+#| include: false
+
+# The rules live in neoipcr, the sentences that render their findings in
+# this report's string resources, keyed by rule id, and the tables the
+# formatter adds labels and fallbacks with in `_mapping.qmd`. The checks below
+# hold these to each other and read nothing else, so they run before the
+# import: a report tree that does not match the loaded neoipcr fails without
+# reading any data. check_validation_rule_texts() in ../common/helpers.R holds
+# the string resources to the rules neoipcr defines, in both directions.
+rule_ids <- neoipcr::validation_rule_ids()
+check_validation_rule_texts(sR, rule_ids)
+
+# Every placeholder a rule's sentences name must be a field the rule records,
+# as `neoipcr::validation_rule_context_fields()` declares them, or a label the
+# formatter adds for the rule, as `context_decorations` in `_mapping.qmd`
+# names them; any other placeholder would fail inside the interpolation on
+# the first finding that reaches the sentence. A decoration's field must be
+# one the rule records, its label map must be one `label_maps()` in
+# `_mapping.qmd` returns and must name a string for every value it maps (a
+# mistyped key in that function reads as nothing), and its placeholder must be
+# named by the rule's sentence, or the formatter would look a label up on
+# nothing or for nothing.
+# That last check reads the English source sentences: it guards the table
+# itself, and a translation that words a sentence without the label still
+# renders, since an unused value is simply not interpolated.
+maps <- label_maps(sR)
+source_problems <- yaml::read_yaml(
+  "content/_sR.yaml", handlers = string_resource_handlers())$problems
+context_fields <- neoipcr::validation_rule_context_fields()
+placeholders <- function(text)
+  unique(gsub("[{}]", "", unlist(regmatches(text, gregexpr("\\{[^{}]+\\}", text)))))
+for (i in seq_len(nrow(context_decorations))) {
+  decoration <- context_decorations[i, ]
+  if (!decoration$field %in% context_fields[[as.character(decoration$rule_id)]])
+    rlang::abort(sprintf(
+      "The decoration of validation rule %d reads the field `%s`, which the rule does not record.",
+      decoration$rule_id, decoration$field))
+  if (!is.list(maps[[decoration$labels]]))
+    rlang::abort(sprintf(
+      "The decoration of validation rule %d looks its labels up in `%s`, which is not one of the label maps.",
+      decoration$rule_id, decoration$labels))
+  unlabelled <- names(Filter(
+    function(label) !(is.character(label) && length(label) == 1L), maps[[decoration$labels]]))
+  if (length(unlabelled) > 0L)
+    rlang::abort(sprintf(
+      "The label map `%s` carries no label for the value(s) %s.",
+      decoration$labels, paste(unlabelled, collapse = ", ")))
+  named_by <- placeholders(unlist(
+    source_problems[[as.character(decoration$rule_id)]][
+      validation_rule_template_keys(decoration$rule_id)]))
+  if (!decoration$placeholder %in% named_by)
+    rlang::abort(sprintf(
+      "The decoration of validation rule %d fills the placeholder `%s`, which none of the rule's sentences names.",
+      decoration$rule_id, decoration$placeholder))
+}
+# A fallback replaces one recorded field by another, so both must be fields
+# the rule records.
+for (i in seq_len(nrow(context_fallbacks))) {
+  fallback <- context_fallbacks[i, ]
+  unrecorded <- setdiff(c(fallback$field, fallback$fallback),
+                        context_fields[[as.character(fallback$rule_id)]])
+  if (length(unrecorded) > 0L)
+    rlang::abort(sprintf(
+      "The fallback of validation rule %d reads field(s) the rule does not record: %s.",
+      fallback$rule_id, paste(unrecorded, collapse = ", ")))
+}
+for (rule_id in rule_ids) {
+  entry <- sR$problems[[as.character(rule_id)]]
+  stray <- setdiff(
+    placeholders(unlist(entry[validation_rule_template_keys(rule_id)])),
+    c(context_fields[[as.character(rule_id)]],
+      context_decorations$placeholder[context_decorations$rule_id == rule_id]))
+  if (length(stray) > 0L)
+    rlang::abort(sprintf(
+      "The sentence(s) of validation rule %d name placeholder(s) the rule does not record: %s.",
+      rule_id, paste(stray, collapse = ", ")))
+}
+```
+
 ```{r Data Import}
 # No warning/message suppression here: configure_logging() (in the first chunk)
 # installs a knitr output hook that routes import_dhis2()'s warnings and messages
@@ -90,109 +170,6 @@ if (!rlang::is_null(departmentFilter))
 
 ```{r Validate}
 #| include: false
-
-# The rules live in neoipcr; the sentences that render their findings live
-# in this report's string resources, keyed by rule id. A rule the package
-# runs without its templates and `summary` here would render as a blank line
-# or fail the header below, so every rule is checked for them first: the
-# templates are the rule's `description` and, for rule 20, a second complete
-# sentence for a pathogen recorded as causing a secondary sepsis and, for
-# rule 55, one for a secondary-BSI item that was never answered.
-rule_ids <- neoipcr::validation_rule_ids()
-template_keys <- function(rule_id)
-  c("description",
-    if (rule_id == 20L) "description_secondary_bsi",
-    if (rule_id == 55L) "description_unanswered")
-has_text <- function(rule_id) {
-  entry <- sR$problems[[as.character(rule_id)]]
-  all(vapply(
-    c(template_keys(rule_id), "summary"),
-    \(field) is.character(entry[[field]]) && length(entry[[field]]) == 1L &&
-      nzchar(entry[[field]]),
-    logical(1)))
-}
-unsentenced <- rule_ids[!vapply(rule_ids, has_text, logical(1))]
-if (length(unsentenced) > 0L)
-  rlang::abort(sprintf(
-    "The string resources carry no complete description and summary for validation rule(s) %s.",
-    paste(unsentenced, collapse = ", ")))
-# And the other way round: every rule the string resources carry sentences for
-# must be one the package defines. The reporting service offers its callers the
-# rules the string resources list, and neoipcr::validate() aborts on an id it
-# does not know; checked here, such a mismatch fails every render with a
-# message naming the id, not only a render that selects it.
-unruled <- setdiff(names(sR$problems), as.character(rule_ids))
-if (length(unruled) > 0L)
-  rlang::abort(
-    sprintf(
-      "The string resources carry sentences for validation rule(s) %s, which neoipcr does not define.",
-      paste(unruled, collapse = ", ")),
-    class = "neoipc_validation_rule_text_without_rule")
-
-# Every placeholder a rule's sentences name must be a field the rule records,
-# as `neoipcr::validation_rule_context_fields()` declares them, or a label the
-# formatter adds for the rule, as `context_decorations` in `_mapping.qmd`
-# names them; any other placeholder would fail inside the interpolation on
-# the first finding that reaches the sentence. A decoration's field must be
-# one the rule records, its label map must be one `label_maps()` in
-# `_mapping.qmd` returns and must name a string for every value it maps (a
-# mistyped key in that function reads as nothing), and its placeholder must be
-# named by the rule's sentence, or the formatter would look a label up on
-# nothing or for nothing.
-# That last check reads the English source sentences: it guards the table
-# itself, and a translation that words a sentence without the label still
-# renders, since an unused value is simply not interpolated.
-maps <- label_maps(sR)
-source_problems <- yaml::read_yaml(
-  "content/_sR.yaml", handlers = string_resource_handlers())$problems
-context_fields <- neoipcr::validation_rule_context_fields()
-placeholders <- function(text)
-  unique(gsub("[{}]", "", unlist(regmatches(text, gregexpr("\\{[^{}]+\\}", text)))))
-for (i in seq_len(nrow(context_decorations))) {
-  decoration <- context_decorations[i, ]
-  if (!decoration$field %in% context_fields[[as.character(decoration$rule_id)]])
-    rlang::abort(sprintf(
-      "The decoration of validation rule %d reads the field `%s`, which the rule does not record.",
-      decoration$rule_id, decoration$field))
-  if (!is.list(maps[[decoration$labels]]))
-    rlang::abort(sprintf(
-      "The decoration of validation rule %d looks its labels up in `%s`, which is not one of the label maps.",
-      decoration$rule_id, decoration$labels))
-  unlabelled <- names(Filter(
-    function(label) !(is.character(label) && length(label) == 1L), maps[[decoration$labels]]))
-  if (length(unlabelled) > 0L)
-    rlang::abort(sprintf(
-      "The label map `%s` carries no label for the value(s) %s.",
-      decoration$labels, paste(unlabelled, collapse = ", ")))
-  named_by <- placeholders(unlist(
-    source_problems[[as.character(decoration$rule_id)]][template_keys(decoration$rule_id)]))
-  if (!decoration$placeholder %in% named_by)
-    rlang::abort(sprintf(
-      "The decoration of validation rule %d fills the placeholder `%s`, which none of the rule's sentences names.",
-      decoration$rule_id, decoration$placeholder))
-}
-# A fallback replaces one recorded field by another, so both must be fields
-# the rule records.
-for (i in seq_len(nrow(context_fallbacks))) {
-  fallback <- context_fallbacks[i, ]
-  unrecorded <- setdiff(c(fallback$field, fallback$fallback),
-                        context_fields[[as.character(fallback$rule_id)]])
-  if (length(unrecorded) > 0L)
-    rlang::abort(sprintf(
-      "The fallback of validation rule %d reads field(s) the rule does not record: %s.",
-      fallback$rule_id, paste(unrecorded, collapse = ", ")))
-}
-for (rule_id in rule_ids) {
-  entry <- sR$problems[[as.character(rule_id)]]
-  stray <- setdiff(
-    placeholders(unlist(entry[template_keys(rule_id)])),
-    c(context_fields[[as.character(rule_id)]],
-      context_decorations$placeholder[context_decorations$rule_id == rule_id]))
-  if (length(stray) > 0L)
-    rlang::abort(sprintf(
-      "The sentence(s) of validation rule %d name placeholder(s) the rule does not record: %s.",
-      rule_id, paste(stray, collapse = ", ")))
-}
 
 exceptions <- NULL
 if (!is.null(params$validationExceptionFile))

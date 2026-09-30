@@ -83,8 +83,8 @@ came from, the API base URL with its trailing slashes and then a trailing `/api`
 
 `get_tracker_capture_base()` in `reports/common/helpers.R` checks that address before the import, on its
 raw text rather than on what a URL parser makes of it: `http://` or `https://`, a host of dot-separated
-labels of ASCII letters, digits, hyphens and underscores (a host name or an IPv4 address), an optional
-port from 1 to 65535, and a path of ASCII letters, digits, `-`, `.`, `_`, `~` and percent-encoded bytes.
+labels of ASCII letters, digits, hyphens, and underscores (a host name or an IPv4 address), an optional
+port from 1 to 65535, and a path of ASCII letters, digits, `-`, `.`, `_`, `~`, and percent-encoded bytes.
 Anything else is refused: whitespace, a user name or password, a query or a fragment (an empty `?` or `#`
 included), a bracketed host such as an IPv6 literal, a parenthesis. The address is written as it stands
 into a Markdown link destination, which Pandoc's Markdown reader ends at an unbalanced `)` and in which it
@@ -92,6 +92,14 @@ percent-encodes brackets and a few other characters, so an address outside that 
 that opens somewhere else. The refusal names the defect but never repeats the address, which can carry a
 password, and a connection address that fails names `dhis2PublicBaseUrl` as the parameter to pass
 instead.
+
+`Build-ValidationReport.ps1` itself refuses a `-Dhis2PublicBaseUrl` with an `@`, whitespace, or a
+control character, before it authenticates or creates `-OutputDir`, again without repeating the value.
+Quarto drops a `-P` value with a line break without a warning (its `parseMetadataFlagValue()` matches
+it against a pattern whose `.` stops at a line terminator), so such a value would never reach the
+report's check, and the links would point at the address the data is read from. The script passes the
+value on as a single-quoted YAML scalar, since a plain one such as `~` or `null` would arrive as no
+value at all.
 
 ## The exception list
 
@@ -144,7 +152,7 @@ included, and a missing file no longer means "clean".
 
 ## Before a render
 
-`_setup.qmd` asserts, before it composes the header, that every id in `validation_rule_ids()` has its
+`_setup.qmd` asserts, before it reads any data, that every id in `validation_rule_ids()` has its
 non-empty templates (the `description`, and for rules 20 and 55 their second sentence as well) and
 `summary` under `problems` in the string resources, so a rule added to neoipcr without its sentences
 fails the render with a message naming the rule rather than rendering a blank line or failing in the
@@ -152,14 +160,16 @@ header. It also asserts the other way round, that every rule the string resource
 is one `validation_rule_ids()` lists: the reporting service offers its callers the rules the string
 resources list, and `validate()` aborts on an id it does not know, so a rule neoipcr retired with its
 sentences left behind, or a report tree ahead of the installed neoipcr, fails every render with a
-message naming the id, not only a render that selects it. `_setup.qmd` fails the render when
-`validate()` reports a selected rule it could not run (its `rules_skipped` attribute, set when the
-dataset lacks a column the rule reads): the import asks for every tier, so a skip means the dataset
-is not what the report expects, and a document that claimed those rules would be wrong. It also fails the render when a rule's
-sentences name a placeholder the rule does not record, as `neoipcr::validation_rule_context_fields()`
-declares the fields, or that `decorate_context()` does not add for it (the placeholders
-`context_decorations` names for the rule), instead of failing inside the interpolation on the first
-finding that reaches the sentence.
+message naming the id, not only a render that selects it. Both directions are
+`check_validation_rule_texts()` in `reports/common/helpers.R`, which is given the ids and so needs no
+neoipcr, and which the Pester tests exercise. Before the data as well, `_setup.qmd` fails the render
+when a rule's sentences name a placeholder the rule does not record, as
+`neoipcr::validation_rule_context_fields()` declares the fields, or that `decorate_context()` does not
+add for it (the placeholders `context_decorations` names for the rule), instead of failing inside the
+interpolation on the first finding that reaches the sentence. After the validation pass, it fails the
+render when `validate()` reports a selected rule it could not run (its `rules_skipped` attribute, set
+when the dataset lacks a column the rule reads): the import asks for every tier, so a skip means the
+dataset is not what the report expects, and a document that claimed those rules would be wrong.
 
 ## Adding a validation rule
 

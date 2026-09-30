@@ -401,7 +401,7 @@ base_url_defect <- function(x) {
   if (!grepl("\\A[A-Za-z0-9_-]+(?:\\.[A-Za-z0-9_-]+)*\\.?\\z", host,
              perl = TRUE, useBytes = TRUE))
     return(paste("has a host that is not made of dot-separated labels of",
-                 "ASCII letters, digits, hyphens and underscores"))
+                 "ASCII letters, digits, hyphens, and underscores"))
   if (grepl(":", authority, fixed = TRUE, useBytes = TRUE)) {
     port <- sub("^[^:]*:", "", authority, useBytes = TRUE)
     if (!grepl("\\A[0-9]{1,5}\\z", port, perl = TRUE, useBytes = TRUE) ||
@@ -409,7 +409,7 @@ base_url_defect <- function(x) {
       return("has a port that is not a number from 1 to 65535")
   }
   paste("has a path with a character other than ASCII letters, digits, `-`,",
-        "`.`, `_`, `~` and a `%` followed by two hexadecimal digits")
+        "`.`, `_`, `~`, and a `%` followed by two hexadecimal digits")
 }
 
 #' The Tracker Capture address the Validation Report's patient links start
@@ -426,12 +426,12 @@ base_url_defect <- function(x) {
 #' `neoipc_invalid_dhis2_public_base_url`:
 #'
 #' - `http://` or `https://`, the scheme in any case;
-#' - a host of dot-separated labels of ASCII letters, digits, hyphens and
+#' - a host of dot-separated labels of ASCII letters, digits, hyphens, and
 #'   underscores, optionally ending in a dot, which admits a host name or an
 #'   IPv4 address;
 #' - optionally `:` and a port from 1 to 65535;
 #' - a path of `/`-separated segments of ASCII letters, digits, `-`, `.`, `_`,
-#'   `~` and `%` followed by two hexadecimal digits.
+#'   `~`, and `%` followed by two hexadecimal digits.
 #'
 #' So no whitespace, user name or password, query or fragment (an empty `?` or
 #' `#` included), bracketed host such as an IPv6 literal, or any other
@@ -439,7 +439,7 @@ base_url_defect <- function(x) {
 #' destination, which Pandoc's Markdown reader ends at an unbalanced `)`,
 #' takes a space before a quote as the start of a link title, collapses other
 #' whitespace, and percent-encodes whitespace, `<`, `>`, `|`, `"`, `{`, `}`,
-#' `[`, `]`, `^` and the backtick, so an address outside the shape could yield
+#' `[`, `]`, `^`, and the backtick, so an address outside the shape could yield
 #' a link that opens somewhere else; the shape is stricter than those
 #' characters, deliberately. The raw text is checked rather than what a URL
 #' parser makes of it, because the link carries the text, and a parser
@@ -457,7 +457,7 @@ base_url_defect <- function(x) {
 get_tracker_capture_base <- function(public_base_url, connection_options) {
   expected_shape <- paste(
     "Give `http://` or `https://`, a host name or IPv4 address, an optional",
-    "port and any context path, with no user name, password, query or",
+    "port, and any context path, with no user name, password, query, or",
     "fragment.")
   if (is.null(public_base_url) || identical(public_base_url, "")) {
     base <- connection_options$base_url
@@ -490,6 +490,73 @@ get_tracker_capture_base <- function(public_base_url, connection_options) {
         defect = defect)
   }
   paste0(sub("/+$", "", base), "/dhis-web-tracker-capture/index.html")
+}
+
+#' The templates the Validation Report renders a validation rule's findings
+#' with
+#'
+#' Every rule's findings render with its `description`. Rule 20 has a second
+#' complete sentence for a pathogen recorded as causing a secondary sepsis,
+#' and rule 55 one for a secondary-BSI item that was never answered, between
+#' which `select_template()` in the report's `_problem_text.qmd` chooses.
+#' @param rule_id A validation rule id
+#' @return The keys of the rule's templates in its entry under `problems` in
+#'   the Validation Report's string resources
+validation_rule_template_keys <- function(rule_id)
+  c("description",
+    if (rule_id == 20L) "description_secondary_bsi",
+    if (rule_id == 55L) "description_unanswered")
+
+#' Check that the Validation Report's string resources carry sentences for
+#' exactly the validation rules neoipcr defines
+#'
+#' The rules live in neoipcr; the sentences that render their findings live in
+#' the report's string resources, under `problems`, keyed by rule id. Both
+#' directions abort the render with an error that names the rules concerned:
+#'
+#' 1. A rule in `rule_ids` whose entry is not a mapping holding its templates,
+#'    as [validation_rule_template_keys()] lists them, and its `summary`, each
+#'    a single non-empty string, aborts with an error of class
+#'    `neoipc_validation_rule_without_text`: its findings would render as a
+#'    blank line, and the report's header, which names a rule it did not apply
+#'    by its summary, would fail.
+#' 2. A rule the string resources carry sentences for that is not in
+#'    `rule_ids` aborts with an error of class
+#'    `neoipc_validation_rule_text_without_rule`: the reporting service offers
+#'    its callers the rules the string resources list, and
+#'    `neoipcr::validate()` aborts on an id it does not know, so the mismatch
+#'    fails every render rather than only one that selects the rule.
+#'
+#' The check reads nothing but its arguments, so the report runs it before it
+#' reads any data.
+#' @param sR String resources
+#' @param rule_ids The validation rule ids, as `neoipcr::validation_rule_ids()`
+#'   lists them
+#' @return NULL, invisibly, when the string resources and the ids match
+check_validation_rule_texts <- function(sR, rule_ids) {
+  has_text <- function(rule_id) {
+    entry <- sR$problems[[as.character(rule_id)]]
+    is.list(entry) && all(vapply(
+      c(validation_rule_template_keys(rule_id), "summary"),
+      \(field) is.character(entry[[field]]) && length(entry[[field]]) == 1L &&
+        nzchar(entry[[field]]),
+      logical(1)))
+  }
+  unsentenced <- rule_ids[!vapply(rule_ids, has_text, logical(1))]
+  if (length(unsentenced) > 0L)
+    rlang::abort(
+      sprintf(
+        "The string resources carry no complete description and summary for validation rule(s) %s.",
+        paste(unsentenced, collapse = ", ")),
+      class = "neoipc_validation_rule_without_text")
+  unruled <- setdiff(names(sR$problems), as.character(rule_ids))
+  if (length(unruled) > 0L)
+    rlang::abort(
+      sprintf(
+        "The string resources carry sentences for validation rule(s) %s, which neoipcr does not define.",
+        paste(unruled, collapse = ", ")),
+      class = "neoipc_validation_rule_text_without_rule")
+  invisible(NULL)
 }
 
 get_dataset_options <- function(

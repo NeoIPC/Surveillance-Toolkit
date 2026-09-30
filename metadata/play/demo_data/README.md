@@ -71,7 +71,7 @@ Consumers resolve the tracked entity **by this identifier**, never by position. 
 The ACTIVE enrolment also gives `AT_TEST_TEST` a validation finding: it has no Surveillance-End form and
 lies more than 120 days before any seed, so neoipcr's rule 43 reports it. neoipc-app's `validation-report`
 end-to-end spec relies on that finding for the links it follows in the rendered report, so completing this
-enrolment, giving it an end form or moving its date forward breaks that spec.
+enrolment, giving it an end form, or moving its date forward breaks that spec.
 
 ## Program-rule validity — validate every change
 
