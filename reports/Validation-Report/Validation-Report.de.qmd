@@ -9,6 +9,7 @@ params:
   dhis2Hostname: NULL
   dhis2Port: NULL
   dhis2Path: NULL
+  dhis2PublicBaseUrl: NULL
 ---
 
 ```{r}

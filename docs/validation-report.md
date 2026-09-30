@@ -75,8 +75,10 @@ One function renders every rule (`problem_text()` in `_problem_text.qmd`):
 
 Markup stays out of the strings. The support-address link in `patient_problem_multiple_hint` is built in
 code and handed to the template as `{support_link}`; the Tracker Capture dashboard link of each patient is
-built from the connection options the data came from (the API base URL with the web context in place of
-`/api`) and the program id the import resolved by its code, never from a fixed host or UID.
+built from the address the report's readers reach DHIS2 at and the program id the import resolved by its
+code, never from a fixed host or UID. That address is `dhis2PublicBaseUrl` when the caller passes it, as
+the reporting service does, since it reads the data over an address inside its own network; otherwise it
+is the address the data came from, the API base URL with the web context in place of `/api`.
 
 ## The exception list
 

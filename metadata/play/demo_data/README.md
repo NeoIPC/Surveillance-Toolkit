@@ -68,6 +68,11 @@ hold several — this mirrors the generator's hernia-readmission pattern):
 
 Consumers resolve the tracked entity **by this identifier**, never by position. Do not renumber it.
 
+The ACTIVE enrollment also gives `AT_TEST_TEST` a validation finding: it has no Surveillance-End form and
+lies more than 120 days before any seed, so neoipcr's rule 43 reports it. neoipc-app's `validation-report`
+end-to-end spec relies on that finding for the links it follows in the rendered report, so completing this
+enrollment, giving it an end form or moving its date forward breaks that spec.
+
 ## Program-rule validity — validate every change
 
 The seed imports with the server-side rule engine on (DHIS2 2.41+), so every patient must pass the ~200
