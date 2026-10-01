@@ -9,7 +9,7 @@
 
 .DESCRIPTION
     No CI job renders a report, so the code between the string resources and the rendered text is
-    exercised nowhere else. Six parts:
+    exercised nowhere else. Eight parts:
 
     - The YAML handlers every string resource is read with (string_resource_handlers() in
       reports/common/helpers.R). A translated label such as Yes reaches the catalogue unquoted, and
@@ -19,6 +19,14 @@
     - The Validation Report's formatter (_problem_text.qmd with the tables of _mapping.qmd): the
       fallback that shows a stored code where its name is missing, the label a decoration looks up,
       and the choice of a rule's second sentence.
+    - The address the Validation Report's patient links start from (get_tracker_capture_base() in
+      reports/common/helpers.R): which public addresses it takes and what base each yields, which it
+      refuses without repeating them or any part of them, and the fallback to the address the data is
+      read from. Beside it, the addresses scripts/Build-ValidationReport.ps1 refuses itself before it
+      authenticates, a test that needs no R.
+    - The check that holds the Validation Report's rule sentences to the rules neoipcr defines, in
+      both directions (check_validation_rule_texts() in reports/common/helpers.R), given the rule
+      ids.
     - The rows of the reconciliation summary table in the Partner and Reference Reports
       (reconciliation_summary_rows() in reports/common/helpers.R, which the gt formatter wraps): a
       label per reconciliation id and a fallback for an id without one, the record kinds, when the
@@ -33,7 +41,7 @@
       size and the column widths, and the column groups. CI's R has no gt, so this part runs only
       where gt is installed and is skipped elsewhere; the parts above need no gt.
 
-    The report's own setup checks call neoipcr, which no CI runner installs; they are not covered here.
+    The report's other setup checks call neoipcr, which no CI runner installs, and are not covered here.
 
 .EXAMPLE
     Invoke-Pester -Path scripts/modules/NeoIPC-Tools/Tests/ReportStringResources.Tests.ps1
@@ -156,6 +164,282 @@ context <- tibble::tibble(sec_bsi = factor("9", levels = c("9")), organisms = 2L
 cat(problem_text(55L, context, sR))
 '@
         Invoke-ValidationReportSnippet $body | Should -Match "item is 'not available', but the number"
+    }
+}
+
+Describe 'The address the Validation Report links its patients to' -Skip:(-not $env:CI -and -not (Get-Command Rscript -ErrorAction SilentlyContinue)) -ForEach @(@{
+    # Each value is an R expression, so a value that is not a string can be given as well. Withheld,
+    # an R expression too, names the parts of the value a refusal must not repeat any more than the
+    # value itself: its host and any user name or password it carries.
+    Accepted = @(
+        @{ Case = 'a host alone'; Value = '"https://neoipc.example.org"'
+           Expected = 'https://neoipc.example.org/dhis-web-tracker-capture/index.html' }
+        @{ Case = 'a port'; Value = '"http://localhost:8080"'
+           Expected = 'http://localhost:8080/dhis-web-tracker-capture/index.html' }
+        @{ Case = 'a context path'; Value = '"https://neoipc.example.org/dhis"'
+           Expected = 'https://neoipc.example.org/dhis/dhis-web-tracker-capture/index.html' }
+        @{ Case = 'trailing slashes'; Value = '"https://neoipc.example.org/dhis//"'
+           Expected = 'https://neoipc.example.org/dhis/dhis-web-tracker-capture/index.html' }
+        @{ Case = 'an upper-case scheme'; Value = '"HTTPS://neoipc.example.org"'
+           Expected = 'HTTPS://neoipc.example.org/dhis-web-tracker-capture/index.html' }
+        @{ Case = 'a host with an underscore'; Value = '"http://dhis2_web:8080/dhis"'
+           Expected = 'http://dhis2_web:8080/dhis/dhis-web-tracker-capture/index.html' }
+        @{ Case = 'an IPv4 address'; Value = '"http://192.0.2.10:8080"'
+           Expected = 'http://192.0.2.10:8080/dhis-web-tracker-capture/index.html' }
+        @{ Case = 'a percent-encoded path segment'; Value = '"https://neoipc.example.org/caf%C3%A9"'
+           Expected = 'https://neoipc.example.org/caf%C3%A9/dhis-web-tracker-capture/index.html' }
+    )
+    Refused = @(
+        @{ Case = 'an empty query'; Value = '"https://neoipc.example.org/dhis?"'
+           Withheld = '"neoipc.example.org"'; Defect = 'query or a fragment' }
+        @{ Case = 'an empty fragment'; Value = '"https://neoipc.example.org/dhis#"'
+           Withheld = '"neoipc.example.org"'; Defect = 'query or a fragment' }
+        @{ Case = 'a query'; Value = '"https://neoipc.example.org/dhis?a=1"'
+           Withheld = '"neoipc.example.org"'; Defect = 'query or a fragment' }
+        @{ Case = 'a fragment'; Value = '"https://neoipc.example.org/dhis#top"'
+           Withheld = '"neoipc.example.org"'; Defect = 'query or a fragment' }
+        @{ Case = 'a single slash after the scheme'; Value = '"https:/neoipc.example.org/dhis"'
+           Withheld = '"neoipc.example.org"'; Defect = 'does not begin with' }
+        @{ Case = 'no scheme'; Value = '"neoipc.example.org/dhis"'
+           Withheld = '"neoipc.example.org"'; Defect = 'does not begin with' }
+        @{ Case = 'the ftp scheme'; Value = '"ftp://admin:secret@neoipc.example.org/"'
+           Withheld = 'c("admin", "secret", "neoipc.example.org")'; Defect = 'does not begin with' }
+        @{ Case = 'the javascript scheme'; Value = '"javascript:alert(1)"'
+           Withheld = '"alert(1)"'; Defect = 'does not begin with' }
+        @{ Case = 'an IPv6 literal'; Value = '"http://[::1]:8080/dhis"'
+           Withheld = '"::1"'; Defect = 'bracketed literal' }
+        @{ Case = 'a parenthesis in the path'; Value = '"https://neoipc.example.org/a)b"'
+           Withheld = '"neoipc.example.org"'; Defect = 'path with a character' }
+        @{ Case = 'a lone percent sign'; Value = '"https://neoipc.example.org/100%"'
+           Withheld = '"neoipc.example.org"'; Defect = 'path with a character' }
+        @{ Case = 'a space in the path'; Value = '"https://neoipc.example.org/my dhis"'
+           Withheld = '"neoipc.example.org"'; Defect = 'whitespace' }
+        @{ Case = 'surrounding whitespace'; Value = '" https://neoipc.example.org\n"'
+           Withheld = '"neoipc.example.org"'; Defect = 'whitespace' }
+        @{ Case = 'a user name and password'; Value = '"https://admin:district@neoipc.example.org/dhis"'
+           Withheld = 'c("admin", "district", "neoipc.example.org")'; Defect = 'an `@`' }
+        @{ Case = 'a password with a number sign'; Value = '"https://admin:S3cret#1@neoipc.example.org/dhis"'
+           Withheld = 'c("admin", "S3cret#1", "neoipc.example.org")'; Defect = 'an `@`' }
+        @{ Case = 'a password with a slash'; Value = '"https://admin:s3/cret@neoipc.example.org/"'
+           Withheld = 'c("admin", "s3/cret", "neoipc.example.org")'; Defect = 'an `@`' }
+        @{ Case = 'a password with a question mark'; Value = '"https://admin:s3?cret@neoipc.example.org/"'
+           Withheld = 'c("admin", "s3?cret", "neoipc.example.org")'; Defect = 'an `@`' }
+        @{ Case = 'a password with a space'; Value = '"https://admin:s3 cret@neoipc.example.org/"'
+           Withheld = 'c("admin", "s3 cret", "neoipc.example.org")'; Defect = 'whitespace' }
+        @{ Case = 'an at sign in the path'; Value = '"https://neoipc.example.org/a@b"'
+           Withheld = '"neoipc.example.org"'; Defect = 'an `@`' }
+        @{ Case = 'port 0'; Value = '"https://neoipc.example.org:0/dhis"'
+           Withheld = '"neoipc.example.org"'; Defect = 'port that is not' }
+        @{ Case = 'port 65536'; Value = '"https://neoipc.example.org:65536/dhis"'
+           Withheld = '"neoipc.example.org"'; Defect = 'port that is not' }
+        @{ Case = 'a colon without a port'; Value = '"https://neoipc.example.org:/dhis"'
+           Withheld = '"neoipc.example.org"'; Defect = 'port that is not' }
+        @{ Case = 'no host'; Value = '"https:///dhis"'; Defect = 'names no host' }
+        @{ Case = 'a host outside ASCII'; Value = '"https://bücher.example/dhis"'
+           Withheld = '"bücher.example"'; Defect = 'host that is not' }
+        @{ Case = 'two values'; Value = 'c("https://a.example.org", "https://b.example.org")'
+           Withheld = 'c("a.example.org", "b.example.org")'; Defect = 'not a single text value' }
+        @{ Case = 'an empty sequence'; Value = 'list()'; Defect = 'not a single text value' }
+        @{ Case = 'a number'; Value = '8080'; Withheld = '"8080"'; Defect = 'not a single text value' }
+        @{ Case = 'a logical'; Value = 'TRUE'; Defect = 'not a single text value' }
+        @{ Case = 'a missing value'; Value = 'NA_character_'; Defect = 'not a single text value' }
+    )
+    # Without a public address, the links start from the address the data is read from.
+    FallbackAccepted = @(
+        @{ Case = '/api'; Connection = 'https://data.example.org/api'
+           Expected = 'https://data.example.org/dhis-web-tracker-capture/index.html' }
+        @{ Case = '/api/'; Connection = 'https://data.example.org/api/'
+           Expected = 'https://data.example.org/dhis-web-tracker-capture/index.html' }
+        @{ Case = '/api//'; Connection = 'https://data.example.org/api//'
+           Expected = 'https://data.example.org/dhis-web-tracker-capture/index.html' }
+        @{ Case = '/dhis/api'; Connection = 'https://data.example.org/dhis/api'
+           Expected = 'https://data.example.org/dhis/dhis-web-tracker-capture/index.html' }
+        @{ Case = 'no path'; Connection = 'http://localhost:8080'
+           Expected = 'http://localhost:8080/dhis-web-tracker-capture/index.html' }
+        @{ Case = 'a host named api'; Connection = 'https://api'
+           Expected = 'https://api/dhis-web-tracker-capture/index.html' }
+        @{ Case = 'an empty public address'; Public = '""'; Connection = 'https://data.example.org/api'
+           Expected = 'https://data.example.org/dhis-web-tracker-capture/index.html' }
+    )
+    # Withheld names the parts of the connection address a refusal must not repeat any more than the
+    # address itself: the base the fallback derives from it where the path is `/api`, and its host.
+    FallbackRefused = @(
+        @{ Case = 'an IPv6 literal'; Connection = 'http://[fd00::1]:8080/api'
+           Withheld = 'c("http://[fd00::1]:8080", "fd00::1")'; Defect = 'bracketed literal' }
+        @{ Case = 'a host outside ASCII'; Connection = 'https://bücher.example/api'
+           Withheld = 'c("https://bücher.example", "bücher.example")'; Defect = 'host that is not' }
+        @{ Case = 'a query'; Connection = 'https://data.example.org/api?a=1'
+           Withheld = 'c("https://data.example.org", "data.example.org")'; Defect = 'query or a fragment' }
+    )
+}) {
+
+    BeforeAll {
+        # Every case runs in one R process, which prints a tab-separated line for each: its key, then
+        # `ok` and the base the links start from, or the class of the condition raised, whether its
+        # message repeats the value, the value trimmed, the connection address, or one of the parts
+        # withheld, whether it names `dhis2PublicBaseUrl`, whether it says the address is the one the
+        # data is read from, whether it states the defect, and the defect.
+        $runner = @'
+run_case <- function(key, value, connection, withheld = NULL) {
+  outcome <- tryCatch(
+    c("ok", get_tracker_capture_base(value, list(base_url = connection))),
+    neoipc_invalid_dhis2_public_base_url = function(cnd) {
+      message <- conditionMessage(cnd)
+      given <- if (is.character(value)) value[!is.na(value)]
+      withheld <- c(given, trimws(given), connection, withheld)
+      c(class(cnd)[1],
+        any(vapply(withheld[nzchar(withheld)], grepl, logical(1), x = message, fixed = TRUE)),
+        grepl("dhis2PublicBaseUrl", message, fixed = TRUE),
+        grepl("address the data is read from", message, fixed = TRUE),
+        grepl(cnd$defect, message, fixed = TRUE),
+        cnd$defect)
+    },
+    error = function(cnd) c("unclassed", class(cnd)[1]))
+  cat(key, outcome, sep = "\t")
+  cat("\n")
+}
+'@
+        # A refusal of a value given does not repeat the connection address either, nor the base the
+        # fallback would derive from it, nor its host.
+        $connection = 'https://data.example.org/api'
+        $connectionParts = '"https://data.example.org", "data.example.org"'
+        $calls = @(
+            foreach ($case in @($Accepted) + @($Refused)) {
+                "run_case(`"given:$($case.Case)`", $($case.Value), `"$connection`", " +
+                    "c($connectionParts, $($case.Withheld ?? 'NULL')))"
+            }
+            foreach ($case in @($FallbackAccepted) + @($FallbackRefused)) {
+                "run_case(`"fallback:$($case.Case)`", $($case.Public ?? 'NULL'), `"$($case.Connection)`", " +
+                    "$($case.Withheld ?? 'NULL'))"
+            })
+        $results = @{}
+        foreach ($line in (Invoke-ReportSnippet -Report 'Validation-Report' -Body ((@($runner) + $calls) -join "`n")) -split "`n") {
+            $fields = $line -split "`t"
+            if ($fields.Count -ge 2) { $results[$fields[0]] = $fields[1..($fields.Count - 1)] }
+        }
+    }
+
+    It 'takes a public address with <Case> as it stands, less trailing slashes' -ForEach $Accepted {
+        $results["given:$Case"] -join '|' | Should -BeExactly "ok|$Expected"
+    }
+
+    It 'refuses a public address with <Case>, without repeating it' -ForEach $Refused {
+        $outcome = $results["given:$Case"]
+        $outcome[0] | Should -BeExactly 'neoipc_invalid_dhis2_public_base_url'
+        $outcome[1..4] -join '|' | Should -BeExactly 'FALSE|TRUE|FALSE|TRUE' -Because (
+            'a refusal names the parameter and states the defect but never repeats the value or any part of it')
+        $outcome[5] | Should -Match ([regex]::Escape($Defect))
+    }
+
+    It 'links to the address the data is read from, less a trailing /api, for a connection with <Case>' -ForEach $FallbackAccepted {
+        $results["fallback:$Case"] -join '|' | Should -BeExactly "ok|$Expected"
+    }
+
+    It 'refuses a connection address with <Case> as the base, naming dhis2PublicBaseUrl instead' -ForEach $FallbackRefused {
+        $outcome = $results["fallback:$Case"]
+        $outcome[0] | Should -BeExactly 'neoipc_invalid_dhis2_public_base_url'
+        $outcome[1..4] -join '|' | Should -BeExactly 'FALSE|TRUE|TRUE|TRUE' -Because (
+            'a refusal of the connection address names the parameter to give instead and states the ' +
+            'defect but never repeats the address or any part of it')
+        $outcome[5] | Should -Match ([regex]::Escape($Defect))
+    }
+}
+
+Describe 'The public address Build-ValidationReport.ps1 refuses itself' {
+
+    BeforeAll {
+        $wrapper = Join-Path $repoRoot 'scripts' 'Build-ValidationReport.ps1'
+
+        # The message the wrapper stops with for a public address. The token is malformed, so the
+        # authentication stops the wrapper before it reads or writes anything; a refusal therefore
+        # comes back only when the address is checked before the authentication.
+        function Get-WrapperRefusal {
+            param([string]$Value)
+            try {
+                & $wrapper -Combined -WhatIf -Token 'not-a-token' -Dhis2PublicBaseUrl $Value
+            } catch {
+                $_.Exception.Message
+            }
+        }
+    }
+
+    It 'refuses a value with <Case> before it authenticates, without repeating the value or any part of it' -ForEach @(
+        @{ Case = 'a trailing line feed'; Value = "https://neoipc.example.org/dhis`n" }
+        @{ Case = 'a trailing carriage return and line feed'; Value = "https://neoipc.example.org/dhis`r`n" }
+        @{ Case = 'a carriage return'; Value = "https://neoipc.example.org/dhis`rx" }
+        @{ Case = 'a line separator'; Value = "https://neoipc.example.org/dhis`u{2028}" }
+        @{ Case = 'a paragraph separator'; Value = "https://neoipc.example.org/dhis`u{2029}" }
+        @{ Case = 'a next-line character'; Value = "https://neoipc.example.org/dhis`u{85}" }
+        @{ Case = 'a space'; Value = 'https://neoipc.example.org/my dhis' }
+        @{ Case = 'a tab'; Value = "https://neoipc.example.org/my`tdhis" }
+        @{ Case = 'a no-break space'; Value = "https://neoipc.example.org/my`u{a0}dhis" }
+        @{ Case = 'a null character'; Value = "https://neoipc.example.org/dhis`0" }
+        @{ Case = 'a delete character'; Value = "https://neoipc.example.org/dhis`u{7f}" }
+        @{ Case = 'a user name and password'; Value = 'https://admin:district@neoipc.example.org/dhis'
+           Refusal = "an '@'"; Withheld = 'admin', 'district' }
+        @{ Case = 'a password and a line break'; Value = "https://admin:district@neoipc.example.org/dhis`n"
+           Refusal = "an '@'"; Withheld = 'admin', 'district' }
+        @{ Case = 'an at sign in the path'; Value = 'https://neoipc.example.org/a@b'; Refusal = "an '@'" }
+        @{ Case = 'a token in a query'; Value = 'https://neoipc.example.org/dhis?api_key=S3cret'
+           Refusal = "a '?' or '#'"; Withheld = 'api_key', 'S3cret' }
+        @{ Case = 'an empty query'; Value = 'https://neoipc.example.org/dhis?'; Refusal = "a '?' or '#'" }
+        @{ Case = 'a token in a fragment'; Value = 'https://neoipc.example.org/dhis#access_token=S3cret'
+           Refusal = "a '?' or '#'"; Withheld = 'access_token', 'S3cret' }
+    ) {
+        $thrown = Get-WrapperRefusal $Value
+        $thrown | Should -BeLike "-Dhis2PublicBaseUrl contains $($Refusal ?? 'whitespace or a control character')*"
+        foreach ($part in @($Value, $Value.Trim(), 'neoipc.example.org') + @($Withheld | Where-Object { $_ })) {
+            $thrown.Contains($part) | Should -BeFalse -Because 'a refusal never repeats the value or any part of it'
+        }
+    }
+}
+
+Describe 'The Validation Report''s rule sentences against the rules neoipcr defines' -Skip:(-not $env:CI -and -not (Get-Command Rscript -ErrorAction SilentlyContinue)) {
+
+    BeforeAll {
+        # check_validation_rule_texts() is given the rule ids, so it runs without neoipcr. Each case
+        # prints `ok`, or the class of the error raised and its message, on a line of its own. The ids
+        # given are the ones the English string resources carry sentences for, and each case changes
+        # one side.
+        $body = @'
+check <- function(sR, ids) tryCatch(
+  {
+    check_validation_rule_texts(sR, ids)
+    "ok"
+  },
+  error = function(cnd) paste(class(cnd)[1], conditionMessage(cnd), sep = "\t"))
+ids <- as.integer(names(sR$problems))
+extra <- sR
+extra$problems[["99"]] <- sR$problems[["1"]]
+blank <- sR
+blank$problems[["3"]]$summary <- ""
+one_sentence <- sR
+one_sentence$problems[["55"]]$description_unanswered <- NULL
+bare_text <- sR
+bare_text$problems[["7"]] <- "A sentence where the rule's templates and summary belong."
+cat(check(sR, ids), check(extra, ids), check(sR, c(ids, 16L)), check(blank, ids),
+    check(one_sentence, ids), check(bare_text, ids), sep = "\n")
+'@
+        $lines = (Invoke-ReportSnippet -Report 'Validation-Report' -Body $body) -split "`n"
+    }
+
+    It 'passes string resources that carry complete sentences for exactly the rules given' {
+        $lines[0] | Should -BeExactly 'ok'
+    }
+
+    It 'names a rule the string resources carry sentences for that is not among the rules given' {
+        $lines[1] | Should -BeExactly ("neoipc_validation_rule_text_without_rule`tThe string resources carry " +
+            'sentences for validation rule(s) 99, which neoipcr does not define.')
+    }
+
+    It 'names a rule given that the string resources carry no complete sentences for: <Case>' -ForEach @(
+        @{ Case = 'no entry'; Line = 2; Rule = 16 }
+        @{ Case = 'a blank summary'; Line = 3; Rule = 3 }
+        @{ Case = 'no second sentence for rule 55'; Line = 4; Rule = 55 }
+        @{ Case = 'text where the entry belongs'; Line = 5; Rule = 7 }
+    ) {
+        $lines[$Line] | Should -BeExactly ("neoipc_validation_rule_without_text`tThe string resources " +
+            "carry no complete description and summary for validation rule(s) $Rule.")
     }
 }
 

@@ -40,6 +40,13 @@ params:
   # public API.
   # @type character
   dhis2Path: NULL
+
+  # Base URL at which the report's readers reach DHIS2 (http or https, with
+  # the context path if DHIS2 has one), for the Tracker Capture links; empty
+  # = the address the data is read from. Server-side override; not exposed
+  # via the public API.
+  # @type character
+  dhis2PublicBaseUrl: NULL
 ---
 
 ```{r}

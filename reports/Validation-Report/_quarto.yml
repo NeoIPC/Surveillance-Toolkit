@@ -10,6 +10,7 @@ format:
   html:
     link-external-icon: true
     link-external-newwindow: true
+    css: validation-report.css
   pdf:
     documentclass: scrartcl
     # LuaLaTeX pinned: `pdf-standard` reaches LaTeX as \DocumentMetadata, which

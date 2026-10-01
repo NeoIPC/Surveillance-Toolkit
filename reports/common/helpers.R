@@ -354,6 +354,212 @@ get_connection_options <- function(scheme = NULL, hostname = NULL,
   do.call(neoipcr::dhis2_connection_options, args)
 }
 
+#' What keeps an address from serving as the base of the Tracker Capture
+#' links, as `get_tracker_capture_base()` states it in a refusal.
+#'
+#' The address is accepted when its raw text matches, as a whole, the shape
+#' `get_tracker_capture_base()` describes. Otherwise the defect is named by
+#' category, never by quoting the address or any part of it.
+#' @param x The address, as a caller handed it over
+#' @return NULL when the address is accepted, otherwise a verb phrase naming
+#'   the defect ("contains whitespace")
+base_url_defect <- function(x) {
+  if (!is.character(x) || length(x) != 1L || is.na(x))
+    return("is not a single text value")
+  # Matched as bytes, so a character outside ASCII matches none of the ranges
+  # and an invalid encoding cannot raise an error that would bypass the
+  # classed refusal.
+  shape <- regmatches(x, regexec(paste0(
+    "\\A(?i:https?)://",
+    "[A-Za-z0-9_-]+(?:\\.[A-Za-z0-9_-]+)*\\.?",
+    "(?::([0-9]{1,5}))?",
+    "(?:/(?:[A-Za-z0-9._~-]|%[0-9A-Fa-f]{2})*)*\\z"),
+    x, perl = TRUE, useBytes = TRUE))[[1]]
+  valid_port <- function(port) {
+    number <- as.integer(port)
+    number >= 1L && number <= 65535L
+  }
+  if (length(shape) == 2L && (!nzchar(shape[2]) || valid_port(shape[2])))
+    return(NULL)
+
+  if (grepl("[[:space:]]", x, useBytes = TRUE))
+    return("contains whitespace")
+  if (!grepl("^[Hh][Tt][Tt][Pp][Ss]?://", x, useBytes = TRUE))
+    return("does not begin with `http://` or `https://`")
+  if (grepl("@", x, fixed = TRUE, useBytes = TRUE))
+    return(paste("contains an `@`, which is refused wherever it stands, since",
+                 "before the host it introduces a user name or password"))
+  if (grepl("[?#]", x, useBytes = TRUE))
+    return("carries a query or a fragment (a `?` or a `#`, even an empty one)")
+  authority <- sub("/.*$", "", sub("^[^:]*://", "", x, useBytes = TRUE),
+                   useBytes = TRUE)
+  if (startsWith(authority, "["))
+    return("names its host by a bracketed literal, such as an IPv6 address")
+  host <- sub(":.*$", "", authority, useBytes = TRUE)
+  if (!nzchar(host))
+    return("names no host")
+  if (!grepl("\\A[A-Za-z0-9_-]+(?:\\.[A-Za-z0-9_-]+)*\\.?\\z", host,
+             perl = TRUE, useBytes = TRUE))
+    return(paste("has a host that is not made of dot-separated labels of",
+                 "ASCII letters, digits, hyphens, and underscores"))
+  if (grepl(":", authority, fixed = TRUE, useBytes = TRUE)) {
+    port <- sub("^[^:]*:", "", authority, useBytes = TRUE)
+    if (!grepl("\\A[0-9]{1,5}\\z", port, perl = TRUE, useBytes = TRUE) ||
+        !valid_port(port))
+      return("has a port that is not a number from 1 to 65535")
+  }
+  paste("has a path with a character other than ASCII letters, digits, `-`,",
+        "`.`, `_`, `~`, and a `%` followed by two hexadecimal digits")
+}
+
+#' The Tracker Capture address the Validation Report's patient links start
+#' from.
+#'
+#' The links go where the report's readers reach DHIS2: `public_base_url`
+#' when the caller gives it, as a render that reads the data over an address
+#' inside its own network does, and otherwise the address the data is read
+#' from, the API base URL of `connection_options` with its trailing slashes and
+#' then a trailing `/api` removed from its path.
+#'
+#' Either address must match, on its raw text and as a whole, this shape, or
+#' the render is refused with an error of class
+#' `neoipc_invalid_dhis2_public_base_url`:
+#'
+#' - `http://` or `https://`, the scheme in any case;
+#' - a host of dot-separated labels of ASCII letters, digits, hyphens, and
+#'   underscores, optionally ending in a dot, which admits a host name or an
+#'   IPv4 address;
+#' - optionally `:` and a port from 1 to 65535;
+#' - a path of `/`-separated segments of ASCII letters, digits, `-`, `.`, `_`,
+#'   `~`, and `%` followed by two hexadecimal digits.
+#'
+#' So no whitespace, user name or password, query or fragment (an empty `?` or
+#' `#` included), bracketed host such as an IPv6 literal, or any other
+#' character. The address is written as it stands into a Markdown link
+#' destination, which Pandoc's Markdown reader ends at an unbalanced `)`,
+#' takes a space before a quote as the start of a link title, collapses other
+#' whitespace, and percent-encodes whitespace, `<`, `>`, `|`, `"`, `{`, `}`,
+#' `[`, `]`, `^`, and the backtick, so an address outside the shape could yield
+#' a link that opens somewhere else; the shape is stricter than those
+#' characters, deliberately. The raw text is checked rather than what a URL
+#' parser makes of it, because the link carries the text, and a parser
+#' normalizes: curl reports no query for an empty `?`.
+#'
+#' A refusal names the defect but never repeats the address or any part of
+#' it, since a refused address can carry a password. The condition carries
+#' the defect in its `defect` field as well, as `base_url_defect()` words it.
+#' @param public_base_url The `dhis2PublicBaseUrl` parameter: `NULL` or `""`
+#'   when it is not given, and otherwise expected to be a single string
+#' @param connection_options The connection options the data is read with, as
+#'   `get_connection_options()` returns them; only `base_url` is read
+#' @return The address with any trailing slashes removed and
+#'   `/dhis-web-tracker-capture/index.html` appended
+get_tracker_capture_base <- function(public_base_url, connection_options) {
+  expected_shape <- paste(
+    "Give `http://` or `https://`, a host name or IPv4 address, an optional",
+    "port, and any context path, with no user name, password, query, or",
+    "fragment.")
+  if (is.null(public_base_url) || identical(public_base_url, "")) {
+    base <- connection_options$base_url
+    # Split at the end of the authority so that only the path loses its
+    # trailing `/api`, never a host of that name.
+    parts <- if (is.character(base) && length(base) == 1L && !is.na(base))
+      regmatches(base, regexec("^([^/]*//[^/]*)(.*)$", base, useBytes = TRUE))[[1]]
+    if (length(parts) == 3L)
+      base <- paste0(parts[2], sub("/api$", "", sub("/+$", "", parts[3])))
+    defect <- base_url_defect(base)
+    if (!is.null(defect))
+      rlang::abort(
+        c("The address the data is read from cannot serve as the base of the Tracker Capture links.",
+          x = paste0("The connection address ", defect, "."),
+          i = paste("Pass `dhis2PublicBaseUrl` (`-Dhis2PublicBaseUrl` with",
+                    "`Build-ValidationReport.ps1`) with the address at which the",
+                    "report's readers reach DHIS2."),
+          i = expected_shape),
+        class = "neoipc_invalid_dhis2_public_base_url",
+        defect = defect)
+  } else {
+    base <- public_base_url
+    defect <- base_url_defect(base)
+    if (!is.null(defect))
+      rlang::abort(
+        c("`dhis2PublicBaseUrl` must be an http or https base URL.",
+          x = paste0("The value given ", defect, "."),
+          i = expected_shape),
+        class = "neoipc_invalid_dhis2_public_base_url",
+        defect = defect)
+  }
+  paste0(sub("/+$", "", base), "/dhis-web-tracker-capture/index.html")
+}
+
+#' The templates the Validation Report renders a validation rule's findings
+#' with
+#'
+#' Every rule's findings render with its `description`. Rule 20 has a second
+#' complete sentence for an infectious agent recorded as causing a secondary
+#' sepsis, and rule 55 one for a secondary-BSI item that was never answered,
+#' between which `select_template()` in the report's `_problem_text.qmd`
+#' chooses.
+#' @param rule_id A validation rule id
+#' @return The keys of the rule's templates in its entry under `problems` in
+#'   the Validation Report's string resources
+validation_rule_template_keys <- function(rule_id)
+  c("description",
+    if (rule_id == 20L) "description_secondary_bsi",
+    if (rule_id == 55L) "description_unanswered")
+
+#' Check that the Validation Report's string resources carry sentences for
+#' exactly the validation rules neoipcr defines
+#'
+#' The rules live in neoipcr; the sentences that render their findings live in
+#' the report's string resources, under `problems`, keyed by rule id. Both
+#' directions abort the render with an error that names the rules concerned:
+#'
+#' 1. A rule in `rule_ids` whose entry is not a mapping holding its templates,
+#'    as [validation_rule_template_keys()] lists them, and its `summary`, each
+#'    a single non-empty string, aborts with an error of class
+#'    `neoipc_validation_rule_without_text`: its findings would render as a
+#'    blank line, and the report's header, which names a rule it did not apply
+#'    by its summary, would fail.
+#' 2. A rule the string resources carry sentences for that is not in
+#'    `rule_ids` aborts with an error of class
+#'    `neoipc_validation_rule_text_without_rule`: the reporting service offers
+#'    its callers the rules the string resources list, and
+#'    `neoipcr::validate()` aborts on an id it does not know, so the mismatch
+#'    fails every render rather than only one that selects the rule.
+#'
+#' The check reads nothing but its arguments, so the report runs it before it
+#' reads any data.
+#' @param sR String resources
+#' @param rule_ids The validation rule ids, as `neoipcr::validation_rule_ids()`
+#'   lists them
+#' @return NULL, invisibly, when the string resources and the ids match
+check_validation_rule_texts <- function(sR, rule_ids) {
+  has_text <- function(rule_id) {
+    entry <- sR$problems[[as.character(rule_id)]]
+    is.list(entry) && all(vapply(
+      c(validation_rule_template_keys(rule_id), "summary"),
+      \(field) is.character(entry[[field]]) && length(entry[[field]]) == 1L &&
+        nzchar(entry[[field]]),
+      logical(1)))
+  }
+  unsentenced <- rule_ids[!vapply(rule_ids, has_text, logical(1))]
+  if (length(unsentenced) > 0L)
+    rlang::abort(
+      sprintf(
+        "The string resources carry no complete description and summary for validation rule(s) %s.",
+        paste(unsentenced, collapse = ", ")),
+      class = "neoipc_validation_rule_without_text")
+  unruled <- setdiff(names(sR$problems), as.character(rule_ids))
+  if (length(unruled) > 0L)
+    rlang::abort(
+      sprintf(
+        "The string resources carry sentences for validation rule(s) %s, which neoipcr does not define.",
+        paste(unruled, collapse = ", ")),
+      class = "neoipc_validation_rule_text_without_rule")
+  invisible(NULL)
+}
+
 get_dataset_options <- function(
     reportingPeriodFrom,
     reportingPeriodTo,
@@ -396,8 +602,9 @@ get_dataset_options <- function(
 #'
 #' Outside code, Pandoc treats any punctuation or space character preceded by a
 #' backslash as that character itself, so escaping every punctuation character
-#' makes a value someone typed — a free-text pathogen name, a patient id — render
-#' as typed whatever it contains, rather than as emphasis, a link or raw HTML.
+#' makes a value someone typed — a free-text infectious-agent name, a patient
+#' id — render as typed whatever it contains, rather than as emphasis, a link,
+#' or raw HTML.
 #' A value is a phrase inside a sentence, a heading or a link, where a line
 #' break would end the block it sits in, so runs of whitespace, line breaks
 #' included, become one space first.

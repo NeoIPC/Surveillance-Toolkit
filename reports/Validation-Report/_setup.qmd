@@ -23,99 +23,18 @@ departmentFilter <- params$departmentFilter
 support_email_address <- "NeoIPC-Support@charite.de"
 ```
 
-```{r Data Import}
-# No warning/message suppression here: configure_logging() (in the first chunk)
-# installs a knitr output hook that routes import_dhis2()'s warnings and messages
-# into the unified log channel and keeps them out of the rendered body; a
-# `warning=FALSE` here would drop them before the hook can log them.
-connection_options <- get_connection_options(
-  scheme = params$dhis2Scheme,
-  hostname = params$dhis2Hostname,
-  port = params$dhis2Port,
-  path = params$dhis2Path)
-
-# The import runs without the validation pass: the report is about the records
-# that pass would remove, so they have to be kept and validated here — the
-# enrolments without an admission form (rule 26) among them, which the
-# import's orphan removal otherwise drops. That also includes the patients
-# with no enrolment, which rule 1 is about and which only
-# `include_unenrolled_patients` keeps in the dataset.
-dataset_options <- neoipcr::dhis2_dataset_options(
-  department_filter = departmentFilter,
-  include_department = "full",
-  include_hospital = "full",
-  include_country = "full",
-  include_world_bank_class = "full",
-  include_patient = "full",
-  patient_columns = c("id", "sex", "birth_weight", "gestational_age",
-                       "delivery_mode", "multiple_birth", "siblings"),
-  include_enrollment = "full",
-  include_event = "full",
-  include_dhis2_ids = c("departments","patients","enrollments","events"),
-  include_incomplete = c("enrollments","events"),
-  include_test_data = isTRUE(params$includeTestData),
-  include_ineligible_patients = TRUE,
-  include_unenrolled_patients = TRUE,
-  include_invalid_patients = TRUE,
-  locale = locale)
-
-data <- with_error_trace(neoipcr::import_dhis2(
-  connection_options = connection_options,
-  dataset_options = dataset_options))
-
-# The problem list links each patient record to its Tracker Capture dashboard
-# on the instance the data came from: the API base URL with the web context in
-# place of the `/api` path, and the program the import resolved by its code.
-tracker_capture_url <- httr2::url_parse(connection_options$base_url)
-api_path <- tracker_capture_url$path
-if (is.null(api_path)) api_path <- ""
-tracker_capture_url$path <- paste0(
-  sub("/api/?$", "", api_path), "/dhis-web-tracker-capture/index.html")
-tracker_capture_base <- httr2::url_build(tracker_capture_url)
-NeoIPC_ProgramId <- data$metadata$programId
-if (is.null(NeoIPC_ProgramId))
-  rlang::abort("The imported metadata carries no program id; the dashboard links cannot be built.")
-```
-
-```{r Filter metadata to in-scope departments}
+```{r Check the rule sentences}
 #| include: false
 
-# departmentFilter narrows which departments the validation runs over.
-# When NULL, every department returned by import_dhis2 is in scope.
-departments <- data$metadata$departments
-if (!rlang::is_null(departmentFilter))
-  departments <- departments |>
-    dplyr::filter(.data$code %in% departmentFilter)
-```
-
-```{r Validate}
-#| include: false
-
-# The rules live in neoipcr; the sentences that render their findings live
-# in this report's string resources, keyed by rule id. A rule the package
-# runs without its templates and `summary` here would render as a blank line
-# or fail the header below, so every rule is checked for them first: the
-# templates are the rule's `description` and, for rule 20, a second complete
-# sentence for a pathogen recorded as causing a secondary sepsis and, for
-# rule 55, one for a secondary-BSI item that was never answered.
+# The rules live in neoipcr, the sentences that render their findings in
+# this report's string resources, keyed by rule id, and the tables the
+# formatter adds labels and fallbacks with in `_mapping.qmd`. The checks below
+# hold these to each other and read nothing else, so they run before the
+# import: a report tree that does not match the loaded neoipcr fails without
+# reading any data. check_validation_rule_texts() in ../common/helpers.R holds
+# the string resources to the rules neoipcr defines, in both directions.
 rule_ids <- neoipcr::validation_rule_ids()
-template_keys <- function(rule_id)
-  c("description",
-    if (rule_id == 20L) "description_secondary_bsi",
-    if (rule_id == 55L) "description_unanswered")
-has_text <- function(rule_id) {
-  entry <- sR$problems[[as.character(rule_id)]]
-  all(vapply(
-    c(template_keys(rule_id), "summary"),
-    \(field) is.character(entry[[field]]) && length(entry[[field]]) == 1L &&
-      nzchar(entry[[field]]),
-    logical(1)))
-}
-unsentenced <- rule_ids[!vapply(rule_ids, has_text, logical(1))]
-if (length(unsentenced) > 0L)
-  rlang::abort(sprintf(
-    "The string resources carry no complete description and summary for validation rule(s) %s.",
-    paste(unsentenced, collapse = ", ")))
+check_validation_rule_texts(sR, rule_ids)
 
 # Every placeholder a rule's sentences name must be a field the rule records,
 # as `neoipcr::validation_rule_context_fields()` declares them, or a label the
@@ -153,7 +72,8 @@ for (i in seq_len(nrow(context_decorations))) {
       "The label map `%s` carries no label for the value(s) %s.",
       decoration$labels, paste(unlabelled, collapse = ", ")))
   named_by <- placeholders(unlist(
-    source_problems[[as.character(decoration$rule_id)]][template_keys(decoration$rule_id)]))
+    source_problems[[as.character(decoration$rule_id)]][
+      validation_rule_template_keys(decoration$rule_id)]))
   if (!decoration$placeholder %in% named_by)
     rlang::abort(sprintf(
       "The decoration of validation rule %d fills the placeholder `%s`, which none of the rule's sentences names.",
@@ -173,7 +93,7 @@ for (i in seq_len(nrow(context_fallbacks))) {
 for (rule_id in rule_ids) {
   entry <- sR$problems[[as.character(rule_id)]]
   stray <- setdiff(
-    placeholders(unlist(entry[template_keys(rule_id)])),
+    placeholders(unlist(entry[validation_rule_template_keys(rule_id)])),
     c(context_fields[[as.character(rule_id)]],
       context_decorations$placeholder[context_decorations$rule_id == rule_id]))
   if (length(stray) > 0L)
@@ -181,6 +101,75 @@ for (rule_id in rule_ids) {
       "The sentence(s) of validation rule %d name placeholder(s) the rule does not record: %s.",
       rule_id, paste(stray, collapse = ", ")))
 }
+```
+
+```{r Data Import}
+# No warning/message suppression here: configure_logging() (in the first chunk)
+# installs a knitr output hook that routes import_dhis2()'s warnings and messages
+# into the unified log channel and keeps them out of the rendered body; a
+# `warning=FALSE` here would drop them before the hook can log them.
+connection_options <- get_connection_options(
+  scheme = params$dhis2Scheme,
+  hostname = params$dhis2Hostname,
+  port = params$dhis2Port,
+  path = params$dhis2Path)
+
+# The problem list links each patient record to its Tracker Capture dashboard
+# where the report's readers reach DHIS2: dhis2PublicBaseUrl, which a render
+# that reads the data over an internal address passes, or else the address the
+# data is read from. The address is checked here, before the import, so an
+# unusable one is refused without reading any data.
+tracker_capture_base <- get_tracker_capture_base(
+  params$dhis2PublicBaseUrl, connection_options)
+
+# The import runs without the validation pass: the report is about the records
+# that pass would remove, so they have to be kept and validated here — the
+# enrolments without an admission form (rule 26) among them, which the
+# import's orphan removal otherwise drops. That also includes the patients
+# with no enrolment, which rule 1 is about and which only
+# `include_unenrolled_patients` keeps in the dataset.
+dataset_options <- neoipcr::dhis2_dataset_options(
+  department_filter = departmentFilter,
+  include_department = "full",
+  include_hospital = "full",
+  include_country = "full",
+  include_world_bank_class = "full",
+  include_patient = "full",
+  patient_columns = c("id", "sex", "birth_weight", "gestational_age",
+                       "delivery_mode", "multiple_birth", "siblings"),
+  include_enrollment = "full",
+  include_event = "full",
+  include_dhis2_ids = c("departments","patients","enrollments","events"),
+  include_incomplete = c("enrollments","events"),
+  include_test_data = isTRUE(params$includeTestData),
+  include_ineligible_patients = TRUE,
+  include_unenrolled_patients = TRUE,
+  include_invalid_patients = TRUE,
+  locale = locale)
+
+data <- with_error_trace(neoipcr::import_dhis2(
+  connection_options = connection_options,
+  dataset_options = dataset_options))
+
+# The dashboard links name the program the import resolved by its code.
+NeoIPC_ProgramId <- data$metadata$programId
+if (is.null(NeoIPC_ProgramId))
+  rlang::abort("The imported metadata carries no program id; the dashboard links cannot be built.")
+```
+
+```{r Filter metadata to in-scope departments}
+#| include: false
+
+# departmentFilter narrows which departments the validation runs over.
+# When NULL, every department returned by import_dhis2 is in scope.
+departments <- data$metadata$departments
+if (!rlang::is_null(departmentFilter))
+  departments <- departments |>
+    dplyr::filter(.data$code %in% departmentFilter)
+```
+
+```{r Validate}
+#| include: false
 
 exceptions <- NULL
 if (!is.null(params$validationExceptionFile))

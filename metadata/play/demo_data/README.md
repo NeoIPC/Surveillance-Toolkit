@@ -1,7 +1,7 @@
 # Play demo data — committed synthetic patient records
 
 A **stable, deterministic** synthetic patient dataset for the play / demo DHIS2 instance, committed as CSVs
-so every seed produces the **same** tracked entities, enrollments, and events. It is the tracker-data
+so every seed produces the **same** tracked entities, enrolments, and events. It is the tracker-data
 counterpart to the org-unit / user overlay in [`../`](../): where that overlay authors *metadata*, this
 authors *data* (patients enrolled in `NEOIPC_CORE`).
 
@@ -51,22 +51,27 @@ by data-element code so a single event's block reads coherently.
 
 `bulk/` dates are **absolute** and frozen at bootstrap time (all in the past relative to any future seed, so
 DHIS2 never rejects a future date). `enrolledAt` must equal the Admission event's `occurredAt` (program rule
-`kuQVuXXgPk0`), and every enrollment sets `occurredAt = enrolledAt` (a DHIS2 2.41 preheat-cache workaround —
-the importer's cached `Program` serves the entity-default `displayIncidentDate = true`, so a null enrollment
+`kuQVuXXgPk0`), and every enrolment sets `occurredAt = enrolledAt` (a DHIS2 2.41 preheat-cache workaround —
+the importer's cached `Program` serves the entity-default `displayIncidentDate = true`, so a null enrolment
 `occurredAt` is rejected at COMMIT with `E1023`).
 
 ## The Tracker Capture ACTIVE fixture (`curated/`)
 
-`NEOIPC_PATIENT_ID = E2E-TC-FIXTURE` in `AT_TEST_TEST` carries **two** enrollments (a tracked entity may
+`NEOIPC_PATIENT_ID = E2E-TC-FIXTURE` in `AT_TEST_TEST` carries **two** enrolments (a tracked entity may
 hold several — this mirrors the generator's hernia-readmission pattern):
 
-- a **COMPLETED** enrollment (Admission → Surveillance-End) — a normal completed patient a read consumer can
+- a **COMPLETED** enrolment (Admission → Surveillance-End) — a normal completed patient a read consumer can
   key on by identifier;
-- a later **ACTIVE** enrollment with a **COMPLETED Admission event** (so downstream ASSIGNs resolve, e.g. the
+- a later **ACTIVE** enrolment with a **COMPLETED Admission event** (so downstream ASSIGNs resolve, e.g. the
   BSI "Day of life"), the infection/surgery stages left **empty** so a UI spec can add a fresh event and
   drive its program rules.
 
 Consumers resolve the tracked entity **by this identifier**, never by position. Do not renumber it.
+
+The ACTIVE enrolment also gives `AT_TEST_TEST` a validation finding: it has no Surveillance-End form and
+lies more than 120 days before any seed, so neoipcr's rule 43 reports it. neoipc-app's `validation-report`
+end-to-end spec relies on that finding for the links it follows in the rendered report, so completing this
+enrolment, giving it an end form, or moving its date forward breaks that spec.
 
 ## Program-rule validity — validate every change
 
