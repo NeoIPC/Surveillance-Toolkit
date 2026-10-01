@@ -19,12 +19,17 @@
       1. a profile (`_quarto-*.yml`), which Quarto merges over the master. The language profiles
          other than English are generated from `_quarto-en.yml` and not checked in, so a fresh
          checkout holds them to it through their source;
-      2. a document's own YAML, which Quarto reads from every block in a .qmd or .Rmd outside HTML
+      2. a directory's metadata (`_metadata.yml` or `_metadata.yaml`), which Quarto merges between
+         the project's configuration and a document's, from the report's directory down to the
+         document's (`directoryMetadataForInputFile` in quarto-cli's src/project/project-shared.ts);
+      3. a document's own YAML, which Quarto reads from every block in a .qmd or .Rmd outside HTML
          comments and fenced code, concatenated. The blocks are found with the expressions Quarto
          itself uses (`readYamlFromMarkdown` in quarto-cli's src/core/yaml.ts), since no parser reads
          a .qmd's metadata short of Quarto, and each is then parsed with powershell-yaml;
-      3. a figure chunk's own options, a line of its own (`#| dev: png`) or a key in the chunk header
-         (`{r name, dev = "png"}`), matched by regex because R's parser cannot read a .qmd whole.
+      4. a figure chunk's own options, a line of its own (`#| dev: png`) or a key in the chunk header
+         (`{r name, dev = "png"}`), indented or not, matched by regex because R's parser cannot read
+         a whole .qmd file. Quarto hands a chunk's `dev-args` to knitr as `dev.args` and its
+         `fig-format` as `dev` (src/resources/rmd/hooks.R in quarto-cli), so those names count too.
     Quarto's `fig-format` is not among them outside a chunk: Quarto derives knitr's `dev` from it and
     then merges the document's knitr chunk options over it (`knitr_options` in quarto-cli's
     src/resources/rmd/execute.R), so a `fig-format` in a profile or front matter cannot displace the
@@ -101,6 +106,17 @@ Describe 'The <_> draws its PDF figures with the Cairo device in Noto Sans' -For
         $overrides | Should -BeNullOrEmpty
     }
 
+    It 'has no directory metadata that sets the device or its arguments' {
+        $overrides = foreach ($file in Get-ChildItem -LiteralPath $reportDir -Recurse -Include '_metadata.yml', '_metadata.yaml') {
+            $config = Get-Content -Raw -LiteralPath $file.FullName | ConvertFrom-Yaml
+            if ($config -is [System.Collections.IDictionary]) {
+                $name = [System.IO.Path]::GetRelativePath($reportDir, $file.FullName)
+                Find-DeviceSetting $config | ForEach-Object { "${name}: $_" }
+            }
+        }
+        $overrides | Should -BeNullOrEmpty
+    }
+
     It 'has no document whose YAML sets the device or its arguments' {
         $overrides = foreach ($file in Get-ChildItem -LiteralPath $reportDir -Recurse -Include '*.qmd', '*.Rmd') {
             $yaml = Get-DocumentYaml $file.FullName
@@ -112,8 +128,8 @@ Describe 'The <_> draws its PDF figures with the Cairo device in Noto Sans' -For
         $overrides | Should -BeNullOrEmpty
     }
 
-    It 'has no figure chunk that sets its own device' {
-        $chunkDevice = '^\s*#\|\s*(dev|fig-format|fig\.format)\s*:|^```\{r[^}]*\bdev\s*='
+    It 'has no figure chunk that sets its own device or its arguments' {
+        $chunkDevice = '^\s*#\|\s*(dev|dev[.-]args|fig-format|fig\.format)\s*:|^\s*`{3,}\s*\{r\b[^}]*\bdev(\.args)?\s*='
         $hits = Get-ChildItem -LiteralPath $reportDir -Recurse -Include '*.qmd', '*.Rmd' |
             Select-String -Pattern $chunkDevice |
             ForEach-Object { "$($_.Path | Split-Path -Leaf):$($_.LineNumber): $($_.Line.Trim())" }
