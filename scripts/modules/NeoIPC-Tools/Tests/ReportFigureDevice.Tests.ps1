@@ -29,7 +29,8 @@
       4. a figure chunk's own options, a line of its own (`#| dev: png`) or a key in the chunk header
          (`{r name, dev = "png"}`), indented or not, matched by regex because R's parser cannot read
          a whole .qmd file. Quarto hands a chunk's `dev-args` to knitr as `dev.args` and its
-         `fig-format` as `dev` (src/resources/rmd/hooks.R in quarto-cli), so those names count too.
+         `fig-format` as `dev` (src/resources/rmd/hooks.R in quarto-cli), and knitr itself draws a
+         chunk whose header sets `fig.format` with that device, so those names count too.
     Quarto's `fig-format` is not among them outside a chunk: Quarto derives knitr's `dev` from it and
     then merges the document's knitr chunk options over it (`knitr_options` in quarto-cli's
     src/resources/rmd/execute.R), so a `fig-format` in a profile or front matter cannot displace the
@@ -129,7 +130,7 @@ Describe 'The <_> draws its PDF figures with the Cairo device in Noto Sans' -For
     }
 
     It 'has no figure chunk that sets its own device or its arguments' {
-        $chunkDevice = '^\s*#\|\s*(dev|dev[.-]args|fig-format|fig\.format)\s*:|^\s*`{3,}\s*\{r\b[^}]*\bdev(\.args)?\s*='
+        $chunkDevice = '^\s*#\|\s*(dev|dev[.-]args|fig-format|fig\.format)\s*:|^\s*`{3,}\s*\{r\b[^}]*\b(dev(\.args)?|fig\.format)\s*='
         $hits = Get-ChildItem -LiteralPath $reportDir -Recurse -Include '*.qmd', '*.Rmd' |
             Select-String -Pattern $chunkDevice |
             ForEach-Object { "$($_.Path | Split-Path -Leaf):$($_.LineNumber): $($_.Line.Trim())" }
