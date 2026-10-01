@@ -317,11 +317,12 @@ When adding a new file to po4a that already has manual translations:
 
 No `sprintf` `%s`, markdown, or LaTeX syntax in translatable strings. Use `glue`-style `{named}` placeholders (e.g., `{patient_id}`, `{count}`). Apply formatting (bold, links, etc.) in rendering code, not in the string resource. Weblate validates `{name}` placeholders automatically.
 
-### Fonts *(Target)*
+### Fonts
 
-- Partner-Report & Reference-Report: EB Garamond primary, Noto Serif Condensed fallback for non-Latin scripts (Greek, Cyrillic, Hebrew, Devanagari, etc.); their PDF figures in Noto Sans, drawn with the Cairo device so the font is embedded, as PDF/A-4 requires, and, with every Noto Sans family Noto Sans falls back to for ≥ and other scripts, from the Noto project's static OTFs, which are CFF, since Cairo embeds a TrueType font's glyphs outside WinAnsi without the `CIDToGIDMap` entry PDF/A-4 also requires
-- Validation-Report & Partner-Certificate: Noto Sans
+- Partner-Report & Reference-Report: EB Garamond, which covers Latin, Greek, and Cyrillic. Their PDF figures are in Noto Sans, drawn with the Cairo device so the font is embedded, as PDF/A-4 requires. Noto Sans and every Noto Sans family it falls back to for ≥ and other scripts come from the Noto project's static OTFs, which are Compact Font Format (CFF) fonts, because Cairo embeds a TrueType font's glyphs outside WinAnsi without the `CIDToGIDMap` entry PDF/A-4 also requires; and fontconfig has to leave out their TrueType builds and DejaVu, or Noto Sans falls back to a TrueType font. `scripts/modules/NeoIPC-Tools/Tests/ReportFigureDevice.Tests.ps1` holds both reports to the Cairo device.
+- Validation-Report, Partner-Certificate & Patient-Data-Report: Noto Sans.
 - All fonts are SIL Open Font License.
+- *Target:* a Noto Serif Condensed fallback for the Partner and Reference Reports' body text in other scripts, such as Hebrew and Devanagari. No report configures one, so such body text has no glyphs.
 
 ### PowerShell Scripts
 
