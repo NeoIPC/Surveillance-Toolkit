@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-10-01 05:59+0200\n"
+"POT-Creation-Date: 2026-10-01 19:22+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Language-Team: none\n"
 "Language: en\n"
@@ -3735,7 +3735,7 @@ msgstr ""
 #. type: Hash Value: patient_problem_dashboard_link_description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "Link to the patient's tracked entity instance dashboard on the NeoIPC Data Management Platform"
+msgid "Link to the patient’s tracked entity instance dashboard on the NeoIPC Data Management Platform"
 msgstr ""
 
 #. type: Hash Value: patient_problem_header_prefix
@@ -4273,7 +4273,7 @@ msgstr ""
 #. type: Hash Value: problems 48 summary
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The enrolment is dated on or after the patient's recorded death."
+msgid "The enrolment is dated on or after the patient’s recorded death."
 msgstr ""
 
 #. type: Hash Value: problems 49 description
@@ -4309,7 +4309,7 @@ msgstr ""
 #. type: Hash Value: problems 50 summary
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "A device-associated infection's enrolment counts no days of that device on its surveillance end form."
+msgid "A device-associated infection’s enrolment counts no days of that device on its surveillance end form."
 msgstr ""
 
 #. type: Hash Value: problems 51 description
@@ -4345,7 +4345,7 @@ msgstr ""
 #. type: Hash Value: problems 53 summary
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "An antibiotic substance's days exceed the total antibiotic days or the patient days."
+msgid "An antibiotic substance’s days exceed the total antibiotic days or the patient days."
 msgstr ""
 
 #. type: Hash Value: problems 54 description
@@ -4411,7 +4411,7 @@ msgstr ""
 #. type: Hash Value: problems 58 summary
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "A patient record's gestational age is recorded in a format other than the one the registration form requires."
+msgid "A patient record’s gestational age is recorded in a format other than the one the registration form requires."
 msgstr ""
 
 #. type: Hash Value: problems 59 description

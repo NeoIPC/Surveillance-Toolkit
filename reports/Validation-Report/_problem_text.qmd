@@ -13,26 +13,28 @@
 # formatting with the locale's digit grouping; a missing value reads as the
 # report's `missing_value` string — worded to sit inside a sentence — so a
 # template never receives an NA. Every value is then escaped for Markdown
-# here, at the boundary: a free-text pathogen name or a procedure description
-# is whatever someone typed, and must render as that rather than as emphasis,
-# a link or HTML, and a date's or a number's separators — the digit group
-# separator is a translated string — are literal characters as well.
+# here, at the boundary: a free-text infectious-agent name or a procedure
+# description is whatever someone typed, and must render as that rather than
+# as emphasis, a link or HTML, and a date's or a number's separators — the
+# digit group separator is a translated string — are literal characters as
+# well. The missing-value string is the report's own wording, so it is
+# escaped as a translation and takes the sentence's typography.
 format_context <- function(context, sR) {
   if (is.null(context) || ncol(context) == 0L)
     return(list())
   lapply(as.list(context), function(column) {
     value <- column[[1]]
-    text <- if (length(value) != 1L || is.na(value))
-      sR$missing_value
-    else if (inherits(value, "Date") || inherits(value, "POSIXt"))
-      format(value, format = "%x")
-    else if (is.numeric(value) && value == round(value))
-      format_integer(value, big_mark = sR$digit_group_separator)
-    else if (is.numeric(value))
-      format(value)
-    else
-      as.character(value)
-    escape_markdown(text)
+    if (length(value) != 1L || is.na(value))
+      return(escape_markdown_translation(sR$missing_value))
+    escape_markdown(
+      if (inherits(value, "Date") || inherits(value, "POSIXt"))
+        format(value, format = "%x")
+      else if (is.numeric(value) && value == round(value))
+        format_integer(value, big_mark = sR$digit_group_separator)
+      else if (is.numeric(value))
+        format(value)
+      else
+        as.character(value))
   })
 }
 
@@ -49,8 +51,9 @@ decorate_context <- function(rule_id, values, context, sR) {
     code  <- as.character(context[[decorations$field[i]]])
     label <- if (length(code) == 1L && !is.na(code))
       label_maps(sR)[[decorations$labels[i]]][[code]]
-    # A value, translated or not, is escaped like every other value.
-    values[[decorations$placeholder[i]]] <- escape_markdown(
+    # A label is a translated string: escaped so it cannot become markup,
+    # and set with the same typography as the sentence around it.
+    values[[decorations$placeholder[i]]] <- escape_markdown_translation(
       if (is.null(label)) sR$missing_value else label)
   }
   values
@@ -71,10 +74,10 @@ fall_back_context <- function(rule_id, context) {
 
 # The template one finding is rendered with: the rule's `description`, or a
 # second complete sentence rather than one sentence with an optional
-# fragment — for rule 20 a pathogen recorded as causing a secondary sepsis,
-# for rule 55 a secondary-BSI item that was never answered, which has no
-# answer a label could name. `_setup.qmd` has checked that every rule carries
-# the templates it renders with before anything is composed.
+# fragment — for rule 20 an infectious agent recorded as causing a secondary
+# sepsis, for rule 55 a secondary-BSI item that was never answered, which has
+# no answer a label could name. `_setup.qmd` has checked that every rule
+# carries the templates it renders with before anything is composed.
 select_template <- function(rule_id, context, sR) {
   key <- if (rule_id == 20L && isTRUE(context$secondary_bsi))
     "description_secondary_bsi"

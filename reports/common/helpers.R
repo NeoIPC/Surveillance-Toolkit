@@ -1208,23 +1208,27 @@ escape_latex <- function(x) {
   }, character(1), USE.NAMES = FALSE)
 }
 
-#' Escape a sentence for insertion into Pandoc Markdown as a paragraph of its
-#' own
+#' Escape a translated string for insertion into Pandoc Markdown
 #'
-#' Unlike [escape_markdown()], which keeps a value exactly as typed, this
-#' leaves the four characters Pandoc's smart typography reads unescaped — `'`,
-#' `"`, `-` and `.` — so a translation's apostrophes, quotation marks, dashes
-#' and ellipses are set as in the rest of the report. Every other ASCII
-#' punctuation character is backslash-escaped, so none can open emphasis, a
-#' link, math, raw TeX or HTML, or a citation. A paragraph's first characters
-#' can open a list as well, so a leading `-`, and the full stop after a
-#' leading number or word, as in "1." or "z. B.", are escaped too. Runs of
-#' whitespace, line breaks included, become one space first, and the ends are
-#' trimmed, since a line break or an indent could end the paragraph or make it
-#' a code block.
+#' For a string from the string resources that the code places into Markdown
+#' it builds: a sentence standing as a paragraph of its own, or a label inside
+#' a sentence, a heading or the text of a link. Unlike [escape_markdown()],
+#' which keeps a value exactly as typed, this leaves the four characters
+#' Pandoc's smart typography reads unescaped — `'`, `"`, `-`, and `.` — so a
+#' translation's apostrophes, quotation marks, dashes, and ellipses are set as
+#' in the rest of the report. Every other ASCII punctuation character is
+#' backslash-escaped, so none can open emphasis, a link, math, raw TeX or
+#' HTML, or a citation. The first characters of a paragraph, or of a list item
+#' a translated sentence begins with the string, can open a list as well, so a
+#' leading `-`, and the full stop after a leading number or word, as in "1."
+#' or "z. B.", are escaped too. Runs of whitespace, line breaks included,
+#' become one space first, and the ends are trimmed, since a line break or an
+#' indent could end the block or make it a code block. Not for a link's
+#' title: Pandoc never sets a title's quotation marks, and a `"` left
+#' unescaped can end it.
 #' @param x character vector
 #' @return the vector escaped as described
-escape_markdown_paragraph <- function(x) {
+escape_markdown_translation <- function(x) {
   x <- gsub("[[:space:]]+", " ", trimws(x), perl = TRUE)
   x <- gsub("([!#$%&()*+,/:;<=>?@\\[\\\\\\]^_`{|}~])", "\\\\\\1", x, perl = TRUE)
   x <- sub("^-", "\\\\-", x, perl = TRUE)
@@ -1243,7 +1247,7 @@ escape_markdown_paragraph <- function(x) {
 no_data_table <- function(message = sR$no_data) {
   cat(
     '::: {.content-visible unless-format="pdf"}',
-    escape_markdown_paragraph(message),
+    escape_markdown_translation(message),
     ":::",
     "",
     '::: {.content-visible when-format="pdf"}',

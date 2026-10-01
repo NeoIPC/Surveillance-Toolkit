@@ -11,6 +11,10 @@
 # records for each rule (see its "Context fields" section); the names are
 # part of the string and stay as they are in every translation.
 #
+# A comment block that begins with a `Translators:` line, directly above a key, is that string's
+# explanation in Weblate, where translators read it: po4a does not carry comments into the
+# catalogue, so each is entered there from here. Every other comment is for maintainers.
+#
 # Language: en
 
 adm_problem_header_prefix: Admission event with the admission date
@@ -27,16 +31,28 @@ neoipc_surveillance_partner_code: NeoIPC Surveillance Partner Code
 no_problems_detected: >-
   No problem was detected in the data of the departments listed above as of
   the date this report was created.
+# Translators:
+# The tooltip of the link in each patient's heading, which opens the patient's dashboard in DHIS2.
+# The report shows it as typed, without setting its quotation marks, so type your language's own
+# apostrophe and quotation marks.
 patient_problem_dashboard_link_description: >-
-  Link to the patient's tracked entity instance dashboard on the NeoIPC Data
+  Link to the patient’s tracked entity instance dashboard on the NeoIPC Data
   Management Platform
 patient_problem_header_prefix: Patient with the NeoIPC-ID
+# Translators:
+# `{support_link}` is replaced by a link whose text is the translation of "support e-mail address"
+# and which opens an e-mail to the NeoIPC support team. Keep it as written, where your sentence
+# needs that phrase.
 patient_problem_multiple_hint: >-
   We have detected more than one problem in this patient record. It can
   sometimes be difficult to fix multiple problems in a patient record, because
   one single error may be causing more than one problem, or fixing one problem
   may cause a new one. If you are unsure how to proceed, please get in touch
   with us via our {support_link} and we will be happy to help you.
+# Translators:
+# The body of the e-mail the support link opens in the reader's e-mail program, as it is typed here:
+# keep its line breaks and type your language's own quotation marks. `{patient_id}` is replaced by
+# the patient's NeoIPC ID as the department recorded it. Keep it as written.
 patient_problem_multiple_hint_email_body: |
   Dear NeoIPC Surveillance support team,
   my validation report contains multiple errors for the patient with the id '{patient_id}'.
@@ -44,86 +60,222 @@ patient_problem_multiple_hint_email_body: |
   Best regards,
 patient_problem_multiple_hint_email_subject: >-
   Support request regarding complex errors in a patient record
+# Translators:
+# The entry for the validation rules in the report's header when every rule was applied. `{count}`
+# is replaced by the number of rules, a whole number. Keep it as written.
 rules_applied_all: "All {count} rules"
+# Translators:
+# The entry for the validation rules in the report's header when only some were applied. `{applied}`
+# is replaced by the number of rules applied and `{total}` by the number of rules there are, both
+# whole numbers; `{not_applied}` by the list of the rules not applied, each as its number followed
+# by its summary in parentheses, separated by semicolons. Keep all three as written.
 rules_applied_subset: "{applied} of {total} rules; the rules not applied are {not_applied}"
+# Translators:
+# Follows each problem the report lists. `{reference}` is replaced by a link to the section that
+# explains the problem, shown as the word for "Section" in the report's language and the section's
+# number, such as "Section 3.2". Keep it as written.
 see_problem_details: "See {reference}."
+# Translators:
+# Stands in place of a value a record lacks, inside a sentence: in quotation marks, in parentheses,
+# after "from" or "to", and in the heading of a form after the label of its date. Write it as a
+# phrase that reads in those places rather than as a label.
 missing_value: not available
 support_email_address_link_text: support e-mail address
 
+# Each rule has a `description`, the sentence the report shows for one finding, and a `summary`, one
+# sentence saying what the rule checks; the explanation above each is the one translators read.
 problems:
   "1":
     description: >-
       The patient record does not have an enrolment.
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
     summary: The patient record has no enrolment.
   "2":
     description: >-
       The patient record has a completed surveillance end form but the
       enrolment is still active.
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
     summary: The surveillance end form is completed while the enrolment is still active.
   "3":
+    # Translators:
+    # `{occurredAt}` is replaced by the admission date on the admission form and `{enrolledAt}` by
+    # the admission date in the enrolment, each a date in the date format of the report's language.
+    # Keep both as written.
     description: >-
       The admission date in the admission form ({occurredAt}) differs from the
       admission date in the enrolment ({enrolledAt}).
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
     summary: The admission date in the admission form differs from the admission date in the enrolment.
   "4":
+    # Translators:
+    # `{endOccurredAt}` is replaced by the surveillance end date on the surveillance end form and
+    # `{admOccurredAt}` by the admission date on the admission form, each a date in the date format
+    # of the report's language. Keep both as written.
     description: >-
       The date of the end of the surveillance ({endOccurredAt}) is earlier than
       the date of admission on the admission form ({admOccurredAt}).
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
     summary: The surveillance end date is earlier than the admission date on the admission form.
   "5":
+    # Translators:
+    # `{status}` is replaced by the admission form's status as DHIS2 stores it: an English code in
+    # capital letters, such as ACTIVE, which stays untranslated and is quoted because it is a code.
+    # Keep it as written.
     description: >-
       The patient record's admission form is not completed (status is
       '{status}').
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
     summary: The admission form is not completed.
   "6":
+    # Translators:
+    # `{status}` is replaced by the surveillance end form's status as DHIS2 stores it: an English
+    # code in capital letters, such as ACTIVE, which stays untranslated and is quoted because it is
+    # a code. Keep it as written.
     description: >-
       The patient record has a completed enrolment but the surveillance end
       form is not completed (status is '{status}').
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
     summary: The enrolment is completed but the surveillance end form is not.
   "7":
+    # Translators:
+    # `{enrollment_status}`, `{end_status}`, and `{bsi_status}` are replaced by the statuses of the
+    # enrolment, the surveillance end form, and the sepsis form as DHIS2 stores them: English codes
+    # in capital letters, such as ACTIVE or COMPLETED, which stay untranslated and are quoted
+    # because they are codes; `{end_status}` is the wording for a missing value ("not available")
+    # where the enrolment has no surveillance end form. Keep all three as written.
     description: >-
       The patient record has a completed enrolment or surveillance end form
       but a sepsis form is not completed (enrolment status is
       '{enrollment_status}', surveillance end form status is '{end_status}',
       sepsis form status is '{bsi_status}').
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
     summary: The enrolment or the surveillance end form is completed but a sepsis form is not.
   "8":
+    # Translators:
+    # `{enrollment_status}`, `{end_status}`, and `{nec_status}` are replaced by the statuses of the
+    # enrolment, the surveillance end form, and the necrotizing enterocolitis form as DHIS2 stores
+    # them: English codes in capital letters, such as ACTIVE or COMPLETED, which stay untranslated
+    # and are quoted because they are codes; `{end_status}` is the wording for a missing value ("not
+    # available") where the enrolment has no surveillance end form. Keep all three as written.
     description: >-
       The patient record has a completed enrolment or surveillance end form
       but a necrotizing enterocolitis form is not completed (enrolment status
       is '{enrollment_status}', surveillance end form status is '{end_status}',
       necrotizing enterocolitis form status is '{nec_status}').
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
     summary: The enrolment or the surveillance end form is completed but a necrotizing enterocolitis form is not.
   "9":
+    # Translators:
+    # `{enrollment_status}`, `{end_status}`, and `{hap_status}` are replaced by the statuses of the
+    # enrolment, the surveillance end form, and the pneumonia form as DHIS2 stores them: English
+    # codes in capital letters, such as ACTIVE or COMPLETED, which stay untranslated and are quoted
+    # because they are codes; `{end_status}` is the wording for a missing value ("not available")
+    # where the enrolment has no surveillance end form. Keep all three as written.
     description: >-
       The patient record has a completed enrolment or surveillance end form
       but a pneumonia form is not completed (enrolment status is
       '{enrollment_status}', surveillance end form status is '{end_status}',
       pneumonia form status is '{hap_status}').
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
     summary: The enrolment or the surveillance end form is completed but a pneumonia form is not.
   "10":
+    # Translators:
+    # `{enrollment_status}`, `{end_status}`, and `{pro_status}` are replaced by the statuses of the
+    # enrolment, the surveillance end form, and the surgical procedure form as DHIS2 stores them:
+    # English codes in capital letters, such as ACTIVE or COMPLETED, which stay untranslated and are
+    # quoted because they are codes; `{end_status}` is the wording for a missing value ("not
+    # available") where the enrolment has no surveillance end form. Keep all three as written.
     description: >-
       The patient record has a completed enrolment or surveillance end form
       but a surgical procedure form is not completed (enrolment status is
       '{enrollment_status}', surveillance end form status is '{end_status}',
       surgical procedure form status is '{pro_status}').
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
     summary: The enrolment or the surveillance end form is completed but a surgical procedure form is not.
   "11":
+    # Translators:
+    # `{enrollment_status}`, `{end_status}`, and `{ssi_status}` are replaced by the statuses of the
+    # enrolment, the surveillance end form, and the surgical site infection form as DHIS2 stores
+    # them: English codes in capital letters, such as ACTIVE or COMPLETED, which stay untranslated
+    # and are quoted because they are codes; `{end_status}` is the wording for a missing value ("not
+    # available") where the enrolment has no surveillance end form. Keep all three as written.
     description: >-
       The patient record has a completed enrolment or surveillance end form
       but a surgical site infection form is not completed (enrolment status
       is '{enrollment_status}', surveillance end form status is '{end_status}',
       surgical site infection form status is '{ssi_status}').
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
     summary: The enrolment or the surveillance end form is completed but a surgical site infection form is not.
   "12":
+    # Translators:
+    # `{enrolledAt}` is replaced by the admission date in the enrolment, `{admOccurredAt}` by the
+    # admission date on the admission form, `{endOccurredAt}` by the surveillance end date, and
+    # `{bsiOccurredAt}` by the date of the sepsis form, each a date in the date format of the
+    # report's language; `{admOccurredAt}` and `{endOccurredAt}` are the wording for a missing value
+    # ("not available") where that form has no date. Keep all four as written.
     description: >-
       The patient record contains a sepsis form with an infection date that
       is not within the time frame of a documented enrolment (admission date
       in the enrolment '{enrolledAt}', admission date in the admission form is
       '{admOccurredAt}', surveillance end date is '{endOccurredAt}', sepsis
       date is '{bsiOccurredAt}').
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
     summary: A sepsis form is dated outside the time frame of its enrolment.
   "13":
+    # Translators:
+    # `{enrolledAt}` is replaced by the admission date in the enrolment, `{admOccurredAt}` by the
+    # admission date on the admission form, `{endOccurredAt}` by the surveillance end date, and
+    # `{necOccurredAt}` by the date of the necrotizing enterocolitis form, each a date in the date
+    # format of the report's language; `{admOccurredAt}` and `{endOccurredAt}` are the wording for a
+    # missing value ("not available") where that form has no date. Keep all four as written.
     description: >-
       The patient record contains a necrotizing enterocolitis form with an
       infection date that is not within the time frame of a documented
@@ -131,257 +283,684 @@ problems:
       date in the admission form is '{admOccurredAt}', surveillance end date
       is '{endOccurredAt}', necrotizing enterocolitis date is
       '{necOccurredAt}').
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
     summary: A necrotizing enterocolitis form is dated outside the time frame of its enrolment.
   "14":
+    # Translators:
+    # `{enrolledAt}` is replaced by the admission date in the enrolment, `{admOccurredAt}` by the
+    # admission date on the admission form, `{endOccurredAt}` by the surveillance end date, and
+    # `{hapOccurredAt}` by the date of the pneumonia form, each a date in the date format of the
+    # report's language; `{admOccurredAt}` and `{endOccurredAt}` are the wording for a missing value
+    # ("not available") where that form has no date. Keep all four as written.
     description: >-
       The patient record contains a pneumonia form with an infection date
       that is not within the time frame of a documented enrolment (admission
       date in the enrolment '{enrolledAt}', admission date in the admission
       form is '{admOccurredAt}', surveillance end date is '{endOccurredAt}',
       pneumonia date is '{hapOccurredAt}').
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
     summary: A pneumonia form is dated outside the time frame of its enrolment.
   "15":
+    # Translators:
+    # `{enrolledAt}` is replaced by the admission date in the enrolment, `{admOccurredAt}` by the
+    # admission date on the admission form, `{endOccurredAt}` by the surveillance end date, and
+    # `{proOccurredAt}` by the date of the surgical procedure form, each a date in the date format
+    # of the report's language; `{admOccurredAt}` and `{endOccurredAt}` are the wording for a
+    # missing value ("not available") where that form has no date. Keep all four as written.
     description: >-
       The patient record contains a surgical procedure form with a procedure
       date that is not within the time frame of a documented enrolment
       (admission date in the enrolment '{enrolledAt}', admission date in the
       admission form is '{admOccurredAt}', surveillance end date is
       '{endOccurredAt}', surgical procedure date is '{proOccurredAt}').
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
     summary: A surgical procedure form is dated outside the time frame of its enrolment.
   "17":
+    # Translators:
+    # `{enrolledAt_this}` and `{endOccurredAt_this}` are replaced by the admission and surveillance
+    # end dates of this enrolment, `{enrolledAt_other}` and `{endOccurredAt_other}` by those of the
+    # other enrolment, each a date in the date format of the report's language, or the wording for a
+    # missing value ("not available") for an enrolment without a surveillance end date. Keep all
+    # four as written.
     description: >-
       The patient record contains an enrolment with a time interval that
       overlaps with that of another enrolment (this enrolment has an interval
       from {enrolledAt_this} to {endOccurredAt_this} and the other enrolment
       has an interval from {enrolledAt_other} to {endOccurredAt_other}).
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
     summary: The time interval of an enrolment overlaps with that of another enrolment of the same patient.
   "18":
+    # Translators:
+    # `{patient_days}` is replaced by the number of patient days recorded on the surveillance end
+    # form and `{patient_days_calculated}` by the number calculated from the admission and
+    # surveillance end dates, each a whole number; `{patient_days}` is the wording for a missing
+    # value ("not available") where the form records none, and `{patient_days_calculated}` where the
+    # surveillance end form has no date. Keep both as written.
     description: >-
       The number of patient days ({patient_days}) does not match the
       calculated value ({patient_days_calculated}).
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
     summary: The number of patient days does not match the value calculated from the admission and surveillance end dates.
   "19":
+    # Translators:
+    # `{ssi_type}` is replaced by the depth of the surgical site infection, as translated in the
+    # strings "superficial incisional SSI", "deep incisional SSI", and "organ/space SSI", or by the
+    # wording for a missing value ("not available") where the form records none, so the sentence has
+    # to read with each. Keep it as written.
     description: >-
       The surgical site infection ({ssi_type}) did not occur during the
       follow-up period of a recorded surgical procedure.
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
     summary: A surgical site infection did not occur during the follow-up period of a recorded surgical procedure.
   "20":
+    # Translators:
+    # `{index}` is replaced by the number of the entry on the form into which the name was typed, a
+    # whole number such as 1, and `{name}` by the name exactly as it was typed and untranslated, or
+    # by the wording for a missing value ("not available") where nothing was typed. Keep both as
+    # written.
     description: >-
       The pathogen manually entered as pathogen {index} ('{name}') cannot be
       assigned.
+    # Translators:
+    # `{index}` is replaced by the number of the entry into which the name was typed, among the
+    # entries for the infectious agents of a secondary sepsis, a whole number such as 1, and
+    # `{name}` by the name exactly as it was typed and untranslated, or by the wording for a missing
+    # value ("not available") where nothing was typed. Keep both as written.
     description_secondary_bsi: >-
       The pathogen manually entered as pathogen {index} causing secondary
       sepsis ('{name}') cannot be assigned.
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
     summary: A manually entered pathogen cannot be assigned to a catalogued infectious agent.
   "21":
+    # Translators:
+    # `{ab_substance_days}` is replaced by the sum of the days of every antibiotic substance entered
+    # on the surveillance end form and `{ab_days}` by the total number of antibiotic days recorded
+    # there, each a whole number. Keep both as written.
     description: >-
       The sum of all antibiotic substance days ({ab_substance_days}) is less
       than the total number of antibiotic days ({ab_days}).
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
     summary: The antibiotic substance days sum to less than the total number of antibiotic days.
   "22":
+    # Translators:
+    # `{procedure_description}` is replaced by the procedure's description and `{procedure_code}` by
+    # its ICHI code, each exactly as it was entered on the form and untranslated;
+    # `{procedure_description}` is the wording for a missing value ("not available") where none was
+    # entered. Keep both as written.
     description: >-
       The surgical procedure ('{procedure_description}') has an invalid ICHI
       code ('{procedure_code}') as the main procedure code.
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
     summary: A surgical procedure has an invalid ICHI code as its main procedure code.
   "23":
+    # Translators:
+    # `{procedure_description}` is replaced by the procedure's description and `{procedure_code}` by
+    # its ICHI code, each exactly as it was entered on the form and untranslated;
+    # `{procedure_description}` is the wording for a missing value ("not available") where none was
+    # entered. Keep both as written.
     description: >-
       The surgical procedure ('{procedure_description}') has an invalid ICHI
       code ('{procedure_code}') as the first side procedure code.
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
     summary: A surgical procedure has an invalid ICHI code as its first side procedure code.
   "24":
+    # Translators:
+    # `{procedure_description}` is replaced by the procedure's description and `{procedure_code}` by
+    # its ICHI code, each exactly as it was entered on the form and untranslated;
+    # `{procedure_description}` is the wording for a missing value ("not available") where none was
+    # entered. Keep both as written.
     description: >-
       The surgical procedure ('{procedure_description}') has an invalid ICHI
       code ('{procedure_code}') as the second side procedure code.
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
     summary: A surgical procedure has an invalid ICHI code as its second side procedure code.
   "25":
     description: >-
       The patient record has a completed enrolment but no surveillance end
       form.
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
     summary: The enrolment is completed but has no surveillance end form.
   "26":
     description: >-
       The patient record has a completed enrolment but no admission form.
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
     summary: The enrolment is completed but has no admission form.
   "27":
+    # Translators:
+    # `{dol}` is replaced by the day of life stored in the sepsis form and `{dol_calc}` by the day
+    # of life calculated from the admission form's day of life and the days from the admission to
+    # the date of the sepsis form, each a whole number. Keep both as written.
     description: >-
       The day of life stored in the sepsis form ({dol}) does not match the
       calculated value ({dol_calc}).
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
     summary: The day of life stored in the sepsis form does not match the value calculated from the dates.
   "28":
+    # Translators:
+    # `{los}` is replaced by the day of occurrence after admission stored in the sepsis form and
+    # `{los_calc}` by the number of days from the admission to the date of the sepsis form, each a
+    # whole number. Keep both as written.
     description: >-
       The day of occurrence after admission stored in the sepsis form ({los})
       does not match the calculated value ({los_calc}).
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
     summary: The day of occurrence after admission stored in the sepsis form does not match the value calculated from the dates.
   "29":
+    # Translators:
+    # `{dol}` is replaced by the day of life stored in the sepsis form, a whole number below 4; the
+    # day of birth is day of life 1. Keep it as written.
     description: >-
       The sepsis occurred within the first 3 days of life (day of life is
       {dol}).
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
     summary: A sepsis occurred within the first three days of life.
   "30":
+    # Translators:
+    # `{dos}` is replaced by the day of hospitalization on which the sepsis occurred, 1 or 2, the
+    # day of admission being day 1. Keep it as written.
     description: >-
       The sepsis occurred within the first two days of hospitalization of a
       referred or (re-)admitted patient (day of hospitalization is {dos}).
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
     summary: A sepsis occurred within the first two days of hospitalization of a referred or (re-)admitted patient.
   "31":
+    # Translators:
+    # `{dol}` is replaced by the day of life stored in the pneumonia form and `{dol_calc}` by the
+    # day of life calculated from the admission form's day of life and the days from the admission
+    # to the date of the pneumonia form, each a whole number. Keep both as written.
     description: >-
       The day of life stored in the pneumonia form ({dol}) does not match the
       calculated value ({dol_calc}).
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
     summary: The day of life stored in the pneumonia form does not match the value calculated from the dates.
   "32":
+    # Translators:
+    # `{los}` is replaced by the day of occurrence after admission stored in the pneumonia form and
+    # `{los_calc}` by the number of days from the admission to the date of the pneumonia form, each
+    # a whole number. Keep both as written.
     description: >-
       The day of occurrence after admission stored in the pneumonia form
       ({los}) does not match the calculated value ({los_calc}).
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
     summary: The day of occurrence after admission stored in the pneumonia form does not match the value calculated from the dates.
   "33":
+    # Translators:
+    # `{dol}` is replaced by the day of life stored in the pneumonia form, a whole number below 4;
+    # the day of birth is day of life 1. Keep it as written.
     description: >-
       The pneumonia occurred within the first 3 days of life (day of life is
       {dol}).
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
     summary: A pneumonia occurred within the first three days of life.
   "34":
+    # Translators:
+    # `{dos}` is replaced by the day of hospitalization on which the pneumonia occurred, 1 or 2, the
+    # day of admission being day 1. Keep it as written.
     description: >-
       The pneumonia occurred within the first two days of hospitalization of a
       referred or (re-)admitted patient (day of hospitalization is {dos}).
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
     summary: A pneumonia occurred within the first two days of hospitalization of a referred or (re-)admitted patient.
   "35":
+    # Translators:
+    # `{dol}` is replaced by the day of life stored in the necrotizing enterocolitis form and
+    # `{dol_calc}` by the day of life calculated from the admission form's day of life and the days
+    # from the admission to the date of the necrotizing enterocolitis form, each a whole number.
+    # Keep both as written.
     description: >-
       The day of life stored in the necrotizing enterocolitis form ({dol}) does
       not match the calculated value ({dol_calc}).
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
     summary: The day of life stored in the necrotizing enterocolitis form does not match the value calculated from the dates.
   "36":
+    # Translators:
+    # `{los}` is replaced by the day of occurrence after admission stored in the necrotizing
+    # enterocolitis form and `{los_calc}` by the number of days from the admission to the date of
+    # the necrotizing enterocolitis form, each a whole number. Keep both as written.
     description: >-
       The day of occurrence after admission stored in the necrotizing
       enterocolitis form ({los}) does not match the calculated value
       ({los_calc}).
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
     summary: The day of occurrence after admission stored in the necrotizing enterocolitis form does not match the value calculated from the dates.
   "37":
+    # Translators:
+    # `{dol}` is replaced by the day of life stored in the necrotizing enterocolitis form, a whole
+    # number below 4; the day of birth is day of life 1. Keep it as written.
     description: >-
       The necrotizing enterocolitis occurred within the first 3 days of life
       (day of life is {dol}).
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
     summary: A necrotizing enterocolitis occurred within the first three days of life.
   "38":
+    # Translators:
+    # `{dos}` is replaced by the day of hospitalization on which the necrotizing enterocolitis
+    # occurred, 1 or 2, the day of admission being day 1. Keep it as written.
     description: >-
       The necrotizing enterocolitis occurred within the first two days of
       hospitalization of a referred or (re-)admitted patient (day of
       hospitalization is {dos}).
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
     summary: A necrotizing enterocolitis occurred within the first two days of hospitalization of a referred or (re-)admitted patient.
   "39":
+    # Translators:
+    # `{dol}` is replaced by the day of life stored in the surgical procedure form and `{dol_calc}`
+    # by the day of life calculated from the admission form's day of life and the days from the
+    # admission to the date of the surgical procedure form, each a whole number. Keep both as
+    # written.
     description: >-
       The day of life stored in the surgical procedure form ({dol}) does not
       match the calculated value ({dol_calc}).
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
     summary: The day of life stored in the surgical procedure form does not match the value calculated from the dates.
   "40":
+    # Translators:
+    # `{los}` is replaced by the day of occurrence after admission stored in the surgical procedure
+    # form and `{los_calc}` by the number of days from the admission to the date of the surgical
+    # procedure form, each a whole number. Keep both as written.
     description: >-
       The day of occurrence after admission stored in the surgical procedure
       form ({los}) does not match the calculated value ({los_calc}).
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
     summary: The day of occurrence after admission stored in the surgical procedure form does not match the value calculated from the dates.
   "41":
+    # Translators:
+    # `{dol}` is replaced by the day of life stored in the surgical site infection form and
+    # `{dol_calc}` by the day of life calculated from the admission form's day of life and the days
+    # from the admission to the date of the surgical site infection form, each a whole number. Keep
+    # both as written.
     description: >-
       The day of life stored in the surgical site infection form ({dol}) does
       not match the calculated value ({dol_calc}).
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
     summary: The day of life stored in the surgical site infection form does not match the value calculated from the dates.
   "42":
+    # Translators:
+    # `{los}` is replaced by the day of occurrence after admission stored in the surgical site
+    # infection form and `{los_calc}` by the number of days from the admission to the date of the
+    # surgical site infection form, each a whole number. Keep both as written.
     description: >-
       The day of occurrence after admission stored in the surgical site
       infection form ({los}) does not match the calculated value ({los_calc}).
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
     summary: The day of occurrence after admission stored in the surgical site infection form does not match the value calculated from the dates.
   "43":
+    # Translators:
+    # `{days_open}` is replaced by the number of whole days from the admission to the day the data
+    # were read, a whole number above 120, and `{enrolledAt}` by the admission date in the
+    # enrolment, a date in the date format of the report's language. Keep both as written.
     description: >-
       The enrolment has been active for {days_open} days since the admission
       on {enrolledAt} and has no surveillance end form. If the infant is
       still in the department, this message can be ignored.
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
     summary: The enrolment is still active more than 120 days after the admission and has no surveillance end form.
   "44":
+    # Translators:
+    # `{days_open}` is replaced by the number of whole days from the admission to the day the data
+    # were read, a whole number above 120; `{enrolledAt}` by the admission date in the enrolment, a
+    # date in the date format of the report's language; and `{status}` by the surveillance end
+    # form's status as DHIS2 stores it: an English code in capital letters, such as ACTIVE, which
+    # stays untranslated and is quoted because it is a code. Keep all three as written.
     description: >-
       The enrolment has been active for {days_open} days since the admission
       on {enrolledAt} and its surveillance end form is not completed (status
       is '{status}'). If the infant is still in the department, this message
       can be ignored.
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
     summary: The enrolment is still active more than 120 days after the admission and its surveillance end form is not completed.
   "45":
+    # Translators:
+    # `{dol}` is replaced by the day of life at admission recorded on the admission form, a whole
+    # number above 120. Keep it as written.
     description: >-
       The infant was admitted on day of life {dol}, after day of life 120, the
       last day on which an infant is eligible for the surveillance.
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
     summary: The day of life at admission is above 120, the last eligible day.
   "46":
+    # Translators:
+    # `{dol}` is replaced by the day of life at admission recorded on the admission form, a whole
+    # number below 2, or by the wording for a missing value ("not available") where the form records
+    # none, so the sentence has to read with either. Keep it as written.
     description: >-
       The admission form records a transfer or readmission after the day of
       birth, but the day of life at admission is {dol}; the day of birth is
       day of life 1, so an infant admitted after it is on day of life 2 or
       later.
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
     summary: The day of life at admission of an infant transferred or readmitted after the day of birth is missing or below 2.
   "47":
+    # Translators:
+    # `{enrolledAt}` is replaced by the date of this enrolment and `{enrolledAt_previous}` by the
+    # date of the patient's latest earlier enrolment, each a date in the date format of the report's
+    # language; `{type_label}` by the type of admission the form records, as translated in the
+    # strings "admitted from the delivery room" and "transferred or readmitted on the day of birth",
+    # which complete "records the infant as". Keep all three as written.
     description: >-
       The admission form of the enrolment dated {enrolledAt} records the infant
       as {type_label}, but the patient has an earlier enrolment dated
       {enrolledAt_previous}, so this admission is a transfer or readmission
       after the day of birth.
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
     summary: A later enrolment of the patient is recorded as an admission from the delivery room or on the day of birth.
   "48":
+    # Translators:
+    # `{enrolledAt}` is replaced by the date of this enrolment and `{death_date}` by the date of the
+    # patient's death recorded on the surveillance end form of another enrolment, each a date in the
+    # date format of the report's language. Keep both as written.
     description: >-
       The enrolment is dated {enrolledAt}, but the patient's death was recorded
       on {death_date} on the surveillance end form of another enrolment.
-    summary: The enrolment is dated on or after the patient's recorded death.
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
+    summary: The enrolment is dated on or after the patient’s recorded death.
   "49":
+    # Translators:
+    # `{occurredAt}` is replaced by the date of this infection and `{occurredAt_previous}` by the
+    # date of the patient's previous infection of the same type, each a date in the date format of
+    # the report's language. Keep both as written.
     description: >-
       The infection dated {occurredAt} is recorded fewer than 14 days after the
       patient's previous infection of the same type, dated
       {occurredAt_previous}.
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
     summary: The same type of infection was recorded again fewer than 14 days after the previous one.
   "50":
+    # Translators:
+    # `{device_label}` is replaced by the abbreviation of a device, as translated in the strings
+    # "CVC", "PVC", "NIV", and "INV"; it appears twice, before "-associated" and before "days", so
+    # the sentence has to read with an abbreviation in both places. `{device_days}` is replaced by
+    # the number of that device's days recorded on the surveillance end form, which is 0 here, or by
+    # the wording for a missing value ("not available") where the form records none. Keep both as
+    # written.
     description: >-
       The infection is recorded as {device_label}-associated, but the
       {device_label} days on the enrolment's surveillance end form are
       {device_days}.
-    summary: A device-associated infection's enrolment counts no days of that device on its surveillance end form.
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
+    summary: A device-associated infection’s enrolment counts no days of that device on its surveillance end form.
   "51":
+    # Translators:
+    # `{count_label}` is replaced by the name of a day count on the surveillance end form, as
+    # translated in the strings such as "CVC days", "antibiotic days", or "INV days and NIV days
+    # together"; `{days}` by that count and `{patient_days}` by the number of patient days, each a
+    # whole number. Keep all three as written.
     description: >-
       The number of {count_label} ({days}) exceeds the number of patient days
       ({patient_days}).
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
     summary: A cumulative day count on the surveillance end form exceeds the number of patient days.
   "52":
+    # Translators:
+    # `{index}` is replaced by the number of the antibiotic substance entry on the surveillance end
+    # form, a whole number from 1 to 9; `{substance}` by the substance's name from the NeoIPC list
+    # of antimicrobial substances, or its code where the list has no name for it, or by the wording
+    # for a missing value ("not available") where no substance was entered; and `{days}` by the days
+    # entered for it, a whole number, or the wording for a missing value ("not available") where
+    # none were entered. Keep all three as written.
     description: >-
       Antibiotic substance entry {index} is incomplete: the substance is
       {substance} and its days are {days}.
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
     summary: An antibiotic substance entry holds a substance without its days or days without a substance.
   "53":
+    # Translators:
+    # `{index}` is replaced by the number of the antibiotic substance entry on the surveillance end
+    # form, a whole number from 1 to 9; `{substance}` by the substance's name from the NeoIPC list
+    # of antimicrobial substances, or its code where the list has no name for it, or by the wording
+    # for a missing value ("not available") where only days were entered; `{days}` by the days
+    # entered for it, a whole number; and `{ab_days}` by the total antibiotic days and
+    # `{patient_days}` by the patient days recorded on the form, each a whole number, or the wording
+    # for a missing value ("not available") where the form records none. Keep all five as written.
     description: >-
       Antibiotic substance entry {index} ({substance}) records more days
       ({days}) than the total antibiotic days ({ab_days}) or the patient days
       ({patient_days}).
-    summary: An antibiotic substance's days exceed the total antibiotic days or the patient days.
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
+    summary: An antibiotic substance’s days exceed the total antibiotic days or the patient days.
   "54":
+    # Translators:
+    # `{substance}` is replaced by the substance's name from the NeoIPC list of antimicrobial
+    # substances, or its code where the list has no name for it; `{index}` and `{index_other}` by
+    # the numbers of the two antibiotic substance entries that record it, whole numbers from 1 to 9,
+    # the lower one first. Keep all three as written.
     description: >-
       The antibiotic substance {substance} is recorded in entry {index} and in
       entry {index_other}.
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
     summary: The same antibiotic substance is recorded in two substance entries.
   "55":
+    # Translators:
+    # `{sec_bsi_label}` is replaced by the answer the form records for the secondary bloodstream
+    # infection item, as translated in the strings "Yes", "No", and "No follow-up", and is quoted
+    # because it is the form's answer; `{organisms}` by the number of infectious agents recorded on
+    # the form as causing the secondary bloodstream infection, a whole number, which is 0 when the
+    # answer is "Yes". Keep both as written.
     description: >-
       The secondary bloodstream infection item is '{sec_bsi_label}', but the
       number of secondary bloodstream infection organisms recorded is
       {organisms}.
+    # Translators:
+    # `{organisms}` is replaced by the number of infectious agents recorded on the form as causing
+    # the secondary bloodstream infection, a whole number above 0. Keep it as written.
     description_unanswered: >-
       The secondary bloodstream infection item has not been answered, but the
       number of secondary bloodstream infection organisms recorded is
       {organisms}.
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
     summary: The secondary bloodstream infection item disagrees with the secondary bloodstream infection organisms recorded.
   "56":
+    # Translators:
+    # `{siblings}` is replaced by the number of infants at birth recorded for the patient, a whole
+    # number below 2. Keep it as written.
     description: >-
       The patient is recorded as part of a multiple birth, but the number of
       infants at birth is {siblings}.
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
     summary: A patient recorded as part of a multiple birth has fewer than two infants at birth.
   "57":
     description: >-
       The patient record holds neither a birth weight nor a gestational age,
       although the registration requires one of the two.
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
     summary: A patient record holds neither a birth weight nor a gestational age.
   "58":
+    # Translators:
+    # `{gest_age}` is replaced by the gestational age exactly as it was recorded, which is not in
+    # the required format, so it stays untranslated and is quoted. Keep it as written. The example
+    # 25+4 is the format the registration form requires and stays as it is.
     description: >-
       The gestational age is recorded as '{gest_age}', which is not in the
       format the registration form requires: the completed weeks as two digits
       from 20 to 49, a plus sign, and the additional days as one digit from 0
       to 6, as in 25+4.
-    summary: A patient record's gestational age is recorded in a format other than the one the registration form requires.
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
+    summary: A patient record’s gestational age is recorded in a format other than the one the registration form requires.
   "59":
+    # Translators:
+    # `{findings}` is replaced by the number of features of generalized infection the form records,
+    # a whole number from 0 to 9, so the sentence has to read with 0, 1, or more. Keep it as
+    # written.
     description: >-
       The completed sepsis form meets neither the definition of a
       laboratory-confirmed bloodstream infection, since it records no
@@ -390,8 +969,18 @@ problems:
       antibiotic therapy for five or more days initiated, and at least two
       features of generalized infection (the form records {findings} of
       them).
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
     summary: A completed sepsis form without an infectious agent does not meet the definition of clinical sepsis.
   "60":
+    # Translators:
+    # `{imaging_count}`, `{clinical_count}`, and `{surgical_count}` are replaced by the numbers of
+    # radiological signs, clinical signs, and surgical or pathological findings recorded on the
+    # form, each a whole number; `{surgical_count}` is always 0, and at least one of the other two
+    # is 0 as well. Keep all three as written.
     description: >-
       The numbers of radiological signs ({imaging_count}), clinical signs
       ({clinical_count}), and surgical or pathological findings
@@ -400,12 +989,26 @@ problems:
       one radiological sign and at least one clinical sign, nor the surgical
       definition, which requires at least one surgical or pathological
       finding.
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
     summary: A completed necrotizing enterocolitis form meets neither the symptom-based nor the surgical definition.
   "61":
+    # Translators:
+    # `{ssi_type}` is replaced by the depth of surgical site infection the form records, as
+    # translated in the strings "superficial incisional SSI", "deep incisional SSI", and
+    # "organ/space SSI". Keep it as written.
     description: >-
       The findings recorded on the completed surgical site infection form do
       not meet the definition of the type of infection it records
       ({ssi_type}).
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
     summary: A completed surgical site infection form does not meet the definition of the type of infection it records.
 ssi_problem_header_prefix: Surgical Site Infection event with the infection date
 ssi_types:

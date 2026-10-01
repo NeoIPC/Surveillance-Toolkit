@@ -217,9 +217,10 @@ rules_applied_text <- if (length(rules_not_applied) == 0L) {
         rules_not_applied,
         vapply(
           as.character(rules_not_applied),
-          # A summary is a value handed to the header's template, so it is
-          # escaped like every other value.
-          \(id) escape_markdown(sR$problems[[id]]$summary),
+          # A summary is a translated string handed to the header's
+          # template: escaped so it cannot become markup, and set with the
+          # same typography as the sentence around it.
+          \(id) escape_markdown_translation(sR$problems[[id]]$summary),
           character(1))),
       collapse = "; "))
 }

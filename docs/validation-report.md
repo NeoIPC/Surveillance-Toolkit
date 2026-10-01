@@ -41,14 +41,18 @@ One function renders every rule (`problem_text()` in `_problem_text.qmd`):
    unnamed value, which it refuses. Every value is escaped for Markdown at this boundary
    (`escape_markdown()` in `reports/common/helpers.R`, which first collapses runs of whitespace, line
    breaks included, to one space, since a value is a phrase and a line break would end the heading or
-   link it sits in), so a free-text pathogen name or a procedure description renders as typed rather
-   than as emphasis, a link or HTML, and a date's or a number's separators — the digit group separator
-   is a translated string — are literal too. The same goes for every string that is placed into
-   markup the code builds rather than into a sentence: the patient id and the dashboard link's title in
-   a record's heading, the support link's label, the translated labels the decorations hand to the
-   templates as values, the rule summaries listed in the header, and the missing-value string wherever
-   it stands in for a value. The templates and headings themselves are the report's Markdown and are
-   not escaped.
+   link it sits in), so a free-text infectious-agent name or a procedure description renders as typed
+   rather than as emphasis, a link or HTML, and a date's or a number's separators — the digit group
+   separator is a translated string — are literal too. The patient id in a record's heading is escaped
+   the same way. A translated string the code places into markup it builds is escaped as well, but
+   with `escape_markdown_translation()`, which leaves the apostrophes, quotation marks, dashes, and
+   full stops to Pandoc's smart typography, so they are set like those of the sentence around them:
+   the support link's label, the translated labels the decorations hand to the templates as values,
+   the rule summaries listed in the header, and the missing-value string wherever it stands in for a
+   value. The dashboard link's title is the exception: Pandoc never sets a link title's typography,
+   and a quotation mark can end it, so it is escaped in full and its string carries its typographic
+   apostrophe itself. The templates and headings themselves are the report's Markdown and are not
+   escaped.
 2. `decorate_context()` adds the values a template needs beyond what the rule records: a localized
    label for each coded value `context_decorations` in `_mapping.qmd` names for the rule (rule 19's and
    rule 61's SSI type from `ssi_types`, rule 47's admission type from `admission_types`, rule 50's
@@ -65,8 +69,8 @@ One function renders every rule (`problem_text()` in `_problem_text.qmd`):
    the rule's sentences names. That last check reads the English source sentences, since it guards
    the table: a translation that words a sentence without the label still renders.
 3. `select_template()` picks the template. Two rules carry a second complete sentence rather than one
-   sentence with an optional fragment: rule 20 (`description_secondary_bsi`) for a pathogen recorded as
-   causing a secondary sepsis, and rule 55 (`description_unanswered`) for a secondary-BSI item that
+   sentence with an optional fragment: rule 20 (`description_secondary_bsi`) for an infectious agent
+   recorded as causing a secondary sepsis, and rule 55 (`description_unanswered`) for a secondary-BSI item that
    was never answered, which has no answer a label could name.
 4. The sentence is followed by `see_problem_details`, interpolated with the cross-reference to the
    rule's `primaryDetail` from `_mapping.qmd`. That column exists because the detail a rule cites is not
@@ -181,7 +185,10 @@ dataset is not what the report expects, and a document that claimed those rules 
    no-detect / exception tests, note it in `NEWS.md`, and release the package.
 2. Here: add `problems.N` with `description` (named placeholders equal to the rule's context fields,
    plus the labels its decorations add) and
-   `summary` to `content/_sR.yaml`, and where the sentence shows a coded value as a label, a row in
+   `summary` to `content/_sR.yaml`, each with its `# Translators:` comment directly above it — the
+   `description`'s saying what each placeholder is replaced with, the `summary`'s the one every summary
+   carries — which is entered as the string's explanation in Weblate once the string has reached it
+   (see `docs/weblate-checks-adoption.md`), and where the sentence shows a coded value as a label, a row in
    `context_decorations` with its labels in the string resources under descriptive keys, mapped from
    the field's values in `label_maps()`
    (and, where a field can be missing while another records the same thing, a row in
