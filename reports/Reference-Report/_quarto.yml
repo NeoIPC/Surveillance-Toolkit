@@ -38,8 +38,11 @@ format:
     # Quarto's `fig-format: pdf` selects, writes a figure's text in the standard
     # Helvetica without embedding it; the Cairo device embeds the fonts it uses.
     # Quarto's `fig-format` has no value for it, so it is set as a knitr option.
-    # Noto Sans keeps the figures sans-serif in a font the rendering image ships
-    # under the SIL OFL, rather than whatever the host resolves "sans" to.
+    # The family must resolve to a CFF-flavoured font: Cairo embeds a TrueType
+    # font's glyphs outside WinAnsi as a CID font without the CIDToGIDMap entry
+    # PDF/A-4 requires. The rendering image serves Noto Sans from the Noto
+    # project's static OTFs, which are CFF, under the SIL OFL; a glyph Noto Sans
+    # lacks, such as ≥, falls back to another font and breaks the conformance.
     knitr:
       opts_chunk:
         dev: cairo_pdf

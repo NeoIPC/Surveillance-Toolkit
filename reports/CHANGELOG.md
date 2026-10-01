@@ -210,7 +210,9 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
 
 - The Partner and Reference Reports' PDFs did not conform to the PDF/A-4 they declare: the birth-weight
   and gestational-age figures set their text in the standard Helvetica without embedding it. The
-  figures are drawn with the Cairo device now, in Noto Sans, which is embedded.
+  figures are drawn with the Cairo device now, in Noto Sans, which is embedded. Rendered on a host, the
+  PDF conforms only with Noto Sans installed as the Noto project's static OTFs: Cairo embeds the
+  TrueType build's glyphs outside WinAnsi without the `CIDToGIDMap` entry PDF/A-4 requires.
 - The Partner and Reference Reports' PDF showed no page number on the first page, whose footer set the
   EU emblem and the funding statement but not the number. Every page is numbered now.
 - The Patient Data Report's labels mixed three casings: most capitalized word by word ("Patient Days",
