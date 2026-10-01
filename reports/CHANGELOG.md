@@ -13,6 +13,14 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
 
 ## [Unreleased]
 
+### Fixed
+
+- The Validation Report sets the apostrophes and quotation marks of its translated labels like those
+  of the sentences around them — the rule summaries in the header, the support link, the labels inside
+  a finding's sentence, and the wording for a missing value — where they stayed straight. The tooltip
+  of a patient's dashboard link, which Pandoc never sets, carries a typographic apostrophe in its text,
+  and so do the rule summaries, which the NeoIPC app shows as they are typed.
+
 ## [0.2.0-alpha] - 2026-10-01
 
 ### Added

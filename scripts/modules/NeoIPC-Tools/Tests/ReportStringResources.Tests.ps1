@@ -18,7 +18,9 @@
       name the class rather than repeat the code.
     - The Validation Report's formatter (_problem_text.qmd with the tables of _mapping.qmd): the
       fallback that shows a stored code where its name is missing, the label a decoration looks up,
-      and the choice of a rule's second sentence.
+      the choice of a rule's second sentence, and the escaping that keeps a typed value as typed while
+      a translated label takes the typography of the sentence around it. Where Pandoc is installed,
+      a test also has Pandoc read a finding's Markdown.
     - The address the Validation Report's patient links start from (get_tracker_capture_base() in
       reports/common/helpers.R): which public addresses it takes and what base each yields, which it
       refuses without repeating them or any part of them, and the fallback to the address the data is
@@ -52,7 +54,7 @@ BeforeDiscovery {
     $rscriptPath = (Get-Command Rscript -ErrorAction SilentlyContinue)?.Source
     $hasGt = [bool]$rscriptPath -and
         ((& $rscriptPath --vanilla -e 'cat(requireNamespace("gt", quietly = TRUE))' 2>$null) -eq 'TRUE')
-    # Whether Pandoc is installed, which only the test that has it read a sentence's Markdown needs.
+    # Whether Pandoc is installed, which only the tests that have it read a report's Markdown need.
     $hasPandoc = [bool](Get-Command pandoc -ErrorAction SilentlyContinue)
 }
 
@@ -164,6 +166,45 @@ context <- tibble::tibble(sec_bsi = factor("9", levels = c("9")), organisms = 2L
 cat(problem_text(55L, context, sR))
 '@
         Invoke-ValidationReportSnippet $body | Should -Match "item is 'not available', but the number"
+    }
+
+    It 'leaves the quotation marks of a translated label to smart typography, and escapes a typed value''s' {
+        # A label and the missing-value string are the report's own wording, set like the sentence
+        # around them; a name is whatever someone typed, kept as typed.
+        $body = @'
+sR$secondary_bsi_items$absent <- "it's \"no\""
+sR$missing_value <- "isn't \"known\""
+cat(
+  problem_text(55L, tibble::tibble(sec_bsi = factor("0", levels = c("1", "0", "-1")), organisms = 2L), sR),
+  problem_text(52L, tibble::tibble(index = 2L, substance_code = NA_character_, substance = NA_character_,
+                                   days = 5L), sR),
+  problem_text(20L, tibble::tibble(index = 1L, secondary_bsi = FALSE, name = "it's \"x\""), sR),
+  sep = "\n")
+'@
+        $lines = (Invoke-ValidationReportSnippet $body) -split "`n"
+        $lines[0] | Should -Match ([regex]::Escape(@'
+item is 'it's "no"', but the number
+'@))
+        $lines[1] | Should -Match ([regex]::Escape(@'
+the substance is isn't "known" and its days are 5
+'@))
+        $lines[2] | Should -Match ([regex]::Escape(@'
+('it\'s \"x\"')
+'@))
+    }
+
+    It 'gives a translated label the typographic quotation marks of the sentence around it' -Skip:(-not $hasPandoc) {
+        # Pandoc reads the finding's bullet as the report does; a label escaped in full would keep its
+        # straight marks. The entities are decoded so the check does not depend on how a Pandoc version
+        # spells them.
+        $body = @'
+sR$secondary_bsi_items$absent <- "it's \"no\""
+cat(problem_text(55L, tibble::tibble(sec_bsi = factor("0", levels = c("1", "0", "-1")), organisms = 2L), sR))
+'@
+        $markdown = Invoke-ValidationReportSnippet $body
+        $html = ($markdown | & pandoc -f markdown -t html --ascii --wrap=none 2>&1) -join "`n"
+        [System.Net.WebUtility]::HtmlDecode($html) |
+            Should -Match ([regex]::Escape("item is `u{2018}it`u{2019}s `u{201C}no`u{201D}`u{2019}, but the number"))
     }
 }
 
@@ -678,7 +719,7 @@ cat(identical(escape_latex(text), text), identical(escape_latex(c("a%", "")), c(
         # A paragraph that starts with a hyphen, or with a number or a word and a full stop, would
         # open a list; a line break or an indent would end the paragraph or make it a code block.
         $body = @'
-cat(escape_markdown_paragraph(c(
+cat(escape_markdown_translation(c(
   "it's \"so\" -- and so...", "- a", "1. Juni", "z. B. so", " a\n  b ")), sep = "|")
 '@
         Invoke-ReportSnippet -Report 'Partner-Report' -Body $body |

@@ -101,9 +101,10 @@ multiple_problems_hint <- function(partner_code, patient_id) {
     utils::URLencode(as.character(mailto_body), reserved = TRUE))
   # The link is markup, so it is built here and handed to the translated
   # sentence as a value rather than written into the string; its label is a
-  # translated string placed inside that markup, so it is escaped like a value.
+  # translated string placed inside that markup, escaped so it cannot become
+  # markup and set with the same typography as the sentence around it.
   support_link <- paste0(
-    "[", escape_markdown(sR$support_email_address_link_text),
+    "[", escape_markdown_translation(sR$support_email_address_link_text),
     "](mailto:", mailto_content, ")")
   interpolate_translation(
     sR$patient_problem_multiple_hint, support_link = support_link)
@@ -171,7 +172,10 @@ if (exists("problem_results")) {
           dplyr::pull()
         pat_header_level <- dept_header_level + 1
           # The id is whatever the department typed; escaped, it cannot close
-          # the link text or format the heading.
+          # the link text or format the heading. The link's title is escaped
+          # in full as well, so a quotation mark cannot end it: Pandoc never
+          # sets a title's typography, which is why the string carries its
+          # typographic apostrophe itself.
           cat(header(paste0(
             sR$patient_problem_header_prefix,
             " \"[", escape_markdown(pat_id),
@@ -282,7 +286,7 @@ if (exists("problem_results")) {
               paste0(
                 event_problem_header_prefix(ev_type),
                 " ",
-                if (is.na(ev_date)) escape_markdown(sR$missing_value)
+                if (is.na(ev_date)) escape_markdown_translation(sR$missing_value)
                 else format(ev_date, format = "%x"),
                 collapse = ""),
               ev_header_level))

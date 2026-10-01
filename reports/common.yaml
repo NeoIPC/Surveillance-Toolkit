@@ -187,24 +187,56 @@ tbl-infectious-agent-detection-rate:
 tbl-reconciliation-summary:
   tbl-cap: "Records the NeoIPC coordinating centre reconciled"
   reconciliations:
+    # Translators:
+    # A row label in the table of the records the NeoIPC coordinating centre reconciled, in the
+    # Partner and Reference Reports. It names what the coordinating centre repaired in the stored
+    # records, so that the reader can tell the rows apart.
     admission_day_of_life: >-
       Day of life set to 1 on the admission form of an infant admitted from the
       delivery room or on the day of birth
+    # Translators:
+    # A row label in the table of the records the NeoIPC coordinating centre reconciled, in the
+    # Partner and Reference Reports. It names what the coordinating centre repaired in the stored
+    # records, so that the reader can tell the rows apart.
     form_day_of_life: >-
       Day of life of the infection and procedure forms recalculated from a
       repaired admission form
+    # Translators:
+    # A row label in the table of the records the NeoIPC coordinating centre reconciled, in the
+    # Partner and Reference Reports. It names what the coordinating centre repaired in the stored
+    # records, so that the reader can tell the rows apart.
     gestation_days_from_text: "Total gestation days recalculated from the gestational age"
+    # Translators:
+    # A row label in the table of the records the NeoIPC coordinating centre reconciled, in the
+    # Partner and Reference Reports. It names what the coordinating centre repaired in the stored
+    # records, so that the reader can tell the rows apart.
     implausible_gestation_days: >-
       Total gestation days outside 140 to 349 days removed where no gestational
       age is recorded in the required format
+    # Translators:
+    # A row label in the table of the records the NeoIPC coordinating centre reconciled, in the
+    # Partner and Reference Reports. It names what the coordinating centre repaired in the stored
+    # records, so that the reader can tell the rows apart.
     ssi_secondary_bsi_agents: >-
       Secondary-BSI infectious agents removed from a surgical site infection form
       whose secondary-BSI item is not Yes
+    # Translators:
+    # A row label in the table of the records the NeoIPC coordinating centre reconciled, in the
+    # Partner and Reference Reports. It names what the coordinating centre repaired in the stored
+    # records, so that the reader can tell the rows apart.
     culture_negative_sepsis_agents: >-
       Infectious agents removed from a sepsis form recorded as culture-negative
+  # Translators:
+  # The row label of a reconciliation the report has no label for, in the table of the records the
+  # NeoIPC coordinating centre reconciled, in the Partner and Reference Reports. `{reconciliation}`
+  # is replaced by the reconciliation's number, a whole number. Keep it as written.
   unknown_label: "Reconciliation {reconciliation}"
   repaired: "Repaired"
   reported: "Reported"
+  # Translators:
+  # A footnote on the column of reported records in the table of the records the NeoIPC coordinating
+  # centre reconciled, in the Partner and Reference Reports. `{column}` is replaced by that column's
+  # heading, as translated in the string "Reported". Keep it as written.
   reported_footnote: >-
     {column}: Records the reconciliation concerns but kept as stored rather
     than repaired, since the repair would have left a form that does not meet
@@ -288,6 +320,10 @@ tbl-surgical-procedure-rates:
   to_be_categorized: "Not yet categorized"
 tbl-validation-summary:
   tbl-cap: "Records removed or exempted by the validation rules"
+  # Translators:
+  # The row label of one rule in the table of the records the validation rules removed or exempted,
+  # in the Partner and Reference Reports. `{rule}` is replaced by the rule's number, a whole number.
+  # Keep it as written.
   rule_label: "Rule {rule}"
   records: "Records"
   removed: "Removed"
@@ -295,12 +331,25 @@ tbl-validation-summary:
   patients: "Patient records"
   admissions: "Patient admissions"
   forms: "Forms"
+  # Translators:
+  # The row label of a totals row in the table of the records the validation rules removed or
+  # exempted, in the Partner and Reference Reports. `{records}` is replaced by the label of a kind
+  # of record from the same table, as translated in the strings "Patient records", "Patient
+  # admissions", and "Forms". Keep it as written.
   total_label: "All rules – {records}"
+  # Translators:
+  # A footnote on the column of removed records in the table of the records the validation rules
+  # removed or exempted, in the Partner and Reference Reports. `{column}` is replaced by that
+  # column's heading, as translated in the string "Removed". Keep it as written.
   removed_footnote: >-
     {column}: Records the rule flagged; the validation removed each from the
     dataset before the analysis together with the whole patient record it
     belongs to, so the total of patient records is the number of patients
     removed.
+  # Translators:
+  # A footnote on the column of exempted records in the table of the records the validation rules
+  # removed or exempted, in the Partner and Reference Reports. `{column}` is replaced by that
+  # column's heading, as translated in the string "Exempted". Keep it as written.
   exempted_footnote: >-
     {column}: Records the rule flagged that an exception list exempted from
     it; a record another rule flagged as well is removed all the same.

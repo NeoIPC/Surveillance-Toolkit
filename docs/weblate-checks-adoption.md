@@ -435,7 +435,7 @@ lives**, and that division decides everything about how they are maintained.
 | Source string description | the `.pot` `#.` comment | generated, committed | yes — it is re-read from the template |
 | Flags (source) | the `.pot` `#,` line | generated, committed | yes |
 | Flags (per-string extra) | Weblate database | web interface or API | yes, but invisible to git |
-| Explanation | Weblate database | web interface or API | yes, but invisible to git |
+| Explanation | Weblate database; for a YAML string resource of `reports`, the `Translators:` comment above its key | web interface or API | yes; the database copy is invisible to git |
 | Labels | Weblate database | web interface, API or bulk edit | yes, but invisible to git |
 | Screenshots | Weblate database plus an uploaded image | API | yes, but invisible to git |
 
@@ -456,26 +456,69 @@ source-string migration does exactly that, wholesale. So a manifest guards the r
 scheduled one, and it should be built when something actually needs it rather than as a precondition for
 writing any explanation at all.
 
-Two consequences follow, and the second is **per catalogue rather than blanket** — an earlier revision
-here said no po4a module carries translator comments, which is wrong for the one catalogue where it
-matters most.
+Two consequences follow, and consequence 2 is **per catalogue rather than blanket**: one po4a module
+carries translator comments, the one for the catalogue where they matter most, and the others do not.
 
-**Where guidance is derivable from the authored source, put it in the description and no manifest
-arises.** The glossary does this already, its generator carrying YAML comments through into the template.
+**Consequence 1: where guidance is derivable from the authored source, put it in the description and no
+manifest arises.** The glossary does this already, its generator carrying YAML comments through into the template.
 Measure the proportion from the current template rather than quoting one here; this branch alone moved it.
 
-**`documentation` can do the same, from the AsciiDoc source.** `AsciiDoc.pm` collects `//` line comments
+**Consequence 2, catalogue by catalogue: `documentation` can do the same, from the AsciiDoc source.** `AsciiDoc.pm` collects `//` line comments
 and `////` comment blocks and passes them to every `translate()` call as the `comment` option, which
 `TransTractor.pm` maps to the PO `automatic` field — the `#.` line this document's own table names as the
 source of truth for a source-string description. So a note written above a protocol paragraph reaches the
 translator, is reviewable in a pull request, and survives a recreate, a reset and the source-string
 migration alike. Prefer it to an explanation wherever the guidance belongs to the document.
 
-**`reports` and `infectious_agents` genuinely cannot**, and this is where an explanation is the only
-route: `Text.pm` declares a comments list and never fills it, and `Yaml.pm` has no comment handling at
-all. Those explanations carry the same sequencing constraint as editorial approval, and for the same
-reason: both are database-only and both die with the unit, so both are written **after** the migration
-that rewrites msgids, not before it.
+**`reports` and `infectious_agents` genuinely cannot**: `Text.pm` declares a comments list and never
+fills it, and `Yaml.pm` has no comment handling at all. What reaches a translator there is an
+explanation, which is database-only and dies with its unit, and the migration that rewrites msgids
+retires every unit. Two routes follow from that:
+
+- **A YAML string resource carries its explanation as a comment block directly above its key that
+  begins with a `# Translators:` line**, and the explanation is entered in Weblate from the lines after
+  that marker. The marker tells it apart from a maintainer's note, which these files also put above
+  keys, as gettext's own `TRANSLATORS:` tag does for source code. po4a drops the comment, so the
+  template does not change, while the guidance stays reviewable and versioned with the string it
+  describes; a generator that replaces po4a has to carry the marked comment into the template's
+  description, and the migration then loses nothing. `reports/Validation-Report/content/_sR.yaml`
+  holds the explanations of the Validation Report's strings this way, and `reports/common.yaml` those
+  of the validation and reconciliation tables' labels.
+- **Markdown prose has no such home**, so an explanation on it — a heading's cross-reference anchor, a
+  figure's identifier and attributes, a cross-reference, a link's target, or R code inside a
+  paragraph — lives in Weblate alone, and goes with its unit whenever that unit's text changes. What
+  stands in for a source is that the explanation is assembled from standard wordings, one for each
+  thing a unit exposes, so a unit whose text has changed gets the same explanation again:
+  1. a heading's anchor: "`{#sec-…}` at the end of this heading is its identifier, which the links
+     elsewhere in the report point to. Keep it exactly as written, after your translation. The English
+     headings use title case; use your language's own capitalization for headings." A heading inside a
+     unit without an anchor gets: "A line beginning with `#` is a heading: keep the `#` characters and
+     the space after them", followed by the sentences on capitalization;
+  2. a figure: "A figure. Translate the caption between the square brackets and the alternative text
+     between the quotation marks after `fig-alt=`, which a screen reader reads out in place of the
+     image. Keep the image path in parentheses, `#fig-…`, `fig-alt=`, and the braces and quotation
+     marks around them exactly as written. A straight double quotation mark inside the alternative
+     text has to be written with a backslash, `\"`, or it ends the text; your language's own quotation
+     marks need none.";
+  3. a cross-reference: "`@sec-…` is a cross-reference: the report replaces it with a link to that
+     section, shown as the word for "Section" in the report's language and the section's number, such
+     as "Section 3.2". Keep it exactly as written, where your sentence refers to what it names." A
+     `@fig-…` reference names the figure and "Figure 1" instead, and several references are listed
+     together;
+  4. R code: "Each span from `` `r `` to the next backtick is R code the report runs when it is built,
+     and what it produces stands in its place; keep each span exactly as written, character for
+     character.";
+  5. a link: "In a link, `[text](target)`, translate the text between the square brackets and keep the
+     target in parentheses exactly as written.";
+  6. a paragraph inside a list item: "Keep the four spaces at the start of each line: they keep the
+     paragraph inside its list item.";
+  7. a name in quotation marks: "Where a name in quotation marks is one Tracker Capture shows on a
+     button, a field, a link, or a dialogue, use the name Tracker Capture shows when DHIS2 is set to
+     your language, which is the English one where Tracker Capture has no translation for your
+     language."
+
+Editorial approval has no source to be re-entered from, so it keeps the sequencing constraint: it is
+given **after** the migration that rewrites msgids, not before it.
 
 ### What fills each field is per catalogue, not uniform
 
@@ -485,7 +528,7 @@ other. Filling them uniformly would be worse than filling them well.
 | catalogue | description | source flags | explanation earns its place when |
 |---|---|---|---|
 | `documentation` | po4a's block type | `asciidoc-text` | an anchor id or macro name must survive unchanged |
-| `reports` | the YAML key path, once `msgctxt` exists | `md-text`, `placeholders` | a placeholder's resolved value is not guessable from its name |
+| `reports` | the YAML key path, once `msgctxt` exists | `md-text`, `placeholders` | a string carries a placeholder, an anchor, a cross-reference, or R code, or is shown somewhere the string does not reveal — a rule summary the NeoIPC app shows too, a table's row label: it says what each stands for and where the string appears |
 | `glossary` | the authored YAML comment | `terminology`, `read-only` | a term collides with another this project uses — `Watch` against *surveillance* |
 | `metadata` | the DHIS2 object and field | `placeholders` | the string is a data-entry label whose length is constrained |
 | `infectious_agents` | rank and concept type | `ignore-same` | the language's own convention for nomenclature is the question |
