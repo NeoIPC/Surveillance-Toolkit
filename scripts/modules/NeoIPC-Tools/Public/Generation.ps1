@@ -16,7 +16,7 @@ function New-NeoIPCPathogenOptionSet {
         surveillance data and compared by the resistance program rules); the option NAME is the node's Name plus a
         bracketed rank/synonym tag — "<Name> [genus]", "<Name> [species]", "<Name> [synonym]" — reproducing the
         deployed convention (a node whose rank is Unknown carries no tag), assembled by Get-NeoIPCPathogenOptionLabel.
-        The name is the domain-authority name (repo CLAUDE.md); the tag is the lowercased ConceptType (the English
+        The name is the domain-authority name (.claude/rules/infectious-agents.md); the tag is the lowercased ConceptType (the English
         label). Output order is a deterministic depth-first walk of the ontology (node, then
         Hierarchies/Synonyms/Children) with a 1-based sortOrder, so diffs are stable.
 

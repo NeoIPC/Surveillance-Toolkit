@@ -253,7 +253,7 @@ markers by inheritance and resolves the *Vibrio*-genus colistin question); *Stut
 three; *Stenotrophomonas* left unflagged. Because the ontology is the source, the fix for any
 clinically-wrong removal is to set the flag on the genus node in the **YAML**, never to special-case
 the generator. The naming, authority, and never-drop-a-synonym policy that makes these *flag-propagation*
-questions rather than data-loss ones is codified in this repository's `CLAUDE.md` (LPSN/LoRN for
+questions rather than data-loss ones is codified in this repository's `.claude/rules/infectious-agents.md` (LPSN/LoRN for
 bacteria, MycoBank for fungi, ICTV for viruses, NHSN for common-commensal status; a renamed organism's
 `Id` follows the name as it becomes a synonym).
 
