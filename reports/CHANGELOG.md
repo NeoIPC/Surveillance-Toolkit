@@ -13,6 +13,8 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
 
 ## [Unreleased]
 
+## [0.2.0-alpha] - 2026-10-01
+
 ### Added
 
 - The Validation Report takes a `rules` parameter (`integer[]`) naming the validation rules to apply,
@@ -193,6 +195,9 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
 - The Partner Report's organism-resistance introduction and the resistance methods paragraphs of the
   Partner and Reference Reports call the phenotypes they count resistance categories, where they said
   resistance markers.
+- `compatibility.yml` declares neoipc-app `v0.2.0-alpha`, the release these reports were validated
+  against, whose forms offer the Validation Report with its rule selection and the Partner and
+  Reference Reports' validation summary toggle.
 
 ### Removed
 

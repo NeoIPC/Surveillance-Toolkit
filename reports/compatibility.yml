@@ -51,5 +51,5 @@ neoipcr:
   minimum: v0.0.0.9007
 
 neoipc-app:
-  tested: v0.1.0-alpha
-  minimum: v0.1.0-alpha
+  tested: v0.2.0-alpha
+  minimum: v0.2.0-alpha
