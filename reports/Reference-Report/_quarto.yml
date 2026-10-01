@@ -62,7 +62,7 @@ format:
         \ModifyLayer[addvoffset=-.6ex]{plain.scrheadings.foot.above.line}
         \ihead{\includegraphics[width=4cm]{../logos/LOGO_NEOIPC_2.png}}
         \ifoot*{\includegraphics[width=1.37cm]{../logos/eu-flag.png}}
-        \ofoot{\pagemark}
+        \ofoot*{\pagemark}
         \newcommand{\FooterText}{}
         \cfoot*{%
           \raggedright

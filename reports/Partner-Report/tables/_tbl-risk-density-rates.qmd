@@ -85,7 +85,7 @@ if (!is.null(benchmark_data$usage_density_rate_table) &&
       "inv" ~ sR$inv,
       "niv" ~ sR$niv,
       "human_milk" ~ sR$human_milk_sc,
-      "probiotic" ~ sR$probiotics,
+      "probiotic" ~ sR$probiotics_sc,
       "kangaroo_care" ~ sR$kangaroo_care_sc,
       "ab" ~ sR$`tbl-risk-density-rates`$any_antibiotic,
       "a" ~ sR$access,
@@ -126,7 +126,7 @@ if (!is.null(benchmark_data$usage_density_rate_table) &&
       label = sR$other,
       rows = tidyselect::any_of(c(
         sR$human_milk_sc,
-        sR$probiotics,
+        sR$probiotics_sc,
         sR$kangaroo_care_sc)),
       id = "grp_othr") |>
     tab_row_group(

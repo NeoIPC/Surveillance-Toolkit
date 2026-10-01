@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-09-29 15:12+0200\n"
+"POT-Creation-Date: 2026-10-01 05:59+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Language-Team: none\n"
 "Language: en\n"
@@ -1618,7 +1618,7 @@ msgstr ""
 #. type: Hash Value: figure_interpretation no_outliers
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "All metrics fall within the interquartile range (25th-75th percentile) of the reference population, suggesting similiar patient characteristics.\n"
+msgid "All metrics fall within the interquartile range (25th-75th percentile) of the reference population, suggesting similar patient characteristics.\n"
 msgstr ""
 
 #. type: Hash Value: figure_interpretation wider_distribution
@@ -3007,67 +3007,67 @@ msgstr ""
 #. type: Hash Value: days
 #: reports/Patient-Data-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "Days"
+msgid "days"
 msgstr ""
 
 #. type: Hash Value: device cvc
 #: reports/Patient-Data-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "Central Venous Catheter (CVC)"
+msgid "Central venous catheter (CVC)"
 msgstr ""
 
 #. type: Hash Value: device inv
 #: reports/Patient-Data-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "Invasive Ventilation"
+msgid "Invasive ventilation"
 msgstr ""
 
 #. type: Hash Value: device niv
 #: reports/Patient-Data-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "Non-invasive Ventilation"
+msgid "Non-invasive ventilation"
 msgstr ""
 
 #. type: Hash Value: device pvc
 #: reports/Patient-Data-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "Peripheral Venous Catheter (PVC)"
+msgid "Peripheral venous catheter (PVC)"
 msgstr ""
 
 #. type: Hash Value: field admission_type
 #: reports/Patient-Data-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "Admission Type"
+msgid "Admission type"
 msgstr ""
 
 #. type: Hash Value: field antibiotic_days
 #: reports/Patient-Data-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "Total Days on Antibiotics"
+msgid "Total days on antibiotics"
 msgstr ""
 
 #. type: Hash Value: field birth_weight
 #: reports/Patient-Data-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "Birth Weight (g)"
+msgid "Birth weight (g)"
 msgstr ""
 
 #. type: Hash Value: field created_by
 #: reports/Patient-Data-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "Created By"
+msgid "Created by"
 msgstr ""
 
 #. type: Hash Value: field date_of_birth
 #: reports/Patient-Data-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "Date of Birth"
+msgid "Date of birth"
 msgstr ""
 
 #. type: Hash Value: field day_of_life
 #: reports/Patient-Data-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "Day of Life"
+msgid "Day of life"
 msgstr ""
 
 #. type: Hash Value: field enrolled_at
@@ -3079,19 +3079,19 @@ msgstr ""
 #. type: Hash Value: field event_date
 #: reports/Patient-Data-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "Event Date"
+msgid "Event date"
 msgstr ""
 
 #. type: Hash Value: field event_type
 #: reports/Patient-Data-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "Event Type"
+msgid "Event type"
 msgstr ""
 
 #. type: Hash Value: field gestational_age
 #: reports/Patient-Data-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "Gestational Age"
+msgid "Gestational age"
 msgstr ""
 
 #. type: Hash Value: field hospital
@@ -3103,19 +3103,13 @@ msgstr ""
 #. type: Hash Value: field infection_type
 #: reports/Patient-Data-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "Infection Type"
+msgid "Infection type"
 msgstr ""
 
 #. type: Hash Value: field pathogen_name
 #: reports/Patient-Data-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Pathogen"
-msgstr ""
-
-#. type: Hash Value: field patient_days
-#: reports/Patient-Data-Report/content/_sR.yaml:1
-#, no-wrap
-msgid "Patient Days"
 msgstr ""
 
 #. type: Hash Value: field patient_id
@@ -3133,13 +3127,13 @@ msgstr ""
 #. type: Hash Value: field procedure_code
 #: reports/Patient-Data-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "Procedure Code (ICHI)"
+msgid "Procedure code (ICHI)"
 msgstr ""
 
 #. type: Hash Value: field procedure_date
 #: reports/Patient-Data-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "Procedure Date"
+msgid "Procedure date"
 msgstr ""
 
 #. type: Hash Value: field resistance
@@ -3169,7 +3163,7 @@ msgstr ""
 #. type: Hash Value: field surveillance_end_date
 #: reports/Patient-Data-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "Surveillance End Date"
+msgid "Surveillance end date"
 msgstr ""
 
 #. type: Hash Value: field surveillance_end_reason
@@ -3181,13 +3175,13 @@ msgstr ""
 #. type: Hash Value: field updated_at
 #: reports/Patient-Data-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "Last Modified"
+msgid "Last modified"
 msgstr ""
 
 #. type: Hash Value: field updated_by
 #: reports/Patient-Data-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "Modified By"
+msgid "Modified by"
 msgstr ""
 
 #. type: Hash Value: generated_on
