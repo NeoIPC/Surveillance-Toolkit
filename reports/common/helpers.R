@@ -496,9 +496,10 @@ get_tracker_capture_base <- function(public_base_url, connection_options) {
 #' with
 #'
 #' Every rule's findings render with its `description`. Rule 20 has a second
-#' complete sentence for a pathogen recorded as causing a secondary sepsis,
-#' and rule 55 one for a secondary-BSI item that was never answered, between
-#' which `select_template()` in the report's `_problem_text.qmd` chooses.
+#' complete sentence for an infectious agent recorded as causing a secondary
+#' sepsis, and rule 55 one for a secondary-BSI item that was never answered,
+#' between which `select_template()` in the report's `_problem_text.qmd`
+#' chooses.
 #' @param rule_id A validation rule id
 #' @return The keys of the rule's templates in its entry under `problems` in
 #'   the Validation Report's string resources
@@ -601,8 +602,9 @@ get_dataset_options <- function(
 #'
 #' Outside code, Pandoc treats any punctuation or space character preceded by a
 #' backslash as that character itself, so escaping every punctuation character
-#' makes a value someone typed — a free-text pathogen name, a patient id — render
-#' as typed whatever it contains, rather than as emphasis, a link or raw HTML.
+#' makes a value someone typed — a free-text infectious-agent name, a patient
+#' id — render as typed whatever it contains, rather than as emphasis, a link,
+#' or raw HTML.
 #' A value is a phrase inside a sentence, a heading or a link, where a line
 #' break would end the block it sits in, so runs of whitespace, line breaks
 #' included, become one space first.
