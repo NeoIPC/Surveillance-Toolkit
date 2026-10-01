@@ -319,7 +319,7 @@ No `sprintf` `%s`, markdown, or LaTeX syntax in translatable strings. Use `glue`
 
 ### Fonts *(Target)*
 
-- Partner-Report & Reference-Report: EB Garamond primary, Noto Serif Condensed fallback for non-Latin scripts (Greek, Cyrillic, Hebrew, Devanagari, etc.)
+- Partner-Report & Reference-Report: EB Garamond primary, Noto Serif Condensed fallback for non-Latin scripts (Greek, Cyrillic, Hebrew, Devanagari, etc.); their PDF figures in Noto Sans, drawn with the Cairo device so the font is embedded, as PDF/A-4 requires
 - Validation-Report & Partner-Certificate: Noto Sans
 - All fonts are SIL Open Font License.
 

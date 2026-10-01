@@ -34,6 +34,18 @@ format:
     # conformance the file does not have. Re-declare it only once the reports
     # move to a tagging-capable class.
     pdf-standard: [a-4]
+    # PDF/A-4 requires every font to be embedded. R's pdf() device, which
+    # Quarto's `fig-format: pdf` selects, writes a figure's text in the standard
+    # Helvetica without embedding it; the Cairo device embeds the fonts it uses.
+    # Quarto's `fig-format` has no value for it, so it is set as a knitr option.
+    # Noto Sans keeps the figures sans-serif in a font the rendering image ships
+    # under the SIL OFL, rather than whatever the host resolves "sans" to.
+    knitr:
+      opts_chunk:
+        dev: cairo_pdf
+        dev.args:
+          cairo_pdf:
+            family: "Noto Sans"
     mainfont: "EB Garamond"
     monofont: "EB Garamond"
     fontsize: 10pt
