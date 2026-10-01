@@ -8,14 +8,14 @@ applyTo: "scripts/Build-*.ps1,scripts/modules/NeoIPC-Tools/**,reports/common/**"
 
 ### PowerShell Scripts
 
-Every script file and exported function uses an approved PowerShell verb (`Get-Verb`) + PascalCase noun, chosen by behaviour (see the approved-verb guardrail above: `New-` = returns an in-memory object, `Build-` = renders an artifact, `Export-` = serializes to a file). The report wrappers are `Build-*.ps1` (e.g. `Build-PartnerReport.ps1`), all in `scripts/`; they import their shared helpers from the `NeoIPC-Tools` module (`scripts/modules/NeoIPC-Tools`).
+Every script file and exported function uses an approved PowerShell verb (`Get-Verb`) and a PascalCase noun, chosen by behaviour, as the approved-verb guardrail in `CLAUDE.md` says (`New-` returns an in-memory object, `Build-` assembles an artefact, `Export-` writes data to a file). The report wrappers are `Build-*.ps1` (e.g. `Build-PartnerReport.ps1`), all in `scripts/`; they import their shared helpers from the `NeoIPC-Tools` module (`scripts/modules/NeoIPC-Tools`).
 
 ### Argument Handling
 
 - PS passes parameters to Quarto via `-P key:value` flags
 - `dhis2_connection_options()` / `dhis2_dataset_options()` in neoipcr coerce string inputs internally — single source of truth for types and defaults
 - Casing per layer: PS `PascalCase` → QMD `camelCase` → R `snake_case`, mapped once at each boundary
-- Defaults defined only in neoipcr functions, not duplicated in PS scripts or QMD YAML — **except the DHIS2 host**: neoipcr (a public library) no longer defaults to any deployment's host, so the production host default lives in `reports/common/helpers.R::get_connection_options()` (used by every report R entry point). Pass `--host` / `-P dhis2Hostname` to override it.
+- Defaults defined only in neoipcr functions, not duplicated in PS scripts or QMD YAML — **except the DHIS2 host**: neoipcr, a public library, defaults to no deployment's host, so the production host default lives in `reports/common/helpers.R::get_connection_options()` (used by every report R entry point). Pass `--host` / `-P dhis2Hostname` to override it.
 
 ### Auth Flow
 

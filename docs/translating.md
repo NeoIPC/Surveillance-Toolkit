@@ -156,7 +156,7 @@ CVC and the rest reach you in Latin, and what to do with them differs by languag
 3. **Your language spells it out letter by letter.** Nepali does this: *सीआरपी*, *एमआरएसए*.
 
 **What none of them is: an abbreviation you build yourself from a translated expansion.** A form printed
-with a plausible-looking abbreviation nobody recognises is worse than one printed in English, because the
+with a plausible-looking abbreviation nobody recognizes is worse than one printed in English, because the
 reader cannot tell it is wrong. Where your language has no established form — Ukrainian has none for
 *3GCR* or *VPT*, and does not abbreviate either — say so in a comment and leave the Latin.
 

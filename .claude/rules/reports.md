@@ -9,6 +9,8 @@ paths: "reports/**"
 - **Never** use imperative voice in Partner Report string resources (outlier interpretation, callout text, or any user-facing prose in `_sR.yaml`). The report cannot know the full clinical context; use suggestive phrasing ("this may indicate…", "…may warrant attention") instead of directives ("Review…", "Confirm…", "Read this…"). *(repo-specific)*
 - **Always** use table-visible labels in outlier interpretation strings. The terms in callout prose must match the row labels shown in the corresponding table so readers can identify the referenced metric — but apply running-text casing, not label casing. For example, use "pneumonia" (from the Table 1 row label "Pneumonia") not "HAP", and "CVC-associated sepsis/BSI" (from the Table 2 row label) not "CVC-associated infection rate". When the same metric ID appears in multiple tables with different display labels (e.g., "CVC" in Table 2 vs Table 8), the `localize_metric_name()` function uses `table_name` context to resolve the correct label. *(repo-specific)*
 - **Number and unit formatting** — Follow SI conventions where they aid clarity, but prioritize readability across cultural backgrounds and automated layout constraints. Specifically: **(a)** Use the `unit_separator` string resource between a number and its unit (e.g., `50 g`, `39.8 days`); do not hardcode spaces. **(b)** Use the `digit_group_separator` string resource via `format_integer()` / `gt::fmt_number()`; do not hardcode commas, periods, or spaces as thousands separators. **(c)** Use the `percent_symbol` string resource; no space before `%` (ISO 31 recommends a space, but the dominant convention in medical literature omits it). **(d)** Do not use non-breaking spaces (`\u00a0`, `\u202F`) in string resources or code unless a specific, documented line-break problem exists — let the layout engine (LaTeX, HTML) handle line-breaking; if a non-breaking space is needed, add a code comment explaining why. **(e)** Use an en-dash `\u2013` (not a hyphen) between lower and upper CI bounds; parentheses around CIs: `(lower–upper)`. **(f)** For inline rate expressions in running text, use plain spaces around operators; for formal formulas in footnotes, use LaTeX math mode. *(repo-specific)*
+- Say "patients" in user-facing report text (captions, table labels, cover summaries), and keep "patient records" and "patient admissions" for technical text that explains the records-versus-admissions distinction, such as an introduction defining the denominators. *(repo-specific)*
+- Avoid footnote overload in tables: the formula footnote names the denominator and the N column shows the counts, so denominator context goes into the introduction, and footnotes are kept for what concerns one cell or row. *(repo-specific)*
 
 ## Report Locations
 
@@ -18,6 +20,7 @@ Reports live under `reports/`:
 - **Reference Report:** `reports/Reference-Report/`
 - **Validation Report:** `reports/Validation-Report/`
 - **Partner Certificate:** `reports/Partner-Certificate/`
+- **Patient Data Report:** `reports/Patient-Data-Report/`
 
 ## Report Architecture
 
@@ -29,7 +32,7 @@ Reports live under `reports/`:
 
 ### Lua Filters
 
-`pandoc-quotes.lua` on all four reports. Empty section headers are suppressed in R (conditional cat-emit gated on the section's `show_section_*` flag), not by a Lua filter.
+Every report runs `pandoc-quotes.lua`. Empty section headers are suppressed in R (conditional cat-emit gated on the section's `show_section_*` flag), not by a Lua filter.
 
 ### Validation Report
 
@@ -42,7 +45,7 @@ The rules live in neoipcr (`neoipcr::validate()` returns keys and context values
 
 ## Report Conventions
 
-### Translatable Strings *(Target)*
+### Translatable Strings
 
 No `sprintf` `%s`, markdown, or LaTeX syntax in translatable strings. Use `glue`-style `{named}` placeholders (e.g., `{patient_id}`, `{count}`). Apply formatting (bold, links, etc.) in rendering code, not in the string resource. Weblate validates `{name}` placeholders automatically.
 
@@ -51,7 +54,7 @@ No `sprintf` `%s`, markdown, or LaTeX syntax in translatable strings. Use `glue`
 - Partner-Report & Reference-Report: EB Garamond, which covers Latin, Greek, and Cyrillic. Their PDF figures are in Noto Sans, drawn with the Cairo device so the font is embedded, as PDF/A-4 requires. Noto Sans and every Noto Sans family it falls back to for ≥ and other scripts come from the Noto project's static OTFs, which are Compact Font Format (CFF) fonts, because Cairo embeds a TrueType font's glyphs outside WinAnsi without the `CIDToGIDMap` entry PDF/A-4 also requires; and fontconfig has to leave out their TrueType builds and DejaVu, or Noto Sans falls back to a TrueType font. `scripts/modules/NeoIPC-Tools/Tests/ReportFigureDevice.Tests.ps1` holds both reports to the Cairo device.
 - Validation-Report, Partner-Certificate & Patient-Data-Report: Noto Sans.
 - All fonts are SIL Open Font License.
-- *Target:* a Noto Serif Condensed fallback for the Partner and Reference Reports' body text in other scripts, such as Hebrew and Devanagari. No report configures one, so such body text has no glyphs.
+- The Partner and Reference Reports configure no body-text fallback for the scripts EB Garamond lacks, such as Hebrew and Devanagari, so body text in those scripts renders without glyphs.
 
 ### Logging
 

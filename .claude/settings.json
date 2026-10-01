@@ -1,0 +1,10 @@
+{
+  "attribution": { "commit": "", "sessionUrl": false },
+  "permissions": {
+    "deny": [
+      "Read(secrets/**)", "Edit(secrets/**)",
+      "Read(data/**)", "Edit(data/**)",
+      "Read(.env)", "Read(.env.*)"
+    ]
+  }
+}
