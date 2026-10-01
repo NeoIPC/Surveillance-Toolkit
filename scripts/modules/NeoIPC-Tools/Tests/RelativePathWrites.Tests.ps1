@@ -133,13 +133,17 @@ Describe 'Writes given a path relative to the current location' {
         [System.IO.File]::ReadAllText($script:config) | Should -BeExactly "[type: yaml] strings.yaml`n"
     }
 
-    It 'Update-Po4aYamlKeys.ps1 fails on a YAML master it cannot find' {
-        [System.IO.File]::WriteAllText($script:config, "[type: yaml] missing.yaml`n")
+    It 'Update-Po4aYamlKeys.ps1 fails on a YAML master it cannot find, <Case>' -ForEach @(
+        @{ Case = 'whose keys it collects'; Line = '[type: yaml] missing.yaml' }
+        @{ Case = 'whose keys are curated'; Line = "[type: yaml] missing.yaml opt:`"-o keys='a b'`" # manual-keys" }
+    ) {
+        [System.IO.File]::WriteAllText($script:config, "$Line`n")
 
         $result = Invoke-KeysScript
 
         $result.ExitCode | Should -Not -Be 0
         ($result.Output -join "`n") | Should -Match "YAML master 'missing\.yaml' not found"
-        [System.IO.File]::ReadAllText($script:config) | Should -BeExactly "[type: yaml] missing.yaml`n"
+        $result.Output | Should -Not -Contain 'Config updated successfully.'
+        [System.IO.File]::ReadAllText($script:config) | Should -BeExactly "$Line`n"
     }
 }

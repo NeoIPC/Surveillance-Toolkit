@@ -124,18 +124,19 @@ foreach ($line in $lines) {
 
         $yamlPath = $Matches[1]
 
+        # The config's paths are relative to the directory po4a runs in, the repository root. A master
+        # that cannot be found here means the script runs elsewhere or the config names a file that is
+        # gone, and keeping its line as it was would report success with a key list nobody refreshed,
+        # or, for a curated list, one that names keys of a file po4a cannot read.
+        if (-not (Test-Path -LiteralPath $yamlPath -PathType Leaf)) {
+            throw "YAML master '$yamlPath' not found relative to '$(Get-Location)'; the config's paths are relative to the directory po4a runs in, the repository root."
+        }
+
         # Skip lines with manual-keys marker — these have a curated key list
         if ($line -match '#\s*manual-keys') {
             Write-Host "Skipping (manual-keys): $yamlPath"
             $newLines += $line
             continue
-        }
-
-        # The config's paths are relative to the directory po4a runs in, the repository root. A master
-        # that cannot be found here means the script runs elsewhere or the config names a file that is
-        # gone, and keeping its line as it was would report success with a key list nobody refreshed.
-        if (-not (Test-Path -LiteralPath $yamlPath -PathType Leaf)) {
-            throw "YAML master '$yamlPath' not found relative to '$(Get-Location)'; the config's paths are relative to the directory po4a runs in, the repository root."
         }
 
         Write-Host "Processing $yamlPath"

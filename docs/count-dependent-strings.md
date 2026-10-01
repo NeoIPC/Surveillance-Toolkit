@@ -93,14 +93,14 @@ Recorded so the question is not reopened.
 
 ## Method
 
-Surveyed all **614** translatable strings across `reports/common.yaml`, `glossary.yaml` and the five
-reports' `content/_sR.yaml`; **124** carry a placeholder. Each was judged by what its placeholder actually
-receives at the call site, not by its shape. The count-selected strings (kind 3) need a search of their
-own, of R for a conditional on a length or row count that chooses between two string resources, and the
-joined ones (kind 4) a third, of R for a count pasted onto a string resource with neither a placeholder
-nor a conditional.
+Every translatable string across `reports/common.yaml`, `glossary.yaml`, and the five reports'
+`content/_sR.yaml` is surveyed, and each one that carries a placeholder is judged by what the placeholder
+actually receives at the call site, not by its shape. The count-selected strings (kind 3) need a search
+of their own, of R for a conditional on a length or row count that chooses between two string resources,
+and the joined ones (kind 4) a third, of R for a count pasted onto a string resource with neither a
+placeholder nor a conditional.
 
 Weblate's **Unpluralised** check should be enabled to cover the same ground mechanically. Expect it to
 disagree with this list in both directions — it will flag label-shaped strings it cannot know are fine, and
-it cannot see the third kind at all, since those carry no number. Exact agreement would mean it was not
+it cannot see kinds 3 and 4 at all, since their strings carry no number. Exact agreement would mean it was not
 actually enabled on the right component.
