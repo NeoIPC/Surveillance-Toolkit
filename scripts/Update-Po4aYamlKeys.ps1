@@ -18,7 +18,9 @@
     same file in LF and a CRLF rewrite here would show the config as modified on every pipeline run.
 
 .PARAMETER ConfigFile
-    The po4a config to update.
+    The po4a config to update. The YAML masters it lists are paths relative to the directory po4a runs
+    in, the repository root, and the script resolves them against the current location, so run it from
+    there.
 
 .PARAMETER DryRun
     Print the resulting config instead of writing it.
@@ -130,10 +132,10 @@ foreach ($line in $lines) {
         }
 
         # The config's paths are relative to the directory po4a runs in, the repository root. A master
-        # that cannot be found here means the script runs elsewhere, and keeping its line as it was would
-        # report success with a key list nobody refreshed.
+        # that cannot be found here means the script runs elsewhere or the config names a file that is
+        # gone, and keeping its line as it was would report success with a key list nobody refreshed.
         if (-not (Test-Path -LiteralPath $yamlPath -PathType Leaf)) {
-            throw "YAML master '$yamlPath' not found relative to '$(Get-Location)'. Run from the directory po4a runs in, the repository root."
+            throw "YAML master '$yamlPath' not found relative to '$(Get-Location)'; the config's paths are relative to the directory po4a runs in, the repository root."
         }
 
         Write-Host "Processing $yamlPath"

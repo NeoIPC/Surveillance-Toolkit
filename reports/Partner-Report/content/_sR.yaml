@@ -44,7 +44,7 @@ figure_interpretation:
     reference population.
   no_outliers: >
     All metrics fall within the interquartile range (25th-75th percentile) of
-    the reference population, suggesting similiar patient characteristics.
+    the reference population, suggesting similar patient characteristics.
   wider_distribution: >
     Your department shows a wider distribution (larger interquartile range),
     indicating more heterogeneous patient characteristics compared to the

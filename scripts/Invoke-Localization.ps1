@@ -235,7 +235,7 @@ $copyrightHolder = 'Charité – Universitätsmedizin Berlin'
 
 function Test-Po4aSubmodule {
     $po4aExe = Join-Path $po4aSubmodule 'po4a'
-    if (-not (Test-Path $po4aExe)) {
+    if (-not (Test-Path -LiteralPath $po4aExe)) {
         $PSCmdlet.ThrowTerminatingError(
             [System.Management.Automation.ErrorRecord]::new(
                 [System.InvalidOperationException]::new(
@@ -292,7 +292,7 @@ function Invoke-Po4a {
         }
         # wslpath cannot handle Windows paths passed as arguments (backslashes
         # are stripped). Use Push-Location + "wslpath -a ." instead.
-        Push-Location $repoRoot
+        Push-Location -LiteralPath $repoRoot
         try {
             $wslRoot = (wsl wslpath -a .).Trim()
             # PERL_UNICODE=SDA: decode @ARGV + default open() layers as UTF-8 so po4a reads the .cfg's
@@ -488,7 +488,7 @@ function Restore-WeblateOwnedPo {
                "(git ls-tree exit code $LASTEXITCODE); refusing to partition them for restore/delete.")
     }
     $tracked = @($declared | Where-Object { $inHead -contains $_ })
-    $created = @($declared | Where-Object { $inHead -notcontains $_ -and (Test-Path (Join-Path $repoRoot $_)) })
+    $created = @($declared | Where-Object { $inHead -notcontains $_ -and (Test-Path -LiteralPath (Join-Path $repoRoot $_)) })
 
     if ($tracked) {
         git -C $repoRoot restore --source=HEAD --worktree -- @tracked
@@ -683,7 +683,7 @@ function Invoke-UpdateYamlKeys {
     $yamlKeysArgs = @{ ConfigFile = $fullConfigPath }
     if ($DryRun) { $yamlKeysArgs['DryRun'] = $true }
     # The config's YAML paths are relative to the repository root, where po4a runs.
-    Push-Location $repoRoot
+    Push-Location -LiteralPath $repoRoot
     try {
         & $script @yamlKeysArgs
     }
@@ -703,7 +703,7 @@ function Invoke-UpdateGlossary {
         Write-Host "[DryRun] $python $($glossaryArgs -join ' ')"
     } else {
         Write-Host "Updating the glossary template and generating localized YAML"
-        Push-Location $repoRoot
+        Push-Location -LiteralPath $repoRoot
         try {
             & $python @glossaryArgs
             if ($LASTEXITCODE -ne 0) {

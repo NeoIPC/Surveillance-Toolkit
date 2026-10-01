@@ -12,14 +12,18 @@
     A script that reads a file with Get-Content and writes it back with [System.IO.File]::WriteAllText
     therefore reads one file and writes another, or fails to write, whenever the two differ, which is the
     case in any session that changed directory after it started. Each test here sets the process's working
-    directory away from the current location, so it goes red for a writer that resolves the path through
-    .NET.
+    directory away from the current location, so the three that run their writer in the Pester process go
+    red for a writer that resolves the path through .NET.
 
-    A failed write, a malformed YAML master and a master that cannot be found each have to stop
+    A failed write, a malformed YAML master, and a master that cannot be found each have to stop
     Update-Po4aYamlKeys.ps1 with a non-zero exit code and no success line, leaving the config as it was.
     Those tests run the script in a child process: in the same process, a statement-terminating error
     reaches Pester's own try/catch whether or not the script stops on it, so only the exit code tells
-    the two apart.
+    the two apart. A child started with -File runs the script at its global scope, where the script's
+    own $ErrorActionPreference reaches the modules it calls. The malformed master is therefore run a
+    second way, with & in a child started with -Command, as a prompt or Invoke-Localization.ps1 runs the
+    script: there a module sees only the global preference, and only the script's -ErrorAction on the
+    YAML parser stops it.
 
 .EXAMPLE
     Invoke-Pester -Path scripts/modules/NeoIPC-Tools/Tests/RelativePathWrites.Tests.ps1
@@ -31,9 +35,17 @@ BeforeAll {
     $script:keysScript = Join-Path $script:repoRoot 'scripts' 'Update-Po4aYamlKeys.ps1'
 
     # Runs Update-Po4aYamlKeys.ps1 in a child process in the current location and returns its exit code
-    # and output lines.
+    # and output lines. The child runs the script as its -File, or with -InProcess calls it with & from
+    # -Command, below the global scope.
     function Invoke-KeysScript {
-        $output = & pwsh -NoProfile -NonInteractive -File $script:keysScript -ConfigFile 'test.po4a.cfg' 2>&1
+        param([switch]$InProcess)
+        $output = if ($InProcess) {
+            $command = "& '$($script:keysScript.Replace("'", "''"))' -ConfigFile 'test.po4a.cfg'"
+            & pwsh -NoProfile -NonInteractive -Command $command 2>&1
+        }
+        else {
+            & pwsh -NoProfile -NonInteractive -File $script:keysScript -ConfigFile 'test.po4a.cfg' 2>&1
+        }
         [pscustomobject]@{ ExitCode = $LASTEXITCODE; Output = @($output | ForEach-Object { "$_" }) }
     }
 }
@@ -107,11 +119,14 @@ Describe 'Writes given a path relative to the current location' {
         [System.IO.File]::ReadAllText($script:config) | Should -BeExactly "[type: yaml] strings.yaml`n"
     }
 
-    It 'Update-Po4aYamlKeys.ps1 fails on a malformed YAML master' {
+    It 'Update-Po4aYamlKeys.ps1 fails on a malformed YAML master, run <Case>' -ForEach @(
+        @{ Case = 'as a child''s -File'; InProcess = $false }
+        @{ Case = 'with & from a child''s -Command'; InProcess = $true }
+    ) {
         [System.IO.File]::WriteAllText((Join-Path $script:here 'strings.yaml'), "key: [unclosed`n")
         [System.IO.File]::WriteAllText($script:config, "[type: yaml] strings.yaml`n")
 
-        $result = Invoke-KeysScript
+        $result = Invoke-KeysScript -InProcess:$InProcess
 
         $result.ExitCode | Should -Not -Be 0
         $result.Output | Should -Not -Contain 'Config updated successfully.'

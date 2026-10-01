@@ -132,7 +132,7 @@ params:
   # @type logical
   includeRiskDensityRateTable: true
 
-  # Include the antibiotic-utilisation table.
+  # Include the antibiotic-utilization table.
   # @type logical
   includeAntibioticUtilisationTable: false
 

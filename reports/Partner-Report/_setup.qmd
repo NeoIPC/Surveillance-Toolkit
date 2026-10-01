@@ -1161,6 +1161,7 @@ localize_metric_name <- function(metric_id, sR, table_name = NULL) {
   metric_key_map <- list(
     bsi = "primary_sepsis_bsi_sc",
     hap = "pneumonia_sc",
+    probiotic = "probiotics",
     all = "total",
     a = "access",
     w = "watch",

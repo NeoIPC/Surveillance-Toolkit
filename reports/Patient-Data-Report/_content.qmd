@@ -318,7 +318,7 @@ cat("\n\n## ", sR$surveillance_end_sc, "\n\n")
 se <- surveillance_end[1, ]
 se_event <- events |> dplyr::filter(event_key == se$event_key)
 
-format_days_value <- function(n) paste(n, sR$days)
+format_days_value <- function(n) paste0(n, sR$unit_separator, sR$days)
 
 # Summary table: date, reason, patient days
 se_fields <- c(sR$field$surveillance_end_date)

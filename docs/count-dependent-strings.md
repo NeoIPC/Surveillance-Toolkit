@@ -29,19 +29,22 @@ case where the absence is invisible — Ukrainian and Polish take three, Arabic 
 rule is to prefer the official WHO rendering, of which Arabic and Russian are official languages. Adding
 such a language to a schema that cannot hold a second form means retranslating, not extending.
 
-## Three kinds of count-bearing string, not two
+## Four kinds of count-bearing string, not two
 
-The third kind is the one every search misses.
+Kinds 3 and 4 are the ones every search of the catalogue misses.
 
 | kind | how it is spotted | example |
 |---|---|---|
-| Count printed in the string | a placeholder receiving a number | `(N = {n} patients)` |
-| Count printed, but the noun does not agree | reading the sentence | `{column}: The aggregated number of infections…` — `{column}` is a column symbol |
-| **Count not printed at all, and R picks the form** | only by finding the *selection* in code | `if (length(countries) > 1) sR$countries else sR$country` |
+| 1. Count printed in the string | a placeholder receiving a number | `(N = {n} patients)` |
+| 2. Count printed, but the noun does not agree | reading the sentence | `{column}: The aggregated number of infections…` — `{column}` is a column symbol |
+| 3. **Count not printed at all, and R picks the form** | only by finding the *selection* in code | `if (length(countries) > 1) sR$countries else sR$country` |
+| 4. **Count printed beside the string, joined in R** | only by finding the *join* in code | `paste0(n, sR$unit_separator, sR$days)` |
 
-The third kind carries no number in the rendered text, so no inspection of the catalogue can find it — the
-count never enters the string. It is nonetheless count-dependent grammar, and gettext handles it exactly:
-`ngettext` takes *n* whether or not *n* is displayed.
+Kind 3 carries no number in the rendered text, so no inspection of the catalogue can find it — the count
+never enters the string. It is nonetheless count-dependent grammar, and gettext handles it exactly:
+`ngettext` takes *n* whether or not *n* is displayed. Kind 4 prints its count, but outside the string: the
+resource is a bare noun with no placeholder, and only the R that joins the two shows that it follows a
+number.
 
 **Detecting these mechanically is harder than it looks.** A sweep for sibling keys differing by a trailing
 `s` finds none of them: `countries` less `s` is `countrie`, not `country`. English irregular plurals defeat
@@ -57,11 +60,11 @@ the obvious heuristic, which is why the list below was built by reading the sele
 | `content[5]` | `reports/Partner-Certificate/content/_sR.yaml` | `…monitoring of {patient_count} newborns with birth weights…`. Receives a newborn count. |
 | `headerList.country` / `.countries` | Partner-Report, Reference-Report | Selected in R by `length(countries) > 1`. No count is printed; the noun still agrees with one. |
 | `header.department` / `.departments` | Validation-Report | Selected in R by `nrow(departments) > 1`. Same shape. |
-| `days` | `reports/Patient-Data-Report/content/_sR.yaml` | `paste(n, sR$days)` in `_content.qmd` prints a count of days before the noun, so one day reads "1 days". |
+| `days` | `reports/Patient-Data-Report/content/_sR.yaml` | `format_days_value()` in `_content.qmd` joins a count of days to the noun with `sR$unit_separator`, so one day reads "1 days". |
 
-**Six, where the design note that preceded this named three.** The three it named were found by inspecting
-`reports/common.yaml`; the other three live in a report's own `_sR.yaml` or in R code, which is why
-inspecting one file could not have found them.
+**Seven, where the design note that preceded this named three.** The three it named were found by
+inspecting `reports/common.yaml`; the other four live in a report's own `_sR.yaml` or in R code, which is
+why inspecting one file could not have found them.
 
 ### The hand-rolled selections are already slightly wrong
 
@@ -92,8 +95,10 @@ Recorded so the question is not reopened.
 
 Surveyed all **614** translatable strings across `reports/common.yaml`, `glossary.yaml` and the five
 reports' `content/_sR.yaml`; **124** carry a placeholder. Each was judged by what its placeholder actually
-receives at the call site, not by its shape. The count-selected strings were found separately, by
-searching R for a conditional on a length or row count that chooses between two string resources.
+receives at the call site, not by its shape. The count-selected strings (kind 3) need a search of their
+own, of R for a conditional on a length or row count that chooses between two string resources, and the
+joined ones (kind 4) a third, of R for a count pasted onto a string resource with neither a placeholder
+nor a conditional.
 
 Weblate's **Unpluralised** check should be enabled to cover the same ground mechanically. Expect it to
 disagree with this list in both directions — it will flag label-shaped strings it cannot know are fine, and

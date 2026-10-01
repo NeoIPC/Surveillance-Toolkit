@@ -192,12 +192,15 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
 
 - The Partner and Reference Reports' PDF showed no page number on the first page, whose footer set the
   EU emblem and the funding statement but not the number. Every page is numbered now.
-- The Patient Data Report's labels mixed three casings: most capitalised word by word ("Patient Days",
+- The Patient Data Report's labels mixed three casings: most capitalized word by word ("Patient Days",
   "Central Venous Catheter (CVC)"), the human milk and kangaroo care days and the antibiotics heading
-  in lower case, and the day counts' unit capitalised ("58 Days"). Its table labels are in sentence case
-  now, as in the Partner and Reference Reports' tables, its antibiotics heading is capitalised, and the
-  unit reads "58 days"; its patient-days label is the one the other reports use. German keeps its noun
-  capitalisation.
+  in lower case, and the day counts' unit capitalized ("58 Days"). Its table labels are in sentence case
+  now, as the Partner and Reference Reports' row labels are, its antibiotics heading is capitalized, and
+  the unit reads "58 days"; its patient-days label is the one the other reports use. German keeps its
+  noun capitalization.
+- In the Partner Report's notes on outlying values, the risk-density table's probiotics appeared as the
+  raw identifier "Probiotic" in every language rather than by the term the table uses, and the note for
+  a table without outliers misspelled "similar".
 - The Patient Data Report failed at its import on every render: neoipcr before `v0.0.0.9006` failed
   on the events' timestamps and on enrolment notes read without the DHIS2 enrolment ids, both of which
   the report requests, and on records without a creator: events created before the instance's upgrade
