@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-09-29 18:28+0200\n"
+"POT-Creation-Date: 2026-10-01 05:59+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Language-Team: none\n"
 "Language: en\n"
@@ -1618,7 +1618,7 @@ msgstr ""
 #. type: Hash Value: figure_interpretation no_outliers
 #: reports/Partner-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "All metrics fall within the interquartile range (25th-75th percentile) of the reference population, suggesting similiar patient characteristics.\n"
+msgid "All metrics fall within the interquartile range (25th-75th percentile) of the reference population, suggesting similar patient characteristics.\n"
 msgstr ""
 
 #. type: Hash Value: figure_interpretation wider_distribution
