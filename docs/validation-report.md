@@ -93,11 +93,14 @@ that opens somewhere else. The refusal names the defect but never repeats the ad
 password, and a connection address that fails names `dhis2PublicBaseUrl` as the parameter to pass
 instead.
 
-`Build-ValidationReport.ps1` itself refuses a `-Dhis2PublicBaseUrl` with an `@`, whitespace, or a
-control character, before it authenticates or creates `-OutputDir`, again without repeating the value.
-Quarto drops a `-P` value with a line break without a warning (its `parseMetadataFlagValue()` matches
-it against a pattern whose `.` stops at a line terminator), so such a value would never reach the
-report's check, and the links would point at the address the data is read from. The script passes the
+`Build-ValidationReport.ps1` itself refuses a `-Dhis2PublicBaseUrl` with an `@`, a `?` or `#`,
+whitespace, or a control character, before it authenticates or creates `-OutputDir`, again without
+repeating the value. User information and a query or fragment are the parts of a URL that can carry a
+secret, which the build report's record of the parameters and the `-Debug` command line would otherwise
+hold before the report refused the value; the other shapes the report refuses carry none. Quarto drops
+a `-P` value with a line break without a warning (its `parseMetadataFlagValue()` matches it against a
+pattern whose `.` stops at a line terminator), so such a value would never reach the report's check,
+and the links would point at the address the data is read from. The script passes the
 value on as a single-quoted YAML scalar, since a plain one such as `~` or `null` would arrive as no
 value at all.
 

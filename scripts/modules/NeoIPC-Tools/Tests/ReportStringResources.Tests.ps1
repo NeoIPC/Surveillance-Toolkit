@@ -380,6 +380,11 @@ Describe 'The public address Build-ValidationReport.ps1 refuses itself' {
         @{ Case = 'a password and a line break'; Value = "https://admin:district@neoipc.example.org/dhis`n"
            Refusal = "an '@'"; Withheld = 'admin', 'district' }
         @{ Case = 'an at sign in the path'; Value = 'https://neoipc.example.org/a@b'; Refusal = "an '@'" }
+        @{ Case = 'a token in a query'; Value = 'https://neoipc.example.org/dhis?api_key=S3cret'
+           Refusal = "a '?' or '#'"; Withheld = 'api_key', 'S3cret' }
+        @{ Case = 'an empty query'; Value = 'https://neoipc.example.org/dhis?'; Refusal = "a '?' or '#'" }
+        @{ Case = 'a token in a fragment'; Value = 'https://neoipc.example.org/dhis#access_token=S3cret'
+           Refusal = "a '?' or '#'"; Withheld = 'access_token', 'S3cret' }
     ) {
         $thrown = Get-WrapperRefusal $Value
         $thrown | Should -BeLike "-Dhis2PublicBaseUrl contains $($Refusal ?? 'whitespace or a control character')*"

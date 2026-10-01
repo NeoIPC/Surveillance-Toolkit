@@ -19,9 +19,9 @@ such as a tunnel or an internal host. Omitted, the links point at the DHIS2 inst
 The host is a host name or an IPv4 address of dot-separated labels of ASCII letters, digits, hyphens, and
 underscores; the path may also carry full stops, tildes, and percent-encoded bytes. Before it authenticates
 or renders, the script itself refuses a value with any '@', which before the host introduces a user name
-or password, and a value with any whitespace or control character. The report refuses any other value
-outside this shape, such as one with a query or fragment or with a bracketed host such as an IPv6 literal.
-Neither refusal repeats the value.
+or password, any '?' or '#', which begins a query or fragment, or any whitespace or control character.
+The report refuses any other value outside this shape, such as one with a bracketed host such as an IPv6
+literal. No refusal repeats the value.
 
 .EXAMPLE
     .\Build-ValidationReport.ps1 -SiteCodeFilter 'NEO_AT.*' -OutputLocale 'de' -Token $myToken -Verbose
@@ -114,10 +114,13 @@ Import-Module (Join-Path $PSScriptRoot 'modules' 'NeoIPC-Tools') -Force -Verbose
 
 # -Dhis2PublicBaseUrl is checked before anything else runs: authentication can
 # prompt for credentials, -OutputDir is created, the build report records the
-# bound parameters, and -Debug prints the Quarto command line. Neither refusal
-# repeats the value, which can carry a password; they are thrown here rather
-# than from a [ValidateScript()], whose own message would repeat it.
-# The report refuses both kinds of value as well, but a value with a line
+# bound parameters, and -Debug prints the Quarto command line. So every part of
+# a URL that can carry a secret is refused here: user information, which comes
+# with an '@', and a query or fragment, which begin with '?' or '#'. The other
+# shapes the report refuses carry none, and it refuses them without repeating
+# the value. No refusal here repeats the value either; they are thrown here
+# rather than from a [ValidateScript()], whose own message would repeat it.
+# The report refuses all of these values as well, but a value with a line
 # terminator never reaches it: Quarto matches each -P argument against
 # /^([^=:]+)[=:](.*)$/, whose `.` does not match `\n`, `\r`, U+2028, or
 # U+2029, and drops an argument that does not match without a warning
@@ -133,6 +136,10 @@ if ($Dhis2PublicBaseUrl) {
     if ($Dhis2PublicBaseUrl -match '[\s\p{Cc}]') {
         throw ('-Dhis2PublicBaseUrl contains whitespace or a control character, such as a line break. ' +
             'Give the address at which the readers reach DHIS2 without either.')
+    }
+    if ($Dhis2PublicBaseUrl.IndexOfAny([char[]]'?#') -ge 0) {
+        throw ("-Dhis2PublicBaseUrl contains a '?' or '#', which begins a query or fragment, where a " +
+            'token can travel. Give the address at which the readers reach DHIS2 without either.')
     }
 }
 
