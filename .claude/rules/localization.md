@@ -1,5 +1,5 @@
 ---
-paths: "po/**,**/*.po,**/*.pot,**/*.po4a.cfg,**/*.py,scripts/po4a.cfg,scripts/Invoke-Localization.ps1,scripts/Update-Po4aYamlKeys.ps1,scripts/Test-PoPlaceholders.ps1,tools/po4a/**,doc/protocol/**,reports/**,glossary*.yaml,common/figure-strings*.yaml"
+paths: "po/**,**/*.po,**/*.pot,**/*.po4a.cfg,**/*.py,scripts/po4a.cfg,scripts/Invoke-Localization.ps1,scripts/Update-Po4aYamlKeys.ps1,scripts/Test-PoPlaceholders.ps1,scripts/*/*-MessageStrings.psd1,scripts/modules/NeoIPC-Tools/Private/MetadataTranslation.ps1,scripts/modules/NeoIPC-Tools/Public/Metadata.ps1,metadata/common/infectious-agents/*.adoc,tools/po4a/**,doc/protocol/**,reports/**,glossary*.yaml,common/figure-strings*.yaml"
 ---
 
 ## Localization
@@ -18,10 +18,10 @@ Translatable content is managed via [po4a](https://po4a.org/) with Weblate for c
 
 ### How It Works
 
-1. Source files (QMD, Rmd, YAML, LaTeX) → po4a extracts → `.pot` template
+1. Source files (Rmd and other text, YAML, AsciiDoc) → po4a extracts → `.pot` template
 2. The `.pot` is merged to `main`; Weblate's *msgmerge* add-on brings each `.po` up to it
 3. Translators work in **Weblate**, which commits the `.po` back
-4. po4a generates localized files (e.g., `Report.de.qmd`, `content.de/_sR.yaml`) from the committed `.po`
+4. po4a generates localized files (e.g., `content.de/_sR.yaml`, `common.de.yaml`) from the committed `.po`; the per-locale `{Report}.<lang>.qmd` wrappers are not po4a output but tracked files that `scripts/Build-LocaleReportSources.ps1` regenerates when a master QMD's parameters change
 
 **Translations live in `.po` files, not in YAML.** The localized YAML files (`content.de/_sR.yaml`, `common.de.yaml`, etc.) are *generated* by po4a from `.po` files — do not edit them directly. To change a translation, change it in Weblate; the catalogue-ownership guardrail above says which `.po` files that applies to, and `scripts/po/*.po` and `po/antibiotics.*.po` are the two that remain repository-owned. Each has a generator here that keeps it in step with its template, so change the English source and re-run the pipeline rather than editing a catalogue by hand.
 
@@ -94,7 +94,7 @@ propagate to the others.
 
 When adding a new file to po4a that already has manual translations:
 
-1. **Back up existing translated files** before any po4a operation. po4a overwrites generated files (`content.de/_sR.yaml`, `*.de.qmd`, etc.) — only `.po` files are version-controlled, everything else is regenerated. Use a naming convention like `content.de_/` (underscore suffix) for backups.
+1. **Back up existing translated files** before any po4a operation. po4a overwrites the files it generates (`content.de/_sR.yaml`, `common.de.yaml`, etc.), which are git-ignored and exist only as its output. Use a naming convention like `content.de_/` (underscore suffix) for backups.
 2. **Run `Update-Po4aYamlKeys.ps1`** if the YAML file has nested keys. po4a's YAML module only extracts values whose keys are explicitly listed in the `keys` option. The script recursively collects all keys from the source YAML and updates the config. Without this, nested keys (e.g., `problems.1.description`, `sex.female`, `admission_types.delivery_room`) won't be extracted.
    ```powershell
    ./scripts/Update-Po4aYamlKeys.ps1 -ConfigFile po/reports.po4a.cfg

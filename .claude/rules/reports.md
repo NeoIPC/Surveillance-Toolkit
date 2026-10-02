@@ -27,11 +27,11 @@ Reports live under `reports/`:
 
 - **Shared R code**: `reports/common/` — `helpers.R` (locale parsing, string resource loading, DHIS2 connection helpers), `load-neoipcr.R`, `parse-args.R` (CLI arg parsing), `getDataset.R` (dataset export), `logging.R` (unified `logger`-based logging: `configure_logging()` + `logInfo`/`logVerbose`/`logDebug`/`logWarn`/`logError`, plus `with_error_trace()` to log a full backtrace when a render-time computation fails), `reference.docx` (Word template)
 - **Base string resources**: `reports/common.yaml` (English domain terms, table headers, footnotes)
-- **Pandoc filters**: `reports/filters/pandoc-quotes.lua` (language-aware typographic quotes)
+- **Pandoc filters**: `reports/filters/` — `pandoc-quotes.lua` (language-aware typographic quotes), `fix-gt-footnote-display-math.lua` (a line for gt's footnote line break to end after display math, which tagged LaTeX otherwise rejects), and `fix-unnumbered-bookmarks.lua` (a `\phantomsection` before each unnumbered heading, so its PDF bookmark points at it)
 
 ### Lua Filters
 
-Every report runs `pandoc-quotes.lua`. Empty section headers are suppressed in R (conditional cat-emit gated on the section's `show_section_*` flag), not by a Lua filter.
+Every report runs `pandoc-quotes.lua`; the Partner and Reference Reports also run `fix-gt-footnote-display-math.lua`, and the Validation Report `fix-unnumbered-bookmarks.lua`. Empty section headers are suppressed in R (conditional cat-emit gated on the section's `show_section_*` flag), not by a Lua filter.
 
 ### Validation Report
 
@@ -46,7 +46,7 @@ The rules live in neoipcr (`neoipcr::validate()` returns keys and context values
 
 ### Translatable Strings
 
-No `sprintf` `%s`, markdown, or LaTeX syntax in translatable strings. Use `glue`-style `{named}` placeholders (e.g., `{patient_id}`, `{count}`). Apply formatting (bold, links, etc.) in rendering code, not in the string resource. Weblate validates `{name}` placeholders automatically.
+No `sprintf` `%s`, markdown, or LaTeX syntax in translatable strings. Use `glue`-style `{named}` placeholders (e.g., `{patient_id}`, `{count}`). Apply formatting (bold, links, etc.) in rendering code, not in the string resource. Weblate checks `{name}` placeholders only where the reports component carries the `placeholders:` flag that [`docs/weblate-checks-adoption.md`](../../docs/weblate-checks-adoption.md) specifies, since its format-based detection does not fire for these catalogues.
 
 ### Fonts
 
