@@ -20,13 +20,13 @@ format:
 
 ## Purpose
 
-This document compares the three fonts used across NeoIPC reports, rendered
-side by side. Use it to verify that all fonts are installed and rendering
+This document compares the two fonts the NeoIPC reports use and one candidate
+fallback, rendered side by side. Use it to verify that all fonts are installed and rendering
 correctly.
 
-- **EB Garamond** --- Partner-Report & Reference-Report (Latin scripts)
-- **Noto Serif Condensed** --- Partner-Report & Reference-Report (non-Latin scripts, e.g. Greek)
-- **Noto Sans** --- Validation-Report & Partner-Certificate
+- **EB Garamond** --- Partner-Report & Reference-Report (Latin, Greek, and Cyrillic scripts)
+- **Noto Serif Condensed** --- a candidate body-text fallback for scripts EB Garamond lacks; no report configures it
+- **Noto Sans** --- Validation-Report, Partner-Certificate & Patient-Data-Report
 
 \bigskip
 

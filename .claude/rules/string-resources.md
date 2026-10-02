@@ -1,19 +1,19 @@
 ---
-paths: "reports/**/*.yaml,glossary*.yaml"
+paths: "reports/**/*.yaml,glossary*.yaml,reports/common/helpers.R,reports/*/_setup.qmd"
 ---
 
 ## String Resources
 
 - **Never** use single letters or bare numbers as YAML keys in string resource files. po4a's YAML module fails to extract some single-letter keys (e.g., `u`), and short keys are not expressive. Use descriptive names instead (e.g., `female`/`male`/`undetermined` instead of `f`/`m`/`u`). When a YAML key must map to a short code from DHIS2, add a mapping in the R code — option codes included, however stable they look (`delivery_room`, not `"1"`): the key then names what the label means for translators, and a changed option code changes one R mapping but no translated string. The one numeric key is a validation rule's id under the Validation Report's `problems`, since the id is the rule's name wherever it appears (neoipcr's registry, the report's headings). *(repo-specific)*
 - String values must not be duplicated across YAML layers (glossary, common, report-specific) or across report-specific files. If two reports share a string, move it to `common.yaml`. Run `scripts/Test-StringResourceLayers.ps1` to check before committing changes to string resource files. *(repo-specific)*
-- **Glossary casing** follows the AMA Manual's capitalization rules. Disease names are common nouns and are lowercase in running text (e.g., "necrotizing enterocolitis", "pneumonia") unless they contain a proper noun (e.g., "Crohn's disease"). The sentence-case variants (`_sc`) exist for labels, not because the terms are proper nouns; how they are derived is set out under "Glossary naming convention" below. *(repo-specific)*
+- **Glossary casing** follows the AMA Manual's capitalization rules. Disease names are common nouns and are lowercase in running text (e.g., "necrotizing enterocolitis", "pneumonia") unless they contain a proper noun (e.g., "Crohn's disease"). The sentence-case variants (`_sc`) exist for labels, not because the terms are proper nouns; how they are derived is set out under "Glossary Naming Convention" below. *(repo-specific)*
 - A YAML *value* is prose and follows the English rule; a YAML *key* is an identifier and does not. The glossary is the exception both ways: its keys become the `msgctxt` that identifies a translator's unit, so a glossary key is part of the translatable surface and moves with its value **and every R call site in the same change**, or the units are recreated twice. *(repo-specific)*
 
 ## String Resource Cascade
 
 `helpers.R::get_string_resources()` implements a cascading YAML merge for localized string resources. Each report provides a base `content/_sR.yaml` (English), and the cascade overlays language-specific overrides using `modifyList()` (recursive merge).
 
-### Cascade order (lowest → highest priority)
+### Cascade Order (Lowest → Highest Priority)
 
 Paths are relative to each report's directory (e.g., `reports/Partner-Report/`).
 
@@ -27,9 +27,9 @@ Paths are relative to each report's directory (e.g., `reports/Partner-Report/`).
 8. `content.<lang>/_sR.yaml` — report-specific strings (language override)
 9. `content.<lang>_<territory>/_sR.yaml` — report-specific strings (language+territory override)
 
-Each level only needs to contain the keys it wants to override — `modifyList()` preserves unmodified keys from earlier levels.
+Each level only needs to contain the keys it wants to override — `modifyList()` preserves unmodified keys from earlier levels. Only the three English levels are written by hand: po4a and `scripts/update-glossary-po.py` generate the `<lang>` levels from the Weblate catalogues, so a translation changes in Weblate, never in those files (see the localization rules), and no repository file provides a `<lang>_<territory>` level.
 
-### Setup pattern (in each report's `_setup.qmd`)
+### Setup Pattern (in Each Report's `_setup.qmd`)
 
 ```r
 locale <- Sys.getenv("LC_ALL")                 # e.g. "de_DE.UTF-8"
@@ -39,17 +39,17 @@ sR <- get_string_resources(localeObj)           # cascading YAML merge
 
 **Important**: `get_string_resources()` reads `localeObj` from the calling scope (not from its parameter `x`). The `localeObj` variable must exist in the parent environment.
 
-### Locale resolution for content files
+### Locale Resolution for Content Files
 
 `helpers.R::get_localised_path(file_name, language, territory)` resolves localized content files with fallback:
 
 `content.<lang>_<territory>/` → `content.<lang>/` → `content/`
 
-### Variable naming
+### Variable Naming
 
 All reports store the string resource result in `sR` (accessed via `sR$key`).
 
-### YAML conventions
+### YAML Conventions
 
 - Use `>-` (folded, strip trailing newline) for multi-line strings that should be a single paragraph
 - Use `|` (literal, keep trailing newline) for strings with intentional newlines (e.g., email templates)
@@ -57,7 +57,7 @@ All reports store the string resource result in `sR` (accessed via `sR$key`).
 - Quote a numeric YAML key — a validation rule's id, the only one allowed (see the guardrail against bare numbers as keys): `"45"` (otherwise YAML interprets it as an integer)
 - Read string resources with `string_resource_handlers()` from `reports/common/helpers.R` (as `get_string_resources()` does), which sets one handler on both the `bool#yes` and the `bool#no` tag: YAML 1.1 reads a bare yes, no, on, off, y or n as a logical, but in string resources such a word is a label (po4a writes a translated `Yes` unquoted), so it stays text, and only true and false are logicals
 
-### Glossary naming convention
+### Glossary Naming Convention
 
 **One key per term.** `glossary.yaml` holds the AMA canonical (lowercase) form — `necrotizing_enterocolitis: "necrotizing enterocolitis"` — and nothing else for that term.
 
