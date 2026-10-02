@@ -1,5 +1,5 @@
 ---
-applyTo: "po/**,**/*.po,**/*.pot,**/*.po4a.cfg,**/*.py,scripts/po4a.cfg,scripts/Invoke-Localization.ps1,scripts/Update-Po4aYamlKeys.ps1,scripts/Test-PoPlaceholders.ps1,scripts/*/*-MessageStrings.psd1,scripts/modules/NeoIPC-Tools/Private/MetadataTranslation.ps1,scripts/modules/NeoIPC-Tools/Public/Metadata.ps1,metadata/common/infectious-agents/*.adoc,tools/po4a/**,doc/protocol/**,reports/**,glossary*.yaml,common/figure-strings*.yaml"
+applyTo: "po/**,**/*.po,**/*.pot,**/*.po4a.cfg,**/*.py,scripts/po4a.cfg,scripts/Invoke-Localization.ps1,scripts/Update-Po4aYamlKeys.ps1,scripts/Test-PoPlaceholders.ps1,scripts/*/*-MessageStrings.psd1,scripts/modules/NeoIPC-Tools/Private/MetadataTranslation.ps1,scripts/modules/NeoIPC-Tools/Public/Metadata.ps1,metadata/common/infectious-agents/*.adoc,metadata/common/infectious-agents/*.yaml,tools/po4a/**,doc/protocol/**,reports/**,glossary*.yaml,common/figure-strings*.yaml"
 ---
 
 ## Localization

@@ -1,5 +1,5 @@
 ---
-applyTo: "reports/**/*.yaml,glossary*.yaml,reports/common/helpers.R,reports/*/_setup.qmd"
+applyTo: "reports/**/*.yaml,glossary*.yaml,common/figure-strings*.yaml,reports/common/helpers.R,reports/*/_setup.qmd"
 ---
 
 ## String Resources
