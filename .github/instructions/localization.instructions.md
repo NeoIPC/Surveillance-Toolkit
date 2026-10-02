@@ -47,7 +47,7 @@ git submodule update --init tools/po4a
 
 **Do not run these bare against a Weblate-owned config.** po4a rewrites every `.po` as a side effect
 of producing the `.pot`, so a bare run over `po/reports.po4a.cfg`, `po/documentation.po4a.cfg` or
-`po/infectious_agents.po4a.cfg` puts a second writer on nine catalogues Weblate owns — the failure the
+`po/infectious_agents.po4a.cfg` puts a second writer on catalogues Weblate owns — the failure the
 ownership rule above exists to prevent. Use `scripts/Invoke-Localization.ps1 -Update`, which restores
 them from `HEAD` afterwards. The invocations below are for reference, and for the one config that is
 repository-owned (`scripts/po4a.cfg`).

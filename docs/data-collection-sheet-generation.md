@@ -795,7 +795,7 @@ glossary, the rest the translator's.
 Joining presumes the shape: *n* items, one delimiter, repeated, in a fixed order. That is a Latin list
 convention rather than a property of writing, and it forecloses a conjunction before the last item, an
 enumeration comma, a different order, or a rendering that is not a list at all — none of which an emitter
-can be asked to decide for nine languages. The same reasoning already applies to the colon after a label,
+can be asked to decide for every language. The same reasoning already applies to the colon after a label,
 which is why one is not appended in code either. The cost is one check: every declared placeholder must
 appear and no undeclared one may, and the build fails otherwise, because a label that quietly lost a
 placeholder would stop offering a resistance category the model still keeps.

@@ -16,8 +16,8 @@
       glossary is largely abbreviations.
 
     Turkish is what makes the locale argument load-bearing: `i` uppercases to `İ` (U+0130), and base
-    toupper() produces a plain `I` unless the process locale is Turkish - which a container rendering
-    nine languages is not. The assertion names the codepoint, because a test that only checked "the
+    toupper() follows the process locale, producing a plain `I` wherever that locale is not Turkish or
+    the platform lacks it. The assertion names the codepoint, because a test that only checked "the
     first letter is capitalised" would pass on the wrong character.
 
     Skipped where R is absent; CI installs none, because rendering happens in the container repository.

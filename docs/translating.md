@@ -280,4 +280,4 @@ request instead. `CONTRIBUTING.md` says how.
 Say so — comment on the string, or write to **NeoIPC-Support@charite.de**. Source strings here have been
 ambiguous, have contained typos, and in a few cases have been impossible to translate well because they
 were assembled from fragments. All of those were found by translators, and fixing the source is better
-than nine languages each working around it.
+than every language working around it.

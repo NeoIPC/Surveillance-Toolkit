@@ -89,8 +89,9 @@ parse_locales <- function(x) {
 sentence_case <- function(text, language) {
   if (!nzchar(text)) return(text)
   # Uppercase the FIRST CHARACTER ONLY, through a locale-aware call so the language's own casing rules
-  # apply rather than the build machine's: Turkish `i` becomes `İ` (U+0130) where base toupper() yields
-  # a plain `I` unless the PROCESS locale is Turkish, which a container rendering nine languages is not.
+  # apply rather than the process locale's: Turkish `i` becomes `İ` (U+0130), while base toupper()
+  # follows the PROCESS locale and yields a plain `I` wherever that locale is not Turkish or the platform
+  # lacks it, so its answer would depend on the machine the report renders on.
   # Delegating to ICU also covers locales nobody here has enumerated — Azerbaijani shares the Turkish
   # rule, Lithuanian has its own — and returns a caseless script unchanged with no special case.
   #

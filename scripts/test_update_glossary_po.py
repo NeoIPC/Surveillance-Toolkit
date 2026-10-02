@@ -229,7 +229,7 @@ def check_committed_template_matches_source(tmp, failures):
     header comment from one line to two and did not regenerate again — leaving all 41 `#:` location
     references pointing one line early. Because `po_no_location` is deliberately false so those become
     clickable links, and because msgmerge copies locations from the template into every catalogue, a
-    stale template propagates the error to all nine languages on the next drain.
+    stale template propagates the error to every language on the next drain.
 
     Asserted against the REAL committed files rather than a fixture, since a fixture cannot go stale.
     POT-Creation-Date is excluded — it moves on every run by design.
@@ -363,7 +363,7 @@ def main():
                 failures.append(f"--generate-yaml exited {result.returncode}: {result.stderr.strip()}")
             else:
                 # The BELOW-threshold path too, which is the one a normal -Update takes for every
-                # language today -- nine catalogues sit far under the default 80 -- so leaving it
+                # language today -- every catalogue sits far under the default 80 -- so leaving it
                 # unbracketed leaves the common branch unguarded. The fixture is fully translated, so
                 # an impossible threshold is what forces the skip.
                 before_skip = read_bytes(po_path)
