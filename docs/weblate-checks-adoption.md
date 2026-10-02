@@ -73,7 +73,7 @@ The cumulative number of days{fn-ab-days} when the infant received ...
 entry only where one has declared it — `AsciiDoc.pm` gates the `translate()` call on that name being
 registered, and its own documentation says *"This declares an attribute entry as being translatable. By
 default, they are not translated."* Without the directive the value is pushed through verbatim: the
-footnote's prose never reaches `po/documentation.pot`, so it ships in English in all nine languages while
+footnote's prose never reaches `po/documentation.pot`, so it ships in English in every language while
 the build stays green and the check goes quiet — the loudest possible way to look like a fix. No
 `//po4a: entry` exists anywhere in this repository today, so this is the first, and every externalized
 footnote needs its own.

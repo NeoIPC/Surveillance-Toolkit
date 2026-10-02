@@ -769,7 +769,7 @@ function Get-NeoIPCCommonCommensalFlag {
     # explicit value on the node->root path (own value if present, else the closest ancestor that carries one); an
     # explicit `false` overrides an inherited `true`; absence everywhere defaults to false — the same own-or-inherited
     # model as Get-NeoIPCResistanceFlag, flowing DOWN through Hierarchies/Synonyms/Children. The NHSN Organism List is
-    # the authority for the classification (see the repo CLAUDE.md). Pipeline-emit idiom (no accumulator); operates on
+    # the authority for the classification (see .claude/rules/infectious-agents.md). Pipeline-emit idiom (no accumulator); operates on
     # an in-memory tree so it is unit-testable. Fails loud on a non-boolean flag value or a non-integer Id.
     [CmdletBinding()]
     [OutputType([System.Collections.Specialized.OrderedDictionary])]

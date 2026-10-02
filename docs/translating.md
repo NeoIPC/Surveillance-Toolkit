@@ -156,7 +156,7 @@ CVC and the rest reach you in Latin, and what to do with them differs by languag
 3. **Your language spells it out letter by letter.** Nepali does this: *सीआरपी*, *एमआरएसए*.
 
 **What none of them is: an abbreviation you build yourself from a translated expansion.** A form printed
-with a plausible-looking abbreviation nobody recognises is worse than one printed in English, because the
+with a plausible-looking abbreviation nobody recognizes is worse than one printed in English, because the
 reader cannot tell it is wrong. Where your language has no established form — Ukrainian has none for
 *3GCR* or *VPT*, and does not abbreviate either — say so in a comment and leave the Latin.
 
@@ -280,4 +280,4 @@ request instead. `CONTRIBUTING.md` says how.
 Say so — comment on the string, or write to **NeoIPC-Support@charite.de**. Source strings here have been
 ambiguous, have contained typos, and in a few cases have been impossible to translate well because they
 were assembled from fragments. All of those were found by translators, and fixing the source is better
-than nine languages each working around it.
+than every language working around it.

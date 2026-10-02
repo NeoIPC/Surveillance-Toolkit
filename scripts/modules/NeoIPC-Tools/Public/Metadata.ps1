@@ -787,7 +787,7 @@ function Export-NeoIPCMetadataTranslation {
     $potPath = Join-Path $PoDirectory 'metadata.pot'
     # Keep the date already on disk when nothing else changed. POT-Creation-Date is stamped from the clock,
     # so a regeneration that found no new string still produces a different file -- and committing that makes
-    # Weblate merge the header into every language of the component, a diff across nine catalogues carrying
+    # Weblate merge the header into every language of the component, a diff across all its catalogues carrying
     # no content. It also destroys the signal, since a run that changed one template then looks exactly like
     # a run that changed nothing.
     #

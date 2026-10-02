@@ -59,3 +59,6 @@ __pycache__/
 
 # Localized figure text, written by po4a from common/figure-strings.yaml on every run.
 common/figure-strings.*.yaml
+
+# Claude Code's per-machine settings; the shared ones are .claude/settings.json.
+.claude/settings.local.json

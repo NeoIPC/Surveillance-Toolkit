@@ -657,7 +657,7 @@ jobs:
                 typst --version
 
             # Use the pinned po4a submodule (tools/po4a) — the Ubuntu apt po4a is too old to recognize the
-            # --width / --wrap-po options our configs use. Invocation matches the CLAUDE.md "po4a setup" section.
+            # --width / --wrap-po options our configs use. Invocation matches the "po4a Setup" section of .claude/rules/localization.md.
             - name: Run po4a (infectious agents)
               # Generates the localized NeoIPC-Infectious-Agents.<lang>.yaml overlays bundled into the infectious agent
               # list release. The protocol build does not read them: it compiles the pathogen list from the

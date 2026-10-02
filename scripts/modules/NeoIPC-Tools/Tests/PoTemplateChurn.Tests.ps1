@@ -9,7 +9,7 @@
     Invoke-Localization.ps1 puts a template back when a run rewrote nothing but its POT-Creation-Date,
     because po4a and the two exporters rewrite that field on every run whether or not a source string
     moved. Committing such a template makes Weblate merge the header into every catalogue of the
-    component -- a diff across nine languages for no content -- and it destroys the signal, since a run
+    component -- a diff across every language for no content -- and it destroys the signal, since a run
     that genuinely changed one template then looks like a run that changed six.
 
     The predicate is therefore load-bearing in the dangerous direction: reverting a template that DID

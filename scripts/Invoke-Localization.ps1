@@ -645,7 +645,7 @@ function Restore-TimestampOnlyTemplate {
     #
     # A template differing in nothing but POT-Creation-Date is pure churn: it
     # carries no new unit, and committing it makes Weblate merge that header into every catalogue of the
-    # component -- a diff across nine languages for no content. It also destroys the signal, because a run
+    # component -- a diff across every language for no content. It also destroys the signal, because a run
     # that genuinely changed one template then looks exactly like a run that changed six, and the reader
     # has to diff each one to find out which.
     #

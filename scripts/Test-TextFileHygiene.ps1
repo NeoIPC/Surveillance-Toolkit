@@ -138,11 +138,12 @@ function Get-EolRow {
 
         # Whether to treat the path as binary, and so exempt from the text rules. The ATTRIBUTE is
         # authoritative, not the detected content: `*.pdf binary` expands to -text, but git still reports
-        # the i/ and w/ columns from what it DETECTED in the bytes. A PDF whose first 8000 bytes contain
-        # no NUL is detected as "lf" while being declared binary — so keying the skip on the i/ column
+        # the i/ and w/ columns from what it DETECTED in the bytes. git reads the whole file and calls it
+        # binary on a NUL byte, a lone CR, or more than one control character per 128 printable ones, so
+        # a PDF without any of them is detected as "lf" while being declared binary — so keying the skip on the i/ column
         # alone reports it as invalid UTF-8, which is how the first run of this script failed.
         # Only the DECLARATION exempts a path. Folding the detected columns into this instead opens a
-        # hole big enough to drive the original defect through: a single NUL byte in the first 8000 bytes
+        # hole big enough to drive the original defect through: a single NUL byte anywhere in the file
         # makes git report -text, which would then skip the line-ending check, the BOM check AND the
         # strict-UTF-8 check at once — so a UTF-16 CRLF catalogue commits silently, which is exactly the
         # class of corruption this script exists to catch. A genuinely binary file must therefore say so
@@ -167,7 +168,8 @@ function Test-LineEnding {
     foreach ($row in (Get-EolRow -Repo $Repo)) {
         if ($row.IsBinary) { continue }
 
-        # Declared text, but git found a NUL in the first 8000 bytes and so reports -text. This has to be
+        # Declared text, but git found binary content (a NUL byte, a lone CR, or more than one control
+        # character per 128 printable ones) and so reports -text. This has to be
         # its own finding rather than a skip, because it is the one state in which NONE of the other checks
         # can see anything wrong: git reports -text instead of crlf so the line-ending columns are empty of
         # evidence, a NUL is perfectly valid UTF-8 so strict decoding passes, and a UTF-16 file carries no
@@ -175,7 +177,7 @@ function Test-LineEnding {
         # corruption this script exists to catch. Either the file is mis-encoded, or it is binary and the
         # attribute should say so.
         if ($row.LooksBinary) {
-            $failures.Add("$Label`: $($row.File) is declared text but git detects binary content (a NUL byte). " +
+            $failures.Add("$Label`: $($row.File) is declared text but git detects binary content (a NUL byte, a lone CR, or too many control characters). " +
                 "That usually means it is UTF-16 or otherwise mis-encoded — git cannot report its real line " +
                 "endings while it looks binary. If it genuinely is binary, declare it '-text' in .gitattributes.")
             continue
