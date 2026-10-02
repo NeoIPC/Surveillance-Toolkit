@@ -16,11 +16,9 @@ In DataFile mode (-DataFile), the script renders a formatted report from a pre-c
 - Streams and parses Quarto output to detect and report errors and warnings.
 
 .EXAMPLE
-.
     .\Build-PartnerReport.ps1 -SiteCodeFilter 'NEO_.*' -OutputLocales @('en','de') -OutputDir 'C:\tmp\partner-reports' -ReferenceDataFile '2026-01-28_124237Z.Reference-Report.json' -IncludeNonCorePatients -Verbose
 
 .EXAMPLE
-.
     .\Build-PartnerReport.ps1 -DataFile 'partner-data.json' -OutputLocales @('en','de') -OutputFormats pdf -OutputDir 'C:\tmp\partner-reports' -Verbose
 #>
 [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Low', DefaultParameterSetName='Online')]

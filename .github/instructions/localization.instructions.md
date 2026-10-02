@@ -88,7 +88,7 @@ propagate to the others.
 | `Invoke-Localization.ps1` | Unified localization wrapper with tab completion. `-Update` runs the full pipeline (fix layers → YAML keys → po4a → glossary). `-Test` runs read-only validation. See `-Config`, `-Force`, `-DryRun` switches. |
 | `Update-Po4aYamlKeys.ps1` | Auto-extract YAML keys for po4a config (run after changing YAML structure) |
 | `Test-PoPlaceholders.ps1` | Validate placeholder consistency between source and translations |
-| `update-glossary-po.py` | Convert `glossary.yaml` to/from bilingual gettext PO (replaces po4a for glossary). Requires `ruamel.yaml` and `polib`. Run after editing `glossary.yaml` to regenerate `po/glossary.pot` — **the template and nothing else under `po/`**. The catalogues belong to the `neoipc-glossary` Weblate component: its msgmerge add-on brings them up to a changed template and its `new_base` creates one for a language Weblate adds, so this script has no per-language header machinery at all. `--generate-yaml` reads whatever Weblate has committed and produces the localized `glossary.<lang>.yaml`. |
+| `update-glossary-po.py` | Convert `glossary.yaml` to/from bilingual gettext PO. Requires `ruamel.yaml` and `polib`. Run after editing `glossary.yaml` to regenerate `po/glossary.pot` — **the template and nothing else under `po/`**. The catalogues belong to the `neoipc-glossary` Weblate component: its msgmerge add-on brings them up to a changed template and its `new_base` creates one for a language Weblate adds, so this script has no per-language header machinery at all. `--generate-yaml` reads whatever Weblate has committed and produces the localized `glossary.<lang>.yaml`. |
 
 ### Importing Existing Translations
 
@@ -104,9 +104,9 @@ When adding a new file to po4a that already has manual translations:
    ```bash
    PERLLIB=tools/po4a/lib tools/po4a/po4a-gettextize -f <format> -m <master> -l <translation> -p /tmp/<report>_<lang>.po
    ```
-5. **Remove fuzzy flags** from the gettextize output. `po4a-gettextize` marks most translations as `fuzzy` (even correct ones), and po4a ignores fuzzy translations when generating output. Strip them before merging:
+5. **Remove fuzzy flags** from the gettextize output. `po4a-gettextize` marks most translations as `fuzzy` (even correct ones), and po4a ignores fuzzy translations when generating output. Clear them with gettext's own tool before merging:
    ```bash
-   sed -i 's/^#, fuzzy, /#, /; s/^#, fuzzy$//' /tmp/<report>_<lang>.po
+   msgattrib --clear-fuzzy /tmp/<report>_<lang>.po -o /tmp/<report>_<lang>.po
    ```
 6. **Merge into a temporary file, never over the committed catalogue.** `msgcat --use-first` keeps the first file's translation for duplicate msgids, so put the imported translations first to override empty entries:
    ```bash
@@ -115,7 +115,7 @@ When adding a new file to po4a that already has manual translations:
 7. **Deliver the result according to who owns the catalogue.**
    - **Weblate-owned** (`reports`, `documentation`, `infectious_agents`, `metadata`, `glossary`): upload it — `wlc upload neoipc/<component>/<lang> --input /tmp/<report>_<lang>_merged.po`. Do **not** commit it; the catalogue-ownership guardrail and the CI gate both reject that, and Weblate would overwrite it anyway. Choose the upload method deliberately: `--method replace` **silently ignores entries whose msgstr is empty**, so it cannot be used to clear a translation, only to add or overwrite non-empty ones.
    - **Repository-owned** (`po/antibiotics.*.po`, `scripts/po/*.po`): move the merged file into place and commit it.
-8. Verify with a round-trip: `PERLLIB=tools/po4a/lib tools/po4a/po4a <config-file>` — check that the generated files match the backup.
+8. Verify with a round-trip once the catalogue is in place (for a Weblate-owned one, after Weblate has committed it back and you have pulled): `./scripts/Invoke-Localization.ps1 -Render -Config <config>`, where `<config>` is the po4a config the file joined (`reports`, `documentation`, `infectious_agents`, or `scripts`), which writes neither `.pot` nor `.po`, then check that the generated files match the backup.
 
 **Important**: Run steps 4–6 in a **single WSL session** (one `wsl -e bash -c '...'` invocation). Temp files in `/tmp` do not persist across separate WSL invocations on Windows.
 
