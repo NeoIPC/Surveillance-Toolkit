@@ -18,8 +18,8 @@
     Invoke-Pester -Path scripts/modules/NeoIPC-Tools/Tests/MetadataVerify.Tests.ps1
 #>
 #
-# Discrepancies are read via Get-VDisc, which filters to the records that carry a Kind — matching how the
-# seed gate consumes the result (`$disc | Where-Object { $_.Kind -in ... }`). That also sidesteps the
+# Discrepancies are read via Get-VDisc, which filters to the records that carry a Kind — matching how
+# Deploy-NeoIPCMetadata consumes the result (`$disc | Where-Object { $_.Kind }`). That also sidesteps the
 # verifier's `, [object[]]@()` return idiom, which an `@(...)` wrapper would otherwise count as one element.
 #
 # Run:  Invoke-Pester -Path scripts/modules/NeoIPC-Tools/Tests/MetadataVerify.Tests.ps1
@@ -42,7 +42,9 @@ InModuleScope 'NeoIPC-Tools' {
             Mock Invoke-NeoIPCDhis2Get {
                 $t = $Path -replace '^api/', ''
                 $items = if ($script:VState.ContainsKey($t)) { @($script:VState[$t]) } else { @() }
-                [pscustomobject]@{ $t = $items }
+                $body = [pscustomobject]@{ $t = $items }
+                # -AsHashtable parses the response text, so the mock goes through JSON the same way.
+                if ($AsHashtable) { ConvertTo-Json -InputObject $body -Depth 100 | ConvertFrom-Json -AsHashtable -DateKind String } else { $body }
             }
         }
 
@@ -207,17 +209,16 @@ InModuleScope 'NeoIPC-Tools' {
             $disc.Count | Should -Be 0
         }
 
-        It 'round-trips option sortOrder by value (1-based dense — no spurious FieldMismatch)' {
-            # DHIS2 stores option sortOrder as the persisted 1-based list position (OptionSet.hbm.xml <list-index base=1>);
-            # the package already emits 1-based contiguous sortOrder, so the value matches and optionSet.options
-            # (idArray) reordering is ignored. Guards the "#4 is a non-issue" finding.
+        It 'does not compare an option''s absolute sortOrder, which DHIS2 renumbers' {
+            # From 2.41 the set's write renumbers every option's sortOrder to its 0-based list position, while the
+            # package numbers options from 1; the order itself is checked on optionSet.options instead.
             $script:VState = @{
                 optionSets = @([pscustomobject]@{ id = 'os1'; code = 'OS1'; name = 'N'; valueType = 'TEXT'
-                        options = @([pscustomobject]@{ id = 'o3' }, [pscustomobject]@{ id = 'o1' }, [pscustomobject]@{ id = 'o2' }) })
+                        options = @([pscustomobject]@{ id = 'o1' }, [pscustomobject]@{ id = 'o2' }, [pscustomobject]@{ id = 'o3' }) })
                 options    = @(
-                    [pscustomobject]@{ id = 'o1'; code = '1'; name = 'A'; sortOrder = 1; optionSet = [pscustomobject]@{ id = 'os1' } }
-                    [pscustomobject]@{ id = 'o2'; code = '2'; name = 'B'; sortOrder = 2; optionSet = [pscustomobject]@{ id = 'os1' } }
-                    [pscustomobject]@{ id = 'o3'; code = '3'; name = 'C'; sortOrder = 3; optionSet = [pscustomobject]@{ id = 'os1' } })
+                    [pscustomobject]@{ id = 'o1'; code = '1'; name = 'A'; sortOrder = 0; optionSet = [pscustomobject]@{ id = 'os1' } }
+                    [pscustomobject]@{ id = 'o2'; code = '2'; name = 'B'; sortOrder = 1; optionSet = [pscustomobject]@{ id = 'os1' } }
+                    [pscustomobject]@{ id = 'o3'; code = '3'; name = 'C'; sortOrder = 2; optionSet = [pscustomobject]@{ id = 'os1' } })
             }
             $pkg = @{
                 optionSets = @([ordered]@{ id = 'os1'; code = 'OS1'; name = 'N'; valueType = 'TEXT'
@@ -228,6 +229,65 @@ InModuleScope 'NeoIPC-Tools' {
                     [ordered]@{ id = 'o3'; code = '3'; name = 'C'; sortOrder = 3; optionSet = [ordered]@{ id = 'os1' } })
             }
             (Get-VDisc $pkg).Count | Should -Be 0
+        }
+
+        It 'flags OrderDrift when DHIS2 holds an option set''s options in another order than the package lists them' {
+            # DHIS2 keeps optionSet.options in the order it receives, so a set posted out of order shows users a
+            # scrambled choice list while every member is present.
+            $script:VState = @{ optionSets = @([pscustomobject]@{ id = 'os1'; code = 'OS1'; name = 'N'; valueType = 'TEXT'
+                        options = @([pscustomobject]@{ id = 'o3' }, [pscustomobject]@{ id = 'o1' }, [pscustomobject]@{ id = 'o2' }) }) }
+            $pkg = @{ optionSets = @([ordered]@{ id = 'os1'; code = 'OS1'; name = 'N'; valueType = 'TEXT'
+                        options = @([ordered]@{ id = 'o1' }, [ordered]@{ id = 'o2' }, [ordered]@{ id = 'o3' }) }) }
+            $disc = Get-VDisc $pkg
+            $disc.Count | Should -Be 1
+            $disc[0].Kind | Should -Be 'OrderDrift'
+            $disc[0].Type | Should -Be 'optionSets'
+            $disc[0].Field | Should -Be 'options'
+        }
+
+        It 'verifies an object against its written body from -Expected, properties carried over from DHIS2 included' {
+            # The package carries no org-unit memberships; a deployment writes the live ones back, so the written
+            # body is what must hold afterwards.
+            $script:VState = @{ organisationUnitGroups = @([pscustomobject]@{ id = 'oug1'; code = 'G'; name = 'G'
+                        organisationUnits = @([pscustomobject]@{ id = 'ou1' }) }) }
+            $pkg = @{ organisationUnitGroups = @([ordered]@{ id = 'oug1'; code = 'G'; name = 'G' }) }
+            $written = @{ organisationUnitGroups = @([ordered]@{ id = 'oug1'; code = 'G'; name = 'G'
+                        organisationUnits = @([ordered]@{ id = 'ou1' }, [ordered]@{ id = 'ou2' }) }) }
+            $disc = @((Test-NeoIPCMetadataImport -Package $pkg -Auth $script:VAuth -Expected $written) | Where-Object { $_.Kind })
+            $disc.Count | Should -Be 1
+            $disc[0].Kind | Should -Be 'LinkDrop'
+            $disc[0].Field | Should -Be 'organisationUnits'
+            (Get-VDisc $pkg).Count | Should -Be 0 -Because 'the package alone says nothing about memberships'
+        }
+
+        It 'with -CheckTranslations flags a package translation DHIS2 lacks or holds with another value, and allows extra ones' {
+            $script:VState = @{ dataElements = @([pscustomobject]@{ id = 'de1'; code = 'DE1'; name = 'N'
+                        translations = @([pscustomobject]@{ locale = 'de'; property = 'NAME'; value = 'N (de)' }
+                            [pscustomobject]@{ locale = 'fr'; property = 'NAME'; value = 'N (fr)' }) }) }
+            $kept = @{ dataElements = @([ordered]@{ id = 'de1'; code = 'DE1'; name = 'N'
+                        translations = @([ordered]@{ locale = 'de'; property = 'NAME'; value = 'N (de)' }) }) }
+            @((Test-NeoIPCMetadataImport -Package $kept -Auth $script:VAuth -CheckTranslations) | Where-Object { $_.Kind }).Count | Should -Be 0
+            $drifted = @{ dataElements = @([ordered]@{ id = 'de1'; code = 'DE1'; name = 'N'
+                        translations = @([ordered]@{ locale = 'de'; property = 'NAME'; value = 'Anders' }
+                            [ordered]@{ locale = 'es'; property = 'NAME'; value = 'N (es)' }) }) }
+            $disc = @((Test-NeoIPCMetadataImport -Package $drifted -Auth $script:VAuth -CheckTranslations) | Where-Object { $_.Kind })
+            $disc.Count | Should -Be 1
+            $disc[0].Kind | Should -Be 'TranslationMismatch'
+            $disc[0].Detail | Should -Match 'de/NAME differs'
+            $disc[0].Detail | Should -Match 'missing es/NAME'
+            (Get-VDisc $drifted).Count | Should -Be 0 -Because 'translations are compared only with -CheckTranslations'
+        }
+
+        It 'with -CheckTranslations requires exactly the written translations for an object in -Expected' {
+            $script:VState = @{ dataElements = @([pscustomobject]@{ id = 'de1'; code = 'DE1'; name = 'N'
+                        translations = @([pscustomobject]@{ locale = 'de'; property = 'NAME'; value = 'N (de)' }
+                            [pscustomobject]@{ locale = 'fr'; property = 'NAME'; value = 'N (fr)' }) }) }
+            $body = [ordered]@{ id = 'de1'; code = 'DE1'; name = 'N'; translations = @([ordered]@{ locale = 'de'; property = 'NAME'; value = 'N (de)' }) }
+            $disc = @((Test-NeoIPCMetadataImport -Package @{ dataElements = @($body) } -Auth $script:VAuth -Expected @{ dataElements = @($body) } -CheckTranslations) |
+                    Where-Object { $_.Kind })
+            $disc.Count | Should -Be 1
+            $disc[0].Kind | Should -Be 'TranslationMismatch'
+            $disc[0].Detail | Should -Match 'unexpected fr/NAME'
         }
 
         It 'does NOT flag a nested object whose keys round-trip in a different order (renderType)' {
@@ -258,6 +318,65 @@ InModuleScope 'NeoIPC-Tools' {
                                 dataElement = [ordered]@{ id = 'de1' }; programStage = [ordered]@{ id = 'ps1' } }) }) }
             $fm = @((Get-VDisc $pkg) | Where-Object { $_.Kind -eq 'FieldMismatch' -and $_.Field -eq 'renderType' })
             $fm.Count | Should -Be 1
+        }
+    }
+
+    Describe 'Test-NeoIPCProgramRuleActionServed (the rule-action collection clients read)' {
+        BeforeAll {
+            $script:SAuth = @{ Basic = 'ignored-by-the-mock' }
+            # Two rules, the first with two actions and the second with one.
+            $script:SPkg = @{
+                programRules       = @([ordered]@{ id = 'rule0000001'; code = 'R1' }, [ordered]@{ id = 'rule0000002'; code = 'R2' })
+                programRuleActions = @(
+                    [ordered]@{ id = 'act00000011'; programRule = [ordered]@{ id = 'rule0000001' } }
+                    [ordered]@{ id = 'act00000012'; programRule = [ordered]@{ id = 'rule0000001' } }
+                    [ordered]@{ id = 'act00000021'; programRule = [ordered]@{ id = 'rule0000002' } })
+            }
+            function Get-SRecord { , @((Test-NeoIPCProgramRuleActionServed -Package $script:SPkg -Auth $script:SAuth) | Where-Object { $_.Kind }) }
+        }
+        BeforeEach {
+            $script:SServed = @()
+            Mock Invoke-NeoIPCDhis2Get { @{ programRules = @($script:SServed) } }
+        }
+
+        It 'reports nothing when every rule serves every declared action' {
+            $script:SServed = @(@{ id = 'rule0000001'; programRuleActions = @(@{ id = 'act00000011' }, @{ id = 'act00000012' }) }
+                @{ id = 'rule0000002'; programRuleActions = @(@{ id = 'act00000021' }) })
+            (Get-SRecord).Count | Should -Be 0
+        }
+
+        It 'reports a declared action the rule does not serve, by id' {
+            $script:SServed = @(@{ id = 'rule0000001'; programRuleActions = @(@{ id = 'act00000011' }) }
+                @{ id = 'rule0000002'; programRuleActions = @(@{ id = 'act00000021' }) })
+            $r = Get-SRecord
+            $r.Count | Should -Be 1
+            $r[0].Kind | Should -Be 'ActionNotServed'
+            $r[0].RuleCode | Should -Be 'R1'
+            @($r[0].ActionIds) | Should -Be @('act00000012')
+        }
+
+        It 'reports a rule served with no actions, as DHIS2 serves it (<Shape>)' -ForEach @(
+            @{ Shape = 'an empty collection'; Rule = @{ id = 'rule0000002'; programRuleActions = @() } }
+            @{ Shape = 'no collection'; Rule = @{ id = 'rule0000002' } }
+        ) {
+            $script:SServed = @(@{ id = 'rule0000001'; programRuleActions = @(@{ id = 'act00000011' }, @{ id = 'act00000012' }) }, $Rule)
+            $r = Get-SRecord
+            $r.Count | Should -Be 1
+            $r[0].Kind | Should -Be 'ActionNotServed'
+            $r[0].RuleId | Should -Be 'rule0000002'
+        }
+
+        It 'reports a rule the response leaves out entirely' {
+            $script:SServed = @(@{ id = 'rule0000001'; programRuleActions = @(@{ id = 'act00000011' }, @{ id = 'act00000012' }) })
+            $r = Get-SRecord
+            $r.Count | Should -Be 1
+            $r[0].Kind | Should -Be 'RuleNotServed'
+            $r[0].RuleId | Should -Be 'rule0000002'
+        }
+
+        It 'refuses a package that declares no actions, which would pass without checking anything' {
+            { Test-NeoIPCProgramRuleActionServed -Package @{ programRules = @([ordered]@{ id = 'rule0000001' }) } -Auth $script:SAuth } |
+                Should -Throw '*declares no program-rule actions*'
         }
     }
 }

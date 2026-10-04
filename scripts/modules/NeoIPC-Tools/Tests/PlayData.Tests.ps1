@@ -260,8 +260,19 @@ InModuleScope 'NeoIPC-Tools' {
     Describe 'Import-NeoIPCPlayData (offline, mocked POST)' {
         # The live POST is mocked, so this exercises the load-bearing pure logic offline: the per-org-unit
         # split (one POST per tracked-entity org unit — the E1064 within-payload-uniqueness workaround), the
-        # cross-POST stats/report aggregation, the OK/WARNING/ERROR derivation, the transport-error fold, and
-        # the representative Raw. -SkipRuleEngine:$false pins the rule-engine gate off without the version GET.
+        # cross-POST stats/report aggregation, the OK/WARNING/ERROR derivation, the transport-error fold, the
+        # representative Raw, and leaving out the events DHIS2 holds as COMPLETED. -SkipRuleEngine:$false pins the
+        # rule-engine gate off; the version read, which picks the tracker dialect, is mocked.
+        BeforeEach {
+            $script:PlayVersion = '2.41.10'
+            $script:PlayEvents = @()
+            Mock Invoke-NeoIPCDhis2Get -ParameterFilter { $Path -eq 'api/system/info' } { @{ version = $script:PlayVersion } }
+            # The events read in the version's dialect: 2.40 lists them under `instances`, 2.41 and later under `events`.
+            Mock Invoke-NeoIPCDhis2Get -ParameterFilter { $Path -eq 'api/tracker/events' } {
+                $key = if ($script:PlayVersion -like '2.40.*') { 'instances' } else { 'events' }
+                @{ $key = @($script:PlayEvents) }
+            }
+        }
         BeforeAll {
             # One tracked entity per listed org unit; the importer groups by orgUnit, so the codes drive the split.
             function New-PlayImportJson([string[]]$OrgUnit) {
@@ -282,7 +293,7 @@ InModuleScope 'NeoIPC-Tools' {
         }
         It 'POSTs once per org unit and sums the stats across the groups' {
             Mock Invoke-NeoIPCDhis2Post { [pscustomobject]@{ StatusCode = 200; Body = (New-OkBody 1) } }
-            $r = Import-NeoIPCPlayData -Json (New-PlayImportJson @('ouAAAAAAAA1', 'ouBBBBBBBB1', 'ouCCCCCCCC1')) -Auth @{} -SkipRuleEngine:$false -Confirm:$false
+            $r = Import-NeoIPCPlayData -Json (New-PlayImportJson @('ouAAAAAAAA1', 'ouBBBBBBBB1', 'ouCCCCCCCC1')) -Auth @{} -Hostname 'dhis2.example.org' -SkipRuleEngine:$false -Confirm:$false
             Should -Invoke Invoke-NeoIPCDhis2Post -Times 3 -Exactly
             $r.OrgUnitGroups | Should -Be 3
             $r.Created | Should -Be 3
@@ -291,7 +302,7 @@ InModuleScope 'NeoIPC-Tools' {
         It 'reports ERROR and aggregates errorReports when any group fails' {
             Mock Invoke-NeoIPCDhis2Post -ParameterFilter { $Body -match 'ouZZZ' } { [pscustomobject]@{ StatusCode = 409; Body = (New-ErrorBody) } }
             Mock Invoke-NeoIPCDhis2Post -ParameterFilter { $Body -notmatch 'ouZZZ' } { [pscustomobject]@{ StatusCode = 200; Body = (New-OkBody 1) } }
-            $r = Import-NeoIPCPlayData -Json (New-PlayImportJson @('ouAAAAAAAA1', 'ouZZZAAAAA1')) -Auth @{} -SkipRuleEngine:$false -Confirm:$false
+            $r = Import-NeoIPCPlayData -Json (New-PlayImportJson @('ouAAAAAAAA1', 'ouZZZAAAAA1')) -Auth @{} -Hostname 'dhis2.example.org' -SkipRuleEngine:$false -Confirm:$false
             $r.Status | Should -Be 'ERROR'
             $r.ErrorReports.Count | Should -BeGreaterThan 0
             $r.HttpStatusCode | Should -Be 409
@@ -303,7 +314,7 @@ InModuleScope 'NeoIPC-Tools' {
             # this ordering — failure first — is what makes the assertion distinguish new code from old.)
             Mock Invoke-NeoIPCDhis2Post -ParameterFilter { $Body -match 'ouAAA' } { [pscustomobject]@{ StatusCode = 409; Body = (New-ErrorBody) } }
             Mock Invoke-NeoIPCDhis2Post -ParameterFilter { $Body -notmatch 'ouAAA' } { [pscustomobject]@{ StatusCode = 200; Body = (New-OkBody 1) } }
-            $r = Import-NeoIPCPlayData -Json (New-PlayImportJson @('ouAAAAAAAA1', 'ouZZZAAAAA1')) -Auth @{} -SkipRuleEngine:$false -Confirm:$false
+            $r = Import-NeoIPCPlayData -Json (New-PlayImportJson @('ouAAAAAAAA1', 'ouZZZAAAAA1')) -Auth @{} -Hostname 'dhis2.example.org' -SkipRuleEngine:$false -Confirm:$false
             $r.Raw.status | Should -Be 'ERROR'
         }
         It 'does not surface a later success in Raw when an earlier group failed with no body' {
@@ -312,27 +323,65 @@ InModuleScope 'NeoIPC-Tools' {
             # aggregate Status carries the failure, so Raw stays null rather than masking it with an OK body.
             Mock Invoke-NeoIPCDhis2Post -ParameterFilter { $Body -match 'ouAAA' } { [pscustomobject]@{ StatusCode = 502; Body = $null } }
             Mock Invoke-NeoIPCDhis2Post -ParameterFilter { $Body -notmatch 'ouAAA' } { [pscustomobject]@{ StatusCode = 200; Body = (New-OkBody 1) } }
-            $r = Import-NeoIPCPlayData -Json (New-PlayImportJson @('ouAAAAAAAA1', 'ouZZZAAAAA1')) -Auth @{} -SkipRuleEngine:$false -Confirm:$false
+            $r = Import-NeoIPCPlayData -Json (New-PlayImportJson @('ouAAAAAAAA1', 'ouZZZAAAAA1')) -Auth @{} -Hostname 'dhis2.example.org' -SkipRuleEngine:$false -Confirm:$false
             $r.Status | Should -Be 'ERROR'
             $r.Raw | Should -BeNullOrEmpty
         }
         It 'folds a non-2xx transport failure with no parseable report into ERROR' {
             Mock Invoke-NeoIPCDhis2Post { [pscustomobject]@{ StatusCode = 502; Body = $null } }
-            $r = Import-NeoIPCPlayData -Json (New-PlayImportJson @('ouAAAAAAAA1')) -Auth @{} -SkipRuleEngine:$false -Confirm:$false
+            $r = Import-NeoIPCPlayData -Json (New-PlayImportJson @('ouAAAAAAAA1')) -Auth @{} -Hostname 'dhis2.example.org' -SkipRuleEngine:$false -Confirm:$false
             $r.Status | Should -Be 'ERROR'
             $r.HttpStatusCode | Should -Be 502
             $r.ErrorMessage | Should -Match 'no parseable import report'
         }
         It 'reports WARNING (not ERROR) when a group warns and none error' {
             Mock Invoke-NeoIPCDhis2Post { [pscustomobject]@{ StatusCode = 200; Body = (New-WarningBody) } }
-            $r = Import-NeoIPCPlayData -Json (New-PlayImportJson @('ouAAAAAAAA1')) -Auth @{} -SkipRuleEngine:$false -Confirm:$false
+            $r = Import-NeoIPCPlayData -Json (New-PlayImportJson @('ouAAAAAAAA1')) -Auth @{} -Hostname 'dhis2.example.org' -SkipRuleEngine:$false -Confirm:$false
             $r.Status | Should -Be 'WARNING'
             $r.WarningReports.Count | Should -BeGreaterThan 0
         }
         It 'validates only (importMode=VALIDATE) under -DryRun' {
             Mock Invoke-NeoIPCDhis2Post { [pscustomobject]@{ StatusCode = 200; Body = (New-OkBody 0) } }
-            $null = Import-NeoIPCPlayData -Json (New-PlayImportJson @('ouAAAAAAAA1')) -Auth @{} -SkipRuleEngine:$false -DryRun
+            $null = Import-NeoIPCPlayData -Json (New-PlayImportJson @('ouAAAAAAAA1')) -Auth @{} -Hostname 'dhis2.example.org' -SkipRuleEngine:$false -DryRun
             Should -Invoke Invoke-NeoIPCDhis2Post -Times 1 -Exactly -ParameterFilter { $QueryParameters.importMode -eq 'VALIDATE' }
+        }
+
+        Context 'events DHIS2 already holds as COMPLETED' {
+            BeforeAll {
+                # One tracked entity in ouAAA whose enrollment carries two events; the first is COMPLETED live.
+                function New-EventPayload {
+                    $te = [ordered]@{ trackedEntity = 'trkImp00001'; orgUnit = 'ouAAAAAAAA1'; attributes = @()
+                        enrollments = @([ordered]@{ enrollment = 'enrImp00001'; program = 'progImp0001'; orgUnit = 'ouAAAAAAAA1'
+                                events = @([ordered]@{ event = 'evtDone0001'; status = 'COMPLETED' }, [ordered]@{ event = 'evtOpen0002'; status = 'ACTIVE' }) }) }
+                    @{ trackedEntities = @($te) } | ConvertTo-Json -Depth 100
+                }
+            }
+            It 'leaves a completed event out of the payload and counts it, in the <Version> dialect' -ForEach @(
+                # NEOIPC-COMPAT(dhis2-2.40-tracker-dialect): see Private/TrackerDialect.ps1.
+                @{ Version = '2.40.12'; ModeParameter = 'ouMode'; PagingParameter = 'skipPaging' }
+                @{ Version = '2.43.1'; ModeParameter = 'orgUnitMode'; PagingParameter = $null }
+            ) {
+                $script:PlayVersion = $Version
+                # The completed event is reported in another department than its tracked entity: the read is not
+                # limited to the payload's org units.
+                $script:PlayEvents = @(@{ event = 'evtDone0001'; status = 'COMPLETED'; orgUnit = 'ouOTHERDEP1' }, @{ event = 'evtOpen0002'; status = 'ACTIVE' })
+                Mock Invoke-NeoIPCDhis2Post { [pscustomobject]@{ StatusCode = 200; Body = (New-OkBody 1) } }
+                $r = Import-NeoIPCPlayData -Json (New-EventPayload) -Auth @{} -Hostname 'dhis2.example.org' -SkipRuleEngine:$false -Confirm:$false
+                $r.SkippedCompletedEvents | Should -Be 1
+                Should -Invoke Invoke-NeoIPCDhis2Post -Times 1 -Exactly -ParameterFilter { $Body -notmatch 'evtDone0001' -and $Body -match 'evtOpen0002' }
+                Should -Invoke Invoke-NeoIPCDhis2Get -Times 1 -Exactly -ParameterFilter {
+                    $Path -eq 'api/tracker/events' -and $QueryParameters['program'] -eq 'progImp0001' -and $QueryParameters[$ModeParameter] -eq 'ACCESSIBLE' -and
+                    $(if ($PagingParameter) { $QueryParameters[$PagingParameter] -eq 'true' } else { $true })
+                }
+            }
+            It 'fails rather than import when the events read returns no list under the expected key' {
+                $script:PlayVersion = '2.43.1'
+                Mock Invoke-NeoIPCDhis2Get -ParameterFilter { $Path -eq 'api/tracker/events' } { @{ instances = @() } }
+                Mock Invoke-NeoIPCDhis2Post { [pscustomobject]@{ StatusCode = 200; Body = (New-OkBody 1) } }
+                { Import-NeoIPCPlayData -Json (New-EventPayload) -Auth @{} -Hostname 'dhis2.example.org' -SkipRuleEngine:$false -Confirm:$false } |
+                    Should -Throw "*did not return a 'events' list*"
+                Should -Invoke Invoke-NeoIPCDhis2Post -Times 0 -Exactly
+            }
         }
     }
 }

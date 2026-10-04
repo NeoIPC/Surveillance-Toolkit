@@ -9,7 +9,7 @@ function ConvertFrom-NeoIPCMetadataJsonText {
     # keeps ISO-8601 date strings (e.g. organisationUnit.openingDate / closedDate) as opaque strings instead of
     # converting them to [datetime]. A [datetime] would then be formatted in the CURRENT CULTURE by the [string]
     # cast in ConvertTo-NeoIPCMetadataCell's string class (e.g. "06/15/2025 00:00:00" under de-DE) when emitted to
-    # a CSV cell, breaking the round-trip. (ConvertTo-Json itself serialises a [datetime] in invariant ISO, so the
+    # a CSV cell, breaking the round-trip. (ConvertTo-Json itself serializes a [datetime] in invariant ISO, so the
     # comparator path is unaffected — it is the CSV-cell emit path that bites.) Dates are carried verbatim as strings.
     [CmdletBinding()]
     [OutputType([System.Collections.Specialized.OrderedDictionary])]
@@ -137,7 +137,7 @@ function Get-NeoIPCSharingCanonicalKey {
     [CmdletBinding()]
     [OutputType([string])]
     param([Parameter(Mandatory)]$Sharing)
-    (ConvertTo-NeoIPCMetadataCanonical $Sharing) | ConvertTo-Json -Compress -Depth 10
+    (ConvertTo-NeoIPCMetadataCanonical $Sharing) | ConvertTo-Json -Compress -Depth 100
 }
 
 function Get-NeoIPCUserGroupKeyMap {
@@ -212,7 +212,9 @@ function Import-NeoIPCSharingProfile {
     param([Parameter(Mandatory)][string]$Path, [hashtable]$KeyToId = @{})
     if (-not (Test-Path -LiteralPath $Path)) { return }
     Import-Module powershell-yaml -ErrorAction Stop
-    $specs = Get-Content -LiteralPath $Path -Raw | ConvertFrom-Yaml
+    # -Ordered keeps every mapping in authored order. A plain hashtable enumerates in .NET's per-process string-hash
+    # order, so the grants of each profile would land in the package in a different order on every build.
+    $specs = Get-Content -LiteralPath $Path -Raw | ConvertFrom-Yaml -Ordered
     if ($specs -isnot [System.Collections.IDictionary]) { throw "Sharing profiles file '$Path' is not a mapping of profile-key -> sharing spec." }
     $byKey = [ordered]@{}
     $byValue = @{}
@@ -315,7 +317,7 @@ function Initialize-NeoIPCSharingProfileFromPackage {
 
 function Export-NeoIPCSharingProfile {
     # Write the loaded sharing-profile registry to a sharing.yaml (spec form), UTF-8 no-BOM / LF, so a
-    # freshly materialised directory is self-contained. A no-op when no profiles are loaded.
+    # freshly materialized directory is self-contained. A no-op when no profiles are loaded.
     [CmdletBinding()]
     param([Parameter(Mandatory)][string]$Path, [hashtable]$IdToKey = @{})
     if (-not $script:NeoIPCSharingProfiles) { return }
@@ -361,8 +363,8 @@ function Remove-NeoIPCMetadataNoise {
                 $value = $Object[$key]
                 # null / empty string / empty dict / empty collection == absent (DHIS2 treats them
                 # equivalently on import, and the flat-cell representation cannot distinguish them from
-                # absent). The export carries explicit nulls (e.g. an anonymiser nulls an org unit's
-                # address/email) and empty {} dicts (e.g. an org unit's unset image) — both must normalise
+                # absent). The export carries explicit nulls (e.g. an anonymizer nulls an org unit's
+                # address/email) and empty {} dicts (e.g. an org unit's unset image) — both must normalize
                 # to absent so a source that has them round-trips equal to a directory that omits them.
                 if ($null -eq $value -or
                     ($value -is [string] -and $value -eq '') -or
@@ -378,10 +380,10 @@ function Remove-NeoIPCMetadataNoise {
         }
         if ($Object -is [System.Collections.IEnumerable] -and $Object -isnot [string]) {
             $items = @(foreach ($item in $Object) { Remove-NeoIPCMetadataNoise -Object $item })
-            # Order-significant collections (DHIS2 <list> mappings whose order is the data and is not
-            # recoverable from an element sortOrder — see $NeoIPCMetadataOrderedRefProps) are compared
-            # positionally. Every other ref-collection is a set (or its order rides on an element-level
-            # sortOrder that survives as data), so sort it deterministically by CANONICAL (key-sorted)
+            # Order-significant collections (DHIS2 <list> mappings whose cell carries the order — see
+            # $NeoIPCMetadataOrderedRefProps) are compared positionally. Every other ref-collection is a set, or
+            # a list whose order the package rebuilds from elsewhere (optionSets.options, from each option's
+            # sortOrder, which survives as data), so sort it deterministically by CANONICAL (key-sorted)
             # JSON: order-insensitive AND dictionary-key-order-insensitive (a round-tripped object emits
             # 'id' first, the source emits it elsewhere; a raw ConvertTo-Json key would mis-sort
             # identical-content elements).
@@ -425,7 +427,8 @@ function Get-NeoIPCMetadataInt64 {
 function ConvertTo-NeoIPCMetadataCell {
     # Serialize a typed JSON value to its flat CSV-cell string per the property class. Inverse of
     # ConvertFrom-NeoIPCMetadataCell. 'idArray'/'stringArray'/'intArray' are sorted so the cell is
-    # deterministic (the collection is a set, or its order is recoverable from element sortOrder);
+    # deterministic (the collection is a set, or a list whose order the package rebuilds from elsewhere:
+    # optionSets.options, from each option's sortOrder in ConvertTo-NeoIPCMetadataPackage);
     # 'idArrayOrdered' preserves array order because that order is the data (DHIS2 <list> mapping).
     [CmdletBinding()]
     [OutputType([string])]
@@ -640,14 +643,14 @@ function Test-NeoIPCMetadataDomainExcluded {
 
 function Get-NeoIPCMetadataGeneratedKeys {
     # Build the per-package identification context for the matrix-generated metadata families, now serving TWO roles
-    # (the matrix families are MATERIALISED into the directory, so this no longer drives their exclusion):
-    #   (a) REFRESH IDENTITY — which materialised rows are generated, so a refresh / hand-edit guard can tell the
+    # (the matrix families are MATERIALIZED into the directory, so this no longer drives their exclusion):
+    #   (a) REFRESH IDENTITY — which materialized rows are generated, so a refresh / hand-edit guard can tell the
     #       generated rows apart: DataElementCodes (per-slot pathogen + substance DE codes), VariableNames and
-    #       RuleNames (resistance / field-gating / substance PRV + rule names), each slot-normalised via
+    #       RuleNames (resistance / field-gating / substance PRV + rule names), each slot-normalized via
     #       ConvertTo-NeoIPCSubstanceUnpaddedName so a deployed unpadded `substance 1` matches the padded plan
     #       `substance 01` (the same padding trap the assembler seam handles).
-    #   (b) RETIRED-rule exclusion — RetiredRuleNames (the superseded HAP aggregate; NOT materialised) and
-    #       RetiredRuleIds (resolved WITHIN $Package — the UID of every programRule whose normalised name is a
+    #   (b) RETIRED-rule exclusion — RetiredRuleNames (the superseded HAP aggregate; NOT materialized) and
+    #       RetiredRuleIds (resolved WITHIN $Package — the UID of every programRule whose normalized name is a
     #       retired name), so the directory emit / comparator drop the retired rule AND its (name-less) actions by
     #       owning-rule id. Mirrors Get-NeoIPCMetadataDomainOptionSetIds: resolved once, shared by emit + comparator.
     #   (c) GATE selection — GeneratedRuleIds (matrix + retired rule ids in $Package) lets the classified-diff gate
@@ -655,8 +658,8 @@ function Get-NeoIPCMetadataGeneratedKeys {
     # Identification is taken from the generator PLANS (not a name regex), so it stays in step with the generators.
     # Counts default to the module-wide slot counts, which match the deployed export the directory is built from.
     #
-    # NOTE — a HAND-AUTHORED action bundled onto a MATERIALISED rule (e.g. the BSI no-positive-culture HIDEFIELD on
-    # the 'when set' rule) is now materialised WITH that rule, since the rule is an ordinary directory row; promoting
+    # NOTE — a HAND-AUTHORED action bundled onto a MATERIALIZED rule (e.g. the BSI no-positive-culture HIDEFIELD on
+    # the 'when set' rule) is now materialized WITH that rule, since the rule is an ordinary directory row; promoting
     # it to a stand-alone directory rule is the export-independence / BSI step, not this
     # exclusion. The gettext-PO path (MetadataTranslation.ps1) deliberately does NOT apply this predicate — that PO
     # is the sole translation source for the regenerated objects, so excluding them there would drop their translations.
@@ -679,14 +682,14 @@ function Get-NeoIPCMetadataGeneratedKeys {
     foreach ($p in @(Get-NeoIPCSubstanceVariablePlan -SubstanceCount $SubstanceCount)) { [void]$varNames.Add((ConvertTo-NeoIPCSubstanceUnpaddedName ([string]$p['Name']))) }
     foreach ($p in @(Get-NeoIPCPathogenVirusVariablePlan -PathogenCount $PathogenCount)) { [void]$varNames.Add((ConvertTo-NeoIPCSubstanceUnpaddedName ([string]$p['Name']))) }
 
-    # Matrix rule names (refresh identity) — the materialised resistance / field-gating / substance rules.
+    # Matrix rule names (refresh identity) — the materialized resistance / field-gating / substance rules.
     $ruleNames = [System.Collections.Generic.HashSet[string]]::new($ordinal)
     foreach ($p in @(Get-NeoIPCPathogenRulePlan -PathogenCount $PathogenCount)) { [void]$ruleNames.Add((ConvertTo-NeoIPCSubstanceUnpaddedName ([string]$p['Name']))) }
     foreach ($p in @(Get-NeoIPCPathogenFieldGatingRulePlan -PathogenCount $PathogenCount)) { [void]$ruleNames.Add((ConvertTo-NeoIPCSubstanceUnpaddedName ([string]$p['Name']))) }
     foreach ($p in @(Get-NeoIPCSubstanceRulePlan -SubstanceCount $SubstanceCount)) { [void]$ruleNames.Add((ConvertTo-NeoIPCSubstanceUnpaddedName ([string]$p['Name']))) }
     foreach ($p in @(Get-NeoIPCPathogenVirusRulePlan -PathogenCount $PathogenCount)) { [void]$ruleNames.Add((ConvertTo-NeoIPCSubstanceUnpaddedName ([string]$p['Name']))) }
 
-    # Retired rules are NOT materialised — the per-slot resistance rules supersede them, and the assembler drops
+    # Retired rules are NOT materialized — the per-slot resistance rules supersede them, and the assembler drops
     # them. Resolve, within the package, two id sets the two consumers need separately:
     #   - RetiredRuleIds   = ids of RETIRED rules — the directory emit / comparator exclude these + their actions;
     #   - GeneratedRuleIds = ids of ALL generated rules (matrix + retired) — the classified-diff gate selects these
@@ -713,10 +716,10 @@ function Get-NeoIPCMetadataGeneratedKeys {
 }
 
 function Test-NeoIPCMetadataGeneratedExcluded {
-    # True when an object is NOT materialised into the directory, so it is skipped by BOTH the directory emit and
+    # True when an object is NOT materialized into the directory, so it is skipped by BOTH the directory emit and
     # the round-trip comparator — exactly as the domain option content is (Test-NeoIPCMetadataDomainExcluded). The
-    # matrix-generated DEs / PRVs / rules / actions ARE materialised (not excluded); what remains directory-omitted
-    # is: a RETIRED rule (slot-normalised name in RetiredRuleNames) or its action (owning programRule id in
+    # matrix-generated DEs / PRVs / rules / actions ARE materialized (not excluded); what remains directory-omitted
+    # is: a RETIRED rule (slot-normalized name in RetiredRuleNames) or its action (owning programRule id in
     # RetiredRuleIds), and the antibiotic option-group domain (code shape). The single predicate shared by emit and
     # comparator so they agree on what the directory omits; $GeneratedKeys is one Get-NeoIPCMetadataGeneratedKeys context.
     [CmdletBinding()]
@@ -728,7 +731,7 @@ function Test-NeoIPCMetadataGeneratedExcluded {
     )
     switch ($Type) {
         # The matrix-generated per-slot pathogen / substance data elements, the resistance / field-gating /
-        # substance program-rule VARIABLES, and the matrix RULES + ACTIONS are now MATERIALISED as ordinary
+        # substance program-rule VARIABLES, and the matrix RULES + ACTIONS are now MATERIALIZED as ordinary
         # directory rows (opaque UID in `id`, expressions under expressions/) — emitted and round-trip-compared
         # like any other object, NOT excluded here. What the directory still omits: (1) RETIRED rules (superseded
         # by the per-slot rules; the assembler drops them) + their actions — so they must not round-trip back in;
@@ -902,6 +905,24 @@ function ConvertTo-NeoIPCMetadataPackage {
         }
     }
 
+    # Each option set lists its options in authored order. DHIS2 keeps the list in the order it receives (from 2.41
+    # the set's write renumbers every option's sortOrder to its list position), so the cell's sorted UID order would
+    # reach users as a scrambled choice list. Ties and options without a sortOrder keep the cell's order, after the
+    # numbered ones.
+    if ($objectsByType.ContainsKey('optionSets') -and $objectsByType.ContainsKey('options')) {
+        $sortOrderById = @{}
+        foreach ($o in $objectsByType['options']) { if ($o.Contains('sortOrder')) { $sortOrderById[[string]$o['id']] = [long]$o['sortOrder'] } }
+        foreach ($os in $objectsByType['optionSets']) {
+            if (-not $os.Contains('options')) { continue }
+            $refs = @($os['options'])
+            $keyed = for ($k = 0; $k -lt $refs.Count; $k++) {
+                $rid = [string]$refs[$k]['id']
+                [pscustomobject]@{ SortOrder = $(if ($sortOrderById.ContainsKey($rid)) { $sortOrderById[$rid] } else { [long]::MaxValue }); Position = $k; Ref = $refs[$k] }
+            }
+            $os['options'] = @($keyed | Sort-Object SortOrder, Position | ForEach-Object { $_.Ref })
+        }
+    }
+
     $pkg = [ordered]@{}
     foreach ($type in $script:NeoIPCMetadataTypeMaps.Keys) {
         if ($script:NeoIPCMetadataTypeMaps[$type].Nesting -eq 'NestedOnly') { continue }
@@ -998,7 +1019,7 @@ function Compare-NeoIPCMetadataCore {
     # The RETIRED rule (superseded HAP aggregate) is directory-omitted: skip it + its actions on both sides so its
     # absence on a directory-derived side is not a false Removed/Added. RetiredRuleNames is package-independent;
     # RetiredRuleIds (the retired rule's actions by owning-rule id) is resolved per side, so union it — the export
-    # side carries the retired rule+actions, a directory side does not. (The matrix families ARE materialised, so
+    # side carries the retired rule+actions, a directory side does not. (The matrix families ARE materialized, so
     # they are compared like any other object — not skipped here.)
     $generatedKeys = Get-NeoIPCMetadataGeneratedKeys -Package $Reference
     $generatedKeys.RetiredRuleIds.UnionWith((Get-NeoIPCMetadataGeneratedKeys -Package $Difference).RetiredRuleIds)

@@ -52,12 +52,20 @@ function Invoke-NeoIPCDhis2Get {
 
         [string[]]$Fields,
         [string[]]$Filter,
-        [hashtable]$QueryParameters
+        [hashtable]$QueryParameters,
+
+        # Parse the body into ordered dictionaries and keep every date as the server's own text. Invoke-RestMethod
+        # turns DHIS2's timestamps into [datetime], and a value written back from one (a `created` a deployment
+        # preserves) is then re-serialized by .NET rather than passed through as DHIS2 stored it.
+        [switch]$AsHashtable,
+
+        # Read only the first page, of this many items, instead of every item: for a question one item answers.
+        [Nullable[int]]$PageSize = $null
     )
 
-    # Always disable paging — all callers want full results
     $queryParts = [System.Collections.Generic.List[string]]::new()
-    $queryParts.Add('paging=false')
+    if ($null -ne $PageSize) { $queryParts.Add("pageSize=$PageSize") }
+    else { $queryParts.Add('paging=false') }
 
     if ($Fields) {
         $joined = ($Fields | Join-String -Separator ',')
@@ -93,6 +101,7 @@ function Invoke-NeoIPCDhis2Get {
             'Fetching DHIS2 data')) {
         Write-Debug "GET $uri"
         try {
+            if ($AsHashtable) { return ((Invoke-WebRequest @invokeParams).Content | ConvertFrom-Json -AsHashtable -DateKind String) }
             Invoke-RestMethod @invokeParams
         }
         catch {
@@ -101,7 +110,39 @@ function Invoke-NeoIPCDhis2Get {
     }
 }
 
+function Get-NeoIPCDhis2StatusCode {
+    # The HTTP status of a GET, without throwing on 4xx/5xx: 200 when the object exists, 404 when it does not. The
+    # read-back that proves a delete, since DHIS2 can answer a DELETE with 200 and keep the object.
+    [CmdletBinding()]
+    [OutputType([int])]
+    param(
+        [Parameter(Mandatory)][hashtable]$Auth,
+        [Parameter(Mandatory)][string]$Path,
+        [string]$Scheme = 'https',
+        [string]$Hostname = 'neoipc.charite.de',
+        [Nullable[int]]$Port = $null
+    )
+    $uri = New-NeoIPCDhis2Uri -Scheme $Scheme -Hostname $Hostname -Port $Port -Path $Path -QueryPart 'fields=id'
+    $invokeParams = @{ Method = 'Get'; Uri = $uri; SkipHttpErrorCheck = $true }
+    Set-NeoIPCDhis2Auth -InvokeParams $invokeParams -Auth $Auth -AllowUnencrypted
+    Write-Debug "GET $uri"
+    [int](Invoke-WebRequest @invokeParams).StatusCode
+}
+
 function Invoke-NeoIPCDhis2Delete {
+    <#
+    .SYNOPSIS
+        DELETE a DHIS2 object, throwing an error that carries the HTTP status and DHIS2's error code on failure.
+    .DESCRIPTION
+        A failure is a transport status outside 2xx, or a 2xx whose WebMessage body reports one (DHIS2 can answer a
+        DELETE with HTTP 200 and an error body). It is thrown as an HttpRequestException whose StatusCode is the
+        failing status and whose Data['Dhis2ErrorCode'] holds DHIS2's errorCode when the body names one, so a
+        caller can decide per object (catch and continue) or per status (stop at the first 401). A 200 proves only
+        that DHIS2 accepted the request: DHIS2 2.41.10 and later answer a program stage section's DELETE with 200
+        and keep the section, so a caller that must know the object is gone reads it back.
+    .PARAMETER AllowUnencrypted
+        Permit Basic auth over http (the local stack).
+    #>
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
     param(
         [Parameter(Mandatory)]
@@ -112,7 +153,9 @@ function Invoke-NeoIPCDhis2Delete {
 
         [string]$Scheme = 'https',
         [string]$Hostname = 'neoipc.charite.de',
-        [Nullable[int]]$Port = $null
+        [Nullable[int]]$Port = $null,
+
+        [switch]$AllowUnencrypted
     )
 
     $uri = New-NeoIPCDhis2Uri -Scheme $Scheme -Hostname $Hostname -Port $Port -Path $Path
@@ -121,8 +164,9 @@ function Invoke-NeoIPCDhis2Delete {
         Method             = 'Delete'
         Uri                = $uri
         SkipHttpErrorCheck = $true
+        StatusCodeVariable = 'statusCode'
     }
-    Set-NeoIPCDhis2Auth -InvokeParams $invokeParams -Auth $Auth
+    Set-NeoIPCDhis2Auth -InvokeParams $invokeParams -Auth $Auth -AllowUnencrypted:$AllowUnencrypted
 
     # Low-level ShouldProcess — callers typically suppress this with -Confirm:$false
     # and implement their own higher-level confirmation
@@ -133,17 +177,72 @@ function Invoke-NeoIPCDhis2Delete {
         Write-Debug "DELETE $uri"
         $($result = . { Invoke-RestMethod @invokeParams }) 4>&1 | Write-Debug
 
-        # DHIS2 can return HTTP 200 with an error in the JSON body on DELETE
-        if ($null -ne $result.httpStatusCode -and ($result.httpStatusCode -lt 200 -or $result.httpStatusCode -ge 300)) {
-            $errorMessage = "DELETE '$Path' failed with HTTP $($result.httpStatusCode) ('$($result.httpStatus)'), DHIS2 status $($result.status)"
-            if ($null -ne $result.errorCode) {
-                $errorMessage += ", message: '$($result.message)', error code: $($result.errorCode)"
-            } else {
-                $errorMessage += ", message: '$($result.message)'"
+        $bodyStatus = if ($result -and $result.PSObject.Properties['httpStatusCode']) { [int]$result.httpStatusCode } else { $null }
+        $failedStatus = if ([int]$statusCode -lt 200 -or [int]$statusCode -ge 300) { [int]$statusCode }
+        elseif ($null -ne $bodyStatus -and ($bodyStatus -lt 200 -or $bodyStatus -ge 300)) { $bodyStatus }
+        else { $null }
+        if ($null -ne $failedStatus) {
+            $errorCode = if ($result -and $result.PSObject.Properties['errorCode']) { [string]$result.errorCode } else { $null }
+            $message = if ($result -and $result.PSObject.Properties['message']) { [string]$result.message } else { '' }
+            $text = "DELETE '$Path' failed with HTTP $failedStatus$(if ($errorCode) { " ($errorCode)" }): $message"
+            $exception = [System.Net.Http.HttpRequestException]::new($text, $null, [System.Net.HttpStatusCode]$failedStatus)
+            $exception.Data['Dhis2ErrorCode'] = $errorCode
+            $category = switch ($failedStatus) {
+                401 { [System.Management.Automation.ErrorCategory]::AuthenticationError }
+                403 { [System.Management.Automation.ErrorCategory]::PermissionDenied }
+                404 { [System.Management.Automation.ErrorCategory]::ObjectNotFound }
+                default { [System.Management.Automation.ErrorCategory]::InvalidOperation }
             }
-            Write-Error $errorMessage
+            $PSCmdlet.ThrowTerminatingError([System.Management.Automation.ErrorRecord]::new($exception, 'NeoIPCDhis2DeleteFailed', $category, $Path))
         }
         $result
+    }
+}
+
+function Invoke-NeoIPCDhis2Put {
+    <#
+    .SYNOPSIS
+        PUT a JSON body to a DHIS2 endpoint, returning the transport status code and the parsed response body.
+    .DESCRIPTION
+        The PUT counterpart of Invoke-NeoIPCDhis2Post, for DHIS2's collection endpoints
+        (api/<type>/<id>/<collection>, which replace a collection with {"identifiableObjects": [...]}). Like the POST
+        helper it does not throw on a non-2xx status; interpreting the outcome is the caller's job. Higher-level
+        callers run their own confirmation and invoke this with -Confirm:$false.
+    .PARAMETER Path
+        API path including the api/ segment.
+    .PARAMETER Body
+        The request body string (already-serialized JSON).
+    #>
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
+    [OutputType([pscustomobject])]
+    param(
+        [Parameter(Mandatory)]
+        [hashtable]$Auth,
+
+        [Parameter(Mandatory)]
+        [string]$Path,
+
+        [string]$Scheme = 'https',
+        [string]$Hostname = 'neoipc.charite.de',
+        [Nullable[int]]$Port = $null,
+
+        [Parameter(Mandatory)][string]$Body,
+        [string]$ContentType = 'application/json'
+    )
+    $uri = New-NeoIPCDhis2Uri -Scheme $Scheme -Hostname $Hostname -Port $Port -Path $Path
+    $invokeParams = @{
+        Method             = 'Put'
+        Uri                = $uri
+        ContentType        = $ContentType
+        Body               = $Body
+        SkipHttpErrorCheck = $true
+        StatusCodeVariable = 'statusCode'
+    }
+    Set-NeoIPCDhis2Auth -InvokeParams $invokeParams -Auth $Auth -AllowUnencrypted
+    if ($PSCmdlet.ShouldProcess("PUT $uri", "Replace DHIS2 data via PUT $uri?", 'Replacing DHIS2 data')) {
+        Write-Debug "PUT $uri"
+        $result = Invoke-RestMethod @invokeParams
+        return [pscustomobject]@{ StatusCode = $statusCode; Body = $result }
     }
 }
 

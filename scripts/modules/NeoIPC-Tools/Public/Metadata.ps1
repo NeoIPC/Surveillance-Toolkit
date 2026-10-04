@@ -8,13 +8,13 @@ function ConvertFrom-NeoIPCMetadataJson {
     .SYNOPSIS
         Convert a DHIS2 metadata.json export into the reviewable per-type CSV directory.
     .DESCRIPTION
-        Initialises a per-type CSV directory from an export. Reads a (PII-cleaned) DHIS2 metadata JSON file, prunes
+        Initializes a per-type CSV directory from an export. Reads a (PII-cleaned) DHIS2 metadata JSON file, prunes
         per-instance noise, extracts nested-only child objects (programStageDataElements,
         programTrackedEntityAttributes, trackedEntityTypeAttributes, analyticsPeriodBoundaries) into their own
         tables, and writes one UTF-8/no-BOM/LF CSV per object type into OutputDirectory. The matrix-generated
         families — the per-slot pathogen / substance data elements and the resistance / field-gating / substance
-        program-rule variables, rules and actions — ARE materialised as ordinary rows (their opaque UID in the `id`
-        column, expressions externalised under expressions/). What stays excluded — because a richer file is its
+        program-rule variables, rules and actions — ARE materialized as ordinary rows (their opaque UID in the `id`
+        column, expressions externalized under expressions/). What stays excluded — because a richer file is its
         canonical source and it is generated at build instead — is: the two domain option sets (NEOIPC_PATHOGENS,
         NEOIPC_ANTIMICROBIAL_SUBSTANCES) + their options (from the infectious-agents YAML / antibiotics CSVs), the
         antibiotic option groups / group-sets, and the superseded (retired) HAP aggregate rule + its actions.
@@ -25,7 +25,7 @@ function ConvertFrom-NeoIPCMetadataJson {
         Directory to write the per-type CSV files into (created if absent). The named sharing profiles live
         here as sharing.yaml: an authored file is the source of truth (an unrecognized sharing shape then
         fails loud, to be named by hand); when absent, the profiles are derived from the package and written
-        out, so the materialised directory is self-contained.
+        out, so the materialized directory is self-contained.
     #>
     [CmdletBinding(SupportsShouldProcess)]
     param(
@@ -48,7 +48,7 @@ function ConvertFrom-NeoIPCMetadataJson {
     if ($writeSharing -and $PSCmdlet.ShouldProcess($sharingPath, 'Write sharing profiles')) {
         Export-NeoIPCSharingProfile -Path $sharingPath -IdToKey $ugMap.IdToKey
     }
-    # Externalise the expression-heavy fields to one text file per expression (mutates the rows: the eligible cell
+    # Externalize the expression-heavy fields to one text file per expression (mutates the rows: the eligible cell
     # becomes a relative file reference). Must run before the CSV write so the cells carry references, not values.
     if ($PSCmdlet.ShouldProcess((Join-Path $OutputDirectory 'expressions'), 'Write expression files')) {
         Write-NeoIPCMetadataExpressionFiles -Rows $rows -Directory $OutputDirectory
@@ -68,7 +68,7 @@ function ConvertTo-NeoIPCMetadataJson {
     .DESCRIPTION
         Reads the per-type CSV files, coerces cells back to typed values, re-nests nested-only children
         into their parents, and emits a DHIS2 metadata package as JSON (every id a valid UID — push with
-        idScheme=UID). The output carries the config + the materialised matrix families but omits what the directory
+        idScheme=UID). The output carries the config + the materialized matrix families but omits what the directory
         does not hold — the two domain option sets (NEOIPC_PATHOGENS, NEOIPC_ANTIMICROBIAL_SUBSTANCES) + their
         options and the antibiotic option groups / group-sets, which stay generated from the YAML / antibiotics CSVs.
         The complete importable package is assembled by New-NeoIPCMetadataPackage (directory read + option-domain
@@ -104,9 +104,9 @@ function Read-NeoIPCMetadataDirectoryPackage {
         Read a per-type CSV metadata directory into a parsed DHIS2 package (hashtable).
     .DESCRIPTION
         The directory-read half of ConvertTo-NeoIPCMetadataJson, factored out so the package assembler
-        (New-NeoIPCMetadataPackage) can source its config + materialised matrix families from the directory the
+        (New-NeoIPCMetadataPackage) can source its config + materialized matrix families from the directory the
         same way the round-trip does — instead of from the seed export. Reads each per-type CSV, resolves the
-        sharing profiles (sharing.yaml), re-inlines the externalised expression files, and re-nests the
+        sharing profiles (sharing.yaml), re-inlines the externalized expression files, and re-nests the
         nested-only children. Excluded types (org units, users — authored separately) and the still-generated
         families (the domain option sets, the antibiotic option groups) are simply absent from the directory and
         therefore from the result. No DHIS2 API calls.
@@ -127,7 +127,7 @@ function Read-NeoIPCMetadataDirectoryPackage {
         $csv = Join-Path $Path "$type.csv"
         if (Test-Path -LiteralPath $csv) { $rows[$type] = Read-NeoIPCMetadataCsv -Path $csv }
     }
-    # Re-inline any externalised expression files (a cell that is an expressions/...dhis2 reference) before re-nesting.
+    # Re-inline any externalized expression files (a cell that is an expressions/...dhis2 reference) before re-nesting.
     Read-NeoIPCMetadataExpressionFiles -Rows $rows -Directory $Path
     ConvertTo-NeoIPCMetadataPackage -Rows $rows
 }
@@ -235,7 +235,7 @@ function Test-NeoIPCMetadataExpression {
         Expression); an empty result means nothing at or above MinimumSeverity. No DHIS2 API calls.
 
         Rules (all parse and validate clean in DHIS2, which is why they are linted here):
-          - MixedBooleanPrecedence (Warning): a parenthesised group mixes && and || directly; && binds
+          - MixedBooleanPrecedence (Warning): a parenthesized group mixes && and || directly; && binds
             tighter than ||, so the grouping may not be what was intended.
           - NegativeSentinelComparison (Warning): an == / != comparison against -1 — for a yes/no or
             categorical data item this is almost always a typo.
@@ -447,7 +447,7 @@ function New-NeoIPCMetadataPackage {
     .DESCRIPTION
         The production / play package build, sourced from the `metadata/` directory ALONE (no seed export; push
         with idScheme=UID):
-          1. Reads the config + the materialised matrix families (per-slot DEs / PRVs / rules / actions) from
+          1. Reads the config + the materialized matrix families (per-slot DEs / PRVs / rules / actions) from
              `common/` (Read-NeoIPCMetadataDirectoryPackage), and drops the excluded authored types (the org-unit
              scaffold, users) — those are read separately from the overlay.
           2. Splices in the still-generated OPTION-DOMAIN families — the NEOIPC_PATHOGENS option set + options
@@ -458,8 +458,10 @@ function New-NeoIPCMetadataPackage {
              the variant (play, or a production OverlayPath) — preserving the committed UIDs, and stitches them
              in group-side, collision-checking every authored UID (Join-NeoIPCMetadataPackage). production with
              no overlay carries none (the WHO install-base convention: config + groups/roles, no org units/users).
-        By default the assembled package is emitted as JSON (returned, or written to OutputPath). Translations are
-        dropped pending the gettext-PO pipeline. No DHIS2 API calls, and no dependency on the seed metadata.json.
+        By default the assembled package is emitted as JSON (returned, or written to OutputPath). Its translations are
+        those of the generated option domains, read from their gettext catalogues; the directory's own objects carry
+        none (Import-NeoIPCMetadataTranslation adds them). No DHIS2 API calls, and no dependency on the seed
+        metadata.json.
     .PARAMETER MetadataDirectory
         The canonical metadata directory root (contains common/ and play/). Config + matrix families are read from
         common/; the org-unit / user overlay from common/ + (play/ under -Play, or the production -OverlayPath).
@@ -473,7 +475,7 @@ function New-NeoIPCMetadataPackage {
         Login password for every authored user. Defaults to a clearly-test value that passes DHIS2's import
         password policy (the bare demo password 'district' is rejected — E4005 — for imported users).
     .PARAMETER SkipGeneration
-        Skip the option-domain generation step, emitting config + the materialised matrix families exactly as the
+        Skip the option-domain generation step, emitting config + the materialized matrix families exactly as the
         directory carries them — for tests / partial directories. The canonical build leaves this off.
     .PARAMETER OutputPath
         Optional file to write the package JSON to (UTF-8, no BOM); if omitted the JSON string is returned
@@ -487,7 +489,7 @@ function New-NeoIPCMetadataPackage {
         (the WHO dhis2-package-exporter key-sorts its output, so first-position is a local choice; the manifest's
         FIELD names follow the WHO convention). Import-safe: DHIS2's JSON metadata import tree-walks the top-level
         keys and skips any whose plural name matches no metadata schema (DefaultRenderService.fromMetadata), so an
-        unrecognised `package` key is dropped, not rejected (the disabled FAIL_ON_UNKNOWN_PROPERTIES on the shared
+        unrecognized `package` key is dropped, not rejected (the disabled FAIL_ON_UNKNOWN_PROPERTIES on the shared
         jsonMapper additionally tolerates unknown per-object fields). The Metadata Package Installer reads it.
         The manifest's contents (code / type / version / DHIS2Version / ...) are the caller's policy, not built here.
     #>
@@ -517,7 +519,7 @@ function New-NeoIPCMetadataPackage {
     else { $null }
     if ($variantDir -and -not (Test-Path -LiteralPath $variantDir)) { throw "Overlay directory not found: '$variantDir'." }
 
-    # Config + the materialised matrix families come from the directory ALONE — no export. Drop the excluded
+    # Config + the materialized matrix families come from the directory ALONE — no export. Drop the excluded
     # authored types (the org-unit scaffold, users): they are read separately below from the selected overlay.
     $config = Read-NeoIPCMetadataDirectoryPackage -Path $commonDir
     foreach ($t in $script:NeoIPCMetadataExcludedTypes) { if ($config.Contains($t)) { $config.Remove($t) } }
@@ -530,7 +532,7 @@ function New-NeoIPCMetadataPackage {
 
     # Splice in the still-generated OPTION-DOMAIN (pathogen options from the YAML + UID sidecar; antibiotic option
     # set / options / groups / group-sets from the curation CSVs) — export-free. The matrix families are already
-    # materialised in the directory config. -SkipGeneration emits config + matrix only (tests / partial directories).
+    # materialized in the directory config. -SkipGeneration emits config + matrix only (tests / partial directories).
     if (-not $SkipGeneration) { $config = Add-NeoIPCGeneratedOptionMetadata -Config $config }
 
     # Authored org units / users + memberships from the selected overlay (common scaffold + variant). With no
@@ -584,45 +586,47 @@ function Import-NeoIPCMetadata {
     .SYNOPSIS
         POST a metadata package to a DHIS2 instance's /api/metadata, returning the import summary.
     .DESCRIPTION
-        The import half of the pipeline: sends a package produced by New-NeoIPCMetadataPackage (or any DHIS2
-        metadata JSON) to /api/metadata and returns a normalized summary of the import report. With -DryRun the
-        server only validates (importMode=VALIDATE) and commits nothing — the recommended first pass against a
-        fresh instance. References resolve by UID (the package is UID-keyed), so no idScheme override is needed.
+        One POST of a metadata package to /api/metadata, returning a normalized summary of the import report. With
+        -DryRun the server only validates (importMode=VALIDATE) and commits nothing. References resolve by UID (the
+        package is UID-keyed), so no idScheme override is needed.
 
-        This DRIVES a DHIS2 instance, so it is intended for the LOCAL / test stack only (synthetic data); it must
-        not be pointed at the production or deployed-test API. A real (non-DryRun) import is high-impact and prompts
-        for confirmation by default; pass -Confirm:$false to run unattended (a dry-run does not prompt). Auth comes
-        from a Resolve-NeoIPCAuth hashtable; for the local http stack pass -Scheme http -Hostname localhost -Port
-        8080 and a Basic-auth hashtable.
+        This is a single, plain import: it replaces every object it is given with the package's version, so it
+        clears what belongs to the instance (org-unit assignments, memberships, translations the package lacks), and
+        a set created in the same request can lose its option groups. To bring an instance to a package, use
+        Deploy-NeoIPCMetadata, which writes only what differs, keeps what belongs to the instance, orders the
+        requests the way DHIS2 needs, and verifies the result. Deploy-NeoIPCMetadata sends each of its metadata
+        imports through this cmdlet.
+
+        It DRIVES a DHIS2 instance. A real (non-DryRun) import is high-impact and prompts for confirmation by
+        default; pass -Confirm:$false to run unattended (a dry-run does not prompt). Auth comes from a
+        Resolve-NeoIPCAuth hashtable; for the local http stack pass -Scheme http -Hostname localhost -Port 8080 and a
+        Basic-auth hashtable.
 
         The summary object carries DryRun, HttpStatusCode (transport), Status (OK / WARNING / ERROR), the create/
         update/delete/ignore/total counts, the per-type reports, ErrorMessage (the top-level WebMessage
         message when the body carries no structured report — e.g. a Hibernate persistence error), and Raw (the
-        full parsed response) for callers that need the conflict detail. A non-OK status is reported, not thrown — the caller decides how to react
-        (a seed continues on WARNING; a strict gate fails). The body is read whatever the transport code, because
-        DHIS2 answers an import with conflicts HTTP 409 while still returning the full report.
+        full parsed response) for callers that need the conflict detail. A non-OK status is reported, not thrown:
+        the caller decides how to react (Deploy-NeoIPCMetadata fails on any status but OK). The body is read
+        whatever the transport code, because DHIS2 answers an import with conflicts HTTP 409 while still returning
+        the full report.
     .PARAMETER Path
         Path to a metadata package JSON file to import.
     .PARAMETER Json
         A metadata package JSON string to import, instead of -Path (e.g. the New-NeoIPCMetadataPackage return).
     .PARAMETER Auth
         Auth hashtable from Resolve-NeoIPCAuth (Token or Basic).
+    .PARAMETER Hostname
+        The DHIS2 host. Mandatory, with no default, so an import always names its target.
+    .PARAMETER Scheme
+        http or https. Default https.
+    .PARAMETER Port
+        DHIS2 port. Default none (the scheme's).
     .PARAMETER ImportStrategy
         DHIS2 importStrategy: CREATE_AND_UPDATE (default), CREATE, UPDATE, or DELETE.
     .PARAMETER AtomicMode
         DHIS2 atomicMode: ALL (default — all-or-nothing) or NONE (import what is valid, report the rest).
     .PARAMETER DryRun
         Validate only (importMode=VALIDATE); the server commits nothing.
-    .PARAMETER ConnectReferences
-        After a committing import, re-apply the package a SECOND time to connect OWNED reference collections that
-        DHIS2 does not link to objects created in the SAME payload. Verified empirically: a single combined import
-        leaves optionGroupSet.optionGroups, programRule.programRuleActions and userGroup.managedGroups members-less
-        even though it reports status=OK — the analogous optionGroup.options links fine, so it is specific to those
-        group-set / rule-action / managed-group collections. The second pass, where every referenced object now
-        exists, connects them. No effect with -DryRun. The returned object's ConnectPassStatus carries the second
-        pass's status; the round-trip Test-NeoIPCMetadataImport is the authoritative gate that it worked. NOTE: on
-        DHIS2 2.42+ the re-apply drops owned ordered <list> collections NON-DETERMINISTICALLY (root cause open;
-        ruled out as an L2-cache issue), so the round-trip gate can fail on 2.42+ even though this call reports OK.
     #>
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High', DefaultParameterSetName = 'Path')]
     [OutputType([pscustomobject])]
@@ -630,13 +634,12 @@ function Import-NeoIPCMetadata {
         [Parameter(Mandatory, ParameterSetName = 'Path')][string]$Path,
         [Parameter(Mandatory, ParameterSetName = 'Json')][string]$Json,
         [Parameter(Mandatory)][hashtable]$Auth,
+        [Parameter(Mandatory)][string]$Hostname,
         [string]$Scheme = 'https',
-        [string]$Hostname = 'neoipc.charite.de',
         [Nullable[int]]$Port = $null,
         [ValidateSet('CREATE_AND_UPDATE', 'CREATE', 'UPDATE', 'DELETE')][string]$ImportStrategy = 'CREATE_AND_UPDATE',
         [ValidateSet('ALL', 'NONE')][string]$AtomicMode = 'ALL',
-        [switch]$DryRun,
-        [switch]$ConnectReferences
+        [switch]$DryRun
     )
     if ($PSCmdlet.ParameterSetName -eq 'Path') {
         if (-not (Test-Path -LiteralPath $Path)) { throw "Metadata package not found: '$Path'." }
@@ -696,26 +699,6 @@ function Import-NeoIPCMetadata {
         $(if ($stats) { ", created=$($stats.created) updated=$($stats.updated) ignored=$($stats.ignored) total=$($stats.total)" } else { '' }),
         $(if ($errorMessage) { " — $errorMessage" } else { '' }))
 
-    # Connect pass: DHIS2's metadata import does not link an object's OWNED reference collections to objects
-    # created in the SAME payload (optionGroupSet.optionGroups, programRule.programRuleActions,
-    # userGroup.managedGroups — verified: they import members-less even though status=OK, while the analogous
-    # optionGroup.options links fine). Re-applying the package once every referenced object exists connects them.
-    # Only after a committing pass that did not hard-fail; Test-NeoIPCMetadataImport is the authoritative gate.
-    $connectPassStatus = $null
-    if ($ConnectReferences -and -not $DryRun -and $status -in 'OK', 'WARNING') {
-        # KNOWN DHIS2 2.42+ issue: this connect re-apply drops the owned ordered <list> collections it is meant to
-        # link (optionGroupSet.optionGroups et al.) NON-DETERMINISTICALLY and per-instance-stickily; root cause
-        # unresolved (ruled out as an L2-cache issue). ConnectPassStatus below is only the second POST's status,
-        # NOT proof the collections linked — Test-NeoIPCMetadataImport is the authoritative gate. 2.40/2.41 connect
-        # on the first pass.
-        Write-Verbose 'Connect pass: re-applying the package to connect same-payload owned-collection memberships...'
-        $connectBody = (Invoke-NeoIPCDhis2Post @postArgs -Confirm:$false).Body
-        $connectReport = if ($connectBody -and ($connectBody.PSObject.Properties.Name -contains 'response') -and $connectBody.response) { $connectBody.response } else { $connectBody }
-        $connectPassStatus = if ($connectReport -and ($connectReport.PSObject.Properties.Name -contains 'status')) { $connectReport.status }
-        elseif ($connectBody -and ($connectBody.PSObject.Properties.Name -contains 'status')) { $connectBody.status } else { $null }
-        Write-Verbose "Connect pass: status $connectPassStatus."
-    }
-
     [pscustomobject]@{
         DryRun         = [bool]$DryRun
         HttpStatusCode = $response.StatusCode
@@ -726,9 +709,8 @@ function Import-NeoIPCMetadata {
         Ignored        = if ($stats) { $stats.ignored } else { $null }
         Total          = if ($stats) { $stats.total } else { $null }
         TypeReports    = if ($report -and ($report.PSObject.Properties.Name -contains 'typeReports')) { $report.typeReports } else { $null }
-        ErrorMessage      = $errorMessage
-        ConnectPassStatus = $connectPassStatus
-        Raw               = $body
+        ErrorMessage   = $errorMessage
+        Raw            = $body
     }
 }
 

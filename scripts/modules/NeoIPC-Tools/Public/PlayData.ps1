@@ -93,12 +93,23 @@ function Import-NeoIPCPlayData {
         SupplementaryDataProvider makes the d2:inOrgUnitGroup rules collide with a 409 "Duplicate key"; fixed in
         2.43.1). The payload is complete and separately VALIDATE-checked, so it needs no server-side rules on
         those two patches. -SkipRuleEngine / -SkipRuleEngine:$false overrides the auto-detection.
+
+        Events DHIS2 already holds as COMPLETED are left out of the payload and left as they are. From 2.41.10 an
+        event in a stage that blocks its form after completion cannot be updated (E1326), so re-importing the same
+        corpus would fail its whole department; one read of the program's events, in every org unit the caller can
+        reach, finds them wherever their department. The summary's SkippedCompletedEvents counts them.
     .PARAMETER Path
         Path to a /api/tracker payload JSON file.
     .PARAMETER Json
         A /api/tracker payload JSON string (e.g. the New-NeoIPCPlayDataPackage return), instead of -Path.
     .PARAMETER Auth
         Auth hashtable from Resolve-NeoIPCAuth (Token or Basic).
+    .PARAMETER Hostname
+        The DHIS2 host. Mandatory, with no default, so an import always names its target.
+    .PARAMETER Scheme
+        http or https. Default https.
+    .PARAMETER Port
+        DHIS2 port. Default none (the scheme's).
     .PARAMETER ImportStrategy
         DHIS2 importStrategy: CREATE_AND_UPDATE (default — idempotent on committed UIDs), CREATE, UPDATE, DELETE.
     .PARAMETER AtomicMode
@@ -114,8 +125,8 @@ function Import-NeoIPCPlayData {
         [Parameter(Mandatory, ParameterSetName = 'Path')][string]$Path,
         [Parameter(Mandatory, ParameterSetName = 'Json')][string]$Json,
         [Parameter(Mandatory)][hashtable]$Auth,
+        [Parameter(Mandatory)][string]$Hostname,
         [string]$Scheme = 'https',
-        [string]$Hostname = 'neoipc.charite.de',
         [Nullable[int]]$Port = $null,
         [ValidateSet('CREATE_AND_UPDATE', 'CREATE', 'UPDATE', 'DELETE')][string]$ImportStrategy = 'CREATE_AND_UPDATE',
         [ValidateSet('ALL', 'OBJECT')][string]$AtomicMode = 'ALL',
@@ -143,19 +154,20 @@ function Import-NeoIPCPlayData {
         reportMode     = 'FULL'
     }
 
+    # -WhatIf:$false: a read under -WhatIf would return nothing, which leaves no version to choose the dialect by.
+    $versionText = [string]((Invoke-NeoIPCDhis2Get @endpoint -Path 'api/system/info' -Fields 'version' -AsHashtable -Confirm:$false -WhatIf:$false)['version'])
+    $dialect = Get-NeoIPCTrackerDialect -Version (ConvertTo-NeoIPCDhis2Version -Text $versionText)
+
     # Skip the rule engine on the two 2.43.0.x patches whose SupplementaryDataProvider 409s our
     # d2:inOrgUnitGroup rules (fixed in 2.43.1); explicit -SkipRuleEngine overrides the detection.
     if ($PSBoundParameters.ContainsKey('SkipRuleEngine')) {
         if ($SkipRuleEngine) { $query['skipRuleEngine'] = 'true' }
     }
-    else {
-        $version = ''
-        try { $version = [string]((Invoke-NeoIPCDhis2Get @endpoint -Path 'api/system/info').version) }
-        catch { Write-Verbose "Could not read the DHIS2 version for the rule-engine gate ($($_.Exception.Message)); leaving the server-side rule engine on." }
-        if ($version -match '^2\.43\.0(\.\d+)?$') {
-            $query['skipRuleEngine'] = 'true'
-            Write-Verbose "DHIS2 ${version}: skipping the program-rule engine on import (2.43.0.x SupplementaryDataProvider workaround; fixed in 2.43.1)."
-        }
+    elseif ($versionText -match '^2\.43\.0(\.\d+)?$') {
+        # NEOIPC-COMPAT(dhis2-2.43.0-rule-engine-skip): remove once no instance an import targets runs 2.43.0.x
+        # (/api/system/info version 2.43.1 or later).
+        $query['skipRuleEngine'] = 'true'
+        Write-Verbose "DHIS2 ${versionText}: skipping the program-rule engine on import (2.43.0.x SupplementaryDataProvider workaround; fixed in 2.43.1)."
     }
 
     $portSuffix = if ($null -ne $Port) { ":$Port" } else { '' }
@@ -175,6 +187,28 @@ function Import-NeoIPCPlayData {
     # per-department seed behaved).
     $payloadObj = $payload | ConvertFrom-Json -Depth 100
     $tes = @($payloadObj.trackedEntities)
+
+    # Leave out the events DHIS2 already holds as COMPLETED (see the help). One read per program, in every org unit
+    # the caller can reach, so a completed event is found wherever its department.
+    $programIds = @($tes | ForEach-Object { @($_.enrollments) } | Where-Object { $_ -and $_.program } | ForEach-Object { [string]$_.program } | Select-Object -Unique)
+    $completed = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::Ordinal)
+    foreach ($programId in $programIds) {
+        $events = Get-NeoIPCTrackerList -Endpoint $endpoint -Dialect $dialect -Resource 'events' -Fields 'event', 'status' `
+            -Query @{ program = $programId; $dialect.OrgUnitMode = 'ACCESSIBLE' }
+        foreach ($e in $events) { if ([string]$e['status'] -eq 'COMPLETED') { [void]$completed.Add([string]$e['event']) } }
+    }
+    $skippedCompleted = 0
+    if ($completed.Count -gt 0) {
+        foreach ($te in $tes) {
+            foreach ($enrollment in @($te.enrollments)) {
+                if (-not $enrollment -or -not $enrollment.PSObject.Properties['events']) { continue }
+                $kept = @($enrollment.events | Where-Object { -not $completed.Contains([string]$_.event) })
+                $skippedCompleted += @($enrollment.events).Count - $kept.Count
+                $enrollment.events = $kept
+            }
+        }
+        Write-Verbose "Left out $skippedCompleted event(s) DHIS2 already holds as COMPLETED."
+    }
     $groups = if ($tes.Count -gt 0) { @($tes | Group-Object -Property orgUnit) } else { @() }
 
     $created = 0; $updated = 0; $deleted = 0; $ignored = 0; $total = 0
@@ -264,6 +298,7 @@ function Import-NeoIPCPlayData {
         Ignored        = $ignored
         Total          = $total
         OrgUnitGroups  = $groups.Count
+        SkippedCompletedEvents = $skippedCompleted
         ErrorReports   = $errorReports.ToArray()
         WarningReports = $warningReports.ToArray()
         ErrorMessage   = $errorMessage

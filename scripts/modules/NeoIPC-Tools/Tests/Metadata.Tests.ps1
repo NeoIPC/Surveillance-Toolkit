@@ -6,7 +6,7 @@
 
 .DESCRIPTION
     Covers Private/Metadata.ps1 and Private/MetadataTypeMaps.ps1 — row/object conversion, sharing
-    profiles, package assembly, dependency closure, expression externalisation and canonicalisation, and
+    profiles, package assembly, dependency closure, expression externalization and canonicalization, and
     the CSV file I/O contract.
 
     Self-contained: every fixture is synthetic, so the suite runs against a standalone Surveillance-Toolkit
@@ -163,7 +163,7 @@ InModuleScope 'NeoIPC-Tools' {
             $r.Back['sharing']['public'] | Should -BeExactly 'rw------'
             $r.Back['sharing'].Contains('owner') | Should -BeFalse  # owner/external/empty grants dropped
         }
-        It 'round-trips an optionSet and ordinal-sorts its option refs (recoverable via Option.sortOrder)' {
+        It 'round-trips an optionSet and ordinal-sorts its option-ref cell (the package rebuilds the order from each option''s sortOrder)' {
             $os = [ordered]@{ id = 'optSetBBB12'; code = 'NEOIPC_OS'; name = 'OS'; valueType = 'TEXT'; version = 3
                 options = @([ordered]@{ id = 'optZZZ99999' }, [ordered]@{ id = 'optAAA11111' }, [ordered]@{ id = 'optMMM55555' })
                 created = '2020'; sharing = [ordered]@{ public = 'rw------' } }
@@ -339,6 +339,23 @@ InModuleScope 'NeoIPC-Tools' {
             $back['sharing']['userGroups']['ugTestAAA01']['access'] | Should -BeExactly 'r-------'
             $back['sharing']['userGroups']['ugTestAAA01'].Contains('displayName') | Should -BeFalse
         }
+        It 'keeps each profile''s grants in authored order, so the package is byte-stable across builds' -Skip:(-not (Get-Module -ListAvailable powershell-yaml)) {
+            # Read as a plain hashtable, the grants would follow .NET's per-process string hashing; ten of them in a
+            # deliberately unsorted order leave no realistic chance of matching the authored order by accident. The
+            # ids sort like the handles, so a sort by either does not pass for the authored order.
+            $handles = @('G_J', 'G_C', 'G_H', 'G_A', 'G_F', 'G_I', 'G_B', 'G_E', 'G_D', 'G_G')
+            $keyToId = @{}
+            foreach ($h in $handles) { $keyToId[$h] = 'ugOrder000' + $h.Substring(2) }
+            $tmp = Join-Path $TestDrive 'sharing-order.yaml'
+            $saved = $script:NeoIPCSharingProfiles
+            try {
+                @('ORDERED:', '  public: "--------"', '  userGroups:') + @($handles | ForEach-Object { "    ${_}: r-------" }) |
+                    Set-TestFileContent -LiteralPath $tmp -Encoding utf8
+                Import-NeoIPCSharingProfile -Path $tmp -KeyToId $keyToId
+                @((Expand-NeoIPCSharingProfile -Key 'ORDERED')['userGroups'].Keys) | Should -Be @($handles | ForEach-Object { $keyToId[$_] })
+            }
+            finally { $script:NeoIPCSharingProfiles = $saved }
+        }
         It 'fails loud on an unrecognized sharing pattern (so a new shape is named in sharing.yaml)' {
             $sharing = Convert-NeoIPCSharing ([ordered]@{ public = 'rwrw----' })
             { Resolve-NeoIPCSharingProfileKey -Sharing $sharing } | Should -Throw '*Unrecognized sharing pattern*'
@@ -366,8 +383,11 @@ InModuleScope 'NeoIPC-Tools' {
 
     Describe 'List-order preservation (regression for form-layout scramble)' {
         It 'derives the ordered-ref-prop set from the idArrayOrdered class' {
-            $expected = @('categories', 'categoryOptions', 'optionGroups', 'dataElements', 'programIndicators', 'trackedEntityAttributes')
+            $expected = @('categories', 'categoryOptions', 'optionGroups', 'dataElements', 'programIndicators', 'trackedEntityAttributes', 'legendSets')
             foreach ($p in $expected) { $script:NeoIPCMetadataOrderedRefProps.Contains($p) | Should -BeTrue -Because "'$p' must be order-preserving" }
+            foreach ($k in 'dataElements|legendSets', 'trackedEntityAttributes|legendSets') {
+                $script:NeoIPCMetadataServerOrderedRefs.Contains($k) | Should -BeTrue -Because "DHIS2 maps $k as a <list>, whose first entry is the legend set"
+            }
         }
         It 'the comparator treats categoryCombos.categories as order-SENSITIVE' {
             $mk = { param($order) [ordered]@{ categoryCombos = @([ordered]@{ id = 'ccTestAAA01'; code = 'CC'; name = 'CC'
@@ -487,6 +507,22 @@ InModuleScope 'NeoIPC-Tools' {
             $rows = ConvertFrom-NeoIPCMetadataPackage -Package $work
             @($rows['options'] | ForEach-Object { [string]$_['id'] }) | Should -Be @('optAAA0001', 'optBBB0001', 'optBBB0002')
         }
+        It 'lists each option set''s options in their authored sortOrder, not the cell''s UID order' {
+            # DHIS2 keeps a set's options in the order the package lists them, so this order is what users see.
+            # An option without a sortOrder follows the numbered ones, in cell order.
+            $rows = [ordered]@{
+                optionSets = @([ordered]@{ id = 'osAAA00001'; code = 'OS'; name = 'OS'; valueType = 'TEXT'
+                        options = 'optAAA0001 optBBB0002 optCCC0003 optDDD0004' })
+                options    = @(
+                    [ordered]@{ id = 'optAAA0001'; code = 'a'; name = 'A'; sortOrder = '3'; optionSet = 'osAAA00001' }
+                    [ordered]@{ id = 'optBBB0002'; code = 'b'; name = 'B'; sortOrder = ''; optionSet = 'osAAA00001' }
+                    [ordered]@{ id = 'optCCC0003'; code = 'c'; name = 'C'; sortOrder = '1'; optionSet = 'osAAA00001' }
+                    [ordered]@{ id = 'optDDD0004'; code = 'd'; name = 'D'; sortOrder = '2'; optionSet = 'osAAA00001' })
+            }
+            $pkg = ConvertTo-NeoIPCMetadataPackage -Rows $rows
+            @($pkg['optionSets'][0]['options'] | ForEach-Object { [string]$_['id'] }) |
+                Should -Be @('optCCC0003', 'optDDD0004', 'optAAA0001', 'optBBB0002')
+        }
     }
 
     Describe 'Domain option-set exclusion (pathogens / substances sourced from YAML, not the directory)' {
@@ -551,12 +587,12 @@ InModuleScope 'NeoIPC-Tools' {
         }
     }
 
-    Describe 'Directory materialisation + retired/option-domain exclusion' {
+    Describe 'Directory materialization + retired/option-domain exclusion' {
         BeforeAll {
-            # A package mixing the matrix-generated families (now MATERIALISED into the directory) with hand-authored
+            # A package mixing the matrix-generated families (now MATERIALIZED into the directory) with hand-authored
             # business metadata (kept) and a RETIRED aggregate rule (omitted — superseded, not in the to-be). The
             # substance PRV / rule names are the DEPLOYED *unpadded* form ("substance 1"), exercising the
-            # slot-normalisation that matches them to the padded plan ("substance 01").
+            # slot-normalization that matches them to the padded plan ("substance 01").
             $script:genPkg = [ordered]@{
                 dataElements = @(
                     [ordered]@{ id = 'deBsiPat001'; code = 'NEOIPC_BSI_PATHOGEN_1'; name = 'NeoIPC BSI Organism 1'; valueType = 'INTEGER_ZERO_OR_POSITIVE' }                          # generated
@@ -589,16 +625,16 @@ InModuleScope 'NeoIPC-Tools' {
         }
         It 'Get-NeoIPCMetadataGeneratedKeys resolves the matrix refresh-identity + the retired rule ids' {
             $gk = Get-NeoIPCMetadataGeneratedKeys -Package (ConvertFrom-NeoIPCMetadataJsonText -Json ($script:genPkg | ConvertTo-Json -Depth 40))
-            # Refresh identity (which materialised rows are generated): matrix DE codes + variable + rule names.
+            # Refresh identity (which materialized rows are generated): matrix DE codes + variable + rule names.
             $gk.DataElementCodes.Contains('NEOIPC_BSI_PATHOGEN_1') | Should -BeTrue
             $gk.DataElementCodes.Contains('NEOIPC_SURVEILLANCE_END_AB_SUBST_01') | Should -BeTrue
             $gk.DataElementCodes.Contains('NEOIPC_BSI_NO_POS_CULTURE') | Should -BeFalse
             $gk.VariableNames.Contains('NeoIPC BSI Pathogen 1 value') | Should -BeTrue
-            # The deployed unpadded substance name is normalised into the (padded) matrix set.
+            # The deployed unpadded substance name is normalized into the (padded) matrix set.
             $gk.VariableNames.Contains('NeoIPC Surveillance end Antibiotic substance 1 - current event value') | Should -BeTrue
             $gk.RuleNames.Contains('NeoIPC BSI Pathogen 1 - set 3GCR') | Should -BeTrue
             $gk.RuleNames.Contains('NeoIPC BSI infection present') | Should -BeFalse
-            # The retired aggregate is NOT a materialised matrix rule — it is tracked separately for exclusion.
+            # The retired aggregate is NOT a materialized matrix rule — it is tracked separately for exclusion.
             $gk.RuleNames.Contains('NeoIPC HAP - set pathogen attribute variables') | Should -BeFalse
             $gk.RetiredRuleNames.Contains('NeoIPC HAP - set pathogen attribute variables') | Should -BeTrue
             # RetiredRuleIds = in-package ids of RETIRED rules (their name-less actions drop by owning id);
@@ -606,9 +642,9 @@ InModuleScope 'NeoIPC-Tools' {
             @($gk.RetiredRuleIds | Sort-Object) | Should -Be @('rlHapAggr01')
             @($gk.GeneratedRuleIds | Sort-Object) | Should -Be @('rlHapAggr01', 'rlSet3gcr01', 'rlSubHide01', 'rlWhenEmp01')
         }
-        It 'Test-NeoIPCMetadataGeneratedExcluded excludes only retired rules + the antibiotic option-domain; matrix families are materialised' {
+        It 'Test-NeoIPCMetadataGeneratedExcluded excludes only retired rules + the antibiotic option-domain; matrix families are materialized' {
             $gk = Get-NeoIPCMetadataGeneratedKeys -Package (ConvertFrom-NeoIPCMetadataJsonText -Json ($script:genPkg | ConvertTo-Json -Depth 40))
-            # Matrix DEs / PRVs / rules / actions are MATERIALISED -> NOT excluded.
+            # Matrix DEs / PRVs / rules / actions are MATERIALIZED -> NOT excluded.
             Test-NeoIPCMetadataGeneratedExcluded -Type 'dataElements' -Object ([ordered]@{ code = 'NEOIPC_BSI_PATHOGEN_1' }) -GeneratedKeys $gk | Should -BeFalse
             Test-NeoIPCMetadataGeneratedExcluded -Type 'programRuleVariables' -Object ([ordered]@{ name = 'NeoIPC Surveillance end Antibiotic substance 1 - current event value' }) -GeneratedKeys $gk | Should -BeFalse
             Test-NeoIPCMetadataGeneratedExcluded -Type 'programRules' -Object ([ordered]@{ name = 'NeoIPC BSI Pathogen 1 - when empty' }) -GeneratedKeys $gk | Should -BeFalse
@@ -624,10 +660,10 @@ InModuleScope 'NeoIPC-Tools' {
             Test-NeoIPCMetadataGeneratedExcluded -Type 'optionGroupSets' -Object ([ordered]@{ code = 'ATC5' }) -GeneratedKeys $gk | Should -BeTrue
             Test-NeoIPCMetadataGeneratedExcluded -Type 'optionGroupSets' -Object ([ordered]@{ code = 'WHO_AWARE' }) -GeneratedKeys $gk | Should -BeTrue
         }
-        It 'the emit materialises the matrix families + business and drops only the retired aggregate' {
+        It 'the emit materializes the matrix families + business and drops only the retired aggregate' {
             $work = ConvertFrom-NeoIPCMetadataJsonText -Json ($script:genPkg | ConvertTo-Json -Depth 40)
             $rows = ConvertFrom-NeoIPCMetadataPackage -Package $work
-            # All five DEs are kept (3 matrix + 2 business) — the matrix families are materialised, not dropped.
+            # All five DEs are kept (3 matrix + 2 business) — the matrix families are materialized, not dropped.
             # (Compare-Object asserts set equality, order-independent — Sort-Object is culture-aware.)
             (Compare-Object @($rows['dataElements'] | ForEach-Object { [string]$_['code'] }) @('NEOIPC_ADM_DATE', 'NEOIPC_BSI_NO_POS_CULTURE', 'NEOIPC_BSI_PATHOGEN_1', 'NEOIPC_BSI_PATHOGEN_1_3GCR', 'NEOIPC_SURVEILLANCE_END_AB_SUBST_01')) | Should -BeNullOrEmpty
             (Compare-Object @($rows['programRuleVariables'] | ForEach-Object { [string]$_['name'] }) @('NeoIPC BSI Pathogen 1 value', 'NeoIPC BSI Pathogen 1 may be 3GCR', 'NeoIPC Surveillance end Antibiotic substance 1 - current event value', 'NeoIPC BSI antibiotic treatment value')) | Should -BeNullOrEmpty
@@ -637,9 +673,9 @@ InModuleScope 'NeoIPC-Tools' {
             @($rows['programRuleActions'] | ForEach-Object { [string]$_['id'] }) | Should -Not -Contain 'acHapAggr01'
             (Compare-Object @($rows['programRuleActions'] | ForEach-Object { [string]$_['id'] }) @('acSet3gcr01', 'acWhenEmp01', 'acSubHide01', 'acBizInf001')) | Should -BeNullOrEmpty
         }
-        It 'materialises a now-directory rule together with its hand-authored action' {
+        It 'materializes a now-directory rule together with its hand-authored action' {
             # The BSI 'when set' rule bundles a hand-authored HIDEFIELD on NEOIPC_BSI_NO_POS_CULTURE alongside the
-            # generated SETMANDATORYFIELD on _SOURCE. The rule is now a MATERIALISED directory row, so BOTH actions
+            # generated SETMANDATORYFIELD on _SOURCE. The rule is now a MATERIALIZED directory row, so BOTH actions
             # (and both DEs) are emitted with it — including the hand-authored one. (The export-independence / BSI
             # step later promotes that hand-authored action to its own stand-alone directory rule.)
             $pkg = [ordered]@{
@@ -660,11 +696,11 @@ InModuleScope 'NeoIPC-Tools' {
             @($rows['programRuleActions'] | ForEach-Object { [string]$_['id'] } | Sort-Object) | Should -Be @('acNoPosHid1', 'acSrcMand01')
             @($rows['dataElements'] | ForEach-Object { [string]$_['code'] } | Sort-Object) | Should -Be @('NEOIPC_BSI_NO_POS_CULTURE', 'NEOIPC_BSI_PATHOGEN_1_SOURCE')
         }
-        It 'the comparator round-trips the materialised matrix families and skips the retired aggregate (both directions)' {
+        It 'the comparator round-trips the materialized matrix families and skips the retired aggregate (both directions)' {
             $baseline = ConvertFrom-NeoIPCMetadataJsonText -Json ($script:genPkg | ConvertTo-Json -Depth 40)
             $work     = ConvertFrom-NeoIPCMetadataJsonText -Json ($script:genPkg | ConvertTo-Json -Depth 40)
             $rebuilt  = ConvertTo-NeoIPCMetadataPackage -Rows (ConvertFrom-NeoIPCMetadataPackage -Package $work)
-            # The matrix families are materialised, so they survive emit->rebuild and compare equal; the retired
+            # The matrix families are materialized, so they survive emit->rebuild and compare equal; the retired
             # aggregate is dropped from $rebuilt, and the comparator skips it via ExcludedRuleIds on BOTH sides.
             @(Compare-NeoIPCMetadataCore -Reference $baseline -Difference $rebuilt).Count | Should -Be 0
             # Reversed sides: the retired rule + its action live only on the Reference here, guarding the
@@ -763,7 +799,7 @@ InModuleScope 'NeoIPC-Tools' {
         }
     }
 
-    Describe 'Per-expression text-file externalisation (directory layout)' {
+    Describe 'Per-expression text-file externalization (directory layout)' {
         BeforeAll {
             function New-ExprRows {
                 [ordered]@{
@@ -798,7 +834,7 @@ InModuleScope 'NeoIPC-Tools' {
             $map = Get-NeoIPCMetadataExpressionRuleSegmentMap -RuleRows @(
                 [ordered]@{ id = 'R1'; code = 'NEOIPC_BSI_AGENT_1_SET_3GCR'; name = 'ignored name/with slash' },
                 [ordered]@{ id = 'R2coded001'; name = 'no code here' })
-            $map['R1'] | Should -BeExactly 'NEOIPC_BSI_AGENT_1_SET_3GCR'   # code, not the sanitised name
+            $map['R1'] | Should -BeExactly 'NEOIPC_BSI_AGENT_1_SET_3GCR'   # code, not the sanitized name
             $map['R2coded001'] | Should -BeExactly 'R2coded001'            # code-less -> the id
         }
         It 'rule-segment map fails loud on a path-unsafe segment' {
@@ -823,7 +859,7 @@ InModuleScope 'NeoIPC-Tools' {
             $rows = New-ExprRows
             @($rows['programRuleActions'])[1]['data'] = '#{cond}'   # a (hypothetical) inline condition on a HIDEFIELD
             Write-NeoIPCMetadataExpressionFiles -Rows $rows -Directory $script:exprDir
-            @($rows['programRuleActions'])[1]['data'] | Should -BeExactly '#{cond}'                   # NOT externalised
+            @($rows['programRuleActions'])[1]['data'] | Should -BeExactly '#{cond}'                   # NOT externalized
             @($rows['validationRules'])[0]['rightSide_expression'] | Should -BeExactly ''             # empty -> no file
         }
         It 'round-trips verbatim through write+read (multi-line preserved)' {
@@ -874,12 +910,12 @@ InModuleScope 'NeoIPC-Tools' {
         }
         It 'rule-segment map skips a null/absent programRules collection (no crash) and returns an empty map' {
             (Get-NeoIPCMetadataExpressionRuleSegmentMap -RuleRows $null).Count | Should -Be 0
-            # the production trigger: a $rows that omits programRules but carries another externalised type must not crash
+            # the production trigger: a $rows that omits programRules but carries another externalized type must not crash
             $rows = [ordered]@{ programIndicators = @([ordered]@{ id = 'PIonly00001'; expression = '#{a.b}' }) }
             { Write-NeoIPCMetadataExpressionFiles -Rows $rows -Directory $script:exprDir } | Should -Not -Throw
             @($rows['programIndicators'])[0]['expression'] | Should -BeExactly 'expressions/programIndicators/PIonly00001.expression.dhis2'
         }
-        It 'wiring: ConvertFrom-/ConvertTo-NeoIPCMetadataJson externalise on emit and re-inline on read (end-to-end)' {
+        It 'wiring: ConvertFrom-/ConvertTo-NeoIPCMetadataJson externalize on emit and re-inline on read (end-to-end)' {
             $pkg = [ordered]@{
                 userGroups         = @()
                 programRules       = @(
@@ -892,7 +928,7 @@ InModuleScope 'NeoIPC-Tools' {
             $jsonPath = Join-Path $script:exprDir 'intg.metadata.json'
             [System.IO.File]::WriteAllText($jsonPath, ($pkg | ConvertTo-Json -Depth 40), [System.Text.UTF8Encoding]::new($false))
             $outDir = Join-Path $script:exprDir 'intg-dir'
-            # ConvertFrom-/ConvertTo-NeoIPCMetadataJson (re)initialise the module-global sharing-profile registry;
+            # ConvertFrom-/ConvertTo-NeoIPCMetadataJson (re)initialize the module-global sharing-profile registry;
             # save + restore it so this integration test does not pollute the sharing state other Describes rely on.
             $savedSharing = $script:NeoIPCSharingProfiles
             try {
@@ -1301,10 +1337,10 @@ InModuleScope 'NeoIPC-Tools' {
     }
 
     Describe 'Join-NeoIPCBalancedBooleanChain (balanced boolean-chain builder)' {
-        It 'wraps a single term in one parenthesised group' {
+        It 'wraps a single term in one parenthesized group' {
             Join-NeoIPCBalancedBooleanChain -Term 'a' -Operator '||' | Should -BeExactly '(a)'
         }
-        It 'joins two terms identically to a plain parenthesised join (small chains unchanged)' {
+        It 'joins two terms identically to a plain parenthesized join (small chains unchanged)' {
             Join-NeoIPCBalancedBooleanChain -Term 'a', 'b' -Operator '||' | Should -BeExactly '(a||b)'
             Join-NeoIPCBalancedBooleanChain -Term 'a', 'b' -Operator '&&' | Should -BeExactly '(a&&b)'
         }
@@ -1536,7 +1572,7 @@ InModuleScope 'NeoIPC-Tools' {
                 openingDate = '2020-01-01T00:00:00'; closedDate = '2025-06-15T00:00:00'; level = 4   # closedDate: a closed dept
                 parent = [ordered]@{ id = 'ouHosp00001' }; image = [ordered]@{ id = 'fileRes0001' }
                 path = '/ouRoot00001/ouHosp00001/ouDept00001'                               # server-derived, stripped
-                address = $null; code = $null; comment = $null; geometry = $null            # anonymiser nulls, dropped
+                address = $null; code = $null; comment = $null; geometry = $null            # anonymizer nulls, dropped
                 created = '2020-01-01'; lastUpdated = '2021-01-01'; translations = @() }
             $r = Get-RowRoundTrip 'organisationUnits' $ou
             $r.Equal | Should -BeTrue -Because ($r.A + ' vs ' + $r.B)
@@ -1557,7 +1593,7 @@ InModuleScope 'NeoIPC-Tools' {
         It 'round-trips an organisationUnitGroup (symbol/color kept), dropping the per-deployment membership' {
             $g = [ordered]@{ id = 'ougDept0001'; code = 'NEO_DEPARTMENT'; name = 'Departments'; shortName = 'Depts'; description = 'd'
                 symbol = '12'; color = '#FF0000'
-                organisationUnits = @([ordered]@{ id = 'ouZ99999999' }, [ordered]@{ id = 'ouA11111111' }, [ordered]@{ id = 'ouM55555555' })   # anonymised instance membership -> dropped
+                organisationUnits = @([ordered]@{ id = 'ouZ99999999' }, [ordered]@{ id = 'ouA11111111' }, [ordered]@{ id = 'ouM55555555' })   # anonymized instance membership -> dropped
                 sharing = [ordered]@{ public = 'r-------' }; created = '2020' }
             $r = Get-RowRoundTrip 'organisationUnitGroups' $g
             $r.Equal | Should -BeTrue -Because ($r.A + ' vs ' + $r.B)
@@ -1639,7 +1675,7 @@ InModuleScope 'NeoIPC-Tools' {
         }
         It 'round-trips a userGroup definition, dropping the per-deployment membership' {
             $g = [ordered]@{ id = 'ugAdmins001'; code = 'NEOIPC_PATHOGEN_LIST_ADMINS'; name = 'NeoIPC Pathogen-List admins'
-                users = @([ordered]@{ id = 'U2632294693' }, [ordered]@{ id = 'U1641935444' })   # anonymised membership -> dropped
+                users = @([ordered]@{ id = 'U2632294693' }, [ordered]@{ id = 'U1641935444' })   # anonymized membership -> dropped
                 managedGroups = @([ordered]@{ id = 'ugTesters01' }, [ordered]@{ id = 'ugEditors01' })
                 sharing = [ordered]@{ public = 'rw------' }; attributeValues = @(); created = '2020'; translations = @() }
             $r = Get-RowRoundTrip 'userGroups' $g
@@ -2197,7 +2233,7 @@ InModuleScope 'NeoIPC-Tools' {
     Describe 'Generated-family translation keys (stable semantic msgctxt — change-locality)' {
         It 'derives stable DE-code-scheme keys for every generated PRV / rule family (name- and UID-independent)' {
             $idx = Get-NeoIPCMetadataGeneratedTranslationKeyIndex -Package ([ordered]@{})
-            # Resistance PRVs (primary + secondary), field-gating PRV, substance PRV (slot-padding-normalised lookup).
+            # Resistance PRVs (primary + secondary), field-gating PRV, substance PRV (slot-padding-normalized lookup).
             $idx.VariableKeyByName['NeoIPC BSI Pathogen 1 value'] | Should -BeExactly 'NEOIPC_BSI_AGENT_1_VAL'
             $idx.VariableKeyByName['NeoIPC BSI Pathogen 1 may be 3GCR'] | Should -BeExactly 'NEOIPC_BSI_AGENT_1_MAYBE_3GCR'
             $idx.VariableKeyByName['NeoIPC BSI Pathogen 1 may be carbapenem-resistant'] | Should -BeExactly 'NEOIPC_BSI_AGENT_1_MAYBE_CAR'
@@ -2331,7 +2367,7 @@ InModuleScope 'NeoIPC-Tools' {
             @(Get-NeoIPCMetadataTranslationUnit -Package $pkg | ForEach-Object { $_.Msgctxt }) | Should -Be @(
                 'options/NEOIPC_ASA_SCORE/1/NAME', 'options/NEOIPC_ASA_SCORE/2/NAME', 'optionSets/NEOIPC_ASA_SCORE/NAME')
         }
-        It 'recognises ATC level-4 (5-char) and level-5 (7-char) codes, not other codes' {
+        It 'recognizes ATC level-4 (5-char) and level-5 (7-char) codes, not other codes' {
             (Test-NeoIPCAtcCode -Code 'J01CG') | Should -BeTrue       # ATC level 4 (drug-class group)
             (Test-NeoIPCAtcCode -Code 'J01AA01') | Should -BeTrue     # ATC level 5 (substance)
             (Test-NeoIPCAtcCode -Code 'WHO_AWARE_ACCESS') | Should -BeFalse
@@ -2360,7 +2396,7 @@ InModuleScope 'NeoIPC-Tools' {
             $keys | Should -Contain 'NEO_ORG_GROUP_SET'     # non-antibiotic group-set stays in the metadata PO
         }
         It 'excludes organisationUnit INSTANCES from extraction (authored content) but keeps the group classification labels' {
-            # Org-unit instances are authored content (real UIDs / ISO codes / country names) the export anonymises,
+            # Org-unit instances are authored content (real UIDs / ISO codes / country names) the export anonymizes,
             # so they are an excluded type — never extracted to the metadata PO. The org-unit GROUPS / GROUP-SETS,
             # however, are translatable classification config and stay (e.g. NEO_DEPARTMENT, World-Bank classes).
             $pkg = [ordered]@{
@@ -2632,14 +2668,14 @@ InModuleScope 'NeoIPC-Tools' {
         }
     }
 
-    Describe 'Translation priority (full surface, internal strings deprioritised)' {
-        It 'elevates a user-facing token and deprioritises an unlisted one on the same object' {
+    Describe 'Translation priority (full surface, internal strings deprioritized)' {
+        It 'elevates a user-facing token and deprioritizes an unlisted one on the same object' {
             $pkg = [ordered]@{ dataElements = @( [ordered]@{ id = 'DEaaaaaaaa1'; code = 'DE1'; name = 'Internal element name'; formName = 'Field label' } ) }
             $units = Get-NeoIPCMetadataTranslationUnit -Package $pkg
             ($units | Where-Object { $_.Token -eq 'FORM_NAME' }).Priority | Should -Be 200   # data-entry label (elevated)
-            ($units | Where-Object { $_.Token -eq 'NAME' }).Priority | Should -Be 10          # internal name (deprioritised)
+            ($units | Where-Object { $_.Token -eq 'NAME' }).Priority | Should -Be 10          # internal name (deprioritized)
         }
-        It 'deprioritises an entirely unlisted type to the low priority' {
+        It 'deprioritizes an entirely unlisted type to the low priority' {
             $pkg = [ordered]@{ programRuleVariables = @( [ordered]@{ id = 'PRVaaaaaaa1'; name = 'myVariable' } ) }
             (Get-NeoIPCMetadataTranslationUnit -Package $pkg)[0].Priority | Should -Be 10
         }
@@ -2731,7 +2767,7 @@ InModuleScope 'NeoIPC-Tools' {
                     dataElements = @( [ordered]@{ id = 'DEaaaaaaaa1'; code = 'DE1'; name = 'Internal'; formName = 'Label' } ) })
             $txt = Write-NeoIPCMetadataPoText -Entry (ConvertTo-NeoIPCMetadataPoEntry -Unit $units)
             $txt | Should -Match '(?m)^#, priority:200$'      # the data-entry label, elevated
-            $txt | Should -Match '(?m)^#, priority:10$'       # the internal name, deprioritised
+            $txt | Should -Match '(?m)^#, priority:10$'       # the internal name, deprioritized
         }
         It 'injects translations[] in deterministic (locale asc, then token) order regardless of PoByLocale key order' {
             $pkg = [ordered]@{ organisationUnitGroups = @( [ordered]@{ id = 'OGaaaaaaaa1'; code = 'NEO_DEPARTMENT'; name = 'Departments'; shortName = 'Depts' } ) }
@@ -3356,7 +3392,7 @@ Hierarchies:
             }
             { New-NeoIPCPathogenDataElement -ExistingPackage $pkg } | Should -Throw '*NEOIPC_YES_NO_NOT_TESTED*'
         }
-        It 'normalises _SOURCE zeroIsSignificant to false for both BSI and HAP (deployed has them inconsistent)' {
+        It 'normalizes _SOURCE zeroIsSignificant to false for both BSI and HAP (deployed has them inconsistent)' {
             $frag = New-NeoIPCPathogenDataElement -ExistingPackage $script:DePackage
             $byCode = @{}; foreach ($de in @($frag['dataElements'])) { $byCode[[string]$de['code']] = $de }
             $byCode['NEOIPC_BSI_PATHOGEN_1_SOURCE']['zeroIsSignificant'] | Should -BeFalse
@@ -3733,7 +3769,7 @@ Hierarchies:
             }
         }
 
-        It 'normalises the slot number for padding-insensitive matching' {
+        It 'normalizes the slot number for padding-insensitive matching' {
             ConvertTo-NeoIPCSubstanceUnpaddedName -Name 'NeoIPC Surveillance end Antibiotic substance 02 days - current event value' |
                 Should -BeExactly 'NeoIPC Surveillance end Antibiotic substance 2 days - current event value'
             ConvertTo-NeoIPCSubstanceUnpaddedName -Name 'NeoIPC Surveillance end Antibiotic substance days - validate' |
@@ -3850,7 +3886,7 @@ Hierarchies:
             { New-NeoIPCSubstanceDataElement -ExistingPackage $pkg } | Should -Throw '*NEOIPC_ANTIMICROBIAL_SUBSTANCES*'
         }
 
-        It 'PRV generator: 18 PRVs, preserving UID by slot-normalised name, resolving the base DE' {
+        It 'PRV generator: 18 PRVs, preserving UID by slot-normalized name, resolving the base DE' {
             $pkg = $script:SubPkg.Clone()
             $pkg['programRuleVariables'] = @([ordered]@{ name = 'NeoIPC Surveillance end Antibiotic substance 2 - current event value'; id = 'SUBprv00002' })
             $frag = New-NeoIPCSubstanceVariable -ExistingPackage $pkg
@@ -4454,7 +4490,6 @@ Hierarchies:
         }
         It 'rule generator: preserves rule UID + action UID from the export by name; uses the plan description; mints otherwise' {
             $pkg = $script:FgPkg.Clone()
-            $bsiStageId = New-NeoIPCMetadataUid -Type 'programStages' -NaturalKey 'NEOIPC_BSI'
             $pkg['programRules'] = @([ordered]@{ name = 'NeoIPC BSI Pathogen 1 - when set'; id = 'RULEseed001'; description = 'Seeded description.' })
             $pkg['programRuleActions'] = @([ordered]@{ id = 'ACTseed0001'; programRule = [ordered]@{ id = 'RULEseed001' }; programRuleActionType = 'SETMANDATORYFIELD'; dataElement = [ordered]@{ id = (New-NeoIPCMetadataUid -Type 'dataElements' -NaturalKey 'NEOIPC_BSI_PATHOGEN_1_SOURCE') } })
             $frag = New-NeoIPCPathogenFieldGatingRule -Path $script:FgYaml -ExistingPackage $pkg
@@ -4606,7 +4641,7 @@ Hierarchies:
         }
     }
 
-    Describe 'Update-NeoIPCGeneratedMetadataDirectory (re-materialise orchestration)' {
+    Describe 'Update-NeoIPCGeneratedMetadataDirectory (re-materialize orchestration)' {
         # The generation + splice + directory-writer pieces are tested in their own Describes; here the internals are
         # MOCKED so this exercises only the ORCHESTRATION — the load-bearing decision that the UID-preservation Export
         # is the assembled install base (which carries the option-set UIDs common/ omits) while the Config is the
@@ -4666,9 +4701,9 @@ Hierarchies:
             Mock New-NeoIPCAntibioticOptionGroup { [ordered]@{ optionGroups = @([ordered]@{ id = 'ogAtc'; code = 'J01AA' }) } }
             Mock New-NeoIPCAntibioticOptionGroupSet { [ordered]@{ optionGroupSets = @([ordered]@{ id = 'ogsAtc'; code = 'ATC5' }) } }
         }
-        It 'adds the generated option-domain to the directory config (pure ADD; keeps the materialised matrix + config)' {
+        It 'adds the generated option-domain to the directory config (pure ADD; keeps the materialized matrix + config)' {
             $config = [ordered]@{
-                dataElements = @([ordered]@{ id = 'deDir'; code = 'NEOIPC_BSI_PATHOGEN_1' })       # materialised matrix DE — untouched
+                dataElements = @([ordered]@{ id = 'deDir'; code = 'NEOIPC_BSI_PATHOGEN_1' })       # materialized matrix DE — untouched
                 optionSets   = @([ordered]@{ id = 'osYn'; code = 'NEOIPC_YES_NO_NOT_TESTED' })       # config option set — kept
             }
             $out = Add-NeoIPCGeneratedOptionMetadata -Config $config
@@ -5081,7 +5116,7 @@ Hierarchies:
             Mock New-NeoIPCPathogenFieldGatingRule { [ordered]@{ programRules = @([ordered]@{ id = 'ruleWS'; code = 'NEOIPC_BSI_AGENT_1_IF_SET'; name = 'NeoIPC BSI Pathogen 1 - when set'; programRuleActions = @([ordered]@{ id = 'actWSsrc' }) }); programRuleActions = @([ordered]@{ id = 'actWSsrc'; programRule = [ordered]@{ id = 'ruleWS' }; programRuleActionType = 'SETMANDATORYFIELD'; dataElement = [ordered]@{ id = 'deSrc' } }) } }
             $r = @(Compare-NeoIPCGeneratedMetadata -ExistingPackage (New-DiffDeployed))
             # Exactly one programRules delta is CodeAuthoring, and `code` is the field that drove it (not a
-            # normalisation class, not Unclassified).
+            # normalization class, not Unclassified).
             @($r | Where-Object { $_.Type -eq 'programRules' -and $_.Class -eq 'CodeAuthoring' -and (($_.DiffFields -split ',') -contains 'code') }).Count | Should -Be 1
             @($r | Where-Object { $_.Class -eq 'Unclassified' }).Count | Should -Be 0
         }
@@ -5257,7 +5292,7 @@ Hierarchies:
             }
             Mock Export-NeoIPCMetadataTranslation { }
             Mock ConvertFrom-NeoIPCMetadataJson {
-                # Simulate the re-emit into the temp dir: the affected config CSVs PLUS an anonymised org-units CSV
+                # Simulate the re-emit into the temp dir: the affected config CSVs PLUS an anonymized org-units CSV
                 # (which the cmdlet must NOT copy back, because organisationUnits is authored / report-only).
                 Set-TestFileContent -LiteralPath (Join-Path $OutputDirectory 'dataElements.csv') -Value "id,code,name`nDEnewwwwww1,NEW_DE,New" -NoNewline
                 Set-TestFileContent -LiteralPath (Join-Path $OutputDirectory 'indicatorTypes.csv') -Value "id,name`nITaaaaaaaa1,Number" -NoNewline
@@ -5304,12 +5339,14 @@ Hierarchies:
             $deCsv = (Get-Content -LiteralPath (Join-Path $script:rcDir 'dataElements.csv') -Raw)
             $deCsv | Should -Match 'NEW_DE'                                                                                # the Added row is merged in
             $deCsv | Should -Match 'OLD_DE'                                                                               # the directory's existing row is KEPT (row-merge, not whole-file replace)
-            (Test-Path -LiteralPath (Join-Path $script:rcDir 'indicatorTypes.csv')) | Should -BeTrue                       # new type materialised
+            (Test-Path -LiteralPath (Join-Path $script:rcDir 'indicatorTypes.csv')) | Should -BeTrue                       # new type materialized
             (Get-Content -LiteralPath (Join-Path $script:rcDir 'organisationUnits.csv') -Raw) | Should -Match 'Austria'    # authored org units untouched
             (Get-Content -LiteralPath (Join-Path $script:rcDir 'organisationUnits.csv') -Raw) | Should -Not -Match 'OUanon00001'
             $r.PoUpdated | Should -BeTrue
             Should -Invoke Assert-NeoIPCReconcileGitClean -Times 1                                                         # -Apply runs the git safety net
-            Should -Invoke Export-NeoIPCMetadataTranslation -Times 1 -Exactly -ParameterFilter { $Package -and -not $Path }   # PO sourced from the scoped package, not a raw -Path export
+            # PO sourced from the scoped package, not a raw -Path export. An unbound -Path is no variable in the filter,
+            # so `-not $Path` would read whatever $Path the caller's scopes hold.
+            Should -Invoke Export-NeoIPCMetadataTranslation -Times 1 -Exactly -ParameterFilter { $Package -and -not $PesterBoundParameters.ContainsKey('Path') }
         }
 
         It 'treats programNotificationTemplates as report-only when the export lacks them' {
@@ -5411,7 +5448,7 @@ Hierarchies:
 
         It 'sends importMode=VALIDATE on a dry-run' {
             Mock Invoke-NeoIPCDhis2Post { [pscustomobject]@{ StatusCode = 200; Body = $script:wrappedReport } }
-            Import-NeoIPCMetadata -Json '{"programs":[]}' -Auth $script:testAuth -DryRun | Out-Null
+            Import-NeoIPCMetadata -Json '{"programs":[]}' -Auth $script:testAuth -Hostname 'dhis2.example.org' -DryRun | Out-Null
             Should -Invoke Invoke-NeoIPCDhis2Post -Times 1 -Exactly -ParameterFilter {
                 $QueryParameters['importMode'] -eq 'VALIDATE' -and $Path -eq 'api/metadata'
             }
@@ -5419,7 +5456,7 @@ Hierarchies:
 
         It 'sends importMode=COMMIT with the default strategy / atomic mode on a real import' {
             Mock Invoke-NeoIPCDhis2Post { [pscustomobject]@{ StatusCode = 200; Body = $script:wrappedReport } }
-            Import-NeoIPCMetadata -Json '{"programs":[]}' -Auth $script:testAuth -Confirm:$false | Out-Null
+            Import-NeoIPCMetadata -Json '{"programs":[]}' -Auth $script:testAuth -Hostname 'dhis2.example.org' -Confirm:$false | Out-Null
             Should -Invoke Invoke-NeoIPCDhis2Post -Times 1 -Exactly -ParameterFilter {
                 $QueryParameters['importMode'] -eq 'COMMIT' -and
                 $QueryParameters['importStrategy'] -eq 'CREATE_AND_UPDATE' -and
@@ -5429,7 +5466,7 @@ Hierarchies:
 
         It 'forwards -ImportStrategy and -AtomicMode to the query' {
             Mock Invoke-NeoIPCDhis2Post { [pscustomobject]@{ StatusCode = 200; Body = $script:wrappedReport } }
-            Import-NeoIPCMetadata -Json '{}' -Auth $script:testAuth -ImportStrategy 'CREATE' -AtomicMode 'NONE' -Confirm:$false | Out-Null
+            Import-NeoIPCMetadata -Json '{}' -Auth $script:testAuth -Hostname 'dhis2.example.org' -ImportStrategy 'CREATE' -AtomicMode 'NONE' -Confirm:$false | Out-Null
             Should -Invoke Invoke-NeoIPCDhis2Post -Times 1 -Exactly -ParameterFilter {
                 $QueryParameters['importStrategy'] -eq 'CREATE' -and $QueryParameters['atomicMode'] -eq 'NONE'
             }
@@ -5439,20 +5476,20 @@ Hierarchies:
             $pkg = Join-Path $TestDrive ('pkg-' + [System.IO.Path]::GetRandomFileName() + '.json')
             Set-TestFileContent -LiteralPath $pkg -Value '{"dataElements":[{"id":"abc"}]}' -NoNewline
             Mock Invoke-NeoIPCDhis2Post { [pscustomobject]@{ StatusCode = 200; Body = $script:wrappedReport } }
-            Import-NeoIPCMetadata -Path $pkg -Auth $script:testAuth -Confirm:$false | Out-Null
+            Import-NeoIPCMetadata -Path $pkg -Auth $script:testAuth -Hostname 'dhis2.example.org' -Confirm:$false | Out-Null
             Should -Invoke Invoke-NeoIPCDhis2Post -Times 1 -Exactly -ParameterFilter {
                 $Body -eq '{"dataElements":[{"id":"abc"}]}'
             }
         }
 
         It 'throws for a missing -Path' {
-            { Import-NeoIPCMetadata -Path (Join-Path $TestDrive 'nope.json') -Auth $script:testAuth } |
+            { Import-NeoIPCMetadata -Path (Join-Path $TestDrive 'nope.json') -Auth $script:testAuth -Hostname 'dhis2.example.org' } |
                 Should -Throw '*not found*'
         }
 
         It 'normalizes a WebMessage-wrapped ImportReport (stats under .response)' {
             Mock Invoke-NeoIPCDhis2Post { [pscustomobject]@{ StatusCode = 200; Body = $script:wrappedReport } }
-            $r = Import-NeoIPCMetadata -Json '{}' -Auth $script:testAuth -DryRun
+            $r = Import-NeoIPCMetadata -Json '{}' -Auth $script:testAuth -Hostname 'dhis2.example.org' -DryRun
             $r.DryRun | Should -BeTrue
             $r.HttpStatusCode | Should -Be 200
             $r.Status | Should -Be 'OK'
@@ -5464,7 +5501,7 @@ Hierarchies:
 
         It 'normalizes a plain (un-wrapped) ImportReport (stats at top level)' {
             Mock Invoke-NeoIPCDhis2Post { [pscustomobject]@{ StatusCode = 200; Body = $script:plainReport } }
-            $r = Import-NeoIPCMetadata -Json '{}' -Auth $script:testAuth -Confirm:$false
+            $r = Import-NeoIPCMetadata -Json '{}' -Auth $script:testAuth -Hostname 'dhis2.example.org' -Confirm:$false
             $r.Status | Should -Be 'WARNING'
             $r.Updated | Should -Be 3
             $r.Ignored | Should -Be 2
@@ -5473,20 +5510,20 @@ Hierarchies:
 
         It 'reports an ERROR import (HTTP 409) without throwing' {
             Mock Invoke-NeoIPCDhis2Post { [pscustomobject]@{ StatusCode = 409; Body = $script:errorReport } }
-            $r = Import-NeoIPCMetadata -Json '{}' -Auth $script:testAuth -Confirm:$false
+            $r = Import-NeoIPCMetadata -Json '{}' -Auth $script:testAuth -Hostname 'dhis2.example.org' -Confirm:$false
             $r.HttpStatusCode | Should -Be 409
             $r.Status | Should -Be 'ERROR'
         }
 
         It 'does not POST under -WhatIf' {
             Mock Invoke-NeoIPCDhis2Post { [pscustomobject]@{ StatusCode = 200; Body = $script:wrappedReport } }
-            Import-NeoIPCMetadata -Json '{}' -Auth $script:testAuth -WhatIf | Out-Null
+            Import-NeoIPCMetadata -Json '{}' -Auth $script:testAuth -Hostname 'dhis2.example.org' -WhatIf | Out-Null
             Should -Invoke Invoke-NeoIPCDhis2Post -Times 0 -Exactly
         }
 
         It 'surfaces the joined message / devMessage when DHIS2 returns a bare WebMessage (no .response)' {
             Mock Invoke-NeoIPCDhis2Post { [pscustomobject]@{ StatusCode = 409; Body = $script:bareWebMessage } }
-            $r = Import-NeoIPCMetadata -Json '{}' -Auth $script:testAuth -Confirm:$false
+            $r = Import-NeoIPCMetadata -Json '{}' -Auth $script:testAuth -Hostname 'dhis2.example.org' -Confirm:$false
             $r.HttpStatusCode | Should -Be 409
             $r.Status | Should -Be 'ERROR'
             $r.ErrorMessage | Should -Be 'Could not commit transaction. / PersistenceException: not-null property references a null or transient value'
@@ -5494,36 +5531,16 @@ Hierarchies:
 
         It 'leaves ErrorMessage null on a happy-path (WebMessage-wrapped) import' {
             Mock Invoke-NeoIPCDhis2Post { [pscustomobject]@{ StatusCode = 200; Body = $script:wrappedReport } }
-            $r = Import-NeoIPCMetadata -Json '{}' -Auth $script:testAuth -DryRun
+            $r = Import-NeoIPCMetadata -Json '{}' -Auth $script:testAuth -Hostname 'dhis2.example.org' -DryRun
             $r.ErrorMessage | Should -BeNullOrEmpty
         }
 
-        It 'does not run a connect pass by default (no -ConnectReferences)' {
+        It 'posts once, and requires the host to be named (no default target)' {
             Mock Invoke-NeoIPCDhis2Post { [pscustomobject]@{ StatusCode = 200; Body = $script:wrappedReport } }
-            $r = Import-NeoIPCMetadata -Json '{}' -Auth $script:testAuth -Confirm:$false
-            Should -Invoke Invoke-NeoIPCDhis2Post -Times 1 -Exactly
-            $r.ConnectPassStatus | Should -BeNullOrEmpty
-        }
-
-        It 'runs a second connect-pass POST when -ConnectReferences and the import status is OK/WARNING' {
-            Mock Invoke-NeoIPCDhis2Post { [pscustomobject]@{ StatusCode = 200; Body = $script:wrappedReport } }
-            $r = Import-NeoIPCMetadata -Json '{}' -Auth $script:testAuth -ConnectReferences -Confirm:$false
-            Should -Invoke Invoke-NeoIPCDhis2Post -Times 2 -Exactly
-            $r.ConnectPassStatus | Should -Be 'OK'
-        }
-
-        It 'skips the connect pass when the import status is ERROR, even with -ConnectReferences' {
-            Mock Invoke-NeoIPCDhis2Post { [pscustomobject]@{ StatusCode = 409; Body = $script:errorReport } }
-            $r = Import-NeoIPCMetadata -Json '{}' -Auth $script:testAuth -ConnectReferences -Confirm:$false
-            Should -Invoke Invoke-NeoIPCDhis2Post -Times 1 -Exactly
-            $r.ConnectPassStatus | Should -BeNullOrEmpty
-        }
-
-        It 'does not run the connect pass on a dry-run even with -ConnectReferences' {
-            Mock Invoke-NeoIPCDhis2Post { [pscustomobject]@{ StatusCode = 200; Body = $script:wrappedReport } }
-            $r = Import-NeoIPCMetadata -Json '{}' -Auth $script:testAuth -ConnectReferences -DryRun
-            Should -Invoke Invoke-NeoIPCDhis2Post -Times 1 -Exactly
-            $r.ConnectPassStatus | Should -BeNullOrEmpty
+            Import-NeoIPCMetadata -Json '{}' -Auth $script:testAuth -Hostname 'dhis2.example.org' -Confirm:$false | Out-Null
+            Should -Invoke Invoke-NeoIPCDhis2Post -Times 1 -Exactly -ParameterFilter { $Hostname -eq 'dhis2.example.org' }
+            $hostParam = (Get-Command Import-NeoIPCMetadata).Parameters['Hostname']
+            @($hostParam.Attributes | Where-Object { $_ -is [System.Management.Automation.ParameterAttribute] -and $_.Mandatory }).Count | Should -Be 1
         }
     }
 

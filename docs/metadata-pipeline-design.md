@@ -63,9 +63,9 @@ Sidecars are the narrow exception: the 3382-option pathogen UID sidecar
 (`NeoIPC-Infectious-Agents.uids.csv`) keeps generated option UIDs out of `options.csv`; the
 antibiotic option/group/group-set families carry their UIDs in their richer curation CSVs.
 
-Org units and users are **not** real config in the export (it carries only anonymised
+Org units and users are **not** real config in the export (it carries only anonymized
 instances), so their package content is *authored*: org units reuse the real production UIDs
-captured from the export's de-anonymised scaffold for the units that exist live, and mint for
+captured from the export's de-anonymized scaffold for the units that exist live, and mint for
 the rest; users mint `f(username)`.
 
 ## 3. Two variants from one directory — `production` (default) and `play`
@@ -187,7 +187,7 @@ renumber the file. Two anti-patterns are designed out:
 
 These are established-practice parallels, not bespoke rules: gettext/Weblate matching by
 `msgctxt` not position; Terraform's `count`→`for_each` lesson (positional index cascades on
-insert, stable string key localises it); RFC 8785 JSON canonicalization (deterministic recursive
+insert, stable string key localizes it); RFC 8785 JSON canonicalization (deterministic recursive
 key-sort); DHIS2's own `idScheme` treating the code as portable identity; and database 1NF /
 keyed structural diff. When adding any new emitter, sort it the same way, key it on stable
 content, and add the shuffle-input regression test — do not let a reshuffle pass as "just
@@ -208,14 +208,16 @@ determinism".
   by design and cannot be asserted in both directions: the exporter emits the template only, because
   every `po/metadata.<lang>.po` belongs to Weblate and a second writer conflicts every language of
   the catalogue at once.
-- **Package:** the generated play package imports into a local DHIS2 (dry-run → import); the
-  app's department picker populates; synthetic test users authenticate.
+- **Package:** the generated play package deploys into a local DHIS2 through `Deploy-NeoIPCMetadata`
+  (dry run, then deployment), which verifies what landed
+  ([`metadata-deployment.md`](metadata-deployment.md)); the app's department picker populates;
+  synthetic test users authenticate.
 
 ## 10. A note on the package manifest (alpha)
 
 The two rendered packages (install base + play) carry a **minimal** top-level `package`
 manifest and are marked **alpha**: they import as-is (DHIS2's importer tree-walks top-level keys
-and skips the unrecognised `package` key, verified in source), but they do **not** yet follow the
+and skips the unrecognized `package` key, verified in source), but they do **not** yet follow the
 WHO `dhis2-package-exporter` sharing/manifest conventions. A standards-compliant package — and
 the user-group / role / permission model it depends on — is a planned successor. The packages are
 not committed: they are rendered on demand by `scripts/Build-NeoIPCMetadataDistribution.ps1` (which

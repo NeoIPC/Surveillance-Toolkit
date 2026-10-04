@@ -2,21 +2,24 @@
 function Update-NeoIPCGeneratedMetadataDirectory {
     <#
     .SYNOPSIS
-        Regenerate the ontology / capability-matrix families and re-materialise them into the canonical metadata
+        Regenerate the ontology / capability-matrix families and re-materialize them into the canonical metadata
         directory's common/ tree.
     .DESCRIPTION
         The matrix-generated families — the per-slot pathogen / substance data elements and the resistance /
         field-gating / virus / substance program-rule variables, rules and actions — are COMMITTED under common/ (as
-        CSV rows + externalised expression files under expressions/) so a human can review them and git can show drift.
+        CSV rows + externalized expression files under expressions/) so a human can review them and git can show drift.
         Their SOURCE OF TRUTH is the generators (Add-NeoIPCGeneratedMetadata): a change to the infectious-agent
-        ontology, the antibiotic sources, or a generator only reaches common/ once the directory is re-materialised.
+        ontology, the antibiotic sources, or a generator only reaches common/ once the directory is re-materialized.
         This command does exactly that — regenerate the generated-class objects (UID-preserving, reconciled against the
         assembled install base, which carries the option-set UIDs that common/ deliberately omits) and write the result
         back into common/ through the faithful directory writer (ConvertFrom-NeoIPCMetadataJson: UTF-8 / no-BOM / LF
-        CSVs, expressions emitted verbatim). So a build that runs this first always ships the current generators, and
-        drift between the generators and the committed directory surfaces as a reviewable git diff. Only the generated
-        families are rewritten; hand-authored config (the infection-definition business rules, the domain YAML, the
-        org-unit / user overlay) is left exactly as the directory carries it. Idempotent. No DHIS2 API calls.
+        CSVs, one file per expression with trailing whitespace trimmed and one closing newline). So a build that runs
+        this first always ships the current generators, and drift between the generators and the committed directory
+        surfaces as a reviewable git diff. Only the generated families change in content; hand-authored config (the
+        infection-definition business rules, the other data elements and option sets) keeps its content, but every
+        CSV of common/ is rewritten in the writer's canonical form (fixed column order, sorted rows and lists, minimal
+        quoting), so a hand edit in another form shows up in that diff too. The domain YAML and the org-unit / user
+        overlay are not written. Idempotent. No DHIS2 API calls.
 
         LIMIT (additive writer): ConvertFrom-NeoIPCMetadataJson writes/overwrites files for the objects it is given but
         never DELETES the expression files (or prunes the CSV rows) of a generated object that this regeneration DROPS
@@ -26,7 +29,7 @@ function Update-NeoIPCGeneratedMetadataDirectory {
         orphaned files must currently be deleted by hand.
 
         Why an assembled install base is the UID source, not common/ alone: the option-domain families
-        (NEOIPC_PATHOGENS / NEOIPC_ANTIMICROBIAL_SUBSTANCES option sets + options + groups) are NOT materialised into
+        (NEOIPC_PATHOGENS / NEOIPC_ANTIMICROBIAL_SUBSTANCES option sets + options + groups) are NOT materialized into
         common/ (a richer source — the ontology YAML + UID sidecar + antibiotic CSVs — owns them, and they are
         generated at build), so the generators, which reconcile every reproduced object against the deployed option
         set, need a source that carries them. New-NeoIPCMetadataPackage assembles exactly that.
@@ -63,7 +66,7 @@ function Update-NeoIPCGeneratedMetadataDirectory {
     if ($PoDirectory) { $genArgs['PoDirectory'] = $PoDirectory }
     $regen = Add-NeoIPCGeneratedMetadata @genArgs
 
-    if ($PSCmdlet.ShouldProcess($common, 'Re-materialise the generated matrix families')) {
+    if ($PSCmdlet.ShouldProcess($common, 'Re-materialize the generated matrix families')) {
         $tmp = [System.IO.Path]::GetTempFileName()
         try {
             Write-NeoIPCTextFile -Path $tmp -Text ($regen | ConvertTo-Json -Depth 100)

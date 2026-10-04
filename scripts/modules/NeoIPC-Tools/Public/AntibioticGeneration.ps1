@@ -20,7 +20,7 @@ function New-NeoIPCAntimicrobialOptionSet {
         already carry the original deployed option's UID in the source row, so the option-set ref stays minimal-diff
         and only the stored data values (not the metadata) need migrating.
 
-        Fail-loud (no silent drop): with -ExistingPackage, every deployed option code — canonicalised through the
+        Fail-loud (no silent drop): with -ExistingPackage, every deployed option code — canonicalized through the
         rename map — MUST resolve to a source substance; any that does not throws (the source and the deployed set
         have diverged beyond the documented migrations — reconcile first). New substances not yet deployed are
         added (reported via -Verbose). The export is consulted ONLY for this validation and the deployed sharing /
@@ -76,7 +76,7 @@ function New-NeoIPCAntimicrobialOptionSet {
 
     # Identity is from source (the option set's -OptionSetUid + each substance's `uid`). The export, when supplied, is
     # consulted ONLY for the deployed sharing / valueType and the no-silent-drop validation — its option-set id scopes
-    # the deployed code set (canonicalised through the rename map), never the emitted identity.
+    # the deployed code set (canonicalized through the rename map), never the emitted identity.
     $existingCodes = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::Ordinal)
     $existingSharing = $null
     $existingValueType = $null
@@ -102,7 +102,7 @@ function New-NeoIPCAntimicrobialOptionSet {
         }
     }
 
-    # No silent drop: every deployed code (canonicalised) must resolve to a source substance.
+    # No silent drop: every deployed code (canonicalized) must resolve to a source substance.
     if ($existingCodes.Count -gt 0) {
         $missing = @($existingCodes | Where-Object { -not $byCode.Contains($_) } | Sort-Object)
         if ($missing.Count -gt 0) {
@@ -122,7 +122,8 @@ function New-NeoIPCAntimicrobialOptionSet {
     $localeMaps = Get-NeoIPCAntibioticLocaleMap -PoDirectory $PoDirectory -PoBaseName $PoBaseName
 
     # Build options + the option-set's ordered option-ref list. sortOrder = 1-based alphabetical by name (the
-    # deployed convention). Ordinal sort keeps it locale-independent and stable across machines.
+    # deployed convention). The invariant culture keeps the order independent of the machine's locale; it compares
+    # linguistically and ignores case, unlike an ordinal sort.
     $ordered = @($substances | Sort-Object -Property @{ Expression = { $_.Name } } -Culture '')
     $seen = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::Ordinal)
     [void]$seen.Add($osUid)
