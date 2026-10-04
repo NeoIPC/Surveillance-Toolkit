@@ -94,10 +94,11 @@ function Import-NeoIPCPlayData {
         2.43.1). The payload is complete and separately VALIDATE-checked, so it needs no server-side rules on
         those two patches. -SkipRuleEngine / -SkipRuleEngine:$false overrides the auto-detection.
 
-        Events DHIS2 already holds as COMPLETED are left out of the payload and left as they are. From 2.41.10 an
-        event in a stage that blocks its form after completion cannot be updated (E1326), so re-importing the same
-        corpus would fail its whole department; one read of the program's events, in every org unit the caller can
-        reach, finds them wherever their department. The summary's SkippedCompletedEvents counts them.
+        Under CREATE_AND_UPDATE and UPDATE, the events DHIS2 already holds as COMPLETED are left out of the payload and
+        left as they are. From 2.41.10 an event in a stage that blocks its form after completion cannot be updated
+        (E1326), so re-importing the same corpus would fail its whole department; one read of the program's events, in
+        every org unit the caller can reach, finds them wherever their department. The summary's
+        SkippedCompletedEvents counts them. A DELETE or a CREATE sends every event the payload holds.
     .PARAMETER Path
         Path to a /api/tracker payload JSON file.
     .PARAMETER Json
@@ -188,14 +189,17 @@ function Import-NeoIPCPlayData {
     $payloadObj = $payload | ConvertFrom-Json -Depth 100
     $tes = @($payloadObj.trackedEntities)
 
-    # Leave out the events DHIS2 already holds as COMPLETED (see the help). One read per program, in every org unit
-    # the caller can reach, so a completed event is found wherever its department.
-    $programIds = @($tes | ForEach-Object { @($_.enrollments) } | Where-Object { $_ -and $_.program } | ForEach-Object { [string]$_.program } | Select-Object -Unique)
+    # Leave out the events DHIS2 already holds as COMPLETED (see the help) under the two strategies that update an
+    # existing event: a DELETE names what it deletes, and a CREATE reports an event that exists. One read per program,
+    # in every org unit the caller can reach, so a completed event is found wherever its department.
     $completed = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::Ordinal)
-    foreach ($programId in $programIds) {
-        $events = Get-NeoIPCTrackerList -Endpoint $endpoint -Dialect $dialect -Resource 'events' -Fields 'event', 'status' `
-            -Query @{ program = $programId; $dialect.OrgUnitMode = 'ACCESSIBLE' }
-        foreach ($e in $events) { if ([string]$e['status'] -eq 'COMPLETED') { [void]$completed.Add([string]$e['event']) } }
+    if ($ImportStrategy -in 'CREATE_AND_UPDATE', 'UPDATE') {
+        $programIds = @($tes | ForEach-Object { @($_.enrollments) } | Where-Object { $_ -and $_.program } | ForEach-Object { [string]$_.program } | Select-Object -Unique)
+        foreach ($programId in $programIds) {
+            $events = Get-NeoIPCTrackerList -Endpoint $endpoint -Dialect $dialect -Resource 'events' -Fields 'event', 'status' `
+                -Query @{ program = $programId; $dialect.OrgUnitMode = 'ACCESSIBLE' }
+            foreach ($e in $events) { if ([string]$e['status'] -eq 'COMPLETED') { [void]$completed.Add([string]$e['event']) } }
+        }
     }
     $skippedCompleted = 0
     if ($completed.Count -gt 0) {

@@ -39,8 +39,13 @@ function Deploy-NeoIPCMetadata {
 
         What belongs to the instance is copied from it into each written body and never compared: org-unit
         assignments and memberships, user-group memberships, attribute values, favourite marks, and the creation
-        audit pair. Translations the package lacks are kept, except those of a property whose value changes.
-        Everything else the type maps describe is the package's: a property the package leaves out is cleared.
+        audit pair. So is the sharing of an object the package gives none, since DHIS2 resets the sharing of an
+        object written without a public access string, grants included. For that reason the deployment stops before
+        any write when the sharing the package gives an object has no public access string, or when the instance's
+        sharing of an object it keeps has none; and DHIS2 refuses to write a kept grant to a user or user group that
+        no longer exists, which the dry run shows. Translations the package lacks are kept, except those of a
+        property whose value changes. Everything else the type maps describe is the package's: a property the
+        package leaves out is cleared.
 
         Before any write, a hazard gate aborts unless each kind found is acknowledged with -AllowHazard:
           - OrphanDelete: a child the package drops from a written parent, which DHIS2 deletes with the parent's
@@ -52,7 +57,8 @@ function Deploy-NeoIPCMetadata {
           - OptionCodeChange: an option whose code changes (stored values are keyed by code);
           - OptionNameChange: an option that keeps its code and changes its name: every value stored under the code
             shows the new name, so each must be checked to be a new spelling of the same thing, not a new meaning;
-          - SharingGrantRemoval: a sharing grant present live but absent from the package;
+          - SharingGrantRemoval: a sharing grant present live but absent from the sharing the package gives the
+            object;
           - ActiveRuleDelete: a rule in -Delete that is not inert on the instance (inert: condition 'false' and no
             actions). Clients keep running a rule they cached after the server deletes it, so a rule is first made
             inert by one deployment and deleted by a later one.
@@ -199,9 +205,9 @@ function Deploy-NeoIPCMetadata {
     function Add-LiveOnly {
         $progress.LiveOnlyListed = $true
         foreach ($type in $types.Keys) {
-            $all = Invoke-NeoIPCDhis2Get @endpoint -Path "api/$type" -Fields 'id', 'code', 'name' -AsHashtable -Confirm:$false -WhatIf:$false
+            $all = Get-NeoIPCMetadataLiveList -Endpoint $endpoint -Type $type -Field 'id', 'code', 'name'
             $known = [System.Collections.Generic.HashSet[string]]::new([string[]]@($types[$type] | ForEach-Object { [string]$_['id'] }), $ordinal)
-            $extra = @(@($all[$type]) | Where-Object { $_ -is [System.Collections.IDictionary] -and -not $known.Contains([string]$_['id']) -and -not ($removedLive -and $removedLive.Contains("$type|$($_['id'])")) })
+            $extra = @($all | Where-Object { -not $known.Contains([string]$_['id']) -and -not ($removedLive -and $removedLive.Contains("$type|$($_['id'])")) })
             if ($extra.Count -gt 0) {
                 $summary.LiveOnly.Add([pscustomobject]@{ Type = $type; Count = $extra.Count
                         Sample = (@($extra | Select-Object -First 5 | ForEach-Object { '{0} {1}' -f $_['id'], $(if ($_['code']) { $_['code'] } else { $_['name'] }) }) -join '; ') })
@@ -358,6 +364,16 @@ function Deploy-NeoIPCMetadata {
         if ($schema.ByPlural.ContainsKey($k)) { throw "The package carries '$k', a DHIS2 metadata type without a type map, which a deployment cannot compare." }
         Write-Verbose "Leaving out the top-level key '$k', which is no metadata type."
     }
+    # Before it writes an object of a shareable type whose sharing has no public access string, DHIS2 resets that
+    # sharing: the default public access, the importing user as owner unless one is given, every grant removed, the
+    # package's included.
+    $shareable = [System.Collections.Generic.HashSet[string]]::new([string[]]@($types.Keys | Where-Object { $schema.ByPlural.ContainsKey($_) -and $schema.ByPlural[$_].Shareable }), $ordinal)
+    $noPublic = @(foreach ($type in $shareable) {
+            foreach ($o in $types[$type]) { if ($null -ne $o['sharing'] -and -not ($o['sharing'] -is [System.Collections.IDictionary] -and $o['sharing']['public'])) { "$type $($o['id'])" } }
+        })
+    if ($noPublic.Count -gt 0) {
+        throw ("DHIS2 resets the sharing of an object whose sharing has no public access string, grants included: {0}. Give their sharing a public access string, or leave the sharing out, which keeps an existing object's." -f ($noPublic -join ', '))
+    }
     $expansion = Get-NeoIPCMetadataNestedExpansion -IncludeSyntheticFk
     function Get-LiveType([string]$Type, [string[]]$Ids) {
         $fields = [System.Collections.Generic.List[string]]::new()
@@ -433,10 +449,9 @@ function Deploy-NeoIPCMetadata {
         if ($stageIds.Count -gt 0) {
             $uses = [System.Collections.Generic.List[string]]::new()
             foreach ($vt in 'eventVisualizations', 'mapViews') {
-                try { $all = Invoke-NeoIPCDhis2Get @endpoint -Path "api/$vt" -Fields 'id', 'name', 'programStage[id]' -AsHashtable -Confirm:$false -WhatIf:$false }
+                try { $all = Get-NeoIPCMetadataLiveList -Endpoint $endpoint -Type $vt -Field 'id', 'name', 'programStage[id]' }
                 catch { Exit-Deployment "Reading the live $vt failed: $($_.Exception.Message)" }
-                foreach ($x in @($all[$vt])) {
-                    if ($x -isnot [System.Collections.IDictionary]) { continue }
+                foreach ($x in $all) {
                     $named = "$vt $($x['id'])$(if ($x['name']) { " ('$($x['name'])')" })"
                     $sid = Get-NeoIPCDeployRefId $x['programStage']
                     if ($sid -and $stageIds.Contains($sid)) { $uses.Add("$named uses programStages $sid") }
@@ -512,10 +527,11 @@ function Deploy-NeoIPCMetadata {
             $st = $state[$type][$id]
             if ($st.Status -eq 'Unchanged') { continue }
             $l = $live[$type][$id]
-            $made = New-NeoIPCDeployBody -Type $type -PackageObject $o -Live $l -CopyOwned $copyOwned[$type] -ChangedProperties $st.Changed -LiveVersion:($type -in 'programs', 'optionSets')
+            $made = New-NeoIPCDeployBody -Type $type -PackageObject $o -Live $l -CopyOwned $copyOwned[$type] -ChangedProperties $st.Changed -LiveVersion:($type -in 'programs', 'optionSets') -Shareable:($shareable.Contains($type))
             $bodies[$type][$id] = $made.Body
             foreach ($d in $made.DroppedTranslations) { $summary.DroppedTranslations.Add($d) }
             if ($l) { foreach ($p in $copyOwned[$type]) { if ($p -notin 'created', 'createdBy' -and -not (Test-NeoIPCDeployEmpty $l[$p])) { $keptCount[$p] = 1 + [int]$keptCount[$p] } } }
+            if ($made.SharingKept) { $keptCount['sharing'] = 1 + [int]$keptCount['sharing'] }
         }
         foreach ($p in $keptCount.Keys) { $summary.Kept.Add([pscustomobject]@{ Type = $type; Property = $p; Objects = $keptCount[$p] }) }
     }
@@ -525,10 +541,10 @@ function Deploy-NeoIPCMetadata {
     # ---- 5. option group sets ------------------------------------------------------------------------------------
     $gsPlan = $null
     if ($types.Contains('optionGroupSets')) {
-        try { $all = Invoke-NeoIPCDhis2Get @endpoint -Path 'api/optionGroupSets' -Fields 'id', 'optionGroups[id]' -AsHashtable -Confirm:$false -WhatIf:$false }
+        try { $all = Get-NeoIPCMetadataLiveList -Endpoint $endpoint -Type 'optionGroupSets' -Field 'id', 'optionGroups[id]' }
         catch { Exit-Deployment "Reading the live option group sets failed: $($_.Exception.Message)" }
         $liveLists = [System.Collections.Generic.Dictionary[string, object]]::new($ordinal)
-        foreach ($s in @($all['optionGroupSets'])) { if ($s -is [System.Collections.IDictionary]) { $liveLists[[string]$s['id']] = Get-NeoIPCDeployRefIdList $s['optionGroups'] } }
+        foreach ($s in $all) { $liveLists[[string]$s['id']] = Get-NeoIPCDeployRefIdList $s['optionGroups'] }
         $newGroups = [System.Collections.Generic.HashSet[string]]::new($ordinal)
         if ($types.Contains('optionGroups')) { foreach ($id in $state['optionGroups'].Keys) { if ($state['optionGroups'][$id].Status -eq 'New') { [void]$newGroups.Add($id) } } }
         $gsResult = Get-NeoIPCDeployGroupSetPlan -PackageSets @($types['optionGroupSets']) -LiveLists $liveLists -NewGroups $newGroups
@@ -737,10 +753,9 @@ function Deploy-NeoIPCMetadata {
             $fields.Add('id')
             foreach ($p in $script:NeoIPCDeployReferenceProperties[$rt].Keys) { $fields.Add("$p[id]") }
             if ($rt -eq 'programRuleActions') { $fields.Add('templateUid'); $fields.Add('programRule[id]') }
-            try { $all = Invoke-NeoIPCDhis2Get @endpoint -Path "api/$rt" -Fields $fields.ToArray() -AsHashtable -Confirm:$false -WhatIf:$false }
+            try { $all = Get-NeoIPCMetadataLiveList -Endpoint $endpoint -Type $rt -Field $fields.ToArray() }
             catch { Exit-Deployment "Reading the live $rt failed: $($_.Exception.Message)" }
-            foreach ($x in @($all[$rt])) {
-                if ($x -isnot [System.Collections.IDictionary]) { continue }
+            foreach ($x in $all) {
                 $hits = @((Get-NeoIPCDeployReference -Type $rt -Object $x) | Where-Object { $removedLive.Contains($_) })
                 if ($hits.Count -eq 0) { continue }
                 $xid = [string]$x['id']
@@ -771,7 +786,7 @@ function Deploy-NeoIPCMetadata {
                     Exit-Deployment "$what with a parent's write, and the package does not carry the rule $rid that holds it, which would have to write it out first. Nothing was written."
                 }
                 if (-not $bodies['programRules'].ContainsKey($rid)) {
-                    $bodies['programRules'][$rid] = (New-NeoIPCDeployBody -Type 'programRules' -PackageObject $pkgById['programRules'][$rid] -Live $live['programRules'][$rid] -CopyOwned $copyOwned['programRules']).Body
+                    $bodies['programRules'][$rid] = (New-NeoIPCDeployBody -Type 'programRules' -PackageObject $pkgById['programRules'][$rid] -Live $live['programRules'][$rid] -CopyOwned $copyOwned['programRules'] -Shareable:($shareable.Contains('programRules'))).Body
                     $state['programRules'][$rid] = [pscustomobject]@{ Status = 'Changed'; Changed = [string[]]@() }
                 }
                 [void]$detachIds.Add($rid)
@@ -827,7 +842,7 @@ function Deploy-NeoIPCMetadata {
             $id = [string]$o['id']
             if ($state['programs'][$id].Status -eq 'New') { continue }
             $lastPrograms[$id] = if ($bodies['programs'].ContainsKey($id)) { $bodies['programs'][$id] }
-            else { (New-NeoIPCDeployBody -Type 'programs' -PackageObject $o -Live $live['programs'][$id] -CopyOwned $copyOwned['programs'] -LiveVersion).Body }
+            else { (New-NeoIPCDeployBody -Type 'programs' -PackageObject $o -Live $live['programs'][$id] -CopyOwned $copyOwned['programs'] -LiveVersion -Shareable:($shareable.Contains('programs'))).Body }
         }
     }
 
@@ -899,6 +914,8 @@ function Deploy-NeoIPCMetadata {
         $left = foreach ($o in $Orphans) {
             if ($script:NeoIPCMetadataTypeMaps[$o.Type].Nesting -ne 'NestedOnly') { if (-not (Test-Gone $o.Type $o.Id)) { "$($o.Type)|$($o.Id)" }; continue }
             $p = Invoke-NeoIPCDhis2Get @endpoint -Path "api/$($o.ParentType)/$($o.ParentId)" -Fields "$($o.Property)[id]" -AsHashtable -Confirm:$false -WhatIf:$false
+            # DHIS2 leaves out only null values, so a parent read without the list is a failed read, not an empty list.
+            if ($p -isnot [System.Collections.IDictionary] -or $null -eq $p[$o.Property]) { Exit-Deployment "${Name}: reading $($o.ParentType) $($o.ParentId) back returned no '$($o.Property)' list." }
             if ((Get-NeoIPCDeployRefIdList $p[$o.Property]) -ccontains $o.Id) { "$($o.Type)|$($o.Id)" }
         }
         $left = @($left)
@@ -941,6 +958,7 @@ function Deploy-NeoIPCMetadata {
             [void](Invoke-DeployImport 'group-set resets' ([ordered]@{ optionGroupSets = $resets.ToArray() }))
             foreach ($z in $resets) {
                 $s = Invoke-NeoIPCDhis2Get @endpoint -Path "api/optionGroupSets/$($z['id'])" -Fields 'optionGroups[id]' -AsHashtable -Confirm:$false -WhatIf:$false
+                if ($s -isnot [System.Collections.IDictionary] -or $null -eq $s['optionGroups']) { Exit-Deployment "Reading option group set $($z['id']) back after its reset returned no 'optionGroups' list." }
                 if ((Get-NeoIPCDeployRefIdList $s['optionGroups']).Count -gt 0) { Exit-Deployment "The reset of option group set $($z['id']) left groups in it." }
             }
         }
@@ -961,7 +979,7 @@ function Deploy-NeoIPCMetadata {
             $snapshot = (Get-LiveType 'programRuleActions' @($aid))[$aid]
             $summary.Snapshots.Add([pscustomobject]@{ Type = 'programRuleActions'; Id = $aid; Object = $snapshot })
             $ruleBody = if ($bodies['programRules'].ContainsKey($rid)) { $bodies['programRules'][$rid] }
-            else { (New-NeoIPCDeployBody -Type 'programRules' -PackageObject $pkgById['programRules'][$rid] -Live (Get-LiveType 'programRules' @($rid))[$rid] -CopyOwned $copyOwned['programRules']).Body }
+            else { (New-NeoIPCDeployBody -Type 'programRules' -PackageObject $pkgById['programRules'][$rid] -Live (Get-LiveType 'programRules' @($rid))[$rid] -CopyOwned $copyOwned['programRules'] -Shareable:($shareable.Contains('programRules'))).Body }
             $others = @((Get-NeoIPCDeployRefIdList $ruleBody['programRuleActions']) | Where-Object { $_ -cne $aid })
             $othersBefore = @{}
             if ($others.Count -gt 0) {
@@ -992,6 +1010,7 @@ function Deploy-NeoIPCMetadata {
                     $after = Get-NeoIPCMetadataLiveObject -Endpoint $endpoint -Type 'programRuleActions' -Id @($aid) -Field 'id', 'templateUid', 'programRule[id]'
                     if ($after.Failure) { throw $after.Failure }
                     $ruleNow = Invoke-NeoIPCDhis2Get @endpoint -Path "api/programRules/$rid" -Fields 'programRuleActions[id]' -AsHashtable -Confirm:$false -WhatIf:$false
+                    if ($ruleNow -isnot [System.Collections.IDictionary] -or $null -eq $ruleNow['programRuleActions']) { throw "the read of rule $rid held no 'programRuleActions' list" }
                     $othersAfter = @{}
                     if ($others.Count -gt 0) {
                         $read = Get-NeoIPCMetadataLiveObject -Endpoint $endpoint -Type 'programRuleActions' -Id $others -Field 'id', 'lastUpdated'

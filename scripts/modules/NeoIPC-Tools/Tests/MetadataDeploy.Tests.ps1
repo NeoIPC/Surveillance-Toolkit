@@ -16,7 +16,8 @@
     cascades a DELETE the way DHIS2 2.41.10 and later do (an option set's options, an option group's member options, a
     rule's actions, a stage's sections and notification templates), keeps a stage section on its own DELETE from
     2.41.10 and refuses a rule action's own DELETE on 2.40.12, replaces a collection with the items a collection
-    endpoint's PUT lists, answers a tracker events read from the events it holds, and records every request. It
+    endpoint's PUT lists, answers a tracker events read from the events it holds, resets the sharing of a shareable
+    object written without a public access string, as DHIS2 does before it writes one, and records every request. It
     refuses an import with a reference, single or in a collection, to an object that neither exists nor comes with it
     (E5002, for the properties the tests use), or with an option whose name or code another option of its set holds
     as stored (E4028), and fails a committing import whole where DHIS2 fails while flushing
@@ -93,7 +94,7 @@ InModuleScope 'NeoIPC-Tools' {
                     $name, $target = $ref -split '>'
                     $props[$name.TrimEnd('[', ']')] = [pscustomobject]@{ Owner = $true; Persisted = $true; Embedded = $false; Collection = $name.EndsWith('[]'); Target = $klassOf[$target] }
                 }
-                $entry = [pscustomobject]@{ Plural = $f[0]; Klass = $klassOf[$f[0]]; Order = [int]$f[2]; Properties = $props }
+                $entry = [pscustomobject]@{ Plural = $f[0]; Klass = $klassOf[$f[0]]; Order = [int]$f[2]; Shareable = $script:FakeShareable.Contains($f[0]); Properties = $props }
                 $byPlural[$f[0]] = $entry; $byKlass[$entry.Klass] = $entry
             }
             [pscustomobject]@{ ByPlural = $byPlural; ByKlass = $byKlass }
@@ -110,13 +111,19 @@ InModuleScope 'NeoIPC-Tools' {
                     if ($name.EndsWith('[]')) { @{ name = $name.TrimEnd('[', ']'); collectionName = $name.TrimEnd('[', ']'); owner = $true; persisted = $true; collection = $true; itemKlass = $klassOf[$target]; klass = 'java.util.List'; embeddedObject = $false } }
                     else { @{ name = $name; owner = $true; persisted = $true; collection = $false; klass = $klassOf[$target]; embeddedObject = $false } }
                 }
-                @{ name = $f[0]; plural = $f[0]; klass = $klassOf[$f[0]]; order = [int]$f[2]; properties = @($props) }
+                @{ name = $f[0]; plural = $f[0]; klass = $klassOf[$f[0]]; order = [int]$f[2]; shareable = $script:FakeShareable.Contains($f[0]); properties = @($props) }
             }
             @{ schemas = @($schemas) }
         }
 
         function Copy-Value($Value) { if ($null -eq $Value) { return $null }; ConvertTo-Json -InputObject $Value -Depth 100 -Compress | ConvertFrom-Json -AsHashtable -DateKind String }
         function Get-IdList($Value) { @(@($Value) | Where-Object { $_ -is [System.Collections.IDictionary] } | ForEach-Object { [string]$_['id'] }) }
+
+        # The types among these whose objects carry sharing, as /api/schemas on DHIS2 2.43.1 reports them (`shareable`).
+        $script:FakeShareable = [System.Collections.Generic.HashSet[string]]::new([string[]]@('attributes', 'userRoles', 'userGroups',
+                'optionSets', 'optionGroups', 'optionGroupSets', 'organisationUnitGroups', 'organisationUnitGroupSets', 'dataElements',
+                'dataElementGroups', 'validationRules', 'trackedEntityAttributes', 'trackedEntityTypes', 'programStages', 'programs',
+                'programIndicators'), [System.StringComparer]::Ordinal)
 
         # ---- the fake DHIS2 -------------------------------------------------------------------------------------
         # The owning collections whose child's own row holds its parent: type, property, child type.
@@ -140,6 +147,7 @@ InModuleScope 'NeoIPC-Tools' {
                 ThrowPost   = $null   # scriptblock ({ Path; Mode }) -> $true to fail any POST in transport, a validation or cache clear included
                 AfterImport = $null   # scriptblock (payload), run after a committed import
                 ThrowGet    = $null   # scriptblock ({ Path; Filter; Fields }) -> $true to fail a read in transport
+                NoList      = $null   # scriptblock ({ Path; Filter; Fields }) -> $true to answer a read with a 200 that holds no list (an object read: only its id)
                 ThrowDelete = $null   # scriptblock (type, id) -> 'Refuse' to answer HTTP 409, 'Lose' to fail in transport
                 EventsKey   = $null   # the key a tracker events read lists its rows under, in place of the version's
                 Stamp       = 0
@@ -210,6 +218,12 @@ InModuleScope 'NeoIPC-Tools' {
                         }
                     }
                     if ($old) { foreach ($k in 'created', 'createdBy') { if (-not $new.Contains($k) -and $old.Contains($k)) { $new[$k] = $old[$k] } } }
+                    # Before the write, DHIS2 resets the sharing of a shareable object whose sharing has no public access
+                    # string: default public access, the importing user as owner unless one is given, no grants.
+                    if ($script:FakeShareable.Contains($t) -and -not ($new['sharing'] -is [System.Collections.IDictionary] -and $new['sharing']['public'])) {
+                        $owner = if ($new['sharing'] -is [System.Collections.IDictionary] -and $new['sharing']['owner']) { $new['sharing']['owner'] } else { 'usIMPORTER1' }
+                        $new['sharing'] = @{ owner = $owner; public = 'rw------'; users = @{}; userGroups = @{} }
+                    }
                     Set-FakeObject $t $new
                     if ($old) { $updated++ } else { $created++ }
                 }
@@ -386,7 +400,12 @@ InModuleScope 'NeoIPC-Tools' {
                 if ($script:Fake.ThrowGet -and (& $script:Fake.ThrowGet ([pscustomobject]@{ Path = $Path; Filter = $Filter; Fields = $Fields }))) { throw "Failed to fetch '$Path' from DHIS2: The SSL connection could not be established." }
                 $p = $Path -replace '^api/', ''
                 if ($p -eq 'system/info') { return @{ version = $script:Fake.Version } }
-                if ($p -eq 'schemas') { return New-SchemaResponseFixture }
+                if ($p -eq 'schemas') {
+                    # Like DHIS2, the schema read carries the shareable flag only when it is asked for.
+                    $f = New-SchemaResponseFixture
+                    if ((@($Fields) -join ',') -notmatch '(^|,)shareable(,|$)') { foreach ($s in $f.schemas) { $s.Remove('shareable') } }
+                    return $f
+                }
                 if ($p -eq 'tracker/events') {
                     $script:Fake.Requests.Add(@{ Kind = 'events'; Query = $QueryParameters; PageSize = $PageSize })
                     if ([version]$script:Fake.Version -ge [version]'2.43' -and -not $QueryParameters['program']) { throw "Failed to fetch '$Path' from DHIS2: 400 (Bad Request)" }
@@ -399,8 +418,10 @@ InModuleScope 'NeoIPC-Tools' {
                 if ($segments.Count -eq 2) {
                     $o = Get-FakeObject $segments[0] $segments[1]
                     if (-not $o) { throw "Failed to fetch '$Path' from DHIS2: 404 (Not Found)" }
+                    if ($script:Fake.NoList -and (& $script:Fake.NoList ([pscustomobject]@{ Path = $Path; Filter = $Filter; Fields = $Fields }))) { return @{ id = [string]$o['id'] } }
                     return (Copy-Value $o)
                 }
+                if ($script:Fake.NoList -and (& $script:Fake.NoList ([pscustomobject]@{ Path = $Path; Filter = $Filter; Fields = $Fields }))) { return @{ pager = @{ page = 1; pageCount = 1 } } }
                 $all = @((Get-FakeType $p).Values)
                 if ($Filter -and $Filter[0] -match '^id:in:\[(.*)\]$') { $ids = $Matches[1] -split ','; $all = @($all | Where-Object { $ids -ccontains [string]$_['id'] }) }
                 @{ $p = @($all | ForEach-Object { Copy-Value $_ }) }
@@ -596,6 +617,56 @@ InModuleScope 'NeoIPC-Tools' {
             @($made.DroppedTranslations).Count | Should -Be 1
             $made.DroppedTranslations[0].Locale | Should -Be 'de'
         }
+        It 'keeps the live sharing of a shareable object only when the package gives it none' {
+            $live = [ordered]@{ id = 'g1'; name = 'G'; sharing = [ordered]@{ owner = 'us1'; public = 'r-------'; userGroups = [ordered]@{ ug1 = [ordered]@{ id = 'ug1'; access = 'rw------' } } } }
+            $kept = New-NeoIPCDeployBody -Type 'optionSets' -PackageObject ([ordered]@{ id = 'g1'; name = 'G' }) -Live $live -Shareable
+            $kept.SharingKept | Should -BeTrue
+            $kept.Body['sharing']['owner'] | Should -Be 'us1'
+            $kept.Body['sharing']['userGroups']['ug1']['access'] | Should -Be 'rw------'
+            $stated = New-NeoIPCDeployBody -Type 'optionSets' -PackageObject ([ordered]@{ id = 'g1'; name = 'G'; sharing = [ordered]@{ public = 'rw------' } }) -Live $live -Shareable
+            $stated.SharingKept | Should -BeFalse
+            $stated.Body['sharing'].Contains('userGroups') | Should -BeFalse -Because 'the package governs the sharing it states'
+            $plain = New-NeoIPCDeployBody -Type 'programRules' -PackageObject ([ordered]@{ id = 'g1'; name = 'G' }) -Live $live
+            $plain.Body.Contains('sharing') | Should -BeFalse -Because 'an object of a type without sharing has none to keep'
+        }
+        It 'refuses to keep live sharing without a public access string, which DHIS2 reads as open and resets on any write' {
+            $live = [ordered]@{ id = 'g1'; name = 'G'; sharing = [ordered]@{ owner = 'us1'; userGroups = [ordered]@{ ug1 = [ordered]@{ id = 'ug1'; access = 'rw------' } } } }
+            { New-NeoIPCDeployBody -Type 'optionSets' -PackageObject ([ordered]@{ id = 'g1'; name = 'G' }) -Live $live -Shareable } |
+                Should -Throw '*optionSets g1 holds sharing without a public access string*give it sharing in the package*'
+        }
+    }
+
+    Describe 'Live reads (a 200 without the list asked for is a failed read)' {
+        It 'refuses a list read whose response has no list, or a null one, under the type''s key (<Case>)' -ForEach @(
+            @{ Case = 'no key'; Response = @{ pager = @{ page = 1 } } }
+            @{ Case = 'a null value'; Response = @{ mapViews = $null } }
+        ) {
+            $script:LiveAnswer = $Response
+            Mock Invoke-NeoIPCDhis2Get { $script:LiveAnswer }
+            { Get-NeoIPCMetadataLiveList -Endpoint @{ Auth = @{} } -Type 'mapViews' -Field 'id' } | Should -Throw "*held no 'mapViews' collection*"
+        }
+        It 'reports a batched read whose response has no list, or a null one, as failed, not as every object absent (<Case>)' -ForEach @(
+            @{ Case = 'no key'; Response = @{ pager = @{ page = 1 } } }
+            @{ Case = 'a null value'; Response = @{ optionSets = $null } }
+        ) {
+            $script:LiveAnswer = $Response
+            Mock Invoke-NeoIPCDhis2Get { $script:LiveAnswer }
+            $read = Get-NeoIPCMetadataLiveObject -Endpoint @{ Auth = @{} } -Type 'optionSets' -Id 'osAAAAAAAA1'
+            $read.Failure | Should -BeLike "*did not contain a 'optionSets' collection*"
+            $read.ById.Count | Should -Be 0
+        }
+        It 'refuses a schema read whose response has no schemas list, or a null one (<Case>)' -ForEach @(
+            @{ Case = 'no key'; Response = @{ pager = @{ page = 1 } } }
+            @{ Case = 'a null value'; Response = @{ schemas = $null } }
+        ) {
+            $script:LiveAnswer = $Response
+            Mock Invoke-NeoIPCDhis2Get { $script:LiveAnswer }
+            { Get-NeoIPCMetadataSchemaIndex -Endpoint @{ Auth = @{} } } | Should -Throw "*did not return a 'schemas' collection*"
+        }
+        It 'refuses a schema read that carries no shareable flag, which would read every type as one without sharing' {
+            Mock Invoke-NeoIPCDhis2Get { @{ schemas = @(@{ name = 'optionSet'; plural = 'optionSets'; klass = 'org.hisp.dhis.option.OptionSet'; order = 1050; properties = @() }) } }
+            { Get-NeoIPCMetadataSchemaIndex -Endpoint @{ Auth = @{} } } | Should -Throw "*'shareable' flag of 'optionSets'*"
+        }
     }
 
     Describe 'Get-NeoIPCDeployDeferral (links DHIS2 drops in a create request)' {
@@ -775,6 +846,44 @@ InModuleScope 'NeoIPC-Tools' {
             @((Get-FakeObject 'organisationUnitGroups' 'ougAAAAAAA1')['organisationUnits'] | ForEach-Object { $_['id'] }) | Should -Be @('ou1')
         }
 
+        It 'keeps the sharing of a shareable object the package gives none, which DHIS2 would otherwise reset' {
+            $pkg = New-TestPackage
+            Set-FakeFromPackage $pkg
+            foreach ($o in (Get-FakeObject 'optionSets' 'osAAAAAAAA1'), (Get-FakeObject 'programs' 'prAAAAAAAA1')) {
+                $o['sharing'] = @{ owner = 'usOWNER0001'; public = 'r-------'; users = @{}; userGroups = @{ ugAAAAAAAA1 = @{ id = 'ugAAAAAAAA1'; access = 'rw------' } } }
+            }
+            # The set changes; the program, unchanged, is written last only to move its version.
+            $pkg['optionSets'][0]['name'] = 'Renamed set'
+            $r = Invoke-TestDeploy $pkg
+            $r.Succeeded | Should -BeTrue
+            (Get-FakeObject 'programs' 'prAAAAAAAA1')['version'] | Should -Be 6
+            foreach ($key in 'optionSets|osAAAAAAAA1', 'programs|prAAAAAAAA1') {
+                $t, $id = $key -split '\|'
+                $stored = (Get-FakeObject $t $id)['sharing']
+                $stored['owner'] | Should -Be 'usOWNER0001'
+                $stored['public'] | Should -Be 'r-------'
+                @($stored['userGroups'].Keys) | Should -Be @('ugAAAAAAAA1') -Because "the $t write keeps the grant"
+            }
+            @($r.Kept | Where-Object { $_.Type -eq 'optionSets' -and $_.Property -eq 'sharing' })[0].Objects | Should -Be 1
+        }
+
+        It 'refuses before any write sharing the package gives without a public access string, which DHIS2 resets grants and all' {
+            $pkg = New-TestPackage
+            Set-FakeFromPackage $pkg
+            $pkg['optionSets'][0]['sharing'] = [ordered]@{ userGroups = [ordered]@{ ugAAAAAAAA1 = [ordered]@{ id = 'ugAAAAAAAA1'; access = 'rw------' } } }
+            { Invoke-TestDeploy $pkg } | Should -Throw '*resets the sharing of an object whose sharing has no public access string*optionSets osAAAAAAAA1*'
+            (Get-CommitRequest).Count | Should -Be 0
+        }
+
+        It 'refuses before any write to keep live sharing that has no public access string' {
+            $pkg = New-TestPackage
+            Set-FakeFromPackage $pkg
+            (Get-FakeObject 'optionSets' 'osAAAAAAAA1')['sharing'] = @{ owner = 'usOWNER0001'; users = @{}; userGroups = @{ ugAAAAAAAA1 = @{ id = 'ugAAAAAAAA1'; access = 'rw------' } } }
+            $pkg['optionSets'][0]['name'] = 'Renamed set'
+            { Invoke-TestDeploy $pkg } | Should -Throw '*optionSets osAAAAAAAA1 holds sharing without a public access string*'
+            (Get-CommitRequest).Count | Should -Be 0
+        }
+
         It 'writes a changed notification action on <Version>: in R1 before 2.42, from 2.42 deleted and re-created after R2' -ForEach @(
             @{ Version = '2.41.10'; OwnStep = $false }
             @{ Version = '2.42.6'; OwnStep = $true }
@@ -891,6 +1000,19 @@ InModuleScope 'NeoIPC-Tools' {
             @($script:Fake.Requests | Where-Object { $_.Kind -eq 'delete' -and $_.Id -eq 'raAAAAAAAA2' }).Count | Should -Be 1 -Because 'no restore deletes it again'
             (Get-FakeObject 'programRuleActions' 'raAAAAAAAA2')['content'] | Should -Be 'Changed'
             @($err.TargetObject.ProgramVersionPending) | Should -Be @('prAAAAAAAA1')
+        }
+
+        It 'keeps a re-created notification action, unrestored, when the read of its rule holds no list of actions' {
+            $script:Fake.Version = '2.43.1'
+            $pkg = New-TestPackage
+            Set-FakeFromPackage $pkg
+            $pkg['programRuleActions'][1]['content'] = 'Changed'
+            $script:Fake.NoList = { param($q) $q.Path -eq 'api/programRules/ruAAAAAAAA2' -and (@($q.Fields) -join ',') -ceq 'programRuleActions[id]' }
+            $err = $null
+            try { Invoke-TestDeploy $pkg } catch { $err = $_ }
+            $err.Exception.Message | Should -BeLike "*raAAAAAAAA2 was re-created with its rule, but reading the result back for its check failed: the read of rule ruAAAAAAAA2 held no 'programRuleActions' list*left as written*"
+            @($script:Fake.Requests | Where-Object { $_.Kind -eq 'delete' -and $_.Id -eq 'raAAAAAAAA2' }).Count | Should -Be 1 -Because 'no restore deletes it again'
+            (Get-FakeObject 'programRuleActions' 'raAAAAAAAA2')['content'] | Should -Be 'Changed'
         }
 
         It 'aborts on an unacknowledged <Kind> hazard (<Case>) before any write, and goes ahead when it is acknowledged' -ForEach @(
@@ -1221,6 +1343,27 @@ InModuleScope 'NeoIPC-Tools' {
                 })
             $lists | Should -Be @('ogAAAAAAAA1,ogAAAAAAAA2', '', 'ogAAAAAAAA2,ogAAAAAAAA1') -Because 'R1 keeps the live list, the reset empties it, R2 writes the new one'
             @((Get-FakeObject 'optionGroupSets' 'gsAAAAAAAA1')['optionGroups'] | ForEach-Object { $_['id'] }) | Should -Be @('ogAAAAAAAA2', 'ogAAAAAAAA1')
+        }
+
+        It 'stops before R2 when the read-back of a reset group set holds no list of groups' {
+            $pkg = New-TestPackage
+            Set-FakeFromPackage $pkg
+            $pkg['optionGroupSets'][0]['optionGroups'] = @([ordered]@{ id = 'ogAAAAAAAA2' }, [ordered]@{ id = 'ogAAAAAAAA1' })
+            $script:Fake.NoList = { param($q) $q.Path -eq 'api/optionGroupSets/gsAAAAAAAA1' }
+            $err = $null
+            try { Invoke-TestDeploy $pkg } catch { $err = $_ }
+            $err.Exception.Message | Should -BeLike "*Reading option group set gsAAAAAAAA1 back after its reset returned no 'optionGroups' list*"
+            (Get-CommitRequest).Count | Should -Be 2 -Because 'R1 and the reset are written, R2 is not'
+        }
+
+        It 'stops when the read-back of a parent whose dropped child has no endpoint holds no list of its children' {
+            $pkg = New-TestPackage
+            Set-FakeFromPackage $pkg
+            (Get-FakeObject 'programStages' 'psAAAAAAAA1')['programStageDataElements'] = @(@{ id = 'sdAAAAAAAA1'; dataElement = @{ id = 'deAAAAAAAA1' } })
+            $script:Fake.NoList = { param($q) $q.Path -eq 'api/programStages/psAAAAAAAA1' -and (@($q.Fields) -join ',') -ceq 'programStageDataElements[id]' }
+            $err = $null
+            try { Invoke-TestDeploy $pkg @{ Delete = @{ programStageDataElements = @('sdAAAAAAAA1') } } } catch { $err = $_ }
+            $err.Exception.Message | Should -BeLike "*R1 read-back: reading programStages psAAAAAAAA1 back returned no 'programStageDataElements' list*"
         }
 
         It 'resets a group set that loses an interior group, whose later groups one write would shift onto rows that still hold them' {
@@ -1912,19 +2055,27 @@ InModuleScope 'NeoIPC-Tools' {
 
         It 'ends with the summary and writes nothing when <Read> fails before the writes' -ForEach @(
             @{ Read = 'the version read'; Message = '*Reading the DHIS2 version failed*'; Delete = @{}
-                ThrowGet = { param($Read) $Read.Path -eq 'api/system/info' }; ThrowPost = $null; EventsKey = $null }
+                ThrowGet = { param($Read) $Read.Path -eq 'api/system/info' }; ThrowPost = $null; EventsKey = $null; NoList = $null }
             @{ Read = 'the cache clear'; Message = '*Clearing the DHIS2 caches failed*'; Delete = @{}
-                ThrowGet = $null; ThrowPost = { param($Post) $Post.Path -eq 'api/maintenance' }; EventsKey = $null }
+                ThrowGet = $null; ThrowPost = { param($Post) $Post.Path -eq 'api/maintenance' }; EventsKey = $null; NoList = $null }
             @{ Read = 'the schema read'; Message = '*Reading the DHIS2 schemas failed*'; Delete = @{}
-                ThrowGet = { param($Read) $Read.Path -eq 'api/schemas' }; ThrowPost = $null; EventsKey = $null }
+                ThrowGet = { param($Read) $Read.Path -eq 'api/schemas' }; ThrowPost = $null; EventsKey = $null; NoList = $null }
             @{ Read = 'the option group sets read'; Message = '*Reading the live option group sets failed*'; Delete = @{}
-                ThrowGet = { param($Read) $Read.Path -eq 'api/optionGroupSets' -and -not $Read.Filter }; ThrowPost = $null; EventsKey = $null }
+                ThrowGet = { param($Read) $Read.Path -eq 'api/optionGroupSets' -and -not $Read.Filter }; ThrowPost = $null; EventsKey = $null; NoList = $null }
+            @{ Read = 'an option group sets read without its list'; Message = "*Reading the live option group sets failed: the response held no 'optionGroupSets' collection*"; Delete = @{}
+                ThrowGet = $null; ThrowPost = $null; EventsKey = $null; NoList = { param($Read) $Read.Path -eq 'api/optionGroupSets' -and -not $Read.Filter } }
             @{ Read = 'the read of the referring objects'; Message = '*Reading the live programRuleVariables failed*'; Delete = @{ programStages = @('psAAAAAAAA2') }
-                ThrowGet = { param($Read) $Read.Path -eq 'api/programRuleVariables' -and -not $Read.Filter }; ThrowPost = $null; EventsKey = $null }
+                ThrowGet = { param($Read) $Read.Path -eq 'api/programRuleVariables' -and -not $Read.Filter }; ThrowPost = $null; EventsKey = $null; NoList = $null }
+            @{ Read = 'a read of the referring objects without its list'; Message = "*Reading the live programRuleVariables failed: the response held no 'programRuleVariables' collection*"; Delete = @{ programStages = @('psAAAAAAAA2') }
+                ThrowGet = $null; ThrowPost = $null; EventsKey = $null; NoList = { param($Read) $Read.Path -eq 'api/programRuleVariables' -and -not $Read.Filter } }
             @{ Read = 'the event read'; Message = '*Reading whether program stage psAAAAAAAA2 has events failed*'; Delete = @{ programStages = @('psAAAAAAAA2') }
-                ThrowGet = { param($Read) $Read.Path -eq 'api/tracker/events' }; ThrowPost = $null; EventsKey = $null }
+                ThrowGet = { param($Read) $Read.Path -eq 'api/tracker/events' }; ThrowPost = $null; EventsKey = $null; NoList = $null }
             @{ Read = 'an event read without its list'; Message = "*Reading whether program stage psAAAAAAAA2 has events returned no 'events' list*"; Delete = @{ programStages = @('psAAAAAAAA2') }
-                ThrowGet = $null; ThrowPost = $null; EventsKey = 'rows' }
+                ThrowGet = $null; ThrowPost = $null; EventsKey = 'rows'; NoList = $null }
+            @{ Read = 'an event visualizations read without its list'; Message = "*Reading the live eventVisualizations failed: the response held no 'eventVisualizations' collection*"; Delete = @{ programStages = @('psAAAAAAAA2') }
+                ThrowGet = $null; ThrowPost = $null; EventsKey = $null; NoList = { param($Read) $Read.Path -eq 'api/eventVisualizations' } }
+            @{ Read = 'a map views read without its list'; Message = "*Reading the live mapViews failed: the response held no 'mapViews' collection*"; Delete = @{ programStages = @('psAAAAAAAA2') }
+                ThrowGet = $null; ThrowPost = $null; EventsKey = $null; NoList = { param($Read) $Read.Path -eq 'api/mapViews' } }
         ) {
             $pkg = New-TestPackage
             Set-FakeFromPackage $pkg
@@ -1933,7 +2084,7 @@ InModuleScope 'NeoIPC-Tools' {
                 Set-FakeObject 'programStages' @{ id = 'psAAAAAAAA2'; code = 'STG2'; name = 'Old stage'; program = @{ id = 'prAAAAAAAA1' } }
             }
             $pkg['dataElements'][0]['name'] = 'Changed'
-            $script:Fake.ThrowGet = $ThrowGet; $script:Fake.ThrowPost = $ThrowPost; $script:Fake.EventsKey = $EventsKey
+            $script:Fake.ThrowGet = $ThrowGet; $script:Fake.ThrowPost = $ThrowPost; $script:Fake.EventsKey = $EventsKey; $script:Fake.NoList = $NoList
             $err = $null
             try { Invoke-TestDeploy $pkg @{ Delete = $Delete } } catch { $err = $_ }
             $err.FullyQualifiedErrorId | Should -BeLike 'NeoIPCDeploymentFailed*'
@@ -1944,16 +2095,18 @@ InModuleScope 'NeoIPC-Tools' {
         }
 
         It 'reports a failed listing of the objects present only on the instance (<Case>)' -ForEach @(
-            @{ Case = 'a dry run'; Extra = @{ DryRun = $true }; Code = $null; Message = '*Listing the objects present only on the instance failed*SSL connection*' }
-            @{ Case = 'a dry run the hazard gate stops'; Extra = @{ DryRun = $true }; Code = 'one'; Message = '*Unacknowledged hazard(s): OptionCodeChange*Listing the objects present only on the instance failed too*' }
-            @{ Case = 'after the verification'; Extra = @{}; Code = $null; Message = '*failed verification: listing the objects present only on the instance failed*' }
+            @{ Case = 'a dry run'; Extra = @{ DryRun = $true }; Code = $null; NoList = $false; Message = '*Listing the objects present only on the instance failed*SSL connection*' }
+            @{ Case = 'a dry run the hazard gate stops'; Extra = @{ DryRun = $true }; Code = 'one'; NoList = $false; Message = '*Unacknowledged hazard(s): OptionCodeChange*Listing the objects present only on the instance failed too*' }
+            @{ Case = 'after the verification'; Extra = @{}; Code = $null; NoList = $false; Message = '*failed verification: listing the objects present only on the instance failed*' }
+            @{ Case = 'a dry run whose reads hold no list'; Extra = @{ DryRun = $true }; Code = $null; NoList = $true; Message = "*Listing the objects present only on the instance failed: the response held no '*' collection*" }
         ) {
             $pkg = New-TestPackage
             Set-FakeFromPackage $pkg
             $pkg['dataElements'][0]['name'] = 'Changed'
             if ($Code) { $pkg['options'][0]['code'] = $Code }
             # The listing reads every type of the package, unfiltered, for its ids, codes and names.
-            $script:Fake.ThrowGet = { param($Read) -not $Read.Filter -and ($Read.Fields -join ',') -eq 'id,code,name' }
+            $listing = { param($Read) -not $Read.Filter -and ($Read.Fields -join ',') -eq 'id,code,name' }
+            if ($NoList) { $script:Fake.NoList = $listing } else { $script:Fake.ThrowGet = $listing }
             $err = $null
             try { Invoke-TestDeploy $pkg $Extra } catch { $err = $_ }
             $err.FullyQualifiedErrorId | Should -BeLike 'NeoIPCDeploymentFailed*'

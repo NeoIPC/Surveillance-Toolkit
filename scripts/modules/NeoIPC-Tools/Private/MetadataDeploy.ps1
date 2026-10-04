@@ -260,10 +260,12 @@ function Compare-NeoIPCDeployObject {
 
 function New-NeoIPCDeployBody {
     # The body written for a package object: the package object, with the properties in $CopyOwned taken from the
-    # live object (absent live means absent in the body), the live creation audit pair kept on its NestedOnly
-    # children, the live version when -LiveVersion, and translations merged: the package's own pairs govern, live
-    # pairs the package lacks are kept, except those of a property in $ChangedProperties, which are dropped (their
-    # text translated the old value). Returns [pscustomobject]@{ Body; DroppedTranslations }.
+    # live object (absent live means absent in the body), the live sharing when -Shareable and the package object
+    # carries none (throwing when that sharing has no public access string), the live creation audit pair kept on its
+    # NestedOnly children, the live version when -LiveVersion,
+    # and translations merged: the package's own pairs govern, live pairs the package lacks are kept, except those of
+    # a property in $ChangedProperties, which are dropped (their text translated the old value). Returns
+    # [pscustomobject]@{ Body; DroppedTranslations; SharingKept }.
     [CmdletBinding()]
     [OutputType([pscustomobject])]
     param(
@@ -272,13 +274,26 @@ function New-NeoIPCDeployBody {
         [System.Collections.IDictionary]$Live,
         [string[]]$CopyOwned = @(),
         [string[]]$ChangedProperties = @(),
-        [switch]$LiveVersion
+        [switch]$LiveVersion,
+        [switch]$Shareable
     )
     $body = Copy-NeoIPCDeployValue $PackageObject
     $dropped = [System.Collections.Generic.List[object]]::new()
+    $sharingKept = $false
     if ($Live) {
         foreach ($k in $CopyOwned) {
             if (Test-NeoIPCDeployEmpty $Live[$k]) { [void]$body.Remove($k) } else { $body[$k] = Copy-NeoIPCDeployValue $Live[$k] }
+        }
+        # Before it writes a shareable object whose sharing has no public access string, DHIS2 resets that sharing (the
+        # default public access, the importing user as owner unless one is given, every grant removed), so sharing the
+        # package leaves out stays the instance's. Sharing stored without one cannot be written back as it is: DHIS2
+        # reads it as open to every user with the authority for the type.
+        if ($Shareable -and $null -eq $PackageObject['sharing'] -and -not (Test-NeoIPCDeployEmpty $Live['sharing'])) {
+            if ($Live['sharing'] -isnot [System.Collections.IDictionary] -or -not $Live['sharing']['public']) {
+                throw "$Type $($PackageObject['id']) holds sharing without a public access string on the instance, which DHIS2 reads as open to every user with the authority for the type and resets on any write: give it sharing in the package."
+            }
+            $body['sharing'] = Copy-NeoIPCDeployValue $Live['sharing']
+            $sharingKept = $true
         }
         foreach ($child in (Get-NeoIPCDeployChildType -Type $Type)) {
             $liveKids = [System.Collections.Generic.Dictionary[string, object]]::new([System.StringComparer]::Ordinal)
@@ -308,7 +323,7 @@ function New-NeoIPCDeployBody {
         if ($merged.Count -gt 0) { $body['translations'] = @($merged) } else { [void]$body.Remove('translations') }
         if ($LiveVersion -and $Live.Contains('version')) { $body['version'] = $Live['version'] }
     }
-    [pscustomobject]@{ Body = $body; DroppedTranslations = $dropped.ToArray() }
+    [pscustomobject]@{ Body = $body; DroppedTranslations = $dropped.ToArray(); SharingKept = $sharingKept }
 }
 
 function Get-NeoIPCDeployDeferral {

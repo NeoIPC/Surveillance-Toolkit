@@ -51,7 +51,7 @@ function Get-NeoIPCMetadataLiveObject {
             return [pscustomobject]@{ ById = $byId; Failure = $_.Exception.Message }
         }
         # A 200 without the `$Type` collection (an unexpected envelope) is a failed read, not "every object absent".
-        if ($resp -isnot [System.Collections.IDictionary] -or -not $resp.Contains($Type)) {
+        if ($resp -isnot [System.Collections.IDictionary] -or $null -eq $resp[$Type]) {
             return [pscustomobject]@{ ById = $byId; Failure = "response did not contain a '$Type' collection" }
         }
         foreach ($o in @($resp[$Type])) {
@@ -61,20 +61,39 @@ function Get-NeoIPCMetadataLiveObject {
     [pscustomobject]@{ ById = $byId; Failure = $null }
 }
 
+function Get-NeoIPCMetadataLiveList {
+    # Every object of one type that DHIS2 lists, unpaged, as ordered dictionaries. A 200 without the `$Type`
+    # collection throws rather than reading as an empty list: the deployment's checks decide from what the list holds,
+    # so a list read as empty would pass them unchecked.
+    [CmdletBinding()]
+    [OutputType([object[]])]
+    param(
+        [Parameter(Mandatory)][hashtable]$Endpoint,
+        [Parameter(Mandatory)][string]$Type,
+        [Parameter(Mandatory)][string[]]$Field
+    )
+    $resp = Invoke-NeoIPCDhis2Get @Endpoint -Path "api/$Type" -Fields $Field -AsHashtable -Confirm:$false -WhatIf:$false
+    if ($resp -isnot [System.Collections.IDictionary] -or $null -eq $resp[$Type]) { throw "the response held no '$Type' collection" }
+    , @(@($resp[$Type]) | Where-Object { $_ -is [System.Collections.IDictionary] })
+}
+
 function Get-NeoIPCMetadataSchemaIndex {
-    # The schema facts link deferral needs, read from /api/schemas: per plural, the class, the commit order, and for
-    # each property, by its JSON name, whether it is owned, persisted, embedded or a collection, and the class it
-    # refers to. Returns [pscustomobject]@{ ByPlural; ByKlass }, each entry { Plural; Klass; Order; Properties }.
+    # The schema facts a deployment needs, read from /api/schemas: per plural, the class, the commit order, whether its
+    # objects carry sharing, and for each property, by its JSON name, whether it is owned, persisted, embedded or a
+    # collection, and the class it refers to. Returns [pscustomobject]@{ ByPlural; ByKlass }, each entry
+    # { Plural; Klass; Order; Shareable; Properties }.
     [CmdletBinding()]
     [OutputType([pscustomobject])]
     param([Parameter(Mandatory)][hashtable]$Endpoint)
     $resp = Invoke-NeoIPCDhis2Get @Endpoint -Path 'api/schemas' -AsHashtable -Confirm:$false -WhatIf:$false `
-        -Fields 'name,plural,klass,order,properties[name,collectionName,owner,persisted,collection,klass,itemKlass,embeddedObject]'
-    if ($resp -isnot [System.Collections.IDictionary] -or -not $resp.Contains('schemas')) { throw "Reading /api/schemas did not return a 'schemas' collection." }
+        -Fields 'name,plural,klass,order,shareable,properties[name,collectionName,owner,persisted,collection,klass,itemKlass,embeddedObject]'
+    if ($resp -isnot [System.Collections.IDictionary] -or $null -eq $resp['schemas']) { throw "Reading /api/schemas did not return a 'schemas' collection." }
     $byPlural = [System.Collections.Generic.Dictionary[string, object]]::new([System.StringComparer]::Ordinal)
     $byKlass = [System.Collections.Generic.Dictionary[string, object]]::new([System.StringComparer]::Ordinal)
     foreach ($s in @($resp['schemas'])) {
         if ($s -isnot [System.Collections.IDictionary]) { continue }
+        # A schema read without the flag would make every type one without sharing, and the sharing rules silently moot.
+        if ($null -eq $s['shareable']) { throw "Reading /api/schemas did not return the 'shareable' flag of '$($s['plural'])'." }
         $props = [System.Collections.Generic.Dictionary[string, object]]::new([System.StringComparer]::Ordinal)
         foreach ($p in @($s['properties'])) {
             if ($p -isnot [System.Collections.IDictionary]) { continue }
@@ -87,7 +106,7 @@ function Get-NeoIPCMetadataSchemaIndex {
                 Target     = [string]$(if ($p['collection']) { $p['itemKlass'] } else { $p['klass'] })
             }
         }
-        $entry = [pscustomobject]@{ Plural = [string]$s['plural']; Klass = [string]$s['klass']; Order = [int]$s['order']; Properties = $props }
+        $entry = [pscustomobject]@{ Plural = [string]$s['plural']; Klass = [string]$s['klass']; Order = [int]$s['order']; Shareable = [bool]$s['shareable']; Properties = $props }
         if ($entry.Plural) { $byPlural[$entry.Plural] = $entry }
         if ($entry.Klass) { $byKlass[$entry.Klass] = $entry }
     }

@@ -20,7 +20,10 @@ already in use, that has five consequences:
 
 1. Whatever the payload leaves out is cleared: a program's organisation-unit assignment, every org-unit group's
    and user group's members, attribute values, and the translations the payload lacks. Each updated object whose
-   payload carries no `created` is stamped as created now.
+   payload carries no `created` is stamped as created now. An object of a type that has sharing, written without a
+   public access string, has its sharing reset before the write: the default public access, the importing user as
+   owner unless one is given, and no user or user-group grant, the payload's included
+   (`DefaultMetadataImportService.preCreateBundleObject` through `AclService.resetSharing`, on all four lines).
 2. A child that a written parent no longer lists is deleted with the parent's write (a stage's sections and data
    elements, a rule's actions, a program's attributes), and an option set's write detaches the options it no
    longer lists. A program's stages and sections are not deleted that way: a program written without one only
@@ -276,14 +279,18 @@ orphan. The probe moved templates between two stages only.
 3. **Classify** each package object as new, changed or unchanged. Compared: the properties and nested fields the
    type maps describe, after the normalizations of section 2.10; the collections DHIS2 keeps in order (an option
    set's options, a group set's groups, a section's data elements) as sequences, all others as sets; the
-   translations the package carries; and sharing, reduced to `public` and the user and user-group grants. A
-   version and an option's `sortOrder` are never compared (sections 2.3 and 2.4).
+   translations the package carries; and the sharing the package gives, reduced to `public` and the user and
+   user-group grants. A version and an option's `sortOrder` are never compared (sections 2.3 and 2.4).
 4. **Build the bodies** of the new and changed objects. The package governs every property the type maps
    describe, so a property it leaves out is cleared. The properties that belong to the instance are copied from
-   the live object: `organisationUnits`, `users`, `attributeValues`, `favorites`, `created` and `createdBy`. The
-   package's translations govern; live translations the package lacks are kept, except those of a property whose
-   value changes, which are dropped and reported. An option that is new or changed is written with its set
-   (section 2.4).
+   the live object: `organisationUnits`, `users`, `attributeValues`, `favorites`, `created` and `createdBy`, and
+   the sharing of an object the package gives none, which a write without it would reset (section 1, item 1).
+   Sharing the instance holds without a public access string, which DHIS2 reads as open to every user with the
+   authority for the type (`DefaultAclService`), cannot be written back as it is, so such an object stops the
+   deployment; and DHIS2 refuses to write a grant to a user or user group that no longer exists (`ReferencesCheck`,
+   E5002, in a validation too), so a kept grant like that fails the request. The package's translations govern;
+   live translations the package lacks are kept, except those of a property whose value changes, which are dropped
+   and reported. An option that is new or changed is written with its set (section 2.4).
 5. **Versions.** A written option set carries its live version. An existing program is written once, in the last
    request, carrying its live version, whenever anything clients load with it changed: an object written, a link
    made in R2, a template action re-created, or an object deleted. It thereby moves exactly once, after everything
@@ -339,7 +346,8 @@ them, which it does not write, the dropped translations, the objects present on 
 package (apart from those it removes), and the snapshots of the notification actions it re-created. A package or
 arguments it cannot carry out are refused before anything is written, whatever the caller's error preference; any
 other failure, a failed read included, throws a terminating error (`NeoIPCDeploymentFailed`) whose target object is
-that summary, with the plan from the moment the objects are classified.
+that summary, with the plan from the moment the objects are classified. A read that answers without the list it
+asked for has failed: a check that took it for an empty list would pass unchecked.
 
 A run that fails after it may have committed a change that clients load with a program, but before the program's
 own request, leaves the program's version where it was, and a later run may find nothing left to write, so clients
@@ -367,17 +375,19 @@ The gate runs before the first write and stops the deployment unless each hazard
 | `OptionSetMembership` | An option set that loses members, to no set or to another one, or gains one anywhere but at the end, or a set in `-Delete` | The values stored under the set's data elements keep the codes of the options it loses, and its write detaches those the package lists in no set; an insertion moves every later option in the list users pick from; deleting a set deletes its options |
 | `OptionCodeChange` | An option whose code changes | Stored values hold the option's code, not its id |
 | `OptionNameChange` | An option that keeps its code and changes its name | Stored values hold the code, so every value under it shows the new name; only a review tells a new spelling of the same thing from a new meaning |
-| `SharingGrantRemoval` | A user or user-group grant present on the instance and absent from the package | Users lose access |
+| `SharingGrantRemoval` | A user or user-group grant present on the instance and absent from the sharing the package gives the object | Users lose access |
 | `ActiveRuleDelete` | A rule in `-Delete` that is not inert on the instance | Clients keep running it (section 2.9) |
 
 A single option in `-Delete` stops the deployment whatever is acknowledged (section 2.4, item 4): drop it from its
-set's list instead, or delete the whole set. So does a program in `-Delete` (section 2.6, item 9); a stage or
-program section that a program no longer lists and `-Delete` does not name, since the program's write would only
-detach it (section 2.6, item 5); a stage in `-Delete` that has events, or that an event visualization or a map view
-uses, and on 2.40 any event visualization without a stage while a stage is in `-Delete` (section 4.1); an object
-the package carries that DHIS2 would delete with a `-Delete` entry (section 4.1); and an option whose name or code
-another option of its set holds as the set is stored (section 2.4, item 5): a name or code passed from one option to
-another, a swap included, takes two deployments, one that frees it and a later one that gives it. Of the children
+set's list instead, or delete the whole set. So does a program in `-Delete` (section 2.6, item 9); sharing the
+package gives an object without a public access string, which DHIS2 would reset, its grants included (section 1,
+item 1), and an object written with the instance's sharing that the instance holds without one (section 3, step 4);
+a stage or program section that a program no longer lists and `-Delete` does not name, since the program's write
+would only detach it (section 2.6, item 5); a stage in `-Delete` that has events, or that an event visualization or a
+map view uses, and on 2.40 any event visualization without a stage while a stage is in `-Delete` (section 4.1); an
+object the package carries that DHIS2 would delete with a `-Delete` entry (section 4.1); and an option whose name or
+code another option of its set holds as the set is stored (section 2.4, item 5): a name or code passed from one option
+to another, a swap included, takes two deployments, one that frees it and a later one that gives it. Of the children
 the package moves to another parent (section 2.11), these stop it too, as not observed or not possible in two
 requests: one that is no rule action, stage section or notification template; a notification template with a
 program as either parent, since its row holds its program apart from its stage and programs are written last; a
@@ -470,14 +480,14 @@ deployment against an in-memory stand-in for DHIS2. It applies the version rules
 actions, a stage's sections and a stage's or program's notification templates, unless another parent of the same
 request lists the child, which then moves there; a parent's write taking the children it lists from their old
 parent, a notification template only from a parent of the same type (section 2.11); the delete cascades (an option
-group's member options as from 2.41.10); and the collection endpoint's replacement. It fails a request the way DHIS2
-does: a reference, single or in a collection, to an object that does not exist (E5002), for the properties the tests
-use, and an option whose name or code another option of its set holds as stored (E4028), in a validation too; while
-it writes, on the unique key of section 2.5 (in either order of the sets), on 2.40.12 on a request that writes both
-parents of a moved rule action or notification template (section 2.11), on an update of a template action from 2.42
-(section 2.2), on a stage's write that drops a section a live action targets (section 2.6, item 3), and from 2.42 on
-a stage's or program's write that drops a template a live action sends (section 2.6, item 4); and on the delete
-vetoes and foreign keys of section 2.6 for stages (events included), option sets and option groups. Like DHIS2, it
-refuses a rule action's own `DELETE` on 2.40.12 and keeps a stage section on its own `DELETE` from 2.41.10
-(section 2.6, items 1 and 2). One test assembles the real play package and pins the references deferred to R2
-(section 2.1).
+group's member options as from 2.41.10); the sharing reset of an object written without a public access string
+(section 1, item 1); and the collection endpoint's replacement. It fails a request the way DHIS2 does: a reference,
+single or in a collection, to an object that does not exist (E5002), for the properties the tests use, and an option
+whose name or code another option of its set holds as stored (E4028), in a validation too; while it writes, on the
+unique key of section 2.5 (in either order of the sets), on 2.40.12 on a request that writes both parents of a moved
+rule action or notification template (section 2.11), on an update of a template action from 2.42 (section 2.2), on a
+stage's write that drops a section a live action targets (section 2.6, item 3), and from 2.42 on a stage's or
+program's write that drops a template a live action sends (section 2.6, item 4); and on the delete vetoes and foreign
+keys of section 2.6 for stages (events included), option sets and option groups. Like DHIS2, it refuses a rule
+action's own `DELETE` on 2.40.12 and keeps a stage section on its own `DELETE` from 2.41.10 (section 2.6, items 1 and
+2). One test assembles the real play package and pins the references deferred to R2 (section 2.1).

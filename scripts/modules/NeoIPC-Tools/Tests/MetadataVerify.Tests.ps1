@@ -41,7 +41,8 @@ InModuleScope 'NeoIPC-Tools' {
             $script:VState = @{}
             Mock Invoke-NeoIPCDhis2Get {
                 $t = $Path -replace '^api/', ''
-                $items = if ($script:VState.ContainsKey($t)) { @($script:VState[$t]) } else { @() }
+                # The comma keeps the list a list through the assignment, as DHIS2 answers: an empty one as [], never null.
+                $items = if ($script:VState.ContainsKey($t)) { , @($script:VState[$t]) } else { , @() }
                 $body = [pscustomobject]@{ $t = $items }
                 # -AsHashtable parses the response text, so the mock goes through JSON the same way.
                 if ($AsHashtable) { ConvertTo-Json -InputObject $body -Depth 100 | ConvertFrom-Json -AsHashtable -DateKind String } else { $body }

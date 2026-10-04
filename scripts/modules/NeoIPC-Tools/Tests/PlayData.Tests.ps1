@@ -356,23 +356,36 @@ InModuleScope 'NeoIPC-Tools' {
                     @{ trackedEntities = @($te) } | ConvertTo-Json -Depth 100
                 }
             }
-            It 'leaves a completed event out of the payload and counts it, in the <Version> dialect' -ForEach @(
+            It 'leaves a completed event out of the payload and counts it, in the <Version> dialect, under <Strategy>' -ForEach @(
                 # NEOIPC-COMPAT(dhis2-2.40-tracker-dialect): see Private/TrackerDialect.ps1.
-                @{ Version = '2.40.12'; ModeParameter = 'ouMode'; PagingParameter = 'skipPaging' }
-                @{ Version = '2.43.1'; ModeParameter = 'orgUnitMode'; PagingParameter = $null }
+                @{ Version = '2.40.12'; ModeParameter = 'ouMode'; PagingParameter = 'skipPaging'; Strategy = 'CREATE_AND_UPDATE' }
+                @{ Version = '2.43.1'; ModeParameter = 'orgUnitMode'; PagingParameter = $null; Strategy = 'CREATE_AND_UPDATE' }
+                @{ Version = '2.43.1'; ModeParameter = 'orgUnitMode'; PagingParameter = $null; Strategy = 'UPDATE' }
             ) {
                 $script:PlayVersion = $Version
                 # The completed event is reported in another department than its tracked entity: the read is not
                 # limited to the payload's org units.
                 $script:PlayEvents = @(@{ event = 'evtDone0001'; status = 'COMPLETED'; orgUnit = 'ouOTHERDEP1' }, @{ event = 'evtOpen0002'; status = 'ACTIVE' })
                 Mock Invoke-NeoIPCDhis2Post { [pscustomobject]@{ StatusCode = 200; Body = (New-OkBody 1) } }
-                $r = Import-NeoIPCPlayData -Json (New-EventPayload) -Auth @{} -Hostname 'dhis2.example.org' -SkipRuleEngine:$false -Confirm:$false
+                $r = Import-NeoIPCPlayData -Json (New-EventPayload) -Auth @{} -Hostname 'dhis2.example.org' -ImportStrategy $Strategy -SkipRuleEngine:$false -Confirm:$false
                 $r.SkippedCompletedEvents | Should -Be 1
                 Should -Invoke Invoke-NeoIPCDhis2Post -Times 1 -Exactly -ParameterFilter { $Body -notmatch 'evtDone0001' -and $Body -match 'evtOpen0002' }
                 Should -Invoke Invoke-NeoIPCDhis2Get -Times 1 -Exactly -ParameterFilter {
                     $Path -eq 'api/tracker/events' -and $QueryParameters['program'] -eq 'progImp0001' -and $QueryParameters[$ModeParameter] -eq 'ACCESSIBLE' -and
                     $(if ($PagingParameter) { $QueryParameters[$PagingParameter] -eq 'true' } else { $true })
                 }
+            }
+            It 'sends every event under <Strategy>, the completed one included, without reading the live events' -ForEach @(
+                @{ Strategy = 'DELETE' }
+                @{ Strategy = 'CREATE' }
+            ) {
+                $script:PlayVersion = '2.43.1'
+                $script:PlayEvents = @(@{ event = 'evtDone0001'; status = 'COMPLETED' }, @{ event = 'evtOpen0002'; status = 'ACTIVE' })
+                Mock Invoke-NeoIPCDhis2Post { [pscustomobject]@{ StatusCode = 200; Body = (New-OkBody 1) } }
+                $r = Import-NeoIPCPlayData -Json (New-EventPayload) -Auth @{} -Hostname 'dhis2.example.org' -ImportStrategy $Strategy -SkipRuleEngine:$false -Confirm:$false
+                $r.SkippedCompletedEvents | Should -Be 0
+                Should -Invoke Invoke-NeoIPCDhis2Post -Times 1 -Exactly -ParameterFilter { $Body -match 'evtDone0001' -and $Body -match 'evtOpen0002' -and $QueryParameters['importStrategy'] -eq $Strategy }
+                Should -Invoke Invoke-NeoIPCDhis2Get -Times 0 -Exactly -ParameterFilter { $Path -eq 'api/tracker/events' }
             }
             It 'fails rather than import when the events read returns no list under the expected key' {
                 $script:PlayVersion = '2.43.1'
