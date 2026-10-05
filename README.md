@@ -22,14 +22,14 @@ Where code and the definitions in this repository disagree, the definitions win.
 | Path | Contents |
 |------|----------|
 | [`doc/protocol/`](doc/protocol/) | The **NeoIPC Core Surveillance Protocol** in AsciiDoc, including the eight normative case definitions under [`definitions/`](doc/protocol/definitions/) — clinical sepsis, the two laboratory-confirmed bloodstream-infection variants, the three surgical-site-infection depths, necrotizing enterocolitis and pneumonia. |
-| [`metadata/`](metadata/) | The **canonical DHIS2 configuration** for the `NEOIPC_CORE` tracker program — data elements, option sets, program rules, tracked-entity attributes and the organisation-unit scaffold — authored as reviewable per-type CSVs plus externalised expression files rather than one opaque JSON blob. See [`metadata/common/README.md`](metadata/common/README.md). |
+| [`metadata/`](metadata/) | The **canonical DHIS2 configuration** for the `NEOIPC_CORE` tracker program — data elements, option sets, program rules, tracked-entity attributes and the organisation-unit scaffold — authored as reviewable per-type CSVs plus externalized expression files rather than one opaque JSON blob. See [`metadata/common/README.md`](metadata/common/README.md). |
 | [`metadata/common/infectious-agents/`](metadata/common/infectious-agents/) | The **NeoIPC Infectious Agent List** — a pragmatic ontology of organisms with their synonyms and phenotypic resistance categories, named from LPSN, MycoBank and ICTV. Licensed separately; see below. |
 | [`metadata/common/antibiotics/`](metadata/common/antibiotics/) | The **NeoIPC Antibiotics List** — substances, groups and WHO AWaRe categories. Licensed separately; see below. |
 | [`reports/`](reports/) | Five **Quarto reports**, drawing their data from the [neoipcr](https://github.com/NeoIPC/neoipcr) R package: the Partner Report a department receives, the network-wide Reference Report, a Validation Report that flags data-quality problems, a Partner Certificate, and a Patient Data Report answering data-subject access requests. |
 | [`po/`](po/) | The **gettext catalogues** behind every localized artifact, managed with [po4a](https://po4a.org/) and translated on Weblate. |
 | [`glossary.yaml`](glossary.yaml) | The controlled vocabulary the reports and translators share, so one concept reads the same way everywhere. |
 | [`scripts/`](scripts/) | PowerShell entry points — `Build-*.ps1` render an artifact, `Test-*.ps1` check an invariant, `Invoke-Localization.ps1` drives the translation pipeline. Shared logic lives in the [`NeoIPC-Tools`](scripts/modules/NeoIPC-Tools/README.md) module. |
-| [`docs/`](docs/) | Design references for the pieces whose reasoning does not fit in a source comment — the metadata pipeline, the infectious-agent ontology, the Weblate component contract. |
+| [`docs/`](docs/) | Design references for the pieces whose reasoning does not fit in a source comment — the metadata pipeline and its deployment to DHIS2, the infectious-agent ontology, the Weblate component contract. |
 
 ## Products and releases
 
@@ -49,26 +49,26 @@ metadata package embeds them as option sets, so both declare the exact list rele
 and CI refuses a release that would ship unreleased list content. [`RELEASING.md`](RELEASING.md) has
 the full mechanics.
 
-To install NeoIPC into a DHIS2 instance you want the **metadata package** — an importable JSON
-release asset, with a synthetic play variant for test instances. It is a generated artifact and is
-deliberately not committed; [`metadata/dist/README.md`](metadata/dist/README.md) explains where to
-get it and how to import it.
+To install NeoIPC into a DHIS2 instance you want the **metadata package** — a JSON release asset,
+with a synthetic play variant for test instances. It is a generated artifact and is deliberately not
+committed; [`metadata/dist/README.md`](metadata/dist/README.md) explains where to get it and how to
+deploy it.
 
-**That package is alpha — expect to adapt it rather than deploy it.** Its version is the one in
-[`metadata/VERSION`](metadata/VERSION), which is what the release tag carries.
-It does not yet follow the WHO `dhis2-package-exporter` sharing and manifest conventions: it imports
-because DHIS2 ignores the manifest key it does not recognise, not because it conforms. It also
-attaches the program to no organisation units, so the hierarchy is yours to build and connect.
+**That package is alpha — expect to adapt it rather than deploy it unchanged.** Its version is the one
+in [`metadata/VERSION`](metadata/VERSION), which is what the release tag carries.
+It does not yet follow the WHO `dhis2-package-exporter` sharing and manifest conventions: DHIS2 takes
+it because it ignores the manifest key it does not recognize, not because the package conforms. It
+also attaches the program to no organisation units, so the hierarchy is yours to build and connect.
 
-It has been verified against DHIS2 **2.40.12** and **2.41.9** only — earlier 2.40 patches are not
-supported, `2.40.3.2` in particular carrying a confirmed defect that was fixed in `2.40.4`. On
-**2.42 and 2.43** an import
-intermittently drops the members of owned ordered collections — an option-group set arrives holding
-none of its groups — and reports no error while doing so. The failure is non-deterministic but sticks
-to an instance: it recurs identically there, while a freshly created instance may take the same
-package cleanly. The cause is open and there is no workaround short of rebuilding the instance, so on
-those versions **verify what actually landed instead of trusting a successful-looking import**. The
-running NeoIPC deployment is unaffected — it is on 2.41 or older.
+Deploy it with NeoIPC-Tools' `Deploy-NeoIPCMetadata`, which is verified on DHIS2 **2.40.12**,
+**2.41.10**, **2.42.6** and **2.43.1**; earlier 2.40 patches are not supported, `2.40.3.2` in
+particular carrying a confirmed defect that was fixed in `2.40.4`. On an earlier patch of those
+lines, or on another line, the deployment stops before writing anything unless
+`-AllowHazard UnverifiedVersion` accepts the release. A plain metadata import is no substitute:
+in one request DHIS2 can leave an option group set without its groups while reporting success,
+and repeated over an existing instance it fails from 2.42 on.
+[`docs/metadata-deployment.md`](docs/metadata-deployment.md) explains why and describes a production
+deployment.
 
 ## Working with the toolkit
 

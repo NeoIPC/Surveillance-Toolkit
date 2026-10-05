@@ -121,7 +121,7 @@ jobs:
                 # registered on Weblate, and remove it here when it is not.
                 owned='po/reports\..*\.po|po/documentation\..*\.po|po/infectious_agents\..*\.po|po/metadata\..*\.po|po/glossary\..*\.po'
                 # Weblate commits everything it pushes under this one identity, whoever wrote the translation,
-                # so a per-commit committer check recognises Weblate's own output no matter who opened the pull
+                # so a per-commit committer check recognizes Weblate's own output no matter who opened the pull
                 # request. Exempting by pull-request author instead would reject the drain pull requests we open
                 # ourselves from a weblate-* branch, whose commits are Weblate's throughout — and would wave
                 # through a stray hand-written commit riding along in a Weblate-authored one.
@@ -430,6 +430,9 @@ jobs:
               # and `-`, which a regex built from it would interpret. A section ends at the next version
               # heading or at a Keep a Changelog link-reference definition (`[x.y.z]: url`), so trailing
               # definitions never join the last version's notes.
+              #
+              # A metadata release's notes end with metadata/RELEASE-NOTICE.md: how to deploy the packages, and
+              # why a plain metadata import is no substitute, which every release needs whatever its section says.
               if: github.ref_type == 'tag'
               shell: bash
               run: |
@@ -451,7 +454,11 @@ jobs:
                 fi
                 mkdir -p ./artifacts
                 printf '%s\n' "$section" > ./artifacts/release-notes.md
-                echo "Release notes for $ver taken from $cfile:"
+                if [[ "${{ steps.rel.outputs.product }}" == metadata ]]; then
+                  printf '\n---\n\n' >> ./artifacts/release-notes.md
+                  cat metadata/RELEASE-NOTICE.md >> ./artifacts/release-notes.md
+                fi
+                echo "Release notes for $ver:"
                 cat ./artifacts/release-notes.md
 
             - name: Reject a moved / retagged release tag
@@ -831,7 +838,7 @@ jobs:
                 # exclusion list rejects. That last one is not hypothetical: the add-on re-adds a bot credit
                 # to every infectious-agents catalogue whenever those translations are touched, and a
                 # translation pull request is exactly where no human is reading the diff.
-                Invoke-Pester -Path scripts/modules/NeoIPC-Tools/Tests/DataDictionary.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/BuildReport.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/ScriptVerbHygiene.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/PlayData.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/MetadataContent.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/Metadata.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/MetadataVerify.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/PoHeader.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/AutomaticVariableHygiene.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/ReportInterpolationHygiene.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/ReportStringResources.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/PoTemplateChurn.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/GlossaryCasingHygiene.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/PoPlaceholders.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/RelativePathWrites.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/ReportFigureDevice.Tests.ps1 -CI
+                Invoke-Pester -Path scripts/modules/NeoIPC-Tools/Tests/DataDictionary.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/BuildReport.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/ScriptVerbHygiene.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/PlayData.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/MetadataContent.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/Metadata.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/MetadataVerify.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/MetadataDeploy.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/PAT.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/Auth.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/PoHeader.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/AutomaticVariableHygiene.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/ReportInterpolationHygiene.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/ReportStringResources.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/PoTemplateChurn.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/GlossaryCasingHygiene.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/PoPlaceholders.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/RelativePathWrites.Tests.ps1,scripts/modules/NeoIPC-Tools/Tests/ReportFigureDevice.Tests.ps1 -CI
 
             - name: Generate data dictionary
               shell: pwsh
@@ -850,6 +857,34 @@ jobs:
                 # source of truth, which build-docs verifies against a metadata release's tag.
                 $version = (Get-Content -LiteralPath ./metadata/VERSION -Raw).Trim()
                 ./scripts/Build-NeoIPCMetadataDistribution.ps1 -OutputDirectory ./artifacts/metadata-package -Version $version
+
+            - name: Fail when the build rewrote committed metadata
+              # The distribution build regenerates the generated families into metadata/common/ and rewrites every
+              # CSV there in the writer's canonical form: fixed column order, sorted rows and lists, minimal quoting,
+              # LF. That output is deterministic, so a file the build changes was edited by hand in another form, or
+              # is stale against a generator, and every later local build would rewrite it again, putting the change
+              # into an unrelated diff. Untracked files count: a generated object whose files were never committed.
+              # The writer never deletes, so files a regeneration drops are not caught here (see
+              # Update-NeoIPCGeneratedMetadataDirectory).
+              shell: bash
+              run: |
+                if ! changed=$(git status --porcelain --untracked-files=all -- metadata/); then
+                  echo "::error::Could not read the working tree's status, so this check cannot vouch for the committed metadata."
+                  exit 1
+                fi
+                if [[ -n "$changed" ]]; then
+                  while IFS= read -r line; do
+                    [ -n "$line" ] || continue
+                    echo "::error file=${line:3}::The metadata distribution build rewrites ${line:3}. Run ./scripts/Build-NeoIPCMetadataDistribution.ps1 and commit what it writes under metadata/."
+                  done <<< "$changed"
+                  # Through a file, not a pipe into head: under Actions' `bash -eo pipefail`, head closing the pipe
+                  # early fails git with SIGPIPE and ends the step before the diff is shown.
+                  git --no-pager diff --stat -- metadata/
+                  git --no-pager diff -- metadata/ > "$RUNNER_TEMP/metadata-drift.diff"
+                  head -n 200 "$RUNNER_TEMP/metadata-drift.diff"
+                  exit 1
+                fi
+                echo "The build left the committed metadata unchanged."
 
             - name: Upload artifacts
               uses: actions/upload-artifact@v7

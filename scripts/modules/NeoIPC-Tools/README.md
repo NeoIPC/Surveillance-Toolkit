@@ -43,14 +43,17 @@ principles, the capability matrix, and the verification gates — lives in
 
 | File | Role |
 |------|------|
-| `Public/Auth.ps1` + `Private/DHIS2Http.ps1` | DHIS2 auth (PAT / user-password) + the REST GET/DELETE layer every live call goes through |
+| `Public/Auth.ps1` + `Private/DHIS2Http.ps1` | DHIS2 auth (PAT / user-password) + the REST GET/POST/PUT/DELETE layer every live call goes through |
 | `Public/OrgUnits.ps1`, `Tracker.ps1`, `UserInfo.ps1`, `DataElements.ps1`, `PAT.ps1` | Live, pipeline-composable inspection of org units, patients/enrolments/events, users, DE codes, and personal-access-token lifecycle |
 | `Public/ReportHelpers.ps1` | Report-build helpers — scoped auth env vars, Quarto/Rscript invocation, locale resolution, build summaries |
 | `Public/InfectiousAgents.ps1` | Infectious-agent ontology helpers (next free `Id`) |
 | `Public/Metadata.ps1` | The metadata-pipeline public surface — convert, compare, round-trip, closure, lint, update, **assemble** (`New-NeoIPCMetadataPackage`), translation export/import |
+| `Public/MetadataDeploy.ps1` + `Private/MetadataDeploy.ps1` | **Deploy** a package to a DHIS2 instance (`Deploy-NeoIPCMetadata`): compare with the live objects, write only what differs in the order DHIS2 needs, gate the hazardous changes, verify; the planning half is free of I/O ([`docs/metadata-deployment.md`](../../../docs/metadata-deployment.md)) |
+| `Public/MetadataVerify.ps1` + `Private/MetadataLive.ps1` | Read a package's objects back from DHIS2 and report what did not land (`Test-NeoIPCMetadataImport`), check that every rule action is served (`Test-NeoIPCProgramRuleActionServed`); the batched live read and the schema index the deployment shares |
+| `Private/TrackerDialect.ps1` | The tracker read parameters and response key per DHIS2 version, and the list read that throws when the key is missing |
 | `Public/MetadataReconcile.ps1` | **Reconcile** the canonical directory against a fresh export (`Update-NeoIPCMetadataDirectory`) — classify drift, auto-write CSV-owned config + PO, report-only for authored / generated / domain |
 | `Public/Generation.ps1` | The ontology/matrix-driven object generators (pathogen + substance + field-gating + virus-classification) |
-| `Public/Regeneration.ps1` | Re-materialise the generated families into `metadata/common/` (`Update-NeoIPCGeneratedMetadataDirectory`) — the generators are the source of truth; this writes their current output back so drift shows as a git diff |
+| `Public/Regeneration.ps1` | Re-materialize the generated families into `metadata/common/` (`Update-NeoIPCGeneratedMetadataDirectory`) — the generators are the source of truth; this writes their current output back so drift shows as a git diff |
 | `Private/Metadata.ps1` | Pipeline **core** — JSON parse, deterministic UID mint, row↔object cell coercion, sharing-profile registry, noise-strip, canonicalize, CSV I/O, package↔directory, semantic compare |
 | `Private/MetadataTypeMaps.ps1` | Per-type field classification (translatable vs technical vs nested), the normalization strip-list, and the non-closure type list — the data the core consults |
 | `Private/MetadataClosure.ps1` | The dependency-closure prune from `NEOIPC_CORE` (structured + expression ref-walk) + the whole-type base⊕supplement merge |
@@ -100,39 +103,41 @@ object replaces its deployed counterpart cleanly.
 `Update-NeoIPCMetadataDirectory` is the reverse path: it ingests a fresh export and brings the
 directory into line with it (report-only unless `-Apply`), auto-writing only the CSV-owned config
 it can faithfully reconcile — and reporting the rest by owner. Authored org units / users (the
-export carries only anonymised instances), the ontology-generated families, and the domain YAML are
+export carries only anonymized instances), the ontology-generated families, and the domain YAML are
 never reverse-written; an unexpected change surfaces as `Unclassified` for investigation.
 
-### Materialised generation, drift detection & the no-hand-authored-enumeration rule
+### Materialized generation, drift detection & the no-hand-authored-enumeration rule
 
 The ontology- and capability-matrix-driven families — the per-slot pathogen / substance data
 elements, and the resistance / field-gating / **virus** / substance program-rule variables, rules and
-actions — are **materialised (committed)** under `metadata/common/` as CSV rows plus externalised
+actions — are **materialized (committed)** under `metadata/common/` as CSV rows plus externalized
 `.dhis2` expression files. Their **source of truth is the generators** (`New-NeoIPCPathogen*` /
 `New-NeoIPCSubstance*`, spliced by `Add-NeoIPCGeneratedMetadata`), **not** the committed files:
-`New-NeoIPCMetadataPackage` **reads** the materialised files when it assembles a package (it regenerates
+`New-NeoIPCMetadataPackage` **reads** the materialized files when it assembles a package (it regenerates
 only the option-domain families at assembly), so a change to a generator, the infectious-agent ontology,
-or the antibiotic sources is **inert** until the directory is re-materialised.
+or the antibiotic sources is **inert** until the directory is re-materialized.
 
-`Update-NeoIPCGeneratedMetadataDirectory` (in `Public/Regeneration.ps1`) is that re-materialise step. It
+`Update-NeoIPCGeneratedMetadataDirectory` (in `Public/Regeneration.ps1`) is that re-materialize step. It
 regenerates every generated-class object and writes it back into `common/` through the faithful
-directory writer (`ConvertFrom-NeoIPCMetadataJson`: LF / UTF-8-no-BOM CSVs, expressions emitted
-verbatim). Two design points make it correct and safe:
+directory writer (`ConvertFrom-NeoIPCMetadataJson`: LF / UTF-8-no-BOM CSVs, one file per expression with
+trailing whitespace trimmed and one closing newline). Two design points make it correct and safe:
 
 - **The UID-preservation Export is the assembled install base, not `common/` alone.** The option-domain
   families (`NEOIPC_PATHOGENS` / `NEOIPC_ANTIMICROBIAL_SUBSTANCES` option sets + options + groups) are
-  deliberately **not** materialised into `common/` (a richer source — the ontology YAML + a UID sidecar +
+  deliberately **not** materialized into `common/` (a richer source — the ontology YAML + a UID sidecar +
   the antibiotic CSVs — owns them), yet the generators reconcile every reproduced object against the
   deployed option set. `New-NeoIPCMetadataPackage` assembles exactly that base, so it is the Export; the
   committed `common/` tree is the Config. Reversing the two would drop the option-set UIDs.
-- **It is idempotent.** The writer only rewrites a file whose content changed, so a drift-free tree stays
-  clean and running it twice produces a byte-identical result.
+- **It is idempotent.** The writer rewrites every CSV of `common/` in one canonical form (fixed column
+  order, sorted rows and lists, minimal quoting), so a drift-free tree comes out byte-identical and
+  running it twice produces the same result. A hand edit in another form is rewritten too.
 
 `Build-NeoIPCMetadataDistribution.ps1` runs `Update-NeoIPCGeneratedMetadataDirectory` on **every build**,
 before rendering the packages, so any divergence between the generators and the committed
 `metadata/common/` tree surfaces as a **reviewable git diff** (a dirty tree after a build means the
-committed metadata is stale and must be committed). `Compare-NeoIPCGeneratedMetadata` reports the same
-drift without writing.
+committed metadata is stale, or was hand-edited in another form, and must be committed). CI's
+`build-metadata` job fails when the build changed anything under `metadata/`.
+`Compare-NeoIPCGeneratedMetadata` reports the generator drift without writing.
 
 > **Additive-writer limit.** `ConvertFrom-NeoIPCMetadataJson` writes/overwrites files for the objects it
 > is given but never **deletes** the expression files (or prunes the CSV rows) of a generated object that
@@ -487,8 +492,10 @@ runs `msgfmt -c` (via WSL on Windows) when gettext is available.
 | DataElements | `Get-NeoIPCDataElementCodes` |
 | PAT | `Read-DHIS2PersonalAccessToken`, `Remove-DHIS2PersonalAccessToken`, `Clear-DHIS2PersonalAccessTokens` |
 | User | `Read-UserInfo` |
-| Quarto | `Invoke-WithNeoIPCAuth`, `Invoke-QuartoRender`, `Invoke-Rscript`, `Build-QmdParamPairs`, `Write-NeoIPCBuildReport`, `Test-QuartoInstallation`, `Split-NeoIPCLocale`, `Resolve-NeoIPCLocaleQmd` |
+| Quarto | `Invoke-WithNeoIPCAuth`, `Invoke-QuartoRender`, `Invoke-Rscript`, `Build-QmdParamPairs`, `Write-NeoIPCBuildReport`, `New-NeoIPCBuildStep`, `Complete-NeoIPCBuildStep`, `Get-NeoIPCParameterSnapshot`, `Get-NeoIPCRenderLogLevel`, `Test-NeoIPCRenderWarningHead`, `Test-QuartoInstallation`, `Split-NeoIPCLocale`, `Resolve-NeoIPCLocaleQmd` |
 | InfectiousAgents | `Find-NextFreeInfectiousAgentId` |
 | Metadata pipeline | `ConvertFrom-NeoIPCMetadataJson`, `ConvertTo-NeoIPCMetadataJson`, `Compare-NeoIPCMetadata`, `Test-NeoIPCMetadataRoundTrip`, `Merge-NeoIPCMetadataJson`, `Select-NeoIPCMetadataClosure`, `Test-NeoIPCMetadataExpression`, `Update-NeoIPCMetadata`, `New-NeoIPCMetadataPackage`, `Export-NeoIPCMetadataTranslation`, `Import-NeoIPCMetadataTranslation`, `Update-NeoIPCMetadataDirectory` |
-| Metadata generation | `New-NeoIPCPathogenOptionSet`, `New-NeoIPCPathogenDataElement`, `New-NeoIPCPathogenVariable`, `New-NeoIPCPathogenRule`, `New-NeoIPCPathogenFieldGatingVariable`, `New-NeoIPCPathogenFieldGatingRule`, `New-NeoIPCPathogenVirusVariable`, `New-NeoIPCPathogenVirusRule`, `New-NeoIPCSubstanceDataElement`, `New-NeoIPCSubstanceVariable`, `New-NeoIPCSubstanceRule`, `Compare-NeoIPCGeneratedMetadata`, `Update-NeoIPCGeneratedMetadataDirectory` |
+| Metadata deployment | `Deploy-NeoIPCMetadata`, `Import-NeoIPCMetadata`, `Test-NeoIPCMetadataImport`, `Test-NeoIPCProgramRuleActionServed` |
+| Play data | `New-NeoIPCPlayDataPackage`, `Import-NeoIPCPlayData`, `Export-NeoIPCPlayDataCsv` |
+| Metadata generation | `New-NeoIPCPathogenOptionSet`, `New-NeoIPCPathogenDataElement`, `New-NeoIPCPathogenVariable`, `New-NeoIPCPathogenRule`, `New-NeoIPCPathogenFieldGatingVariable`, `New-NeoIPCPathogenFieldGatingRule`, `New-NeoIPCPathogenVirusVariable`, `New-NeoIPCPathogenVirusRule`, `New-NeoIPCSubstanceDataElement`, `New-NeoIPCSubstanceVariable`, `New-NeoIPCSubstanceRule`, `New-NeoIPCAntimicrobialOptionSet`, `New-NeoIPCAntibioticOptionGroup`, `New-NeoIPCAntibioticOptionGroupSet`, `Export-NeoIPCAntibioticTranslation`, `Compare-NeoIPCGeneratedMetadata`, `Update-NeoIPCGeneratedMetadataDirectory` |
 | Data dictionary | `Export-NeoIPCDataDictionary` |

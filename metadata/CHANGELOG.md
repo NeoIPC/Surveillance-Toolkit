@@ -13,6 +13,12 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
 
 ## [Unreleased]
 
+### Added
+
+- Each package says how to deploy it: its manifest's `deployment` entry names NeoIPC-Tools' `Deploy-NeoIPCMetadata`
+  and says why a plain metadata import is no substitute, and every metadata release's notes end with the same
+  advice.
+
 ### Changed
 
 - `NEOIPC_SURVEILLANCE_END_INV_DAYS` and `NEOIPC_SURVEILLANCE_END_NIV_DAYS` describe a day of the
@@ -21,9 +27,17 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
   two counts could together exceed the patient days. The CVC and PVC day counts keep "at least",
   since both lines can be in place on one day. The NIV description also names CPAP beside high-flow
   nasal cannulae, as the protocol does.
+- `dist/README.md` deploys the package with NeoIPC-Tools' `Deploy-NeoIPCMetadata`, which writes only
+  what differs, links in a second request what DHIS2 leaves unlinked in one, and verifies the result,
+  where it had the package imported twice. It names the DHIS2 lines the package is verified on: 2.40.12,
+  2.41.10, 2.42.6 and 2.43.1. On an earlier patch of those lines, or on another line, the deployment
+  stops before writing anything unless told to accept the release.
 
 ### Fixed
 
+- Each option set lists its options in their authored order, which DHIS2 keeps as the order users
+  pick from. The package listed them by UID, so a set whose UIDs sort differently reached users
+  scrambled.
 - `NEOIPC_BSI_WBC` describes the white-blood-cell criterion as the protocol defines it: a count
   below 4 ×10⁹/L or above 20 ×10⁹/L. Its form label had named only an increased count, and its
   description had stated a single threshold, more than 4 ×10⁹/L, which is neither arm of the

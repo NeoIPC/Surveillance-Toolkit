@@ -147,7 +147,9 @@ function Remove-DHIS2PersonalAccessToken {
                     if ($Scheme)   { $deleteParams.Scheme   = $Scheme }
                     if ($Hostname) { $deleteParams.Hostname = $Hostname }
                     if ($Port)     { $deleteParams.Port     = $Port }
-                    $results.Add((Invoke-NeoIPCDhis2Delete @deleteParams)) | Out-Null
+                    # A failed delete is that token's error; the remaining tokens are still processed.
+                    try { $results.Add((Invoke-NeoIPCDhis2Delete @deleteParams)) | Out-Null }
+                    catch { $PSCmdlet.WriteError($_) }
                 } else {
                     Write-Debug "Skipping removal of token '$currentId'."
                 }

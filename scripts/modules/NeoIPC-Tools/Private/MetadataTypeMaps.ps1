@@ -11,9 +11,9 @@ $script:NeoIPCMetadataStripList = @(
     'created', 'lastUpdated', 'createdBy', 'lastUpdatedBy',
     'access', 'favorite', 'favorites', 'userAccesses', 'userGroupAccesses', 'externalAccess',
     'href', 'user', 'publicAccess', 'lastUpdatedDuration',
-    'users',  # the anonymised, per-deployment member list ON a userGroup object — dropped on capture, so common groups carry no members. (Does NOT affect sharing.users grants: those live inside the 'sharing' object, which Convert-NeoIPCSharing normalizes separately — reducing each grant to {id, access} and preserving it as authorization intent — and the recursive strip never reaches into the sharing branch.)
-    'organisationUnits',  # per-deployment org-unit ASSIGNMENT / membership — organisationUnitGroups membership, the program's org-unit assignment, a categoryOption's restriction. Always references org-unit INSTANCES (anonymised in the export), never config; dropped on capture so common carries none. (Distinct from organisationUnitGroupSets.organisationUnitGroups and userGroups.managedGroups, which are definition→definition CONFIG and are kept.)
-    'path'   # organisationUnit's materialised ancestor path — derived from `parent`, recomputed on import
+    'users',  # the anonymized, per-deployment member list ON a userGroup object — dropped on capture, so common groups carry no members. (Does NOT affect sharing.users grants: those live inside the 'sharing' object, which Convert-NeoIPCSharing normalizes separately — reducing each grant to {id, access} and preserving it as authorization intent — and the recursive strip never reaches into the sharing branch.)
+    'organisationUnits',  # per-deployment org-unit ASSIGNMENT / membership — organisationUnitGroups membership, the program's org-unit assignment, a categoryOption's restriction. Always references org-unit INSTANCES (anonymized in the export), never config; dropped on capture so common carries none. (Distinct from organisationUnitGroupSets.organisationUnitGroups and userGroups.managedGroups, which are definition→definition CONFIG and are kept.)
+    'path'   # organisationUnit's materialized ancestor path — derived from `parent`, recomputed on import
 )
 
 # Server-derived i18n PROJECTIONS — read-only mirrors of a translatable base field, recomputed from
@@ -38,18 +38,18 @@ $script:NeoIPCMetadataDeferredFields = @('translations')
 
 # Whole object TYPES excluded from the package entirely (not field-stripping): account/PII-shaped
 # objects, server-generated collections, and authored-instance content the export carries only in
-# anonymised form. Excluded from emit, the comparator, AND the PO, so their presence in a source
+# anonymized form. Excluded from emit, the comparator, AND the PO, so their presence in a source
 # export is not reported as a round-trip difference.
 $script:NeoIPCMetadataExcludedTypes = @(
-    'users', 'apiToken',           # account/PII tier (users are fully anonymised in the export; the play variant gets synthetic authored accounts)
+    'users', 'apiToken',           # account/PII tier (users are fully anonymized in the export; the play variant gets synthetic authored accounts)
     'categoryOptionCombos',        # server-generated (regenerate-on-import)
-    'organisationUnits'            # authored content (real production UIDs / ISO codes / English names) the export carries only as anonymised instances (code:null, dummy O… ids, name:"Anonymized Org Unit"); assembled from the directory via Read-NeoIPCAuthoredOrgUnit, never the converter type-map. The org-unit GROUPS / GROUP-SETS / LEVELS stay non-closure (translatable classification config).
+    'organisationUnits'            # authored content (real production UIDs / ISO codes / English names) the export carries only as anonymized instances (code:null, dummy O… ids, name:"Anonymized Org Unit"); assembled from the directory via Read-NeoIPCAuthoredOrgUnit, never the converter type-map. The org-unit GROUPS / GROUP-SETS / LEVELS stay non-closure (translatable classification config).
 )
 
 # Option SETS whose member options are domain-authored elsewhere — generated from a richer canonical source, not
 # hand-maintained in the per-type CSV directory: NEOIPC_PATHOGENS from infectious-agents/NeoIPC-Infectious-Agents.yaml
 # (3269 options) and NEOIPC_ANTIMICROBIAL_SUBSTANCES from antibiotics/NeoIPC-Antibiotics.csv (242) — together
-# 3511/3557 of all options. The set definitions AND their member options are dropped from the materialised
+# 3511/3557 of all options. The set definitions AND their member options are dropped from the materialized
 # directory (ConvertFrom-NeoIPCMetadataPackage) and ignored by the comparator (Compare-NeoIPCMetadataCore), so the
 # round-trip gate does not flag their absence. They are NOT dropped from the closure: New-NeoIPCMetadataPackage
 # builds the importable package from the export's closure, which carries them, so the import stays complete — the
@@ -60,7 +60,7 @@ $script:NeoIPCMetadataDomainOptionSetCodes = [System.Collections.Generic.HashSet
 
 # Program rules that are GENERATED elsewhere — the pathogen / substance / resistance / field-gating machinery the
 # ontology + capability matrix produce (Add-NeoIPCGeneratedMetadata). Identified by the generator PLANS, not a
-# regex (see Get-NeoIPCMetadataGeneratedKeys), and dropped from the materialised directory and the comparator the
+# regex (see Get-NeoIPCMetadataGeneratedKeys), and dropped from the materialized directory and the comparator the
 # same way the domain option sets are — the YAML / matrix are their single source. This list holds only the
 # DEPLOYED rules a generator family does NOT reproduce by name yet still supersedes, so the family predicate alone
 # would miss them: the stale HAP aggregate 'NeoIPC HAP - set pathogen attribute variables' (15 dead ASSIGNs the
@@ -79,7 +79,7 @@ $script:NeoIPCMetadataRetiredRuleNames = [System.Collections.Generic.HashSet[str
 #   reference-centre / test-unit / trial-site identification. The NEOIPC_CORE program references the groups
 #   only by CODE inside expression strings (d2:inOrgUnitGroup('NEO_DEPARTMENT')), never by structured {id}, so
 #   the {id}-walk closure cannot pull them in. (The org-unit INSTANCES themselves are NOT here — they are
-#   excluded authored content the export anonymises; see $NeoIPCMetadataExcludedTypes.)
+#   excluded authored content the export anonymizes; see $NeoIPCMetadataExcludedTypes.)
 #
 #   userRoles and userGroups — the access-control config. userRoles (authorities + restrictions) are
 #   deployment-agnostic and referenced only by user accounts (which are excluded/synthetic), so nothing in
@@ -87,7 +87,7 @@ $script:NeoIPCMetadataRetiredRuleNames = [System.Collections.Generic.HashSet[str
 #   (NEOIPC_PATHOGEN_LIST_ADMINS) is the recipientUserGroup of every program notification template, so a
 #   closure object DOES reference it by {id} — but since userGroups is packaged whole, that reference is
 #   satisfied without indexing the type into the closure walk (previously it resolved only because excluded
-#   types are treated as import-time overlays). Their per-deployment membership (the anonymised users[]) is
+#   types are treated as import-time overlays). Their per-deployment membership (the anonymized users[]) is
 #   stripped on capture, so common groups carry no members.
 $script:NeoIPCMetadataNonClosureTypes = @(
     'organisationUnitGroups', 'organisationUnitGroupSets', 'organisationUnitLevels',
@@ -124,16 +124,17 @@ $script:NeoIPCMetadataDefaultUids = @(
 #                 idArrayOrdered | intArray | stringArray. 'idString' is a bare-string UID reference (not a
 #                 {id} object) — e.g. programRuleActions.templateUid -> a programNotificationTemplate; it
 #                 serializes like a string but the closure follows it as a dependency edge. 'idArrayOrdered'
-#                 is for DHIS2 <list> ref-collections whose
-#                 element order is the data and is NOT recoverable from an element-level sortOrder
-#                 (categoryCombos.categories, categories.categoryOptions, optionGroupSets.optionGroups,
-#                 programStageSections.dataElements/programIndicators, programSections.trackedEntityAttributes);
-#                 it preserves array order in the cell, and the normalizer compares it positionally.
-#                 Plain 'idArray' is for <set>s and for <list>s whose order is recoverable from each
-#                 element's sortOrder (e.g. optionSets.options). The synthesized 'id' key, 'sharing'
-#                 (carried as a normalized JSON cell),
-#                 'translations' (JSON cell, currently comparator-ignored), and the audit/noise fields
-#                 (handled by Remove-NeoIPCMetadataNoise) are implicit and NOT listed here.
+#                 is for DHIS2 <list> ref-collections whose element order is the data and lives in the cell
+#                 itself (categoryCombos.categories, categories.categoryOptions, optionGroupSets.optionGroups,
+#                 programStageSections.dataElements/programIndicators, programSections.trackedEntityAttributes,
+#                 and the legendSets of data elements and tracked-entity attributes, whose first entry DHIS2
+#                 takes as the element's legend set); it preserves array order in the cell, and the normalizer
+#                 compares it positionally. Plain 'idArray' is for <set>s, and for optionSets.options: DHIS2
+#                 keeps that list in the order it receives, but its cell is sorted because options.csv carries
+#                 each option's authored sortOrder, from which ConvertTo-NeoIPCMetadataPackage rebuilds the
+#                 list's order when the package is assembled. The synthesized 'id' key, 'sharing' (carried as a
+#                 normalized JSON cell), 'translations' (JSON cell, currently comparator-ignored), and the
+#                 audit/noise fields (handled by Remove-NeoIPCMetadataNoise) are implicit and NOT listed here.
 # Derived from the empirical per-type shapes in metadata.json, not from the prior art or the spec.
 #
 # The name-family properties are factored into two shared bases that mirror DHIS2's own class hierarchy
@@ -157,7 +158,7 @@ $script:NeoIPCMetadataTypeMaps = [ordered]@{
     'dataElements'          = @{ NaturalKey = 'code'; Nesting = 'TopLevel'; Properties = [ordered]@{
         code = 'string'; name = 'string'; shortName = 'string'; formName = 'string'; description = 'string'; url = 'string'
         valueType = 'string'; domainType = 'string'; aggregationType = 'string'; zeroIsSignificant = 'bool'
-        categoryCombo = 'id'; optionSet = 'id'; commentOptionSet = 'id'; aggregationLevels = 'intArray'; legendSets = 'idArray' } }
+        categoryCombo = 'id'; optionSet = 'id'; commentOptionSet = 'id'; aggregationLevels = 'intArray'; legendSets = 'idArrayOrdered' } }
     'options'               = @{ NaturalKey = @('optionSet', 'code'); Nesting = 'TopLevel'; Properties = $IdentifiableBase + [ordered]@{
         sortOrder = 'int'; optionSet = 'id' } }
     'optionSets'            = @{ NaturalKey = 'code'; Nesting = 'TopLevel'; Properties = $IdentifiableBase + [ordered]@{
@@ -181,7 +182,7 @@ $script:NeoIPCMetadataTypeMaps = [ordered]@{
         valueType = 'string'; aggregationType = 'string'
         confidential = 'bool'; displayInListNoProgram = 'bool'; displayOnVisitSchedule = 'bool'; generated = 'bool'; inherit = 'bool'
         orgunitScope = 'bool'; skipSynchronization = 'bool'; unique = 'bool'
-        optionSet = 'id'; legendSets = 'idArray' } }
+        optionSet = 'id'; legendSets = 'idArrayOrdered' } }
     'programRuleVariables'  = @{ NaturalKey = 'name'; Nesting = 'TopLevel'; Properties = $IdentifiableBase + [ordered]@{
         programRuleVariableSourceType = 'string'; valueType = 'string'; useCodeForOptionSet = 'bool'
         program = 'id'; dataElement = 'id'; trackedEntityAttribute = 'id'; programStage = 'id' } }
@@ -283,31 +284,38 @@ $script:NeoIPCMetadataTypeMaps = [ordered]@{
 # idArrayOrdered in ANY type is therefore treated as ordered in EVERY type that carries it — which is
 # why 'dataElements' is idArrayOrdered on both dataElementGroups (a <set>, harmless to keep in order)
 # and programStageSections (a <list>, where order is the form layout). Verified against refs/dhis2-core
-# *.hbm.xml: these are the <list>-mapped collections with no element-level sortOrder to recover from.
+# *.hbm.xml: these are the <list>-mapped collections whose cell carries the order.
 $script:NeoIPCMetadataOrderedRefProps = [System.Collections.Generic.HashSet[string]]::new(
     [string[]]@(foreach ($map in $script:NeoIPCMetadataTypeMaps.Values) {
         foreach ($prop in $map.Properties.Keys) { if ($map.Properties[$prop] -eq 'idArrayOrdered') { $prop } }
     }),
     [System.StringComparer]::Ordinal)
 
-# The ref-collections DHIS2 actually persists as ORDERED <list>s (a sort_order list-index column), keyed by
-# "<type>|<property>". This is the round-trip VERIFIER's source of truth for an order check (Test-NeoIPCMetadataImport
-# OrderDrift): only these collections are guaranteed to read back in the imported order, so only these may be compared
-# positionally against DHIS2. It is deliberately NARROWER than $NeoIPCMetadataOrderedRefProps above, for two reasons:
+# The ref-collections DHIS2 actually persists in ORDER, keyed by "<type>|<property>". This is the round-trip
+# VERIFIER's source of truth for an order check (Test-NeoIPCMetadataImport OrderDrift): only these collections are
+# guaranteed to read back in the imported order, so only these may be compared positionally against DHIS2. It is
+# deliberately NARROWER than $NeoIPCMetadataOrderedRefProps above, for two reasons:
 # (1) that set is keyed by property NAME and serves the NORMALIZER's cell determinism (preserve-in-cell, NOT
 #     server-order), so it cannot distinguish two types that share a property name; and
 # (2) `dataElementGroups.dataElements` is classed idArrayOrdered there only so its CSV cell stays stable, but DHIS2
 #     maps DataElementGroup.members as an unordered <set> (no list-index — DataElementGroup.hbm.xml), so it is
 #     EXCLUDED here: ordering it positionally would false-positive (the server returns members in hash order).
-# Each entry verified against refs/dhis2-core *.hbm.xml as a <list> with <list-index column="sort_order" base="1">.
+# It is also wider in one place: optionSets.options is classed idArray (its cell is sorted, the package rebuilds its
+# order from each option's sortOrder), yet DHIS2 keeps the list in the order it receives, so the order is checked.
+# Each entry verified against refs/dhis2-core as a <list> indexed by its sort_order column (*.hbm.xml up to 2.42.6; on
+# 2.43.1 some types are mapped by JPA annotations instead, @OrderColumn with the same column), except
+# optionSets.options (below).
 $script:NeoIPCMetadataServerOrderedRefs = [System.Collections.Generic.HashSet[string]]::new(
     [string[]]@(
         'optionGroupSets|optionGroups'                  # OptionGroupSet.hbm.xml <list>
+        'optionSets|options'                            # OptionSet.hbm.xml: a <list> indexed by sort_order on 2.40, a <bag> ordered by sort_order on 2.41 and 2.42 (@OrderBy("sortOrder ASC") in OptionSet.java on 2.43), which the set's write renumbers to the list position
         'categories|categoryOptions'                    # Category.hbm.xml <list>
         'categoryCombos|categories'                     # CategoryCombo.hbm.xml <list>
         'programStageSections|dataElements'             # ProgramStageSection.hbm.xml <list> (form layout)
         'programStageSections|programIndicators'        # ProgramStageSection.hbm.xml <list>
         'programSections|trackedEntityAttributes'       # ProgramSection.hbm.xml <list>
+        'dataElements|legendSets'                       # DataElement.hbm.xml <list> (the first is the element's legend set)
+        'trackedEntityAttributes|legendSets'            # TrackedEntityAttribute.hbm.xml <list>
         # NestedOnly attribute lists — genuine <list> with sort_order, but their order lives on the PARENT
         # collection (TrackedEntityTypeAttribute has no element sortOrder at all), so the verifier checks it
         # positionally on the parent's child-id sequence (the NestedOnly pass), not via a parent field compare.
@@ -362,7 +370,7 @@ $script:NeoIPCMetadataTranslationIgnoredTokens = @{
 # but the thousands of strings on metadata/common are dominated by internal labels no end-user sees (program-rule and
 # program-rule-variable names — #{var} expression identifiers — raw data-element / category / userRole names). So
 # every (type, TOKEN) listed below is ELEVATED to the given Weblate priority (higher = translated first); every
-# (type, TOKEN) NOT listed is DEPRIORITISED to $NeoIPCMetadataLowTranslationPriority so translators clear the
+# (type, TOKEN) NOT listed is DEPRIORITIZED to $NeoIPCMetadataLowTranslationPriority so translators clear the
 # user-facing strings first and the internal ones sink to the bottom of the queue (nothing is excluded — the
 # whole surface stays translatable). The bands: form-entry labels (200) > option values / notifications /
 # org-unit names (150) > user-facing titles + descriptions (100, the Weblate default — no flag emitted) > the
