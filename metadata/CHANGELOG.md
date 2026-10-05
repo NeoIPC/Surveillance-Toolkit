@@ -30,7 +30,8 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
 - `dist/README.md` deploys the package with NeoIPC-Tools' `Deploy-NeoIPCMetadata`, which writes only
   what differs, links in a second request what DHIS2 leaves unlinked in one, and verifies the result,
   where it had the package imported twice. It names the DHIS2 lines the package is verified on: 2.40.12,
-  2.41.10, 2.42.6 and 2.43.1.
+  2.41.10, 2.42.6 and 2.43.1. On an earlier patch of those lines, or on another line, the deployment
+  stops before writing anything unless told to accept the release.
 
 ### Fixed
 

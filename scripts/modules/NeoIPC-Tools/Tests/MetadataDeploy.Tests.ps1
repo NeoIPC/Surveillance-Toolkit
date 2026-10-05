@@ -94,7 +94,8 @@ InModuleScope 'NeoIPC-Tools' {
                     $name, $target = $ref -split '>'
                     $props[$name.TrimEnd('[', ']')] = [pscustomobject]@{ Owner = $true; Persisted = $true; Embedded = $false; Collection = $name.EndsWith('[]'); Target = $klassOf[$target] }
                 }
-                $entry = [pscustomobject]@{ Plural = $f[0]; Klass = $klassOf[$f[0]]; Order = [int]$f[2]; Shareable = $script:FakeShareable.Contains($f[0]); Properties = $props }
+                $entry = [pscustomobject]@{ Plural = $f[0]; Klass = $klassOf[$f[0]]; Order = [int]$f[2]; Shareable = $script:FakeShareable.Contains($f[0])
+                    DataShareable = $script:FakeDataShareable.Contains($f[0]); Properties = $props }
                 $byPlural[$f[0]] = $entry; $byKlass[$entry.Klass] = $entry
             }
             [pscustomobject]@{ ByPlural = $byPlural; ByKlass = $byKlass }
@@ -111,7 +112,8 @@ InModuleScope 'NeoIPC-Tools' {
                     if ($name.EndsWith('[]')) { @{ name = $name.TrimEnd('[', ']'); collectionName = $name.TrimEnd('[', ']'); owner = $true; persisted = $true; collection = $true; itemKlass = $klassOf[$target]; klass = 'java.util.List'; embeddedObject = $false } }
                     else { @{ name = $name; owner = $true; persisted = $true; collection = $false; klass = $klassOf[$target]; embeddedObject = $false } }
                 }
-                @{ name = $f[0]; plural = $f[0]; klass = $klassOf[$f[0]]; order = [int]$f[2]; shareable = $script:FakeShareable.Contains($f[0]); properties = @($props) }
+                @{ name = $f[0]; plural = $f[0]; klass = $klassOf[$f[0]]; order = [int]$f[2]; shareable = $script:FakeShareable.Contains($f[0])
+                    dataShareable = $script:FakeDataShareable.Contains($f[0]); properties = @($props) }
             }
             @{ schemas = @($schemas) }
         }
@@ -124,6 +126,9 @@ InModuleScope 'NeoIPC-Tools' {
                 'optionSets', 'optionGroups', 'optionGroupSets', 'organisationUnitGroups', 'organisationUnitGroupSets', 'dataElements',
                 'dataElementGroups', 'validationRules', 'trackedEntityAttributes', 'trackedEntityTypes', 'programStages', 'programs',
                 'programIndicators'), [System.StringComparer]::Ordinal)
+        # Those whose sharing also grants data access, as DHIS2's schema descriptors set it on every line (`dataShareable`).
+        $script:FakeDataShareable = [System.Collections.Generic.HashSet[string]]::new([string[]]@('programs', 'programStages', 'trackedEntityTypes'),
+            [System.StringComparer]::Ordinal)
 
         # ---- the fake DHIS2 -------------------------------------------------------------------------------------
         # The owning collections whose child's own row holds its parent: type, property, child type.
@@ -401,9 +406,11 @@ InModuleScope 'NeoIPC-Tools' {
                 $p = $Path -replace '^api/', ''
                 if ($p -eq 'system/info') { return @{ version = $script:Fake.Version } }
                 if ($p -eq 'schemas') {
-                    # Like DHIS2, the schema read carries the shareable flag only when it is asked for.
+                    # Like DHIS2, the schema read carries the sharing flags only when they are asked for.
                     $f = New-SchemaResponseFixture
-                    if ((@($Fields) -join ',') -notmatch '(^|,)shareable(,|$)') { foreach ($s in $f.schemas) { $s.Remove('shareable') } }
+                    foreach ($flag in 'shareable', 'dataShareable') {
+                        if ((@($Fields) -join ',') -notmatch "(^|,)$flag(,|$)") { foreach ($s in $f.schemas) { $s.Remove($flag) } }
+                    }
                     return $f
                 }
                 if ($p -eq 'tracker/events') {
@@ -558,6 +565,21 @@ InModuleScope 'NeoIPC-Tools' {
         }
     }
 
+    Describe 'Test-NeoIPCDeployVerifiedVersion (the releases the deployment was verified on, and later patches)' {
+        It 'counts <Text> as verified: <Verified>' -ForEach @(
+            @{ Text = '2.40.12'; Verified = $true }
+            @{ Text = '2.41.10'; Verified = $true }
+            @{ Text = '2.41.11'; Verified = $true }
+            @{ Text = '2.42.6.1'; Verified = $true }
+            @{ Text = '2.43.1'; Verified = $true }
+            @{ Text = '2.40.11'; Verified = $false }
+            @{ Text = '2.41.9'; Verified = $false }
+            @{ Text = '2.43-SNAPSHOT'; Verified = $false }
+            @{ Text = '2.39.6'; Verified = $false }
+            @{ Text = '2.44.0'; Verified = $false }
+        ) { (Test-NeoIPCDeployVerifiedVersion -Version (ConvertTo-NeoIPCDhis2Version -Text $Text)) | Should -Be $Verified }
+    }
+
     Describe 'Compare-NeoIPCDeployObject (what DHIS2 holds as the package states compares equal)' {
         It 'applies DHIS2''s normalizations: dates, derived and unstored fields, renumbered sortOrder, managed versions, added nested keys' {
             $v = [version]'2.41.10'
@@ -584,6 +606,15 @@ InModuleScope 'NeoIPC-Tools' {
                 -Live ([ordered]@{ id = 's1'; options = @(@{ id = 'b' }, @{ id = 'a' }) })) | Should -Be @('options')
             (Compare-NeoIPCDeployObject -Type 'programs' -Version $v -PackageObject ([ordered]@{ id = 'p1'; programStages = @(@{ id = 'a' }, @{ id = 'b' }) }) `
                 -Live ([ordered]@{ id = 'p1'; programStages = @(@{ id = 'b' }, @{ id = 'a' }) })).Count | Should -Be 0
+        }
+        It 'compares two children whose ids differ only in case apart (a change in <Changed>)' -ForEach @(
+            @{ Changed = 'PSDECASE001' }
+            @{ Changed = 'psdeCASE001' }
+        ) {
+            $kid = { param([string]$Id, [bool]$Compulsory) [ordered]@{ id = $Id; compulsory = $Compulsory; programStage = [ordered]@{ id = 'ps1' }; dataElement = [ordered]@{ id = "de$Id" } } }
+            $pkg = [ordered]@{ id = 'ps1'; name = 'S'; programStageDataElements = @((& $kid 'PSDECASE001' ($Changed -ceq 'PSDECASE001')), (& $kid 'psdeCASE001' ($Changed -ceq 'psdeCASE001'))) }
+            $live = [ordered]@{ id = 'ps1'; name = 'S'; programStageDataElements = @((& $kid 'PSDECASE001' $false), (& $kid 'psdeCASE001' $false)) }
+            (Compare-NeoIPCDeployObject -Type 'programStages' -Version ([version]'2.41.10') -PackageObject $pkg -Live $live) | Should -Be @('programStageDataElements')
         }
         It 'reports a translation the package carries but DHIS2 lacks, and not one only DHIS2 carries' {
             $v = [version]'2.41.10'
@@ -636,6 +667,45 @@ InModuleScope 'NeoIPC-Tools' {
         }
     }
 
+    Describe 'Get-NeoIPCDeploySharingLoss (what writing the package''s sharing takes away)' {
+        BeforeAll {
+            # Parsed from JSON, as the instance's answer and the package are: a hashtable literal folds keys that differ
+            # only in case.
+            function Get-Loss([string]$Live, [string]$Package, [switch]$DataShareable) {
+                $l = Convert-NeoIPCSharing ($Live | ConvertFrom-Json -AsHashtable)
+                $p = Convert-NeoIPCSharing ($Package | ConvertFrom-Json -AsHashtable)
+                $loss = Get-NeoIPCDeploySharingLoss -Live $l -Package $p -DataShareable:$DataShareable
+                , $loss
+            }
+        }
+        It 'reports <Case>' -ForEach @(
+            @{ Case = 'a narrowed public access string'; Live = '{"public":"rw------"}'; Package = '{"public":"r-------"}'
+                Expected = 'public access loses metadata write (rw------ to r-------)' }
+            @{ Case = 'a user-group grant the package leaves out'; Live = '{"public":"r-------","userGroups":{"ugAAAAAAAA1":{"id":"ugAAAAAAAA1","access":"rw------"}}}'
+                Package = '{"public":"r-------"}'; Expected = 'user group ugAAAAAAAA1 loses metadata read, metadata write (rw------ to no grant)' }
+            @{ Case = 'a narrowed user grant'; Live = '{"public":"--------","users":{"usAAAAAAAA1":{"id":"usAAAAAAAA1","access":"rw------"}}}'
+                Package = '{"public":"--------","users":{"usAAAAAAAA1":{"id":"usAAAAAAAA1","access":"r-------"}}}'; Expected = 'user usAAAAAAAA1 loses metadata write (rw------ to r-------)' }
+            @{ Case = 'a missing public access string, which grants every permission'; Live = '{"owner":"usAAAAAAAA1"}'; Package = '{"public":"r-------"}'
+                Expected = 'public access loses metadata write (no access string to r-------)' }
+            @{ Case = 'the grant of one of two user groups whose ids differ only in case'
+                Live = '{"public":"--------","userGroups":{"ugCASE00001":{"id":"ugCASE00001","access":"r-------"},"UGCASE00001":{"id":"UGCASE00001","access":"r-------"}}}'
+                Package = '{"public":"--------","userGroups":{"ugCASE00001":{"id":"ugCASE00001","access":"r-------"}}}'; Expected = 'user group UGCASE00001 loses metadata read (r------- to no grant)' }
+        ) {
+            (Get-Loss $Live $Package) -join '|' | Should -BeExactly $Expected
+        }
+        It 'counts the data permissions only for a type that shares data' {
+            (Get-Loss '{"public":"rwrw----"}' '{"public":"rw------"}' -DataShareable) -join '|' | Should -BeExactly 'public access loses data read, data write (rwrw---- to rw------)'
+            (Get-Loss '{"public":"rwrw----"}' '{"public":"rw------"}').Count | Should -Be 0
+            (Get-Loss '{"public":"--------","users":{"usAAAAAAAA1":{"id":"usAAAAAAAA1"}}}' '{"public":"--------","users":{"usAAAAAAAA1":{"id":"usAAAAAAAA1","access":"rwr-----"}}}' -DataShareable) -join '|' |
+                Should -BeExactly 'user usAAAAAAAA1 loses data write (no access string to rwr-----)'
+        }
+        It 'reports nothing for sharing the package widens or keeps, nor for an access string DHIS2 does not accept' {
+            (Get-Loss '{"public":"r-------","userGroups":{"ugAAAAAAAA1":{"id":"ugAAAAAAAA1","access":"r-------"}}}' `
+                    '{"public":"rw------","userGroups":{"ugAAAAAAAA1":{"id":"ugAAAAAAAA1","access":"rw------"},"ugAAAAAAAA2":{"id":"ugAAAAAAAA2","access":"r-------"}}}').Count | Should -Be 0
+            (Get-Loss '{"public":"rwx-----"}' '{"public":"--------"}').Count | Should -Be 0 -Because 'DHIS2 grants nothing for an access string it does not accept'
+        }
+    }
+
     Describe 'Live reads (a 200 without the list asked for is a failed read)' {
         It 'refuses a list read whose response has no list, or a null one, under the type''s key (<Case>)' -ForEach @(
             @{ Case = 'no key'; Response = @{ pager = @{ page = 1 } } }
@@ -663,9 +733,14 @@ InModuleScope 'NeoIPC-Tools' {
             Mock Invoke-NeoIPCDhis2Get { $script:LiveAnswer }
             { Get-NeoIPCMetadataSchemaIndex -Endpoint @{ Auth = @{} } } | Should -Throw "*did not return a 'schemas' collection*"
         }
-        It 'refuses a schema read that carries no shareable flag, which would read every type as one without sharing' {
-            Mock Invoke-NeoIPCDhis2Get { @{ schemas = @(@{ name = 'optionSet'; plural = 'optionSets'; klass = 'org.hisp.dhis.option.OptionSet'; order = 1050; properties = @() }) } }
-            { Get-NeoIPCMetadataSchemaIndex -Endpoint @{ Auth = @{} } } | Should -Throw "*'shareable' flag of 'optionSets'*"
+        It 'refuses a schema read that carries no <Flag> flag, which would read every type as one without that sharing' -ForEach @(
+            @{ Flag = 'shareable'; Present = @{ dataShareable = $false } }
+            @{ Flag = 'dataShareable'; Present = @{ shareable = $true } }
+        ) {
+            $schema = @{ name = 'optionSet'; plural = 'optionSets'; klass = 'org.hisp.dhis.option.OptionSet'; order = 1050; properties = @() } + $Present
+            $script:LiveAnswer = @{ schemas = @($schema) }
+            Mock Invoke-NeoIPCDhis2Get { $script:LiveAnswer }
+            { Get-NeoIPCMetadataSchemaIndex -Endpoint @{ Auth = @{} } } | Should -Throw "*'$Flag' flag of 'optionSets'*"
         }
     }
 
@@ -1025,6 +1100,8 @@ InModuleScope 'NeoIPC-Tools' {
             @{ Kind = 'OptionNameChange'; Case = 'an option renamed'; Live = $null; Change = { param($p) $p['options'][0]['name'] = 'Uno' } }
             @{ Kind = 'SharingGrantRemoval'; Case = 'a user-group grant'; Change = { param($p) $p['dataElements'][0]['sharing'] = [ordered]@{ public = 'r-------' } }
                 Live = { (Get-FakeObject 'dataElements' 'deAAAAAAAA1')['sharing'] = @{ public = 'r-------'; userGroups = @{ ugAAAAAAAA1 = @{ id = 'ugAAAAAAAA1'; access = 'r-------' } } } } }
+            @{ Kind = 'SharingGrantRemoval'; Case = 'a narrowed public access string'; Change = { param($p) $p['dataElements'][0]['sharing'] = [ordered]@{ public = 'r-------' } }
+                Live = { (Get-FakeObject 'dataElements' 'deAAAAAAAA1')['sharing'] = @{ public = 'rw------' } } }
             @{ Kind = 'OrphanDelete'; Case = 'an action its rule drops'; Live = $null; Change = { param($p) $p['programRules'][1]['programRuleActions'] = @(); $p['programRuleActions'] = @($p['programRuleActions'][0], $p['programRuleActions'][2]) } }
         ) {
             $pkg = New-TestPackage
@@ -1036,6 +1113,50 @@ InModuleScope 'NeoIPC-Tools' {
             $r = Invoke-TestDeploy $pkg @{ AllowHazard = @($Kind) }
             $r.Succeeded | Should -BeTrue
             @($r.Hazards | Where-Object Kind -eq $Kind).Count | Should -BeGreaterThan 0
+        }
+
+        It 'names each permission the package''s sharing takes away, the data permissions only for a type that shares data' {
+            $pkg = New-TestPackage
+            Set-FakeFromPackage $pkg
+            (Get-FakeObject 'dataElements' 'deAAAAAAAA1')['sharing'] = @{ public = 'rwrw----' }
+            (Get-FakeObject 'programs' 'prAAAAAAAA1')['sharing'] = @{ public = 'rwrw----' }
+            $pkg['dataElements'][0]['sharing'] = [ordered]@{ public = 'rw------' }
+            $pkg['programs'][0]['sharing'] = [ordered]@{ public = 'rw------' }
+            { Invoke-TestDeploy $pkg } | Should -Throw '*Unacknowledged hazard(s): SharingGrantRemoval*'
+            (Get-CommitRequest).Count | Should -Be 0
+            $r = Invoke-TestDeploy $pkg @{ AllowHazard = @('SharingGrantRemoval') }
+            $r.Succeeded | Should -BeTrue
+            @($r.Hazards | Where-Object Kind -eq 'SharingGrantRemoval' | ForEach-Object { "$($_.Type) $($_.Id): $($_.Detail)" }) |
+                Should -BeExactly @('programs prAAAAAAAA1: public access loses data read, data write (rwrw---- to rw------)') -Because 'a data element shares no data'
+        }
+
+        It 'stops before any write on a DHIS2 release it was not verified on (<Version>), unless acknowledged or synthetic' -ForEach @(
+            @{ Version = '2.44.0' }
+            @{ Version = '2.41.9' }
+        ) {
+            $pkg = New-TestPackage
+            Set-FakeFromPackage $pkg
+            $pkg['dataElements'][0]['name'] = 'Renamed'
+            $script:Fake.Version = $Version
+            { Invoke-TestDeploy $pkg } | Should -Throw '*Unacknowledged hazard(s): UnverifiedVersion*'
+            (Get-CommitRequest).Count | Should -Be 0
+            $r = Invoke-TestDeploy $pkg @{ AllowHazard = @('UnverifiedVersion') }
+            $r.Succeeded | Should -BeTrue
+            $h = @($r.Hazards | Where-Object Kind -eq 'UnverifiedVersion')
+            $h.Count | Should -Be 1
+            "$($h[0].Type) $($h[0].Id) $($h[0].Detail)" |
+                Should -BeExactly "DHIS2 $Version is no release this deployment was verified on: 2.40.12, 2.41.10, 2.42.6, 2.43.1, or a later patch of one of their lines"
+            (Invoke-TestDeploy $pkg @{ SyntheticInstance = $true }).Succeeded | Should -BeTrue -Because 'a synthetic deployment acknowledges every hazard'
+        }
+
+        It 'raises no version hazard on a later patch of a verified line' {
+            $pkg = New-TestPackage
+            Set-FakeFromPackage $pkg
+            $pkg['dataElements'][0]['name'] = 'Renamed'
+            $script:Fake.Version = '2.41.11'
+            $r = Invoke-TestDeploy $pkg
+            $r.Succeeded | Should -BeTrue
+            @($r.Hazards).Count | Should -Be 0
         }
 
         It 'aborts when a rule action the package keeps refers to a section it drops, naming the action' {
@@ -1796,6 +1917,45 @@ InModuleScope 'NeoIPC-Tools' {
             @((Get-FakeObject 'optionSets' 'osAAAAAAAA2')['options'] | ForEach-Object { $_['id'] }) | Should -Be @('opAAAAAAAA3', 'opAAAAAAAA2')
             (Get-FakeObject 'optionSets' 'osAAAAAAAA1')['version'] | Should -Be 3
             (Get-FakeObject 'optionSets' 'osAAAAAAAA2')['version'] | Should -Be 2
+        }
+
+        It 'keeps two option sets whose ids differ only in case apart: each one''s options created and checked for names' {
+            # DHIS2 UIDs are case-sensitive. The second set holds an option named and coded like one of the first set's,
+            # which DHIS2 allows across sets.
+            $pkg = New-TestPackage
+            $pkg['optionSets'] += [ordered]@{ id = 'OSAAAAAAAA1'; code = 'OS1B'; name = 'Twin set'; valueType = 'TEXT'; version = 1; options = @([ordered]@{ id = 'opBBBBBBBB1' }) }
+            $pkg['options'] += [ordered]@{ id = 'opBBBBBBBB1'; code = '1'; name = 'One'; sortOrder = 1; optionSet = [ordered]@{ id = 'OSAAAAAAAA1' } }
+            Set-FakeFromPackage $pkg
+            $pkg['options'] += [ordered]@{ id = 'opAAAAAAAA3'; code = '3'; name = 'Three'; sortOrder = 3; optionSet = [ordered]@{ id = 'osAAAAAAAA1' } }
+            $pkg['optionSets'][0]['options'] += [ordered]@{ id = 'opAAAAAAAA3' }
+            $pkg['options'] += [ordered]@{ id = 'opBBBBBBBB2'; code = '2'; name = 'Two'; sortOrder = 2; optionSet = [ordered]@{ id = 'OSAAAAAAAA1' } }
+            $pkg['optionSets'][1]['options'] += [ordered]@{ id = 'opBBBBBBBB2' }
+            $r = Invoke-TestDeploy $pkg
+            $r.Succeeded | Should -BeTrue -Because "the twin's new option clashes with no option of its own set"
+            foreach ($set in @(@{ Id = 'osAAAAAAAA1'; Version = 3 }, @{ Id = 'OSAAAAAAAA1'; Version = 2 })) {
+                $row = @($r.Versions | Where-Object { $_.Type -eq 'optionSets' -and $_.Id -ceq $set.Id })
+                $row.Count | Should -Be 1
+                "$($row[0].Expected) $($row[0].Stored)" | Should -Be "$($set.Version) $($set.Version)" -Because 'one option created in each set moves each version once'
+            }
+        }
+
+        It 'names the option a set detaches apart from one it gives away whose id differs only in case' {
+            $pkg = New-TestPackage
+            $pkg['optionSets'] += [ordered]@{ id = 'osAAAAAAAA2'; code = 'OS2'; name = 'Set two'; valueType = 'TEXT'; version = 1; options = @([ordered]@{ id = 'opAAAAAAAA3' }) }
+            $pkg['options'] += [ordered]@{ id = 'opAAAAAAAA3'; code = '3'; name = 'Three'; sortOrder = 1; optionSet = [ordered]@{ id = 'osAAAAAAAA2' } }
+            $pkg['optionSets'][0]['options'] += [ordered]@{ id = 'OPAAAAAAAA2' }
+            $pkg['options'] += [ordered]@{ id = 'OPAAAAAAAA2'; code = '9'; name = 'Nine'; sortOrder = 3; optionSet = [ordered]@{ id = 'osAAAAAAAA1' } }
+            Set-FakeFromPackage $pkg
+            # The first set gives opAAAAAAAA2 to the second set and drops OPAAAAAAAA2, which the package no longer carries.
+            $pkg['optionSets'][0]['options'] = @([ordered]@{ id = 'opAAAAAAAA1' })
+            $pkg['optionSets'][1]['options'] = @([ordered]@{ id = 'opAAAAAAAA3' }, [ordered]@{ id = 'opAAAAAAAA2' })
+            $pkg['options'][1]['optionSet'] = [ordered]@{ id = 'osAAAAAAAA2' }
+            $pkg['options'][1]['sortOrder'] = 2
+            $pkg['options'] = @($pkg['options'] | Where-Object { [string]$_['id'] -cne 'OPAAAAAAAA2' })
+            $r = Invoke-TestDeploy $pkg @{ AllowHazard = @('OptionSetMembership') }
+            $r.Succeeded | Should -BeTrue
+            @($r.Hazards | Where-Object { $_.Kind -eq 'OptionSetMembership' } | ForEach-Object { $_.Detail }) | Should -BeExactly @(
+                "loses 1 option(s): OPAAAAAAAA2; the set's write detaches them, leaving them in no set; gives 1 option(s) to another set: opAAAAAAAA2 to osAAAAAAAA2")
         }
 
         It 'names each option whose stored values would show another name' {

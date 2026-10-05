@@ -379,5 +379,31 @@ InModuleScope 'NeoIPC-Tools' {
             { Test-NeoIPCProgramRuleActionServed -Package @{ programRules = @([ordered]@{ id = 'rule0000001' }) } -Auth $script:SAuth } |
                 Should -Throw '*declares no program-rule actions*'
         }
+
+        It 'keeps two rules whose ids differ only in case apart, as DHIS2 does' {
+            # The first rule serves one of its two actions, the second all of its own.
+            $pkg = @{
+                programRules       = @([ordered]@{ id = 'ruleCASE001'; code = 'R1' }, [ordered]@{ id = 'RULEcase001'; code = 'R2' })
+                programRuleActions = @(
+                    [ordered]@{ id = 'act00000011'; programRule = [ordered]@{ id = 'ruleCASE001' } }
+                    [ordered]@{ id = 'act00000012'; programRule = [ordered]@{ id = 'ruleCASE001' } }
+                    [ordered]@{ id = 'act00000021'; programRule = [ordered]@{ id = 'RULEcase001' } })
+            }
+            $script:SServed = @(@{ id = 'ruleCASE001'; programRuleActions = @(@{ id = 'act00000011' }) }, @{ id = 'RULEcase001'; programRuleActions = @(@{ id = 'act00000021' }) })
+            $r = @((Test-NeoIPCProgramRuleActionServed -Package $pkg -Auth $script:SAuth) | Where-Object { $_.Kind })
+            $r.Count | Should -Be 1
+            $r[0].RuleId | Should -BeExactly 'ruleCASE001'
+            $r[0].RuleCode | Should -BeExactly 'R1'
+            @($r[0].ActionIds) -join ',' | Should -BeExactly 'act00000012'
+        }
+
+        It 'fails a read whose response has no rule list, or a null one, rather than reporting every rule unserved (<Case>)' -ForEach @(
+            @{ Case = 'no key'; Response = @{ pager = @{ page = 1 } } }
+            @{ Case = 'a null value'; Response = @{ programRules = $null } }
+        ) {
+            $script:SAnswer = $Response
+            Mock Invoke-NeoIPCDhis2Get { $script:SAnswer }
+            { Test-NeoIPCProgramRuleActionServed -Package $script:SPkg -Auth $script:SAuth } | Should -Throw "*did not return a 'programRules' collection*"
+        }
     }
 }

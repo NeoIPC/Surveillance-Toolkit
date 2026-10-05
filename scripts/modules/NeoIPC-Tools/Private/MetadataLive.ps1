@@ -79,21 +79,23 @@ function Get-NeoIPCMetadataLiveList {
 
 function Get-NeoIPCMetadataSchemaIndex {
     # The schema facts a deployment needs, read from /api/schemas: per plural, the class, the commit order, whether its
-    # objects carry sharing, and for each property, by its JSON name, whether it is owned, persisted, embedded or a
-    # collection, and the class it refers to. Returns [pscustomobject]@{ ByPlural; ByKlass }, each entry
-    # { Plural; Klass; Order; Shareable; Properties }.
+    # objects carry sharing and whether that sharing grants data access, and for each property, by its JSON name,
+    # whether it is owned, persisted, embedded or a collection, and the class it refers to. Returns
+    # [pscustomobject]@{ ByPlural; ByKlass }, each entry { Plural; Klass; Order; Shareable; DataShareable; Properties }.
     [CmdletBinding()]
     [OutputType([pscustomobject])]
     param([Parameter(Mandatory)][hashtable]$Endpoint)
     $resp = Invoke-NeoIPCDhis2Get @Endpoint -Path 'api/schemas' -AsHashtable -Confirm:$false -WhatIf:$false `
-        -Fields 'name,plural,klass,order,shareable,properties[name,collectionName,owner,persisted,collection,klass,itemKlass,embeddedObject]'
+        -Fields 'name,plural,klass,order,shareable,dataShareable,properties[name,collectionName,owner,persisted,collection,klass,itemKlass,embeddedObject]'
     if ($resp -isnot [System.Collections.IDictionary] -or $null -eq $resp['schemas']) { throw "Reading /api/schemas did not return a 'schemas' collection." }
     $byPlural = [System.Collections.Generic.Dictionary[string, object]]::new([System.StringComparer]::Ordinal)
     $byKlass = [System.Collections.Generic.Dictionary[string, object]]::new([System.StringComparer]::Ordinal)
     foreach ($s in @($resp['schemas'])) {
         if ($s -isnot [System.Collections.IDictionary]) { continue }
-        # A schema read without the flag would make every type one without sharing, and the sharing rules silently moot.
-        if ($null -eq $s['shareable']) { throw "Reading /api/schemas did not return the 'shareable' flag of '$($s['plural'])'." }
+        # A schema read without the flags would make every type one without sharing, and the sharing rules silently moot.
+        foreach ($flag in 'shareable', 'dataShareable') {
+            if ($null -eq $s[$flag]) { throw "Reading /api/schemas did not return the '$flag' flag of '$($s['plural'])'." }
+        }
         $props = [System.Collections.Generic.Dictionary[string, object]]::new([System.StringComparer]::Ordinal)
         foreach ($p in @($s['properties'])) {
             if ($p -isnot [System.Collections.IDictionary]) { continue }
@@ -106,7 +108,7 @@ function Get-NeoIPCMetadataSchemaIndex {
                 Target     = [string]$(if ($p['collection']) { $p['itemKlass'] } else { $p['klass'] })
             }
         }
-        $entry = [pscustomobject]@{ Plural = [string]$s['plural']; Klass = [string]$s['klass']; Order = [int]$s['order']; Shareable = [bool]$s['shareable']; Properties = $props }
+        $entry = [pscustomobject]@{ Plural = [string]$s['plural']; Klass = [string]$s['klass']; Order = [int]$s['order']; Shareable = [bool]$s['shareable']; DataShareable = [bool]$s['dataShareable']; Properties = $props }
         if ($entry.Plural) { $byPlural[$entry.Plural] = $entry }
         if ($entry.Klass) { $byKlass[$entry.Klass] = $entry }
     }

@@ -48,6 +48,9 @@ function Deploy-NeoIPCMetadata {
         package leaves out is cleared.
 
         Before any write, a hazard gate aborts unless each kind found is acknowledged with -AllowHazard:
+          - UnverifiedVersion: an instance on a DHIS2 release the deployment was not verified on: a line other than
+            2.40 to 2.43, or a patch below 2.40.12, 2.41.10, 2.42.6 or 2.43.1 in its line. The DHIS2 behaviour its
+            rules answer to was read in the source of those four releases and observed on them;
           - OrphanDelete: a child the package drops from a written parent, which DHIS2 deletes with the parent's
             write (a stage's section, a rule's action, a program's attribute), and which neither -Delete nor another
             parent of the package lists;
@@ -57,8 +60,10 @@ function Deploy-NeoIPCMetadata {
           - OptionCodeChange: an option whose code changes (stored values are keyed by code);
           - OptionNameChange: an option that keeps its code and changes its name: every value stored under the code
             shows the new name, so each must be checked to be a new spelling of the same thing, not a new meaning;
-          - SharingGrantRemoval: a sharing grant present live but absent from the sharing the package gives the
-            object;
+          - SharingGrantRemoval: a permission the live sharing grants, through the public access string or a user's
+            or user group's grant, that the sharing the package gives the object does not: a grant the package leaves
+            out, or an access string it narrows. A missing access string grants every permission, and the data
+            permissions count only for a type that shares data;
           - ActiveRuleDelete: a rule in -Delete that is not inert on the instance (inert: condition 'false' and no
             actions). Clients keep running a rule they cached after the server deletes it, so a rule is first made
             inert by one deployment and deleted by a later one.
@@ -155,7 +160,7 @@ function Deploy-NeoIPCMetadata {
         [string]$Scheme = 'https',
         [Nullable[int]]$Port = $null,
         [System.Collections.IDictionary]$Delete = @{},
-        [ValidateSet('OrphanDelete', 'OptionSetMembership', 'OptionCodeChange', 'OptionNameChange', 'SharingGrantRemoval', 'ActiveRuleDelete')]
+        [ValidateSet('UnverifiedVersion', 'OrphanDelete', 'OptionSetMembership', 'OptionCodeChange', 'OptionNameChange', 'SharingGrantRemoval', 'ActiveRuleDelete')]
         [string[]]$AllowHazard = @(),
         [switch]$DryRun,
         [switch]$SkipCacheClear,
@@ -500,7 +505,7 @@ function Deploy-NeoIPCMetadata {
     # An option that is created or changed is written with its set: from 2.41 only the set's write renumbers its
     # options' sortOrder to their list position, and an option written alone keeps the package's sortOrder, which
     # ties with or passes its neighbours.
-    $createdInSet = @{}
+    $createdInSet = [System.Collections.Generic.Dictionary[string, int]]::new($ordinal)
     if ($types.Contains('options')) {
         foreach ($o in $types['options']) {
             $st = $state['options'][[string]$o['id']]
@@ -621,6 +626,10 @@ function Deploy-NeoIPCMetadata {
     function Add-Hazard([string]$Kind, [string]$Type, [string]$Id, [string]$Detail) {
         $summary.Hazards.Add([pscustomobject]@{ Kind = $Kind; Type = $Type; Id = $Id; Detail = $Detail })
     }
+    if (-not (Test-NeoIPCDeployVerifiedVersion -Version $version)) {
+        Add-Hazard 'UnverifiedVersion' 'DHIS2' $summary.Dhis2Version ("is no release this deployment was verified on: {0}, or a later patch of one of their lines" -f
+            (($script:NeoIPCDeployVerifiedReleases | ForEach-Object { "$_" }) -join ', '))
+    }
     foreach ($o in $orphans) {
         if (-not ($deleteIds.ContainsKey($o.Type) -and $deleteIds[$o.Type].Contains($o.Id))) {
             Add-Hazard 'OrphanDelete' $o.Type $o.Id "dropped from $($o.ParentType) $($o.ParentId).$($o.Property), which DHIS2 deletes with the parent's write"
@@ -639,7 +648,7 @@ function Deploy-NeoIPCMetadata {
             $inserted = @(for ($i = 0; $i -lt $lastLive; $i++) { if ($liveList -cnotcontains $keep[$i]) { $keep[$i] } })
             # An option the package gives to another set moves there in R1, with both sets' writes; one it lists in no
             # set is only detached. Either way, the values stored under this set's data elements keep its code.
-            $movedTo = @{}
+            $movedTo = [System.Collections.Generic.Dictionary[string, string]]::new($ordinal)
             foreach ($o in $lost) {
                 $to = if ($pkgById.Contains('options') -and $pkgById['options'].ContainsKey($o)) { Get-NeoIPCDeployRefId $pkgById['options'][$o]['optionSet'] }
                 if ($to -and $to -cne $id) { $movedTo[$o] = $to }
@@ -673,7 +682,7 @@ function Deploy-NeoIPCMetadata {
         # request, a member the same request drops included, and refuses one whose name or code another of them holds
         # (OptionObjectBundleHook.checkDuplicateOption, E4028, comparing case-sensitively and skipping a member without
         # a name or code). A name or code passed from one option to another therefore takes two deployments.
-        $members = @{}
+        $members = [System.Collections.Generic.Dictionary[string, object]]::new($ordinal)
         foreach ($id in $bodies['options'].Keys) {
             $sid = Get-NeoIPCDeployRefId $pkgById['options'][$id]['optionSet']
             if ($sid -and -not $members.ContainsKey($sid) -and $live.Contains('optionSets') -and $live['optionSets'][$sid]) { $members[$sid] = Get-NeoIPCDeployRefIdList $live['optionSets'][$sid]['options'] }
@@ -698,15 +707,12 @@ function Deploy-NeoIPCMetadata {
         }
     }
     foreach ($type in $types.Keys) {
+        $dataShareable = $schema.ByPlural.ContainsKey($type) -and $schema.ByPlural[$type].DataShareable
         foreach ($id in $bodies[$type].Keys) {
             $o = $pkgById[$type][$id]; $l = $live[$type][$id]
             if (-not $l -or -not $o['sharing']) { continue }
-            $ps = Convert-NeoIPCSharing $o['sharing']; $ls = Convert-NeoIPCSharing $l['sharing']
-            foreach ($g in 'users', 'userGroups') {
-                $have = if ($ps.Contains($g)) { @($ps[$g].Keys) } else { @() }
-                $lost = @(if ($ls.Contains($g)) { @($ls[$g].Keys) | Where-Object { $have -cnotcontains $_ } })
-                if ($lost.Count -gt 0) { Add-Hazard 'SharingGrantRemoval' $type $id "$g grant(s) removed: $($lost -join ', ')" }
-            }
+            $lost = Get-NeoIPCDeploySharingLoss -Live (Convert-NeoIPCSharing $l['sharing']) -Package (Convert-NeoIPCSharing $o['sharing']) -DataShareable:$dataShareable
+            if ($lost.Count -gt 0) { Add-Hazard 'SharingGrantRemoval' $type $id ($lost -join '; ') }
         }
     }
     if ($deleteIds.ContainsKey('programRules')) {
@@ -736,7 +742,7 @@ function Deploy-NeoIPCMetadata {
     #     the deployment.
     # Rules the package makes inert are written in the same first request.
     $detachIds = [System.Collections.Generic.HashSet[string]]::new($ordinal)
-    $detachDrop = @{}
+    $detachDrop = [System.Collections.Generic.Dictionary[string, object]]::new($ordinal)
     $recreated = [System.Collections.Generic.HashSet[string]]::new($ordinal)
     if ($removedLive.Count -gt 0) {
         $removedTypes = [System.Collections.Generic.HashSet[string]]::new([string[]]@($removedLive | ForEach-Object { ($_ -split '\|', 2)[0] }), $ordinal)

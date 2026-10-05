@@ -249,6 +249,18 @@ InModuleScope 'NeoIPC-Tools' {
             $sharing['userGroups']['ugTestAAA01']['access'] | Should -BeExactly 'r-------'
             (Resolve-NeoIPCSharingProfileKey -Sharing $sharing) | Should -BeExactly 'NEOIPC_READ'
         }
+        It 'keeps two grants whose user-group ids differ only in case apart, normalized and canonicalized' {
+            # Parsed from JSON, as DHIS2's answer and the package are: a PowerShell hashtable literal cannot hold both keys.
+            $raw = '{"public":"--------","userGroups":{"ugCASE00001":{"id":"ugCASE00001","access":"r-------"},"UGCASE00001":{"id":"UGCASE00001","access":"rw------"}}}' |
+                ConvertFrom-Json -AsHashtable
+            $sharing = Convert-NeoIPCSharing $raw
+            $canonical = ConvertTo-NeoIPCMetadataCanonical $sharing
+            foreach ($map in $sharing['userGroups'], $canonical['userGroups']) {
+                $map.Count | Should -Be 2
+                $map['ugCASE00001']['access'] | Should -BeExactly 'r-------'
+                $map['UGCASE00001']['access'] | Should -BeExactly 'rw------'
+            }
+        }
         It 'expands a profile key back into a DHIS2 sharing object' {
             $sharing = Expand-NeoIPCSharingProfile -Key 'NEOIPC_READ'
             $sharing['public'] | Should -BeExactly '--------'
@@ -522,6 +534,29 @@ InModuleScope 'NeoIPC-Tools' {
             $pkg = ConvertTo-NeoIPCMetadataPackage -Rows $rows
             @($pkg['optionSets'][0]['options'] | ForEach-Object { [string]$_['id'] }) |
                 Should -Be @('optCCC0003', 'optDDD0004', 'optAAA0001', 'optBBB0002')
+        }
+        It 'keeps the sortOrder of two options whose ids differ only in case apart' {
+            $rows = [ordered]@{
+                optionSets = @([ordered]@{ id = 'osAAA00001'; code = 'OS'; name = 'OS'; valueType = 'TEXT'; options = 'OPTCASE0001 optCASE0001' })
+                options    = @(
+                    [ordered]@{ id = 'OPTCASE0001'; code = 'a'; name = 'A'; sortOrder = '2'; optionSet = 'osAAA00001' }
+                    [ordered]@{ id = 'optCASE0001'; code = 'b'; name = 'B'; sortOrder = '1'; optionSet = 'osAAA00001' })
+            }
+            $pkg = ConvertTo-NeoIPCMetadataPackage -Rows $rows
+            @($pkg['optionSets'][0]['options'] | ForEach-Object { [string]$_['id'] }) -join ',' | Should -BeExactly 'optCASE0001,OPTCASE0001'
+        }
+        It 're-nests each child under its own parent when two parents'' ids differ only in case' {
+            $two = [ordered]@{ programStages = @(
+                    [ordered]@{ id = 'psCASE00001'; name = 'One'; program = [ordered]@{ id = 'progAAAA001' }; sortOrder = 1; repeatable = $false
+                        programStageDataElements = @([ordered]@{ id = 'psdeAAA0001'; programStage = [ordered]@{ id = 'psCASE00001' }; dataElement = [ordered]@{ id = 'deAAAA00001' }; compulsory = $false; sortOrder = 1 }) }
+                    [ordered]@{ id = 'PSCASE00001'; name = 'Two'; program = [ordered]@{ id = 'progAAAA001' }; sortOrder = 2; repeatable = $false
+                        programStageDataElements = @([ordered]@{ id = 'psdeBBB0002'; programStage = [ordered]@{ id = 'PSCASE00001' }; dataElement = [ordered]@{ id = 'deBBBB00002' }; compulsory = $false; sortOrder = 1 }) }) }
+            $work = ConvertFrom-NeoIPCMetadataJsonText -Json ($two | ConvertTo-Json -Depth 40)
+            $pkg = ConvertTo-NeoIPCMetadataPackage -Rows (ConvertFrom-NeoIPCMetadataPackage -Package $work)
+            foreach ($case in @(@{ Stage = 'psCASE00001'; Child = 'psdeAAA0001' }, @{ Stage = 'PSCASE00001'; Child = 'psdeBBB0002' })) {
+                $stage = @($pkg['programStages'] | Where-Object { [string]$_['id'] -ceq $case.Stage })[0]
+                @($stage['programStageDataElements'] | ForEach-Object { [string]$_['id'] }) -join ',' | Should -BeExactly $case.Child
+            }
         }
     }
 

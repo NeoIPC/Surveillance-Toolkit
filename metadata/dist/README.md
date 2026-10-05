@@ -44,7 +44,9 @@ depends on, will supersede them.
 ## Supported DHIS2 Versions
 
 The packages are verified with `Deploy-NeoIPCMetadata` (below) on DHIS2 **2.40.12**, **2.41.10**, **2.42.6** and
-**2.43.1**, the newest patch of each line; the manifest declares `2.40.12.0`.
+**2.43.1**, the newest patch of each line; the manifest declares `2.40.12.0`. On an earlier patch of those lines, or
+on another line, the deployment stops before writing anything unless `-AllowHazard UnverifiedVersion` accepts the
+release.
 
 Earlier 2.40 patches are **not** supported: `2.40.3.2` carries a confirmed defect, fixed in `2.40.4`, and nothing
 between `2.40.4` and `2.40.12` is exercised — so the declared version names a release the packages are tested on

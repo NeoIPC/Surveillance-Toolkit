@@ -417,8 +417,9 @@ function Test-NeoIPCProgramRuleActionServed {
     elseif ($Package -is [System.Collections.IDictionary]) { $pkg = $Package }
     else { throw 'Package must be a JSON string, a parsed hashtable, or supply -Path.' }
 
+    # Rule ids key these maps ordinally: DHIS2 UIDs are case-sensitive, and @{} would fold two that differ only in case.
     $ordinal = [System.StringComparer]::Ordinal
-    $expected = @{}
+    $expected = [System.Collections.Generic.Dictionary[string, object]]::new($ordinal)
     foreach ($act in @($pkg['programRuleActions'])) {
         if ($act -isnot [System.Collections.IDictionary]) { continue }
         $ruleRef = $act['programRule']
@@ -428,18 +429,18 @@ function Test-NeoIPCProgramRuleActionServed {
         [void]$expected[$ruleId].Add([string]$act['id'])
     }
     if ($expected.Count -eq 0) { throw 'The package declares no program-rule actions, so there is nothing whose serving could be checked.' }
-    $ruleCode = @{}
+    $ruleCode = [System.Collections.Generic.Dictionary[string, string]]::new($ordinal)
     foreach ($r in @($pkg['programRules'])) { if ($r -is [System.Collections.IDictionary]) { $ruleCode[[string]$r['id']] = [string]$r['code'] } }
 
     $getArgs = @{ Auth = $Auth; Scheme = $Scheme; Hostname = $Hostname }
     if ($null -ne $Port) { $getArgs['Port'] = $Port }
     $resp = Invoke-NeoIPCDhis2Get @getArgs -Path 'api/programRules' -Fields 'id', 'programRuleActions[id]' -AsHashtable -Confirm:$false -WhatIf:$false
-    if ($resp -isnot [System.Collections.IDictionary] -or -not $resp.Contains('programRules')) {
+    if ($resp -isnot [System.Collections.IDictionary] -or $null -eq $resp['programRules']) {
         throw "Reading the program rules back did not return a 'programRules' collection."
     }
     # A rule serving no actions comes with an empty collection (DHIS2 omits only null values), and one without the
     # collection reads the same: either is exactly a rule to report.
-    $served = @{}
+    $served = [System.Collections.Generic.Dictionary[string, object]]::new($ordinal)
     foreach ($r in @($resp['programRules'])) {
         if ($r -isnot [System.Collections.IDictionary] -or -not $r['id']) { continue }
         $served[[string]$r['id']] = [System.Collections.Generic.HashSet[string]]::new(

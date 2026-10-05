@@ -371,11 +371,12 @@ The gate runs before the first write and stops the deployment unless each hazard
 
 | Kind | What it is | Why it is a hazard |
 | --- | --- | --- |
+| `UnverifiedVersion` | An instance on a DHIS2 release the deployment was not verified on: a line other than 2.40 to 2.43, or a patch below 2.40.12, 2.41.10, 2.42.6 or 2.43.1 in its line | The behaviour this note records was read in the source of those four releases and observed on them; another release may keep, delete or refuse differently what a write touches |
 | `OrphanDelete` | A child a written parent no longer lists, and that neither `-Delete` nor another parent of the package lists | DHIS2 deletes it with the parent's write (section 1, item 2) |
 | `OptionSetMembership` | An option set that loses members, to no set or to another one, or gains one anywhere but at the end, or a set in `-Delete` | The values stored under the set's data elements keep the codes of the options it loses, and its write detaches those the package lists in no set; an insertion moves every later option in the list users pick from; deleting a set deletes its options |
 | `OptionCodeChange` | An option whose code changes | Stored values hold the option's code, not its id |
 | `OptionNameChange` | An option that keeps its code and changes its name | Stored values hold the code, so every value under it shows the new name; only a review tells a new spelling of the same thing from a new meaning |
-| `SharingGrantRemoval` | A user or user-group grant present on the instance and absent from the sharing the package gives the object | Users lose access |
+| `SharingGrantRemoval` | A permission the sharing on the instance grants, through the public access string or a user's or user group's grant, that the sharing the package gives the object does not: a grant the package leaves out, or an access string it narrows. DHIS2 reads an access string by position (metadata read and write, data read and write), checks the data positions only for a type whose schema shares data (`DefaultAclService`), and reads a missing access string as granting every permission (`AccessStringHelper.isEnabled`) | Users lose access |
 | `ActiveRuleDelete` | A rule in `-Delete` that is not inert on the instance | Clients keep running it (section 2.9) |
 
 A single option in `-Delete` stops the deployment whatever is acknowledged (section 2.4, item 4): drop it from its
@@ -460,7 +461,8 @@ deployments:
    program.
 4. Run `-DryRun`, review its plan, the children it moves, its hazards and its objects present only on the instance,
    decide on `-Delete` and `-AllowHazard`, then deploy. An `OptionNameChange` is acknowledged only once every option
-   it lists is known to keep its meaning under the new name.
+   it lists is known to keep its meaning under the new name, and an `UnverifiedVersion` only once the rehearsal of
+   step 2 has passed on that release.
 5. Check the result: the summary's verification, the forms in the data-entry app, and, where a deployment deleted
    a rule, that users clear Tracker Capture's cache. After a failed run, fix the cause and deploy again, with
    `-BumpProgramVersion` when its summary names programs under `ProgramVersionPending` (section 3).

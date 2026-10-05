@@ -104,7 +104,8 @@ function Convert-NeoIPCSharing {
     foreach ($grantKey in 'users', 'userGroups') {
         $grants = $Sharing[$grantKey]
         if ($grants -is [System.Collections.IDictionary] -and $grants.Count -gt 0) {
-            $normalized = [ordered]@{}
+            # Keyed ordinally: grants are keyed by UID, which DHIS2 compares case-sensitively; [ordered]@{} does not.
+            $normalized = [System.Collections.Specialized.OrderedDictionary]::new([System.StringComparer]::Ordinal)
             foreach ($gid in $grants.Keys) {
                 $grant = $grants[$gid]
                 $entry = [ordered]@{ id = [string]$gid }
@@ -591,7 +592,8 @@ function ConvertTo-NeoIPCMetadataCanonical {
     [OutputType([object])]
     param([Parameter(Mandatory)][AllowNull()]$Object)
     if ($Object -is [System.Collections.IDictionary]) {
-        $h = [ordered]@{}
+        # Ordinal like the sort: some maps are keyed by UIDs (a sharing's grants), which differ in case alone.
+        $h = [System.Collections.Specialized.OrderedDictionary]::new([System.StringComparer]::Ordinal)
         foreach ($k in (@($Object.Keys) | Sort-Object -CaseSensitive)) { $h["$k"] = ConvertTo-NeoIPCMetadataCanonical $Object[$k] }
         return $h
     }
@@ -891,7 +893,9 @@ function ConvertTo-NeoIPCMetadataPackage {
         $map = $script:NeoIPCMetadataTypeMaps[$type]
         if ($map.Nesting -ne 'NestedOnly' -or -not $objectsByType.ContainsKey($type)) { continue }
         $p = $map.Parent
-        $index = @{}
+        # Keyed ordinally: DHIS2 UIDs are case-sensitive, and @{} would hand two parents whose ids differ only in case
+        # each other's children.
+        $index = [System.Collections.Generic.Dictionary[string, object]]::new([System.StringComparer]::Ordinal)
         $objs = $objectsByType[$type]; $fks = $fkByType[$type]
         for ($k = 0; $k -lt $objs.Count; $k++) {
             $fk = $fks[$k]
@@ -910,7 +914,7 @@ function ConvertTo-NeoIPCMetadataPackage {
     # reach users as a scrambled choice list. Ties and options without a sortOrder keep the cell's order, after the
     # numbered ones.
     if ($objectsByType.ContainsKey('optionSets') -and $objectsByType.ContainsKey('options')) {
-        $sortOrderById = @{}
+        $sortOrderById = [System.Collections.Generic.Dictionary[string, long]]::new([System.StringComparer]::Ordinal)
         foreach ($o in $objectsByType['options']) { if ($o.Contains('sortOrder')) { $sortOrderById[[string]$o['id']] = [long]$o['sortOrder'] } }
         foreach ($os in $objectsByType['optionSets']) {
             if (-not $os.Contains('options')) { continue }

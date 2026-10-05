@@ -62,9 +62,11 @@ also attaches the program to no organisation units, so the hierarchy is yours to
 
 Deploy it with NeoIPC-Tools' `Deploy-NeoIPCMetadata`, which is verified on DHIS2 **2.40.12**,
 **2.41.10**, **2.42.6** and **2.43.1**; earlier 2.40 patches are not supported, `2.40.3.2` in
-particular carrying a confirmed defect that was fixed in `2.40.4`. A plain metadata import is no
-substitute: in one request DHIS2 can leave an option group set without its groups while reporting
-success, and repeated over an existing instance it fails from 2.42 on.
+particular carrying a confirmed defect that was fixed in `2.40.4`. On an earlier patch of those
+lines, or on another line, the deployment stops before writing anything unless
+`-AllowHazard UnverifiedVersion` accepts the release. A plain metadata import is no substitute:
+in one request DHIS2 can leave an option group set without its groups while reporting success,
+and repeated over an existing instance it fails from 2.42 on.
 [`docs/metadata-deployment.md`](docs/metadata-deployment.md) explains why and describes a production
 deployment.
 

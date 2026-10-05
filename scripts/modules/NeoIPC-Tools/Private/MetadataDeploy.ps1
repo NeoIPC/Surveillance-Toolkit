@@ -4,6 +4,11 @@
 # and the hazard gate. Each rule names the DHIS2 behaviour it answers to; docs/metadata-deployment.md describes them
 # together.
 
+# The DHIS2 releases whose source the deployment's rules were read in and on which they were observed, one per line.
+# A later patch of one of these lines counts as verified; an earlier patch or another line is an UnverifiedVersion
+# hazard.
+$script:NeoIPCDeployVerifiedReleases = @([version]'2.40.12', [version]'2.41.10', [version]'2.42.6', [version]'2.43.1')
+
 # Properties a deployment takes from the live object, because they belong to the instance rather than to the
 # package: org-unit assignments and memberships, user-group memberships, attribute values, per-user favourite marks,
 # and the creation audit pair. A write without them would clear them (a metadata import replaces whatever it is
@@ -51,6 +56,17 @@ function ConvertTo-NeoIPCDhis2Version {
     $parts.Add($(if ($Matches[3]) { $Matches[3] } else { '0' }))
     if ($Matches[4]) { $parts.Add($Matches[4]) }
     [version]($parts -join '.')
+}
+
+function Test-NeoIPCDeployVerifiedVersion {
+    # Whether a DHIS2 version is a verified release ($NeoIPCDeployVerifiedReleases) or a later patch of its line.
+    [CmdletBinding()]
+    [OutputType([bool])]
+    param([Parameter(Mandatory)][version]$Version)
+    foreach ($v in $script:NeoIPCDeployVerifiedReleases) {
+        if ($Version.Major -eq $v.Major -and $Version.Minor -eq $v.Minor) { return $Version -ge $v }
+    }
+    $false
 }
 
 function Copy-NeoIPCDeployValue {
@@ -193,7 +209,8 @@ function Get-NeoIPCDeployProjection {
     foreach ($child in (Get-NeoIPCDeployChildType -Type $Type)) {
         $kids = @(@($Object[$child.ArrayProp]) | Where-Object { $_ -is [System.Collections.IDictionary] -and $_['id'] })
         if ($kids.Count -eq 0) { continue }
-        $byId = [ordered]@{}
+        # Keyed ordinally: [ordered]@{} would fold two children whose UIDs differ only in case into one.
+        $byId = [System.Collections.Specialized.OrderedDictionary]::new([System.StringComparer]::Ordinal)
         foreach ($kid in ($kids | Sort-Object { [string]$_['id'] } -CaseSensitive)) {
             $byId[[string]$kid['id']] = Get-NeoIPCDeployProjection -Type $child.ChildType -Object $kid -Version $Version
         }
@@ -324,6 +341,51 @@ function New-NeoIPCDeployBody {
         if ($LiveVersion -and $Live.Contains('version')) { $body['version'] = $Live['version'] }
     }
     [pscustomobject]@{ Body = $body; DroppedTranslations = $dropped.ToArray(); SharingKept = $sharingKept }
+}
+
+function Get-NeoIPCDeploySharingLoss {
+    # What writing the package's sharing over the live sharing takes away: one line for each grant that loses a
+    # permission, the public access string or a user's or user group's grant. Both are sharing objects as
+    # Convert-NeoIPCSharing returns them. DHIS2 reads an access string by position, metadata read and write and then
+    # data read and write, and checks the data positions only for a type whose schema shares data (DefaultAclService);
+    # it reads a missing access string as granting every permission, and one it does not accept as granting none
+    # (AccessStringHelper.isEnabled). A grant the package leaves out grants nothing.
+    [CmdletBinding()]
+    [OutputType([string[]])]
+    param(
+        [Parameter(Mandatory)][AllowNull()]$Live,
+        [Parameter(Mandatory)][AllowNull()]$Package,
+        [switch]$DataShareable
+    )
+    $names = 'metadata read', 'metadata write', 'data read', 'data write'
+    $positions = if ($DataShareable) { 0..3 } else { 0..1 }
+    $grants = {
+        param($Access, [int]$Position)
+        if ($null -eq $Access) { return $true }
+        $a = [string]$Access
+        $a.Length -eq 8 -and $a.EndsWith('----') -and $a -cmatch '^[r-][w-][r-][w-]' -and [string]$a[$Position] -ceq [string]'rwrw'[$Position]
+    }
+    $lines = [System.Collections.Generic.List[string]]::new()
+    $add = {
+        param([string]$Who, $From, [bool]$Kept, $To)
+        $gone = @(foreach ($i in $positions) { if ((& $grants $From $i) -and -not ($Kept -and (& $grants $To $i))) { $names[$i] } })
+        if ($gone.Count -eq 0) { return }
+        $was = if ($null -eq $From) { 'no access string' } else { [string]$From }
+        $now = if (-not $Kept) { 'no grant' } elseif ($null -eq $To) { 'no access string' } else { [string]$To }
+        $lines.Add(('{0} loses {1} ({2} to {3})' -f $Who, ($gone -join ', '), $was, $now))
+    }
+    $liveSharing = if ($Live -is [System.Collections.IDictionary]) { $Live } else { @{} }
+    $pkgSharing = if ($Package -is [System.Collections.IDictionary]) { $Package } else { @{} }
+    & $add 'public access' $liveSharing['public'] $true $pkgSharing['public']
+    foreach ($g in @(@{ Key = 'users'; Name = 'user' }, @{ Key = 'userGroups'; Name = 'user group' })) {
+        $liveGrants = $liveSharing[$g.Key]; $pkgGrants = $pkgSharing[$g.Key]
+        if ($liveGrants -isnot [System.Collections.IDictionary]) { continue }
+        foreach ($id in @($liveGrants.Keys)) {
+            $kept = $pkgGrants -is [System.Collections.IDictionary] -and $pkgGrants.Contains($id)
+            & $add "$($g.Name) $id" $liveGrants[$id]['access'] $kept $(if ($kept) { $pkgGrants[$id]['access'] })
+        }
+    }
+    , $lines.ToArray()
 }
 
 function Get-NeoIPCDeployDeferral {
