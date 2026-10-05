@@ -59,12 +59,15 @@ function ConvertTo-NeoIPCDhis2Version {
 }
 
 function Test-NeoIPCDeployVerifiedVersion {
-    # Whether a DHIS2 version is a verified release ($NeoIPCDeployVerifiedReleases) or a later patch of its line.
+    # Whether DHIS2's version text names a verified release ($NeoIPCDeployVerifiedReleases) or a later patch of its line.
+    # A build with a suffix ('2.43.1-SNAPSHOT', '2.43.1-RC1') is none of them, whatever its numbers.
     [CmdletBinding()]
     [OutputType([bool])]
-    param([Parameter(Mandatory)][version]$Version)
+    param([Parameter(Mandatory)][AllowEmptyString()][string]$Text)
+    if ($Text -notmatch '^\d+\.\d+\.\d+(\.\d+)?$') { return $false }
+    $version = ConvertTo-NeoIPCDhis2Version -Text $Text
     foreach ($v in $script:NeoIPCDeployVerifiedReleases) {
-        if ($Version.Major -eq $v.Major -and $Version.Minor -eq $v.Minor) { return $Version -ge $v }
+        if ($version.Major -eq $v.Major -and $version.Minor -eq $v.Minor) { return $version -ge $v }
     }
     $false
 }
@@ -724,6 +727,16 @@ $script:NeoIPCDeployReferenceProperties = [ordered]@{
     optionGroupSets         = [ordered]@{ optionSet = 'optionSets'; optionGroups = 'optionGroups' }
 }
 
+# The types -Delete accepts: those whose referrers that can refuse their delete (DHIS2's deletion handlers and foreign
+# keys, the same on every verified release) the deployment reads before its first write, and the children a parent's
+# write removes, whose entry only acknowledges that. Another type's delete could fail on a referrer only after
+# earlier requests had committed.
+$script:NeoIPCDeployDeletableTypes = [System.Collections.Generic.HashSet[string]]::new(
+    [string[]]@('programRules', 'programRuleVariables', 'programStages', 'programSections', 'optionSets', 'optionGroups',
+        'optionGroupSets', 'programRuleActions', 'programStageSections', 'programNotificationTemplates', 'programStageDataElements',
+        'programTrackedEntityAttributes', 'analyticsPeriodBoundaries', 'trackedEntityTypeAttributes'),
+    [System.StringComparer]::Ordinal)
+
 # What DHIS2 deletes together with an object a deployment deletes through its own endpoint: type -> property -> type.
 # A rule's actions, a stage's notification templates and a set's options go by cascade, which runs no deletion
 # handler; a stage's sections go through ProgramStageSectionDeletionHandler, which deletes each through its service,
@@ -758,8 +771,9 @@ function Get-NeoIPCDeployReference {
 
 function Get-NeoIPCDeployDeleteOrder {
     # The order in which the types of the -Delete entries go: each before every type it refers to, through its own
-    # objects or what DHIS2 deletes with them (an attribute before the option set it uses, although attributes commit
-    # first; a rule, whose actions go with it, before the stage they target), and otherwise in descending schema order.
+    # objects or what DHIS2 deletes with them (an option group set before the option groups it lists, which share its
+    # schema order; a rule, whose actions go with it, before the stage they target), and otherwise in descending schema
+    # order.
     # DHIS2 refuses to delete what something still refers to, so whatever refers goes first.
     [CmdletBinding()]
     [OutputType([string[]])]

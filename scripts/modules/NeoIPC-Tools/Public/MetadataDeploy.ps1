@@ -49,8 +49,9 @@ function Deploy-NeoIPCMetadata {
 
         Before any write, a hazard gate aborts unless each kind found is acknowledged with -AllowHazard:
           - UnverifiedVersion: an instance on a DHIS2 release the deployment was not verified on: a line other than
-            2.40 to 2.43, or a patch below 2.40.12, 2.41.10, 2.42.6 or 2.43.1 in its line. The DHIS2 behaviour its
-            rules answer to was read in the source of those four releases and observed on them;
+            2.40 to 2.43, a patch below 2.40.12, 2.41.10, 2.42.6 or 2.43.1 in its line, or a build with a suffix such
+            as -SNAPSHOT. The DHIS2 behaviour its rules answer to was read in the source of those four releases and
+            observed on them. It is checked first, before the run asks for confirmation or clears DHIS2's caches;
           - OrphanDelete: a child the package drops from a written parent, which DHIS2 deletes with the parent's
             write (a stage's section, a rule's action, a program's attribute), and which neither -Delete nor another
             parent of the package lists;
@@ -81,7 +82,11 @@ function Deploy-NeoIPCMetadata {
         also refuses to delete a program stage that has events, deleted ones included, which stops the deployment
         before any write too. A stage's DELETE deletes the event visualizations built on it and clears the stage on the
         map views that use it, so a stage in -Delete that one of them uses stops the deployment, and so does, on DHIS2
-        2.40, any event visualization without a stage, which makes every stage's delete fail there. A program written
+        2.40, any event visualization without a stage, which makes every stage's delete fail there. DHIS2 refuses the
+        delete of a stage that a working list, a relationship type's constraint, an SMS command or an event
+        visualization's or map view's data-element dimension names, and, from 2.42, of an option set one of whose
+        options a visualization or map view holds as a data dimension item; each stops the deployment before any write
+        as well. A program written
         without one of its stages or sections only detaches it, so each one the package drops must be listed in
         -Delete, which deletes it through its own endpoint. DHIS2 refuses an option whose name or code another option
         of its set holds, as the set is stored before the request, so a name or code passed from one option to another
@@ -115,12 +120,17 @@ function Deploy-NeoIPCMetadata {
     .PARAMETER Port
         DHIS2 port. Default none (the scheme's).
     .PARAMETER Delete
-        Objects to delete, as type -> ids (@{ optionGroups = 'id1', 'id2'; programRules = 'id3' }). An entry for a
-        child of an owning collection (a stage section, a rule action, ...) acknowledges the delete the parent's
-        write performs; it is never deleted through its own endpoint. Programs are refused: DHIS2 deletes a program's
-        stages, rules, rule variables and indicators with it, and the relationship types, event reports, event charts
-        and event visualizations built on it, none of which a deployment checks or reads back. Single options are
-        refused too: on DHIS2 2.40.12 an option's own DELETE, which DHIS2 runs as a metadata import with
+        Objects to delete, as type -> ids (@{ optionGroups = 'id1', 'id2'; programRules = 'id3' }). The types are
+        program rules, rule variables, program stages, program sections, option sets, option groups and option group
+        sets, whose referrers the deployment checks before its first write, and the children of an owning collection
+        (a stage section, a rule action, a notification template, a stage's data element, a program's or
+        tracked-entity type's attribute, an indicator's boundary), whose entry acknowledges the delete the parent's
+        write performs; such a child is never deleted through its own endpoint. Any other type is refused before any
+        write, since DHIS2 could refuse its delete only after earlier requests had committed: delete it outside the
+        deployment, once nothing refers to it. Programs are refused with a reason of their own: DHIS2 deletes a
+        program's stages, rules, rule variables and indicators with it, and the relationship types, event reports,
+        event charts and event visualizations built on it, none of which a deployment checks or reads back. Single
+        options are refused too: on DHIS2 2.40.12 an option's own DELETE, which DHIS2 runs as a metadata import with
         importStrategy DELETE, is refused while its set lists it, and on an earlier 2.40 patch such an import of an
         option that was not last in its set left a gap in the set's order, which broke every later read of the set.
         Drop an option from its set's list instead, or delete the whole set.
@@ -303,7 +313,17 @@ function Deploy-NeoIPCMetadata {
         else { Add-Step $Name 'OK' $detail }
         $import
     }
-    function Test-Gone([string]$Type, [string]$Id) { (Get-NeoIPCDhis2StatusCode @endpoint -Path "api/$Type/$Id") -eq 404 }
+    # Whether DHIS2 holds an object: 404 answers no and 2xx yes. Any other answer (an expired session, a server error)
+    # proves neither, so it fails the read rather than be taken for one of them.
+    function Test-Present([string]$Type, [string]$Id) {
+        $code = Get-NeoIPCDhis2StatusCode @endpoint -Path "api/$Type/$Id"
+        if ($code -eq 404) { return $false }
+        if ($code -ge 200 -and $code -lt 300) { return $true }
+        throw "reading $Type $Id back answered HTTP $code, which proves neither that it exists nor that it is gone"
+    }
+    function Add-Hazard([string]$Kind, [string]$Type, [string]$Id, [string]$Detail) {
+        $summary.Hazards.Add([pscustomobject]@{ Kind = $Kind; Type = $Type; Id = $Id; Detail = $Detail })
+    }
     # A request the server refused (HTTP 4xx) changed nothing; any other failure, an answer lost on the way included,
     # can follow a change.
     function Test-RefusedStatus($Code) { $null -ne $Code -and [int]$Code -ge 400 -and [int]$Code -lt 500 }
@@ -331,6 +351,31 @@ function Deploy-NeoIPCMetadata {
     }
     if ($types.Contains('programs')) { $progress.Programs = @($types['programs'] | ForEach-Object { [string]$_['id'] }) }
 
+    # The -Delete entries, as far as they can be judged without the instance, before any request.
+    $deleteIds = @{}
+    foreach ($type in @($Delete.Keys)) {
+        $t = [string]$type
+        if ($t -eq 'users' -or ($script:NeoIPCMetadataExcludedTypes -contains $t -and $t -ne 'organisationUnits')) { throw "A deployment does not delete '$t'." }
+        if ($t -eq 'programs') { throw "A deployment does not delete programs: DHIS2 deletes a program's stages, rules, rule variables and indicators with it, and the relationship types, event reports, event charts and event visualizations built on it, none of which a deployment checks or reads back." }
+        # On 2.40 a set's options are a list indexed by sort_order. DHIS2 runs an option's own DELETE as a metadata import
+        # with importStrategy DELETE, which 2.40.12 refuses while the set lists the option; on an earlier 2.40 patch such
+        # an import of an option that was not last left a gap in the index, which broke every later read of the set.
+        if ($t -eq 'options') { throw "A deployment does not delete single options: drop them from their set's list, which detaches them (an OptionSetMembership hazard), or delete the whole set." }
+        if (-not $script:NeoIPCMetadataTypeMaps.Contains($t)) { throw "-Delete names '$t', which is no metadata type a deployment knows." }
+        if (-not $script:NeoIPCDeployDeletableTypes.Contains($t)) {
+            throw ("-Delete names '{0}'. A deployment deletes only {1}, whose referrers it checks before its first write; DHIS2 could refuse another type's delete only after earlier requests had committed. Delete it outside the deployment, once nothing refers to it." -f
+                $t, (($script:NeoIPCDeployDeletableTypes | Sort-Object) -join ', '))
+        }
+        $deleteIds[$t] = [System.Collections.Generic.HashSet[string]]::new([string[]]@(@($Delete[$type]) | ForEach-Object { [string]$_ } | Where-Object { $_ }), $ordinal)
+    }
+    $childTypes = [System.Collections.Generic.HashSet[string]]::new($ordinal)
+    foreach ($m in $script:NeoIPCDeployOwnedChildren.Values) { foreach ($c in $m.Values) { [void]$childTypes.Add([string]$c) } }
+    foreach ($t in $deleteIds.Keys) {
+        foreach ($id in $deleteIds[$t]) {
+            if ($types.Contains($t) -and @($types[$t] | Where-Object { [string]$_['id'] -ceq $id }).Count -gt 0) { throw "-Delete names $t $id, which the package still carries." }
+        }
+    }
+
     # ---- 1. version, preflight, confirmation, cache clear ---------------------------------------------------------
     # Every read passes -WhatIf:$false: the GET helper asks ShouldProcess, and a -WhatIf given to this cmdlet reaches
     # it (-Confirm:$false does not stop that), which would leave a dry run nothing to plan with. A read that fails ends
@@ -341,6 +386,17 @@ function Deploy-NeoIPCMetadata {
     $version = ConvertTo-NeoIPCDhis2Version -Text $summary.Dhis2Version
     Write-Host ("Deploying metadata to {0} (DHIS2 {1}){2}{3}" -f $target, $summary.Dhis2Version,
         $(if ($DryRun) { ', dry run' } else { '' }), $(if ($SyntheticInstance) { ', synthetic instance' } else { '' }))
+    # A release the deployment was not verified on stops it here, before the confirmation and the cache clear, unless
+    # acknowledged; a dry run reports it with the other hazards.
+    if (-not (Test-NeoIPCDeployVerifiedVersion -Text $summary.Dhis2Version)) {
+        $versionDetail = "is no release this deployment was verified on: {0}, or a later patch of one of their lines" -f
+        (($script:NeoIPCDeployVerifiedReleases | ForEach-Object { "$_" }) -join ', ')
+        Add-Hazard 'UnverifiedVersion' 'DHIS2' $summary.Dhis2Version $versionDetail
+        if (-not ($DryRun -or $SyntheticInstance -or $AllowHazard -contains 'UnverifiedVersion')) {
+            Write-Host ("  hazard UnverifiedVersion: DHIS2 {0} {1}" -f $summary.Dhis2Version, $versionDetail) -ForegroundColor Red
+            Exit-Deployment 'Unacknowledged hazard(s): UnverifiedVersion. Nothing was written. Acknowledge with -AllowHazard UnverifiedVersion, after a rehearsal on this release.'
+        }
+    }
 
     $findings = @(Test-NeoIPCMetadataExpression -Package $pkg -MinimumSeverity Warning)
     $errorFindings = @($findings | Where-Object { $_.Severity -eq 'Error' })
@@ -392,25 +448,6 @@ function Deploy-NeoIPCMetadata {
     foreach ($type in $types.Keys) { $live[$type] = Get-LiveType $type @($types[$type] | ForEach-Object { [string]$_['id'] }) }
     if ($types.Contains('programs')) { $progress.Programs = @($progress.Programs | Where-Object { $live['programs'][$_] }) }
 
-    $deleteIds = @{}
-    foreach ($type in @($Delete.Keys)) {
-        $t = [string]$type
-        if ($t -eq 'users' -or ($script:NeoIPCMetadataExcludedTypes -contains $t -and $t -ne 'organisationUnits')) { throw "A deployment does not delete '$t'." }
-        if ($t -eq 'programs') { throw "A deployment does not delete programs: DHIS2 deletes a program's stages, rules, rule variables and indicators with it, and the relationship types, event reports, event charts and event visualizations built on it, none of which a deployment checks or reads back." }
-        # On 2.40 a set's options are a list indexed by sort_order. DHIS2 runs an option's own DELETE as a metadata import
-        # with importStrategy DELETE, which 2.40.12 refuses while the set lists the option; on an earlier 2.40 patch such
-        # an import of an option that was not last left a gap in the index, which broke every later read of the set.
-        if ($t -eq 'options') { throw "A deployment does not delete single options: drop them from their set's list, which detaches them (an OptionSetMembership hazard), or delete the whole set." }
-        if (-not $script:NeoIPCMetadataTypeMaps.Contains($t)) { throw "-Delete names '$t', which is no metadata type a deployment knows." }
-        $deleteIds[$t] = [System.Collections.Generic.HashSet[string]]::new([string[]]@(@($Delete[$type]) | ForEach-Object { [string]$_ } | Where-Object { $_ }), $ordinal)
-    }
-    $childTypes = [System.Collections.Generic.HashSet[string]]::new($ordinal)
-    foreach ($m in $script:NeoIPCDeployOwnedChildren.Values) { foreach ($c in $m.Values) { [void]$childTypes.Add([string]$c) } }
-    foreach ($t in $deleteIds.Keys) {
-        foreach ($id in $deleteIds[$t]) {
-            if ($types.Contains($t) -and @($types[$t] | Where-Object { [string]$_['id'] -ceq $id }).Count -gt 0) { throw "-Delete names $t $id, which the package still carries." }
-        }
-    }
     $deleteLive = @{}
     foreach ($t in $deleteIds.Keys) {
         if ($childTypes.Contains($t) -or $script:NeoIPCMetadataTypeMaps[$t].Nesting -eq 'NestedOnly') { continue }
@@ -448,23 +485,40 @@ function Deploy-NeoIPCMetadata {
         # A stage's DELETE also deletes the event visualizations built on it (event reports and charts are rows of the
         # same table) and clears the stage on the map views that use it, through their deletion handlers. On DHIS2 2.40
         # those handlers compare every visualization's stage without a null check, so one without a stage makes every
-        # stage's delete fail. None of it is the package's, so each stops the deployment. One the deploying user cannot
-        # see is not found.
+        # stage's delete fail. No handler covers a working list, a relationship type's constraint, an SMS command, or an
+        # event visualization's or map view's data-element dimension that names the stage, so their foreign keys refuse
+        # its delete. None of it is the package's, so each stops the deployment. One the deploying user cannot see is not
+        # found.
         $stageIds = [System.Collections.Generic.HashSet[string]]::new([string[]]@($deleteIds['programStages'] | Where-Object { $deleteLive['programStages'][$_] }), $ordinal)
         if ($stageIds.Count -gt 0) {
             $uses = [System.Collections.Generic.List[string]]::new()
-            foreach ($vt in 'eventVisualizations', 'mapViews') {
-                try { $all = Get-NeoIPCMetadataLiveList -Endpoint $endpoint -Type $vt -Field 'id', 'name', 'programStage[id]' }
+            $reads = @(
+                @{ Type = 'eventVisualizations'; Field = @('id', 'name', 'programStage[id]', 'dataElementDimensions[programStage[id]]') }
+                @{ Type = 'mapViews'; Field = @('id', 'name', 'programStage[id]', 'dataElementDimensions[programStage[id]]') }
+                @{ Type = 'programStageWorkingLists'; Field = @('id', 'name', 'programStage[id]') }
+                @{ Type = 'relationshipTypes'; Field = @('id', 'name', 'fromConstraint[programStage[id]]', 'toConstraint[programStage[id]]') }
+                @{ Type = 'smsCommands'; Field = @('id', 'name', 'programStage[id]') })
+            foreach ($rd in $reads) {
+                $vt = $rd.Type
+                try { $all = Get-NeoIPCMetadataLiveList -Endpoint $endpoint -Type $vt -Field $rd.Field }
                 catch { Exit-Deployment "Reading the live $vt failed: $($_.Exception.Message)" }
                 foreach ($x in $all) {
                     $named = "$vt $($x['id'])$(if ($x['name']) { " ('$($x['name'])')" })"
                     $sid = Get-NeoIPCDeployRefId $x['programStage']
                     if ($sid -and $stageIds.Contains($sid)) { $uses.Add("$named uses programStages $sid") }
                     elseif (-not $sid -and $vt -eq 'eventVisualizations' -and $version -lt [version]'2.41') { $uses.Add("$named has no stage") }
+                    foreach ($c in 'fromConstraint', 'toConstraint') {
+                        $csid = if ($x[$c] -is [System.Collections.IDictionary]) { Get-NeoIPCDeployRefId $x[$c]['programStage'] }
+                        if ($csid -and $stageIds.Contains($csid)) { $uses.Add("$named names programStages $csid in its $c") }
+                    }
+                    foreach ($dim in @($x['dataElementDimensions'])) {
+                        $dsid = if ($dim -is [System.Collections.IDictionary]) { Get-NeoIPCDeployRefId $dim['programStage'] }
+                        if ($dsid -and $stageIds.Contains($dsid)) { $uses.Add("$named has a data-element dimension on programStages $dsid") }
+                    }
                 }
             }
             if ($uses.Count -gt 0) {
-                throw ("DHIS2 deletes the event visualizations built on a stage it deletes and clears the stage on the map views that use it, and on 2.40 fails a stage's delete while any event visualization has no stage: {0}. Change or delete them first, or keep the stage." -f ($uses -join '; '))
+                throw ("DHIS2 deletes the event visualizations built on a stage it deletes and clears the stage on the map views that use it, on 2.40 fails a stage's delete while any event visualization has no stage, and refuses it while a working list, a relationship type's constraint, an SMS command or a data-element dimension names the stage: {0}. Change or delete them first, or keep the stage." -f ($uses -join '; '))
             }
         }
     }
@@ -623,13 +677,6 @@ function Deploy-NeoIPCMetadata {
     # children go with its last write, and the -Delete entries after R2.
     $removedByWrite = [System.Collections.Generic.HashSet[string]]::new([string[]]@($orphans | Where-Object { $_.ParentType -ne 'programs' } | ForEach-Object { "$($_.Type)|$($_.Id)" }), $ordinal)
 
-    function Add-Hazard([string]$Kind, [string]$Type, [string]$Id, [string]$Detail) {
-        $summary.Hazards.Add([pscustomobject]@{ Kind = $Kind; Type = $Type; Id = $Id; Detail = $Detail })
-    }
-    if (-not (Test-NeoIPCDeployVerifiedVersion -Version $version)) {
-        Add-Hazard 'UnverifiedVersion' 'DHIS2' $summary.Dhis2Version ("is no release this deployment was verified on: {0}, or a later patch of one of their lines" -f
-            (($script:NeoIPCDeployVerifiedReleases | ForEach-Object { "$_" }) -join ', '))
-    }
     foreach ($o in $orphans) {
         if (-not ($deleteIds.ContainsKey($o.Type) -and $deleteIds[$o.Type].Contains($o.Id))) {
             Add-Hazard 'OrphanDelete' $o.Type $o.Id "dropped from $($o.ParentType) $($o.ParentId).$($o.Property), which DHIS2 deletes with the parent's write"
@@ -802,6 +849,28 @@ function Deploy-NeoIPCMetadata {
             }
         }
     }
+    # From 2.42 a visualization or a map view can hold an option as a data dimension item, which no handler removes with
+    # the option, so its foreign key refuses the delete of a set whose options go with it.
+    $removedOptions = [System.Collections.Generic.HashSet[string]]::new(
+        [string[]]@($removedLive | Where-Object { $_.StartsWith('options|', [System.StringComparison]::Ordinal) } | ForEach-Object { ($_ -split '\|', 2)[1] }), $ordinal)
+    if ($removedOptions.Count -gt 0 -and $version -ge [version]'2.42') {
+        $uses = [System.Collections.Generic.List[string]]::new()
+        foreach ($vt in 'visualizations', 'mapViews') {
+            try { $all = Get-NeoIPCMetadataLiveList -Endpoint $endpoint -Type $vt -Field 'id', 'name', 'dataDimensionItems[programDataElementOption[option[id]],programAttributeOption[option[id]]]' }
+            catch { Exit-Deployment "Reading the live $vt failed: $($_.Exception.Message)" }
+            foreach ($x in $all) {
+                foreach ($item in @($x['dataDimensionItems'])) {
+                    foreach ($k in 'programDataElementOption', 'programAttributeOption') {
+                        $oid = if ($item -is [System.Collections.IDictionary] -and $item[$k] -is [System.Collections.IDictionary]) { Get-NeoIPCDeployRefId $item[$k]['option'] }
+                        if ($oid -and $removedOptions.Contains($oid)) { $uses.Add("$vt $($x['id'])$(if ($x['name']) { " ('$($x['name'])')" }) holds options $oid as a data dimension item") }
+                    }
+                }
+            }
+        }
+        if ($uses.Count -gt 0) {
+            Exit-Deployment ("DHIS2 refuses to delete an option that a visualization or map view holds as a data dimension item, and an option set's delete takes its options with it: {0}. Change or delete them first, or keep the set. Nothing was written." -f ($uses -join '; '))
+        }
+    }
     if ($types.Contains('programRules')) {
         foreach ($id in @($bodies['programRules'].Keys)) {
             if ($state['programRules'][$id].Status -eq 'Changed' -and (Test-NeoIPCDeployInertRule -Rule $pkgById['programRules'][$id]) -and
@@ -911,14 +980,22 @@ function Deploy-NeoIPCMetadata {
 
     # ---- 10. commit ----------------------------------------------------------------------------------------------
     function Assert-Gone([string]$Name, [object[]]$Keys) {
-        $left = @(foreach ($k in $Keys) { $t, $i = $k -split '\|', 2; if (-not (Test-Gone $t $i)) { $k } })
+        $left = @(foreach ($k in $Keys) {
+                $t, $i = $k -split '\|', 2
+                try { if (Test-Present $t $i) { $k } }
+                catch { Add-Step $Name 'Failed' $_.Exception.Message; Exit-Deployment "$Name failed: $($_.Exception.Message)." }
+            })
         if ($left.Count -gt 0) { Add-Step $Name 'Failed' "still present: $($left -join ', ')"; Exit-Deployment "$Name left $($left.Count) object(s) in place: $($left -join ', ')." }
         Add-Step $Name 'OK' "$(@($Keys).Count) object(s) read back as gone"
     }
     function Assert-ChildGone([string]$Name, [object[]]$Orphans) {
         # A child with an endpoint is read back directly; a NestedOnly one has none, so its parent must no longer list it.
         $left = foreach ($o in $Orphans) {
-            if ($script:NeoIPCMetadataTypeMaps[$o.Type].Nesting -ne 'NestedOnly') { if (-not (Test-Gone $o.Type $o.Id)) { "$($o.Type)|$($o.Id)" }; continue }
+            if ($script:NeoIPCMetadataTypeMaps[$o.Type].Nesting -ne 'NestedOnly') {
+                try { if (Test-Present $o.Type $o.Id) { "$($o.Type)|$($o.Id)" } }
+                catch { Add-Step $Name 'Failed' $_.Exception.Message; Exit-Deployment "$Name failed: $($_.Exception.Message)." }
+                continue
+            }
             $p = Invoke-NeoIPCDhis2Get @endpoint -Path "api/$($o.ParentType)/$($o.ParentId)" -Fields "$($o.Property)[id]" -AsHashtable -Confirm:$false -WhatIf:$false
             # DHIS2 leaves out only null values, so a parent read without the list is a failed read, not an empty list.
             if ($p -isnot [System.Collections.IDictionary] -or $null -eq $p[$o.Property]) { Exit-Deployment "${Name}: reading $($o.ParentType) $($o.ParentId) back returned no '$($o.Property)' list." }
@@ -936,12 +1013,12 @@ function Deploy-NeoIPCMetadata {
     function Restore-TemplateAction([string]$Id, $Snapshot, $RuleBody) {
         $failed = { param([string]$Text) [pscustomobject]@{ Restored = $false; Text = $Text } }
         try {
-            if (-not (Test-Gone 'programRuleActions' $Id)) {
+            if (Test-Present 'programRuleActions' $Id) {
                 [void](Invoke-NeoIPCDhis2Delete @endpoint -Path "api/programRuleActions/$Id" -AllowUnencrypted -Confirm:$false)
-                if (-not (Test-Gone 'programRuleActions' $Id)) { return (& $failed 'It could not be removed for its restore; its snapshot is in the summary (Snapshots).') }
+                if (Test-Present 'programRuleActions' $Id) { return (& $failed 'It could not be removed for its restore; its snapshot is in the summary (Snapshots).') }
             }
             $r = Import-NeoIPCMetadata -Json ([ordered]@{ programRuleActions = @($Snapshot); programRules = @($RuleBody) } | ConvertTo-Json -Depth 100 -Compress) @endpoint -AtomicMode 'ALL' -Confirm:$false
-            if ($r.Status -eq 'OK' -and -not (Test-Gone 'programRuleActions' $Id)) { return [pscustomobject]@{ Restored = $true; Text = 'It was restored from its snapshot.' } }
+            if ($r.Status -eq 'OK' -and (Test-Present 'programRuleActions' $Id)) { return [pscustomobject]@{ Restored = $true; Text = 'It was restored from its snapshot.' } }
             return (& $failed "Its restore failed (status $($r.Status): $(Get-ImportErrorText $r)); its snapshot is in the summary (Snapshots).")
         }
         catch { return (& $failed "Its restore failed ($($_.Exception.Message)); its snapshot is in the summary (Snapshots).") }
@@ -980,7 +1057,8 @@ function Deploy-NeoIPCMetadata {
         foreach ($aid in $templateSteps) {
             $body = $bodies['programRuleActions'][$aid]
             $rid = Get-NeoIPCDeployRefId $body['programRule']
-            $missing = @((Get-NeoIPCDeployReference -Type 'programRuleActions' -Object $body) | Where-Object { $t, $i = $_ -split '\|', 2; Test-Gone $t $i })
+            try { $missing = @((Get-NeoIPCDeployReference -Type 'programRuleActions' -Object $body) | Where-Object { $t, $i = $_ -split '\|', 2; -not (Test-Present $t $i) }) }
+            catch { Exit-Deployment "Checking what program-rule action $aid refers to before its re-creation failed: $($_.Exception.Message)." }
             if ($missing.Count -gt 0) { Exit-Deployment "Program-rule action $aid refers to $($missing -join ', '), which does not exist." }
             $snapshot = (Get-LiveType 'programRuleActions' @($aid))[$aid]
             $summary.Snapshots.Add([pscustomobject]@{ Type = 'programRuleActions'; Id = $aid; Object = $snapshot })
@@ -1001,7 +1079,11 @@ function Deploy-NeoIPCMetadata {
                 if (Test-Refused $_) { $progress.ProgramScoped = $scopedBefore }
                 Exit-Deployment "Deleting program-rule action $aid for its re-creation failed: $($_.Exception.Message)"
             }
-            if (-not (Test-Gone 'programRuleActions' $aid)) { $progress.ProgramScoped = $scopedBefore; Exit-Deployment "Program-rule action $aid is still present after its DELETE." }
+            # A read-back that proves nothing leaves the action most likely gone: the program's version stays pending, and
+            # a later run creates the action as the package states it.
+            try { $stillThere = Test-Present 'programRuleActions' $aid }
+            catch { Exit-Deployment "Program-rule action $aid was deleted for its re-creation, but $($_.Exception.Message). As DHIS2 accepted the DELETE, it is most likely gone; its snapshot is in the summary (Snapshots). Deploy again, which creates it as the package states it." }
+            if ($stillThere) { $progress.ProgramScoped = $scopedBefore; Exit-Deployment "Program-rule action $aid is still present after its DELETE." }
             # From here the action is gone, so a failed re-creation, an exception included, ends in its restore. Once DHIS2
             # has accepted the re-creation, a check that cannot read the result stops the run without a restore, which
             # would delete and write again what most likely holds the package's version already.
@@ -1076,7 +1158,8 @@ function Deploy-NeoIPCMetadata {
                 }
                 Assert-Gone "delete $t $id" $readBack
                 foreach ($k in $readBack) { [void]$summary.Deleted.Add($k) }
-                $lost = @($mustStay | Where-Object { $tt, $ii = $_ -split '\|', 2; Test-Gone $tt $ii })
+                try { $lost = @($mustStay | Where-Object { $tt, $ii = $_ -split '\|', 2; -not (Test-Present $tt $ii) }) }
+                catch { Exit-Deployment "Deleting $t $id succeeded, but checking that its former options stayed failed: $($_.Exception.Message)." }
                 if ($lost.Count -gt 0) { Exit-Deployment "Deleting $t $id also removed $($lost -join ', ')." }
             }
         }

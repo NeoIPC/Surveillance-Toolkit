@@ -179,7 +179,10 @@ rewrites a set's list row by row, so:
    `EventReportDeletionHandler`, whose classes map the same `eventvisualization` table) and clears the stage on the
    map views that use it (`MapViewDeletionHandler`). On 2.40.12 the three visualization handlers compare every
    visualization's stage without checking for none (2.41.10 checks), so a single visualization without a stage makes
-   every stage's delete fail.
+   every stage's delete fail. No deletion handler covers a working list (`ProgramStageWorkingList`), a relationship
+   type's constraint (`RelationshipConstraint`), an SMS command (`SMSCommand`), or an event visualization's or map
+   view's data-element dimension (`TrackedEntityDataElementDimension`) that names a stage, so the foreign key of each
+   refuses the stage's delete (their mappings, on all four lines).
 6. **Option groups.** A group's `members` cascade to the options (`OptionGroup.hbm.xml`: `cascade="all"`). From
    2.41.10 a group's `DELETE` deletes its member options with it; on 2.40.12 it fails while the group has members
    (409). On every line it fails while a group set lists the group (foreign key
@@ -189,7 +192,9 @@ rewrites a set's list row by row, so:
 7. **Option sets.** A set's `DELETE` deletes its options. It fails while a data element uses the set
    (`DataElementDeletionHandler`) or while a tracked-entity attribute, an attribute, an option group or an option
    group set refers to it, and, since its options go by cascade, while an option group holds one of them or a rule
-   action targets one (foreign keys).
+   action targets one (foreign keys). From 2.42 a visualization or a map view can also hold an option as a data
+   dimension item (`DataDimensionItem`: `programDataElementOption` and `programAttributeOption`), which no deletion
+   handler removes, so it refuses the delete as well.
 8. A delete request for several types deletes them in creation order, so a dependent type can fail on a foreign
    key. One object per request avoids that.
 9. **Programs.** Through the deletion handlers, a program's `DELETE` deletes its stages, rules, rule variables and
@@ -272,8 +277,10 @@ orphan. The probe moved templates between two stages only.
 
 ## 3. The Algorithm
 
-1. **Prepare.** Read the DHIS2 version, clear the caches (section 2.8; a dry run asks first), and lint the
-   package's expressions (`Test-NeoIPCMetadataExpression`): an error finding aborts, warnings are reported.
+1. **Prepare.** Read the DHIS2 version, and stop on a release the deployment was not verified on unless that is
+   acknowledged (`UnverifiedVersion`, section 4), before asking for confirmation; a dry run reports it with the other
+   hazards. Then clear the caches (section 2.8; a dry run asks first), and lint the package's expressions
+   (`Test-NeoIPCMetadataExpression`): an error finding aborts, warnings are reported.
 2. **Read the live objects.** Every package object, by id, in batches, with its owned fields, translations and
    sharing, and the children that have no endpoint of their own expanded.
 3. **Classify** each package object as new, changed or unchanged. Compared: the properties and nested fields the
@@ -324,8 +331,8 @@ orphan. The probe moved templates between two stages only.
       leaves the action as DHIS2 accepted it, since a restore would delete and write again what most likely holds the
       package's version;
    6. the `-Delete` entries, one object per request, type by type, each type before the types it refers to through
-      its own objects or what DHIS2 deletes with them (an attribute before the option set it uses, although
-      attributes commit first), and otherwise in descending schema order. Each is read back together with what
+      its own objects or what DHIS2 deletes with them (an option group set before the option groups it lists, which
+      share its schema order), and otherwise in descending schema order. Each is read back together with what
       DHIS2 deletes with it (section 2.6): an option group, out of every set by then (a set the package keeps lets go
       of it in R2, a set in `-Delete` goes first) and emptied first, its former options read back as still present; a
       rule with its actions, which the gate lets through only when the rule is inert or `ActiveRuleDelete` is
@@ -371,7 +378,7 @@ The gate runs before the first write and stops the deployment unless each hazard
 
 | Kind | What it is | Why it is a hazard |
 | --- | --- | --- |
-| `UnverifiedVersion` | An instance on a DHIS2 release the deployment was not verified on: a line other than 2.40 to 2.43, or a patch below 2.40.12, 2.41.10, 2.42.6 or 2.43.1 in its line | The behaviour this note records was read in the source of those four releases and observed on them; another release may keep, delete or refuse differently what a write touches |
+| `UnverifiedVersion` | An instance on a DHIS2 release the deployment was not verified on: a line other than 2.40 to 2.43, a patch below 2.40.12, 2.41.10, 2.42.6 or 2.43.1 in its line, or a build with a suffix such as `-SNAPSHOT`. It is checked first, before the deployment asks for confirmation (section 3, step 1) | The behaviour this note records was read in the source of those four releases and observed on them; another release may keep, delete or refuse differently what a write touches |
 | `OrphanDelete` | A child a written parent no longer lists, and that neither `-Delete` nor another parent of the package lists | DHIS2 deletes it with the parent's write (section 1, item 2) |
 | `OptionSetMembership` | An option set that loses members, to no set or to another one, or gains one anywhere but at the end, or a set in `-Delete` | The values stored under the set's data elements keep the codes of the options it loses, and its write detaches those the package lists in no set; an insertion moves every later option in the list users pick from; deleting a set deletes its options |
 | `OptionCodeChange` | An option whose code changes | Stored values hold the option's code, not its id |
@@ -380,23 +387,29 @@ The gate runs before the first write and stops the deployment unless each hazard
 | `ActiveRuleDelete` | A rule in `-Delete` that is not inert on the instance | Clients keep running it (section 2.9) |
 
 A single option in `-Delete` stops the deployment whatever is acknowledged (section 2.4, item 4): drop it from its
-set's list instead, or delete the whole set. So does a program in `-Delete` (section 2.6, item 9); sharing the
-package gives an object without a public access string, which DHIS2 would reset, its grants included (section 1,
-item 1), and an object written with the instance's sharing that the instance holds without one (section 3, step 4);
-a stage or program section that a program no longer lists and `-Delete` does not name, since the program's write
-would only detach it (section 2.6, item 5); a stage in `-Delete` that has events, or that an event visualization or a
-map view uses, and on 2.40 any event visualization without a stage while a stage is in `-Delete` (section 4.1); an
-object the package carries that DHIS2 would delete with a `-Delete` entry (section 4.1); and an option whose name or
-code another option of its set holds as the set is stored (section 2.4, item 5): a name or code passed from one option
-to another, a swap included, takes two deployments, one that frees it and a later one that gives it. Of the children
-the package moves to another parent (section 2.11), these stop it too, as not observed or not possible in two
-requests: one that is no rule action, stage section or notification template; a notification template with a
-program as either parent, since its row holds its program apart from its stage and programs are written last; a
-child taken from a parent the package does not carry, whether `-Delete` deletes that parent or it stays on the
-instance, and likewise an option taken from a set the package does not carry; a parent that both gives a child and
-takes one, since it would have to be written both after and before a move; from 2.42, an action that sends a
-notification, which is created again on its own after R2 instead of with its new rule in R1; and a child the package
-lists under two parents.
+set's list instead, or delete the whole set. So does a program in `-Delete` (section 2.6, item 9), and any type but
+program rules, rule variables, program stages and sections, option sets, option groups, option group sets and the
+children a parent's write removes, whose referrers the deployment does not check, so that DHIS2 could refuse the
+delete only after earlier requests had committed: such an object is deleted outside the deployment, once nothing
+refers to it.
+So does sharing the package gives an object without a public access string, which DHIS2 would reset, its grants
+included (section 1, item 1), and an object written with the instance's sharing that the instance holds without one
+(section 3, step 4); a stage or program section that a program no longer lists and `-Delete` does not name, since the
+program's write would only detach it (section 2.6, item 5); a stage in `-Delete` that has events, or that an event
+visualization, a map view, a working list, a relationship type's constraint, an SMS command or a data-element
+dimension uses, and on 2.40 any event visualization without a stage while a stage is in `-Delete` (section 4.1); from
+2.42, an option set in `-Delete` one of whose options a visualization or map view holds as a data dimension item
+(section 4.1); an object the package carries that DHIS2 would delete with a `-Delete` entry (section 4.1); and an
+option whose name or code another option of its set holds as the set is stored (section 2.4, item 5): a name or code
+passed from one option to another, a swap included, takes two deployments, one that frees it and a later one that
+gives it. Of the children the package moves to another parent (section 2.11), these stop it too, as not observed or
+not possible in two requests: one that is no rule action, stage section or notification template; a notification
+template with a program as either parent, since its row holds its program apart from its stage and programs are
+written last; a child taken from a parent the package does not carry, whether `-Delete` deletes that parent or it
+stays on the instance, and likewise an option taken from a set the package does not carry; a parent that both gives
+a child and takes one, since it would have to be written both after and before a move; from 2.42, an action that
+sends a notification, which is created again on its own after R2 instead of with its new rule in R1; and a child the
+package lists under two parents.
 
 A reorder of an option set's members is no hazard: it is how the order reaches the instance (section 2.4).
 
@@ -435,13 +448,16 @@ For each stage in `-Delete` the deployment reads one event, in every org unit (`
 `orgUnitMode=ALL` from 2.41, which needs the authority to search all org units), and a stage that has one stops the
 deployment: the package must keep it. A stage's delete also deletes the event visualizations built on it and clears
 the stage on the map views that use it, none of which is the package's, and on 2.40 it fails while any event
-visualization has no stage (section 2.6, item 5). The deployment reads every event visualization and map view, and
-stops when one uses a stage in `-Delete`, or, on 2.40, when an event visualization has no stage. One the deploying
-user cannot see is not found.
+visualization has no stage; a working list, a relationship type's constraint, an SMS command or a data-element
+dimension that names the stage refuses its delete (section 2.6, item 5). The deployment reads every event
+visualization and map view, their data-element dimensions included, and every working list, relationship type and
+SMS command, and stops when one uses or names a stage in `-Delete`, or, on 2.40, when an event visualization has no
+stage. From 2.42 it also reads the data dimension items of every visualization and map view, and stops when one holds
+an option of an option set in `-Delete` (section 2.6, item 7). One the deploying user cannot see is not found.
 
-Other refusals are not checked, such as that of a data element that events hold values for. A delete one of them
-refuses stops the deployment after its writes, and the summary names the programs whose versions are pending
-(section 3).
+`-Delete` takes only the types whose referrers that can refuse a delete this section covers (section 4). A delete
+that fails nonetheless, for want of an authority for instance, stops the deployment after its writes, and the summary
+names the programs whose versions are pending (section 3).
 
 ## 5. Retiring a Rule
 

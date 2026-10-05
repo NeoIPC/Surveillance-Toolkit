@@ -139,6 +139,8 @@ InModuleScope 'NeoIPC-Tools' {
             @{ Type = 'programStages'; Prop = 'notificationTemplates'; Child = 'programNotificationTemplates' }
             @{ Type = 'programs'; Prop = 'notificationTemplates'; Child = 'programNotificationTemplates' }
         )
+        # The fake's version as the deployment reads DHIS2's text, a build suffix such as -SNAPSHOT left aside.
+        function Get-FakeVersion { ConvertTo-NeoIPCDhis2Version -Text $script:Fake.Version }
         function Reset-FakeDhis2([string]$Version = '2.41.10') {
             $script:Fake = @{
                 Version     = $Version
@@ -154,6 +156,7 @@ InModuleScope 'NeoIPC-Tools' {
                 ThrowGet    = $null   # scriptblock ({ Path; Filter; Fields }) -> $true to fail a read in transport
                 NoList      = $null   # scriptblock ({ Path; Filter; Fields }) -> $true to answer a read with a 200 that holds no list (an object read: only its id)
                 ThrowDelete = $null   # scriptblock (type, id) -> 'Refuse' to answer HTTP 409, 'Lose' to fail in transport
+                StatusRead  = $null   # scriptblock ({ Path }) -> an HTTP status to answer a status read with, or nothing for the fake's own
                 EventsKey   = $null   # the key a tracker events read lists its rows under, in place of the version's
                 Stamp       = 0
             }
@@ -310,7 +313,7 @@ InModuleScope 'NeoIPC-Tools' {
                     }
                 }
                 if (@($script:Fake.Events | Where-Object { $_.programStage -ceq $Id }).Count -gt 0) { return 'associated with another object: Event' }
-                if ([version]$script:Fake.Version -ge [version]'2.42') {
+                if ((Get-FakeVersion) -ge [version]'2.42') {
                     $templates = Get-IdList $Object['notificationTemplates']
                     foreach ($a in (Get-FakeType 'programRuleActions').Values) {
                         if ($a['templateUid'] -and $templates -ccontains [string]$a['templateUid']) { return "violating foreign key constraint fk_programruleaction_notificationtemplate: $($a['id'])" }
@@ -320,7 +323,7 @@ InModuleScope 'NeoIPC-Tools' {
             if ($Type -eq 'optionGroups') {
                 foreach ($s in (Get-FakeType 'optionGroupSets').Values) { if ((Get-IdList $s['optionGroups']) -ccontains $Id) { return "violating foreign key constraint fk_optiongroupsetmembers_optiongroupid: $($s['id'])" } }
                 # On 2.40.12 a group that still has members cannot go; from 2.41.10 its members go with it (the cascade below).
-                if ([version]$script:Fake.Version -lt [version]'2.41' -and @(Get-IdList $Object['options']).Count -gt 0) { return 'deleted object would be re-saved by cascade (remove deleted object from associations)' }
+                if ((Get-FakeVersion) -lt [version]'2.41' -and @(Get-IdList $Object['options']).Count -gt 0) { return 'deleted object would be re-saved by cascade (remove deleted object from associations)' }
             }
             if ($Type -eq 'optionSets') {
                 foreach ($rt in 'dataElements', 'trackedEntityAttributes', 'attributes', 'optionGroups', 'optionGroupSets') {
@@ -340,7 +343,7 @@ InModuleScope 'NeoIPC-Tools' {
             # On 2.40.12 a request that writes the rule an action leaves and the rule it moves to fails whole, and so
             # does one that moves a notification template between two stages or programs: the old parent's write
             # orphans the child, and the new parent's cascade reaches it again. A stage section moves.
-            if ([version]$script:Fake.Version -lt [version]'2.41') {
+            if ((Get-FakeVersion) -lt [version]'2.41') {
                 foreach ($h in @($script:FakeHolders | Where-Object { $_.Child -in 'programRuleActions', 'programNotificationTemplates' })) {
                     foreach ($p in @($Payload[$h.Type])) {
                         $old = if ($p -is [System.Collections.IDictionary]) { Get-FakeObject $h.Type ([string]$p['id']) }
@@ -352,7 +355,7 @@ InModuleScope 'NeoIPC-Tools' {
                 }
             }
             # From 2.42 any update of an existing rule action that carries a template fails whole.
-            if ([version]$script:Fake.Version -ge [version]'2.42') {
+            if ((Get-FakeVersion) -ge [version]'2.42') {
                 foreach ($a in @($Payload['programRuleActions'])) {
                     if ($a -is [System.Collections.IDictionary] -and $a['templateUid'] -and (Get-FakeObject 'programRuleActions' ([string]$a['id']))) {
                         return 'object references an unsaved transient instance: ProgramRuleAction.notificationTemplate'
@@ -361,7 +364,7 @@ InModuleScope 'NeoIPC-Tools' {
             }
             # From 2.42 an action refers to its template through a foreign key, and a stage's or a program's write
             # deletes the templates it drops before the request's rule actions commit.
-            if ([version]$script:Fake.Version -ge [version]'2.42') {
+            if ((Get-FakeVersion) -ge [version]'2.42') {
                 foreach ($pt in 'programStages', 'programs') {
                     foreach ($p in @($Payload[$pt])) {
                         $old = if ($p -is [System.Collections.IDictionary]) { Get-FakeObject $pt ([string]$p['id']) }
@@ -415,10 +418,10 @@ InModuleScope 'NeoIPC-Tools' {
                 }
                 if ($p -eq 'tracker/events') {
                     $script:Fake.Requests.Add(@{ Kind = 'events'; Query = $QueryParameters; PageSize = $PageSize })
-                    if ([version]$script:Fake.Version -ge [version]'2.43' -and -not $QueryParameters['program']) { throw "Failed to fetch '$Path' from DHIS2: 400 (Bad Request)" }
+                    if ((Get-FakeVersion) -ge [version]'2.43' -and -not $QueryParameters['program']) { throw "Failed to fetch '$Path' from DHIS2: 400 (Bad Request)" }
                     $rows = @($script:Fake.Events | Where-Object { $_.programStage -ceq [string]$QueryParameters['programStage'] -and ($QueryParameters['includeDeleted'] -eq 'true' -or -not $_.deleted) })
                     if ($null -ne $PageSize) { $rows = @($rows | Select-Object -First $PageSize) }
-                    $key = if ($script:Fake.EventsKey) { $script:Fake.EventsKey } elseif ([version]$script:Fake.Version -lt [version]'2.41') { 'instances' } else { 'events' }
+                    $key = if ($script:Fake.EventsKey) { $script:Fake.EventsKey } elseif ((Get-FakeVersion) -lt [version]'2.41') { 'instances' } else { 'events' }
                     return @{ $key = @($rows | ForEach-Object { @{ event = $_.event } }) }
                 }
                 $segments = $p -split '/'
@@ -433,7 +436,10 @@ InModuleScope 'NeoIPC-Tools' {
                 if ($Filter -and $Filter[0] -match '^id:in:\[(.*)\]$') { $ids = $Matches[1] -split ','; $all = @($all | Where-Object { $ids -ccontains [string]$_['id'] }) }
                 @{ $p = @($all | ForEach-Object { Copy-Value $_ }) }
             }
-            Mock Get-NeoIPCDhis2StatusCode { $segments = ($Path -replace '^api/', '') -split '/'; if (Get-FakeObject $segments[0] $segments[1]) { 200 } else { 404 } }
+            Mock Get-NeoIPCDhis2StatusCode {
+                if ($script:Fake.StatusRead) { $code = & $script:Fake.StatusRead ([pscustomobject]@{ Path = $Path }); if ($null -ne $code) { return $code } }
+                $segments = ($Path -replace '^api/', '') -split '/'; if (Get-FakeObject $segments[0] $segments[1]) { 200 } else { 404 }
+            }
             Mock Invoke-NeoIPCDhis2Post {
                 if ($WhatIfPreference) { return }
                 if ($script:Fake.ThrowPost -and (& $script:Fake.ThrowPost ([pscustomobject]@{ Path = $Path; Mode = [string]$QueryParameters['importMode'] }))) { throw 'The SSL connection could not be established.' }
@@ -472,11 +478,11 @@ InModuleScope 'NeoIPC-Tools' {
                 if ($how -eq 'Refuse') { throw [System.Net.Http.HttpRequestException]::new("DELETE $Path failed (HTTP 409): refused", $null, [System.Net.HttpStatusCode]::Conflict) }
                 if ($how -eq 'Lose') { throw [System.Net.Http.HttpRequestException]::new('The SSL connection could not be established.') }
                 # DHIS2 2.40.12 refuses a rule action's own DELETE.
-                if ($segments[0] -eq 'programRuleActions' -and [version]$script:Fake.Version -lt [version]'2.41') {
+                if ($segments[0] -eq 'programRuleActions' -and (Get-FakeVersion) -lt [version]'2.41') {
                     throw [System.Net.Http.HttpRequestException]::new("DELETE $Path failed (HTTP 409): deleted object would be re-saved by cascade (remove deleted object from associations)", $null, [System.Net.HttpStatusCode]::Conflict)
                 }
                 # The 200 that keeps the object: DHIS2 2.41.10 and later on a stage section's DELETE, or what a test asks for.
-                if ($script:Fake.DeleteKeeps.Contains("$($segments[0])|$($segments[1])") -or ($segments[0] -eq 'programStageSections' -and [version]$script:Fake.Version -ge [version]'2.41')) {
+                if ($script:Fake.DeleteKeeps.Contains("$($segments[0])|$($segments[1])") -or ($segments[0] -eq 'programStageSections' -and (Get-FakeVersion) -ge [version]'2.41')) {
                     return [pscustomobject]@{ httpStatusCode = 200; status = 'OK' }
                 }
                 $o = Get-FakeObject $segments[0] $segments[1]
@@ -575,9 +581,12 @@ InModuleScope 'NeoIPC-Tools' {
             @{ Text = '2.40.11'; Verified = $false }
             @{ Text = '2.41.9'; Verified = $false }
             @{ Text = '2.43-SNAPSHOT'; Verified = $false }
+            @{ Text = '2.43.1-SNAPSHOT'; Verified = $false }
+            @{ Text = '2.43.1-RC1'; Verified = $false }
+            @{ Text = '2.43.2-SNAPSHOT'; Verified = $false }
             @{ Text = '2.39.6'; Verified = $false }
             @{ Text = '2.44.0'; Verified = $false }
-        ) { (Test-NeoIPCDeployVerifiedVersion -Version (ConvertTo-NeoIPCDhis2Version -Text $Text)) | Should -Be $Verified }
+        ) { (Test-NeoIPCDeployVerifiedVersion -Text $Text) | Should -Be $Verified }
     }
 
     Describe 'Compare-NeoIPCDeployObject (what DHIS2 holds as the package states compares equal)' {
@@ -1051,6 +1060,50 @@ InModuleScope 'NeoIPC-Tools' {
             $err.TargetObject.Snapshots[0].Object['templateUid'] | Should -Be 'ntAAAAAAAA1'
         }
 
+        It 'stops with the program version pending, unrestored, when a notification action''s accepted DELETE reads back neither present nor gone' {
+            $script:Fake.Version = '2.43.1'
+            $pkg = New-TestPackage
+            Set-FakeFromPackage $pkg
+            $pkg['programRuleActions'][1]['content'] = 'Changed'
+            $script:Fake.StatusRead = { param($q) if ($q.Path -eq 'api/programRuleActions/raAAAAAAAA2') { 503 } }
+            $err = $null
+            try { Invoke-TestDeploy $pkg } catch { $err = $_ }
+            $err.Exception.Message | Should -BeLike '*raAAAAAAAA2 was deleted for its re-creation, but reading programRuleActions raAAAAAAAA2 back answered HTTP 503*most likely gone*Deploy again*'
+            @($err.TargetObject.ProgramVersionPending) | Should -Be @('prAAAAAAAA1') -Because 'the action is most likely gone while clients still run it'
+            @($script:Fake.Requests | Where-Object { $_.Kind -eq 'delete' -and $_.Id -eq 'raAAAAAAAA2' }).Count | Should -Be 1 -Because 'no restore deletes it again'
+            # A later run whose reads answer creates the action as the package states it.
+            $script:Fake.StatusRead = $null
+            (Invoke-TestDeploy $pkg).Succeeded | Should -BeTrue
+            (Get-FakeObject 'programRuleActions' 'raAAAAAAAA2')['content'] | Should -Be 'Changed'
+        }
+
+        It 'reports a restore as failed, with the program version pending, when its read-back proves nothing' {
+            $script:Fake.Version = '2.43.1'
+            $pkg = New-TestPackage
+            Set-FakeFromPackage $pkg
+            $pkg['programRuleActions'][1]['content'] = 'Changed'
+            $script:Fake.FailImport = { param($p) $p.Contains('programRuleActions') -and @($p['programRuleActions'])[0]['content'] -eq 'Changed' }
+            # The read after the DELETE answers; the restore's own reads do not.
+            $script:Fake['StatusReads'] = 0
+            $script:Fake.StatusRead = { param($q) if ($q.Path -ne 'api/programRuleActions/raAAAAAAAA2') { return }; $script:Fake['StatusReads']++; if ($script:Fake['StatusReads'] -ge 2) { 503 } }
+            $err = $null
+            try { Invoke-TestDeploy $pkg } catch { $err = $_ }
+            $err.Exception.Message | Should -BeLike '*Its restore failed (reading programRuleActions raAAAAAAAA2 back answered HTTP 503*its snapshot is in the summary (Snapshots).*'
+            @($err.TargetObject.ProgramVersionPending) | Should -Be @('prAAAAAAAA1')
+        }
+
+        It 'stops with the program version pending when a delete''s read-back proves nothing, rather than call the object still present' {
+            $pkg = New-TestPackage
+            Set-FakeFromPackage $pkg
+            Set-FakeObject 'optionGroups' @{ id = 'ogAAAAAAAA9'; code = 'G9'; name = 'G9'; shortName = 'G9'; optionSet = @{ id = 'osAAAAAAAA1' } }
+            $script:Fake.StatusRead = { param($q) if ($q.Path -eq 'api/optionGroups/ogAAAAAAAA9') { 401 } }
+            $err = $null
+            try { Invoke-TestDeploy $pkg @{ Delete = @{ optionGroups = @('ogAAAAAAAA9') } } } catch { $err = $_ }
+            $err.Exception.Message | Should -BeLike '*delete optionGroups ogAAAAAAAA9 failed: reading optionGroups ogAAAAAAAA9 back answered HTTP 401*'
+            $err.Exception.Message | Should -Not -BeLike '*in place*'
+            @($err.TargetObject.ProgramVersionPending) | Should -Be @('prAAAAAAAA1')
+        }
+
         It 'stops before the DELETE of a notification action when the rule''s other actions cannot be read, and keeps a re-created one when its check cannot read the result' {
             $script:Fake.Version = '2.43.1'
             $pkg = New-TestPackage
@@ -1130,15 +1183,22 @@ InModuleScope 'NeoIPC-Tools' {
                 Should -BeExactly @('programs prAAAAAAAA1: public access loses data read, data write (rwrw---- to rw------)') -Because 'a data element shares no data'
         }
 
-        It 'stops before any write on a DHIS2 release it was not verified on (<Version>), unless acknowledged or synthetic' -ForEach @(
+        It 'stops before its confirmation and any request but its reads on a DHIS2 release it was not verified on (<Version>), unless acknowledged or synthetic' -ForEach @(
             @{ Version = '2.44.0' }
             @{ Version = '2.41.9' }
+            @{ Version = '2.43.1-SNAPSHOT' }
         ) {
             $pkg = New-TestPackage
             Set-FakeFromPackage $pkg
             $pkg['dataElements'][0]['name'] = 'Renamed'
             $script:Fake.Version = $Version
             { Invoke-TestDeploy $pkg } | Should -Throw '*Unacknowledged hazard(s): UnverifiedVersion*'
+            $script:Fake.Requests.Count | Should -Be 0 -Because 'it stops before the cache clear'
+            # A dry run reports it with the other hazards, the plan included.
+            $err = $null
+            try { Invoke-TestDeploy $pkg @{ DryRun = $true } } catch { $err = $_ }
+            $err.Exception.Message | Should -BeLike '*Unacknowledged hazard(s): UnverifiedVersion*'
+            @($err.TargetObject.Plan | Where-Object Type -eq 'dataElements')[0].Changed | Should -Be 1
             (Get-CommitRequest).Count | Should -Be 0
             $r = Invoke-TestDeploy $pkg @{ AllowHazard = @('UnverifiedVersion') }
             $r.Succeeded | Should -BeTrue
@@ -1276,17 +1336,6 @@ InModuleScope 'NeoIPC-Tools' {
             Get-FakeObject 'programStages' 'psAAAAAAAA2' | Should -BeNullOrEmpty
         }
 
-        It 'deletes an attribute before the option set it uses, although attributes commit first' {
-            $pkg = New-TestPackage
-            Set-FakeFromPackage $pkg
-            Set-FakeObject 'optionSets' @{ id = 'osAAAAAAAA9'; code = 'OS9'; name = 'Old set'; valueType = 'TEXT'; version = 1; options = @() }
-            Set-FakeObject 'attributes' @{ id = 'atAAAAAAAA9'; code = 'AT9'; name = 'Old attribute'; shortName = 'AT9'; valueType = 'TEXT'; optionSet = @{ id = 'osAAAAAAAA9' } }
-            $r = Invoke-TestDeploy $pkg @{ Delete = @{ optionSets = @('osAAAAAAAA9'); attributes = @('atAAAAAAAA9') }; AllowHazard = @('OptionSetMembership') }
-            $r.Succeeded | Should -BeTrue
-            @($script:Fake.Requests | Where-Object { $_.Kind -eq 'delete' } | ForEach-Object { "$($_.Type)|$($_.Id)" }) |
-                Should -Be @('attributes|atAAAAAAAA9', 'optionSets|osAAAAAAAA9') -Because 'DHIS2 refuses to delete an option set an attribute still uses'
-        }
-
         It 'stops before any write when an action the package does not carry sends a template that a stage in -Delete takes with it (<Version>)' -ForEach @(
             @{ Version = '2.41.10' }
             @{ Version = '2.43.1' }
@@ -1377,6 +1426,16 @@ InModuleScope 'NeoIPC-Tools' {
                 Live = { Set-FakeObject 'mapViews' @{ id = 'mvAAAAAAAA9'; programStage = @{ id = 'psAAAAAAAA2' } } } }
             @{ Case = 'nothing uses, on 2.40 while an event visualization has no stage'; Version = '2.40.12'; Expect = "*eventVisualizations evAAAAAAAA9 ('Enrollment list') has no stage*"
                 Live = { Set-FakeObject 'eventVisualizations' @{ id = 'evAAAAAAAA9'; name = 'Enrollment list' } } }
+            @{ Case = 'a working list names'; Version = '2.42.6'; Expect = "*programStageWorkingLists wlAAAAAAAA9 ('Open') uses programStages psAAAAAAAA2*"
+                Live = { Set-FakeObject 'programStageWorkingLists' @{ id = 'wlAAAAAAAA9'; name = 'Open'; programStage = @{ id = 'psAAAAAAAA2' } } } }
+            @{ Case = 'a relationship type''s constraint names'; Version = '2.41.10'; Expect = '*relationshipTypes rtAAAAAAAA9 names programStages psAAAAAAAA2 in its toConstraint*'
+                Live = { Set-FakeObject 'relationshipTypes' @{ id = 'rtAAAAAAAA9'; fromConstraint = @{ relationshipEntity = 'TRACKED_ENTITY_INSTANCE' }; toConstraint = @{ programStage = @{ id = 'psAAAAAAAA2' } } } } }
+            @{ Case = 'an SMS command names'; Version = '2.43.1'; Expect = '*smsCommands scAAAAAAAA9 uses programStages psAAAAAAAA2*'
+                Live = { Set-FakeObject 'smsCommands' @{ id = 'scAAAAAAAA9'; programStage = @{ id = 'psAAAAAAAA2' } } } }
+            @{ Case = 'an event visualization''s data-element dimension names'; Version = '2.43.1'; Expect = '*eventVisualizations evAAAAAAAA9 has a data-element dimension on programStages psAAAAAAAA2*'
+                Live = { Set-FakeObject 'eventVisualizations' @{ id = 'evAAAAAAAA9'; programStage = @{ id = 'psAAAAAAAA1' }; dataElementDimensions = @(@{ dataElement = @{ id = 'deAAAAAAAA1' }; programStage = @{ id = 'psAAAAAAAA2' } }) } } }
+            @{ Case = 'a map view''s data-element dimension names'; Version = '2.42.6'; Expect = '*mapViews mvAAAAAAAA9 has a data-element dimension on programStages psAAAAAAAA2*'
+                Live = { Set-FakeObject 'mapViews' @{ id = 'mvAAAAAAAA9'; dataElementDimensions = @(@{ programStage = @{ id = 'psAAAAAAAA2' } }) } } }
         ) {
             $script:Fake.Version = $Version
             $pkg = New-TestPackage
@@ -1592,6 +1651,38 @@ InModuleScope 'NeoIPC-Tools' {
             Get-FakeObject 'optionSets' 'osAAAAAAAA9' | Should -BeNullOrEmpty
             $r.Deleted.Contains('optionSets|osAAAAAAAA9') | Should -BeTrue
             $r.Deleted.Contains('options|opAAAAAAAA9') | Should -BeTrue
+        }
+
+        It 'refuses before any write to delete an option set one of whose options a <Holder> holds as a data dimension item, from 2.42 only' -ForEach @(
+            @{ Holder = 'visualization'; Type = 'visualizations'; Item = @{ dataDimensionItemType = 'PROGRAM_DATA_ELEMENT_OPTION'; programDataElementOption = @{ option = @{ id = 'opAAAAAAAA9' } } } }
+            @{ Holder = 'map view'; Type = 'mapViews'; Item = @{ dataDimensionItemType = 'PROGRAM_ATTRIBUTE_OPTION'; programAttributeOption = @{ option = @{ id = 'opAAAAAAAA9' } } } }
+        ) {
+            $script:Fake.Version = '2.42.6'
+            $pkg = New-TestPackage
+            Set-FakeFromPackage $pkg
+            Set-FakeObject 'optionSets' @{ id = 'osAAAAAAAA9'; code = 'OS9'; name = 'Old set'; valueType = 'TEXT'; version = 1; options = @(@{ id = 'opAAAAAAAA9' }) }
+            Set-FakeObject 'options' @{ id = 'opAAAAAAAA9'; code = '9'; name = 'Nine'; sortOrder = 1; optionSet = @{ id = 'osAAAAAAAA9' } }
+            Set-FakeObject $Type @{ id = 'vzAAAAAAAA9'; name = 'Counts'; dataDimensionItems = @($Item) }
+            $delete = @{ Delete = @{ optionSets = @('osAAAAAAAA9') }; AllowHazard = @('OptionSetMembership') }
+            { Invoke-TestDeploy $pkg $delete } | Should -Throw "*$Type vzAAAAAAAA9 ('Counts') holds options opAAAAAAAA9 as a data dimension item*Nothing was written*"
+            (Get-CommitRequest).Count | Should -Be 0
+            @($script:Fake.Requests | Where-Object { $_.Kind -eq 'delete' }).Count | Should -Be 0
+            # Before 2.42 no data dimension item holds an option, and none is read.
+            $script:Fake.Version = '2.41.10'
+            $script:Fake.ThrowGet = { param($q) $q.Path -in 'api/visualizations', 'api/mapViews' }
+            (Invoke-TestDeploy $pkg $delete).Succeeded | Should -BeTrue
+        }
+
+        It 'refuses before any request a -Delete type whose referrers it does not check (<Type>)' -ForEach @(
+            @{ Type = 'dataElements'; Id = 'deAAAAAAAA1' }
+            @{ Type = 'organisationUnits'; Id = 'ouAAAAAAAA1' }
+            @{ Type = 'programIndicators'; Id = 'piAAAAAAAA1' }
+            @{ Type = 'attributes'; Id = 'atAAAAAAAA9' }
+        ) {
+            $pkg = New-TestPackage
+            Set-FakeFromPackage $pkg
+            { Invoke-TestDeploy $pkg @{ Delete = @{ $Type = @($Id) } } } | Should -Throw "*-Delete names '$Type'. A deployment deletes only *, whose referrers it checks before its first write*Delete it outside the deployment*"
+            $script:Fake.Requests.Count | Should -Be 0
         }
 
         It 'fails the run when a DELETE answers 200 but the object is still there' {
