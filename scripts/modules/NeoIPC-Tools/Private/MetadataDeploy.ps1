@@ -58,18 +58,29 @@ function ConvertTo-NeoIPCDhis2Version {
     [version]($parts -join '.')
 }
 
-function Test-NeoIPCDeployVerifiedVersion {
-    # Whether DHIS2's version text names a verified release ($NeoIPCDeployVerifiedReleases) or a later patch of its line.
-    # A build with a suffix ('2.43.1-SNAPSHOT', '2.43.1-RC1') is none of them, whatever its numbers.
+function Test-NeoIPCVerifiedDhis2Version {
+    # Whether DHIS2's version text names one of the given verified releases or a later patch of its line. A build with
+    # a suffix ('2.43.1-SNAPSHOT', '2.43.1-RC1') is none of them, whatever its numbers.
     [CmdletBinding()]
     [OutputType([bool])]
-    param([Parameter(Mandatory)][AllowEmptyString()][string]$Text)
+    param(
+        [Parameter(Mandatory)][AllowEmptyString()][string]$Text,
+        [Parameter(Mandatory)][version[]]$Release
+    )
     if ($Text -notmatch '^\d+\.\d+\.\d+(\.\d+)?$') { return $false }
     $version = ConvertTo-NeoIPCDhis2Version -Text $Text
-    foreach ($v in $script:NeoIPCDeployVerifiedReleases) {
+    foreach ($v in $Release) {
         if ($version.Major -eq $v.Major -and $version.Minor -eq $v.Minor) { return $version -ge $v }
     }
     $false
+}
+
+function Test-NeoIPCDeployVerifiedVersion {
+    # Whether DHIS2's version text names a release the deployment was verified on ($NeoIPCDeployVerifiedReleases).
+    [CmdletBinding()]
+    [OutputType([bool])]
+    param([Parameter(Mandatory)][AllowEmptyString()][string]$Text)
+    Test-NeoIPCVerifiedDhis2Version -Text $Text -Release $script:NeoIPCDeployVerifiedReleases
 }
 
 function Copy-NeoIPCDeployValue {
