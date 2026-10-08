@@ -9,18 +9,25 @@
 
 .DESCRIPTION
     No CI job renders a report, so the code between the string resources and the rendered text is
-    exercised nowhere else. Eight parts:
+    exercised nowhere else. Nine parts:
 
     - The YAML handlers every string resource is read with (string_resource_handlers() in
       reports/common/helpers.R). A translated label such as Yes reaches the catalogue unquoted, and
-      YAML 1.1 would read it as a logical.
+      YAML 1.1 would read it as a logical. Beside them, the label template that leaves the punctuation
+      after a header label to the translation, and the translated unit of the average surveillance
+      period.
     - The income-class labels the Partner and Reference Reports look up for a class code, whose keys
       name the class rather than repeat the code.
     - The Validation Report's formatter (_problem_text.qmd with the tables of _mapping.qmd): the
       fallback that shows a stored code where its name is missing, the label a decoration looks up,
-      the choice of a rule's second sentence, and the escaping that keeps a typed value as typed while
-      a translated label takes the typography of the sentence around it. Where Pandoc is installed,
-      a test also has Pandoc read a finding's Markdown.
+      the choice among a rule's sentences, the rule number each problem starts with and the label of
+      a problem a warning found, and the escaping
+      that keeps a typed value as typed while a translated label takes the typography of the sentence
+      around it. Where Pandoc is installed, a test also has Pandoc read a finding's Markdown.
+    - The Validation Report's validation-exception list (reports/common/helpers.R): how its state is
+      derived from the parameters, given a stand-in for neoipcr's reader; the upload time it reads; the
+      header entry for each state; the hint on requesting an exception with its e-mail link; and the
+      administrators' appendix of the list's unused records, which Pandoc reads where it is installed.
     - The address the Validation Report's patient links start from (get_tracker_capture_base() in
       reports/common/helpers.R): which public addresses it takes and what base each yields, which it
       refuses without repeating them or any part of them, and the fallback to the address the data is
@@ -40,8 +47,9 @@
       gets, and for the Markdown every other format reads it from, Word included. Where Pandoc is
       installed, a test also has Pandoc read that Markdown.
     - The gt formatters of both summary tables: the dash and the note for a missing count, the font
-      size and the column widths, and the column groups. CI's R has no gt, so this part runs only
-      where gt is installed and is skipped elsewhere; the parts above need no gt.
+      size and the column widths, the column groups, and the validation summary's column of
+      warnings, with the note on data built before warnings were counted apart. CI's R has no gt, so
+      this part runs only where gt is installed and is skipped elsewhere; the parts above need no gt.
 
     The report's other setup checks call neoipcr, which no CI runner installs, and are not covered here.
 
@@ -113,6 +121,26 @@ cat(vapply(parsed, function(value) paste(class(value), format(value)), character
             'logical TRUE|logical FALSE|logical TRUE')
     }
 
+    It 'gives a header label the punctuation its translation sets after it, and escapes the name' {
+        # A French translation writes a no-break space before the colon; the name is a translated
+        # string, escaped as one.
+        $body = @'
+french <- local({
+  sR$term_label <- "{term} :"
+  term_label("Le", sR)
+})
+cat(term_label(sR$headerList$created, sR), identical(french, "Le :"), term_label("A*B", sR), sep = "|")
+'@
+        Invoke-ValidationReportSnippet $body | Should -BeExactly 'Created:|TRUE|A\*B:'
+    }
+
+    It 'gives the average surveillance period in the words of the translation' {
+        $body = @'
+cat(as.character(interpolate_translation(sR$headerList$averageSurveillancePeriodValue, days = "12.3")))
+'@
+        Invoke-ValidationReportSnippet $body | Should -BeExactly '12.3 days'
+    }
+
     It 'labels every income class by its code, and shows an unknown code as it is' {
         $body = @'
 cat(get_localised_world_bank_class_names(c("H", "UM", "LM", "L", "XX")), sep = "|")
@@ -158,6 +186,305 @@ cat(problem_text(55L, context, sR))
         $text = Invoke-ValidationReportSnippet $body
         $text | Should -Match 'item has not been answered, but the number'
         $text | Should -Not -Match 'not available'
+    }
+
+    It 'chooses rule 54''s sentence from the days of the substance''s entries: <Case>' -ForEach @(
+        @{ Case = 'different days'; Days = '3L'; Other = '4L'; Total = '7L'; Ab = '9L'
+           Pattern = 'with different numbers of days \(3 and 4\), probably one for each treatment course' }
+        @{ Case = 'the same days'; Days = '3L'; Other = '3L'; Total = '6L'; Ab = '9L'
+           Pattern = 'both with the same number of days \(3\)' }
+        @{ Case = 'an entry without days'; Days = '3L'; Other = 'NA_integer_'; Total = '3L'; Ab = '9L'
+           Pattern = 'is recorded in entry 1 and in entry 2\. See' }
+        @{ Case = 'a first entry without days'; Days = 'NA_integer_'; Other = '4L'; Total = '4L'; Ab = '9L'
+           Pattern = 'is recorded in entry 1 and in entry 2\. See' }
+        @{ Case = 'an entry of zero days'; Days = '0L'; Other = '4L'; Total = '4L'; Ab = '9L'
+           Pattern = 'is recorded in entry 1 and in entry 2\. See' }
+        @{ Case = 'a second entry of zero days'; Days = '3L'; Other = '0L'; Total = '3L'; Ab = '9L'
+           Pattern = 'is recorded in entry 1 and in entry 2\. See' }
+        @{ Case = 'two entries of zero days'; Days = '0L'; Other = '0L'; Total = '0L'; Ab = '9L'
+           Pattern = 'is recorded in entry 1 and in entry 2\. See' }
+        @{ Case = 'days adding up to the antibiotic days'; Days = '3L'; Other = '4L'; Total = '7L'; Ab = '7L'
+           Pattern = 'with different numbers of days \(3 and 4\), probably one for each treatment course' }
+        @{ Case = 'an entry without days, the other above the antibiotic days'; Days = 'NA_integer_'; Other = '8L'
+           Total = '8L'; Ab = '5L'; Pattern = 'is recorded in entry 1 and in entry 2\. See' }
+        @{ Case = 'no antibiotic days on the form'; Days = '3L'; Other = '4L'; Total = '7L'; Ab = 'NA_integer_'
+           Pattern = 'probably one for each treatment course' }
+    ) {
+        $body = @"
+context <- tibble::tibble(substance_code = "J01CA04", substance = "Amoxicillin", index = 1L,
+  index_other = 2L, days = $Days, days_other = $Other, ab_days = $Ab, substance_days = $Total)
+cat(problem_text(54L, context, sR))
+"@
+        Invoke-ValidationReportSnippet $body | Should -Match $Pattern
+    }
+
+    It 'renders rule 62''s sentence, with the stored code where the substance has no name' {
+        $body = @'
+context <- tibble::tibble(substance_code = "J99XX99", substance = NA_character_,
+  substance_days = 7L, ab_days = 5L)
+cat(problem_text(62L, context, sR))
+'@
+        Invoke-ValidationReportSnippet $body |
+            Should -Match ('^\* Rule 62: The antibiotic substance J99XX99 is recorded in more than one entry, ' +
+                'and its entries together record more days \(7\) than the total antibiotic days \(5\)\.')
+    }
+
+    It 'starts each problem with its rule number' {
+        $body = @'
+context <- tibble::tibble(sec_bsi = factor("0", levels = c("1", "0", "-1")), organisms = 2L)
+cat(problem_text(55L, context, sR))
+'@
+        Invoke-ValidationReportSnippet $body | Should -Match '^\* Rule 55: The secondary bloodstream infection item'
+    }
+
+    It 'labels a problem a warning found as a warning, and only such a problem' {
+        $body = @'
+warnings <- c(43L, 44L, 54L)
+context <- tibble::tibble(substance_code = "J01CA04", substance = "Amoxicillin", index = 1L,
+  index_other = 2L, days = 3L, days_other = 4L, ab_days = 9L, substance_days = 7L)
+cat(problem_text(54L, context, sR, warning_rule_ids = warnings))
+cat("\n")
+context <- tibble::tibble(substance_code = "J01CA04", substance = "Amoxicillin",
+  substance_days = 7L, ab_days = 5L)
+cat(problem_text(62L, context, sR, warning_rule_ids = warnings))
+'@
+        $warningLine, $errorLine = (Invoke-ValidationReportSnippet $body) -split "`n"
+        $warningLine | Should -Match '^\* Rule 54 \(warning\): The antibiotic substance Amoxicillin'
+        $errorLine | Should -Match '^\* Rule 62: The antibiotic substance Amoxicillin'
+    }
+
+    It 'keeps a translated label that starts with an ordinal from opening a list' {
+        $body = @'
+sR$problem_rule_label <- "{rule}. kural:"
+sR$validation_exceptions$rule_records <- "{rule}) kural – {kind} ({count})"
+context <- tibble::tibble(sec_bsi = factor("0", levels = c("1", "0", "-1")), organisms = 2L)
+cat(problem_text(55L, context, sR))
+cat("\n")
+summary <- tibble::tibble(
+  rule_id = 54L, record_kind = factor("enrollments", levels = c("patients", "enrollments", "events")),
+  n_flagged = 0L, n_exempted = 2L)
+cat(validation_exception_overview("applied", NULL, summary, sR)[[2]])
+'@
+        $finding, $overview = (Invoke-ValidationReportSnippet $body) -split "`n"
+        $finding | Should -Match '^\* 55\\\. kural: The secondary'
+        $overview | Should -Match '^54\\\) kural'
+    }
+
+    It 'escapes each list marker a line can start with, and nothing else: <Line>' -ForEach @(
+        @{ Line = '54. kural'; Expected = '54\. kural' }
+        @{ Line = '54) kural'; Expected = '54\) kural' }
+        @{ Line = '(54) kural'; Expected = '\(54) kural' }
+        @{ Line = '(iv) kural'; Expected = '\(iv) kural' }
+        @{ Line = '#. kural'; Expected = '#\. kural' }
+        @{ Line = '(#) kural'; Expected = '\(#) kural' }
+        @{ Line = '(@) kural'; Expected = '\(@) kural' }
+        @{ Line = '@note. kural'; Expected = '@note\. kural' }
+        @{ Line = '- kural'; Expected = '\- kural' }
+        @{ Line = '+ kural'; Expected = '\+ kural' }
+        @{ Line = '* kural'; Expected = '\* kural' }
+        @{ Line = '**Rule 54:** kural'; Expected = '**Rule 54:** kural' }
+        @{ Line = '(see below) kural'; Expected = '(see below) kural' }
+        @{ Line = '-5 kural'; Expected = '-5 kural' }
+    ) {
+        Invoke-ValidationReportSnippet "cat(escape_leading_list_marker('$Line'))" | Should -BeExactly $Expected
+    }
+
+    It 'reads the upload time the service passes, and the ISO 8601 forms its documentation names: <Value>' -ForEach @(
+        @{ Value = '2026-09-30T14:03:00Z'; Expected = '2026-09-30 14:03:00' }
+        @{ Value = '2026-09-30T14:03:00.1234567Z'; Expected = '2026-09-30 14:03:00' }
+        @{ Value = '2026-09-30T16:03:00+02:00'; Expected = '2026-09-30 14:03:00' }
+        @{ Value = '2026-09-30T16:03:00+0200'; Expected = '2026-09-30 14:03:00' }
+        @{ Value = 'the day before yesterday'; Expected = 'NA' }
+        @{ Value = '2026/09/30 14:03:00'; Expected = 'NA' }
+        @{ Value = '26-09-30 14:03:00'; Expected = 'NA' }
+        @{ Value = '2026-09-30T14:03:00'; Expected = 'NA' }
+        @{ Value = '2026-09-30T14:03Z'; Expected = 'NA' }
+        @{ Value = '2026-09-30T14:03:00Z and more'; Expected = 'NA' }
+        @{ Value = '2026-02-30T14:03:00Z'; Expected = 'NA' }
+    ) {
+        Invoke-ValidationReportSnippet "cat(format(validation_exception_upload_time('$Value'), '%Y-%m-%d %H:%M:%S'))" |
+            Should -BeExactly $Expected
+    }
+
+    It 'derives the exception list''s state from the parameters: <Case>' -ForEach @(
+        @{ Case = 'a list switched off'; Apply = 'FALSE'; File = '"list.csv"'; Uploaded = 'NULL'
+           Expected = 'switched_off|FALSE|-' }
+        @{ Case = 'the upload time alone, switched off'; Apply = 'FALSE'; File = 'NULL'
+           Uploaded = '"2026-09-30T14:03:00Z"'; Expected = 'switched_off|FALSE|-' }
+        @{ Case = 'switched off without a list'; Apply = 'FALSE'; File = 'NULL'; Uploaded = 'NULL'
+           Expected = 'none|FALSE|-' }
+        @{ Case = 'an upload time without a list'; Apply = 'TRUE'; File = 'NULL'
+           Uploaded = '"2026-09-30T14:03:00Z"'; Expected = 'none|FALSE|-' }
+        @{ Case = 'a list applied'; Apply = 'TRUE'; File = '"list.csv"'; Uploaded = 'NULL'
+           Expected = 'applied|TRUE|the keys' }
+    ) {
+        $body = @"
+read <- FALSE
+state <- validation_exception_state($Apply, $File, $Uploaded, function(path) {
+  read <<- TRUE
+  list(list = "the list", keys = "the keys")
+})
+cat(state`$state, read, if (is.null(state`$keys)) "-" else state`$keys, sep = "|")
+"@
+        Invoke-ValidationReportSnippet $body | Should -BeExactly $Expected
+    }
+
+    It 'skips a list neoipcr refuses, with the refusal, and lets any other error through' {
+        $body = @'
+refused <- validation_exception_state(TRUE, "list.csv", NULL, function(path)
+  rlang::abort("The list is refused.", class = "neoipcr_invalid_exception_list"))
+cat(refused$state, refused$refusal, sep = "|")
+cat("\n")
+failed <- tryCatch(
+  validation_exception_state(TRUE, "list.csv", NULL, function(path) stop("A defect.")),
+  error = function(cnd) paste("error:", conditionMessage(cnd)))
+cat(if (is.character(failed)) failed else failed$state)
+'@
+        $refused, $failed = (Invoke-ValidationReportSnippet $body) -split "`n"
+        $refused | Should -BeExactly 'unusable|The list is refused.'
+        $failed | Should -BeExactly 'error: A defect.'
+    }
+
+    It 'counts the list as having exempted records only where a rule exempted one' {
+        $body = @'
+cat(validation_exceptions_exempted(NULL),
+    validation_exceptions_exempted(tibble::tibble(rule_id = c(3L, NA), n_exempted = c(0L, 2L))),
+    validation_exceptions_exempted(tibble::tibble(rule_id = c(3L, NA), n_exempted = c(1L, 1L))),
+    sep = "|")
+'@
+        Invoke-ValidationReportSnippet $body | Should -BeExactly 'FALSE|FALSE|TRUE'
+    }
+
+    It 'lists in the header the upload date, then the records an applied exception list exempted, in rule order' {
+        $body = @'
+summary <- tibble::tibble(
+  rule_id     = c(56L, 3L, 54L, 12L, NA_integer_),
+  record_kind = factor(c("patients", "enrollments", "enrollments", "events", "patients"),
+                       levels = c("patients", "enrollments", "events")),
+  n_flagged   = c(0L, 1L, 0L, 0L, 1L),
+  n_exempted  = c(1L, 0L, 2L, 3L, 2L))
+cat(validation_exception_overview(
+  "applied", validation_exception_upload_time("2026-09-30T14:03:00Z"), summary, sR), sep = "\n")
+'@
+        $lines = (Invoke-ValidationReportSnippet $body) -split "`n"
+        $lines.Count | Should -Be 5
+        $lines[0] | Should -Match '^List uploaded on \S'
+        $lines[1] | Should -BeExactly 'Applied; records exempted:'
+        # In rule order, each with the label of the records its rule concerns; a rule that exempted
+        # nothing gets no line, and the totals row is not a rule.
+        $lines[2] | Should -Match '^Rule 12 \S Forms \(3\)$'
+        $lines[3] | Should -Match '^Rule 54 \S Patient admissions \(2\)$'
+        $lines[4] | Should -Match '^Rule 56 \S Patient records \(1\)$'
+    }
+
+    It 'states in the header why no exception list was applied: <State>' -ForEach @(
+        @{ State = 'none'; Expected = 'No exception list' }
+        @{ State = 'switched_off'; Expected = 'Not applied; an administrator rendered this report without the exception list' }
+        @{ State = 'unusable'; Expected = 'Not applied; the list could not be read or applied to these departments' }
+    ) {
+        Invoke-ValidationReportSnippet "cat(validation_exception_overview('$State', NULL, NULL, sR))" |
+            Should -BeExactly $Expected
+    }
+
+    It 'gives the upload date of a list the report speaks of, and none without a list: <State>' -ForEach @(
+        @{ State = 'switched_off'; Count = 2 }
+        @{ State = 'unusable'; Count = 2 }
+        @{ State = 'none'; Count = 1 }
+    ) {
+        $body = "cat(validation_exception_overview('$State', validation_exception_upload_time('2026-09-30T14:03:00Z'), NULL, sR), sep = '\n')"
+        $lines = (Invoke-ValidationReportSnippet $body) -split "`n"
+        $lines.Count | Should -Be $Count
+        $lines[0] | Should -Match $(if ($Count -eq 2) { '^List uploaded on \S' } else { '^No exception list$' })
+    }
+
+    It 'says in the header that an applied exception list exempted nothing' {
+        $body = @'
+summary <- tibble::tibble(
+  rule_id = NA_integer_,
+  record_kind = factor("patients", levels = c("patients", "enrollments", "events")),
+  n_flagged = 1L, n_exempted = 0L)
+cat(validation_exception_overview("applied", NULL, summary, sR))
+'@
+        Invoke-ValidationReportSnippet $body | Should -BeExactly 'Applied; no record exempted'
+    }
+
+    It 'links the hint on requesting an exception to an e-mail asking for the department, the patient, the enrolment, the form, and the rule' {
+        $text = Invoke-ValidationReportSnippet 'cat(exception_request_hint(sR, "support@example.org"))'
+        $text | Should -MatchExactly ('\[support e-mail address\]\(mailto:support@example\.org\?' +
+            'subject=Request%20for%20a%20validation%20exception&body=Dear%20')
+        # Reserved characters are encoded, and every line break as RFC 6068 requires.
+        $text | Should -MatchExactly 'team%2C%0D%0APlease%20consider'
+        $text | Should -MatchExactly '%0D%0ADepartment%3A%0D%0A'
+        $text | Should -MatchExactly '%0D%0AAdmission%20date%20of%20the%20enrolment%3A%0D%0A'
+        $text | Should -MatchExactly '%0D%0ARule%20number%3A%0D%0A'
+        $text | Should -Not -MatchExactly '(?<!%0D)%0A'
+        $text | Should -Match 'naming the department, the patient''s NeoIPC-ID'
+        $text | Should -Match 'as long as the patient''s NeoIPC-ID and the dates'
+    }
+
+    It 'encodes a percent sign in an e-mail field that already reads as an escape' {
+        Invoke-ValidationReportSnippet 'cat(mailto_encode("50%20 off\nnext"))' |
+            Should -BeExactly '50%2520%20off%0D%0Anext'
+    }
+
+    It 'tables the unused exception records, values escaped, and says why there is nothing to list' {
+        $body = @'
+usage <- tibble::tibble(
+  RULE_ID           = c(3L, 12L, 1L, 25L),
+  NEOIPC_PATIENT_ID = c("PAT_1", "PAT|2", "PAT_9", "PAT_4"),
+  ENROLMENT_DATE    = as.Date(c("2024-01-01", "2024-01-01", NA, "2024-01-01")),
+  EVENT_TYPE        = c(NA, "bsi", NA, NA),
+  EVENT_DATE        = as.Date(c(NA, "2024-01-06", NA, NA)),
+  DEPARTMENT_CODE   = "DEPT_1",
+  matched           = c(TRUE, TRUE, FALSE, TRUE),
+  n_exempted        = c(1L, 0L, 0L, NA))
+cat(unused_validation_exceptions_markdown("applied", usage, sR), sep = "\n")
+cat("\n=====\n")
+cat(unused_validation_exceptions_markdown("switched_off", NULL, sR), sep = "\n")
+cat("\n=====\n")
+cat(unused_validation_exceptions_markdown("unusable", NULL, sR), sep = "\n")
+cat("\n=====\n")
+cat(unused_validation_exceptions_markdown("applied", usage[0, ], sR), sep = "\n")
+cat("\n=====\n")
+cat(unused_validation_exceptions_markdown("applied", usage[usage$n_exempted %in% 1L, ], sR), sep = "\n")
+cat("\n=====\n")
+cat(unused_validation_exceptions_markdown(
+  "applied", usage[, names(usage) != "DEPARTMENT_CODE"], sR), sep = "\n")
+'@
+        $applied, $switchedOff, $unusable, $noRecords, $noneUnused, $noCodes =
+            (Invoke-ValidationReportSnippet $body) -split '====='
+        $applied | Should -Match '## Unused Validation Exceptions \{\.unnumbered\}'
+        # The record that exempted one is not listed, nor the matched one whose rule the render did not
+        # run; the other two are, with their outcome.
+        $applied | Should -Not -Match 'PAT\\_1'
+        $applied | Should -Not -Match 'PAT\\_4'
+        $applied | Should -Not -Match '\| NA \|'
+        $applied | Should -MatchExactly '\| 12 \| DEPT\\_1 \| PAT\\\|2 \|.*\| BSI \|.*\| Exempts nothing \|'
+        $applied | Should -MatchExactly '\| 1 \| DEPT\\_1 \| PAT\\_9 \| not available \|.*\| Matches no record \|'
+        $switchedOff | Should -Match 'No validation exception list was applied to this report'
+        $unusable | Should -Match 'could not be read or applied to the departments of this report'
+        $noRecords | Should -Match 'holds no record for the departments of this report'
+        $noneUnused | Should -Match 'matches a record in their data'
+        # A list without department codes is kept whole, so its records could be other departments'.
+        $noCodes | Should -Match 'does not name the department of its records'
+        $noCodes | Should -Not -Match 'PAT'
+    }
+
+    It 'gives Pandoc the appendix as a table of seven columns, the widest for the codes' -Skip:(-not $hasPandoc) {
+        $body = @'
+usage <- tibble::tibble(
+  RULE_ID = 1L, NEOIPC_PATIENT_ID = "PAT|9", ENROLMENT_DATE = as.Date(NA), EVENT_TYPE = NA_character_,
+  EVENT_DATE = as.Date(NA), DEPARTMENT_CODE = "DEPT_1", matched = FALSE, n_exempted = NA_integer_)
+cat(unused_validation_exceptions_markdown("applied", usage, sR), sep = "\n")
+'@
+        $markdown = Invoke-ValidationReportSnippet $body
+        $native = ($markdown | & pandoc -f markdown -t native 2>&1) -join "`n"
+        $widths = [regex]::Matches($native, 'ColWidth ([0-9.e-]+)') | ForEach-Object { [double]$_.Groups[1].Value }
+        $widths.Count | Should -Be 7
+        # Rule, Department, NeoIPC-ID, Enrolment date, Form, Form date, Outcome.
+        $widths[1] | Should -BeGreaterThan $widths[0]
+        $widths[2] | Should -BeGreaterThan $widths[4]
+        $native | Should -Match 'Str "PAT\|9"'
     }
 
     It 'falls back to the missing-value string for a code the label map does not carry' {
@@ -458,8 +785,10 @@ one_sentence <- sR
 one_sentence$problems[["55"]]$description_unanswered <- NULL
 bare_text <- sR
 bare_text$problems[["7"]] <- "A sentence where the rule's templates and summary belong."
+no_same_days <- sR
+no_same_days$problems[["54"]]$description_same_days <- NULL
 cat(check(sR, ids), check(extra, ids), check(sR, c(ids, 16L)), check(blank, ids),
-    check(one_sentence, ids), check(bare_text, ids), sep = "\n")
+    check(one_sentence, ids), check(bare_text, ids), check(no_same_days, ids), sep = "\n")
 '@
         $lines = (Invoke-ReportSnippet -Report 'Validation-Report' -Body $body) -split "`n"
     }
@@ -478,6 +807,7 @@ cat(check(sR, ids), check(extra, ids), check(sR, c(ids, 16L)), check(blank, ids)
         @{ Case = 'a blank summary'; Line = 3; Rule = 3 }
         @{ Case = 'no second sentence for rule 55'; Line = 4; Rule = 55 }
         @{ Case = 'text where the entry belongs'; Line = 5; Rule = 7 }
+        @{ Case = 'no sentence for rule 54''s entries of the same days'; Line = 6; Rule = 54 }
     ) {
         $lines[$Line] | Should -BeExactly ("neoipc_validation_rule_without_text`tThe string resources " +
             "carry no complete description and summary for validation rule(s) $Rule.")
@@ -800,6 +1130,21 @@ cat(grepl("\\fontsize{8.0pt}{10.0pt}", two, fixed = TRUE),
         Invoke-SummaryTableSnippet $body | Should -BeExactly 'TRUE|TRUE|TRUE|TRUE'
     }
 
+    It 'labels the records each rule of the validation summary counts with the string resources'' labels' {
+        $body = @'
+sR$`tbl-validation-summary`$patients <- "LABEL-PATIENTS"
+sR$`tbl-validation-summary`$admissions <- "LABEL-ADMISSIONS"
+sR$`tbl-validation-summary`$forms <- "LABEL-FORMS"
+summary <- tibble::tibble(
+  rule_id = c(3L, 12L, 56L, NA), record_kind = factor(c("enrollments", "events", "patients", "patients")),
+  n_removed = c(1L, 1L, 1L, 3L), n_exempted = c(0L, 0L, 0L, 0L))
+tex <- latex(format_validation_summary_table(list(summary), sR, font_size = 11L))
+cat(vapply(c("LABEL-PATIENTS", "LABEL-ADMISSIONS", "LABEL-FORMS"),
+           \(label) grepl(label, tex, fixed = TRUE), logical(1)), sep = "|")
+'@
+        Invoke-SummaryTableSnippet $body | Should -BeExactly 'TRUE|TRUE|TRUE'
+    }
+
     It 'labels a column group for each named summary, and none for a single unnamed one' {
         $body = @'
 has_group <- function(tbl, label) grepl(paste0("{{", label, "}}"), latex(tbl), fixed = TRUE)
@@ -813,5 +1158,57 @@ cat(has_group(format_reconciliation_summary_table(
           fixed = TRUE), sep = "|")
 '@
         Invoke-SummaryTableSnippet $body | Should -BeExactly 'TRUE|TRUE|FALSE|FALSE'
+    }
+
+    # NEOIPC-PERMANENT(validation-summary-warnings): see reports/common/helpers.R.
+    It 'gives a summary that counts warnings their column, and notes that an older one counts them as removed' {
+        # The summary without n_warned is the fixture's, the shape of data built before neoipcr
+        # counted warnings apart. The footnotes are read off the gt object, which names the column
+        # each one marks.
+        $body = @'
+warned <- tibble::tibble(
+  rule_id = c(54L, NA, NA, NA), record_kind = factor(c("enrollments", "patients", "enrollments", "events")),
+  n_removed = 0L, n_exempted = 0L, n_warned = c(2L, 2L, 2L, 0L))
+strings <- sR$`tbl-validation-summary`
+tbl <- format_validation_summary_table(list("Own" = warned, "Reference" = validation_summary), sR)
+notes <- tbl[["_footnotes"]]
+note_on <- function(column) notes$footnotes[notes$colname == column]
+cat(paste(setdiff(names(tbl[["_data"]]), c("label", "records")), collapse = ","),
+    identical(unlist(note_on("warned_1")),
+              as.character(interpolate_translation(strings$warned_footnote, column = strings$warned))),
+    identical(unlist(note_on("removed_2")),
+              as.character(interpolate_translation(strings$warned_absent_footnote, column = strings$removed))),
+    length(note_on("removed_1")),
+    is.null(format_validation_summary_table(list(warned), sR)),
+    is.null(format_validation_summary_table(list(dplyr::mutate(warned, n_warned = 0L)), sR)),
+    sep = "|")
+'@
+        Invoke-SummaryTableSnippet $body |
+            Should -BeExactly 'removed_1,exempted_1,warned_1,removed_2,exempted_2|TRUE|TRUE|1|FALSE|TRUE'
+    }
+
+    # NEOIPC-PERMANENT(validation-summary-warnings): see reports/common/helpers.R.
+    It 'gives each removed column one note, which an older summary first in the table does not change' {
+        # The note that leaves warnings out goes on the first summary that counts them apart, and an
+        # older summary's removed column carries only its own, alone in a table or first in one.
+        $body = @'
+warned <- tibble::tibble(
+  rule_id = c(54L, NA, NA, NA), record_kind = factor(c("enrollments", "patients", "enrollments", "events")),
+  n_removed = 0L, n_exempted = 0L, n_warned = c(2L, 2L, 2L, 0L))
+strings <- sR$`tbl-validation-summary`
+removed <- as.character(interpolate_translation(strings$removed_footnote, column = strings$removed))
+absent <- as.character(interpolate_translation(strings$warned_absent_footnote, column = strings$removed))
+notes_on <- function(tbl, column) {
+  notes <- tbl[["_footnotes"]]
+  unlist(notes$footnotes[notes$colname == column])
+}
+mixed <- format_validation_summary_table(list("Own" = validation_summary, "Reference" = warned), sR)
+older <- format_validation_summary_table(list(validation_summary), sR)
+cat(identical(notes_on(mixed, "removed_1"), absent),
+    identical(notes_on(mixed, "removed_2"), removed),
+    identical(notes_on(older, "removed_1"), absent),
+    sep = "|")
+'@
+        Invoke-SummaryTableSnippet $body | Should -BeExactly 'TRUE|TRUE|TRUE'
     }
 }

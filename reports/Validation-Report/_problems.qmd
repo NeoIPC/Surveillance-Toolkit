@@ -60,7 +60,8 @@ if (nrow(problems) > 0) {
         "nec" ~ "NEC", "ssi" ~ "SSI", "hap" ~ "HAP",
         "end" ~ "END"),
       problem_text = purrr::map2_chr(
-        .data$rule_id, .data$context, problem_text, sR = sR))
+        .data$rule_id, .data$context, problem_text, sR = sR,
+        warning_rule_ids = warning_rule_ids))
 }
 ```
 
@@ -96,9 +97,9 @@ multiple_problems_hint <- function(partner_code, patient_id) {
   mailto_content <- paste0(
     support_email_address,
     "?subject=",
-    utils::URLencode(mailto_subject, reserved = TRUE),
+    mailto_encode(mailto_subject),
     "&body=",
-    utils::URLencode(as.character(mailto_body), reserved = TRUE))
+    mailto_encode(as.character(mailto_body)))
   # The link is markup, so it is built here and handed to the translated
   # sentence as a value rather than written into the string; its label is a
   # translated string placed inside that markup, escaped so it cannot become
@@ -193,8 +194,12 @@ if (exists("problem_results")) {
             .data$department_orgunit == dept_ou &
             .data$patient_trackedentity == pat_tei)
 
+        # The callout carries its own title: without one, the minimal HTML
+        # profile gives it an English title from its type, in every language.
         if (nrow(patient_problems) > 1) {
           cat("::: {.callout-tip}",
+            paste("##", sR$patient_problem_multiple_hint_title),
+            "",
             multiple_problems_hint(site, pat_id),
             ":::",
             sep = "\n")

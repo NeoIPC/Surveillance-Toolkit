@@ -35,6 +35,13 @@ support_email_address <- "NeoIPC-Support@charite.de"
 # the string resources to the rules neoipcr defines, in both directions.
 rule_ids <- neoipcr::validation_rule_ids()
 check_validation_rule_texts(sR, rule_ids)
+# The rules whose findings the list labels as warnings: neoipcr's import
+# keeps a patient only a warning flags, so such a finding may be correct as
+# entered.
+warning_rule_ids <- local({
+  severities <- neoipcr::validation_rule_severities()
+  as.integer(names(severities)[severities == "warning"])
+})
 
 # Every placeholder a rule's sentences name must be a field the rule records,
 # as `neoipcr::validation_rule_context_fields()` declares them, or a label the
@@ -171,9 +178,27 @@ if (!rlang::is_null(departmentFilter))
 ```{r Validate}
 #| include: false
 
-exceptions <- NULL
-if (!is.null(params$validationExceptionFile))
-  exceptions <- neoipcr::read_validation_exceptions(params$validationExceptionFile)
+# The state of the validation-exception list, which the header states, as
+# validation_exception_state() in reports/common/helpers.R derives it. An
+# unusable list is skipped rather than failing the render, so one bad list
+# cannot keep every department from its report; the header says so and the
+# log names the refusal.
+exception <- validation_exception_state(
+  params$applyValidationExceptions,
+  params$validationExceptionFile,
+  params$validationExceptionFileUploadedAt,
+  function(path) {
+    read <- neoipcr::read_validation_exceptions(path)
+    list(list = read, keys = neoipcr::resolve_validation_exceptions(data, read))
+  })
+exception_state <- exception$state
+if (identical(exception_state, "unusable"))
+  logWarn("The validation exception list was not applied: {exception$refusal}")
+exception_uploaded_at <- validation_exception_upload_time(params$validationExceptionFileUploadedAt)
+if (length(exception_uploaded_at) == 1L && is.na(exception_uploaded_at))
+  logWarn(logger::skip_formatter(sprintf(
+    "The upload time of the validation exception list, '%s', is not an ISO 8601 date and time with seconds and a zone, so the header leaves it out.",
+    params$validationExceptionFileUploadedAt)))
 
 # An empty `rules` value (NULL, or `[]` from the command line) means every
 # rule; a repeated id is applied once, so the header counts it once. An id
@@ -189,7 +214,7 @@ if (length(requested_rules) == 0L) {
       paste(requested_rules, collapse = ", ")))
   rules <- as.integer(requested_rules)
 }
-problems <- neoipcr::validate(data, rules = rules, exceptions = exceptions)
+problems <- neoipcr::validate(data, rules = rules, exceptions = exception$keys)
 
 # A rule the package could not run, for want of a column the dataset does not
 # hold, flags nothing and would read as clean. This import asks for every
@@ -200,6 +225,24 @@ if (length(rules_skipped) > 0L)
   rlang::abort(sprintf(
     "Validation rule(s) %s could not be applied to the imported dataset; see the log for the column each is missing.",
     paste(rules_skipped, collapse = ", ")))
+
+# What the list exempted, counted in records per rule for the header, and,
+# for an administrator who asked, how each of its records for these
+# departments fared. Both are computed from validate()'s result as it
+# returned it: a reshaped copy keeps the run's attributes, so
+# validation_summary() would accept it but count its rows against every
+# exemption of the run. The usage is that of the whole list validate() was
+# given, since whether a record matches does not depend on the rules
+# applied; a matched record of a rule the render did not run exempts nothing
+# for want of a run, and the appendix leaves it out.
+exception_summary <- if (exception_state == "applied")
+  neoipcr::validation_summary(problems)
+exception_usage <- if (exception_state == "applied" &&
+                       isTRUE(params$includeUnusedValidationExceptions))
+  neoipcr::validation_exception_usage(data, exception$list, problems)
+exception_overview <- validation_exception_overview(
+  exception_state, exception_uploaded_at, exception_summary, sR)
+records_exempted <- validation_exceptions_exempted(exception_summary)
 
 # The header says which rules produced this report, so a document rendered
 # with a subset cannot be read as a clean bill on the rules it skipped.

@@ -19,6 +19,26 @@ params:
   # @type character
   validationExceptionFile: NULL
 
+  # Apply the validation-exception list; false renders without it, and the
+  # report's header says so. Administrators only: the reporting service
+  # refuses false from other callers.
+  # @type logical
+  applyValidationExceptions: true
+
+  # Add an appendix listing the exception records of the departments in
+  # scope that match no record, or match one but exempt nothing.
+  # Administrators only: the reporting service refuses true from other
+  # callers.
+  # @type logical
+  includeUnusedValidationExceptions: false
+
+  # When the stored validation-exception list was uploaded, for the report's
+  # header, as yyyy-mm-ddThh:mm:ssZ in UTC (the same with fractional
+  # seconds, or with an offset from UTC in place of the Z, is read as well).
+  # Server-side override; not exposed via the public API.
+  # @type character
+  validationExceptionFileUploadedAt: NULL
+
   # DHIS2 endpoint scheme (http or https). Server-side override; not
   # exposed via the public API.
   # @type character

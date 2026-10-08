@@ -72,6 +72,11 @@ headerList:
   allGestationalAges: "All eligible gestational ages"
   and: " and "
   averageSurveillancePeriod: Average surveillance period per patient
+  # Translators:
+  # The value of the entry "Average surveillance period per patient". `{days}` is replaced by the
+  # average number of days, a number that always has a digit after the decimal mark, so use the form
+  # of the word your language takes after such a number. Keep it as written.
+  averageSurveillancePeriodValue: "{days} days"
   birthweightFilter: "Birth weight filter"
   countries: Countries
   country: Country
@@ -319,40 +324,67 @@ tbl-surgical-procedure-rates:
   tbl-cap: "Surgical procedures by category"
   to_be_categorized: "Not yet categorized"
 tbl-validation-summary:
-  tbl-cap: "Records removed or exempted by the validation rules"
+  tbl-cap: "Records flagged by the validation rules"
   # Translators:
-  # The row label of one rule in the table of the records the validation rules removed or exempted,
-  # in the Partner and Reference Reports. `{rule}` is replaced by the rule's number, a whole number.
-  # Keep it as written.
+  # The row label of one rule in the table of the records the validation rules flagged, in the
+  # Partner and Reference Reports. `{rule}` is replaced by the rule's number, a whole number. Keep it
+  # as written.
   rule_label: "Rule {rule}"
   records: "Records"
   removed: "Removed"
   exempted: "Exempted"
+  # Translators:
+  # The heading of the column of the records that a rule which is only a warning flagged, in the
+  # table of the records the validation rules flagged, in the Partner and Reference Reports; it
+  # stands beside the headings "Removed" and "Exempted".
+  warned: "Warnings"
   patients: "Patient records"
   admissions: "Patient admissions"
   forms: "Forms"
   # Translators:
-  # The row label of a totals row in the table of the records the validation rules removed or
-  # exempted, in the Partner and Reference Reports. `{records}` is replaced by the label of a kind
-  # of record from the same table, as translated in the strings "Patient records", "Patient
-  # admissions", and "Forms". Keep it as written.
+  # The row label of a totals row in the table of the records the validation rules flagged, in the
+  # Partner and Reference Reports. `{records}` is replaced by the label of a kind of record from the
+  # same table, as translated in the strings "Patient records", "Patient admissions", and "Forms".
+  # Keep it as written.
   total_label: "All rules – {records}"
   # Translators:
   # A footnote on the column of removed records in the table of the records the validation rules
-  # removed or exempted, in the Partner and Reference Reports. `{column}` is replaced by that
-  # column's heading, as translated in the string "Removed". Keep it as written.
+  # flagged, in the Partner and Reference Reports, for data that count the records a warning flagged
+  # in a column of their own. `{column}` is replaced by that column's heading, as translated in the
+  # string "Removed". Keep it as written.
   removed_footnote: >-
+    {column}: Records the rule flagged, unless it is only a warning; the
+    validation removed each from the dataset before the analysis together
+    with the whole patient record it belongs to, so the total of patient
+    records is the number of patients removed.
+  # Translators:
+  # A footnote on the column of exempted records in the table of the records the validation rules
+  # flagged, in the Partner and Reference Reports. `{column}` is replaced by that column's heading,
+  # as translated in the string "Exempted". Keep it as written.
+  exempted_footnote: >-
+    {column}: Records the rule flagged that an exception list exempted from
+    it; an exception concerns that rule alone, so a record another rule
+    flagged as well also counts in that rule's row.
+  # Translators:
+  # A footnote on the column of the records a warning flagged in the table of the records the
+  # validation rules flagged, in the Partner and Reference Reports. `{column}` is replaced by that
+  # column's heading, as translated in the string "Warnings". Keep it as written.
+  warned_footnote: >-
+    {column}: Records a rule that is only a warning flagged, since such a
+    record may be correct as entered; the validation kept each in the dataset,
+    unless another rule removed it.
+  # Translators:
+  # A footnote on the column of removed records of data built before the validation counted the
+  # records a warning flagged apart, in the table of the records the validation rules flagged, in
+  # the Partner and Reference Reports; such a column has it in place of the footnote that begins
+  # "Records the rule flagged, unless it is only a warning". `{column}` is replaced by that column's
+  # heading, as translated in the string "Removed". Keep it as written.
+  warned_absent_footnote: >-
     {column}: Records the rule flagged; the validation removed each from the
     dataset before the analysis together with the whole patient record it
     belongs to, so the total of patient records is the number of patients
-    removed.
-  # Translators:
-  # A footnote on the column of exempted records in the table of the records the validation rules
-  # removed or exempted, in the Partner and Reference Reports. `{column}` is replaced by that
-  # column's heading, as translated in the string "Exempted". Keep it as written.
-  exempted_footnote: >-
-    {column}: Records the rule flagged that an exception list exempted from
-    it; a record another rule flagged as well is removed all the same.
+    removed. These data were built before the records a warning flags were
+    counted apart, so such records were removed then and count here as well.
   rule_footnote: >-
     The rules are numbered as in the NeoIPC Validation Report, which explains
     each rule and lists the affected records.
@@ -380,6 +412,12 @@ tbl-validation-summary:
   reference_pass_not_run: >-
     The validation rules were not applied to the reference data: they were
     built with the records the rules would remove kept in.
+# Translators:
+# The label of an entry in a report's header or overview list, such as "Created" or "Number of patient
+# records", followed by the value on the next line. `{term}` is replaced by the entry's name. Keep it
+# as written, with the punctuation your language puts after a label: French, for example, writes a
+# no-break space before the colon.
+term_label: "{term}:"
 total: "Total"
 unit_separator: " "
 methods:

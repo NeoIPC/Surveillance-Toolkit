@@ -13,8 +13,54 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
 
 ## [Unreleased]
 
+### Added
+
+- The Validation Report's header says what became of the validation-exception list: applied, with the
+  records it exempted from each rule; no list; switched off by an administrator
+  (`applyValidationExceptions: false`); or unusable, in which case the report renders without it rather
+  than failing. Where a list is stored, the header gives the day it was uploaded. A report with problems
+  adds a note on requesting an exception from the NeoIPC support team, and each problem shows its rule
+  number, so a request can name it.
+- An administrator can add an appendix to the Validation Report (`includeUnusedValidationExceptions`)
+  listing the exception list's records for the departments in scope that match no record or exempt
+  nothing.
+- The Validation Report labels a problem a warning found as one, and where such a problem is listed, a
+  note says that a warning may concern data correct as recorded, so the validation does not remove the
+  patient record from the analyses for it, while an enrolment still open stays out of them until its
+  surveillance has ended. Rules 43 and 44, an enrolment open for more than 120 days, and rule 54, a
+  substance in two antibiotic substance entries, are warnings (neoipcr 0.0.0.9008).
+- The Validation Report lists rule 62's findings: a substance whose antibiotic substance entries
+  together record more days than the total antibiotic days, which separate treatment courses cannot
+  (neoipcr 0.0.0.9008).
+- The Partner and Reference Reports' table of the records the validation rules flagged counts the
+  records a warning flagged in a column of their own, since the analyses keep them. For data built
+  before warnings were counted apart, the table shows no such column, and a note on the removed records
+  says they include them.
+
+### Changed
+
+- Rule 54's finding says what the two entries' days suggest: different days, most likely one entry per
+  treatment course, which the analyses add up correctly; or the same days, which may be a course
+  entered twice. The explanation of the antibiotic substance entries asks for one entry per substance
+  holding the days of all its courses, rather than for keeping one entry and clearing the other, which
+  lost a course's days, and gives the order in which to remove an entry, since Tracker Capture blanks
+  out the entries after one it clears.
+- The caption of the Partner and Reference Reports' table of the records the validation rules flagged
+  names all of its columns.
+
 ### Fixed
 
+- The labels in the reports' headers and in the Partner and Reference Reports' overview lists take the
+  punctuation after them from the translation, where the code set a colon, so a French translation can
+  write the no-break space before it. The average surveillance period per patient is given with a
+  translated unit, where it read "days" in every language.
+- The Validation Report's note on a patient record with more than one problem carries a title of its
+  own, where the HTML fragment the NeoIPC app shows gave it an English one in every language.
+- The Validation Report falls back to an English introduction where po4a withheld the translation for
+  falling below its completeness threshold, as it already did for the problem details and solutions;
+  such a render failed before.
+- The explanation of an admission date that differs from the enrolment's names the admission form, where
+  it said "exception form".
 - The Validation Report sets the apostrophes and quotation marks of its translated labels like those
   of the sentences around them — the rule summaries in the header, the support link, the labels inside
   a finding's sentence, and the wording for a missing value — where they stayed straight. The tooltip

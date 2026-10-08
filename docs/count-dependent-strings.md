@@ -24,10 +24,11 @@ containing only families would be evidence that the pass converted rather than j
 ## Why this matters now
 
 The reports currently express **no** count-dependence at all: there is not one `msgid_plural` in the
-project. That is the gap, not a reassurance. Every target language so far takes two forms, which is the one
-case where the absence is invisible — Ukrainian and Polish take three, Arabic six, and this project's own
-rule is to prefer the official WHO rendering, of which Arabic and Russian are official languages. Adding
-such a language to a schema that cannot hold a second form means retranslating, not extending.
+project. That is the gap, not a reassurance. Every language the repository's report catalogues carry so
+far takes two forms, which is the one case where the absence is invisible — Ukrainian and Hebrew, already
+target languages on Weblate, take more than two, as does Polish, Arabic six, and this project's own rule
+is to prefer the official WHO rendering, of which Arabic and Russian are official languages. Adding such
+a language to a schema that cannot hold a second form means retranslating, not extending.
 
 ## Four kinds of count-bearing string, not two
 

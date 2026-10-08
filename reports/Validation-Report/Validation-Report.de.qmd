@@ -5,6 +5,9 @@ params:
   rules: NULL
   includeTestData: false
   validationExceptionFile: NULL
+  applyValidationExceptions: true
+  includeUnusedValidationExceptions: false
+  validationExceptionFileUploadedAt: NULL
   dhis2Scheme: NULL
   dhis2Hostname: NULL
   dhis2Port: NULL

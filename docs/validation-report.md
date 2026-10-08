@@ -32,7 +32,7 @@ sentence shows. That section is the contract; this report does not restate it.
 One function renders every rule (`problem_text()` in `_problem_text.qmd`):
 
 1. `fall_back_context()` first replaces a missing field by another field the rule records, where
-   `context_fallbacks` in `_mapping.qmd` pairs the two: rules 52 to 54 record a substance both as the
+   `context_fallbacks` in `_mapping.qmd` pairs the two: rules 52 to 54 and 62 record a substance both as the
    name the form shows and as the code it stores, and a code the option set does not carry has no
    name, so the sentence shows the code. The setup refuses a pair naming a field the rule does not
    record. Then `format_context()` turns the one-row context into named character scalars — dates in the locale's
@@ -68,17 +68,44 @@ One function renders every rule (`problem_text()` in `_problem_text.qmd`):
    `label_maps()` lacks, whose map has no string for one of its values, or whose placeholder none of
    the rule's sentences names. That last check reads the English source sentences, since it guards
    the table: a translation that words a sentence without the label still renders.
-3. `select_template()` picks the template. Two rules carry a second complete sentence rather than one
-   sentence with an optional fragment: rule 20 (`description_secondary_bsi`) for an infectious agent
-   recorded as causing a secondary sepsis, and rule 55 (`description_unanswered`) for a secondary-BSI item that
-   was never answered, which has no answer a label could name.
-4. The sentence is followed by `see_problem_details`, interpolated with the cross-reference to the
-   rule's `primaryDetail` from `_mapping.qmd`. That column exists because the detail a rule cites is not
-   derivable from the details it uses: the day-of-life and day-of-occurrence rules share the same pair of
-   details but cite different members of it.
+3. `select_template()` picks the template. Three rules carry more complete sentences rather than one
+   sentence with an optional fragment:
+   - rule 20 (`description_secondary_bsi`) for an infectious agent recorded as causing a secondary
+     sepsis;
+   - rule 55 (`description_unanswered`) for a secondary-BSI item that was never answered, which has no
+     answer a label could name;
+   - rule 54, a substance in two entries, by what the entries' days say (`rule_54_template()`):
+     1. `description_days_missing` when an entry has no days, so the entries cannot be compared,
+        whatever the other holds;
+     2. `description_same_days` for equal days, which fit two courses of the same length as well as one
+        course entered twice;
+     3. its `description` for different days, most likely one entry per course, which the analyses add
+        up correctly.
 
-Markup stays out of the strings. The support-address link in `patient_problem_multiple_hint` is built in
-code and handed to the template as `{support_link}`; the Tracker Capture dashboard link of each patient is
+     Two entries with days whose substance adds up to more than the form's antibiotic days, which
+     separate treatment courses cannot, are not rule 54's finding but rule 62's, which has one sentence.
+4. The line starts with `problem_rule_label`, the rule's number, so that a request for an exception can
+   name the rule, or with `problem_rule_label_warning` for a rule neoipcr declares a warning
+   (`neoipcr::validation_rule_severities()`, which `_setup.qmd` reads into `warning_rule_ids`); the
+   sentence follows, then `see_problem_details`, interpolated with the cross-reference
+   to the rule's `primaryDetail` from `_mapping.qmd`. That column
+   exists because the detail a rule cites is not derivable from the details it uses: the day-of-life and
+   day-of-occurrence rules share the same pair of details but cite different members of it.
+
+A warning flags a record that may be correct as entered: neoipcr's import keeps a patient only a
+warning flags in the dataset the Partner and Reference Reports analyse, where an error removes it. The
+Validation Report lists both alike, apart from the label, and where a warning is among the findings,
+`problems_warning_note` follows the introduction to the list to say so. The note is a string rather than
+a sentence of `_problems_intro.Rmd`, whose paragraphs are few: one changed paragraph, untranslated
+until Weblate catches up, can take a translation below po4a's completeness threshold, and po4a then
+writes no translated file at all. A string without a translation falls back to English on its own. The
+introductions, the problem details, and the solutions each fall back to their English text where the
+translated file is absent, with a warning in the log.
+
+Markup stays out of the strings. The support-address links in `patient_problem_multiple_hint` and
+`exception_request_hint` are built in code and handed to the template as `{support_link}`, their e-mail's
+subject and body percent-encoded with each line break as `%0D%0A` (`mailto_encode()` in
+`reports/common/helpers.R`); the Tracker Capture dashboard link of each patient is
 built from the address the report's readers reach DHIS2 at and the program id the import resolved by its
 code, never from a fixed host or UID. That address is `dhis2PublicBaseUrl` when the caller passes it, as
 the reporting service does, since it reads the data over an address inside its own network, and as
@@ -113,11 +140,49 @@ value at all.
 The report never removes flagged records: it imports with `include_invalid_patients = TRUE`, which
 skips the import's validation pass and keeps the enrolments without an admission form that the import's
 orphan removal otherwise drops, together with `include_unenrolled_patients = TRUE` for the patients
-without an enrolment, and calls `validate()` itself, passing the list
-`neoipcr::read_validation_exceptions()` reads from the `validationExceptionFile` parameter. neoipcr resolves the list onto the dataset's keys and each rule
-exempts the records addressed to it. The same reader serves the Partner and Reference Reports through
-`get_validation_exceptions()` in `reports/common/helpers.R`, so a malformed file is refused once, the same
-way, wherever it is used.
+without an enrolment, and calls `validate()` itself. It passes the list
+`neoipcr::read_validation_exceptions()` reads from the `validationExceptionFile` parameter, which
+`neoipcr::resolve_validation_exceptions()` has mapped onto the dataset's keys, and each rule exempts the
+records addressed to it. The same reader serves the Partner and Reference Reports through
+`get_validation_exceptions()` in `reports/common/helpers.R`, so a list is read the same way wherever it is
+used.
+
+The header's "Validation exceptions" entry says what became of the list, in one of four states, which
+`validation_exception_state()` in `reports/common/helpers.R` derives:
+
+1. **applied**, with the records the list exempted from each rule, in rule order, as
+   `neoipcr::validation_summary()` counts them, at the rule's level as the Partner and Reference Reports'
+   table counts them;
+2. **none**, when no list is given;
+3. **switched off**, when `applyValidationExceptions` is false while a list is stored or given, as an
+   administrator may ask through the reporting service, which then passes the upload time but no file;
+4. **unusable**, when the reader or the resolver refuses the list, as the resolver refuses a list without
+   `DEPARTMENT_CODE` on a render of several departments: the report renders without it, logs the
+   refusal, and says so, so that one bad list cannot keep every department from its report. Only
+   neoipcr's refusal of the list (`neoipcr_invalid_exception_list`) is caught.
+
+In states 1, 3, and 4 the entry also gives the day the stored list was uploaded, where the
+`validationExceptionFileUploadedAt` parameter gives it: the reporting service passes it as
+`yyyy-mm-ddThh:mm:ssZ`. The same time with fractional seconds, or with an offset from UTC in place of the
+`Z`, is read as well; a value in any other form is logged and left out.
+
+The Partner and Reference Reports, where the list decides which flagged records stay in the analyses,
+fail on an unusable list instead, since skipping it there would change their numbers without a word.
+Where the report lists problems, a note follows the header on requesting an exception: the NeoIPC support
+team assesses each request, and an accepted exception keeps its problem out of later reports while the
+patient's NeoIPC-ID and the record's dates stay the same, since the list matches records by them. Its
+e-mail link asks for what the team needs to write the record: the department, the patient, the enrolment,
+the form, and the rule.
+
+An administrator can add an appendix (`includeUnusedValidationExceptions`, the wrapper's
+`-IncludeUnusedValidationExceptions`) listing the list's records for
+the departments in scope that match no record, or match one that the rule they name does not flag, as
+`neoipcr::validation_exception_usage()` reports them for the whole list `validate()` was given, for the
+list's upkeep. Whether a record matches does not depend on the rules a render applies; a matched record of
+a rule the render did not apply is left out. The appendix names patients and is not meant to be passed on.
+Everything the header and the appendix show is computed from the records of the departments in scope,
+never from the whole list, which covers every partner: a list without `DEPARTMENT_CODE`, which neoipcr
+keeps whole, gets a sentence in the appendix rather than its records.
 
 ## Reconciled data
 
@@ -151,16 +216,18 @@ does not know aborts the render. The `# @type integer[]` annotation names the pa
 consumer of the parameter schema: the reporting service's schema generator maps it to an array of
 integers, through which the service's `/validation-report` endpoint passes the rules a caller selects.
 
-A render that finds nothing renders a document that says so (`no_problems_detected`) under the same
-header, and stops: the introduction, the problem details and the solutions cross-reference sections that
-exist only when there are findings to explain. This is what lets the service and the app return a report
+A render that finds nothing renders a document that says so under the same header and leaves out the
+introduction, the problem details, and the solutions, which cross-reference sections that exist only when
+there are findings to explain; an administrator's appendix can still follow. The sentence is
+`no_problems_detected`, or `no_problems_detected_exempted` when
+the exception list exempted records, which the header counts. This is what lets the service and the app return a report
 for a clean department; for the wrapper it means a per-site batch writes one file per site, clean sites
 included, and a missing file no longer means "clean".
 
 ## Before a render
 
 `_setup.qmd` asserts, before it reads any data, that every id in `validation_rule_ids()` has its
-non-empty templates (the `description`, and for rules 20 and 55 their second sentence as well) and
+non-empty templates (the `description`, and for rules 20, 54, and 55 their further sentences as well) and
 `summary` under `problems` in the string resources, so a rule added to neoipcr without its sentences
 fails the render with a message naming the rule rather than rendering a blank line or failing in the
 header. It also asserts the other way round, that every rule the string resources carry sentences for
@@ -176,13 +243,16 @@ add for it (the placeholders `context_decorations` names for the rule), instead 
 interpolation on the first finding that reaches the sentence. After the validation pass, it fails the
 render when `validate()` reports a selected rule it could not run (its `rules_skipped` attribute, set
 when the dataset lacks a column the rule reads): the import asks for every tier, so a skip means the
-dataset is not what the report expects, and a document that claimed those rules would be wrong.
+dataset is not what the report expects, and a document that claimed those rules would be wrong. A
+neoipcr older than the report needs fails the rule-text check, before any data is read: it defines no
+rule 62, whose sentences the string resources carry.
 
 ## Adding a validation rule
 
 1. neoipcr: implement `validation_rule_N()` in the matching `R/validation-rules-*.R`, register it in
-   `validation_rules`, document its context fields in the table on `validate()`, add the detect /
-   no-detect / exception tests, note it in `NEWS.md`, and release the package.
+   `validation_rules`, with `severity = "warning"` if it flags records the analyses can use as they
+   stand although they may hide a mistake, document its context fields in the table on `validate()`,
+   add the detect / no-detect / exception tests, note it in `NEWS.md`, and release the package.
 2. Here: add `problems.N` with `description` (named placeholders equal to the rule's context fields,
    plus the labels its decorations add) and
    `summary` to `content/_sR.yaml`, each with its `# Translators:` comment directly above it — the

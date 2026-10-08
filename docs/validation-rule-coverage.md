@@ -10,8 +10,8 @@ keyed by the protocol's own anchor, and says for each one what enforces it today
 does, what would.
 
 The inventory is hand-maintained. It describes the protocol at `doc/protocol/VERSION` 1.3.0-preview2
-together with the changes under [Unreleased] in its changelog, the 60 rules and the six
-reconciliations of neoipcr v0.0.0.9007 (rule ids 1 to 61, with id 16 withdrawn), and the program
+together with the changes under [Unreleased] in its changelog, the 61 rules and the six
+reconciliations of neoipcr v0.0.0.9008 (rule ids 1 to 62, with id 16 withdrawn), and the program
 rules, compulsory flags, and option sets of `metadata/common/`. A change to any of the three has to be
 reflected here: a new protocol constraint gets a row, a new rule is entered in the rows it covers, a
 new reconciliation in the gap entry it closes, and a program rule that starts or stops enforcing
@@ -132,8 +132,12 @@ So a finding has one of three homes, and the gap entries below say which. neoipc
 and 2: home 1 as the validation rules, home 2 as the reconciliations of `import_dhis2()`.
 
 1. **A partner-facing rule.** The inconsistency is visible in the form and the team can correct it.
-   It becomes a validation rule, is listed in the Validation Report, removes the record from the
-   analyses until fixed, and is counted in the validation summary as removed or exempted.
+   It becomes a validation rule and is listed in the Validation Report. An error, which flags a
+   record the analyses cannot use as recorded, removes the record from the analyses until fixed and
+   is counted in the validation summary as removed or exempted. A warning, which flags a record the
+   analyses can use as it stands although it may hide a mistake the record cannot prove, leaves it
+   in the analyses and is counted as a warning or exempted; rules 43, 44, and 54 are warnings
+   (`neoipcr::validation_rule_severities()`).
 2. **Reconciliation by the NeoIPC coordinating centre.** The inconsistency is invisible, or not of
    the team's making, or one the client itself removes without asking once it processes the
    reopened form, and the intended state can be inferred reliably. It belongs to a class of its own
@@ -434,17 +438,31 @@ days exceed the total antibiotic days, no substance is recorded without antibiot
 are recorded without a substance. Rule 21 flags only the shortfall (the substance days summing to less
 than the antibiotic days) on forms with antibiotic days, and the capture-time rules only hide, require
 and sum the slots. A substance with no days, days with no substance, the same substance in two slots,
-a substance whose days exceed the antibiotic days or the patient days, and a substance on a form with
-zero antibiotic days are rules 52 to 54's findings post hoc. All of them are on the form: a substance recorded on
+a substance whose days exceed the antibiotic days or the patient days, a substance whose slots
+together exceed the antibiotic days, and a substance on a form with zero antibiotic days are rules 52
+to 54 and 62's findings post hoc. All of them are on the form: a substance recorded on
 a form whose total antibiotic days are zero sits in a slot the rules hide, but a field that holds a
 value is never hidden, so the team sees it, read-only while the event is completed, and the client
 blanks it once it processes the reopened form.
 
 Proposal: extend rule 21, or add a sibling on the `substanceDays` rows, to flag each of those shapes
-with the slot's index, substance and days as context. Who acts: the partner. Decided: three sibling
+with the slot's index, substance and days as context. Who acts: the partner. Decided: four sibling
 rules on the `substanceDays` rows — 52 for a substance without its days or days without a substance,
 53 for days above the antibiotic or patient days, a substance on a form with zero antibiotic days
-among them, and 54 for a substance in two slots.
+among them, 54 for a substance in two slots, and 62 for a substance whose slots that hold days add up
+to more than the antibiotic days.
+
+A substance in two slots is most often one slot per treatment course, a natural reading of the form,
+which the analyses add up correctly; it is one course entered twice less often, which they count twice.
+The record cannot say which, so rule 54 is a warning, and it records both slots' days, the days of all
+the substance's slots on the form, and the form's antibiotic days, so that the Validation Report says
+what they suggest: equal days may be a course entered twice, and different days are most likely one
+slot per course. Slots that hold days and together exceed the antibiotic days cannot all be separate
+courses, which proves a mistake, so they are not rule 54's finding but rule 62's, an error, one per
+substance and form. The explanation asks for the protocol's one slot per substance, holding the days
+of all its courses, and gives the order in which to remove a slot: the client blanks the values of a
+slot it hides, and it hides each slot after one without a substance, so a slot that others follow is
+first overwritten with the last slot that holds a substance, which is then cleared.
 
 ### G11 — A compulsory value missing from a completed form
 
@@ -1236,7 +1254,7 @@ publications. None constrains a record; none is checkable.
 | `dd-antibiotic-days-total`, `dd-antibiotic-days-per-substance` | An antibiotic course counts the day of the first dose, the day of the last dose and every day between them, dose-free days within the course included; days after the last dose are not counted whatever the drug level. | Not checkable | — | — |  |
 | `dd-antibiotic-days-total` | At most one antibiotic day is counted per calendar day, so a day with several antibiotics counts as one antibiotic day (no daily timeline is recorded; the checkable consequence, antibiotic days not exceeding patient days, is the row above and G9). | Not checkable | — | — |  |
 | `dd-antibiotic-days-per-substance` | Antibiotic days per substance count, for each recorded systemic antibiotic substance, the days on which the infant received that substance. | Partial | 52, 54 | `NEOIPC_SURV_END_AB_SUBST_0n_HIDE`, `NEOIPC_SURV_END_AB_SUBST_01_REQUIRE`, `NEOIPC_SURV_END_AB_SUBST_0n_DAYS_REQUIRE`, the generated substance option set | G10 |
-| `dd-antibiotic-days-per-substance` | *(derived)* No single substance's antibiotic days exceed the total antibiotic days, and the sum of per-substance days is at least the total antibiotic days. | Covered | 21, 53, 54 | `NEOIPC_SURV_END_AB_SUBST_DAYS_VR` (the floor only) | G10 |
+| `dd-antibiotic-days-per-substance` | *(derived)* No single substance's antibiotic days exceed the total antibiotic days, and the sum of per-substance days is at least the total antibiotic days. | Covered | 21, 53, 62 | `NEOIPC_SURV_END_AB_SUBST_DAYS_VR` (the floor only) | G10 |
 
 ### 5.2 Surgical Procedure (`sec-dd-surgical-procedure`)
 
@@ -1335,7 +1353,7 @@ pneumonia and the deepest-level rule for the SSI type.
 | `sec-analysis-antibiotic-use` | *(derived)* Each recorded antibiotic substance is an entry of the List of Antibiotics, whose entries carry a WHO Anatomical Therapeutic Chemical (ATC) code from which the substance groups are derived, except for the substances the ATC index does not list, which carry a placeholder code. | Capture time | — | the generated option set `NEOIPC_ANTIMICROBIAL_SUBSTANCES` | G19 |
 | `sec-analysis-antibiotic-use` | *(derived)* Substances are grouped at ATC levels 1, 2, 4 and 5 only. | Not checkable | — | — |  |
 | `sec-analysis-antibiotic-use` | *(derived)* Substance and substance-group use rates are expressed per 1000 patient days according to the prose, while the formula that follows multiplies by 100. | Not checkable | — | — |  |
-| `sec-analysis-antibiotic-use` | *(derived)* Total therapy days for a substance is a count of patient days and cannot exceed the patient days. | Covered | 53, 54 | — | G10 |
+| `sec-analysis-antibiotic-use` | *(derived)* Total therapy days for a substance is a count of patient days and cannot exceed the patient days. | Covered | 53, 54, 62 | — | G10 |
 | `sec-analysis-antibiotic-use` | *(derived)* A patient counted as receiving a specific substance is also a patient receiving any antibiotic, so a record with any substance recorded has antibiotic days of at least one. | Covered | 52, 53 | `NEOIPC_SURV_END_AB_SUBST_01_HIDE` to `NEOIPC_SURV_END_AB_SUBST_09_HIDE` (slot 1 is hidden until the antibiotic days exceed zero, each later slot until the previous one holds a substance) | G10 |
 | `sec-analysis-antibiotic-use` | *(derived)* The stated formula for the proportion of patients receiving a substance divides therapy days by patient days, contradicting the prose definition (patients over patients) immediately before it. | Not checkable | — | — |  |
 

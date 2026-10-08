@@ -21,16 +21,53 @@ adm_problem_header_prefix: Admission event with the admission date
 bsi_problem_header_prefix: Primary Sepsis/BSI event with the infection date
 end_problem_header_prefix: Surveillance-End event with the surveillance end date
 enrolment_problem_header_prefix: Enrolment with the admission date
+# Translators:
+# `{support_link}` is replaced by a link whose text is the translation of "support e-mail address"
+# and which opens an e-mail to the NeoIPC support team. Keep it as written, where your sentence
+# needs that phrase. "Rule number" refers to the number each problem in the list starts with.
+exception_request_hint: >-
+  If a problem listed below describes data that are correct as recorded, you
+  can ask the NeoIPC support team for an exception through our
+  {support_link}, naming the department, the patient's NeoIPC-ID, the form or
+  the enrolment the problem concerns, and the rule number shown with the
+  problem. The team assesses each request individually. An accepted exception
+  is added to the exception list, and the problem then no longer appears in
+  later reports, as long as the patient's NeoIPC-ID and the dates of the
+  enrolment and of the form stay the same.
+# Translators:
+# The body of the e-mail the support link of the hint on requesting an exception opens in the
+# reader's e-mail program, as it is typed here: keep its line breaks. The reader fills in what each
+# line ending in a colon asks for.
+exception_request_hint_email_body: |
+  Dear NeoIPC Surveillance support team,
+  Please consider an exception for this problem in my validation report.
+  Department:
+  NeoIPC-ID of the patient:
+  Admission date of the enrolment:
+  Form and its date:
+  Rule number:
+  Why the data are correct as recorded:
+  Best regards,
+exception_request_hint_email_subject: Request for a validation exception
+# Translators:
+# The title of the note on requesting an exception, a heading in the report: use your language's
+# capitalization for document headings.
+exception_request_hint_title: Requesting an Exception
 hap_problem_header_prefix: Pneumonia event with the infection date
 
 header:
   departments: Departments
+  validation_exceptions: Validation exceptions
   validation_rules: Validation rules
 nec_problem_header_prefix: Necrotizing enterocolitis event with the infection date
 neoipc_surveillance_partner_code: NeoIPC Surveillance Partner Code
 no_problems_detected: >-
   No problem was detected in the data of the departments listed above as of
   the date this report was created.
+no_problems_detected_exempted: >-
+  No problem was detected in the data of the departments listed above as of
+  the date this report was created, apart from the records the exception list
+  exempts, which the header counts.
 # Translators:
 # The tooltip of the link in each patient's heading, which opens the patient's dashboard in DHIS2.
 # The report shows it as typed, without setting its quotation marks, so type your language's own
@@ -55,11 +92,34 @@ patient_problem_multiple_hint: >-
 # the patient's NeoIPC ID as the department recorded it. Keep it as written.
 patient_problem_multiple_hint_email_body: |
   Dear NeoIPC Surveillance support team,
-  my validation report contains multiple errors for the patient with the id '{patient_id}'.
+  My validation report contains multiple errors for the patient with the id '{patient_id}'.
   Can you please have a look and get in touch with me?
   Best regards,
 patient_problem_multiple_hint_email_subject: >-
   Support request regarding complex errors in a patient record
+# Translators:
+# The title of the note on a patient record with more than one problem, a heading in the report: use
+# your language's capitalization for document headings.
+patient_problem_multiple_hint_title: More Than One Problem in This Patient Record
+# Translators:
+# The label each problem in the list starts with, before the sentence describing it. `{rule}` is
+# replaced by the number of the rule that found the problem, a whole number. Keep it as written, with
+# the punctuation your language puts after a label.
+problem_rule_label: "Rule {rule}:"
+# Translators:
+# The label a problem found by a warning starts with, in place of the one above: a warning points to
+# data that may be correct as recorded. `{rule}` is replaced by the number of the rule, a whole number.
+# Keep it as written, with the punctuation your language puts after a label.
+problem_rule_label_warning: "Rule {rule} (warning):"
+# Translators:
+# A note after the introduction to the list of problems, shown when a problem in the list starts with
+# the label for a warning ("Rule {rule} (warning):").
+problems_warning_note: >-
+  A problem labelled as a warning points to data that may be correct as
+  recorded, so unlike the other problems it does not make the validation
+  remove the patient record from the analyses. An enrolment that is still
+  open stays out of them until its surveillance has ended, warning or not.
+  Please check each warning all the same.
 # Translators:
 # The entry for the validation rules in the report's header when every rule was applied. `{count}`
 # is replaced by the number of rules, a whole number. Keep it as written.
@@ -81,6 +141,64 @@ see_problem_details: "See {reference}."
 # phrase that reads in those places rather than as a label.
 missing_value: not available
 support_email_address_link_text: support e-mail address
+
+# The appendix an administrator can add, listing the exception records of the report's departments
+# that matched no record or exempted nothing.
+unused_validation_exceptions:
+  enrolment_date: Enrolment date
+  exempts_nothing: Exempts nothing
+  form: Form
+  form_date: Form date
+  # Translators:
+  # The title of the appendix, a heading in the report: use your language's capitalization for
+  # document headings.
+  heading: Unused Validation Exceptions
+  intro: >-
+    The records of the validation exception list below concern the
+    departments of this report and either match no record in their data or
+    match one that the rule they name does not flag, so that they exempt
+    nothing. The appendix serves the upkeep of the list and is not meant to be
+    passed on.
+  matches_nothing: Matches no record
+  no_department_codes: >-
+    The validation exception list does not name the department of its
+    records, so they cannot be narrowed to the departments of this report,
+    and none of them is listed.
+  no_records: >-
+    The validation exception list holds no record for the departments of this
+    report.
+  none_unused: >-
+    Every record of the validation exception list for the departments of this
+    report matches a record in their data. Each one whose rule this report
+    applied exempted that record from the rule.
+  not_applied: >-
+    No validation exception list was applied to this report, so none of its
+    records can be listed.
+  outcome: Outcome
+  patient: NeoIPC-ID
+  rule: Rule
+  unusable: >-
+    The validation exception list could not be read or applied to the
+    departments of this report, so none of its records can be listed.
+
+# The definitions of the "Validation exceptions" entry in the report's header: the list's state, when
+# it was uploaded, and the records it exempted from each rule.
+validation_exceptions:
+  applied: "Applied; records exempted:"
+  applied_none_exempted: Applied; no record exempted
+  none: No exception list
+  # Translators:
+  # `{rule}` is replaced by the number of a validation rule, a whole number; `{kind}` by the kind of
+  # record the rule concerns, as translated in the strings "Patient records", "Patient admissions",
+  # and "Forms"; and `{count}` by the number of such records the exception list exempted from the
+  # rule, a whole number. Keep all three as written.
+  rule_records: "Rule {rule} – {kind} ({count})"
+  switched_off: Not applied; an administrator rendered this report without the exception list
+  unusable: Not applied; the list could not be read or applied to these departments
+  # Translators:
+  # `{date}` is replaced by the day the list was uploaded, a date in the date format of the report's
+  # language. Keep it as written.
+  uploaded: "List uploaded on {date}"
 
 # Each rule has a `description`, the sentence the report shows for one finding, and a `summary`, one
 # sentence saying what the rule checks; the explanation above each is the one translators read.
@@ -880,19 +998,44 @@ problems:
     summary: An antibiotic substance’s days exceed the total antibiotic days or the patient days.
   "54":
     # Translators:
+    # The sentence for a substance recorded in two entries with different numbers of days, most
+    # likely one entry for each treatment course. `{substance}` is replaced by the substance's name
+    # from the NeoIPC list of antimicrobial substances, or its code where the list has no name for
+    # it; `{index}` and `{index_other}` by the numbers of the two antibiotic substance entries that
+    # record it, whole numbers from 1 to 9, the lower one first; `{days}` and `{days_other}` by their
+    # days, whole numbers. Keep all five as written.
+    description: >-
+      The antibiotic substance {substance} is recorded in entry {index} and in
+      entry {index_other}, with different numbers of days ({days} and
+      {days_other}), probably one for each treatment course. The analyses add
+      up a substance's entries, so the results are not distorted, but the
+      protocol asks for one entry holding the days of all its courses.
+    # Translators:
+    # The sentence for a substance recorded in two entries where an entry has no days, so the
+    # entries cannot be compared. `{substance}` is replaced by the substance's name from the NeoIPC
+    # list of antimicrobial substances, or its code where the list has no name for it; `{index}` and
+    # `{index_other}` by the numbers of the two antibiotic substance entries that record it, whole
+    # numbers from 1 to 9, the lower one first. Keep all three as written.
+    description_days_missing: >-
+      The antibiotic substance {substance} is recorded in entry {index} and in
+      entry {index_other}.
+    # Translators:
+    # The sentence for a substance recorded in two entries with the same number of days.
     # `{substance}` is replaced by the substance's name from the NeoIPC list of antimicrobial
     # substances, or its code where the list has no name for it; `{index}` and `{index_other}` by
     # the numbers of the two antibiotic substance entries that record it, whole numbers from 1 to 9,
-    # the lower one first. Keep all three as written.
-    description: >-
+    # the lower one first; `{days}` by the days of each, a whole number. Keep all four as written.
+    description_same_days: >-
       The antibiotic substance {substance} is recorded in entry {index} and in
-      entry {index_other}.
+      entry {index_other}, both with the same number of days ({days}). Two
+      courses of the same length are added up correctly, but a course entered
+      twice is counted twice.
     # Translators:
     # What the rule checks, in one sentence that stands on its own and has no placeholder: the
     # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
     # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
     # language's own apostrophe and quotation marks.
-    summary: The same antibiotic substance is recorded in two substance entries.
+    summary: The same antibiotic substance is recorded in two substance entries; where its entries together record more days than the total antibiotic days, rule 62 reports them instead.
   "55":
     # Translators:
     # `{sec_bsi_label}` is replaced by the answer the form records for the secondary bloodstream
@@ -1010,6 +1153,25 @@ problems:
     # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
     # language's own apostrophe and quotation marks.
     summary: A completed surgical site infection form does not meet the definition of the type of infection it records.
+  "62":
+    # Translators:
+    # `{substance}` is replaced by the substance's name from the NeoIPC list of antimicrobial
+    # substances, or its code where the list has no name for it; `{substance_days}` by the days of
+    # all its antibiotic substance entries together and `{ab_days}` by the total antibiotic days
+    # recorded on the form, both whole numbers. Keep all three as written.
+    description: >-
+      The antibiotic substance {substance} is recorded in more than one entry,
+      and its entries together record more days ({substance_days}) than the
+      total antibiotic days ({ab_days}). Separate treatment courses cannot add
+      up to more than the antibiotic days, so either a course was entered
+      twice, an entry records too many days, or the total antibiotic days are
+      too few.
+    # Translators:
+    # What the rule checks, in one sentence that stands on its own and has no placeholder: the
+    # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
+    # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
+    # language's own apostrophe and quotation marks.
+    summary: The entries of one antibiotic substance together record more days than the total antibiotic days.
 ssi_problem_header_prefix: Surgical Site Infection event with the infection date
 ssi_types:
   superficial_incisional: superficial incisional SSI

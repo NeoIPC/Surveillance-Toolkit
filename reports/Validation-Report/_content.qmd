@@ -4,32 +4,63 @@
 
 {{< include _problem_text.qmd >}}
 
-`{r} sR$headerList$created`:
+`{r} term_label(sR$headerList$created, sR)`
 
 :   `{r} format(Sys.time(), format = "%x %X", tz = "UTC", usetz = TRUE)`
 
-`{r} if(nrow(departments) > 1){sR$header$departments}else{sR$header$department}`:
+`{r} term_label(if (nrow(departments) > 1) sR$header$departments else sR$header$department, sR)`
 
 :   `{r} paste(departments |> pull(code) |> sort(), collapse = ", ")`
 
-`{r} sR$header$validation_rules`:
+`{r} term_label(sR$header$validation_rules, sR)`
 
 :   `{r} rules_applied_text`
+
+```{r Write the validation exceptions entry}
+#| output: asis
+
+# The entry joins the header's definition list: one definition per line of
+# the overview, each after a blank line.
+cat("", term_label(sR$header$validation_exceptions, sR), "",
+    paste0(":   ", exception_overview, "\n"), sep = "\n")
+```
 
 ```{r Write problems intro}
 #| output: asis
 
-# A report with nothing to report says so and stops here: the introduction,
-# the problem details and the solutions all cross-reference sections that
-# exist only when there are findings to explain.
+# One of the report's texts in its language, or in English where po4a
+# withheld the translation for falling below its completeness threshold,
+# which it reports only by the file's absence.
+localized_text_file <- function(name) {
+  localized <- file.path(language, name)
+  if (file.exists(localized))
+    return(localized)
+  logWarn("Text not available in this language, using English: ", name)
+  file.path("en", name)
+}
+
+# A report with nothing to report says so and leaves out the introduction,
+# the problem details, and the solutions, which all cross-reference sections
+# that exist only when there are findings to explain; an administrator's
+# appendix can still follow. Where the exception list exempted records, the
+# sentence says that it did; with findings, the hint on requesting an
+# exception comes first, and a note on warnings follows the introduction
+# where a warning found one.
 if (nrow(problems) == 0L) {
-  cat(sR$no_problems_detected, "\n")
+  cat(if (records_exempted) sR$no_problems_detected_exempted else sR$no_problems_detected, "\n")
 } else {
+  cat("", "::: {.callout-note}",
+      paste("##", sR$exception_request_hint_title),
+      "",
+      exception_request_hint(sR, support_email_address),
+      ":::", "", sep = "\n")
   cat(
     sep = "\n",
-    knitr::knit_child(text = readr::read_file(Sys.glob(paste0(language, "/_problems_intro.Rmd"))), quiet = TRUE),
+    knitr::knit_child(text = readr::read_file(localized_text_file("_problems_intro.Rmd")), quiet = TRUE),
     ""
   )
+  if (any(problems$rule_id %in% warning_rule_ids))
+    cat(sR$problems_warning_note, "", sep = "\n")
 }
 ```
 
@@ -45,7 +76,7 @@ cat("::: {.content-visible unless-format=\"html\"}", "\\newpage", ":::", "", sep
 # Problem details intro
 cat(
   sep = "\n",
-  knitr::knit_child(text = readr::read_file(Sys.glob(paste0(language, "/_problem_details_intro.Rmd"))), quiet = TRUE),
+  knitr::knit_child(text = readr::read_file(localized_text_file("_problem_details_intro.Rmd")), quiet = TRUE),
   ""
 )
 
@@ -98,7 +129,7 @@ cat("::: {.content-visible unless-format=\"html\"}", "\\newpage", ":::", "", sep
 # Solutions intro
 cat(
   sep = "\n",
-  knitr::knit_child(text = readr::read_file(Sys.glob(paste0(language, "/_solutions_intro.Rmd"))), quiet = TRUE),
+  knitr::knit_child(text = readr::read_file(localized_text_file("_solutions_intro.Rmd")), quiet = TRUE),
   ""
 )
 
@@ -125,5 +156,16 @@ for (solution_file in solution_files) {
   cat(sep = "\n", knitr::knit_child(quiet = TRUE, text = readr::read_file(solution_file)), "")
 }
 
+}
+```
+
+```{r Write the unused validation exceptions}
+#| output: asis
+
+# An administrator's appendix, only on request: it names patients of the
+# exception list, which serves the list's upkeep and is not for partners.
+if (isTRUE(params$includeUnusedValidationExceptions)) {
+  cat("::: {.content-visible unless-format=\"html\"}", "\\newpage", ":::", "", sep = "\n")
+  cat(unused_validation_exceptions_markdown(exception_state, exception_usage, sR), "", sep = "\n")
 }
 ```
